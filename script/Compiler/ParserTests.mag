@@ -1,0 +1,104 @@
+using Core
+using Core:Collections
+
+using Magpie:Syntax
+
+// Tests for the Magpie parser
+namespace Magpie:Compiler
+
+    TestParser (->)
+        Print "testing parser"
+
+        TestPrimaryExpr
+        TestReverseApplyExpr
+        TestApplyExpr
+        TestTypeArgs
+        
+        Print "done parser tests"
+    end
+    
+    TestTypeArgs (->)
+        // no type args present: ok
+        TestParse ("blah",        fn TypeArgs (Parser), List'String)
+        
+        TestParse ("'Int",        fn TypeArgs (Parser), ListOf ("Int"))
+        TestParse ("'(Int, Foo)", fn TypeArgs (Parser), ListOf ("Int", "Foo"))
+    end
+    
+    TestApplyExpr (->)
+        // fallthrough to primary
+        TestParse ("true",        fn ApplyExpr (Parser), "bool true")
+        
+        // fallthrough to reverse
+        TestParse ("a.b",         fn ApplyExpr (Parser), "b a")
+        
+        // apply
+        TestParse ("a b",         fn ApplyExpr (Parser), "a b")
+        TestParse ("a 123 true",  fn ApplyExpr (Parser), "a int 123 bool true")
+        TestParse ("a b.c",       fn ApplyExpr (Parser), "a c b")
+    end
+
+    TestReverseApplyExpr (->)
+        // fallthrough to primary
+        TestParse ("SomeName",    fn ReverseApplyExpr (Parser), Some "SomeName")
+        TestParse ("true",        fn ReverseApplyExpr (Parser), Some "bool true")
+        
+        // dot operator gets translated to regular apply
+        TestParse ("a.b",         fn ReverseApplyExpr (Parser), Some "b a")
+        TestParse ("a.b.c",       fn ReverseApplyExpr (Parser), Some "c b a")
+    end
+    
+    TestPrimaryExpr (->)
+        TestParse ("SomeName",    fn PrimaryExpr (Parser), Some "SomeName")
+        TestParse ("true",        fn PrimaryExpr (Parser), Some "bool true")
+        TestParse ("123",         fn PrimaryExpr (Parser), Some "int 123")
+        TestParse ("\"foo bar\"", fn PrimaryExpr (Parser), Some "\"foo bar\"")
+        TestParse ("()",          fn PrimaryExpr (Parser), Some "()")
+        TestParse ("fn Foo ()",   fn PrimaryExpr (Parser), Some "fn Foo")
+        TestParse ("<-",          fn PrimaryExpr (Parser), None'String)
+    end
+        
+    TestParse (text String, parseFunc fn (Parser -> List'Decl), expected List'String ->)
+        Print ("parsing " + text)
+        
+        def parser <- Parser text
+        def result <- parseFunc parser
+        
+        //### bob: hack. just test size
+        if result.Size != expected.Size do
+            Print ("  error: got " + result.Size.String + " decls and expected " + expected.Size.String)
+        end
+    end
+
+    TestParse (text String, parseFunc fn (Parser -> Expr), expected String ->)
+        Print ("parsing " + text)
+        
+        def parser <- Parser text
+        def result <- parseFunc parser
+        
+        if result.String != expected do
+            Print ("  error: got " + result.String + " and expected " + expected)
+        end
+    end
+    
+    TestParse (text String, parseFunc fn (Parser -> Option'Expr), expected Option'String ->)
+        Print ("parsing " + text)
+        
+        def parser <- Parser text
+        def result <- parseFunc parser
+        
+        if result.None? != expected.None? then
+            if result.None? then Print ("  error: got none and expected " + expected.SomeValue)
+            else Print ("  error: got " + result.SomeValue.String + " and expected none")
+        else
+            if result.None? & expected.None? then
+                () // do nothing
+            else
+                def resultString <- result.SomeValue.String
+                if resultString != expected.SomeValue do
+                    Print ("  error: got " + resultString + " and expected " + expected.SomeValue)
+                end
+            end
+        end
+    end
+end

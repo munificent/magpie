@@ -1,0 +1,102 @@
+using Core
+using Core:Collections
+
+using Magpie:Syntax
+
+namespace Magpie:Compiler
+
+    union Expr
+        // literals
+        UnitLiteral
+        BoolLiteral     Bool
+        IntLiteral      Int
+        StringLiteral   Int                 // index into string table
+        FunctionLiteral Function
+        
+        // compounds
+        Tuple           List'Expr
+        Block           List'Expr
+        
+        // variables
+        Locals
+        Load            (Expr, Int)         // structure, field
+        Store           (Expr, Int, Expr)   // structure, field, value
+
+        // flow control
+        IfDo            (Expr, Expr)        // condition, body
+        IfThenElse      (Expr, Expr, Expr)  // condition, then, else
+        While           (Expr, Expr)        // condition, body
+        
+        // other
+        Call            (Expr, Expr)        // function, arg
+        
+        // bound only
+        Intrinsic       (IntrinsicExpr, Expr)
+        
+        // unbound only
+        Name            (String, List'Decl) // name, type args
+        UnboundString   String
+        Define          (String, Expr, Bool) // name, body, mutable?
+        Assign          (Expr, Expr)         // target, value
+        FunctionRef     (String, List'Decl, List'Decl) // name, type args, param types
+    end
+    
+    union IntrinsicExpr
+        BoolToString
+        IntToString
+        
+        Print
+        AddInt
+        AddString
+    end
+    
+    String (expr Expr -> String)
+        // literals
+        if expr.UnitLiteral?            then "()"
+        else if expr.BoolLiteral?       then "bool " + expr.BoolLiteralValue.String
+        else if expr.IntLiteral?        then "int " + expr.IntLiteralValue.String
+        else if expr.StringLiteral?     then "string at " + expr.StringLiteralValue.String
+        else if expr.FunctionLiteral?   then expr.FunctionLiteralValue.Name
+        
+        // compounds
+        else if expr.Tuple?             then "(" + Join (expr.TupleValue, ", ") + ")"
+        else if expr.Block?             then "{" + Join (expr.TupleValue, "; ") + "}"
+        
+        // variables
+        else if expr.Locals?            then "_locals"
+        else if expr.Load?              then expr.LoadValue.First.String + "'" + expr.LoadValue.Second.String + ""
+        else if expr.Store?             then expr.StoreValue.First.String + "'" + expr.StoreValue.Second.String + " <- " + expr.StoreValue.Third.String
+
+        // flow control
+        else if expr.IfDo?              then "if " + expr.IfDoValue.First.String +
+                                             " do " + expr.IfDoValue.Second.String
+        else if expr.IfThenElse?        then "if " + expr.IfThenElseValue.First.String +
+                                             " then " + expr.IfThenElseValue.Second.String +
+                                             " else " + expr.IfThenElseValue.Third.String
+        
+        // other
+        else if expr.Intrinsic? then
+            def intrinsic <- expr.IntrinsicValue.First
+            def text <- if intrinsic.BoolToString?      then "String"
+                        else if intrinsic.BoolToString? then "String"
+                        else if intrinsic.IntToString?  then "String"
+                        else if intrinsic.Print?        then "Print"
+                        else if intrinsic.AddInt?       then "+"
+                        else if intrinsic.AddString?    then "+"
+                        else "???"
+            text + " " + expr.IntrinsicValue.Second.String
+            
+        else if expr.Call?              then expr.CallValue.First.String + " " + expr.CallValue.Second.String
+        
+        // unbound
+        else if expr.Name?              then expr.NameValue.First // ### bob: need to include type args
+        else if expr.UnboundString?     then "\"" + expr.UnboundStringValue + "\""
+        else if expr.Define?            then
+            def type <- if expr.DefineValue.Third then "mutable " else "def "
+            type + expr.DefineValue.First + " <- " + expr.DefineValue.Second.String
+        else if expr.Assign?            then expr.AssignValue.First.String + " <- " + expr.AssignValue.Second.String
+        else if expr.FunctionRef?       then "fn " + expr.FunctionRefValue.First
+        
+        else "???"
+    end
+end

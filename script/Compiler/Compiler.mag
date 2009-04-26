@@ -1,0 +1,172 @@
+using Core
+using Core:Collections
+
+using Magpie:Syntax
+
+namespace Magpie:Compiler
+
+    CompileFunction (file File, function Function ->)
+        Print ("compile " + function.Name)
+        
+        Write (file, function.NumParameters)
+        Write (file, function.NumLocals)
+        
+        // the length of the function
+        Write (file, 0)
+        Mark file
+        
+        Compile (file, function.Body)
+        
+        Write (file, Op-Return)
+
+        // ### bob: negative int literals are broke
+        WriteAt (file, (0 - 4), file.GetOffset)
+    end
+    
+    // compiles an expression
+    Compile (file File, expr Expr ->)
+        // literals
+        if expr.UnitLiteral? then () // nothing to do
+            
+        else if expr.BoolLiteral? then
+            Write (file, Op-PushBool)
+            Write (file, expr.BoolLiteralValue)
+            
+        else if expr.IntLiteral? then
+            Write (file, Op-PushInt)
+            Write (file, expr.IntLiteralValue)
+            
+        else if expr.StringLiteral? then
+            Write (file, Op-PushString)
+            Write (file, expr.StringLiteralValue)
+            
+        else if expr.FunctionLiteral? then
+            Write (file, Op-PushInt)
+            Write (file, expr.FunctionLiteralValue.Index)
+        
+        // compounds
+        else if expr.Tuple? then
+            // compile the fields
+            Iterate (expr.TupleValue, file, fn Compile (File, Expr))
+            
+            // put them in a tuple
+            Write (file, Op-Alloc)
+            Write (file, expr.TupleValue.Size)
+            
+        else if expr.Block? then
+            // compile the expressions
+            Iterate (expr.BlockValue, file, fn Compile (File, Expr))
+
+        // variables
+        else if expr.Locals? then
+            Write (file, Op-PushLocals)
+            
+        else if expr.Load? then
+            // evaluate the structure
+            Compile (file, expr.LoadValue.First)
+
+            // load the field
+            Write (file, Op-Load)
+            WriteByte (file, expr.LoadValue.Second)            
+
+        else if expr.Store? then
+            // evaluate the value
+            Compile (file, expr.StoreValue.Third)
+            
+            // evaluate the structure
+            Compile (file, expr.StoreValue.First)
+
+            // store the field
+            Write (file, Op-Store)
+            WriteByte (file, expr.StoreValue.Second)            
+        
+        // flow control
+        else if expr.IfDo? then
+            // evaluate the condition
+            Compile (file, expr.IfDoValue.First)
+            
+            def endPos <- JumpIfFalse file
+            
+            // evaluate the body
+            Compile (file, expr.IfDoValue.Second)
+            
+            PatchJump (file, endPos)
+        
+        else if expr.IfThenElse? then
+            // evaluate the condition
+            Compile (file, expr.IfThenElseValue.First)
+        
+            def elsePos <- JumpIfFalse file
+
+            // then body
+            Compile (file, expr.IfThenElseValue.Second)
+        
+            // ### bob: not having block scope sucks
+            def endPos2 <- Jump file
+            
+            // else body
+            PatchJump (file, elsePos)
+            Compile (file, expr.IfThenElseValue.Third)
+            
+            // end
+            PatchJump (file, endPos2)
+            
+        // intrinsics
+        else if expr.Intrinsic? then
+            Compile (file, expr.IntrinsicValue.First, expr.IntrinsicValue.Second)
+        
+        else if expr.Call? then
+            CompileCall (file, expr.CallValue.First, expr.CallValue.Second)
+            
+        else Print "error: uncompilable expr type"
+    end
+    
+    // inserts a jump if false opcode and returns the offset of the place in the
+    // file to patch with the offset when known later
+    JumpIfFalse (file File -> Int) Jump (file, Op-JumpIfFalse)
+    
+    Jump (file File -> Int) Jump (file, Op-Jump)
+
+    Jump (file File, op OpCode -> Int)
+        Write (file, op)
+        
+        def offset <- file.GetOffset
+        Write (file, 0) // make room for the offset
+        
+        offset
+    end
+    
+    PatchJump (file File, offset Int ->)
+        WriteAt (file, offset, file.GetOffset)
+    end
+    
+    // compiles an intrinsic expression
+    Compile (file File, expr IntrinsicExpr, arg Expr ->)
+        // compile the argument
+        Compile (file, arg)
+        
+        // compile the intrinsic ops
+        if      expr.BoolToString?  then Write (file, Op-BoolToString)
+        else if expr.IntToString?   then Write (file, Op-IntToString)
+        else if expr.Print?         then Write (file, Op-Print)
+        else if expr.AddInt?        then Write (file, Op-AddInt)
+        else if expr.AddString?     then Write (file, Op-AddString)
+        else ()
+    end
+    
+    // compiles a call
+    CompileCall (file File, function Expr, arg Expr ->)
+        Compile (file, arg)
+        Compile (file, function)
+        Write (file, Op-Call)
+    end
+    
+    Write (file File, value Bool ->)
+        WriteByte (file, (if value then 1 else 0))
+    end
+    
+    Write (file File, op OpCode ->)
+        WriteByte (file, op.Value)
+    end
+    
+end

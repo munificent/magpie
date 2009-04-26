@@ -1,0 +1,20 @@
+// expected: true 1
+// expected: true 2
+// expected: true 3
+
+Main (->)
+    // single line
+    if true do Print "true 1"
+    if false do Print "false 1"
+
+    // multi-line body
+    if true do
+        Print "true 2"
+        Print "true 3"
+    end
+
+    if false do
+        Print "false 2"
+        Print "false 3"
+    end
+end

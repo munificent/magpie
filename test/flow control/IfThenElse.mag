@@ -1,0 +1,38 @@
+// expected: true 1
+// expected: false 2
+// expected: true 3
+// expected: true 4
+// expected: false 5
+// expected: true 7
+// expected: false 9
+// expected: false 10
+
+Main (->)
+    // single line
+    if true then Print "true 1" else Print "false 1"
+    if false then Print "true 2" else Print "false 2"
+
+    // multi-line then body
+    if true then
+        Print "true 3"
+        Print "true 4"
+    else Print "false 3"
+
+    if false then
+        Print "true 5"
+        Print "true 6"
+    else Print "false 5"
+
+    // multi-line else body
+    if true then Print "true 7"
+    else
+        Print "false 7"
+        Print "false 8"
+    end
+    
+    if false then Print "true 9"
+    else
+        Print "false 9"
+        Print "false 10"
+    end
+end

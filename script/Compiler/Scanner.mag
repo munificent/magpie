@@ -1,0 +1,290 @@
+using Core
+using Core:Collections
+
+using Magpie:Syntax
+
+namespace Magpie:Compiler
+
+    struct Scanner
+        Index       mutable Int
+        Source      String
+        State       mutable ScanState
+        TokenStart  mutable Int
+        EatLines?   mutable Bool
+    end
+    
+    union ScanState
+        Default
+        InString
+        InStringEscape
+        InName
+        InOperator
+        InNumber
+        InMinus
+        InLineComment
+        InBlockComment  Int // depth of nesting
+    end
+    
+    Scanner (source String -> Scanner) Scanner (0, source, Default, 0, true)
+    
+    Scan (scanner Scanner -> Token)
+        mutable token     <- None'Token
+        
+        while token.None? do
+            token <- ScanCharacter scanner
+            
+            // post-process newline handling
+            if token.Some? do
+                token <- Some LookUpKeyword token.SomeValue
+            
+                def result <- ProcessLines (scanner.EatLines?, token.SomeValue)
+                
+                scanner.EatLines? <- result.First
+                token             <- result.Second
+            end
+        end
+        
+        token.SomeValue
+    end
+    
+    LookUpKeyword (token Token -> Token)
+        if token.NameToken? then
+            // look up name keywords
+            def name <- token.NameTokenValue
+            
+            if      name = "def"        then DefToken
+            else if name = "do"         then DoToken
+            else if name = "else"       then ElseToken
+            else if name = "end"        then EndToken
+            else if name = "fn"         then FnToken
+            else if name = "if"         then IfToken
+            else if name = "mutable"    then MutableToken
+            else if name = "namespace"  then NamespaceToken
+            else if name = "struct"     then StructToken
+            else if name = "then"       then ThenToken
+            else if name = "union"      then UnionToken
+            else if name = "using"      then UsingToken
+            else if name = "while"      then WhileToken
+            
+            else if name = "true"       then BoolToken true
+            else if name = "false"      then BoolToken false
+            else token
+        
+        else if token.OperatorToken? then
+            // look up operator keywords
+            def operator <- token.OperatorTokenValue
+            
+            if      operator = "<-" then LeftArrowToken
+            else if operator = "->" then RightArrowToken
+            else token
+        
+        else token
+    end
+    
+    ProcessLines (eatLines? Bool, token Token -> (Bool, Option'Token))
+        if token.LineToken? then
+            if eatLines? then (true, None'Token) // eat it
+            else (true, Some token)               // eat subsequent ones
+            
+        else if token.CommaToken? |
+           token.DotToken? |
+           token.OperatorToken? then (true, Some token) // eat subsequent lines
+            
+        else (false, Some token)
+    end
+    
+    // Scans a single character. Returns a token if one is completed, or None
+    // otherwise.
+    ScanCharacter (scanner Scanner -> Option'Token)
+        if scanner.State.Default? then
+            if scanner.Done? then Some EofToken
+            
+            // skip whitespace
+            else if Match (scanner, " ")  then None'Token
+            else if Match (scanner, "\r") then None'Token
+            
+            else if Match (scanner, "/", "/")       then StartToken (scanner, InLineComment)
+            else if Match (scanner, "/", "*")       then StartToken (scanner, InBlockComment 1)
+
+            else if Match (scanner, "(")            then Some LeftParenToken
+            else if Match (scanner, ")")            then Some RightParenToken
+            else if Match (scanner, "[")            then Some LeftBracketToken
+            else if Match (scanner, "]")            then Some RightBracketToken
+            else if Match (scanner, ",")            then Some CommaToken
+            else if Match (scanner, ":")            then Some ColonToken
+            else if Match (scanner, ".")            then Some DotToken
+            else if Match (scanner, SpecialChar "newline") then Some LineToken
+            else if Match (scanner, "'")            then Some PrimeToken
+            
+            else if scanner.Current.Quote?          then StartToken (scanner, InString)
+            else if scanner.Current.Minus?          then StartToken (scanner, InMinus)
+            else if scanner.Current.Alpha?          then StartToken (scanner, InName)
+            else if scanner.Current.Punctuation?    then StartToken (scanner, InOperator)
+            else if scanner.Current.Digit?          then StartToken (scanner, InNumber)
+                
+            else
+                Print ("unexpected character: " + scanner.Current)
+                Some EofToken
+            end
+        
+        else if scanner.State.InString? then
+            scanner.Advance
+            
+            if scanner.Current.Backslash? then ChangeState (scanner, InStringEscape)
+            else if scanner.Current.Quote? then
+                scanner.Advance // eat the end quote
+                CompleteToken (scanner, fn EscapeString (String))
+            else if scanner.Done? then
+                Print "error: source ended while still in string"
+                Some EofToken
+            else None'Token // still in string
+            
+        else if scanner.State.InStringEscape? then
+            scanner.Advance
+            
+            if scanner.Done? then
+                Print "error: source ended while still in string"
+                Some EofToken
+            else ChangeState (scanner, InString)
+            
+        else if scanner.State.InMinus? then
+            scanner.Advance
+            
+            // a "-" can be the start of a name "-foo", an operator "-+!", a
+            // number "-123", or an operator all by itself "-"
+            if scanner.Current.Punctuation? then ChangeState (scanner, InOperator)
+            else if scanner.Current.Alpha?  then ChangeState (scanner, InName)
+            else if scanner.Current.Digit?  then ChangeState (scanner, InNumber)
+            else CompleteToken (scanner, fn OperatorToken (String))
+            
+        else if scanner.State.InName? then
+            scanner.Advance
+            
+            if Not (scanner.Current.Alpha? |
+                    scanner.Current.Punctuation? |
+                    scanner.Current.Digit?) then CompleteToken (scanner, fn NameToken (String))
+            else None'Token // still in identifier
+            
+        else if scanner.State.InOperator? then
+            scanner.Advance
+            
+            // if there are any letters, it's a name
+            if scanner.Current.Alpha? then ChangeState (scanner, InName)
+            else if Not (scanner.Current.Punctuation? |
+                         scanner.Current.Digit?) then CompleteToken (scanner, fn OperatorToken (String))
+                
+            else None'Token // still in identifier
+        
+        else if scanner.State.InNumber? then
+            scanner.Advance
+            
+            if Not scanner.Current.Digit? then CompleteToken (scanner, fn IntToken (String))
+            else None'Token // still in number
+            
+        else if scanner.State.InLineComment? then
+            if Match (scanner, SpecialChar "newline") then
+                scanner.State <- Default
+                
+            else scanner.Advance // ignore everything else
+            None'Token
+            
+        else if scanner.State.InBlockComment? then
+            if Match (scanner, "/", "*") then
+                scanner.State <- InBlockComment (scanner.State.InBlockCommentValue + 1)
+                
+            else if Match (scanner, "*", "/") then
+                scanner.State <- if scanner.State.InBlockCommentValue > 1 then
+                    InBlockComment (scanner.State.InBlockCommentValue - 1) // pop a level of nesting
+                    else Default // not in a comment anymore
+            else scanner.Advance // ignore everything else
+            None'Token
+
+        else
+            Print "unknown state"
+            Some EofToken
+        end
+    end
+    
+    // Advances the scanner to the next character.
+    Advance (scanner Scanner ->) scanner.Index <- + 1
+    
+    // Marks the next multi-character token as starting at the current position
+    // then switches to the given state.
+    StartToken (scanner Scanner, newState ScanState -> Option'Token)
+        scanner.TokenStart <- scanner.Index
+        ChangeState (scanner, newState)
+    end
+    
+    // Switches to the given state without resetting the multi-character token
+    // start position.
+    ChangeState (scanner Scanner, newState ScanState -> Option'Token)
+        scanner.State <- newState
+        None'Token
+    end
+  
+    // Emits the current character range as a token using the given conversion
+    // function, and then reverts back to the default state.
+    CompleteToken (scanner Scanner, func fn (String -> Token) -> Option'Token)
+        scanner.State <- Default
+        Some func Substring (scanner.Source, scanner.TokenStart, scanner.Index - scanner.TokenStart)
+    end
+    
+    EscapeString (text String -> Token)
+        mutable result    <- ""
+        mutable inEscape? <- false
+        mutable index     <- 1 // skip starting "
+        
+        while index < (text.Size - 1) do // - 1 to skip ending "
+            def c <- text @ index
+            if inEscape? then
+                if      c = "\"" then result <- + "\""
+                else if c = "\\" then result <- + "\\"
+                else if c = "n"  then result <- + "\n"
+                else if c = "r"  then result <- + "\r"
+                else Print ("unknown escape char " + c)
+                inEscape? <- false
+            else
+                if c.Backslash? then inEscape? <- true
+                else result <- + c
+            end
+            index <- + 1
+        end
+        
+        StringToken result
+    end
+    
+    // Attempts to match the current character with the given one. Consumes it
+    // and returns true if successful.
+    Match (scanner Scanner, character String -> Bool)
+        if scanner.Current = character then
+            // consume the character
+            scanner.Index <- + 1
+            true
+        else false
+    end
+        
+    // Attempts to match the next two characters with the given pair. Consumes
+    // them and returns true if successful.
+    Match (scanner Scanner, current String, next String -> Bool)
+        if (scanner.Current = current) & (scanner.Next = next) then
+            // consume the characters
+            scanner.Index <- + 2
+            true
+        else false
+    end
+
+    Current (scanner Scanner -> String)
+        if scanner.Index < scanner.Source.Size then
+            Substring (scanner.Source, scanner.Index, 1)
+        else "end"
+    end
+    
+    Next (scanner Scanner -> String)
+        if scanner.Index < (scanner.Source.Size - 1) then
+            Substring (scanner.Source, scanner.Index + 1, 1)
+        else "end"
+    end
+    
+    Done? (scanner Scanner -> Bool) scanner.Current = "end"
+
+end

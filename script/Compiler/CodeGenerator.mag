@@ -1,0 +1,72 @@
+using Core
+using Core:Collections
+
+using Magpie:Syntax
+
+namespace Magpie:Compiler
+    
+    CodeGenerator (-> CodeGenerator)
+        CodeGenerator (List'String, List'Function)
+    end
+    
+    // Adds the given source file to the code generator.
+    Add (codeGen CodeGenerator, sourceFile SourceFile ->)
+        Add (codeGen, sourceFile.Contents)
+    end
+    
+    Add (codeGen CodeGenerator, content NamespaceContent ->)
+        // add the functions
+        Iterate (content.Functions, codeGen, fn Add (CodeGenerator, Function))
+    end
+    
+    // Adds the given function to the code generator.
+    Add (codeGen CodeGenerator, function Function ->)
+        Print "add function"
+        // store the index
+        function.Index <- codeGen.Functions.Size
+        
+        codeGen.Functions << function
+    end
+    
+    // creates a string table entry for the given string literal (or re-uses an
+    // existing one if possible. returns the index of the string in the table
+    MakeString (codeGen CodeGenerator, s String -> Int)
+        def index <- IndexOf (codeGen.Strings, s)
+        
+        if index != -1 then index else
+            Add (codeGen.Strings, s)
+            codeGen.Strings.Size - 1
+        end
+    end
+    
+    // write the compiled code to a file
+    Write (codeGen CodeGenerator, outputFile String ->)
+        // ### bob: a "using"-like block would be cool
+        def file <- CreateFile (outputFile + ".pie")
+
+        // strings
+        Write (file, codeGen.Strings.Size) // count
+        
+        Iterate (codeGen.Strings, file, fn Write* (File, String))
+
+        // functions
+        def indexOfMain <- First# (codeGen.Functions, fn Main? (Function))
+        Print ("main index = " + indexOfMain.String)
+        
+        Write (file, codeGen.Functions.Size)
+        Write (file, indexOfMain)
+        
+        Iterate (codeGen.Functions, file, fn CompileFunction (File, Function))
+        
+        Close file
+    end
+    
+    // ### bob: this is because you can't get a reference to an intrinsic
+    Write* (file File, s String ->) Write (file, s)
+
+    struct CodeGenerator
+        Strings     List'String
+        Functions   List'Function
+    end
+    
+end

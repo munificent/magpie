@@ -1,0 +1,31 @@
+using Core
+using Core:Collections
+
+using Magpie:Syntax
+
+namespace Magpie:Compiler
+
+    Function (name String, typeArgs List'Decl, type FunctionDecl, body Expr -> Function)
+        // ### bob: type args are not used yet
+        Function (name, type, Scope, body, -1)
+    end
+
+    NumParameters (function Function -> Int) function.Type.Parameters.Size
+    
+    Main? (function Function -> Bool)
+        //### bob: hackish
+        function.Name = "Main"
+    end
+    
+    NumLocals (function Function -> Int)
+        function.Locals.Struct.Fields.Size
+    end
+    
+    struct Function
+        Name            String
+        Type            FunctionDecl
+        Locals          Scope
+        Body            mutable Expr
+        Index           mutable Int
+    end
+end

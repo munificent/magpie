@@ -1,0 +1,11 @@
+syntax: glob
+
+# ignore the c# build output
+csharp/bin/**.*
+csharp/*.*/obj/**.*
+
+# ignore other vs local stuff
+csharp/Magpie.suo
+csharp/TestResult.xml
+csharp/Unit Tests.VisualState.xml
+csharp/**/*.csproj.user

@@ -1,0 +1,91 @@
+using Core
+using Core:Collections
+
+using Magpie:Syntax
+
+namespace Magpie:Compiler
+
+    union Token
+        LeftParenToken
+        RightParenToken
+        LeftBracketToken
+        RightBracketToken
+        LeftArrowToken
+        RightArrowToken
+        CommaToken
+        ColonToken
+        DotToken
+        LineToken
+        PrimeToken
+        
+        // keywords
+        DefToken
+        DoToken
+        ElseToken
+        EndToken
+        FnToken
+        IfToken
+        MutableToken
+        NamespaceToken
+        StructToken
+        ThenToken
+        UnionToken
+        UsingToken
+        WhileToken
+        
+        // literals
+        UnitToken
+        BoolToken   Bool
+        IntToken    Int
+        StringToken String
+        
+        // identifiers
+        NameToken      String
+        OperatorToken  String
+        
+        // the end of the source has been reached
+        EofToken
+    end
+    
+    IntToken (text String -> Token) IntToken ParseInt text
+    
+    String (token Token -> String)
+        if      token.LeftParenToken?    then "("
+        else if token.RightParenToken?   then ")"
+        else if token.LeftBracketToken?  then "["
+        else if token.RightBracketToken? then "]"
+        else if token.LeftArrowToken?    then "<-"
+        else if token.RightArrowToken?   then "->"
+        else if token.CommaToken?        then ","
+        else if token.ColonToken?        then ":"
+        else if token.DotToken?          then "."
+        else if token.LineToken?         then "newline"
+        else if token.PrimeToken?        then "'"
+        
+        else if token.NameToken?         then ("name " + token.NameTokenValue)
+        else if token.OperatorToken?     then ("operator " + token.OperatorTokenValue)
+
+        else if token.DefToken?        then "def"
+        else if token.DoToken?         then "do"
+        else if token.ElseToken?       then "else"
+        else if token.EndToken?        then "end"
+        else if token.FnToken?         then "fn"
+        else if token.IfToken?         then "if"
+        else if token.MutableToken?    then "mutable"
+        else if token.NamespaceToken?  then "namespace"
+        else if token.StructToken?     then "struct"
+        else if token.ThenToken?       then "then"
+        else if token.UnionToken?      then "union"
+        else if token.UsingToken?      then "using"
+        else if token.WhileToken?      then "while"
+
+        else if token.UnitToken?    then "()"
+        else if token.BoolToken?    then ("bool " + token.BoolTokenValue.String)
+        else if token.IntToken?     then ("int " + token.IntTokenValue.String)
+        else if token.StringToken?  then ("\"" + token.StringTokenValue + "\"")
+
+        else if token.EofToken?        then "[eof]"
+        else "???"
+    end
+    
+end

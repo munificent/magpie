@@ -1,0 +1,14 @@
+﻿// expected: false
+// expected: whoop
+
+Main (->)
+    def a <- Bar "whoop"
+    
+    Print a.Frob?.String
+    Print a.BarValue
+end
+
+union Foo
+    Bar     String
+    Frob
+end

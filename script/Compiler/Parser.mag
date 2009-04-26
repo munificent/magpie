@@ -1,0 +1,143 @@
+using Core
+using Core:Collections
+
+using Magpie:Syntax
+
+// General-purpose LL parser functions
+namespace Magpie:Compiler
+    
+    Parser (text String -> Parser) Parser (Scanner text, List'Token)
+    
+    OneOrMoreLeft (parser Parser, separatorType Token,
+            parseFunc fn (Parser -> Option'Expr),
+            combineFunc fn (Expr, Token, Expr -> Expr) -> Option'Expr)
+        
+        mutable left <- parseFunc parser
+        
+        if left.Some? do
+            while CurrentIs (parser, separatorType) do
+                def separator <- Consume (parser, separatorType)
+                def right     <- parseFunc parser
+                
+                if right.Some? then
+                    left <- Some combineFunc (left.SomeValue, separator, right.SomeValue)
+                else
+                    Print "error: expected value"
+                end
+            end
+        end
+        
+        left
+    end
+    
+    OneOrMoreRight (parser Parser,
+            parseFunc fn (Parser -> Option'Expr),
+            combineFunc fn (Expr, Expr -> Expr) -> Expr)
+            
+        def exprs <- List'Expr
+
+        mutable expr <- parseFunc parser
+        
+        if expr.None? then
+            Print ("Parse error finding first token in a right-associative sequence. Found " + parser.Current.String + " instead.")
+            UnitLiteral
+        else
+            while Not expr.None? do // ### bob: why the hell doesn't expr.Some? work here?
+                exprs << expr.SomeValue
+                expr <- parseFunc parser
+            end
+
+            mutable result <- None'Expr
+
+            while exprs.Size > 0 do
+                result <- if result.None? then Some Pop exprs
+                          else Some combineFunc (Pop exprs, result.SomeValue)
+            end
+
+            if (result.None?) do Print "no result!"
+            result.SomeValue
+        end
+    end
+
+    Current (parser Parser -> Token)
+        def r <- parser.Read
+        
+        if parser.Read.Size = 0 do
+            parser.Read << parser.Scanner.Scan
+        end
+        
+        parser.Read.Peek.SomeValue
+    end
+    
+    ConsumeIf (parser Parser, token Token -> Bool)
+        if CurrentIs (parser, token) then
+            Ignore Consume parser
+            true
+        else false
+    end
+    
+    Consume (parser Parser -> Token)
+        def token <- parser.Read.Dequeue.SomeValue
+        Print ("<< " + token.String)
+        token
+    end
+    
+    Consume (parser Parser, token Token -> Token)
+        if SameType (parser.Current, token) then
+            Consume parser
+        else
+            Print ("parse error: expected " + token.String + " and got " + parser.Current.String)
+            EofToken
+        end
+    end
+    
+    Expect (parser Parser, token Token ->) Ignore Consume (parser, token)
+
+    CurrentIs (parser Parser, token Token -> Bool)
+        SameType (parser.Current, token)
+    end
+    
+    // ### bob: put somewhere global or bake into language?
+    Ignore'T (arg T ->) ()
+    
+    // ### bob: would be awesome if this was auto-generated
+    SameType (a Token, b Token -> Bool)
+        if a.LeftParenToken? then b.LeftParenToken?
+        else if a.RightParenToken? then b.RightParenToken?
+        else if a.LeftBracketToken? then b.LeftBracketToken?
+        else if a.RightBracketToken? then b.RightBracketToken?
+        else if a.LeftArrowToken? then b.LeftArrowToken?
+        else if a.RightArrowToken? then b.RightArrowToken?
+        else if a.CommaToken? then b.CommaToken?
+        else if a.ColonToken? then b.ColonToken?
+        else if a.DotToken? then b.DotToken?
+        else if a.LineToken? then b.LineToken?
+        else if a.PrimeToken? then b.PrimeToken?
+        else if a.DefToken? then b.DefToken?
+        else if a.DoToken? then b.DoToken?
+        else if a.ElseToken? then b.ElseToken?
+        else if a.EndToken? then b.EndToken?
+        else if a.FnToken? then b.FnToken?
+        else if a.IfToken? then b.IfToken?
+        else if a.MutableToken? then b.MutableToken?
+        else if a.NamespaceToken? then b.NamespaceToken?
+        else if a.StructToken? then b.StructToken?
+        else if a.ThenToken? then b.ThenToken?
+        else if a.UnionToken? then b.UnionToken?
+        else if a.UsingToken? then b.UsingToken?
+        else if a.WhileToken? then b.WhileToken?
+        else if a.UnitToken? then b.UnitToken?
+        else if a.BoolToken? then b.BoolToken?
+        else if a.IntToken? then b.IntToken?
+        else if a.StringToken? then b.StringToken?
+        else if a.NameToken? then b.NameToken?
+        else if a.OperatorToken? then b.OperatorToken?
+        else if a.EofToken? then b.EofToken?
+        else false // error
+    end
+    
+    struct Parser
+        Scanner Scanner
+        Read    List'Token
+    end
+end

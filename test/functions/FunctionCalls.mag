@@ -1,0 +1,51 @@
+// expected: noArgs
+// expected: noArgs
+// expected: one one
+// expected: one one
+// expected: one chain returned
+// expected: one chain returned
+// expected: one chain returned
+// expected: one chain returned
+// expected: two a b
+// expected: two a b
+// expected: two a b
+
+NoArgs  (->)                    Print "noArgs"
+OneArg  (a String ->)           Print ("one " + a)
+TwoArgs (a String, b String ->) Print ("two " + a + b)
+
+Bounce  (a String -> String)    a + " returned"
+
+Main (->)
+    // implicit () application
+    NoArgs
+    
+    // explicit () application
+    NoArgs ()
+    
+    // regular application
+    OneArg "one"
+    
+    // reverse application
+    "one".OneArg
+    
+    // chained
+    OneArg Bounce "chain"
+    
+    // reverse chained
+    "chain".Bounce.OneArg
+
+    // mixed
+    OneArg "chain".Bounce
+    (Bounce "chain").OneArg
+    
+    // tupled arguments
+    TwoArgs ("a ", "b")
+    
+    // stored tuple
+    def args <- ("a ", "b")
+    TwoArgs args
+    
+    // reverse application
+    ("a ", "b").TwoArgs
+end

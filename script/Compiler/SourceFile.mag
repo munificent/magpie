@@ -1,0 +1,14 @@
+using Core
+using Core:Collections
+
+using Magpie:Syntax
+
+namespace Magpie:Compiler
+
+    SourceFile (usings List'String -> SourceFile) SourceFile (usings, NamespaceContent)
+    
+    struct SourceFile
+        Usings      List'String
+        Contents    NamespaceContent
+    end
+end

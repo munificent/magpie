@@ -1,0 +1,254 @@
+using Core
+
+namespace Core:Collections
+
+    // Gets the number of items in the List.
+    Size'T (list List'T -> Int)
+        if Not list.Empty? then
+            mutable count   <- 1
+            mutable current <- list.Head.SomeValue
+            
+            while current.Next.Some? do
+                count   <- + 1
+                current <- current.Next.SomeValue
+            end
+            
+            count
+        else 0
+    end
+
+    // Creates an empty List.
+    List'T (-> List'T)                    List None'_Node'T
+
+    ListOf'T (i1 T                         -> List'T) i1 ~ List'T
+    ListOf'T (i1 T, i2 T                   -> List'T) i1 ~ (i2 ~ List'T)
+    ListOf'T (i1 T, i2 T, i3 T             -> List'T) i1 ~ ListOf (i2, i3)
+    ListOf'T (i1 T, i2 T, i3 T, i4 T       -> List'T) i1 ~ ListOf (i2, i3, i4)
+    ListOf'T (i1 T, i2 T, i3 T, i4 T, i5 T -> List'T) i1 ~ ListOf (i2, i3, i4, i5)
+    
+    Empty?'T (list List'T -> Bool)    list.Head.None?
+    
+    // Prepends the given node to the list.
+    ~'T (head T, rest List'T -> List'T)  List Some _Node (head, rest.Head)
+
+    // Gets the list item at the given zero-based index.
+    //### bob: doesn't check bounds!
+    @'T (list List'T, position Int -> T)
+        mutable current <- list.Head.SomeValue
+        mutable index   <- 0
+        
+        while index < position do
+            current <- current.Next.SomeValue
+            index <- + 1
+        end
+        
+        current.Item
+    end
+
+    // Creates a terminating node.
+    _Node'T (item T -> _Node'T)           _Node (item, None'_Node'T)
+
+    // Converts all list items to strings, and concatenates them together using
+    // the given separator string.
+    Join'T (list List'T, separator String -> String)
+        mutable joined  <- ""
+        mutable current <- list.Head
+        
+        while current.Some? do
+            joined  <- + String current.SomeValue.Item
+            current <- current.SomeValue.Next
+
+            if current.Some? do joined <- + separator
+        end
+        
+        joined
+    end
+    
+    // Appends the given item at the end of the list.
+    Add'T (list List'T, item T ->)
+        if list.Empty? then
+            // empty list, add to the head
+            list.Head <- Some _Node (item, None'_Node'T)
+        else
+            // find the last node
+            mutable node <- list.Head.SomeValue
+            while node.Next.Some? do node <- node.Next.SomeValue
+
+            // add the item
+            node.Next <- Some _Node (item, None'_Node'T)
+        end
+    end
+
+    <<'T (list List'T, item T ->) Add (list, item)
+    
+    Peek'T (list List'T -> Option'T)
+        if list.Head.None? then None'T
+        else
+            mutable node <- list.Head.SomeValue
+            while node.Next.Some? do node <- node.Next.SomeValue
+            
+            Some node.Item
+        end
+    end
+    
+    Pop'T (list List'T -> T)
+        // ### bob: undefined if list is empty :(
+        
+        // edge case: only one item
+        if list.Head.SomeValue.Next.None? then
+            def head <- list.Head.SomeValue
+            list.Head <- None'_Node'T
+            head.Item
+        else
+        
+            // find the next-to-last node
+            mutable previous <- list.Head.SomeValue
+            mutable node <- previous.Next.SomeValue
+            while node.Next.Some? do
+                previous <- node
+                node <- node.Next.SomeValue
+            end
+            
+            // remove the last item
+            previous.Next <- None'_Node'T
+            node.Item
+        end
+    end
+    
+    Dequeue'T (list List'T -> Option'T)
+        if list.Head.None? then None'T
+        else
+            def node <- list.Head.SomeValue
+            list.Head <- node.Next
+            Some node.Item
+        end
+    end
+    
+    // gets the index of the first item in the list equal to the given item
+    // or -1 if none found
+    IndexOf'T (list List'T, item T -> Int)
+        if list.Empty? then
+            // empty list
+            -1
+        else
+            mutable node  <- list.Head
+            mutable index <- 0
+            
+            // ### bob: could get rid of going if & short-circuited
+            mutable going <- true
+            
+            while going do
+                if node.None? then
+                    // failure
+                    index <- -1
+                    going <- false
+                else if node.SomeValue.Item = item then
+                    // success
+                    going <- false
+                else
+                    index <- + 1
+                    node <- node.SomeValue.Next
+                end
+            end
+            
+            index
+        end
+    end
+    
+    First#'T (list List'T, match? fn (T -> Bool) -> Int)
+        _First# (list.Head, 0, match?)
+    end
+    
+    _First#'T (node Option'_Node'T, index Int, match? fn (T -> Bool) -> Int)
+        if node.None? then -1
+        else if (match? node.SomeValue.Item) then index
+        else _First# (node.SomeValue.Next, index + 1, match?)
+    end
+    
+    First#'(T, A) (list List'T, arg A, match? fn (A, T -> Bool) -> Int)
+        _First# (list.Head, 0, arg, match?)
+    end
+    
+    _First#'(T, A) (node Option'_Node'T, index Int, arg A, match? fn (A, T -> Bool) -> Int)
+        if node.None? then -1
+        else if (match? (arg, node.SomeValue.Item)) then index
+        else _First# (node.SomeValue.Next, index + 1, arg, match?)
+    end
+    
+    Iterate'T (list List'T, func fn (T ->) ->)
+        if Not list.Empty? do _Iterate (list.Head.SomeValue, func)
+    end
+
+    _Iterate'T (node _Node'T, func fn (T ->) ->)
+        func node.Item
+        if node.Next.Some? do _Iterate (node.Next.SomeValue, func)
+    end
+
+    Iterate'(T, A) (list List'T, arg A, func fn (A, T ->) ->)
+        if Not list.Empty? do _Iterate (list.Head.SomeValue, arg, func)
+    end
+
+    _Iterate'(T, A) (node _Node'T, arg A, func fn (A, T ->) ->)
+        func (arg, node.Item)
+        if node.Next.Some? do _Iterate (node.Next.SomeValue, arg, func)
+    end
+    
+    ReverseIterate'(T, A) (list List'T, arg A, func fn (A, T ->) ->)
+        if Not list.Empty? do _ReverseIterate (list.Head.SomeValue, arg, func)
+    end
+
+    _ReverseIterate'(T, A) (node _Node'T, arg A, func fn (A, T ->) ->)
+        // reverse, so recurse first
+        if node.Next.Some? do _ReverseIterate (node.Next.SomeValue, arg, func)
+        
+        func (arg, node.Item)
+    end
+    
+    Map'(From, To, Arg) (list List'From, arg Arg, func fn (Arg, From -> To) -> List'To)
+        def result <- List'To
+        
+        result.Head <- _Map (list.Head, arg, func)
+        result
+    end
+    
+    _Map'(From, To, Arg) (from Option'_Node'From, arg Arg, func fn (Arg, From -> To) -> Option'_Node'To)
+        if from.Some? then
+            def to  <- Some _Node func (arg, from.SomeValue.Item)
+            to.SomeValue.Next <- _Map (from.SomeValue.Next, arg, func)
+            to
+        else None'_Node'To
+    end
+    
+    Map'(From, To) (list List'From, func fn (From -> To) -> List'To)
+        def result <- List'To
+        
+        result.Head <- _Map (list.Head, func)
+        result
+    end
+    
+    _Map'(From, To) (from Option'_Node'From, func fn (From -> To) -> Option'_Node'To)
+        if from.Some? then
+            def to  <- Some _Node func from.SomeValue.Item
+            to.SomeValue.Next <- _Map (from.SomeValue.Next, func)
+            to
+        else None'_Node'To
+    end
+
+    struct List'T
+        Head    mutable Option'_Node'T
+    end
+
+    struct _Node'T
+        Item    mutable T
+        Next    mutable Option'_Node'T
+    end
+
+    //### bob: the above isn't the best type for a list. a better one would be
+    /*
+    union List'T
+        Empty
+        Nonempty (T, List'T)
+    end
+    */
+    
+end

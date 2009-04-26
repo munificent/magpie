@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Magpie.Interpreter", "Magpie.Interpreter\Magpie.Interpreter.csproj", "{5C3C5651-DA35-4DBC-9988-4FF09042268B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Magpie.Compilation", "Magpie.Compilation\Magpie.Compilation.csproj", "{19987567-5FF8-4401-A9FE-05E4B859E58B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Magpie.App", "Magpie.App\Magpie.App.csproj", "{9D7385F0-825B-4F36-BC97-EB3179845037}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5C3C5651-DA35-4DBC-9988-4FF09042268B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C3C5651-DA35-4DBC-9988-4FF09042268B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C3C5651-DA35-4DBC-9988-4FF09042268B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C3C5651-DA35-4DBC-9988-4FF09042268B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19987567-5FF8-4401-A9FE-05E4B859E58B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19987567-5FF8-4401-A9FE-05E4B859E58B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19987567-5FF8-4401-A9FE-05E4B859E58B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19987567-5FF8-4401-A9FE-05E4B859E58B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D7385F0-825B-4F36-BC97-EB3179845037}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D7385F0-825B-4F36-BC97-EB3179845037}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D7385F0-825B-4F36-BC97-EB3179845037}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D7385F0-825B-4F36-BC97-EB3179845037}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

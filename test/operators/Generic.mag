@@ -1,0 +1,16 @@
+// expected: ab
+// expected: 12
+// expected: 1true
+// expected: false2c
+
+Main (->)
+    Print ("a" ++ "b")
+    Print (1 ++ 2)
+    Print (1 ++ true)
+    Print (false ++ 2 ++ "c")
+end
+
+// generic operator
+++'(Left, Right) (left Left, right Right -> String)
+    left.String + right.String
+end

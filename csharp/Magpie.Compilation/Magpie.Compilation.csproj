@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{19987567-5FF8-4401-A9FE-05E4B859E58B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Magpie.Compilation</RootNamespace>
+    <AssemblyName>Magpie.Compilation</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Parser\LineProcessor.cs" />
+    <Compile Include="Syntax\Expressions\ApplyExpr.cs" />
+    <Compile Include="Syntax\Expressions\ArrayExpr.cs" />
+    <Compile Include="Syntax\Expressions\AssignExpr.cs" />
+    <Compile Include="Syntax\Expressions\BlockExpr.cs" />
+    <Compile Include="Syntax\Expressions\ConstructExpr.cs" />
+    <Compile Include="Syntax\Expressions\ConstructUnionExpr.cs" />
+    <Compile Include="Syntax\Expressions\DefineExpr.cs" />
+    <Compile Include="Syntax\Expressions\IBoundExpr.cs" />
+    <Compile Include="Syntax\Expressions\FuncRefExpr.cs" />
+    <Compile Include="Syntax\Expressions\IfDoExpr.cs" />
+    <Compile Include="Syntax\Expressions\IfThenExpr.cs" />
+    <Compile Include="Syntax\Expressions\IntrinsicExpr.cs" />
+    <Compile Include="Syntax\Expressions\IUnboundExpr.cs" />
+    <Compile Include="Syntax\Expressions\LoadExpr.cs" />
+    <Compile Include="Syntax\Expressions\LocalsExpr.cs" />
+    <Compile Include="Syntax\Expressions\NameExpr.cs" />
+    <Compile Include="Syntax\Expressions\OperatorExpr.cs" />
+    <Compile Include="Syntax\Expressions\StoreExpr.cs" />
+    <Compile Include="Syntax\Expressions\TupleExpr.cs" />
+    <Compile Include="Syntax\Expressions\ValueExpr.cs" />
+    <Compile Include="Syntax\Expressions\UnitExpr.cs" />
+    <Compile Include="Syntax\Expressions\WhileExpr.cs" />
+    <Compile Include="Syntax\Expressions\WrapBoundExpr.cs" />
+    <Compile Include="Syntax\IBoundExprVisitor.cs" />
+    <Compile Include="Syntax\IDeclVisitor.cs" />
+    <Compile Include="Syntax\IEnumerableExtensions.cs" />
+    <Compile Include="Syntax\IUnboundExprVisitor.cs" />
+    <Compile Include="Syntax\Namespace.cs" />
+    <Compile Include="Syntax\Scope.cs" />
+    <Compile Include="Syntax\SourceFile.cs" />
+    <Compile Include="Syntax\Type Declarations\ArrayType.cs" />
+    <Compile Include="Syntax\Type Declarations\AtomicDecl.cs" />
+    <Compile Include="Syntax\Type Declarations\Decl.cs" />
+    <Compile Include="Syntax\Type Declarations\FuncType.cs" />
+    <Compile Include="Syntax\Type Declarations\NamedType.cs" />
+    <Compile Include="Syntax\Type Declarations\TupleType.cs" />
+    <Compile Include="Syntax\Type Definitions\BoundFunction.cs" />
+    <Compile Include="Syntax\Type Definitions\Function.cs" />
+    <Compile Include="Syntax\Type Definitions\Struct.cs" />
+    <Compile Include="Syntax\Type Definitions\TypeDefinition.cs" />
+    <Compile Include="Syntax\Type Definitions\Union.cs" />
+    <Compile Include="Bytecode\BinaryPatcher.cs" />
+    <Compile Include="Bytecode\BytecodeFile.cs" />
+    <Compile Include="Bytecode\FunctionBlock.cs" />
+    <Compile Include="Bytecode\OpCode.cs" />
+    <Compile Include="Compiler\CompileException.cs" />
+    <Compile Include="Compiler\DeclComparer.cs" />
+    <Compile Include="Compiler\AutoFunctions.cs" />
+    <Compile Include="Compiler\BytecodeGenerator.cs" />
+    <Compile Include="Compiler\Compiler.cs" />
+    <Compile Include="Compiler\CompileUnit.cs" />
+    <Compile Include="Compiler\FunctionBinder.cs" />
+    <Compile Include="Parser\LlParser.cs" />
+    <Compile Include="Parser\MagpieParser.cs" />
+    <Compile Include="Parser\ParseException.cs" />
+    <Compile Include="Parser\Scanner.cs" />
+    <Compile Include="Parser\Token.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Compiler\TypeArgInferrer.cs" />
+    <Compile Include="Compiler\UnboundBodyInstancer.cs" />
+    <Compile Include="Compiler\TypeInstancer.cs" />
+    <Compile Include="Compiler\TypeArgApplicator.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

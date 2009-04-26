@@ -1,0 +1,54 @@
+// expected: 6
+// expected: 0
+// expected: 6
+// expected: 2
+// expected: 9
+// expected: true
+// expected: false
+// expected: true
+// expected: false
+// expected: true
+// expected: false
+// expected: false
+// expected: true
+// expected: false
+// expected: true
+// expected: false
+// expected: true
+// expected: true
+// expected: false
+// expected: ab
+
+Main (->)
+    // int arithmetic
+    Print (1 + 2 + 3).String
+    Print (3 - 2 - 1).String
+    Print (1 * 2 * 3).String
+    Print (8 / 2 / 2).String
+    
+    // flat precedence
+    Print (1 + 2 * 3).String
+
+    // comparison
+    Print (1 < 2).String
+    Print (1 > 2).String
+    Print (1 <= 2).String
+    Print (1 >= 2).String
+    
+    // equality
+    Print (true = true).String
+    Print (true != true).String
+    Print (2 = 3).String
+    Print (2 != 3).String
+    Print ("a" = "b").String
+    Print ("a" != "b").String
+
+    // boolean
+    Print (true & false).String
+    Print (true & true).String
+    Print (true | false).String
+    Print (false | false).String
+    
+    // strings
+    Print ("a" + "b")
+end

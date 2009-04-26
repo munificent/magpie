@@ -1,0 +1,102 @@
+using Core
+using Core:Collections
+
+namespace Magpie:Syntax
+
+    Value (op OpCode -> Int)
+        if      op.Op-PushNull?         then 0
+        else if op.Op-PushBool?         then 1  // done
+        else if op.Op-PushChar?         then 2
+        else if op.Op-PushInt?          then 3  // done
+        else if op.Op-PushString?       then 4  // done
+        else if op.Op-PushLocals?       then 5  // done
+        else if op.Op-Alloc?            then 6  // done
+        else if op.Op-Load?             then 7  // done
+        else if op.Op-Store?            then 8  // done
+        else if op.Op-Call?             then 9  // done
+        else if op.Op-Return?           then 10 // done
+        else if op.Op-Jump?             then 11 // done
+        else if op.Op-JumpIfFalse?      then 12 // done
+        else if op.Op-BoolToString?     then 13 // done
+        else if op.Op-CharToString?     then 14
+        else if op.Op-IntToString?      then 15 // done
+        else if op.Op-EqualBool?        then 16
+        else if op.Op-EqualChar?        then 17
+        else if op.Op-EqualInt?         then 18
+        else if op.Op-EqualString?      then 19
+        else if op.Op-LessChar?         then 20
+        else if op.Op-GreaterChar?      then 21
+        else if op.Op-LessInt?          then 22
+        else if op.Op-GreaterInt?       then 23
+        else if op.Op-NegateBool?       then 24
+        else if op.Op-NegateInt?        then 25
+        else if op.Op-AndBool?          then 26
+        else if op.Op-OrBool?           then 27
+        else if op.Op-AddInt?           then 28 // done
+        else if op.Op-SubInt?           then 29
+        else if op.Op-MultInt?          then 30
+        else if op.Op-DivInt?           then 31
+        else if op.Op-HasValue?         then 32
+        else if op.Op-BoxValue?         then 33
+        else if op.Op-UnboxValue?       then 34
+        else if op.Op-AddString?        then 35 // done
+        else if op.Op-Print?            then 36 // done
+        else if op.Op-StringSize?       then 37
+        else if op.Op-CharAt?           then 38
+        else if op.Op-Substring?        then 39
+        else if op.Op-FileCreate?       then 40
+        else if op.Op-FileClose?        then 41
+        else if op.Op-FileWriteByte?    then 42
+        else if op.Op-FileWriteInt?     then 43
+        else if op.Op-FileWriteString?  then 44
+        else 9999
+    end
+    
+    union OpCode
+        Op-PushNull
+        Op-PushBool
+        Op-PushChar
+        Op-PushInt
+        Op-PushString
+        Op-PushLocals
+        Op-Alloc
+        Op-Load
+        Op-Store
+        Op-Call
+        Op-Return
+        Op-Jump
+        Op-JumpIfFalse
+        Op-BoolToString
+        Op-CharToString
+        Op-IntToString
+        Op-EqualBool
+        Op-EqualChar
+        Op-EqualInt
+        Op-EqualString
+        Op-LessChar
+        Op-GreaterChar
+        Op-LessInt
+        Op-GreaterInt
+        Op-NegateBool
+        Op-NegateInt
+        Op-AndBool
+        Op-OrBool
+        Op-AddInt
+        Op-SubInt
+        Op-MultInt
+        Op-DivInt
+        Op-HasValue
+        Op-BoxValue
+        Op-UnboxValue
+        Op-AddString
+        Op-Print
+        Op-StringSize
+        Op-CharAt
+        Op-Substring
+        Op-FileCreate
+        Op-FileClose
+        Op-FileWriteByte
+        Op-FileWriteInt
+        Op-FileWriteString
+    end
+end
