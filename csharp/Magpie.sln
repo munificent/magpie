@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Magpie.Compilation", "Magpi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Magpie.App", "Magpie.App\Magpie.App.csproj", "{9D7385F0-825B-4F36-BC97-EB3179845037}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Magpie.Foreign", "Magpie.Foreign\Magpie.Foreign.csproj", "{1CC4FC20-715E-4036-AFDE-3F8CBDFA5ADE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +27,10 @@ Global
 		{9D7385F0-825B-4F36-BC97-EB3179845037}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D7385F0-825B-4F36-BC97-EB3179845037}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D7385F0-825B-4F36-BC97-EB3179845037}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CC4FC20-715E-4036-AFDE-3F8CBDFA5ADE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CC4FC20-715E-4036-AFDE-3F8CBDFA5ADE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CC4FC20-715E-4036-AFDE-3F8CBDFA5ADE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CC4FC20-715E-4036-AFDE-3F8CBDFA5ADE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

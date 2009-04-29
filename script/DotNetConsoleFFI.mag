@@ -1,0 +1,11 @@
+Main (->)
+    Write "enter something: "
+    def a <- ReadLine
+    
+    WriteLine ("you said " + a)
+    
+    while Not KeyAvailable? do Write "*"
+    
+    Clear
+    WriteLine "that was weird"    
+end

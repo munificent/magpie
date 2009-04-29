@@ -45,6 +45,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Foreign Interface\ForeignFunction.cs" />
+    <Compile Include="Foreign Interface\IForeignStaticInterface.cs" />
     <Compile Include="Parser\LineProcessor.cs" />
     <Compile Include="Syntax\Expressions\ApplyExpr.cs" />
     <Compile Include="Syntax\Expressions\ArrayExpr.cs" />
@@ -53,6 +55,7 @@
     <Compile Include="Syntax\Expressions\ConstructExpr.cs" />
     <Compile Include="Syntax\Expressions\ConstructUnionExpr.cs" />
     <Compile Include="Syntax\Expressions\DefineExpr.cs" />
+    <Compile Include="Syntax\Expressions\ForeignCallExpr.cs" />
     <Compile Include="Syntax\Expressions\IBoundExpr.cs" />
     <Compile Include="Syntax\Expressions\FuncRefExpr.cs" />
     <Compile Include="Syntax\Expressions\IfDoExpr.cs" />

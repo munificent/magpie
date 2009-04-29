@@ -11,7 +11,7 @@
 
 
 
-Magpie is a simple embeddable strongly-typed
+Magpie is a simple, embeddable, strongly-typed
 memory-managed procedural language.
 
 Like its namesake, it collects the shiniest parts
@@ -95,6 +95,51 @@ need an explicit "return" in Magpie: the result of
 evaluating the function body is implicitly
 returned like in Ruby.
 
+
+--- How do I poke at it? -------------------------
+
+To try things out for yourself, you'll need to:
+
+1. Get the source. If you're reading this, you
+   probably have it.
+   
+2. Build Magpie. The Visual Studio solution is
+   /csharp/Magpie.sln
+   If you don't have Visual Studio, you can 
+   download Visual Studio Express for free from
+   Microsoft. It's quite nice actually.
+   
+   Magpie *should* be able to build with Mono, I
+   think. It doesn't really depend on much. But I
+   haven't tried to yet.
+   
+   Anyway, build that solution.
+   
+3. Write yourself a little script. Call it
+   "awesome.mag" and put something awesome in it.
+   Maybe:
+   
+   Main (->)
+       mutable i <- 0
+       while i < 100 do
+           Print "Awesome!"
+           i <- + 1
+       end
+   end
+   
+   Yeah, I know. I can't wait to implement real
+   loops either.
+   
+4. Run it. The VS solution builds magpie to
+   /csharp/bin/Debug/magpie.exe
+   
+   Open that in a command prompt and do:
+   
+   magpie.exe awesome.mag
+   
+   If you actually put your awesome script in
+   there, you should see a lot of awesome now.
+   
 
 --- Where's it at --------------------------------
 

@@ -113,13 +113,13 @@ namespace Magpie.Compilation
             Add(jumpOp, jump.Location);
         }
 
-        private void Add(OpCode op, byte operand)
+        public void Add(OpCode op, byte operand)
         {
             Byte((byte)op);
             Byte(operand);
         }
 
-        private void Add(OpCode op, char c)
+        public void Add(OpCode op, char c)
         {
             Byte((byte)op);
 
@@ -129,7 +129,7 @@ namespace Magpie.Compilation
             Byte((byte)((operand & 0x0000ff00) >> 8));
         }
 
-        private void Add(OpCode op, int operand)
+        public void Add(OpCode op, int operand)
         {
             Byte((byte)op);
 

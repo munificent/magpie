@@ -8,8 +8,9 @@ namespace Magpie.Compilation
 {
     public class Compiler
     {
-        public Compiler()
+        public Compiler(IForeignStaticInterface foreignInterface)
         {
+            mOutput = new CompileUnit(foreignInterface);
         }
 
         public void AddSourceFile(string filePath)
@@ -31,6 +32,6 @@ namespace Magpie.Compilation
             mOutput.Compile(outputStream);
         }
 
-        private CompileUnit mOutput = new CompileUnit();
+        private CompileUnit mOutput;
     }
 }

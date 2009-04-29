@@ -20,20 +20,25 @@ namespace Magpie.Compilation
 
         // allocates a structure on the heap, initializes each slot by popping values,
         // then pushes a reference to it
-        Alloc, // int number of slots
+        Alloc, // int : number of slots
 
         // pops a reference to a structure, and pushes the value of the field at the given index
-        Load, // byte index of field
+        Load, // byte : index of field
 
         // pops a value and a reference to a structure, and assigns the value to the field at the given index
-        Store, // byte index of field
+        Store, // byte : index of field
 
         //### bob: function index is temp. should eventually be byte offset to start of fn
-        Call, // pops function index from operand stack
+        Call,        // pops function index from operand stack
+
+        ForeignCall0, // int : foreign function identifier
+        ForeignCall1, // int : foreign function identifier
+        ForeignCallTuple, // int : foreign function identifier
+
         Return,
 
         Jump,
-        JumpIfFalse, // new instruction offset
+        JumpIfFalse, // int: new instruction offset
 
         // conversion
         BoolToString,

@@ -11,6 +11,11 @@ namespace Magpie.Compilation
         public readonly List<string> Strings = new List<string>();
         public IList<BoundFunction> Bound { get { return mBound; } }
 
+        public CompileUnit(IForeignStaticInterface foreignInterface)
+        {
+            mForeignInterface = foreignInterface;
+        }
+
         public int DefineString(string text)
         {
             // look it up in the string table
@@ -214,9 +219,18 @@ namespace Magpie.Compilation
                 argTypes = arg.Type.Expanded;
             }
 
+            //### bob: all of this iterating through lists is dumb. there should really be
+            // a dictionary that maps unique names to values.
+
             // see if it's intrinsic
             IBoundExpr intrinsic = IntrinsicExpr.Find(name, arg);
             if (intrinsic != null) return intrinsic;
+
+            //### bob: should really be doing this in ResolveFunction so that foreign functions
+            // can be namespaced, but that'll require shifting some stuff around.
+            // see if it's a foreign function
+            ForeignFunction foreign = ResolveForeignFunction(BoundFunction.GetUniqueName(name, typeArgs, argTypes));
+            if (foreign != null) return new ForeignCallExpr(foreign, arg);
 
             // see if it's something defined at the sourcefile level
             BoundFunction bound = ResolveFunction(containingType, instancingContext, scope, name, typeArgs, argTypes);
@@ -226,6 +240,11 @@ namespace Magpie.Compilation
             }
 
             throw new CompileException(String.Format("Could not resolve name {0}.", BoundFunction.GetUniqueName(name, typeArgs, argTypes)));
+        }
+
+        private ForeignFunction ResolveForeignFunction(string uniqueName)
+        {
+            return mForeignInterface.FindFunction(uniqueName);
         }
 
         public BoundFunction ResolveFunction(Function containingType, Function instancingContext, Scope scope, string name, IList<Decl> typeArgs, Decl[] argTypes)
@@ -389,5 +408,6 @@ namespace Magpie.Compilation
         private readonly List<BoundFunction> mBound = new List<BoundFunction>();
         private readonly List<Function> mGenerics = new List<Function>();
         private readonly List<Function> mFunctions = new List<Function>();
+        private readonly IForeignStaticInterface mForeignInterface;
     }
 }

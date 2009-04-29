@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 
 using Magpie.Compilation;
+using Magpie.Foreign;
 using Magpie.Interpreter;
 
 namespace Magpie.App
@@ -15,7 +16,9 @@ namespace Magpie.App
         {
             sPrintCallback = printCallback;
 
-            var compiler = new Compiler();
+            var foreign = new DotNetForeign();
+
+            var compiler = new Compiler(foreign);
             compiler.AddSourceFile(path);
 
             using (var stream = new MemoryStream())
@@ -24,7 +27,7 @@ namespace Magpie.App
 
                 stream.Seek(0, SeekOrigin.Begin);
 
-                var machine = new Machine();
+                var machine = new Machine(foreign);
                 machine.Printed += Machine_Printed;
 
                 machine.Interpret(stream);

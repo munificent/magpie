@@ -10,6 +10,11 @@ namespace Magpie.Compilation
     /// </summary>
     public class FuncType : Decl
     {
+        public static FuncType Create(Decl returnType)
+        {
+            return new FuncType(new ParamDecl[0], returnType);
+        }
+
         public static FuncType Create(Decl arg, Decl returnType)
         {
             return new FuncType(new ParamDecl[] { new ParamDecl("a", arg) }, returnType);

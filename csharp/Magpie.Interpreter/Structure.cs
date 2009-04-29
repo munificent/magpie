@@ -10,6 +10,8 @@ namespace Magpie.Interpreter
     /// </summary>
     public class Structure
     {
+        public IEnumerable<Value> Fields { get { return mFields; } }
+
         public Structure(int numFields)
         {
             mFields = new Value[numFields];

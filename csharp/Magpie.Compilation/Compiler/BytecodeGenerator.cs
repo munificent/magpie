@@ -29,6 +29,28 @@ namespace Magpie.Compilation
             return true;
         }
 
+        public bool Visit(ForeignCallExpr expr)
+        {
+            // evaluate the arg
+            expr.Arg.Accept(this);
+
+            // add the foreign call
+            if (expr.Function.Type.Parameters.Count == 0)
+            {
+                mFunction.Add(OpCode.ForeignCall0, expr.Function.ID);
+            }
+            else if (expr.Function.Type.Parameters.Count == 1)
+            {
+                mFunction.Add(OpCode.ForeignCall1, expr.Function.ID);
+            }
+            else
+            {
+                mFunction.Add(OpCode.ForeignCallTuple, expr.Function.ID);
+            }
+
+            return true;
+        }
+
         public bool Visit(BoundTupleExpr tuple)
         {
             // must visit in forward order to ensure that function arguments are

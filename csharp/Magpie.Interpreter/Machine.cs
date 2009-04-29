@@ -12,6 +12,11 @@ namespace Magpie.Interpreter
     {
         public event EventHandler<PrintEventArgs> Printed;
 
+        public Machine(IForeignRuntimeInterface foreignInterface)
+        {
+            mForeignInterface = foreignInterface;
+        }
+
         public void Interpret(Stream stream)
         {
             Interpret(BytecodeFile.Load(stream), String.Empty);
@@ -131,6 +136,32 @@ namespace Magpie.Interpreter
                                     }
                                     break;
                             }
+                        }
+                        break;
+
+                    case OpCode.ForeignCall0:
+                        {
+                            int id = ReadInt();
+
+                            ForeignCall(id, new Value[0]);
+                        }
+                        break;
+
+                    case OpCode.ForeignCall1:
+                        {
+                            int id = ReadInt();
+                            Value arg = Pop();
+
+                            ForeignCall(id, new Value[] { arg });
+                        }
+                        break;
+
+                    case OpCode.ForeignCallTuple:
+                        {
+                            int id = ReadInt();
+                            Structure args = PopStructure();
+
+                            ForeignCall(id, args.Fields.ToArray());
                         }
                         break;
 
@@ -332,6 +363,13 @@ namespace Magpie.Interpreter
             return frame;
         }
 
+        private void ForeignCall(int id, Value[] args)
+        {
+            Value result = mForeignInterface.ForeignCall(id, args);
+
+            if (result != null) Push(result);
+        }
+
         private BytecodeFile mFile;
 
         private byte[] mCode;
@@ -347,5 +385,7 @@ namespace Magpie.Interpreter
         // n + 2  : instruction pointer for parent frame
         // n + 3  : function index for parent frame
         private Structure mCurrentFrame;
+
+        private readonly IForeignRuntimeInterface mForeignInterface;
     }
 }

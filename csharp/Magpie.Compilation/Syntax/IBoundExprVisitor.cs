@@ -23,6 +23,7 @@ namespace Magpie.Compilation
         TReturn Visit(StoreExpr expr);
         TReturn Visit(LocalsExpr expr);
         TReturn Visit(BoundFuncRefExpr expr);
+        TReturn Visit(ForeignCallExpr expr);
         TReturn Visit(ConstructExpr expr);
         TReturn Visit(ConstructUnionExpr expr);
     }
