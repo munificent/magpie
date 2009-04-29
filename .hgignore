@@ -9,3 +9,6 @@ csharp/Magpie.suo
 csharp/TestResult.xml
 csharp/Unit Tests.VisualState.xml
 csharp/**/*.csproj.user
+
+# ignore (for now) the outdated ref manual
+doc/reference manual/*.*

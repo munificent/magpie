@@ -351,7 +351,7 @@ namespace Magpie.Compilation
             IUnboundExpr expression;
 
             if (CurrentIs(TokenType.Name)) expression = new NameExpr(Name(), TypeArgs());
-            else if (ConsumeIf(TokenType.Fn)) expression = new FuncRefExpr(new NameExpr(Name(), TypeArgs()), TupleType());
+            else if (CurrentIs(TokenType.Fn)) expression = FuncRefExpr();
             else if (CurrentIs(TokenType.Bool)) expression = new BoolExpr(Consume(TokenType.Bool).BoolValue);
             else if (CurrentIs(TokenType.Int)) expression = new IntExpr(Consume(TokenType.Int).IntValue);
             else if (CurrentIs(TokenType.String)) expression = new StringExpr(Consume(TokenType.String).StringValue);
@@ -359,13 +359,20 @@ namespace Magpie.Compilation
             {
                 Consume(TokenType.LeftParen);
 
-                if (!CurrentIs(TokenType.RightParen))
+                if (CurrentIs(TokenType.RightParen))
                 {
-                    expression = Expression();
+                    // () -> unit
+                    expression = new UnitExpr();
+                }
+                else if (CurrentIs(TokenType.Operator))
+                {
+                    // ( OPERATOR ) -> an operator in prefix form
+                    expression = new NameExpr(Consume(TokenType.Operator).StringValue);
                 }
                 else
                 {
-                    expression = new UnitExpr();
+                    // anything else is a regular parenthesized expression
+                    expression = Expression();
                 }
 
                 Consume(TokenType.RightParen);
@@ -373,6 +380,23 @@ namespace Magpie.Compilation
             else expression = null;
 
             return expression;
+        }
+
+        private IUnboundExpr FuncRefExpr()
+        {
+            Consume(TokenType.Fn);
+
+            NameExpr name;
+            if (CurrentIs(TokenType.Operator))
+            {
+                name = new NameExpr(Consume(TokenType.Operator).StringValue);
+            }
+            else
+            {
+                name = new NameExpr(Name(), TypeArgs());
+            }
+
+            return new FuncRefExpr(name, TupleType());
         }
 
         // <-- STRUCT NAME GenericDecl LINE StructBody END
