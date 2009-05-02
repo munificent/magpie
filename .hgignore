@@ -5,10 +5,10 @@ csharp/bin/**.*
 csharp/*.*/obj/**.*
 
 # ignore other vs local stuff
-csharp/Magpie.suo
+**.suo
 csharp/TestResult.xml
 csharp/Unit Tests.VisualState.xml
-csharp/**/*.csproj.user
+**.user
 
 # ignore (for now) the outdated ref manual
 doc/reference manual/*.*

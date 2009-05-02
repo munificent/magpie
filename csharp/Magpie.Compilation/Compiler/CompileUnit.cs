@@ -38,68 +38,13 @@ namespace Magpie.Compilation
 
         public void Compile(Stream outputStream)
         {
-            // bytecode file format:
-            // 'magp' magic number          4 bytes
-            // major version                1 byte
-            // minor version                1 byte
-            // point version                1 byte
-            // release version              1 byte
-            //
-            // -- export table
-            // count                        4 bytes
-            // for each export:
-            //     unique name              4 byte offset into string table
-            //     code                     4 byte offset into code section
-            // end for
-            //
-            // -- static data section (string table)
-            // for each string:
-            //     null-terminated chars    n bytes
-            // end for
-            //
-            // -- code section
-            // for each function:
-            //     bytecode                 n bytes
-            // end for
-
-            // to do for this:
-            // - direct function jumps
-            //   - when generating bytecode, create a table of each function call, and write out
-            //     a space for the jump offset
-            //   - when starting the bytecode for each function, note the offset for it
-            //   - when all functions are compiled, patch all of the calls and put in the actual
-            //     function offsets
-            //   - add a prelude to each function that includes the number of locals, and number
-            //     of parameters
-            //   - change the function calling interpreter code to jump to the offset, then read
-            //     the number of locals and params from the prelude
-            // - direct string offsets
-            //   - function binding will create a string table
-            //   - write all of the strings to the static data section, storing the offset for
-            //     each string
-            //   - when writing the function bytecode, write out the offset (not index) when
-            //     compiling a string reference
-
+            //### bob: ideally, should compile all functions, just for error-checking
+            //         but only include reached ones
             // recursively bind the reached functions, starting with Main()
             Function main = mFunctions.Find(func => func.Name == "Main");
             FunctionBinder.Bind(this, main, null);
 
-            BytecodeFile file = new BytecodeFile();
-
-            // compile the code
-            foreach (BoundFunction function in mBound)
-            {
-                FunctionBlock compiled = file.AddFunction(function.Name, function.Type.Parameters.Count, function.Locals.Fields.Count);
-
-                BytecodeGenerator generator = new BytecodeGenerator(this, compiled);
-                function.Body.Accept(generator);
-
-                compiled.Add(OpCode.Return);
-            }
-
-            // add the strings
-            file.SetStrings(Strings);
-
+            BytecodeFile file = new BytecodeFile(this);
             file.Save(outputStream);
         }
 
@@ -200,7 +145,7 @@ namespace Magpie.Compilation
                         throw new CompileException("Argument types passed to local function reference do not match function's parameter types.");
                     }
 
-                    return new BoundApplyExpr(new LoadExpr(new LocalsExpr(), local), arg);
+                    return new BoundCallExpr(new LoadExpr(new LocalsExpr(), local), arg);
                 }
 
                 // just load the value
@@ -236,7 +181,7 @@ namespace Magpie.Compilation
             BoundFunction bound = ResolveFunction(containingType, instancingContext, scope, name, typeArgs, argTypes);
             if (bound != null)
             {
-                return new BoundApplyExpr(new BoundFuncRefExpr(bound), arg);
+                return new BoundCallExpr(new BoundFuncRefExpr(bound), arg);
             }
 
             throw new CompileException(String.Format("Could not resolve name {0}.", BoundFunction.GetUniqueName(name, typeArgs, argTypes)));

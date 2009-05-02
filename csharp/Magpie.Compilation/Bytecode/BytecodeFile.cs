@@ -10,79 +10,71 @@ namespace Magpie.Compilation
 {
     public class BytecodeFile
     {
-        public static BytecodeFile Load(Stream stream)
+        public BytecodeFile(CompileUnit unit)
         {
-            var file = new BytecodeFile();
-
-            var reader = new BinaryReader(stream, Encoding.UTF8);
-
-            // strings
-            int numStrings = reader.ReadInt32();
-            for (int i = 0; i < numStrings; i++)
-            {
-                file.Strings.Add(reader.ReadString());
-            }
-
-            // functions
-            int numFunctions = reader.ReadInt32();
-            int indexOfMain = reader.ReadInt32();
-            for (int i = 0; i < numFunctions; i++)
-            {
-                int numParams = reader.ReadInt32();
-                int numLocals = reader.ReadInt32();
-                int codeSize = reader.ReadInt32();
-
-                byte[] code = reader.ReadBytes((int)codeSize);
-
-                var function = new FunctionBlock(i == indexOfMain, numParams, numLocals, code);
-                file.Functions.Add(function);
-            }
-
-            return file;
+            mUnit = unit;
         }
 
-        public IList<FunctionBlock> Functions { get { return mFunctions; } }
-        public IList<String> Strings { get { return mStrings; } }
-
-        public void Save(Stream stream)
+        // bytecode file format:
+        // 'pie!' magic number          4 bytes
+        // major version                1 byte
+        // minor version                1 byte
+        // point version                1 byte
+        // release version              1 byte
+        //
+        // -- export table
+        // count                        4 bytes
+        // for each export:
+        //     unique name              4 byte offset into string table
+        //     code                     4 byte offset into code section
+        // end for
+        //
+        // -- code section
+        // for each function:
+        //     num locals               4 bytes
+        //     num params               4 bytes  ### bob: this goes away when we are no longer unwrapping the arg tuple
+        //     bytecode                 n bytes
+        // end for
+        //
+        // -- static data section (string table)
+        // for each string:
+        //     null-terminated chars    n bytes
+        // end for
+        public void Save(Stream outputStream)
         {
             // save the file
-            var writer = new BinaryWriter(stream, Encoding.UTF8);
+            var writer = new BinaryWriter(outputStream, Encoding.UTF8);
+            var funcPatcher = new OffsetTable(writer);
+            var strings = new StringTable(writer);
+            var exportTable = new OffsetTable(writer);
+
+            // magic number
+            writer.Write(Encoding.ASCII.GetBytes(new char[] { 'p', 'i', 'e', '!' }));
+
+            // version
+            writer.Write(new byte[] { 0, 0, 0, 0 });
+
+            // export table
+            writer.Write(1); // number of exported functions ### bob: temp
+            strings.InsertOffset("Main__()");
+            exportTable.InsertOffset("main");
+
+            // code section
+            foreach (BoundFunction function in mUnit.Bound)
+            {
+                if (function.Name == "Main__()") exportTable.DefineOffset("main");
+
+                BytecodeGenerator.Generate(mUnit, writer, funcPatcher, strings, function);
+            }
+
+            // now wire up all of the function offsets to each other
+            funcPatcher.PatchOffsets();
+            exportTable.PatchOffsets();
 
             // strings
-            writer.Write(Strings.Count);
-            foreach (var s in Strings)
-            {
-                writer.Write(s);
-            }
-
-            // functions
-            writer.Write(Functions.Count);
-            writer.Write(Functions.IndexOf(Functions.First(fn => fn.Name.Contains("Main__"))));
-            foreach (var function in Functions)
-            {
-                writer.Write(function.NumParameters);
-                writer.Write(function.NumLocals);
-                writer.Write(function.Code.Length);
-
-                writer.Write(function.Code);
-            }
+            strings.WriteStrings();
         }
 
-        public void SetStrings(IEnumerable<string> strings)
-        {
-            mStrings.AddRange(strings);
-        }
-
-        public FunctionBlock AddFunction(string name, int numParameters, int numLocals)
-        {
-            FunctionBlock function = new FunctionBlock(name, numParameters, numLocals);
-            mFunctions.Add(function);
-
-            return function;
-        }
-
-        private readonly List<string> mStrings = new List<string>();
-        private readonly List<FunctionBlock> mFunctions = new List<FunctionBlock>();
+        private CompileUnit mUnit;
     }
 }

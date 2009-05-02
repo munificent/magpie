@@ -53,7 +53,7 @@ namespace Magpie.Compilation
         }
     }
 
-    public class StringExpr : ValueExpr<string>, IUnboundExpr
+    public class StringExpr : ValueExpr<string>, IUnboundExpr, IBoundExpr
     {
         public StringExpr(string value) : base(value) { }
 
@@ -62,25 +62,13 @@ namespace Magpie.Compilation
             return visitor.Visit(this);
         }
 
-        public override string ToString() { return "\"" + Value + "\""; }
-    }
-
-    public class BoundStringExpr : IBoundExpr
-    {
-        public int Index;
-
-        public BoundStringExpr(int index)
-        {
-            Index = index;
-        }
-
-        public override string ToString() { return "[string at " + Index + "]"; }
-
         public Decl Type { get { return Decl.String; } }
 
         public TReturn Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)
         {
             return visitor.Visit(this);
         }
+
+        public override string ToString() { return "\"" + Value + "\""; }
     }
 }

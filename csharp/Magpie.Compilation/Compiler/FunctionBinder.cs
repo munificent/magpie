@@ -50,7 +50,7 @@ namespace Magpie.Compilation
 
         #region IUnboundExprVisitor<IBoundExpr> Members
 
-        public IBoundExpr Visit(ApplyExpr expr)
+        public IBoundExpr Visit(CallExpr expr)
         {
             IBoundExpr boundArg = expr.Arg.Accept(this);
 
@@ -72,7 +72,7 @@ namespace Magpie.Compilation
             }
 
             // simply apply the arg to the bound expression
-            return new BoundApplyExpr(target, boundArg);
+            return new BoundCallExpr(target, boundArg);
         }
 
         public IBoundExpr Visit(ArrayExpr expr)
@@ -129,7 +129,7 @@ namespace Magpie.Compilation
             }
 
             // handle a function apply target: Foo 1 <- 3  ==> Foo<- (1, 3)
-            ApplyExpr applyTarget = expr.Target as ApplyExpr;
+            CallExpr applyTarget = expr.Target as CallExpr;
             if (applyTarget != null)
             {
                 // make sure it's a direct function call
@@ -248,7 +248,7 @@ namespace Magpie.Compilation
         public IBoundExpr Visit(OperatorExpr expr)
         {
             // an operator is just function application
-            ApplyExpr apply = new ApplyExpr(new NameExpr(expr.Name), new TupleExpr(new IUnboundExpr[] { expr.Left, expr.Right }));
+            CallExpr apply = new CallExpr(new NameExpr(expr.Name), new TupleExpr(new IUnboundExpr[] { expr.Left, expr.Right }));
 
             return apply.Accept(this);
         }
@@ -270,7 +270,7 @@ namespace Magpie.Compilation
 
         public IBoundExpr Visit(StringExpr expr)
         {
-            return new BoundStringExpr(mUnit.DefineString(expr.Value));
+            return expr;
         }
 
         public IBoundExpr Visit(UnitExpr expr)

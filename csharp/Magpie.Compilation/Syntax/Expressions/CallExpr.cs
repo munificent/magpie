@@ -5,12 +5,16 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
-    public class ApplyExpr<TExpr>
+    /// <summary>
+    /// Base class for a bound or unbound function call.
+    /// </summary>
+    /// <typeparam name="TExpr"></typeparam>
+    public class CallExpr<TExpr>
     {
         public TExpr Target;
         public TExpr Arg;
 
-        public ApplyExpr(TExpr target, TExpr arg)
+        public CallExpr(TExpr target, TExpr arg)
         {
             Target = target;
             Arg = arg;
@@ -19,9 +23,12 @@ namespace Magpie.Compilation
         public override string ToString() { return String.Format("{0} {1}", Target, Arg); }
     }
 
-    public class ApplyExpr : ApplyExpr<IUnboundExpr>, IUnboundExpr
+    /// <summary>
+    /// Unbound prefix function call.
+    /// </summary>
+    public class CallExpr : CallExpr<IUnboundExpr>, IUnboundExpr
     {
-        public ApplyExpr(IUnboundExpr target, IUnboundExpr arg) : base(target, arg) {}
+        public CallExpr(IUnboundExpr target, IUnboundExpr arg) : base(target, arg) {}
 
         public TReturn Accept<TReturn>(IUnboundExprVisitor<TReturn> visitor)
         {
@@ -31,9 +38,13 @@ namespace Magpie.Compilation
         public override string ToString() { return String.Format("{0} {1}", Target, Arg); }
     }
 
-    public class BoundApplyExpr : ApplyExpr<IBoundExpr>, IBoundExpr
+    /// <summary>
+    /// Bound function call. This is used for both prefix and infix functions, but
+    /// not for intrinsics or foreign function calls.
+    /// </summary>
+    public class BoundCallExpr : CallExpr<IBoundExpr>, IBoundExpr
     {
-        public BoundApplyExpr(IBoundExpr target, IBoundExpr arg) : base(target, arg) { }
+        public BoundCallExpr(IBoundExpr target, IBoundExpr arg) : base(target, arg) { }
 
         public Decl Type
         {

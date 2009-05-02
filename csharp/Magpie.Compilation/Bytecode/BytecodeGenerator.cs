@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -10,22 +11,63 @@ namespace Magpie.Compilation
     /// </summary>
     public class BytecodeGenerator : IBoundExprVisitor<bool>
     {
-        public BytecodeGenerator(CompileUnit unit, FunctionBlock function)
+        public int Position { get { return (int)mWriter.BaseStream.Position; } }
+
+        private BytecodeGenerator(CompileUnit unit, int numLocals, BinaryWriter writer,
+            OffsetTable functionPatcher, StringTable stringTable)
         {
             mUnit = unit;
-            mFunction = function;
+            mNumLocals = numLocals;
+            mWriter = writer;
+            mFunctionPatcher = functionPatcher;
+            mStrings = stringTable;
+            mJumpTable = new JumpTable(this);
+        }
+
+        public static void Generate(CompileUnit unit, BinaryWriter writer,
+            OffsetTable functionPatcher, StringTable stringTable, BoundFunction function)
+        {
+            BytecodeGenerator generator = new BytecodeGenerator(unit, function.Locals.Fields.Count,
+                writer, functionPatcher, stringTable);
+
+            functionPatcher.DefineOffset(function.Name);
+
+            writer.Write(function.Locals.Fields.Count);
+            writer.Write(function.Type.Parameters.Count);
+
+            function.Body.Accept(generator);
+
+            generator.Write(OpCode.Return);
+        }
+
+        public void SeekTo(int position)
+        {
+            mWriter.Seek(position, SeekOrigin.Begin);
+        }
+
+        public void SeekToEnd()
+        {
+            mWriter.Seek(0, SeekOrigin.End);
         }
 
         #region IBoundExprVisitor Members
 
-        public bool Visit(UnitExpr expr)        { return true; } // do nothing
-        public bool Visit(BoolExpr expr)        { mFunction.PushBool(expr.Value); return true;   }
-        public bool Visit(IntExpr expr)         { mFunction.PushInt(expr.Value); return true;    }
-        public bool Visit(BoundStringExpr expr) { mFunction.PushString(expr.Index); return true; }
+        public bool Visit(UnitExpr expr) { return true; } // do nothing
+        public bool Visit(BoolExpr expr) { Write(OpCode.PushBool, expr.Value ? (byte)1 : (byte)0); return true; }
+        public bool Visit(IntExpr expr)  { Write(OpCode.PushInt, expr.Value); return true; }
+
+        public bool Visit(StringExpr expr)
+        {
+            Write(OpCode.PushString);
+            mStrings.InsertOffset(expr.Value);
+
+            return true;
+        }
 
         public bool Visit(BoundFuncRefExpr expr)
         {
-            mFunction.PushInt(mUnit.Bound.IndexOf(expr.Function));
+            Write(OpCode.PushInt);
+            mFunctionPatcher.InsertOffset(expr.Function.Name);
             return true;
         }
 
@@ -35,18 +77,15 @@ namespace Magpie.Compilation
             expr.Arg.Accept(this);
 
             // add the foreign call
-            if (expr.Function.Type.Parameters.Count == 0)
+            OpCode op;
+            switch (expr.Function.Type.Parameters.Count)
             {
-                mFunction.Add(OpCode.ForeignCall0, expr.Function.ID);
+                case 0: op = OpCode.ForeignCall0; break;
+                case 1: op = OpCode.ForeignCall1; break;
+                default: op = OpCode.ForeignCallN; break;
             }
-            else if (expr.Function.Type.Parameters.Count == 1)
-            {
-                mFunction.Add(OpCode.ForeignCall1, expr.Function.ID);
-            }
-            else
-            {
-                mFunction.Add(OpCode.ForeignCallTuple, expr.Function.ID);
-            }
+
+            Write(op, expr.Function.ID);
 
             return true;
         }
@@ -61,7 +100,7 @@ namespace Magpie.Compilation
             }
 
             // create the structure
-            mFunction.Alloc(tuple.Fields.Count);
+            Write(OpCode.Alloc, tuple.Fields.Count);
 
             return true;
         }
@@ -70,17 +109,25 @@ namespace Magpie.Compilation
         {
             expr.Arg.Accept(this);
 
-            expr.OpCodes.ForEach(op => mFunction.Add(op));
+            expr.OpCodes.ForEach(op => Write(op));
 
             return true;
         }
 
-        public bool Visit(BoundApplyExpr expr)
+        public bool Visit(BoundCallExpr expr)
         {
             expr.Arg.Accept(this);
             expr.Target.Accept(this);
 
-            mFunction.Add(OpCode.Call);
+            // add the call
+            OpCode op;
+            switch (expr.Arg.Type.Expanded.Length)
+            {
+                case 0: op = OpCode.Call0; break;
+                case 1: op = OpCode.Call1; break;
+                default: op = OpCode.CallN; break;
+            }
+            Write(op);
 
             return true;
         }
@@ -95,7 +142,7 @@ namespace Magpie.Compilation
             }
 
             // create the structure
-            mFunction.Alloc(expr.Elements.Count);
+            Write(OpCode.Alloc, expr.Elements.Count);
 
             return true;
         }
@@ -111,13 +158,13 @@ namespace Magpie.Compilation
         {
             // evaluate the condition
             expr.Condition.Accept(this);
-            mFunction.JumpIfFalse("end");
+            mJumpTable.JumpIfFalse("end");
 
             // execute the body
             expr.Body.Accept(this);
 
             // jump past it
-            mFunction.PatchJump("end");
+            mJumpTable.PatchJump("end");
 
             return true;
         }
@@ -126,40 +173,40 @@ namespace Magpie.Compilation
         {
             // evaluate the condition
             expr.Condition.Accept(this);
-            mFunction.JumpIfFalse("else");
+            mJumpTable.JumpIfFalse("else");
 
             // thenBody
             expr.ThenBody.Accept(this);
 
             // jump to end
-            mFunction.Jump("end");
+            mJumpTable.Jump("end");
 
             // elseBody
-            mFunction.PatchJump("else");
+            mJumpTable.PatchJump("else");
             expr.ElseBody.Accept(this);
 
             // end
-            mFunction.PatchJump("end");
+            mJumpTable.PatchJump("end");
 
             return true;
         }
 
         public bool Visit(BoundWhileExpr expr)
         {
-            mFunction.PatchJumpBack("while");
+            mJumpTable.PatchJumpBack("while");
 
             // evaluate the condition
             expr.Condition.Accept(this);
-            mFunction.JumpIfFalse("end");
+            mJumpTable.JumpIfFalse("end");
 
             // body
             expr.Body.Accept(this);
 
             // jump back to loop
-            mFunction.JumpBack("while");
+            mJumpTable.JumpBack("while");
 
             // exit loop
-            mFunction.PatchJump("end");
+            mJumpTable.PatchJump("end");
 
             return true;
         }
@@ -168,7 +215,7 @@ namespace Magpie.Compilation
         {
             expr.Struct.Accept(this);
 
-            mFunction.Load(expr.Field.Index);
+            Write(OpCode.Load, expr.Field.Index);
 
             return true;
         }
@@ -178,7 +225,7 @@ namespace Magpie.Compilation
             expr.Value.Accept(this);
             expr.Struct.Accept(this);
 
-            mFunction.Store(expr.Field.Index);
+            Write(OpCode.Store, expr.Field.Index);
 
             return true;
         }
@@ -186,7 +233,7 @@ namespace Magpie.Compilation
         public bool Visit(LocalsExpr expr)
         {
             //### bob: will need to handle other scopes at some point
-            mFunction.Add(OpCode.PushLocals);
+            Write(OpCode.PushLocals);
 
             return true;
         }
@@ -207,14 +254,14 @@ namespace Magpie.Compilation
             // kinda dumb.
 
             // load all of the locals
-            for (int i = 0; i < mFunction.NumLocals; i++)
+            for (int i = 0; i < mNumLocals; i++)
             {
-                mFunction.Add(OpCode.PushLocals);
-                mFunction.Load((byte)i);
+                Write(OpCode.PushLocals);
+                Write(OpCode.Load, (byte)i);
             }
 
             // create the structure
-            mFunction.Alloc(mFunction.NumLocals);
+            Write(OpCode.Alloc, mNumLocals);
 
             return true;
         }
@@ -222,24 +269,56 @@ namespace Magpie.Compilation
         public bool Visit(ConstructUnionExpr expr)
         {
             // load the case tag
-            mFunction.PushInt(expr.Case.Index);
+            Write(OpCode.PushInt, expr.Case.Index);
 
             // load all of the locals
-            for (int i = 0; i < mFunction.NumLocals; i++)
+            for (int i = 0; i < mNumLocals; i++)
             {
-                mFunction.Add(OpCode.PushLocals);
-                mFunction.Load((byte)i);
+                Write(OpCode.PushLocals);
+                Write(OpCode.Load, (byte)i);
             }
 
-            // create the structure
-            mFunction.Alloc(mFunction.NumLocals + 1);
+            // create the structure, add one for the case tag
+            Write(OpCode.Alloc, mNumLocals + 1);
 
             return true;
         }
 
         #endregion
 
+        public void Write(OpCode op)
+        {
+            mWriter.Write((byte)op);
+        }
+
+        public void Write(byte value)
+        {
+            mWriter.Write(value);
+        }
+
+        public void Write(int value)
+        {
+            mWriter.Write(value);
+        }
+
+        public void Write(OpCode op, byte operand)
+        {
+            Write(op);
+            Write(operand);
+        }
+
+        public void Write(OpCode op, int operand)
+        {
+            Write(op);
+            Write(operand);
+        }
+
+        private int mNumLocals; //### bob: temp
+
         private CompileUnit mUnit;
-        private FunctionBlock mFunction;
+        private BinaryWriter mWriter;
+        private OffsetTable mFunctionPatcher;
+        private StringTable mStrings;
+        private JumpTable mJumpTable;
     }
 }

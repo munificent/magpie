@@ -16,9 +16,9 @@ namespace Magpie.Compilation
 
         #region IUnboundExprVisitor<IUnboundExpr> Members
 
-        public IUnboundExpr Visit(ApplyExpr expr)
+        public IUnboundExpr Visit(CallExpr expr)
         {
-            return new ApplyExpr(expr.Target.Accept(this), expr.Arg.Accept(this));
+            return new CallExpr(expr.Target.Accept(this), expr.Arg.Accept(this));
         }
 
         public IUnboundExpr Visit(ArrayExpr expr)

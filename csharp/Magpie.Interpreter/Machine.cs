@@ -4,8 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-using Magpie.Compilation;
-
 namespace Magpie.Interpreter
 {
     public class Machine
@@ -19,34 +17,23 @@ namespace Magpie.Interpreter
 
         public void Interpret(Stream stream)
         {
-            Interpret(BytecodeFile.Load(stream), String.Empty);
+            BytecodeFile3 bytecode = new BytecodeFile3(stream);
+
+            Interpret(bytecode, String.Empty);
         }
 
-        public void Interpret(BytecodeFile file, string argument)
+        public void Interpret(BytecodeFile3 file, string argument)
         {
             mFile = file;
 
             // find "main"
-            FunctionBlock main = mFile.Functions.First(func => func.Name == "Main__()");
-            int index = mFile.Functions.IndexOf(main);
-
-            mCurrentFrame = MakeCallFrame(main.NumLocals, null, -1, -1);
-
-            mCurrentFunc = index;
-            mCurrentOp = 0;
-
-            mCode = main.Code;
-
-            // if main takes an argument, pass it
-            if (main.NumParameters == 1)
-            {
-                mCurrentFrame[0] = new Value(argument);
-            }
+            Push(mFile.OffsetToMain);
+            Call(0);
 
             Interpret();
         }
 
-        public void Interpret(BytecodeFile file)
+        public void Interpret(BytecodeFile3 file)
         {
             Interpret(file, String.Empty);
         }
@@ -65,7 +52,7 @@ namespace Magpie.Interpreter
                     case OpCode.PushNull:       Push((Structure)null); break;
                     case OpCode.PushBool:       Push(ReadByte() != 0); break;
                     case OpCode.PushInt:        Push(ReadInt()); break;
-                    case OpCode.PushString:     Push(mFile.Strings[ReadInt()]); break;
+                    case OpCode.PushString:     Push(mFile.ReadString(ReadInt())); break;
 
                     case OpCode.PushLocals:     Push(mCurrentFrame); break;
 
@@ -108,36 +95,9 @@ namespace Magpie.Interpreter
                         }
                         break;
 
-                    case OpCode.Call:
-                        {
-                            // jump to the function
-                            int index = PopInt();
-                            FunctionBlock function = mFile.Functions[index];
-
-                            Structure callFrame = MakeCallFrame(function.NumLocals, mCurrentFrame, mCurrentOp, mCurrentFunc);
-
-                            mCurrentFrame = callFrame;
-                            mCurrentFunc = index;
-                            mCurrentOp = 0;
-
-                            mCode = function.Code;
-
-                            // pop and store the arguments into locals
-                            switch (function.NumParameters)
-                            {
-                                case 0: break; // do nothing
-                                case 1: mCurrentFrame[0] = Pop(); break; // single value on stack
-                                default:
-                                    // multiple values, so pop and unwrap tuple
-                                    Structure tuple = PopStructure();
-                                    for (int i = 0; i < function.NumParameters; i++)
-                                    {
-                                        mCurrentFrame[i] = tuple[i];
-                                    }
-                                    break;
-                            }
-                        }
-                        break;
+                    case OpCode.Call0: Call(0); break;
+                    case OpCode.Call1: Call(1); break;
+                    case OpCode.CallN: Call(2); break;
 
                     case OpCode.ForeignCall0:
                         {
@@ -156,7 +116,7 @@ namespace Magpie.Interpreter
                         }
                         break;
 
-                    case OpCode.ForeignCallTuple:
+                    case OpCode.ForeignCallN:
                         {
                             int id = ReadInt();
                             Structure args = PopStructure();
@@ -167,26 +127,17 @@ namespace Magpie.Interpreter
 
                     case OpCode.Return:
                         {
-                            mCurrentOp = mCurrentFrame[mCurrentFrame.Count - 2].Int;
-                            mCurrentFunc = mCurrentFrame[mCurrentFrame.Count - 1].Int;
-
-                            mCurrentFrame = mCurrentFrame[mCurrentFrame.Count - 3].Struct;
+                            mInstruction = mCurrentFrame[mCurrentFrame.Count - 1].Int;
+                            mCurrentFrame = mCurrentFrame[mCurrentFrame.Count - 2].Struct;
 
                             // stop completely if we've returned from main
-                            if (mCurrentFrame == null)
-                            {
-                                running = false;
-                            }
-                            else
-                            {
-                                mCode = mFile.Functions[mCurrentFunc].Code;
-                            }
+                            if (mCurrentFrame == null) running = false;
                         }
                         break;
                         
-                    case OpCode.Jump:               mCurrentOp = ReadInt(); break;
+                    case OpCode.Jump:               mInstruction = ReadInt(); break;
                     case OpCode.JumpIfFalse:        int offset = ReadInt();
-                                                    if (!PopBool()) mCurrentOp = offset;
+                                                    if (!PopBool()) mInstruction = offset;
                                                     break;
 
                     case OpCode.BoolToString:       Push(PopBool() ? "true" : "false"); break;
@@ -316,28 +267,28 @@ namespace Magpie.Interpreter
 
         private OpCode ReadOpCode()
         {
-            return (OpCode)mCode[mCurrentOp++];
+            return (OpCode)mFile.Bytes[mInstruction++];
         }
 
         private byte ReadByte()
         {
-            return mCode[mCurrentOp++];
+            return mFile.Bytes[mInstruction++];
         }
 
         private char ReadChar()
         {
-            int c = ((int)mCode[mCurrentOp++]) |
-                    ((int)mCode[mCurrentOp++] << 8);
+            int c = ((int)mFile.Bytes[mInstruction++]) |
+                    ((int)mFile.Bytes[mInstruction++] << 8);
 
             return (char)c;
         }
 
         private int ReadInt()
         {
-            return ((int)mCode[mCurrentOp++]) |
-                   ((int)mCode[mCurrentOp++] << 8) |
-                   ((int)mCode[mCurrentOp++] << 16) |
-                   ((int)mCode[mCurrentOp++] << 24);
+            return ((int)mFile.Bytes[mInstruction++]) |
+                   ((int)mFile.Bytes[mInstruction++] << 8) |
+                   ((int)mFile.Bytes[mInstruction++] << 16) |
+                   ((int)mFile.Bytes[mInstruction++] << 24);
         }
 
         private void Push(Value value) { mOperands.Push(value); }
@@ -353,14 +304,40 @@ namespace Magpie.Interpreter
         private string PopString() { return mOperands.Pop().String; }
         private Structure PopStructure() { return mOperands.Pop().Struct; }
 
-        private Structure MakeCallFrame(int numLocals, Structure parentFrame, int opCode, int parentFunc)
+        private Structure MakeCallFrame(int numLocals, Structure parentFrame, int instruction)
         {
-            var frame = new Structure(numLocals + 3);
+            var frame = new Structure(numLocals + 2);
             frame[numLocals] = new Value(parentFrame);
-            frame[numLocals + 1] = new Value(opCode);
-            frame[numLocals + 2] = new Value(parentFunc);
+            frame[numLocals + 1] = new Value(instruction);
 
             return frame;
+        }
+
+        private void Call(int paramType)
+        {
+            // jump to the function
+            int previousInstruction = mInstruction;
+
+            mInstruction = PopInt();
+            int numLocals = ReadInt();
+            int numParams = ReadInt(); //### bob: this can go away we we aren't unwrapping the arg tuple
+
+            mCurrentFrame = MakeCallFrame(numLocals, mCurrentFrame, previousInstruction);
+
+            // pop and store the arguments into locals
+            switch (paramType)
+            {
+                case 0: break; // do nothing
+                case 1: mCurrentFrame[0] = Pop(); break; // single value on stack
+                default:
+                    // multiple values, so pop and unwrap tuple
+                    Structure tuple = PopStructure();
+                    for (int i = 0; i < numParams; i++)
+                    {
+                        mCurrentFrame[i] = tuple[i];
+                    }
+                    break;
+            }
         }
 
         private void ForeignCall(int id, Value[] args)
@@ -370,11 +347,12 @@ namespace Magpie.Interpreter
             if (result != null) Push(result);
         }
 
-        private BytecodeFile mFile;
+        private BytecodeFile3 mFile;
 
-        private byte[] mCode;
-        private int mCurrentFunc;
-        private int mCurrentOp;
+        //private byte[] mCode;
+        //private int mCurrentFunc;
+        //### bob: could also just store this in the current frame
+        private int mInstruction; // position in bytecode file
 
         private readonly Stack<Value> mOperands = new Stack<Value>();
 

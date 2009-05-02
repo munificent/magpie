@@ -10,11 +10,11 @@ namespace Magpie.Compilation
         TReturn Visit(BoolExpr expr);
         TReturn Visit(UnitExpr expr);
         TReturn Visit(IntExpr expr);
-        TReturn Visit(BoundStringExpr expr);
+        TReturn Visit(StringExpr expr);
         TReturn Visit(BoundArrayExpr expr);
         TReturn Visit(BoundTupleExpr expr);
         TReturn Visit(IntrinsicExpr expr);
-        TReturn Visit(BoundApplyExpr expr);
+        TReturn Visit(BoundCallExpr expr);
         TReturn Visit(BoundBlockExpr expr);
         TReturn Visit(BoundIfDoExpr expr);
         TReturn Visit(BoundIfThenExpr expr);

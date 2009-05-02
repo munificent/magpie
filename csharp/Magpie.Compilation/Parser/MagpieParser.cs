@@ -262,7 +262,7 @@ namespace Magpie.Compilation
 
                 IUnboundExpr value = Block();
 
-                if (isDot) expr = new AssignExpr(expr, new ApplyExpr(value, expr));
+                if (isDot) expr = new AssignExpr(expr, new CallExpr(value, expr));
                 else if (!String.IsNullOrEmpty(opName)) expr = new AssignExpr(expr, new OperatorExpr(expr, opName, value));
                 else expr = new AssignExpr(expr, value);
             }
@@ -297,14 +297,14 @@ namespace Magpie.Compilation
         // <-- PrimaryExpr+
         private IUnboundExpr ApplyExpr()
         {
-            return OneOrMoreRight(ReverseApplyExpr, (left, right) => new ApplyExpr(left, right));
+            return OneOrMoreRight(ReverseApplyExpr, (left, right) => new CallExpr(left, right));
         }
 
         // <-- ArrayExpr (DOT ArrayExpr)*
         private IUnboundExpr ReverseApplyExpr()
         {
             return OneOrMoreLeft(TokenType.Dot, ArrayExpr,
-                (left, separator, right) => new ApplyExpr(right, left));
+                (left, separator, right) => new CallExpr(right, left));
         }
 
         // <-- LBRACKET (RBRACKET PRIME TypeDecl |

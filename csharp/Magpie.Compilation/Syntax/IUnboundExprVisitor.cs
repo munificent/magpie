@@ -7,7 +7,7 @@ namespace Magpie.Compilation
 {
     public interface IUnboundExprVisitor<TReturn>
     {
-        TReturn Visit(ApplyExpr expr);
+        TReturn Visit(CallExpr expr);
         TReturn Visit(ArrayExpr expr);
         TReturn Visit(AssignExpr expr);
         TReturn Visit(BlockExpr expr);

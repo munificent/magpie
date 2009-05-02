@@ -19,6 +19,9 @@ namespace Magpie.App
 
         public void Run()
         {
+            int passed = 0;
+            int failed = 0;
+
             foreach (string test in Directory.GetFiles(mTestDir, "*.mag", SearchOption.AllDirectories))
             {
                 if (Debugger.IsAttached)
@@ -45,10 +48,12 @@ namespace Magpie.App
                 if (mErrors.Count == 0)
                 {
                     Console.WriteLine("  pass " + relativePath);
+                    passed++;
                 }
                 else
                 {
                     Console.WriteLine("! FAIL " + relativePath);
+                    failed++;
 
                     foreach (string error in mErrors)
                     {
@@ -56,6 +61,9 @@ namespace Magpie.App
                     }
                 }
             }
+
+            Console.WriteLine();
+            Console.WriteLine("passed {0}/{1} tests", passed, passed + failed);
         }
 
         private void RunTest(string test)
