@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Magpie.Interpreter
 {
-    public class BytecodeFile3
+    public class BytecodeFile
     {
         public byte[] Bytes { get { return mData; } }
 
@@ -24,7 +24,7 @@ namespace Magpie.Interpreter
             }
         }
 
-        public BytecodeFile3(Stream stream)
+        public BytecodeFile(Stream stream)
         {
             // read the file
             mData = new byte[stream.Length];

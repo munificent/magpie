@@ -17,12 +17,12 @@ namespace Magpie.Interpreter
 
         public void Interpret(Stream stream)
         {
-            BytecodeFile3 bytecode = new BytecodeFile3(stream);
+            BytecodeFile bytecode = new BytecodeFile(stream);
 
             Interpret(bytecode, String.Empty);
         }
 
-        public void Interpret(BytecodeFile3 file, string argument)
+        public void Interpret(BytecodeFile file, string argument)
         {
             mFile = file;
 
@@ -33,7 +33,7 @@ namespace Magpie.Interpreter
             Interpret();
         }
 
-        public void Interpret(BytecodeFile3 file)
+        public void Interpret(BytecodeFile file)
         {
             Interpret(file, String.Empty);
         }
@@ -347,7 +347,7 @@ namespace Magpie.Interpreter
             if (result != null) Push(result);
         }
 
-        private BytecodeFile3 mFile;
+        private BytecodeFile mFile;
 
         //private byte[] mCode;
         //private int mCurrentFunc;
