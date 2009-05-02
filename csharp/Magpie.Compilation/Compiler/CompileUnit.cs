@@ -8,27 +8,11 @@ namespace Magpie.Compilation
 {
     public class CompileUnit
     {
-        public readonly List<string> Strings = new List<string>();
         public IList<BoundFunction> Bound { get { return mBound; } }
 
         public CompileUnit(IForeignStaticInterface foreignInterface)
         {
             mForeignInterface = foreignInterface;
-        }
-
-        public int DefineString(string text)
-        {
-            // look it up in the string table
-            int index = Strings.IndexOf(text);
-
-            if (index == -1)
-            {
-                // new string, so add it
-                Strings.Add(text);
-                index = Strings.Count - 1;
-            }
-
-            return index;
         }
 
         public void Include(SourceFile file)

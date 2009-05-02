@@ -45,9 +45,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Bytecode\BidirectionalPatcher.cs" />
     <Compile Include="Bytecode\BytecodeGenerator.cs" />
     <Compile Include="Bytecode\JumpTable.cs" />
+    <Compile Include="Bytecode\OffsetTable.cs" />
     <Compile Include="Bytecode\StringTable.cs" />
     <Compile Include="Compiler\SymbolTable.cs" />
     <Compile Include="Foreign Interface\ForeignFunction.cs" />
@@ -96,9 +96,7 @@
     <Compile Include="Syntax\Type Definitions\Struct.cs" />
     <Compile Include="Syntax\Type Definitions\TypeDefinition.cs" />
     <Compile Include="Syntax\Type Definitions\Union.cs" />
-    <Compile Include="Bytecode\BinaryPatcher.cs" />
     <Compile Include="Bytecode\BytecodeFile.cs" />
-    <Compile Include="Bytecode\FunctionBlock.cs" />
     <Compile Include="Bytecode\OpCode.cs" />
     <Compile Include="Compiler\CompileException.cs" />
     <Compile Include="Compiler\DeclComparer.cs" />

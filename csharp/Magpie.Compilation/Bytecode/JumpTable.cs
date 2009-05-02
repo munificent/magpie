@@ -41,7 +41,6 @@ namespace Magpie.Compilation
             int position = jump.Location;
             int destination = (int)mBytecode.Position;
 
-            //### bob: see if we can use a regular write int here
             mBytecode.SeekTo(position);
             mBytecode.Write(destination);
 

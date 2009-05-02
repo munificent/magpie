@@ -31,10 +31,9 @@ namespace Magpie.Compilation
         // pops a value and a reference to a structure, and assigns the value to the field at the given index
         Store, // byte : index of field
 
-        //### bob: function index is temp. should eventually be byte offset to start of fn
-        Call0,        // pops function index from operand stack
-        Call1,        // pops function index from operand stack
-        CallN,        // pops function index from operand stack
+        Call0,        // pops function offset from operand stack
+        Call1,        // pops function offset from operand stack
+        CallN,        // pops function offset from operand stack
 
         ForeignCall0, // int : foreign function identifier
         ForeignCall1, // int : foreign function identifier
@@ -76,7 +75,7 @@ namespace Magpie.Compilation
 
         // strings
         AddString,
-        Print,   //### bob: temp until there's some sort of platform interface
+        Print,
         StringSize,
         Substring
     }

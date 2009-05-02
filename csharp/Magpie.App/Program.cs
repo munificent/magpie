@@ -56,7 +56,7 @@ namespace Magpie.App
 
         private static void RunTests()
         {
-            //### bob: hack. assumes location of tests relative to build directory. :(
+            //### bob: hack. assumes location of tests relative to working directory. :(
             string testDir = Path.GetDirectoryName(Environment.CurrentDirectory);
             testDir = Path.GetDirectoryName(testDir);
             testDir = Path.GetDirectoryName(testDir);
