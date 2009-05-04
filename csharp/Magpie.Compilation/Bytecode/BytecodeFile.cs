@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 
 namespace Magpie.Compilation
@@ -35,7 +33,7 @@ namespace Magpie.Compilation
             exportTable.InsertOffset("main");
 
             // code section
-            foreach (BoundFunction function in mUnit.Bound)
+            foreach (BoundFunction function in mUnit.BoundFunctions.Functions)
             {
                 if (function.Name == "Main__()") exportTable.DefineOffset("main");
 

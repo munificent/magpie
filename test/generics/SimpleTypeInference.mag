@@ -1,0 +1,11 @@
+// expected: 1
+// expected: true
+
+Main (->)
+    Foo 1
+    Foo true
+end
+
+Foo'T (a T ->)
+    Print a.String
+end

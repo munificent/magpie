@@ -49,7 +49,8 @@
     <Compile Include="Bytecode\JumpTable.cs" />
     <Compile Include="Bytecode\OffsetTable.cs" />
     <Compile Include="Bytecode\StringTable.cs" />
-    <Compile Include="Compiler\SymbolTable.cs" />
+    <Compile Include="Compiler\FunctionTable.cs" />
+    <Compile Include="Compiler\Intrinsic.cs" />
     <Compile Include="Foreign Interface\ForeignFunction.cs" />
     <Compile Include="Foreign Interface\IForeignStaticInterface.cs" />
     <Compile Include="Parser\LineProcessor.cs" />

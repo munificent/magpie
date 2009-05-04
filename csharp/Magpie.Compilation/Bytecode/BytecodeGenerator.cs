@@ -27,12 +27,12 @@ namespace Magpie.Compilation
         public static void Generate(CompileUnit unit, BinaryWriter writer,
             OffsetTable functionPatcher, StringTable stringTable, BoundFunction function)
         {
-            BytecodeGenerator generator = new BytecodeGenerator(unit, function.Locals.Fields.Count,
+            BytecodeGenerator generator = new BytecodeGenerator(unit, function.NumLocals,
                 writer, functionPatcher, stringTable);
 
             functionPatcher.DefineOffset(function.Name);
 
-            writer.Write(function.Locals.Fields.Count);
+            writer.Write(function.NumLocals);
             writer.Write(function.Type.Parameters.Count);
 
             function.Body.Accept(generator);
@@ -109,7 +109,7 @@ namespace Magpie.Compilation
         {
             expr.Arg.Accept(this);
 
-            expr.OpCodes.ForEach(op => Write(op));
+            expr.Intrinsic.OpCodes.ForEach(op => Write(op));
 
             return true;
         }

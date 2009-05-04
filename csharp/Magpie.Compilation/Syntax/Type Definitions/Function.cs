@@ -44,11 +44,11 @@ namespace Magpie.Compilation
 
         protected override void OnQualify()
         {
-            mUniqueName = BoundFunction.GetUniqueName(FullName, TypeParameters, FuncType.ParameterTypes);
+            mUniqueName = FunctionTable.GetUniqueName(FullName, TypeParameters, FuncType.ParameterTypes);
 
             if (mCanOmitTypeArgs)
             {
-                mInferredName = BoundFunction.GetUniqueName(FullName, null, FuncType.ParameterTypes);
+                mInferredName = FunctionTable.GetUniqueName(FullName, FuncType.ParameterTypes);
             }
             else
             {

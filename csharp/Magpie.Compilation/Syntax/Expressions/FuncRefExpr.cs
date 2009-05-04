@@ -41,8 +41,6 @@ namespace Magpie.Compilation
 
         public BoundFuncRefExpr(BoundFunction function)
         {
-            if (function == null) throw new ArgumentNullException("function");
-
             mFunction = function;
         }
 

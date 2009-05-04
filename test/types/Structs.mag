@@ -1,0 +1,13 @@
+﻿// expected: 1
+// expected: 2
+
+Main (->)
+    def a <- Point (1, 2)
+    Print a.X.String
+    Print a.Y.String
+end
+
+struct Point
+    X Int
+    Y Int
+end

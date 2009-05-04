@@ -8,7 +8,7 @@ namespace Magpie.Compilation
     /// <summary>
     /// Identifies a foreign function.
     /// </summary>
-    public class ForeignFunction
+    public class ForeignFunction : ICallable
     {
         /// <summary>
         /// The ID for the function. This will be provided to the interpreter at runtime
@@ -26,7 +26,7 @@ namespace Magpie.Compilation
             Type = type;
             ID = id;
 
-            mUniqueName = BoundFunction.GetUniqueName(name, null, type.ParameterTypes);
+            mUniqueName = FunctionTable.GetUniqueName(name, type.ParameterTypes);
         }
 
         public ForeignFunction(string name, int id, Decl returnType)
@@ -50,6 +50,15 @@ namespace Magpie.Compilation
         {
             return mUniqueName == uniqueName;
         }
+
+        #region ICallable Members
+
+        public IBoundExpr CreateCall(IBoundExpr arg)
+        {
+            return new ForeignCallExpr(this, arg);
+        }
+
+        #endregion
 
         private string mUniqueName;
     }

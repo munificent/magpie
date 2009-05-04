@@ -8,7 +8,7 @@ namespace Magpie.Compilation
 {
     public class CompileUnit
     {
-        public IList<BoundFunction> Bound { get { return mBound; } }
+        public FunctionTable BoundFunctions { get { return mFunctions; } }
 
         public CompileUnit(IForeignStaticInterface foreignInterface)
         {
@@ -22,11 +22,7 @@ namespace Magpie.Compilation
 
         public void Compile(Stream outputStream)
         {
-            //### bob: ideally, should compile all functions, just for error-checking
-            //         but only include reached ones
-            // recursively bind the reached functions, starting with Main()
-            Function main = mFunctions.Find(func => func.Name == "Main");
-            FunctionBinder.Bind(this, main, null);
+            mFunctions.BindAll(this);
 
             BytecodeFile file = new BytecodeFile(this);
             file.Save(outputStream);
@@ -148,27 +144,26 @@ namespace Magpie.Compilation
                 argTypes = arg.Type.Expanded;
             }
 
-            //### bob: all of this iterating through lists is dumb. there should really be
-            // a dictionary that maps unique names to values.
+            //### bob: intrinsics should be part of the FunctionTable
 
             // see if it's intrinsic
-            IBoundExpr intrinsic = IntrinsicExpr.Find(name, arg);
-            if (intrinsic != null) return intrinsic;
+            ICallable intrinsic = Intrinsic.Find(name, arg);
+            if (intrinsic != null) return intrinsic.CreateCall(arg);
 
             //### bob: should really be doing this in ResolveFunction so that foreign functions
             // can be namespaced, but that'll require shifting some stuff around.
             // see if it's a foreign function
-            ForeignFunction foreign = ResolveForeignFunction(BoundFunction.GetUniqueName(name, typeArgs, argTypes));
-            if (foreign != null) return new ForeignCallExpr(foreign, arg);
+            ICallable foreign = ResolveForeignFunction(FunctionTable.GetUniqueName(name, typeArgs, argTypes));
+            if (foreign != null) return foreign.CreateCall(arg);
 
             // see if it's something defined at the sourcefile level
-            BoundFunction bound = ResolveFunction(containingType, instancingContext, scope, name, typeArgs, argTypes);
-            if (bound != null)
+            ICallable callable = ResolveFunction(containingType, instancingContext, scope, name, typeArgs, argTypes);
+            if (callable != null)
             {
-                return new BoundCallExpr(new BoundFuncRefExpr(bound), arg);
+                return callable.CreateCall(arg);
             }
 
-            throw new CompileException(String.Format("Could not resolve name {0}.", BoundFunction.GetUniqueName(name, typeArgs, argTypes)));
+            throw new CompileException(String.Format("Could not resolve name {0}.", FunctionTable.GetUniqueName(name, typeArgs, argTypes)));
         }
 
         private ForeignFunction ResolveForeignFunction(string uniqueName)
@@ -214,20 +209,11 @@ namespace Magpie.Compilation
 
         private BoundFunction LookUpFunction(Function containingType, Scope scope, string fullName, IList<Decl> typeArgs, Decl[] argTypes)
         {
-            string uniqueName = BoundFunction.GetUniqueName(fullName, typeArgs, argTypes);
+            string uniqueName = FunctionTable.GetUniqueName(fullName, typeArgs, argTypes);
 
             // try the already bound functions
-            foreach (var bound in mBound)
-            {
-                if (bound.Matches(uniqueName)) return bound;
-            }
-
-            // try to bind a function or previously instanced generic
-            foreach (var function in mFunctions)
-            {
-                BoundFunction bound = TryBind(uniqueName, function, null);
-                if (bound != null) return bound;
-            }
+            BoundFunction boundFunc;
+            if (mFunctions.TryFind(fullName, argTypes, out boundFunc)) return boundFunc;
 
             // try to instantiate a generic
             foreach (var generic in mGenerics)
@@ -240,7 +226,7 @@ namespace Magpie.Compilation
                 if (instance != null)
                 {
                     // don't instantiate it multiple times
-                    mFunctions.Add(instance);
+                    mFunctions.Declare(instance);
 
                     BoundFunction bound = TryBind(uniqueName, instance, containingType);
                     if (bound != null)
@@ -264,7 +250,8 @@ namespace Magpie.Compilation
         {
             if (function.Matches(uniqueName))
             {
-                return FunctionBinder.Bind(this, function, instancingContext);
+                BoundFunction bound = mFunctions.Find(function);
+                return FunctionBinder.Bind(this, bound, instancingContext);
             }
 
             return null;
@@ -296,13 +283,8 @@ namespace Magpie.Compilation
             }
             else
             {
-                mFunctions.Add(function);
+                mFunctions.Declare(function);
             }
-        }
-
-        public void AddBound(BoundFunction bound)
-        {
-            mBound.Add(bound);
         }
 
         private void AddNamespace(string parentName, SourceFile file, Namespace namespaceObj)
@@ -334,9 +316,8 @@ namespace Magpie.Compilation
             }
         }
 
-        private readonly List<BoundFunction> mBound = new List<BoundFunction>();
+        private readonly FunctionTable mFunctions = new FunctionTable();
         private readonly List<Function> mGenerics = new List<Function>();
-        private readonly List<Function> mFunctions = new List<Function>();
         private readonly IForeignStaticInterface mForeignInterface;
     }
 }

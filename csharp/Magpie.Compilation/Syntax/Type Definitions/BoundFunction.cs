@@ -5,61 +5,42 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
-    public class BoundFunction
+    public class BoundFunction : ICallable
     {
-        //### bob: is this the best place for this?
-        public static string GetUniqueName(string name, IEnumerable<Decl> typeArgs, IEnumerable<Decl> paramTypes)
-        {
-            string typeArgString = ((typeArgs != null) && typeArgs.Any()) ? "[" + typeArgs.JoinAll(", ") + "]" : "";
-            string argTypes = "(" + paramTypes.JoinAll(", ") + ")";
-            return name + "__" + typeArgString + argTypes;
-        }
-
         /// <summary>
         /// A unique name for the function, including type arguments and value argument types.
         /// </summary>
         public string Name { get { return mName; } }
 
-        public Scope Locals { get { return mLocals; } }
+        public FuncType Type { get { return Unbound.FuncType; } }
 
         public IBoundExpr Body { get { return mBody; } }
-        
-        public FuncType Type { get { return mType; } }
 
-        public BoundFunction(string name, string inferredName, FuncType funcType, Scope locals)
+        public int NumLocals { get { return mNumLocals; } }
+
+        public BoundFunction(string name)
         {
             mName = name;
-            mInferredName = inferredName;
-
-            mType = funcType;
-            mLocals = locals;
         }
 
-        /// <summary>
-        /// Sets the bound body for the function. Happens after construction so that the bound function
-        /// can be created before the body is bound, allowing the body to have bound recursive references
-        /// to itself.
-        /// </summary>
-        /// <param name="body"></param>
-        public void SetBody(IBoundExpr body)
+        public void Bind(IBoundExpr body, int numLocals)
         {
             mBody = body;
+            mNumLocals = numLocals;
         }
 
-        public bool Matches(string uniqueName)
+        #region ICallable Members
+
+        public IBoundExpr CreateCall(IBoundExpr arg)
         {
-            return (uniqueName == mName) || (uniqueName == mInferredName);
+            return new BoundCallExpr(new BoundFuncRefExpr(this), arg);
         }
 
-        public override string ToString()
-        {
-            return mName;
-        }
+        #endregion
 
         private readonly string mName;
-        private readonly string mInferredName;
-        private readonly FuncType mType;
-        private readonly Scope mLocals;
+        public Function Unbound;
         private IBoundExpr mBody;
+        private int mNumLocals;
     }
 }

@@ -5,12 +5,8 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
-    /// <summary>
-    /// Interface for any bound expression type that acts like a function:
-    /// i.e. it can have an argument applied to it.
-    /// </summary>
-    public interface ICallable : IBoundExpr
+    public interface ICallable
     {
-        void BindArgument(IBoundExpr arg);
+        IBoundExpr CreateCall(IBoundExpr arg);
     }
 }

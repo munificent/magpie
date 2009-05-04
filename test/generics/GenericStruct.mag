@@ -1,0 +1,18 @@
+// expected: 1
+// expected: 2
+// expected: true
+
+Main (->)
+    def a <- Foo 1
+    Print a.Value.String
+    
+    def b <- Foo "2"
+    Print b.Value
+    
+    def c <- Foo'Bool true
+    Print c.Value.String
+end
+
+struct Foo'T
+    Value   T
+end
