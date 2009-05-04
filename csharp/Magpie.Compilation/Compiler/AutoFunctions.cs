@@ -10,9 +10,9 @@ namespace Magpie.Compilation
     /// </summary>
     public class AutoFunctions
     {
-        public AutoFunctions(CompileUnit unit)
+        public AutoFunctions(Compiler compiler)
         {
-            mUnit = unit;
+            mCompiler = compiler;
         }
 
         public void BuildFunctions(Struct structure)
@@ -155,9 +155,9 @@ namespace Magpie.Compilation
             var function = new Function(name, parentType.TypeParameters, type, new WrapBoundExpr(body));
             function.Qualify(parentType);
 
-            mUnit.AddFunction(function);
+            mCompiler.AddFunction(function);
         }
 
-        private CompileUnit mUnit;
+        private Compiler mCompiler;
     }
 }

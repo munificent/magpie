@@ -103,7 +103,6 @@
     <Compile Include="Compiler\DeclComparer.cs" />
     <Compile Include="Compiler\AutoFunctions.cs" />
     <Compile Include="Compiler\Compiler.cs" />
-    <Compile Include="Compiler\CompileUnit.cs" />
     <Compile Include="Compiler\FunctionBinder.cs" />
     <Compile Include="Parser\LlParser.cs" />
     <Compile Include="Parser\MagpieParser.cs" />

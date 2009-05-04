@@ -14,7 +14,7 @@ namespace Magpie.Compilation
         {
             string typeArgString = ((typeArgs != null) && typeArgs.Any()) ? "[" + typeArgs.JoinAll(", ") + "]" : "";
             string argTypes = "(" + paramTypes.JoinAll(", ") + ")";
-            return name + "__" + typeArgString + argTypes;
+            return name + " " + typeArgString + argTypes;
         }
 
         //### bob: is this the best place for this?
@@ -65,7 +65,7 @@ namespace Magpie.Compilation
             return mCallables.TryGetValue(uniqueName, out bound);
         }
 
-        public void BindAll(CompileUnit unit)
+        public void BindAll(Compiler compiler)
         {
             // copy the functions to an array because binding a function may cause generics
             // to be instantiated, adding to the collection.
@@ -74,7 +74,7 @@ namespace Magpie.Compilation
             // determines if a generic's type arguments are valid.)
             foreach (BoundFunction func in Functions.ToArray())
             {
-                FunctionBinder.Bind(unit, func, null);
+                FunctionBinder.Bind(compiler, func, null);
             }
         }
 

@@ -8,9 +8,9 @@ namespace Magpie.Compilation
 {
     public class BytecodeFile
     {
-        public BytecodeFile(CompileUnit unit)
+        public BytecodeFile(Compiler compiler)
         {
-            mUnit = unit;
+            mCompiler = compiler;
         }
 
         public void Save(Stream outputStream)
@@ -29,15 +29,15 @@ namespace Magpie.Compilation
 
             // export table
             writer.Write(1); // number of exported functions ### bob: temp
-            strings.InsertOffset("Main__()");
+            strings.InsertOffset("Main ()");
             exportTable.InsertOffset("main");
 
             // code section
-            foreach (BoundFunction function in mUnit.BoundFunctions.Functions)
+            foreach (BoundFunction function in mCompiler.Functions.Functions)
             {
-                if (function.Name == "Main__()") exportTable.DefineOffset("main");
+                if (function.Name == "Main ()") exportTable.DefineOffset("main");
 
-                BytecodeGenerator.Generate(mUnit, writer, funcPatcher, strings, function);
+                BytecodeGenerator.Generate(mCompiler, writer, funcPatcher, strings, function);
             }
 
             // now wire up all of the function offsets to each other
@@ -48,6 +48,6 @@ namespace Magpie.Compilation
             strings.WriteStrings();
         }
 
-        private CompileUnit mUnit;
+        private Compiler mCompiler;
     }
 }

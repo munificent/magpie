@@ -10,7 +10,7 @@ namespace Magpie.Compilation
     /// </summary>
     public class FunctionBinder : IUnboundExprVisitor<IBoundExpr>
     {
-        public static void Bind(CompileUnit unit, BoundFunction function, Function instancingContext)
+        public static void Bind(Compiler compiler, BoundFunction function, Function instancingContext)
         {
             var scope = new Scope();
 
@@ -21,7 +21,7 @@ namespace Magpie.Compilation
                 scope.Define(arg.Name, arg.Type, false);
             }
 
-            var binder = new FunctionBinder(function.Unbound, instancingContext, unit, scope);
+            var binder = new FunctionBinder(function.Unbound, instancingContext, compiler, scope);
 
             // bind the function
             IBoundExpr body = function.Unbound.Body.Accept<IBoundExpr>(binder);
@@ -46,7 +46,7 @@ namespace Magpie.Compilation
             NameExpr namedTarget = expr.Target as NameExpr;
             if (namedTarget != null)
             {
-                return mUnit.ResolveName(mFunction, mInstancingContext, Scope, namedTarget.Name, namedTarget.TypeArgs, boundArg);
+                return mCompiler.ResolveName(mFunction, mInstancingContext, Scope, namedTarget.Name, namedTarget.TypeArgs, boundArg);
             }
 
             IBoundExpr target = expr.Target.Accept(this);
@@ -191,7 +191,7 @@ namespace Magpie.Compilation
 
         public IBoundExpr Visit(FuncRefExpr expr)
         {
-            ICallable callable = mUnit.ResolveFunction(mFunction, mInstancingContext,
+            ICallable callable = mCompiler.ResolveFunction(mFunction, mInstancingContext,
                 Scope, expr.Name.Name, expr.Name.TypeArgs, expr.ParamTypes);
 
             BoundFunction bound = callable as BoundFunction;
@@ -245,7 +245,7 @@ namespace Magpie.Compilation
 
         public IBoundExpr Visit(NameExpr expr)
         {
-            return mUnit.ResolveName(mFunction, mInstancingContext, Scope, expr.Name, expr.TypeArgs, null);
+            return mCompiler.ResolveName(mFunction, mInstancingContext, Scope, expr.Name, expr.TypeArgs, null);
         }
 
         public IBoundExpr Visit(OperatorExpr expr)
@@ -322,14 +322,14 @@ namespace Magpie.Compilation
             // add the value argument
             arg = arg.AppendArg(value);
 
-            return mUnit.ResolveName(mFunction, mInstancingContext, Scope, name, typeArgs, arg);
+            return mCompiler.ResolveName(mFunction, mInstancingContext, Scope, name, typeArgs, arg);
         }
 
-        private FunctionBinder(Function function, Function instancingContext, CompileUnit unit, Scope scope)
+        private FunctionBinder(Function function, Function instancingContext, Compiler compiler, Scope scope)
         {
             mFunction = function;
             mInstancingContext = instancingContext;
-            mUnit = unit;
+            mCompiler = compiler;
             mScope = scope;
         }
 
@@ -338,7 +338,7 @@ namespace Magpie.Compilation
 
         private Function mFunction;
         private Function mInstancingContext;
-        private CompileUnit mUnit;
+        private Compiler mCompiler;
         private Scope mScope;
     }
 }

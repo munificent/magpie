@@ -13,10 +13,10 @@ namespace Magpie.Compilation
     {
         public int Position { get { return (int)mWriter.BaseStream.Position; } }
 
-        private BytecodeGenerator(CompileUnit unit, int numLocals, BinaryWriter writer,
+        private BytecodeGenerator(Compiler compiler, int numLocals, BinaryWriter writer,
             OffsetTable functionPatcher, StringTable stringTable)
         {
-            mUnit = unit;
+            mCompiler = compiler;
             mNumLocals = numLocals;
             mWriter = writer;
             mFunctionPatcher = functionPatcher;
@@ -24,10 +24,10 @@ namespace Magpie.Compilation
             mJumpTable = new JumpTable(this);
         }
 
-        public static void Generate(CompileUnit unit, BinaryWriter writer,
+        public static void Generate(Compiler compiler, BinaryWriter writer,
             OffsetTable functionPatcher, StringTable stringTable, BoundFunction function)
         {
-            BytecodeGenerator generator = new BytecodeGenerator(unit, function.NumLocals,
+            BytecodeGenerator generator = new BytecodeGenerator(compiler, function.NumLocals,
                 writer, functionPatcher, stringTable);
 
             functionPatcher.DefineOffset(function.Name);
@@ -315,7 +315,7 @@ namespace Magpie.Compilation
 
         private int mNumLocals; //### bob: temp
 
-        private CompileUnit mUnit;
+        private Compiler mCompiler;
         private BinaryWriter mWriter;
         private OffsetTable mFunctionPatcher;
         private StringTable mStrings;
