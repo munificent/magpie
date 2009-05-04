@@ -10,7 +10,7 @@ namespace Magpie.Compilation
         /// <summary>
         /// A unique name for the function, including type arguments and value argument types.
         /// </summary>
-        public string Name { get { return mName; } }
+        public string Name { get { return FunctionTable.GetUniqueName(Unbound.FullName, Unbound.TypeParameters, Unbound.FuncType.ParameterTypes); } }
 
         public FuncType Type { get { return Unbound.FuncType; } }
 
@@ -18,10 +18,7 @@ namespace Magpie.Compilation
 
         public int NumLocals { get { return mNumLocals; } }
 
-        public BoundFunction(string name)
-        {
-            mName = name;
-        }
+        public BoundFunction() { }
 
         public void Bind(IBoundExpr body, int numLocals)
         {
@@ -38,7 +35,6 @@ namespace Magpie.Compilation
 
         #endregion
 
-        private readonly string mName;
         public Function Unbound;
         private IBoundExpr mBody;
         private int mNumLocals;

@@ -7,6 +7,9 @@ namespace Magpie.Compilation
 {
     public interface IForeignStaticInterface
     {
-        ForeignFunction FindFunction(string uniqueName);
+        /// <summary>
+        /// Gets the collection of foreign functions exposed by this interface.
+        /// </summary>
+        IEnumerable<ForeignFunction> Functions { get; }
     }
 }

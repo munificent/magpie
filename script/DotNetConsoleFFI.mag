@@ -1,11 +1,13 @@
+using System
+
 Main (->)
-    Write "enter something: "
-    def a <- ReadLine
+    Console:Write "enter something: "
+    def a <- Console:ReadLine
     
-    WriteLine ("you said " + a)
+    Console:WriteLine ("you said " + a)
     
-    while Not KeyAvailable? do Write "*"
+    while Not Console:KeyAvailable? do Console:Write "*"
     
-    Clear
-    WriteLine "that was weird"    
+    Console:Clear
+    Console:WriteLine "that was weird"    
 end

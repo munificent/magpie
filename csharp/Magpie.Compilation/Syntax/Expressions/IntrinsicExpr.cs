@@ -12,9 +12,10 @@ namespace Magpie.Compilation
     /// </summary>
     public class IntrinsicExpr : IBoundExpr
     {
+        //### bob: want this to go away
         public static IntrinsicExpr EqualInt(IBoundExpr arg)
         {
-            var intrinsic = new Intrinsic(OpCode.EqualInt, FuncType.Create(Decl.Int, Decl.Int, Decl.Bool));
+            var intrinsic = new Intrinsic("=", OpCode.EqualInt, FuncType.Create(Decl.Int, Decl.Int, Decl.Bool));
             var expr = new IntrinsicExpr(intrinsic, arg);
 
             return expr;

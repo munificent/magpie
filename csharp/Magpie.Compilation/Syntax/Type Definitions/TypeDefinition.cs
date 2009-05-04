@@ -21,7 +21,7 @@ namespace Magpie.Compilation
         /// </summary>
         public SourceFile SourceFile { get { return mSourceFile; } }
 
-        public string FullName { get { return Magpie.Compilation.Namespace.Qualify(Namespace, Name); } }
+        public string FullName { get { return CompileUnit.QualifyName(Namespace, Name); } }
 
         public bool IsGeneric { get { return mTypeParams.Count > 0; } }
 

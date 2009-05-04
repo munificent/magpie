@@ -15,14 +15,12 @@ namespace Magpie.Foreign
     {
         public DotNetForeign()
         {
-            //### bob: when the ffi supports namespaces, these should be namespaced
-
             // create the functions
-            Add("Clear", Decl.Unit, Clear);
-            Add("KeyAvailable?", Decl.Bool, KeyAvailable);
-            Add("ReadLine", Decl.String, ReadLine);
-            Add("Write", Decl.String, Decl.Unit, Write);
-            Add("WriteLine", Decl.String, Decl.Unit, WriteLine);
+            Add("System:Console:Clear", Decl.Unit, Clear);
+            Add("System:Console:KeyAvailable?", Decl.Bool, KeyAvailable);
+            Add("System:Console:ReadLine", Decl.String, ReadLine);
+            Add("System:Console:Write", Decl.String, Decl.Unit, Write);
+            Add("System:Console:WriteLine", Decl.String, Decl.Unit, WriteLine);
         }
 
         private void Add(string name, Decl returnType, Func<Value[], Value> func)
@@ -74,17 +72,11 @@ namespace Magpie.Foreign
 
         #endregion
 
-        #region IForeignInterface Members
+        #region IForeignStaticInterface Members
 
-        public ForeignFunction FindFunction(string uniqueName)
+        public IEnumerable<ForeignFunction> Functions
         {
-            foreach (var foreign in mFunctions.Values)
-            {
-                if (foreign.Key.Matches(uniqueName)) return foreign.Key;
-            }
-
-            // no foreign calls matched
-            return null;
+            get { return mFunctions.Values.Select(pair => pair.Key); }
         }
 
         #endregion

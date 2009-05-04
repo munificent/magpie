@@ -7,12 +7,6 @@ namespace Magpie.Compilation
 {
     public class Namespace
     {
-        public static string Qualify(string namespaceName, string name)
-        {
-            if (String.IsNullOrEmpty(namespaceName)) return name;
-            return namespaceName + ":" + name;
-        }
-
         public string Name;
 
         public readonly List<Namespace> Namespaces = new List<Namespace>();

@@ -10,10 +10,11 @@ namespace Magpie.Compilation
     /// </summary>
     public class FunctionBinder : IUnboundExprVisitor<IBoundExpr>
     {
-        public static BoundFunction Bind(CompileUnit unit, BoundFunction function, Function instancingContext)
+        public static void Bind(CompileUnit unit, BoundFunction function, Function instancingContext)
         {
             var scope = new Scope();
 
+            //### bob: this should change when we aren't unwrapping the arg tuple any more
             // create locals for all of the arguments
             foreach (ParamDecl arg in function.Type.Parameters)
             {
@@ -34,8 +35,6 @@ namespace Magpie.Compilation
                 throw new CompileException(String.Format("{0} is declared to return {1} but is returning {2}.",
                     function.Name, function.Type.Return, function.Body.Type));
             }
-
-            return function;
         }
 
         #region IUnboundExprVisitor<IBoundExpr> Members
@@ -166,8 +165,7 @@ namespace Magpie.Compilation
                 // all but last expression must be void
                 if (index < block.Exprs.Count - 1)
                 {
-                    if (bound.Type != Decl.Unit)
-                        throw new CompileException("All expressions in a block except the last must be of type Unit. " + block.ToString());
+                    if (bound.Type != Decl.Unit) throw new CompileException("All expressions in a block except the last must be of type Unit. " + block.ToString());
                 }
 
                 index++;
@@ -193,8 +191,23 @@ namespace Magpie.Compilation
 
         public IBoundExpr Visit(FuncRefExpr expr)
         {
-            BoundFunction function = mUnit.ResolveFunction(mFunction, mInstancingContext, Scope, expr.Name.Name, expr.Name.TypeArgs, expr.ParamTypes);
-            return new BoundFuncRefExpr(function);
+            ICallable callable = mUnit.ResolveFunction(mFunction, mInstancingContext,
+                Scope, expr.Name.Name, expr.Name.TypeArgs, expr.ParamTypes);
+
+            BoundFunction bound = callable as BoundFunction;
+
+            //### bob: to support intrinsics, we'll need to basically create wrapper functions
+            // that have the same type signature as the intrinsic and that do nothing but
+            // call the intrinsic and return. then, we can get a reference to that wrapper.
+            // 
+            // to support foreign functions, we can either do the same thing, or change the
+            // way function references work. if a function reference can be distinguished
+            // between being a regular function, a foreign one (or later a closure), then
+            // we can get rid of ForeignFuncCallExpr and just use CallExpr for foreign calls
+            // too.
+            if (bound == null) throw new NotImplementedException("Can only get references to user-defined or auto-generated functions. Intrinsics and foreign function references aren't supported yet.");
+
+            return new BoundFuncRefExpr(bound);
         }
 
         public IBoundExpr Visit(IfDoExpr expr)
@@ -307,7 +320,7 @@ namespace Magpie.Compilation
             string name = baseName + "<-";
 
             // add the value argument
-            arg = mUnit.AppendArg(arg, value);
+            arg = arg.AppendArg(value);
 
             return mUnit.ResolveName(mFunction, mInstancingContext, Scope, name, typeArgs, arg);
         }

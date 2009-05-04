@@ -20,7 +20,7 @@ namespace Magpie.Compilation
 
         Decl IBoundExpr.Type
         {
-            get { return mFunction.Type.Return; }
+            get { return mFunction.FuncType.Return; }
         }
 
         TReturn IBoundExpr.Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)

@@ -5,82 +5,75 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
+    /// <summary>
+    /// Defines an intrinsic function. An intrinsic is a "function" that is supported directly
+    /// by opcodes in the virtual machine. Unlike other functions, instrinsics don't compile
+    /// to a call and return. Instead, their opcodes are inserted directly inline.
+    /// </summary>
     public class Intrinsic : ICallable
     {
-        public static Intrinsic Find(string name, IBoundExpr arg)
+        public static IEnumerable<Intrinsic> All
         {
-            Intrinsic intrinsic = null;
-
-            //### bob: hackish
-            string argString = arg.Type.ToString();
-            switch (name + " " + argString)
+            get
             {
-                case "Not Bool": intrinsic = new Intrinsic(OpCode.NegateBool, FuncType.Create(Decl.Bool, Decl.Bool)); break;
-                case "Neg Int": intrinsic = new Intrinsic(OpCode.NegateInt, FuncType.Create(Decl.Int, Decl.Int)); break;
+                yield return new Intrinsic("Not", OpCode.NegateBool, FuncType.Create(Decl.Bool, Decl.Bool));
+                yield return new Intrinsic("Neg", OpCode.NegateInt, FuncType.Create(Decl.Int, Decl.Int));
 
-                case "= (Bool, Bool)": intrinsic = new Intrinsic(OpCode.EqualBool, FuncType.Create(Decl.Bool, Decl.Bool, Decl.Bool)); break;
-                case "= (Int, Int)": intrinsic = new Intrinsic(OpCode.EqualInt, FuncType.Create(Decl.Int, Decl.Int, Decl.Bool)); break;
-                case "= (String, String)": intrinsic = new Intrinsic(OpCode.EqualString, FuncType.Create(Decl.String, Decl.String, Decl.Bool)); break;
+                yield return new Intrinsic("=", OpCode.EqualBool, FuncType.Create(Decl.Bool, Decl.Bool, Decl.Bool));
+                yield return new Intrinsic("=", OpCode.EqualInt, FuncType.Create(Decl.Int, Decl.Int, Decl.Bool));
+                yield return new Intrinsic("=", OpCode.EqualString, FuncType.Create(Decl.String, Decl.String, Decl.Bool));
 
-                case "!= (Bool, Bool)": intrinsic = new Intrinsic(OpCode.EqualBool, OpCode.NegateBool, FuncType.Create(Decl.Bool, Decl.Bool, Decl.Bool)); break;
-                case "!= (Int, Int)": intrinsic = new Intrinsic(OpCode.EqualInt, OpCode.NegateBool, FuncType.Create(Decl.Int, Decl.Int, Decl.Bool)); break;
-                case "!= (String, String)": intrinsic = new Intrinsic(OpCode.EqualString, OpCode.NegateBool, FuncType.Create(Decl.String, Decl.String, Decl.Bool)); break;
+                yield return new Intrinsic("!=", OpCode.EqualBool, OpCode.NegateBool, FuncType.Create(Decl.Bool, Decl.Bool, Decl.Bool));
+                yield return new Intrinsic("!=", OpCode.EqualInt, OpCode.NegateBool, FuncType.Create(Decl.Int, Decl.Int, Decl.Bool));
+                yield return new Intrinsic("!=", OpCode.EqualString, OpCode.NegateBool, FuncType.Create(Decl.String, Decl.String, Decl.Bool));
 
                 //### bob: should short-circuit!
-                case "| (Bool, Bool)": intrinsic = new Intrinsic(OpCode.OrBool, FuncType.Create(Decl.Bool, Decl.Bool, Decl.Bool)); break;
-                case "& (Bool, Bool)": intrinsic = new Intrinsic(OpCode.AndBool, FuncType.Create(Decl.Bool, Decl.Bool, Decl.Bool)); break;
+                yield return new Intrinsic("|", OpCode.OrBool, FuncType.Create(Decl.Bool, Decl.Bool, Decl.Bool));
+                yield return new Intrinsic("&", OpCode.AndBool, FuncType.Create(Decl.Bool, Decl.Bool, Decl.Bool));
 
-                case "< (Int, Int)": intrinsic = new Intrinsic(OpCode.LessInt, FuncType.Create(Decl.Int, Decl.Int, Decl.Bool)); break;
-                case "> (Int, Int)": intrinsic = new Intrinsic(OpCode.GreaterInt, FuncType.Create(Decl.Int, Decl.Int, Decl.Bool)); break;
-                case "<= (Int, Int)": intrinsic = new Intrinsic(OpCode.GreaterInt, OpCode.NegateBool, FuncType.Create(Decl.Int, Decl.Int, Decl.Bool)); break;
-                case ">= (Int, Int)": intrinsic = new Intrinsic(OpCode.LessInt, OpCode.NegateBool, FuncType.Create(Decl.Int, Decl.Int, Decl.Bool)); break;
+                yield return new Intrinsic("<", OpCode.LessInt, FuncType.Create(Decl.Int, Decl.Int, Decl.Bool));
+                yield return new Intrinsic(">", OpCode.GreaterInt, FuncType.Create(Decl.Int, Decl.Int, Decl.Bool));
+                yield return new Intrinsic("<=", OpCode.GreaterInt, OpCode.NegateBool, FuncType.Create(Decl.Int, Decl.Int, Decl.Bool));
+                yield return new Intrinsic(">=", OpCode.LessInt, OpCode.NegateBool, FuncType.Create(Decl.Int, Decl.Int, Decl.Bool));
 
-                case "+ (Int, Int)": intrinsic = new Intrinsic(OpCode.AddInt, FuncType.Create(Decl.Int, Decl.Int, Decl.Int)); break;
-                case "- (Int, Int)": intrinsic = new Intrinsic(OpCode.SubInt, FuncType.Create(Decl.Int, Decl.Int, Decl.Int)); break;
-                case "* (Int, Int)": intrinsic = new Intrinsic(OpCode.MultInt, FuncType.Create(Decl.Int, Decl.Int, Decl.Int)); break;
-                case "/ (Int, Int)": intrinsic = new Intrinsic(OpCode.DivInt, FuncType.Create(Decl.Int, Decl.Int, Decl.Int)); break;
+                yield return new Intrinsic("+", OpCode.AddInt, FuncType.Create(Decl.Int, Decl.Int, Decl.Int));
+                yield return new Intrinsic("-", OpCode.SubInt, FuncType.Create(Decl.Int, Decl.Int, Decl.Int));
+                yield return new Intrinsic("*", OpCode.MultInt, FuncType.Create(Decl.Int, Decl.Int, Decl.Int));
+                yield return new Intrinsic("/", OpCode.DivInt, FuncType.Create(Decl.Int, Decl.Int, Decl.Int));
 
-                case "String Bool": intrinsic = new Intrinsic(OpCode.BoolToString, FuncType.Create(Decl.Bool, Decl.String)); break;
-                case "String Int": intrinsic = new Intrinsic(OpCode.IntToString, FuncType.Create(Decl.Int, Decl.String)); break;
-                case "String String": intrinsic = new Intrinsic(FuncType.Create(Decl.String, Decl.String)); break;
+                yield return new Intrinsic("String", OpCode.BoolToString, FuncType.Create(Decl.Bool, Decl.String));
+                yield return new Intrinsic("String", OpCode.IntToString, FuncType.Create(Decl.Int, Decl.String));
+                yield return new Intrinsic("String", FuncType.Create(Decl.String, Decl.String));
 
-                case "+ (String, String)": intrinsic = new Intrinsic(OpCode.AddString, FuncType.Create(Decl.String, Decl.String, Decl.String)); break;
+                yield return new Intrinsic("+", OpCode.AddString, FuncType.Create(Decl.String, Decl.String, Decl.String));
 
-                case "Print String": intrinsic = new Intrinsic(OpCode.Print, FuncType.Create(Decl.String, Decl.Unit)); break;
-                case "Size String": intrinsic = new Intrinsic(OpCode.StringSize, FuncType.Create(Decl.String, Decl.Int)); break;
-                case "Substring (String, Int, Int)": intrinsic = new Intrinsic(OpCode.Substring, FuncType.Create(Decl.String, Decl.Int, Decl.Int, Decl.String)); break;
+                yield return new Intrinsic("Print", OpCode.Print, FuncType.Create(Decl.String, Decl.Unit));
+                yield return new Intrinsic("Size", OpCode.StringSize, FuncType.Create(Decl.String, Decl.Int));
+                yield return new Intrinsic("Substring", OpCode.Substring, FuncType.Create(Decl.String, Decl.Int, Decl.Int, Decl.String));
             }
-
-            // attach the argument if we succeeded
-            if (intrinsic != null)
-            {
-                intrinsic.Name = name;
-
-                return intrinsic;
-            }
-
-            return null;
         }
 
-        public string Name { get; set; }
+        public string Name { get; private set; }
+        public FuncType FuncType { get { return mType; } }
         public Decl Type { get { return mType.Return; } }
         public List<OpCode> OpCodes = new List<OpCode>();
 
-        public Intrinsic(OpCode opCode1, OpCode opCode2, FuncType type)
-            : this(type)
+        public Intrinsic(string name, OpCode opCode1, OpCode opCode2, FuncType type)
+            : this(name, type)
         {
             OpCodes.Add(opCode1);
             OpCodes.Add(opCode2);
         }
 
-        public Intrinsic(OpCode opCode, FuncType type)
-            : this(type)
+        public Intrinsic(string name, OpCode opCode, FuncType type)
+            : this(name, type)
         {
             OpCodes.Add(opCode);
         }
 
-        public Intrinsic(FuncType type)
+        public Intrinsic(string name, FuncType type)
         {
+            Name = name;
             mType = type;
         }
 

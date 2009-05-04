@@ -8,6 +8,12 @@ namespace Magpie.Compilation
 {
     public class CompileUnit
     {
+        public static string QualifyName(string namespaceName, string name)
+        {
+            if (String.IsNullOrEmpty(namespaceName)) return name;
+            return namespaceName + ":" + name;
+        }
+
         public FunctionTable BoundFunctions { get { return mFunctions; } }
 
         public CompileUnit(IForeignStaticInterface foreignInterface)
@@ -22,76 +28,17 @@ namespace Magpie.Compilation
 
         public void Compile(Stream outputStream)
         {
+            mFunctions.Add(Intrinsic.All);
+
+            if (mForeignInterface != null)
+            {
+                mFunctions.Add(mForeignInterface.Functions);
+            }
+
             mFunctions.BindAll(this);
 
             BytecodeFile file = new BytecodeFile(this);
             file.Save(outputStream);
-        }
-
-        /// <summary>
-        /// Gets whether the given function call matches the function.
-        /// </summary>
-        /// <param name="name">Fully-qualified name of the function being called.</param>
-        /// <param name="function">The function being matched.</param>
-        /// <param name="typeArgs">The explicit type arguments applied.</param>
-        /// <param name="argTypes">Types of the arguments passed to it.</param>
-        public bool Matches(Function function, string name, IList<Decl> typeArgs, Decl[] argTypes)
-        {
-            if (name != function.FullName) return false;
-
-            // type arguments must match (if there are any)
-            bool funcHasTypeArgs = (function.TypeParameters != null) && (function.TypeParameters.Count > 0);
-            bool matchHasTypeArgs = (typeArgs != null) && (typeArgs.Count > 0);
-
-            if (funcHasTypeArgs != matchHasTypeArgs) return false;
-            if (funcHasTypeArgs && (function.TypeParameters.Count != typeArgs.Count)) return false;
-
-            if (!DeclComparer.Equals(typeArgs.ToArray(), function.TypeParameters.ToArray())) return false;
-
-            // argument types must match parameter types
-            return DeclComparer.Equals(function.FuncType.ParameterTypes, argTypes);
-        }
-
-        public IBoundExpr AppendArg(IBoundExpr arg, IBoundExpr value)
-        {
-            if (arg is UnitExpr)
-            {
-                // no arg, so just use the value
-                return value;
-            }
-            
-            BoundTupleExpr tuple = arg as BoundTupleExpr;
-            if (tuple != null)
-            {
-                // multiple args, so just add another
-                BoundTupleExpr newArg = new BoundTupleExpr(tuple.Fields);
-                newArg.Fields.Add(value);
-                return newArg;
-            }
-
-            // single arg, so create a tuple
-            return new BoundTupleExpr(new IBoundExpr[] { arg, value });
-        }
-
-        public IBoundExpr PrependArg(IBoundExpr arg, IBoundExpr value)
-        {
-            if (arg is UnitExpr)
-            {
-                // no arg, so just use the value
-                return value;
-            }
-
-            BoundTupleExpr tuple = arg as BoundTupleExpr;
-            if (tuple != null)
-            {
-                // multiple args, so just add another
-                BoundTupleExpr newArg = new BoundTupleExpr(tuple.Fields);
-                newArg.Fields.Insert(0, value);
-                return newArg;
-            }
-
-            // single arg, so create a tuple
-            return new BoundTupleExpr(new IBoundExpr[] { value, arg });
         }
 
         /// <summary>
@@ -144,61 +91,41 @@ namespace Magpie.Compilation
                 argTypes = arg.Type.Expanded;
             }
 
-            //### bob: intrinsics should be part of the FunctionTable
-
-            // see if it's intrinsic
-            ICallable intrinsic = Intrinsic.Find(name, arg);
-            if (intrinsic != null) return intrinsic.CreateCall(arg);
-
-            //### bob: should really be doing this in ResolveFunction so that foreign functions
-            // can be namespaced, but that'll require shifting some stuff around.
-            // see if it's a foreign function
-            ICallable foreign = ResolveForeignFunction(FunctionTable.GetUniqueName(name, typeArgs, argTypes));
-            if (foreign != null) return foreign.CreateCall(arg);
-
-            // see if it's something defined at the sourcefile level
+            // look up the function
             ICallable callable = ResolveFunction(containingType, instancingContext, scope, name, typeArgs, argTypes);
-            if (callable != null)
-            {
-                return callable.CreateCall(arg);
-            }
+            if (callable == null) throw new CompileException(String.Format("Could not resolve name {0}.", FunctionTable.GetUniqueName(name, typeArgs, argTypes)));
 
-            throw new CompileException(String.Format("Could not resolve name {0}.", FunctionTable.GetUniqueName(name, typeArgs, argTypes)));
+            return callable.CreateCall(arg);
         }
 
-        private ForeignFunction ResolveForeignFunction(string uniqueName)
-        {
-            return mForeignInterface.FindFunction(uniqueName);
-        }
-
-        public BoundFunction ResolveFunction(Function containingType, Function instancingContext, Scope scope, string name, IList<Decl> typeArgs, Decl[] argTypes)
+        public ICallable ResolveFunction(Function containingType, Function instancingContext, Scope scope, string name, IList<Decl> typeArgs, Decl[] argTypes)
         {
             // try the name as-is
-            BoundFunction bound = LookUpFunction(containingType, scope, name, typeArgs, argTypes);
+            ICallable bound = LookUpFunction(containingType, scope, name, typeArgs, argTypes);
             if (bound != null) return bound;
 
             // try the current function's namespace
-            bound = LookUpFunction(containingType, scope, Namespace.Qualify(containingType.Namespace, name), typeArgs, argTypes);
+            bound = LookUpFunction(containingType, scope, QualifyName(containingType.Namespace, name), typeArgs, argTypes);
             if (bound != null) return bound;
 
             // try each of the open namespaces
             IList<string> namespaces = containingType.SourceFile.UsingNamespaces;
             for (int i = namespaces.Count - 1; i >= 0; i--)
             {
-                bound = LookUpFunction(containingType, scope, Namespace.Qualify(namespaces[i], name), typeArgs, argTypes);
+                bound = LookUpFunction(containingType, scope, QualifyName(namespaces[i], name), typeArgs, argTypes);
                 if (bound != null) return bound;
             }
 
             // try the instance context's namespaces
             if (instancingContext != null)
             {
-                bound = LookUpFunction(containingType, scope, Namespace.Qualify(instancingContext.Namespace, name), typeArgs, argTypes);
+                bound = LookUpFunction(containingType, scope, QualifyName(instancingContext.Namespace, name), typeArgs, argTypes);
                 if (bound != null) return bound;
 
                 namespaces = instancingContext.SourceFile.UsingNamespaces;
                 for (int i = namespaces.Count - 1; i >= 0; i--)
                 {
-                    bound = LookUpFunction(containingType, scope, Namespace.Qualify(namespaces[i], name), typeArgs, argTypes);
+                    bound = LookUpFunction(containingType, scope, QualifyName(namespaces[i], name), typeArgs, argTypes);
                     if (bound != null) return bound;
                 }
             }
@@ -207,13 +134,13 @@ namespace Magpie.Compilation
             return null;
         }
 
-        private BoundFunction LookUpFunction(Function containingType, Scope scope, string fullName, IList<Decl> typeArgs, Decl[] argTypes)
+        private ICallable LookUpFunction(Function containingType, Scope scope, string fullName, IList<Decl> typeArgs, Decl[] argTypes)
         {
             string uniqueName = FunctionTable.GetUniqueName(fullName, typeArgs, argTypes);
 
             // try the already bound functions
-            BoundFunction boundFunc;
-            if (mFunctions.TryFind(fullName, argTypes, out boundFunc)) return boundFunc;
+            ICallable callable;
+            if (mFunctions.TryFind(fullName, argTypes, out callable)) return callable;
 
             // try to instantiate a generic
             foreach (var generic in mGenerics)
@@ -226,34 +153,18 @@ namespace Magpie.Compilation
                 if (instance != null)
                 {
                     // don't instantiate it multiple times
-                    mFunctions.Declare(instance);
+                    BoundFunction bound = mFunctions.Add(instance);
 
-                    BoundFunction bound = TryBind(uniqueName, instance, containingType);
-                    if (bound != null)
+                    if (instance.Matches(uniqueName))
                     {
+                        FunctionBinder.Bind(this, bound, containingType);
+
                         return bound;
                     }
                 }
             }
 
             // couldn't find it
-            return null;
-        }
-
-        /// <param name="uniqueName"></param>
-        /// <param name="function"></param>
-        /// <param name="instancingContext">When binding a function that is an instance of the generic,
-        /// this will be the function whose body contains the function call that causes the generic to
-        /// be instantiated.</param>
-        /// <returns></returns>
-        private BoundFunction TryBind(string uniqueName, Function function, Function instancingContext)
-        {
-            if (function.Matches(uniqueName))
-            {
-                BoundFunction bound = mFunctions.Find(function);
-                return FunctionBinder.Bind(this, bound, instancingContext);
-            }
-
             return null;
         }
 
@@ -277,13 +188,15 @@ namespace Magpie.Compilation
 
         public void AddFunction(Function function)
         {
+            // shunt the generics over to the staging area. they will be instantiated
+            // into real functions as needed.
             if (function.IsGeneric)
             {
                 mGenerics.Add(function);
             }
             else
             {
-                mFunctions.Declare(function);
+                mFunctions.Add(function);
             }
         }
 
@@ -311,7 +224,7 @@ namespace Magpie.Compilation
 
             foreach (Namespace childNamespace in namespaceObj.Namespaces)
             {
-                string name = Namespace.Qualify(parentName, childNamespace.Name);
+                string name = CompileUnit.QualifyName(parentName, childNamespace.Name);
                 AddNamespace(name, file, childNamespace);
             }
         }
