@@ -141,11 +141,6 @@ Early returns ("return" expression).
   
 Ability to break out of loops ("break" expression).
 
-Simplify/optimize the interpreter/compiler.
-- There's some shenanigans related to argument passing that's unnecessary. Each
-  arg in the arg tuple gets put into its own local variable. Why not just put
-  the entire tuple in one?
-
 Lazy arguments.
 - Basically, do what Scala does.
 - This is surprisingly important: logical operators can't short-circuit without
@@ -164,3 +159,8 @@ Done:
 Make the bytecode file format less .NET-related, and more precisely defined.
 - Instead of function indexes, use absolute offsets for the function's location
   in the file.
+
+Simplify/optimize the interpreter/compiler.
+- There's some shenanigans related to argument passing that's unnecessary. Each
+  arg in the arg tuple gets put into its own local variable. Why not just put
+  the entire tuple in one?
