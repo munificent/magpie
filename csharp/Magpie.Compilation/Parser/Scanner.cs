@@ -193,6 +193,10 @@ namespace Magpie.Compilation
                         mState = ScanState.Default;
                         return new Token(LastChar, TokenType.Line);
                     }
+                    else if (IsDone)
+                    {
+                        return Eof;
+                    }
                     else
                     {
                         Advance(); // ignore everything else

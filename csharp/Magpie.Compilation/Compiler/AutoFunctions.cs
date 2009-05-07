@@ -66,12 +66,16 @@ namespace Magpie.Compilation
             var arg = new ParamDecl[] { new ParamDecl("s", structure.Type) };
             var funcType = new FuncType(arg, field.Type);
 
-            var structArg = new LoadExpr(new LocalsExpr(), new Field("s", structure.Type, false, 0));
+            // load the struct argument
+            var loadStruct = new LoadExpr(new LocalsExpr(), structure.Type, 0);
+            var loadField  = new LoadExpr(loadStruct, field);
 
-            var body = new LoadExpr(structArg, field);
-
-            BuildFunction(structure, field.Name, funcType, body);
+            BuildFunction(structure, field.Name, funcType, loadField);
         }
+
+        //### bob: structs are all good now. just need unions.
+        // single value unions coincidentally work.
+        // tuple value unions are broke
 
         private void BuildSetter(Struct structure, Field field)
         {
@@ -79,10 +83,25 @@ namespace Magpie.Compilation
             ParamDecl[] args = new ParamDecl[] { new ParamDecl("s", structure.Type), new ParamDecl("value", field.Type) };
             FuncType funcType = new FuncType(args, Decl.Unit);
 
-            LoadExpr structArg = new LoadExpr(new LocalsExpr(), new Field("s", structure.Type, false, 0));
-            LoadExpr valueArg = new LoadExpr(new LocalsExpr(), new Field("value", field.Type, false, 1));
+            //### opt: this is kind of tedious...
+            // load the locals
+            // load the arg
+            // load the first arg element
+            // load the locals
+            // load the arg
+            // load the second arg element
+            // definitely some optimizations we can do there...
 
-            var body = new StoreExpr(structArg, field, valueArg);
+            // load the argument tuple
+            var loadArg = new LoadExpr(new LocalsExpr(), Decl.Unit /* ignored */, 0);
+
+            // load the struct argument
+            var loadStruct = new LoadExpr(loadArg, structure.Type, 0);
+
+            // load the new value
+            var loadValue = new LoadExpr(loadArg, field.Type, 1);
+
+            var body = new StoreExpr(loadStruct, field, loadValue);
 
             BuildFunction(structure, field.Name + "<-", funcType, body);
         }
@@ -103,51 +122,49 @@ namespace Magpie.Compilation
         {
             FuncType funcType = new FuncType(new ParamDecl[] { new ParamDecl("u", unionCase.Union.Type) }, Decl.Bool);
 
-            var argField = new Field("u", unionCase.Union.Type, false, 0);
-            var tagField = new Field("tag", Decl.Int, false, 0);
+            // a union in memory looks like:
+            //
+            // no value
+            // +------------+      +------------+
+            // | union      | ---> | case (int) |
+            // +------------+      +------------+
+            //
+            // single value
+            // +------------+      +------------+
+            // | union      | ---> | case (int) |
+            // +------------+      +------------+
+            //                     | value      |
+            //                     +------------+
+            //
+            // tuple or ref value
+            // +------------+      +------------+
+            // | union      | ---> | case (int) |
+            // +------------+      +------------+      +------------+
+            //                     | reference  | ---> | field ...  |
+            //                     +------------+      +------------+
+            //                                         | field ...  |
+            //                                         +------------+
 
-            // get first field from union
-            var body = IntrinsicExpr.EqualInt(
-                new BoundTupleExpr(new IBoundExpr[] {
-                        new IntExpr(unionCase.Index),
-                        new LoadExpr(new LoadExpr(new LocalsExpr(), argField), tagField)}));
+            //### opt: unions with no value don't need to be references
+            //         could just put the value in place
 
-            BuildFunction(unionCase.Union, unionCase.Name + "?", funcType, body);
+            var loadUnion = new LoadExpr(new LocalsExpr(), unionCase.Union.Type, 0);
+            var loadCase  = new LoadExpr(loadUnion, Decl.Int, 0);
+
+            var compare = Intrinsic.EqualInt(loadCase, new IntExpr(unionCase.Index));
+
+            BuildFunction(unionCase.Union, unionCase.Name + "?", funcType, compare);
         }
 
+        //### bob: this should go away when we have pattern matching
         private void BuildValueAccessor(UnionCase unionCase)
         {
             FuncType funcType = new FuncType(new ParamDecl[] { new ParamDecl("u", unionCase.Union.Type) }, unionCase.ValueType);
 
-            var argField = new Field("u", unionCase.Union.Type, false, 0);
+            var loadUnion = new LoadExpr(new LocalsExpr(), unionCase.Union.Type, 0);
+            var loadValue = new LoadExpr(loadUnion, unionCase.ValueType, 1);
 
-            IBoundExpr body;
-            TupleType tupleValue = unionCase.ValueType as TupleType;
-            if (tupleValue != null)
-            {
-                // the tuple fields are split out in the union struct (unfortunately), so
-                // we need to pack them back into a tuple.
-                //### bob: if i change things so that a function receives the args as a tuple and
-                // not unwrapped, then this can go away.
-                List<IBoundExpr> fields = new List<IBoundExpr>();
-                for (int i = 0; i < tupleValue.Fields.Count; i++)
-                {
-                    var field = new Field("arg" + i, tupleValue.Fields[i], false, (byte)(i + 1));
-                    fields.Add(new LoadExpr(new LoadExpr(new LocalsExpr(), argField), field));
-                }
-
-                // tuple value
-                body = new BoundTupleExpr(fields);
-            }
-            else
-            {
-                var valueField = new Field("value", Decl.Int, false, 1);
-
-                // single value
-                body = new LoadExpr(new LoadExpr(new LocalsExpr(), argField), valueField);
-            }
-
-            BuildFunction(unionCase.Union, unionCase.Name + "Value", funcType, body);
+            BuildFunction(unionCase.Union, unionCase.Name + "Value", funcType, loadValue);
         }
 
         private void BuildFunction(TypeDefinition parentType, string name, FuncType type, IBoundExpr body)

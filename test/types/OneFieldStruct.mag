@@ -1,0 +1,12 @@
+﻿// expected: foo
+
+Main (->)
+    def a <- OneField "foo"
+    Foo a
+end
+
+Foo (a OneField ->) Print a.X
+
+struct OneField
+    X String
+end

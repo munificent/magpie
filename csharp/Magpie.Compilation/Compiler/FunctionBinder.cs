@@ -14,11 +14,10 @@ namespace Magpie.Compilation
         {
             var scope = new Scope();
 
-            //### bob: this should change when we aren't unwrapping the arg tuple any more
-            // create locals for all of the arguments
-            foreach (ParamDecl arg in function.Type.Parameters)
+            // create a local slot for the arg
+            if (function.Type.Parameters.Count > 0)
             {
-                scope.Define(arg.Name, arg.Type, false);
+                scope.Define("__arg", Decl.Unit /* ignored */, false);
             }
 
             var binder = new FunctionBinder(function.Unbound, instancingContext, compiler, scope);
@@ -191,7 +190,7 @@ namespace Magpie.Compilation
 
         public IBoundExpr Visit(FuncRefExpr expr)
         {
-            ICallable callable = mCompiler.ResolveFunction(mFunction, mInstancingContext,
+            ICallable callable = mCompiler.FindFunction(mFunction, mInstancingContext,
                 Scope, expr.Name.Name, expr.Name.TypeArgs, expr.ParamTypes);
 
             BoundFunction bound = callable as BoundFunction;

@@ -1,0 +1,11 @@
+﻿// expected: foo
+
+Main (->)
+    def a <- NoFields
+    Foo a
+end
+
+Foo (a NoFields ->) Print "foo"
+
+struct NoFields
+end

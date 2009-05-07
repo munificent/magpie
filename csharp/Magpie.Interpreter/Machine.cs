@@ -320,24 +320,11 @@ namespace Magpie.Interpreter
 
             mInstruction = PopInt();
             int numLocals = ReadInt();
-            int numParams = ReadInt(); //### bob: this can go away we we aren't unwrapping the arg tuple
 
             mCurrentFrame = MakeCallFrame(numLocals, mCurrentFrame, previousInstruction);
 
-            // pop and store the arguments into locals
-            switch (paramType)
-            {
-                case 0: break; // do nothing
-                case 1: mCurrentFrame[0] = Pop(); break; // single value on stack
-                default:
-                    // multiple values, so pop and unwrap tuple
-                    Structure tuple = PopStructure();
-                    for (int i = 0; i < numParams; i++)
-                    {
-                        mCurrentFrame[i] = tuple[i];
-                    }
-                    break;
-            }
+            // pop and store the argument
+            if (paramType != 0) mCurrentFrame[0] = Pop();
         }
 
         private void ForeignCall(int id, Value[] args)

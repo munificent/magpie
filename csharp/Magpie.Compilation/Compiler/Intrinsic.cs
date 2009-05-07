@@ -53,25 +53,31 @@ namespace Magpie.Compilation
             }
         }
 
+        public static IBoundExpr EqualInt(IBoundExpr left, IBoundExpr right)
+        {
+            var intrinsic = new Intrinsic("=", OpCode.EqualInt, FuncType.Create(Decl.Int, Decl.Int, Decl.Bool));
+            return intrinsic.CreateCall(new BoundTupleExpr(new IBoundExpr[] { left, right }));
+        }
+
         public string Name { get; private set; }
         public FuncType FuncType { get { return mType; } }
         public Decl Type { get { return mType.Return; } }
         public List<OpCode> OpCodes = new List<OpCode>();
 
-        public Intrinsic(string name, OpCode opCode1, OpCode opCode2, FuncType type)
+        private Intrinsic(string name, OpCode opCode1, OpCode opCode2, FuncType type)
             : this(name, type)
         {
             OpCodes.Add(opCode1);
             OpCodes.Add(opCode2);
         }
 
-        public Intrinsic(string name, OpCode opCode, FuncType type)
+        private Intrinsic(string name, OpCode opCode, FuncType type)
             : this(name, type)
         {
             OpCodes.Add(opCode);
         }
 
-        public Intrinsic(string name, FuncType type)
+        private Intrinsic(string name, FuncType type)
         {
             Name = name;
             mType = type;

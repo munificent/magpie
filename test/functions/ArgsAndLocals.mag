@@ -1,0 +1,31 @@
+Main (->)
+    Zero
+    One "one"
+    Two ("two a", "two b")
+end
+
+Zero (->)
+    def local <- "local"
+    Print local
+end
+    
+One (a String ->)
+    def local <- "local"
+    Print a
+    Print local
+end
+
+Two (a String, b String ->)
+    def local <- "local"
+    Print a
+    Print b
+    Print local
+end
+
+//### bob: also need to test local variables
+// ..\..\..\script\Functions.mag
+
+// to do:
+// looks like regular function calls are working
+// need to change the opcodes generated for the auto-generated functions
+// should write test scripts, and then test the auto functions one at a time

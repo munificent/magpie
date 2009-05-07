@@ -13,11 +13,10 @@ namespace Magpie.Compilation
     {
         public int Position { get { return (int)mWriter.BaseStream.Position; } }
 
-        private BytecodeGenerator(Compiler compiler, int numLocals, BinaryWriter writer,
+        private BytecodeGenerator(Compiler compiler, BinaryWriter writer,
             OffsetTable functionPatcher, StringTable stringTable)
         {
             mCompiler = compiler;
-            mNumLocals = numLocals;
             mWriter = writer;
             mFunctionPatcher = functionPatcher;
             mStrings = stringTable;
@@ -27,13 +26,12 @@ namespace Magpie.Compilation
         public static void Generate(Compiler compiler, BinaryWriter writer,
             OffsetTable functionPatcher, StringTable stringTable, BoundFunction function)
         {
-            BytecodeGenerator generator = new BytecodeGenerator(compiler, function.NumLocals,
+            BytecodeGenerator generator = new BytecodeGenerator(compiler,
                 writer, functionPatcher, stringTable);
 
             functionPatcher.DefineOffset(function.Name);
 
             writer.Write(function.NumLocals);
-            writer.Write(function.Type.Parameters.Count);
 
             function.Body.Accept(generator);
 
@@ -52,11 +50,11 @@ namespace Magpie.Compilation
 
         #region IBoundExprVisitor Members
 
-        public bool Visit(UnitExpr expr) { return true; } // do nothing
-        public bool Visit(BoolExpr expr) { Write(OpCode.PushBool, expr.Value ? (byte)1 : (byte)0); return true; }
-        public bool Visit(IntExpr expr)  { Write(OpCode.PushInt, expr.Value); return true; }
+        bool IBoundExprVisitor<bool>.Visit(UnitExpr expr) { return true; } // do nothing
+        bool IBoundExprVisitor<bool>.Visit(BoolExpr expr) { Write(OpCode.PushBool, expr.Value ? (byte)1 : (byte)0); return true; }
+        bool IBoundExprVisitor<bool>.Visit(IntExpr expr) { Write(OpCode.PushInt, expr.Value); return true; }
 
-        public bool Visit(StringExpr expr)
+        bool IBoundExprVisitor<bool>.Visit(StringExpr expr)
         {
             Write(OpCode.PushString);
             mStrings.InsertOffset(expr.Value);
@@ -64,14 +62,14 @@ namespace Magpie.Compilation
             return true;
         }
 
-        public bool Visit(BoundFuncRefExpr expr)
+        bool IBoundExprVisitor<bool>.Visit(BoundFuncRefExpr expr)
         {
             Write(OpCode.PushInt);
             mFunctionPatcher.InsertOffset(expr.Function.Name);
             return true;
         }
 
-        public bool Visit(ForeignCallExpr expr)
+        bool IBoundExprVisitor<bool>.Visit(ForeignCallExpr expr)
         {
             // evaluate the arg
             expr.Arg.Accept(this);
@@ -90,7 +88,7 @@ namespace Magpie.Compilation
             return true;
         }
 
-        public bool Visit(BoundTupleExpr tuple)
+        bool IBoundExprVisitor<bool>.Visit(BoundTupleExpr tuple)
         {
             // must visit in forward order to ensure that function arguments are
             // evaluated left to right
@@ -105,7 +103,7 @@ namespace Magpie.Compilation
             return true;
         }
 
-        public bool Visit(IntrinsicExpr expr)
+        bool IBoundExprVisitor<bool>.Visit(IntrinsicExpr expr)
         {
             expr.Arg.Accept(this);
 
@@ -114,7 +112,7 @@ namespace Magpie.Compilation
             return true;
         }
 
-        public bool Visit(BoundCallExpr expr)
+        bool IBoundExprVisitor<bool>.Visit(BoundCallExpr expr)
         {
             expr.Arg.Accept(this);
             expr.Target.Accept(this);
@@ -132,7 +130,7 @@ namespace Magpie.Compilation
             return true;
         }
 
-        public bool Visit(BoundArrayExpr expr)
+        bool IBoundExprVisitor<bool>.Visit(BoundArrayExpr expr)
         {
             // must visit in forward order to ensure that array elements are
             // evaluated left to right
@@ -147,14 +145,14 @@ namespace Magpie.Compilation
             return true;
         }
 
-        public bool Visit(BoundBlockExpr block)
+        bool IBoundExprVisitor<bool>.Visit(BoundBlockExpr block)
         {
             block.Exprs.ForEach(expr => expr.Accept(this));
 
             return true;
         }
 
-        public bool Visit(BoundIfDoExpr expr)
+        bool IBoundExprVisitor<bool>.Visit(BoundIfDoExpr expr)
         {
             // evaluate the condition
             expr.Condition.Accept(this);
@@ -169,7 +167,7 @@ namespace Magpie.Compilation
             return true;
         }
 
-        public bool Visit(BoundIfThenExpr expr)
+        bool IBoundExprVisitor<bool>.Visit(BoundIfThenExpr expr)
         {
             // evaluate the condition
             expr.Condition.Accept(this);
@@ -191,7 +189,7 @@ namespace Magpie.Compilation
             return true;
         }
 
-        public bool Visit(BoundWhileExpr expr)
+        bool IBoundExprVisitor<bool>.Visit(BoundWhileExpr expr)
         {
             mJumpTable.PatchJumpBack("while");
 
@@ -211,16 +209,16 @@ namespace Magpie.Compilation
             return true;
         }
 
-        public bool Visit(LoadExpr expr)
+        bool IBoundExprVisitor<bool>.Visit(LoadExpr expr)
         {
             expr.Struct.Accept(this);
 
-            Write(OpCode.Load, expr.Field.Index);
+            Write(OpCode.Load, (byte)expr.Index);
 
             return true;
         }
 
-        public bool Visit(StoreExpr expr)
+        bool IBoundExprVisitor<bool>.Visit(StoreExpr expr)
         {
             expr.Value.Accept(this);
             expr.Struct.Accept(this);
@@ -230,7 +228,7 @@ namespace Magpie.Compilation
             return true;
         }
 
-        public bool Visit(LocalsExpr expr)
+        bool IBoundExprVisitor<bool>.Visit(LocalsExpr expr)
         {
             //### bob: will need to handle other scopes at some point
             Write(OpCode.PushLocals);
@@ -238,48 +236,47 @@ namespace Magpie.Compilation
             return true;
         }
 
-        public bool Visit(ConstructExpr expr)
+        bool IBoundExprVisitor<bool>.Visit(ConstructExpr expr)
         {
-            //### bob: there's some redundancy here. when we *call* the constructor, we create a tuple
-            // with all of the arguments, which are the struct fields in order. that tuple is pushed
-            // onto the stack and the constructor is called.
-            // the interpreter than allocates a structure for its locals.
-            // it pops the tuple off the stack, and assigns each of its fields to the locals, in order.
-            // then the body of the constructor here creates a new structure, and initializes each field
-            // by reading each of the locals. so we have:
-            // - tuple arg passed to constructor
-            // - constructor's local variables
-            // - created structure
-            // each of those (provided the structure has more than one field) are essentially identical.
-            // kinda dumb.
+            // just push the arg tuple onto the stack
+            Write(OpCode.PushLocals);
+            Write(OpCode.Load, (byte)0);
 
-            // load all of the locals
-            for (int i = 0; i < mNumLocals; i++)
+            // if the struct has only one field, the arg tuple will just be a
+            // value. in that case, we need to hoist it into a struct to make
+            // it properly a reference type.
+            //### opt: this is really only needed for mutable single-field
+            //    structs. for immutable ones, pass by reference and pass by value
+            //    are indistinguishable.
+            if (expr.Struct.Fields.Count == 1)
             {
-                Write(OpCode.PushLocals);
-                Write(OpCode.Load, (byte)i);
+                Write(OpCode.Alloc, 1);
             }
 
-            // create the structure
-            Write(OpCode.Alloc, mNumLocals);
-
             return true;
+
         }
 
-        public bool Visit(ConstructUnionExpr expr)
+        bool IBoundExprVisitor<bool>.Visit(ConstructUnionExpr expr)
         {
             // load the case tag
             Write(OpCode.PushInt, expr.Case.Index);
 
-            // load all of the locals
-            for (int i = 0; i < mNumLocals; i++)
+            // one slot for the case tag
+            int numSlots = 1;
+
+            // load the value (if any)
+            if (expr.Case.ValueType != Decl.Unit)
             {
                 Write(OpCode.PushLocals);
-                Write(OpCode.Load, (byte)i);
+                Write(OpCode.Load, (byte)0);
+
+                // add a slot for the value
+                numSlots++;
             }
 
-            // create the structure, add one for the case tag
-            Write(OpCode.Alloc, mNumLocals + 1);
+            // create the structure
+            Write(OpCode.Alloc, numSlots);
 
             return true;
         }
@@ -312,8 +309,6 @@ namespace Magpie.Compilation
             Write(op);
             Write(operand);
         }
-
-        private int mNumLocals; //### bob: temp
 
         private Compiler mCompiler;
         private BinaryWriter mWriter;

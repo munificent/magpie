@@ -1,11 +1,15 @@
 ﻿// expected: false
 // expected: whoop
+// expected: true
 
 Main (->)
     def a <- Bar "whoop"
     
     Print a.Frob?.String
     Print a.BarValue
+    
+    def b <- Frob
+    Print b.Frob?.String
 end
 
 union Foo

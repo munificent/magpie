@@ -51,39 +51,68 @@ namespace Magpie.Compilation
         /// <summary>
         /// Resolves and binds a reference to a name.
         /// </summary>
+        /// <param name="function">The function being compiled.</param>
         /// <param name="scope">The scope in which the name is being bound.</param>
         /// <param name="name">The name being resolved. May or may not be fully-qualified.</param>
         /// <param name="typeArgs">The type arguments being applied to the name. For
         /// example, resolving "foo[int, bool]" would pass in {int, bool} here.</param>
         /// <param name="arg">The argument being applied to the name.</param>
         /// <returns></returns>
-        public IBoundExpr ResolveName(Function containingType, Function instancingContext, Scope scope, string name, IList<Decl> typeArgs, IBoundExpr arg)
+        public IBoundExpr ResolveName(Function function, Function instancingContext, Scope scope, string name, IList<Decl> typeArgs, IBoundExpr arg)
         {
             Decl[] argTypes = null;
             if (arg != null) argTypes = arg.Type.Expanded;
 
-            // see if it's a local
-            if (scope.Contains(name))
-            {
-                if ((typeArgs != null) && (typeArgs.Count > 0)) throw new InvalidOperationException("Cannot apply generic type arguments to a local variable.");
+            IBoundExpr resolved = null;
+            Decl resolvedType = null;
 
+            // see if it's an argument
+            ParamDecl param = function.FuncType.Parameters.Find(p => p.Name == name);
+            if (param != null)
+            {
+                resolved = new LoadExpr(new LocalsExpr(), param.Type, 0);
+                resolvedType = param.Type;
+
+                if (function.FuncType.Parameters.Count > 1)
+                {
+                    // function has multiple parameters, so the first local slot is a tuple and we need to load the arg from it
+                    byte argIndex = (byte)function.FuncType.Parameters.IndexOf(param);
+                    resolved = new LoadExpr(resolved, param.Type, argIndex);
+                }
+            }
+            else if (scope.Contains(name))
+            {
                 Field local = scope[name];
 
-                // if the local is holding a function reference and we're passed args, call it
-                if ((local.Type is FuncType) && (argTypes != null))
+                // just load the value
+                resolved = new LoadExpr(new LocalsExpr(), scope[name]);
+                resolvedType = local.Type;
+            }
+
+            // if we resolved to a local name, handle it
+            if (resolved != null)
+            {
+                if ((typeArgs != null) && (typeArgs.Count > 0)) throw new InvalidOperationException("Cannot apply generic type arguments to a local variable or function argument.");
+
+                // if the local or argument is holding a function reference and we're passed args, call it
+                if (argTypes != null)
                 {
+                    FuncType funcType = resolvedType as FuncType;
+
+                    // can only call functions
+                    if (funcType == null) throw new CompileException("Cannot call a local variable or argument that is not a function reference.");
+
                     // check that args match
-                    FuncType funcType = (FuncType)local.Type;
                     if (!DeclComparer.Equals(funcType.ParameterTypes, argTypes))
                     {
                         throw new CompileException("Argument types passed to local function reference do not match function's parameter types.");
                     }
 
-                    return new BoundCallExpr(new LoadExpr(new LocalsExpr(), local), arg);
+                    // call it
+                    resolved = new BoundCallExpr(resolved, arg);
                 }
 
-                // just load the value
-                return new LoadExpr(new LocalsExpr(), scope[name]);
+                return resolved;
             }
 
             // implicitly apply () as the argument if no other argument was provided.
@@ -99,13 +128,23 @@ namespace Magpie.Compilation
             }
 
             // look up the function
-            ICallable callable = ResolveFunction(containingType, instancingContext, scope, name, typeArgs, argTypes);
+            ICallable callable = FindFunction(function, instancingContext, scope, name, typeArgs, argTypes);
             if (callable == null) throw new CompileException(String.Format("Could not resolve name {0}.", FunctionTable.GetUniqueName(name, typeArgs, argTypes)));
 
             return callable.CreateCall(arg);
         }
 
-        public ICallable ResolveFunction(Function containingType, Function instancingContext, Scope scope, string name, IList<Decl> typeArgs, Decl[] argTypes)
+        /// <summary>
+        /// Looks for a function with the given name in all of the currently used namespaces.
+        /// </summary>
+        /// <param name="containingType"></param>
+        /// <param name="instancingContext"></param>
+        /// <param name="scope"></param>
+        /// <param name="name"></param>
+        /// <param name="typeArgs"></param>
+        /// <param name="argTypes"></param>
+        /// <returns></returns>
+        public ICallable FindFunction(Function containingType, Function instancingContext, Scope scope, string name, IList<Decl> typeArgs, Decl[] argTypes)
         {
             // try the name as-is
             ICallable bound = LookUpFunction(containingType, scope, name, typeArgs, argTypes);

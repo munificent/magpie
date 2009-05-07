@@ -6,7 +6,7 @@
 // expected: 7
 
 Main (->)
-    def i <- IntBox 0
+    def i <- IntBox (0, 1)
     Print i.Value.String
     
     // unsugared assignment
@@ -35,4 +35,5 @@ Add<- (box IntBox, a Int, b Int ->) box.Value <- (a + b)
 
 struct IntBox
     Value mutable Int
+    Dummy  Int
 end
