@@ -37,12 +37,12 @@ namespace Magpie.Interpreter
 
             // version
             Expect(4, new byte[] { 0, 0, 0, 0 });
-
         }
 
         public string ReadString(int offset)
         {
             int start = offset;
+
             // find the end of the string
             while (mData[offset] != 0) offset++;
 

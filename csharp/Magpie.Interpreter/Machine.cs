@@ -99,31 +99,9 @@ namespace Magpie.Interpreter
                     case OpCode.Call1: Call(1); break;
                     case OpCode.CallN: Call(2); break;
 
-                    case OpCode.ForeignCall0:
-                        {
-                            int id = ReadInt();
-
-                            ForeignCall(id, new Value[0]);
-                        }
-                        break;
-
-                    case OpCode.ForeignCall1:
-                        {
-                            int id = ReadInt();
-                            Value arg = Pop();
-
-                            ForeignCall(id, new Value[] { arg });
-                        }
-                        break;
-
-                    case OpCode.ForeignCallN:
-                        {
-                            int id = ReadInt();
-                            Structure args = PopStructure();
-
-                            ForeignCall(id, args.Fields.ToArray());
-                        }
-                        break;
+                    case OpCode.ForeignCall0: ForeignCall(0); break;
+                    case OpCode.ForeignCall1: ForeignCall(1); break;
+                    case OpCode.ForeignCallN: ForeignCall(2); break;
 
                     case OpCode.Return:
                         {
@@ -327,17 +305,25 @@ namespace Magpie.Interpreter
             if (paramType != 0) mCurrentFrame[0] = Pop();
         }
 
-        private void ForeignCall(int id, Value[] args)
+        private void ForeignCall(int paramType) // (int id, Value[] args)
         {
-            Value result = mForeignInterface.ForeignCall(id, args);
+            int id = ReadInt();
 
+            Value[] args;
+            switch (paramType)
+            {
+                case 0: args = new Value[0]; break;
+                case 1: args = new Value[] { Pop() }; break;
+                case 2: args = PopStructure().Fields.ToArray(); break;
+                default: throw new ArgumentException("Unknown parameter type.");
+            }
+
+            Value result = mForeignInterface.ForeignCall(id, args);
             if (result != null) Push(result);
         }
 
         private BytecodeFile mFile;
 
-        //private byte[] mCode;
-        //private int mCurrentFunc;
         //### bob: could also just store this in the current frame
         private int mInstruction; // position in bytecode file
 
@@ -348,7 +334,6 @@ namespace Magpie.Interpreter
         // 0 ... n: local variables
         // n + 1  : reference to parent call frame
         // n + 2  : instruction pointer for parent frame
-        // n + 3  : function index for parent frame
         private Structure mCurrentFrame;
 
         private readonly IForeignRuntimeInterface mForeignInterface;

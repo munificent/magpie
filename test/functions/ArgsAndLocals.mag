@@ -1,3 +1,10 @@
+// expected: zero local
+// expected: one
+// expected: one local
+// expected: two a
+// expected: two b
+// expected: two local
+
 Main (->)
     Zero
     One "one"
@@ -5,27 +12,19 @@ Main (->)
 end
 
 Zero (->)
-    def local <- "local"
+    def local <- "zero local"
     Print local
 end
     
 One (a String ->)
-    def local <- "local"
+    def local <- "one local"
     Print a
     Print local
 end
 
 Two (a String, b String ->)
-    def local <- "local"
+    def local <- "two local"
     Print a
     Print b
     Print local
 end
-
-//### bob: also need to test local variables
-// ..\..\..\script\Functions.mag
-
-// to do:
-// looks like regular function calls are working
-// need to change the opcodes generated for the auto-generated functions
-// should write test scripts, and then test the auto functions one at a time

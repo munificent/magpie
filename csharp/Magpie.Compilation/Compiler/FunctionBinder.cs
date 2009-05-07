@@ -22,6 +22,9 @@ namespace Magpie.Compilation
 
             var binder = new FunctionBinder(function.Unbound, instancingContext, compiler, scope);
 
+            //### bob: also need to bind the function's type signature so that named type references
+            //         can be properly fully-qualified
+
             // bind the function
             IBoundExpr body = function.Unbound.Body.Accept<IBoundExpr>(binder);
             function.Bind(body, scope.Fields.Count);
