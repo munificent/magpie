@@ -1,0 +1,11 @@
+// expected: 1
+// expected: 2
+// expected: 3
+
+Main (->)
+    def a <- [1, 2, 3]
+    
+    Print a.0.String
+    Print a.1.String
+    Print a.2.String
+end

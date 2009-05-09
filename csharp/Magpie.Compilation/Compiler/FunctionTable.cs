@@ -38,7 +38,7 @@ namespace Magpie.Compilation
             BoundFunction bound = new BoundFunction();
             bound.Unbound = function;
 
-            Add(bound, function.FullName, function.TypeParameters, function.FuncType.ParameterTypes);
+            Add(bound, function.FullName, function.TypeParameters);
             return bound;
         }
 
@@ -46,7 +46,7 @@ namespace Magpie.Compilation
         {
             foreach (var intrinsic in intrinsics)
             {
-                Add(intrinsic, intrinsic.Name, null, intrinsic.FuncType.ParameterTypes);
+                Add(intrinsic, intrinsic.Name, null);
             }
         }
 
@@ -54,7 +54,7 @@ namespace Magpie.Compilation
         {
             foreach (var foreign in foreigns)
             {
-                Add(foreign, foreign.Name, null, foreign.FuncType.ParameterTypes);
+                Add(foreign, foreign.Name, null);
             }
         }
 
@@ -62,7 +62,21 @@ namespace Magpie.Compilation
         {
             string uniqueName = GetUniqueName(name, paramTypes);
 
-            return mCallables.TryGetValue(uniqueName, out bound);
+            // look up by unique name
+            if (mCallables.TryGetValue(uniqueName, out bound)) return true;
+
+            // barring that, look for a wildcard
+            foreach (var pair in mWildcardCallables)
+            {
+                if ((pair.Key == name) && (DeclComparer.TypesMatch(pair.Value.ParameterTypes, paramTypes.ToArray())))
+                {
+                    bound = pair.Value;
+                    return true;
+                }
+            }
+
+            // wasn't found
+            return false;
         }
 
         public void BindAll(Compiler compiler)
@@ -78,16 +92,26 @@ namespace Magpie.Compilation
             }
         }
 
-        private void Add(ICallable callable, string name, IEnumerable<Decl> typeArgs, IEnumerable<Decl> paramTypes)
+        private void Add(ICallable callable, string name, IEnumerable<Decl> typeArgs)
         {
-            var uniqueName = GetUniqueName(name, typeArgs, paramTypes);
+            if (DeclPredicate.Any(callable.ParameterTypes, decl => decl is AnyType))
+            {
+                // has a wildcard, so will need to match against the actual parameter types
+                mWildcardCallables.Add(new KeyValuePair<string, ICallable>(name, callable));
+            }
+            else
+            {
+                // no wildcards, so can simply match against the unique name
+                var uniqueName = GetUniqueName(name, typeArgs, callable.ParameterTypes);
 
-            //### bob: if we want users to be able to override intrinsics, we may need to handle this differently
-            if (mCallables.ContainsKey(uniqueName)) throw new CompileException("A function named " + uniqueName + " has already been declared.");
+                //### bob: if we want users to be able to override intrinsics, we may need to handle this differently
+                if (mCallables.ContainsKey(uniqueName)) throw new CompileException("A function named " + uniqueName + " has already been declared.");
 
-            mCallables.Add(uniqueName, callable);
+                mCallables.Add(uniqueName, callable);
+            }
         }
 
         private readonly Dictionary<string, ICallable> mCallables = new Dictionary<string, ICallable>();
+        private readonly List<KeyValuePair<string, ICallable>> mWildcardCallables = new List<KeyValuePair<string, ICallable>>();
     }
 }

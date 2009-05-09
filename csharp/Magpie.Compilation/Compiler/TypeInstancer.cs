@@ -14,9 +14,14 @@ namespace Magpie.Compilation
 
         #region IDeclVisitor Members
 
+        public Decl Visit(AnyType decl)
+        {
+            return decl;
+        }
+
         public Decl Visit(ArrayType decl)
         {
-            return new ArrayType(decl.ElementType.Accept(this));
+            return new ArrayType(decl.ElementType.Accept(this), decl.IsMutable);
         }
 
         public Decl Visit(AtomicDecl decl)

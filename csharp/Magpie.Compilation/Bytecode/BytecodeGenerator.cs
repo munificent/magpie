@@ -132,6 +132,9 @@ namespace Magpie.Compilation
 
         bool IBoundExprVisitor<bool>.Visit(BoundArrayExpr expr)
         {
+            // the count is the first element
+            Write(OpCode.PushInt, expr.Elements.Count);
+
             // must visit in forward order to ensure that array elements are
             // evaluated left to right
             for (int i = 0; i < expr.Elements.Count; i++)
@@ -139,8 +142,8 @@ namespace Magpie.Compilation
                 expr.Elements[i].Accept(this);
             }
 
-            // create the structure
-            Write(OpCode.Alloc, expr.Elements.Count);
+            // create the structure (+1 for the size)
+            Write(OpCode.Alloc, expr.Elements.Count + 1);
 
             return true;
         }
@@ -232,6 +235,27 @@ namespace Magpie.Compilation
         {
             //### bob: will need to handle other scopes at some point
             Write(OpCode.PushLocals);
+
+            return true;
+        }
+
+        bool IBoundExprVisitor<bool>.Visit(LoadElementExpr expr)
+        {
+            expr.Index.Accept(this);
+            expr.Array.Accept(this);
+
+            Write(OpCode.LoadArray);
+
+            return true;
+        }
+
+        bool IBoundExprVisitor<bool>.Visit(StoreElementExpr expr)
+        {
+            expr.Value.Accept(this);
+            expr.Index.Accept(this);
+            expr.Array.Accept(this);
+
+            Write(OpCode.StoreArray);
 
             return true;
         }

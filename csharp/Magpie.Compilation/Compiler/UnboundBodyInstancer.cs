@@ -23,7 +23,7 @@ namespace Magpie.Compilation
 
         public IUnboundExpr Visit(ArrayExpr expr)
         {
-            return new ArrayExpr(expr.Elements.Accept(this));
+            return new ArrayExpr(expr.Elements.Accept(this), expr.IsMutable);
         }
 
         public IUnboundExpr Visit(AssignExpr expr)

@@ -59,7 +59,7 @@ namespace Magpie.Compilation
             return result;
         }
 
-        private Token Current
+        public Token Current
         {
             get
             {

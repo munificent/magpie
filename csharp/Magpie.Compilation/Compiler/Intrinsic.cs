@@ -50,6 +50,8 @@ namespace Magpie.Compilation
                 yield return new Intrinsic("Print", OpCode.Print, FuncType.Create(Decl.String, Decl.Unit));
                 yield return new Intrinsic("Size", OpCode.StringSize, FuncType.Create(Decl.String, Decl.Int));
                 yield return new Intrinsic("Substring", OpCode.Substring, FuncType.Create(Decl.String, Decl.Int, Decl.Int, Decl.String));
+
+                yield return new Intrinsic("Size", OpCode.SizeArray, FuncType.Create(new ArrayType(new AnyType(), false), Decl.Int));
             }
         }
 
@@ -91,6 +93,8 @@ namespace Magpie.Compilation
 
             return new IntrinsicExpr(this, arg);
         }
+
+        public Decl[] ParameterTypes { get { return mType.ParameterTypes; } } 
 
         #endregion
 

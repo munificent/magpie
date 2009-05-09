@@ -1,0 +1,14 @@
+// expected: 0
+// expected: 0
+// expected: 0
+
+Main (->)
+    // empty arrays
+    def e <- []'Int
+    def f <- []'(String, Bool)
+    def g <- []'[]'Int
+    
+    Print e.Size.String
+    Print f.Size.String
+    Print g.Size.String
+end

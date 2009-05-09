@@ -1,0 +1,16 @@
+// expected: 3
+// expected: 4
+// expected: 5
+
+Main (->)
+    def a <- [1, 2, 3]!
+    
+    a.1 <- 4
+    2 a <- 5
+    
+    a.(2 - 2) <- 3
+    
+    Print a.0.String
+    Print a.1.String
+    Print a.2.String
+end

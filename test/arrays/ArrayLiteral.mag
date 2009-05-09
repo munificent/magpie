@@ -1,0 +1,11 @@
+// expected: 2
+// expected: b
+
+Main (->)
+    // array literals
+    def a <- [1, 2, 3]
+    def b <- ["a", "b"]
+    
+    Print a.1.String
+    Print b.1
+end

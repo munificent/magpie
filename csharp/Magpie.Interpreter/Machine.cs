@@ -95,6 +95,40 @@ namespace Magpie.Interpreter
                         }
                         break;
 
+                    case OpCode.LoadArray:
+                        {
+                            Structure struc = PopStructure();
+                            int index = PopInt();
+
+                            //### bob: should bounds-check
+
+                            // add one to skip the first slot which holds the array size
+                            Push (struc[index + 1]);
+                        }
+                        break;
+
+                    case OpCode.StoreArray:
+                        {
+                            Structure struc = PopStructure();
+                            int index = PopInt();
+                            Value value = Pop();
+
+                            //### bob: should bounds-check
+
+                            // add one to skip the first slot which holds the array size
+                            struc[index + 1] = value;
+                        }
+                        break;
+
+                    case OpCode.SizeArray:
+                        {
+                            Structure struc = PopStructure();
+
+                            // array size is the first element
+                            Push(struc[0]);
+                        }
+                        break;
+
                     case OpCode.Call0: Call(0); break;
                     case OpCode.Call1: Call(1); break;
                     case OpCode.CallN: Call(2); break;

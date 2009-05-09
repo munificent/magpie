@@ -49,6 +49,8 @@ namespace Magpie.Compilation
             return new ForeignCallExpr(this, arg);
         }
 
+        public Decl[] ParameterTypes { get { return FuncType.ParameterTypes; } } 
+
         #endregion
     }
 }

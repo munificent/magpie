@@ -44,6 +44,11 @@ namespace Magpie.Compilation
 
         #region IDeclVisitor<bool> Members
 
+        public bool Visit(AnyType decl)
+        {
+            throw new NotImplementedException();
+        }
+
         public bool Visit(ArrayType decl)
         {
             throw new NotImplementedException();
@@ -188,7 +193,7 @@ namespace Magpie.Compilation
             else
             {
                 // already inferred, make sure it matches
-                if (!DeclComparer.Equals(mTypeArguments[typeParamIndex], argType))
+                if (!DeclComparer.TypesMatch(mTypeArguments[typeParamIndex], argType))
                 {
                     // can't infer the same type parameter to multiple different types
                     // example: Foo[A] (a A, b A)

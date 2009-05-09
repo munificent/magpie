@@ -104,7 +104,7 @@ namespace Magpie.Compilation
                     if (funcType == null) throw new CompileException("Cannot call a local variable or argument that is not a function reference.");
 
                     // check that args match
-                    if (!DeclComparer.Equals(funcType.ParameterTypes, argTypes))
+                    if (!DeclComparer.TypesMatch(funcType.ParameterTypes, argTypes))
                     {
                         throw new CompileException("Argument types passed to local function reference do not match function's parameter types.");
                     }

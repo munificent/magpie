@@ -1,0 +1,11 @@
+// expected: 4
+
+Main (->)
+    def a <- Foo [2, 3, 4]
+    
+    Print a.Items.2.String
+end
+
+struct Foo
+    Items        []'Int
+end

@@ -33,6 +33,8 @@ namespace Magpie.Compilation
             return new BoundCallExpr(new BoundFuncRefExpr(this), arg);
         }
 
+        public Decl[] ParameterTypes { get { return Unbound.FuncType.ParameterTypes; } } 
+
         #endregion
 
         public Function Unbound;

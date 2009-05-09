@@ -314,11 +314,17 @@ namespace Magpie.Compilation
         {
             if (ConsumeIf(TokenType.LeftBracket))
             {
-                if (ConsumeIf(TokenType.RightBracket))
+                if (ConsumeIf(TokenType.RightBracketBang))
                 {
                     // empty (explicitly typed) array
                     Consume(TokenType.Prime);
-                    return new ArrayExpr(TypeDecl());
+                    return new ArrayExpr(TypeDecl(), true);
+                }
+                else if (ConsumeIf(TokenType.RightBracket))
+                {
+                    // empty (explicitly typed) array
+                    Consume(TokenType.Prime);
+                    return new ArrayExpr(TypeDecl(), false);
                 }
                 else
                 {
@@ -332,9 +338,17 @@ namespace Magpie.Compilation
                     }
                     while (ConsumeIf(TokenType.Comma));
 
-                    Consume(TokenType.RightBracket);
+                    bool isMutable = false;
+                    if (ConsumeIf(TokenType.RightBracketBang))
+                    {
+                        isMutable = true;
+                    }
+                    else
+                    {
+                        Consume(TokenType.RightBracket);
+                    }
 
-                    return new ArrayExpr(elements);
+                    return new ArrayExpr(elements, isMutable);
                 }
             }
             else return PrimaryExpr();
@@ -522,14 +536,42 @@ namespace Magpie.Compilation
             return decls;
         }
 
-        // <-- TupleType
-        //   | FnTypeDecl
-        //   | Name (LBRACKET GenericBody RBRACKET)?
+        // <-- ( LBRACKET RBRACKET PRIME ) * ( TupleType
+        //                                   | FnTypeDecl
+        //                                   | Name TypeArgs )
         private Decl TypeDecl()
         {
-            if (CurrentIs(TokenType.LeftParen)) return new TupleType(TupleType());
-            else if (ConsumeIf(TokenType.Fn)) return FnArgsDecl(false);
-            else return Decl.FromName(Name(), TypeArgs());
+            Stack<bool> arrays = new Stack<bool>();
+            while (ConsumeIf(TokenType.LeftBracket))
+            {
+                bool isMutable = false;
+                if (ConsumeIf(TokenType.RightBracketBang))
+                {
+                    isMutable = true;
+                }
+                else
+                {
+                    Consume(TokenType.RightBracket);
+                }
+
+                Consume(TokenType.Prime);
+
+                arrays.Push(isMutable);
+            }
+
+            // figure out the endmost type
+            Decl type;
+            if (CurrentIs(TokenType.LeftParen)) type = new TupleType(TupleType());
+            else if (ConsumeIf(TokenType.Fn)) type = FnArgsDecl(false);
+            else type = Decl.FromName(Name(), TypeArgs());
+
+            // wrap it in the array declarations
+            while (arrays.Count > 0)
+            {
+                type = new ArrayType(type, arrays.Pop());
+            }
+
+            return type;
         }
 
         // <-- NAME (COLON NAME)*

@@ -10,23 +10,23 @@ namespace Magpie.Compilation
     /// </summary>
     public class ArrayType : Decl
     {
-        public Decl ElementType { get { return mElementType; } }
+        public Decl ElementType { get; private set; }
+        public bool IsMutable { get; private set; }
 
-        public ArrayType(Decl elementType)
+        public ArrayType(Decl elementType, bool isMutable)
         {
-            mElementType = elementType;
+            ElementType = elementType;
+            IsMutable = isMutable;
         }
 
         public override string ToString()
         {
-            return "Array'" + mElementType.ToString();
+            return "Array'" + ElementType.ToString();
         }
 
         public override TReturn Accept<TReturn>(IDeclVisitor<TReturn> visitor)
         {
             return visitor.Visit(this);
         }
-
-        private readonly Decl mElementType;
     }
 }

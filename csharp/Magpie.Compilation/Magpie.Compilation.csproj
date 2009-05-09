@@ -49,6 +49,7 @@
     <Compile Include="Bytecode\JumpTable.cs" />
     <Compile Include="Bytecode\OffsetTable.cs" />
     <Compile Include="Bytecode\StringTable.cs" />
+    <Compile Include="Compiler\DeclPredicate.cs" />
     <Compile Include="Compiler\FunctionTable.cs" />
     <Compile Include="Compiler\Intrinsic.cs" />
     <Compile Include="Foreign Interface\ForeignFunction.cs" />
@@ -68,10 +69,12 @@
     <Compile Include="Syntax\Expressions\IfThenExpr.cs" />
     <Compile Include="Syntax\Expressions\IntrinsicExpr.cs" />
     <Compile Include="Syntax\Expressions\IUnboundExpr.cs" />
+    <Compile Include="Syntax\Expressions\LoadElementExpr.cs" />
     <Compile Include="Syntax\Expressions\LoadExpr.cs" />
     <Compile Include="Syntax\Expressions\LocalsExpr.cs" />
     <Compile Include="Syntax\Expressions\NameExpr.cs" />
     <Compile Include="Syntax\Expressions\OperatorExpr.cs" />
+    <Compile Include="Syntax\Expressions\StoreElementExpr.cs" />
     <Compile Include="Syntax\Expressions\StoreExpr.cs" />
     <Compile Include="Syntax\Expressions\TupleExpr.cs" />
     <Compile Include="Syntax\Expressions\ValueExpr.cs" />
@@ -86,6 +89,7 @@
     <Compile Include="Syntax\Namespace.cs" />
     <Compile Include="Syntax\Scope.cs" />
     <Compile Include="Syntax\SourceFile.cs" />
+    <Compile Include="Syntax\Type Declarations\AnyType.cs" />
     <Compile Include="Syntax\Type Declarations\ArrayType.cs" />
     <Compile Include="Syntax\Type Declarations\AtomicDecl.cs" />
     <Compile Include="Syntax\Type Declarations\Decl.cs" />

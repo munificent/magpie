@@ -31,6 +31,10 @@ namespace Magpie.Interpreter
         // pops a value and a reference to a structure, and assigns the value to the field at the given index
         Store, // byte : index of field
 
+        LoadArray,  // pops array and index : pushes value of array element at index
+        StoreArray,
+        SizeArray,  // pops array : pushes size
+
         Call0,        // pops function offset from operand stack
         Call1,        // pops function offset from operand stack
         CallN,        // pops function offset from operand stack

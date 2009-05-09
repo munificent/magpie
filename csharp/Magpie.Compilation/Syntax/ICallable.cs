@@ -8,5 +8,6 @@ namespace Magpie.Compilation
     public interface ICallable
     {
         IBoundExpr CreateCall(IBoundExpr arg);
+        Decl[] ParameterTypes { get; } 
     }
 }

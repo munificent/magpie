@@ -7,42 +7,54 @@ namespace Magpie.Compilation
 {
     public class DeclComparer : IDeclVisitor<bool>
     {
-        public static bool Equals(Decl[] parameters, Decl[] arguments)
+        public static bool TypesMatch(Decl[] parameters, Decl[] arguments)
         {
             if (parameters.Length != arguments.Length) return false;
 
             for (int i = 0; i < parameters.Length; i++)
             {
-                if (!Equals(parameters[i], arguments[i])) return false;
+                if (!TypesMatch(parameters[i], arguments[i])) return false;
             }
 
             return true;
         }
 
-        public static bool Equals(Decl parameter, Decl argument)
+        public static bool TypesMatch(Decl parameter, Decl argument)
         {
+            if (parameter is AnyType) return true;
+
             return argument.Accept(new DeclComparer(parameter));
         }
 
         #region IDeclVisitor Members
 
-        public bool Visit(AtomicDecl decl)
+        bool IDeclVisitor<bool>.Visit(AnyType decl)
+        {
+            return true;
+        }
+
+        bool IDeclVisitor<bool>.Visit(AtomicDecl decl)
         {
             // there is a single instance of each atomic type, so they must match exactly
             return ReferenceEquals(mParam, decl);
         }
 
-        public bool Visit(ArrayType decl)
+        bool IDeclVisitor<bool>.Visit(ArrayType decl)
         {
             ArrayType array = mParam as ArrayType;
 
             if (array == null) return false;
 
+            // mutability must match
+            //### bob: are there cases where we want to let this slide?
+            //         can you pass a mutable array everywhere an immutable one is allowed?
+            if (decl.IsMutable != array.IsMutable) return false;
+
             // element type must match
-            return Equals(decl.ElementType, array.ElementType);
+            return TypesMatch(decl.ElementType, array.ElementType);
         }
 
-        public bool Visit(FuncType decl)
+        bool IDeclVisitor<bool>.Visit(FuncType decl)
         {
             FuncType paramFunc = mParam as FuncType;
 
@@ -53,17 +65,17 @@ namespace Magpie.Compilation
 
             for (int i = 0; i < paramFunc.Parameters.Count; i++)
             {
-                if (!Equals(paramFunc.Parameters[i].Type, decl.Parameters[i].Type))
+                if (!TypesMatch(paramFunc.Parameters[i].Type, decl.Parameters[i].Type))
                 {
                     return false;
                 }
             }
 
             // return type must match
-            return Equals(paramFunc.Return, decl.Return);
+            return TypesMatch(paramFunc.Return, decl.Return);
         }
 
-        public bool Visit(NamedType decl)
+        bool IDeclVisitor<bool>.Visit(NamedType decl)
         {
             NamedType named = mParam as NamedType;
             if (named == null) return false;
@@ -73,10 +85,10 @@ namespace Magpie.Compilation
 
             // the type args must match
             if (named.TypeArgs.Length != decl.TypeArgs.Length) return false;
-            return Equals(named.TypeArgs, decl.TypeArgs);
+            return TypesMatch(named.TypeArgs, decl.TypeArgs);
         }
 
-        public bool Visit(TupleType decl)
+        bool IDeclVisitor<bool>.Visit(TupleType decl)
         {
             TupleType paramTuple = mParam as TupleType;
             if (paramTuple == null) return false;
@@ -86,7 +98,7 @@ namespace Magpie.Compilation
             // fields must match
             for (int i = 0; i < paramTuple.Fields.Count; i++)
             {
-                if (!Equals(paramTuple.Fields[i], decl.Fields[i]))
+                if (!TypesMatch(paramTuple.Fields[i], decl.Fields[i]))
                 {
                     return false;
                 }

@@ -1,0 +1,13 @@
+// expected: one
+// expected: two
+// expected: three
+
+Main (->)
+    Foo ["one", "two", "three"]
+end
+
+Foo (array []'String ->)
+    Print array.0
+    Print array.1
+    Print array.2
+end
