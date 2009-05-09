@@ -1,0 +1,14 @@
+// expected: first
+// expected: 2
+
+Main (->)
+    if true do
+        def a <- "first"
+        Print a
+    end
+    
+    if true do
+        def a <- 2
+        Print a.String
+    end
+end

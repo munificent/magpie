@@ -87,8 +87,9 @@ namespace Magpie.Compilation
 
         public IBoundExpr CreateCall(IBoundExpr arg)
         {
+            //### bob: constant folding goes here...
+
             return new IntrinsicExpr(this, arg);
-            throw new NotImplementedException();
         }
 
         #endregion

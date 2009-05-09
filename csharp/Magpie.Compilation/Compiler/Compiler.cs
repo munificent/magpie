@@ -58,7 +58,8 @@ namespace Magpie.Compilation
         /// example, resolving "foo[int, bool]" would pass in {int, bool} here.</param>
         /// <param name="arg">The argument being applied to the name.</param>
         /// <returns></returns>
-        public IBoundExpr ResolveName(Function function, Function instancingContext, Scope scope, string name, IList<Decl> typeArgs, IBoundExpr arg)
+        public IBoundExpr ResolveName(Function function, Function instancingContext,
+            Scope scope, string name, IList<Decl> typeArgs, IBoundExpr arg)
         {
             Decl[] argTypes = null;
             if (arg != null) argTypes = arg.Type.Expanded;
@@ -128,7 +129,7 @@ namespace Magpie.Compilation
             }
 
             // look up the function
-            ICallable callable = FindFunction(function, instancingContext, scope, name, typeArgs, argTypes);
+            ICallable callable = FindFunction(function, instancingContext, name, typeArgs, argTypes);
             if (callable == null) throw new CompileException(String.Format("Could not resolve name {0}.", FunctionTable.GetUniqueName(name, typeArgs, argTypes)));
 
             return callable.CreateCall(arg);
@@ -144,34 +145,35 @@ namespace Magpie.Compilation
         /// <param name="typeArgs"></param>
         /// <param name="argTypes"></param>
         /// <returns></returns>
-        public ICallable FindFunction(Function containingType, Function instancingContext, Scope scope, string name, IList<Decl> typeArgs, Decl[] argTypes)
+        public ICallable FindFunction(Function containingType, Function instancingContext,
+            string name, IList<Decl> typeArgs, Decl[] argTypes)
         {
             // try the name as-is
-            ICallable bound = LookUpFunction(containingType, scope, name, typeArgs, argTypes);
+            ICallable bound = LookUpFunction(containingType, name, typeArgs, argTypes);
             if (bound != null) return bound;
 
             // try the current function's namespace
-            bound = LookUpFunction(containingType, scope, QualifyName(containingType.Namespace, name), typeArgs, argTypes);
+            bound = LookUpFunction(containingType, QualifyName(containingType.Namespace, name), typeArgs, argTypes);
             if (bound != null) return bound;
 
             // try each of the open namespaces
             IList<string> namespaces = containingType.SourceFile.UsingNamespaces;
             for (int i = namespaces.Count - 1; i >= 0; i--)
             {
-                bound = LookUpFunction(containingType, scope, QualifyName(namespaces[i], name), typeArgs, argTypes);
+                bound = LookUpFunction(containingType, QualifyName(namespaces[i], name), typeArgs, argTypes);
                 if (bound != null) return bound;
             }
 
             // try the instance context's namespaces
             if (instancingContext != null)
             {
-                bound = LookUpFunction(containingType, scope, QualifyName(instancingContext.Namespace, name), typeArgs, argTypes);
+                bound = LookUpFunction(containingType, QualifyName(instancingContext.Namespace, name), typeArgs, argTypes);
                 if (bound != null) return bound;
 
                 namespaces = instancingContext.SourceFile.UsingNamespaces;
                 for (int i = namespaces.Count - 1; i >= 0; i--)
                 {
-                    bound = LookUpFunction(containingType, scope, QualifyName(namespaces[i], name), typeArgs, argTypes);
+                    bound = LookUpFunction(containingType, QualifyName(namespaces[i], name), typeArgs, argTypes);
                     if (bound != null) return bound;
                 }
             }
@@ -180,7 +182,7 @@ namespace Magpie.Compilation
             return null;
         }
 
-        private ICallable LookUpFunction(Function containingType, Scope scope, string fullName, IList<Decl> typeArgs, Decl[] argTypes)
+        private ICallable LookUpFunction(Function containingType, string fullName, IList<Decl> typeArgs, Decl[] argTypes)
         {
             string uniqueName = FunctionTable.GetUniqueName(fullName, typeArgs, argTypes);
 
