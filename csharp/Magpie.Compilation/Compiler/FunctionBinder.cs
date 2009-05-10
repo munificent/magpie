@@ -138,28 +138,28 @@ namespace Magpie.Compilation
             {
                 IBoundExpr callArg = callTarget.Arg.Accept(this);
 
-                //### bob: in progress array assignment
-
-                // if the arg is an array, assume it's an array set
-                //### bob: this is hackish
-                ArrayType arrayArgType = callArg.Type as ArrayType;
-                if (arrayArgType != null)
+                // see if it's a direct function call
+                NameExpr funcName = callTarget.Target as NameExpr;
+                if (funcName != null)
                 {
-                    if (!arrayArgType.IsMutable) throw new CompileException("Cannot set an element in an immutable array.");
+                    // translate the call
+                    return TranslateAssignment(funcName.Name, funcName.TypeArgs, callArg, value);
+                }
 
-                    IBoundExpr boundCallTarget = callTarget.Target.Accept(this);
+                //### bob: in progress array assignment
+                IBoundExpr boundCallTarget = callTarget.Target.Accept(this);
+
+                // if the target evaluates to an int and the arg is an array, it's an array set
+                if ((boundCallTarget.Type == Decl.Int) && (callArg.Type is ArrayType))
+                {
+                    ArrayType arrayArgType = (ArrayType)callArg.Type;
+                    if (!arrayArgType.IsMutable) throw new CompileException("Cannot set an element in an immutable array.");
 
                     // array access
                     return new StoreElementExpr(callArg, boundCallTarget, value);
                 }
 
-
-                // make sure it's a direct function call
-                NameExpr funcName = callTarget.Target as NameExpr;
-                if (funcName == null) throw new CompileException("Application target on left-hand side of an assignment must be a named function.");
-
-                // translate the call
-                return TranslateAssignment(funcName.Name, funcName.TypeArgs, callArg, value);
+                throw new CompileException("Couldn't figure out what you're trying to do on the left side of an assignment.");
             }
 
             // handle an operator target: 1 $$ 2 <- 3  ==> $$<- (1, 2, 3)
@@ -246,9 +246,9 @@ namespace Magpie.Compilation
             return new BoundFuncRefExpr(bound);
         }
 
-        public IBoundExpr Visit(IfDoExpr expr)
+        public IBoundExpr Visit(IfThenExpr expr)
         {
-            var bound = new BoundIfDoExpr(
+            var bound = new BoundIfThenExpr(
                 expr.Condition.Accept(this),
                 expr.Body.Accept(this));
 
@@ -262,9 +262,9 @@ namespace Magpie.Compilation
             return bound;
         }
 
-        public IBoundExpr Visit(IfThenExpr expr)
+        public IBoundExpr Visit(IfThenElseExpr expr)
         {
-            var bound = new BoundIfThenExpr(
+            var bound = new BoundIfThenElseExpr(
                 expr.Condition.Accept(this),
                 expr.ThenBody.Accept(this),
                 expr.ElseBody.Accept(this));

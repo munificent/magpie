@@ -146,12 +146,6 @@ namespace Magpie.Compilation
         // <-- Expression | LINE (Expression LINE)+ END
         private IUnboundExpr Block()
         {
-            return Block(TokenType.End);
-        }
-
-        // <-- Expression LINE? | LINE (Expression LINE)+ <terminator>
-        private IUnboundExpr Block(TokenType terminator)
-        {
             if (ConsumeIf(TokenType.Line))
             {
                 var expressions = new List<IUnboundExpr>();
@@ -161,7 +155,41 @@ namespace Magpie.Compilation
                     expressions.Add(Expression());
                     Consume(TokenType.Line);
                 }
-                while (!ConsumeIf(terminator));
+                while (!ConsumeIf(TokenType.End));
+
+                return new BlockExpr(expressions);
+            }
+            else
+            {
+                return Expression();
+            }
+        }
+
+        // <-- Expression LINE? | LINE (Expression LINE)+ <terminator>
+        private IUnboundExpr ThenBlock(out bool hasElse)
+        {
+            hasElse = false;
+
+            if (ConsumeIf(TokenType.Line))
+            {
+                var expressions = new List<IUnboundExpr>();
+
+                bool inBlock = true;
+                while (inBlock)
+                {
+                    expressions.Add(Expression());
+                    Consume(TokenType.Line);
+
+                    if (ConsumeIf(TokenType.Else))
+                    {
+                        inBlock = false;
+                        hasElse = true;
+                    }
+                    else if (ConsumeIf(TokenType.End))
+                    {
+                        inBlock = false;
+                    }
+                }
 
                 return new BlockExpr(expressions);
             }
@@ -169,16 +197,14 @@ namespace Magpie.Compilation
             {
                 IUnboundExpr expr = Expression();
 
+                if (ConsumeIf(TokenType.Else)) hasElse = true;
+                else if (ConsumeIf(TokenType.Line, TokenType.Else)) hasElse = true;
                 // for inner blocks, allow a line at the end. this is for cases like:
-                // if foo
-                // do bar
-                if (terminator != TokenType.End)
-                {
-                    ConsumeIf(TokenType.Line);
-
-                    // make sure the terminator is consumed
-                    Consume(terminator);
-                }
+                // if foo then bar
+                // else bang
+                //
+                // only do this if there is an "else" after the line so that we don't
+                // eat the line after an "if/then"
 
                 return expr;
             }
@@ -231,17 +257,45 @@ namespace Magpie.Compilation
             {
                 IUnboundExpr condition = AssignExpr();
 
+                // then/do can optionally be on the next line
+                ConsumeIf(TokenType.Line);
+
                 if (ConsumeIf(TokenType.Then))
                 {
-                    IUnboundExpr thenBody = Block(TokenType.Else);
-                    IUnboundExpr elseBody = Block();
-                    return new IfThenExpr(condition, thenBody, elseBody);
+                    bool hasElse;
+                    IUnboundExpr thenBody = ThenBlock(out hasElse);
+
+                    //### bob: this is in-progress. specifically, it barfs on:
+                    //
+                    //  if true then Print "true 1"
+                    //  
+                    //  if true
+                    //  then Print "true 3"
+                    //  
+                    //  because in both cases it consumes the newline after the 
+                    //  string literals in anticipation of an "else". when the
+                    //  "else" isn't found, it pops all the way up to the parent
+                    //  Block(), which expects to consume a newline after an
+                    //  expression. could fix this by adding look-ahead (see if
+                    //  there's an "else" after the newline before consuming it)
+                    //  but that makes the language LL(2). maybe there's a better
+                    //  solution.
+
+                    if (hasElse)
+                    {
+                        IUnboundExpr elseBody = Block();
+                        return new IfThenElseExpr(condition, thenBody, elseBody);
+                    }
+                    else
+                    {
+                        return new IfThenExpr(condition, thenBody);
+                    }
                 }
                 else
                 {
                     Consume(TokenType.Do);
                     IUnboundExpr thenBody = Block();
-                    return new IfDoExpr(condition, thenBody);
+                    return new IfThenExpr(condition, thenBody);
                 }
             }
             else return AssignExpr();

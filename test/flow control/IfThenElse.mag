@@ -6,6 +6,7 @@
 // expected: true 7
 // expected: false 9
 // expected: false 10
+// expected: false 11
 
 Main (->)
     // single line
@@ -35,4 +36,10 @@ Main (->)
         Print "false 9"
         Print "false 10"
     end
+    
+    // then on next line
+    if false
+    then Print "true 11"
+    else Print "false 11"
+    
 end

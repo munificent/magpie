@@ -8,34 +8,33 @@ namespace Magpie.Compilation
     public class IfThenExpr<TExpr>
     {
         public TExpr Condition;
-        public TExpr ThenBody;
-        public TExpr ElseBody;
+        public TExpr Body;
 
-        public IfThenExpr(TExpr condition, TExpr thenBody, TExpr elseBody)
+        public IfThenExpr(TExpr condition, TExpr body)
         {
             Condition = condition;
-            ThenBody = thenBody;
-            ElseBody = elseBody;
+            Body = body;
         }
 
-        public override string ToString() { return String.Format("if {0} then {1} else {2}", Condition, ThenBody, ElseBody); }
+        public override string ToString() { return String.Format("if {0} then {1}", Condition, Body); }
     }
 
     public class IfThenExpr : IfThenExpr<IUnboundExpr>, IUnboundExpr
     {
-        public IfThenExpr(IUnboundExpr condition, IUnboundExpr thenBody, IUnboundExpr elseBody) : base(condition, thenBody, elseBody) { }
+        public IfThenExpr(IUnboundExpr condition, IUnboundExpr body) : base(condition, body) { }
 
         public TReturn Accept<TReturn>(IUnboundExprVisitor<TReturn> visitor)
         {
             return visitor.Visit(this);
         }
-    }
 
+        public override string ToString() { return String.Format("if {0} then {1}", Condition, Body); }
+    }
     public class BoundIfThenExpr : IfThenExpr<IBoundExpr>, IBoundExpr
     {
-        public BoundIfThenExpr(IBoundExpr condition, IBoundExpr thenBody, IBoundExpr elseBody) : base(condition, thenBody, elseBody) { }
+        public BoundIfThenExpr(IBoundExpr condition, IBoundExpr body) : base(condition, body) { }
 
-        public Decl Type { get { return ((IBoundExpr)ThenBody).Type; } }
+        public Decl Type { get { return Decl.Unit; } }
 
         public TReturn Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)
         {

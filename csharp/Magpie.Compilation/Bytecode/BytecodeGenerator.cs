@@ -155,7 +155,7 @@ namespace Magpie.Compilation
             return true;
         }
 
-        bool IBoundExprVisitor<bool>.Visit(BoundIfDoExpr expr)
+        bool IBoundExprVisitor<bool>.Visit(BoundIfThenExpr expr)
         {
             // evaluate the condition
             expr.Condition.Accept(this);
@@ -170,7 +170,7 @@ namespace Magpie.Compilation
             return true;
         }
 
-        bool IBoundExprVisitor<bool>.Visit(BoundIfThenExpr expr)
+        bool IBoundExprVisitor<bool>.Visit(BoundIfThenElseExpr expr)
         {
             // evaluate the condition
             expr.Condition.Accept(this);

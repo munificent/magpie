@@ -59,26 +59,9 @@ namespace Magpie.Compilation
             return result;
         }
 
-        public Token Current
-        {
-            get
-            {
-                if (mRead.Count == 0)
-                {
-                    if (mTokens.MoveNext())
-                    {
-                        mRead.Enqueue(mTokens.Current);
-                    }
-                    else
-                    {
-                        //### bob: hackish. position is fake.
-                        mRead.Enqueue(new Token(new TokenPosition(0, 0, 0), TokenType.Eof));
-                    }
-                }
+        private Token Current { get { return LookAhead(1); } }
 
-                return mRead.Peek();
-            }
-        }
+        private Token Next { get { return LookAhead(2); } }
 
         protected bool CurrentIs(TokenType type)
         {
@@ -89,6 +72,18 @@ namespace Magpie.Compilation
         {
             if (CurrentIs(type))
             {
+                Consume();
+                return true;
+            }
+
+            return false;
+        }
+
+        protected bool ConsumeIf(TokenType current, TokenType next)
+        {
+            if ((Current.Type == current) && (Next.Type == next))
+            {
+                Consume();
                 Consume();
                 return true;
             }
@@ -111,6 +106,26 @@ namespace Magpie.Compilation
             }
 
             throw new ParseException(Current.Position, "Found token " + Current.Type + " when looking for " + type + ".");
+        }
+
+        private Token LookAhead(int distance)
+        {
+            // read in as many as needed
+            while (mRead.Count < distance)
+            {
+                if (mTokens.MoveNext())
+                {
+                    mRead.Enqueue(mTokens.Current);
+                }
+                else
+                {
+                    //### bob: hackish. position is fake.
+                    mRead.Enqueue(new Token(new TokenPosition(0, 0, 0), TokenType.Eof));
+                }
+            }
+
+            // get the queued token
+            return mRead.ElementAt(distance - 1);
         }
 
         private readonly IEnumerator<Token> mTokens;

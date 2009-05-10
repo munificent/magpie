@@ -24,6 +24,9 @@ namespace Magpie.App
 
             foreach (string test in Directory.GetFiles(mTestDir, "*.mag", SearchOption.AllDirectories))
             {
+                //### bob: testing
+                //if (!test.EndsWith("IfThen.mag")) continue;
+
                 if (Debugger.IsAttached)
                 {
                     // don't catch exceptions when a debugger is attached, that way

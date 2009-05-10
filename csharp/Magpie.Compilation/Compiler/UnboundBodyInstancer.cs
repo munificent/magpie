@@ -46,16 +46,16 @@ namespace Magpie.Compilation
             throw new NotImplementedException();
         }
 
-        public IUnboundExpr Visit(IfDoExpr expr)
+        public IUnboundExpr Visit(IfThenExpr expr)
         {
-            return new IfDoExpr(
+            return new IfThenExpr(
                 expr.Condition.Accept(this),
                 expr.Body.Accept(this));
         }
 
-        public IUnboundExpr Visit(IfThenExpr expr)
+        public IUnboundExpr Visit(IfThenElseExpr expr)
         {
-            return new IfThenExpr(
+            return new IfThenElseExpr(
                 expr.Condition.Accept(this),
                 expr.ThenBody.Accept(this),
                 expr.ElseBody.Accept(this));
