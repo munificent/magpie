@@ -12,6 +12,13 @@ namespace Magpie.Compilation
     /// </summary>
     public class UnitExpr : IUnboundExpr, IBoundExpr
     {
+        public TokenPosition Position { get; private set; }
+
+        public UnitExpr(TokenPosition position)
+        {
+            Position = position;
+        }
+
         public TReturn Accept<TReturn>(IUnboundExprVisitor<TReturn> visitor)
         {
             return visitor.Visit(this);

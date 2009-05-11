@@ -15,7 +15,6 @@ namespace Magpie.Compilation
         protected IUnboundExpr OneOrMoreLeft(TokenType separatorType, Func<IUnboundExpr> parseFunc, Func<IUnboundExpr, Token, IUnboundExpr, IUnboundExpr> combineFunc)
         {
             IUnboundExpr left = parseFunc();
-            //if (left == null) throw new ParseException(Current.Position, "Parse error finding first token in a left-associative sequence. Found " + Current + " instead.");
 
             while (CurrentIs(separatorType))
             {
@@ -79,6 +78,18 @@ namespace Magpie.Compilation
             return false;
         }
 
+        protected bool ConsumeIf(TokenType type, out TokenPosition position)
+        {
+            if (CurrentIs(type))
+            {
+                position = Consume().Position;
+                return true;
+            }
+
+            position = TokenPosition.None;
+            return false;
+        }
+
         protected bool ConsumeIf(TokenType current, TokenType next)
         {
             if ((Current.Type == current) && (Next.Type == next))
@@ -91,9 +102,12 @@ namespace Magpie.Compilation
             return false;
         }
 
-        protected void Consume()
+        protected Token Consume()
         {
-            mConsumed.Enqueue(mRead.Dequeue());
+            Token token = mRead.Dequeue();
+            mConsumed.Enqueue(token);
+
+            return token;
         }
 
         protected Token Consume(TokenType type)
@@ -120,7 +134,7 @@ namespace Magpie.Compilation
                 else
                 {
                     //### bob: hackish. position is fake.
-                    mRead.Enqueue(new Token(new TokenPosition(0, 0, 0), TokenType.Eof));
+                    mRead.Enqueue(new Token(TokenPosition.None, TokenType.Eof));
                 }
             }
 

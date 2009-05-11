@@ -74,11 +74,29 @@ namespace Magpie.App
             mErrors = new List<string>();
 
             ParseExpected(test);
-            Script.Run(test, TestPrint);
+            IList<CompileError> compileErrors = Script.Run(test, TestPrint);
 
-            while (mExpectedOutput.Count > 0)
+            if (compileErrors.Count == 0)
             {
-                mErrors.Add("out of output while expecting \"" + mExpectedOutput.Dequeue() + "\"");
+                while (mExpectedOutput.Count > 0)
+                {
+                    mErrors.Add("out of output while expecting \"" + mExpectedOutput.Dequeue() + "\"");
+                }
+            }
+            else
+            {
+                foreach (var error in compileErrors)
+                {
+                    if (mExpectedErrorLines.Count > 0)
+                    {
+                        int expectedLine = mExpectedErrorLines.Dequeue();
+                        if (error.Line != expectedLine) mErrors.Add("Expected compile error on line " + expectedLine + " but was on line " + error.Line);
+                    }
+                    else
+                    {
+                        mErrors.Add("Got compile error on line " + error.Line + " when no more were expected.");
+                    }
+                }
             }
         }
 
@@ -88,7 +106,7 @@ namespace Magpie.App
             mExpectedErrorLines.Clear();
 
             const string ExpectedHeader = "// expected: ";
-            const string ErrorHeader    = "// error: ";
+            const string ErrorHeader    = "// error line: ";
 
             foreach (string line in File.ReadAllLines(path))
             {

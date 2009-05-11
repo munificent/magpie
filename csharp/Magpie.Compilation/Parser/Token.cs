@@ -50,6 +50,8 @@ namespace Magpie.Compilation
 
     public class TokenPosition
     {
+        public static TokenPosition None { get { return new TokenPosition(-1, -1, -1); } }
+
         public int Line { get; private set; }
         public int Column { get; private set; }
         public int Length { get; private set; }

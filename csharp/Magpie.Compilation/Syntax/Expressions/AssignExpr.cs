@@ -7,11 +7,13 @@ namespace Magpie.Compilation
 {
     public class AssignExpr : IUnboundExpr
     {
-        public IUnboundExpr Target;
-        public IUnboundExpr Value;
+        public TokenPosition Position { get; private set; }
+        public IUnboundExpr Target { get; private set; }
+        public IUnboundExpr Value { get; private set; }
 
-        public AssignExpr(IUnboundExpr target, IUnboundExpr value)
+        public AssignExpr(TokenPosition position, IUnboundExpr target, IUnboundExpr value)
         {
+            Position = position;
             Target = target;
             Value = value;
         }

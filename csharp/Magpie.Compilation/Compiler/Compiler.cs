@@ -34,7 +34,7 @@ namespace Magpie.Compilation
             }
         }
 
-        public void Compile(Stream outputStream)
+        public IList<CompileError> Compile(Stream outputStream)
         {
             mFunctions.Add(Intrinsic.All);
 
@@ -43,10 +43,24 @@ namespace Magpie.Compilation
                 mFunctions.Add(mForeignInterface.Functions);
             }
 
-            mFunctions.BindAll(this);
+            var errors = new List<CompileError>();
 
-            BytecodeFile file = new BytecodeFile(this);
-            file.Save(outputStream);
+            try
+            {
+                mFunctions.BindAll(this);
+            }
+            catch (CompileException ex)
+            {
+                errors.Add(new CompileError(CompileStage.Compiler, ex.Position.Line, ex.Message));
+            }
+
+            if (errors.Count == 0)
+            {
+                BytecodeFile file = new BytecodeFile(this);
+                file.Save(outputStream);
+            }
+
+            return errors;
         }
         /// <summary>
         /// Resolves and binds a reference to a name.
@@ -93,7 +107,7 @@ namespace Magpie.Compilation
             // if we resolved to a local name, handle it
             if (resolved != null)
             {
-                if ((typeArgs != null) && (typeArgs.Count > 0)) throw new InvalidOperationException("Cannot apply generic type arguments to a local variable or function argument.");
+                if ((typeArgs != null) && (typeArgs.Count > 0)) throw new CompileException("Cannot apply generic type arguments to a local variable or function argument.");
 
                 // if the local or argument is holding a function reference and we're passed args, call it
                 if (argTypes != null)
@@ -124,7 +138,7 @@ namespace Magpie.Compilation
             // it, pass it around, etc.
             if (arg == null)
             {
-                arg = new UnitExpr();
+                arg = new UnitExpr(TokenPosition.None);
                 argTypes = arg.Type.Expanded;
             }
 

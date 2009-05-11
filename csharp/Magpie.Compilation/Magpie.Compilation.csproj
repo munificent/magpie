@@ -49,6 +49,7 @@
     <Compile Include="Bytecode\JumpTable.cs" />
     <Compile Include="Bytecode\OffsetTable.cs" />
     <Compile Include="Bytecode\StringTable.cs" />
+    <Compile Include="Compiler\CompileError.cs" />
     <Compile Include="Compiler\DeclPredicate.cs" />
     <Compile Include="Compiler\FunctionTable.cs" />
     <Compile Include="Compiler\Intrinsic.cs" />

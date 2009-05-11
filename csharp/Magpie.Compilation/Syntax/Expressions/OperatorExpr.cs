@@ -7,12 +7,14 @@ namespace Magpie.Compilation
 {
     public class OperatorExpr : IUnboundExpr
     {
-        public IUnboundExpr Left;
-        public string Name;
-        public IUnboundExpr Right;
+        public TokenPosition Position { get; private set; }
+        public IUnboundExpr Left { get; private set; }
+        public string Name { get; private set; }
+        public IUnboundExpr Right { get; private set; }
 
-        public OperatorExpr(IUnboundExpr left, string name, IUnboundExpr right)
+        public OperatorExpr(TokenPosition position, IUnboundExpr left, string name, IUnboundExpr right)
         {
+            Position = position;
             Left = left;
             Name = name;
             Right = right;

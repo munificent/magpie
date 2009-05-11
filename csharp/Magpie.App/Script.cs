@@ -12,7 +12,7 @@ namespace Magpie.App
 {
     public static class Script
     {
-        public static void Run(string path, Action<string> printCallback)
+        public static IList<CompileError> Run(string path, Action<string> printCallback)
         {
             sPrintCallback = printCallback;
 
@@ -23,7 +23,10 @@ namespace Magpie.App
 
             using (var stream = new MemoryStream())
             {
-                compiler.Compile(stream);
+                IList<CompileError> errors = compiler.Compile(stream);
+
+                // bail if there were compile errors
+                if (errors.Count > 0) return errors;
 
                 stream.Seek(0, SeekOrigin.Begin);
 
@@ -31,6 +34,8 @@ namespace Magpie.App
                 machine.Printed += Machine_Printed;
 
                 machine.Interpret(stream);
+
+                return errors;
             }
         }
 

@@ -38,7 +38,7 @@ namespace Magpie.Compilation
 
             while (ConsumeIf(TokenType.Using))
             {
-                string name = Name();
+                string name = Name().Key;
                 Consume(TokenType.Line);
 
                 usings.Add(name);
@@ -71,7 +71,7 @@ namespace Magpie.Compilation
         private Namespace Namespace()
         {
             Consume(TokenType.Namespace);
-            string name = Name();
+            string name = Name().Key;
             Consume(TokenType.Line);
 
             List<object> contents = NamespaceContents();
@@ -220,11 +220,12 @@ namespace Magpie.Compilation
         {
             bool? isMutable = null;
 
-            if (ConsumeIf(TokenType.Def))
+            TokenPosition position;
+            if (ConsumeIf(TokenType.Def, out position))
             {
                 isMutable = false;
             }
-            else if (ConsumeIf(TokenType.Mutable))
+            else if (ConsumeIf(TokenType.Mutable, out position))
             {
                 isMutable = true;
             }
@@ -235,7 +236,7 @@ namespace Magpie.Compilation
                 Consume(TokenType.LeftArrow);
                 IUnboundExpr body = Block();
 
-                return new DefineExpr(name, body, isMutable.Value);
+                return new DefineExpr(position, name, body, isMutable.Value);
             }
             else return FlowExpr();
         }
@@ -245,15 +246,16 @@ namespace Magpie.Compilation
         //   | AssignExpr
         private IUnboundExpr FlowExpr()
         {
-            if (ConsumeIf(TokenType.While))
+            TokenPosition position;
+            if (ConsumeIf(TokenType.While, out position))
             {
                 IUnboundExpr condition = AssignExpr();
                 Consume(TokenType.Do);
                 IUnboundExpr body = Block();
 
-                return new WhileExpr(condition, body);
+                return new WhileExpr(position, condition, body);
             }
-            else if (ConsumeIf(TokenType.If))
+            else if (ConsumeIf(TokenType.If, out position))
             {
                 IUnboundExpr condition = AssignExpr();
 
@@ -284,18 +286,18 @@ namespace Magpie.Compilation
                     if (hasElse)
                     {
                         IUnboundExpr elseBody = Block();
-                        return new IfThenElseExpr(condition, thenBody, elseBody);
+                        return new IfThenElseExpr(position, condition, thenBody, elseBody);
                     }
                     else
                     {
-                        return new IfThenExpr(condition, thenBody);
+                        return new IfThenExpr(position, condition, thenBody);
                     }
                 }
                 else
                 {
                     Consume(TokenType.Do);
                     IUnboundExpr thenBody = Block();
-                    return new IfThenExpr(condition, thenBody);
+                    return new IfThenExpr(position, condition, thenBody);
                 }
             }
             else return AssignExpr();
@@ -306,19 +308,26 @@ namespace Magpie.Compilation
         {
             IUnboundExpr expr = TupleExpr();
 
-            if (ConsumeIf(TokenType.LeftArrow))
+            TokenPosition position;
+            if (ConsumeIf(TokenType.LeftArrow, out position))
             {
                 bool isDot = false;
                 string opName = String.Empty;
+                TokenPosition opPosition = null;
 
                 if (ConsumeIf(TokenType.Dot)) isDot = true;
-                else if (CurrentIs(TokenType.Operator)) opName = Consume(TokenType.Operator).StringValue;
+                else if (CurrentIs(TokenType.Operator))
+                {
+                    Token op = Consume(TokenType.Operator);
+                    opName = op.StringValue;
+                    opPosition = op.Position;
+                }
 
                 IUnboundExpr value = Block();
 
-                if (isDot) expr = new AssignExpr(expr, new CallExpr(value, expr));
-                else if (!String.IsNullOrEmpty(opName)) expr = new AssignExpr(expr, new OperatorExpr(expr, opName, value));
-                else expr = new AssignExpr(expr, value);
+                if (isDot) expr = new AssignExpr(position, expr, new CallExpr(value, expr));
+                else if (!String.IsNullOrEmpty(opName)) expr = new AssignExpr(position, expr, new OperatorExpr(opPosition, expr, opName, value));
+                else expr = new AssignExpr(position, expr, value);
             }
 
             return expr;
@@ -345,7 +354,7 @@ namespace Magpie.Compilation
         private IUnboundExpr OperatorExpr()
         {
             return OneOrMoreLeft(TokenType.Operator, ApplyExpr,
-                (left, separator, right) => new OperatorExpr(left, separator.StringValue, right));
+                (left, separator, right) => new OperatorExpr(separator.Position, left, separator.StringValue, right));
         }
 
         // <-- PrimaryExpr+
@@ -366,19 +375,20 @@ namespace Magpie.Compilation
         //   | PrimaryExpr
         private IUnboundExpr ArrayExpr()
         {
-            if (ConsumeIf(TokenType.LeftBracket))
+            TokenPosition position;
+            if (ConsumeIf(TokenType.LeftBracket, out position))
             {
                 if (ConsumeIf(TokenType.RightBracketBang))
                 {
                     // empty (explicitly typed) array
                     Consume(TokenType.Prime);
-                    return new ArrayExpr(TypeDecl(), true);
+                    return new ArrayExpr(position, TypeDecl(), true);
                 }
                 else if (ConsumeIf(TokenType.RightBracket))
                 {
                     // empty (explicitly typed) array
                     Consume(TokenType.Prime);
-                    return new ArrayExpr(TypeDecl(), false);
+                    return new ArrayExpr(position, TypeDecl(), false);
                 }
                 else
                 {
@@ -402,7 +412,7 @@ namespace Magpie.Compilation
                         Consume(TokenType.RightBracket);
                     }
 
-                    return new ArrayExpr(elements, isMutable);
+                    return new ArrayExpr(position, elements, isMutable);
                 }
             }
             else return PrimaryExpr();
@@ -420,22 +430,23 @@ namespace Magpie.Compilation
 
             if (CurrentIs(TokenType.Name)) expression = new NameExpr(Name(), TypeArgs());
             else if (CurrentIs(TokenType.Fn)) expression = FuncRefExpr();
-            else if (CurrentIs(TokenType.Bool)) expression = new BoolExpr(Consume(TokenType.Bool).BoolValue);
-            else if (CurrentIs(TokenType.Int)) expression = new IntExpr(Consume(TokenType.Int).IntValue);
-            else if (CurrentIs(TokenType.String)) expression = new StringExpr(Consume(TokenType.String).StringValue);
+            else if (CurrentIs(TokenType.Bool)) expression = new BoolExpr(Consume(TokenType.Bool));
+            else if (CurrentIs(TokenType.Int)) expression = new IntExpr(Consume(TokenType.Int));
+            else if (CurrentIs(TokenType.String)) expression = new StringExpr(Consume(TokenType.String));
             else if (CurrentIs(TokenType.LeftParen))
             {
-                Consume(TokenType.LeftParen);
+                Token leftParen = Consume(TokenType.LeftParen);
 
                 if (CurrentIs(TokenType.RightParen))
                 {
                     // () -> unit
-                    expression = new UnitExpr();
+                    expression = new UnitExpr(leftParen.Position);
                 }
                 else if (CurrentIs(TokenType.Operator))
                 {
                     // ( OPERATOR ) -> an operator in prefix form
-                    expression = new NameExpr(Consume(TokenType.Operator).StringValue);
+                    Token op = Consume(TokenType.Operator);
+                    expression = new NameExpr(op.Position, op.StringValue);
                 }
                 else
                 {
@@ -452,19 +463,20 @@ namespace Magpie.Compilation
 
         private IUnboundExpr FuncRefExpr()
         {
-            Consume(TokenType.Fn);
+            TokenPosition position = Consume(TokenType.Fn).Position;
 
             NameExpr name;
             if (CurrentIs(TokenType.Operator))
             {
-                name = new NameExpr(Consume(TokenType.Operator).StringValue);
+                Token op = Consume(TokenType.Operator);
+                name = new NameExpr(op.Position, op.StringValue);
             }
             else
             {
                 name = new NameExpr(Name(), TypeArgs());
             }
 
-            return new FuncRefExpr(name, TupleType());
+            return new FuncRefExpr(position, name, TupleType());
         }
 
         // <-- STRUCT NAME GenericDecl LINE StructBody END
@@ -617,7 +629,7 @@ namespace Magpie.Compilation
             Decl type;
             if (CurrentIs(TokenType.LeftParen)) type = new TupleType(TupleType());
             else if (ConsumeIf(TokenType.Fn)) type = FnArgsDecl(false);
-            else type = Decl.FromName(Name(), TypeArgs());
+            else type = Decl.FromName(Name().Key, TypeArgs());
 
             // wrap it in the array declarations
             while (arrays.Count > 0)
@@ -629,16 +641,22 @@ namespace Magpie.Compilation
         }
 
         // <-- NAME (COLON NAME)*
-        private string Name()
+        private KeyValuePair<string, TokenPosition> Name()
         {
-            string name = Consume(TokenType.Name).StringValue;
+            Token token = Consume(TokenType.Name);
+            TokenPosition position = token.Position;
+            string name = token.StringValue;
 
             while (ConsumeIf(TokenType.Colon))
             {
-                name += ":" + Consume(TokenType.Name).StringValue;
+                token = Consume(TokenType.Name);
+                name += ":" + token.StringValue;
+
+                // combine all of the names into a single span
+                position = new TokenPosition(position.Line, position.Column, name.Length);
             }
 
-            return name;
+            return new KeyValuePair<string,TokenPosition>(name, position);
         }
     }
 }

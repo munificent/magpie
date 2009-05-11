@@ -23,12 +23,12 @@ namespace Magpie.Compilation
 
         public IUnboundExpr Visit(ArrayExpr expr)
         {
-            return new ArrayExpr(expr.Elements.Accept(this), expr.IsMutable);
+            return new ArrayExpr(expr.Position, expr.Elements.Accept(this), expr.IsMutable);
         }
 
         public IUnboundExpr Visit(AssignExpr expr)
         {
-            return new AssignExpr(expr.Target.Accept(this), expr.Value.Accept(this));
+            return new AssignExpr(expr.Position, expr.Target.Accept(this), expr.Value.Accept(this));
         }
 
         public IUnboundExpr Visit(BlockExpr expr)
@@ -38,7 +38,7 @@ namespace Magpie.Compilation
 
         public IUnboundExpr Visit(DefineExpr expr)
         {
-            return new DefineExpr(expr.Name, expr.Value.Accept(this), expr.IsMutable);
+            return new DefineExpr(expr.Position, expr.Name, expr.Value.Accept(this), expr.IsMutable);
         }
 
         public IUnboundExpr Visit(FuncRefExpr expr)
@@ -48,14 +48,14 @@ namespace Magpie.Compilation
 
         public IUnboundExpr Visit(IfThenExpr expr)
         {
-            return new IfThenExpr(
+            return new IfThenExpr(expr.Position,
                 expr.Condition.Accept(this),
                 expr.Body.Accept(this));
         }
 
         public IUnboundExpr Visit(IfThenElseExpr expr)
         {
-            return new IfThenElseExpr(
+            return new IfThenElseExpr(expr.Position,
                 expr.Condition.Accept(this),
                 expr.ThenBody.Accept(this),
                 expr.ElseBody.Accept(this));
@@ -63,12 +63,12 @@ namespace Magpie.Compilation
 
         public IUnboundExpr Visit(NameExpr expr)
         {
-            return new NameExpr(expr.Name, mApplicator.ApplyTypes(expr.TypeArgs));
+            return new NameExpr(expr.Position, expr.Name, mApplicator.ApplyTypes(expr.TypeArgs));
         }
 
         public IUnboundExpr Visit(OperatorExpr expr)
         {
-            return new OperatorExpr(
+            return new OperatorExpr(expr.Position,
                 expr.Left.Accept(this),
                 expr.Name,
                 expr.Right.Accept(this));
@@ -86,7 +86,7 @@ namespace Magpie.Compilation
 
         public IUnboundExpr Visit(WhileExpr expr)
         {
-            return new WhileExpr(
+            return new WhileExpr(expr.Position,
                 expr.Condition.Accept(this),
                 expr.Body.Accept(this));
         }

@@ -122,14 +122,14 @@ namespace Magpie.Compilation
                 // see if it's a local
                 if (Scope.Contains(nameTarget.Name))
                 {
-                    if (!Scope[nameTarget.Name].IsMutable) throw new CompileException("Cannot assign to immutable local.");
+                    if (!Scope[nameTarget.Name].IsMutable) throw new CompileException(expr.Position, "Cannot assign to immutable local.");
 
                     // direct assign to local
                     return new StoreExpr(new LocalsExpr(), Scope[nameTarget.Name], value);
                 }
 
                 // look for an assignment function
-                return TranslateAssignment(nameTarget.Name, nameTarget.TypeArgs, new UnitExpr(), value);
+                return TranslateAssignment(nameTarget.Name, nameTarget.TypeArgs, new UnitExpr(TokenPosition.None), value);
             }
 
             // handle a function apply target: Foo 1 <- 3  ==> Foo<- (1, 3)
@@ -153,7 +153,7 @@ namespace Magpie.Compilation
                 if ((boundCallTarget.Type == Decl.Int) && (callArg.Type is ArrayType))
                 {
                     ArrayType arrayArgType = (ArrayType)callArg.Type;
-                    if (!arrayArgType.IsMutable) throw new CompileException("Cannot set an element in an immutable array.");
+                    if (!arrayArgType.IsMutable) throw new CompileException(expr.Position, "Cannot set an element in an immutable array.");
 
                     // array access
                     return new StoreElementExpr(callArg, boundCallTarget, value);
@@ -199,7 +199,7 @@ namespace Magpie.Compilation
                 // all but last expression must be void
                 if (index < block.Exprs.Count - 1)
                 {
-                    if (bound.Type != Decl.Unit) throw new CompileException("All expressions in a block except the last must be of type Unit. " + block.ToString());
+                    if (bound.Type != Decl.Unit) throw new CompileException(expr.Position, "All expressions in a block except the last must be of type Unit. " + block.ToString());
                 }
 
                 index++;
@@ -214,7 +214,7 @@ namespace Magpie.Compilation
 
         public IBoundExpr Visit(DefineExpr expr)
         {
-            if (Scope.Contains(expr.Name)) throw new CompileException("A local variable named \"" + expr.Name + "\" is already defined in this scope.");
+            if (Scope.Contains(expr.Name)) throw new CompileException(expr.Position, "A local variable named \"" + expr.Name + "\" is already defined in this scope.");
 
             IBoundExpr value = expr.Value.Accept(this);
 
@@ -287,7 +287,7 @@ namespace Magpie.Compilation
         public IBoundExpr Visit(OperatorExpr expr)
         {
             // an operator is just function application
-            CallExpr apply = new CallExpr(new NameExpr(expr.Name), new TupleExpr(new IUnboundExpr[] { expr.Left, expr.Right }));
+            CallExpr apply = new CallExpr(new NameExpr(expr.Position, expr.Name), new TupleExpr(new IUnboundExpr[] { expr.Left, expr.Right }));
 
             return apply.Accept(this);
         }

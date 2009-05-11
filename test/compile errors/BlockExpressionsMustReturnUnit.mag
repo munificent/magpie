@@ -1,0 +1,8 @@
+// error line: 6
+
+Main (->)
+    Print "a"
+    Print "b"
+    1
+    Print "d"
+end

@@ -1,0 +1,6 @@
+// error line: 5
+
+Main (->)
+    def x <- 0  
+    x <- 10
+end

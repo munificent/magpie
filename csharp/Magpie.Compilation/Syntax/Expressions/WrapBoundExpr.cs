@@ -12,6 +12,9 @@ namespace Magpie.Compilation
     /// </summary>
     public class WrapBoundExpr : IUnboundExpr
     {
+        // no position needed for this. should never cause a compile error.
+        public TokenPosition Position { get { return TokenPosition.None; } }
+
         public IBoundExpr Bound { get { return mBound; } }
 
         public WrapBoundExpr(IBoundExpr bound)

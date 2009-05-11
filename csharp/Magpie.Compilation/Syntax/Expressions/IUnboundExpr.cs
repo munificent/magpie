@@ -12,6 +12,7 @@ namespace Magpie.Compilation
     /// </summary>
     public interface IUnboundExpr
     {
+        TokenPosition Position { get; }
         TReturn Accept<TReturn>(IUnboundExprVisitor<TReturn> visitor);
     }
 }

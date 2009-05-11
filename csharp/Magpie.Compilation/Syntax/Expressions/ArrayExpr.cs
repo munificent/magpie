@@ -50,8 +50,19 @@ namespace Magpie.Compilation
 
     public class ArrayExpr : ArrayExpr<IUnboundExpr>, IUnboundExpr
     {
-        public ArrayExpr(IEnumerable<IUnboundExpr> elements, bool isMutable) : base(elements, isMutable) { }
-        public ArrayExpr(Decl elementType, bool isMutable) : base(elementType, isMutable) { }
+        public TokenPosition Position { get; private set; }
+
+        public ArrayExpr(TokenPosition position, IEnumerable<IUnboundExpr> elements, bool isMutable)
+            : base(elements, isMutable)
+        {
+            Position = position;
+        }
+
+        public ArrayExpr(TokenPosition position, Decl elementType, bool isMutable)
+            : base(elementType, isMutable)
+        {
+            Position = position;
+        }
 
         public TReturn Accept<TReturn>(IUnboundExprVisitor<TReturn> visitor)
         {

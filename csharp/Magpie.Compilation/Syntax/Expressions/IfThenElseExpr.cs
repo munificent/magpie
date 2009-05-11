@@ -23,7 +23,13 @@ namespace Magpie.Compilation
 
     public class IfThenElseExpr : IfThenElseExpr<IUnboundExpr>, IUnboundExpr
     {
-        public IfThenElseExpr(IUnboundExpr condition, IUnboundExpr thenBody, IUnboundExpr elseBody) : base(condition, thenBody, elseBody) { }
+        public TokenPosition Position { get; private set; }
+
+        public IfThenElseExpr(TokenPosition position, IUnboundExpr condition, IUnboundExpr thenBody, IUnboundExpr elseBody)
+        : base(condition, thenBody, elseBody)
+        {
+            Position = position;
+        }
 
         public TReturn Accept<TReturn>(IUnboundExprVisitor<TReturn> visitor)
         {
