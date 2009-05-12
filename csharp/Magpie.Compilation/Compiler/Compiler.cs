@@ -51,7 +51,7 @@ namespace Magpie.Compilation
             }
             catch (CompileException ex)
             {
-                errors.Add(new CompileError(CompileStage.Compiler, ex.Position.Line, ex.Message));
+                errors.Add(new CompileError(CompileStage.Compile, ex.Position.Line, ex.Message));
             }
 
             if (errors.Count == 0)

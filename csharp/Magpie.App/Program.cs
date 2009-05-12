@@ -76,7 +76,13 @@ namespace Magpie.App
                 return;
             }
 
-            Script.Run(path, text => Console.WriteLine(text));
+            IList<CompileError> errors = Script.Run(path, text => Console.WriteLine(text));
+
+            // show the errors if any
+            foreach (var error in errors)
+            {
+                Console.WriteLine("{0} error (line {1}): {2}", error.Stage, error.Line, error.Message);
+            }
         }
 
         static void Machine_Printed(object sender, PrintEventArgs e)
