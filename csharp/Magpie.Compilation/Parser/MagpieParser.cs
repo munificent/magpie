@@ -83,26 +83,26 @@ namespace Magpie.Compilation
         // <-- NAME FunctionDefinition
         private Function Function()
         {
-            string name = Consume(TokenType.Name).StringValue;
-            return FunctionDefinition(name);
+            Token token = Consume(TokenType.Name);
+            return FunctionDefinition(token.StringValue, token.Position);
         }
 
         // <-- OPERATOR FunctionDefinition
         private Function Operator()
         {
-            string name = Consume(TokenType.Operator).StringValue;
-            return FunctionDefinition(name);
+            Token token = Consume(TokenType.Operator);
+            return FunctionDefinition(token.StringValue, token.Position);
         }
 
         // <-- GenericDecl FnArgsDecl Block
-        private Function FunctionDefinition(string name)
+        private Function FunctionDefinition(string name, TokenPosition position)
         {
             IEnumerable<Decl> typeParams = TypeArgs();
 
             FuncType funcType = FnArgsDecl(true);
             IUnboundExpr body = Block();
 
-            return new Function(name, typeParams, funcType, body);
+            return new Function(position, name, typeParams, funcType, body);
         }
 
         // <-- LPAREN ArgsDecl? ARROW TypeDecl? RPAREN

@@ -1,0 +1,5 @@
+// error line: 4
+
+Main (->)
+    if true then 1
+end

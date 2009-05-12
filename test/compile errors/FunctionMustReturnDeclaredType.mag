@@ -1,0 +1,9 @@
+// error line: 7
+
+Main (->)
+    def a <- Foo
+end
+
+Foo (-> Int)
+    true
+end

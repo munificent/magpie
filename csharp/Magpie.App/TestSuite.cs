@@ -25,7 +25,7 @@ namespace Magpie.App
             foreach (string test in Directory.GetFiles(mTestDir, "*.mag", SearchOption.AllDirectories))
             {
                 //### bob: testing
-                //if (!test.EndsWith("IfThen.mag")) continue;
+                //if (!test.EndsWith("EvaluatedFuncRefArgsMustBeRightType.mag")) continue;
 
                 if (Debugger.IsAttached)
                 {

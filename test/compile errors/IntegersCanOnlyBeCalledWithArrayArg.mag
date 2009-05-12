@@ -1,0 +1,8 @@
+// error line: 7
+
+//### note: this test will go away if we add support for user-created
+//    indexers
+
+Main (->)
+    1 true
+end

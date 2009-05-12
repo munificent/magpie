@@ -73,7 +73,7 @@ namespace Magpie.Compilation
         /// <param name="arg">The argument being applied to the name.</param>
         /// <returns></returns>
         public IBoundExpr ResolveName(Function function, Function instancingContext,
-            Scope scope, string name, IList<Decl> typeArgs, IBoundExpr arg)
+            Scope scope, TokenPosition position, string name, IList<Decl> typeArgs, IBoundExpr arg)
         {
             Decl[] argTypes = null;
             if (arg != null) argTypes = arg.Type.Expanded;
@@ -107,7 +107,7 @@ namespace Magpie.Compilation
             // if we resolved to a local name, handle it
             if (resolved != null)
             {
-                if ((typeArgs != null) && (typeArgs.Count > 0)) throw new CompileException("Cannot apply generic type arguments to a local variable or function argument.");
+                if ((typeArgs != null) && (typeArgs.Count > 0)) throw new CompileException(position, "Cannot apply generic type arguments to a local variable or function argument.");
 
                 // if the local or argument is holding a function reference and we're passed args, call it
                 if (argTypes != null)
@@ -115,12 +115,12 @@ namespace Magpie.Compilation
                     FuncType funcType = resolvedType as FuncType;
 
                     // can only call functions
-                    if (funcType == null) throw new CompileException("Cannot call a local variable or argument that is not a function reference.");
+                    if (funcType == null) throw new CompileException(position, "Cannot call a local variable or argument that is not a function reference.");
 
                     // check that args match
                     if (!DeclComparer.TypesMatch(funcType.ParameterTypes, argTypes))
                     {
-                        throw new CompileException("Argument types passed to local function reference do not match function's parameter types.");
+                        throw new CompileException(position, "Argument types passed to local function reference do not match function's parameter types.");
                     }
 
                     // call it
@@ -144,7 +144,7 @@ namespace Magpie.Compilation
 
             // look up the function
             ICallable callable = FindFunction(function, instancingContext, name, typeArgs, argTypes);
-            if (callable == null) throw new CompileException(String.Format("Could not resolve name {0}.", FunctionTable.GetUniqueName(name, typeArgs, argTypes)));
+            if (callable == null) throw new CompileException(position, String.Format("Could not resolve name {0}.", FunctionTable.GetUniqueName(name, typeArgs, argTypes)));
 
             return callable.CreateCall(arg);
         }
@@ -241,7 +241,7 @@ namespace Magpie.Compilation
 
             IUnboundExpr body = UnboundBodyInstancer.Instance(applicator, generic.Body);
 
-            Function instance = new Function(generic.Name, typeArgs, funcType, body, applicator.CanInfer);
+            Function instance = new Function(generic.Position, generic.Name, typeArgs, funcType, body, applicator.CanInfer);
 
             instance.Qualify(generic);
 

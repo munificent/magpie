@@ -1,0 +1,9 @@
+// error line: 4
+
+Main (->)
+    (GetFoo ()) ("1", true)
+end
+
+GetFoo (-> fn (Int, Bool ->)) fn Foo (Int, Bool)
+
+Foo (a Int, b Bool ->) ()

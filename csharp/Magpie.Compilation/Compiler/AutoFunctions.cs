@@ -169,7 +169,7 @@ namespace Magpie.Compilation
 
         private void BuildFunction(TypeDefinition parentType, string name, FuncType type, IBoundExpr body)
         {
-            var function = new Function(name, parentType.TypeParameters, type, new WrapBoundExpr(body));
+            var function = new Function(TokenPosition.None, name, parentType.TypeParameters, type, new WrapBoundExpr(body));
             function.Qualify(parentType);
 
             mCompiler.AddFunction(function);

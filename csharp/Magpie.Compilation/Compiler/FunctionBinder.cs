@@ -34,7 +34,7 @@ namespace Magpie.Compilation
             // since types aren't instantiated for generics, the expr type will be wrong
             if (!(function.Unbound.Body is WrapBoundExpr) && !DeclComparer.TypesMatch(function.Type.Return, body.Type))
             {
-                throw new CompileException(String.Format("{0} is declared to return {1} but is returning {2}.",
+                throw new CompileException(function.Unbound.Position, String.Format("{0} is declared to return {1} but is returning {2}.",
                     function.Name, function.Type.Return, function.Body.Type));
             }
         }
@@ -48,7 +48,7 @@ namespace Magpie.Compilation
             NameExpr namedTarget = expr.Target as NameExpr;
             if (namedTarget != null)
             {
-                return mCompiler.ResolveName(mFunction, mInstancingContext, Scope, namedTarget.Name, namedTarget.TypeArgs, boundArg);
+                return mCompiler.ResolveName(mFunction, mInstancingContext, Scope, namedTarget.Position, namedTarget.Name, namedTarget.TypeArgs, boundArg);
             }
 
             IBoundExpr target = expr.Target.Accept(this);
@@ -63,16 +63,28 @@ namespace Magpie.Compilation
                 }
                 else
                 {
-                    throw new CompileException("Integers can only be called with an array argument.");
+                    //### bob: could desugar this to support indexers:
+                    //  Main (->)
+                    //      def a <- Indexable
+                    //      def b <- a.1 // desugared to Index_
+                    //  end
+                    //  
+                    //  struct Indexable
+                    //  end
+                    //
+                    //  Index_ (a Indexable, index Int -> Int)
+                    //      123 // whatever
+                    //  end
+                    throw new CompileException(expr.Position, "Integers can only be called with an array argument.");
                 }
             }
-            else if(!(target.Type is FuncType)) throw new CompileException("Target of an application must be a function.");
+            else if(!(target.Type is FuncType)) throw new CompileException(expr.Position, "Target of call is not a function.");
 
             // check that args match
             FuncType funcType = (FuncType)target.Type;
             if (!DeclComparer.TypesMatch(funcType.ParameterTypes, boundArg.Type.Expanded))
             {
-                throw new CompileException("Argument types passed to evaluated function reference do not match function's parameter types.");
+                throw new CompileException(expr.Position, "Argument types passed to evaluated function reference do not match function's parameter types.");
             }
 
             // simply apply the arg to the bound expression
@@ -99,7 +111,7 @@ namespace Magpie.Compilation
                     {
                         // make sure the others match
                         if (!DeclComparer.TypesMatch(elementType, element.Type))
-                            throw new CompileException(String.Format("Array elements must all be the same type. Array is type {0}, but element {1} is type {2}.",
+                            throw new CompileException(expr.Position, String.Format("Array elements must all be the same type. Array is type {0}, but element {1} is type {2}.",
                                 elementType, index, element.Type));
                     }
 
@@ -129,7 +141,7 @@ namespace Magpie.Compilation
                 }
 
                 // look for an assignment function
-                return TranslateAssignment(nameTarget.Name, nameTarget.TypeArgs, new UnitExpr(TokenPosition.None), value);
+                return TranslateAssignment(nameTarget.Position, nameTarget.Name, nameTarget.TypeArgs, new UnitExpr(TokenPosition.None), value);
             }
 
             // handle a function apply target: Foo 1 <- 3  ==> Foo<- (1, 3)
@@ -143,13 +155,11 @@ namespace Magpie.Compilation
                 if (funcName != null)
                 {
                     // translate the call
-                    return TranslateAssignment(funcName.Name, funcName.TypeArgs, callArg, value);
+                    return TranslateAssignment(callTarget.Position, funcName.Name, funcName.TypeArgs, callArg, value);
                 }
 
-                //### bob: in progress array assignment
+                // see if it's an array set
                 IBoundExpr boundCallTarget = callTarget.Target.Accept(this);
-
-                // if the target evaluates to an int and the arg is an array, it's an array set
                 if ((boundCallTarget.Type == Decl.Int) && (callArg.Type is ArrayType))
                 {
                     ArrayType arrayArgType = (ArrayType)callArg.Type;
@@ -157,9 +167,22 @@ namespace Magpie.Compilation
 
                     // array access
                     return new StoreElementExpr(callArg, boundCallTarget, value);
+
+                    //### bob: if callArg is not ArrayType, could desugar this to support indexers:
+                    //  Main (->)
+                    //      def a <- Indexable
+                    //      a.1 <- 3 // desugared to Index_<-
+                    //  end
+                    //  
+                    //  struct Indexable
+                    //  end
+                    //
+                    //  Index_<- (a Indexable, index Int -> Int)
+                    //      123 // whatever
+                    //  end
                 }
 
-                throw new CompileException("Couldn't figure out what you're trying to do on the left side of an assignment.");
+                throw new CompileException(expr.Position, "Couldn't figure out what you're trying to do on the left side of an assignment.");
             }
 
             // handle an operator target: 1 $$ 2 <- 3  ==> $$<- (1, 2, 3)
@@ -170,7 +193,7 @@ namespace Magpie.Compilation
                     { operatorTarget.Left.Accept(this),
                       operatorTarget.Right.Accept(this) });
 
-                return TranslateAssignment(operatorTarget.Name, null /* no operator generics yet */, opArg, value);
+                return TranslateAssignment(operatorTarget.Position, operatorTarget.Name, null /* no operator generics yet */, opArg, value);
             }
 
             TupleExpr tupleTarget = expr.Target as TupleExpr;
@@ -182,7 +205,7 @@ namespace Magpie.Compilation
             }
 
             // if we got here, it's not a valid assignment expression
-            throw new CompileException("Cannot assign to " + expr.Target);
+            throw new CompileException(expr.Position, "Cannot assign to " + expr.Target);
         }
 
         public IBoundExpr Visit(BlockExpr block)
@@ -252,10 +275,17 @@ namespace Magpie.Compilation
                 expr.Condition.Accept(this),
                 expr.Body.Accept(this));
 
+            if (bound.Condition.Type != Decl.Bool)
+            {
+                throw new CompileException(expr.Position, String.Format(
+                    "Condition of if/then is returning type {0} but should be Bool.",
+                    bound.Condition.Type));
+            }
+
             if (bound.Body.Type != Decl.Unit)
             {
-                throw new CompileException(String.Format(
-                    "Body of if/do is returning type {0} but should be void.",
+                throw new CompileException(expr.Position, String.Format(
+                    "Body of if/then is returning type {0} but must be Unit if there is no else branch.",
                     bound.Body.Type));
             }
 
@@ -269,10 +299,17 @@ namespace Magpie.Compilation
                 expr.ThenBody.Accept(this),
                 expr.ElseBody.Accept(this));
 
+            if (bound.Condition.Type != Decl.Bool)
+            {
+                throw new CompileException(expr.Position, String.Format(
+                    "Condition of if/then/else is returning type {0} but should be Bool.",
+                    bound.Condition.Type));
+            }
+
             if (!DeclComparer.TypesMatch(bound.ThenBody.Type, bound.ElseBody.Type))
             {
-                throw new CompileException(String.Format(
-                    "Arms of if/then/else to not return the same type. Then arm returns {0} while else arm returns {1}.",
+                throw new CompileException(expr.Position, String.Format(
+                    "Branches of if/then/else do not return the same type. Then arm returns {0} while else arm returns {1}.",
                     bound.ThenBody.Type, bound.ElseBody.Type));
             }
 
@@ -281,7 +318,7 @@ namespace Magpie.Compilation
 
         public IBoundExpr Visit(NameExpr expr)
         {
-            return mCompiler.ResolveName(mFunction, mInstancingContext, Scope, expr.Name, expr.TypeArgs, null);
+            return mCompiler.ResolveName(mFunction, mInstancingContext, Scope, expr.Position, expr.Name, expr.TypeArgs, null);
         }
 
         public IBoundExpr Visit(OperatorExpr expr)
@@ -323,14 +360,14 @@ namespace Magpie.Compilation
 
             if (bound.Condition.Type != Decl.Bool)
             {
-                throw new CompileException(String.Format(
+                throw new CompileException(expr.Position, String.Format(
                     "Condition of while/do is returning type {0} but should be Bool.",
-                    bound.Body.Type));
+                    bound.Condition.Type));
             }
 
             if (bound.Body.Type != Decl.Unit)
             {
-                throw new CompileException(String.Format(
+                throw new CompileException(expr.Position, String.Format(
                     "Body of while/do is returning type {0} but should be Unit.",
                     bound.Body.Type));
             }
@@ -351,14 +388,14 @@ namespace Magpie.Compilation
 
         #endregion
 
-        private IBoundExpr TranslateAssignment(string baseName, IList<Decl> typeArgs, IBoundExpr arg, IBoundExpr value)
+        private IBoundExpr TranslateAssignment(TokenPosition position, string baseName, IList<Decl> typeArgs, IBoundExpr arg, IBoundExpr value)
         {
             string name = baseName + "<-";
 
             // add the value argument
             arg = arg.AppendArg(value);
 
-            return mCompiler.ResolveName(mFunction, mInstancingContext, Scope, name, typeArgs, arg);
+            return mCompiler.ResolveName(mFunction, mInstancingContext, Scope, position, name, typeArgs, arg);
         }
 
         private FunctionBinder(Function function, Function instancingContext, Compiler compiler, Scope scope)

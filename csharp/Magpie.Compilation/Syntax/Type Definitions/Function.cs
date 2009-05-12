@@ -10,6 +10,8 @@ namespace Magpie.Compilation
     /// </summary>
     public class Function : TypeDefinition
     {
+        public TokenPosition Position { get; private set; }
+
         public IUnboundExpr Body { get { return mBody; } }
 
         public override Decl Type { get { return mType; } }
@@ -17,12 +19,13 @@ namespace Magpie.Compilation
 
         public bool CanOmitTypeArgs { get { return mCanOmitTypeArgs; } }
 
-        public Function(string name, IEnumerable<Decl> typeParams, FuncType type, IUnboundExpr body)
-            : this(name, typeParams, type, body, false) { }
+        public Function(TokenPosition position, string name, IEnumerable<Decl> typeParams, FuncType type, IUnboundExpr body)
+            : this(position, name, typeParams, type, body, false) { }
 
-        public Function(string name, IEnumerable<Decl> typeParams, FuncType type, IUnboundExpr body, bool canOmitTypeArgs)
+        public Function(TokenPosition position, string name, IEnumerable<Decl> typeParams, FuncType type, IUnboundExpr body, bool canOmitTypeArgs)
             : base(name, typeParams)
         {
+            Position = position;
             mType = type;
             mBody = body;
 
