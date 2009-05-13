@@ -242,7 +242,8 @@ namespace Magpie.Compilation
         }
 
         // <-- WHILE AssignExpr DO Block
-        //   | IF AssignExpr ((THEN InnerBlock ELSE Block) | (DO Block))
+        //   | IF AssignExpr THEN InnerBlock (ELSE Block)?
+        //   | RETURN FlowExpr
         //   | AssignExpr
         private IUnboundExpr FlowExpr()
         {
@@ -298,6 +299,19 @@ namespace Magpie.Compilation
                     Consume(TokenType.Do);
                     IUnboundExpr thenBody = Block();
                     return new IfThenExpr(position, condition, thenBody);
+                }
+            }
+            else if (ConsumeIf(TokenType.Return, out position))
+            {
+                if (CurrentIs(TokenType.Line))
+                {
+                    // infer () if there is no value
+                    return new ReturnExpr(position, new UnitExpr(position));
+                }
+                else
+                {
+                    // no line after return, so parse the expression
+                    return new ReturnExpr(position, FlowExpr());
                 }
             }
             else return AssignExpr();

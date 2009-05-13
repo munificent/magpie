@@ -84,6 +84,12 @@ namespace Magpie.Compilation
         public IUnboundExpr Visit(StringExpr expr) { return expr; }
         public IUnboundExpr Visit(UnitExpr expr) { return expr; }
 
+        public IUnboundExpr Visit(ReturnExpr expr)
+        {
+            return new ReturnExpr(expr.Position,
+                expr.Value.Accept(this));
+        }
+
         public IUnboundExpr Visit(WhileExpr expr)
         {
             return new WhileExpr(expr.Position,

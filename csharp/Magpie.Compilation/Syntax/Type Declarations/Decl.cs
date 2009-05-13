@@ -16,6 +16,13 @@ namespace Magpie.Compilation
         public static readonly Decl Int    = new AtomicDecl("Int");
         public static readonly Decl String = new AtomicDecl("String");
 
+        /// <summary>
+        /// This special type is the return type of an early return expression.
+        /// It lets us ensure that return expressions are only valid in certain
+        /// places.
+        /// </summary>
+        public static readonly Decl EarlyReturn = new AtomicDecl("return");
+
         public static Decl FromName(string name, IEnumerable<Decl> args)
         {
             // see if it's an atomic type

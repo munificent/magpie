@@ -34,8 +34,15 @@ namespace Magpie.Compilation
             // since types aren't instantiated for generics, the expr type will be wrong
             if (!(function.Unbound.Body is WrapBoundExpr) && !DeclComparer.TypesMatch(function.Type.Return, body.Type))
             {
-                throw new CompileException(function.Unbound.Position, String.Format("{0} is declared to return {1} but is returning {2}.",
-                    function.Name, function.Type.Return, function.Body.Type));
+                if (body.Type == Decl.EarlyReturn)
+                {
+                    throw new CompileException(function.Unbound.Body.Position, "Unneeded explicit \"return\".");
+                }
+                else
+                {
+                    throw new CompileException(function.Unbound.Position, String.Format("{0} is declared to return {1} but is returning {2}.",
+                        function.Name, function.Type.Return, function.Body.Type));
+                }
             }
         }
 
@@ -282,10 +289,10 @@ namespace Magpie.Compilation
                     bound.Condition.Type));
             }
 
-            if (bound.Body.Type != Decl.Unit)
+            if ((bound.Body.Type != Decl.Unit) && (bound.Body.Type != Decl.EarlyReturn))
             {
                 throw new CompileException(expr.Position, String.Format(
-                    "Body of if/then is returning type {0} but must be Unit if there is no else branch.",
+                    "Body of if/then is returning type {0} but must be Unit (or a return) if there is no else branch.",
                     bound.Body.Type));
             }
 
@@ -352,6 +359,11 @@ namespace Magpie.Compilation
         public IBoundExpr Visit(UnitExpr expr)
         {
             return expr;
+        }
+
+        public IBoundExpr Visit(ReturnExpr expr)
+        {
+            return new BoundReturnExpr(expr.Value.Accept(this));
         }
 
         public IBoundExpr Visit(WhileExpr expr)

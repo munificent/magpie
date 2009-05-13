@@ -153,6 +153,10 @@ Argument inference for function references.
 
 Constant folding
 
+Indexers.
+- Syntactic sugar for applying array-element-access syntax to arbitrary types.
+- Looks like foo.1 where foo is a value of some non-array type.
+
 Done:
 ----
 

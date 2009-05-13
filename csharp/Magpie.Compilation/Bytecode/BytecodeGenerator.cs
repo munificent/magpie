@@ -192,6 +192,14 @@ namespace Magpie.Compilation
             return true;
         }
 
+        bool IBoundExprVisitor<bool>.Visit(BoundReturnExpr expr)
+        {
+            expr.Value.Accept(this);
+            Write(OpCode.Return);
+
+            return true;
+        }
+
         bool IBoundExprVisitor<bool>.Visit(BoundWhileExpr expr)
         {
             mJumpTable.PatchJumpBack("while");

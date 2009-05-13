@@ -1,0 +1,9 @@
+// error line: 8
+
+Main (->)
+    def a <- Foo
+end
+
+Foo (-> Int)
+    return 4
+end

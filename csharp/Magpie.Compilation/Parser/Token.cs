@@ -29,6 +29,7 @@ namespace Magpie.Compilation
         If,
         Mutable,
         Namespace,
+        Return,
         Struct,
         Then,
         Union,
@@ -61,6 +62,11 @@ namespace Magpie.Compilation
             Line = line;
             Column = column;
             Length = length;
+        }
+
+        public override string ToString()
+        {
+            return String.Format("line {0} column {1}-{2}", Line, Column, Column + Length);
         }
     }
 

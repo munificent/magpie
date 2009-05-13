@@ -24,9 +24,6 @@ namespace Magpie.App
 
             foreach (string test in Directory.GetFiles(mTestDir, "*.mag", SearchOption.AllDirectories))
             {
-                //### bob: testing
-                //if (!test.EndsWith("EvaluatedFuncRefArgsMustBeRightType.mag")) continue;
-
                 if (Debugger.IsAttached)
                 {
                     // don't catch exceptions when a debugger is attached, that way
@@ -90,11 +87,16 @@ namespace Magpie.App
                     if (mExpectedErrorLines.Count > 0)
                     {
                         int expectedLine = mExpectedErrorLines.Dequeue();
-                        if (error.Line != expectedLine) mErrors.Add("Expected compile error on line " + expectedLine + " but was on line " + error.Line);
+                        if (error.Line != expectedLine)
+                        {
+                            mErrors.Add("Expected compile error on line " + expectedLine + " but was on line " + error.Line);
+                            mErrors.Add(error.Message);
+                        }
                     }
                     else
                     {
                         mErrors.Add("Got compile error on line " + error.Line + " when no more were expected.");
+                        mErrors.Add(error.Message);
                     }
                 }
             }

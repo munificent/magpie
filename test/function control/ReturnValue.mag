@@ -1,0 +1,14 @@
+// expected: didn't return
+// expected: no
+// expected: yes
+
+Main (->)
+    Print Foo false
+    Print Foo true
+end
+
+Foo (b Bool -> String)
+    if b then return "yes"
+    Print "didn't return"
+    "no"
+end
