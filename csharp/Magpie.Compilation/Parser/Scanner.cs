@@ -153,10 +153,9 @@ namespace Magpie.Compilation
                 case ScanState.InMinus:
                     Advance();
 
-                    // a "-" can be the start of a name "-foo", an operator "-+!", a
+                    // a "-" can be the start of an operator "-+!", a
                     // number "-123", or an operator all by itself "-"
-                    if (IsPunctuation(Current)) return ChangeState(ScanState.InOperator);
-                    else if (IsAlpha(Current)) return ChangeState(ScanState.InName);
+                    if (IsPunctuation(Current) || IsAlpha(Current)) return ChangeState(ScanState.InOperator);
                     else if (IsDigit(Current)) return ChangeState(ScanState.InNumber);
                     
                     return CompleteToken((text, pos) => new Token(pos, TokenType.Operator, text));
@@ -174,9 +173,7 @@ namespace Magpie.Compilation
                 case ScanState.InOperator:
                     Advance();
 
-                    // if there are any letters, it's a name
-                    if (IsAlpha(Current)) return ChangeState(ScanState.InName);
-                    else if (!(IsPunctuation(Current) | IsDigit(Current)))
+                    if (!(IsAlpha(Current) || IsPunctuation(Current) || IsDigit(Current)))
                     {
                         return CompleteToken((text, pos) => new Token(pos, TokenType.Operator, text));
                     }
@@ -360,8 +357,8 @@ namespace Magpie.Compilation
         }
 
         private bool IsDigit(string text) { return "0123456789".Contains(text); }
-        private bool IsAlpha(string text) { return "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".Contains(text); }
-        private bool IsPunctuation(string text) { return "_!&|-+=<>?*/~@#$%^`".Contains(text); }
+        private bool IsAlpha(string text) { return "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".Contains(text); }
+        private bool IsPunctuation(string text) { return "!&|-+=<>?*/~@#$%^`".Contains(text); }
 
         private bool IsDone { get { return Current == "end"; } }
 
