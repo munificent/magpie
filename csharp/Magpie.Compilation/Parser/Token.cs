@@ -26,6 +26,7 @@ namespace Magpie.Compilation
         Else,
         End,
         Fn,
+        For,
         If,
         Mutable,
         Namespace,

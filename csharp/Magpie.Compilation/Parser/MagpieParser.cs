@@ -241,14 +241,35 @@ namespace Magpie.Compilation
             else return FlowExpr();
         }
 
-        // <-- WHILE AssignExpr DO Block
+        // <-- (FOR Name <- OperatorExpr LINE?)+ DO Block
+        //   | WHILE AssignExpr DO Block
         //   | IF AssignExpr THEN InnerBlock (ELSE Block)?
         //   | RETURN FlowExpr
         //   | AssignExpr
         private IUnboundExpr FlowExpr()
         {
             TokenPosition position;
-            if (ConsumeIf(TokenType.While, out position))
+            if (CurrentIs(TokenType.For))
+            {
+                List<NamedIterator> iterators = new List<NamedIterator>();
+
+                while (ConsumeIf(TokenType.For, out position))
+                {
+                    string name = Consume(TokenType.Name).StringValue;
+                    Consume(TokenType.LeftArrow);
+                    IUnboundExpr iterator = OperatorExpr();
+
+                    ConsumeIf(TokenType.Line);
+
+                    iterators.Add(new NamedIterator(position, name, iterator));
+                }
+
+                position = Consume(TokenType.Do).Position;
+                IUnboundExpr body = Block();
+
+                return new ForExpr(position, iterators, body);
+            }
+            else if (ConsumeIf(TokenType.While, out position))
             {
                 IUnboundExpr condition = AssignExpr();
                 Consume(TokenType.Do);
@@ -267,22 +288,6 @@ namespace Magpie.Compilation
                 {
                     bool hasElse;
                     IUnboundExpr thenBody = ThenBlock(out hasElse);
-
-                    //### bob: this is in-progress. specifically, it barfs on:
-                    //
-                    //  if true then Print "true 1"
-                    //  
-                    //  if true
-                    //  then Print "true 3"
-                    //  
-                    //  because in both cases it consumes the newline after the 
-                    //  string literals in anticipation of an "else". when the
-                    //  "else" isn't found, it pops all the way up to the parent
-                    //  Block(), which expects to consume a newline after an
-                    //  expression. could fix this by adding look-ahead (see if
-                    //  there's an "else" after the newline before consuming it)
-                    //  but that makes the language LL(2). maybe there's a better
-                    //  solution.
 
                     if (hasElse)
                     {

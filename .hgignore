@@ -12,3 +12,6 @@ csharp/Unit Tests.VisualState.xml
 
 # ignore (for now) the outdated ref manual
 doc/reference manual/*.*
+
+# ignore revert backups
+**.orig

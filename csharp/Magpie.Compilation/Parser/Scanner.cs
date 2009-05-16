@@ -33,6 +33,7 @@ namespace Magpie.Compilation
                             case "else": token = new Token(token.Position, TokenType.Else); break;
                             case "end": token = new Token(token.Position, TokenType.End); break;
                             case "fn": token = new Token(token.Position, TokenType.Fn); break;
+                            case "for": token = new Token(token.Position, TokenType.For); break;
                             case "if": token = new Token(token.Position, TokenType.If); break;
                             case "mutable": token = new Token(token.Position, TokenType.Mutable); break;
                             case "namespace": token = new Token(token.Position, TokenType.Namespace); break;

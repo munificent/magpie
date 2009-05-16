@@ -1,0 +1,54 @@
+// expected: 0
+// expected: 1
+// expected: 2
+// expected: 0
+// expected: 1
+// expected: 2
+// expected: 10
+// expected: 5
+// expected: 0
+// expected: 11
+// expected: 6
+// expected: 1
+// expected: 12
+// expected: 7
+// expected: 2
+
+Main (->)
+    // one line
+    for i <- 3.Times do Print i.String
+    
+    // block body
+    for i <- 3.Times do
+        Print i.String
+    end
+    
+    // parallel iterators
+    for i <- 10 -- 60 for j <- 5 -- 12
+    for k <- 3.Times do
+        Print i.String
+        Print j.String
+        Print k.String
+    end    
+end
+
+Times (count Int -> Range) Range (0, count)
+
+-- (min Int, max Int -> Range) Range (min, max)
+
+Iterate (range Range -> RangeIterator) RangeIterator (range.Max, range.Min - 1)
+
+MoveNext (iter RangeIterator -> Bool)
+    iter.Current <- + 1
+    iter.Current < iter.Max
+end
+
+struct Range
+    Min     Int
+    Max     Int
+end
+
+struct RangeIterator
+    Max     Int
+    Current mutable Int
+end

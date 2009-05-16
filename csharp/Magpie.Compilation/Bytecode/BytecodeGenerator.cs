@@ -92,9 +92,9 @@ namespace Magpie.Compilation
         {
             // must visit in forward order to ensure that function arguments are
             // evaluated left to right
-            for (int i = 0; i < tuple.Fields.Count; i++)
+            foreach (var field in tuple.Fields)
             {
-                tuple.Fields[i].Accept(this);
+                field.Accept(this);
             }
 
             // create the structure
@@ -137,9 +137,9 @@ namespace Magpie.Compilation
 
             // must visit in forward order to ensure that array elements are
             // evaluated left to right
-            for (int i = 0; i < expr.Elements.Count; i++)
+            foreach (var element in expr.Elements)
             {
-                expr.Elements[i].Accept(this);
+                element.Accept(this);
             }
 
             // create the structure (+1 for the size)

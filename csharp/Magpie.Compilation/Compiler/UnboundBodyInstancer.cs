@@ -97,11 +97,15 @@ namespace Magpie.Compilation
                 expr.Body.Accept(this));
         }
 
+        public IUnboundExpr Visit(ForExpr expr)
+        {
+            throw new NotImplementedException();
+        }
+
         public IUnboundExpr Visit(WrapBoundExpr expr)
         {
             // already bound, which implies it isn't affected by instantiation
             return expr;
-            //return new WrapBoundExpr(BoundBodyInstancer.Instance(mApplicator, expr.Bound));
         }
 
         #endregion

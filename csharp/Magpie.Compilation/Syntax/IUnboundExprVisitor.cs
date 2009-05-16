@@ -24,6 +24,7 @@ namespace Magpie.Compilation
         TReturn Visit(ReturnExpr expr);
         TReturn Visit(UnitExpr expr);
         TReturn Visit(WhileExpr expr);
+        TReturn Visit(ForExpr expr);
         TReturn Visit(WrapBoundExpr expr);
     }
 }

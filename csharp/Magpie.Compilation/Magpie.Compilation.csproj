@@ -64,6 +64,7 @@
     <Compile Include="Syntax\Expressions\ConstructUnionExpr.cs" />
     <Compile Include="Syntax\Expressions\DefineExpr.cs" />
     <Compile Include="Syntax\Expressions\ForeignCallExpr.cs" />
+    <Compile Include="Syntax\Expressions\ForExpr.cs" />
     <Compile Include="Syntax\Expressions\IBoundExpr.cs" />
     <Compile Include="Syntax\Expressions\FuncRefExpr.cs" />
     <Compile Include="Syntax\Expressions\IfThenElseExpr.cs" />

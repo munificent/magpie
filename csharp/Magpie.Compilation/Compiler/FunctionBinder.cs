@@ -387,6 +387,66 @@ namespace Magpie.Compilation
             return bound;
         }
 
+        public IBoundExpr Visit(ForExpr expr)
+        {
+            // a for expression is basically syntactic sugar for a while expression
+            // and one or more iterators. for example, the following:
+            //
+            // for foo <- bar do
+            //     Print foo
+            // end
+            //
+            // is equivalent to:
+            //
+            // def _fooIter <- Iterate bar
+            // while MoveNext _fooIter do
+            //     def foo <- Current _fooIter
+            //     Print foo
+            // end
+            //
+            // so, to bind a for expression, we just desugar it, then bind that.
+
+            var topExprs = new List<IUnboundExpr>();
+            IUnboundExpr conditionExpr = null;
+            var whileExprs = new List<IUnboundExpr>();
+
+            // instantiate each iterator
+            foreach (var iterator in expr.Iterators)
+            {
+                // note: the iterator variable includes a space to ensure it can't collide with a
+                // user-defined variable.
+                var createIterator = new CallExpr(new NameExpr(iterator.Position, "Iterate"), iterator.Iterator);
+                topExprs.Add(new DefineExpr(iterator.Position, iterator.Name + " iter", createIterator, false));
+
+                var condition = new CallExpr(new NameExpr(iterator.Position, "MoveNext"), new NameExpr(iterator.Position, iterator.Name + " iter"));
+                if (conditionExpr == null)
+                {
+                    conditionExpr = condition;
+                }
+                else
+                {
+                    // combine with previous condition(s)
+                    conditionExpr = new OperatorExpr(iterator.Position, conditionExpr, "&", condition);
+                }
+
+                var currentValue = new CallExpr(new NameExpr(iterator.Position, "Current"), new NameExpr(iterator.Position, iterator.Name + " iter"));
+                whileExprs.Add(new DefineExpr(iterator.Position, iterator.Name, currentValue, false));
+            }
+
+            // create the while loop
+            whileExprs.Add(expr.Body);
+            var whileExpr = new WhileExpr(expr.Position,
+                conditionExpr,
+                new BlockExpr(whileExprs));
+            topExprs.Add(whileExpr);
+
+            // build the whole block
+            var block = new BlockExpr(topExprs);
+
+            // now bind the whole thing
+            return block.Accept(this);
+        }
+
         public IBoundExpr Visit(ConstructUnionExpr expr)
         {
             return expr;
