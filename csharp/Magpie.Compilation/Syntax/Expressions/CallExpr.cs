@@ -51,9 +51,9 @@ namespace Magpie.Compilation
     {
         public BoundCallExpr(IBoundExpr target, IBoundExpr arg) : base(target, arg) { }
 
-        public Decl Type
+        public IBoundDecl Type
         {
-            get { return ((FuncType)Target.Type).Return; }
+            get { return ((FuncType)Target.Type).Return.Bound; }
         }
 
         public TReturn Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)

@@ -8,12 +8,12 @@ namespace Magpie.Compilation
     /// <summary>
     /// Defines an array type declaration, including the type of the elements.
     /// </summary>
-    public class ArrayType : Decl
+    public class ArrayType<TDecl>
     {
-        public Decl ElementType { get; private set; }
+        public TDecl ElementType { get; private set; }
         public bool IsMutable { get; private set; }
 
-        public ArrayType(Decl elementType, bool isMutable)
+        public ArrayType(TDecl elementType, bool isMutable)
         {
             ElementType = elementType;
             IsMutable = isMutable;
@@ -21,12 +21,47 @@ namespace Magpie.Compilation
 
         public override string ToString()
         {
-            return "Array'" + ElementType.ToString();
+            return "[]'" + ElementType.ToString();
+        }
+    }
+    
+    /// <summary>
+    /// Defines an array type declaration, including the type of the elements.
+    /// </summary>
+    public class ArrayType : ArrayType<IUnboundDecl>, IUnboundDecl
+    {
+        public TokenPosition Position { get; private set; }
+
+        public ArrayType(TokenPosition position, IUnboundDecl elementType, bool isMutable)
+            : base(elementType, isMutable)
+        {
+            Position = position;
         }
 
-        public override TReturn Accept<TReturn>(IDeclVisitor<TReturn> visitor)
+        #region IUnboundDecl Members
+
+        TReturn IUnboundDecl.Accept<TReturn>(IUnboundDeclVisitor<TReturn> visitor)
         {
             return visitor.Visit(this);
         }
+
+        #endregion
+    }
+
+    public class BoundArrayType : ArrayType<IBoundDecl>, IBoundDecl
+    {
+        public BoundArrayType(IBoundDecl elementType, bool isMutable)
+            : base(elementType, isMutable)
+        {
+        }
+
+        #region IBoundDecl Members
+
+        TReturn IBoundDecl.Accept<TReturn>(IBoundDeclVisitor<TReturn> visitor)
+        {
+            return visitor.Visit(this);
+        }
+
+        #endregion
     }
 }

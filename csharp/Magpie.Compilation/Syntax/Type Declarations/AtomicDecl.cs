@@ -6,25 +6,40 @@ using System.Text;
 namespace Magpie.Compilation
 {
     /// <summary>
-    /// Userd for type declarations for which there is only a single instance: int, bool, etc.
+    /// Used for type declarations for which there is only a single instance: int, bool, etc.
     /// </summary>
-    public class AtomicDecl : Decl
+    public class AtomicDecl : IUnboundDecl, INamedType
     {
+        public TokenPosition Position { get { return TokenPosition.None; } }
+
+        public string Name { get; private set; }
+
         public AtomicDecl(string name)
         {
-            mName = name;
+            Name = name;
         }
 
         public override string ToString()
         {
-            return mName;
+            return Name;
         }
 
-        public override TReturn Accept<TReturn>(IDeclVisitor<TReturn> visitor)
+        #region IUnboundDecl Members
+
+        TReturn IUnboundDecl.Accept<TReturn>(IUnboundDeclVisitor<TReturn> visitor)
         {
             return visitor.Visit(this);
         }
 
-        private string mName;
+        #endregion
+
+        #region IBoundDecl Members
+
+        TReturn IBoundDecl.Accept<TReturn>(IBoundDeclVisitor<TReturn> visitor)
+        {
+            return visitor.Visit(this);
+        }
+
+        #endregion
     }
 }

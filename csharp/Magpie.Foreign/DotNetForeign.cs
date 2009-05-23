@@ -23,7 +23,7 @@ namespace Magpie.Foreign
             Add("System:Console:WriteLine", Decl.String, Decl.Unit, WriteLine);
         }
 
-        private void Add(string name, Decl returnType, Func<Value[], Value> func)
+        private void Add(string name, IBoundDecl returnType, Func<Value[], Value> func)
         {
             int id = mFunctions.Count;
 
@@ -31,7 +31,7 @@ namespace Magpie.Foreign
             mFunctions[id] = new KeyValuePair<ForeignFunction, Func<Value[], Value>>(foreignFunction, func);
         }
 
-        private void Add(string name, Decl arg, Decl returnType, Func<Value[], Value> func)
+        private void Add(string name, IBoundDecl arg, IBoundDecl returnType, Func<Value[], Value> func)
         {
             int id = mFunctions.Count;
 

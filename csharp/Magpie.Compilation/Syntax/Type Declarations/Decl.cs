@@ -6,58 +6,50 @@ using System.Text;
 namespace Magpie.Compilation
 {
     /// <summary>
-    /// A type declaration.
+    /// A type declaration in both its unbound and bound form.
     /// </summary>
-    public abstract class Decl
+    public class Decl
     {
-        public static readonly Decl Unit   = new AtomicDecl("Unit");
-        public static readonly Decl Bool   = new AtomicDecl("Bool");
-        public static readonly Decl Char   = new AtomicDecl("Char");
-        public static readonly Decl Int    = new AtomicDecl("Int");
-        public static readonly Decl String = new AtomicDecl("String");
+        public static readonly AtomicDecl Unit = new AtomicDecl("Unit");
+        public static readonly AtomicDecl Bool = new AtomicDecl("Bool");
+        public static readonly AtomicDecl Int = new AtomicDecl("Int");
+        public static readonly AtomicDecl String = new AtomicDecl("String");
 
         /// <summary>
         /// This special type is the return type of an early return expression.
         /// It lets us ensure that return expressions are only valid in certain
         /// places.
         /// </summary>
-        public static readonly Decl EarlyReturn = new AtomicDecl("return");
+        public static readonly AtomicDecl EarlyReturn = new AtomicDecl("return");
 
-        public static Decl FromName(string name, IEnumerable<Decl> args)
+        public IUnboundDecl Unbound { get; private set; }
+        public IBoundDecl Bound { get; private set; }
+
+        public bool IsBound { get { return Bound != null; } }
+
+        public Decl(IUnboundDecl unbound)
         {
-            // see if it's an atomic type
-            //### bob: should barf if it's an atomic type and there is an arg
-            switch (name)
-            {
-                case "Bool": return Bool;
-                case "Char": return Char;
-                case "Int": return Int;
-                case "String": return String;
-            }
+            if (unbound == null) throw new ArgumentNullException("unbound");
 
-            // must be a user-defined type
-            return new NamedType(name, args);
+            Unbound = unbound;
         }
 
-        public static Decl FromName(string name)
+        public Decl(IBoundDecl bound)
         {
-            return FromName(name, null);
+            if (bound == null) throw new ArgumentNullException("bound");
+
+            Bound = bound;
         }
 
-        /// <summary>
-        /// Expands a type declaration. Most types return themselves, but
-        /// a tuple will be flattened and unit will return an empty array.
-        /// </summary>
-        public virtual Decl[] Expanded
+        public void Bind(IBoundDecl bound)
         {
-            get
-            {
-                if (ReferenceEquals(this, Unit)) return new Decl[0];
+            if (bound == null) throw new ArgumentNullException("bound");
 
-                return new Decl[] { this };
-            }
+            Bound = bound;
+
+            // discard the unbound one now. makes sure we're clear on what state we expect
+            // the declaration to be in.
+            Unbound = null;
         }
-
-        public abstract TReturn Accept<TReturn>(IDeclVisitor<TReturn> visitor);
     }
 }

@@ -28,11 +28,11 @@ namespace Magpie.Compilation
             return left;
         }
 
-        protected IUnboundExpr OneOrMoreRight(Func<IUnboundExpr> parseFunc, Func<IUnboundExpr, IUnboundExpr, IUnboundExpr> combineFunc)
+        protected T OneOrMoreRight<T>(Func<T> parseFunc, Func<T, T, T> combineFunc) where T : class
         {
-            Stack<IUnboundExpr> exprs = new Stack<IUnboundExpr>();
+            Stack<T> exprs = new Stack<T>();
 
-            IUnboundExpr expr = parseFunc();
+            T expr = parseFunc();
             if (expr == null) throw new ParseException(Current.Position, "Parse error finding first token in a right-associative sequence. Found " + Current + " instead.");
 
             while (expr != null)
@@ -41,7 +41,7 @@ namespace Magpie.Compilation
                 expr = parseFunc();
             }
 
-            IUnboundExpr result = null;
+            T result = null;
 
             while (exprs.Count > 0)
             {
@@ -65,6 +65,11 @@ namespace Magpie.Compilation
         protected bool CurrentIs(TokenType type)
         {
             return Current.Type == type;
+        }
+
+        protected bool CurrentIs(TokenType current, TokenType next)
+        {
+            return (Current.Type == current) && (Next.Type == next);
         }
 
         protected bool ConsumeIf(TokenType type)

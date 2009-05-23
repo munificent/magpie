@@ -39,7 +39,7 @@ namespace Magpie.Compilation
     {
         public BoundBlockExpr(IEnumerable<IBoundExpr> exprs) : base(exprs) { }
 
-        public Decl Type
+        public IBoundDecl Type
         {
             get
             {

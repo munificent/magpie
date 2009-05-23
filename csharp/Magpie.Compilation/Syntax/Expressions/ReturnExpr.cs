@@ -44,7 +44,7 @@ namespace Magpie.Compilation
 
         #region IBoundExpr Members
 
-        public Decl Type { get { return Decl.EarlyReturn; } }
+        public IBoundDecl Type { get { return Decl.EarlyReturn; } }
 
         public TReturn Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)
         {

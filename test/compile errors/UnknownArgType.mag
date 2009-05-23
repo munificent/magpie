@@ -1,0 +1,8 @@
+// error line: 7
+
+Main (->)
+    Print "hi"
+end
+
+Foo (a Undefined ->) ()
+

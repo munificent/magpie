@@ -5,13 +5,23 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
-    public interface IDeclVisitor<TReturn>
+    public interface IUnboundDeclVisitor<TReturn>
     {
-        TReturn Visit(AnyType decl);
         TReturn Visit(ArrayType decl);
         TReturn Visit(AtomicDecl decl);
         TReturn Visit(FuncType decl);
-        TReturn Visit(NamedType decl);
         TReturn Visit(TupleType decl);
+        TReturn Visit(NamedType decl);
+    }
+
+    public interface IBoundDeclVisitor<TReturn>
+    {
+        TReturn Visit(AnyType decl);
+        TReturn Visit(BoundArrayType decl);
+        TReturn Visit(AtomicDecl decl);
+        TReturn Visit(FuncType decl);
+        TReturn Visit(Struct decl);
+        TReturn Visit(BoundTupleType decl);
+        TReturn Visit(Union decl);
     }
 }

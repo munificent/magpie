@@ -24,7 +24,7 @@ Main (->)
     end
     
     // parallel iterators
-    for i <- 10 -- 60 for j <- 5 -- 12
+    for i <- 10 -to- 60 for j <- 5 -to- 12
     for k <- 3.Times do
         Print i.String
         Print j.String
@@ -34,7 +34,7 @@ end
 
 Times (count Int -> Range) Range (0, count)
 
--- (min Int, max Int -> Range) Range (min, max)
+-to- (min Int, max Int -> Range) Range (min, max)
 
 Iterate (range Range -> RangeIterator) RangeIterator (range.Max, range.Min - 1)
 

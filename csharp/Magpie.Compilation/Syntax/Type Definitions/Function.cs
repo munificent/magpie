@@ -8,62 +8,60 @@ namespace Magpie.Compilation
     /// <summary>
     /// A function definition.
     /// </summary>
-    public class Function : TypeDefinition
+    public class Function : TypeDefinition, ICallable
     {
-        public TokenPosition Position { get; private set; }
-
-        public IUnboundExpr Body { get { return mBody; } }
-
-        public override Decl Type { get { return mType; } }
-        public FuncType FuncType { get { return mType; } }
-
-        public bool CanOmitTypeArgs { get { return mCanOmitTypeArgs; } }
-
-        public Function(TokenPosition position, string name, IEnumerable<Decl> typeParams, FuncType type, IUnboundExpr body)
-            : this(position, name, typeParams, type, body, false) { }
-
-        public Function(TokenPosition position, string name, IEnumerable<Decl> typeParams, FuncType type, IUnboundExpr body, bool canOmitTypeArgs)
-            : base(name, typeParams)
+        /// <summary>
+        /// A unique name for the function, including type arguments and value argument types.
+        /// </summary>
+        public string UniqueName
         {
-            Position = position;
-            mType = type;
-            mBody = body;
-
-            mCanOmitTypeArgs = canOmitTypeArgs;
-        }
-
-        public override string ToString()
-        {
-            return String.Format("{0}{1} {2} {3}",
-                Name,
-                IsGeneric ? ("[" + TypeParameters.JoinAll(", ") + "]") : "",
-                Type, Body);
-        }
-
-        public bool Matches(string uniqueName)
-        {
-            return (uniqueName == mUniqueName) || (uniqueName == mInferredName);
-        }
-
-        protected override void OnQualify()
-        {
-            mUniqueName = FunctionTable.GetUniqueName(FullName, TypeParameters, FuncType.ParameterTypes);
-
-            if (mCanOmitTypeArgs)
+            get
             {
-                mInferredName = FunctionTable.GetUniqueName(FullName, FuncType.ParameterTypes);
-            }
-            else
-            {
-                mInferredName = String.Empty;
+                return FunctionTable.GetUniqueName(Name, null, Type.ParameterTypes);
             }
         }
 
-        private FuncType mType;
-        private IUnboundExpr mBody;
+        public FuncType Type { get; private set; }
 
-        private bool mCanOmitTypeArgs; // true if the type arguments can be inferred from the value args, so do not need to be explicitly passed in
-        private string mUniqueName;
-        private string mInferredName;
+        public readonly Expr Body;
+
+        public int NumLocals { get; private set; }
+
+        public bool CanOmitTypeArgs { get; private set; }
+
+        public Function(TokenPosition position, string name, FuncType type, IUnboundExpr body)
+            : this(position, name, type, body, null, false) { }
+
+        public Function(TokenPosition position, string name, FuncType type, IUnboundExpr body,
+            IEnumerable<IBoundDecl> typeArgs, bool hasInferrableTypeArguments)
+            : base(position, name, typeArgs)
+        {
+            if (position == null) throw new ArgumentNullException("position");
+            if (type == null) throw new ArgumentNullException("type");
+
+            Body = new Expr(body);
+
+            Type = type;
+            HasInferrableTypeArguments = hasInferrableTypeArguments;
+        }
+
+        public void Bind(IBoundExpr body, int numLocals)
+        {
+            Body.Bind(body);
+            NumLocals = numLocals;
+        }
+
+        #region ICallable Members
+
+        public IBoundExpr CreateCall(IBoundExpr arg)
+        {
+            return new BoundCallExpr(new BoundFuncRefExpr(this), arg);
+        }
+
+        public bool HasInferrableTypeArguments { get; private set; }
+
+        public IBoundDecl[] ParameterTypes { get { return Type.ParameterTypes; } }
+
+        #endregion
     }
 }

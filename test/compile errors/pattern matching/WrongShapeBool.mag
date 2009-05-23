@@ -1,0 +1,8 @@
+// error line: 5
+
+Main (->)
+    match 1
+        case true  then Print "true"
+        case _     then Print "false"
+    end
+end

@@ -28,6 +28,7 @@ namespace Magpie.Compilation
                     {
                         switch (token.StringValue)
                         {
+                            case "case": token = new Token(token.Position, TokenType.Case); break;
                             case "def": token = new Token(token.Position, TokenType.Def); break;
                             case "do": token = new Token(token.Position, TokenType.Do); break;
                             case "else": token = new Token(token.Position, TokenType.Else); break;
@@ -35,6 +36,7 @@ namespace Magpie.Compilation
                             case "fn": token = new Token(token.Position, TokenType.Fn); break;
                             case "for": token = new Token(token.Position, TokenType.For); break;
                             case "if": token = new Token(token.Position, TokenType.If); break;
+                            case "match": token = new Token(token.Position, TokenType.Match); break;
                             case "mutable": token = new Token(token.Position, TokenType.Mutable); break;
                             case "namespace": token = new Token(token.Position, TokenType.Namespace); break;
                             case "return": token = new Token(token.Position, TokenType.Return); break;

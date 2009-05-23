@@ -38,7 +38,7 @@ namespace Magpie.Compilation
 
             while (ConsumeIf(TokenType.Using))
             {
-                string name = Name().Key;
+                string name = Name().Item1;
                 Consume(TokenType.Line);
 
                 usings.Add(name);
@@ -71,38 +71,42 @@ namespace Magpie.Compilation
         private Namespace Namespace()
         {
             Consume(TokenType.Namespace);
-            string name = Name().Key;
+            var name = Name().Item1;
             Consume(TokenType.Line);
 
-            List<object> contents = NamespaceContents();
+            var contents = NamespaceContents();
             Consume(TokenType.End);
 
             return new Namespace(name, contents);
         }
 
         // <-- NAME FunctionDefinition
-        private Function Function()
+        private object Function()
         {
-            Token token = Consume(TokenType.Name);
+            var token = Consume(TokenType.Name);
             return FunctionDefinition(token.StringValue, token.Position);
         }
 
         // <-- OPERATOR FunctionDefinition
-        private Function Operator()
+        private object Operator()
         {
-            Token token = Consume(TokenType.Operator);
+            var token = Consume(TokenType.Operator);
             return FunctionDefinition(token.StringValue, token.Position);
         }
 
         // <-- GenericDecl FnArgsDecl Block
-        private Function FunctionDefinition(string name, TokenPosition position)
+        private object FunctionDefinition(string name, TokenPosition position)
         {
-            IEnumerable<Decl> typeParams = TypeArgs();
+            var typeParams = TypeParams();
 
-            FuncType funcType = FnArgsDecl(true);
-            IUnboundExpr body = Block();
+            var funcType = FnArgsDecl(true);
+            var body = Block();
 
-            return new Function(position, name, typeParams, funcType, body);
+            var function = new Function(position, name, funcType, body);
+
+            if (typeParams.Count == 0) return function;
+
+            return new GenericFunction(function, typeParams);
         }
 
         // <-- LPAREN ArgsDecl? ARROW TypeDecl? RPAREN
@@ -110,31 +114,31 @@ namespace Magpie.Compilation
         {
             Consume(TokenType.LeftParen);
 
-            IEnumerable<ParamDecl> args = CurrentIs(TokenType.RightArrow) ? new ParamDecl[0] : ArgDecls(includeArgNames);
+            var args = CurrentIs(TokenType.RightArrow) ? new ParamDecl[0] : ArgDecls(includeArgNames);
 
-            Consume(TokenType.RightArrow);
+            var position = Consume(TokenType.RightArrow).Position;
 
-            Decl returnType = CurrentIs(TokenType.RightParen) ? Decl.Unit : TypeDecl();
+            IUnboundDecl returnType = CurrentIs(TokenType.RightParen) ? Decl.Unit : TypeDecl();
 
             Consume(TokenType.RightParen);
 
-            return new FuncType(args, returnType);
+            return new FuncType(position, args, returnType);
         }
 
         // <-- NAME TypeDecl (COMMA NAME TypeDecl)*
         private IEnumerable<ParamDecl> ArgDecls(bool includeArgNames)
         {
-            List<ParamDecl> args = new List<ParamDecl>();
+            var args = new List<ParamDecl>();
 
             while (true)
             {
-                string name = "_";
+                var name = "_";
                 if (includeArgNames)
                 {
                     name = Consume(TokenType.Name).StringValue;
                 }
 
-                Decl type = TypeDecl();
+                var type = TypeDecl();
                 args.Add(new ParamDecl(name, type));
 
                 if (!ConsumeIf(TokenType.Comma)) break;
@@ -166,10 +170,15 @@ namespace Magpie.Compilation
         }
 
         // <-- Expression LINE? | LINE (Expression LINE)+ <terminator>
-        private IUnboundExpr ThenBlock(out bool hasElse)
+        /// <summary>
+        /// Parses a block terminated by "end" or a continue terminator. Used for blocks
+        /// that may end or be followed by something else (such as an "else" clause).
+        /// </summary>
+        /// <param name="continueTerminator"></param>
+        /// <param name="hasContinue"></param>
+        /// <returns></returns>
+        private IUnboundExpr InnerBlock(TokenType continueTerminator)
         {
-            hasElse = false;
-
             if (ConsumeIf(TokenType.Line))
             {
                 var expressions = new List<IUnboundExpr>();
@@ -180,10 +189,9 @@ namespace Magpie.Compilation
                     expressions.Add(Expression());
                     Consume(TokenType.Line);
 
-                    if (ConsumeIf(TokenType.Else))
+                    if (CurrentIs(continueTerminator)) // don't consume
                     {
                         inBlock = false;
-                        hasElse = true;
                     }
                     else if (ConsumeIf(TokenType.End))
                     {
@@ -197,8 +205,15 @@ namespace Magpie.Compilation
             {
                 IUnboundExpr expr = Expression();
 
-                if (ConsumeIf(TokenType.Else)) hasElse = true;
-                else if (ConsumeIf(TokenType.Line, TokenType.Else)) hasElse = true;
+                if (CurrentIs(TokenType.Else))
+                {
+                    // don't consume
+                }
+                else if (CurrentIs(TokenType.Line, TokenType.Else))
+                {
+                    // just consume the line
+                    Consume(TokenType.Line);
+                }
                 // for inner blocks, allow a line at the end. this is for cases like:
                 // if foo then bar
                 // else bang
@@ -238,7 +253,78 @@ namespace Magpie.Compilation
 
                 return new DefineExpr(position, name, body, isMutable.Value);
             }
+            else return MatchExpr();
+        }
+
+        // <-- MATCH FlowExpr LINE? (CASE CaseExpr THEN Block)+ END
+        //   | FlowExpr
+        private IUnboundExpr MatchExpr()
+        {
+            TokenPosition position;
+            if (ConsumeIf(TokenType.Match, out position))
+            {
+                IUnboundExpr matchExpr = FlowExpr();
+                ConsumeIf(TokenType.Line);
+
+                var cases = new List<MatchCase>();
+                TokenPosition casePosition;
+                while (ConsumeIf(TokenType.Case, out casePosition))
+                {
+                    ICaseExpr caseExpr = CaseExpr();
+                    Consume(TokenType.Then);
+                    IUnboundExpr bodyExpr = InnerBlock(TokenType.Case);
+
+                    cases.Add(new MatchCase(casePosition, caseExpr, bodyExpr));
+
+                    // optional line after case
+                    ConsumeIf(TokenType.Line);
+                }
+                Consume(TokenType.End);
+
+                return new MatchExpr(position, matchExpr, cases);
+            }
             else return FlowExpr();
+        }
+
+        // <-- PrimaryCaseExpr+
+        private ICaseExpr CaseExpr()
+        {
+            return OneOrMoreRight<ICaseExpr>(PrimaryCaseExpr, (left, right) => new CallCase(left, right));
+        }
+
+        // <-- BOOL
+        //   | INT
+        //   | STRING
+        //   | NAME
+        //   | LPAREN CaseExpr (COMMA CaseExpr)+ RPAREN )
+        //   | <null>
+        private ICaseExpr PrimaryCaseExpr()
+        {
+            if (CurrentIs(TokenType.Bool))        return new BoolCase(Consume(TokenType.Bool).BoolValue);
+            else if (CurrentIs(TokenType.Int))    return new IntCase(Consume(TokenType.Int).IntValue);
+            else if (CurrentIs(TokenType.String)) return new StringCase(Consume(TokenType.String).StringValue);
+            else if (CurrentIs(TokenType.Name))
+            {
+                string name = Consume(TokenType.Name).StringValue;
+
+                if (name == "_") return new AnyCase();
+                else return new NameCase(name);
+            }
+            else if (ConsumeIf(TokenType.LeftParen))
+            {
+                List<ICaseExpr> fields = new List<ICaseExpr>();
+
+                fields.Add(CaseExpr());
+                while (ConsumeIf(TokenType.Comma))
+                {
+                    fields.Add(CaseExpr());
+                }
+
+                Consume(TokenType.RightParen);
+
+                return new TupleCase(fields);
+            }
+            else return null;
         }
 
         // <-- (FOR Name <- OperatorExpr LINE?)+ DO Block
@@ -286,10 +372,9 @@ namespace Magpie.Compilation
 
                 if (ConsumeIf(TokenType.Then))
                 {
-                    bool hasElse;
-                    IUnboundExpr thenBody = ThenBlock(out hasElse);
+                    IUnboundExpr thenBody = InnerBlock(TokenType.Else);
 
-                    if (hasElse)
+                    if (ConsumeIf(TokenType.Else))
                     {
                         IUnboundExpr elseBody = Block();
                         return new IfThenElseExpr(position, condition, thenBody, elseBody);
@@ -379,7 +464,7 @@ namespace Magpie.Compilation
         // <-- PrimaryExpr+
         private IUnboundExpr ApplyExpr()
         {
-            return OneOrMoreRight(ReverseApplyExpr, (left, right) => new CallExpr(left, right));
+            return OneOrMoreRight<IUnboundExpr>(ReverseApplyExpr, (left, right) => new CallExpr(left, right));
         }
 
         // <-- ArrayExpr (DOT ArrayExpr)*
@@ -495,22 +580,26 @@ namespace Magpie.Compilation
                 name = new NameExpr(Name(), TypeArgs());
             }
 
-            return new FuncRefExpr(position, name, TupleType());
+            return new FuncRefExpr(position, name, TupleType().Item1);
         }
 
         // <-- STRUCT NAME GenericDecl LINE StructBody END
-        private Struct Struct()
+        private object Struct()
         {
             Consume(TokenType.Struct);
-            string name = Consume(TokenType.Name).StringValue;
+            var name = Consume(TokenType.Name);
 
-            IEnumerable<Decl> typeParams = TypeArgs();
+            var typeParams = TypeParams();
             Consume(TokenType.Line);
 
-            List<Field> fields = StructFields();
+            var fields = StructFields();
             Consume(TokenType.End);
 
-            return new Struct(name, typeParams, fields);
+            var structure = new Struct(name.Position, name.StringValue, fields);
+            
+            if (typeParams.Count == 0) return structure;
+
+            return new GenericStruct(structure, typeParams);
         }
 
         // <-- (NAME (MUTABLE?) TypeDecl LINE)*
@@ -520,9 +609,9 @@ namespace Magpie.Compilation
 
             while (CurrentIs(TokenType.Name))
             {
-                string name = Consume(TokenType.Name).StringValue;
-                bool isMutable = ConsumeIf(TokenType.Mutable);
-                Decl type = TypeDecl();
+                var name = Consume(TokenType.Name).StringValue;
+                var isMutable = ConsumeIf(TokenType.Mutable);
+                var type = TypeDecl();
                 Consume(TokenType.Line);
 
                 fields.Add(new Field(name, type, isMutable));
@@ -532,18 +621,22 @@ namespace Magpie.Compilation
         }
 
         // <-- UNION NAME GenericDecl LINE UnionBody END
-        private Union Union()
+        private object Union()
         {
             Consume(TokenType.Union);
-            string name = Consume(TokenType.Name).StringValue;
+            var name = Consume(TokenType.Name);
 
-            IEnumerable<Decl> typeParams = TypeArgs();
+            var typeParams = TypeParams();
             Consume(TokenType.Line);
 
-            List<UnionCase> cases = UnionCases();
+            var cases = UnionCases();
             Consume(TokenType.End);
 
-            return new Union(name, typeParams, cases);
+            var union = new Union(name.Position, name.StringValue, cases);
+
+            if (typeParams.Count == 0) return union;
+
+            return new GenericUnion(union, typeParams);
         }
 
         // <-- (NAME (TypeDecl)? LINE)*
@@ -553,27 +646,27 @@ namespace Magpie.Compilation
 
             while (CurrentIs(TokenType.Name))
             {
-                string name = Consume(TokenType.Name).StringValue;
+                var name = Consume(TokenType.Name).StringValue;
 
-                Decl type = Decl.Unit;
+                IUnboundDecl type = Decl.Unit;
                 if (!CurrentIs(TokenType.Line))
                 {
                     type = TypeDecl();
                 }
                 Consume(TokenType.Line);
 
-                cases.Add(new UnionCase(name, type));
+                cases.Add(new UnionCase(name, type, cases.Count));
             }
 
             return cases;
         }
 
         // <-- LPAREN (TypeDecl (COMMA TypeDecl)*)? RPAREN
-        private IEnumerable<Decl> TupleType()
+        private Tuple<IEnumerable<IUnboundDecl>, TokenPosition> TupleType()
         {
-            List<Decl> decls = new List<Decl>();
+            var decls = new List<IUnboundDecl>();
 
-            Consume(TokenType.LeftParen);
+            var position = Consume(TokenType.LeftParen).Position;
 
             if (!CurrentIs(TokenType.RightParen))
             {
@@ -587,15 +680,14 @@ namespace Magpie.Compilation
 
             Consume(TokenType.RightParen);
 
-            return decls;
+            return Tuple.Create((IEnumerable<IUnboundDecl>)decls, position);
         }
 
-        // <-- LBRACKET TypeDecl (COMMA TypeDecl)* RBRACKET
-        //   | PRIME (TypeDecl | (LPAREN TypeDecl (COMMA TypeDecl)* RPAREN))
+        // <-- PRIME (TypeDecl | (LPAREN TypeDecl (COMMA TypeDecl)* RPAREN))
         //   | <nothing>
-        private IEnumerable<Decl> TypeArgs()
+        private IEnumerable<IUnboundDecl> TypeArgs()
         {
-            List<Decl> decls = new List<Decl>();
+            var decls = new List<IUnboundDecl>();
 
             // may not be any args
             if (ConsumeIf(TokenType.Prime))
@@ -621,12 +713,42 @@ namespace Magpie.Compilation
             return decls;
         }
 
+        // <-- PRIME (NAME | (LPAREN NAME (COMMA NAME)* RPAREN))
+        //   | <nothing>
+        private IList<string> TypeParams()
+        {
+            var parameters = new List<string>();
+
+            // may not be any params
+            if (ConsumeIf(TokenType.Prime))
+            {
+                if (ConsumeIf(TokenType.LeftParen))
+                {
+                    parameters.Add(Consume(TokenType.Name).StringValue);
+
+                    while (ConsumeIf(TokenType.Comma))
+                    {
+                        parameters.Add(Consume(TokenType.Name).StringValue);
+                    }
+
+                    Consume(TokenType.RightParen);
+                }
+                else
+                {
+                    // no grouping, so just a single type declaration
+                    parameters.Add(Consume(TokenType.Name).StringValue);
+                }
+            }
+
+            return parameters;
+        }
+
         // <-- ( LBRACKET RBRACKET PRIME ) * ( TupleType
         //                                   | FnTypeDecl
         //                                   | Name TypeArgs )
-        private Decl TypeDecl()
+        private IUnboundDecl TypeDecl()
         {
-            Stack<bool> arrays = new Stack<bool>();
+            var arrays = new Stack<Tuple<bool, TokenPosition>>();
             while (ConsumeIf(TokenType.LeftBracket))
             {
                 bool isMutable = false;
@@ -639,28 +761,29 @@ namespace Magpie.Compilation
                     Consume(TokenType.RightBracket);
                 }
 
-                Consume(TokenType.Prime);
+                var position = Consume(TokenType.Prime).Position;
 
-                arrays.Push(isMutable);
+                arrays.Push(Tuple.Create(isMutable, position));
             }
 
             // figure out the endmost type
-            Decl type;
+            IUnboundDecl type;
             if (CurrentIs(TokenType.LeftParen)) type = new TupleType(TupleType());
             else if (ConsumeIf(TokenType.Fn)) type = FnArgsDecl(false);
-            else type = Decl.FromName(Name().Key, TypeArgs());
+            else type = new NamedType(Name(), TypeArgs());
 
             // wrap it in the array declarations
             while (arrays.Count > 0)
             {
-                type = new ArrayType(type, arrays.Pop());
+                var array = arrays.Pop();
+                type = new ArrayType(array.Item2, type, array.Item1);
             }
 
             return type;
         }
 
         // <-- NAME (COLON NAME)*
-        private KeyValuePair<string, TokenPosition> Name()
+        private Tuple<string, TokenPosition> Name()
         {
             Token token = Consume(TokenType.Name);
             TokenPosition position = token.Position;
@@ -675,7 +798,7 @@ namespace Magpie.Compilation
                 position = new TokenPosition(position.Line, position.Column, name.Length);
             }
 
-            return new KeyValuePair<string,TokenPosition>(name, position);
+            return new Tuple<string, TokenPosition>(name, position);
         }
     }
 }

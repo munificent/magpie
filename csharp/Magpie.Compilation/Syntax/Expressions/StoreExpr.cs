@@ -7,9 +7,9 @@ namespace Magpie.Compilation
 {
     public class StoreExpr : IBoundExpr
     {
-        public IBoundExpr Struct;
-        public Field Field;
-        public IBoundExpr Value;
+        public IBoundExpr Struct { get; private set; }
+        public Field Field { get; private set; }
+        public IBoundExpr Value { get; private set; }
 
         public StoreExpr(IBoundExpr structure, Field field, IBoundExpr value)
         {
@@ -21,7 +21,7 @@ namespace Magpie.Compilation
         //### bob: this means assignment can't be used in the middle of an expression like
         //    you can in C. it might be nice if there was an alternate assignment syntax
         //    that did the assignment and also returned the assigned value.
-        public Decl Type { get { return Decl.Unit; } }
+        public IBoundDecl Type { get { return Decl.Unit; } }
 
         public TReturn Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)
         {

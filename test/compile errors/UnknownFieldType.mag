@@ -1,0 +1,9 @@
+// error line: 8
+
+Main (->)
+    Print "hi"
+end
+
+struct Foo
+    A Undefined
+end

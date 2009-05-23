@@ -7,7 +7,7 @@ namespace Magpie.Compilation
 {
     public class LocalsExpr : IBoundExpr
     {
-        public Decl Type { get { throw new NotImplementedException(); } }
+        public IBoundDecl Type { get { throw new NotSupportedException(); } }
 
         public TReturn Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)
         {

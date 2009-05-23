@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,7 @@ namespace Magpie.Compilation
         }
 
         public FunctionTable Functions { get { return mFunctions; } }
+        public TypeTable Types { get { return mTypes; } }
 
         public Compiler(IForeignStaticInterface foreignInterface)
         {
@@ -23,30 +25,66 @@ namespace Magpie.Compilation
 
         public void AddSourceFile(string filePath)
         {
-            try
-            {
-                SourceFile source = MagpieParser.ParseSourceFile(filePath);
-                AddNamespace(source.Name, source, source);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Exception parsing \"" + filePath + "\".", ex);
-            }
+            // defer the actual parsing until we compile. this way errors that occur
+            // during source translation can generate compile errors at an expected
+            // time.
+            mSourcePaths.Add(filePath);
         }
 
         public IList<CompileError> Compile(Stream outputStream)
         {
-            mFunctions.Add(Intrinsic.All);
-
-            if (mForeignInterface != null)
-            {
-                mFunctions.Add(mForeignInterface.Functions);
-            }
-
             var errors = new List<CompileError>();
 
             try
             {
+                // parse all the source files
+                foreach (var path in mSourcePaths)
+                {
+                    SourceFile source = MagpieParser.ParseSourceFile(path);
+                    AddNamespace(source.Name, source, source);
+                }
+
+                // build the function table
+                mFunctions = new FunctionTable();
+                mFunctions.Add(Intrinsic.All);
+
+                // bind the user-defined types and create their auto-generated functions
+                foreach (var structure in mTypes.Structs)
+                {
+                    TypeBinder.Bind(this, structure);
+                    mFunctions.Add(structure.BuildFunctions());
+                }
+
+                foreach (var union in mTypes.Unions)
+                {
+                    TypeBinder.Bind(this, union);
+                    mFunctions.Add(union.BuildFunctions());
+                }
+
+                foreach (var structure in mGenericStructs)
+                {
+                    mGenericFunctions.AddRange(structure.BuildFunctions());
+                }
+
+                foreach (var union in mGenericUnions)
+                {
+                    mGenericFunctions.AddRange(union.BuildFunctions());
+                }
+
+
+                // bind the types of the user functions and add them
+                foreach (var unbound in mUnboundFunctions)
+                {
+                    var context = new BindingContext(this, unbound.NameContext);
+                    TypeBinder.Bind(context, unbound.Type);
+                    mFunctions.Add(unbound);
+                }
+
+                if (mForeignInterface != null)
+                {
+                    mFunctions.Add(mForeignInterface.Functions.Cast<ICallable>());
+                }
+
                 mFunctions.BindAll(this);
             }
             catch (CompileException ex)
@@ -62,6 +100,7 @@ namespace Magpie.Compilation
 
             return errors;
         }
+
         /// <summary>
         /// Resolves and binds a reference to a name.
         /// </summary>
@@ -69,30 +108,31 @@ namespace Magpie.Compilation
         /// <param name="scope">The scope in which the name is being bound.</param>
         /// <param name="name">The name being resolved. May or may not be fully-qualified.</param>
         /// <param name="typeArgs">The type arguments being applied to the name. For
-        /// example, resolving "foo[int, bool]" would pass in {int, bool} here.</param>
+        /// example, resolving "foo'(int, bool)" would pass in {int, bool} here.</param>
         /// <param name="arg">The argument being applied to the name.</param>
         /// <returns></returns>
-        public IBoundExpr ResolveName(Function function, Function instancingContext,
-            Scope scope, TokenPosition position, string name, IList<Decl> typeArgs, IBoundExpr arg)
+        public IBoundExpr ResolveName(Function function,
+            Scope scope, TokenPosition position, string name,
+            IList<IUnboundDecl> typeArgs, IBoundExpr arg)
         {
-            Decl[] argTypes = null;
-            if (arg != null) argTypes = arg.Type.Expanded;
+            IBoundDecl[] argTypes = null;
+            if (arg != null) argTypes = arg.Type.Expand();
 
             IBoundExpr resolved = null;
-            Decl resolvedType = null;
+            IBoundDecl resolvedType = null;
 
             // see if it's an argument
-            ParamDecl param = function.FuncType.Parameters.Find(p => p.Name == name);
+            ParamDecl param = function.Type.Parameters.Find(p => p.Name == name);
             if (param != null)
             {
-                resolved = new LoadExpr(new LocalsExpr(), param.Type, 0);
-                resolvedType = param.Type;
+                resolved = new LoadExpr(new LocalsExpr(), param.Type.Bound, 0);
+                resolvedType = param.Type.Bound;
 
-                if (function.FuncType.Parameters.Count > 1)
+                if (function.Type.Parameters.Count > 1)
                 {
                     // function has multiple parameters, so the first local slot is a tuple and we need to load the arg from it
-                    byte argIndex = (byte)function.FuncType.Parameters.IndexOf(param);
-                    resolved = new LoadExpr(resolved, param.Type, argIndex);
+                    byte argIndex = (byte)function.Type.Parameters.IndexOf(param);
+                    resolved = new LoadExpr(resolved, param.Type.Bound, argIndex);
                 }
             }
             else if (scope.Contains(name))
@@ -101,14 +141,12 @@ namespace Magpie.Compilation
 
                 // just load the value
                 resolved = new LoadExpr(new LocalsExpr(), scope[name]);
-                resolvedType = local.Type;
+                resolvedType = local.Type.Bound;
             }
 
             // if we resolved to a local name, handle it
             if (resolved != null)
             {
-                if ((typeArgs != null) && (typeArgs.Count > 0)) throw new CompileException(position, "Cannot apply generic type arguments to a local variable or function argument.");
-
                 // if the local or argument is holding a function reference and we're passed args, call it
                 if (argTypes != null)
                 {
@@ -139,12 +177,12 @@ namespace Magpie.Compilation
             if (arg == null)
             {
                 arg = new UnitExpr(TokenPosition.None);
-                argTypes = arg.Type.Expanded;
+                argTypes = arg.Type.Expand();
             }
 
             // look up the function
-            ICallable callable = FindFunction(function, instancingContext, name, typeArgs, argTypes);
-            if (callable == null) throw new CompileException(position, String.Format("Could not resolve name {0}.", FunctionTable.GetUniqueName(name, typeArgs, argTypes)));
+            ICallable callable = FindFunction(function.NameContext, name, typeArgs, argTypes);
+            if (callable == null) throw new CompileException(position, String.Format("Could not resolve name {0}.", FunctionTable.GetUniqueName(name, argTypes)));
 
             return callable.CreateCall(arg);
         }
@@ -159,140 +197,136 @@ namespace Magpie.Compilation
         /// <param name="typeArgs"></param>
         /// <param name="argTypes"></param>
         /// <returns></returns>
-        public ICallable FindFunction(Function containingType, Function instancingContext,
-            string name, IList<Decl> typeArgs, Decl[] argTypes)
+        public ICallable FindFunction(NameContext context,
+            string name, IList<IUnboundDecl> typeArgs, IBoundDecl[] argTypes)
         {
-            // try the name as-is
-            ICallable bound = LookUpFunction(containingType, name, typeArgs, argTypes);
-            if (bound != null) return bound;
-
-            // try the current function's namespace
-            bound = LookUpFunction(containingType, QualifyName(containingType.Namespace, name), typeArgs, argTypes);
-            if (bound != null) return bound;
-
-            // try each of the open namespaces
-            IList<string> namespaces = containingType.SourceFile.UsingNamespaces;
-            for (int i = namespaces.Count - 1; i >= 0; i--)
+            foreach (var potentialName in PotentialNames(name, context))
             {
-                bound = LookUpFunction(containingType, QualifyName(namespaces[i], name), typeArgs, argTypes);
+                var bound = LookUpFunction(context, potentialName, typeArgs, argTypes);
                 if (bound != null) return bound;
-            }
-
-            // try the instance context's namespaces
-            if (instancingContext != null)
-            {
-                bound = LookUpFunction(containingType, QualifyName(instancingContext.Namespace, name), typeArgs, argTypes);
-                if (bound != null) return bound;
-
-                namespaces = instancingContext.SourceFile.UsingNamespaces;
-                for (int i = namespaces.Count - 1; i >= 0; i--)
-                {
-                    bound = LookUpFunction(containingType, QualifyName(namespaces[i], name), typeArgs, argTypes);
-                    if (bound != null) return bound;
-                }
             }
 
             // not found
             return null;
         }
 
-        private ICallable LookUpFunction(Function containingType, string fullName, IList<Decl> typeArgs, Decl[] argTypes)
+        public IBoundDecl FindType(NameContext context, TokenPosition position, string name,
+            IEnumerable<IBoundDecl> typeArgs)
         {
-            string uniqueName = FunctionTable.GetUniqueName(fullName, typeArgs, argTypes);
+            foreach (var potentialName in PotentialNames(name, context))
+            {
+                var type = mTypes.Find(potentialName, typeArgs);
+                if (type != null) return type;
+            }
+
+            // not found
+            throw new CompileException(position, "Could not find a type named " + name + ".");
+        }
+
+        private IEnumerable<string> PotentialNames(string name, NameContext context)
+        {
+            // try the name as-is
+            yield return name;
+
+            // try the current function's namespace
+            yield return QualifyName(context.Namespace, name);
+
+            // try each of the open namespaces
+            foreach (var usingNamespace in context.UsingNamespaces.Reverse())
+            {
+                yield return QualifyName(usingNamespace, name);
+            }
+        }
+
+        private ICallable LookUpFunction(NameContext context, string fullName,
+            IList<IUnboundDecl> typeArgs, IBoundDecl[] argTypes)
+        {
+            var boundTypeArgs = TypeBinder.Bind(new BindingContext(this, context), typeArgs);
+
+            string uniqueName = FunctionTable.GetUniqueName(fullName, boundTypeArgs, argTypes);
 
             // try the already bound functions
             ICallable callable;
             if (mFunctions.TryFind(fullName, argTypes, out callable)) return callable;
 
             // try to instantiate a generic
-            foreach (var generic in mGenerics)
+            foreach (var generic in mGenericFunctions)
             {
                 // names must match
-                if (generic.FullName != fullName) continue;
+                if (generic.Name != fullName) continue;
 
-                Function instance = Instantiate(generic, typeArgs, argTypes);
+                ICallable instance = generic.Instantiate(this, boundTypeArgs, argTypes);
 
-                if (instance != null)
-                {
-                    // don't instantiate it multiple times
-                    BoundFunction bound = mFunctions.Add(instance);
+                //### bob: there's a bug here. it doesn't check that the *unique* names of the two functions
+                // match, just the base names. i think this means it could incorrectly collide:
+                // List'Int ()
+                // List'Bool ()
+                // but i'm not positive
 
-                    if (instance.Matches(uniqueName))
-                    {
-                        FunctionBinder.Bind(this, bound, containingType);
-
-                        return bound;
-                    }
-                }
+                if (instance != null) return instance;
             }
 
             // couldn't find it
             return null;
         }
 
-        private Function Instantiate(Function generic, IList<Decl> typeArgs, IEnumerable<Decl> argTypes)
-        {
-            // apply the type arguments to the parameters
-            var applicator = TypeArgApplicator.Create(generic, typeArgs, argTypes);
-            if (applicator == null) return null;
-
-            FuncType funcType = TypeInstancer.Instance(applicator, generic.FuncType);
-            if (funcType == null) return null;
-
-            IUnboundExpr body = UnboundBodyInstancer.Instance(applicator, generic.Body);
-
-            Function instance = new Function(generic.Position, generic.Name, typeArgs, funcType, body, applicator.CanInfer);
-
-            instance.Qualify(generic);
-
-            return instance;
-        }
-
-        public void AddFunction(Function function)
-        {
-            // shunt the generics over to the staging area. they will be instantiated
-            // into real functions as needed.
-            if (function.IsGeneric)
-            {
-                mGenerics.Add(function);
-            }
-            else
-            {
-                mFunctions.Add(function);
-            }
-        }
-
         private void AddNamespace(string parentName, SourceFile file, Namespace namespaceObj)
         {
-            foreach (Function function in namespaceObj.Functions)
+            var context = new NameContext(parentName, file.UsingNamespaces);
+
+            foreach (var function in namespaceObj.Functions)
             {
-                function.Qualify(parentName, file);
-                AddFunction(function);
+                function.SetContext(context);
+                mUnboundFunctions.Add(function);
             }
 
-            var auto = new AutoFunctions(this);
-
-            foreach (Struct structure in namespaceObj.Structs)
+            foreach (var structure in namespaceObj.Structs)
             {
-                structure.Qualify(parentName, file);
-                auto.BuildFunctions(structure);
+                structure.SetContext(context);
+                mTypes.Add(structure);
             }
 
-            foreach (Union union in namespaceObj.Unions)
+            foreach (var union in namespaceObj.Unions)
             {
-                union.Qualify(parentName, file);
-                auto.BuildFunctions(union);
+                union.SetContext(context);
+                mTypes.Add(union);
             }
 
-            foreach (Namespace childNamespace in namespaceObj.Namespaces)
+            foreach (var childNamespace in namespaceObj.Namespaces)
             {
-                string name = Compiler.QualifyName(parentName, childNamespace.Name);
+                var name = Compiler.QualifyName(parentName, childNamespace.Name);
                 AddNamespace(name, file, childNamespace);
+            }
+
+            foreach (var function in namespaceObj.GenericFunctions)
+            {
+                function.BaseType.SetContext(context);
+                mGenericFunctions.Add(function);
+            }
+
+            foreach (var structure in namespaceObj.GenericStructs)
+            {
+                structure.BaseType.SetContext(context);
+                mGenericStructs.Add(structure);
+            }
+
+            foreach (var union in namespaceObj.GenericUnions)
+            {
+                union.BaseType.SetContext(context);
+                mGenericUnions.Add(union);
             }
         }
 
-        private readonly FunctionTable mFunctions = new FunctionTable();
-        private readonly List<Function> mGenerics = new List<Function>();
+        private readonly List<string> mSourcePaths = new List<string>();
+
+        //### bob: would be cool to get rid of this
+        private readonly List<Function> mUnboundFunctions = new List<Function>();
+
+        private FunctionTable mFunctions;
+        private readonly List<GenericStruct> mGenericStructs = new List<GenericStruct>();
+        private readonly List<GenericUnion> mGenericUnions = new List<GenericUnion>();
+        private readonly TypeTable mTypes = new TypeTable();
+        private readonly List<IGenericCallable> mGenericFunctions = new List<IGenericCallable>();
         private readonly IForeignStaticInterface mForeignInterface;
     }
 }

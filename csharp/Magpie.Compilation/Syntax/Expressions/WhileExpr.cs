@@ -48,7 +48,7 @@ namespace Magpie.Compilation
     {
         public BoundWhileExpr(IBoundExpr condition, IBoundExpr body) : base(condition, body) { }
 
-        public Decl Type { get { return Body.Type; } }
+        public IBoundDecl Type { get { return Body.Type; } }
 
         public TReturn Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)
         {

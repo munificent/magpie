@@ -45,7 +45,7 @@ namespace Magpie.Compilation
             return mStruct.Contains(name);
         }
 
-        public void Define(string name, Decl type, bool isMutable)
+        public void Define(string name, IBoundDecl type, bool isMutable)
         {
             mStruct.Define(name, type, isMutable);
 
@@ -53,7 +53,7 @@ namespace Magpie.Compilation
             mNumVariables = Math.Max(mNumVariables, mStruct.Fields.Count);
         }
 
-        private readonly Struct mStruct = new Struct("_scope", null, null);
+        private readonly Struct mStruct = new Struct(TokenPosition.None, "_scope", null);
         private readonly Stack<int> mInnerScopes = new Stack<int>();
         private int mNumVariables = 0;
     }

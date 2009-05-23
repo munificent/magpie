@@ -19,24 +19,19 @@ namespace Magpie.Compilation
         public TokenPosition Position { get; private set; }
 
         public string Name { get; private set; }
-        public IList<Decl> TypeArgs { get { return mTypeArgs; } }
-
-        public NameExpr(KeyValuePair<string, TokenPosition> pair)
-            : this(pair.Value, pair.Key, null)
-        {
-        }
+        public IList<IUnboundDecl> TypeArgs { get { return mTypeArgs; } }
 
         public NameExpr(TokenPosition position, string name)
             : this(position, name, null)
         {
         }
 
-        public NameExpr(KeyValuePair<string, TokenPosition> pair, IEnumerable<Decl> typeArgs)
-            : this(pair.Value, pair.Key, typeArgs)
+        public NameExpr(Tuple<string, TokenPosition> pair, IEnumerable<IUnboundDecl> typeArgs)
+            : this(pair.Item2, pair.Item1, typeArgs)
         {
         }
 
-        public NameExpr(TokenPosition position, string name, IEnumerable<Decl> typeArgs)
+        public NameExpr(TokenPosition position, string name, IEnumerable<IUnboundDecl> typeArgs)
         {
             Position = position;
 
@@ -65,6 +60,6 @@ namespace Magpie.Compilation
             }
         }
 
-        private readonly List<Decl> mTypeArgs = new List<Decl>();
+        private readonly List<IUnboundDecl> mTypeArgs = new List<IUnboundDecl>();
     }
 }

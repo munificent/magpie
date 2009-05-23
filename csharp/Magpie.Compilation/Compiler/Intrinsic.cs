@@ -12,7 +12,7 @@ namespace Magpie.Compilation
     /// </summary>
     public class Intrinsic : ICallable
     {
-        public static IEnumerable<Intrinsic> All
+        public static IEnumerable<ICallable> All
         {
             get
             {
@@ -51,7 +51,7 @@ namespace Magpie.Compilation
                 yield return new Intrinsic("Size", OpCode.StringSize, FuncType.Create(Decl.String, Decl.Int));
                 yield return new Intrinsic("Substring", OpCode.Substring, FuncType.Create(Decl.String, Decl.Int, Decl.Int, Decl.String));
 
-                yield return new Intrinsic("Size", OpCode.SizeArray, FuncType.Create(new ArrayType(new AnyType(), false), Decl.Int));
+                yield return new Intrinsic("Size", OpCode.SizeArray, FuncType.Create(new BoundArrayType(new AnyType(), false), Decl.Int));
             }
         }
 
@@ -62,8 +62,8 @@ namespace Magpie.Compilation
         }
 
         public string Name { get; private set; }
-        public FuncType FuncType { get { return mType; } }
-        public Decl Type { get { return mType.Return; } }
+        public FuncType FuncType { get; private set; }
+        public IBoundDecl Type { get { return FuncType.Return.Bound; } }
         public List<OpCode> OpCodes = new List<OpCode>();
 
         private Intrinsic(string name, OpCode opCode1, OpCode opCode2, FuncType type)
@@ -82,7 +82,7 @@ namespace Magpie.Compilation
         private Intrinsic(string name, FuncType type)
         {
             Name = name;
-            mType = type;
+            FuncType = type;
         }
 
         #region ICallable Members
@@ -94,10 +94,13 @@ namespace Magpie.Compilation
             return new IntrinsicExpr(this, arg);
         }
 
-        public Decl[] ParameterTypes { get { return mType.ParameterTypes; } } 
+        public IBoundDecl[] ParameterTypes { get { return FuncType.ParameterTypes; } }
+
+        //### bob: no generic intrinsics
+        public IBoundDecl[] TypeArguments { get { return new IBoundDecl[0]; } }
+
+        public bool HasInferrableTypeArguments { get { return false; } }
 
         #endregion
-
-        private FuncType mType;
     }
 }

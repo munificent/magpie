@@ -7,20 +7,24 @@ namespace Magpie.Compilation
 {
     public class ConstructExpr : IBoundExpr
     {
-        public Struct Struct { get { return mStruct; } }
+        public Struct Struct { get; private set; }
+        public IBoundExpr Arg { get; private set; }
 
-        public ConstructExpr(Struct structure)
+        public ConstructExpr(Struct structure, IBoundExpr arg)
         {
-            mStruct = structure;
+            Struct = structure;
+            Arg = arg;
         }
 
-        private Struct mStruct;
+        public IBoundDecl Type { get { return Struct; } }
 
-        public Decl Type { get { return mStruct.Type; } }
+        #region IBoundExpr Members
 
-        public TReturn Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)
+        TReturn IBoundExpr.Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)
         {
             return visitor.Visit(this);
         }
+
+        #endregion
     }
 }

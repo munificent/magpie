@@ -11,13 +11,12 @@ namespace Magpie.Compilation
     /// </summary>
     public interface IBoundExpr
     {
-        Decl Type { get; }
+        IBoundDecl Type { get; }
         TReturn Accept<TReturn>(IBoundExprVisitor<TReturn> visitor);
     }
 
     public static class IBoundExprExtensions
     {
-
         public static IBoundExpr AppendArg(this IBoundExpr arg, IBoundExpr value)
         {
             if (arg is UnitExpr)
@@ -26,11 +25,11 @@ namespace Magpie.Compilation
                 return value;
             }
 
-            BoundTupleExpr tuple = arg as BoundTupleExpr;
+            var tuple = arg as BoundTupleExpr;
             if (tuple != null)
             {
                 // multiple args, so just add another
-                BoundTupleExpr newArg = new BoundTupleExpr(tuple.Fields);
+                var newArg = new BoundTupleExpr(tuple.Fields);
                 newArg.Fields.Add(value);
                 return newArg;
             }
@@ -47,11 +46,11 @@ namespace Magpie.Compilation
                 return value;
             }
 
-            BoundTupleExpr tuple = arg as BoundTupleExpr;
+            var tuple = arg as BoundTupleExpr;
             if (tuple != null)
             {
                 // multiple args, so just add another
-                BoundTupleExpr newArg = new BoundTupleExpr(tuple.Fields);
+                var newArg = new BoundTupleExpr(tuple.Fields);
                 newArg.Fields.Insert(0, value);
                 return newArg;
             }

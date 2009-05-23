@@ -8,24 +8,39 @@ namespace Magpie.Compilation
     /// <summary>
     /// A named type declaration.
     /// </summary>
-    public class NamedType : Decl
+    public class NamedType : IUnboundDecl
     {
-        public string Name { get { return mName; } }
-        public Decl[] TypeArgs { get { return mTypeArgs; } }
+        public TokenPosition Position { get; private set; }
+
+        public string Name { get; private set; }
+        public IUnboundDecl[] TypeArgs { get { return mTypeArgs; } }
 
         public bool IsGeneric { get { return mTypeArgs.Length > 0; } }
 
         public NamedType(string name)
         {
-            mName = name;
-            mTypeArgs = new Decl[0];
+            Position = TokenPosition.None;
+            Name = name;
+            mTypeArgs = new IUnboundDecl[0];
         }
 
-        public NamedType(string name, IEnumerable<Decl> typeArgs)
-            : this(name)
+        public NamedType(string name, IEnumerable<IUnboundDecl> typeArgs)
         {
-            mName = name;
+            Position = TokenPosition.None;
+            Name = name;
+            mTypeArgs = typeArgs.ToArray();
+        }
 
+        public NamedType(Tuple<string, TokenPosition> args)
+        {
+            Position = args.Item2;
+            Name = args.Item1;
+            mTypeArgs = new IUnboundDecl[0];
+        }
+
+        public NamedType(Tuple<string, TokenPosition> args, IEnumerable<IUnboundDecl> typeArgs)
+            : this(args)
+        {
             if (typeArgs != null)
             {
                 mTypeArgs = typeArgs.ToArray();
@@ -34,17 +49,20 @@ namespace Magpie.Compilation
 
         public override string ToString()
         {
-            if (mTypeArgs.Length > 0) return mName + "[" + mTypeArgs.JoinAll(", ") + "]";
+            if (mTypeArgs.Length > 0) return Name + "[" + mTypeArgs.JoinAll(", ") + "]";
 
-            return mName;
+            return Name;
         }
 
-        public override TReturn Accept<TReturn>(IDeclVisitor<TReturn> visitor)
+        #region IUnboundDecl Members
+
+        TReturn IUnboundDecl.Accept<TReturn>(IUnboundDeclVisitor<TReturn> visitor)
         {
             return visitor.Visit(this);
         }
 
-        private string mName;
-        private Decl[] mTypeArgs;
+        #endregion
+
+        private IUnboundDecl[] mTypeArgs;
     }
 }

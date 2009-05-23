@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
-    public class DeclComparer : IDeclVisitor<bool>
+    public class DeclComparer : IBoundDeclVisitor<bool>
     {
-        public static bool TypesMatch(Decl[] parameters, Decl[] arguments)
+        public static bool TypesMatch(IBoundDecl[] parameters, IBoundDecl[] arguments)
         {
             if (parameters.Length != arguments.Length) return false;
 
@@ -19,29 +19,29 @@ namespace Magpie.Compilation
             return true;
         }
 
-        public static bool TypesMatch(Decl parameter, Decl argument)
+        public static bool TypesMatch(IBoundDecl parameter, IBoundDecl argument)
         {
             if (parameter is AnyType) return true;
 
             return argument.Accept(new DeclComparer(parameter));
         }
 
-        #region IDeclVisitor Members
+        #region IBoundDeclVisitor<bool> Members
 
-        bool IDeclVisitor<bool>.Visit(AnyType decl)
+        bool IBoundDeclVisitor<bool>.Visit(AnyType decl)
         {
             return true;
         }
 
-        bool IDeclVisitor<bool>.Visit(AtomicDecl decl)
+        bool IBoundDeclVisitor<bool>.Visit(AtomicDecl decl)
         {
             // there is a single instance of each atomic type, so they must match exactly
             return ReferenceEquals(mParam, decl);
         }
 
-        bool IDeclVisitor<bool>.Visit(ArrayType decl)
+        bool IBoundDeclVisitor<bool>.Visit(BoundArrayType decl)
         {
-            ArrayType array = mParam as ArrayType;
+            var array = mParam as BoundArrayType;
 
             if (array == null) return false;
 
@@ -54,9 +54,9 @@ namespace Magpie.Compilation
             return TypesMatch(decl.ElementType, array.ElementType);
         }
 
-        bool IDeclVisitor<bool>.Visit(FuncType decl)
+        bool IBoundDeclVisitor<bool>.Visit(FuncType decl)
         {
-            FuncType paramFunc = mParam as FuncType;
+            var paramFunc = mParam as FuncType;
 
             if (paramFunc == null) return false;
 
@@ -65,32 +65,19 @@ namespace Magpie.Compilation
 
             for (int i = 0; i < paramFunc.Parameters.Count; i++)
             {
-                if (!TypesMatch(paramFunc.Parameters[i].Type, decl.Parameters[i].Type))
+                if (!TypesMatch(paramFunc.Parameters[i].Type.Bound, decl.Parameters[i].Type.Bound))
                 {
                     return false;
                 }
             }
 
             // return type must match
-            return TypesMatch(paramFunc.Return, decl.Return);
+            return TypesMatch(paramFunc.Return.Bound, decl.Return.Bound);
         }
 
-        bool IDeclVisitor<bool>.Visit(NamedType decl)
+        bool IBoundDeclVisitor<bool>.Visit(BoundTupleType decl)
         {
-            NamedType named = mParam as NamedType;
-            if (named == null) return false;
-
-            //### bob: should this be checking the qualified name?
-            if (named.Name != decl.Name) return false;
-
-            // the type args must match
-            if (named.TypeArgs.Length != decl.TypeArgs.Length) return false;
-            return TypesMatch(named.TypeArgs, decl.TypeArgs);
-        }
-
-        bool IDeclVisitor<bool>.Visit(TupleType decl)
-        {
-            TupleType paramTuple = mParam as TupleType;
+            var paramTuple = mParam as BoundTupleType;
             if (paramTuple == null) return false;
 
             if (paramTuple.Fields.Count != decl.Fields.Count) return false;
@@ -107,13 +94,25 @@ namespace Magpie.Compilation
             return true;
         }
 
+        bool IBoundDeclVisitor<bool>.Visit(Struct decl)
+        {
+            // should be same structure
+            return ReferenceEquals(mParam, decl);
+        }
+
+        bool IBoundDeclVisitor<bool>.Visit(Union decl)
+        {
+            // should be same structure
+            return ReferenceEquals(mParam, decl);
+        }
+
         #endregion
 
-        private DeclComparer(Decl parameter)
+        private DeclComparer(IBoundDecl parameter)
         {
             mParam = parameter;
         }
 
-        private Decl mParam;
+        private IBoundDecl mParam;
     }
 }

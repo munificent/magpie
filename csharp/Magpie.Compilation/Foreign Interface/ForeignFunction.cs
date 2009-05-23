@@ -30,16 +30,16 @@ namespace Magpie.Compilation
             ID = id;
         }
 
-        public ForeignFunction(string name, int id, Decl returnType)
-            : this(name, id, FuncType.Create(returnType)) {}
+        public ForeignFunction(string name, int id, IBoundDecl returnType)
+            : this(name, id, FuncType.Create(returnType)) { }
 
-        public ForeignFunction(string name, int id, Decl arg, Decl returnType)
+        public ForeignFunction(string name, int id, IBoundDecl arg, IBoundDecl returnType)
             : this(name, id, FuncType.Create(arg, returnType)) { }
 
-        public ForeignFunction(string name, int id, Decl arg1, Decl arg2, Decl returnType)
+        public ForeignFunction(string name, int id, IBoundDecl arg1, IBoundDecl arg2, IBoundDecl returnType)
             : this(name, id, FuncType.Create(arg1, arg2, returnType)) { }
 
-        public ForeignFunction(string name, int id, Decl arg1, Decl arg2, Decl arg3, Decl returnType)
+        public ForeignFunction(string name, int id, IBoundDecl arg1, IBoundDecl arg2, IBoundDecl arg3, IBoundDecl returnType)
             : this(name, id, FuncType.Create(arg1, arg2, arg3, returnType)) { }
 
         #region ICallable Members
@@ -49,7 +49,12 @@ namespace Magpie.Compilation
             return new ForeignCallExpr(this, arg);
         }
 
-        public Decl[] ParameterTypes { get { return FuncType.ParameterTypes; } } 
+        public IBoundDecl[] ParameterTypes { get { return FuncType.ParameterTypes; } }
+
+        //### bob: no generic foreign functions
+        public IBoundDecl[] TypeArguments { get { return new IBoundDecl[0]; } }
+
+        public bool HasInferrableTypeArguments { get { return false; } }
 
         #endregion
     }

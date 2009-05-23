@@ -33,9 +33,9 @@ namespace Magpie.Compilation
             exportTable.InsertOffset("main");
 
             // code section
-            foreach (BoundFunction function in mCompiler.Functions.Functions)
+            foreach (Function function in mCompiler.Functions.Functions)
             {
-                if (function.Name == "Main ()") exportTable.DefineOffset("main");
+                if (function.UniqueName == "Main ()") exportTable.DefineOffset("main");
 
                 BytecodeGenerator.Generate(mCompiler, writer, funcPatcher, strings, function);
             }

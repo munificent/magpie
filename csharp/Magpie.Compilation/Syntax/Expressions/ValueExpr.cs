@@ -29,7 +29,7 @@ namespace Magpie.Compilation
 
         public override string ToString() { return Value.ToString(); }
 
-        public Decl Type { get { return Decl.Int; } }
+        public IBoundDecl Type { get { return Decl.Int; } }
 
         public TReturn Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)
         {
@@ -48,7 +48,7 @@ namespace Magpie.Compilation
 
         public override string ToString() { return Value.ToString(); }
 
-        public Decl Type { get { return Decl.Bool; } }
+        public IBoundDecl Type { get { return Decl.Bool; } }
 
         public TReturn Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)
         {
@@ -65,7 +65,7 @@ namespace Magpie.Compilation
             return visitor.Visit(this);
         }
 
-        public Decl Type { get { return Decl.String; } }
+        public IBoundDecl Type { get { return Decl.String; } }
 
         public TReturn Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)
         {

@@ -13,7 +13,11 @@ namespace Magpie.Compilation
         public readonly List<Function> Functions = new List<Function>();
         public readonly List<Struct> Structs = new List<Struct>();
         public readonly List<Union> Unions = new List<Union>();
+        public readonly List<GenericFunction> GenericFunctions = new List<GenericFunction>();
+        public readonly List<GenericStruct> GenericStructs = new List<GenericStruct>();
+        public readonly List<GenericUnion> GenericUnions = new List<GenericUnion>();
 
+        //### bob: using object here is gross
         public Namespace(string name, IEnumerable<object> contents)
         {
             Name = name;
@@ -24,6 +28,9 @@ namespace Magpie.Compilation
                 else if (obj is Function) Functions.Add((Function)obj);
                 else if (obj is Struct) Structs.Add((Struct)obj);
                 else if (obj is Union) Unions.Add((Union)obj);
+                else if (obj is GenericFunction) GenericFunctions.Add((GenericFunction)obj);
+                else if (obj is GenericStruct) GenericStructs.Add((GenericStruct)obj);
+                else if (obj is GenericUnion) GenericUnions.Add((GenericUnion)obj);
             }
         }
 

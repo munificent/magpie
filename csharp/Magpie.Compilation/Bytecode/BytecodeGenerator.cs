@@ -24,16 +24,16 @@ namespace Magpie.Compilation
         }
 
         public static void Generate(Compiler compiler, BinaryWriter writer,
-            OffsetTable functionPatcher, StringTable stringTable, BoundFunction function)
+            OffsetTable functionPatcher, StringTable stringTable, Function function)
         {
             BytecodeGenerator generator = new BytecodeGenerator(compiler,
                 writer, functionPatcher, stringTable);
 
-            functionPatcher.DefineOffset(function.Name);
+            functionPatcher.DefineOffset(function.UniqueName);
 
             writer.Write(function.NumLocals);
 
-            function.Body.Accept(generator);
+            function.Body.Bound.Accept(generator);
 
             generator.Write(OpCode.Return);
         }
@@ -65,7 +65,7 @@ namespace Magpie.Compilation
         bool IBoundExprVisitor<bool>.Visit(BoundFuncRefExpr expr)
         {
             Write(OpCode.PushInt);
-            mFunctionPatcher.InsertOffset(expr.Function.Name);
+            mFunctionPatcher.InsertOffset(expr.Function.UniqueName);
             return true;
         }
 
@@ -119,7 +119,7 @@ namespace Magpie.Compilation
 
             // add the call
             OpCode op;
-            switch (expr.Arg.Type.Expanded.Length)
+            switch (expr.Arg.Type.Expand().Length)
             {
                 case 0: op = OpCode.Call0; break;
                 case 1: op = OpCode.Call1; break;
@@ -270,9 +270,7 @@ namespace Magpie.Compilation
 
         bool IBoundExprVisitor<bool>.Visit(ConstructExpr expr)
         {
-            // just push the arg tuple onto the stack
-            Write(OpCode.PushLocals);
-            Write(OpCode.Load, (byte)0);
+            expr.Arg.Accept(this);
 
             // if the struct has only one field, the arg tuple will just be a
             // value. in that case, we need to hoist it into a struct to make
@@ -284,25 +282,34 @@ namespace Magpie.Compilation
             {
                 Write(OpCode.Alloc, 1);
             }
+            else if (expr.Struct.Fields.Count == 0)
+            {
+                // for an empty struct, just include a dummy value
+                //### bob: this is gross
+                Write(OpCode.PushInt, 0);
+            }
+
+            // note that if there is more than one field, this evaluates to
+            // nothing: the arg tuple for the structure *is* the structure
+            // so the work is already done.
 
             return true;
-
         }
 
         bool IBoundExprVisitor<bool>.Visit(ConstructUnionExpr expr)
         {
-            // load the case tag
+            // push the case tag
             Write(OpCode.PushInt, expr.Case.Index);
+
+            // evaluate the value
+            expr.Arg.Accept(this);
 
             // one slot for the case tag
             int numSlots = 1;
 
             // load the value (if any)
-            if (expr.Case.ValueType != Decl.Unit)
+            if (expr.Case.ValueType.Bound != Decl.Unit)
             {
-                Write(OpCode.PushLocals);
-                Write(OpCode.Load, (byte)0);
-
                 // add a slot for the value
                 numSlots++;
             }

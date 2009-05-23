@@ -22,11 +22,11 @@ namespace Magpie.Compilation
             Index = index;
         }
 
-        public Decl Type
+        public IBoundDecl Type
         {
             get
             {
-                ArrayType arrayType = (ArrayType)Array.Type;
+                var arrayType = (BoundArrayType)Array.Type;
                 return arrayType.ElementType;
             }
         }

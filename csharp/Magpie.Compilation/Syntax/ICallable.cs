@@ -7,7 +7,11 @@ namespace Magpie.Compilation
 {
     public interface ICallable
     {
+        string Name { get; }
         IBoundExpr CreateCall(IBoundExpr arg);
-        Decl[] ParameterTypes { get; } 
+        IBoundDecl[] ParameterTypes { get; }
+
+        bool HasInferrableTypeArguments { get; }
+        IBoundDecl[] TypeArguments { get; }
     }
 }

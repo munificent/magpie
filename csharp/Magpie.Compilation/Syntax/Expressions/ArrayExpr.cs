@@ -5,10 +5,10 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
-    public class ArrayExpr<TExpr>
+    public class ArrayExpr<TExpr, TDecl> where TDecl : class
     {
         public readonly List<TExpr> Elements = new List<TExpr>();
-        public Decl ElementType { get { return mElementType; } }
+        public TDecl ElementType { get { return mElementType; } }
         public bool IsMutable { get; private set; }
 
         public ArrayExpr(IEnumerable<TExpr> elements, bool isMutable)
@@ -20,12 +20,12 @@ namespace Magpie.Compilation
         /// Used for empty arrays.
         /// </summary>
         /// <param name="elementType"></param>
-        public ArrayExpr(Decl elementType, bool isMutable)
+        public ArrayExpr(TDecl elementType, bool isMutable)
             : this(elementType, null, isMutable)
         {
         }
 
-        protected ArrayExpr(Decl elementType, IEnumerable<TExpr> elements, bool isMutable)
+        protected ArrayExpr(TDecl elementType, IEnumerable<TExpr> elements, bool isMutable)
         {
             mElementType = elementType;
             IsMutable = isMutable;
@@ -45,10 +45,10 @@ namespace Magpie.Compilation
             }
         }
 
-        private Decl mElementType; // only set if array is empty
+        private TDecl mElementType; // only set if array is empty
     }
 
-    public class ArrayExpr : ArrayExpr<IUnboundExpr>, IUnboundExpr
+    public class ArrayExpr : ArrayExpr<IUnboundExpr, IUnboundDecl>, IUnboundExpr
     {
         public TokenPosition Position { get; private set; }
 
@@ -58,7 +58,7 @@ namespace Magpie.Compilation
             Position = position;
         }
 
-        public ArrayExpr(TokenPosition position, Decl elementType, bool isMutable)
+        public ArrayExpr(TokenPosition position, IUnboundDecl elementType, bool isMutable)
             : base(elementType, isMutable)
         {
             Position = position;
@@ -70,15 +70,15 @@ namespace Magpie.Compilation
         }
     }
 
-    public class BoundArrayExpr : ArrayExpr<IBoundExpr>, IBoundExpr
+    public class BoundArrayExpr : ArrayExpr<IBoundExpr, IBoundDecl>, IBoundExpr
     {
-        public BoundArrayExpr(Decl elementType, IEnumerable<IBoundExpr> elements, bool isMutable)
+        public BoundArrayExpr(IBoundDecl elementType, IEnumerable<IBoundExpr> elements, bool isMutable)
             : base(elementType, elements, isMutable)
         { }
 
-        public Decl Type
+        public IBoundDecl Type
         {
-            get { return new ArrayType(ElementType, IsMutable); }
+            get { return new BoundArrayType(ElementType, IsMutable); }
         }
 
         public TReturn Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)

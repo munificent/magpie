@@ -9,16 +9,20 @@ namespace Magpie.Compilation
     /// Special wildcard type that matches any type. Used internally for
     /// intrinsics such as array Size that need to match arrays of any type.
     /// </summary>
-    public class AnyType : Decl
+    public class AnyType : IBoundDecl
     {
         public override string ToString()
         {
             return "*";
         }
 
-        public override TReturn Accept<TReturn>(IDeclVisitor<TReturn> visitor)
+        #region IBoundDecl Members
+
+        TReturn IBoundDecl.Accept<TReturn>(IBoundDeclVisitor<TReturn> visitor)
         {
             return visitor.Visit(this);
         }
+
+        #endregion
     }
 }

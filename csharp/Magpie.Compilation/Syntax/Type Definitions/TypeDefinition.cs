@@ -5,80 +5,78 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
-    //### bob: this type is used for both instantiated and generic types (Foo'A and Foo'Int). Things might be
-    // a little clearer if that was split out the way bound and unbound expressions are.
+    //### bob: should be renamed to something like Named or Entity since Functions inherit it from it too.
     /// <summary>
     /// Base class for a user-defined named type.
     /// </summary>
     public abstract class TypeDefinition
     {
-        public string Name { get { return mName; } }
-        public string Namespace { get { return mNamespace; } }
+        public TokenPosition Position { get; private set; }
 
         /// <summary>
-        /// Gets the source file this type is defined in. Used to determine which namespaces are in
-        /// use (i.e the set of "using" directives) when binding this definition.
+        /// Gets the name of the type. Will include the namespace once the type has been fully-qualified.
         /// </summary>
-        public SourceFile SourceFile { get { return mSourceFile; } }
+        public string Name
+        {
+            get { return Compiler.QualifyName(NameContext.Namespace, mName); }
+        }
 
-        public string FullName { get { return Compiler.QualifyName(Namespace, Name); } }
+        public string BaseName { get { return mName; } }
 
-        public bool IsGeneric { get { return mTypeParams.Count > 0; } }
-
-        public virtual Decl Type { get { return new NamedType(mName, TypeParameters); } }
+        public NameContext NameContext { get; private set; }
 
         /// <summary>
-        /// For a type instanced by explicitly applying type arguments to a generic, gets the
-        /// list of type arguments applied. Will be null for generic types.
+        /// For types that are instantiated generics, this will contain the type arguments used to
+        /// instantiate it. Otherwise, it will be an empty array.
         /// </summary>
-        public IList<Decl> TypeParameters { get { return mTypeParams; } }
+        public IBoundDecl[] TypeArguments { get; private set; }
 
         public override string ToString()
         {
-            return String.Format("{0}{1}",
-                Name,
-                IsGeneric ? ("[" + TypeParameters.JoinAll(", ") + "]") : "");
-        }
+            if (TypeArguments == null) return Name;
 
-        /// <summary>
-        /// Stores the list of concrete argument types explicitly applied to instance a generic into
-        /// this function.
-        /// </summary>
-        /// <param name="args">The type arguments.</param>
-        public void BindTypeArgs(IEnumerable<Decl> args)
-        {
-            mTypeParams = new List<Decl>(args);
-        }
-
-        public void Qualify(string namespaceName, SourceFile sourceFile)
-        {
-            mNamespace = namespaceName;
-            mSourceFile = sourceFile;
-
-            OnQualify();
-        }
-
-        public void Qualify(TypeDefinition parentType)
-        {
-            Qualify(parentType.Namespace, parentType.SourceFile);
-        }
-
-        protected TypeDefinition(string name, IEnumerable<Decl> typeParams)
-        {
-            mName = name;
-
-            if (typeParams != null)
+            switch (TypeArguments.Length)
             {
-                mTypeParams.AddRange(typeParams);
+                case 0: return Name;
+                case 1: return Name + "'" + TypeArguments[0].ToString();
+                default: return Name + "'(" + TypeArguments.JoinAll(", ") + ")";
             }
         }
 
-        protected virtual void OnQualify() { }
+        public void SetContext(NameContext context)
+        {
+            NameContext = context;
+        }
+
+        /// <summary>
+        /// Binds the type arguments used to instantiate this structure.
+        /// </summary>
+        /// <param name="typeArgs"></param>
+        public void BindTypeArguments(IEnumerable<IBoundDecl> typeArgs)
+        {
+            TypeArguments = typeArgs.ToArray();
+        }
+
+        protected TypeDefinition(TokenPosition position, string name, IEnumerable<IBoundDecl> typeArgs)
+        {
+            Position = position;
+            mName = name;
+
+            if (typeArgs == null)
+            {
+                TypeArguments = new IBoundDecl[0];
+            }
+            else
+            {
+                TypeArguments = typeArgs.ToArray();
+            }
+        }
+
+        protected TypeDefinition(TokenPosition position, string name)
+            : this (position, name, new IBoundDecl[0])
+        {
+        }
 
         private string mName;
-        private List<Decl> mTypeParams = new List<Decl>();
-
-        private string mNamespace = String.Empty;
-        private SourceFile mSourceFile;
     }
 }

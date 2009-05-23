@@ -21,6 +21,7 @@ namespace Magpie.Compilation
         Prime, // '
 
         // keywords
+        Case,
         Def,
         Do,
         Else,
@@ -28,6 +29,7 @@ namespace Magpie.Compilation
         Fn,
         For,
         If,
+        Match,
         Mutable,
         Namespace,
         Return,
@@ -134,12 +136,15 @@ namespace Magpie.Compilation
                 case TokenType.Name:          return "name " + StringValue;
                 case TokenType.Operator:      return "operator " + StringValue;
 
+                case TokenType.Case:        return "case";
                 case TokenType.Def:         return "def";
                 case TokenType.Do:          return "do";
                 case TokenType.Else:        return "else";
                 case TokenType.End:         return "end";
                 case TokenType.Fn:          return "fn";
+                case TokenType.For:         return "for";
                 case TokenType.If:          return "if";
+                case TokenType.Match:       return "match";
                 case TokenType.Mutable:     return "mutable";
                 case TokenType.Namespace:   return "namespace";
                 case TokenType.Struct:      return "struct";

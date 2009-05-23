@@ -8,72 +8,157 @@ namespace Magpie.Compilation
     /// <summary>
     /// A function type declaration.
     /// </summary>
-    public class FuncType : Decl
+    public class FuncType : IUnboundDecl, IBoundDecl
     {
-        public static FuncType Create(Decl returnType)
+        //### bob: use "params IBoundDecl[]" for these
+        public static FuncType Create(IBoundDecl returnType)
         {
             return new FuncType(new ParamDecl[0], returnType);
         }
 
-        public static FuncType Create(Decl arg, Decl returnType)
+        public static FuncType Create(IBoundDecl arg, IBoundDecl returnType)
         {
-            return new FuncType(new ParamDecl[] { new ParamDecl("a", arg) }, returnType);
+            return new FuncType(new ParamDecl[]
+                {
+                    new ParamDecl("a", arg)
+                }, returnType);
         }
 
-        public static FuncType Create(Decl arg1, Decl arg2, Decl returnType)
+        public static FuncType Create(IBoundDecl arg1, IBoundDecl arg2, IBoundDecl returnType)
         {
-            return new FuncType(new ParamDecl[] { new ParamDecl("a", arg1), new ParamDecl("b", arg2) }, returnType);
+            return new FuncType(new ParamDecl[]
+                {
+                    new ParamDecl("a", arg1),
+                    new ParamDecl("b", arg2)
+                }, returnType);
         }
 
-        public static FuncType Create(Decl arg1, Decl arg2, Decl arg3, Decl returnType)
+        public static FuncType Create(IBoundDecl arg1, IBoundDecl arg2, IBoundDecl arg3, IBoundDecl returnType)
         {
-            return new FuncType(new ParamDecl[] { new ParamDecl("a", arg1), new ParamDecl("b", arg2), new ParamDecl("c", arg3) }, returnType);
+            return new FuncType(new ParamDecl[]
+                {
+                    new ParamDecl("a", arg1),
+                    new ParamDecl("b", arg2),
+                    new ParamDecl("c", arg3)
+                }, returnType);
+        }
+
+        public TokenPosition Position { get; private set; }
+
+        public readonly List<ParamDecl> Parameters = new List<ParamDecl>();
+
+        public readonly Decl Return;
+
+        /// <summary>
+        /// Gets the parameter types for the function.
+        /// </summary>
+        public IUnboundDecl[] UnboundParameterTypes
+        {
+            get { return Parameters.ConvertAll(arg => arg.Type.Unbound).ToArray(); }
         }
 
         /// <summary>
         /// Gets the parameter types for the function.
         /// </summary>
-        public Decl[] ParameterTypes
+        public IBoundDecl[] ParameterTypes
         {
-            get { return Parameters.ConvertAll(arg => arg.Type).ToArray(); }
+            get { return Parameters.ConvertAll(arg => arg.Type.Bound).ToArray(); }
         }
 
-        public readonly List<ParamDecl> Parameters = new List<ParamDecl>();
-        public Decl Return;
+        private static int sID = 0;
+        private int mID;
 
-        public FuncType(IEnumerable<ParamDecl> parameters, Decl returnType)
+        public FuncType(TokenPosition position, IEnumerable<ParamDecl> parameters, IUnboundDecl returnType)
         {
+            if (parameters == null) throw new ArgumentNullException("parameters");
+            if (returnType == null) throw new ArgumentNullException("returnType");
+
+            Position = position;
             Parameters.AddRange(parameters);
-            Return = returnType;
+            Return = new Decl(returnType);
+
+            mID = sID++;
+        }
+
+        public FuncType(IEnumerable<ParamDecl> parameters, IUnboundDecl returnType)
+            : this (TokenPosition.None, parameters, returnType)
+        {
+        }
+
+        public FuncType(IEnumerable<ParamDecl> parameters, IBoundDecl returnType)
+        {
+            if (parameters == null) throw new ArgumentNullException("parameters");
+            if (returnType == null) throw new ArgumentNullException("returnType");
+
+            Parameters.AddRange(parameters);
+            Return = new Decl(returnType);
+
+            mID = sID++;
         }
 
         public override string ToString()
         {
-            if ((Parameters.Count == 0) && (Return == Decl.Unit)) return "(->)";
+            if ((Parameters.Count == 0) && ReferenceEquals(Return, Decl.Unit)) return "(->)";
             if (Parameters.Count == 0) return "(-> " + Return.ToString() + ")";
 
             string argString = Parameters.JoinAll(", ");
 
-            if (Return == Decl.Unit) return "(" + argString + " ->)";
+            if (ReferenceEquals(Return, Decl.Unit)) return "(" + argString + " ->)";
 
             return "(" + argString + " -> " + Return.ToString() + ")";
         }
 
-        public override TReturn Accept<TReturn>(IDeclVisitor<TReturn> visitor)
+        /// <summary>
+        /// Creates a copy of this FuncType in unbound form.
+        /// </summary>
+        /// <returns></returns>
+        public FuncType Clone()
+        {
+            var parameters = Parameters.Select(p => new ParamDecl(p.Name, p.Type.Unbound));
+            return new FuncType(Position, parameters, Return.Unbound);
+        }
+
+        #region IUnboundDecl Members
+
+        TReturn IUnboundDecl.Accept<TReturn>(IUnboundDeclVisitor<TReturn> visitor)
         {
             return visitor.Visit(this);
         }
+
+        #endregion
+
+        #region IBoundDecl Members
+
+        TReturn IBoundDecl.Accept<TReturn>(IBoundDeclVisitor<TReturn> visitor)
+        {
+            return visitor.Visit(this);
+        }
+
+        #endregion
     }
 
     public class ParamDecl
     {
-        public string Name;
-        public Decl Type;
+        public string Name { get; private set; }
+
+        public readonly Decl Type;
 
         public ParamDecl(string name, Decl type)
         {
+            if (type == null) throw new ArgumentNullException("type");
+
             Name = name;
             Type = type;
+        }
+
+        public ParamDecl(string name, IUnboundDecl type)
+            : this(name, new Decl(type))
+        {
+        }
+
+        public ParamDecl(string name, IBoundDecl type)
+            : this(name, new Decl(type))
+        {
         }
 
         public override string ToString()

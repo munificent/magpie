@@ -7,17 +7,16 @@ namespace Magpie.Compilation
 {
     public class ConstructUnionExpr : IBoundExpr
     {
-        public UnionCase Case { get { return mCase; } }
-        public Union Union { get { return mCase.Union; } }
+        public UnionCase Case { get; private set; }
+        public IBoundExpr Arg { get; private set; }
 
-        public ConstructUnionExpr(UnionCase unionCase)
+        public ConstructUnionExpr(UnionCase unionCase, IBoundExpr arg)
         {
-            mCase = unionCase;
+            Case = unionCase;
+            Arg = arg;
         }
 
-        private UnionCase mCase;
-
-        public Decl Type { get { return mCase.Union.Type; } }
+        public IBoundDecl Type { get { return Case.Union; } }
 
         public TReturn Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)
         {

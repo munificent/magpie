@@ -10,9 +10,9 @@ namespace Magpie.Compilation
         public TokenPosition Position { get; private set; }
 
         public NameExpr Name { get { return mName; } }
-        public Decl[] ParamTypes { get { return mParamTypes.ToArray(); } }
+        public IUnboundDecl[] ParamTypes { get { return mParamTypes.ToArray(); } }
 
-        public FuncRefExpr(TokenPosition position, NameExpr name, IEnumerable<Decl> paramTypes)
+        public FuncRefExpr(TokenPosition position, NameExpr name, IEnumerable<IUnboundDecl> paramTypes)
         {
             Position = position;
             mName = name;
@@ -30,28 +30,23 @@ namespace Magpie.Compilation
         }
 
         private NameExpr mName;
-        private readonly List<Decl> mParamTypes = new List<Decl>();
+        private readonly List<IUnboundDecl> mParamTypes = new List<IUnboundDecl>();
     }
 
     public class BoundFuncRefExpr : IBoundExpr
     {
-        public BoundFunction Function { get { return mFunction; } }
+        public Function Function { get; private set; }
 
-        public Decl Type
-        {
-            get { return mFunction.Type; }
-        }
+        public IBoundDecl Type { get { return Function.Type; } }
 
-        public BoundFuncRefExpr(BoundFunction function)
+        public BoundFuncRefExpr(Function function)
         {
-            mFunction = function;
+            Function = function;
         }
 
         public TReturn Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)
         {
             return visitor.Visit(this);
         }
-
-        private BoundFunction mFunction;
     }
 }

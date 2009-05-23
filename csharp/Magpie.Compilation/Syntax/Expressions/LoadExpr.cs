@@ -10,23 +10,30 @@ namespace Magpie.Compilation
         public IBoundExpr Struct;
         public int Index { get; private set; }
 
-        public LoadExpr(IBoundExpr structure, Decl type, int index)
+        public IBoundDecl Type { get; private set; }
+
+        public LoadExpr(IBoundExpr structure, IBoundDecl type, int index)
         {
+            if (structure == null) throw new ArgumentNullException("structure");
+            if (type == null) throw new ArgumentNullException("type");
+
             Struct = structure;
             Type = type;
             Index = index;
         }
 
         public LoadExpr(IBoundExpr structure, Field field)
-            : this(structure, field.Type, field.Index)
+            : this(structure, field.Type.Bound, field.Index)
         {
         }
 
-        public Decl Type { get; private set; }
+        #region IBoundExpr Members
 
-        public TReturn Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)
+        TReturn IBoundExpr.Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)
         {
             return visitor.Visit(this);
         }
+
+        #endregion
     }
 }

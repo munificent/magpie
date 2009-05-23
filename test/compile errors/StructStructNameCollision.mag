@@ -1,0 +1,12 @@
+// error line: 10
+
+Main (->)
+    Print "hi"
+end
+
+struct Foo
+end
+
+struct Foo
+end
+

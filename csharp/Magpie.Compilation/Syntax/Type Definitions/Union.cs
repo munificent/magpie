@@ -9,67 +9,76 @@ namespace Magpie.Compilation
     /// <summary>
     /// A union type definition.
     /// </summary>
-    public class Union : TypeDefinition
+    public class Union : TypeDefinition, INamedType
     {
-        public ReadOnlyCollection<UnionCase> Cases { get { return mCases; } }
+        public ReadOnlyCollection<UnionCase> Cases { get; private set; }
 
-        public Union(string name, IEnumerable<Decl> typeParams, IEnumerable<UnionCase> cases)
-            : base(name, typeParams)
+        public Union(TokenPosition position, string name, IEnumerable<UnionCase> cases)
+            : base(position, name)
         {
-            mCases = new ReadOnlyCollection<UnionCase>(new List<UnionCase>(cases));
+            Cases = new ReadOnlyCollection<UnionCase>(new List<UnionCase>(cases));
+        }
 
-            for (int i = 0; i < mCases.Count; i++)
+        public IEnumerable<ICallable> BuildFunctions()
+        {
+            // constructors for each case
+            foreach (var unionCase in Cases)
             {
-                mCases[i].SetUnion(this);
+                yield return new UnionConstructor(this, unionCase);
+                yield return new UnionCaseChecker(this, unionCase);
+
+                if (unionCase.ValueType.Bound != Decl.Unit)
+                {
+                    yield return new UnionValueGetter(this, unionCase);
+                }
             }
         }
 
-        private readonly ReadOnlyCollection<UnionCase> mCases;
+        /// <summary>
+        /// Creates a new deep copy of this structure in unbound form.
+        /// </summary>
+        public Union Clone(IEnumerable<IBoundDecl> typeArguments)
+        {
+            var union = new Union(Position, BaseName,
+                Cases.Select(unionCase => new UnionCase(unionCase.Name, unionCase.ValueType.Unbound, unionCase.Index)));
+
+            union.SetContext(NameContext);
+            union.BindTypeArguments(typeArguments);
+
+            return union;
+        }
+
+        #region IBoundDecl Members
+
+        TReturn IBoundDecl.Accept<TReturn>(IBoundDeclVisitor<TReturn> visitor)
+        {
+            return visitor.Visit(this);
+        }
+
+        #endregion
     }
 
     public class UnionCase
     {
-        public string Name { get { return mName; } }
-        public Decl ValueType { get { return mValueType; } }
+        public Union Union { get; private set; }
+        public string Name { get; private set; }
+        public Decl ValueType { get; private set; }
 
-        public Union Union { get { return mUnion; } }
-        public int Index
+        public int Index { get; private set; }
+
+        public UnionCase(string name, IUnboundDecl valueType, int index)
         {
-            get
-            {
-                if (mUnion != null) return mUnion.Cases.IndexOf(this);
+            if (valueType == null) throw new ArgumentNullException("valueType");
 
-                return mIndex;
-            }
-        }
-
-        public UnionCase(string name, Decl valueType)
-        {
-            mName = name;
-            mValueType = valueType;
+            Name = name;
+            ValueType = new Decl(valueType);
+            Index = index;
         }
 
         public void SetUnion(Union union)
         {
-            // only set once
-            if (mUnion != null) throw new InvalidOperationException();
-
-            mUnion = union;
+            if (union == null) throw new ArgumentNullException("union");
+            Union = union;
         }
-
-        public void SetIndex(int index)
-        {
-            mIndex = index;
-        }
-
-        public override string ToString()
-        {
-            return mUnion.Name + "/" + mName;
-        }
-
-        private int mIndex = -1; // used for instanced generic cases that are not bound to a union
-        private string mName;
-        private Union mUnion;
-        private Decl mValueType;
     }
 }

@@ -26,7 +26,7 @@ namespace Magpie.Compilation
             return String.Format("{0} {1}", Intrinsic.Name, Arg);
         }
 
-        public Decl Type { get { return Intrinsic.Type; } }
+        public IBoundDecl Type { get { return Intrinsic.Type; } }
 
         public TReturn Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)
         {

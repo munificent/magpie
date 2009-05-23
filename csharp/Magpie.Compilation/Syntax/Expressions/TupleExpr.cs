@@ -39,12 +39,9 @@ namespace Magpie.Compilation
     {
         public BoundTupleExpr(IEnumerable<IBoundExpr> fields) : base(fields) { }
 
-        public Decl Type
+        public IBoundDecl Type
         {
-            get
-            {
-                return new TupleType(Fields.ConvertAll(field => field.Type));
-            }
+            get { return new BoundTupleType(Fields.ConvertAll(field => field.Type)); }
         }
 
         public TReturn Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)

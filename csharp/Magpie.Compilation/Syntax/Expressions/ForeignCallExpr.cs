@@ -18,9 +18,9 @@ namespace Magpie.Compilation
 
         #region IBoundExpr Members
 
-        Decl IBoundExpr.Type
+        IBoundDecl IBoundExpr.Type
         {
-            get { return mFunction.FuncType.Return; }
+            get { return mFunction.FuncType.Return.Bound; }
         }
 
         TReturn IBoundExpr.Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)

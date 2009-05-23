@@ -8,12 +8,12 @@ namespace Magpie.Compilation
     /// <summary>
     /// Traverses the tree of declarations in a type declaration.
     /// </summary>
-    public class DeclPredicate : IDeclVisitor<bool>
+    public class DeclPredicate : IBoundDeclVisitor<bool>
     {
         /// <summary>
         /// Returns true if any of the declarations in the tree pass the predicate.
         /// </summary>
-        public static bool Any(Decl decl, Func<Decl, bool> predicate)
+        public static bool Any(IBoundDecl decl, Func<IBoundDecl, bool> predicate)
         {
             return decl.Accept(new DeclPredicate(predicate, (a, b) => a || b));
         }
@@ -21,9 +21,9 @@ namespace Magpie.Compilation
         /// <summary>
         /// Returns true if any of the declarations in the tree pass the predicate.
         /// </summary>
-        public static bool Any(IEnumerable<Decl> decls, Func<Decl, bool> predicate)
+        public static bool Any(IEnumerable<IBoundDecl> decls, Func<IBoundDecl, bool> predicate)
         {
-            foreach (Decl decl in decls)
+            foreach (var decl in decls)
             {
                 if (decl.Accept(new DeclPredicate(predicate, (a, b) => a || b)))
                 {
@@ -34,52 +34,45 @@ namespace Magpie.Compilation
             return false;
         }
 
-        #region IDeclVisitor Members
+        #region IBoundDeclVisitor Members
 
-        bool IDeclVisitor<bool>.Visit(AnyType decl)
+        bool IBoundDeclVisitor<bool>.Visit(AnyType decl)
         {
             return mPredicate(decl);
         }
 
-        bool IDeclVisitor<bool>.Visit(AtomicDecl decl)
+        bool IBoundDeclVisitor<bool>.Visit(AtomicDecl decl)
         {
             return mPredicate(decl);
         }
 
-        bool IDeclVisitor<bool>.Visit(ArrayType decl)
+        bool IBoundDeclVisitor<bool>.Visit(BoundArrayType decl)
         {
             return mCombine(mPredicate(decl), decl.ElementType.Accept(this));
         }
 
-        bool IDeclVisitor<bool>.Visit(FuncType decl)
+        bool IBoundDeclVisitor<bool>.Visit(FuncType decl)
         {
-            bool result = mPredicate(decl);
+            var result = mPredicate(decl);
 
-            foreach (Decl paramType in decl.ParameterTypes)
+            foreach (var paramType in decl.ParameterTypes)
             {
                 result = mCombine(result, paramType.Accept(this));
             }
 
-            return mCombine(result, decl.Return.Accept(this));
+            return mCombine(result, decl.Return.Bound.Accept(this));
         }
 
-        bool IDeclVisitor<bool>.Visit(NamedType decl)
+        bool IBoundDeclVisitor<bool>.Visit(Struct decl)
         {
-            bool result = mPredicate(decl);
-
-            foreach (Decl typeArg in decl.TypeArgs)
-            {
-                result = mCombine(result, typeArg.Accept(this));
-            }
-
-            return result;
+            return mPredicate(decl);
         }
 
-        bool IDeclVisitor<bool>.Visit(TupleType decl)
+        bool IBoundDeclVisitor<bool>.Visit(BoundTupleType decl)
         {
-            bool result = mPredicate(decl);
+            var result = mPredicate(decl);
 
-            foreach (Decl field in decl.Fields)
+            foreach (var field in decl.Fields)
             {
                 result = mCombine(result, field.Accept(this));
             }
@@ -87,15 +80,20 @@ namespace Magpie.Compilation
             return result;
         }
 
+        bool IBoundDeclVisitor<bool>.Visit(Union decl)
+        {
+            return mPredicate(decl);
+        }
+
         #endregion
 
-        private DeclPredicate(Func<Decl, bool> predicate, Func<bool, bool, bool> combine)
+        private DeclPredicate(Func<IBoundDecl, bool> predicate, Func<bool, bool, bool> combine)
         {
             mPredicate = predicate;
             mCombine = combine;
         }
 
-        Func<Decl, bool> mPredicate;
+        Func<IBoundDecl, bool> mPredicate;
         Func<bool, bool, bool> mCombine;
     }
 }
