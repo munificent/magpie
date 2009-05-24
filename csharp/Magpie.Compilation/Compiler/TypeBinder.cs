@@ -45,7 +45,7 @@ namespace Magpie.Compilation
 
         public static void Bind(Compiler compiler, Struct structure)
         {
-            Bind(new BindingContext(compiler, structure.NameContext), structure);
+            Bind(new BindingContext(compiler, structure.SearchSpace), structure);
         }
 
         public static void Bind(BindingContext context, Union union)
@@ -62,7 +62,7 @@ namespace Magpie.Compilation
 
         public static void Bind(Compiler compiler, Union union)
         {
-            Bind(new BindingContext(compiler, union.NameContext), union);
+            Bind(new BindingContext(compiler, union.SearchSpace), union);
         }
 
         private TypeBinder(BindingContext context)
@@ -126,7 +126,7 @@ namespace Magpie.Compilation
             // bind the type arguments
             var typeArgs = decl.TypeArgs.Accept(this);
 
-            return mContext.Compiler.FindType(mContext.NameContext, decl.Position, decl.Name, typeArgs);
+            return mContext.Compiler.FindType(mContext.SearchSpace, decl.Position, decl.Name, typeArgs);
         }
 
         #endregion

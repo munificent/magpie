@@ -19,15 +19,14 @@ namespace Magpie.Compilation
             return name + " " + typeArgString + argTypes;
         }
 
-        //### bob: is this the best place for this?
-        public static string GetUniqueName(string name, IEnumerable<IBoundDecl> paramTypes)
-        {
-            return GetUniqueName(name, null, paramTypes);
-        }
-
         public IEnumerable<Function> Functions
         {
             get { return mCallables.Values.OfType<Function>(); }
+        }
+
+        public void AddUnbound(Function function)
+        {
+            mUnboundFunctions.Add(function);
         }
 
         public void Add(IEnumerable<ICallable> callables)
@@ -38,9 +37,9 @@ namespace Magpie.Compilation
             }
         }
 
-        public bool TryFind(string name, IEnumerable<IBoundDecl> paramTypes, out ICallable bound)
+        public bool TryFind(string name, IEnumerable<IBoundDecl> typeArguments, IEnumerable<IBoundDecl> paramTypes, out ICallable bound)
         {
-            string uniqueName = GetUniqueName(name, paramTypes);
+            string uniqueName = GetUniqueName(name, typeArguments, paramTypes);
 
             // look up by unique name
             if (mCallables.TryGetValue(uniqueName, out bound)) return true;
@@ -61,6 +60,14 @@ namespace Magpie.Compilation
 
         public void BindAll(Compiler compiler)
         {
+            // bind the types of the user functions and add them to the main table
+            foreach (var unbound in mUnboundFunctions)
+            {
+                var context = new BindingContext(compiler, unbound.SearchSpace);
+                TypeBinder.Bind(context, unbound.Type);
+                Add(unbound);
+            }
+
             // copy the functions to an array because binding a function may cause generics
             // to be instantiated, adding to the collection.
             // (we don't need to worry about binding the newly added generics, because they
@@ -68,7 +75,7 @@ namespace Magpie.Compilation
             // determines if a generic's type arguments are valid.)
             foreach (var function in Functions.ToArray())
             {
-                var context = new BindingContext(compiler, function.NameContext);
+                var context = new BindingContext(compiler, function.SearchSpace);
                 FunctionBinder.Bind(context, function);
             }
         }
@@ -90,7 +97,7 @@ namespace Magpie.Compilation
 
                 mCallables.Add(uniqueName, callable);
 
-                // if there is an inferrable name, also add it without the type arguments
+                // if there is an inferrable name, also include the name without the type arguments
                 if (callable.HasInferrableTypeArguments)
                 {
                     uniqueName = GetUniqueName(callable.Name, null, callable.ParameterTypes);
@@ -98,6 +105,8 @@ namespace Magpie.Compilation
                 }
             }
         }
+
+        private readonly List<Function> mUnboundFunctions = new List<Function>();
 
         private readonly Dictionary<string, ICallable> mCallables = new Dictionary<string, ICallable>();
 

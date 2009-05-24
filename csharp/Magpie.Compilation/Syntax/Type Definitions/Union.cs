@@ -42,7 +42,7 @@ namespace Magpie.Compilation
             var union = new Union(Position, BaseName,
                 Cases.Select(unionCase => new UnionCase(unionCase.Name, unionCase.ValueType.Unbound, unionCase.Index)));
 
-            union.SetContext(NameContext);
+            union.SetSearchSpace(SearchSpace);
             union.BindTypeArguments(typeArguments);
 
             return union;

@@ -18,12 +18,12 @@ namespace Magpie.Compilation
         /// </summary>
         public string Name
         {
-            get { return Compiler.QualifyName(NameContext.Namespace, mName); }
+            get { return NameSearchSpace.Qualify(SearchSpace.Namespace, mName); }
         }
 
         public string BaseName { get { return mName; } }
 
-        public NameContext NameContext { get; private set; }
+        public NameSearchSpace SearchSpace { get; private set; }
 
         /// <summary>
         /// For types that are instantiated generics, this will contain the type arguments used to
@@ -43,9 +43,9 @@ namespace Magpie.Compilation
             }
         }
 
-        public void SetContext(NameContext context)
+        public void SetSearchSpace(NameSearchSpace searchSpace)
         {
-            NameContext = context;
+            SearchSpace = searchSpace;
         }
 
         /// <summary>

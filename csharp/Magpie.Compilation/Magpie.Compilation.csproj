@@ -101,7 +101,7 @@
     <Compile Include="Syntax\IDeclVisitor.cs" />
     <Compile Include="Syntax\IEnumerableExtensions.cs" />
     <Compile Include="Syntax\IGenericCallable.cs" />
-    <Compile Include="Syntax\NameContext.cs" />
+    <Compile Include="Syntax\NameSearchSpace.cs" />
     <Compile Include="Syntax\IUnboundExprVisitor.cs" />
     <Compile Include="Syntax\Namespace.cs" />
     <Compile Include="Syntax\Pattern Matching\AnyCase.cs" />

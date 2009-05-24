@@ -9,12 +9,6 @@ namespace Magpie.Compilation
 {
     public class Compiler
     {
-        public static string QualifyName(string namespaceName, string name)
-        {
-            if (String.IsNullOrEmpty(namespaceName)) return name;
-            return namespaceName + ":" + name;
-        }
-
         public FunctionTable Functions { get { return mFunctions; } }
         public TypeTable Types { get { return mTypes; } }
 
@@ -45,7 +39,6 @@ namespace Magpie.Compilation
                 }
 
                 // build the function table
-                mFunctions = new FunctionTable();
                 mFunctions.Add(Intrinsic.All);
 
                 // bind the user-defined types and create their auto-generated functions
@@ -69,15 +62,6 @@ namespace Magpie.Compilation
                 foreach (var union in mGenericUnions)
                 {
                     mGenericFunctions.AddRange(union.BuildFunctions());
-                }
-
-
-                // bind the types of the user functions and add them
-                foreach (var unbound in mUnboundFunctions)
-                {
-                    var context = new BindingContext(this, unbound.NameContext);
-                    TypeBinder.Bind(context, unbound.Type);
-                    mFunctions.Add(unbound);
                 }
 
                 if (mForeignInterface != null)
@@ -181,8 +165,9 @@ namespace Magpie.Compilation
             }
 
             // look up the function
-            ICallable callable = FindFunction(function.NameContext, name, typeArgs, argTypes);
-            if (callable == null) throw new CompileException(position, String.Format("Could not resolve name {0}.", FunctionTable.GetUniqueName(name, argTypes)));
+            ICallable callable = FindFunction(function.SearchSpace, name, typeArgs, argTypes);
+            if (callable == null) throw new CompileException(position, String.Format("Could not resolve name {0}.",
+                FunctionTable.GetUniqueName(name, null, argTypes)));
 
             return callable.CreateCall(arg);
         }
@@ -190,19 +175,12 @@ namespace Magpie.Compilation
         /// <summary>
         /// Looks for a function with the given name in all of the currently used namespaces.
         /// </summary>
-        /// <param name="containingType"></param>
-        /// <param name="instancingContext"></param>
-        /// <param name="scope"></param>
-        /// <param name="name"></param>
-        /// <param name="typeArgs"></param>
-        /// <param name="argTypes"></param>
-        /// <returns></returns>
-        public ICallable FindFunction(NameContext context,
+        public ICallable FindFunction(NameSearchSpace searchSpace,
             string name, IList<IUnboundDecl> typeArgs, IBoundDecl[] argTypes)
         {
-            foreach (var potentialName in PotentialNames(name, context))
+            foreach (var potentialName in searchSpace.SearchFor(name))
             {
-                var bound = LookUpFunction(context, potentialName, typeArgs, argTypes);
+                var bound = LookUpFunction(searchSpace, potentialName, typeArgs, argTypes);
                 if (bound != null) return bound;
             }
 
@@ -210,10 +188,10 @@ namespace Magpie.Compilation
             return null;
         }
 
-        public IBoundDecl FindType(NameContext context, TokenPosition position, string name,
+        public IBoundDecl FindType(NameSearchSpace searchSpace, TokenPosition position, string name,
             IEnumerable<IBoundDecl> typeArgs)
         {
-            foreach (var potentialName in PotentialNames(name, context))
+            foreach (var potentialName in searchSpace.SearchFor(name))
             {
                 var type = mTypes.Find(potentialName, typeArgs);
                 if (type != null) return type;
@@ -223,31 +201,16 @@ namespace Magpie.Compilation
             throw new CompileException(position, "Could not find a type named " + name + ".");
         }
 
-        private IEnumerable<string> PotentialNames(string name, NameContext context)
-        {
-            // try the name as-is
-            yield return name;
-
-            // try the current function's namespace
-            yield return QualifyName(context.Namespace, name);
-
-            // try each of the open namespaces
-            foreach (var usingNamespace in context.UsingNamespaces.Reverse())
-            {
-                yield return QualifyName(usingNamespace, name);
-            }
-        }
-
-        private ICallable LookUpFunction(NameContext context, string fullName,
+        private ICallable LookUpFunction(NameSearchSpace searchSpace, string fullName,
             IList<IUnboundDecl> typeArgs, IBoundDecl[] argTypes)
         {
-            var boundTypeArgs = TypeBinder.Bind(new BindingContext(this, context), typeArgs);
+            var boundTypeArgs = TypeBinder.Bind(new BindingContext(this, searchSpace), typeArgs);
 
             string uniqueName = FunctionTable.GetUniqueName(fullName, boundTypeArgs, argTypes);
 
             // try the already bound functions
             ICallable callable;
-            if (mFunctions.TryFind(fullName, argTypes, out callable)) return callable;
+            if (mFunctions.TryFind(fullName, boundTypeArgs, argTypes, out callable)) return callable;
 
             // try to instantiate a generic
             foreach (var generic in mGenericFunctions)
@@ -272,57 +235,54 @@ namespace Magpie.Compilation
 
         private void AddNamespace(string parentName, SourceFile file, Namespace namespaceObj)
         {
-            var context = new NameContext(parentName, file.UsingNamespaces);
+            var searchSpace = new NameSearchSpace(parentName, file.UsingNamespaces);
 
             foreach (var function in namespaceObj.Functions)
             {
-                function.SetContext(context);
-                mUnboundFunctions.Add(function);
+                function.SetSearchSpace(searchSpace);
+                mFunctions.AddUnbound(function);
             }
 
             foreach (var structure in namespaceObj.Structs)
             {
-                structure.SetContext(context);
+                structure.SetSearchSpace(searchSpace);
                 mTypes.Add(structure);
             }
 
             foreach (var union in namespaceObj.Unions)
             {
-                union.SetContext(context);
+                union.SetSearchSpace(searchSpace);
                 mTypes.Add(union);
-            }
-
-            foreach (var childNamespace in namespaceObj.Namespaces)
-            {
-                var name = Compiler.QualifyName(parentName, childNamespace.Name);
-                AddNamespace(name, file, childNamespace);
             }
 
             foreach (var function in namespaceObj.GenericFunctions)
             {
-                function.BaseType.SetContext(context);
+                function.BaseType.SetSearchSpace(searchSpace);
                 mGenericFunctions.Add(function);
             }
 
             foreach (var structure in namespaceObj.GenericStructs)
             {
-                structure.BaseType.SetContext(context);
+                structure.BaseType.SetSearchSpace(searchSpace);
                 mGenericStructs.Add(structure);
             }
 
             foreach (var union in namespaceObj.GenericUnions)
             {
-                union.BaseType.SetContext(context);
+                union.BaseType.SetSearchSpace(searchSpace);
                 mGenericUnions.Add(union);
+            }
+
+            foreach (var childNamespace in namespaceObj.Namespaces)
+            {
+                var name = NameSearchSpace.Qualify(parentName, childNamespace.Name);
+                AddNamespace(name, file, childNamespace);
             }
         }
 
         private readonly List<string> mSourcePaths = new List<string>();
 
-        //### bob: would be cool to get rid of this
-        private readonly List<Function> mUnboundFunctions = new List<Function>();
-
-        private FunctionTable mFunctions;
+        private readonly FunctionTable mFunctions = new FunctionTable();
         private readonly List<GenericStruct> mGenericStructs = new List<GenericStruct>();
         private readonly List<GenericUnion> mGenericUnions = new List<GenericUnion>();
         private readonly TypeTable mTypes = new TypeTable();

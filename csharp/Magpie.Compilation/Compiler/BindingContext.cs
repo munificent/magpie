@@ -13,18 +13,18 @@ namespace Magpie.Compilation
     public class BindingContext
     {
         public Compiler Compiler { get; private set; }
-        public NameContext NameContext { get; private set; }
+        public NameSearchSpace SearchSpace { get; private set; }
         public IDictionary<string, IBoundDecl> TypeArguments { get; private set; }
 
-        public BindingContext(Compiler compiler, NameContext context)
-            : this(compiler, context, new Dictionary<string, IBoundDecl>())
+        public BindingContext(Compiler compiler, NameSearchSpace searchSpace)
+            : this(compiler, searchSpace, new Dictionary<string, IBoundDecl>())
         {
         }
 
-        public BindingContext(Compiler compiler, NameContext context, IDictionary<string, IBoundDecl> typeArguments)
+        public BindingContext(Compiler compiler, NameSearchSpace searchSpace, IDictionary<string, IBoundDecl> typeArguments)
         {
             Compiler = compiler;
-            NameContext = context;
+            SearchSpace = searchSpace;
             TypeArguments = typeArguments;
         }
     }

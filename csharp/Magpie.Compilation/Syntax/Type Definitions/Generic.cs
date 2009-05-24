@@ -41,7 +41,7 @@ namespace Magpie.Compilation
                 argDictionary[pair.Item1] = pair.Item2;
             }
 
-            return new BindingContext(compiler, BaseType.NameContext, argDictionary);
+            return new BindingContext(compiler, BaseType.SearchSpace, argDictionary);
         }
     }
 }

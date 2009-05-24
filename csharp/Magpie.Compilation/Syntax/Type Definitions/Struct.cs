@@ -56,7 +56,7 @@ namespace Magpie.Compilation
             var structure = new Struct(Position, BaseName,
                 Fields.Select(field => new Field(field.Name, field.Type.Unbound, field.IsMutable)));
 
-            structure.SetContext(NameContext);
+            structure.SetSearchSpace(SearchSpace);
             structure.BindTypeArguments(typeArguments);
 
             return structure;

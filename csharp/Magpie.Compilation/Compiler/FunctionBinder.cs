@@ -263,7 +263,7 @@ namespace Magpie.Compilation
         {
             var paramTypes = TypeBinder.Bind(mContext, expr.ParamTypes);
 
-            var callable = mContext.Compiler.FindFunction(mFunction.NameContext, 
+            var callable = mContext.Compiler.FindFunction(mFunction.SearchSpace, 
                 expr.Name.Name, expr.Name.TypeArgs, paramTypes);
 
             var function = callable as Function;
