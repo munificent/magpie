@@ -7,12 +7,12 @@ namespace Magpie.Compilation
 {
     public class DefineExpr : IUnboundExpr
     {
-        public TokenPosition Position { get; private set; }
+        public Position Position { get; private set; }
         public string Name { get; private set; }
         public IUnboundExpr Value { get; private set; }
         public bool IsMutable { get; private set; }
 
-        public DefineExpr(TokenPosition position, string name, IUnboundExpr value, bool isMutable)
+        public DefineExpr(Position position, string name, IUnboundExpr value, bool isMutable)
         {
             Position = position;
             Name = name;

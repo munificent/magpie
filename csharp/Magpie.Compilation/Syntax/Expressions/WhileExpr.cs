@@ -28,9 +28,9 @@ namespace Magpie.Compilation
     /// </summary>
     public class WhileExpr : WhileExpr<IUnboundExpr>, IUnboundExpr
     {
-        public TokenPosition Position { get; private set; }
+        public Position Position { get; private set; }
 
-        public WhileExpr(TokenPosition position, IUnboundExpr condition, IUnboundExpr body) : base(condition, body)
+        public WhileExpr(Position position, IUnboundExpr condition, IUnboundExpr body) : base(condition, body)
         {
             Position = position;
         }

@@ -52,67 +52,46 @@ namespace Magpie.Compilation
         Eof
     }
 
-    public class TokenPosition
-    {
-        public static TokenPosition None { get { return new TokenPosition(-1, -1, -1); } }
-
-        public int Line { get; private set; }
-        public int Column { get; private set; }
-        public int Length { get; private set; }
-
-        public TokenPosition(int line, int column, int length)
-        {
-            Line = line;
-            Column = column;
-            Length = length;
-        }
-
-        public override string ToString()
-        {
-            return String.Format("line {0} column {1}-{2}", Line, Column, Column + Length);
-        }
-    }
-
     public class Token
     {
-        public TokenPosition Position;
+        public Position Position;
         public TokenType Type;
         public bool BoolValue;
         public int IntValue;
         public string StringValue;
 
-        public Token(TokenPosition position, TokenType type)
+        public Token(Position position, TokenType type)
             : this(position)
         {
             Type = type;
         }
 
-        public Token(TokenPosition position, TokenType type, string text)
+        public Token(Position position, TokenType type, string text)
             : this(position)
         {
             Type = type;
             StringValue = text;
         }
 
-        public Token(TokenPosition position, bool value)
+        public Token(Position position, bool value)
             : this(position, TokenType.Bool)
         {
             BoolValue = value;
         }
 
-        public Token(TokenPosition position, int value)
+        public Token(Position position, int value)
             : this(position, TokenType.Int)
         {
             IntValue = value;
         }
 
-        public Token(TokenPosition position, string value)
+        public Token(Position position, string value)
             : this(position, TokenType.String)
         {
             StringValue = value;
         }
 
-        private Token(TokenPosition position)
+        private Token(Position position)
         {
             Position = position;
         }

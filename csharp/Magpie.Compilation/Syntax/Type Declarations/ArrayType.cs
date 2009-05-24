@@ -30,9 +30,9 @@ namespace Magpie.Compilation
     /// </summary>
     public class ArrayType : ArrayType<IUnboundDecl>, IUnboundDecl
     {
-        public TokenPosition Position { get; private set; }
+        public Position Position { get; private set; }
 
-        public ArrayType(TokenPosition position, IUnboundDecl elementType, bool isMutable)
+        public ArrayType(Position position, IUnboundDecl elementType, bool isMutable)
             : base(elementType, isMutable)
         {
             Position = position;

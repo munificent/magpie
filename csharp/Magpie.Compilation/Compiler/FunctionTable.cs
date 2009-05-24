@@ -48,6 +48,14 @@ namespace Magpie.Compilation
             }
         }
 
+        /// <summary>
+        /// Adds the given generic function to the symbol table.
+        /// </summary>
+        public void Add(IGenericCallable generic)
+        {
+            mGenerics.Add(generic);
+        }
+
         public void AddRange(IEnumerable<ICallable> callables)
         {
             foreach (var callable in callables)
@@ -56,7 +64,63 @@ namespace Magpie.Compilation
             }
         }
 
-        public bool TryFind(string name, IEnumerable<IBoundDecl> typeArguments, IEnumerable<IBoundDecl> paramTypes, out ICallable bound)
+        public void AddRange(IEnumerable<IGenericCallable> generics)
+        {
+            foreach (var generic in generics)
+            {
+                Add(generic);
+            }
+        }
+
+        /// <summary>
+        /// Looks for a function with the given name in all of the currently used namespaces.
+        /// </summary>
+        public ICallable Find(Compiler compiler, NameSearchSpace searchSpace,
+            string name, IList<IUnboundDecl> typeArgs, IBoundDecl[] argTypes)
+        {
+            foreach (var potentialName in searchSpace.SearchFor(name))
+            {
+                var bound = LookUpFunction(compiler, searchSpace, potentialName, typeArgs, argTypes);
+                if (bound != null) return bound;
+            }
+
+            // not found
+            return null;
+        }
+
+        private ICallable LookUpFunction(Compiler compiler, NameSearchSpace searchSpace, string fullName,
+            IList<IUnboundDecl> typeArgs, IBoundDecl[] argTypes)
+        {
+            var boundTypeArgs = TypeBinder.Bind(new BindingContext(compiler, searchSpace), typeArgs);
+
+            string uniqueName = Callable.UniqueName(fullName, boundTypeArgs, argTypes);
+
+            // try the already bound functions
+            ICallable callable;
+            if (TryFind(fullName, boundTypeArgs, argTypes, out callable)) return callable;
+
+            // try to instantiate a generic
+            foreach (var generic in mGenerics)
+            {
+                // names must match
+                if (generic.Name != fullName) continue;
+
+                ICallable instance = generic.Instantiate(compiler, boundTypeArgs, argTypes);
+
+                //### bob: there's a bug here. it doesn't check that the *unique* names of the two functions
+                // match, just the base names. i think this means it could incorrectly collide:
+                // List'Int ()
+                // List'Bool ()
+                // but i'm not positive
+
+                if (instance != null) return instance;
+            }
+
+            // couldn't find it
+            return null;
+        }
+
+        private bool TryFind(string name, IEnumerable<IBoundDecl> typeArguments, IEnumerable<IBoundDecl> paramTypes, out ICallable bound)
         {
             string uniqueName = Callable.UniqueName(name, typeArguments, paramTypes);
 
@@ -94,5 +158,6 @@ namespace Magpie.Compilation
 
         private readonly List<Function>                mUnbound   = new List<Function>();
         private readonly Dictionary<string, ICallable> mCallables = new Dictionary<string, ICallable>();
+        private readonly List<IGenericCallable>        mGenerics = new List<IGenericCallable>();
     }
 }

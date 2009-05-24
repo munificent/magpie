@@ -17,7 +17,7 @@ namespace Magpie.Compilation
 
     public class ReturnExpr : ReturnExpr<IUnboundExpr>, IUnboundExpr
     {
-        public ReturnExpr(TokenPosition position, IUnboundExpr value)
+        public ReturnExpr(Position position, IUnboundExpr value)
             : base(value)
         {
             Position = position;
@@ -25,7 +25,7 @@ namespace Magpie.Compilation
 
         #region IUnboundExpr Members
 
-        public TokenPosition Position { get; private set; }
+        public Position Position { get; private set; }
 
         public TReturn Accept<TReturn>(IUnboundExprVisitor<TReturn> visitor)
         {

@@ -11,7 +11,7 @@ namespace Magpie.Compilation
     /// </summary>
     public abstract class TypeDefinition
     {
-        public TokenPosition Position { get; private set; }
+        public Position Position { get; private set; }
 
         /// <summary>
         /// Gets the name of the type. Will include the namespace once the type has been fully-qualified.
@@ -57,7 +57,7 @@ namespace Magpie.Compilation
             TypeArguments = typeArgs.ToArray();
         }
 
-        protected TypeDefinition(TokenPosition position, string name, IEnumerable<IBoundDecl> typeArgs)
+        protected TypeDefinition(Position position, string name, IEnumerable<IBoundDecl> typeArgs)
         {
             Position = position;
             mName = name;
@@ -72,7 +72,7 @@ namespace Magpie.Compilation
             }
         }
 
-        protected TypeDefinition(TokenPosition position, string name)
+        protected TypeDefinition(Position position, string name)
             : this (position, name, new IBoundDecl[0])
         {
         }

@@ -10,7 +10,7 @@ namespace Magpie.Compilation
     /// </summary>
     public class NamedType : IUnboundDecl
     {
-        public TokenPosition Position { get; private set; }
+        public Position Position { get; private set; }
 
         public string Name { get; private set; }
         public IUnboundDecl[] TypeArgs { get { return mTypeArgs; } }
@@ -19,26 +19,26 @@ namespace Magpie.Compilation
 
         public NamedType(string name)
         {
-            Position = TokenPosition.None;
+            Position = Position.None;
             Name = name;
             mTypeArgs = new IUnboundDecl[0];
         }
 
         public NamedType(string name, IEnumerable<IUnboundDecl> typeArgs)
         {
-            Position = TokenPosition.None;
+            Position = Position.None;
             Name = name;
             mTypeArgs = typeArgs.ToArray();
         }
 
-        public NamedType(Tuple<string, TokenPosition> args)
+        public NamedType(Tuple<string, Position> args)
         {
             Position = args.Item2;
             Name = args.Item1;
             mTypeArgs = new IUnboundDecl[0];
         }
 
-        public NamedType(Tuple<string, TokenPosition> args, IEnumerable<IUnboundDecl> typeArgs)
+        public NamedType(Tuple<string, Position> args, IEnumerable<IUnboundDecl> typeArgs)
             : this(args)
         {
             if (typeArgs != null)

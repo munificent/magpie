@@ -234,18 +234,18 @@ namespace Magpie.Compilation
         {
             get
             {
-                return new Token(new TokenPosition(mLine, mColumn, 0), TokenType.Eof);
+                return new Token(new Position(mLine, mColumn, 0), TokenType.Eof);
             }
         }
 
-        private TokenPosition LastChar
+        private Position LastChar
         {
-            get { return new TokenPosition(mLine, mColumn - 1, 1); }
+            get { return new Position(mLine, mColumn - 1, 1); }
         }
 
-        private TokenPosition Last2Chars
+        private Position Last2Chars
         {
-            get { return new TokenPosition(mLine, mColumn - 2, 2); }
+            get { return new Position(mLine, mColumn - 2, 2); }
         }
 
         // Advances the scanner to the next character.
@@ -272,13 +272,13 @@ namespace Magpie.Compilation
   
         // Emits the current character range as a token using the given conversion
         // function, and then reverts back to the default state.
-        private Token CompleteToken(Func<string, TokenPosition, Token> callback)
+        private Token CompleteToken(Func<string, Position, Token> callback)
         {
             mState = ScanState.Default;
-            return callback(mSource.Substring(mTokenStart, mIndex - mTokenStart), new TokenPosition(mLine, mColumn, mIndex - mTokenStart));
+            return callback(mSource.Substring(mTokenStart, mIndex - mTokenStart), new Position(mLine, mColumn, mIndex - mTokenStart));
         }
     
-        private Token EscapeString(string text, TokenPosition position)
+        private Token EscapeString(string text, Position position)
         {
             string result   = "";
 

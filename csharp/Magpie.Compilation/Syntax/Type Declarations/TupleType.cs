@@ -27,9 +27,9 @@ namespace Magpie.Compilation
     /// </summary>
     public class TupleType : TupleType<IUnboundDecl>, IUnboundDecl
     {
-        public TokenPosition Position { get; private set; }
+        public Position Position { get; private set; }
 
-        public TupleType(Tuple<IEnumerable<IUnboundDecl>, TokenPosition> args)
+        public TupleType(Tuple<IEnumerable<IUnboundDecl>, Position> args)
             : base(args.Item1)
         {
             Position = args.Item2;

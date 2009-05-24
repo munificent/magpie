@@ -22,7 +22,7 @@ namespace Magpie.Compilation
 
     public class TupleExpr : TupleExpr<IUnboundExpr>, IUnboundExpr
     {
-        public TokenPosition Position { get { return Fields[0].Position; } }
+        public Position Position { get { return Fields[0].Position; } }
 
         public TupleExpr(IEnumerable<IUnboundExpr> fields)
             : base(fields)

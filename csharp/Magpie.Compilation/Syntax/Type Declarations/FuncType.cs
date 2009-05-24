@@ -10,40 +10,25 @@ namespace Magpie.Compilation
     /// </summary>
     public class FuncType : IUnboundDecl, IBoundDecl
     {
-        //### bob: use "params IBoundDecl[]" for these
-        public static FuncType Create(IBoundDecl returnType)
+        public static FuncType Create(params IBoundDecl[] paramsAndReturn)
         {
-            return new FuncType(new ParamDecl[0], returnType);
-        }
+            if (paramsAndReturn.Length == 0) throw new ArgumentException("Must provide at least the return type.");
 
-        public static FuncType Create(IBoundDecl arg, IBoundDecl returnType)
-        {
-            return new FuncType(new ParamDecl[]
+            // pull out the parameters
+            var parameters = new List<ParamDecl>();
+            if (paramsAndReturn.Length > 1)
+            {
+                for (int i = 0; i < paramsAndReturn.Length - 1; i++)
                 {
-                    new ParamDecl("a", arg)
-                }, returnType);
+                    parameters.Add(new ParamDecl("arg" + i, paramsAndReturn[i]));
+                }
+            }
+
+            return new FuncType(parameters,
+                paramsAndReturn[paramsAndReturn.Length - 1]);
         }
 
-        public static FuncType Create(IBoundDecl arg1, IBoundDecl arg2, IBoundDecl returnType)
-        {
-            return new FuncType(new ParamDecl[]
-                {
-                    new ParamDecl("a", arg1),
-                    new ParamDecl("b", arg2)
-                }, returnType);
-        }
-
-        public static FuncType Create(IBoundDecl arg1, IBoundDecl arg2, IBoundDecl arg3, IBoundDecl returnType)
-        {
-            return new FuncType(new ParamDecl[]
-                {
-                    new ParamDecl("a", arg1),
-                    new ParamDecl("b", arg2),
-                    new ParamDecl("c", arg3)
-                }, returnType);
-        }
-
-        public TokenPosition Position { get; private set; }
+        public Position Position { get; private set; }
 
         public readonly List<ParamDecl> Parameters = new List<ParamDecl>();
 
@@ -65,10 +50,7 @@ namespace Magpie.Compilation
             get { return Parameters.ConvertAll(arg => arg.Type.Bound).ToArray(); }
         }
 
-        private static int sID = 0;
-        private int mID;
-
-        public FuncType(TokenPosition position, IEnumerable<ParamDecl> parameters, IUnboundDecl returnType)
+        public FuncType(Position position, IEnumerable<ParamDecl> parameters, IUnboundDecl returnType)
         {
             if (parameters == null) throw new ArgumentNullException("parameters");
             if (returnType == null) throw new ArgumentNullException("returnType");
@@ -76,12 +58,10 @@ namespace Magpie.Compilation
             Position = position;
             Parameters.AddRange(parameters);
             Return = new Decl(returnType);
-
-            mID = sID++;
         }
 
         public FuncType(IEnumerable<ParamDecl> parameters, IUnboundDecl returnType)
-            : this (TokenPosition.None, parameters, returnType)
+            : this (Position.None, parameters, returnType)
         {
         }
 
@@ -92,8 +72,6 @@ namespace Magpie.Compilation
 
             Parameters.AddRange(parameters);
             Return = new Decl(returnType);
-
-            mID = sID++;
         }
 
         public override string ToString()

@@ -152,7 +152,7 @@ namespace Magpie.Compilation
                 }
 
                 // look for an assignment function
-                return TranslateAssignment(nameTarget.Position, nameTarget.Name, nameTarget.TypeArgs, new UnitExpr(TokenPosition.None), value);
+                return TranslateAssignment(nameTarget.Position, nameTarget.Name, nameTarget.TypeArgs, new UnitExpr(Position.None), value);
             }
 
             // handle a function apply target: Foo 1 <- 3  ==> Foo<- (1, 3)
@@ -263,7 +263,7 @@ namespace Magpie.Compilation
         {
             var paramTypes = TypeBinder.Bind(mContext, expr.ParamTypes);
 
-            var callable = mContext.Compiler.FindFunction(mFunction.SearchSpace, 
+            var callable = mContext.Compiler.Functions.Find(mContext.Compiler, mFunction.SearchSpace, 
                 expr.Name.Name, expr.Name.TypeArgs, paramTypes);
 
             var function = callable as Function;
@@ -474,7 +474,7 @@ namespace Magpie.Compilation
 
         #endregion
 
-        private IBoundExpr TranslateAssignment(TokenPosition position, string baseName, IList<IUnboundDecl> typeArgs, IBoundExpr arg, IBoundExpr value)
+        private IBoundExpr TranslateAssignment(Position position, string baseName, IList<IUnboundDecl> typeArgs, IBoundExpr arg, IBoundExpr value)
         {
             var name = baseName + "<-";
 

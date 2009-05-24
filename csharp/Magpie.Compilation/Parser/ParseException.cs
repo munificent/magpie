@@ -7,7 +7,7 @@ namespace Magpie.Compilation
 {
     public class ParseException : Exception
     {
-        public ParseException(TokenPosition position, string message)
+        public ParseException(Position position, string message)
             : base(String.Format("Parse error at (line {0} column {1}-{2}): {3}", position.Line, position.Column, position.Column + position.Length, message))
         { }
     }

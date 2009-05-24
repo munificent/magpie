@@ -83,7 +83,7 @@ namespace Magpie.Compilation
             return false;
         }
 
-        protected bool ConsumeIf(TokenType type, out TokenPosition position)
+        protected bool ConsumeIf(TokenType type, out Position position)
         {
             if (CurrentIs(type))
             {
@@ -91,7 +91,7 @@ namespace Magpie.Compilation
                 return true;
             }
 
-            position = TokenPosition.None;
+            position = Position.None;
             return false;
         }
 
@@ -139,7 +139,7 @@ namespace Magpie.Compilation
                 else
                 {
                     //### bob: hackish. position is fake.
-                    mRead.Enqueue(new Token(TokenPosition.None, TokenType.Eof));
+                    mRead.Enqueue(new Token(Position.None, TokenType.Eof));
                 }
             }
 

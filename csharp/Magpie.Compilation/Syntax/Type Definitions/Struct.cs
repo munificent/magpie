@@ -14,9 +14,9 @@ namespace Magpie.Compilation
 
         public Field this[string name] { get { return Fields.Find(field => field.Name == name); } }
 
-        public Struct(TokenPosition position, string name) : base(position, name) { }
+        public Struct(Position position, string name) : base(position, name) { }
 
-        public Struct(TokenPosition position, string name, IEnumerable<Field> fields)
+        public Struct(Position position, string name, IEnumerable<Field> fields)
             : base(position, name)
         {
             AddFields(fields);

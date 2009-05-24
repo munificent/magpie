@@ -64,6 +64,7 @@
     <Compile Include="Foreign Interface\ForeignFunction.cs" />
     <Compile Include="Foreign Interface\IForeignStaticInterface.cs" />
     <Compile Include="Parser\LineProcessor.cs" />
+    <Compile Include="Parser\Position.cs" />
     <Compile Include="Syntax\Expr.cs" />
     <Compile Include="Syntax\Expressions\ArrayExpr.cs" />
     <Compile Include="Syntax\Expressions\AssignExpr.cs" />

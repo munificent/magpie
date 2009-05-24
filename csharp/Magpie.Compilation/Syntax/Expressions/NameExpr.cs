@@ -16,22 +16,22 @@ namespace Magpie.Compilation
     /// </example>
     public class NameExpr : IUnboundExpr
     {
-        public TokenPosition Position { get; private set; }
+        public Position Position { get; private set; }
 
         public string Name { get; private set; }
         public IList<IUnboundDecl> TypeArgs { get { return mTypeArgs; } }
 
-        public NameExpr(TokenPosition position, string name)
+        public NameExpr(Position position, string name)
             : this(position, name, null)
         {
         }
 
-        public NameExpr(Tuple<string, TokenPosition> pair, IEnumerable<IUnboundDecl> typeArgs)
+        public NameExpr(Tuple<string, Position> pair, IEnumerable<IUnboundDecl> typeArgs)
             : this(pair.Item2, pair.Item1, typeArgs)
         {
         }
 
-        public NameExpr(TokenPosition position, string name, IEnumerable<IUnboundDecl> typeArgs)
+        public NameExpr(Position position, string name, IEnumerable<IUnboundDecl> typeArgs)
         {
             Position = position;
 

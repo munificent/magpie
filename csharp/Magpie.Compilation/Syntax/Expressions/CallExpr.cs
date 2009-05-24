@@ -28,7 +28,7 @@ namespace Magpie.Compilation
     /// </summary>
     public class CallExpr : CallExpr<IUnboundExpr>, IUnboundExpr
     {
-        public TokenPosition Position { get { return Target.Position; } }
+        public Position Position { get { return Target.Position; } }
 
         public CallExpr(IUnboundExpr target, IUnboundExpr arg)
             : base(target, arg)

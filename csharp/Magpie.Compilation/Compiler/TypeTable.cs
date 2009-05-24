@@ -37,7 +37,20 @@ namespace Magpie.Compilation
             mTypes[uniqueName] = type;
         }
 
-        public INamedType Find(string name, IEnumerable<IBoundDecl> typeArgs)
+        public INamedType Find(NameSearchSpace searchSpace, Position position, string name,
+            IEnumerable<IBoundDecl> typeArgs)
+        {
+            foreach (var potentialName in searchSpace.SearchFor(name))
+            {
+                var type = Find(potentialName, typeArgs);
+                if (type != null) return type;
+            }
+
+            // not found
+            throw new CompileException(position, "Could not find a type named " + name + ".");
+        }
+
+        private INamedType Find(string name, IEnumerable<IBoundDecl> typeArgs)
         {
             var uniqueName = GetUniqueName(name, typeArgs);
 

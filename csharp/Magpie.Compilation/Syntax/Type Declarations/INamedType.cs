@@ -7,7 +7,7 @@ namespace Magpie.Compilation
 {
     public interface INamedType : IBoundDecl
     {
-        TokenPosition Position { get; }
+        Position Position { get; }
         string Name { get; }
     }
 }

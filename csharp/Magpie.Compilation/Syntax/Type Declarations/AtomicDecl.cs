@@ -10,7 +10,7 @@ namespace Magpie.Compilation
     /// </summary>
     public class AtomicDecl : IUnboundDecl, INamedType
     {
-        public TokenPosition Position { get { return TokenPosition.None; } }
+        public Position Position { get { return Position.None; } }
 
         public string Name { get; private set; }
 

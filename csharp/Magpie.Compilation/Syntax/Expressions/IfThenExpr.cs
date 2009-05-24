@@ -21,9 +21,9 @@ namespace Magpie.Compilation
 
     public class IfThenExpr : IfThenExpr<IUnboundExpr>, IUnboundExpr
     {
-        public TokenPosition Position { get; private set; }
+        public Position Position { get; private set; }
 
-        public IfThenExpr(TokenPosition position, IUnboundExpr condition, IUnboundExpr body)
+        public IfThenExpr(Position position, IUnboundExpr condition, IUnboundExpr body)
             : base(condition, body)
         {
             Position = position;

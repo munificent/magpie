@@ -13,7 +13,7 @@ namespace Magpie.Compilation
     {
         public ReadOnlyCollection<UnionCase> Cases { get; private set; }
 
-        public Union(TokenPosition position, string name, IEnumerable<UnionCase> cases)
+        public Union(Position position, string name, IEnumerable<UnionCase> cases)
             : base(position, name)
         {
             Cases = new ReadOnlyCollection<UnionCase>(new List<UnionCase>(cases));

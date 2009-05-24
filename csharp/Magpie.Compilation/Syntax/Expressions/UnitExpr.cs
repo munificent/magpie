@@ -12,9 +12,9 @@ namespace Magpie.Compilation
     /// </summary>
     public class UnitExpr : IUnboundExpr, IBoundExpr
     {
-        public TokenPosition Position { get; private set; }
+        public Position Position { get; private set; }
 
-        public UnitExpr(TokenPosition position)
+        public UnitExpr(Position position)
         {
             Position = position;
         }

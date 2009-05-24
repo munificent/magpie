@@ -10,7 +10,7 @@ namespace Magpie.Compilation
         public IList<NamedIterator> Iterators { get; private set; }
         public IUnboundExpr Body { get; private set; }
 
-        public ForExpr(TokenPosition position, IList<NamedIterator> iterators, IUnboundExpr body)
+        public ForExpr(Position position, IList<NamedIterator> iterators, IUnboundExpr body)
         {
             Position = position;
             Iterators = iterators;
@@ -19,7 +19,7 @@ namespace Magpie.Compilation
 
         #region IUnboundExpr Members
 
-        public TokenPosition Position { get; private set; }
+        public Position Position { get; private set; }
 
         public TReturn Accept<TReturn>(IUnboundExprVisitor<TReturn> visitor)
         {
@@ -34,12 +34,12 @@ namespace Magpie.Compilation
     /// </summary>
     public class NamedIterator
     {
-        public TokenPosition Position { get; private set; }
+        public Position Position { get; private set; }
 
         public string Name { get; private set; }
         public IUnboundExpr Iterator { get; private set; }
 
-        public NamedIterator(TokenPosition position, string name, IUnboundExpr iterator)
+        public NamedIterator(Position position, string name, IUnboundExpr iterator)
         {
             Position = position;
             Name = name;

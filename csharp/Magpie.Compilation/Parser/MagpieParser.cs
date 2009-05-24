@@ -95,7 +95,7 @@ namespace Magpie.Compilation
         }
 
         // <-- GenericDecl FnArgsDecl Block
-        private object FunctionDefinition(string name, TokenPosition position)
+        private object FunctionDefinition(string name, Position position)
         {
             var typeParams = TypeParams();
 
@@ -235,7 +235,7 @@ namespace Magpie.Compilation
         {
             bool? isMutable = null;
 
-            TokenPosition position;
+            Position position;
             if (ConsumeIf(TokenType.Def, out position))
             {
                 isMutable = false;
@@ -260,14 +260,14 @@ namespace Magpie.Compilation
         //   | FlowExpr
         private IUnboundExpr MatchExpr()
         {
-            TokenPosition position;
+            Position position;
             if (ConsumeIf(TokenType.Match, out position))
             {
                 IUnboundExpr matchExpr = FlowExpr();
                 ConsumeIf(TokenType.Line);
 
                 var cases = new List<MatchCase>();
-                TokenPosition casePosition;
+                Position casePosition;
                 while (ConsumeIf(TokenType.Case, out casePosition))
                 {
                     ICaseExpr caseExpr = CaseExpr();
@@ -334,7 +334,7 @@ namespace Magpie.Compilation
         //   | AssignExpr
         private IUnboundExpr FlowExpr()
         {
-            TokenPosition position;
+            Position position;
             if (CurrentIs(TokenType.For))
             {
                 List<NamedIterator> iterators = new List<NamedIterator>();
@@ -412,12 +412,12 @@ namespace Magpie.Compilation
         {
             IUnboundExpr expr = TupleExpr();
 
-            TokenPosition position;
+            Position position;
             if (ConsumeIf(TokenType.LeftArrow, out position))
             {
                 bool isDot = false;
                 string opName = String.Empty;
-                TokenPosition opPosition = null;
+                Position opPosition = null;
 
                 if (ConsumeIf(TokenType.Dot)) isDot = true;
                 else if (CurrentIs(TokenType.Operator))
@@ -479,7 +479,7 @@ namespace Magpie.Compilation
         //   | PrimaryExpr
         private IUnboundExpr ArrayExpr()
         {
-            TokenPosition position;
+            Position position;
             if (ConsumeIf(TokenType.LeftBracket, out position))
             {
                 if (ConsumeIf(TokenType.RightBracketBang))
@@ -567,7 +567,7 @@ namespace Magpie.Compilation
 
         private IUnboundExpr FuncRefExpr()
         {
-            TokenPosition position = Consume(TokenType.Fn).Position;
+            Position position = Consume(TokenType.Fn).Position;
 
             NameExpr name;
             if (CurrentIs(TokenType.Operator))
@@ -662,7 +662,7 @@ namespace Magpie.Compilation
         }
 
         // <-- LPAREN (TypeDecl (COMMA TypeDecl)*)? RPAREN
-        private Tuple<IEnumerable<IUnboundDecl>, TokenPosition> TupleType()
+        private Tuple<IEnumerable<IUnboundDecl>, Position> TupleType()
         {
             var decls = new List<IUnboundDecl>();
 
@@ -748,7 +748,7 @@ namespace Magpie.Compilation
         //                                   | Name TypeArgs )
         private IUnboundDecl TypeDecl()
         {
-            var arrays = new Stack<Tuple<bool, TokenPosition>>();
+            var arrays = new Stack<Tuple<bool, Position>>();
             while (ConsumeIf(TokenType.LeftBracket))
             {
                 bool isMutable = false;
@@ -783,10 +783,10 @@ namespace Magpie.Compilation
         }
 
         // <-- NAME (COLON NAME)*
-        private Tuple<string, TokenPosition> Name()
+        private Tuple<string, Position> Name()
         {
             Token token = Consume(TokenType.Name);
-            TokenPosition position = token.Position;
+            Position position = token.Position;
             string name = token.StringValue;
 
             while (ConsumeIf(TokenType.Colon))
@@ -795,10 +795,10 @@ namespace Magpie.Compilation
                 name += ":" + token.StringValue;
 
                 // combine all of the names into a single span
-                position = new TokenPosition(position.Line, position.Column, name.Length);
+                position = new Position(position.Line, position.Column, name.Length);
             }
 
-            return new Tuple<string, TokenPosition>(name, position);
+            return new Tuple<string, Position>(name, position);
         }
     }
 }

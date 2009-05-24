@@ -16,10 +16,10 @@ namespace Magpie.Compilation
 
         public int NumLocals { get; private set; }
 
-        public Function(TokenPosition position, string name, FuncType type, IUnboundExpr body)
+        public Function(Position position, string name, FuncType type, IUnboundExpr body)
             : this(position, name, type, body, null, false) { }
 
-        public Function(TokenPosition position, string name, FuncType type, IUnboundExpr body,
+        public Function(Position position, string name, FuncType type, IUnboundExpr body,
             IEnumerable<IBoundDecl> typeArgs, bool hasInferrableTypeArguments)
             : base(position, name, typeArgs)
         {

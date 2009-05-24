@@ -7,7 +7,7 @@ namespace Magpie.Compilation
 {
     public interface IUnboundDecl
     {
-        TokenPosition Position { get; }
+        Position Position { get; }
         TReturn Accept<TReturn>(IUnboundDeclVisitor<TReturn> visitor);
     }
 

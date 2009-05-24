@@ -7,12 +7,12 @@ namespace Magpie.Compilation
 {
     public class FuncRefExpr : IUnboundExpr
     {
-        public TokenPosition Position { get; private set; }
+        public Position Position { get; private set; }
 
         public NameExpr Name { get { return mName; } }
         public IUnboundDecl[] ParamTypes { get { return mParamTypes.ToArray(); } }
 
-        public FuncRefExpr(TokenPosition position, NameExpr name, IEnumerable<IUnboundDecl> paramTypes)
+        public FuncRefExpr(Position position, NameExpr name, IEnumerable<IUnboundDecl> paramTypes)
         {
             Position = position;
             mName = name;

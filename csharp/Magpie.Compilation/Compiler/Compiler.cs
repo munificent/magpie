@@ -40,7 +40,7 @@ namespace Magpie.Compilation
 
                 // build the function table
                 mFunctions.AddRange(Intrinsic.All);
-                mGenericFunctions.AddRange(Intrinsic.AllGenerics);
+                mFunctions.AddRange(Intrinsic.AllGenerics);
 
                 // bind the user-defined types and create their auto-generated functions
                 foreach (var structure in mTypes.Structs)
@@ -57,12 +57,12 @@ namespace Magpie.Compilation
 
                 foreach (var structure in mGenericStructs)
                 {
-                    mGenericFunctions.AddRange(structure.BuildFunctions());
+                    mFunctions.AddRange(structure.BuildFunctions());
                 }
 
                 foreach (var union in mGenericUnions)
                 {
-                    mGenericFunctions.AddRange(union.BuildFunctions());
+                    mFunctions.AddRange(union.BuildFunctions());
                 }
 
                 if (mForeignInterface != null)
@@ -97,7 +97,7 @@ namespace Magpie.Compilation
         /// <param name="arg">The argument being applied to the name.</param>
         /// <returns></returns>
         public IBoundExpr ResolveName(Function function,
-            Scope scope, TokenPosition position, string name,
+            Scope scope, Position position, string name,
             IList<IUnboundDecl> typeArgs, IBoundExpr arg)
         {
             IBoundDecl[] argTypes = null;
@@ -161,77 +161,17 @@ namespace Magpie.Compilation
             // it, pass it around, etc.
             if (arg == null)
             {
-                arg = new UnitExpr(TokenPosition.None);
+                arg = new UnitExpr(Position.None);
                 argTypes = arg.Type.Expand();
             }
 
             // look up the function
-            ICallable callable = FindFunction(function.SearchSpace, name, typeArgs, argTypes);
+            ICallable callable = Functions.Find(this, function.SearchSpace, name, typeArgs, argTypes);
+
             if (callable == null) throw new CompileException(position, String.Format("Could not resolve name {0}.",
                 Callable.UniqueName(name, null, argTypes)));
 
             return callable.CreateCall(arg);
-        }
-
-        /// <summary>
-        /// Looks for a function with the given name in all of the currently used namespaces.
-        /// </summary>
-        public ICallable FindFunction(NameSearchSpace searchSpace,
-            string name, IList<IUnboundDecl> typeArgs, IBoundDecl[] argTypes)
-        {
-            foreach (var potentialName in searchSpace.SearchFor(name))
-            {
-                var bound = LookUpFunction(searchSpace, potentialName, typeArgs, argTypes);
-                if (bound != null) return bound;
-            }
-
-            // not found
-            return null;
-        }
-
-        public IBoundDecl FindType(NameSearchSpace searchSpace, TokenPosition position, string name,
-            IEnumerable<IBoundDecl> typeArgs)
-        {
-            foreach (var potentialName in searchSpace.SearchFor(name))
-            {
-                var type = mTypes.Find(potentialName, typeArgs);
-                if (type != null) return type;
-            }
-
-            // not found
-            throw new CompileException(position, "Could not find a type named " + name + ".");
-        }
-
-        private ICallable LookUpFunction(NameSearchSpace searchSpace, string fullName,
-            IList<IUnboundDecl> typeArgs, IBoundDecl[] argTypes)
-        {
-            var boundTypeArgs = TypeBinder.Bind(new BindingContext(this, searchSpace), typeArgs);
-
-            string uniqueName = Callable.UniqueName(fullName, boundTypeArgs, argTypes);
-
-            // try the already bound functions
-            ICallable callable;
-            if (mFunctions.TryFind(fullName, boundTypeArgs, argTypes, out callable)) return callable;
-
-            // try to instantiate a generic
-            foreach (var generic in mGenericFunctions)
-            {
-                // names must match
-                if (generic.Name != fullName) continue;
-
-                ICallable instance = generic.Instantiate(this, boundTypeArgs, argTypes);
-
-                //### bob: there's a bug here. it doesn't check that the *unique* names of the two functions
-                // match, just the base names. i think this means it could incorrectly collide:
-                // List'Int ()
-                // List'Bool ()
-                // but i'm not positive
-
-                if (instance != null) return instance;
-            }
-
-            // couldn't find it
-            return null;
         }
 
         private void AddNamespace(string parentName, SourceFile file, Namespace namespaceObj)
@@ -259,7 +199,7 @@ namespace Magpie.Compilation
             foreach (var function in namespaceObj.GenericFunctions)
             {
                 function.BaseType.SetSearchSpace(searchSpace);
-                mGenericFunctions.Add(function);
+                mFunctions.Add(function);
             }
 
             foreach (var structure in namespaceObj.GenericStructs)
@@ -287,7 +227,6 @@ namespace Magpie.Compilation
         private readonly List<GenericStruct> mGenericStructs = new List<GenericStruct>();
         private readonly List<GenericUnion> mGenericUnions = new List<GenericUnion>();
         private readonly TypeTable mTypes = new TypeTable();
-        private readonly List<IGenericCallable> mGenericFunctions = new List<IGenericCallable>();
         private readonly IForeignStaticInterface mForeignInterface;
     }
 }

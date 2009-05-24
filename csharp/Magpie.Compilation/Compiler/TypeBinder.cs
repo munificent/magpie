@@ -39,7 +39,7 @@ namespace Magpie.Compilation
             // bind the fields
             foreach (var field in structure.Fields)
             {
-                field.Type.Bind(field.Type.Unbound.Accept(binder));
+                field.Type.Bind(binder);
             }
         }
 
@@ -56,7 +56,7 @@ namespace Magpie.Compilation
             foreach (var unionCase in union.Cases)
             {
                 unionCase.SetUnion(union);
-                unionCase.ValueType.Bind(unionCase.ValueType.Unbound.Accept(binder));
+                unionCase.ValueType.Bind(binder);
             }
         }
 
@@ -76,11 +76,11 @@ namespace Magpie.Compilation
             // auto-functions are created in bound form.
             if (!func.Return.IsBound)
             {
-                func.Return.Bind(func.Return.Unbound.Accept(this));
+                func.Return.Bind(this);
 
                 foreach (var parameter in func.Parameters)
                 {
-                    parameter.Type.Bind(parameter.Type.Unbound.Accept(this));
+                    parameter.Type.Bind(this);
                 }
             }
         }
@@ -126,7 +126,8 @@ namespace Magpie.Compilation
             // bind the type arguments
             var typeArgs = decl.TypeArgs.Accept(this);
 
-            return mContext.Compiler.FindType(mContext.SearchSpace, decl.Position, decl.Name, typeArgs);
+            // look up the named type
+            return mContext.Compiler.Types.Find(mContext.SearchSpace, decl.Position, decl.Name, typeArgs);
         }
 
         #endregion

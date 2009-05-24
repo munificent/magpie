@@ -22,7 +22,7 @@ namespace Magpie.Compilation
 
     public class BlockExpr : BlockExpr<IUnboundExpr>, IUnboundExpr
     {
-        public TokenPosition Position { get { return Exprs[0].Position; } }
+        public Position Position { get { return Exprs[0].Position; } }
 
         public BlockExpr(IEnumerable<IUnboundExpr> exprs)
             : base(exprs)
