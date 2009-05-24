@@ -21,17 +21,10 @@ namespace Magpie.Compilation
 
         public static bool TypesMatch(IBoundDecl parameter, IBoundDecl argument)
         {
-            if (parameter is AnyType) return true;
-
             return argument.Accept(new DeclComparer(parameter));
         }
 
         #region IBoundDeclVisitor<bool> Members
-
-        bool IBoundDeclVisitor<bool>.Visit(AnyType decl)
-        {
-            return true;
-        }
 
         bool IBoundDeclVisitor<bool>.Visit(AtomicDecl decl)
         {

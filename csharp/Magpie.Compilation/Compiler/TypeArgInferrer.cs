@@ -43,11 +43,6 @@ namespace Magpie.Compilation
 
         #region IBoundDeclVisitor<bool> Members
 
-        bool IBoundDeclVisitor<bool>.Visit(AnyType decl)
-        {
-            throw new NotImplementedException();
-        }
-
         bool IBoundDeclVisitor<bool>.Visit(BoundArrayType decl)
         {
             throw new NotImplementedException();

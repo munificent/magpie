@@ -16,7 +16,6 @@ namespace Magpie.Compilation
 
     public interface IBoundDeclVisitor<TReturn>
     {
-        TReturn Visit(AnyType decl);
         TReturn Visit(BoundArrayType decl);
         TReturn Visit(AtomicDecl decl);
         TReturn Visit(FuncType decl);

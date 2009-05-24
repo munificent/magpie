@@ -8,7 +8,7 @@ namespace Magpie.Compilation
     /// <summary>
     /// The byte codes.
     /// </summary>
-    /// <remarks>There is a mirror of this file in the compiler. These two must be kept in sync for obvious
+    /// <remarks>There is a mirror of this file in the interpreter. These two must be kept in sync for obvious
     /// reasons. They are duplicated to make it explicit that there is little real dependency between the
     /// compiler and the interpreter.</remarks>
     public enum OpCode : byte

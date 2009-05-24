@@ -51,7 +51,6 @@
     <Compile Include="Bytecode\StringTable.cs" />
     <Compile Include="Compiler\BindingContext.cs" />
     <Compile Include="Compiler\CompileError.cs" />
-    <Compile Include="Compiler\DeclPredicate.cs" />
     <Compile Include="Compiler\FunctionTable.cs" />
     <Compile Include="Compiler\Automatic Functions\FieldGetter.cs" />
     <Compile Include="Compiler\Automatic Functions\FieldSetter.cs" />
@@ -116,7 +115,6 @@
     <Compile Include="Syntax\Pattern Matching\TupleCase.cs" />
     <Compile Include="Syntax\Scope.cs" />
     <Compile Include="Syntax\SourceFile.cs" />
-    <Compile Include="Syntax\Type Declarations\AnyType.cs" />
     <Compile Include="Syntax\Type Declarations\ArrayType.cs" />
     <Compile Include="Syntax\Type Declarations\AtomicDecl.cs" />
     <Compile Include="Syntax\Type Declarations\Decl.cs" />

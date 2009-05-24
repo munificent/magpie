@@ -39,19 +39,20 @@ namespace Magpie.Compilation
                 }
 
                 // build the function table
-                mFunctions.Add(Intrinsic.All);
+                mFunctions.AddRange(Intrinsic.All);
+                mGenericFunctions.AddRange(Intrinsic.AllGenerics);
 
                 // bind the user-defined types and create their auto-generated functions
                 foreach (var structure in mTypes.Structs)
                 {
                     TypeBinder.Bind(this, structure);
-                    mFunctions.Add(structure.BuildFunctions());
+                    mFunctions.AddRange(structure.BuildFunctions());
                 }
 
                 foreach (var union in mTypes.Unions)
                 {
                     TypeBinder.Bind(this, union);
-                    mFunctions.Add(union.BuildFunctions());
+                    mFunctions.AddRange(union.BuildFunctions());
                 }
 
                 foreach (var structure in mGenericStructs)
@@ -66,7 +67,7 @@ namespace Magpie.Compilation
 
                 if (mForeignInterface != null)
                 {
-                    mFunctions.Add(mForeignInterface.Functions.Cast<ICallable>());
+                    mFunctions.AddRange(mForeignInterface.Functions.Cast<ICallable>());
                 }
 
                 mFunctions.BindAll(this);
@@ -167,7 +168,7 @@ namespace Magpie.Compilation
             // look up the function
             ICallable callable = FindFunction(function.SearchSpace, name, typeArgs, argTypes);
             if (callable == null) throw new CompileException(position, String.Format("Could not resolve name {0}.",
-                FunctionTable.GetUniqueName(name, null, argTypes)));
+                Callable.UniqueName(name, null, argTypes)));
 
             return callable.CreateCall(arg);
         }
@@ -206,7 +207,7 @@ namespace Magpie.Compilation
         {
             var boundTypeArgs = TypeBinder.Bind(new BindingContext(this, searchSpace), typeArgs);
 
-            string uniqueName = FunctionTable.GetUniqueName(fullName, boundTypeArgs, argTypes);
+            string uniqueName = Callable.UniqueName(fullName, boundTypeArgs, argTypes);
 
             // try the already bound functions
             ICallable callable;

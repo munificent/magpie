@@ -10,24 +10,11 @@ namespace Magpie.Compilation
     /// </summary>
     public class Function : TypeDefinition, ICallable
     {
-        /// <summary>
-        /// A unique name for the function, including type arguments and value argument types.
-        /// </summary>
-        public string UniqueName
-        {
-            get
-            {
-                return FunctionTable.GetUniqueName(Name, null, Type.ParameterTypes);
-            }
-        }
-
         public FuncType Type { get; private set; }
 
         public readonly Expr Body;
 
         public int NumLocals { get; private set; }
-
-        public bool CanOmitTypeArgs { get; private set; }
 
         public Function(TokenPosition position, string name, FuncType type, IUnboundExpr body)
             : this(position, name, type, body, null, false) { }

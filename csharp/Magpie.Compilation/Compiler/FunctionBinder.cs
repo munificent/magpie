@@ -277,7 +277,7 @@ namespace Magpie.Compilation
             // between being a regular function, a foreign one (or later a closure), then
             // we can get rid of ForeignFuncCallExpr and just use CallExpr for foreign calls
             // too.
-            if (function == null) throw new NotImplementedException("Can only get references to user-defined or auto-generated functions. Intrinsics and foreign function references aren't supported yet.");
+            if (function == null) throw new NotImplementedException("Can only get references to user-defined functions. Intrinsics, auto-generated, and foreign function references aren't supported yet.");
 
             return new BoundFuncRefExpr(function);
         }

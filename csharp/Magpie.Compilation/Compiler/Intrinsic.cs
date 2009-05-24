@@ -50,8 +50,14 @@ namespace Magpie.Compilation
                 yield return new Intrinsic("Print", OpCode.Print, FuncType.Create(Decl.String, Decl.Unit));
                 yield return new Intrinsic("Size", OpCode.StringSize, FuncType.Create(Decl.String, Decl.Int));
                 yield return new Intrinsic("Substring", OpCode.Substring, FuncType.Create(Decl.String, Decl.Int, Decl.Int, Decl.String));
+            }
+        }
 
-                yield return new Intrinsic("Size", OpCode.SizeArray, FuncType.Create(new BoundArrayType(new AnyType(), false), Decl.Int));
+        public static IEnumerable<IGenericCallable> AllGenerics
+        {
+            get
+            {
+                yield return new ArraySize();
             }
         }
 
@@ -100,6 +106,32 @@ namespace Magpie.Compilation
         public IBoundDecl[] TypeArguments { get { return new IBoundDecl[0]; } }
 
         public bool HasInferrableTypeArguments { get { return false; } }
+
+        #endregion
+
+        #region Generic intrinsics
+
+        private class ArraySize : IGenericCallable
+        {
+            #region IGenericCallable Members
+
+            public string Name { get { return "Size"; } }
+
+            public ICallable Instantiate(Compiler compiler, IEnumerable<IBoundDecl> typeArgs, IEnumerable<IBoundDecl> argTypes)
+            {
+                // make sure the type signature matches
+                var argTypeArray = argTypes.ToArray();
+                if (argTypeArray.Length != 1) return null;
+
+                var arrayType = argTypeArray[0] as BoundArrayType;
+                if (arrayType == null) return null;
+
+                // make the intrinsic
+                return new Intrinsic("Size", OpCode.SizeArray, FuncType.Create(arrayType, Decl.Int));
+            }
+
+            #endregion
+        }
 
         #endregion
     }

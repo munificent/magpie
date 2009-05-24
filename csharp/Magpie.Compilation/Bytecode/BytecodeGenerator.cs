@@ -29,7 +29,7 @@ namespace Magpie.Compilation
             BytecodeGenerator generator = new BytecodeGenerator(compiler,
                 writer, functionPatcher, stringTable);
 
-            functionPatcher.DefineOffset(function.UniqueName);
+            functionPatcher.DefineOffset(function.UniqueName());
 
             writer.Write(function.NumLocals);
 
@@ -65,7 +65,7 @@ namespace Magpie.Compilation
         bool IBoundExprVisitor<bool>.Visit(BoundFuncRefExpr expr)
         {
             Write(OpCode.PushInt);
-            mFunctionPatcher.InsertOffset(expr.Function.UniqueName);
+            mFunctionPatcher.InsertOffset(expr.Function.UniqueName());
             return true;
         }
 

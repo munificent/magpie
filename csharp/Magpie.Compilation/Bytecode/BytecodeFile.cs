@@ -35,7 +35,7 @@ namespace Magpie.Compilation
             // code section
             foreach (Function function in mCompiler.Functions.Functions)
             {
-                if (function.UniqueName == "Main ()") exportTable.DefineOffset("main");
+                if (function.UniqueName() == "Main ()") exportTable.DefineOffset("main");
 
                 BytecodeGenerator.Generate(mCompiler, writer, funcPatcher, strings, function);
             }
