@@ -27,7 +27,5 @@ namespace Magpie.Compilation
         TReturn Visit(ForeignCallExpr expr);
         TReturn Visit(ConstructExpr expr);
         TReturn Visit(ConstructUnionExpr expr);
-        TReturn Visit(LoadElementExpr expr);
-        TReturn Visit(StoreElementExpr expr);
     }
 }

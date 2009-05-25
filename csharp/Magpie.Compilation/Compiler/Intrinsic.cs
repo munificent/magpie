@@ -57,6 +57,8 @@ namespace Magpie.Compilation
         {
             get
             {
+                yield return new GetArrayElement();
+                yield return new SetArrayElement();
                 yield return new ArraySize();
             }
         }
@@ -110,6 +112,64 @@ namespace Magpie.Compilation
         #endregion
 
         #region Generic intrinsics
+
+        private class GetArrayElement : IGenericCallable
+        {
+            #region IGenericCallable Members
+
+            public string Name { get { return "__Call"; } }
+
+            public ICallable Instantiate(Compiler compiler, IEnumerable<IBoundDecl> typeArgs,
+                IBoundDecl argType)
+            {
+                // should have two args: an int and an array
+                var argTuple = argType as BoundTupleType;
+                if (argTuple == null) return null;
+
+                if (argTuple.Fields[0] != Decl.Int) return null;
+
+                var arrayType = argTuple.Fields[1] as BoundArrayType;
+                if (arrayType == null) return null;
+
+                // make the intrinsic
+                return new Intrinsic("__Call", OpCode.LoadArray, FuncType.Create(argTuple, arrayType.ElementType));
+            }
+
+            #endregion
+        }
+
+        private class SetArrayElement : IGenericCallable
+        {
+            #region IGenericCallable Members
+
+            public string Name { get { return "__Call<-"; } }
+
+            public ICallable Instantiate(Compiler compiler, IEnumerable<IBoundDecl> typeArgs,
+                IBoundDecl argType)
+            {
+                // should have three args: an int, an array, and a value
+                var argTuple = argType as BoundTupleType;
+                if (argTuple == null) return null;
+
+                // index
+                if (argTuple.Fields[0] != Decl.Int) return null;
+
+                // array
+                var arrayType = argTuple.Fields[1] as BoundArrayType;
+                if (arrayType == null) return null;
+
+                // cannot assign to immutable arrays
+                if (!arrayType.IsMutable) return null;
+
+                // value
+                if (!DeclComparer.TypesMatch(argTuple.Fields[2], arrayType.ElementType)) return null;
+
+                // make the intrinsic
+                return new Intrinsic("__Call<-", OpCode.StoreArray, FuncType.Create(argTuple, Decl.Unit));
+            }
+
+            #endregion
+        }
 
         private class ArraySize : IGenericCallable
         {

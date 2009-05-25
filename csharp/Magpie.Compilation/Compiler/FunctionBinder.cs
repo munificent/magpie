@@ -59,42 +59,29 @@ namespace Magpie.Compilation
 
             IBoundExpr target = expr.Target.Accept(this);
 
-            // if the "function" is an int, the arg can be an array
-            if (target.Type == Decl.Int)
+            // see if we're calling a function
+            FuncType funcType = target.Type as FuncType;
+            if (funcType != null)
             {
-                if (boundArg.Type is BoundArrayType)
+                // check that args match
+                if (!DeclComparer.TypesMatch(funcType.Parameter.Bound, boundArg.Type))
                 {
-                    // array access
-                    return new LoadElementExpr(boundArg, target);
+                    throw new CompileException(expr.Position, "Argument types passed to evaluated function reference do not match function's parameter types.");
                 }
-                else
-                {
-                    //### bob: could desugar this to support indexers:
-                    //  Main (->)
-                    //      def a <- Indexable
-                    //      def b <- a.1 // desugared to Index_
-                    //  end
-                    //  
-                    //  struct Indexable
-                    //  end
-                    //
-                    //  Index_ (a Indexable, index Int -> Int)
-                    //      123 // whatever
-                    //  end
-                    throw new CompileException(expr.Position, "Integers can only be called with an array argument.");
-                }
-            }
-            else if(!(target.Type is FuncType)) throw new CompileException(expr.Position, "Target of call is not a function.");
 
-            // check that args match
-            FuncType funcType = (FuncType)target.Type;
-            if (!DeclComparer.TypesMatch(funcType.Parameter.Bound, boundArg.Type))
-            {
-                throw new CompileException(expr.Position, "Argument types passed to evaluated function reference do not match function's parameter types.");
+                // simply apply the arg to the bound expression
+                return new BoundCallExpr(target, boundArg);
             }
 
-            // simply apply the arg to the bound expression
-            return new BoundCallExpr(target, boundArg);
+            // not calling a function, so try to desugar to a __Call
+            var callArg = new BoundTupleExpr(new IBoundExpr[] { target, boundArg });
+
+            var call = mContext.Compiler.ResolveName(mFunction, Scope, expr.Target.Position,
+                "__Call", new IUnboundDecl[0], callArg);
+
+            if (call != null) return call;
+
+            throw new CompileException(expr.Position, "Target of call is not a function.");
         }
 
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(ArrayExpr expr)
@@ -169,29 +156,14 @@ namespace Magpie.Compilation
                     return TranslateAssignment(callTarget.Position, funcName.Name, funcName.TypeArgs, callArg, value);
                 }
 
-                // see if it's an array set
-                var boundCallTarget = callTarget.Target.Accept(this);
-                if ((boundCallTarget.Type == Decl.Int) && (callArg.Type is BoundArrayType))
-                {
-                    var arrayArgType = (BoundArrayType)callArg.Type;
-                    if (!arrayArgType.IsMutable) throw new CompileException(expr.Position, "Cannot set an element in an immutable array.");
+                // not calling a function, so try to desugar to a __Call<-
+                var desugaredCallTarget = callTarget.Target.Accept(this);
+                var desugaredCallArg = new BoundTupleExpr(new IBoundExpr[] { desugaredCallTarget, callArg, value });
 
-                    // array access
-                    return new StoreElementExpr(callArg, boundCallTarget, value);
+                var call = mContext.Compiler.ResolveName(mFunction, Scope, expr.Target.Position,
+                    "__Call<-", new IUnboundDecl[0], desugaredCallArg);
 
-                    //### bob: if callArg is not ArrayType, could desugar this to support indexers:
-                    //  Main (->)
-                    //      def a <- Indexable
-                    //      a.1 <- 3 // desugared to Index_<-
-                    //  end
-                    //  
-                    //  struct Indexable
-                    //  end
-                    //
-                    //  Index_<- (a Indexable, index Int -> Int)
-                    //      123 // whatever
-                    //  end
-                }
+                if (call != null) return call;
 
                 throw new CompileException(expr.Position, "Couldn't figure out what you're trying to do on the left side of an assignment.");
             }

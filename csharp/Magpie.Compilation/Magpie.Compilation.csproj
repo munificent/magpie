@@ -83,14 +83,12 @@
     </Compile>
     <Compile Include="Syntax\Expressions\IntrinsicExpr.cs" />
     <Compile Include="Syntax\Expressions\IUnboundExpr.cs" />
-    <Compile Include="Syntax\Expressions\LoadElementExpr.cs" />
     <Compile Include="Syntax\Expressions\LoadExpr.cs" />
     <Compile Include="Syntax\Expressions\LocalsExpr.cs" />
     <Compile Include="Syntax\Expressions\MatchExpr.cs" />
     <Compile Include="Syntax\Expressions\NameExpr.cs" />
     <Compile Include="Syntax\Expressions\OperatorExpr.cs" />
     <Compile Include="Syntax\Expressions\ReturnExpr.cs" />
-    <Compile Include="Syntax\Expressions\StoreElementExpr.cs" />
     <Compile Include="Syntax\Expressions\StoreExpr.cs" />
     <Compile Include="Syntax\Expressions\TupleExpr.cs" />
     <Compile Include="Syntax\Expressions\ValueExpr.cs" />

@@ -98,25 +98,28 @@ namespace Magpie.Interpreter
                     case OpCode.LoadArray:
                         {
                             Structure struc = PopStructure();
-                            int index = PopInt();
+
+                            int index = struc[0].Int;
+                            Structure array = struc[1].Struct;
 
                             //### bob: should bounds-check
 
                             // add one to skip the first slot which holds the array size
-                            Push (struc[index + 1]);
+                            Push(array[index + 1]);
                         }
                         break;
 
                     case OpCode.StoreArray:
                         {
                             Structure struc = PopStructure();
-                            int index = PopInt();
-                            Value value = Pop();
+                            int index = struc[0].Int;
+                            Structure array = struc[1].Struct;
+                            Value value = struc[2];
 
                             //### bob: should bounds-check
 
                             // add one to skip the first slot which holds the array size
-                            struc[index + 1] = value;
+                            array[index + 1] = value;
                         }
                         break;
 

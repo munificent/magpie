@@ -247,27 +247,6 @@ namespace Magpie.Compilation
             return true;
         }
 
-        bool IBoundExprVisitor<bool>.Visit(LoadElementExpr expr)
-        {
-            expr.Index.Accept(this);
-            expr.Array.Accept(this);
-
-            Write(OpCode.LoadArray);
-
-            return true;
-        }
-
-        bool IBoundExprVisitor<bool>.Visit(StoreElementExpr expr)
-        {
-            expr.Value.Accept(this);
-            expr.Index.Accept(this);
-            expr.Array.Accept(this);
-
-            Write(OpCode.StoreArray);
-
-            return true;
-        }
-
         bool IBoundExprVisitor<bool>.Visit(ConstructExpr expr)
         {
             expr.Arg.Accept(this);

@@ -14,8 +14,6 @@ Foo (a Int, b String ->)
     Print b
 end
 
-//### bob: not implemented yet
-/*
 // arg tuple
 Bar (args (Int, String) ->)
     Print args.First.String
@@ -24,4 +22,3 @@ end
 
 First (a Int, b String -> Int) a
 Second (a Int, b String -> String ) b
-*/

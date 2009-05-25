@@ -134,6 +134,8 @@ namespace Magpie.Compilation
             // if we resolved to a local name, handle it
             if (resolved != null)
             {
+                if (typeArgs.Count > 0) throw new CompileException(position, "Cannot apply type arguments to a local variable or function argument.");
+
                 // if the local or argument is holding a function reference and we're passed args, call it
                 if (argType != null)
                 {

@@ -82,6 +82,12 @@ namespace Magpie.App
                 {
                     mErrors.Add("out of output while expecting \"" + mExpectedOutput.Dequeue() + "\"");
                 }
+
+                while (mExpectedErrorLines.Count > 0)
+                {
+                    int expectedLine = mExpectedErrorLines.Dequeue();
+                    mErrors.Add("Expected compile error on line " + expectedLine + " but got none.");
+                }
             }
             else
             {
