@@ -100,7 +100,7 @@ namespace Magpie.Compilation
             return new IntrinsicExpr(this, arg);
         }
 
-        public IBoundDecl[] ParameterTypes { get { return FuncType.ParameterTypes; } }
+        public IBoundDecl ParameterType { get { return FuncType.Parameter.Bound; } }
 
         //### bob: no generic intrinsics
         public IBoundDecl[] TypeArguments { get { return new IBoundDecl[0]; } }
@@ -117,13 +117,10 @@ namespace Magpie.Compilation
 
             public string Name { get { return "Size"; } }
 
-            public ICallable Instantiate(Compiler compiler, IEnumerable<IBoundDecl> typeArgs, IEnumerable<IBoundDecl> argTypes)
+            public ICallable Instantiate(Compiler compiler, IEnumerable<IBoundDecl> typeArgs,
+                IBoundDecl argType)
             {
-                // make sure the type signature matches
-                var argTypeArray = argTypes.ToArray();
-                if (argTypeArray.Length != 1) return null;
-
-                var arrayType = argTypeArray[0] as BoundArrayType;
+                var arrayType = argType as BoundArrayType;
                 if (arrayType == null) return null;
 
                 // make the intrinsic

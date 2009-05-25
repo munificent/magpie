@@ -9,7 +9,7 @@ namespace Magpie.Compilation
     {
         string Name { get; }
         IBoundExpr CreateCall(IBoundExpr arg);
-        IBoundDecl[] ParameterTypes { get; }
+        IBoundDecl ParameterType { get; }
 
         bool HasInferrableTypeArguments { get; }
         IBoundDecl[] TypeArguments { get; }
@@ -19,11 +19,10 @@ namespace Magpie.Compilation
     {
         public static string UniqueName(string name,
             IEnumerable<IBoundDecl> typeArgs,
-            IEnumerable<IBoundDecl> paramTypes)
+            IBoundDecl paramType)
         {
             string typeArgString = ((typeArgs != null) && typeArgs.Any()) ? "'(" + typeArgs.JoinAll(", ") + ")" : "";
-            string argTypes = "(" + paramTypes.JoinAll(", ") + ")";
-            return name + " " + typeArgString + argTypes;
+            return name + " " + typeArgString + paramType.ToString();
         }
 
         /// <summary>
@@ -32,7 +31,7 @@ namespace Magpie.Compilation
         /// </summary>
         public static string UniqueName(this ICallable callable)
         {
-            return UniqueName(callable.Name, callable.TypeArguments, callable.ParameterTypes);
+            return UniqueName(callable.Name, callable.TypeArguments, callable.ParameterType);
         }
 
         /// <summary>
@@ -40,7 +39,7 @@ namespace Magpie.Compilation
         /// </summary>
         public static string UniqueInferredName(this ICallable callable)
         {
-            return UniqueName(callable.Name, null, callable.ParameterTypes);
+            return UniqueName(callable.Name, null, callable.ParameterType);
         }
     }
 }

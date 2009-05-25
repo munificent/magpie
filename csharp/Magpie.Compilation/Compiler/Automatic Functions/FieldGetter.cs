@@ -23,9 +23,9 @@ namespace Magpie.Compilation
             return new LoadExpr(arg, mField);
         }
 
-        public IBoundDecl[] ParameterTypes
+        public IBoundDecl ParameterType
         {
-            get { return new IBoundDecl[] { mStruct }; }
+            get { return mStruct; }
         }
 
         public IBoundDecl[] TypeArguments { get { return mStruct.TypeArguments; } }

@@ -99,22 +99,23 @@ namespace Magpie.Compilation
         {
             var typeParams = TypeParams();
 
-            var funcType = FnArgsDecl(true);
+            var paramNames = new List<string>();
+            var funcType = FnArgsDecl(paramNames);
             var body = Block();
 
-            var function = new Function(position, name, funcType, body);
+            var function = new Function(position, name, funcType, paramNames, body);
 
             if (typeParams.Count == 0) return function;
 
             return new GenericFunction(function, typeParams);
         }
 
-        // <-- LPAREN ArgsDecl? ARROW TypeDecl? RPAREN
-        private FuncType FnArgsDecl(bool includeArgNames)
+        // <-- LPAREN ParamDecl? ARROW TypeDecl? RPAREN
+        private FuncType FnArgsDecl(List<string> paramNames)
         {
             Consume(TokenType.LeftParen);
 
-            var args = CurrentIs(TokenType.RightArrow) ? new ParamDecl[0] : ArgDecls(includeArgNames);
+            var arg = CurrentIs(TokenType.RightArrow) ? Decl.Unit : ParamDecl(paramNames);
 
             var position = Consume(TokenType.RightArrow).Position;
 
@@ -122,29 +123,31 @@ namespace Magpie.Compilation
 
             Consume(TokenType.RightParen);
 
-            return new FuncType(position, args, returnType);
+            return new FuncType(position, arg, returnType);
         }
 
         // <-- NAME TypeDecl (COMMA NAME TypeDecl)*
-        private IEnumerable<ParamDecl> ArgDecls(bool includeArgNames)
+        private IUnboundDecl ParamDecl(List<string> paramNames)
         {
-            var args = new List<ParamDecl>();
+            var args = new List<IUnboundDecl>();
 
             while (true)
             {
-                var name = "_";
-                if (includeArgNames)
+                if (paramNames != null)
                 {
-                    name = Consume(TokenType.Name).StringValue;
+                    paramNames.Add(Consume(TokenType.Name).StringValue);
                 }
 
-                var type = TypeDecl();
-                args.Add(new ParamDecl(name, type));
+                args.Add(TypeDecl());
 
                 if (!ConsumeIf(TokenType.Comma)) break;
             }
 
-            return args;
+            if (args.Count == 0) return Decl.Unit;
+            if (args.Count == 1) return args[0];
+
+            //### bob: position is temp
+            return new TupleType(Tuple.Create((IEnumerable<IUnboundDecl>)args, Position.None));
         }
 
         // <-- Expression | LINE (Expression LINE)+ END
@@ -580,7 +583,22 @@ namespace Magpie.Compilation
                 name = new NameExpr(Name(), TypeArgs());
             }
 
-            return new FuncRefExpr(position, name, TupleType().Item1);
+            var parameters = TupleType().Item1.ToArray();
+            IUnboundDecl parameter;
+            if (parameters.Length == 0)
+            {
+                parameter = Decl.Unit;
+            }
+            else if (parameters.Length == 1)
+            {
+                parameter = parameters[0];
+            }
+            else
+            {
+                parameter = new TupleType(parameters);
+            }
+
+            return new FuncRefExpr(position, name, parameter);
         }
 
         // <-- STRUCT NAME GenericDecl LINE StructBody END
@@ -769,7 +787,7 @@ namespace Magpie.Compilation
             // figure out the endmost type
             IUnboundDecl type;
             if (CurrentIs(TokenType.LeftParen)) type = new TupleType(TupleType());
-            else if (ConsumeIf(TokenType.Fn)) type = FnArgsDecl(false);
+            else if (ConsumeIf(TokenType.Fn)) type = FnArgsDecl(null);
             else type = new NamedType(Name(), TypeArgs());
 
             // wrap it in the array declarations

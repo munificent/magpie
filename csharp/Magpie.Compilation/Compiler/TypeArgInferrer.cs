@@ -15,22 +15,14 @@ namespace Magpie.Compilation
         /// <param name="parameters"></param>
         /// <returns></returns>
         public static IList<IBoundDecl> Infer(IEnumerable<string> typeParameters,
-            IUnboundDecl[] parameterTypes,
-            IEnumerable<IBoundDecl> argTypes)
+            IUnboundDecl parameterType,
+            IBoundDecl argType)
         {
             var inferrer = new TypeArgInferrer(typeParameters);
 
-            // go through the args, inferring the type arguments
-            var argTypeArray = argTypes.ToArray();
-
-            if (argTypeArray.Length != parameterTypes.Length) return null;
-
-            for (int i = 0; i < argTypeArray.Length; i++)
-            {
-                inferrer.mParamTypes.Push(parameterTypes[i]);
-                bool dummy = argTypeArray[i].Accept(inferrer);
-                inferrer.mParamTypes.Pop();
-            }
+            inferrer.mParamTypes.Push(parameterType);
+            bool dummy = argType.Accept(inferrer);
+            inferrer.mParamTypes.Pop();
 
             // if the inference failed (like from a type collision) then fail
             if (inferrer.mFailed) return null;
@@ -58,26 +50,16 @@ namespace Magpie.Compilation
         {
             if (!TryInferParam(decl))
             {
-                FuncType paramFunc = mParamTypes.Peek() as FuncType;
+                FuncType paramFunc = ParamType as FuncType;
                 if (paramFunc == null)
                 {
                     mFailed = true;
                     return false;
                 }
 
-                // .ToArray() is to make sure the result is fully enumerated
-                if (decl.Parameters.Count != paramFunc.Parameters.Count)
-                {
-                    mFailed = true;
-                    return false;
-                }
-
-                for (int i = 0; i < decl.Parameters.Count; i++)
-                {
-                    mParamTypes.Push(paramFunc.Parameters[i].Type.Unbound);
-                    decl.Parameters[i].Type.Bound.Accept(this);
-                    mParamTypes.Pop();
-                }
+                mParamTypes.Push(paramFunc.Parameter.Unbound);
+                decl.Parameter.Bound.Accept(this);
+                mParamTypes.Pop();
 
                 mParamTypes.Push(paramFunc.Return.Unbound);
                 decl.Return.Bound.Accept(this);
@@ -91,7 +73,7 @@ namespace Magpie.Compilation
         {
             if (!TryInferParam(decl))
             {
-                TupleType paramDecl = mParamTypes.Peek() as TupleType;
+                TupleType paramDecl = ParamType as TupleType;
                 if (paramDecl == null)
                 {
                     mFailed = true;
@@ -127,6 +109,11 @@ namespace Magpie.Compilation
 
         #endregion
 
+        private IUnboundDecl ParamType
+        {
+            get { return mParamTypes.Peek(); }
+        }
+
         private TypeArgInferrer(IEnumerable<string> typeParameters)
         {
             // make an empty list with slots for each filled argument
@@ -137,7 +124,7 @@ namespace Magpie.Compilation
         private bool TryInferParam(IBoundDecl argType)
         {
             // see if the parameter type on top of the stack is a generic type
-            NamedType named = mParamTypes.Peek() as NamedType;
+            NamedType named = ParamType as NamedType;
             if (named == null) return false;
 
             // see if the named type is a generic type (instead of an actual concrete named type)

@@ -25,9 +25,9 @@ namespace Magpie.Compilation
             return new StoreExpr(argTuple.Fields[0], mField, argTuple.Fields[1]);
         }
 
-        public IBoundDecl[] ParameterTypes
+        public IBoundDecl ParameterType
         {
-            get { return new IBoundDecl[] { mStruct, mField.Type.Bound }; }
+            get { return new BoundTupleType(new IBoundDecl[] { mStruct, mField.Type.Bound }); }
         }
 
         public IBoundDecl[] TypeArguments { get { return mStruct.TypeArguments; } }

@@ -76,7 +76,7 @@ namespace Magpie.Compilation
 
             // add the foreign call
             OpCode op;
-            switch (expr.Function.FuncType.Parameters.Count)
+            switch (expr.Function.FuncType.Parameter.Bound.Expand().Length)
             {
                 case 0: op = OpCode.ForeignCall0; break;
                 case 1: op = OpCode.ForeignCall1; break;

@@ -16,8 +16,8 @@ namespace Magpie.Compilation
 
             var scope = new Scope();
 
-            // create a local slot for the arg
-            if (function.Type.Parameters.Count > 0)
+            // create a local slot for the arg if there is one
+            if (function.Type.Parameter.Unbound != Decl.Unit)
             {
                 scope.Define("__arg", Decl.Unit /* ignored */, false);
             }
@@ -88,7 +88,7 @@ namespace Magpie.Compilation
 
             // check that args match
             FuncType funcType = (FuncType)target.Type;
-            if (!DeclComparer.TypesMatch(funcType.ParameterTypes, boundArg.Type.Expand()))
+            if (!DeclComparer.TypesMatch(funcType.Parameter.Bound, boundArg.Type))
             {
                 throw new CompileException(expr.Position, "Argument types passed to evaluated function reference do not match function's parameter types.");
             }
@@ -261,10 +261,10 @@ namespace Magpie.Compilation
 
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(FuncRefExpr expr)
         {
-            var paramTypes = TypeBinder.Bind(mContext, expr.ParamTypes);
+            var paramType = TypeBinder.Bind(mContext, expr.ParamType);
 
             var callable = mContext.Compiler.Functions.Find(mContext.Compiler, mFunction.SearchSpace, 
-                expr.Name.Name, expr.Name.TypeArgs, paramTypes);
+                expr.Name.Name, expr.Name.TypeArgs, paramType);
 
             var function = callable as Function;
 

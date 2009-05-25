@@ -13,12 +13,12 @@ namespace Magpie.Compilation
         }
 
         public ICallable Instantiate(Compiler compiler, IEnumerable<IBoundDecl> typeArgs,
-            IEnumerable<IBoundDecl> argTypes)
+            IBoundDecl argType)
         {
             bool canInfer;
             var context = BuildContext(compiler,
-                BaseType.Type.Parameters.Select(p => p.Type.Unbound),
-                argTypes, ref typeArgs, out canInfer);
+                BaseType.Type.Parameter.Unbound,
+                argType, ref typeArgs, out canInfer);
 
             // create a new bound function type with the type arguments applied
             FuncType funcType = BaseType.Type.Clone();
@@ -26,7 +26,7 @@ namespace Magpie.Compilation
 
             // create a new unbound function with the proper type
             Function instance = new Function(BaseType.Position, BaseType.Name,
-                funcType, BaseType.Body.Unbound, typeArgs, canInfer);
+                funcType, BaseType.ParamNames, BaseType.Body.Unbound, typeArgs, canInfer);
 
             instance.SetSearchSpace(BaseType.SearchSpace);
 

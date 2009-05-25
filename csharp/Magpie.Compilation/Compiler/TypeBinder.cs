@@ -74,14 +74,10 @@ namespace Magpie.Compilation
         {
             // do nothing if already bound. some functions such as intrinsics or
             // auto-functions are created in bound form.
-            if (!func.Return.IsBound)
+            if (!func.Parameter.IsBound)
             {
+                func.Parameter.Bind(this);
                 func.Return.Bind(this);
-
-                foreach (var parameter in func.Parameters)
-                {
-                    parameter.Type.Bind(this);
-                }
             }
         }
 

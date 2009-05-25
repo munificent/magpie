@@ -10,7 +10,7 @@ namespace Magpie.Compilation
     /// </summary>
     public class Decl
     {
-        public static readonly AtomicDecl Unit = new AtomicDecl("Unit");
+        public static readonly AtomicDecl Unit = new AtomicDecl("()");
         public static readonly AtomicDecl Bool = new AtomicDecl("Bool");
         public static readonly AtomicDecl Int = new AtomicDecl("Int");
         public static readonly AtomicDecl String = new AtomicDecl("String");
@@ -57,6 +57,12 @@ namespace Magpie.Compilation
             if (bound == null) throw new ArgumentNullException("bound");
 
             Bound = bound;
+        }
+
+        public override string ToString()
+        {
+            if (IsBound) return Bound.ToString();
+            return Unbound.ToString();
         }
 
         /// <summary>

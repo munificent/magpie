@@ -19,12 +19,12 @@ namespace Magpie.Compilation
         }
 
         public BindingContext BuildContext(Compiler compiler,
-            IEnumerable<IUnboundDecl> parameterTypes, IEnumerable<IBoundDecl> argTypes,
+            IUnboundDecl parameterType, IBoundDecl argType,
             ref IEnumerable<IBoundDecl> typeArgs, out bool canInferArgs)
         {
             // try to infer the args if not passed in
             IList<IBoundDecl> inferredTypeArgs = TypeArgInferrer.Infer(TypeParameters,
-                parameterTypes.ToArray(), argTypes);
+                parameterType, argType);
 
             canInferArgs = inferredTypeArgs != null;
 

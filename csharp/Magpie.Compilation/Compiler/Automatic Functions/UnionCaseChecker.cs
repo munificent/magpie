@@ -27,9 +27,9 @@ namespace Magpie.Compilation
             return Intrinsic.EqualInt(loadCase, new IntExpr(mCase.Index));
         }
 
-        public IBoundDecl[] ParameterTypes
+        public IBoundDecl ParameterType
         {
-            get { return new IBoundDecl[] { mUnion }; }
+            get { return mUnion; }
         }
 
         public IBoundDecl[] TypeArguments { get { return mUnion.TypeArguments; } }

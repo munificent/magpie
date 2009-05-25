@@ -29,6 +29,12 @@ namespace Magpie.Compilation
     {
         public Position Position { get; private set; }
 
+        public TupleType(IEnumerable<IUnboundDecl> fields)
+            : base(fields)
+        {
+            Position = Position.None;
+        }
+
         public TupleType(Tuple<IEnumerable<IUnboundDecl>, Position> args)
             : base(args.Item1)
         {

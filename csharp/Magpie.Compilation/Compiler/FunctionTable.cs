@@ -76,11 +76,11 @@ namespace Magpie.Compilation
         /// Looks for a function with the given name in all of the currently used namespaces.
         /// </summary>
         public ICallable Find(Compiler compiler, NameSearchSpace searchSpace,
-            string name, IList<IUnboundDecl> typeArgs, IBoundDecl[] argTypes)
+            string name, IList<IUnboundDecl> typeArgs, IBoundDecl argType)
         {
             foreach (var potentialName in searchSpace.SearchFor(name))
             {
-                var bound = LookUpFunction(compiler, searchSpace, potentialName, typeArgs, argTypes);
+                var bound = LookUpFunction(compiler, searchSpace, potentialName, typeArgs, argType);
                 if (bound != null) return bound;
             }
 
@@ -89,15 +89,15 @@ namespace Magpie.Compilation
         }
 
         private ICallable LookUpFunction(Compiler compiler, NameSearchSpace searchSpace, string fullName,
-            IList<IUnboundDecl> typeArgs, IBoundDecl[] argTypes)
+            IList<IUnboundDecl> typeArgs, IBoundDecl argType)
         {
             var boundTypeArgs = TypeBinder.Bind(new BindingContext(compiler, searchSpace), typeArgs);
 
-            string uniqueName = Callable.UniqueName(fullName, boundTypeArgs, argTypes);
+            string uniqueName = Callable.UniqueName(fullName, boundTypeArgs, argType);
 
             // try the already bound functions
             ICallable callable;
-            if (TryFind(fullName, boundTypeArgs, argTypes, out callable)) return callable;
+            if (TryFind(fullName, boundTypeArgs, argType, out callable)) return callable;
 
             // try to instantiate a generic
             foreach (var generic in mGenerics)
@@ -105,7 +105,7 @@ namespace Magpie.Compilation
                 // names must match
                 if (generic.Name != fullName) continue;
 
-                ICallable instance = generic.Instantiate(compiler, boundTypeArgs, argTypes);
+                ICallable instance = generic.Instantiate(compiler, boundTypeArgs, argType);
 
                 //### bob: there's a bug here. it doesn't check that the *unique* names of the two functions
                 // match, just the base names. i think this means it could incorrectly collide:
@@ -120,9 +120,9 @@ namespace Magpie.Compilation
             return null;
         }
 
-        private bool TryFind(string name, IEnumerable<IBoundDecl> typeArguments, IEnumerable<IBoundDecl> paramTypes, out ICallable bound)
+        private bool TryFind(string name, IEnumerable<IBoundDecl> typeArguments, IBoundDecl paramType, out ICallable bound)
         {
-            string uniqueName = Callable.UniqueName(name, typeArguments, paramTypes);
+            string uniqueName = Callable.UniqueName(name, typeArguments, paramType);
 
             // look up by unique name
             if (mCallables.TryGetValue(uniqueName, out bound)) return true;

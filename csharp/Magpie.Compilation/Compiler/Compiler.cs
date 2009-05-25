@@ -100,48 +100,50 @@ namespace Magpie.Compilation
             Scope scope, Position position, string name,
             IList<IUnboundDecl> typeArgs, IBoundExpr arg)
         {
-            IBoundDecl[] argTypes = null;
-            if (arg != null) argTypes = arg.Type.Expand();
+            IBoundDecl argType = null;
+            if (arg != null) argType = arg.Type;
 
             IBoundExpr resolved = null;
-            IBoundDecl resolvedType = null;
 
             // see if it's an argument
-            ParamDecl param = function.Type.Parameters.Find(p => p.Name == name);
-            if (param != null)
+            //### bob: port again :(
+            if (function.ParamNames.Contains(name))
             {
-                resolved = new LoadExpr(new LocalsExpr(), param.Type.Bound, 0);
-                resolvedType = param.Type.Bound;
+                // load the argument
+                resolved = new LoadExpr(new LocalsExpr(), function.ParameterType, 0);
 
-                if (function.Type.Parameters.Count > 1)
+                if (function.ParamNames.Count > 1)
                 {
-                    // function has multiple parameters, so the first local slot is a tuple and we need to load the arg from it
-                    byte argIndex = (byte)function.Type.Parameters.IndexOf(param);
-                    resolved = new LoadExpr(resolved, param.Type.Bound, argIndex);
+                    // function takes multiple parameters, so load it from the tuple
+                    var paramTuple = (BoundTupleType)function.ParameterType;
+
+                    var argIndex = (byte)function.ParamNames.IndexOf(name);
+                    resolved = new LoadExpr(resolved, paramTuple.Fields[argIndex], argIndex);
                 }
             }
-            else if (scope.Contains(name))
+
+            // see if it's a local
+            if (scope.Contains(name))
             {
-                Field local = scope[name];
+                var local = scope[name];
 
                 // just load the value
                 resolved = new LoadExpr(new LocalsExpr(), scope[name]);
-                resolvedType = local.Type.Bound;
             }
 
             // if we resolved to a local name, handle it
             if (resolved != null)
             {
                 // if the local or argument is holding a function reference and we're passed args, call it
-                if (argTypes != null)
+                if (argType != null)
                 {
-                    FuncType funcType = resolvedType as FuncType;
+                    var funcType = resolved.Type as FuncType;
 
                     // can only call functions
                     if (funcType == null) throw new CompileException(position, "Cannot call a local variable or argument that is not a function reference.");
 
                     // check that args match
-                    if (!DeclComparer.TypesMatch(funcType.ParameterTypes, argTypes))
+                    if (!DeclComparer.TypesMatch(funcType.Parameter.Bound, argType))
                     {
                         throw new CompileException(position, "Argument types passed to local function reference do not match function's parameter types.");
                     }
@@ -162,14 +164,14 @@ namespace Magpie.Compilation
             if (arg == null)
             {
                 arg = new UnitExpr(Position.None);
-                argTypes = arg.Type.Expand();
+                argType = arg.Type;
             }
 
             // look up the function
-            ICallable callable = Functions.Find(this, function.SearchSpace, name, typeArgs, argTypes);
+            var callable = Functions.Find(this, function.SearchSpace, name, typeArgs, argType);
 
             if (callable == null) throw new CompileException(position, String.Format("Could not resolve name {0}.",
-                Callable.UniqueName(name, null, argTypes)));
+                Callable.UniqueName(name, null, argType)));
 
             return callable.CreateCall(arg);
         }

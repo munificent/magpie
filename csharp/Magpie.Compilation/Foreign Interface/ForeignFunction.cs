@@ -49,7 +49,7 @@ namespace Magpie.Compilation
             return new ForeignCallExpr(this, arg);
         }
 
-        public IBoundDecl[] ParameterTypes { get { return FuncType.ParameterTypes; } }
+        public IBoundDecl ParameterType { get { return FuncType.Parameter.Bound; } }
 
         //### bob: no generic foreign functions
         public IBoundDecl[] TypeArguments { get { return new IBoundDecl[0]; } }

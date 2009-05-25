@@ -24,9 +24,9 @@ namespace Magpie.Compilation
             return new LoadExpr(arg, mCase.ValueType.Bound, 1);
         }
 
-        public IBoundDecl[] ParameterTypes
+        public IBoundDecl ParameterType
         {
-            get { return new IBoundDecl[] { mUnion }; }
+            get { return mUnion; }
         }
 
         public IBoundDecl[] TypeArguments { get { return mUnion.TypeArguments; } }

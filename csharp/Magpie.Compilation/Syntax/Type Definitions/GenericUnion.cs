@@ -49,11 +49,12 @@ namespace Magpie.Compilation
 
         public abstract string Name { get; }
 
-        public ICallable Instantiate(Compiler compiler, IEnumerable<IBoundDecl> typeArgs, IEnumerable<IBoundDecl> argTypes)
+        public ICallable Instantiate(Compiler compiler, IEnumerable<IBoundDecl> typeArgs,
+            IBoundDecl argType)
         {
             bool dummy;
             var context = Union.BuildContext(compiler,
-                ParameterTypes, argTypes, ref typeArgs, out dummy);
+                ParameterType, argType, ref typeArgs, out dummy);
 
             // instantiate the structure
             var union = Union.BaseType.Clone(typeArgs);
@@ -74,7 +75,7 @@ namespace Magpie.Compilation
             return instantiated;
         }
 
-        protected abstract IEnumerable<IUnboundDecl> ParameterTypes { get; }
+        protected abstract IUnboundDecl ParameterType { get; }
         protected abstract Type FunctionType { get; }
 
         protected GenericUnion Union { get; private set; }
@@ -91,9 +92,9 @@ namespace Magpie.Compilation
         //### bob: need to qualify
         public override string Name { get { return Case.Name; } }
 
-        protected override IEnumerable<IUnboundDecl> ParameterTypes
+        protected override IUnboundDecl ParameterType
         {
-            get { return Case.ValueType.Unbound.Expand(); }
+            get { return Case.ValueType.Unbound; }
         }
 
         protected override Type FunctionType
@@ -110,9 +111,9 @@ namespace Magpie.Compilation
         //### bob: need to qualify
         public override string Name { get { return Case.Name + "?"; } }
 
-        protected override IEnumerable<IUnboundDecl> ParameterTypes
+        protected override IUnboundDecl ParameterType
         {
-            get { return new IUnboundDecl[] { Union.Type }; }
+            get { return Union.Type; }
         }
 
         protected override Type FunctionType
@@ -129,9 +130,9 @@ namespace Magpie.Compilation
         //### bob: need to qualify
         public override string Name { get { return Case.Name + "Value"; } }
 
-        protected override IEnumerable<IUnboundDecl> ParameterTypes
+        protected override IUnboundDecl ParameterType
         {
-            get { return new IUnboundDecl[] { Union.Type }; }
+            get { return Union.Type; }
         }
 
         protected override Type FunctionType

@@ -21,9 +21,15 @@ namespace Magpie.Compilation
             return new ConstructExpr(mStruct, arg);
         }
 
-        public IBoundDecl[] ParameterTypes
+        public IBoundDecl ParameterType
         {
-            get { return mStruct.Fields.Select(field => field.Type.Bound).ToArray(); }
+            get
+            {
+                if (mStruct.Fields.Count == 0) return Decl.Unit;
+                if (mStruct.Fields.Count == 1) return mStruct.Fields[0].Type.Bound;
+
+                return new BoundTupleType(mStruct.Fields.Select(field => field.Type.Bound));
+            }
         }
 
         public IBoundDecl[] TypeArguments { get { return mStruct.TypeArguments; } }

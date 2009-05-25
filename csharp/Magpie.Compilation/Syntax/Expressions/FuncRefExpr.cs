@@ -8,29 +8,25 @@ namespace Magpie.Compilation
     public class FuncRefExpr : IUnboundExpr
     {
         public Position Position { get; private set; }
+        public NameExpr Name { get; private set; }
+        public IUnboundDecl ParamType { get; private set; }
 
-        public NameExpr Name { get { return mName; } }
-        public IUnboundDecl[] ParamTypes { get { return mParamTypes.ToArray(); } }
-
-        public FuncRefExpr(Position position, NameExpr name, IEnumerable<IUnboundDecl> paramTypes)
+        public FuncRefExpr(Position position, NameExpr name, IUnboundDecl paramType)
         {
             Position = position;
-            mName = name;
-            mParamTypes.AddRange(paramTypes);
+            Name = name;
+            ParamType = paramType;
         }
 
         public override string ToString()
         {
-            return mName.ToString();
+            return Name.ToString();
         }
 
         public TReturn Accept<TReturn>(IUnboundExprVisitor<TReturn> visitor)
         {
             return visitor.Visit(this);
         }
-
-        private NameExpr mName;
-        private readonly List<IUnboundDecl> mParamTypes = new List<IUnboundDecl>();
     }
 
     public class BoundFuncRefExpr : IBoundExpr

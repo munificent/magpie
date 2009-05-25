@@ -10,6 +10,6 @@ namespace Magpie.Compilation
         string Name { get; }
 
         ICallable Instantiate(Compiler compiler, IEnumerable<IBoundDecl> typeArgs,
-            IEnumerable<IBoundDecl> argTypes);
+            IBoundDecl argType);
     }
 }

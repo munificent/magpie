@@ -7,18 +7,6 @@ namespace Magpie.Compilation
 {
     public class DeclComparer : IBoundDeclVisitor<bool>
     {
-        public static bool TypesMatch(IBoundDecl[] parameters, IBoundDecl[] arguments)
-        {
-            if (parameters.Length != arguments.Length) return false;
-
-            for (int i = 0; i < parameters.Length; i++)
-            {
-                if (!TypesMatch(parameters[i], arguments[i])) return false;
-            }
-
-            return true;
-        }
-
         public static bool TypesMatch(IBoundDecl parameter, IBoundDecl argument)
         {
             return argument.Accept(new DeclComparer(parameter));
@@ -53,16 +41,8 @@ namespace Magpie.Compilation
 
             if (paramFunc == null) return false;
 
-            // args must match
-            if (paramFunc.Parameters.Count != decl.Parameters.Count) return false;
-
-            for (int i = 0; i < paramFunc.Parameters.Count; i++)
-            {
-                if (!TypesMatch(paramFunc.Parameters[i].Type.Bound, decl.Parameters[i].Type.Bound))
-                {
-                    return false;
-                }
-            }
+            // arg must match
+            if (!TypesMatch(paramFunc.Parameter.Bound, decl.Parameter.Bound)) return false;
 
             // return type must match
             return TypesMatch(paramFunc.Return.Bound, decl.Return.Bound);

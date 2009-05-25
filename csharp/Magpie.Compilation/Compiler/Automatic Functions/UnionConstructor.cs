@@ -23,9 +23,9 @@ namespace Magpie.Compilation
             return new ConstructUnionExpr(mCase, arg);
         }
 
-        public IBoundDecl[] ParameterTypes
+        public IBoundDecl ParameterType
         {
-            get { return mCase.ValueType.Bound.Expand(); }
+            get { return mCase.ValueType.Bound; }
         }
 
         public IBoundDecl[] TypeArguments { get { return mUnion.TypeArguments; } }

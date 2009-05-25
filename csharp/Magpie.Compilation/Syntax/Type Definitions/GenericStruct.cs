@@ -42,11 +42,12 @@ namespace Magpie.Compilation
         
         public abstract string Name { get; }
 
-        public ICallable Instantiate(Compiler compiler, IEnumerable<IBoundDecl> typeArgs, IEnumerable<IBoundDecl> argTypes)
+        public ICallable Instantiate(Compiler compiler, IEnumerable<IBoundDecl> typeArgs,
+            IBoundDecl argType)
         {
             bool dummy;
             var context = Struct.BuildContext(compiler,
-                ParameterTypes, argTypes, ref typeArgs, out dummy);
+                ParameterType, argType, ref typeArgs, out dummy);
 
             // instantiate the structure
             var structure = Struct.BaseType.Clone(typeArgs);
@@ -67,7 +68,7 @@ namespace Magpie.Compilation
             return instantiated;
         }
 
-        protected abstract IEnumerable<IUnboundDecl> ParameterTypes { get; }
+        protected abstract IUnboundDecl ParameterType { get; }
         protected abstract Type FunctionType { get; }
 
         protected GenericStruct Struct { get; private set; }
@@ -82,9 +83,15 @@ namespace Magpie.Compilation
 
         public override string Name { get { return Struct.Name; } }
 
-        protected override IEnumerable<IUnboundDecl> ParameterTypes
+        protected override IUnboundDecl ParameterType
         {
-            get { return Struct.BaseType.Fields.Select(field => field.Type.Unbound); }
+            get
+            {
+                if (Struct.BaseType.Fields.Count == 0) return Decl.Unit;
+                if (Struct.BaseType.Fields.Count == 1) return Struct.BaseType.Fields[0].Type.Unbound;
+
+                return new TupleType(Struct.BaseType.Fields.Select(field => field.Type.Unbound));
+            }
         }
 
         protected override Type FunctionType
@@ -103,9 +110,9 @@ namespace Magpie.Compilation
 
         public override string Name { get { return Struct.BaseType.Fields[mFieldIndex].Name; } }
 
-        protected override IEnumerable<IUnboundDecl> ParameterTypes
+        protected override IUnboundDecl ParameterType
         {
-            get { return new IUnboundDecl[] { Struct.Type }; }
+            get { return Struct.Type; }
         }
 
         protected override Type FunctionType
@@ -126,9 +133,9 @@ namespace Magpie.Compilation
 
         public override string Name { get { return Struct.BaseType.Fields[mFieldIndex].Name + "<-"; } }
 
-        protected override IEnumerable<IUnboundDecl> ParameterTypes
+        protected override IUnboundDecl ParameterType
         {
-            get { return new IUnboundDecl[] { Struct.Type, Struct.BaseType.Fields[mFieldIndex].Type.Unbound }; }
+            get { return new TupleType(new IUnboundDecl[] { Struct.Type, Struct.BaseType.Fields[mFieldIndex].Type.Unbound }); }
         }
 
         protected override Type FunctionType

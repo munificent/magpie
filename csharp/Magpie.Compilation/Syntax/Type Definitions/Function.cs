@@ -13,18 +13,24 @@ namespace Magpie.Compilation
         public FuncType Type { get; private set; }
 
         public readonly Expr Body;
+        public readonly List<string> ParamNames = new List<string>();
 
         public int NumLocals { get; private set; }
 
-        public Function(Position position, string name, FuncType type, IUnboundExpr body)
-            : this(position, name, type, body, null, false) { }
+        public Function(Position position, string name, FuncType type, IEnumerable<string> paramNames, IUnboundExpr body)
+            : this(position, name, type, paramNames, body, null, false) { }
 
-        public Function(Position position, string name, FuncType type, IUnboundExpr body,
+        public Function(Position position, string name, FuncType type, IEnumerable<string> paramNames, IUnboundExpr body,
             IEnumerable<IBoundDecl> typeArgs, bool hasInferrableTypeArguments)
             : base(position, name, typeArgs)
         {
             if (position == null) throw new ArgumentNullException("position");
             if (type == null) throw new ArgumentNullException("type");
+
+            if (paramNames != null)
+            {
+                ParamNames.AddRange(paramNames);
+            }
 
             Body = new Expr(body);
 
@@ -47,7 +53,7 @@ namespace Magpie.Compilation
 
         public bool HasInferrableTypeArguments { get; private set; }
 
-        public IBoundDecl[] ParameterTypes { get { return Type.ParameterTypes; } }
+        public IBoundDecl ParameterType { get { return Type.Parameter.Bound; } }
 
         #endregion
     }
