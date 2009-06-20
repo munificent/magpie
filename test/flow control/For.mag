@@ -31,24 +31,3 @@ Main (->)
         Print k.String
     end    
 end
-
-Times (count Int -> Range) Range (0, count)
-
--to- (min Int, max Int -> Range) Range (min, max)
-
-Iterate (range Range -> RangeIterator) RangeIterator (range.Max, range.Min - 1)
-
-MoveNext (iter RangeIterator -> Bool)
-    iter.Current <- + 1
-    iter.Current < iter.Max
-end
-
-struct Range
-    Min     Int
-    Max     Int
-end
-
-struct RangeIterator
-    Max     Int
-    Current mutable Int
-end

@@ -17,15 +17,26 @@ namespace Magpie.Compilation
         public IDictionary<string, IBoundDecl> TypeArguments { get; private set; }
 
         public BindingContext(Compiler compiler, NameSearchSpace searchSpace)
-            : this(compiler, searchSpace, new Dictionary<string, IBoundDecl>())
+            : this(compiler, searchSpace, null, null)
         {
         }
 
-        public BindingContext(Compiler compiler, NameSearchSpace searchSpace, IDictionary<string, IBoundDecl> typeArguments)
+        public BindingContext(Compiler compiler, NameSearchSpace searchSpace,
+            IEnumerable<string> typeParameters, IEnumerable<IBoundDecl> typeArguments)
         {
             Compiler = compiler;
             SearchSpace = searchSpace;
-            TypeArguments = typeArguments;
+
+            // build the argument dictionary
+            TypeArguments = new Dictionary<string, IBoundDecl>();
+
+            if ((typeParameters != null) && (typeArguments != null))
+            {
+                foreach (var pair in typeParameters.Zip(typeArguments))
+                {
+                    TypeArguments[pair.Item1] = pair.Item2;
+                }
+            }
         }
     }
 }

@@ -5,6 +5,21 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
+    /*
+     * sequencing:
+     * a b c
+     * 
+     * repetition:
+     * a*
+     * a+
+     * 
+     * optional:
+     * a?
+     * 
+     * choice:
+     * a | b
+     * 
+     */
     public class LlParser
     {
         public LlParser(IEnumerable<Token> tokens)

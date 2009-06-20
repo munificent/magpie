@@ -19,6 +19,20 @@ namespace Magpie.App
             var foreign = new DotNetForeign();
 
             var compiler = new Compiler(foreign);
+
+            // add the base sources
+            //### bob: hack. assumes location of base relative to working directory. :(
+            string baseDir = Path.GetDirectoryName(Environment.CurrentDirectory);
+            baseDir = Path.GetDirectoryName(baseDir);
+            baseDir = Path.GetDirectoryName(baseDir);
+            baseDir = Path.Combine(baseDir, "base");
+
+            foreach (var baseFile in Directory.GetFiles(baseDir, "*.mag"))
+            {
+                compiler.AddSourceFile(baseFile);
+            }
+
+            // add the main file to compile
             compiler.AddSourceFile(path);
 
             using (var stream = new MemoryStream())

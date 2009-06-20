@@ -104,7 +104,6 @@ namespace Magpie.Compilation
 
         public IBoundDecl ParameterType { get { return FuncType.Parameter.Bound; } }
 
-        //### bob: no generic intrinsics
         public IBoundDecl[] TypeArguments { get { return new IBoundDecl[0]; } }
 
         public bool HasInferrableTypeArguments { get { return false; } }

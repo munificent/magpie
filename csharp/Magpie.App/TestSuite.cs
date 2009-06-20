@@ -24,6 +24,7 @@ namespace Magpie.App
 
             foreach (string test in Directory.GetFiles(mTestDir, "*.mag", SearchOption.AllDirectories))
             {
+//                if (!test.Contains("CallAssign")) continue;
                 //### bob: not ready yet
                 if (test.Contains("pattern matching")) continue;
 

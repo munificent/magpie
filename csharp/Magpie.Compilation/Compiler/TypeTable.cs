@@ -13,6 +13,9 @@ namespace Magpie.Compilation
         public IEnumerable<Struct> Structs { get { return mTypes.Values.OfType<Struct>(); } }
         public IEnumerable<Union> Unions { get { return mTypes.Values.OfType<Union>(); } }
 
+        public IEnumerable<GenericStruct> GenericStructs { get { return mGenericStructs; } }
+        public IEnumerable<GenericUnion> GenericUnions { get { return mGenericUnions; } }
+
         public TypeTable()
         {
             // add the built-in types
@@ -27,7 +30,6 @@ namespace Magpie.Compilation
             Add(type, null);
         }
 
-        //### bob: get rid of type args param, get from INamedType
         public void Add(INamedType type, IEnumerable<IBoundDecl> typeArgs)
         {
             var uniqueName = GetUniqueName(type.Name, typeArgs);
@@ -37,13 +39,58 @@ namespace Magpie.Compilation
             mTypes[uniqueName] = type;
         }
 
-        public INamedType Find(NameSearchSpace searchSpace, Position position, string name,
+        public void Add(GenericStruct generic)
+        {
+            mGenericStructs.Add(generic);
+        }
+
+        public void Add(GenericUnion generic)
+        {
+            mGenericUnions.Add(generic);
+        }
+
+        //### bob: need to copy this for union
+        public Struct FindStruct(string name, IEnumerable<IBoundDecl> typeArgs)
+        {
+            var uniqueName = GetUniqueName(name, typeArgs);
+
+            INamedType type;
+            if (mTypes.TryGetValue(uniqueName, out type))
+            {
+                // may be a union, so cast using "as"
+                return type as Struct;
+            }
+
+            return null;
+        }
+
+        public INamedType Find(Compiler compiler, NameSearchSpace searchSpace, Position position, string name,
             IEnumerable<IBoundDecl> typeArgs)
         {
+            // look through the namespaces
             foreach (var potentialName in searchSpace.SearchFor(name))
             {
+                // look for a concrete type
                 var type = Find(potentialName, typeArgs);
                 if (type != null) return type;
+
+                //### bob: need to copy this for union
+                // look for a generic
+                foreach (var structure in mGenericStructs)
+                {
+                    // names must match
+                    if (structure.Name != potentialName) continue;
+
+                    // number of type args must match
+                    if (typeArgs.Count() != structure.TypeParameters.Count) continue;
+
+                    var instance = structure.Instantiate(compiler, typeArgs);
+
+                    // only instantiate once
+                    Add(instance);
+
+                    return instance;
+                }
             }
 
             // not found
@@ -84,6 +131,8 @@ namespace Magpie.Compilation
             }
         }
 
-        private Dictionary<string, INamedType> mTypes = new Dictionary<string, INamedType>();
+        private readonly Dictionary<string, INamedType> mTypes = new Dictionary<string, INamedType>();
+        private readonly List<GenericStruct> mGenericStructs = new List<GenericStruct>();
+        private readonly List<GenericUnion> mGenericUnions = new List<GenericUnion>();
     }
 }

@@ -123,7 +123,7 @@ namespace Magpie.Compilation
             var typeArgs = decl.TypeArgs.Accept(this);
 
             // look up the named type
-            return mContext.Compiler.Types.Find(mContext.SearchSpace, decl.Position, decl.Name, typeArgs);
+            return mContext.Compiler.Types.Find(mContext.Compiler, mContext.SearchSpace, decl.Position, decl.Name, typeArgs);
         }
 
         #endregion

@@ -241,7 +241,6 @@ namespace Magpie.Compilation
 
         bool IBoundExprVisitor<bool>.Visit(LocalsExpr expr)
         {
-            //### bob: will need to handle other scopes at some point
             Write(OpCode.PushLocals);
 
             return true;

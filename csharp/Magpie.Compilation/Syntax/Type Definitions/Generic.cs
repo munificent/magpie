@@ -33,15 +33,7 @@ namespace Magpie.Compilation
                 typeArgs = inferredTypeArgs;
             }
 
-            // build the argument dictionary
-            var argDictionary = new Dictionary<string, IBoundDecl>();
-
-            foreach (var pair in TypeParameters.Zip(typeArgs))
-            {
-                argDictionary[pair.Item1] = pair.Item2;
-            }
-
-            return new BindingContext(compiler, BaseType.SearchSpace, argDictionary);
+            return new BindingContext(compiler, BaseType.SearchSpace, TypeParameters, typeArgs);
         }
     }
 }

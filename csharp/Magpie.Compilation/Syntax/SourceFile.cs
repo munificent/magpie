@@ -9,24 +9,9 @@ namespace Magpie.Compilation
     {
         public IList<string> UsingNamespaces { get { return mUsing; } }
 
-        public SourceFile(IEnumerable<string> usingDeclarations, IEnumerable<object> contents) : base("", contents)
+        public SourceFile(IEnumerable<string> usingDeclarations) : base("")
         {
             mUsing.AddRange(usingDeclarations);
-        }
-
-        public override string ToString()
-        {
-            var builder = new StringBuilder();
-
-            foreach (var usingName in mUsing)
-            {
-                builder.AppendLine("using " + usingName);
-            }
-
-            builder.AppendLine();
-            builder.Append(ContentsToString());
-
-            return builder.ToString();
         }
 
         private readonly List<string> mUsing = new List<string>();

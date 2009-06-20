@@ -1,0 +1,20 @@
+Times (count Int -> Range) Range (0, count)
+
+-to- (min Int, max Int -> Range) Range (min, max)
+
+Iterate (range Range -> Range^) Range^ (range.Max, range.Min - 1)
+
+MoveNext (iter Range^ -> Bool)
+    iter.Current <- + 1
+    iter.Current < iter.Max
+end
+
+struct Range
+    Min     Int
+    Max     Int
+end
+
+struct Range^
+    Max     Int
+    Current mutable Int
+end

@@ -1,0 +1,10 @@
+// expected: 1
+// expected: 2
+// expected: 3
+// expected: 4
+
+Main (->)
+    def a <- [1, 2, 3, 4]
+    
+    for b <- a do Print b.String
+end

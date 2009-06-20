@@ -37,7 +37,21 @@ namespace Magpie.Compilation
 
         bool IBoundDeclVisitor<bool>.Visit(BoundArrayType decl)
         {
-            throw new NotImplementedException();
+            if (!TryInferParam(decl))
+            {
+                var paramDecl = ParamType as ArrayType;
+                if (paramDecl == null)
+                {
+                    mFailed = true;
+                    return false;
+                }
+
+                mParamTypes.Push(paramDecl.ElementType);
+                decl.ElementType.Accept(this);
+                mParamTypes.Pop();
+            }
+
+            return false;
         }
 
         bool IBoundDeclVisitor<bool>.Visit(AtomicDecl decl)
@@ -99,7 +113,31 @@ namespace Magpie.Compilation
 
         bool IBoundDeclVisitor<bool>.Visit(Struct decl)
         {
-            throw new NotImplementedException();
+            //### bob: need to copy this for union
+            if (!TryInferParam(decl))
+            {
+                var named = ParamType as NamedType;
+                if (named == null)
+                {
+                    mFailed = true;
+                    return false;
+                }
+
+                if (named.TypeArgs.Length != decl.TypeArguments.Length)
+                {
+                    mFailed = true;
+                    return false;
+                }
+
+                for (int i = 0; i < named.TypeArgs.Length; i++)
+                {
+                    mParamTypes.Push(named.TypeArgs[i]);
+                    decl.TypeArguments[i].Accept(this);
+                    mParamTypes.Pop();
+                }
+            }
+
+            return false;
         }
 
         bool IBoundDeclVisitor<bool>.Visit(Union decl)

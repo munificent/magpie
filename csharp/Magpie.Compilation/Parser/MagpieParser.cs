@@ -24,11 +24,13 @@ namespace Magpie.Compilation
         private SourceFile SourceFile()
         {
             var usings = Usings();
-            var contents = NamespaceContents();
+
+            var sourceFile = new SourceFile(usings);
+            var contents = NamespaceContents(sourceFile);
 
             Consume(TokenType.Eof);
 
-            return new SourceFile(usings, contents);
+            return sourceFile;
         }
 
         // <-- (USING Name LINE)*
@@ -38,27 +40,25 @@ namespace Magpie.Compilation
 
             while (ConsumeIf(TokenType.Using))
             {
-                string name = Name().Item1;
+                usings.Add(Name().Item1);
                 Consume(TokenType.Line);
-
-                usings.Add(name);
             }
 
             return usings;
         }
 
         // <-- ((Namespace | Function | Struct | Union) LINE)*
-        private List<object> NamespaceContents()
+        private List<object> NamespaceContents(Namespace namespaceObj)
         {
             List<object> contents = new List<object>();
 
             while (true)
             {
-                if      (CurrentIs(TokenType.Namespace))    contents.Add(Namespace());
-                else if (CurrentIs(TokenType.Name))         contents.Add(Function());
-                else if (CurrentIs(TokenType.Operator))     contents.Add(Operator());
-                else if (CurrentIs(TokenType.Struct))       contents.Add(Struct());
-                else if (CurrentIs(TokenType.Union))        contents.Add(Union());
+                if (CurrentIs(TokenType.Namespace))     namespaceObj.Namespaces.Add(Namespace());
+                else if (CurrentIs(TokenType.Name))     Function(namespaceObj);
+                else if (CurrentIs(TokenType.Operator)) Operator(namespaceObj);
+                else if (CurrentIs(TokenType.Struct))   Struct(namespaceObj);
+                else if (CurrentIs(TokenType.Union))    Union(namespaceObj);
                 else break;
 
                 if (!ConsumeIf(TokenType.Line)) break;
@@ -74,28 +74,29 @@ namespace Magpie.Compilation
             var name = Name().Item1;
             Consume(TokenType.Line);
 
-            var contents = NamespaceContents();
+            var namespaceObj = new Namespace(name);
+            var contents = NamespaceContents(namespaceObj);
             Consume(TokenType.End);
 
-            return new Namespace(name, contents);
+            return namespaceObj;
         }
 
         // <-- NAME FunctionDefinition
-        private object Function()
+        private void Function(Namespace namespaceObj)
         {
             var token = Consume(TokenType.Name);
-            return FunctionDefinition(token.StringValue, token.Position);
+            FunctionDefinition(namespaceObj, token.StringValue, token.Position);
         }
 
         // <-- OPERATOR FunctionDefinition
-        private object Operator()
+        private void Operator(Namespace namespaceObj)
         {
             var token = Consume(TokenType.Operator);
-            return FunctionDefinition(token.StringValue, token.Position);
+            FunctionDefinition(namespaceObj, token.StringValue, token.Position);
         }
 
         // <-- GenericDecl FnArgsDecl Block
-        private object FunctionDefinition(string name, Position position)
+        private void FunctionDefinition(Namespace namespaceObj, string name, Position position)
         {
             var typeParams = TypeParams();
 
@@ -105,9 +106,14 @@ namespace Magpie.Compilation
 
             var function = new Function(position, name, funcType, paramNames, body);
 
-            if (typeParams.Count == 0) return function;
-
-            return new GenericFunction(function, typeParams);
+            if (typeParams.Count == 0)
+            {
+                namespaceObj.Functions.Add(function);
+            }
+            else
+            {
+                namespaceObj.GenericFunctions.Add(new GenericFunction(function, typeParams));
+            }
         }
 
         // <-- LPAREN ParamDecl? ARROW TypeDecl? RPAREN
@@ -602,7 +608,7 @@ namespace Magpie.Compilation
         }
 
         // <-- STRUCT NAME GenericDecl LINE StructBody END
-        private object Struct()
+        private void Struct(Namespace namespaceObj)
         {
             Consume(TokenType.Struct);
             var name = Consume(TokenType.Name);
@@ -614,10 +620,15 @@ namespace Magpie.Compilation
             Consume(TokenType.End);
 
             var structure = new Struct(name.Position, name.StringValue, fields);
-            
-            if (typeParams.Count == 0) return structure;
 
-            return new GenericStruct(structure, typeParams);
+            if (typeParams.Count == 0)
+            {
+                namespaceObj.Structs.Add(structure);
+            }
+            else
+            {
+                namespaceObj.GenericStructs.Add(new GenericStruct(structure, typeParams));
+            }
         }
 
         // <-- (NAME (MUTABLE?) TypeDecl LINE)*
@@ -639,7 +650,7 @@ namespace Magpie.Compilation
         }
 
         // <-- UNION NAME GenericDecl LINE UnionBody END
-        private object Union()
+        private void Union(Namespace namespaceObj)
         {
             Consume(TokenType.Union);
             var name = Consume(TokenType.Name);
@@ -652,9 +663,14 @@ namespace Magpie.Compilation
 
             var union = new Union(name.Position, name.StringValue, cases);
 
-            if (typeParams.Count == 0) return union;
-
-            return new GenericUnion(union, typeParams);
+            if (typeParams.Count == 0)
+            {
+                namespaceObj.Unions.Add(union);
+            }
+            else
+            {
+                namespaceObj.GenericUnions.Add(new GenericUnion(union, typeParams));
+            }
         }
 
         // <-- (NAME (TypeDecl)? LINE)*

@@ -55,12 +55,12 @@ namespace Magpie.Compilation
                     mFunctions.AddRange(union.BuildFunctions());
                 }
 
-                foreach (var structure in mGenericStructs)
+                foreach (var structure in mTypes.GenericStructs)
                 {
                     mFunctions.AddRange(structure.BuildFunctions());
                 }
 
-                foreach (var union in mGenericUnions)
+                foreach (var union in mTypes.GenericUnions)
                 {
                     mFunctions.AddRange(union.BuildFunctions());
                 }
@@ -106,7 +106,6 @@ namespace Magpie.Compilation
             IBoundExpr resolved = null;
 
             // see if it's an argument
-            //### bob: port again :(
             if (function.ParamNames.Contains(name))
             {
                 // load the argument
@@ -141,17 +140,27 @@ namespace Magpie.Compilation
                 {
                     var funcType = resolved.Type as FuncType;
 
-                    // can only call functions
-                    if (funcType == null) throw new CompileException(position, "Cannot call a local variable or argument that is not a function reference.");
-
-                    // check that args match
-                    if (!DeclComparer.TypesMatch(funcType.Parameter.Bound, argType))
+                    if (funcType != null)
                     {
-                        throw new CompileException(position, "Argument types passed to local function reference do not match function's parameter types.");
-                    }
+                        // check that args match
+                        if (!DeclComparer.TypesMatch(funcType.Parameter.Bound, argType))
+                        {
+                            throw new CompileException(position, "Argument types passed to local function reference do not match function's parameter types.");
+                        }
 
-                    // call it
-                    resolved = new BoundCallExpr(resolved, arg);
+                        // call it
+                        resolved = new BoundCallExpr(resolved, arg);
+                    }
+                    else
+                    {
+                        // not calling a function, so try to desugar to a __Call
+                        var callArg = new BoundTupleExpr(new IBoundExpr[] { resolved, arg });
+
+                        resolved = ResolveFunction(function, position,
+                            "__Call", new IUnboundDecl[0], callArg);
+
+                        if (resolved == null) throw new CompileException(position, "Cannot call a local variable or argument that is not a function reference, and could not find a matching __Call.");
+                    }
                 }
 
                 return resolved;
@@ -169,13 +178,40 @@ namespace Magpie.Compilation
                 argType = arg.Type;
             }
 
+            return ResolveFunction(function, position, name, typeArgs, arg);
+        }
+
+        public IBoundExpr ResolveFunction(Function function,
+            Position position, string name,
+            IList<IUnboundDecl> typeArgs, IBoundExpr arg)
+        {
+            if (arg == null) throw new ArgumentNullException("arg");
+
             // look up the function
-            var callable = Functions.Find(this, function.SearchSpace, name, typeArgs, argType);
+            var callable = Functions.Find(this, function.SearchSpace, name, typeArgs, arg.Type);
 
             if (callable == null) throw new CompileException(position, String.Format("Could not resolve name {0}.",
-                Callable.UniqueName(name, null, argType)));
+                Callable.UniqueName(name, null, arg.Type)));
 
             return callable.CreateCall(arg);
+        }
+
+        public bool IsLocal(Function function,
+            Scope scope, string name)
+        {
+            // see if it's an argument
+            if (function.ParamNames.Contains(name))
+            {
+                return true;
+            }
+
+            // see if it's a local
+            if (scope.Contains(name))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private void AddNamespace(string parentName, SourceFile file, Namespace namespaceObj)
@@ -209,13 +245,13 @@ namespace Magpie.Compilation
             foreach (var structure in namespaceObj.GenericStructs)
             {
                 structure.BaseType.SetSearchSpace(searchSpace);
-                mGenericStructs.Add(structure);
+                mTypes.Add(structure);
             }
 
             foreach (var union in namespaceObj.GenericUnions)
             {
                 union.BaseType.SetSearchSpace(searchSpace);
-                mGenericUnions.Add(union);
+                mTypes.Add(union);
             }
 
             foreach (var childNamespace in namespaceObj.Namespaces)
@@ -228,8 +264,6 @@ namespace Magpie.Compilation
         private readonly List<string> mSourcePaths = new List<string>();
 
         private readonly FunctionTable mFunctions = new FunctionTable();
-        private readonly List<GenericStruct> mGenericStructs = new List<GenericStruct>();
-        private readonly List<GenericUnion> mGenericUnions = new List<GenericUnion>();
         private readonly TypeTable mTypes = new TypeTable();
         private readonly IForeignStaticInterface mForeignInterface;
     }

@@ -31,6 +31,22 @@ namespace Magpie.Compilation
                 if (field.IsMutable) yield return new GenericFieldSetter(this, field.Index);
             }
         }
+
+        //### bob: need to copy this for union
+        public Struct Instantiate(Compiler compiler, IEnumerable<IBoundDecl> typeArgs)
+        {
+            // look for a previously instantiated one
+            var structure = compiler.Types.FindStruct(BaseType.Name, typeArgs);
+
+            if (structure == null)
+            {
+                // instantiate the structure
+                structure = BaseType.Clone(typeArgs);
+                compiler.Types.Add(structure, typeArgs);
+            }
+
+            return structure;
+        }
     }
 
     public abstract class GenericStructFunction : IGenericCallable
@@ -49,9 +65,11 @@ namespace Magpie.Compilation
             var context = Struct.BuildContext(compiler,
                 ParameterType, argType, ref typeArgs, out dummy);
 
+            // bail if we couldn't match all of the type arguments
+            if (typeArgs == null) return null;
+
             // instantiate the structure
-            var structure = Struct.BaseType.Clone(typeArgs);
-            compiler.Types.Add(structure, typeArgs);
+            var structure = Struct.Instantiate(compiler, typeArgs);
 
             TypeBinder.Bind(context, structure);
 

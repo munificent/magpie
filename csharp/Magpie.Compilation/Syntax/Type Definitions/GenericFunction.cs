@@ -20,6 +20,9 @@ namespace Magpie.Compilation
                 BaseType.Type.Parameter.Unbound,
                 argType, ref typeArgs, out canInfer);
 
+            // bail if we couldn't get the right number of type arguments
+            if ((typeArgs == null) || (TypeParameters.Count != typeArgs.Count())) return null;
+
             // create a new bound function type with the type arguments applied
             FuncType funcType = BaseType.Type.Clone();
             TypeBinder.Bind(context, funcType);

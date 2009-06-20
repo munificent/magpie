@@ -1,0 +1,59 @@
+using System
+
+Main (->)
+    Print (Recursive:Fib 20).String
+    Print (Iterative:Fib 20).String
+    Print (Generative:Fib 20).String
+end
+
+namespace Recursive
+    Fib (i Int -> Int)
+        if i = 0 then 0
+        else if i = 1 then 1
+        else Fib (i - 2) + Fib (i - 1)
+    end
+end
+
+namespace Iterative
+    Fib (i Int -> Int)
+        mutable pair <- (0, 1)
+        for n <- i.Times do
+            pair <- (pair.Second, pair.First + pair.Second)
+        end
+        
+        pair.First
+    end
+end
+
+namespace Generative
+    Fib (i Int -> Int)
+        mutable last <- 0
+        
+        for f <- FibSequence
+        for n <- i.Times do
+            last <- f
+        end
+        
+        last
+    end
+
+    Iterate (fib FibSequence -> FibSequence^) FibSequence^ (0, 1)
+
+    MoveNext (iter FibSequence^ -> Bool)
+        def next <- iter.Current + iter.Next
+        iter.Current <- iter.Next
+        iter.Next    <- next
+        true
+    end
+    
+    struct FibSequence
+    end
+    
+    struct FibSequence^
+        Current mutable Int
+        Next    mutable Int
+    end
+end
+
+First  (a Int, b Int -> Int) a
+Second (a Int, b Int -> Int) b
