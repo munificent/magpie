@@ -27,6 +27,11 @@ namespace Magpie.Compilation
         {
         }
 
+        public override string ToString()
+        {
+            return "load " + Struct.ToString() + "[" + Index + "]";
+        }
+
         #region IBoundExpr Members
 
         TReturn IBoundExpr.Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)

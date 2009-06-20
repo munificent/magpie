@@ -25,13 +25,12 @@ namespace Magpie.Compilation
             var binder = new FunctionBinder(function, context, scope);
 
             // bind the function
-            IBoundExpr body = function.Body.Unbound.Accept<IBoundExpr>(binder);
-            function.Bind(body, scope.NumVariables);
+            function.Bind(binder);
 
             // make sure declared return type matches actual return type
-            if (!DeclComparer.TypesMatch(function.Type.Return.Bound, body.Type))
+            if (!DeclComparer.TypesMatch(function.Type.Return.Bound, function.Body.Bound.Type))
             {
-                if (body.Type == Decl.EarlyReturn)
+                if (function.Body.Bound.Type == Decl.EarlyReturn)
                 {
                     //### bob: should find the return expr
                     throw new CompileException(function.Position, "Unneeded explicit \"return\".");
@@ -43,6 +42,8 @@ namespace Magpie.Compilation
                 }
             }
         }
+
+        public Scope Scope { get; private set; }
 
         #region IUnboundExprVisitor<IBoundExpr> Members
 
@@ -152,7 +153,7 @@ namespace Magpie.Compilation
                 //### bob: there's a bug here. if the NameExpr is a local variable, translating to an assignment 
                 // based on its name isn't right.
                 var funcName = callTarget.Target as NameExpr;
-                if ((funcName != null) && !mContext.Compiler.IsLocal(mFunction, mScope, funcName.Name))
+                if ((funcName != null) && !mContext.Compiler.IsLocal(mFunction, Scope, funcName.Name))
                 {
                     // translate the call
                     return TranslateAssignment(callTarget.Position, funcName.Name, funcName.TypeArgs, callArg, value);
@@ -196,7 +197,7 @@ namespace Magpie.Compilation
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(BlockExpr block)
         {
             // create an inner scope
-            mScope.Push();
+            Scope.Push();
 
             var exprs = new List<IBoundExpr>();
             var index = 0;
@@ -215,7 +216,7 @@ namespace Magpie.Compilation
                 exprs.Add(bound);
             }
 
-            mScope.Pop();
+            Scope.Pop();
 
             return new BoundBlockExpr(exprs);
         }
@@ -466,13 +467,10 @@ namespace Magpie.Compilation
         {
             mFunction = function;
             mContext = context;
-            mScope = scope;
+            Scope = scope;
         }
-
-        private Scope Scope { get { return mScope; } }
 
         private BindingContext mContext;
         private Function mFunction;
-        private Scope mScope;
     }
 }

@@ -62,20 +62,16 @@ How does pattern matching work?
 - Once this is working, we should get rid of union __Value functions since
   they can cause runtime errors.
   
-How are array and tuple elements accessed?
+How are tuple elements accessed?
 - The current tuple functions (First, Second, Third, etc.) are kind of lame
   because they're generic. That means you can't make *any* function called
   First: the tuple one already stomps on that.
-- Maybe treat integers like functions, so you could do:
+- Maybe treat integers like functions (like array access works), so you could
+  do:
     def a <- (10, 20, 30)
     def b <- a.1 // b = 20
-  Would have to be integer *literals* for tuples, since the type varies by
-  element. Arrays could use arbitrary expressions.
-- Maybe treat tuples and arrays like functions, so you could do:
-    def a <- (10, 20, 30)
-    def b <- a 1 // b = 20
-- Maybe just solve this for arrays and do fixed functions with a more discreet
-  naming convention for tuples.
+  Would have to be integer *literals* (or constant expressions) for tuples,
+  since the type varies by element.
   
 Built-in support for hashes?
 - To be statically-typed, would they be like named-element tuples?
@@ -84,6 +80,9 @@ How do coroutines and iterators work?
 - Some of the groundwork is there (stack frames are on the heap), but there's a
   lot left.
 - Should we support full continuations?
+- Should we support Lua-style deep coroutines (can yield at any depth in the
+  callstack.
+- Can values be passed in when resuming?
 
 Does Magpie have constants?
   Because of implicit calling, there isn't a syntactical difference between
@@ -93,7 +92,11 @@ Does Magpie have constants?
 
 Are there implicit type conversions?
 - Having to do .String everywhere is definitely a pain.
-  
+
+Register-based VM.
+- Magpie doesn't have a lot of opcodes anyway, and it seems to work very well
+  for Lua. We do a lot of stack churn right now.
+
 Things to do:
 ------------
 
@@ -123,6 +126,9 @@ Constant folding.
 Wrappers to allow references to intrinsics, auto-generated functions, and
   foreign functions.
 
+Tuple decomposition on assignment.
+  . (a, b) <- (1, 2)
+  
 Done:
 ----
 

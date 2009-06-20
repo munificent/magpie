@@ -38,10 +38,10 @@ namespace Magpie.Compilation
             HasInferrableTypeArguments = hasInferrableTypeArguments;
         }
 
-        public void Bind(IBoundExpr body, int numLocals)
+        public void Bind(FunctionBinder binder)
         {
-            Body.Bind(body);
-            NumLocals = numLocals;
+            Body.Bind(binder);
+            NumLocals = binder.Scope.NumVariables;
         }
 
         #region ICallable Members

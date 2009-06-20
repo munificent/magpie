@@ -18,6 +18,11 @@ namespace Magpie.Compilation
 
         public IBoundDecl Type { get { return Struct; } }
 
+        public override string ToString()
+        {
+            return "construct " + Struct.ToString() + " " + Arg.ToString();
+        }
+
         #region IBoundExpr Members
 
         TReturn IBoundExpr.Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)

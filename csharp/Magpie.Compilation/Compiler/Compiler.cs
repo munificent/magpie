@@ -196,20 +196,24 @@ namespace Magpie.Compilation
             return callable.CreateCall(arg);
         }
 
+        /// <summary>
+        /// Gets whether or not the given name within the given function and scope
+        /// represents a local variable (or function parameter).
+        /// </summary>
+        /// <param name="function">The function in whose body the name is being
+        /// looked up.</param>
+        /// <param name="scope">The current local variable scope.</param>
+        /// <param name="name">The name to look up.</param>
+        /// <returns><c>true</c> if the name is a local variable or function
+        /// parameter.</returns>
         public bool IsLocal(Function function,
             Scope scope, string name)
         {
             // see if it's an argument
-            if (function.ParamNames.Contains(name))
-            {
-                return true;
-            }
+            if (function.ParamNames.Contains(name)) return true;
 
             // see if it's a local
-            if (scope.Contains(name))
-            {
-                return true;
-            }
+            if (scope.Contains(name)) return true;
 
             return false;
         }

@@ -27,11 +27,19 @@ namespace Magpie.Compilation
             Bound = bound;
         }
 
-        public void Bind(IBoundExpr bound)
+        //### bob: for some reason, the binder doesn't work here. once that's fixed,
+        // get rid of the explicit bound arg
+        /// <summary>
+        /// Binds this expression using the given binder to convert the unbound
+        /// form to the bound one.
+        /// </summary>
+        /// <param name="binder">A binder to convert from unbound to bound form.</param>
+        public void Bind(IUnboundExprVisitor<IBoundExpr> binder)
         {
-            if (bound == null) throw new ArgumentNullException("bound");
+            if (binder == null) throw new ArgumentNullException("binder");
+            if (Unbound == null) throw new InvalidOperationException("Cannot bind an Expr that is already bound.");
 
-            Bound = bound;
+            Bound = Unbound.Accept(binder);
 
             // discard the unbound one now. makes sure we're clear on what state we expect
             // the expression to be in.
