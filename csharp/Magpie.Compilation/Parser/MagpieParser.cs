@@ -631,15 +631,15 @@ namespace Magpie.Compilation
             }
         }
 
-        // <-- (NAME (MUTABLE?) TypeDecl LINE)*
+        // <-- ((MUTABLE?) NAME TypeDecl LINE)*
         private List<Field> StructFields()
         {
             var fields = new List<Field>();
 
-            while (CurrentIs(TokenType.Name))
+            while (CurrentIs(TokenType.Name) || CurrentIs(TokenType.Mutable))
             {
-                var name = Consume(TokenType.Name).StringValue;
                 var isMutable = ConsumeIf(TokenType.Mutable);
+                var name = Consume(TokenType.Name).StringValue;
                 var type = TypeDecl();
                 Consume(TokenType.Line);
 

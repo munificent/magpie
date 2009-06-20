@@ -50,8 +50,8 @@ namespace Generative
     end
     
     struct FibSequence^
-        Current mutable Int
-        Next    mutable Int
+        mutable Current Int
+        mutable Next    Int
     end
 end
 

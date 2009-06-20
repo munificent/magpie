@@ -34,5 +34,5 @@ end
 Add<- (box IntBox, a Int, b Int ->) box.Value <- (a + b)
 
 struct IntBox
-    Value mutable Int
+    mutable Value Int
 end
