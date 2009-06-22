@@ -9,5 +9,6 @@ namespace Magpie.Compilation
     {
         Position Position { get; }
         string Name { get; }
+        IBoundDecl[] TypeArguments { get; }
     }
 }

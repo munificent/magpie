@@ -31,7 +31,7 @@ namespace Magpie.Compilation
             Function instance = new Function(BaseType.Position, BaseType.Name,
                 funcType, BaseType.ParamNames, BaseType.Body.Unbound, typeArgs, canInfer);
 
-            instance.SetSearchSpace(BaseType.SearchSpace);
+            instance.BindSearchSpace(BaseType.SearchSpace);
 
             // bind it with the type arguments in context
             FunctionBinder.Bind(context, instance);

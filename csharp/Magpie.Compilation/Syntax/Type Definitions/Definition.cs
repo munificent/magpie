@@ -5,11 +5,10 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
-    //### bob: should be renamed to something like Named or Entity since Functions inherit it from it too.
     /// <summary>
-    /// Base class for a user-defined named type.
+    /// Base class for a named, defined function or type.
     /// </summary>
-    public abstract class TypeDefinition
+    public abstract class Definition
     {
         public Position Position { get; private set; }
 
@@ -43,7 +42,11 @@ namespace Magpie.Compilation
             }
         }
 
-        public void SetSearchSpace(NameSearchSpace searchSpace)
+        /// <summary>
+        /// Binds the definition to the name context in which it is defined.
+        /// </summary>
+        /// <param name="searchSpace"></param>
+        public void BindSearchSpace(NameSearchSpace searchSpace)
         {
             SearchSpace = searchSpace;
         }
@@ -57,7 +60,7 @@ namespace Magpie.Compilation
             TypeArguments = typeArgs.ToArray();
         }
 
-        protected TypeDefinition(Position position, string name, IEnumerable<IBoundDecl> typeArgs)
+        protected Definition(Position position, string name, IEnumerable<IBoundDecl> typeArgs)
         {
             Position = position;
             mName = name;
@@ -72,7 +75,7 @@ namespace Magpie.Compilation
             }
         }
 
-        protected TypeDefinition(Position position, string name)
+        protected Definition(Position position, string name)
             : this (position, name, new IBoundDecl[0])
         {
         }

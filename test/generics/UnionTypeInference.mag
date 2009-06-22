@@ -1,0 +1,15 @@
+// expected: 1
+// expected: true
+
+Main (->)
+    Foo Bar 1
+    Foo Bar true
+end
+
+Foo'T (a FooUnion'T ->)
+    Print a.BarValue.String
+end
+
+union FooUnion'T
+    Bar T
+end

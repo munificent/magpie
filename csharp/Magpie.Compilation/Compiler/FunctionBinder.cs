@@ -150,8 +150,6 @@ namespace Magpie.Compilation
                 var callArg = callTarget.Arg.Accept(this);
 
                 // see if it's a direct function call
-                //### bob: there's a bug here. if the NameExpr is a local variable, translating to an assignment 
-                // based on its name isn't right.
                 var funcName = callTarget.Target as NameExpr;
                 if ((funcName != null) && !mContext.Compiler.IsLocal(mFunction, Scope, funcName.Name))
                 {

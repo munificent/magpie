@@ -8,7 +8,7 @@ namespace Magpie.Compilation
     /// <summary>
     /// A structure type definition.
     /// </summary>
-    public class Struct : TypeDefinition, INamedType
+    public class Struct : Definition, INamedType
     {
         public readonly List<Field> Fields = new List<Field>();
 
@@ -56,7 +56,7 @@ namespace Magpie.Compilation
             var structure = new Struct(Position, BaseName,
                 Fields.Select(field => new Field(field.Name, field.Type.Unbound, field.IsMutable)));
 
-            structure.SetSearchSpace(SearchSpace);
+            structure.BindSearchSpace(SearchSpace);
             structure.BindTypeArguments(typeArguments);
 
             return structure;

@@ -113,7 +113,30 @@ namespace Magpie.Compilation
 
         bool IBoundDeclVisitor<bool>.Visit(Struct decl)
         {
-            //### bob: need to copy this for union
+            return InferNamedType(decl);
+        }
+
+        bool IBoundDeclVisitor<bool>.Visit(Union decl)
+        {
+            return InferNamedType(decl);
+        }
+
+        #endregion
+
+        private IUnboundDecl ParamType
+        {
+            get { return mParamTypes.Peek(); }
+        }
+
+        private TypeArgInferrer(IEnumerable<string> typeParameters)
+        {
+            // make an empty list with slots for each filled argument
+            mTypeArguments = new List<IBoundDecl>(typeParameters.Select(p => (IBoundDecl)null));
+            mTypeParamNames = new List<string>(typeParameters);
+        }
+
+        private bool InferNamedType(INamedType decl)
+        {
             if (!TryInferParam(decl))
             {
                 var named = ParamType as NamedType;
@@ -138,25 +161,6 @@ namespace Magpie.Compilation
             }
 
             return false;
-        }
-
-        bool IBoundDeclVisitor<bool>.Visit(Union decl)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
-
-        private IUnboundDecl ParamType
-        {
-            get { return mParamTypes.Peek(); }
-        }
-
-        private TypeArgInferrer(IEnumerable<string> typeParameters)
-        {
-            // make an empty list with slots for each filled argument
-            mTypeArguments = new List<IBoundDecl>(typeParameters.Select(p => (IBoundDecl)null));
-            mTypeParamNames = new List<string>(typeParameters);
         }
 
         private bool TryInferParam(IBoundDecl argType)

@@ -224,37 +224,37 @@ namespace Magpie.Compilation
 
             foreach (var function in namespaceObj.Functions)
             {
-                function.SetSearchSpace(searchSpace);
+                function.BindSearchSpace(searchSpace);
                 mFunctions.AddUnbound(function);
             }
 
             foreach (var structure in namespaceObj.Structs)
             {
-                structure.SetSearchSpace(searchSpace);
+                structure.BindSearchSpace(searchSpace);
                 mTypes.Add(structure);
             }
 
             foreach (var union in namespaceObj.Unions)
             {
-                union.SetSearchSpace(searchSpace);
+                union.BindSearchSpace(searchSpace);
                 mTypes.Add(union);
             }
 
             foreach (var function in namespaceObj.GenericFunctions)
             {
-                function.BaseType.SetSearchSpace(searchSpace);
+                function.BaseType.BindSearchSpace(searchSpace);
                 mFunctions.Add(function);
             }
 
             foreach (var structure in namespaceObj.GenericStructs)
             {
-                structure.BaseType.SetSearchSpace(searchSpace);
+                structure.BaseType.BindSearchSpace(searchSpace);
                 mTypes.Add(structure);
             }
 
             foreach (var union in namespaceObj.GenericUnions)
             {
-                union.BaseType.SetSearchSpace(searchSpace);
+                union.BaseType.BindSearchSpace(searchSpace);
                 mTypes.Add(union);
             }
 

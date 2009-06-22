@@ -8,7 +8,7 @@ namespace Magpie.Compilation
     /// <summary>
     /// A function definition.
     /// </summary>
-    public class Function : TypeDefinition, ICallable
+    public class Function : Definition, ICallable
     {
         public FuncType Type { get; private set; }
 

@@ -9,7 +9,7 @@ namespace Magpie.Compilation
     /// <summary>
     /// A union type definition.
     /// </summary>
-    public class Union : TypeDefinition, INamedType
+    public class Union : Definition, INamedType
     {
         public ReadOnlyCollection<UnionCase> Cases { get; private set; }
 
@@ -42,7 +42,7 @@ namespace Magpie.Compilation
             var union = new Union(Position, BaseName,
                 Cases.Select(unionCase => new UnionCase(unionCase.Name, unionCase.ValueType.Unbound, unionCase.Index)));
 
-            union.SetSearchSpace(SearchSpace);
+            union.BindSearchSpace(SearchSpace);
             union.BindTypeArguments(typeArguments);
 
             return union;

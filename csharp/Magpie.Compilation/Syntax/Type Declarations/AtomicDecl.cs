@@ -41,5 +41,14 @@ namespace Magpie.Compilation
         }
 
         #endregion
+
+        #region INamedType Members
+
+        IBoundDecl[] INamedType.TypeArguments
+        {
+            get { return new IBoundDecl[0]; }
+        }
+
+        #endregion
     }
 }

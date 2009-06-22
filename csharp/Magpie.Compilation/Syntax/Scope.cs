@@ -16,6 +16,11 @@ namespace Magpie.Compilation
         /// </summary>
         public int NumVariables { get { return mNumVariables; } }
 
+        /// <summary>
+        /// Gets the local variable with the given name.
+        /// </summary>
+        /// <param name="name">Name of the local variable to look up.</param>
+        /// <returns>The Field representing the local variable.</returns>
         public Field this[string name] { get { return mStruct[name]; } }
 
         /// <summary>
@@ -40,11 +45,23 @@ namespace Magpie.Compilation
             }
         }
 
+        /// <summary>
+        /// Gets whether or not the scope currently has a local variable with
+        /// the given name.
+        /// </summary>
+        /// <param name="name">Name to look for.</param>
+        /// <returns><c>true</c> if a local variable with that name is in scope.</returns>
         public bool Contains(string name)
         {
             return mStruct.Contains(name);
         }
 
+        /// <summary>
+        /// Defines a local variable with the given name and type.
+        /// </summary>
+        /// <param name="name">Variable name.</param>
+        /// <param name="type">Variable type.</param>
+        /// <param name="isMutable"><c>true</c> if the variable is mutable.</param>
         public void Define(string name, IBoundDecl type, bool isMutable)
         {
             mStruct.Define(name, type, isMutable);

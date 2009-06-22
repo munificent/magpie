@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
-    public class Generic<TType> where TType : TypeDefinition
+    public class Generic<TType> where TType : Definition
     {
         public string Name { get { return BaseType.Name; } }
 

@@ -1,0 +1,15 @@
+// expected: 1
+// expected: true
+
+Main (->)
+    Foo FooStruct 1
+    Foo FooStruct true
+end
+
+Foo'T (a FooStruct'T ->)
+    Print a.Bar.String
+end
+
+struct FooStruct'T
+    Bar T
+end
