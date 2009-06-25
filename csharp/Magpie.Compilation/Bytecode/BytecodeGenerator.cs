@@ -35,6 +35,23 @@ namespace Magpie.Compilation
 
             function.Body.Bound.Accept(generator);
 
+            // if there is a call at the end, translate it to a tail call
+            if (generator.mLastCallPosition == generator.Position - 1)
+            {
+                generator.SeekTo(generator.mLastCallPosition);
+
+                OpCode op;
+                switch (generator.mLastCall)
+                {
+                    case OpCode.Call0: op = OpCode.TailCall0; break;
+                    case OpCode.Call1: op = OpCode.TailCall1; break;
+                    default:           op = OpCode.TailCallN; break;
+                }
+
+                generator.Write(op);
+                generator.SeekToEnd();
+            }
+
             generator.Write(OpCode.Return);
         }
 
@@ -125,6 +142,10 @@ namespace Magpie.Compilation
                 case 1: op = OpCode.Call1; break;
                 default: op = OpCode.CallN; break;
             }
+
+            mLastCallPosition = Position;
+            mLastCall = op;
+
             Write(op);
 
             return true;
@@ -195,6 +216,9 @@ namespace Magpie.Compilation
         bool IBoundExprVisitor<bool>.Visit(BoundReturnExpr expr)
         {
             expr.Value.Accept(this);
+
+            //### bob: tco here?
+
             Write(OpCode.Return);
 
             return true;
@@ -305,11 +329,6 @@ namespace Magpie.Compilation
             mWriter.Write((byte)op);
         }
 
-        public void Write(byte value)
-        {
-            mWriter.Write(value);
-        }
-
         public void Write(int value)
         {
             mWriter.Write(value);
@@ -327,10 +346,17 @@ namespace Magpie.Compilation
             Write(operand);
         }
 
+        private void Write(byte value)
+        {
+            mWriter.Write(value);
+        }
+
         private Compiler mCompiler;
         private BinaryWriter mWriter;
         private OffsetTable mFunctionPatcher;
         private StringTable mStrings;
         private JumpTable mJumpTable;
+        private int mLastCallPosition;
+        private OpCode mLastCall;
     }
 }

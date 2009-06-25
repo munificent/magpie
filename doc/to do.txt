@@ -128,7 +128,9 @@ Wrappers to allow references to intrinsics, auto-generated functions, and
 
 Tuple decomposition on assignment.
   . (a, b) <- (1, 2)
-  
+
+Tail call optimization.
+
 Done:
 ----
 

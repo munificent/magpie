@@ -14,6 +14,11 @@ namespace Magpie.App
     {
         public static IList<CompileError> Run(string path, Action<string> printCallback)
         {
+            return Run(path, 0, printCallback);
+        }
+
+        public static IList<CompileError> Run(string path, int memoryLimit, Action<string> printCallback)
+        {
             sPrintCallback = printCallback;
 
             var foreign = new DotNetForeign();
@@ -46,8 +51,18 @@ namespace Magpie.App
 
                 var machine = new Machine(foreign);
                 machine.Printed += Machine_Printed;
+                machine.MemoryLimit = memoryLimit;
 
-                machine.Interpret(stream);
+                try
+                {
+                    machine.Interpret(stream);
+                }
+                catch (InterpreterException ex)
+                {
+                    // do nothing
+                    //### bob: should report runtime errors
+                    Console.WriteLine(ex.ToString());
+                }
 
                 return errors;
             }

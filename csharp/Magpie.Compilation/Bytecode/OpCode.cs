@@ -39,6 +39,10 @@ namespace Magpie.Compilation
         Call1,        // pops function offset from operand stack
         CallN,        // pops function offset from operand stack
 
+        TailCall0,    // pops function offset from operand stack
+        TailCall1,    // pops function offset from operand stack
+        TailCallN,    // pops function offset from operand stack
+
         ForeignCall0, // int : foreign function identifier
         ForeignCall1, // int : foreign function identifier
         ForeignCallN, // int : foreign function identifier

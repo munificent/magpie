@@ -10,6 +10,15 @@ namespace Magpie.Interpreter
     {
         public event EventHandler<PrintEventArgs> Printed;
 
+        /// <summary>
+        /// Gets and sets the memory limit the interpreter operates under. If set to a non-zero
+        /// value, the interpreter will track memory usage and immediately stop if the usage
+        /// exceeds the limit.
+        /// </summary>
+        /// <remarks>Setting this to a non-zero value forces the interpreter to garbage collect
+        /// before every instruction. This is very slow.</remarks>
+        public long MemoryLimit { get; set; }
+
         public Machine(IForeignRuntimeInterface foreignInterface)
         {
             mForeignInterface = foreignInterface;
@@ -28,7 +37,7 @@ namespace Magpie.Interpreter
 
             // find "main"
             Push(mFile.OffsetToMain);
-            Call(0);
+            Call(0, false);
 
             Interpret();
         }
@@ -42,10 +51,25 @@ namespace Magpie.Interpreter
         {
             bool running = true;
 
+            // if we're tracking memory, clear everything before we start
+            if (MemoryLimit != 0)
+            {
+                GC.Collect();
+            }
+
             while (running)
             {
                 OpCode theOp = ReadOpCode();
                 //Console.WriteLine(theOp.ToString());
+
+                // track memory usage
+                if (MemoryLimit != 0)
+                {
+                    // note: this collects every time, which is very slow, but needed to accurately track usage
+                    long used = GC.GetTotalMemory(true);
+
+                    if (used > MemoryLimit) throw new MemoryLimitExceededException(MemoryLimit, used);
+                }
 
                 switch (theOp)
                 {
@@ -132,9 +156,13 @@ namespace Magpie.Interpreter
                         }
                         break;
 
-                    case OpCode.Call0: Call(0); break;
-                    case OpCode.Call1: Call(1); break;
-                    case OpCode.CallN: Call(2); break;
+                    case OpCode.Call0: Call(0, false); break;
+                    case OpCode.Call1: Call(1, false); break;
+                    case OpCode.CallN: Call(2, false); break;
+
+                    case OpCode.TailCall0: Call(0, true); break;
+                    case OpCode.TailCall1: Call(1, true); break;
+                    case OpCode.TailCallN: Call(2, true); break;
 
                     case OpCode.ForeignCall0: ForeignCall(0); break;
                     case OpCode.ForeignCall1: ForeignCall(1); break;
@@ -328,7 +356,7 @@ namespace Magpie.Interpreter
             return frame;
         }
 
-        private void Call(int paramType)
+        private void Call(int paramType, bool isTailCall)
         {
             // jump to the function
             int previousInstruction = mInstruction;
@@ -336,7 +364,16 @@ namespace Magpie.Interpreter
             mInstruction = PopInt();
             int numLocals = ReadInt();
 
-            mCurrentFrame = MakeCallFrame(numLocals, mCurrentFrame, previousInstruction);
+            // if it's a tail call, discard the parent frame
+            //### bob: not tested. compiler doesn't emit tail calls yet
+            var parent = mCurrentFrame;
+            if (isTailCall)
+            {
+                parent = mCurrentFrame[mCurrentFrame.Count - 2].Struct;
+                previousInstruction = mCurrentFrame[mCurrentFrame.Count - 1].Int;
+            }
+
+            mCurrentFrame = MakeCallFrame(numLocals, parent, previousInstruction);
 
             // pop and store the argument
             if (paramType != 0) mCurrentFrame[0] = Pop();

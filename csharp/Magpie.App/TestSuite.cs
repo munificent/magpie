@@ -74,7 +74,8 @@ namespace Magpie.App
             mErrors = new List<string>();
 
             ParseExpected(test);
-            IList<CompileError> compileErrors = Script.Run(test, TestPrint);
+
+            IList<CompileError> compileErrors = Script.Run(test, mMemoryLimit, TestPrint);
 
             if (compileErrors.Count == 0)
             {
@@ -115,9 +116,11 @@ namespace Magpie.App
         {
             mExpectedOutput.Clear();
             mExpectedErrorLines.Clear();
+            mMemoryLimit = 0;
 
-            const string ExpectedHeader = "// expected: ";
-            const string ErrorHeader    = "// error line: ";
+            const string ExpectedHeader    = "// expected: ";
+            const string ErrorHeader       = "// error line: ";
+            const string MemoryLimitHeader = "// memory limit: ";
 
             foreach (string line in File.ReadAllLines(path))
             {
@@ -129,6 +132,11 @@ namespace Magpie.App
                 {
                     string errorLine = line.Substring(ErrorHeader.Length).Trim();
                     mExpectedErrorLines.Enqueue(Int32.Parse(errorLine));
+                }
+                else if (line.StartsWith(MemoryLimitHeader))
+                {
+                    string limitLine = line.Substring(MemoryLimitHeader.Length).Trim();
+                    mMemoryLimit = Int32.Parse(limitLine);
                 }
             }
         }
@@ -153,6 +161,7 @@ namespace Magpie.App
         private string mTestDir;
         private Queue<string> mExpectedOutput = new Queue<string>();
         private Queue<int> mExpectedErrorLines = new Queue<int>();
+        private int mMemoryLimit;
         private List<string> mErrors;
     }
 }
