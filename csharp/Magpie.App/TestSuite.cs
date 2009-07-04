@@ -75,7 +75,7 @@ namespace Magpie.App
 
             ParseExpected(test);
 
-            IList<CompileError> compileErrors = Script.Run(test, mMemoryLimit, TestPrint);
+            IList<CompileError> compileErrors = Script.Run(test, mMaxStackDepth, TestPrint);
 
             if (compileErrors.Count == 0)
             {
@@ -116,11 +116,11 @@ namespace Magpie.App
         {
             mExpectedOutput.Clear();
             mExpectedErrorLines.Clear();
-            mMemoryLimit = 0;
+            mMaxStackDepth = 0;
 
             const string ExpectedHeader    = "// expected: ";
             const string ErrorHeader       = "// error line: ";
-            const string MemoryLimitHeader = "// memory limit: ";
+            const string MaxStackHeader    = "// stack limit: ";
 
             foreach (string line in File.ReadAllLines(path))
             {
@@ -133,10 +133,10 @@ namespace Magpie.App
                     string errorLine = line.Substring(ErrorHeader.Length).Trim();
                     mExpectedErrorLines.Enqueue(Int32.Parse(errorLine));
                 }
-                else if (line.StartsWith(MemoryLimitHeader))
+                else if (line.StartsWith(MaxStackHeader))
                 {
-                    string limitLine = line.Substring(MemoryLimitHeader.Length).Trim();
-                    mMemoryLimit = Int32.Parse(limitLine);
+                    string stackLine = line.Substring(MaxStackHeader.Length).Trim();
+                    mMaxStackDepth = Int32.Parse(stackLine);
                 }
             }
         }
@@ -161,7 +161,7 @@ namespace Magpie.App
         private string mTestDir;
         private Queue<string> mExpectedOutput = new Queue<string>();
         private Queue<int> mExpectedErrorLines = new Queue<int>();
-        private int mMemoryLimit;
+        private int mMaxStackDepth;
         private List<string> mErrors;
     }
 }

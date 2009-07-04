@@ -35,23 +35,7 @@ namespace Magpie.Compilation
 
             function.Body.Bound.Accept(generator);
 
-            // if there is a call at the end, translate it to a tail call
-            if (generator.mLastCallPosition == generator.Position - 1)
-            {
-                generator.SeekTo(generator.mLastCallPosition);
-
-                OpCode op;
-                switch (generator.mLastCall)
-                {
-                    case OpCode.Call0: op = OpCode.TailCall0; break;
-                    case OpCode.Call1: op = OpCode.TailCall1; break;
-                    default:           op = OpCode.TailCallN; break;
-                }
-
-                generator.Write(op);
-                generator.SeekToEnd();
-            }
-
+            generator.TranslateTailCall();
             generator.Write(OpCode.Return);
         }
 
@@ -217,8 +201,7 @@ namespace Magpie.Compilation
         {
             expr.Value.Accept(this);
 
-            //### bob: tco here?
-
+            TranslateTailCall();
             Write(OpCode.Return);
 
             return true;
@@ -349,6 +332,26 @@ namespace Magpie.Compilation
         private void Write(byte value)
         {
             mWriter.Write(value);
+        }
+
+        private void TranslateTailCall()
+        {
+            // if there is a call at the end, translate it to a tail call
+            if (mLastCallPosition == Position - 1)
+            {
+                SeekTo(mLastCallPosition);
+
+                OpCode op;
+                switch (mLastCall)
+                {
+                    case OpCode.Call0: op = OpCode.TailCall0; break;
+                    case OpCode.Call1: op = OpCode.TailCall1; break;
+                    default: op = OpCode.TailCallN; break;
+                }
+
+                Write(op);
+                SeekToEnd();
+            }
         }
 
         private Compiler mCompiler;

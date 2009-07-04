@@ -127,12 +127,20 @@ Wrappers to allow references to intrinsics, auto-generated functions, and
   foreign functions.
 
 Tuple decomposition on assignment.
-  . (a, b) <- (1, 2)
-
-Tail call optimization.
+. (a, b) <- (1, 2)
+  
+Document and test precedence of self-assignment syntax.
+. Is a <- a - 2 + 3 the same as a = a - 2 + 3 or a = a - (2 + 3
 
 Done:
 ----
+
+Tail call optimization.
+. Simple tail recursive case is working. Need to test:
+- Early returns
+- Mutual recursion
+- Make test work by counting stack depth at each call, instead of tracking
+  memory usage. Should be much faster, and more reliable.
 
 Indexers.
 - Syntactic sugar for applying array-element-access syntax to arbitrary types.

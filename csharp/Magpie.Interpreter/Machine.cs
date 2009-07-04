@@ -11,13 +11,10 @@ namespace Magpie.Interpreter
         public event EventHandler<PrintEventArgs> Printed;
 
         /// <summary>
-        /// Gets and sets the memory limit the interpreter operates under. If set to a non-zero
-        /// value, the interpreter will track memory usage and immediately stop if the usage
-        /// exceeds the limit.
+        /// Gets and sets the maximum stack depth. If set to a non-zero value, the interpreter
+        /// will track it during calls and immediately stop if the max is exceeded.
         /// </summary>
-        /// <remarks>Setting this to a non-zero value forces the interpreter to garbage collect
-        /// before every instruction. This is very slow.</remarks>
-        public long MemoryLimit { get; set; }
+        public int MaxStackDepth { get; set; }
 
         public Machine(IForeignRuntimeInterface foreignInterface)
         {
@@ -51,25 +48,10 @@ namespace Magpie.Interpreter
         {
             bool running = true;
 
-            // if we're tracking memory, clear everything before we start
-            if (MemoryLimit != 0)
-            {
-                GC.Collect();
-            }
-
             while (running)
             {
                 OpCode theOp = ReadOpCode();
                 //Console.WriteLine(theOp.ToString());
-
-                // track memory usage
-                if (MemoryLimit != 0)
-                {
-                    // note: this collects every time, which is very slow, but needed to accurately track usage
-                    long used = GC.GetTotalMemory(true);
-
-                    if (used > MemoryLimit) throw new MemoryLimitExceededException(MemoryLimit, used);
-                }
 
                 switch (theOp)
                 {
@@ -377,6 +359,14 @@ namespace Magpie.Interpreter
 
             // pop and store the argument
             if (paramType != 0) mCurrentFrame[0] = Pop();
+
+            // track stack depth
+            if (MaxStackDepth != 0)
+            {
+                int stackDepth = GetStackDepth(mCurrentFrame);
+
+                if (stackDepth > MaxStackDepth) throw new MaxStackDepthExceededException(MaxStackDepth);
+            }
         }
 
         private void ForeignCall(int paramType) // (int id, Value[] args)
@@ -394,6 +384,12 @@ namespace Magpie.Interpreter
 
             Value result = mForeignInterface.ForeignCall(id, args);
             if (result != null) Push(result);
+        }
+
+        private int GetStackDepth(Structure callFrame)
+        {
+            if (callFrame == null) return 0;
+            return 1 + GetStackDepth(callFrame[callFrame.Count - 2].Struct);
         }
 
         private BytecodeFile mFile;

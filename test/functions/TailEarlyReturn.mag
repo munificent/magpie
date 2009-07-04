@@ -1,0 +1,16 @@
+// stack limit: 10
+// expected: done
+
+Main (->)
+    Count 100
+    Print "done"
+end
+
+Count (n Int ->)
+    if n > 0 then return Count (n - 1)
+    
+    DoNothing
+    DoNothing
+end
+
+DoNothing (->) ()

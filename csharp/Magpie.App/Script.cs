@@ -17,7 +17,7 @@ namespace Magpie.App
             return Run(path, 0, printCallback);
         }
 
-        public static IList<CompileError> Run(string path, int memoryLimit, Action<string> printCallback)
+        public static IList<CompileError> Run(string path, int maxStackDepth, Action<string> printCallback)
         {
             sPrintCallback = printCallback;
 
@@ -51,7 +51,7 @@ namespace Magpie.App
 
                 var machine = new Machine(foreign);
                 machine.Printed += Machine_Printed;
-                machine.MemoryLimit = memoryLimit;
+                machine.MaxStackDepth = maxStackDepth;
 
                 try
                 {
