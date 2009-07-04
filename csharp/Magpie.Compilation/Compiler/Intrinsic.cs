@@ -17,7 +17,7 @@ namespace Magpie.Compilation
             get
             {
                 yield return new Intrinsic("Not", OpCode.NegateBool, FuncType.Create(Decl.Bool, Decl.Bool));
-                yield return new Intrinsic("Neg", OpCode.NegateInt, FuncType.Create(Decl.Int, Decl.Int));
+                yield return new Intrinsic("Negate", OpCode.NegateInt, FuncType.Create(Decl.Int, Decl.Int));
 
                 yield return new Intrinsic("=", OpCode.EqualBool, FuncType.Create(Decl.Bool, Decl.Bool, Decl.Bool));
                 yield return new Intrinsic("=", OpCode.EqualInt, FuncType.Create(Decl.Int, Decl.Int, Decl.Bool));
@@ -50,6 +50,8 @@ namespace Magpie.Compilation
                 yield return new Intrinsic("Print", OpCode.Print, FuncType.Create(Decl.String, Decl.Unit));
                 yield return new Intrinsic("Size", OpCode.StringSize, FuncType.Create(Decl.String, Decl.Int));
                 yield return new Intrinsic("Substring", OpCode.Substring, FuncType.Create(Decl.String, Decl.Int, Decl.Int, Decl.String));
+
+                yield return new Intrinsic("Math:Random", OpCode.Random, FuncType.Create(Decl.Int, Decl.Int));
             }
         }
 

@@ -82,6 +82,7 @@ How do coroutines and iterators work?
 - Should we support full continuations?
 - Should we support Lua-style deep coroutines (can yield at any depth in the
   callstack.
+  . Yes, we should.
 - Can values be passed in when resuming?
 
 Does Magpie have constants?
@@ -97,6 +98,11 @@ Register-based VM.
 - Magpie doesn't have a lot of opcodes anyway, and it seems to work very well
   for Lua. We do a lot of stack churn right now.
 
+More atomic types:
+- float
+- char
+- byte?
+  
 Things to do:
 ------------
 
@@ -115,6 +121,7 @@ Lazy arguments.
 - Basically, do what Scala does.
 - This is surprisingly important: logical operators can't short-circuit without
   it.
+- Change boolean operators to use this.
 
 Argument inference for function references.
 - You should be able to omit the argument types when creating a function

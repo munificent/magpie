@@ -248,20 +248,16 @@ namespace Magpie.Interpreter
                         }
                         break;
 
-                    case OpCode.HasValue:
-                        Push(PopStructure() != null);
-                        break;
-
-                    case OpCode.BoxValue:
+                    case OpCode.Random:
                         {
-                            Structure structure = new Structure(1);
-                            structure[0] = Pop();
-                            Push(structure);
-                        }
-                        break;
+                            // only create if needed
+                            if (mRandom == null)
+                            {
+                                mRandom = new Random();
+                            }
 
-                    case OpCode.UnboxValue:
-                        Push(PopStructure()[0]);
+                            Push(mRandom.Next(PopInt()));
+                        }
                         break;
 
                     case OpCode.AddString:
@@ -405,6 +401,8 @@ namespace Magpie.Interpreter
         // n + 1  : reference to parent call frame
         // n + 2  : instruction pointer for parent frame
         private Structure mCurrentFrame;
+
+        private Random mRandom;
 
         private readonly IForeignRuntimeInterface mForeignInterface;
     }

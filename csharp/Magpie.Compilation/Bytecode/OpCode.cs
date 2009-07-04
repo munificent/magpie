@@ -76,10 +76,7 @@ namespace Magpie.Compilation
         MultInt,
         DivInt,
 
-        // optional
-        HasValue,
-        BoxValue,
-        UnboxValue,
+        Random,
 
         // strings
         AddString,

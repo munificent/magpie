@@ -18,7 +18,7 @@ Main (->)
     Print i.Value.String
     
     // works with self-assignment operators too
-    Value i <- .Neg
+    Value i <- .Negate
     Print i.Value.String
     
     Value i <- + 5

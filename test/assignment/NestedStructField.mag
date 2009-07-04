@@ -21,7 +21,7 @@ Main (->)
     Print a.Box.Value.String
     
     // works with self-assignment operators too
-    a.Box.Value <- .Neg
+    a.Box.Value <- .Negate
     Print a.Box.Value.String
     
     a.Box.Value <- + 5
