@@ -1,5 +1,8 @@
 syntax: glob
 
+# ignore mac desktop files
+**.DS_Store
+
 # ignore the c# build output
 csharp/bin/**.*
 csharp/*.*/obj/**.*
