@@ -1,0 +1,485 @@
+using System
+
+struct Game
+    mutable D1 Int
+    mutable P1 Int
+    mutable Z Int
+    mutable P Int
+    mutable S Int
+    mutable H Int
+    mutable E Int
+    mutable Y Int
+    mutable A Int
+    mutable I Int
+    mutable Q Int
+    mutable D Int
+    mutable C Int
+end
+
+Main (->)
+    F80 Game (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+end
+
+Input (query String -> Int)
+    System:Console:Write query
+    def line <- System:Console:ReadLine
+    line.Int
+end
+
+//### bob: ghetto mod
+% (value Int, divisor Int -> Int)
+    def dividend <- value / divisor
+    value - dividend
+end    
+
+//### bob: very hackish string -> int
+Int (string String -> Int)
+    mutable value <- 0
+    
+    // bail if empty string
+    if string.Size = 0 then return 0
+    
+    def negative? <- Substring (string, 0, 1) = "-"
+    def startChar <- if negative? then 1 else 0
+    
+    for i <- startChar -to- string.Size do
+        def c <- Substring (string, i, 1)
+        value <- * 10
+        
+        if c = "1" then value <- + 1
+        else if c = "2" then value <- + 2
+        else if c = "3" then value <- + 3
+        else if c = "4" then value <- + 4
+        else if c = "5" then value <- + 5
+        else if c = "6" then value <- + 6
+        else if c = "7" then value <- + 7
+        else if c = "8" then value <- + 8
+        else if c = "9" then value <- + 9
+    end
+    
+    if negative? then value <- .Negate
+    
+    value
+end
+
+// 10 rem *** converted from the original focal program and modified
+// 20 rem *** for edusystem 70 by david ahl, digital
+// 30 rem *** modified for 8k microsoft basic by peter turnbull
+
+F80 (game Game ->)
+    // 80 print "try your hand at governing ancient sumeria"
+    // 85 print "successfully for a 10-yr term of office.":print
+
+    Print "Try your hand at governing ancient Sumeria"
+    Print "successfully for a 10 year term of office."
+    Print ""
+    
+    // 95 d1=0:p1=0
+    // 110 z=0:p=95:s=2800:h=3000:e=h-s
+    // 120 y=3:a=h/y:i=5:q=1
+    
+    game.D1 <- 0
+    game.P1 <- 0
+    game.Z <- 0
+    game.P <- 95
+    game.S <- 2800
+    game.H <- 3000
+    game.E <- game.H - game.S
+    game.Y <- 3
+    game.A <- game.H / game.Y
+    game.I <- 5
+    game.Q <- 1
+    
+    F210 game
+end
+
+F210 (game Game ->)
+    // 210 d=0
+    game.D <- 0
+    
+    F215 game
+end
+
+F215 (game Game ->)
+    // 215 print:print:print "hamurabi:  i beg to report to you,":z=z+1
+    // 217 print "in year"z","d"people starved,"i"came to the city."
+    // 218 p=p+i
+    Print ""
+    Print ""
+    Print "Hamurabi:  I beg to report to you"
+    game.Z <- + 1
+    Print ("in year " + game.Z.String + ", " + game.D.String +
+           " people starved, " + game.I.String +
+           " came to the city.")
+    game.P <- + game.I
+
+    // 227 if q>0 then 230
+    if game.Q > 0 then return F230 game
+
+    // 228 p=int(p/2)
+    // 229 print "a horrible plague struck!  half the people died."
+    game.P <- game.P / 2
+    Print "A horrible plague struck! Half the people died."
+    
+    F230 game
+end
+
+F230 (game Game ->)
+    // 230 print "population is now"p 
+    // 232 print "the city now owns"a"acres."
+    // 235 print "you harvested"y"bushels per acre."
+    // 250 print "rats ate"e"bushels."
+    // 260 print "you now have"s"bushels in store.":print
+    Print ("Population is now " + game.P.String + "." )
+    Print ("The city now owns " + game.A.String + " acres.")
+    Print ("You harvested " + game.Y.String + " bushels per acre.")
+    Print ("Rats ate " + game.E.String + " bushels.")
+    Print ("You now have " + game.S.String + " bushels in store.")
+    Print ""
+    
+    // 270 if z=11 then 860
+    if game.Z = 11 then return F860 game
+    
+    // 310 c=int(10*rnd(1)):y=c+17
+    game.C <- Math:Random 10
+    game.Y <- game.C + 17
+    
+    // 312 print "land is trading at"y"bushels per acre."
+    Print ("Land is trading at " + game.Y.String + " bushels per acre.")
+    
+    F320 game
+end
+
+F320 (game Game ->)
+    // 320 print "how many acres do you wish to buy";
+    // 321 input q:if q<0 then 850
+    game.Q <- Input "How many acres do you wish to buy? "
+    if game.Q < 0 then return F850 game
+    
+    // 322 if y*q<=s then 330
+    if game.Y * game.Q <= game.S then return F330 game
+    
+    // 323 gosub 710
+    F710 game
+    
+    // 324 goto 320 
+    F320 game
+end
+
+F330 (game Game ->)
+    // 330 if q=0 then 340
+    if game.Q = 0 then return F340 game
+    
+    // 331 a=a+q:s=s-y*q:c=0
+    game.A <- + game.Q
+    game.S <- - (game.Y * game.Q)
+    game.C <- 0
+    
+    // 334 goto 400
+    F400 game
+end
+
+F340 (game Game ->)
+    // 340 print "how many acres do you wish to sell";
+    // 341 input q:if q<0 then 850
+    game.Q <- Input "How many acres do you wish to sell? "
+    if game.Q < 0 then return F850 game
+    
+    // 342 if q<a then 350
+    if game.Q < game.A then return F350 game
+    
+    // 343 gosub 720
+    F720 game
+    
+    // 344 goto 340
+    F340 game
+end
+
+F350 (game Game ->)
+    // 350 a=a-q:s=s+y*q:c=0
+    game.A <- - game.Q
+    game.S <- + (game.Y * game.Q)
+    game.C <- 0
+    
+    F400 game
+end
+
+F400 (game Game ->)
+    // 400 print
+    Print ""
+    
+    F410 game
+end
+
+F410 (game Game ->)
+    // 410 print "how many bushels do you wish to feed your people";
+    // 411 input q
+    // 412 if q<0 then 850
+    game.Q <- Input "How many bushels do you wish to feed your people? "
+    if game.Q < 0 then return F850 game
+    
+    // 418 rem *** trying to use more grain than in the silos?
+    // trying to use more grain than in the silos?
+    
+    // 420 if q<=s then 430 
+    if game.Q <= game.S then return F430 game
+    
+    // 421 gosub 710
+    F710 game
+    
+    // 422 goto 410 
+    F410 game
+end
+
+F430 (game Game ->)
+    // 430 s=s-q:c=1:print
+    game.S <- - game.Q
+    game.C <- 1
+    
+    F440 game
+end
+
+F440 (game Game ->)
+    // 440 print "how many acres do you wish to plant with seed";
+    Print ""
+
+    // 441 input d:if d=0 then 511
+    // 442 if d<0 then 850
+    game.D <- Input "How many acres do you wish to plant with seed? "
+    if game.D = 0 then return F511 game
+    if game.D < 0 then return F850 game
+    
+    // 444 rem *** trying to plant more acres than you own?
+    // trying to plant more acres than you own?
+    
+    // 445 if d<=a then 450
+    if game.D <= game.A then return F450 game
+    
+    // 446 gosub 720
+    F720 game
+    
+    // 447 goto 440
+    F440 game
+end
+
+F450 (game Game ->)
+    // 449 rem *** enough grain for seed?
+    // enough grain for seed?
+    
+    // 450 if int(d/2)<s then 455
+    if game.D / 2 < game.S then return F455 game
+    
+    // 452 gosub 710
+    F710 game
+    
+    // 453 goto 440 
+    F440 game
+end
+
+F455 (game Game ->)
+    // 454 rem *** enough people to tend the crops?
+    // enough people to tend the crops?
+    
+    // 455 if d<10*p then 510
+    if game.D < (10 * game.P) then return F510 game
+    
+    // 460 print "but you have only"p"people to tend the fields. now then,"
+    Print ("But you have only " + game.P.String + " people to tend the fields. Now then,")
+    
+    // 470 goto 440
+    F440 game
+end
+
+F510 (game Game ->)
+    // 510 s=s-int(d/2)
+    game.S <- - (game.D / 2)
+    
+    F511 game
+end
+
+F511 (game Game ->)
+    // 511 gosub 800
+    F800 game
+    
+    // 512 rem *** a bountyfull harvest!!
+    // a bountyfull harvest!!
+    
+    // 515 y=c:h=d*y:e=0
+    game.Y <- game.C
+    game.H <- game.D * game.Y
+    game.E <- 0
+    
+    // 521 gosub 800
+    F800 game
+    
+    // 522 if int(c/2)<>c/2 then 530
+    if (game.C % 2) = 1 then return F530 game
+    
+    // 523 rem *** the rats are running wild!!
+    // the rats are running wild!!
+    
+    // 525 e=int(s/c)
+    game.E <- game.S / game.C
+    
+    F530 game
+end
+
+F530 (game Game ->)
+    // 530 s=s-e+h
+    game.S <- - (game.E + game.H)
+    
+    // 531 gosub 800
+    F800 game
+    
+    // 532 rem *** let's have some babies
+    // let's have some babies
+    
+    // 533 i=int(c*(20*a+s)/p/100+1)
+    game.I <- game.C * ((20 * game.A) + game.S) / game.P / 100 + 1
+    
+    // 539 rem *** how many people had full tummies?
+    // how many people had full tummies?
+    
+    // 540 c=int(q/20)
+    game.C <- game.Q / 20
+    
+    // 541 rem *** horrors, a 15% chance of plague
+    // horrors, a 15% chance of plague
+    
+    // 542 q=int(10*(2*rnd(1)-.3))
+    game.Q <- (100 * (Math:Random 20 - 3)) / 10
+    
+    // 550 if p<c then 210
+    if game.P < game.C then return F210 game
+    
+    // 551 rem *** starve enough for impeachment?
+    // starve enough for impeachment?
+    
+    // 552 d=p-c:if d>.45*p then 560
+    game.D <- game.P - game.C
+    if game.D > (game.P * 100 / 45) then return F560 game
+    
+    // 553 p1=((z-1)*p1+d*100/p)/z
+    game.P1 <- ((game.Z - 1) * game.P1 + game.D * 100 / game.P) / game.Z
+    
+    // 555 p=c:d1=d1+d:goto 215
+    game.P <- game.C
+    game.D1 <- + game.D
+    
+    F215 game
+end
+
+F560 (game Game ->)
+    // 560 print:print "you starved"d"people in one year!!!"
+    Print ""
+    Print ("You starved " + game.D.String + " people in one year!!!")
+    
+    F565 game
+end
+
+F565 (game Game ->)
+    // 565 print "due to this extreme mismanagement you have not only"
+    // 566 print "been impeached and thrown out of office but you have"
+    // 567 print "also been declared 'national fink' !!":goto 990   
+    Print "Due to this extreme mismanagement you have not only"
+    Print "been impeached and thrown out of office but you have"
+    Print "also been declared 'national fink'!!"
+    
+    End game
+end
+
+F710 (game Game ->)
+    // 710 print "hamurabi:  think again. you have only"
+    // 711 print s"bushels of grain.  now then,"
+    // 712 return
+    Print ("Hamurabi:  Think again. You have only " + game.S.String)
+    Print "bushels of grain.  Now then,"
+end
+
+F720 (game Game ->)
+    // 720 print "hamurabi:  think again. you own only"a"acres.  now then,"
+    // 730 return
+    Print ("Hamurabi:  Think again. You own only " + game.A.String + " acres.  Now then,")
+end
+
+F800 (game Game ->)
+    // 800 c=int(rnd(1)*5)+1
+    // 801 return
+    game.C <- Math:Random 5 + 1
+end
+
+F850 (game Game ->)
+    // 850 print:print "hamurabi:  i cannot do what you wish."
+    // 855 print "get yourself another steward!!!!!"
+    // 857 goto 990
+    Print ""
+    Print "Hamurabi:  I cannot do what you wish."
+    Print "Get yourself another steward!!!!!"
+    
+    End game
+end
+
+F860 (game Game ->)
+    // 860 print "in your 10-year term of office,"p1"percent of the"
+    // 862 print "population starved per year on average, i.e., a total of"
+    // 865 print d1"people died!!":l=a/p
+    // 870 print "you started with 10 acres per person and ended with"
+    // 875 print l"acres per person.":print
+
+    Print ("In your 10-year term of office," + game.P1.String + "percent of the")
+    Print "Population starved per year on average, i.e., a total of"
+    Print (game.D1.String + " people died!!")
+    
+    def l <- game.A / game.P
+    Print "You started with 10 acres per person and ended with"
+    Print (l.String + " acres per person.")
+    Print ""
+
+    // 880 if p1>33 then 565
+    // 885 if l<7 then 565
+    if (game.P1 > 33) | (l < 7) then return F565 game
+    
+    // 890 if p1>10 then 940
+    // 892 if l<9 then 940
+    if (game.P1 > 10) | (l < 9) then
+        // 940 print "your heavy-handed performance smacks of nero and ivan iv."
+        // 945 print "the people (remaining) find you an unpleasant ruler, and,"
+        // 950 print "frankly, hate your guts!":goto 990
+        Print "Your heavy-handed performance smacks of Nero and Ivan IV."
+        Print "The people (remaining) find you an unpleasant ruler, and,"
+        Print "frankly, hate your guts!"
+        
+    // 895 if p1>3 then 960
+    // 896 if l<10 then 960
+    else if (game.P1 > 3) | (l < 10) then
+        // 960 print "your performance could have been somewhat better, but"
+        // 965 print "really wasn't too bad at all. ";
+        // 966 print int(p*.8*rnd(1));"people would"
+        // 970 print "dearly like to see you assassinated but we all have our"
+        // 975 print "trivial problems."
+        
+        def haters <- game.P * Random 80 / 100
+        
+        Print "Your performance could have been somewhat better, but"
+        Print ("really wasn't too bad at all. " + haters.String + " people would")
+        Print "dearly like to see you assassinated but we all have our"
+        Print "trivial problems."
+    else
+    
+        // 900 print "a fantastic performance!!!  charlemange, disraeli, and"
+        // 905 print "jefferson combined could not have done better!":goto 990
+        Print "a fantastic performance!!!  charlemange, disraeli, and"
+        Print "jefferson combined could not have done better!"
+    end
+    
+    End game
+end
+
+End (game Game ->)
+    // 990 print:for n=1 to 10:print chr$(7);:next n
+    // 995 print "so long for now.":print
+    // 999 end
+    for n <- 1 -to- 10 do Print "<ding!>"
+    Print "So long for now."
+    Print ""
+end
