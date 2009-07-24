@@ -2,114 +2,144 @@ Things to figure out or decide:
 ------------------------------
 
 How are programs split into multiple files?
-- Have a include/require/import-like directive so each file can indicate which
-  others it uses. This would work like Lua where imports define a set of files
-  which are all unioned together than imported, not C's textual substitution
-  model.
+- Have a include/require/import-like directive so each file can
+  indicate which others it uses. This would work like Lua where
+  imports define a set of files which are all unioned together than
+  imported, not C's textual substitution model.
 - Have a separate "project" file that lists files to import?
 
 How can we do closures or function objects?
-- It's really nice to be able to have something that looks just like a function
-  reference, but has access to its own private state.
+- It's really nice to be able to have something that looks just like a
+  function reference, but has access to its own private state.
 - Local functions are particularly nice for things like map and fold.
-- Could be used to implement "interface-like" constructs: a function takes a
-  function reference, or a struct of function references, and treats the like
-  an object that it can call.
-- If we don't want local functions, could do argument binding, where binding
-  one or more arguments to a function returns a new function reference with
-  fewer arguments. Calling that reference calls the original function with the
-  previously bound arguments inserted.
+- Could be used to implement "interface-like" constructs: a function
+  takes a function reference, or a struct of function references, and
+  treats the like an object that it can call.
+- If we don't want local functions, could do argument binding, where
+  binding one or more arguments to a function returns a new function
+  reference with fewer arguments. Calling that reference calls the
+  original function with the previously bound arguments inserted.
 
 How can you program using ADTs or interfaces?
-- For example, I want to define a function Contains() that works on any
-  collection type that "implements an interface". If I just use generics, it
-  isn't clear what kinds of types are valid type arguments, and what aren't.
-- But this shouldn't be limited to OOP-style single type interfaces. It needs
-  to span multiple types, for example an "interface" that says things like
-  "a function Foo that takes an A and a B and returns a C".
+- For example, I want to define a function Contains() that works on
+  any collection type that "implements an interface". If I just use
+  generics, it isn't clear what kinds of types are valid type
+  arguments, and what aren't.
+- But this shouldn't be limited to OOP-style single type interfaces.
+  It needs to span multiple types, for example an "interface" that
+  says things like "a function Foo that takes an A and a B and returns
+  a C".
 
-Should there be an assignment expression that returns the assigned value?
-- Assignment expressions return Unit so that they can be used in blocks. This
-  prevents them from being used (for example) as the condition in a while loop.
-  Could we make an alternate assignment syntax that assigns and returns the
-  assigned value? What about one that assigns and returns the *previous* value?
+Should there be an assignment expression that returns the assigned
+value?
+- Assignment expressions return Unit so that they can be used in
+  blocks. This prevents them from being used (for example) as the
+  condition in a while loop. Could we make an alternate assignment
+  syntax that assigns and returns the assigned value? What about one
+  that assigns and returns the *previous* value?
 
 Can we do keywork functions like Smalltalk?
-- My guess is "no". At the very least, it would require a syntax change to
-  distinguish keywords from identifiers, likely a trailing ":".
-- It isn't clear how something like pattern matching would be defined using
-  keyword functions, since it can have an arbitrary number of clauses.
+- My guess is "no". At the very least, it would require a syntax
+  change to distinguish keywords from identifiers, likely a trailing
+  ":".
+- It isn't clear how something like pattern matching would be defined
+  using keyword functions, since it can have an arbitrary number of
+  clauses.
 - It would make it hard to get rid of the "end" before an "else" in an
   if/then/else block. Smalltalk is particularly ugly about that.
 
-Should characters be an atomic type? If so, what is their literal syntax?
-- Maybe use a suffix after a string literal similar to how numbers work in
-  C: "a"c
+Should characters be an atomic type? If so, what is their literal
+syntax?
+- Maybe use a suffix after a string literal similar to how numbers
+  work in C: "a"c
   
 Are we happy with ":" as the namespace separator?
-- Using "/" or "\" would open up ":" for use as either keyword functions
-  or possibly declarations.
+- Using "/" or "\" would open up ":" for use as either keyword
+  functions or possibly declarations.
   
 Are we happy with the local declaration syntax?
 - Could use "var" instead of "mutable".
-- Would be nice if you could declare variables in expressions (especially in
-  while and for loops), but the current syntax is a bit verbose for that. This
-  is also true of assignment for that matter.
+- Would be nice if you could declare variables in expressions
+  (especially in while and for loops), but the current syntax is a bit
+  verbose for that. This is also true of assignment for that matter.
 
 How does pattern matching work?
-- Can users define their own pattern matching functions, like F#'s active
-  patterns?
-- Once this is working, we should get rid of union __Value functions since
-  they can cause runtime errors.
+- Can users define their own pattern matching functions, like F#'s
+  active patterns?
+- Once this is working, we should get rid of union __Value functions
+  since they can cause runtime errors.
   
 How are tuple elements accessed?
-- The current tuple functions (First, Second, Third, etc.) are kind of lame
-  because they're generic. That means you can't make *any* function called
-  First: the tuple one already stomps on that.
-- Maybe treat integers like functions (like array access works), so you could
-  do:
+- The current tuple functions (First, Second, Third, etc.) are kind of
+  lame because they're generic. That means you can't make *any*
+  function called First: the tuple one already stomps on that.
+- Maybe treat integers like functions (like array access works), so
+  you could do:
     def a <- (10, 20, 30)
     def b <- a.1 // b = 20
-  Would have to be integer *literals* (or constant expressions) for tuples,
-  since the type varies by element.
+  Would have to be integer *literals* (or constant expressions) for
+  tuples, since the type varies by element.
   
 Built-in support for hashes?
 - To be statically-typed, would they be like named-element tuples?
 
 How do coroutines and iterators work?
-- Some of the groundwork is there (stack frames are on the heap), but there's a
-  lot left.
+- Some of the groundwork is there (stack frames are on the heap), but
+  there's a lot left.
 - Should we support full continuations?
-- Should we support Lua-style deep coroutines (can yield at any depth in the
-  callstack.
+- Should we support Lua-style deep coroutines (can yield at any depth
+  in the callstack.
   . Yes, we should.
 - Can values be passed in when resuming?
 
 Does Magpie have constants?
-  Because of implicit calling, there isn't a syntactical difference between
-  using a constant Foo and calling a "const" function Foo that just returns a
-  value. It could be that if you define a function whose body is constant, that
-  it just becomes a compiled-in value.
+- Because of implicit calling, there isn't a syntactical difference
+  between using a constant Foo and calling a "const" function Foo that
+  just returns a value. It could be that if you define a function
+  whose body is constant, that it just becomes a compiled-in value.
 
 Are there implicit type conversions?
 - Having to do .String everywhere is definitely a pain.
 
 Register-based VM.
-- Magpie doesn't have a lot of opcodes anyway, and it seems to work very well
-  for Lua. We do a lot of stack churn right now.
+- Magpie doesn't have a lot of opcodes anyway, and it seems to work
+  very well for Lua. We do a lot of stack churn right now.
 
 More atomic types:
 - float
 - char
 - byte?
+
+Get rid of immutable fields?
+- Having structs that differ only in mutability brings up covariance
+  issues. Given the following:
   
+  struct Foo
+      Bar Int
+  end
+  
+  struct Foo!
+      mutable Bar Int
+  end
+  
+  You would expect any function that takes a Foo could also take a
+  Foo!, but there's no real way to make that work, since the types
+  are unrelated. Likewise, there's no way to make Foo! a subtype of
+  Foo that differs only by making a field mutable.
+
+- One easy solution: get rid of immutability completely. All fields
+  are mutable. Might as well get rid of immutable locals too. I still
+  kind of like the idea of encouraging immutability, but maybe it
+  doesn't really fit with Magpie's goal of being usable by
+  non-technical people.
+
 Things to do:
 ------------
 
 Change the tuple precedence.
-- Instead of allowing just "," to create tuples, it's simpler and a little
-  easier to use to always require them to be in parentheses. So the parser
-  needs to put the tuple parsing inside PrimaryExpr.
+- Instead of allowing just "," to create tuples, it's simpler and a
+  little easier to use to always require them to be in parentheses. So
+  the parser needs to put the tuple parsing inside PrimaryExpr.
 
 Autogenerated function/operator to compare unions.
 - Just returns if they are the same case. Doesn't compare values.
@@ -119,25 +149,25 @@ Ability to break out of loops ("break" expression).
 
 Lazy arguments.
 - Basically, do what Scala does.
-- This is surprisingly important: logical operators can't short-circuit without
-  it.
+- This is surprisingly important: logical operators can't
+  short-circuit without it.
 - Change boolean operators to use this.
 
 Argument inference for function references.
-- You should be able to omit the argument types when creating a function
-  reference if the function isn't overloaded, or they could be inferred
-  from context.
+- You should be able to omit the argument types when creating a
+  function reference if the function isn't overloaded, or they could
+  be inferred from context.
 
 Constant folding.
 
-Wrappers to allow references to intrinsics, auto-generated functions, and
-  foreign functions.
+Wrappers to allow references to intrinsics, auto-generated functions,
+and foreign functions.
 
 Tuple decomposition on assignment.
 . (a, b) <- (1, 2)
   
 Document and test precedence of self-assignment syntax.
-. Is a <- a - 2 + 3 the same as a = a - 2 + 3 or a = a - (2 + 3
+. Is a <- a - 2 + 3 the same as a = (a - 2) + 3 or a = a - (2 + 3)
 
 Done:
 ----
@@ -146,56 +176,67 @@ Tail call optimization.
 . Simple tail recursive case is working. Need to test:
 - Early returns
 - Mutual recursion
-- Make test work by counting stack depth at each call, instead of tracking
-  memory usage. Should be much faster, and more reliable.
+- Make test work by counting stack depth at each call, instead of
+  tracking memory usage. Should be much faster, and more reliable.
 
 Indexers.
-- Syntactic sugar for applying array-element-access syntax to arbitrary types.
+- Syntactic sugar for applying array-element-access syntax to
+  arbitrary types.
 - Looks like foo.1 where foo is a value of some non-array type.
  
 Should union case constructors be namespaced?
-- Could either do this explicitly: a union defines a namespace, which can be
-  opened using "using". Case constructors are in that namespace.
-- Or by concatenating the union and case name together, but that's a bit ugly.
+- Could either do this explicitly: a union defines a namespace, which
+  can be opened using "using". Case constructors are in that
+  namespace.
+- Or by concatenating the union and case name together, but that's a
+  bit ugly.
 - Or just not namespace at all (the current solution).
 
 Block scope locals.
-- You should be able to declare locals in a block that are not in scope outside
-  that block.
-- Sibling blocks should be able to reuse the same local variable names.
+- You should be able to declare locals in a block that are not in
+  scope outside that block.
+- Sibling blocks should be able to reuse the same local variable
+  names.
 - There's two approaches I can think of for this:
-  - Just build a single function-level local scope struc that includes the
-    inner block scopes. Sibling scopes can be unioned to reuse local variable
-    slots. This makes local lookup and assignment simple.
-  - Actually push and pop local scope structs when entering and leaving blocks
-    (that contain declarations). This is probably better because it will make
-    closures easier to implement later. The downside is that to access outer
-    scopes, you'll have to walk up the stack.
+  - Just build a single function-level local scope struc that includes
+    the inner block scopes. Sibling scopes can be unioned to reuse
+    local variable slots. This makes local lookup and assignment
+    simple.
+  - Actually push and pop local scope structs when entering and
+    leaving blocks (that contain declarations). This is probably
+    better because it will make closures easier to implement later.
+    The downside is that to access outer scopes, you'll have to walk
+    up the stack.
 
 Early returns ("return" expression).
-- Compiler will need to make sure all return statements return the right type.
-- Consider using Void as the return type of the return expression itself, and
-  then creating limitations on where that type is allowed. This will let the
-  compiler ensure that early returns aren't used in weird places. For example,
-  there's no value in having an early return in the middle of a block since
-  nothing else after it will ever execute.
+- Compiler will need to make sure all return statements return the
+  right type.
+- Consider using Void as the return type of the return expression
+  itself, and then creating limitations on where that type is allowed.
+  This will let the compiler ensure that early returns aren't used in
+  weird places. For example, there's no value in having an early
+  return in the middle of a block since nothing else after it will
+  ever execute.
 
 How do arrays work?
-- The syntax is mostly figured out, but there's some semantic questions.
+- The syntax is mostly figured out, but there's some semantic
+  questions.
 - Different types for mutable and immutable arrays?
+  . This gets resolved if I get rid of immutability.
 - Can they be resized? (I would assume "yes" for mutable arrays.)
 
 How do loops work?
 
 Are we happy with the operator versus regular identifier rules?
-- Another option would be the first character determines the type. This would
-  allow letters in operators.
+- Another option would be the first character determines the type.
+  This would allow letters in operators.
 
-Make the bytecode file format less .NET-related, and more precisely defined.
-- Instead of function indexes, use absolute offsets for the function's location
-  in the file.
+Make the bytecode file format less .NET-related, and more precisely
+defined.
+- Instead of function indexes, use absolute offsets for the function's
+  location in the file.
 
 Simplify/optimize the interpreter/compiler.
-- There's some shenanigans related to argument passing that's unnecessary. Each
-  arg in the arg tuple gets put into its own local variable. Why not just put
-  the entire tuple in one?
+- There's some shenanigans related to argument passing that's
+  unnecessary. Each arg in the arg tuple gets put into its own local
+  variable. Why not just put the entire tuple in one?
