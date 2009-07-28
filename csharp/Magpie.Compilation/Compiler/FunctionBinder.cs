@@ -315,7 +315,7 @@ namespace Magpie.Compilation
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(OperatorExpr expr)
         {
             // an operator is just function application
-            var apply = new CallExpr(new NameExpr(expr.Position, expr.Name), new TupleExpr(new IUnboundExpr[] { expr.Left, expr.Right }));
+            var apply = new CallExpr(new NameExpr(expr.Position, expr.Name), new TupleExpr(expr.Left, expr.Right));
 
             return apply.Accept(this);
         }
@@ -433,20 +433,79 @@ namespace Magpie.Compilation
 
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(MatchExpr expr)
         {
-            // bind the match
-            var match = expr.Match.Accept(this);
+            // bind the cases
+            /*  match true
+             *      case true then Print "t"
+             *      case false then Print "f"
+             *  end
+             * 
+             *  desugared to:
+             * 
+             *  def __value <- true
+             *  if __value = true then Print "t"
+             *  else if __value = false then Print "f"
+             *  end
+             */
+
+            // convert the cases to vanilla if/then blocks
+            //### bob: name is a hack here. need to make sure it won't collide on nested
+            // matches
+            var valueExpr = new DefineExpr(expr.Value.Position, " m", expr.Value, false);
+
+            var ifThens = new Stack<Tuple<IUnboundExpr, IUnboundExpr>>();
+
+            var boundValue = expr.Value.Accept(this);
+            foreach (var matchCase in expr.Cases)
+            {
+                var compare = CreateMatchComparison(boundValue, matchCase);
+
+                ifThens.Push(Tuple.Create(compare, matchCase.Body));
+            }
+
+            // build a single compound if expression
+            var ifExpr = (IUnboundExpr)null;
+
+            if (ifThens.Count == 0)
+            {
+                throw new CompileException(expr.Position, "Match expression has no cases.");
+            }
+            else if (ifThens.Count == 1)
+            {
+                var ifThen = ifThens.Pop();
+                ifExpr = new IfThenExpr(ifThen.Item1.Position, ifThen.Item1, ifThen.Item2);
+                //### bob: using IfThen here (and below) means that match expressions can only
+                // return Unit. if we can get the compiler to ensure exhaustive cases, we can
+                // have matches that return other values.
+            }
+            else
+            {
+                foreach (var ifThen in ifThens)
+                {
+                    if (ifExpr == null)
+                    {
+                        ifExpr = new IfThenExpr(ifThen.Item1.Position, ifThen.Item1, ifThen.Item2);
+                    }
+                    else
+                    {
+                        ifExpr = new IfThenElseExpr(ifThen.Item1.Position, ifThen.Item1, ifThen.Item2, ifExpr);
+                    }
+                }
+            }
+
+            var desugaredMatch = new BlockExpr(new IUnboundExpr[] { valueExpr, ifExpr });
 
             // make sure the patterns are the right shape
             foreach (var matchCase in expr.Cases)
             {
-                if (!CaseDeclMatcher.Matches(mContext.Compiler, match.Type, matchCase.Case))
+                if (!CaseDeclMatcher.Matches(mContext.Compiler, boundValue.Type, matchCase.Case))
                 {
                     throw new CompileException(matchCase.Position,
-                        String.Format("The match case {0} is not the right shape to match a value of type {1}.", matchCase, match.Type));
+                        String.Format("The match case {0} is not the right shape to match a value of type {1}.", matchCase, boundValue.Type));
                 }
             }
 
-            throw new NotImplementedException();
+            // bind the desugared form
+            return desugaredMatch.Accept(this);
         }
 
         #endregion
@@ -459,6 +518,34 @@ namespace Magpie.Compilation
             arg = arg.AppendArg(value);
 
             return mContext.Compiler.ResolveFunction(mFunction, position, name, typeArgs, arg);
+        }
+
+        private IUnboundExpr CreateMatchComparison(IBoundExpr value, MatchCase matchCase)
+        {
+            var equals = new NameExpr(matchCase.Position, "=");
+            var matchVar = new NameExpr(matchCase.Position, " m");
+
+            IUnboundExpr caseValue;
+            if (value.Type == Decl.Bool)
+            {
+                BoolCase boolCase = matchCase.Case as BoolCase;
+                if (boolCase == null) throw new CompileException(matchCase.Position, "Cannot match a Bool value with a case of type " + matchCase.GetType().Name + ".");
+
+                caseValue = new BoolExpr(matchCase.Position, boolCase.Value);
+            }
+            else if (value.Type == Decl.Int)
+            {
+                IntCase intCase = matchCase.Case as IntCase;
+                if (intCase == null) throw new CompileException(matchCase.Position, "Cannot match an Int value with a case of type " + matchCase.GetType().Name + ".");
+
+                caseValue = new IntExpr(matchCase.Position, intCase.Value);
+            }
+            else
+            {
+                throw new CompileException(matchCase.Position, "Cannot match against values of type " + value.Type + ".");
+            }
+
+            return new CallExpr(equals, new TupleExpr(matchVar, caseValue));
         }
 
         private FunctionBinder(Function function, BindingContext context, Scope scope)

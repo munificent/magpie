@@ -19,6 +19,7 @@ namespace Magpie.Compilation
 
     public class IntExpr : ValueExpr<int>, IUnboundExpr, IBoundExpr
     {
+        public IntExpr(Position position, int value) : base(position, value) { }
         public IntExpr(int value) : base(Position.None, value) { }
         public IntExpr(Token token) : base(token.Position, token.IntValue) { }
 
@@ -39,6 +40,7 @@ namespace Magpie.Compilation
 
     public class BoolExpr : ValueExpr<bool>, IUnboundExpr, IBoundExpr
     {
+        public BoolExpr(Position position, bool value) : base(position, value) { }
         public BoolExpr(Token token) : base(token.Position, token.BoolValue) { }
 
         public TReturn Accept<TReturn>(IUnboundExprVisitor<TReturn> visitor)

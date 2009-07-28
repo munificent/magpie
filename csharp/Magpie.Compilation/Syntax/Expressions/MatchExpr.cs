@@ -10,13 +10,20 @@ namespace Magpie.Compilation
     /// </summary>
     public class MatchExpr : IUnboundExpr
     {
-        public IUnboundExpr Match { get; private set; }
+        /// <summary>
+        /// The value being matched against.
+        /// </summary>
+        public IUnboundExpr Value { get; private set; }
+
+        /// <summary>
+        /// The cases the try to match, in order.
+        /// </summary>
         public IList<MatchCase> Cases { get; private set; }
 
-        public MatchExpr(Position position, IUnboundExpr match, IList<MatchCase> cases)
+        public MatchExpr(Position position, IUnboundExpr value, IList<MatchCase> cases)
         {
             Position = position;
-            Match = match;
+            Value = value;
             Cases = cases;
         }
 

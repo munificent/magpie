@@ -1,0 +1,16 @@
+// expected: two
+// expected: one
+
+Main (->)
+    def a <- 2
+    match a
+        case 1 then Print "one"
+        case 2 then Print "two"
+        case 3 then Print "three"
+    end
+    
+    match 1
+        case 4 then Print "four"
+        case 1 then Print "one"
+    end
+end

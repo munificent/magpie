@@ -29,6 +29,11 @@ namespace Magpie.Compilation
         {
         }
 
+        public TupleExpr(params IUnboundExpr[] fields)
+            : this((IEnumerable<IUnboundExpr>)fields)
+        {
+        }
+
         public TReturn Accept<TReturn>(IUnboundExprVisitor<TReturn> visitor)
         {
             return visitor.Visit(this);

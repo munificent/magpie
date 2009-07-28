@@ -1,11 +1,6 @@
 Main (->)
+/*
     // atomic types
-    def a <- true
-    match a
-        case true  then Print "true"
-        case false then Print "false"
-    end
-    
     def b <- 123
     match b
         case 1 then Print "1"
@@ -75,6 +70,8 @@ Main (->)
             end
         case 2 then Print "i 2"
     end
+    */
+    ()
 end
 
 union Fruit

@@ -25,7 +25,7 @@ namespace Magpie.App
             foreach (string test in Directory.GetFiles(mTestDir, "*.mag", SearchOption.AllDirectories))
             {
                 //### bob: not ready yet
-                if (test.Contains("pattern matching")) continue;
+                if (test.Contains("compile errors\\pattern matching")) continue;
 
                 if (Debugger.IsAttached)
                 {
