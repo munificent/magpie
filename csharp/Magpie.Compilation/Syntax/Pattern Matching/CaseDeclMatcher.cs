@@ -27,22 +27,12 @@ namespace Magpie.Compilation
 
         bool ICaseExprVisitor<bool>.Visit(AnyCase expr)
         {
-            throw new NotImplementedException();
+            return true;
         }
 
-        bool ICaseExprVisitor<bool>.Visit(BoolCase expr)
+        bool ICaseExprVisitor<bool>.Visit(LiteralCase expr)
         {
-            return mDecl == Decl.Bool;
-        }
-
-        bool ICaseExprVisitor<bool>.Visit(IntCase expr)
-        {
-            return mDecl == Decl.Int;
-        }
-
-        bool ICaseExprVisitor<bool>.Visit(StringCase expr)
-        {
-            return mDecl == Decl.String;
+            return mDecl == expr.Type;
         }
 
         bool ICaseExprVisitor<bool>.Visit(NameCase expr)

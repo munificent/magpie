@@ -525,27 +525,25 @@ namespace Magpie.Compilation
             var equals = new NameExpr(matchCase.Position, "=");
             var matchVar = new NameExpr(matchCase.Position, " m");
 
-            IUnboundExpr caseValue;
-            if (value.Type == Decl.Bool)
-            {
-                BoolCase boolCase = matchCase.Case as BoolCase;
-                if (boolCase == null) throw new CompileException(matchCase.Position, "Cannot match a Bool value with a case of type " + matchCase.GetType().Name + ".");
+            //### bob: replace this to use a visitor
 
-                caseValue = new BoolExpr(matchCase.Position, boolCase.Value);
-            }
-            else if (value.Type == Decl.Int)
+            var literalCase = matchCase.Case as LiteralCase;
+            if (literalCase != null)
             {
-                IntCase intCase = matchCase.Case as IntCase;
-                if (intCase == null) throw new CompileException(matchCase.Position, "Cannot match an Int value with a case of type " + matchCase.GetType().Name + ".");
+                if (literalCase.Type != value.Type) throw new CompileException(matchCase.Position,
+                    String.Format("Cannot match a value of type {0} against a literal case of type {1}.", value.Type, literalCase.Type));
 
-                caseValue = new IntExpr(matchCase.Position, intCase.Value);
-            }
-            else
-            {
-                throw new CompileException(matchCase.Position, "Cannot match against values of type " + value.Type + ".");
+                return new CallExpr(equals, new TupleExpr(matchVar, literalCase.Value));
             }
 
-            return new CallExpr(equals, new TupleExpr(matchVar, caseValue));
+            var anyCase = matchCase.Case as AnyCase;
+            if (anyCase != null)
+            {
+                // any case always succeeds
+                return new BoolExpr(matchCase.Position, true);
+            }
+
+            throw new NotImplementedException("Pattern matching against anything but literals is not implemented yet.");
         }
 
         private FunctionBinder(Function function, BindingContext context, Scope scope)

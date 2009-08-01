@@ -60,6 +60,7 @@ namespace Magpie.Compilation
 
     public class StringExpr : ValueExpr<string>, IUnboundExpr, IBoundExpr
     {
+        public StringExpr(Position position, string value) : base(position, value) { }
         public StringExpr(Token token) : base(token.Position, token.StringValue) { }
 
         public TReturn Accept<TReturn>(IUnboundExprVisitor<TReturn> visitor)

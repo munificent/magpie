@@ -309,9 +309,9 @@ namespace Magpie.Compilation
         //   | <null>
         private ICaseExpr PrimaryCaseExpr()
         {
-            if (CurrentIs(TokenType.Bool))        return new BoolCase(Consume(TokenType.Bool).BoolValue);
-            else if (CurrentIs(TokenType.Int))    return new IntCase(Consume(TokenType.Int).IntValue);
-            else if (CurrentIs(TokenType.String)) return new StringCase(Consume(TokenType.String).StringValue);
+            if (CurrentIs(TokenType.Bool))        return new LiteralCase(new BoolExpr(Consume(TokenType.Bool)));
+            else if (CurrentIs(TokenType.Int))    return new LiteralCase(new IntExpr(Consume(TokenType.Int)));
+            else if (CurrentIs(TokenType.String)) return new LiteralCase(new StringExpr(Consume(TokenType.String)));
             else if (CurrentIs(TokenType.Name))
             {
                 string name = Consume(TokenType.Name).StringValue;

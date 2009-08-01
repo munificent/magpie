@@ -5,18 +5,22 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
-    public class StringCase : ICaseExpr
+    public class LiteralCase : ICaseExpr
     {
-        public string Value { get; private set; }
+        public IUnboundExpr Value { get; private set; }
 
-        public StringCase(string value)
+        //### bob: hackish. assumes value is a ValueExpr, which implements both
+        // IUnboundExpr and IBoundExpr
+        public IBoundDecl Type { get { return ((IBoundExpr)Value).Type; } }
+
+        public LiteralCase(IUnboundExpr value)
         {
             Value = value;
         }
 
         public override string ToString()
         {
-            return "\"" + Value.ToString() + "\"";
+            return Value.ToString();
         }
 
         #region ICaseExpr Members
