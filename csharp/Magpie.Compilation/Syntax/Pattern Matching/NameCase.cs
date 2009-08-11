@@ -5,11 +5,12 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
-    public class NameCase : ICaseExpr
+    public class NameCase : CaseBase, ICaseExpr
     {
         public string Name { get; private set; }
 
-        public NameCase(string name)
+        public NameCase(Position position, string name)
+            : base(position)
         {
             Name = name;
         }

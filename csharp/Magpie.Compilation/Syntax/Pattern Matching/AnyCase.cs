@@ -5,8 +5,10 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
-    public class AnyCase : ICaseExpr
+    public class AnyCase : CaseBase, ICaseExpr
     {
+        public AnyCase(Position position) : base(position) { }
+
         public override string ToString()
         {
             return "_";

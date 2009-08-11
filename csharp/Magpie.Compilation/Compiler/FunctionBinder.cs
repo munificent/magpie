@@ -74,6 +74,19 @@ namespace Magpie.Compilation
                 return new BoundCallExpr(target, boundArg);
             }
 
+            // see if we're accessing a tuple field
+            var tupleType = boundArg.Type as BoundTupleType;
+            if ((tupleType != null) && (target.Type == Decl.Int))
+            {
+                var index = target as IntExpr;
+                if (index == null) throw new CompileException(expr.Position, "Tuple fields can only be accessed using a literal index, not an int expression.");
+
+                // translate to a field access
+                IUnboundExpr fieldExpr = new TupleFieldExpr(expr.Arg, index.Value);
+
+                return fieldExpr.Accept(this);
+            }
+
             // not calling a function, so try to desugar to a __Call
             var callArg = new BoundTupleExpr(new IBoundExpr[] { target, boundArg });
 
@@ -450,14 +463,15 @@ namespace Magpie.Compilation
             // convert the cases to vanilla if/then blocks
             //### bob: name is a hack here. need to make sure it won't collide on nested
             // matches
-            var valueExpr = new DefineExpr(expr.Value.Position, " m", expr.Value, false);
+            var defineValueExpr = new DefineExpr(expr.Value.Position, " m", expr.Value, false);
+            var valueExpr = new NameExpr(expr.Value.Position, " m");
 
             var ifThens = new Stack<Tuple<IUnboundExpr, IUnboundExpr>>();
 
             var boundValue = expr.Value.Accept(this);
             foreach (var matchCase in expr.Cases)
             {
-                var compare = CreateMatchComparison(boundValue, matchCase);
+                var compare = CaseDeclMatcher.Match(mContext, boundValue.Type, matchCase.Case, valueExpr);
 
                 ifThens.Push(Tuple.Create(compare, matchCase.Body));
             }
@@ -492,20 +506,26 @@ namespace Magpie.Compilation
                 }
             }
 
-            var desugaredMatch = new BlockExpr(new IUnboundExpr[] { valueExpr, ifExpr });
-
-            // make sure the patterns are the right shape
-            foreach (var matchCase in expr.Cases)
-            {
-                if (!CaseDeclMatcher.Matches(mContext.Compiler, boundValue.Type, matchCase.Case))
-                {
-                    throw new CompileException(matchCase.Position,
-                        String.Format("The match case {0} is not the right shape to match a value of type {1}.", matchCase, boundValue.Type));
-                }
-            }
+            var desugaredMatch = new BlockExpr(new IUnboundExpr[] { defineValueExpr, ifExpr });
 
             // bind the desugared form
             return desugaredMatch.Accept(this);
+        }
+
+        IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(TupleFieldExpr expr)
+        {
+            // bind the tuple
+            var value = expr.Value.Accept(this);
+
+            // make sure it's valid
+            var tupleType = value.Type as BoundTupleType;
+            if (tupleType == null) throw new CompileException(expr.Position, String.Format("Cannot access a tuple field from value of type \"{0}\".", value.Type));
+
+            if ((expr.Field < 0) || (expr.Field >= tupleType.Fields.Count))
+                throw new CompileException(expr.Position, String.Format("Cannot access field {0} because the tuple only has {1} fields.", expr.Field, tupleType.Fields.Count));
+
+            // bind it
+            return new LoadExpr(value, tupleType.Fields[expr.Field], expr.Field);
         }
 
         #endregion
@@ -518,32 +538,6 @@ namespace Magpie.Compilation
             arg = arg.AppendArg(value);
 
             return mContext.Compiler.ResolveFunction(mFunction, position, name, typeArgs, arg);
-        }
-
-        private IUnboundExpr CreateMatchComparison(IBoundExpr value, MatchCase matchCase)
-        {
-            var equals = new NameExpr(matchCase.Position, "=");
-            var matchVar = new NameExpr(matchCase.Position, " m");
-
-            //### bob: replace this to use a visitor
-
-            var literalCase = matchCase.Case as LiteralCase;
-            if (literalCase != null)
-            {
-                if (literalCase.Type != value.Type) throw new CompileException(matchCase.Position,
-                    String.Format("Cannot match a value of type {0} against a literal case of type {1}.", value.Type, literalCase.Type));
-
-                return new CallExpr(equals, new TupleExpr(matchVar, literalCase.Value));
-            }
-
-            var anyCase = matchCase.Case as AnyCase;
-            if (anyCase != null)
-            {
-                // any case always succeeds
-                return new BoolExpr(matchCase.Position, true);
-            }
-
-            throw new NotImplementedException("Pattern matching against anything but literals is not implemented yet.");
         }
 
         private FunctionBinder(Function function, BindingContext context, Scope scope)

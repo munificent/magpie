@@ -314,10 +314,10 @@ namespace Magpie.Compilation
             else if (CurrentIs(TokenType.String)) return new LiteralCase(new StringExpr(Consume(TokenType.String)));
             else if (CurrentIs(TokenType.Name))
             {
-                string name = Consume(TokenType.Name).StringValue;
+                var token = Consume(TokenType.Name);
 
-                if (name == "_") return new AnyCase();
-                else return new NameCase(name);
+                if (token.StringValue == "_") return new AnyCase(token.Position);
+                else return new NameCase(token.Position, token.StringValue);
             }
             else if (ConsumeIf(TokenType.LeftParen))
             {

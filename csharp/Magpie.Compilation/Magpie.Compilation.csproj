@@ -91,6 +91,7 @@
     <Compile Include="Syntax\Expressions\ReturnExpr.cs" />
     <Compile Include="Syntax\Expressions\StoreExpr.cs" />
     <Compile Include="Syntax\Expressions\TupleExpr.cs" />
+    <Compile Include="Syntax\Expressions\TupleFieldExpr.cs" />
     <Compile Include="Syntax\Expressions\ValueExpr.cs" />
     <Compile Include="Syntax\Expressions\UnitExpr.cs" />
     <Compile Include="Syntax\Expressions\WhileExpr.cs" />
@@ -103,6 +104,7 @@
     <Compile Include="Syntax\IUnboundExprVisitor.cs" />
     <Compile Include="Syntax\Namespace.cs" />
     <Compile Include="Syntax\Pattern Matching\AnyCase.cs" />
+    <Compile Include="Syntax\Pattern Matching\CaseBase.cs" />
     <Compile Include="Syntax\Pattern Matching\LiteralCase.cs" />
     <Compile Include="Syntax\Pattern Matching\CallCase.cs" />
     <Compile Include="Syntax\Pattern Matching\CaseDeclMatcher.cs" />

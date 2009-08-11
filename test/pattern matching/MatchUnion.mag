@@ -1,0 +1,21 @@
+// expected: apple
+// expected: banana
+
+Main (->)
+    def apple <- Apple
+    match apple
+        case Apple  then Print "apple"
+        case Banana then Print "banana"
+    end
+
+    match Banana
+        case Apple  then Print "apple"
+        case Banana then Print "banana"
+    end
+end
+
+union Fruit
+    Apple
+    Banana
+    Cherry Int
+end

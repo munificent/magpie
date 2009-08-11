@@ -7,6 +7,7 @@ namespace Magpie.Compilation
 {
     public interface ICaseExpr
     {
+        Position Position { get; }
         TReturn Accept<TReturn>(ICaseExprVisitor<TReturn> visitor);
     }
 }

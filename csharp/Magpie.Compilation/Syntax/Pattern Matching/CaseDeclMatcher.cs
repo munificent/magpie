@@ -6,86 +6,105 @@ using System.Text;
 namespace Magpie.Compilation
 {
     /// <summary>
-    /// Walks a case tree to make sure its shape can be matched against a value of the
-    /// given type.
+    /// Given a case, generates an expression that will evaluate to true if the case matches
+    /// a given value.
     /// </summary>
-    public class CaseDeclMatcher : ICaseExprVisitor<bool>
+    public class CaseDeclMatcher : ICaseExprVisitor<IUnboundExpr>
     {
-        public static bool Matches(Compiler compiler, IBoundDecl decl, ICaseExpr caseExpr)
+        public static IUnboundExpr Match(BindingContext context, IBoundDecl decl,
+            ICaseExpr caseExpr,
+            IUnboundExpr value)
         {
-            var matcher = new CaseDeclMatcher(compiler, decl);
+            var matcher = new CaseDeclMatcher(context, decl, value);
             return caseExpr.Accept(matcher);
         }
 
-        private CaseDeclMatcher(Compiler compiler, IBoundDecl decl)
+        private CaseDeclMatcher(BindingContext context, IBoundDecl decl, IUnboundExpr value)
         {
-            mCompiler = compiler;
+            mContext = context;
             mDecl = decl;
+            mValue = value;
         }
 
         #region ICaseExprVisitor<bool> Members
 
-        bool ICaseExprVisitor<bool>.Visit(AnyCase expr)
+        IUnboundExpr ICaseExprVisitor<IUnboundExpr>.Visit(AnyCase expr)
         {
-            return true;
+            // always succeed
+            return new BoolExpr(expr.Position, true);
         }
 
-        bool ICaseExprVisitor<bool>.Visit(LiteralCase expr)
+        IUnboundExpr ICaseExprVisitor<IUnboundExpr>.Visit(LiteralCase expr)
         {
-            return mDecl == expr.Type;
+            if (expr.Type != mDecl) throw new CompileException(expr.Position,
+                String.Format("Cannot match a value of type {0} against a literal case of type {1}.",
+                    mDecl, expr.Type));
+
+            var equals = new NameExpr(Position.None, "=");
+
+            return new CallExpr(equals, new TupleExpr(mValue, expr.Value));
         }
 
-        bool ICaseExprVisitor<bool>.Visit(NameCase expr)
+        IUnboundExpr ICaseExprVisitor<IUnboundExpr>.Visit(NameCase expr)
         {
-            throw new NotImplementedException();
-            /*
-            // the decl must be a named type
-            NamedType named = mDecl as NamedType;
+            var unionDecl = mDecl as Union;
+            if (unionDecl == null) throw new CompileException(expr.Position,
+                String.Format("Could not match union case {0} because type {1} is not a union type.", expr.Name, mDecl));
 
-            if (named == null) return false;
+            var unionCase = unionDecl.Cases.FirstOrDefault(thisCase => thisCase.Name == expr.Name);
+            if (unionCase == null) throw new CompileException(expr.Position,
+                String.Format("Could not find a case named {0} in union type {1}.", expr.Name, unionDecl.Name));
 
-            //### bob: if we bind decls so that union is a real decl, we won't have
-            //         to look it up from the compiler any more
-            
-            // find the union
-            Union union = mCompiler.FindUnion(named);
-            if (union == null) return false;
-
-            // the name must be a case in the union
-            foreach (var unionCase in union.Cases)
-            {
-                //### bob: what about the value?
-                if (unionCase.Name == expr.Name) return true;
-            }
-
-            return false;
-             */
+            //### bob: hack! should use UnionCaseChecker directly and work with bound exprs
+            var caseCheck = new NameExpr(Position.None, unionCase.Name + "?");
+            return new CallExpr(caseCheck, mValue);
         }
 
-        bool ICaseExprVisitor<bool>.Visit(CallCase expr)
+        IUnboundExpr ICaseExprVisitor<IUnboundExpr>.Visit(CallCase expr)
         {
             throw new NotImplementedException();
         }
 
-        bool ICaseExprVisitor<bool>.Visit(TupleCase expr)
+        IUnboundExpr ICaseExprVisitor<IUnboundExpr>.Visit(TupleCase expr)
         {
-            var tuple = mDecl as BoundTupleType;
+            var tupleDecl = mDecl as BoundTupleType;
 
-            if (tuple == null) return false;
-            if (tuple.Fields.Count != expr.Fields.Count) return false;
+            if (tupleDecl == null) throw new CompileException(expr.Position,
+                String.Format("Can not match a tuple case against a non-tuple value of type {0}.", mDecl));
 
-            // fields must match
-            for (int i = 0; i < tuple.Fields.Count; i++)
+            if (tupleDecl.Fields.Count != expr.Fields.Count) throw new CompileException(expr.Position,
+                String.Format("Can not match a tuple with {0} fields against a value with {1} fields.",
+                tupleDecl.Fields.Count, expr.Fields.Count));
+
+            // match each field
+            var match = (IUnboundExpr)null;
+            for (int i = 0; i < tupleDecl.Fields.Count; i++)
             {
-                if (!CaseDeclMatcher.Matches(mCompiler, tuple.Fields[i], expr.Fields[i])) return false;
+                // create an expression to pull out the tuple field
+                var fieldValue = new TupleFieldExpr(mValue, i);
+
+                // match it
+                var matchField = CaseDeclMatcher.Match(mContext, tupleDecl.Fields[i], expr.Fields[i], fieldValue);
+
+                if (match == null)
+                {
+                    match = matchField;
+                }
+                else
+                {
+                    // combine with the previous matches
+                    match = new CallExpr(new NameExpr(Position.None, "&"), 
+                        new TupleExpr(match, matchField));
+                }
             }
 
-            return true;
+            return match;
         }
 
         #endregion
 
-        private Compiler mCompiler;
+        private BindingContext mContext;
         private IBoundDecl mDecl;
+        private IUnboundExpr mValue;
     }
 }

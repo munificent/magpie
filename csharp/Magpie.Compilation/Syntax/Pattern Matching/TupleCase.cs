@@ -21,6 +21,14 @@ namespace Magpie.Compilation
 
         #region ICaseExpr Members
 
+        public Position Position
+        {
+            get
+            {
+                return Fields[0].Position;
+            }
+        }
+
         TReturn ICaseExpr.Accept<TReturn>(ICaseExprVisitor<TReturn> visitor)
         {
             return visitor.Visit(this);
