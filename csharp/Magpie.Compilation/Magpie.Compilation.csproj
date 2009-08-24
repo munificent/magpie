@@ -109,7 +109,7 @@
     <Compile Include="Syntax\Pattern Matching\CaseDeclMatcher.cs" />
     <Compile Include="Syntax\Pattern Matching\ICaseExpr.cs" />
     <Compile Include="Syntax\Pattern Matching\ICaseExprVisitor.cs" />
-    <Compile Include="Syntax\Pattern Matching\NameCase.cs" />
+    <Compile Include="Syntax\Pattern Matching\UnionCaseCase.cs" />
     <Compile Include="Syntax\Pattern Matching\TupleCase.cs" />
     <Compile Include="Syntax\Scope.cs" />
     <Compile Include="Syntax\SourceFile.cs" />
