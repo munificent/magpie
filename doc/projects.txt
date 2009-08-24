@@ -1,0 +1,36 @@
+// magproj
+a project file describes where to find sources and other related
+projects. in this way, everything related to finding files and the
+filesystem is encapsulated in projects, and sources files only deal
+with namespaces and code.
+
+projects can contain regular block and line comments. there are also
+a couple of built-in commands
+
+
+reference <project>
+// references another project from this one. <project> is the name
+// and possibly relative path to another project file, without the
+// extension. magpie will search through the search directories
+// looking for a matching project. before searching the global search
+// paths, it will look for a matching project relative to this one.
+// ex: reference Core/Collections
+
+include <pattern>
+// includes the magpie scripts that match the given pattern. file
+// extension should not be used. directory names and wildcards can be
+// used. searches relative to the project file's location.
+// ex: include *
+
+exclude <pattern>
+// excludes matching scripts from the project. include and exclude
+// commands are processed in order, and the set of matching scripts
+// that are left after all commands are processed is what is loaded.
+
+search <path>
+// adds the given path to the set of search paths to use when looking
+// for projects
+
+nosearch <path>
+// removes the last instance of the given search path from the search
+// paths

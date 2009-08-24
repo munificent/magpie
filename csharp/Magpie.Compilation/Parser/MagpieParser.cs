@@ -295,19 +295,14 @@ namespace Magpie.Compilation
             else return FlowExpr();
         }
 
-        // <-- PrimaryCaseExpr+
-        private ICaseExpr CaseExpr()
-        {
-            return OneOrMoreRight<ICaseExpr>(PrimaryCaseExpr, (left, right) => new CallCase(left, right));
-        }
-
         // <-- BOOL
         //   | INT
         //   | STRING
-        //   | NAME
+        //   | "_"
+        //   | NAME CaseExpr?
         //   | LPAREN CaseExpr (COMMA CaseExpr)+ RPAREN )
         //   | <null>
-        private ICaseExpr PrimaryCaseExpr()
+        private ICaseExpr CaseExpr()
         {
             if (CurrentIs(TokenType.Bool))        return new LiteralCase(new BoolExpr(Consume(TokenType.Bool)));
             else if (CurrentIs(TokenType.Int))    return new LiteralCase(new IntExpr(Consume(TokenType.Int)));
@@ -317,7 +312,11 @@ namespace Magpie.Compilation
                 var token = Consume(TokenType.Name);
 
                 if (token.StringValue == "_") return new AnyCase(token.Position);
-                else return new NameCase(token.Position, token.StringValue);
+
+                // a union case may match the subsequent value
+                var value = CaseExpr();
+
+                return new UnionCaseCase(token.Position, token.StringValue, value);
             }
             else if (ConsumeIf(TokenType.LeftParen))
             {

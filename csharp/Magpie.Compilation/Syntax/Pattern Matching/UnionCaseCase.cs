@@ -5,18 +5,27 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
-    public class NameCase : CaseBase, ICaseExpr
+    /// <summary>
+    /// Pattern match expression to match against a union case, and its
+    /// value if appropriate.
+    /// </summary>
+    public class UnionCaseCase : CaseBase, ICaseExpr
     {
         public string Name { get; private set; }
 
-        public NameCase(Position position, string name)
+        public ICaseExpr Value { get; private set; }
+
+        public UnionCaseCase(Position position, string name, ICaseExpr value)
             : base(position)
         {
             Name = name;
+            Value = value;
         }
 
         public override string ToString()
         {
+            if (Value != null) return String.Format("{0} {1}", Name, Value);
+
             return Name.ToString();
         }
 

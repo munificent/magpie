@@ -1,5 +1,7 @@
 // expected: apple
 // expected: banana
+// expected: three
+// expected: three
 
 Main (->)
     def apple <- Apple
@@ -12,10 +14,26 @@ Main (->)
         case Apple  then Print "apple"
         case Banana then Print "banana"
     end
+    
+    match Cherry 3
+        case Apple    then Print "one"
+        case Cherry 2 then Print "two"
+        case Cherry 3 then Print "three"
+        case Cherry _ then Print "else"
+    end
+    
+    match Date Date Date Apple
+        case Date Apple then Print "one"
+        case Date Date Apple then Print "two"
+        case Date Date Date Apple then Print "three"
+        case Date Date Date Date Apple then Print "four"
+        case _ then Print "else"
+    end
 end
 
 union Fruit
     Apple
     Banana
     Cherry Int
+    Date   Fruit
 end

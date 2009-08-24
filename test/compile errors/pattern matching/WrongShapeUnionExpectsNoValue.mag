@@ -1,0 +1,12 @@
+// error line: 5
+
+Main (->)
+    match Apple
+        case Apple 1   then Print "true"
+        case _       then Print "false"
+    end
+end
+
+union Fruit
+    Apple
+end

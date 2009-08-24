@@ -14,8 +14,7 @@ namespace Magpie.Compilation
         TReturn Visit(IntCase expr);
         TReturn Visit(StringCase expr);
          */
-        TReturn Visit(NameCase expr);
-        TReturn Visit(CallCase expr);
+        TReturn Visit(UnionCaseCase expr);
         TReturn Visit(TupleCase expr);
     }
 }

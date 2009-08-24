@@ -1,0 +1,44 @@
+// pattern matching not yet implemented
+
+// tuple elision
+match (foo, bar, bang) with
+    case (1, ...)       then Print "one other stuff"
+    case (2, true, ...) then Print "two true other"
+    case (..., "f")     then Print "other stuff f"
+end
+
+// unions
+union Fruit
+    Apple
+    Banana
+    Cherry Int
+end
+
+match foo with
+    case Cherry 1 then Print "one cherry"
+    case Cherry 2 then Print "two cherries"
+end
+
+// bound variables
+match 123 with
+    case 1 then Print "one"
+    case a then Print ("other " + a.String)
+end
+
+match (1, 2) with
+    case (1, b) then Print ("one " + b.String)
+    case b      then Print b.String
+end
+
+// guards
+match 123 with
+    case a if a < 100 then Print "< 100"
+    case b            then Print ">= 100"
+end
+
+// also need:
+// - exhaustivity: should cause compile error if it's possible to not
+//   match anything
+// - non-unit match expressions: once we have exhaustivity, we can
+//   have matches that return values
+// - active patterns?

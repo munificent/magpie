@@ -1,0 +1,41 @@
+interfaces
+
+goals:
+allow you to develop generic functions for parameters of "valid" types.
+for example, a Sum function that sums the items in a collection whether
+it's a list, array, etc.
+
+not have to use actual generics since those are syntactically odd, and
+get multiply instantiated.
+
+be associated with a *collection* of types, not a single type. we
+aren't oop, so there's no "primary" type.
+
+
+an interface defines a set of types parameters, and a set of functions
+that take those type parameters.
+
+a set of concrete types is then implements that interface if there are
+matching functions that take those concrete types.
+
+q: do we need to explicitly declare that a set of types implements an
+interface, or is the presence of the functions enough?
+
+// syntax to define interfaces
+
+// interface for types that can be converted to a string
+interface IToString T
+    String (T -> String)
+end
+
+// interface for types that can be compared
+interface IComparable Left Right
+    < (left Left, right Right -> Bool)
+    > (left Left, right Right -> Bool)
+end
+
+// syntax to take interfaces
+
+InOrder (a A, b B, c C -> Bool)
+    (a < b) & (b < c)
+end

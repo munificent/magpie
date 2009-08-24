@@ -45,7 +45,7 @@ namespace Magpie.Compilation
             return new CallExpr(equals, new TupleExpr(mValue, expr.Value));
         }
 
-        IUnboundExpr ICaseExprVisitor<IUnboundExpr>.Visit(NameCase expr)
+        IUnboundExpr ICaseExprVisitor<IUnboundExpr>.Visit(UnionCaseCase expr)
         {
             var unionDecl = mDecl as Union;
             if (unionDecl == null) throw new CompileException(expr.Position,
@@ -55,14 +55,34 @@ namespace Magpie.Compilation
             if (unionCase == null) throw new CompileException(expr.Position,
                 String.Format("Could not find a case named {0} in union type {1}.", expr.Name, unionDecl.Name));
 
-            //### bob: hack! should use UnionCaseChecker directly and work with bound exprs
-            var caseCheck = new NameExpr(Position.None, unionCase.Name + "?");
-            return new CallExpr(caseCheck, mValue);
-        }
+            if ((unionCase.ValueType.Bound == Decl.Unit) && (expr.Value != null)) throw new CompileException(expr.Position,
+                String.Format("Union case {0} does not have a value, so should not be matched against a case using one.", unionCase));
 
-        IUnboundExpr ICaseExprVisitor<IUnboundExpr>.Visit(CallCase expr)
-        {
-            throw new NotImplementedException();
+            if ((unionCase.ValueType.Bound != Decl.Unit) && (expr.Value == null)) throw new CompileException(expr.Position,
+                String.Format("Union case {0} has value of type {1}, so cannot be matched against a case with no value.", unionCase, unionCase.ValueType));
+ 
+            // create an expression to match the union case
+            var caseCheck = new NameExpr(Position.None, unionCase.Name + "?");
+            var matchExpr = new CallExpr(caseCheck, mValue);
+
+            // match the value
+            if (expr.Value != null)
+            {
+                // create an expression to pull out the tuple field
+                var unionValue = new CallExpr(new NameExpr(expr.Position, unionCase.Name + "Value"), mValue);
+
+                // match it
+                var matchValue = CaseDeclMatcher.Match(mContext, unionCase.ValueType.Bound, expr.Value, unionValue);
+
+                if (matchValue != null)
+                {
+                    // combine with the previous check
+                    matchExpr = new CallExpr(new NameExpr(Position.None, "&"),
+                        new TupleExpr(matchExpr, matchValue));
+                }
+            }
+
+            return matchExpr;
         }
 
         IUnboundExpr ICaseExprVisitor<IUnboundExpr>.Visit(TupleCase expr)

@@ -106,7 +106,6 @@
     <Compile Include="Syntax\Pattern Matching\AnyCase.cs" />
     <Compile Include="Syntax\Pattern Matching\CaseBase.cs" />
     <Compile Include="Syntax\Pattern Matching\LiteralCase.cs" />
-    <Compile Include="Syntax\Pattern Matching\CallCase.cs" />
     <Compile Include="Syntax\Pattern Matching\CaseDeclMatcher.cs" />
     <Compile Include="Syntax\Pattern Matching\ICaseExpr.cs" />
     <Compile Include="Syntax\Pattern Matching\ICaseExprVisitor.cs" />
