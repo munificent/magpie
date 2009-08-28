@@ -5,9 +5,12 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
-    public class AnyCase : CaseBase, ICaseExpr
+    /// <summary>
+    /// Pattern matching expression that successfully matches any value.
+    /// </summary>
+    public class AnyPattern : Pattern, IPattern
     {
-        public AnyCase(Position position) : base(position) { }
+        public AnyPattern(Position position) : base(position) { }
 
         public override string ToString()
         {
@@ -16,7 +19,7 @@ namespace Magpie.Compilation
 
         #region ICaseExpr Members
 
-        TReturn ICaseExpr.Accept<TReturn>(ICaseExprVisitor<TReturn> visitor)
+        TReturn IPattern.Accept<TReturn>(IPatternVisitor<TReturn> visitor)
         {
             return visitor.Visit(this);
         }

@@ -5,9 +5,12 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
-    public interface ICaseExpr
+    /// <summary>
+    /// A pattern matching expression.
+    /// </summary>
+    public interface IPattern
     {
         Position Position { get; }
-        TReturn Accept<TReturn>(ICaseExprVisitor<TReturn> visitor);
+        TReturn Accept<TReturn>(IPatternVisitor<TReturn> visitor);
     }
 }

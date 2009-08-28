@@ -279,7 +279,7 @@ namespace Magpie.Compilation
                 Position casePosition;
                 while (ConsumeIf(TokenType.Case, out casePosition))
                 {
-                    ICaseExpr caseExpr = CaseExpr();
+                    IPattern caseExpr = CaseExpr();
                     Consume(TokenType.Then);
                     IUnboundExpr bodyExpr = InnerBlock(TokenType.Case);
 
@@ -302,25 +302,25 @@ namespace Magpie.Compilation
         //   | NAME CaseExpr?
         //   | LPAREN CaseExpr (COMMA CaseExpr)+ RPAREN )
         //   | <null>
-        private ICaseExpr CaseExpr()
+        private IPattern CaseExpr()
         {
-            if (CurrentIs(TokenType.Bool))        return new LiteralCase(new BoolExpr(Consume(TokenType.Bool)));
-            else if (CurrentIs(TokenType.Int))    return new LiteralCase(new IntExpr(Consume(TokenType.Int)));
-            else if (CurrentIs(TokenType.String)) return new LiteralCase(new StringExpr(Consume(TokenType.String)));
+            if (CurrentIs(TokenType.Bool))        return new BoolPattern(Consume(TokenType.Bool));
+            else if (CurrentIs(TokenType.Int))    return new IntPattern(Consume(TokenType.Int));
+            else if (CurrentIs(TokenType.String)) return new StringPattern(Consume(TokenType.String));
             else if (CurrentIs(TokenType.Name))
             {
                 var token = Consume(TokenType.Name);
 
-                if (token.StringValue == "_") return new AnyCase(token.Position);
+                if (token.StringValue == "_") return new AnyPattern(token.Position);
 
                 // a union case may match the subsequent value
                 var value = CaseExpr();
 
-                return new UnionCaseCase(token.Position, token.StringValue, value);
+                return new UnionPattern(token.Position, token.StringValue, value);
             }
             else if (ConsumeIf(TokenType.LeftParen))
             {
-                List<ICaseExpr> fields = new List<ICaseExpr>();
+                List<IPattern> fields = new List<IPattern>();
 
                 fields.Add(CaseExpr());
                 while (ConsumeIf(TokenType.Comma))
@@ -330,7 +330,7 @@ namespace Magpie.Compilation
 
                 Consume(TokenType.RightParen);
 
-                return new TupleCase(fields);
+                return new TuplePattern(fields);
             }
             else return null;
         }

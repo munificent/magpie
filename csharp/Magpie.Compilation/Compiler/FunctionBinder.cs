@@ -446,67 +446,11 @@ namespace Magpie.Compilation
 
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(MatchExpr expr)
         {
-            // bind the cases
-            /*  match true
-             *      case true then Print "t"
-             *      case false then Print "f"
-             *  end
-             * 
-             *  desugared to:
-             * 
-             *  def __value <- true
-             *  if __value = true then Print "t"
-             *  else if __value = false then Print "f"
-             *  end
-             */
-
-            // convert the cases to vanilla if/then blocks
-            //### bob: name is a hack here. need to make sure it won't collide on nested
-            // matches
-            var defineValueExpr = new DefineExpr(expr.Value.Position, " m", expr.Value, false);
-            var valueExpr = new NameExpr(expr.Value.Position, " m");
-
-            var ifThens = new Stack<Tuple<IUnboundExpr, IUnboundExpr>>();
-
+            // bind the value expression
             var boundValue = expr.Value.Accept(this);
-            foreach (var matchCase in expr.Cases)
-            {
-                var compare = CaseDeclMatcher.Match(mContext, boundValue.Type, matchCase.Case, valueExpr);
 
-                ifThens.Push(Tuple.Create(compare, matchCase.Body));
-            }
-
-            // build a single compound if expression
-            var ifExpr = (IUnboundExpr)null;
-
-            if (ifThens.Count == 0)
-            {
-                throw new CompileException(expr.Position, "Match expression has no cases.");
-            }
-            else if (ifThens.Count == 1)
-            {
-                var ifThen = ifThens.Pop();
-                ifExpr = new IfThenExpr(ifThen.Item1.Position, ifThen.Item1, ifThen.Item2);
-                //### bob: using IfThen here (and below) means that match expressions can only
-                // return Unit. if we can get the compiler to ensure exhaustive cases, we can
-                // have matches that return other values.
-            }
-            else
-            {
-                foreach (var ifThen in ifThens)
-                {
-                    if (ifExpr == null)
-                    {
-                        ifExpr = new IfThenExpr(ifThen.Item1.Position, ifThen.Item1, ifThen.Item2);
-                    }
-                    else
-                    {
-                        ifExpr = new IfThenElseExpr(ifThen.Item1.Position, ifThen.Item1, ifThen.Item2, ifExpr);
-                    }
-                }
-            }
-
-            var desugaredMatch = new BlockExpr(new IUnboundExpr[] { defineValueExpr, ifExpr });
+            // convert the patterns to desugared conditional expressions
+            var desugaredMatch = PatternMatcher.Match(mContext, expr, boundValue);
 
             // bind the desugared form
             return desugaredMatch.Accept(this);

@@ -5,11 +5,17 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
-    public class TupleCase : ICaseExpr
+    /// <summary>
+    /// Pattern for matching a tuple value.
+    /// </summary>
+    public class TuplePattern : IPattern
     {
-        public IList<ICaseExpr> Fields { get; private set; }
+        /// <summary>
+        /// The patterns for each field in the tuple.
+        /// </summary>
+        public IList<IPattern> Fields { get; private set; }
 
-        public TupleCase(IList<ICaseExpr> fields)
+        public TuplePattern(IList<IPattern> fields)
         {
             Fields = fields;
         }
@@ -29,7 +35,7 @@ namespace Magpie.Compilation
             }
         }
 
-        TReturn ICaseExpr.Accept<TReturn>(ICaseExprVisitor<TReturn> visitor)
+        TReturn IPattern.Accept<TReturn>(IPatternVisitor<TReturn> visitor)
         {
             return visitor.Visit(this);
         }

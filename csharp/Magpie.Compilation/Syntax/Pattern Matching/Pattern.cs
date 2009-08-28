@@ -5,11 +5,14 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
-    public abstract class CaseBase
+    /// <summary>
+    /// Base class for pattern matching expressions.
+    /// </summary>
+    public abstract class Pattern
     {
         public Position Position { get; private set; }
 
-        protected CaseBase(Position position)
+        protected Pattern(Position position)
         {
             Position = position;
         }

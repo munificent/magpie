@@ -1,0 +1,9 @@
+// error line: 7
+
+Main (->)
+    match true
+        case true then Print "first"
+        case false then Print "second"
+        case _ then Print "third"
+    end
+end

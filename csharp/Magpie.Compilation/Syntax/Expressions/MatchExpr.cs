@@ -42,13 +42,13 @@ namespace Magpie.Compilation
     public class MatchCase
     {
         public Position Position { get; private set; }
-        public ICaseExpr Case { get; private set; }
+        public IPattern Pattern { get; private set; }
         public IUnboundExpr Body { get; private set; }
 
-        public MatchCase(Position position, ICaseExpr caseExpr, IUnboundExpr body)
+        public MatchCase(Position position, IPattern caseExpr, IUnboundExpr body)
         {
             Position = position;
-            Case = caseExpr;
+            Pattern = caseExpr;
             Body = body;
         }
     }

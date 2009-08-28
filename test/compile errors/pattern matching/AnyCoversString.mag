@@ -1,0 +1,8 @@
+// error line: 6
+
+Main (->)
+    match "a"
+        case _   then Print "first"
+        case "a" then Print "second"
+    end
+end
