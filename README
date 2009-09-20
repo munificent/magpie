@@ -120,15 +120,10 @@ To try things out for yourself, you'll need to:
    Maybe:
    
    Main (->)
-       mutable i <- 0
-       while i < 100 do
+       for i <- 1 -to- 100 do
            Print "Awesome!"
-           i <- + 1
        end
    end
-   
-   Yeah, I know. I can't wait to implement real
-   loops either.
    
 4. Run it. The VS solution builds magpie to
    /csharp/bin/Debug/magpie.exe
