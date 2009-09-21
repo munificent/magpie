@@ -5,139 +5,219 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
+    /* pattern matching needs to:
+     * 
+     * static checking, raise an error if:
+     * + the shape of a pattern doesn't match the value type
+     * - a pattern cannot be matched because a previous pattern covers it
+     * - there are possible values that will not be matched
+     *   by any pattern (i.e. the patterns are not exhaustive)
+     * - a variable is used twice in a pattern (i.e. the pattern is not linear)
+     * + the expressions for each pattern do not all return the same type
+     * 
+     * runtime behavior:
+     * - generate a conditional expression that determines which pattern is matched
+     *   given a value.
+     * - assign values to variables defined in the pattern
+     */
     //### bob: move to separate file
+    //### bob: this whole class is pretty hideous, but once it's more or less working,
+    //         i can refactor it into something more sensible
     public class Coverage
     {
         /// <summary>
-        /// Adds the given pattern's values to the set of covered values. Returns true if
-        /// the pattern's values are already covered.
+        /// Creates an empty coverage for values of the given type.
+        /// </summary>
+        /// <param name="decl">The value type being matched against.</param>
+        /// <returns></returns>
+        public static Coverage Create(IBoundDecl decl)
+        {
+            return decl.Accept(new CreateCoverage());
+        }
+
+        /// <summary>
+        /// Returns true if the pattern's values are already covered.
         /// </summary>
         /// <param name="pattern"></param>
         /// <returns></returns>
-        public bool Cover(IPattern pattern)
+        public bool Covers(IPattern pattern)
         {
             // bail if already covered
-            if (pattern.Accept(new CheckCoverage(this))) return true;
+            if (mFullyCovered) return true;
+            if (this.Match(pattern,
+                a => Covers(a),
+                a => Covers(a),
+                a => Covers(a),
+                a => Covers(a),
+                a => Covers(a),
+                a => Covers(a))) return true;
 
-            pattern.Accept(new AddCoverage(this));
             return false;
         }
 
-        private class CheckCoverage : IPatternVisitor<bool>
+        /// <summary>
+        /// Adds the given pattern's values to the set of covered values.
+        /// </summary>
+        /// <param name="pattern"></param>
+        /// <returns></returns>
+        public void Cover(IPattern pattern)
         {
-            public CheckCoverage(Coverage coverage)
-            {
-                mCoverage = coverage;
-            }
-
-            #region IPatternVisitor<bool> Members
-
-            bool IPatternVisitor<bool>.Visit(AnyPattern expr)
-            {
-                return mCoverage.mFullyCovered;
-            }
-
-            bool IPatternVisitor<bool>.Visit(BoolPattern expr)
-            {
-                if (mCoverage.mFullyCovered) return true;
-                if (mCoverage.mCoveredBools.ContainsKey(expr.Value)) return true;
-
-                return false;
-            }
-
-            bool IPatternVisitor<bool>.Visit(IntPattern expr)
-            {
-                if (mCoverage.mFullyCovered) return true;
-                if (mCoverage.mCoveredInts.ContainsKey(expr.Value)) return true;
-
-                return false;
-            }
-
-            bool IPatternVisitor<bool>.Visit(StringPattern expr)
-            {
-                if (mCoverage.mFullyCovered) return true;
-                if (mCoverage.mCoveredStrings.ContainsKey(expr.Value)) return true;
-
-                return mCoverage.mFullyCovered;
-            }
-
-            bool IPatternVisitor<bool>.Visit(UnionPattern expr)
-            {
-                //### bob: not implemented
-                return mCoverage.mFullyCovered;
-            }
-
-            bool IPatternVisitor<bool>.Visit(TuplePattern expr)
-            {
-                //### bob: not implemented
-                return mCoverage.mFullyCovered;
-            }
-
-            #endregion
-
-            private Coverage mCoverage;
+            this.Match(pattern,
+                a => Cover(a),
+                a => Cover(a),
+                a => Cover(a),
+                a => Cover(a),
+                a => Cover(a),
+                a => Cover(a));
         }
 
-        private class AddCoverage : IPatternVisitor<bool>
+        //### bob: should these throw NotImpl by default?
+        protected virtual bool Covers(AnyPattern pattern) { return false; }
+        protected virtual bool Covers(BoolPattern pattern) { return false; }
+        protected virtual bool Covers(IntPattern pattern) { return false; }
+        protected virtual bool Covers(StringPattern pattern) { return false; }
+        protected virtual bool Covers(UnionPattern pattern) { return false; } //### bob: not implemented
+        protected virtual bool Covers(TuplePattern pattern) { return false; } //### bob: not implemented
+
+        protected virtual void Cover(AnyPattern pattern)
         {
-            public AddCoverage(Coverage coverage)
+            FullyCover();
+        }
+
+        protected virtual void Cover(BoolPattern pattern) { }
+        protected virtual void Cover(IntPattern pattern) { }
+        protected virtual void Cover(StringPattern pattern) { }
+        protected virtual void Cover(UnionPattern pattern) { } //### bob: not implemented
+        protected virtual void Cover(TuplePattern pattern) { } //### bob: not implemented
+
+        protected void FullyCover()
+        {
+            mFullyCovered = true;
+        }
+
+        private class CreateCoverage : IBoundDeclVisitor<Coverage>
+        {
+            #region IBoundDeclVisitor<Coverage> Members
+
+            Coverage IBoundDeclVisitor<Coverage>.Visit(BoundArrayType decl)
             {
-                mCoverage = coverage;
+                throw new NotSupportedException();
             }
 
-            #region IPatternVisitor<bool> Members
-
-            bool IPatternVisitor<bool>.Visit(AnyPattern expr)
+            Coverage IBoundDeclVisitor<Coverage>.Visit(AtomicDecl decl)
             {
-                mCoverage.mFullyCovered = true;
-                return false;
+                if (decl == Decl.Bool) return new BoolCoverage();
+                if (decl == Decl.Int) return new IntCoverage();
+                if (decl == Decl.String) return new StringCoverage();
+
+                throw new ArgumentException();
             }
 
-            bool IPatternVisitor<bool>.Visit(BoolPattern expr)
+            Coverage IBoundDeclVisitor<Coverage>.Visit(FuncType decl)
             {
-                mCoverage.mCoveredBools[expr.Value] = true;
-
-                // note if we've covered all bools
-                if (mCoverage.mCoveredBools.Count == 2) mCoverage.mFullyCovered = true;
-                return false;
+                throw new NotSupportedException();
             }
 
-            bool IPatternVisitor<bool>.Visit(IntPattern expr)
+            Coverage IBoundDeclVisitor<Coverage>.Visit(Struct decl)
             {
-                mCoverage.mCoveredInts[expr.Value] = true;
-                return false;
+                throw new NotSupportedException();
             }
 
-            bool IPatternVisitor<bool>.Visit(StringPattern expr)
+            Coverage IBoundDeclVisitor<Coverage>.Visit(BoundTupleType decl)
             {
-                mCoverage.mCoveredStrings[expr.Value] = true;
-                return false;
+                return new TupleCoverage(decl);
             }
 
-            bool IPatternVisitor<bool>.Visit(UnionPattern expr)
+            Coverage IBoundDeclVisitor<Coverage>.Visit(Union decl)
             {
-                //### bob: not implemented
-                return false;
-            }
-
-            bool IPatternVisitor<bool>.Visit(TuplePattern expr)
-            {
-                //### bob: not implemented
-                return false;
+                return new Coverage(); //### bob: not implemented
             }
 
             #endregion
-
-            private Coverage mCoverage;
         }
 
         private bool mFullyCovered;
-        //### bob: hack. only one of these will be needed for any given coverage
+    }
+
+    public class BoolCoverage : Coverage
+    {
+        protected override bool Covers(BoolPattern pattern) { return mCoveredBools.ContainsKey(pattern.Value); }
+
+        protected override void Cover(BoolPattern pattern)
+        {
+            mCoveredBools[pattern.Value] = true;
+
+            // note if we've covered all bools
+            if (mCoveredBools.Count == 2) FullyCover();
+        }
+
         private readonly Dictionary<bool, bool> mCoveredBools = new Dictionary<bool, bool>();
+    }
+
+    public class IntCoverage : Coverage
+    {
+        protected override bool Covers(IntPattern pattern) { return mCoveredInts.ContainsKey(pattern.Value); }
+
+        protected override void Cover(IntPattern pattern)
+        {
+            mCoveredInts[pattern.Value] = true;
+        }
+
         private readonly Dictionary<int, bool> mCoveredInts = new Dictionary<int, bool>();
+    }
+
+    public class StringCoverage : Coverage
+    {
+        protected override bool Covers(StringPattern pattern) { return mCoveredStrings.ContainsKey(pattern.Value); }
+
+        protected override void Cover(StringPattern pattern)
+        {
+            mCoveredStrings[pattern.Value] = true;
+        }
+
         private readonly Dictionary<string, bool> mCoveredStrings = new Dictionary<string, bool>();
     }
 
+    //### bob: this is wrong. it needs to handle tuples combinatorially. the implementation below will
+    // fail on:
+    // match foo
+    // case (true, true)
+    // case (false, false)
+    // end
+    //
+    // it will incorrectly think all possible cases are covered.
+    public class TupleCoverage : Coverage
+    {
+        public TupleCoverage(BoundTupleType tupleType)
+        {
+            foreach (var field in tupleType.Fields)
+            {
+                mFields.Add(Coverage.Create(field));
+            }
+        }
+
+        protected override bool Covers(TuplePattern pattern)
+        {
+            for (int i = 0; i < pattern.Fields.Count; i++)
+            {
+                if (!mFields[i].Covers(pattern.Fields[i])) return false;
+            }
+
+            // if we got here, all fields are covered
+            return true;
+        }
+
+        protected override void Cover(TuplePattern pattern)
+        {
+            for (int i = 0; i < pattern.Fields.Count; i++)
+            {
+                mFields[i].Cover(pattern.Fields[i]);
+            }
+        }
+
+        private readonly List<Coverage> mFields = new List<Coverage>();
+    }
+    
     /// <summary>
     /// Given a pattern, generates a conditional expression that will evaluate to true if the
     /// pattern matches a given value.
@@ -153,7 +233,7 @@ namespace Magpie.Compilation
             var valueExpr = new NameExpr(expr.Value.Position, " m");
 
             var ifThens = new Stack<Tuple<IUnboundExpr, IUnboundExpr>>();
-            var coverage = new Coverage();
+            var coverage = Coverage.Create(boundValue.Type);
 
             foreach (var matchCase in expr.Cases)
             {
@@ -202,10 +282,12 @@ namespace Magpie.Compilation
         private static IUnboundExpr Match(BindingContext context, Coverage coverage, IBoundDecl decl,
             IPattern caseExpr, IUnboundExpr value)
         {
-            bool covered = coverage.Cover(caseExpr);
-
+            bool covered = coverage.Covers(caseExpr);
             if (covered) throw new CompileException(caseExpr.Position,
                 "This pattern will never be matched because previous patterns cover it.");
+
+            // add coverage for this case
+            coverage.Cover(caseExpr);
 
             var matcher = new PatternMatcher(context, coverage, decl, value);
             return caseExpr.Accept(matcher);

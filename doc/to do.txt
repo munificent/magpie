@@ -1,6 +1,19 @@
 Things to figure out or decide:
 ------------------------------
 
+How can we do metaprogramming in Magpie?
+- Would be very cool if it was easy to construct and compile Magpie
+  code at runtime.
+- Would also be cool if the compiler could automatically support
+  multiple passes. So, if a program generates code, the compiler
+  immediately executes the program to get the generated code. Repeat
+  until done. Sort of like if C's preprocessor langauge was also C.
+  
+  Of course, we'll need a way to code that should be executed at
+  compile time.
+- To generate and compile code, it would be very useful to have data
+  types for the AST nodes, as well as syntax literals and quotations.
+  
 How are programs split into multiple files?
 - Have a include/require/import-like directive so each file can
   indicate which others it uses. This would work like Lua where
@@ -29,7 +42,9 @@ How can you program using ADTs or interfaces?
   It needs to span multiple types, for example an "interface" that
   says things like "a function Foo that takes an A and a B and returns
   a C".
-
+- If we get this working, should change "for" system to actually check
+  that the object implments some iterator interface.
+  
 Should there be an assignment expression that returns the assigned
 value?
 - Assignment expressions return Unit so that they can be used in
@@ -133,6 +148,8 @@ Get rid of immutable fields?
   doesn't really fit with Magpie's goal of being usable by
   non-technical people.
 
+- Another more radical solution: get rid of mutability instead.
+  
 Things to do:
 ------------
 
@@ -152,6 +169,7 @@ Lazy arguments.
 - This is surprisingly important: logical operators can't
   short-circuit without it.
 - Change boolean operators to use this.
+- Need closures for this to be useful.
 
 Argument inference for function references.
 - You should be able to omit the argument types when creating a
@@ -165,7 +183,9 @@ and foreign functions.
 
 Tuple decomposition on assignment.
 . (a, b) <- (1, 2)
-  
+- Use full pattern matching syntax for this?
+  def Some a <- Some 123 // a = 123
+
 Document and test precedence of self-assignment syntax.
 . Is a <- a - 2 + 3 the same as a = (a - 2) + 3 or a = a - (2 + 3)
 

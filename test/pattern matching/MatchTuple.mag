@@ -7,6 +7,7 @@ Main (->)
         case (1, false) then Print "no"
         case (1, true)  then Print "yes"
         case (3, true)  then Print "no"
+        case _          then Print "else"
     end
     
     match (1, (2, 3))
@@ -15,5 +16,6 @@ Main (->)
         case (3, (1, 2)) then Print "no"
         case (_, (2, 3)) then Print "yes"
         case (1, (2, 3)) then Print "no!"
+        case _           then Print "else"
     end
 end
