@@ -45,14 +45,6 @@ How can you program using ADTs or interfaces?
 - If we get this working, should change "for" system to actually check
   that the object implments some iterator interface.
   
-Should there be an assignment expression that returns the assigned
-value?
-- Assignment expressions return Unit so that they can be used in
-  blocks. This prevents them from being used (for example) as the
-  condition in a while loop. Could we make an alternate assignment
-  syntax that assigns and returns the assigned value? What about one
-  that assigns and returns the *previous* value?
-
 Can we do keywork functions like Smalltalk?
 - My guess is "no". At the very least, it would require a syntax
   change to distinguish keywords from identifiers, likely a trailing
@@ -106,7 +98,8 @@ How do coroutines and iterators work?
   in the callstack.
   . Yes, we should.
 - Can values be passed in when resuming?
-
+  . Yes, it's cool.
+  
 Does Magpie have constants?
 - Because of implicit calling, there isn't a syntactical difference
   between using a constant Foo and calling a "const" function Foo that
@@ -260,3 +253,15 @@ Simplify/optimize the interpreter/compiler.
 - There's some shenanigans related to argument passing that's
   unnecessary. Each arg in the arg tuple gets put into its own local
   variable. Why not just put the entire tuple in one?
+
+Not doing:
+---------
+  
+Should there be an assignment expression that returns the assigned
+value?
+- Assignment expressions return Unit so that they can be used in
+  blocks. This prevents them from being used (for example) as the
+  condition in a while loop. Could we make an alternate assignment
+  syntax that assigns and returns the assigned value? What about one
+  that assigns and returns the *previous* value?
+  . No, for loops and custom generators can handle both of these.

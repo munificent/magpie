@@ -85,6 +85,7 @@
     <Compile Include="Syntax\Expressions\IntrinsicExpr.cs" />
     <Compile Include="Syntax\Expressions\IUnboundExpr.cs" />
     <Compile Include="Syntax\Expressions\LoadExpr.cs" />
+    <Compile Include="Syntax\Expressions\LocalFuncExpr.cs" />
     <Compile Include="Syntax\Expressions\LocalsExpr.cs" />
     <Compile Include="Syntax\Expressions\MatchExpr.cs" />
     <Compile Include="Syntax\Expressions\NameExpr.cs" />

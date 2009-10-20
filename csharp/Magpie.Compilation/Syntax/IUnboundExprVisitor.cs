@@ -13,6 +13,7 @@ namespace Magpie.Compilation
         TReturn Visit(BlockExpr expr);
         TReturn Visit(DefineExpr expr);
         TReturn Visit(FuncRefExpr expr);
+        TReturn Visit(LocalFuncExpr expr);
         TReturn Visit(IfThenExpr expr);
         TReturn Visit(IfThenElseExpr expr);
         TReturn Visit(NameExpr expr);

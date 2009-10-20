@@ -1,0 +1,11 @@
+// error line: 8
+
+Main (->)
+    match (1, true)
+        case (1, true) then Print "first"
+        case (1, false) then Print "first"
+        case (2, true) then Print "first"
+        case (1, true) then Print "first"
+        case _ then Print "first"
+    end
+end

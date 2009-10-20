@@ -29,6 +29,18 @@ namespace Magpie.Compilation
         }
 
         /// <summary>
+        /// Adds the given fully-unbound (i.e. just parsed) user-defined function to the symbol
+        /// table and immediately binds it. Should only be called for functions created during
+        /// the binding process (i.e. local functions).
+        /// </summary>
+        public void AddAndBind(Compiler compiler, Function function)
+        {
+            AddUnbound(function);
+            Bind(compiler, function);
+            mToBind.Enqueue(function);
+        }
+
+        /// <summary>
         /// Adds the given function to the symbol table.
         /// </summary>
         public void Add(ICallable callable)
@@ -136,28 +148,36 @@ namespace Magpie.Compilation
             // bind the types of the user functions and add them to the main table
             foreach (var unbound in mUnbound)
             {
-                var context = new BindingContext(compiler, unbound.SearchSpace);
-                TypeBinder.Bind(context, unbound.Type);
-                Add(unbound);
+                Bind(compiler, unbound);
             }
 
-            // copy the functions to an array because binding a function may cause generics
+            // copy the functions to a queue because binding a function may cause generics
             // to be instantiated, adding to the collection.
             // (we don't need to worry about binding the newly added generics, because they
             // are bound as part of the instantiation process. binding is how the compiler
             // determines if a generic's type arguments are valid.)
-            var toBind = Functions.ToArray();
+            mToBind = new Queue<Function>(Functions);
 
             // bind the bodies of all of the functions
-            foreach (var function in toBind)
+            while (mToBind.Count > 0)
             {
+                var function = mToBind.Dequeue();
                 var context = new BindingContext(compiler, function.SearchSpace);
                 FunctionBinder.Bind(context, function);
             }
         }
 
+        private void Bind(Compiler compiler, Function unbound)
+        {
+            var context = new BindingContext(compiler, unbound.SearchSpace);
+            TypeBinder.Bind(context, unbound.Type);
+            Add(unbound);
+        }
+
         private readonly List<Function>                mUnbound   = new List<Function>();
         private readonly Dictionary<string, ICallable> mCallables = new Dictionary<string, ICallable>();
         private readonly List<IGenericCallable>        mGenerics = new List<IGenericCallable>();
+
+        private Queue<Function> mToBind;
     }
 }

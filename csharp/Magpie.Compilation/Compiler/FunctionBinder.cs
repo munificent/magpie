@@ -272,6 +272,36 @@ namespace Magpie.Compilation
             return new BoundFuncRefExpr(function);
         }
 
+        IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(LocalFuncExpr expr)
+        {
+            // create a unique name for the local function
+            //### bob: this actually isn't foolproof. if the parent
+            // named function is overloaded (in two separate source files),
+            // this could collide if both overloads defined local function
+            // at the same source position.
+            string name = String.Format("{0}.{1}.{2}", mFunction.Name,
+                expr.Position.Line, expr.Position.Column);
+
+            // create a reference to it
+            var reference = new FuncRefExpr(expr.Position,
+                new NameExpr(expr.Position, name),
+                expr.Type.Parameter.Unbound);
+
+            // lift the local function into a new top-level function
+            var function = new Function(expr.Position, name,
+                expr.Type, expr.ParamNames, expr.Body);
+
+            function.BindSearchSpace(mContext.SearchSpace);
+
+            // bind it
+            mContext.Compiler.Functions.AddAndBind(mContext.Compiler, function);
+
+            // return the reference to it
+            return reference.Accept(this);
+
+            //### bob: eventually, will need to handle closures
+        }
+
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(IfThenExpr expr)
         {
             var bound = new BoundIfThenExpr(

@@ -1,0 +1,44 @@
+// expected: b
+// expected: c
+// expected: c
+// expected: dd
+// expected: e1e2
+// expected: fg
+// expected: outer 2
+// expected: inner 2
+
+Main (->)
+    // a function that takes an int and returns unit
+    def a <- fn (arg Int ->) ()
+    a 123
+    
+    // a function that takes an int, prints, and returns unit
+    def b <- fn (arg Int ->) Print "b"
+    b 123
+    
+    // a function that takes an int, prints, and returns unit
+    def c <- fn (arg Int ->)
+            Print "c"
+            Print "c"
+        end
+    c 123
+    
+    // a function that returns a string
+    def d <- fn (-> String) "d" + "d"
+    Print d ()
+    
+    // a function that concatenates two strings
+    def e <- fn (arg1 String, arg2 String -> String) arg1 + arg2
+    Print e ("e1", "e2")
+    
+    // use in place
+    Print (fn (arg1 String, arg2 String -> String) arg1 + arg2) ("f", "g")
+    
+    // nested local function
+    def f <- fn (arg Int ->)
+            Print ("outer " + arg.String)
+            def g <- fn (arg2 String ->) Print ("inner " + arg2)
+            g arg.String
+        end
+    f 2
+end

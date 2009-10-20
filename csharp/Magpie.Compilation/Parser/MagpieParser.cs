@@ -137,7 +137,7 @@ namespace Magpie.Compilation
         {
             var args = new List<IUnboundDecl>();
 
-            while (true)
+            while (!CurrentIs(TokenType.RightParen))
             {
                 if (paramNames != null)
                 {
@@ -541,7 +541,7 @@ namespace Magpie.Compilation
             IUnboundExpr expression;
 
             if (CurrentIs(TokenType.Name)) expression = new NameExpr(Name(), TypeArgs());
-            else if (CurrentIs(TokenType.Fn)) expression = FuncRefExpr();
+            else if (CurrentIs(TokenType.Fn)) expression = FuncExpr();
             else if (CurrentIs(TokenType.Bool)) expression = new BoolExpr(Consume(TokenType.Bool));
             else if (CurrentIs(TokenType.Int)) expression = new IntExpr(Consume(TokenType.Int));
             else if (CurrentIs(TokenType.String)) expression = new StringExpr(Consume(TokenType.String));
@@ -573,37 +573,52 @@ namespace Magpie.Compilation
             return expression;
         }
 
-        private IUnboundExpr FuncRefExpr()
+        // <-- FN ((Name | Operator) TupleType)
+        //      | (LPAREN ParamDecl RPAREN)
+        private IUnboundExpr FuncExpr()
         {
             Position position = Consume(TokenType.Fn).Position;
 
-            NameExpr name;
-            if (CurrentIs(TokenType.Operator))
+            if (CurrentIs(TokenType.LeftParen))
             {
-                Token op = Consume(TokenType.Operator);
-                name = new NameExpr(op.Position, op.StringValue);
+                // local function
+                var paramNames = new List<string>();
+                var funcType = FnArgsDecl(paramNames);
+                var body = Block();
+
+                return new LocalFuncExpr(position, paramNames, funcType, body);
             }
             else
             {
-                name = new NameExpr(Name(), TypeArgs());
-            }
+                // function reference
+                NameExpr name;
+                if (CurrentIs(TokenType.Operator))
+                {
+                    Token op = Consume(TokenType.Operator);
+                    name = new NameExpr(op.Position, op.StringValue);
+                }
+                else
+                {
+                    name = new NameExpr(Name(), TypeArgs());
+                }
 
-            var parameters = TupleType().Item1.ToArray();
-            IUnboundDecl parameter;
-            if (parameters.Length == 0)
-            {
-                parameter = Decl.Unit;
-            }
-            else if (parameters.Length == 1)
-            {
-                parameter = parameters[0];
-            }
-            else
-            {
-                parameter = new TupleType(parameters);
-            }
+                var parameters = TupleType().Item1.ToArray();
+                IUnboundDecl parameter;
+                if (parameters.Length == 0)
+                {
+                    parameter = Decl.Unit;
+                }
+                else if (parameters.Length == 1)
+                {
+                    parameter = parameters[0];
+                }
+                else
+                {
+                    parameter = new TupleType(parameters);
+                }
 
-            return new FuncRefExpr(position, name, parameter);
+                return new FuncRefExpr(position, name, parameter);
+            }
         }
 
         // <-- STRUCT NAME GenericDecl LINE StructBody END
