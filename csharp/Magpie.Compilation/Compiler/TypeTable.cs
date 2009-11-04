@@ -49,7 +49,6 @@ namespace Magpie.Compilation
             mGenericUnions.Add(generic);
         }
 
-        //### bob: need to copy this for union
         public Struct FindStruct(string name, IEnumerable<IBoundDecl> typeArgs)
         {
             var uniqueName = GetUniqueName(name, typeArgs);
@@ -59,6 +58,21 @@ namespace Magpie.Compilation
             {
                 // may be a union, so cast using "as"
                 return type as Struct;
+            }
+
+            return null;
+        }
+
+        //### bob: copy/paste from struct :(
+        public Union FindUnion(string name, IEnumerable<IBoundDecl> typeArgs)
+        {
+            var uniqueName = GetUniqueName(name, typeArgs);
+
+            INamedType type;
+            if (mTypes.TryGetValue(uniqueName, out type))
+            {
+                // may be a struct, so cast using "as"
+                return type as Union;
             }
 
             return null;
@@ -74,7 +88,6 @@ namespace Magpie.Compilation
                 var type = Find(potentialName, typeArgs);
                 if (type != null) return type;
 
-                //### bob: need to copy this for union
                 // look for a generic
                 foreach (var structure in mGenericStructs)
                 {
@@ -87,7 +100,25 @@ namespace Magpie.Compilation
                     var instance = structure.Instantiate(compiler, typeArgs);
 
                     // only instantiate once
-                    Add(instance);
+                    //Add(instance, typeArgs);
+
+                    return instance;
+                }
+
+                //### bob: gross copy/paste of above
+                // look for a generic
+                foreach (var union in mGenericUnions)
+                {
+                    // names must match
+                    if (union.Name != potentialName) continue;
+
+                    // number of type args must match
+                    if (typeArgs.Count() != union.TypeParameters.Count) continue;
+
+                    var instance = union.Instantiate(compiler, typeArgs);
+
+                    // only instantiate once
+                    //Add(instance, typeArgs);
 
                     return instance;
                 }
