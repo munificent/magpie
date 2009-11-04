@@ -1,0 +1,16 @@
+﻿// expected: 3
+
+Main (->)
+    def a <- Next Next Next Empty
+    Print a.Length.String
+end
+
+Length (list List -> Int)
+    if list.Empty? then 0
+    else 1 + list.NextValue.Length
+end
+
+union List
+    Empty
+    Next  List
+end

@@ -1,0 +1,11 @@
+﻿// expected: ok
+
+Main (->)
+    Print "ok"
+end
+
+// note: we can't actually instantiate one of these, but we can at
+// least ensure that they compile
+struct Ouroboros
+    Tail    Ouroboros
+end
