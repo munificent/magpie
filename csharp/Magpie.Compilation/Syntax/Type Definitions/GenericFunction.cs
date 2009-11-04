@@ -28,7 +28,7 @@ namespace Magpie.Compilation
             TypeBinder.Bind(context, funcType);
 
             // create a new unbound function with the proper type
-            Function instance = new Function(BaseType.Position, BaseType.Name,
+            Function instance = new Function(BaseType.Position, BaseType.BaseName,
                 funcType, BaseType.ParamNames, BaseType.Body.Unbound, typeArgs, canInfer);
 
             instance.BindSearchSpace(BaseType.SearchSpace);

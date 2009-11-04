@@ -25,6 +25,10 @@ namespace Magpie.App
 
             var compiler = new Compiler(foreign);
 
+            //### bob: temp. work-in-progress debug stuff
+            DebugInfo debug = new DebugInfo();
+            compiler.FunctionStarted = debug.StartFunction;
+
             // add the base sources
             //### bob: hack. assumes location of base relative to working directory. :(
             string baseDir = Path.GetDirectoryName(Environment.CurrentDirectory);
@@ -37,8 +41,20 @@ namespace Magpie.App
                 compiler.AddSourceFile(baseFile);
             }
 
-            // add the main file to compile
-            compiler.AddSourceFile(path);
+            // add the main file(s) to compile
+            if (Directory.Exists(path))
+            {
+                // path is a directory, so include all files in it
+                foreach (var file in Directory.GetFiles(path, "*.mag", SearchOption.AllDirectories))
+                {
+                    compiler.AddSourceFile(file);
+                }
+            }
+            else
+            {
+                // path is a single file
+                compiler.AddSourceFile(path);
+            }
 
             using (var stream = new MemoryStream())
             {
@@ -55,7 +71,7 @@ namespace Magpie.App
 
                 try
                 {
-                    machine.Interpret(stream);
+                    machine.Interpret(stream, debug);
                 }
                 catch (InterpreterException ex)
                 {

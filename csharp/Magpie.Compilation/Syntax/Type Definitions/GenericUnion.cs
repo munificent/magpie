@@ -47,7 +47,26 @@ namespace Magpie.Compilation
             {
                 // instantiate the structure
                 union = BaseType.Clone(typeArgs);
+
+                // add it to the list of known types. this must happen before
+                // the subsequent binding in case the type is recursive.
                 compiler.Types.Add(union, typeArgs);
+
+                // immediately bind it with the type arguments
+                BindingContext context = new BindingContext(compiler, union.SearchSpace, TypeParameters, typeArgs);
+                TypeBinder.Bind(context, union);
+
+                // figure out which of the cases can infer type arguments. this
+                // needs to be done now while we still know the type parameters
+                // and the unbound uses of them in the cases.
+                for (int i = 0; i < union.Cases.Count; i++)
+                {
+                    var inferredTypeArgs = TypeArgInferrer.Infer(TypeParameters,
+                        BaseType.Cases[i].ValueType.Unbound,
+                        union.Cases[i].ValueType.Bound);
+
+                    union.Cases[i].HasInferrableTypeArguments = inferredTypeArgs != null;
+                }
             }
 
             return union;
@@ -73,8 +92,6 @@ namespace Magpie.Compilation
                 ParameterType, argType, ref typeArgs, out dummy);
 
             var union = Union.Instantiate(compiler, typeArgs);
-
-            TypeBinder.Bind(context, union);
 
             // now build the auto functions for it
             ICallable instantiated = null;

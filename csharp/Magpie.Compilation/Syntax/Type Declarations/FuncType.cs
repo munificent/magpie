@@ -68,19 +68,10 @@ namespace Magpie.Compilation
             Return = new Decl(returnType);
         }
 
-        /*
         public override string ToString()
         {
-            if ((Parameters.Count == 0) && ReferenceEquals(Return, Decl.Unit)) return "(->)";
-            if (Parameters.Count == 0) return "(-> " + Return.ToString() + ")";
-
-            string argString = Parameters.JoinAll(", ");
-
-            if (ReferenceEquals(Return, Decl.Unit)) return "(" + argString + " ->)";
-
-            return "(" + argString + " -> " + Return.ToString() + ")";
+            return "(" + Parameter.ToString() + "->" + Return.ToString() + ")";
         }
-        */
 
         /// <summary>
         /// Creates a copy of this FuncType in unbound form.

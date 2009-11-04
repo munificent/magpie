@@ -47,7 +47,7 @@ namespace Magpie.App
                 string relativePath = test.Replace(mTestDir, "");
                 if (mErrors.Count == 0)
                 {
-                    Console.WriteLine("  pass " + relativePath);
+                    //Console.WriteLine("  pass " + relativePath);
                     passed++;
                 }
                 else
@@ -94,15 +94,15 @@ namespace Magpie.App
                     if (mExpectedErrorLines.Count > 0)
                     {
                         int expectedLine = mExpectedErrorLines.Dequeue();
-                        if (error.Line != expectedLine)
+                        if (error.Position.Line != expectedLine)
                         {
-                            mErrors.Add("Expected compile error on line " + expectedLine + " but was on line " + error.Line);
+                            mErrors.Add("Expected compile error on line " + expectedLine + " but was on line " + error.Position.Line);
                             mErrors.Add(error.Message);
                         }
                     }
                     else
                     {
-                        mErrors.Add("Got compile error on line " + error.Line + " when no more were expected.");
+                        mErrors.Add("Got compile error on line " + error.Position.Line + " when no more were expected.");
                         mErrors.Add(error.Message);
                     }
                 }

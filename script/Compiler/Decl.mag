@@ -45,7 +45,7 @@ namespace Magpie:Compiler
             def thenType <- expr.IfThenElseValue.Second
             def elseType <- expr.IfThenElseValue.Third
             
-            if thenType != elseType do Print "then and else types don't match!"
+            if thenType != elseType then Print "then and else types don't match!"
             
             thenType
 

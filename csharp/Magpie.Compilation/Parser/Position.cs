@@ -11,14 +11,16 @@ namespace Magpie.Compilation
     /// </summary>
     public class Position
     {
-        public static Position None { get { return new Position(-1, -1, -1); } }
+        public static Position None { get { return new Position(String.Empty, -1, -1, -1); } }
 
+        public string File { get; private set; }
         public int Line { get; private set; }
         public int Column { get; private set; }
         public int Length { get; private set; }
 
-        public Position(int line, int column, int length)
+        public Position(string file, int line, int column, int length)
         {
+            File = file;
             Line = line;
             Column = column;
             Length = length;

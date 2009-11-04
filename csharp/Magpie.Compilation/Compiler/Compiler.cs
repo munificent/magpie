@@ -12,6 +12,9 @@ namespace Magpie.Compilation
         public FunctionTable Functions { get { return mFunctions; } }
         public TypeTable Types { get { return mTypes; } }
 
+        //### bob: hack temp.
+        public Action<string, long> FunctionStarted;
+
         public Compiler(IForeignStaticInterface foreignInterface)
         {
             mForeignInterface = foreignInterface;
@@ -43,15 +46,15 @@ namespace Magpie.Compilation
                 mFunctions.AddRange(Intrinsic.AllGenerics);
 
                 // bind the user-defined types and create their auto-generated functions
+                mTypes.BindAll(this);
+
                 foreach (var structure in mTypes.Structs)
                 {
-                    TypeBinder.Bind(this, structure);
                     mFunctions.AddRange(structure.BuildFunctions());
                 }
 
                 foreach (var union in mTypes.Unions)
                 {
-                    TypeBinder.Bind(this, union);
                     mFunctions.AddRange(union.BuildFunctions());
                 }
 
@@ -74,7 +77,7 @@ namespace Magpie.Compilation
             }
             catch (CompileException ex)
             {
-                errors.Add(new CompileError(CompileStage.Compile, ex.Position.Line, ex.Message));
+                errors.Add(new CompileError(CompileStage.Compile, ex.Position, ex.Message));
             }
 
             if (errors.Count == 0)

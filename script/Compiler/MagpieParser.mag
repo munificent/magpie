@@ -49,7 +49,7 @@ namespace Magpie:Compiler
             else if parser.Current.UnionToken?     then contents.Unions     << Union parser
             else looping <- false
             
-            if Not ConsumeIf (parser, LineToken) do looping <- false
+            if Not ConsumeIf (parser, LineToken) then looping <- false
         end
 
         contents
@@ -93,7 +93,7 @@ namespace Magpie:Compiler
         def decls <- List'Decl
 
         // may not be any args
-        if ConsumeIf (parser, PrimeToken) do
+        if ConsumeIf (parser, PrimeToken) then
             if ConsumeIf (parser, LeftParenToken) then
                 decls << TypeDecl parser
 
@@ -137,7 +137,7 @@ namespace Magpie:Compiler
             def type <- TypeDecl parser
             params << ParamDecl (name, type)
 
-            if Not ConsumeIf (parser, CommaToken) do looping <- false
+            if Not ConsumeIf (parser, CommaToken) then looping <- false
         end
 
         params
@@ -161,7 +161,7 @@ namespace Magpie:Compiler
         // ### bob: the if allows (), should only be valid for after a function
         //     reference ("fn Foo ()"), not in an explicit tuple type
         //     declaration ("Foo (-> (some, tuple))")
-        if Not CurrentIs (parser, RightParenToken) do
+        if Not CurrentIs (parser, RightParenToken) then
             decls << TypeDecl parser
 
             while ConsumeIf (parser, CommaToken) do decls << TypeDecl parser
@@ -258,7 +258,7 @@ namespace Magpie:Compiler
                 expressions << Expression parser
                 Expect (parser, LineToken)
                 
-                if ConsumeIf (parser, terminator) do looping <- false
+                if ConsumeIf (parser, terminator) then looping <- false
             end
 
             Block expressions
@@ -269,7 +269,7 @@ namespace Magpie:Compiler
             // for inner blocks, allow a line at the end for cases like:
             // if foo
             // do bar
-            if Not SameType (terminator, EndToken) do
+            if Not SameType (terminator, EndToken) then
                 Ignore ConsumeIf (parser, LineToken)
 
                 // make sure the terminator is consumed
@@ -328,12 +328,12 @@ namespace Magpie:Compiler
     AssignExpr (parser Parser -> Expr)
         mutable expr <- TupleExpr parser
 
-        if ConsumeIf (parser, LeftArrowToken) do
+        if ConsumeIf (parser, LeftArrowToken) then
             mutable dot? <- false
             mutable opName <- ""
 
             if ConsumeIf (parser, DotToken) then dot? <- true
-            else if CurrentIs (parser, OperatorToken "") do
+            else if CurrentIs (parser, OperatorToken "") then
                 opName <- OperatorTokenValue Consume (parser, OperatorToken "")
             end
             

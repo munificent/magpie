@@ -66,6 +66,8 @@ namespace Magpie.Compilation
 
         public int Index { get; private set; }
 
+        public bool HasInferrableTypeArguments { get; set; }
+
         public UnionCase(string name, IUnboundDecl valueType, int index)
         {
             if (valueType == null) throw new ArgumentNullException("valueType");

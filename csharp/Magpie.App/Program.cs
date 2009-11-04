@@ -68,20 +68,20 @@ namespace Magpie.App
 
         private static void RunScript(string script)
         {
-            string path = Path.Combine(Environment.CurrentDirectory, script);
-
-            if (!File.Exists(path))
+            if (!File.Exists(script) && !Directory.Exists(script))
             {
-                Console.WriteLine("Could not find a script at \"" + path + "\".");
+                Console.WriteLine("Could not find a script at \"" + script + "\".");
                 return;
             }
 
-            IList<CompileError> errors = Script.Run(path, text => Console.WriteLine(text));
+            IList<CompileError> errors = Script.Run(script, text => Console.WriteLine(text));
 
             // show the errors if any
             foreach (var error in errors)
             {
-                Console.WriteLine("{0} error (line {1}): {2}", error.Stage, error.Line, error.Message);
+                Console.WriteLine("{0} error in {1} (line {2}, col {3}): {4}",
+                    error.Stage, error.Position.File, error.Position.Line,
+                    error.Position.Column, error.Message);
             }
         }
 

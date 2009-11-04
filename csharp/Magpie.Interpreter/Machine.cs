@@ -21,16 +21,17 @@ namespace Magpie.Interpreter
             mForeignInterface = foreignInterface;
         }
 
-        public void Interpret(Stream stream)
+        public void Interpret(Stream stream, DebugInfo debug)
         {
             BytecodeFile bytecode = new BytecodeFile(stream);
 
-            Interpret(bytecode, String.Empty);
+            Interpret(bytecode, debug, String.Empty);
         }
 
-        public void Interpret(BytecodeFile file, string argument)
+        public void Interpret(BytecodeFile file, DebugInfo debug, string argument)
         {
             mFile = file;
+            mDebug = debug;
 
             // find "main"
             Push(mFile.OffsetToMain);
@@ -41,7 +42,7 @@ namespace Magpie.Interpreter
 
         public void Interpret(BytecodeFile file)
         {
-            Interpret(file, String.Empty);
+            Interpret(file, null, String.Empty);
         }
 
         public void Interpret()
@@ -342,8 +343,15 @@ namespace Magpie.Interpreter
             mInstruction = PopInt();
             int numLocals = ReadInt();
 
+            //### bob: work in progress stuff.
+            if (mDebug != null)
+            {
+                string function = mDebug.GetFunctionName(mInstruction);
+                //Console.WriteLine(">> calling " + function);
+                //System.Diagnostics.Debug.WriteLine("calling " + function);
+            }
+
             // if it's a tail call, discard the parent frame
-            //### bob: not tested. compiler doesn't emit tail calls yet
             var parent = mCurrentFrame;
             if (isTailCall)
             {
@@ -389,6 +397,7 @@ namespace Magpie.Interpreter
         }
 
         private BytecodeFile mFile;
+        private DebugInfo mDebug;
 
         //### bob: could also just store this in the current frame
         private int mInstruction; // position in bytecode file

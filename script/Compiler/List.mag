@@ -58,7 +58,7 @@ namespace Core:Collections
             joined  <- + String current.SomeValue.Item
             current <- current.SomeValue.Next
 
-            if current.Some? do joined <- + separator
+            if current.Some? then joined <- + separator
         end
         
         joined
@@ -176,30 +176,30 @@ namespace Core:Collections
     end
     
     Iterate'T (list List'T, func fn (T ->) ->)
-        if Not list.Empty? do _Iterate (list.Head.SomeValue, func)
+        if Not list.Empty? then _Iterate (list.Head.SomeValue, func)
     end
 
     _Iterate'T (node _Node'T, func fn (T ->) ->)
         func node.Item
-        if node.Next.Some? do _Iterate (node.Next.SomeValue, func)
+        if node.Next.Some? then _Iterate (node.Next.SomeValue, func)
     end
 
     Iterate'(T, A) (list List'T, arg A, func fn (A, T ->) ->)
-        if Not list.Empty? do _Iterate (list.Head.SomeValue, arg, func)
+        if Not list.Empty? then _Iterate (list.Head.SomeValue, arg, func)
     end
 
     _Iterate'(T, A) (node _Node'T, arg A, func fn (A, T ->) ->)
         func (arg, node.Item)
-        if node.Next.Some? do _Iterate (node.Next.SomeValue, arg, func)
+        if node.Next.Some? then _Iterate (node.Next.SomeValue, arg, func)
     end
     
     ReverseIterate'(T, A) (list List'T, arg A, func fn (A, T ->) ->)
-        if Not list.Empty? do _ReverseIterate (list.Head.SomeValue, arg, func)
+        if Not list.Empty? then _ReverseIterate (list.Head.SomeValue, arg, func)
     end
 
     _ReverseIterate'(T, A) (node _Node'T, arg A, func fn (A, T ->) ->)
         // reverse, so recurse first
-        if node.Next.Some? do _ReverseIterate (node.Next.SomeValue, arg, func)
+        if node.Next.Some? then _ReverseIterate (node.Next.SomeValue, arg, func)
         
         func (arg, node.Item)
     end
@@ -235,12 +235,12 @@ namespace Core:Collections
     end
 
     struct List'T
-        Head    mutable Option'_Node'T
+        mutable Head Option'_Node'T
     end
 
     struct _Node'T
-        Item    mutable T
-        Next    mutable Option'_Node'T
+        mutable Item    T
+        mutable Next    Option'_Node'T
     end
 
     //### bob: the above isn't the best type for a list. a better one would be

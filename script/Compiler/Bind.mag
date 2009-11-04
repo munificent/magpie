@@ -123,7 +123,7 @@ namespace Magpie:Compiler
                 mutable found <- None'Function
                 
                 while (node.Some? & found.None?) do
-                    if node.SomeValue.Item.Name = name do found <- Some node.SomeValue.Item
+                    if node.SomeValue.Item.Name = name then found <- Some node.SomeValue.Item
                     node <- node.SomeValue.Next
                 end
                 

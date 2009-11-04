@@ -8,13 +8,13 @@ namespace Magpie.Compilation
     public class CompileError
     {
         public CompileStage Stage { get; private set; }
-        public int Line { get; private set; }
+        public Position Position { get; private set; }
         public string Message { get; private set; }
 
-        public CompileError(CompileStage stage, int line, string message)
+        public CompileError(CompileStage stage, Position position, string message)
         {
             Stage = stage;
-            Line = line;
+            Position = position;
             Message = message;
         }
     }

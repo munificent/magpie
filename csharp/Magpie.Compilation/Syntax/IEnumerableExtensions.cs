@@ -30,25 +30,29 @@ namespace Magpie.Compilation
         public static IEnumerable<TReturn> Accept<T, TReturn>(this IEnumerable<T> enumerable, IUnboundExprVisitor<TReturn> visitor)
             where T : IUnboundExpr
         {
-            return enumerable.Select(item => item.Accept(visitor));
+            // ToArray() is to force select to eager evaluate. makes it much easier to see what's going on in the debugger
+            return enumerable.Select(item => item.Accept(visitor)).ToArray();
         }
 
         public static IEnumerable<TReturn> Accept<T, TReturn>(this IEnumerable<T> enumerable, IBoundExprVisitor<TReturn> visitor)
             where T : IBoundExpr
         {
-            return enumerable.Select(item => item.Accept(visitor));
+            // ToArray() is to force select to eager evaluate. makes it much easier to see what's going on in the debugger
+            return enumerable.Select(item => item.Accept(visitor)).ToArray();
         }
 
         public static IEnumerable<TReturn> Accept<T, TReturn>(this IEnumerable<T> enumerable, IUnboundDeclVisitor<TReturn> visitor)
             where T : IUnboundDecl
         {
-            return enumerable.Select(item => item.Accept(visitor));
+            // ToArray() is to force select to eager evaluate. makes it much easier to see what's going on in the debugger
+            return enumerable.Select(item => item.Accept(visitor)).ToArray();
         }
 
         public static IEnumerable<TReturn> Accept<T, TReturn>(this IEnumerable<T> enumerable, IBoundDeclVisitor<TReturn> visitor)
             where T : IBoundDecl
         {
-            return enumerable.Select(item => item.Accept(visitor));
+            // ToArray() is to force select to eager evaluate. makes it much easier to see what's going on in the debugger
+            return enumerable.Select(item => item.Accept(visitor)).ToArray();
         }
 
         public static IEnumerable<Tuple<T, U>> Zip<T, U>(this IEnumerable<T> enumerable, IEnumerable<U> other)

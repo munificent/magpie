@@ -65,7 +65,7 @@ namespace Magpie:Compiler
         def result <- parseFunc parser
         
         //### bob: hack. just test size
-        if result.Size != expected.Size do
+        if result.Size != expected.Size then
             Print ("  error: got " + result.Size.String + " decls and expected " + expected.Size.String)
         end
     end
@@ -76,7 +76,7 @@ namespace Magpie:Compiler
         def parser <- Parser text
         def result <- parseFunc parser
         
-        if result.String != expected do
+        if result.String != expected then
             Print ("  error: got " + result.String + " and expected " + expected)
         end
     end
@@ -95,7 +95,7 @@ namespace Magpie:Compiler
                 () // do nothing
             else
                 def resultString <- result.SomeValue.String
-                if resultString != expected.SomeValue do
+                if resultString != expected.SomeValue then
                     Print ("  error: got " + resultString + " and expected " + expected.SomeValue)
                 end
             end

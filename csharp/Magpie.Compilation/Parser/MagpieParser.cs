@@ -11,7 +11,7 @@ namespace Magpie.Compilation
         public static SourceFile ParseSourceFile(string filePath)
         {
             // chain the parsing passes together
-            var scanner       = new Scanner(File.ReadAllText(filePath));
+            var scanner       = new Scanner(filePath, File.ReadAllText(filePath));
             var lineProcessor = new LineProcessor(scanner);
             var parser        = new MagpieParser(lineProcessor);
 
@@ -378,24 +378,17 @@ namespace Magpie.Compilation
                 // then/do can optionally be on the next line
                 ConsumeIf(TokenType.Line);
 
-                if (ConsumeIf(TokenType.Then))
-                {
-                    IUnboundExpr thenBody = InnerBlock(TokenType.Else);
+                Consume(TokenType.Then);
 
-                    if (ConsumeIf(TokenType.Else))
-                    {
-                        IUnboundExpr elseBody = Block();
-                        return new IfThenElseExpr(position, condition, thenBody, elseBody);
-                    }
-                    else
-                    {
-                        return new IfThenExpr(position, condition, thenBody);
-                    }
+                IUnboundExpr thenBody = InnerBlock(TokenType.Else);
+
+                if (ConsumeIf(TokenType.Else))
+                {
+                    IUnboundExpr elseBody = Block();
+                    return new IfThenElseExpr(position, condition, thenBody, elseBody);
                 }
                 else
                 {
-                    Consume(TokenType.Do);
-                    IUnboundExpr thenBody = Block();
                     return new IfThenExpr(position, condition, thenBody);
                 }
             }
@@ -843,7 +836,7 @@ namespace Magpie.Compilation
                 name += ":" + token.StringValue;
 
                 // combine all of the names into a single span
-                position = new Position(position.Line, position.Column, name.Length);
+                position = new Position(position.File, position.Line, position.Column, name.Length);
             }
 
             return new Tuple<string, Position>(name, position);

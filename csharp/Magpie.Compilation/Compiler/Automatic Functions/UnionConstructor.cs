@@ -34,8 +34,7 @@ namespace Magpie.Compilation
         {
             get
             {
-                // if a union has type arguments, then they can be inferred
-                return mUnion.TypeArguments.Length > 0;
+                return mCase.HasInferrableTypeArguments;
             }
         }
 

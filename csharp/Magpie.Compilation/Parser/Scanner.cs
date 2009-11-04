@@ -8,8 +8,9 @@ namespace Magpie.Compilation
 {
     public class Scanner : IEnumerable<Token>
     {
-        public Scanner(string source)
+        public Scanner(string fileName, string source)
         {
+            mFile = fileName;
             mSource = source;
         }
 
@@ -234,18 +235,18 @@ namespace Magpie.Compilation
         {
             get
             {
-                return new Token(new Position(mLine, mColumn, 0), TokenType.Eof);
+                return new Token(new Position(mFile, mLine, mColumn, 0), TokenType.Eof);
             }
         }
 
         private Position LastChar
         {
-            get { return new Position(mLine, mColumn - 1, 1); }
+            get { return new Position(mFile, mLine, mColumn - 1, 1); }
         }
 
         private Position Last2Chars
         {
-            get { return new Position(mLine, mColumn - 2, 2); }
+            get { return new Position(mFile, mLine, mColumn - 2, 2); }
         }
 
         // Advances the scanner to the next character.
@@ -275,7 +276,7 @@ namespace Magpie.Compilation
         private Token CompleteToken(Func<string, Position, Token> callback)
         {
             mState = ScanState.Default;
-            return callback(mSource.Substring(mTokenStart, mIndex - mTokenStart), new Position(mLine, mColumn, mIndex - mTokenStart));
+            return callback(mSource.Substring(mTokenStart, mIndex - mTokenStart), new Position(mFile, mLine, mColumn, mIndex - mTokenStart));
         }
     
         private Token EscapeString(string text, Position position)
@@ -395,6 +396,7 @@ namespace Magpie.Compilation
         private int mTokenStart;
         private int mBlockCommentDepth;
 
+        private string mFile;
         private int mLine = 1;
         private int mColumn = 0;
     }

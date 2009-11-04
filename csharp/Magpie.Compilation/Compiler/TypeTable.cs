@@ -25,6 +25,33 @@ namespace Magpie.Compilation
             Add(Decl.String);
         }
 
+        public void BindAll(Compiler compiler)
+        {
+            // copy the types to a queue because binding a type may cause
+            // other generic types to be instantiated, adding to the type
+            // table.
+            mToBind = new Queue<INamedType>(mTypes.Values.Where(type => (type is Struct) || (type is Union)));
+
+            while (mToBind.Count > 0)
+            {
+                INamedType type = mToBind.Dequeue();
+
+                //### bob: call the appropriate bind function. this is gross.
+                // should use an overridden method or something.
+                Struct structure = type as Struct;
+                if (structure != null)
+                {
+                    TypeBinder.Bind(compiler, structure);
+                }
+                else
+                {
+                    TypeBinder.Bind(compiler, (Union)type);
+                }
+            }
+
+            mToBind = null;
+        }
+
         public void Add(INamedType type)
         {
             Add(type, null);
@@ -37,6 +64,13 @@ namespace Magpie.Compilation
             if (mTypes.ContainsKey(uniqueName)) throw new CompileException(type.Position, "There is already a type named " + uniqueName + ".");
 
             mTypes[uniqueName] = type;
+
+            /*
+            // if we are in the middle of binding, make sure we bind this type too
+            if (mToBind != null)
+            {
+                mToBind.Enqueue(type);
+            }*/
         }
 
         public void Add(GenericStruct generic)
@@ -165,5 +199,7 @@ namespace Magpie.Compilation
         private readonly Dictionary<string, INamedType> mTypes = new Dictionary<string, INamedType>();
         private readonly List<GenericStruct> mGenericStructs = new List<GenericStruct>();
         private readonly List<GenericUnion> mGenericUnions = new List<GenericUnion>();
+
+        private Queue<INamedType> mToBind;
     }
 }

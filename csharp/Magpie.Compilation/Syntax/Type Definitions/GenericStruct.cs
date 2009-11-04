@@ -41,7 +41,14 @@ namespace Magpie.Compilation
             {
                 // instantiate the structure
                 structure = BaseType.Clone(typeArgs);
+
+                // add it to the list of known types. this must happen before
+                // the subsequent binding in case the type is recursive.
                 compiler.Types.Add(structure, typeArgs);
+
+                // immediately bind it with the type arguments
+                BindingContext context = new BindingContext(compiler, structure.SearchSpace, TypeParameters, typeArgs);
+                TypeBinder.Bind(context, structure);
             }
 
             return structure;
@@ -69,8 +76,6 @@ namespace Magpie.Compilation
 
             // instantiate the structure
             var structure = Struct.Instantiate(compiler, typeArgs);
-
-            TypeBinder.Bind(context, structure);
 
             // now build the auto functions for it
             ICallable instantiated = null;

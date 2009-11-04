@@ -22,10 +22,10 @@ namespace Magpie:Compiler
     end
     
     struct Function
-        Name            String
-        Type            FunctionDecl
-        Locals          Scope
-        Body            mutable Expr
-        Index           mutable Int
+                Name    String
+                Type    FunctionDecl
+                Locals  Scope
+        mutable Body    Expr
+        mutable Index   Int
     end
 end

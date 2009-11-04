@@ -31,6 +31,12 @@ namespace Magpie.Compilation
 
             functionPatcher.DefineOffset(function.UniqueName());
 
+            //### bob: hack temp
+            if (compiler.FunctionStarted != null)
+            {
+                compiler.FunctionStarted(function.UniqueName(), writer.BaseStream.Position);
+            }
+
             writer.Write(function.NumLocals);
 
             function.Body.Bound.Accept(generator);

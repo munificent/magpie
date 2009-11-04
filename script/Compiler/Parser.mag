@@ -14,7 +14,7 @@ namespace Magpie:Compiler
         
         mutable left <- parseFunc parser
         
-        if left.Some? do
+        if left.Some? then
             while CurrentIs (parser, separatorType) do
                 def separator <- Consume (parser, separatorType)
                 def right     <- parseFunc parser
@@ -54,7 +54,7 @@ namespace Magpie:Compiler
                           else Some combineFunc (Pop exprs, result.SomeValue)
             end
 
-            if (result.None?) do Print "no result!"
+            if (result.None?) then Print "no result!"
             result.SomeValue
         end
     end
@@ -62,7 +62,7 @@ namespace Magpie:Compiler
     Current (parser Parser -> Token)
         def r <- parser.Read
         
-        if parser.Read.Size = 0 do
+        if parser.Read.Size = 0 then
             parser.Read << parser.Scanner.Scan
         end
         

@@ -49,10 +49,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BytecodeFile.cs" />
+    <Compile Include="DebugInfo.cs" />
     <Compile Include="IForeignRuntimeInterface.cs" />
     <Compile Include="InterpreterException.cs" />
     <Compile Include="Machine.cs" />
-    <Compile Include="MemoryLimitExceededException.cs" />
+    <Compile Include="MaxStackDepthExceededException.cs" />
     <Compile Include="OpCode.cs" />
     <Compile Include="Operand.cs" />
     <Compile Include="PrintEventArgs.cs" />

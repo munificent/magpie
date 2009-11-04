@@ -6,11 +6,11 @@ using Magpie:Syntax
 namespace Magpie:Compiler
 
     struct Scanner
-        Index       mutable Int
-        Source      String
-        State       mutable ScanState
-        TokenStart  mutable Int
-        EatLines?   mutable Bool
+        mutable Index       Int
+                Source      String
+        mutable State       ScanState
+        mutable TokenStart  Int
+        mutable EatLines?   Bool
     end
     
     union ScanState
@@ -34,7 +34,7 @@ namespace Magpie:Compiler
             token <- ScanCharacter scanner
             
             // post-process newline handling
-            if token.Some? do
+            if token.Some? then
                 token <- Some LookUpKeyword token.SomeValue
             
                 def result <- ProcessLines (scanner.EatLines?, token.SomeValue)
