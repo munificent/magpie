@@ -36,6 +36,22 @@ namespace Magpie.Compilation
                 }
             }
         }
+
+        //### bob: this is basically a copy from Struct :(
+        public Union Instantiate(Compiler compiler, IEnumerable<IBoundDecl> typeArgs)
+        {
+            // look for a previously instantiated one
+            var union = compiler.Types.FindUnion(BaseType.Name, typeArgs);
+
+            if (union == null)
+            {
+                // instantiate the structure
+                union = BaseType.Clone(typeArgs);
+                compiler.Types.Add(union, typeArgs);
+            }
+
+            return union;
+        }
     }
 
     //### bob: copy/paste of GenericStructFunction
@@ -56,9 +72,7 @@ namespace Magpie.Compilation
             var context = Union.BuildContext(compiler,
                 ParameterType, argType, ref typeArgs, out dummy);
 
-            // instantiate the structure
-            var union = Union.BaseType.Clone(typeArgs);
-            compiler.Types.Add(union, typeArgs);
+            var union = Union.Instantiate(compiler, typeArgs);
 
             TypeBinder.Bind(context, union);
 

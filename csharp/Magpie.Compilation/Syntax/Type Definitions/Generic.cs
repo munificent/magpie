@@ -28,7 +28,7 @@ namespace Magpie.Compilation
 
             canInferArgs = inferredTypeArgs != null;
 
-            if ((typeArgs == null) || typeArgs.IsEmpty())
+            if (canInferArgs && ((typeArgs == null) || typeArgs.IsEmpty()))
             {
                 typeArgs = inferredTypeArgs;
             }

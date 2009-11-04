@@ -32,7 +32,6 @@ namespace Magpie.Compilation
             }
         }
 
-        //### bob: need to copy this for union
         public Struct Instantiate(Compiler compiler, IEnumerable<IBoundDecl> typeArgs)
         {
             // look for a previously instantiated one

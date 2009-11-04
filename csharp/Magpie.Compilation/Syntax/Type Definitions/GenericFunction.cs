@@ -33,11 +33,13 @@ namespace Magpie.Compilation
 
             instance.BindSearchSpace(BaseType.SearchSpace);
 
+            // don't instantiate it multiple times
+            // note that this must happen *before* the function is bound, in case the
+            // newly instantiated generic function is recursive.
+            compiler.Functions.Add(instance);
+
             // bind it with the type arguments in context
             FunctionBinder.Bind(context, instance);
-
-            // don't instantiate it multiple times
-            compiler.Functions.Add(instance);
 
             return instance;
         }
