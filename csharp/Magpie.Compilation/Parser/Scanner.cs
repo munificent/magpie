@@ -83,16 +83,6 @@ namespace Magpie.Compilation
         // or null otherwise.
         private Token ScanCharacter()
         {
-            if (Current == "\n")
-            {
-                mLine++;
-                mColumn = 0;
-            }
-            else
-            {
-                mColumn++;
-            }
-
             switch (mState)
             {
                 case ScanState.Default:
@@ -250,7 +240,20 @@ namespace Magpie.Compilation
         }
 
         // Advances the scanner to the next character.
-        private void Advance() { mIndex++; }
+        private void Advance()
+        {
+            if (Current == "\n")
+            {
+                mLine++;
+                mColumn = 0;
+            }
+            else
+            {
+                mColumn++;
+            }
+
+            mIndex++;
+        }
     
         // Marks the next multi-character token as starting at the current position
         // then switches to the given state.
@@ -318,7 +321,7 @@ namespace Magpie.Compilation
             if (Current == current)
             {
                 // consume the character
-                mIndex += 1;
+                Advance();
 
                 return true;
             }
@@ -333,7 +336,8 @@ namespace Magpie.Compilation
             if ((Current == current) && (Next == next))
             {
                 // consume the characters
-                mIndex += 2;
+                Advance();
+                Advance();
 
                 return true;
             }

@@ -21,7 +21,7 @@ namespace Magpie:Compiler
         // no type args present: ok
         TestParse ("blah",        fn TypeArgs (Parser), List'String)
         
-        TestParse ("'Int",        fn TypeArgs (Parser), ListOf ("Int"))
+        TestParse ("'Int",        fn TypeArgs (Parser), List1 ("Int"))
         TestParse ("'(Int, Foo)", fn TypeArgs (Parser), ListOf ("Int", "Foo"))
     end
     

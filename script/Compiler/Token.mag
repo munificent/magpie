@@ -5,6 +5,11 @@ using Magpie:Syntax
 
 namespace Magpie:Compiler
 
+    //### bob: temp hack because you can't get a reference to an
+    // auto function (yet)
+    OperatorToken* (name String -> Token) OperatorToken name
+    NameToken* (name String -> Token) NameToken name
+    
     union Token
         LeftParenToken
         RightParenToken

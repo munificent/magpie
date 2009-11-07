@@ -42,8 +42,8 @@ namespace Magpie:Compiler
         else if expr.IfDo? then UnitType
         
         else if expr.IfThenElse? then
-            def thenType <- expr.IfThenElseValue.Second
-            def elseType <- expr.IfThenElseValue.Third
+            def thenType <- expr.IfThenElseValue.Second.Type
+            def elseType <- expr.IfThenElseValue.Third.Type
             
             if thenType != elseType then Print "then and else types don't match!"
             
@@ -92,6 +92,17 @@ namespace Magpie:Compiler
         else if decl.StringType? then "String"
         else "? not impl"
     end
+    
+    = (a Decl, b Decl -> Bool)
+        if a.UnitType? & b.UnitType? then true
+        else if a.BoolType? & b.BoolType? then true
+        else if a.IntType? & b.IntType? then true
+        else if a.StringType? & b.StringType? then true
+        else false
+        //### bob: need to support tuple and function types!
+    end
+    
+    != (a Decl, b Decl -> Bool) Not (a = b)
     
     // A type declaration.
     union Decl

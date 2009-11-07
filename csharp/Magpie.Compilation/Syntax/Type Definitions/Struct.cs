@@ -54,7 +54,8 @@ namespace Magpie.Compilation
         public Struct Clone(IEnumerable<IBoundDecl> typeArguments)
         {
             var structure = new Struct(Position, BaseName,
-                Fields.Select(field => new Field(field.Name, field.Type.Unbound, field.IsMutable)));
+                Fields.Select(field => new Field(field.Name, 
+                    DeclCloner.Clone(field.Type.Unbound), field.IsMutable)));
 
             structure.BindSearchSpace(SearchSpace);
             structure.BindTypeArguments(typeArguments);

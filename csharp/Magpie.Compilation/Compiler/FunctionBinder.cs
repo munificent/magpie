@@ -54,7 +54,7 @@ namespace Magpie.Compilation
             var namedTarget = expr.Target as NameExpr;
             if (namedTarget != null)
             {
-                return mContext.Compiler.ResolveName(mFunction, Scope, namedTarget.Position,
+                return mContext.ResolveName(mFunction, Scope, namedTarget.Position,
                     namedTarget.Name, namedTarget.TypeArgs, boundArg);
             }
 
@@ -90,7 +90,7 @@ namespace Magpie.Compilation
             // not calling a function, so try to desugar to a __Call
             var callArg = new BoundTupleExpr(new IBoundExpr[] { target, boundArg });
 
-            var call = mContext.Compiler.ResolveFunction(mFunction, expr.Target.Position,
+            var call = mContext.ResolveFunction(mFunction, expr.Target.Position,
                 "__Call", new IUnboundDecl[0], callArg);
 
             if (call != null) return call;
@@ -174,7 +174,7 @@ namespace Magpie.Compilation
                 var desugaredCallTarget = callTarget.Target.Accept(this);
                 var desugaredCallArg = new BoundTupleExpr(new IBoundExpr[] { desugaredCallTarget, callArg, value });
 
-                var call = mContext.Compiler.ResolveFunction(mFunction, expr.Target.Position,
+                var call = mContext.ResolveFunction(mFunction, expr.Target.Position,
                     "__Call<-", new IUnboundDecl[0], desugaredCallArg);
 
                 if (call != null) return call;
@@ -253,7 +253,7 @@ namespace Magpie.Compilation
                 paramType = TypeBinder.Bind(mContext, expr.ParamType);
             }
 
-            var callable = mContext.Compiler.Functions.Find(mContext.Compiler, mFunction.SearchSpace, 
+            var callable = mContext.Compiler.Functions.Find(mContext, 
                 expr.Name.Name, expr.Name.TypeArgs, paramType);
 
             var function = callable as Function;
@@ -351,7 +351,7 @@ namespace Magpie.Compilation
 
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(NameExpr expr)
         {
-            return mContext.Compiler.ResolveName(mFunction, Scope,
+            return mContext.ResolveName(mFunction, Scope,
                 expr.Position, expr.Name, expr.TypeArgs, null);
         }
 
@@ -511,7 +511,7 @@ namespace Magpie.Compilation
             // add the value argument
             arg = arg.AppendArg(value);
 
-            return mContext.Compiler.ResolveFunction(mFunction, position, name, typeArgs, arg);
+            return mContext.ResolveFunction(mFunction, position, name, typeArgs, arg);
         }
 
         private FunctionBinder(Function function, BindingContext context, Scope scope)

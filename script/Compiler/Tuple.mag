@@ -1,9 +1,6 @@
 namespace Core
 
     // Functions for decomposing tuples.
-
-    First'T1 (arg1 T1 -> T1) arg1
-
     First'(T1, T2)  (arg1 T1, arg2 T2 -> T1) arg1
     Second'(T1, T2) (arg1 T1, arg2 T2 -> T2) arg2
 

@@ -18,7 +18,7 @@ namespace Magpie.Compilation
             TypeParameters = new List<string>(typeParameters);
         }
 
-        public BindingContext BuildContext(Compiler compiler,
+        public BindingContext BuildContext(BindingContext callingContext,
             IUnboundDecl parameterType, IBoundDecl argType,
             ref IEnumerable<IBoundDecl> typeArgs, out bool canInferArgs)
         {
@@ -28,12 +28,22 @@ namespace Magpie.Compilation
 
             canInferArgs = inferredTypeArgs != null;
 
-            if (canInferArgs && ((typeArgs == null) || typeArgs.IsEmpty()))
+            if (canInferArgs)
             {
                 typeArgs = inferredTypeArgs;
             }
 
-            return new BindingContext(compiler, BaseType.SearchSpace, TypeParameters, typeArgs);
+            if (typeArgs.IsEmpty())
+            {
+                typeArgs = null;
+            }
+
+            // include the open namespaces of the calling context. this was the instantiated
+            // generic has access to everything that the instantiation call site has access
+            // to
+            var searchSpace = new NameSearchSpace(BaseType.SearchSpace, callingContext.SearchSpace);
+
+            return new BindingContext(callingContext.Compiler, searchSpace, TypeParameters, typeArgs);
         }
     }
 }

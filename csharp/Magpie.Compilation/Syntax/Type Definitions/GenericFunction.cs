@@ -12,11 +12,11 @@ namespace Magpie.Compilation
         {
         }
 
-        public ICallable Instantiate(Compiler compiler, IEnumerable<IBoundDecl> typeArgs,
+        public ICallable Instantiate(BindingContext context, IEnumerable<IBoundDecl> typeArgs,
             IBoundDecl argType)
         {
             bool canInfer;
-            var context = BuildContext(compiler,
+            var genericContext = BuildContext(context,
                 BaseType.Type.Parameter.Unbound,
                 argType, ref typeArgs, out canInfer);
 
@@ -25,7 +25,7 @@ namespace Magpie.Compilation
 
             // create a new bound function type with the type arguments applied
             FuncType funcType = BaseType.Type.Clone();
-            TypeBinder.Bind(context, funcType);
+            TypeBinder.Bind(genericContext, funcType);
 
             // create a new unbound function with the proper type
             Function instance = new Function(BaseType.Position, BaseType.BaseName,
@@ -36,10 +36,10 @@ namespace Magpie.Compilation
             // don't instantiate it multiple times
             // note that this must happen *before* the function is bound, in case the
             // newly instantiated generic function is recursive.
-            compiler.Functions.Add(instance);
+            context.Compiler.Functions.Add(instance);
 
             // bind it with the type arguments in context
-            FunctionBinder.Bind(context, instance);
+            FunctionBinder.Bind(genericContext, instance);
 
             return instance;
         }

@@ -40,6 +40,44 @@ namespace Magpie.Compilation
         }
 
         /// <summary>
+        /// Creates a new search space by combining the usings of one search
+        /// space with another.
+        /// </summary>
+        public NameSearchSpace(NameSearchSpace main, NameSearchSpace additional)
+        {
+            // clone the main one
+            Namespace = main.Namespace;
+            UsingNamespaces = new List<string>(main.UsingNamespaces);
+
+            // include that additional namespaces
+            if (!UsingNamespaces.Contains(additional.Namespace)) UsingNamespaces.Add(additional.Namespace);
+
+            foreach (var name in additional.UsingNamespaces)
+            {
+                if (!UsingNamespaces.Contains(name)) UsingNamespaces.Add(name);
+            }
+        }
+
+        public override string ToString()
+        {
+            var builder = new StringBuilder();
+
+            foreach (var usingName in UsingNamespaces)
+            {
+                builder.Append("using ").AppendLine(usingName);
+            }
+
+            if (!String.IsNullOrEmpty(Namespace))
+            {
+                if (builder.Length > 0) builder.AppendLine();
+
+                builder.Append("namespace ").AppendLine(Namespace);
+            }
+
+            return builder.ToString();
+        }
+
+        /// <summary>
         /// Yields every possible fully-qualified name given a base name, in appropriate
         /// search order.
         /// </summary>

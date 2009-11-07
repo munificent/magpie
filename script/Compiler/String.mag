@@ -41,9 +41,9 @@ namespace Magpie:Compiler
     
     @ (text String, position Int -> String) Substring (text, position, 1)
     
-    Quote? (character String -> Bool) character = SpecialChar "quote"
-    Newline? (character String -> Bool) character = SpecialChar "newline"
-    Backslash? (character String -> Bool) character = SpecialChar "backslash"
+    Quote? (character String -> Bool) character = "\""
+    Newline? (character String -> Bool) character = "\n"
+    Backslash? (character String -> Bool) character = "\\"
     Minus? (character String -> Bool) character = "-"
     
     Alpha? (character String -> Bool)

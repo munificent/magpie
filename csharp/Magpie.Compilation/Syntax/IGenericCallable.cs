@@ -9,7 +9,7 @@ namespace Magpie.Compilation
     {
         string Name { get; }
 
-        ICallable Instantiate(Compiler compiler, IEnumerable<IBoundDecl> typeArgs,
+        ICallable Instantiate(BindingContext context, IEnumerable<IBoundDecl> typeArgs,
             IBoundDecl argType);
     }
 }

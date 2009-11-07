@@ -1,0 +1,8 @@
+use file <- CreateFile "c:\foo" do
+    Write (file, "hi")
+end
+
+// expands to
+def file <- CreateFile "c:\foo"
+Write (file, "hi")
+End file

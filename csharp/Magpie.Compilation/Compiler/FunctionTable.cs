@@ -87,12 +87,12 @@ namespace Magpie.Compilation
         /// <summary>
         /// Looks for a function with the given name in all of the currently used namespaces.
         /// </summary>
-        public ICallable Find(Compiler compiler, NameSearchSpace searchSpace,
+        public ICallable Find(BindingContext context,
             string name, IList<IUnboundDecl> typeArgs, IBoundDecl argType)
         {
-            foreach (var potentialName in searchSpace.SearchFor(name))
+            foreach (var potentialName in context.SearchSpace.SearchFor(name))
             {
-                var bound = LookUpFunction(compiler, searchSpace, potentialName, typeArgs, argType);
+                var bound = LookUpFunction(context, potentialName, typeArgs, argType);
                 if (bound != null) return bound;
             }
 
@@ -100,10 +100,17 @@ namespace Magpie.Compilation
             return null;
         }
 
-        private ICallable LookUpFunction(Compiler compiler, NameSearchSpace searchSpace, string fullName,
+        private ICallable LookUpFunction(BindingContext context, string fullName,
             IList<IUnboundDecl> typeArgs, IBoundDecl argType)
         {
-            var boundTypeArgs = TypeBinder.Bind(new BindingContext(compiler, searchSpace), typeArgs);
+            // with this line uncommented, the "InferredGenericUsesExplicitType" test
+            // passes, but the self-hosting compiler doesn't compile. the line after
+            // the next will get the compiler to break at a different point (earlier?
+            // later?), but breaks the test
+            // the first line is newer and (i think) correct. the old line is what it was
+            // doing before.
+            var boundTypeArgs = TypeBinder.Bind(context, typeArgs);
+            //var boundTypeArgs = TypeBinder.Bind(new BindingContext(context.Compiler, context.SearchSpace), typeArgs);
 
             string uniqueName = Callable.UniqueName(fullName, boundTypeArgs, argType);
 
@@ -117,7 +124,7 @@ namespace Magpie.Compilation
                 // names must match
                 if (generic.Name != fullName) continue;
 
-                ICallable instance = generic.Instantiate(compiler, boundTypeArgs, argType);
+                ICallable instance = generic.Instantiate(context, boundTypeArgs, argType);
 
                 //### bob: there's a bug here. it doesn't check that the *unique* names of the two functions
                 // match, just the base names. i think this means it could incorrectly collide:

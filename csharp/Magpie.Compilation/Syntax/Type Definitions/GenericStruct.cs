@@ -64,25 +64,25 @@ namespace Magpie.Compilation
         
         public abstract string Name { get; }
 
-        public ICallable Instantiate(Compiler compiler, IEnumerable<IBoundDecl> typeArgs,
+        public ICallable Instantiate(BindingContext context, IEnumerable<IBoundDecl> typeArgs,
             IBoundDecl argType)
         {
             bool dummy;
-            var context = Struct.BuildContext(compiler,
+            Struct.BuildContext(context,
                 ParameterType, argType, ref typeArgs, out dummy);
 
             // bail if we couldn't match all of the type arguments
             if (typeArgs == null) return null;
 
             // instantiate the structure
-            var structure = Struct.Instantiate(compiler, typeArgs);
+            var structure = Struct.Instantiate(context.Compiler, typeArgs);
 
             // now build the auto functions for it
             ICallable instantiated = null;
             foreach (ICallable function in structure.BuildFunctions())
             {
                 // add to the symbol table so they are only instantiated once
-                compiler.Functions.Add(function);
+                context.Compiler.Functions.Add(function);
 
                 if (function.GetType().Equals(FunctionType)) instantiated = function;
             }

@@ -1,0 +1,25 @@
+// expected: hi
+
+//### bob: note that this *doesn't* work if Main was in a different
+// namespace than Foo and String (Foo -> String). for *that* to work
+// the generic instantiation process would also need to implicitly
+// have access to the namespaces of its arguments, and not just its
+// instantiation callsite.
+
+Main (->)
+    def foo <- Foo "hi"
+    
+    Print NamespaceTwo:Bar foo
+end
+
+struct Foo
+    Value String
+end
+
+String (foo Foo -> String) foo.Value
+
+namespace NamespaceTwo
+
+    Bar'T (value T -> String) value.String
+ 
+end

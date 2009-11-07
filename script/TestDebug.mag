@@ -1,0 +1,14 @@
+Main (->)
+    Print "in main"
+    
+    Foo Bar
+    Bar
+end
+
+Foo (->)
+    Print "in foo"
+end
+
+Bar (->)
+    Print "in bar"
+end

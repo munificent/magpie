@@ -112,8 +112,8 @@ namespace Magpie.Compilation
             return null;
         }
 
-        public INamedType Find(Compiler compiler, NameSearchSpace searchSpace, Position position, string name,
-            IEnumerable<IBoundDecl> typeArgs)
+        public INamedType Find(Compiler compiler, NameSearchSpace searchSpace, Position position,
+            string name, IEnumerable<IBoundDecl> typeArgs)
         {
             // look through the namespaces
             foreach (var potentialName in searchSpace.SearchFor(name))

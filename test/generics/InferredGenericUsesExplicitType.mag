@@ -1,0 +1,10 @@
+Main (->)
+    def a <- Foo 123
+end
+
+Foo'T (value T -> Option'T) None'T
+
+union Option'T
+    Some T
+    None
+end

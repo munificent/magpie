@@ -40,7 +40,8 @@ namespace Magpie.Compilation
         public Union Clone(IEnumerable<IBoundDecl> typeArguments)
         {
             var union = new Union(Position, BaseName,
-                Cases.Select(unionCase => new UnionCase(unionCase.Name, unionCase.ValueType.Unbound, unionCase.Index)));
+                Cases.Select(unionCase => new UnionCase(unionCase.Name,
+                    DeclCloner.Clone(unionCase.ValueType.Unbound), unionCase.Index)));
 
             union.BindSearchSpace(SearchSpace);
             union.BindTypeArguments(typeArguments);

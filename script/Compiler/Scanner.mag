@@ -113,7 +113,7 @@ namespace Magpie:Compiler
             else if Match (scanner, ",")            then Some CommaToken
             else if Match (scanner, ":")            then Some ColonToken
             else if Match (scanner, ".")            then Some DotToken
-            else if Match (scanner, SpecialChar "newline") then Some LineToken
+            else if Match (scanner, "\n")           then Some LineToken
             else if Match (scanner, "'")            then Some PrimeToken
             
             else if scanner.Current.Quote?          then StartToken (scanner, InString)
@@ -155,14 +155,14 @@ namespace Magpie:Compiler
             if scanner.Current.Punctuation? then ChangeState (scanner, InOperator)
             else if scanner.Current.Alpha?  then ChangeState (scanner, InName)
             else if scanner.Current.Digit?  then ChangeState (scanner, InNumber)
-            else CompleteToken (scanner, fn OperatorToken (String))
+            else CompleteToken (scanner, fn OperatorToken* (String))
             
         else if scanner.State.InName? then
             scanner.Advance
             
             if Not (scanner.Current.Alpha? |
                     scanner.Current.Punctuation? |
-                    scanner.Current.Digit?) then CompleteToken (scanner, fn NameToken (String))
+                    scanner.Current.Digit?) then CompleteToken (scanner, fn NameToken* (String))
             else None'Token // still in identifier
             
         else if scanner.State.InOperator? then
@@ -171,7 +171,7 @@ namespace Magpie:Compiler
             // if there are any letters, it's a name
             if scanner.Current.Alpha? then ChangeState (scanner, InName)
             else if Not (scanner.Current.Punctuation? |
-                         scanner.Current.Digit?) then CompleteToken (scanner, fn OperatorToken (String))
+                         scanner.Current.Digit?) then CompleteToken (scanner, fn OperatorToken* (String))
                 
             else None'Token // still in identifier
         
@@ -182,7 +182,7 @@ namespace Magpie:Compiler
             else None'Token // still in number
             
         else if scanner.State.InLineComment? then
-            if Match (scanner, SpecialChar "newline") then
+            if Match (scanner, "\n") then
                 scanner.State <- Default
                 
             else scanner.Advance // ignore everything else

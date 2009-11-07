@@ -120,7 +120,7 @@ namespace Magpie.Compilation
 
             public string Name { get { return "__Call"; } }
 
-            public ICallable Instantiate(Compiler compiler, IEnumerable<IBoundDecl> typeArgs,
+            public ICallable Instantiate(BindingContext context, IEnumerable<IBoundDecl> typeArgs,
                 IBoundDecl argType)
             {
                 // should have two args: an int and an array
@@ -145,7 +145,7 @@ namespace Magpie.Compilation
 
             public string Name { get { return "__Call<-"; } }
 
-            public ICallable Instantiate(Compiler compiler, IEnumerable<IBoundDecl> typeArgs,
+            public ICallable Instantiate(BindingContext context, IEnumerable<IBoundDecl> typeArgs,
                 IBoundDecl argType)
             {
                 // should have three args: an int, an array, and a value
@@ -178,7 +178,7 @@ namespace Magpie.Compilation
 
             public string Name { get { return "Size"; } }
 
-            public ICallable Instantiate(Compiler compiler, IEnumerable<IBoundDecl> typeArgs,
+            public ICallable Instantiate(BindingContext context, IEnumerable<IBoundDecl> typeArgs,
                 IBoundDecl argType)
             {
                 var arrayType = argType as BoundArrayType;

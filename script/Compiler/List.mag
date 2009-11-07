@@ -1,5 +1,11 @@
 using Core
 
+
+using Magpie:Compiler //### bob: hack temp. instantiating Join needs
+using Magpie:Syntax   // access to this because it doesn't implicitly
+                      // search in the namespace where it's being
+                      // instantiated
+
 namespace Core:Collections
 
     // Gets the number of items in the List.
@@ -20,7 +26,10 @@ namespace Core:Collections
     // Creates an empty List.
     List'T (-> List'T)                    List None'_Node'T
 
-    ListOf'T (i1 T                         -> List'T) i1 ~ List'T
+    //### bob: this name must be different from ListOf or all calls to
+    // ListOf will go to this one, passing in the single arg tuple
+    List1'T (i T -> List'T) i ~ List'T
+
     ListOf'T (i1 T, i2 T                   -> List'T) i1 ~ (i2 ~ List'T)
     ListOf'T (i1 T, i2 T, i3 T             -> List'T) i1 ~ ListOf (i2, i3)
     ListOf'T (i1 T, i2 T, i3 T, i4 T       -> List'T) i1 ~ ListOf (i2, i3, i4)
@@ -46,7 +55,7 @@ namespace Core:Collections
     end
 
     // Creates a terminating node.
-    _Node'T (item T -> _Node'T)           _Node (item, None'_Node'T)
+    //_Node'T (item T -> _Node'T)           _Node (item, None'_Node'T)
 
     // Converts all list items to strings, and concatenates them together using
     // the given separator string.
@@ -213,7 +222,7 @@ namespace Core:Collections
     
     _Map'(From, To, Arg) (from Option'_Node'From, arg Arg, func fn (Arg, From -> To) -> Option'_Node'To)
         if from.Some? then
-            def to  <- Some _Node func (arg, from.SomeValue.Item)
+            def to  <- Some _Node (func (arg, from.SomeValue.Item), None'_Node'To)
             to.SomeValue.Next <- _Map (from.SomeValue.Next, arg, func)
             to
         else None'_Node'To
@@ -228,7 +237,7 @@ namespace Core:Collections
     
     _Map'(From, To) (from Option'_Node'From, func fn (From -> To) -> Option'_Node'To)
         if from.Some? then
-            def to  <- Some _Node func from.SomeValue.Item
+            def to  <- Some _Node (func from.SomeValue.Item, None'_Node'To)
             to.SomeValue.Next <- _Map (from.SomeValue.Next, func)
             to
         else None'_Node'To

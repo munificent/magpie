@@ -378,7 +378,7 @@ namespace Magpie:Compiler
     
     // <-- PrimaryExpr+
     ApplyExpr (parser Parser -> Expr)
-        OneOrMoreRight(parser, fn ReverseApplyExpr (Parser), fn Call (Expr, Expr))
+        OneOrMoreRight(parser, fn ReverseApplyExpr (Parser), fn Call* (Expr, Expr))
     end
 
     // <-- PrimaryExpr (DOT PrimaryExpr)*

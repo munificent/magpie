@@ -37,16 +37,16 @@ namespace Magpie:Compiler
             ListOf (NameToken "foo", OperatorToken "+", NameToken "bar"))
 
         // test strings
-        TestScan ("\"quote\"", ListOf (StringToken "quote"))
+        TestScan ("\"quote\"", List1 (StringToken "quote"))
         
         TestScan ("\"with \\\\ backslash\"",
-            ListOf (StringToken ("with \\ backslash")))
+            List1 (StringToken ("with \\ backslash")))
 
         TestScan ("\"with \\\" quote\"",
-            ListOf (StringToken ("with \" quote")))
+            List1 (StringToken ("with \" quote")))
 
         TestScan ("\"with \\n newline\"",
-            ListOf (StringToken ("with \n newline")))
+            List1 (StringToken ("with \n newline")))
             
         Print "done scanner tests"
     end

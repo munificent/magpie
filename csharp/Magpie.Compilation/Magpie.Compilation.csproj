@@ -51,6 +51,7 @@
     <Compile Include="Bytecode\StringTable.cs" />
     <Compile Include="Compiler\BindingContext.cs" />
     <Compile Include="Compiler\CompileError.cs" />
+    <Compile Include="Compiler\DeclCloner.cs" />
     <Compile Include="Compiler\FunctionTable.cs" />
     <Compile Include="Compiler\Automatic Functions\FieldGetter.cs" />
     <Compile Include="Compiler\Automatic Functions\FieldSetter.cs" />
