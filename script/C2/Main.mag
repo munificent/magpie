@@ -1,0 +1,6 @@
+Main (->)
+    TestOption
+    TestTuple
+    TestList
+    //TestLexer
+end

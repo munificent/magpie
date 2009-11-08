@@ -1,0 +1,15 @@
+AssertFail (message String ->)
+    Print ("fail: " + message)
+end
+
+AssertTrue (condition Bool, message String ->)
+    if Not condition then AssertFail message
+end
+
+AssertEqual'T (expected T, actual T ->)
+    AssertEqual (expected, actual, "expected " + expected.String + " actual " + actual.String)
+end
+
+AssertEqual'T (expected T, actual T, message String ->)
+    AssertTrue (expected = actual, message)
+end

@@ -1,0 +1,51 @@
+using Core
+
+// note: it is a runtime error to call this on an empty list
+Head'T (list List'T -> T) list.ConsValue.First
+
+// note: it is a runtime error to call this on an empty list
+Rest'T (list List'T -> List'T) list.ConsValue.Second
+
+Count'T (list List'T -> Int)
+    mutable count <- 0
+    
+    for item <- list do count <- + 1
+    
+    count
+end
+
+// cons operator
+
+++'T (head T, tail T -> List'T) head ++ Cons (tail, Empty'T)
+
+++'T (head T, rest List'T -> List'T) Cons (head, rest)
+
+
+// list iterator
+
+Iterate'T (list List'T -> ListIterator'T) ListIterator (false, list)
+
+MoveNext'T (iterator ListIterator'T -> Bool)
+    if iterator.Started? then
+        // move if we can
+        if iterator.List.Cons? then
+            iterator.List <- .Rest
+        end
+    else
+        iterator.Started? <- true
+    end
+    
+    Not iterator.List.Empty?
+end
+
+Current'T (iterator ListIterator'T -> T) iterator.List.Head
+
+struct ListIterator'T
+    mutable Started? Bool
+    mutable List     List'T
+end
+
+union List'T
+    Empty
+    Cons (T, List'T)
+end
