@@ -1,4 +1,7 @@
-Main (->)
+Main (arg String ->)
+
+    Print arg
+
     // base stuff
     TestOption
     TestTuple

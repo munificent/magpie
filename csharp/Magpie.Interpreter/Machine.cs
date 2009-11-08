@@ -23,9 +23,14 @@ namespace Magpie.Interpreter
 
         public void Interpret(Stream stream, DebugInfo debug)
         {
+            Interpret(stream, debug, String.Empty);
+        }
+
+        public void Interpret(Stream stream, DebugInfo debug, string argument)
+        {
             BytecodeFile bytecode = new BytecodeFile(stream);
 
-            Interpret(bytecode, debug, String.Empty);
+            Interpret(bytecode, debug, argument);
         }
 
         public void Interpret(BytecodeFile file, DebugInfo debug, string argument)
@@ -33,9 +38,18 @@ namespace Magpie.Interpreter
             mFile = file;
             mDebug = debug;
 
+            int paramType = 0;
+            if (file.MainTakesArgument)
+            {
+                // push the string argument
+                Push(argument);
+
+                paramType = 1;
+            }
+
             // find "main"
             Push(mFile.OffsetToMain);
-            Call(0, false);
+            Call(paramType, false);
 
             Interpret();
         }

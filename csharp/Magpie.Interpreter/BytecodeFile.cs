@@ -10,12 +10,22 @@ namespace Magpie.Interpreter
     {
         public byte[] Bytes { get { return mData; } }
 
+        public bool MainTakesArgument
+        {
+            get
+            {
+                int offset = 8; // magic num + version
+                //### bob: hack temp
+                return mData[offset] != 0;
+            }
+        }
+
         //### bob: hackish. should be able to look up export by name
         public int OffsetToMain
         {
             get
             {
-                int offset = 16; // magic num + version + num exports + export name
+                int offset = 17; // magic num + version + main arg flag + num exports + export name
                 //### bob: hack temp
                 return ((int)mData[offset++]) |
                        ((int)mData[offset++] << 8) |

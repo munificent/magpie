@@ -71,7 +71,7 @@ namespace Magpie.App
 
                 try
                 {
-                    machine.Interpret(stream, debug);
+                    machine.Interpret(stream, debug, "argument!");
                 }
                 catch (InterpreterException ex)
                 {
