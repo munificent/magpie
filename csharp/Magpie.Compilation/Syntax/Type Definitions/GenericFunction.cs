@@ -27,6 +27,9 @@ namespace Magpie.Compilation
             FuncType funcType = BaseType.Type.Clone();
             TypeBinder.Bind(genericContext, funcType);
 
+            // make sure the concrete argument types of this instance match what we're actually given
+            if (!DeclComparer.TypesMatch(funcType.Parameter.Bound, argType)) return null;
+
             // create a new unbound function with the proper type
             Function instance = new Function(BaseType.Position, BaseType.BaseName,
                 funcType, BaseType.ParamNames, BaseType.Body.Unbound, typeArgs, canInfer);

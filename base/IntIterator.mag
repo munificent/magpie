@@ -2,6 +2,10 @@ Times (count Int -> Range) Range (0, count)
 
 -to- (min Int, max Int -> Range) Range (min, max)
 
+StartAt (min Int -> Range) Range (min, 2147483647)
+
+FromZero (-> Range) StartAt 0
+
 Iterate (range Range -> Range^) Range^ (range.Max, range.Min - 1)
 
 MoveNext (iter Range^ -> Bool)

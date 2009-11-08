@@ -1,16 +1,16 @@
-Iterate'T (array []'T -> Array^'T) Array^ (array, -1)
+Iterate'T (array []'T -> ArrayIterator'T) ArrayIterator (array, -1)
 
-MoveNext'T (iter Array^'T -> Bool)
+MoveNext'T (iter ArrayIterator'T -> Bool)
     iter.Index <- + 1
     iter.Index < iter.Array.Size
 end
 
-Current'T (iter Array^'T -> T)
+Current'T (iter ArrayIterator'T -> T)
     def index <- iter.Index
     iter.Array.index 
 end
 
-struct Array^'T
+struct ArrayIterator'T
             Array []'T
     mutable Index Int
 end
