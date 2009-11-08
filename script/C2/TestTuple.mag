@@ -1,5 +1,3 @@
-using Core
-
 TestTuple (->)
     Print "TestTuple"
     

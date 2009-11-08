@@ -1,5 +1,3 @@
-using Core
-
 TestOption (->)
     Print "TestOption"
     

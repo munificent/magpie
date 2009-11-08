@@ -39,6 +39,7 @@ namespace Magpie.Compilation
                             case "if": token = new Token(token.Position, TokenType.If); break;
                             case "match": token = new Token(token.Position, TokenType.Match); break;
                             case "mutable": token = new Token(token.Position, TokenType.Mutable); break;
+                            case "var": token = new Token(token.Position, TokenType.Mutable); break;
                             case "namespace": token = new Token(token.Position, TokenType.Namespace); break;
                             case "return": token = new Token(token.Position, TokenType.Return); break;
                             case "struct": token = new Token(token.Position, TokenType.Struct); break;

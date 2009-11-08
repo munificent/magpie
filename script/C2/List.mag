@@ -1,4 +1,22 @@
-using Core
+// constructors
+
+List'T (i T -> List'T) i ++ Empty'T
+
+ListOf'T (i1 T, i2 T -> List'T)
+    i1 ++ i2
+end
+
+ListOf'T (i1 T, i2 T, i3 T -> List'T)
+    i1 ++ (i2 ++ i3)
+end
+
+ListOf'T (i1 T, i2 T, i3 T, i4 T -> List'T)
+    i1 ++ (i2 ++ (i3 ++ i4))
+end
+
+ListOf'T (i1 T, i2 T, i3 T, i4 T, i5 T -> List'T)
+    i1 ++ (i2 ++ (i3 ++ (i4 ++ i5)))
+end
 
 // note: it is a runtime error to call this on an empty list
 Head'T (list List'T -> T) list.ConsValue.First
@@ -7,7 +25,7 @@ Head'T (list List'T -> T) list.ConsValue.First
 Rest'T (list List'T -> List'T) list.ConsValue.Second
 
 Count'T (list List'T -> Int)
-    mutable count <- 0
+    var count <- 0
     
     for item <- list do count <- + 1
     
@@ -41,8 +59,8 @@ end
 Current'T (iterator ListIterator'T -> T) iterator.List.Head
 
 struct ListIterator'T
-    mutable Started? Bool
-    mutable List     List'T
+    var Started? Bool
+    var List     List'T
 end
 
 union List'T

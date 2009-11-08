@@ -1,0 +1,34 @@
+TestString (->)
+    TestString/Index
+    TestString/Iterator
+    TestString/Contains
+end
+
+TestString/Index (->)
+    Print "TestString/Index"
+    
+    AssertEqual ("c", "abcd".2)
+end
+
+TestString/Iterator (->)
+    Print "TestString/Iterator"
+    
+    for item <- "" do
+        AssertFail "should not get item for string"
+    end
+    
+    for item <- "ab"
+    for index <- FromZero do
+        if index = 0 then AssertEqual ("a", item, "first char should be 'a'")
+        if index = 1 then AssertEqual ("b", item, "second char should be 'b'")
+        AssertTrue (index <= 1, "index out of bounds")
+    end
+end
+
+TestString/Contains (->)
+    Print "TestString/Contains"
+    
+    AssertEqual (true, Contains ("abcde", "abc"))
+    AssertEqual (true, Contains ("abcde", "de"))
+    AssertEqual (false, Contains ("abcde", "abb"))
+end

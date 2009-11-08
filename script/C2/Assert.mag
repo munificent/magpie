@@ -1,5 +1,5 @@
 AssertFail (message String ->)
-    Print ("fail: " + message)
+    Print ("!!! fail: " + message)
 end
 
 AssertTrue (condition Bool, message String ->)

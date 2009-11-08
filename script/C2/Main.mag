@@ -1,6 +1,11 @@
 Main (->)
+    // base stuff
     TestOption
     TestTuple
     TestList
-    //TestLexer
+    TestString
+    
+    // lexing
+    TestToken
+    TestLexer
 end

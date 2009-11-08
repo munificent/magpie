@@ -1,0 +1,263 @@
+// Creates a new lexer for the given text.
+Lexer (text String -> Lexer) Lexer (0, text, Default, 0, true)
+
+// The special "character" used to signify a value beyond the end of
+// the text.
+Lexer/Eof (-> String) "eof"
+
+// Gets the current character that the lexer is looking at.
+Current (lexer Lexer -> String)
+    if lexer.Index < lexer.Text.Count then
+        Substring (lexer.Text, lexer.Index, 1)
+    else Lexer/Eof
+end
+
+// Gets the character past the one that the lexer is looking at.
+Next (lexer Lexer -> String)
+    if lexer.Index < (lexer.Text.Count - 1) then
+        Substring (lexer.Text, lexer.Index + 1, 1)
+    else Lexer/Eof
+end
+
+// Gets whether or not the lexer has processed all characters.
+Done? (lexer Lexer -> Bool) lexer.Current = Lexer/Eof
+
+// Advances the Lexer to the next character.
+Advance (lexer Lexer ->) lexer.Index <- + 1
+
+// Attempts to match the current character with the given one.
+// Consumes it and returns true if successful.
+Match (lexer Lexer, character String -> Bool)
+    if lexer.Current = character then
+        // consume the character
+        lexer.Index <- + 1
+        true
+    else false
+end
+    
+// Attempts to match the next two characters with the given pair.
+// Consumes them and returns true if successful.
+Match (lexer Lexer, current String, next String -> Bool)
+    if (lexer.Current = current) & (lexer.Next = next) then
+        // consume the characters
+        lexer.Index <- + 2
+        true
+    else false
+end
+
+// Takes a quoted string with escape codes in it and returns the
+// processed resulting "real" string.
+// Ex: "foo\"bar" -> foo"bar
+EscapeString (text String -> String)
+    // strip off surrounding ""
+    def contents <- Substring (text, 1, text.Count - 2)
+    
+    var result    <- ""
+    var inEscape? <- false
+    
+    for c <- contents do
+        if inEscape? then
+            if      c = "\"" then result <- + "\""
+            else if c = "\\" then result <- + "\\"
+            else if c = "n"  then result <- + "\n"
+            else if c = "r"  then result <- + "\r"
+            else Print ("unknown escape char " + c)
+            inEscape? <- false
+        else
+            if c = "\\" then inEscape? <- true
+            else result <- + c
+        end
+    end
+    
+    //### bob: should check that we aren't in an escape at the end
+    // of the string (i.e. "foo\")
+    
+    result
+end
+
+// Escapes the given string and makes a literal token for it.
+MakeStringToken (text String -> Token) StringToken EscapeString text
+
+MakeIntToken (text String -> Token) IntToken ParseInt text
+
+// Processes characters until the next token is completed and returns
+// it.
+ReadToken (lexer Lexer -> Token)
+    mutable token     <- None'Token
+    
+    while token.None? do
+        token <- ProcessCharacter lexer
+        
+        // post-process newline handling
+        if token.Some? then
+            def result <- ProcessLines (lexer.EatLines?, token.SomeValue)
+            
+            lexer.EatLines? <- result.First
+            token           <- result.Second
+        end
+    end
+    
+    token.SomeValue
+end
+
+ProcessLines (eatLines? Bool, token Token -> (Bool, Option'Token))
+    if token.LineToken? then
+        if eatLines? then (true, None'Token) // eat it
+        else (true, Some token)              // eat subsequent ones
+        
+    else if token.CommaToken? |
+       token.DotToken? |
+       token.OperatorToken? then (true, Some token) // eat subsequent lines
+        
+    else (false, Some token)
+end
+
+// Scans a single character. Returns a token if one is completed, or None
+// otherwise.
+ProcessCharacter (lexer Lexer -> Option'Token)
+    if lexer.State.Default? then
+        if lexer.Done? then Some EofToken
+        
+        // skip whitespace
+        else if Match (lexer, " ")  then None'Token
+        else if Match (lexer, "\r") then None'Token
+        
+        else if Match (lexer, "/", "/")       then StartToken (lexer, InLineComment)
+        else if Match (lexer, "/", "*")       then StartToken (lexer, InBlockComment)
+
+        else if Match (lexer, "(")            then Some LeftParenToken
+        else if Match (lexer, ")")            then Some RightParenToken
+        else if Match (lexer, "[")            then Some LeftBracketToken
+        else if Match (lexer, "]")            then Some RightBracketToken
+        else if Match (lexer, ",")            then Some CommaToken
+        else if Match (lexer, ":")            then Some ColonToken
+        else if Match (lexer, ".")            then Some DotToken
+        else if Match (lexer, "\n")           then Some LineToken
+        else if Match (lexer, "'")            then Some PrimeToken
+        
+        else if lexer.Current = "\""          then StartToken (lexer, InString)
+        else if lexer.Current = "-"           then StartToken (lexer, InMinus)
+        else if lexer.Current.Alpha?          then StartToken (lexer, InName)
+        else if lexer.Current.Punctuation?    then StartToken (lexer, InOperator)
+        else if lexer.Current.Digit?          then StartToken (lexer, InNumber)
+            
+        else
+            Print ("unexpected character: " + lexer.Current)
+            Some EofToken
+        end
+    
+    else if lexer.State.InString? then
+        lexer.Advance
+        
+        if lexer.Current = "\\" then ChangeState (lexer, InStringEscape)
+        else if lexer.Current = "\"" then
+            lexer.Advance // eat the end quote
+            CompleteToken (lexer, fn MakeStringToken (String))
+        else if lexer.Done? then
+            Print "error: source ended while still in string"
+            Some EofToken
+        else None'Token // still in string
+        
+    else if lexer.State.InStringEscape? then
+        lexer.Advance
+        
+        if lexer.Done? then
+            Print "error: source ended while still in string"
+            Some EofToken
+        else ChangeState (lexer, InString)
+        
+    else if lexer.State.InMinus? then
+        lexer.Advance
+        
+        // a "-" can be the start of a name "-foo", an operator "-+!", a
+        // number "-123", or an operator all by itself "-"
+        if lexer.Current.Punctuation? then ChangeState (lexer, InOperator)
+        else if lexer.Current.Alpha?  then ChangeState (lexer, InName)
+        else if lexer.Current.Digit?  then ChangeState (lexer, InNumber)
+        else CompleteToken (lexer, fn OperatorToken* (String))
+        
+    else if lexer.State.InName? then
+        lexer.Advance
+        
+        if Not (lexer.Current.Alpha? |
+                lexer.Current.Punctuation? |
+                lexer.Current.Digit?) then CompleteToken (lexer, fn NameToken* (String))
+        else None'Token // still in identifier
+        
+    else if lexer.State.InOperator? then
+        lexer.Advance
+        
+        // if there are any letters, it's a name
+        if lexer.Current.Alpha? then ChangeState (lexer, InName)
+        else if Not (lexer.Current.Punctuation? |
+                     lexer.Current.Digit?) then CompleteToken (lexer, fn OperatorToken* (String))
+            
+        else None'Token // still in identifier
+    
+    else if lexer.State.InNumber? then
+        lexer.Advance
+        
+        if Not lexer.Current.Digit? then CompleteToken (lexer, fn MakeIntToken (String))
+        else None'Token // still in number
+        
+    else if lexer.State.InLineComment? then
+        if Match (lexer, "\n") then
+            lexer.State <- Default
+            
+        else lexer.Advance // ignore everything else
+        None'Token
+        
+    else if lexer.State.InBlockComment? then
+        if Match (lexer, "*", "/") then
+            lexer.State <- Default
+            
+        else lexer.Advance // ignore everything else
+        None'Token
+
+    else
+        Print "unknown state"
+        Some EofToken
+    end
+end
+
+// Marks the next multi-character token as starting at the current position
+// then switches to the given state.
+StartToken (lexer Lexer, newState LexState -> Option'Token)
+    lexer.TokenStart <- lexer.Index
+    ChangeState (lexer, newState)
+end
+
+// Switches to the given state without resetting the multi-character token
+// start position.
+ChangeState (lexer Lexer, newState LexState -> Option'Token)
+    lexer.State <- newState
+    None'Token
+end
+
+// Emits the current character range as a token using the given conversion
+// function, and then reverts back to the default state.
+CompleteToken (lexer Lexer, func fn (String -> Token) -> Option'Token)
+    lexer.State <- Default
+    Some func Substring (lexer.Text, lexer.TokenStart, lexer.Index - lexer.TokenStart)
+end
+
+
+struct Lexer
+    var Index       Int
+        Text        String
+    var State       LexState
+    var TokenStart  Int
+    var EatLines?   Bool
+end
+
+union LexState
+    Default
+    InString
+    InStringEscape
+    InName
+    InOperator
+    InNumber
+    InMinus
+    InLineComment
+    InBlockComment
+end

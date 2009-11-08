@@ -1,0 +1,154 @@
+TestLexer (->)
+    Print "TestLexer"
+    
+    TestLexer/Current
+    TestLexer/Next
+    TestLexer/Done?
+    TestLexer/Advance
+    TestLexer/Match
+    TestLexer/EscapeString
+    TestLexer/ReadToken
+end
+
+TestLexer/Current (->)
+    Print "TestLexer/Current"
+    
+    def a <- Lexer "abcd"
+    AssertEqual ("a", a.Current)
+    
+    def b <- Lexer ""
+    AssertEqual (Lexer/Eof, b.Current)
+end
+
+TestLexer/Next (->)
+    Print "TestLexer/Next"
+    
+    def a <- Lexer "abcd"
+    AssertEqual (a.Next, "b")
+    
+    def b <- Lexer "a"
+    AssertEqual (Lexer/Eof, b.Next)
+    
+    def c <- Lexer ""
+    AssertEqual (Lexer/Eof, c.Next)
+end
+
+TestLexer/Done? (->)
+    Print "TestLexer/Done?"
+    
+    def a <- Lexer "abcd"
+    AssertEqual (false, a.Done?)
+    
+    def b <- Lexer ""
+    AssertEqual (true, b.Done?)
+end
+
+TestLexer/Advance (->)
+    Print "TestLexer/Advance"
+
+    def a <- Lexer "abc"
+    
+    a.Advance
+    AssertEqual ("b", a.Current)
+    
+    a.Advance
+    AssertEqual ("c", a.Current)
+    
+    a.Advance
+    AssertEqual (Lexer/Eof, a.Current)
+end
+
+TestLexer/Match (->)
+    Print "TestLexer/Match"
+
+    def a <- Lexer "abcdefgh"
+    
+    AssertEqual (true, Match (a, "a"))
+    AssertEqual (false, Match (a, "z"))
+    AssertEqual (true, Match (a, "b", "c"))
+    AssertEqual (true, Match (a, "d"))
+end
+
+TestLexer/EscapeString (->)
+    Print "TestLexer/EscapeString"
+
+    AssertEqual ("",            EscapeString "\"\"")
+    AssertEqual ("foo",         EscapeString "\"foo\"")
+    AssertEqual ("line\rline",  EscapeString "\"line\\rline\"")
+    AssertEqual ("line\nline",  EscapeString "\"line\\nline\"")
+    AssertEqual ("\"quote\"",   EscapeString "\"\\\"quote\\\"\"")
+    AssertEqual ("back\\slash", EscapeString "\"back\\\\slash\"")
+end
+
+TestLexer/ProcessCharacter (->)
+    Print "TestLexer/ProcessCharacter"
+end
+
+TestLexer/ReadToken (->)
+    TestReadToken ("def a <- true",
+        ListOf (DefToken, NameToken "a", LeftArrowToken, BoolToken true))
+        
+    TestReadToken ("name +012",
+        ListOf (NameToken "name", OperatorToken "+012"))
+    
+    TestReadToken ("fo3210o //some comment\nbar",
+        ListOf (NameToken "fo3210o", NameToken "bar"))
+    
+    // quotes don't nest
+    TestReadToken ("foo /* a /*b  */ bar",
+        ListOf (NameToken "foo", NameToken "bar"))
+    
+    TestReadToken ("0 1234 -3",
+        ListOf (IntToken 0, IntToken 1234, IntToken -3))
+
+    TestReadToken ("- foo -(",
+        ListOf (OperatorToken "-", NameToken "foo", OperatorToken "-", LeftParenToken))
+
+    // test lines
+    TestReadToken ("foo\nbar",
+        ListOf (NameToken "foo", LineToken, NameToken "bar"))
+    
+    TestReadToken ("foo\n\n\nbar",
+        ListOf (NameToken "foo", LineToken, NameToken "bar"))
+
+    TestReadToken ("foo,\nbar",
+        ListOf (NameToken "foo", CommaToken, NameToken "bar"))
+
+    TestReadToken ("foo.\nbar",
+        ListOf (NameToken "foo", DotToken, NameToken "bar"))
+
+    TestReadToken ("foo +\nbar",
+        ListOf (NameToken "foo", OperatorToken "+", NameToken "bar"))
+
+    // test strings
+    TestReadToken ("\"quote\"",
+        List (StringToken "quote"))
+    
+    TestReadToken ("\"with \\\\ backslash\"",
+        List StringToken ("with \\ backslash"))
+
+    TestReadToken ("\"with \\\" quote\"",
+        List StringToken ("with \" quote"))
+
+    TestReadToken ("\"with \\n newline\"",
+        List StringToken ("with \n newline"))
+end
+
+TestReadToken (text String, expected List'Token ->)
+    def lexer <- Lexer text
+
+    var token <- lexer.ReadToken
+    var node <- expected
+    
+    while Not token.EofToken? do
+        if node.Empty? then
+            AssertFail "still have tokens when not expecting more"
+            token <- EofToken
+        else
+            AssertEqual (node.Head.String, token.String)
+
+            node  <- node.Rest
+            token <- lexer.ReadToken
+        end
+    end
+end
