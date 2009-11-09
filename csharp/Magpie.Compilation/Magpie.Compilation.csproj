@@ -63,6 +63,7 @@
     <Compile Include="Compiler\TypeBinder.cs" />
     <Compile Include="Compiler\TypeTable.cs" />
     <Compile Include="Foreign Interface\ForeignFunction.cs" />
+    <Compile Include="Foreign Interface\ForeignType.cs" />
     <Compile Include="Foreign Interface\IForeignStaticInterface.cs" />
     <Compile Include="ObjectExtensions.cs" />
     <Compile Include="Parser\LineProcessor.cs" />

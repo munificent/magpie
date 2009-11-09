@@ -48,7 +48,7 @@ namespace Magpie.Compilation
                 yield return new Intrinsic("+", OpCode.AddString, FuncType.Create(Decl.String, Decl.String, Decl.String));
 
                 yield return new Intrinsic("Print", OpCode.Print, FuncType.Create(Decl.String, Decl.Unit));
-                yield return new Intrinsic("Count", OpCode.StringSize, FuncType.Create(Decl.String, Decl.Int));
+                yield return new Intrinsic("Count", OpCode.StringCount, FuncType.Create(Decl.String, Decl.Int));
                 yield return new Intrinsic("Substring", OpCode.Substring, FuncType.Create(Decl.String, Decl.Int, Decl.Int, Decl.String));
 
                 yield return new Intrinsic("Math:Random", OpCode.Random, FuncType.Create(Decl.Int, Decl.Int));

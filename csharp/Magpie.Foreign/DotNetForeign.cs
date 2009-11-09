@@ -11,7 +11,7 @@ namespace Magpie.Foreign
     /// <summary>
     /// Contains the foreign functions available for the .NET interpreter.
     /// </summary>
-    public class DotNetForeign : IForeignStaticInterface, IForeignRuntimeInterface
+    public class DotNetForeign : ForeignBase
     {
         public DotNetForeign()
         {
@@ -21,22 +21,6 @@ namespace Magpie.Foreign
             Add("System:Console:ReadLine", Decl.String, ReadLine);
             Add("System:Console:Write", Decl.String, Decl.Unit, Write);
             Add("System:Console:WriteLine", Decl.String, Decl.Unit, WriteLine);
-        }
-
-        private void Add(string name, IBoundDecl returnType, Func<Value[], Value> func)
-        {
-            int id = mFunctions.Count;
-
-            var foreignFunction = new ForeignFunction(name, id, returnType);
-            mFunctions[id] = new KeyValuePair<ForeignFunction, Func<Value[], Value>>(foreignFunction, func);
-        }
-
-        private void Add(string name, IBoundDecl arg, IBoundDecl returnType, Func<Value[], Value> func)
-        {
-            int id = mFunctions.Count;
-
-            var foreignFunction = new ForeignFunction(name, id, arg, returnType);
-            mFunctions[id] = new KeyValuePair<ForeignFunction, Func<Value[], Value>>(foreignFunction, func);
         }
 
         #region Foreign Functions
@@ -71,26 +55,5 @@ namespace Magpie.Foreign
         }
 
         #endregion
-
-        #region IForeignStaticInterface Members
-
-        public IEnumerable<ForeignFunction> Functions
-        {
-            get { return mFunctions.Values.Select(pair => pair.Key); }
-        }
-
-        #endregion
-
-        #region IForeignRuntimeInterface Members
-
-        public Value ForeignCall(int id, Value[] args)
-        {
-            var func = mFunctions[id].Value;
-            return func(args);
-        }
-
-        #endregion
-
-        private readonly Dictionary<int, KeyValuePair<ForeignFunction, Func<Value[], Value>>> mFunctions = new Dictionary<int, KeyValuePair<ForeignFunction, Func<Value[], Value>>>();
     }
 }

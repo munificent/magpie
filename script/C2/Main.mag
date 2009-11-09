@@ -1,14 +1,61 @@
 Main (arg String ->)
 
-    Print arg
+    // if the arg is a file, then compile it, otherwise run the unit
+    // tests
+    if arg.Count = 0 then
+        // base stuff
+        TestOption
+        TestTuple
+        TestList
+        TestString
+        
+        // lexing
+        TestToken
+        TestLexer
+    else     
+        Print arg
 
-    // base stuff
-    TestOption
-    TestTuple
-    TestList
-    TestString
+        def text <- ReadFile arg
+        Print text
+        
+        WriteDumbBytecode
+    end
+end
+
+//### bob: temp for testing
+WriteDumbBytecode (->)
+    def stream <- Stream
     
-    // lexing
-    TestToken
-    TestLexer
+    // magic number
+    stream <<Byte 112 // p
+    stream <<Byte 105 // i
+    stream <<Byte 101 // e
+    stream <<Byte 33  // !
+    
+    // version
+    stream <<Byte 0
+    stream <<Byte 0
+    stream <<Byte 0
+    stream <<Byte 0
+    
+    // main takes argument flag (hack)
+    stream <<Byte 0
+    
+    // number of exported functions
+    stream << 1
+    
+    // offset to exported function name (not valid!)
+    stream << 0
+    
+    // exported function offset
+    stream << 17
+    
+    // bytecode
+    stream <<Byte 2  // push int
+    stream << 123    // literal
+    stream <<Byte 24 // int to string
+    stream <<Byte 40 // print
+    stream <<Byte 20 // return
+    
+    stream.Close
 end

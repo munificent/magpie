@@ -81,7 +81,7 @@ namespace Magpie.Compilation
         // strings
         AddString,
         Print,
-        StringSize,
+        StringCount,
         Substring
     }
 }

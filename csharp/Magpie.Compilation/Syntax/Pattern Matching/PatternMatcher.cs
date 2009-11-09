@@ -133,6 +133,11 @@ namespace Magpie.Compilation
                 return new Coverage(); //### bob: not implemented
             }
 
+            Coverage IBoundDeclVisitor<Coverage>.Visit(ForeignType decl)
+            {
+                return new Coverage(); //### bob: not implemented
+            }
+
             #endregion
         }
 

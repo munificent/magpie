@@ -121,6 +121,11 @@ namespace Magpie.Compilation
             return InferNamedType(decl);
         }
 
+        bool IBoundDeclVisitor<bool>.Visit(ForeignType decl)
+        {
+            return InferNamedType(decl);
+        }
+
         #endregion
 
         private IUnboundDecl ParamType

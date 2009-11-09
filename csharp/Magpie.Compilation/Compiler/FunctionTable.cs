@@ -90,6 +90,10 @@ namespace Magpie.Compilation
         public ICallable Find(BindingContext context,
             string name, IList<IUnboundDecl> typeArgs, IBoundDecl argType)
         {
+            //### bob: eventually, this should also do koenig lookup to search in the
+            // namespaces available to the arguments of the function
+            // see: http://en.wikipedia.org/wiki/Argument_dependent_name_lookup
+
             foreach (var potentialName in context.SearchSpace.SearchFor(name))
             {
                 var bound = LookUpFunction(context, potentialName, typeArgs, argType);

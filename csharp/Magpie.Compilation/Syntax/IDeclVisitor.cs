@@ -22,5 +22,6 @@ namespace Magpie.Compilation
         TReturn Visit(Struct decl);
         TReturn Visit(BoundTupleType decl);
         TReturn Visit(Union decl);
+        TReturn Visit(ForeignType decl);
     }
 }

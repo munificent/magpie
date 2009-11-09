@@ -81,7 +81,7 @@ namespace Magpie.Interpreter
         // strings
         AddString,
         Print,
-        StringSize,
+        StringCount,
         Substring
     }
 }

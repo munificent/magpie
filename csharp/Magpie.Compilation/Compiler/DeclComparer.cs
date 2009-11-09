@@ -79,6 +79,15 @@ namespace Magpie.Compilation
             return ReferenceEquals(mParam, decl);
         }
 
+        bool IBoundDeclVisitor<bool>.Visit(ForeignType decl)
+        {
+            // should be a foreign type with the same name
+            var foreignParam = mParam as ForeignType;
+            if (foreignParam == null) return false;
+
+            return foreignParam.Name == decl.Name;
+        }
+
         #endregion
 
         private DeclComparer(IBoundDecl parameter)

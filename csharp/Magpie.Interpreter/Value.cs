@@ -15,12 +15,15 @@ namespace Magpie.Interpreter
         public string String    { get { return (string)mValue; } }
         public Structure Struct { get { return (Structure)mValue; } }
 
+        // only used for foreign object interface
+        public object Object    { get { return mValue; } }
+
         public Value(bool value)      : this((object)value) { }
         public Value(int value)       : this((object)value) { }
         public Value(string value)    : this((object)value) { }
         public Value(Structure value) : this((object)value) { }
 
-        private Value(object value)
+        public Value(object value)
         {
             mValue = value;
         }

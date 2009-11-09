@@ -34,11 +34,9 @@ namespace Magpie.Interpreter
             }
         }
 
-        public BytecodeFile(Stream stream)
+        public BytecodeFile(byte[] data)
         {
-            // read the file
-            mData = new byte[stream.Length];
-            stream.Read(mData, 0, mData.Length);
+            mData = data;
 
             // check the header
 

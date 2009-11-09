@@ -21,16 +21,16 @@ namespace Magpie.Interpreter
             mForeignInterface = foreignInterface;
         }
 
-        public void Interpret(Stream stream, DebugInfo debug)
+        public void Interpret(byte[] bytecode, DebugInfo debug)
         {
-            Interpret(stream, debug, String.Empty);
+            Interpret(bytecode, debug, String.Empty);
         }
 
-        public void Interpret(Stream stream, DebugInfo debug, string argument)
+        public void Interpret(byte[] bytecode, DebugInfo debug, string argument)
         {
-            BytecodeFile bytecode = new BytecodeFile(stream);
+            BytecodeFile file = new BytecodeFile(bytecode);
 
-            Interpret(bytecode, debug, argument);
+            Interpret(file, debug, argument);
         }
 
         public void Interpret(BytecodeFile file, DebugInfo debug, string argument)
@@ -287,7 +287,7 @@ namespace Magpie.Interpreter
                         if (Printed != null) Printed(this, new PrintEventArgs(text));
                         break;
 
-                    case OpCode.StringSize:         Push(PopString().Length); break;
+                    case OpCode.StringCount:         Push(PopString().Length); break;
 
                     case OpCode.Substring:
                         {

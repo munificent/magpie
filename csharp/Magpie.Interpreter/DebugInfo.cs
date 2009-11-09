@@ -13,7 +13,11 @@ namespace Magpie.Interpreter
     {
         public string GetFunctionName(long offset)
         {
-            return mFunctions.Last(region => region.Start <= offset).Name;
+            var found = mFunctions.LastOrDefault(region => region.Start <= offset);
+
+            if (found != null) return found.Name;
+
+            return String.Empty;
         }
 
         public void StartFunction(string name, long offset)

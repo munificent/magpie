@@ -16,7 +16,7 @@ namespace Magpie.App
         [STAThread]
         static void Main(string[] args)
         {
-            if (args.Length != 1)
+            if (args.Length == 0)
             {
                 Console.WriteLine();
                 Console.WriteLine("               _/Oo>");
@@ -39,9 +39,13 @@ namespace Magpie.App
             {
                 RunTests();
             }
+            else if (args[0] == "self")
+            {
+                SelfHost.Run();
+            }
             else
             {
-                RunScript(args[0]);
+                RunScript(args[0], args.Length > 1 ? args[1] : String.Empty);
             }
 
             // don't immediately quit (and close the console) if we're running attached
@@ -66,28 +70,25 @@ namespace Magpie.App
             suite.Run();
         }
 
-        private static void RunScript(string script)
+        private static void RunScript(string path, string argument)
         {
-            if (!File.Exists(script) && !Directory.Exists(script))
+            if (!File.Exists(path) && !Directory.Exists(path))
             {
-                Console.WriteLine("Could not find a script at \"" + script + "\".");
+                Console.WriteLine("Could not find a script at \"" + path + "\".");
                 return;
             }
 
-            IList<CompileError> errors = Script.Run(script, text => Console.WriteLine(text));
+            Script script = new Script(path);
+
+            script.Run(argument);
 
             // show the errors if any
-            foreach (var error in errors)
+            foreach (var error in script.Errors)
             {
                 Console.WriteLine("{0} error in {1} (line {2}, col {3}): {4}",
                     error.Stage, error.Position.File, error.Position.Line,
                     error.Position.Column, error.Message);
             }
-        }
-
-        static void Machine_Printed(object sender, PrintEventArgs e)
-        {
-            Console.WriteLine(e.Text);
         }
     }
 }

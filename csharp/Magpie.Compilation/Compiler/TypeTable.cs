@@ -179,6 +179,9 @@ namespace Magpie.Compilation
 
             if (args.Length > 0)
             {
+                //### bob: using ToString here is sketchy. should have a separate
+                // UniqueName property in IBoundDecl
+
                 // an instantiated generic type, so mangle it
                 if (args.Length == 1)
                 {

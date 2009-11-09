@@ -55,7 +55,7 @@
     <Compile Include="Machine.cs" />
     <Compile Include="MaxStackDepthExceededException.cs" />
     <Compile Include="OpCode.cs" />
-    <Compile Include="Operand.cs" />
+    <Compile Include="Value.cs" />
     <Compile Include="PrintEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">

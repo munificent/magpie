@@ -72,7 +72,16 @@ namespace Magpie.App
 
             ParseExpected(test);
 
-            IList<CompileError> compileErrors = Script.Run(test, mMaxStackDepth, TestPrint);
+            Script script = new Script(test);
+
+            script.Printed += TestPrint;
+            script.MaxStackDepth = mMaxStackDepth;
+
+            script.Run(String.Empty);
+
+            script.Printed -= TestPrint;
+
+            IList<CompileError> compileErrors = script.Errors;
 
             if (compileErrors.Count == 0)
             {
@@ -138,19 +147,19 @@ namespace Magpie.App
             }
         }
 
-        private void TestPrint(string text)
+        private void TestPrint(object sender, PrintEventArgs e)
         {
             if (mExpectedOutput.Count == 0)
             {
-                mErrors.Add("got \"" + text + "\" when not expecting any more output");
+                mErrors.Add("got \"" + e.Text + "\" when not expecting any more output");
             }
             else
             {
                 string expecting = mExpectedOutput.Dequeue();
 
-                if (expecting != text)
+                if (expecting != e.Text)
                 {
-                    mErrors.Add("got \"" + text + "\" when expecting \"" + expecting + "\"");
+                    mErrors.Add("got \"" + e.Text + "\" when expecting \"" + expecting + "\"");
                 }
             }
         }
