@@ -343,33 +343,42 @@ namespace Magpie.Compilation
         private IUnboundExpr FlowExpr()
         {
             Position position;
-            if (CurrentIs(TokenType.For))
+            if (CurrentIs(TokenType.For) ||
+                CurrentIs(TokenType.While))
             {
-                List<NamedIterator> iterators = new List<NamedIterator>();
+                var clauses = new List<LoopClause>();
 
-                while (ConsumeIf(TokenType.For, out position))
+                while (true)
                 {
-                    string name = Consume(TokenType.Name).StringValue;
-                    Consume(TokenType.LeftArrow);
-                    IUnboundExpr iterator = OperatorExpr();
+                    if (ConsumeIf(TokenType.For, out position))
+                    {
+                        var name = Consume(TokenType.Name).StringValue;
+                        Consume(TokenType.LeftArrow);
+                        var iterator = OperatorExpr();
 
-                    ConsumeIf(TokenType.Line);
+                        ConsumeIf(TokenType.Line);
 
-                    iterators.Add(new NamedIterator(position, name, iterator));
+                        clauses.Add(new LoopClause(position, name, iterator));
+                    }
+                    else if (ConsumeIf(TokenType.While, out position))
+                    {
+                        var condition = AssignExpr();
+
+                        ConsumeIf(TokenType.Line);
+
+                        clauses.Add(new LoopClause(position, String.Empty, condition));
+                    }
+                    else
+                    {
+                        // no more clauses
+                        break;
+                    }
                 }
 
                 position = Consume(TokenType.Do).Position;
                 IUnboundExpr body = Block();
 
-                return new ForExpr(position, iterators, body);
-            }
-            else if (ConsumeIf(TokenType.While, out position))
-            {
-                IUnboundExpr condition = AssignExpr();
-                Consume(TokenType.Do);
-                IUnboundExpr body = Block();
-
-                return new WhileExpr(position, condition, body);
+                return new LoopExpr(position, clauses, body);
             }
             else if (ConsumeIf(TokenType.If, out position))
             {

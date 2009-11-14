@@ -5,6 +5,8 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
+    //### bob: should get rid of these completely instead of having for loops desugar to this
+    // and then compile it.
     /// <summary>
     /// Base class for an unbound or bound "while/do" expression.
     /// </summary>

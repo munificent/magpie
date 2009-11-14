@@ -25,7 +25,7 @@ namespace Magpie.Compilation
         TReturn Visit(ReturnExpr expr);
         TReturn Visit(UnitExpr expr);
         TReturn Visit(WhileExpr expr);
-        TReturn Visit(ForExpr expr);
+        TReturn Visit(LoopExpr expr);
         TReturn Visit(MatchExpr expr);
         TReturn Visit(TupleFieldExpr expr);
     }

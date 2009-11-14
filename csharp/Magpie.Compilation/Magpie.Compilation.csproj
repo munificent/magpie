@@ -77,7 +77,6 @@
     <Compile Include="Syntax\Expressions\ConstructUnionExpr.cs" />
     <Compile Include="Syntax\Expressions\DefineExpr.cs" />
     <Compile Include="Syntax\Expressions\ForeignCallExpr.cs" />
-    <Compile Include="Syntax\Expressions\ForExpr.cs" />
     <Compile Include="Syntax\Expressions\IBoundExpr.cs" />
     <Compile Include="Syntax\Expressions\FuncRefExpr.cs" />
     <Compile Include="Syntax\Expressions\IfThenElseExpr.cs" />
@@ -89,6 +88,7 @@
     <Compile Include="Syntax\Expressions\LoadExpr.cs" />
     <Compile Include="Syntax\Expressions\LocalFuncExpr.cs" />
     <Compile Include="Syntax\Expressions\LocalsExpr.cs" />
+    <Compile Include="Syntax\Expressions\LoopExpr.cs" />
     <Compile Include="Syntax\Expressions\MatchExpr.cs" />
     <Compile Include="Syntax\Expressions\NameExpr.cs" />
     <Compile Include="Syntax\Expressions\OperatorExpr.cs" />

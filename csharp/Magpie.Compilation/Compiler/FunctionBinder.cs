@@ -414,7 +414,7 @@ namespace Magpie.Compilation
             return bound;
         }
 
-        IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(ForExpr expr)
+        IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(LoopExpr expr)
         {
             // a for expression is basically syntactic sugar for a while expression
             // and one or more iterators. for example, the following:
@@ -437,27 +437,42 @@ namespace Magpie.Compilation
             var conditionExpr = (IUnboundExpr)null;
             var whileExprs = new List<IUnboundExpr>();
 
-            // instantiate each iterator
-            foreach (var iterator in expr.Iterators)
+            // instantiate each clause
+            foreach (var clause in expr.Clauses)
             {
-                // note: the iterator variable includes a space to ensure it can't collide with a
-                // user-defined variable.
-                var createIterator = new CallExpr(new NameExpr(iterator.Position, "Iterate"), iterator.Iterator);
-                topExprs.Add(new DefineExpr(iterator.Position, iterator.Name + " iter", createIterator, false));
-
-                var condition = new CallExpr(new NameExpr(iterator.Position, "MoveNext"), new NameExpr(iterator.Position, iterator.Name + " iter"));
-                if (conditionExpr == null)
+                if (clause.IsWhile)
                 {
-                    conditionExpr = condition;
+                    if (conditionExpr == null)
+                    {
+                        conditionExpr = clause.Expression;
+                    }
+                    else
+                    {
+                        // combine with previous condition(s)
+                        conditionExpr = new OperatorExpr(clause.Position, conditionExpr, "&", clause.Expression);
+                    }
                 }
                 else
                 {
-                    // combine with previous condition(s)
-                    conditionExpr = new OperatorExpr(iterator.Position, conditionExpr, "&", condition);
-                }
+                    // note: the iterator variable includes a space to ensure it can't collide with a
+                    // user-defined variable.
+                    var createIterator = new CallExpr(new NameExpr(clause.Position, "Iterate"), clause.Expression);
+                    topExprs.Add(new DefineExpr(clause.Position, clause.Name + " iter", createIterator, false));
 
-                var currentValue = new CallExpr(new NameExpr(iterator.Position, "Current"), new NameExpr(iterator.Position, iterator.Name + " iter"));
-                whileExprs.Add(new DefineExpr(iterator.Position, iterator.Name, currentValue, false));
+                    var condition = new CallExpr(new NameExpr(clause.Position, "MoveNext"), new NameExpr(clause.Position, clause.Name + " iter"));
+                    if (conditionExpr == null)
+                    {
+                        conditionExpr = condition;
+                    }
+                    else
+                    {
+                        // combine with previous condition(s)
+                        conditionExpr = new OperatorExpr(clause.Position, conditionExpr, "&", condition);
+                    }
+
+                    var currentValue = new CallExpr(new NameExpr(clause.Position, "Current"), new NameExpr(clause.Position, clause.Name + " iter"));
+                    whileExprs.Add(new DefineExpr(clause.Position, clause.Name, currentValue, false));
+                }
             }
 
             // create the while loop
