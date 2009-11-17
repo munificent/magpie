@@ -302,35 +302,12 @@ namespace Magpie.Compilation
             //### bob: eventually, will need to handle closures
         }
 
-        IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(IfThenExpr expr)
-        {
-            var bound = new BoundIfThenExpr(
-                expr.Condition.Accept(this),
-                expr.Body.Accept(this));
-
-            if (bound.Condition.Type != Decl.Bool)
-            {
-                throw new CompileException(expr.Position, String.Format(
-                    "Condition of if/then is returning type {0} but should be Bool.",
-                    bound.Condition.Type));
-            }
-
-            if ((bound.Body.Type != Decl.Unit) && (bound.Body.Type != Decl.EarlyReturn))
-            {
-                throw new CompileException(expr.Position, String.Format(
-                    "Body of if/then is returning type {0} but must be Unit (or a return) if there is no else branch.",
-                    bound.Body.Type));
-            }
-
-            return bound;
-        }
-
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(IfThenElseExpr expr)
         {
             var bound = new BoundIfThenElseExpr(
                 expr.Condition.Accept(this),
                 expr.ThenBody.Accept(this),
-                expr.ElseBody.Accept(this));
+                (expr.ElseBody == null) ? null : expr.ElseBody.Accept(this));
 
             if (bound.Condition.Type != Decl.Bool)
             {
@@ -339,11 +316,25 @@ namespace Magpie.Compilation
                     bound.Condition.Type));
             }
 
-            if (!DeclComparer.TypesMatch(bound.ThenBody.Type, bound.ElseBody.Type))
+            if (bound.ElseBody != null)
             {
-                throw new CompileException(expr.Position, String.Format(
-                    "Branches of if/then/else do not return the same type. Then arm returns {0} while else arm returns {1}.",
-                    bound.ThenBody.Type, bound.ElseBody.Type));
+                // has an else, so make sure both arms match
+                if (!DeclComparer.TypesMatch(bound.ThenBody.Type, bound.ElseBody.Type))
+                {
+                    throw new CompileException(expr.Position, String.Format(
+                        "Branches of if/then/else do not return the same type. Then arm returns {0} while else arm returns {1}.",
+                        bound.ThenBody.Type, bound.ElseBody.Type));
+                }
+            }
+            else
+            {
+                // no else, so make the then body doesn't return a value
+                if ((bound.ThenBody.Type != Decl.Unit) && (bound.ThenBody.Type != Decl.EarlyReturn))
+                {
+                    throw new CompileException(expr.Position, String.Format(
+                        "Body of if/then is returning type {0} but must be Unit (or a return) if there is no else branch.",
+                        bound.ThenBody.Type));
+                }
             }
 
             return bound;

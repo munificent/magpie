@@ -389,17 +389,15 @@ namespace Magpie.Compilation
 
                 Consume(TokenType.Then);
 
-                IUnboundExpr thenBody = InnerBlock(TokenType.Else);
+                var thenBody = InnerBlock(TokenType.Else);
+                var elseBody = (IUnboundExpr)null;
 
                 if (ConsumeIf(TokenType.Else))
                 {
-                    IUnboundExpr elseBody = Block();
-                    return new IfThenElseExpr(position, condition, thenBody, elseBody);
+                    elseBody = Block();
                 }
-                else
-                {
-                    return new IfThenExpr(position, condition, thenBody);
-                }
+
+                return new IfThenElseExpr(position, condition, thenBody, elseBody);
             }
             else if (ConsumeIf(TokenType.Return, out position))
             {

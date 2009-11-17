@@ -166,21 +166,6 @@ namespace Magpie.Compilation
             return true;
         }
 
-        bool IBoundExprVisitor<bool>.Visit(BoundIfThenExpr expr)
-        {
-            // evaluate the condition
-            expr.Condition.Accept(this);
-            mJumpTable.JumpIfFalse("end");
-
-            // execute the body
-            expr.Body.Accept(this);
-
-            // jump past it
-            mJumpTable.PatchJump("end");
-
-            return true;
-        }
-
         bool IBoundExprVisitor<bool>.Visit(BoundIfThenElseExpr expr)
         {
             // evaluate the condition
@@ -190,15 +175,23 @@ namespace Magpie.Compilation
             // thenBody
             expr.ThenBody.Accept(this);
 
-            // jump to end
-            mJumpTable.Jump("end");
+            if (expr.ElseBody == null)
+            {
+                // jump past it
+                mJumpTable.PatchJump("else");
+            }
+            else
+            {
+                // jump to end
+                mJumpTable.Jump("end");
 
-            // elseBody
-            mJumpTable.PatchJump("else");
-            expr.ElseBody.Accept(this);
+                // elseBody
+                mJumpTable.PatchJump("else");
+                expr.ElseBody.Accept(this);
 
-            // end
-            mJumpTable.PatchJump("end");
+                // end
+                mJumpTable.PatchJump("end");
+            }
 
             return true;
         }

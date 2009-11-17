@@ -16,7 +16,6 @@ namespace Magpie.Compilation
         TReturn Visit(IntrinsicExpr expr);
         TReturn Visit(BoundCallExpr expr);
         TReturn Visit(BoundBlockExpr expr);
-        TReturn Visit(BoundIfThenExpr expr);
         TReturn Visit(BoundIfThenElseExpr expr);
         TReturn Visit(BoundReturnExpr expr);
         TReturn Visit(BoundWhileExpr expr);

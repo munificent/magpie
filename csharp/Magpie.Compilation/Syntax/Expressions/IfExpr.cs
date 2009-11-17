@@ -9,6 +9,11 @@ namespace Magpie.Compilation
     {
         public TExpr Condition;
         public TExpr ThenBody;
+
+        /// <summary>
+        /// Gets the expression for the else arm. Will be <c>null</c> if there
+        /// is no else arm.
+        /// </summary>
         public TExpr ElseBody;
 
         public IfThenElseExpr(TExpr condition, TExpr thenBody, TExpr elseBody)
@@ -41,7 +46,17 @@ namespace Magpie.Compilation
     {
         public BoundIfThenElseExpr(IBoundExpr condition, IBoundExpr thenBody, IBoundExpr elseBody) : base(condition, thenBody, elseBody) { }
 
-        public IBoundDecl Type { get { return ((IBoundExpr)ThenBody).Type; } }
+        public IBoundDecl Type
+        {
+            get
+            {
+                // if there is no "else" branch, the expression type is always unit
+                // (even if the "then" branch's type is actually EarlyReturn)
+                if (ElseBody == null) return Decl.Unit;
+
+                return ((IBoundExpr)ThenBody).Type;
+            }
+        }
 
         public TReturn Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)
         {

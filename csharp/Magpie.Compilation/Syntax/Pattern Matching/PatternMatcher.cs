@@ -261,7 +261,7 @@ namespace Magpie.Compilation
             else if (ifThens.Count == 1)
             {
                 var ifThen = ifThens.Pop();
-                ifExpr = new IfThenExpr(ifThen.Item1.Position, ifThen.Item1, ifThen.Item2);
+                ifExpr = new IfThenElseExpr(ifThen.Item1.Position, ifThen.Item1, ifThen.Item2, new UnitExpr(ifThen.Item1.Position));
                 //### bob: using IfThen here (and below) means that match expressions can only
                 // return Unit. if we can get the compiler to ensure exhaustive cases, we can
                 // have matches that return other values.
@@ -272,7 +272,7 @@ namespace Magpie.Compilation
                 {
                     if (ifExpr == null)
                     {
-                        ifExpr = new IfThenExpr(ifThen.Item1.Position, ifThen.Item1, ifThen.Item2);
+                        ifExpr = new IfThenElseExpr(ifThen.Item1.Position, ifThen.Item1, ifThen.Item2, new UnitExpr(ifThen.Item1.Position));
                     }
                     else
                     {

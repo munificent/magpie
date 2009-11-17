@@ -80,9 +80,6 @@
     <Compile Include="Syntax\Expressions\IBoundExpr.cs" />
     <Compile Include="Syntax\Expressions\FuncRefExpr.cs" />
     <Compile Include="Syntax\Expressions\IfThenElseExpr.cs" />
-    <Compile Include="Syntax\Expressions\IfThenExpr.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Syntax\Expressions\IntrinsicExpr.cs" />
     <Compile Include="Syntax\Expressions\IUnboundExpr.cs" />
     <Compile Include="Syntax\Expressions\LoadExpr.cs" />
