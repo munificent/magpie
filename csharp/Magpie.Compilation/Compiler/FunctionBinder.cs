@@ -340,6 +340,43 @@ namespace Magpie.Compilation
             return bound;
         }
 
+        IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(LetExpr expr)
+        {
+            // a let expression desugars like this:
+            //
+            //      let a <- Foo then Bar else Bang
+            // 
+            // becomes...
+            //
+            //      def a__ <- Foo
+            //      if Some? a__ then
+            //          def a <- SomeValue a__
+            //          Bar
+            //      else Bang
+
+            // use a space so we can't collide with a user's variable
+            var optionName = expr.Name + " ";
+
+            // def a__ <- Foo
+            var defineOption = new DefineExpr(expr.Position, optionName, expr.Condition, false);
+
+            // Some? a__
+            var condition = new CallExpr(new NameExpr(expr.Position, "Some?"),
+                                         new NameExpr(expr.Position, optionName));
+
+            // def a <- SomeValue a__
+            var getValue = new CallExpr(new NameExpr(expr.Position, "SomeValue"),
+                                        new NameExpr(expr.Position, optionName));
+            var defineValue = new DefineExpr(expr.Position, expr.Name, getValue, false);
+
+            var thenBody = new BlockExpr(new IUnboundExpr[] { defineValue, expr.ThenBody });
+            var ifThen = new IfExpr(expr.Position, condition, thenBody, expr.ElseBody);
+            var block = new BlockExpr(new IUnboundExpr[] { defineOption, ifThen });
+
+            // now bind the desugared expression
+            return block.Accept(this);
+        }
+
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(NameExpr expr)
         {
             return mContext.ResolveName(mFunction, Scope,

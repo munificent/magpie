@@ -335,11 +335,6 @@ namespace Magpie.Compilation
             else return null;
         }
 
-        // <-- (FOR Name <- OperatorExpr LINE?)+ DO Block
-        //   | WHILE AssignExpr DO Block
-        //   | IF AssignExpr THEN InnerBlock (ELSE Block)?
-        //   | RETURN FlowExpr
-        //   | AssignExpr
         private IUnboundExpr FlowExpr()
         {
             Position position;
@@ -382,9 +377,9 @@ namespace Magpie.Compilation
             }
             else if (ConsumeIf(TokenType.If, out position))
             {
-                IUnboundExpr condition = AssignExpr();
+                var condition = AssignExpr();
 
-                // then/do can optionally be on the next line
+                // then can optionally be on the next line
                 ConsumeIf(TokenType.Line);
 
                 Consume(TokenType.Then);
@@ -398,6 +393,29 @@ namespace Magpie.Compilation
                 }
 
                 return new IfExpr(position, condition, thenBody, elseBody);
+            }
+            else if (ConsumeIf(TokenType.Let, out position))
+            {
+                var name = Consume(TokenType.Name).StringValue;
+
+                Consume(TokenType.LeftArrow);
+
+                var condition = AssignExpr();
+
+                // then can optionally be on the next line
+                ConsumeIf(TokenType.Line);
+
+                Consume(TokenType.Then);
+
+                var thenBody = InnerBlock(TokenType.Else);
+                var elseBody = (IUnboundExpr)null;
+
+                if (ConsumeIf(TokenType.Else))
+                {
+                    elseBody = Block();
+                }
+
+                return new LetExpr(position, name, condition, thenBody, elseBody);
             }
             else if (ConsumeIf(TokenType.Return, out position))
             {

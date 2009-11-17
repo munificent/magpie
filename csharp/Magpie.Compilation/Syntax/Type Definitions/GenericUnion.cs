@@ -91,6 +91,9 @@ namespace Magpie.Compilation
             Union.BuildContext(context,
                 ParameterType, argType, ref typeArgs, out dummy);
 
+            // bail if we couldn't get the right number of type arguments
+            if ((typeArgs == null) || (Union.TypeParameters.Count != typeArgs.Count())) return null;
+
             var union = Union.Instantiate(context.Compiler, typeArgs);
 
             // now build the auto functions for it

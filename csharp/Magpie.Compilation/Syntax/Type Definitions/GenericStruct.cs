@@ -71,8 +71,8 @@ namespace Magpie.Compilation
             Struct.BuildContext(context,
                 ParameterType, argType, ref typeArgs, out dummy);
 
-            // bail if we couldn't match all of the type arguments
-            if (typeArgs == null) return null;
+            // bail if we couldn't get the right number of type arguments
+            if ((typeArgs == null) || (Struct.TypeParameters.Count != typeArgs.Count())) return null;
 
             // instantiate the structure
             var structure = Struct.Instantiate(context.Compiler, typeArgs);

@@ -1,0 +1,51 @@
+// expected: 1
+// expected: 2
+// expected: 3
+// expected: should
+// expected: 1
+// expected: should
+// expected: 2
+// expected: should
+// expected: 3
+
+Main (->)
+    let a <- None'Int then Print "should not"
+    let a <- Some 1 then Print "1"
+    
+    let a <- None'Int
+    then Print "should not"
+    
+    let a <- Some 2
+    then Print "2"
+    
+    let a <- None'Int then
+        Print "should not"
+    end
+    
+    let a <- Some 3 then
+        Print "3"
+    end
+    
+    let a <- None'Int then Print "should not" else Print "should"
+    let a <- Some 1 then Print "1" else Print "should not"
+    
+    let a <- None'Int
+    then Print "should not"
+    else Print "should"
+    
+    let a <- Some 2
+    then Print "2"
+    else Print "should not"
+    
+    let a <- None'Int then
+        Print "should not"
+    else
+        Print "should"
+    end
+    
+    let a <- Some 3 then
+        Print "3"
+    else
+        Print "should not"
+    end
+end

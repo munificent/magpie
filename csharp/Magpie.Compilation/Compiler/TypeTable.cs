@@ -16,8 +16,10 @@ namespace Magpie.Compilation
         public IEnumerable<GenericStruct> GenericStructs { get { return mGenericStructs; } }
         public IEnumerable<GenericUnion> GenericUnions { get { return mGenericUnions; } }
 
-        public TypeTable()
+        public TypeTable(Compiler compiler)
         {
+            mCompiler = compiler;
+
             // add the built-in types
             Add(Decl.Unit);
             Add(Decl.Bool);
@@ -25,7 +27,7 @@ namespace Magpie.Compilation
             Add(Decl.String);
         }
 
-        public void BindAll(Compiler compiler)
+        public void BindAll()
         {
             // copy the types to a queue because binding a type may cause
             // other generic types to be instantiated, adding to the type
@@ -41,11 +43,11 @@ namespace Magpie.Compilation
                 Struct structure = type as Struct;
                 if (structure != null)
                 {
-                    TypeBinder.Bind(compiler, structure);
+                    TypeBinder.Bind(mCompiler, structure);
                 }
                 else
                 {
-                    TypeBinder.Bind(compiler, (Union)type);
+                    TypeBinder.Bind(mCompiler, (Union)type);
                 }
             }
 
@@ -112,7 +114,7 @@ namespace Magpie.Compilation
             return null;
         }
 
-        public INamedType Find(Compiler compiler, NameSearchSpace searchSpace, Position position,
+        public INamedType Find(NameSearchSpace searchSpace, Position position,
             string name, IEnumerable<IBoundDecl> typeArgs)
         {
             // look through the namespaces
@@ -131,12 +133,7 @@ namespace Magpie.Compilation
                     // number of type args must match
                     if (typeArgs.Count() != structure.TypeParameters.Count) continue;
 
-                    var instance = structure.Instantiate(compiler, typeArgs);
-
-                    // only instantiate once
-                    //Add(instance, typeArgs);
-
-                    return instance;
+                    return structure.Instantiate(mCompiler, typeArgs);
                 }
 
                 //### bob: gross copy/paste of above
@@ -149,12 +146,7 @@ namespace Magpie.Compilation
                     // number of type args must match
                     if (typeArgs.Count() != union.TypeParameters.Count) continue;
 
-                    var instance = union.Instantiate(compiler, typeArgs);
-
-                    // only instantiate once
-                    //Add(instance, typeArgs);
-
-                    return instance;
+                    return union.Instantiate(mCompiler, typeArgs);
                 }
             }
 
@@ -198,6 +190,8 @@ namespace Magpie.Compilation
                 return name;
             }
         }
+
+        private readonly Compiler mCompiler;
 
         private readonly Dictionary<string, INamedType> mTypes = new Dictionary<string, INamedType>();
         private readonly List<GenericStruct> mGenericStructs = new List<GenericStruct>();

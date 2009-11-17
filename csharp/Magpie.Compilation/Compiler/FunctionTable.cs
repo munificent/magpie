@@ -19,6 +19,11 @@ namespace Magpie.Compilation
             get { return mCallables.Values.OfType<Function>(); }
         }
 
+        public FunctionTable(Compiler compiler)
+        {
+            mCompiler = compiler;
+        }
+
         /// <summary>
         /// Adds the given fully-unbound (i.e. just parsed) user-defined function to the symbol
         /// table.
@@ -36,7 +41,7 @@ namespace Magpie.Compilation
         public void AddAndBind(Compiler compiler, Function function)
         {
             AddUnbound(function);
-            Bind(compiler, function);
+            Bind(function);
             mToBind.Enqueue(function);
         }
 
@@ -154,12 +159,12 @@ namespace Magpie.Compilation
             return false;
         }
 
-        public void BindAll(Compiler compiler)
+        public void BindAll()
         {
             // bind the types of the user functions and add them to the main table
             foreach (var unbound in mUnbound)
             {
-                Bind(compiler, unbound);
+                Bind(unbound);
             }
 
             // copy the functions to a queue because binding a function may cause generics
@@ -173,17 +178,19 @@ namespace Magpie.Compilation
             while (mToBind.Count > 0)
             {
                 var function = mToBind.Dequeue();
-                var context = new BindingContext(compiler, function.SearchSpace);
+                var context = new BindingContext(mCompiler, function.SearchSpace);
                 FunctionBinder.Bind(context, function);
             }
         }
 
-        private void Bind(Compiler compiler, Function unbound)
+        private void Bind(Function unbound)
         {
-            var context = new BindingContext(compiler, unbound.SearchSpace);
+            var context = new BindingContext(mCompiler, unbound.SearchSpace);
             TypeBinder.Bind(context, unbound.Type);
             Add(unbound);
         }
+
+        private readonly Compiler mCompiler;
 
         private readonly List<Function>                mUnbound   = new List<Function>();
         private readonly Dictionary<string, ICallable> mCallables = new Dictionary<string, ICallable>();

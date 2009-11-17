@@ -18,6 +18,9 @@ namespace Magpie.Compilation
         public Compiler(IForeignStaticInterface foreignInterface)
         {
             mForeignInterface = foreignInterface;
+
+            mFunctions = new FunctionTable(this);
+            mTypes = new TypeTable(this);
         }
 
         public void AddSourceFile(string filePath)
@@ -46,7 +49,7 @@ namespace Magpie.Compilation
                 mFunctions.AddRange(Intrinsic.AllGenerics);
 
                 // bind the user-defined types and create their auto-generated functions
-                mTypes.BindAll(this);
+                mTypes.BindAll();
 
                 foreach (var structure in mTypes.Structs)
                 {
@@ -73,7 +76,7 @@ namespace Magpie.Compilation
                     mFunctions.AddRange(mForeignInterface.Functions.Cast<ICallable>());
                 }
 
-                mFunctions.BindAll(this);
+                mFunctions.BindAll();
             }
             catch (CompileException ex)
             {
@@ -160,8 +163,8 @@ namespace Magpie.Compilation
 
         private readonly List<string> mSourcePaths = new List<string>();
 
-        private readonly FunctionTable mFunctions = new FunctionTable();
-        private readonly TypeTable mTypes = new TypeTable();
+        private readonly FunctionTable mFunctions;
+        private readonly TypeTable mTypes;
         private readonly IForeignStaticInterface mForeignInterface;
     }
 }

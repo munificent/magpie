@@ -29,6 +29,7 @@ namespace Magpie.Compilation
         Fn,
         For,
         If,
+        Let,
         Match,
         Mutable,
         Namespace,
@@ -123,6 +124,7 @@ namespace Magpie.Compilation
                 case TokenType.Fn:          return "fn";
                 case TokenType.For:         return "for";
                 case TokenType.If:          return "if";
+                case TokenType.Let:         return "let";
                 case TokenType.Match:       return "match";
                 case TokenType.Mutable:     return "mutable";
                 case TokenType.Namespace:   return "namespace";
