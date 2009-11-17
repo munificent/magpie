@@ -397,7 +397,7 @@ namespace Magpie.Compilation
                     elseBody = Block();
                 }
 
-                return new IfThenElseExpr(position, condition, thenBody, elseBody);
+                return new IfExpr(position, condition, thenBody, elseBody);
             }
             else if (ConsumeIf(TokenType.Return, out position))
             {

@@ -302,9 +302,9 @@ namespace Magpie.Compilation
             //### bob: eventually, will need to handle closures
         }
 
-        IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(IfThenElseExpr expr)
+        IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(IfExpr expr)
         {
-            var bound = new BoundIfThenElseExpr(
+            var bound = new BoundIfExpr(
                 expr.Condition.Accept(this),
                 expr.ThenBody.Accept(this),
                 (expr.ElseBody == null) ? null : expr.ElseBody.Accept(this));

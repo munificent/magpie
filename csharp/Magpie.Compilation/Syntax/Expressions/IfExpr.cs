@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
-    public class IfThenElseExpr<TExpr>
+    public class IfExpr<TExpr>
     {
         public TExpr Condition;
         public TExpr ThenBody;
@@ -16,7 +16,7 @@ namespace Magpie.Compilation
         /// </summary>
         public TExpr ElseBody;
 
-        public IfThenElseExpr(TExpr condition, TExpr thenBody, TExpr elseBody)
+        public IfExpr(TExpr condition, TExpr thenBody, TExpr elseBody)
         {
             Condition = condition;
             ThenBody = thenBody;
@@ -26,11 +26,11 @@ namespace Magpie.Compilation
         public override string ToString() { return String.Format("if {0} then {1} else {2}", Condition, ThenBody, ElseBody); }
     }
 
-    public class IfThenElseExpr : IfThenElseExpr<IUnboundExpr>, IUnboundExpr
+    public class IfExpr : IfExpr<IUnboundExpr>, IUnboundExpr
     {
         public Position Position { get; private set; }
 
-        public IfThenElseExpr(Position position, IUnboundExpr condition, IUnboundExpr thenBody, IUnboundExpr elseBody)
+        public IfExpr(Position position, IUnboundExpr condition, IUnboundExpr thenBody, IUnboundExpr elseBody)
         : base(condition, thenBody, elseBody)
         {
             Position = position;
@@ -42,9 +42,9 @@ namespace Magpie.Compilation
         }
     }
 
-    public class BoundIfThenElseExpr : IfThenElseExpr<IBoundExpr>, IBoundExpr
+    public class BoundIfExpr : IfExpr<IBoundExpr>, IBoundExpr
     {
-        public BoundIfThenElseExpr(IBoundExpr condition, IBoundExpr thenBody, IBoundExpr elseBody) : base(condition, thenBody, elseBody) { }
+        public BoundIfExpr(IBoundExpr condition, IBoundExpr thenBody, IBoundExpr elseBody) : base(condition, thenBody, elseBody) { }
 
         public IBoundDecl Type
         {

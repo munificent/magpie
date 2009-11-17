@@ -166,7 +166,7 @@ namespace Magpie.Compilation
             return true;
         }
 
-        bool IBoundExprVisitor<bool>.Visit(BoundIfThenElseExpr expr)
+        bool IBoundExprVisitor<bool>.Visit(BoundIfExpr expr)
         {
             // evaluate the condition
             expr.Condition.Accept(this);
