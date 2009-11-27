@@ -140,9 +140,6 @@ namespace Magpie.Compilation
 
             return new BoundTupleExpr(fields,
                 new BoundArrayType(elementType, expr.IsMutable));
-            /*
-            return new BoundArrayExpr(elementType, elements, expr.IsMutable);
-             */
         }
 
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(AssignExpr expr)
@@ -190,17 +187,6 @@ namespace Magpie.Compilation
                 if (call != null) return call;
 
                 throw new CompileException(expr.Position, "Couldn't figure out what you're trying to do on the left side of an assignment.");
-            }
-
-            // handle an operator target: 1 $$ 2 <- 3  ==> $$<- (1, 2, 3)
-            var operatorTarget = expr.Target as OperatorExpr;
-            if (operatorTarget != null)
-            {
-                var opArg = new BoundTupleExpr(new IBoundExpr[]
-                    { operatorTarget.Left.Accept(this),
-                      operatorTarget.Right.Accept(this) });
-
-                return TranslateAssignment(operatorTarget.Position, operatorTarget.Name, null /* no operator generics yet */, opArg, value);
             }
 
             var tupleTarget = expr.Target as TupleExpr;
@@ -393,14 +379,6 @@ namespace Magpie.Compilation
                 expr.Position, expr.Name, expr.TypeArgs, null);
         }
 
-        IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(OperatorExpr expr)
-        {
-            // an operator is just function application
-            var apply = new CallExpr(new NameExpr(expr.Position, expr.Name), new TupleExpr(expr.Left, expr.Right));
-
-            return apply.Accept(this);
-        }
-
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(TupleExpr expr)
         {
             return new BoundTupleExpr(expr.Fields.Accept(this));
@@ -487,7 +465,7 @@ namespace Magpie.Compilation
                     else
                     {
                         // combine with previous condition(s)
-                        conditionExpr = new OperatorExpr(clause.Position, conditionExpr, "&", clause.Expression);
+                        conditionExpr = new CallExpr(new NameExpr(clause.Position, "&"), new TupleExpr(conditionExpr, clause.Expression));
                     }
                 }
                 else
@@ -505,7 +483,7 @@ namespace Magpie.Compilation
                     else
                     {
                         // combine with previous condition(s)
-                        conditionExpr = new OperatorExpr(clause.Position, conditionExpr, "&", condition);
+                        conditionExpr = new CallExpr(new NameExpr(clause.Position, "&"), new TupleExpr(conditionExpr, condition));
                     }
 
                     var currentValue = new CallExpr(new NameExpr(clause.Position, "Current"), new NameExpr(clause.Position, clause.Name + " iter"));

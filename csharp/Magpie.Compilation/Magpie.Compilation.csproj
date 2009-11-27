@@ -73,7 +73,6 @@
     <Compile Include="Syntax\Expressions\AssignExpr.cs" />
     <Compile Include="Syntax\Expressions\BlockExpr.cs" />
     <Compile Include="Syntax\Expressions\CallExpr.cs" />
-    <Compile Include="Syntax\Expressions\ConstructUnionExpr.cs" />
     <Compile Include="Syntax\Expressions\DefineExpr.cs" />
     <Compile Include="Syntax\Expressions\ForeignCallExpr.cs" />
     <Compile Include="Syntax\Expressions\IBoundExpr.cs" />
@@ -88,7 +87,6 @@
     <Compile Include="Syntax\Expressions\LoopExpr.cs" />
     <Compile Include="Syntax\Expressions\MatchExpr.cs" />
     <Compile Include="Syntax\Expressions\NameExpr.cs" />
-    <Compile Include="Syntax\Expressions\OperatorExpr.cs" />
     <Compile Include="Syntax\Expressions\ReturnExpr.cs" />
     <Compile Include="Syntax\Expressions\StoreExpr.cs" />
     <Compile Include="Syntax\Expressions\TupleExpr.cs" />

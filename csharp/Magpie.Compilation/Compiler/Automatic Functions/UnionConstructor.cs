@@ -33,9 +33,6 @@ namespace Magpie.Compilation
 
             // create the structure
             return new BoundTupleExpr(fields, mCase.Union);
-
-            /*
-            return new ConstructUnionExpr(mCase, arg);*/
         }
 
         public IBoundDecl ParameterType

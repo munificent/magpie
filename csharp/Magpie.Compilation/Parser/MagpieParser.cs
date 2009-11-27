@@ -455,9 +455,18 @@ namespace Magpie.Compilation
 
                 IUnboundExpr value = Block();
 
-                if (isDot) expr = new AssignExpr(position, expr, new CallExpr(value, expr));
-                else if (!String.IsNullOrEmpty(opName)) expr = new AssignExpr(position, expr, new OperatorExpr(opPosition, expr, opName, value));
-                else expr = new AssignExpr(position, expr, value);
+                if (isDot)
+                {
+                    expr = new AssignExpr(position, expr, new CallExpr(value, expr));
+                }
+                else if (!String.IsNullOrEmpty(opName))
+                {
+                    expr = new AssignExpr(position, expr, new CallExpr(new NameExpr(opPosition, opName), new TupleExpr(expr, value)));
+                }
+                else
+                {
+                    expr = new AssignExpr(position, expr, value);
+                }
             }
 
             return expr;
@@ -484,7 +493,7 @@ namespace Magpie.Compilation
         private IUnboundExpr OperatorExpr()
         {
             return OneOrMoreLeft(TokenType.Operator, ApplyExpr,
-                (left, separator, right) => new OperatorExpr(separator.Position, left, separator.StringValue, right));
+                (left, separator, right) => new CallExpr(new NameExpr(separator.Position, separator.StringValue), new TupleExpr(left, right)));
         }
 
         // <-- PrimaryExpr+

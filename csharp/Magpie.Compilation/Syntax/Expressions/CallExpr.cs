@@ -24,7 +24,7 @@ namespace Magpie.Compilation
     }
 
     /// <summary>
-    /// Unbound prefix function call.
+    /// Unbound function call.
     /// </summary>
     public class CallExpr : CallExpr<IUnboundExpr>, IUnboundExpr
     {
