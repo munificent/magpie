@@ -398,7 +398,11 @@ namespace Magpie.Compilation
             for (int i = 0; i < tupleDecl.Fields.Count; i++)
             {
                 // create an expression to pull out the tuple field
+                //### bob: no more TupleFieldExpr
+                /*
                 var fieldValue = new TupleFieldExpr(mValue, i);
+                */
+                IUnboundExpr fieldValue = null;
 
                 // match it
                 var coverage = new Coverage(); //### bob: not implemented yet

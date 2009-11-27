@@ -81,10 +81,12 @@ namespace Magpie.Compilation
                 var index = target as IntExpr;
                 if (index == null) throw new CompileException(expr.Position, "Tuple fields can only be accessed using a literal index, not an int expression.");
 
-                // translate to a field access
-                IUnboundExpr fieldExpr = new TupleFieldExpr(expr.Arg, index.Value);
+                // make sure the field is in range
+                if ((index.Value < 0) || (index.Value >= tupleType.Fields.Count))
+                    throw new CompileException(expr.Position, String.Format("Cannot access field {0} because the tuple only has {1} fields.", index.Value, tupleType.Fields.Count));
 
-                return fieldExpr.Accept(this);
+                // bind it
+                return new LoadExpr(boundArg, tupleType.Fields[index.Value], index.Value);
             }
 
             // not calling a function, so try to desugar to a __Call
@@ -515,22 +517,6 @@ namespace Magpie.Compilation
 
             // bind the desugared form
             return desugaredMatch.Accept(this);
-        }
-
-        IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(TupleFieldExpr expr)
-        {
-            // bind the tuple
-            var value = expr.Value.Accept(this);
-
-            // make sure it's valid
-            var tupleType = value.Type as BoundTupleType;
-            if (tupleType == null) throw new CompileException(expr.Position, String.Format("Cannot access a tuple field from value of type \"{0}\".", value.Type));
-
-            if ((expr.Field < 0) || (expr.Field >= tupleType.Fields.Count))
-                throw new CompileException(expr.Position, String.Format("Cannot access field {0} because the tuple only has {1} fields.", expr.Field, tupleType.Fields.Count));
-
-            // bind it
-            return new LoadExpr(value, tupleType.Fields[expr.Field], expr.Field);
         }
 
         #endregion

@@ -90,7 +90,6 @@
     <Compile Include="Syntax\Expressions\ReturnExpr.cs" />
     <Compile Include="Syntax\Expressions\StoreExpr.cs" />
     <Compile Include="Syntax\Expressions\TupleExpr.cs" />
-    <Compile Include="Syntax\Expressions\TupleFieldExpr.cs" />
     <Compile Include="Syntax\Expressions\ValueExpr.cs" />
     <Compile Include="Syntax\Expressions\UnitExpr.cs" />
     <Compile Include="Syntax\Expressions\WhileExpr.cs" />
