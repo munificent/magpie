@@ -2,6 +2,7 @@
 // expected: true 2
 // expected: true 2
 // expected: true 3
+// expected: false
 
 Main (->)
     // single line
@@ -25,4 +26,8 @@ Main (->)
     
     if true
     then Print "true 3"
+        
+    // flow control inside condition
+    def a <- true
+    if if a then false else true then Print "true" else Print "false"
 end

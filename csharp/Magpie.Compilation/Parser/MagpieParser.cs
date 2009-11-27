@@ -377,7 +377,7 @@ namespace Magpie.Compilation
             }
             else if (ConsumeIf(TokenType.If, out position))
             {
-                var condition = AssignExpr();
+                var condition = InnerBlock(TokenType.Then);
 
                 // then can optionally be on the next line
                 ConsumeIf(TokenType.Line);
@@ -400,7 +400,7 @@ namespace Magpie.Compilation
 
                 Consume(TokenType.LeftArrow);
 
-                var condition = AssignExpr();
+                var condition = InnerBlock(TokenType.Then);
 
                 // then can optionally be on the next line
                 ConsumeIf(TokenType.Line);
