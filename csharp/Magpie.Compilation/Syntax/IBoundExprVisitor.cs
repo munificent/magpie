@@ -11,7 +11,6 @@ namespace Magpie.Compilation
         TReturn Visit(UnitExpr expr);
         TReturn Visit(IntExpr expr);
         TReturn Visit(StringExpr expr);
-        TReturn Visit(BoundArrayExpr expr);
         TReturn Visit(BoundTupleExpr expr);
         TReturn Visit(IntrinsicExpr expr);
         TReturn Visit(BoundCallExpr expr);
@@ -24,7 +23,5 @@ namespace Magpie.Compilation
         TReturn Visit(LocalsExpr expr);
         TReturn Visit(BoundFuncRefExpr expr);
         TReturn Visit(ForeignCallExpr expr);
-        TReturn Visit(ConstructExpr expr);
-        TReturn Visit(ConstructUnionExpr expr);
     }
 }

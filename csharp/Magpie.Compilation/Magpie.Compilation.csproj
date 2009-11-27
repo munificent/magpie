@@ -73,7 +73,6 @@
     <Compile Include="Syntax\Expressions\AssignExpr.cs" />
     <Compile Include="Syntax\Expressions\BlockExpr.cs" />
     <Compile Include="Syntax\Expressions\CallExpr.cs" />
-    <Compile Include="Syntax\Expressions\ConstructExpr.cs" />
     <Compile Include="Syntax\Expressions\ConstructUnionExpr.cs" />
     <Compile Include="Syntax\Expressions\DefineExpr.cs" />
     <Compile Include="Syntax\Expressions\ForeignCallExpr.cs" />

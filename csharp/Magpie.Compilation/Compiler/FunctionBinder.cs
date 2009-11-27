@@ -132,7 +132,17 @@ namespace Magpie.Compilation
                 }
             }
 
+            // build a structure for the array
+            var fields = new List<IBoundExpr>();
+            fields.Add(new IntExpr(expr.Elements.Count));
+
+            fields.AddRange(elements);
+
+            return new BoundTupleExpr(fields,
+                new BoundArrayType(elementType, expr.IsMutable));
+            /*
             return new BoundArrayExpr(elementType, elements, expr.IsMutable);
+             */
         }
 
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(AssignExpr expr)

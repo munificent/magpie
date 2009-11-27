@@ -1,0 +1,18 @@
+// expected: condition
+// expected: passed
+// expected: condition
+// expected: foo
+
+Main (->)
+    // block if condition
+    if
+        Print "condition"
+        true
+    then Print "passed"
+    
+    // block let condition
+    let a <-
+        Print "condition"
+        Some "foo"
+    then Print a
+end

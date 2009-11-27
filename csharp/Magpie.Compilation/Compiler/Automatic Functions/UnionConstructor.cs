@@ -20,7 +20,22 @@ namespace Magpie.Compilation
 
         public IBoundExpr CreateCall(IBoundExpr arg)
         {
-            return new ConstructUnionExpr(mCase, arg);
+            var fields = new List<IBoundExpr>();
+
+            // add the case tag
+            fields.Add(new IntExpr(mCase.Index));
+
+            // add the value, if any
+            if (!(arg is UnitExpr))
+            {
+                fields.Add(arg);
+            }
+
+            // create the structure
+            return new BoundTupleExpr(fields, mCase.Union);
+
+            /*
+            return new ConstructUnionExpr(mCase, arg);*/
         }
 
         public IBoundDecl ParameterType

@@ -141,24 +141,6 @@ namespace Magpie.Compilation
             return true;
         }
 
-        bool IBoundExprVisitor<bool>.Visit(BoundArrayExpr expr)
-        {
-            // the count is the first element
-            Write(OpCode.PushInt, expr.Elements.Count);
-
-            // must visit in forward order to ensure that array elements are
-            // evaluated left to right
-            foreach (var element in expr.Elements)
-            {
-                element.Accept(this);
-            }
-
-            // create the structure (+1 for the size)
-            Write(OpCode.Alloc, expr.Elements.Count + 1);
-
-            return true;
-        }
-
         bool IBoundExprVisitor<bool>.Visit(BoundBlockExpr block)
         {
             block.Exprs.ForEach(expr => expr.Accept(this));
@@ -248,58 +230,6 @@ namespace Magpie.Compilation
         bool IBoundExprVisitor<bool>.Visit(LocalsExpr expr)
         {
             Write(OpCode.PushLocals);
-
-            return true;
-        }
-
-        bool IBoundExprVisitor<bool>.Visit(ConstructExpr expr)
-        {
-            expr.Arg.Accept(this);
-
-            // if the struct has only one field, the arg tuple will just be a
-            // value. in that case, we need to hoist it into a struct to make
-            // it properly a reference type.
-            //### opt: this is really only needed for mutable single-field
-            //    structs. for immutable ones, pass by reference and pass by value
-            //    are indistinguishable.
-            if (expr.Struct.Fields.Count == 1)
-            {
-                Write(OpCode.Alloc, 1);
-            }
-            else if (expr.Struct.Fields.Count == 0)
-            {
-                // for an empty struct, just include a dummy value
-                //### bob: this is gross
-                Write(OpCode.PushInt, 0);
-            }
-
-            // note that if there is more than one field, this evaluates to
-            // nothing: the arg tuple for the structure *is* the structure
-            // so the work is already done.
-
-            return true;
-        }
-
-        bool IBoundExprVisitor<bool>.Visit(ConstructUnionExpr expr)
-        {
-            // push the case tag
-            Write(OpCode.PushInt, expr.Case.Index);
-
-            // evaluate the value
-            expr.Arg.Accept(this);
-
-            // one slot for the case tag
-            int numSlots = 1;
-
-            // load the value (if any)
-            if (expr.Case.ValueType.Bound != Decl.Unit)
-            {
-                // add a slot for the value
-                numSlots++;
-            }
-
-            // create the structure
-            Write(OpCode.Alloc, numSlots);
 
             return true;
         }
