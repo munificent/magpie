@@ -507,6 +507,7 @@ namespace Magpie.Compilation
             return block.Accept(this);
         }
 
+        /*
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(MatchExpr expr)
         {
             // bind the value expression
@@ -518,6 +519,7 @@ namespace Magpie.Compilation
             // bind the desugared form
             return desugaredMatch.Accept(this);
         }
+        */
 
         #endregion
 

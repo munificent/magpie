@@ -268,7 +268,7 @@ namespace Magpie.Compilation
         // <-- MATCH FlowExpr LINE? (CASE CaseExpr THEN Block)+ END
         //   | FlowExpr
         private IUnboundExpr MatchExpr()
-        {
+        {/*
             Position position;
             if (ConsumeIf(TokenType.Match, out position))
             {
@@ -292,7 +292,7 @@ namespace Magpie.Compilation
 
                 return new MatchExpr(position, matchExpr, cases);
             }
-            else return FlowExpr();
+            else*/ return FlowExpr();
         }
 
         // <-- BOOL

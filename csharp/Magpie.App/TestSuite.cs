@@ -21,6 +21,7 @@ namespace Magpie.App
         {
             int passed = 0;
             int failed = 0;
+            int skipped = 0;
 
             foreach (string test in Directory.GetFiles(mTestDir, "*.mag", SearchOption.AllDirectories))
             {
@@ -29,14 +30,14 @@ namespace Magpie.App
                     // don't catch exceptions when a debugger is attached, that way
                     // the debugger will break at the place where the exception was
                     // thrown and we can see what's going on.
-                    RunTest(test);
+                    if (!RunTest(test)) skipped++;
                 }
                 else
                 {
                     // no debugger, so catch all exceptions
                     try
                     {
-                        RunTest(test);
+                        if (!RunTest(test)) skipped++;
                     }
                     catch (Exception ex)
                     {
@@ -63,14 +64,18 @@ namespace Magpie.App
             }
 
             Console.WriteLine();
-            Console.WriteLine("passed {0}/{1} tests", passed, passed + failed);
+            Console.WriteLine("passed {0}/{1} tests ({2} skipped)", passed, passed + failed, skipped);
         }
 
-        private void RunTest(string test)
+        private bool RunTest(string test)
         {
             mErrors = new List<string>();
 
-            ParseExpected(test);
+            if (!ParseExpected(test))
+            {
+                // script is disabled
+                return false;
+            }
 
             Script script = new Script(test);
 
@@ -116,17 +121,21 @@ namespace Magpie.App
                     }
                 }
             }
+
+            return true;
         }
 
-        private void ParseExpected(string path)
+        private bool ParseExpected(string path)
         {
             mExpectedOutput.Clear();
             mExpectedErrorLines.Clear();
             mMaxStackDepth = 0;
+            bool enabled = true;
 
             const string ExpectedHeader    = "// expected: ";
             const string ErrorHeader       = "// error line: ";
             const string MaxStackHeader    = "// stack limit: ";
+            const string Disable           = "// disable";
 
             foreach (string line in File.ReadAllLines(path))
             {
@@ -144,7 +153,13 @@ namespace Magpie.App
                     string stackLine = line.Substring(MaxStackHeader.Length).Trim();
                     mMaxStackDepth = Int32.Parse(stackLine);
                 }
+                else if (line.StartsWith(Disable))
+                {
+                    enabled = false;
+                }
             }
+
+            return enabled;
         }
 
         private void TestPrint(object sender, PrintEventArgs e)

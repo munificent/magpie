@@ -5,6 +5,7 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
+    /*
     /// <summary>
     /// A pattern matching expression.
     /// </summary>
@@ -52,4 +53,5 @@ namespace Magpie.Compilation
             Body = body;
         }
     }
+    */
 }

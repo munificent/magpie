@@ -20,6 +20,7 @@ namespace Magpie.Compilation
      *   given a value.
      * - assign values to variables defined in the pattern
      */
+    /*
     //### bob: move to separate file
     //### bob: this whole class is pretty hideous, but once it's more or less working,
     //         i can refactor it into something more sensible
@@ -398,11 +399,7 @@ namespace Magpie.Compilation
             for (int i = 0; i < tupleDecl.Fields.Count; i++)
             {
                 // create an expression to pull out the tuple field
-                //### bob: no more TupleFieldExpr
-                /*
                 var fieldValue = new TupleFieldExpr(mValue, i);
-                */
-                IUnboundExpr fieldValue = null;
 
                 // match it
                 var coverage = new Coverage(); //### bob: not implemented yet
@@ -430,5 +427,5 @@ namespace Magpie.Compilation
         private Coverage mCoverage;
         private IBoundDecl mDecl;
         private IUnboundExpr mValue;
-    }
+    }*/
 }
