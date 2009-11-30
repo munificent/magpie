@@ -507,6 +507,12 @@ namespace Magpie.Compilation
             return block.Accept(this);
         }
 
+        IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(SyntaxExpr expr)
+        {
+            var innerExpr = SyntaxLiteral.Desugar(expr.Expr);
+            return innerExpr.Accept(this);
+        }
+
         /*
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(MatchExpr expr)
         {

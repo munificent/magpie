@@ -60,6 +60,7 @@
     <Compile Include="Compiler\Automatic Functions\UnionConstructor.cs" />
     <Compile Include="Compiler\Automatic Functions\UnionValueGetter.cs" />
     <Compile Include="Compiler\Intrinsic.cs" />
+    <Compile Include="Compiler\SyntaxLiteral.cs" />
     <Compile Include="Compiler\TypeBinder.cs" />
     <Compile Include="Compiler\TypeTable.cs" />
     <Compile Include="Foreign Interface\ForeignFunction.cs" />
@@ -89,6 +90,7 @@
     <Compile Include="Syntax\Expressions\NameExpr.cs" />
     <Compile Include="Syntax\Expressions\ReturnExpr.cs" />
     <Compile Include="Syntax\Expressions\StoreExpr.cs" />
+    <Compile Include="Syntax\Expressions\SyntaxExpr.cs" />
     <Compile Include="Syntax\Expressions\TupleExpr.cs" />
     <Compile Include="Syntax\Expressions\ValueExpr.cs" />
     <Compile Include="Syntax\Expressions\UnitExpr.cs" />

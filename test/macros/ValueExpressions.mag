@@ -1,0 +1,29 @@
+// expected: ()
+// expected: true
+// expected: 123
+// expected: "foo"
+// expected: (1, 2, 3)
+// expected: [1, 2, 3]
+
+Main (->)
+    def a <- { () }
+    Print a.String
+    
+    def b <- { true }
+    Print b.String
+    
+    def c <- { 123 }
+    Print c.String
+    
+    def d <- { "foo" }
+    Print d.String
+    
+    def e <- { 1, 2, 3 }
+    Print e.String
+    
+    def f <- { [1, 2, 3] }
+    Print f.String
+    
+    //### bob: what about empty arrays?
+    
+end

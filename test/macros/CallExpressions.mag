@@ -1,0 +1,18 @@
+// expected: Foo
+// expected: Foo bar
+// expected: * (+ (1, 2), 3)
+// expected: Foo bar
+
+Main (->)
+    def a <- { Foo }
+    Print a.String
+    
+    def b <- { Foo bar }
+    Print b.String
+    
+    def c <- { 1 + 2 * 3 }
+    Print c.String
+    
+    def d <- { bar.Foo }
+    Print d.String
+end

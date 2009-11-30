@@ -171,10 +171,11 @@ namespace Magpie.App
             else
             {
                 string expecting = mExpectedOutput.Dequeue();
+                string actual = e.Text.Replace("\n", "\\n");
 
-                if (expecting != e.Text)
+                if (expecting != actual)
                 {
-                    mErrors.Add("got \"" + e.Text + "\" when expecting \"" + expecting + "\"");
+                    mErrors.Add("got \"" + actual + "\" when expecting \"" + expecting + "\"");
                 }
             }
         }

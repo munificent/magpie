@@ -27,41 +27,26 @@ namespace Magpie.Compilation
             // version
             writer.Write(new byte[] { 0, 0, 0, 0 });
 
-            // flag for whether or not main takes a string argument
-            int mainArgOffset = (int)writer.BaseStream.Position;
-            writer.Write((byte)0);
-
             // export table
-            writer.Write(1); // number of exported functions ### bob: temp
-            strings.InsertOffset("Main ()");
-            exportTable.InsertOffset("main");
-
-            // code section
-            bool mainTakesArg = false;
+            // number of exported functions
+            //### bob: hack temp. exports all functions
+            int numFunctions = mCompiler.Functions.Functions.Count();
+            writer.Write(numFunctions);
             foreach (Function function in mCompiler.Functions.Functions)
             {
-                if (function.Name == "Main")
-                {
-                    string uniqueName = function.UniqueName();
+                string uniqueName = function.UniqueName();
 
-                    // allow either a main with a string arg, or without
-                    if (function.UniqueName() == "Main ()") exportTable.DefineOffset("main");
-
-                    if (function.UniqueName() == "Main String")
-                    {
-                        exportTable.DefineOffset("main");
-                        mainTakesArg = true;
-                    }
-                }
-
-                BytecodeGenerator.Generate(mCompiler, writer, funcPatcher, strings, function);
+                strings.InsertOffset(uniqueName);
+                exportTable.InsertOffset(uniqueName);
             }
 
-            if (mainTakesArg)
+            // code section
+            foreach (Function function in mCompiler.Functions.Functions)
             {
-                writer.Seek(mainArgOffset, SeekOrigin.Begin);
-                writer.Write((byte)1);
-                writer.Seek(0, SeekOrigin.End);
+                string uniqueName = function.UniqueName();
+
+                exportTable.DefineOffset(uniqueName);
+                BytecodeGenerator.Generate(mCompiler, writer, funcPatcher, strings, function);
             }
 
             // now wire up all of the function offsets to each other

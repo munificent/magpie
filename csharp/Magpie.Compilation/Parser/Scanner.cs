@@ -102,6 +102,8 @@ namespace Magpie.Compilation
                     else if (Match ("["))            return new Token(LastChar, TokenType.LeftBracket);
                     else if (Match ("]", "!"))       return new Token(LastChar, TokenType.RightBracketBang);
                     else if (Match ("]"))            return new Token(LastChar, TokenType.RightBracket);
+                    else if (Match ("{"))            return new Token(LastChar, TokenType.LeftCurly);
+                    else if (Match ("}"))            return new Token(LastChar, TokenType.RightCurly);
                     else if (Match (","))            return new Token(LastChar, TokenType.Comma);
                     else if (Match (":"))            return new Token(LastChar, TokenType.Colon);
                     else if (Match ("."))            return new Token(LastChar, TokenType.Dot);

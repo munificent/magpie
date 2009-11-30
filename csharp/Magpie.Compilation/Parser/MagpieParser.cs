@@ -184,8 +184,6 @@ namespace Magpie.Compilation
         /// that may end or be followed by something else (such as an "else" clause).
         /// </summary>
         /// <param name="continueTerminator"></param>
-        /// <param name="hasContinue"></param>
-        /// <returns></returns>
         private IUnboundExpr InnerBlock(TokenType continueTerminator)
         {
             if (ConsumeIf(TokenType.Line))
@@ -236,10 +234,43 @@ namespace Magpie.Compilation
 
         private IUnboundExpr Expression()
         {
-            return DefineExpr();
+            return SyntaxExpr();
         }
 
-        // <-- (DEF | MUTABLE) NAME ASSIGN Block
+        private IUnboundExpr SyntaxExpr()
+        {
+            Position position;
+            if (ConsumeIf(TokenType.LeftCurly, out position))
+            {
+                // ignore a leading line
+                ConsumeIf(TokenType.Line);
+
+                var expressions = new List<IUnboundExpr>();
+
+                while (true)
+                {
+                    expressions.Add(Expression());
+
+                    if (ConsumeIf(TokenType.RightCurly)) break;
+                    Consume(TokenType.Line);
+                    if (ConsumeIf(TokenType.RightCurly)) break;
+                }
+
+                IUnboundExpr expr;
+                if (expressions.Count > 1)
+                {
+                    expr = new BlockExpr(expressions);
+                }
+                else
+                {
+                    expr = expressions[0];
+                }
+
+                return new SyntaxExpr(position, expr);
+            }
+            else return DefineExpr();
+        }
+
         private IUnboundExpr DefineExpr()
         {
             bool? isMutable = null;
@@ -419,7 +450,7 @@ namespace Magpie.Compilation
             }
             else if (ConsumeIf(TokenType.Return, out position))
             {
-                if (CurrentIs(TokenType.Line))
+                if (CurrentIs(TokenType.Line) | CurrentIs(TokenType.RightCurly))
                 {
                     // infer () if there is no value
                     return new ReturnExpr(position, new UnitExpr(position));

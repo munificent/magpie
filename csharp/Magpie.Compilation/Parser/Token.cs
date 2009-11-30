@@ -12,6 +12,8 @@ namespace Magpie.Compilation
         LeftBracket,
         RightBracket,
         RightBracketBang, // ]! used for mutable arrays
+        LeftCurly,
+        RightCurly,
         LeftArrow,
         RightArrow,
         Comma,
@@ -106,6 +108,8 @@ namespace Magpie.Compilation
                 case TokenType.LeftBracket:   return "[";
                 case TokenType.RightBracket:  return "]";
                 case TokenType.RightBracketBang:  return "]!";
+                case TokenType.LeftCurly:     return "{";
+                case TokenType.RightCurly:    return "}";
                 case TokenType.LeftArrow:     return "<-";
                 case TokenType.RightArrow:    return "->";
                 case TokenType.Comma:         return ",";

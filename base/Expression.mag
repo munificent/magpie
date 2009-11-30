@@ -1,0 +1,67 @@
+// NOTE: the c# compiler is directly bound to the types and functions
+// defined here. SyntaxLiteralCompiler.cs must be kept in sync with
+// this file.
+
+union Expression
+    UnitExpr
+    BoolExpr    Bool
+    IntExpr     Int
+    StringExpr  String
+    
+    NameExpr    String
+    
+    TupleExpr   []'Expression
+    ArrayExpr   []'Expression
+
+    BlockExpr   []'Expression
+    
+    CallExpr    (Expression, Expression)
+    DefineExpr  (Bool, String, Expression) // mutable?, name, value
+    AssignExpr  (Expression, Expression) // target, value
+    ReturnExpr  Expression
+    
+    IfExpr      (Expression, Expression, Expression) // condition, then, else
+end
+
+String (expr Expression -> String)
+    if      expr.UnitExpr?      then "()"
+    else if expr.BoolExpr?      then expr.BoolExprValue.String
+    else if expr.IntExpr?       then expr.IntExprValue.String
+    else if expr.StringExpr?    then "\"" + expr.StringExprValue.String + "\""
+
+    else if expr.NameExpr?      then expr.NameExprValue.String
+                                     
+    else if expr.TupleExpr?     then Join ("(", ", ", ")", expr.TupleExprValue)
+    else if expr.ArrayExpr?     then Join ("[", ", ", "]", expr.ArrayExprValue)
+
+    else if expr.BlockExpr?     then Join ("", "\n", "", expr.BlockExprValue)
+
+    else if expr.CallExpr?      then expr.CallExprValue.0.String + " " +
+                                     expr.CallExprValue.1.String
+
+    else if expr.DefineExpr?    then
+        (if expr.DefineExprValue.0 then "var " else "def ") +
+        expr.DefineExprValue.1 + " <- " +
+        expr.DefineExprValue.2.String
+
+    else if expr.AssignExpr?    then expr.AssignExprValue.0.String + " <- " +
+                                     expr.AssignExprValue.1.String
+
+    else if expr.ReturnExpr?    then "return " + expr.ReturnExprValue.String
+
+    else if expr.IfExpr?        then "if " + expr.IfExprValue.0.String + " then " +
+                                     expr.IfExprValue.1.String + " else " +
+                                     expr.IfExprValue.2.String
+        
+    else "???"
+end
+
+Join (before String, separator String, after String,
+      exprs []'Expression -> String)
+    var s <- before
+    for expr <- exprs do
+        if s.Count > before.Count then s <- + separator
+        s <- + expr.String
+    end
+    s + after
+end

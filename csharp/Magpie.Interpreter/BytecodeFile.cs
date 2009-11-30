@@ -14,23 +14,22 @@ namespace Magpie.Interpreter
         {
             get
             {
-                int offset = 8; // magic num + version
-                //### bob: hack temp
-                return mData[offset] != 0;
+                // main can take a string or not
+                int offset = FindFunction("Main String");
+
+                return offset != -1;
             }
         }
 
-        //### bob: hackish. should be able to look up export by name
         public int OffsetToMain
         {
             get
             {
-                int offset = 17; // magic num + version + main arg flag + num exports + export name
-                //### bob: hack temp
-                return ((int)mData[offset++]) |
-                       ((int)mData[offset++] << 8) |
-                       ((int)mData[offset++] << 16) |
-                       ((int)mData[offset++] << 24);
+                // main can take a string or not
+                int offset = FindFunction("Main String");
+                if (offset != -1) return offset;
+
+                return FindFunction("Main ()");
             }
         }
 
@@ -45,6 +44,36 @@ namespace Magpie.Interpreter
 
             // version
             Expect(4, new byte[] { 0, 0, 0, 0 });
+        }
+
+        public int FindFunction(string uniqueName)
+        {
+            int offset = 4 + 4; // magic num + version
+            int numExports = ReadInt(offset);
+
+            offset += 4; // num exports
+            for (int i = 0; i < numExports; i++)
+            {
+                int stringOffset = ReadInt(offset);
+                string name = ReadString(stringOffset);
+
+                offset += 4;
+                int functionOffset = ReadInt(offset);
+                if (name == uniqueName) return functionOffset;
+
+                offset += 4;
+            }
+
+            // not found
+            return -1;
+        }
+
+        public int ReadInt(int offset)
+        {
+            return ((int)mData[offset++]) |
+                   ((int)mData[offset++] << 8) |
+                   ((int)mData[offset++] << 16) |
+                   ((int)mData[offset++] << 24);
         }
 
         public string ReadString(int offset)
