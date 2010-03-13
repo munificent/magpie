@@ -49,9 +49,19 @@ namespace Magpie.Compilation
 
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(CallExpr expr)
         {
+            var namedTarget = expr.Target as NameExpr;
+
+            // see if it's a macro call before binding the arg
+            if ((namedTarget != null) && (mContext.Compiler.MacroProcessor != null))
+            {
+                IUnboundExpr macroResult = mContext.Compiler.MacroProcessor.Process(namedTarget.Name, expr.Arg);
+
+                // if it was a macro call, bind the result of it
+                if (macroResult != null) return macroResult.Accept(this);
+            }
+
             var boundArg = expr.Arg.Accept(this);
 
-            var namedTarget = expr.Target as NameExpr;
             if (namedTarget != null)
             {
                 return mContext.ResolveName(mFunction, Scope, namedTarget.Position,
@@ -232,15 +242,60 @@ namespace Magpie.Compilation
 
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(DefineExpr expr)
         {
-            if (Scope.Contains(expr.Name)) throw new CompileException(expr.Position, "A local variable named \"" + expr.Name + "\" is already defined in this scope.");
+            var stores = new List<IBoundExpr>();
 
-            var value = expr.Value.Accept(this);
+            foreach (var define in expr.Definitions)
+            {
+                foreach (var name in define.Names)
+                {
+                    if (Scope.Contains(name)) throw new CompileException(define.Position,
+                        "A local variable named \"" + name + "\" is already defined in this scope.");
+                }
 
-            // add it to the scope
-            Scope.Define(expr.Name, value.Type, expr.IsMutable);
+                var value = define.Value.Accept(this);
 
-            // assign it
-            return new StoreExpr(new LocalsExpr(), Scope[expr.Name], value);
+                if (define.Names.Count > 1)
+                {
+
+                    // splitting a tuple
+                    var tupleType = value.Type as BoundTupleType;
+
+                    if (tupleType == null) throw new CompileException(define.Position,
+                        "Cannot define multiple names if the value is not a tuple.");
+
+                    if (tupleType.Fields.Count < define.Names.Count) throw new CompileException(define.Position,
+                        "Cannot bind more names in a define than the tuple has fields.");
+
+                    // define a temporary for the entire tuple expression
+                    var temp = GenerateName();
+                    Scope.Define(temp, value.Type, false);
+
+                    // split out the fields
+                    int field = 0;
+                    foreach (var name in define.Names)
+                    {
+                        Scope.Define(name, tupleType.Fields[field], expr.IsMutable);
+
+                        // assign it
+                        var fieldValue = new LoadExpr(value, tupleType.Fields[field], field);
+                        stores.Add(new StoreExpr(new LocalsExpr(), Scope[name], fieldValue));
+
+                        field++;
+                    }
+                }
+                else
+                {
+                    // just a single variable
+
+                    // add it to the scope
+                    Scope.Define(define.Names[0], value.Type, expr.IsMutable);
+
+                    // assign it
+                    stores.Add(new StoreExpr(new LocalsExpr(), Scope[define.Names[0]], value));
+                }
+            }
+
+            return new BoundBlockExpr(stores);
         }
 
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(FuncRefExpr expr)
@@ -342,18 +397,19 @@ namespace Magpie.Compilation
         {
             // a let expression desugars like this:
             //
-            //      let a <- Foo then Bar else Bang
+            //      let a b <- Foo then Bar else Bang
             // 
             // becomes...
             //
-            //      def a__ <- Foo
-            //      if Some? a__ then
-            //          def a <- SomeValue a__
+            //      def let__ <- Foo
+            //      if Some? let__ then
+            //          def a b <- 0 SomeValue let__
             //          Bar
             //      else Bang
 
             // use a space so we can't collide with a user's variable
-            var optionName = expr.Name + " ";
+            //### bob: should use some auto-generated name so multiple lets don't collide
+            var optionName = "let ";
 
             // def a__ <- Foo
             var defineOption = new DefineExpr(expr.Position, optionName, expr.Condition, false);
@@ -365,7 +421,7 @@ namespace Magpie.Compilation
             // def a <- SomeValue a__
             var getValue = new CallExpr(new NameExpr(expr.Position, "SomeValue"),
                                         new NameExpr(expr.Position, optionName));
-            var defineValue = new DefineExpr(expr.Position, expr.Name, getValue, false);
+            var defineValue = new DefineExpr(expr.Position, expr.Names, getValue, false);
 
             var thenBody = new BlockExpr(new IUnboundExpr[] { defineValue, expr.ThenBody });
             var ifThen = new IfExpr(expr.Position, condition, thenBody, expr.ElseBody);
@@ -546,7 +602,15 @@ namespace Magpie.Compilation
             Scope = scope;
         }
 
+        //### bob: should refactor code to use this for all temps
+        private string GenerateName()
+        {
+            // using space in identifiers ensures it can't collide with a user-defined name
+            return "__temp " + mTempIndex;
+        }
+
         private BindingContext mContext;
         private Function mFunction;
+        private int mTempIndex;
     }
 }

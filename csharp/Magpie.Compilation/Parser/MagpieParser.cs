@@ -287,13 +287,43 @@ namespace Magpie.Compilation
 
             if (isMutable.HasValue)
             {
-                string name = Consume(TokenType.Name).StringValue;
-                Consume(TokenType.LeftArrow);
-                IUnboundExpr body = Block();
+                var definitions = new List<Define>();
 
-                return new DefineExpr(position, name, body, isMutable.Value);
+                // check for multi-line define
+                if (ConsumeIf(TokenType.Line))
+                {
+                    while (true)
+                    {
+                        definitions.Add(Define());
+                        Consume(TokenType.Line);
+                        if (ConsumeIf(TokenType.End)) break;
+                    }
+                }
+                else
+                {
+                    // single line define
+                    definitions.Add(Define());
+                }
+
+                return new DefineExpr(isMutable.Value, definitions);
             }
             else return MatchExpr();
+        }
+
+        private Define Define()
+        {
+            var names = new List<string>();
+            var position = CurrentPosition;
+
+            while (CurrentIs(TokenType.Name))
+            {
+                names.Add(Consume(TokenType.Name).StringValue);
+            }
+
+            Consume(TokenType.LeftArrow);
+            IUnboundExpr body = Block();
+
+            return new Define(position, names, body);
         }
 
         // <-- MATCH FlowExpr LINE? (CASE CaseExpr THEN Block)+ END
@@ -427,7 +457,11 @@ namespace Magpie.Compilation
             }
             else if (ConsumeIf(TokenType.Let, out position))
             {
-                var name = Consume(TokenType.Name).StringValue;
+                var names = new List<string>();
+                while (CurrentIs(TokenType.Name))
+                {
+                    names.Add(Consume(TokenType.Name).StringValue);
+                }
 
                 Consume(TokenType.LeftArrow);
 
@@ -446,7 +480,7 @@ namespace Magpie.Compilation
                     elseBody = Block();
                 }
 
-                return new LetExpr(position, name, condition, thenBody, elseBody);
+                return new LetExpr(position, names, condition, thenBody, elseBody);
             }
             else if (ConsumeIf(TokenType.Return, out position))
             {

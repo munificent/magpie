@@ -12,15 +12,31 @@ namespace Magpie.Compilation
         public FunctionTable Functions { get { return mFunctions; } }
         public TypeTable Types { get { return mTypes; } }
 
+        public IMacroProcessor MacroProcessor { get { return mMacroProcessor; } }
+
         //### bob: hack temp.
         public Action<string, long> FunctionStarted;
 
-        public Compiler(IForeignStaticInterface foreignInterface)
+        public Compiler(IForeignStaticInterface foreignInterface, IMacroProcessor macroProcessor)
         {
             mForeignInterface = foreignInterface;
+            mMacroProcessor = macroProcessor;
+
+            //### bob: temp testing
+            mMacroProcessor = new HackTempMacro();
 
             mFunctions = new FunctionTable(this);
             mTypes = new TypeTable(this);
+        }
+
+        public Compiler(IForeignStaticInterface foreignInterface)
+            : this(foreignInterface, null)
+        {
+        }
+
+        public Compiler()
+            : this(null, null)
+        {
         }
 
         public void AddSourceFile(string filePath)
@@ -166,5 +182,6 @@ namespace Magpie.Compilation
         private readonly FunctionTable mFunctions;
         private readonly TypeTable mTypes;
         private readonly IForeignStaticInterface mForeignInterface;
+        private readonly IMacroProcessor mMacroProcessor;
     }
 }

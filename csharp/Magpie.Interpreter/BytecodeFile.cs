@@ -10,29 +10,6 @@ namespace Magpie.Interpreter
     {
         public byte[] Bytes { get { return mData; } }
 
-        public bool MainTakesArgument
-        {
-            get
-            {
-                // main can take a string or not
-                int offset = FindFunction("Main String");
-
-                return offset != -1;
-            }
-        }
-
-        public int OffsetToMain
-        {
-            get
-            {
-                // main can take a string or not
-                int offset = FindFunction("Main String");
-                if (offset != -1) return offset;
-
-                return FindFunction("Main ()");
-            }
-        }
-
         public BytecodeFile(byte[] data)
         {
             mData = data;

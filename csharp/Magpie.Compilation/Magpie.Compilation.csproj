@@ -60,12 +60,13 @@
     <Compile Include="Compiler\Automatic Functions\UnionConstructor.cs" />
     <Compile Include="Compiler\Automatic Functions\UnionValueGetter.cs" />
     <Compile Include="Compiler\Intrinsic.cs" />
-    <Compile Include="Compiler\SyntaxLiteral.cs" />
+    <Compile Include="Macros\SyntaxLiteral.cs" />
     <Compile Include="Compiler\TypeBinder.cs" />
     <Compile Include="Compiler\TypeTable.cs" />
     <Compile Include="Foreign Interface\ForeignFunction.cs" />
     <Compile Include="Foreign Interface\ForeignType.cs" />
     <Compile Include="Foreign Interface\IForeignStaticInterface.cs" />
+    <Compile Include="Macros\IMacroProcessor.cs" />
     <Compile Include="ObjectExtensions.cs" />
     <Compile Include="Parser\LineProcessor.cs" />
     <Compile Include="Parser\Position.cs" />

@@ -73,6 +73,8 @@ namespace Magpie.Compilation
             return result;
         }
 
+        public Position CurrentPosition { get { return Current.Position; } }
+
         private Token Current { get { return LookAhead(1); } }
 
         private Token Next { get { return LookAhead(2); } }

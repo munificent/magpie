@@ -7,7 +7,7 @@ How can we do metaprogramming in Magpie?
 - Would also be cool if the compiler could automatically support
   multiple passes. So, if a program generates code, the compiler
   immediately executes the program to get the generated code. Repeat
-  until done. Sort of like if C's preprocessor langauge was also C.
+  until done. Sort of like if C's preprocessor language was also C.
   
   Of course, we'll need a way to code that should be executed at
   compile time.

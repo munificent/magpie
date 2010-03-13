@@ -8,19 +8,19 @@ namespace Magpie.Compilation
     public class LetExpr : IUnboundExpr
     {
         /// <summary>
-        /// Gets the name of the value that will be defined if the condition succeeds.
+        /// Gets the names of the values that will be defined if the condition succeeds.
         /// </summary>
-        public string Name { get; private set; }
+        public IList<string> Names { get; private set; }
 
         public IUnboundExpr Condition { get; private set; }
         public IUnboundExpr ThenBody { get; private set; }
         public IUnboundExpr ElseBody { get; private set; }
 
-        public LetExpr(Position position, string name, IUnboundExpr condition,
+        public LetExpr(Position position, IEnumerable<string> names, IUnboundExpr condition,
             IUnboundExpr thenBody, IUnboundExpr elseBody)
         {
             Position = position;
-            Name = name;
+            Names = new List<string>(names);
             Condition = condition;
             ThenBody = thenBody;
             ElseBody = elseBody;

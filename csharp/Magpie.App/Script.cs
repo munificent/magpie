@@ -28,7 +28,7 @@ namespace Magpie.App
 
         public Script(byte[] bytecode)
         {
-            mBytecode = bytecode;
+            mBytecode = new Magpie.Interpreter.BytecodeFile(bytecode);
             mErrors = new List<CompileError>();
         }
 
@@ -54,17 +54,20 @@ namespace Magpie.App
                 // bail if there were compile errors
                 if (mErrors.Count > 0) return;
 
-                mBytecode = stream.ToArray();
+                mBytecode = new Magpie.Interpreter.BytecodeFile(stream.ToArray());
             }
+        }
+
+        public bool HasFunction(string function)
+        {
+            if (!EnsureCompiled()) return false;
+
+            return mBytecode.FindFunction(function) != -1;
         }
 
         public void Run(string argument)
         {
-            // compile it first, if not already compiled
-            if (mBytecode == null) Compile();
-
-            // bail if we didn't compile successfully
-            if (mBytecode == null) return;
+            if (!EnsureCompiled()) return;
 
             // interpret the resulting bytecode
             var machine = new Machine(mForeign);
@@ -87,14 +90,47 @@ namespace Magpie.App
             }
         }
 
+        public Value Run(string functionName, Value argument)
+        {
+            if (!EnsureCompiled()) return null;
+
+            // interpret the resulting bytecode
+            var machine = new Machine(mForeign);
+            machine.Printed += Machine_Printed;
+            machine.MaxStackDepth = MaxStackDepth;
+
+            try
+            {
+                return machine.Interpret(mBytecode, mDebug, functionName, argument);
+            }
+            catch (InterpreterException ex)
+            {
+                // do nothing
+                //### bob: should report runtime errors
+                Console.WriteLine(ex.ToString());
+
+                return null;
+            }
+            finally
+            {
+                machine.Printed -= Machine_Printed;
+            }
+        }
+
+        private bool EnsureCompiled()
+        {
+            // compile it first, if not already compiled
+            if (mBytecode == null) Compile();
+
+            // bail if we didn't compile successfully
+            return (mBytecode != null);
+        }
+
         private IEnumerable<string> GetSourceFiles(string path)
         {
             // add the base sources
             //### bob: hack. assumes location of base relative to working directory. :(
-            string baseDir = Path.GetDirectoryName(Environment.CurrentDirectory);
-            baseDir = Path.GetDirectoryName(baseDir);
-            baseDir = Path.GetDirectoryName(baseDir);
-            baseDir = Path.Combine(baseDir, "base");
+            string baseDir = Path.Combine(Environment.CurrentDirectory, @"..\..\..\base\runtime");
 
             foreach (var baseFile in Directory.GetFiles(baseDir, "*.mag"))
             {
@@ -132,7 +168,7 @@ namespace Magpie.App
 
         private string mPath;
         private IList<CompileError> mErrors;
-        private byte[] mBytecode;
+        private Magpie.Interpreter.BytecodeFile mBytecode;
         private StreamForeign mForeign = new StreamForeign();
 
         //### bob: temp. work-in-progress debug stuff

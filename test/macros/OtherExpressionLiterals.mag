@@ -1,3 +1,4 @@
+// disable
 // expected: a <- b
 // expected: def a <- b
 // expected: var a <- b

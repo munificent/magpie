@@ -9,7 +9,7 @@ Inc (a Int -> Int) a + 1
 
 Main (->)
     // local variable
-    mutable x <- 0
+    var x <- 0
     Print x.String
     
     x <- 10

@@ -21,45 +21,49 @@ namespace Magpie.Interpreter
             mForeignInterface = foreignInterface;
         }
 
-        public void Interpret(byte[] bytecode, DebugInfo debug)
+        public Value Interpret(BytecodeFile file, DebugInfo debug, string argument)
         {
-            Interpret(bytecode, debug, String.Empty);
+            if (file.FindFunction("Main String") != -1)
+            {
+                return Interpret(file, debug, "Main String", new Value(argument));
+            }
+            else
+            {
+                // no main that takes a string, so look for one with no string
+                return Interpret(file, debug, "Main ()", null);
+            }
         }
 
-        public void Interpret(byte[] bytecode, DebugInfo debug, string argument)
-        {
-            BytecodeFile file = new BytecodeFile(bytecode);
-
-            Interpret(file, debug, argument);
-        }
-
-        public void Interpret(BytecodeFile file, DebugInfo debug, string argument)
+        public Value Interpret(BytecodeFile file, DebugInfo debug, string function, Value argument)
         {
             mFile = file;
             mDebug = debug;
 
-            int paramType = 0;
-            if (file.MainTakesArgument)
+            int functionOffset = file.FindFunction(function);
+
+            if (argument != null)
             {
-                // push the string argument
+                // push the argument
                 Push(argument);
 
-                paramType = 1;
+                Push(functionOffset);
+                Call(1, false);
+            }
+            else
+            {
+                Push(functionOffset);
+                Call(0, false);
             }
 
-            // find "main"
-            Push(mFile.OffsetToMain);
-            Call(paramType, false);
-
-            Interpret();
+            return Interpret();
         }
 
-        public void Interpret(BytecodeFile file)
+        public Value Interpret(BytecodeFile file)
         {
-            Interpret(file, null, String.Empty);
+            return Interpret(file, null, String.Empty);
         }
 
-        public void Interpret()
+        public Value Interpret()
         {
             bool running = true;
 
@@ -299,6 +303,14 @@ namespace Magpie.Interpreter
                     default: throw new Exception("Unknown opcode.");
                 }
             }
+
+            // if there is anything left on the stack, return it
+            if (mOperands.Count > 0)
+            {
+                return mOperands.Peek();
+            }
+
+            return null;
         }
 
         private OpCode ReadOpCode()
