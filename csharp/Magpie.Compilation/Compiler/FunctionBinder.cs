@@ -19,7 +19,7 @@ namespace Magpie.Compilation
             // create a local slot for the arg if there is one
             if (function.Type.Parameter.Unbound != Decl.Unit)
             {
-                scope.Define("__arg", Decl.Unit /* ignored */, false);
+                scope.Define(GenerateName(), Decl.Unit /* ignored */, false);
             }
 
             var binder = new FunctionBinder(function, context, scope);
@@ -328,12 +328,7 @@ namespace Magpie.Compilation
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(LocalFuncExpr expr)
         {
             // create a unique name for the local function
-            //### bob: this actually isn't foolproof. if the parent
-            // named function is overloaded (in two separate source files),
-            // this could collide if both overloads defined local function
-            // at the same source position.
-            string name = String.Format("{0}.{1}.{2}", mFunction.Name,
-                expr.Position.Line, expr.Position.Column);
+            string name = GenerateName();
 
             // create a reference to it
             var reference = new FuncRefExpr(expr.Position,
@@ -408,8 +403,7 @@ namespace Magpie.Compilation
             //      else Bang
 
             // use a space so we can't collide with a user's variable
-            //### bob: should use some auto-generated name so multiple lets don't collide
-            var optionName = "let ";
+            var optionName = GenerateName();
 
             // def a__ <- Foo
             var defineOption = new DefineExpr(expr.Position, optionName, expr.Condition, false);
@@ -528,12 +522,11 @@ namespace Magpie.Compilation
                 }
                 else
                 {
-                    // note: the iterator variable includes a space to ensure it can't collide with a
-                    // user-defined variable.
+                    var iterName = GenerateName();
                     var createIterator = new CallExpr(new NameExpr(clause.Position, "Iterate"), clause.Expression);
-                    topExprs.Add(new DefineExpr(clause.Position, clause.Name + " iter", createIterator, false));
+                    topExprs.Add(new DefineExpr(clause.Position, iterName, createIterator, false));
 
-                    var condition = new CallExpr(new NameExpr(clause.Position, "MoveNext"), new NameExpr(clause.Position, clause.Name + " iter"));
+                    var condition = new CallExpr(new NameExpr(clause.Position, "MoveNext"), new NameExpr(clause.Position, iterName));
                     if (conditionExpr == null)
                     {
                         conditionExpr = condition;
@@ -544,7 +537,7 @@ namespace Magpie.Compilation
                         conditionExpr = new CallExpr(new NameExpr(clause.Position, "&"), new TupleExpr(conditionExpr, condition));
                     }
 
-                    var currentValue = new CallExpr(new NameExpr(clause.Position, "Current"), new NameExpr(clause.Position, clause.Name + " iter"));
+                    var currentValue = new CallExpr(new NameExpr(clause.Position, "Current"), new NameExpr(clause.Position, iterName));
                     whileExprs.Add(new DefineExpr(clause.Position, clause.Name, currentValue, false));
                 }
             }
@@ -603,14 +596,16 @@ namespace Magpie.Compilation
         }
 
         //### bob: should refactor code to use this for all temps
-        private string GenerateName()
+        private static string GenerateName()
         {
+            sTempIndex++;
+
             // using space in identifiers ensures it can't collide with a user-defined name
-            return "__temp " + mTempIndex;
+            return "__temp " + sTempIndex;
         }
 
         private BindingContext mContext;
         private Function mFunction;
-        private int mTempIndex;
+        private static int sTempIndex;
     }
 }
