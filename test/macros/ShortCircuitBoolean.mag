@@ -1,0 +1,18 @@
+// expected: false
+// expected: true
+// expected: yes
+
+Main (->)
+    if FalseFunc & TrueFunc then Print "no"
+    if TrueFunc | FalseFunc then Print "yes"
+end
+
+TrueFunc (-> Bool)
+    Print "true"
+    true
+end
+
+FalseFunc (-> Bool)
+    Print "false"
+    false
+end

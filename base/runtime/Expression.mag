@@ -1,5 +1,5 @@
 // NOTE: the c# compiler is directly bound to the types and functions
-// defined here. SyntaxLiteralCompiler.cs must be kept in sync with
+// defined here. SyntaxLiteral.cs must be kept in sync with
 // this file.
 
 union Expression

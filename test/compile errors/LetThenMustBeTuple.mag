@@ -1,0 +1,5 @@
+// error line: 4
+
+Main (->)
+    let a b c <- Some (1, 2) then Print "no!"
+end

@@ -1,0 +1,119 @@
+// a template is a function call that is evaluated at compile time,
+// specifically after parsing, but before the template call itself is
+// bound. (i.e. binding a template means to evaluate it).
+// it's evaluated *before* its arguments are bound because the
+// parameter to the template is the *ast* of its argument, not the
+// value. since only the unbound ast is well-defined (the bound form
+// is implementation-specific), that must be what the template
+// receives. this means that templates cannot be overloaded by type.
+//
+// template binding is an iterative process. the result of evaluating
+// a template is an *unbound* expression, so that must in turn be
+// bound again. if the result of evaluating a template itself calls
+// a template, then you may have to bind it repeatedly until it
+// finally reduces to a fully bindable expression.
+//
+// templates enable conditional compilation, or at least they will
+// once the compiler evaluates constant expressions at compile-time.
+// consider the following template:
+
+Assert (condition Expression, message String -> Expression)
+    { if DebugMode & `condition then Print `message }
+end
+
+// if DebugMode is a constant function that evaluates to true, then
+// the Assert will be in the final code. if it evaluates to false,
+// the compiler should get this:
+//   if false & condition then Print message
+// short-circuit the &:
+//   if false then Print message
+// and finally do dead-code elimination on the entire "if" expression,
+// removing the assert entirely from code.
+
+// mechanically, templates work like this:
+//
+// when the compiler parses a source file, it separates out the
+// templates from the rest of the code. it gets all of the template
+// definitions and builds a new compilation unit containing them. it
+// then compiles this to an executable library. each template call is
+// exported as a publicly visible function.
+// the compiler also adds the templates to the symbol table of the
+// main code being compiled.
+// then it compiles the main code. any time a call to a template is
+// found, it calls that function in the compiled template library,
+// gets the result, and substitutes it back into the ast of the code
+// being compiled.
+//
+// note that this pretty much requires a self-hosting compiler:
+// template functions are functions written in magpie which create
+// ast objects which need to be understandable by the compiler.
+//
+// it would be nice if the compiler listened to the Print call when
+// executing template code. this would let you programmatically
+// create output at *compile* time (for example, warnings, deprecated
+// warnings, etc.).
+
+// open questions:
+// q: can a template call a template?
+// a: in the description above, that won't work. templates are only
+//    added to the symbol table of the main code being compiled, not
+//    the separate template lib. it would be nice if we could make
+//    this work.
+// q: can a template call a non-template function?
+
+// another option instead of an explicit template syntax at the
+// "function" level would be an "include"-type command that means
+// "include and compile as a template". that would clarify the
+// distinction between what functions are available at compile-time
+// and what only at runtime:
+
+// templates.mag
+& (left Expression, right Expression -> Expression)
+    Foo "i'm calling a template function"
+    { if not `left then false else `right }
+end
+
+Foo (message String ->) Print message
+
+// main.mag
+#template "templates.mag"
+
+Main (->)
+    if true & false then Print "?"
+end
+
+// this gives us a way to create and call templates that function as
+// expressions within function bodies. can we also use metaprogramming
+// at the top level? how to we write and invoke templates that
+// generate new types or functions?
+
+MakeVector (numCoords Int, type Type -> Definition)
+    def name <- "Vector" + numCoords.String
+    def fieldNames <- "XYZWABCDEF";
+    
+    def fields <- List'Field
+    for i <- 1 -to- numCoords do
+        Add (fields, Field (fieldNames.i, type))
+    end
+    
+    Struct (name, fields)
+end
+
+// so a sourcefile has two "levels". the top level are Definitions:
+// function and type definitions. the order of definitions doesn't
+// matter: they are essentially a bag of code. within a function
+// definition is an Expression. there are syntax literals for
+// expressions, {}, but not necessarily for definitions.
+//
+// once you have a template that generates a definition, it can be
+// invoked at the top level like this:
+
+`MakeVector (3, TypeOf'Int)
+// the above call is the same as:
+struct Vector3
+    X Int
+    Y Int
+    Z Int
+end
+
+

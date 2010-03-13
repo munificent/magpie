@@ -1,0 +1,35 @@
+// the following built-in subtype relations exist:
+
+// tuples
+// ------
+
+// a longer tuple is a subtype of a shorter tuple with the same
+// fields:
+// (Int, String, Bool) is a subtype of (Int, String)
+
+//### bob: (need to think about what this implies about function
+// dispatch. can this function:
+Foo (i Int, s String ->) Print s
+
+// be called like:
+Foo (1, "two", true)
+
+// a tuple with subtyped fields is a subtype
+// (Sub, Int) is a subtype of (Super, Int)
+
+// arrays
+// ------
+
+// a read-write array is a subtype of a read-only or write-only
+// array
+TakeRead (a Array-'Int ->) ()
+TakeWrite (a Array+'Int ->) ()
+
+Test (->)
+    // make a read-write array
+    def a <- Array (1, 2, 3)
+    
+    // can use in place of read-only or write-only
+    TakeRead a
+    TakeWrite a
+end

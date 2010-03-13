@@ -1,0 +1,93 @@
+// def and var are used to bind values to names
+
+def a <- 123
+var b <- true
+
+// they can also be used to define local functions
+
+def doubleFunc <- fn (a Int -> Int) a * 2
+
+// it would be cool to allow multiple definitions with the same 'def'
+
+def
+    c <- 123
+    d <- 234
+end
+
+// those definitions are "simultaneous", which would allow defining
+// mutually recursive local functions
+
+def
+    isEven <- fn (a Int -> Bool) if a = 0 then true else Not isOdd (a - 1)
+    isOdd  <- fn (a Int -> Bool) if a = 1 then true else Not isEven (a - 1)
+end
+
+// at this point, it looks a lot like what top-level definitions are.
+// so, can we unify the two idea by saying that all source files are
+// implicitly inside one big 'def' block?
+//
+// to do that, we need to unify the syntax for local and top-level
+// functions. maybe:
+
+Main fn (->) Print "main"
+
+// and it would be good to make other definitions consistent with
+// that, like:
+
+def
+    a 123
+    b fn (->) Print "a function"
+    c struct
+        Field Int
+    end
+end
+
+// defining values without '<-' might be odd
+
+Main fn (->)
+    def a 123
+    def b 345345
+    
+    Print (a + b).String
+end
+
+Point struct
+    X Int
+    Y Int
+end
+
+// but i'm not crazy about having 'fn' and 'struct' after the name.
+// maybe:
+
+def
+    a 123
+    fn b (->) Print "a function"
+    struct c
+        Field Int
+    end
+end
+
+// this does provide a convenient way to define constants: they're
+// just top-level values. on the other hand, this implies local
+// environments with things like local struct types. that could be a
+// bit complex. or maybe not?
+
+// hmm. the big problem with this is that local function definitions
+// aren't *expressions* now, they're part of 'def'. that's lame. it
+// also doesn't quite make sense for type definitions. when you
+// define a named struct, the name is *not* a value: you can't pass it
+// around. there's no concept (now, at least) of a reference to a
+// type. i suppose you could say that defining a named struct binds
+// the name to the type's constructor function. maybe.
+
+def
+    a <- 123
+    Main fn (->) Print "hi"
+end
+
+fn Add (a Int, b Int -> Int) a + b
+
+fn Main (->) Print "hi"
+
+def fn Add (a Int, b Int -> Int) a + b
+

@@ -1,0 +1,49 @@
+// expected: 123
+// expected: bar
+// expected: in block
+// expected: c
+// expected: d
+// expected: e
+// expected: f
+// expected: g
+// expected: h
+
+Main (->)
+    // single line define
+    def a <- 123
+    Print a.String
+    
+    // single line variable
+    var b <- "foo"
+    b <- "bar"
+    Print b
+    
+    // multi-line define
+    def
+        c <- "c"
+        d <-
+                Print "in block"
+                "d"
+            end
+    end
+    
+    Print c
+    Print d
+    
+    // multi-line variable
+    var
+        e <- "c"
+        f <- "d"
+    end
+    
+    e <- "e"
+    f <- "f"
+    
+    Print e
+    Print f
+    
+    // tuple splitting
+    def g h <- ("g", "h")
+    Print g
+    Print h
+end

@@ -74,10 +74,14 @@ namespace Magpie.Compilation
 
         IUnboundExpr IUnboundExprVisitor<IUnboundExpr>.Visit(DefineExpr expr)
         {
+            /*
+            //### bob: hack temp. doesn't work with multiple defines
             return Call("DefineExpr", Tuple(
                 Bool(expr.IsMutable),
-                String(expr.Name),
-                expr.Value.Accept(this)));
+                String(expr.Definitions[0].Name),
+                expr.Definitions[0].Value.Accept(this)));
+            */
+            throw new NotImplementedException();
         }
 
         IUnboundExpr IUnboundExprVisitor<IUnboundExpr>.Visit(FuncRefExpr expr)

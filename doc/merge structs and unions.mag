@@ -1,0 +1,36 @@
+struct Point
+    X Int
+    Y Int
+end
+
+union Expression
+    AddExpr (Expression, Expression)
+    IntExpr Int
+end
+
+type Expr
+    Line    Int
+    Column  Int
+    
+case Add
+    Left    Expr
+    Right   Expr
+case Int
+    Value   Int
+end
+
+Main (->)
+    // current syntax
+    def a <- Expr/Add (1, 2, Expr/Int (1, 2, 3),
+                             Expr/Int (1, 2, 3))
+    
+    // using keyword function
+    Expr/Int Line: 1 Column: 3 Value: 4
+    
+    // using anonymous struct
+    Expr/Int (line: 1, column: 2, value: 3)
+end
+
+Expr/Int (line: Int, column: Int, value: Int) -> Expr)
+    // ...
+end
