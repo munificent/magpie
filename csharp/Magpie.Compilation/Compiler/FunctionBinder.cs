@@ -19,13 +19,13 @@ namespace Magpie.Compilation
             // create a local slot for the arg if there is one
             if (function.Type.Parameter.Unbound != Decl.Unit)
             {
-                scope.Define(GenerateName(), Decl.Unit /* ignored */, false);
+                scope.Define(context.NameGenerator.Generate(), Decl.Unit /* ignored */, false);
             }
 
             var binder = new FunctionBinder(function, context, scope);
 
             // bind the function
-            function.Bind(binder);
+            function.Bind(context, binder);
 
             // make sure declared return type matches actual return type
             if (!DeclComparer.TypesMatch(function.Type.Return.Bound, function.Body.Bound.Type))
@@ -158,6 +158,8 @@ namespace Magpie.Compilation
         {
             var value = expr.Value.Accept(this);
 
+            if (expr.Target is TupleExpr) throw new NotSupportedException("Assignment to a tuple must be simplified before binding.");
+
             // handle a name target: foo <- 3
             var nameTarget = expr.Target as NameExpr;
             if (nameTarget != null)
@@ -201,14 +203,6 @@ namespace Magpie.Compilation
                 throw new CompileException(expr.Position, "Couldn't figure out what you're trying to do on the left side of an assignment.");
             }
 
-            var tupleTarget = expr.Target as TupleExpr;
-            if (tupleTarget != null)
-            {
-                //### bob: need to handle tuple decomposition here:
-                //         a, b <- (1, 2)
-                throw new NotImplementedException();
-            }
-
             // if we got here, it's not a valid assignment expression
             throw new CompileException(expr.Position, "Cannot assign to " + expr.Target);
         }
@@ -216,7 +210,7 @@ namespace Magpie.Compilation
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(BlockExpr block)
         {
             // create an inner scope
-            Scope.Push();
+            if (block.HasScope) Scope.Push();
 
             var exprs = new List<IBoundExpr>();
             var index = 0;
@@ -235,7 +229,7 @@ namespace Magpie.Compilation
                 exprs.Add(bound);
             }
 
-            Scope.Pop();
+            if (block.HasScope) Scope.Pop();
 
             return new BoundBlockExpr(exprs);
         }
@@ -267,7 +261,7 @@ namespace Magpie.Compilation
                         "Cannot bind more names in a define than the tuple has fields.");
 
                     // define a temporary for the entire tuple expression
-                    var temp = GenerateName();
+                    var temp = mContext.NameGenerator.Generate();
                     Scope.Define(temp, value.Type, false);
 
                     // split out the fields
@@ -328,7 +322,7 @@ namespace Magpie.Compilation
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(LocalFuncExpr expr)
         {
             // create a unique name for the local function
-            string name = GenerateName();
+            string name = mContext.NameGenerator.Generate();
 
             // create a reference to it
             var reference = new FuncRefExpr(expr.Position,
@@ -390,39 +384,7 @@ namespace Magpie.Compilation
 
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(LetExpr expr)
         {
-            // a let expression desugars like this:
-            //
-            //      let a b <- Foo then Bar else Bang
-            // 
-            // becomes...
-            //
-            //      def let__ <- Foo
-            //      if Some? let__ then
-            //          def a b <- 0 SomeValue let__
-            //          Bar
-            //      else Bang
-
-            // use a space so we can't collide with a user's variable
-            var optionName = GenerateName();
-
-            // def a__ <- Foo
-            var defineOption = new DefineExpr(expr.Position, optionName, expr.Condition, false);
-
-            // Some? a__
-            var condition = new CallExpr(new NameExpr(expr.Position, "Some?"),
-                                         new NameExpr(expr.Position, optionName));
-
-            // def a <- SomeValue a__
-            var getValue = new CallExpr(new NameExpr(expr.Position, "SomeValue"),
-                                        new NameExpr(expr.Position, optionName));
-            var defineValue = new DefineExpr(expr.Position, expr.Names, getValue, false);
-
-            var thenBody = new BlockExpr(new IUnboundExpr[] { defineValue, expr.ThenBody });
-            var ifThen = new IfExpr(expr.Position, condition, thenBody, expr.ElseBody);
-            var block = new BlockExpr(new IUnboundExpr[] { defineOption, ifThen });
-
-            // now bind the desugared expression
-            return block.Accept(this);
+            throw new NotSupportedException("Let expressions should be desugared to more primitive expressions before binding.");
         }
 
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(NameExpr expr)
@@ -484,76 +446,7 @@ namespace Magpie.Compilation
 
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(LoopExpr expr)
         {
-            // a for expression is basically syntactic sugar for a while expression
-            // and one or more iterators. for example, the following:
-            //
-            // for foo <- bar do
-            //     Print foo
-            // end
-            //
-            // is equivalent to:
-            //
-            // def _fooIter <- Iterate bar
-            // while MoveNext _fooIter do
-            //     def foo <- Current _fooIter
-            //     Print foo
-            // end
-            //
-            // so, to bind a for expression, we just desugar it, then bind that.
-
-            var topExprs = new List<IUnboundExpr>();
-            var conditionExpr = (IUnboundExpr)null;
-            var whileExprs = new List<IUnboundExpr>();
-
-            // instantiate each clause
-            foreach (var clause in expr.Clauses)
-            {
-                if (clause.IsWhile)
-                {
-                    if (conditionExpr == null)
-                    {
-                        conditionExpr = clause.Expression;
-                    }
-                    else
-                    {
-                        // combine with previous condition(s)
-                        conditionExpr = new CallExpr(new NameExpr(clause.Position, "&"), new TupleExpr(conditionExpr, clause.Expression));
-                    }
-                }
-                else
-                {
-                    var iterName = GenerateName();
-                    var createIterator = new CallExpr(new NameExpr(clause.Position, "Iterate"), clause.Expression);
-                    topExprs.Add(new DefineExpr(clause.Position, iterName, createIterator, false));
-
-                    var condition = new CallExpr(new NameExpr(clause.Position, "MoveNext"), new NameExpr(clause.Position, iterName));
-                    if (conditionExpr == null)
-                    {
-                        conditionExpr = condition;
-                    }
-                    else
-                    {
-                        // combine with previous condition(s)
-                        conditionExpr = new CallExpr(new NameExpr(clause.Position, "&"), new TupleExpr(conditionExpr, condition));
-                    }
-
-                    var currentValue = new CallExpr(new NameExpr(clause.Position, "Current"), new NameExpr(clause.Position, iterName));
-                    whileExprs.Add(new DefineExpr(clause.Position, clause.Name, currentValue, false));
-                }
-            }
-
-            // create the while loop
-            whileExprs.Add(expr.Body);
-            var whileExpr = new WhileExpr(expr.Position,
-                conditionExpr,
-                new BlockExpr(whileExprs));
-            topExprs.Add(whileExpr);
-
-            // build the whole block
-            var block = new BlockExpr(topExprs);
-
-            // now bind the whole thing
-            return block.Accept(this);
+            throw new NotSupportedException("Loop expressions should be desugared to simpler expressions before binding.");
         }
 
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(SyntaxExpr expr)
@@ -595,17 +488,7 @@ namespace Magpie.Compilation
             Scope = scope;
         }
 
-        //### bob: should refactor code to use this for all temps
-        private static string GenerateName()
-        {
-            sTempIndex++;
-
-            // using space in identifiers ensures it can't collide with a user-defined name
-            return "__temp " + sTempIndex;
-        }
-
         private BindingContext mContext;
         private Function mFunction;
-        private static int sTempIndex;
     }
 }

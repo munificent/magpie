@@ -13,8 +13,8 @@ namespace Magpie.Compilation
     /// <typeparam name="TExpr"></typeparam>
     public abstract class WhileExpr<TExpr>
     {
-        public TExpr Condition { get; private set; }
-        public TExpr Body { get; private set; }
+        public TExpr Condition { get; set; }
+        public TExpr Body { get; set; }
 
         public WhileExpr(TExpr condition, TExpr body)
         {
@@ -40,6 +40,14 @@ namespace Magpie.Compilation
         public TReturn Accept<TReturn>(IUnboundExprVisitor<TReturn> visitor)
         {
             return visitor.Visit(this);
+        }
+
+        public IUnboundExpr AcceptTransformer(IUnboundExprTransformer transformer)
+        {
+            Condition = Condition.AcceptTransformer(transformer);
+            Body = Body.AcceptTransformer(transformer);
+
+            return transformer.Transform(this);
         }
     }
 

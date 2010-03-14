@@ -38,6 +38,16 @@ namespace Magpie.Compilation
         {
             return visitor.Visit(this);
         }
+
+        public IUnboundExpr AcceptTransformer(IUnboundExprTransformer transformer)
+        {
+            for (int i = 0; i < Fields.Count; i++)
+            {
+                Fields[i] = Fields[i].AcceptTransformer(transformer);
+            }
+
+            return transformer.Transform(this);
+        }
     }
 
     //### bob: this class should be renamed StructureExpr since it's used for more than

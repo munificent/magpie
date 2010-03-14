@@ -52,6 +52,7 @@
     <Compile Include="Compiler\BindingContext.cs" />
     <Compile Include="Compiler\CompileError.cs" />
     <Compile Include="Compiler\DeclCloner.cs" />
+    <Compile Include="Compiler\ExpandTupleAssignment.cs" />
     <Compile Include="Compiler\FunctionTable.cs" />
     <Compile Include="Compiler\Automatic Functions\FieldGetter.cs" />
     <Compile Include="Compiler\Automatic Functions\FieldSetter.cs" />
@@ -60,6 +61,9 @@
     <Compile Include="Compiler\Automatic Functions\UnionConstructor.cs" />
     <Compile Include="Compiler\Automatic Functions\UnionValueGetter.cs" />
     <Compile Include="Compiler\Intrinsic.cs" />
+    <Compile Include="Compiler\LetTransformer.cs" />
+    <Compile Include="Compiler\LoopTransformer.cs" />
+    <Compile Include="Compiler\NameGenerator.cs" />
     <Compile Include="Macros\SyntaxLiteral.cs" />
     <Compile Include="Compiler\TypeBinder.cs" />
     <Compile Include="Compiler\TypeTable.cs" />
@@ -101,6 +105,7 @@
     <Compile Include="Syntax\IDeclVisitor.cs" />
     <Compile Include="Syntax\IEnumerableExtensions.cs" />
     <Compile Include="Syntax\IGenericCallable.cs" />
+    <Compile Include="Syntax\IUnboundExprTransformer.cs" />
     <Compile Include="Syntax\NameSearchSpace.cs" />
     <Compile Include="Syntax\IUnboundExprVisitor.cs" />
     <Compile Include="Syntax\Namespace.cs" />

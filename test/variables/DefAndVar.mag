@@ -43,7 +43,7 @@ Main (->)
     Print f
     
     // tuple splitting
-    def g h <- ("g", "h")
+    def g, h <- ("g", "h")
     Print g
     Print h
 end

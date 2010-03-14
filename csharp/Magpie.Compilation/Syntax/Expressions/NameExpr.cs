@@ -48,6 +48,11 @@ namespace Magpie.Compilation
             return visitor.Visit(this);
         }
 
+        public IUnboundExpr AcceptTransformer(IUnboundExprTransformer transformer)
+        {
+            return transformer.Transform(this);
+        }
+
         public override string ToString()
         {
             if (mTypeArgs.Count > 0)

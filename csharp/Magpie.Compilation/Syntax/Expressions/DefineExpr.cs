@@ -37,6 +37,16 @@ namespace Magpie.Compilation
             return visitor.Visit(this);
         }
 
+        public IUnboundExpr AcceptTransformer(IUnboundExprTransformer transformer)
+        {
+            foreach (var define in Definitions)
+            {
+                define.Value = define.Value.AcceptTransformer(transformer);
+            }
+
+            return transformer.Transform(this);
+        }
+
         public override string ToString()
         {
             var keyword = IsMutable ? "var" : "def";
@@ -69,7 +79,7 @@ namespace Magpie.Compilation
     {
         public Position Position { get; private set; }
         public IList<string> Names { get; private set; }
-        public IUnboundExpr Value { get; private set; }
+        public IUnboundExpr Value { get; set; }
 
         public Define(Position position, IEnumerable<string> names, IUnboundExpr value)
         {

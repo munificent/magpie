@@ -27,6 +27,13 @@ namespace Magpie.Compilation
         {
             return visitor.Visit(this);
         }
+
+        public IUnboundExpr AcceptTransformer(IUnboundExprTransformer transformer)
+        {
+            Name = (NameExpr)Name.AcceptTransformer(transformer);
+
+            return transformer.Transform(this);
+        }
     }
 
     public class BoundFuncRefExpr : IBoundExpr

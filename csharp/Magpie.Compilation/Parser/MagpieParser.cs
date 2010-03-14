@@ -315,10 +315,11 @@ namespace Magpie.Compilation
             var names = new List<string>();
             var position = CurrentPosition;
 
-            while (CurrentIs(TokenType.Name))
+            do
             {
                 names.Add(Consume(TokenType.Name).StringValue);
             }
+            while (ConsumeIf(TokenType.Comma));
 
             Consume(TokenType.LeftArrow);
             IUnboundExpr body = Block();
@@ -458,10 +459,12 @@ namespace Magpie.Compilation
             else if (ConsumeIf(TokenType.Let, out position))
             {
                 var names = new List<string>();
-                while (CurrentIs(TokenType.Name))
+
+                do
                 {
                     names.Add(Consume(TokenType.Name).StringValue);
                 }
+                while (ConsumeIf(TokenType.Comma));
 
                 Consume(TokenType.LeftArrow);
 

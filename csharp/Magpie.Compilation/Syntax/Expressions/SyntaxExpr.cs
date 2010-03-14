@@ -27,6 +27,14 @@ namespace Magpie.Compilation
             return visitor.Visit(this);
         }
 
+        public IUnboundExpr AcceptTransformer(IUnboundExprTransformer transformer)
+        {
+            //### bob: should the expr be transformed in a syntax literal?
+            Expr = Expr.AcceptTransformer(transformer);
+
+            return transformer.Transform(this);
+        }
+
         #endregion
     }
 }

@@ -38,9 +38,9 @@ namespace Magpie.Compilation
             HasInferrableTypeArguments = hasInferrableTypeArguments;
         }
 
-        public void Bind(FunctionBinder binder)
+        public void Bind(BindingContext context, FunctionBinder binder)
         {
-            Body.Bind(binder);
+            Body.Bind(context, binder);
             NumLocals = binder.Scope.NumVariables;
         }
 

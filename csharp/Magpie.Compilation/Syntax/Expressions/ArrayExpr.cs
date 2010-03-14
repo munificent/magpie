@@ -44,6 +44,16 @@ namespace Magpie.Compilation
             return visitor.Visit(this);
         }
 
+        public IUnboundExpr AcceptTransformer(IUnboundExprTransformer transformer)
+        {
+            for (int i = 0; i < Elements.Count; i++)
+            {
+                Elements[i] = Elements[i].AcceptTransformer(transformer);
+            }
+
+            return transformer.Transform(this);
+        }
+
         private IUnboundDecl mElementType; // only set if array is empty
     }
 }

@@ -34,12 +34,25 @@ namespace Magpie.Compilation
         /// form to the bound one.
         /// </summary>
         /// <param name="binder">A binder to convert from unbound to bound form.</param>
-        public void Bind(IUnboundExprVisitor<IBoundExpr> binder)
+        public void Bind(BindingContext context, IUnboundExprVisitor<IBoundExpr> binder)
         {
             if (binder == null) throw new ArgumentNullException("binder");
             if (Unbound == null) throw new InvalidOperationException("Cannot bind an Expr that is already bound.");
 
-            Bound = Unbound.Accept(binder);
+            //### bob: doing this here is a hack. need to find a clean location for the
+            // multi-pass compiling. if we get away from a separate bound and unbound expr and
+            // just use more mutability, this whole class will go away.
+            // desugar
+            var letTransformer = new LetTransformer(context.NameGenerator);
+            var unbound = Unbound.AcceptTransformer(letTransformer);
+
+            var loopTransformer = new LoopTransformer(context.NameGenerator);
+            unbound = unbound.AcceptTransformer(loopTransformer);
+
+            var expandTuple = new ExpandTupleAssignment(context.NameGenerator);
+            unbound = unbound.AcceptTransformer(expandTuple);
+
+            Bound = unbound.Accept(binder);
 
             // discard the unbound one now. makes sure we're clear on what state we expect
             // the expression to be in.

@@ -26,6 +26,18 @@ namespace Magpie.Compilation
             return visitor.Visit(this);
         }
 
+        public IUnboundExpr AcceptTransformer(IUnboundExprTransformer transformer)
+        {
+            for (int i = 0; i < Clauses.Count; i++)
+            {
+                Clauses[i].Expression = Clauses[i].Expression.AcceptTransformer(transformer);
+            }
+
+            Body = Body.AcceptTransformer(transformer);
+
+            return transformer.Transform(this);
+        }
+
         #endregion
     }
 
@@ -48,7 +60,7 @@ namespace Magpie.Compilation
         /// Gets the expression for the clause. If it is a while clause, this
         /// is the condition. For a for clause, this is the generator expression.
         /// </summary>
-        public IUnboundExpr Expression { get; private set; }
+        public IUnboundExpr Expression { get; set; }
 
         public LoopClause(Position position, string name, IUnboundExpr expression)
         {

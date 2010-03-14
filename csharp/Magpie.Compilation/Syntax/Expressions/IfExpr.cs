@@ -40,6 +40,15 @@ namespace Magpie.Compilation
         {
             return visitor.Visit(this);
         }
+
+        public IUnboundExpr AcceptTransformer(IUnboundExprTransformer transformer)
+        {
+            Condition = Condition.AcceptTransformer(transformer);
+            ThenBody = ThenBody.AcceptTransformer(transformer);
+            ElseBody = (ElseBody == null) ? null : ElseBody.AcceptTransformer(transformer);
+
+            return transformer.Transform(this);
+        }
     }
 
     public class BoundIfExpr : IfExpr<IBoundExpr>, IBoundExpr

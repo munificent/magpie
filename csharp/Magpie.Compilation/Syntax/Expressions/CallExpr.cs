@@ -40,6 +40,14 @@ namespace Magpie.Compilation
             return visitor.Visit(this);
         }
 
+        public IUnboundExpr AcceptTransformer(IUnboundExprTransformer transformer)
+        {
+            Target = Target.AcceptTransformer(transformer);
+            Arg = Arg.AcceptTransformer(transformer);
+
+            return transformer.Transform(this);
+        }
+
         public override string ToString() { return String.Format("{0} {1}", Target, Arg); }
     }
 

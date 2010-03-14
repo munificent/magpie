@@ -7,7 +7,7 @@ namespace Magpie.Compilation
 {
     public class ReturnExpr<TExpr>
     {
-        public TExpr Value { get; private set; }
+        public TExpr Value { get; set; }
 
         public ReturnExpr(TExpr value)
         {
@@ -30,6 +30,13 @@ namespace Magpie.Compilation
         public TReturn Accept<TReturn>(IUnboundExprVisitor<TReturn> visitor)
         {
             return visitor.Visit(this);
+        }
+
+        public IUnboundExpr AcceptTransformer(IUnboundExprTransformer transformer)
+        {
+            Value = Value.AcceptTransformer(transformer);
+
+            return transformer.Transform(this);
         }
 
         #endregion

@@ -54,7 +54,7 @@ Main (->)
     end
     
     // tuple splitting
-    let a b c <- Some (4, "five", 6) then
+    let a, b, c <- Some (4, "five", 6) then
         Print a.String
         Print b.String
         Print c.String
@@ -66,7 +66,7 @@ Main (->)
     // () is used to define the type argument list itself. to pass in
     // a *single* type argument whose type is a tuple, double parens
     // are needed. that's lame. need to fix the syntax here. :(
-    let a b c <- None'((Int, String, Bool)) then
+    let a, b, c <- None'((Int, String, Bool)) then
         Print "should not"
     else
         Print "should"

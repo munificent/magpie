@@ -36,6 +36,11 @@ namespace Magpie.Compilation
         {
             return visitor.Visit(this);
         }
+
+        public IUnboundExpr AcceptTransformer(IUnboundExprTransformer transformer)
+        {
+            return transformer.Transform(this);
+        }
     }
 
     public class BoolExpr : ValueExpr<bool>, IUnboundExpr, IBoundExpr
@@ -56,6 +61,11 @@ namespace Magpie.Compilation
         {
             return visitor.Visit(this);
         }
+
+        public IUnboundExpr AcceptTransformer(IUnboundExprTransformer transformer)
+        {
+            return transformer.Transform(this);
+        }
     }
 
     public class StringExpr : ValueExpr<string>, IUnboundExpr, IBoundExpr
@@ -73,6 +83,11 @@ namespace Magpie.Compilation
         public TReturn Accept<TReturn>(IBoundExprVisitor<TReturn> visitor)
         {
             return visitor.Visit(this);
+        }
+
+        public IUnboundExpr AcceptTransformer(IUnboundExprTransformer transformer)
+        {
+            return transformer.Transform(this);
         }
 
         public override string ToString() { return "\"" + Value + "\""; }

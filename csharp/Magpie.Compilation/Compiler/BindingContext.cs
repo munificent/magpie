@@ -16,6 +16,8 @@ namespace Magpie.Compilation
         public NameSearchSpace SearchSpace { get; private set; }
         public IDictionary<string, IBoundDecl> TypeArguments { get; private set; }
 
+        public NameGenerator NameGenerator { get; private set; }
+
         public BindingContext(Compiler compiler, NameSearchSpace searchSpace)
             : this(compiler, searchSpace, null, null)
         {
@@ -26,6 +28,8 @@ namespace Magpie.Compilation
         {
             Compiler = compiler;
             SearchSpace = searchSpace;
+
+            NameGenerator = new NameGenerator();
 
             // build the argument dictionary
             TypeArguments = new Dictionary<string, IBoundDecl>();

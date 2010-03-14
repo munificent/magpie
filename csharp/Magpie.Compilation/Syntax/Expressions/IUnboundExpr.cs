@@ -14,5 +14,6 @@ namespace Magpie.Compilation
     {
         Position Position { get; }
         TReturn Accept<TReturn>(IUnboundExprVisitor<TReturn> visitor);
+        IUnboundExpr AcceptTransformer(IUnboundExprTransformer transformer);
     }
 }

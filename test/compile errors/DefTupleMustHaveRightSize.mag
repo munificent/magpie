@@ -1,5 +1,5 @@
 // error line: 4
 
 Main (->)
-    def a b c <- (1, 2)
+    def a, b, c <- (1, 2)
 end
