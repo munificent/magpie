@@ -1,6 +1,20 @@
 Things to figure out or decide:
 ------------------------------
 
+How can we do a multi-case flow control construct?
+- Having to chain if/then/else is ugly, particularly with unions.
+  Pattern matching or at least a switch-case would be good.
+
+Can we improve the syntax for instantiating a generic with a tuple
+type?
+- Because generics use () to separate the type arg list, applying a
+  tuple as a single type argument requires double ():
+
+  Foo'(A, B)   // two type args
+  Foo'((A, B)) // one type arg of tuple type
+
+- That's kind of gross. Can we improve that?  
+  
 How can we do metaprogramming in Magpie?
 - Would be very cool if it was easy to construct and compile Magpie
   code at runtime.
@@ -44,6 +58,9 @@ How can you program using ADTs or interfaces?
   a C".
 - If we get this working, should change "for" system to actually check
   that the object implments some iterator interface.
+- We can solve this C-style: Define a struct containing function refs
+  (closures). That struct is an abstract object with functions for the
+  operations.
   
 Can we do keywork functions like Smalltalk?
 - My guess is "no". At the very least, it would require a syntax
@@ -65,7 +82,6 @@ Are we happy with ":" as the namespace separator?
   functions or possibly declarations.
   
 Are we happy with the local declaration syntax?
-- Could use "var" instead of "mutable".
 - Would be nice if you could declare variables in expressions
   (especially in while and for loops), but the current syntax is a bit
   verbose for that. This is also true of assignment for that matter.
@@ -75,17 +91,6 @@ How does pattern matching work?
   active patterns?
 - Once this is working, we should get rid of union __Value functions
   since they can cause runtime errors.
-  
-How are tuple elements accessed?
-- The current tuple functions (First, Second, Third, etc.) are kind of
-  lame because they're generic. That means you can't make *any*
-  function called First: the tuple one already stomps on that.
-- Maybe treat integers like functions (like array access works), so
-  you could do:
-    def a <- (10, 20, 30)
-    def b <- a.1 // b = 20
-  Would have to be integer *literals* (or constant expressions) for
-  tuples, since the type varies by element.
   
 Built-in support for hashes?
 - To be statically-typed, would they be like named-element tuples?
@@ -117,31 +122,6 @@ More atomic types:
 - float
 - char
 - byte?
-
-Get rid of immutable fields?
-- Having structs that differ only in mutability brings up covariance
-  issues. Given the following:
-  
-  struct Foo
-      Bar Int
-  end
-  
-  struct Foo!
-      mutable Bar Int
-  end
-  
-  You would expect any function that takes a Foo could also take a
-  Foo!, but there's no real way to make that work, since the types
-  are unrelated. Likewise, there's no way to make Foo! a subtype of
-  Foo that differs only by making a field mutable.
-
-- One easy solution: get rid of immutability completely. All fields
-  are mutable. Might as well get rid of immutable locals too. I still
-  kind of like the idea of encouraging immutability, but maybe it
-  doesn't really fit with Magpie's goal of being usable by
-  non-technical people.
-
-- Another more radical solution: get rid of mutability instead.
   
 Things to do:
 ------------
@@ -174,16 +154,53 @@ Constant folding.
 Wrappers to allow references to intrinsics, auto-generated functions,
 and foreign functions.
 
-Tuple decomposition on assignment.
-. (a, b) <- (1, 2)
-- Use full pattern matching syntax for this?
-  def Some a <- Some 123 // a = 123
-
 Document and test precedence of self-assignment syntax.
 . Is a <- a - 2 + 3 the same as a = (a - 2) + 3 or a = a - (2 + 3)
 
 Done:
 ----
+  
+Tuple decomposition on assignment.
+. (a, b) <- (1, 2)
+- Use full pattern matching syntax for this?
+  def Some a <- Some 123 // a = 123
+
+How are tuple elements accessed?
+- The current tuple functions (First, Second, Third, etc.) are kind of
+  lame because they're generic. That means you can't make *any*
+  function called First: the tuple one already stomps on that.
+- Maybe treat integers like functions (like array access works), so
+  you could do:
+    def a <- (10, 20, 30)
+    def b <- a.1 // b = 20
+  Would have to be integer *literals* (or constant expressions) for
+  tuples, since the type varies by element.
+
+Are we happy with the local declaration syntax?
+- Could use "var" instead of "mutable".
+
+Get rid of immutable fields?
+- Having structs that differ only in mutability brings up covariance
+  issues. Given the following:
+  
+  struct Foo
+      Bar Int
+  end
+  
+  struct Foo!
+      mutable Bar Int
+  end
+  
+  You would expect any function that takes a Foo could also take a
+  Foo!, but there's no real way to make that work, since the types
+  are unrelated. Likewise, there's no way to make Foo! a subtype of
+  Foo that differs only by making a field mutable.
+
+- One easy solution: get rid of immutability completely. All fields
+  are mutable. Might as well get rid of immutable locals too. I still
+  kind of like the idea of encouraging immutability, but maybe it
+  doesn't really fit with Magpie's goal of being usable by
+  non-technical people.
 
 Tail call optimization.
 . Simple tail recursive case is working. Need to test:
