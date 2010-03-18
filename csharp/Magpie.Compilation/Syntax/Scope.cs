@@ -57,6 +57,16 @@ namespace Magpie.Compilation
         }
 
         /// <summary>
+        /// Gets whether or not the variable with the given name is mutable.
+        /// </summary>
+        /// <param name="name">The name of the variable.</param>
+        /// <returns><c>true</c> if the variable is mutable.</returns>
+        public bool IsMutable(string name)
+        {
+            return mVariableMutability[name];
+        }
+
+        /// <summary>
         /// Defines a local variable with the given name and type.
         /// </summary>
         /// <param name="name">Variable name.</param>
@@ -64,7 +74,9 @@ namespace Magpie.Compilation
         /// <param name="isMutable"><c>true</c> if the variable is mutable.</param>
         public void Define(string name, IBoundDecl type, bool isMutable)
         {
-            mStruct.Define(name, type, isMutable);
+            mStruct.Define(name, type);
+
+            mVariableMutability[name] = isMutable;
 
             // track the highwater
             mNumVariables = Math.Max(mNumVariables, mStruct.Fields.Count);
@@ -72,6 +84,7 @@ namespace Magpie.Compilation
 
         private readonly Struct mStruct = new Struct(Position.None, "_scope", null);
         private readonly Stack<int> mInnerScopes = new Stack<int>();
+        private readonly Dictionary<string, bool> mVariableMutability = new Dictionary<string,bool>();
         private int mNumVariables = 0;
     }
 }

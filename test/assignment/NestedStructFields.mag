@@ -29,11 +29,11 @@ Main (->)
 end
 
 struct Box2
-    mutable Box   IntBox
-            Dummy Int
+    Box   IntBox
+    Dummy Int
 end
 
 struct IntBox
-    mutable Value Int
-            Dummy Int
+    Value Int
+    Dummy Int
 end

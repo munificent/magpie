@@ -28,7 +28,7 @@ namespace Magpie.Compilation
             foreach (var field in BaseType.Fields)
             {
                 yield return new GenericFieldGetter(this, field.Index);
-                if (field.IsMutable) yield return new GenericFieldSetter(this, field.Index);
+                yield return new GenericFieldSetter(this, field.Index);
             }
         }
 

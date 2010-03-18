@@ -29,9 +29,9 @@ Main (->)
 end
 
 struct Box2
-    mutable Box IntBox
+    Box IntBox
 end
 
 struct IntBox
-    mutable Value Int
+    Value Int
 end

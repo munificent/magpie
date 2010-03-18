@@ -280,7 +280,7 @@ namespace Magpie.Compilation
             {
                 isMutable = false;
             }
-            else if (ConsumeIf(TokenType.Mutable, out position))
+            else if (ConsumeIf(TokenType.Var, out position))
             {
                 isMutable = true;
             }
@@ -740,19 +740,18 @@ namespace Magpie.Compilation
             }
         }
 
-        // <-- ((MUTABLE?) NAME TypeDecl LINE)*
+        // <-- (NAME TypeDecl LINE)*
         private List<Field> StructFields()
         {
             var fields = new List<Field>();
 
-            while (CurrentIs(TokenType.Name) || CurrentIs(TokenType.Mutable))
+            while (CurrentIs(TokenType.Name))
             {
-                var isMutable = ConsumeIf(TokenType.Mutable);
                 var name = Consume(TokenType.Name).StringValue;
                 var type = TypeDecl();
                 Consume(TokenType.Line);
 
-                fields.Add(new Field(name, type, isMutable));
+                fields.Add(new Field(name, type));
             }
 
             return fields;

@@ -11,6 +11,6 @@ Current'T (iter ArrayIterator'T -> T)
 end
 
 struct ArrayIterator'T
-            Array []'T
-    mutable Index Int
+    Array []'T
+    Index Int
 end

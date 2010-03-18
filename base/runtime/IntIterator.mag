@@ -19,6 +19,6 @@ struct Range
 end
 
 struct Range^
-            Max     Int
-    mutable Current Int
+    Max     Int
+    Current Int
 end

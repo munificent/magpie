@@ -33,13 +33,13 @@ namespace Magpie.Compilation
         If,
         Let,
         Match,
-        Mutable,
         Namespace,
         Return,
         Struct,
         Then,
         Union,
         Using,
+        Var,
         While,
         
         // literals
@@ -130,12 +130,12 @@ namespace Magpie.Compilation
                 case TokenType.If:          return "if";
                 case TokenType.Let:         return "let";
                 case TokenType.Match:       return "match";
-                case TokenType.Mutable:     return "mutable";
                 case TokenType.Namespace:   return "namespace";
                 case TokenType.Struct:      return "struct";
                 case TokenType.Then:        return "then";
                 case TokenType.Union:       return "union";
                 case TokenType.Using:       return "using";
+                case TokenType.Var:         return "var";
                 case TokenType.While:       return "while";
 
                 case TokenType.Bool:        return "bool " + BoolValue;

@@ -167,7 +167,7 @@ namespace Magpie.Compilation
                 // see if it's a local
                 if (Scope.Contains(nameTarget.Name))
                 {
-                    if (!Scope[nameTarget.Name].IsMutable) throw new CompileException(expr.Position, "Cannot assign to immutable local.");
+                    if (!Scope.IsMutable(nameTarget.Name)) throw new CompileException(expr.Position, "Cannot assign to immutable local.");
 
                     // direct assign to local
                     return new StoreExpr(new LocalsExpr(), Scope[nameTarget.Name], value);

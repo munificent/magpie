@@ -8,7 +8,7 @@
 
 Main (->)
     // single line
-    mutable a <- 0
+    var a <- 0
     
     while a < 5 do a <- + 1
     

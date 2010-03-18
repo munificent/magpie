@@ -27,14 +27,14 @@ namespace Magpie.Compilation
             return Fields.Any(field => field.Name == name);
         }
 
-        public void Define(string name, IUnboundDecl type, bool isMutable)
+        public void Define(string name, IUnboundDecl type)
         {
-            Fields.Add(new Field(name, type, isMutable, (byte)Fields.Count));
+            Fields.Add(new Field(name, type, (byte)Fields.Count));
         }
 
-        public void Define(string name, IBoundDecl type, bool isMutable)
+        public void Define(string name, IBoundDecl type)
         {
-            Fields.Add(new Field(name, type, isMutable, (byte)Fields.Count));
+            Fields.Add(new Field(name, type, (byte)Fields.Count));
         }
 
         public IEnumerable<ICallable> BuildFunctions()
@@ -44,7 +44,7 @@ namespace Magpie.Compilation
             foreach (var field in Fields)
             {
                 yield return new FieldGetter(this, field);
-                if (field.IsMutable) yield return new FieldSetter(this, field);
+                yield return new FieldSetter(this, field);
             }
         }
 
@@ -55,7 +55,7 @@ namespace Magpie.Compilation
         {
             var structure = new Struct(Position, BaseName,
                 Fields.Select(field => new Field(field.Name, 
-                    DeclCloner.Clone(field.Type.Unbound), field.IsMutable)));
+                    DeclCloner.Clone(field.Type.Unbound))));
 
             structure.BindSearchSpace(SearchSpace);
             structure.BindTypeArguments(typeArguments);
@@ -90,28 +90,26 @@ namespace Magpie.Compilation
     {
         public string Name;
         public readonly Decl Type;
-        public bool IsMutable;
         public byte Index { get; private set; }
 
-        public Field(string name, IUnboundDecl type, bool isMutable)
-            : this(name, type, isMutable, 0) { }
+        public Field(string name, IUnboundDecl type)
+            : this(name, type, 0) { }
 
-        public Field(string name, IUnboundDecl type, bool isMutable, byte index)
-            : this(name, isMutable, index)
+        public Field(string name, IUnboundDecl type, byte index)
+            : this(name, index)
         {
             Type = new Decl(type);
         }
 
-        public Field(string name, IBoundDecl type, bool isMutable, byte index)
-            : this(name, isMutable, index)
+        public Field(string name, IBoundDecl type, byte index)
+            : this(name, index)
         {
             Type = new Decl(type);
         }
 
-        private Field(string name, bool isMutable, byte index)
+        private Field(string name, byte index)
         {
             Name = name;
-            IsMutable = isMutable;
             Index = index;
         }
 

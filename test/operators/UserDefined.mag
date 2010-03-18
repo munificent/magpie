@@ -22,8 +22,8 @@ Main (->)
 end
 
 ^ (base Int, exponent Int -> Int)
-    mutable i       <- 0
-    mutable result  <- 1
+    var i       <- 0
+    var result  <- 1
     
     while i < exponent do
         result <- * base
