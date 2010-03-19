@@ -99,7 +99,6 @@ namespace Magpie.Compilation
                     else if (Match ("("))            return new Token(LastChar, TokenType.LeftParen);
                     else if (Match (")"))            return new Token(LastChar, TokenType.RightParen);
                     else if (Match ("["))            return new Token(LastChar, TokenType.LeftBracket);
-                    else if (Match ("]", "!"))       return new Token(LastChar, TokenType.RightBracketBang);
                     else if (Match ("]"))            return new Token(LastChar, TokenType.RightBracket);
                     else if (Match ("{"))            return new Token(LastChar, TokenType.LeftCurly);
                     else if (Match ("}"))            return new Token(LastChar, TokenType.RightCurly);

@@ -151,7 +151,7 @@ namespace Magpie.Compilation
             fields.AddRange(elements);
 
             return new BoundTupleExpr(fields,
-                new BoundArrayType(elementType, expr.IsMutable));
+                new BoundArrayType(elementType));
         }
 
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(AssignExpr expr)

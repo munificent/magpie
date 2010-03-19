@@ -11,12 +11,10 @@ namespace Magpie.Compilation
     public class ArrayType<TDecl>
     {
         public TDecl ElementType { get; private set; }
-        public bool IsMutable { get; private set; }
 
-        public ArrayType(TDecl elementType, bool isMutable)
+        public ArrayType(TDecl elementType)
         {
             ElementType = elementType;
-            IsMutable = isMutable;
         }
 
         public override string ToString()
@@ -32,8 +30,8 @@ namespace Magpie.Compilation
     {
         public Position Position { get; private set; }
 
-        public ArrayType(Position position, IUnboundDecl elementType, bool isMutable)
-            : base(elementType, isMutable)
+        public ArrayType(Position position, IUnboundDecl elementType)
+            : base(elementType)
         {
             Position = position;
         }
@@ -50,8 +48,8 @@ namespace Magpie.Compilation
 
     public class BoundArrayType : ArrayType<IBoundDecl>, IBoundDecl
     {
-        public BoundArrayType(IBoundDecl elementType, bool isMutable)
-            : base(elementType, isMutable)
+        public BoundArrayType(IBoundDecl elementType)
+            : base(elementType)
         {
         }
 

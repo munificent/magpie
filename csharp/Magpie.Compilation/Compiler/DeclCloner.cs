@@ -21,7 +21,7 @@ namespace Magpie.Compilation
 
         IUnboundDecl IUnboundDeclVisitor<IUnboundDecl>.Visit(ArrayType decl)
         {
-            return new ArrayType(decl.Position, decl.ElementType.Accept(this), decl.IsMutable);
+            return new ArrayType(decl.Position, decl.ElementType.Accept(this));
         }
 
         IUnboundDecl IUnboundDeclVisitor<IUnboundDecl>.Visit(AtomicDecl decl)

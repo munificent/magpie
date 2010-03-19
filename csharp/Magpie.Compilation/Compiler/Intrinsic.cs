@@ -159,9 +159,6 @@ namespace Magpie.Compilation
                 var arrayType = argTuple.Fields[1] as BoundArrayType;
                 if (arrayType == null) return null;
 
-                // cannot assign to immutable arrays
-                if (!arrayType.IsMutable) return null;
-
                 // value
                 if (!DeclComparer.TypesMatch(argTuple.Fields[2], arrayType.ElementType)) return null;
 

@@ -9,22 +9,19 @@ namespace Magpie.Compilation
     {
         public readonly List<IUnboundExpr> Elements = new List<IUnboundExpr>();
         public IUnboundDecl ElementType { get { return mElementType; } }
-        public bool IsMutable { get; private set; }
 
         public Position Position { get; private set; }
 
-        public ArrayExpr(Position position, IEnumerable<IUnboundExpr> elements, bool isMutable)
+        public ArrayExpr(Position position, IEnumerable<IUnboundExpr> elements)
         {
             Position = position;
             Elements.AddRange(elements);
-            IsMutable = isMutable;
         }
 
-        public ArrayExpr(Position position, IUnboundDecl elementType, bool isMutable)
+        public ArrayExpr(Position position, IUnboundDecl elementType)
         {
             Position = position;
             mElementType = elementType;
-            IsMutable = isMutable;
         }
 
         public override string ToString()

@@ -26,11 +26,6 @@ namespace Magpie.Compilation
 
             if (array == null) return false;
 
-            // mutability must match
-            //### bob: are there cases where we want to let this slide?
-            //         can you pass a mutable array everywhere an immutable one is allowed?
-            if (decl.IsMutable != array.IsMutable) return false;
-
             // element type must match
             return TypesMatch(decl.ElementType, array.ElementType);
         }

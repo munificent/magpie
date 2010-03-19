@@ -585,17 +585,11 @@ namespace Magpie.Compilation
             Position position;
             if (ConsumeIf(TokenType.LeftBracket, out position))
             {
-                if (ConsumeIf(TokenType.RightBracketBang))
+                if (ConsumeIf(TokenType.RightBracket))
                 {
                     // empty (explicitly typed) array
                     Consume(TokenType.Prime);
-                    return new ArrayExpr(position, TypeDecl(), true);
-                }
-                else if (ConsumeIf(TokenType.RightBracket))
-                {
-                    // empty (explicitly typed) array
-                    Consume(TokenType.Prime);
-                    return new ArrayExpr(position, TypeDecl(), false);
+                    return new ArrayExpr(position, TypeDecl());
                 }
                 else
                 {
@@ -609,17 +603,9 @@ namespace Magpie.Compilation
                     }
                     while (ConsumeIf(TokenType.Comma));
 
-                    bool isMutable = false;
-                    if (ConsumeIf(TokenType.RightBracketBang))
-                    {
-                        isMutable = true;
-                    }
-                    else
-                    {
-                        Consume(TokenType.RightBracket);
-                    }
+                    Consume(TokenType.RightBracket);
 
-                    return new ArrayExpr(position, elements, isMutable);
+                    return new ArrayExpr(position, elements);
                 }
             }
             else return PrimaryExpr();
@@ -890,22 +876,13 @@ namespace Magpie.Compilation
         //                                   | Name TypeArgs )
         private IUnboundDecl TypeDecl()
         {
-            var arrays = new Stack<Tuple<bool, Position>>();
+            var arrays = new Stack<Position>();
             while (ConsumeIf(TokenType.LeftBracket))
             {
-                bool isMutable = false;
-                if (ConsumeIf(TokenType.RightBracketBang))
-                {
-                    isMutable = true;
-                }
-                else
-                {
-                    Consume(TokenType.RightBracket);
-                }
-
+                Consume(TokenType.RightBracket);
                 var position = Consume(TokenType.Prime).Position;
 
-                arrays.Push(Tuple.Create(isMutable, position));
+                arrays.Push(position);
             }
 
             // figure out the endmost type
@@ -918,7 +895,7 @@ namespace Magpie.Compilation
             while (arrays.Count > 0)
             {
                 var array = arrays.Pop();
-                type = new ArrayType(array.Item2, type, array.Item1);
+                type = new ArrayType(array, type);
             }
 
             return type;

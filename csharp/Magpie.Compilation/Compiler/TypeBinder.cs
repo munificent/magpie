@@ -85,7 +85,7 @@ namespace Magpie.Compilation
 
         IBoundDecl IUnboundDeclVisitor<IBoundDecl>.Visit(ArrayType decl)
         {
-            return new BoundArrayType(decl.ElementType.Accept(this), decl.IsMutable);
+            return new BoundArrayType(decl.ElementType.Accept(this));
         }
 
         IBoundDecl IUnboundDeclVisitor<IBoundDecl>.Visit(AtomicDecl decl)

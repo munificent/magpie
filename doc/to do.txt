@@ -1,6 +1,8 @@
 Things to figure out or decide:
 ------------------------------
 
+Get rid of immutable arrays to simplify things?
+
 How can we do a multi-case flow control construct?
 - Having to chain if/then/else is ugly, particularly with unions.
   Pattern matching or at least a switch-case would be good.

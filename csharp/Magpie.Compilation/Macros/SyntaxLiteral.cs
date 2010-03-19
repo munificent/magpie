@@ -164,7 +164,7 @@ namespace Magpie.Compilation
 
         private IUnboundExpr Array(IEnumerable<IUnboundExpr> exprs)
         {
-            return new ArrayExpr(Position.None, exprs, false);
+            return new ArrayExpr(Position.None, exprs);
         }
     }
 }

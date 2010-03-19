@@ -20,15 +20,22 @@ case Int
 end
 
 Main (->)
+    // constructors:
+    
     // current syntax
-    def a <- Expr/Add (1, 2, Expr/Int (1, 2, 3),
-                             Expr/Int (1, 2, 3))
+    def a <- Expr|Add (1, 2, Expr|Int (1, 2, 3),
+                             Expr|Int (1, 2, 3))
     
     // using keyword function
-    Expr/Int Line: 1 Column: 3 Value: 4
+    Expr|Int Line: 1 Column: 3 Value: 4
     
     // using anonymous struct
-    Expr/Int (line: 1, column: 2, value: 3)
+    Expr|Int (line: 1, column: 2, value: 3)
+    
+    // value access
+    let left, right <- a.AsAdd then
+    end
+    
 end
 
 Expr/Int (line: Int, column: Int, value: Int) -> Expr)
