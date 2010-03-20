@@ -1,6 +1,0 @@
-// error line: 5
-
-Main (->)
-    def x <- [1, 2, 3] 
-    x.1 <- 10
-end

@@ -67,10 +67,6 @@ namespace Magpie.Compilation
             {
                 // allow overriding the type. this lets us use bound tuples for other distinct
                 // types
-                //### bob: this is a work-in-progress. eventually, this should become a 
-                // StructureExpr that's used for constructing all structure objects: structs,
-                // arrays, tuples, unions. the idea is to reduce the number of bound
-                // expression classes.
                 if (mType != null) return mType;
 
                 return new BoundTupleType(Fields.ConvertAll(field => field.Type));
