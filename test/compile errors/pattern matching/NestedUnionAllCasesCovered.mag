@@ -1,0 +1,32 @@
+// error line: 12
+
+Main (->)
+    match Ash Banana
+        case Ash Apple       then Print "first"
+        case Ash Banana      then Print "first"
+        case Ash Cherry      then Print "first"
+        case Beech Avocado   then Print "first"
+        case Beech Beet      then Print "first"
+        case Beech Carrot    then Print "first"
+        case Elm             then Print "first"
+        case _ then Print "first"
+    end
+end
+
+union Fruit
+    Apple
+    Banana
+    Cherry
+end
+
+union Vegetable
+    Avocado
+    Beet
+    Carrot
+end
+
+union Tree
+    Ash Fruit
+    Beech Vegetable
+    Elm
+end

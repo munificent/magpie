@@ -32,8 +32,6 @@ namespace Magpie.Compilation
 
         TReturn Visit(SyntaxExpr expr);
 
-        /*
         TReturn Visit(MatchExpr expr);
-         */
     }
 }

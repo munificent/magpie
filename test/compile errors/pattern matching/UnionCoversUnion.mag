@@ -1,0 +1,14 @@
+// error line: 6
+
+Main (->)
+    match Apple
+        case Banana then Print "first"
+        case Banana then Print "second"
+    end
+end
+
+union Fruit
+    Apple
+    Banana
+    Cherry
+end

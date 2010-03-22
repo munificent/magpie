@@ -1,0 +1,12 @@
+// disable
+// error line: 9
+
+Main (->)
+    match (false, false)
+        case (true, true)   then Print "first"
+        case (true, false)  then Print "first"
+        case (false, true)  then Print "first"
+        case (false, false) then Print "first"
+        case _ then Print "first"
+    end
+end

@@ -121,6 +121,11 @@ namespace Magpie.Compilation
             throw new NotImplementedException();
         }
 
+        IUnboundExpr IUnboundExprVisitor<IUnboundExpr>.Visit(MatchExpr expr)
+        {
+            throw new NotImplementedException();
+        }
+
         IUnboundExpr IUnboundExprVisitor<IUnboundExpr>.Visit(SyntaxExpr expr)
         {
             throw new NotImplementedException();

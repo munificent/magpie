@@ -3,8 +3,6 @@
 // expected: yes
 
 Main (->)
-    //### bob: not implemented yet
-/*
     match (1, true)
         case (2, true)  then Print "no"
         case (1, false) then Print "no"
@@ -21,7 +19,4 @@ Main (->)
         case (1, (2, 3)) then Print "no!"
         case _           then Print "else"
     end
-*/
-    Print "yes"
-    Print "yes"
 end

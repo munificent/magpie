@@ -5,7 +5,6 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
-    /*
     /// <summary>
     /// A pattern matching expression.
     /// </summary>
@@ -37,6 +36,11 @@ namespace Magpie.Compilation
             return visitor.Visit(this);
         }
 
+        public IUnboundExpr AcceptTransformer(IUnboundExprTransformer transformer)
+        {
+            return transformer.Transform(this);
+        }
+
         #endregion
     }
 
@@ -53,5 +57,4 @@ namespace Magpie.Compilation
             Body = body;
         }
     }
-    */
 }

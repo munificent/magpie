@@ -1,4 +1,3 @@
-// disable
 // expected: true
 // expected: false
 
@@ -7,10 +6,12 @@ Main (->)
     match a
         case "foo" then Print "true"
         case "bar" then Print "false"
+        case _ then Print "else"
     end
     
     match "bar"
         case "foo" then Print "true"
         case "bar" then Print "false"
+        case _ then Print "else"
     end
 end

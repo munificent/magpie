@@ -37,6 +37,7 @@ namespace Magpie.Compilation
         IUnboundExpr Transform(WhileExpr expr);
         IUnboundExpr Transform(LoopExpr expr);
 
+        IUnboundExpr Transform(MatchExpr expr);
         IUnboundExpr Transform(SyntaxExpr expr);
     }
 
@@ -68,6 +69,7 @@ namespace Magpie.Compilation
         public virtual IUnboundExpr Transform(WhileExpr expr) { return expr; }
         public virtual IUnboundExpr Transform(LoopExpr expr) { return expr; }
 
+        public virtual IUnboundExpr Transform(MatchExpr expr) { return expr; }
         public virtual IUnboundExpr Transform(SyntaxExpr expr) { return expr; }
     }
 }

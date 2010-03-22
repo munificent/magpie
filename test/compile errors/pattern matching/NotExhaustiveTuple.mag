@@ -1,0 +1,9 @@
+// disable
+// error line: 4
+
+Main (->)
+    match (true, true)
+        case (true, true) then Print "true"
+        case (false, false) then Print "true"
+    end
+end

@@ -1,0 +1,20 @@
+// error line: 6
+
+Main (->)
+    match Ash Banana
+        case Ash _           then Print "first"
+        case Ash Banana      then Print "first"
+        case _ then Print "first"
+    end
+end
+
+union Fruit
+    Apple
+    Banana
+    Cherry
+end
+
+union Tree
+    Ash Fruit
+    Elm
+end

@@ -110,11 +110,13 @@
     <Compile Include="Syntax\IUnboundExprVisitor.cs" />
     <Compile Include="Syntax\Namespace.cs" />
     <Compile Include="Syntax\Pattern Matching\AnyPattern.cs" />
+    <Compile Include="Syntax\Pattern Matching\Coverage.cs" />
     <Compile Include="Syntax\Pattern Matching\Pattern.cs" />
     <Compile Include="Syntax\Pattern Matching\LiteralPattern.cs" />
     <Compile Include="Syntax\Pattern Matching\PatternMatcher.cs" />
     <Compile Include="Syntax\Pattern Matching\IPattern.cs" />
     <Compile Include="Syntax\Pattern Matching\IPatternVisitor.cs" />
+    <Compile Include="Syntax\Pattern Matching\ShapeChecker.cs" />
     <Compile Include="Syntax\Pattern Matching\UnionPattern.cs" />
     <Compile Include="Syntax\Pattern Matching\TuplePattern.cs" />
     <Compile Include="Syntax\Scope.cs" />

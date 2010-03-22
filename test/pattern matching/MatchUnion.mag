@@ -1,4 +1,3 @@
-// disable
 // expected: apple
 // expected: banana
 // expected: three
@@ -9,11 +8,13 @@ Main (->)
     match apple
         case Apple  then Print "apple"
         case Banana then Print "banana"
+        case _      then Print "else"
     end
 
     match Banana
         case Apple  then Print "apple"
         case Banana then Print "banana"
+        case _      then Print "else"
     end
     
     match Cherry 3
@@ -21,6 +22,7 @@ Main (->)
         case Cherry 2 then Print "two"
         case Cherry 3 then Print "three"
         case Cherry _ then Print "else"
+        case _      then Print "else"
     end
     
     match Date Date Date Apple

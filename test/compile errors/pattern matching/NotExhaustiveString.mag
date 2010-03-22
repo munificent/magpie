@@ -1,0 +1,8 @@
+// error line: 4
+
+Main (->)
+    match "hi"
+        case "foo" then Print "true"
+        case "bar" then Print "true"
+    end
+end
