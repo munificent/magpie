@@ -31,6 +31,8 @@ namespace Magpie.Compilation
             //
             // so, to bind a for expression, we just desugar it, then bind that.
 
+            var c = new CodeBuilder(mNameGenerator, expr.Position);
+
             var topExprs = new List<IUnboundExpr>();
             var conditionExpr = (IUnboundExpr)null;
             var whileExprs = new List<IUnboundExpr>();
@@ -38,49 +40,44 @@ namespace Magpie.Compilation
             // instantiate each clause
             foreach (var clause in expr.Clauses)
             {
+                c.SetPosition(clause.Position);
+
+                var condition = (IUnboundExpr)null;
+
                 if (clause.IsWhile)
                 {
-                    if (conditionExpr == null)
-                    {
-                        conditionExpr = clause.Expression;
-                    }
-                    else
-                    {
-                        // combine with previous condition(s)
-                        conditionExpr = new CallExpr(new NameExpr(clause.Position, "&"), new TupleExpr(conditionExpr, clause.Expression));
-                    }
+                    condition = clause.Expression;
                 }
                 else
                 {
                     var iterName = mNameGenerator.Generate();
-                    var createIterator = new CallExpr(new NameExpr(clause.Position, "Iterate"), clause.Expression);
-                    topExprs.Add(new DefineExpr(clause.Position, iterName, createIterator, false));
+                    topExprs.Add(c.Def(iterName, c.Call("Iterate", clause.Expression)));
+                    whileExprs.Add(c.Def(clause.Name, c.Call("Current", iterName)));
 
-                    var condition = new CallExpr(new NameExpr(clause.Position, "MoveNext"), new NameExpr(clause.Position, iterName));
-                    if (conditionExpr == null)
-                    {
-                        conditionExpr = condition;
-                    }
-                    else
-                    {
-                        // combine with previous condition(s)
-                        conditionExpr = new CallExpr(new NameExpr(clause.Position, "&"), new TupleExpr(conditionExpr, condition));
-                    }
+                    condition = c.Call("MoveNext", iterName);
+                }
 
-                    var currentValue = new CallExpr(new NameExpr(clause.Position, "Current"), new NameExpr(clause.Position, iterName));
-                    whileExprs.Add(new DefineExpr(clause.Position, clause.Name, currentValue, false));
+                if (conditionExpr == null)
+                {
+                    conditionExpr = condition;
+                }
+                else
+                {
+                    // combine with previous condition(s)
+                    conditionExpr = c.Op(conditionExpr, "&", condition);
                 }
             }
 
             // create the while loop
+            c.SetPosition(expr.Position);
             whileExprs.Add(expr.Body);
-            var whileExpr = new WhileExpr(expr.Position,
+            var whileExpr = c.While(
                 conditionExpr,
-                new BlockExpr(whileExprs));
+                c.Block(whileExprs));
             topExprs.Add(whileExpr);
 
             // build the whole block
-            return new BlockExpr(topExprs);
+            return c.Block(topExprs);
         }
 
         private NameGenerator mNameGenerator;

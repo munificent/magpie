@@ -29,24 +29,16 @@ namespace Magpie.Compilation
             //          def a b <- 0 SomeValue let__
             //          Bar
             //      else Bang
+            var c = new CodeBuilder(mNameGenerator, expr.Position);
+            var option = c.TempName();
 
-            // def a__ <- Foo
-            var optionName = mNameGenerator.Generate();
-            var defineOption = new DefineExpr(expr.Position, optionName, expr.Condition, false);
-
-            // Some? a__
-            var condition = new CallExpr(new NameExpr(expr.Position, "Some?"),
-                                         new NameExpr(expr.Position, optionName));
-
-            // def a <- SomeValue a__
-            var getValue = new CallExpr(new NameExpr(expr.Position, "SomeValue"),
-                                        new NameExpr(expr.Position, optionName));
-            var defineValue = new DefineExpr(expr.Position, expr.Names, getValue, false);
-
-            var thenBody = new BlockExpr(new IUnboundExpr[] { defineValue, expr.ThenBody });
-            var ifThen = new IfExpr(expr.Position, condition, thenBody, expr.ElseBody);
-
-            return new BlockExpr(new IUnboundExpr[] { defineOption, ifThen });
+            return c.Block(
+                c.Def(option, expr.Condition),
+                c.If(c.Call("Some?", option),
+                    c.Block(
+                        c.Def(expr.Names, c.Call("SomeValue", option)),
+                        expr.ThenBody),
+                    expr.ElseBody));
         }
 
         private NameGenerator mNameGenerator;

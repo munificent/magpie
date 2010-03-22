@@ -73,6 +73,7 @@
     <Compile Include="Macros\IMacroProcessor.cs" />
     <Compile Include="Parser\LineProcessor.cs" />
     <Compile Include="Parser\Position.cs" />
+    <Compile Include="Syntax\CodeBuilder.cs" />
     <Compile Include="Syntax\Expr.cs" />
     <Compile Include="Syntax\Expressions\ArrayExpr.cs" />
     <Compile Include="Syntax\Expressions\AssignExpr.cs" />
