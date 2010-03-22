@@ -375,6 +375,9 @@ namespace Magpie.Compilation
 
                 if (token.StringValue == "_") return new AnyPattern(token.Position);
 
+                // lower-case names are variables
+                if (Char.IsLower(token.StringValue[0])) return new VariablePattern(token.Position, token.StringValue);
+
                 // a union case may match the subsequent value
                 var value = CaseExpr();
 

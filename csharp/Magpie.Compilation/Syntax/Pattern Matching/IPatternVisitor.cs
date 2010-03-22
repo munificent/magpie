@@ -13,5 +13,6 @@ namespace Magpie.Compilation
         TReturn Visit(StringPattern expr);
         TReturn Visit(UnionPattern expr);
         TReturn Visit(TuplePattern expr);
+        TReturn Visit(VariablePattern expr);
     }
 }

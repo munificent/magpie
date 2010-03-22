@@ -1,5 +1,6 @@
 // expected: two
 // expected: one
+// expected: 3
 
 Main (->)
     def a <- 2
@@ -14,5 +15,11 @@ Main (->)
         case 4 then Print "four"
         case 1 then Print "one"
         case _ then Print "else"
+    end
+    
+    match 3
+        case 1 then Print "no"
+        case 2 then Print "no"
+        case b then Print b.String
     end
 end

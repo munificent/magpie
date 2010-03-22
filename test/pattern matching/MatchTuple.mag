@@ -1,6 +1,7 @@
 // disable
 // expected: yes
 // expected: yes
+// expected: b
 
 Main (->)
     match (1, true)
@@ -18,5 +19,11 @@ Main (->)
         case (_, (2, 3)) then Print "yes"
         case (1, (2, 3)) then Print "no!"
         case _           then Print "else"
+    end
+    
+    match ("a", ("b", "c"), "d")
+        case ("a", ("z", "c"), "d") then Print "no"
+        case ("a", (b, "c"), "d")   then Print b
+        case _                      then Print "else"
     end
 end

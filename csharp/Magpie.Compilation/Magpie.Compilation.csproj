@@ -71,7 +71,6 @@
     <Compile Include="Foreign Interface\ForeignType.cs" />
     <Compile Include="Foreign Interface\IForeignStaticInterface.cs" />
     <Compile Include="Macros\IMacroProcessor.cs" />
-    <Compile Include="ObjectExtensions.cs" />
     <Compile Include="Parser\LineProcessor.cs" />
     <Compile Include="Parser\Position.cs" />
     <Compile Include="Syntax\Expr.cs" />
@@ -111,6 +110,7 @@
     <Compile Include="Syntax\Namespace.cs" />
     <Compile Include="Syntax\Pattern Matching\AnyPattern.cs" />
     <Compile Include="Syntax\Pattern Matching\Coverage.cs" />
+    <Compile Include="Syntax\Pattern Matching\DesugaredMatchCase.cs" />
     <Compile Include="Syntax\Pattern Matching\Pattern.cs" />
     <Compile Include="Syntax\Pattern Matching\LiteralPattern.cs" />
     <Compile Include="Syntax\Pattern Matching\PatternMatcher.cs" />
@@ -119,6 +119,7 @@
     <Compile Include="Syntax\Pattern Matching\ShapeChecker.cs" />
     <Compile Include="Syntax\Pattern Matching\UnionPattern.cs" />
     <Compile Include="Syntax\Pattern Matching\TuplePattern.cs" />
+    <Compile Include="Syntax\Pattern Matching\VariablePattern.cs" />
     <Compile Include="Syntax\Scope.cs" />
     <Compile Include="Syntax\SourceFile.cs" />
     <Compile Include="Syntax\Type Declarations\ArrayType.cs" />

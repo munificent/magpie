@@ -2,6 +2,8 @@
 // expected: banana
 // expected: three
 // expected: three
+// expected: cherry
+// expected: 123
 
 Main (->)
     def apple <- Apple
@@ -30,6 +32,21 @@ Main (->)
         case Date Date Apple then Print "two"
         case Date Date Date Apple then Print "three"
         case Date Date Date Date Apple then Print "four"
+        case _ then Print "else"
+    end
+    
+    // bind variable to union
+    match Cherry 123
+        case Apple then Print "no"
+        case Banana then Print "no"
+        case b then Print "cherry"
+    end
+    
+    // bind variable to value
+    match Cherry 123
+        case Apple then Print "no"
+        case Banana then Print "no"
+        case Cherry b then Print b.String
         case _ then Print "else"
     end
 end

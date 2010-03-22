@@ -1,6 +1,7 @@
 // expected: true
 // expected: false
 // expected: any
+// expected: true
 
 Main (->)
     def a <- true
@@ -17,5 +18,9 @@ Main (->)
     match false
         case true then Print "true"
         case _    then Print "any"
+    end
+    
+    match true
+        case b then Print b.String
     end
 end

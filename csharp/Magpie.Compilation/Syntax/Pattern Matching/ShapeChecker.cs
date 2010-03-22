@@ -105,6 +105,12 @@ namespace Magpie.Compilation
             return true;
         }
 
+        bool IPatternVisitor<bool>.Visit(VariablePattern expr)
+        {
+            // a variable pattern matches any type
+            return true;
+        }
+
         #endregion
 
         private IBoundDecl mType;

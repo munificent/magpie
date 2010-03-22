@@ -1,5 +1,6 @@
 // expected: true
 // expected: false
+// expected: foo
 
 Main (->)
     def a <- "foo"
@@ -13,5 +14,10 @@ Main (->)
         case "foo" then Print "true"
         case "bar" then Print "false"
         case _ then Print "else"
+    end
+    
+    match "foo"
+        case "bar" then Print "no"
+        case b     then Print b
     end
 end

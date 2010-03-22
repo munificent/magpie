@@ -28,44 +28,49 @@ namespace Magpie.Compilation
             var defineValueExpr = new DefineExpr(expr.Value.Position, valueName, expr.Value, false);
             var valueExpr = new NameExpr(expr.Value.Position, valueName);
 
-            var cases = new Stack<Tuple<IUnboundExpr, IUnboundExpr>>();
+            var conditions = new List<DesugaredMatchCase>();
 
             foreach (var matchCase in expr.Cases)
             {
-                var compare = PatternMatcher.Match(context,
-                    boundValue.Type, matchCase.Pattern, valueExpr);
+                var result = new DesugaredMatchCase();
 
-                cases.Push(Tuple.Create(compare, matchCase.Body));
+                result.Condition = Match(context, boundValue.Type,
+                    matchCase.Pattern, valueExpr, result.Variables);
+
+                conditions.Add(result);
             }
 
             // build a single compound "if" expression
             var ifExpr = (IUnboundExpr)null;
 
-            if (cases.Count == 0)
+            if (expr.Cases.Count == 0)
             {
                 throw new CompileException(expr.Position, "Match expression has no cases.");
             }
-            else if (cases.Count == 1)
+            else if (expr.Cases.Count == 1)
             {
                 // if there is only a since case, and we've ensured exhaustivity already, 
                 // then it must match all values, so just use the body directly
-                var ifThen = cases.Pop();
-                ifExpr = ifThen.Item2;
+                ifExpr = CreateCaseBody(conditions[0].Variables, expr.Cases[0].Body);
             }
             else
             {
-                foreach (var ifThen in cases)
+                // go in reverse order so that we start with the trailing else and build
+                // forward
+                for (int i = expr.Cases.Count - 1; i >= 0; i--)
                 {
                     if (ifExpr == null)
                     {
                         // for the first popped (i.e. last appearing) case, we know it must
                         // match because the match expression is exhaustive, so just use its
                         // body directly
-                        ifExpr = ifThen.Item2;
+                        ifExpr = CreateCaseBody(conditions[i].Variables, expr.Cases[i].Body);
                     }
                     else
                     {
-                        ifExpr = new IfExpr(ifThen.Item1.Position, ifThen.Item1, ifThen.Item2, ifExpr);
+                        var body = CreateCaseBody(conditions[i].Variables, expr.Cases[i].Body);
+                        ifExpr = new IfExpr(expr.Cases[i].Position, conditions[i].Condition,
+                            body, ifExpr);
                     }
                 }
             }
@@ -73,18 +78,37 @@ namespace Magpie.Compilation
             return new BlockExpr(new IUnboundExpr[] { defineValueExpr, ifExpr });
         }
 
-        private static IUnboundExpr Match(BindingContext context, IBoundDecl decl,
-            IPattern caseExpr, IUnboundExpr value)
+        private static IUnboundExpr CreateCaseBody(IDictionary<string, IUnboundExpr> variables, IUnboundExpr body)
         {
-            var matcher = new PatternMatcher(context, decl, value);
+            // if there are no variables, just use the body directly
+            if (variables.Count == 0) return body;
+
+            // otherwise, define all of the variables and then execute the body
+            var exprs = new List<IUnboundExpr>();
+            foreach (var pair in variables)
+            {
+                exprs.Add(new DefineExpr(Position.None, pair.Key, pair.Value, false));
+            }
+
+            exprs.Add(body);
+
+            return new BlockExpr(true, exprs);
+        }
+
+        private static IUnboundExpr Match(BindingContext context, IBoundDecl decl,
+            IPattern caseExpr, IUnboundExpr value, IDictionary<string, IUnboundExpr> variables)
+        {
+            var matcher = new PatternMatcher(context, decl, value, variables);
             return caseExpr.Accept(matcher);
         }
 
-        private PatternMatcher(BindingContext context, IBoundDecl decl, IUnboundExpr value)
+        private PatternMatcher(BindingContext context, IBoundDecl decl, IUnboundExpr value,
+            IDictionary<string, IUnboundExpr> variables)
         {
             mContext = context;
             mDecl = decl;
             mValue = value;
+            mVariables = variables;
         }
 
         private IUnboundExpr VisitLiteral(LiteralPattern expr)
@@ -131,8 +155,8 @@ namespace Magpie.Compilation
                 var unionValue = new CallExpr(new NameExpr(expr.Position, unionCase.Name + "Value"), mValue);
 
                 // match it
-                var matchValue = PatternMatcher.Match(mContext, unionCase.ValueType.Bound, expr.Value,
-                    unionValue);
+                var matchValue = Match(mContext, unionCase.ValueType.Bound, expr.Value,
+                    unionValue, mVariables);
 
                 if (matchValue != null)
                 {
@@ -159,8 +183,8 @@ namespace Magpie.Compilation
                 var fieldValue = new CallExpr(new IntExpr(position, i), mValue);
 
                 // match it
-                var matchField = PatternMatcher.Match(mContext, tupleDecl.Fields[i], expr.Fields[i],
-                    fieldValue);
+                var matchField = Match(mContext, tupleDecl.Fields[i], expr.Fields[i],
+                    fieldValue, mVariables);
 
                 if (match == null)
                 {
@@ -177,10 +201,20 @@ namespace Magpie.Compilation
             return match;
         }
 
+        IUnboundExpr IPatternVisitor<IUnboundExpr>.Visit(VariablePattern expr)
+        {
+            // bind the variable
+            mVariables[expr.Name] = mValue;
+
+            // always succeed
+            return new BoolExpr(expr.Position, true);
+        }
+
         #endregion
 
         private BindingContext mContext;
         private IBoundDecl mDecl;
         private IUnboundExpr mValue;
+        private IDictionary<string, IUnboundExpr> mVariables;
     }
 }

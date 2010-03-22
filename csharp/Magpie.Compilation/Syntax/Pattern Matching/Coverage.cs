@@ -128,6 +128,12 @@ namespace Magpie.Compilation
             throw new NotImplementedException();
         }
 
+        bool IPatternVisitor<bool>.Visit(VariablePattern expr)
+        {
+            FullyCovered = true;
+            return false;
+        }
+
         #endregion
 
         private IBoundDecl mMatchType;
