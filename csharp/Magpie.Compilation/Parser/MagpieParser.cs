@@ -18,7 +18,10 @@ namespace Magpie.Compilation
             return parser.SourceFile();
         }
 
-        private MagpieParser(IEnumerable<Token> tokens) : base(tokens) {}
+        private MagpieParser(IEnumerable<Token> tokens) : base(tokens)
+        {
+            mC = new CodeBuilder(null);
+        }
 
         // <-- Usings NamespaceContents
         private SourceFile SourceFile()
@@ -514,29 +517,29 @@ namespace Magpie.Compilation
             {
                 bool isDot = false;
                 string opName = String.Empty;
-                Position opPosition = null;
 
                 if (ConsumeIf(TokenType.Dot)) isDot = true;
                 else if (CurrentIs(TokenType.Operator))
                 {
                     Token op = Consume(TokenType.Operator);
                     opName = op.StringValue;
-                    opPosition = op.Position;
                 }
 
                 IUnboundExpr value = Block();
 
+                mC.SetPosition(position);
+
                 if (isDot)
                 {
-                    expr = new AssignExpr(position, expr, new CallExpr(value, expr));
+                    expr = mC.Assign(expr, mC.Call(value, expr));
                 }
                 else if (!String.IsNullOrEmpty(opName))
                 {
-                    expr = new AssignExpr(position, expr, new CallExpr(new NameExpr(opPosition, opName), new TupleExpr(expr, value)));
+                    expr = mC.Assign(expr, mC.Op(expr, opName, value));
                 }
                 else
                 {
-                    expr = new AssignExpr(position, expr, value);
+                    expr = mC.Assign(expr, value);
                 }
             }
 
@@ -564,20 +567,20 @@ namespace Magpie.Compilation
         private IUnboundExpr OperatorExpr()
         {
             return OneOrMoreLeft(TokenType.Operator, ApplyExpr,
-                (left, separator, right) => new CallExpr(new NameExpr(separator.Position, separator.StringValue), new TupleExpr(left, right)));
+                (left, separator, right) => mC.Call(new NameExpr(separator.Position, separator.StringValue), mC.Tuple(left, right)));
         }
 
         // <-- PrimaryExpr+
         private IUnboundExpr ApplyExpr()
         {
-            return OneOrMoreRight<IUnboundExpr>(ReverseApplyExpr, (left, right) => new CallExpr(left, right));
+            return OneOrMoreRight<IUnboundExpr>(ReverseApplyExpr, (left, right) => mC.Call(left, right));
         }
 
         // <-- ArrayExpr (DOT ArrayExpr)*
         private IUnboundExpr ReverseApplyExpr()
         {
             return OneOrMoreLeft(TokenType.Dot, ArrayExpr,
-                (left, separator, right) => new CallExpr(right, left));
+                (left, separator, right) => mC.Call(right, left));
         }
 
         // <-- LBRACKET (RBRACKET PRIME TypeDecl |
@@ -922,5 +925,7 @@ namespace Magpie.Compilation
 
             return new Tuple<string, Position>(name, position);
         }
+
+        private CodeBuilder mC;
     }
 }

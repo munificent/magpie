@@ -98,22 +98,23 @@ namespace Magpie.Compilation
         private static IUnboundExpr Match(BindingContext context, IBoundDecl decl,
             IPattern caseExpr, IUnboundExpr value, IDictionary<string, IUnboundExpr> variables)
         {
-            var matcher = new PatternMatcher(context, decl, value, variables);
+            var matcher = new PatternMatcher(context, decl, value, caseExpr, variables);
             return caseExpr.Accept(matcher);
         }
 
         private PatternMatcher(BindingContext context, IBoundDecl decl, IUnboundExpr value,
-            IDictionary<string, IUnboundExpr> variables)
+            IPattern caseExpr, IDictionary<string, IUnboundExpr> variables)
         {
             mContext = context;
             mDecl = decl;
             mValue = value;
             mVariables = variables;
+            mC = new CodeBuilder(context.NameGenerator, caseExpr.Position);
         }
 
         private IUnboundExpr VisitLiteral(LiteralPattern expr)
         {
-            return new CallExpr(new NameExpr(expr.Position, "="), new TupleExpr(mValue, expr.ValueExpr));
+            return mC.Op(mValue, "=", expr.ValueExpr);
         }
 
         #region ICaseExprVisitor<bool> Members
@@ -145,14 +146,13 @@ namespace Magpie.Compilation
             var unionCase = unionDecl.Cases.First(thisCase => thisCase.Name == expr.Name);
 
             // create an expression to match the union case
-            var caseCheck = new NameExpr(Position.None, unionCase.Name + "?");
-            var matchExpr = new CallExpr(caseCheck, mValue);
+            var matchExpr = mC.Call(unionCase.Name + "?", mValue);
 
             // match the value
             if (expr.Value != null)
             {
                 // create an expression to pull out the union value
-                var unionValue = new CallExpr(new NameExpr(expr.Position, unionCase.Name + "Value"), mValue);
+                var unionValue = mC.Call(unionCase.Name + "Value", mValue);
 
                 // match it
                 var matchValue = Match(mContext, unionCase.ValueType.Bound, expr.Value,
@@ -161,8 +161,7 @@ namespace Magpie.Compilation
                 if (matchValue != null)
                 {
                     // combine with the previous check
-                    matchExpr = new CallExpr(new NameExpr(expr.Position, "&"),
-                        new TupleExpr(matchExpr, matchValue));
+                    matchExpr = mC.Op(matchExpr, "&", matchValue);
                 }
             }
 
@@ -177,10 +176,10 @@ namespace Magpie.Compilation
             var match = (IUnboundExpr)null;
             for (int i = 0; i < tupleDecl.Fields.Count; i++)
             {
-                var position = expr.Fields[i].Position;
+                mC.SetPosition(expr.Fields[i].Position);
 
                 // create an expression to pull out the tuple field
-                var fieldValue = new CallExpr(new IntExpr(position, i), mValue);
+                var fieldValue = mC.Call(mC.Int(i), mValue);
 
                 // match it
                 var matchField = Match(mContext, tupleDecl.Fields[i], expr.Fields[i],
@@ -193,8 +192,7 @@ namespace Magpie.Compilation
                 else
                 {
                     // combine with the previous matches
-                    match = new CallExpr(new NameExpr(position, "&"), 
-                        new TupleExpr(match, matchField));
+                    match = mC.Op(match, "&", matchField);
                 }
             }
 
@@ -216,5 +214,6 @@ namespace Magpie.Compilation
         private IBoundDecl mDecl;
         private IUnboundExpr mValue;
         private IDictionary<string, IUnboundExpr> mVariables;
+        private CodeBuilder mC;
     }
 }

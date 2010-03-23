@@ -31,6 +31,11 @@ namespace Magpie.Compilation
             return mGenerator.Generate();
         }
 
+        public IUnboundExpr Assign(IUnboundExpr target, IUnboundExpr value)
+        {
+            return new AssignExpr(mPosition, target, value);
+        }
+
         public IUnboundExpr Block(IEnumerable<IUnboundExpr> exprs)
         {
             return new BlockExpr(exprs);
@@ -74,6 +79,11 @@ namespace Magpie.Compilation
         public IUnboundExpr If(IUnboundExpr condition, IUnboundExpr thenBody, IUnboundExpr elseBody)
         {
             return new IfExpr(mPosition, condition, thenBody, elseBody);
+        }
+
+        public IUnboundExpr Int(int value)
+        {
+            return new IntExpr(mPosition, value);
         }
 
         public IUnboundExpr Op(IUnboundExpr left, string op, IUnboundExpr right)
