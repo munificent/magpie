@@ -11,6 +11,9 @@ namespace Magpie.Compilation
     /// possible matched values, or if there are potential values that will not be
     /// matched by any case.
     /// </summary>
+    /// <remarks>This assumes that the pattern shapes match the value type, so it is
+    /// important that <see cref="ShapeChecker"/> has successfully validated the match
+    /// before calling this.</remarks>
     public class Coverage : IPatternVisitor<bool>
     {
         public static void Validate(MatchExpr expr, IBoundDecl valueType)
@@ -19,7 +22,7 @@ namespace Magpie.Compilation
 
             foreach (var matchCase in expr.Cases)
             {
-                if (coverage.Cover(matchCase.Pattern)) throw new CompileException(matchCase.Position,
+                if (coverage.CoverPattern(matchCase.Pattern)) throw new CompileException(matchCase.Position,
                     "This pattern will never be matched because previous patterns cover it.");
             }
 
@@ -34,6 +37,8 @@ namespace Magpie.Compilation
         {
             mMatchType = matchType;
 
+            mCover = new Cover(matchType);
+
             // since unit has exactly one value, if we've got a coverage for it
             // at all, it's fully covered. this handles union cases where the
             // value type is unit. the presence of the union case at all means
@@ -41,7 +46,16 @@ namespace Magpie.Compilation
             if (mMatchType == Decl.Unit) FullyCovered = true;
         }
 
-        private bool FullyCovered { get; set; }
+        private bool FullyCovered
+        {
+            get
+            {
+                if (mCover.IsFull) return true;
+                return mFullyCovered;
+            }
+
+            set { mFullyCovered = value; }
+        }
 
         /// <summary>
         /// Gets whether or not the given pattern is covered and will not
@@ -50,7 +64,7 @@ namespace Magpie.Compilation
         /// <param name="pattern">The pattern being matched.</param>
         /// <returns><c>true</c> if the pattern could be matched, <c>false</c>
         /// if a previous patterns cover it.</returns>
-        private bool Cover(IPattern pattern)
+        private bool CoverPattern(IPattern pattern)
         {
             if (FullyCovered) return true;
             return pattern.Accept(this);
@@ -68,23 +82,49 @@ namespace Magpie.Compilation
 
         bool IPatternVisitor<bool>.Visit(AnyPattern expr)
         {
+            var coord = new int[] { Cover.InfiniteSpan };
+            var result = mCover.IsCovered(coord);
+            mCover.Insert(coord, Cover.Full);
+
+            return result;
+            /*
             FullyCovered = true;
             return false;
+             */
         }
 
         bool IPatternVisitor<bool>.Visit(BoolPattern expr)
         {
+            int[] value = new int[] { expr.Value ? 1 : 0 };
+
+            var result = mCover.IsCovered(value);
+
+            mCover.Insert(value, Cover.Full);
+
+            return result;
+
+            /*
             var result = CoverName(expr.Value.ToString());
 
             // if we got true and false, we're fully covered
             if (mCoveredValues.Count == 2) FullyCovered = true;
 
             return result;
+            */
         }
 
         bool IPatternVisitor<bool>.Visit(IntPattern expr)
         {
+            int[] value = new int[] { expr.Value };
+
+            var result = mCover.IsCovered(value);
+
+            mCover.Insert(value, Cover.Full);
+
+            return result;
+            /*
             return CoverName(expr.Value.ToString());
+             */
         }
 
         bool IPatternVisitor<bool>.Visit(StringPattern expr)
@@ -110,7 +150,7 @@ namespace Magpie.Compilation
             // if we have a value for the case, recurse in to cover it
             if (expr.Value != null)
             {
-                covered = mCoveredValues[expr.Name].Cover(expr.Value);
+                covered = mCoveredValues[expr.Name].CoverPattern(expr.Value);
             }
 
             // if we have all cases, and all of their values are covered, we're covered
@@ -130,13 +170,22 @@ namespace Magpie.Compilation
 
         bool IPatternVisitor<bool>.Visit(VariablePattern expr)
         {
+            var coord = new int[] { Cover.InfiniteSpan };
+            var result = mCover.IsCovered(coord);
+            mCover.Insert(coord, Cover.Full);
+
+            return result;
+            /*
             FullyCovered = true;
             return false;
+            */
         }
 
         #endregion
 
         private IBoundDecl mMatchType;
+        private readonly Cover mCover;
+        private bool mFullyCovered;
         private Dictionary<string, Coverage> mCoveredValues = new Dictionary<string, Coverage>();
     }
 }
