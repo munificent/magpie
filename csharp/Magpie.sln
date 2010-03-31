@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Magpie.Interpreter", "Magpie.Interpreter\Magpie.Interpreter.csproj", "{5C3C5651-DA35-4DBC-9988-4FF09042268B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Magpie.Compilation", "Magpie.Compilation\Magpie.Compilation.csproj", "{19987567-5FF8-4401-A9FE-05E4B859E58B}"

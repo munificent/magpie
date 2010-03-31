@@ -37,7 +37,9 @@ namespace Magpie.Compilation
         {
             mMatchType = matchType;
 
+            /*
             mCover = new Cover(matchType);
+            */
 
             // since unit has exactly one value, if we've got a coverage for it
             // at all, it's fully covered. this handles union cases where the
@@ -50,7 +52,9 @@ namespace Magpie.Compilation
         {
             get
             {
+                /*
                 if (mCover.IsFull) return true;
+                */
                 return mFullyCovered;
             }
 
@@ -82,49 +86,44 @@ namespace Magpie.Compilation
 
         bool IPatternVisitor<bool>.Visit(AnyPattern expr)
         {
-            var coord = new int[] { Cover.InfiniteSpan };
-            var result = mCover.IsCovered(coord);
-            mCover.Insert(coord, Cover.Full);
+            /*
+            var cover = Cover.Create(mMatchType, expr);
+            var result = mCover.IsCovered(cover);
+            mCover.Merge(cover);
 
             return result;
-            /*
+            */
             FullyCovered = true;
             return false;
-             */
         }
 
         bool IPatternVisitor<bool>.Visit(BoolPattern expr)
         {
-            int[] value = new int[] { expr.Value ? 1 : 0 };
-
-            var result = mCover.IsCovered(value);
-
-            mCover.Insert(value, Cover.Full);
+            /*
+            var cover = Cover.Create(mMatchType, expr);
+            var result = mCover.IsCovered(cover);
+            mCover.Merge(cover);
 
             return result;
-
-            /*
+            */
             var result = CoverName(expr.Value.ToString());
 
             // if we got true and false, we're fully covered
             if (mCoveredValues.Count == 2) FullyCovered = true;
 
             return result;
-            */
         }
 
         bool IPatternVisitor<bool>.Visit(IntPattern expr)
         {
-            int[] value = new int[] { expr.Value };
-
-            var result = mCover.IsCovered(value);
-
-            mCover.Insert(value, Cover.Full);
+            /*
+            var cover = Cover.Create(mMatchType, expr);
+            var result = mCover.IsCovered(cover);
+            mCover.Merge(cover);
 
             return result;
-            /*
+            */
             return CoverName(expr.Value.ToString());
-             */
         }
 
         bool IPatternVisitor<bool>.Visit(StringPattern expr)
@@ -134,6 +133,14 @@ namespace Magpie.Compilation
 
         bool IPatternVisitor<bool>.Visit(UnionPattern expr)
         {
+            /*
+            var cover = Cover.Create(mMatchType, expr);
+            var result = mCover.IsCovered(cover);
+            mCover.Merge(cover);
+
+            return result;
+            */
+
             // if this union case has never been matched, add it
             bool covered = false;
             if (!mCoveredValues.ContainsKey(expr.Name))
@@ -170,21 +177,24 @@ namespace Magpie.Compilation
 
         bool IPatternVisitor<bool>.Visit(VariablePattern expr)
         {
-            var coord = new int[] { Cover.InfiniteSpan };
-            var result = mCover.IsCovered(coord);
-            mCover.Insert(coord, Cover.Full);
+            /*
+            var cover = Cover.Create(mMatchType, expr);
+            var result = mCover.IsCovered(cover);
+            mCover.Merge(cover);
 
             return result;
-            /*
+            */
+
             FullyCovered = true;
             return false;
-            */
         }
 
         #endregion
 
         private IBoundDecl mMatchType;
+        /*
         private readonly Cover mCover;
+        */
         private bool mFullyCovered;
         private Dictionary<string, Coverage> mCoveredValues = new Dictionary<string, Coverage>();
     }

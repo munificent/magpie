@@ -51,6 +51,61 @@ namespace Magpie.Compilation
             }
         }
 
+        public static Cover Create(IBoundDecl valueType, IPattern pattern)
+        {
+            var cover = new Cover(valueType);
+
+            if (pattern is AnyPattern)
+            {
+                cover.mIsFull = true;
+            }
+            else if (pattern is BoolPattern)
+            {
+                var boolPattern = (BoolPattern)pattern;
+                int[] value = new int[] { boolPattern.Value ? 1 : 0 };
+                cover.Insert(value, Cover.Full);
+            }
+            else if (pattern is IntPattern)
+            {
+                var intPattern = (IntPattern)pattern;
+                int[] value = new int[] { intPattern.Value };
+                cover.Insert(value, Cover.Full);
+            }
+            else if (pattern is StringPattern)
+            {
+                var stringPattern = (StringPattern)pattern;
+                throw new NotImplementedException();
+            }
+            else if (pattern is TuplePattern)
+            {
+                throw new NotImplementedException();
+            }
+            else if (pattern is UnionPattern)
+            {
+                var unionPattern = (UnionPattern)pattern;
+                var matchedCase = ((Union)valueType).Cases.First(unionCase => unionCase.Name == unionPattern.Name);
+                int[] value = new int[] { matchedCase.Index };
+
+                var valueCover = Cover.Full;
+                if (unionPattern.Value != null)
+                {
+                    valueCover = Create(matchedCase.ValueType.Bound, unionPattern.Value);
+                }
+
+                cover.Insert(value, valueCover);
+            }
+            else if (pattern is VariablePattern)
+            {
+                cover.mIsFull = true;
+            }
+            else
+            {
+                throw new ArgumentException("Unexpected pattern type.");
+            }
+
+            return cover;
+        }
+
         public static Cover Full { get { return sFull; } }
 
         public Cover(IBoundDecl type)
@@ -63,6 +118,20 @@ namespace Magpie.Compilation
         public bool IsCovered(int[] coordinate)
         {
             return mPoints.ContainsKey(GetKey(coordinate));
+        }
+
+        public bool IsCovered(Cover other)
+        {
+            if (other.IsFull && !IsFull) return false;
+
+            //### bob: this isn't complete. needs to handle filled dimensions
+
+            foreach (var point in other.mPoints)
+            {
+                if (!mPoints.ContainsKey(point.Key)) return false;
+            }
+
+            return true;
         }
 
         public void Merge(Cover other)
@@ -79,11 +148,6 @@ namespace Magpie.Compilation
             }
         }
 
-        public void Insert(int[] coordinate, Cover value)
-        {
-            Insert(GetKey(coordinate), value);
-        }
-
         private Cover(int[] dimensions)
         {
             mDimensions = dimensions;
@@ -93,6 +157,11 @@ namespace Magpie.Compilation
         {
             return String.Join(",", coordinate.Select(it => it == -1 ? "*" : it.ToString())
                                               .ToArray());
+        }
+
+        private void Insert(int[] coordinate, Cover value)
+        {
+            Insert(GetKey(coordinate), value);
         }
 
         private void Insert(string key, Cover value)
@@ -143,7 +212,7 @@ namespace Magpie.Compilation
             }
 
             // see if the entire coordinate space is filled
-            var fullSpan = GetKey(mDimensions.Select(it => -1).ToArray());
+            var fullSpan = GetKey(mDimensions.Select(it => InfiniteSpan).ToArray());
             mIsFull = mPoints.ContainsKey(fullSpan);
         }
 
