@@ -132,7 +132,6 @@
     <Compile Include="Syntax\IUnboundExprVisitor.cs" />
     <Compile Include="Syntax\Namespace.cs" />
     <Compile Include="Syntax\Pattern Matching\AnyPattern.cs" />
-    <Compile Include="Syntax\Pattern Matching\Cover.cs" />
     <Compile Include="Syntax\Pattern Matching\Coverage.cs" />
     <Compile Include="Syntax\Pattern Matching\DesugaredMatchCase.cs" />
     <Compile Include="Syntax\Pattern Matching\Pattern.cs" />

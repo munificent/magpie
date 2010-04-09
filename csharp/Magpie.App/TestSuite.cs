@@ -25,26 +25,13 @@ namespace Magpie.App
 
             foreach (string test in Directory.GetFiles(mTestDir, "*.mag", SearchOption.AllDirectories))
             {
-                //if (!test.Contains("MatchInt.")) continue;
-
-                if (Debugger.IsAttached)
+                try
                 {
-                    // don't catch exceptions when a debugger is attached, that way
-                    // the debugger will break at the place where the exception was
-                    // thrown and we can see what's going on.
                     if (!RunTest(test)) skipped++;
                 }
-                else
+                catch (Exception ex)
                 {
-                    // no debugger, so catch all exceptions
-                    try
-                    {
-                        if (!RunTest(test)) skipped++;
-                    }
-                    catch (Exception ex)
-                    {
-                        mErrors.Add("interpreter threw \"" + ex.Message + "\"");
-                    }
+                    mErrors.Add("interpreter threw \"" + ex.Message + "\"");
                 }
 
                 string relativePath = test.Replace(mTestDir, "");

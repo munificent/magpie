@@ -16,13 +16,15 @@ namespace Magpie.Compilation
         {
             foreach (var matchCase in expr.Cases)
             {
-                matchCase.Pattern.Accept(new ShapeChecker(valueType));
+                var usedVariables = new Dictionary<string, bool>();
+                matchCase.Pattern.Accept(new ShapeChecker(valueType, usedVariables));
             }
         }
 
-        private ShapeChecker(IBoundDecl type)
+        private ShapeChecker(IBoundDecl type, IDictionary<string, bool> usedVariables)
         {
             mType = type;
+            mUsedVariables = usedVariables;
         }
 
         #region IPatternVisitor<bool> Members
@@ -78,7 +80,7 @@ namespace Magpie.Compilation
                 if (expr.Value == null) throw new CompileException(expr.Position,
                     String.Format("Union case {0} expects a value.", unionCase.Name));
 
-                expr.Value.Accept(new ShapeChecker(unionCase.ValueType.Bound));
+                expr.Value.Accept(new ShapeChecker(unionCase.ValueType.Bound, mUsedVariables));
             }
 
             return true;
@@ -99,7 +101,7 @@ namespace Magpie.Compilation
             // the fields must match for
             for (int i = 0; i < expr.Fields.Count; i++)
             {
-                expr.Fields[i].Accept(new ShapeChecker(tuple.Fields[i]));
+                expr.Fields[i].Accept(new ShapeChecker(tuple.Fields[i], mUsedVariables));
             }
 
             return true;
@@ -107,12 +109,19 @@ namespace Magpie.Compilation
 
         bool IPatternVisitor<bool>.Visit(VariablePattern expr)
         {
+            // make sure the pattern is linear
+            if (mUsedVariables.ContainsKey(expr.Name)) throw new CompileException(
+                expr.Position, "The variable \"" + expr.Name + "\" cannot appear more than once in a single pattern.");
+
+            mUsedVariables[expr.Name] = true;
+
             // a variable pattern matches any type
             return true;
         }
 
         #endregion
 
-        private IBoundDecl mType;
+        private readonly IBoundDecl mType;
+        private readonly IDictionary<string, bool> mUsedVariables;
     }
 }
