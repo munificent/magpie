@@ -11,6 +11,6 @@ Main (->)
 end
 
 // generic operator
-++'(Left, Right) (left Left, right Right -> String)
+++[Left, Right] (left Left, right Right -> String)
     left.String + right.String
 end

@@ -15,7 +15,7 @@ Main (->)
     Print a.Bang?.String
     Print b.BarValue
     
-    def c <- Bar'Bool true
+    def c <- Bar[Bool] true
     Print c.BarValue.String
     
     //### bob: you should also be able to do Bar (3, 4) here, but
@@ -30,7 +30,7 @@ Print (a Int, b Int ->)
     Print b.String
 end
 
-union Foo'T
+union Foo[T]
     Bar   T
     Bang  (T, T)
 end

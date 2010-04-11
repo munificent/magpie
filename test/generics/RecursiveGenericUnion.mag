@@ -7,17 +7,17 @@ Main (->)
     Print a.String
 end
 
-Length'T (list List'T -> Int)
+Length[T] (list List[T] -> Int)
     if list.Empty? then 0
     else 1 + list.NextValue.Length
 end
 
-String (list List'String -> String)
+String (list List[String] -> String)
     if list.Empty? then list.EmptyValue
     else list.NextValue.String
 end
 
-union List'T
+union List[T]
     Empty T
-    Next  List'T
+    Next  List[T]
 end

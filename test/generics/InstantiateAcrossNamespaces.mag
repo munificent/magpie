@@ -20,6 +20,6 @@ String (foo Foo -> String) foo.Value
 
 namespace NamespaceTwo
 
-    Bar'T (value T -> String) value.String
+    Bar[T] (value T -> String) value.String
  
 end

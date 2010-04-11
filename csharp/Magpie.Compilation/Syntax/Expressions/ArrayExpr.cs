@@ -5,6 +5,8 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
+    //### bob: this should go away. there are no longer array literals. instead there's an "ArrayOf" function.
+    // once that is a proper intrinsic instead of the hacked stuff in FunctionBinder, this can go away.
     /// <summary>
     /// An array literal expression like [1, 2, 3].
     /// </summary>

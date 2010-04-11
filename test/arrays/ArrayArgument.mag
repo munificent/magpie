@@ -3,10 +3,10 @@
 // expected: three
 
 Main (->)
-    Foo ["one", "two", "three"]
+    Foo ArrayOf ("one", "two", "three")
 end
 
-Foo (array []'String ->)
+Foo (array Array[String] ->)
     Print array.0
     Print array.1
     Print array.2

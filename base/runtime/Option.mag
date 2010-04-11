@@ -1,8 +1,8 @@
-union Option'T
+union Option[T]
     Some T
     None
 end
 
-String'T (option Option'T -> String)
+String[T] (option Option[T] -> String)
     if option.None? then "none" else "some " + option.SomeValue.String
 end

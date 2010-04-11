@@ -3,7 +3,6 @@
 // expected: 123
 // expected: "foo"
 // expected: (1, 2, 3)
-// expected: [1, 2, 3]
 
 Main (->)
     def a <- { () }
@@ -20,10 +19,5 @@ Main (->)
     
     def e <- { 1, 2, 3 }
     Print e.String
-    
-    def f <- { [1, 2, 3] }
-    Print f.String
-    
-    //### bob: what about empty arrays?
     
 end

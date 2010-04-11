@@ -2,5 +2,5 @@
 
 Main (->)
     def a <- 1
-    def b <- a'Int
+    def b <- a[Int]
 end

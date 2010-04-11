@@ -3,7 +3,7 @@
 // expected: 3
 
 Main (->)
-    def a <- [1, 2, 3]
+    def a <- ArrayOf (1, 2, 3)
     
     Print a.0.String
     Print a.1.String

@@ -60,6 +60,25 @@ namespace Magpie.Compilation
                 if (macroResult != null) return macroResult.Accept(this);
             }
 
+            //### bob: handle array constructors. hack! should be intrinsic
+            if ((namedTarget != null) && (namedTarget.Name == "ArrayOf"))
+            {
+                // handle ArrayOf[Int]
+                if ((expr.Arg is UnitExpr) && (namedTarget.TypeArgs.Count == 1))
+                {
+                    return new ArrayExpr(namedTarget.Position, namedTarget.TypeArgs[0]).Accept(this);
+                }
+
+                // handle ArrayOf (1, 2, 3)
+                var elements = (IEnumerable<IUnboundExpr>)(new IUnboundExpr[] { expr.Arg });
+                if (expr.Arg is TupleExpr)
+                {
+                    elements = ((TupleExpr)expr.Arg).Fields;
+                }
+
+                return new ArrayExpr(namedTarget.Position, elements).Accept(this);
+            }
+
             var boundArg = expr.Arg.Accept(this);
 
             if (namedTarget != null)
@@ -389,6 +408,16 @@ namespace Magpie.Compilation
 
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(NameExpr expr)
         {
+            //### bob: handle array constructors. hack! should be intrinsic
+            if (expr.Name == "ArrayOf")
+            {
+                // handle ArrayOf[Int]
+                if (expr.TypeArgs.Count == 1)
+                {
+                    return new ArrayExpr(expr.Position, expr.TypeArgs[0]).Accept(this);
+                }
+            }
+
             return mContext.ResolveName(mFunction, Scope,
                 expr.Position, expr.Name, expr.TypeArgs, null);
         }

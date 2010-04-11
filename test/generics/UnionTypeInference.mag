@@ -6,10 +6,10 @@ Main (->)
     Foo Bar true
 end
 
-Foo'T (a FooUnion'T ->)
+Foo[T] (a FooUnion[T] ->)
     Print a.BarValue.String
 end
 
-union FooUnion'T
+union FooUnion[T]
     Bar T
 end

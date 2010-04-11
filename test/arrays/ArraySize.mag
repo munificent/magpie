@@ -3,12 +3,12 @@
 // expected: 5
 
 Main (->)
-    def a <- []'Bool 
+    def a <- ArrayOf[Bool]
     Print a.Size.String
     
-    def b <- [true]
+    def b <- ArrayOf true
     Print b.Size.String
 
-    def c <- [2, 3, 4, 5, 6]
+    def c <- ArrayOf (2, 3, 4, 5, 6)
     Print c.Size.String
 end

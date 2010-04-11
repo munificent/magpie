@@ -17,7 +17,7 @@ Main (->)
     (fn Foo (Int)) 1
     a 1
     
-    def b <- fn Bar'Int (Int)
+    def b <- fn Bar[Int] (Int)
     b 2
     
     // return a function reference from a function
@@ -43,6 +43,6 @@ Foo (->)            Print "foo no args"
 Foo (a Int ->)      Print ("foo " + a.String)
 Foo (a String ->)   Print ("foo string " + a)
 
-Bar'A (a A ->) Foo a
+Bar[A] (a A ->) Foo a
 
-<*'T (func fn (T ->), arg T ->) func arg
+<*[T] (func fn (T ->), arg T ->) func arg

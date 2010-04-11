@@ -579,42 +579,8 @@ namespace Magpie.Compilation
         // <-- ArrayExpr (DOT ArrayExpr)*
         private IUnboundExpr ReverseApplyExpr()
         {
-            return OneOrMoreLeft(TokenType.Dot, ArrayExpr,
+            return OneOrMoreLeft(TokenType.Dot, PrimaryExpr,
                 (left, separator, right) => mC.Call(right, left));
-        }
-
-        // <-- LBRACKET (RBRACKET PRIME TypeDecl |
-        //              (OperatorExpr (COMMA OperatorExpr)* )? RBRACKET)
-        //   | PrimaryExpr
-        private IUnboundExpr ArrayExpr()
-        {
-            Position position;
-            if (ConsumeIf(TokenType.LeftBracket, out position))
-            {
-                if (ConsumeIf(TokenType.RightBracket))
-                {
-                    // empty (explicitly typed) array
-                    Consume(TokenType.Prime);
-                    return new ArrayExpr(position, TypeDecl());
-                }
-                else
-                {
-                    // non-empty array
-                    var elements = new List<IUnboundExpr>();
-
-                    // get the elements
-                    do
-                    {
-                        elements.Add(OperatorExpr());
-                    }
-                    while (ConsumeIf(TokenType.Comma));
-
-                    Consume(TokenType.RightBracket);
-
-                    return new ArrayExpr(position, elements);
-                }
-            }
-            else return PrimaryExpr();
         }
 
         // <-- Name
@@ -817,12 +783,27 @@ namespace Magpie.Compilation
             return Tuple.Create((IEnumerable<IUnboundDecl>)decls, position);
         }
 
-        // <-- PRIME (TypeDecl | (LPAREN TypeDecl (COMMA TypeDecl)* RPAREN))
+        // <-- LBRACKET (TypeDecl (COMMA TypeDecl)*) RBRACKET
         //   | <nothing>
         private IEnumerable<IUnboundDecl> TypeArgs()
         {
             var decls = new List<IUnboundDecl>();
 
+            // using [] for generics
+            // may not be any args
+            if (ConsumeIf(TokenType.LeftBracket))
+            {
+                do
+                {
+                    decls.Add(TypeDecl());
+                }
+                while (ConsumeIf(TokenType.Comma));
+
+                Consume(TokenType.RightBracket);
+            }
+
+            /* using ' for generics */
+            /*
             // may not be any args
             if (ConsumeIf(TokenType.Prime))
             {
@@ -843,35 +824,27 @@ namespace Magpie.Compilation
                     decls.Add(TypeDecl());
                 }
             }
+            */
 
             return decls;
         }
 
-        // <-- PRIME (NAME | (LPAREN NAME (COMMA NAME)* RPAREN))
+        // <-- LBRACKET NAME (COMMA NAME)* RBRACKET
         //   | <nothing>
         private IList<string> TypeParams()
         {
             var parameters = new List<string>();
 
             // may not be any params
-            if (ConsumeIf(TokenType.Prime))
+            if (ConsumeIf(TokenType.LeftBracket))
             {
-                if (ConsumeIf(TokenType.LeftParen))
+                do
                 {
                     parameters.Add(Consume(TokenType.Name).StringValue);
-
-                    while (ConsumeIf(TokenType.Comma))
-                    {
-                        parameters.Add(Consume(TokenType.Name).StringValue);
-                    }
-
-                    Consume(TokenType.RightParen);
                 }
-                else
-                {
-                    // no grouping, so just a single type declaration
-                    parameters.Add(Consume(TokenType.Name).StringValue);
-                }
+                while (ConsumeIf(TokenType.Comma));
+
+                Consume(TokenType.RightBracket);
             }
 
             return parameters;
@@ -882,26 +855,26 @@ namespace Magpie.Compilation
         //                                   | Name TypeArgs )
         private IUnboundDecl TypeDecl()
         {
-            var arrays = new Stack<Position>();
-            while (ConsumeIf(TokenType.LeftBracket))
-            {
-                Consume(TokenType.RightBracket);
-                var position = Consume(TokenType.Prime).Position;
-
-                arrays.Push(position);
-            }
-
             // figure out the endmost type
             IUnboundDecl type;
             if (CurrentIs(TokenType.LeftParen)) type = new TupleType(TupleType());
             else if (ConsumeIf(TokenType.Fn)) type = FnArgsDecl(null);
-            else type = new NamedType(Name(), TypeArgs());
-
-            // wrap it in the array declarations
-            while (arrays.Count > 0)
+            else
             {
-                var array = arrays.Pop();
-                type = new ArrayType(array, type);
+                var name = Name();
+                var typeArgs = TypeArgs();
+
+                // handle array types
+                //### bob: hackish. probably don't need the parser to care about this. should handle this at type binding
+                // time instead.
+                if ((name.Item1 == "Array") && (typeArgs.Count() == 1))
+                {
+                    type = new ArrayType(name.Item2, typeArgs.First());
+                }
+                else
+                {
+                    type = new NamedType(name, typeArgs);
+                }
             }
 
             return type;

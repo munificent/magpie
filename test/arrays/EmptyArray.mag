@@ -4,9 +4,9 @@
 
 Main (->)
     // empty arrays
-    def e <- []'Int
-    def f <- []'(String, Bool)
-    def g <- []'[]'Int
+    def e <- ArrayOf[Int]
+    def f <- ArrayOf[(String, Bool)]
+    def g <- ArrayOf[Int]
     
     Print e.Size.String
     Print f.Size.String

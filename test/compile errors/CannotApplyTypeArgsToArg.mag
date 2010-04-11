@@ -5,5 +5,5 @@ Main (->)
 end
 
 Foo (a Int ->)
-    def b <- a'Int
+    def b <- a[Int]
 end

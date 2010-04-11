@@ -1,7 +1,7 @@
 // error line: 4
 
 Main (->)
-    Foo'Undefined
+    Foo[Undefined]
 end
 
-Foo'T (->) ()
+Foo[T] (->) ()

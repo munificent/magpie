@@ -6,6 +6,6 @@ Main (->)
     Foo true
 end
 
-Foo'T (a T ->)
+Foo[T] (a T ->)
     Print a.String
 end

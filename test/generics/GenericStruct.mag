@@ -9,10 +9,10 @@ Main (->)
     def b <- Foo "2"
     Print b.Value
     
-    def c <- Foo'Bool true
+    def c <- Foo[Bool] true
     Print c.Value.String
 end
 
-struct Foo'T
+struct Foo[T]
     Value   T
 end

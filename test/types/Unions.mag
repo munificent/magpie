@@ -22,6 +22,6 @@ union Foo
     Frob
 end
 
-AsBar (foo Foo -> Option'String)
-    if foo.Bar? then Some foo.BarValue else None'String
+AsBar (foo Foo -> Option[String])
+    if foo.Bar? then Some foo.BarValue else None[String]
 end

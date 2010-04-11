@@ -1,21 +1,37 @@
 Things to figure out or decide:
 ------------------------------
 
-Get rid of immutable arrays to simplify things?
+Add records?
+- Records are anonymous tuples with named fields:
+  def a <- (Foo: 1, Bar: true)
+  // creates a record of type (Bar: Bool, Foo: Int)
+- Field order doesn't matter.
+- The field names and types define the record. Each set of different field names
+  or types is a different type.
+- Would let us do named arguments: define a function that takes a record.
+- If we do open types, this will be important for conustructors since the order
+  of fields is no longer well-defined when a type is defined across multiple
+  files. Records address this.
 
-How can we do a multi-case flow control construct?
-- Having to chain if/then/else is ugly, particularly with unions.
-  Pattern matching or at least a switch-case would be good.
+Open types?
+- Would be cool if you could add fields to an existing struct and cases to a
+  previously defined union.
 
-Can we improve the syntax for instantiating a generic with a tuple
-type?
-- Because generics use () to separate the type arg list, applying a
-  tuple as a single type argument requires double ():
+Get rid of __Value functions on unions now that we have pattern matching?
 
-  Foo'(A, B)   // two type args
-  Foo'((A, B)) // one type arg of tuple type
-
-- That's kind of gross. Can we improve that?  
+Figure out how options, let, and pattern matching interact.
+- Right now, options are "special" because let needs to know about their
+  internal representation. The __Value functions in a union in turn return an
+  option union, so it must be special to let you ever actually get the raw
+  value out.
+- Now that we have pattern matching, can let be redone in terms of that? Or
+  should we just get rid of it?
+  
+Make unions mutable reference types?
+- Unions and structs have different semantics right now. Unions are immutable
+  like FP where structs are mutable like imperative programming. Should be
+  consistent, which means mutable for Magpie. So, change unions to be a
+  reference type and have a function to let you change the union's case.
   
 How can we do metaprogramming in Magpie?
 - Would be very cool if it was easy to construct and compile Magpie
@@ -43,28 +59,13 @@ How can we do closures or function objects?
 - Local functions are particularly nice for things like map and fold.
 - Could be used to implement "interface-like" constructs: a function
   takes a function reference, or a struct of function references, and
-  treats the like an object that it can call.
+  treats it like an object that it can call.
 - If we don't want local functions, could do argument binding, where
   binding one or more arguments to a function returns a new function
   reference with fewer arguments. Calling that reference calls the
   original function with the previously bound arguments inserted.
-
-How can you program using ADTs or interfaces?
-- For example, I want to define a function Contains() that works on
-  any collection type that "implements an interface". If I just use
-  generics, it isn't clear what kinds of types are valid type
-  arguments, and what aren't.
-- But this shouldn't be limited to OOP-style single type interfaces.
-  It needs to span multiple types, for example an "interface" that
-  says things like "a function Foo that takes an A and a B and returns
-  a C".
-- If we get this working, should change "for" system to actually check
-  that the object implments some iterator interface.
-- We can solve this C-style: Define a struct containing function refs
-  (closures). That struct is an abstract object with functions for the
-  operations.
   
-Can we do keywork functions like Smalltalk?
+Can we do keyword functions like Smalltalk?
 - My guess is "no". At the very least, it would require a syntax
   change to distinguish keywords from identifiers, likely a trailing
   ":".
@@ -73,6 +74,7 @@ Can we do keywork functions like Smalltalk?
   clauses.
 - It would make it hard to get rid of the "end" before an "else" in an
   if/then/else block. Smalltalk is particularly ugly about that.
+- If we add records, that would probably subsume this.
 
 Should characters be an atomic type? If so, what is their literal
 syntax?
@@ -87,12 +89,6 @@ Are we happy with the local declaration syntax?
 - Would be nice if you could declare variables in expressions
   (especially in while and for loops), but the current syntax is a bit
   verbose for that. This is also true of assignment for that matter.
-
-How does pattern matching work?
-- Can users define their own pattern matching functions, like F#'s
-  active patterns?
-- Once this is working, we should get rid of union __Value functions
-  since they can cause runtime errors.
   
 Built-in support for hashes?
 - To be statically-typed, would they be like named-element tuples?
@@ -106,6 +102,10 @@ How do coroutines and iterators work?
   . Yes, we should.
 - Can values be passed in when resuming?
   . Yes, it's cool.
+- How do we ensure that yielding values in an out of coroutines are type safe?
+  For example, you create a coroutine that you expect to yield ints. How do we
+  ensure that all of the places that yield from that coroutine actually yield
+  the correct type?
   
 Does Magpie have constants?
 - Because of implicit calling, there isn't a syntactical difference
@@ -140,10 +140,6 @@ Change the tuple precedence.
 - Instead of allowing just "," to create tuples, it's simpler and a
   little easier to use to always require them to be in parentheses. So
   the parser needs to put the tuple parsing inside PrimaryExpr.
-
-Autogenerated function/operator to compare unions.
-- Just returns if they are the same case. Doesn't compare values.
-- Could just rely on pattern matching for this.
   
 Ability to break out of loops ("break" expression).
 
@@ -153,6 +149,7 @@ Lazy arguments.
   short-circuit without it.
 - Change boolean operators to use this.
 - Need closures for this to be useful.
+- Macros may make this unnecessary.
 
 Argument inference for function references.
 - You should be able to omit the argument types when creating a
@@ -169,7 +166,50 @@ Document and test precedence of self-assignment syntax.
 
 Done:
 ----
+
+Can we improve the syntax for instantiating a generic with a tuple
+type?
+- Because generics use () to separate the type arg list, applying a
+  tuple as a single type argument requires double ():
+
+  Foo'(A, B)   // two type args
+  Foo'((A, B)) // one type arg of tuple type
+
+- That's kind of gross. Can we improve that?  
+- Using [] for type arguments would fix this:
+  Foo[A, B]   // two type args
+  Foo[(A, B)] // one type arg of tuple type
+  None[Int]   // not actually that bad
+
+How does pattern matching work?
+- Can users define their own pattern matching functions, like F#'s
+  active patterns?
+- Once this is working, we should get rid of union __Value functions
+  since they can cause runtime errors.
+
+How can you program using ADTs or interfaces?
+- For example, I want to define a function Contains() that works on
+  any collection type that "implements an interface". If I just use
+  generics, it isn't clear what kinds of types are valid type
+  arguments, and what aren't.
+- But this shouldn't be limited to OOP-style single type interfaces.
+  It needs to span multiple types, for example an "interface" that
+  says things like "a function Foo that takes an A and a B and returns
+  a C".
+- If we get this working, should change "for" system to actually check
+  that the object implments some iterator interface.
++ We can solve this C-style: Define a struct containing function refs
+  (closures). That struct is an abstract object with functions for the
+  operations.
+
   
+How can we do a multi-case flow control construct?
+- Having to chain if/then/else is ugly, particularly with unions.
+  Pattern matching or at least a switch-case would be good.
++ Use pattern matching
+  
+Get rid of immutable arrays to simplify things?
+
 Tuple decomposition on assignment.
 . (a, b) <- (1, 2)
 - Use full pattern matching syntax for this?

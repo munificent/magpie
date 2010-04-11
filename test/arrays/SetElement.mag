@@ -3,7 +3,7 @@
 // expected: five
 
 Main (->)
-    def a <- ["one", "two", "three"]
+    def a <- ArrayOf ("one", "two", "three")
     
     a.1 <- "four"
     2 a <- "five"

@@ -1,11 +1,11 @@
 // expected: 4
 
 Main (->)
-    def a <- Foo [2, 3, 4]
+    def a <- Foo ArrayOf (2, 3, 4)
     
     Print a.Items.2.String
 end
 
 struct Foo
-    Items        []'Int
+    Items Array[Int]
 end

@@ -4,7 +4,7 @@
 // expected: 4
 
 Main (->)
-    def a <- [1, 2, 3, 4]
+    def a <- ArrayOf (1, 2, 3, 4)
     
     for b <- a do Print b.String
 end

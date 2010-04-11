@@ -1,5 +1,5 @@
 // error line: 4
 
 Main (->)
-    def a <- [1, true]
+    def a <- ArrayOf (1, true)
 end

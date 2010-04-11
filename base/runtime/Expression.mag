@@ -10,10 +10,10 @@ union Expression
     
     NameExpr    String
     
-    TupleExpr   []'Expression
-    ArrayExpr   []'Expression
+    TupleExpr   Array[Expression]
+    ArrayExpr   Array[Expression]
 
-    BlockExpr   []'Expression
+    BlockExpr   Array[Expression]
     
     CallExpr    (Expression, Expression)
     DefineExpr  (Bool, String, Expression) // mutable?, name, value
@@ -57,7 +57,7 @@ String (expr Expression -> String)
 end
 
 Join (before String, separator String, after String,
-      exprs []'Expression -> String)
+      exprs Array[Expression] -> String)
     var s <- before
     for expr <- exprs do
         if s.Count > before.Count then s <- + separator
