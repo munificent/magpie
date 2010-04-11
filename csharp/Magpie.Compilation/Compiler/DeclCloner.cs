@@ -19,11 +19,6 @@ namespace Magpie.Compilation
 
         #region IUnboundDeclVisitor<IUnboundDecl> Members
 
-        IUnboundDecl IUnboundDeclVisitor<IUnboundDecl>.Visit(ArrayType decl)
-        {
-            return new ArrayType(decl.Position, decl.ElementType.Accept(this));
-        }
-
         IUnboundDecl IUnboundDeclVisitor<IUnboundDecl>.Visit(AtomicDecl decl)
         {
             // atomic types are immutable, so we can reuse it

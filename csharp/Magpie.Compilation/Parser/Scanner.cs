@@ -159,7 +159,10 @@ namespace Magpie.Compilation
 
                     if (!(IsAlpha(Current) || IsPunctuation(Current) || IsDigit(Current) || IsColon(Current)))
                     {
-                        return CompleteToken((text, pos) => new Token(pos, TokenType.Name, text));
+                        return CompleteToken((text, pos) => {
+                            if (text.EndsWith(":")) return new Token(pos, TokenType.Keyword, text);
+                            return new Token(pos, TokenType.Name, text);
+                        });
                     }
 
                     return null; // still in identifier

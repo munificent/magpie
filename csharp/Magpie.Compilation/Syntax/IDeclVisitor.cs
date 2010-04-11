@@ -7,7 +7,6 @@ namespace Magpie.Compilation
 {
     public interface IUnboundDeclVisitor<TReturn>
     {
-        TReturn Visit(ArrayType decl);
         TReturn Visit(AtomicDecl decl);
         TReturn Visit(FuncType decl);
         TReturn Visit(TupleType decl);

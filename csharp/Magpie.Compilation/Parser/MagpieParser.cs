@@ -807,30 +807,6 @@ namespace Magpie.Compilation
                 Consume(TokenType.RightBracket);
             }
 
-            /* using ' for generics */
-            /*
-            // may not be any args
-            if (ConsumeIf(TokenType.Prime))
-            {
-                if (ConsumeIf(TokenType.LeftParen))
-                {
-                    decls.Add(TypeDecl());
-
-                    while (ConsumeIf(TokenType.Comma))
-                    {
-                        decls.Add(TypeDecl());
-                    }
-
-                    Consume(TokenType.RightParen);
-                }
-                else
-                {
-                    // no grouping, so just a single type declaration
-                    decls.Add(TypeDecl());
-                }
-            }
-            */
-
             return decls;
         }
 
@@ -867,19 +843,7 @@ namespace Magpie.Compilation
             else
             {
                 var name = Consume(TokenType.Name);
-                var typeArgs = TypeArgs();
-
-                // handle array types
-                //### bob: hackish. probably don't need the parser to care about this. should handle this at type binding
-                // time instead.
-                if ((name.StringValue == "Array") && (typeArgs.Count() == 1))
-                {
-                    type = new ArrayType(name.Position, typeArgs.First());
-                }
-                else
-                {
-                    type = new NamedType(name.Position, name.StringValue, typeArgs);
-                }
+                type = new NamedType(name.Position, name.StringValue, TypeArgs());
             }
 
             return type;

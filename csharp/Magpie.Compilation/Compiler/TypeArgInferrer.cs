@@ -39,14 +39,14 @@ namespace Magpie.Compilation
         {
             if (!TryInferParam(decl))
             {
-                var paramDecl = ParamType as ArrayType;
-                if (paramDecl == null)
+                var paramDecl = ParamType as NamedType;
+                if ((paramDecl == null) || (paramDecl.Name != "Array") || (paramDecl.TypeArgs.Count() != 1))
                 {
                     mFailed = true;
                     return false;
                 }
 
-                mParamTypes.Push(paramDecl.ElementType);
+                mParamTypes.Push(paramDecl.TypeArgs.First());
                 decl.ElementType.Accept(this);
                 mParamTypes.Pop();
             }

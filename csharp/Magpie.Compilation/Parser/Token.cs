@@ -48,6 +48,7 @@ namespace Magpie.Compilation
         // identifiers
         Name,
         Operator,
+        Keyword,
         
         // the end of the source has been reached
         Eof
@@ -115,6 +116,7 @@ namespace Magpie.Compilation
                 
                 case TokenType.Name:          return "name " + StringValue;
                 case TokenType.Operator:      return "operator " + StringValue;
+                case TokenType.Keyword:       return "keyword " + StringValue;
 
                 case TokenType.Case:        return "case";
                 case TokenType.Def:         return "def";

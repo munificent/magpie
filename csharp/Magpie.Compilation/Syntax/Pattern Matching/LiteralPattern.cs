@@ -6,43 +6,8 @@ using System.Text;
 namespace Magpie.Compilation
 {
     /// <summary>
-    /// Pattern for matching an explicit literal value of an atomic type.
+    /// Base pattern class for matching an explicit literal value of an atomic type.
     /// </summary>
-    /*
-    public class LiteralPattern : IPattern
-    {
-        /// <summary>
-        /// Gets the value this pattern will successfully match.
-        /// </summary>
-        public IUnboundExpr Value { get; private set; }
-
-        //### bob: hackish. assumes value is a ValueExpr, which implements both
-        // IUnboundExpr and IBoundExpr
-        public IBoundDecl Type { get { return ((IBoundExpr)Value).Type; } }
-
-        public LiteralPattern(IUnboundExpr value)
-        {
-            Value = value;
-        }
-
-        public override string ToString()
-        {
-            return Value.ToString();
-        }
-
-        #region ICaseExpr Members
-
-        public Position Position { get { return Value.Position; } }
-
-        TReturn IPattern.Accept<TReturn>(IPatternVisitor<TReturn> visitor)
-        {
-            return visitor.Visit(this);
-        }
-
-        #endregion
-    }
-    */
-
     public abstract class LiteralPattern
     {
         public Position Position { get { return Token.Position; } }
@@ -63,6 +28,9 @@ namespace Magpie.Compilation
         protected Token Token { get; private set; }
     }
 
+    /// <summary>
+    /// A boolean literal pattern.
+    /// </summary>
     public class BoolPattern : LiteralPattern, IPattern
     {
         public bool Value { get { return Token.BoolValue; } }
@@ -78,6 +46,9 @@ namespace Magpie.Compilation
         }
     }
 
+    /// <summary>
+    /// An int literal pattern.
+    /// </summary>
     public class IntPattern : LiteralPattern, IPattern
     {
         public int Value { get { return Token.IntValue; } }
@@ -93,6 +64,9 @@ namespace Magpie.Compilation
         }
     }
 
+    /// <summary>
+    /// A string literal pattern.
+    /// </summary>
     public class StringPattern : LiteralPattern, IPattern
     {
         public string Value { get { return Token.StringValue; } }

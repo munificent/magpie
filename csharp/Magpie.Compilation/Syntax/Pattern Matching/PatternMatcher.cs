@@ -5,7 +5,6 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
-    //### bob: the overall process is:
     /// <summary>
     /// Translates a pattern matching expression into simpler primitive conditinal form.
     /// Validates that the pattern cases are non-overlapping and exhaustive. The basic

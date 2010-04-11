@@ -83,11 +83,6 @@ namespace Magpie.Compilation
 
         #region IUnboundDeclVisitor<IBoundDecl> Members
 
-        IBoundDecl IUnboundDeclVisitor<IBoundDecl>.Visit(ArrayType decl)
-        {
-            return new BoundArrayType(decl.ElementType.Accept(this));
-        }
-
         IBoundDecl IUnboundDeclVisitor<IBoundDecl>.Visit(AtomicDecl decl)
         {
             // atomics are already bound
@@ -117,6 +112,12 @@ namespace Magpie.Compilation
                 if (decl.IsGeneric) throw new CompileException("Cannot apply type arguments to a type parameter.");
 
                 return mContext.TypeArguments[decl.Name];
+            }
+
+            // see if it's an array
+            if ((decl.Name == "Array") && (decl.TypeArgs.Count() == 1))
+            {
+                return new BoundArrayType(decl.TypeArgs.First().Accept(this));
             }
 
             // bind the type arguments
