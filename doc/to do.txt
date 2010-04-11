@@ -125,6 +125,14 @@ More atomic types:
 - char
 - byte?
   
+Else clause for while loops, to let them return values:
+  def a <- while b < 10 do
+             c <- * 2
+             b <- + 1
+             c
+           else 0
+
+
 Things to do:
 ------------
 

@@ -1,0 +1,41 @@
+- making unions mutable reference types like structs
+- open unions so you can add cases across multiple files
+- unifying unions and structs so a union can have fields for all cases
+- making structs open so you can add fields to previously defined structs?
+
+note: if we do open structs then we have to figure out what order the
+fields are defined in since that also defines the constructor. the
+other option would be to have records, like so:
+
+type Point
+	X Int
+	Y Int
+end
+
+// another file
+extend Point
+	Z Int
+end
+
+// some other file
+extend Point
+	W Int
+end
+
+// as it stands now, it isn't clear what:
+def a <- Point (1, 2, 3, 4)
+// actually defines. is Z 4, or W?
+
+// with records:
+def a <- Point (X: 1, Y: 2, Z: 3, W: 4)
+
+// the order of fields in a record isn't meaningful, just the names
+// a record is like a named tuple, so the above is the same as:
+def b <- (X: 1, Z: 3, Y: 2, W: 4)
+def a <- Point b
+
+consider replacing '() generic syntax with []:
+- no more array literals. define functions to create arrays instead
+- even single-arg generics are grouped: None[Int]
+- solves tuple problem: List[(Int, Int)] is a single generic arg that's
+  a tuple

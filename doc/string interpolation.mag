@@ -1,0 +1,33 @@
+/*
+
+string interpolation.
+
+if a string literal contains "{" or "}", then it will use
+interpolation. this means, *at compile time*, the literal will be
+expanded out into the code required to substitute those variables in.
+
+*/
+
+// this:
+Main (->)
+    def a <- 123
+    def b <- 345
+    def c <- "hi"
+    
+    def d <- "a = {a}, b = {b}, a + b = {a + b} {c}"
+end
+
+// is desugared to:
+Main (->)
+    def a <- 123
+    def b <- 345
+    def c <- "hi"
+    
+    def d <- ("a = " + a.String +
+              ", b = " + b.String +
+              ", a + b = " + (a + b).String +
+              " " + c.String)
+end
+
+// might be nice if there was distinct string literal syntax for
+// interpolated and non-interpolated strings.

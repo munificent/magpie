@@ -36,3 +36,19 @@ if a__.Some? then
     def a <- a.SomeValue
     Bar
 end
+
+match (1, 2)
+case (1, a) then Print "first is 1"
+case (2, 3) then Print "2 3"
+case (a, 2) then Print "second is two"
+case (a, b) then Print "bind two vars"
+end
+
+let a, b <- Some (1, 2) then
+end
+
+switch m
+    if (1, 2) then Print "1 2"
+    if (2, 3) then Print "2 3"
+    let a <- 
+end
