@@ -16,7 +16,6 @@ namespace Magpie.Compilation
         LeftArrow,
         RightArrow,
         Comma,
-        Colon,
         Dot,
         Line,
         Prime, // '
@@ -111,7 +110,6 @@ namespace Magpie.Compilation
                 case TokenType.LeftArrow:     return "<-";
                 case TokenType.RightArrow:    return "->";
                 case TokenType.Comma:         return ",";
-                case TokenType.Colon:         return ":";
                 case TokenType.Dot:           return ".";
                 case TokenType.Line:          return "newline";
                 

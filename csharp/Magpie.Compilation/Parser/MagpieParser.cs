@@ -43,7 +43,7 @@ namespace Magpie.Compilation
 
             while (ConsumeIf(TokenType.Using))
             {
-                usings.Add(Name().Item1);
+                usings.Add(Consume(TokenType.Name).StringValue);
                 Consume(TokenType.Line);
             }
 
@@ -74,7 +74,7 @@ namespace Magpie.Compilation
         private Namespace Namespace()
         {
             Consume(TokenType.Namespace);
-            var name = Name().Item1;
+            var name = Consume(TokenType.Name).StringValue;
             Consume(TokenType.Line);
 
             var namespaceObj = new Namespace(name);
@@ -593,7 +593,11 @@ namespace Magpie.Compilation
         {
             IUnboundExpr expression;
 
-            if (CurrentIs(TokenType.Name)) expression = new NameExpr(Name(), TypeArgs());
+            if (CurrentIs(TokenType.Name))
+            {
+                var name = Consume();
+                expression = new NameExpr(name.Position, name.StringValue, TypeArgs());
+            }
             else if (CurrentIs(TokenType.Fn)) expression = FuncExpr();
             else if (CurrentIs(TokenType.Bool)) expression = new BoolExpr(Consume(TokenType.Bool));
             else if (CurrentIs(TokenType.Int)) expression = new IntExpr(Consume(TokenType.Int));
@@ -652,7 +656,8 @@ namespace Magpie.Compilation
                 }
                 else
                 {
-                    name = new NameExpr(Name(), TypeArgs());
+                    var token = Consume(TokenType.Name);
+                    name = new NameExpr(token.Position, token.StringValue, TypeArgs());
                 }
 
                 var parameters = TupleType().Item1.ToArray();
@@ -861,42 +866,23 @@ namespace Magpie.Compilation
             else if (ConsumeIf(TokenType.Fn)) type = FnArgsDecl(null);
             else
             {
-                var name = Name();
+                var name = Consume(TokenType.Name);
                 var typeArgs = TypeArgs();
 
                 // handle array types
                 //### bob: hackish. probably don't need the parser to care about this. should handle this at type binding
                 // time instead.
-                if ((name.Item1 == "Array") && (typeArgs.Count() == 1))
+                if ((name.StringValue == "Array") && (typeArgs.Count() == 1))
                 {
-                    type = new ArrayType(name.Item2, typeArgs.First());
+                    type = new ArrayType(name.Position, typeArgs.First());
                 }
                 else
                 {
-                    type = new NamedType(name, typeArgs);
+                    type = new NamedType(name.Position, name.StringValue, typeArgs);
                 }
             }
 
             return type;
-        }
-
-        // <-- NAME (COLON NAME)*
-        private Tuple<string, Position> Name()
-        {
-            Token token = Consume(TokenType.Name);
-            Position position = token.Position;
-            string name = token.StringValue;
-
-            while (ConsumeIf(TokenType.Colon))
-            {
-                token = Consume(TokenType.Name);
-                name += ":" + token.StringValue;
-
-                // combine all of the names into a single span
-                position = new Position(position.File, position.Line, position.Column, name.Length);
-            }
-
-            return new Tuple<string, Position>(name, position);
         }
 
         private CodeBuilder mC;

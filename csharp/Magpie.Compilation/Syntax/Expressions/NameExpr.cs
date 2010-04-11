@@ -26,11 +26,6 @@ namespace Magpie.Compilation
         {
         }
 
-        public NameExpr(Tuple<string, Position> pair, IEnumerable<IUnboundDecl> typeArgs)
-            : this(pair.Item2, pair.Item1, typeArgs)
-        {
-        }
-
         public NameExpr(Position position, string name, IEnumerable<IUnboundDecl> typeArgs)
         {
             Position = position;

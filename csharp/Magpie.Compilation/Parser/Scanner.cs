@@ -103,7 +103,6 @@ namespace Magpie.Compilation
                     else if (Match ("{"))            return new Token(LastChar, TokenType.LeftCurly);
                     else if (Match ("}"))            return new Token(LastChar, TokenType.RightCurly);
                     else if (Match (","))            return new Token(LastChar, TokenType.Comma);
-                    else if (Match (":"))            return new Token(LastChar, TokenType.Colon);
                     else if (Match ("."))            return new Token(LastChar, TokenType.Dot);
                     else if (Match ("\n"))           return new Token(LastChar, TokenType.Line);
                     else if (Match("'"))             return new Token(LastChar, TokenType.Prime);
@@ -158,7 +157,7 @@ namespace Magpie.Compilation
                 case ScanState.InName:
                     Advance();
 
-                    if (!(IsAlpha(Current) || IsPunctuation(Current) || IsDigit(Current)))
+                    if (!(IsAlpha(Current) || IsPunctuation(Current) || IsDigit(Current) || IsColon(Current)))
                     {
                         return CompleteToken((text, pos) => new Token(pos, TokenType.Name, text));
                     }
@@ -368,6 +367,7 @@ namespace Magpie.Compilation
         private bool IsDigit(string text) { return "0123456789".Contains(text); }
         private bool IsAlpha(string text) { return "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".Contains(text); }
         private bool IsPunctuation(string text) { return "!&|-+=<>?*/~@#$%^`".Contains(text); }
+        private bool IsColon(string text) { return text == ":"; }
 
         private bool IsDone { get { return Current == "end"; } }
 

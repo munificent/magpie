@@ -31,16 +31,10 @@ namespace Magpie.Compilation
             mTypeArgs = typeArgs.ToArray();
         }
 
-        public NamedType(Tuple<string, Position> args)
+        public NamedType(Position position, string name, IEnumerable<IUnboundDecl> typeArgs)
         {
-            Position = args.Item2;
-            Name = args.Item1;
-            mTypeArgs = new IUnboundDecl[0];
-        }
-
-        public NamedType(Tuple<string, Position> args, IEnumerable<IUnboundDecl> typeArgs)
-            : this(args)
-        {
+            Position = position;
+            Name = name;
             if (typeArgs != null)
             {
                 mTypeArgs = typeArgs.ToArray();
