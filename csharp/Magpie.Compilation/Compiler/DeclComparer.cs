@@ -43,6 +43,23 @@ namespace Magpie.Compilation
             return TypesMatch(paramFunc.Return.Bound, decl.Return.Bound);
         }
 
+        bool IBoundDeclVisitor<bool>.Visit(BoundRecordType decl)
+        {
+            var paramRecord = mParam as BoundRecordType;
+            if (paramRecord == null) return false;
+
+            if (paramRecord.Fields.Count != decl.Fields.Count) return false;
+
+            // fields must match
+            foreach (var pair in paramRecord.Fields.Zip(decl.Fields))
+            {
+                if (pair.Item1.Key != pair.Item2.Key) return false;
+                if (!TypesMatch(pair.Item1.Value, pair.Item2.Value)) return false;
+            }
+
+            return true;
+        }
+
         bool IBoundDeclVisitor<bool>.Visit(BoundTupleType decl)
         {
             var paramTuple = mParam as BoundTupleType;

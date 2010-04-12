@@ -81,6 +81,20 @@ namespace Magpie.Compilation
 
             var boundArg = expr.Arg.Accept(this);
 
+            // see if we're accessing a record field
+            BoundRecordType recordType = boundArg.Type as BoundRecordType;
+            if ((namedTarget != null) &&
+                (recordType != null) &&
+                recordType.Fields.ContainsKey(namedTarget.Name))
+            {
+                // find the index of the field
+                //### bob: ToList() here is a gross hack.
+                var index = recordType.Fields.Keys.ToList().IndexOf(namedTarget.Name);
+
+                // bind it
+                return new LoadExpr(boundArg, recordType.Fields[namedTarget.Name], index);
+            }
+
             if (namedTarget != null)
             {
                 return mContext.ResolveName(mFunction, Scope, namedTarget.Position,
@@ -420,6 +434,30 @@ namespace Magpie.Compilation
 
             return mContext.ResolveName(mFunction, Scope,
                 expr.Position, expr.Name, expr.TypeArgs, null);
+        }
+
+        IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(RecordExpr expr)
+        {
+            // bind the fields
+            var fields = new Dictionary<string, IBoundExpr>();
+            foreach (var field in expr.Fields)
+            {
+                fields.Add(field.Key, field.Value.Accept(this));
+            }
+
+            // determine the record type
+            var fieldTypes = new Dictionary<string, IBoundDecl>();
+            foreach (var field in fields)
+            {
+                fieldTypes.Add(field.Key, field.Value.Type);
+            }
+
+            var boundType = new BoundRecordType(fieldTypes);
+
+            // discard the names and convert to just a struct
+            // note that this assumes the fields will be correctly
+            // iterated in sorted order
+            return new BoundTupleExpr(fields.Values, boundType);
         }
 
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(TupleExpr expr)

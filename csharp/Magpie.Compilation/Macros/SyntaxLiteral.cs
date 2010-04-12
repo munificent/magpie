@@ -52,6 +52,11 @@ namespace Magpie.Compilation
             return Call("ArrayExpr", Array(expr.Elements.Accept(this)));
         }
 
+        IUnboundExpr IUnboundExprVisitor<IUnboundExpr>.Visit(RecordExpr expr)
+        {
+            throw new NotImplementedException();
+        }
+
         IUnboundExpr IUnboundExprVisitor<IUnboundExpr>.Visit(TupleExpr expr)
         {
             return Call("TupleExpr", Array(expr.Fields.Accept(this)));

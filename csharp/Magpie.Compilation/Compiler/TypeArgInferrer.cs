@@ -83,6 +83,41 @@ namespace Magpie.Compilation
             return false;
         }
 
+        bool IBoundDeclVisitor<bool>.Visit(BoundRecordType decl)
+        {
+            if (!TryInferParam(decl))
+            {
+                RecordType paramDecl = ParamType as RecordType;
+                if (paramDecl == null)
+                {
+                    mFailed = true;
+                    return false;
+                }
+
+                if (paramDecl.Fields.Count != decl.Fields.Count)
+                {
+                    mFailed = true;
+                    return false;
+                }
+
+                foreach (var pair in paramDecl.Fields.Zip(decl.Fields))
+                {
+                    // field names must match
+                    if (pair.Item1.Key != pair.Item2.Key)
+                    {
+                        mFailed = true;
+                        return false;
+                    }
+
+                    mParamTypes.Push(pair.Item1.Value);
+                    pair.Item2.Value.Accept(this);
+                    mParamTypes.Pop();
+                }
+            }
+
+            return false;
+        }
+
         bool IBoundDeclVisitor<bool>.Visit(BoundTupleType decl)
         {
             if (!TryInferParam(decl))

@@ -22,6 +22,7 @@ namespace Magpie.Compilation
         IUnboundExpr Transform(NameExpr expr);
 
         IUnboundExpr Transform(ArrayExpr expr);
+        IUnboundExpr Transform(RecordExpr expr);
         IUnboundExpr Transform(TupleExpr expr);
 
         IUnboundExpr Transform(CallExpr expr);
@@ -54,6 +55,7 @@ namespace Magpie.Compilation
         public virtual IUnboundExpr Transform(NameExpr expr) { return expr; }
 
         public virtual IUnboundExpr Transform(ArrayExpr expr) { return expr; }
+        public virtual IUnboundExpr Transform(RecordExpr expr) { return expr; }
         public virtual IUnboundExpr Transform(TupleExpr expr) { return expr; }
 
         public virtual IUnboundExpr Transform(CallExpr expr) { return expr; }

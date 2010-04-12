@@ -155,8 +155,7 @@ namespace Magpie.Compilation
             if (args.Count == 0) return Decl.Unit;
             if (args.Count == 1) return args[0];
 
-            //### bob: position is temp
-            return new TupleType(Tuple.Create((IEnumerable<IUnboundDecl>)args, Position.None));
+            return new TupleType(args);
         }
 
         // <-- Expression | LINE (Expression LINE)+ END
@@ -546,21 +545,43 @@ namespace Magpie.Compilation
             return expr;
         }
 
-        // <-- OperatorExpr (COMMA OperatorExpr)*
+        // <-- RecordExpr (COMMA RecordExpr)*
         private IUnboundExpr TupleExpr()
         {
             var fields = new List<IUnboundExpr>();
 
-            fields.Add(OperatorExpr());
+            fields.Add(RecordExpr());
 
             while (ConsumeIf(TokenType.Comma))
             {
-                fields.Add(OperatorExpr());
+                fields.Add(RecordExpr());
             }
 
             if (fields.Count == 1) return fields[0];
 
             return new TupleExpr(fields);
+        }
+
+        // <-- KEYWORD OperatorExpr (COMMA KEYWORD OperatorExpr)*
+        private IUnboundExpr RecordExpr()
+        {
+            if (CurrentIs(TokenType.Keyword))
+            {
+                var fields = new Dictionary<string, IUnboundExpr>();
+                do
+                {
+                    var keyword = Consume(TokenType.Keyword).StringValue;
+
+                    // strip the trailing :
+                    keyword = keyword.Substring(0, keyword.Length - 1);
+
+                    fields.Add(keyword, OperatorExpr());
+                }
+                while (CurrentIs(TokenType.Keyword));
+
+                return new RecordExpr(fields);
+            }
+            else return OperatorExpr();
         }
 
         // <-- ApplyExpr (OPERATOR ApplyExpr)*
@@ -660,7 +681,7 @@ namespace Magpie.Compilation
                     name = new NameExpr(token.Position, token.StringValue, TypeArgs());
                 }
 
-                var parameters = TupleType().Item1.ToArray();
+                var parameters = TupleType().ToArray();
                 IUnboundDecl parameter;
                 if (parameters.Length == 0)
                 {
@@ -767,11 +788,11 @@ namespace Magpie.Compilation
         }
 
         // <-- LPAREN (TypeDecl (COMMA TypeDecl)*)? RPAREN
-        private Tuple<IEnumerable<IUnboundDecl>, Position> TupleType()
+        private IEnumerable<IUnboundDecl> TupleType()
         {
             var decls = new List<IUnboundDecl>();
 
-            var position = Consume(TokenType.LeftParen).Position;
+            Consume(TokenType.LeftParen);
 
             if (!CurrentIs(TokenType.RightParen))
             {
@@ -785,7 +806,7 @@ namespace Magpie.Compilation
 
             Consume(TokenType.RightParen);
 
-            return Tuple.Create((IEnumerable<IUnboundDecl>)decls, position);
+            return decls;
         }
 
         // <-- LBRACKET (TypeDecl (COMMA TypeDecl)*) RBRACKET
@@ -831,22 +852,42 @@ namespace Magpie.Compilation
             return parameters;
         }
 
-        // <-- ( LBRACKET RBRACKET PRIME ) * ( TupleType
-        //                                   | FnTypeDecl
-        //                                   | Name TypeArgs )
+        // <-- LPAREN KEYWORD TypeDecl (COMMA KEYWORD TypeDecl)* RPAREN
+        private IUnboundDecl RecordType()
+        {
+            var fields = new Dictionary<string, IUnboundDecl>();
+
+            Consume(TokenType.LeftParen);
+
+            do
+            {
+                var keyword = Consume(TokenType.Keyword).StringValue;
+
+                // strip the trailing :
+                keyword = keyword.Substring(0, keyword.Length - 1);
+
+                fields.Add(keyword, TypeDecl());
+            }
+            while (CurrentIs(TokenType.Keyword));
+
+            Consume(TokenType.RightParen);
+
+            return new RecordType(fields);
+        }
+
+        // <-- TupleType
+        //   | FN FnArgsDecl
+        //   | NAME TypeArgs
         private IUnboundDecl TypeDecl()
         {
-            // figure out the endmost type
-            IUnboundDecl type;
-            if (CurrentIs(TokenType.LeftParen)) type = new TupleType(TupleType());
-            else if (ConsumeIf(TokenType.Fn)) type = FnArgsDecl(null);
+            if (CurrentIs(TokenType.LeftParen, TokenType.Keyword)) return RecordType();
+            else if (CurrentIs(TokenType.LeftParen)) return new TupleType(TupleType());
+            else if (ConsumeIf(TokenType.Fn)) return FnArgsDecl(null);
             else
             {
                 var name = Consume(TokenType.Name);
-                type = new NamedType(name.Position, name.StringValue, TypeArgs());
+                return new NamedType(name.Position, name.StringValue, TypeArgs());
             }
-
-            return type;
         }
 
         private CodeBuilder mC;

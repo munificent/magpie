@@ -1,18 +1,15 @@
 Things to figure out or decide:
 ------------------------------
 
-Add records?
-- Records are anonymous tuples with named fields:
-  def a <- (Foo: 1, Bar: true)
-  // creates a record of type (Bar: Bool, Foo: Int)
-- Field order doesn't matter.
-- The field names and types define the record. Each set of different field names
-  or types is a different type.
-- Would let us do named arguments: define a function that takes a record.
-- If we do open types, this will be important for conustructors since the order
-  of fields is no longer well-defined when a type is defined across multiple
-  files. Records address this.
-
+Use ? for option types?
+- let syntax means options may need to be baked into the language and not just
+  be a union defined in the lib. If so, it may be nice to have syntax for them.
+  One way would be to follow C# and use a ? suffix on the type for an option:
+  
+  Divide (num Int, div Int -> Int?)
+      if div = 0 then None[Int] else Some (num / div)
+  end
+  
 Open types?
 - Would be cool if you could add fields to an existing struct and cases to a
   previously defined union.
@@ -166,6 +163,18 @@ Document and test precedence of self-assignment syntax.
 
 Done:
 ----
+
+Add records?
+- Records are anonymous tuples with named fields:
+  def a <- foo: 1 bar: true
+  // creates a record of type (bar: Bool, foo: Int)
+- Field order doesn't matter.
+- The field names and types define the record. Each set of different field names
+  or types is a different type.
+- Would let us do named arguments: define a function that takes a record.
+- If we do open types, this will be important for conustructors since the order
+  of fields is no longer well-defined when a type is defined across multiple
+  files. Records address this.
 
 Can we improve the syntax for instantiating a generic with a tuple
 type?

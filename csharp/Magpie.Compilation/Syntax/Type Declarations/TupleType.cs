@@ -27,18 +27,11 @@ namespace Magpie.Compilation
     /// </summary>
     public class TupleType : TupleType<IUnboundDecl>, IUnboundDecl
     {
-        public Position Position { get; private set; }
+        public Position Position { get { return Fields[0].Position; } }
 
         public TupleType(IEnumerable<IUnboundDecl> fields)
             : base(fields)
         {
-            Position = Position.None;
-        }
-
-        public TupleType(Tuple<IEnumerable<IUnboundDecl>, Position> args)
-            : base(args.Item1)
-        {
-            Position = args.Item2;
         }
 
         #region IUnboundDecl Members

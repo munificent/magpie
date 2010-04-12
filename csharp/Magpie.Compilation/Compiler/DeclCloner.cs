@@ -32,6 +32,17 @@ namespace Magpie.Compilation
                 decl.Return.Unbound.Accept(this));
         }
 
+        IUnboundDecl IUnboundDeclVisitor<IUnboundDecl>.Visit(RecordType decl)
+        {
+            var fields = new Dictionary<string, IUnboundDecl>();
+            foreach (var field in decl.Fields)
+            {
+                fields.Add(field.Key, field.Value.Accept(this));
+            }
+
+            return new RecordType(fields);
+        }
+
         IUnboundDecl IUnboundDeclVisitor<IUnboundDecl>.Visit(TupleType decl)
         {
             return new TupleType(decl.Fields.Accept(this));

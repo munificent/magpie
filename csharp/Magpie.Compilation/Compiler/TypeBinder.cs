@@ -95,6 +95,18 @@ namespace Magpie.Compilation
             return decl;
         }
 
+        IBoundDecl IUnboundDeclVisitor<IBoundDecl>.Visit(RecordType decl)
+        {
+            var fields = new Dictionary<string, IBoundDecl>();
+
+            foreach (var field in decl.Fields)
+            {
+                fields.Add(field.Key, field.Value.Accept(this));
+            }
+
+            return new BoundRecordType(fields);
+        }
+
         IBoundDecl IUnboundDeclVisitor<IBoundDecl>.Visit(TupleType decl)
         {
             return new BoundTupleType(decl.Fields.Select(field => field.Accept(this)));

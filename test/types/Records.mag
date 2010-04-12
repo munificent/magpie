@@ -1,0 +1,32 @@
+﻿// expected: foo a 1:two
+// expected: foo a 3:four
+// expected: foo b 5:6
+// expected: foo b 7:8
+
+Main (->)
+    Foo (x: 1 y: "two")
+
+    def a <- x: 3 y: "four"
+    Foo a
+    
+    Foo (x: 5 y: 6)
+
+    // field order doesn't matter
+    Foo (y: 8 x: 7)
+    
+    //Bar (x: 1 z: true y: "nine")
+end
+
+Foo (arg (x: Int y: String) ->)
+    Print ("foo a " + arg.x.String + ":" + arg.y)
+end
+
+// overload by record field type
+Foo (arg (x: Int y: Int) ->)
+    Print ("foo b " + arg.x.String + ":" + arg.y.String)
+end
+
+// single record argument
+//Bar (x: Int y: String z: Bool) ->)
+//    Print (x.String + " " + y + " " + z.String)
+//end

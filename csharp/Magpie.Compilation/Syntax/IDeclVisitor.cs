@@ -9,6 +9,7 @@ namespace Magpie.Compilation
     {
         TReturn Visit(AtomicDecl decl);
         TReturn Visit(FuncType decl);
+        TReturn Visit(RecordType decl);
         TReturn Visit(TupleType decl);
         TReturn Visit(NamedType decl);
     }
@@ -19,6 +20,7 @@ namespace Magpie.Compilation
         TReturn Visit(AtomicDecl decl);
         TReturn Visit(FuncType decl);
         TReturn Visit(Struct decl);
+        TReturn Visit(BoundRecordType decl);
         TReturn Visit(BoundTupleType decl);
         TReturn Visit(Union decl);
         TReturn Visit(ForeignType decl);

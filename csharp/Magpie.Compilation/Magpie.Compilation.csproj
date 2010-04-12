@@ -115,6 +115,7 @@
     <Compile Include="Syntax\Expressions\LoopExpr.cs" />
     <Compile Include="Syntax\Expressions\MatchExpr.cs" />
     <Compile Include="Syntax\Expressions\NameExpr.cs" />
+    <Compile Include="Syntax\Expressions\RecordExpr.cs" />
     <Compile Include="Syntax\Expressions\ReturnExpr.cs" />
     <Compile Include="Syntax\Expressions\StoreExpr.cs" />
     <Compile Include="Syntax\Expressions\SyntaxExpr.cs" />
@@ -153,6 +154,7 @@
     <Compile Include="Syntax\Type Declarations\INamedType.cs" />
     <Compile Include="Syntax\Type Declarations\IUnboundDecl.cs" />
     <Compile Include="Syntax\Type Declarations\NamedType.cs" />
+    <Compile Include="Syntax\Type Declarations\RecordType.cs" />
     <Compile Include="Syntax\Type Declarations\TupleType.cs" />
     <Compile Include="Syntax\Type Definitions\Function.cs" />
     <Compile Include="Syntax\Type Definitions\Generic.cs" />
