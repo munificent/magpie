@@ -438,6 +438,20 @@ namespace Magpie.Compilation
 
         IBoundExpr IUnboundExprVisitor<IBoundExpr>.Visit(RecordExpr expr)
         {
+            //### bob: there's a bug here. this will convert the record into a
+            // tuple where the fields are ordered by name, not by how the appear
+            // in the source code. when the tuple is then compiled, the fields
+            // will be evaluated in that order. this violates the left-to-right
+            // evaluation a user would expect. for example:
+            //
+            //  Foo (->) Print "foo"
+            //  Bar (->) Print "bar"
+            //  Main (->)
+            //      def a <- (y: Foo x: Bar)
+            //  end
+            //
+            //  this will print "bar" then "foo".
+
             // bind the fields
             var fields = new Dictionary<string, IBoundExpr>();
             foreach (var field in expr.Fields)

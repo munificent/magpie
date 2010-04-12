@@ -506,10 +506,10 @@ namespace Magpie.Compilation
             else return AssignExpr();
         }
 
-        // <-- TupleExpr (ASSIGN (DOT | OPERATOR | e) Block)?
+        // <-- RecordExpr (ASSIGN (DOT | OPERATOR | e) Block)?
         private IUnboundExpr AssignExpr()
         {
-            IUnboundExpr expr = TupleExpr();
+            IUnboundExpr expr = RecordExpr();
 
             Position position;
             if (ConsumeIf(TokenType.LeftArrow, out position))
@@ -545,24 +545,7 @@ namespace Magpie.Compilation
             return expr;
         }
 
-        // <-- RecordExpr (COMMA RecordExpr)*
-        private IUnboundExpr TupleExpr()
-        {
-            var fields = new List<IUnboundExpr>();
-
-            fields.Add(RecordExpr());
-
-            while (ConsumeIf(TokenType.Comma))
-            {
-                fields.Add(RecordExpr());
-            }
-
-            if (fields.Count == 1) return fields[0];
-
-            return new TupleExpr(fields);
-        }
-
-        // <-- KEYWORD OperatorExpr (COMMA KEYWORD OperatorExpr)*
+        // <-- KEYWORD TupleExpr (COMMA KEYWORD TupleExpr)*
         private IUnboundExpr RecordExpr()
         {
             if (CurrentIs(TokenType.Keyword))
@@ -575,13 +558,30 @@ namespace Magpie.Compilation
                     // strip the trailing :
                     keyword = keyword.Substring(0, keyword.Length - 1);
 
-                    fields.Add(keyword, OperatorExpr());
+                    fields.Add(keyword, TupleExpr());
                 }
                 while (CurrentIs(TokenType.Keyword));
 
                 return new RecordExpr(fields);
             }
-            else return OperatorExpr();
+            else return TupleExpr();
+        }
+
+        // <-- OperatorExpr (COMMA OperatorExpr)*
+        private IUnboundExpr TupleExpr()
+        {
+            var fields = new List<IUnboundExpr>();
+
+            fields.Add(OperatorExpr());
+
+            while (ConsumeIf(TokenType.Comma))
+            {
+                fields.Add(OperatorExpr());
+            }
+
+            if (fields.Count == 1) return fields[0];
+
+            return new TupleExpr(fields);
         }
 
         // <-- ApplyExpr (OPERATOR ApplyExpr)*
@@ -597,7 +597,7 @@ namespace Magpie.Compilation
             return OneOrMoreRight<IUnboundExpr>(ReverseApplyExpr, (left, right) => mC.Call(left, right));
         }
 
-        // <-- ArrayExpr (DOT ArrayExpr)*
+        // <-- PrimaryExpr (DOT PrimaryExpr)*
         private IUnboundExpr ReverseApplyExpr()
         {
             return OneOrMoreLeft(TokenType.Dot, PrimaryExpr,
