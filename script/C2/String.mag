@@ -71,6 +71,6 @@ end
 Current (iterator StringIterator -> String) iterator.Text.(iterator.Index)
 
 struct StringIterator
-        Text  String
-    var Index Int
+    Text  String
+    Index Int
 end

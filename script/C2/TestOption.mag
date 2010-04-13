@@ -2,6 +2,6 @@ TestOption (->)
     Print "TestOption"
     
     // string conversion
-    AssertEqual ("none", None'Int.String, "none option string is none")
+    AssertEqual ("none", None[Int].String, "none option string is none")
     AssertEqual ("some banana", (Some "banana").String, "some option string is some")
 end

@@ -9,20 +9,20 @@ end
 TestList/Head (->)
     Print "TestList/Head"
     
-    def a <- Cons (123, Empty'Int)
+    def a <- Cons (123, Empty[Int])
     AssertEqual (123, a.Head, "head of list is 123")
     
-    def b <- Cons (1, Cons (2, Empty'Int))
+    def b <- Cons (1, Cons (2, Empty[Int]))
     AssertEqual (1, b.Head, "head of list is 1")
 end
 
 TestList/Rest (->)
     Print "TestList/Rest"
     
-    def a <- Cons (123, Empty'Int)
+    def a <- Cons (123, Empty[Int])
     AssertTrue (a.Rest.Empty?, "rest of list is empty")
     
-    def b <- Cons (1, Cons (2, Empty'Int))
+    def b <- Cons (1, Cons (2, Empty[Int]))
     AssertEqual (2, b.Rest.Head, "head of rest of list is 2")
 end
 
@@ -42,12 +42,12 @@ end
 TestList/Iterator (->)
     Print "TestList/Iterator"
     
-    def a <- Empty'Bool
+    def a <- Empty[Bool]
     for item <- a do
         AssertFail "should not get item for empty list"
     end
     
-    def b <- Cons ("first", Cons ("second", Empty'String))
+    def b <- Cons ("first", Cons ("second", Empty[String]))
     
     for item <- b
     for index <- FromZero do
@@ -60,13 +60,13 @@ end
 TestList/Count (->)
     Print "TestList/Count"
     
-    def a <- Empty'Bool
+    def a <- Empty[Bool]
     AssertEqual (0, a.Count, "empty list count is zero")
     
-    def b <- Cons (true, Empty'Bool)
+    def b <- Cons (true, Empty[Bool])
     AssertEqual (1, b.Count, "list count is one")
     
-    def c <- Cons (true, Cons (true, Empty'Bool))
+    def c <- Cons (true, Cons (true, Empty[Bool]))
     AssertEqual (2, c.Count, "list count is two")
     
 end

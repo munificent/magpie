@@ -61,17 +61,6 @@ How can we do closures or function objects?
   binding one or more arguments to a function returns a new function
   reference with fewer arguments. Calling that reference calls the
   original function with the previously bound arguments inserted.
-  
-Can we do keyword functions like Smalltalk?
-- My guess is "no". At the very least, it would require a syntax
-  change to distinguish keywords from identifiers, likely a trailing
-  ":".
-- It isn't clear how something like pattern matching would be defined
-  using keyword functions, since it can have an arbitrary number of
-  clauses.
-- It would make it hard to get rid of the "end" before an "else" in an
-  if/then/else block. Smalltalk is particularly ugly about that.
-- If we add records, that would probably subsume this.
 
 Should characters be an atomic type? If so, what is their literal
 syntax?
@@ -86,9 +75,6 @@ Are we happy with the local declaration syntax?
 - Would be nice if you could declare variables in expressions
   (especially in while and for loops), but the current syntax is a bit
   verbose for that. This is also true of assignment for that matter.
-  
-Built-in support for hashes?
-- To be statically-typed, would they be like named-element tuples?
 
 How do coroutines and iterators work?
 - Some of the groundwork is there (stack frames are on the heap), but
@@ -163,6 +149,17 @@ Document and test precedence of self-assignment syntax.
 
 Done:
 ----
+  
+Can we do keyword functions like Smalltalk?
+- My guess is "no". At the very least, it would require a syntax
+  change to distinguish keywords from identifiers, likely a trailing
+  ":".
+- It isn't clear how something like pattern matching would be defined
+  using keyword functions, since it can have an arbitrary number of
+  clauses.
+- It would make it hard to get rid of the "end" before an "else" in an
+  if/then/else block. Smalltalk is particularly ugly about that.
+- If we add records, that would probably subsume this.
 
 Add records?
 - Records are anonymous tuples with named fields:

@@ -134,11 +134,11 @@ TestLexer/ReadToken (->)
         List StringToken ("with \n newline"))
 end
 
-TestReadToken (text String, expected List'Token ->)
+TestReadToken (text String, expected List[Token] ->)
     def lexer <- Lexer text
 
     var token <- lexer.ReadToken
-    var node <- expected
+    var node  <- expected
     
     while Not token.EofToken? do
         if node.Empty? then

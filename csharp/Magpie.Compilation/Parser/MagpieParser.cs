@@ -180,6 +180,31 @@ namespace Magpie.Compilation
             }
         }
 
+        private IUnboundExpr CaseBlock()
+        {
+            if (ConsumeIf(TokenType.Line))
+            {
+                var expressions = new List<IUnboundExpr>();
+
+                // note that we don't consume the terminator in either case. it will be
+                // terminated either by the next case, which will consume the "case"
+                // token, or it will be terminated by the "end" for the entire match
+                // expression, in which case match will consume the "end"
+                do
+                {
+                    expressions.Add(Expression());
+                    Consume(TokenType.Line);
+                }
+                while (!CurrentIs(TokenType.Case) && !CurrentIs(TokenType.End));
+
+                return new BlockExpr(expressions);
+            }
+            else
+            {
+                return Expression();
+            }
+        }
+
         // <-- Expression LINE? | LINE (Expression LINE)+ <terminator>
         /// <summary>
         /// Parses a block terminated by "end" or a continue terminator. Used for blocks
@@ -345,7 +370,7 @@ namespace Magpie.Compilation
                 {
                     IPattern caseExpr = CaseExpr();
                     Consume(TokenType.Then);
-                    IUnboundExpr bodyExpr = InnerBlock(TokenType.Case);
+                    IUnboundExpr bodyExpr = CaseBlock();
 
                     cases.Add(new MatchCase(casePosition, caseExpr, bodyExpr));
 

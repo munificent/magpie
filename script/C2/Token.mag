@@ -13,7 +13,6 @@ union Token
     DotToken
     PrimeToken
     
-    /*
     // keywords
     LeftArrowToken
     RightArrowToken
@@ -30,10 +29,10 @@ union Token
     UsingToken
     VarToken
     WhileToken
-    */
     
     // literals
     UnitToken
+    BoolToken   Bool
     IntToken    Int
     StringToken String
     
@@ -48,128 +47,68 @@ union Token
     EofToken
 end
 
-LeftArrowToken  (-> Token) OperatorToken "<-"
-RightArrowToken (-> Token) OperatorToken "->"
-DefToken        (-> Token) NameToken "def"
-DoToken         (-> Token) NameToken "do"
-ElseToken       (-> Token) NameToken "else"
-EndToken        (-> Token) NameToken "end"
-FnToken         (-> Token) NameToken "fn"
-IfToken         (-> Token) NameToken "if"
-NamespaceToken  (-> Token) NameToken "namespace"
-StructToken     (-> Token) NameToken "struct"
-ThenToken       (-> Token) NameToken "then"
-UnionToken      (-> Token) NameToken "union"
-UsingToken      (-> Token) NameToken "using"
-VarToken        (-> Token) NameToken "var"
-WhileToken      (-> Token) NameToken "while"
-
-LeftArrowToken?  (token Token -> Bool) if token.OperatorToken? then token.OperatorTokenValue = "<-" else false
-RightArrowToken? (token Token -> Bool) if token.OperatorToken? then token.OperatorTokenValue = "->" else false
-DefToken?        (token Token -> Bool) if token.NameToken? then token.NameTokenValue = "def" else false
-DoToken?         (token Token -> Bool) if token.NameToken? then token.NameTokenValue = "do" else false
-ElseToken?       (token Token -> Bool) if token.NameToken? then token.NameTokenValue = "else" else false
-EndToken?        (token Token -> Bool) if token.NameToken? then token.NameTokenValue = "end" else false
-FnToken?         (token Token -> Bool) if token.NameToken? then token.NameTokenValue = "fn" else false
-IfToken?         (token Token -> Bool) if token.NameToken? then token.NameTokenValue = "if" else false
-NamespaceToken?  (token Token -> Bool) if token.NameToken? then token.NameTokenValue = "namespace" else false
-StructToken?     (token Token -> Bool) if token.NameToken? then token.NameTokenValue = "struct" else false
-ThenToken?       (token Token -> Bool) if token.NameToken? then token.NameTokenValue = "then" else false
-UnionToken?      (token Token -> Bool) if token.NameToken? then token.NameTokenValue = "union" else false
-UsingToken?      (token Token -> Bool) if token.NameToken? then token.NameTokenValue = "using" else false
-VarToken?        (token Token -> Bool) if token.NameToken? then token.NameTokenValue = "var" else false
-WhileToken?      (token Token -> Bool) if token.NameToken? then token.NameTokenValue = "while" else false
-
-
-BoolToken       (value Bool -> Token) NameToken value.String
-
-BoolToken? (token Token -> Bool)
-    if token.NameToken? then
-        if token.NameTokenValue = "true" then true
-        else if token.NameTokenValue = "false" then true
-        else false
-    else false
-end
-
-BoolTokenValue (token Token -> Bool)
-    token.NameTokenValue = "true"
-end
-
 String (token Token -> String)
-    //### bob: note that keywords and bool literals aren't "real"
-    // tokens, just special NameTokens. this means the order of the
-    // if cases below matters
-    
-    if      token.LeftParenToken?    then "("
-    else if token.RightParenToken?   then ")"
-    else if token.LeftBracketToken?  then "["
-    else if token.RightBracketToken? then "]"
-    else if token.CommaToken?        then ","
-    else if token.ColonToken?        then ":"
-    else if token.DotToken?          then "."
-    else if token.PrimeToken?        then "'"
+    match token
+        case LeftParenToken    then "("
+        case RightParenToken   then ")"
+        case LeftBracketToken  then "["
+        case RightBracketToken then "]"
+        case CommaToken        then ","
+        case ColonToken        then ":"
+        case DotToken          then "."
+        case PrimeToken        then "'"
 
-    else if token.LeftArrowToken?    then "<-"
-    else if token.RightArrowToken?   then "->"
-    else if token.DefToken?          then "def"
-    else if token.DoToken?           then "do"
-    else if token.ElseToken?         then "else"
-    else if token.EndToken?          then "end"
-    else if token.FnToken?           then "fn"
-    else if token.IfToken?           then "if"
-    else if token.NamespaceToken?    then "namespace"
-    else if token.StructToken?       then "struct"
-    else if token.ThenToken?         then "then"
-    else if token.UnionToken?        then "union"
-    else if token.UsingToken?        then "using"
-    else if token.VarToken?          then "var"
-    else if token.WhileToken?        then "while"
+        case LeftArrowToken    then "<-"
+        case RightArrowToken   then "->"
+        case DefToken          then "def"
+        case DoToken           then "do"
+        case ElseToken         then "else"
+        case EndToken          then "end"
+        case FnToken           then "fn"
+        case IfToken           then "if"
+        case NamespaceToken    then "namespace"
+        case StructToken       then "struct"
+        case ThenToken         then "then"
+        case UnionToken        then "union"
+        case UsingToken        then "using"
+        case VarToken          then "var"
+        case WhileToken        then "while"
 
-    else if token.UnitToken?         then "()"
-    else if token.BoolToken?         then ("bool " + token.BoolTokenValue.String)
-    else if token.IntToken?          then ("int " + token.IntTokenValue.String)
-    else if token.StringToken?       then ("\"" + token.StringTokenValue + "\"")
-    
-    else if token.NameToken?         then ("name " + token.NameTokenValue)
-    else if token.OperatorToken?     then ("op " + token.OperatorTokenValue)
+        case UnitToken         then "()"
+        case BoolToken value   then ("bool " + value.String)
+        case IntToken value    then ("int " + value.String)
+        case StringToken value then ("\"" + value + "\"")
+        
+        case NameToken name    then ("name " + name)
+        case OperatorToken op  then ("op " + op)
 
-    else if token.LineToken?         then "[line]"
-    else if token.EofToken?          then "[eof]"
-    else "???"
+        case LineToken         then "[line]"
+        case EofToken          then "[eof]"
+    end
 end
 
-/*
 LookUpKeyword (token Token -> Token)
-    if token.NameToken? then
-        // look up name keywords
-        def name <- token.NameTokenValue
+    match token
+        case NameToken "def"        then DefToken
+        case NameToken "do"         then DoToken
+        case NameToken "else"       then ElseToken
+        case NameToken "end"        then EndToken
+        case NameToken "fn"         then FnToken
+        case NameToken "if"         then IfToken
+        case NameToken "var"        then VarToken
+        case NameToken "namespace"  then NamespaceToken
+        case NameToken "struct"     then StructToken
+        case NameToken "then"       then ThenToken
+        case NameToken "union"      then UnionToken
+        case NameToken "using"      then UsingToken
+        case NameToken "while"      then WhileToken
         
-        if      name = "def"        then DefToken
-        else if name = "do"         then DoToken
-        else if name = "else"       then ElseToken
-        else if name = "end"        then EndToken
-        else if name = "fn"         then FnToken
-        else if name = "if"         then IfToken
-        else if name = "var"        then VarToken
-        else if name = "namespace"  then NamespaceToken
-        else if name = "struct"     then StructToken
-        else if name = "then"       then ThenToken
-        else if name = "union"      then UnionToken
-        else if name = "using"      then UsingToken
-        else if name = "while"      then WhileToken
+        case NameToken "true"       then BoolToken true
+        case NameToken "false"      then BoolToken false
         
-        else if name = "true"       then BoolToken true
-        else if name = "false"      then BoolToken false
-        else token
-    
-    else if token.OperatorToken? then
-        // look up operator keywords
-        def operator <- token.OperatorTokenValue
+        case OperatorToken "<-"     then LeftArrowToken
+        case OperatorToken "->"     then RightArrowToken
         
-        if      operator = "<-" then LeftArrowToken
-        else if operator = "->" then RightArrowToken
-        else token
-    
-    else token
+        case _ then token
+    end
 end
-*/

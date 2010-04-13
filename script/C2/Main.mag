@@ -5,7 +5,6 @@ Main (arg String ->)
     if arg.Count = 0 then
         // base stuff
         TestOption
-        TestTuple
         TestList
         TestString
         
