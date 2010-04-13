@@ -4,5 +4,8 @@ union Option[T]
 end
 
 String[T] (option Option[T] -> String)
-    if option.None? then "none" else "some " + option.SomeValue.String
+    match option
+        case None       then "none"
+        case Some value then "some " + value.String
+    end
 end
