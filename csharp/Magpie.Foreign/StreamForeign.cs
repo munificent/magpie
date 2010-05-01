@@ -21,9 +21,9 @@ namespace Magpie.Foreign
             var streamType = new ForeignType("Stream");
 
             Add("Stream", streamType, Stream);
-            Add("<<", new BoundTupleType(new IBoundDecl[] { streamType, Decl.Int }), Decl.Unit, WriteInt);
-            Add("<<Byte", new BoundTupleType(new IBoundDecl[] { streamType, Decl.Int }), Decl.Unit, WriteByte);
-            Add("<<", new BoundTupleType(new IBoundDecl[] { streamType, Decl.String }), Decl.Unit, WriteString);
+            Add("Write", new BoundTupleType(new IBoundDecl[] { streamType, Decl.Int }), Decl.Unit, WriteInt);
+            Add("WriteByte", new BoundTupleType(new IBoundDecl[] { streamType, Decl.Int }), Decl.Unit, WriteByte);
+            Add("Write", new BoundTupleType(new IBoundDecl[] { streamType, Decl.String }), Decl.Unit, WriteString);
             Add("Seek", new BoundTupleType(new IBoundDecl[] { streamType, Decl.Int }), Decl.Unit, Seek);
             Add("Position", streamType, Decl.Int, StreamPosition);
             Add("Close", streamType, Decl.Unit, CloseStream);
@@ -61,7 +61,8 @@ namespace Magpie.Foreign
             var writer = (BinaryWriter)args[0].Object;
             var value = args[1].String;
 
-            writer.Write(value);
+            writer.Write(Encoding.UTF8.GetBytes(value));
+            writer.Write(0);
             return null;
         }
 

@@ -16,6 +16,7 @@ Main (arg String ->)
 
         def text <- ReadFile arg
         Print text
+        Print "writing bytecode"
         
         WriteDumbBytecode
     end
@@ -26,35 +27,36 @@ WriteDumbBytecode (->)
     def stream <- Stream
     
     // magic number
-    stream <<Byte 112 // p
-    stream <<Byte 105 // i
-    stream <<Byte 101 // e
-    stream <<Byte 33  // !
+    WriteByte (stream, 112) // p
+    WriteByte (stream, 105) // i
+    WriteByte (stream, 101) // e
+    WriteByte (stream, 33)  // !
     
     // version
-    stream <<Byte 0
-    stream <<Byte 0
-    stream <<Byte 0
-    stream <<Byte 0
-    
-    // main takes argument flag (hack)
-    stream <<Byte 0
+    WriteByte (stream, 0)
+    WriteByte (stream, 0)
+    WriteByte (stream, 0)
+    WriteByte (stream, 0)
     
     // number of exported functions
-    stream << 1
+    Write (stream, 1)
     
-    // offset to exported function name (not valid!)
-    stream << 0
+    // offset to exported function name
+    Write (stream, 32)
     
     // exported function offset
-    stream << 17
+    Write (stream, 20)
     
     // bytecode
-    stream <<Byte 2  // push int
-    stream << 123    // literal
-    stream <<Byte 24 // int to string
-    stream <<Byte 40 // print
-    stream <<Byte 20 // return
+    Write (stream, 0)      // num locals
+    WriteByte (stream, 2)  // push int
+    Write (stream, 123)    // literal
+    WriteByte (stream, 24) // int to string
+    WriteByte (stream, 40) // print
+    WriteByte (stream, 20) // return
     
-    stream.Close
+    // strings
+    Write (stream, "Main ()")
+    
+    Close stream
 end
