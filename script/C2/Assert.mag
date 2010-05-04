@@ -6,6 +6,10 @@ AssertTrue (condition Bool, message String ->)
     if Not condition then AssertFail message
 end
 
+AssertFalse (condition Bool, message String ->)
+    if condition then AssertFail message
+end
+
 AssertEqual[T] (expected T, actual T ->)
     AssertEqual (expected, actual, "expected " + expected.String + " actual " + actual.String)
 end

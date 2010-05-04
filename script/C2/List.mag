@@ -1,5 +1,7 @@
 // constructors
 
+List[T] (-> List[T]) Empty[T]
+
 List[T] (i T -> List[T]) i ++ Empty[T]
 
 ListOf[T] (i1 T, i2 T -> List[T])

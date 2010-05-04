@@ -84,7 +84,7 @@ namespace Magpie.Compilation
                 // add to the symbol table so they are only instantiated once
                 context.Compiler.Functions.Add(function);
 
-                if (function.GetType().Equals(FunctionType)) instantiated = function;
+                if ((Name == function.Name) && function.GetType().Equals(FunctionType)) instantiated = function;
             }
 
             return instantiated;

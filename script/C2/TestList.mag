@@ -1,9 +1,17 @@
 TestList (->)
+    TestList/Constructor
     TestList/Head
     TestList/Rest
     TestList/++
     TestList/Iterator
     TestList/Count
+end
+
+TestList/Constructor (->)
+    Print "TestList/Constructor"
+    
+    def a <- List[Int]
+    AssertEqual (0, a.Count)
 end
 
 TestList/Head (->)

@@ -62,6 +62,8 @@ namespace Magpie.Compilation
             {
                 // if a struct has type arguments, then they can be inferred for the constructor
                 return mStruct.TypeArguments.Length > 0;
+                //### bob: this isn't correct. it's valid to define a struct that has type arguments that
+                // it doesn't actually use in fields. in that case, it isn't inferrable.
             }
         }
 

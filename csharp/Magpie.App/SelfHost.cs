@@ -13,6 +13,16 @@ namespace Magpie.App
             Script compiler = new Script(@"..\..\..\script\C2");
             compiler.Compile();
 
+            if (compiler.Errors.Count > 0)
+            {
+                Console.WriteLine("Got errors compiling compiler:");
+                foreach (var error in compiler.Errors)
+                {
+                    Console.WriteLine("({0}) {1}", error.Position, error.Message);
+                }
+                return;
+            }
+
             // run it once with no arguments to run the unit tests
             compiler.Run(String.Empty);
 

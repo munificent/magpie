@@ -7,10 +7,15 @@ Main (arg String ->)
         TestOption
         TestList
         TestString
+        TestDict
         
         // lexing
         TestToken
         TestLexer
+        
+        // bytecode generation
+        TestOffsetTable
+        
     else     
         Print arg
 

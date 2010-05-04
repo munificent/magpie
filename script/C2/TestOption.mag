@@ -4,4 +4,18 @@ TestOption (->)
     // string conversion
     AssertEqual ("none", None[Int].String, "none option string is none")
     AssertEqual ("some banana", (Some "banana").String, "some option string is some")
+    
+    // equals
+    AssertTrue (None[Int] = None[Int], "none = none")
+    AssertFalse (Some 123 = None[Int], "some = none")
+    AssertFalse (None[Int] = Some 123, "none = some")
+    AssertTrue  (Some 123 = Some 123, "some = some")
+    AssertFalse (Some 432 = Some 123, "some = some")
+    
+    // not equals
+    AssertFalse (None[Int] != None[Int], "none != none")
+    AssertTrue  (Some 123 != None[Int], "some != none")
+    AssertTrue  (None[Int] != Some 123, "none != some")
+    AssertFalse (Some 123 != Some 123, "some != some")
+    AssertTrue  (Some 432 != Some 123, "some != some")
 end

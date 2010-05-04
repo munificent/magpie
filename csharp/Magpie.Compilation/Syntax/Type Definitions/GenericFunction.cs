@@ -24,7 +24,7 @@ namespace Magpie.Compilation
             if ((typeArgs == null) || (TypeParameters.Count != typeArgs.Count())) return null;
 
             // create a new bound function type with the type arguments applied
-            FuncType funcType = BaseType.Type.Clone();
+            FuncType funcType = BaseType.Type.CloneFunc();
             TypeBinder.Bind(genericContext, funcType);
 
             // make sure the concrete argument types of this instance match what we're actually given

@@ -9,3 +9,15 @@ String[T] (option Option[T] -> String)
         case Some value then "some " + value.String
     end
 end
+
+=[T] (left Option[T], right Option[T] -> Bool)
+    match left, right
+        case (None  , None  ) then true
+        case (Some _, None  ) then false
+        case (None  , Some _) then false
+        case (Some a, Some b) then a = b
+        case _                then false //### bob: tuple matching is not exhaustive yet :(
+    end
+end
+
+!=[T] (left Option[T], right Option[T] -> Bool) Not (left = right)

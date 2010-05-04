@@ -21,7 +21,7 @@ namespace Magpie.Compilation
             IEnumerable<IBoundDecl> typeArgs,
             IBoundDecl paramType)
         {
-            string typeArgString = ((typeArgs != null) && typeArgs.Any()) ? "'(" + typeArgs.JoinAll(", ") + ")" : "";
+            string typeArgString = ((typeArgs != null) && typeArgs.Any()) ? "[" + typeArgs.JoinAll(", ") + "]" : "";
             return name + " " + typeArgString + paramType.ToString();
         }
 

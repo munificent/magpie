@@ -77,9 +77,9 @@ namespace Magpie.Compilation
         /// Creates a copy of this FuncType in unbound form.
         /// </summary>
         /// <returns></returns>
-        public FuncType Clone()
+        public FuncType CloneFunc()
         {
-            return (FuncType)DeclCloner.Clone(this);
+            return new FuncType(Position, Parameter.Unbound.Clone(), Return.Unbound.Clone());
         }
 
         #region IUnboundDecl Members

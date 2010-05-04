@@ -32,14 +32,9 @@ namespace Magpie.Compilation
 
         public override string ToString()
         {
-            if (TypeArguments == null) return Name;
+            if ((TypeArguments == null) || (TypeArguments.Length == 0)) return Name;
 
-            switch (TypeArguments.Length)
-            {
-                case 0: return Name;
-                case 1: return Name + "'" + TypeArguments[0].ToString();
-                default: return Name + "'(" + TypeArguments.JoinAll(", ") + ")";
-            }
+            return Name + "[" + TypeArguments.JoinAll(", ") + "]";
         }
 
         /// <summary>
