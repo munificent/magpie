@@ -66,6 +66,11 @@ namespace Magpie.Compilation
         {
             return new Tuple<T, U>(item1, item2);
         }
+
+        public static bool All<T, U>(this IEnumerable<Tuple<T, U>> collection, Func<T, U, bool> predicate)
+        {
+            return collection.All(tuple => predicate(tuple.Item1, tuple.Item2));
+        }
     }
 
     public class Tuple<T, U>

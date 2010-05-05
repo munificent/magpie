@@ -5,6 +5,7 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
+    //### bob: not used. get rid of?
     public interface IUnboundDeclVisitor<TReturn>
     {
         TReturn Visit(AtomicDecl decl);

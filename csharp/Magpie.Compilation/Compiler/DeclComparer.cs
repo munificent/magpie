@@ -5,108 +5,50 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
-    public class DeclComparer : IBoundDeclVisitor<bool>
+    public class DeclComparer
     {
         public static bool TypesMatch(IBoundDecl parameter, IBoundDecl argument)
         {
-            return argument.Accept(new DeclComparer(parameter));
+            // if they're the same object, they must match
+            if (ReferenceEquals(parameter, argument)) return true;
+
+            // if they're different types, they can't match
+            if (!parameter.GetType().Equals(argument.GetType())) return false;
+
+            // types that return false here do so because if they did match,
+            // the above ReferenceEquals check should have been true. since
+            // we got here, they must not match.
+            return parameter.Match(
+                atomic      =>  false,
+                array       =>  TypesMatch(array.ElementType, ((BoundArrayType)argument).ElementType),
+                func        =>  {
+                                    var argFunc = (FuncType)argument;
+                                    return TypesMatch(func.Parameter.Bound, argFunc.Parameter.Bound) &&
+                                           TypesMatch(func.Return.Bound, argFunc.Return.Bound);
+                                },
+                record      =>  {
+                                    var argRecord = (BoundRecordType)argument;
+                                    if (record.Fields.Count != argRecord.Fields.Count) return false;
+
+                                    // fields must match
+                                    foreach (var pair in record.Fields.Zip(argRecord.Fields))
+                                    {
+                                        if (pair.Item1.Key != pair.Item2.Key) return false;
+                                        if (!TypesMatch(pair.Item1.Value, pair.Item2.Value)) return false;
+                                    }
+
+                                    return true;
+                                },
+                tuple       =>  {
+                                    var argTuple = (BoundTupleType)argument;
+                                    if (tuple.Fields.Count != argTuple.Fields.Count) return false;
+
+                                    // fields must match
+                                    return tuple.Fields.Zip(argTuple.Fields).All(TypesMatch);
+                                },
+                structType  =>  false,
+                union       =>  false,
+                foreign     =>  foreign.Name == ((ForeignType)argument).Name);
         }
-
-        #region IBoundDeclVisitor<bool> Members
-
-        bool IBoundDeclVisitor<bool>.Visit(AtomicDecl decl)
-        {
-            // there is a single instance of each atomic type, so they must match exactly
-            return ReferenceEquals(mParam, decl);
-        }
-
-        bool IBoundDeclVisitor<bool>.Visit(BoundArrayType decl)
-        {
-            var array = mParam as BoundArrayType;
-
-            if (array == null) return false;
-
-            // element type must match
-            return TypesMatch(decl.ElementType, array.ElementType);
-        }
-
-        bool IBoundDeclVisitor<bool>.Visit(FuncType decl)
-        {
-            var paramFunc = mParam as FuncType;
-
-            if (paramFunc == null) return false;
-
-            // arg must match
-            if (!TypesMatch(paramFunc.Parameter.Bound, decl.Parameter.Bound)) return false;
-
-            // return type must match
-            return TypesMatch(paramFunc.Return.Bound, decl.Return.Bound);
-        }
-
-        bool IBoundDeclVisitor<bool>.Visit(BoundRecordType decl)
-        {
-            var paramRecord = mParam as BoundRecordType;
-            if (paramRecord == null) return false;
-
-            if (paramRecord.Fields.Count != decl.Fields.Count) return false;
-
-            // fields must match
-            foreach (var pair in paramRecord.Fields.Zip(decl.Fields))
-            {
-                if (pair.Item1.Key != pair.Item2.Key) return false;
-                if (!TypesMatch(pair.Item1.Value, pair.Item2.Value)) return false;
-            }
-
-            return true;
-        }
-
-        bool IBoundDeclVisitor<bool>.Visit(BoundTupleType decl)
-        {
-            var paramTuple = mParam as BoundTupleType;
-            if (paramTuple == null) return false;
-
-            if (paramTuple.Fields.Count != decl.Fields.Count) return false;
-
-            // fields must match
-            for (int i = 0; i < paramTuple.Fields.Count; i++)
-            {
-                if (!TypesMatch(paramTuple.Fields[i], decl.Fields[i]))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        bool IBoundDeclVisitor<bool>.Visit(Struct decl)
-        {
-            // should be same structure
-            return ReferenceEquals(mParam, decl);
-        }
-
-        bool IBoundDeclVisitor<bool>.Visit(Union decl)
-        {
-            // should be same structure
-            return ReferenceEquals(mParam, decl);
-        }
-
-        bool IBoundDeclVisitor<bool>.Visit(ForeignType decl)
-        {
-            // should be a foreign type with the same name
-            var foreignParam = mParam as ForeignType;
-            if (foreignParam == null) return false;
-
-            return foreignParam.Name == decl.Name;
-        }
-
-        #endregion
-
-        private DeclComparer(IBoundDecl parameter)
-        {
-            mParam = parameter;
-        }
-
-        private IBoundDecl mParam;
     }
 }
