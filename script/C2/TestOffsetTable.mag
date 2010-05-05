@@ -1,0 +1,9 @@
+TestOffsetTable (->)
+    TestOffsetTable/Foo
+end
+
+TestOffsetTable/Foo (->)
+    Print "TestOffsetTable/Foo"
+    
+    AssertFail "not implemented"
+end

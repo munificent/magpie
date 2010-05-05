@@ -68,6 +68,21 @@ namespace Magpie.Compilation
         /// <summary>
         /// Binds this declaration to the given binder.
         /// </summary>
+        public void Bind(Func<IUnboundDecl, IBoundDecl> binder)
+        {
+            if (binder == null) throw new ArgumentNullException("binder");
+            if (IsBound) throw new InvalidOperationException("Cannot bind a Decl that is already bound.");
+
+            Bound = binder(Unbound);
+
+            // discard the unbound one now. makes sure we're clear on what state we expect
+            // the declaration to be in.
+            Unbound = null;
+        }
+        /*
+        /// <summary>
+        /// Binds this declaration to the given binder.
+        /// </summary>
         public void Bind(IUnboundDeclVisitor<IBoundDecl> binder)
         {
             if (binder == null) throw new ArgumentNullException("binder");
@@ -79,5 +94,6 @@ namespace Magpie.Compilation
             // the declaration to be in.
             Unbound = null;
         }
+        */
     }
 }

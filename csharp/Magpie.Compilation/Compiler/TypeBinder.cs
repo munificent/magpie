@@ -5,41 +5,54 @@ using System.Text;
 
 namespace Magpie.Compilation
 {
-    public class TypeBinder : IUnboundDeclVisitor<IBoundDecl>
+    public class TypeBinder
     {
         public static IBoundDecl Bind(BindingContext context, IUnboundDecl unbound)
         {
-            return unbound.Accept(new TypeBinder(context));
+            return unbound.Match<IBoundDecl>(
+                // atomics are already bound
+                atomic  =>  atomic,
+                func    =>  {
+                                Bind(context, func);
+                                return func;
+                            },
+                record  =>  {
+                                var fields = new Dictionary<string, IBoundDecl>();
+
+                                foreach (var field in record.Fields)
+                                {
+                                    fields.Add(field.Key, Bind(context, field.Value));
+                                }
+
+                                return new BoundRecordType(fields);
+                            },
+                tuple   =>  new BoundTupleType(tuple.Fields.Select(field => Bind(context, field))),
+                named   =>  BindNamed(context, named));
         }
 
         public static IBoundDecl[] Bind(BindingContext context, IEnumerable<IUnboundDecl> unbounds)
         {
-            var bound = new List<IBoundDecl>();
-
-            var binder = new TypeBinder(context);
-            foreach (var unbound in unbounds)
-            {
-                bound.Add(unbound.Accept(binder));
-            }
-
-            return bound.ToArray();
+            return unbounds.Select(unbound => Bind(context, unbound)).ToArray();
         }
 
         public static void Bind(BindingContext context, FuncType func)
         {
-            var binder = new TypeBinder(context);
-
-            binder.Bind(func);
+            // do nothing if already bound. some functions such as intrinsics or
+            // auto-functions are created in bound form.
+            if (!func.Parameter.IsBound)
+            {
+                var binder = MakeBinder(context);
+                func.Parameter.Bind(binder);
+                func.Return.Bind(binder);
+            }
         }
 
         public static void Bind(BindingContext context, Struct structure)
         {
-            var binder = new TypeBinder(context);
-
             // bind the fields
             foreach (var field in structure.Fields)
             {
-                field.Type.Bind(binder);
+                field.Type.Bind(MakeBinder(context));
             }
         }
 
@@ -50,13 +63,11 @@ namespace Magpie.Compilation
 
         public static void Bind(BindingContext context, Union union)
         {
-            var binder = new TypeBinder(context);
-
             // bind the cases
             foreach (var unionCase in union.Cases)
             {
                 unionCase.SetUnion(union);
-                unionCase.ValueType.Bind(binder);
+                unionCase.ValueType.Bind(MakeBinder(context));
             }
         }
 
@@ -65,57 +76,15 @@ namespace Magpie.Compilation
             Bind(new BindingContext(compiler, union.SearchSpace), union);
         }
 
-        private TypeBinder(BindingContext context)
+        private static Func<IUnboundDecl, IBoundDecl> MakeBinder(BindingContext context)
         {
-            mContext = context;
+            return new Func<IUnboundDecl, IBoundDecl>(unbound => Bind(context, unbound));
         }
 
-        private void Bind(FuncType func)
-        {
-            // do nothing if already bound. some functions such as intrinsics or
-            // auto-functions are created in bound form.
-            if (!func.Parameter.IsBound)
-            {
-                func.Parameter.Bind(this);
-                func.Return.Bind(this);
-            }
-        }
-
-        #region IUnboundDeclVisitor<IBoundDecl> Members
-
-        IBoundDecl IUnboundDeclVisitor<IBoundDecl>.Visit(AtomicDecl decl)
-        {
-            // atomics are already bound
-            return decl;
-        }
-
-        IBoundDecl IUnboundDeclVisitor<IBoundDecl>.Visit(FuncType decl)
-        {
-            Bind(decl);
-            return decl;
-        }
-
-        IBoundDecl IUnboundDeclVisitor<IBoundDecl>.Visit(RecordType decl)
-        {
-            var fields = new Dictionary<string, IBoundDecl>();
-
-            foreach (var field in decl.Fields)
-            {
-                fields.Add(field.Key, field.Value.Accept(this));
-            }
-
-            return new BoundRecordType(fields);
-        }
-
-        IBoundDecl IUnboundDeclVisitor<IBoundDecl>.Visit(TupleType decl)
-        {
-            return new BoundTupleType(decl.Fields.Select(field => field.Accept(this)));
-        }
-
-        IBoundDecl IUnboundDeclVisitor<IBoundDecl>.Visit(NamedType decl)
+        private static IBoundDecl BindNamed(BindingContext context, NamedType decl)
         {
             // see if it's a type parameter
-            if (mContext.TypeArguments.ContainsKey(decl.Name))
+            if (context.TypeArguments.ContainsKey(decl.Name))
             {
                 //### bob: need a test for this
                 // this basically means
@@ -123,24 +92,20 @@ namespace Magpie.Compilation
                 // is bad. this *could* be made to work and might be useful in some cases
                 if (decl.IsGeneric) throw new CompileException("Cannot apply type arguments to a type parameter.");
 
-                return mContext.TypeArguments[decl.Name];
+                return context.TypeArguments[decl.Name];
             }
 
             // see if it's an array
             if ((decl.Name == "Array") && (decl.TypeArgs.Count() == 1))
             {
-                return new BoundArrayType(decl.TypeArgs.First().Accept(this));
+                return new BoundArrayType(Bind(context, decl.TypeArgs.First()));
             }
 
             // bind the type arguments
-            var typeArgs = decl.TypeArgs.Accept(this);
+            var typeArgs = Bind(context, decl.TypeArgs);
 
             // look up the named type
-            return mContext.Compiler.Types.Find(mContext.SearchSpace, decl.Position, decl.Name, typeArgs);
+            return context.Compiler.Types.Find(context.SearchSpace, decl.Position, decl.Name, typeArgs);
         }
-
-        #endregion
-
-        private BindingContext mContext;
     }
 }

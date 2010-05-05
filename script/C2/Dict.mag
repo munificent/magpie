@@ -1,0 +1,36 @@
+struct Dict[TKey, TValue]
+    Entries List[DictEntry[TKey, TValue]]
+end
+
+struct DictEntry[TKey, TValue]
+    Key     TKey
+    Value   TValue
+end
+
+// construct an empty dict
+Dict[TKey, TValue] (-> Dict[TKey, TValue])
+    Dict[TKey, TValue] List[DictEntry[TKey, TValue]]
+end
+
+// look up a value by key
+__Call[TKey, TValue] (key TKey, dict Dict[TKey, TValue] -> Option[TValue])
+    for entry <- dict.Entries do
+        if entry.Key = key then return Some entry.Value
+    end
+    
+    None[TValue]
+end
+
+// assign a value to the dict
+__Call<-[TKey, TValue] (key TKey, dict Dict[TKey, TValue], value TValue ->)
+    // if the key is already present, replace the value
+    for entry <- dict.Entries do
+        if entry.Key = key then
+            entry.Value <- value
+            return
+        end
+    end
+    
+    // if we got here, the key wasn't found, so add it
+    dict.Entries <- DictEntry (key, value) ++ dict.Entries
+end

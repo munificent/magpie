@@ -41,13 +41,6 @@ namespace Magpie.Compilation
             return enumerable.Select(item => item.Accept(visitor)).ToArray();
         }
 
-        public static IEnumerable<TReturn> Accept<T, TReturn>(this IEnumerable<T> enumerable, IUnboundDeclVisitor<TReturn> visitor)
-            where T : IUnboundDecl
-        {
-            // ToArray() is to force select to eager evaluate. makes it much easier to see what's going on in the debugger
-            return enumerable.Select(item => item.Accept(visitor)).ToArray();
-        }
-
         public static IEnumerable<TReturn> Accept<T, TReturn>(this IEnumerable<T> enumerable, IBoundDeclVisitor<TReturn> visitor)
             where T : IBoundDecl
         {
