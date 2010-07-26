@@ -104,6 +104,6 @@ public class MagpieParser extends Parser {
       return expr;
     }
     
-    throw new Error("Couldn't parse primary.");
+    throw new ParseError("Couldn't parse primary.");
   }
 }

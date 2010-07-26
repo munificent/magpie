@@ -32,7 +32,7 @@ public abstract class Parser {
     // make sure all of the types match before we start consuming
     for (int i = 0; i < types.length; i++) {
       if (!lookAhead(i).getType().equals(types[i]))
-        throw new Error("Expected " + types[i] + " and found " + lookAhead(i));
+        throw new ParseError("Expected " + types[i] + " and found " + lookAhead(i));
     }
 
     // consume the matched tokens

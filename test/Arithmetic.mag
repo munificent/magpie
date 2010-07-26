@@ -1,0 +1,8 @@
+// expected: 3
+// expected: 3
+// expected: 12
+// expected: 4
+(2 + 3) toString print
+(5 - 2) toString print
+(3 * 4) toString print
+(8 / 2) toString print
