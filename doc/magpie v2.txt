@@ -1,0 +1,43 @@
+High-level goals: 
+- Magpie should be the language I want to code in every day. High-blown 
+  experimental ideals are less important than just making it feel right.
+- From static typing, should get:
+  - Overloading so that argument type can be used as available context to make
+    code more terse.
+  - Error messages when you try to do the wrong thing. The more it can tell the
+    user at "compile" time, the better.
+  - No null.
+  - No uninitialized variables.
+- From dynamic typing, should get:
+  - Scripts are distributed as source and don't need to be compiled ahead of 
+    time.
+  - Type annotations shouldn't be needed everywhere. Foo foo = new Foo() is
+    dumb.
+  - Should be able to load and run new code on the fly, modify existing, types,
+    etc.
+  - All types should be open to extension.
+- Should solve the expression problem.
+- To keep things simple, should not solve the multiple dispatch problem.
+- No type hierarchy.
+
+Decided:
+- Platform will be an interpreter running on top of the JVM. At some point, it
+  may compile directly to JVM bytecode, but for now it will interpret.
+
+Undecided:
+
+- Should it have built-in keywords for flow control?
+  - Pros:
+    - Can make it look really nice. I think Magpie's current syntax is great.
+    - Can handle complex things like pattern matching.
+    - Gives us a lower precedence level than keyword message sends, so you don't
+      have to (for example) use parentheses to call a keyword function inside an
+      if block.
+  - Cons:
+    - Not as flexible. Users can't define things that look like native flow
+      control.
+      - This could be mitigated by having some real high level metaprogramming
+        facility like OCaml's syntax plugin stuff. Just having a good built-in
+        syntax will address most of the problem.
+    - More complex grammar. Actually have to hard-code the built-in flow control
+      constructs into the parser.
