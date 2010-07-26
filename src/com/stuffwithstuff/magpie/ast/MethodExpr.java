@@ -6,7 +6,13 @@ public class MethodExpr extends Expr {
     mMethod = method;
     mArg = arg;
   }
+
+  public Expr   getReceiver() { return mReceiver; }
+  public String getMethod()   { return mMethod; }
+  public Expr   getArg()      { return mArg; }
   
+  public <T> T accept(ExprVisitor<T> visitor) { return visitor.visit(this); }
+
   @Override public String toString() {
     StringBuilder builder = new StringBuilder();
     builder.append(mReceiver)

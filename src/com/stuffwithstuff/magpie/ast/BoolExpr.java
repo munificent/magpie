@@ -7,6 +7,8 @@ public class BoolExpr extends Expr {
   
   public boolean getValue() { return mValue; }
   
+  public <T> T accept(ExprVisitor<T> visitor) { return visitor.visit(this); }
+
   @Override public String toString() { return Boolean.toString(mValue); }
 
   private final boolean mValue;

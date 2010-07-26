@@ -9,6 +9,8 @@ public class TupleExpr extends Expr {
   
   public List<Expr> getFields() { return mFields; }
   
+  public <T> T accept(ExprVisitor<T> visitor) { return visitor.visit(this); }
+
   @Override public String toString() {
     StringBuilder builder = new StringBuilder();
     

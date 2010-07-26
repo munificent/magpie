@@ -6,6 +6,8 @@ public class CallExpr extends Expr {
     mArg = arg;
   }
   
+  public <T> T accept(ExprVisitor<T> visitor) { return visitor.visit(this); }
+
   @Override public String toString() {
     StringBuilder builder = new StringBuilder();
     builder.append(mTarget)
