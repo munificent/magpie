@@ -92,6 +92,8 @@ public class MagpieParser extends Parser {
   private Expr primary() {
     if (match(TokenType.INT)) {
       return new IntExpr(last(1).getInt());
+    } else if (match(TokenType.BOOL)){
+      return new BoolExpr(last(1).getBool());
     } else if (match(TokenType.NAME)) {
       return new NameExpr(last(1).getString());
     } else if (match(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)) {

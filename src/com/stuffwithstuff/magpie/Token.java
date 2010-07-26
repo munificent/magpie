@@ -6,37 +6,20 @@ import com.stuffwithstuff.magpie.TokenType;
 public final class Token {
     public Token(final TokenType type) {
         mType = type;
-        mStringValue = "";
-        mIntValue = 0;
-        mDoubleValue = 0;
+        mValue = null;
     }
 
-    public Token(final TokenType type, final String value) {
+    public Token(final TokenType type, final Object value) {
         mType = type;
-        mStringValue = value;
-        mIntValue = 0;
-        mDoubleValue = 0;
-    }
-
-    public Token(final TokenType type, final double value) {
-        mType = type;
-        mStringValue = "";
-        mIntValue = 0;
-        mDoubleValue = value;
-    }
-
-    public Token(final TokenType type, final int value) {
-        mType = type;
-        mStringValue = "";
-        mIntValue = value;
-        mDoubleValue = 0;
+        mValue = value;
     }
 
     public TokenType getType() { return mType; }
     
-    public String getString() { return mStringValue; }
-    public int    getInt()    { return mIntValue; }
-    public double getDouble() { return mDoubleValue; }
+    public boolean getBool()   { return ((Boolean)mValue).booleanValue(); }
+    public int     getInt()    { return ((Integer)mValue).intValue(); }
+    public double  getDouble() { return ((Double)mValue).doubleValue(); }
+    public String  getString() { return (String)mValue; }
     
     public String toString() {
         switch (mType)
@@ -51,12 +34,13 @@ public final class Token {
             case LINE: return "(line)";
             case DOT: return ".";
 
-            case NAME: return mStringValue + " (name)";
-            case OPERATOR: return mStringValue + " (op)";
+            case NAME: return getString() + " (name)";
+            case OPERATOR: return getString() + " (op)";
 
-            case INT: return Integer.toString(mIntValue);
-            case DOUBLE: return Double.toString(mDoubleValue);
-            case STRING: return "\"" + mStringValue + "\"";
+            case BOOL: return Boolean.toString(getBool());
+            case INT: return Integer.toString(getInt());
+            case DOUBLE: return Double.toString(getDouble());
+            case STRING: return "\"" + getString() + "\"";
 
             case EOF: return "(eof)";
 
@@ -65,7 +49,5 @@ public final class Token {
     }
     
     private final TokenType mType;
-    private final String mStringValue;
-    private final int    mIntValue;
-    private final double mDoubleValue;
+    private final Object    mValue;
 }

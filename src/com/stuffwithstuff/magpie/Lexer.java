@@ -209,6 +209,11 @@ public class Lexer {
   private Token createStringToken(TokenType type) {
     String text = mText.substring(mTokenStart, mIndex);
     mState = LexState.DEFAULT;
+    
+    // handle reserved words
+    if (text.equals("true")) return new Token(TokenType.BOOL, true);
+    if (text.equals("false")) return new Token(TokenType.BOOL, false);
+    
     return new Token(type, text);
   }
 
