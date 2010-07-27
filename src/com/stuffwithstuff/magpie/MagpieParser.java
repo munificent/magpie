@@ -68,17 +68,112 @@ public class MagpieParser extends Parser {
   private Expr flowControl() {
     if (match(TokenType.DO)) {
       // "do" block.
+      return parseDoBlock();
+    } else if (lookAhead(TokenType.IF)) {
+      
+      // Parse the conditions.
+      List<Expr> conditions = new ArrayList<Expr>();
+      while (match(TokenType.IF)) {
+        conditions.add(parseIfBlock());
+      }
+      
+      // Parse the then body.
+      consume(TokenType.THEN);
+      Expr thenExpr = parseThenBlock();
+      
+      // Parse the else body.
+      Expr elseExpr = null;
+      if (match(TokenType.ELSE) || match(TokenType.LINE, TokenType.ELSE)) {
+        elseExpr = parseElseBlock();
+      } else {
+        elseExpr = new UnitExpr();
+      }
+      
+      return new IfExpr(conditions, thenExpr, elseExpr);
+    }
+    else return tuple();
+  }
+  
+  // TODO(bob): There's a lot of overlap in the next four functions, but,
+  //            unfortunately also some slight differences. It would be cool to
+  //            unify these somehow.
+  
+  private Expr parseDoBlock() {
+    if (match(TokenType.LINE)){
+      List<Expr> exprs = new ArrayList<Expr>();
+      
+      do {
+        exprs.add(expression());
+        consume(TokenType.LINE);
+      } while (!match(TokenType.END));
+      
       consume(TokenType.LINE);
       
+      return new BlockExpr(exprs);
+    } else {
+      return expression();
+    }
+  }
+
+  private Expr parseIfBlock() {
+    if (match(TokenType.LINE)){
       List<Expr> exprs = new ArrayList<Expr>();
-      while (!match(TokenType.END)) {
+      
+      do {
         exprs.add(expression());
+        consume(TokenType.LINE);
+      } while (!lookAhead(TokenType.THEN));
+      
+      consume(TokenType.LINE);
+
+      return new BlockExpr(exprs);
+    } else {
+      Expr expr = expression();
+      // Each if expression may be on its own line.
+      match(TokenType.LINE);
+      return expr;
+    }
+  }
+
+  private Expr parseThenBlock() {
+    if (match(TokenType.LINE)){
+      List<Expr> exprs = new ArrayList<Expr>();
+      
+      do {
+        exprs.add(expression());
+        consume(TokenType.LINE);
+      } while (!lookAhead(TokenType.ELSE) && !match(TokenType.END));
+      
+      if (lookAhead(TokenType.ELSE)) {
+        // A newline is allowed before else
+        match(TokenType.LINE);
+      } else {
+        // A newline is required after end
         consume(TokenType.LINE);
       }
       
       return new BlockExpr(exprs);
+    } else {
+      return expression();
     }
-    else return tuple();
+  }
+  
+  private Expr parseElseBlock() {
+    if (match(TokenType.LINE)){
+      List<Expr> exprs = new ArrayList<Expr>();
+      
+      do {
+        exprs.add(expression());
+        consume(TokenType.LINE);
+      } while (!match(TokenType.END));
+      
+      // A newline is required after end
+      consume(TokenType.LINE);
+      
+      return new BlockExpr(exprs);
+    } else {
+      return expression();
+    }
   }
   
   /**

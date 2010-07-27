@@ -6,6 +6,7 @@ public interface ExprVisitor<T> {
   T visit(BoolExpr expr);
   T visit(CallExpr expr);
   T visit(DefineExpr expr);
+  T visit(IfExpr expr);
   T visit(IntExpr expr);
   T visit(MethodExpr expr);
   T visit(NameExpr expr);

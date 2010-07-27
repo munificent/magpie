@@ -13,12 +13,18 @@ public abstract class Parser {
     return mConsumed.get(offset - 1);
   }
 
-  protected boolean match(TokenType... types) {
+  protected boolean lookAhead(TokenType... types) {
     // make sure all of the types match before we start consuming
     for (int i = 0; i < types.length; i++) {
       if (!lookAhead(i).getType().equals(types[i]))
         return false;
     }
+
+    return true;
+  }
+
+  protected boolean match(TokenType... types) {
+    if (!lookAhead(types)) return false;
 
     // consume the matched tokens
     for (int i = 0; i < types.length; i++) {

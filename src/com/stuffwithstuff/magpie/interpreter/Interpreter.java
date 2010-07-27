@@ -98,6 +98,27 @@ public class Interpreter implements ExprVisitor<Obj> {
   }
 
   @Override
+  public Obj visit(IfExpr expr) {
+    // Evaluate all of the conditions.
+    boolean passed = true;
+    for (Expr condition : expr.getConditions()) {
+      Obj result = evaluate(condition);
+      if (!((Boolean)result.getPrimitiveValue()).booleanValue()) {
+        // Condition failed.
+        passed = false;
+        break;
+      }
+    }
+    
+    // Evaluate the body.
+    if (passed) {
+      return evaluate(expr.getThen());
+    } else {
+      return evaluate(expr.getElse());
+    }
+  }
+
+  @Override
   public Obj visit(IntExpr expr) {
     return new Obj((TypeObj)find("Int"), expr.getValue());
   }
