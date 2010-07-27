@@ -10,13 +10,31 @@ public class MagpieParser extends Parser {
   
   public Expr parse() {
     Expr expr = expression();
+    consume(TokenType.LINE);
+    
     // make sure we didn't stop early
     consume(TokenType.EOF);
     return expr;
   }
   
   private Expr expression() {
-    return tuple();
+    return flowControl();
+  }
+  
+  private Expr flowControl() {
+    if (match(TokenType.DO)) {
+      // do block
+      consume(TokenType.LINE);
+      
+      List<Expr> exprs = new ArrayList<Expr>();
+      while (!match(TokenType.END)) {
+        exprs.add(expression());
+        consume(TokenType.LINE);
+      }
+      
+      return new BlockExpr(exprs);
+    }
+    else return tuple();
   }
   
   /**
@@ -39,55 +57,73 @@ public class MagpieParser extends Parser {
    * Parses a series of operator expressions like "a + b - c".
    */
   private Expr operator() {
-    Expr left = method();
+    Expr left = call();
+    if (left == null) throw new ParseError(":(");
     
     while (match(TokenType.OPERATOR)) {
       String op = last(1).getString();
-      Expr right = method();
+      Expr right = call();
+      if (right == null) throw new ParseError(":(");
+
       left = new MethodExpr(left, op, right);
     }
     
     return left;
   }
+
+  // The next two functions are a bit squirrely. Function calls like "abs 123"
+  // are generally lower precedence than method calls like "123.abs". However,
+  // they interact with each other. Some examples will clarify:
+  // a b c d  ->  a(b(c(d)))
+  // a b c.d  ->  a(b(c.d())
+  // a b.c d  ->  a(b.c(d))
+  // a b.c.d  ->  a(b.c().d())
+  // a.b c d  ->  a.b(c(d))
+  // a.b c.d  ->  a.b(c.d())
+  // a.b.c d  ->  a.b().c(d)
+  // a.b.c.d  ->  a.b().c().d()
   
   /**
-   * Parses a series of method calls like "list add 123 squared"
+   * Parses a series of function calls like "foo bar bang".
+   * @return The parsed expression or null if unsuccessful.
    */
-  private Expr method() {
-    Expr left = call();
+  private Expr call() {
+    Expr expr = method();
+    if (expr == null) return null;
     
-    while (match(TokenType.NAME)) {
-      String method = last(1).getString();
-      Expr right;
-      try {
-        right = call();
-      } catch (Error err) {
-        // if the argument is omitted, infer ()
-        right = new UnitExpr();
-      }
-      left = new MethodExpr(left, method, right);
-    }
+    Expr arg = call();
+    if (arg == null) return expr;
     
-    return left;
+    return new CallExpr(expr, arg);
   }
   
   /**
-   * Parses a series of non-method calls like "foo(bar)"
+   * Parses a series of method calls like "foo.bar.bang".
+   * @return The parsed expression or null if unsuccessful.
    */
-  private Expr call() {
-    Expr target = primary();
+  private Expr method() {
+    Expr receiver = primary();
+    if (receiver == null) return null;
     
-    if (match(TokenType.LEFT_PAREN)) {
-      Expr arg = expression();
-      consume(TokenType.RIGHT_PAREN);
-      return new CallExpr(target, arg);
+    while (match(TokenType.DOT)) {
+      // TODO(bob): should handle non-name tokens here to support method-like
+      // things such as indexers: someArray.234
+      String method = consume(TokenType.NAME).getString();
+
+      Expr arg = call();
+      if (arg == null) {
+        // if the argument is omitted, infer ()
+        arg = new UnitExpr();
+      }
+      receiver = new MethodExpr(receiver, method, arg);
     }
     
-    return target;
+    return receiver;
   }
   
   /**
    * Parses a primary expression like a literal.
+   * @return The parsed expression or null if unsuccessful.
    */
   private Expr primary() {
     if (match(TokenType.INT)) {
@@ -104,6 +140,6 @@ public class MagpieParser extends Parser {
       return expr;
     }
     
-    throw new ParseError("Couldn't parse primary.");
+    return null;
   }
 }

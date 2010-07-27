@@ -207,6 +207,17 @@ public class Lexer {
     // handle reserved words
     if (text.equals("true")) return new Token(TokenType.BOOL, true);
     if (text.equals("false")) return new Token(TokenType.BOOL, false);
+    if (text.equals("case")) return new Token(TokenType.CASE);
+    if (text.equals("def")) return new Token(TokenType.DEF);
+    if (text.equals("do")) return new Token(TokenType.DO);
+    if (text.equals("else")) return new Token(TokenType.ELSE);
+    if (text.equals("end")) return new Token(TokenType.END);
+    if (text.equals("if")) return new Token(TokenType.IF);
+    if (text.equals("let")) return new Token(TokenType.LET);
+    if (text.equals("match")) return new Token(TokenType.MATCH);
+    if (text.equals("then")) return new Token(TokenType.THEN);
+    if (text.equals("var")) return new Token(TokenType.VAR);
+    if (text.equals("while")) return new Token(TokenType.WHILE);
     
     return new Token(type, text);
   }

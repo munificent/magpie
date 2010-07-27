@@ -13,11 +13,24 @@ public class Interpreter implements ExprVisitor<Obj> {
     
     TypeObj intType = new TypeObj(typeObject, "Int");
     mScope.put("Int", intType);
-    intType.addMethod("+", IntMethods.add());
+    intType.addMethod("+",     IntMethods.operatorPlus());
+    intType.addMethod("-",     IntMethods.operatorMinus());
   }
   
   public Obj evaluate(Expr expr) {
     return expr.accept(this);
+  }
+
+  @Override
+  public Obj visit(BlockExpr expr) {
+    Obj result = null;
+    
+    // evaluate all of the expressions and return the last
+    for (Expr thisExpr : expr.getExpressions()) {
+      result = evaluate(thisExpr);
+    }
+    
+    return result;
   }
 
   @Override

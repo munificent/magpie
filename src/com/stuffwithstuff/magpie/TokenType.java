@@ -21,6 +21,19 @@ public enum TokenType {
   DOUBLE,
   STRING,
   
+  // keywords
+  CASE,
+  DEF,
+  DO,
+  ELSE,
+  END,
+  IF,
+  LET,
+  MATCH,
+  THEN,
+  VAR,
+  WHILE,
+  
   // spacing
   LINE,
   EOF

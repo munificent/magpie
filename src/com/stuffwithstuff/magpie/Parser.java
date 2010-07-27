@@ -28,16 +28,11 @@ public abstract class Parser {
     return true;
   }
 
-  protected void consume(TokenType... types) {
-    // make sure all of the types match before we start consuming
-    for (int i = 0; i < types.length; i++) {
-      if (!lookAhead(i).getType().equals(types[i]))
-        throw new ParseError("Expected " + types[i] + " and found " + lookAhead(i));
-    }
-
-    // consume the matched tokens
-    for (int i = 0; i < types.length; i++) {
-      mConsumed.add(0, mRead.remove(0));
+  protected Token consume(TokenType type) {
+    if (match(type)) {
+      return last(1);
+    } else {
+      throw new ParseError("Expected " + type + " and found " + lookAhead(0));
     }
   }
 

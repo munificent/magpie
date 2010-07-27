@@ -13,7 +13,7 @@ public class Magpie {
    * @param args
    */
   public static void main(String[] args) {
-    runTestScripts();
+    //runTestScripts();
     
     System.out.println("magpie");
     System.out.println("------");
@@ -29,11 +29,13 @@ public class Magpie {
         while (true) {
           System.out.print("> ");
           String line = in.readLine();
-          if (line.equals("")) break;
+
           if (line.equals("quit")) break;
           
-          if (line.length() > 0) code += "\n";
+          if (code.length() > 0) code += "\n";
           code += line;
+
+          if (line.equals("")) break;
         }
 
         if (code.equals("quit")) break;
@@ -49,6 +51,8 @@ public class Magpie {
           System.out.println(result);
         } catch (ParseError err) {
           System.out.println("! " + err.toString());
+        } catch (Exception ex) {
+          System.out.println("! " + ex.toString());
         }
       } catch (IOException ex) {
         break;

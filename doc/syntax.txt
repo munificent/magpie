@@ -8,17 +8,19 @@ true false  // bool
 (1 + 2)     // grouping
 
 // function calls
-foo(1)
-foo(bar)
-"something"(3)
+foo 1
+foo bar
+"something" 3
 
 // method calls
-foo bar      // foo.bar()
-foo bar baz  // foo.bar(baz)
-a b c d e    // a.b(c).d(e)
-"foo" length // "foo".length()
--12 abs      // -12.abs()
-list add 2   // list.add(2)
+foo.bar      // foo.bar()
+foo.bar baz  // foo.bar(baz)
+(a.b c).d e  // a.b(c).d(e)
+a.b c.d e    // a.b(c.d(e))
+"foo".length // "foo".length()
+-12.abs      // -12.abs()
+list.add 2   // list.add(2)
+1.to 3       // 1.to(3)
 
 // operators
 1 + 2 * 3    // 1.+(2).*(3)
