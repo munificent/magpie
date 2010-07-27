@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie.ast;
 
 public interface ExprVisitor<T> {
+  T visit(AssignExpr expr);
   T visit(BlockExpr expr);
   T visit(BoolExpr expr);
   T visit(CallExpr expr);

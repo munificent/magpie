@@ -39,6 +39,13 @@ public class Interpreter implements ExprVisitor<Obj> {
   public Obj unit() { return mUnit; }
 
   @Override
+  public Obj visit(AssignExpr expr) {
+    Obj value = evaluate(expr.getValue());
+    mScope.put(expr.getName(), value);
+    return value;
+  }
+
+  @Override
   public Obj visit(BlockExpr expr) {
     Obj result = null;
     

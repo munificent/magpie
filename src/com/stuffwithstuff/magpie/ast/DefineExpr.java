@@ -22,7 +22,7 @@ public class DefineExpr extends Expr {
       builder.append("def ");
     }
     
-    builder.append(mName).append(" ").append(mValue);
+    builder.append(mName).append(" = ").append(mValue);
     
     return builder.toString();
   }

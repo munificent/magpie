@@ -29,8 +29,38 @@ public class MagpieParser extends Parser {
       String name = consume(TokenType.NAME).getString();
       consume(TokenType.EQUALS);
       
+      // Skip over assignment to prevent "def a = b = c"
       Expr value = flowControl();
       return new DefineExpr(isMutable, name, value);
+    }
+    else return assignment();
+  }
+
+  /* TODO(bob): Need to figure out how the syntax for assignment is going to be
+   * parsed. A lot of things can be on the left side of =, but equally many
+   * can't. The full breakdown is:
+   * 
+   * Allowed:                                 Desugared
+   * --------------------------------------------------------------------------
+   * Name         foo          = 123          Implemented natively
+   * Method       foo.bar      = 123          foo.bar=(123)
+   *              foo.bar 456  = 123          foo.bar=(456, 123)
+   *              foo.456      = 123          foo.(Int)=(456, 123)
+   * Operator     foo ?! 456   = 123          foo.?!=(456, 123)
+   * Tuple        foo, foo.bar = 123, 456     foo = 123; foo.bar=(456)
+   * (where each field must be allowed on the left side)
+   * 
+   * The following are not allowed to the left of a =:
+   * Literals like 123, "foo", ().
+   * Calls like "123 abs".
+   * Flow control, definition, or other expressions.
+   */
+  private Expr assignment() {
+    // TODO(bob): Support more than just names.
+    if (match(TokenType.NAME, TokenType.EQUALS)) {
+      String name = last(2).getString();
+      Expr value = flowControl();
+      return new AssignExpr(name, value);
     }
     else return flowControl();
   }
