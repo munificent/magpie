@@ -18,7 +18,21 @@ public class MagpieParser extends Parser {
   }
   
   private Expr expression() {
-    return flowControl();
+    return definition();
+  }
+  
+  private Expr definition() {
+    if (match(TokenType.DEF) || match(TokenType.VAR)) {
+      boolean isMutable = last(1).getType() == TokenType.VAR;
+      
+      // TODO(bob): support multiple definitions and tuple decomposition here
+      String name = consume(TokenType.NAME).getString();
+      consume(TokenType.EQUALS);
+      
+      Expr value = flowControl();
+      return new DefineExpr(isMutable, name, value);
+    }
+    else return flowControl();
   }
   
   private Expr flowControl() {

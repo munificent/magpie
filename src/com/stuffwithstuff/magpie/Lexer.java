@@ -217,6 +217,7 @@ public class Lexer {
     if (text.equals("then")) return new Token(TokenType.THEN);
     if (text.equals("var")) return new Token(TokenType.VAR);
     if (text.equals("while")) return new Token(TokenType.WHILE);
+    if (text.equals("=")) return new Token(TokenType.EQUALS);
     
     return new Token(type, text);
   }

@@ -8,6 +8,10 @@ public class Interpreter implements ExprVisitor<Obj> {
     mTypeType = new TypeObj();
     mScope.put("Type", mTypeType);
 
+    // TODO(bob): Putting types as values in global variables will likely break
+    //            static typing completely. Will probably need to be more...
+    //            static... about them.
+    
     // Register the built-in types.
     createType("Unit");
     createType("Bool");
@@ -76,6 +80,14 @@ public class Interpreter implements ExprVisitor<Obj> {
     }
     
     throw new Error("Couldn't interpret call.");
+  }
+
+  @Override
+  public Obj visit(DefineExpr expr) {
+    // TODO(bob): need to handle mutability
+    Obj value = evaluate(expr.getValue());
+    mScope.put(expr.getName(), value);
+    return value;
   }
 
   @Override
