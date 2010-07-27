@@ -10,14 +10,12 @@ public class TypeObj extends Obj {
    * Special constructor for the magical "Type" type object. This one is special
    * because it needs to have its type reference point to itself.
    */
-  public TypeObj(int typeId) {
-    mTypeId = typeId;
+  public TypeObj() {
     mName = "Type";
   }
   
-  public TypeObj(TypeObj type, int typeId, String name) {
+  public TypeObj(TypeObj type, String name) {
     super(type);
-    mTypeId = typeId;
     mName = name;
   }
   
@@ -35,7 +33,6 @@ public class TypeObj extends Obj {
   @Override
   public String toString() { return mName; }
   
-  private final int mTypeId;
   private final String mName;
   private final Map<String, Method> mMethods = new HashMap<String, Method>();
 }

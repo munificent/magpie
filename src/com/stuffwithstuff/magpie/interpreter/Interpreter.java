@@ -5,7 +5,7 @@ import com.stuffwithstuff.magpie.ast.*;
 
 public class Interpreter implements ExprVisitor<Obj> {
   public Interpreter() {
-    mTypeType = new TypeObj(mNextTypeId++);
+    mTypeType = new TypeObj();
     mScope.put("Type", mTypeType);
 
     // Register the built-in types.
@@ -115,7 +115,7 @@ public class Interpreter implements ExprVisitor<Obj> {
   }
   
   private TypeObj createType(String name) {
-    TypeObj typeObj = new TypeObj(mTypeType, mNextTypeId++, name);
+    TypeObj typeObj = new TypeObj(mTypeType, name);
     mScope.put(name, typeObj);
     return typeObj;
   }
@@ -127,5 +127,4 @@ public class Interpreter implements ExprVisitor<Obj> {
   private final Map<String, Obj> mScope = new HashMap<String, Obj>();
   private final TypeObj mTypeType;
   private final Obj mUnit;
-  private int mNextTypeId = 0;
 }
