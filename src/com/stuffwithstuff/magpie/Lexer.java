@@ -16,194 +16,188 @@ public class Lexer {
   }
 
   public Token readToken() {
-    while (true) {
-      Token token = readRawToken();
-
-      switch (token.getType()) {
-      // ignore lines after tokens that can't end an expression
-      case LEFT_PAREN:
-      case LEFT_BRACKET:
-      case LEFT_BRACE:
-      case COMMA:
-      case DOT:
-      case OPERATOR:
-        mEatLines = true;
-        return token;
-
-      case LINE:
-        if (!mEatLines) {
-          // collapse multiple lines
-          mEatLines = true;
-          return token;
-        }
-        break;
-
-      default:
-        // a line after any other token is significant
-        mEatLines = false;
-        return token;
-      }
+    Token token = null;
+    while (token == null) {
+      token = readRawToken();
+      if (token != null) token = normalizeLines(token);
     }
+    
+    return token;
   }
 
+  private Token normalizeLines(Token token) {
+    switch (token.getType()) {
+    // ignore lines after tokens that can't end an expression
+    case LEFT_PAREN:
+    case LEFT_BRACKET:
+    case LEFT_BRACE:
+    case COMMA:
+    case DOT:
+    case OPERATOR:
+      mEatLines = true;
+      return token;
+
+    case LINE:
+      if (mEatLines) return null;
+      
+      // collapse multiple lines
+      mEatLines = true;
+      break;
+
+    default:
+      // a line after any other token is significant
+      mEatLines = false;
+      break;
+    }
+    
+    return token;
+  }
+  
   private Token readRawToken() {
-    while (mIndex <= mText.length()) {
+    // tack on a '\0' to the end of the string and lex it. that will let
+    // us conveniently have a place to end any token that goes to the
+    // end of the string
+    char c = (mIndex < mText.length()) ? mText.charAt(mIndex) : '\0';
 
-      // tack on a '\0' to the end of the string and lex it. that will let
-      // us conveniently have a place to end any token that goes to the
-      // end of the string
-      char c = (mIndex < mText.length()) ? mText.charAt(mIndex) : '\0';
+    switch (mState) {
+    case DEFAULT:
+      if (match("(")) return new Token(TokenType.LEFT_PAREN, last(1));
+      if (match(")")) return new Token(TokenType.RIGHT_PAREN, last(1));
+      if (match("[")) return new Token(TokenType.LEFT_BRACKET, last(1));
+      if (match("]")) return new Token(TokenType.RIGHT_BRACKET, last(1));
+      if (match("{")) return new Token(TokenType.LEFT_BRACE, last(1));
+      if (match("}")) return new Token(TokenType.RIGHT_BRACE, last(1));
+      if (match(",")) return new Token(TokenType.COMMA, last(1));
+      if (match(".")) return new Token(TokenType.DOT, last(1));
 
-      switch (mState) {
-      case DEFAULT:
-        switch (c) {
-        case '(':
-          return singleCharToken(TokenType.LEFT_PAREN);
-        case ')':
-          return singleCharToken(TokenType.RIGHT_PAREN);
-        case '[':
-          return singleCharToken(TokenType.LEFT_BRACKET);
-        case ']':
-          return singleCharToken(TokenType.RIGHT_BRACKET);
-        case '{':
-          return singleCharToken(TokenType.LEFT_BRACE);
-        case '}':
-          return singleCharToken(TokenType.RIGHT_BRACE);
-        case ',':
-          return singleCharToken(TokenType.COMMA);
-        case ';':
-          return singleCharToken(TokenType.LINE);
-        case '.':
-          return singleCharToken(TokenType.DOT);
+      // match line ending characters
+      if (match(";"))  return new Token(TokenType.LINE, last(1));
+      if (match("\n")) return new Token(TokenType.LINE, last(1));
+      if (match("\r")) return new Token(TokenType.LINE, last(1));
+      
+      // comments
+      if (match("//")) return startToken(LexState.IN_LINE_COMMENT);
+      if (match("/*")) return startToken(LexState.IN_BLOCK_COMMENT);
+      
+      if (lookAhead("\"")) return startToken(LexState.IN_STRING);
+      if (lookAhead("-")) return startToken(LexState.IN_MINUS);
+      
+      if (isAlpha(c)) return startToken(LexState.IN_NAME);
+      if (isOperator(c)) return startToken(LexState.IN_OPERATOR);
+      if (isDigit(c)) return startToken(LexState.IN_NUMBER);
+      if (isAlpha(c)) return startToken(LexState.IN_NAME);
 
-        case '"':
-          startToken(LexState.IN_STRING);
-          break;
-        case '#':
-          startToken(LexState.IN_COMMENT);
-          break;
+      // ignore whitespace
+      if (match(" ")) return null;
+      if (match("\t")) return null;
+      
+      // ### bob: hack temp. unexpected character
+      return new Token(TokenType.EOF);
 
-        case '-':
-          startToken(LexState.IN_MINUS);
-          break;
-
-        case '\n':
-        case '\r':
-          return singleCharToken(TokenType.LINE);
-
-          // ignore whitespace
-        case ' ':
-        case '\t':
-        case '\0':
-          mIndex++;
-          break;
-
-        default:
-          if (isAlpha(c)) {
-            startToken(LexState.IN_NAME);
-          } else if (isOperator(c)) {
-            startToken(LexState.IN_OPERATOR);
-          } else if (isDigit(c)) {
-            startToken(LexState.IN_NUMBER);
-          } else {
-            // ### bob: hack temp. unexpected character
-            return new Token(TokenType.EOF);
-          }
-          break;
-        }
-        break;
-
-      case IN_NAME:
-        if (isAlpha(c) || isDigit(c) || isOperator(c)) {
-          mIndex++;
-        } else {
-          return createStringToken(TokenType.NAME);
-        }
-        break;
-
-      case IN_OPERATOR:
-        if (isOperator(c) || isAlpha(c) || isDigit(c)) {
-          mIndex++;
-        } else {
-          return createStringToken(TokenType.OPERATOR);
-        }
-        break;
-
-      case IN_NUMBER:
-        if (isDigit(c)) {
-          mIndex++;
-        } else if (c == '.') {
-          changeToken(LexState.IN_DECIMAL);
-        } else {
-          return createIntToken(TokenType.INT);
-        }
-        break;
-
-      case IN_DECIMAL:
-        if (isDigit(c)) {
-          mIndex++;
-        } else {
-          return createDoubleToken(TokenType.DOUBLE);
-        }
-        break;
-
-      case IN_MINUS:
-        if (isDigit(c)) {
-          changeToken(LexState.IN_NUMBER);
-        } else if (isOperator(c) || isAlpha(c)) {
-          changeToken(LexState.IN_OPERATOR);
-        } else {
-          return createStringToken(TokenType.OPERATOR);
-        }
-        break;
-
-      case IN_STRING:
-        if (c == '"') {
-          // eat the closing "
-          mIndex++;
-
-          // get the contained string without the quotes
-          String text = mText.substring(mTokenStart + 1, mIndex - 1);
-          mState = LexState.DEFAULT;
-          return new Token(TokenType.STRING, text);
-        } else if (c == '\0') {
-          // ### bob: need error handling. ran out of characters before
-          // string was closed
-          return new Token(TokenType.EOF);
-        } else {
-          mIndex++;
-        }
-        break;
-
-      case IN_COMMENT:
-        if ((c == '\n') || (c == '\r')) {
-          // don't eat the newline here. that way, a comment on the
-          // same line as other code still allows the newline to be
-          // processed
-          mState = LexState.DEFAULT;
-        } else {
-          mIndex++;
-        }
-        break;
+    case IN_NAME:
+      if (isAlpha(c) || isDigit(c) || isOperator(c)) {
+        mIndex++;
+        return null;
+      } else {
+        return createStringToken(TokenType.NAME);
       }
+
+    case IN_OPERATOR:
+      if (isOperator(c) || isAlpha(c) || isDigit(c)) {
+        mIndex++;
+        return null;
+      } else {
+        return createStringToken(TokenType.OPERATOR);
+      }
+
+    case IN_NUMBER:
+      if (isDigit(c)) {
+        mIndex++;
+        return null;
+      } else if (c == '.') {
+        return changeToken(LexState.IN_DECIMAL);
+      } else {
+        return createIntToken(TokenType.INT);
+      }
+
+    case IN_DECIMAL:
+      if (isDigit(c)) {
+        mIndex++;
+        return null;
+      } else {
+        return createDoubleToken(TokenType.DOUBLE);
+      }
+      
+    case IN_MINUS:
+      if (isDigit(c)) {
+        return changeToken(LexState.IN_NUMBER);
+      } else if (isOperator(c) || isAlpha(c)) {
+        return changeToken(LexState.IN_OPERATOR);
+      } else {
+        return createStringToken(TokenType.OPERATOR);
+      }
+
+    case IN_STRING:
+      mIndex++;
+
+      if (last(1).equals("\"")) {
+        // eat the closing "
+        // get the contained string without the quotes
+        String text = mText.substring(mTokenStart + 1, mIndex - 1);
+        mState = LexState.DEFAULT;
+        return new Token(TokenType.STRING, text);
+      } else {
+        // consume other characters
+        return null;
+      }
+
+    case IN_LINE_COMMENT:
+      if (match("\n") || match("\r")) {
+        mState = LexState.DEFAULT;
+        return new Token(TokenType.LINE, last(1));
+      } else {
+        // ignore everything else
+        mIndex++;
+        return null;
+      }
+      
+    default:
+      throw new Error("Unexpected lex state.");
     }
-
-    return new Token(TokenType.EOF);
+  }
+  
+  private boolean lookAhead(String text) {
+    // see if all of the characters match
+    for (int i = 0; i < text.length(); i++) {
+      if (mIndex + i >= mText.length()) return false;
+      if (mText.charAt(mIndex + i) != text.charAt(i)) return false;
+    }
+    
+    // if we got here, they did
+    return true;
   }
 
-  private Token singleCharToken(TokenType type) {
-    mIndex++;
-    return new Token(type, mText.substring(mIndex - 1, mIndex));
+  private boolean match(String text) {
+    boolean matched = lookAhead(text);
+    
+    if (matched) mIndex += text.length();
+    return matched;
   }
-
-  private void startToken(LexState state) {
+  
+  private String last(int count) {
+    return mText.substring(mIndex - count, mIndex);
+  }
+  
+  private Token startToken(LexState state) {
     mTokenStart = mIndex;
     changeToken(state);
+    return null;
   }
 
-  private void changeToken(LexState state) {
+  private Token changeToken(LexState state) {
     mState = state;
     mIndex++;
+    return null;
   }
 
   private Token createStringToken(TokenType type) {
@@ -245,7 +239,8 @@ public class Lexer {
   }
 
   private enum LexState {
-    DEFAULT, IN_NAME, IN_OPERATOR, IN_NUMBER, IN_DECIMAL, IN_MINUS, IN_STRING, IN_COMMENT
+    DEFAULT, IN_NAME, IN_OPERATOR, IN_NUMBER, IN_DECIMAL, IN_MINUS, IN_STRING,
+    IN_LINE_COMMENT, IN_BLOCK_COMMENT
   }
 
   private final String mText;
