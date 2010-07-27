@@ -12,7 +12,7 @@ public class MagpieParser extends Parser {
     Expr expr = expression();
     consume(TokenType.LINE);
     
-    // make sure we didn't stop early
+    // Make sure we didn't stop early.
     consume(TokenType.EOF);
     return expr;
   }
@@ -23,7 +23,7 @@ public class MagpieParser extends Parser {
   
   private Expr flowControl() {
     if (match(TokenType.DO)) {
-      // do block
+      // "do" block.
       consume(TokenType.LINE);
       
       List<Expr> exprs = new ArrayList<Expr>();
@@ -47,7 +47,7 @@ public class MagpieParser extends Parser {
       fields.add(operator());
     } while (match(TokenType.COMMA));
     
-    // only wrap in a tuple if there are multiple fields
+    // Only wrap in a tuple if there are multiple fields.
     if (fields.size() == 1) return fields.get(0);
     
     return new TupleExpr(fields);
@@ -106,13 +106,13 @@ public class MagpieParser extends Parser {
     if (receiver == null) return null;
     
     while (match(TokenType.DOT)) {
-      // TODO(bob): should handle non-name tokens here to support method-like
+      // TODO(bob): Should handle non-name tokens here to support method-like
       // things such as indexers: someArray.234
       String method = consume(TokenType.NAME).getString();
 
       Expr arg = call();
       if (arg == null) {
-        // if the argument is omitted, infer ()
+        // If the argument is omitted, infer ()
         arg = new UnitExpr();
       }
       receiver = new MethodExpr(receiver, method, arg);
@@ -126,10 +126,12 @@ public class MagpieParser extends Parser {
    * @return The parsed expression or null if unsuccessful.
    */
   private Expr primary() {
-    if (match(TokenType.INT)) {
+    if (match(TokenType.BOOL)){
+    return new BoolExpr(last(1).getBool());
+    } else if (match(TokenType.INT)) {
       return new IntExpr(last(1).getInt());
-    } else if (match(TokenType.BOOL)){
-      return new BoolExpr(last(1).getBool());
+    } else if (match(TokenType.STRING)) {
+      return new StringExpr(last(1).getString());
     } else if (match(TokenType.NAME)) {
       return new NameExpr(last(1).getString());
     } else if (match(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)) {

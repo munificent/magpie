@@ -6,6 +6,9 @@ public class CallExpr extends Expr {
     mArg = arg;
   }
   
+  public Expr getTarget() { return mTarget; }
+  public Expr getArg()    { return mArg; }
+  
   public <T> T accept(ExprVisitor<T> visitor) { return visitor.visit(this); }
 
   @Override public String toString() {

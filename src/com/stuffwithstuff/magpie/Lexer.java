@@ -11,7 +11,7 @@ public class Lexer {
     mIndex = 0;
     mTokenStart = 0;
 
-    // ignore starting lines
+    // Ignore starting lines.
     mEatLines = true;
   }
 
@@ -27,7 +27,7 @@ public class Lexer {
 
   private Token normalizeLines(Token token) {
     switch (token.getType()) {
-    // ignore lines after tokens that can't end an expression
+    // Ignore lines after tokens that can't end an expression.
     case LEFT_PAREN:
     case LEFT_BRACKET:
     case LEFT_BRACE:
@@ -40,12 +40,12 @@ public class Lexer {
     case LINE:
       if (mEatLines) return null;
       
-      // collapse multiple lines
+      // Collapse multiple lines into one.
       mEatLines = true;
       break;
 
     default:
-      // a line after any other token is significant
+      // A line after any other token is significant.
       mEatLines = false;
       break;
     }
@@ -54,9 +54,9 @@ public class Lexer {
   }
   
   private Token readRawToken() {
-    // tack on a '\0' to the end of the string and lex it. that will let
+    // Tack on a '\0' to the end of the string and lex it. That will let
     // us conveniently have a place to end any token that goes to the
-    // end of the string
+    // end of the string.
     char c = (mIndex < mText.length()) ? mText.charAt(mIndex) : '\0';
 
     switch (mState) {
@@ -70,12 +70,12 @@ public class Lexer {
       if (match(",")) return new Token(TokenType.COMMA, last(1));
       if (match(".")) return new Token(TokenType.DOT, last(1));
 
-      // match line ending characters
+      // Match line ending characters.
       if (match(";"))  return new Token(TokenType.LINE, last(1));
       if (match("\n")) return new Token(TokenType.LINE, last(1));
       if (match("\r")) return new Token(TokenType.LINE, last(1));
       
-      // comments
+      // Comments.
       if (match("//")) return startToken(LexState.IN_LINE_COMMENT);
       if (match("/*")) return startToken(LexState.IN_BLOCK_COMMENT);
       
@@ -87,11 +87,11 @@ public class Lexer {
       if (isDigit(c)) return startToken(LexState.IN_NUMBER);
       if (isAlpha(c)) return startToken(LexState.IN_NAME);
 
-      // ignore whitespace
+      // Ignore whitespace.
       if (match(" ")) return null;
       if (match("\t")) return null;
       
-      // ### bob: hack temp. unexpected character
+      // TODO(bob): Hack temp. Unexpected character
       return new Token(TokenType.EOF);
 
     case IN_NAME:
@@ -141,13 +141,12 @@ public class Lexer {
       mIndex++;
 
       if (last(1).equals("\"")) {
-        // eat the closing "
-        // get the contained string without the quotes
+        // Get the contained string without the quotes.
         String text = mText.substring(mTokenStart + 1, mIndex - 1);
         mState = LexState.DEFAULT;
         return new Token(TokenType.STRING, text);
       } else {
-        // consume other characters
+        // Consume other characters.
         return null;
       }
 
@@ -156,7 +155,7 @@ public class Lexer {
         mState = LexState.DEFAULT;
         return new Token(TokenType.LINE, last(1));
       } else {
-        // ignore everything else
+        // Ignore everything else.
         mIndex++;
         return null;
       }
@@ -167,13 +166,13 @@ public class Lexer {
   }
   
   private boolean lookAhead(String text) {
-    // see if all of the characters match
+    // See if all of the characters match.
     for (int i = 0; i < text.length(); i++) {
       if (mIndex + i >= mText.length()) return false;
       if (mText.charAt(mIndex + i) != text.charAt(i)) return false;
     }
     
-    // if we got here, they did
+    // If we got here, they did.
     return true;
   }
 
@@ -204,7 +203,7 @@ public class Lexer {
     String text = mText.substring(mTokenStart, mIndex);
     mState = LexState.DEFAULT;
     
-    // handle reserved words
+    // Handle reserved words.
     if (text.equals("true")) return new Token(TokenType.BOOL, true);
     if (text.equals("false")) return new Token(TokenType.BOOL, false);
     if (text.equals("case")) return new Token(TokenType.CASE);

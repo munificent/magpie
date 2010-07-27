@@ -45,7 +45,6 @@ public class Magpie {
         
         try {
           Expr expr = parser.parse();
-          System.out.println(". " + expr);
           Obj result = interpreter.evaluate(expr);
           System.out.print("= ");
           System.out.println(result);
