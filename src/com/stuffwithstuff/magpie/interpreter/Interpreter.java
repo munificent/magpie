@@ -5,11 +5,11 @@ import java.util.*;
 import com.stuffwithstuff.magpie.ast.*;
 
 public class Interpreter implements ExprVisitor<Obj> {
-  public Interpreter(InterpreterHost host, List<FunctionDefn> functions) {
+  public Interpreter(InterpreterHost host, SourceFile sourceFile) {
     mHost = host;
     
     // Build a map of the defined functions.
-    for (FunctionDefn function : functions) {
+    for (FunctionDefn function : sourceFile.getFunctions()) {
       mFunctions.put(function.getName(), function);
     }
     
@@ -43,7 +43,7 @@ public class Interpreter implements ExprVisitor<Obj> {
     FunctionDefn main = mFunctions.get("main");
     if (main == null) throw new IllegalStateException("Couldn't find a main method.");
     
-    return invoke(main);
+    return invoke(main, unit());
   }
   
   public void print(String text) {
@@ -112,7 +112,7 @@ public class Interpreter implements ExprVisitor<Obj> {
       // Look for a defined function with the name.
       FunctionDefn function = mFunctions.get(name);
       if (function != null) {
-        return invoke(function);
+        return invoke(function, arg);
       }
       
       // Try to call it as a method on the argument. In other words,
@@ -172,7 +172,13 @@ public class Interpreter implements ExprVisitor<Obj> {
 
   @Override
   public Obj visit(NameExpr expr) {
-    return mScope.get(expr.getName());
+    // See if it's a named variable.
+    Obj variable = mScope.get(expr.getName());
+    if (variable != null) return variable;
+    
+    // Not a variable. Must be a call to function with an implicit ().
+    FunctionDefn function = mFunctions.get(expr.getName());
+    return invoke(function, unit());
   }
 
   @Override
@@ -182,8 +188,13 @@ public class Interpreter implements ExprVisitor<Obj> {
 
   @Override
   public Obj visit(TupleExpr expr) {
-    // TODO(bob): Fill this in once we have tuple objects.
-    return null;
+    List<Obj> fields = new ArrayList<Obj>();
+    
+    for (Expr field : expr.getFields()) {
+      fields.add(evaluate(field));
+    }
+    
+    return new TupleObj(fields);
   }
 
   @Override
@@ -191,10 +202,20 @@ public class Interpreter implements ExprVisitor<Obj> {
     return mUnit;
   }
   
-  private Obj invoke(FunctionDefn function) {
+  private Obj invoke(FunctionDefn function, Obj arg) {
     // Create a new local scope for the function.
     Scope oldScope = mScope;
     mScope = new Scope();
+    
+    // Bind arguments to their parameter names.
+    if (function.getParamNames().size() == 1) {
+      mScope.put(function.getParamNames().get(0), arg);
+    } else if (function.getParamNames().size() > 1) {
+      TupleObj tuple = (TupleObj)arg;
+      for (int i = 0; i < function.getParamNames().size(); i++) {
+        mScope.put(function.getParamNames().get(i), tuple.getFields().get(i));
+      }
+    }
     
     Obj result = evaluate(function.getBody());
     

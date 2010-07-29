@@ -24,7 +24,7 @@ public class Scope {
     }
     
     // If we got here, it wasn't defined.
-    throw new Error("Undefined var. Type-checker should catch this.");
+    return null;
   }
   
   public void push() {

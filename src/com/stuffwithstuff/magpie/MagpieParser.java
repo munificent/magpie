@@ -2,37 +2,93 @@ package com.stuffwithstuff.magpie;
 
 import java.util.*;
 import com.stuffwithstuff.magpie.ast.*;
+import com.stuffwithstuff.magpie.type.*;
 
 public class MagpieParser extends Parser {
   public MagpieParser(Lexer lexer) {
     super(lexer);
   }
   
-  public List<FunctionDefn> parse() {
-    List<FunctionDefn> functions = definitions();
+  public SourceFile parse() {
+    SourceFile file = sourceFile();
     
     // Make sure we didn't stop early.
     consume(TokenType.EOF);
-    return functions;
+    return file;
   }
   
-  private List<FunctionDefn> definitions() {
+  private SourceFile sourceFile() {
     List<FunctionDefn> functions = new ArrayList<FunctionDefn>();
     
-    while (match(TokenType.NAME)) {
-      String name = last(1).getString();
-      
-      // Parse the prototype: (foo Foo, bar Bar -> Bang)
-      // TODO(bob): Hack. Right now it doesn't support args or returns.
-      consume(TokenType.LEFT_PAREN);
-      consume(TokenType.ARROW);
-      consume(TokenType.RIGHT_PAREN);
-      
-      Expr body = parseBlock();
-      functions.add(new FunctionDefn(name, body));
+    while (lookAhead(TokenType.NAME)) {
+      functions.add(function());
     }
     
-    return functions;
+    return new SourceFile(functions);
+  }
+  
+  private FunctionDefn function() {
+    String name = consume(TokenType.NAME).getString();
+    
+    List<String> paramNames = new ArrayList<String>();
+    FunctionType type = functionType(paramNames);
+    
+    Expr body = parseBlock();
+    consume(TokenType.LINE);
+    
+    return new FunctionDefn(name, type, paramNames, body);
+  }
+  
+  private FunctionType functionType(List<String> paramNames) {
+    // Parse the prototype: (foo Foo, bar Bar -> Bang)
+    // TODO(bob): Hack. Right now it doesn't support args or returns.
+    consume(TokenType.LEFT_PAREN);
+    
+    TypeDecl paramType = null;
+    if (match(TokenType.ARROW)) {
+      // No parameters.
+      paramType = new NamedType("Unit");
+    } else {
+      // Parse all of the parameters.
+      List<TypeDecl> paramTypes = new ArrayList<TypeDecl>();
+      
+      do {
+        // If we're looking for parameter names, parse it now.
+        if (paramNames != null) {
+          paramNames.add(consume(TokenType.NAME).getString());
+        }
+        
+        // Parse the type.
+        paramTypes.add(typeDeclaration());
+      } while (match(TokenType.COMMA));
+      
+      if (paramTypes.size() == 1) {
+        paramType = paramTypes.get(0);
+      } else {
+        // Multiple parameters, so make a tuple.
+        paramType = new TupleType(paramTypes);
+      }
+      
+      consume(TokenType.ARROW);
+    }
+    
+    // Parse the return type, if any.
+    TypeDecl returnType = null;
+    if (match(TokenType.RIGHT_PAREN)) {
+      // No return type, so infer Unit.
+      returnType = new NamedType("Unit");
+    } else {
+      returnType = typeDeclaration();
+      consume(TokenType.RIGHT_PAREN);
+    }
+    
+    return new FunctionType(paramType, returnType);
+  }
+  
+  private TypeDecl typeDeclaration() {
+    // TODO(bob): Support more than just named types.
+    String name = consume(TokenType.NAME).getString();
+    return new NamedType(name);
   }
   
   private Expr expression() {
@@ -124,9 +180,7 @@ public class MagpieParser extends Parser {
         exprs.add(expression());
         consume(TokenType.LINE);
       } while (!match(TokenType.END));
-      
-      consume(TokenType.LINE);
-      
+            
       return new BlockExpr(exprs);
     } else {
       return expression();
@@ -215,12 +269,16 @@ public class MagpieParser extends Parser {
    */
   private Expr operator() {
     Expr left = call();
-    if (left == null) throw new ParseException(":(");
+    if (left == null) {
+      throw new ParseException(":(");
+    }
     
     while (match(TokenType.OPERATOR)) {
       String op = last(1).getString();
       Expr right = call();
-      if (right == null) throw new ParseException(":(");
+      if (right == null) {
+        throw new ParseException(":(");
+      }
 
       left = new MethodExpr(left, op, right);
     }

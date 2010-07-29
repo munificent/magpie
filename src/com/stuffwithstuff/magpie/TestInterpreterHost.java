@@ -3,7 +3,7 @@ package com.stuffwithstuff.magpie;
 import java.io.IOException;
 import java.util.*;
 
-import com.stuffwithstuff.magpie.ast.FunctionDefn;
+import com.stuffwithstuff.magpie.ast.SourceFile;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.InterpreterHost;
 
@@ -26,9 +26,9 @@ public class TestInterpreterHost implements InterpreterHost {
       
       Lexer lexer = new Lexer(source);
       MagpieParser parser = new MagpieParser(lexer);
-      List<FunctionDefn> functions = parser.parse();
+      SourceFile file = parser.parse();
 
-      Interpreter interpreter = new Interpreter(this, functions);
+      Interpreter interpreter = new Interpreter(this, file);
       interpreter.runMain();
       
       if (mExpectedOutput.size() > 0) {
