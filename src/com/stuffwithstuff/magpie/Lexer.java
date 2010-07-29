@@ -122,8 +122,17 @@ public class Lexer {
 
     case IN_DECIMAL:
       if (isDigit(c)) {
+        return changeToken(LexState.IN_FRACTION);
+      } else {
+        // Rollback to reprocess the "." as its own token. This lets us parse
+        // things like "123.foo".
+        mIndex--;
+        return createIntToken(TokenType.INT);
+      }
+      
+    case IN_FRACTION:
+      if (isDigit(c)) {
         mIndex++;
-        return null;
       } else {
         return createDoubleToken(TokenType.DOUBLE);
       }
@@ -218,6 +227,7 @@ public class Lexer {
     if (text.equals("var")) return new Token(TokenType.VAR);
     if (text.equals("while")) return new Token(TokenType.WHILE);
     if (text.equals("=")) return new Token(TokenType.EQUALS);
+    if (text.equals("->")) return new Token(TokenType.ARROW);
     
     return new Token(type, text);
   }
@@ -250,8 +260,8 @@ public class Lexer {
   }
 
   private enum LexState {
-    DEFAULT, IN_NAME, IN_OPERATOR, IN_NUMBER, IN_DECIMAL, IN_MINUS, IN_STRING,
-    IN_LINE_COMMENT, IN_BLOCK_COMMENT
+    DEFAULT, IN_NAME, IN_OPERATOR, IN_NUMBER, IN_DECIMAL, IN_FRACTION, IN_MINUS,
+    IN_STRING, IN_LINE_COMMENT, IN_BLOCK_COMMENT
   }
 
   private final String mText;

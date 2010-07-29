@@ -23,6 +23,7 @@ public enum TokenType {
   STRING,
   
   // keywords
+  ARROW,
   CASE,
   DEF,
   DO,

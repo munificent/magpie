@@ -1,16 +1,20 @@
 package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.*;
+
 import com.stuffwithstuff.magpie.ast.*;
 
 public class Interpreter implements ExprVisitor<Obj> {
-  public Interpreter() {
+  public Interpreter(InterpreterHost host, List<FunctionDefn> functions) {
+    mHost = host;
+    
+    // Build a map of the defined functions.
+    for (FunctionDefn function : functions) {
+      mFunctions.put(function.getName(), function);
+    }
+    
     mTypeType = new TypeObj();
-    mScope.put("Type", mTypeType);
-
-    // TODO(bob): Putting types as values in global variables will likely break
-    //            static typing completely. Will probably need to be more...
-    //            static... about them.
+    mTypes.put("Type", mTypeType);
     
     // Register the built-in types.
     createType("Unit");
@@ -19,17 +23,35 @@ public class Interpreter implements ExprVisitor<Obj> {
     TypeObj intType = createType("Int");
     intType.addMethod("+", IntMethods.operatorPlus());
     intType.addMethod("-", IntMethods.operatorMinus());
+    intType.addMethod("*", IntMethods.operatorMultiply());
+    intType.addMethod("/", IntMethods.operatorDivide());
+    intType.addMethod("toString", IntMethods.toStringMethod());
     
     TypeObj stringType = createType("String");
     stringType.addMethod("+",     StringMethods.operatorPlus());
     stringType.addMethod("print", StringMethods.print());
     
     // Register the () object.
-    mUnit = new Obj((TypeObj)find("Unit"), null);
+    mUnit = new Obj(findType("Unit"), null);
   }
   
   public Obj evaluate(Expr expr) {
     return expr.accept(this);
+  }
+  
+  public Obj runMain() {
+    FunctionDefn main = mFunctions.get("main");
+    if (main == null) throw new IllegalStateException("Couldn't find a main method.");
+    
+    return invoke(main);
+  }
+  
+  public void print(String text) {
+    mHost.print(text);
+  }
+  
+  public Obj createString(String text) {
+    return new Obj(findType("String"), text);
   }
   
   /**
@@ -49,19 +71,22 @@ public class Interpreter implements ExprVisitor<Obj> {
   public Obj visit(BlockExpr expr) {
     Obj result = null;
     
-    // TODO(bob): Need to create a local scope.
+    // Create a lexical scope.
+    mScope.push();
     
     // Evaluate all of the expressions and return the last.
     for (Expr thisExpr : expr.getExpressions()) {
       result = evaluate(thisExpr);
     }
     
+    mScope.pop();
+    
     return result;
   }
 
   @Override
   public Obj visit(BoolExpr expr) {
-    return new Obj((TypeObj)find("Bool"), expr.getValue());
+    return new Obj(findType("Bool"), expr.getValue());
   }
 
   @Override
@@ -77,16 +102,28 @@ public class Interpreter implements ExprVisitor<Obj> {
     
     Obj arg = evaluate(expr.getArg());
     
-    // If the target is a name, try to call it as a method on the argument.
-    // In other words "abs 123" is equivalent to "123.abs".
+    // Handle a named target.
     if (expr.getTarget() instanceof NameExpr) {
-      NameExpr targetName = (NameExpr)expr.getTarget();
+      String name = ((NameExpr)expr.getTarget()).getName();
+      
+      // Look for a local variable with the name.
+      // TODO(bob): Implement me.
+      
+      // Look for a defined function with the name.
+      FunctionDefn function = mFunctions.get(name);
+      if (function != null) {
+        return invoke(function);
+      }
+      
+      // Try to call it as a method on the argument. In other words,
+      // "abs 123" is equivalent to "123.abs".
       TypeObj argType = arg.getType();
-      Method method = argType.getMethod(targetName.getName(), argType);
+      Method method = argType.getMethod(name, argType);
       return method.invoke(this, arg, unit());
     }
     
-    throw new Error("Couldn't interpret call.");
+    // TODO(bob): The type checker should prevent this from happening.
+    throw new RuntimeException("Couldn't interpret call.");
   }
 
   @Override
@@ -120,7 +157,7 @@ public class Interpreter implements ExprVisitor<Obj> {
 
   @Override
   public Obj visit(IntExpr expr) {
-    return new Obj((TypeObj)find("Int"), expr.getValue());
+    return new Obj(findType("Int"), expr.getValue());
   }
 
   @Override
@@ -140,7 +177,7 @@ public class Interpreter implements ExprVisitor<Obj> {
 
   @Override
   public Obj visit(StringExpr expr) {
-    return new Obj((TypeObj)find("String"), expr.getValue());
+    return createString(expr.getValue());
   }
 
   @Override
@@ -154,17 +191,34 @@ public class Interpreter implements ExprVisitor<Obj> {
     return mUnit;
   }
   
+  private Obj invoke(FunctionDefn function) {
+    // Create a new local scope for the function.
+    Scope oldScope = mScope;
+    mScope = new Scope();
+    
+    Obj result = evaluate(function.getBody());
+    
+    // Restore the previous scope.
+    mScope = oldScope;
+    
+    return result;
+  }
+  
   private TypeObj createType(String name) {
     TypeObj typeObj = new TypeObj(mTypeType, name);
-    mScope.put(name, typeObj);
+    mTypes.put(name, typeObj);
     return typeObj;
   }
   
-  private Obj find(String name) {
-    return mScope.get(name);
+  private TypeObj findType(String name) {
+    return mTypes.get(name);
   }
   
-  private final Map<String, Obj> mScope = new HashMap<String, Obj>();
+  private final InterpreterHost mHost;
+  private final Map<String, FunctionDefn> mFunctions =
+      new HashMap<String, FunctionDefn>();
+  private final Map<String, TypeObj> mTypes = new HashMap<String, TypeObj>();
+  private Scope mScope;
   private final TypeObj mTypeType;
   private final Obj mUnit;
 }

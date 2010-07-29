@@ -20,7 +20,7 @@ public class StringMethods {
       public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
         String string = (String)thisObj.getPrimitiveValue();
         
-        System.out.println(string);
+        interpreter.print(string);
         
         return interpreter.unit();
       }

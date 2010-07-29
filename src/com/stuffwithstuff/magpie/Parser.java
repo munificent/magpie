@@ -38,7 +38,7 @@ public abstract class Parser {
     if (match(type)) {
       return last(1);
     } else {
-      throw new ParseError("Expected " + type + " and found " + lookAhead(0));
+      throw new ParseException("Expected " + type + " and found " + lookAhead(0));
     }
   }
 

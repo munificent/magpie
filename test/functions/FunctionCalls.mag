@@ -1,0 +1,25 @@
+noArgs  (->)                    print "noArgs"
+oneArg  (a String ->)           print ("one " + a)
+twoArgs (a String, b String ->) print ("two " + a + b)
+bounce  (a String -> String)    a + " returned"
+
+main (->)
+    // implicit () application
+    noArgs //: noArgs
+    
+    // explicit () application
+    noArgs () //: noArgs
+    
+    // regular application
+    oneArg "one" //: one one
+    
+    // chained
+    oneArg bounce "chain" //: one chain returned
+    
+    // tupled arguments
+    twoArgs ("a ", "b") //: two a b
+    
+    // stored tuple
+    def args = ("a ", "b")
+    twoArgs args //: two a b
+end

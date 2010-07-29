@@ -4,7 +4,7 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
 
-import com.stuffwithstuff.magpie.ast.Expr;
+import com.stuffwithstuff.magpie.ast.FunctionDefn;
 import com.stuffwithstuff.magpie.interpreter.*;
 
 public class Magpie {
@@ -13,11 +13,12 @@ public class Magpie {
    * @param args
    */
   public static void main(String[] args) {
-    //runTestScripts();
+    runTestScripts();
     
     System.out.println("magpie");
     System.out.println("------");
     
+    /*
     InputStreamReader converter = new InputStreamReader(System.in);
     BufferedReader in = new BufferedReader(converter);
 
@@ -56,30 +57,30 @@ public class Magpie {
       } catch (IOException ex) {
         break;
       }
-    }
+    }*/
   }
   
   private static void runTestScripts() {
+    int tests   = 0;
+    int success = 0;
+    
     for (File testScript : listTestScripts()) {
-      runTestScript(testScript);
+      tests++;
+      if (runTestScript(testScript)) success++;
     }
+    
+    System.out.println("Passed " + success + " out of " + tests + " tests.");
   }
   
-  private static void runTestScript(File script) {
+  private static boolean runTestScript(File script) {
     try {
       String source = readFile(script.getPath());
       
-      Lexer lexer = new Lexer(source);
-      MagpieParser parser = new MagpieParser(lexer);
-      Expr expr = parser.parse();
-
-      Interpreter interpreter = new Interpreter();
-      interpreter.evaluate(expr);
-      
-    } catch (ParseError err) {
-      System.out.println("FAIL " + script + ": Parse error " + err.toString());
+      TestInterpreterHost host = new TestInterpreterHost(script.getPath());
+      return host.run(source);
     } catch (IOException ex) {
       System.out.println("FAIL " + script + ": IO error");
+      return false;
     }
   }
   
@@ -91,11 +92,12 @@ public class Magpie {
   }
   
   private static void listTestScripts(File dir, List<File> files) {
-    for (String file : dir.list()) {
-      if (file.endsWith(".mag")) {
-        files.add(new File(dir, file));
-      } else {
-        listTestScripts(new File(dir, file), files);
+    for (String fileName : dir.list()) {
+      File file = new File(dir, fileName);
+      if (fileName.endsWith(".mag")) {
+        files.add(file);
+      } else if (file.isDirectory()) {
+        listTestScripts(file, files);
       }
     }
   }

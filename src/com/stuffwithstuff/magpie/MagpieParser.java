@@ -8,13 +8,31 @@ public class MagpieParser extends Parser {
     super(lexer);
   }
   
-  public Expr parse() {
-    Expr expr = expression();
-    consume(TokenType.LINE);
+  public List<FunctionDefn> parse() {
+    List<FunctionDefn> functions = definitions();
     
     // Make sure we didn't stop early.
     consume(TokenType.EOF);
-    return expr;
+    return functions;
+  }
+  
+  private List<FunctionDefn> definitions() {
+    List<FunctionDefn> functions = new ArrayList<FunctionDefn>();
+    
+    while (match(TokenType.NAME)) {
+      String name = last(1).getString();
+      
+      // Parse the prototype: (foo Foo, bar Bar -> Bang)
+      // TODO(bob): Hack. Right now it doesn't support args or returns.
+      consume(TokenType.LEFT_PAREN);
+      consume(TokenType.ARROW);
+      consume(TokenType.RIGHT_PAREN);
+      
+      Expr body = parseBlock();
+      functions.add(new FunctionDefn(name, body));
+    }
+    
+    return functions;
   }
   
   private Expr expression() {
@@ -68,7 +86,7 @@ public class MagpieParser extends Parser {
   private Expr flowControl() {
     if (match(TokenType.DO)) {
       // "do" block.
-      return parseDoBlock();
+      return parseBlock();
     } else if (lookAhead(TokenType.IF)) {
       
       // Parse the conditions.
@@ -98,7 +116,7 @@ public class MagpieParser extends Parser {
   //            unfortunately also some slight differences. It would be cool to
   //            unify these somehow.
   
-  private Expr parseDoBlock() {
+  private Expr parseBlock() {
     if (match(TokenType.LINE)){
       List<Expr> exprs = new ArrayList<Expr>();
       
@@ -197,12 +215,12 @@ public class MagpieParser extends Parser {
    */
   private Expr operator() {
     Expr left = call();
-    if (left == null) throw new ParseError(":(");
+    if (left == null) throw new ParseException(":(");
     
     while (match(TokenType.OPERATOR)) {
       String op = last(1).getString();
       Expr right = call();
-      if (right == null) throw new ParseError(":(");
+      if (right == null) throw new ParseException(":(");
 
       left = new MethodExpr(left, op, right);
     }
