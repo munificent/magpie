@@ -33,6 +33,9 @@ public class Interpreter implements ExprVisitor<Obj> {
     
     // Register the () object.
     mUnit = new Obj(findType("Unit"), null);
+    
+    // Create a top-level scope.
+    mScope = new Scope();
   }
   
   public Obj evaluate(Expr expr) {
@@ -204,8 +207,7 @@ public class Interpreter implements ExprVisitor<Obj> {
   
   private Obj invoke(FunctionDefn function, Obj arg) {
     // Create a new local scope for the function.
-    Scope oldScope = mScope;
-    mScope = new Scope();
+    mScope = mScope.push();
     
     // Bind arguments to their parameter names.
     if (function.getParamNames().size() == 1) {
@@ -220,7 +222,7 @@ public class Interpreter implements ExprVisitor<Obj> {
     Obj result = evaluate(function.getBody());
     
     // Restore the previous scope.
-    mScope = oldScope;
+    mScope = mScope.pop();
     
     return result;
   }

@@ -8,33 +8,38 @@ import java.util.*;
  */
 public class Scope {
   public Scope() {
-    // Push an initial empty scope onto the stack.
-    push();
+    mParent = null;
   }
   
   public void put(String name, Obj value) {
-    mVariables.peek().put(name, value);
+    mVariables.put(name, value);
   }
   
   public Obj get(String name) {
     // Walk up the scope chain.
-    for (Map<String, Obj> scope : mVariables) {
-      Obj value = scope.get(name);
+    Scope scope = this;
+    while (scope != null) {
+      Obj value = scope.mVariables.get(name);
       if (value != null) return value;
+      scope = scope.mParent;
     }
     
     // If we got here, it wasn't defined.
     return null;
   }
   
-  public void push() {
-    mVariables.push(new HashMap<String, Obj>());
+  public Scope push() {
+    return new Scope(this);
   }
   
-  public void pop() {
-    mVariables.pop();
+  public Scope pop() {
+    return mParent;
   }
   
-  private final Stack<Map<String, Obj>> mVariables =
-      new Stack<Map<String, Obj>>();
+  private Scope(Scope parent) {
+    mParent = parent;
+  }
+
+  private final Scope mParent;
+  private final Map<String, Obj> mVariables = new HashMap<String, Obj>();
 }
