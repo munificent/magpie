@@ -11,6 +11,10 @@ public class Scope {
     mParent = null;
   }
   
+  public Scope(Scope parent) {
+    mParent = parent;
+  }
+
   public void put(String name, Obj value) {
     mVariables.put(name, value);
   }
@@ -34,10 +38,6 @@ public class Scope {
   
   public Scope pop() {
     return mParent;
-  }
-  
-  private Scope(Scope parent) {
-    mParent = parent;
   }
 
   private final Scope mParent;

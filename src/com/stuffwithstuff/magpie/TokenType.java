@@ -30,6 +30,7 @@ public enum TokenType {
   DO,
   ELSE,
   END,
+  FN,
   IF,
   LET,
   MATCH,

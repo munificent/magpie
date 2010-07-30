@@ -2,26 +2,25 @@ package com.stuffwithstuff.magpie.ast;
 
 import java.util.List;
 
-import com.stuffwithstuff.magpie.type.*;
+import com.stuffwithstuff.magpie.type.FunctionType;
 
-// TODO(bob): Eliminate.
 /**
- * AST node for a function definition.
+ * AST node class for an function definition.
  */
-public class FunctionDefn {
-  public FunctionDefn(String name, FunctionType type, List<String> paramNames, Expr body) {
-    mName = name;
+public class FnExpr extends Expr {
+  public FnExpr(FunctionType type, List<String> paramNames, Expr body) {
     mType = type;
     mParamNames = paramNames;
     mBody = body;
   }
   
-  public String getName() { return mName; }
   public FunctionType getType() { return mType; }
   public List<String> getParamNames() { return mParamNames; }
   public Expr   getBody() { return mBody; }
-  
-  private final String mName;
+
+  @Override
+  public <T> T accept(ExprVisitor<T> visitor) { return visitor.visit(this); }
+
   private final FunctionType mType;
   private final List<String> mParamNames;
   private final Expr   mBody;

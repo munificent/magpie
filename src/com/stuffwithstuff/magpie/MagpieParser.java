@@ -21,13 +21,14 @@ public class MagpieParser extends Parser {
     List<FunctionDefn> functions = new ArrayList<FunctionDefn>();
     
     while (lookAhead(TokenType.NAME)) {
-      functions.add(function());
+      functions.add(topLevelFunction());
     }
     
     return new SourceFile(functions);
   }
   
-  private FunctionDefn function() {
+  // TODO(bob): This should go away once function definitions are expressions.
+  private FunctionDefn topLevelFunction() {
     String name = consume(TokenType.NAME).getString();
     
     List<String> paramNames = new ArrayList<String>();
@@ -41,7 +42,6 @@ public class MagpieParser extends Parser {
   
   private FunctionType functionType(List<String> paramNames) {
     // Parse the prototype: (foo Foo, bar Bar -> Bang)
-    // TODO(bob): Hack. Right now it doesn't support args or returns.
     consume(TokenType.LEFT_PAREN);
     
     TypeDecl paramType = null;
@@ -200,7 +200,19 @@ public class MagpieParser extends Parser {
       
       return new IfExpr(conditions, thenExpr, elseExpr);
     }
-    else return tuple();
+    else return function();
+  }
+  
+  // fn (a) print "hi"
+  private Expr function() {
+    if (match(TokenType.FN)) {
+      List<String> paramNames = new ArrayList<String>();
+      FunctionType type = functionType(paramNames);
+      
+      Expr body = parseBlock();
+      
+      return new FnExpr(type, paramNames, body);
+    } else return tuple();
   }
   
   // TODO(bob): There's a lot of overlap in the next four functions, but,

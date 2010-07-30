@@ -221,6 +221,7 @@ public class Lexer {
     if (text.equals("do")) return new Token(TokenType.DO);
     if (text.equals("else")) return new Token(TokenType.ELSE);
     if (text.equals("end")) return new Token(TokenType.END);
+    if (text.equals("fn")) return new Token(TokenType.FN);
     if (text.equals("if")) return new Token(TokenType.IF);
     if (text.equals("let")) return new Token(TokenType.LET);
     if (text.equals("match")) return new Token(TokenType.MATCH);

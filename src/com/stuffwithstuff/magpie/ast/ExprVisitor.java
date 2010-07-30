@@ -7,6 +7,7 @@ public interface ExprVisitor<T> {
   T visit(CallExpr expr);
   T visit(ClassExpr expr);
   T visit(DefineExpr expr);
+  T visit(FnExpr expr);
   T visit(IfExpr expr);
   T visit(IntExpr expr);
   T visit(MethodExpr expr);

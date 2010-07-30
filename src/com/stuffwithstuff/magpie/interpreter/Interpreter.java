@@ -14,10 +14,10 @@ public class Interpreter implements ExprVisitor<Obj> {
     }
     
     // Create a top-level scope.
-    mScope = new Scope();
+    mGlobalScope = new Scope();
 
     mMetaclass = new ClassObj();
-    mScope.put("Class", mMetaclass);
+    mGlobalScope.put("Class", mMetaclass);
     mMetaclass.addInstanceMethod("addInstanceField", ClassMethods.addInstanceField());
     mMetaclass.addInstanceMethod("instanceField?", ClassMethods.instanceFieldQ());
     mMetaclass.addInstanceMethod("name", ClassMethods.name());
@@ -39,6 +39,9 @@ public class Interpreter implements ExprVisitor<Obj> {
     stringClass.addInstanceMethod("+",     StringMethods.operatorPlus());
     stringClass.addInstanceMethod("print", StringMethods.print());
     
+    ClassObj fnClass = createClass("Function");
+    fnClass.addInstanceMethod("invoke", FnMethods.invoke());
+
     // Register the () object.
     mNothing = new Obj(findClass("Nothing"), null);
   }
@@ -76,6 +79,34 @@ public class Interpreter implements ExprVisitor<Obj> {
     return new Obj(findClass("String"), text);
   }
   
+  public Obj invoke(FunctionDefn function, Obj arg) {
+    return invoke(function.getParamNames(), function.getBody(), arg);
+  }
+  
+  public Obj invoke(List<String> paramNames, Expr body, Obj arg) {
+    // Create a new local scope for the function.
+    Scope oldScope = mScope;
+    mScope = new Scope(mGlobalScope);
+    
+    // Bind arguments to their parameter names.
+    if (paramNames.size() == 1) {
+      mScope.put(paramNames.get(0), arg);
+    } else if (paramNames.size() > 1) {
+      TupleObj tuple = (TupleObj)arg;
+      for (int i = 0; i < paramNames.size(); i++) {
+        mScope.put(paramNames.get(i), tuple.getFields().get(i));
+      }
+    }
+    
+    Obj result = evaluate(body);
+    
+    // Restore the previous scope.
+    mScope = oldScope;
+    
+    return result;
+  }
+
+  
   @Override
   public Obj visit(AssignExpr expr) {
     Obj value = evaluate(expr.getValue());
@@ -88,14 +119,14 @@ public class Interpreter implements ExprVisitor<Obj> {
     Obj result = null;
     
     // Create a lexical scope.
-    mScope.push();
+    mScope = mScope.push();
     
     // Evaluate all of the expressions and return the last.
     for (Expr thisExpr : expr.getExpressions()) {
       result = evaluate(thisExpr);
     }
     
-    mScope.pop();
+    mScope = mScope.pop();
     
     return result;
   }
@@ -123,7 +154,17 @@ public class Interpreter implements ExprVisitor<Obj> {
       String name = ((NameExpr)expr.getTarget()).getName();
       
       // Look for a local variable with the name.
-      // TODO(bob): Implement me.
+      Obj local = mScope.get(name);
+      if (local != null) {
+        if (!(local instanceof FnObj)) {
+          throw new InterpreterException("Can not call a local variable that does not contain a function.");
+        }
+        
+        // TODO(bob): May want to support a more generic callable interface
+        // eventually.
+        FnObj function = (FnObj)local;
+        return invoke(function.getParamNames(), function.getBody(), arg);
+      }
       
       // Look for a defined function with the name.
       FunctionDefn function = mFunctions.get(name);
@@ -136,7 +177,15 @@ public class Interpreter implements ExprVisitor<Obj> {
       return invokeMethod(name, arg, nothing());
     }
     
-    throw new InterpreterException("Couldn't interpret call.");
+    // Not an explicit named target, so evaluate it and see if it's callable.
+    Obj target = evaluate(expr.getTarget());
+    
+    if (!(target instanceof FnObj)) {
+      throw new InterpreterException("Can not call an expression that does not evaluate to a function.");
+    }
+
+    FnObj targetFn = (FnObj)target;
+    return invoke(targetFn.getParamNames(), targetFn.getBody(), arg);
   }
 
   @Override
@@ -157,6 +206,11 @@ public class Interpreter implements ExprVisitor<Obj> {
     Obj value = evaluate(expr.getValue());
     mScope.put(expr.getName(), value);
     return value;
+  }
+
+  @Override
+  public Obj visit(FnExpr expr) {
+    return new FnObj(findClass("Function"), expr.getParamNames(), expr.getBody());
   }
 
   @Override
@@ -242,41 +296,21 @@ public class Interpreter implements ExprVisitor<Obj> {
     return method.invoke(this, thisObj, arg);
   }
   
-  private Obj invoke(FunctionDefn function, Obj arg) {
-    // Create a new local scope for the function.
-    mScope = mScope.push();
-    
-    // Bind arguments to their parameter names.
-    if (function.getParamNames().size() == 1) {
-      mScope.put(function.getParamNames().get(0), arg);
-    } else if (function.getParamNames().size() > 1) {
-      TupleObj tuple = (TupleObj)arg;
-      for (int i = 0; i < function.getParamNames().size(); i++) {
-        mScope.put(function.getParamNames().get(i), tuple.getFields().get(i));
-      }
-    }
-    
-    Obj result = evaluate(function.getBody());
-    
-    // Restore the previous scope.
-    mScope = mScope.pop();
-    
-    return result;
-  }
-  
   private ClassObj createClass(String name) {
     ClassObj classObj = new ClassObj(mMetaclass, name);
-    mScope.put(name, classObj);
+    // TODO(bob): Classes don't always need to be in global scope.
+    mGlobalScope.put(name, classObj);
     return classObj;
   }
   
   private ClassObj findClass(String name) {
-    return (ClassObj)mScope.get(name);
+    return (ClassObj)mGlobalScope.get(name);
   }
   
   private final InterpreterHost mHost;
   private final Map<String, FunctionDefn> mFunctions =
       new HashMap<String, FunctionDefn>();
+  private Scope mGlobalScope;
   private Scope mScope;
   private final ClassObj mMetaclass;
   private final Obj mNothing;
