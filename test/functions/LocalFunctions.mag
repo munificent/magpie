@@ -1,33 +1,31 @@
-main (->)
-    // a function that takes an int and returns nothing
-    def a = fn (arg Int ->) print arg.toString
-    a 123 //: 123
-    
-    // a function that takes an int, prints, and returns unit
-    def c = fn (arg Int ->)
-            print "c"
-            print arg.toString
-        end
-    c 123 //: c
-          //: 123
-    
-    // a function that returns a string
-    def d = fn (-> String) "d" + "d"
-    print d () //: dd
-    
-    // a function that concatenates two strings
-    def e = fn (arg1 String, arg2 String -> String) arg1 + arg2
-    print e ("e1", "e2") //: e1e2
-    
-    // use in place
-    print (fn (arg1 String, arg2 String -> String) arg1 + arg2) ("f", "g") //: fg
-    
-    // nested local function
-    def f = fn (arg Int ->)
-            print ("outer " + arg.toString)
-            def g = fn (arg2 String ->) print ("inner " + arg2)
-            g arg.toString
-        end
-    f 2 //: outer 2
-        //: inner 2
-end
+// a function that takes an int and returns nothing
+def a = fn (arg Int ->) print arg.toString
+a 123 //: 123
+
+// a function that takes an int, prints, and returns unit
+def c = fn (arg Int ->)
+        print "c"
+        print arg.toString
+    end
+c 123 //: c
+      //: 123
+
+// a function that returns a string
+def d = fn (-> String) "d" + "d"
+print d () //: dd
+
+// a function that concatenates two strings
+def e = fn (arg1 String, arg2 String -> String) arg1 + arg2
+print e ("e1", "e2") //: e1e2
+
+// use in place
+print (fn (arg1 String, arg2 String -> String) arg1 + arg2) ("f", "g") //: fg
+
+// nested local function
+def f = fn (arg Int ->)
+        print ("outer " + arg.toString)
+        def g = fn (arg2 String ->) print ("inner " + arg2)
+        g arg.toString
+    end
+f 2 //: outer 2
+    //: inner 2

@@ -1,6 +1,4 @@
-main (->)
-    class Foo
-    end
-    
-    print Foo.name //: Foo
+class Foo
 end
+    
+print Foo.name //: Foo

@@ -3,7 +3,6 @@ package com.stuffwithstuff.magpie;
 import java.io.IOException;
 import java.util.*;
 
-import com.stuffwithstuff.magpie.ast.SourceFile;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.InterpreterHost;
 
@@ -26,11 +25,10 @@ public class TestInterpreterHost implements InterpreterHost {
       
       Lexer lexer = new Lexer(source);
       MagpieParser parser = new MagpieParser(lexer);
-      SourceFile file = parser.parse();
 
-      Interpreter interpreter = new Interpreter(this, file);
-      interpreter.runMain();
-      
+      Interpreter interpreter = new Interpreter(this);
+      interpreter.run(parser.parse());
+
       if (mExpectedOutput.size() > 0) {
         fail("Ran out of output when still expecting \"" +
             mExpectedOutput.poll() + "\".");

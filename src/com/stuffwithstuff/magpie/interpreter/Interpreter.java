@@ -5,17 +5,13 @@ import java.util.*;
 import com.stuffwithstuff.magpie.ast.*;
 
 public class Interpreter implements ExprVisitor<Obj> {
-  public Interpreter(InterpreterHost host, SourceFile sourceFile) {
+  public Interpreter(InterpreterHost host) {
     mHost = host;
-    
-    // Build a map of the defined functions.
-    for (FunctionDefn function : sourceFile.getFunctions()) {
-      mFunctions.put(function.getName(), function);
-    }
     
     // Create a top-level scope.
     mGlobalScope = new Scope();
-
+    mScope = mGlobalScope;
+    
     mMetaclass = new ClassObj();
     mGlobalScope.put("Class", mMetaclass);
     mMetaclass.addInstanceMethod("addInstanceField", ClassMethods.addInstanceField());
@@ -50,11 +46,22 @@ public class Interpreter implements ExprVisitor<Obj> {
     return expr.accept(this);
   }
   
-  public Obj runMain() {
-    FunctionDefn main = mFunctions.get("main");
-    if (main == null) throw new InterpreterException("Couldn't find a main method.");
+  public void run(List<Expr> expressions) {
+    // First, evaluate the expressions. This is the load time evaluation.
+    for (Expr expr : expressions) {
+      evaluate(expr);
+    }
     
-    return invoke(main, nothing());
+    // TODO(bob): Type-checking and static analysis goes here.
+    
+    // Now, if there is a main(), call it. This is the runtime.
+    Obj main = mScope.get("main");
+    if (main == null) return;
+    
+    if (!(main instanceof FnObj)) throw new InterpreterException("main is not a function.");
+    
+    FnObj mainFn = (FnObj)main;
+    invokeInCurrentScope(mainFn.getParamNames(), mainFn.getBody(), nothing());
   }
   
   public void print(String text) {
@@ -88,6 +95,19 @@ public class Interpreter implements ExprVisitor<Obj> {
     Scope oldScope = mScope;
     mScope = new Scope(mGlobalScope);
     
+    Obj result = invokeInCurrentScope(paramNames, body, arg);
+    
+    // Restore the previous scope.
+    mScope = oldScope;
+    
+    return result;
+  }
+  
+  private Obj invokeInCurrentScope(List<String> paramNames, Expr body, Obj arg) {
+    // Create a new local scope for the function.
+    Scope oldScope = mScope;
+    mScope = new Scope(mGlobalScope);
+    
     // Bind arguments to their parameter names.
     if (paramNames.size() == 1) {
       mScope.put(paramNames.get(0), arg);
@@ -105,7 +125,6 @@ public class Interpreter implements ExprVisitor<Obj> {
     
     return result;
   }
-
   
   @Override
   public Obj visit(AssignExpr expr) {
@@ -164,12 +183,6 @@ public class Interpreter implements ExprVisitor<Obj> {
         // eventually.
         FnObj function = (FnObj)local;
         return invoke(function.getParamNames(), function.getBody(), arg);
-      }
-      
-      // Look for a defined function with the name.
-      FunctionDefn function = mFunctions.get(name);
-      if (function != null) {
-        return invoke(function, arg);
       }
       
       // Try to call it as a method on the argument. In other words,
@@ -249,13 +262,13 @@ public class Interpreter implements ExprVisitor<Obj> {
 
   @Override
   public Obj visit(NameExpr expr) {
-    // See if it's a named variable.
+    // Look up a named variable.
     Obj variable = mScope.get(expr.getName());
-    if (variable != null) return variable;
-    
-    // Not a variable. Must be a call to function with an implicit ().
-    FunctionDefn function = mFunctions.get(expr.getName());
-    return invoke(function, nothing());
+    if (variable == null) {
+      throw new InterpreterException("Could not find a variable named \"" + expr.getName() + "\".");
+    }
+      
+    return variable;
   }
 
   @Override
@@ -308,8 +321,6 @@ public class Interpreter implements ExprVisitor<Obj> {
   }
   
   private final InterpreterHost mHost;
-  private final Map<String, FunctionDefn> mFunctions =
-      new HashMap<String, FunctionDefn>();
   private Scope mGlobalScope;
   private Scope mScope;
   private final ClassObj mMetaclass;

@@ -9,35 +9,15 @@ public class MagpieParser extends Parser {
     super(lexer);
   }
   
-  public SourceFile parse() {
-    SourceFile file = sourceFile();
-    
-    // Make sure we didn't stop early.
-    consume(TokenType.EOF);
-    return file;
-  }
-  
-  private SourceFile sourceFile() {
-    List<FunctionDefn> functions = new ArrayList<FunctionDefn>();
-    
-    while (lookAhead(TokenType.NAME)) {
-      functions.add(topLevelFunction());
-    }
-    
-    return new SourceFile(functions);
-  }
-  
-  // TODO(bob): This should go away once function definitions are expressions.
-  private FunctionDefn topLevelFunction() {
-    String name = consume(TokenType.NAME).getString();
-    
-    List<String> paramNames = new ArrayList<String>();
-    FunctionType type = functionType(paramNames);
-    
-    Expr body = parseBlock();
-    consume(TokenType.LINE);
-    
-    return new FunctionDefn(name, type, paramNames, body);
+  public List<Expr> parse() {
+    // Parse the entire file.
+    List<Expr> expressions = new ArrayList<Expr>();
+    do {
+      expressions.add(expression());
+      consume(TokenType.LINE);
+    } while (!match(TokenType.EOF));
+
+    return expressions;
   }
   
   /**

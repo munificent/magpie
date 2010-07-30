@@ -1,0 +1,142 @@
+(Note: All Magpie syntax in here is subject to radical change.)
+
+The core idea for Magpie redux is that it is a hyrid dynamic and static
+language. At its core, it's a relatively vanilla dynamic OOP language. It then
+layers a level of static analysis on top of that. There are a couple of core
+pieces:
+
+
+"Load time"
+-----------
+A core piece of statically-typed languages is that parts of the program text are
+considered to be eternally unchanging, as if they'd executed at some point in
+the distant past ("compile-time"). Consider this dumb C code:
+
+  main() {
+    if (isPointDefinedYet()) { printf("yes"); }
+  }
+
+  typedef struct Point {
+    int x, y;
+  }
+
+We understand that it will always print "yes" because the Point type is created
+before any "code" is "run". This is in contrast with dynamic languages where
+creating a type is itself an imperative action that can happen during the course
+of program flow.
+
+That level of flexibility is nice, but it makes it hard to do static analyis. To
+address this, Magpie has a concept of "load time" versus "run time". Magpie code
+is executed both at load time and at run time. For example:
+
+  main ()
+    print "run"
+  end
+  
+  print "load"
+  
+This program will print "load", then "run". All top-level code in a script is
+executed at loadtime. This includes imperative code like 'print "load"', as
+well as things that look declarative like the definition of "main", which
+defines a function but does not, of course, execute its body.
+
+Once all of the load time code has been executed, the environment is taken as a
+snapshot in time, and static analysis proceeds from the world henceforth. This
+means we can do fun stuff like defining types procedurally:
+
+  if DEBUG_MODE then
+    debugPrint (text String) print ("debug: " + text)
+  else
+    debugPrint (text String) // do nothing
+  end
+
+While at the same time doing "static" analysis of the results:
+
+  main ()
+    debugPrint 123 // load time error since debugPrint takes a string.
+  end
+
+So, the "compile" cycle for Magpie looks like:
+
+1. Load a script and all of the scripts it requires/includes/imports.
+2. Run the load time code in those scripts.*
+3. Perform static analysis on the code, generating load time errors as needed.
+4. If no errors, invoke main().
+
+* There are two subtle questions here: 1. In what order is the load time code
+  executed? 2. What happens when you call a function or use a type at load time
+  that is defined at load time? Until I get it up and running, I won't know the
+  answers for sure. For 1, I'm guessing it will be executed in dependency order.
+  For 2, it will probably just degrade to behaving like a dynamic language.
+
+
+User-defined flow analysis
+--------------------------
+One way to look at static typing is that its helpful because it lets the
+compiler tell us things about one part of a program that it can infer from
+other parts. It doesn't tells us if our program is *correct*, but it tells us
+if it's *consistent*. For example, if you define a function foo that takes an
+int and you pass it a string, the compiler doesn't know if the problem is in the
+definition or the callsite, just that the two are inconsistent.
+
+The idea with Magpie's static typing is to let that consistency analysis be
+something the user can use for their own purposes. A simple example is types.
+Magpie can infer the types of expressions and then ensure that they match up
+with the types you've declared that you expect in certain places (like in method
+signatures).
+
+A more flexible idea is typestate. In code, you can specify that a variable
+meets a certain predicate:
+
+  ensure foo isBar?
+
+isBar? is a predicate function that can do pretty much whatever it wants. In
+other places in code, you can indicate that you expect a given predicate to
+have been ensured:
+
+  require foo isBar?
+
+Flow analysis will then check to make sure that all paths that lead to a require
+have passed through an ensure first.
+
+
+Interfaces
+----------
+In addition to defining types, users can also define interfaces. An interface
+is a protocol, a set of methods some type must support. Magpie can then at load
+time determine which types support that interface, and perform flow analysis on
+them. (This is much like how Go works.)
+
+
+Open types
+----------
+One cool, but dangerous property of dynamic languages is openness: you can
+usually add additional fields or methods to an existing class or even object.
+Magpie allows this. For example, this defines a type:
+
+  class Point
+    x Int
+    y Int
+    
+    shared zero (-> Point) Point.new (x: 0 y: 0)
+    shared magnitude (-> Int) sqrt (x.squared + y.squared)
+  end
+
+And this extends it:
+
+  extend Point
+    z Int
+    
+    shared magnitude (-> Int) sqrt (x.squared + y.squared + z.squared)
+  end
+
+At load time, all of the extensions will be applied to the types they extend,
+creating the final type that will be analyzed against.*
+
+* I haven't decided what happens yet if extensions collide with each other.
+
+
+Dynamic types
+-------------
+Much like C# 4.0, Magpie allows you to define variables as dynamically typed in
+places where you want that flexibility.

@@ -1,10 +1,8 @@
-main (->)
-  // toString
-  123.toString.print //: 123
+// toString
+123.toString.print //: 123
 
-  // integer arithmetic
-  (1 + 2).toString.print //: 3
-  (5 - 3).toString.print //: 2
-  (3 * 4).toString.print //: 12
-  (6 / 3).toString.print //: 2
-end
+// integer arithmetic
+(1 + 2).toString.print //: 3
+(5 - 3).toString.print //: 2
+(3 * 4).toString.print //: 12
+(6 / 3).toString.print //: 2

@@ -1,21 +1,19 @@
-main (->)
-    do
-        def a = "first"
-        print a //: first
-    end
-    
-    // can change type
-    do
-        def a = 2
-        print a.toString //: 2
-    end
-    
-    // shadowing
-    def b = "outer"
-    print b //: outer
-    do
-      def b = "inner"
-      print b //: inner
-    end
-    print b //: outer
+do
+    def a = "first"
+    print a //: first
 end
+
+// can change type
+do
+    def a = 2
+    print a.toString //: 2
+end
+
+// shadowing
+def b = "outer"
+print b //: outer
+do
+    def b = "inner"
+    print b //: inner
+end
+print b //: outer
