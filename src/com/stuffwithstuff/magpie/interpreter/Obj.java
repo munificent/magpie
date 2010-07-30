@@ -1,34 +1,39 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Obj {
   /**
-   * Special constructor for the magical "Type" type object. This one is special
-   * because it needs to have its type reference point to itself.
+   * Special constructor for the magical "Class" class object. This one is
+   * special because it needs to have its class reference point to itself.
    */
   public Obj() {
-    mType = (TypeObj)this;
+    mClass = (ClassObj)this;
     mPrimitiveValue = null;
   }
   
-  public Obj(TypeObj type) {
-    mType = type;
+  public Obj(ClassObj classObj) {
+    mClass = classObj;
     mPrimitiveValue = null;
   }
   
-  public Obj(TypeObj type, Object primitiveValue) {
-    mType = type;
+  public Obj(ClassObj classObj, Object primitiveValue) {
+    mClass = classObj;
     mPrimitiveValue = primitiveValue;
   }
   
-  public TypeObj getType() { return mType; }
+  public ClassObj getClassObj() { return mClass; }
   public Object getPrimitiveValue() { return mPrimitiveValue; }
+  public Map<String, Method> getMethods() { return mMethods; }
   
   @Override
   public String toString() {
-    if (mPrimitiveValue == null) return "() : " + mType.toString();
-    return mPrimitiveValue.toString() + " : " + mType.toString();
+    if (mPrimitiveValue == null) return "() : " + mClass.toString();
+    return mPrimitiveValue.toString() + " : " + mClass.toString();
   }
   
-  private final TypeObj mType;
+  private final ClassObj mClass;
   private final Object mPrimitiveValue;
+  private final Map<String, Method> mMethods = new HashMap<String, Method>();
 }

@@ -10,7 +10,7 @@ public class StringMethods {
         String left = (String)thisObj.getPrimitiveValue();
         String right = (String)arg.getPrimitiveValue();
         
-        return new Obj(thisObj.getType(), left + right);
+        return new Obj(thisObj.getClassObj(), left + right);
       }
     };
   }

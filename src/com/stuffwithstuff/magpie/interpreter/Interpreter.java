@@ -13,29 +13,30 @@ public class Interpreter implements ExprVisitor<Obj> {
       mFunctions.put(function.getName(), function);
     }
     
-    mTypeType = new TypeObj();
-    mTypes.put("Type", mTypeType);
-    
-    // Register the built-in types.
-    createType("Unit");
-    createType("Bool");
-    
-    TypeObj intType = createType("Int");
-    intType.addMethod("+", IntMethods.operatorPlus());
-    intType.addMethod("-", IntMethods.operatorMinus());
-    intType.addMethod("*", IntMethods.operatorMultiply());
-    intType.addMethod("/", IntMethods.operatorDivide());
-    intType.addMethod("toString", IntMethods.toStringMethod());
-    
-    TypeObj stringType = createType("String");
-    stringType.addMethod("+",     StringMethods.operatorPlus());
-    stringType.addMethod("print", StringMethods.print());
-    
-    // Register the () object.
-    mUnit = new Obj(findType("Unit"), null);
-    
     // Create a top-level scope.
     mScope = new Scope();
+
+    mMetaclass = new ClassObj();
+    mScope.put("Class", mMetaclass);
+    mMetaclass.addInstanceMethod("addInstanceField", ClassMethods.addInstanceField());
+    
+    // Register the built-in types.
+    createClass("Unit");
+    createClass("Bool");
+    
+    ClassObj intType = createClass("Int");
+    intType.addInstanceMethod("+", IntMethods.operatorPlus());
+    intType.addInstanceMethod("-", IntMethods.operatorMinus());
+    intType.addInstanceMethod("*", IntMethods.operatorMultiply());
+    intType.addInstanceMethod("/", IntMethods.operatorDivide());
+    intType.addInstanceMethod("toString", IntMethods.toStringMethod());
+    
+    ClassObj stringType = createClass("String");
+    stringType.addInstanceMethod("+",     StringMethods.operatorPlus());
+    stringType.addInstanceMethod("print", StringMethods.print());
+    
+    // Register the () object.
+    mUnit = new Obj(findClass("Unit"), null);
   }
   
   public Obj evaluate(Expr expr) {
@@ -53,8 +54,12 @@ public class Interpreter implements ExprVisitor<Obj> {
     mHost.print(text);
   }
   
+  public Obj createInt(int value) {
+    return new Obj(findClass("Int"), value);
+  }
+  
   public Obj createString(String text) {
-    return new Obj(findType("String"), text);
+    return new Obj(findClass("String"), text);
   }
   
   /**
@@ -89,7 +94,7 @@ public class Interpreter implements ExprVisitor<Obj> {
 
   @Override
   public Obj visit(BoolExpr expr) {
-    return new Obj(findType("Bool"), expr.getValue());
+    return new Obj(findClass("Bool"), expr.getValue());
   }
 
   @Override
@@ -120,9 +125,7 @@ public class Interpreter implements ExprVisitor<Obj> {
       
       // Try to call it as a method on the argument. In other words,
       // "abs 123" is equivalent to "123.abs".
-      TypeObj argType = arg.getType();
-      Method method = argType.getMethod(name, argType);
-      return method.invoke(this, arg, unit());
+      return invokeMethod(name, arg, unit());
     }
     
     // TODO(bob): The type checker should prevent this from happening.
@@ -160,7 +163,7 @@ public class Interpreter implements ExprVisitor<Obj> {
 
   @Override
   public Obj visit(IntExpr expr) {
-    return new Obj(findType("Int"), expr.getValue());
+    return new Obj(findClass("Int"), expr.getValue());
   }
 
   @Override
@@ -168,9 +171,7 @@ public class Interpreter implements ExprVisitor<Obj> {
     Obj receiver = evaluate(expr.getReceiver());
     Obj arg = evaluate(expr.getArg());
     
-    Method method = receiver.getType().getMethod(expr.getMethod(),
-        arg.getType());
-    return method.invoke(this, receiver, arg);
+    return invokeMethod(expr.getMethod(), receiver, arg);
   }
 
   @Override
@@ -205,6 +206,23 @@ public class Interpreter implements ExprVisitor<Obj> {
     return mUnit;
   }
   
+  private Obj invokeMethod(String name, Obj thisObj, Obj arg) {
+    // See if the object itself has the method.
+    Method method = thisObj.getMethods().get(name);
+    
+    // If not, see if it's type has an instance method for it.
+    if (method == null) {
+      ClassObj thisClass = thisObj.getClassObj();
+      method = thisClass.getInstanceMethods().get(name);
+    }
+    
+    if (method == null) {
+      throw new RuntimeException("Could not find a method \"" + name + "\" on " + thisObj);
+    }
+    
+    return method.invoke(this, thisObj, arg);
+  }
+  
   private Obj invoke(FunctionDefn function, Obj arg) {
     // Create a new local scope for the function.
     mScope = mScope.push();
@@ -227,21 +245,20 @@ public class Interpreter implements ExprVisitor<Obj> {
     return result;
   }
   
-  private TypeObj createType(String name) {
-    TypeObj typeObj = new TypeObj(mTypeType, name);
-    mTypes.put(name, typeObj);
-    return typeObj;
+  private ClassObj createClass(String name) {
+    ClassObj classObj = new ClassObj(mMetaclass, name);
+    mScope.put(name, classObj);
+    return classObj;
   }
   
-  private TypeObj findType(String name) {
-    return mTypes.get(name);
+  private ClassObj findClass(String name) {
+    return (ClassObj)mScope.get(name);
   }
   
   private final InterpreterHost mHost;
   private final Map<String, FunctionDefn> mFunctions =
       new HashMap<String, FunctionDefn>();
-  private final Map<String, TypeObj> mTypes = new HashMap<String, TypeObj>();
   private Scope mScope;
-  private final TypeObj mTypeType;
+  private final ClassObj mMetaclass;
   private final Obj mUnit;
 }
