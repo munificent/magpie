@@ -45,6 +45,7 @@ public final class Token {
 
             case ARROW: return "->";
             case CASE: return "case";
+            case CLASS: return "class";
             case DEF: return "def";
             case DO: return "do";
             case ELSE: return "else";

@@ -19,24 +19,28 @@ public class Interpreter implements ExprVisitor<Obj> {
     mMetaclass = new ClassObj();
     mScope.put("Class", mMetaclass);
     mMetaclass.addInstanceMethod("addInstanceField", ClassMethods.addInstanceField());
+    mMetaclass.addInstanceMethod("instanceField?", ClassMethods.instanceFieldQ());
+    mMetaclass.addInstanceMethod("name", ClassMethods.name());
     
     // Register the built-in types.
-    createClass("Unit");
-    createClass("Bool");
+    createClass("Nothing");
     
-    ClassObj intType = createClass("Int");
-    intType.addInstanceMethod("+", IntMethods.operatorPlus());
-    intType.addInstanceMethod("-", IntMethods.operatorMinus());
-    intType.addInstanceMethod("*", IntMethods.operatorMultiply());
-    intType.addInstanceMethod("/", IntMethods.operatorDivide());
-    intType.addInstanceMethod("toString", IntMethods.toStringMethod());
+    ClassObj boolClass = createClass("Bool");
+    boolClass.addInstanceMethod("toString", BoolMethods.toStringMethod());
     
-    ClassObj stringType = createClass("String");
-    stringType.addInstanceMethod("+",     StringMethods.operatorPlus());
-    stringType.addInstanceMethod("print", StringMethods.print());
+    ClassObj intClass = createClass("Int");
+    intClass.addInstanceMethod("+", IntMethods.operatorPlus());
+    intClass.addInstanceMethod("-", IntMethods.operatorMinus());
+    intClass.addInstanceMethod("*", IntMethods.operatorMultiply());
+    intClass.addInstanceMethod("/", IntMethods.operatorDivide());
+    intClass.addInstanceMethod("toString", IntMethods.toStringMethod());
+    
+    ClassObj stringClass = createClass("String");
+    stringClass.addInstanceMethod("+",     StringMethods.operatorPlus());
+    stringClass.addInstanceMethod("print", StringMethods.print());
     
     // Register the () object.
-    mNothing = new Obj(findClass("Unit"), null);
+    mNothing = new Obj(findClass("Nothing"), null);
   }
   
   public Obj evaluate(Expr expr) {
@@ -45,7 +49,7 @@ public class Interpreter implements ExprVisitor<Obj> {
   
   public Obj runMain() {
     FunctionDefn main = mFunctions.get("main");
-    if (main == null) throw new IllegalStateException("Couldn't find a main method.");
+    if (main == null) throw new InterpreterException("Couldn't find a main method.");
     
     return invoke(main, nothing());
   }
@@ -54,6 +58,16 @@ public class Interpreter implements ExprVisitor<Obj> {
     mHost.print(text);
   }
   
+  /**
+   * Gets the single value () of type Nothing.
+   * @return
+   */
+  public Obj nothing() { return mNothing; }
+
+  public Obj createBool(boolean value) {
+    return new Obj(findClass("Bool"), value);
+  }
+
   public Obj createInt(int value) {
     return new Obj(findClass("Int"), value);
   }
@@ -62,12 +76,6 @@ public class Interpreter implements ExprVisitor<Obj> {
     return new Obj(findClass("String"), text);
   }
   
-  /**
-   * Gets the single value () of type Nothing.
-   * @return
-   */
-  public Obj nothing() { return mNothing; }
-
   @Override
   public Obj visit(AssignExpr expr) {
     Obj value = evaluate(expr.getValue());
@@ -128,8 +136,19 @@ public class Interpreter implements ExprVisitor<Obj> {
       return invokeMethod(name, arg, nothing());
     }
     
-    // TODO(bob): The type checker should prevent this from happening.
-    throw new RuntimeException("Couldn't interpret call.");
+    throw new InterpreterException("Couldn't interpret call.");
+  }
+
+  @Override
+  public Obj visit(ClassExpr expr) {
+    ClassObj classObj = new ClassObj(mMetaclass, expr.getName());
+    
+    for (String field : expr.getFields()) {
+      classObj.addInstanceField(field);
+    }
+    
+    mScope.put(expr.getName(), classObj);
+    return classObj;
   }
 
   @Override
@@ -217,7 +236,7 @@ public class Interpreter implements ExprVisitor<Obj> {
     }
     
     if (method == null) {
-      throw new RuntimeException("Could not find a method \"" + name + "\" on " + thisObj);
+      throw new InterpreterException("Could not find a method \"" + name + "\" on " + thisObj);
     }
     
     return method.invoke(this, thisObj, arg);

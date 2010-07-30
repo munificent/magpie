@@ -107,7 +107,29 @@ public class MagpieParser extends Parser {
       Expr value = flowControl();
       return new DefineExpr(isMutable, name, value);
     }
-    else return assignment();
+    else if (match(TokenType.CLASS)) {
+      // Parse the class name line.
+      String name = consume(TokenType.NAME).getString();
+      consume(TokenType.LINE);
+      
+      // Parse the body.
+      Set<String> fields = new HashSet<String>();
+      
+      // TODO(bob): Need to add support for methods.
+      while (!match(TokenType.END)){
+        String fieldName = consume(TokenType.NAME).getString();
+        
+        if (fields.contains(fieldName)) {
+          throw new ParseException("The class \"" + name + "\" already " +
+              "contains a field named \"" + fieldName + "\".");
+        }
+        
+        fields.add(fieldName);
+        consume(TokenType.LINE);
+      }
+      
+      return new ClassExpr(name, fields);
+    } else return assignment();
   }
 
   /* TODO(bob): Need to figure out how the syntax for assignment is going to be

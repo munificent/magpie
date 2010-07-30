@@ -1,0 +1,6 @@
+main (->)
+    class Foo
+    end
+    
+    print Foo.name //: Foo
+end

@@ -29,6 +29,7 @@ public class ClassObj extends Obj {
   
   public String getName() { return mName; }
   
+  public Map<String, Boolean> getInstanceFields() { return mInstanceFields; }
   public Map<String, Method> getInstanceMethods() { return mInstanceMethods; }
   
   public void addInstanceField(String name) {

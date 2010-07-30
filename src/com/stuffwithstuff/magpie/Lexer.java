@@ -216,6 +216,7 @@ public class Lexer {
     if (text.equals("true")) return new Token(TokenType.BOOL, true);
     if (text.equals("false")) return new Token(TokenType.BOOL, false);
     if (text.equals("case")) return new Token(TokenType.CASE);
+    if (text.equals("class")) return new Token(TokenType.CLASS);
     if (text.equals("def")) return new Token(TokenType.DEF);
     if (text.equals("do")) return new Token(TokenType.DO);
     if (text.equals("else")) return new Token(TokenType.ELSE);
