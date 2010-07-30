@@ -1,0 +1,22 @@
+// single line
+def a = 0
+
+while a < 5 do a = a + 1
+
+print a.toString            //: 5
+
+// multi-line body
+a = 0
+
+while a < 5 do
+    print a.toString
+    a = a + 1
+end
+//: 0
+//: 1
+//: 2
+//: 3
+//: 4
+
+print a.toString
+//: 5

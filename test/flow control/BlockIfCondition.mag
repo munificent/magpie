@@ -1,0 +1,5 @@
+// block if condition
+if
+    print "condition"   //: condition
+    true
+then print "passed"     //: passed

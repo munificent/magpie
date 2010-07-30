@@ -1,0 +1,27 @@
+// single line
+if true then print "true 1"     //: true 1
+if false then print "false 1"
+
+// multi-line body
+if true then
+    print "true 2"              //: true 2
+    print "true 2"              //: true 2
+end
+
+if false then
+    print "false 2"
+    print "false 2"
+end
+
+// then on next line
+if false
+then print "false 3"
+
+if true
+then print "true 3"             //: true 3
+    
+// flow control inside condition
+def a = true
+if
+    if a then false else true
+then print "true" else print "false"    //: false

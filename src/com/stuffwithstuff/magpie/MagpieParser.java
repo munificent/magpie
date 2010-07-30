@@ -20,70 +20,6 @@ public class MagpieParser extends Parser {
     return expressions;
   }
   
-  /**
-   * Parses a function type declaration. Valid examples include:
-   * ()             // takes nothing, returns nothing
-   * (a)            // takes a single dynamic, returns nothing
-   * (->)           // takes nothing, returns a dynamic
-   * (a Int -> Int) // takes and returns an int
-   * 
-   * @param paramNames After calling, will contain the list of parameter names.
-   *                   If this is null, no parameter names will be parsed.
-   *                   (This is used for inner function type declarations like
-   *                   fn (Int, String ->).)
-   * @return The parsed function type.
-   */
-  private FunctionType functionType(List<String> paramNames) {
-    // Parse the prototype: (foo Foo, bar Bar -> Bang)
-    consume(TokenType.LEFT_PAREN);
-    
-    // Parse the parameters, if any.
-    List<TypeDecl> paramTypes = new ArrayList<TypeDecl>();
-    while (!lookAheadAny(TokenType.ARROW, TokenType.RIGHT_PAREN)){
-      if (paramNames != null) {
-        paramNames.add(consume(TokenType.NAME).getString());
-      }
-      
-      paramTypes.add(typeDeclaration());
-      
-      if (!match(TokenType.COMMA)) break;
-    }
-    
-    // Aggregate the parameter types into a single type.
-    TypeDecl paramType = null;
-    switch (paramTypes.size()) {
-    case 0:  paramType = TypeDecl.nothing(); break;
-    case 1:  paramType = paramTypes.get(0); break;
-    default: paramType = new TupleType(paramTypes);
-    }
-    
-    // Parse the return type, if any.
-    TypeDecl returnType = null;
-    if (match(TokenType.RIGHT_PAREN)) {
-      // No return type, so infer Nothing.
-      returnType = TypeDecl.nothing();
-    } else {
-      consume(TokenType.ARROW);
-      
-      if (lookAhead(TokenType.RIGHT_PAREN)) {
-        // An arrow, but no return type, so infer dynamic.
-        returnType = TypeDecl.dynamic();
-      } else {
-        returnType = typeDeclaration();
-      }
-      consume(TokenType.RIGHT_PAREN);
-    }
-    
-    return new FunctionType(paramType, returnType);
-  }
-  
-  private TypeDecl typeDeclaration() {
-    // TODO(bob): Support more than just named types.
-    String name = consume(TokenType.NAME).getString();
-    // TODO(bob): Check for built-in type names like Int?
-    return new NamedType(name);
-  }
-  
   private Expr expression() {
     return definition();
   }
@@ -205,6 +141,77 @@ public class MagpieParser extends Parser {
       }
       
       return new IfExpr(conditions, thenExpr, elseExpr);
+    } else if (lookAheadAny(TokenType.WHILE, TokenType.FOR)) {
+      // "while" and "for" loop.
+      
+      // a for loop is desugared from this:
+      //
+      //   for a <- foo do
+      //     print a
+      //   end
+      //
+      // to:
+      //
+      //   do
+      //     def __a_gen = foo.generate
+      //     while __a_gen.next do
+      //       def a = __a_gen.current
+      //       print a
+      //     end
+      //   end
+      
+      List<Expr> generators = new ArrayList<Expr>();
+      List<Expr> initializers = new ArrayList<Expr>();
+      
+      List<Expr> conditions = new ArrayList<Expr>();
+      
+      while (match(TokenType.WHILE) || match(TokenType.FOR)) {
+        if (last(1).getType() == TokenType.WHILE) {
+          conditions.add(expression());
+        } else {
+          String variable = consume(TokenType.NAME).getString();
+          consume(TokenType.EQUALS);
+          Expr generator = expression();
+          
+          // Initialize the generator before the loop.
+          String generatorVar = variable + " gen";
+          generators.add(new DefineExpr(false, generatorVar,
+              new MethodExpr(generator, "generate", new NothingExpr())));
+          
+          // The the condition expression just increments the generator.
+          conditions.add(new MethodExpr(
+              new NameExpr(generatorVar), "next", new NothingExpr()));
+          
+          // In the body of the loop, we need to initialize the variable.
+          initializers.add(new DefineExpr(false, variable,
+              new MethodExpr(new NameExpr(generatorVar), "current", new NothingExpr())));
+        }
+        match(TokenType.LINE); // Optional line after a clause.
+      }
+      
+      consume(TokenType.DO);
+      Expr body = parseBlock();
+      
+      // If there are "for" loops, mix in the generators and variables.
+      if (generators.size() > 0) {
+        // Create the variables inside the loop.
+        List<Expr> innerBlock = new ArrayList<Expr>();
+        for (Expr initializer : initializers) innerBlock.add(initializer);
+
+        // Then execute the main body.
+        innerBlock.add(body);
+        body = new BlockExpr(innerBlock);
+        
+        // Create the generators outside the loop.
+        List<Expr> outerBlock = new ArrayList<Expr>();
+        for (Expr generator : generators) outerBlock.add(generator);
+        
+        // Then execute the loop.
+        outerBlock.add(new LoopExpr(conditions, body));
+        return new BlockExpr(outerBlock);
+      }
+      
+      return new LoopExpr(conditions, body);
     }
     else return function();
   }
@@ -249,7 +256,7 @@ public class MagpieParser extends Parser {
         consume(TokenType.LINE);
       } while (!lookAhead(TokenType.THEN));
       
-      consume(TokenType.LINE);
+      match(TokenType.LINE);
 
       return new BlockExpr(exprs);
     } else {
@@ -269,14 +276,6 @@ public class MagpieParser extends Parser {
         consume(TokenType.LINE);
       } while (!lookAhead(TokenType.ELSE) && !match(TokenType.END));
       
-      if (lookAhead(TokenType.ELSE)) {
-        // A newline is allowed before else
-        match(TokenType.LINE);
-      } else {
-        // A newline is required after end
-        consume(TokenType.LINE);
-      }
-      
       return new BlockExpr(exprs);
     } else {
       return expression();
@@ -291,9 +290,6 @@ public class MagpieParser extends Parser {
         exprs.add(expression());
         consume(TokenType.LINE);
       } while (!match(TokenType.END));
-      
-      // A newline is required after end
-      consume(TokenType.LINE);
       
       return new BlockExpr(exprs);
     } else {
@@ -411,5 +407,69 @@ public class MagpieParser extends Parser {
     }
     
     return null;
+  }
+
+  /**
+   * Parses a function type declaration. Valid examples include:
+   * ()             // takes nothing, returns nothing
+   * (a)            // takes a single dynamic, returns nothing
+   * (->)           // takes nothing, returns a dynamic
+   * (a Int -> Int) // takes and returns an int
+   * 
+   * @param paramNames After calling, will contain the list of parameter names.
+   *                   If this is null, no parameter names will be parsed.
+   *                   (This is used for inner function type declarations like
+   *                   fn (Int, String ->).)
+   * @return The parsed function type.
+   */
+  private FunctionType functionType(List<String> paramNames) {
+    // Parse the prototype: (foo Foo, bar Bar -> Bang)
+    consume(TokenType.LEFT_PAREN);
+    
+    // Parse the parameters, if any.
+    List<TypeDecl> paramTypes = new ArrayList<TypeDecl>();
+    while (!lookAheadAny(TokenType.ARROW, TokenType.RIGHT_PAREN)){
+      if (paramNames != null) {
+        paramNames.add(consume(TokenType.NAME).getString());
+      }
+      
+      paramTypes.add(typeDeclaration());
+      
+      if (!match(TokenType.COMMA)) break;
+    }
+    
+    // Aggregate the parameter types into a single type.
+    TypeDecl paramType = null;
+    switch (paramTypes.size()) {
+    case 0:  paramType = TypeDecl.nothing(); break;
+    case 1:  paramType = paramTypes.get(0); break;
+    default: paramType = new TupleType(paramTypes);
+    }
+    
+    // Parse the return type, if any.
+    TypeDecl returnType = null;
+    if (match(TokenType.RIGHT_PAREN)) {
+      // No return type, so infer Nothing.
+      returnType = TypeDecl.nothing();
+    } else {
+      consume(TokenType.ARROW);
+      
+      if (lookAhead(TokenType.RIGHT_PAREN)) {
+        // An arrow, but no return type, so infer dynamic.
+        returnType = TypeDecl.dynamic();
+      } else {
+        returnType = typeDeclaration();
+      }
+      consume(TokenType.RIGHT_PAREN);
+    }
+    
+    return new FunctionType(paramType, returnType);
+  }
+  
+  private TypeDecl typeDeclaration() {
+    // TODO(bob): Support more than just named types.
+    String name = consume(TokenType.NAME).getString();
+    // TODO(bob): Check for built-in type names like Int?
+    return new NamedType(name);
   }
 }

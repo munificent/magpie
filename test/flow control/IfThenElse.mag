@@ -1,0 +1,33 @@
+// single line
+if true then print "true 1" else print "false 1"    //: true 1
+if false then print "true 2" else print "false 2"   //: false 2
+
+// multi-line then body
+if true then
+    print "true 3"                                  //: true 3
+    print "true 4"                                  //: true 4
+else print "false 3"
+
+if false then
+    print "true 5"
+    print "true 6"
+else print "false 5"                                //: false 5
+
+// multi-line else body
+if true then print "true 7"                         //: true 7
+else
+    print "false 7"
+    print "false 8"
+end
+
+if false then print "true 9"
+else
+    print "false 9"                                 //: false 9
+    print "false 10"                                //: false 10
+end
+
+// then on next line
+if false
+then print "true 11"
+else print "false 11"                               //: false 11
+

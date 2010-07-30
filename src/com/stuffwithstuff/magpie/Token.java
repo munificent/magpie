@@ -50,6 +50,7 @@ public final class Token {
             case DO: return "do";
             case ELSE: return "else";
             case END: return "end";
+            case FOR: return "for";
             case FN: return "fn";
             case IF: return "if";
             case LET: return "let";

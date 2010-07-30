@@ -1,0 +1,30 @@
+// one line
+for i = 3.times do print i.toString
+//: 0
+//: 1
+//: 2
+
+// block body
+for i = 3.times do
+    print i.toString
+end
+//: 0
+//: 1
+//: 2
+
+// parallel iterators
+for i = 10.to 60 for j = 5.to 12
+for k = 3.times do
+    print i.toString
+    print j.toString
+    print k.toString
+end
+//: 10
+//: 5
+//: 0
+//: 11
+//: 6
+//: 1
+//: 12
+//: 7
+//: 2

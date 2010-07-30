@@ -48,6 +48,72 @@ public class IntMethods {
     };
   }
 
+  public static Method operatorEqual() {
+    return new Method() {
+      public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+        int left = ((Integer)thisObj.getPrimitiveValue()).intValue();
+        int right = ((Integer)arg.getPrimitiveValue()).intValue();
+        
+        return interpreter.createBool(left == right);
+      }
+    };
+  }
+
+  public static Method operatorNotEqual() {
+    return new Method() {
+      public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+        int left = ((Integer)thisObj.getPrimitiveValue()).intValue();
+        int right = ((Integer)arg.getPrimitiveValue()).intValue();
+        
+        return interpreter.createBool(left != right);
+      }
+    };
+  }
+  
+  public static Method operatorLessThan() {
+    return new Method() {
+      public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+        int left = ((Integer)thisObj.getPrimitiveValue()).intValue();
+        int right = ((Integer)arg.getPrimitiveValue()).intValue();
+        
+        return interpreter.createBool(left < right);
+      }
+    };
+  }
+
+  public static Method operatorGreaterThan() {
+    return new Method() {
+      public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+        int left = ((Integer)thisObj.getPrimitiveValue()).intValue();
+        int right = ((Integer)arg.getPrimitiveValue()).intValue();
+        
+        return interpreter.createBool(left > right);
+      }
+    };
+  }
+
+  public static Method operatorLessThanOrEqual() {
+    return new Method() {
+      public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+        int left = ((Integer)thisObj.getPrimitiveValue()).intValue();
+        int right = ((Integer)arg.getPrimitiveValue()).intValue();
+        
+        return interpreter.createBool(left <= right);
+      }
+    };
+  }
+
+  public static Method operatorGreaterThanOrEqual() {
+    return new Method() {
+      public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+        int left = ((Integer)thisObj.getPrimitiveValue()).intValue();
+        int right = ((Integer)arg.getPrimitiveValue()).intValue();
+        
+        return interpreter.createBool(left >= right);
+      }
+    };
+  }
+
   public static Method toStringMethod() {
     return new Method() {
       public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {

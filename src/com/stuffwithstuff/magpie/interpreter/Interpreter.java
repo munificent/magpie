@@ -13,7 +13,7 @@ public class Interpreter implements ExprVisitor<Obj> {
     mScope = mGlobalScope;
     
     mMetaclass = new ClassObj();
-    mGlobalScope.put("Class", mMetaclass);
+    mScope.define("Class", mMetaclass);
     mMetaclass.addInstanceMethod("addInstanceField", ClassMethods.addInstanceField());
     mMetaclass.addInstanceMethod("instanceField?", ClassMethods.instanceFieldQ());
     mMetaclass.addInstanceMethod("name", ClassMethods.name());
@@ -30,6 +30,12 @@ public class Interpreter implements ExprVisitor<Obj> {
     intClass.addInstanceMethod("*", IntMethods.operatorMultiply());
     intClass.addInstanceMethod("/", IntMethods.operatorDivide());
     intClass.addInstanceMethod("toString", IntMethods.toStringMethod());
+    intClass.addInstanceMethod("==", IntMethods.operatorEqual());
+    intClass.addInstanceMethod("!=", IntMethods.operatorNotEqual());
+    intClass.addInstanceMethod("<",  IntMethods.operatorLessThan());
+    intClass.addInstanceMethod(">",  IntMethods.operatorGreaterThan());
+    intClass.addInstanceMethod("<=", IntMethods.operatorLessThanOrEqual());
+    intClass.addInstanceMethod(">=", IntMethods.operatorGreaterThanOrEqual());
     
     ClassObj stringClass = createClass("String");
     stringClass.addInstanceMethod("+",     StringMethods.operatorPlus());
@@ -110,11 +116,11 @@ public class Interpreter implements ExprVisitor<Obj> {
     
     // Bind arguments to their parameter names.
     if (paramNames.size() == 1) {
-      mScope.put(paramNames.get(0), arg);
+      mScope.define(paramNames.get(0), arg);
     } else if (paramNames.size() > 1) {
       TupleObj tuple = (TupleObj)arg;
       for (int i = 0; i < paramNames.size(); i++) {
-        mScope.put(paramNames.get(i), tuple.getFields().get(i));
+        mScope.define(paramNames.get(i), tuple.getFields().get(i));
       }
     }
     
@@ -129,7 +135,7 @@ public class Interpreter implements ExprVisitor<Obj> {
   @Override
   public Obj visit(AssignExpr expr) {
     Obj value = evaluate(expr.getValue());
-    mScope.put(expr.getName(), value);
+    mScope.assign(expr.getName(), value);
     return value;
   }
 
@@ -209,7 +215,7 @@ public class Interpreter implements ExprVisitor<Obj> {
       classObj.addInstanceField(field);
     }
     
-    mScope.put(expr.getName(), classObj);
+    mScope.define(expr.getName(), classObj);
     return classObj;
   }
 
@@ -217,7 +223,7 @@ public class Interpreter implements ExprVisitor<Obj> {
   public Obj visit(DefineExpr expr) {
     // TODO(bob): need to handle mutability
     Obj value = evaluate(expr.getValue());
-    mScope.put(expr.getName(), value);
+    mScope.define(expr.getName(), value);
     return value;
   }
 
@@ -250,6 +256,31 @@ public class Interpreter implements ExprVisitor<Obj> {
   @Override
   public Obj visit(IntExpr expr) {
     return new Obj(findClass("Int"), expr.getValue());
+  }
+
+  @Override
+  public Obj visit(LoopExpr expr) {
+    boolean done = false;
+    while (true) {
+      // Evaluate the conditions.
+      for (Expr conditionExpr : expr.getConditions()) {
+        // See if the while clause is still true.
+        Obj condition = evaluate(conditionExpr);
+        if (((Boolean)condition.getPrimitiveValue()).booleanValue() != true) {
+          done = true;
+          break;
+        }
+      }
+      
+      // If any clause failed, stop the loop.
+      if (done) break;
+      
+      evaluate(expr.getBody());
+    }
+    
+    // TODO(bob): It would be cool if loops could have "else" clauses and then
+    // reliably return a value.
+    return nothing();
   }
 
   @Override
@@ -311,8 +342,7 @@ public class Interpreter implements ExprVisitor<Obj> {
   
   private ClassObj createClass(String name) {
     ClassObj classObj = new ClassObj(mMetaclass, name);
-    // TODO(bob): Classes don't always need to be in global scope.
-    mGlobalScope.put(name, classObj);
+    mScope.define(name, classObj);
     return classObj;
   }
   

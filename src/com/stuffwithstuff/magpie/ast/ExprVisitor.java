@@ -10,6 +10,7 @@ public interface ExprVisitor<T> {
   T visit(FnExpr expr);
   T visit(IfExpr expr);
   T visit(IntExpr expr);
+  T visit(LoopExpr expr);
   T visit(MethodExpr expr);
   T visit(NameExpr expr);
   T visit(NothingExpr expr);
