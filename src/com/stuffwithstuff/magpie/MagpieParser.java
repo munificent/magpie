@@ -160,7 +160,7 @@ public class MagpieParser extends Parser {
       if (match(TokenType.ELSE) || match(TokenType.LINE, TokenType.ELSE)) {
         elseExpr = parseElseBlock();
       } else {
-        elseExpr = new UnitExpr();
+        elseExpr = new NothingExpr();
       }
       
       return new IfExpr(conditions, thenExpr, elseExpr);
@@ -328,7 +328,7 @@ public class MagpieParser extends Parser {
       Expr arg = call();
       if (arg == null) {
         // If the argument is omitted, infer ()
-        arg = new UnitExpr();
+        arg = new NothingExpr();
       }
       receiver = new MethodExpr(receiver, method, arg);
     }
@@ -350,7 +350,7 @@ public class MagpieParser extends Parser {
     } else if (match(TokenType.NAME)) {
       return new NameExpr(last(1).getString());
     } else if (match(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)) {
-      return new UnitExpr();
+      return new NothingExpr();
     } else if (match(TokenType.LEFT_PAREN)) {
       Expr expr = expression();
       consume(TokenType.RIGHT_PAREN);

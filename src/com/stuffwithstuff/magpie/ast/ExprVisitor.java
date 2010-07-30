@@ -10,7 +10,7 @@ public interface ExprVisitor<T> {
   T visit(IntExpr expr);
   T visit(MethodExpr expr);
   T visit(NameExpr expr);
+  T visit(NothingExpr expr);
   T visit(StringExpr expr);
   T visit(TupleExpr expr);
-  T visit(UnitExpr expr);
 }

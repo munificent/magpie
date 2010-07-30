@@ -22,7 +22,7 @@ public class StringMethods {
         
         interpreter.print(string);
         
-        return interpreter.unit();
+        return interpreter.nothing();
       }
     };
   }

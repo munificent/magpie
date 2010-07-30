@@ -16,7 +16,7 @@ public class CallExpr extends Expr {
     builder.append(mTarget)
            .append("(");
     
-    if (!(mArg instanceof UnitExpr)) builder.append(mArg);
+    if (!(mArg instanceof NothingExpr)) builder.append(mArg);
     
     builder.append(")");
     return builder.toString();

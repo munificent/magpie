@@ -1,7 +1,8 @@
-package com.stuffwithstuff.magpie.interpreter;
+package com.stuffwithstuff.magpie.type;
 
 import com.stuffwithstuff.magpie.ast.*;
 
+/*
 public class TypeChecker implements ExprVisitor<Boolean> {
 
   @Override
@@ -75,5 +76,5 @@ public class TypeChecker implements ExprVisitor<Boolean> {
     // TODO Auto-generated method stub
     return null;
   }
-
 }
+*/

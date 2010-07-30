@@ -36,7 +36,7 @@ public class Interpreter implements ExprVisitor<Obj> {
     stringType.addInstanceMethod("print", StringMethods.print());
     
     // Register the () object.
-    mUnit = new Obj(findClass("Unit"), null);
+    mNothing = new Obj(findClass("Unit"), null);
   }
   
   public Obj evaluate(Expr expr) {
@@ -47,7 +47,7 @@ public class Interpreter implements ExprVisitor<Obj> {
     FunctionDefn main = mFunctions.get("main");
     if (main == null) throw new IllegalStateException("Couldn't find a main method.");
     
-    return invoke(main, unit());
+    return invoke(main, nothing());
   }
   
   public void print(String text) {
@@ -63,10 +63,10 @@ public class Interpreter implements ExprVisitor<Obj> {
   }
   
   /**
-   * Gets the single value () of type Unit.
+   * Gets the single value () of type Nothing.
    * @return
    */
-  public Obj unit() { return mUnit; }
+  public Obj nothing() { return mNothing; }
 
   @Override
   public Obj visit(AssignExpr expr) {
@@ -125,7 +125,7 @@ public class Interpreter implements ExprVisitor<Obj> {
       
       // Try to call it as a method on the argument. In other words,
       // "abs 123" is equivalent to "123.abs".
-      return invokeMethod(name, arg, unit());
+      return invokeMethod(name, arg, nothing());
     }
     
     // TODO(bob): The type checker should prevent this from happening.
@@ -182,7 +182,12 @@ public class Interpreter implements ExprVisitor<Obj> {
     
     // Not a variable. Must be a call to function with an implicit ().
     FunctionDefn function = mFunctions.get(expr.getName());
-    return invoke(function, unit());
+    return invoke(function, nothing());
+  }
+
+  @Override
+  public Obj visit(NothingExpr expr) {
+    return mNothing;
   }
 
   @Override
@@ -199,11 +204,6 @@ public class Interpreter implements ExprVisitor<Obj> {
     }
     
     return new TupleObj(fields);
-  }
-
-  @Override
-  public Obj visit(UnitExpr expr) {
-    return mUnit;
   }
   
   private Obj invokeMethod(String name, Obj thisObj, Obj arg) {
@@ -260,5 +260,5 @@ public class Interpreter implements ExprVisitor<Obj> {
       new HashMap<String, FunctionDefn>();
   private Scope mScope;
   private final ClassObj mMetaclass;
-  private final Obj mUnit;
+  private final Obj mNothing;
 }
