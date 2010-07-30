@@ -40,45 +40,57 @@ public class MagpieParser extends Parser {
     return new FunctionDefn(name, type, paramNames, body);
   }
   
+  /**
+   * Parses a function type declaration. Valid examples include:
+   * ()             // takes nothing, returns nothing
+   * (a)            // takes a single dynamic, returns nothing
+   * (->)           // takes nothing, returns a dynamic
+   * (a Int -> Int) // takes and returns an int
+   * 
+   * @param paramNames After calling, will contain the list of parameter names.
+   *                   If this is null, no parameter names will be parsed.
+   *                   (This is used for inner function type declarations like
+   *                   fn (Int, String ->).)
+   * @return The parsed function type.
+   */
   private FunctionType functionType(List<String> paramNames) {
     // Parse the prototype: (foo Foo, bar Bar -> Bang)
     consume(TokenType.LEFT_PAREN);
     
-    TypeDecl paramType = null;
-    if (match(TokenType.ARROW)) {
-      // No parameters.
-      paramType = new NamedType("Unit");
-    } else {
-      // Parse all of the parameters.
-      List<TypeDecl> paramTypes = new ArrayList<TypeDecl>();
-      
-      do {
-        // If we're looking for parameter names, parse it now.
-        if (paramNames != null) {
-          paramNames.add(consume(TokenType.NAME).getString());
-        }
-        
-        // Parse the type.
-        paramTypes.add(typeDeclaration());
-      } while (match(TokenType.COMMA));
-      
-      if (paramTypes.size() == 1) {
-        paramType = paramTypes.get(0);
-      } else {
-        // Multiple parameters, so make a tuple.
-        paramType = new TupleType(paramTypes);
+    // Parse the parameters, if any.
+    List<TypeDecl> paramTypes = new ArrayList<TypeDecl>();
+    while (!lookAheadAny(TokenType.ARROW, TokenType.RIGHT_PAREN)){
+      if (paramNames != null) {
+        paramNames.add(consume(TokenType.NAME).getString());
       }
       
-      consume(TokenType.ARROW);
+      paramTypes.add(typeDeclaration());
+      
+      if (!match(TokenType.COMMA)) break;
+    }
+    
+    // Aggregate the parameter types into a single type.
+    TypeDecl paramType = null;
+    switch (paramTypes.size()) {
+    case 0:  paramType = TypeDecl.nothing(); break;
+    case 1:  paramType = paramTypes.get(0); break;
+    default: paramType = new TupleType(paramTypes);
     }
     
     // Parse the return type, if any.
     TypeDecl returnType = null;
     if (match(TokenType.RIGHT_PAREN)) {
-      // No return type, so infer Unit.
-      returnType = new NamedType("Unit");
+      // No return type, so infer Nothing.
+      returnType = TypeDecl.nothing();
     } else {
-      returnType = typeDeclaration();
+      consume(TokenType.ARROW);
+      
+      if (lookAhead(TokenType.RIGHT_PAREN)) {
+        // An arrow, but no return type, so infer dynamic.
+        returnType = TypeDecl.dynamic();
+      } else {
+        returnType = typeDeclaration();
+      }
       consume(TokenType.RIGHT_PAREN);
     }
     
@@ -102,11 +114,25 @@ public class MagpieParser extends Parser {
       
       // TODO(bob): support multiple definitions and tuple decomposition here
       String name = consume(TokenType.NAME).getString();
-      consume(TokenType.EQUALS);
       
-      // Skip over assignment to prevent "def a = b = c"
-      Expr value = flowControl();
-      return new DefineExpr(isMutable, name, value);
+      // See if we're defining a function in shorthand notation:
+      // def foo() blah
+      if (lookAhead(TokenType.LEFT_PAREN)) {
+        List<String> paramNames = new ArrayList<String>();
+        FunctionType type = functionType(paramNames);
+        Expr body = parseBlock();
+        
+        // Desugar it to: def foo = fn () blah
+        FnExpr function = new FnExpr(type, paramNames, body);
+        return new DefineExpr(isMutable, name, function);
+      } else {
+        // Just a regular variable definition.
+        consume(TokenType.EQUALS);
+        
+        // Skip over assignment to prevent "def a = b = c"
+        Expr value = flowControl();
+        return new DefineExpr(isMutable, name, value);
+      }
     }
     else if (match(TokenType.CLASS)) {
       return parseClass();

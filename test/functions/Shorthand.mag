@@ -1,0 +1,19 @@
+main (->)
+    def a () print "a"
+    a () //: a
+        
+    def b (s String) print s
+    b "hi" //: hi
+    
+    def c (left String, right String)
+      print left  //: left
+      print right //: right
+    end
+    c ("left", "right")
+    
+    def d (-> String) "d"
+    print d () //: d
+    
+    def e (s String -> String) s
+    print e "e" //: e
+end
