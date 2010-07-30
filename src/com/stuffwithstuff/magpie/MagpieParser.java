@@ -88,6 +88,7 @@ public class MagpieParser extends Parser {
   private TypeDecl typeDeclaration() {
     // TODO(bob): Support more than just named types.
     String name = consume(TokenType.NAME).getString();
+    // TODO(bob): Check for built-in type names like Int?
     return new NamedType(name);
   }
   
@@ -108,30 +109,42 @@ public class MagpieParser extends Parser {
       return new DefineExpr(isMutable, name, value);
     }
     else if (match(TokenType.CLASS)) {
-      // Parse the class name line.
-      String name = consume(TokenType.NAME).getString();
-      consume(TokenType.LINE);
-      
-      // Parse the body.
-      Set<String> fields = new HashSet<String>();
-      
-      // TODO(bob): Need to add support for methods.
-      while (!match(TokenType.END)){
-        String fieldName = consume(TokenType.NAME).getString();
-        
-        if (fields.contains(fieldName)) {
-          throw new ParseException("The class \"" + name + "\" already " +
-              "contains a field named \"" + fieldName + "\".");
-        }
-        
-        fields.add(fieldName);
-        consume(TokenType.LINE);
-      }
-      
-      return new ClassExpr(name, fields);
+      return parseClass();
     } else return assignment();
   }
-
+  
+  private Expr parseClass() {
+    // Parse the class name line.
+    String name = consume(TokenType.NAME).getString();
+    consume(TokenType.LINE);
+    
+    // Parse the body.
+    Map<String, TypeDecl> fields = new HashMap<String, TypeDecl>();
+    
+    // TODO(bob): Need to add support for methods.
+    while (!match(TokenType.END)){
+      String fieldName = consume(TokenType.NAME).getString();
+      
+      if (fields.containsKey(fieldName)) {
+        throw new ParseException("The class \"" + name + "\" already " +
+            "contains a field named \"" + fieldName + "\".");
+      }
+      
+      // Parse the optional type declaration.
+      TypeDecl type = null;
+      if (!match(TokenType.LINE)) {
+        type = typeDeclaration();
+        consume(TokenType.LINE);
+      } else {
+        type = TypeDecl.dynamic();
+      }
+      
+      fields.put(fieldName, type);
+    }
+    
+    return new ClassExpr(name, fields);
+  }
+  
   /* TODO(bob): Need to figure out how the syntax for assignment is going to be
    * parsed. A lot of things can be on the left side of =, but equally many
    * can't. The full breakdown is:

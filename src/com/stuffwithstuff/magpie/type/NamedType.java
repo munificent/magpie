@@ -1,6 +1,6 @@
 package com.stuffwithstuff.magpie.type;
 
-public class NamedType implements TypeDecl {
+public class NamedType extends TypeDecl {
   public NamedType(String name) {
     mName = name;
   }

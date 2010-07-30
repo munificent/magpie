@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * AST node representing a function type declaration, like (a Int -> b String).
  */
-public class FunctionType implements TypeDecl {
+public class FunctionType extends TypeDecl {
   public FunctionType(TypeDecl paramType, TypeDecl returnType) {
     mParamType = paramType;
     mReturnType = returnType;

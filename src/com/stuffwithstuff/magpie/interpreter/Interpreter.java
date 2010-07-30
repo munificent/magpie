@@ -143,7 +143,7 @@ public class Interpreter implements ExprVisitor<Obj> {
   public Obj visit(ClassExpr expr) {
     ClassObj classObj = new ClassObj(mMetaclass, expr.getName());
     
-    for (String field : expr.getFields()) {
+    for (String field : expr.getFields().keySet()) {
       classObj.addInstanceField(field);
     }
     
