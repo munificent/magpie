@@ -1,7 +1,5 @@
 package com.stuffwithstuff.magpie.type;
 
-import com.stuffwithstuff.magpie.ast.*;
-
 /*
 public class TypeChecker implements ExprVisitor<Boolean> {
 

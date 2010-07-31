@@ -4,8 +4,8 @@ package com.stuffwithstuff.magpie.interpreter;
  * Built-in methods on ints.
  */
 public class IntMethods {
-  public static Method operatorPlus() {
-    return new Method() {
+  public static Invokable operatorPlus() {
+    return new Invokable() {
       public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
         int left = ((Integer)thisObj.getPrimitiveValue()).intValue();
         int right = ((Integer)arg.getPrimitiveValue()).intValue();
@@ -15,8 +15,8 @@ public class IntMethods {
     };
   }
 
-  public static Method operatorMinus() {
-    return new Method() {
+  public static Invokable operatorMinus() {
+    return new Invokable() {
       public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
         int left = ((Integer)thisObj.getPrimitiveValue()).intValue();
         int right = ((Integer)arg.getPrimitiveValue()).intValue();
@@ -26,8 +26,8 @@ public class IntMethods {
     };
   }
 
-  public static Method operatorMultiply() {
-    return new Method() {
+  public static Invokable operatorMultiply() {
+    return new Invokable() {
       public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
         int left = ((Integer)thisObj.getPrimitiveValue()).intValue();
         int right = ((Integer)arg.getPrimitiveValue()).intValue();
@@ -37,8 +37,8 @@ public class IntMethods {
     };
   }
 
-  public static Method operatorDivide() {
-    return new Method() {
+  public static Invokable operatorDivide() {
+    return new Invokable() {
       public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
         int left = ((Integer)thisObj.getPrimitiveValue()).intValue();
         int right = ((Integer)arg.getPrimitiveValue()).intValue();
@@ -48,8 +48,8 @@ public class IntMethods {
     };
   }
 
-  public static Method operatorEqual() {
-    return new Method() {
+  public static Invokable operatorEqual() {
+    return new Invokable() {
       public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
         int left = ((Integer)thisObj.getPrimitiveValue()).intValue();
         int right = ((Integer)arg.getPrimitiveValue()).intValue();
@@ -59,8 +59,8 @@ public class IntMethods {
     };
   }
 
-  public static Method operatorNotEqual() {
-    return new Method() {
+  public static Invokable operatorNotEqual() {
+    return new Invokable() {
       public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
         int left = ((Integer)thisObj.getPrimitiveValue()).intValue();
         int right = ((Integer)arg.getPrimitiveValue()).intValue();
@@ -70,8 +70,8 @@ public class IntMethods {
     };
   }
   
-  public static Method operatorLessThan() {
-    return new Method() {
+  public static Invokable operatorLessThan() {
+    return new Invokable() {
       public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
         int left = ((Integer)thisObj.getPrimitiveValue()).intValue();
         int right = ((Integer)arg.getPrimitiveValue()).intValue();
@@ -81,8 +81,8 @@ public class IntMethods {
     };
   }
 
-  public static Method operatorGreaterThan() {
-    return new Method() {
+  public static Invokable operatorGreaterThan() {
+    return new Invokable() {
       public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
         int left = ((Integer)thisObj.getPrimitiveValue()).intValue();
         int right = ((Integer)arg.getPrimitiveValue()).intValue();
@@ -92,8 +92,8 @@ public class IntMethods {
     };
   }
 
-  public static Method operatorLessThanOrEqual() {
-    return new Method() {
+  public static Invokable operatorLessThanOrEqual() {
+    return new Invokable() {
       public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
         int left = ((Integer)thisObj.getPrimitiveValue()).intValue();
         int right = ((Integer)arg.getPrimitiveValue()).intValue();
@@ -103,8 +103,8 @@ public class IntMethods {
     };
   }
 
-  public static Method operatorGreaterThanOrEqual() {
-    return new Method() {
+  public static Invokable operatorGreaterThanOrEqual() {
+    return new Invokable() {
       public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
         int left = ((Integer)thisObj.getPrimitiveValue()).intValue();
         int right = ((Integer)arg.getPrimitiveValue()).intValue();
@@ -114,8 +114,8 @@ public class IntMethods {
     };
   }
 
-  public static Method toStringMethod() {
-    return new Method() {
+  public static Invokable toStringMethod() {
+    return new Invokable() {
       public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
         int value = ((Integer)thisObj.getPrimitiveValue()).intValue();
         return interpreter.createString(Integer.toString(value));

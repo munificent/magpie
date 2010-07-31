@@ -30,15 +30,7 @@ public class ClassObj extends Obj {
   public String getName() { return mName; }
   
   public Map<String, Boolean> getInstanceFields() { return mInstanceFields; }
-  public Map<String, Method> getInstanceMethods() { return mInstanceMethods; }
-  
-  public void addInstanceField(String name) {
-    mInstanceFields.put(name, true);
-  }
-  
-  public void addInstanceMethod(String name, Method method) {
-    mInstanceMethods.put(name, method);
-  }
+  public Map<String, Invokable> getInstanceMethods() { return mInstanceMethods; }
   
   @Override
   public String toString() { return mName; }
@@ -46,5 +38,5 @@ public class ClassObj extends Obj {
   private final String mName;
   // TODO(bob): Eventually value should be type declaration.
   private final Map<String, Boolean> mInstanceFields = new HashMap<String, Boolean>();
-  private final Map<String, Method> mInstanceMethods = new HashMap<String, Method>();
+  private final Map<String, Invokable> mInstanceMethods = new HashMap<String, Invokable>();
 }

@@ -25,8 +25,8 @@ public class Obj {
   
   public ClassObj getClassObj() { return mClass; }
   public Object getPrimitiveValue() { return mPrimitiveValue; }
-  public Map<String, Method> getMethods() { return mMethods; }
-  
+  public Map<String, Invokable> getMethods() { return mMethods; }
+
   @Override
   public String toString() {
     if (mPrimitiveValue == null) return "() : " + mClass.toString();
@@ -35,5 +35,5 @@ public class Obj {
   
   private final ClassObj mClass;
   private final Object mPrimitiveValue;
-  private final Map<String, Method> mMethods = new HashMap<String, Method>();
+  private final Map<String, Invokable> mMethods = new HashMap<String, Invokable>();
 }

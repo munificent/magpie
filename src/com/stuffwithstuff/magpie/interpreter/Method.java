@@ -1,9 +1,19 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import com.stuffwithstuff.magpie.ast.FnExpr;
+
 /**
- * Interface for a method. A method is some entity that can be called with a
- * "this" reference and an argument.
+ * An implementation of Invokable for a regular user-defined method.
  */
-public interface Method {
-  Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg);
+public class Method implements Invokable {
+  public Method(FnExpr function) {
+    mFunction = function;
+  }
+  
+  @Override
+  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+    return interpreter.invoke(mFunction.getParamNames(), mFunction.getBody(), arg);
+  }
+
+  private final FnExpr mFunction;
 }

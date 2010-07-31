@@ -4,8 +4,8 @@ package com.stuffwithstuff.magpie.interpreter;
  * Built-in methods on ints.
  */
 public class StringMethods {
-  public static Method operatorPlus() {
-    return new Method() {
+  public static Invokable operatorPlus() {
+    return new Invokable() {
       public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
         String left = (String)thisObj.getPrimitiveValue();
         String right = (String)arg.getPrimitiveValue();
@@ -15,8 +15,8 @@ public class StringMethods {
     };
   }
 
-  public static Method print() {
-    return new Method() {
+  public static Invokable print() {
+    return new Invokable() {
       public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
         String string = (String)thisObj.getPrimitiveValue();
         

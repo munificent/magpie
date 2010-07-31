@@ -50,41 +50,64 @@ public class MagpieParser extends Parser {
         return new DefineExpr(isMutable, name, value);
       }
     }
-    else if (match(TokenType.CLASS)) {
+    else if (lookAhead(TokenType.CLASS)) {
       return parseClass();
     } else return assignment();
   }
   
   private Expr parseClass() {
     // Parse the class name line.
-    String name = consume(TokenType.NAME).getString();
+    consume(TokenType.CLASS);
+    String className = consume(TokenType.NAME).getString();
     consume(TokenType.LINE);
     
     // Parse the body.
     Map<String, TypeDecl> fields = new HashMap<String, TypeDecl>();
+    Map<String, FnExpr> methods = new HashMap<String, FnExpr>();
     
-    // TODO(bob): Need to add support for methods.
     while (!match(TokenType.END)){
-      String fieldName = consume(TokenType.NAME).getString();
+      String name = consume(TokenType.NAME).getString();
       
-      if (fields.containsKey(fieldName)) {
+      if (fields.containsKey(name)) {
         throw new ParseException("The class \"" + name + "\" already " +
-            "contains a field named \"" + fieldName + "\".");
+            "contains a field named \"" + name + "\".");
       }
       
-      // Parse the optional type declaration.
-      TypeDecl type = null;
-      if (!match(TokenType.LINE)) {
-        type = typeDeclaration();
+      if (methods.containsKey(name)) {
+        throw new ParseException("The class \"" + name + "\" already " +
+            "contains a method named \"" + name + "\".");
+      }
+
+      // See if it's a field or a method.
+      if (lookAhead(TokenType.LEFT_PAREN)) {
+        // A method declaration.
+        
+        // TODO(bob): This is very similar to definition(). Should combine at
+        // some point (especially if class bodies become expressions.)
+        List<String> paramNames = new ArrayList<String>();
+        FunctionType type = functionType(paramNames);
+        Expr body = parseBlock();
         consume(TokenType.LINE);
+        
+        FnExpr function = new FnExpr(type, paramNames, body);
+        methods.put(name, function);
       } else {
-        type = TypeDecl.dynamic();
+        // A field declaration.
+        
+        // Parse the optional type declaration.
+        TypeDecl type = null;
+        if (!match(TokenType.LINE)) {
+          type = typeDeclaration();
+          consume(TokenType.LINE);
+        } else {
+          type = TypeDecl.dynamic();
+        }
+        
+        fields.put(name, type);
       }
-      
-      fields.put(fieldName, type);
     }
     
-    return new ClassExpr(name, fields);
+    return new ClassExpr(className, fields, methods);
   }
   
   /* TODO(bob): Need to figure out how the syntax for assignment is going to be

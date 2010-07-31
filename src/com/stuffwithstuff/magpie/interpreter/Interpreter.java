@@ -14,35 +14,36 @@ public class Interpreter implements ExprVisitor<Obj> {
     
     mMetaclass = new ClassObj();
     mScope.define("Class", mMetaclass);
-    mMetaclass.addInstanceMethod("addInstanceField", ClassMethods.addInstanceField());
-    mMetaclass.addInstanceMethod("instanceField?", ClassMethods.instanceFieldQ());
-    mMetaclass.addInstanceMethod("name", ClassMethods.name());
+    mMetaclass.getInstanceMethods().put("addInstanceField", ClassMethods.addInstanceField());
+    mMetaclass.getInstanceMethods().put("instanceField?", ClassMethods.instanceFieldQ());
+    mMetaclass.getInstanceMethods().put("name", ClassMethods.getName());
+    mMetaclass.getInstanceMethods().put("new", ClassMethods.construct());
     
     // Register the built-in types.
     createClass("Nothing");
     
     ClassObj boolClass = createClass("Bool");
-    boolClass.addInstanceMethod("toString", BoolMethods.toStringMethod());
+    boolClass.getInstanceMethods().put("toString", BoolMethods.toStringMethod());
     
     ClassObj intClass = createClass("Int");
-    intClass.addInstanceMethod("+", IntMethods.operatorPlus());
-    intClass.addInstanceMethod("-", IntMethods.operatorMinus());
-    intClass.addInstanceMethod("*", IntMethods.operatorMultiply());
-    intClass.addInstanceMethod("/", IntMethods.operatorDivide());
-    intClass.addInstanceMethod("toString", IntMethods.toStringMethod());
-    intClass.addInstanceMethod("==", IntMethods.operatorEqual());
-    intClass.addInstanceMethod("!=", IntMethods.operatorNotEqual());
-    intClass.addInstanceMethod("<",  IntMethods.operatorLessThan());
-    intClass.addInstanceMethod(">",  IntMethods.operatorGreaterThan());
-    intClass.addInstanceMethod("<=", IntMethods.operatorLessThanOrEqual());
-    intClass.addInstanceMethod(">=", IntMethods.operatorGreaterThanOrEqual());
+    intClass.getInstanceMethods().put("+", IntMethods.operatorPlus());
+    intClass.getInstanceMethods().put("-", IntMethods.operatorMinus());
+    intClass.getInstanceMethods().put("*", IntMethods.operatorMultiply());
+    intClass.getInstanceMethods().put("/", IntMethods.operatorDivide());
+    intClass.getInstanceMethods().put("toString", IntMethods.toStringMethod());
+    intClass.getInstanceMethods().put("==", IntMethods.operatorEqual());
+    intClass.getInstanceMethods().put("!=", IntMethods.operatorNotEqual());
+    intClass.getInstanceMethods().put("<",  IntMethods.operatorLessThan());
+    intClass.getInstanceMethods().put(">",  IntMethods.operatorGreaterThan());
+    intClass.getInstanceMethods().put("<=", IntMethods.operatorLessThanOrEqual());
+    intClass.getInstanceMethods().put(">=", IntMethods.operatorGreaterThanOrEqual());
     
     ClassObj stringClass = createClass("String");
-    stringClass.addInstanceMethod("+",     StringMethods.operatorPlus());
-    stringClass.addInstanceMethod("print", StringMethods.print());
+    stringClass.getInstanceMethods().put("+",     StringMethods.operatorPlus());
+    stringClass.getInstanceMethods().put("print", StringMethods.print());
     
     ClassObj fnClass = createClass("Function");
-    fnClass.addInstanceMethod("invoke", FnMethods.invoke());
+    fnClass.getInstanceMethods().put("invoke", FnMethods.invoke());
 
     // Register the () object.
     mNothing = new Obj(findClass("Nothing"), null);
@@ -211,9 +212,19 @@ public class Interpreter implements ExprVisitor<Obj> {
   public Obj visit(ClassExpr expr) {
     ClassObj classObj = new ClassObj(mMetaclass, expr.getName());
     
+    // Define the fields.
     for (String field : expr.getFields().keySet()) {
-      classObj.addInstanceField(field);
+      classObj.getInstanceFields().put(field, true);
     }
+    
+    // Define the methods.
+    for (String name : expr.getMethods().keySet()) {
+      // TODO(bob): Is there a better way to iterate over a map?
+      Method method = new Method(expr.getMethods().get(name));
+      classObj.getInstanceMethods().put(name, method);
+    }
+    
+    // TODO(bob): Hack. Temp.
     
     mScope.define(expr.getName(), classObj);
     return classObj;
@@ -325,7 +336,7 @@ public class Interpreter implements ExprVisitor<Obj> {
   
   private Obj invokeMethod(String name, Obj thisObj, Obj arg) {
     // See if the object itself has the method.
-    Method method = thisObj.getMethods().get(name);
+    Invokable method = thisObj.getMethods().get(name);
     
     // If not, see if it's type has an instance method for it.
     if (method == null) {
@@ -352,6 +363,8 @@ public class Interpreter implements ExprVisitor<Obj> {
   
   private final InterpreterHost mHost;
   private Scope mGlobalScope;
+  // TODO(bob): Get rid of this is a member, and instead pass it around as part
+  //            of an evaluation context.
   private Scope mScope;
   private final ClassObj mMetaclass;
   private final Obj mNothing;

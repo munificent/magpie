@@ -4,8 +4,8 @@ package com.stuffwithstuff.magpie.interpreter;
  * Built-in methods on function objects.
  */
 public class FnMethods {
-  public static Method invoke() {
-    return new Method() {
+  public static Invokable invoke() {
+    return new Invokable() {
       public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
         FnObj thisFn = (FnObj)thisObj;
         

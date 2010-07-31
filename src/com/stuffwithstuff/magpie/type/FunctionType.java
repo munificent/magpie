@@ -1,7 +1,5 @@
 package com.stuffwithstuff.magpie.type;
 
-import java.util.List;
-
 /**
  * AST node representing a function type declaration, like (a Int -> b String).
  */
