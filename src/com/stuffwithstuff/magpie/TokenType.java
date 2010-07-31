@@ -36,6 +36,7 @@ public enum TokenType {
   LET,
   MATCH,
   THEN,
+  THIS,
   VAR,
   WHILE,
   

@@ -1,6 +1,5 @@
 package com.stuffwithstuff.magpie.interpreter;
 
-import java.util.*;
 import com.stuffwithstuff.magpie.ast.FnExpr;
 
 /**

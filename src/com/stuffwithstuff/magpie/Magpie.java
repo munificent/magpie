@@ -4,9 +4,6 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
 
-import com.stuffwithstuff.magpie.ast.FunctionDefn;
-import com.stuffwithstuff.magpie.interpreter.*;
-
 public class Magpie {
 
   /**
@@ -18,6 +15,7 @@ public class Magpie {
     System.out.println("magpie");
     System.out.println("------");
     
+    // TODO(bob): REPL is dead for now.
     /*
     InputStreamReader converter = new InputStreamReader(System.in);
     BufferedReader in = new BufferedReader(converter);

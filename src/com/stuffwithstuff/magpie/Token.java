@@ -56,6 +56,7 @@ public final class Token {
             case LET: return "let";
             case MATCH: return "match";
             case THEN: return "then";
+            case THIS: return "this";
             case VAR: return "var";
             case WHILE: return "while";
 

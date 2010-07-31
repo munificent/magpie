@@ -1,0 +1,23 @@
+class Foo
+    noArgs () print "noArgs"
+    oneArg (arg String) print ("oneArg " + arg)
+    
+    someMethod ()
+        // implicit receiver
+        // implicit ()
+        noArgs              //: noArgs
+        // explicit
+        noArgs ()           //: noArgs
+        oneArg "foo"        //: oneArg foo
+
+        // explicit receiver
+        // implicit ()
+        this.noArgs              //: noArgs
+        // explicit
+        this.noArgs ()           //: noArgs
+        this.oneArg "foo"        //: oneArg foo
+    end
+end
+
+def foo = Foo.new
+foo.someMethod

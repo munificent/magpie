@@ -227,6 +227,7 @@ public class Lexer {
     if (text.equals("let")) return new Token(TokenType.LET);
     if (text.equals("match")) return new Token(TokenType.MATCH);
     if (text.equals("then")) return new Token(TokenType.THEN);
+    if (text.equals("this")) return new Token(TokenType.THIS);
     if (text.equals("var")) return new Token(TokenType.VAR);
     if (text.equals("while")) return new Token(TokenType.WHILE);
     if (text.equals("=")) return new Token(TokenType.EQUALS);

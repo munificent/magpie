@@ -249,8 +249,11 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
         return invoke(mNothing, function.getFunction(), arg);
       }
       
-      // Look for a method on this with the name.
-      // TODO(bob): Implement me.
+      // Look for an implicit call to a method on this with the name.
+      Invokable method = context.getThis().getMethod(name);
+      if (method != null) {
+        return invokeMethod(context, context.getThis(), name, arg);
+      }
       
       // Try to call it as a method on the argument. In other words,
       // "abs 123" is equivalent to "123.abs".
@@ -373,11 +376,15 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(NameExpr expr, EvalContext context) {
     // Look up a named variable.
     Obj variable = context.lookUp(expr.getName());
-    if (variable == null) {
-      throw new InterpreterException("Could not find a variable named \"" + expr.getName() + "\".");
+    if (variable != null) return variable;
+    
+    // See if there's a method on this with the name.
+    Invokable method = context.getThis().getMethod(expr.getName());
+    if (method != null) {
+      return invokeMethod(context, context.getThis(), expr.getName(), mNothing);
     }
-      
-    return variable;
+    
+    throw new InterpreterException("Could not find a variable or member named \"" + expr.getName() + "\".");
   }
 
   @Override
@@ -388,6 +395,11 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(StringExpr expr, EvalContext context) {
     return createString(expr.getValue());
+  }
+
+  @Override
+  public Obj visit(ThisExpr expr, EvalContext context) {
+    return context.getThis();
   }
 
   @Override

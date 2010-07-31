@@ -421,6 +421,8 @@ public class MagpieParser extends Parser {
       return new StringExpr(last(1).getString());
     } else if (match(TokenType.NAME)) {
       return new NameExpr(last(1).getString());
+    } else if (match(TokenType.THIS)) {
+      return new ThisExpr();
     } else if (match(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)) {
       return new NothingExpr();
     } else if (match(TokenType.LEFT_PAREN)) {
