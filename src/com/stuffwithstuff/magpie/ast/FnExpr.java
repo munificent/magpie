@@ -19,7 +19,9 @@ public class FnExpr extends Expr {
   public Expr   getBody() { return mBody; }
 
   @Override
-  public <T> T accept(ExprVisitor<T> visitor) { return visitor.visit(this); }
+  public <R, C> R accept(ExprVisitor<R, C> visitor, C context) {
+    return visitor.visit(this, context);
+  }
 
   private final FunctionType mType;
   private final List<String> mParamNames;

@@ -19,7 +19,9 @@ public class ClassExpr extends Expr {
   public Map<String, FnExpr> getMethods() { return mMethods; }
   
   @Override
-  public <T> T accept(ExprVisitor<T> visitor) { return visitor.visit(this); }
+  public <R, C> R accept(ExprVisitor<R, C> visitor, C context) {
+    return visitor.visit(this, context);
+  }
   
   private final String mName;
   private final Map<String, TypeDecl> mFields;

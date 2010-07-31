@@ -15,7 +15,10 @@ public class LoopExpr extends Expr {
   public List<Expr> getConditions() { return mConditions; }
   public Expr getBody() { return mBody; }
   
-  public <T> T accept(ExprVisitor<T> visitor) { return visitor.visit(this); }
+  @Override
+  public <R, C> R accept(ExprVisitor<R, C> visitor, C context) {
+    return visitor.visit(this, context);
+  }
 
   private final List<Expr> mConditions;
   private final Expr mBody;

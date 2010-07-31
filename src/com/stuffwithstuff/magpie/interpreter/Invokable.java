@@ -5,5 +5,5 @@ package com.stuffwithstuff.magpie.interpreter;
  * be called with a "this" reference and an argument.
  */
 public interface Invokable {
-  Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg);
+  Obj invoke(Interpreter interpreter, EvalContext context, Obj arg);
 }

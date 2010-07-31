@@ -5,13 +5,12 @@ import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.*;
 
-public class Interpreter implements ExprVisitor<Obj> {
+public class Interpreter implements ExprVisitor<Obj, EvalContext> {
   public Interpreter(InterpreterHost host) {
     mHost = host;
     
     // Create a top-level scope.
     mGlobalScope = new Scope();
-    mScope = mGlobalScope;
     
     // Create the built-in objects. These objects essentially define a class
     // system in terms of Magpie's core prototype-based runtime. The diagram
@@ -96,11 +95,11 @@ public class Interpreter implements ExprVisitor<Obj> {
     mTupleProto.add("class", tupleClass);
     
     // Give the classes names and make then available.
-    mScope.define("Bool", boolClass);
-    mScope.define("Function", fnClass);
-    mScope.define("Int", intClass);
-    mScope.define("String", stringClass);
-    mScope.define("Tuple", tupleClass);
+    mGlobalScope.define("Bool", boolClass);
+    mGlobalScope.define("Function", fnClass);
+    mGlobalScope.define("Int", intClass);
+    mGlobalScope.define("String", stringClass);
+    mGlobalScope.define("Tuple", tupleClass);
 
     boolClass.add("name", createString("Bool"));
     classClass.add("name", createString("Class"));
@@ -111,26 +110,28 @@ public class Interpreter implements ExprVisitor<Obj> {
     tupleClass.add("name", createString("Tuple"));
   }
   
-  public Obj evaluate(Expr expr) {
-    return expr.accept(this);
+  public Obj evaluate(Expr expr, EvalContext context) {
+    return expr.accept(this, context);
   }
   
   public void run(List<Expr> expressions) {
+    EvalContext context = new EvalContext(mGlobalScope, mNothing);
+    
     // First, evaluate the expressions. This is the load time evaluation.
     for (Expr expr : expressions) {
-      evaluate(expr);
+      evaluate(expr, context);
     }
     
     // TODO(bob): Type-checking and static analysis goes here.
     
     // Now, if there is a main(), call it. This is the runtime.
-    Obj main = mScope.get("main");
+    Obj main = context.lookUp("main");
     if (main == null) return;
     
     if (!(main instanceof FnObj)) throw new InterpreterException("main is not a function.");
     
     FnObj mainFn = (FnObj)main;
-    invokeInCurrentScope(mainFn.getParamNames(), mainFn.getBody(), nothing());
+    invoke(mNothing, mainFn.getFunction(), nothing());
   }
   
   public void print(String text) {
@@ -155,78 +156,71 @@ public class Interpreter implements ExprVisitor<Obj> {
     return mStringProto.spawn(value);
   }
   
-  public Obj invoke(FunctionDefn function, Obj arg) {
-    return invoke(function.getParamNames(), function.getBody(), arg);
-  }
-  
-  public Obj invoke(List<String> paramNames, Expr body, Obj arg) {
+  public Obj invoke(Obj thisRef, FnExpr function, Obj arg) {
     // Create a new local scope for the function.
-    Scope oldScope = mScope;
-    mScope = new Scope(mGlobalScope);
-    
-    Obj result = invokeInCurrentScope(paramNames, body, arg);
-    
-    // Restore the previous scope.
-    mScope = oldScope;
-    
-    return result;
-  }
-  
-  private Obj invokeInCurrentScope(List<String> paramNames, Expr body, Obj arg) {
-    // Create a new local scope for the function.
-    Scope oldScope = mScope;
-    mScope = new Scope(mGlobalScope);
+    EvalContext context = new EvalContext(new Scope(mGlobalScope), thisRef);
     
     // Bind arguments to their parameter names.
-    if (paramNames.size() == 1) {
-      mScope.define(paramNames.get(0), arg);
-    } else if (paramNames.size() > 1) {
+    List<String> params = function.getParamNames();
+    if (params.size() == 1) {
+      context.define(params.get(0), arg);
+    } else if (params.size() > 1) {
       // TODO(bob): Hack. Assume the arg is a tuple with the right number of
       // fields.
-      for (int i = 0; i < paramNames.size(); i++) {
-        mScope.define(paramNames.get(i), arg.getField(Integer.toString(i)));
+      for (int i = 0; i < params.size(); i++) {
+        context.define(params.get(i), arg.getField(Integer.toString(i)));
       }
     }
     
-    Obj result = evaluate(body);
+    return evaluate(function.getBody(), context);
+  }
+  
+  private Obj invokeMethod(EvalContext context, Obj thisObj, String name, Obj arg) {
+    // Look up the method.
+    Invokable method = thisObj.getMethod(name);
+    if (method != null) {
+      EvalContext thisContext = context.bindThis(thisObj);
+      return method.invoke(this, thisContext, arg);
+    }
     
-    // Restore the previous scope.
-    mScope = oldScope;
-    
-    return result;
+    // If there is no arg, look for a field.
+    if (arg == mNothing) {
+      Obj field = thisObj.getField(name);
+      if (field != null) return field;
+    }
+
+    throw new InterpreterException("Could not find a member \"" + name + "\" on " + thisObj);
   }
   
   @Override
-  public Obj visit(AssignExpr expr) {
-    Obj value = evaluate(expr.getValue());
-    mScope.assign(expr.getName(), value);
+  public Obj visit(AssignExpr expr, EvalContext context) {
+    Obj value = evaluate(expr.getValue(), context);
+    context.assign(expr.getName(), value);
     return value;
   }
 
   @Override
-  public Obj visit(BlockExpr expr) {
+  public Obj visit(BlockExpr expr, EvalContext context) {
     Obj result = null;
     
     // Create a lexical scope.
-    mScope = mScope.push();
+    EvalContext localContext = context.newScope();
     
     // Evaluate all of the expressions and return the last.
     for (Expr thisExpr : expr.getExpressions()) {
-      result = evaluate(thisExpr);
+      result = evaluate(thisExpr, localContext);
     }
-    
-    mScope = mScope.pop();
     
     return result;
   }
 
   @Override
-  public Obj visit(BoolExpr expr) {
+  public Obj visit(BoolExpr expr, EvalContext context) {
     return createBool(expr.getValue());
   }
 
   @Override
-  public Obj visit(CallExpr expr) {
+  public Obj visit(CallExpr expr, EvalContext context) {
     // Given a call expression like "foo bar", we look for the following in
     // order until we find a match.
     // 1. Look for a variable named "foo".
@@ -236,14 +230,14 @@ public class Interpreter implements ExprVisitor<Obj> {
     //            variables.
     // 2. Look for a method "foo" on the type of the argument "bar".
     
-    Obj arg = evaluate(expr.getArg());
+    Obj arg = evaluate(expr.getArg(), context);
     
     // Handle a named target.
     if (expr.getTarget() instanceof NameExpr) {
       String name = ((NameExpr)expr.getTarget()).getName();
       
       // Look for a local variable with the name.
-      Obj local = mScope.get(name);
+      Obj local = context.lookUp(name);
       if (local != null) {
         if (!(local instanceof FnObj)) {
           throw new InterpreterException("Can not call a local variable that does not contain a function.");
@@ -252,27 +246,30 @@ public class Interpreter implements ExprVisitor<Obj> {
         // TODO(bob): May want to support a more generic callable interface
         // eventually.
         FnObj function = (FnObj)local;
-        return invoke(function.getParamNames(), function.getBody(), arg);
+        return invoke(mNothing, function.getFunction(), arg);
       }
+      
+      // Look for a method on this with the name.
+      // TODO(bob): Implement me.
       
       // Try to call it as a method on the argument. In other words,
       // "abs 123" is equivalent to "123.abs".
-      return invokeMethod(name, arg, nothing());
+      return invokeMethod(context, arg, name, nothing());
     }
     
     // Not an explicit named target, so evaluate it and see if it's callable.
-    Obj target = evaluate(expr.getTarget());
+    Obj target = evaluate(expr.getTarget(), context);
     
     if (!(target instanceof FnObj)) {
       throw new InterpreterException("Can not call an expression that does not evaluate to a function.");
     }
 
     FnObj targetFn = (FnObj)target;
-    return invoke(targetFn.getParamNames(), targetFn.getBody(), arg);
+    return invoke(mNothing, targetFn.getFunction(), arg);
   }
 
   @Override
-  public Obj visit(ClassExpr expr) {
+  public Obj visit(ClassExpr expr, EvalContext context) {
     // Create a class object with the shared properties.
     Obj classObj = mClassProto.spawn();
     classObj.add("name", createString(expr.getName()));
@@ -296,29 +293,29 @@ public class Interpreter implements ExprVisitor<Obj> {
       proto.add(entry.getKey(), method);
     }
     
-    mScope.define(expr.getName(), classObj);
+    context.define(expr.getName(), classObj);
     return classObj;
   }
 
   @Override
-  public Obj visit(DefineExpr expr) {
+  public Obj visit(DefineExpr expr, EvalContext context) {
     // TODO(bob): need to handle mutability
-    Obj value = evaluate(expr.getValue());
-    mScope.define(expr.getName(), value);
+    Obj value = evaluate(expr.getValue(), context);
+    context.define(expr.getName(), value);
     return value;
   }
 
   @Override
-  public Obj visit(FnExpr expr) {
-    return new FnObj(mFnProto, expr.getParamNames(), expr.getBody());
+  public Obj visit(FnExpr expr, EvalContext context) {
+    return new FnObj(mFnProto, expr);
   }
 
   @Override
-  public Obj visit(IfExpr expr) {
+  public Obj visit(IfExpr expr, EvalContext context) {
     // Evaluate all of the conditions.
     boolean passed = true;
     for (Expr condition : expr.getConditions()) {
-      Obj result = evaluate(condition);
+      Obj result = evaluate(condition, context);
       if (!((Boolean)result.getPrimitiveValue()).booleanValue()) {
         // Condition failed.
         passed = false;
@@ -328,25 +325,25 @@ public class Interpreter implements ExprVisitor<Obj> {
     
     // Evaluate the body.
     if (passed) {
-      return evaluate(expr.getThen());
+      return evaluate(expr.getThen(), context);
     } else {
-      return evaluate(expr.getElse());
+      return evaluate(expr.getElse(), context);
     }
   }
 
   @Override
-  public Obj visit(IntExpr expr) {
+  public Obj visit(IntExpr expr, EvalContext context) {
     return createInt(expr.getValue());
   }
 
   @Override
-  public Obj visit(LoopExpr expr) {
+  public Obj visit(LoopExpr expr, EvalContext context) {
     boolean done = false;
     while (true) {
       // Evaluate the conditions.
       for (Expr conditionExpr : expr.getConditions()) {
         // See if the while clause is still true.
-        Obj condition = evaluate(conditionExpr);
+        Obj condition = evaluate(conditionExpr, context);
         if (((Boolean)condition.getPrimitiveValue()).booleanValue() != true) {
           done = true;
           break;
@@ -356,7 +353,7 @@ public class Interpreter implements ExprVisitor<Obj> {
       // If any clause failed, stop the loop.
       if (done) break;
       
-      evaluate(expr.getBody());
+      evaluate(expr.getBody(), context);
     }
     
     // TODO(bob): It would be cool if loops could have "else" clauses and then
@@ -365,17 +362,17 @@ public class Interpreter implements ExprVisitor<Obj> {
   }
 
   @Override
-  public Obj visit(MethodExpr expr) {
-    Obj receiver = evaluate(expr.getReceiver());
-    Obj arg = evaluate(expr.getArg());
+  public Obj visit(MethodExpr expr, EvalContext context) {
+    Obj receiver = evaluate(expr.getReceiver(), context);
+    Obj arg = evaluate(expr.getArg(), context);
     
-    return invokeMethod(expr.getMethod(), receiver, arg);
+    return invokeMethod(context, receiver, expr.getMethod(), arg);
   }
 
   @Override
-  public Obj visit(NameExpr expr) {
+  public Obj visit(NameExpr expr, EvalContext context) {
     // Look up a named variable.
-    Obj variable = mScope.get(expr.getName());
+    Obj variable = context.lookUp(expr.getName());
     if (variable == null) {
       throw new InterpreterException("Could not find a variable named \"" + expr.getName() + "\".");
     }
@@ -384,46 +381,29 @@ public class Interpreter implements ExprVisitor<Obj> {
   }
 
   @Override
-  public Obj visit(NothingExpr expr) {
+  public Obj visit(NothingExpr expr, EvalContext context) {
     return mNothing;
   }
 
   @Override
-  public Obj visit(StringExpr expr) {
+  public Obj visit(StringExpr expr, EvalContext context) {
     return createString(expr.getValue());
   }
 
   @Override
-  public Obj visit(TupleExpr expr) {
+  public Obj visit(TupleExpr expr, EvalContext context) {
     // A tuple is an object with fields whose names are zero-based numbers.
     
     Obj tuple = mTupleProto.spawn();
     for (int i = 0; i < expr.getFields().size(); i++) {
-      tuple.add(Integer.toString(i), evaluate(expr.getFields().get(i)));
+      tuple.add(Integer.toString(i), evaluate(expr.getFields().get(i), context));
     }
     
     return tuple;
   }
   
-  private Obj invokeMethod(String name, Obj thisObj, Obj arg) {
-    // Look up the method.
-    Invokable method = thisObj.getMethod(name);
-    if (method != null) return method.invoke(this, thisObj, arg);
-    
-    // If there is no arg, look for a field.
-    if (arg == mNothing) {
-      Obj field = thisObj.getField(name);
-      if (field != null) return field;
-    }
-
-    throw new InterpreterException("Could not find a member \"" + name + "\" on " + thisObj);
-  }
-  
   private final InterpreterHost mHost;
   private Scope mGlobalScope;
-  // TODO(bob): Get rid of this is a member, and instead pass it around as part
-  //            of an evaluation context.
-  private Scope mScope;
   private final Obj mRoot;
   private final Obj mNothing;
   private final Obj mBoolProto;

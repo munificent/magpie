@@ -1,5 +1,7 @@
 package com.stuffwithstuff.magpie.ast;
 
 public abstract class Expr {
-  public abstract <T> T accept(ExprVisitor<T> visitor);
+  public abstract <TReturn, TContext> TReturn accept(
+      ExprVisitor<TReturn, TContext> visitor, TContext context);
 }
+

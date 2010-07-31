@@ -11,7 +11,10 @@ public class MethodExpr extends Expr {
   public String getMethod()   { return mMethod; }
   public Expr   getArg()      { return mArg; }
   
-  public <T> T accept(ExprVisitor<T> visitor) { return visitor.visit(this); }
+  @Override
+  public <R, C> R accept(ExprVisitor<R, C> visitor, C context) {
+    return visitor.visit(this, context);
+  }
 
   @Override public String toString() {
     StringBuilder builder = new StringBuilder();

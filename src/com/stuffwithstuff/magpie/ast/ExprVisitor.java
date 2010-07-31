@@ -1,19 +1,19 @@
 package com.stuffwithstuff.magpie.ast;
 
-public interface ExprVisitor<T> {
-  T visit(AssignExpr expr);
-  T visit(BlockExpr expr);
-  T visit(BoolExpr expr);
-  T visit(CallExpr expr);
-  T visit(ClassExpr expr);
-  T visit(DefineExpr expr);
-  T visit(FnExpr expr);
-  T visit(IfExpr expr);
-  T visit(IntExpr expr);
-  T visit(LoopExpr expr);
-  T visit(MethodExpr expr);
-  T visit(NameExpr expr);
-  T visit(NothingExpr expr);
-  T visit(StringExpr expr);
-  T visit(TupleExpr expr);
+public interface ExprVisitor<R, C> {
+  R visit(AssignExpr expr, C context);
+  R visit(BlockExpr expr, C context);
+  R visit(BoolExpr expr, C context);
+  R visit(CallExpr expr, C context);
+  R visit(ClassExpr expr, C context);
+  R visit(DefineExpr expr, C context);
+  R visit(FnExpr expr, C context);
+  R visit(IfExpr expr, C context);
+  R visit(IntExpr expr, C context);
+  R visit(LoopExpr expr, C context);
+  R visit(MethodExpr expr, C context);
+  R visit(NameExpr expr, C context);
+  R visit(NothingExpr expr, C context);
+  R visit(StringExpr expr, C context);
+  R visit(TupleExpr expr, C context);
 }

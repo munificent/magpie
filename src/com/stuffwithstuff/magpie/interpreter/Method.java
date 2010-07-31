@@ -11,8 +11,8 @@ public class Method implements Invokable {
   }
   
   @Override
-  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-    return interpreter.invoke(mFunction.getParamNames(), mFunction.getBody(), arg);
+  public Obj invoke(Interpreter interpreter, EvalContext context, Obj arg) {
+    return interpreter.invoke(context.getThis(), mFunction, arg);
   }
 
   private final FnExpr mFunction;

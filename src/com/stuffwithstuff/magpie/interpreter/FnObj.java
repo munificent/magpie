@@ -1,22 +1,19 @@
 package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.*;
-import com.stuffwithstuff.magpie.ast.Expr;
+import com.stuffwithstuff.magpie.ast.FnExpr;
 
 /**
  * Object type for a function object.
  */
 public class FnObj extends Obj {
-  public FnObj(Obj parent, List<String> paramNames, Expr body) {
+  public FnObj(Obj parent, FnExpr function) {
     super(parent);
     
-    mParamNames = paramNames;
-    mBody = body;
+    mFunction = function;
   }
 
-  public List<String> getParamNames() { return mParamNames; }
-  public Expr getBody() { return mBody; }
+  public FnExpr getFunction() { return mFunction; }
   
-  private final List<String> mParamNames;
-  private final Expr mBody;
+  private final FnExpr mFunction;
 }

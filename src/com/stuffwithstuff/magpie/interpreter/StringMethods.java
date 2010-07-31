@@ -6,8 +6,8 @@ package com.stuffwithstuff.magpie.interpreter;
 public class StringMethods {
   public static Invokable operatorPlus() {
     return new Invokable() {
-      public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-        String left = (String)thisObj.getPrimitiveValue();
+      public Obj invoke(Interpreter interpreter, EvalContext context, Obj arg) {
+        String left = (String)context.getThis().getPrimitiveValue();
         String right = (String)arg.getPrimitiveValue();
         
         return interpreter.createString(left + right);
@@ -17,8 +17,8 @@ public class StringMethods {
 
   public static Invokable print() {
     return new Invokable() {
-      public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-        String string = (String)thisObj.getPrimitiveValue();
+      public Obj invoke(Interpreter interpreter, EvalContext context, Obj arg) {
+        String string = (String)context.getThis().getPrimitiveValue();
         
         interpreter.print(string);
         

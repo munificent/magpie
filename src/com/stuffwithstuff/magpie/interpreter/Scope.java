@@ -46,14 +46,6 @@ public class Scope {
     // If we got here, it wasn't defined.
     return null;
   }
-  
-  public Scope push() {
-    return new Scope(this);
-  }
-  
-  public Scope pop() {
-    return mParent;
-  }
 
   private final Scope mParent;
   private final Map<String, Obj> mVariables = new HashMap<String, Obj>();
