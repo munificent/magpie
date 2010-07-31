@@ -127,7 +127,7 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     Obj main = context.lookUp("main");
     if (main == null) return;
     
-    if (!(main instanceof FnObj)) throw new InterpreterException("main is not a function.");
+    expect(main instanceof FnObj, "Member \"main\" is not a function.");
     
     FnObj mainFn = (FnObj)main;
     invoke(mNothing, mainFn.getFunction(), nothing());
@@ -178,9 +178,8 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
   private Obj invokeMethod(EvalContext context, Obj thisObj, String name, Obj arg) {
     Obj member = thisObj.getMember(name);
     
-    if (member == null) {
-      throw new InterpreterException("Could not find a member \"" + name + "\" on " + thisObj);
-    }
+    expect(member != null, "Could not find a member \"%s\" on %s.",
+        name, thisObj);
     
     if (member instanceof Invokable) {
       // It's a method, so invoke it.
@@ -193,7 +192,7 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
       if (arg == mNothing) {
         return member;
       } else {
-        throw new InterpreterException("Member \"" + name + "\" on " + thisObj + " is not invokable.");
+        throw failure("Member \"%s\" on %s is not invokable.", name, thisObj);
       }
     }
   }
@@ -236,9 +235,8 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
       // Look for a local variable with the name.
       Obj local = context.lookUp(name);
       if (local != null) {
-        if (!(local instanceof Invokable)) {
-          throw new InterpreterException("Can not call a local variable that does not contain a function.");
-        }
+        expect(local instanceof Invokable,
+            "Can not call a local variable that does not contain a function.");
         
         Invokable function = (Invokable)local;
         return function.invoke(this, context, arg);
@@ -247,14 +245,10 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
       // Look for an implicit call to a method on this with the name.
       Obj member = context.getThis().getMember(name);
       if (member != null) {
-        if (!(member instanceof Invokable)) {
-          throw new InterpreterException("Member \"" + name + " of " + context.getThis() + " cannot be invoked.");
-        }
+        expect(member instanceof Invokable,
+            "Member \"%s\" of %s cannot be invoked.", name, context.getThis());
         
-        Invokable method = (Invokable)member;
-        if (method != null) {
-          return invokeMethod(context, context.getThis(), name, arg);
-        }
+        return invokeMethod(context, context.getThis(), name, arg);
       }
       
       // Try to call it as a method on the argument. In other words,
@@ -265,9 +259,8 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     // Not an explicit named target, so evaluate it and see if it's callable.
     Obj target = evaluate(expr.getTarget(), context);
     
-    if (!(target instanceof FnObj)) {
-      throw new InterpreterException("Can not call an expression that does not evaluate to a function.");
-    }
+    expect(target instanceof FnObj,
+        "Can not call an expression that does not evaluate to a function.");
 
     FnObj targetFn = (FnObj)target;
     return invoke(mNothing, targetFn.getFunction(), arg);
@@ -384,9 +377,9 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     
     // See if there's a member of this with the name.
     Obj member = context.getThis().getMember(expr.getName());
-    if (member == null) {
-      throw new InterpreterException("Could not find a variable or member named \"" + expr.getName() + "\".");
-    }
+    expect(member != null, 
+        "Could not find a variable or member named \"%s\".",
+        expr.getName());
     
     // If it's a method, implicitly invoke it with nothing.
     // TODO(bob): Do we need to distinguish between method members and fields
@@ -424,6 +417,27 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     }
     
     return tuple;
+  }
+  
+  private void expect(boolean condition, String format, Object... args) {
+    if (!condition) throw failure(format, args);
+  }
+  
+  /**
+   * Returns a new interpreter exception. It should be called like:
+   * 
+   *    throw failure(...);
+   * 
+   * Note that this *returns* an exception instead of throwing it so that you
+   * can use it in places where the Java compiler is doing reachability
+   * analysis. For example, you can do "throw failure(...)" in the last line of
+   * a function with a non-void return type and Java will allow it. If fail did
+   * the throw internally, it would have no way of knowing the function doesn't
+   * return.
+   */
+  private InterpreterException failure(String format, Object... args) {
+    String message = String.format(format, args);
+    return new InterpreterException(message);
   }
   
   private final InterpreterHost mHost;
