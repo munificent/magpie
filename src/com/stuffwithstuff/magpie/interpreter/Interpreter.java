@@ -155,6 +155,16 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     return mStringProto.spawn(value);
   }
   
+  public Obj createTuple(EvalContext context, Obj... fields) {
+    // A tuple is an object with fields whose names are zero-based numbers.
+    Obj tuple = mTupleProto.spawn();
+    for (int i = 0; i < fields.length; i++) {
+      tuple.add(Integer.toString(i), fields[i]);
+    }
+    
+    return tuple;
+  }
+  
   public Obj invoke(Obj thisRef, FnExpr function, Obj arg) {
     // Create a new local scope for the function.
     EvalContext context = new EvalContext(new Scope(mGlobalScope), thisRef);
@@ -199,9 +209,54 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
   
   @Override
   public Obj visit(AssignExpr expr, EvalContext context) {
-    Obj value = evaluate(expr.getValue(), context);
-    context.assign(expr.getName(), value);
-    return value;
+    if (expr.getTarget() == null) {
+      // No target means we're just assigning to a variable (or field of this)
+      // with the given name.
+      String name = expr.getName();
+      Obj value = evaluate(expr.getValue(), context);
+      
+      // Try to assign to a local.
+      if (context.assign(name, value)) return value;
+      
+      // If not found, try to assign to a member of this.
+      if (context.getThis().assign(name, value)) return value;
+      
+      throw failure("Couldn't find a variable or member \"%s\" to assign to.", name);
+    } else {
+      // The target of the assignment is an actual expression, like a.b = c
+      Obj target = evaluate(expr.getTarget(), context);
+      
+      // Look for a setter method.
+      String setterName = expr.getName() + "=";
+      Obj setter = target.getMember(setterName);
+      if (setter != null) {
+        expect(setter instanceof Invokable,
+            "Cannot use a field named \"%s\" as an assignment target.",
+            setterName);
+
+        Obj value = evaluate(expr.getValue(), context);
+        
+        // If the assignment statement has an argument and a value, like:
+        // a.b c = v (c is the arg, v is the value)
+        // then bundle them together:
+        if (expr.getTargetArg() != null) {
+          Obj targetArg = evaluate(expr.getTargetArg(), context);
+          value = createTuple(context, targetArg, value);
+        }
+        
+        // Invoke the setter.
+        return invokeMethod(context, target, setterName, value);
+      }
+      
+      // Try to assign a field with the right name.
+      if (expr.getTargetArg() == null) {
+        Obj value = evaluate(expr.getValue(), context);
+        if (target.assign(expr.getName(), value)) return value;
+      }
+      
+      throw failure("Could not find a setter or member named \"%s\" on %s to assign to.",
+        expr.getName(), target);
+    }
   }
 
   @Override
@@ -409,14 +464,13 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(TupleExpr expr, EvalContext context) {
-    // A tuple is an object with fields whose names are zero-based numbers.
-    
-    Obj tuple = mTupleProto.spawn();
-    for (int i = 0; i < expr.getFields().size(); i++) {
-      tuple.add(Integer.toString(i), evaluate(expr.getFields().get(i), context));
+    // Evaluate the fields.
+    Obj[] fields = new Obj[expr.getFields().size()];
+    for (int i = 0; i < fields.length; i++) {
+      fields[i] = evaluate(expr.getFields().get(i), context);
     }
-    
-    return tuple;
+
+    return createTuple(context, fields);
   }
   
   private void expect(boolean condition, String format, Object... args) {

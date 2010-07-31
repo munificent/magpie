@@ -39,6 +39,24 @@ public class Obj {
     mScope.define(name, member);
   }
   
+  /**
+   * Assigns a new value to an existing member with the given name.
+   * @param name
+   * @param member
+   * @return
+   */
+  public boolean assign(String name, Obj member) {
+    // Walk up the parent chain.
+    Obj obj = this;
+    while (obj != null) {
+      if (obj.mScope.assign(name, member)) return true;
+      obj = obj.mParent;
+    }
+    
+    // If we got here, it wasn't found.
+    return false;
+  }
+  
   public Obj getMember(String name) {
     // Walk up the parent chain.
     Obj obj = this;

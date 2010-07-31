@@ -45,14 +45,13 @@ public class MagpieParser extends Parser {
         // Just a regular variable definition.
         consume(TokenType.EQUALS);
         
-        // Skip over assignment to prevent "def a = b = c"
         Expr value = flowControl();
         return new DefineExpr(isMutable, name, value);
       }
     }
     else if (lookAhead(TokenType.CLASS)) {
       return parseClass();
-    } else return assignment();
+    } else return flowControl();
   }
   
   private Expr parseClass() {
@@ -70,35 +69,6 @@ public class MagpieParser extends Parser {
     }
     
     return new ClassExpr(name, exprs);
-  }
-  
-  /* TODO(bob): Need to figure out how the syntax for assignment is going to be
-   * parsed. A lot of things can be on the left side of =, but equally many
-   * can't. The full breakdown is:
-   * 
-   * Allowed:                                 Desugared
-   * --------------------------------------------------------------------------
-   * Name         foo          = 123          Implemented natively
-   * Method       foo.bar      = 123          foo.bar=(123)
-   *              foo.bar 456  = 123          foo.bar=(456, 123)
-   *              foo.456      = 123          foo.(Int)=(456, 123)
-   * Operator     foo ?! 456   = 123          foo.?!=(456, 123)
-   * Tuple        foo, foo.bar = 123, 456     foo = 123; foo.bar=(456)
-   * (where each field must be allowed on the left side)
-   * 
-   * The following are not allowed to the left of a =:
-   * Literals like 123, "foo", ().
-   * Calls like "123 abs".
-   * Flow control, definition, or other expressions.
-   */
-  private Expr assignment() {
-    // TODO(bob): Support more than just names.
-    if (match(TokenType.NAME, TokenType.EQUALS)) {
-      String name = last(2).getString();
-      Expr value = flowControl();
-      return new AssignExpr(name, value);
-    }
-    else return flowControl();
   }
   
   private Expr flowControl() {
@@ -198,7 +168,64 @@ public class MagpieParser extends Parser {
       
       return new LoopExpr(conditions, body);
     }
-    else return function();
+    else return assignment();
+  }
+  
+  /* TODO(bob): Need to figure out how the syntax for assignment is going to be
+   * parsed. A lot of things can be on the left side of =, but equally many
+   * can't. The full breakdown is:
+   * 
+   * Allowed:                                 Desugared
+   * --------------------------------------------------------------------------
+   * Name         foo          = 123          Implemented natively
+   * Method       foo.bar      = 123          foo.bar=(123)
+   *              foo.bar 456  = 123          foo.bar=(456, 123)
+   *              foo.456      = 123          foo.(Int)=(456, 123)
+   * Operator     foo ?! 456   = 123          foo.?!=(456, 123)
+   * Tuple        foo, foo.bar = 123, 456     foo = 123; foo.bar=(456)
+   * (where each field must be allowed on the left side)
+   * 
+   * The following are not allowed to the left of a =:
+   * Literals like 123, "foo", ().
+   * Calls like "123 abs".
+   * Flow control, definition, or other expressions.
+   */
+  private Expr assignment() {
+    Expr expr = function();
+    
+    if (match(TokenType.EQUALS)) {
+      // Parse the value being assigned.
+      Expr value = flowControl();
+
+      // Transform the left-hand expression into an assignment form. Examples:
+      // a = v       ->  a = v      AssignExpr(null, "a", null, v)
+      // a.b = v     ->  a.b=(v)    AssignExpr(a,    "b", null, v)
+      // a.b.c = v   ->  a.b.c=(v)  AssignExpr(a.b,  "c", null, v)
+      // a.b c = v   ->  a.b=(c, v) AssignExpr(a,    "b", c,    v)
+      // a ^ b = v   ->  a.^=(b)    AssignExpr(a,    "^", b,    v)
+      // Other expression forms on the left-hand side are considered invalid and
+      // will throw a parse exception.
+      
+      if (expr instanceof NameExpr) {
+        return new AssignExpr(null, ((NameExpr)expr).getName(), null, value);
+      } else if (expr instanceof MethodExpr) {
+        MethodExpr method = (MethodExpr) expr;
+        
+        if (method.getArg() instanceof NothingExpr) {
+          // a.b = v -> a.b=(v)
+          return new AssignExpr(method.getReceiver(), method.getMethod(), null, value);
+        } else {
+          // a.b c = v -> a.b=(c, v)
+          return new AssignExpr(method.getReceiver(), method.getMethod(),
+              method.getArg(), value);
+        }
+      } else {
+        throw new ParseException("Expression \"" + expr +
+        "\" is not a valid target for assignment.");
+      }
+    }
+    
+    return expr;
   }
   
   // fn (a) print "hi"

@@ -15,19 +15,19 @@ public class Scope {
     mParent = parent;
   }
 
-  public Obj assign(String name, Obj value) {
+  public boolean assign(String name, Obj value) {
     // Walk up the scope chain until we find where it was previously defined.
     Scope scope = this;
     while (scope != null) {
       if (scope.mVariables.containsKey(name)) {
         scope.mVariables.put(name, value);
-        return value;
+        return true;
       }
       scope = scope.mParent;
     }
     
     // If we got here, it wasn't defined.
-    throw new InterpreterException("Couldn't find a previously defined variable \"" + name + "\" to assign to.");
+    return false;
   }
 
   public void define(String name, Obj value) {

@@ -34,8 +34,8 @@ public class EvalContext {
     mScope.define(name, value);
   }
   
-  public void assign(String name, Obj value) {
-    mScope.assign(name, value);
+  public boolean assign(String name, Obj value) {
+    return mScope.assign(name, value);
   }
   
   private final Scope mScope;

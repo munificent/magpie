@@ -1,12 +1,16 @@
 package com.stuffwithstuff.magpie.ast;
 
 public class AssignExpr extends Expr {
-  public AssignExpr(String name, Expr value) {
+  public AssignExpr(Expr target, String name, Expr targetArg, Expr value) {
+    mTarget = target;
     mName = name;
+    mTargetArg = targetArg;
     mValue = value;
   }
   
+  public Expr getTarget() { return mTarget; }
   public String getName() { return mName; }
+  public Expr getTargetArg() { return mTargetArg; }
   public Expr getValue() { return mValue; }
   
   @Override
@@ -18,6 +22,8 @@ public class AssignExpr extends Expr {
     return mName + " = " + mValue;
   }
 
+  private final Expr mTarget;
   private final String mName;
+  private final Expr mTargetArg;
   private final Expr mValue;
 }

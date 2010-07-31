@@ -11,3 +11,6 @@ def foo = Foo.new
 foo.noArgs              //: noArgs
 foo.oneArg "one"        //: oneArg one
 foo.twoArgs ("a", "b")  //: ab
+
+// can also call no-argument methods in prefix position
+noArgs foo              //: noArgs
