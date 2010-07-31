@@ -7,8 +7,8 @@ import com.stuffwithstuff.magpie.ast.Expr;
  * Object type for a function object.
  */
 public class FnObj extends Obj {
-  public FnObj(ClassObj classObj, List<String> paramNames, Expr body) {
-    super(classObj);
+  public FnObj(Obj parent, List<String> paramNames, Expr body) {
+    super(parent);
     
     mParamNames = paramNames;
     mBody = body;

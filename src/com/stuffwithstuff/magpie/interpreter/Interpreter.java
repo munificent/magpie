@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.*;
+import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.*;
 
@@ -12,41 +13,102 @@ public class Interpreter implements ExprVisitor<Obj> {
     mGlobalScope = new Scope();
     mScope = mGlobalScope;
     
-    mMetaclass = new ClassObj();
-    mScope.define("Class", mMetaclass);
-    mMetaclass.getInstanceMethods().put("addInstanceField", ClassMethods.addInstanceField());
-    mMetaclass.getInstanceMethods().put("instanceField?", ClassMethods.instanceFieldQ());
-    mMetaclass.getInstanceMethods().put("name", ClassMethods.getName());
-    mMetaclass.getInstanceMethods().put("new", ClassMethods.construct());
+    // Create the built-in objects. These objects essentially define a class
+    // system in terms of Magpie's core prototype-based runtime. The diagram
+    // below shows the object hierarchy for the built-in objects.
+    //
+    // Root
+    //  +-- BoolProto
+    //  |    +-- true
+    //  |    +-- false
+    //  +-- ClassProto
+    //  |    +-- BoolClass
+    //  |    +-- ClassClass
+    //  |    +-- FnClass
+    //  |    +-- IntClass
+    //  |    +-- NothingClass
+    //  |    +-- StringClass
+    //  |    +-- TupleClass
+    //  +-- FnProto
+    //  +-- IntProto
+    //  |    +-- int instances...
+    //  +-- Nothing
+    //  +-- StringProto
+    //  |    +-- string instances...
+    //  +-- TupleProto
+    //
+    // In addition, each of the ___Proto object has a field named "class" that
+    // refers to its corresponding ___Class object. Likewise, the ___Class
+    // objects have a reference to the ___Proto objects that they use when
+    // constructing new instances of their class (except for NothingClass).
     
-    // Register the built-in types.
-    createClass("Nothing");
+    mRoot = new Obj();
     
-    ClassObj boolClass = createClass("Bool");
-    boolClass.getInstanceMethods().put("toString", BoolMethods.toStringMethod());
+    mClassProto = mRoot.spawn();
+    Obj classClass = mRoot.spawn();
+    classClass.add("proto", mClassProto);
+    mClassProto.add("class", classClass);
+    mClassProto.add("new", ClassMethods.newObj());
     
-    ClassObj intClass = createClass("Int");
-    intClass.getInstanceMethods().put("+", IntMethods.operatorPlus());
-    intClass.getInstanceMethods().put("-", IntMethods.operatorMinus());
-    intClass.getInstanceMethods().put("*", IntMethods.operatorMultiply());
-    intClass.getInstanceMethods().put("/", IntMethods.operatorDivide());
-    intClass.getInstanceMethods().put("toString", IntMethods.toStringMethod());
-    intClass.getInstanceMethods().put("==", IntMethods.operatorEqual());
-    intClass.getInstanceMethods().put("!=", IntMethods.operatorNotEqual());
-    intClass.getInstanceMethods().put("<",  IntMethods.operatorLessThan());
-    intClass.getInstanceMethods().put(">",  IntMethods.operatorGreaterThan());
-    intClass.getInstanceMethods().put("<=", IntMethods.operatorLessThanOrEqual());
-    intClass.getInstanceMethods().put(">=", IntMethods.operatorGreaterThanOrEqual());
-    
-    ClassObj stringClass = createClass("String");
-    stringClass.getInstanceMethods().put("+",     StringMethods.operatorPlus());
-    stringClass.getInstanceMethods().put("print", StringMethods.print());
-    
-    ClassObj fnClass = createClass("Function");
-    fnClass.getInstanceMethods().put("invoke", FnMethods.invoke());
+    Obj nothingClass = mClassProto.spawn();
+    mNothing = mRoot.spawn();
+    mNothing.add("class", nothingClass);
 
-    // Register the () object.
-    mNothing = new Obj(findClass("Nothing"), null);
+    Obj boolClass = mClassProto.spawn();
+    mBoolProto = mRoot.spawn();
+    boolClass.add("proto", mBoolProto);
+    mBoolProto.add("class", boolClass);
+    mBoolProto.add("toString", BoolMethods.toStringMethod());
+    
+    Obj fnClass = mClassProto.spawn();
+    mFnProto = mRoot.spawn();
+    fnClass.add("proto", mFnProto);
+    mFnProto.add("class", fnClass);
+    
+    Obj intClass = mClassProto.spawn();
+    mIntProto = mRoot.spawn();
+    intClass.add("proto", mIntProto);
+    mIntProto.add("class", intClass);
+    mIntProto.add("+", IntMethods.operatorPlus());
+    mIntProto.add("-", IntMethods.operatorMinus());
+    mIntProto.add("*", IntMethods.operatorMultiply());
+    mIntProto.add("/", IntMethods.operatorDivide());
+    mIntProto.add("toString", IntMethods.toStringMethod());
+    mIntProto.add("==", IntMethods.operatorEqual());
+    mIntProto.add("!=", IntMethods.operatorNotEqual());
+    mIntProto.add("<",  IntMethods.operatorLessThan());
+    mIntProto.add(">",  IntMethods.operatorGreaterThan());
+    mIntProto.add("<=", IntMethods.operatorLessThanOrEqual());
+    mIntProto.add(">=", IntMethods.operatorGreaterThanOrEqual());
+
+    Obj stringClass = mClassProto.spawn();
+    mStringProto = mRoot.spawn();
+    stringClass.add("proto", mStringProto);
+    mStringProto.add("class", stringClass);
+    mStringProto.add("+",     StringMethods.operatorPlus());
+    mStringProto.add("print", StringMethods.print());
+
+    // TODO(bob): At some point, may want different tuple types based on the
+    // types of the fields.
+    Obj tupleClass = mClassProto.spawn();
+    mTupleProto = mRoot.spawn();
+    tupleClass.add("proto", mTupleProto);
+    mTupleProto.add("class", tupleClass);
+    
+    // Give the classes names and make then available.
+    mScope.define("Bool", boolClass);
+    mScope.define("Function", fnClass);
+    mScope.define("Int", intClass);
+    mScope.define("String", stringClass);
+    mScope.define("Tuple", tupleClass);
+
+    boolClass.add("name", createString("Bool"));
+    classClass.add("name", createString("Class"));
+    fnClass.add("name", createString("Function"));
+    intClass.add("name", createString("Int"));
+    nothingClass.add("name", createString("Nothing"));
+    stringClass.add("name", createString("String"));
+    tupleClass.add("name", createString("Tuple"));
   }
   
   public Obj evaluate(Expr expr) {
@@ -82,15 +144,15 @@ public class Interpreter implements ExprVisitor<Obj> {
   public Obj nothing() { return mNothing; }
 
   public Obj createBool(boolean value) {
-    return new Obj(findClass("Bool"), value);
+    return mBoolProto.spawn(value);
   }
 
   public Obj createInt(int value) {
-    return new Obj(findClass("Int"), value);
+    return mIntProto.spawn(value);
   }
   
-  public Obj createString(String text) {
-    return new Obj(findClass("String"), text);
+  public Obj createString(String value) {
+    return mStringProto.spawn(value);
   }
   
   public Obj invoke(FunctionDefn function, Obj arg) {
@@ -119,9 +181,10 @@ public class Interpreter implements ExprVisitor<Obj> {
     if (paramNames.size() == 1) {
       mScope.define(paramNames.get(0), arg);
     } else if (paramNames.size() > 1) {
-      TupleObj tuple = (TupleObj)arg;
+      // TODO(bob): Hack. Assume the arg is a tuple with the right number of
+      // fields.
       for (int i = 0; i < paramNames.size(); i++) {
-        mScope.define(paramNames.get(i), tuple.getFields().get(i));
+        mScope.define(paramNames.get(i), arg.getField(Integer.toString(i)));
       }
     }
     
@@ -159,7 +222,7 @@ public class Interpreter implements ExprVisitor<Obj> {
 
   @Override
   public Obj visit(BoolExpr expr) {
-    return new Obj(findClass("Bool"), expr.getValue());
+    return createBool(expr.getValue());
   }
 
   @Override
@@ -210,21 +273,28 @@ public class Interpreter implements ExprVisitor<Obj> {
 
   @Override
   public Obj visit(ClassExpr expr) {
-    ClassObj classObj = new ClassObj(mMetaclass, expr.getName());
+    // Create a class object with the shared properties.
+    Obj classObj = mClassProto.spawn();
+    classObj.add("name", createString(expr.getName()));
     
+    // TODO(bob): Need to add constructors here...
+    
+    // Create an instance prototype with the instance methods.
+    Obj proto = mRoot.spawn();
+    classObj.add("proto", proto);
+
+    /*
     // Define the fields.
     for (String field : expr.getFields().keySet()) {
       classObj.getInstanceFields().put(field, true);
     }
+    */
     
     // Define the methods.
-    for (String name : expr.getMethods().keySet()) {
-      // TODO(bob): Is there a better way to iterate over a map?
-      Method method = new Method(expr.getMethods().get(name));
-      classObj.getInstanceMethods().put(name, method);
+    for (Entry<String, FnExpr> entry : expr.getMethods().entrySet()) {
+      Method method = new Method(entry.getValue());
+      proto.add(entry.getKey(), method);
     }
-    
-    // TODO(bob): Hack. Temp.
     
     mScope.define(expr.getName(), classObj);
     return classObj;
@@ -240,7 +310,7 @@ public class Interpreter implements ExprVisitor<Obj> {
 
   @Override
   public Obj visit(FnExpr expr) {
-    return new FnObj(findClass("Function"), expr.getParamNames(), expr.getBody());
+    return new FnObj(mFnProto, expr.getParamNames(), expr.getBody());
   }
 
   @Override
@@ -266,7 +336,7 @@ public class Interpreter implements ExprVisitor<Obj> {
 
   @Override
   public Obj visit(IntExpr expr) {
-    return new Obj(findClass("Int"), expr.getValue());
+    return createInt(expr.getValue());
   }
 
   @Override
@@ -325,40 +395,28 @@ public class Interpreter implements ExprVisitor<Obj> {
 
   @Override
   public Obj visit(TupleExpr expr) {
-    List<Obj> fields = new ArrayList<Obj>();
+    // A tuple is an object with fields whose names are zero-based numbers.
     
-    for (Expr field : expr.getFields()) {
-      fields.add(evaluate(field));
+    Obj tuple = mTupleProto.spawn();
+    for (int i = 0; i < expr.getFields().size(); i++) {
+      tuple.add(Integer.toString(i), evaluate(expr.getFields().get(i)));
     }
     
-    return new TupleObj(fields);
+    return tuple;
   }
   
   private Obj invokeMethod(String name, Obj thisObj, Obj arg) {
-    // See if the object itself has the method.
-    Invokable method = thisObj.getMethods().get(name);
+    // Look up the method.
+    Invokable method = thisObj.getMethod(name);
+    if (method != null) return method.invoke(this, thisObj, arg);
     
-    // If not, see if it's type has an instance method for it.
-    if (method == null) {
-      ClassObj thisClass = thisObj.getClassObj();
-      method = thisClass.getInstanceMethods().get(name);
+    // If there is no arg, look for a field.
+    if (arg == mNothing) {
+      Obj field = thisObj.getField(name);
+      if (field != null) return field;
     }
-    
-    if (method == null) {
-      throw new InterpreterException("Could not find a method \"" + name + "\" on " + thisObj);
-    }
-    
-    return method.invoke(this, thisObj, arg);
-  }
-  
-  private ClassObj createClass(String name) {
-    ClassObj classObj = new ClassObj(mMetaclass, name);
-    mScope.define(name, classObj);
-    return classObj;
-  }
-  
-  private ClassObj findClass(String name) {
-    return (ClassObj)mGlobalScope.get(name);
+
+    throw new InterpreterException("Could not find a member \"" + name + "\" on " + thisObj);
   }
   
   private final InterpreterHost mHost;
@@ -366,6 +424,12 @@ public class Interpreter implements ExprVisitor<Obj> {
   // TODO(bob): Get rid of this is a member, and instead pass it around as part
   //            of an evaluation context.
   private Scope mScope;
-  private final ClassObj mMetaclass;
+  private final Obj mRoot;
   private final Obj mNothing;
+  private final Obj mBoolProto;
+  private final Obj mClassProto;
+  private final Obj mFnProto;
+  private final Obj mIntProto;
+  private final Obj mStringProto;
+  private final Obj mTupleProto;
 }

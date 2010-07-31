@@ -1,9 +1,0 @@
-class Foo
-    bar
-    bang
-end
-
-// TODO(bob): method syntax kind of sucks here
-print (Foo.instanceField? "bar").toString //: true
-print (Foo.instanceField? "bang").toString //: true
-print (Foo.instanceField? "moop").toString //: false

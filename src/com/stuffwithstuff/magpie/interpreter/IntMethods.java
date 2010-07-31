@@ -10,7 +10,7 @@ public class IntMethods {
         int left = ((Integer)thisObj.getPrimitiveValue()).intValue();
         int right = ((Integer)arg.getPrimitiveValue()).intValue();
         
-        return new Obj(thisObj.getClassObj(), left + right);
+        return interpreter.createInt(left + right);
       }
     };
   }
@@ -21,7 +21,7 @@ public class IntMethods {
         int left = ((Integer)thisObj.getPrimitiveValue()).intValue();
         int right = ((Integer)arg.getPrimitiveValue()).intValue();
         
-        return new Obj(thisObj.getClassObj(), left - right);
+        return interpreter.createInt(left - right);
       }
     };
   }
@@ -32,7 +32,7 @@ public class IntMethods {
         int left = ((Integer)thisObj.getPrimitiveValue()).intValue();
         int right = ((Integer)arg.getPrimitiveValue()).intValue();
         
-        return new Obj(thisObj.getClassObj(), left * right);
+        return interpreter.createInt(left * right);
       }
     };
   }
