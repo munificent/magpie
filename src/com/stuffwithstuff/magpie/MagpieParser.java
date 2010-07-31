@@ -58,56 +58,18 @@ public class MagpieParser extends Parser {
   private Expr parseClass() {
     // Parse the class name line.
     consume(TokenType.CLASS);
-    String className = consume(TokenType.NAME).getString();
-    consume(TokenType.LINE);
+    String name = consume(TokenType.NAME).getString();
     
     // Parse the body.
-    Map<String, TypeDecl> fields = new HashMap<String, TypeDecl>();
-    Map<String, FnExpr> methods = new HashMap<String, FnExpr>();
+    consume(TokenType.LINE);
+    List<Expr> exprs = new ArrayList<Expr>();
     
-    while (!match(TokenType.END)){
-      String name = consume(TokenType.NAME).getString();
-      
-      if (fields.containsKey(name)) {
-        throw new ParseException("The class \"" + name + "\" already " +
-            "contains a field named \"" + name + "\".");
-      }
-      
-      if (methods.containsKey(name)) {
-        throw new ParseException("The class \"" + name + "\" already " +
-            "contains a method named \"" + name + "\".");
-      }
-
-      // See if it's a field or a method.
-      if (lookAhead(TokenType.LEFT_PAREN)) {
-        // A method declaration.
-        
-        // TODO(bob): This is very similar to definition(). Should combine at
-        // some point (especially if class bodies become expressions.)
-        List<String> paramNames = new ArrayList<String>();
-        FunctionType type = functionType(paramNames);
-        Expr body = parseBlock();
-        consume(TokenType.LINE);
-        
-        FnExpr function = new FnExpr(type, paramNames, body);
-        methods.put(name, function);
-      } else {
-        // A field declaration.
-        
-        // Parse the optional type declaration.
-        TypeDecl type = null;
-        if (!match(TokenType.LINE)) {
-          type = typeDeclaration();
-          consume(TokenType.LINE);
-        } else {
-          type = TypeDecl.dynamic();
-        }
-        
-        fields.put(name, type);
-      }
+    while (!match(TokenType.END)) {
+      exprs.add(expression());
+      consume(TokenType.LINE);
     }
     
-    return new ClassExpr(className, fields, methods);
+    return new ClassExpr(name, exprs);
   }
   
   /* TODO(bob): Need to figure out how the syntax for assignment is going to be
@@ -259,10 +221,10 @@ public class MagpieParser extends Parser {
     if (match(TokenType.LINE)){
       List<Expr> exprs = new ArrayList<Expr>();
       
-      do {
+      while (!match(TokenType.END)) {
         exprs.add(expression());
         consume(TokenType.LINE);
-      } while (!match(TokenType.END));
+      }
             
       return new BlockExpr(exprs);
     } else {
@@ -494,7 +456,6 @@ public class MagpieParser extends Parser {
   private TypeDecl typeDeclaration() {
     // TODO(bob): Support more than just named types.
     String name = consume(TokenType.NAME).getString();
-    // TODO(bob): Check for built-in type names like Int?
     return new NamedType(name);
   }
 }

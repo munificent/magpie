@@ -1,8 +1,8 @@
 class Foo
-    noArgs () print "noArgs"
-    oneArg (arg String) print ("oneArg " + arg)
+    def noArgs () print "noArgs"
+    def oneArg (arg String) print ("oneArg " + arg)
     
-    someMethod ()
+    def someMethod ()
         // implicit receiver
         // implicit ()
         noArgs              //: noArgs

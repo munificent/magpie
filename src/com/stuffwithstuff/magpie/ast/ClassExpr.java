@@ -1,22 +1,18 @@
 package com.stuffwithstuff.magpie.ast;
 
-import java.util.*;
-import com.stuffwithstuff.magpie.type.*;
+import java.util.List;
 
 /**
  * AST node for a class definition expression.
  */
 public class ClassExpr extends Expr {
-  public ClassExpr(String name, Map<String, TypeDecl> fields,
-      Map<String, FnExpr> methods) {
+  public ClassExpr(String name, List<Expr> body) {
     mName = name;
-    mFields = fields;
-    mMethods = methods;
+    mBody = body;
   }
   
   public String getName() { return mName; }
-  public Map<String, TypeDecl> getFields() { return mFields; }
-  public Map<String, FnExpr> getMethods() { return mMethods; }
+  public List<Expr> getBody() { return mBody; }
   
   @Override
   public <R, C> R accept(ExprVisitor<R, C> visitor, C context) {
@@ -24,6 +20,5 @@ public class ClassExpr extends Expr {
   }
   
   private final String mName;
-  private final Map<String, TypeDecl> mFields;
-  private final Map<String, FnExpr> mMethods;
+  private final List<Expr> mBody;
 }

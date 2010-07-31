@@ -1,8 +1,5 @@
 package com.stuffwithstuff.magpie.interpreter;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class Obj {
   public Obj() {
     mParent = null;
@@ -32,63 +29,43 @@ public class Obj {
   
   public Obj getParent() { return mParent; }
   public Object getPrimitiveValue() { return mPrimitiveValue; }
-
-  // TODO(bob): Right now, fields and methods are in distinct namespaces.
-  //            Semantically, I don't think I want them to work that way. Might
-  //            need to make the add methods check their counterpart for a name
-  //            collision.
   
-  public Obj getField(String name) {
-    // Walk up the parent chain.
-    Obj obj = this;
-    while (obj != null) {
-      Obj field = obj.mFields.get(name);
-      if (field != null) return field;
-      obj = obj.getParent();
-    }
-    
-    return null;
+  /**
+   * Adds the given member to the Obj.
+   * @param name   The name of the member.
+   * @param member The member's value.
+   */
+  public void add(String name, Obj member) {
+    mScope.define(name, member);
   }
   
-  public Invokable getMethod(String name) {
+  public Obj getMember(String name) {
     // Walk up the parent chain.
     Obj obj = this;
     while (obj != null) {
-      Invokable method = obj.mMethods.get(name);
-      if (method != null) return method;
-      obj = obj.getParent();
+      Obj member = obj.mScope.get(name);
+      if (member != null) return member;
+      obj = obj.mParent;
     }
     
+    // If we got here, it wasn't found.
     return null;
   }
   
   /**
-   * Adds the given field to the Obj.
-   * @param name  The name of the field.
-   * @param field The field's value.
+   * Creates a new EvalContext for evaluating code within the scope of this
+   * object's members.
+   * @param thisRef The object to bind to "this".
    */
-  public void add(String name, Obj field) {
-    mFields.put(name, field);
+  public EvalContext createContext(Obj thisRef) {
+    return new EvalContext(mScope, thisRef);
   }
   
-  /**
-   * Adds the given method to the Obj.
-   * @param name   The name of the method.
-   * @param method The method.
-   */
-  public void add(String name, Invokable method) {
-    mMethods.put(name, method);
-  }
-  
-  public Map<String, Obj> getFields() { return mFields; }
-  public Map<String, Invokable> getMethods() { return mMethods; }
-
   @Override
   public String toString() {
     // Use the object's name if it has one.
-    if (mFields.containsKey("name")) {
-      return mFields.get("name").getPrimitiveValue().toString();
-    }
+    Obj name = mScope.get("name");
+    if (name != null) return name.getPrimitiveValue().toString();
     
     // Else try its value.
     if (mPrimitiveValue == null) return "()";
@@ -97,6 +74,5 @@ public class Obj {
   
   private final Obj mParent;
   private final Object mPrimitiveValue;
-  private final Map<String, Obj> mFields = new HashMap<String, Obj>();
-  private final Map<String, Invokable> mMethods = new HashMap<String, Invokable>();
+  private final Scope mScope = new Scope();
 }

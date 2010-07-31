@@ -1,7 +1,6 @@
 package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.*;
-import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.*;
 
@@ -47,7 +46,7 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     Obj classClass = mRoot.spawn();
     classClass.add("proto", mClassProto);
     mClassProto.add("class", classClass);
-    mClassProto.add("new", ClassMethods.newObj());
+    mClassProto.add("new", new NativeMethodObj.ClassNew());
     
     Obj nothingClass = mClassProto.spawn();
     mNothing = mRoot.spawn();
@@ -57,7 +56,7 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     mBoolProto = mRoot.spawn();
     boolClass.add("proto", mBoolProto);
     mBoolProto.add("class", boolClass);
-    mBoolProto.add("toString", BoolMethods.toStringMethod());
+    mBoolProto.add("toString", new NativeMethodObj.BoolToString());
     
     Obj fnClass = mClassProto.spawn();
     mFnProto = mRoot.spawn();
@@ -68,24 +67,24 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     mIntProto = mRoot.spawn();
     intClass.add("proto", mIntProto);
     mIntProto.add("class", intClass);
-    mIntProto.add("+", IntMethods.operatorPlus());
-    mIntProto.add("-", IntMethods.operatorMinus());
-    mIntProto.add("*", IntMethods.operatorMultiply());
-    mIntProto.add("/", IntMethods.operatorDivide());
-    mIntProto.add("toString", IntMethods.toStringMethod());
-    mIntProto.add("==", IntMethods.operatorEqual());
-    mIntProto.add("!=", IntMethods.operatorNotEqual());
-    mIntProto.add("<",  IntMethods.operatorLessThan());
-    mIntProto.add(">",  IntMethods.operatorGreaterThan());
-    mIntProto.add("<=", IntMethods.operatorLessThanOrEqual());
-    mIntProto.add(">=", IntMethods.operatorGreaterThanOrEqual());
+    mIntProto.add("+", new NativeMethodObj.IntPlus());
+    mIntProto.add("-", new NativeMethodObj.IntMinus());
+    mIntProto.add("*", new NativeMethodObj.IntMultiply());
+    mIntProto.add("/", new NativeMethodObj.IntDivide());
+    mIntProto.add("toString", new NativeMethodObj.IntToString());
+    mIntProto.add("==", new NativeMethodObj.IntEqual());
+    mIntProto.add("!=", new NativeMethodObj.IntNotEqual());
+    mIntProto.add("<",  new NativeMethodObj.IntLessThan());
+    mIntProto.add(">",  new NativeMethodObj.IntGreaterThan());
+    mIntProto.add("<=", new NativeMethodObj.IntLessThanOrEqual());
+    mIntProto.add(">=", new NativeMethodObj.IntGreaterThanOrEqual());
 
     Obj stringClass = mClassProto.spawn();
     mStringProto = mRoot.spawn();
     stringClass.add("proto", mStringProto);
     mStringProto.add("class", stringClass);
-    mStringProto.add("+",     StringMethods.operatorPlus());
-    mStringProto.add("print", StringMethods.print());
+    mStringProto.add("+",     new NativeMethodObj.StringPlus());
+    mStringProto.add("print", new NativeMethodObj.StringPrint());
 
     // TODO(bob): At some point, may want different tuple types based on the
     // types of the fields.
@@ -168,7 +167,8 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
       // TODO(bob): Hack. Assume the arg is a tuple with the right number of
       // fields.
       for (int i = 0; i < params.size(); i++) {
-        context.define(params.get(i), arg.getField(Integer.toString(i)));
+        // TODO(bob): What happens if this member is a method?
+        context.define(params.get(i), arg.getMember(Integer.toString(i)));
       }
     }
     
@@ -176,20 +176,26 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
   }
   
   private Obj invokeMethod(EvalContext context, Obj thisObj, String name, Obj arg) {
-    // Look up the method.
-    Invokable method = thisObj.getMethod(name);
-    if (method != null) {
-      EvalContext thisContext = context.bindThis(thisObj);
-      return method.invoke(this, thisContext, arg);
+    Obj member = thisObj.getMember(name);
+    
+    if (member == null) {
+      throw new InterpreterException("Could not find a member \"" + name + "\" on " + thisObj);
     }
     
-    // If there is no arg, look for a field.
-    if (arg == mNothing) {
-      Obj field = thisObj.getField(name);
-      if (field != null) return field;
+    if (member instanceof Invokable) {
+      // It's a method, so invoke it.
+      Invokable method = (Invokable)member;
+      EvalContext thisContext = context.bindThis(thisObj);
+      return method.invoke(this, thisContext, arg);
+    } else {
+      // If the member isn't callable and we aren't passing an arg, it's a
+      // field, so just return it.
+      if (arg == mNothing) {
+        return member;
+      } else {
+        throw new InterpreterException("Member \"" + name + "\" on " + thisObj + " is not invokable.");
+      }
     }
-
-    throw new InterpreterException("Could not find a member \"" + name + "\" on " + thisObj);
   }
   
   @Override
@@ -204,7 +210,7 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     Obj result = null;
     
     // Create a lexical scope.
-    EvalContext localContext = context.newScope();
+    EvalContext localContext = context.innerScope();
     
     // Evaluate all of the expressions and return the last.
     for (Expr thisExpr : expr.getExpressions()) {
@@ -221,15 +227,6 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(CallExpr expr, EvalContext context) {
-    // Given a call expression like "foo bar", we look for the following in
-    // order until we find a match.
-    // 1. Look for a variable named "foo".
-    //    (The type checker will ensure "foo" is a function that takes "bar"'s
-    //    type.)
-    // TODO(bob): Implement this case once we have function objects and
-    //            variables.
-    // 2. Look for a method "foo" on the type of the argument "bar".
-    
     Obj arg = evaluate(expr.getArg(), context);
     
     // Handle a named target.
@@ -239,20 +236,25 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
       // Look for a local variable with the name.
       Obj local = context.lookUp(name);
       if (local != null) {
-        if (!(local instanceof FnObj)) {
+        if (!(local instanceof Invokable)) {
           throw new InterpreterException("Can not call a local variable that does not contain a function.");
         }
         
-        // TODO(bob): May want to support a more generic callable interface
-        // eventually.
-        FnObj function = (FnObj)local;
-        return invoke(mNothing, function.getFunction(), arg);
+        Invokable function = (Invokable)local;
+        return function.invoke(this, context, arg);
       }
       
       // Look for an implicit call to a method on this with the name.
-      Invokable method = context.getThis().getMethod(name);
-      if (method != null) {
-        return invokeMethod(context, context.getThis(), name, arg);
+      Obj member = context.getThis().getMember(name);
+      if (member != null) {
+        if (!(member instanceof Invokable)) {
+          throw new InterpreterException("Member \"" + name + " of " + context.getThis() + " cannot be invoked.");
+        }
+        
+        Invokable method = (Invokable)member;
+        if (method != null) {
+          return invokeMethod(context, context.getThis(), name, arg);
+        }
       }
       
       // Try to call it as a method on the argument. In other words,
@@ -283,17 +285,20 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     Obj proto = mRoot.spawn();
     classObj.add("proto", proto);
 
-    /*
-    // Define the fields.
-    for (String field : expr.getFields().keySet()) {
-      classObj.getInstanceFields().put(field, true);
-    }
-    */
     
-    // Define the methods.
-    for (Entry<String, FnExpr> entry : expr.getMethods().entrySet()) {
-      Method method = new Method(entry.getValue());
-      proto.add(entry.getKey(), method);
+    
+    // when a def is encountered, it's defined in the scope of the class proto
+    // when a "shared" is encountered, it's defined in the scope of the class
+    // obj
+    EvalContext classContext = proto.createContext(context.getThis());
+    
+    // Evaluate the expressions that form the body of the class. Note that
+    // class explicitly has a collection of expressions and not a single
+    // BlockExpr. That's because evaluatin a block creates a new lexical scope
+    // which is then discarded when the block ends. We want to evaluate the
+    // class body directly in the class's scope.
+    for (Expr bodyExpr : expr.getBody()) {
+      evaluate(bodyExpr, classContext);
     }
     
     context.define(expr.getName(), classObj);
@@ -302,7 +307,6 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(DefineExpr expr, EvalContext context) {
-    // TODO(bob): need to handle mutability
     Obj value = evaluate(expr.getValue(), context);
     context.define(expr.getName(), value);
     return value;
@@ -378,13 +382,21 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     Obj variable = context.lookUp(expr.getName());
     if (variable != null) return variable;
     
-    // See if there's a method on this with the name.
-    Invokable method = context.getThis().getMethod(expr.getName());
-    if (method != null) {
-      return invokeMethod(context, context.getThis(), expr.getName(), mNothing);
+    // See if there's a member of this with the name.
+    Obj member = context.getThis().getMember(expr.getName());
+    if (member == null) {
+      throw new InterpreterException("Could not find a variable or member named \"" + expr.getName() + "\".");
     }
     
-    throw new InterpreterException("Could not find a variable or member named \"" + expr.getName() + "\".");
+    // If it's a method, implicitly invoke it with nothing.
+    // TODO(bob): Do we need to distinguish between method members and fields
+    // whose value is a function?
+    if (member instanceof Invokable) {
+      return invokeMethod(context, context.getThis(), expr.getName(), mNothing);
+    } else {
+      // Just a field, so return it.
+      return member;
+    }
   }
 
   @Override

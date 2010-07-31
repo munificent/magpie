@@ -14,8 +14,12 @@ public class EvalContext {
     return new EvalContext(mScope, thisObj);
   }
   
-  public EvalContext newScope() {
-    return new EvalContext(new Scope(mScope), mThis);
+  public EvalContext inScope(Scope scope) {
+    return new EvalContext(scope, mThis);
+  }
+  
+  public EvalContext innerScope() {
+    return inScope(new Scope(mScope));
   }
   
   public Obj getThis() {
