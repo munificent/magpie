@@ -6,11 +6,6 @@ class Foo
         print bar
         print this.bang
     end
-    
-    def change ()
-        bar = "c"
-        this.bang = "d"
-    end
 end
 
 def foo = Foo.new
@@ -19,10 +14,3 @@ print foo.bang        //: b
 
 foo.printFields       //: a
                       //: b
-foo.change
-
-foo.printFields       //: c
-                      //: d
-
-print foo.bar         //: c
-print foo.bang        //: d

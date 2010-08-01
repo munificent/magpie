@@ -1,0 +1,18 @@
+class Foo
+    def bar = "a"
+    def bang = "b"
+    
+    def change ()
+        bar = "c"
+        this.bang = "d"
+    end
+end
+
+def foo = Foo.new
+foo.change
+
+print foo.bar         //: c
+print foo.bang        //: d
+
+foo.bar = "e"
+print foo.bar         //: e

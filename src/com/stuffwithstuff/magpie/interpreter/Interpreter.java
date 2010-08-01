@@ -114,7 +114,7 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
   }
   
   public void run(List<Expr> expressions) {
-    EvalContext context = new EvalContext(mGlobalScope, mNothing);
+    EvalContext context = new EvalContext(null, mGlobalScope, mNothing);
     
     // First, evaluate the expressions. This is the load time evaluation.
     for (Expr expr : expressions) {
@@ -167,7 +167,7 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
   
   public Obj invoke(Obj thisRef, FnExpr function, Obj arg) {
     // Create a new local scope for the function.
-    EvalContext context = new EvalContext(new Scope(mGlobalScope), thisRef);
+    EvalContext context = EvalContext.forMethod(mGlobalScope, thisRef);
     
     // Bind arguments to their parameter names.
     List<String> params = function.getParamNames();
@@ -333,12 +333,15 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     Obj proto = mRoot.spawn();
     classObj.add("proto", proto);
 
-    
-    
-    // when a def is encountered, it's defined in the scope of the class proto
-    // when a "shared" is encountered, it's defined in the scope of the class
-    // obj
-    EvalContext classContext = proto.createContext(context.getThis());
+    // TODO(bob): There's a bug here. When a class body is evaluated, it needs
+    // to have access to two scopes:
+    // 1. The scope of the class proto being defined so that you can assign new
+    //    fields and methods.
+    // 2. The scope surrounding the class definition, so that you can access
+    //    things like global variables (other classes, for instance) etc.
+    // Right now, this just uses the proto's scope, which doesn't have the
+    // global or outer scope as its parent. Complicated!
+    EvalContext classContext = proto.createContext(context);
     
     // Evaluate the expressions that form the body of the class. Note that
     // class explicitly has a collection of expressions and not a single
@@ -474,7 +477,9 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
   }
   
   private void expect(boolean condition, String format, Object... args) {
-    if (!condition) throw failure(format, args);
+    if (!condition) {
+      throw failure(format, args);
+    }
   }
   
   /**

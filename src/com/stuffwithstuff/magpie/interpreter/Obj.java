@@ -73,10 +73,9 @@ public class Obj {
   /**
    * Creates a new EvalContext for evaluating code within the scope of this
    * object's members.
-   * @param thisRef The object to bind to "this".
    */
-  public EvalContext createContext(Obj thisRef) {
-    return new EvalContext(mScope, thisRef);
+  public EvalContext createContext(EvalContext outer) {
+    return new EvalContext(outer, mScope, outer.getThis());
   }
   
   @Override
