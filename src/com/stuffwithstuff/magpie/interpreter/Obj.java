@@ -78,6 +78,33 @@ public class Obj {
     return new EvalContext(outer, mScope, outer.getThis());
   }
   
+  public boolean asBool() {
+    if (mPrimitiveValue instanceof Boolean) {
+      return ((Boolean)mPrimitiveValue).booleanValue();
+    }
+    
+    throw new InterpreterException(String.format(
+        "The object \"%s\" is not a boolean.", this));
+  }
+  
+  public int asInt() {
+    if (mPrimitiveValue instanceof Integer) {
+      return ((Integer)mPrimitiveValue).intValue();
+    }
+    
+    throw new InterpreterException(String.format(
+        "The object \"%s\" is not an int.", this));
+  }
+  
+  public String asString() {
+    if (mPrimitiveValue instanceof String) {
+      return (String)mPrimitiveValue;
+    }
+    
+    throw new InterpreterException(String.format(
+        "The object \"%s\" is not a string.", this));
+  }
+  
   @Override
   public String toString() {
     // Use the object's name if it has one.

@@ -56,6 +56,7 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     mBoolProto = mRoot.spawn();
     boolClass.add("proto", mBoolProto);
     mBoolProto.add("class", boolClass);
+    mBoolProto.add("not", new NativeMethodObj.BoolNot());
     mBoolProto.add("toString", new NativeMethodObj.BoolToString());
     
     Obj fnClass = mClassProto.spawn();
