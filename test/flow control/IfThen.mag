@@ -21,7 +21,7 @@ if true
 then print "true 3"             //: true 3
     
 // flow control inside condition
-def a = true
+var a = true
 if
     if a then false else true
 then print "true" else print "false"    //: false

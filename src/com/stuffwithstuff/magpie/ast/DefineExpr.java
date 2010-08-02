@@ -1,13 +1,15 @@
 package com.stuffwithstuff.magpie.ast;
 
+import com.stuffwithstuff.magpie.ScopeType;
+
 public class DefineExpr extends Expr {
-  public DefineExpr(boolean isShared, String name, Expr value) {
-    mIsShared = isShared;
+  public DefineExpr(ScopeType scope, String name, Expr value) {
+    mScope = scope;
     mName = name;
     mValue = value;
   }
   
-  public boolean isShared() { return mIsShared; }
+  public ScopeType getScope() { return mScope; }
   public String getName() { return mName; }
   public Expr getValue() { return mValue; }
   
@@ -19,10 +21,10 @@ public class DefineExpr extends Expr {
   @Override public String toString() {
     StringBuilder builder = new StringBuilder();
     
-    if (mIsShared) {
-      builder.append("shared ");
-    } else {
-      builder.append("def ");
+    switch (mScope) {
+    case LOCAL: builder.append("var "); break;
+    case OBJECT: builder.append("def "); break;
+    case CLASS: builder.append("shared "); break;
     }
     
     builder.append(mName).append(" = ").append(mValue);
@@ -30,7 +32,7 @@ public class DefineExpr extends Expr {
     return builder.toString();
   }
 
-  private final boolean mIsShared;
+  private final ScopeType mScope;
   private final String mName;
   private final Expr mValue;
 }

@@ -25,8 +25,15 @@ public class MagpieParser extends Parser {
   }
   
   private Expr definition() {
-    if (match(TokenType.DEF) || match(TokenType.SHARED)) {
-      boolean isShared = last(1).getType() == TokenType.SHARED;
+    if (match(TokenType.VAR) ||
+        match(TokenType.DEF) ||
+        match(TokenType.SHARED)) {
+      ScopeType scope = ScopeType.LOCAL;
+      switch (last(1).getType()) {
+      case VAR: scope = ScopeType.LOCAL; break;
+      case DEF: scope = ScopeType.OBJECT; break;
+      case SHARED: scope = ScopeType.CLASS; break;
+      }
       
       // TODO(bob): support multiple definitions and tuple decomposition here
       String name = consume(TokenType.NAME).getString();
@@ -40,13 +47,13 @@ public class MagpieParser extends Parser {
         
         // Desugar it to: def foo = fn () blah
         FnExpr function = new FnExpr(type, paramNames, body);
-        return new DefineExpr(isShared, name, function);
+        return new DefineExpr(scope, name, function);
       } else {
         // Just a regular variable definition.
         consume(TokenType.EQUALS);
         
         Expr value = flowControl();
-        return new DefineExpr(isShared, name, value);
+        return new DefineExpr(scope, name, value);
       }
     }
     else if (lookAhead(TokenType.CLASS)) {
@@ -130,7 +137,7 @@ public class MagpieParser extends Parser {
           
           // Initialize the generator before the loop.
           String generatorVar = variable + " gen";
-          generators.add(new DefineExpr(false, generatorVar,
+          generators.add(new DefineExpr(ScopeType.LOCAL, generatorVar,
               new MethodExpr(generator, "generate", new NothingExpr())));
           
           // The the condition expression just increments the generator.
@@ -138,7 +145,7 @@ public class MagpieParser extends Parser {
               new NameExpr(generatorVar), "next", new NothingExpr()));
           
           // In the body of the loop, we need to initialize the variable.
-          initializers.add(new DefineExpr(false, variable,
+          initializers.add(new DefineExpr(ScopeType.LOCAL, variable,
               new MethodExpr(new NameExpr(generatorVar), "current", new NothingExpr())));
         }
         match(TokenType.LINE); // Optional line after a clause.

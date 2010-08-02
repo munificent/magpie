@@ -1,4 +1,4 @@
-def main ()
+var main ()
     zero ()                 //: zero local
     one "one"               //: one
                             //: one local
@@ -7,19 +7,19 @@ def main ()
                             //: two local
 end
 
-def zero ()
-    def local = "zero local"
+var zero ()
+    var local = "zero local"
     print local
 end
     
-def one (a String)
-    def local = "one local"
+var one (a String)
+    var local = "one local"
     print a
     print local
 end
 
-def two (a String, b String)
-    def local = "two local"
+var two (a String, b String)
+    var local = "two local"
     print a
     print b
     print local

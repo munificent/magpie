@@ -8,7 +8,7 @@ class Foo
     end
 end
 
-def foo = Foo.new
+var foo = Foo.new
 print foo.bar         //: a
 print foo.bang        //: b
 

@@ -1,0 +1,17 @@
+class Foo
+    def prop = "old"
+    def change () prop = "new"
+end
+
+class Bar
+    def foo = Foo.new
+end
+
+var a = Bar.new
+var b = Bar.new
+
+print a.foo.prop //: old
+print b.foo.prop //: old
+a.foo.change
+print a.foo.prop //: new
+print b.foo.prop //: old

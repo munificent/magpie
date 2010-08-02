@@ -1,5 +1,5 @@
 // single line
-def a = 0
+var a = 0
 
 while a < 5 do a = a + 1
 

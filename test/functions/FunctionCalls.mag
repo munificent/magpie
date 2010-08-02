@@ -1,7 +1,7 @@
-def noArgs  ()                    print "noArgs"
-def oneArg  (a String)            print ("one " + a)
-def twoArgs (a String, b String)  print ("two " + a + b)
-def bounce  (a String -> String)  a + " returned"
+var noArgs  ()                    print "noArgs"
+var oneArg  (a String)            print ("one " + a)
+var twoArgs (a String, b String)  print ("two " + a + b)
+var bounce  (a String -> String)  a + " returned"
 
 // explicit () application is required
 noArgs () //: noArgs
@@ -16,5 +16,5 @@ oneArg bounce "chain" //: one chain returned
 twoArgs ("a ", "b") //: two a b
 
 // stored tuple
-def args = ("a ", "b")
+var args = ("a ", "b")
 twoArgs args //: two a b

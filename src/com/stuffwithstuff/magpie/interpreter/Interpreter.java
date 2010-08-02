@@ -115,7 +115,7 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
   }
   
   public void run(List<Expr> expressions) {
-    EvalContext context = new EvalContext(null, mGlobalScope, mNothing);
+    EvalContext context = EvalContext.topLevel(mGlobalScope, mNothing);
     
     // First, evaluate the expressions. This is the load time evaluation.
     for (Expr expr : expressions) {
@@ -265,7 +265,7 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     Obj result = null;
     
     // Create a lexical scope.
-    EvalContext localContext = context.innerScope();
+    EvalContext localContext = context.newBlockScope();
     
     // Evaluate all of the expressions and return the last.
     for (Expr thisExpr : expr.getExpressions()) {
@@ -334,15 +334,13 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     Obj proto = mRoot.spawn();
     classObj.add("proto", proto);
 
-    // Create a context where the scope is this class's object prototype so that
-    // "def" calls create fields and methods, and where the shared scope is this
-    // class's class object so that "shared" calls create class members.
-    EvalContext classContext = new EvalContext(context, proto.getScope(),
-        classObj.getScope(), context.getThis());
+    // Create a context that includes this class so that we can define instance
+    // and shared members in it.
+    EvalContext classContext = EvalContext.forClass(context, classObj);
 
     // Evaluate the expressions that form the body of the class. Note that
     // class explicitly has a collection of expressions and not a single
-    // BlockExpr. That's because evaluatin a block creates a new lexical scope
+    // BlockExpr. That's because evaluating a block creates a new lexical scope
     // which is then discarded when the block ends. We want to evaluate the
     // class body directly in the class's scope.
     for (Expr bodyExpr : expr.getBody()) {
@@ -357,12 +355,7 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(DefineExpr expr, EvalContext context) {
     Obj value = evaluate(expr.getValue(), context);
 
-    if (expr.isShared()) {
-      context.defineShared(expr.getName(), value);
-    } else {
-      context.define(expr.getName(), value);
-    }
-    
+    context.define(expr.getScope(), expr.getName(), value);
     return value;
   }
 

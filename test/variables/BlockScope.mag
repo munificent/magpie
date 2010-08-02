@@ -1,19 +1,19 @@
 do
-    def a = "first"
+    var a = "first"
     print a //: first
 end
 
 // can change type
 do
-    def a = 2
+    var a = 2
     print a.toString //: 2
 end
 
 // shadowing
-def b = "outer"
+var b = "outer"
 print b //: outer
 do
-    def b = "inner"
+    var b = "inner"
     print b //: inner
 end
 print b //: outer

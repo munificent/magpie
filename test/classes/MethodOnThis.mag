@@ -19,5 +19,5 @@ class Foo
     end
 end
 
-def foo = Foo.new
+var foo = Foo.new
 foo.someMethod

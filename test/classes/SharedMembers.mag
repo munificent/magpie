@@ -6,7 +6,7 @@ class Foo
     shared sayHi () print "shared"
 end
 
-def foo = Foo.new
+var foo = Foo.new
 print foo.bar         //: bar
 foo.sayHi             //: nonshared
 

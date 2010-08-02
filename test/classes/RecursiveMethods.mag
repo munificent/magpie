@@ -14,7 +14,7 @@ class Foo
     end
 end
 
-def foo = Foo.new
+var foo = Foo.new
 print (foo.fib 10).toString //: 55
 
 print (foo.odd? 9).toString //: true

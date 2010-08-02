@@ -7,7 +7,7 @@ class Foo
     end
 end
 
-def foo = Foo.new
+var foo = Foo.new
 foo.noArgs              //: noArgs
 foo.oneArg "one"        //: oneArg one
 foo.twoArgs ("a", "b")  //: ab

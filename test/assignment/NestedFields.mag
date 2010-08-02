@@ -10,7 +10,7 @@ class Foo
     end
 end
 
-def foo = Foo.new
+var foo = Foo.new
 print foo.bar.bang    //: b
 
 foo.bar.bang = "c"
