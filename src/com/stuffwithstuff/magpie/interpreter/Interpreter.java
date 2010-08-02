@@ -334,16 +334,12 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     Obj proto = mRoot.spawn();
     classObj.add("proto", proto);
 
-    // TODO(bob): There's a bug here. When a class body is evaluated, it needs
-    // to have access to two scopes:
-    // 1. The scope of the class proto being defined so that you can assign new
-    //    fields and methods.
-    // 2. The scope surrounding the class definition, so that you can access
-    //    things like global variables (other classes, for instance) etc.
-    // Right now, this just uses the proto's scope, which doesn't have the
-    // global or outer scope as its parent. Complicated!
-    EvalContext classContext = proto.createContext(context);
-    
+    // Create a context where the scope is this class's object prototype so that
+    // "def" calls create fields and methods, and where the shared scope is this
+    // class's class object so that "shared" calls create class members.
+    EvalContext classContext = new EvalContext(context, proto.getScope(),
+        classObj.getScope(), context.getThis());
+
     // Evaluate the expressions that form the body of the class. Note that
     // class explicitly has a collection of expressions and not a single
     // BlockExpr. That's because evaluatin a block creates a new lexical scope
@@ -360,7 +356,13 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(DefineExpr expr, EvalContext context) {
     Obj value = evaluate(expr.getValue(), context);
-    context.define(expr.getName(), value);
+
+    if (expr.isShared()) {
+      context.defineShared(expr.getName(), value);
+    } else {
+      context.define(expr.getName(), value);
+    }
+    
     return value;
   }
 

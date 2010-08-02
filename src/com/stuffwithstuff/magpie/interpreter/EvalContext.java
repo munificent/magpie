@@ -10,12 +10,18 @@ public class EvalContext {
     return outerContext.innerScope();
   }
 
-  public EvalContext(EvalContext parent, Scope scope, Obj thisObj) {
+  public EvalContext(EvalContext parent, Scope scope, Scope sharedScope,
+      Obj thisObj) {
     mParent = parent;
     mScope = scope;
+    mSharedScope = sharedScope;
     mThis = thisObj;
   }
 
+  public EvalContext(EvalContext parent, Scope scope, Obj thisObj) {
+    this(parent, scope, null, thisObj);
+  }
+  
   public EvalContext(Scope scope, Obj thisObj) {
     this(null, scope, thisObj);
   }
@@ -57,6 +63,12 @@ public class EvalContext {
     mScope.define(name, value);
   }
   
+  public void defineShared(String name, Obj value) {
+    if (mSharedScope == null) throw new InterpreterException("There is no shared scope here.");
+    
+    mSharedScope.define(name, value);
+  }
+  
   public boolean assign(String name, Obj value) {
     EvalContext context = this;
     while (context != null) {
@@ -69,5 +81,6 @@ public class EvalContext {
   
   private final EvalContext mParent;
   private final Scope mScope;
+  private final Scope mSharedScope;
   private final Obj   mThis;
 }

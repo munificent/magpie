@@ -1,0 +1,14 @@
+class Foo
+    def bar = "bar"
+    shared bar = "shared bar"
+    
+    def sayHi () print "nonshared"
+    shared sayHi () print "shared"
+end
+
+def foo = Foo.new
+print foo.bar         //: bar
+foo.sayHi             //: nonshared
+
+print Foo.bar         //: shared bar
+Foo.sayHi             //: shared

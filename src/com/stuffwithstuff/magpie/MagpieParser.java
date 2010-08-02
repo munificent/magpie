@@ -25,8 +25,8 @@ public class MagpieParser extends Parser {
   }
   
   private Expr definition() {
-    if (match(TokenType.DEF) || match(TokenType.VAR)) {
-      boolean isMutable = last(1).getType() == TokenType.VAR;
+    if (match(TokenType.DEF) || match(TokenType.SHARED)) {
+      boolean isShared = last(1).getType() == TokenType.SHARED;
       
       // TODO(bob): support multiple definitions and tuple decomposition here
       String name = consume(TokenType.NAME).getString();
@@ -40,13 +40,13 @@ public class MagpieParser extends Parser {
         
         // Desugar it to: def foo = fn () blah
         FnExpr function = new FnExpr(type, paramNames, body);
-        return new DefineExpr(isMutable, name, function);
+        return new DefineExpr(isShared, name, function);
       } else {
         // Just a regular variable definition.
         consume(TokenType.EQUALS);
         
         Expr value = flowControl();
-        return new DefineExpr(isMutable, name, value);
+        return new DefineExpr(isShared, name, value);
       }
     }
     else if (lookAhead(TokenType.CLASS)) {

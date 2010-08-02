@@ -1,13 +1,13 @@
 package com.stuffwithstuff.magpie.ast;
 
 public class DefineExpr extends Expr {
-  public DefineExpr(boolean isMutable, String name, Expr value) {
-    mIsMutable = isMutable;
+  public DefineExpr(boolean isShared, String name, Expr value) {
+    mIsShared = isShared;
     mName = name;
     mValue = value;
   }
   
-  public boolean isMutable() { return mIsMutable; }
+  public boolean isShared() { return mIsShared; }
   public String getName() { return mName; }
   public Expr getValue() { return mValue; }
   
@@ -19,8 +19,8 @@ public class DefineExpr extends Expr {
   @Override public String toString() {
     StringBuilder builder = new StringBuilder();
     
-    if (mIsMutable) {
-      builder.append("var ");
+    if (mIsShared) {
+      builder.append("shared ");
     } else {
       builder.append("def ");
     }
@@ -30,7 +30,7 @@ public class DefineExpr extends Expr {
     return builder.toString();
   }
 
-  private final boolean mIsMutable;
+  private final boolean mIsShared;
   private final String mName;
   private final Expr mValue;
 }

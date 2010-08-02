@@ -70,13 +70,7 @@ public class Obj {
     return null;
   }
   
-  /**
-   * Creates a new EvalContext for evaluating code within the scope of this
-   * object's members.
-   */
-  public EvalContext createContext(EvalContext outer) {
-    return new EvalContext(outer, mScope, outer.getThis());
-  }
+  public Scope getScope() { return mScope; }
   
   public boolean asBool() {
     if (mPrimitiveValue instanceof Boolean) {
