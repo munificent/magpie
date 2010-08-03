@@ -1,10 +1,10 @@
 class Foo
-    def prop = "old"
-    def change () prop = "new"
+    prop = "old"
+    change () prop = "new"
 end
 
 class Bar
-    def foo = Foo.new
+    foo = Foo.new
 end
 
 var a = Bar.new

@@ -1,5 +1,9 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import java.util.Map.Entry;
+
+import com.stuffwithstuff.magpie.ast.Expr;
+
 public abstract class NativeMethodObj extends Obj implements Invokable {
   public abstract Obj invoke(Interpreter interpreter, EvalContext context, Obj arg);
   
@@ -23,13 +27,56 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
   
   // Class methods:
   
+  public static class ClassAddMethod extends NativeMethodObj {
+    @Override
+    public Obj invoke(Interpreter interpreter, EvalContext context, Obj arg) {
+      String name = arg.getTupleField(0).asString();
+      Obj method = arg.getTupleField(1);
+      
+      ClassObj classObj = (ClassObj)context.getThis();
+      classObj.addInstanceMember(name, method);
+      
+      return interpreter.nothing();
+    }
+  }
+  
+  public static class ClassAddSharedMethod extends NativeMethodObj {
+    @Override
+    public Obj invoke(Interpreter interpreter, EvalContext context, Obj arg) {
+      String name = arg.getTupleField(0).asString();
+      Obj method = arg.getTupleField(1);
+      
+      ClassObj classObj = (ClassObj)context.getThis();
+      classObj.add(name, method);
+      
+      return interpreter.nothing();
+    }
+  }
+  
   // TODO(bob): This is pretty much temp.
   public static class ClassNew extends NativeMethodObj {
     @Override
     public Obj invoke(Interpreter interpreter, EvalContext context, Obj arg) {
-      // TODO(bob): Should do something with arg, initialize fields, etc.
-      Obj proto = context.getThis().getMember("proto");
-      return proto.spawn();
+      ClassObj classObj = (ClassObj)context.getThis();
+      
+      // Instantiate the object.
+      Obj obj = new Obj(classObj);
+      
+      // Create a fresh context for evaluating the field initializers so that
+      // they can't erroneously access stuff around where the object is being
+      // constructed.
+      EvalContext fieldContext = EvalContext.topLevel(
+          interpreter.getGlobals(), interpreter.nothing());
+      
+      // Initialize its fields.
+      for (Entry<String, Expr> field : classObj.getFieldInitializers().entrySet()) {
+        Obj value = interpreter.evaluate(field.getValue(), fieldContext);
+        obj.add(field.getKey(), value);
+      }
+      
+      // TODO(bob): Need to call constructor here and pass in arg.
+      
+      return obj;
     }
   }
   

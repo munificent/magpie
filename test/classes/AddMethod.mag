@@ -1,0 +1,10 @@
+class Foo
+end
+
+var foo = Foo.new
+
+Foo.addMethod ("sayHi", fn () print "hi")
+Foo.addSharedMethod ("sayHi", fn () print "shared hi")
+
+foo.sayHi   //: hi
+Foo.sayHi   //: shared hi

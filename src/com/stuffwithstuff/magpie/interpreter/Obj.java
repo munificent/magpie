@@ -1,33 +1,28 @@
 package com.stuffwithstuff.magpie.interpreter;
 
-public class Obj {
-  public Obj() {
-    mParent = null;
-    mPrimitiveValue = null;
-  }
-  
-  protected Obj(Obj parent) {
-    mParent = parent;
-    mPrimitiveValue = null;
-  }
-  
-  protected Obj(Obj parent, Object primitiveValue) {
-    mParent = parent;
+public class Obj {  
+  public Obj(ClassObj classObj, Object primitiveValue) {
+    mClass = classObj;
     mPrimitiveValue = primitiveValue;
   }
   
-  /**
-   * Creates a new Obj with this one as its parent.
-   */
-  public Obj spawn() { return new Obj(this); }
+  public Obj(ClassObj classObj) {
+    this(classObj, null);
+  }
   
   /**
-   * Creates a new Obj with this one as its parent and with the given primitive
-   * value.
+   * This gets called in one of two contexts. It will either be instantiating
+   * the ClassObj that represents ths class of classes, or it will be a
+   * NativeMethodObj. For the former, it is its own class, for the latter it
+   * will have no class at all.
    */
-  public Obj spawn(Object primitiveValue) { return new Obj(this, primitiveValue); }
+  public Obj() {
+    // If we are a class, we're our own class.
+    mClass = (this instanceof ClassObj) ? (ClassObj)this : null;
+    mPrimitiveValue = null;
+  }
   
-  public Obj getParent() { return mParent; }
+  public ClassObj getClassObj() { return mClass; }
   public Object getPrimitiveValue() { return mPrimitiveValue; }
   
   /**
@@ -46,31 +41,24 @@ public class Obj {
    * @return
    */
   public boolean assign(String name, Obj member) {
-    // Walk up the parent chain.
-    Obj obj = this;
-    while (obj != null) {
-      if (obj.mScope.assign(name, member)) return true;
-      obj = obj.mParent;
-    }
-    
-    // If we got here, it wasn't found.
-    return false;
+    return mScope.assign(name, member);
   }
   
   public Obj getMember(String name) {
-    // Walk up the parent chain.
-    Obj obj = this;
-    while (obj != null) {
-      Obj member = obj.mScope.get(name);
-      if (member != null) return member;
-      obj = obj.mParent;
-    }
+    // See if it's specific to this instance.
+    Obj member = mScope.get(name);
+    if (member != null) return member;
     
-    // If we got here, it wasn't found.
-    return null;
+    // Otherwise, see if the class defines it.
+    member = mClass.getInstanceMember(name);
+    return member;
   }
   
   public Scope getScope() { return mScope; }
+  
+  public Obj getTupleField(int index) {
+    return mScope.get(Integer.toString(index));
+  }
   
   public boolean asBool() {
     if (mPrimitiveValue instanceof Boolean) {
@@ -110,7 +98,7 @@ public class Obj {
     return mPrimitiveValue.toString();
   }
   
-  private final Obj mParent;
+  private final ClassObj mClass;
   private final Object mPrimitiveValue;
   private final Scope mScope = new Scope();
 }

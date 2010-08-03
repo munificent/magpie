@@ -1,8 +1,8 @@
 class Foo
-    def bar = "a"
-    def bang = "b"
+    bar = "a"
+    bang = "b"
     
-    def change ()
+    change ()
         bar = "c"
         this.bang = "d"
     end

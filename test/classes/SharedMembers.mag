@@ -1,8 +1,8 @@
 class Foo
-    def bar = "bar"
+    bar = "bar"
     shared bar = "shared bar"
     
-    def sayHi () print "nonshared"
+    sayHi () print "nonshared"
     shared sayHi () print "shared"
 end
 

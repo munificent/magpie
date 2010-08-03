@@ -1,7 +1,5 @@
 package com.stuffwithstuff.magpie.interpreter;
 
-import com.stuffwithstuff.magpie.ScopeType;
-
 /**
  * Describes the context in which an expression can be evaluated. Includes the
  * lexical scope, this reference, etc.
@@ -14,16 +12,7 @@ public class EvalContext {
    * @param nothing A reference to Nothing.
    */
   public static EvalContext topLevel(Scope scope, Obj nothing) {
-    return new EvalContext(null, scope, null, null, nothing);
-  }
-  
-  /**
-   * Creates a new EvalContext within the given class.
-   */
-  public static EvalContext forClass(EvalContext context, Obj classObj) {
-    return new EvalContext(context, new Scope(),
-        classObj.getMember("proto").getScope(),
-        classObj.getScope(), classObj);
+    return new EvalContext(null, scope, nothing);
   }
   
   /**
@@ -31,7 +20,7 @@ public class EvalContext {
    * Retains the same object, class and this but creates a fresh local scope.
    */
   public EvalContext newBlockScope() {
-    return new EvalContext(this, new Scope(), mObjectScope, mClassScope, mThis);
+    return new EvalContext(this, new Scope(), mThis);
   }
   
   /**
@@ -39,7 +28,7 @@ public class EvalContext {
    * lexical scope and no object or class scope.
    */
   public static EvalContext forMethod(Scope closure, Obj thisObj) {
-    EvalContext closureContext = new EvalContext(null, closure, null, null, thisObj);
+    EvalContext closureContext = new EvalContext(null, closure, thisObj);
     return closureContext.newBlockScope();
   }
   
@@ -49,7 +38,7 @@ public class EvalContext {
    * method is evaluated within.
    */
   public EvalContext bindThis(Obj thisObj) {
-    return new EvalContext(mParent, mScope, mObjectScope, mClassScope, thisObj);
+    return new EvalContext(mParent, mScope, thisObj);
   }
   
   public Obj getThis() {
@@ -68,25 +57,7 @@ public class EvalContext {
   }
   
   public void define(String name, Obj value) {
-    define(ScopeType.LOCAL, name, value);
-  }
-  
-  public void define(ScopeType scope, String name, Obj value) {
-    switch (scope) {
-    case LOCAL:
-      mScope.define(name, value);
-      break;
-      
-    case OBJECT:
-      if (mObjectScope == null) throw new InterpreterException("Cannot define an instance member outside of a class.");
-      mObjectScope.define(name, value);
-      break;
-      
-    case CLASS:
-      if (mClassScope == null) throw new InterpreterException("Cannot define a shared member outside of a class.");
-      mClassScope.define(name, value);
-      break;
-    }
+    mScope.define(name, value);
   }
   
   public boolean assign(String name, Obj value) {
@@ -99,18 +70,13 @@ public class EvalContext {
     return false;
   }
   
-  private EvalContext(EvalContext parent, Scope localScope, Scope objectScope,
-      Scope classScope, Obj thisObj) {
+  private EvalContext(EvalContext parent, Scope scope, Obj thisObj) {
     mParent = parent;
-    mScope = localScope;
-    mObjectScope = objectScope;
-    mClassScope = classScope;
+    mScope = scope;
     mThis = thisObj;
   }
 
   private final EvalContext mParent;
   private final Scope mScope;
-  private final Scope mObjectScope;
-  private final Scope mClassScope;
   private final Obj   mThis;
 }

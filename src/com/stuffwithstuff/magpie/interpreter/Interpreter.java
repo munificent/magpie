@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.*;
+import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.*;
 
@@ -11,103 +12,55 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     // Create a top-level scope.
     mGlobalScope = new Scope();
     
-    // Create the built-in objects. These objects essentially define a class
-    // system in terms of Magpie's core prototype-based runtime. The diagram
-    // below shows the object hierarchy for the built-in objects.
-    //
-    // Root
-    //  +-- BoolProto
-    //  |    +-- true
-    //  |    +-- false
-    //  +-- ClassProto
-    //  |    +-- BoolClass
-    //  |    +-- ClassClass
-    //  |    +-- FnClass
-    //  |    +-- IntClass
-    //  |    +-- NothingClass
-    //  |    +-- StringClass
-    //  |    +-- TupleClass
-    //  +-- FnProto
-    //  +-- IntProto
-    //  |    +-- int instances...
-    //  +-- Nothing
-    //  +-- StringProto
-    //  |    +-- string instances...
-    //  +-- TupleProto
-    //
-    // In addition, each of the ___Proto object has a field named "class" that
-    // refers to its corresponding ___Class object. Likewise, the ___Class
-    // objects have a reference to the ___Proto objects that they use when
-    // constructing new instances of their class (except for NothingClass).
-    
-    mRoot = new Obj();
-    
-    mClassProto = mRoot.spawn();
-    Obj classClass = mRoot.spawn();
-    classClass.add("proto", mClassProto);
-    mClassProto.add("class", classClass);
-    mClassProto.add("new", new NativeMethodObj.ClassNew());
-    
-    Obj nothingClass = mClassProto.spawn();
-    mNothing = mRoot.spawn();
-    mNothing.add("class", nothingClass);
+    mClassClass = new ClassObj();
+    mClassClass.addInstanceMember("addMethod", new NativeMethodObj.ClassAddMethod());
+    mClassClass.addInstanceMember("addSharedMethod", new NativeMethodObj.ClassAddSharedMethod());
+    mClassClass.addInstanceMember("new", new NativeMethodObj.ClassNew());
 
-    Obj boolClass = mClassProto.spawn();
-    mBoolProto = mRoot.spawn();
-    boolClass.add("proto", mBoolProto);
-    mBoolProto.add("class", boolClass);
-    mBoolProto.add("not", new NativeMethodObj.BoolNot());
-    mBoolProto.add("toString", new NativeMethodObj.BoolToString());
-    
-    Obj fnClass = mClassProto.spawn();
-    mFnProto = mRoot.spawn();
-    fnClass.add("proto", mFnProto);
-    mFnProto.add("class", fnClass);
-    
-    Obj intClass = mClassProto.spawn();
-    mIntProto = mRoot.spawn();
-    intClass.add("proto", mIntProto);
-    mIntProto.add("class", intClass);
-    mIntProto.add("+", new NativeMethodObj.IntPlus());
-    mIntProto.add("-", new NativeMethodObj.IntMinus());
-    mIntProto.add("*", new NativeMethodObj.IntMultiply());
-    mIntProto.add("/", new NativeMethodObj.IntDivide());
-    mIntProto.add("toString", new NativeMethodObj.IntToString());
-    mIntProto.add("==", new NativeMethodObj.IntEqual());
-    mIntProto.add("!=", new NativeMethodObj.IntNotEqual());
-    mIntProto.add("<",  new NativeMethodObj.IntLessThan());
-    mIntProto.add(">",  new NativeMethodObj.IntGreaterThan());
-    mIntProto.add("<=", new NativeMethodObj.IntLessThanOrEqual());
-    mIntProto.add(">=", new NativeMethodObj.IntGreaterThanOrEqual());
+    mBoolClass = new ClassObj(mClassClass);
+    mBoolClass.addInstanceMember("not", new NativeMethodObj.BoolNot());
+    mBoolClass.addInstanceMember("toString", new NativeMethodObj.BoolToString());
 
-    Obj stringClass = mClassProto.spawn();
-    mStringProto = mRoot.spawn();
-    stringClass.add("proto", mStringProto);
-    mStringProto.add("class", stringClass);
-    mStringProto.add("+",     new NativeMethodObj.StringPlus());
-    mStringProto.add("print", new NativeMethodObj.StringPrint());
+    mFnClass = new ClassObj(mClassClass);
+    
+    mIntClass = new ClassObj(mClassClass);
+    mIntClass.addInstanceMember("+", new NativeMethodObj.IntPlus());
+    mIntClass.addInstanceMember("-", new NativeMethodObj.IntMinus());
+    mIntClass.addInstanceMember("*", new NativeMethodObj.IntMultiply());
+    mIntClass.addInstanceMember("/", new NativeMethodObj.IntDivide());
+    mIntClass.addInstanceMember("toString", new NativeMethodObj.IntToString());
+    mIntClass.addInstanceMember("==", new NativeMethodObj.IntEqual());
+    mIntClass.addInstanceMember("!=", new NativeMethodObj.IntNotEqual());
+    mIntClass.addInstanceMember("<",  new NativeMethodObj.IntLessThan());
+    mIntClass.addInstanceMember(">",  new NativeMethodObj.IntGreaterThan());
+    mIntClass.addInstanceMember("<=", new NativeMethodObj.IntLessThanOrEqual());
+    mIntClass.addInstanceMember(">=", new NativeMethodObj.IntGreaterThanOrEqual());
+
+    mStringClass = new ClassObj(mClassClass);
+    mStringClass.addInstanceMember("+",     new NativeMethodObj.StringPlus());
+    mStringClass.addInstanceMember("print", new NativeMethodObj.StringPrint());
 
     // TODO(bob): At some point, may want different tuple types based on the
     // types of the fields.
-    Obj tupleClass = mClassProto.spawn();
-    mTupleProto = mRoot.spawn();
-    tupleClass.add("proto", mTupleProto);
-    mTupleProto.add("class", tupleClass);
+    mTupleClass = new ClassObj(mClassClass);
+    
+    ClassObj nothingClass = new ClassObj(mClassClass);
+    mNothing = new Obj(nothingClass);
     
     // Give the classes names and make then available.
-    mGlobalScope.define("Bool", boolClass);
-    mGlobalScope.define("Function", fnClass);
-    mGlobalScope.define("Int", intClass);
-    mGlobalScope.define("String", stringClass);
-    mGlobalScope.define("Tuple", tupleClass);
+    mGlobalScope.define("Bool", mBoolClass);
+    mGlobalScope.define("Function", mFnClass);
+    mGlobalScope.define("Int", mIntClass);
+    mGlobalScope.define("String", mStringClass);
+    mGlobalScope.define("Tuple", mTupleClass);
 
-    boolClass.add("name", createString("Bool"));
-    classClass.add("name", createString("Class"));
-    fnClass.add("name", createString("Function"));
-    intClass.add("name", createString("Int"));
+    mBoolClass.add("name", createString("Bool"));
+    mClassClass.add("name", createString("Class"));
+    mFnClass.add("name", createString("Function"));
+    mIntClass.add("name", createString("Int"));
     nothingClass.add("name", createString("Nothing"));
-    stringClass.add("name", createString("String"));
-    tupleClass.add("name", createString("Tuple"));
+    mStringClass.add("name", createString("String"));
+    mTupleClass.add("name", createString("Tuple"));
   }
   
   public Obj evaluate(Expr expr, EvalContext context) {
@@ -138,6 +91,8 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     mHost.print(text);
   }
   
+  public Scope getGlobals() { return mGlobalScope; }
+  
   /**
    * Gets the single value () of type Nothing.
    * @return
@@ -145,20 +100,20 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
   public Obj nothing() { return mNothing; }
 
   public Obj createBool(boolean value) {
-    return mBoolProto.spawn(value);
+    return mBoolClass.instantiate(value);
   }
 
   public Obj createInt(int value) {
-    return mIntProto.spawn(value);
+    return mIntClass.instantiate(value);
   }
   
   public Obj createString(String value) {
-    return mStringProto.spawn(value);
+    return mStringClass.instantiate(value);
   }
   
   public Obj createTuple(EvalContext context, Obj... fields) {
     // A tuple is an object with fields whose names are zero-based numbers.
-    Obj tuple = mTupleProto.spawn();
+    Obj tuple = mTupleClass.instantiate();
     for (int i = 0; i < fields.length; i++) {
       tuple.add(Integer.toString(i), fields[i]);
     }
@@ -325,28 +280,35 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(ClassExpr expr, EvalContext context) {
     // Create a class object with the shared properties.
-    Obj classObj = mClassProto.spawn();
+    ClassObj classObj = new ClassObj(mClassClass);
     classObj.add("name", createString(expr.getName()));
+    
+    // Evaluate and define the shared fields.
+    EvalContext classContext = context.bindThis(classObj);
+    for (Entry<String, Expr> field : expr.getSharedFields().entrySet()) {
+      Obj value = evaluate(field.getValue(), classContext);
+      classObj.add(field.getKey(), value);
+    }
+    
+    // Define the shared methods.
+    for (Entry<String, FnExpr> method : expr.getSharedMethods().entrySet()) {
+      FnObj methodObj = new FnObj(mFnClass, method.getValue());
+      classObj.add(method.getKey(), methodObj);
+    }
+    
+    // Define the instance methods.
+    for (Entry<String, FnExpr> method : expr.getMethods().entrySet()) {
+      FnObj methodObj = new FnObj(mFnClass, method.getValue());
+      classObj.addInstanceMember(method.getKey(), methodObj);
+    }
+    
+    // Add the field initializers to the class so it can evaluate them when an
+    // object is constructed.
+    classObj.defineFields(expr.getFields());
     
     // TODO(bob): Need to add constructors here...
     
-    // Create an instance prototype with the instance methods.
-    Obj proto = mRoot.spawn();
-    classObj.add("proto", proto);
-
-    // Create a context that includes this class so that we can define instance
-    // and shared members in it.
-    EvalContext classContext = EvalContext.forClass(context, classObj);
-
-    // Evaluate the expressions that form the body of the class. Note that
-    // class explicitly has a collection of expressions and not a single
-    // BlockExpr. That's because evaluating a block creates a new lexical scope
-    // which is then discarded when the block ends. We want to evaluate the
-    // class body directly in the class's scope.
-    for (Expr bodyExpr : expr.getBody()) {
-      evaluate(bodyExpr, classContext);
-    }
-    
+    // Define a variable for the class in the current scope.
     context.define(expr.getName(), classObj);
     return classObj;
   }
@@ -355,13 +317,13 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(DefineExpr expr, EvalContext context) {
     Obj value = evaluate(expr.getValue(), context);
 
-    context.define(expr.getScope(), expr.getName(), value);
+    context.define(expr.getName(), value);
     return value;
   }
 
   @Override
   public Obj visit(FnExpr expr, EvalContext context) {
-    return new FnObj(mFnProto, expr);
+    return new FnObj(mFnClass, expr);
   }
 
   @Override
@@ -497,12 +459,24 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
   
   private final InterpreterHost mHost;
   private Scope mGlobalScope;
+  
+  private final ClassObj mClassClass;
+  private final ClassObj mBoolClass;
+  private final ClassObj mFnClass;
+  private final ClassObj mIntClass;
+  private final ClassObj mStringClass;
+  private final ClassObj mTupleClass;
+  
+  /*
   private final Obj mRoot;
+  */
   private final Obj mNothing;
+  /*
   private final Obj mBoolProto;
   private final Obj mClassProto;
   private final Obj mFnProto;
   private final Obj mIntProto;
   private final Obj mStringProto;
   private final Obj mTupleProto;
+  */
 }

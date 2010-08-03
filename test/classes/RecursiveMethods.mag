@@ -1,15 +1,15 @@
 class Foo
     // self recursion
-    def fib(n Int -> Int)
+    fib (n Int -> Int)
         if n < 2 then n else fib (n - 1) + fib (n - 2)
     end
     
     // mutual recursion
-    def odd?(n Int -> Bool)
+    odd? (n Int -> Bool)
         if n == 0 then false else even? (n - 1)
     end
 
-    def even?(n Int -> Bool)
+    even? (n Int -> Bool)
         if n == 0 then true else odd? (n - 1)
     end
 end

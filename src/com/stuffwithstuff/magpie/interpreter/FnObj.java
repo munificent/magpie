@@ -6,8 +6,8 @@ import com.stuffwithstuff.magpie.ast.FnExpr;
  * Object type for a function object.
  */
 public class FnObj extends Obj implements Invokable {
-  public FnObj(Obj parent, FnExpr function) {
-    super(parent);
+  public FnObj(ClassObj classObj, FnExpr function) {
+    super(classObj);
     
     mFunction = function;
   }

@@ -1,8 +1,8 @@
 class Foo
-    def noArgs () print "noArgs"
-    def oneArg (arg String) print ("oneArg " + arg)
+    noArgs () print "noArgs"
+    oneArg (arg String) print ("oneArg " + arg)
     
-    def twoArgs (arg1 String, arg2 String)
+    twoArgs (arg1 String, arg2 String)
         print (arg1 + arg2)
     end
 end

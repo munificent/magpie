@@ -1,3 +1,43 @@
+// TODO(bob): Hack temp code for "to" and "times". But it works!
+
+class RangeGenerator
+    current = 0
+    stop = 9999
+    
+    next (-> Bool)
+        current = current + 1
+        current < stop
+    end
+end
+
+class Range
+    start = 0
+    stop = 9999
+    
+    generate (-> RangeGenerator)
+        var generator = RangeGenerator.new
+        generator.current = start - 1
+        generator.stop = stop
+        generator
+    end
+end
+
+
+Int.addMethod ("times", fn ()
+    var range = Range.new
+    range.start = 0
+    range.stop = this
+    range
+end)
+
+Int.addMethod ("to", fn (to Int)
+    var range = Range.new
+    range.start = this
+    range.stop = to
+    range
+end)
+
+
 // one line
 for i = 3.times do print i.toString
 //: 0

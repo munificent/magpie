@@ -1,0 +1,38 @@
+// "def this" is syntax for ctor. every ctor encountered creates a new shared
+// "new" method on the class that takes the matching parameters. in a call to
+// "new", the interpreter will instantiate an object, bind its class, init any
+// fields that have initializer expressions, then call the ctor.
+// One core philosophy of Magpie is that imperative systems are more expressive
+// but declarative systems are easier to use. To reconcile those, Magpie builds
+// small imperative cores and then adds syntactic declarative sugar for the
+// common cases on top.
+//
+// Classes are a good example. At its code, Magpie supports (or will support) a
+// simple API for *building* a class, like:
+//
+// var Foo = class.new "Foo" 
+// Foo.addMethod("doSomething", fn () ...)
+//
+// Magpie's class syntax then desugars to that form. The syntax is like this:
+
+class Vector
+    // Define a constructor.
+    this (a Int) 
+        x = a
+        y = a
+    end
+    
+    // Declare a field declaration. This can be used at load time for type
+    // checking, but does nothing at runtime.
+    x Int
+    
+    // Define a field. All field definitions will be evaluated when an object
+    // is instantiated, right before its constructor runs.
+    y = 3
+    
+    // Define a method.
+    mag (-> Int) sqrt (x.squared + y.squared)
+    
+    // Define a "shared" or class method.
+    shared zero (-> Vector) this.new (0, 0)
+end

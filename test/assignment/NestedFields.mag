@@ -1,11 +1,11 @@
 class Bar
-    def bang = "b"
+    bang = "b"
 end
 
 class Foo
-    def bar = Bar.new
+    bar = Bar.new
 
-    def change ()
+    change ()
         this.bar.bang = "d"
     end
 end

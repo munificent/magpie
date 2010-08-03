@@ -25,16 +25,7 @@ public class MagpieParser extends Parser {
   }
   
   private Expr definition() {
-    if (match(TokenType.VAR) ||
-        match(TokenType.DEF) ||
-        match(TokenType.SHARED)) {
-      ScopeType scope = ScopeType.LOCAL;
-      switch (last(1).getType()) {
-      case VAR: scope = ScopeType.LOCAL; break;
-      case DEF: scope = ScopeType.OBJECT; break;
-      case SHARED: scope = ScopeType.CLASS; break;
-      }
-      
+    if (match(TokenType.VAR)) {
       // TODO(bob): support multiple definitions and tuple decomposition here
       String name = consume(TokenType.NAME).getString();
       
@@ -47,35 +38,18 @@ public class MagpieParser extends Parser {
         
         // Desugar it to: def foo = fn () blah
         FnExpr function = new FnExpr(type, paramNames, body);
-        return new DefineExpr(scope, name, function);
+        return new DefineExpr(name, function);
       } else {
         // Just a regular variable definition.
         consume(TokenType.EQUALS);
         
         Expr value = flowControl();
-        return new DefineExpr(scope, name, value);
+        return new DefineExpr(name, value);
       }
     }
     else if (lookAhead(TokenType.CLASS)) {
       return parseClass();
     } else return flowControl();
-  }
-  
-  private Expr parseClass() {
-    // Parse the class name line.
-    consume(TokenType.CLASS);
-    String name = consume(TokenType.NAME).getString();
-    
-    // Parse the body.
-    consume(TokenType.LINE);
-    List<Expr> exprs = new ArrayList<Expr>();
-    
-    while (!match(TokenType.END)) {
-      exprs.add(expression());
-      consume(TokenType.LINE);
-    }
-    
-    return new ClassExpr(name, exprs);
   }
   
   private Expr flowControl() {
@@ -137,7 +111,7 @@ public class MagpieParser extends Parser {
           
           // Initialize the generator before the loop.
           String generatorVar = variable + " gen";
-          generators.add(new DefineExpr(ScopeType.LOCAL, generatorVar,
+          generators.add(new DefineExpr(generatorVar,
               new MethodExpr(generator, "generate", new NothingExpr())));
           
           // The the condition expression just increments the generator.
@@ -145,7 +119,7 @@ public class MagpieParser extends Parser {
               new NameExpr(generatorVar), "next", new NothingExpr()));
           
           // In the body of the loop, we need to initialize the variable.
-          initializers.add(new DefineExpr(ScopeType.LOCAL, variable,
+          initializers.add(new DefineExpr(variable,
               new MethodExpr(new NameExpr(generatorVar), "current", new NothingExpr())));
         }
         match(TokenType.LINE); // Optional line after a clause.
@@ -198,7 +172,7 @@ public class MagpieParser extends Parser {
    * Flow control, definition, or other expressions.
    */
   private Expr assignment() {
-    Expr expr = function();
+    Expr expr = tuple();
     
     if (match(TokenType.EQUALS)) {
       // Parse the value being assigned.
@@ -233,18 +207,6 @@ public class MagpieParser extends Parser {
     }
     
     return expr;
-  }
-  
-  // fn (a) print "hi"
-  private Expr function() {
-    if (match(TokenType.FN)) {
-      List<String> paramNames = new ArrayList<String>();
-      FunctionType type = functionType(paramNames);
-      
-      Expr body = parseBlock();
-      
-      return new FnExpr(type, paramNames, body);
-    } else return tuple();
   }
   
   // TODO(bob): There's a lot of overlap in the next four functions, but,
@@ -419,6 +381,8 @@ public class MagpieParser extends Parser {
       return new NameExpr(last(1).getString());
     } else if (match(TokenType.THIS)) {
       return new ThisExpr();
+    } else if (match(TokenType.FN)) {
+      return parseFunction();
     } else if (match(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)) {
       return new NothingExpr();
     } else if (match(TokenType.LEFT_PAREN)) {
@@ -428,6 +392,81 @@ public class MagpieParser extends Parser {
     }
     
     return null;
+  }
+  
+  private Expr parseClass() {
+    // Parse the class name line.
+    consume(TokenType.CLASS);
+    String name = consume(TokenType.NAME).getString();
+    consume(TokenType.LINE);
+    
+    ClassExpr classExpr = new ClassExpr(name);
+    
+    // There are four kinds of things that can appear in a class body:
+    // class Foo
+    //     // 1. constructors
+    //     this (bar Bar) ...
+    //
+    //     // 2. field declarations
+    //     x Int
+    //
+    //     // 3. field definitions
+    //     y = 123
+    //
+    //     // 4. method definitions
+    //     doSomething (a Int) ...
+    //
+    //     // 5. shared field declarations
+    //     shared x Int
+    //
+    //     // 6. shared field definitions
+    //     shared y = 123
+    //
+    //     // 7. shared method definitions
+    //     shared doSomething (a Int) ...
+    // end
+    
+    // Parse the body.
+    while (!match(TokenType.END)) {
+      if (match(TokenType.THIS)) {
+        // TODO(bob): parse constructor
+      } else {
+        // Member declaration.
+        boolean isShared = match(TokenType.SHARED);
+        String member = consume(TokenType.NAME).getString();
+        
+        // See what kind of member it is.
+        if (match(TokenType.EQUALS)) {
+          // Field definition: "a = 123".
+          Expr body = parseBlock();
+          classExpr.defineField(isShared, member, body);
+        }
+        else if (lookAhead(TokenType.LEFT_PAREN)) {
+          // Method definition: "foo () print 123".
+          FnExpr function = parseFunction();
+          classExpr.defineMethod(isShared, member, function);
+        } else {
+          // Field declaration.
+          if (isShared) throw new ParseException("Field declarations cannot be shared.");
+          
+          TypeDecl type = typeDeclaration();
+          classExpr.declareField(member, type);
+        }
+      }
+      consume(TokenType.LINE);
+    }
+    
+    return classExpr;
+  }
+
+  // fn (a) print "hi"
+  private FnExpr parseFunction() {
+    List<String> paramNames = new ArrayList<String>();
+    FunctionType type = functionType(paramNames);
+    
+    Expr body = parseBlock();
+    
+    return new FnExpr(type, paramNames, body);
   }
 
   /**
