@@ -251,9 +251,22 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(ClassExpr expr, EvalContext context) {
-    // Create a class object with the shared properties.
-    ClassObj classObj = new ClassObj(mClassClass);
-    classObj.setField("name", createString(expr.getName()));
+    // Look up the class if we are extending one, otherwise create it.
+    ClassObj classObj;
+    if (expr.isExtend()) {
+      Obj obj = context.lookUp(expr.getName());
+      
+      expect(obj != null, "Could not find a class object named \"%s\".",
+          expr.getName());
+      expect(obj instanceof ClassObj, "Object \"%s\" is not a class.",
+          expr.getName());
+      
+      classObj = (ClassObj)obj;
+    } else {
+      // Create a class object with the shared properties.
+      classObj = new ClassObj(mClassClass);
+      classObj.setField("name", createString(expr.getName()));
+    }
     
     // Add the constructors.
     for (FnExpr constructorFn : expr.getConstructors()) {

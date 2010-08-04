@@ -47,7 +47,7 @@ public class MagpieParser extends Parser {
         return new DefineExpr(name, value);
       }
     }
-    else if (lookAhead(TokenType.CLASS)) {
+    else if (lookAheadAny(TokenType.CLASS, TokenType.EXTEND)) {
       return parseClass();
     } else return flowControl();
   }
@@ -378,11 +378,13 @@ public class MagpieParser extends Parser {
   
   private Expr parseClass() {
     // Parse the class name line.
-    consume(TokenType.CLASS);
+    boolean isExtend = match(TokenType.EXTEND);
+    if (!isExtend) consume(TokenType.CLASS);
+    
     String name = consume(TokenType.NAME).getString();
     consume(TokenType.LINE);
     
-    ClassExpr classExpr = new ClassExpr(name);
+    ClassExpr classExpr = new ClassExpr(isExtend, name);
     
     // There are four kinds of things that can appear in a class body:
     // class Foo

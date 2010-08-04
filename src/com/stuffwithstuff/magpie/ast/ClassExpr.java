@@ -2,17 +2,18 @@ package com.stuffwithstuff.magpie.ast;
 
 import java.util.*;
 
-import com.stuffwithstuff.magpie.interpreter.Multimethod;
 import com.stuffwithstuff.magpie.type.TypeDecl;
 
 /**
  * AST node for a class definition expression.
  */
 public class ClassExpr extends Expr {
-  public ClassExpr(String name) {
+  public ClassExpr(boolean isExtend, String name) {
+    mIsExtend = isExtend;
     mName = name;
   }
   
+  public boolean isExtend() { return mIsExtend; }
   public String getName() { return mName; }
   
   public void defineConstructor(FnExpr function) {
@@ -51,6 +52,7 @@ public class ClassExpr extends Expr {
     return visitor.visit(this, context);
   }
   
+  private final boolean mIsExtend;
   private final String mName;
   private final List<FnExpr> mConstructors = new ArrayList<FnExpr>();
   private final Map<String, TypeDecl> mFieldDeclarations = new HashMap<String, TypeDecl>();

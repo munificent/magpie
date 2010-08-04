@@ -29,11 +29,10 @@ class Range
     end
 end
 
-
-Int.addMethod ("times", fn () Range.new (0, this))
-
-Int.addMethod ("to", fn (to Int) Range.new (this, to))
-
+extend Int
+    times (-> Range) Range.new (0, this)
+    to (to Int -> Range) Range.new (this, to)
+end
 
 // one line
 for i = 3.times do print i.toString
