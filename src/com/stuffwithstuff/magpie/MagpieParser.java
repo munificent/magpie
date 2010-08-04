@@ -411,7 +411,9 @@ public class MagpieParser extends Parser {
     // Parse the body.
     while (!match(TokenType.END)) {
       if (match(TokenType.THIS)) {
-        // TODO(bob): parse constructor
+        // Constructor.
+        FnExpr body = parseFunction();
+        classExpr.defineConstructor(body);
       } else {
         // Member declaration.
         boolean isShared = match(TokenType.SHARED);

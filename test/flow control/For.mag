@@ -1,8 +1,13 @@
 // TODO(bob): Hack temp code for "to" and "times". But it works!
 
 class RangeGenerator
-    current = 0
-    stop = 9999
+    this (start Int, stop Int)
+        current = start
+        this.stop = stop
+    end
+    
+    current Int
+    stop    Int
     
     next (-> Bool)
         current = current + 1
@@ -11,31 +16,23 @@ class RangeGenerator
 end
 
 class Range
-    start = 0
-    stop = 9999
+    this (start Int, stop Int)
+        this.start = start
+        this.stop = stop
+    end
+    
+    start Int
+    stop  Int
     
     generate (-> RangeGenerator)
-        var generator = RangeGenerator.new
-        generator.current = start - 1
-        generator.stop = stop
-        generator
+        RangeGenerator.new (start - 1, stop)
     end
 end
 
 
-Int.addMethod ("times", fn ()
-    var range = Range.new
-    range.start = 0
-    range.stop = this
-    range
-end)
+Int.addMethod ("times", fn () Range.new (0, this))
 
-Int.addMethod ("to", fn (to Int)
-    var range = Range.new
-    range.start = this
-    range.stop = to
-    range
-end)
+Int.addMethod ("to", fn (to Int) Range.new (this, to))
 
 
 // one line

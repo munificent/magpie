@@ -1,5 +1,6 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+
 public class Obj {  
   public Obj(ClassObj classObj, Object primitiveValue) {
     mClass = classObj;

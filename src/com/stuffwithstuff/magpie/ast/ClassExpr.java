@@ -2,6 +2,7 @@ package com.stuffwithstuff.magpie.ast;
 
 import java.util.*;
 
+import com.stuffwithstuff.magpie.interpreter.Multimethod;
 import com.stuffwithstuff.magpie.type.TypeDecl;
 
 /**
@@ -13,6 +14,10 @@ public class ClassExpr extends Expr {
   }
   
   public String getName() { return mName; }
+  
+  public void defineConstructor(FnExpr function) {
+    mConstructors.add(function);
+  }
   
   public void declareField(String name, TypeDecl type) {
     mFieldDeclarations.put(name, type);
@@ -34,6 +39,7 @@ public class ClassExpr extends Expr {
     }
   }
   
+  public List<FnExpr> getConstructors() { return mConstructors; }
   public Map<String, TypeDecl> getFieldDeclarations() { return mFieldDeclarations; }
   public Map<String, Expr> getFields() { return mFields; }
   public Map<String, Expr> getSharedFields() { return mSharedFields; }
@@ -46,6 +52,7 @@ public class ClassExpr extends Expr {
   }
   
   private final String mName;
+  private final List<FnExpr> mConstructors = new ArrayList<FnExpr>();
   private final Map<String, TypeDecl> mFieldDeclarations = new HashMap<String, TypeDecl>();
   private final Map<String, Expr> mFields = new HashMap<String, Expr>();
   private final Map<String, Expr> mSharedFields = new HashMap<String, Expr>();

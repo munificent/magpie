@@ -255,6 +255,12 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     ClassObj classObj = new ClassObj(mClassClass);
     classObj.setField("name", createString(expr.getName()));
     
+    // Add the constructors.
+    for (FnExpr constructorFn : expr.getConstructors()) {
+      FnObj fnObj = new FnObj(mFnClass, constructorFn);
+      classObj.addConstructor(fnObj);
+    }
+    
     // Evaluate and define the shared fields.
     EvalContext classContext = context.bindThis(classObj);
     for (Entry<String, Expr> field : expr.getSharedFields().entrySet()) {

@@ -101,7 +101,11 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
         obj.setField(field.getKey(), value);
       }
       
-      // TODO(bob): Need to call constructor here and pass in arg.
+      // Find and call the constructor (if any).
+      Invokable constructor = classObj.findConstructor(arg);
+      if (constructor != null) {
+        constructor.invoke(interpreter, obj, arg);
+      }
       
       return obj;
     }
