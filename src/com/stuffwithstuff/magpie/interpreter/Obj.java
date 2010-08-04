@@ -26,40 +26,40 @@ public class Obj {
   public Object getPrimitiveValue() { return mPrimitiveValue; }
   
   /**
-   * Adds the given member to the Obj.
-   * @param name   The name of the member.
-   * @param member The member's value.
+   * Gets the value of a given field.
+   * @param name   The name of the field.
+   * @return The value or null if there is no field with that name.
    */
-  public void add(String name, Obj member) {
-    mScope.define(name, member);
+  public Obj getField(String name) {
+    return mFields.get(name);
   }
-  
-  /**
-   * Assigns a new value to an existing member with the given name.
-   * @param name
-   * @param member
-   * @return
-   */
-  public boolean assign(String name, Obj member) {
-    return mScope.assign(name, member);
-  }
-  
-  public Obj getMember(String name) {
-    // See if it's specific to this instance.
-    Obj member = mScope.get(name);
-    if (member != null) return member;
-    
-    // Otherwise, see if the class defines it.
-    member = mClass.getInstanceMember(name);
-    return member;
-  }
-  
-  public Scope getScope() { return mScope; }
   
   public Obj getTupleField(int index) {
-    return mScope.get(Integer.toString(index));
+    return getField(Integer.toString(index));
+  }
+
+  /**
+   * Sets the given field to the given value.
+   * @param name   The name of the field.
+   * @param member The fields's value.
+   */
+  public void setField(String name, Obj field) {
+    mFields.define(name, field);
   }
   
+  public void addMethod(String name, Invokable method) {
+    mMethods.add(name, method);
+  }
+  
+  public Invokable findMethod(String name, Obj arg) {
+    // Look on the object itself.
+    Invokable method = mMethods.find(name, arg);
+    if (method != null) return method;
+    
+    // Otherwise, see if the class defines an instance method.
+    return mClass.findInstanceMethod(name, arg);
+  }
+    
   public boolean asBool() {
     if (mPrimitiveValue instanceof Boolean) {
       return ((Boolean)mPrimitiveValue).booleanValue();
@@ -90,7 +90,7 @@ public class Obj {
   @Override
   public String toString() {
     // Use the object's name if it has one.
-    Obj name = mScope.get("name");
+    Obj name = mFields.get("name");
     if (name != null) return name.getPrimitiveValue().toString();
     
     // Else try its value.
@@ -100,5 +100,6 @@ public class Obj {
   
   private final ClassObj mClass;
   private final Object mPrimitiveValue;
-  private final Scope mScope = new Scope();
+  private final Scope mFields = new Scope();
+  private final MethodSet mMethods = new MethodSet();
 }

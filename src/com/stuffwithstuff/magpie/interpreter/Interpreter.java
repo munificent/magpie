@@ -13,32 +13,33 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     mGlobalScope = new Scope();
     
     mClassClass = new ClassObj();
-    mClassClass.addInstanceMember("addMethod", new NativeMethodObj.ClassAddMethod());
-    mClassClass.addInstanceMember("addSharedMethod", new NativeMethodObj.ClassAddSharedMethod());
-    mClassClass.addInstanceMember("new", new NativeMethodObj.ClassNew());
+    mClassClass.addInstanceMethod("addMethod", new NativeMethodObj.ClassAddMethod());
+    mClassClass.addInstanceMethod("addSharedMethod", new NativeMethodObj.ClassAddSharedMethod());
+    mClassClass.addInstanceMethod("name", new NativeMethodObj.ClassFieldGetter("name"));
+    mClassClass.addInstanceMethod("new", new NativeMethodObj.ClassNew());
 
     mBoolClass = new ClassObj(mClassClass);
-    mBoolClass.addInstanceMember("not", new NativeMethodObj.BoolNot());
-    mBoolClass.addInstanceMember("toString", new NativeMethodObj.BoolToString());
+    mBoolClass.addInstanceMethod("not", new NativeMethodObj.BoolNot());
+    mBoolClass.addInstanceMethod("toString", new NativeMethodObj.BoolToString());
 
     mFnClass = new ClassObj(mClassClass);
     
     mIntClass = new ClassObj(mClassClass);
-    mIntClass.addInstanceMember("+", new NativeMethodObj.IntPlus());
-    mIntClass.addInstanceMember("-", new NativeMethodObj.IntMinus());
-    mIntClass.addInstanceMember("*", new NativeMethodObj.IntMultiply());
-    mIntClass.addInstanceMember("/", new NativeMethodObj.IntDivide());
-    mIntClass.addInstanceMember("toString", new NativeMethodObj.IntToString());
-    mIntClass.addInstanceMember("==", new NativeMethodObj.IntEqual());
-    mIntClass.addInstanceMember("!=", new NativeMethodObj.IntNotEqual());
-    mIntClass.addInstanceMember("<",  new NativeMethodObj.IntLessThan());
-    mIntClass.addInstanceMember(">",  new NativeMethodObj.IntGreaterThan());
-    mIntClass.addInstanceMember("<=", new NativeMethodObj.IntLessThanOrEqual());
-    mIntClass.addInstanceMember(">=", new NativeMethodObj.IntGreaterThanOrEqual());
+    mIntClass.addInstanceMethod("+", new NativeMethodObj.IntPlus());
+    mIntClass.addInstanceMethod("-", new NativeMethodObj.IntMinus());
+    mIntClass.addInstanceMethod("*", new NativeMethodObj.IntMultiply());
+    mIntClass.addInstanceMethod("/", new NativeMethodObj.IntDivide());
+    mIntClass.addInstanceMethod("toString", new NativeMethodObj.IntToString());
+    mIntClass.addInstanceMethod("==", new NativeMethodObj.IntEqual());
+    mIntClass.addInstanceMethod("!=", new NativeMethodObj.IntNotEqual());
+    mIntClass.addInstanceMethod("<",  new NativeMethodObj.IntLessThan());
+    mIntClass.addInstanceMethod(">",  new NativeMethodObj.IntGreaterThan());
+    mIntClass.addInstanceMethod("<=", new NativeMethodObj.IntLessThanOrEqual());
+    mIntClass.addInstanceMethod(">=", new NativeMethodObj.IntGreaterThanOrEqual());
 
     mStringClass = new ClassObj(mClassClass);
-    mStringClass.addInstanceMember("+",     new NativeMethodObj.StringPlus());
-    mStringClass.addInstanceMember("print", new NativeMethodObj.StringPrint());
+    mStringClass.addInstanceMethod("+",     new NativeMethodObj.StringPlus());
+    mStringClass.addInstanceMethod("print", new NativeMethodObj.StringPrint());
 
     // TODO(bob): At some point, may want different tuple types based on the
     // types of the fields.
@@ -54,13 +55,13 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     mGlobalScope.define("String", mStringClass);
     mGlobalScope.define("Tuple", mTupleClass);
 
-    mBoolClass.add("name", createString("Bool"));
-    mClassClass.add("name", createString("Class"));
-    mFnClass.add("name", createString("Function"));
-    mIntClass.add("name", createString("Int"));
-    nothingClass.add("name", createString("Nothing"));
-    mStringClass.add("name", createString("String"));
-    mTupleClass.add("name", createString("Tuple"));
+    mBoolClass.setField("name", createString("Bool"));
+    mClassClass.setField("name", createString("Class"));
+    mFnClass.setField("name", createString("Function"));
+    mIntClass.setField("name", createString("Int"));
+    nothingClass.setField("name", createString("Nothing"));
+    mStringClass.setField("name", createString("String"));
+    mTupleClass.setField("name", createString("Tuple"));
   }
   
   public Obj evaluate(Expr expr, EvalContext context) {
@@ -84,7 +85,7 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     expect(main instanceof FnObj, "Member \"main\" is not a function.");
     
     FnObj mainFn = (FnObj)main;
-    invoke(mNothing, mainFn.getFunction(), nothing());
+    mainFn.invoke(this, mNothing, mNothing);
   }
   
   public void print(String text) {
@@ -115,15 +116,17 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     // A tuple is an object with fields whose names are zero-based numbers.
     Obj tuple = mTupleClass.instantiate();
     for (int i = 0; i < fields.length; i++) {
-      tuple.add(Integer.toString(i), fields[i]);
+      String name = Integer.toString(i);
+      tuple.setField(name, fields[i]);
+      tuple.addMethod(name, new NativeMethodObj.ClassFieldGetter(name));
     }
     
     return tuple;
   }
-  
-  public Obj invoke(Obj thisRef, FnExpr function, Obj arg) {
+    
+  public Obj invoke(Obj thisObj, FnExpr function, Obj arg) {
     // Create a new local scope for the function.
-    EvalContext context = EvalContext.forMethod(mGlobalScope, thisRef);
+    EvalContext context = EvalContext.forMethod(mGlobalScope, thisObj);
     
     // Bind arguments to their parameter names.
     List<String> params = function.getParamNames();
@@ -133,34 +136,11 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
       // TODO(bob): Hack. Assume the arg is a tuple with the right number of
       // fields.
       for (int i = 0; i < params.size(); i++) {
-        // TODO(bob): What happens if this member is a method?
-        context.define(params.get(i), arg.getMember(Integer.toString(i)));
+        context.define(params.get(i), arg.getTupleField(i));
       }
     }
     
     return evaluate(function.getBody(), context);
-  }
-  
-  private Obj invokeMethod(EvalContext context, Obj thisObj, String name, Obj arg) {
-    Obj member = thisObj.getMember(name);
-    
-    expect(member != null, "Could not find a member \"%s\" on %s.",
-        name, thisObj);
-    
-    if (member instanceof Invokable) {
-      // It's a method, so invoke it.
-      Invokable method = (Invokable)member;
-      EvalContext thisContext = context.bindThis(thisObj);
-      return method.invoke(this, thisContext, arg);
-    } else {
-      // If the member isn't callable and we aren't passing an arg, it's a
-      // field, so just return it.
-      if (arg == mNothing) {
-        return member;
-      } else {
-        throw failure("Member \"%s\" on %s is not invokable.", name, thisObj);
-      }
-    }
   }
   
   @Override
@@ -175,43 +155,34 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
       if (context.assign(name, value)) return value;
       
       // If not found, try to assign to a member of this.
-      if (context.getThis().assign(name, value)) return value;
+      Invokable setter = context.getThis().findMethod(name + "=", value);
+      if (setter != null) {
+        return setter.invoke(this, context.getThis(), value);
+      }
       
       throw failure("Couldn't find a variable or member \"%s\" to assign to.", name);
     } else {
       // The target of the assignment is an actual expression, like a.b = c
       Obj target = evaluate(expr.getTarget(), context);
-      
+      Obj value = evaluate(expr.getValue(), context);
+
+      // If the assignment statement has an argument and a value, like:
+      // a.b c = v (c is the arg, v is the value)
+      // then bundle them together:
+      if (expr.getTargetArg() != null) {
+        Obj targetArg = evaluate(expr.getTargetArg(), context);
+        value = createTuple(context, targetArg, value);
+      }
+
       // Look for a setter method.
       String setterName = expr.getName() + "=";
-      Obj setter = target.getMember(setterName);
-      if (setter != null) {
-        expect(setter instanceof Invokable,
-            "Cannot use a field named \"%s\" as an assignment target.",
-            setterName);
-
-        Obj value = evaluate(expr.getValue(), context);
-        
-        // If the assignment statement has an argument and a value, like:
-        // a.b c = v (c is the arg, v is the value)
-        // then bundle them together:
-        if (expr.getTargetArg() != null) {
-          Obj targetArg = evaluate(expr.getTargetArg(), context);
-          value = createTuple(context, targetArg, value);
-        }
-        
-        // Invoke the setter.
-        return invokeMethod(context, target, setterName, value);
-      }
+      Invokable setter = target.findMethod(setterName, value);
       
-      // Try to assign a field with the right name.
-      if (expr.getTargetArg() == null) {
-        Obj value = evaluate(expr.getValue(), context);
-        if (target.assign(expr.getName(), value)) return value;
-      }
+      expect(setter != null,
+          "Could not find a method named \"%s\" on %s.", setterName, target);
       
-      throw failure("Could not find a setter or member named \"%s\" on %s to assign to.",
-        expr.getName(), target);
+      // Invoke the setter.
+      return setter.invoke(this, target, value);
     }
   }
 
@@ -250,21 +221,22 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
             "Can not call a local variable that does not contain a function.");
         
         Invokable function = (Invokable)local;
-        return function.invoke(this, context, arg);
+        return function.invoke(this, mNothing, arg);
       }
       
       // Look for an implicit call to a method on this with the name.
-      Obj member = context.getThis().getMember(name);
-      if (member != null) {
-        expect(member instanceof Invokable,
-            "Member \"%s\" of %s cannot be invoked.", name, context.getThis());
-        
-        return invokeMethod(context, context.getThis(), name, arg);
+      Invokable method = context.getThis().findMethod(name, arg);
+      if (method != null) {
+        return method.invoke(this, context.getThis(), arg);
       }
       
       // Try to call it as a method on the argument. In other words,
       // "abs 123" is equivalent to "123.abs".
-      return invokeMethod(context, arg, name, nothing());
+      method = arg.findMethod(name, mNothing);
+      expect(method != null,
+          "Could not find a method \"%s\" on %s.", name, arg);
+
+      return method.invoke(this, arg, mNothing);
     }
     
     // Not an explicit named target, so evaluate it and see if it's callable.
@@ -274,32 +246,62 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
         "Can not call an expression that does not evaluate to a function.");
 
     FnObj targetFn = (FnObj)target;
-    return invoke(mNothing, targetFn.getFunction(), arg);
+    return targetFn.invoke(this, mNothing, arg);
   }
 
   @Override
   public Obj visit(ClassExpr expr, EvalContext context) {
     // Create a class object with the shared properties.
     ClassObj classObj = new ClassObj(mClassClass);
-    classObj.add("name", createString(expr.getName()));
+    classObj.setField("name", createString(expr.getName()));
     
     // Evaluate and define the shared fields.
     EvalContext classContext = context.bindThis(classObj);
     for (Entry<String, Expr> field : expr.getSharedFields().entrySet()) {
       Obj value = evaluate(field.getValue(), classContext);
-      classObj.add(field.getKey(), value);
+      
+      classObj.setField(field.getKey(), value);
+      
+      // Add a getter.
+      classObj.addMethod(field.getKey(),
+          new NativeMethodObj.ClassFieldGetter(field.getKey()));
+      
+      // Add a setter.
+      classObj.addMethod(field.getKey() + "=",
+          new NativeMethodObj.ClassFieldSetter(field.getKey()));
     }
     
     // Define the shared methods.
     for (Entry<String, FnExpr> method : expr.getSharedMethods().entrySet()) {
       FnObj methodObj = new FnObj(mFnClass, method.getValue());
-      classObj.add(method.getKey(), methodObj);
+      classObj.addMethod(method.getKey(), methodObj);
     }
     
     // Define the instance methods.
     for (Entry<String, FnExpr> method : expr.getMethods().entrySet()) {
       FnObj methodObj = new FnObj(mFnClass, method.getValue());
-      classObj.addInstanceMember(method.getKey(), methodObj);
+      classObj.addInstanceMethod(method.getKey(), methodObj);
+    }
+    
+    // Define the getters and setters for the fields.
+    for (String field : expr.getFields().keySet()) {
+      // Add a getter.
+      classObj.addInstanceMethod(field,
+          new NativeMethodObj.ClassFieldGetter(field));
+      
+      // Add a setter.
+      classObj.addInstanceMethod(field + "=",
+          new NativeMethodObj.ClassFieldSetter(field));
+    }
+    
+    for (String field : expr.getFieldDeclarations().keySet()) {
+      // Add a getter.
+      classObj.addInstanceMethod(field,
+          new NativeMethodObj.ClassFieldGetter(field));
+      
+      // Add a setter.
+      classObj.addInstanceMethod(field + "=",
+          new NativeMethodObj.ClassFieldSetter(field));
     }
     
     // Add the field initializers to the class so it can evaluate them when an
@@ -382,7 +384,13 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     Obj receiver = evaluate(expr.getReceiver(), context);
     Obj arg = evaluate(expr.getArg(), context);
     
-    return invokeMethod(context, receiver, expr.getMethod(), arg);
+    Invokable method = receiver.findMethod(expr.getMethod(), arg);
+    expect (method != null,
+        "Could not find a method named \"%s\" on %s.",
+        expr.getMethod(), receiver);
+    
+
+    return method.invoke(this, receiver, arg);
   }
 
   @Override
@@ -391,21 +399,12 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     Obj variable = context.lookUp(expr.getName());
     if (variable != null) return variable;
     
-    // See if there's a member of this with the name.
-    Obj member = context.getThis().getMember(expr.getName());
-    expect(member != null, 
-        "Could not find a variable or member named \"%s\".",
+    Invokable method = context.getThis().findMethod(expr.getName(), mNothing);
+    expect (method != null,
+        "Could not find a variable named \"%s\".",
         expr.getName());
     
-    // If it's a method, implicitly invoke it with nothing.
-    // TODO(bob): Do we need to distinguish between method members and fields
-    // whose value is a function?
-    if (member instanceof Invokable) {
-      return invokeMethod(context, context.getThis(), expr.getName(), mNothing);
-    } else {
-      // Just a field, so return it.
-      return member;
-    }
+    return method.invoke(this, context.getThis(), mNothing);
   }
 
   @Override
@@ -467,16 +466,5 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
   private final ClassObj mStringClass;
   private final ClassObj mTupleClass;
   
-  /*
-  private final Obj mRoot;
-  */
   private final Obj mNothing;
-  /*
-  private final Obj mBoolProto;
-  private final Obj mClassProto;
-  private final Obj mFnProto;
-  private final Obj mIntProto;
-  private final Obj mStringProto;
-  private final Obj mTupleProto;
-  */
 }

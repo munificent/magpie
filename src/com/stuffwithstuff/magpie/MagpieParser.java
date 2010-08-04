@@ -152,25 +152,6 @@ public class MagpieParser extends Parser {
     else return assignment();
   }
   
-  /* TODO(bob): Need to figure out how the syntax for assignment is going to be
-   * parsed. A lot of things can be on the left side of =, but equally many
-   * can't. The full breakdown is:
-   * 
-   * Allowed:                                 Desugared
-   * --------------------------------------------------------------------------
-   * Name         foo          = 123          Implemented natively
-   * Method       foo.bar      = 123          foo.bar=(123)
-   *              foo.bar 456  = 123          foo.bar=(456, 123)
-   *              foo.456      = 123          foo.(Int)=(456, 123)
-   * Operator     foo ?! 456   = 123          foo.?!=(456, 123)
-   * Tuple        foo, foo.bar = 123, 456     foo = 123; foo.bar=(456)
-   * (where each field must be allowed on the left side)
-   * 
-   * The following are not allowed to the left of a =:
-   * Literals like 123, "foo", ().
-   * Calls like "123 abs".
-   * Flow control, definition, or other expressions.
-   */
   private Expr assignment() {
     Expr expr = tuple();
     
@@ -186,6 +167,7 @@ public class MagpieParser extends Parser {
       // a ^ b = v   ->  a.^=(b)    AssignExpr(a,    "^", b,    v)
       // Other expression forms on the left-hand side are considered invalid and
       // will throw a parse exception.
+      // TODO(bob): Need to handle tuples here too.
       
       if (expr instanceof NameExpr) {
         return new AssignExpr(null, ((NameExpr)expr).getName(), null, value);

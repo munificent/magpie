@@ -5,7 +5,7 @@ import java.util.Map.Entry;
 import com.stuffwithstuff.magpie.ast.Expr;
 
 public abstract class NativeMethodObj extends Obj implements Invokable {
-  public abstract Obj invoke(Interpreter interpreter, EvalContext context, Obj arg);
+  public abstract Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg);
   
   // Native methods:
   
@@ -13,15 +13,15 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
   
   public static class BoolNot extends NativeMethodObj {
     @Override
-    public Obj invoke(Interpreter interpreter, EvalContext context, Obj arg) {
-      return interpreter.createBool(!context.getThis().asBool());
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      return interpreter.createBool(!thisObj.asBool());
     }
   }
   
   public static class BoolToString extends NativeMethodObj {
     @Override
-    public Obj invoke(Interpreter interpreter, EvalContext context, Obj arg) {
-      return interpreter.createString(Boolean.toString(context.getThis().asBool()));
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      return interpreter.createString(Boolean.toString(thisObj.asBool()));
     }
   }
   
@@ -29,12 +29,12 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
   
   public static class ClassAddMethod extends NativeMethodObj {
     @Override
-    public Obj invoke(Interpreter interpreter, EvalContext context, Obj arg) {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();
-      Obj method = arg.getTupleField(1);
+      FnObj method = (FnObj)arg.getTupleField(1);
       
-      ClassObj classObj = (ClassObj)context.getThis();
-      classObj.addInstanceMember(name, method);
+      ClassObj classObj = (ClassObj)thisObj;
+      classObj.addInstanceMethod(name, method);
       
       return interpreter.nothing();
     }
@@ -42,22 +42,49 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
   
   public static class ClassAddSharedMethod extends NativeMethodObj {
     @Override
-    public Obj invoke(Interpreter interpreter, EvalContext context, Obj arg) {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();
-      Obj method = arg.getTupleField(1);
+      FnObj method = (FnObj)arg.getTupleField(1);
       
-      ClassObj classObj = (ClassObj)context.getThis();
-      classObj.add(name, method);
+      ClassObj classObj = (ClassObj)thisObj;
+      classObj.addMethod(name, method);
       
       return interpreter.nothing();
     }
+  }
+
+  public static class ClassFieldGetter extends NativeMethodObj {
+    public ClassFieldGetter(String name) {
+      mName = name;
+    }
+    
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      return thisObj.getField(mName);
+    }
+    
+    private final String mName;
+  }
+
+  public static class ClassFieldSetter extends NativeMethodObj {
+    public ClassFieldSetter(String name) {
+      mName = name;
+    }
+    
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      thisObj.setField(mName, arg);
+      return arg;
+    }
+    
+    private final String mName;
   }
   
   // TODO(bob): This is pretty much temp.
   public static class ClassNew extends NativeMethodObj {
     @Override
-    public Obj invoke(Interpreter interpreter, EvalContext context, Obj arg) {
-      ClassObj classObj = (ClassObj)context.getThis();
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      ClassObj classObj = (ClassObj)thisObj;
       
       // Instantiate the object.
       Obj obj = new Obj(classObj);
@@ -71,7 +98,7 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
       // Initialize its fields.
       for (Entry<String, Expr> field : classObj.getFieldInitializers().entrySet()) {
         Obj value = interpreter.evaluate(field.getValue(), fieldContext);
-        obj.add(field.getKey(), value);
+        obj.setField(field.getKey(), value);
       }
       
       // TODO(bob): Need to call constructor here and pass in arg.
@@ -84,8 +111,8 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
   
   public static class IntPlus extends NativeMethodObj {
     @Override
-    public Obj invoke(Interpreter interpreter, EvalContext context, Obj arg) {
-      int left = context.getThis().asInt();
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = thisObj.asInt();
       int right = arg.asInt();
       
       return interpreter.createInt(left + right);
@@ -94,8 +121,8 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
 
   public static class IntMinus extends NativeMethodObj {
     @Override
-    public Obj invoke(Interpreter interpreter, EvalContext context, Obj arg) {
-      int left = context.getThis().asInt();
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = thisObj.asInt();
       int right = arg.asInt();
       
       return interpreter.createInt(left - right);
@@ -104,8 +131,8 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
   
   public static class IntMultiply extends NativeMethodObj {
     @Override
-    public Obj invoke(Interpreter interpreter, EvalContext context, Obj arg) {
-      int left = context.getThis().asInt();
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = thisObj.asInt();
       int right = arg.asInt();
       
       return interpreter.createInt(left * right);
@@ -114,8 +141,8 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
   
   public static class IntDivide extends NativeMethodObj {
     @Override
-    public Obj invoke(Interpreter interpreter, EvalContext context, Obj arg) {
-      int left = context.getThis().asInt();
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = thisObj.asInt();
       int right = arg.asInt();
       
       return interpreter.createInt(left / right);
@@ -124,8 +151,8 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
   
   public static class IntEqual extends NativeMethodObj {
     @Override
-    public Obj invoke(Interpreter interpreter, EvalContext context, Obj arg) {
-      int left = context.getThis().asInt();
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = thisObj.asInt();
       int right = arg.asInt();
       
       return interpreter.createBool(left == right);
@@ -134,8 +161,8 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
   
   public static class IntNotEqual extends NativeMethodObj {
     @Override
-    public Obj invoke(Interpreter interpreter, EvalContext context, Obj arg) {
-      int left = context.getThis().asInt();
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = thisObj.asInt();
       int right = arg.asInt();
       
       return interpreter.createBool(left != right);
@@ -144,8 +171,8 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
   
   public static class IntLessThan extends NativeMethodObj {
     @Override
-    public Obj invoke(Interpreter interpreter, EvalContext context, Obj arg) {
-      int left = context.getThis().asInt();
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = thisObj.asInt();
       int right = arg.asInt();
       
       return interpreter.createBool(left < right);
@@ -154,8 +181,8 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
   
   public static class IntGreaterThan extends NativeMethodObj {
     @Override
-    public Obj invoke(Interpreter interpreter, EvalContext context, Obj arg) {
-      int left = context.getThis().asInt();
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = thisObj.asInt();
       int right = arg.asInt();
       
       return interpreter.createBool(left > right);
@@ -164,8 +191,8 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
   
   public static class IntLessThanOrEqual extends NativeMethodObj {
     @Override
-    public Obj invoke(Interpreter interpreter, EvalContext context, Obj arg) {
-      int left = context.getThis().asInt();
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = thisObj.asInt();
       int right = arg.asInt();
       
       return interpreter.createBool(left <= right);
@@ -174,8 +201,8 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
   
   public static class IntGreaterThanOrEqual extends NativeMethodObj {
     @Override
-    public Obj invoke(Interpreter interpreter, EvalContext context, Obj arg) {
-      int left = context.getThis().asInt();
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = thisObj.asInt();
       int right = arg.asInt();
       
       return interpreter.createBool(left >= right);
@@ -184,8 +211,8 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
   
   public static class IntToString extends NativeMethodObj {
     @Override
-    public Obj invoke(Interpreter interpreter, EvalContext context, Obj arg) {
-      return interpreter.createString(Integer.toString(context.getThis().asInt()));
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      return interpreter.createString(Integer.toString(thisObj.asInt()));
     }
   }
 
@@ -193,8 +220,8 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
 
   public static class StringPlus extends NativeMethodObj {
     @Override
-    public Obj invoke(Interpreter interpreter, EvalContext context, Obj arg) {
-      String left = context.getThis().asString();
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      String left = thisObj.asString();
       String right = arg.asString();
       
       return interpreter.createString(left + right);
@@ -203,8 +230,8 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
 
   public static class StringPrint extends NativeMethodObj {
     @Override
-    public Obj invoke(Interpreter interpreter, EvalContext context, Obj arg) {
-      interpreter.print(context.getThis().asString());
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      interpreter.print(thisObj.asString());
       return interpreter.nothing();
     }
   }

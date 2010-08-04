@@ -6,5 +6,5 @@ package com.stuffwithstuff.magpie.interpreter;
  */
 // TODO(bob): Is this needed anymore? Are only FnObjs invokable now?
 public interface Invokable {
-  Obj invoke(Interpreter interpreter, EvalContext context, Obj arg);
+  Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg);
 }

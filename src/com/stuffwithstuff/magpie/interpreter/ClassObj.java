@@ -27,12 +27,12 @@ public class ClassObj extends Obj {
     return new Obj(this, primitiveValue);
   }
   
-  public void addInstanceMember(String name, Obj value) {
-    mInstanceMembers.define(name, value);
+  public void addInstanceMethod(String name, Invokable method) {
+    mInstanceMethods.add(name, method);
   }
   
-  public Obj getInstanceMember(String name) {
-    return mInstanceMembers.get(name);
+  public Invokable findInstanceMethod(String name, Obj arg) {
+    return mInstanceMethods.find(name, arg);
   }
   
   public void defineFields(Map<String, Expr> fields) {
@@ -40,5 +40,5 @@ public class ClassObj extends Obj {
   }
   
   private Map<String, Expr> mFieldInitializers;
-  private final Scope mInstanceMembers = new Scope();
+  private final MethodSet mInstanceMethods = new MethodSet();
 }
