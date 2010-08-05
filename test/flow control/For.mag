@@ -1,16 +1,16 @@
 // one line
-for i = 3.times do print i.toString
-//: 0
+for i = 1.to 3 do print i.toString
 //: 1
 //: 2
+//: 3
 
 // block body
-for i = 3.times do
+for i = 1.until 4 do
     print i.toString
 end
-//: 0
 //: 1
 //: 2
+//: 3
 
 // parallel iterators
 for i = 10.to 60 for j = 5.to 12

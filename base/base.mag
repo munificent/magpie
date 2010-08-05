@@ -1,6 +1,7 @@
 class RangeGenerator
     this (start Int, stop Int)
-        current = start
+        // rollback so the first call to next advances to the first
+        current = start - 1
         this.stop = stop
     end
     
@@ -9,7 +10,7 @@ class RangeGenerator
     
     next (-> Bool)
         current = current + 1
-        current < stop
+        current <= stop
     end
 end
 
@@ -23,12 +24,13 @@ class Range
     stop  Int
     
     generate (-> RangeGenerator)
-        RangeGenerator.new (start - 1, stop)
+        RangeGenerator.new (start, stop)
     end
 end
 
 // Add generator methods on Ints.
 extend Int
-    times (-> Range) Range.new (0, this)
-    to (to Int -> Range) Range.new (this, to)
+    times (-> Range) Range.new (0, this - 1)
+    to (last Int -> Range) Range.new (this, last)
+    until (last Int -> Range) Range.new (this, last - 1)
 end

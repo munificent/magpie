@@ -265,6 +265,8 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     // Look up the class if we are extending one, otherwise create it.
     ClassObj classObj;
     if (expr.isExtend()) {
+      // TODO(bob): Should this be a generic expression that returns a class?
+      // Like: class foo.bar.bang
       Obj obj = context.lookUp(expr.getName());
       
       expect(obj != null, "Could not find a class object named \"%s\".",
