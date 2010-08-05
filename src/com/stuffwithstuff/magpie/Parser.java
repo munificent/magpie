@@ -30,7 +30,7 @@ public abstract class Parser {
   /**
    * Gets whether or not the next Token is of any of the given types.
    * @param  types The allowed types for the next Token.
-   * @return       true if the token is one of the types, false otherwise.
+   * @return       true if the Token is one of the types, false otherwise.
    */
   protected boolean lookAheadAny(TokenType... types) {
     for (TokenType type : types) {

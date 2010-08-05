@@ -70,16 +70,9 @@ public class Magpie {
     System.out.println("Passed " + success + " out of " + tests + " tests.");
   }
   
-  private static boolean runTestScript(File script) {
-    try {
-      String source = readFile(script.getPath());
-      
-      TestInterpreterHost host = new TestInterpreterHost(script.getPath());
-      return host.run(source);
-    } catch (IOException ex) {
-      System.out.println("FAIL " + script + ": IO error");
-      return false;
-    }
+private static boolean runTestScript(File script) {      
+    TestInterpreterHost host = new TestInterpreterHost(script.getPath());
+    return host.run();
   }
   
   private static List<File> listTestScripts() {
@@ -97,28 +90,6 @@ public class Magpie {
       } else if (file.isDirectory()) {
         listTestScripts(file, files);
       }
-    }
-  }
-  
-  private static String readFile(String path) throws IOException {
-    FileInputStream stream = new FileInputStream(path);
-
-    try {
-      InputStreamReader input = new InputStreamReader(stream, Charset
-          .defaultCharset());
-      Reader reader = new BufferedReader(input);
-
-      StringBuilder builder = new StringBuilder();
-      char[] buffer = new char[8192];
-      int read;
-
-      while ((read = reader.read(buffer, 0, buffer.length)) > 0) {
-        builder.append(buffer, 0, read);
-      }
-
-      return builder.toString();
-    } finally {
-      stream.close();
     }
   }
 }

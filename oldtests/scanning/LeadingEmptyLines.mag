@@ -1,7 +1,0 @@
-﻿// bug:      2009/04/25 - Blank lines at the start of a source file would cause it
-//                        to not parse anything else in the file.
-// expected: ok
-
-
-
-Main (->) Print "ok"

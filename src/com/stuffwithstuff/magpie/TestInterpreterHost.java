@@ -1,5 +1,11 @@
 package com.stuffwithstuff.magpie;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.Charset;
 import java.util.*;
 
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
@@ -10,10 +16,16 @@ public class TestInterpreterHost implements InterpreterHost {
   public TestInterpreterHost(String path) {
     mPath = path;
     mSuccess = true;
+    mInterpreter = new Interpreter(this);
   }
   
-  public boolean run(String source) {
+  public boolean run() {
     try {
+      // Load the runtime library.
+      loadScript("base/base.mag");
+      
+      String source = readFile(mPath);
+      
       // Parse the expected output.
       int lineNumber = 1;
       for (String line : source.split("\n")) {
@@ -34,11 +46,10 @@ public class TestInterpreterHost implements InterpreterHost {
       MagpieParser parser = new MagpieParser(lexer);
 
       try {
-        Interpreter interpreter = new Interpreter(this);
-        interpreter.load(parser.parse());
+        mInterpreter.load(parser.parse());
         
         // Do the static analysis and see if we got the errors we expect.
-        List<Integer> errors = interpreter.analyze();
+        List<Integer> errors = mInterpreter.analyze();
         if (mExpectedErrors.size() != errors.size()) {
           fail("Expected " + mExpectedErrors.size() + " errors and got " +
               errors.size() + ".");
@@ -51,7 +62,7 @@ public class TestInterpreterHost implements InterpreterHost {
           }
         }
         
-        interpreter.runMain();
+        mInterpreter.runMain();
         
         if (mExpectedOutput.size() > 0) {
           fail("Ran out of output when still expecting \"" +
@@ -62,8 +73,10 @@ public class TestInterpreterHost implements InterpreterHost {
       } catch (UnsupportedOperationException ex) {
         fail("Unsupported operation error " + ex.toString());
       }
+    } catch (IOException ex) {
+      fail("Couldn't load file: " + ex.toString());
     } catch (ParseException ex) {
-      fail("Parse error " + ex.toString());
+      fail("Parse error: " + ex.toString());
     }
     return mSuccess;
   }
@@ -81,12 +94,51 @@ public class TestInterpreterHost implements InterpreterHost {
     }
   }
   
+  private void loadScript(String path) {
+    try {
+      String source = readFile(path);
+            
+      Lexer lexer = new Lexer(path, source);
+      MagpieParser parser = new MagpieParser(lexer);
+
+      mInterpreter.load(parser.parse());
+      
+    } catch (IOException ex) {
+      fail("Couldn't load file: " + ex.toString());
+    } catch (ParseException ex) {
+      fail("Parse error: " + ex.toString());
+    }
+  }
+  
   private void fail(String message) {
     System.out.println("FAIL " + mPath + ": " + message);
     mSuccess = false;
   }
   
+  private static String readFile(String path) throws IOException {
+    FileInputStream stream = new FileInputStream(path);
+
+    try {
+      InputStreamReader input = new InputStreamReader(stream, Charset
+          .defaultCharset());
+      Reader reader = new BufferedReader(input);
+
+      StringBuilder builder = new StringBuilder();
+      char[] buffer = new char[8192];
+      int read;
+
+      while ((read = reader.read(buffer, 0, buffer.length)) > 0) {
+        builder.append(buffer, 0, read);
+      }
+
+      return builder.toString();
+    } finally {
+      stream.close();
+    }
+  }
+
   private final String mPath;
+  private final Interpreter mInterpreter;
   private final Queue<String> mExpectedOutput = new LinkedList<String>();
   private final List<Integer> mExpectedErrors = new ArrayList<Integer>();
   private boolean mSuccess;

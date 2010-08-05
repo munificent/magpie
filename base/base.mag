@@ -1,0 +1,34 @@
+class RangeGenerator
+    this (start Int, stop Int)
+        current = start
+        this.stop = stop
+    end
+    
+    current Int
+    stop    Int
+    
+    next (-> Bool)
+        current = current + 1
+        current < stop
+    end
+end
+
+class Range
+    this (start Int, stop Int)
+        this.start = start
+        this.stop = stop
+    end
+    
+    start Int
+    stop  Int
+    
+    generate (-> RangeGenerator)
+        RangeGenerator.new (start - 1, stop)
+    end
+end
+
+// Add generator methods on Ints.
+extend Int
+    times (-> Range) Range.new (0, this)
+    to (to Int -> Range) Range.new (this, to)
+end

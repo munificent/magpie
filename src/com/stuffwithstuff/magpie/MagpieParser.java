@@ -88,7 +88,7 @@ public class MagpieParser extends Parser {
           conditions, thenExpr, elseExpr);
     } else if (lookAheadAny(TokenType.WHILE, TokenType.FOR)) {
       // "while" and "for" loop.
-      Position startPos = last(1).getPosition();
+      Position startPos = current().getPosition();
       
       // a for loop is desugared from this:
       //
