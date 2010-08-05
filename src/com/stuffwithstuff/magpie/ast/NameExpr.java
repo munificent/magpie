@@ -1,8 +1,15 @@
 package com.stuffwithstuff.magpie.ast;
 
+import com.stuffwithstuff.magpie.Token;
+
 public class NameExpr extends Expr {
-  public NameExpr(String name) {
+  public NameExpr(Position position, String name) {
+    super(position);
     mName = name;
+  }
+  
+  public NameExpr(Token token) {
+    this(token.getPosition(), token.getString());
   }
   
   public String getName() { return mName; }

@@ -1,7 +1,8 @@
 package com.stuffwithstuff.magpie.ast;
 
 public class ThisExpr extends Expr {
-  public ThisExpr() {
+  public ThisExpr(Position position) {
+    super(position);
   }
   
   @Override

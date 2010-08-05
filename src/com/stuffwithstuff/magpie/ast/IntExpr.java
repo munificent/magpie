@@ -1,8 +1,11 @@
 package com.stuffwithstuff.magpie.ast;
 
+import com.stuffwithstuff.magpie.Token;
+
 public class IntExpr extends Expr {
-  public IntExpr(int value) {
-    mValue = value;
+  public IntExpr(Token token) {
+    super(token.getPosition());
+    mValue = token.getInt();
   }
   
   public int getValue() { return mValue; }

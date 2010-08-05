@@ -3,7 +3,9 @@ package com.stuffwithstuff.magpie.ast;
 import java.util.*;
 
 public class IfExpr extends Expr {
-  public IfExpr(List<Expr> conditions, Expr thenExpr, Expr elseExpr) {
+  public IfExpr(Position position, List<Expr> conditions, Expr thenExpr, Expr elseExpr) {
+    super(position);
+    
     mConditions = conditions;
     mThen = thenExpr;
     mElse = elseExpr;

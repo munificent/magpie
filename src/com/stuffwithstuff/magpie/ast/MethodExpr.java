@@ -2,6 +2,8 @@ package com.stuffwithstuff.magpie.ast;
 
 public class MethodExpr extends Expr {
   public MethodExpr(Expr receiver, String method, Expr arg) {
+    super(Position.union(receiver.getPosition(), arg.getPosition()));
+    
     mReceiver = receiver;
     mMethod = method;
     mArg = arg;

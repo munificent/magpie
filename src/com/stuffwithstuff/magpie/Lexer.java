@@ -2,15 +2,18 @@ package com.stuffwithstuff.magpie;
 
 import com.stuffwithstuff.magpie.Token;
 import com.stuffwithstuff.magpie.TokenType;
+import com.stuffwithstuff.magpie.ast.Position;
 
 public class Lexer {
 
-  public Lexer(String text) {
+  public Lexer(String sourceFile, String text) {
+    mSourceFile = sourceFile;
     mText = text;
     mState = LexState.DEFAULT;
     mIndex = 0;
     mTokenStart = 0;
-
+    mLine = 1;
+    
     // Ignore starting lines.
     mEatLines = true;
   }
@@ -59,21 +62,23 @@ public class Lexer {
     // end of the string.
     char c = (mIndex < mText.length()) ? mText.charAt(mIndex) : '\0';
 
+    // Adjust the current position.
+    
     switch (mState) {
     case DEFAULT:
-      if (match("(")) return new Token(TokenType.LEFT_PAREN, last(1));
-      if (match(")")) return new Token(TokenType.RIGHT_PAREN, last(1));
-      if (match("[")) return new Token(TokenType.LEFT_BRACKET, last(1));
-      if (match("]")) return new Token(TokenType.RIGHT_BRACKET, last(1));
-      if (match("{")) return new Token(TokenType.LEFT_BRACE, last(1));
-      if (match("}")) return new Token(TokenType.RIGHT_BRACE, last(1));
-      if (match(",")) return new Token(TokenType.COMMA, last(1));
-      if (match(".")) return new Token(TokenType.DOT, last(1));
+      if (match("(")) return characterToken(TokenType.LEFT_PAREN);
+      if (match(")")) return characterToken(TokenType.RIGHT_PAREN);
+      if (match("[")) return characterToken(TokenType.LEFT_BRACKET);
+      if (match("]")) return characterToken(TokenType.RIGHT_BRACKET);
+      if (match("{")) return characterToken(TokenType.LEFT_BRACE);
+      if (match("}")) return characterToken(TokenType.RIGHT_BRACE);
+      if (match(",")) return characterToken(TokenType.COMMA);
+      if (match(".")) return characterToken(TokenType.DOT);
 
       // Match line ending characters.
-      if (match(";"))  return new Token(TokenType.LINE, last(1));
-      if (match("\n")) return new Token(TokenType.LINE, last(1));
-      if (match("\r")) return new Token(TokenType.LINE, last(1));
+      if (match(";"))  return characterToken(TokenType.LINE);
+      if (match("\n")) return characterToken(TokenType.LINE);
+      if (match("\r")) return characterToken(TokenType.LINE);
       
       // Comments.
       if (match("//")) return startToken(LexState.IN_LINE_COMMENT);
@@ -92,11 +97,11 @@ public class Lexer {
       if (match("\t")) return null;
       
       // TODO(bob): Hack temp. Unexpected character
-      return new Token(TokenType.EOF);
+      return new Token(lastCharacterPosition(), TokenType.EOF);
 
     case IN_NAME:
       if (isAlpha(c) || isDigit(c) || isOperator(c)) {
-        mIndex++;
+        advance();
         return null;
       } else {
         return createStringToken(TokenType.NAME);
@@ -104,7 +109,7 @@ public class Lexer {
 
     case IN_OPERATOR:
       if (isOperator(c) || isAlpha(c) || isDigit(c)) {
-        mIndex++;
+        advance();
         return null;
       } else {
         return createStringToken(TokenType.OPERATOR);
@@ -112,7 +117,7 @@ public class Lexer {
 
     case IN_NUMBER:
       if (isDigit(c)) {
-        mIndex++;
+        advance();
         return null;
       } else if (c == '.') {
         return changeToken(LexState.IN_DECIMAL);
@@ -124,15 +129,16 @@ public class Lexer {
       if (isDigit(c)) {
         return changeToken(LexState.IN_FRACTION);
       } else {
-        // Rollback to reprocess the "." as its own token. This lets us parse
-        // things like "123.foo".
+        // Rollback to reprocess the dot.
         mIndex--;
+        mCol--;
+        
         return createIntToken(TokenType.INT);
       }
       
     case IN_FRACTION:
       if (isDigit(c)) {
-        mIndex++;
+        advance();
       } else {
         return createDoubleToken(TokenType.DOUBLE);
       }
@@ -147,13 +153,12 @@ public class Lexer {
       }
 
     case IN_STRING:
-      mIndex++;
-
+      advance();
       if (last(1).equals("\"")) {
         // Get the contained string without the quotes.
         String text = mText.substring(mTokenStart + 1, mIndex - 1);
         mState = LexState.DEFAULT;
-        return new Token(TokenType.STRING, text);
+        return new Token(currentPosition(), TokenType.STRING, text);
       } else {
         // Consume other characters.
         return null;
@@ -162,10 +167,10 @@ public class Lexer {
     case IN_LINE_COMMENT:
       if (match("\n") || match("\r")) {
         mState = LexState.DEFAULT;
-        return new Token(TokenType.LINE, last(1));
+        return new Token(lastCharacterPosition(), TokenType.LINE, last(1));
       } else {
         // Ignore everything else.
-        mIndex++;
+        advance();
         return null;
       }
       
@@ -188,7 +193,7 @@ public class Lexer {
   private boolean match(String text) {
     boolean matched = lookAhead(text);
     
-    if (matched) mIndex += text.length();
+    if (matched) advance(text.length());
     return matched;
   }
   
@@ -198,60 +203,95 @@ public class Lexer {
   
   private Token startToken(LexState state) {
     mTokenStart = mIndex;
+    mStartLine = mLine;
+    mStartCol = mCol;
+    
     changeToken(state);
     return null;
   }
 
   private Token changeToken(LexState state) {
     mState = state;
-    mIndex++;
+    advance();
     return null;
+  }
+  
+  private Token characterToken(TokenType type) {
+    return new Token(lastCharacterPosition(), type, last(1));
   }
 
   private Token createStringToken(TokenType type) {
     String text = mText.substring(mTokenStart, mIndex);
     mState = LexState.DEFAULT;
     
-    // Handle reserved words.
-    if (text.equals("true")) return new Token(TokenType.BOOL, true);
-    if (text.equals("false")) return new Token(TokenType.BOOL, false);
-    if (text.equals("case")) return new Token(TokenType.CASE);
-    if (text.equals("class")) return new Token(TokenType.CLASS);
-    if (text.equals("def")) return new Token(TokenType.DEF);
-    if (text.equals("do")) return new Token(TokenType.DO);
-    if (text.equals("else")) return new Token(TokenType.ELSE);
-    if (text.equals("end")) return new Token(TokenType.END);
-    if (text.equals("extend")) return new Token(TokenType.EXTEND);
-    if (text.equals("fn")) return new Token(TokenType.FN);
-    if (text.equals("for")) return new Token(TokenType.FOR);
-    if (text.equals("if")) return new Token(TokenType.IF);
-    if (text.equals("let")) return new Token(TokenType.LET);
-    if (text.equals("match")) return new Token(TokenType.MATCH);
-    if (text.equals("shared")) return new Token(TokenType.SHARED);
-    if (text.equals("then")) return new Token(TokenType.THEN);
-    if (text.equals("this")) return new Token(TokenType.THIS);
-    if (text.equals("var")) return new Token(TokenType.VAR);
-    if (text.equals("while")) return new Token(TokenType.WHILE);
-    if (text.equals("=")) return new Token(TokenType.EQUALS);
-    if (text.equals("->")) return new Token(TokenType.ARROW);
+    Position position = currentPosition();
     
-    return new Token(type, text);
+    // Handle reserved words.
+    if (text.equals("true")) return new Token(position, TokenType.BOOL, true);
+    if (text.equals("false")) return new Token(position, TokenType.BOOL, false);
+    if (text.equals("case")) return new Token(position, TokenType.CASE);
+    if (text.equals("class")) return new Token(position, TokenType.CLASS);
+    if (text.equals("def")) return new Token(position, TokenType.DEF);
+    if (text.equals("do")) return new Token(position, TokenType.DO);
+    if (text.equals("else")) return new Token(position, TokenType.ELSE);
+    if (text.equals("end")) return new Token(position, TokenType.END);
+    if (text.equals("extend")) return new Token(position, TokenType.EXTEND);
+    if (text.equals("fn")) return new Token(position, TokenType.FN);
+    if (text.equals("for")) return new Token(position, TokenType.FOR);
+    if (text.equals("if")) return new Token(position, TokenType.IF);
+    if (text.equals("let")) return new Token(position, TokenType.LET);
+    if (text.equals("match")) return new Token(position, TokenType.MATCH);
+    if (text.equals("shared")) return new Token(position, TokenType.SHARED);
+    if (text.equals("then")) return new Token(position, TokenType.THEN);
+    if (text.equals("this")) return new Token(position, TokenType.THIS);
+    if (text.equals("var")) return new Token(position, TokenType.VAR);
+    if (text.equals("while")) return new Token(position, TokenType.WHILE);
+    if (text.equals("=")) return new Token(position, TokenType.EQUALS);
+    if (text.equals("->")) return new Token(position, TokenType.ARROW);
+    
+    return new Token(position, type, text);
   }
 
   private Token createIntToken(TokenType type) {
     String text = mText.substring(mTokenStart, mIndex);
     int value = Integer.parseInt(text);
     mState = LexState.DEFAULT;
-    return new Token(type, value);
+    return new Token(currentPosition(), type, value);
   }
 
   private Token createDoubleToken(TokenType type) {
     String text = mText.substring(mTokenStart, mIndex);
     double value = Double.parseDouble(text);
     mState = LexState.DEFAULT;
-    return new Token(type, value);
+    return new Token(currentPosition(), type, value);
   }
 
+  private Position currentPosition() {
+    return new Position(mSourceFile, mStartLine, mStartCol, mLine, mCol);
+  }
+  
+  private Position lastCharacterPosition() {
+    return new Position(mSourceFile, mLine, mCol - 1, mLine, mCol);
+  }
+  
+  private void advance() {
+    mIndex++;
+
+    // Update the position.
+    if (last(1) == "\n") {
+      mLine++;
+      mCol = 0;
+    } else {
+      mCol++;
+    }
+  }
+  
+  private void advance(int count) {
+    for (int i = 0; i < count; i++) {
+      advance();
+    }
+  }
+  
   private boolean isAlpha(final char c) {
     return ((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'))
         || (c == '_') || (c == '\'');
@@ -270,9 +310,14 @@ public class Lexer {
     IN_STRING, IN_LINE_COMMENT, IN_BLOCK_COMMENT
   }
 
+  private final String mSourceFile;
   private final String mText;
   private LexState mState;
   private int mTokenStart;
+  private int mStartLine;
+  private int mStartCol;
   private int mIndex;
   private boolean mEatLines;
+  private int mLine;
+  private int mCol;
 }

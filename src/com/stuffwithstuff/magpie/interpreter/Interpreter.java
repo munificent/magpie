@@ -65,20 +65,27 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
   }
   
   public Obj evaluate(Expr expr, EvalContext context) {
+    mCurrentPosition = expr.getPosition();
     return expr.accept(this, context);
   }
   
-  public void run(List<Expr> expressions) {
+  public void load(List<Expr> expressions) {
     EvalContext context = EvalContext.topLevel(mGlobalScope, mNothing);
     
-    // First, evaluate the expressions. This is the load time evaluation.
+    // Evaluate the expressions. This is the load time evaluation.
     for (Expr expr : expressions) {
       evaluate(expr, context);
     }
-    
+  }
+  
+  public List<Integer> analyze() {
+    List<Integer> errors = new ArrayList<Integer>();
     // TODO(bob): Type-checking and static analysis goes here.
-    
-    // Now, if there is a main(), call it. This is the runtime.
+    return errors;
+  }
+  
+  public void runMain() {
+    EvalContext context = EvalContext.topLevel(mGlobalScope, mNothing);
     Obj main = context.lookUp("main");
     if (main == null) return;
     
@@ -472,18 +479,20 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
    */
   private InterpreterException failure(String format, Object... args) {
     String message = String.format(format, args);
+    message = String.format("%s: %s", mCurrentPosition, message);
     return new InterpreterException(message);
   }
   
   private final InterpreterHost mHost;
   private Scope mGlobalScope;
-  
   private final ClassObj mClassClass;
   private final ClassObj mBoolClass;
   private final ClassObj mFnClass;
   private final ClassObj mIntClass;
   private final ClassObj mStringClass;
   private final ClassObj mTupleClass;
+  
+  private Position mCurrentPosition;
   
   private final Obj mNothing;
 }

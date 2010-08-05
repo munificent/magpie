@@ -1,7 +1,9 @@
 package com.stuffwithstuff.magpie.ast;
 
 public class AssignExpr extends Expr {
-  public AssignExpr(Expr target, String name, Expr targetArg, Expr value) {
+  public AssignExpr(Position position, Expr target, String name, Expr targetArg, Expr value) {
+    super(position);
+    
     mTarget = target;
     mName = name;
     mTargetArg = targetArg;

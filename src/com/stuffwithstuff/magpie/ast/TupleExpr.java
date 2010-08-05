@@ -4,6 +4,9 @@ import java.util.*;
 
 public class TupleExpr extends Expr {
   public TupleExpr(List<Expr> fields) {
+    super(Position.union(fields.get(0).getPosition(),
+        fields.get(fields.size() - 1).getPosition()));
+    
     mFields = fields;
   }
   

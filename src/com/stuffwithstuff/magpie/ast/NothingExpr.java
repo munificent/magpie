@@ -1,7 +1,8 @@
 package com.stuffwithstuff.magpie.ast;
 
 public class NothingExpr extends Expr {
-  public NothingExpr() {
+  public NothingExpr(Position position) {
+    super(position);
   }
   
   @Override

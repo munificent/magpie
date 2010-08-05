@@ -8,7 +8,9 @@ import com.stuffwithstuff.magpie.type.FunctionType;
  * AST node class for an function definition.
  */
 public class FnExpr extends Expr {
-  public FnExpr(FunctionType type, List<String> paramNames, Expr body) {
+  public FnExpr(Position position, FunctionType type, List<String> paramNames, Expr body) {
+    super(position);
+    
     mType = type;
     mParamNames = paramNames;
     mBody = body;

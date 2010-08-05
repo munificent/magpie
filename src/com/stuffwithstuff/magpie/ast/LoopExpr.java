@@ -7,7 +7,9 @@ import java.util.List;
  * also handles "for" loops since the parser desugars those to this.
  */
 public class LoopExpr extends Expr {
-  public LoopExpr(List<Expr> conditions, Expr body) {
+  public LoopExpr(Position position, List<Expr> conditions, Expr body) {
+    super(position);
+    
     mConditions = conditions;
     mBody = body;
   }

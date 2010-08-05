@@ -13,6 +13,10 @@ public abstract class Parser {
     return mConsumed.get(offset - 1);
   }
 
+  protected Token current() {
+    return lookAhead(1);
+  }
+  
   protected boolean lookAhead(TokenType... types) {
     // make sure all of the types match before we start consuming
     for (int i = 0; i < types.length; i++) {

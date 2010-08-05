@@ -8,7 +8,9 @@ import com.stuffwithstuff.magpie.type.TypeDecl;
  * AST node for a class definition expression.
  */
 public class ClassExpr extends Expr {
-  public ClassExpr(boolean isExtend, String name) {
+  public ClassExpr(Position position, boolean isExtend, String name) {
+    super(position);
+    
     mIsExtend = isExtend;
     mName = name;
   }

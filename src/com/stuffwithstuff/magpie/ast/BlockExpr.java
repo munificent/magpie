@@ -4,6 +4,9 @@ import java.util.*;
 
 public class BlockExpr extends Expr {
   public BlockExpr(List<Expr> expressions) {
+    super(Position.union(expressions.get(0).getPosition(),
+        expressions.get(expressions.size() - 1).getPosition()));
+    
     mExpressions = expressions;
   }
   

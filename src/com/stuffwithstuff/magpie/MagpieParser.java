@@ -26,25 +26,32 @@ public class MagpieParser extends Parser {
   
   private Expr definition() {
     if (match(TokenType.VAR)) {
+      Position startPos = last(1).getPosition();
+      
       // TODO(bob): support multiple definitions and tuple decomposition here
       String name = consume(TokenType.NAME).getString();
       
       // See if we're defining a function in shorthand notation:
       // def foo() blah
       if (lookAhead(TokenType.LEFT_PAREN)) {
+        Position fnPosition = last(1).getPosition();
+        
         List<String> paramNames = new ArrayList<String>();
         FunctionType type = functionType(paramNames);
         Expr body = parseBlock();
         
         // Desugar it to: def foo = fn () blah
-        FnExpr function = new FnExpr(type, paramNames, body);
-        return new DefineExpr(name, function);
+        FnExpr function = new FnExpr(Position.union(fnPosition, body.getPosition()),
+            type, paramNames, body);
+        return new DefineExpr(Position.union(startPos, function.getPosition()),
+            name, function);
       } else {
         // Just a regular variable definition.
         consume(TokenType.EQUALS);
         
         Expr value = flowControl();
-        return new DefineExpr(name, value);
+        return new DefineExpr(Position.union(startPos, value.getPosition()),
+            name, value);
       }
     }
     else if (lookAheadAny(TokenType.CLASS, TokenType.EXTEND)) {
@@ -57,6 +64,7 @@ public class MagpieParser extends Parser {
       // "do" block.
       return parseBlock();
     } else if (lookAhead(TokenType.IF)) {
+      Position startPos = current().getPosition();
       
       // Parse the conditions.
       List<Expr> conditions = new ArrayList<Expr>();
@@ -73,12 +81,14 @@ public class MagpieParser extends Parser {
       if (match(TokenType.ELSE) || match(TokenType.LINE, TokenType.ELSE)) {
         elseExpr = parseElseBlock();
       } else {
-        elseExpr = new NothingExpr();
+        elseExpr = new NothingExpr(last(1).getPosition());
       }
       
-      return new IfExpr(conditions, thenExpr, elseExpr);
+      return new IfExpr(Position.union(startPos, elseExpr.getPosition()),
+          conditions, thenExpr, elseExpr);
     } else if (lookAheadAny(TokenType.WHILE, TokenType.FOR)) {
       // "while" and "for" loop.
+      Position startPos = last(1).getPosition();
       
       // a for loop is desugared from this:
       //
@@ -105,22 +115,24 @@ public class MagpieParser extends Parser {
         if (last(1).getType() == TokenType.WHILE) {
           conditions.add(expression());
         } else {
-          String variable = consume(TokenType.NAME).getString();
+          Token nameToken = consume(TokenType.NAME);
+          String variable = nameToken.getString();
+          Position position = nameToken.getPosition();
           consume(TokenType.EQUALS);
           Expr generator = expression();
           
           // Initialize the generator before the loop.
           String generatorVar = variable + " gen";
-          generators.add(new DefineExpr(generatorVar,
-              new MethodExpr(generator, "generate", new NothingExpr())));
+          generators.add(new DefineExpr(position, generatorVar,
+              new MethodExpr(generator, "generate", new NothingExpr(position))));
           
           // The the condition expression just increments the generator.
           conditions.add(new MethodExpr(
-              new NameExpr(generatorVar), "next", new NothingExpr()));
+              new NameExpr(position, generatorVar), "next", new NothingExpr(position)));
           
           // In the body of the loop, we need to initialize the variable.
-          initializers.add(new DefineExpr(variable,
-              new MethodExpr(new NameExpr(generatorVar), "current", new NothingExpr())));
+          initializers.add(new DefineExpr(position, variable,
+              new MethodExpr(new NameExpr(position, generatorVar), "current", new NothingExpr(position))));
         }
         match(TokenType.LINE); // Optional line after a clause.
       }
@@ -143,11 +155,11 @@ public class MagpieParser extends Parser {
         for (Expr generator : generators) outerBlock.add(generator);
         
         // Then execute the loop.
-        outerBlock.add(new LoopExpr(conditions, body));
+        outerBlock.add(new LoopExpr(Position.union(startPos, body.getPosition()), conditions, body));
         return new BlockExpr(outerBlock);
       }
       
-      return new LoopExpr(conditions, body);
+      return new LoopExpr(Position.union(startPos, body.getPosition()), conditions, body);
     }
     else return assignment();
   }
@@ -159,6 +171,8 @@ public class MagpieParser extends Parser {
       // Parse the value being assigned.
       Expr value = flowControl();
 
+      Position position = Position.union(expr.getPosition(), value.getPosition());
+      
       // Transform the left-hand expression into an assignment form. Examples:
       // a = v       ->  a = v      AssignExpr(null, "a", null, v)
       // a.b = v     ->  a.b=(v)    AssignExpr(a,    "b", null, v)
@@ -170,16 +184,16 @@ public class MagpieParser extends Parser {
       // TODO(bob): Need to handle tuples here too.
       
       if (expr instanceof NameExpr) {
-        return new AssignExpr(null, ((NameExpr)expr).getName(), null, value);
+        return new AssignExpr(position, null, ((NameExpr)expr).getName(), null, value);
       } else if (expr instanceof MethodExpr) {
         MethodExpr method = (MethodExpr) expr;
         
         if (method.getArg() instanceof NothingExpr) {
           // a.b = v -> a.b=(v)
-          return new AssignExpr(method.getReceiver(), method.getMethod(), null, value);
+          return new AssignExpr(position, method.getReceiver(), method.getMethod(), null, value);
         } else {
           // a.b c = v -> a.b=(c, v)
-          return new AssignExpr(method.getReceiver(), method.getMethod(),
+          return new AssignExpr(position, method.getReceiver(), method.getMethod(),
               method.getArg(), value);
         }
       } else {
@@ -340,7 +354,7 @@ public class MagpieParser extends Parser {
       Expr arg = call();
       if (arg == null) {
         // If the argument is omitted, infer ()
-        arg = new NothingExpr();
+        arg = new NothingExpr(last(1).getPosition());
       }
       receiver = new MethodExpr(receiver, method, arg);
     }
@@ -354,19 +368,20 @@ public class MagpieParser extends Parser {
    */
   private Expr primary() {
     if (match(TokenType.BOOL)){
-    return new BoolExpr(last(1).getBool());
+    return new BoolExpr(last(1));
     } else if (match(TokenType.INT)) {
-      return new IntExpr(last(1).getInt());
+      return new IntExpr(last(1));
     } else if (match(TokenType.STRING)) {
-      return new StringExpr(last(1).getString());
+      return new StringExpr(last(1));
     } else if (match(TokenType.NAME)) {
-      return new NameExpr(last(1).getString());
+      return new NameExpr(last(1));
     } else if (match(TokenType.THIS)) {
-      return new ThisExpr();
+      return new ThisExpr(last(1).getPosition());
     } else if (match(TokenType.FN)) {
       return parseFunction();
     } else if (match(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)) {
-      return new NothingExpr();
+      return new NothingExpr(
+          Position.union(last(2).getPosition(), last(1).getPosition()));
     } else if (match(TokenType.LEFT_PAREN)) {
       Expr expr = expression();
       consume(TokenType.RIGHT_PAREN);
@@ -382,9 +397,11 @@ public class MagpieParser extends Parser {
     if (!isExtend) consume(TokenType.CLASS);
     
     String name = consume(TokenType.NAME).getString();
+    Position position = last(1).getPosition();
+    
     consume(TokenType.LINE);
     
-    ClassExpr classExpr = new ClassExpr(isExtend, name);
+    ClassExpr classExpr = new ClassExpr(position, isExtend, name);
     
     // There are four kinds of things that can appear in a class body:
     // class Foo
@@ -452,7 +469,7 @@ public class MagpieParser extends Parser {
     
     Expr body = parseBlock();
     
-    return new FnExpr(type, paramNames, body);
+    return new FnExpr(body.getPosition(), type, paramNames, body);
   }
 
   /**

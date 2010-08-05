@@ -1,7 +1,8 @@
 package com.stuffwithstuff.magpie.ast;
 
 public class DefineExpr extends Expr {
-  public DefineExpr(String name, Expr value) {
+  public DefineExpr(Position position, String name, Expr value) {
+    super(position);
     mName = name;
     mValue = value;
   }
