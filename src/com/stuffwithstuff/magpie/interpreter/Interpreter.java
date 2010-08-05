@@ -13,33 +13,33 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     mGlobalScope = new Scope();
     
     mClassClass = new ClassObj();
-    mClassClass.addInstanceMethod("addMethod", new NativeMethodObj.ClassAddMethod());
-    mClassClass.addInstanceMethod("addSharedMethod", new NativeMethodObj.ClassAddSharedMethod());
-    mClassClass.addInstanceMethod("name", new NativeMethodObj.ClassFieldGetter("name"));
-    mClassClass.addInstanceMethod("new", new NativeMethodObj.ClassNew());
+    mClassClass.addInstanceMethod("addMethod", new NativeMethod.ClassAddMethod());
+    mClassClass.addInstanceMethod("addSharedMethod", new NativeMethod.ClassAddSharedMethod());
+    mClassClass.addInstanceMethod("name", new NativeMethod.ClassFieldGetter("name"));
+    mClassClass.addInstanceMethod("new", new NativeMethod.ClassNew());
 
     mBoolClass = new ClassObj(mClassClass);
-    mBoolClass.addInstanceMethod("not", new NativeMethodObj.BoolNot());
-    mBoolClass.addInstanceMethod("toString", new NativeMethodObj.BoolToString());
+    mBoolClass.addInstanceMethod("not", new NativeMethod.BoolNot());
+    mBoolClass.addInstanceMethod("toString", new NativeMethod.BoolToString());
 
     mFnClass = new ClassObj(mClassClass);
     
     mIntClass = new ClassObj(mClassClass);
-    mIntClass.addInstanceMethod("+", new NativeMethodObj.IntPlus());
-    mIntClass.addInstanceMethod("-", new NativeMethodObj.IntMinus());
-    mIntClass.addInstanceMethod("*", new NativeMethodObj.IntMultiply());
-    mIntClass.addInstanceMethod("/", new NativeMethodObj.IntDivide());
-    mIntClass.addInstanceMethod("toString", new NativeMethodObj.IntToString());
-    mIntClass.addInstanceMethod("==", new NativeMethodObj.IntEqual());
-    mIntClass.addInstanceMethod("!=", new NativeMethodObj.IntNotEqual());
-    mIntClass.addInstanceMethod("<",  new NativeMethodObj.IntLessThan());
-    mIntClass.addInstanceMethod(">",  new NativeMethodObj.IntGreaterThan());
-    mIntClass.addInstanceMethod("<=", new NativeMethodObj.IntLessThanOrEqual());
-    mIntClass.addInstanceMethod(">=", new NativeMethodObj.IntGreaterThanOrEqual());
+    mIntClass.addInstanceMethod("+", new NativeMethod.IntPlus());
+    mIntClass.addInstanceMethod("-", new NativeMethod.IntMinus());
+    mIntClass.addInstanceMethod("*", new NativeMethod.IntMultiply());
+    mIntClass.addInstanceMethod("/", new NativeMethod.IntDivide());
+    mIntClass.addInstanceMethod("toString", new NativeMethod.IntToString());
+    mIntClass.addInstanceMethod("==", new NativeMethod.IntEqual());
+    mIntClass.addInstanceMethod("!=", new NativeMethod.IntNotEqual());
+    mIntClass.addInstanceMethod("<",  new NativeMethod.IntLessThan());
+    mIntClass.addInstanceMethod(">",  new NativeMethod.IntGreaterThan());
+    mIntClass.addInstanceMethod("<=", new NativeMethod.IntLessThanOrEqual());
+    mIntClass.addInstanceMethod(">=", new NativeMethod.IntGreaterThanOrEqual());
 
     mStringClass = new ClassObj(mClassClass);
-    mStringClass.addInstanceMethod("+",     new NativeMethodObj.StringPlus());
-    mStringClass.addInstanceMethod("print", new NativeMethodObj.StringPrint());
+    mStringClass.addInstanceMethod("+",     new NativeMethod.StringPlus());
+    mStringClass.addInstanceMethod("print", new NativeMethod.StringPrint());
 
     // TODO(bob): At some point, may want different tuple types based on the
     // types of the fields.
@@ -125,7 +125,7 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     for (int i = 0; i < fields.length; i++) {
       String name = Integer.toString(i);
       tuple.setField(name, fields[i]);
-      tuple.addMethod(name, new NativeMethodObj.ClassFieldGetter(name));
+      tuple.addMethod(name, new NativeMethod.ClassFieldGetter(name));
     }
     
     return tuple;
@@ -290,44 +290,48 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
       
       // Add a getter.
       classObj.addMethod(field.getKey(),
-          new NativeMethodObj.ClassFieldGetter(field.getKey()));
+          new NativeMethod.ClassFieldGetter(field.getKey()));
       
       // Add a setter.
       classObj.addMethod(field.getKey() + "=",
-          new NativeMethodObj.ClassFieldSetter(field.getKey()));
+          new NativeMethod.ClassFieldSetter(field.getKey()));
     }
     
     // Define the shared methods.
-    for (Entry<String, FnExpr> method : expr.getSharedMethods().entrySet()) {
-      FnObj methodObj = new FnObj(mFnClass, method.getValue());
-      classObj.addMethod(method.getKey(), methodObj);
+    for (Entry<String, List<FnExpr>> methods : expr.getSharedMethods().entrySet()) {
+      for (FnExpr method : methods.getValue()) {
+        FnObj methodObj = new FnObj(mFnClass, method);
+        classObj.addMethod(methods.getKey(), methodObj);
+      }
     }
     
     // Define the instance methods.
-    for (Entry<String, FnExpr> method : expr.getMethods().entrySet()) {
-      FnObj methodObj = new FnObj(mFnClass, method.getValue());
-      classObj.addInstanceMethod(method.getKey(), methodObj);
+    for (Entry<String, List<FnExpr>> methods : expr.getMethods().entrySet()) {
+      for (FnExpr method : methods.getValue()) {
+        FnObj methodObj = new FnObj(mFnClass, method);
+        classObj.addInstanceMethod(methods.getKey(), methodObj);
+      }
     }
     
     // Define the getters and setters for the fields.
     for (String field : expr.getFields().keySet()) {
       // Add a getter.
       classObj.addInstanceMethod(field,
-          new NativeMethodObj.ClassFieldGetter(field));
+          new NativeMethod.ClassFieldGetter(field));
       
       // Add a setter.
       classObj.addInstanceMethod(field + "=",
-          new NativeMethodObj.ClassFieldSetter(field));
+          new NativeMethod.ClassFieldSetter(field));
     }
     
     for (String field : expr.getFieldDeclarations().keySet()) {
       // Add a getter.
       classObj.addInstanceMethod(field,
-          new NativeMethodObj.ClassFieldGetter(field));
+          new NativeMethod.ClassFieldGetter(field));
       
       // Add a setter.
       classObj.addInstanceMethod(field + "=",
-          new NativeMethodObj.ClassFieldSetter(field));
+          new NativeMethod.ClassFieldSetter(field));
     }
     
     // Add the field initializers to the class so it can evaluate them when an

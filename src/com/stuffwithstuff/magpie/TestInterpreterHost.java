@@ -59,6 +59,8 @@ public class TestInterpreterHost implements InterpreterHost {
         }
       } catch (InterpreterException ex) {
         fail("Interpreter error " + ex.toString());
+      } catch (UnsupportedOperationException ex) {
+        fail("Unsupported operation error " + ex.toString());
       }
     } catch (ParseException ex) {
       fail("Parse error " + ex.toString());
