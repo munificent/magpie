@@ -44,6 +44,8 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
     // TODO(bob): At some point, may want different tuple types based on the
     // types of the fields.
     mTupleClass = new ClassObj(mClassClass);
+    mTupleClass.addInstanceMethod("apply", new NativeMethod.TupleGetField());
+    mTupleClass.addInstanceMethod("count", new NativeMethod.ClassFieldGetter("count"));
     
     ClassObj nothingClass = new ClassObj(mClassClass);
     mNothing = new Obj(nothingClass);
@@ -127,6 +129,8 @@ public class Interpreter implements ExprVisitor<Obj, EvalContext> {
       tuple.setField(name, fields[i]);
       tuple.addMethod(name, new NativeMethod.ClassFieldGetter(name));
     }
+    
+    tuple.setField("count", createInt(fields.length));
     
     return tuple;
   }

@@ -3,31 +3,47 @@ package com.stuffwithstuff.magpie.interpreter;
 import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.Expr;
+import com.stuffwithstuff.magpie.type.*;
 
-public abstract class NativeMethodObj extends Obj implements Invokable {
+public abstract class NativeMethod implements Invokable {
   public abstract Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg);
+  
+  public abstract FunctionType getFunctionType();
+  
+  // TODO(bob): Many of these just use dynamic in their type signature. Would be
+  // good to change to something more specific when possible.
   
   // Native methods:
   
   // Bool methods:
   
-  public static class BoolNot extends NativeMethodObj {
+  public static class BoolNot extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       return interpreter.createBool(!thisObj.asBool());
     }
+    
+    @Override
+    public FunctionType getFunctionType() {
+      return new FunctionType(TypeDecl.nothing(), TypeDecl.boolType());
+    }
   }
   
-  public static class BoolToString extends NativeMethodObj {
+  public static class BoolToString extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       return interpreter.createString(Boolean.toString(thisObj.asBool()));
+    }
+    
+    @Override
+    public FunctionType getFunctionType() {
+      return new FunctionType(TypeDecl.nothing(), TypeDecl.stringType());
     }
   }
   
   // Class methods:
   
-  public static class ClassAddMethod extends NativeMethodObj {
+  public static class ClassAddMethod extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();
@@ -38,9 +54,16 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
       
       return interpreter.nothing();
     }
+    
+    @Override
+    public FunctionType getFunctionType() {
+      return new FunctionType(new TupleType(
+          TypeDecl.stringType(), TypeDecl.functionType()),
+          TypeDecl.nothing());
+    }
   }
   
-  public static class ClassAddSharedMethod extends NativeMethodObj {
+  public static class ClassAddSharedMethod extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();
@@ -48,12 +71,19 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
       
       ClassObj classObj = (ClassObj)thisObj;
       classObj.addMethod(name, method);
-      
+
       return interpreter.nothing();
+    }
+    
+    @Override
+    public FunctionType getFunctionType() {
+      return new FunctionType(new TupleType(
+          TypeDecl.stringType(), TypeDecl.functionType()),
+          TypeDecl.nothing());
     }
   }
 
-  public static class ClassFieldGetter extends NativeMethodObj {
+  public static class ClassFieldGetter extends NativeMethod {
     public ClassFieldGetter(String name) {
       mName = name;
     }
@@ -63,10 +93,15 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
       return thisObj.getField(mName);
     }
     
+    @Override
+    public FunctionType getFunctionType() {
+      return new FunctionType(TypeDecl.dynamic(), TypeDecl.dynamic());
+    }
+
     private final String mName;
   }
 
-  public static class ClassFieldSetter extends NativeMethodObj {
+  public static class ClassFieldSetter extends NativeMethod {
     public ClassFieldSetter(String name) {
       mName = name;
     }
@@ -77,11 +112,16 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
       return arg;
     }
     
+    @Override
+    public FunctionType getFunctionType() {
+      return new FunctionType(TypeDecl.dynamic(), TypeDecl.dynamic());
+    }
+
     private final String mName;
   }
   
   // TODO(bob): This is pretty much temp.
-  public static class ClassNew extends NativeMethodObj {
+  public static class ClassNew extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       ClassObj classObj = (ClassObj)thisObj;
@@ -109,11 +149,16 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
       
       return obj;
     }
+    
+    @Override
+    public FunctionType getFunctionType() {
+      return new FunctionType(TypeDecl.dynamic(), TypeDecl.dynamic());
+    }
   }
   
   // Int methods:
   
-  public static class IntPlus extends NativeMethodObj {
+  public static class IntPlus extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       int left = thisObj.asInt();
@@ -121,9 +166,14 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
       
       return interpreter.createInt(left + right);
     }
+    
+    @Override
+    public FunctionType getFunctionType() {
+      return new FunctionType(TypeDecl.intType(), TypeDecl.intType());
+    }
   }
 
-  public static class IntMinus extends NativeMethodObj {
+  public static class IntMinus extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       int left = thisObj.asInt();
@@ -131,9 +181,14 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
       
       return interpreter.createInt(left - right);
     }
+    
+    @Override
+    public FunctionType getFunctionType() {
+      return new FunctionType(TypeDecl.intType(), TypeDecl.intType());
+    }
   }
   
-  public static class IntMultiply extends NativeMethodObj {
+  public static class IntMultiply extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       int left = thisObj.asInt();
@@ -141,9 +196,14 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
       
       return interpreter.createInt(left * right);
     }
+    
+    @Override
+    public FunctionType getFunctionType() {
+      return new FunctionType(TypeDecl.intType(), TypeDecl.intType());
+    }
   }
   
-  public static class IntDivide extends NativeMethodObj {
+  public static class IntDivide extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       int left = thisObj.asInt();
@@ -151,9 +211,14 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
       
       return interpreter.createInt(left / right);
     }
+    
+    @Override
+    public FunctionType getFunctionType() {
+      return new FunctionType(TypeDecl.intType(), TypeDecl.intType());
+    }
   }
   
-  public static class IntEqual extends NativeMethodObj {
+  public static class IntEqual extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       int left = thisObj.asInt();
@@ -161,9 +226,14 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
       
       return interpreter.createBool(left == right);
     }
+    
+    @Override
+    public FunctionType getFunctionType() {
+      return new FunctionType(TypeDecl.intType(), TypeDecl.boolType());
+    }
   }
   
-  public static class IntNotEqual extends NativeMethodObj {
+  public static class IntNotEqual extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       int left = thisObj.asInt();
@@ -171,9 +241,14 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
       
       return interpreter.createBool(left != right);
     }
+    
+    @Override
+    public FunctionType getFunctionType() {
+      return new FunctionType(TypeDecl.intType(), TypeDecl.boolType());
+    }
   }
   
-  public static class IntLessThan extends NativeMethodObj {
+  public static class IntLessThan extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       int left = thisObj.asInt();
@@ -181,9 +256,14 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
       
       return interpreter.createBool(left < right);
     }
+    
+    @Override
+    public FunctionType getFunctionType() {
+      return new FunctionType(TypeDecl.intType(), TypeDecl.boolType());
+    }
   }
   
-  public static class IntGreaterThan extends NativeMethodObj {
+  public static class IntGreaterThan extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       int left = thisObj.asInt();
@@ -191,9 +271,14 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
       
       return interpreter.createBool(left > right);
     }
+    
+    @Override
+    public FunctionType getFunctionType() {
+      return new FunctionType(TypeDecl.intType(), TypeDecl.boolType());
+    }
   }
   
-  public static class IntLessThanOrEqual extends NativeMethodObj {
+  public static class IntLessThanOrEqual extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       int left = thisObj.asInt();
@@ -201,9 +286,14 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
       
       return interpreter.createBool(left <= right);
     }
+    
+    @Override
+    public FunctionType getFunctionType() {
+      return new FunctionType(TypeDecl.intType(), TypeDecl.boolType());
+    }
   }
   
-  public static class IntGreaterThanOrEqual extends NativeMethodObj {
+  public static class IntGreaterThanOrEqual extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       int left = thisObj.asInt();
@@ -211,18 +301,28 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
       
       return interpreter.createBool(left >= right);
     }
+    
+    @Override
+    public FunctionType getFunctionType() {
+      return new FunctionType(TypeDecl.intType(), TypeDecl.boolType());
+    }
   }
   
-  public static class IntToString extends NativeMethodObj {
+  public static class IntToString extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       return interpreter.createString(Integer.toString(thisObj.asInt()));
+    }
+    
+    @Override
+    public FunctionType getFunctionType() {
+      return new FunctionType(TypeDecl.nothing(), TypeDecl.stringType());
     }
   }
 
   // String methods:
 
-  public static class StringPlus extends NativeMethodObj {
+  public static class StringPlus extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String left = thisObj.asString();
@@ -230,13 +330,37 @@ public abstract class NativeMethodObj extends Obj implements Invokable {
       
       return interpreter.createString(left + right);
     }
+    
+    @Override
+    public FunctionType getFunctionType() {
+      return new FunctionType(TypeDecl.stringType(), TypeDecl.stringType());
+    }
   }
 
-  public static class StringPrint extends NativeMethodObj {
+  public static class StringPrint extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       interpreter.print(thisObj.asString());
       return interpreter.nothing();
+    }
+    
+    @Override
+    public FunctionType getFunctionType() {
+      return new FunctionType(TypeDecl.nothing(), TypeDecl.nothing());
+    }
+  }
+  
+  // Tuple methods:
+
+  public static class TupleGetField extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      return thisObj.getTupleField(arg.asInt());
+    }
+    
+    @Override
+    public FunctionType getFunctionType() {
+      return new FunctionType(TypeDecl.intType(), TypeDecl.dynamic());
     }
   }
 }

@@ -347,16 +347,21 @@ public class MagpieParser extends Parser {
     if (receiver == null) return null;
     
     while (match(TokenType.DOT)) {
-      // TODO(bob): Should handle non-name tokens here to support method-like
-      // things such as indexers: someArray.234
-      String method = consume(TokenType.NAME).getString();
+      if (match(TokenType.NAME)) {
+        // Regular named method: foo.bar
+        String method = last(1).getString();
 
-      Expr arg = call();
-      if (arg == null) {
-        // If the argument is omitted, infer ()
-        arg = new NothingExpr(last(1).getPosition());
+        Expr arg = call();
+        if (arg == null) {
+          // If the argument is omitted, infer ()
+          arg = new NothingExpr(last(1).getPosition());
+        }
+        receiver = new MethodExpr(receiver, method, arg);
+      } else {
+        // Functor object: foo.123
+        Expr arg = primary();
+        receiver = new MethodExpr(receiver, "apply", arg);
       }
-      receiver = new MethodExpr(receiver, method, arg);
     }
     
     return receiver;
