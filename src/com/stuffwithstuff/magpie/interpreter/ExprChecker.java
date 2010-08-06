@@ -9,7 +9,7 @@ import com.stuffwithstuff.magpie.ast.*;
 
 public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   // TODO(bob): This is kinda temp.
-  public static void check(Interpreter interpreter, List<Integer> errors,
+  public static void check(Interpreter interpreter, List<CheckError> errors,
       FnObj fn) {
     ExprChecker checker = new ExprChecker(interpreter, errors);
     
@@ -17,7 +17,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     fn.getFunction().getBody().accept(checker, context);
   }
   
-  public ExprChecker(Interpreter interpreter, List<Integer> errors) {
+  public ExprChecker(Interpreter interpreter, List<CheckError> errors) {
     mInterpreter = interpreter;
     mErrors = errors;
   }
@@ -33,14 +33,14 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       Obj value = check(expr.getValue(), context);
       
       // Try to assign to a local.
-      Obj current = context.lookUpCheck(name);
+      Obj declared = context.lookUpCheck(name);
       
       // Make sure the types match.
       // TODO(bob): Instead of just check ref equality, should eventually call
       // a canAssignTo? method on the actual "type" object itself.
-      if (current != value) {
-        mErrors.add(expr.getPosition().getStartLine());
-      }
+      errorIf(declared != value, expr,
+          "Cannot assign a %s value to a variable declared %s.",
+          value, declared);
       
       // If not found, try to assign to a member of this.
       /*
@@ -87,9 +87,19 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     EvalContext localContext = context.newBlockScope();
     
     // Evaluate all of the expressions and return the last.
+    int index = 0;
     for (Expr thisExpr : expr.getExpressions()) {
       result = check(thisExpr, localContext);
-      // TODO(bob): Should check that non-last exprs are nothing.
+      
+      // All but the last expression in a block should return nothing.
+      // TODO(bob): We may want to relax this and discard their returns like
+      // most statement-oriented languages allow.
+      /*
+      if (index < expr.getExpressions().size() - 1) {
+        errorIf(result != mInterpreter.getNothingType(), thisExpr,
+            "All but the last expression in a block must return nothing.");
+      }*/
+      index++;
     }
     
     return result;
@@ -117,9 +127,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     Obj value = check(expr.getValue(), context);
 
     // Variables cannot be of type Nothing.
-    if (value == mInterpreter.getNothingType()) {
-      mErrors.add(expr.getPosition().getStartLine());
-    }
+    errorIf(value == mInterpreter.getNothingType(), expr,
+        "Cannot declare a variable \"%s\" of type Nothing.", expr.getName());
     
     context.defineCheck(expr.getName(), value);
     return value;
@@ -133,8 +142,22 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(IfExpr expr, EvalContext context) {
-    // TODO(bob): Implement me.
-    return null;
+    // Make sure the conditions are bools.
+    for (Expr condition : expr.getConditions()) {
+      Obj conditionType = check(condition, context);
+      errorIf(conditionType != mInterpreter.getBoolType(), condition,
+          "Condition expression in an if expression must evaluate to Bool.");
+    }
+    
+    // TODO(bob): Should relax this to return the union of the two arms.
+    // Make sure the arms return the same thing.
+    Obj thenArm = check(expr.getThen(), context);
+    Obj elseArm = check(expr.getElse(), context);
+    
+    errorIf(thenArm != elseArm, expr.getThen(),
+        "Both then and else arms of an if expression must return the same type.");
+    
+    return thenArm;
   }
 
   @Override
@@ -144,8 +167,19 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(LoopExpr expr, EvalContext context) {
-    // TODO(bob): Implement me.
-    return null;
+    // Make sure the conditions are bools.
+    for (Expr condition : expr.getConditions()) {
+      Obj conditionType = check(condition, context);
+      errorIf(conditionType != mInterpreter.getBoolType(), condition,
+          "Condition expression in a while loop must evaluate to Bool.");
+    }
+    
+    // Make sure the body returns nothing.
+    Obj body = check(expr.getBody(), context);
+    errorIf(body != mInterpreter.getNothingType(), expr.getBody(),
+        "While loop body must return Nothing.");
+    
+    return mInterpreter.getNothingType();
   }
 
   @Override
@@ -182,10 +216,18 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     return null;
   }
   
+  private void errorIf(boolean condition, Expr expr,
+      String format, Object... args) {
+    if (condition) {
+      mErrors.add(new CheckError(expr.getPosition(),
+          String.format(format, args)));
+    }
+  }
+  
   private Obj check(Expr expr, EvalContext context) {
     return expr.accept(this, context);
   }
   
-  private final List<Integer> mErrors;
+  private final List<CheckError> mErrors;
   private final Interpreter mInterpreter;
 }

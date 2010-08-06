@@ -1,3 +1,3 @@
 var main ()
-    var foo = () //! error
+    var foo = () //!
 end

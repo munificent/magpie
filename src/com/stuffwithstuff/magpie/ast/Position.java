@@ -37,17 +37,12 @@ public class Position {
   public int getEndCol() { return mEndCol; }
   
   public String toString() {
-    StringBuilder builder = new StringBuilder();
-    
     if (mStartLine == mEndLine) {
-      builder.append(String.format(" (%d-%d,%d)",
-          mStartCol, mEndCol, mStartLine));
-    } else {
-      builder.append(String.format(" (%d,%d-%d,%d)",
-          mStartCol, mStartLine, mEndCol, mEndLine));
+      return String.format("(%d-%d,%d)", mStartCol, mEndCol, mStartLine);
     }
     
-    return builder.toString();
+    return String.format("(%d,%d-%d,%d)", mStartCol, mStartLine,
+        mEndCol, mEndLine);
   }
   
   private final String mSourceFile;

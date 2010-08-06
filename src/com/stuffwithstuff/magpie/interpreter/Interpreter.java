@@ -75,8 +75,8 @@ public class Interpreter {
     }
   }
   
-  public List<Integer> check() {
-    List<Integer> errors = new ArrayList<Integer>();
+  public List<CheckError> check() {
+    List<CheckError> errors = new ArrayList<CheckError>();
 
     for (Entry<String, Obj> entry : mGlobalScope.entries()) {
       // TODO(bob): Hack temp. Just check top-level functions for now.
