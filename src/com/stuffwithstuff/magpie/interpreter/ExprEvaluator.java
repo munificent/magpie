@@ -45,7 +45,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       if (context.assign(name, value)) return value;
       
       // If not found, try to assign to a member of this.
-      Invokable setter = context.getThis().findMethod(name + "=", value);
+      Invokable setter = context.getThis().findMethod(name + "=");
       if (setter != null) {
         return setter.invoke(mInterpreter, context.getThis(), value);
       }
@@ -66,7 +66,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
       // Look for a setter method.
       String setterName = expr.getName() + "=";
-      Invokable setter = target.findMethod(setterName, value);
+      Invokable setter = target.findMethod(setterName);
       
       expect(setter != null,
           "Could not find a method named \"%s\" on %s.", setterName, target);
@@ -115,14 +115,14 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       }
       
       // Look for an implicit call to a method on this with the name.
-      Invokable method = context.getThis().findMethod(name, arg);
+      Invokable method = context.getThis().findMethod(name);
       if (method != null) {
         return method.invoke(mInterpreter, context.getThis(), arg);
       }
       
       // Try to call it as a method on the argument. In other words,
       // "abs 123" is equivalent to "123.abs".
-      method = arg.findMethod(name, mInterpreter.nothing());
+      method = arg.findMethod(name);
       expect(method != null,
           "Could not find a method \"%s\" on %s.", name, arg);
 
@@ -299,7 +299,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     Obj receiver = evaluate(expr.getReceiver(), context);
     Obj arg = evaluate(expr.getArg(), context);
     
-    Invokable method = receiver.findMethod(expr.getMethod(), arg);
+    Invokable method = receiver.findMethod(expr.getMethod());
     expect (method != null,
         "Could not find a method named \"%s\" on %s.",
         expr.getMethod(), receiver);
@@ -314,7 +314,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     Obj variable = context.lookUp(expr.getName());
     if (variable != null) return variable;
     
-    Invokable method = context.getThis().findMethod(expr.getName(), mInterpreter.nothing());
+    Invokable method = context.getThis().findMethod(expr.getName());
     expect (method != null,
         "Could not find a variable named \"%s\".",
         expr.getName());

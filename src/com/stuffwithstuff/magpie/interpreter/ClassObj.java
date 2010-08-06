@@ -31,23 +31,27 @@ public class ClassObj extends Obj {
     mInstanceMethods.add(name, method);
   }
   
-  public Invokable findInstanceMethod(String name, Obj arg) {
-    return mInstanceMethods.find(name, arg);
+  public Invokable findInstanceMethod(String name) {
+    return mInstanceMethods.find(name);
   }
   
   public void addConstructor(FnObj constructor) {
-    mConstructor.add(constructor);
+    if (mConstructor != null) {
+      throw new InterpreterException("Cannot overload constructors.");
+    }
+    
+    mConstructor = constructor;
   }
 
-  public Invokable findConstructor(Obj arg) {
-    return mConstructor.find(arg);
+  public Invokable getConstructor() {
+    return mConstructor;
   }
   
   public void defineFields(Map<String, Expr> fields) {
     mFieldInitializers = fields;
   }
   
-  private final Multimethod mConstructor = new Multimethod();
+  private Invokable mConstructor;
   private Map<String, Expr> mFieldInitializers;
   private final MethodSet mInstanceMethods = new MethodSet();
 }

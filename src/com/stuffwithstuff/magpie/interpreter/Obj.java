@@ -52,13 +52,13 @@ public class Obj {
     mMethods.add(name, method);
   }
   
-  public Invokable findMethod(String name, Obj arg) {
+  public Invokable findMethod(String name) {
     // Look on the object itself.
-    Invokable method = mMethods.find(name, arg);
+    Invokable method = mMethods.find(name);
     if (method != null) return method;
     
     // Otherwise, see if the class defines an instance method.
-    return mClass.findInstanceMethod(name, arg);
+    return mClass.findInstanceMethod(name);
   }
     
   public boolean asBool() {

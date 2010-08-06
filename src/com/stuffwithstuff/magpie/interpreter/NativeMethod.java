@@ -142,7 +142,7 @@ public abstract class NativeMethod implements Invokable {
       }
       
       // Find and call the constructor (if any).
-      Invokable constructor = classObj.findConstructor(arg);
+      Invokable constructor = classObj.getConstructor();
       if (constructor != null) {
         constructor.invoke(interpreter, obj, arg);
       }

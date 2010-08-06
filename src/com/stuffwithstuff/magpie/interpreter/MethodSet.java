@@ -6,23 +6,16 @@ import java.util.*;
 public class MethodSet {
   
   public void add(String name, Invokable method) {
-    // Merge it with the other overloads of the same name.
-    Multimethod multimethod = mMethods.get(name);
-    if (multimethod == null) {
-      multimethod = new Multimethod();
-      mMethods.put(name, multimethod);
+    if (mMethods.containsKey(name)) {
+      throw new InterpreterException("There is already a method named \"" + name + "\".");
     }
     
-    multimethod.add(method);
+    mMethods.put(name, method);
   }
   
-  public Invokable find(String name, Obj arg) {
-    // TODO(bob): Make sure arg type matches.
-    Multimethod multimethod = mMethods.get(name);
-    if (multimethod == null) return null;
-    
-    return multimethod.find(arg);
+  public Invokable find(String name) {
+    return mMethods.get(name);
   }
   
-  private final Map<String, Multimethod> mMethods = new HashMap<String, Multimethod>();
+  private final Map<String, Invokable> mMethods = new HashMap<String, Invokable>();
 }
