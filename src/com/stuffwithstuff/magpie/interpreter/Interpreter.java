@@ -80,6 +80,7 @@ public class Interpreter {
 
     for (Entry<String, Obj> entry : mGlobalScope.entries()) {
       // TODO(bob): Hack temp. Just check top-level functions for now.
+      // Also need to check top-level classes.
       if (entry.getValue() instanceof FnObj) {
         ExprChecker.check(this, errors, (FnObj)entry.getValue());
       }

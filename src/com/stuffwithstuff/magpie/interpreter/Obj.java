@@ -60,7 +60,7 @@ public class Obj {
     // Otherwise, see if the class defines an instance method.
     return mClass.findInstanceMethod(name);
   }
-    
+  
   public boolean asBool() {
     if (mPrimitiveValue instanceof Boolean) {
       return ((Boolean)mPrimitiveValue).booleanValue();

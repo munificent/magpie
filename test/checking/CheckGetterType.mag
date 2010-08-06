@@ -1,0 +1,13 @@
+class Foo
+    bar = "a string"
+    
+    test ()
+        var n = 123
+        n = bar //!
+    end
+end
+
+var main ()
+    var foo = Foo.new
+    foo.test
+end

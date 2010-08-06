@@ -13,8 +13,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       FnObj fn) {
     ExprChecker checker = new ExprChecker(interpreter, errors);
     
-    EvalContext context = interpreter.createTopLevelContext();
-    fn.getFunction().getBody().accept(checker, context);
+    checker.invoke(interpreter.getNothingType(), fn.getFunction(),
+        interpreter.getNothingType());
   }
   
   public ExprChecker(Interpreter interpreter, List<CheckError> errors) {
@@ -33,7 +33,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       Obj value = check(expr.getValue(), context);
       
       // Try to assign to a local.
-      Obj declared = context.lookUpCheck(name);
+      Obj declared = context.lookUp(name);
       
       // Make sure the types match.
       // TODO(bob): Instead of just check ref equality, should eventually call
@@ -130,7 +130,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     errorIf(value == mInterpreter.getNothingType(), expr,
         "Cannot declare a variable \"%s\" of type Nothing.", expr.getName());
     
-    context.defineCheck(expr.getName(), value);
+    context.define(expr.getName(), value);
     return value;
   }
 
@@ -191,22 +191,26 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(NameExpr expr, EvalContext context) {
     // Look up a named variable.
-    Obj variable = context.lookUpCheck(expr.getName());
+    Obj variable = context.lookUp(expr.getName());
     if (variable != null) return variable;
     
-    error(expr, "Variable \"%s\" must be previously defined.", expr.getName());
-
-    // TODO(bob): Port from evaluator:
-    /*
-    Invokable method = context.getThis().findMethod(expr.getName());
-    expect (method != null,
+    Invokable method = findMethodType(context.getThis(), expr.getName());
+    
+    // Make sure we could find a method.
+    errorIf(method == null, expr,
         "Could not find a variable named \"%s\".",
         expr.getName());
-    return method.invoke(mInterpreter, context.getThis(), mInterpreter.nothing());
-    */
+    // Just return an empty type and try to continute to find more errors.
+    if (method == null) return mInterpreter.getNothingType();
     
-    // Just return nothing and continue to find other errors.
-    return mInterpreter.getNothingType();
+    EvalContext methodTypeContext = mInterpreter.createTopLevelContext();
+    Obj paramType = check(method.getParamType(), methodTypeContext);
+    
+    errorIf(paramType != mInterpreter.getNothingType(), expr,
+        "Method \"%s\" on this expects a %s parameter and got %s.",
+        expr.getName(), paramType, mInterpreter.getNothingType());
+    
+    return check(method.getReturnType(), methodTypeContext);
   }
 
   @Override
@@ -221,14 +225,47 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(ThisExpr expr, EvalContext context) {
-    // TODO(bob): Implement me.
-    return null;
+    return context.getThis();
   }
 
   @Override
   public Obj visit(TupleExpr expr, EvalContext context) {
-    // TODO(bob): Implement me.
-    return null;
+    // Evaluate the fields.
+    Obj[] fields = new Obj[expr.getFields().size()];
+    for (int i = 0; i < fields.length; i++) {
+      fields[i] = check(expr.getFields().get(i), context);
+    }
+
+    return mInterpreter.createTuple(context, fields);
+  }
+  
+  private Obj invoke(Obj thisObj, FnExpr function, Obj arg) {
+    // Create a new local scope for the function.
+    EvalContext context = EvalContext.forMethod(mInterpreter.getGlobals(), thisObj);
+    
+    // Bind arguments to their parameter names.
+    List<String> params = function.getParamNames();
+    if (params.size() == 1) {
+      context.define(params.get(0), arg);
+    } else if (params.size() > 1) {
+      // TODO(bob): Hack. Assume the arg is a tuple with the right number of
+      // fields.
+      for (int i = 0; i < params.size(); i++) {
+        context.define(params.get(i), arg.getTupleField(i));
+      }
+    }
+    
+    return check(function.getBody(), context);
+  }
+
+  private Invokable findMethodType(Obj typeObj, String name) {
+    // TODO(bob): Only works with class objects right now. Eventually need a
+    // more extensible generic way of doing this so we can handle (for example),
+    // methods specific to an instance.
+    if (!(typeObj instanceof ClassObj)) return null;
+    
+    ClassObj classObj = (ClassObj)typeObj;
+    return classObj.findInstanceMethod(name);
   }
   
   private void errorIf(boolean condition, Expr expr,

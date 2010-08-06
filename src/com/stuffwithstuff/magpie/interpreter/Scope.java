@@ -19,16 +19,8 @@ public class Scope {
     mVariables.put(name, value);
   }
 
-  public void defineCheck(String name, Obj value) {
-    mChecks.put(name, value);
-  }
-  
   public Obj get(String name) {
     return mVariables.get(name);
-  }
-  
-  public Obj getCheck(String name) {
-    return mChecks.get(name);
   }
 
   public Set<Entry<String, Obj>> entries() {
@@ -36,5 +28,4 @@ public class Scope {
   }
   
   private final Map<String, Obj> mVariables = new HashMap<String, Obj>();
-  private final Map<String, Obj> mChecks = new HashMap<String, Obj>();
 }

@@ -55,24 +55,9 @@ public class EvalContext {
     
     return null;
   }
-  
-  public Obj lookUpCheck(String name) {
-    EvalContext context = this;
-    while (context != null) {
-      Obj value = context.mScope.getCheck(name);
-      if (value != null) return value;
-      context = context.mParent;
-    }
-    
-    return null;
-  }
 
   public void define(String name, Obj value) {
     mScope.define(name, value);
-  }
-  
-  public void defineCheck(String name, Obj value) {
-    mScope.defineCheck(name, value);
   }
   
   public boolean assign(String name, Obj value) {
