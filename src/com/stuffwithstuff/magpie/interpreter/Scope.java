@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * A scope for named variables. This is used to define the name environment
@@ -17,10 +18,23 @@ public class Scope {
   public void define(String name, Obj value) {
     mVariables.put(name, value);
   }
+
+  public void defineCheck(String name, Obj value) {
+    mChecks.put(name, value);
+  }
   
   public Obj get(String name) {
     return mVariables.get(name);
   }
+  
+  public Obj getCheck(String name) {
+    return mChecks.get(name);
+  }
 
+  public Set<Entry<String, Obj>> entries() {
+    return mVariables.entrySet();
+  }
+  
   private final Map<String, Obj> mVariables = new HashMap<String, Obj>();
+  private final Map<String, Obj> mChecks = new HashMap<String, Obj>();
 }

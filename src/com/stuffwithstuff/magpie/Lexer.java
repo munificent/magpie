@@ -278,7 +278,7 @@ public class Lexer {
     mIndex++;
 
     // Update the position.
-    if (last(1) == "\n") {
+    if (last(1).equals("\n")) {
       mLine++;
       mCol = 0;
     } else {

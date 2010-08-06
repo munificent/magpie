@@ -303,7 +303,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     expect (method != null,
         "Could not find a method named \"%s\" on %s.",
         expr.getMethod(), receiver);
-    
 
     return method.invoke(mInterpreter, receiver, arg);
   }

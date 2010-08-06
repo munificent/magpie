@@ -1,0 +1,3 @@
+var main ()
+    var foo = () //! error
+end

@@ -49,13 +49,13 @@ public class TestInterpreterHost implements InterpreterHost {
         mInterpreter.load(parser.parse());
         
         // Do the static analysis and see if we got the errors we expect.
-        List<Integer> errors = mInterpreter.analyze();
+        List<Integer> errors = mInterpreter.check();
         if (mExpectedErrors.size() != errors.size()) {
           fail("Expected " + mExpectedErrors.size() + " errors and got " +
               errors.size() + ".");
         }
         
-        for (int i = 0; i < errors.size(); i++) {
+        for (int i = 0; i < Math.min(mExpectedErrors.size(), errors.size()); i++) {
           if (mExpectedErrors.get(i) != errors.get(i)) {
             fail("Expected an error on line " + mExpectedErrors.get(i) +
                 " and got one on line " + errors.get(i) + " instead.");

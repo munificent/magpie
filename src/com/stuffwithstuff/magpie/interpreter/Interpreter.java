@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.*;
+import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.*;
 
@@ -46,8 +47,8 @@ public class Interpreter {
     mTupleClass.addInstanceMethod("apply", new NativeMethod.TupleGetField());
     mTupleClass.addInstanceMethod("count", new NativeMethod.ClassFieldGetter("count"));
     
-    ClassObj nothingClass = new ClassObj(mClassClass);
-    mNothing = new Obj(nothingClass);
+    mNothingClass = new ClassObj(mClassClass);
+    mNothing = new Obj(mNothingClass);
     
     // Give the classes names and make then available.
     mGlobalScope.define("Bool", mBoolClass);
@@ -60,7 +61,7 @@ public class Interpreter {
     mClassClass.setField("name", createString("Class"));
     mFnClass.setField("name", createString("Function"));
     mIntClass.setField("name", createString("Int"));
-    nothingClass.setField("name", createString("Nothing"));
+    mNothingClass.setField("name", createString("Nothing"));
     mStringClass.setField("name", createString("String"));
     mTupleClass.setField("name", createString("Tuple"));
   }
@@ -74,9 +75,16 @@ public class Interpreter {
     }
   }
   
-  public List<Integer> analyze() {
+  public List<Integer> check() {
     List<Integer> errors = new ArrayList<Integer>();
-    // TODO(bob): Type-checking and static analysis goes here.
+
+    for (Entry<String, Obj> entry : mGlobalScope.entries()) {
+      // TODO(bob): Hack temp. Just check top-level functions for now.
+      if (entry.getValue() instanceof FnObj) {
+        ExprChecker.check(this, errors, (FnObj)entry.getValue());
+      }
+    }
+    
     return errors;
   }
   
@@ -89,12 +97,16 @@ public class Interpreter {
       throw new InterpreterException("Member \"main\" is not a function.");
     }
     
-    FnObj mainFn = (FnObj)main;
+    Invokable mainFn = (Invokable)main;
     mainFn.invoke(this, mNothing, mNothing);
   }
   
   public void print(String text) {
     mHost.print(text);
+  }
+  
+  public EvalContext createTopLevelContext() {
+    return EvalContext.topLevel(mGlobalScope, mNothing);
   }
   
   public Scope getGlobals() { return mGlobalScope; }
@@ -105,6 +117,11 @@ public class Interpreter {
    */
   public Obj nothing() { return mNothing; }
 
+  public Obj getBoolType() { return mBoolClass; }
+  public Obj getIntType() { return mIntClass; }
+  public Obj getNothingType() { return mNothingClass; }
+  public Obj getStringType() { return mStringClass; }
+  
   public Obj createBool(boolean value) {
     return mBoolClass.instantiate(value);
   }
@@ -169,6 +186,7 @@ public class Interpreter {
   private final ClassObj mBoolClass;
   private final ClassObj mFnClass;
   private final ClassObj mIntClass;
+  private final ClassObj mNothingClass;
   private final ClassObj mStringClass;
   private final ClassObj mTupleClass;
   
