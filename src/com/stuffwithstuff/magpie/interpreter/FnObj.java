@@ -1,7 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
-import com.stuffwithstuff.magpie.type.FunctionType;
 
 /**
  * Object type for a function object.
@@ -19,7 +19,8 @@ public class FnObj extends Obj implements Invokable {
     return interpreter.invoke(thisObj, mFunction, arg);
   }
   
-  public FunctionType getFunctionType() { return mFunction.getType(); }
-
+  public Expr getParamType() { return mFunction.getParamType(); }
+  public Expr getReturnType() { return mFunction.getReturnType(); }
+  
   private final FnExpr mFunction;
 }

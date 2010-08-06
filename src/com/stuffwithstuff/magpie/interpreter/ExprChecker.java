@@ -190,8 +190,23 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(NameExpr expr, EvalContext context) {
-    // TODO(bob): Implement me.
-    return null;
+    // Look up a named variable.
+    Obj variable = context.lookUpCheck(expr.getName());
+    if (variable != null) return variable;
+    
+    error(expr, "Variable \"%s\" must be previously defined.", expr.getName());
+
+    // TODO(bob): Port from evaluator:
+    /*
+    Invokable method = context.getThis().findMethod(expr.getName());
+    expect (method != null,
+        "Could not find a variable named \"%s\".",
+        expr.getName());
+    return method.invoke(mInterpreter, context.getThis(), mInterpreter.nothing());
+    */
+    
+    // Just return nothing and continue to find other errors.
+    return mInterpreter.getNothingType();
   }
 
   @Override
@@ -219,9 +234,13 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   private void errorIf(boolean condition, Expr expr,
       String format, Object... args) {
     if (condition) {
-      mErrors.add(new CheckError(expr.getPosition(),
-          String.format(format, args)));
+      error(expr, format, args);
     }
+  }
+  
+  private void error(Expr expr, String format, Object... args) {
+    mErrors.add(new CheckError(
+        expr.getPosition(), String.format(format, args)));
   }
   
   private Obj check(Expr expr, EvalContext context) {

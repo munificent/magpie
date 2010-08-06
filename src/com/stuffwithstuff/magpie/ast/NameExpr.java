@@ -8,6 +8,10 @@ public class NameExpr extends Expr {
     mName = name;
   }
   
+  public NameExpr(String name) {
+    this(Position.none(), name);
+  }
+  
   public NameExpr(Token token) {
     this(token.getPosition(), token.getString());
   }

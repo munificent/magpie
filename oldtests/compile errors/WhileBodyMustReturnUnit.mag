@@ -1,5 +1,0 @@
-// error line: 4
-
-Main (->)
-    while true do 2
-end

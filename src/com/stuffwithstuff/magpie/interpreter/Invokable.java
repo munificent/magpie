@@ -1,6 +1,6 @@
 package com.stuffwithstuff.magpie.interpreter;
 
-import com.stuffwithstuff.magpie.type.FunctionType;
+import com.stuffwithstuff.magpie.ast.Expr;
 
 /**
  * Interface for something that can be invoked like a method: an entity that can
@@ -10,5 +10,6 @@ import com.stuffwithstuff.magpie.type.FunctionType;
 public interface Invokable {
   Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg);
   
-  FunctionType getFunctionType();
+  Expr getParamType();
+  Expr getReturnType();
 }

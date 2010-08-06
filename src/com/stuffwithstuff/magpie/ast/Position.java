@@ -21,6 +21,10 @@ public class Position {
         endLine, endCol);
   }
   
+  public static Position none() {
+    return new Position("", -1, -1, -1, -1);
+  }
+  
   public Position(String sourceFile, int startLine, int startCol,
       int endLine, int endCol) {
     mSourceFile = sourceFile;

@@ -2,7 +2,6 @@ package com.stuffwithstuff.magpie;
 
 import java.util.*;
 import com.stuffwithstuff.magpie.ast.*;
-import com.stuffwithstuff.magpie.type.*;
 
 public class MagpieParser extends Parser {
   public MagpieParser(Lexer lexer) {
@@ -42,7 +41,7 @@ public class MagpieParser extends Parser {
         
         // Desugar it to: def foo = fn () blah
         FnExpr function = new FnExpr(Position.union(fnPosition, body.getPosition()),
-            type, paramNames, body);
+            paramNames, type.getParamType(), type.getReturnType(), body);
         return new DefineExpr(Position.union(startPos, function.getPosition()),
             name, function);
       } else {
@@ -457,7 +456,7 @@ public class MagpieParser extends Parser {
           // Field declaration.
           if (isShared) throw new ParseException("Field declarations cannot be shared.");
           
-          TypeDecl type = typeDeclaration();
+          Expr type = typeDeclaration();
           classExpr.declareField(member, type);
         }
       }
@@ -474,7 +473,8 @@ public class MagpieParser extends Parser {
     
     Expr body = parseBlock();
     
-    return new FnExpr(body.getPosition(), type, paramNames, body);
+    return new FnExpr(body.getPosition(), paramNames, type.getParamType(),
+        type.getReturnType(), body);
   }
 
   /**
@@ -495,7 +495,7 @@ public class MagpieParser extends Parser {
     consume(TokenType.LEFT_PAREN);
     
     // Parse the parameters, if any.
-    List<TypeDecl> paramTypes = new ArrayList<TypeDecl>();
+    List<Expr> paramTypes = new ArrayList<Expr>();
     while (!lookAheadAny(TokenType.ARROW, TokenType.RIGHT_PAREN)){
       if (paramNames != null) {
         paramNames.add(consume(TokenType.NAME).getString());
@@ -507,24 +507,24 @@ public class MagpieParser extends Parser {
     }
     
     // Aggregate the parameter types into a single type.
-    TypeDecl paramType = null;
+    Expr paramType = null;
     switch (paramTypes.size()) {
-    case 0:  paramType = TypeDecl.nothing(); break;
+    case 0:  paramType = new NameExpr("Nothing"); break;
     case 1:  paramType = paramTypes.get(0); break;
-    default: paramType = new TupleType(paramTypes);
+    default: paramType = new TupleExpr(paramTypes);
     }
     
     // Parse the return type, if any.
-    TypeDecl returnType = null;
+    Expr returnType = null;
     if (match(TokenType.RIGHT_PAREN)) {
       // No return type, so infer Nothing.
-      returnType = TypeDecl.nothing();
+      returnType = new NameExpr("Nothing");
     } else {
       consume(TokenType.ARROW);
       
       if (lookAhead(TokenType.RIGHT_PAREN)) {
         // An arrow, but no return type, so infer dynamic.
-        returnType = TypeDecl.dynamic();
+        returnType = new NameExpr("Dynamic");
       } else {
         returnType = typeDeclaration();
       }
@@ -534,9 +534,8 @@ public class MagpieParser extends Parser {
     return new FunctionType(paramType, returnType);
   }
   
-  private TypeDecl typeDeclaration() {
+  private Expr typeDeclaration() {
     // TODO(bob): Support more than just named types.
-    String name = consume(TokenType.NAME).getString();
-    return new NamedType(name);
+    return new NameExpr(consume(TokenType.NAME));
   }
 }

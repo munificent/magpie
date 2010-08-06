@@ -1,5 +1,0 @@
-// error line: 4
-
-Main (->)
-    if 1 then ()
-end
