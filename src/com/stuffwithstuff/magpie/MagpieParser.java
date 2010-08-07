@@ -479,9 +479,10 @@ public class MagpieParser extends Parser {
 
   /**
    * Parses a function type declaration. Valid examples include:
-   * ()             // takes nothing, returns nothing
-   * (a)            // takes a single dynamic, returns nothing
-   * (->)           // takes nothing, returns a dynamic
+   * (->)           // takes nothing, returns nothing
+   * (a)            // takes a single dynamic, returns dynamic
+   * (a ->)         // takes a single dynamic, returns nothing
+   * ()             // takes dynamic, returns a dynamic
    * (a Int -> Int) // takes and returns an int
    * 
    * @param paramNames After calling, will contain the list of parameter names.
@@ -501,6 +502,8 @@ public class MagpieParser extends Parser {
         paramNames.add(consume(TokenType.NAME).getString());
       }
       
+      // TODO(bob): Need to handle named parameter with no type as a dynamic
+      // parameter.
       paramTypes.add(typeDeclaration());
       
       if (!match(TokenType.COMMA)) break;
@@ -517,14 +520,14 @@ public class MagpieParser extends Parser {
     // Parse the return type, if any.
     Expr returnType = null;
     if (match(TokenType.RIGHT_PAREN)) {
-      // No return type, so infer Nothing.
-      returnType = new NameExpr("Nothing");
+      // No return type, so infer dynamic.
+      returnType = new NameExpr("Dynamic");
     } else {
       consume(TokenType.ARROW);
       
       if (lookAhead(TokenType.RIGHT_PAREN)) {
-        // An arrow, but no return type, so infer dynamic.
-        returnType = new NameExpr("Dynamic");
+        // An arrow, but no return type, so infer nothing.
+        returnType = new NameExpr("Nothing");
       } else {
         returnType = typeDeclaration();
       }

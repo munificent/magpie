@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.List;
+import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.*;
 
@@ -10,11 +11,27 @@ import com.stuffwithstuff.magpie.ast.*;
 public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   // TODO(bob): This is kinda temp.
   public static void check(Interpreter interpreter, List<CheckError> errors,
-      FnObj fn) {
+      Scope globalScope) {
     ExprChecker checker = new ExprChecker(interpreter, errors);
     
-    checker.invoke(interpreter.getNothingType(), fn.getFunction(),
-        interpreter.getNothingType());
+    // TODO(bob): Here, we need to go through the given globalScope and look up
+    // the types of all of the values defined in it. Then we'll create a new
+    // top-level scope that the type-checking functions here will use.
+    // That way, when Foo is defined in the value global scope, we can have
+    // access to its class in the checker's global scope.
+    // (This gets a little tricky, though. We'll need to handle non-instance
+    // methods at that point. If there is a class Foo, the type of the global
+    // variable "Foo" is "Class", which doesn't have any of the specific
+    // shared methods in Foo like "new".
+    
+    for (Entry<String, Obj> entry : globalScope.entries()) {
+      // TODO(bob): Hack temp. Just check top-level functions for now.
+      // Also need to check top-level classes.
+      if (entry.getValue() instanceof FnObj) {
+        FnExpr function = ((FnObj)entry.getValue()).getFunction();
+        checker.check(function);
+      }
+    }
   }
   
   public ExprChecker(Interpreter interpreter, List<CheckError> errors) {
@@ -36,9 +53,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       Obj declared = context.lookUp(name);
       
       // Make sure the types match.
-      // TODO(bob): Instead of just check ref equality, should eventually call
-      // a canAssignTo? method on the actual "type" object itself.
-      errorIf(declared != value, expr,
+      expectType(value, declared, expr,
           "Cannot assign a %s value to a variable declared %s.",
           value, declared);
       
@@ -87,19 +102,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     EvalContext localContext = context.newBlockScope();
     
     // Evaluate all of the expressions and return the last.
-    int index = 0;
     for (Expr thisExpr : expr.getExpressions()) {
       result = check(thisExpr, localContext);
-      
-      // All but the last expression in a block should return nothing.
-      // TODO(bob): We may want to relax this and discard their returns like
-      // most statement-oriented languages allow.
-      /*
-      if (index < expr.getExpressions().size() - 1) {
-        errorIf(result != mInterpreter.getNothingType(), thisExpr,
-            "All but the last expression in a block must return nothing.");
-      }*/
-      index++;
     }
     
     return result;
@@ -136,6 +140,13 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(FnExpr expr, EvalContext context) {
+    // fn (a Int, b String) print (a.toString + b)
+    // create context
+    // define params
+    // check body
+    // return obj representing fn type (i.e. an obj that knows param and return
+    // type)
+    
     // TODO(bob): Implement me.
     return null;
   }
@@ -145,15 +156,15 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     // Make sure the conditions are bools.
     for (Expr condition : expr.getConditions()) {
       Obj conditionType = check(condition, context);
-      errorIf(conditionType != mInterpreter.getBoolType(), condition,
+      expectType(conditionType, mInterpreter.getBoolType(), condition,
           "Condition expression in an if expression must evaluate to Bool.");
     }
     
-    // TODO(bob): Should relax this to return the union of the two arms.
     // Make sure the arms return the same thing.
     Obj thenArm = check(expr.getThen(), context);
     Obj elseArm = check(expr.getElse(), context);
     
+    // TODO(bob): Should relax this to return the union of the two arms.
     errorIf(thenArm != elseArm, expr.getThen(),
         "Both then and else arms of an if expression must return the same type.");
     
@@ -170,13 +181,13 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     // Make sure the conditions are bools.
     for (Expr condition : expr.getConditions()) {
       Obj conditionType = check(condition, context);
-      errorIf(conditionType != mInterpreter.getBoolType(), condition,
+      expectType(conditionType, mInterpreter.getBoolType(), condition,
           "Condition expression in a while loop must evaluate to Bool.");
     }
     
     // Make sure the body returns nothing.
     Obj body = check(expr.getBody(), context);
-    errorIf(body != mInterpreter.getNothingType(), expr.getBody(),
+    expectType(body, mInterpreter.getNothingType(), expr.getBody(),
         "While loop body must return Nothing.");
     
     return mInterpreter.getNothingType();
@@ -184,8 +195,28 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(MethodExpr expr, EvalContext context) {
-    // TODO(bob): Implement me.
-    return null;
+    Obj receiver = check(expr.getReceiver(), context);
+    Obj arg = check(expr.getArg(), context);
+
+    Invokable method = findMethodType(receiver, expr.getMethod());
+    
+    // TODO(bob): Copy/pasted from NameExpr    
+    errorIf(method == null, expr,
+        "Could not find a method named \"%s\" on type %s.",
+        expr.getMethod(), receiver);
+
+    // Just return an empty type and try to continute to find more errors.
+    if (method == null) return mInterpreter.getNothingType();
+
+    EvalContext methodTypeContext = mInterpreter.createTopLevelContext();
+    Obj paramType = check(method.getParamType(), methodTypeContext);
+    
+    expectType(arg, paramType, expr,
+        "Method \"%s\" on this expects a %s parameter and got %s.",
+        expr.getMethod(), paramType, arg);
+    
+    return check(method.getReturnType(), methodTypeContext);
+    // TODO(bob): Need to check against method's expected return type.
   }
 
   @Override
@@ -200,17 +231,19 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     errorIf(method == null, expr,
         "Could not find a variable named \"%s\".",
         expr.getName());
+    
     // Just return an empty type and try to continute to find more errors.
     if (method == null) return mInterpreter.getNothingType();
     
     EvalContext methodTypeContext = mInterpreter.createTopLevelContext();
     Obj paramType = check(method.getParamType(), methodTypeContext);
     
-    errorIf(paramType != mInterpreter.getNothingType(), expr,
+    expectType(mInterpreter.getNothingType(), paramType, expr,
         "Method \"%s\" on this expects a %s parameter and got %s.",
         expr.getName(), paramType, mInterpreter.getNothingType());
     
     return check(method.getReturnType(), methodTypeContext);
+    // TODO(bob): Need to check against method's expected return type.
   }
 
   @Override
@@ -239,23 +272,61 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     return mInterpreter.createTuple(context, fields);
   }
   
-  private Obj invoke(Obj thisObj, FnExpr function, Obj arg) {
-    // Create a new local scope for the function.
-    EvalContext context = EvalContext.forMethod(mInterpreter.getGlobals(), thisObj);
+  /**
+   * Checks the given function for type-safety. Virtually invokes it by binding
+   * the parameters to their declared types and then checking the body of the
+   * function. Returns the discovered return type of the function.
+   * @return
+   */
+  private Obj check(FnExpr function) {
+    // Create a new local scope for the function. This scope will be used to
+    // hold *types* not values, which is why it doesn't root at the existing
+    // global scope which holds the values defined at runtime.
+    EvalContext context = EvalContext.topLevel(new Scope(),
+        mInterpreter.getNothingType());
     
-    // Bind arguments to their parameter names.
+    // Bind parameter names to their declared types.
+    Obj paramType = evaluateType(function.getParamType());
+
     List<String> params = function.getParamNames();
     if (params.size() == 1) {
-      context.define(params.get(0), arg);
+      context.define(params.get(0), paramType);
     } else if (params.size() > 1) {
-      // TODO(bob): Hack. Assume the arg is a tuple with the right number of
-      // fields.
+      // The parser should ensure that the paramType object is a tuple with as
+      // many fields as we have parameter names.
       for (int i = 0; i < params.size(); i++) {
-        context.define(params.get(i), arg.getTupleField(i));
+        context.define(params.get(i), paramType.getTupleField(i));
       }
     }
     
-    return check(function.getBody(), context);
+    Obj returnType = check(function.getBody(), context);
+    Obj expectedReturn = evaluateType(function.getReturnType());
+    expectType(returnType, expectedReturn, function,
+        "Function is declared to return %s but is returning %s.",
+        expectedReturn, returnType);
+    
+    return expectedReturn;
+  }
+  
+  private boolean typeAllowed(Obj actual, Obj expected) {
+    // Anything goes with dynamic.
+    if (expected == mInterpreter.getDynamicType()) return true;
+    
+    // TODO(bob): Eventually a looser conversion process will happen here.
+    return actual == expected;
+  }
+  
+  private Obj check(Expr expr, EvalContext context) {
+    return expr.accept(this, context);
+  }
+  
+  private Obj evaluateType(Expr expr) {
+    // Type expressions always evaluate in a clean context that only access
+    // global scope. (For now at least. We may relax this later so that you
+    // could, for example, reference classes declared locally in the same
+    // scope.)
+    EvalContext context = mInterpreter.createTopLevelContext();
+    return mInterpreter.evaluate(expr, context);
   }
 
   private Invokable findMethodType(Obj typeObj, String name) {
@@ -266,6 +337,14 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     
     ClassObj classObj = (ClassObj)typeObj;
     return classObj.findInstanceMethod(name);
+    
+    // TODO(bob): If typeObj is Dynamic, we should I think just return a
+    // Dynamic -> Dynamic Invokable for any given name.
+  }
+  
+  private void expectType(Obj actual, Obj expected, Expr expr, 
+      String format, Object... args) {
+    errorIf(!typeAllowed(actual, expected), expr, format, args);
   }
   
   private void errorIf(boolean condition, Expr expr,
@@ -276,12 +355,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   }
   
   private void error(Expr expr, String format, Object... args) {
-    mErrors.add(new CheckError(
-        expr.getPosition(), String.format(format, args)));
-  }
-  
-  private Obj check(Expr expr, EvalContext context) {
-    return expr.accept(this, context);
+    String message = String.format(format, args);
+    mErrors.add(new CheckError(expr.getPosition(), message));
   }
   
   private final List<CheckError> mErrors;

@@ -1,0 +1,3 @@
+var foo (-> Int) //!
+    "string"
+end

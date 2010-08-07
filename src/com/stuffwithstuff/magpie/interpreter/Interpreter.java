@@ -22,6 +22,7 @@ public class Interpreter {
     mBoolClass.addInstanceMethod("not", new NativeMethod.BoolNot());
     mBoolClass.addInstanceMethod("toString", new NativeMethod.BoolToString());
 
+    mDynamicClass = new ClassObj(mClassClass);
     mFnClass = new ClassObj(mClassClass);
     
     mIntClass = new ClassObj(mClassClass);
@@ -53,12 +54,15 @@ public class Interpreter {
     // Give the classes names and make then available.
     mGlobalScope.define("Bool", mBoolClass);
     mGlobalScope.define("Function", mFnClass);
+    mGlobalScope.define("Dynamic", mDynamicClass);
     mGlobalScope.define("Int", mIntClass);
+    mGlobalScope.define("Nothing", mNothingClass);
     mGlobalScope.define("String", mStringClass);
     mGlobalScope.define("Tuple", mTupleClass);
 
     mBoolClass.setField("name", createString("Bool"));
     mClassClass.setField("name", createString("Class"));
+    mDynamicClass.setField("name", createString("Dynamic"));
     mFnClass.setField("name", createString("Function"));
     mIntClass.setField("name", createString("Int"));
     mNothingClass.setField("name", createString("Nothing"));
@@ -78,13 +82,7 @@ public class Interpreter {
   public List<CheckError> check() {
     List<CheckError> errors = new ArrayList<CheckError>();
 
-    for (Entry<String, Obj> entry : mGlobalScope.entries()) {
-      // TODO(bob): Hack temp. Just check top-level functions for now.
-      // Also need to check top-level classes.
-      if (entry.getValue() instanceof FnObj) {
-        ExprChecker.check(this, errors, (FnObj)entry.getValue());
-      }
-    }
+    ExprChecker.check(this, errors, mGlobalScope);
     
     return errors;
   }
@@ -119,6 +117,7 @@ public class Interpreter {
   public Obj nothing() { return mNothing; }
 
   public Obj getBoolType() { return mBoolClass; }
+  public Obj getDynamicType() { return mDynamicClass; }
   public Obj getIntType() { return mIntClass; }
   public Obj getNothingType() { return mNothingClass; }
   public Obj getStringType() { return mStringClass; }
@@ -185,6 +184,7 @@ public class Interpreter {
   private Scope mGlobalScope;
   private final ClassObj mClassClass;
   private final ClassObj mBoolClass;
+  private final ClassObj mDynamicClass;
   private final ClassObj mFnClass;
   private final ClassObj mIntClass;
   private final ClassObj mNothingClass;
