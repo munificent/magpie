@@ -1,0 +1,18 @@
+// beginning of file
+
+print "1" // end of line
+//: 1
+print "2"// no space
+//: 2
+
+print ("left" +// after operator
+    "right") //: leftright
+
+var a = "3"
+print a// after identifier
+//: 3
+
+print (4 -// after minus
+    2).toString //: 2
+
+// end of file

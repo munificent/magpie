@@ -1,6 +1,0 @@
-﻿// bug:      2009/05/05 - Lexing a with a block comment at the very end hangs.
-// expected: ok
-
-Main (->) Print "ok"
-
-/* here is the ending comment */

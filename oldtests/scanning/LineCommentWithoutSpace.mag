@@ -1,8 +1,0 @@
-﻿// bug:      2009/02/17 - A line comment followed by anything other than a
-//                        space does not parse.
-// expected: ok
-
-Main (->)
-    //Print "should not print"
-    Print "ok"
-end

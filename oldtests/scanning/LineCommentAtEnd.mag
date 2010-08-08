@@ -1,8 +1,0 @@
-﻿// bug:      2009/02/17 - Lexing a line comment would not emit a LINE token at
-//                        the end of the line, which is needed to end an
-//                        expression.
-// expected: ok
-
-Main (->)
-    Print "ok" // comment
-end
