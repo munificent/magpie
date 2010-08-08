@@ -1,0 +1,56 @@
+let a = () then print "should not"
+let a = 1 then print a.toString //: 1
+
+let a = ()
+then print "should not"
+
+let a = 2
+then print "2" //: 2
+
+let a = () then
+    print "should not"
+end
+
+let a = "3" then
+    print "3" //: 3
+end
+
+let a = () then print "should not" else print "should" //: should
+let a = 1 then print "1" else print "should not" //: 1
+
+let a = ()
+then print "should not"
+else print "should" //: should
+
+let a = 2
+then print "2" //: 2
+else print "should not"
+
+let a = () then
+    print "should not"
+else
+    print "should" //: should
+end
+
+let a = 3 then
+    print "3" //: 3
+else
+    print "should not"
+end
+
+/*
+// tuple splitting
+let a, b, c = Some (4, "five", 6) then
+    print a.String
+    print b.String
+    print c.String
+else
+    print "should not"
+end
+
+let a, b, c = None[(Int, String, Bool)] then
+    print "should not"
+else
+    print "should"
+end
+*/

@@ -3,7 +3,8 @@ package com.stuffwithstuff.magpie.ast;
 import java.util.*;
 
 public class IfExpr extends Expr {
-  public IfExpr(Position position, List<Expr> conditions, Expr thenExpr, Expr elseExpr) {
+  public IfExpr(Position position, List<Condition> conditions,
+      Expr thenExpr, Expr elseExpr) {
     super(position);
     
     mConditions = conditions;
@@ -11,7 +12,7 @@ public class IfExpr extends Expr {
     mElse = elseExpr;
   }
   
-  public List<Expr> getConditions() { return mConditions; }
+  public List<Condition> getConditions() { return mConditions; }
   public Expr getThen() { return mThen; }
   public Expr getElse() { return mElse; }
   
@@ -23,8 +24,8 @@ public class IfExpr extends Expr {
   @Override public String toString() {
     StringBuilder builder = new StringBuilder();
     
-    for (Expr condition : mConditions) {
-      builder.append("if ").append(condition).append("\n");
+    for (Condition condition : mConditions) {
+      builder.append(condition).append("\n");
     }
     builder.append("then\n")
            .append("  ").append(mThen)
@@ -35,7 +36,7 @@ public class IfExpr extends Expr {
     return builder.toString();
   }
 
-  private final List<Expr> mConditions;
+  private final List<Condition> mConditions;
   private final Expr mThen;
   private final Expr mElse;
 }

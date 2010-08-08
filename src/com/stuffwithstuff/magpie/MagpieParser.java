@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie;
 
 import java.util.*;
+import java.util.Map.Entry;
 import com.stuffwithstuff.magpie.ast.*;
 
 public class MagpieParser extends Parser {
@@ -61,18 +62,50 @@ public class MagpieParser extends Parser {
       return parseClass();
     } else return flowControl();
   }
-  
+    
   private Expr flowControl() {
     if (match(TokenType.DO)) {
       // "do" block.
       return parseBlock();
-    } else if (lookAhead(TokenType.IF)) {
+    } else if (lookAheadAny(TokenType.IF, TokenType.LET)) {
       Position startPos = current().getPosition();
       
+      // Let expressions and multiple if conditions get desugared like this:
+      //
+      // let a = foo
+      // let b = bar
+      // if c = d then
+      //     e
+      // end
+      //
+      // To:
+      //
+      // var a__ = foo
+      // if a__ != () then
+      //     var a = a__ // plus some type annotation to remove ()
+      //     var b__ = bar
+      //     if b__ != () then
+      //         var b = b__
+      //         if c = d then
+      //             e
+      //         end
+      //     end
+      // end
+      //
+      
       // Parse the conditions.
-      List<Expr> conditions = new ArrayList<Expr>();
-      while (match(TokenType.IF)) {
-        conditions.add(parseIfBlock());
+      Stack<Condition> conditions = new Stack<Condition>();
+      while (true) {
+        if (match(TokenType.IF)) {
+          conditions.add(new Condition(parseIfBlock()));
+        } else if (match(TokenType.LET)) {
+          // TODO(bob): Eventually allow tuple decomposition here.
+          String name = consume(TokenType.NAME).getString();
+          consume(TokenType.EQUALS);
+          conditions.add(new Condition(name, parseIfBlock()));
+        } else {
+          break;
+        }
       }
       
       // Parse the then body.
@@ -93,13 +126,13 @@ public class MagpieParser extends Parser {
       // "while" and "for" loop.
       Position startPos = current().getPosition();
       
-      // a for loop is desugared from this:
+      // A for loop is desugared from this:
       //
       //   for a <- foo do
       //     print a
       //   end
       //
-      // to:
+      // To:
       //
       //   do
       //     def __a_gen = foo.generate

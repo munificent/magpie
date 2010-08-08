@@ -161,9 +161,10 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(IfExpr expr, EvalContext context) {
     // Make sure the conditions are bools.
-    for (Expr condition : expr.getConditions()) {
-      Obj conditionType = check(condition, context);
-      expectType(conditionType, mInterpreter.getBoolType(), condition,
+    for (Condition condition : expr.getConditions()) {
+      // TODO(bob): Need to handle let conditions here.
+      Obj conditionType = check(condition.getBody(), context);
+      expectType(conditionType, mInterpreter.getBoolType(), condition.getBody(),
           "Condition expression in an if expression must evaluate to Bool.");
     }
     

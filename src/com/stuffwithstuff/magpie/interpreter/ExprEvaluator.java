@@ -3,25 +3,7 @@ package com.stuffwithstuff.magpie.interpreter;
 import java.util.List;
 import java.util.Map.Entry;
 
-import com.stuffwithstuff.magpie.ast.AssignExpr;
-import com.stuffwithstuff.magpie.ast.BlockExpr;
-import com.stuffwithstuff.magpie.ast.BoolExpr;
-import com.stuffwithstuff.magpie.ast.CallExpr;
-import com.stuffwithstuff.magpie.ast.ClassExpr;
-import com.stuffwithstuff.magpie.ast.DefineExpr;
-import com.stuffwithstuff.magpie.ast.Expr;
-import com.stuffwithstuff.magpie.ast.ExprVisitor;
-import com.stuffwithstuff.magpie.ast.FnExpr;
-import com.stuffwithstuff.magpie.ast.IfExpr;
-import com.stuffwithstuff.magpie.ast.IntExpr;
-import com.stuffwithstuff.magpie.ast.LoopExpr;
-import com.stuffwithstuff.magpie.ast.MethodExpr;
-import com.stuffwithstuff.magpie.ast.NameExpr;
-import com.stuffwithstuff.magpie.ast.NothingExpr;
-import com.stuffwithstuff.magpie.ast.Position;
-import com.stuffwithstuff.magpie.ast.StringExpr;
-import com.stuffwithstuff.magpie.ast.ThisExpr;
-import com.stuffwithstuff.magpie.ast.TupleExpr;
+import com.stuffwithstuff.magpie.ast.*;
 
 public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   public ExprEvaluator(Interpreter interpreter) {
@@ -264,14 +246,35 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(IfExpr expr, EvalContext context) {
+    // Put it in a block so that variables declared in conditions end when the
+    // if expression ends.
+    context = context.newBlockScope();
+    
     // Evaluate all of the conditions.
     boolean passed = true;
-    for (Expr condition : expr.getConditions()) {
-      Obj result = evaluate(condition, context);
-      if (!((Boolean)result.getPrimitiveValue()).booleanValue()) {
-        // Condition failed.
-        passed = false;
-        break;
+    for (Condition condition : expr.getConditions()) {
+      if (condition.isLet()) {
+        // "let" condition.
+        Obj result = evaluate(condition.getBody(), context);
+        
+        // If it evaluates to nothing, the condition fails. Otherwise, bind the
+        // result to a name and continue.
+        if (result != mInterpreter.nothing()) {
+          // Success, bind the result.
+          context.define(condition.getName(), result);
+        } else {
+          // Condition failed.
+          passed = false;
+          break;
+        }
+      } else {
+        // Regular "if" condition.
+        Obj result = evaluate(condition.getBody(), context);
+        if (!((Boolean)result.getPrimitiveValue()).booleanValue()) {
+          // Condition failed.
+          passed = false;
+          break;
+        }
       }
     }
     
