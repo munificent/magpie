@@ -9,21 +9,52 @@ public class Interpreter {
   public Interpreter(InterpreterHost host) {
     mHost = host;
     
+    // The class hierarchy is a bit confusing in a language where classes are
+    // first class and inheritance is supported. Every object has a class.
+    // However, classes are objects, which means they also have a class. In
+    // addition, a class may also have a parent class.
+    //
+    // One key piece that it's important to understand is that the methods on
+    // an object *always* come from its class. So, when you call a shared
+    // method like Foo.bar, you are actually calling an *instance* method on
+    // the class of Foo (its metaclass: FooClass).
+    
     // Create a top-level scope.
     mGlobalScope = new Scope();
+
+    // The class of all class objects. Given a class Foo, it's class will be a
+    // singleton instance of its metaclass FooClass. The class of FooClass will
+    // in turn be this class, Class. FooClass will also *inherit* from Class, so
+    // that all of the methods defined on Class are available in FooClass (i.e.
+    // "name", "parent", etc.)
+    mClass = new ClassObj("Class", null);
+    mClass.addMethod("name", new NativeMethod.ClassGetName());
+    mClass.addMethod("addMethod", new NativeMethod.ClassAddMethod());
+    mClass.addMethod("addSharedMethod", new NativeMethod.ClassAddSharedMethod());
+    mClass.addMethod("parent", new NativeMethod.ClassGetParent());
+    mClass.addMethod("parent=", new NativeMethod.ClassSetParent());
+    mGlobalScope.define("Class", mClass);
+
+    // Object is the root class of all objects. All parent chains eventually
+    // end here. Note that there is no distinct metaclass for class Object: its
+    // metaclass is the main metaclass Class.
+    mObjectClass = new ClassObj(mClass, "Object", null);
+    mObjectClass.addMethod("type", new NativeMethod.ObjectGetType());
+    mGlobalScope.define("Object", mObjectClass);
     
-    mClassClass = new ClassObj();
+    // Now that both Class and Object exist, wire them up.
+    mClass.setParent(mObjectClass);
     
-    mBoolClass = new ClassObj(mClassClass);
+    mBoolClass = createGlobalClass("Bool");
     mBoolClass.addMethod("not", new NativeMethod.BoolNot());
     mBoolClass.addMethod("toString", new NativeMethod.BoolToString());
 
-    mDynamicClass = new ClassObj(mClassClass);
+    mDynamicClass = createGlobalClass("Dynamic");
     
-    mFnClass = new ClassObj(mClassClass);
+    mFnClass = createGlobalClass("Function");
     mFnClass.addMethod("apply", new NativeMethod.FunctionApply());
     
-    mIntClass = new ClassObj(mClassClass);
+    mIntClass = createGlobalClass("Int");
     mIntClass.addMethod("+", new NativeMethod.IntPlus());
     mIntClass.addMethod("-", new NativeMethod.IntMinus());
     mIntClass.addMethod("*", new NativeMethod.IntMultiply());
@@ -36,13 +67,13 @@ public class Interpreter {
     mIntClass.addMethod("<=", new NativeMethod.IntLessThanOrEqual());
     mIntClass.addMethod(">=", new NativeMethod.IntGreaterThanOrEqual());
 
-    mStringClass = new ClassObj(mClassClass);
+    mStringClass = createGlobalClass("String");
     mStringClass.addMethod("+",     new NativeMethod.StringPlus());
     mStringClass.addMethod("print", new NativeMethod.StringPrint());
 
     // TODO(bob): At some point, may want different tuple types based on the
     // types of the fields.
-    mTupleClass = new ClassObj(mClassClass);
+    mTupleClass = createGlobalClass("Tuple");
     mTupleClass.addMethod("apply", new NativeMethod.TupleGetField());
     mTupleClass.addMethod("count", new NativeMethod.ClassFieldGetter("count",
         new NameExpr("Int")));
@@ -57,27 +88,9 @@ public class Interpreter {
           new NameExpr("Dynamic")));
     }
     
-    mNothingClass = new ClassObj(mClassClass);
+    mNothingClass = createGlobalClass("Nothing");
     mNothingClass.addMethod("toString", new NativeMethod.NothingToString());
     mNothing = mNothingClass.instantiate();
-    
-    // Give the classes names and make then available.
-    mGlobalScope.define("Bool", mBoolClass);
-    mGlobalScope.define("Function", mFnClass);
-    mGlobalScope.define("Dynamic", mDynamicClass);
-    mGlobalScope.define("Int", mIntClass);
-    mGlobalScope.define("Nothing", mNothingClass);
-    mGlobalScope.define("String", mStringClass);
-    mGlobalScope.define("Tuple", mTupleClass);
-
-    mBoolClass.setField("name", createString("Bool"));
-    mClassClass.setField("name", createString("Class"));
-    mDynamicClass.setField("name", createString("Dynamic"));
-    mFnClass.setField("name", createString("Function"));
-    mIntClass.setField("name", createString("Int"));
-    mNothingClass.setField("name", createString("Nothing"));
-    mStringClass.setField("name", createString("String"));
-    mTupleClass.setField("name", createString("Tuple"));
   }
   
   public void load(List<Expr> expressions) {
@@ -134,10 +147,12 @@ public class Interpreter {
    */
   public Obj nothing() { return mNothing; }
 
+  public ClassObj getMetaclass() { return mClass; }
   public ClassObj getBoolType() { return mBoolClass; }
   public ClassObj getDynamicType() { return mDynamicClass; }
   public ClassObj getIntType() { return mIntClass; }
   public ClassObj getNothingType() { return mNothingClass; }
+  public ClassObj getObjectType() { return mObjectClass; }
   public ClassObj getStringType() { return mStringClass; }
   
   public Obj createBool(boolean value) {
@@ -151,9 +166,17 @@ public class Interpreter {
   public Obj createString(String value) {
     return mStringClass.instantiate(value);
   }
-  
-  public ClassObj createClass() {
-    return new ClassObj(mClassClass);
+
+  public ClassObj createClass(String name, Scope scope) {
+    // Create the metaclass. This will hold shared methods on the class.
+    ClassObj metaclass = new ClassObj(mClass, name + "Class", mClass);
+    
+    // Create the class object itself. This will hold the instance methods for
+    // objects of the class.
+    ClassObj classObj = new ClassObj(metaclass, name, mClass);
+    scope.define(name, classObj);
+    
+    return classObj;
   }
   
   public FnObj createFn(FnExpr expr) {
@@ -178,14 +201,19 @@ public class Interpreter {
     return evaluator.evaluate(expr, context);
   }
   
+  private ClassObj createGlobalClass(String name) {
+    return createClass(name, mGlobalScope);
+  }
+  
   private final InterpreterHost mHost;
   private Scope mGlobalScope;
-  private final ClassObj mClassClass;
+  private final ClassObj mClass;
   private final ClassObj mBoolClass;
   private final ClassObj mDynamicClass;
   private final ClassObj mFnClass;
   private final ClassObj mIntClass;
   private final ClassObj mNothingClass;
+  private final ClassObj mObjectClass;
   private final ClassObj mStringClass;
   private final ClassObj mTupleClass;
   

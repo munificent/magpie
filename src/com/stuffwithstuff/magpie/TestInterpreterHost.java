@@ -71,7 +71,7 @@ public class TestInterpreterHost implements InterpreterHost {
         */
         
         if (mExpectedOutput.size() > 0) {
-          fail(mPath + ": Ran out of output when still expecting \""
+          fail("Ran out of output when still expecting \""
               + mExpectedOutput.poll() + "\".");
         }
         
@@ -125,7 +125,7 @@ public class TestInterpreterHost implements InterpreterHost {
   }
 
   private void fail(String message) {
-    System.out.println("FAIL: " + message);
+    System.out.println("FAIL " + mPath + ": " + message);
     mSuccess = false;
   }
 

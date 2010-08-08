@@ -8,11 +8,15 @@ import com.stuffwithstuff.magpie.ast.Expr;
  * A runtime object representing a class.
  */
 public class ClassObj extends Obj {
-  public ClassObj(ClassObj classClass) {
-    super(classClass);
+  public ClassObj(ClassObj metaclass, String name, ClassObj parent) {
+    super(metaclass);
+    mName = name;
+    mParent = parent;
   }
 
-  public ClassObj() {
+  public ClassObj(String name, ClassObj parent) {
+    mName = name;
+    mParent = parent;
   }
 
   public Map<String, Expr> getFieldInitializers() {
@@ -26,6 +30,8 @@ public class ClassObj extends Obj {
   public Obj instantiate(Object primitiveValue) {
     return new Obj(this, primitiveValue);
   }
+  
+  public String getName() { return mName; }
   
   public ClassObj getParent() { return mParent; }
   
@@ -70,6 +76,7 @@ public class ClassObj extends Obj {
     mFieldInitializers = fields;
   }
   
+  private final String mName;
   private ClassObj mParent;
   private Invokable mConstructor;
   private Map<String, Expr> mFieldInitializers;

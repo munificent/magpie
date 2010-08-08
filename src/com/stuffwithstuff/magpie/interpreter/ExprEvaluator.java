@@ -122,26 +122,11 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       classObj = (ClassObj)obj;
       metaclass = classObj.getClassObj();
     } else {
-      // Create a metaclass. This will be the class of the class. It will hold
-      // the shared methods of the class. So, if we're defining a class "Foo"
-      // with a shared method "bar", we will create a metaclass FooClass. It
-      // will have an *instance* method "bar", and there will be one instance
-      // of this metaclass: Foo.
-      metaclass = mInterpreter.createClass();
+      classObj = mInterpreter.createClass(expr.getName(), context.getScope());
+      metaclass = classObj.getClassObj();
       
-      // Add the methods every class instance supports.
-      // TODO(bob): When inheritance is in, metaclasses should inherit from a
-      // base metaclass that provides these.
-      metaclass.addMethod("addMethod", new NativeMethod.ClassAddMethod());
-      metaclass.addMethod("addSharedMethod", new NativeMethod.ClassAddSharedMethod());
-      metaclass.addMethod("name", new NativeMethod.ClassFieldGetter("name",
-          new NameExpr("String")));
+      // Add the constructor method.
       metaclass.addMethod("new", new NativeMethod.ClassNew(expr.getName()));
-      metaclass.addMethod("parent", new NativeMethod.ClassGetParent());
-      metaclass.addMethod("parent=", new NativeMethod.ClassSetParent());
-      
-      classObj = new ClassObj(metaclass);
-      classObj.setField("name", mInterpreter.createString(expr.getName()));
     }
     
     // Add the constructors.

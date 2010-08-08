@@ -39,6 +39,8 @@ public class EvalContext {
     return mThis;
   }
   
+  public Scope getScope() { return mScope; }
+  
   public Obj lookUp(String name) {
     EvalContext context = this;
     while (context != null) {

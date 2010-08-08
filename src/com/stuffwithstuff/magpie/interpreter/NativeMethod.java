@@ -71,12 +71,29 @@ public abstract class NativeMethod implements Invokable {
     public Expr getReturnType() { return new NameExpr("Nothing"); }
   }
   
+  public static class ClassGetName extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      ClassObj classObj = (ClassObj)thisObj;
+      
+      return interpreter.createString(classObj.getName());
+    }
+
+    public Expr getParamType() { return new NameExpr("Nothing"); }
+    public Expr getReturnType() { return new NameExpr("String"); }
+  }
+  
   public static class ClassGetParent extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       ClassObj classObj = (ClassObj)thisObj;
       
-      return classObj.getParent();
+      ClassObj parent = classObj.getParent();
+      
+      // If a class has no parent, its parent is implicitly Object.
+      if (parent == null) return interpreter.getObjectType();
+      
+      return parent;
     }
 
     public Expr getParamType() { return new NameExpr("Nothing"); }
@@ -346,6 +363,18 @@ public abstract class NativeMethod implements Invokable {
     
     public Expr getParamType() { return new NameExpr("Nothing"); }
     public Expr getReturnType() { return new NameExpr("String"); }
+  }
+  
+  // Object methods:
+  
+  public static class ObjectGetType extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      return thisObj.getClassObj();
+    }
+
+    public Expr getParamType() { return new NameExpr("Nothing"); }
+    public Expr getReturnType() { return new NameExpr("Class"); }
   }
 
   // String methods:
