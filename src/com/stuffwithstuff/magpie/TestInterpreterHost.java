@@ -8,10 +8,7 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.*;
 
-import com.stuffwithstuff.magpie.interpreter.CheckError;
-import com.stuffwithstuff.magpie.interpreter.Interpreter;
-import com.stuffwithstuff.magpie.interpreter.InterpreterException;
-import com.stuffwithstuff.magpie.interpreter.InterpreterHost;
+import com.stuffwithstuff.magpie.interpreter.*;
 
 public class TestInterpreterHost implements InterpreterHost {
   public TestInterpreterHost(String path) {
@@ -102,6 +99,13 @@ public class TestInterpreterHost implements InterpreterHost {
     if (!expected.equals(text)) {
       fail("Got output \"" + text + "\", expected \"" + expected + "\"");
     }
+  }
+  
+  public void runtimeError(Position position, String message) {
+    // Uncomment this to see the runtime errors as they occur. Commented out
+    // because some tests intentionally cause runtime errors to test that the
+    // behavior after the error is as expected.
+    //System.out.println(position.toString() + ": " + message);
   }
 
   private void loadScript(String path) {

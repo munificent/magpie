@@ -1,7 +1,6 @@
 package com.stuffwithstuff.magpie;
 
 import com.stuffwithstuff.magpie.TokenType;
-import com.stuffwithstuff.magpie.ast.Position;
 
 
 public final class Token {

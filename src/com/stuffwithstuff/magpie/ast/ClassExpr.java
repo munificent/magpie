@@ -2,6 +2,8 @@ package com.stuffwithstuff.magpie.ast;
 
 import java.util.*;
 
+import com.stuffwithstuff.magpie.Position;
+
 /**
  * AST node for a class definition expression.
  */

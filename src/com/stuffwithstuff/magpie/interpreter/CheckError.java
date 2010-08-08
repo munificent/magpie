@@ -1,6 +1,6 @@
 package com.stuffwithstuff.magpie.interpreter;
 
-import com.stuffwithstuff.magpie.ast.Position;
+import com.stuffwithstuff.magpie.Position;
 
 public class CheckError {
   public CheckError(Position position, String message) {

@@ -2,7 +2,6 @@ package com.stuffwithstuff.magpie;
 
 import com.stuffwithstuff.magpie.Token;
 import com.stuffwithstuff.magpie.TokenType;
-import com.stuffwithstuff.magpie.ast.Position;
 
 public class Lexer {
 

@@ -1,0 +1,16 @@
+class Foo
+    defined ()
+        notDefined
+    end
+end
+
+var foo = Foo.new
+
+// calling an undefined method returns Nothing
+print foo.notDefined.toString //: ()
+
+// calling an undefined method from within this returns Nothing
+print foo.defined.toString //: ()
+
+// but still evaluates arg
+foo.notDefined (print "hi") //: hi

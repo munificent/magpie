@@ -18,7 +18,9 @@ public class Interpreter {
     mBoolClass.addInstanceMethod("toString", new NativeMethod.BoolToString());
 
     mDynamicClass = new ClassObj(mClassClass);
+    
     mFnClass = new ClassObj(mClassClass);
+    mFnClass.addInstanceMethod("apply", new NativeMethod.FunctionApply());
     
     mIntClass = new ClassObj(mClassClass);
     mIntClass.addInstanceMethod("+", new NativeMethod.IntPlus());
@@ -55,6 +57,7 @@ public class Interpreter {
     }
     
     mNothingClass = new ClassObj(mClassClass);
+    mNothingClass.addInstanceMethod("toString", new NativeMethod.NothingToString());
     mNothing = new Obj(mNothingClass);
     
     // Give the classes names and make then available.
@@ -110,6 +113,10 @@ public class Interpreter {
     mHost.print(text);
   }
   
+  public void runtimeError(Expr expr, String format, Object... args) {
+    mHost.runtimeError(expr.getPosition(), String.format(format, args));
+  }
+  
   public EvalContext createTopLevelContext() {
     return new EvalContext(mGlobalScope, mNothing);
   }
@@ -159,25 +166,6 @@ public class Interpreter {
     tuple.setField("count", createInt(fields.length));
     
     return tuple;
-  }
-    
-  public Obj invoke(Obj thisObj, FnExpr function, Obj arg) {
-    // Create a new local scope for the function.
-    EvalContext context = EvalContext.forMethod(mGlobalScope, thisObj);
-    
-    // Bind arguments to their parameter names.
-    List<String> params = function.getParamNames();
-    if (params.size() == 1) {
-      context.define(params.get(0), arg);
-    } else if (params.size() > 1) {
-      // TODO(bob): Hack. Assume the arg is a tuple with the right number of
-      // fields.
-      for (int i = 0; i < params.size(); i++) {
-        context.define(params.get(i), arg.getTupleField(i));
-      }
-    }
-    
-    return evaluate(function.getBody(), context);
   }
   
   public Obj evaluate(Expr expr, EvalContext context) {

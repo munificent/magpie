@@ -1,5 +1,7 @@
 package com.stuffwithstuff.magpie.ast;
 
+import com.stuffwithstuff.magpie.Position;
+
 public class NothingExpr extends Expr {
   public NothingExpr(Position position) {
     super(position);

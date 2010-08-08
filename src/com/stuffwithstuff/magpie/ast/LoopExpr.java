@@ -2,6 +2,8 @@ package com.stuffwithstuff.magpie.ast;
 
 import java.util.List;
 
+import com.stuffwithstuff.magpie.Position;
+
 /**
  * AST node for loop expressions. Represents a multi-condition "while" loop but
  * also handles "for" loops since the parser desugars those to this.

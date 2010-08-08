@@ -1,5 +1,7 @@
 package com.stuffwithstuff.magpie.ast;
 
+import com.stuffwithstuff.magpie.Position;
+
 public class CallExpr extends Expr {
   public CallExpr(Expr target, Expr arg) {
     super(Position.union(target.getPosition(), arg.getPosition()));

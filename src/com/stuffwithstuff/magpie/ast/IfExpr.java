@@ -2,6 +2,8 @@ package com.stuffwithstuff.magpie.ast;
 
 import java.util.*;
 
+import com.stuffwithstuff.magpie.Position;
+
 public class IfExpr extends Expr {
   public IfExpr(Position position, List<Condition> conditions,
       Expr thenExpr, Expr elseExpr) {

@@ -148,6 +148,20 @@ public abstract class NativeMethod implements Invokable {
     private final String mClassName;
   }
   
+  // Function methods:
+  
+  public static class FunctionApply extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      FnObj function = (FnObj)thisObj;
+      
+      return function.invoke(interpreter, interpreter.nothing(), arg);
+    }
+    
+    public Expr getParamType() { return new NameExpr("Int"); }
+    public Expr getReturnType() { return new NameExpr("Int"); }
+  }
+  
   // Int methods:
   
   public static class IntPlus extends NativeMethod {
@@ -286,7 +300,19 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.createString(Integer.toString(thisObj.asInt()));
     }
     
-    public Expr getParamType() { return new NameExpr("Int"); }
+    public Expr getParamType() { return new NameExpr("Nothing"); }
+    public Expr getReturnType() { return new NameExpr("String"); }
+  }
+  
+  // Nothing methods:
+  
+  public static class NothingToString extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      return interpreter.createString("()");
+    }
+    
+    public Expr getParamType() { return new NameExpr("Nothing"); }
     public Expr getReturnType() { return new NameExpr("String"); }
   }
 

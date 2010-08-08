@@ -1,5 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import java.util.List;
+
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
 
@@ -16,7 +18,23 @@ public class FnObj extends Obj implements Invokable {
   public FnExpr getFunction() { return mFunction; }
   
   public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-    return interpreter.invoke(thisObj, mFunction, arg);
+    // Create a new local scope for the function.
+    EvalContext context = EvalContext.forMethod(
+        interpreter.getGlobals(), thisObj);
+    
+    // Bind arguments to their parameter names.
+    List<String> params = mFunction.getParamNames();
+    if (params.size() == 1) {
+      context.define(params.get(0), arg);
+    } else if (params.size() > 1) {
+      // TODO(bob): Hack. Assume the arg is a tuple with the right number of
+      // fields.
+      for (int i = 0; i < params.size(); i++) {
+        context.define(params.get(i), arg.getTupleField(i));
+      }
+    }
+    
+    return interpreter.evaluate(mFunction.getBody(), context);
   }
   
   public Expr getParamType() { return mFunction.getParamType(); }

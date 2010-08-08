@@ -1,5 +1,7 @@
 package com.stuffwithstuff.magpie.ast;
 
+import com.stuffwithstuff.magpie.Position;
+
 
 public abstract class Expr {
   public Expr(Position position) {

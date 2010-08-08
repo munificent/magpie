@@ -1,7 +1,6 @@
 package com.stuffwithstuff.magpie;
 
 import java.util.*;
-import java.util.Map.Entry;
 import com.stuffwithstuff.magpie.ast.*;
 
 public class MagpieParser extends Parser {

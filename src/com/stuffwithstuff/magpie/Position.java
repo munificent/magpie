@@ -1,4 +1,4 @@
-package com.stuffwithstuff.magpie.ast;
+package com.stuffwithstuff.magpie;
 
 /**
  * Describes the location of a piece of text in a source file.

@@ -1,5 +1,7 @@
 package com.stuffwithstuff.magpie.ast;
 
+import com.stuffwithstuff.magpie.Position;
+
 public class DefineExpr extends Expr {
   public DefineExpr(Position position, String name, Expr value) {
     super(position);

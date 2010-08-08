@@ -1,5 +1,6 @@
 package com.stuffwithstuff.magpie.ast;
 
+import com.stuffwithstuff.magpie.Position;
 import com.stuffwithstuff.magpie.Token;
 
 public class NameExpr extends Expr {

@@ -2,6 +2,8 @@ package com.stuffwithstuff.magpie.ast;
 
 import java.util.*;
 
+import com.stuffwithstuff.magpie.Position;
+
 public class BlockExpr extends Expr {
   public BlockExpr(List<Expr> expressions) {
     super(Position.union(expressions.get(0).getPosition(),

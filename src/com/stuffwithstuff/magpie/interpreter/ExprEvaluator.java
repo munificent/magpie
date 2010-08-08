@@ -11,28 +11,23 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
   
   public Obj evaluate(Expr expr, EvalContext context) {
-    mCurrentPosition = expr.getPosition();
     return expr.accept(this, context);
   }
 
   @Override
   public Obj visit(AssignExpr expr, EvalContext context) {
+    String name = expr.getName();
+    
     if (expr.getTarget() == null) {
       // No target means we're just assigning to a variable (or field of this)
       // with the given name.
-      String name = expr.getName();
       Obj value = evaluate(expr.getValue(), context);
       
       // Try to assign to a local.
       if (context.assign(name, value)) return value;
       
-      // If not found, try to assign to a member of this.
-      Invokable setter = context.getThis().findMethod(name + "=");
-      if (setter != null) {
-        return setter.invoke(mInterpreter, context.getThis(), value);
-      }
-      
-      throw failure("Couldn't find a variable or member \"%s\" to assign to.", name);
+      // Otherwise, it must be a setter on this.
+      return invokeMethod(expr, context.getThis(), name + "=", value);
     } else {
       // The target of the assignment is an actual expression, like a.b = c
       Obj target = evaluate(expr.getTarget(), context);
@@ -46,15 +41,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
         value = mInterpreter.createTuple(context, targetArg, value);
       }
 
-      // Look for a setter method.
-      String setterName = expr.getName() + "=";
-      Invokable setter = target.findMethod(setterName);
-      
-      expect(setter != null,
-          "Could not find a method named \"%s\" on %s.", setterName, target);
-      
-      // Invoke the setter.
-      return setter.invoke(mInterpreter, target, value);
+      // Invoke the setter method.
+      return invokeMethod(expr, target, name + "=", value);
     }
   }
 
@@ -89,11 +77,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       // Look for a local variable with the name.
       Obj local = context.lookUp(name);
       if (local != null) {
-        expect(local instanceof Invokable,
-            "Can not call a local variable that does not contain a function.");
-        
-        Invokable function = (Invokable)local;
-        return function.invoke(mInterpreter, mInterpreter.nothing(), arg);
+        return invokeMethod(expr, local, "apply", arg);
       }
       
       // Look for an implicit call to a method on this with the name.
@@ -104,23 +88,15 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       
       // Try to call it as a method on the argument. In other words,
       // "abs 123" is equivalent to "123.abs".
-      method = arg.findMethod(name);
-      expect(method != null,
-          "Could not find a method \"%s\" on %s.", name, arg);
-
-      return method.invoke(mInterpreter, arg, mInterpreter.nothing());
+      return invokeMethod(expr, arg, name, mInterpreter.nothing());
     }
     
-    // Not an explicit named target, so evaluate it and see if it's callable.
+    // Not an explicit named target, so evaluate it and send it an "apply"
+    // message.
     Obj target = evaluate(expr.getTarget(), context);
-    
-    expect(target instanceof FnObj,
-        "Can not call an expression that does not evaluate to a function.");
-
-    FnObj targetFn = (FnObj)target;
-    return targetFn.invoke(mInterpreter, mInterpreter.nothing(), arg);
+    return invokeMethod(expr, target, "apply", arg);
   }
-
+  
   @Override
   public Obj visit(ClassExpr expr, EvalContext context) {
     // Look up the class if we are extending one, otherwise create it.
@@ -131,10 +107,17 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       // Like: class foo.bar.bang
       Obj obj = context.lookUp(expr.getName());
       
-      expect(obj != null, "Could not find a class object named \"%s\".",
-          expr.getName());
-      expect(obj instanceof ClassObj, "Object \"%s\" is not a class.",
-          expr.getName());
+      if (obj == null) {
+        mInterpreter.runtimeError(expr,
+            "Could not find a class object named \"%s\".", expr.getName());
+        return mInterpreter.nothing();
+      }
+      
+      if (!(obj instanceof ClassObj)) {
+        mInterpreter.runtimeError(expr, "Object \"%s\" is not a class.",
+            expr.getName());
+        return mInterpreter.nothing();
+      }
       
       classObj = (ClassObj)obj;
       metaclass = classObj.getClassObj();
@@ -321,12 +304,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     Obj receiver = evaluate(expr.getReceiver(), context);
     Obj arg = evaluate(expr.getArg(), context);
     
-    Invokable method = receiver.findMethod(expr.getMethod());
-    expect (method != null,
-        "Could not find a method named \"%s\" on %s.",
-        expr.getMethod(), receiver);
-
-    return method.invoke(mInterpreter, receiver, arg);
+    return invokeMethod(expr, receiver, expr.getMethod(), arg);
   }
 
   @Override
@@ -335,12 +313,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     Obj variable = context.lookUp(expr.getName());
     if (variable != null) return variable;
     
-    Invokable method = context.getThis().findMethod(expr.getName());
-    expect (method != null,
-        "Could not find a variable named \"%s\".",
-        expr.getName());
-    
-    return method.invoke(mInterpreter, context.getThis(), mInterpreter.nothing());
+    // Try to find a no-arg method on this.
+    return invokeMethod(expr, context.getThis(), expr.getName(), mInterpreter.nothing());
   }
 
   @Override
@@ -368,31 +342,19 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
     return mInterpreter.createTuple(context, fields);
   }
-  
-  private void expect(boolean condition, String format, Object... args) {
-    if (!condition) {
-      throw failure(format, args);
+
+  private Obj invokeMethod(Expr expr, Obj receiver, String name, Obj arg) {
+    Invokable method = receiver.findMethod(name);
+    
+    if (method == null) {
+      mInterpreter.runtimeError(expr,
+          "Could not find a variable or method named \"%s\".", name);
+      
+      return mInterpreter.nothing();
     }
-  }
-  
-  /**
-   * Returns a new interpreter exception. It should be called like:
-   * 
-   *    throw failure(...);
-   * 
-   * Note that this *returns* an exception instead of throwing it so that you
-   * can use it in places where the Java compiler is doing reachability
-   * analysis. For example, you can do "throw failure(...)" in the last line of
-   * a function with a non-void return type and Java will allow it. If fail did
-   * the throw internally, it would have no way of knowing the function doesn't
-   * return.
-   */
-  private InterpreterException failure(String format, Object... args) {
-    String message = String.format(format, args);
-    message = String.format("%s: %s", mCurrentPosition, message);
-    return new InterpreterException(message);
+    
+    return method.invoke(mInterpreter, receiver, arg);
   }
 
   private final Interpreter mInterpreter;
-  private Position mCurrentPosition;
 }
