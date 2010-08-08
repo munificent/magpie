@@ -124,8 +124,7 @@ public abstract class NativeMethod implements Invokable {
       // Create a fresh context for evaluating the field initializers so that
       // they can't erroneously access stuff around where the object is being
       // constructed.
-      EvalContext fieldContext = EvalContext.topLevel(
-          interpreter.getGlobals(), interpreter.nothing());
+      EvalContext fieldContext = interpreter.createTopLevelContext();
       
       // Initialize its fields.
       for (Entry<String, Expr> field : classObj.getFieldInitializers().entrySet()) {

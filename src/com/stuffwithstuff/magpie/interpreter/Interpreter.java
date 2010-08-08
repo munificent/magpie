@@ -77,7 +77,7 @@ public class Interpreter {
   }
   
   public void load(List<Expr> expressions) {
-    EvalContext context = EvalContext.topLevel(mGlobalScope, mNothing);
+    EvalContext context = createTopLevelContext();
     
     // Evaluate the expressions. This is the load time evaluation.
     for (Expr expr : expressions) {
@@ -94,7 +94,7 @@ public class Interpreter {
   }
   
   public void runMain() {
-    EvalContext context = EvalContext.topLevel(mGlobalScope, mNothing);
+    EvalContext context = createTopLevelContext();
     Obj main = context.lookUp("main");
     if (main == null) return;
     
@@ -111,7 +111,7 @@ public class Interpreter {
   }
   
   public EvalContext createTopLevelContext() {
-    return EvalContext.topLevel(mGlobalScope, mNothing);
+    return new EvalContext(mGlobalScope, mNothing);
   }
   
   public Scope getGlobals() { return mGlobalScope; }

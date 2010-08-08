@@ -5,14 +5,8 @@ package com.stuffwithstuff.magpie.interpreter;
  * lexical scope, this reference, etc.
  */
 public class EvalContext {
-  /**
-   * Creates a new top-level EvalContext. This is the context in which a script
-   * begins evaluating.
-   * @param scope   The global scope.
-   * @param nothing A reference to Nothing.
-   */
-  public static EvalContext topLevel(Scope scope, Obj nothing) {
-    return new EvalContext(null, scope, nothing);
+  public EvalContext(Scope scope, Obj thisObj) {
+    this(null, scope, thisObj);
   }
   
   /**

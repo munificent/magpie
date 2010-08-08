@@ -29,7 +29,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     // Create a new local scope for the function. This scope will be used to
     // hold *types* not values, unlike the regular expression evaluation
     // context.
-    EvalContext context = EvalContext.topLevel(typeScope,
+    EvalContext context = new EvalContext(typeScope,
         interpreter.getNothingType());
     
     // Now check all of the reachable code.
@@ -207,54 +207,19 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     Obj receiver = check(expr.getReceiver(), context);
     Obj arg = check(expr.getArg(), context);
 
-    FunctionType method = findMethodType(receiver, expr.getMethod());
-    
-    // TODO(bob): Copy/pasted from NameExpr    
-    errorIf(method == null, expr,
-        "Could not find a method named \"%s\" on type %s.",
-        expr.getMethod(), receiver);
-
-    // Just return an empty type and try to continute to find more errors.
-    if (method == null) return mInterpreter.getNothingType();
-
-    EvalContext methodTypeContext = mInterpreter.createTopLevelContext();
-    Obj paramType = check(method.getParamType(), methodTypeContext);
-    
-    expectType(arg, paramType, expr,
-        "Method \"%s\" on this expects a %s parameter and got %s.",
-        expr.getMethod(), paramType, arg);
-    
-    return check(method.getReturnType(), methodTypeContext);
-    // TODO(bob): Need to check against method's expected return type.
+    return checkMethod(expr, receiver, expr.getMethod(), arg);
   }
-
+  
   @Override
   public Obj visit(NameExpr expr, EvalContext context) {
     // Look up a named variable.
     Obj variable = context.lookUp(expr.getName());
     if (variable != null) return variable;
     
-    FunctionType method = findMethodType(context.getThis(), expr.getName());
-    
-    // Make sure we could find a method.
-    errorIf(method == null, expr,
-        "Could not find a variable named \"%s\".",
-        expr.getName());
-    
-    // Just return an empty type and try to continute to find more errors.
-    if (method == null) return mInterpreter.getNothingType();
-    
-    EvalContext methodTypeContext = mInterpreter.createTopLevelContext();
-    Obj paramType = check(method.getParamType(), methodTypeContext);
-    
-    expectType(mInterpreter.getNothingType(), paramType, expr,
-        "Method \"%s\" on this expects a %s parameter and got %s.",
-        expr.getName(), paramType, mInterpreter.getNothingType());
-    
-    return check(method.getReturnType(), methodTypeContext);
-    // TODO(bob): Need to check against method's expected return type.
+    // Look for a method on this: foo -> this.foo ()
+    return checkMethod(expr, context.getThis(), expr.getName(), mInterpreter.getNothingType());
   }
-
+  
   @Override
   public Obj visit(NothingExpr expr, EvalContext context) {
     return mInterpreter.getNothingType();
@@ -345,6 +310,27 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
         check((FnObj)entry.getValue(), classContext);
       }
     }
+  }
+  
+  private Obj checkMethod(Expr expr, Obj receiver, String name, Obj arg) {
+    FunctionType method = findMethodType(receiver, name);
+    
+    // Make sure we could find a method.
+    errorIf(method == null, expr,
+        "Could not find a variable or method named \"%s\".", name);
+
+    // Just return an empty type and try to continute to find more errors.
+    if (method == null) return mInterpreter.getNothingType();
+    
+    EvalContext methodTypeContext = mInterpreter.createTopLevelContext();
+    Obj paramType = check(method.getParamType(), methodTypeContext);
+    
+    expectType(arg, paramType, expr,
+        "Method \"%s\" expects %s and got %s.",
+        name, paramType, arg);
+    
+    return check(method.getReturnType(), methodTypeContext);
+    // TODO(bob): Need to check against method's expected return type.
   }
   
   private boolean typeAllowed(Obj actual, Obj expected) {
