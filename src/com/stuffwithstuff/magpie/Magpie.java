@@ -10,10 +10,11 @@ public class Magpie {
    * @param args
    */
   public static void main(String[] args) {
-    runTestScripts();
-    
     System.out.println("magpie");
     System.out.println("------");
+    
+    System.out.println("Running test suite...");
+    runTestScripts();
     
     // TODO(bob): REPL is dead for now.
     /*

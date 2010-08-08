@@ -2,6 +2,7 @@ package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.*;
 
+import com.stuffwithstuff.magpie.Position;
 import com.stuffwithstuff.magpie.ast.*;
 
 public class Interpreter {
@@ -58,7 +59,7 @@ public class Interpreter {
     
     mNothingClass = new ClassObj(mClassClass);
     mNothingClass.addMethod("toString", new NativeMethod.NothingToString());
-    mNothing = new Obj(mNothingClass);
+    mNothing = mNothingClass.instantiate();
     
     // Give the classes names and make then available.
     mGlobalScope.define("Bool", mBoolClass);
@@ -115,6 +116,10 @@ public class Interpreter {
   
   public void runtimeError(Expr expr, String format, Object... args) {
     mHost.runtimeError(expr.getPosition(), String.format(format, args));
+  }
+  
+  public void runtimeError(String format, Object... args) {
+    mHost.runtimeError(Position.none(), String.format(format, args));
   }
   
   public EvalContext createTopLevelContext() {

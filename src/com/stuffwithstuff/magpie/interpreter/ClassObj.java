@@ -27,6 +27,12 @@ public class ClassObj extends Obj {
     return new Obj(this, primitiveValue);
   }
   
+  public ClassObj getParent() { return mParent; }
+  
+  public void setParent(ClassObj parent) {
+    mParent = parent;
+  }
+  
   public void addMethod(String name, Invokable method) {
     mMethods.add(name, method);
   }
@@ -36,7 +42,16 @@ public class ClassObj extends Obj {
   }
   
   public Invokable findMethod(String name) {
-    return mMethods.find(name);
+    // Walk up the inheritance chain.
+    ClassObj classObj = this;
+    while (classObj != null) {
+      Invokable method = classObj.mMethods.find(name);
+      if (method != null) return method;
+      classObj = classObj.mParent;
+    }
+    
+    // If we got here, it wasn't found.
+    return null;
   }
   
   public void addConstructor(FnObj constructor) {
@@ -55,6 +70,7 @@ public class ClassObj extends Obj {
     mFieldInitializers = fields;
   }
   
+  private ClassObj mParent;
   private Invokable mConstructor;
   private Map<String, Expr> mFieldInitializers;
   private final MethodSet mMethods = new MethodSet();

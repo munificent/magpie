@@ -130,11 +130,15 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       metaclass = mInterpreter.createClass();
       
       // Add the methods every class instance supports.
+      // TODO(bob): When inheritance is in, metaclasses should inherit from a
+      // base metaclass that provides these.
       metaclass.addMethod("addMethod", new NativeMethod.ClassAddMethod());
       metaclass.addMethod("addSharedMethod", new NativeMethod.ClassAddSharedMethod());
       metaclass.addMethod("name", new NativeMethod.ClassFieldGetter("name",
           new NameExpr("String")));
       metaclass.addMethod("new", new NativeMethod.ClassNew(expr.getName()));
+      metaclass.addMethod("parent", new NativeMethod.ClassGetParent());
+      metaclass.addMethod("parent=", new NativeMethod.ClassSetParent());
       
       classObj = new ClassObj(metaclass);
       classObj.setField("name", mInterpreter.createString(expr.getName()));

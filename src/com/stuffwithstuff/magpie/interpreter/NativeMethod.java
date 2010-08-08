@@ -70,6 +70,39 @@ public abstract class NativeMethod implements Invokable {
     public Expr getParamType() { return new NameExpr("Dynamic"); }
     public Expr getReturnType() { return new NameExpr("Nothing"); }
   }
+  
+  public static class ClassGetParent extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      ClassObj classObj = (ClassObj)thisObj;
+      
+      return classObj.getParent();
+    }
+
+    public Expr getParamType() { return new NameExpr("Nothing"); }
+    public Expr getReturnType() { return new NameExpr("Class"); }
+  }
+  
+  public static class ClassSetParent extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      ClassObj classObj = (ClassObj)thisObj;
+      
+      if (!(arg instanceof ClassObj)) {
+        interpreter.runtimeError(
+            "Cannot assign %s as the base class for %s because it is not a class.",
+            arg, thisObj);
+        
+        return interpreter.nothing();
+      }
+      
+      classObj.setParent((ClassObj)arg);
+      return arg;
+    }
+
+    public Expr getParamType() { return new NameExpr("Class"); }
+    public Expr getReturnType() { return new NameExpr("Class"); }
+  }
 
   public static class ClassFieldGetter extends NativeMethod {
     public ClassFieldGetter(String name, Expr type) {
@@ -118,8 +151,7 @@ public abstract class NativeMethod implements Invokable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       ClassObj classObj = (ClassObj)thisObj;
       
-      // Instantiate the object.
-      Obj obj = new Obj(classObj);
+      Obj obj = classObj.instantiate();
       
       // Create a fresh context for evaluating the field initializers so that
       // they can't erroneously access stuff around where the object is being

@@ -1,0 +1,20 @@
+class Base
+    sayHi () print "hi"
+end
+
+class Derived
+end
+
+var d = Derived.new
+d.sayHi // prints nothing
+
+Derived.parent = Base
+
+d.sayHi //: hi
+
+// override the method
+extend Derived
+    sayHi () print "in derived"
+end
+
+d.sayHi //: in derived
