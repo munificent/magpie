@@ -359,7 +359,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     }
     
     ClassObj classObj = (ClassObj)typeObj;
-    Invokable method = classObj.findInstanceMethod(name);
+    Invokable method = classObj.findMethod(name);
     
     if (method != null) {
       // TODO(bob): Invokable should really just return the FunctionType

@@ -27,16 +27,16 @@ public class ClassObj extends Obj {
     return new Obj(this, primitiveValue);
   }
   
-  public void addInstanceMethod(String name, Invokable method) {
-    mInstanceMethods.add(name, method);
+  public void addMethod(String name, Invokable method) {
+    mMethods.add(name, method);
   }
   
   public Map<String, Invokable> getMethods() {
-    return mInstanceMethods.getMethods();
+    return mMethods.getMethods();
   }
   
-  public Invokable findInstanceMethod(String name) {
-    return mInstanceMethods.find(name);
+  public Invokable findMethod(String name) {
+    return mMethods.find(name);
   }
   
   public void addConstructor(FnObj constructor) {
@@ -57,5 +57,5 @@ public class ClassObj extends Obj {
   
   private Invokable mConstructor;
   private Map<String, Expr> mFieldInitializers;
-  private final MethodSet mInstanceMethods = new MethodSet();
+  private final MethodSet mMethods = new MethodSet();
 }

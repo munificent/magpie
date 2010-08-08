@@ -48,10 +48,6 @@ public class Obj {
     mFields.define(name, field);
   }
   
-  public Invokable findMethod(String name) {
-    return mClass.findInstanceMethod(name);
-  }
-  
   public boolean asBool() {
     if (mPrimitiveValue instanceof Boolean) {
       return ((Boolean)mPrimitiveValue).booleanValue();

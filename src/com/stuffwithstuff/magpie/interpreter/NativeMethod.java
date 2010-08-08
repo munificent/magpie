@@ -43,7 +43,7 @@ public abstract class NativeMethod implements Invokable {
       FnObj method = (FnObj)arg.getTupleField(1);
       
       ClassObj classObj = (ClassObj)thisObj;
-      classObj.addInstanceMethod(name, method);
+      classObj.addMethod(name, method);
       
       return interpreter.nothing();
     }
@@ -61,7 +61,7 @@ public abstract class NativeMethod implements Invokable {
       
       ClassObj classObj = (ClassObj)thisObj;
       ClassObj metaclass = classObj.getClassObj();
-      metaclass.addInstanceMethod(name, method);
+      metaclass.addMethod(name, method);
 
       return interpreter.nothing();
     }

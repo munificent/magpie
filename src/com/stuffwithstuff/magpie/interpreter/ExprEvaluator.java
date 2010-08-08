@@ -81,7 +81,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       }
       
       // Look for an implicit call to a method on this with the name.
-      Invokable method = context.getThis().findMethod(name);
+      Invokable method = context.getThis().getClassObj().findMethod(name);
       if (method != null) {
         return method.invoke(mInterpreter, context.getThis(), arg);
       }
@@ -130,11 +130,11 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       metaclass = mInterpreter.createClass();
       
       // Add the methods every class instance supports.
-      metaclass.addInstanceMethod("addMethod", new NativeMethod.ClassAddMethod());
-      metaclass.addInstanceMethod("addSharedMethod", new NativeMethod.ClassAddSharedMethod());
-      metaclass.addInstanceMethod("name", new NativeMethod.ClassFieldGetter("name",
+      metaclass.addMethod("addMethod", new NativeMethod.ClassAddMethod());
+      metaclass.addMethod("addSharedMethod", new NativeMethod.ClassAddSharedMethod());
+      metaclass.addMethod("name", new NativeMethod.ClassFieldGetter("name",
           new NameExpr("String")));
-      metaclass.addInstanceMethod("new", new NativeMethod.ClassNew(expr.getName()));
+      metaclass.addMethod("new", new NativeMethod.ClassNew(expr.getName()));
       
       classObj = new ClassObj(metaclass);
       classObj.setField("name", mInterpreter.createString(expr.getName()));
@@ -154,11 +154,11 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       classObj.setField(field.getKey(), value);
       
       // Add a getter.
-      metaclass.addInstanceMethod(field.getKey(),
+      metaclass.addMethod(field.getKey(),
           new NativeMethod.ClassFieldGetter(field.getKey(), null));
       
       // Add a setter.
-      metaclass.addInstanceMethod(field.getKey() + "=",
+      metaclass.addMethod(field.getKey() + "=",
           new NativeMethod.ClassFieldSetter(field.getKey(), null));
     }
     
@@ -166,7 +166,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     for (Entry<String, List<FnExpr>> methods : expr.getSharedMethods().entrySet()) {
       for (FnExpr method : methods.getValue()) {
         FnObj methodObj = mInterpreter.createFn(method);
-        metaclass.addInstanceMethod(methods.getKey(), methodObj);
+        metaclass.addMethod(methods.getKey(), methodObj);
       }
     }
     
@@ -174,7 +174,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     for (Entry<String, List<FnExpr>> methods : expr.getMethods().entrySet()) {
       for (FnExpr method : methods.getValue()) {
         FnObj methodObj = mInterpreter.createFn(method);
-        classObj.addInstanceMethod(methods.getKey(), methodObj);
+        classObj.addMethod(methods.getKey(), methodObj);
       }
     }
     
@@ -185,21 +185,21 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       // annotation.
       
       // Add a getter.
-      classObj.addInstanceMethod(field,
+      classObj.addMethod(field,
           new NativeMethod.ClassFieldGetter(field, null));
       
       // Add a setter.
-      classObj.addInstanceMethod(field + "=",
+      classObj.addMethod(field + "=",
           new NativeMethod.ClassFieldSetter(field, null));
     }
     
     for (Entry<String, Expr> entry : expr.getFieldDeclarations().entrySet()) {
       // Add a getter.
-      classObj.addInstanceMethod(entry.getKey(),
+      classObj.addMethod(entry.getKey(),
           new NativeMethod.ClassFieldGetter(entry.getKey(), entry.getValue()));
       
       // Add a setter.
-      classObj.addInstanceMethod(entry.getKey() + "=",
+      classObj.addMethod(entry.getKey() + "=",
           new NativeMethod.ClassFieldSetter(entry.getKey(), entry.getValue()));
     }
     
@@ -344,7 +344,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   private Obj invokeMethod(Expr expr, Obj receiver, String name, Obj arg) {
-    Invokable method = receiver.findMethod(name);
+    Invokable method = receiver.getClassObj().findMethod(name);
     
     if (method == null) {
       mInterpreter.runtimeError(expr,

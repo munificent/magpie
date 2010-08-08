@@ -14,36 +14,36 @@ public class Interpreter {
     mClassClass = new ClassObj();
     
     mBoolClass = new ClassObj(mClassClass);
-    mBoolClass.addInstanceMethod("not", new NativeMethod.BoolNot());
-    mBoolClass.addInstanceMethod("toString", new NativeMethod.BoolToString());
+    mBoolClass.addMethod("not", new NativeMethod.BoolNot());
+    mBoolClass.addMethod("toString", new NativeMethod.BoolToString());
 
     mDynamicClass = new ClassObj(mClassClass);
     
     mFnClass = new ClassObj(mClassClass);
-    mFnClass.addInstanceMethod("apply", new NativeMethod.FunctionApply());
+    mFnClass.addMethod("apply", new NativeMethod.FunctionApply());
     
     mIntClass = new ClassObj(mClassClass);
-    mIntClass.addInstanceMethod("+", new NativeMethod.IntPlus());
-    mIntClass.addInstanceMethod("-", new NativeMethod.IntMinus());
-    mIntClass.addInstanceMethod("*", new NativeMethod.IntMultiply());
-    mIntClass.addInstanceMethod("/", new NativeMethod.IntDivide());
-    mIntClass.addInstanceMethod("toString", new NativeMethod.IntToString());
-    mIntClass.addInstanceMethod("==", new NativeMethod.IntEqual());
-    mIntClass.addInstanceMethod("!=", new NativeMethod.IntNotEqual());
-    mIntClass.addInstanceMethod("<",  new NativeMethod.IntLessThan());
-    mIntClass.addInstanceMethod(">",  new NativeMethod.IntGreaterThan());
-    mIntClass.addInstanceMethod("<=", new NativeMethod.IntLessThanOrEqual());
-    mIntClass.addInstanceMethod(">=", new NativeMethod.IntGreaterThanOrEqual());
+    mIntClass.addMethod("+", new NativeMethod.IntPlus());
+    mIntClass.addMethod("-", new NativeMethod.IntMinus());
+    mIntClass.addMethod("*", new NativeMethod.IntMultiply());
+    mIntClass.addMethod("/", new NativeMethod.IntDivide());
+    mIntClass.addMethod("toString", new NativeMethod.IntToString());
+    mIntClass.addMethod("==", new NativeMethod.IntEqual());
+    mIntClass.addMethod("!=", new NativeMethod.IntNotEqual());
+    mIntClass.addMethod("<",  new NativeMethod.IntLessThan());
+    mIntClass.addMethod(">",  new NativeMethod.IntGreaterThan());
+    mIntClass.addMethod("<=", new NativeMethod.IntLessThanOrEqual());
+    mIntClass.addMethod(">=", new NativeMethod.IntGreaterThanOrEqual());
 
     mStringClass = new ClassObj(mClassClass);
-    mStringClass.addInstanceMethod("+",     new NativeMethod.StringPlus());
-    mStringClass.addInstanceMethod("print", new NativeMethod.StringPrint());
+    mStringClass.addMethod("+",     new NativeMethod.StringPlus());
+    mStringClass.addMethod("print", new NativeMethod.StringPrint());
 
     // TODO(bob): At some point, may want different tuple types based on the
     // types of the fields.
     mTupleClass = new ClassObj(mClassClass);
-    mTupleClass.addInstanceMethod("apply", new NativeMethod.TupleGetField());
-    mTupleClass.addInstanceMethod("count", new NativeMethod.ClassFieldGetter("count",
+    mTupleClass.addMethod("apply", new NativeMethod.TupleGetField());
+    mTupleClass.addMethod("count", new NativeMethod.ClassFieldGetter("count",
         new NameExpr("Int")));
     
     // TODO(bob): Hackish.
@@ -52,12 +52,12 @@ public class Interpreter {
       // TODO(bob): Using dynamic as the type here is lame. Ideally, there would
       // be a separate tuple class for each set of tuple field types and it
       // would have field getters that were typed to match the fields.
-      mTupleClass.addInstanceMethod(name, new NativeMethod.ClassFieldGetter(name,
+      mTupleClass.addMethod(name, new NativeMethod.ClassFieldGetter(name,
           new NameExpr("Dynamic")));
     }
     
     mNothingClass = new ClassObj(mClassClass);
-    mNothingClass.addInstanceMethod("toString", new NativeMethod.NothingToString());
+    mNothingClass.addMethod("toString", new NativeMethod.NothingToString());
     mNothing = new Obj(mNothingClass);
     
     // Give the classes names and make then available.
