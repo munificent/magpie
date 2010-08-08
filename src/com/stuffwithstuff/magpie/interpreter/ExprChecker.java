@@ -99,6 +99,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       // Invoke the setter.
       return setter.invoke(mInterpreter, target, value);
       */
+      System.out.println("Checking complex assignment is not implemented.");
       return mInterpreter.getDynamicType();
     }
   }
@@ -126,12 +127,14 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(CallExpr expr, EvalContext context) {
     // TODO(bob): Implement me.
+    System.out.println("Call expressions are not implemented.");
     return mInterpreter.getDynamicType();
   }
 
   @Override
   public Obj visit(ClassExpr expr, EvalContext context) {
     // TODO(bob): Implement me.
+    System.out.println("Checking class expressions is not implemented.");
     return mInterpreter.getDynamicType();
   }
 
@@ -149,14 +152,12 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(FnExpr expr, EvalContext context) {
-    // fn (a Int, b String) print (a.toString + b)
-    // create context
-    // define params
-    // check body
-    // return obj representing fn type (i.e. an obj that knows param and return
-    // type)
+    // Check the body of the function.
+    check(expr, context);
     
+    // Return the type of the function itself.
     // TODO(bob): Implement me.
+    System.out.println("Function types are not implemented.");
     return mInterpreter.getDynamicType();
   }
 
@@ -257,8 +258,10 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
    * @return
    */
   private Obj check(FnObj obj, EvalContext context) {
-    FnExpr function = obj.getFunction();
-    
+    return check(obj.getFunction(), context);
+  }
+  
+  private Obj check(FnExpr function, EvalContext context) {
     // Bind parameter names to their declared types.
     Obj paramType = evaluateType(function.getParamType());
 
@@ -281,7 +284,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     
     return expectedReturn;
   }
-  
+
   private void check(ClassObj classObj, EvalContext context) {
     // Create a context for the methods that binds the class as the type of
     // this.
