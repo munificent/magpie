@@ -60,7 +60,8 @@ public abstract class NativeMethod implements Invokable {
       FnObj method = (FnObj)arg.getTupleField(1);
       
       ClassObj classObj = (ClassObj)thisObj;
-      classObj.addMethod(name, method);
+      ClassObj metaclass = classObj.getClassObj();
+      metaclass.addInstanceMethod(name, method);
 
       return interpreter.nothing();
     }
@@ -71,8 +72,9 @@ public abstract class NativeMethod implements Invokable {
   }
 
   public static class ClassFieldGetter extends NativeMethod {
-    public ClassFieldGetter(String name) {
+    public ClassFieldGetter(String name, Expr type) {
       mName = name;
+      mType = type;
     }
     
     @Override
@@ -80,16 +82,17 @@ public abstract class NativeMethod implements Invokable {
       return thisObj.getField(mName);
     }
     
-    // TODO(bob): Should be typed.
-    public Expr getParamType() { return new NameExpr("Dynamic"); }
-    public Expr getReturnType() { return new NameExpr("Dynamic"); }
+    public Expr getParamType() { return new NameExpr("Nothing"); }
+    public Expr getReturnType() { return mType; }
 
     private final String mName;
+    private final Expr mType;
   }
 
   public static class ClassFieldSetter extends NativeMethod {
-    public ClassFieldSetter(String name) {
+    public ClassFieldSetter(String name, Expr type) {
       mName = name;
+      mType = type;
     }
     
     @Override
@@ -98,15 +101,19 @@ public abstract class NativeMethod implements Invokable {
       return arg;
     }
     
-    // TODO(bob): Should be typed.
-    public Expr getParamType() { return new NameExpr("Dynamic"); }
-    public Expr getReturnType() { return new NameExpr("Dynamic"); }
+    public Expr getParamType() { return mType; }
+    public Expr getReturnType() { return mType; }
 
     private final String mName;
+    private final Expr mType;
   }
   
   // TODO(bob): This is pretty much temp.
   public static class ClassNew extends NativeMethod {
+    public ClassNew(String className) {
+      mClassName = className;
+    }
+    
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       ClassObj classObj = (ClassObj)thisObj;
@@ -137,7 +144,9 @@ public abstract class NativeMethod implements Invokable {
     
     // TODO(bob): Should be typed.
     public Expr getParamType() { return new NameExpr("Dynamic"); }
-    public Expr getReturnType() { return new NameExpr("Dynamic"); }
+    public Expr getReturnType() { return new NameExpr(mClassName); }
+    
+    private final String mClassName;
   }
   
   // Int methods:

@@ -63,6 +63,8 @@ public class Magpie {
     int success = 0;
     
     for (File testScript : listTestScripts()) {
+      //if (!testScript.getPath().contains("CheckGetter")) continue;
+      
       tests++;
       if (runTestScript(testScript)) success++;
     }

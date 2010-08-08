@@ -31,6 +31,10 @@ public class ClassObj extends Obj {
     mInstanceMethods.add(name, method);
   }
   
+  public Map<String, Invokable> getMethods() {
+    return mInstanceMethods.getMethods();
+  }
+  
   public Invokable findInstanceMethod(String name) {
     return mInstanceMethods.find(name);
   }

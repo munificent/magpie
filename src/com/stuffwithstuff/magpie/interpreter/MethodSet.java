@@ -17,5 +17,9 @@ public class MethodSet {
     return mMethods.get(name);
   }
   
+  public Map<String, Invokable> getMethods() {
+    return mMethods;
+  }
+  
   private final Map<String, Invokable> mMethods = new HashMap<String, Invokable>();
 }

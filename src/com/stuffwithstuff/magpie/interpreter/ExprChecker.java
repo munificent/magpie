@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.*;
@@ -12,37 +13,44 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   // TODO(bob): This is kinda temp.
   public static void check(Interpreter interpreter, List<CheckError> errors,
       Scope globalScope) {
+    
+    // Create a mirror of the interpreter's global scope where each global
+    // variable has been replaced with its type. If, for example, there is a
+    // global variable "foo" whose value is 123, the type scope will have a
+    // global variable "foo" whose value is Int: the ClassObj representing the
+    // class of Ints.
+    Scope typeScope = new Scope();
+    for (Entry<String, Obj> entry : globalScope.entries()) {
+      typeScope.define(entry.getKey(), entry.getValue().getClassObj());
+    }
+    
     ExprChecker checker = new ExprChecker(interpreter, errors);
     
-    // TODO(bob): Here, we need to go through the given globalScope and look up
-    // the types of all of the values defined in it. Then we'll create a new
-    // top-level scope that the type-checking functions here will use.
-    // That way, when Foo is defined in the value global scope, we can have
-    // access to its class in the checker's global scope.
-    // (This gets a little tricky, though. We'll need to handle non-instance
-    // methods at that point. If there is a class Foo, the type of the global
-    // variable "Foo" is "Class", which doesn't have any of the specific
-    // shared methods in Foo like "new".
+    // Create a new local scope for the function. This scope will be used to
+    // hold *types* not values, unlike the regular expression evaluation
+    // context.
+    EvalContext context = EvalContext.topLevel(typeScope,
+        interpreter.getNothingType());
     
+    // Now check all of the reachable code.
     for (Entry<String, Obj> entry : globalScope.entries()) {
       // TODO(bob): Hack temp. Just check top-level functions for now.
       // Also need to check top-level classes.
       if (entry.getValue() instanceof FnObj) {
-        FnExpr function = ((FnObj)entry.getValue()).getFunction();
-        checker.check(function);
+        checker.check((FnObj)entry.getValue(), context);
+      } else if (entry.getValue() instanceof ClassObj) {
+        checker.check((ClassObj)entry.getValue(), context);
       }
     }
   }
   
-  public ExprChecker(Interpreter interpreter, List<CheckError> errors) {
+  private ExprChecker(Interpreter interpreter, List<CheckError> errors) {
     mInterpreter = interpreter;
     mErrors = errors;
   }
   
   @Override
   public Obj visit(AssignExpr expr, EvalContext context) {
-    // TODO(bob): Implement commented out parts.
-    
     if (expr.getTarget() == null) {
       // No target means we're just assigning to a variable (or field of this)
       // with the given name.
@@ -52,21 +60,22 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       // Try to assign to a local.
       Obj declared = context.lookUp(name);
       
+      // If not found, try to assign to a member of this.
+      if (declared == null) {
+        FunctionType setter = findMethodType(context.getThis(), name + "=");
+        if (setter != null) {
+          declared = evaluateType(setter.getParamType());
+        }
+      }
+      
       // Make sure the types match.
       expectType(value, declared, expr,
           "Cannot assign a %s value to a variable declared %s.",
           value, declared);
       
-      // If not found, try to assign to a member of this.
-      /*
-      Invokable setter = context.getThis().findMethod(name + "=");
-      if (setter != null) {
-        return setter.invoke(mInterpreter, context.getThis(), value);
-      }
-      */
-      
       return value;
     } else {
+      // TODO(bob): Implement commented out parts.
       /*
       // The target of the assignment is an actual expression, like a.b = c
       Obj target = evaluate(expr.getTarget(), context);
@@ -90,7 +99,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       // Invoke the setter.
       return setter.invoke(mInterpreter, target, value);
       */
-      return null;
+      return mInterpreter.getDynamicType();
     }
   }
 
@@ -117,13 +126,13 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(CallExpr expr, EvalContext context) {
     // TODO(bob): Implement me.
-    return null;
+    return mInterpreter.getDynamicType();
   }
 
   @Override
   public Obj visit(ClassExpr expr, EvalContext context) {
     // TODO(bob): Implement me.
-    return null;
+    return mInterpreter.getDynamicType();
   }
 
   @Override
@@ -148,7 +157,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     // type)
     
     // TODO(bob): Implement me.
-    return null;
+    return mInterpreter.getDynamicType();
   }
 
   @Override
@@ -198,7 +207,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     Obj receiver = check(expr.getReceiver(), context);
     Obj arg = check(expr.getArg(), context);
 
-    Invokable method = findMethodType(receiver, expr.getMethod());
+    FunctionType method = findMethodType(receiver, expr.getMethod());
     
     // TODO(bob): Copy/pasted from NameExpr    
     errorIf(method == null, expr,
@@ -225,7 +234,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     Obj variable = context.lookUp(expr.getName());
     if (variable != null) return variable;
     
-    Invokable method = findMethodType(context.getThis(), expr.getName());
+    FunctionType method = findMethodType(context.getThis(), expr.getName());
     
     // Make sure we could find a method.
     errorIf(method == null, expr,
@@ -272,18 +281,18 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     return mInterpreter.createTuple(context, fields);
   }
   
+  private Obj check(Expr expr, EvalContext context) {
+    return expr.accept(this, context);
+  }
+
   /**
    * Checks the given function for type-safety. Virtually invokes it by binding
    * the parameters to their declared types and then checking the body of the
    * function. Returns the discovered return type of the function.
    * @return
    */
-  private Obj check(FnExpr function) {
-    // Create a new local scope for the function. This scope will be used to
-    // hold *types* not values, which is why it doesn't root at the existing
-    // global scope which holds the values defined at runtime.
-    EvalContext context = EvalContext.topLevel(new Scope(),
-        mInterpreter.getNothingType());
+  private Obj check(FnObj obj, EvalContext context) {
+    FnExpr function = obj.getFunction();
     
     // Bind parameter names to their declared types.
     Obj paramType = evaluateType(function.getParamType());
@@ -308,16 +317,42 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     return expectedReturn;
   }
   
+  private void check(ClassObj classObj, EvalContext context) {
+    // Create a context for the methods that binds the class as the type of
+    // this.
+    EvalContext classContext = context.bindThis(classObj).newBlockScope();
+
+    // We've got to do something a little fishy here. For declared fields like
+    // "foo Int", the getter and setter methods for the class already have a
+    // type expression defined that we can check against.
+    // For defined fields, like "foo = 123", we don't. The type must be inferred
+    // from evaluating that expression. We'll do that evaluation here and store
+    // the result in local variables that shadow the "real" getters and setters.
+    Map<String, Expr> fields = classObj.getFieldInitializers();
+    if (fields != null) {
+      for (Entry<String, Expr> entry : classObj.getFieldInitializers().entrySet()) {
+        // Note: we use the original context here not the class one because field
+        // initializers don't have access to anything defined within the class.
+        Obj fieldType = check(entry.getValue(), context);
+        classContext.define(entry.getKey(), fieldType);
+      }
+    }
+    
+    // Check the methods.
+    for (Entry<String, Invokable> entry : classObj.getMethods().entrySet()) {
+      // Ignore native methods.
+      if (entry.getValue() instanceof FnObj) {
+        check((FnObj)entry.getValue(), classContext);
+      }
+    }
+  }
+  
   private boolean typeAllowed(Obj actual, Obj expected) {
     // Anything goes with dynamic.
     if (expected == mInterpreter.getDynamicType()) return true;
     
     // TODO(bob): Eventually a looser conversion process will happen here.
     return actual == expected;
-  }
-  
-  private Obj check(Expr expr, EvalContext context) {
-    return expr.accept(this, context);
   }
   
   private Obj evaluateType(Expr expr) {
@@ -329,17 +364,23 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     return mInterpreter.evaluate(expr, context);
   }
 
-  private Invokable findMethodType(Obj typeObj, String name) {
-    // TODO(bob): Only works with class objects right now. Eventually need a
-    // more extensible generic way of doing this so we can handle (for example),
-    // methods specific to an instance.
-    if (!(typeObj instanceof ClassObj)) return null;
+  private FunctionType findMethodType(Obj typeObj, String name) {
+    // If the class is "Dynamic" all methods are presumed to exist and be typed
+    // Dynamic -> Dynamic.
+    if (typeObj == mInterpreter.getDynamicType()) {
+      return new FunctionType(new NameExpr("Dynamic"), new NameExpr("Dynamic"));
+    }
     
     ClassObj classObj = (ClassObj)typeObj;
-    return classObj.findInstanceMethod(name);
+    Invokable method = classObj.findInstanceMethod(name);
     
-    // TODO(bob): If typeObj is Dynamic, we should I think just return a
-    // Dynamic -> Dynamic Invokable for any given name.
+    if (method != null) {
+      // TODO(bob): Invokable should really just return the FunctionType
+      // directly.
+      return new FunctionType(method.getParamType(), method.getReturnType());
+    }
+    
+    return null;
   }
   
   private void expectType(Obj actual, Obj expected, Expr expr, 

@@ -1,7 +1,6 @@
 package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.*;
-import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.*;
 
@@ -13,11 +12,7 @@ public class Interpreter {
     mGlobalScope = new Scope();
     
     mClassClass = new ClassObj();
-    mClassClass.addInstanceMethod("addMethod", new NativeMethod.ClassAddMethod());
-    mClassClass.addInstanceMethod("addSharedMethod", new NativeMethod.ClassAddSharedMethod());
-    mClassClass.addInstanceMethod("name", new NativeMethod.ClassFieldGetter("name"));
-    mClassClass.addInstanceMethod("new", new NativeMethod.ClassNew());
-
+    
     mBoolClass = new ClassObj(mClassClass);
     mBoolClass.addInstanceMethod("not", new NativeMethod.BoolNot());
     mBoolClass.addInstanceMethod("toString", new NativeMethod.BoolToString());
@@ -46,7 +41,18 @@ public class Interpreter {
     // types of the fields.
     mTupleClass = new ClassObj(mClassClass);
     mTupleClass.addInstanceMethod("apply", new NativeMethod.TupleGetField());
-    mTupleClass.addInstanceMethod("count", new NativeMethod.ClassFieldGetter("count"));
+    mTupleClass.addInstanceMethod("count", new NativeMethod.ClassFieldGetter("count",
+        new NameExpr("Int")));
+    
+    // TODO(bob): Hackish.
+    for (int i = 0; i < 20; i++) {
+      String name = Integer.toString(i);
+      // TODO(bob): Using dynamic as the type here is lame. Ideally, there would
+      // be a separate tuple class for each set of tuple field types and it
+      // would have field getters that were typed to match the fields.
+      mTupleClass.addInstanceMethod(name, new NativeMethod.ClassFieldGetter(name,
+          new NameExpr("Dynamic")));
+    }
     
     mNothingClass = new ClassObj(mClassClass);
     mNothing = new Obj(mNothingClass);
@@ -116,11 +122,11 @@ public class Interpreter {
    */
   public Obj nothing() { return mNothing; }
 
-  public Obj getBoolType() { return mBoolClass; }
-  public Obj getDynamicType() { return mDynamicClass; }
-  public Obj getIntType() { return mIntClass; }
-  public Obj getNothingType() { return mNothingClass; }
-  public Obj getStringType() { return mStringClass; }
+  public ClassObj getBoolType() { return mBoolClass; }
+  public ClassObj getDynamicType() { return mDynamicClass; }
+  public ClassObj getIntType() { return mIntClass; }
+  public ClassObj getNothingType() { return mNothingClass; }
+  public ClassObj getStringType() { return mStringClass; }
   
   public Obj createBool(boolean value) {
     return mBoolClass.instantiate(value);
@@ -148,7 +154,6 @@ public class Interpreter {
     for (int i = 0; i < fields.length; i++) {
       String name = Integer.toString(i);
       tuple.setField(name, fields[i]);
-      tuple.addMethod(name, new NativeMethod.ClassFieldGetter(name));
     }
     
     tuple.setField("count", createInt(fields.length));

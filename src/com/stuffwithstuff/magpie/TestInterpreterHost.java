@@ -117,7 +117,7 @@ public class TestInterpreterHost implements InterpreterHost {
   }
 
   private void fail(String message) {
-    System.out.println("FAIL " + mPath + ": " + message);
+    System.out.println("FAIL: " + message);
     mSuccess = false;
   }
 

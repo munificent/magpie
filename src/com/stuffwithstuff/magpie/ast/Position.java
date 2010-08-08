@@ -42,10 +42,11 @@ public class Position {
   
   public String toString() {
     if (mStartLine == mEndLine) {
-      return String.format("(%d-%d,%d)", mStartCol, mEndCol, mStartLine);
+      return String.format("%s (%d-%d,%d)", mSourceFile, mStartCol,
+          mEndCol, mStartLine);
     }
     
-    return String.format("(%d,%d-%d,%d)", mStartCol, mStartLine,
+    return String.format("%s (%d,%d-%d,%d)", mSourceFile, mStartCol, mStartLine,
         mEndCol, mEndLine);
   }
   

@@ -142,6 +142,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(ClassExpr expr, EvalContext context) {
     // Look up the class if we are extending one, otherwise create it.
+    ClassObj metaclass;
     ClassObj classObj;
     if (expr.isExtend()) {
       // TODO(bob): Should this be a generic expression that returns a class?
@@ -154,9 +155,23 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
           expr.getName());
       
       classObj = (ClassObj)obj;
+      metaclass = classObj.getClassObj();
     } else {
-      // Create a class object with the shared properties.
-      classObj = mInterpreter.createClass();
+      // Create a metaclass. This will be the class of the class. It will hold
+      // the shared methods off the class. So, if we're defining a class "Foo"
+      // with a shared method "bar", we will create a metaclass FooClass. It
+      // will have an *instance* method "bar", and there will be one instance
+      // of this metaclass: Foo.
+      metaclass = mInterpreter.createClass();
+      
+      // Add the methods every class instance supports.
+      metaclass.addInstanceMethod("addMethod", new NativeMethod.ClassAddMethod());
+      metaclass.addInstanceMethod("addSharedMethod", new NativeMethod.ClassAddSharedMethod());
+      metaclass.addInstanceMethod("name", new NativeMethod.ClassFieldGetter("name",
+          new NameExpr("String")));
+      metaclass.addInstanceMethod("new", new NativeMethod.ClassNew(expr.getName()));
+      
+      classObj = new ClassObj(metaclass);
       classObj.setField("name", mInterpreter.createString(expr.getName()));
     }
     
@@ -174,19 +189,19 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       classObj.setField(field.getKey(), value);
       
       // Add a getter.
-      classObj.addMethod(field.getKey(),
-          new NativeMethod.ClassFieldGetter(field.getKey()));
+      metaclass.addInstanceMethod(field.getKey(),
+          new NativeMethod.ClassFieldGetter(field.getKey(), null));
       
       // Add a setter.
-      classObj.addMethod(field.getKey() + "=",
-          new NativeMethod.ClassFieldSetter(field.getKey()));
+      metaclass.addInstanceMethod(field.getKey() + "=",
+          new NativeMethod.ClassFieldSetter(field.getKey(), null));
     }
     
     // Define the shared methods.
     for (Entry<String, List<FnExpr>> methods : expr.getSharedMethods().entrySet()) {
       for (FnExpr method : methods.getValue()) {
         FnObj methodObj = mInterpreter.createFn(method);
-        classObj.addMethod(methods.getKey(), methodObj);
+        metaclass.addInstanceMethod(methods.getKey(), methodObj);
       }
     }
     
@@ -200,23 +215,27 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     
     // Define the getters and setters for the fields.
     for (String field : expr.getFields().keySet()) {
+      // Note that we don't provide type expressions for the fields here because
+      // we only know the initializer expression. We don't have an actual type
+      // annotation.
+      
       // Add a getter.
       classObj.addInstanceMethod(field,
-          new NativeMethod.ClassFieldGetter(field));
+          new NativeMethod.ClassFieldGetter(field, null));
       
       // Add a setter.
       classObj.addInstanceMethod(field + "=",
-          new NativeMethod.ClassFieldSetter(field));
+          new NativeMethod.ClassFieldSetter(field, null));
     }
     
-    for (String field : expr.getFieldDeclarations().keySet()) {
+    for (Entry<String, Expr> entry : expr.getFieldDeclarations().entrySet()) {
       // Add a getter.
-      classObj.addInstanceMethod(field,
-          new NativeMethod.ClassFieldGetter(field));
+      classObj.addInstanceMethod(entry.getKey(),
+          new NativeMethod.ClassFieldGetter(entry.getKey(), entry.getValue()));
       
       // Add a setter.
-      classObj.addInstanceMethod(field + "=",
-          new NativeMethod.ClassFieldSetter(field));
+      classObj.addInstanceMethod(entry.getKey() + "=",
+          new NativeMethod.ClassFieldSetter(entry.getKey(), entry.getValue()));
     }
     
     // Add the field initializers to the class so it can evaluate them when an
