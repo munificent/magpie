@@ -158,7 +158,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       metaclass = classObj.getClassObj();
     } else {
       // Create a metaclass. This will be the class of the class. It will hold
-      // the shared methods off the class. So, if we're defining a class "Foo"
+      // the shared methods of the class. So, if we're defining a class "Foo"
       // with a shared method "bar", we will create a metaclass FooClass. It
       // will have an *instance* method "bar", and there will be one instance
       // of this metaclass: Foo.

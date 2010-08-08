@@ -99,7 +99,6 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       // Invoke the setter.
       return setter.invoke(mInterpreter, target, value);
       */
-      System.out.println("Checking complex assignment is not implemented.");
       return mInterpreter.getDynamicType();
     }
   }
@@ -127,14 +126,12 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(CallExpr expr, EvalContext context) {
     // TODO(bob): Implement me.
-    System.out.println("Call expressions are not implemented.");
     return mInterpreter.getDynamicType();
   }
 
   @Override
   public Obj visit(ClassExpr expr, EvalContext context) {
     // TODO(bob): Implement me.
-    System.out.println("Checking class expressions is not implemented.");
     return mInterpreter.getDynamicType();
   }
 
