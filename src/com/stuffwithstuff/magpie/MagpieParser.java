@@ -13,6 +13,10 @@ public class MagpieParser extends Parser {
     List<Expr> expressions = new ArrayList<Expr>();
     do {
       expressions.add(expression());
+      
+      // Allow files with no trailing newline.
+      if (match(TokenType.EOF)) break;
+      
       consume(TokenType.LINE);
     } while (!match(TokenType.EOF));
 
@@ -420,6 +424,7 @@ public class MagpieParser extends Parser {
     //
     //     // 4. method definitions
     //     doSomething (a Int) ...
+    //     + (other) ...
     //
     //     // 5. shared field declarations
     //     shared x Int
@@ -440,7 +445,8 @@ public class MagpieParser extends Parser {
       } else {
         // Member declaration.
         boolean isShared = match(TokenType.SHARED);
-        String member = consume(TokenType.NAME).getString();
+        String member = consumeAny(TokenType.NAME, TokenType.OPERATOR)
+            .getString();
         
         // See what kind of member it is.
         if (match(TokenType.EQUALS)) {
@@ -454,7 +460,8 @@ public class MagpieParser extends Parser {
           classExpr.defineMethod(isShared, member, function);
         } else {
           // Field declaration.
-          if (isShared) throw new ParseException("Field declarations cannot be shared.");
+          if (isShared) throw new ParseException(
+              "Field declarations cannot be shared.");
           
           Expr type = typeDeclaration();
           classExpr.declareField(member, type);
@@ -538,7 +545,11 @@ public class MagpieParser extends Parser {
   }
   
   private Expr typeDeclaration() {
-    // TODO(bob): Support more than just named types.
-    return new NameExpr(consume(TokenType.NAME));
+    // Any Magpie expression can be used as a type declaration. If omitted, it
+    // defaults to dynamically typed.
+    Expr type = primary();
+    if (type != null) return type;
+    
+    return new NameExpr("Dynamic");
   }
 }

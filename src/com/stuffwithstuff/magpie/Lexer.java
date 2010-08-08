@@ -13,6 +13,7 @@ public class Lexer {
     mIndex = 0;
     mTokenStart = 0;
     mLine = 1;
+    mCol = 1;
     
     // Ignore starting lines.
     mEatLines = true;
@@ -90,7 +91,6 @@ public class Lexer {
       if (isAlpha(c)) return startToken(LexState.IN_NAME);
       if (isOperator(c)) return startToken(LexState.IN_OPERATOR);
       if (isDigit(c)) return startToken(LexState.IN_NUMBER);
-      if (isAlpha(c)) return startToken(LexState.IN_NAME);
 
       // Ignore whitespace.
       if (match(" ")) return null;
@@ -100,82 +100,97 @@ public class Lexer {
       return new Token(lastCharacterPosition(), TokenType.EOF);
 
     case IN_NAME:
-      if (isAlpha(c) || isDigit(c) || isOperator(c)) {
-        advance();
-        return null;
-      } else {
+      if (lookAhead("//")) {
         return createStringToken(TokenType.NAME);
       }
+      if (lookAhead("/*")) {
+        return createStringToken(TokenType.NAME);
+      }
+      if (isAlpha(c) || isDigit(c) || isOperator(c)) {
+        return advance();
+      }
+      return createStringToken(TokenType.NAME);
 
     case IN_OPERATOR:
-      if (isOperator(c) || isAlpha(c) || isDigit(c)) {
-        advance();
-        return null;
-      } else {
+      if (lookAhead("//")) {
         return createStringToken(TokenType.OPERATOR);
       }
+      if (lookAhead("/*")) {
+        return createStringToken(TokenType.OPERATOR);
+      }
+      if (isOperator(c) || isAlpha(c) || isDigit(c)) {
+        return advance();
+      }
+      return createStringToken(TokenType.OPERATOR);
 
     case IN_NUMBER:
       if (isDigit(c)) {
-        advance();
-        return null;
-      } else if (c == '.') {
-        return changeToken(LexState.IN_DECIMAL);
-      } else {
-        return createIntToken(TokenType.INT);
+        return advance();
       }
+      if (c == '.') {
+        return changeToken(LexState.IN_DECIMAL);
+      }
+      return createIntToken(TokenType.INT);
 
     case IN_DECIMAL:
       if (isDigit(c)) {
         return changeToken(LexState.IN_FRACTION);
-      } else {
-        // Rollback to reprocess the dot.
-        mIndex--;
-        mCol--;
-        
-        return createIntToken(TokenType.INT);
       }
+
+      // Rollback to reprocess the dot.
+      mIndex--;
+      mCol--;
+      return createIntToken(TokenType.INT);
       
     case IN_FRACTION:
       if (isDigit(c)) {
-        advance();
-      } else {
-        return createDoubleToken(TokenType.DOUBLE);
+        return advance();
       }
+      return createDoubleToken(TokenType.DOUBLE);
       
     case IN_MINUS:
-      if (isDigit(c)) {
-        return changeToken(LexState.IN_NUMBER);
-      } else if (isOperator(c) || isAlpha(c)) {
-        return changeToken(LexState.IN_OPERATOR);
-      } else {
+      if (lookAhead("//")) {
         return createStringToken(TokenType.OPERATOR);
       }
+      if (lookAhead("/*")) {
+        return createStringToken(TokenType.OPERATOR);
+      }
+      if (isDigit(c)) {
+        return changeToken(LexState.IN_NUMBER);
+      }
+      if (isOperator(c) || isAlpha(c)) {
+        return changeToken(LexState.IN_OPERATOR);
+      }
+      return createStringToken(TokenType.OPERATOR);
 
     case IN_STRING:
-      advance();
-      if (last(1).equals("\"")) {
+      if (match("\"")) {
         // Get the contained string without the quotes.
         String text = mText.substring(mTokenStart + 1, mIndex - 1);
         mState = LexState.DEFAULT;
         return new Token(currentPosition(), TokenType.STRING, text);
-      } else {
-        // Consume other characters.
-        return null;
       }
+      // Consume other characters.
+      return advance();
 
     case IN_LINE_COMMENT:
       if (match("\n") || match("\r")) {
         mState = LexState.DEFAULT;
         return new Token(lastCharacterPosition(), TokenType.LINE, last(1));
-      } else {
-        // Ignore everything else.
-        advance();
+      }
+      // Ignore everything else.
+      return advance();
+      
+    case IN_BLOCK_COMMENT:
+      if (match("*/")) {
+        mState = LexState.DEFAULT;
         return null;
       }
+      // Ignore everything else.
+      return advance();
       
     default:
-      throw new Error("Unexpected lex state.");
+      throw new ParseException("Unexpected lex state.");
     }
   }
   
@@ -274,16 +289,20 @@ public class Lexer {
     return new Position(mSourceFile, mLine, mCol - 1, mLine, mCol);
   }
   
-  private void advance() {
+  private Token advance() {
     mIndex++;
 
     // Update the position.
-    if (last(1).equals("\n")) {
+    if ((mIndex < mText.length()) && last(1).equals("\n")) {
       mLine++;
-      mCol = 0;
+      mCol = 1;
     } else {
       mCol++;
     }
+    
+    // Return whether or not we've advanced to the end.
+    if (mIndex < mText.length()) return null;
+    return new Token(Position.none(), TokenType.EOF);
   }
   
   private void advance(int count) {

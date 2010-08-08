@@ -59,6 +59,28 @@ public abstract class Parser {
     }
   }
 
+  protected Token consumeAny(TokenType... types) {
+    for (int i = 0; i < types.length; i++) {
+      if (match(types[i])) return last(1);
+    }
+    
+    StringBuilder builder = new StringBuilder();
+    builder.append("Expected ");
+    
+    for (int i = 0; i < types.length; i++) {
+      builder.append(types[i]);
+
+      if (i < types.length - 2) {
+        builder.append(", ");
+      } else if (i < types.length - 2) {
+        builder.append(" or ");
+      }
+    }
+    
+    builder.append("and found ").append(lookAhead(0));
+    throw new ParseException(builder.toString());
+  }
+
   private Token lookAhead(int distance) {
     // read in as many as needed
     while (distance >= mRead.size()) {

@@ -86,7 +86,7 @@ public class TestInterpreterHost implements InterpreterHost {
     } catch (IOException ex) {
       fail("Couldn't load file: " + ex.toString());
     } catch (ParseException ex) {
-      fail("Parse error: " + ex.toString());
+      fail(mPath + ": " + ex.toString());
     }
     return mSuccess;
   }
@@ -129,8 +129,8 @@ public class TestInterpreterHost implements InterpreterHost {
     FileInputStream stream = new FileInputStream(path);
 
     try {
-      InputStreamReader input = new InputStreamReader(stream, Charset
-          .defaultCharset());
+      InputStreamReader input = new InputStreamReader(
+          stream, Charset.forName("UTF-8"));
       Reader reader = new BufferedReader(input);
 
       StringBuilder builder = new StringBuilder();
