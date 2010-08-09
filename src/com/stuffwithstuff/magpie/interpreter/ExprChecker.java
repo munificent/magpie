@@ -225,6 +225,13 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
+  public Obj visit(ReturnExpr expr, EvalContext context) {
+    // TODO(bob): Implement me.
+    System.out.println("Return expressions are not implemented.");
+    return mInterpreter.getDynamicType();
+  }
+
+  @Override
   public Obj visit(StringExpr expr, EvalContext context) {
     return mInterpreter.getStringType();
   }

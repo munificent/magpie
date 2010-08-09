@@ -14,6 +14,7 @@ public interface ExprVisitor<R, C> {
   R visit(MethodExpr expr, C context);
   R visit(NameExpr expr, C context);
   R visit(NothingExpr expr, C context);
+  R visit(ReturnExpr expr, C context);
   R visit(StringExpr expr, C context);
   R visit(ThisExpr expr, C context);
   R visit(TupleExpr expr, C context);

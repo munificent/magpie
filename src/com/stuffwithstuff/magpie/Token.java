@@ -60,6 +60,7 @@ public final class Token {
       case IF: return "if";
       case LET: return "let";
       case MATCH: return "match";
+      case RETURN: return "return";
       case SHARED: return "shared";
       case THEN: return "then";
       case THIS: return "this";

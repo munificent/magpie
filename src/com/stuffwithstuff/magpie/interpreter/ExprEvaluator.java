@@ -312,6 +312,12 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
+  public Obj visit(ReturnExpr expr, EvalContext context) {
+    Obj value = evaluate(expr.getValue(), context);
+    throw new ReturnException(value);
+  }
+
+  @Override
   public Obj visit(StringExpr expr, EvalContext context) {
     return mInterpreter.createString(expr.getValue());
   }
@@ -345,6 +351,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     
     return method.invoke(mInterpreter, receiver, arg);
   }
-
+  
   private final Interpreter mInterpreter;
 }

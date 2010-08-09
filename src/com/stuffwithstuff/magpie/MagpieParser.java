@@ -195,8 +195,14 @@ public class MagpieParser extends Parser {
       }
       
       return new LoopExpr(Position.union(startPos, body.getPosition()), conditions, body);
-    }
-    else return assignment();
+    } else if (match(TokenType.RETURN)) {
+      Position position = last(1).getPosition();
+      if (lookAhead(TokenType.LINE)) {
+        return new ReturnExpr(position, new NothingExpr(position));
+      } else {
+        return new ReturnExpr(position, expression());
+      }
+    } else return assignment();
   }
   
   private Expr assignment() {

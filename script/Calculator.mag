@@ -25,31 +25,29 @@ class TokenIterator
 
     // Iterator
     next (-> Bool)
-        if start >= text.count then false
-        else
-            // skip over whitespace
-            while start < text.count
-            while text.(start) == " " do
-                start = start + 1
-            end
+        if start >= text.count then return false
 
-            // if we had whitespace until the very end, just stop
-            if start >= text.count then false
-            else
-                // now walk the stop forward until we hit whitespace or the end
-                var stop = start
-                while stop < text.count
-                while text.(stop) != " " do
-                    stop = stop + 1
-                end
-                
-                // store the token we got
-                current = text.substring (start, stop)
-                // and move past it
-                start = stop
-                true
-            end
+        // skip over whitespace
+        while start < text.count
+        while text.(start) == " " do
+            start = start + 1
         end
+
+        // if we had whitespace until the very end, just stop
+        if start >= text.count then return false
+
+        // now walk the stop forward until we hit whitespace or the end
+        var stop = start
+        while stop < text.count
+        while text.(stop) != " " do
+            stop = stop + 1
+        end
+        
+        // store the token we got
+        current = text.substring (start, stop)
+        // and move past it
+        start = stop
+        true
     end
     
     text    String
