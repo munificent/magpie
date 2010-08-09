@@ -337,7 +337,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     
     if (method == null) {
       mInterpreter.runtimeError(expr,
-          "Could not find a variable or method named \"%s\".", name);
+          "Could not find a variable or method named \"%s\" on %s.",
+          name, receiver.getClassObj());
       
       return mInterpreter.nothing();
     }

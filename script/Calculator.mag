@@ -1,0 +1,63 @@
+// This implements an RPN calculator.
+
+print "RPN"
+
+// sqrt(3^2 + (4^2))
+var source = "3 2 ^ 4 2 ^ + sqrt"
+
+class Tokenizer
+    this (text String)
+        this.text = text
+    end
+    
+    // Iteratable
+    iterate (-> TokenIterator) TokenIterator.new text
+    
+    text String
+end
+
+class TokenIterator
+    this (text String)
+        this.text = text
+        this.current = ""
+        this.start = 0
+    end
+
+    // Iterator
+    next (-> Bool)
+        if start >= text.count then false
+        else
+            // skip over whitespace
+            while start < text.count
+            while text.(start) == " " do
+                start = start + 1
+            end
+
+            // if we had whitespace until the very end, just stop
+            if start >= text.count then false
+            else
+                // now walk the stop forward until we hit whitespace or the end
+                var stop = start
+                while stop < text.count
+                while text.(stop) != " " do
+                    stop = stop + 1
+                end
+                
+                // store the token we got
+                current = text.substring (start, stop)
+                // and move past it
+                start = stop
+                true
+            end
+        end
+    end
+    
+    text    String
+    current String
+    start   Int
+end
+
+var tokenizer = Tokenizer.new source
+for token = tokenizer do
+    print ("(" + token + ")")
+end

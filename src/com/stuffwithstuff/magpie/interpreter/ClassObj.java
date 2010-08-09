@@ -76,6 +76,11 @@ public class ClassObj extends Obj {
     mFieldInitializers = fields;
   }
   
+  @Override
+  public String toString() {
+    return mName;
+  }
+  
   private final String mName;
   private ClassObj mParent;
   private Invokable mConstructor;

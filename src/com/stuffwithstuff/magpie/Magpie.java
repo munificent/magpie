@@ -1,7 +1,6 @@
 package com.stuffwithstuff.magpie;
 
 import java.io.*;
-import java.nio.charset.Charset;
 import java.util.*;
 
 public class Magpie {
@@ -10,11 +9,16 @@ public class Magpie {
    * @param args
    */
   public static void main(String[] args) {
-    System.out.println("magpie");
-    System.out.println("------");
-    
-    System.out.println("Running test suite...");
-    runTestScripts();
+    if (args.length == 0) {
+      // With no command line args, just runs the test suite and quits.
+      System.out.println("magpie");
+      System.out.println("------");
+      System.out.println("Running test suite...");
+      runTestScripts();
+    } else if (args.length == 1) {
+      // One command line arg: load the script at that path and run it.
+      runScript(args[0]);
+    }
     
     // TODO(bob): REPL is dead for now.
     /*
@@ -59,6 +63,15 @@ public class Magpie {
     }*/
   }
   
+  private static void runScript(String path) {
+    try {
+      Script script = Script.fromPath(path);
+      script.execute();
+    } catch (IOException ex) {
+      System.out.println("Could not load " + path);
+    }
+  }
+  
   private static void runTestScripts() {
     int tests   = 0;
     int success = 0;
@@ -73,7 +86,7 @@ public class Magpie {
     System.out.println("Passed " + success + " out of " + tests + " tests.");
   }
   
-private static boolean runTestScript(File script) {      
+  private static boolean runTestScript(File script) {      
     TestInterpreterHost host = new TestInterpreterHost(script.getPath());
     return host.run();
   }

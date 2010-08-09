@@ -68,8 +68,12 @@ public class Interpreter {
     mIntClass.addMethod(">=", new NativeMethod.IntGreaterThanOrEqual());
 
     mStringClass = createGlobalClass("String");
-    mStringClass.addMethod("+",     new NativeMethod.StringPlus());
-    mStringClass.addMethod("print", new NativeMethod.StringPrint());
+    mStringClass.addMethod("+",         new NativeMethod.StringPlus());
+    mStringClass.addMethod("==",        new NativeMethod.StringEquals());
+    mStringClass.addMethod("print",     new NativeMethod.StringPrint());
+    mStringClass.addMethod("at",        new NativeMethod.StringAt());
+    mStringClass.addMethod("substring", new NativeMethod.StringSubstring());
+    mStringClass.addMethod("count",     new NativeMethod.StringCount());
 
     // TODO(bob): At some point, may want different tuple types based on the
     // types of the fields.

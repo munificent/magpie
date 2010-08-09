@@ -159,7 +159,7 @@ public class MagpieParser extends Parser {
           // Initialize the generator before the loop.
           String generatorVar = variable + " gen";
           generators.add(new DefineExpr(position, generatorVar,
-              new MethodExpr(generator, "generate", new NothingExpr(position))));
+              new MethodExpr(generator, "iterate", new NothingExpr(position))));
           
           // The the condition expression just increments the generator.
           conditions.add(new MethodExpr(

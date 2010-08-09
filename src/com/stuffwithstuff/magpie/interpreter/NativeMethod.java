@@ -392,6 +392,19 @@ public abstract class NativeMethod implements Invokable {
     public Expr getReturnType() { return new NameExpr("String"); }
   }
 
+  public static class StringEquals extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      String left = thisObj.asString();
+      String right = arg.asString();
+      
+      return interpreter.createBool(left.equals(right));
+    }
+    
+    public Expr getParamType() { return new NameExpr("String"); }
+    public Expr getReturnType() { return new NameExpr("String"); }
+  }
+
   public static class StringPrint extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
@@ -402,7 +415,49 @@ public abstract class NativeMethod implements Invokable {
     public Expr getParamType() { return new NameExpr("Nothing"); }
     public Expr getReturnType() { return new NameExpr("Nothing"); }
   }
+
+  public static class StringAt extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int index = arg.asInt();
+      String c = thisObj.asString().substring(index, index + 1);
+      return interpreter.createString(c);
+    }
+    
+    public Expr getParamType() { return new NameExpr("Int"); }
+    public Expr getReturnType() { return new NameExpr("String"); }
+  }
+
+  public static class StringSubstring extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      // TODO(bob): Hackish way to see if we have one or two arguments to this.
+      if (arg.getTupleField(0) != null) {
+        int startIndex = arg.getTupleField(0).asInt();
+        int endIndex = arg.getTupleField(1).asInt();
+        String substring = thisObj.asString().substring(startIndex, endIndex);
+        return interpreter.createString(substring);
+      } else {
+        int startIndex = arg.asInt();
+        String substring = thisObj.asString().substring(startIndex);
+        return interpreter.createString(substring);
+      }
+    }
+    
+    public Expr getParamType() { return new NameExpr("Nothing"); }
+    public Expr getReturnType() { return new NameExpr("Int"); }
+  }
   
+  public static class StringCount extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      return interpreter.createInt(thisObj.asString().length());
+    }
+    
+    public Expr getParamType() { return new NameExpr("Nothing"); }
+    public Expr getReturnType() { return new NameExpr("Int"); }
+  }
+
   // Tuple methods:
 
   public static class TupleGetField extends NativeMethod {

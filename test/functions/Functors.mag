@@ -6,3 +6,6 @@ var foo = Foo.new
 
 foo "hey" //: apply hey
 (Foo.new) "also" //: apply also
+
+foo."hey" //: apply hey
+(Foo.new)."also" //: apply also

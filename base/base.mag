@@ -1,4 +1,4 @@
-class RangeGenerator
+class RangeIterator
     this (start Int, stop Int)
         // rollback so the first call to next advances to the first
         current = start - 1
@@ -23,14 +23,21 @@ class Range
     start Int
     stop  Int
     
-    generate (-> RangeGenerator)
-        RangeGenerator.new (start, stop)
+    iterate (-> RangeIterator)
+        RangeIterator.new (start, stop)
     end
 end
 
-// Add generator methods on Ints.
+// Extend the built-in classes.
+
 extend Int
+    // Add generator methods on Ints.
     times (-> Range) Range.new (0, this - 1)
     to (last Int -> Range) Range.new (this, last)
     until (last Int -> Range) Range.new (this, last - 1)
+end
+
+extend String
+    != (other String -> Bool) not (this == other)
+    apply (index Int -> String) this.at index
 end
