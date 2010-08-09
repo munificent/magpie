@@ -271,7 +271,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       for (Expr conditionExpr : expr.getConditions()) {
         // See if the while clause is still true.
         Obj condition = evaluate(conditionExpr, context);
-        if (((Boolean)condition.getPrimitiveValue()).booleanValue() != true) {
+        if (!condition.asBool()) {
           done = true;
           break;
         }

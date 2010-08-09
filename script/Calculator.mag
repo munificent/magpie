@@ -2,8 +2,7 @@
 
 print "RPN"
 
-// sqrt(3^2 + (4^2))
-var source = "3 2 ^ 4 2 ^ + sqrt"
+var tokenize (text String -> Tokenizer) Tokenizer.new text
 
 class Tokenizer
     this (text String)
@@ -55,7 +54,61 @@ class TokenIterator
     start   Int
 end
 
-var tokenizer = Tokenizer.new source
-for token = tokenizer do
-    print ("(" + token + ")")
+class StackItem
+    this (item, rest)
+        this.item = item
+        this.rest = rest
+    end
+    
+    item Dynamic
+    rest StackItem
 end
+
+class Stack
+    push (item)
+        top = StackItem.new (item, top)
+    end
+    
+    pop ()
+        var item = top.item
+        top = top.rest
+        item
+    end
+    
+    count (-> Int)
+        var count = 0
+        var stack = this.top
+        while stack != () do
+            stack = stack.rest
+            count = count + 1
+        end
+        count
+    end
+    
+    top StackItem
+end
+
+// sqrt(3^2 + (4^2))
+var source = "3 2 ^ 4 2 ^ + sqrt"
+
+var stack = Stack.new
+
+for token = tokenize source do
+    let i = Int.parse token then
+        stack.push i
+        print ("push " + token)
+    else if token == "+" then
+        var right = stack.pop
+        var left  = stack.pop
+        var sum   = left + right
+        stack.push sum
+    else if token == "^" then
+        print "exponent"
+    else if token == "sqrt" then
+        print "square root"
+    else
+        print ("unknown op " + token)
+    end
+end
+
+print ("result: " + stack.pop.toString)

@@ -77,13 +77,13 @@ public class Obj {
   
   @Override
   public String toString() {
-    // Use the object's name if it has one.
-    Obj name = mFields.get("name");
-    if (name != null) return name.getPrimitiveValue().toString();
-    
-    // Else try its value.
-    if (mPrimitiveValue == null) return "()";
-    return mPrimitiveValue.toString();
+    if (mPrimitiveValue instanceof String) {
+      return "\"" + mPrimitiveValue + "\"";
+    } else if (mPrimitiveValue != null) {
+      return mPrimitiveValue.toString();
+    }
+
+    return "Instance of " + mClass.getName();
   }
   
   private final ClassObj mClass;

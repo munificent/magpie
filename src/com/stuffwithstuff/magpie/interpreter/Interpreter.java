@@ -40,6 +40,7 @@ public class Interpreter {
     // metaclass is the main metaclass Class.
     mObjectClass = new ClassObj(mClass, "Object", null);
     mObjectClass.addMethod("type", new NativeMethod.ObjectGetType());
+    mObjectClass.addMethod("==", new NativeMethod.ObjectEqual());
     mGlobalScope.define("Object", mObjectClass);
     
     // Now that both Class and Object exist, wire them up.
@@ -55,6 +56,7 @@ public class Interpreter {
     mFnClass.addMethod("apply", new NativeMethod.FunctionApply());
     
     mIntClass = createGlobalClass("Int");
+    mIntClass.getClassObj().addMethod("parse", new NativeMethod.IntParse());
     mIntClass.addMethod("+", new NativeMethod.IntPlus());
     mIntClass.addMethod("-", new NativeMethod.IntMinus());
     mIntClass.addMethod("*", new NativeMethod.IntMultiply());

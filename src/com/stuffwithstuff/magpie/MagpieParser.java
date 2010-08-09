@@ -525,9 +525,9 @@ public class MagpieParser extends Parser {
   /**
    * Parses a function type declaration. Valid examples include:
    * (->)           // takes nothing, returns nothing
+   * ()             // takes nothing, returns dynamic
    * (a)            // takes a single dynamic, returns dynamic
    * (a ->)         // takes a single dynamic, returns nothing
-   * ()             // takes dynamic, returns a dynamic
    * (a Int -> Int) // takes and returns an int
    * 
    * @param paramNames After calling, will contain the list of parameter names.

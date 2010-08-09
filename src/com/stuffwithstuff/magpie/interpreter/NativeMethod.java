@@ -129,7 +129,9 @@ public abstract class NativeMethod implements Invokable {
     
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      return thisObj.getField(mName);
+      Obj value = thisObj.getField(mName);
+      if (value == null) return interpreter.nothing();
+      return value;
     }
     
     public Expr getParamType() { return new NameExpr("Nothing"); }
@@ -213,6 +215,23 @@ public abstract class NativeMethod implements Invokable {
   
   // Int methods:
   
+  public static class IntParse extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      String text = arg.asString();
+      
+      try {
+        int value = Integer.parseInt(text);
+        return interpreter.createInt(value);
+      } catch (NumberFormatException ex) {
+        return interpreter.nothing();
+      }
+    }
+    
+    public Expr getParamType() { return new NameExpr("Int"); }
+    public Expr getReturnType() { return new NameExpr("Int"); }
+  }
+
   public static class IntPlus extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
@@ -375,6 +394,16 @@ public abstract class NativeMethod implements Invokable {
 
     public Expr getParamType() { return new NameExpr("Nothing"); }
     public Expr getReturnType() { return new NameExpr("Class"); }
+  }
+  
+  public static class ObjectEqual extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      return interpreter.createBool(thisObj == arg);
+    }
+    
+    public Expr getParamType() { return new NameExpr("Int"); }
+    public Expr getReturnType() { return new NameExpr("Bool"); }
   }
 
   // String methods:

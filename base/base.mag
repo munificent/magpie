@@ -30,6 +30,10 @@ end
 
 // Extend the built-in classes.
 
+extend Object
+    != (other -> Bool) not (this == other)
+end
+
 extend Int
     // Add generator methods on Ints.
     times (-> Range) Range.new (0, this - 1)
@@ -38,6 +42,5 @@ extend Int
 end
 
 extend String
-    != (other String -> Bool) not (this == other)
     apply (index Int -> String) this.at index
 end
