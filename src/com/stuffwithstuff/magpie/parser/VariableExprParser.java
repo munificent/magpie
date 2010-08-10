@@ -3,12 +3,12 @@ package com.stuffwithstuff.magpie.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.stuffwithstuff.magpie.ast.DefineExpr;
+import com.stuffwithstuff.magpie.ast.VariableExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
 import com.stuffwithstuff.magpie.ast.FunctionType;
 
-public class DefineExprParser implements ExprParser {
+public class VariableExprParser implements ExprParser {
 
   @Override
   public Expr parse(MagpieParser parser) {
@@ -29,14 +29,14 @@ public class DefineExprParser implements ExprParser {
       // Desugar it to: def foo = fn () blah
       FnExpr function = new FnExpr(Position.union(fnPosition, body.getPosition()),
           paramNames, type.getParamType(), type.getReturnType(), body);
-      return new DefineExpr(Position.union(startPos, function.getPosition()),
+      return new VariableExpr(Position.union(startPos, function.getPosition()),
           name, function);
     } else {
       // Just a regular variable definition.
       parser.consume(TokenType.EQUALS);
       
       Expr value = parser.parseExpression();
-      return new DefineExpr(Position.union(startPos, value.getPosition()),
+      return new VariableExpr(Position.union(startPos, value.getPosition()),
           name, value);
     }
   }

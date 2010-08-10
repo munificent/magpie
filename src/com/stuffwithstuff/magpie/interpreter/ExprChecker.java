@@ -130,18 +130,6 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
-  public Obj visit(DefineExpr expr, EvalContext context) {
-    Obj value = check(expr.getValue(), context);
-
-    // Variables cannot be of type Nothing.
-    errorIf(value == mInterpreter.getNothingType(), expr,
-        "Cannot declare a variable \"%s\" of type Nothing.", expr.getName());
-    
-    context.define(expr.getName(), value);
-    return value;
-  }
-
-  @Override
   public Obj visit(FnExpr expr, EvalContext context) {
     // Check the body of the function.
     check(expr, context);
@@ -238,6 +226,18 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   
   private Obj check(Expr expr, EvalContext context) {
     return expr.accept(this, context);
+  }
+
+  @Override
+  public Obj visit(VariableExpr expr, EvalContext context) {
+    Obj value = check(expr.getValue(), context);
+
+    // Variables cannot be of type Nothing.
+    errorIf(value == mInterpreter.getNothingType(), expr,
+        "Cannot declare a variable \"%s\" of type Nothing.", expr.getName());
+    
+    context.define(expr.getName(), value);
+    return value;
   }
 
   /**

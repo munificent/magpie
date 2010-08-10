@@ -2,8 +2,8 @@ package com.stuffwithstuff.magpie.ast;
 
 import com.stuffwithstuff.magpie.parser.Position;
 
-public class DefineExpr extends Expr {
-  public DefineExpr(Position position, String name, Expr value) {
+public class VariableExpr extends Expr {
+  public VariableExpr(Position position, String name, Expr value) {
     super(position);
     mName = name;
     mValue = value;

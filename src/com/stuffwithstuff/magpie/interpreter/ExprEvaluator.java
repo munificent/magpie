@@ -173,14 +173,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
-  public Obj visit(DefineExpr expr, EvalContext context) {
-    Obj value = evaluate(expr.getValue(), context);
-
-    context.define(expr.getName(), value);
-    return value;
-  }
-
-  @Override
   public Obj visit(FnExpr expr, EvalContext context) {
     return mInterpreter.createFn(expr);
   }
@@ -314,6 +306,14 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     }
 
     return mInterpreter.createTuple(context, fields);
+  }
+
+  @Override
+  public Obj visit(VariableExpr expr, EvalContext context) {
+    Obj value = evaluate(expr.getValue(), context);
+
+    context.define(expr.getName(), value);
+    return value;
   }
 
   private Obj invokeMethod(Expr expr, Obj receiver, String name, Obj arg) {
