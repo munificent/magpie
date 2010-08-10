@@ -1,17 +1,17 @@
 class Foo
     prop = "old"
-    change () prop = "new"
+    change() prop = "new"
 end
 
 class Bar
-    foo = Foo.new
+    foo = Foo new
 end
 
-var a = Bar.new
-var b = Bar.new
+var a = Bar new
+var b = Bar new
 
-print a.foo.prop //: old
-print b.foo.prop //: old
-a.foo.change
-print a.foo.prop //: new
-print b.foo.prop //: old
+print(a foo prop) //: old
+print(b foo prop) //: old
+a foo change
+print(a foo prop) //: new
+print(b foo prop) //: old

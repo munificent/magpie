@@ -41,6 +41,7 @@ public class Interpreter {
     mObjectClass = new ClassObj(mClass, "Object", null);
     mObjectClass.addMethod("type", new NativeMethod.ObjectGetType());
     mObjectClass.addMethod("==", new NativeMethod.ObjectEqual());
+    mObjectClass.addMethod("print",    new NativeMethod.ObjectPrint());
     mGlobalScope.define("Object", mObjectClass);
     
     // Now that both Class and Object exist, wire them up.
@@ -72,7 +73,6 @@ public class Interpreter {
     mStringClass = createGlobalClass("String");
     mStringClass.addMethod("+",         new NativeMethod.StringPlus());
     mStringClass.addMethod("==",        new NativeMethod.StringEquals());
-    mStringClass.addMethod("print",     new NativeMethod.StringPrint());
     mStringClass.addMethod("at",        new NativeMethod.StringAt());
     mStringClass.addMethod("substring", new NativeMethod.StringSubstring());
     mStringClass.addMethod("count",     new NativeMethod.StringCount());
@@ -80,18 +80,16 @@ public class Interpreter {
     // TODO(bob): At some point, may want different tuple types based on the
     // types of the fields.
     mTupleClass = createGlobalClass("Tuple");
-    mTupleClass.addMethod("apply", new NativeMethod.TupleGetField());
     mTupleClass.addMethod("count", new NativeMethod.ClassFieldGetter("count",
-        new NameExpr("Int")));
-    
+        Expr.name("Int")));
     // TODO(bob): Hackish.
     for (int i = 0; i < 20; i++) {
-      String name = Integer.toString(i);
+      String name = "_" + Integer.toString(i);
       // TODO(bob): Using dynamic as the type here is lame. Ideally, there would
       // be a separate tuple class for each set of tuple field types and it
       // would have field getters that were typed to match the fields.
       mTupleClass.addMethod(name, new NativeMethod.ClassFieldGetter(name,
-          new NameExpr("Dynamic")));
+          Expr.name("Dynamic")));
     }
     
     mNothingClass = createGlobalClass("Nothing");
@@ -179,7 +177,7 @@ public class Interpreter {
     
     // Create the class object itself. This will hold the instance methods for
     // objects of the class.
-    ClassObj classObj = new ClassObj(metaclass, name, mClass);
+    ClassObj classObj = new ClassObj(metaclass, name, mObjectClass);
     scope.define(name, classObj);
     
     return classObj;
@@ -193,7 +191,7 @@ public class Interpreter {
     // A tuple is an object with fields whose names are zero-based numbers.
     Obj tuple = mTupleClass.instantiate();
     for (int i = 0; i < fields.length; i++) {
-      String name = Integer.toString(i);
+      String name = "_" + Integer.toString(i);
       tuple.setField(name, fields[i]);
     }
     

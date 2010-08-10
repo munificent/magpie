@@ -1,46 +1,46 @@
 class RangeIterator
-    this (start Int, stop Int)
+    this(start Int, stop Int)
         // rollback so the first call to next advances to the first
         current = start - 1
-        this.stop = stop
+        this stop = stop
     end
     
     current Int
     stop    Int
     
-    next (-> Bool)
+    next(-> Bool)
         current = current + 1
         current <= stop
     end
 end
 
 class Range
-    this (start Int, stop Int)
-        this.start = start
-        this.stop = stop
+    this(start Int, stop Int)
+        this start = start
+        this stop = stop
     end
     
     start Int
     stop  Int
     
-    iterate (-> RangeIterator)
-        RangeIterator.new (start, stop)
+    iterate(-> RangeIterator)
+        RangeIterator new(start, stop)
     end
 end
 
 // Extend the built-in classes.
 
 extend Object
-    != (other -> Bool) not (this == other)
+    != (other -> Bool) (this == other) not
 end
 
 extend Int
     // Add generator methods on Ints.
-    times (-> Range) Range.new (0, this - 1)
-    to (last Int -> Range) Range.new (this, last)
-    until (last Int -> Range) Range.new (this, last - 1)
+    times (-> Range) Range new(0, this - 1)
+    to (last Int -> Range) Range new(this, last)
+    until (last Int -> Range) Range new(this, last - 1)
 end
 
 extend String
-    apply (index Int -> String) this.at index
+    apply (index Int -> String) this at(index)
 end

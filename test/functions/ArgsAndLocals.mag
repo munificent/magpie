@@ -1,24 +1,24 @@
-var zero ()
+var zero()
     var local = "zero local"
-    print local
+    print(local)
 end
     
-var one (a String)
+var one(a String)
     var local = "one local"
-    print a
-    print local
+    print(a)
+    print(local)
 end
 
-var two (a String, b String)
+var two(a String, b String)
     var local = "two local"
-    print a
-    print b
-    print local
+    print(a)
+    print(b)
+    print(local)
 end
 
-zero ()                 //: zero local
-one "one"               //: one
+zero()                  //: zero local
+one("one")              //: one
                         //: one local
-two ("two a", "two b")  //: two a
+two("two a", "two b")   //: two a
                         //: two b
                         //: two local

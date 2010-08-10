@@ -2,17 +2,17 @@ class Foo
     bar = "a"
     bang = "b"
     
-    change ()
+    change()
         bar = "c"
-        this.bang = "d"
+        this bang = "d"
     end
 end
 
-var foo = Foo.new
-foo.change
+var foo = Foo new
+foo change
 
-print foo.bar         //: c
-print foo.bang        //: d
+print(foo bar)         //: c
+print(foo bang)        //: d
 
-foo.bar = "e"
-print foo.bar         //: e
+foo bar = "e"
+print(foo bar)         //: e

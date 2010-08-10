@@ -1,7 +1,7 @@
 var a = 1, "two", 3
 
-print a.0.toString      //: 1
-print a.1               //: two
-print a.2.toString      //: 3
+print(a _0 toString)      //: 1
+print(a _1)               //: two
+print(a _2 toString)      //: 3
 
-print a.count.toString  //: 3
+print(a count toString)  //: 3

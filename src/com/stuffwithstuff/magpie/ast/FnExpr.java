@@ -19,9 +19,9 @@ public class FnExpr extends Expr {
   }
   
   public List<String> getParamNames() { return mParamNames; }
-  public Expr getParamType() { return mParamType; }
+  public Expr getParamType()  { return mParamType; }
   public Expr getReturnType() { return mReturnType; }
-  public Expr   getBody() { return mBody; }
+  public Expr getBody()       { return mBody; }
 
   @Override
   public <R, C> R accept(ExprVisitor<R, C> visitor, C context) {

@@ -4,6 +4,10 @@ import com.stuffwithstuff.magpie.parser.Position;
 
 
 public abstract class Expr {
+  public static Expr name(String name) {
+    return new MessageExpr(Position.none(), null, name, null);
+  }
+  
   public Expr(Position position) {
     mPosition = position;
   }

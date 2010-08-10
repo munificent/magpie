@@ -3,18 +3,18 @@ class Bar
 end
 
 class Foo
-    bar = Bar.new
+    bar = Bar new
 
-    change ()
-        this.bar.bang = "d"
+    change()
+        this bar bang = "d"
     end
 end
 
-var foo = Foo.new
-print foo.bar.bang    //: b
+var foo = Foo new
+print(foo bar bang)    //: b
 
-foo.bar.bang = "c"
-print foo.bar.bang    //: c
+foo bar bang = "c"
+print(foo bar bang)    //: c
 
-foo.change
-print foo.bar.bang    //: d
+foo change
+print(foo bar bang)    //: d

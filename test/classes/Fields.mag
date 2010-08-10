@@ -3,14 +3,14 @@ class Foo
     bang = "b"
     
     printFields ()
-        print bar
-        print this.bang
+        print(bar)
+        print(this bang)
     end
 end
 
-var foo = Foo.new
-print foo.bar         //: a
-print foo.bang        //: b
+var foo = Foo new
+print(foo bar)        //: a
+print(foo bang)       //: b
 
-foo.printFields       //: a
+foo printFields       //: a
                       //: b

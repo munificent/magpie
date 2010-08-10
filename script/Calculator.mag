@@ -1,49 +1,49 @@
 // This implements an RPN calculator.
 
-print "RPN"
+print("RPN")
 
-var tokenize (text String -> Tokenizer) Tokenizer.new text
+var tokenize(text String -> Tokenizer) Tokenizer new(text)
 
 class Tokenizer
-    this (text String)
-        this.text = text
+    this(text String)
+        this text = text
     end
     
     // Iteratable
-    iterate (-> TokenIterator) TokenIterator.new text
+    iterate(-> TokenIterator) TokenIterator new(text)
     
     text String
 end
 
 class TokenIterator
-    this (text String)
-        this.text = text
-        this.current = ""
-        this.start = 0
+    this(text String)
+        this text = text
+        this current = ""
+        this start = 0
     end
 
     // Iterator
-    next (-> Bool)
-        if start >= text.count then return false
+    next(-> Bool)
+        if start >= text count then return false
 
         // skip over whitespace
-        while start < text.count
-        while text.(start) == " " do
+        while start < text count
+        while text at(start) == " " do
             start = start + 1
         end
 
         // if we had whitespace until the very end, just stop
-        if start >= text.count then return false
+        if start >= text count then return false
 
         // now walk the stop forward until we hit whitespace or the end
         var stop = start
-        while stop < text.count
-        while text.(stop) != " " do
+        while stop < text count
+        while text at(stop) != " " do
             stop = stop + 1
         end
         
         // store the token we got
-        current = text.substring (start, stop)
+        current = text substring(start, stop)
         // and move past it
         start = stop
         true
@@ -55,9 +55,9 @@ class TokenIterator
 end
 
 class StackItem
-    this (item, rest)
-        this.item = item
-        this.rest = rest
+    this(item, rest)
+        this item = item
+        this rest = rest
     end
     
     item Dynamic
@@ -65,21 +65,21 @@ class StackItem
 end
 
 class Stack
-    push (item)
-        top = StackItem.new (item, top)
+    push(item)
+        top = StackItem new(item, top)
     end
     
-    pop ()
-        var item = top.item
-        top = top.rest
+    pop()
+        var item = top item
+        top = top rest
         item
     end
     
-    count (-> Int)
+    count(-> Int)
         var count = 0
-        var stack = this.top
+        var stack = this top
         while stack != () do
-            stack = stack.rest
+            stack = stack rest
             count = count + 1
         end
         count
@@ -91,24 +91,24 @@ end
 // sqrt(3^2 + (4^2))
 var source = "3 2 ^ 4 2 ^ + sqrt"
 
-var stack = Stack.new
+var stack = Stack new
 
-for token = tokenize source do
-    let i = Int.parse token then
-        stack.push i
-        print ("push " + token)
+for token = tokenize apply(source) do
+    let i = Int parse(token) then
+        stack push(i)
+        print("push " + token)
     else if token == "+" then
-        var right = stack.pop
-        var left  = stack.pop
+        var right = stack pop
+        var left  = stack pop
         var sum   = left + right
-        stack.push sum
+        stack push(sum)
     else if token == "^" then
-        print "exponent"
+        print("exponent")
     else if token == "sqrt" then
-        print "square root"
+        print("square root")
     else
-        print ("unknown op " + token)
+        print("unknown op " + token)
     end
 end
 
-print ("result: " + stack.pop.toString)
+print("result: " + stack pop toString)

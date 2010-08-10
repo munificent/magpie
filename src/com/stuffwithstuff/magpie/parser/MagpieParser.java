@@ -152,7 +152,11 @@ public class MagpieParser extends Parser {
       
       // TODO(bob): Need to handle named parameter with no type as a dynamic
       // parameter.
-      paramTypes.add(parseTypeExpression());
+      if (!lookAheadAny(TokenType.ARROW, TokenType.COMMA, TokenType.RIGHT_PAREN)) {
+        paramTypes.add(parseTypeExpression());
+      } else {
+        paramTypes.add(Expr.name("Dynamic"));
+      }
       
       if (!match(TokenType.COMMA)) break;
     }
@@ -160,7 +164,7 @@ public class MagpieParser extends Parser {
     // Aggregate the parameter types into a single type.
     Expr paramType = null;
     switch (paramTypes.size()) {
-    case 0:  paramType = new NameExpr("Nothing"); break;
+    case 0:  paramType = Expr.name("Nothing"); break;
     case 1:  paramType = paramTypes.get(0); break;
     default: paramType = new TupleExpr(paramTypes);
     }
@@ -169,13 +173,13 @@ public class MagpieParser extends Parser {
     Expr returnType = null;
     if (match(TokenType.RIGHT_PAREN)) {
       // No return type, so infer dynamic.
-      returnType = new NameExpr("Dynamic");
+      returnType = Expr.name("Dynamic");
     } else {
       consume(TokenType.ARROW);
       
       if (lookAhead(TokenType.RIGHT_PAREN)) {
         // An arrow, but no return type, so infer nothing.
-        returnType = new NameExpr("Nothing");
+        returnType = Expr.name("Nothing");
       } else {
         returnType = parseTypeExpression();
       }
@@ -186,12 +190,8 @@ public class MagpieParser extends Parser {
   }
   
   public Expr parseTypeExpression() {
-    // Any Magpie expression can be used as a type declaration. If omitted, it
-    // defaults to dynamically typed.
-    Expr type = primary();
-    if (type != null) return type;
-    
-    return new NameExpr("Dynamic");
+    // Any Magpie expression can be used as a type declaration.
+    return message();
   }
   
   private Expr assignment() {
@@ -203,29 +203,12 @@ public class MagpieParser extends Parser {
 
       Position position = Position.union(expr.getPosition(), value.getPosition());
       
-      // Transform the left-hand expression into an assignment form. Examples:
-      // a = v       ->  a = v      AssignExpr(null, "a", null, v)
-      // a.b = v     ->  a.b=(v)    AssignExpr(a,    "b", null, v)
-      // a.b.c = v   ->  a.b.c=(v)  AssignExpr(a.b,  "c", null, v)
-      // a.b c = v   ->  a.b=(c, v) AssignExpr(a,    "b", c,    v)
-      // a ^ b = v   ->  a.^=(b)    AssignExpr(a,    "^", b,    v)
-      // Other expression forms on the left-hand side are considered invalid and
-      // will throw a parse exception.
       // TODO(bob): Need to handle tuples here too.
-      
-      if (expr instanceof NameExpr) {
-        return new AssignExpr(position, null, ((NameExpr)expr).getName(), null, value);
-      } else if (expr instanceof MethodExpr) {
-        MethodExpr method = (MethodExpr) expr;
+      if (expr instanceof MessageExpr) {
+        MessageExpr message = (MessageExpr) expr;
         
-        if (method.getArg() instanceof NothingExpr) {
-          // a.b = v -> a.b=(v)
-          return new AssignExpr(position, method.getReceiver(), method.getMethod(), null, value);
-        } else {
-          // a.b c = v -> a.b=(c, v)
-          return new AssignExpr(position, method.getReceiver(), method.getMethod(),
-              method.getArg(), value);
-        }
+        return new AssignExpr(position,
+            message.getReceiver(), message.getName(), message.getArg(), value);
       } else {
         throw new ParseException("Expression \"" + expr +
         "\" is not a valid target for assignment.");
@@ -255,77 +238,51 @@ public class MagpieParser extends Parser {
    * Parses a series of operator expressions like "a + b - c".
    */
   private Expr operator() {
-    Expr left = call();
-    if (left == null) {
-      throw new ParseException(":(");
-    }
+    Expr left = message();
     
     while (match(TokenType.OPERATOR)) {
       String op = last(1).getString();
-      Expr right = call();
-      if (right == null) {
-        throw new ParseException(":(");
-      }
+      Expr right = message();
 
-      left = new MethodExpr(left, op, right);
+      left = new MessageExpr(Position.union(
+          left.getPosition(), right.getPosition()), left, op, right);
     }
     
     return left;
   }
-
-  // The next two functions are a bit squirrely. Function calls like "abs 123"
-  // are generally lower precedence than method calls like "123.abs". However,
-  // they interact with each other. Some examples will clarify:
-  // a b c d  ->  a(b(c(d)))
-  // a b c.d  ->  a(b(c.d())
-  // a b.c d  ->  a(b.c(d))
-  // a b.c.d  ->  a(b.c().d())
-  // a.b c d  ->  a.b(c(d))
-  // a.b c.d  ->  a.b(c.d())
-  // a.b.c d  ->  a.b().c(d)
-  // a.b.c.d  ->  a.b().c().d()
   
   /**
-   * Parses a series of function calls like "foo bar bang".
-   * @return The parsed expression or null if unsuccessful.
+   * Parses a series of messages sends (which may or may not start with a
+   * receiver like "obj message(1) andThen finally(3, 4)"
    */
-  private Expr call() {
-    Expr expr = method();
-    if (expr == null) return null;
+  private Expr message() {
+    Expr message = primary();
     
-    Expr arg = call();
-    if (arg == null) return expr;
-    
-    return new CallExpr(expr, arg);
-  }
-  
-  /**
-   * Parses a series of method calls like "foo.bar.bang".
-   * @return The parsed expression or null if unsuccessful.
-   */
-  private Expr method() {
-    Expr receiver = primary();
-    if (receiver == null) return null;
-    
-    while (match(TokenType.DOT)) {
-      if (match(TokenType.NAME)) {
-        // Regular named method: foo.bar
-        String method = last(1).getString();
+    while (match(TokenType.NAME)) {
+      String name = last(1).getString();
+      Position position = last(1).getPosition();
 
-        Expr arg = call();
-        if (arg == null) {
-          // If the argument is omitted, infer ()
-          arg = new NothingExpr(last(1).getPosition());
-        }
-        receiver = new MethodExpr(receiver, method, arg);
-      } else {
-        // Functor object: foo.123
-        Expr arg = primary();
-        receiver = new MethodExpr(receiver, "apply", arg);
+      // See if it has an argument.
+      Expr arg = null;
+      if (match(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)) {
+        arg = new NothingExpr(Position.union(last(2).getPosition(), last(1).getPosition()));
+      } else if (match(TokenType.LEFT_PAREN)) {
+        arg = tuple();
+        consume(TokenType.RIGHT_PAREN);
       }
+      
+      if (message != null) {
+        position = Position.union(position, message.getPosition());
+      }
+      
+      if (arg != null) {
+        position = Position.union(position, arg.getPosition());
+      }
+      
+      message = new MessageExpr(position, message, name, arg);
     }
     
-    return receiver;
+    return message;
   }
   
   /**
@@ -339,8 +296,6 @@ public class MagpieParser extends Parser {
       return new IntExpr(last(1));
     } else if (match(TokenType.STRING)) {
       return new StringExpr(last(1));
-    } else if (match(TokenType.NAME)) {
-      return new NameExpr(last(1));
     } else if (match(TokenType.THIS)) {
       return new ThisExpr(last(1).getPosition());
     } else if (match(TokenType.FN)) {

@@ -25,10 +25,10 @@ class Foo
     ~!@#$%^&*-=+|/?<> (other) "everything"
 end
 
-var foo = Foo.new
-print (foo +    foo)              //: plus
-print (foo ?!   foo)              //: wha?
-print (foo $___ foo)              //: underscore
-print (foo %123 foo)              //: nums
-print (foo ^abc foo)              //: letters
-print (foo ~!@#$%^&*-=+|/?<> foo) //: everything
+var foo = Foo new
+print(foo +    foo)              //: plus
+print(foo ?!   foo)              //: wha?
+print(foo $___ foo)              //: underscore
+print(foo %123 foo)              //: nums
+print(foo ^abc foo)              //: letters
+print(foo ~!@#$%^&*-=+|/?<> foo) //: everything

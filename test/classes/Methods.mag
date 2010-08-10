@@ -1,16 +1,13 @@
 class Foo
-    noArgs () print "noArgs"
-    oneArg (arg String) print ("oneArg " + arg)
+    noArgs() print("noArgs")
+    oneArg(arg String) print("oneArg " + arg)
     
-    twoArgs (arg1 String, arg2 String)
-        print (arg1 + arg2)
+    twoArgs(arg1 String, arg2 String)
+        print(arg1 + arg2)
     end
 end
 
-var foo = Foo.new
-foo.noArgs              //: noArgs
-foo.oneArg "one"        //: oneArg one
-foo.twoArgs ("a", "b")  //: ab
-
-// can also call no-argument methods in prefix position
-noArgs foo              //: noArgs
+var foo = Foo new
+foo noArgs              //: noArgs
+foo oneArg("one")       //: oneArg one
+foo twoArgs("a", "b")   //: ab

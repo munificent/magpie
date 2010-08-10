@@ -67,37 +67,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
-  public Obj visit(CallExpr expr, EvalContext context) {
-    Obj arg = evaluate(expr.getArg(), context);
-    
-    // Handle a named target.
-    if (expr.getTarget() instanceof NameExpr) {
-      String name = ((NameExpr)expr.getTarget()).getName();
-      
-      // Look for a local variable with the name.
-      Obj local = context.lookUp(name);
-      if (local != null) {
-        return invokeMethod(expr, local, "apply", arg);
-      }
-      
-      // Look for an implicit call to a method on this with the name.
-      Invokable method = context.getThis().getClassObj().findMethod(name);
-      if (method != null) {
-        return method.invoke(mInterpreter, context.getThis(), arg);
-      }
-      
-      // Try to call it as a method on the argument. In other words,
-      // "abs 123" is equivalent to "123.abs".
-      return invokeMethod(expr, arg, name, mInterpreter.nothing());
-    }
-    
-    // Not an explicit named target, so evaluate it and send it an "apply"
-    // message.
-    Obj target = evaluate(expr.getTarget(), context);
-    return invokeMethod(expr, target, "apply", arg);
-  }
-  
-  @Override
   public Obj visit(ClassExpr expr, EvalContext context) {
     // Look up the class if we are extending one, otherwise create it.
     ClassObj metaclass;
@@ -289,23 +258,32 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
-  public Obj visit(MethodExpr expr, EvalContext context) {
-    Obj receiver = evaluate(expr.getReceiver(), context);
-    Obj arg = evaluate(expr.getArg(), context);
+  public Obj visit(MessageExpr expr, EvalContext context) {
+    Obj receiver = (expr.getReceiver() == null) ? null :
+        evaluate(expr.getReceiver(), context);
     
-    return invokeMethod(expr, receiver, expr.getMethod(), arg);
-  }
-
-  @Override
-  public Obj visit(NameExpr expr, EvalContext context) {
-    // Look up a named variable.
-    Obj variable = context.lookUp(expr.getName());
-    if (variable != null) return variable;
+    Obj arg = (expr.getArg() == null) ? null :
+        evaluate(expr.getArg(), context);
     
-    // Try to find a no-arg method on this.
-    return invokeMethod(expr, context.getThis(), expr.getName(), mInterpreter.nothing());
+    if (expr.getReceiver() == null) {
+      // a     -> local var, or no-arg method on this
+      // Just a name, so maybe it's a variable.
+      Obj variable = context.lookUp(expr.getName());
+      if (variable != null) {
+        // If we have an argument, apply it.
+        if (arg != null) {
+          return invokeMethod(expr, variable, "apply", arg);
+        }
+        return variable;
+      }
+      
+      // Otherwise it must be a method on this.
+      return invokeMethod(expr, context.getThis(), expr.getName(), arg);
+    }
+    
+    return invokeMethod(expr, receiver, expr.getName(), arg);
   }
-
+  
   @Override
   public Obj visit(NothingExpr expr, EvalContext context) {
     return mInterpreter.nothing();

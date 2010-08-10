@@ -4,7 +4,7 @@ var b = 10
 // multiple whiles
 while a < 3
 while b < 14 do
-    print (a.toString + " " + b.toString)
+    print(a toString + " " + b toString)
     a = a + 1
     b = b + 1
 end
@@ -13,8 +13,8 @@ end
 //: 2 12
 
 // multiple fors
-for c = 1.to 5
-for d = 3.until 6 do print (c.toString + " " + d.toString)
+for c = 1 to(5)
+for d = 3 until(6) do print(c toString + " " + d toString)
 //: 1 3
 //: 2 4
 //: 3 5
@@ -24,10 +24,10 @@ b = 2
 
 // mixed
 while a < 30
-for c = 1.to 5
+for c = 1 to(5)
 while b < 4
-for d = 30.to 50 do
-    print (a.toString + " " + b.toString + " " + c.toString + " " + d.toString)
+for d = 30 to(50) do
+    print(a toString + " " + b toString + " " + c toString + " " + d toString)
     a = a + 1
     b = b + 1
 end

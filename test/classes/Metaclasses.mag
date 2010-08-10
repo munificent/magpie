@@ -1,21 +1,21 @@
 class Foo
 end
 
-var foo = Foo.new
+var foo = Foo new
 
-// Walk up the class chain until it loops.
-print foo.type.name //: Foo
-print foo.type.type.name //: FooClass
-print foo.type.type.type.name //: Class
-print foo.type.type.type.type.name //: Class
+// Walk up the class chain until it loops 
+print(foo type name) //: Foo
+print(foo type type name) //: FooClass
+print(foo type type type name) //: Class
+print(foo type type type type name) //: Class
 
-// Foo is an instance of its metaclass.
-print Foo.name //: Foo
-print Foo.type.name //: FooClass
-print Foo.type.type.name //: Class
+// Foo is an instance of its metaclass 
+print(Foo name) //: Foo
+print(Foo type name) //: FooClass
+print(Foo type type name) //: Class
 
-// The class inherits from Class.
-print Foo.parent.name //: Class
+// The class inherits from Object by default 
+print(Foo parent name) //: Object
 
-// The metaclass also inherits from Class.
-print Foo.type.parent.name //: Class
+// The metaclass inherits from Class 
+print(Foo type parent name) //: Class

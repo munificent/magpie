@@ -1,20 +1,20 @@
-var noArgs  ()                    print "noArgs"
-var oneArg  (a String)            print ("one " + a)
-var twoArgs (a String, b String)  print ("two " + a + b)
+var noArgs  ()                    print("noArgs")
+var oneArg  (a String)            print("one " + a)
+var twoArgs (a String, b String)  print("two " + a + b)
 var bounce  (a String -> String)  a + " returned"
 
-// explicit () application is required
-noArgs () //: noArgs
+noArgs  // does nothing, local functions don't auto-invoke
+noArgs() //: noArgs
 
 // regular application
-oneArg "one" //: one one
+oneArg("one") //: one one
 
 // chained
-oneArg bounce "chain" //: one chain returned
+oneArg(bounce("chain")) //: one chain returned
 
 // tupled arguments
-twoArgs ("a ", "b") //: two a b
+twoArgs("a ", "b") //: two a b
 
 // stored tuple
-var args = ("a ", "b")
-twoArgs args //: two a b
+var args = "a ", "b"
+twoArgs(args) //: two a b

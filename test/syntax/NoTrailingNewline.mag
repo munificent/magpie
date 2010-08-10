@@ -1,1 +1,1 @@
-print "ok" //: ok
+print("ok") //: ok

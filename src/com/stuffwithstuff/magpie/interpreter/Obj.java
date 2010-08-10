@@ -36,7 +36,7 @@ public class Obj {
   }
   
   public Obj getTupleField(int index) {
-    return getField(Integer.toString(index));
+    return getField("_" + Integer.toString(index));
   }
 
   /**

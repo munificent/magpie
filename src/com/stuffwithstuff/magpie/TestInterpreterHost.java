@@ -12,11 +12,15 @@ import com.stuffwithstuff.magpie.parser.Position;
 public class TestInterpreterHost implements InterpreterHost {
   public TestInterpreterHost(String path) {
     mPath = path;
-    mSuccess = true;
+    mPassed = true;
+    mSkipped = false;
     mInterpreter = new Interpreter(this);
   }
+  
+  public boolean passed() { return mPassed; }
+  public boolean skipped() { return mSkipped; }
 
-  public boolean run() {
+  public void run() {
     try {
       // Load the runtime library.
       loadScript("base/base.mag");
@@ -37,6 +41,12 @@ public class TestInterpreterHost implements InterpreterHost {
           mExpectedErrors.add(lineNumber);
         }
 
+        if (line.indexOf("[disable]") != -1) {
+          mPassed = false;
+          mSkipped = true;
+          return;
+        }
+        
         lineNumber++;
       }
 
@@ -85,7 +95,6 @@ public class TestInterpreterHost implements InterpreterHost {
     } catch (ParseException ex) {
       fail(mPath + ": " + ex.toString());
     }
-    return mSuccess;
   }
 
   @Override
@@ -121,12 +130,13 @@ public class TestInterpreterHost implements InterpreterHost {
 
   private void fail(String message) {
     System.out.println("FAIL " + mPath + ": " + message);
-    mSuccess = false;
+    mPassed = false;
   }
 
   private final String mPath;
   private final Interpreter mInterpreter;
   private final Queue<String> mExpectedOutput = new LinkedList<String>();
   private final List<Integer> mExpectedErrors = new ArrayList<Integer>();
-  private boolean mSuccess;
+  private boolean mPassed;
+  private boolean mSkipped;
 }

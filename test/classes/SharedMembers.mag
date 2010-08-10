@@ -2,13 +2,13 @@ class Foo
     bar = "bar"
     shared bar = "shared bar"
     
-    sayHi () print "nonshared"
-    shared sayHi () print "shared"
+    sayHi() print("nonshared")
+    shared sayHi() print("shared")
 end
 
-var foo = Foo.new
-print foo.bar         //: bar
-foo.sayHi             //: nonshared
+var foo = Foo new
+print(foo bar)        //: bar
+foo sayHi             //: nonshared
 
-print Foo.bar         //: shared bar
-Foo.sayHi             //: shared
+print(Foo bar)        //: shared bar
+Foo sayHi             //: shared

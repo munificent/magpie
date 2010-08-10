@@ -1,6 +1,6 @@
 var a = "outer"
 
-var foo () var a = "inner"
+var foo() var a = "inner"
 foo
 
-print a //: outer
+print(a) //: outer

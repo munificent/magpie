@@ -2,6 +2,8 @@ package com.stuffwithstuff.magpie.ast;
 
 import com.stuffwithstuff.magpie.parser.Position;
 
+// TODO(bob): Get rid of this. We should be able to have the parser just desugar
+// this to a regular MessageExpr.
 public class AssignExpr extends Expr {
   public AssignExpr(Position position, Expr target, String name, Expr targetArg, Expr value) {
     super(position);

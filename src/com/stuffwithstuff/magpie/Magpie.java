@@ -75,20 +75,24 @@ public class Magpie {
   private static void runTestScripts() {
     int tests   = 0;
     int success = 0;
+    int skipped = 0;
     
     for (File testScript : listTestScripts()) {
       //if (!testScript.getPath().contains("BlockComments")) continue;
       
       tests++;
-      if (runTestScript(testScript)) success++;
+      
+      TestInterpreterHost host = new TestInterpreterHost(testScript.getPath());
+      host.run();
+
+      if (host.passed()) success++;
+      if (host.skipped()) skipped++;
     }
     
-    System.out.println("Passed " + success + " out of " + tests + " tests.");
-  }
-  
-  private static boolean runTestScript(File script) {      
-    TestInterpreterHost host = new TestInterpreterHost(script.getPath());
-    return host.run();
+    System.out.println("Passed " + success + " out of " + (tests - skipped) + " tests.");
+    if (skipped > 0) {
+      System.out.println("(" + skipped + " disabled tests skipped.)");
+    }
   }
   
   private static List<File> listTestScripts() {

@@ -1,5 +1,5 @@
 class Foo
 end
     
-print Foo.name //: Foo
-print Int.name //: Int
+print(Foo name) //: Foo
+print(Int name) //: Int

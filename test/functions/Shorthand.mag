@@ -1,17 +1,17 @@
-var a () print "a"
-a () //: a
+var a() print("a")
+a() //: a
     
-var b (s String) print s
-b "hi" //: hi
+var b(s String) print(s)
+b("hi") //: hi
 
-var c (left String, right String)
-  print left  //: left
-  print right //: right
+var c(left String, right String)
+  print(left)  //: left
+  print(right) //: right
 end
-c ("left", "right")
+c("left", "right")
 
-var d (-> String) "d"
-print d () //: d
+var d(-> String) "d"
+print(d()) //: d
 
-var e (s String -> String) s
-print e "e" //: e
+var e(s String -> String) s
+print(e("e")) //: e

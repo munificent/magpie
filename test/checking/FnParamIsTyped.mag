@@ -1,4 +1,4 @@
-var foo (a Int)
+var foo(a Int)
     var s = "string"
     s = a //!
 end

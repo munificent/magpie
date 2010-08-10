@@ -1,18 +1,17 @@
 // beginning of file
 
-print "1" // end of line
+print("1") // end of line
 //: 1
-print "2"// no space
+print("2") // no space
 //: 2
 
-print ("left" +// after operator
+print("left" +// after operator
     "right") //: leftright
 
-var a = "3"
-print a// after identifier
-//: 3
+var foo(a String) a//after identifier
+print(foo("3")) //: 3
 
-print (4 -// after minus
-    2).toString //: 2
+print((4 -// after minus
+    2) toString) //: 2
 
 // end of file

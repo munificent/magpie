@@ -1,11 +1,7 @@
 class Foo
-    apply (arg) print ("apply " + arg)
+    apply(arg) print("apply " + arg)
 end
 
-var foo = Foo.new
+var foo = Foo new
 
-foo "hey" //: apply hey
-(Foo.new) "also" //: apply also
-
-foo."hey" //: apply hey
-(Foo.new)."also" //: apply also
+foo("hey") //: apply hey

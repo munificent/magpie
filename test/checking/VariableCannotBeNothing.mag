@@ -1,3 +1,3 @@
-var main ()
+var main()
     var foo = () //!
 end

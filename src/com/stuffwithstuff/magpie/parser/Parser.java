@@ -59,7 +59,9 @@ public abstract class Parser {
     if (match(type)) {
       return last(1);
     } else {
-      throw new ParseException("Expected " + type + " and found " + lookAhead(0));
+      String message = String.format("Expected token %s at %s, found %s.",
+          type, current().getPosition(), current());
+      throw new ParseException(message);
     }
   }
 
@@ -81,7 +83,10 @@ public abstract class Parser {
       }
     }
     
-    builder.append("and found ").append(lookAhead(0));
+    builder.append(" at ")
+           .append(current().getPosition())
+           .append(" and found ")
+           .append(current());
     throw new ParseException(builder.toString());
   }
 

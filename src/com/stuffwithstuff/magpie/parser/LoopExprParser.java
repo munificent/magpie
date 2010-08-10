@@ -7,8 +7,7 @@ import com.stuffwithstuff.magpie.ast.BlockExpr;
 import com.stuffwithstuff.magpie.ast.DefineExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.LoopExpr;
-import com.stuffwithstuff.magpie.ast.MethodExpr;
-import com.stuffwithstuff.magpie.ast.NameExpr;
+import com.stuffwithstuff.magpie.ast.MessageExpr;
 import com.stuffwithstuff.magpie.ast.NothingExpr;
 
 public class LoopExprParser implements ExprParser {
@@ -52,15 +51,15 @@ public class LoopExprParser implements ExprParser {
         // Initialize the generator before the loop.
         String generatorVar = variable + " gen";
         generators.add(new DefineExpr(position, generatorVar,
-            new MethodExpr(generator, "iterate", new NothingExpr(position))));
+            new MessageExpr(Position.none(), generator, "iterate", new NothingExpr(position))));
         
         // The the condition expression just increments the generator.
-        conditions.add(new MethodExpr(
-            new NameExpr(position, generatorVar), "next", new NothingExpr(position)));
+        conditions.add(new MessageExpr(Position.none(), 
+            Expr.name(generatorVar), "next", new NothingExpr(position)));
         
         // In the body of the loop, we need to initialize the variable.
         initializers.add(new DefineExpr(position, variable,
-            new MethodExpr(new NameExpr(position, generatorVar), "current", new NothingExpr(position))));
+            new MessageExpr(Position.none(), Expr.name(generatorVar), "current", new NothingExpr(position))));
       }
       parser.match(TokenType.LINE); // Optional line after a clause.
     }

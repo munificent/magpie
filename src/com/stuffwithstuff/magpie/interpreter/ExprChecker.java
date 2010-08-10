@@ -122,13 +122,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(BoolExpr expr, EvalContext context) {
     return mInterpreter.getBoolType();
   }
-
-  @Override
-  public Obj visit(CallExpr expr, EvalContext context) {
-    // TODO(bob): Implement me.
-    return mInterpreter.getDynamicType();
-  }
-
+  
   @Override
   public Obj visit(ClassExpr expr, EvalContext context) {
     // TODO(bob): Implement me.
@@ -202,21 +196,11 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
-  public Obj visit(MethodExpr expr, EvalContext context) {
+  public Obj visit(MessageExpr expr, EvalContext context) {
     Obj receiver = check(expr.getReceiver(), context);
     Obj arg = check(expr.getArg(), context);
 
-    return checkMethod(expr, receiver, expr.getMethod(), arg);
-  }
-  
-  @Override
-  public Obj visit(NameExpr expr, EvalContext context) {
-    // Look up a named variable.
-    Obj variable = context.lookUp(expr.getName());
-    if (variable != null) return variable;
-    
-    // Look for a method on this: foo -> this.foo ()
-    return checkMethod(expr, context.getThis(), expr.getName(), mInterpreter.getNothingType());
+    return checkMethod(expr, receiver, expr.getName(), arg);
   }
   
   @Override
@@ -362,7 +346,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     // If the class is "Dynamic" all methods are presumed to exist and be typed
     // Dynamic -> Dynamic.
     if (typeObj == mInterpreter.getDynamicType()) {
-      return new FunctionType(new NameExpr("Dynamic"), new NameExpr("Dynamic"));
+      return new FunctionType(Expr.name("Dynamic"), Expr.name("Dynamic"));
     }
     
     ClassObj classObj = (ClassObj)typeObj;

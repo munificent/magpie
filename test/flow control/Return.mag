@@ -1,21 +1,21 @@
-var foo (b Bool -> String)
+var foo(b Bool -> String)
     if b then return "yes"
-    print "didn't return"
+    print("didn't return")
     "no"
 end
 
-print foo false //: didn't return
-                //: no
-print foo true  //: yes
+print(foo(false)) //: didn't return
+                  //: no
+print(foo(true))  //: yes
 
 
-var bar (b Bool ->)
-    print "foo"
+var bar(b Bool ->)
+    print("foo")
     if b then return
-    print "didn't return"
+    print("didn't return")
 end
 
-bar false   //: foo
-            //: didn't return
-bar true    //: foo
-print "end" //: end
+bar(false)   //: foo
+             //: didn't return
+bar(true)    //: foo
+print("end") //: end

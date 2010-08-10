@@ -1,4 +1,4 @@
-var main ()
+var main()
     if 1 then //!
         ()
     end
