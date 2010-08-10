@@ -8,6 +8,8 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
+import com.stuffwithstuff.magpie.parser.Lexer;
+import com.stuffwithstuff.magpie.parser.MagpieParser;
 
 public class Script {
   public static Script fromPath(String path) throws IOException {

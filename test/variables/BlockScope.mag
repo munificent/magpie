@@ -1,10 +1,10 @@
-do
+if true then
     var a = "first"
     print a //: first
 end
 
 // can change type
-do
+if true then
     var a = 2
     print a.toString //: 2
 end
@@ -12,7 +12,7 @@ end
 // shadowing
 var b = "outer"
 print b //: outer
-do
+if true then
     var b = "inner"
     print b //: inner
 end

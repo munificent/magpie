@@ -2,7 +2,7 @@ package com.stuffwithstuff.magpie.ast;
 
 import java.util.*;
 
-import com.stuffwithstuff.magpie.Position;
+import com.stuffwithstuff.magpie.parser.Position;
 
 /**
  * AST node for a class definition expression.

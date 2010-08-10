@@ -1,4 +1,4 @@
-package com.stuffwithstuff.magpie;
+package com.stuffwithstuff.magpie.parser;
 
 @SuppressWarnings("serial")
 public class ParseException extends RuntimeException {

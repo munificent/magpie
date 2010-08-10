@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.util.*;
 
 import com.stuffwithstuff.magpie.interpreter.*;
+import com.stuffwithstuff.magpie.parser.Lexer;
+import com.stuffwithstuff.magpie.parser.MagpieParser;
+import com.stuffwithstuff.magpie.parser.ParseException;
+import com.stuffwithstuff.magpie.parser.Position;
 
 public class TestInterpreterHost implements InterpreterHost {
   public TestInterpreterHost(String path) {

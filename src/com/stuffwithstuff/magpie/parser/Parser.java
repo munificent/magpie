@@ -1,4 +1,4 @@
-package com.stuffwithstuff.magpie;
+package com.stuffwithstuff.magpie.parser;
 
 import java.util.*;
 
@@ -9,15 +9,15 @@ public abstract class Parser {
     mConsumed = new LinkedList<Token>();
   }
 
-  protected Token last(int offset) {
+  public Token last(int offset) {
     return mConsumed.get(offset - 1);
   }
 
-  protected Token current() {
-    return lookAhead(1);
+  public Token current() {
+    return lookAhead(0);
   }
   
-  protected boolean lookAhead(TokenType... types) {
+  public boolean lookAhead(TokenType... types) {
     // make sure all of the types match before we start consuming
     for (int i = 0; i < types.length; i++) {
       if (!lookAhead(i).getType().equals(types[i]))
@@ -32,7 +32,7 @@ public abstract class Parser {
    * @param  types The allowed types for the next Token.
    * @return       true if the Token is one of the types, false otherwise.
    */
-  protected boolean lookAheadAny(TokenType... types) {
+  public boolean lookAheadAny(TokenType... types) {
     for (TokenType type : types) {
       if (lookAhead(type)) return true;
     }
@@ -40,18 +40,22 @@ public abstract class Parser {
     return false;
   }
 
-  protected boolean match(TokenType... types) {
+  public boolean match(TokenType... types) {
     if (!lookAhead(types)) return false;
 
     // consume the matched tokens
     for (int i = 0; i < types.length; i++) {
-      mConsumed.add(0, mRead.remove(0));
+      consume();
     }
     
     return true;
   }
+  
+  public void consume() {
+    mConsumed.add(0, mRead.remove(0));
+  }
 
-  protected Token consume(TokenType type) {
+  public Token consume(TokenType type) {
     if (match(type)) {
       return last(1);
     } else {
@@ -59,7 +63,7 @@ public abstract class Parser {
     }
   }
 
-  protected Token consumeAny(TokenType... types) {
+  public Token consumeAny(TokenType... types) {
     for (int i = 0; i < types.length; i++) {
       if (match(types[i])) return last(1);
     }

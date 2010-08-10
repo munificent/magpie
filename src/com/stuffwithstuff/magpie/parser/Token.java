@@ -1,7 +1,6 @@
-package com.stuffwithstuff.magpie;
+package com.stuffwithstuff.magpie.parser;
 
-import com.stuffwithstuff.magpie.TokenType;
-
+import com.stuffwithstuff.magpie.parser.TokenType;
 
 public final class Token {
   public Token(Position position, TokenType type) {

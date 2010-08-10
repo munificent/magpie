@@ -1,4 +1,4 @@
-package com.stuffwithstuff.magpie;
+package com.stuffwithstuff.magpie.parser;
 
 public enum TokenType {
   // punctuation and grouping

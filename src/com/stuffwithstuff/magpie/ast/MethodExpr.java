@@ -1,6 +1,6 @@
 package com.stuffwithstuff.magpie.ast;
 
-import com.stuffwithstuff.magpie.Position;
+import com.stuffwithstuff.magpie.parser.Position;
 
 public class MethodExpr extends Expr {
   public MethodExpr(Expr receiver, String method, Expr arg) {

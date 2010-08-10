@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie;
 
 import com.stuffwithstuff.magpie.interpreter.InterpreterHost;
+import com.stuffwithstuff.magpie.parser.Position;
 
 public class ScriptInterpreterHost implements InterpreterHost {
 

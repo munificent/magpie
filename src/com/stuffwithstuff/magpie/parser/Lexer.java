@@ -1,7 +1,7 @@
-package com.stuffwithstuff.magpie;
+package com.stuffwithstuff.magpie.parser;
 
-import com.stuffwithstuff.magpie.Token;
-import com.stuffwithstuff.magpie.TokenType;
+import com.stuffwithstuff.magpie.parser.Token;
+import com.stuffwithstuff.magpie.parser.TokenType;
 
 public class Lexer {
 

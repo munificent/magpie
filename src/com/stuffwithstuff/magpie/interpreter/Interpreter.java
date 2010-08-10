@@ -2,8 +2,8 @@ package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.*;
 
-import com.stuffwithstuff.magpie.Position;
 import com.stuffwithstuff.magpie.ast.*;
+import com.stuffwithstuff.magpie.parser.Position;
 
 public class Interpreter {
   public Interpreter(InterpreterHost host) {

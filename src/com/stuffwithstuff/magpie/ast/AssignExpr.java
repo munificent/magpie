@@ -1,6 +1,6 @@
 package com.stuffwithstuff.magpie.ast;
 
-import com.stuffwithstuff.magpie.Position;
+import com.stuffwithstuff.magpie.parser.Position;
 
 public class AssignExpr extends Expr {
   public AssignExpr(Position position, Expr target, String name, Expr targetArg, Expr value) {

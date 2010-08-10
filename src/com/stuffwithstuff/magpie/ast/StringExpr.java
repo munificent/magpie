@@ -1,6 +1,6 @@
 package com.stuffwithstuff.magpie.ast;
 
-import com.stuffwithstuff.magpie.Token;
+import com.stuffwithstuff.magpie.parser.Token;
 
 public class StringExpr extends Expr {
   public StringExpr(Token token) {
