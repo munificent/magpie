@@ -1,11 +1,11 @@
 class Foo
     bar = "a"
     bang = "b"
+end
     
-    printFields ()
-        print(bar)
-        print(this bang)
-    end
+def Foo printFields()
+    print(bar)
+    print(this bang)
 end
 
 var foo = Foo new

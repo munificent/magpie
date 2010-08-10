@@ -1,13 +1,14 @@
 class Foo
-    noArgs() print("noArgs")
-    oneArg(arg String) print("oneArg " + arg)
-    
-    someMethod()
-        noArgs              //: noArgs
-        oneArg("foo")       //: oneArg foo
-        this noArgs             //: noArgs
-        this oneArg("foo")      //: oneArg foo
-    end
+end
+
+def Foo noArgs() print("noArgs")
+def Foo oneArg(arg String) print("oneArg " + arg)
+
+def Foo someMethod()
+    noArgs              //: noArgs
+    oneArg("foo")       //: oneArg foo
+    this noArgs             //: noArgs
+    this oneArg("foo")      //: oneArg foo
 end
 
 var foo = Foo new

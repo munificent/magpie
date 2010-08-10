@@ -4,10 +4,10 @@ end
 
 class Foo
     bar = Bar new
+end
 
-    change()
-        this bar bang = "d"
-    end
+def Foo change()
+    this bar bang = "d"
 end
 
 var foo = Foo new

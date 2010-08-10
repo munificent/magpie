@@ -1,10 +1,10 @@
 class Foo
     bar = "bar"
     shared bar = "shared bar"
-    
-    sayHi() print("nonshared")
-    shared sayHi() print("shared")
 end
+
+def Foo sayHi() print("nonshared")
+shared Foo sayHi() print("shared")
 
 var foo = Foo new
 print(foo bar)        //: bar

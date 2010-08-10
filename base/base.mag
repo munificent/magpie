@@ -7,11 +7,11 @@ class RangeIterator
     
     current Int
     stop    Int
-    
-    next(-> Bool)
-        current = current + 1
-        current <= stop
-    end
+end
+
+def RangeIterator next(-> Bool)
+    current = current + 1
+    current <= stop
 end
 
 class Range
@@ -22,10 +22,10 @@ class Range
     
     start Int
     stop  Int
+end
     
-    iterate(-> RangeIterator)
-        RangeIterator new(start, stop)
-    end
+def Range iterate(-> RangeIterator)
+    RangeIterator new(start, stop)
 end
 
 // Extend the built-in classes.
@@ -34,13 +34,9 @@ extend Object
     != (other -> Bool) (this == other) not
 end
 
-extend Int
-    // Add generator methods on Ints.
-    times (-> Range) Range new(0, this - 1)
-    to (last Int -> Range) Range new(this, last)
-    until (last Int -> Range) Range new(this, last - 1)
-end
+// Add generator methods on Ints.
+def Int times (-> Range) Range new(0, this - 1)
+def Int to (last Int -> Range) Range new(this, last)
+def Int until (last Int -> Range) Range new(this, last - 1)
 
-extend String
-    apply (index Int -> String) this at(index)
-end
+def String apply (index Int -> String) this at(index)

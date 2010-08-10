@@ -8,12 +8,12 @@ class Tokenizer
     this(text String)
         this text = text
     end
-    
-    // Iteratable
-    iterate(-> TokenIterator) TokenIterator new(text)
-    
+        
     text String
 end
+
+// Iteratable
+def Tokenizer iterate(-> TokenIterator) TokenIterator new(text)
 
 class TokenIterator
     this(text String)
@@ -21,37 +21,37 @@ class TokenIterator
         this current = ""
         this start = 0
     end
-
-    // Iterator
-    next(-> Bool)
-        if start >= text count then return false
-
-        // skip over whitespace
-        while start < text count
-        while text at(start) == " " do
-            start = start + 1
-        end
-
-        // if we had whitespace until the very end, just stop
-        if start >= text count then return false
-
-        // now walk the stop forward until we hit whitespace or the end
-        var stop = start
-        while stop < text count
-        while text at(stop) != " " do
-            stop = stop + 1
-        end
-        
-        // store the token we got
-        current = text substring(start, stop)
-        // and move past it
-        start = stop
-        true
-    end
     
     text    String
     current String
     start   Int
+end
+
+// Iterator
+def TokenIterator next(-> Bool)
+    if start >= text count then return false
+
+    // skip over whitespace
+    while start < text count
+    while text at(start) == " " do
+        start = start + 1
+    end
+
+    // if we had whitespace until the very end, just stop
+    if start >= text count then return false
+
+    // now walk the stop forward until we hit whitespace or the end
+    var stop = start
+    while stop < text count
+    while text at(stop) != " " do
+        stop = stop + 1
+    end
+    
+    // store the token we got
+    current = text substring(start, stop)
+    // and move past it
+    start = stop
+    true
 end
 
 class StackItem
@@ -64,28 +64,28 @@ class StackItem
     rest StackItem
 end
 
-class Stack
-    push(item)
-        top = StackItem new(item, top)
-    end
-    
-    pop()
-        var item = top item
-        top = top rest
-        item
-    end
-    
-    count(-> Int)
-        var count = 0
-        var stack = this top
-        while stack != () do
-            stack = stack rest
-            count = count + 1
-        end
-        count
-    end
-    
+class Stack    
     top StackItem
+end
+
+def Stack push(item)
+    top = StackItem new(item, top)
+end
+
+def Stack pop()
+    var item = top item
+    top = top rest
+    item
+end
+
+def Stack count(-> Int)
+    var count = 0
+    var stack = this top
+    while stack != () do
+        stack = stack rest
+        count = count + 1
+    end
+    count
 end
 
 // sqrt(3^2 + (4^2))

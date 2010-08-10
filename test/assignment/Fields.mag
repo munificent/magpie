@@ -1,11 +1,11 @@
 class Foo
     bar = "a"
     bang = "b"
+end
     
-    change()
-        bar = "c"
-        this bang = "d"
-    end
+def Foo change()
+    bar = "c"
+    this bang = "d"
 end
 
 var foo = Foo new

@@ -17,6 +17,8 @@ public class MagpieParser extends Parser {
     mParsers.put(TokenType.VAR, new VariableExprParser());
     mParsers.put(TokenType.CLASS, new ClassExprParser());
     mParsers.put(TokenType.EXTEND, new ClassExprParser());
+    mParsers.put(TokenType.DEF, new DefineExprParser());
+    mParsers.put(TokenType.SHARED, new DefineExprParser());
   }
   
   public List<Expr> parse() {

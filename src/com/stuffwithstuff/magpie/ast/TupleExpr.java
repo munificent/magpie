@@ -12,6 +12,10 @@ public class TupleExpr extends Expr {
     mFields = fields;
   }
   
+  public TupleExpr(Expr... fields) {
+    this(Arrays.asList(fields));
+  }
+  
   public List<Expr> getFields() { return mFields; }
   
   @Override

@@ -1,17 +1,18 @@
 class Foo
-    // self recursion
-    fib(n Int -> Int)
-        if n < 2 then n else fib(n - 1) + fib(n - 2)
-    end
-    
-    // mutual recursion
-    odd?(n Int -> Bool)
-        if n == 0 then false else even?(n - 1)
-    end
+end
 
-    even?(n Int -> Bool)
-        if n == 0 then true else odd?(n - 1)
-    end
+// self recursion
+def Foo fib(n Int -> Int)
+    if n < 2 then n else fib(n - 1) + fib(n - 2)
+end
+
+// mutual recursion
+def Foo odd?(n Int -> Bool)
+    if n == 0 then false else even?(n - 1)
+end
+
+def Foo even?(n Int -> Bool)
+    if n == 0 then true else odd?(n - 1)
 end
 
 var foo = Foo new

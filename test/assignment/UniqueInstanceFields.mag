@@ -1,7 +1,8 @@
 class Foo
     prop = "old"
-    change() prop = "new"
 end
+
+def Foo change() prop = "new"
 
 class Bar
     foo = Foo new

@@ -36,7 +36,7 @@ public abstract class NativeMethod implements Invokable {
   
   // Class methods:
   
-  public static class ClassAddMethod extends NativeMethod {
+  public static class ClassDefineMethod extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();
@@ -53,7 +53,7 @@ public abstract class NativeMethod implements Invokable {
     public Expr getReturnType() { return Expr.name("Nothing"); }
   }
   
-  public static class ClassAddSharedMethod extends NativeMethod {
+  public static class ClassDefineSharedMethod extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();

@@ -1,6 +1,7 @@
 class Base
-    sayHi() print("hi")
 end
+
+def Base sayHi() print("hi")
 
 class Derived
 end
@@ -13,8 +14,6 @@ Derived parent = Base
 d sayHi //: hi
 
 // override the method
-extend Derived
-    sayHi() print("in derived")
-end
+def Derived sayHi() print("in derived")
 
 d sayHi //: in derived

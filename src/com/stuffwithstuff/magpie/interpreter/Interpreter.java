@@ -29,8 +29,8 @@ public class Interpreter {
     // "name", "parent", etc.)
     mClass = new ClassObj("Class", null);
     mClass.addMethod("name", new NativeMethod.ClassGetName());
-    mClass.addMethod("addMethod", new NativeMethod.ClassAddMethod());
-    mClass.addMethod("addSharedMethod", new NativeMethod.ClassAddSharedMethod());
+    mClass.addMethod("defineMethod", new NativeMethod.ClassDefineMethod());
+    mClass.addMethod("defineSharedMethod", new NativeMethod.ClassDefineSharedMethod());
     mClass.addMethod("parent", new NativeMethod.ClassGetParent());
     mClass.addMethod("parent=", new NativeMethod.ClassSetParent());
     mGlobalScope.define("Class", mClass);

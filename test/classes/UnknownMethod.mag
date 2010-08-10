@@ -1,7 +1,8 @@
 class Foo
-    defined()
-        notDefined
-    end
+end
+
+def Foo defined()
+    notDefined
 end
 
 var foo = Foo new

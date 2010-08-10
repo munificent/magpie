@@ -1,10 +1,11 @@
 class Foo
-    noArgs() print("noArgs")
-    oneArg(arg String) print("oneArg " + arg)
-    
-    twoArgs(arg1 String, arg2 String)
-        print(arg1 + arg2)
-    end
+end
+
+def Foo noArgs() print("noArgs")
+def Foo oneArg(arg String) print("oneArg " + arg)
+
+def Foo twoArgs(arg1 String, arg2 String)
+    print(arg1 + arg2)
 end
 
 var foo = Foo new
