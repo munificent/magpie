@@ -1,6 +1,7 @@
 class Foo
-    apply(arg) print("apply " + arg)
 end
+
+def Foo apply(arg) print("apply " + arg)
 
 var foo = Foo new
 

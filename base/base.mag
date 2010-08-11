@@ -30,9 +30,7 @@ end
 
 // Extend the built-in classes.
 
-extend Object
-    != (other -> Bool) (this == other) not
-end
+def Object !=(other -> Bool) (this == other) not
 
 // Add generator methods on Ints.
 def Int times (-> Range) Range new(0, this - 1)

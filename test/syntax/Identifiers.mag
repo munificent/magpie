@@ -15,15 +15,16 @@ var a~!@#$%^&*-=+|/?<> = 8
 // : colon     (either records, keyword args, or namespaces)
 
 class Foo
-    // operators start with punctuation and can have anything following:
-    +    (other) "plus"
-    ?!   (other) "wha?"
-    $___ (other) "underscore"
-    %123 (other) "nums"
-    ^abc (other) "letters"
-    
-    ~!@#$%^&*-=+|/?<> (other) "everything"
 end
+
+// operators start with punctuation and can have anything following:
+def Foo +    (other) "plus"
+def Foo ?!   (other) "wha?"
+def Foo $___ (other) "underscore"
+def Foo %123 (other) "nums"
+def Foo ^abc (other) "letters"
+
+def Foo ~!@#$%^&*-=+|/?<> (other) "everything"
 
 var foo = Foo new
 print(foo +    foo)              //: plus

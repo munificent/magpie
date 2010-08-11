@@ -50,6 +50,14 @@ public abstract class Parser {
     
     return true;
   }
+
+  public boolean matchAny(TokenType... types) {
+    for (TokenType type : types) {
+      if (match(type)) return true;
+    }
+    
+    return false;
+  }
   
   public void consume() {
     mConsumed.add(0, mRead.remove(0));

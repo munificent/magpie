@@ -25,14 +25,12 @@ public class DefineExprParser implements ExprParser {
     
     boolean isShared = parser.last(1).getType() == TokenType.SHARED;
     
-    // Allow a sequence of identifiers like:
-    // def a b c d e()
-    // Where the last one will be the method name, and the other ones will form
-    // an expression that evaluates to the class to define the method on.
-    // TODO(bob): Ideally should allow an arbitrary expression here.
-    // TODO(bob): Also need to allow defining an operator here.
+    // Parse the target we're defining the method on and the method name.
+    // TODO(bob): This is a total hack. It shouldn't just allow an arbitrary
+    // stream of names and operators. It needs to basically parse a message send
+    // followed by a single name or operator, followed by the type signature.
     List<Token> names = new ArrayList<Token>();
-    while (parser.match(TokenType.NAME)) {
+    while (parser.matchAny(TokenType.NAME, TokenType.OPERATOR)) {
       names.add(parser.last(1));
     }
     

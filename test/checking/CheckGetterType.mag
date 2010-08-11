@@ -1,10 +1,10 @@
 class Foo
     bar = "a string"
+end
     
-    test()
-        var n = 123
-        n = bar //!
-    end
+def Foo test()
+    var n = 123
+    n = bar //!
 end
 
 var main()
