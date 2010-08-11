@@ -1,5 +1,5 @@
 var main()
     if 1 then //!
-        ()
+        nothing
     end
 end

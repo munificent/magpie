@@ -57,6 +57,8 @@ def Class canAssignFrom(other IType -> Bool)
     // looking for this type.
     while other != Object do
         if this == other then return true
+        // Bail if got stuck in an infinite loop.
+        if other == nothing then return false
         other = other parent
     end
     

@@ -36,6 +36,7 @@ public enum TokenType {
   IF,
   LET,
   MATCH,
+  NOTHING,
   RETURN,
   SHARED,
   THEN,

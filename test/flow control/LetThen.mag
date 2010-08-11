@@ -1,13 +1,13 @@
-let a = () then print("should not")
+let a = nothing then print("should not")
 let a = 1 then print(a toString) //: 1
 
-let a = ()
+let a = nothing
 then print("should not")
 
 let a = 2
 then print("2") //: 2
 
-let a = () then
+let a = nothing then
     print("should not")
 end
 
@@ -15,10 +15,10 @@ let a = "3" then
     print("3") //: 3
 end
 
-let a = () then print("should not") else print("should") //: should
+let a = nothing then print("should not") else print("should") //: should
 let a = 1 then print("1") else print("should not") //: 1
 
-let a = ()
+let a = nothing
 then print("should not")
 else print("should") //: should
 
@@ -26,7 +26,7 @@ let a = 2
 then print("2") //: 2
 else print("should not")
 
-let a = () then
+let a = nothing then
     print("should not")
 else
     print("should") //: should
