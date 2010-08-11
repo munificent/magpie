@@ -241,8 +241,7 @@ public class Lexer {
     Position position = currentPosition();
     
     // Handle reserved words.
-    if (text.equals("true")) return new Token(position, TokenType.BOOL, true);
-    if (text.equals("false")) return new Token(position, TokenType.BOOL, false);
+    if (text.equals("and")) return new Token(position, TokenType.AND);
     if (text.equals("case")) return new Token(position, TokenType.CASE);
     if (text.equals("class")) return new Token(position, TokenType.CLASS);
     if (text.equals("def")) return new Token(position, TokenType.DEF);
@@ -250,16 +249,19 @@ public class Lexer {
     if (text.equals("else")) return new Token(position, TokenType.ELSE);
     if (text.equals("end")) return new Token(position, TokenType.END);
     if (text.equals("extend")) return new Token(position, TokenType.EXTEND);
+    if (text.equals("false")) return new Token(position, TokenType.BOOL, false);
     if (text.equals("fn")) return new Token(position, TokenType.FN);
     if (text.equals("for")) return new Token(position, TokenType.FOR);
     if (text.equals("if")) return new Token(position, TokenType.IF);
     if (text.equals("let")) return new Token(position, TokenType.LET);
     if (text.equals("match")) return new Token(position, TokenType.MATCH);
     if (text.equals("nothing")) return new Token(position, TokenType.NOTHING);
+    if (text.equals("or")) return new Token(position, TokenType.OR);
     if (text.equals("return")) return new Token(position, TokenType.RETURN);
     if (text.equals("shared")) return new Token(position, TokenType.SHARED);
     if (text.equals("then")) return new Token(position, TokenType.THEN);
     if (text.equals("this")) return new Token(position, TokenType.THIS);
+    if (text.equals("true")) return new Token(position, TokenType.BOOL, true);
     if (text.equals("var")) return new Token(position, TokenType.VAR);
     if (text.equals("while")) return new Token(position, TokenType.WHILE);
     if (text.equals("=")) return new Token(position, TokenType.EQUALS);

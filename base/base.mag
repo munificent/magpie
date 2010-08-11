@@ -66,3 +66,15 @@ def Class canAssignFrom(other IType -> Bool)
     // that's us.
     this == Object
 end
+
+def Class |(other IType -> OrType) OrType new(this, right)
+
+class OrType
+    this(left IType, right IType)
+        this left = left
+        this right = right
+    end
+    
+    left  IType
+    right IType
+end

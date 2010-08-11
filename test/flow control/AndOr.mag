@@ -1,0 +1,32 @@
+def truthy(-> Bool)
+    print("true")
+    true
+end
+
+def falsy(-> Bool)
+    print("false")
+    false
+end
+
+print(truthy and truthy) //: true
+                         //: true
+                         //: true
+print(truthy and falsy)  //: true
+                         //: false
+                         //: false
+print(falsy and truthy)  //: false
+                         //: false
+print(falsy and falsy)   //: false
+                         //: false
+
+
+print(truthy or truthy)  //: true
+                         //: true
+print(truthy or falsy)   //: true
+                         //: true
+print(falsy or truthy)   //: false
+                         //: true
+                         //: true
+print(falsy or falsy)    //: false
+                         //: false
+                         //: false

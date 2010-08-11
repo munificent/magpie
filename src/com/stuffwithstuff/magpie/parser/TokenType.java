@@ -23,6 +23,7 @@ public enum TokenType {
   STRING,
   
   // keywords
+  AND,
   ARROW,
   CASE,
   CLASS,
@@ -37,6 +38,7 @@ public enum TokenType {
   LET,
   MATCH,
   NOTHING,
+  OR,
   RETURN,
   SHARED,
   THEN,

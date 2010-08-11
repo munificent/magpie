@@ -15,6 +15,17 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
+  public Obj visit(AndExpr expr, EvalContext context) {
+    Obj left = evaluate(expr.getLeft(), context);
+    
+    // TODO(bob): Determine if this is how we want to be more flexible about
+    // truthiness.
+    if (!left.asBool()) return left;
+    
+    return evaluate(expr.getRight(), context);
+  }
+
+  @Override
   public Obj visit(AssignExpr expr, EvalContext context) {
     String name = expr.getName();
     
@@ -279,6 +290,17 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(NothingExpr expr, EvalContext context) {
     return mInterpreter.nothing();
+  }
+
+  @Override
+  public Obj visit(OrExpr expr, EvalContext context) {
+    Obj left = evaluate(expr.getLeft(), context);
+    
+    // TODO(bob): Determine if this is how we want to be more flexible about
+    // truthiness.
+    if (left.asBool()) return left;
+    
+    return evaluate(expr.getRight(), context);
   }
 
   @Override

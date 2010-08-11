@@ -227,7 +227,7 @@ public class MagpieParser extends Parser {
     List<Expr> fields = new ArrayList<Expr>();
     
     do {
-      fields.add(operator());
+      fields.add(conjunction());
     } while (match(TokenType.COMMA));
     
     // Only wrap in a tuple if there are multiple fields.
@@ -236,6 +236,29 @@ public class MagpieParser extends Parser {
     return new TupleExpr(fields);
   }
 
+  /**
+   * Parses "and" and "or" expressions.
+   * @return
+   */
+  private Expr conjunction() {
+    Expr left = operator();
+    
+    while (matchAny(TokenType.AND, TokenType.OR)) {
+      Token conjunction = last(1);
+      Expr right = operator();
+
+      Position position = Position.union(left.getPosition(), right.getPosition());
+      
+      if (conjunction.getType() == TokenType.AND) {
+        left = new AndExpr(position, left, right);
+      } else {
+        left = new OrExpr(position, left, right);
+      }
+    }
+    
+    return left;
+  }
+  
   /**
    * Parses a series of operator expressions like "a + b - c".
    */

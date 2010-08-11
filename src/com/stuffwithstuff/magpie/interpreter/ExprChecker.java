@@ -50,6 +50,12 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   }
   
   @Override
+  public Obj visit(AndExpr expr, EvalContext context) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
   public Obj visit(AssignExpr expr, EvalContext context) {
     // TODO Auto-generated method stub
     return null;
@@ -105,6 +111,12 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(NothingExpr expr, EvalContext context) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+  
+  @Override
+  public Obj visit(OrExpr expr, EvalContext context) {
     // TODO Auto-generated method stub
     return null;
   }
