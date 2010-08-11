@@ -1,8 +1,6 @@
 package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.*;
 
@@ -13,6 +11,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   // TODO(bob): This is kinda temp.
   public static void check(Interpreter interpreter, List<CheckError> errors,
       Scope globalScope) {
+    /*
     
     // Create a mirror of the interpreter's global scope where each global
     // variable has been replaced with its type. If, for example, there is a
@@ -42,6 +41,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
         checker.check((ClassObj)entry.getValue(), context);
       }
     }
+  */
   }
   
   private ExprChecker(Interpreter interpreter, List<CheckError> errors) {
@@ -49,6 +49,97 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     mErrors = errors;
   }
   
+  @Override
+  public Obj visit(AssignExpr expr, EvalContext context) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Obj visit(BlockExpr expr, EvalContext context) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Obj visit(BoolExpr expr, EvalContext context) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Obj visit(ClassExpr expr, EvalContext context) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Obj visit(FnExpr expr, EvalContext context) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Obj visit(IfExpr expr, EvalContext context) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Obj visit(IntExpr expr, EvalContext context) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Obj visit(LoopExpr expr, EvalContext context) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Obj visit(MessageExpr expr, EvalContext context) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Obj visit(NothingExpr expr, EvalContext context) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Obj visit(ReturnExpr expr, EvalContext context) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Obj visit(StringExpr expr, EvalContext context) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Obj visit(ThisExpr expr, EvalContext context) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Obj visit(TupleExpr expr, EvalContext context) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Obj visit(VariableExpr expr, EvalContext context) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+  
+  /*
   @Override
   public Obj visit(AssignExpr expr, EvalContext context) {
     if (expr.getTarget() == null) {
@@ -75,30 +166,6 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       
       return value;
     } else {
-      // TODO(bob): Implement commented out parts.
-      /*
-      // The target of the assignment is an actual expression, like a.b = c
-      Obj target = evaluate(expr.getTarget(), context);
-      Obj value = check(expr.getValue(), context);
-
-      // If the assignment statement has an argument and a value, like:
-      // a.b c = v (c is the arg, v is the value)
-      // then bundle them together:
-      if (expr.getTargetArg() != null) {
-        Obj targetArg = evaluate(expr.getTargetArg(), context);
-        value = mInterpreter.createTuple(context, targetArg, value);
-      }
-
-      // Look for a setter method.
-      String setterName = expr.getName() + "=";
-      Invokable setter = target.findMethod(setterName);
-      
-      expect(setter != null,
-          "Could not find a method named \"%s\" on %s.", setterName, target);
-      
-      // Invoke the setter.
-      return setter.invoke(mInterpreter, target, value);
-      */
       return mInterpreter.getDynamicType();
     }
   }
@@ -126,6 +193,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(ClassExpr expr, EvalContext context) {
     // TODO(bob): Implement me.
+    System.out.println("ClassExpr is not implemented.");
     return mInterpreter.getDynamicType();
   }
 
@@ -223,15 +291,13 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
     return mInterpreter.createTuple(context, fields);
   }
-  
-  private Obj check(Expr expr, EvalContext context) {
-    return expr.accept(this, context);
-  }
 
   @Override
   public Obj visit(VariableExpr expr, EvalContext context) {
     Obj value = check(expr.getValue(), context);
 
+    // TODO(bob): Should check for reclaring a variable.
+    
     // Variables cannot be of type Nothing.
     errorIf(value == mInterpreter.getNothingType(), expr,
         "Cannot declare a variable \"%s\" of type Nothing.", expr.getName());
@@ -239,6 +305,11 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     context.define(expr.getName(), value);
     return value;
   }
+  
+  private Obj check(Expr expr, EvalContext context) {
+    return expr.accept(this, context);
+  }
+    */
 
   /**
    * Checks the given function for type-safety. Virtually invokes it by binding
@@ -246,6 +317,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
    * function. Returns the discovered return type of the function.
    * @return
    */
+  /*
   private Obj check(FnObj obj, EvalContext context) {
     return check(obj.getFunction(), context);
   }
@@ -365,7 +437,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       String format, Object... args) {
     errorIf(!typeAllowed(actual, expected), expr, format, args);
   }
-  
+    */
+
   private void errorIf(boolean condition, Expr expr,
       String format, Object... args) {
     if (condition) {

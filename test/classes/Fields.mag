@@ -2,7 +2,7 @@ class Foo
     bar = "a"
     bang = "b"
 end
-    
+
 def Foo printFields()
     print(bar)
     print(this bang)

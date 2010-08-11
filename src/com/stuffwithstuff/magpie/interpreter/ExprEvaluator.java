@@ -34,7 +34,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       Obj value = evaluate(expr.getValue(), context);
 
       // If the assignment statement has an argument and a value, like:
-      // a.b c = v (c is the arg, v is the value)
+      // a b(c) = v (c is the arg, v is the value)
       // then bundle them together:
       if (expr.getTargetArg() != null) {
         Obj targetArg = evaluate(expr.getTargetArg(), context);
@@ -203,7 +203,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       } else {
         // Regular "if" condition.
         Obj result = evaluate(condition.getBody(), context);
-        if (!((Boolean)result.getPrimitiveValue()).booleanValue()) {
+        if (!result.asBool()) {
           // Condition failed.
           passed = false;
           break;
@@ -257,10 +257,10 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     Obj arg = (expr.getArg() == null) ? null :
         evaluate(expr.getArg(), context);
     
-    if (expr.getReceiver() == null) {
-      // a     -> local var, or no-arg method on this
+    if (receiver == null) {
       // Just a name, so maybe it's a variable.
       Obj variable = context.lookUp(expr.getName());
+
       if (variable != null) {
         // If we have an argument, apply it.
         if (arg != null) {

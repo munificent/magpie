@@ -56,9 +56,7 @@ public class TestInterpreterHost implements InterpreterHost {
       try {
         mInterpreter.load(parser.parse());
 
-        // TODO(bob): Not working on type checking right now.
         // Do the static analysis and see if we got the errors we expect.
-        /*
         List<CheckError> errors = mInterpreter.check();
         int count = Math.max(mExpectedErrors.size(), errors.size());
         for (int i = 0; i < count; i++) {
@@ -78,7 +76,6 @@ public class TestInterpreterHost implements InterpreterHost {
         if (errors.size() == 0) {
           mInterpreter.runMain();
         }
-        */
         
         if (mExpectedOutput.size() > 0) {
           fail("Ran out of output when still expecting \""
