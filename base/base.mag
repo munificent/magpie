@@ -40,6 +40,27 @@ def String apply (index Int -> String) this at(index)
 
 def String toString(-> String) this
 def Nothing toString(-> String) "nothing"
+def Class toString(-> String) name
 
 // Provide a generic print that converts arg to string first.
 def Object print(arg) printRaw(arg toString)
+
+// Type relations.
+
+shared Nothing canAssignFrom(other IType -> Bool) other == Nothing
+
+def Class canAssignFrom(other IType -> Bool)
+    // Not even object can assign from Nothing.
+    if other == Nothing then return false
+    
+    // A derived type can be assigned to a base type, so walk up the chain
+    // looking for this type.
+    while other != Object do
+        if this == other then return true
+        other = other parent
+    end
+    
+    // If we got here, the only thing other has in common is Object, so see if
+    // that's us.
+    this == Object
+end

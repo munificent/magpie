@@ -1,0 +1,24 @@
+class Base
+end
+
+class Derived1
+end
+
+Derived1 parent = Base
+
+class Derived2
+end
+
+Derived2 parent = Base
+
+// Upcasts are OK.
+print(Base canAssignFrom(Derived1)) //: true
+print(Base canAssignFrom(Derived2)) //: true
+
+// Downcasts are not.
+print(Derived1 canAssignFrom(Base)) //: false
+print(Derived2 canAssignFrom(Base)) //: false
+
+// Neither is a side-cast.
+print(Derived1 canAssignFrom(Derived2)) //: false
+print(Derived2 canAssignFrom(Derived1)) //: false

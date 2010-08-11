@@ -1,0 +1,3 @@
+print(true type)  //: Bool
+print(123 type)   //: Int
+print("hey" type) //: String
