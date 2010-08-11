@@ -29,7 +29,6 @@ def Range iterate(-> RangeIterator)
 end
 
 // Extend the built-in classes.
-
 def Object !=(other -> Bool) (this == other) not
 
 // Add generator methods on Ints.
@@ -38,3 +37,9 @@ def Int to (last Int -> Range) Range new(this, last)
 def Int until (last Int -> Range) Range new(this, last - 1)
 
 def String apply (index Int -> String) this at(index)
+
+def String toString(-> String) this
+def Nothing toString(-> String) "nothing"
+
+// Provide a generic print that converts arg to string first.
+def Object print(arg) printRaw(arg toString)

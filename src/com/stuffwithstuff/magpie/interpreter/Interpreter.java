@@ -41,7 +41,7 @@ public class Interpreter {
     mObjectClass = new ClassObj(mClass, "Object", null);
     mObjectClass.addMethod("type", new NativeMethod.ObjectGetType());
     mObjectClass.addMethod("==", new NativeMethod.ObjectEqual());
-    mObjectClass.addMethod("print",    new NativeMethod.ObjectPrint());
+    mObjectClass.addMethod("printRaw", new NativeMethod.ObjectPrint());
     mGlobalScope.define("Object", mObjectClass);
     
     // Now that both Class and Object exist, wire them up.
@@ -93,7 +93,6 @@ public class Interpreter {
     }
     
     mNothingClass = createGlobalClass("Nothing");
-    mNothingClass.addMethod("toString", new NativeMethod.NothingToString());
     mNothing = mNothingClass.instantiate();
   }
   

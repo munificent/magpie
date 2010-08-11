@@ -16,9 +16,9 @@ def Foo even?(n Int -> Bool)
 end
 
 var foo = Foo new
-print(foo fib(10) toString) //: 55
+print(foo fib(10)) //: 55
 
-print(foo odd?(9) toString) //: true
-print(foo odd?(10) toString) //: false
-print(foo even?(9) toString) //: false
-print(foo even?(10) toString) //: true
+print(foo odd?(9)) //: true
+print(foo odd?(10)) //: false
+print(foo even?(9)) //: false
+print(foo even?(10)) //: true

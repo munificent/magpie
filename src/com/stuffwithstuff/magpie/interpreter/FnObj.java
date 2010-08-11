@@ -35,7 +35,7 @@ public class FnObj extends Obj implements Invokable {
     }
     
     try {
-    return interpreter.evaluate(mFunction.getBody(), context);
+      return interpreter.evaluate(mFunction.getBody(), context);
     } catch (ReturnException ex) {
       // There was an early return in the function, so return the value of that.
       return ex.getValue();

@@ -11,16 +11,16 @@ def Int ^ (exponent Int -> Int)
 end
 
 var a = 3 ^ 0
-print(a toString) //: 1
+print(a) //: 1
 
 var b = 2 ^ 1
-print(b toString) //: 2
+print(b) //: 2
 
 var c = 3 ^ 3
-print(c toString) //: 27
+print(c) //: 27
     
 var d = 2 ^ 2 ^ 3
-print(d toString) //: 64
+print(d) //: 64
 
 var e = 2 ^ (2 ^ 3)
-print(e toString) //: 256
+print(e) //: 256

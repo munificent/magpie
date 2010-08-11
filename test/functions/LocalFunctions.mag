@@ -1,11 +1,11 @@
 // a function that takes an int and returns nothing
-var a = fn (arg Int ->) print(arg toString)
+var a = fn (arg Int ->) print(arg)
 a(123) //: 123
 
 // a function that takes an int, prints, and returns unit
 var c = fn (arg Int ->)
         print("c")
-        print(arg toString)
+        print(arg)
     end
 c(123) //: c
        //: 123

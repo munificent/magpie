@@ -1,0 +1,6 @@
+print(true toString) //: true
+print(false toString) //: false
+
+print(123 toString) //: 123
+
+print("hi" toString) //: hi

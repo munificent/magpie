@@ -6,7 +6,7 @@ end
 // can change type
 if true then
     var a = 2
-    print(a toString) //: 2
+    print(a) //: 2
 end
 
 // shadowing

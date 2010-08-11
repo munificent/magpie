@@ -3,13 +3,13 @@ var a = 0
 
 while a < 5 do a = a + 1
 
-print(a toString)            //: 5
+print(a)            //: 5
 
 // multi-line body
 a = 0
 
 while a < 5 do
-    print(a toString)
+    print(a)
     a = a + 1
 end
 //: 0
@@ -18,5 +18,5 @@ end
 //: 3
 //: 4
 
-print(a toString)
+print(a)
 //: 5

@@ -372,18 +372,6 @@ public abstract class NativeMethod implements Invokable {
     public Expr getReturnType() { return Expr.name("String"); }
   }
   
-  // Nothing methods:
-
-  public static class NothingToString extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      return interpreter.createString("()");
-    }
-    
-    public Expr getParamType() { return Expr.name("Nothing"); }
-    public Expr getReturnType() { return Expr.name("String"); }
-  }
-  
   // Object methods:
   
   public static class ObjectGetType extends NativeMethod {
