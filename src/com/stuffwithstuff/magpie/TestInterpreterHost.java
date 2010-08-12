@@ -34,7 +34,7 @@ public class TestInterpreterHost implements InterpreterHost {
         int index = line.indexOf("//:");
         if (index != -1) {
           String expect = line.substring(index + 3).trim();
-          mExpectedOutput.add(expect);
+          mExpectedOutput.add(new ExpectedOutput(expect, lineNumber));
         }
 
         if (line.indexOf("//!") != -1) {
@@ -96,6 +96,16 @@ public class TestInterpreterHost implements InterpreterHost {
     }
   }
 
+  private static class ExpectedOutput {
+    public ExpectedOutput(String text, int line) {
+      this.text = text;
+      this.line = line;
+    }
+    
+    public String text;
+    public int line;
+  }
+  
   @Override
   public void print(String text) {
     if (mExpectedOutput.size() == 0) {
@@ -103,9 +113,10 @@ public class TestInterpreterHost implements InterpreterHost {
       return;
     }
 
-    String expected = mExpectedOutput.poll();
-    if (!expected.equals(text)) {
-      fail("Got output \"" + text + "\", expected \"" + expected + "\"");
+    ExpectedOutput expected = mExpectedOutput.poll();
+    if (!expected.text.equals(text)) {
+      fail(String.format("Got output \"%s\" on line %d, expected \"%s\"",
+          text, expected.line, expected.text));
     }
   }
   
@@ -134,7 +145,7 @@ public class TestInterpreterHost implements InterpreterHost {
 
   private final String mPath;
   private final Interpreter mInterpreter;
-  private final Queue<String> mExpectedOutput = new LinkedList<String>();
+  private final Queue<ExpectedOutput> mExpectedOutput = new LinkedList<ExpectedOutput>();
   private final List<Integer> mExpectedErrors = new ArrayList<Integer>();
   private boolean mPassed;
   private boolean mSkipped;

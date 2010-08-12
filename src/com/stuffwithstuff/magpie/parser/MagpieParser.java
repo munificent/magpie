@@ -19,6 +19,7 @@ public class MagpieParser extends Parser {
     mParsers.put(TokenType.EXTEND, new ClassExprParser());
     mParsers.put(TokenType.DEF, new DefineExprParser());
     mParsers.put(TokenType.SHARED, new DefineExprParser());
+    mParsers.put(TokenType.TYPEOF, new TypeofExprParser());
   }
   
   public List<Expr> parse() {
@@ -292,7 +293,7 @@ public class MagpieParser extends Parser {
       if (match(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)) {
         arg = new NothingExpr(Position.union(last(2).getPosition(), last(1).getPosition()));
       } else if (match(TokenType.LEFT_PAREN)) {
-        arg = tuple();
+        arg = parseExpression();
         consume(TokenType.RIGHT_PAREN);
       }
       

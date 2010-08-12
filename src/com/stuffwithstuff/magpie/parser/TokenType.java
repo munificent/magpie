@@ -43,6 +43,7 @@ public enum TokenType {
   SHARED,
   THEN,
   THIS,
+  TYPEOF,
   VAR,
   WHILE,
   

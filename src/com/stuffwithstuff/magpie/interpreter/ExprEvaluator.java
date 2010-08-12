@@ -320,6 +320,11 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
+  public Obj visit(TypeofExpr expr, EvalContext context) {
+    return TypeEvaluator.evaluate(mInterpreter, expr.getBody(), context);
+  }
+
+  @Override
   public Obj visit(TupleExpr expr, EvalContext context) {
     // Evaluate the fields.
     Obj[] fields = new Obj[expr.getFields().size()];

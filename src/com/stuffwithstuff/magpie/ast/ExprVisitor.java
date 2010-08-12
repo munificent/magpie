@@ -17,5 +17,6 @@ public interface ExprVisitor<R, C> {
   R visit(StringExpr expr, C context);
   R visit(ThisExpr expr, C context);
   R visit(TupleExpr expr, C context);
+  R visit(TypeofExpr expr, C context);
   R visit(VariableExpr expr, C context);
 }

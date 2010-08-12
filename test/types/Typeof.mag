@@ -1,0 +1,22 @@
+// Literals.
+print(typeof nothing) //: Nothing
+print(typeof true) //: Bool
+print(typeof 123) //: Int
+print(typeof "i") //: String
+
+// Blocks.
+print(typeof
+    123
+end)        //: Int
+
+print(typeof
+    123
+    true
+end)        //: Bool
+
+
+print(typeof
+    123
+    true
+    "hey"
+end)        //: String

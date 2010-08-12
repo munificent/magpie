@@ -64,6 +64,7 @@ public final class Token {
       case SHARED: return "shared";
       case THEN: return "then";
       case THIS: return "this";
+      case TYPEOF: return "typeof";
       case VAR: return "var";
       case WHILE: return "while";
 
