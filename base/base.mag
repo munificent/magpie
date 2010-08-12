@@ -45,6 +45,13 @@ def Class toString(-> String) name
 // Provide a generic print that converts arg to string first.
 def Object print(arg) printRaw(arg toString)
 
+// Truthiness.
+def Object true?(-> Bool) true
+def Bool true?(-> Bool) this
+def Int true?(-> Bool) this != 0
+def String true?(-> Bool) this length > 0
+def Nothing true?(-> Bool) false
+
 // Type relations.
 
 shared Nothing canAssignFrom(other IType -> Bool) other == Nothing

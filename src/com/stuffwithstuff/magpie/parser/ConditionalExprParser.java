@@ -5,6 +5,7 @@ import java.util.Stack;
 import com.stuffwithstuff.magpie.ast.Condition;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.IfExpr;
+import com.stuffwithstuff.magpie.ast.MessageExpr;
 import com.stuffwithstuff.magpie.ast.NothingExpr;
 
 public class ConditionalExprParser implements ExprParser {
@@ -13,6 +14,16 @@ public class ConditionalExprParser implements ExprParser {
   public Expr parse(MagpieParser parser) {
     Position startPos = parser.current().getPosition();
     
+    // If expressions have their condition wrapped in a truthiness test. This
+    // lets you use arbitrary types in conditions and let the types themselves
+    // determine what true means for them. They get desugared like this:
+    //
+    // if foo then
+    //
+    // To:
+    //
+    // if foo true? then
+    //
     // Let expressions and multiple if conditions get desugared like this:
     //
     // let a = foo
@@ -40,7 +51,10 @@ public class ConditionalExprParser implements ExprParser {
     Stack<Condition> conditions = new Stack<Condition>();
     while (true) {
       if (parser.match(TokenType.IF)) {
-        conditions.add(new Condition(parser.parseIfBlock()));
+        Expr condition = parser.parseIfBlock();
+        condition = new MessageExpr(condition.getPosition(), condition,
+            "true?", null);
+        conditions.add(new Condition(condition));
       } else if (parser.match(TokenType.LET)) {
         // TODO(bob): Eventually allow tuple decomposition here.
         String name = parser.consume(TokenType.NAME).getString();
