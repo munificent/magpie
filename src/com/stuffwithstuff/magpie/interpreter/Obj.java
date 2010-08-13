@@ -1,10 +1,12 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import java.util.List;
+
 
 public class Obj {  
-  public Obj(ClassObj classObj, Object primitiveValue) {
+  public Obj(ClassObj classObj, Object value) {
     mClass = classObj;
-    mPrimitiveValue = primitiveValue;
+    mValue = value;
   }
   
   public Obj(ClassObj classObj) {
@@ -20,11 +22,10 @@ public class Obj {
   public Obj() {
     // If we are a class, we're our own class.
     mClass = (this instanceof ClassObj) ? (ClassObj)this : null;
-    mPrimitiveValue = null;
+    mValue = null;
   }
   
   public ClassObj getClassObj() { return mClass; }
-  public Object getPrimitiveValue() { return mPrimitiveValue; }
   
   /**
    * Gets the value of a given field.
@@ -48,9 +49,19 @@ public class Obj {
     mFields.define(name, field);
   }
   
+  @SuppressWarnings("unchecked")
+  public List<Obj> asArray() {
+    if (mValue instanceof List<?>) {
+      return (List<Obj>)mValue;
+    }
+    
+    throw new InterpreterException(String.format(
+        "The object \"%s\" is not an array.", this));
+  }
+
   public boolean asBool() {
-    if (mPrimitiveValue instanceof Boolean) {
-      return ((Boolean)mPrimitiveValue).booleanValue();
+    if (mValue instanceof Boolean) {
+      return ((Boolean)mValue).booleanValue();
     }
     
     throw new InterpreterException(String.format(
@@ -58,8 +69,8 @@ public class Obj {
   }
   
   public int asInt() {
-    if (mPrimitiveValue instanceof Integer) {
-      return ((Integer)mPrimitiveValue).intValue();
+    if (mValue instanceof Integer) {
+      return ((Integer)mValue).intValue();
     }
     
     throw new InterpreterException(String.format(
@@ -67,8 +78,8 @@ public class Obj {
   }
   
   public String asString() {
-    if (mPrimitiveValue instanceof String) {
-      return (String)mPrimitiveValue;
+    if (mValue instanceof String) {
+      return (String)mValue;
     }
     
     throw new InterpreterException(String.format(
@@ -77,16 +88,16 @@ public class Obj {
   
   @Override
   public String toString() {
-    if (mPrimitiveValue instanceof String) {
-      return "\"" + mPrimitiveValue + "\"";
-    } else if (mPrimitiveValue != null) {
-      return mPrimitiveValue.toString();
+    if (mValue instanceof String) {
+      return "\"" + mValue + "\"";
+    } else if (mValue != null) {
+      return mValue.toString();
     }
 
     return "Instance of " + mClass.getName();
   }
   
   private final ClassObj mClass;
-  private final Object mPrimitiveValue;
+  private final Object mValue;
   private final Scope mFields = new Scope();
 }

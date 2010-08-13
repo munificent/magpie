@@ -47,6 +47,15 @@ public class Interpreter {
     // Now that both Class and Object exist, wire them up.
     mClass.setParent(mObjectClass);
     
+    mArrayClass = createGlobalClass("Array");
+    mArrayClass.addMethod("count", new NativeMethod.ArrayCount());
+    mArrayClass.addMethod("[]", new NativeMethod.ArrayGetElement());
+    mArrayClass.addMethod("[]=", new NativeMethod.ArraySetElement());
+    mArrayClass.addMethod("add", new NativeMethod.ArrayAdd());
+    mArrayClass.addMethod("insert", new NativeMethod.ArrayInsert());
+    mArrayClass.addMethod("removeAt", new NativeMethod.ArrayRemoveAt());
+    mArrayClass.addMethod("clear", new NativeMethod.ArrayClear());
+
     mBoolClass = createGlobalClass("Bool");
     mBoolClass.addMethod("not", new NativeMethod.BoolNot());
     mBoolClass.addMethod("toString", new NativeMethod.BoolToString());
@@ -158,6 +167,10 @@ public class Interpreter {
   public ClassObj getObjectType() { return mObjectClass; }
   public ClassObj getStringType() { return mStringClass; }
   
+  public Obj createArray(List<Obj> elements) {
+    return mArrayClass.instantiate(elements);
+  }
+  
   public Obj createBool(boolean value) {
     return mBoolClass.instantiate(value);
   }
@@ -186,7 +199,7 @@ public class Interpreter {
     return new FnObj(mFnClass, expr);
   }
   
-  public Obj createTuple(EvalContext context, Obj... fields) {
+  public Obj createTuple(Obj... fields) {
     // A tuple is an object with fields whose names are zero-based numbers.
     Obj tuple = mTupleClass.instantiate();
     for (int i = 0; i < fields.length; i++) {
@@ -211,6 +224,7 @@ public class Interpreter {
   private final InterpreterHost mHost;
   private Scope mGlobalScope;
   private final ClassObj mClass;
+  private final ClassObj mArrayClass;
   private final ClassObj mBoolClass;
   private final ClassObj mDynamicClass;
   private final ClassObj mFnClass;

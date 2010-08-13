@@ -225,18 +225,14 @@ public class MagpieParser extends Parser {
    * Parses a tuple expression like "a, b, c".
    */
   private Expr tuple() {
-    List<Expr> fields = new ArrayList<Expr>();
-    
-    do {
-      fields.add(conjunction());
-    } while (match(TokenType.COMMA));
-    
+    List<Expr> fields = parseCommaList();
+        
     // Only wrap in a tuple if there are multiple fields.
     if (fields.size() == 1) return fields.get(0);
     
     return new TupleExpr(fields);
   }
-
+  
   /**
    * Parses "and" and "or" expressions.
    * @return
@@ -284,17 +280,37 @@ public class MagpieParser extends Parser {
   private Expr message() {
     Expr message = primary();
     
-    while (match(TokenType.NAME)) {
-      String name = last(1).getString();
-      Position position = last(1).getPosition();
-
-      // See if it has an argument.
+    while (true) {
+      String name;
+      Position position;
       Expr arg = null;
-      if (match(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)) {
-        arg = new NothingExpr(Position.union(last(2).getPosition(), last(1).getPosition()));
-      } else if (match(TokenType.LEFT_PAREN)) {
-        arg = parseExpression();
-        consume(TokenType.RIGHT_PAREN);
+      
+      if (match(TokenType.NAME)) {
+        // A normal named message.
+        name = last(1).getString();
+        position = last(1).getPosition();
+        
+        // See if it has an argument.
+        if (match(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)) {
+          arg = new NothingExpr(Position.union(last(2).getPosition(), last(1).getPosition()));
+        } else if (match(TokenType.LEFT_PAREN)) {
+          arg = parseExpression();
+          consume(TokenType.RIGHT_PAREN);
+        }
+      } else if (match(TokenType.LEFT_BRACKET)) {
+        // An indexer expression: foo[123, 4]
+        name = "[]";
+        position = last(1).getPosition();
+        
+        // Parse the argument.
+        if (lookAhead(TokenType.RIGHT_BRACKET)) {
+          arg = new NothingExpr(Position.union(position, current().getPosition()));
+        } else {
+          arg = parseExpression();
+          consume(TokenType.RIGHT_BRACKET);
+        }
+      } else {
+        break;
       }
       
       if (message != null) {
@@ -332,11 +348,27 @@ public class MagpieParser extends Parser {
       Expr expr = parseExpression();
       consume(TokenType.RIGHT_PAREN);
       return expr;
+    } else if (match(TokenType.LEFT_BRACKET)) {
+      Position position = last(1).getPosition();
+      List<Expr> elements = parseCommaList();
+      consume(TokenType.RIGHT_BRACKET);
+      position = Position.union(position, last(1).getPosition());
+      return new ArrayExpr(position, elements);
     }
     
     return null;
   }
-  
+
+  private List<Expr> parseCommaList() {
+    List<Expr> exprs = new ArrayList<Expr>();
+    
+    do {
+      exprs.add(conjunction());
+    } while (match(TokenType.COMMA));
+    
+    return exprs;
+  }
+
   private final Map<TokenType, ExprParser> mParsers =
     new HashMap<TokenType, ExprParser>();
 }

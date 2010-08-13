@@ -1,5 +1,6 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import java.util.List;
 import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.*;
@@ -10,7 +11,109 @@ public abstract class NativeMethod implements Invokable {
   // TODO(bob): Many of these just use dynamic in their type signature. Would be
   // good to change to something more specific when possible.
   
-  // Native methods:
+  // Array methods:
+  
+  public static class ArrayCount extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      List<Obj> elements = thisObj.asArray();
+      return interpreter.createInt(elements.size());
+    }
+    
+    public Expr getParamType() { return Expr.name("Nothing"); }
+    public Expr getReturnType() { return Expr.name("Int"); }
+  }
+  
+  public static class ArrayGetElement extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      List<Obj> elements = thisObj.asArray();
+      
+      int index = arg.asInt();
+      
+      // Negative indices count backwards from the end.
+      if (index < 0) {
+        index = elements.size() + index;
+      }
+      
+      return elements.get(index);
+    }
+    
+    public Expr getParamType() { return Expr.name("Int"); }
+    public Expr getReturnType() { return Expr.name("Dynamic"); }
+  }
+  
+  public static class ArraySetElement extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      List<Obj> elements = thisObj.asArray();
+      
+      int index = arg.getTupleField(0).asInt();
+      
+      // Negative indices count backwards from the end.
+      if (index < 0) {
+        index = elements.size() + index;
+      }
+      
+      elements.set(index, arg.getTupleField(1));
+      return interpreter.nothing();
+    }
+    
+    public Expr getParamType() { return Expr.name("Int"); }
+    public Expr getReturnType() { return Expr.name("Dynamic"); }
+  }
+  
+  public static class ArrayAdd extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      List<Obj> elements = thisObj.asArray();
+      elements.add(arg);
+      
+      return interpreter.nothing();
+    }
+    
+    public Expr getParamType() { return Expr.name("Object"); }
+    public Expr getReturnType() { return Expr.name("Nothing"); }
+  }
+  
+  public static class ArrayInsert extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int index = arg.getTupleField(0).asInt();
+      Obj value = arg.getTupleField(1);
+
+      List<Obj> elements = thisObj.asArray();
+      elements.add(index, value);
+      
+      return interpreter.nothing();
+    }
+    
+    public Expr getParamType() { return Expr.name("Dynamic"); }
+    public Expr getReturnType() { return Expr.name("Nothing"); }
+  }
+  
+  public static class ArrayRemoveAt extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      List<Obj> elements = thisObj.asArray();
+      return elements.remove(arg.asInt());
+    }
+    
+    public Expr getParamType() { return Expr.name("Dynamic"); }
+    public Expr getReturnType() { return Expr.name("Nothing"); }
+  }
+  
+  public static class ArrayClear extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      List<Obj> elements = thisObj.asArray();
+      elements.clear();
+      return interpreter.nothing();
+    }
+    
+    public Expr getParamType() { return Expr.name("Dynamic"); }
+    public Expr getReturnType() { return Expr.name("Nothing"); }
+  }
   
   // Bool methods:
   

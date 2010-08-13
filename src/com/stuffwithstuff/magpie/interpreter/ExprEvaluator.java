@@ -1,5 +1,6 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -12,6 +13,17 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   
   public Obj evaluate(Expr expr, EvalContext context) {
     return expr.accept(this, context);
+  }
+  
+  @Override
+  public Obj visit(ArrayExpr expr, EvalContext context) {
+    // Evaluate the elements.
+    List<Obj> elements = new ArrayList<Obj>(expr.getElements().size());
+    for (int i = 0; i < expr.getElements().size(); i++) {
+      elements.add(evaluate(expr.getElements().get(i), context));
+    }
+
+    return mInterpreter.createArray(elements);
   }
 
   @Override
@@ -49,7 +61,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       // then bundle them together:
       if (expr.getTargetArg() != null) {
         Obj targetArg = evaluate(expr.getTargetArg(), context);
-        value = mInterpreter.createTuple(context, targetArg, value);
+        value = mInterpreter.createTuple(targetArg, value);
       }
 
       // Invoke the setter method.
@@ -332,7 +344,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       fields[i] = evaluate(expr.getFields().get(i), context);
     }
 
-    return mInterpreter.createTuple(context, fields);
+    return mInterpreter.createTuple(fields);
   }
 
   @Override

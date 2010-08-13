@@ -16,6 +16,12 @@ public class TypeEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
   
   @Override
+  public Obj visit(ArrayExpr expr, EvalContext context) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
   public Obj visit(AndExpr expr, EvalContext context) {
     // TODO Auto-generated method stub
     return null;
