@@ -7,6 +7,7 @@ import com.stuffwithstuff.magpie.parser.Position;
 public class ArrayExpr extends Expr {
   public ArrayExpr(Position position, List<Expr> elements) {
     super(position);
+    
     mElements = elements;
   }
   

@@ -10,7 +10,7 @@ public abstract class NativeMethod implements Invokable {
   
   // TODO(bob): Many of these just use dynamic in their type signature. Would be
   // good to change to something more specific when possible.
-  
+
   // Array methods:
   
   public static class ArrayCount extends NativeMethod {
@@ -523,19 +523,6 @@ public abstract class NativeMethod implements Invokable {
     public Expr getReturnType() { return Expr.name("String"); }
   }
 
-  public static class StringEquals extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      String left = thisObj.asString();
-      String right = arg.asString();
-      
-      return interpreter.createBool(left.equals(right));
-    }
-    
-    public Expr getParamType() { return Expr.name("String"); }
-    public Expr getReturnType() { return Expr.name("String"); }
-  }
-
   public static class StringAt extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
@@ -546,6 +533,16 @@ public abstract class NativeMethod implements Invokable {
     
     public Expr getParamType() { return Expr.name("Int"); }
     public Expr getReturnType() { return Expr.name("String"); }
+  }
+
+  public static class StringCompare extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      return interpreter.createInt(thisObj.asString().compareTo(arg.asString()));
+    }
+    
+    public Expr getParamType() { return Expr.name("String"); }
+    public Expr getReturnType() { return Expr.name("Int"); }
   }
 
   public static class StringSubstring extends NativeMethod {

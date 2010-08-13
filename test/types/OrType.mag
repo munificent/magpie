@@ -6,6 +6,13 @@ end
 
 Derived parent = Base
 
+// toString. Note: branches are sorted, duplicates are removed, and a
+// hierarchy gets flattened.
+print(Int | Bool) //: Bool | Int
+print(Int | Bool | String) //: Bool | Int | String
+print(Int | Bool | String | Bool) //: Bool | Int | String
+print((Int | Bool) | (String | Bool)) //: Bool | Int | String
+
 // A value of any of the unioned types is permitted.
 print((Int | Bool) canAssignFrom(Int)) //: true
 print((Int | Bool) canAssignFrom(Bool)) //: true

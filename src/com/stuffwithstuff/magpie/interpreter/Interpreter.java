@@ -81,7 +81,7 @@ public class Interpreter {
 
     mStringClass = createGlobalClass("String");
     mStringClass.addMethod("+",         new NativeMethod.StringPlus());
-    mStringClass.addMethod("==",        new NativeMethod.StringEquals());
+    mStringClass.addMethod("compareTo", new NativeMethod.StringCompare());
     mStringClass.addMethod("at",        new NativeMethod.StringAt());
     mStringClass.addMethod("substring", new NativeMethod.StringSubstring());
     mStringClass.addMethod("count",     new NativeMethod.StringCount());
@@ -103,7 +103,13 @@ public class Interpreter {
     
     mNothingClass = createGlobalClass("Nothing");
     mNothing = mNothingClass.instantiate();
-  }
+
+    // "Never" is the evaluated type of an expression that can never yield a
+    // result. It's equivalent to the bottom type. More concretely, it's the
+    // type of a "return" expression, since a return will always unwind the
+    // stack instead of actually yielding a result.
+    mNeverClass = createGlobalClass("Never");
+}
   
   public void load(List<Expr> expressions) {
     EvalContext context = createTopLevelContext();
@@ -166,6 +172,7 @@ public class Interpreter {
   public ClassObj getNothingType() { return mNothingClass; }
   public ClassObj getObjectType() { return mObjectClass; }
   public ClassObj getStringType() { return mStringClass; }
+  public ClassObj getNeverType() { return mNeverClass; }
   
   public Obj createArray(List<Obj> elements) {
     return mArrayClass.instantiate(elements);
@@ -230,6 +237,7 @@ public class Interpreter {
   private final ClassObj mFnClass;
   private final ClassObj mIntClass;
   private final ClassObj mNothingClass;
+  private final ClassObj mNeverClass;
   private final ClassObj mObjectClass;
   private final ClassObj mStringClass;
   private final ClassObj mTupleClass;

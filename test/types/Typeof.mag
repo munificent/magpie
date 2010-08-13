@@ -4,6 +4,10 @@ print(typeof true) //: Bool
 print(typeof 123) //: Int
 print(typeof "i") //: String
 
+// Assignment.
+print(typeof a = 3)       //: Int
+print(typeof foo = "bar") //: String
+
 // Blocks.
 print(typeof
     123
@@ -20,3 +24,14 @@ print(typeof
     true
     "hey"
 end)        //: String
+
+// Loops never return anything.
+print(typeof while a < 2 do 4) //: Nothing
+
+// Variable definitions.
+print(typeof var a = 234) //: Int
+print(typeof var a = true) //: Bool
+
+// Return expressions never actually evaluate to a result since they
+// immediately unwind the stack.
+print(typeof return 123) //: Never

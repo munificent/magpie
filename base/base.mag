@@ -38,6 +38,7 @@ def Int until (last Int -> Range) Range new(this, last - 1)
 
 def String apply (index Int -> String) this at(index)
 
+def Object toString(-> String) "object"
 def String toString(-> String) this
 def Nothing toString(-> String) "nothing"
 def Class toString(-> String) name
@@ -51,6 +52,13 @@ def Bool true?(-> Bool) this
 def Int true?(-> Bool) this != 0
 def String true?(-> Bool) this count > 0
 def Nothing true?(-> Bool) false
+
+def String ==(other -> String) this compareTo(other) == 0
+def String !=(other -> String) this compareTo(other) != 0
+def String <(other -> String) this compareTo(other) < 0
+def String >(other -> String) this compareTo(other) > 0
+def String <=(other -> String) this compareTo(other) <= 0
+def String >=(other -> String) this compareTo(other) >= 0
 
 // Type relations.
 
@@ -74,16 +82,92 @@ def Class canAssignFrom(other IType -> Bool)
     this == Object
 end
 
-def Class |(other IType -> OrType) OrType new(this, other)
-
-class OrType
-    this(left IType, right IType)
-        this left = left
-        this right = right
+class ArrayIterator
+    this(array Array ->)
+        this array = array
+        this index = -1
     end
     
-    left  IType
-    right IType
+    array Array
+    index Int
+end
+
+def ArrayIterator next(-> Bool)
+    index = index + 1
+    index < array count
+end
+
+def ArrayIterator current() array[index]
+
+def Array iterate(-> ArrayIterator) ArrayIterator new(this)
+
+def Array toString(-> String)
+    var text = "["
+    for i = 0 until(count) do
+        text = text + this[i] toString
+        if i < (count - 1) then text = text + ", "
+    end
+    text + "]"
+end
+
+def Array copy(-> Array)
+    var result = []
+    for item = this do result add(item)
+    result
+end
+
+def Array sortByString(-> Array)
+    var result = copy
+    
+    // TODO(bob): Awful bubble sort FTW!
+    for i = 0 until(result count) do
+        for j = (i + 1) until(result count) do
+            if result[i] toString > result[j] toString then
+                var temp = result[i]
+                result[i] = result[j]
+                result[j] = temp
+            end
+        end
+    end
+    
+    result
+end
+
+def Array unique(-> Array)
+    var result = []
+    for item = this do
+        if result count == 0 then result add(item)
+        else
+            if result[-1] != item then result add(item)
+        end
+    end
+    
+    result
+end
+
+def Class |(other IType -> OrType)
+    // combine the cases of both arms
+    var cases = if this type == OrType then this cases
+                else [this]
+    
+    if other type == OrType then
+        for item = other cases do cases add(item)
+    else
+        cases add(other)
+    end
+    
+    // sort and remove the duplicates
+    cases = cases sortByString unique
+    
+    OrType new(cases)
+end
+
+class OrType
+    this(cases)
+        this cases
+    end
+    
+    cases Array // TODO(bob): Array of(IType)
 end
 
 def OrType canAssignFrom(other IType -> Bool)

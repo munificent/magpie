@@ -348,6 +348,10 @@ public class MagpieParser extends Parser {
       Expr expr = parseExpression();
       consume(TokenType.RIGHT_PAREN);
       return expr;
+    } else if (match(TokenType.LEFT_BRACKET, TokenType.RIGHT_BRACKET)) {
+      Position position = Position.union(last(2).getPosition(), last(1).getPosition());
+      List<Expr> elements = new ArrayList<Expr>();
+      return new ArrayExpr(position, elements);
     } else if (match(TokenType.LEFT_BRACKET)) {
       Position position = last(1).getPosition();
       List<Expr> elements = parseCommaList();

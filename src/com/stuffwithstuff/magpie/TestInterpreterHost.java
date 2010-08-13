@@ -124,7 +124,7 @@ public class TestInterpreterHost implements InterpreterHost {
     // Uncomment this to see the runtime errors as they occur. Commented out
     // because some tests intentionally cause runtime errors to test that the
     // behavior after the error is as expected.
-    //System.out.println(position.toString() + ": " + message);
+    System.out.println(position.toString() + ": " + message);
   }
 
   private void loadScript(String path) {

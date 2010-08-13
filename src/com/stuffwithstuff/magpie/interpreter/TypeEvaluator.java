@@ -29,8 +29,8 @@ public class TypeEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(AssignExpr expr, EvalContext context) {
-    // TODO Auto-generated method stub
-    return null;
+    // An assignment returns the value being assigned.
+    return evaluate(expr.getValue(), context);
   }
 
   @Override
@@ -81,8 +81,8 @@ public class TypeEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(LoopExpr expr, EvalContext context) {
-    // TODO Auto-generated method stub
-    return null;
+    // Right now, loops can't evaluate to anything.
+    return mInterpreter.getNothingType();
   }
 
   @Override
@@ -104,8 +104,7 @@ public class TypeEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(ReturnExpr expr, EvalContext context) {
-    // TODO Auto-generated method stub
-    return null;
+    return mInterpreter.getNeverType();
   }
 
   @Override
@@ -133,8 +132,8 @@ public class TypeEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(VariableExpr expr, EvalContext context) {
-    // TODO Auto-generated method stub
-    return null;
+    // Variable definitions return the defined value.
+    return evaluate(expr.getValue(), context);
   }
   
   private Obj evaluate(Expr expr, EvalContext context) {
