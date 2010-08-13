@@ -249,7 +249,7 @@ public class MagpieParser extends Parser {
       Expr right = operator();
 
       Position position = Position.union(left.getPosition(), right.getPosition());
-      
+
       if (conjunction.getType() == TokenType.AND) {
         left = new AndExpr(position, left, right);
       } else {

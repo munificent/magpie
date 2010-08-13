@@ -1,11 +1,16 @@
 package com.stuffwithstuff.magpie.ast;
 
+import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.parser.Token;
 
 public class BoolExpr extends Expr {
+  public BoolExpr(Position position, boolean value) {
+    super(position);
+    mValue = value;
+  }
+
   public BoolExpr(Token token) {
-    super(token.getPosition());
-    mValue = token.getBool();
+    this(token.getPosition(), token.getBool());
   }
   
   public boolean getValue() { return mValue; }

@@ -17,12 +17,12 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(AndExpr expr, EvalContext context) {
     Obj left = evaluate(expr.getLeft(), context);
-    
-    // TODO(bob): Determine if this is how we want to be more flexible about
-    // truthiness.
-    if (!left.asBool()) return left;
-    
-    return evaluate(expr.getRight(), context);
+        
+    if (isTruthy(expr, left)) {
+      return evaluate(expr.getRight(), context);
+    } else {
+      return left;
+    }
   }
 
   @Override
@@ -214,7 +214,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       } else {
         // Regular "if" condition.
         Obj result = evaluate(condition.getBody(), context);
-        if (!result.asBool()) {
+        if (!isTruthy(expr, result)) {
           // Condition failed.
           passed = false;
           break;
@@ -243,7 +243,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       for (Expr conditionExpr : expr.getConditions()) {
         // See if the while clause is still true.
         Obj condition = evaluate(conditionExpr, context);
-        if (!condition.asBool()) {
+        if (!isTruthy(conditionExpr, condition)) {
           done = true;
           break;
         }
@@ -296,11 +296,11 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(OrExpr expr, EvalContext context) {
     Obj left = evaluate(expr.getLeft(), context);
     
-    // TODO(bob): Determine if this is how we want to be more flexible about
-    // truthiness.
-    if (left.asBool()) return left;
-    
-    return evaluate(expr.getRight(), context);
+    if (isTruthy(expr, left)) {
+      return left;
+    } else {
+      return evaluate(expr.getRight(), context);
+    }
   }
 
   @Override
@@ -341,6 +341,11 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
     context.define(expr.getName(), value);
     return value;
+  }
+  
+  private boolean isTruthy(Expr expr, Obj receiver) {
+    Obj truthy = invokeMethod(expr, receiver, "true?", null);
+    return truthy.asBool();
   }
 
   private Obj invokeMethod(Expr expr, Obj receiver, String name, Obj arg) {

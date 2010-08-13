@@ -49,7 +49,7 @@ def Object print(arg) printRaw(arg toString)
 def Object true?(-> Bool) true
 def Bool true?(-> Bool) this
 def Int true?(-> Bool) this != 0
-def String true?(-> Bool) this length > 0
+def String true?(-> Bool) this count > 0
 def Nothing true?(-> Bool) false
 
 // Type relations.

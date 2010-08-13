@@ -41,9 +41,6 @@ public class LoopExprParser implements ExprParser {
     while (parser.match(TokenType.WHILE) || parser.match(TokenType.FOR)) {
       if (parser.last(1).getType() == TokenType.WHILE) {
         Expr condition = parser.parseExpression();
-        // Wrap the condition in a truthiness check so that we can use any type
-        // of expression in a while loop.
-        condition = new MessageExpr(condition.getPosition(), condition, "true?", null);
         conditions.add(condition);
       } else {
         Token nameToken = parser.consume(TokenType.NAME);

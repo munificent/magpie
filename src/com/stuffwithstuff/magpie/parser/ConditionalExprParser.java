@@ -5,7 +5,6 @@ import java.util.Stack;
 import com.stuffwithstuff.magpie.ast.Condition;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.IfExpr;
-import com.stuffwithstuff.magpie.ast.MessageExpr;
 import com.stuffwithstuff.magpie.ast.NothingExpr;
 
 public class ConditionalExprParser implements ExprParser {
@@ -52,8 +51,6 @@ public class ConditionalExprParser implements ExprParser {
     while (true) {
       if (parser.match(TokenType.IF)) {
         Expr condition = parser.parseIfBlock();
-        condition = new MessageExpr(condition.getPosition(), condition,
-            "true?", null);
         conditions.add(new Condition(condition));
       } else if (parser.match(TokenType.LET)) {
         // TODO(bob): Eventually allow tuple decomposition here.
