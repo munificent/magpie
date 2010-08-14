@@ -23,8 +23,10 @@ public class TypeEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(AndExpr expr, EvalContext context) {
-    // TODO Auto-generated method stub
-    return null;
+    Obj left = evaluate(expr.getLeft(), context);
+    Obj right = evaluate(expr.getRight(), context);
+    
+    return orTypes(expr, left, right, mInterpreter.getBoolType());
   }
 
   @Override
@@ -70,8 +72,10 @@ public class TypeEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(IfExpr expr, EvalContext context) {
-    // TODO Auto-generated method stub
-    return null;
+    Obj thenType = evaluate(expr.getThen(), context);
+    Obj elseType = evaluate(expr.getElse(), context);
+    
+    return orTypes(expr, thenType, elseType);
   }
 
   @Override
@@ -98,8 +102,10 @@ public class TypeEvaluator implements ExprVisitor<Obj, EvalContext> {
   
   @Override
   public Obj visit(OrExpr expr, EvalContext context) {
-    // TODO Auto-generated method stub
-    return null;
+    Obj left = evaluate(expr.getLeft(), context);
+    Obj right = evaluate(expr.getRight(), context);
+    
+    return orTypes(expr, left, right, mInterpreter.getBoolType());
   }
 
   @Override
@@ -139,6 +145,17 @@ public class TypeEvaluator implements ExprVisitor<Obj, EvalContext> {
   private Obj evaluate(Expr expr, EvalContext context) {
     return expr.accept(this, context);
   }
+  
+  private Obj orTypes(Expr expr, Obj... types) {
+    ExprEvaluator evaluator = new ExprEvaluator(mInterpreter);
     
+    Obj result = types[0];
+    for (int i = 1; i < types.length; i++) {
+      result = evaluator.invokeMethod(expr, result, "|", types[i]);
+    }
+    
+    return result;
+  }
+  
   private final Interpreter mInterpreter;
 }

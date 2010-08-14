@@ -14,7 +14,21 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   public Obj evaluate(Expr expr, EvalContext context) {
     return expr.accept(this, context);
   }
-  
+
+  public Obj invokeMethod(Expr expr, Obj receiver, String name, Obj arg) {
+    Invokable method = receiver.getClassObj().findMethod(name);
+    
+    if (method == null) {
+      mInterpreter.runtimeError(expr,
+          "Could not find a variable or method named \"%s\" on %s.",
+          name, receiver.getClassObj());
+      
+      return mInterpreter.nothing();
+    }
+    
+    return method.invoke(mInterpreter, receiver, arg);
+  }
+
   @Override
   public Obj visit(ArrayExpr expr, EvalContext context) {
     // Evaluate the elements.
@@ -358,20 +372,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   private boolean isTruthy(Expr expr, Obj receiver) {
     Obj truthy = invokeMethod(expr, receiver, "true?", null);
     return truthy.asBool();
-  }
-
-  private Obj invokeMethod(Expr expr, Obj receiver, String name, Obj arg) {
-    Invokable method = receiver.getClassObj().findMethod(name);
-    
-    if (method == null) {
-      mInterpreter.runtimeError(expr,
-          "Could not find a variable or method named \"%s\" on %s.",
-          name, receiver.getClassObj());
-      
-      return mInterpreter.nothing();
-    }
-    
-    return method.invoke(mInterpreter, receiver, arg);
   }
   
   private final Interpreter mInterpreter;
