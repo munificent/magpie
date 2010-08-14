@@ -1,0 +1,8 @@
+print([1] contains(1)) //: true
+print([1] contains(2)) //: false
+
+print([1, 2] contains(1)) //: true
+print([1, 2] contains(2)) //: true
+
+print(["s", "b"] contains("s")) //: true
+print(["f", "b"] contains("s")) //: false
