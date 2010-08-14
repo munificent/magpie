@@ -104,3 +104,26 @@ def OrType canAssignFrom(other IType -> Bool)
         false
     end
 end
+
+// TODO(bob): This is kind of hokey.
+shared Array newType(elementType -> ArrayType)
+    ArrayType new(elementType)
+end
+
+class ArrayType
+    this(elementType)
+        this elementType = elementType
+    end
+    
+    elementType IType
+end
+
+def ArrayType toString(-> String)
+    elementType toString + "[]"
+end
+
+// If you call [] on a class like, it returns the type of an array of this
+// class.
+def Class [](-> ArrayType)
+    ArrayType new(this)
+end

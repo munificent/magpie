@@ -1,0 +1,2 @@
+print(Int[]) //: Int[]
+print(Bool[] elementType) //: Bool

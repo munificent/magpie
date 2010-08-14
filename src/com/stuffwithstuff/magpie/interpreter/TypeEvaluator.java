@@ -1,5 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import java.util.List;
+
 import com.stuffwithstuff.magpie.ast.*;
 
 public class TypeEvaluator implements ExprVisitor<Obj, EvalContext> {
@@ -17,8 +19,43 @@ public class TypeEvaluator implements ExprVisitor<Obj, EvalContext> {
   
   @Override
   public Obj visit(ArrayExpr expr, EvalContext context) {
-    // TODO Auto-generated method stub
-    return null;
+    // Try to infer the element type from the contents. The rules (which may
+    // change over time) are:
+    // 1. An empty array has element type Object.
+    // 2. If all elements are == to the first, that's the element type.
+    // 3. Otherwise, it's Object.
+    
+    // Other currently unsupported options would be:
+    // For classes, look for a common base class.
+    // For unrelated types, | them together.
+
+    List<Expr> elements = expr.getElements();
+    
+    ExprEvaluator evaluator = new ExprEvaluator(mInterpreter);
+
+    Obj elementType;
+    if (elements.size() == 0) {
+      elementType = mInterpreter.getObjectType();
+    } else {
+      // Get the first element's type.
+      elementType = evaluate(elements.get(0), context);
+      
+      // Compare all of the others to it, if any.
+      if (elements.size() > 1) {
+        for (int i = 1; i < elements.size(); i++) {
+          Obj other = evaluate(elements.get(i), context);
+          Obj result = evaluator.invokeMethod(expr, elementType, "==", other);
+          if (!result.asBool()) {
+            // No match, so default to Object.
+            elementType = mInterpreter.getObjectType();
+            break;
+          }
+        }
+      }
+    }
+    
+    Obj arrayType = mInterpreter.getArrayType();
+    return evaluator.invokeMethod(expr, arrayType, "newType", elementType);
   }
 
   @Override

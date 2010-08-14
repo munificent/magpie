@@ -32,6 +32,19 @@ public class DefineExprParser implements ExprParser {
     List<Token> names = new ArrayList<Token>();
     while (parser.matchAny(TokenType.NAME, TokenType.OPERATOR)) {
       names.add(parser.last(1));
+      
+      // TODO(bob): Hack, handle indexers.
+      if (parser.match(TokenType.LEFT_BRACKET, TokenType.RIGHT_BRACKET, TokenType.EQUALS)) {
+        names.add(new Token(
+            Position.union(parser.last(3).getPosition(), parser.last(1).getPosition()),
+            TokenType.NAME, "[]="));
+        break;
+      } else if (parser.match(TokenType.LEFT_BRACKET, TokenType.RIGHT_BRACKET)) {
+        names.add(new Token(
+            Position.union(parser.last(3).getPosition(), parser.last(1).getPosition()),
+            TokenType.NAME, "[]"));
+        break;
+      }
     }
     
     if (names.size() < 0) throw new ParseException(

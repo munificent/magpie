@@ -174,6 +174,7 @@ public class Interpreter {
   public ClassObj getObjectType() { return mObjectClass; }
   public ClassObj getStringType() { return mStringClass; }
   public ClassObj getNeverType() { return mNeverClass; }
+  public ClassObj getArrayType() { return mArrayClass; }
   
   public Obj createArray(List<Obj> elements) {
     return mArrayClass.instantiate(elements);

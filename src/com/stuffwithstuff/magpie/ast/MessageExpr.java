@@ -22,17 +22,21 @@ public class MessageExpr extends Expr {
 
   @Override public String toString() {
     StringBuilder builder = new StringBuilder();
-    builder.append(mReceiver)
-           .append(" ")
-           .append(mName);
     
-    if (!(mArg instanceof NothingExpr)) {
-      builder.append("(")
-             .append(mArg)
-             .append(")");
+    if (mReceiver != null) {
+      builder.append(mReceiver).append(" ");
     }
     
-    builder.append(")");
+    builder.append(mName);
+    
+    if (mArg != null) {
+      builder.append("(");
+      if (!(mArg instanceof NothingExpr)) {
+        builder.append(mArg);
+      }
+      builder.append(")");
+    }
+    
     return builder.toString();
   }
   

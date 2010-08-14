@@ -4,6 +4,12 @@ print(typeof true) //: Bool
 print(typeof 123) //: Int
 print(typeof "i") //: String
 
+// Arrays.
+print(typeof [])            //: Object[]
+print(typeof [1, 2, 3])     //: Int[]
+print(typeof [true, false]) //: Bool[]
+print(typeof [1, true])     //: Object[]
+
 // Assignment.
 print(typeof a = 3)       //: Int
 print(typeof foo = "bar") //: String

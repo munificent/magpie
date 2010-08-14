@@ -303,7 +303,7 @@ public class MagpieParser extends Parser {
         position = last(1).getPosition();
         
         // Parse the argument.
-        if (lookAhead(TokenType.RIGHT_BRACKET)) {
+        if (match(TokenType.RIGHT_BRACKET)) {
           arg = new NothingExpr(Position.union(position, current().getPosition()));
         } else {
           arg = parseExpression();
