@@ -36,10 +36,12 @@ public class Script {
   }
   
   public void execute(Interpreter interpreter) {
+    interpreter.pushScriptPath(mPath);
     Lexer lexer = new Lexer(mPath, mText);
     MagpieParser parser = new MagpieParser(lexer);
 
     interpreter.load(parser.parse());
+    interpreter.popScriptPath();
   }
 
   private static String readFile(String path) throws IOException {

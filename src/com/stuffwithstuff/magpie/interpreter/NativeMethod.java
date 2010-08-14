@@ -1,8 +1,11 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map.Entry;
 
+import com.stuffwithstuff.magpie.Script;
 import com.stuffwithstuff.magpie.ast.*;
 
 public abstract class NativeMethod implements Invokable {
@@ -495,6 +498,27 @@ public abstract class NativeMethod implements Invokable {
     
     public Expr getParamType() { return Expr.name("Int"); }
     public Expr getReturnType() { return Expr.name("Bool"); }
+  }
+
+  public static class ObjectImport extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      String currentDir = new File(interpreter.getCurrentScript()).getParent();
+      String relativePath = arg.asString();
+      File scriptFile = new File(currentDir, relativePath);
+      
+      try {
+        Script script = Script.fromPath(scriptFile.getPath());
+        script.execute(interpreter);
+      } catch (IOException e) {
+        throw new InterpreterException("Could not load script \"" + relativePath + "\".");
+      }
+      
+      return interpreter.nothing();
+    }
+    
+    public Expr getParamType() { return Expr.name("Nothing"); }
+    public Expr getReturnType() { return Expr.name("Nothing"); }
   }
 
   public static class ObjectPrint extends NativeMethod {

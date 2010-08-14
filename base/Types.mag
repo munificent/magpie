@@ -1,0 +1,106 @@
+// These define the key operations on types that type checking is implemented
+// in terms of. The most important part is "canAssignFrom". All types (objects)
+// that can be the result of a type expression) are expect to implement this
+// and return true if an argument of the given type would be OK in a variable
+// defined to be that type.
+// 
+// For example, "Int canAssignFrom(Bool)" returns false since an Int variable
+// can't hold a Bool. Given a class Base and a derived class Derived,
+// "Base canAssignFrom(Derived)" returns true since every Derived is also a
+// Base.
+
+// No type except Nothing is allowed where Nothing is expected.
+shared Nothing canAssignFrom(other IType -> Bool) other == Nothing
+
+def Class canAssignFrom(other IType -> Bool)
+    // Not even object can assign from Nothing.
+    if other == Nothing then return false
+    
+    if other type == OrType then return false
+    
+    // A derived type can be assigned to a base type, so walk up the chain
+    // looking for this type.
+    while other != Object do
+        if this == other then return true
+        // Bail if got stuck in an infinite loop.
+        if other == nothing then return false
+        other = other parent
+    end
+    
+    // If we got here, the only thing other has in common is Object, so see if
+    // that's us.
+    this == Object
+end
+
+def Class |(other IType -> OrType)
+    // combine the cases of both arms
+    var cases = [this]
+    
+    if other type == OrType then
+        for item = other cases do cases add(item)
+    else
+        cases add(other)
+    end
+    
+    // Sort and remove the duplicates.
+    cases = cases sortByString unique
+    
+    // If just one case remains, there's no union.
+    if cases count == 1 then return cases[0]
+    
+    OrType new(cases)
+end
+
+
+class OrType
+    this(cases)
+        this cases = cases
+    end
+    
+    cases Array // TODO(bob): Array of(IType)
+end
+
+def OrType toString(-> String)
+    var result = ""
+    for index = 0 until(cases count) do
+        result = result + cases[index] toString
+        if index < (cases count - 1) then result = result + " | "
+    end
+    result
+end
+
+def OrType |(other IType -> OrType)
+    // combine the cases of both arms
+    var union = cases copy
+
+    if other type == OrType then
+        for item = other cases do union add(item)
+    else
+        union add(other)
+    end
+
+    // sort and remove the duplicates
+    union = union sortByString unique
+    
+    // If just one case remains, there's no union.
+    if union count == 1 then return union[0]
+
+    OrType new(union)
+end
+
+def OrType canAssignFrom(other IType -> Bool)
+    if other type == OrType then
+        // It's also an or, so see if all of its cases are matched by one of
+        // the ones here.
+        for otherCase = other cases do
+            if canAssignFrom(otherCase) not then return false
+        end
+        true
+    else
+        // It's a regular class, so see if any of the cases match it.
+        for type = cases do
+            if type canAssignFrom(other) then return true
+        end
+        false
+    end
+end

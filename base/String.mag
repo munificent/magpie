@@ -1,0 +1,10 @@
+// Allow indexing strings like arrays.
+def String apply (index Int -> String) this at(index)
+
+// Comparisons.
+def String ==(other -> String) this compareTo(other toString) == 0
+def String !=(other -> String) this compareTo(other toString) != 0
+def String <(other -> String) this compareTo(other toString) < 0
+def String >(other -> String) this compareTo(other toString) > 0
+def String <=(other -> String) this compareTo(other toString) <= 0
+def String >=(other -> String) this compareTo(other toString) >= 0

@@ -41,3 +41,7 @@ print((Bool | Int | String) canAssignFrom(Int | Bool | String)) //: true
 // Covariant.
 print((Base | Bool) canAssignFrom(Derived | Bool)) //: true
 print((Derived | Bool) canAssignFrom(Base | Bool)) //: false
+
+// Cases collapse to a single case.
+print((Bool | Bool) canAssignFrom(Bool)) //: true
+print(Bool canAssignFrom(Bool | Bool)) //: true

@@ -42,6 +42,7 @@ public class Interpreter {
     mObjectClass.addMethod("type", new NativeMethod.ObjectGetType());
     mObjectClass.addMethod("==", new NativeMethod.ObjectEqual());
     mObjectClass.addMethod("printRaw", new NativeMethod.ObjectPrint());
+    mObjectClass.addMethod("import", new NativeMethod.ObjectImport());
     mGlobalScope.define("Object", mObjectClass);
     
     // Now that both Class and Object exist, wire them up.
@@ -228,6 +229,18 @@ public class Interpreter {
     return createClass(name, mGlobalScope);
   }
   
+  public void pushScriptPath(String path) {
+    mScriptPaths.push(path);
+  }
+  
+  public String getCurrentScript() {
+    return mScriptPaths.peek();
+  }
+  
+  public void popScriptPath() {
+    mScriptPaths.pop();
+  }
+  
   private final InterpreterHost mHost;
   private Scope mGlobalScope;
   private final ClassObj mClass;
@@ -243,4 +256,5 @@ public class Interpreter {
   private final ClassObj mTupleClass;
   
   private final Obj mNothing;
+  private final Stack<String> mScriptPaths = new Stack<String>();
 }

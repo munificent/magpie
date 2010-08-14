@@ -1,0 +1,69 @@
+class ArrayIterator
+    this(array Array ->)
+        this array = array
+        this index = -1
+    end
+    
+    array Array
+    index Int
+end
+
+def ArrayIterator next(-> Bool)
+    index = index + 1
+    index < array count
+end
+
+def ArrayIterator current() array[index]
+
+def Array iterate(-> ArrayIterator) ArrayIterator new(this)
+
+def Array toString(-> String)
+    var text = "["
+    for i = 0 until(count) do
+        text = text + this[i] toString
+        if i < (count - 1) then text = text + ", "
+    end
+    text + "]"
+end
+
+def Array copy(-> Array)
+    var result = []
+    for item = this do result add(item)
+    result
+end
+
+def Array sortByString(-> Array)
+    var result = copy
+    
+    // TODO(bob): Awful bubble sort FTW!
+    for i = 0 until(result count) do
+        for j = (i + 1) until(result count) do
+            if result[i] toString > result[j] toString then
+                var temp = result[i]
+                result[i] = result[j]
+                result[j] = temp
+            end
+        end
+    end
+    
+    result
+end
+
+def Array unique(-> Array)
+    var result = []
+    for item = this do
+        if result count == 0 then result add(item)
+        else
+            if result[-1] != item then result add(item)
+        end
+    end
+    
+    result
+end
+
+def Array contains(item -> Bool)
+    for element = this do
+        if item == element then return true
+    end
+    false
+end
