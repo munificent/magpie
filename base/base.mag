@@ -1,6 +1,7 @@
 import("Array.mag")
 import("Int.mag")
 import("String.mag")
+import("Tuple.mag")
 import("Types.mag")
 
 // Extend the built-in classes.

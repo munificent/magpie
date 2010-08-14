@@ -1,5 +1,7 @@
 var a = 1, "two", 3
 
+print(a)        //: (1, two, 3)
+
 print(a _0)     //: 1
 print(a _1)     //: two
 print(a _2)     //: 3

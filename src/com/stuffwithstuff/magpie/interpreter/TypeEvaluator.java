@@ -1,5 +1,6 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.*;
@@ -163,8 +164,13 @@ public class TypeEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(TupleExpr expr, EvalContext context) {
-    // TODO Auto-generated method stub
-    return null;
+    // A tuple type is just a tuple of types.
+    List<Obj> fields = new ArrayList<Obj>();
+    for (Expr field : expr.getFields()) {
+      fields.add(evaluate(field, context));
+    }
+    
+    return mInterpreter.createTuple(fields);
   }
 
   @Override
@@ -175,6 +181,8 @@ public class TypeEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(VariableExpr expr, EvalContext context) {
+    // TODO(bob): Needs to bind the name to its type here too.
+    
     // Variable definitions return the defined value.
     return evaluate(expr.getValue(), context);
   }

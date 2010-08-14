@@ -54,3 +54,6 @@ print(typeof 1 and "two")    //: Bool | Int | String
 print(typeof if true then 1)          //: Int | Nothing
 print(typeof if true then 1 else 2)   //: Int
 print(typeof if true then 1 else "2") //: Int | String
+
+// Tuples.
+print(typeof 1, true, "three")        //: (Int, Bool, String)

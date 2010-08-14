@@ -534,7 +534,7 @@ public abstract class NativeMethod implements Invokable {
 
   // String methods:
 
-  public static class StringPlus extends NativeMethod {
+  public static class StringConcatenate extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String left = thisObj.asString();

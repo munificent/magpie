@@ -81,7 +81,7 @@ public class Interpreter {
     mIntClass.addMethod(">=", new NativeMethod.IntGreaterThanOrEqual());
 
     mStringClass = createGlobalClass("String");
-    mStringClass.addMethod("+",         new NativeMethod.StringPlus());
+    mStringClass.addMethod("concatenate", new NativeMethod.StringConcatenate());
     mStringClass.addMethod("compareTo", new NativeMethod.StringCompare());
     mStringClass.addMethod("at",        new NativeMethod.StringAt());
     mStringClass.addMethod("substring", new NativeMethod.StringSubstring());
@@ -209,14 +209,18 @@ public class Interpreter {
   }
   
   public Obj createTuple(Obj... fields) {
+    return createTuple(Arrays.asList(fields));
+  }
+  
+  public Obj createTuple(List<Obj> fields) {
     // A tuple is an object with fields whose names are zero-based numbers.
     Obj tuple = mTupleClass.instantiate();
-    for (int i = 0; i < fields.length; i++) {
+    for (int i = 0; i < fields.size(); i++) {
       String name = "_" + Integer.toString(i);
-      tuple.setField(name, fields[i]);
+      tuple.setField(name, fields.get(i));
     }
     
-    tuple.setField("count", createInt(fields.length));
+    tuple.setField("count", createInt(fields.size()));
     
     return tuple;
   }
