@@ -81,7 +81,7 @@ public class TypeEvaluator implements ExprVisitor<Obj, EvalContext> {
     // TODO(bob): This is maybe a little fishy. We're creating a new context
     // that will hold types now and not values. Do we need to explicitly split
     // these up in the interpreter?
-    EvalContext localContext = context.newBlockScope();
+    EvalContext localContext = context.nestScope();
     
     // Evaluate all of the expressions and return the last.
     for (Expr thisExpr : expr.getExpressions()) {

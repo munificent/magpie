@@ -54,14 +54,16 @@ public class MagpieParser extends Parser {
   
   public Expr parseBlock() {
     if (match(TokenType.LINE)){
+      Position position = last(1).getPosition();
       List<Expr> exprs = new ArrayList<Expr>();
       
       while (!match(TokenType.END)) {
         exprs.add(parseExpression());
         consume(TokenType.LINE);
       }
-            
-      return new BlockExpr(exprs);
+      
+      position = position.union(last(1).getPosition());
+      return new BlockExpr(position, exprs);
     } else {
       return parseExpression();
     }
@@ -69,6 +71,7 @@ public class MagpieParser extends Parser {
 
   public Expr parseIfBlock() {
     if (match(TokenType.LINE)){
+      Position position = last(1).getPosition();
       List<Expr> exprs = new ArrayList<Expr>();
       
       do {
@@ -78,7 +81,8 @@ public class MagpieParser extends Parser {
       
       match(TokenType.LINE);
 
-      return new BlockExpr(exprs);
+      position = position.union(last(1).getPosition());
+      return new BlockExpr(position, exprs);
     } else {
       Expr expr = parseExpression();
       // Each if expression may be on its own line.
@@ -89,6 +93,7 @@ public class MagpieParser extends Parser {
 
   public Expr parseThenBlock() {
     if (match(TokenType.LINE)){
+      Position position = last(1).getPosition();
       List<Expr> exprs = new ArrayList<Expr>();
       
       do {
@@ -96,7 +101,8 @@ public class MagpieParser extends Parser {
         consume(TokenType.LINE);
       } while (!lookAhead(TokenType.ELSE) && !match(TokenType.END));
       
-      return new BlockExpr(exprs);
+      position = position.union(last(1).getPosition());
+      return new BlockExpr(position, exprs);
     } else {
       return parseExpression();
     }
@@ -104,6 +110,7 @@ public class MagpieParser extends Parser {
   
   public Expr parseElseBlock() {
     if (match(TokenType.LINE)){
+      Position position = last(1).getPosition();
       List<Expr> exprs = new ArrayList<Expr>();
       
       do {
@@ -111,7 +118,8 @@ public class MagpieParser extends Parser {
         consume(TokenType.LINE);
       } while (!match(TokenType.END));
       
-      return new BlockExpr(exprs);
+      position = position.union(last(1).getPosition());
+      return new BlockExpr(position, exprs);
     } else {
       return parseExpression();
     }
@@ -204,7 +212,7 @@ public class MagpieParser extends Parser {
       // Parse the value being assigned.
       Expr value = parseExpression();
 
-      Position position = Position.union(expr.getPosition(), value.getPosition());
+      Position position = expr.getPosition().union(value.getPosition());
       
       // TODO(bob): Need to handle tuples here too.
       if (expr instanceof MessageExpr) {
@@ -244,7 +252,7 @@ public class MagpieParser extends Parser {
       Token conjunction = last(1);
       Expr right = operator();
 
-      Position position = Position.union(left.getPosition(), right.getPosition());
+      Position position = left.getPosition().union(right.getPosition());
 
       if (conjunction.getType() == TokenType.AND) {
         left = new AndExpr(position, left, right);
@@ -266,8 +274,8 @@ public class MagpieParser extends Parser {
       String op = last(1).getString();
       Expr right = message();
 
-      left = new MessageExpr(Position.union(
-          left.getPosition(), right.getPosition()), left, op, right);
+      left = new MessageExpr(left.getPosition().union(right.getPosition()),
+          left, op, right);
     }
     
     return left;
@@ -292,7 +300,7 @@ public class MagpieParser extends Parser {
         
         // See if it has an argument.
         if (match(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)) {
-          arg = new NothingExpr(Position.union(last(2).getPosition(), last(1).getPosition()));
+          arg = new NothingExpr(last(2).getPosition().union(last(1).getPosition()));
         } else if (match(TokenType.LEFT_PAREN)) {
           arg = parseExpression();
           consume(TokenType.RIGHT_PAREN);
@@ -304,7 +312,7 @@ public class MagpieParser extends Parser {
         
         // Parse the argument.
         if (match(TokenType.RIGHT_BRACKET)) {
-          arg = new NothingExpr(Position.union(position, current().getPosition()));
+          arg = new NothingExpr(position.union(current().getPosition()));
         } else {
           arg = parseExpression();
           consume(TokenType.RIGHT_BRACKET);
@@ -314,11 +322,11 @@ public class MagpieParser extends Parser {
       }
       
       if (message != null) {
-        position = Position.union(position, message.getPosition());
+        position = position.union(message.getPosition());
       }
       
       if (arg != null) {
-        position = Position.union(position, arg.getPosition());
+        position = position.union(arg.getPosition());
       }
       
       message = new MessageExpr(position, message, name, arg);
@@ -349,14 +357,14 @@ public class MagpieParser extends Parser {
       consume(TokenType.RIGHT_PAREN);
       return expr;
     } else if (match(TokenType.LEFT_BRACKET, TokenType.RIGHT_BRACKET)) {
-      Position position = Position.union(last(2).getPosition(), last(1).getPosition());
+      Position position = last(2).getPosition().union(last(1).getPosition());
       List<Expr> elements = new ArrayList<Expr>();
       return new ArrayExpr(position, elements);
     } else if (match(TokenType.LEFT_BRACKET)) {
       Position position = last(1).getPosition();
       List<Expr> elements = parseCommaList();
       consume(TokenType.RIGHT_BRACKET);
-      position = Position.union(position, last(1).getPosition());
+      position = position.union(last(1).getPosition());
       return new ArrayExpr(position, elements);
     }
     

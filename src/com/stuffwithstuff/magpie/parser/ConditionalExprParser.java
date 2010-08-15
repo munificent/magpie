@@ -74,7 +74,7 @@ public class ConditionalExprParser implements ExprParser {
       elseExpr = new NothingExpr(parser.last(1).getPosition());
     }
     
-    return new IfExpr(Position.union(startPos, elseExpr.getPosition()),
+    return new IfExpr(startPos.union(elseExpr.getPosition()),
         conditions, thenExpr, elseExpr);
   }
 }

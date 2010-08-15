@@ -9,9 +9,10 @@ import com.stuffwithstuff.magpie.ast.FnExpr;
  * Object type for a function object.
  */
 public class FnObj extends Obj implements Invokable {
-  public FnObj(ClassObj classObj, FnExpr function) {
+  public FnObj(ClassObj classObj, Scope closure, FnExpr function) {
     super(classObj);
     
+    mClosure = closure;
     mFunction = function;
   }
 
@@ -19,8 +20,7 @@ public class FnObj extends Obj implements Invokable {
   
   public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
     // Create a new local scope for the function.
-    EvalContext context = EvalContext.forMethod(
-        interpreter.getGlobals(), thisObj);
+    EvalContext context = new EvalContext(mClosure, thisObj).nestScope();
     
     // Bind arguments to their parameter names.
     List<String> params = mFunction.getParamNames();
@@ -45,5 +45,6 @@ public class FnObj extends Obj implements Invokable {
   public Expr getParamType() { return mFunction.getParamType(); }
   public Expr getReturnType() { return mFunction.getReturnType(); }
   
+  private final Scope mClosure;
   private final FnExpr mFunction;
 }

@@ -1,52 +1,14 @@
 package com.stuffwithstuff.magpie.interpreter;
 
-import java.util.List;
-
 import com.stuffwithstuff.magpie.ast.*;
 
-// TODO(bob): This code is almost identical to the actual ExprEvaluator. Should
-// refactor and share code between them.
-
 public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
-  // TODO(bob): This is kinda temp.
-  public static void check(Interpreter interpreter, List<CheckError> errors,
-      Scope globalScope) {
-    /*
-    
-    // Create a mirror of the interpreter's global scope where each global
-    // variable has been replaced with its type. If, for example, there is a
-    // global variable "foo" whose value is 123, the type scope will have a
-    // global variable "foo" whose value is Int: the ClassObj representing the
-    // class of Ints.
-    Scope typeScope = new Scope();
-    for (Entry<String, Obj> entry : globalScope.entries()) {
-      typeScope.define(entry.getKey(), entry.getValue().getClassObj());
-    }
-    
-    ExprChecker checker = new ExprChecker(interpreter, errors);
-    
-    // Create a new local scope for the function. This scope will be used to
-    // hold *types* not values, unlike the regular expression evaluation
-    // context.
-    EvalContext context = new EvalContext(typeScope,
-        interpreter.getNothingType());
-    
-    // Now check all of the reachable code.
-    for (Entry<String, Obj> entry : globalScope.entries()) {
-      // TODO(bob): Hack temp. Just check top-level functions for now.
-      // Also need to check top-level classes.
-      if (entry.getValue() instanceof FnObj) {
-        checker.check((FnObj)entry.getValue(), context);
-      } else if (entry.getValue() instanceof ClassObj) {
-        checker.check((ClassObj)entry.getValue(), context);
-      }
-    }
-  */
+  public ExprChecker(Checker checker) {
+    mChecker = checker;
   }
   
-  private ExprChecker(Interpreter interpreter, List<CheckError> errors) {
-    mInterpreter = interpreter;
-    mErrors = errors;
+  public Obj check(Expr expr, EvalContext context) {
+    return expr.accept(this, context);
   }
   
   @Override
@@ -330,11 +292,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     return value;
   }
   
-  private Obj check(Expr expr, EvalContext context) {
-    return expr.accept(this, context);
-  }
     */
-
+  
   /**
    * Checks the given function for type-safety. Virtually invokes it by binding
    * the parameters to their declared types and then checking the body of the
@@ -462,19 +421,6 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     errorIf(!typeAllowed(actual, expected), expr, format, args);
   }
     */
-
-  private void errorIf(boolean condition, Expr expr,
-      String format, Object... args) {
-    if (condition) {
-      error(expr, format, args);
-    }
-  }
   
-  private void error(Expr expr, String format, Object... args) {
-    String message = String.format(format, args);
-    mErrors.add(new CheckError(expr.getPosition(), message));
-  }
-  
-  private final List<CheckError> mErrors;
-  private final Interpreter mInterpreter;
+  private final Checker mChecker;
 }

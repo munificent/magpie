@@ -56,9 +56,9 @@ public class TestInterpreterHost implements InterpreterHost {
       try {
         mInterpreter.load(parser.parse());
 
-        /*
         // Do the static analysis and see if we got the errors we expect.
-        List<CheckError> errors = mInterpreter.check();
+        Checker checker = new Checker(mInterpreter);
+        List<CheckError> errors = checker.check();
         int count = Math.max(mExpectedErrors.size(), errors.size());
         for (int i = 0; i < count; i++) {
           if (i >= mExpectedErrors.size()) {
@@ -82,7 +82,6 @@ public class TestInterpreterHost implements InterpreterHost {
           fail("Ran out of output when still expecting \""
               + mExpectedOutput.poll() + "\".");
         }
-        */
         
       } catch (InterpreterException ex) {
         fail("Interpreter error " + ex.toString());

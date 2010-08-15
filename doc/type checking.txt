@@ -1,0 +1,53 @@
+There are two flavors of semantic compile errors in a static language:
+
+1. Things the language defines as wrong:
+-  Changing the type of a variable
+-  Not having a bool expression as a condition in an if/then or while/do
+-  Different return types in a then/else expression
+-  Accessing an unknown/undefined name
+
+2. Things a user defines as inconsistent:
+-  Arguments to a function not matching declared parameter types
+-  Function body evaluating to a type that doesn't match declared return type
+-  Return expression not returning the function's declared type
+
+Magpie generally cares only about the latter. In other words, it assumes you
+know what you're doing until you tell it otherwise by explicitly stating an
+expectation. Specifically, it handles the above cases like this:
+
+1. Changing the type of a variable.
+   Magpie allows this. The statically-defined type of the variable will be the
+   union of all possible types that could be assigned to it:
+   
+   var a = 123
+   if foo then a = "bar"
+   
+   The type-checker will consider the type of 'a' before the if expression to be
+   Int, and Int | String after it.
+
+2. Not having a bool expression as a condition.
+   All expressions used as conditions are implicitly sent a 'true?' message as
+   part of evaluating the condition. This lets users put arbitrary expressions
+   there and determine on a type-by-type basis what "truth" means. If 'true?'
+   itself doesn't return a Bool, any non-nothing value will be considered true.
+
+3. Different return types in a then/else expression.
+   If the arms of an if/then/else expression evaluate to different types, the
+   type of the overall expression is the union of those types. For example:
+   
+   if foo then 1 else true
+   
+   The type of this expression is Bool | Int. If the else branch is omitted then
+   it returns nothing, so the following:
+   
+   if foo then 1
+   
+   Evaluates to type Int | Nothing.
+
+4. Accessing an unknown/undefined name.
+   Because typos are such a common error, this probably *will* generate a type-
+   check error. However, there may be support at some point for objects being
+   able to indicate that they can handle unknown messages. If that goes it, the
+   type-checker will probably determine if the receiver of the unknown message
+   implements that IUnknownMessage interface and only raise an error if it
+   doesn't.

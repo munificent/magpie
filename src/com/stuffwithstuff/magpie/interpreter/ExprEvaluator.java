@@ -88,7 +88,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     Obj result = null;
     
     // Create a lexical scope.
-    EvalContext localContext = context.newBlockScope();
+    EvalContext localContext = context.nestScope();
     
     // Evaluate all of the expressions and return the last.
     for (Expr thisExpr : expr.getExpressions()) {
@@ -137,12 +137,12 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     
     // Add the constructors.
     for (FnExpr constructorFn : expr.getConstructors()) {
-      FnObj fnObj = mInterpreter.createFn(constructorFn);
+      FnObj fnObj = mInterpreter.createFn(constructorFn, context.getScope());
       classObj.addConstructor(fnObj);
     }
     
     // Evaluate and define the shared fields.
-    EvalContext classContext = context.bindThis(classObj);
+    EvalContext classContext = context.withThis(classObj);
     for (Entry<String, Expr> field : expr.getSharedFields().entrySet()) {
       Obj value = evaluate(field.getValue(), classContext);
       
@@ -160,7 +160,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     // Define the shared methods.
     for (Entry<String, List<FnExpr>> methods : expr.getSharedMethods().entrySet()) {
       for (FnExpr method : methods.getValue()) {
-        FnObj methodObj = mInterpreter.createFn(method);
+        FnObj methodObj = mInterpreter.createFn(method, context.getScope());
         metaclass.addMethod(methods.getKey(), methodObj);
       }
     }
@@ -168,7 +168,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     // Define the instance methods.
     for (Entry<String, List<FnExpr>> methods : expr.getMethods().entrySet()) {
       for (FnExpr method : methods.getValue()) {
-        FnObj methodObj = mInterpreter.createFn(method);
+        FnObj methodObj = mInterpreter.createFn(method, context.getScope());
         classObj.addMethod(methods.getKey(), methodObj);
       }
     }
@@ -211,14 +211,14 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(FnExpr expr, EvalContext context) {
-    return mInterpreter.createFn(expr);
+    return mInterpreter.createFn(expr, context.getScope());
   }
 
   @Override
   public Obj visit(IfExpr expr, EvalContext context) {
     // Put it in a block so that variables declared in conditions end when the
     // if expression ends.
-    context = context.newBlockScope();
+    context = context.nestScope();
     
     // Evaluate all of the conditions.
     boolean passed = true;

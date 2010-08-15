@@ -124,6 +124,8 @@ end
 
 // If you call [] on a class like, it returns the type of an array of this
 // class.
+// TODO(bob): This should be moved to Type, which should be what Class, Tuple,
+// and Array inherit from.
 def Class [](-> ArrayType)
     ArrayType new(this)
 end

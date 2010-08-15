@@ -121,14 +121,6 @@ public class Interpreter {
     }
   }
   
-  public List<CheckError> check() {
-    List<CheckError> errors = new ArrayList<CheckError>();
-
-    ExprChecker.check(this, errors, mGlobalScope);
-    
-    return errors;
-  }
-  
   public void runMain() {
     EvalContext context = createTopLevelContext();
     Obj main = context.lookUp("main");
@@ -204,8 +196,8 @@ public class Interpreter {
     return classObj;
   }
   
-  public FnObj createFn(FnExpr expr) {
-    return new FnObj(mFnClass, expr);
+  public FnObj createFn(FnExpr expr, Scope closure) {
+    return new FnObj(mFnClass, closure, expr);
   }
   
   public Obj createTuple(Obj... fields) {

@@ -1,0 +1,8 @@
+var foo(a Int ->)
+    nothing
+end
+
+var main(->)
+    foo(3)
+    foo(true) //!
+end

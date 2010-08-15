@@ -1,0 +1,48 @@
+What is a type expression? Instead of having a separate syntax and semantics for
+types, Magpie just has one language: Magpie. This means a type annotation like:
+
+  foo(a Int) // where "Int" is the type annotation
+ 
+Really just means "evaluate the expression 'Int'". In this case, Int is a global
+variable whose value is the class of ints. Other type expressions:
+
+  Bool | Int  // | is an operator on types that returns an OrType
+  (Bool, Int) // Just a regular tuple whose fields happen to be types
+
+What happens if a type expression evaluates to something that isn't a type? 
+Like:
+
+  var NotType = 123
+  var foo(param NotType)
+
+That will probably just be a check error: "NotType does not evaluate to a type."
+
+There are three ways that Magpie evaluates to things that are types:
+
+1. When evaluating a type annotation like above. The process for this is just
+   evaluating a regular Magpie expression. No magic beyond the stuff in the base
+   libs for the types.
+
+2. What type-checking the body of a function. This needs to, given an 
+   expression, *statically* determine what type (or types) the result could be
+   for any possible invokation. It needs to do this to ensure that methods match
+   their declared return type, and that the arguments to methods match their
+   declared parameter types.
+
+3. When sending a "type" message to an object.
+
+Is there a way to minimize this duplication?
+
+A: Probably not. There is no duplication for the first case since there isn't
+   actually any code/script for that to begin with beyond the implementation of
+   things like | on Class, etc.
+   
+   For 2 and 3, there's a fundamental difference between taking this:
+   
+   var a = [if foo then 1 else true]
+   
+   And determining statically what types it *could* be, which results in:
+   (Int | Bool)[] or Object[]
+   
+   And what type 'a' actually *is* after some invocation, which will either be
+   Int[] or Bool[].

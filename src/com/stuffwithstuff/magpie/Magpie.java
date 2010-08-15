@@ -78,7 +78,7 @@ public class Magpie {
     int skipped = 0;
     
     for (File testScript : listTestScripts()) {
-      //if (!testScript.getPath().contains("BlockComments")) continue;
+      //if (!testScript.getPath().contains("ArgMustMatchParam")) continue;
       
       tests++;
       

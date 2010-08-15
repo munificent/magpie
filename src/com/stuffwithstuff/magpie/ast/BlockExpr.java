@@ -5,9 +5,8 @@ import java.util.*;
 import com.stuffwithstuff.magpie.parser.Position;
 
 public class BlockExpr extends Expr {
-  public BlockExpr(List<Expr> expressions) {
-    super(Position.union(expressions.get(0).getPosition(),
-        expressions.get(expressions.size() - 1).getPosition()));
+  public BlockExpr(Position position, List<Expr> expressions) {
+    super(position);
     
     mExpressions = expressions;
   }

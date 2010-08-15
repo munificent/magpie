@@ -1,4 +1,0 @@
-var main()
-    var foo = 123
-    foo = "a string" //!
-end

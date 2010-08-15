@@ -6,33 +6,23 @@ package com.stuffwithstuff.magpie.interpreter;
  */
 public class EvalContext {
   public EvalContext(Scope scope, Obj thisObj) {
-    this(null, scope, thisObj);
+    mScope = scope;
+    mThis = thisObj;
   }
   
   /**
    * Creates an EvalContext for a new lexical block scope within this one.
-   * Retains the same object, class and this but creates a fresh local scope.
    */
-  public EvalContext newBlockScope() {
-    return new EvalContext(this, new Scope(), mThis);
-  }
-  
-  /**
-   * Creates a new EvalContext for evaluating a method body. Will have a fresh
-   * lexical scope and no object or class scope.
-   */
-  public static EvalContext forMethod(Scope closure, Obj thisObj) {
-    EvalContext closureContext = new EvalContext(null, closure, thisObj);
-    return closureContext.newBlockScope();
+  public EvalContext nestScope() {
+    return new EvalContext(new Scope(mScope), mThis);
   }
   
   /**
    * Creates a new EvalContext with the same scope as this one, but bound to a
-   * different this reference. Used to create the context that the body of a
-   * method is evaluated within.
+   * different this reference.
    */
-  public EvalContext bindThis(Obj thisObj) {
-    return new EvalContext(mParent, mScope, thisObj);
+  public EvalContext withThis(Obj thisObj) {
+    return new EvalContext(mScope, thisObj);
   }
   
   public Obj getThis() {
@@ -42,11 +32,11 @@ public class EvalContext {
   public Scope getScope() { return mScope; }
   
   public Obj lookUp(String name) {
-    EvalContext context = this;
-    while (context != null) {
-      Obj value = context.mScope.get(name);
+    Scope scope = mScope;
+    while (scope != null) {
+      Obj value = scope.get(name);
       if (value != null) return value;
-      context = context.mParent;
+      scope = scope.getParent();
     }
     
     return null;
@@ -57,22 +47,15 @@ public class EvalContext {
   }
   
   public boolean assign(String name, Obj value) {
-    EvalContext context = this;
-    while (context != null) {
-      if (context.mScope.assign(name, value)) return true;
-      context = context.mParent;
+    Scope scope = mScope;
+    while (scope != null) {
+      if (scope.assign(name, value)) return true;
+      scope = scope.getParent();
     }
     
     return false;
   }
-  
-  private EvalContext(EvalContext parent, Scope scope, Obj thisObj) {
-    mParent = parent;
-    mScope = scope;
-    mThis = thisObj;
-  }
 
-  private final EvalContext mParent;
   private final Scope mScope;
   private final Obj   mThis;
 }

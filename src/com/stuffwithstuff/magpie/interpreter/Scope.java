@@ -8,6 +8,18 @@ import java.util.Map.Entry;
  * both for local variables in a block, and for members in an object.
  */
 public class Scope {
+  public Scope(Scope parent) {
+    mParent = parent;
+  }
+  
+  public Scope() {
+    this(null);
+  }
+  
+  public Scope getParent() {
+    return mParent;
+  }
+  
   public boolean assign(String name, Obj value) {
     if (!mVariables.containsKey(name)) return false;
     
@@ -27,5 +39,6 @@ public class Scope {
     return mVariables.entrySet();
   }
   
+  private final Scope mParent;
   private final Map<String, Obj> mVariables = new HashMap<String, Obj>();
 }

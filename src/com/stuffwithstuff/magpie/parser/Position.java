@@ -4,23 +4,6 @@ package com.stuffwithstuff.magpie.parser;
  * Describes the location of a piece of text in a source file.
  */
 public class Position {
-  public static Position union(Position... positions) {
-    int startLine = positions[0].getStartLine();
-    int startCol = positions[0].getStartCol();
-    int endLine = positions[0].getEndLine();
-    int endCol = positions[0].getEndCol();
-    
-    for (Position position : positions) {
-      startLine = Math.min(startLine, position.getStartLine());
-      startCol = Math.min(startCol, position.getStartCol());
-      endLine = Math.max(endLine, position.getEndLine());
-      endCol = Math.max(endCol, position.getEndCol());
-    }
-    
-    return new Position(positions[0].getSourceFile(), startLine, startCol,
-        endLine, endCol);
-  }
-  
   public static Position none() {
     return new Position("", -1, -1, -1, -1);
   }
@@ -32,6 +15,16 @@ public class Position {
     mStartCol = startCol;
     mEndLine = endLine;
     mEndCol = endCol;
+  }
+  
+  public Position union(Position other) {
+    int startLine = Math.min(mStartLine, other.mStartLine);
+    int startCol = Math.min(mStartCol, other.mStartCol);
+    int endLine = Math.max(mEndLine, other.mEndLine);
+    int endCol = Math.max(mEndCol, other.mEndCol);
+    
+    return new Position(mSourceFile, startLine, startCol,
+        endLine, endCol);
   }
   
   public String getSourceFile() { return mSourceFile; }

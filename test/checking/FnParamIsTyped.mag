@@ -1,4 +1,0 @@
-var foo(a Int)
-    var s = "string"
-    s = a //!
-end

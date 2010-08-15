@@ -2,11 +2,9 @@ package com.stuffwithstuff.magpie.ast;
 
 import java.util.*;
 
-import com.stuffwithstuff.magpie.parser.Position;
-
 public class TupleExpr extends Expr {
   public TupleExpr(List<Expr> fields) {
-    super(Position.union(fields.get(0).getPosition(),
+    super(fields.get(0).getPosition().union(
         fields.get(fields.size() - 1).getPosition()));
     
     mFields = fields;
