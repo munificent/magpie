@@ -1,9 +1,13 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.stuffwithstuff.magpie.ast.*;
 
 public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   public ExprChecker(Checker checker) {
+    mInterpreter = checker.getInterpreter();
     mChecker = checker;
   }
   
@@ -37,8 +41,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(BoolExpr expr, EvalContext context) {
-    // TODO Auto-generated method stub
-    return null;
+    return mInterpreter.getBoolType();
   }
 
   @Override
@@ -61,8 +64,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(IntExpr expr, EvalContext context) {
-    // TODO Auto-generated method stub
-    return null;
+    return mInterpreter.getIntType();
   }
 
   @Override
@@ -97,20 +99,23 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(StringExpr expr, EvalContext context) {
-    // TODO Auto-generated method stub
-    return null;
+    return mInterpreter.getStringType();
   }
 
   @Override
   public Obj visit(ThisExpr expr, EvalContext context) {
-    // TODO Auto-generated method stub
-    return null;
+    return mInterpreter.getStringType();
   }
 
   @Override
   public Obj visit(TupleExpr expr, EvalContext context) {
-    // TODO Auto-generated method stub
-    return null;
+    // The type of a tuple type is just a tuple of its types.
+    List<Obj> fields = new ArrayList<Obj>();
+    for (Expr field : expr.getFields()) {
+      fields.add(evaluate(field, context));
+    }
+    
+    return mInterpreter.createTuple(fields);
   }
 
   @Override
@@ -125,6 +130,10 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     return null;
   }
   
+  private Obj evaluate(Expr expr, EvalContext context) {
+    return expr.accept(this, context);
+  }
+
   /*
   @Override
   public Obj visit(AssignExpr expr, EvalContext context) {
@@ -422,5 +431,6 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   }
     */
   
+  private final Interpreter mInterpreter;
   private final Checker mChecker;
 }

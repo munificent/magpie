@@ -16,17 +16,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   public Obj invokeMethod(Expr expr, Obj receiver, String name, Obj arg) {
-    Invokable method = receiver.getClassObj().findMethod(name);
-    
-    if (method == null) {
-      mInterpreter.runtimeError(expr,
-          "Could not find a variable or method named \"%s\" on %s.",
-          name, receiver.getClassObj());
-      
-      return mInterpreter.nothing();
-    }
-    
-    return method.invoke(mInterpreter, receiver, arg);
+    return mInterpreter.invokeMethod(expr, receiver, name, arg);
   }
 
   @Override

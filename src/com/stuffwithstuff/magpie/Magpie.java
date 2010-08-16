@@ -3,6 +3,13 @@ package com.stuffwithstuff.magpie;
 import java.io.*;
 import java.util.*;
 
+import com.stuffwithstuff.magpie.ast.Expr;
+import com.stuffwithstuff.magpie.interpreter.Interpreter;
+import com.stuffwithstuff.magpie.interpreter.InterpreterException;
+import com.stuffwithstuff.magpie.parser.Lexer;
+import com.stuffwithstuff.magpie.parser.MagpieParser;
+import com.stuffwithstuff.magpie.parser.ParseException;
+
 public class Magpie {
 
   /**
@@ -10,25 +17,31 @@ public class Magpie {
    */
   public static void main(String[] args) {
     if (args.length == 0) {
-      // With no command line args, just runs the test suite and quits.
+      // With no command line args, runs the REPL.
       System.out.println("magpie");
       System.out.println("------");
-      System.out.println("Running test suite...");
-      runTestScripts();
+      runRepl();
     } else if (args.length == 1) {
-      // One command line arg: load the script at that path and run it.
-      runScript(args[0]);
+      if (args[0].equals("test")) {
+        System.out.println("Running test suite...");
+        runTestScripts();
+      } else {
+        // One command line arg: load the script at that path and run it.
+        runScript(args[0]);
+      }
     }
-    
-    // TODO(bob): REPL is dead for now.
-    /*
+  }
+  
+  private static void runRepl() {
     InputStreamReader converter = new InputStreamReader(System.in);
     BufferedReader in = new BufferedReader(converter);
 
-    Interpreter interpreter = new Interpreter();
+    Interpreter interpreter = new Interpreter(new ScriptInterpreterHost());
     
-    while (true) {
-      try {
+    try {
+      Script.loadBase(interpreter);
+      
+      while (true) {
         String code = "";
         while (true) {
           System.out.print("> ");
@@ -44,23 +57,24 @@ public class Magpie {
 
         if (code.equals("quit")) break;
         
-        Lexer lexer = new Lexer(code);
+        Lexer lexer = new Lexer("<repl>", code);
         MagpieParser parser = new MagpieParser(lexer);
         
         try {
-          Expr expr = parser.parse();
-          Obj result = interpreter.evaluate(expr);
-          System.out.print("= ");
-          System.out.println(result);
-        } catch (ParseError err) {
-          System.out.println("! " + err.toString());
-        } catch (Exception ex) {
+          List<Expr> exprs = parser.parse();
+          for (Expr expr : exprs) {
+            String result = interpreter.evaluate(expr);
+            System.out.print("= ");
+            System.out.println(result);
+          }
+        } catch (ParseException ex) {
+          System.out.println("! " + ex.toString());
+        } catch (InterpreterException ex) {
           System.out.println("! " + ex.toString());
         }
-      } catch (IOException ex) {
-        break;
       }
-    }*/
+    } catch (IOException ex) {
+    }
   }
   
   private static void runScript(String path) {
@@ -78,8 +92,6 @@ public class Magpie {
     int skipped = 0;
     
     for (File testScript : listTestScripts()) {
-      //if (!testScript.getPath().contains("ArgMustMatchParam")) continue;
-      
       tests++;
       
       TestInterpreterHost host = new TestInterpreterHost(testScript.getPath());

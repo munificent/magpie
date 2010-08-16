@@ -24,3 +24,16 @@ def Tuple toString(-> String)
     if count > 19 then s = s + ", " + this _19
     s + ")"
 end
+
+def Tuple type()
+    var types = []
+    
+    // TODO(bob): This is pretty gross right now. :(
+    if count == 1 then return (_0 type)
+    if count == 2 then return (_0 type, _1 type)
+    if count == 3 then return (_0 type, _1 type, _2 type)
+    if count == 4 then return (_0 type, _1 type, _2 type, _3 type)
+    if count == 5 then return (_0 type, _1 type, _2 type, _3 type, _4 type)
+    if count == 6 then return (_0 type, _1 type, _2 type, _3 type, _4 type, _5 type)
+    Tuple
+end

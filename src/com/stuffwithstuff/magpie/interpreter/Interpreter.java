@@ -121,6 +121,15 @@ public class Interpreter {
     }
   }
   
+  public String evaluate(Expr expr) {
+    EvalContext context = createTopLevelContext();
+    Obj result = evaluate(expr, context);
+    
+    // Convert it to a string.
+    result = invokeMethod(expr, result, "toString", mNothing);
+    return result.asString();
+  }
+  
   public void runMain() {
     EvalContext context = createTopLevelContext();
     Obj main = context.lookUp("main");
@@ -133,7 +142,21 @@ public class Interpreter {
     Invokable mainFn = (Invokable)main;
     mainFn.invoke(this, mNothing, mNothing);
   }
-  
+
+  public Obj invokeMethod(Expr expr, Obj receiver, String name, Obj arg) {
+    Invokable method = receiver.getClassObj().findMethod(name);
+    
+    if (method == null) {
+      runtimeError(expr,
+          "Could not find a variable or method named \"%s\" on %s.",
+          name, receiver.getClassObj());
+      
+      return mNothing;
+    }
+    
+    return method.invoke(this, receiver, arg);
+  }
+
   public void print(String text) {
     mHost.print(text);
   }

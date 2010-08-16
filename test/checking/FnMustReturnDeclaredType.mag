@@ -1,3 +1,23 @@
-var foo(-> Int) //!
+var bad1(-> Int) //!
     "string"
+end
+
+var bad2(-> Int) //!
+    nothing
+end
+
+var bad3(-> Bool | Int) //!
+    "string"
+end
+
+var good1(-> Bool) //!
+    true
+end
+
+var good2(-> Bool | Int) //!
+    true
+end
+
+var good2(-> Bool | Int) //!
+    2
 end
