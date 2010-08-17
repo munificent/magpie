@@ -1,7 +1,2 @@
 print(Int[])              //: Int[]
 print(Bool[] elementType) //: Bool
-
-print([1, 2, 3] type)     //: Int[]
-print([true, false] type) //: Bool[]
-print([1, true] type)     //: Object[]
-print([] type)            //: Object[]

@@ -202,7 +202,7 @@ public class MagpieParser extends Parser {
   
   public Expr parseTypeExpression() {
     // Any Magpie expression can be used as a type declaration.
-    return message();
+    return operator();
   }
   
   private Expr assignment() {

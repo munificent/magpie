@@ -1,0 +1,34 @@
+a class defines:
+- a set of fields and their expected types
+- a ctor method
+
+the interpreter then takes that and:
+- builds a ClassObj for the class
+- gives it a shared "new" method that:
+  - defines all of the fields and sets them to nothing
+    (that way assignment to them in the ctor and other methods will work)
+  - executes the body of the ctor
+
+from there, the checker:
+- goes through all of the methods (including the ctor) and verifies that
+  assignments to the fields are of allowed types
+- goes through the ctor and verifies that all fields are definitely assigned
+
+what stuff do i care about and need to support:
+- ctors (as opposed to just struct literals that do a flat init of all fields)
+  these are important for cases where the fields may need to do some calculation
+  before they can be initialized. the ctor is an open window of time to
+  violate the field's type declaration before its gets locked down. think, for
+  example, a ring data structure.
+- field declarations. cause type checked state is nice.
+- shared methods.
+- shared fields. although this isn't something that should be used much.
+- methods. whether or not they are syntactically defined inside the class body
+  doesn't matter much.
+- adding methods to previously defined classes.
+- specifying the base class.
+
+what don't i care about right now:
+- adding type-checked fields to an existing class.
+- extending or replacing a class's ctor.
+

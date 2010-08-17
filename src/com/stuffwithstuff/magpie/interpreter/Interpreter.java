@@ -144,17 +144,11 @@ public class Interpreter {
   }
 
   public Obj invokeMethod(Expr expr, Obj receiver, String name, Obj arg) {
-    Invokable method = receiver.getClassObj().findMethod(name);
-    
-    if (method == null) {
-      runtimeError(expr,
-          "Could not find a variable or method named \"%s\" on %s.",
-          name, receiver.getClassObj());
-      
-      return mNothing;
-    }
-    
-    return method.invoke(this, receiver, arg);
+    return invokeMethod(expr.getPosition(), receiver, name, arg);
+  }
+
+  public Obj invokeMethod(Obj receiver, String name, Obj arg) {
+    return invokeMethod(Position.none(), receiver, name, arg);
   }
 
   public void print(String text) {
@@ -260,7 +254,25 @@ public class Interpreter {
   public void popScriptPath() {
     mScriptPaths.pop();
   }
+
+  private Obj invokeMethod(Position position, Obj receiver, String name, Obj arg) {
+    Invokable method = receiver.getClassObj().findMethod(name);
+    
+    if (method == null) {
+      runtimeError(position,
+          "Could not find a variable or method named \"%s\" on %s.",
+          name, receiver.getClassObj());
+      
+      return mNothing;
+    }
+    
+    return method.invoke(this, receiver, arg);
+  }
   
+  private void runtimeError(Position position, String format, Object... args) {
+    mHost.runtimeError(position, String.format(format, args));
+  }
+
   private final InterpreterHost mHost;
   private Scope mGlobalScope;
   private final ClassObj mClass;

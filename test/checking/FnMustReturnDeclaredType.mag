@@ -10,14 +10,14 @@ var bad3(-> Bool | Int) //!
     "string"
 end
 
-var good1(-> Bool) //!
+var good1(-> Bool)
     true
 end
 
-var good2(-> Bool | Int) //!
+var good2(-> Bool | Int)
     true
 end
 
-var good2(-> Bool | Int) //!
+var good2(-> Bool | Int)
     2
 end

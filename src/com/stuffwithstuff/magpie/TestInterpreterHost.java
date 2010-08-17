@@ -58,7 +58,7 @@ public class TestInterpreterHost implements InterpreterHost {
 
         // Do the static analysis and see if we got the errors we expect.
         Checker checker = new Checker(mInterpreter);
-        List<CheckError> errors = checker.check();
+        List<CheckError> errors = checker.checkAll();
         int count = Math.max(mExpectedErrors.size(), errors.size());
         for (int i = 0; i < count; i++) {
           if (i >= mExpectedErrors.size()) {
@@ -123,7 +123,7 @@ public class TestInterpreterHost implements InterpreterHost {
     // Uncomment this to see the runtime errors as they occur. Commented out
     // because some tests intentionally cause runtime errors to test that the
     // behavior after the error is as expected.
-    System.out.println(position.toString() + ": " + message);
+    //System.out.println(position.toString() + ": " + message);
   }
 
   private void loadScript(String path) {

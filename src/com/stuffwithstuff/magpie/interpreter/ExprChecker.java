@@ -6,8 +6,8 @@ import java.util.List;
 import com.stuffwithstuff.magpie.ast.*;
 
 public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
-  public ExprChecker(Checker checker) {
-    mInterpreter = checker.getInterpreter();
+  public ExprChecker(Interpreter interpreter, Checker checker) {
+    mInterpreter = interpreter;
     mChecker = checker;
   }
   
@@ -35,8 +35,17 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(BlockExpr expr, EvalContext context) {
-    // TODO Auto-generated method stub
-    return null;
+    Obj result = null;
+    
+    // Create a lexical scope.
+    EvalContext localContext = context.nestScope();
+    
+    // Evaluate all of the expressions and return the last.
+    for (Expr thisExpr : expr.getExpressions()) {
+      result = check(thisExpr, localContext);
+    }
+    
+    return result;
   }
 
   @Override

@@ -5,20 +5,26 @@ import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
+import com.stuffwithstuff.magpie.parser.Position;
 
 public class Checker {
   public Checker(Interpreter interpreter) {
     mInterpreter = interpreter;
   }
   
-  public List<CheckError> check() {
-    ExprChecker checker = new ExprChecker(this);
+  public List<CheckError> checkAll() {
+    // Create a copy of the global scope and replace all defines values with
+    // their types. From here on out, we'll be storing types in variables and
+    // not values, and we need lookup to work with types uniformly up the scope
+    // chain. This also lets us check expressions that assign to global
+    // variables without trashing the actual value stored there.
+    Scope globals = typeScope(mInterpreter.getGlobals());
     
     // Check all of the reachable functions.
-    EvalContext context = mInterpreter.createTopLevelContext();
+    EvalContext context = new EvalContext(globals, mInterpreter.getNothingType());
     for (Entry<String, Obj> entry : mInterpreter.getGlobals().entries()) {
       if (entry.getValue() instanceof FnObj) {
-//        checker.check((FnObj)entry.getValue(), context);
+        ((FnObj)entry.getValue()).check(this, context);
       }
     }
 
@@ -45,44 +51,56 @@ public class Checker {
     //   if value is FnObj, type check fn
     //   if value is ClassObj, type check its methods
 
-    // to type check a fn:
-    // - dynamically evaluate its type signature to get the expected parameter
-    //   types from the type annotations
-    // - statically check the body expression and verify that the returned type
-    //   matches the declared return type
-    
     // to check an expression:
     // - message expr:
-    //   - look up the receiver
+    //   - look up the receiver type
     //   - check the arg
-    //   - get its class
-    //   - look up the method from the class
+    //   - look up the method from the receiver type
     //   - dynamically evaluate the method's type signature
     //   - make sure the param matches the arg
     //   - return the declared return type
     // - define expr:
     //   - check the value
-    //   - create a TypedProxy and bind it to the name
-    
-    // a TypedProxy is a shadow of a real object. it's what the type checker
-    // puts in place of an actual value when doing an assignment. it has a type
-    // which is what the type checker cares about, but no actual state. thing of
-    // it as a shell object whose only purpose is to respond correctly to a
-    // "type" message
+    //   - bind the type to the name
     return mErrors;
   }
   
+  public Obj evaluateType(Expr expr) {
+    // We create a context from the interpreter here because we need to evaluate
+    // type expressions in the regular interpreter context where scopes hold
+    // values not types.
+    EvalContext context = mInterpreter.createTopLevelContext();
+    return mInterpreter.evaluate(expr, context);
+  }
+  
+  public Obj invokeMethod(Obj receiver, String name, Obj arg) {
+    return mInterpreter.invokeMethod(receiver, name, arg);
+  }
+  
   public Obj check(Expr expr, EvalContext context) {
-    ExprChecker checker = new ExprChecker(this);
+    ExprChecker checker = new ExprChecker(mInterpreter, this);
     return checker.check(expr, context);
   }
   
-  public void error(Expr expr, String format, Object... args) {
-    mErrors.add(new CheckError(
-        expr.getPosition(), String.format(format, args)));
+  /**
+   * Walks through a Scope containing values and invokes "type" on them,
+   * yielding a new Scope where all of the names are bound to the types of the
+   * values in the given Scope.
+   */
+  public Scope typeScope(Scope valueScope) {
+    Scope scope = new Scope();
+    for (Entry<String, Obj> entry : valueScope.entries()) {
+      Obj type = mInterpreter.invokeMethod(entry.getValue(), "type",
+          mInterpreter.nothing());
+      scope.define(entry.getKey(), type);
+    }
+    
+    return scope;
   }
-  
-  public Interpreter getInterpreter() { return mInterpreter; }
+
+  public void addError(Position position, String format, Object... args) {
+    mErrors.add(new CheckError(position, String.format(format, args)));
+  }
     
   private Interpreter mInterpreter;
   private final List<CheckError> mErrors = new ArrayList<CheckError>();

@@ -42,6 +42,48 @@ public class FnObj extends Obj implements Invokable {
     }
   }
   
+  public Obj check(Checker checker, EvalContext context) {
+    // Evaluate the parameter type declaration expression to get the declared
+    // parameter type(s).
+    Obj paramType = checker.evaluateType(mFunction.getParamType());
+    
+    // Create a new local scope for the function.
+    Scope closureTypes = checker.typeScope(mClosure);
+    EvalContext functionContext = new EvalContext(
+        closureTypes, context.getThis()).nestScope();
+    
+    // Bind parameter types to their names.
+    List<String> params = mFunction.getParamNames();
+    if (params.size() == 1) {
+      context.define(params.get(0), paramType);
+    } else if (params.size() > 1) {
+      // TODO(bob): Hack. Assume the parameter is a tuple with the right number of
+      // fields.
+      for (int i = 0; i < params.size(); i++) {
+        context.define(params.get(i), paramType.getTupleField(i));
+      }
+    }
+    
+    Obj returnType = checker.check(mFunction.getBody(), functionContext);
+    
+    // Check that the body returns a valid type.
+    Obj expectedReturn = checker.evaluateType(mFunction.getReturnType());
+    Obj matches = checker.invokeMethod(expectedReturn, "canAssignFrom", returnType);
+
+    if (!matches.asBool()) {
+      checker.addError(getReturnType().getPosition(),
+          "Function is declared to return %s but is returning %s.",
+          expectedReturn, returnType);
+    }
+    
+    // TODO(bob): If this FnObj is a method (i.e. this isn't nothing?), then we
+    // also need to check that any assignment to a field matches the declared
+    // type.
+    
+    // Always return the expected type so that we don't get cascading errors.
+    return expectedReturn;
+  }
+  
   public Expr getParamType() { return mFunction.getParamType(); }
   public Expr getReturnType() { return mFunction.getReturnType(); }
   
