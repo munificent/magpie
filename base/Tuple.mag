@@ -25,6 +25,7 @@ def Tuple toString(-> String)
     s + ")"
 end
 
+/*
 def Tuple type()
     var types = []
     
@@ -36,4 +37,38 @@ def Tuple type()
     if count == 5 then return (_0 type, _1 type, _2 type, _3 type, _4 type)
     if count == 6 then return (_0 type, _1 type, _2 type, _3 type, _4 type, _5 type)
     Tuple
+end
+*/
+
+class TupleIterator
+    this(tuple Tuple)
+        this tuple = tuple
+        // rollback so the first call to next advances to the first
+        index = -1
+    end
+    
+    tuple   Tuple
+    index   Int
+end
+
+def TupleIterator next(-> Bool)
+    index = index + 1
+    index <= tuple count
+end
+
+def TupleIterator current()
+    if index == 0 then tuple _0
+    else if index == 1 then tuple _1
+    else if index == 2 then tuple _2
+    else if index == 3 then tuple _3
+    else if index == 4 then tuple _4
+    else if index == 5 then tuple _5
+    else if index == 6 then tuple _6
+    else if index == 7 then tuple _7
+    else if index == 8 then tuple _8
+    else if index == 9 then tuple _9
+end
+    
+def Tuple iterate(-> TupleIterator)
+    TupleIterator new(this)
 end

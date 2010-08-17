@@ -77,6 +77,10 @@ public class Checker {
     return mInterpreter.invokeMethod(receiver, name, arg);
   }
   
+  public Obj invokeMethod(Obj receiver, String name) {
+    return mInterpreter.invokeMethod(receiver, name, mInterpreter.nothing());
+  }
+  
   public Obj check(Expr expr, EvalContext context) {
     ExprChecker checker = new ExprChecker(mInterpreter, this);
     return checker.check(expr, context);

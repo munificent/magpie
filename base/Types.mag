@@ -12,6 +12,31 @@
 // No type except Nothing is allowed where Nothing is expected.
 shared Nothing canAssignFrom(other IType -> Bool) other == Nothing
 
+shared Class orTypes(left IType, right IType -> IType)
+    // combine the cases of both arms
+    var cases = []
+
+    if left type == OrType then
+        for item = left cases do cases add(item)
+    else
+        cases add(left)
+    end
+
+    if right type == OrType then
+        for item = right cases do cases add(item)
+    else
+        cases add(right)
+    end
+
+    // Sort and remove the duplicates.
+    cases = cases sortByString unique
+
+    // If just one case remains, there's no union.
+    if cases count == 1 then return cases[0]
+    
+    OrType new(cases)
+end
+
 def Class canAssignFrom(other IType -> Bool)
     // Not even object can assign from Nothing.
     if other == Nothing then return false
@@ -33,22 +58,7 @@ def Class canAssignFrom(other IType -> Bool)
 end
 
 def Class |(other IType -> OrType)
-    // combine the cases of both arms
-    var cases = [this]
-    
-    if other type == OrType then
-        for item = other cases do cases add(item)
-    else
-        cases add(other)
-    end
-    
-    // Sort and remove the duplicates.
-    cases = cases sortByString unique
-    
-    // If just one case remains, there's no union.
-    if cases count == 1 then return cases[0]
-    
-    OrType new(cases)
+    Class orTypes(this, other)
 end
 
 
@@ -70,22 +80,7 @@ def OrType toString(-> String)
 end
 
 def OrType |(other IType -> OrType)
-    // combine the cases of both arms
-    var union = cases copy
-
-    if other type == OrType then
-        for item = other cases do union add(item)
-    else
-        union add(other)
-    end
-
-    // sort and remove the duplicates
-    union = union sortByString unique
-    
-    // If just one case remains, there's no union.
-    if union count == 1 then return union[0]
-
-    OrType new(union)
+    Class orTypes(this, other)
 end
 
 def OrType canAssignFrom(other IType -> Bool)
@@ -128,4 +123,20 @@ end
 // and Array inherit from.
 def Class [](-> ArrayType)
     ArrayType new(this)
+end
+
+def Tuple canAssignFrom(other IType -> Bool)
+    // Both must be tuples.
+    if other type != Tuple then return false
+    
+    // With the same number of fields.
+    if count != other count then return false
+    
+    // And the fields must be assignable.
+    for field = this
+    for otherField = other do
+        if field canAssignFrom(otherField) not then return false
+    end
+    
+    true
 end

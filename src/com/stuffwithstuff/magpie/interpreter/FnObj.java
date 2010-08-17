@@ -69,11 +69,13 @@ public class FnObj extends Obj implements Invokable {
     // Check that the body returns a valid type.
     Obj expectedReturn = checker.evaluateType(mFunction.getReturnType());
     Obj matches = checker.invokeMethod(expectedReturn, "canAssignFrom", returnType);
-
+    
     if (!matches.asBool()) {
+      String expectedText = checker.invokeMethod(expectedReturn, "toString").asString();
+      String actualText = checker.invokeMethod(returnType, "toString").asString();
       checker.addError(getReturnType().getPosition(),
           "Function is declared to return %s but is returning %s.",
-          expectedReturn, returnType);
+          expectedText, actualText);
     }
     
     // TODO(bob): If this FnObj is a method (i.e. this isn't nothing?), then we
