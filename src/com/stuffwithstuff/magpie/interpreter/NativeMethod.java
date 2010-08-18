@@ -315,6 +315,7 @@ public abstract class NativeMethod implements Invokable {
       return function.invoke(interpreter, interpreter.nothing(), arg);
     }
     
+    // TODO(bob): These are not correct.
     public Expr getParamType() { return Expr.name("Int"); }
     public Expr getReturnType() { return Expr.name("Int"); }
   }

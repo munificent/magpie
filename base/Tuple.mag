@@ -53,7 +53,7 @@ end
 
 def TupleIterator next(-> Bool)
     index = index + 1
-    index <= tuple count
+    index < tuple count
 end
 
 def TupleIterator current()

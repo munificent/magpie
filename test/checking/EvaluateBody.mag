@@ -47,9 +47,6 @@ var if3(-> Int | Nothing)
     if true then 1
 end
 
-
-// TODO(bob): implement.
-
 // Int expressions.
 var int1(-> Int) 123
 
@@ -67,6 +64,11 @@ var loop2(->)
 end
 
 // Message expressions.
+var message1(-> Int)
+    var i = 123
+    i
+end
+
 // TODO(bob): implement.
 
 // Nothing expressions.
@@ -82,6 +84,21 @@ var or2(-> Int)
 end
 
 // Return expressions.
+var return1(-> String)
+    return "hi"
+end
+
+var return1(-> Int | String)
+    if true then return "hi"
+    123
+end
+
+var return2(-> Bool | Int | String)
+    if true then return "hi"
+    if false then return true
+    123
+end
+
 // TODO(bob): implement.
 
 // String expressions.
@@ -107,4 +124,8 @@ end
 // TODO(bob): implement.
 
 // Variable declaration expressions.
+var var1(-> Int)
+    var i = 123
+end
+
 // TODO(bob): implement.

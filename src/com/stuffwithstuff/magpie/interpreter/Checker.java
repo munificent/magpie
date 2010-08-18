@@ -81,9 +81,9 @@ public class Checker {
     return mInterpreter.invokeMethod(receiver, name, mInterpreter.nothing());
   }
   
-  public Obj check(Expr expr, EvalContext context) {
+  public Obj checkFunction(Expr expr, EvalContext context) {
     ExprChecker checker = new ExprChecker(mInterpreter, this);
-    return checker.check(expr, context);
+    return checker.checkFunction(expr, context);
   }
   
   /**

@@ -55,16 +55,16 @@ public class FnObj extends Obj implements Invokable {
     // Bind parameter types to their names.
     List<String> params = mFunction.getParamNames();
     if (params.size() == 1) {
-      context.define(params.get(0), paramType);
+      functionContext.define(params.get(0), paramType);
     } else if (params.size() > 1) {
       // TODO(bob): Hack. Assume the parameter is a tuple with the right number of
       // fields.
       for (int i = 0; i < params.size(); i++) {
-        context.define(params.get(i), paramType.getTupleField(i));
+        functionContext.define(params.get(i), paramType.getTupleField(i));
       }
     }
     
-    Obj returnType = checker.check(mFunction.getBody(), functionContext);
+    Obj returnType = checker.checkFunction(mFunction.getBody(), functionContext);
     
     // Check that the body returns a valid type.
     Obj expectedReturn = checker.evaluateType(mFunction.getReturnType());
@@ -76,6 +76,9 @@ public class FnObj extends Obj implements Invokable {
       checker.addError(getReturnType().getPosition(),
           "Function is declared to return %s but is returning %s.",
           expectedText, actualText);
+      
+      // TODO(bob): Hack for testing:
+      checker.checkFunction(mFunction.getBody(), functionContext);
     }
     
     // TODO(bob): If this FnObj is a method (i.e. this isn't nothing?), then we

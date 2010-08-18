@@ -11,8 +11,12 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     mChecker = checker;
   }
   
-  public Obj check(Expr expr, EvalContext context) {
-    return expr.accept(this, context);
+  public Obj checkFunction(Expr body, EvalContext context) {
+    // Get the type implicitly returned by the function.
+    Obj evaluatedType = body.accept(this, context);
+    
+    // And include any early returned types as well.
+    return orTypes(evaluatedType, mReturnedTypes.toArray(new Obj[mReturnedTypes.size()]));
   }
   
   @Override
@@ -23,8 +27,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   
   @Override
   public Obj visit(AndExpr expr, EvalContext context) {
-    Obj left = evaluate(expr.getLeft(), context);
-    Obj right = evaluate(expr.getRight(), context);
+    Obj left = check(expr.getLeft(), context);
+    Obj right = check(expr.getRight(), context);
     
     return orTypes(left, right);
   }
@@ -75,8 +79,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     }
     
     // Get the types of the arms.
-    Obj thenArm = check(expr.getThen(), context);
-    Obj elseArm = check(expr.getElse(), context);
+    Obj thenArm = check(expr.getThen(), context, true);
+    Obj elseArm = check(expr.getElse(), context, true);
     
     return orTypes(thenArm, elseArm);
   }
@@ -102,8 +106,29 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(MessageExpr expr, EvalContext context) {
-    // TODO Auto-generated method stub
-    return mInterpreter.getNothingType();
+    Obj receiver = (expr.getReceiver() == null) ? null :
+        check(expr.getReceiver(), context);
+    
+    Obj arg = (expr.getArg() == null) ? null :
+        check(expr.getArg(), context);
+    
+    if (receiver == null) {
+      // Just a name, so maybe it's a variable.
+      Obj variableType = context.lookUp(expr.getName());
+  
+      if (variableType != null) {
+        // If we have an argument, apply it.
+        if (arg != null) {
+          return getMethodReturn(expr, variableType, "apply", arg);
+        }
+        return variableType;
+      }
+      
+      // Otherwise it must be a method on this.
+      return getMethodReturn(expr, context.getThis(), expr.getName(), arg);
+    }
+    
+    return getMethodReturn(expr, receiver, expr.getName(), arg);
   }
 
   @Override
@@ -113,16 +138,21 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   
   @Override
   public Obj visit(OrExpr expr, EvalContext context) {
-    Obj left = evaluate(expr.getLeft(), context);
-    Obj right = evaluate(expr.getRight(), context);
+    Obj left = check(expr.getLeft(), context);
+    Obj right = check(expr.getRight(), context);
     
     return orTypes(left, right);
   }
 
   @Override
   public Obj visit(ReturnExpr expr, EvalContext context) {
-    // TODO Auto-generated method stub
-    return mInterpreter.getNothingType();
+    // Get the type of value being returned.
+    Obj returnedType = check(expr.getValue(), context);
+    mReturnedTypes.add(returnedType);
+    
+    // The type of the return expression itself is "Never", which means an
+    // expression that contains a "return" can never finish evaluating.
+    return mInterpreter.getNeverType();
   }
 
   @Override
@@ -141,7 +171,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     // The type of a tuple type is just a tuple of its types.
     List<Obj> fields = new ArrayList<Obj>();
     for (Expr field : expr.getFields()) {
-      fields.add(evaluate(field, context));
+      fields.add(check(field, context));
     }
     
     return mInterpreter.createTuple(fields);
@@ -155,21 +185,56 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(VariableExpr expr, EvalContext context) {
-    // TODO Auto-generated method stub
-    return mInterpreter.getNothingType();
+    Obj varType = check(expr.getValue(), context);
+
+    context.define(expr.getName(), varType);
+    return varType;
   }
   
-  private Obj evaluate(Expr expr, EvalContext context) {
-    return expr.accept(this, context);
+  private Obj check(Expr expr, EvalContext context, boolean allowNever) {
+    Obj result = expr.accept(this, context);
+    
+    if (!allowNever && result == mInterpreter.getNeverType()) {
+      mChecker.addError(expr.getPosition(),
+          "An early return here will cause unreachable code.");
+    }
+    
+    return result;
   }
   
-  private Obj orTypes(Obj... types) {
-    Obj result = types[0];
-    for (int i = 1; i < types.length; i++) {
+  private Obj check(Expr expr, EvalContext context) {
+    return check(expr, context, false);
+  }
+
+  private Obj orTypes(Obj first, Obj... types) {
+    Obj result = first;
+    for (int i = 0; i < types.length; i++) {
       result = mChecker.invokeMethod(result, "|", types[i]);
     }
     
     return result;
+  }
+
+  public Obj getMethodReturn(Expr expr, Obj receiverType, String name, Obj arg) {
+    // TODO(bob): This is going to fail if the receiver type isn't an actual
+    // class: it could be a tuple, a function type, an array, an or type, etc.
+    if (!(receiverType instanceof ClassObj)) {
+      mChecker.addError(expr.getPosition(), "Can't check non-class methods yet.");
+      return mInterpreter.getNothingType();
+    }
+    
+    ClassObj receiverClass = (ClassObj)receiverType;
+    Invokable method = receiverClass.findMethod(name);
+    
+    if (method == null) {
+      mChecker.addError(expr.getPosition(),
+          "Could not find a variable or method named \"%s\" on %s when checking.",
+          name, receiverClass);
+      
+      return mInterpreter.getNothingType();
+    }
+    
+    return mChecker.evaluateType(method.getReturnType());
   }
 
   /*
@@ -222,41 +287,12 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
-  public Obj visit(MessageExpr expr, EvalContext context) {
-    Obj receiver = check(expr.getReceiver(), context);
-    Obj arg = check(expr.getArg(), context);
-
-    return checkMethod(expr, receiver, expr.getName(), arg);
-  }
-
-  @Override
-  public Obj visit(ReturnExpr expr, EvalContext context) {
-    // TODO(bob): Implement me.
-    System.out.println("Return expressions are not implemented.");
-    return mInterpreter.getDynamicType();
-  }
-
-  @Override
   public Obj visit(ThisExpr expr, EvalContext context) {
     return context.getThis();
   }
-
-  @Override
-  public Obj visit(VariableExpr expr, EvalContext context) {
-    Obj value = check(expr.getValue(), context);
-
-    // TODO(bob): Should check for reclaring a variable.
-    
-    // Variables cannot be of type Nothing.
-    errorIf(value == mInterpreter.getNothingType(), expr,
-        "Cannot declare a variable \"%s\" of type Nothing.", expr.getName());
-    
-    context.define(expr.getName(), value);
-    return value;
-  }
-  
     */
   
   private final Interpreter mInterpreter;
   private final Checker mChecker;
+  private final List<Obj> mReturnedTypes = new ArrayList<Obj>();
 }

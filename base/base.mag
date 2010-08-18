@@ -13,7 +13,7 @@ def Nothing toString(-> String) "nothing"
 def Class toString(-> String) name
 
 // Provide a generic print that converts arg to string first.
-def Object print(arg) printRaw(arg toString)
+def Object print(arg Object -> Nothing) printRaw(arg toString)
 
 // Truthiness.
 def Object true?(-> Bool) true

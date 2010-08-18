@@ -140,3 +140,8 @@ def Tuple canAssignFrom(other IType -> Bool)
     
     true
 end
+
+shared Dynamic canAssignFrom(other IType -> Bool)
+    // Everything goes with Dynamic.
+    true
+end

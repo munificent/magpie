@@ -1,0 +1,35 @@
+// This script is to test that the checker raises an error on unreachable code
+// (code that would execute after a "return" expression).
+
+var foo(a)
+    nothing
+end
+
+var notInExpr()
+    foo(return 1) //!
+end
+
+var nothingAfterReturn()
+    return 1 //!
+    print("unreachable")
+end
+
+var thenBranchReturningIsOk()
+    if true then return 1
+    print("reachable")
+end
+
+var elseBranchReturningIsOk()
+    if true then 1 else return 2
+    print("reachable")
+end
+
+var bothBranchesReturn()
+    if true then return 1 else return 2 //!
+    print("unreachable")
+end
+
+var unnecessaryReturn()
+    print("reachable")
+    return 2 //!
+end

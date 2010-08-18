@@ -59,19 +59,31 @@ public class TestInterpreterHost implements InterpreterHost {
         // Do the static analysis and see if we got the errors we expect.
         Checker checker = new Checker(mInterpreter);
         List<CheckError> errors = checker.checkAll();
-        int count = Math.max(mExpectedErrors.size(), errors.size());
-        for (int i = 0; i < count; i++) {
-          if (i >= mExpectedErrors.size()) {
-            fail("Got an error on line " + errors.get(i).getLine()
-                + " when no more were expected: " + errors.get(i));
-          } else if (i >= errors.size()) {
-            fail("Expected an error on line " + mExpectedErrors.get(i)
-                + " but got none.");
-          } else if (mExpectedErrors.get(i) != errors.get(i).getLine()) {
-            fail("Expected an error on line " + mExpectedErrors.get(i)
-                + " but got one on line " + errors.get(i).getLine()
-                + " instead: " + errors.get(i));
+
+        // Go through each error we got.
+        for (CheckError error : errors) {
+          // Remove it from the collection of errors we expect. We have to
+          // search since the errors may not actually be given in order. (The
+          // checker is free to check in whatever order it wants.)
+          boolean found = false;
+          for (int i = 0; i < mExpectedErrors.size(); i++) {
+            if (mExpectedErrors.get(i) == error.getLine()) {
+              mExpectedErrors.remove(i);
+              found = true;
+              break;
+            }
           }
+          
+          if (!found) {
+            fail("Found an unexpected error on line " + error.getLine() +
+                ": " + error.getMessage());
+          }
+        }
+        
+        // We should not have any errors let.
+        for (int i = 0; i < mExpectedErrors.size(); i++) {
+          fail("Expected an error on line " + mExpectedErrors.get(i)
+              + " but got none.");
         }
         
         if (errors.size() == 0) {
@@ -123,7 +135,7 @@ public class TestInterpreterHost implements InterpreterHost {
     // Uncomment this to see the runtime errors as they occur. Commented out
     // because some tests intentionally cause runtime errors to test that the
     // behavior after the error is as expected.
-    System.out.println(position.toString() + ": " + message);
+    //System.out.println(position.toString() + ": " + message);
   }
 
   private void loadScript(String path) {
