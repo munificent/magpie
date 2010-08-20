@@ -308,6 +308,55 @@ public abstract class NativeMethod implements Invokable {
     
     private final String mClassName;
   }
+
+  public static class ClassAssertType extends NativeMethod {
+    public ClassAssertType(String className) {
+      mClassName = className;
+    }
+    
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      if (arg.getClassObj() != thisObj) {
+        interpreter.runtimeError(
+            "Cannot assign %s as the base class for %s because it is not a class.",
+            arg, thisObj);
+        
+        // TODO(bob): Should throw an exception. Returning nothing here violates
+        // the return type.
+        return interpreter.nothing();
+      }
+      
+      // Just echo the argument back. The important part is tha the annotated
+      // type has changed.
+      return arg;
+    }
+
+    public Expr getParamType() { return Expr.name("Dynamic"); }
+    public Expr getReturnType() { return Expr.name(mClassName); }
+    
+    private final String mClassName;
+  }
+
+  public static class ClassGetMethodReturnType extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      String name = arg.getTupleField(0).asString();
+      // TODO(bob): Arg type is ignored since there is no overloading yet.
+      
+      ClassObj thisClass = (ClassObj)thisObj;
+      Invokable method = thisClass.findMethod(name);
+      
+      if (method == null) {
+        return interpreter.nothing();
+      }
+      
+      return interpreter.evaluateType(method.getReturnType());
+    }
+
+    public Expr getParamType() { return Expr.name("Nothing"); }
+    // TODO(bob): Should eventually return IType | Nothing
+    public Expr getReturnType() { return Expr.name("Dynamic"); }
+  }
   
   // Function methods:
   
@@ -501,7 +550,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.createBool(thisObj == arg);
     }
     
-    public Expr getParamType() { return Expr.name("Int"); }
+    public Expr getParamType() { return Expr.name("Object"); }
     public Expr getReturnType() { return Expr.name("Bool"); }
   }
 

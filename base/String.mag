@@ -1,9 +1,9 @@
 // Comparisons.
-def String ==(other -> String) this compareTo(other toString) == 0
-def String !=(other -> String) this compareTo(other toString) != 0
-def String <(other -> String) this compareTo(other toString) < 0
-def String >(other -> String) this compareTo(other toString) > 0
-def String <=(other -> String) this compareTo(other toString) <= 0
-def String >=(other -> String) this compareTo(other toString) >= 0
+def String ==(other -> Bool) this compareTo(other toString) == 0
+def String !=(other -> Bool) this compareTo(other toString) != 0
+def String <(other -> Bool) this compareTo(other toString) < 0
+def String >(other -> Bool) this compareTo(other toString) > 0
+def String <=(other -> Bool) this compareTo(other toString) <= 0
+def String >=(other -> Bool) this compareTo(other toString) >= 0
 
 def String +(other -> String) this concatenate(other toString)

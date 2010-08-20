@@ -33,8 +33,9 @@ public class Interpreter {
     mClass.addMethod("defineSharedMethod", new NativeMethod.ClassDefineSharedMethod());
     mClass.addMethod("parent", new NativeMethod.ClassGetParent());
     mClass.addMethod("parent=", new NativeMethod.ClassSetParent());
+    mClass.addMethod("getMethodReturnType", new NativeMethod.ClassGetMethodReturnType());
     mGlobalScope.define("Class", mClass);
-
+    
     // Object is the root class of all objects. All parent chains eventually
     // end here. Note that there is no distinct metaclass for class Object: its
     // metaclass is the main metaclass Class.
@@ -56,7 +57,9 @@ public class Interpreter {
     mArrayClass.addMethod("insert", new NativeMethod.ArrayInsert());
     mArrayClass.addMethod("removeAt", new NativeMethod.ArrayRemoveAt());
     mArrayClass.addMethod("clear", new NativeMethod.ArrayClear());
-
+    // TODO(bob): Should really be type and not class, I think?
+    //mArrayClass.setParent(mClass);
+    
     mBoolClass = createGlobalClass("Bool");
     mBoolClass.addMethod("not", new NativeMethod.BoolNot());
     mBoolClass.addMethod("toString", new NativeMethod.BoolToString());
@@ -130,6 +133,14 @@ public class Interpreter {
     return result.asString();
   }
   
+  public Obj evaluateType(Expr expr) {
+    // We create a context from the interpreter here because we need to evaluate
+    // type expressions in the regular interpreter context where scopes hold
+    // values not types.
+    EvalContext context = createTopLevelContext();
+    return evaluate(expr, context);
+  }
+
   public void runMain() {
     EvalContext context = createTopLevelContext();
     Obj main = context.lookUp("main");
@@ -205,6 +216,9 @@ public class Interpreter {
     // Create the metaclass. This will hold shared methods on the class.
     ClassObj metaclass = new ClassObj(mClass, name + "Class", mClass);
     
+    // Define a conversion method.
+    metaclass.addMethod("assertType", new NativeMethod.ClassAssertType(name));
+
     // Create the class object itself. This will hold the instance methods for
     // objects of the class.
     ClassObj classObj = new ClassObj(metaclass, name, mObjectClass);

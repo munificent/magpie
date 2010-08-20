@@ -249,7 +249,27 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     return result;
   }
 
-  public Obj getMethodReturn(Expr expr, Obj receiverType, String name, Obj arg) {
+  public Obj getMethodReturn(Expr expr, Obj receiverType, String name,
+      Obj argType) {
+
+    Obj returnType = mChecker.invokeMethod(receiverType, "getMethodReturnType",
+        mInterpreter.createTuple(mInterpreter.createString(name), argType));
+    
+    if (returnType == mInterpreter.nothing()) {
+      mChecker.addError(expr.getPosition(),
+          "Could not find a variable or method named \"%s\" on %s when checking.",
+          name, receiverType);
+
+      // TODO(bob): Hack testing.
+      mChecker.invokeMethod(receiverType, "getMethodReturnType",
+          mInterpreter.createTuple(mInterpreter.createString(name), argType));
+
+      return mInterpreter.getNothingType();
+    }
+    
+    return returnType;
+    
+    /*
     // TODO(bob): This is going to fail if the receiver type isn't an actual
     // class: it could be a tuple, a function type, an array, an or type, etc.
     if (!(receiverType instanceof ClassObj)) {
@@ -257,23 +277,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       return mInterpreter.getNothingType();
     }
     
-    // Every method on a Dynamic object returns Dynamic.
-    if (receiverType == mInterpreter.getDynamicType()) {
-      return mInterpreter.getDynamicType();
-    }
-    
-    ClassObj receiverClass = (ClassObj)receiverType;
-    Invokable method = receiverClass.findMethod(name);
-    
-    if (method == null) {
-      mChecker.addError(expr.getPosition(),
-          "Could not find a variable or method named \"%s\" on %s when checking.",
-          name, receiverClass);
-      
-      return mInterpreter.getNothingType();
-    }
-    
-    return mChecker.evaluateType(method.getReturnType());
+
+    */
   }
 
   /*

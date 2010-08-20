@@ -12,7 +12,8 @@
 // No type except Nothing is allowed where Nothing is expected.
 shared Nothing canAssignFrom(other -> Bool) other == Nothing
 
-shared Class orTypes(left, right ->)
+// TODO(bob): Return Dynamic here is lame. Need type interface.
+shared Class orTypes(left, right -> Dynamic)
     // combine the cases of both arms
     var cases = []
 
@@ -57,7 +58,7 @@ def Class canAssignFrom(other -> Bool)
     this == Object
 end
 
-def Class |(other -> OrType)
+def Class |(other -> Dynamic)
     Class orTypes(this, other)
 end
 
@@ -67,7 +68,7 @@ class OrType
         this cases = cases
     end
     
-    cases Array // TODO(bob): Array of(IType)
+    cases Array // TODO(bob): IType[Int]
 end
 
 def OrType toString(-> String)
@@ -79,7 +80,7 @@ def OrType toString(-> String)
     result
 end
 
-def OrType |(other -> OrType)
+def OrType |(other -> Object)
     Class orTypes(this, other)
 end
 
@@ -87,7 +88,9 @@ def OrType canAssignFrom(other -> Bool)
     if other type == OrType then
         // It's also an or, so see if all of its cases are matched by one of
         // the ones here.
-        for otherCase = other cases do
+        // TODO(bob): Should use let instead of raw assertType.
+        var orType = OrType assertType(other)
+        for otherCase = orType cases do
             if canAssignFrom(otherCase) not then return false
         end
         true
@@ -119,4 +122,10 @@ end
 shared Dynamic canAssignFrom(other -> Bool)
     // Everything goes with Dynamic.
     true
+end
+
+// TODO(bob): Should return IType
+shared Dynamic getMethodReturnType(name String, argType -> Dynamic)
+    // A dynamic object accepts all methods and they all return Dynamic
+    Dynamic
 end

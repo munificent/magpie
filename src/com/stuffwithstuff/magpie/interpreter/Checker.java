@@ -77,11 +77,7 @@ public class Checker {
   }
   
   public Obj evaluateType(Expr expr) {
-    // We create a context from the interpreter here because we need to evaluate
-    // type expressions in the regular interpreter context where scopes hold
-    // values not types.
-    EvalContext context = mInterpreter.createTopLevelContext();
-    return mInterpreter.evaluate(expr, context);
+    return mInterpreter.evaluateType(expr);
   }
   
   public Obj invokeMethod(Obj receiver, String name, Obj arg) {

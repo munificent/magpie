@@ -192,8 +192,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     // object is constructed.
     classObj.defineFields(expr.getFields());
     
-    // TODO(bob): Need to add constructors here...
-    
     // Define a variable for the class in the current scope.
     context.define(expr.getName(), classObj);
     return classObj;
@@ -337,7 +335,11 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(TypeofExpr expr, EvalContext context) {
+    /*
     return TypeEvaluator.evaluate(mInterpreter, expr.getBody(), context);
+    */
+    // TODO(bob): Not supported right now. Should use ExprChecker at some point.
+    return mInterpreter.nothing();
   }
 
   @Override

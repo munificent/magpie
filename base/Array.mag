@@ -49,7 +49,7 @@ def Array sortByString(-> Array)
     result
 end
 
-def Array unique(-> Array)
+def Array unique(-> Dynamic[])
     var result = []
     for item = this do
         if result count == 0 then result add(item)
@@ -73,16 +73,29 @@ shared Array newType(elementType -> ArrayType)
     ArrayType new(elementType)
 end
 
+shared Array canAssignFrom(other -> Bool)
+    if this == other then true
+    else if other type == ArrayType then true
+    else false
+end
+
 class ArrayType
-    this(elementType)
+    this(elementType Object)
         this elementType = elementType
     end
     
-    elementType Dynamic
+    elementType Object
 end
 
+ArrayType parent = Array
+
 def ArrayType toString(-> String)
-    elementType toString + "[]"
+    String assertType(elementType toString + "[]")
+end
+
+def ArrayType canAssignFrom(other -> Bool)
+    // Element type must match exactly (not variant).
+    this elementType == (ArrayType assertType(other)) elementType
 end
 
 // If you call [] on a class like, it returns the type of an array of this

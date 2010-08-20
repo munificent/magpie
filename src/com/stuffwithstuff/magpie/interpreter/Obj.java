@@ -92,6 +92,8 @@ public class Obj {
       return "\"" + mValue + "\"";
     } else if (mValue != null) {
       return mValue.toString();
+    } else if (mClass.getName().equals("Nothing")) {
+      return "nothing";
     }
 
     return "Instance of " + mClass.getName();
