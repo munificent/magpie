@@ -317,6 +317,20 @@ public class MagpieParser extends Parser {
           arg = parseExpression();
           consume(TokenType.RIGHT_BRACKET);
         }
+      } else if (match(TokenType.LEFT_PAREN)) {
+        // A call (i.e. an unnamed message like 123(345) or (foo bar)(bang).
+        name = "call";
+        
+        position = last(1).getPosition();
+        
+        if (match(TokenType.RIGHT_PAREN)) {
+          arg = new NothingExpr(last(2).getPosition().union(last(1).getPosition()));
+        } else {
+          arg = parseExpression();
+          consume(TokenType.RIGHT_PAREN);
+        }
+        
+        position = position.union(last(1).getPosition());
       } else {
         break;
       }

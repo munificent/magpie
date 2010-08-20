@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.Script;
 import com.stuffwithstuff.magpie.ast.*;
+import com.stuffwithstuff.magpie.util.Expect;
 
 public abstract class NativeMethod implements Invokable {
   public abstract Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg);
@@ -229,6 +230,9 @@ public abstract class NativeMethod implements Invokable {
 
   public static class ClassFieldGetter extends NativeMethod {
     public ClassFieldGetter(String name, Expr type) {
+      Expect.notEmpty(name);
+      Expect.notNull(type);
+      
       mName = name;
       mType = type;
     }
@@ -307,7 +311,7 @@ public abstract class NativeMethod implements Invokable {
   
   // Function methods:
   
-  public static class FunctionApply extends NativeMethod {
+  public static class FunctionCall extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       FnObj function = (FnObj)thisObj;

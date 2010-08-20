@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.Expr;
-import com.stuffwithstuff.magpie.ast.FnExpr;
 import com.stuffwithstuff.magpie.parser.Position;
 
 public class Checker {
@@ -25,6 +24,18 @@ public class Checker {
     for (Entry<String, Obj> entry : mInterpreter.getGlobals().entries()) {
       if (entry.getValue() instanceof FnObj) {
         ((FnObj)entry.getValue()).check(this, context);
+      } else if (entry.getValue() instanceof ClassObj) {
+        ClassObj classObj = (ClassObj)entry.getValue();
+        
+        EvalContext classContext = context.withThis(classObj);
+        
+        // Check all of the methods.
+        for (Entry<String, Invokable> method : classObj.getMethods().entrySet()) {
+          // Only check user-defined methods.
+          if (method.getValue() instanceof FnObj) {
+            ((FnObj)method.getValue()).check(this, classContext);
+          }
+        }
       }
     }
 

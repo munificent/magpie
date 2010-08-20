@@ -140,11 +140,11 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       
       // Add a getter.
       metaclass.addMethod(field.getKey(),
-          new NativeMethod.ClassFieldGetter(field.getKey(), null));
+          new NativeMethod.ClassFieldGetter(field.getKey(), Expr.name("Dynamic")));
       
       // Add a setter.
       metaclass.addMethod(field.getKey() + "=",
-          new NativeMethod.ClassFieldSetter(field.getKey(), null));
+          new NativeMethod.ClassFieldSetter(field.getKey(), Expr.name("Dynamic")));
     }
     
     // Define the shared methods.
@@ -171,11 +171,11 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       
       // Add a getter.
       classObj.addMethod(field,
-          new NativeMethod.ClassFieldGetter(field, null));
+          new NativeMethod.ClassFieldGetter(field, Expr.name("Dynamic")));
       
       // Add a setter.
       classObj.addMethod(field + "=",
-          new NativeMethod.ClassFieldSetter(field, null));
+          new NativeMethod.ClassFieldSetter(field, Expr.name("Dynamic")));
     }
     
     for (Entry<String, Expr> entry : expr.getFieldDeclarations().entrySet()) {
@@ -291,7 +291,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       if (variable != null) {
         // If we have an argument, apply it.
         if (arg != null) {
-          return invokeMethod(expr, variable, "apply", arg);
+          return invokeMethod(expr, variable, "call", arg);
         }
         return variable;
       }

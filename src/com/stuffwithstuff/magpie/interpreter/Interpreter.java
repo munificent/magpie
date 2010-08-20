@@ -64,7 +64,7 @@ public class Interpreter {
     mDynamicClass = createGlobalClass("Dynamic");
     
     mFnClass = createGlobalClass("Function");
-    mFnClass.addMethod("apply", new NativeMethod.FunctionApply());
+    mFnClass.addMethod("call", new NativeMethod.FunctionCall());
     
     mIntClass = createGlobalClass("Int");
     mIntClass.getClassObj().addMethod("parse", new NativeMethod.IntParse());

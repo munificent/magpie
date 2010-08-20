@@ -10,9 +10,9 @@
 // Base.
 
 // No type except Nothing is allowed where Nothing is expected.
-shared Nothing canAssignFrom(other IType -> Bool) other == Nothing
+shared Nothing canAssignFrom(other -> Bool) other == Nothing
 
-shared Class orTypes(left IType, right IType -> IType)
+shared Class orTypes(left, right ->)
     // combine the cases of both arms
     var cases = []
 
@@ -37,7 +37,7 @@ shared Class orTypes(left IType, right IType -> IType)
     OrType new(cases)
 end
 
-def Class canAssignFrom(other IType -> Bool)
+def Class canAssignFrom(other -> Bool)
     // Not even object can assign from Nothing.
     if other == Nothing then return false
     
@@ -57,7 +57,7 @@ def Class canAssignFrom(other IType -> Bool)
     this == Object
 end
 
-def Class |(other IType -> OrType)
+def Class |(other -> OrType)
     Class orTypes(this, other)
 end
 
@@ -79,11 +79,11 @@ def OrType toString(-> String)
     result
 end
 
-def OrType |(other IType -> OrType)
+def OrType |(other -> OrType)
     Class orTypes(this, other)
 end
 
-def OrType canAssignFrom(other IType -> Bool)
+def OrType canAssignFrom(other -> Bool)
     if other type == OrType then
         // It's also an or, so see if all of its cases are matched by one of
         // the ones here.
@@ -100,32 +100,7 @@ def OrType canAssignFrom(other IType -> Bool)
     end
 end
 
-// TODO(bob): This is kind of hokey.
-shared Array newType(elementType -> ArrayType)
-    ArrayType new(elementType)
-end
-
-class ArrayType
-    this(elementType)
-        this elementType = elementType
-    end
-    
-    elementType IType
-end
-
-def ArrayType toString(-> String)
-    elementType toString + "[]"
-end
-
-// If you call [] on a class like, it returns the type of an array of this
-// class.
-// TODO(bob): This should be moved to Type, which should be what Class, Tuple,
-// and Array inherit from.
-def Class [](-> ArrayType)
-    ArrayType new(this)
-end
-
-def Tuple canAssignFrom(other IType -> Bool)
+def Tuple canAssignFrom(other -> Bool)
     // Both must be tuples.
     if other type != Tuple then return false
     
@@ -141,7 +116,7 @@ def Tuple canAssignFrom(other IType -> Bool)
     true
 end
 
-shared Dynamic canAssignFrom(other IType -> Bool)
+shared Dynamic canAssignFrom(other -> Bool)
     // Everything goes with Dynamic.
     true
 end

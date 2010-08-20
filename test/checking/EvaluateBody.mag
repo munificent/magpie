@@ -99,13 +99,20 @@ var return2(-> Bool | Int | String)
     123
 end
 
-// TODO(bob): implement.
-
 // String expressions.
 var string1(-> String) "hi"
 
 // This expressions.
-// TODO(bob): implement.
+class Foo
+end
+
+def Foo bar(-> Foo)
+    this
+end
+
+var this1(-> Foo)
+    Foo new bar
+end
 
 // Tuple expressions.
 var tuple1(-> (Int, String))

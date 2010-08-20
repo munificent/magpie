@@ -1,0 +1,59 @@
+An object is a reference to a bag of state and a set of methods. The only things
+an object supports is copying its reference and invoking methods on it. The set
+of methods an object supports isn't strongly tied to any high-level idea of a
+"type" or a "class". Each object can be considered to have a totally unique set
+of methods.
+
+At an even higher level, an object may not necessarily even need to *store* a
+set of methods. All it really needs is a single "lookup" procedure that will
+find a method given its name and parameter type.
+
+A type draws a border around a set of objects and defines which objects are in
+the set and which are not. Types exist for the user to easily declare which
+objects are allowed in a certain place and which are not. The most minimal type
+system possible would be one where the user simply lists the entire set of
+methods an object needs to support. Everything beyond that exists merely to make
+that more convenient to do.
+
+By defining a type, a user is creating a name or expression that can determine
+which objects meet its requirements and which don't. Concretely, to be a type,
+the following operations must be supported:
+
+1. contains?(otherType)
+   Given another type, are all of the values of that type also values of this
+   type? Academically: is otherType a subtype of this one? Pragmatically: can
+   any object of otherType be passed to a method that expects this type?
+   
+   The checker uses this to match up a method's declared parameter type with the
+   evaluated type of the argument being passed to it.
+   
+2. hasMethod?(name, paramType)
+   Do all values of this type support a method with the given name and parameter
+   type (for overloading)?
+   
+   The checker uses this to ensure that all of the methods invoked on an object
+   are valid for its declared or inferred type.
+
+A type is an object. So, the two concepts unify in that a type is simply an
+object with methods for contains?() and hasMethod?().
+
+
+So what needs to be implemented in Java?
+
+We need an object class. It contains a map of named values (also objects). It
+may also contain a single primitive value (int, String, etc.)
+
+We need the ability to evaluate expressions, with a few built in primitives like
+if/then, etc.
+
+We need method objects, which are a declared parameter and return type, and a
+body expression. (The parameter and return types are also simply expressions.)
+We need the ability to invoke a method by binding this and the parameters then
+evaluating the body.
+
+We need pre-defined objects that represent the built-in literal types: Bool,
+Int, String. We also need the ability to create type objects that represent
+composite types like arrays and literals.
+
+We need built-in methods for basic operations (arithmetic, etc.) as well as
+adding fields and methods to objects.
