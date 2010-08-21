@@ -335,11 +335,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(TypeofExpr expr, EvalContext context) {
-    /*
-    return TypeEvaluator.evaluate(mInterpreter, expr.getBody(), context);
-    */
-    // TODO(bob): Not supported right now. Should use ExprChecker at some point.
-    return mInterpreter.nothing();
+    Checker checker = new Checker(mInterpreter);
+    return checker.evaluateExpressionType(expr.getBody());
   }
 
   @Override

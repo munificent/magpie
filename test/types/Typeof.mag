@@ -32,7 +32,7 @@ print(typeof
 end)        //: String
 
 // Loops never return anything.
-print(typeof while a < 2 do 4) //: Nothing
+print(typeof while true do 4) //: Nothing
 
 // Variable definitions.
 print(typeof var a = 234) //: Int
@@ -47,8 +47,8 @@ print(typeof true or false)  //: Bool
 print(typeof true and false) //: Bool
 print(typeof 1 or false)     //: Bool | Int
 print(typeof 1 and false)    //: Bool | Int
-print(typeof 1 or "two")     //: Bool | Int | String
-print(typeof 1 and "two")    //: Bool | Int | String
+print(typeof 1 or "two")     //: Int | String
+print(typeof 1 and "two")    //: Int | String
 
 // Conditionals.
 print(typeof if true then 1)          //: Int | Nothing

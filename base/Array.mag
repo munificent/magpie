@@ -49,7 +49,7 @@ def Array sortByString(-> Array)
     result
 end
 
-def Array unique(-> Dynamic[])
+def Array unique(-> Object[])
     var result = []
     for item = this do
         if result count == 0 then result add(item)

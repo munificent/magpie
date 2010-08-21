@@ -38,7 +38,23 @@ public class Checker {
         }
       }
     }
+    
     return mErrors;
+  }
+  
+  public Obj evaluateExpressionType(Expr expr) {
+    ExprChecker checker = new ExprChecker(mInterpreter, this);
+
+    Scope globals = typeScope(mInterpreter.getGlobals());
+    EvalContext context = new EvalContext(globals, mInterpreter.getNothingType());
+
+    // Get the expression's type.
+    Obj type = checker.check(expr, context);
+    
+    // But if there are any type errors, don't return it.
+    if (mErrors.size() > 0) return mInterpreter.nothing();
+    
+    return type;
   }
   
   public Obj evaluateType(Expr expr) {

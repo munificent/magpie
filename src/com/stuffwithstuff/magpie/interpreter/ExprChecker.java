@@ -19,6 +19,10 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     return orTypes(evaluatedType, mReturnedTypes.toArray(new Obj[mReturnedTypes.size()]));
   }
   
+  public Obj check(Expr expr, EvalContext context) {
+    return check(expr, context, false);
+  }
+
   @Override
   public Obj visit(ArrayExpr expr, EvalContext context) {
     // Try to infer the element type from the contents. The rules (which may
@@ -37,7 +41,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
     Obj elementType;
     if (elements.size() == 0) {
-      elementType = mInterpreter.getDynamicType();
+      elementType = mInterpreter.getObjectType();
     } else {
       // Get the first element's type.
       elementType = check(elements.get(0), context);
@@ -62,6 +66,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   
   @Override
   public Obj visit(AndExpr expr, EvalContext context) {
+    // TODO(bob): Should eventually check that both arms implement ITrueable
+    // so that you can only use truthy stuff in a conjunction.
     Obj left = check(expr.getLeft(), context);
     Obj right = check(expr.getRight(), context);
     
@@ -108,6 +114,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(IfExpr expr, EvalContext context) {
+    // TODO(bob): Should eventually check that conditions implement ITrueable
+    // so that you can only use truthy stuff in an if.
     // Check the conditions for errors.
     for (Condition condition : expr.getConditions()) {
       check(condition.getBody(), context);
@@ -127,6 +135,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(LoopExpr expr, EvalContext context) {
+    // TODO(bob): Should eventually check that conditions implement ITrueable
+    // so that you can only use truthy stuff in a while.
     // Check the conditions for errors.
     for (Expr condition : expr.getConditions()) {
       check(condition, context);
@@ -175,6 +185,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   
   @Override
   public Obj visit(OrExpr expr, EvalContext context) {
+    // TODO(bob): Should eventually check that both arms implement ITrueable
+    // so that you can only use truthy stuff in a conjunction.
     Obj left = check(expr.getLeft(), context);
     Obj right = check(expr.getRight(), context);
     
@@ -215,7 +227,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(TypeofExpr expr, EvalContext context) {
-    // TODO Auto-generated method stub
+    // TODO(bob): This should eventually return IType | Nothing
     return mInterpreter.getNothingType();
   }
 
@@ -236,10 +248,6 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     }
     
     return result;
-  }
-  
-  private Obj check(Expr expr, EvalContext context) {
-    return check(expr, context, false);
   }
 
   private Obj orTypes(Obj first, Obj... types) {
