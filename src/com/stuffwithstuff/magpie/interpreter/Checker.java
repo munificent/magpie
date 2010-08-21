@@ -38,41 +38,6 @@ public class Checker {
         }
       }
     }
-
-    // at load time, every object should know its type. in other words, for
-    // every object, you should be able to send it a "type" message and get the
-    // right object back.
-    // for basic objects and instances of classes, its easy: just return the
-    // class.
-    // Tuple class should provide a "type" message that returns a tuple of the
-    // types of its elements.
-    // Array class should provide a "type" message that returns an ArrayType
-    // object with the correct element type.
-    // Function class should provide a "type" message that returns a
-    // FunctionType with the correct return and param types.
-    
-    // this means that at check time, given a name, we can immediately tell its
-    // type without having to (for example) step into function bodies.
-    
-    // What does it mean to type check (top down?)
-    // - create a copy of the current global scope. this is because if we type
-    //   check an assignment to a global var, we'll change its value, and we
-    //   want to be able to restore it
-    // - for each value in global scope
-    //   if value is FnObj, type check fn
-    //   if value is ClassObj, type check its methods
-
-    // to check an expression:
-    // - message expr:
-    //   - look up the receiver type
-    //   - check the arg
-    //   - look up the method from the receiver type
-    //   - dynamically evaluate the method's type signature
-    //   - make sure the param matches the arg
-    //   - return the declared return type
-    // - define expr:
-    //   - check the value
-    //   - bind the type to the name
     return mErrors;
   }
   

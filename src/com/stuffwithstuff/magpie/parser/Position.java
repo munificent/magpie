@@ -40,7 +40,7 @@ public class Position {
     }
     
     return String.format("%s (line %d col %d - line %d col %d)", mSourceFile,
-        mStartLine, mEndLine, mStartCol, mEndCol);
+        mStartLine, mStartCol, mEndLine, mEndCol);
   }
   
   private final String mSourceFile;

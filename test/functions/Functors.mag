@@ -1,8 +1,8 @@
 class Foo
 end
 
-def Foo apply(arg) print("apply " + arg)
+def Foo call(arg) print("call " + arg)
 
 var foo = Foo new
 
-foo("hey") //: apply hey
+foo("hey") //: call hey

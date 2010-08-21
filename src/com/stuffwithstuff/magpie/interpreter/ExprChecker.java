@@ -160,9 +160,11 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       }
       
       // Otherwise it must be a method on this.
+      if (arg == null) arg = mInterpreter.getNothingType();
       return getMethodReturn(expr, context.getThis(), expr.getName(), arg);
     }
     
+    if (arg == null) arg = mInterpreter.getNothingType();
     return getMethodReturn(expr, receiver, expr.getName(), arg);
   }
 
@@ -252,90 +254,37 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   public Obj getMethodReturn(Expr expr, Obj receiverType, String name,
       Obj argType) {
 
-    Obj returnType = mChecker.invokeMethod(receiverType, "getMethodReturnType",
+    Obj methodType = mChecker.invokeMethod(receiverType, "getMethodType",
         mInterpreter.createTuple(mInterpreter.createString(name), argType));
     
-    if (returnType == mInterpreter.nothing()) {
+    if (methodType == mInterpreter.nothing()) {
       mChecker.addError(expr.getPosition(),
           "Could not find a variable or method named \"%s\" on %s when checking.",
           name, receiverType);
 
-      // TODO(bob): Hack testing.
-      mChecker.invokeMethod(receiverType, "getMethodReturnType",
-          mInterpreter.createTuple(mInterpreter.createString(name), argType));
-
       return mInterpreter.getNothingType();
     }
     
+    // getMethodType in Magpie is expected to return a tuple of the param and
+    // return type, or nothing if the method cannot be handled by the object.
+    Obj paramType = methodType.getTupleField(0);
+    Obj returnType = methodType.getTupleField(1);
+    
+    // Make sure the argument type matches the declared parameter type.
+    Obj matches = mChecker.invokeMethod(paramType, "canAssignFrom", argType);
+    
+    if (!matches.asBool()) {
+      String expectedText = mChecker.invokeMethod(paramType, "toString").asString();
+      String actualText = mChecker.invokeMethod(argType, "toString").asString();
+      mChecker.addError(expr.getPosition(),
+          "Function is declared to take %s but is being passed %s.",
+          expectedText, actualText);
+    }
+    
+    // Return the return type.
     return returnType;
-    
-    /*
-    // TODO(bob): This is going to fail if the receiver type isn't an actual
-    // class: it could be a tuple, a function type, an array, an or type, etc.
-    if (!(receiverType instanceof ClassObj)) {
-      mChecker.addError(expr.getPosition(), "Can't check non-class methods yet.");
-      return mInterpreter.getNothingType();
-    }
-    
-
-    */
   }
 
-  /*
-  @Override
-  public Obj visit(AssignExpr expr, EvalContext context) {
-    if (expr.getTarget() == null) {
-      // No target means we're just assigning to a variable (or field of this)
-      // with the given name.
-      String name = expr.getName();
-      Obj value = check(expr.getValue(), context);
-      
-      // Try to assign to a local.
-      Obj declared = context.lookUp(name);
-      
-      // If not found, try to assign to a member of this.
-      if (declared == null) {
-        FunctionType setter = findMethodType(context.getThis(), name + "=");
-        if (setter != null) {
-          declared = evaluateType(setter.getParamType());
-        }
-      }
-      
-      // Make sure the types match.
-      expectType(value, declared, expr,
-          "Cannot assign a %s value to a variable declared %s.",
-          value, declared);
-      
-      return value;
-    } else {
-      return mInterpreter.getDynamicType();
-    }
-  }
-  
-  @Override
-  public Obj visit(ClassExpr expr, EvalContext context) {
-    // TODO(bob): Implement me.
-    System.out.println("ClassExpr is not implemented.");
-    return mInterpreter.getDynamicType();
-  }
-
-  @Override
-  public Obj visit(FnExpr expr, EvalContext context) {
-    // Check the body of the function.
-    check(expr, context);
-    
-    // Return the type of the function itself.
-    // TODO(bob): Implement me.
-    System.out.println("Function types are not implemented.");
-    return mInterpreter.getDynamicType();
-  }
-
-  @Override
-  public Obj visit(ThisExpr expr, EvalContext context) {
-    return context.getThis();
-  }
-    */
-  
   private final Interpreter mInterpreter;
   private final Checker mChecker;
   private final List<Obj> mReturnedTypes = new ArrayList<Obj>();

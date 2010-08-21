@@ -56,43 +56,46 @@ public class TestInterpreterHost implements InterpreterHost {
       try {
         mInterpreter.load(parser.parse());
 
-        // Do the static analysis and see if we got the errors we expect.
-        Checker checker = new Checker(mInterpreter);
-        List<CheckError> errors = checker.checkAll();
-
-        // Go through each error we got.
-        for (CheckError error : errors) {
-          // Remove it from the collection of errors we expect. We have to
-          // search since the errors may not actually be given in order. (The
-          // checker is free to check in whatever order it wants.)
-          boolean found = false;
-          for (int i = 0; i < mExpectedErrors.size(); i++) {
-            if (mExpectedErrors.get(i) == error.getLine()) {
-              mExpectedErrors.remove(i);
-              found = true;
-              break;
+        // If there is a main() function, then we need to type-check first:
+        if (mInterpreter.hasMain()) {
+          // Do the static analysis and see if we got the errors we expect.
+          Checker checker = new Checker(mInterpreter);
+          List<CheckError> errors = checker.checkAll();
+  
+          // Go through each error we got.
+          for (CheckError error : errors) {
+            // Remove it from the collection of errors we expect. We have to
+            // search since the errors may not actually be given in order. (The
+            // checker is free to check in whatever order it wants.)
+            boolean found = false;
+            for (int i = 0; i < mExpectedErrors.size(); i++) {
+              if (mExpectedErrors.get(i) == error.getLine()) {
+                mExpectedErrors.remove(i);
+                found = true;
+                break;
+              }
+            }
+            
+            if (!found) {
+              fail("Found an unexpected error on line " + error.getLine() +
+                  ": " + error.getMessage());
             }
           }
           
-          if (!found) {
-            fail("Found an unexpected error on line " + error.getLine() +
-                ": " + error.getMessage());
+          // We should not have any errors let.
+          for (int i = 0; i < mExpectedErrors.size(); i++) {
+            fail("Expected an error on line " + mExpectedErrors.get(i)
+                + " but got none.");
           }
-        }
-        
-        // We should not have any errors let.
-        for (int i = 0; i < mExpectedErrors.size(); i++) {
-          fail("Expected an error on line " + mExpectedErrors.get(i)
-              + " but got none.");
-        }
-        
-        if (errors.size() == 0) {
-          mInterpreter.runMain();
+          
+          if (errors.size() == 0) {
+            mInterpreter.runMain();
+          }
         }
         
         if (mExpectedOutput.size() > 0) {
           fail("Ran out of output when still expecting \""
-              + mExpectedOutput.poll() + "\".");
+              + mExpectedOutput.poll().text + "\".");
         }
         
       } catch (InterpreterException ex) {

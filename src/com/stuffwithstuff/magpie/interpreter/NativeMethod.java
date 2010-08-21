@@ -309,8 +309,8 @@ public abstract class NativeMethod implements Invokable {
     private final String mClassName;
   }
 
-  public static class ClassAssertType extends NativeMethod {
-    public ClassAssertType(String className) {
+  public static class ClassUnsafeCast extends NativeMethod {
+    public ClassUnsafeCast(String className) {
       mClassName = className;
     }
     
@@ -337,7 +337,7 @@ public abstract class NativeMethod implements Invokable {
     private final String mClassName;
   }
 
-  public static class ClassGetMethodReturnType extends NativeMethod {
+  public static class ClassGetMethodType extends NativeMethod {
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();
@@ -350,17 +350,26 @@ public abstract class NativeMethod implements Invokable {
         return interpreter.nothing();
       }
       
-      return interpreter.evaluateType(method.getReturnType());
+      // Make sure the argument matches the parameter type.
+      Obj paramType = interpreter.evaluateType(method.getParamType());
+      Obj returnType = interpreter.evaluateType(method.getReturnType());
+      return interpreter.createTuple(paramType, returnType);
     }
 
-    public Expr getParamType() { return Expr.name("Nothing"); }
-    // TODO(bob): Should eventually return IType | Nothing
+    // TODO(bob): Should eventually be (String, IType)
+    public Expr getParamType() { return Expr.name("Dynamic"); }
+    // TODO(bob): Should eventually return (IType, IType) | Nothing
     public Expr getReturnType() { return Expr.name("Dynamic"); }
   }
   
   // Function methods:
   
   public static class FunctionCall extends NativeMethod {
+    public FunctionCall(Expr paramType, Expr returnType) {
+      mParamType = paramType;
+      mReturnType = returnType;
+    }
+    
     @Override
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       FnObj function = (FnObj)thisObj;
@@ -368,9 +377,11 @@ public abstract class NativeMethod implements Invokable {
       return function.invoke(interpreter, interpreter.nothing(), arg);
     }
     
-    // TODO(bob): These are not correct.
-    public Expr getParamType() { return Expr.name("Int"); }
-    public Expr getReturnType() { return Expr.name("Int"); }
+    public Expr getParamType() { return mParamType; }
+    public Expr getReturnType() { return mReturnType; }
+    
+    private final Expr mParamType;
+    private final Expr mReturnType;
   }
   
   // Int methods:
@@ -582,7 +593,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.nothing();
     }
     
-    public Expr getParamType() { return Expr.name("Nothing"); }
+    public Expr getParamType() { return Expr.name("String"); }
     public Expr getReturnType() { return Expr.name("Nothing"); }
   }
 

@@ -90,12 +90,16 @@ end
 ArrayType parent = Array
 
 def ArrayType toString(-> String)
-    String assertType(elementType toString + "[]")
+    String unsafeCast(elementType toString + "[]")
 end
 
 def ArrayType canAssignFrom(other -> Bool)
     // Element type must match exactly (not variant).
-    this elementType == (ArrayType assertType(other)) elementType
+    this elementType == (ArrayType unsafeCast(other)) elementType
+end
+
+def ArrayType getMethodType(name String, arg)
+    Array getMethodType(name, arg)
 end
 
 // If you call [] on a class like, it returns the type of an array of this

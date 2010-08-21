@@ -88,8 +88,8 @@ def OrType canAssignFrom(other -> Bool)
     if other type == OrType then
         // It's also an or, so see if all of its cases are matched by one of
         // the ones here.
-        // TODO(bob): Should use let instead of raw assertType.
-        var orType = OrType assertType(other)
+        // TODO(bob): Should use let instead of raw unsafeCast.
+        var orType = OrType unsafeCast(other)
         for otherCase = orType cases do
             if canAssignFrom(otherCase) not then return false
         end
@@ -108,7 +108,7 @@ def Tuple canAssignFrom(other -> Bool)
     if other type != Tuple then return false
     
     // With the same number of fields.
-    if count != other count then return false
+    if count != Int unsafeCast(other count) then return false
     
     // And the fields must be assignable.
     for field = this
@@ -125,7 +125,7 @@ shared Dynamic canAssignFrom(other -> Bool)
 end
 
 // TODO(bob): Should return IType
-shared Dynamic getMethodReturnType(name String, argType -> Dynamic)
-    // A dynamic object accepts all methods and they all return Dynamic
-    Dynamic
+shared Dynamic getMethodType(name String, argType -> Dynamic)
+    // A dynamic object accepts all methods and they all take and return Dynamic
+    Dynamic, Dynamic
 end

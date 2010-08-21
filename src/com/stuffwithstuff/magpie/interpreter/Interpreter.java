@@ -33,7 +33,7 @@ public class Interpreter {
     mClass.addMethod("defineSharedMethod", new NativeMethod.ClassDefineSharedMethod());
     mClass.addMethod("parent", new NativeMethod.ClassGetParent());
     mClass.addMethod("parent=", new NativeMethod.ClassSetParent());
-    mClass.addMethod("getMethodReturnType", new NativeMethod.ClassGetMethodReturnType());
+    mClass.addMethod("getMethodType", new NativeMethod.ClassGetMethodType());
     mGlobalScope.define("Class", mClass);
     
     // Object is the root class of all objects. All parent chains eventually
@@ -67,7 +67,6 @@ public class Interpreter {
     mDynamicClass = createGlobalClass("Dynamic");
     
     mFnClass = createGlobalClass("Function");
-    mFnClass.addMethod("call", new NativeMethod.FunctionCall());
     
     mIntClass = createGlobalClass("Int");
     mIntClass.getClassObj().addMethod("parse", new NativeMethod.IntParse());
@@ -141,6 +140,10 @@ public class Interpreter {
     return evaluate(expr, context);
   }
 
+  public boolean hasMain() {
+    return mGlobalScope.get("main") != null;
+  }
+  
   public void runMain() {
     EvalContext context = createTopLevelContext();
     Obj main = context.lookUp("main");
@@ -216,8 +219,8 @@ public class Interpreter {
     // Create the metaclass. This will hold shared methods on the class.
     ClassObj metaclass = new ClassObj(mClass, name + "Class", mClass);
     
-    // Define a conversion method.
-    metaclass.addMethod("assertType", new NativeMethod.ClassAssertType(name));
+    // Define a method to cheat the type-checker.
+    metaclass.addMethod("unsafeCast", new NativeMethod.ClassUnsafeCast(name));
 
     // Create the class object itself. This will hold the instance methods for
     // objects of the class.
@@ -228,7 +231,15 @@ public class Interpreter {
   }
   
   public FnObj createFn(FnExpr expr, Scope closure) {
-    return new FnObj(mFnClass, closure, expr);
+    // Create a new subclass just for this function so that it's implementation
+    // of "call" has the correct return and parameter types.
+    // TODO(bob): Figure out a simpler way to do this.
+    ClassObj fnClass = new ClassObj(mClass, "FunctionType", mFnClass);
+    
+    fnClass.addMethod("call", new NativeMethod.FunctionCall(
+        expr.getParamType(), expr.getReturnType()));
+    
+    return new FnObj(fnClass, closure, expr);
   }
   
   public Obj createTuple(Obj... fields) {

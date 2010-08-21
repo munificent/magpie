@@ -76,9 +76,6 @@ public class FnObj extends Obj implements Invokable {
       checker.addError(getReturnType().getPosition(),
           "Function is declared to return %s but is returning %s.",
           expectedText, actualText);
-      
-      // TODO(bob): Hack for testing:
-      checker.checkFunction(mFunction.getBody(), functionContext);
     }
     
     // TODO(bob): If this FnObj is a method (i.e. this isn't nothing?), then we
