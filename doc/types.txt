@@ -1,0 +1,224 @@
+                        
+Nothing is what magpie calls Unit. Why? It reads intuitively. A function like:
+
+    foo (-> Int) ...
+
+takes Nothing and returns an Int. Likewise:
+
+    foo (a Int)
+
+takes an Int and returns Nothing.
+
+Philosophically/semantically, nothing does exist. If you have two boxes with
+nothing in them, they have the same thing in them. If you put something in one
+box, it no longer has nothing in it.
+
+
+syntax:
+
+// type declarations:
+Dynamic     // dynamic
+Any         // Any (static top type)
+Int         // named type or primitive type
+(Int, Bool) // tuple
+fn (Int -> Bool) // function from int to bool
+fn (-> Bool)     // function from nothing to bool
+fn (Int)         // function from int to unit
+fn (Int ->)      // function from int to dynamic
+fn (Dynamic)     // function from dynamic to unit
+
+foo (a, b)              // takes two dynamic args, returns nothing
+foo (a, b ->)           // takes two dynamic args, returns one dynamic
+foo (a Any -> Any)      // takes Any, returns Any
+foo (a (Dynamic, Int))  // takes a tuple of a dynamic and an int
+foo ()                  // takes and returns nothing
+foo (->)                // takes nothing, returns dynamic
+foo (-> Int)            // takes nothing, returns int
+
+-> means "returns". its absence means nothing (unit) is returns
+
+in many cases, "Dynamic" can be omitted.
+
+// types
+
+// create a new concrete type
+type Point
+    // fields
+    x Int
+    y Int
+    
+    // methods
+    magnitude (-> Int) sqrt (x.squared + y.squared)
+    
+    // "static" methods
+    shared new (-> Point) Point.new (x: 0 y: 0)
+end
+
+// add fields to it
+extend Point
+    z Int
+end
+
+// add methods
+extend Point
+    toString (-> String) x.toString + ", " + y.toString
+end
+
+// create a new interface
+interface INumber
+    + (other Int -> Int)
+    - (other Int -> Int)
+end
+
+// extend it
+extend INumber
+    * (other Int -> Int)
+end
+
+// add a concrete method
+extend INumber
+    add2 (-> Int) this + 2
+end
+
+
+in a dynamic language, what does a class define?
+
+- the set of methods that can be performed on the object. (although more may
+  be added later.)
+- the state of an object. (although more may be added later.)
+- a receiver for dynamic dispatch.
+- metadata for introspecting and reasoning about the object at runtime.
+- an inheritance chain.
+
+what do we want to get from static typing?
+
+- overloading methods by argument type.
+- guarantees that an object passed to a method correctly supports all of the
+  operations the method will perform on it.
+- make sure variable type doesn't change.
+
+
+two distinct concepts:
+1. types.
+2. properties. (interfaces, typestate, etc.)
+
+a type is a thing. it has some concrete storage and a set of methods that it
+supports, either of which could change at runtime in a dynamic context.
+
+a property describes the capabilities of some variable. you can think of it as
+an interface. if some type has a method toString(->String), then it implicitly
+has the property "Stringable" if that property says you have to have that
+method.
+
+now, the question is, what properties can we statically associate with parts of
+programs?
+
+1. we can tell which types have which properties.
+2. we can tell which variables have which properties based of the types of
+   their initializing expressions.
+3. type (er, property) assertions can be used to associate additional properties
+   with variables.
+
+
+
+decided:
+-------
+
+a struct must be explicitly declared. there is only a single canonical place
+where you say "create this concrete type".
+
+structs can be extended with new fields. users who do so are encouraged to
+overload the constructor to provide default values for the new fields so that
+existing code still compiles.
+
+when a struct is created, the compiler automatically creates a constructor that
+initializes all of the fields and getters and setters for all of the fields.
+
+structs can be extended with new methods.
+
+methods can be overloaded by argument type.
+
+an interface must be explicitly declared. there is only a single canonical
+place where you say "define this interface".
+
+interfaces can be extended with new methods. doing so may break existing code
+if types that previously implemented the interface now no longer do.
+
+a type implicitly implements an interface if it has all of the methods in the
+interface. there is no explicit "implements" declaration required.
+
+built-in types can implement interfaces. users can make built-in types implement
+their own interfaces.
+
+concrete methods can be added to interfaces. these work like extension methods
+and cannot be overridden by a concrete type that implements the interface.
+
+there is a special interface type, Any, that has no methods and is thus
+implemented by all types. it's essentially void* for magpie.
+
+variables can be statically ("def") or dynamically ("var") typed. dynamically-
+typed variables get no type checking and dynamically dispatch all methods.
+static ones do the opposite. note that a dynamically-typed variable is not the
+same as one whose type is Any.
+
+undecided:
+---------
+
+can you overload a method with both an interface and a type that may or may not
+implement it? ex:
+    foo (obj Bar ->) ...
+    foo (obj IBang ->) ...
+what happens if Bar implements IBang?
+
+a1: compile error. an interface in an arg list is basically "any" as far as
+    overloading is concerned, so the IBang above would shadow Bar. once an
+    interface appears in an arg list, no other type is allowed in that position.
+
+
+can you overload a method with two interfaces? ex:
+    foo (obj IBar ->) ...
+    foo (obj IBang ->) ...
+what happens if you call foo with an object of a type that implements both IBar
+and IBang?
+
+a1: see a1 above.
+
+
+can the extension methods in an interface cause it to in turn implement another
+interface?
+    interface IToString
+        toString (-> String)
+        print (->) this.toString.print
+    end
+    
+    interface IPrintable
+        print (->)
+    end
+does everything that implements IToString now implement IPrintable?
+
+
+does it dynamically dispatch on arguments? given two types Foo and Bar that
+both implement IBang, what does this do:
+    something (foo Foo ->) print "foo"
+    something (bar Bar ->) print "bar"
+    dispatch (obj IBang->) something obj
+    main (->)
+        def obj <- Foo().as[IBang]
+        dispatch obj
+    end
+does it compile? print "foo"?
+a1: for this to compile, it would need to ensure that every overloaded type for
+    "something" implements IBang. this could be a cool feature, but it doesn't
+    add much beyond dispatching on this, since you can add new methods to
+    interfaces already.
+
+decided, but later:
+------------------
+in a type declaration "or" can be used to indicate that a variable may be one
+of two types (or both). the compiler will only allow methods valid for both
+types unless an explcit type assertion is performed first.
+
+in a type declaration "and" can be used to indicate a variable implements two
+interfaces. the compiler will then allow methods of both interfaces on the
+variable.
+

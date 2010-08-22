@@ -1,0 +1,39 @@
+class OrType
+    this(cases)
+        this cases = cases
+    end
+    
+    cases Array // TODO(bob): IType[Int]
+end
+
+def OrType toString(-> String)
+    var result = ""
+    for index = 0 until(cases count) do
+        result = result + cases[index] toString
+        if index < (cases count - 1) then result = result + " | "
+    end
+    result
+end
+
+def OrType |(other -> Object)
+    Class orTypes(this, other)
+end
+
+def OrType canAssignFrom(other -> Bool)
+    if other type == OrType then
+        // It's also an or, so see if all of its cases are matched by one of
+        // the ones here.
+        // TODO(bob): Should use let instead of raw unsafeCast.
+        var orType = OrType unsafeCast(other)
+        for otherCase = orType cases do
+            if canAssignFrom(otherCase) not then return false
+        end
+        true
+    else
+        // It's a regular class, so see if any of the cases match it.
+        for type = cases do
+            if type canAssignFrom(other) then return true
+        end
+        false
+    end
+end

@@ -1,0 +1,68 @@
+// These test how assignment changes the type of a variable both in the current
+// and in an outer scope. Note that assignment currently isn't optimal regarding
+// types: it doesn't note if all possible branches assign to the same type and
+// collapse them.
+
+var assign1(-> String)
+    var a = 234
+    a = "String"
+    a
+end
+
+var assign2(-> Int | String)
+    var a = 234
+    if true then
+        a = "String"
+    end
+    a
+end
+
+var assign3(-> Int | String) // optimal: String
+    var a = 234
+    if true then
+        a = "String"
+    else
+        a = "Other"
+    end
+    a
+end
+
+var assign4(-> Int | String)
+    var a = 234
+    while false do
+        a = "String"
+    end
+    a
+end
+
+var assign5(-> Int | String)
+    var a = 234
+    if false then
+        if false then
+            a = "String"
+        else
+            a = "Other"
+        end
+    end
+    a
+end
+
+var assign6(-> Bool | Int | String)
+    var a = 234
+    var funcs = [fn () a = "String",
+                 fn () a = true,
+                 fn () nothing]
+    funcs[1]()
+    a
+end
+
+var assign7(-> Bool)
+    var a = 234
+    if true then a = "String"
+    a = true
+    a
+end
+
+var main(->)
+    nothing
+end

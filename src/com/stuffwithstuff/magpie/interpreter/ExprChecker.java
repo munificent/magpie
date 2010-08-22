@@ -23,6 +23,18 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     return check(expr, context, false);
   }
 
+  public Obj check(Expr expr, EvalContext context, boolean allowNever) {
+    Obj result = expr.accept(this, context);
+    
+    if (!allowNever && result == mInterpreter.getNeverType()) {
+      mChecker.addError(expr.getPosition(),
+          "An early return here will cause unreachable code.");
+    }
+    
+    return result;
+  }
+
+
   @Override
   public Obj visit(ArrayExpr expr, EvalContext context) {
     // Try to infer the element type from the contents. The rules (which may
@@ -76,8 +88,54 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(AssignExpr expr, EvalContext context) {
-    // TODO Auto-generated method stub
-    return mInterpreter.getNothingType();
+    String name = expr.getName();
+    if (expr.getTarget() == null) {
+      // No target means we're just assigning to a variable (or field of this)
+      // with the given name.
+      Obj valueType = check(expr.getValue(), context);
+      
+      // Try to assign to a local.
+      Obj existingType = context.lookUp(name);
+      if (existingType != null) {
+        if (context.getScope().get(name) != null) {
+          // In the current scope, so just override the type.
+          context.assign(name, valueType);
+        } else {
+          // In an outer scope, so combine the types. This handles cases where we
+          // assign inside a conditional. When that occurs, the variable's type
+          // may be the previous one or the new one. For example:
+          //
+          // var a = 123
+          // if foo then a = "hi"
+          // 
+          // After that, a's static type will be Int | String
+          Obj combinedType = orTypes(existingType, valueType);
+          context.assign(name, combinedType);
+        }
+        
+        // In either case, the assignment expression itself returns the new
+        // value.
+        return valueType;
+      }
+
+      // Otherwise, it must be a setter on this.
+      return getMethodReturn(expr, context.getThis(), name + "=", valueType);
+    } else {
+      // The target of the assignment is an actual expression, like a.b = c
+      Obj targetType = check(expr.getTarget(), context);
+      Obj valueType = check(expr.getValue(), context);
+
+      // If the assignment statement has an argument and a value, like:
+      // a b(c) = v (c is the arg, v is the value)
+      // then bundle them together:
+      if (expr.getTargetArg() != null) {
+        Obj targetArg = check(expr.getTargetArg(), context);
+        valueType = mInterpreter.createTuple(targetArg, valueType);
+      }
+
+      // Check the setter method.
+      return getMethodReturn(expr, targetType, name + "=", valueType);
+    }
   }
 
   @Override
@@ -239,17 +297,6 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     return varType;
   }
   
-  private Obj check(Expr expr, EvalContext context, boolean allowNever) {
-    Obj result = expr.accept(this, context);
-    
-    if (!allowNever && result == mInterpreter.getNeverType()) {
-      mChecker.addError(expr.getPosition(),
-          "An early return here will cause unreachable code.");
-    }
-    
-    return result;
-  }
-
   private Obj orTypes(Obj first, Obj... types) {
     Obj result = first;
     for (int i = 0; i < types.length; i++) {

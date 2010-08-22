@@ -49,7 +49,7 @@ public class Checker {
     EvalContext context = new EvalContext(globals, mInterpreter.getNothingType());
 
     // Get the expression's type.
-    Obj type = checker.check(expr, context);
+    Obj type = checker.check(expr, context, true);
     
     // But if there are any type errors, don't return it.
     if (mErrors.size() > 0) return mInterpreter.nothing();

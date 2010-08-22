@@ -63,7 +63,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.nothing();
     }
     
-    public Expr getParamType() { return Expr.name("Int"); }
+    public Expr getParamType() { return Expr.tuple(Expr.name("Int"), Expr.name("Dynamic")); }
     public Expr getReturnType() { return Expr.name("Dynamic"); }
   }
   

@@ -8,6 +8,10 @@ public abstract class Expr {
     return new MessageExpr(Position.none(), null, name, null);
   }
   
+  public static Expr tuple(Expr... fields) {
+    return new TupleExpr(fields);
+  }
+  
   public Expr(Position position) {
     mPosition = position;
   }

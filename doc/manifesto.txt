@@ -1,0 +1,27 @@
+These are the rules I try to follow when designing the language. They are sort
+of like a manifesto for Magpie, but it's closer to say that they're the
+manifesto for the process of designing Magpie.
+
+1. Build the language I want to use. The language is a means to an end. The
+   focus should be on "would I use this feature in programs I write?" and not
+   "is this feature interesting or unusual?"
+
+2. Optimize for the common case. "Common case" being the common case in the kind
+   of code I want to write. It's good for features to be systematic in general,
+   and edge cases should work, but not at the expense of making the 90% cases
+   awkward.
+
+3. Minimize magic and cuteness. It's better to be wise than clever. If it feels
+   like a trick, it will probably just trip up users. Boring = unsurprising, and
+   I want to follow the principle of least astonishment.
+
+4. If I can't decide, just pick one and run with it. That's the quickest way to
+   find out if it's the right decision. Don't get stuck.
+
+5. Imperative is more powerful than declarative. Declarative is easier to use.
+   To get the best of both worlds, build imperative cores with declarative sugar
+   for handling the 90% cases on top.
+
+6. Prefer comfort over perfection. Features don't need to be perfectly
+   orthogonal or mathematically rigorous. They should just be useful and work
+   right.
