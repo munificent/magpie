@@ -1,159 +1,54 @@
 
 
 
-               _/Oo>
-              /(MM) 
-             A___/       m a g p i e
-     _______AV_h_h___________________________
-           AV
-          AV
-         AV
+                              _/Oo>
+                             /(MM) 
+                            A___/       m a g p i e
+                    _______AV_h_h___________________________
+                          AV
+                         AV
+                        AV
 
 
+--- Warning --------------------------------------------------------------------
 
-Magpie is a simple, embeddable, strongly-typed
-memory-managed procedural language.
+Magpie is currently undergoing a rebirth, so all of the docs and code here are
+in a huge state of flux, incompletion, or are outdated. You're welcome to poke
+around, but take it all with a huge grain of salt.
 
-Like its namesake, it collects the shiniest parts
-of several different languages:
-
-  - The syntax looks a lot like Ruby.
-
-  - But is as simple as Smalltalk.
-
-  - Its simple and procedural like C.
-
-  - But garbage collects memory like Java.
-
-  - Its type system is like ML's.
-
-  - But its generics are like C++ templates.
-
-  - Its small and embeddable like Lua.
-
-The result, I hope, is a cohesive little language
-suitable for embedding but with better error-
-checking and performance than the dynamic
-languages most typically used for embedding today.
-
-It is also a bit of an experiment to see if the
-procedural paradigm is still relevant if you bring
-in modern advancements in memory management and a
-cleaner syntax.
+As I get closer to solidifying the new Magpie, I'll start cleaning out the old
+stuff and documenting the new. Until then, tread carefully. That being said, the
+Java stuff in here does work and does interesting stuff. Feel free to try it out
+and let me know if you run into any problems.
 
 
---- Hello, world! --------------------------------
+--- About Magpie ---------------------------------------------------------------
 
-Here's a tiny sample of Magpie:
+Magpie is an interpreted programming language running on the JVM. Its raison
+d'être is to try to combine the flexibility of dynamic languages with the safety
+of static languages. It's a dynamic language that type-checks what you want it
+to.
 
-  Main (->) Print "Hello, world!"
-  
-Like C, all code must reside in functions, and
-execution starts by calling Main. The (->) is the
-signature for the function. In this case, Main
-takes no arguments and returns nothing. Here's a
-slightly more interesting example:
+Syntactically, it's a bit like Io mixed with Ruby. Here's a little program that
+helps you draw a dragon curve:
 
-  Main (->) Hello World
-  
-  Hello (who String ->)
-    def text <- "Hello, " + who
-    Print text
-  end
-  
-  World (-> String) "world!"
-  
-This program still prints "Hello, world!", but
-shows a few more language features. It defines
-three functions: Main, Hello, and World.
+    var dragon(n, turn)
+        if n > 0 then dragon(n - 1, "R") + turn + dragon(n - 1, "L")
+        else ""
+    end
 
-Main calls World, passing it no parameters. It
-then passes the result of that to Hello. In C,
-this would look like Hello(World()).
+    print(dragon(5))
 
-Hello takes a single string argument and places it
-in the variable "who". The body of Hello is a
-block: an expression containing a list of other
-expressions. The first expression in the block
-defines a local variable "text", and assigns it
-the result of concatenating "Hello, " and who.
+And if we want to type-check it, we just change it to:
 
-In Magpie, variables are not declared with types.
-Instead, the type is inferred from the expression
-used to initialize it. Variables are always
-initialized when declared. This gets rid of
-uninitialized variable errors.
+    var dragon(n Int, turn String)
+        if n > 0 then dragon(n - 1, "R") + turn + dragon(n - 1, "L")
+        else ""
+    end
 
-Assignment is done using "<-" instead of "=" like
-in other languages. This is to clarify that
-assignment isn't really related to equality at
-all.
+    var main(->)
+        print(dragon(5))
+    end
 
-World takes no arguments but returns a string, in
-this case the literal "world!". Functions do not
-need an explicit "return" in Magpie: the result of
-evaluating the function body is implicitly
-returned like in Ruby.
-
-
---- How do I poke at it? -------------------------
-
-To try things out for yourself, you'll need to:
-
-1. Get the source. If you're reading this, you
-   probably have it.
-   
-2. Build Magpie. The Visual Studio solution is
-   /csharp/Magpie.sln
-   If you don't have Visual Studio, you can 
-   download Visual Studio Express for free from
-   Microsoft. It's quite nice actually.
-   
-   Magpie *should* be able to build with Mono, I
-   think. It doesn't really depend on much. But I
-   haven't tried to yet.
-   
-   Anyway, build that solution.
-   
-3. Write yourself a little script. Call it
-   "awesome.mag" and put something awesome in it.
-   Maybe:
-   
-   Main (->)
-       for i <- 1 -to- 100 do
-           Print "Awesome!"
-       end
-   end
-   
-4. Run it. The VS solution builds magpie to
-   /csharp/bin/Debug/magpie.exe
-   
-   Open that in a command prompt and do:
-   
-   magpie.exe awesome.mag
-   
-   If you actually put your awesome script in
-   there, you should see a lot of awesome now.
-   
-
---- Where's it at --------------------------------
-
-Magpie still has a good way to go before it's
-ready for real use. The ultimate goal is to have
-a portable ANSI C interpreter and a self-hosting
-compiler.
-
-Right now, there is a prototype C# compiler and
-interpreter. My plan is to get most of the
-language features working cleanly in the C#
-compiler, and then port that over to Magpie. The
-C interpreter should be comparatively easy (with
-static languages, most of the work is in the
-compiler).
-
-In the meantime, a lot of the language is still in
-flux, and several important features (pattern
-matching, lazy evaluation, closures) have yet to
-be implemented. But many other things are there
-and working: unions, structs, generics. There's
-plenty to play around with.
+Both are perfectly valid Magpie programs and you can even mix together types and
+untyped code. Get it? Good!
