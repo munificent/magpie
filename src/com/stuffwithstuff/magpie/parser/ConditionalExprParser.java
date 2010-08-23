@@ -35,7 +35,7 @@ public class ConditionalExprParser implements ExprParser {
     //
     // var a__ = foo
     // if a__ != () then
-    //     var a = a__ // plus some type annotation to remove ()
+    //     var a = OrType removeType(a__, Nothing)
     //     var b__ = bar
     //     if b__ != () then
     //         var b = b__

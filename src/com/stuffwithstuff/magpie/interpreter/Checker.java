@@ -3,6 +3,7 @@ package com.stuffwithstuff.magpie.interpreter;
 import java.util.*;
 import java.util.Map.Entry;
 
+import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.parser.Position;
 
@@ -82,7 +83,7 @@ public class Checker {
   public Scope typeScope(Scope valueScope) {
     Scope scope = new Scope();
     for (Entry<String, Obj> entry : valueScope.entries()) {
-      Obj type = mInterpreter.invokeMethod(entry.getValue(), "type",
+      Obj type = mInterpreter.invokeMethod(entry.getValue(), Identifiers.TYPE,
           mInterpreter.nothing());
       scope.define(entry.getKey(), type);
     }

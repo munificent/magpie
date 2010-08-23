@@ -3,6 +3,7 @@ package com.stuffwithstuff.magpie.interpreter;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.*;
 
 public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
@@ -62,7 +63,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       if (elements.size() > 1) {
         for (int i = 1; i < elements.size(); i++) {
           Obj other = check(elements.get(i), context);
-          Obj result = evaluator.invokeMethod(expr, elementType, "==", other);
+          Obj result = evaluator.invokeMethod(expr, elementType, Identifiers.EQUALS, other);
           if (!result.asBool()) {
             // No match, so default to Object.
             elementType = mInterpreter.getObjectType();
@@ -73,7 +74,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     }
     
     Obj arrayType = mInterpreter.getArrayType();
-    return evaluator.invokeMethod(expr, arrayType, "newType", elementType);
+    return evaluator.invokeMethod(expr, arrayType, Identifiers.NEW_TYPE, elementType);
   }
   
   @Override
@@ -89,6 +90,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(AssignExpr expr, EvalContext context) {
     String name = expr.getName();
+    String setter = Identifiers.makeSetter(name);
+    
     if (expr.getTarget() == null) {
       // No target means we're just assigning to a variable (or field of this)
       // with the given name.
@@ -119,7 +122,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       }
 
       // Otherwise, it must be a setter on this.
-      return getMethodReturn(expr, context.getThis(), name + "=", valueType);
+      return getMethodReturn(expr, context.getThis(), setter, valueType);
     } else {
       // The target of the assignment is an actual expression, like a.b = c
       Obj targetType = check(expr.getTarget(), context);
@@ -134,7 +137,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       }
 
       // Check the setter method.
-      return getMethodReturn(expr, targetType, name + "=", valueType);
+      return getMethodReturn(expr, targetType, setter, valueType);
     }
   }
 
@@ -222,7 +225,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       if (variableType != null) {
         // If we have an argument, apply it.
         if (arg != null) {
-          return getMethodReturn(expr, variableType, "call", arg);
+          return getMethodReturn(expr, variableType, Identifiers.CALL, arg);
         }
         return variableType;
       }
@@ -300,7 +303,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   private Obj orTypes(Obj first, Obj... types) {
     Obj result = first;
     for (int i = 0; i < types.length; i++) {
-      result = mChecker.invokeMethod(result, "|", types[i]);
+      result = mChecker.invokeMethod(result, Identifiers.OR, types[i]);
     }
     
     return result;
@@ -309,7 +312,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   public Obj getMethodReturn(Expr expr, Obj receiverType, String name,
       Obj argType) {
 
-    Obj methodType = mChecker.invokeMethod(receiverType, "getMethodType",
+    Obj methodType = mChecker.invokeMethod(receiverType, Identifiers.GET_METHOD_TYPE,
         mInterpreter.createTuple(mInterpreter.createString(name), argType));
     
     if (methodType == mInterpreter.nothing()) {
@@ -326,11 +329,11 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     Obj returnType = methodType.getTupleField(1);
     
     // Make sure the argument type matches the declared parameter type.
-    Obj matches = mChecker.invokeMethod(paramType, "canAssignFrom", argType);
+    Obj matches = mChecker.invokeMethod(paramType, Identifiers.CAN_ASSIGN_FROM, argType);
     
     if (!matches.asBool()) {
-      String expectedText = mChecker.invokeMethod(paramType, "toString").asString();
-      String actualText = mChecker.invokeMethod(argType, "toString").asString();
+      String expectedText = mChecker.invokeMethod(paramType, Identifiers.TO_STRING).asString();
+      String actualText = mChecker.invokeMethod(argType, Identifiers.TO_STRING).asString();
       mChecker.addError(expr.getPosition(),
           "Function is declared to take %s but is being passed %s.",
           expectedText, actualText);

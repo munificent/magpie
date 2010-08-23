@@ -2,6 +2,7 @@ package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.List;
 
+import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
 
@@ -68,11 +69,11 @@ public class FnObj extends Obj implements Invokable {
     
     // Check that the body returns a valid type.
     Obj expectedReturn = checker.evaluateType(mFunction.getReturnType());
-    Obj matches = checker.invokeMethod(expectedReturn, "canAssignFrom", returnType);
+    Obj matches = checker.invokeMethod(expectedReturn, Identifiers.CAN_ASSIGN_FROM, returnType);
     
     if (!matches.asBool()) {
-      String expectedText = checker.invokeMethod(expectedReturn, "toString").asString();
-      String actualText = checker.invokeMethod(returnType, "toString").asString();
+      String expectedText = checker.invokeMethod(expectedReturn, Identifiers.TO_STRING).asString();
+      String actualText = checker.invokeMethod(returnType, Identifiers.TO_STRING).asString();
       checker.addError(getReturnType().getPosition(),
           "Function is declared to return %s but is returning %s.",
           expectedText, actualText);

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.*;
 
 public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
@@ -44,6 +45,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(AssignExpr expr, EvalContext context) {
     String name = expr.getName();
+    String setter = Identifiers.makeSetter(name);
     
     if (expr.getTarget() == null) {
       // No target means we're just assigning to a variable (or field of this)
@@ -54,7 +56,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       if (context.assign(name, value)) return value;
       
       // Otherwise, it must be a setter on this.
-      return invokeMethod(expr, context.getThis(), name + "=", value);
+      return invokeMethod(expr, context.getThis(), setter, value);
     } else {
       // The target of the assignment is an actual expression, like a.b = c
       Obj target = evaluate(expr.getTarget(), context);
@@ -69,7 +71,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       }
 
       // Invoke the setter method.
-      return invokeMethod(expr, target, name + "=", value);
+      return invokeMethod(expr, target, setter, value);
     }
   }
 
@@ -122,7 +124,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       metaclass = classObj.getClassObj();
       
       // Add the constructor method.
-      metaclass.addMethod("new", new NativeMethod.ClassNew(expr.getName()));
+      metaclass.addMethod(Identifiers.NEW, new NativeMethod.ClassNew(expr.getName()));
     }
     
     // Add the constructors.
@@ -143,7 +145,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
           new NativeMethod.ClassFieldGetter(field.getKey(), Expr.name("Dynamic")));
       
       // Add a setter.
-      metaclass.addMethod(field.getKey() + "=",
+      String setter = Identifiers.makeSetter(field.getKey());
+      metaclass.addMethod(setter,
           new NativeMethod.ClassFieldSetter(field.getKey(), Expr.name("Dynamic")));
     }
     
@@ -174,7 +177,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
           new NativeMethod.ClassFieldGetter(field, Expr.name("Dynamic")));
       
       // Add a setter.
-      classObj.addMethod(field + "=",
+      classObj.addMethod(Identifiers.makeSetter(field),
           new NativeMethod.ClassFieldSetter(field, Expr.name("Dynamic")));
     }
     
@@ -184,7 +187,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
           new NativeMethod.ClassFieldGetter(entry.getKey(), entry.getValue()));
       
       // Add a setter.
-      classObj.addMethod(entry.getKey() + "=",
+      classObj.addMethod(Identifiers.makeSetter(entry.getKey()),
           new NativeMethod.ClassFieldSetter(entry.getKey(), entry.getValue()));
     }
     
@@ -289,7 +292,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       if (variable != null) {
         // If we have an argument, apply it.
         if (arg != null) {
-          return invokeMethod(expr, variable, "call", arg);
+          return invokeMethod(expr, variable, Identifiers.CALL, arg);
         }
         return variable;
       }
@@ -359,7 +362,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
   
   private boolean isTruthy(Expr expr, Obj receiver) {
-    Obj truthy = invokeMethod(expr, receiver, "true?", null);
+    Obj truthy = invokeMethod(expr, receiver, Identifiers.IS_TRUE, null);
     return truthy.asBool();
   }
   
