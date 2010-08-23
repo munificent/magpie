@@ -3,7 +3,7 @@ class OrType
         this cases = cases
     end
     
-    cases Array // TODO(bob): IType[Int]
+    cases Dynamic[] // TODO(bob): IType[Int]
 end
 
 def OrType toString(-> String)
@@ -36,4 +36,22 @@ def OrType canAssignFrom(other -> Bool)
         end
         false
     end
+end
+
+def OrType getMethodType(name String, arg)
+    var firstType = cases[0] getMethodType(name, arg)
+    
+    for type = cases do
+        var method = type getMethodType(name, arg)
+        // The method must be present in all cases
+        if method == nothing then return nothing
+        
+        // And all types must match.
+        // TODO(bob): Right now, the arg and return types of all cases must
+        // match exactly. We could at some point loosen this to allow subtypes.
+        if firstType _0 != method _0 then return nothing
+        if firstType _1 != method _1 then return nothing
+    end
+    
+    firstType
 end

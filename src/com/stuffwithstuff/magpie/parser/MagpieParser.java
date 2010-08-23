@@ -90,23 +90,6 @@ public class MagpieParser extends Parser {
       return expr;
     }
   }
-
-  public Expr parseThenBlock() {
-    if (match(TokenType.LINE)){
-      Position position = last(1).getPosition();
-      List<Expr> exprs = new ArrayList<Expr>();
-      
-      do {
-        exprs.add(parseExpression());
-        consume(TokenType.LINE);
-      } while (!lookAhead(TokenType.ELSE) && !match(TokenType.END));
-      
-      position = position.union(last(1).getPosition());
-      return new BlockExpr(position, exprs);
-    } else {
-      return parseExpression();
-    }
-  }
   
   public Expr parseElseBlock() {
     if (match(TokenType.LINE)){

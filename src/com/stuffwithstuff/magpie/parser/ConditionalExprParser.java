@@ -1,7 +1,10 @@
 package com.stuffwithstuff.magpie.parser;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
+import com.stuffwithstuff.magpie.ast.BlockExpr;
 import com.stuffwithstuff.magpie.ast.Condition;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.IfExpr;
@@ -34,11 +37,11 @@ public class ConditionalExprParser implements ExprParser {
     // To:
     //
     // var a__ = foo
-    // if a__ != () then
-    //     var a = OrType removeType(a__, Nothing)
+    // if a__ != nothing then
+    //     var a = OrType unsafeRemoveType(a__, Nothing)
     //     var b__ = bar
-    //     if b__ != () then
-    //         var b = b__
+    //     if b__ != nothing then
+    //         var b = OrType unsafeRemoveType(b__, Nothing)
     //         if c = d then
     //             e
     //         end
@@ -64,11 +67,32 @@ public class ConditionalExprParser implements ExprParser {
     
     // Parse the then body.
     parser.consume(TokenType.THEN);
-    Expr thenExpr = parser.parseThenBlock();
-    
+    Expr thenExpr;
+    boolean allowElse = true;
+    if (parser.match(TokenType.LINE)){
+      Position position = parser.last(1).getPosition();
+      List<Expr> exprs = new ArrayList<Expr>();
+      
+      do {
+        exprs.add(parser.parseExpression());
+        parser.consume(TokenType.LINE);
+      } while (!parser.lookAhead(TokenType.ELSE) && !parser.match(TokenType.END));
+      
+      // Can't have an else clause if the then clause ended with "end".
+      if (parser.last(1).getType() == TokenType.END) {
+        allowElse = false;
+      }
+      
+      position = position.union(parser.last(1).getPosition());
+      thenExpr = new BlockExpr(position, exprs);
+    } else {
+      thenExpr = parser.parseExpression();
+    }
+
     // Parse the else body.
     Expr elseExpr = null;
-    if (parser.match(TokenType.ELSE) || parser.match(TokenType.LINE, TokenType.ELSE)) {
+    if (allowElse && (parser.match(TokenType.ELSE) ||
+                      parser.match(TokenType.LINE, TokenType.ELSE))) {
       elseExpr = parser.parseElseBlock();
     } else {
       elseExpr = new NothingExpr(parser.last(1).getPosition());

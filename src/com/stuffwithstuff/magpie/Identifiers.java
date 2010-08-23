@@ -1,5 +1,9 @@
 package com.stuffwithstuff.magpie;
 
+/**
+ * This defines identifiers that are defined or used within Magpie but also
+ * referenced directly by the Java code.
+ */
 public final class Identifiers {
   public static final String TYPE = "type";
   public static final String EQUALS = "==";
