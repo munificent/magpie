@@ -1,0 +1,53 @@
+// This shows a fake File API to give you an idea of how Nothing, or types, and
+// let work together to safely solve the null reference problem while still
+// allowing operations to fail.
+
+// Define a "File" class. This represents a handle to an open file, so you
+// shouldn't be able to have an instance of this if open fails.
+class File
+    this(path String)
+        this path = path
+    end
+    
+    path String
+end
+
+// Add a fake method to read a line from the file.
+def File read(-> String)
+    "a line of text"
+end
+
+// This is a shared ("static") method to create a new File by opening it. It
+// returns a File if successful, or nothing if it fails. (In our fake example
+// here, it will fail if the path is empty.) Note the return type of the
+// function makes this explicit.
+shared File open(path String -> File | Nothing)
+    if path count == 0 then nothing
+    else File new(path)
+end
+
+var main(->)
+    // Open a valid file.
+    var maybeFile = File open("some/path")
+    // Note: the script won't type-check if this line is uncommented out:
+    //var line = maybeFile read
+    // That's because "read" is only a method on File, not File | Nothing,
+    // which is maybeFile's type. (If Nothing also had a "read" method, this
+    // would be fine.)
+    
+    // See if we were successful:
+    let file = maybeFile then
+        // We will only get here if maybeFile is not nothing, so file's type
+        // will be just File now, not File | Nothing.
+        print(file read)
+    end
+    // When we end the let block, we also close the scope where "file" is
+    // declared, so we will only ever have a variable of type File (and not
+    // File | Nothing) if we've successfully checked for nothing first.
+    
+    // Of course, any expression can be used in a let, so we can simplify this
+    // to:
+    let file = File open("some/path") then
+        print(file read)
+    end
+end

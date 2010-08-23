@@ -343,6 +343,10 @@ public abstract class NativeMethod implements Invokable {
       String name = arg.getTupleField(0).asString();
       // TODO(bob): Arg type is ignored since there is no overloading yet.
       
+      if (name.equals("unsafeRemoveType")) {
+        System.out.println("!!!");
+      }
+      
       ClassObj thisClass = (ClassObj)thisObj;
       Invokable method = thisClass.findMethod(name);
       

@@ -55,3 +55,16 @@ def OrType getMethodType(name String, arg)
     
     firstType
 end
+
+def OrType unsafeRemoveNothing(-> Dynamic)
+    var remaining = []
+    for type = cases do
+        if type != Nothing then remaining add(type)
+    end
+
+    // If just one case remains, there's no or.
+    if remaining count == 1 then return remaining[0]
+    
+    // Create a new OrType with what's left.
+    OrType new(remaining)
+end

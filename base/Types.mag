@@ -14,6 +14,11 @@ import("OrType.mag")
 // No type except Nothing is allowed where Nothing is expected.
 shared Nothing canAssignFrom(other -> Bool) other == Nothing
 
+shared Class unsafeRemoveNothing(-> Class)
+    // Doesn't have Nothing to begin with, so we're good.
+    this
+end
+
 // TODO(bob): Return Dynamic here is lame. Need type interface.
 shared Class orTypes(left, right -> Dynamic)
     // combine the cases of both arms

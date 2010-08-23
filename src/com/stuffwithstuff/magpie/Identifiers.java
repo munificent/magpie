@@ -18,6 +18,7 @@ public final class Identifiers {
   public static final String ITERATE = "iterate";
   public static final String NEXT = "next";
   public static final String CURRENT = "current";
+  public static final String UNSAFE_REMOVE_NOTHING = "unsafeRemoveNothing";
   
   public static String makeSetter(String baseName) {
     return baseName + "=";

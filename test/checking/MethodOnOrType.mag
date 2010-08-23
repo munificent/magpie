@@ -1,0 +1,28 @@
+// These test calling methods on objects whose declared types are or types.
+// A method is only valid on an or type if it's valid on all of the cases of it.
+
+class Foo
+end
+
+def Foo inFoo(->) print("Foo inFoo")
+def Foo inBoth(->) print("Foo inBoth")
+
+class Bar
+end
+
+def Bar inBar(->) print("Bar inBar")
+def Bar inBoth(->) print("Bar inBoth")
+
+var test(a Foo | Bar ->)
+    a inFoo //!
+    a inBar //!
+    a inBoth
+end
+
+var main(->)
+    var foo = Foo new
+    var bar = Bar new
+    
+    test(foo)
+    test(bar)
+end

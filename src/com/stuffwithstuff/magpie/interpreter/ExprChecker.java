@@ -175,11 +175,30 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(IfExpr expr, EvalContext context) {
+    // Put it in a block so that variables declared in conditions end when the
+    // if expression ends.
+    context = context.nestScope();
+    
     // TODO(bob): Should eventually check that conditions implement ITrueable
     // so that you can only use truthy stuff in an if.
     // Check the conditions for errors.
     for (Condition condition : expr.getConditions()) {
-      check(condition.getBody(), context);
+      Obj conditionType = check(condition.getBody(), context);
+      
+      // If it's a "let" condition, bind and type the variable, stripping out
+      // Nothing.
+      if (condition.isLet()) {
+        // If the condition's type evaluates to Nothing (and only Nothing), this
+        // is an error, since that means we've statically determined that the
+        // condition can never be entered.
+        if (conditionType == mInterpreter.getNothingType()) {
+          mChecker.addError(condition.getBody().getPosition(),
+              "Let expression's type is Nothing which means it can never be entered.");
+        }
+        
+        conditionType = mChecker.invokeMethod(conditionType, Identifiers.UNSAFE_REMOVE_NOTHING);
+        context.define(condition.getName(), conditionType);
+      }
     }
     
     // Get the types of the arms.

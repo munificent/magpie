@@ -1,0 +1,19 @@
+// A let expression should take the type of the conditional expression and
+// create a new variable whose type is the same minus the "| Nothing" branch.
+
+var foo(a Int | String ->)
+    print(a toString)
+end
+
+var main(->)
+    var a = 123                 // a: Int
+    if true then a = "str"      // a: Int | String
+    if true then a = nothing    // a: Int | Nothing | String
+    
+    let b = a then              // b: Int | String
+        // If b can be nothing, then this call to foo() should cause a type
+        // error because it doesn't allow that:
+        foo(b)
+    end
+end
+
