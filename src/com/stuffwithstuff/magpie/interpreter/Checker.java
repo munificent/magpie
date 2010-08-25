@@ -24,7 +24,7 @@ public class Checker {
         ClassObj classObj = (ClassObj)entry.getValue();
         
         // Check all of the methods.
-        for (Entry<String, Invokable> method : classObj.getMethods().entrySet()) {
+        for (Entry<String, Callable> method : classObj.getMethods().entrySet()) {
           // Only check user-defined methods.
           if (method.getValue() instanceof FnObj) {
             FnObj function = (FnObj)method.getValue();

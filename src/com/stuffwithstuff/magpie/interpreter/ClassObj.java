@@ -39,19 +39,19 @@ public class ClassObj extends Obj {
     mParent = parent;
   }
   
-  public void addMethod(String name, Invokable method) {
+  public void addMethod(String name, Callable method) {
     mMethods.add(name, method);
   }
   
-  public Map<String, Invokable> getMethods() {
+  public Map<String, Callable> getMethods() {
     return mMethods.getMethods();
   }
   
-  public Invokable findMethod(String name) {
+  public Callable findMethod(String name) {
     // Walk up the inheritance chain.
     ClassObj classObj = this;
     while (classObj != null) {
-      Invokable method = classObj.mMethods.find(name);
+      Callable method = classObj.mMethods.find(name);
       if (method != null) return method;
       classObj = classObj.mParent;
     }
@@ -68,7 +68,7 @@ public class ClassObj extends Obj {
     mConstructor = constructor;
   }
 
-  public Invokable getConstructor() {
+  public Callable getConstructor() {
     return mConstructor;
   }
   
@@ -83,7 +83,7 @@ public class ClassObj extends Obj {
   
   private final String mName;
   private ClassObj mParent;
-  private Invokable mConstructor;
+  private Callable mConstructor;
   private Map<String, Expr> mFieldInitializers;
   private final MethodSet mMethods = new MethodSet();
 }

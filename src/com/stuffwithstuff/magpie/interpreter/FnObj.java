@@ -2,13 +2,13 @@ package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.List;
 
-import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
+import com.stuffwithstuff.magpie.ast.FunctionType;
 
 /**
  * Object type for a function object.
  */
-public class FnObj extends Obj implements Invokable {
+public class FnObj extends Obj implements Callable {
   public FnObj(ClassObj classObj, Scope closure, FnExpr function) {
     super(classObj);
     
@@ -57,8 +57,7 @@ public class FnObj extends Obj implements Invokable {
     }
   }
   
-  public Expr getParamType() { return mFunction.getType().getParamType(); }
-  public Expr getReturnType() { return mFunction.getType().getReturnType(); }
+  public FunctionType getType() { return mFunction.getType(); }
   
   private final Scope mClosure;
   private final FnExpr mFunction;

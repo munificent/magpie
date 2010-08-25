@@ -5,7 +5,7 @@ import java.util.*;
 
 public class MethodSet {
   
-  public void add(String name, Invokable method) {
+  public void add(String name, Callable method) {
     if (mMethods.containsKey(name)) {
       throw new InterpreterException("There is already a method named \"" + name + "\".");
     }
@@ -13,13 +13,13 @@ public class MethodSet {
     mMethods.put(name, method);
   }
   
-  public Invokable find(String name) {
+  public Callable find(String name) {
     return mMethods.get(name);
   }
   
-  public Map<String, Invokable> getMethods() {
+  public Map<String, Callable> getMethods() {
     return mMethods;
   }
   
-  private final Map<String, Invokable> mMethods = new HashMap<String, Invokable>();
+  private final Map<String, Callable> mMethods = new HashMap<String, Callable>();
 }

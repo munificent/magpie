@@ -2,6 +2,7 @@ package com.stuffwithstuff.magpie.interpreter;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -9,9 +10,25 @@ import com.stuffwithstuff.magpie.Script;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.util.Expect;
 
-public abstract class NativeMethod implements Invokable {
+public abstract class NativeMethod implements Callable {
   public abstract Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg);
   
+  protected static FunctionType fn(String paramTypeName, String returnType) {
+    return fn(Expr.name(paramTypeName), returnType);
+  }
+  
+  protected static FunctionType fn(Expr paramType, String returnType) {
+    return fn(paramType, Expr.name(returnType));
+  }
+  
+  protected static FunctionType fn(String paramType, Expr returnType) {
+    return fn(Expr.name(paramType), returnType);
+  }
+  
+  protected static FunctionType fn(Expr paramType, Expr returnType) {
+    return new FunctionType(new ArrayList<String>(), paramType, returnType);
+  }
+
   // TODO(bob): Many of these just use dynamic in their type signature. Would be
   // good to change to something more specific when possible.
 
@@ -24,8 +41,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.createInt(elements.size());
     }
     
-    public Expr getParamType() { return Expr.name("Nothing"); }
-    public Expr getReturnType() { return Expr.name("Int"); }
+    public FunctionType getType() { return fn("Nothing", "Int"); }
   }
   
   public static class ArrayGetElement extends NativeMethod {
@@ -43,8 +59,7 @@ public abstract class NativeMethod implements Invokable {
       return elements.get(index);
     }
     
-    public Expr getParamType() { return Expr.name("Int"); }
-    public Expr getReturnType() { return Expr.name("Dynamic"); }
+    public FunctionType getType() { return fn("Int", "Dynamic"); }
   }
   
   public static class ArraySetElement extends NativeMethod {
@@ -63,8 +78,8 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.nothing();
     }
     
-    public Expr getParamType() { return Expr.tuple(Expr.name("Int"), Expr.name("Dynamic")); }
-    public Expr getReturnType() { return Expr.name("Dynamic"); }
+    public FunctionType getType() { return fn(Expr.tuple(
+        Expr.name("Int"), Expr.name("Dynamic")), "Dynamic"); }
   }
   
   public static class ArrayAdd extends NativeMethod {
@@ -76,8 +91,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.nothing();
     }
     
-    public Expr getParamType() { return Expr.name("Object"); }
-    public Expr getReturnType() { return Expr.name("Nothing"); }
+    public FunctionType getType() { return fn("Object", "Nothing"); }
   }
   
   public static class ArrayInsert extends NativeMethod {
@@ -92,8 +106,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.nothing();
     }
     
-    public Expr getParamType() { return Expr.name("Dynamic"); }
-    public Expr getReturnType() { return Expr.name("Nothing"); }
+    public FunctionType getType() { return fn("Dynamic", "Nothing"); }
   }
   
   public static class ArrayRemoveAt extends NativeMethod {
@@ -103,8 +116,7 @@ public abstract class NativeMethod implements Invokable {
       return elements.remove(arg.asInt());
     }
     
-    public Expr getParamType() { return Expr.name("Dynamic"); }
-    public Expr getReturnType() { return Expr.name("Nothing"); }
+    public FunctionType getType() { return fn("Dynamic", "Nothing"); }
   }
   
   public static class ArrayClear extends NativeMethod {
@@ -115,8 +127,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.nothing();
     }
     
-    public Expr getParamType() { return Expr.name("Dynamic"); }
-    public Expr getReturnType() { return Expr.name("Nothing"); }
+    public FunctionType getType() { return fn("Nothing", "Nothing"); }
   }
   
   // Bool methods:
@@ -127,8 +138,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.createBool(!thisObj.asBool());
     }
     
-    public Expr getParamType() { return Expr.name("Nothing"); }
-    public Expr getReturnType() { return Expr.name("Bool"); }
+    public FunctionType getType() { return fn("Nothing", "Bool"); }
   }
   
   public static class BoolToString extends NativeMethod {
@@ -137,8 +147,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.createString(Boolean.toString(thisObj.asBool()));
     }
     
-    public Expr getParamType() { return Expr.name("Nothing"); }
-    public Expr getReturnType() { return Expr.name("String"); }
+    public FunctionType getType() { return fn("Nothing", "String"); }
   }
   
   // Class methods:
@@ -155,9 +164,8 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.nothing();
     }
     
-    // TODO(bob): Should be tuple.
-    public Expr getParamType() { return Expr.name("Dynamic"); }
-    public Expr getReturnType() { return Expr.name("Nothing"); }
+    public FunctionType getType() { return fn(Expr.tuple(
+        Expr.name("String"), Expr.name("Dynamic")), "Nothing"); }
   }
   
   public static class ClassDefineSharedMethod extends NativeMethod {
@@ -173,9 +181,8 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.nothing();
     }
     
-    // TODO(bob): Should be tuple.
-    public Expr getParamType() { return Expr.name("Dynamic"); }
-    public Expr getReturnType() { return Expr.name("Nothing"); }
+    public FunctionType getType() { return fn(Expr.tuple(
+        Expr.name("String"), Expr.name("Dynamic")), "Nothing"); }
   }
   
   public static class ClassGetName extends NativeMethod {
@@ -186,8 +193,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.createString(classObj.getName());
     }
 
-    public Expr getParamType() { return Expr.name("Nothing"); }
-    public Expr getReturnType() { return Expr.name("String"); }
+    public FunctionType getType() { return fn("Nothing", "String"); }
   }
   
   public static class ClassGetParent extends NativeMethod {
@@ -203,8 +209,7 @@ public abstract class NativeMethod implements Invokable {
       return parent;
     }
 
-    public Expr getParamType() { return Expr.name("Nothing"); }
-    public Expr getReturnType() { return Expr.name("Class"); }
+    public FunctionType getType() { return fn("Nothing", "Class"); }
   }
   
   public static class ClassSetParent extends NativeMethod {
@@ -224,8 +229,7 @@ public abstract class NativeMethod implements Invokable {
       return arg;
     }
 
-    public Expr getParamType() { return Expr.name("Class"); }
-    public Expr getReturnType() { return Expr.name("Class"); }
+    public FunctionType getType() { return fn("Class", "Class"); }
   }
 
   public static class ClassFieldGetter extends NativeMethod {
@@ -244,8 +248,7 @@ public abstract class NativeMethod implements Invokable {
       return value;
     }
     
-    public Expr getParamType() { return Expr.name("Nothing"); }
-    public Expr getReturnType() { return mType; }
+    public FunctionType getType() { return fn("Nothing", mType); }
 
     private final String mName;
     private final Expr mType;
@@ -263,8 +266,7 @@ public abstract class NativeMethod implements Invokable {
       return arg;
     }
     
-    public Expr getParamType() { return mType; }
-    public Expr getReturnType() { return mType; }
+    public FunctionType getType() { return fn(mType, mType); }
 
     private final String mName;
     private final Expr mType;
@@ -294,7 +296,7 @@ public abstract class NativeMethod implements Invokable {
       }
       
       // Find and call the constructor (if any).
-      Invokable constructor = classObj.getConstructor();
+      Callable constructor = classObj.getConstructor();
       if (constructor != null) {
         constructor.invoke(interpreter, obj, arg);
       }
@@ -302,9 +304,7 @@ public abstract class NativeMethod implements Invokable {
       return obj;
     }
     
-    // TODO(bob): Should be typed.
-    public Expr getParamType() { return Expr.name("Dynamic"); }
-    public Expr getReturnType() { return Expr.name(mClassName); }
+    public FunctionType getType() { return fn("Dynamic", Expr.name(mClassName)); }
     
     private final String mClassName;
   }
@@ -331,8 +331,7 @@ public abstract class NativeMethod implements Invokable {
       return arg;
     }
 
-    public Expr getParamType() { return Expr.name("Dynamic"); }
-    public Expr getReturnType() { return Expr.name(mClassName); }
+    public FunctionType getType() { return fn("Dynamic", Expr.name(mClassName)); }
     
     private final String mClassName;
   }
@@ -348,22 +347,20 @@ public abstract class NativeMethod implements Invokable {
       }
       
       ClassObj thisClass = (ClassObj)thisObj;
-      Invokable method = thisClass.findMethod(name);
+      Callable method = thisClass.findMethod(name);
       
       if (method == null) {
         return interpreter.nothing();
       }
       
       // Make sure the argument matches the parameter type.
-      Obj paramType = interpreter.evaluateType(method.getParamType());
-      Obj returnType = interpreter.evaluateType(method.getReturnType());
+      Obj paramType = interpreter.evaluateType(method.getType().getParamType());
+      Obj returnType = interpreter.evaluateType(method.getType().getReturnType());
       return interpreter.createTuple(paramType, returnType);
     }
 
-    // TODO(bob): Should eventually be (String, IType)
-    public Expr getParamType() { return Expr.name("Dynamic"); }
-    // TODO(bob): Should eventually return (IType, IType) | Nothing
-    public Expr getReturnType() { return Expr.name("Dynamic"); }
+    // TODO(bob): Should eventually be (String, IType) -> (IType, IType) | Nothing
+    public FunctionType getType() { return fn("Dynamic", "Dynamic"); }
   }
   
   // Function methods:
@@ -380,8 +377,7 @@ public abstract class NativeMethod implements Invokable {
       return function.invoke(interpreter, interpreter.nothing(), arg);
     }
     
-    public Expr getParamType() { return mType.getParamType(); }
-    public Expr getReturnType() { return mType.getReturnType(); }
+    public FunctionType getType() { return mType; }
     
     private final FunctionType mType;
   }
@@ -401,8 +397,7 @@ public abstract class NativeMethod implements Invokable {
       }
     }
     
-    public Expr getParamType() { return Expr.name("Int"); }
-    public Expr getReturnType() { return Expr.name("Int"); }
+    public FunctionType getType() { return fn("Int", "Int"); }
   }
 
   public static class IntPlus extends NativeMethod {
@@ -414,8 +409,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.createInt(left + right);
     }
     
-    public Expr getParamType() { return Expr.name("Int"); }
-    public Expr getReturnType() { return Expr.name("Int"); }
+    public FunctionType getType() { return fn("Int", "Int"); }
   }
 
   public static class IntMinus extends NativeMethod {
@@ -427,8 +421,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.createInt(left - right);
     }
     
-    public Expr getParamType() { return Expr.name("Int"); }
-    public Expr getReturnType() { return Expr.name("Int"); }
+    public FunctionType getType() { return fn("Int", "Int"); }
   }
   
   public static class IntMultiply extends NativeMethod {
@@ -440,8 +433,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.createInt(left * right);
     }
     
-    public Expr getParamType() { return Expr.name("Int"); }
-    public Expr getReturnType() { return Expr.name("Int"); }
+    public FunctionType getType() { return fn("Int", "Int"); }
   }
   
   public static class IntDivide extends NativeMethod {
@@ -453,8 +445,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.createInt(left / right);
     }
     
-    public Expr getParamType() { return Expr.name("Int"); }
-    public Expr getReturnType() { return Expr.name("Int"); }
+    public FunctionType getType() { return fn("Int", "Int"); }
   }
   
   public static class IntEqual extends NativeMethod {
@@ -466,8 +457,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.createBool(left == right);
     }
     
-    public Expr getParamType() { return Expr.name("Int"); }
-    public Expr getReturnType() { return Expr.name("Bool"); }
+    public FunctionType getType() { return fn("Int", "Bool"); }
   }
   
   public static class IntNotEqual extends NativeMethod {
@@ -479,8 +469,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.createBool(left != right);
     }
     
-    public Expr getParamType() { return Expr.name("Int"); }
-    public Expr getReturnType() { return Expr.name("Bool"); }
+    public FunctionType getType() { return fn("Int", "Bool"); }
   }
   
   public static class IntLessThan extends NativeMethod {
@@ -492,8 +481,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.createBool(left < right);
     }
     
-    public Expr getParamType() { return Expr.name("Int"); }
-    public Expr getReturnType() { return Expr.name("Bool"); }
+    public FunctionType getType() { return fn("Int", "Bool"); }
   }
   
   public static class IntGreaterThan extends NativeMethod {
@@ -505,8 +493,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.createBool(left > right);
     }
     
-    public Expr getParamType() { return Expr.name("Int"); }
-    public Expr getReturnType() { return Expr.name("Bool"); }
+    public FunctionType getType() { return fn("Int", "Bool"); }
   }
   
   public static class IntLessThanOrEqual extends NativeMethod {
@@ -518,8 +505,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.createBool(left <= right);
     }
     
-    public Expr getParamType() { return Expr.name("Int"); }
-    public Expr getReturnType() { return Expr.name("Bool"); }
+    public FunctionType getType() { return fn("Int", "Bool"); }
   }
   
   public static class IntGreaterThanOrEqual extends NativeMethod {
@@ -531,8 +517,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.createBool(left >= right);
     }
     
-    public Expr getParamType() { return Expr.name("Int"); }
-    public Expr getReturnType() { return Expr.name("Bool"); }
+    public FunctionType getType() { return fn("Int", "Bool"); }
   }
   
   public static class IntToString extends NativeMethod {
@@ -541,8 +526,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.createString(Integer.toString(thisObj.asInt()));
     }
     
-    public Expr getParamType() { return Expr.name("Nothing"); }
-    public Expr getReturnType() { return Expr.name("String"); }
+    public FunctionType getType() { return fn("Nothing", "String"); }
   }
   
   // Object methods:
@@ -553,8 +537,7 @@ public abstract class NativeMethod implements Invokable {
       return thisObj.getClassObj();
     }
 
-    public Expr getParamType() { return Expr.name("Nothing"); }
-    public Expr getReturnType() { return Expr.name("Class"); }
+    public FunctionType getType() { return fn("Nothing", "Class"); }
   }
   
   public static class ObjectEqual extends NativeMethod {
@@ -563,8 +546,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.createBool(thisObj == arg);
     }
     
-    public Expr getParamType() { return Expr.name("Object"); }
-    public Expr getReturnType() { return Expr.name("Bool"); }
+    public FunctionType getType() { return fn("Object", "Bool"); }
   }
 
   public static class ObjectImport extends NativeMethod {
@@ -584,8 +566,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.nothing();
     }
     
-    public Expr getParamType() { return Expr.name("Nothing"); }
-    public Expr getReturnType() { return Expr.name("Nothing"); }
+    public FunctionType getType() { return fn("String", "Nothing"); }
   }
 
   public static class ObjectPrint extends NativeMethod {
@@ -595,8 +576,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.nothing();
     }
     
-    public Expr getParamType() { return Expr.name("String"); }
-    public Expr getReturnType() { return Expr.name("Nothing"); }
+    public FunctionType getType() { return fn("String", "Nothing"); }
   }
 
   // String methods:
@@ -610,8 +590,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.createString(left + right);
     }
     
-    public Expr getParamType() { return Expr.name("String"); }
-    public Expr getReturnType() { return Expr.name("String"); }
+    public FunctionType getType() { return fn("String", "String"); }
   }
 
   public static class StringAt extends NativeMethod {
@@ -622,8 +601,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.createString(c);
     }
     
-    public Expr getParamType() { return Expr.name("Int"); }
-    public Expr getReturnType() { return Expr.name("String"); }
+    public FunctionType getType() { return fn("Int", "String"); }
   }
 
   public static class StringCompare extends NativeMethod {
@@ -632,8 +610,7 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.createInt(thisObj.asString().compareTo(arg.asString()));
     }
     
-    public Expr getParamType() { return Expr.name("String"); }
-    public Expr getReturnType() { return Expr.name("Int"); }
+    public FunctionType getType() { return fn("String", "Int"); }
   }
 
   public static class StringSubstring extends NativeMethod {
@@ -652,8 +629,7 @@ public abstract class NativeMethod implements Invokable {
       }
     }
     
-    public Expr getParamType() { return Expr.name("Nothing"); }
-    public Expr getReturnType() { return Expr.name("Int"); }
+    public FunctionType getType() { return fn("Dynamic", "String"); }
   }
   
   public static class StringCount extends NativeMethod {
@@ -662,7 +638,6 @@ public abstract class NativeMethod implements Invokable {
       return interpreter.createInt(thisObj.asString().length());
     }
     
-    public Expr getParamType() { return Expr.name("Nothing"); }
-    public Expr getReturnType() { return Expr.name("Int"); }
+    public FunctionType getType() { return fn("Nothing", "Int"); }
   }
 }

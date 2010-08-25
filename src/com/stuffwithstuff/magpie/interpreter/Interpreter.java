@@ -149,11 +149,11 @@ public class Interpreter {
     Obj main = context.lookUp("main");
     if (main == null) return;
     
-    if (!(main instanceof Invokable)) {
+    if (!(main instanceof Callable)) {
       throw new InterpreterException("Member \"main\" is not a function.");
     }
     
-    Invokable mainFn = (Invokable)main;
+    Callable mainFn = (Callable)main;
     mainFn.invoke(this, mNothing, mNothing);
   }
 
@@ -282,7 +282,7 @@ public class Interpreter {
   }
 
   private Obj invokeMethod(Position position, Obj receiver, String name, Obj arg) {
-    Invokable method = receiver.getClassObj().findMethod(name);
+    Callable method = receiver.getClassObj().findMethod(name);
     
     if (method == null) {
       runtimeError(position,
