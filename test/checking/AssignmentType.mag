@@ -49,9 +49,9 @@ end
 
 var assign6(-> Bool | Int | String)
     var a = 234
-    var funcs = [fn () a = "String",
-                 fn () a = true,
-                 fn () nothing]
+    var funcs = [(fn () a = "String"),
+                 (fn () a = true),
+                 (fn () nothing)]
     funcs[1]()
     a
 end

@@ -1,1 +1,3 @@
-print("ok") //: ok
+var foo()
+    nothing
+end

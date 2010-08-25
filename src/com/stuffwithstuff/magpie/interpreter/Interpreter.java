@@ -192,6 +192,7 @@ public class Interpreter {
   public ClassObj getMetaclass() { return mClass; }
   public ClassObj getBoolType() { return mBoolClass; }
   public ClassObj getDynamicType() { return mDynamicClass; }
+  public ClassObj getFunctionType() { return mFnClass; }
   public ClassObj getIntType() { return mIntClass; }
   public ClassObj getNothingType() { return mNothingClass; }
   public ClassObj getObjectType() { return mObjectClass; }

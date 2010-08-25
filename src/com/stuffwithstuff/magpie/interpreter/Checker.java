@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.Expr;
+import com.stuffwithstuff.magpie.ast.FnExpr;
 import com.stuffwithstuff.magpie.parser.Position;
 
 public class Checker {
@@ -13,28 +14,22 @@ public class Checker {
   }
   
   public List<CheckError> checkAll() {
-    // Create a copy of the global scope and replace all defines values with
-    // their types. From here on out, we'll be storing types in variables and
-    // not values, and we need lookup to work with types uniformly up the scope
-    // chain. This also lets us check expressions that assign to global
-    // variables without trashing the actual value stored there.
-    Scope globals = typeScope(mInterpreter.getGlobals());
-    
     // Check all of the reachable functions.
-    EvalContext context = new EvalContext(globals, mInterpreter.getNothingType());
     for (Entry<String, Obj> entry : mInterpreter.getGlobals().entries()) {
       if (entry.getValue() instanceof FnObj) {
-        ((FnObj)entry.getValue()).check(this, context);
+        FnObj function = (FnObj)entry.getValue();
+        checkFunction(function.getFunction(), function.getClosure(),
+            mInterpreter.getNothingType());
       } else if (entry.getValue() instanceof ClassObj) {
         ClassObj classObj = (ClassObj)entry.getValue();
-        
-        EvalContext classContext = context.withThis(classObj);
         
         // Check all of the methods.
         for (Entry<String, Invokable> method : classObj.getMethods().entrySet()) {
           // Only check user-defined methods.
           if (method.getValue() instanceof FnObj) {
-            ((FnObj)method.getValue()).check(this, classContext);
+            FnObj function = (FnObj)method.getValue();
+            checkFunction(function.getFunction(), function.getClosure(),
+                classObj);
           }
         }
       }
@@ -70,9 +65,51 @@ public class Checker {
     return mInterpreter.invokeMethod(receiver, name, mInterpreter.nothing());
   }
   
-  public Obj checkFunction(Expr expr, EvalContext context) {
+  public Obj checkFunction(FnExpr function, Scope closure, Obj thisType) {
+    // Evaluate the parameter type declaration expression to get the declared
+    // parameter type(s).
+    Obj paramType = evaluateType(function.getParamType());
+    
+    // Create a new local scope for the function.
+    // TODO(bob): Walking the entire closure and getting its type could be
+    // painfully slow here.
+    Scope closureTypes = typeScope(closure);
+    EvalContext functionContext = new EvalContext(
+        closureTypes, thisType).nestScope();
+    
+    // Bind parameter types to their names.
+    List<String> params = function.getParamNames();
+    if (params.size() == 1) {
+      functionContext.define(params.get(0), paramType);
+    } else if (params.size() > 1) {
+      // TODO(bob): Hack. Assume the parameter is a tuple with the right number of
+      // fields.
+      for (int i = 0; i < params.size(); i++) {
+        functionContext.define(params.get(i), paramType.getTupleField(i));
+      }
+    }
+    
     ExprChecker checker = new ExprChecker(mInterpreter, this);
-    return checker.checkFunction(expr, context);
+    Obj returnType = checker.checkFunction(function.getBody(), functionContext);
+
+    // Check that the body returns a valid type.
+    Obj expectedReturn = evaluateType(function.getReturnType());
+    Obj matches = invokeMethod(expectedReturn, Identifiers.CAN_ASSIGN_FROM, returnType);
+    
+    if (!matches.asBool()) {
+      String expectedText = invokeMethod(expectedReturn, Identifiers.TO_STRING).asString();
+      String actualText = invokeMethod(returnType, Identifiers.TO_STRING).asString();
+      addError(function.getReturnType().getPosition(),
+          "Function is declared to return %s but is returning %s.",
+          expectedText, actualText);
+    }
+    
+    // TODO(bob): If this function is a method (i.e. this isn't nothing?), then we
+    // also need to check that any assignment to a field matches the declared
+    // type.
+    
+    // Always return the expected type so that we don't get cascading errors.
+    return expectedReturn;
   }
   
   /**

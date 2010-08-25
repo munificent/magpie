@@ -1,0 +1,43 @@
+// Defines the base Function type constructor.
+
+// Make "Function" a functor that you can call to instantiate function types.
+shared Function call(paramType, returnType)
+    FunctionType new(paramType, returnType)
+end
+
+class FunctionType
+    this(paramType, returnType)
+        this paramType = paramType
+        this returnType = returnType
+    end
+    
+    paramType Dynamic
+    returnType Dynamic
+end
+
+// TODO(bob): Once interfaces are in, function types can just become sugar for
+// creating ICallable(Arg, Return) instances.
+def FunctionType canAssignFrom(other -> Bool)
+    // Both must be functions.
+    if other type != FunctionType then return false
+
+    // Parameter must be contravariant.
+    if other paramType canAssignFrom(paramType) not then return false
+    
+    // Return must be covariant.
+    if returnType canAssignFrom(other returnType) not then return false
+    
+    true
+end
+
+def FunctionType getMethodType(name String, arg)
+    // Yield call with the appropriate types.
+    if name == "call" then return (paramType, returnType)
+    
+    // For other methods, just defer to the base function class.
+    Function getMethodType(name, arg)
+end
+
+def FunctionType toString()
+    paramType toString + " -> " + returnType toString
+end

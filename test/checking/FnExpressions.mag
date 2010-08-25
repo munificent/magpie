@@ -1,0 +1,39 @@
+var rightReturn(-> Int)
+    var a = fn (-> Int) 234
+    a()
+end
+
+var wrongReturn(-> Int) //!
+    var a = fn (-> String) "hi"
+    a()
+end
+
+var inferredDynamic(-> Dynamic)
+    var a = fn () 234
+    a()
+end
+
+var rightParam(->)
+    var f = fn (b Int ->) print(b)
+    f(123)
+end
+
+var wrongParam(->)
+    var f = fn (b String ->) print(b)
+    f(123) //!
+end
+
+var errorInBody(->)
+    var f = fn (a Bool ->)
+        a notDefined //!
+    end
+    f(true)
+end
+
+var main(->)
+    rightReturn()
+    wrongReturn()
+    inferredDynamic()
+    rightParam()
+    wrongParam()
+end

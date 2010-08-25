@@ -169,8 +169,17 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(FnExpr expr, EvalContext context) {
-    // TODO Auto-generated method stub
-    return mInterpreter.getNothingType();
+    // Check the body.
+    mChecker.checkFunction(expr, context.getScope(), context.getThis());
+    
+    // Create the function type for the function.
+    Obj paramType = mInterpreter.evaluateType(expr.getParamType());
+    Obj returnType = mInterpreter.evaluateType(expr.getReturnType());
+    
+    Obj functionType = mChecker.invokeMethod(mInterpreter.getFunctionType(),
+        Identifiers.CALL, mInterpreter.createTuple(paramType, returnType));
+    
+    return functionType;
   }
 
   @Override

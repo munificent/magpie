@@ -304,8 +304,9 @@ public class Lexer {
       mCol++;
     }
     
-    // Return whether or not we've advanced to the end.
-    if (mIndex < mText.length()) return null;
+    // Return whether or not we've advanced to the end (+1 so that we can
+    // process a trailing \0 and close the last Token).
+    if (mIndex < mText.length() + 1) return null;
     return new Token(Position.none(), TokenType.EOF);
   }
   

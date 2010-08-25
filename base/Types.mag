@@ -10,6 +10,7 @@
 // Base.
 
 import("OrType.mag")
+import("Function.mag")
 
 // No type except Nothing is allowed where Nothing is expected.
 shared Nothing canAssignFrom(other -> Bool) other == Nothing

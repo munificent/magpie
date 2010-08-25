@@ -1,0 +1,13 @@
+var foo = 123
+
+var good(-> Int)
+    foo
+end
+
+var bad(-> String) //!
+    foo
+end
+
+var main(->)
+    nothing
+end

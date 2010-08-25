@@ -1,9 +1,20 @@
 package com.stuffwithstuff.magpie.ast;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.stuffwithstuff.magpie.parser.Position;
 
-
 public abstract class Expr {
+  public static Expr fn(Expr body) {
+    return new FnExpr(Position.none(), new ArrayList<String>(),
+        Expr.name("Nothing"), Expr.name("Dynamic"), body);
+  }
+  
+  public static Expr message(Expr receiver, String name, Expr arg) {
+    return new MessageExpr(Position.none(), null, name, arg);
+  }
+  
   public static Expr name(String name) {
     return new MessageExpr(Position.none(), null, name, null);
   }
