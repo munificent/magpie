@@ -197,6 +197,7 @@ public class Interpreter {
   public ClassObj getNothingType() { return mNothingClass; }
   public ClassObj getObjectType() { return mObjectClass; }
   public ClassObj getStringType() { return mStringClass; }
+  public ClassObj getTupleType() { return mTupleClass; }
   public ClassObj getNeverType() { return mNeverClass; }
   public ClassObj getArrayType() { return mArrayClass; }
   

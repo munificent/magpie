@@ -1,6 +1,7 @@
 // Defines the base Function type constructor.
 
 // Make "Function" a functor that you can call to instantiate function types.
+// Type annotations of function types look like Function(Int, String) 
 shared Function call(paramType, returnType)
     FunctionType new(paramType, returnType)
 end

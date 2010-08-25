@@ -28,10 +28,24 @@ public class FnObj extends Obj implements Invokable {
     if (params.size() == 1) {
       context.define(params.get(0), arg);
     } else if (params.size() > 1) {
-      // TODO(bob): Hack. Assume the arg is a tuple with the right number of
-      // fields.
-      for (int i = 0; i < params.size(); i++) {
-        context.define(params.get(i), arg.getTupleField(i));
+      // Make sure the argument's structure matches our expected parameter list.
+      // If it doesn't, ignore extra tuple fields and pad missing ones with
+      // nothing.
+      if (arg.getClassObj() != interpreter.getTupleType()) {
+        // Not a tuple and we're expecting it to be, so just bind it to the
+        // first parameter and define the others as nothing.
+        context.define(params.get(0), arg);
+        
+        for (int i = 1; i < params.size(); i++) {
+          context.define(params.get(1), interpreter.nothing());
+        }
+      } else {
+        // Destructure the tuple.
+        for (int i = 0; i < params.size(); i++) {
+          Obj field = arg.getTupleField(i);
+          if (field == null) field = interpreter.nothing();
+          context.define(params.get(i), field);
+        }
       }
     }
     
