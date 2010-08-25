@@ -68,7 +68,7 @@ public class Checker {
   public Obj checkFunction(FnExpr function, Scope closure, Obj thisType) {
     // Evaluate the parameter type declaration expression to get the declared
     // parameter type(s).
-    Obj paramType = evaluateType(function.getParamType());
+    Obj paramType = evaluateType(function.getType().getParamType());
     
     // Create a new local scope for the function.
     // TODO(bob): Walking the entire closure and getting its type could be
@@ -78,7 +78,7 @@ public class Checker {
         closureTypes, thisType).nestScope();
     
     // Bind parameter types to their names.
-    List<String> params = function.getParamNames();
+    List<String> params = function.getType().getParamNames();
     if (params.size() == 1) {
       functionContext.define(params.get(0), paramType);
     } else if (params.size() > 1) {
@@ -93,13 +93,13 @@ public class Checker {
     Obj returnType = checker.checkFunction(function.getBody(), functionContext);
 
     // Check that the body returns a valid type.
-    Obj expectedReturn = evaluateType(function.getReturnType());
+    Obj expectedReturn = evaluateType(function.getType().getReturnType());
     Obj matches = invokeMethod(expectedReturn, Identifiers.CAN_ASSIGN_FROM, returnType);
     
     if (!matches.asBool()) {
       String expectedText = invokeMethod(expectedReturn, Identifiers.TO_STRING).asString();
       String actualText = invokeMethod(returnType, Identifiers.TO_STRING).asString();
-      addError(function.getReturnType().getPosition(),
+      addError(function.getType().getReturnType().getPosition(),
           "Function is declared to return %s but is returning %s.",
           expectedText, actualText);
     }

@@ -1,8 +1,5 @@
 package com.stuffwithstuff.magpie.parser;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.stuffwithstuff.magpie.ast.VariableExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
@@ -22,13 +19,12 @@ public class VariableExprParser implements ExprParser {
     if (parser.lookAhead(TokenType.LEFT_PAREN)) {
       Position fnPosition = parser.last(1).getPosition();
       
-      List<String> paramNames = new ArrayList<String>();
-      FunctionType type = parser.functionType(paramNames);
+      FunctionType type = parser.functionType();
       Expr body = parser.parseBlock();
       
       // Desugar it to: def foo = fn () blah
       FnExpr function = new FnExpr(fnPosition.union(body.getPosition()),
-          paramNames, type.getParamType(), type.getReturnType(), body);
+          type, body);
       return new VariableExpr(startPos.union(function.getPosition()),
           name, function);
     } else {

@@ -369,9 +369,8 @@ public abstract class NativeMethod implements Invokable {
   // Function methods:
   
   public static class FunctionCall extends NativeMethod {
-    public FunctionCall(Expr paramType, Expr returnType) {
-      mParamType = paramType;
-      mReturnType = returnType;
+    public FunctionCall(FunctionType type) {
+      mType = type;
     }
     
     @Override
@@ -381,11 +380,10 @@ public abstract class NativeMethod implements Invokable {
       return function.invoke(interpreter, interpreter.nothing(), arg);
     }
     
-    public Expr getParamType() { return mParamType; }
-    public Expr getReturnType() { return mReturnType; }
+    public Expr getParamType() { return mType.getParamType(); }
+    public Expr getReturnType() { return mType.getReturnType(); }
     
-    private final Expr mParamType;
-    private final Expr mReturnType;
+    private final FunctionType mType;
   }
   
   // Int methods:

@@ -24,7 +24,7 @@ public class FnObj extends Obj implements Invokable {
     EvalContext context = new EvalContext(mClosure, thisObj).nestScope();
     
     // Bind arguments to their parameter names.
-    List<String> params = mFunction.getParamNames();
+    List<String> params = mFunction.getType().getParamNames();
     if (params.size() == 1) {
       context.define(params.get(0), arg);
     } else if (params.size() > 1) {
@@ -57,8 +57,8 @@ public class FnObj extends Obj implements Invokable {
     }
   }
   
-  public Expr getParamType() { return mFunction.getParamType(); }
-  public Expr getReturnType() { return mFunction.getReturnType(); }
+  public Expr getParamType() { return mFunction.getType().getParamType(); }
+  public Expr getReturnType() { return mFunction.getType().getReturnType(); }
   
   private final Scope mClosure;
   private final FnExpr mFunction;

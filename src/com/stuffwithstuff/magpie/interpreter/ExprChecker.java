@@ -173,8 +173,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     mChecker.checkFunction(expr, context.getScope(), context.getThis());
     
     // Create the function type for the function.
-    Obj paramType = mInterpreter.evaluateType(expr.getParamType());
-    Obj returnType = mInterpreter.evaluateType(expr.getReturnType());
+    Obj paramType = mInterpreter.evaluateType(expr.getType().getParamType());
+    Obj returnType = mInterpreter.evaluateType(expr.getType().getReturnType());
     
     Obj functionType = mChecker.invokeMethod(mInterpreter.getFunctionType(),
         Identifiers.CALL, mInterpreter.createTuple(paramType, returnType));

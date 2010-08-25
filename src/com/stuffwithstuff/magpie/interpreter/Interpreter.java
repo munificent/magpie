@@ -238,8 +238,7 @@ public class Interpreter {
     // TODO(bob): Figure out a simpler way to do this.
     ClassObj fnClass = new ClassObj(mClass, "FunctionType", mFnClass);
     
-    fnClass.addMethod("call", new NativeMethod.FunctionCall(
-        expr.getParamType(), expr.getReturnType()));
+    fnClass.addMethod("call", new NativeMethod.FunctionCall(expr.getType()));
     
     return new FnObj(fnClass, closure, expr);
   }

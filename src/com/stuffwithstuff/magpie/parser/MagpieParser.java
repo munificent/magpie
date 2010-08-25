@@ -110,13 +110,11 @@ public class MagpieParser extends Parser {
 
   // fn (a) print "hi"
   public FnExpr parseFunction() {
-    List<String> paramNames = new ArrayList<String>();
-    FunctionType type = functionType(paramNames);
+    FunctionType type = functionType();
     
     Expr body = parseBlock();
     
-    return new FnExpr(body.getPosition(), paramNames, type.getParamType(),
-        type.getReturnType(), body);
+    return new FnExpr(body.getPosition(), type, body);
   }
 
   /**
@@ -133,16 +131,15 @@ public class MagpieParser extends Parser {
    *                   fn (Int, String ->).)
    * @return The parsed function type.
    */
-  public FunctionType functionType(List<String> paramNames) {
+  public FunctionType functionType() {
     // Parse the prototype: (foo Foo, bar Bar -> Bang)
     consume(TokenType.LEFT_PAREN);
     
     // Parse the parameters, if any.
+    List<String> paramNames = new ArrayList<String>();
     List<Expr> paramTypes = new ArrayList<Expr>();
     while (!lookAheadAny(TokenType.ARROW, TokenType.RIGHT_PAREN)){
-      if (paramNames != null) {
-        paramNames.add(consume(TokenType.NAME).getString());
-      }
+      paramNames.add(consume(TokenType.NAME).getString());
       
       // TODO(bob): Need to handle named parameter with no type as a dynamic
       // parameter.
@@ -180,7 +177,7 @@ public class MagpieParser extends Parser {
       consume(TokenType.RIGHT_PAREN);
     }
     
-    return new FunctionType(paramType, returnType);
+    return new FunctionType(paramNames, paramType, returnType);
   }
   
   public Expr parseTypeExpression() {
