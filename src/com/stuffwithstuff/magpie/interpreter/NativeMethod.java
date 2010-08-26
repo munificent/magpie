@@ -381,6 +381,17 @@ public abstract class NativeMethod implements Callable {
     
     private final FunctionType mType;
   }
+
+  public static class FunctionGetType extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      FnObj function = (FnObj)thisObj;
+      
+      return interpreter.evaluateFunctionType(function.getType());
+    }
+    
+    public FunctionType getType() { return fn("Nothing", "FunctionType"); }
+  }
   
   // Int methods:
   

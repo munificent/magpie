@@ -2,6 +2,7 @@ package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.*;
 
+import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.parser.Position;
 
@@ -67,6 +68,7 @@ public class Interpreter {
     mDynamicClass = createGlobalClass("Dynamic");
     
     mFnClass = createGlobalClass("Function");
+    mFnClass.addMethod("type", new NativeMethod.FunctionGetType());
     
     mIntClass = createGlobalClass("Int");
     mIntClass.getClassObj().addMethod("parse", new NativeMethod.IntParse());
@@ -140,6 +142,15 @@ public class Interpreter {
     return evaluate(expr, context);
   }
 
+  public Obj evaluateFunctionType(FunctionType type) {
+    // Create the function type for the function.
+    Obj paramType = evaluateType(type.getParamType());
+    Obj returnType = evaluateType(type.getReturnType());
+    
+    return invokeMethod(mFnClass, Identifiers.CALL,
+        createTuple(paramType, returnType));
+  }
+  
   public boolean hasMain() {
     return mGlobalScope.get("main") != null;
   }
@@ -237,7 +248,6 @@ public class Interpreter {
     // of "call" has the correct return and parameter types.
     // TODO(bob): Figure out a simpler way to do this.
     ClassObj fnClass = new ClassObj(mClass, "FunctionType", mFnClass);
-    
     fnClass.addMethod("call", new NativeMethod.FunctionCall(expr.getType()));
     
     return new FnObj(fnClass, closure, expr);
