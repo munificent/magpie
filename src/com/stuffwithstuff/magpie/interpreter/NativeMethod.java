@@ -353,7 +353,6 @@ public abstract class NativeMethod implements Callable {
         return interpreter.nothing();
       }
       
-      // Make sure the argument matches the parameter type.
       Obj paramType = interpreter.evaluateType(method.getType().getParamType());
       Obj returnType = interpreter.evaluateType(method.getType().getReturnType());
       return interpreter.createTuple(paramType, returnType);

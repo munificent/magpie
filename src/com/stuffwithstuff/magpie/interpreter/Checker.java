@@ -53,10 +53,6 @@ public class Checker {
     return type;
   }
   
-  public Obj evaluateType(Expr expr) {
-    return mInterpreter.evaluateType(expr);
-  }
-  
   public Obj invokeMethod(Obj receiver, String name, Obj arg) {
     return mInterpreter.invokeMethod(receiver, name, arg);
   }
@@ -68,7 +64,7 @@ public class Checker {
   public Obj checkFunction(FnExpr function, Scope closure, Obj thisType) {
     // Evaluate the parameter type declaration expression to get the declared
     // parameter type(s).
-    Obj paramType = evaluateType(function.getType().getParamType());
+    Obj paramType = mInterpreter.evaluateType(function.getType().getParamType());
     
     // Create a new local scope for the function.
     // TODO(bob): Walking the entire closure and getting its type could be
@@ -93,7 +89,7 @@ public class Checker {
     Obj returnType = checker.checkFunction(function.getBody(), functionContext);
 
     // Check that the body returns a valid type.
-    Obj expectedReturn = evaluateType(function.getType().getReturnType());
+    Obj expectedReturn = mInterpreter.evaluateType(function.getType().getReturnType());
     Obj matches = invokeMethod(expectedReturn, Identifiers.CAN_ASSIGN_FROM, returnType);
     
     if (!matches.asBool()) {
