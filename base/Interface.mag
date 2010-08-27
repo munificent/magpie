@@ -1,0 +1,71 @@
+// Defines interface types. An interface is a collection of named typed methods.
+// Interfaces are duck-typed like Go: any type that has methods with the names
+// of the methods in the interface with matching types, then that type
+// implicitly implements the interface.
+
+class Interface
+    this(name String)
+        this name = name
+        this methods = []
+    end
+    
+    name    String
+    methods Method[]
+end
+
+def Interface toString(-> String) name
+
+def Interface canAssignFrom(other -> Bool)
+    for method = methods do
+        var otherMethod = other getMethodType(method name, method argType)
+        
+        // Must have method
+        if otherMethod == nothing then return false
+        
+        // Invoke the type expressions
+        var paramType = (method paramType)()
+        var returnType = (method returnType)()
+        
+        // TODO(bob): This is basically copied from Function. If methods stored
+        // an actual function type, and getMethodType returned a function type,
+        // we should be able to just compare them directly and have this logic
+        // in one place.
+        var otherParam = otherMethod _0
+        var otherReturn = otherMethod _1
+        
+        // Parameter must be contravariant.
+        if otherParam canAssignFrom(paramType) not then return false
+
+        // Return must be covariant.
+        if returnType canAssignFrom(otherReturn) not then return false
+    end
+    
+    // If we got here, every method was found and matched.
+    true
+end
+
+def Interface getMethodType(name String, argType)
+    let method = methods first(fn (m) m name == name) then
+        (method paramType)(), (method returnType)()
+    else
+        // No method by that name
+        nothing
+    end
+end
+
+class Method
+    this(name String, paramType Function(Nothing, Dynamic),
+         returnType(Nothing, Dynamic))
+         this name = name
+         this paramType = paramType
+         this returnType = returnType
+    end
+    
+    name       String
+    paramType  Function(Nothing, Dynamic) // should return IType eventually
+    returnType Function(Nothing, Dynamic) // should return IType eventually
+end
+
+def Method toString(-> String)
+    name + " " + paramType toString + " -> " + returnType toString
+end

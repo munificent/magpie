@@ -68,6 +68,14 @@ def Array contains(item -> Bool)
     false
 end
 
+// TODO(bob): Need generics to use for return type.
+def Array first(predicate -> Dynamic)
+    for element = this do
+        if predicate(element) then return element
+    end
+    nothing
+end
+
 // TODO(bob): This is kind of hokey.
 shared Array newType(elementType -> ArrayType)
     ArrayType new(elementType)
