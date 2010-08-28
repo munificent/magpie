@@ -175,6 +175,10 @@ public class Interpreter {
   public Obj invokeMethod(Obj receiver, String name, Obj arg) {
     return invokeMethod(Position.none(), receiver, name, arg);
   }
+  
+  public Obj invokeMethod(Obj receiver, String name) {
+    return invokeMethod(receiver, name, mNothing);
+  }
 
   public void print(String text) {
     mHost.print(text);

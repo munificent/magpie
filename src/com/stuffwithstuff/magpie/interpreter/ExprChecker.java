@@ -6,12 +6,27 @@ import java.util.List;
 import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.*;
 
+/**
+ * Implements the visitor pattern on AST nodes. For any given expression,
+ * evaluates the type of object that could result from evaluating that
+ * expression. Also reports type errors as they are found.
+ */
 public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   public ExprChecker(Interpreter interpreter, Checker checker) {
     mInterpreter = interpreter;
     mChecker = checker;
   }
   
+  /**
+   * Checks the given function body for a function declared within the given
+   * lexical context. Returns the type returned by a call to that function. This
+   * type will include the type of the expression body itself, combined with the
+   * types returned by any "return" expressions found in the function.
+   * 
+   * @param body     The body of the function.
+   * @param context  The type context where the function was declared.
+   * @return         The type of object returned by a call to this function.
+   */
   public Obj checkFunction(Expr body, EvalContext context) {
     // Get the type implicitly returned by the function.
     Obj evaluatedType = body.accept(this, context);
@@ -198,7 +213,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
               "Let expression's type is Nothing which means it can never be entered.");
         }
         
-        conditionType = mChecker.invokeMethod(conditionType, Identifiers.UNSAFE_REMOVE_NOTHING);
+        conditionType = mInterpreter.invokeMethod(conditionType,
+            Identifiers.UNSAFE_REMOVE_NOTHING);
         context.define(condition.getName(), conditionType);
       }
     }
@@ -324,7 +340,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   private Obj orTypes(Obj first, Obj... types) {
     Obj result = first;
     for (int i = 0; i < types.length; i++) {
-      result = mChecker.invokeMethod(result, Identifiers.OR, types[i]);
+      result = mInterpreter.invokeMethod(result, Identifiers.OR, types[i]);
     }
     
     return result;
@@ -333,7 +349,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   public Obj getMethodReturn(Expr expr, Obj receiverType, String name,
       Obj argType) {
 
-    Obj methodType = mChecker.invokeMethod(receiverType, Identifiers.GET_METHOD_TYPE,
+    Obj methodType = mInterpreter.invokeMethod(receiverType,
+        Identifiers.GET_METHOD_TYPE,
         mInterpreter.createTuple(mInterpreter.createString(name), argType));
     
     if (methodType == mInterpreter.nothing()) {
@@ -350,11 +367,14 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     Obj returnType = methodType.getTupleField(1);
     
     // Make sure the argument type matches the declared parameter type.
-    Obj matches = mChecker.invokeMethod(paramType, Identifiers.CAN_ASSIGN_FROM, argType);
+    Obj matches = mInterpreter.invokeMethod(paramType,
+        Identifiers.CAN_ASSIGN_FROM, argType);
     
     if (!matches.asBool()) {
-      String expectedText = mChecker.invokeMethod(paramType, Identifiers.TO_STRING).asString();
-      String actualText = mChecker.invokeMethod(argType, Identifiers.TO_STRING).asString();
+      String expectedText = mInterpreter.invokeMethod(paramType,
+          Identifiers.TO_STRING).asString();
+      String actualText = mInterpreter.invokeMethod(argType,
+          Identifiers.TO_STRING).asString();
       mChecker.addError(expr.getPosition(),
           "Function is declared to take %s but is being passed %s.",
           expectedText, actualText);
