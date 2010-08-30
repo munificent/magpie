@@ -17,8 +17,8 @@ public class Interpreter {
     //
     // One key piece that it's important to understand is that the methods on
     // an object *always* come from its class. So, when you call a shared
-    // method like Foo.bar, you are actually calling an *instance* method on
-    // the class of Foo (its metaclass: FooClass).
+    // method like "Foo bar", you are actually calling an *instance* method on
+    // the class of of the object "Foo", its metaclass: FooClass.
     
     // Create a top-level scope.
     mGlobalScope = new Scope();
@@ -112,9 +112,15 @@ public class Interpreter {
     // "Never" is the evaluated type of an expression that can never yield a
     // result. It's equivalent to the bottom type. More concretely, it's the
     // type of a "return" expression, since a return will always unwind the
-    // stack instead of actually yielding a result.
+    // stack instead of actually yielding a result. In other words, if you do:
+    //
+    //   foo(return 123)
+    //
+    // The type of value passed to "foo" is "Never", meaning that in this case,
+    // the call to "foo" will never occur since the return will unwind the
+    // stack.
     mNeverClass = createGlobalClass("Never");
-}
+  }
   
   public void load(List<Expr> expressions) {
     EvalContext context = createTopLevelContext();
@@ -168,14 +174,39 @@ public class Interpreter {
     mainFn.invoke(this, mNothing, mNothing);
   }
 
+  /**
+   * Invokes a named method on an object, passing in the given argument.
+   * 
+   * @param expr      The expression where this method invocation occurs. Just
+   *                  used for position information if an error occurs.
+   * @param receiver  The object the method is being invoked on.
+   * @param name      The name of the method to invoke.
+   * @param arg       The argument passed to the method.
+   * @return          The result of invoking the method.
+   */
   public Obj invokeMethod(Expr expr, Obj receiver, String name, Obj arg) {
     return invokeMethod(expr.getPosition(), receiver, name, arg);
   }
 
+  /**
+   * Invokes a named method on an object, passing in the given argument.
+   * 
+   * @param receiver  The object the method is being invoked on.
+   * @param name      The name of the method to invoke.
+   * @param arg       The argument passed to the method.
+   * @return          The result of invoking the method.
+   */
   public Obj invokeMethod(Obj receiver, String name, Obj arg) {
     return invokeMethod(Position.none(), receiver, name, arg);
   }
   
+  /**
+   * Invokes a named method on an object, passing in nothing as the argument.
+   * 
+   * @param receiver  The object the method is being invoked on.
+   * @param name      The name of the method to invoke.
+   * @return          The result of invoking the method.
+   */
   public Obj invokeMethod(Obj receiver, String name) {
     return invokeMethod(receiver, name, mNothing);
   }

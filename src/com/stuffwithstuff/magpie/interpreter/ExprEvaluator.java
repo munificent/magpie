@@ -7,17 +7,24 @@ import java.util.Map.Entry;
 import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.*;
 
+/**
+ * Implements the visitor pattern on AST nodes, in order to evaluate
+ * expressions. This is the heart of the interpreter and is where Magpie code is
+ * actually executed.
+ */
 public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   public ExprEvaluator(Interpreter interpreter) {
     mInterpreter = interpreter;
   }
   
+  /**
+   * Evaluates the given expression in the given context.
+   * @param   expr     The expression to evaluate.
+   * @param   context  The context in which to evaluate the expression.
+   * @return           The result of evaluating the expression.
+   */
   public Obj evaluate(Expr expr, EvalContext context) {
     return expr.accept(this, context);
-  }
-
-  public Obj invokeMethod(Expr expr, Obj receiver, String name, Obj arg) {
-    return mInterpreter.invokeMethod(expr, receiver, name, arg);
   }
 
   @Override
@@ -56,7 +63,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       if (context.assign(name, value)) return value;
       
       // Otherwise, it must be a setter on this.
-      return invokeMethod(expr, context.getThis(), setter, value);
+      return mInterpreter.invokeMethod(expr, context.getThis(), setter, value);
     } else {
       // The target of the assignment is an actual expression, like a.b = c
       Obj target = evaluate(expr.getTarget(), context);
@@ -71,7 +78,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       }
 
       // Invoke the setter method.
-      return invokeMethod(expr, target, setter, value);
+      return mInterpreter.invokeMethod(expr, target, setter, value);
     }
   }
 
@@ -292,16 +299,18 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       if (variable != null) {
         // If we have an argument, apply it.
         if (arg != null) {
-          return invokeMethod(expr, variable, Identifiers.CALL, arg);
+          return mInterpreter.invokeMethod(
+              expr, variable, Identifiers.CALL, arg);
         }
         return variable;
       }
       
       // Otherwise it must be a method on this.
-      return invokeMethod(expr, context.getThis(), expr.getName(), arg);
+      return mInterpreter.invokeMethod(
+          expr, context.getThis(), expr.getName(), arg);
     }
     
-    return invokeMethod(expr, receiver, expr.getName(), arg);
+    return mInterpreter.invokeMethod(expr, receiver, expr.getName(), arg);
   }
   
   @Override
@@ -362,7 +371,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
   
   private boolean isTruthy(Expr expr, Obj receiver) {
-    Obj truthy = invokeMethod(expr, receiver, Identifiers.IS_TRUE, null);
+    Obj truthy = mInterpreter.invokeMethod(expr, receiver, Identifiers.IS_TRUE, null);
     return truthy.asBool();
   }
   

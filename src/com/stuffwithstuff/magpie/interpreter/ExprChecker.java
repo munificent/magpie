@@ -65,8 +65,6 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
     List<Expr> elements = expr.getElements();
     
-    ExprEvaluator evaluator = new ExprEvaluator(mInterpreter);
-
     Obj elementType;
     if (elements.size() == 0) {
       elementType = mInterpreter.getObjectType();
@@ -78,7 +76,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       if (elements.size() > 1) {
         for (int i = 1; i < elements.size(); i++) {
           Obj other = check(elements.get(i), context);
-          Obj result = evaluator.invokeMethod(expr, elementType, Identifiers.EQUALS, other);
+          Obj result = mInterpreter.invokeMethod(expr, elementType, Identifiers.EQUALS, other);
           if (!result.asBool()) {
             // No match, so default to Object.
             elementType = mInterpreter.getObjectType();
@@ -89,7 +87,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     }
     
     Obj arrayType = mInterpreter.getArrayType();
-    return evaluator.invokeMethod(expr, arrayType, Identifiers.NEW_TYPE, elementType);
+    return mInterpreter.invokeMethod(expr, arrayType, Identifiers.NEW_TYPE, elementType);
   }
   
   @Override

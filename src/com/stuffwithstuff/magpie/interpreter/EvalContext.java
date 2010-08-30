@@ -2,7 +2,7 @@ package com.stuffwithstuff.magpie.interpreter;
 
 /**
  * Describes the context in which an expression can be evaluated. Includes the
- * lexical scope, this reference, etc.
+ * lexical scope and the object that "this" refers to.
  */
 public class EvalContext {
   public EvalContext(Scope scope, Obj thisObj) {
@@ -25,13 +25,16 @@ public class EvalContext {
     return new EvalContext(mScope, thisObj);
   }
   
-  public Obj getThis() {
-    return mThis;
-  }
-  
   public Scope getScope() { return mScope; }
+  public Obj   getThis()  { return mThis; }
   
+  /**
+   * Looks up the given name in the context's lexical scope chain.
+   * @param   name The name of the variable to look up.
+   * @return       The value bound to that name, or null if not found.
+   */
   public Obj lookUp(String name) {
+    // Walk up the scope chain until we find it.
     Scope scope = mScope;
     while (scope != null) {
       Obj value = scope.get(name);
@@ -42,10 +45,29 @@ public class EvalContext {
     return null;
   }
 
+  /**
+   * Defines (or redefines) a variable with the given name in this context's
+   * current scope.
+   * 
+   * @param name  Name of the variable to define.
+   * @param value The variable's value.
+   */
   public void define(String name, Obj value) {
     mScope.define(name, value);
   }
   
+  /**
+   * Assigns the given value to an existing variable with the given name in the
+   * scope where the name is already defined. Does nothing if there is no
+   * variable with that name. Note this is different from {code define}, which
+   * always binds in the current lexical scope and would shadow an existing
+   * definition in an outer scope. This will walk up the scope chain to assign
+   * the value wherever it's already defined.
+   * 
+   * @param name  Name of the variable to assign.
+   * @param value The variable's value.
+   * @return      True if the variable was found, otherwise false.
+   */
   public boolean assign(String name, Obj value) {
     Scope scope = mScope;
     while (scope != null) {
