@@ -1,8 +1,8 @@
-use file <- CreateFile "c:\foo" do
-    Write (file, "hi")
+use file <- File new("c:\foo") do
+    file write("hi")
 end
 
 // expands to
-def file <- CreateFile "c:\foo"
-Write (file, "hi")
-End file
+def file <- File new("c:\foo")
+file write("hi")
+file close

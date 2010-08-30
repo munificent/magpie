@@ -1,0 +1,37 @@
+// function literal syntax
+// use cases:
+// - functional idioms like filter, map, etc.
+// - defining methods (although there will likely be sugar for this)
+// - defining non-method functions (likely sugar too)
+
+// needs to support:
+// - body expression
+// - param names
+// - param type
+// - return type
+
+// return type can be inferred from body, so isn't required (but can be provided
+// in which case it will be checked)
+// ideally, we'd support inferring the param type
+
+// goals:
+// try not to eat too many operator characters
+// needs to be ll(k)
+// terse
+
+// current:
+fn (a Int, b Int -> Int)
+    if a < b then
+        print("less")
+    else if a > b then
+        print("greater")
+    else
+        print("equal")
+    end
+end
+
+list filter(fn (item String -> Bool) item == "needle")
+
+list filter(-> it == "needle")
+
+list sort((a, b) -> a toString compareTo(b toString))

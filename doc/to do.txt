@@ -8,11 +8,19 @@ Types
     of allowed types by the end of the ctor.
   - Figure out if there's some way constructors can be extended to a) add new
     construction logic and/or b) add new fields.
+  - Allow duck typing classes too. Right now, you can only a value where a class
+    type is expected if that value's type is in the class's inheritance chain.
+    Should instead work like interfaces where only method matching is required.
+    This will help solve the brittle base class problem and make things like
+    mocking a lot easier.
 - Interfaces
-  - Core imperative system to create and extend them.
-  - Declarative syntax that wraps that.
-  - Typing rules for them that allow other types to be assignable to them if 
+  + Core imperative system to create and extend them.
+  + Typing rules for them that allow other types to be assignable to them if 
     they implement all of its methods.
+  - Declarative syntax that wraps that.
+  - Determine if something like C#'s explicit interface implementation is
+    useful. It may be nice for cases where a class implements multiple
+    interfaces with overlapping names.
 - Generics
   - Need to figure out how they work. One option would be that a class object
     implements ICallable and takes arguments that are types and returns a type.
@@ -29,34 +37,45 @@ Types
     with type arguments for the function's argument and return types.
 - Unions
   - Unlike or types, these would have named cases.
+- Enums
+  - Interfaces may cover this, but it might be nice to have some syntactic sugar
+    for it. Java's system where enums are essentially singleton instances is
+    interesting.
 
 Expressions
 - Scope guards
   - Basically destructors, or some other way to execute code at the close of a
-    local scope.
+    local scope. See also: using() in C#.
 - Closures
   - In theory, they're there and work, but they need tests and probably have 
     lots of bugs.
+- Floats, characters, and other atomic types.
+  - Pretty much the full suite of what Java provides.
 
 Syntax
-- Being able to omit parens with single-arg methods is nice, but it feels weird
-  with thing like "print" where the arg may be an expression with lower
-  precedence so you have to parentheses for that:
-  
-  print "hi"
-  print ("a" + "b") // parens here are annoying
-  
-  It would be nice if it felt consistent.
+- Function literals
+  - The syntax for these is kind of verbose, especially for use cases like
+    filter/map. A shorter lambda syntax would be nice.
+- Some kind of message cascade syntax? User-defined operators can handle most
+  cases (i.e. a string builder in Magpie could just have a + operator), but it
+  may be nice for some things?
+- Keyword arguments. Something like:
+    dictionary add(key: 123 value: "hey")
+  which desugars to:
+    dictionary add:key:value(123, "hey")
+  Also allow no keyword for the first argument:
+    list insert("item" at: 3)
+  which desugars to:
+    list insert:at("item", 3)
 
-- Some kind of message cascade syntax. Users shouldn't have to explicitly create
-  fluid interfaces.
+Library
+- Reorganize and clean up the type stuff.
 
-  builder.append "one" ..append "two" ..append "three"
-
-- Consider following more IO-style syntax:
-
-  foo bar                // no-arg method
-  foo bar(1)             // one-arg method 
-  foo bar bang(2, 3) baz // chain
-
-  So dots aren't needed for methods, but parens always are for args.
+Other
+- A well-defined package/import/namespace system including nice syntax.
+- Interop with Java. Should be able to instantiate Java types and call arbitrary
+  methods on those objects.
+- Coroutines and/or CSP-style concurrency. Some way to easily hop between
+  different callstacks, basically.
+- TCO.
+- Exceptions. (Or, ideally, something closer to CL's condition system.)

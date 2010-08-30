@@ -47,7 +47,7 @@ expectation. Specifically, it handles the above cases like this:
 4. Accessing an unknown/undefined name.
    Because typos are such a common error, this probably *will* generate a type-
    check error. However, there may be support at some point for objects being
-   able to indicate that they can handle unknown messages. If that goes it, the
+   able to indicate that they can handle unknown messages. If that goes in, the
    type-checker will probably determine if the receiver of the unknown message
    implements that IUnknownMessage interface and only raise an error if it
    doesn't.

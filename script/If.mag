@@ -1,9 +1,0 @@
-var iff(condition, thenFn, elseFn)
-    var arms = [thenFn, elseFn]
-    var index = if condition then 0 else 1
-    arms[index] call
-end
-
-iff(1 < 2, (fn () print("then")), (fn () print("else")))
-
-if 1 > 2 then print("then") else print("else")

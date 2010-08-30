@@ -35,7 +35,7 @@ foo ()                  // takes and returns nothing
 foo (->)                // takes nothing, returns dynamic
 foo (-> Int)            // takes nothing, returns int
 
--> means "returns". its absence means nothing (unit) is returns
+-> means "returns". its absence means nothing (unit) is returned
 
 in many cases, "Dynamic" can be omitted.
 

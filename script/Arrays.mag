@@ -1,9 +1,0 @@
-Main (->)
-    def a <- [1, 2, 3]
-    
-    def b <- [Foo 1, Foo 2]
-    def c <- [1 + 2, 3 + 4]
-    def d <- [(1, 2), (3, 4)] // tuples must be parenthesized
-end
-
-Foo (a Int -> Int) a + 1
