@@ -133,10 +133,23 @@ public class Checker {
 
     // Check that the body returns a valid type.
     Obj expectedReturn = mInterpreter.evaluateType(function.getType().getReturnType());
-    Obj matches = mInterpreter.invokeMethod(expectedReturn,
-        Identifiers.CAN_ASSIGN_FROM, returnType);
     
-    if (!matches.asBool()) {
+    // If it's declared to return Nothing, then we'll also allow (and ignore)
+    // any other return type. Note that this doesn't mean we'll discard the
+    // return value. Type annotations don't affect the behavior at all. It just
+    // means that the checker will ignore any returned type if Nothing is
+    // expected.
+    boolean validReturnType;
+    if (expectedReturn == mInterpreter.getNothingType()) {
+      validReturnType = true;
+    } else {
+      Obj matches = mInterpreter.invokeMethod(expectedReturn,
+          Identifiers.CAN_ASSIGN_FROM, returnType);
+      
+      validReturnType = matches.asBool();
+    }
+    
+    if (!validReturnType) {
       String expectedText = mInterpreter.invokeMethod(expectedReturn,
           Identifiers.TO_STRING).asString();
       String actualText = mInterpreter.invokeMethod(returnType,

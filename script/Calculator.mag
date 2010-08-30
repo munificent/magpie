@@ -1,8 +1,6 @@
-// This implements an RPN calculator.
+// This implements a simple Reverse Polish Notation calculator.
 
-print("RPN")
-
-var tokenize(text String -> Tokenizer) Tokenizer new(text)
+// Define a basic tokenizer for splitting a string into chunks -----------------
 
 class Tokenizer
     this(text String)
@@ -12,7 +10,6 @@ class Tokenizer
     text String
 end
 
-// Iteratable
 def Tokenizer iterate(-> TokenIterator) TokenIterator new(text)
 
 class TokenIterator
@@ -27,13 +24,11 @@ class TokenIterator
     start   Int
 end
 
-// Iterator
 def TokenIterator next(-> Bool)
     if start >= text count then return false
 
     // skip over whitespace
-    while start < text count
-    while text at(start) == " " do
+    while start < text count and text at(start) == " " do
         start = start + 1
     end
 
@@ -42,8 +37,7 @@ def TokenIterator next(-> Bool)
 
     // now walk the stop forward until we hit whitespace or the end
     var stop = start
-    while stop < text count
-    while text at(stop) != " " do
+    while stop < text count and text at(stop) != " " do
         stop = stop + 1
     end
     
@@ -54,25 +48,17 @@ def TokenIterator next(-> Bool)
     true
 end
 
-class StackItem
-    this(item, rest)
-        this item = item
-        this rest = rest
-    end
-    
-    item Dynamic
-    rest StackItem
-end
+// Implement a simple stack using a linked list --------------------------------
 
 class Stack    
     top StackItem
 end
 
-def Stack push(item)
+def Stack push(item Int ->)
     top = StackItem new(item, top)
 end
 
-def Stack pop()
+def Stack pop(-> Int)
     var item = top item
     top = top rest
     item
@@ -81,34 +67,55 @@ end
 def Stack count(-> Int)
     var count = 0
     var stack = this top
-    while stack != () do
+    while stack != nothing do
         stack = stack rest
         count = count + 1
     end
     count
 end
 
-// sqrt(3^2 + (4^2))
-var source = "3 2 ^ 4 2 ^ + sqrt"
-
-var stack = Stack new
-
-for token = tokenize apply(source) do
-    let i = Int parse(token) then
-        stack push(i)
-        print("push " + token)
-    else if token == "+" then
-        var right = stack pop
-        var left  = stack pop
-        var sum   = left + right
-        stack push(sum)
-    else if token == "^" then
-        print("exponent")
-    else if token == "sqrt" then
-        print("square root")
-    else
-        print("unknown op " + token)
+class StackItem
+    this(item Int, rest StackItem)
+        this item = item
+        this rest = rest
     end
+    
+    item Int
+    rest StackItem
 end
 
-print("result: " + stack pop toString)
+// Define the actual calculation function --------------------------------------
+
+var calculate(text String -> Int)
+    var stack = Stack new
+
+    for token = Tokenizer new(text) do
+        let i = Int parse(token) then
+            stack push(i)
+            print("push " + i)
+        else if token == "+" then
+            var right = stack pop
+            var left  = stack pop
+            var sum   = left + right
+            print("add  " + left + " + " + right + " = " + sum)
+            stack push(sum)
+        else if token == "*" then
+            var right   = stack pop
+            var left    = stack pop
+            var product = left * right
+            print("mult " + left + " * " + right + " = " + product)
+            stack push(product)
+        else
+            print("unknown op " + token)
+        end
+    end
+    
+    stack pop
+end
+
+// Now let's try it out --------------------------------------------------------
+
+var main(->)
+    var result = calculate("3 2 * 4 2 * +")
+    print("result: " + result)
+end

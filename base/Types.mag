@@ -87,6 +87,10 @@ def Tuple canAssignFrom(other -> Bool)
     true
 end
 
+def Tuple |(other -> Dynamic)
+    Class orTypes(this, other)
+end
+
 shared Dynamic canAssignFrom(other -> Bool)
     // Everything goes with Dynamic.
     true

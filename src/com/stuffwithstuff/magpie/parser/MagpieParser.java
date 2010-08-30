@@ -326,6 +326,10 @@ public class MagpieParser extends Parser {
       message = new MessageExpr(position, message, name, arg);
     }
     
+    if (message == null) {
+      throw new ParseException("Could not parse expression at " + current().getPosition());
+    }
+    
     return message;
   }
   

@@ -407,7 +407,7 @@ public abstract class NativeMethod implements Callable {
       }
     }
     
-    public FunctionType getType() { return fn("Int", "Int"); }
+    public FunctionType getType() { return fn("String", "Int"); }
   }
 
   public static class IntPlus extends NativeMethod {
