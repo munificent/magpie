@@ -1,0 +1,18 @@
+class Foo
+end
+
+def Foo addFields()
+    this onThis = "this added"
+    implicitThis = "added"
+end
+
+def Foo getField()
+    implicitThis
+end
+
+var foo = Foo new
+foo addFields
+
+print(foo onThis)       //: this added
+print(foo implicitThis) //: added
+print(foo getField)     //: added

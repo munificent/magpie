@@ -67,9 +67,12 @@ Syntax
     list insert("item" at: 3)
   which desugars to:
     list insert:at("item", 3)
+- Map and/or set literals?
+- Pattern-matching or switch?
 
 Library
 - Reorganize and clean up the type stuff.
+- Conversion and casting methods (is, as, explicit cast).
 
 Other
 - A well-defined package/import/namespace system including nice syntax.

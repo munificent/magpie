@@ -330,6 +330,21 @@ public class Interpreter {
     Callable method = receiver.getClassObj().findMethod(name);
     
     if (method == null) {
+      // If there isn't an actual method, then calling a setter defaults to
+      // creating a field with the given name.
+      if (Identifiers.isSetter(name)) {
+        String field = Identifiers.getSetterBaseName(name);
+        receiver.setField(field, arg);
+        return arg;
+      }
+      
+      // If that fails, see if we can find a field with the name.
+      Obj field = receiver.getField(name);
+      if (field != null) {
+        // TODO(bob): Should it invoke it if given an argument?
+        return field;
+      }
+      
       runtimeError(position,
           "Could not find a variable or method named \"%s\" on %s.",
           name, receiver.getClassObj());

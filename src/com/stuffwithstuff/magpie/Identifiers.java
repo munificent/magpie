@@ -20,6 +20,24 @@ public final class Identifiers {
   public static final String CURRENT = "current";
   public static final String UNSAFE_REMOVE_NOTHING = "unsafeRemoveNothing";
   
+  /**
+   * Gets whether or not this method name could be a setter (i.e. "foo=").
+   * @param   name  The full name of the method.
+   * @return        True if the name is a setter.
+   */
+  public static boolean isSetter(String name) {
+    return name.endsWith("=");
+  }
+  
+  /**
+   * Given a setter name like "foo=", returns the base name "foo".
+   * @param  setter  The name of the setter method.
+   * @return         The base name of the field being set.
+   */
+  public static String getSetterBaseName(String setter) {
+    return setter.substring(0, setter.length() - 1);
+  }
+  
   public static String makeSetter(String baseName) {
     return baseName + "=";
   }
