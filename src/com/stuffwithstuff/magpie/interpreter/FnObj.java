@@ -23,6 +23,9 @@ public class FnObj extends Obj implements Callable {
     // Create a new local scope for the function.
     EvalContext context = new EvalContext(mClosure, thisObj).nestScope();
     
+    // A missing argument is implied nothing.
+    if (arg == null) arg = interpreter.nothing();
+    
     // Bind arguments to their parameter names.
     List<String> params = mFunction.getType().getParamNames();
     if (params.size() == 1) {

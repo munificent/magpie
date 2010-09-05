@@ -14,7 +14,7 @@ public abstract class Expr {
   }
   
   public static Expr message(Expr receiver, String name, Expr arg) {
-    return new MessageExpr(Position.none(), null, name, arg);
+    return new MessageExpr(Position.none(), receiver, name, arg);
   }
   
   public static Expr name(String name) {

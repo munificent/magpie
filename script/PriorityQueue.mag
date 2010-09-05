@@ -1,0 +1,99 @@
+// This implements a priority queue using a heap as the backing data structure.
+// It demonstrates interfaces and generics (or, it will once those are
+// implemented.)
+
+class PriorityQueue
+    this()
+        this heap = Array new
+    end
+end
+
+// The following methods "traverse" the tree stored in the heap array. The tree
+// nodes are laid out in the array like the following:
+//    0
+//   / \
+//  1   2
+// / \ / \
+// 3 4 5 6
+// Because of this, given the index of a node, we can find its parent and
+// children using simple integer arithmetic.
+// TODO(bob): Note, presumes integer division.
+def PriorityQueue parent(index)     (index - 1) / 2
+def PriorityQueue leftChild(index)  (index * 2) + 1
+def PriorityQueue rightChild(index) (index * 2) + 2
+
+def PriorityQueue add(item)
+    // Add to the end of the heap.
+    heap add(item)
+    
+    // Re-heapify.
+    var index = heap count - 1
+    while index > 0 do
+        if heap(parent(index)) > heap(index) then
+            heap swap(index, parent(index))
+            index = parent(index)
+        else
+            index = 0
+            // TODO(bob): Could do 'break' here if we had it.
+        end
+    end
+end
+
+def PriorityQueue dequeue(item)
+    // Remove the top item.
+    var top = heap(0)
+    heap(0) = heap last
+    heap removeAt(heap count - 1)
+    
+    // Re-heapify.
+    var index = 0
+    while index < heap count do
+        var min = index
+        var left = leftChild(index)
+        var right = rightChild(index)
+        
+        if left < heap count and heap(left) < heap(min) then
+            min = left
+        end
+        
+        if right < heap count and heap(right) < heap(min) then
+            min = right
+        end
+        
+        if min != index then
+            heap swap(index, min)
+            index = min
+        else
+            // Terminate the loop.
+            index = heap count
+            // TODO(bob): A 'break' would be simpler here.
+        end
+    end
+    
+    top
+end
+
+def PriorityQueue addAll(items)
+    for item = items do add(item)
+end
+
+var expect(queue, items)
+    var success = true
+    for item = items do
+        var top = queue dequeue
+        if top != item then
+            print("FAIL: Expected " + item + " and got " + top)
+            success = false
+        end
+    end
+    
+    if success then print("Got all expected: " + items);
+end
+
+var queue = PriorityQueue new
+queue addAll(Array of(5, 2, 3, 4, 1))
+expect(queue, Array of(1, 2, 3, 4, 5))
+
+queue = PriorityQueue new
+queue addAll(Array of("e", "a", "c", "g", "h", "b", "d", "i", "f"))
+expect(queue, Array of("a", "b", "c", "d", "e", "f", "g", "h", "i"))
