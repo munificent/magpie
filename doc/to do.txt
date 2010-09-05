@@ -8,11 +8,11 @@ Types
     of allowed types by the end of the ctor.
   - Figure out if there's some way constructors can be extended to a) add new
     construction logic and/or b) add new fields.
-  - Allow duck typing classes too. Right now, you can only a value where a class
-    type is expected if that value's type is in the class's inheritance chain.
-    Should instead work like interfaces where only method matching is required.
-    This will help solve the brittle base class problem and make things like
-    mocking a lot easier.
+  - Masquerades. Two class cannot implicitly duck type to each other even if 
+    they have matching methods. However, there should be a "masquerade" function
+    that will take an instance of one class and return it typed to another if
+    they have compatible methods. This will allow things like mocks without
+    forcing users to make everything an interface up front.
 - Interfaces
   + Core imperative system to create and extend them.
   + Typing rules for them that allow other types to be assignable to them if 
@@ -49,8 +49,13 @@ Expressions
 - Closures
   - In theory, they're there and work, but they need tests and probably have 
     lots of bugs.
-- Floats, characters, and other atomic types.
+- Floats, characters, and other atomic types
   - Pretty much the full suite of what Java provides.
+- Static arguments
+  - In addition to a regular argument, a method can have a static argument like
+    foo[static](arg). It will be evaluated at *check* time, and bound to a name
+    that's available in the context used to evaluate type expressions. This
+    will let us handle type arguments for generics along with other stuff.
 
 Syntax
 - Function literals
@@ -69,6 +74,21 @@ Syntax
     list insert:at("item", 3)
 - Map and/or set literals?
 - Pattern-matching or switch?
+- Parsewords
+  Everything but the core message syntax should be moved out of Java into 
+  Magpie. In Magpie, you can register a parseword, a name keyword. When the
+  parser encounters that keyword, it calls a Magpie function that takes a parser
+  and returns an expression. Then things like if, for, class, etc. can be
+  implemented in Magpie. Users can then implement their own custom control
+  structures.
+- Annotations
+  Users should be able to attach annotations, arbitrary expressions attached to
+  other expressions. Those are executed and bound to the expression at check
+  time and runtime. There should then be an API to access those annotations.
+- Syntax literals and quasiquoting
+  An expression like { a + b } evaluates to a data structure for the AST. Useful
+  for metaprogramming and parsewords.
+  
 
 Library
 - Reorganize and clean up the type stuff.
@@ -82,3 +102,4 @@ Other
   different callstacks, basically.
 - TCO.
 - Exceptions. (Or, ideally, something closer to CL's condition system.)
+- Implement test infrastructure in Magpie (at least for as much as possible).
