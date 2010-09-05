@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.Script;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.util.Expect;
@@ -26,13 +27,52 @@ public abstract class NativeMethod implements Callable {
   }
   
   protected static FunctionType fn(Expr paramType, Expr returnType) {
-    return new FunctionType(new ArrayList<String>(), paramType, returnType);
+    List<String> paramNames = new ArrayList<String>();
+    // If there is a param (or multiple), give it a name.
+    boolean isNothing =((paramType instanceof MessageExpr) &&
+        ((MessageExpr)paramType).getName().equals("Nothing"));
+    
+    if (!isNothing) {
+      paramNames.add("___");
+    }
+    
+    return new FunctionType(paramNames, paramType, returnType);
   }
 
   // TODO(bob): Many of these just use dynamic in their type signature. Would be
   // good to change to something more specific when possible.
 
   // Array methods:
+  
+  public static class ArrayOf extends NativeMethod {
+    @Override
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      List<Obj> elements = new ArrayList<Obj>();
+      if (arg == interpreter.nothing()) {
+        // zero element array
+      } else {
+        Obj countObj = arg.getField(Identifiers.COUNT);
+        // TODO(bob): Hackish. Checks for "count" to decide if arg is a tuple.
+        // Should do something smarter.
+        if (countObj != null) {
+          int count = countObj.asInt();
+          
+          for (int i = 0; i < count; i++) {
+            elements.add(arg.getTupleField(i));
+          }
+        } else {
+         // a non-tuple arg means a one-element array
+          elements.add(arg);
+        }
+      }
+      
+      return interpreter.createArray(elements);
+    }
+    
+    // TODO(bob): Gross. Always return Object[]
+    public FunctionType getType() { return fn("Dynamic",
+        Expr.message(Expr.name("Array"), "newType", Expr.name("Object"))); }
+  }
   
   public static class ArrayCount extends NativeMethod {
     @Override
@@ -341,10 +381,6 @@ public abstract class NativeMethod implements Callable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();
       // TODO(bob): Arg type is ignored since there is no overloading yet.
-      
-      if (name.equals("unsafeRemoveType")) {
-        System.out.println("!!!");
-      }
       
       ClassObj thisClass = (ClassObj)thisObj;
       Callable method = thisClass.findMethod(name);

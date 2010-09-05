@@ -5,18 +5,14 @@ import com.stuffwithstuff.magpie.parser.Position;
 // TODO(bob): Get rid of this. We should be able to have the parser just desugar
 // this to a regular MessageExpr.
 public class AssignExpr extends Expr {
-  public AssignExpr(Position position, Expr target, String name, Expr targetArg, Expr value) {
+  public AssignExpr(Position position, String name, Expr value) {
     super(position);
     
-    mTarget = target;
     mName = name;
-    mTargetArg = targetArg;
     mValue = value;
   }
   
-  public Expr getTarget() { return mTarget; }
   public String getName() { return mName; }
-  public Expr getTargetArg() { return mTargetArg; }
   public Expr getValue() { return mValue; }
   
   @Override
@@ -28,8 +24,6 @@ public class AssignExpr extends Expr {
     return mName + " = " + mValue;
   }
 
-  private final Expr mTarget;
   private final String mName;
-  private final Expr mTargetArg;
   private final Expr mValue;
 }

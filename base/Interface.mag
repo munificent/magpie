@@ -6,11 +6,11 @@
 class Interface
     this(name String)
         this name = name
-        this methods = []
+        this methods = Array new
     end
     
     name    String
-    methods Method[]
+    methods ArrayType new(Method)
 end
 
 def Interface toString(-> String) name

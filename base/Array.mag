@@ -13,21 +13,23 @@ def ArrayIterator next(-> Bool)
     index < array count
 end
 
-def ArrayIterator current() array[index]
+def ArrayIterator current() array(index)
+
+shared Array new(-> ArrayType new(Object)) Array of()
 
 def Array iterate(-> ArrayIterator) ArrayIterator new(this)
 
 def Array toString(-> String)
     var text = "["
     for i = 0 until(count) do
-        text = text + this[i] toString
+        text = text + this(i) toString
         if i < (count - 1) then text = text + ", "
     end
     text + "]"
 end
 
 def Array copy(-> Array)
-    var result = []
+    var result = Array new
     for item = this do result add(item)
     result
 end
@@ -38,10 +40,10 @@ def Array sortByString(-> Array)
     // TODO(bob): Awful bubble sort FTW!
     for i = 0 until(result count) do
         for j = (i + 1) until(result count) do
-            if result[i] toString > result[j] toString then
-                var temp = result[i]
-                result[i] = result[j]
-                result[j] = temp
+            if result(i) toString > result(j) toString then
+                var temp = result(i)
+                result(i) = result(j)
+                result(j) = temp
             end
         end
     end
@@ -49,12 +51,12 @@ def Array sortByString(-> Array)
     result
 end
 
-def Array unique(-> Object[])
-    var result = []
+def Array unique(-> ArrayType new(Object))
+    var result = Array new
     for item = this do
         if result count == 0 then result add(item)
         else
-            if result[-1] != item then result add(item)
+            if result(-1) != item then result add(item)
         end
     end
     
@@ -108,12 +110,4 @@ end
 
 def ArrayType getMethodType(name String, arg)
     Array getMethodType(name, arg)
-end
-
-// If you call [] on a class like, it returns the type of an array of this
-// class.
-// TODO(bob): This should be moved to Type, which should be what Class, Tuple,
-// and Array inherit from.
-def Class [](-> ArrayType)
-    ArrayType new(this)
 end

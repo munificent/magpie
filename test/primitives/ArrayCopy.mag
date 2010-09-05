@@ -1,9 +1,9 @@
-var a = [1, true, "three"]
+var a = Array of(1, true, "three")
 var b = a copy
 a clear
 
 print(a count) //: 0
 print(b count) //: 3
-print(b[0]) //: 1
-print(b[1]) //: true
-print(b[2]) //: three
+print(b(0)) //: 1
+print(b(1)) //: true
+print(b(2)) //: three

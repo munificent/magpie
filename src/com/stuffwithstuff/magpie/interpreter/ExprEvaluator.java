@@ -1,6 +1,5 @@
 package com.stuffwithstuff.magpie.interpreter;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -28,17 +27,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
-  public Obj visit(ArrayExpr expr, EvalContext context) {
-    // Evaluate the elements.
-    List<Obj> elements = new ArrayList<Obj>(expr.getElements().size());
-    for (int i = 0; i < expr.getElements().size(); i++) {
-      elements.add(evaluate(expr.getElements().get(i), context));
-    }
-
-    return mInterpreter.createArray(elements);
-  }
-
-  @Override
   public Obj visit(AndExpr expr, EvalContext context) {
     Obj left = evaluate(expr.getLeft(), context);
         
@@ -52,34 +40,14 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(AssignExpr expr, EvalContext context) {
     String name = expr.getName();
-    String setter = Identifiers.makeSetter(name);
     
-    if (expr.getTarget() == null) {
-      // No target means we're just assigning to a variable (or field of this)
-      // with the given name.
-      Obj value = evaluate(expr.getValue(), context);
-      
-      // Try to assign to a local.
-      if (context.assign(name, value)) return value;
-      
-      // Otherwise, it must be a setter on this.
-      return mInterpreter.invokeMethod(expr, context.getThis(), setter, value);
-    } else {
-      // The target of the assignment is an actual expression, like a.b = c
-      Obj target = evaluate(expr.getTarget(), context);
-      Obj value = evaluate(expr.getValue(), context);
-
-      // If the assignment statement has an argument and a value, like:
-      // a b(c) = v (c is the arg, v is the value)
-      // then bundle them together:
-      if (expr.getTargetArg() != null) {
-        Obj targetArg = evaluate(expr.getTargetArg(), context);
-        value = mInterpreter.createTuple(targetArg, value);
-      }
-
-      // Invoke the setter method.
-      return mInterpreter.invokeMethod(expr, target, setter, value);
-    }
+    // Try to assign to a local.
+    Obj value = evaluate(expr.getValue(), context);    
+    if (context.assign(name, value)) return value;
+    
+    // Otherwise, it must be a setter on this.
+    String setter = Identifiers.makeSetter(name);
+    return mInterpreter.invokeMethod(expr, context.getThis(), setter, value);
   }
 
   @Override
@@ -160,16 +128,16 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     // Define the shared methods.
     for (Entry<String, List<FnExpr>> methods : expr.getSharedMethods().entrySet()) {
       for (FnExpr method : methods.getValue()) {
-        FnObj methodObj = mInterpreter.createFn(method, context.getScope());
-        metaclass.addMethod(methods.getKey(), methodObj);
+        FnObj fnObj = mInterpreter.createFn(method, context.getScope());
+        metaclass.addMethod(methods.getKey(), fnObj);
       }
     }
     
     // Define the instance methods.
     for (Entry<String, List<FnExpr>> methods : expr.getMethods().entrySet()) {
       for (FnExpr method : methods.getValue()) {
-        FnObj methodObj = mInterpreter.createFn(method, context.getScope());
-        classObj.addMethod(methods.getKey(), methodObj);
+        FnObj fnObj = mInterpreter.createFn(method, context.getScope());
+        classObj.addMethod(methods.getKey(), fnObj);
       }
     }
     

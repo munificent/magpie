@@ -77,7 +77,7 @@ public class TestInterpreterHost implements InterpreterHost {
             }
             
             if (!found) {
-              fail("Found an unexpected error on line " + error.getLine() +
+              fail("Found an unexpected error on " + error.getPosition() +
                   ": " + error.getMessage());
             }
           }

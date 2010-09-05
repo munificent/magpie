@@ -98,6 +98,7 @@ public class ConditionalExprParser implements ExprParser {
       elseExpr = new NothingExpr(parser.last(1).getPosition());
     }
     
+    /*
     // TODO(bob): For testing, compile simple if expressions to something that
     // just uses local functions.
     if ((conditions.size() == 1) && !conditions.get(0).isLet()) {
@@ -106,6 +107,7 @@ public class ConditionalExprParser implements ExprParser {
           Expr.fn(thenExpr),
           Expr.fn(elseExpr)));
     }
+    */
     
     return new IfExpr(startPos.union(elseExpr.getPosition()),
         conditions, thenExpr, elseExpr);

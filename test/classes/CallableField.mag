@@ -1,0 +1,20 @@
+class Foo
+    this()
+        items = Array of(1, 2, 3)
+        declaredItems = Array of(4, 5, 6)
+    end
+    
+    // this will cause the field to be wrapped in a getter
+    declaredItems Int[]
+end
+
+def Foo test()
+    print(items)    //: [1, 2, 3]
+    print(items(1)) //: 2
+
+    print(declaredItems)    //: [4, 5, 6]
+    print(declaredItems(1)) //: 5
+end
+
+var foo = Foo new
+foo test

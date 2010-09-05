@@ -2,6 +2,7 @@ package com.stuffwithstuff.magpie.parser;
 
 import java.util.*;
 
+import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.*;
 
 public class MagpieParser extends Parser {
@@ -141,8 +142,6 @@ public class MagpieParser extends Parser {
     while (!lookAheadAny(TokenType.ARROW, TokenType.RIGHT_PAREN)){
       paramNames.add(consume(TokenType.NAME).getString());
       
-      // TODO(bob): Need to handle named parameter with no type as a dynamic
-      // parameter.
       if (!lookAheadAny(TokenType.ARROW, TokenType.COMMA, TokenType.RIGHT_PAREN)) {
         paramTypes.add(parseTypeExpression());
       } else {
@@ -198,8 +197,42 @@ public class MagpieParser extends Parser {
       if (expr instanceof MessageExpr) {
         MessageExpr message = (MessageExpr) expr;
         
-        return new AssignExpr(position,
-            message.getReceiver(), message.getName(), message.getArg(), value);
+        // Based on whether or not the left-hand side has a target or an
+        // argument, there are four different flavors of assignment. The
+        // simplest is no target and no target argument, like:
+        //
+        //    name = value
+        //
+        // This is the only case that actually becomes an assignment expression.
+        // The other cases all desugar to a regular method call like so:
+        //
+        // name = value              -->  name = value
+        // name(arg) = value         -->  name call=(arg, value)
+        // target name = value       -->  target name=(value)
+        // target name(arg) = value  -->  target name=(arg, value)
+
+        if (message.getReceiver() == null) {
+          if (message.getArg() == null) {
+            // name = value
+            return new AssignExpr(position, message.getName(), value);
+          } else {
+            // name(arg) = value  -->  name call=(arg, value)
+            return new MessageExpr(position, Expr.name(message.getName()),
+                Identifiers.CALL_ASSIGN, Expr.tuple(message.getArg(), value));
+          }
+        } else {
+          if (message.getArg() == null) {
+            // target name = value  -->  target name=(value)
+            return new MessageExpr(position, message.getReceiver(),
+                Identifiers.makeSetter(message.getName()), value);
+          } else {
+            // target name(arg) = value  -->  target name=(arg, value)
+            return new MessageExpr(position, message.getReceiver(),
+                Identifiers.makeSetter(message.getName()),
+                Expr.tuple(message.getArg(), value));
+          }
+        }
+        
       } else {
         throw new ParseException("Expression \"" + expr +
         "\" is not a valid target for assignment.");
@@ -354,16 +387,6 @@ public class MagpieParser extends Parser {
       Expr expr = parseExpression();
       consume(TokenType.RIGHT_PAREN);
       return expr;
-    } else if (match(TokenType.LEFT_BRACKET, TokenType.RIGHT_BRACKET)) {
-      Position position = last(2).getPosition().union(last(1).getPosition());
-      List<Expr> elements = new ArrayList<Expr>();
-      return new ArrayExpr(position, elements);
-    } else if (match(TokenType.LEFT_BRACKET)) {
-      Position position = last(1).getPosition();
-      List<Expr> elements = parseCommaList();
-      consume(TokenType.RIGHT_BRACKET);
-      position = position.union(last(1).getPosition());
-      return new ArrayExpr(position, elements);
     }
     
     return null;

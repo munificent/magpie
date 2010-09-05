@@ -50,46 +50,6 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     return result;
   }
 
-
-  @Override
-  public Obj visit(ArrayExpr expr, EvalContext context) {
-    // Try to infer the element type from the contents. The rules (which may
-    // change over time) are:
-    // 1. An empty array has element type Dynamic.
-    // 2. If all elements are == to the first, that's the element type.
-    // 3. Otherwise, it's Object.
-    
-    // Other currently unsupported options would be:
-    // For classes, look for a common base class.
-    // For unrelated types, | them together.
-
-    List<Expr> elements = expr.getElements();
-    
-    Obj elementType;
-    if (elements.size() == 0) {
-      elementType = mInterpreter.getObjectType();
-    } else {
-      // Get the first element's type.
-      elementType = check(elements.get(0), context);
-      
-      // Compare all of the others to it, if any.
-      if (elements.size() > 1) {
-        for (int i = 1; i < elements.size(); i++) {
-          Obj other = check(elements.get(i), context);
-          Obj result = mInterpreter.invokeMethod(expr, elementType, Identifiers.EQUALS, other);
-          if (!result.asBool()) {
-            // No match, so default to Object.
-            elementType = mInterpreter.getObjectType();
-            break;
-          }
-        }
-      }
-    }
-    
-    Obj arrayType = mInterpreter.getArrayType();
-    return mInterpreter.invokeMethod(expr, arrayType, Identifiers.NEW_TYPE, elementType);
-  }
-  
   @Override
   public Obj visit(AndExpr expr, EvalContext context) {
     // TODO(bob): Should eventually check that both arms implement ITrueable
@@ -103,55 +63,35 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(AssignExpr expr, EvalContext context) {
     String name = expr.getName();
-    String setter = Identifiers.makeSetter(name);
     
-    if (expr.getTarget() == null) {
-      // No target means we're just assigning to a variable (or field of this)
-      // with the given name.
-      Obj valueType = check(expr.getValue(), context);
+    // Try to assign to a local.
+    Obj valueType = check(expr.getValue(), context);
+    Obj existingType = context.lookUp(name);
+    if (existingType != null) {
+      if (context.getScope().get(name) != null) {
+        // In the current scope, so just override the type.
+        context.assign(name, valueType);
+      } else {
+        // In an outer scope, so combine the types. This handles cases where we
+        // assign inside a conditional. When that occurs, the variable's type
+        // may be the previous one or the new one. For example:
+        //
+        // var a = 123
+        // if foo then a = "hi"
+        // 
+        // After that, a's static type will be Int | String
+        Obj combinedType = orTypes(existingType, valueType);
+        context.assign(name, combinedType);
+      }
       
-      // Try to assign to a local.
-      Obj existingType = context.lookUp(name);
-      if (existingType != null) {
-        if (context.getScope().get(name) != null) {
-          // In the current scope, so just override the type.
-          context.assign(name, valueType);
-        } else {
-          // In an outer scope, so combine the types. This handles cases where we
-          // assign inside a conditional. When that occurs, the variable's type
-          // may be the previous one or the new one. For example:
-          //
-          // var a = 123
-          // if foo then a = "hi"
-          // 
-          // After that, a's static type will be Int | String
-          Obj combinedType = orTypes(existingType, valueType);
-          context.assign(name, combinedType);
-        }
-        
-        // In either case, the assignment expression itself returns the new
-        // value.
-        return valueType;
-      }
-
-      // Otherwise, it must be a setter on this.
-      return getMethodReturn(expr, context.getThis(), setter, valueType);
-    } else {
-      // The target of the assignment is an actual expression, like a.b = c
-      Obj targetType = check(expr.getTarget(), context);
-      Obj valueType = check(expr.getValue(), context);
-
-      // If the assignment statement has an argument and a value, like:
-      // a b(c) = v (c is the arg, v is the value)
-      // then bundle them together:
-      if (expr.getTargetArg() != null) {
-        Obj targetArg = check(expr.getTargetArg(), context);
-        valueType = mInterpreter.createTuple(targetArg, valueType);
-      }
-
-      // Check the setter method.
-      return getMethodReturn(expr, targetType, setter, valueType);
+      // In either case, the assignment expression itself returns the new
+      // value.
+      return valueType;
     }
+
+    // Otherwise, it must be a setter on this.
+    String setter = Identifiers.makeSetter(name);
+    return getMethodReturn(expr, context.getThis(), setter, valueType);
   }
 
   @Override
@@ -363,6 +303,21 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     // return type, or nothing if the method cannot be handled by the object.
     Obj paramType = methodType.getTupleField(0);
     Obj returnType = methodType.getTupleField(1);
+    
+    // If the paramType is Nothing and the argType is not, then we'll treat the
+    // return type as callable and call it with the argType. For example, given:
+    //
+    //    foo bar(123)
+    //
+    // If bar is declared to take Nothing then that expression is shorthand for
+    //
+    //    foo bar()(123)
+    //
+    // So we'll make that translation here.
+    if ((paramType == mInterpreter.getNothingType()) &&
+        (argType != mInterpreter.getNothingType())) {
+      return getMethodReturn(expr, returnType, Identifiers.CALL, argType);
+    }
     
     // Make sure the argument type matches the declared parameter type.
     Obj matches = mInterpreter.invokeMethod(paramType,

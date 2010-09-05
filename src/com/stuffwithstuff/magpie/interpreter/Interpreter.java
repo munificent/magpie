@@ -51,9 +51,10 @@ public class Interpreter {
     mClass.setParent(mObjectClass);
     
     mArrayClass = createGlobalClass("Array");
+    mArrayClass.getClassObj().addMethod("of", new NativeMethod.ArrayOf());
     mArrayClass.addMethod("count", new NativeMethod.ArrayCount());
-    mArrayClass.addMethod("[]", new NativeMethod.ArrayGetElement());
-    mArrayClass.addMethod("[]=", new NativeMethod.ArraySetElement());
+    mArrayClass.addMethod("call", new NativeMethod.ArrayGetElement());
+    mArrayClass.addMethod("call=", new NativeMethod.ArraySetElement());
     mArrayClass.addMethod("add", new NativeMethod.ArrayAdd());
     mArrayClass.addMethod("insert", new NativeMethod.ArrayInsert());
     mArrayClass.addMethod("removeAt", new NativeMethod.ArrayRemoveAt());
@@ -300,7 +301,7 @@ public class Interpreter {
       tuple.setField(name, fields.get(i));
     }
     
-    tuple.setField("count", createInt(fields.size()));
+    tuple.setField(Identifiers.COUNT, createInt(fields.size()));
     
     return tuple;
   }
@@ -327,32 +328,63 @@ public class Interpreter {
   }
 
   private Obj invokeMethod(Position position, Obj receiver, String name, Obj arg) {
+    // Look up the member.
     Callable method = receiver.getClassObj().findMethod(name);
-    
-    if (method == null) {
-      // If there isn't an actual method, then calling a setter defaults to
-      // creating a field with the given name.
-      if (Identifiers.isSetter(name)) {
-        String field = Identifiers.getSetterBaseName(name);
-        receiver.setField(field, arg);
-        return arg;
+    if (method != null) {
+      // There's a special case we need to handle here. Consider:
+      //
+      //    foo bar(123)
+      //
+      // There are actually two ways to interpret it:
+      // 1. Call a method 'bar' on foo, passing 123.
+      // 2. Call a method 'bar' on foo with no argument, then call 'call' on the
+      //    result, passing 123.
+      // Scenario 2 comes up when 'bar' is a field getter and the field is
+      // a callable, like an array. To avoid having to do foo bar()(123), we'll
+      // do something a little sneaky: If the method being called doesn't take
+      // an argument, we'll invoke it without one, then immediately call the
+      // result with the argument.
+      if ((method.getType().getParamNames().size() == 0) &&
+          (arg != null) && (arg != mNothing)) {
+        Obj result = method.invoke(this, receiver, null);
+        
+        // Now invoke the result of the method with the argument.
+        if (arg != null) {
+          result = invokeMethod(position, result, Identifiers.CALL, arg);
+        }
+        
+        return result;
+      } else {
+        // Just a regular method call.
+        return method.invoke(this, receiver, arg);
       }
-      
-      // If that fails, see if we can find a field with the name.
-      Obj field = receiver.getField(name);
-      if (field != null) {
-        // TODO(bob): Should it invoke it if given an argument?
-        return field;
-      }
-      
-      runtimeError(position,
-          "Could not find a variable or method named \"%s\" on %s.",
-          name, receiver.getClassObj());
-      
-      return mNothing;
     }
     
-    return method.invoke(this, receiver, arg);
+    // If there isn't an actual method, then calling a setter defaults to
+    // creating a field with the given name.
+    if (Identifiers.isSetter(name)) {
+      String field = Identifiers.getSetterBaseName(name);
+      receiver.setField(field, arg);
+      return arg;
+    }
+    
+    // If that fails, see if we can find a field with the name.
+    Obj field = receiver.getField(name);
+    if (field != null) {
+      // If we have an argument, treat the field like a callable.
+      if (arg != null) {
+        return invokeMethod(position, field, Identifiers.CALL, arg);
+      }
+      
+      // Otherwise just return the field itself.
+      return field;
+    }
+    
+    runtimeError(position,
+        "Could not find a variable or method named \"%s\" on %s.",
+        name, receiver.getClassObj());
+    
+    return mNothing;
   }
   
   private void runtimeError(Position position, String format, Object... args) {

@@ -1,2 +1,2 @@
-print(Int[])              //: Int[]
-print(Bool[] elementType) //: Bool
+print(ArrayType new(Int))              //: Int[]
+print(ArrayType new(Bool) elementType) //: Bool

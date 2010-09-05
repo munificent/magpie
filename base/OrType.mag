@@ -3,13 +3,13 @@ class OrType
         this cases = cases
     end
     
-    cases Dynamic[] // TODO(bob): IType[Int]
+    cases ArrayType new(Dynamic) // TODO(bob): IType[Int]
 end
 
 def OrType toString(-> String)
     var result = ""
     for index = 0 until(cases count) do
-        result = result + cases[index] toString
+        result = result + cases(index) toString
         if index < (cases count - 1) then result = result + " | "
     end
     result
@@ -39,7 +39,7 @@ def OrType canAssignFrom(other -> Bool)
 end
 
 def OrType getMethodType(name String, arg)
-    var firstType = cases[0] getMethodType(name, arg)
+    var firstType = cases(0) getMethodType(name, arg)
     
     for type = cases do
         var method = type getMethodType(name, arg)
@@ -57,13 +57,13 @@ def OrType getMethodType(name String, arg)
 end
 
 def OrType unsafeRemoveNothing(-> Dynamic)
-    var remaining = []
+    var remaining = Array new
     for type = cases do
         if type != Nothing then remaining add(type)
     end
 
     // If just one case remains, there's no or.
-    if remaining count == 1 then return remaining[0]
+    if remaining count == 1 then return remaining(0)
     
     // Create a new OrType with what's left.
     OrType new(remaining)
