@@ -1,0 +1,11 @@
+class Foo
+    noArgs() print("noArgs")
+    oneArg(arg String) print("oneArg " + arg)
+    
+    shared noArgs() print("shared noArgs")
+end
+
+var foo = Foo new
+foo noArgs              //: noArgs
+foo oneArg("one")       //: oneArg one
+Foo noArgs              //: shared noArgs

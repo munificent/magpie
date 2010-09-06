@@ -34,26 +34,18 @@ public class ClassExprParser implements ExprParser {
       // There are seven kinds of things that can appear in a class body. Each
       // gets desugared to an imperative call.
       //
-      // constructor:
-      // this (bar Bar) ...
-      // Foo defineConstructor(fn(bar Bar) ...)
-      //
-      // field declaration:
-      // x Int
-      // Foo declareField("x", fn() Int)
-      //
-      // field definition:
-      // y = 123
-      // Foo defineField("y", fn() 123)
-      //
-      // shared field definition:
-      // shared y = 123
-      // Foo y=(123)
+      // this (bar Bar) ...   -->  Foo defineConstructor(fn(bar Bar) ...)
+      // x Int                -->  Foo declareField("x", fn() Int)
+      // y = 123              -->  Foo defineField("y", fn() 123)
+      // shared y = 123       -->  Foo y=(123)
+      // bar(arg) ...         -->  Foo defineMethod("bar", fn(arg) ...)
+      // shared bar(arg) ...  -->  Foo type defineMethod("bar", fn(arg) ...)
+      
       // TODO(bob): Allow method definitions in here too.
       if (parser.match(TokenType.THIS)) {
         // Constructor.
         FnExpr body = parser.parseFunction();
-        exprs.add(Expr.message(Expr.name(name), "defineConstructor", body));
+        exprs.add(Expr.message(Expr.name(name), Identifiers.DEFINE_CONSTRUCTOR, body));
       } else {
         // Member declaration.
         boolean isShared = parser.match(TokenType.SHARED);
@@ -68,18 +60,26 @@ public class ClassExprParser implements ExprParser {
             // Foo a=(123)
             exprs.add(Expr.message(Expr.name(name), Identifiers.makeSetter(member), body));
           } else {
-            exprs.add(Expr.message(Expr.name(name), "defineField", Expr.tuple(
-                Expr.string(member), Expr.fn(body))));
+            exprs.add(Expr.message(Expr.name(name), Identifiers.DEFINE_FIELD,
+                Expr.tuple(Expr.string(member), Expr.fn(body))));
           }
-
+        } else if (parser.lookAhead(TokenType.LEFT_PAREN)) {
+          // Method definition.
+          Expr receiver = Expr.name(name);
+          if (isShared) {
+            receiver = Expr.message(receiver, Identifiers.TYPE);
+          }
+          Expr function = parser.parseFunction();
+          exprs.add(Expr.message(receiver, Identifiers.DEFINE_METHOD,
+              Expr.tuple(Expr.string(member), function)));
         } else {
           // Field declaration.
           if (isShared) throw new ParseException(
               "Field declarations cannot be shared.");
           
           Expr type = parser.parseTypeExpression();
-          exprs.add(Expr.message(Expr.name(name), "declareField", Expr.tuple(
-              Expr.string(member), Expr.fn(type))));
+          exprs.add(Expr.message(Expr.name(name), Identifiers.DECLARE_FIELD,
+              Expr.tuple(Expr.string(member), Expr.fn(type))));
         }
       }
       parser.consume(TokenType.LINE);
