@@ -1,8 +1,13 @@
 package com.stuffwithstuff.magpie.parser;
 
-import com.stuffwithstuff.magpie.ast.ClassExpr;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.stuffwithstuff.magpie.Identifiers;
+import com.stuffwithstuff.magpie.ast.BlockExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
+import com.stuffwithstuff.magpie.ast.VariableExpr;
 
 public class ClassExprParser implements ExprParser {
 
@@ -17,32 +22,38 @@ public class ClassExprParser implements ExprParser {
     
     parser.consume(TokenType.LINE);
     
-    ClassExpr classExpr = new ClassExpr(position, isExtend, name);
-    
-    // There are five kinds of things that can appear in a class body:
-    // class Foo
-    //     // 1. constructors
-    //     this (bar Bar) ...
-    //
-    //     // 2. field declarations
-    //     x Int
-    //
-    //     // 3. field definitions
-    //     y = 123
-    //
-    //     // 4. shared field declarations
-    //     shared x Int
-    //
-    //     // 5. shared field definitions
-    //     shared y = 123
-    // end
+    List<Expr> exprs = new ArrayList<Expr>();
+
+    // Declare the class:
+    // var Foo = Class newClass("Foo")
+    exprs.add(new VariableExpr(position, name,
+        Expr.message(Expr.name("Class"), "newClass", Expr.string(name))));
     
     // Parse the body.
     while (!parser.match(TokenType.END)) {
+      // There are seven kinds of things that can appear in a class body. Each
+      // gets desugared to an imperative call.
+      //
+      // constructor:
+      // this (bar Bar) ...
+      // Foo defineConstructor(fn(bar Bar) ...)
+      //
+      // field declaration:
+      // x Int
+      // Foo declareField("x", fn() Int)
+      //
+      // field definition:
+      // y = 123
+      // Foo defineField("y", fn() 123)
+      //
+      // shared field definition:
+      // shared y = 123
+      // Foo y=(123)
+      // TODO(bob): Allow method definitions in here too.
       if (parser.match(TokenType.THIS)) {
         // Constructor.
         FnExpr body = parser.parseFunction();
-        classExpr.defineConstructor(body);
+        exprs.add(Expr.message(Expr.name(name), "defineConstructor", body));
       } else {
         // Member declaration.
         boolean isShared = parser.match(TokenType.SHARED);
@@ -52,19 +63,28 @@ public class ClassExprParser implements ExprParser {
         if (parser.match(TokenType.EQUALS)) {
           // Field definition: "a = 123".
           Expr body = parser.parseBlock();
-          classExpr.defineField(isShared, member, body);
+          if (isShared) {
+            // Just assign the field immediately.
+            // Foo a=(123)
+            exprs.add(Expr.message(Expr.name(name), Identifiers.makeSetter(member), body));
+          } else {
+            exprs.add(Expr.message(Expr.name(name), "defineField", Expr.tuple(
+                Expr.string(member), Expr.fn(body))));
+          }
+
         } else {
           // Field declaration.
           if (isShared) throw new ParseException(
               "Field declarations cannot be shared.");
           
           Expr type = parser.parseTypeExpression();
-          classExpr.declareField(member, type);
+          exprs.add(Expr.message(Expr.name(name), "declareField", Expr.tuple(
+              Expr.string(member), Expr.fn(type))));
         }
       }
       parser.consume(TokenType.LINE);
     }
     
-    return classExpr;
+    return new BlockExpr(position, exprs, false);
   }
 }

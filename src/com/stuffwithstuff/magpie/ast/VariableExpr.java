@@ -17,12 +17,10 @@ public class VariableExpr extends Expr {
     return visitor.visit(this, context);
   }
 
-  @Override public String toString() {
-    StringBuilder builder = new StringBuilder();
-    
-    builder.append("var ").append(mName).append(" = ").append(mValue);
-    
-    return builder.toString();
+  @Override
+  public void toString(StringBuilder builder, String indent) {
+    builder.append("var ").append(mName).append(" = ");
+    mValue.toString(builder, indent);
   }
 
   private final String mName;

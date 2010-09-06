@@ -5,7 +5,6 @@ public interface ExprVisitor<R, C> {
   R visit(AssignExpr expr, C context);
   R visit(BlockExpr expr, C context);
   R visit(BoolExpr expr, C context);
-  R visit(ClassExpr expr, C context);
   R visit(FnExpr expr, C context);
   R visit(IfExpr expr, C context);
   R visit(IntExpr expr, C context);

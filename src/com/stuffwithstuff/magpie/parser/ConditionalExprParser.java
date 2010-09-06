@@ -84,7 +84,7 @@ public class ConditionalExprParser implements ExprParser {
       }
       
       position = position.union(parser.last(1).getPosition());
-      thenExpr = new BlockExpr(position, exprs);
+      thenExpr = new BlockExpr(position, exprs, true);
     } else {
       thenExpr = parser.parseExpression();
     }

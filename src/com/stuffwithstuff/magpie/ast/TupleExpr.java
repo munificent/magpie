@@ -32,5 +32,15 @@ public class TupleExpr extends Expr {
     return builder.toString();
   }
 
+  @Override
+  public void toString(StringBuilder builder, String indent) {
+    builder.append("(");
+    for (int i = 0; i < mFields.size(); i++) {
+      mFields.get(i).toString(builder, indent);
+      if (i < mFields.size() - 1) builder.append(", ");
+    }
+    builder.append(")");
+  }
+
   private final List<Expr> mFields;
 }

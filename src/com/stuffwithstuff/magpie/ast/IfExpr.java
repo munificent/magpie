@@ -23,19 +23,16 @@ public class IfExpr extends Expr {
     return visitor.visit(this, context);
   }
 
-  @Override public String toString() {
-    StringBuilder builder = new StringBuilder();
-    
+  @Override
+  public void toString(StringBuilder builder, String indent) {
     for (Condition condition : mConditions) {
-      builder.append(condition).append("\n");
+      builder.append(condition).append("\n").append(indent);
     }
-    builder.append("then\n")
-           .append("  ").append(mThen)
-           .append("else\n")
-           .append("  ").append(mElse)
-           .append("end");
-        
-    return builder.toString();
+    builder.append("then\n").append(indent);
+    mThen.toString(builder, indent + "    ");
+    builder.append("else\n").append(indent);
+    mElse.toString(builder, indent + "    ");
+    builder.append("\n").append(indent).append("end");
   }
 
   private final List<Condition> mConditions;

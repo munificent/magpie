@@ -15,8 +15,10 @@ public class TypeofExpr extends Expr {
     return visitor.visit(this, context);
   }
 
-  @Override public String toString() {
-    return "typeof " + mBody.toString();
+  @Override
+  public void toString(StringBuilder builder, String indent) {
+    builder.append("typeof ");
+    mBody.toString(builder, indent);
   }
   
   private final Expr mBody;

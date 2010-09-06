@@ -13,4 +13,9 @@ public class ThisExpr extends Expr {
   }
 
   @Override public String toString() { return "this"; }
+
+  @Override
+  public void toString(StringBuilder builder, String indent) {
+    builder.append("this");
+  }
 }

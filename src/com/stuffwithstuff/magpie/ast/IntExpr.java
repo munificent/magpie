@@ -17,5 +17,10 @@ public class IntExpr extends Expr {
 
   @Override public String toString() { return Integer.toString(mValue); }
 
+  @Override
+  public void toString(StringBuilder builder, String indent) {
+    builder.append(mValue);
+  }
+
   private final int mValue;
 }

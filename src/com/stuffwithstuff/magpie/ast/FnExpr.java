@@ -20,6 +20,12 @@ public class FnExpr extends Expr {
   public <R, C> R accept(ExprVisitor<R, C> visitor, C context) {
     return visitor.visit(this, context);
   }
+  
+  @Override
+  public void toString(StringBuilder builder, String indent) {
+    builder.append("fn (").append(mType).append(") ");
+    mBody.toString(builder, indent);
+  }
 
   private final FunctionType  mType;
   private final Expr          mBody;

@@ -17,7 +17,7 @@ def Interface toString(-> String) name
 
 def Interface canAssignFrom(other -> Bool)
     for method = methods do
-        var otherMethod = other getMethodType(method name, method argType)
+        var otherMethod = other getMethodType(method name, method paramType)
         
         // Must have method
         if otherMethod == nothing then return false

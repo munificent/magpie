@@ -29,9 +29,15 @@ public class Interpreter {
     // that all of the methods defined on Class are available in FooClass (i.e.
     // "name", "parent", etc.)
     mClass = new ClassObj("Class", null);
+    // TODO(bob): This shouldn't be an instance method on class. Instead, we
+    // should have a metaclass for Class, so that you can create a new class
+    // by doing Class new("Foo").
+    mClass.addMethod("newClass", new NativeMethod.ClassNewClass());
     mClass.addMethod("name", new NativeMethod.ClassGetName());
+    mClass.addMethod("defineConstructor", new NativeMethod.ClassDefineConstructor());
     mClass.addMethod("defineMethod", new NativeMethod.ClassDefineMethod());
-    mClass.addMethod("defineSharedMethod", new NativeMethod.ClassDefineSharedMethod());
+    mClass.addMethod("defineField", new NativeMethod.ClassDefineField());
+    mClass.addMethod("declareField", new NativeMethod.ClassDeclareField());
     mClass.addMethod("parent", new NativeMethod.ClassGetParent());
     mClass.addMethod("parent=", new NativeMethod.ClassSetParent());
     mClass.addMethod("getMethodType", new NativeMethod.ClassGetMethodType());

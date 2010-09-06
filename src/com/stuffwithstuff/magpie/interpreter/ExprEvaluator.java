@@ -1,8 +1,5 @@
 package com.stuffwithstuff.magpie.interpreter;
 
-import java.util.List;
-import java.util.Map.Entry;
-
 import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.*;
 
@@ -55,11 +52,13 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     Obj result = null;
     
     // Create a lexical scope.
-    EvalContext localContext = context.nestScope();
+    if (expr.createScope()) {
+      context = context.nestScope();
+    }
     
     // Evaluate all of the expressions and return the last.
     for (Expr thisExpr : expr.getExpressions()) {
-      result = evaluate(thisExpr, localContext);
+      result = evaluate(thisExpr, context);
     }
     
     return result;
@@ -68,111 +67,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(BoolExpr expr, EvalContext context) {
     return mInterpreter.createBool(expr.getValue());
-  }
-
-  @Override
-  public Obj visit(ClassExpr expr, EvalContext context) {
-    // Look up the class if we are extending one, otherwise create it.
-    ClassObj metaclass;
-    ClassObj classObj;
-    if (expr.isExtend()) {
-      // TODO(bob): Should this be a generic expression that returns a class?
-      // Like: class foo.bar.bang
-      Obj obj = context.lookUp(expr.getName());
-      
-      if (obj == null) {
-        mInterpreter.runtimeError(expr,
-            "Could not find a class object named \"%s\".", expr.getName());
-        return mInterpreter.nothing();
-      }
-      
-      if (!(obj instanceof ClassObj)) {
-        mInterpreter.runtimeError(expr, "Object \"%s\" is not a class.",
-            expr.getName());
-        return mInterpreter.nothing();
-      }
-      
-      classObj = (ClassObj)obj;
-      metaclass = classObj.getClassObj();
-    } else {
-      classObj = mInterpreter.createClass(expr.getName(), context.getScope());
-      metaclass = classObj.getClassObj();
-      
-      // Add the constructor method.
-      metaclass.addMethod(Identifiers.NEW, new NativeMethod.ClassNew(expr.getName()));
-    }
-    
-    // Add the constructors.
-    for (FnExpr constructorFn : expr.getConstructors()) {
-      FnObj fnObj = mInterpreter.createFn(constructorFn, context.getScope());
-      classObj.addConstructor(fnObj);
-    }
-    
-    // Evaluate and define the shared fields.
-    EvalContext classContext = context.withThis(classObj);
-    for (Entry<String, Expr> field : expr.getSharedFields().entrySet()) {
-      Obj value = evaluate(field.getValue(), classContext);
-      
-      classObj.setField(field.getKey(), value);
-      
-      // Add a getter.
-      metaclass.addMethod(field.getKey(),
-          new NativeMethod.ClassFieldGetter(field.getKey(), Expr.name("Dynamic")));
-      
-      // Add a setter.
-      String setter = Identifiers.makeSetter(field.getKey());
-      metaclass.addMethod(setter,
-          new NativeMethod.ClassFieldSetter(field.getKey(), Expr.name("Dynamic")));
-    }
-    
-    // Define the shared methods.
-    for (Entry<String, List<FnExpr>> methods : expr.getSharedMethods().entrySet()) {
-      for (FnExpr method : methods.getValue()) {
-        FnObj fnObj = mInterpreter.createFn(method, context.getScope());
-        metaclass.addMethod(methods.getKey(), fnObj);
-      }
-    }
-    
-    // Define the instance methods.
-    for (Entry<String, List<FnExpr>> methods : expr.getMethods().entrySet()) {
-      for (FnExpr method : methods.getValue()) {
-        FnObj fnObj = mInterpreter.createFn(method, context.getScope());
-        classObj.addMethod(methods.getKey(), fnObj);
-      }
-    }
-    
-    // Define the getters and setters for the fields.
-    for (String field : expr.getFields().keySet()) {
-      // Note that we don't provide type expressions for the fields here because
-      // we only know the initializer expression. We don't have an actual type
-      // annotation.
-      
-      // Add a getter.
-      classObj.addMethod(field,
-          new NativeMethod.ClassFieldGetter(field, Expr.name("Dynamic")));
-      
-      // Add a setter.
-      classObj.addMethod(Identifiers.makeSetter(field),
-          new NativeMethod.ClassFieldSetter(field, Expr.name("Dynamic")));
-    }
-    
-    for (Entry<String, Expr> entry : expr.getFieldDeclarations().entrySet()) {
-      // Add a getter.
-      classObj.addMethod(entry.getKey(),
-          new NativeMethod.ClassFieldGetter(entry.getKey(), entry.getValue()));
-      
-      // Add a setter.
-      classObj.addMethod(Identifiers.makeSetter(entry.getKey()),
-          new NativeMethod.ClassFieldSetter(entry.getKey(), entry.getValue()));
-    }
-    
-    // Add the field initializers to the class so it can evaluate them when an
-    // object is constructed.
-    classObj.defineFields(expr.getFields());
-    
-    // Define a variable for the class in the current scope.
-    context.define(expr.getName(), classObj);
-    return classObj;
   }
 
   @Override

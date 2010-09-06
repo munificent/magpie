@@ -20,11 +20,11 @@ public class MessageExpr extends Expr {
     return visitor.visit(this, context);
   }
 
-  @Override public String toString() {
-    StringBuilder builder = new StringBuilder();
-    
+  @Override
+  public void toString(StringBuilder builder, String indent) {
     if (mReceiver != null) {
-      builder.append(mReceiver).append(" ");
+      mReceiver.toString(builder, indent);
+      builder.append(" ");
     }
     
     builder.append(mName);
@@ -32,14 +32,12 @@ public class MessageExpr extends Expr {
     if (mArg != null) {
       builder.append("(");
       if (!(mArg instanceof NothingExpr)) {
-        builder.append(mArg);
+        mArg.toString(builder, indent);
       }
       builder.append(")");
     }
-    
-    return builder.toString();
   }
-  
+
   private final Expr mReceiver;
   private final String mName;
   private final Expr mArg;

@@ -77,7 +77,7 @@ public class LoopExprParser implements ExprParser {
 
       // Then execute the main body.
       innerBlock.add(body);
-      body = new BlockExpr(Position.none(), innerBlock);
+      body = new BlockExpr(Position.none(), innerBlock, true);
       
       // Create the generators outside the loop.
       List<Expr> outerBlock = new ArrayList<Expr>();
@@ -85,7 +85,7 @@ public class LoopExprParser implements ExprParser {
       
       // Then execute the loop.
       outerBlock.add(new LoopExpr(startPos.union(body.getPosition()), conditions, body));
-      return new BlockExpr(Position.none(), outerBlock);
+      return new BlockExpr(Position.none(), outerBlock, true);
     }
     
     return new LoopExpr(startPos.union(body.getPosition()), conditions, body);

@@ -32,4 +32,21 @@ Advantages for Go style:
 - Highlights the separation between state (the core class definition) and
   methods.
 
-A: No clear answer yet.
+A: There are advantages both ways. If you're adding a lot of methods to one class, then being able to do that in one block saves a lot of redundant typing, especially with long class names or generic classes:
+
+    def AbstractDictionary[Key, Value] blah...
+    def AbstractDictionary[Key, Value] blah...
+    def AbstractDictionary[Key, Value] blah...
+    def AbstractDictionary[Key, Value] blah...
+
+On the other hand, if you're adding a bunch of methods to different classes (i.e. avoiding the visitor pattern), the blocks are tedious:
+
+    extend AddExpr
+        evaluate(-> Int) left + right
+    end
+    extend IntExpr
+        evaluate(-> Int) value
+    end
+    ...
+
+The best solution may be to just support both.

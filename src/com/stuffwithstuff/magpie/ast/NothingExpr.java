@@ -12,5 +12,10 @@ public class NothingExpr extends Expr {
     return visitor.visit(this, context);
   }
 
-  @Override public String toString() { return "()"; }
+  @Override public String toString() { return "nothing"; }
+
+  @Override
+  public void toString(StringBuilder builder, String indent) {
+    builder.append("nothing");
+  }
 }

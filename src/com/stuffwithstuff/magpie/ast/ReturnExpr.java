@@ -19,5 +19,11 @@ public class ReturnExpr extends Expr {
     return "return " + mValue.toString();
   }
 
+  @Override
+  public void toString(StringBuilder builder, String indent) {
+    builder.append("return ");
+    mValue.toString(builder, indent);
+  }
+
   private final Expr mValue;
 }

@@ -64,7 +64,7 @@ public class MagpieParser extends Parser {
       }
       
       position = position.union(last(1).getPosition());
-      return new BlockExpr(position, exprs);
+      return new BlockExpr(position, exprs, true);
     } else {
       return parseExpression();
     }
@@ -83,7 +83,7 @@ public class MagpieParser extends Parser {
       match(TokenType.LINE);
 
       position = position.union(last(1).getPosition());
-      return new BlockExpr(position, exprs);
+      return new BlockExpr(position, exprs, true);
     } else {
       Expr expr = parseExpression();
       // Each if expression may be on its own line.
@@ -103,7 +103,7 @@ public class MagpieParser extends Parser {
       } while (!match(TokenType.END));
       
       position = position.union(last(1).getPosition());
-      return new BlockExpr(position, exprs);
+      return new BlockExpr(position, exprs, true);
     } else {
       return parseExpression();
     }

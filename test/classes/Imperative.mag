@@ -1,0 +1,14 @@
+// Tests the core imperative syntax for working with classes. The declarative
+// stuff is desugared to this.
+
+var Foo = Class newClass("Foo")
+
+Foo defineConstructor(fn (arg) print("ctor " + arg))
+Foo defineMethod("method", fn (arg) print("method " + arg))
+Foo type defineMethod("sharedMethod", fn (arg) print("shared " + arg))
+
+// TODO(bob): Field methods.
+
+var foo = Foo new("hi")   //: ctor hi
+foo method("hi")          //: method hi
+Foo sharedMethod("hi")    //: shared hi

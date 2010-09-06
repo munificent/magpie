@@ -12,6 +12,7 @@ public class ClassObj extends Obj {
     super(metaclass);
     mName = name;
     mParent = parent;
+    mFieldInitializers = new HashMap<String, Expr>();
   }
 
   public ClassObj(String name, ClassObj parent) {
@@ -72,8 +73,13 @@ public class ClassObj extends Obj {
     return mConstructor;
   }
   
+  // TODO(bob): Get rid of this.
   public void defineFields(Map<String, Expr> fields) {
     mFieldInitializers = fields;
+  }
+  
+  public void defineField(String name, Expr body) {
+    mFieldInitializers.put(name, body);
   }
   
   @Override

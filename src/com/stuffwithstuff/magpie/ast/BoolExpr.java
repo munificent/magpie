@@ -20,7 +20,10 @@ public class BoolExpr extends Expr {
     return visitor.visit(this, context);
   }
 
-  @Override public String toString() { return Boolean.toString(mValue); }
+  @Override
+  public void toString(StringBuilder builder, String indent) {
+    builder.append(mValue);
+  }
 
   private final boolean mValue;
 }

@@ -21,6 +21,13 @@ public class OrExpr extends Expr {
     return mLeft.toString() + " or " + mRight.toString();
   }
 
+  @Override
+  public void toString(StringBuilder builder, String indent) {
+    mLeft.toString(builder, indent);
+    builder.append(" or ");
+    mRight.toString(builder, indent);
+  }
+
   private final Expr mLeft;
   private final Expr mRight;
 }

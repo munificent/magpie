@@ -5,7 +5,7 @@ var foo = Foo new
 
 // Call primitive class manipulation methods.
 Foo defineMethod("sayHi", fn () print("hi"))
-Foo defineSharedMethod("sayHi", fn () print("shared hi"))
+Foo type defineMethod("sayHi", fn () print("shared hi"))
 
 foo sayHi   //: hi
 Foo sayHi   //: shared hi

@@ -3,6 +3,7 @@ package com.stuffwithstuff.magpie.parser;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.MessageExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.StringExpr;
@@ -51,7 +52,12 @@ public class DefineExprParser implements ExprParser {
     Expr function = parser.parseFunction();
     Expr arg = new TupleExpr(new StringExpr(method), function);
     
-    String addMethod = isShared ? "defineSharedMethod" : "defineMethod";
-    return new MessageExpr(startPos, message, addMethod, arg);
+    // If it's a shared method, walk up to the type (i.e. the class's metaclass
+    // and define it there.
+    if (isShared) {
+      message = Expr.message(message, "type");
+    }
+    
+    return new MessageExpr(startPos, message, Identifiers.DEFINE_METHOD, arg);
   }
 }

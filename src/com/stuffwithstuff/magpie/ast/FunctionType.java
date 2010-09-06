@@ -18,6 +18,34 @@ public class FunctionType {
   public Expr         getParamType()  { return mParamType; }
   public Expr         getReturnType() { return mReturnType; }
   
+  @Override
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+    
+    TupleExpr params = null;
+    if (mParamNames.size() > 1) {
+      params = (TupleExpr)mParamType;
+    }
+    
+    for (int i = 0; i < mParamNames.size(); i++) {
+      builder.append(mParamNames.get(i));
+      if (params != null) {
+        builder.append(params.getFields().get(i));
+      } else {
+        builder.append(mParamType);
+      }
+      
+      if (i < mParamNames.size() - 1) {
+        builder.append(", ");
+      }
+    }
+    
+    builder.append(" -> ");
+    builder.append(mReturnType);
+    
+    return builder.toString();
+  }
+  
   private final List<String> mParamNames;
   private final Expr         mParamType;
   private final Expr         mReturnType;

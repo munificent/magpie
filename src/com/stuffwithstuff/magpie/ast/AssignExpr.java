@@ -20,8 +20,10 @@ public class AssignExpr extends Expr {
     return visitor.visit(this, context);
   }
 
-  @Override public String toString() {
-    return mName + " = " + mValue;
+  @Override
+  public void toString(StringBuilder builder, String indent) {
+    builder.append(mName).append(" = ");
+    mValue.toString(builder, indent);
   }
 
   private final String mName;

@@ -11,6 +11,7 @@ public final class Identifiers {
   public static final String CALL = "call";
   public static final String CALL_ASSIGN = "call=";
   public static final String COUNT = "count";
+  public static final String DEFINE_METHOD = "defineMethod";
   public static final String OR = "|";
   public static final String GET_METHOD_TYPE = "getMethodType";
   public static final String CAN_ASSIGN_FROM = "canAssignFrom";

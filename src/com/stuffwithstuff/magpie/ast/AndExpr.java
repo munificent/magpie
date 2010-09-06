@@ -17,8 +17,11 @@ public class AndExpr extends Expr {
     return visitor.visit(this, context);
   }
 
-  @Override public String toString() {
-    return mLeft.toString() + " and " + mRight.toString();
+  @Override
+  public void toString(StringBuilder builder, String indent) {
+    mLeft.toString(builder, indent);
+    builder.append(" and ");
+    mRight.toString(builder, indent);
   }
 
   private final Expr mLeft;

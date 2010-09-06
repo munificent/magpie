@@ -99,11 +99,13 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     Obj result = null;
     
     // Create a lexical scope.
-    EvalContext localContext = context.nestScope();
+    if (expr.createScope()) {
+      context = context.nestScope();
+    }
     
     // Evaluate all of the expressions and return the last.
     for (Expr thisExpr : expr.getExpressions()) {
-      result = check(thisExpr, localContext);
+      result = check(thisExpr, context);
     }
     
     return result;
@@ -112,12 +114,6 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(BoolExpr expr, EvalContext context) {
     return mInterpreter.getBoolType();
-  }
-
-  @Override
-  public Obj visit(ClassExpr expr, EvalContext context) {
-    // TODO Auto-generated method stub
-    return mInterpreter.getNothingType();
   }
 
   @Override
