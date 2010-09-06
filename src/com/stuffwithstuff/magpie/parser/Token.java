@@ -52,6 +52,7 @@ public final class Token {
       case STRING: return "\"" + getString() + "\"";
 
       case ARROW: return "->";
+      case BREAK: return "break";
       case CASE: return "case";
       case CLASS: return "class";
       case DEF: return "def";

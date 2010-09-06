@@ -12,8 +12,6 @@ public class ThisExpr extends Expr {
     return visitor.visit(this, context);
   }
 
-  @Override public String toString() { return "this"; }
-
   @Override
   public void toString(StringBuilder builder, String indent) {
     builder.append("this");

@@ -10,6 +10,7 @@ public class MagpieParser extends Parser {
     super(lexer);
     
     // Register the parsers for the different keywords.
+    mParsers.put(TokenType.BREAK, new BreakExprParser());
     mParsers.put(TokenType.RETURN, new ReturnExprParser());
     mParsers.put(TokenType.IF, new ConditionalExprParser());
     mParsers.put(TokenType.LET, new ConditionalExprParser());

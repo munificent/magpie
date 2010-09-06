@@ -20,8 +20,6 @@ public class StringExpr extends Expr {
     return visitor.visit(this, context);
   }
 
-  @Override public String toString() { return mValue; }
-
   @Override
   public void toString(StringBuilder builder, String indent) {
     builder.append("\"").append(mValue).append("\"");

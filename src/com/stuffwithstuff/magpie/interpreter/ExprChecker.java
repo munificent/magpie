@@ -115,6 +115,13 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(BoolExpr expr, EvalContext context) {
     return mInterpreter.getBoolType();
   }
+  
+  @Override
+  public Obj visit(BreakExpr expr, EvalContext context) {
+    // The type of the break expression itself is "Never", which means an
+    // expression that contains a "break" can never finish evaluating.
+    return mInterpreter.getNeverType();
+  }
 
   @Override
   public Obj visit(FnExpr expr, EvalContext context) {

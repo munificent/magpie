@@ -242,6 +242,7 @@ public class Lexer {
     
     // Handle reserved words.
     if (text.equals("and")) return new Token(position, TokenType.AND);
+    if (text.equals("break")) return new Token(position, TokenType.BREAK);
     if (text.equals("case")) return new Token(position, TokenType.CASE);
     if (text.equals("class")) return new Token(position, TokenType.CLASS);
     if (text.equals("def")) return new Token(position, TokenType.DEF);

@@ -17,10 +17,6 @@ public class OrExpr extends Expr {
     return visitor.visit(this, context);
   }
 
-  @Override public String toString() {
-    return mLeft.toString() + " or " + mRight.toString();
-  }
-
   @Override
   public void toString(StringBuilder builder, String indent) {
     mLeft.toString(builder, indent);

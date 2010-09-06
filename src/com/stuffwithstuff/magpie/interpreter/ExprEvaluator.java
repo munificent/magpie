@@ -70,6 +70,11 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
+  public Obj visit(BreakExpr expr, EvalContext context) {
+    throw new BreakException();
+  }
+
+  @Override
   public Obj visit(FnExpr expr, EvalContext context) {
     return mInterpreter.createFn(expr, context.getScope());
   }
@@ -123,22 +128,26 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(LoopExpr expr, EvalContext context) {
-    boolean done = false;
-    while (true) {
-      // Evaluate the conditions.
-      for (Expr conditionExpr : expr.getConditions()) {
-        // See if the while clause is still true.
-        Obj condition = evaluate(conditionExpr, context);
-        if (!isTruthy(conditionExpr, condition)) {
-          done = true;
-          break;
+    try {
+      boolean done = false;
+      while (true) {
+        // Evaluate the conditions.
+        for (Expr conditionExpr : expr.getConditions()) {
+          // See if the while clause is still true.
+          Obj condition = evaluate(conditionExpr, context);
+          if (!isTruthy(conditionExpr, condition)) {
+            done = true;
+            break;
+          }
         }
+        
+        // If any clause failed, stop the loop.
+        if (done) break;
+        
+        evaluate(expr.getBody(), context);
       }
-      
-      // If any clause failed, stop the loop.
-      if (done) break;
-      
-      evaluate(expr.getBody(), context);
+    } catch (BreakException ex) {
+      // Nothing to do.
     }
     
     // TODO(bob): It would be cool if loops could have "else" clauses and then

@@ -31,10 +31,7 @@ class PriorityQueue
             if heap(parent(index)) > heap(index) then
                 heap swap(index, parent(index))
                 index = parent(index)
-            else
-                index = 0
-                // TODO(bob): Could do 'break' here if we had it.
-            end
+            else break
         end
     end
 
@@ -62,11 +59,7 @@ class PriorityQueue
             if min != index then
                 heap swap(index, min)
                 index = min
-            else
-                // Terminate the loop.
-                index = heap count
-                // TODO(bob): A 'break' would be simpler here.
-            end
+            else break
         end
     
         top

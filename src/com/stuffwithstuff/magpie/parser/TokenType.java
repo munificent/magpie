@@ -25,6 +25,7 @@ public enum TokenType {
   // keywords
   AND,
   ARROW,
+  BREAK,
   CASE,
   CLASS,
   DEF,

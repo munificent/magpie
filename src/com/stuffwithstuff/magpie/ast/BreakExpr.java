@@ -2,8 +2,8 @@ package com.stuffwithstuff.magpie.ast;
 
 import com.stuffwithstuff.magpie.parser.Position;
 
-public class NothingExpr extends Expr {
-  public NothingExpr(Position position) {
+public class BreakExpr extends Expr {
+  public BreakExpr(Position position) {
     super(position);
   }
   
@@ -14,6 +14,6 @@ public class NothingExpr extends Expr {
 
   @Override
   public void toString(StringBuilder builder, String indent) {
-    builder.append("nothing");
+    builder.append("break");
   }
 }

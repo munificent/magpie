@@ -21,17 +21,6 @@ public class TupleExpr extends Expr {
     return visitor.visit(this, context);
   }
 
-  @Override public String toString() {
-    StringBuilder builder = new StringBuilder();
-    
-    for (int i = 0; i < mFields.size(); i++) {
-      builder.append(mFields.get(i));
-      if (i < mFields.size() - 1) builder.append(", ");
-    }
-    
-    return builder.toString();
-  }
-
   @Override
   public void toString(StringBuilder builder, String indent) {
     builder.append("(");

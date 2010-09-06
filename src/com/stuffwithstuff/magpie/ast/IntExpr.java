@@ -15,8 +15,6 @@ public class IntExpr extends Expr {
     return visitor.visit(this, context);
   }
 
-  @Override public String toString() { return Integer.toString(mValue); }
-
   @Override
   public void toString(StringBuilder builder, String indent) {
     builder.append(mValue);
