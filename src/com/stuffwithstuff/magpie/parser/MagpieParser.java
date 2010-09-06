@@ -49,7 +49,7 @@ public class MagpieParser extends Parser {
     // Otherwise parse a built-in expression type.
     return assignment();
   }
-  
+
   // TODO(bob): There's a lot of overlap in the next four functions, but,
   //            unfortunately also some slight differences. It would be cool to
   //            unify these somehow.
@@ -112,7 +112,7 @@ public class MagpieParser extends Parser {
 
   // fn (a) print "hi"
   public FnExpr parseFunction() {
-    FunctionType type = functionType();
+    FunctionType type = parseFunctionType();
     
     Expr body = parseBlock();
     
@@ -133,7 +133,7 @@ public class MagpieParser extends Parser {
    *                   fn (Int, String ->).)
    * @return The parsed function type.
    */
-  public FunctionType functionType() {
+  public FunctionType parseFunctionType() {
     // Parse the prototype: (foo Foo, bar Bar -> Bang)
     consume(TokenType.LEFT_PAREN);
     
@@ -178,6 +178,10 @@ public class MagpieParser extends Parser {
     }
     
     return new FunctionType(paramNames, paramType, returnType);
+  }
+  
+  public String parseFunctionName() {
+    return consumeAny(TokenType.NAME, TokenType.OPERATOR).getString();
   }
   
   public Expr parseTypeExpression() {

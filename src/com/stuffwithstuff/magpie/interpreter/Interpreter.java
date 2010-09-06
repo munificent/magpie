@@ -4,6 +4,7 @@ import java.util.*;
 
 import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.*;
+import com.stuffwithstuff.magpie.interpreter.builtin.*;
 import com.stuffwithstuff.magpie.parser.Position;
 
 public class Interpreter {
@@ -47,56 +48,21 @@ public class Interpreter {
     // end here. Note that there is no distinct metaclass for class Object: its
     // metaclass is the main metaclass Class.
     mObjectClass = new ClassObj(mClass, "Object", null);
-    mObjectClass.addMethod("type", new NativeMethod.ObjectGetType());
-    mObjectClass.addMethod("==", new NativeMethod.ObjectEqual());
-    mObjectClass.addMethod("printRaw", new NativeMethod.ObjectPrint());
-    mObjectClass.addMethod("import", new NativeMethod.ObjectImport());
     mGlobalScope.define("Object", mObjectClass);
     
     // Now that both Class and Object exist, wire them up.
     mClass.setParent(mObjectClass);
     
     mArrayClass = createGlobalClass("Array");
-    mArrayClass.getClassObj().addMethod("of", new NativeMethod.ArrayOf());
-    mArrayClass.addMethod("count", new NativeMethod.ArrayCount());
-    mArrayClass.addMethod("call", new NativeMethod.ArrayGetElement());
-    mArrayClass.addMethod("call=", new NativeMethod.ArraySetElement());
-    mArrayClass.addMethod("add", new NativeMethod.ArrayAdd());
-    mArrayClass.addMethod("insert", new NativeMethod.ArrayInsert());
-    mArrayClass.addMethod("removeAt", new NativeMethod.ArrayRemoveAt());
-    mArrayClass.addMethod("clear", new NativeMethod.ArrayClear());
     // TODO(bob): Should really be type and not class, I think?
     //mArrayClass.setParent(mClass);
     
     mBoolClass = createGlobalClass("Bool");
-    mBoolClass.addMethod("not", new NativeMethod.BoolNot());
-    mBoolClass.addMethod("toString", new NativeMethod.BoolToString());
-
     mDynamicClass = createGlobalClass("Dynamic");
-    
     mFnClass = createGlobalClass("Function");
-    mFnClass.addMethod("type", new NativeMethod.FunctionGetType());
-    
     mIntClass = createGlobalClass("Int");
-    mIntClass.getClassObj().addMethod("parse", new NativeMethod.IntParse());
-    mIntClass.addMethod("+", new NativeMethod.IntPlus());
-    mIntClass.addMethod("-", new NativeMethod.IntMinus());
-    mIntClass.addMethod("*", new NativeMethod.IntMultiply());
-    mIntClass.addMethod("/", new NativeMethod.IntDivide());
-    mIntClass.addMethod("toString", new NativeMethod.IntToString());
-    mIntClass.addMethod("==", new NativeMethod.IntEqual());
-    mIntClass.addMethod("!=", new NativeMethod.IntNotEqual());
-    mIntClass.addMethod("<",  new NativeMethod.IntLessThan());
-    mIntClass.addMethod(">",  new NativeMethod.IntGreaterThan());
-    mIntClass.addMethod("<=", new NativeMethod.IntLessThanOrEqual());
-    mIntClass.addMethod(">=", new NativeMethod.IntGreaterThanOrEqual());
 
     mStringClass = createGlobalClass("String");
-    mStringClass.addMethod("concatenate", new NativeMethod.StringConcatenate());
-    mStringClass.addMethod("compareTo", new NativeMethod.StringCompare());
-    mStringClass.addMethod("at",        new NativeMethod.StringAt());
-    mStringClass.addMethod("substring", new NativeMethod.StringSubstring());
-    mStringClass.addMethod("count",     new NativeMethod.StringCount());
 
     // TODO(bob): At some point, may want different tuple types based on the
     // types of the fields.
@@ -127,6 +93,14 @@ public class Interpreter {
     // the call to "foo" will never occur since the return will unwind the
     // stack.
     mNeverClass = createGlobalClass("Never");
+
+    // Register the built-in methods.
+    BuiltIns.register(ArrayBuiltIns.class, mArrayClass);
+    BuiltIns.register(BoolBuiltIns.class, mBoolClass);
+    BuiltIns.register(FunctionBuiltIns.class, mFnClass);
+    BuiltIns.register(IntBuiltIns.class, mIntClass);
+    BuiltIns.register(ObjectBuiltIns.class, mObjectClass);
+    BuiltIns.register(StringBuiltIns.class, mStringClass);
   }
   
   public void load(List<Expr> expressions) {

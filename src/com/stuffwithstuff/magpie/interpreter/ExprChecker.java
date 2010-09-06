@@ -118,8 +118,6 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   
   @Override
   public Obj visit(BreakExpr expr, EvalContext context) {
-    // The type of the break expression itself is "Never", which means an
-    // expression that contains a "break" can never finish evaluating.
     return mInterpreter.getNeverType();
   }
 
@@ -238,8 +236,6 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     Obj returnedType = check(expr.getValue(), context);
     mReturnedTypes.add(returnedType);
     
-    // The type of the return expression itself is "Never", which means an
-    // expression that contains a "return" can never finish evaluating.
     return mInterpreter.getNeverType();
   }
 

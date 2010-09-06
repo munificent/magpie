@@ -1,32 +1,35 @@
 package com.stuffwithstuff.magpie.interpreter;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.Identifiers;
-import com.stuffwithstuff.magpie.Script;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.util.Expect;
+
+// TODO(bob): This contains the old way of defining native methods. Eventually,
+// everything in here should be moved into builtin, which is the new hotness.
+// Most stuff should move over cleanly. The only tricky ones are the parametric
+// native methods like ClassFieldGetter where each instance of the NativeMethod
+// has actual different state. The builtin stuff doesn't handle that yet.
 
 public abstract class NativeMethod implements Callable {
   public abstract Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg);
   
-  protected static FunctionType fn(String paramTypeName, String returnType) {
+  public static FunctionType fn(String paramTypeName, String returnType) {
     return fn(Expr.name(paramTypeName), returnType);
   }
   
-  protected static FunctionType fn(Expr paramType, String returnType) {
+  public static FunctionType fn(Expr paramType, String returnType) {
     return fn(paramType, Expr.name(returnType));
   }
   
-  protected static FunctionType fn(String paramType, Expr returnType) {
+  public static FunctionType fn(String paramType, Expr returnType) {
     return fn(Expr.name(paramType), returnType);
   }
   
-  protected static FunctionType fn(Expr paramType, Expr returnType) {
+  public static FunctionType fn(Expr paramType, Expr returnType) {
     List<String> paramNames = new ArrayList<String>();
     // If there is a param (or multiple), give it a name.
     boolean isNothing =((paramType instanceof MessageExpr) &&
@@ -42,154 +45,6 @@ public abstract class NativeMethod implements Callable {
   // TODO(bob): Many of these just use dynamic in their type signature. Would be
   // good to change to something more specific when possible.
 
-  // Array methods:
-  
-  public static class ArrayOf extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      List<Obj> elements = new ArrayList<Obj>();
-      if (arg == interpreter.nothing()) {
-        // zero element array
-      } else {
-        Obj countObj = arg.getField(Identifiers.COUNT);
-        // TODO(bob): Hackish. Checks for "count" to decide if arg is a tuple.
-        // Should do something smarter.
-        if (countObj != null) {
-          int count = countObj.asInt();
-          
-          for (int i = 0; i < count; i++) {
-            elements.add(arg.getTupleField(i));
-          }
-        } else {
-         // a non-tuple arg means a one-element array
-          elements.add(arg);
-        }
-      }
-      
-      return interpreter.createArray(elements);
-    }
-    
-    // TODO(bob): Gross. Always return Object[]
-    public FunctionType getType() { return fn("Dynamic",
-        Expr.message(Expr.name("Array"), "newType", Expr.name("Object"))); }
-  }
-  
-  public static class ArrayCount extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      List<Obj> elements = thisObj.asArray();
-      return interpreter.createInt(elements.size());
-    }
-    
-    public FunctionType getType() { return fn("Nothing", "Int"); }
-  }
-  
-  public static class ArrayGetElement extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      List<Obj> elements = thisObj.asArray();
-      
-      int index = arg.asInt();
-      
-      // Negative indices count backwards from the end.
-      if (index < 0) {
-        index = elements.size() + index;
-      }
-      
-      return elements.get(index);
-    }
-    
-    public FunctionType getType() { return fn("Int", "Dynamic"); }
-  }
-  
-  public static class ArraySetElement extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      List<Obj> elements = thisObj.asArray();
-      
-      int index = arg.getTupleField(0).asInt();
-      
-      // Negative indices count backwards from the end.
-      if (index < 0) {
-        index = elements.size() + index;
-      }
-      
-      elements.set(index, arg.getTupleField(1));
-      return interpreter.nothing();
-    }
-    
-    public FunctionType getType() { return fn(Expr.tuple(
-        Expr.name("Int"), Expr.name("Dynamic")), "Dynamic"); }
-  }
-  
-  public static class ArrayAdd extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      List<Obj> elements = thisObj.asArray();
-      elements.add(arg);
-      
-      return interpreter.nothing();
-    }
-    
-    public FunctionType getType() { return fn("Object", "Nothing"); }
-  }
-  
-  public static class ArrayInsert extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      int index = arg.getTupleField(0).asInt();
-      Obj value = arg.getTupleField(1);
-
-      List<Obj> elements = thisObj.asArray();
-      elements.add(index, value);
-      
-      return interpreter.nothing();
-    }
-    
-    public FunctionType getType() { return fn("Dynamic", "Nothing"); }
-  }
-  
-  public static class ArrayRemoveAt extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      List<Obj> elements = thisObj.asArray();
-      return elements.remove(arg.asInt());
-    }
-    
-    public FunctionType getType() { return fn("Dynamic", "Nothing"); }
-  }
-  
-  public static class ArrayClear extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      List<Obj> elements = thisObj.asArray();
-      elements.clear();
-      return interpreter.nothing();
-    }
-    
-    public FunctionType getType() { return fn("Nothing", "Nothing"); }
-  }
-  
-  // Bool methods:
-  
-  public static class BoolNot extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      return interpreter.createBool(!thisObj.asBool());
-    }
-    
-    public FunctionType getType() { return fn("Nothing", "Bool"); }
-  }
-  
-  public static class BoolToString extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      return interpreter.createString(Boolean.toString(thisObj.asBool()));
-    }
-    
-    public FunctionType getType() { return fn("Nothing", "String"); }
-  }
-  
   // Class methods:
 
   public static class ClassDefineConstructor extends NativeMethod {
@@ -490,275 +345,5 @@ public abstract class NativeMethod implements Callable {
     public FunctionType getType() { return mType; }
     
     private final FunctionType mType;
-  }
-
-  public static class FunctionGetType extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      FnObj function = (FnObj)thisObj;
-      
-      return interpreter.evaluateFunctionType(function.getType());
-    }
-    
-    public FunctionType getType() { return fn("Nothing", "FunctionType"); }
-  }
-  
-  // Int methods:
-  
-  public static class IntParse extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      String text = arg.asString();
-      
-      try {
-        int value = Integer.parseInt(text);
-        return interpreter.createInt(value);
-      } catch (NumberFormatException ex) {
-        return interpreter.nothing();
-      }
-    }
-    
-    public FunctionType getType() { return fn("String", "Int"); }
-  }
-
-  public static class IntPlus extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      int left = thisObj.asInt();
-      int right = arg.asInt();
-      
-      return interpreter.createInt(left + right);
-    }
-    
-    public FunctionType getType() { return fn("Int", "Int"); }
-  }
-
-  public static class IntMinus extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      int left = thisObj.asInt();
-      int right = arg.asInt();
-      
-      return interpreter.createInt(left - right);
-    }
-    
-    public FunctionType getType() { return fn("Int", "Int"); }
-  }
-  
-  public static class IntMultiply extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      int left = thisObj.asInt();
-      int right = arg.asInt();
-      
-      return interpreter.createInt(left * right);
-    }
-    
-    public FunctionType getType() { return fn("Int", "Int"); }
-  }
-  
-  public static class IntDivide extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      int left = thisObj.asInt();
-      int right = arg.asInt();
-      
-      return interpreter.createInt(left / right);
-    }
-    
-    public FunctionType getType() { return fn("Int", "Int"); }
-  }
-  
-  public static class IntEqual extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      int left = thisObj.asInt();
-      int right = arg.asInt();
-      
-      return interpreter.createBool(left == right);
-    }
-    
-    public FunctionType getType() { return fn("Int", "Bool"); }
-  }
-  
-  public static class IntNotEqual extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      int left = thisObj.asInt();
-      int right = arg.asInt();
-      
-      return interpreter.createBool(left != right);
-    }
-    
-    public FunctionType getType() { return fn("Int", "Bool"); }
-  }
-  
-  public static class IntLessThan extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      int left = thisObj.asInt();
-      int right = arg.asInt();
-      
-      return interpreter.createBool(left < right);
-    }
-    
-    public FunctionType getType() { return fn("Int", "Bool"); }
-  }
-  
-  public static class IntGreaterThan extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      int left = thisObj.asInt();
-      int right = arg.asInt();
-      
-      return interpreter.createBool(left > right);
-    }
-    
-    public FunctionType getType() { return fn("Int", "Bool"); }
-  }
-  
-  public static class IntLessThanOrEqual extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      int left = thisObj.asInt();
-      int right = arg.asInt();
-      
-      return interpreter.createBool(left <= right);
-    }
-    
-    public FunctionType getType() { return fn("Int", "Bool"); }
-  }
-  
-  public static class IntGreaterThanOrEqual extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      int left = thisObj.asInt();
-      int right = arg.asInt();
-      
-      return interpreter.createBool(left >= right);
-    }
-    
-    public FunctionType getType() { return fn("Int", "Bool"); }
-  }
-  
-  public static class IntToString extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      return interpreter.createString(Integer.toString(thisObj.asInt()));
-    }
-    
-    public FunctionType getType() { return fn("Nothing", "String"); }
-  }
-  
-  // Object methods:
-  
-  public static class ObjectGetType extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      return thisObj.getClassObj();
-    }
-
-    public FunctionType getType() { return fn("Nothing", "Class"); }
-  }
-  
-  public static class ObjectEqual extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      return interpreter.createBool(thisObj == arg);
-    }
-    
-    public FunctionType getType() { return fn("Object", "Bool"); }
-  }
-
-  public static class ObjectImport extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      String currentDir = new File(interpreter.getCurrentScript()).getParent();
-      String relativePath = arg.asString();
-      File scriptFile = new File(currentDir, relativePath);
-      
-      try {
-        Script script = Script.fromPath(scriptFile.getPath());
-        script.execute(interpreter);
-      } catch (IOException e) {
-        throw new InterpreterException("Could not load script \"" + relativePath + "\".");
-      }
-      
-      return interpreter.nothing();
-    }
-    
-    public FunctionType getType() { return fn("String", "Nothing"); }
-  }
-
-  public static class ObjectPrint extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      interpreter.print(arg.asString());
-      return interpreter.nothing();
-    }
-    
-    public FunctionType getType() { return fn("String", "Nothing"); }
-  }
-
-  // String methods:
-
-  public static class StringConcatenate extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      String left = thisObj.asString();
-      String right = arg.asString();
-      
-      return interpreter.createString(left + right);
-    }
-    
-    public FunctionType getType() { return fn("String", "String"); }
-  }
-
-  public static class StringAt extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      int index = arg.asInt();
-      String c = thisObj.asString().substring(index, index + 1);
-      return interpreter.createString(c);
-    }
-    
-    public FunctionType getType() { return fn("Int", "String"); }
-  }
-
-  public static class StringCompare extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      return interpreter.createInt(thisObj.asString().compareTo(arg.asString()));
-    }
-    
-    public FunctionType getType() { return fn("String", "Int"); }
-  }
-
-  public static class StringSubstring extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      // TODO(bob): Hackish way to see if we have one or two arguments to this.
-      if (arg.getTupleField(0) != null) {
-        int startIndex = arg.getTupleField(0).asInt();
-        int endIndex = arg.getTupleField(1).asInt();
-        String substring = thisObj.asString().substring(startIndex, endIndex);
-        return interpreter.createString(substring);
-      } else {
-        int startIndex = arg.asInt();
-        String substring = thisObj.asString().substring(startIndex);
-        return interpreter.createString(substring);
-      }
-    }
-    
-    public FunctionType getType() { return fn("Dynamic", "String"); }
-  }
-  
-  public static class StringCount extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      return interpreter.createInt(thisObj.asString().length());
-    }
-    
-    public FunctionType getType() { return fn("Nothing", "Int"); }
   }
 }

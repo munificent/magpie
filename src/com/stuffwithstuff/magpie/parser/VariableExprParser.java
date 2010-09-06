@@ -19,7 +19,7 @@ public class VariableExprParser implements ExprParser {
     if (parser.lookAhead(TokenType.LEFT_PAREN)) {
       Position fnPosition = parser.last(1).getPosition();
       
-      FunctionType type = parser.functionType();
+      FunctionType type = parser.parseFunctionType();
       Expr body = parser.parseBlock();
       
       // Desugar it to: def foo = fn () blah
