@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
-import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.util.Expect;
 
@@ -47,122 +46,6 @@ public abstract class NativeMethod implements Callable {
 
   // Class methods:
 
-  public static class ClassDefineConstructor extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      FnObj method = (FnObj)arg;
-      
-      ClassObj classObj = (ClassObj)thisObj;
-      classObj.addConstructor(method);
-      
-      return interpreter.nothing();
-    }
-    
-    public FunctionType getType() { return fn("Dynamic", "Nothing"); }
-  }
-  
-  public static class ClassDefineMethod extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      String name = arg.getTupleField(0).asString();
-      FnObj method = (FnObj)arg.getTupleField(1);
-      
-      ClassObj classObj = (ClassObj)thisObj;
-      classObj.addMethod(name, method);
-      
-      return interpreter.nothing();
-    }
-    
-    public FunctionType getType() { return fn(Expr.tuple(
-        Expr.name("String"), Expr.name("Dynamic")), "Nothing"); }
-  }
-  
-  public static class ClassDeclareField extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      String name = arg.getTupleField(0).asString();
-      FnObj type = (FnObj)arg.getTupleField(1);
-      
-      ClassObj classObj = (ClassObj)thisObj;
-
-      // Add a getter.
-      classObj.addMethod(name,
-          new NativeMethod.ClassFieldGetter(name, type.getFunction().getBody()));
-      
-      // Add a setter.
-      classObj.addMethod(Identifiers.makeSetter(name),
-          new NativeMethod.ClassFieldSetter(name, type.getFunction().getBody()));
-
-      return interpreter.nothing();
-    }
-    
-    public FunctionType getType() { return fn(Expr.tuple(
-        Expr.name("String"), Expr.name("Dynamic")), "Nothing"); }
-  }
-  
-  public static class ClassDefineField extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      String name = arg.getTupleField(0).asString();
-      FnObj initializer = (FnObj)arg.getTupleField(1);
-      
-      ClassObj classObj = (ClassObj)thisObj;
-      classObj.defineField(name, initializer.getFunction().getBody());
-      
-      return interpreter.nothing();
-    }
-    
-    public FunctionType getType() { return fn(Expr.tuple(
-        Expr.name("String"), Expr.name("Dynamic")), "Nothing"); }
-  }
-  
-  public static class ClassGetName extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      ClassObj classObj = (ClassObj)thisObj;
-      
-      return interpreter.createString(classObj.getName());
-    }
-
-    public FunctionType getType() { return fn("Nothing", "String"); }
-  }
-  
-  public static class ClassGetParent extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      ClassObj classObj = (ClassObj)thisObj;
-      
-      ClassObj parent = classObj.getParent();
-      
-      // If a class has no parent, its parent is implicitly Object.
-      if (parent == null) return interpreter.getObjectType();
-      
-      return parent;
-    }
-
-    public FunctionType getType() { return fn("Nothing", "Class"); }
-  }
-  
-  public static class ClassSetParent extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      ClassObj classObj = (ClassObj)thisObj;
-      
-      if (!(arg instanceof ClassObj)) {
-        interpreter.runtimeError(
-            "Cannot assign %s as the base class for %s because it is not a class.",
-            arg, thisObj);
-        
-        return interpreter.nothing();
-      }
-      
-      classObj.setParent((ClassObj)arg);
-      return arg;
-    }
-
-    public FunctionType getType() { return fn("Class", "Class"); }
-  }
-
   public static class ClassFieldGetter extends NativeMethod {
     public ClassFieldGetter(String name, Expr type) {
       Expect.notEmpty(name);
@@ -202,42 +85,7 @@ public abstract class NativeMethod implements Callable {
     private final String mName;
     private final Expr mType;
   }
-  
-  /**
-   * Creates a new class.
-   */
-  public static class ClassNewClass extends NativeMethod {
-    public ClassNewClass() {
-    }
     
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      
-      // Get the name of the class.
-      String name = arg.asString();
-      
-      // Create the metaclass. This will hold shared methods on the class.
-      ClassObj metaclass = new ClassObj(interpreter.getMetaclass(),
-          name + "Class", interpreter.getMetaclass());
-      
-      // Add the constructor method.
-      metaclass.addMethod(Identifiers.NEW, new NativeMethod.ClassNew(name));
-
-      // TODO(bob): Get rid of this.
-      // Define a method to cheat the type-checker.
-      metaclass.addMethod("unsafeCast", new NativeMethod.ClassUnsafeCast(name));
-
-      // Create the class object itself. This will hold the instance methods for
-      // objects of the class.
-      ClassObj classObj = new ClassObj(metaclass, name,
-          interpreter.getObjectType());
-      
-      return classObj;
-    }
-    
-    public FunctionType getType() { return fn("String", "Class"); }
-  }
-  
   /**
    * Constructs a new instance of a class. This corresponds to 'Foo new', not
    * 'Class new' like above.
@@ -279,6 +127,7 @@ public abstract class NativeMethod implements Callable {
     private final String mClassName;
   }
 
+  // TODO(bob): This should become a generic method on Object.
   public static class ClassUnsafeCast extends NativeMethod {
     public ClassUnsafeCast(String className) {
       mClassName = className;
@@ -304,28 +153,6 @@ public abstract class NativeMethod implements Callable {
     public FunctionType getType() { return fn("Dynamic", Expr.name(mClassName)); }
     
     private final String mClassName;
-  }
-
-  public static class ClassGetMethodType extends NativeMethod {
-    @Override
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      String name = arg.getTupleField(0).asString();
-      // TODO(bob): Arg type is ignored since there is no overloading yet.
-      
-      ClassObj thisClass = (ClassObj)thisObj;
-      Callable method = thisClass.findMethod(name);
-      
-      if (method == null) {
-        return interpreter.nothing();
-      }
-      
-      Obj paramType = interpreter.evaluateType(method.getType().getParamType());
-      Obj returnType = interpreter.evaluateType(method.getType().getReturnType());
-      return interpreter.createTuple(paramType, returnType);
-    }
-
-    // TODO(bob): Should eventually be (String, IType) -> (IType, IType) | Nothing
-    public FunctionType getType() { return fn("Dynamic", "Dynamic"); }
   }
   
   // Function methods:

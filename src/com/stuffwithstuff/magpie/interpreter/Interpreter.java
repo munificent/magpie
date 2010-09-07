@@ -30,18 +30,6 @@ public class Interpreter {
     // that all of the methods defined on Class are available in FooClass (i.e.
     // "name", "parent", etc.)
     mClass = new ClassObj("Class", null);
-    // TODO(bob): This shouldn't be an instance method on class. Instead, we
-    // should have a metaclass for Class, so that you can create a new class
-    // by doing Class new("Foo").
-    mClass.addMethod("newClass", new NativeMethod.ClassNewClass());
-    mClass.addMethod("name", new NativeMethod.ClassGetName());
-    mClass.addMethod("defineConstructor", new NativeMethod.ClassDefineConstructor());
-    mClass.addMethod("defineMethod", new NativeMethod.ClassDefineMethod());
-    mClass.addMethod("defineField", new NativeMethod.ClassDefineField());
-    mClass.addMethod("declareField", new NativeMethod.ClassDeclareField());
-    mClass.addMethod("parent", new NativeMethod.ClassGetParent());
-    mClass.addMethod("parent=", new NativeMethod.ClassSetParent());
-    mClass.addMethod("getMethodType", new NativeMethod.ClassGetMethodType());
     mGlobalScope.define("Class", mClass);
     
     // Object is the root class of all objects. All parent chains eventually
@@ -97,6 +85,7 @@ public class Interpreter {
     // Register the built-in methods.
     BuiltIns.register(ArrayBuiltIns.class, mArrayClass);
     BuiltIns.register(BoolBuiltIns.class, mBoolClass);
+    BuiltIns.register(ClassBuiltIns.class, mClass);
     BuiltIns.register(FunctionBuiltIns.class, mFnClass);
     BuiltIns.register(IntBuiltIns.class, mIntClass);
     BuiltIns.register(ObjectBuiltIns.class, mObjectClass);
