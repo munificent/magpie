@@ -5,7 +5,6 @@ import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.FnObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
-import com.stuffwithstuff.magpie.interpreter.NativeMethod;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class ClassBuiltIns {
@@ -18,11 +17,11 @@ public class ClassBuiltIns {
 
     // Add a getter.
     classObj.addMethod(name,
-        new NativeMethod.ClassFieldGetter(name, type.getFunction().getBody()));
+        new FieldGetter(name, type.getFunction().getBody()));
     
     // Add a setter.
     classObj.addMethod(Identifiers.makeSetter(name),
-        new NativeMethod.ClassFieldSetter(name, type.getFunction().getBody()));
+        new FieldSetter(name, type.getFunction().getBody()));
 
     return interpreter.nothing();
   }
@@ -96,11 +95,11 @@ public class ClassBuiltIns {
         name + "Class", interpreter.getMetaclass());
     
     // Add the constructor method.
-    metaclass.addMethod(Identifiers.NEW, new NativeMethod.ClassNew(name));
+    metaclass.addMethod(Identifiers.NEW, new ClassNew(name));
 
     // TODO(bob): Get rid of this.
     // Define a method to cheat the type-checker.
-    metaclass.addMethod("unsafeCast", new NativeMethod.ClassUnsafeCast(name));
+    metaclass.addMethod("unsafeCast", new UnsafeCast(name));
 
     // Create the class object itself. This will hold the instance methods for
     // objects of the class.

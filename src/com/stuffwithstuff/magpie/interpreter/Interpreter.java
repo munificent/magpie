@@ -55,16 +55,14 @@ public class Interpreter {
     // TODO(bob): At some point, may want different tuple types based on the
     // types of the fields.
     mTupleClass = createGlobalClass("Tuple");
-    mTupleClass.addMethod("count", new NativeMethod.ClassFieldGetter("count",
-        Expr.name("Int")));
+    mTupleClass.addMethod("count", new FieldGetter("count", Expr.name("Int")));
     // TODO(bob): Hackish.
     for (int i = 0; i < 20; i++) {
       String name = "_" + Integer.toString(i);
       // TODO(bob): Using dynamic as the type here is lame. Ideally, there would
       // be a separate tuple class for each set of tuple field types and it
       // would have field getters that were typed to match the fields.
-      mTupleClass.addMethod(name, new NativeMethod.ClassFieldGetter(name,
-          Expr.name("Dynamic")));
+      mTupleClass.addMethod(name, new FieldGetter(name, Expr.name("Dynamic")));
     }
     
     mNothingClass = createGlobalClass("Nothing");
@@ -232,28 +230,13 @@ public class Interpreter {
   public Obj createString(String value) {
     return mStringClass.instantiate(value);
   }
-
-  public ClassObj createClass(String name, Scope scope) {
-    // Create the metaclass. This will hold shared methods on the class.
-    ClassObj metaclass = new ClassObj(mClass, name + "Class", mClass);
-    
-    // Define a method to cheat the type-checker.
-    metaclass.addMethod("unsafeCast", new NativeMethod.ClassUnsafeCast(name));
-
-    // Create the class object itself. This will hold the instance methods for
-    // objects of the class.
-    ClassObj classObj = new ClassObj(metaclass, name, mObjectClass);
-    scope.define(name, classObj);
-    
-    return classObj;
-  }
   
   public FnObj createFn(FnExpr expr, Scope closure) {
     // Create a new subclass just for this function so that it's implementation
     // of "call" has the correct return and parameter types.
     // TODO(bob): Figure out a simpler way to do this.
     ClassObj fnClass = new ClassObj(mClass, "FunctionType", mFnClass);
-    fnClass.addMethod("call", new NativeMethod.FunctionCall(expr.getType()));
+    fnClass.addMethod("call", new FunctionCall(expr.getType()));
     
     return new FnObj(fnClass, closure, expr);
   }
@@ -280,10 +263,6 @@ public class Interpreter {
     return evaluator.evaluate(expr, context);
   }
   
-  private ClassObj createGlobalClass(String name) {
-    return createClass(name, mGlobalScope);
-  }
-  
   public void pushScriptPath(String path) {
     mScriptPaths.push(path);
   }
@@ -296,6 +275,21 @@ public class Interpreter {
     mScriptPaths.pop();
   }
 
+  private ClassObj createGlobalClass(String name) {
+    // Create the metaclass. This will hold shared methods on the class.
+    ClassObj metaclass = new ClassObj(mClass, name + "Class", mClass);
+    
+    // Define a method to cheat the type-checker.
+    metaclass.addMethod("unsafeCast", new UnsafeCast(name));
+
+    // Create the class object itself. This will hold the instance methods for
+    // objects of the class.
+    ClassObj classObj = new ClassObj(metaclass, name, mObjectClass);
+    mGlobalScope.define(name, classObj);
+    
+    return classObj;
+  }
+  
   private Obj invokeMethod(Position position, Obj receiver, String name, Obj arg) {
     // Look up the member.
     Callable method = receiver.getClassObj().findMethod(name);
