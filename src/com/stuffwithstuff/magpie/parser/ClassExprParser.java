@@ -17,17 +17,23 @@ public class ClassExprParser implements ExprParser {
     boolean isExtend = parser.match(TokenType.EXTEND);
     if (!isExtend) parser.consume(TokenType.CLASS);
     
+    List<Expr> exprs = new ArrayList<Expr>();
+
     String name = parser.consume(TokenType.NAME).getString();
     Position position = parser.last(1).getPosition();
     
-    parser.consume(TokenType.LINE);
-    
-    List<Expr> exprs = new ArrayList<Expr>();
-
     // Declare the class:
     // var Foo = Class newClass("Foo")
     exprs.add(new VariableExpr(position, name,
         Expr.message(Expr.name("Class"), "newClass", Expr.string(name))));
+    
+    // Parse the inherits clause, if any.
+    if (parser.match(TokenType.COLON)) {
+      String baseClass = parser.consume(TokenType.NAME).getString();
+      exprs.add(Expr.message(Expr.name(name), "parent=", Expr.name(baseClass)));
+    }
+    
+    parser.consume(TokenType.LINE);
     
     // Parse the body.
     while (!parser.match(TokenType.END)) {
@@ -41,7 +47,6 @@ public class ClassExprParser implements ExprParser {
       // bar(arg) ...         -->  Foo defineMethod("bar", fn(arg) ...)
       // shared bar(arg) ...  -->  Foo type defineMethod("bar", fn(arg) ...)
       
-      // TODO(bob): Allow method definitions in here too.
       if (parser.match(TokenType.THIS)) {
         // Constructor.
         FnExpr body = parser.parseFunction();
@@ -49,10 +54,14 @@ public class ClassExprParser implements ExprParser {
       } else {
         // Member declaration.
         boolean isShared = parser.match(TokenType.SHARED);
-        String member = parser.consumeAny(TokenType.NAME).getString();
+        String member = parser.consumeAny(TokenType.NAME, TokenType.OPERATOR).getString();
+        boolean isOperator = parser.last(1).getType() == TokenType.OPERATOR;
         
         // See what kind of member it is.
         if (parser.match(TokenType.EQUALS)) {
+          if (isOperator) throw new ParseException(
+              "The operator \"" + member + "\" is not a valid name for a field.");
+          
           // Field definition: "a = 123".
           Expr body = parser.parseBlock();
           if (isShared) {
@@ -76,6 +85,8 @@ public class ClassExprParser implements ExprParser {
           // Field declaration.
           if (isShared) throw new ParseException(
               "Field declarations cannot be shared.");
+          if (isOperator) throw new ParseException(
+              "The operator \"" + member + "\" is not a valid name for a field.");
           
           Expr type = parser.parseTypeExpression();
           exprs.add(Expr.message(Expr.name(name), Identifiers.DECLARE_FIELD,

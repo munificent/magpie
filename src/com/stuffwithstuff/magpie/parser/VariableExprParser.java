@@ -15,14 +15,14 @@ public class VariableExprParser implements ExprParser {
     String name = parser.consume(TokenType.NAME).getString();
     
     // See if we're defining a function in shorthand notation:
-    // def foo() blah
-    if (parser.lookAhead(TokenType.LEFT_PAREN)) {
+    // var foo() blah
+    if (parser.lookAheadAny(TokenType.LEFT_PAREN, TokenType.LEFT_BRACKET)) {
       Position fnPosition = parser.last(1).getPosition();
       
       FunctionType type = parser.parseFunctionType();
       Expr body = parser.parseBlock();
       
-      // Desugar it to: def foo = fn () blah
+      // Desugar it to: var foo = fn () blah
       FnExpr function = new FnExpr(fnPosition.union(body.getPosition()),
           type, body);
       return new VariableExpr(startPos.union(function.getPosition()),

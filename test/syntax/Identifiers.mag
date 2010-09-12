@@ -5,14 +5,16 @@ var _ = 3
 var a123 = 4
 var _123 = 5
 var a?!  = 6
-var _#$% = 7
+var _$% = 7
 
 // these punctuation characters are valid
-var a~!@#$%^&*-=+|/?<> = 8
+var a~!$%^&*-=+|/?<> = 8
 // not allowed in identifiers for future use:
 // \ backslash (probably used for line continuation)
 // ` backtick  (may be used for metaprogramming)
 // : colon     (either records, keyword args, or namespaces)
+// @ at        (annotations)
+// # hash      (not sure)
 
 class Foo
 end
@@ -24,7 +26,7 @@ def Foo $___ (other) "underscore"
 def Foo %123 (other) "nums"
 def Foo ^abc (other) "letters"
 
-def Foo ~!@#$%^&*-=+|/?<> (other) "everything"
+def Foo ~!$%^&*-=+|/?<> (other) "everything"
 
 var foo = Foo new
 print(foo +    foo)              //: plus
@@ -32,4 +34,4 @@ print(foo ?!   foo)              //: wha?
 print(foo $___ foo)              //: underscore
 print(foo %123 foo)              //: nums
 print(foo ^abc foo)              //: letters
-print(foo ~!@#$%^&*-=+|/?<> foo) //: everything
+print(foo ~!$%^&*-=+|/?<> foo)   //: everything

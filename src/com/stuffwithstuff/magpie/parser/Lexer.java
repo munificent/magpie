@@ -74,6 +74,7 @@ public class Lexer {
       if (match("}")) return characterToken(TokenType.RIGHT_BRACE);
       if (match(",")) return characterToken(TokenType.COMMA);
       if (match(".")) return characterToken(TokenType.DOT);
+      if (match(":")) return characterToken(TokenType.COLON);
 
       // Match line ending characters.
       if (match(";"))  return characterToken(TokenType.LINE);
@@ -254,6 +255,7 @@ public class Lexer {
     if (text.equals("fn")) return new Token(position, TokenType.FN);
     if (text.equals("for")) return new Token(position, TokenType.FOR);
     if (text.equals("if")) return new Token(position, TokenType.IF);
+    if (text.equals("interface")) return new Token(position, TokenType.INTERFACE);
     if (text.equals("let")) return new Token(position, TokenType.LET);
     if (text.equals("match")) return new Token(position, TokenType.MATCH);
     if (text.equals("nothing")) return new Token(position, TokenType.NOTHING);
@@ -327,7 +329,7 @@ public class Lexer {
   }
 
   private boolean isOperator(final char c) {
-    return "`~!@#$%^&*-=+\\|/?<>".indexOf(c) != -1;
+    return "`~!$%^&*-=+\\|/?<>".indexOf(c) != -1;
   }
 
   private enum LexState {

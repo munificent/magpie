@@ -38,10 +38,11 @@ public final class Token {
       case RIGHT_BRACKET: return "]";
       case LEFT_BRACE: return "{";
       case RIGHT_BRACE: return "}";
+      case COLON: return ":";
       case COMMA: return ",";
-      case LINE: return "(line)";
       case DOT: return ".";
       case EQUALS: return "=";
+      case LINE: return "(line)";
 
       case NAME: return getString() + " (name)";
       case OPERATOR: return getString() + " (op)";
@@ -63,6 +64,7 @@ public final class Token {
       case FOR: return "for";
       case FN: return "fn";
       case IF: return "if";
+      case INTERFACE: return "interface";
       case LET: return "let";
       case MATCH: return "match";
       case NOTHING: return "nothing";
