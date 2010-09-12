@@ -73,11 +73,6 @@ public class ClassObj extends Obj {
     return mConstructor;
   }
   
-  // TODO(bob): Get rid of this.
-  public void defineFields(Map<String, Expr> fields) {
-    mFieldInitializers = fields;
-  }
-  
   public void defineField(String name, Expr body) {
     mFieldInitializers.put(name, body);
   }

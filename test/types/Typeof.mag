@@ -5,9 +5,10 @@ print(typeof 123) //: Int
 print(typeof "i") //: String
 
 // Assignment.
-var a = true
+var a = 1
 print(typeof a = 3)       //: Int
-print(typeof a = "bar")   //: String
+var b = "hi"
+print(typeof b = "bar")   //: String
 
 // Blocks.
 print(typeof

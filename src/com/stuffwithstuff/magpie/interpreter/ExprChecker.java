@@ -68,6 +68,25 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     Obj valueType = check(expr.getValue(), context);
     Obj existingType = context.lookUp(name);
     if (existingType != null) {
+      
+      // Make sure the new value is compatible with the variable's type.
+      Obj matches = mInterpreter.invokeMethod(existingType,
+          Identifiers.CAN_ASSIGN_FROM, valueType);
+      
+      if (!matches.asBool()) {
+        String expectedText = mInterpreter.invokeMethod(existingType,
+            Identifiers.TO_STRING).asString();
+        String actualText = mInterpreter.invokeMethod(valueType,
+            Identifiers.TO_STRING).asString();
+        mChecker.addError(expr.getPosition(),
+            "Variable \"%s\" of type %s cannot be assigned a value of type %s.",
+            name, expectedText, actualText);
+      }
+
+      // The type doesn't change.
+      return existingType;
+      
+      /*
       if (context.getScope().get(name) != null) {
         // In the current scope, so just override the type.
         context.assign(name, valueType);
@@ -87,6 +106,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       // In either case, the assignment expression itself returns the new
       // value.
       return valueType;
+      */
     }
 
     // Otherwise, it must be a setter on this.
