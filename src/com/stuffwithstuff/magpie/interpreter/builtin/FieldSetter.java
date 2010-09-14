@@ -22,7 +22,7 @@ public class FieldSetter implements Callable {
   }
   
   @Override
-  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj staticArg, Obj arg) {
     thisObj.setField(mName, arg);
     return arg;
   }

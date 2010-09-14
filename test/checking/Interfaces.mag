@@ -5,16 +5,16 @@ def Foo bar(a Int -> Int) a
 def Foo baz(->) print("baz")
 
 var IFoo = Interface new("IFoo")
-IFoo methods add(Method new("bar", (fn() Int), fn() Int))
-IFoo methods add(Method new("baz", (fn() Nothing), fn() Nothing))
+IFoo declareMethod("bar", (fn() Int), (fn() Int))
+IFoo declareMethod("baz", (fn() Nothing), (fn() Nothing))
 
 var ITooMany = Interface new("ITooMany")
-ITooMany methods add(Method new("bar", (fn() Int), fn() Int))
-ITooMany methods add(Method new("baz", (fn() Nothing), fn() Nothing))
-ITooMany methods add(Method new("notThere", (fn() Int), fn() Int))
+ITooMany declareMethod("bar", (fn() Int), (fn() Int))
+ITooMany declareMethod("baz", (fn() Nothing), (fn() Nothing))
+ITooMany declareMethod("notThere", (fn() Int), (fn() Int))
 
 var ISubset = Interface new("ISubset")
-ISubset methods add(Method new("bar", (fn() Int), fn() Int))
+ISubset declareMethod("bar", (fn() Int), (fn() Int))
 
 var main(->)
     print(IFoo canAssignFrom(Foo))     //: true

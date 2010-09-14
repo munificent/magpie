@@ -18,7 +18,8 @@ Types
   + Core imperative system to create and extend them.
   + Typing rules for them that allow other types to be assignable to them if 
     they implement all of its methods.
-  - Declarative syntax that wraps that.
+  + Declarative syntax to create an interface.
+  - Declarative syntax to extend an interface.
   - Determine if something like C#'s explicit interface implementation is
     useful. It may be nice for cases where a class implements multiple
     interfaces with overlapping names.

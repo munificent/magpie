@@ -144,7 +144,7 @@ public class Checker {
       validReturnType = true;
     } else {
       Obj matches = mInterpreter.invokeMethod(expectedReturn,
-          Identifiers.CAN_ASSIGN_FROM, returnType);
+          Identifiers.CAN_ASSIGN_FROM, null, returnType);
       
       validReturnType = matches.asBool();
     }
@@ -177,10 +177,10 @@ public class Checker {
   // EvalContext and/or Scope support binding both values and types to a name
   // and then only translating values to types as needed.
   public Scope typeScope(Scope valueScope) {
+    // TODO(bob): What about parent scopes here?
     Scope scope = new Scope();
     for (Entry<String, Obj> entry : valueScope.entries()) {
-      Obj type = mInterpreter.invokeMethod(entry.getValue(), Identifiers.TYPE,
-          mInterpreter.nothing());
+      Obj type = mInterpreter.invokeMethod(entry.getValue(), Identifiers.TYPE);
       scope.define(entry.getKey(), type);
     }
     

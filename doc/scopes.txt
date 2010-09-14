@@ -1,0 +1,69 @@
+Three scopes where things get evaluated:
+
+1. Runtime scope. This is the regular scope that the interpreter uses. Variable
+   names are bound to their value.
+   
+   A fresh runtime scope is created when an interpreter is instantiated and then
+   populated with top level definitions. New lexical scopes are created when
+   functions are declared, and also when blocks are entered. Defining or
+   assigning to a variable populates the scope.
+
+2. Check scope. This is the scope the checker uses when type-checking 
+   expressions. Variable names are bound to the type of value that variable can
+   hold.
+   
+   Before checking, a global check scope is created from the global runtime 
+   scope by invoking "type" on all of the variables defined in it. From there
+   nested scopes will be created like they are in runtime scope. Defining a
+   variable populates the scope with the type of the variable's initializer
+   expression.
+
+3. Type scope. This is the scope used to evaluate type annotations, static
+   parameter constraint, and static type arguments. For example, given:
+   
+   interface IConvertTo[T]
+       T convert()
+   end
+   
+   var flip[A IConvertTo[B], B IConvertTo[A]](items Array[A | B])
+       var results = Array[A | B] new
+       for item = items do
+           let a = item as[A] then
+               results add(a convert)
+           else let b = item as[B] then
+               results add(b convert)
+           end
+       end
+   end
+
+   Type scope will be used when evaluating the type annotations (Array[A | B]),
+   the constraints (IConvertTo[B], etc.), and the static type arguments ([A |
+   B]). Type annotations and constraints are evaluated at check time. Static
+   type arguments are evaluated both at check time and runtime.
+   
+   The last point means that type scope operates under constrained
+   circumstances since it basically only has access to information that's
+   meaningful both at check time and runtime.
+   
+   The top-level type scope is created from the regular global scope. How it
+   proceeds from there varies based on what we're checking:
+   
+   If we're checking a method body, like:
+       var foo[A IFoo]()
+           // ...
+       end
+   The process is:
+   - Evaluate the type annotations of the static parameter constraints in the
+     current type scope.
+   - Create a nested type scope.
+   - Bind the evaluated constraints to the static parameter names.
+   - Evaluate the dynamic type annotations in that nested scope.
+   
+   If we're checking a method *call*, like:
+       foo[Int]()
+   The process is:
+   - Evaluate the *arguments* to the static parameters in the current type
+     scope.
+   - Create a nested type scope.
+   - Bind the evaluated static arguments to the static parameter names.
+   - Evaluate the dynamic type annotations in that nested scope.

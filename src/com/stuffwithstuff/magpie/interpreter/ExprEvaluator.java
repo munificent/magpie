@@ -20,6 +20,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
    * @return           The result of evaluating the expression.
    */
   public Obj evaluate(Expr expr, EvalContext context) {
+    if (expr == null) return null;
     return expr.accept(this, context);
   }
 
@@ -44,7 +45,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     
     // Otherwise, it must be a setter on this.
     String setter = Identifiers.makeSetter(name);
-    return mInterpreter.invokeMethod(expr, context.getThis(), setter, value);
+    return mInterpreter.invokeMethod(expr, context.getThis(), setter, null, value);
   }
 
   @Override
@@ -157,11 +158,9 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(MessageExpr expr, EvalContext context) {
-    Obj receiver = (expr.getReceiver() == null) ? null :
-        evaluate(expr.getReceiver(), context);
-    
-    Obj arg = (expr.getArg() == null) ? null :
-        evaluate(expr.getArg(), context);
+    Obj receiver = evaluate(expr.getReceiver(), context);
+    Obj staticArg = evaluate(expr.getStaticArg(), context);
+    Obj arg = evaluate(expr.getArg(), context);
     
     if (receiver == null) {
       // Just a name, so maybe it's a variable.
@@ -169,19 +168,19 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
       if (variable != null) {
         // If we have an argument, apply it.
-        if (arg != null) {
+        if ((staticArg != null) || (arg != null)) {
           return mInterpreter.invokeMethod(
-              expr, variable, Identifiers.CALL, arg);
+              expr, variable, Identifiers.CALL, staticArg, arg);
         }
         return variable;
       }
       
       // Otherwise it must be a method on this.
       return mInterpreter.invokeMethod(
-          expr, context.getThis(), expr.getName(), arg);
+          expr, context.getThis(), expr.getName(), staticArg, arg);
     }
     
-    return mInterpreter.invokeMethod(expr, receiver, expr.getName(), arg);
+    return mInterpreter.invokeMethod(expr, receiver, expr.getName(), staticArg, arg);
   }
   
   @Override
@@ -242,7 +241,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
   
   private boolean isTruthy(Expr expr, Obj receiver) {
-    Obj truthy = mInterpreter.invokeMethod(expr, receiver, Identifiers.IS_TRUE, null);
+    Obj truthy = mInterpreter.invokeMethod(receiver, Identifiers.IS_TRUE);
     return truthy.asBool();
   }
   

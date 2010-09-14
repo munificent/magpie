@@ -12,6 +12,8 @@ import com.stuffwithstuff.magpie.util.Expect;
 /**
  * Built-in callable that returns the value of a named field.
  */
+// TODO(bob): Get rid of this and make a single built-in unsafeCast method that
+// takes a static argument.
 public class UnsafeCast implements Callable {
   public UnsafeCast(String className) {
     Expect.notEmpty(className);
@@ -20,7 +22,7 @@ public class UnsafeCast implements Callable {
   }
   
   @Override
-  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj staticArg, Obj arg) {
     if (arg.getClassObj() != thisObj) {
       interpreter.runtimeError(
           "Cannot assign %s as the base class for %s because it is not a class.",

@@ -1,0 +1,33 @@
+class Foo
+    bar(a Int -> Int) a
+    baz(->) print("baz")
+end
+
+interface IFoo
+    bar(a Int -> Int)
+    baz(->)
+end
+
+interface ITooMany
+    bar(a Int -> Int)
+    baz(->)
+    notThere(a Int -> Int)
+end
+
+interface ISubset
+    bar(a Int -> Int)
+end
+
+// TODO(bob): Need syntax for adding methods to an existing interface.
+
+var main(->)
+    print(IFoo canAssignFrom(Foo))     //: true
+    print(ITooMany canAssignFrom(Foo)) //: false
+    print(ISubset canAssignFrom(Foo))  //: true
+    
+    // Interfaces also duck type to each other.
+    print(ISubset canAssignFrom(IFoo))     //: true
+    print(ISubset canAssignFrom(ITooMany)) //: true
+    print(IFoo canAssignFrom(ISubset))     //: false
+    print(ITooMany canAssignFrom(ISubset)) //: false
+end

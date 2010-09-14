@@ -2,6 +2,8 @@ class Foo
     noArgs() print("noArgs")
     oneArg(arg String) print("oneArg " + arg)
     
+    +-(other) print("operator " + other)
+    
     shared noArgs() print("shared noArgs")
 end
 
@@ -9,3 +11,4 @@ var foo = Foo new
 foo noArgs              //: noArgs
 foo oneArg("one")       //: oneArg one
 Foo noArgs              //: shared noArgs
+foo +- "other"          //: operator other

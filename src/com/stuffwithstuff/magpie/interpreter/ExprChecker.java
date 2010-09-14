@@ -71,7 +71,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       
       // Make sure the new value is compatible with the variable's type.
       Obj matches = mInterpreter.invokeMethod(existingType,
-          Identifiers.CAN_ASSIGN_FROM, valueType);
+          Identifiers.CAN_ASSIGN_FROM, null, valueType);
       
       if (!matches.asBool()) {
         String expectedText = mInterpreter.invokeMethod(existingType,
@@ -85,28 +85,6 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
       // The type doesn't change.
       return existingType;
-      
-      /*
-      if (context.getScope().get(name) != null) {
-        // In the current scope, so just override the type.
-        context.assign(name, valueType);
-      } else {
-        // In an outer scope, so combine the types. This handles cases where we
-        // assign inside a conditional. When that occurs, the variable's type
-        // may be the previous one or the new one. For example:
-        //
-        // var a = 123
-        // if foo then a = "hi"
-        // 
-        // After that, a's static type will be Int | String
-        Obj combinedType = orTypes(existingType, valueType);
-        context.assign(name, combinedType);
-      }
-      
-      // In either case, the assignment expression itself returns the new
-      // value.
-      return valueType;
-      */
     }
 
     // Otherwise, it must be a setter on this.
@@ -297,7 +275,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   private Obj orTypes(Obj first, Obj... types) {
     Obj result = first;
     for (int i = 0; i < types.length; i++) {
-      result = mInterpreter.invokeMethod(result, Identifiers.OR, types[i]);
+      // TODO(bob): Should we use a static arg here?
+      result = mInterpreter.invokeMethod(result, Identifiers.OR, null, types[i]);
     }
     
     return result;
@@ -307,7 +286,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       Obj argType) {
 
     Obj methodType = mInterpreter.invokeMethod(receiverType,
-        Identifiers.GET_METHOD_TYPE,
+        Identifiers.GET_METHOD_TYPE, null,
         mInterpreter.createTuple(mInterpreter.createString(name), argType));
     
     if (methodType == mInterpreter.nothing()) {
@@ -340,7 +319,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     
     // Make sure the argument type matches the declared parameter type.
     Obj matches = mInterpreter.invokeMethod(paramType,
-        Identifiers.CAN_ASSIGN_FROM, argType);
+        Identifiers.CAN_ASSIGN_FROM, null, argType);
     
     if (!matches.asBool()) {
       String expectedText = mInterpreter.invokeMethod(paramType,

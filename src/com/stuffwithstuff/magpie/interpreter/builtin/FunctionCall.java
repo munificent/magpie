@@ -18,10 +18,10 @@ public class FunctionCall implements Callable {
   }
   
   @Override
-  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj staticArg, Obj arg) {
     FnObj function = (FnObj)thisObj;
     
-    return function.invoke(interpreter, interpreter.nothing(), arg);
+    return function.invoke(interpreter, interpreter.nothing(), staticArg, arg);
   }
   
   public FunctionType getType() { return mType; }

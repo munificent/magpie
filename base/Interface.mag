@@ -15,6 +15,10 @@ end
 
 def Interface toString(-> String) name
 
+def Interface declareMethod(name String, paramType, returnType ->)
+    methods add(Method new(name, paramType, returnType))
+end
+
 def Interface canAssignFrom(other -> Bool)
     for method = methods do
         var otherMethod = other getMethodType(method name, method paramType)

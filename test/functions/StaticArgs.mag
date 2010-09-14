@@ -1,0 +1,36 @@
+var foo[a](b)
+    print(a)
+    print(b)
+end
+
+foo["static"]("dynamic")    //: static
+                            //: dynamic
+
+var returnArg[T](arg T -> T) arg
+
+var takeInt(a Int) nothing
+
+var main(->)
+    foo[print("check")]() //: check
+
+    // Test that argument types are checked correctly.
+    returnArg[Int](123)
+    returnArg[String]("hi")
+    returnArg[String](123) //!
+    
+    // Test that return types are.
+    takeInt(returnArg[Int](123))
+    takeInt(returnArg[Bool](true)) //!
+end
+
+var outer[A]()
+    var inner[B]()
+        print(A)
+        print(B)
+    end
+    
+    inner[Int]()
+end
+
+outer[Bool]() //: Bool
+              //: Int

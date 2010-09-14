@@ -1,0 +1,58 @@
+Here's the initial roadmap for getting from where Magpie is now to (hopefully!) a living breathing language with actual users and contributors:
+
+Phase 1: Proof of concept.
+Get the core hard ideas of the language working even if performance is awful and the syntax needs work.
+- Get generics working.
+- Figure out how constructors and multiple inheritance will work.
+- Figure out if all dispatch and type system will be moved into Magpie. (I.e.
+  COLA-style and get rid of ClassObj.)
+- Type-checking of fields.
+  - Make sure ctor definitely assigns them to declared type.
+  - Make sure methods don't change their type. (May already work now.)
+  - Make sure inherited or overridden methods don't change their type.
+- Fix variable typing bug (from blog post).
+  - var/val/dyn syntax?
+  - Don't allow some/all variables to change type.
+- Masquerades.
+- Fix lots of type bugs:
+  - Base class constructors not being called.
+  - Make sure overridden methods match types.
+  - Etc. Basically fill out the test suite for types.
+Gating test: Ensure that Magpie's core ideas will work.
+
+Phase 2: Cover syntax space.
+The idea here is to get the big syntax pieces in place and tested so that there hopefully isn't a large amount of syntax churn afterward. The 
+- Change from camelCase to hyphen-separated?
+- Annotations. (Not type annotations, arbitrary ones.)
+- Syntax literals and quasiquoting.
+- Declarative syntax for extending interfaces.
+- Parsewords and move declarative sugar into Magpie.
+- Object, set, list, and map literals?
+- Keyword arguments?
+- Pattern matching, unions, and enums.
+Gating test: Ensure that it's possible to solve lots of problems in a way that
+looks good.
+
+Phase 3: Go public.
+At this point, Magpie is a real language, but buggy and missing important features. It should be at the point now where other people can help fix those bugs. To get people involved:
+- Clean up test suite (rewrite some of it in Magpie if possible).
+- Build website.
+  - Manifesto.
+  - Getting started.
+  - Tutorials.
+  - Sample code.
+  - Language guide.
+  - Hacking on Magpie guide.
+- Go through OSS process at work.
+- IRC channel.
+- Announce!
+
+Phase 4: Solidify.
+The goal here is to fix bugs, fill in missing features, and get Magpie to being a real-world usable language.
+- IType and type annotations for entire type system.
+- Clean up standard lib.
+- Floats and other numeric stuff.
+- Chars.
+- String interpolation.
+- Java interop.
+- Scripting API.

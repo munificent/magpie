@@ -24,7 +24,7 @@ public class ClassNew implements Callable {
   }
   
   @Override
-  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj staticArg, Obj arg) {
     ClassObj classObj = (ClassObj)thisObj;
     
     Obj obj = classObj.instantiate();
@@ -45,7 +45,7 @@ public class ClassNew implements Callable {
     // Find and call the constructor (if any).
     Callable constructor = classObj.getConstructor();
     if (constructor != null) {
-      constructor.invoke(interpreter, obj, arg);
+      constructor.invoke(interpreter, obj, staticArg, arg);
     }
     
     return obj;

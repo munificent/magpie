@@ -23,7 +23,7 @@ public class FnExpr extends Expr {
   
   @Override
   public void toString(StringBuilder builder, String indent) {
-    builder.append("fn (").append(mType).append(") ");
+    builder.append("fn ").append(mType).append(" ");
     mBody.toString(builder, indent);
   }
 

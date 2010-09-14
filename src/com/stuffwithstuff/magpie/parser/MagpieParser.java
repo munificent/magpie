@@ -19,6 +19,7 @@ public class MagpieParser extends Parser {
     mParsers.put(TokenType.VAR, new VariableExprParser());
     mParsers.put(TokenType.CLASS, new ClassExprParser());
     mParsers.put(TokenType.EXTEND, new ClassExprParser());
+    mParsers.put(TokenType.INTERFACE, new InterfaceExprParser());
     mParsers.put(TokenType.DEF, new DefineExprParser());
     mParsers.put(TokenType.SHARED, new DefineExprParser());
     mParsers.put(TokenType.TYPEOF, new TypeofExprParser());
@@ -120,20 +121,32 @@ public class MagpieParser extends Parser {
   }
 
   /**
-   * Parses a function type declaration. Valid examples include:
+   * Parses a function type declaration. A function type consists of an optional
+   * static parameter declaration like:
+   * [a]
+   * [a, b, c]
+   * 
+   * Followed by a mandatory dynamic argument declaration. Valid examples
+   * include:
    * (->)           // takes nothing, returns nothing
    * ()             // takes nothing, returns dynamic
    * (a)            // takes a single dynamic, returns dynamic
    * (a ->)         // takes a single dynamic, returns nothing
    * (a Int -> Int) // takes and returns an int
    * 
-   * @param paramNames After calling, will contain the list of parameter names.
-   *                   If this is null, no parameter names will be parsed.
-   *                   (This is used for inner function type declarations like
-   *                   fn (Int, String ->).)
    * @return The parsed function type.
    */
   public FunctionType parseFunctionType() {
+    // Parse the static parameter declaration, if any.
+    List<String> staticParams = new ArrayList<String>();
+    if (match(TokenType.LEFT_BRACKET)) {
+      while (true) {
+        staticParams.add(consume(TokenType.NAME).getString());
+        if (!match(TokenType.COMMA)) break;
+      }
+      consume(TokenType.RIGHT_BRACKET);
+    }
+    
     // Parse the prototype: (foo Foo, bar Bar -> Bang)
     consume(TokenType.LEFT_PAREN);
     
@@ -177,7 +190,7 @@ public class MagpieParser extends Parser {
       consume(TokenType.RIGHT_PAREN);
     }
     
-    return new FunctionType(paramNames, paramType, returnType);
+    return new FunctionType(staticParams, paramNames, paramType, returnType);
   }
   
   public String parseFunctionName() {
@@ -309,6 +322,7 @@ public class MagpieParser extends Parser {
     while (true) {
       String name;
       Position position;
+      Expr staticArg = null;
       Expr arg = null;
       
       if (match(TokenType.NAME)) {
@@ -316,34 +330,39 @@ public class MagpieParser extends Parser {
         name = last(1).getString();
         position = last(1).getPosition();
         
-        // See if it has an argument.
+        // See if it has a static argument.
+        if (match(TokenType.LEFT_BRACKET, TokenType.RIGHT_BRACKET)) {
+          staticArg = new NothingExpr(position.union(current().getPosition()));
+        } else if (match(TokenType.LEFT_BRACKET)) {
+          staticArg = parseExpression();
+          consume(TokenType.RIGHT_BRACKET);
+        }
+        
+        // See if it has a dynamic argument.
         if (match(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)) {
           arg = new NothingExpr(last(2).getPosition().union(last(1).getPosition()));
         } else if (match(TokenType.LEFT_PAREN)) {
           arg = parseExpression();
           consume(TokenType.RIGHT_PAREN);
         }
-      } else if (match(TokenType.LEFT_BRACKET)) {
-        // An indexer expression: foo[123, 4]
-        name = "[]";
-        position = last(1).getPosition();
-        
-        // Parse the argument.
-        if (match(TokenType.RIGHT_BRACKET)) {
-          arg = new NothingExpr(position.union(current().getPosition()));
-        } else {
-          arg = parseExpression();
-          consume(TokenType.RIGHT_BRACKET);
-        }
-      } else if (match(TokenType.LEFT_PAREN)) {
-        // A call (i.e. an unnamed message like 123(345) or (foo bar)(bang).
+      } else if (lookAheadAny(TokenType.LEFT_PAREN, TokenType.LEFT_BRACKET)) {
+        // A call (i.e. an unnamed message like 123(345) or (foo bar)[baz](bang).
         name = "call";
         
         position = last(1).getPosition();
         
-        if (match(TokenType.RIGHT_PAREN)) {
+        // Parse the static argument if present.
+        if (match(TokenType.LEFT_BRACKET, TokenType.RIGHT_BRACKET)) {
+          staticArg = new NothingExpr(position.union(current().getPosition()));
+        } else if (match(TokenType.LEFT_BRACKET)) {
+          staticArg = parseExpression();
+          consume(TokenType.RIGHT_BRACKET);
+        }
+        
+        // Pass the dynamic argument if present.
+        if (match(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)) {
           arg = new NothingExpr(last(2).getPosition().union(last(1).getPosition()));
-        } else {
+        } else if(match(TokenType.LEFT_PAREN)) {
           arg = parseExpression();
           consume(TokenType.RIGHT_PAREN);
         }
@@ -357,11 +376,15 @@ public class MagpieParser extends Parser {
         position = position.union(message.getPosition());
       }
       
+      if (staticArg != null) {
+        position = position.union(staticArg.getPosition());
+      }
+      
       if (arg != null) {
         position = position.union(arg.getPosition());
       }
       
-      message = new MessageExpr(position, message, name, arg);
+      message = new MessageExpr(position, message, name, staticArg, arg);
     }
     
     if (message == null) {

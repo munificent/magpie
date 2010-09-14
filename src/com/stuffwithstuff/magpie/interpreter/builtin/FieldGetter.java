@@ -22,7 +22,7 @@ public class FieldGetter implements Callable {
   }
   
   @Override
-  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj staticArg, Obj arg) {
     Obj value = thisObj.getField(mName);
     if (value == null) return interpreter.nothing();
     return value;

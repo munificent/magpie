@@ -11,6 +11,7 @@ public final class Identifiers {
   public static final String COUNT = "count";
   public static final String CURRENT = "current";
   public static final String DECLARE_FIELD = "declareField";
+  public static final String DECLARE_METHOD = "declareMethod";
   public static final String DEFINE_CONSTRUCTOR = "defineConstructor";
   public static final String DEFINE_FIELD = "defineField";
   public static final String DEFINE_METHOD = "defineMethod";
