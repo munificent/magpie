@@ -1,0 +1,94 @@
+class Counter
+    this() value = 0
+    
+    reset(->) value = 0
+    inc(->)   value = value + 1
+    
+    value Int
+end
+
+class TestCase
+    this()
+        asserts = 0
+        tests = 0
+    end
+    
+    asserts Int
+    tests   Int
+    
+    assertEqual(expected, actual ->)
+        asserts = asserts + 1
+        if expected != actual then
+            print("Error: Expected " + expected + " but was " + actual + ".")
+        end
+    end
+end
+
+class AndOrTest : TestCase
+    testShortCircuiting()
+        var c = Counter new
+        truthy(c) and truthy(c)
+        assertEqual(2, c value)
+        
+        c reset
+        truthy(c) and falsy(c)
+        assertEqual(2, c value)
+        
+        c reset
+        falsy(c) and truthy(c)
+        assertEqual(1, c value)
+        
+        c reset
+        falsy(c) and falsy(c)
+        assertEqual(1, c value)
+
+        var c = Counter new
+        truthy(c) or truthy(c)
+        assertEqual(1, c value)
+        
+        c reset
+        truthy(c) or falsy(c)
+        assertEqual(1, c value)
+        
+        c reset
+        falsy(c) or truthy(c)
+        assertEqual(2, c value)
+        
+        c reset
+        falsy(c) or falsy(c)
+        assertEqual(2, c value)
+    end
+
+    testReturnsOneArm(->)
+        // Returns the result expression of the side that affected the result.
+        // Note that this presumes non-zero ints and non-empty strings are
+        // truthy.
+        assertEqual(0, 0 and "")
+        assertEqual(0, 0 and 1)
+        assertEqual(0, 1 and 0)
+        assertEqual(2, 1 and 2)
+
+        assertEqual(0, "" or 0)
+        assertEqual("a", 0 or "a")
+        assertEqual(1,1 or 0)
+        assertEqual(1, 1 or 2)
+    end
+    
+    truthy(c Counter -> Bool)
+        c inc
+        true
+    end
+
+    falsy(c Counter -> Bool)
+        c inc
+        false
+    end
+end
+
+var main(->)
+    print("Running tests...")
+    var t = AndOrTest new
+    t testShortCircuiting
+    t testReturnsOneArm
+    print("Done. Checked " + t asserts + " assertions.")
+end

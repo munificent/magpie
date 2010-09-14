@@ -57,7 +57,7 @@ public class ClassBuiltIns {
     
     return interpreter.nothing();
   }
-
+  
   @Signature("getMethodType(name)")
   public static Obj getMethodType(Interpreter interpreter, Obj thisObj, Obj arg) {
     String name = arg.getTupleField(0).asString();

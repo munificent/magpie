@@ -37,7 +37,10 @@ public class Interpreter {
     // metaclass is the main metaclass Class.
     mObjectClass = new ClassObj(mClass, "Object", null);
     mGlobalScope.define("Object", mObjectClass);
-    
+
+    // Add a constructor so you can create new Objects.
+    mObjectClass.addMethod(Identifiers.NEW, new ClassNew("Object"));
+
     // Now that both Class and Object exist, wire them up.
     mClass.setParent(mObjectClass);
     
@@ -291,8 +294,8 @@ public class Interpreter {
   }
   
   private Obj invokeMethod(Position position, Obj receiver, String name, Obj arg) {
-    // Look up the member.
     Callable method = receiver.getClassObj().findMethod(name);
+    
     if (method != null) {
       // There's a special case we need to handle here. Consider:
       //

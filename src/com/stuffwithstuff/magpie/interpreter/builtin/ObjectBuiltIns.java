@@ -15,6 +15,16 @@ public class ObjectBuiltIns {
     return interpreter.createBool(thisObj == arg);
   }
 
+  @Signature("getField(name String)")
+  public static Obj getField(Interpreter interpreter, Obj thisObj, Obj arg) {
+    String name = arg.asString();
+    
+    Obj field = thisObj.getField(name);
+    if (field == null) return interpreter.nothing();
+    
+    return field;
+  }
+
   @Signature("import(path String ->)")
   public static Obj _import_(Interpreter interpreter, Obj thisObj, Obj arg) {
     String currentDir = new File(interpreter.getCurrentScript()).getParent();

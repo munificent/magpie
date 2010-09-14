@@ -1,0 +1,49 @@
+print("hi")
+
+var methodLookup(name String)
+    var methods = getField("__methods")
+    var found = methods getField(name)
+    if found != nothing then found
+end
+
+var Point = Object new
+
+Point __lookup = methodLookup
+
+Point __methods = Object new
+
+Point __methods new = fn(x Int, y Int)
+    print("Point ctor")
+    var point = Object new
+    point __lookup = protoLookup
+    point __methods = getField("__instanceMethods")
+    point x = x
+    point y = y
+    point
+end
+
+Point __instanceMethods = Object new
+Point __instanceMethods distance = fn()
+    x + y
+end
+
+/*
+var a = Object new
+
+a __class = Object new
+a __class __methods = Object new
+a __class __methods foo = fn() print("called foo")
+
+a __lookup = fn(name String)
+//    print("lookup " + name)
+    var myClass = this getField("__class")
+    var methods = myClass getField("__methods")
+    var found = methods getField(name)
+    if found != nothing then found
+end
+
+a foo
+*/
+
+var p = Point new(2, 3)
+print(p distance)
