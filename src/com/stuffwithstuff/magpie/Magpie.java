@@ -92,7 +92,7 @@ public class Magpie {
     int skipped = 0;
     
     for (File testScript : listTestScripts()) {
-      //if (!testScript.getPath().contains("SharedMembers")) continue;
+      if (!testScript.getPath().contains("StaticArgs")) continue;
       
       tests++;
       

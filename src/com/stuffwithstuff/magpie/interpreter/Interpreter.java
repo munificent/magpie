@@ -111,18 +111,10 @@ public class Interpreter {
     return result.asString();
   }
   
-  public Obj evaluateType(Expr expr) {
-    // We create a context from the interpreter here because we need to evaluate
-    // type expressions in the regular interpreter context where scopes hold
-    // values not types.
-    EvalContext context = createTopLevelContext();
-    return evaluate(expr, context);
-  }
-
-  public Obj evaluateFunctionType(FunctionType type) {
+  public Obj evaluateFunctionType(FunctionType type, EvalContext context) {
     // Create the function type for the function.
-    Obj paramType = evaluateType(type.getParamType());
-    Obj returnType = evaluateType(type.getReturnType());
+    Obj paramType = evaluate(type.getParamType(), context);
+    Obj returnType = evaluate(type.getReturnType(), context);
     
     return invokeMethod(mFnClass, Identifiers.CALL,
         null, createTuple(paramType, returnType));

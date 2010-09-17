@@ -105,9 +105,6 @@ public class Checker {
    *                  the class that this a method on.
    */
   public void checkFunction(FnExpr function, Scope closure, Obj thisType) {
-    // Evaluate the parameter type declaration expression to get the declared
-    // parameter type(s).
-    Obj paramType = mInterpreter.evaluateType(function.getType().getParamType());
     
     // Create a new local scope for the function.
     // TODO(bob): Walking the entire closure and getting its type could be
@@ -115,8 +112,28 @@ public class Checker {
     Scope closureTypes = typeScope(closure);
     EvalContext functionContext = new EvalContext(
         closureTypes, thisType).nestScope();
+
+    // Evaluate the static parameter constraints and bind their names. Bind them
+    // in both the static context (for use in annotations) and in the function
+    // context (so you can reference them as first-class values in expressions).
+    // TODO(bob): Implement static parameter constraints! Just assume Dynamic
+    // for now.
+    EvalContext staticContext = mInterpreter.createTopLevelContext().nestScope();
+    for (String name : function.getType().getStaticParams()) {
+      Obj constraint = mInterpreter.evaluate(Expr.name("Dynamic"),
+          staticContext);
+      staticContext.define(name, constraint);
+      functionContext.define(name, constraint);
+    }
     
-    // Bind parameter types to their names.
+    // Evaluate the function's type annotations in the static value scope.
+    Obj paramType = mInterpreter.evaluate(function.getType().getParamType(),
+        staticContext);
+
+    Obj expectedReturn = mInterpreter.evaluate(
+        function.getType().getReturnType(), staticContext);
+
+    // Bind the parameter names to their evaluated types.
     List<String> params = function.getType().getParamNames();
     if (params.size() == 1) {
       functionContext.define(params.get(0), paramType);
@@ -128,11 +145,9 @@ public class Checker {
       }
     }
     
+    // Check the body of the function.
     ExprChecker checker = new ExprChecker(mInterpreter, this);
     Obj returnType = checker.checkFunction(function.getBody(), functionContext);
-
-    // Check that the body returns a valid type.
-    Obj expectedReturn = mInterpreter.evaluateType(function.getType().getReturnType());
     
     // If it's declared to return Nothing, then we'll also allow (and ignore)
     // any other return type. Note that this doesn't mean we'll discard the
@@ -159,8 +174,8 @@ public class Checker {
           expectedText, actualText);
     }
     
-    // TODO(bob): If this function is a method (i.e. this isn't nothing?), then we
-    // also need to check that any assignment to a field matches the declared
+    // TODO(bob): If this function is a method (i.e. 'this' isn't nothing), then
+    // we also need to check that any assignment to a field matches the declared
     // type.
   }
   
@@ -175,10 +190,14 @@ public class Checker {
    */
   // TODO(bob): Instead of doing this all at once, it's probably smarter to make
   // EvalContext and/or Scope support binding both values and types to a name
-  // and then only translating values to types as needed.
+  // and then only translate values to types as needed.
   public Scope typeScope(Scope valueScope) {
-    // TODO(bob): What about parent scopes here?
-    Scope scope = new Scope();
+    Scope parent = null;
+    if (valueScope.getParent() != null) {
+      parent = typeScope(valueScope.getParent());
+    }
+
+    Scope scope = new Scope(parent);
     for (Entry<String, Obj> entry : valueScope.entries()) {
       Obj type = mInterpreter.invokeMethod(entry.getValue(), Identifiers.TYPE);
       scope.define(entry.getKey(), type);

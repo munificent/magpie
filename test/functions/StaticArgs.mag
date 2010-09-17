@@ -10,19 +10,6 @@ var returnArg[T](arg T -> T) arg
 
 var takeInt(a Int) nothing
 
-var main(->)
-    foo[print("check")]() //: check
-
-    // Test that argument types are checked correctly.
-    returnArg[Int](123)
-    returnArg[String]("hi")
-    returnArg[String](123) //!
-    
-    // Test that return types are.
-    takeInt(returnArg[Int](123))
-    takeInt(returnArg[Bool](true)) //!
-end
-
 var outer[A]()
     var inner[B]()
         print(A)
@@ -34,3 +21,27 @@ end
 
 outer[Bool]() //: Bool
               //: Int
+
+var makeFn[A](a A ->)
+    var f = fn (arg A -> String) arg toString
+    print(f(a))
+end
+
+var main(->)
+    foo[print("check")]() //: check
+
+    // Test that argument types are checked correctly.
+    returnArg[Int](123)
+    returnArg[String]("hi")
+    returnArg[String](123) //!
+    
+    // Test that return types are.
+    takeInt(returnArg[Int](123))
+    takeInt(returnArg[Bool](true)) //!
+    
+    // Test that a type annotation in a local function can access its enclosing
+    // static type arguments.
+    makeFn[Int](123) //: 123
+end
+
+// TODO(bob): Need to test constraints versus args

@@ -3,6 +3,7 @@ package com.stuffwithstuff.magpie.interpreter.builtin;
 import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
+import com.stuffwithstuff.magpie.interpreter.EvalContext;
 import com.stuffwithstuff.magpie.interpreter.FnObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
@@ -70,8 +71,23 @@ public class ClassBuiltIns {
       return interpreter.nothing();
     }
     
-    Obj paramType = interpreter.evaluateType(method.getType().getParamType());
-    Obj returnType = interpreter.evaluateType(method.getType().getReturnType());
+    // TODO(bob): Hackish.
+    // Figure out a context to evaluate the method's type signature in. If it's
+    // a user-defined method we'll evaluate it the method's closure so that
+    // outer static arguments are available. Otherwise, we'll assume it has no
+    // outer scope and just evaluate it in a top-level context.
+    EvalContext staticContext;
+    if (method instanceof FnObj) {
+      staticContext = new EvalContext(((FnObj)method).getClosure(),
+          interpreter.nothing());
+    } else {
+      staticContext = interpreter.createTopLevelContext();
+    }
+    
+    Obj paramType = interpreter.evaluate(method.getType().getParamType(),
+        staticContext);
+    Obj returnType = interpreter.evaluate(method.getType().getReturnType(),
+        staticContext);
     return interpreter.createTuple(paramType, returnType);
   }
   

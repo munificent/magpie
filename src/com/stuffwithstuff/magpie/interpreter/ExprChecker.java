@@ -124,7 +124,10 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     // Check the body.
     mChecker.checkFunction(expr, context.getScope(), context.getThis());
     
-    return mInterpreter.evaluateFunctionType(expr.getType());
+    // TODO(bob): This isn't correct. Need to have a context that includes
+    // surrounding static type parameters.
+    EvalContext hackContext = mInterpreter.createTopLevelContext();
+    return mInterpreter.evaluateFunctionType(expr.getType(), hackContext);
   }
 
   @Override
