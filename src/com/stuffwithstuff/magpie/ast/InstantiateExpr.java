@@ -23,13 +23,10 @@ public class InstantiateExpr extends Expr {
   
   @Override
   public void toString(StringBuilder builder, String indent) {
-    // TODO(bob): This syntax is completely temporary!
-    builder.append("[ ");
-    
     mFn.toString(builder, indent);
-    builder.append(" : ");
+    builder.append("[");
     mArg.toString(builder, indent);
-    builder.append(" ]");
+    builder.append("]");
   }
 
   private final Expr mFn;

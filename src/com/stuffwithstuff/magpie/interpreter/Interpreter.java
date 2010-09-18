@@ -149,6 +149,10 @@ public class Interpreter {
     Obj type = invokeMethod(staticFunctionTypeClass,
         Identifiers.NEW, createTuple(createArray(names), body));
     
+    // TODO(bob): Cram the original expr in there so we can get it back out
+    // when type checking. So dirty.
+    type.setValue(expr);
+    
     return type;    
   }
   

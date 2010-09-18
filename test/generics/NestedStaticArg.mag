@@ -1,13 +1,21 @@
-// [disable]
-
 var outer[A](argA A ->)
     var inner[B](a A, b B -> A) a + b
     
-    inner[Int](2)
+    inner[Int](argA, 2)
+end
+
+// A copy of the above just for testing the case where the argument is wrong.
+var outer2[A](argA A ->)
+    var inner[B](a A, b B -> A) //! (for return type)
+        var result = a + b //! (for no + on A)
+        result
+    end
+    
+    inner[Int](argA, 2)
 end
 
 var main(->)
     outer[Int](1)
     outer[String]("1") // ok: string converts to int
-    outer[Bool](true) //!
+    outer2[Bool](true)
 end

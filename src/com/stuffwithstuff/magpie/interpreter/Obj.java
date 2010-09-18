@@ -53,6 +53,10 @@ public class Obj {
     return mValue;
   }
   
+  public void setValue(Object value) {
+    mValue = value;
+  }
+  
   @SuppressWarnings("unchecked")
   public List<Obj> asArray() {
     if (mValue instanceof List<?>) {
@@ -104,6 +108,6 @@ public class Obj {
   }
   
   private final ClassObj mClass;
-  private final Object mValue;
+  private Object mValue;
   private final Scope mFields = new Scope();
 }

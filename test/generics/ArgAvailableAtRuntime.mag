@@ -1,5 +1,3 @@
-// [disable]
-
 var foo[A]()
     print(A)
 end
@@ -8,14 +6,15 @@ var bar[A]()
     var nested[B]()
         print(A toString + " " + B)
     end
-    nested[Int]
+    nested[Int]()
 end
 
+// TODO(bob): Having to explicitly do () after [] is lame.
 var main(->)
-    foo[Int]   //: Int
-    foo[Bool]  //: Bool
-    foo[123]   //: 123
+    foo[Int]()   //: Int
+    foo[Bool]()  //: Bool
+    foo[123]()   //: 123
     
-    bar[Int]  //: Int Int
-    bar[Bool] //: Bool Int
+    bar[Int]()  //: Int Int
+    bar[Bool]() //: Bool Int
 end

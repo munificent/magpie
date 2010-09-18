@@ -172,7 +172,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(InstantiateExpr expr, EvalContext context) {
     // TODO(bob): Almost all of this is copied from ExprEvaluator. Should unify.
     // Evaluate the static argument.
-    Obj fn = mInterpreter.evaluate(expr.getFn(), mStaticContext);
+    Obj fn = mInterpreter.evaluate(expr.getFn(), context);
     Obj arg = mInterpreter.evaluate(expr.getArg(), mStaticContext);
     
     // TODO(bob): Unchecked cast = lame!
@@ -181,19 +181,21 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     // Push a new static context with the bound static arguments.
     EvalContext staticContext = mStaticContext.pushScope();
     
-    // Bind the argument(s) to the static parameter(s).
+    // Bind the argument(s) to the static parameter(s). Note that the names are
+    // bound in both the static context and the regular type context. The former
+    // is so that static arguments can be used in subsequent type annotations
+    // (this is the motivation to even *have* static functions). The latter is
+    // so that the static arguments are also available at runtime.
     if (staticFn.getParams().size() > 1) {
       // TODO(bob): Gross, assume arg is a tuple.
       for (int i = 0; i < staticFn.getParams().size(); i++) {
         staticContext.define(staticFn.getParams().get(i), arg.getTupleField(i));
+        context.define(staticFn.getParams().get(i), arg.getTupleField(i));
       }
     } else if (staticFn.getParams().size() == 1) {
       staticContext.define(staticFn.getParams().get(0), arg);
+      context.define(staticFn.getParams().get(0), arg);
     }
-    
-    // TODO(bob): Also need to bind the *types* of the static arguments to the
-    // parameter names in the *type* scope so that places where static arguments
-    // are used at runtime can type-check.
     
     // Now that we have a context where the static parameters are bound to
     // concrete values, we can check the body of the original static function.
@@ -277,7 +279,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(StaticFnExpr expr, EvalContext context) {
-    return mInterpreter.evaluateStaticFunctionType(expr, context);
+    return mInterpreter.evaluateStaticFunctionType(expr, mStaticContext);
   }
 
   @Override
