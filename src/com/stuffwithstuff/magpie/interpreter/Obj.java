@@ -49,6 +49,10 @@ public class Obj {
     mFields.define(name, field);
   }
   
+  public Object getValue() {
+    return mValue;
+  }
+  
   @SuppressWarnings("unchecked")
   public List<Obj> asArray() {
     if (mValue instanceof List<?>) {

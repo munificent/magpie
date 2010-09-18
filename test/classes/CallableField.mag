@@ -5,7 +5,7 @@ class Foo
     end
     
     // this will cause the field to be wrapped in a getter
-    declaredItems Int[]
+    declaredItems Array of(Int)
 end
 
 def Foo test()

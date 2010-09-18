@@ -1,3 +1,5 @@
+// [disable]
+
 class Foo
     bar = "a string"
 end

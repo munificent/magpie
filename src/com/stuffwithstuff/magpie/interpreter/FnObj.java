@@ -22,7 +22,7 @@ public class FnObj extends Obj implements Callable {
   public Obj invoke(Interpreter interpreter, Obj thisObj,
       Obj staticArg, Obj arg) {
     // Create a new local scope for the function.
-    EvalContext context = new EvalContext(mClosure, thisObj).nestScope();
+    EvalContext context = new EvalContext(mClosure, thisObj).pushScope();
     
     // A missing argument is implied nothing.
     if (arg == null) arg = interpreter.nothing();

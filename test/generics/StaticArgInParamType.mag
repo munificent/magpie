@@ -1,0 +1,11 @@
+// [disable]
+
+var foo[T](arg T ->)
+    print(arg)
+end
+
+var main(->)
+    foo[Int](123)     // ok
+    foo[String]("hi") // ok
+    foo[Bool](34) //!
+end

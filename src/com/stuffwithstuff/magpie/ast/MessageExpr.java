@@ -36,6 +36,14 @@ public class MessageExpr extends Expr {
     
     builder.append(mName);
     
+    if (mStaticArg != null) {
+      builder.append("[");
+      if (!(mStaticArg instanceof NothingExpr)) {
+        mStaticArg.toString(builder, indent);
+      }
+      builder.append("]");
+    }
+    
     if (mArg != null) {
       builder.append("(");
       if (!(mArg instanceof NothingExpr)) {

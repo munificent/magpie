@@ -1,5 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import java.util.Map.Entry;
+
 /**
  * Describes the context in which an expression can be evaluated. Includes the
  * lexical scope and the object that "this" refers to.
@@ -13,8 +15,15 @@ public class EvalContext {
   /**
    * Creates an EvalContext for a new lexical block scope within this one.
    */
-  public EvalContext nestScope() {
+  public EvalContext pushScope() {
     return new EvalContext(new Scope(mScope), mThis);
+  }
+  
+  /**
+   * Creates an EvalContext that discards the current innermost lexical scope.
+   */
+  public EvalContext popScope() {
+    return new EvalContext(mScope.getParent(), mThis);
   }
   
   /**
@@ -78,6 +87,26 @@ public class EvalContext {
     return false;
   }
 
+  @Override
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+    builder.append("this -> ").append(mThis).append("\n");
+    
+    String indent = "";
+    Scope scope = mScope;
+    while (scope != null) {
+      for (Entry<String, Obj> entry : scope.entries()) {
+        builder.append(indent).append(entry.getKey())
+               .append(" -> ").append(entry.getValue()).append("\n");
+      }
+      
+      indent = indent + "  ";
+      scope = scope.getParent();
+    }
+    
+    return builder.toString();
+  }
+  
   private final Scope mScope;
   private final Obj   mThis;
 }

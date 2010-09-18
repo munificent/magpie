@@ -1,0 +1,13 @@
+// [disable]
+
+var outer[A](argA A ->)
+    var inner[B](a A, b B -> A) a + b
+    
+    inner[Int](2)
+end
+
+var main(->)
+    outer[Int](1)
+    outer[String]("1") // ok: string converts to int
+    outer[Bool](true) //!
+end

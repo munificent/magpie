@@ -1,0 +1,14 @@
+// [disable]
+
+var foo[T](arg T -> T)
+    arg
+end
+
+var expectInt(a Int ->) nothing
+var expectString(a String ->) nothing
+
+var main(->)
+    expectInt(foo[Int](123))        // ok
+    expectString(foo[String]("hi")) // ok
+    expectInt(foo[Bool](true))     //!
+end

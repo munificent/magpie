@@ -54,7 +54,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     
     // Create a lexical scope.
     if (expr.createScope()) {
-      context = context.nestScope();
+      context = context.pushScope();
     }
     
     // Evaluate all of the expressions and return the last.
@@ -84,7 +84,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(IfExpr expr, EvalContext context) {
     // Put it in a block so that variables declared in conditions end when the
     // if expression ends.
-    context = context.nestScope();
+    context = context.pushScope();
     
     // Evaluate all of the conditions.
     boolean passed = true;
@@ -120,6 +120,29 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     } else {
       return evaluate(expr.getElse(), context);
     }
+  }
+
+  @Override
+  public Obj visit(InstantiateExpr expr, EvalContext context) {
+    Obj fn = evaluate(expr.getFn(), context);
+    Obj arg = evaluate(expr.getArg(), context);
+    
+    // TODO(bob): Unchecked cast = lame!
+    StaticFnExpr staticFn = (StaticFnExpr)fn.getValue();
+    
+    // Bind the argument(s) to the static parameter(s).
+    context = context.pushScope();
+    if (staticFn.getParams().size() > 1) {
+      // TODO(bob): Gross, assume arg is a tuple.
+      for (int i = 0; i < staticFn.getParams().size(); i++) {
+        context.define(staticFn.getParams().get(i), arg.getTupleField(i));
+      }
+    } else if (staticFn.getParams().size() == 1) {
+      context.define(staticFn.getParams().get(0), arg);
+    }
+    
+    // Now evaluate the body in that context.
+    return evaluate(staticFn.getBody(), context);
   }
 
   @Override
@@ -203,6 +226,13 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(ReturnExpr expr, EvalContext context) {
     Obj value = evaluate(expr.getValue(), context);
     throw new ReturnException(value);
+  }
+
+  @Override
+  public Obj visit(StaticFnExpr expr, EvalContext context) {
+    // TODO(bob): Ghetto! Should have a real class and probably close over the
+    // current context.
+    return new Obj(mInterpreter.getStaticFunctionType(), expr);
   }
 
   @Override

@@ -45,12 +45,14 @@ public class Checker {
    *         others from being determined.
    */
   public List<CheckError> checkAll() {
+    EvalContext staticContext = mInterpreter.createTopLevelContext();
+    
     // Check all of the reachable functions.
     for (Entry<String, Obj> entry : mInterpreter.getGlobals().entries()) {
       if (entry.getValue() instanceof FnObj) {
         FnObj function = (FnObj)entry.getValue();
         checkFunction(function.getFunction(), function.getClosure(),
-            mInterpreter.getNothingType());
+            mInterpreter.getNothingType(), staticContext);
       } else if (entry.getValue() instanceof ClassObj) {
         ClassObj classObj = (ClassObj)entry.getValue();
         
@@ -60,7 +62,7 @@ public class Checker {
           if (method.getValue() instanceof FnObj) {
             FnObj function = (FnObj)method.getValue();
             checkFunction(function.getFunction(), function.getClosure(),
-                classObj);
+                classObj, staticContext);
           }
         }
       }
@@ -78,7 +80,8 @@ public class Checker {
    * @return       The type of the expression.
    */
   public Obj evaluateExpressionType(Expr expr) {
-    ExprChecker checker = new ExprChecker(mInterpreter, this);
+    ExprChecker checker = new ExprChecker(mInterpreter, this, 
+        mInterpreter.createTopLevelContext());
 
     Scope globals = typeScope(mInterpreter.getGlobals());
     EvalContext context = new EvalContext(globals, mInterpreter.getNothingType());
@@ -103,22 +106,24 @@ public class Checker {
    *                  evaluator).
    * @param thisType  The type of "this" within the function. In other words,
    *                  the class that this a method on.
+   * @return          The evaluated type of the function.
    */
-  public void checkFunction(FnExpr function, Scope closure, Obj thisType) {
+  public Obj checkFunction(FnExpr function, Scope closure, Obj thisType,
+      EvalContext staticContext) {
     
     // Create a new local scope for the function.
     // TODO(bob): Walking the entire closure and getting its type could be
     // painfully slow here.
     Scope closureTypes = typeScope(closure);
     EvalContext functionContext = new EvalContext(
-        closureTypes, thisType).nestScope();
+        closureTypes, thisType).pushScope();
 
     // Evaluate the static parameter constraints and bind their names. Bind them
     // in both the static context (for use in annotations) and in the function
     // context (so you can reference them as first-class values in expressions).
     // TODO(bob): Implement static parameter constraints! Just assume Dynamic
     // for now.
-    EvalContext staticContext = mInterpreter.createTopLevelContext().nestScope();
+    staticContext = staticContext.pushScope();
     for (String name : function.getType().getStaticParams()) {
       Obj constraint = mInterpreter.evaluate(Expr.name("Dynamic"),
           staticContext);
@@ -146,7 +151,7 @@ public class Checker {
     }
     
     // Check the body of the function.
-    ExprChecker checker = new ExprChecker(mInterpreter, this);
+    ExprChecker checker = new ExprChecker(mInterpreter, this, staticContext);
     Obj returnType = checker.checkFunction(function.getBody(), functionContext);
     
     // If it's declared to return Nothing, then we'll also allow (and ignore)
@@ -177,6 +182,7 @@ public class Checker {
     // TODO(bob): If this function is a method (i.e. 'this' isn't nothing), then
     // we also need to check that any assignment to a field matches the declared
     // type.
+    return mInterpreter.evaluateFunctionType(function.getType(), staticContext);
   }
   
   /**

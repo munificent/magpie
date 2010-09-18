@@ -1,0 +1,30 @@
+// [disable]
+
+class Box[T]
+    this (value T)
+        this value = value
+    end
+    
+    value T
+    
+    test(other T -> Bool)
+        value == other
+    end
+    
+    showType()
+        print(T)
+    end
+end
+
+var main(->)
+    var a = Box[Int] new(123)
+    a value = 234
+    print(a test(234))  //: true
+    print(a test(345))  //: false
+    a showType          //: Int
+    
+    var b = Box[Int] new(true) //!
+    
+    var c = Box[String] new ("hi")
+    c test(234) //!
+end

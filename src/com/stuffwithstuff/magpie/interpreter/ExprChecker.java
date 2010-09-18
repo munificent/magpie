@@ -12,9 +12,11 @@ import com.stuffwithstuff.magpie.ast.*;
  * expression. Also reports type errors as they are found.
  */
 public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
-  public ExprChecker(Interpreter interpreter, Checker checker) {
+  public ExprChecker(Interpreter interpreter, Checker checker, EvalContext
+      staticContext) {
     mInterpreter = interpreter;
     mChecker = checker;
+    mStaticContext = staticContext;
   }
   
   /**
@@ -98,12 +100,15 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     
     // Create a lexical scope.
     if (expr.createScope()) {
-      context = context.nestScope();
+      context = context.pushScope();
     }
     
     // Evaluate all of the expressions and return the last.
-    for (Expr thisExpr : expr.getExpressions()) {
-      result = check(thisExpr, context);
+    for (int i = 0; i < expr.getExpressions().size(); i++) {
+      Expr thisExpr = expr.getExpressions().get(i);
+      // Can only early return from the end of a block.
+      boolean allowReturn = i == expr.getExpressions().size() - 1;
+      result = check(thisExpr, context, allowReturn);
     }
     
     return result;
@@ -121,20 +126,17 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(FnExpr expr, EvalContext context) {
-    // Check the body.
-    mChecker.checkFunction(expr, context.getScope(), context.getThis());
-    
-    // TODO(bob): This isn't correct. Need to have a context that includes
-    // surrounding static type parameters.
-    EvalContext hackContext = mInterpreter.createTopLevelContext();
-    return mInterpreter.evaluateFunctionType(expr.getType(), hackContext);
+    // Check the body and create a context containing any static arguments the
+    // function defines.
+    return mChecker.checkFunction(expr, context.getScope(), context.getThis(),
+        mStaticContext);
   }
 
   @Override
   public Obj visit(IfExpr expr, EvalContext context) {
     // Put it in a block so that variables declared in conditions end when the
     // if expression ends.
-    context = context.nestScope();
+    context = context.pushScope();
     
     // TODO(bob): Should eventually check that conditions implement ITrueable
     // so that you can only use truthy stuff in an if.
@@ -164,6 +166,39 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     Obj elseArm = check(expr.getElse(), context, true);
     
     return orTypes(thenArm, elseArm);
+  }
+
+  @Override
+  public Obj visit(InstantiateExpr expr, EvalContext context) {
+    // TODO(bob): Almost all of this is copied from ExprEvaluator. Should unify.
+    // Evaluate the static argument.
+    Obj fn = mInterpreter.evaluate(expr.getFn(), mStaticContext);
+    Obj arg = mInterpreter.evaluate(expr.getArg(), mStaticContext);
+    
+    // TODO(bob): Unchecked cast = lame!
+    StaticFnExpr staticFn = (StaticFnExpr)fn.getValue();
+    
+    // Push a new static context with the bound static arguments.
+    EvalContext staticContext = mStaticContext.pushScope();
+    
+    // Bind the argument(s) to the static parameter(s).
+    if (staticFn.getParams().size() > 1) {
+      // TODO(bob): Gross, assume arg is a tuple.
+      for (int i = 0; i < staticFn.getParams().size(); i++) {
+        staticContext.define(staticFn.getParams().get(i), arg.getTupleField(i));
+      }
+    } else if (staticFn.getParams().size() == 1) {
+      staticContext.define(staticFn.getParams().get(0), arg);
+    }
+    
+    // TODO(bob): Also need to bind the *types* of the static arguments to the
+    // parameter names in the *type* scope so that places where static arguments
+    // are used at runtime can type-check.
+    
+    // Now that we have a context where the static parameters are bound to
+    // concrete values, we can check the body of the original static function.
+    ExprChecker checker = new ExprChecker(mInterpreter, mChecker, staticContext);
+    return checker.check(staticFn.getBody(), context);
   }
 
   @Override
@@ -238,6 +273,11 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     mReturnedTypes.add(returnedType);
     
     return mInterpreter.getNeverType();
+  }
+
+  @Override
+  public Obj visit(StaticFnExpr expr, EvalContext context) {
+    return mInterpreter.evaluateStaticFunctionType(expr, context);
   }
 
   @Override
@@ -324,6 +364,13 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     Obj matches = mInterpreter.invokeMethod(paramType,
         Identifiers.CAN_ASSIGN_FROM, null, argType);
     
+    // TODO(bob): Hack! Temp for testing.
+    if (matches.toString().equals("nothing")) {
+      mInterpreter.invokeMethod(receiverType,
+          Identifiers.GET_METHOD_TYPE, null,
+          mInterpreter.createTuple(mInterpreter.createString(name), argType));
+    }
+    
     if (!matches.asBool()) {
       String expectedText = mInterpreter.invokeMethod(paramType,
           Identifiers.TO_STRING).asString();
@@ -341,4 +388,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   private final Interpreter mInterpreter;
   private final Checker mChecker;
   private final List<Obj> mReturnedTypes = new ArrayList<Obj>();
+  // The context in which type annotations and other static expressions are
+  // evaluated during type-checking.
+  // TODO(bob): Everything that evaluates during check time should use this.
+  private final EvalContext mStaticContext;
 }

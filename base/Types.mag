@@ -51,7 +51,14 @@ def Class canAssignFrom(other -> Bool)
     // Not even object can assign from Nothing.
     if other == Nothing then return false
     
-    if other type == OrType then return false
+    // If it's an Or type, just check the arms.
+    if other type == OrType then
+        var orType = OrType unsafeCast(other)
+        for otherCase = orType cases do
+            if canAssignFrom(otherCase) not then return false
+        end
+        return true
+    end
     
     // A derived type can be assigned to a base type, so walk up the chain
     // looking for this type.

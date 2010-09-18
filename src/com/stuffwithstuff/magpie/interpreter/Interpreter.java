@@ -52,6 +52,7 @@ public class Interpreter {
     mDynamicClass = createGlobalClass("Dynamic");
     mFnClass = createGlobalClass("Function");
     mIntClass = createGlobalClass("Int");
+    mStaticFnClass = createGlobalClass("StaticFunction");
 
     mStringClass = createGlobalClass("String");
 
@@ -90,6 +91,7 @@ public class Interpreter {
     BuiltIns.register(FunctionBuiltIns.class, mFnClass);
     BuiltIns.register(IntBuiltIns.class, mIntClass);
     BuiltIns.register(ObjectBuiltIns.class, mObjectClass);
+    BuiltIns.register(StaticFunctionBuiltIns.class, mStaticFnClass);
     BuiltIns.register(StringBuiltIns.class, mStringClass);
   }
   
@@ -113,11 +115,41 @@ public class Interpreter {
   
   public Obj evaluateFunctionType(FunctionType type, EvalContext context) {
     // Create the function type for the function.
+    // TODO(bob): Support static param constraints.
+    Obj staticParamConstraint = mDynamicClass;
+    
     Obj paramType = evaluate(type.getParamType(), context);
     Obj returnType = evaluate(type.getReturnType(), context);
     
+    if (paramType == mNothing) {
+      throw new InterpreterException(String.format(
+          "Could not evaluate parameter type %s.", type.getParamType()));
+    }
+    if (returnType == mNothing) {
+      throw new InterpreterException(String.format(
+          "Could not evaluate return type %s.", type.getReturnType()));
+    }
+    
     return invokeMethod(mFnClass, Identifiers.CALL,
-        null, createTuple(paramType, returnType));
+        null, createTuple(staticParamConstraint, paramType, returnType));
+  }
+  
+  public Obj evaluateStaticFunctionType(StaticFnExpr expr, EvalContext context) {
+    // Convert the object to a first-class Magpie object.
+    List<Obj> names = new ArrayList<Obj>();
+    for (String name : expr.getParams()) {
+      names.add(createString(name));
+    }
+    
+    // TODO(bob): Should this be closing here?
+    Obj body = createFn(Expr.fn(expr.getBody()), context.getScope());
+    
+    // Create a StaticFunctionType object.
+    Obj staticFunctionTypeClass = context.lookUp("StaticFunctionType");
+    Obj type = invokeMethod(staticFunctionTypeClass,
+        Identifiers.NEW, null, createTuple(createArray(names), body));
+    
+    return type;    
   }
   
   public boolean hasMain() {
@@ -209,6 +241,7 @@ public class Interpreter {
   public ClassObj getIntType() { return mIntClass; }
   public ClassObj getNothingType() { return mNothingClass; }
   public ClassObj getObjectType() { return mObjectClass; }
+  public ClassObj getStaticFunctionType() { return mStaticFnClass; }
   public ClassObj getStringType() { return mStringClass; }
   public ClassObj getTupleType() { return mTupleClass; }
   public ClassObj getNeverType() { return mNeverClass; }
@@ -367,6 +400,7 @@ public class Interpreter {
   private final ClassObj mNothingClass;
   private final ClassObj mNeverClass;
   private final ClassObj mObjectClass;
+  private final ClassObj mStaticFnClass;
   private final ClassObj mStringClass;
   private final ClassObj mTupleClass;
   
