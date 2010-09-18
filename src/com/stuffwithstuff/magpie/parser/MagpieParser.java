@@ -324,51 +324,28 @@ public class MagpieParser extends Parser {
     
     while (true) {
       String name;
-      Position position;
+      Position position = current().getPosition();
       Expr staticArg = null;
       Expr arg = null;
       
+      // TODO(bob): This is kind of gross. The static arg stuff is just jammed
+      // in here awkwardly. Should refactor.
       if (match(TokenType.NAME)) {
         // A normal named message.
         name = last(1).getString();
-        position = last(1).getPosition();
         
-        // See if it has a static argument.
-        // TODO(bob): Commented out for now.
-        /*
-        if (match(TokenType.LEFT_BRACKET, TokenType.RIGHT_BRACKET)) {
-          staticArg = new NothingExpr(position.union(current().getPosition()));
-        } else if (match(TokenType.LEFT_BRACKET)) {
-          staticArg = parseExpression();
-          consume(TokenType.RIGHT_BRACKET);
-        }
-        */
-        
-        // See if it has a dynamic argument.
+        // See if it has an argument.
         if (match(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)) {
           arg = new NothingExpr(last(2).getPosition().union(last(1).getPosition()));
         } else if (match(TokenType.LEFT_PAREN)) {
           arg = parseExpression();
           consume(TokenType.RIGHT_PAREN);
         }
-      } else if (lookAheadAny(TokenType.LEFT_PAREN /*, TokenType.LEFT_BRACKET */)) {
+      } else if (lookAhead(TokenType.LEFT_PAREN)) {
         // A call (i.e. an unnamed message like 123(345) or (foo bar)[baz](bang).
         name = "call";
         
-        position = last(1).getPosition();
-        
-        // TODO(bob): Commented out for now.
-        /*
-        // Parse the static argument if present.
-        if (match(TokenType.LEFT_BRACKET, TokenType.RIGHT_BRACKET)) {
-          staticArg = new NothingExpr(position.union(current().getPosition()));
-        } else if (match(TokenType.LEFT_BRACKET)) {
-          staticArg = parseExpression();
-          consume(TokenType.RIGHT_BRACKET);
-        }
-        */
-        
-        // Pass the dynamic argument if present.
+        // Pass the argument if present.
         if (match(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)) {
           arg = new NothingExpr(last(2).getPosition().union(last(1).getPosition()));
         } else if(match(TokenType.LEFT_PAREN)) {
@@ -376,24 +353,28 @@ public class MagpieParser extends Parser {
           consume(TokenType.RIGHT_PAREN);
         }
         
-        position = position.union(last(1).getPosition());
+      } else if (match(TokenType.LEFT_BRACKET)) {
+        // A static function call (i.e. foo[123]).
+        name = "not used";
+
+        if (match(TokenType.RIGHT_BRACKET)) {
+          staticArg = new NothingExpr(last(2).getPosition().union(last(1).getPosition()));
+        } else {
+          staticArg = parseExpression();
+          consume(TokenType.RIGHT_BRACKET);
+        }
+        
       } else {
         break;
       }
       
-      if (message != null) {
-        position = position.union(message.getPosition());
-      }
+      position = position.union(last(1).getPosition());
       
       if (staticArg != null) {
-        position = position.union(staticArg.getPosition());
+        message = new InstantiateExpr(position, message, staticArg);
+      } else {
+        message = new MessageExpr(position, message, name, null, arg);
       }
-      
-      if (arg != null) {
-        position = position.union(arg.getPosition());
-      }
-      
-      message = new MessageExpr(position, message, name, staticArg, arg);
     }
     
     if (message == null) {
@@ -424,44 +405,9 @@ public class MagpieParser extends Parser {
       Expr expr = parseExpression();
       consume(TokenType.RIGHT_PAREN);
       return expr;
-    } else if (match(TokenType.LEFT_BRACE)) {
-      // TODO(bob): This syntax is totally temporary!
-      Expr expr = staticFunction();
-      consume(TokenType.RIGHT_BRACE);
-      return expr;
-    } else if (match(TokenType.LEFT_BRACKET)) {
-      // TODO(bob): This syntax is totally temporary!
-      Expr expr = instantiate();
-      consume(TokenType.RIGHT_BRACKET);
-      return expr;
     }
     
     return null;
-  }
-  
-  private Expr staticFunction() {
-    Position position = last(1).getPosition();
-    
-    // Parse the parameter names.
-    List<String> params = new ArrayList<String>();
-    while (!match(TokenType.COLON)) {
-      params.add(consume(TokenType.NAME).getString());
-    }
-    
-    // Parse the body.
-    Expr body = parseExpression();
-    position = position.union(last(1).getPosition());
-    return new StaticFnExpr(position, params, body);
-  }
-
-  private Expr instantiate() {
-    Position position = last(1).getPosition();
-    
-    Expr fn = parseExpression();
-    consume(TokenType.COLON);
-    Expr body = parseExpression();
-    position = position.union(last(1).getPosition());
-    return new InstantiateExpr(position, fn, body);
   }
   
   private List<Expr> parseCommaList() {

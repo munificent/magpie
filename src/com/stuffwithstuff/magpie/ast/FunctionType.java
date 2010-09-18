@@ -7,6 +7,8 @@ import java.util.List;
  * Describes a function's type declaration, including its parameter and return
  * type, along with its parameter names, if any.
  */
+// TODO(bob): Get rid of all of the static stuff here. Should be handled outside
+// of this.
 public class FunctionType {
   public FunctionType(List<String> staticParams, List<String> paramNames,
       Expr paramType, Expr returnType) {

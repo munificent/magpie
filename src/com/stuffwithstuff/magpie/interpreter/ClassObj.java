@@ -18,6 +18,7 @@ public class ClassObj extends Obj {
   public ClassObj(String name, ClassObj parent) {
     mName = name;
     mParent = parent;
+    mFieldInitializers = new HashMap<String, Expr>();
   }
 
   public Map<String, Expr> getFieldInitializers() {
@@ -85,6 +86,6 @@ public class ClassObj extends Obj {
   private final String mName;
   private ClassObj mParent;
   private Callable mConstructor;
-  private Map<String, Expr> mFieldInitializers;
+  private final Map<String, Expr> mFieldInitializers;
   private final MethodSet mMethods = new MethodSet();
 }

@@ -1,5 +1,3 @@
-// [disable]
-
 var foo[T](arg T -> T)
     arg
 end
