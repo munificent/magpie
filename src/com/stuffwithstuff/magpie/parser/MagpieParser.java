@@ -121,12 +121,7 @@ public class MagpieParser extends Parser {
   }
 
   /**
-   * Parses a function type declaration. A function type consists of an optional
-   * static parameter declaration like:
-   * [a]
-   * [a, b, c]
-   * 
-   * Followed by a mandatory dynamic argument declaration. Valid examples
+   * Parses a function type declaration. Valid examples
    * include:
    * (->)           // takes nothing, returns nothing
    * ()             // takes nothing, returns dynamic
@@ -137,19 +132,6 @@ public class MagpieParser extends Parser {
    * @return The parsed function type.
    */
   public FunctionType parseFunctionType() {
-    // Parse the static parameter declaration, if any.
-    List<String> staticParams = new ArrayList<String>();
-    // TODO(bob): Commented out for now.
-    /*
-    if (match(TokenType.LEFT_BRACKET)) {
-      while (true) {
-        staticParams.add(consume(TokenType.NAME).getString());
-        if (!match(TokenType.COMMA)) break;
-      }
-      consume(TokenType.RIGHT_BRACKET);
-    }
-    */
-    
     // Parse the prototype: (foo Foo, bar Bar -> Bang)
     consume(TokenType.LEFT_PAREN);
     
@@ -193,7 +175,7 @@ public class MagpieParser extends Parser {
       consume(TokenType.RIGHT_PAREN);
     }
     
-    return new FunctionType(staticParams, paramNames, paramType, returnType);
+    return new FunctionType(paramNames, paramType, returnType);
   }
   
   public String parseFunctionName() {
@@ -373,7 +355,7 @@ public class MagpieParser extends Parser {
       if (staticArg != null) {
         message = new InstantiateExpr(position, message, staticArg);
       } else {
-        message = new MessageExpr(position, message, name, null, arg);
+        message = new MessageExpr(position, message, name, arg);
       }
     }
     

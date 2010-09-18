@@ -19,8 +19,7 @@ public class FnObj extends Obj implements Callable {
   public Scope getClosure() { return mClosure; }
   public FnExpr getFunction() { return mFunction; }
   
-  public Obj invoke(Interpreter interpreter, Obj thisObj,
-      Obj staticArg, Obj arg) {
+  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
     // Create a new local scope for the function.
     EvalContext context = new EvalContext(mClosure, thisObj).pushScope();
     
@@ -28,8 +27,6 @@ public class FnObj extends Obj implements Callable {
     if (arg == null) arg = interpreter.nothing();
     
     // Bind arguments to their parameter names.
-    bindParameters(interpreter, context,
-        mFunction.getType().getStaticParams(), staticArg);
     bindParameters(interpreter, context,
         mFunction.getType().getParamNames(), arg);
     
@@ -43,6 +40,8 @@ public class FnObj extends Obj implements Callable {
   
   public FunctionType getType() { return mFunction.getType(); }
   
+  // TODO(bob): There are a couple of places where we bind an object to names.
+  // Should refactor to all use the same code.
   private void bindParameters(Interpreter interpreter, EvalContext context,
       List<String> names, Obj arg) {
     

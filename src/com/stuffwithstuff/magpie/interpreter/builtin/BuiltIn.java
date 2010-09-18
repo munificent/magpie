@@ -24,7 +24,7 @@ public class BuiltIn implements Callable {
   }
 
   @Override
-  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj staticArg, Obj arg) {
+  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
     try {
       return (Obj)mMethod.invoke(null, interpreter, thisObj, arg);
     } catch (IllegalArgumentException e) {

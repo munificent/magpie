@@ -73,7 +73,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       
       // Make sure the new value is compatible with the variable's type.
       Obj matches = mInterpreter.invokeMethod(existingType,
-          Identifiers.CAN_ASSIGN_FROM, null, valueType);
+          Identifiers.CAN_ASSIGN_FROM, valueType);
       
       if (!matches.asBool()) {
         String expectedText = mInterpreter.invokeMethod(existingType,
@@ -319,7 +319,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     Obj result = first;
     for (int i = 0; i < types.length; i++) {
       // TODO(bob): Should we use a static arg here?
-      result = mInterpreter.invokeMethod(result, Identifiers.OR, null, types[i]);
+      result = mInterpreter.invokeMethod(result, Identifiers.OR, types[i]);
     }
     
     return result;
@@ -329,7 +329,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       Obj argType) {
 
     Obj methodType = mInterpreter.invokeMethod(receiverType,
-        Identifiers.GET_METHOD_TYPE, null,
+        Identifiers.GET_METHOD_TYPE,
         mInterpreter.createTuple(mInterpreter.createString(name), argType));
     
     if (methodType == mInterpreter.nothing()) {
@@ -362,14 +362,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     
     // Make sure the argument type matches the declared parameter type.
     Obj matches = mInterpreter.invokeMethod(paramType,
-        Identifiers.CAN_ASSIGN_FROM, null, argType);
-    
-    // TODO(bob): Hack! Temp for testing.
-    if (matches.toString().equals("nothing")) {
-      mInterpreter.invokeMethod(receiverType,
-          Identifiers.GET_METHOD_TYPE, null,
-          mInterpreter.createTuple(mInterpreter.createString(name), argType));
-    }
+        Identifiers.CAN_ASSIGN_FROM, argType);
     
     if (!matches.asBool()) {
       String expectedText = mInterpreter.invokeMethod(paramType,

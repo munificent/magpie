@@ -8,7 +8,7 @@ import com.stuffwithstuff.magpie.ast.FunctionType;
  * uniform way to invoke methods.
  */
 public interface Callable {
-  Obj invoke(Interpreter interpreter, Obj thisObj, Obj staticArg, Obj arg);
+  Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg);
   
   FunctionType getType();
 }

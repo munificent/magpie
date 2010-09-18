@@ -22,7 +22,7 @@ public class UnsafeCast implements Callable {
   }
   
   @Override
-  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj staticArg, Obj arg) {
+  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
     if (arg.getClassObj() != thisObj) {
       interpreter.runtimeError(
           "Cannot assign %s as the base class for %s because it is not a class.",

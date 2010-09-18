@@ -117,19 +117,6 @@ public class Checker {
     Scope closureTypes = typeScope(closure);
     EvalContext functionContext = new EvalContext(
         closureTypes, thisType).pushScope();
-
-    // Evaluate the static parameter constraints and bind their names. Bind them
-    // in both the static context (for use in annotations) and in the function
-    // context (so you can reference them as first-class values in expressions).
-    // TODO(bob): Implement static parameter constraints! Just assume Dynamic
-    // for now.
-    staticContext = staticContext.pushScope();
-    for (String name : function.getType().getStaticParams()) {
-      Obj constraint = mInterpreter.evaluate(Expr.name("Dynamic"),
-          staticContext);
-      staticContext.define(name, constraint);
-      functionContext.define(name, constraint);
-    }
     
     // Evaluate the function's type annotations in the static value scope.
     Obj paramType = mInterpreter.evaluate(function.getType().getParamType(),
@@ -164,7 +151,7 @@ public class Checker {
       validReturnType = true;
     } else {
       Obj matches = mInterpreter.invokeMethod(expectedReturn,
-          Identifiers.CAN_ASSIGN_FROM, null, returnType);
+          Identifiers.CAN_ASSIGN_FROM, returnType);
       
       validReturnType = matches.asBool();
     }

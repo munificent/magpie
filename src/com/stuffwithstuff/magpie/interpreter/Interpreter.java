@@ -109,7 +109,7 @@ public class Interpreter {
     Obj result = evaluate(expr, context);
     
     // Convert it to a string.
-    result = invokeMethod(expr, result, "toString", null, mNothing);
+    result = invokeMethod(expr, result, "toString", mNothing);
     return result.asString();
   }
   
@@ -131,7 +131,7 @@ public class Interpreter {
     }
     
     return invokeMethod(mFnClass, Identifiers.CALL,
-        null, createTuple(staticParamConstraint, paramType, returnType));
+        createTuple(staticParamConstraint, paramType, returnType));
   }
   
   public Obj evaluateStaticFunctionType(StaticFnExpr expr, EvalContext context) {
@@ -147,7 +147,7 @@ public class Interpreter {
     // Create a StaticFunctionType object.
     Obj staticFunctionTypeClass = context.lookUp("StaticFunctionType");
     Obj type = invokeMethod(staticFunctionTypeClass,
-        Identifiers.NEW, null, createTuple(createArray(names), body));
+        Identifiers.NEW, createTuple(createArray(names), body));
     
     return type;    
   }
@@ -166,7 +166,7 @@ public class Interpreter {
     }
     
     Callable mainFn = (Callable)main;
-    mainFn.invoke(this, mNothing, null, mNothing);
+    mainFn.invoke(this, mNothing, mNothing);
   }
 
   /**
@@ -176,13 +176,11 @@ public class Interpreter {
    *                   used for position information if an error occurs.
    * @param receiver   The object the method is being invoked on.
    * @param name       The name of the method to invoke.
-   * @param staticArg  The static argument passed to the method.
    * @param arg        The argument passed to the method.
    * @return           The result of invoking the method.
    */
-  public Obj invokeMethod(Expr expr, Obj receiver, String name,
-      Obj staticArg, Obj arg) {
-    return invokeMethod(expr.getPosition(), receiver, name, staticArg, arg);
+  public Obj invokeMethod(Expr expr, Obj receiver, String name, Obj arg) {
+    return invokeMethod(expr.getPosition(), receiver, name, arg);
   }
 
   /**
@@ -190,12 +188,11 @@ public class Interpreter {
    * 
    * @param receiver   The object the method is being invoked on.
    * @param name       The name of the method to invoke.
-   * @param staticArg  The static argument passed to the method.
    * @param arg        The argument passed to the method.
    * @return           The result of invoking the method.
    */
-  public Obj invokeMethod(Obj receiver, String name, Obj staticArg, Obj arg) {
-    return invokeMethod(Position.none(), receiver, name, staticArg, arg);
+  public Obj invokeMethod(Obj receiver, String name, Obj arg) {
+    return invokeMethod(Position.none(), receiver, name, arg);
   }
   
   /**
@@ -206,7 +203,7 @@ public class Interpreter {
    * @return          The result of invoking the method.
    */
   public Obj invokeMethod(Obj receiver, String name) {
-    return invokeMethod(receiver, name, null, mNothing);
+    return invokeMethod(receiver, name, mNothing);
   }
 
 
@@ -323,7 +320,7 @@ public class Interpreter {
   }
   
   private Obj invokeMethod(Position position, Obj receiver, String name,
-      Obj staticArg, Obj arg) {
+      Obj arg) {
     // Look up the member.
     Callable method = receiver.getClassObj().findMethod(name);
     
@@ -343,18 +340,17 @@ public class Interpreter {
       // result with the argument.
       if ((method.getType().getParamNames().size() == 0) &&
           (arg != null) && (arg != mNothing)) {
-        Obj result = method.invoke(this, receiver, null, null);
+        Obj result = method.invoke(this, receiver, null);
         
         // Now invoke the result of the method with the argument.
         if (arg != null) {
-          result = invokeMethod(position, result, Identifiers.CALL,
-              staticArg, arg);
+          result = invokeMethod(position, result, Identifiers.CALL, arg);
         }
         
         return result;
       } else {
         // Just a regular method call.
-        return method.invoke(this, receiver, staticArg, arg);
+        return method.invoke(this, receiver, arg);
       }
     }
     
@@ -371,7 +367,7 @@ public class Interpreter {
     if (field != null) {
       // If we have an argument, treat the field like a callable.
       if (arg != null) {
-        return invokeMethod(position, field, Identifiers.CALL, staticArg, arg);
+        return invokeMethod(position, field, Identifiers.CALL, arg);
       }
       
       // Otherwise just return the field itself.

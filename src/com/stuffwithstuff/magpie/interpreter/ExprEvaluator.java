@@ -45,7 +45,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     
     // Otherwise, it must be a setter on this.
     String setter = Identifiers.makeSetter(name);
-    return mInterpreter.invokeMethod(expr, context.getThis(), setter, null, value);
+    return mInterpreter.invokeMethod(expr, context.getThis(), setter, value);
   }
 
   @Override
@@ -182,7 +182,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(MessageExpr expr, EvalContext context) {
     Obj receiver = evaluate(expr.getReceiver(), context);
-    Obj staticArg = evaluate(expr.getStaticArg(), context);
     Obj arg = evaluate(expr.getArg(), context);
     
     if (receiver == null) {
@@ -191,19 +190,19 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
       if (variable != null) {
         // If we have an argument, apply it.
-        if ((staticArg != null) || (arg != null)) {
+        if (arg != null) {
           return mInterpreter.invokeMethod(
-              expr, variable, Identifiers.CALL, staticArg, arg);
+              expr, variable, Identifiers.CALL, arg);
         }
         return variable;
       }
       
       // Otherwise it must be a method on this.
       return mInterpreter.invokeMethod(
-          expr, context.getThis(), expr.getName(), staticArg, arg);
+          expr, context.getThis(), expr.getName(), arg);
     }
     
-    return mInterpreter.invokeMethod(expr, receiver, expr.getName(), staticArg, arg);
+    return mInterpreter.invokeMethod(expr, receiver, expr.getName(), arg);
   }
   
   @Override
