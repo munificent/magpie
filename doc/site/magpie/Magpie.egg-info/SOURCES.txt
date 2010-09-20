@@ -1,0 +1,7 @@
+setup.py
+Magpie.egg-info/PKG-INFO
+Magpie.egg-info/SOURCES.txt
+Magpie.egg-info/dependency_links.txt
+Magpie.egg-info/entry_points.txt
+Magpie.egg-info/top_level.txt
+magpie/__init__.py

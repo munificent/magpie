@@ -1,20 +1,24 @@
-Q: How do we distinguish between a method that takes an argument, and a method
-that doesn't take an argument but returns a callable object?
+^title How Do Callable Fields Work?
+
+In other words, how do we distinguish between a method that takes an argument,
+and a method that doesn't take an argument but returns a callable object?
 
 The scenario is this:
 
-    def Foo bar()
-        items(123)
+    class Foo
+        this() this items = Array of(123)
+        bar() items(123)
     end
 
-The body of that method could be interpreted to mean two different things:
-1. Invoke the "items" method, passing in 123.
-2. Look up the field "items" (which is done using a getter method that takes no
-   argument) and then call "call" on it.
+The body of `bar` method could be interpreted to mean two different things:
+
+1. Invoke the `items` method, passing in `123`.
+2. Look up the field `items` (which is done using a getter method that takes no
+   argument) and then call `call` on it.
 
 The second is the intended interpretation in this case. Unfortunately, a
 strictly Io-style syntax cannot support that. (Io doesn't have callables. You
-always invoke a named method. Getting an item from a list is 'list at(123)'.)
+always invoke a named method. Getting an item from a list is `list at(123)`.)
 
 The way Python and C# handle this is with properties. A property is *not* a
 method, and the distinction is known at runtime. This means we can disambiguate
@@ -41,13 +45,14 @@ implicitly add the call. Now it can apply the same logic to declared fields and
 other getters.
 
 On the user side, there are two questions:
+
 1. How do I declare a property?
 2. Which things should be zero-argument methods, and which should be properties?
 
 Scala's answer to 2 is that functions with side-effects should have an explicit
-() and others should not. Io assumes that all zero-argument functions should
-omit the (). I lean towards that simply because it's shorter. Magpie is
-different enough that user's shouldn't expect a ()-less method to always be
+`()` and others should not. Io assumes that all zero-argument functions should
+omit the `()`. I lean towards that simply because it's shorter. Magpie is
+different enough that user's shouldn't expect a `()`-less method to always be
 "field-like".
 
 So the answer to 2 is "all zero-argument methods should be properties". Which

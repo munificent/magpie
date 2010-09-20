@@ -1,0 +1,127 @@
+body, h1, h2, h3, h4, li, ol, ul {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  color: #444;
+}
+
+h1 {
+  background: #666;
+  color: #888;
+  font: normal 13px Verdana, sans-serif;
+  padding: 2px 2px 4px 200px;
+}
+
+h1 a {
+  color: #aaa;
+  text-decoration: none;
+}
+
+h1 a:hover {
+  color: #eee;
+}
+
+h2 {
+  color: #4b81ab;
+  font: normal 48px "Reenie Beanie", sans-serif;
+  min-height: 50px;
+}
+
+h3 {
+  font: normal 18px Verdana, sans-serif;
+  color: #4b81ab;
+  margin: 30px 0 0 0;
+}
+
+h4 {
+  font: italic 16px Georgia, serif;
+  color: #4b81ab;
+  margin: 20px 0 0 0;
+}
+
+p {
+  font: 15px/25px Georgia, serif;
+  margin: 10px 0;
+}
+
+a {
+  color: #4b81ab;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #4b81ab;
+}
+
+ul, ol {
+  padding-left: 20px;
+  margin: 10px 0;
+}
+
+li {
+  font: 15px/25px Georgia, serif;
+}
+
+li + li {
+  margin-top: 10px;
+}
+
+pre, code {
+  background: #f6f9fb;
+  color: #7b7c7d;
+  font: 13px "Droid Sans Mono", Consolas, Monaco, monospace;
+}
+
+pre {
+  margin: 10px 0;
+  padding: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+
+hr {
+  margin: 20px 0;
+  border: none;
+  border-bottom: solid 1px #4b81ab;
+}
+
+.nav {
+  color: #beb79f;
+  float: left;
+  font: normal 12px Verdana, sans-serif;
+  margin: 85px 0 0 20px;
+  padding: 10px;
+  background: #f9fbf6;
+  width: 240px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+
+.nav a {
+  color: #cfaa2e;
+}
+
+.nav a:hover {
+  color: #9e7900;
+}
+
+.nav ul {
+  margin: 2px 0;
+  padding-left: 20px;
+}
+
+.nav li {
+  font: normal 12px Verdana, sans-serif;
+}
+
+.content {
+  margin: 20px 20px 20px 300px;
+}
+
+/* syntax highlighting */
+pre .k  { color: #4b81ab; }
+pre .p  { color: #acaeaf; }
+pre .s  { color: #c1a953; }
+pre .c1 { color: #acaeaf; }

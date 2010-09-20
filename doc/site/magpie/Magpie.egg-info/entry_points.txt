@@ -1,0 +1,4 @@
+
+    [pygments.lexers]
+    magpielexer = magpie:MagpieLexer
+    

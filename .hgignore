@@ -13,12 +13,11 @@ csharp/TestResult.xml
 csharp/Unit Tests.VisualState.xml
 **.user
 
-# the outdated ref manual (for now)
-doc/reference manual/*.*
+# java output files
+bin/**.*
+
+# the generated site html
+doc/site/html/**.*
 
 # revert backups
 **.orig
-
-# java output files
-bin/**.*
- 

@@ -1,0 +1,97 @@
+Learning a new language can be a lot of work, and it's especially challenging learning one that's still being born. So why might you be interested in Magpie?
+
+<h2>Comfort Zone</h2>
+
+One way to answer that is by showing what's familiar about it. The more familiar it is, the more you can leverage what you already know. So here's where Magpie is probably within your comfort zone:
+
+<h3>Looks a lot like Ruby or BASIC</h3>
+
+Magpie's syntax is a mixture of Ruby and IO. It looks more or less like a lot of OOP languages out there. Here's a simple example:
+
+<pre>
+var hello(name, lady?)
+    print("Hello, " + name + ".")
+    if lady? then print(" I tip my hat to you!")
+end
+</pre>
+
+<h3>Works like a scripting language</h3>
+
+Like most scripting languages, a Magpie script is just executed from top to bottom. Just dump some text in a .mag file and you're ready to go. Here's a complete Magpie program:
+
+<pre>
+print("Hello, world!")
+</pre>
+
+<h3>Organizes like an OOP language</h3>
+
+Magpie is object-oriented like the dominant languages in use today. It has classes and interfaces, fields and methods, and they work pretty much like you expect. If you know how to organize code in Java, C#, Ruby, or Python, you can do it in Magpie.
+
+<pre>
+class Greeter
+    // constructor
+    this(name)
+        this name = name
+    end
+    
+    sayHi() print("Hi, " + name)
+end
+
+var greeter = Greeter new("Bob")
+greeter sayHi
+</pre>
+
+<h3>Duck types like a dynamic language</h3>
+
+Magpie is dynamically-typed like Javascript, Python or Ruby. Methods are
+dynamically dispatched, and you can pass arbitrary objects to methods. You can
+add new methods to existing classes and everything is pretty much open.
+
+<h2>New Territory</h2>
+
+Of course, if it was <em>all</em> familiar territory, there'd be no reason to waste your time going there at all: what's the gain? So now let's talk about where Magpie is a bit different from other languages out there.
+
+There is little that's really new in Magpie. Instead, it takes features from several different languages. So this "new" territory is really new relative to where you might be living today.
+
+
+<h3>Optional Types</h3>
+
+The biggest difference from most dynamically-typed languages out there is that Magpie features a pretty rich static type system. If you want, you can add type annotations to your methods and it will statically check that you're using them consistently. If you write something like this:
+
+<pre>
+var square(i) i * i
+
+square("hi")
+</pre>
+
+It will try to call <code>*</code> on a string, which fails at runtime like a typical dynamic language. But change it to this:
+
+<pre>
+var square(i Int -> Int) i * i
+
+var main(->)
+    square("hi")
+end
+</pre>
+
+And you'll get a "compile" error before it ever tries to run <code>main</code>.
+
+While Magpie has a lot of neat features, this is <em>the</em> feature that made me want to create it. I love the flexibility and openness of dynamic languages, but I really like the safety and modularity of static languages. A single language that gives you both is pretty rare these days.
+
+<h3>Open classes</h3>
+
+This is the jelly to the above point's peanut butter. In Magpie, classes are fully open to extension: you can add new methods to them wherever and whenever you'd like. Where static languages force you to contort your code into things like the visitor pattern, Magpie says, "just add those methods to the class".
+
+The idea here is that just because the <em>code</em> for two systems should be decoupled, that doesn't mean that the methods themselves should end up on the same class.
+
+// TODO(bob): Fill in more here.
+
+<h3>Flexible syntax</h3>
+
+Magpie's rules for identifiers (names) are looser than most popular languages today. You can define your own operators (any sequence of typical punctuation characters) and use most punctuation characters in regular identifiers.
+
+These let you define your own methods and operators, but don't change the core syntax (precedence rules, etc.) If that isn't enough for you, Magpie has a parseword system that lets you take control over the parser to implement your own keywords and syntax structures. Most of Magpie's apparent syntax for things like class declarations are actually implemented in Magpie using this.
+
+<h3>First-class type system</h3>
+
+

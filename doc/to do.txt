@@ -24,16 +24,10 @@ Types
     useful. It may be nice for cases where a class implements multiple
     interfaces with overlapping names.
 - Generics
-  - Need to figure out how they work. One option would be that a class object
-    implements ICallable and takes arguments that are types and returns a type.
-    That would let you do List(Int), which is desugared to List call(Int) and
-    would be implemented to return a type.
-  - Need to figure out how the type parameters can be used to modify the type
-    signatures of methods in an instantiated generic type. Would we just
-    construct a new ClassObj for each instantiation? Or maybe when we evalate
-    the type expressions, we do so in a local scope that includes the     
-    instantiated type arguments bound to the names of the type parameters?
   - Figure out variance for instantiated types.
+  - Get them working with classes and objects. If you instantiate a generic
+    *class*, how do methods see the static arguments on the class?
+  - Get constraints working.
 - Function types
   - These need an expression syntax that evaluates to an ICallable interface
     with type arguments for the function's argument and return types.
@@ -74,6 +68,7 @@ Syntax
     list insert("item" at: 3)
   which desugars to:
     list insert:at("item", 3)
+- Object literals?
 - Map and/or set literals?
 - Pattern-matching or switch?
 - Parsewords
@@ -91,7 +86,6 @@ Syntax
   An expression like { a + b } evaluates to a data structure for the AST. Useful
   for metaprogramming and parsewords.
   
-
 Library
 - Reorganize and clean up the type stuff.
 - Conversion and casting methods (is, as, explicit cast).
