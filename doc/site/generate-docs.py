@@ -23,6 +23,7 @@ def get_title(path):
     basename = basename.split('.')[0]
     
     # read the markdown file
+    title = path
     with open(path, 'r') as input:
         # read each line, ignoring everything but the special codes
         for line in input:
@@ -98,57 +99,71 @@ def format_file(path, nav):
     
     # write the html output
     with open('html/{0}.html'.format(basename), 'w') as out:
-        header = """
+        out.write("""
         <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
         <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
         <head>
         <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
-        <title>The Magpie Programming Language</title>
+        <title>Magpie Docs: {0}</title>
         <link rel="stylesheet" type="text/css"
           href="http://fonts.googleapis.com/css?family=Reenie+Beanie|Droid+Sans+Mono">
-        <link rel="stylesheet" type="text/css" href="{0}" />
+        <link rel="stylesheet" type="text/css" href="{1}" />
         </head>
-        <body>
-        <h1>&rsaquo; <a href="#">Magpie Guide</a> &rsaquo; <a href="#">Basic Syntax</a></h1>
-        <div class="nav">
-        <ul>
-        """.format(stylerel)
-        out.write(header)
+        <body>""".format(title, stylerel))
         
-        out.write(make_nav_html(nav, basename + '.html'))
-        
-        header2 = """
-          </ul>
-        </div>
-        <div class="content">
-        """
-        out.write(header2)
-            
-        # title
-        out.write('<h2>{0}</h2>\n'.format(title))
-            
-        # content
+        roothref = os.path.relpath('html/index.html', dir)
+        navhtml = make_nav_html(nav, basename + '.html')
         html = markdown.markdown(contents, ['def_list', 'codehilite'])
-        out.write(html)
 
-        footer = """
+        out.write("""
+        <h1>{0}</h1>
+        <table>
+          <tr class="header">
+            <td><h2 class="subhead"><a href="{1}">Magpie Docs:</a></h2></td>
+            <td><h2>{2}</h2></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="nav">
+                <ul>{3}</ul>
+              </div>
+            </td>
+            <td>
+              <div class="content">{4}<div>
+            </td>
+          </tr>
+        </table>
         </div>
         </body>
         </html>
-        """
-        out.write(footer)
+        """.format(breadcrumb(basename), roothref, title, navhtml, html))
+
+
+def breadcrumb(path):
+    # handle the top level page a little specially
+    if path == 'index': return 'Magpie Docs'
+    
+    outdir = 'html/' + os.path.dirname(path)
+
+    #rootpath = os.path.relpath('html/index.html', outdir)
+    #breadcrumb = '<a href="{0}">Magpie Docs</a>'.format(rootpath)
+    breadcrumb = ''
+    
+    # add links to the parent directories
+    dir = ''
+    for part in os.path.dirname(path).split('/'):
+        if part == '': break
+        dir = os.path.join(dir, part)
+        title = get_title('markdown/{0}.markdown'.format(dir))
+        relpath = os.path.relpath('html/{0}.html'.format(dir), outdir)
+        breadcrumb += ' &rsaquo; <a href="{0}">{1}</a>'.format(relpath, title)
         
-    print "converted", basename
+    # include the name of the page itself
+    title = get_title('markdown/{0}.markdown'.format(path))
+    breadcrumb += ' &rsaquo; ' + title
+    
+    return breadcrumb
 
-
-# clean out the output directory
-if os.path.isdir('html'):
-    shutil.rmtree('html')
-
-# copy over the static content
-shutil.copytree('static', 'html')
-
-nav = build_nav('markdown')
 
 def walk(dir, callback):
     """ walks a directory, and executes a callback on each file """
@@ -159,12 +174,21 @@ def walk(dir, callback):
         if os.path.isdir(nfile):
             walk(nfile, callback)
 
+count = 0
 def do_format(path):
+    global count
     if os.path.splitext(path)[1] == '.markdown':
+        count += 1
         format_file(path, nav)
 
-walk('markdown', do_format)
 
-# process each markdown file
-#for f in glob.iglob('markdown/*.markdown'):
-#    format_file(f, nav)
+# clean out the output directory
+if os.path.isdir('html'):
+    shutil.rmtree('html')
+
+# copy over the static content
+shutil.copytree('static', 'html')
+
+nav = build_nav('markdown')
+walk('markdown', do_format)
+print 'Generated', count, 'HTML files.'

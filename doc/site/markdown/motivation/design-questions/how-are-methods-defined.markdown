@@ -17,7 +17,7 @@ other option is Go style, where methods are just declared freestanding, like:
         // ...
     end
 
-#### Advantages for class style:
+### Advantages for class style:
 
 * Minimizes duplication when defining a lot of methods. Avoids repeating the
   class name for each method. With generic methods where the class name is an
@@ -26,7 +26,7 @@ other option is Go style, where methods are just declared freestanding, like:
 * If we allow interface declarations to define methods in the main declaration,
   allowing classes to do the same would be more consistent.
   
-#### Advantages for Go style:
+### Advantages for Go style:
 * Avoids an unneeded level of indentation.
 * Emphasizes the openness of classes. Encourages people to add methods to
   arbitrary classes by making it lightweight to do so.

@@ -1,4 +1,4 @@
-body, h1, h2, h3, h4, li, ol, ul {
+body, h1, h2, h3, h4, li, ol, ul, tr, td {
   margin: 0;
   padding: 0;
 }
@@ -10,8 +10,9 @@ body {
 h1 {
   background: #666;
   color: #888;
-  font: normal 13px Verdana, sans-serif;
-  padding: 2px 2px 4px 200px;
+  font: normal 12px Verdana, sans-serif;
+  padding: 2px 2px 4px 300px;
+  white-space: nowrap;
 }
 
 h1 a {
@@ -26,7 +27,7 @@ h1 a:hover {
 h2 {
   color: #4b81ab;
   font: normal 48px "Reenie Beanie", sans-serif;
-  min-height: 50px;
+  margin: 30px 0 0 20px;
 }
 
 h3 {
@@ -69,9 +70,15 @@ li + li {
 }
 
 pre, code {
-  background: #f6f9fb;
-  color: #7b7c7d;
-  font: 13px "Droid Sans Mono", Consolas, Monaco, monospace;
+  background: #e6edf2;
+  color: #70777d;
+  font: 12px "Droid Sans Mono", Consolas, Monaco, monospace;
+}
+
+code {
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  padding: 0 2px;
 }
 
 pre {
@@ -87,24 +94,42 @@ hr {
   border-bottom: solid 1px #4b81ab;
 }
 
+table {
+  border-collapse: collapse;
+}
+
+td {
+  vertical-align: top;
+}
+
+.header td {
+  vertical-align: baseline;
+}
+
+.subhead {
+  font-size: 36px;
+  text-align: right;
+}
+
 .nav {
-  color: #beb79f;
-  float: left;
+  color: #ccb97a;
   font: normal 12px Verdana, sans-serif;
-  margin: 85px 0 0 20px;
+  margin: 20px 0 0 20px;
   padding: 10px;
-  background: #f9fbf6;
+  background: #faf9ed;
   width: 240px;
   -moz-border-radius: 5px;
   border-radius: 5px;
 }
 
-.nav a {
-  color: #cfaa2e;
+.nav a,
+.subhead a {
+  color: #c49837;
 }
 
-.nav a:hover {
-  color: #9e7900;
+.nav a:hover,
+.subhead a:hover {
+  color: #a8770c;
 }
 
 .nav ul {
@@ -114,14 +139,16 @@ hr {
 
 .nav li {
   font: normal 12px Verdana, sans-serif;
+  margin: 0;
+  padding: 2px 0;
 }
 
 .content {
-  margin: 20px 20px 20px 300px;
+  margin: 20px;
 }
+
 
 /* syntax highlighting */
 pre .k  { color: #4b81ab; }
-pre .p  { color: #acaeaf; }
 pre .s  { color: #c1a953; }
-pre .c1 { color: #acaeaf; }
+pre .c1 { color: #8c9ca8; }

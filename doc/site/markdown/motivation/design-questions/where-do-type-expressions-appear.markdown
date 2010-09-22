@@ -1,4 +1,4 @@
-^title Where Do Type Expressions Appear
+^title Where Do Type Expressions Appear?
 
 Answer:
 
@@ -54,8 +54,7 @@ you can in C#, the type argument will have a runtime effect. For example:
         /// ...
     end
    
-### Q: Can you have "value template arguments"? I.e. things inside [] that don't
-evaluate to types?
+### Q: Can you have "value template arguments"? I.e. things inside [] that don't evaluate to types?
 
 A: *Sure*, there's no reason not to. The only real difference between stuff in
 `[]` and stuff in `()` is that the former is evaluated at check time and the
