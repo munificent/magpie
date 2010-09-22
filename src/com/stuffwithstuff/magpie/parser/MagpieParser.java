@@ -387,6 +387,12 @@ public class MagpieParser extends Parser {
       Expr expr = parseExpression();
       consume(TokenType.RIGHT_PAREN);
       return expr;
+    } else if (match(TokenType.LEFT_BRACE)) {
+      Position position = last(1).getPosition();
+      Expr expr = parseExpression();
+      consume(TokenType.RIGHT_BRACE);
+      position = position.union(last(1).getPosition());
+      return new ExpressionExpr(position, expr);
     }
     
     return null;

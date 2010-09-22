@@ -123,6 +123,11 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(BreakExpr expr, EvalContext context) {
     return mInterpreter.getNeverType();
   }
+  
+  @Override
+  public Obj visit(ExpressionExpr expr, EvalContext context) {
+    return mInterpreter.getExpressionType();
+  }
 
   @Override
   public Obj visit(FnExpr expr, EvalContext context) {

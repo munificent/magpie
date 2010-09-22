@@ -23,6 +23,11 @@ Types
   - Determine if something like C#'s explicit interface implementation is
     useful. It may be nice for cases where a class implements multiple
     interfaces with overlapping names.
+  - Figure out how what happens if an interface references itself, like:
+    interface Foo
+        do(foo Foo)
+    end
+    Does the type-checker stack overflow when testing a type against that?
 - Generics
   - Figure out variance for instantiated types.
   - Get them working with classes and objects. If you instantiate a generic
@@ -47,11 +52,6 @@ Expressions
     lots of bugs.
 - Floats, characters, and other atomic types
   - Pretty much the full suite of what Java provides.
-- Static arguments
-  - In addition to a regular argument, a method can have a static argument like
-    foo[static](arg). It will be evaluated at *check* time, and bound to a name
-    that's available in the context used to evaluate type expressions. This
-    will let us handle type arguments for generics along with other stuff.
 
 Syntax
 - Function literals

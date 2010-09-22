@@ -50,6 +50,7 @@ public class Interpreter {
     
     mBoolClass = createGlobalClass("Bool");
     mDynamicClass = createGlobalClass("Dynamic");
+    mExpressionClass = createGlobalClass("Expression");
     mFnClass = createGlobalClass("Function");
     mIntClass = createGlobalClass("Int");
     mStaticFnClass = createGlobalClass("StaticFunction");
@@ -88,6 +89,7 @@ public class Interpreter {
     BuiltIns.register(ArrayBuiltIns.class, mArrayClass);
     BuiltIns.register(BoolBuiltIns.class, mBoolClass);
     BuiltIns.register(ClassBuiltIns.class, mClass);
+    BuiltIns.register(ExpressionBuiltIns.class, mExpressionClass);
     BuiltIns.register(FunctionBuiltIns.class, mFnClass);
     BuiltIns.register(IntBuiltIns.class, mIntClass);
     BuiltIns.register(ObjectBuiltIns.class, mObjectClass);
@@ -238,6 +240,7 @@ public class Interpreter {
   public ClassObj getMetaclass() { return mClass; }
   public ClassObj getBoolType() { return mBoolClass; }
   public ClassObj getDynamicType() { return mDynamicClass; }
+  public ClassObj getExpressionType() { return mExpressionClass; }
   public ClassObj getFunctionType() { return mFnClass; }
   public ClassObj getIntType() { return mIntClass; }
   public ClassObj getNothingType() { return mNothingClass; }
@@ -395,6 +398,7 @@ public class Interpreter {
   private final ClassObj mArrayClass;
   private final ClassObj mBoolClass;
   private final ClassObj mDynamicClass;
+  private final ClassObj mExpressionClass;
   private final ClassObj mFnClass;
   private final ClassObj mIntClass;
   private final ClassObj mNothingClass;
