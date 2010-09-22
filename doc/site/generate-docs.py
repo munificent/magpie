@@ -104,7 +104,7 @@ def format_file(path, nav):
         <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
         <head>
         <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
-        <title>Magpie Docs: {0}</title>
+        <title>Magpie: {0}</title>
         <link rel="stylesheet" type="text/css"
           href="http://fonts.googleapis.com/css?family=Reenie+Beanie|Droid+Sans+Mono">
         <link rel="stylesheet" type="text/css" href="{1}" />
@@ -119,7 +119,7 @@ def format_file(path, nav):
         <h1>{0}</h1>
         <table>
           <tr class="header">
-            <td><h2 class="subhead"><a href="{1}">Magpie Docs:</a></h2></td>
+            <td><h2 class="subhead"><a href="{1}">Magpie:</a></h2></td>
             <td><h2>{2}</h2></td>
           </tr>
           <tr>
@@ -141,7 +141,7 @@ def format_file(path, nav):
 
 def breadcrumb(path):
     # handle the top level page a little specially
-    if path == 'index': return 'Magpie Docs'
+    if path == 'index': return '&nbsp;'
     
     outdir = 'html/' + os.path.dirname(path)
 
