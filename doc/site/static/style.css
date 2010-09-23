@@ -75,6 +75,11 @@ pre, code {
   font: 12px "Droid Sans Mono", Consolas, Monaco, monospace;
 }
 
+tt {
+  color: #70777d;
+  font: 12px "Droid Sans Mono", Consolas, Monaco, monospace;
+}
+
 code {
   -moz-border-radius: 3px;
   border-radius: 3px;

@@ -180,7 +180,13 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     Obj fn = mInterpreter.evaluate(expr.getFn(), context);
     Obj arg = mInterpreter.evaluate(expr.getArg(), mStaticContext);
     
-    // TODO(bob): Unchecked cast = lame!
+    if (!(fn.getValue() instanceof StaticFnExpr)) {
+      mChecker.addError(expr.getFn().getPosition(),
+          "The expression \"%s\" does not evaluate to a static function.",
+          expr.getFn());
+      return mInterpreter.getNothingType();
+    }
+    
     StaticFnExpr staticFn = (StaticFnExpr)fn.getValue();
     
     // Push a new static context with the bound static arguments.

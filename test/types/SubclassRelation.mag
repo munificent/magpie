@@ -1,15 +1,11 @@
 class Base
 end
 
-class Derived1
+class Derived1 : Base
 end
 
-Derived1 parent = Base
-
-class Derived2
+class Derived2 : Base
 end
-
-Derived2 parent = Base
 
 // Upcasts are OK.
 print(Base canAssignFrom(Derived1)) //: true

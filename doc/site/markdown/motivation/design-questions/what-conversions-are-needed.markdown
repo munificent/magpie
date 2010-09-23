@@ -30,13 +30,13 @@ This implies that casting operations, at least ones general enough to apply to a
 
 Back to the actual use cases for casting. There are a few use cases I can think of:
 
-#### 1. A widening cast
+#### 1. An upcast
 
-This loosens the inferred type of an expression. By nature it will always
+This widens the inferred type of an expression. By nature it will always
 succeed. The main use case for this is since we don't allow variables to change
 type (which is necessary to address another issue), it may be important to have
-a variable's type be wider than what's directly inferred from its initializer.
-For example:
+a variable's type be a supertype of what's directly inferred from its
+initializer. For example:
 
     var a = 123
     a = "hi" // error
@@ -44,10 +44,10 @@ For example:
 But if we could widen `a`'s type at the point of initialization to allow
 `String`s, that would be fine:
 
-    var a = 123 widen[Int | String]
+    var a = 123 upcast[Int | String]
     a = "hi" // ok now, no type change
 
-If widening variable types is the only use case for widening casts, we could consider rolling this into variable declaration syntax:
+If widening variable types is the only use case for upcasts, we could consider rolling this into variable declaration syntax:
 
     var a Int | String = 123
 
