@@ -1,3 +1,4 @@
+import re
 from pygments import highlight
 from pygments.lexers import PythonLexer
 from pygments.formatters import HtmlFormatter
@@ -10,6 +11,8 @@ class MagpieLexer(RegexLexer):
     aliases = ['mag']
     filenames = ['*.mag']
 
+    flags = re.MULTILINE | re.DOTALL
+
     tokens = {
         'root': [
             (r'\s+', Text),
@@ -18,8 +21,12 @@ class MagpieLexer(RegexLexer):
             (r'(and|break|case|class|def|do|else|end|extend|false|fn|for|if|'
              r'interface|let|match|namespace|nothing|or|return|shared|'
              r'struct|then|union|using|this|true|typeof|var|while|\<\-|\-\>|\.)', Keyword),
+             
             (r'[,()\\\[\]{}]', Punctuation),
+            
+            # comments
             (r'//.*?\n', Comment.Single),
+            (r'/\*.*?\*/', Comment.Multiline),
 
             # user-defined names
             (r'[a-zA-Z_][a-zA-Z_0-9`~!$%^&*\-=+\\|/?<>]*', Name),

@@ -1,6 +1,6 @@
 ^title Welcome
 
-Thanks for coming. Let's get started. Magpie is an object-oriented programming language for the JVM that combines the safety of dynamic typing with the flexibility of static typing. Maybe I have that backwards. Let's hope so.
+Thanks for coming. Let's get started. Magpie is an object-oriented programming language for the JVM that combines the safety of dynamic typing with the flexibility of static typing. Maybe I have that backwards.
 
 It looks a bit like this:
 
@@ -43,7 +43,7 @@ There are a slew of languages out there already. What's so interesting about thi
     everywhere](http://lambda-the-ultimate.org/node/3186). It has interfaces
     which duck type like
     [Go](http://golang.org/doc/effective_go.html#interfaces_and_types).
-    Generics, intersection types, and structural types are on the to do list.
+    Generics, intersection types, and structural types are on the to-do list.
 
 *   **It's an open language.** Classes and objects are freely open to extension 
     in Magpie. You should never need to create abominations like:
@@ -99,12 +99,15 @@ If that sounds like the way you'd like to code, Magpie might be the language for
 
 ### Now the Bad Part
 
-But here's the deal. It's still very early days for Magpie. It isn't
+Here's the deal. It's still very early days for Magpie. It isn't
 vaporware&mdash; everything described here is implemented and working now. But
 it's still really early and lots of stuff is missing, buggy, or likely to
 change. I wouldn't put my bank account in it if I were you.
 
-If you just want a language to use, this is bad news. But if you want to work on a language, this is great news! Lot of interesting important decisions have yet to be made, and there's lots of fun stuff that needs coding. I'd love to have you involved.
+If you just want a language to *use*, this is bad news. But if you want a
+language to *contribute to*, this is great news! Lots of interesting important
+decisions have yet to be made, and there's lots of fun stuff that needs coding.
+I'd love to have you involved.
 
 ### Getting Started
 

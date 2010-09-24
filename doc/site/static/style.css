@@ -8,15 +8,15 @@ body {
 }
 
 h1 {
-  background: #666;
-  color: #888;
+  background: #888;
+  color: #aaa;
   font: normal 12px Verdana, sans-serif;
   padding: 2px 2px 4px 300px;
   white-space: nowrap;
 }
 
 h1 a {
-  color: #aaa;
+  color: #ccc;
   text-decoration: none;
 }
 
@@ -155,4 +155,6 @@ td {
 /* syntax highlighting */
 pre .k  { color: #4b81ab; }
 pre .s  { color: #c1a953; }
+pre .se { color: #d19943; }
 pre .c1 { color: #8c9ca8; }
+pre .cm { color: #8c9ca8; }
