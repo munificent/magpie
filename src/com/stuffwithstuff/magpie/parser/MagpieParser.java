@@ -4,6 +4,7 @@ import java.util.*;
 
 import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.*;
+import com.stuffwithstuff.magpie.util.Pair;
 
 public class MagpieParser extends Parser {
   public MagpieParser(Lexer lexer) {
@@ -310,6 +311,10 @@ public class MagpieParser extends Parser {
       Expr staticArg = null;
       Expr arg = null;
       
+      // TODO(bob): Hackish. If we encounter a name: pair, then we're in the
+      // middle of an object literal, so don't treat the name as a message.
+      if (lookAhead(TokenType.NAME, TokenType.COLON)) break;
+      
       // TODO(bob): This is kind of gross. The static arg stuff is just jammed
       // in here awkwardly. Should refactor.
       if (match(TokenType.NAME)) {
@@ -393,9 +398,26 @@ public class MagpieParser extends Parser {
       consume(TokenType.RIGHT_BRACE);
       position = position.union(last(1).getPosition());
       return new ExpressionExpr(position, expr);
+    } else if (lookAhead(TokenType.NAME, TokenType.COLON)) {
+      return parseObjectLiteral();
     }
     
     return null;
+  }
+  
+  /**
+   * Parses an object literal like "x: 1 y: 2"
+   */
+  private Expr parseObjectLiteral() {
+    Position position = current().getPosition();
+    List<Pair<String, Expr>> fields = new ArrayList<Pair<String, Expr>>();
+    while (match(TokenType.NAME, TokenType.COLON)) {
+      String name = last(2).getString();
+      Expr value = parseExpression();
+      fields.add(new Pair<String, Expr>(name, value));
+    }
+    
+    return new ObjectExpr(position, fields);
   }
   
   private List<Expr> parseCommaList() {

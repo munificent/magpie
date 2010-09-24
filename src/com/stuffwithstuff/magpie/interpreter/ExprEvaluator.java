@@ -2,6 +2,7 @@ package com.stuffwithstuff.magpie.interpreter;
 
 import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.*;
+import com.stuffwithstuff.magpie.util.Pair;
 
 /**
  * Implements the visitor pattern on AST nodes, in order to evaluate
@@ -213,6 +214,19 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(NothingExpr expr, EvalContext context) {
     return mInterpreter.nothing();
+  }
+  
+  @Override
+  public Obj visit(ObjectExpr expr, EvalContext context) {
+    Obj obj = mInterpreter.getObjectType().instantiate();
+    
+    // Define the fields.
+    for (Pair<String, Expr> entry : expr.getFields()) {
+      Obj value = evaluate(entry.getValue(), context);
+      obj.setField(entry.getKey(), value);
+    }
+    
+    return obj;
   }
 
   @Override

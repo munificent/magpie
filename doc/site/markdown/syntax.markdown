@@ -22,7 +22,10 @@ Like many scripting languages, newlines are significant in Magpie and are used t
     print("hi")
     print("bye")
 
-To make things easier, Magpie will ignore a newline in any place where it wouldn't make sense. Specifically that means newlines following a comma (`,`), operator (`+`, `-`, etc.), or open brace (`(`, `[`, `{`) will be discarded:
+To make things easier, Magpie will ignore a newline in any place where it
+wouldn't make sense. Specifically that means newlines following a comma (`,`),
+colon (`:`), operator (`+`, `-`, etc.), or open brace (`(`, `[`, `{`) will be
+discarded:
 
     var a = 1,
             2 // a will be the tuple (1, 2)

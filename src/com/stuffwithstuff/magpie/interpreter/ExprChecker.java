@@ -270,6 +270,11 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   }
   
   @Override
+  public Obj visit(ObjectExpr expr, EvalContext context) {
+    return mInterpreter.getObjectType();
+  }
+  
+  @Override
   public Obj visit(OrExpr expr, EvalContext context) {
     // TODO(bob): Should eventually check that both arms implement ITrueable
     // so that you can only use truthy stuff in a conjunction.

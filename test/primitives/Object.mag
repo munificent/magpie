@@ -1,0 +1,13 @@
+var a = x: 1 y: 2
+
+print(a x) //: 1
+print(a y) //: 2
+
+// can span multiple lines
+var b = someName:
+    "value"
+
+print(b someName) //: value
+
+
+x: 1 foo("bar")
