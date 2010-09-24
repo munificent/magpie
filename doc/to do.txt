@@ -8,17 +8,13 @@ Types
     of allowed types by the end of the ctor.
   - Figure out if there's some way constructors can be extended to a) add new
     construction logic and/or b) add new fields.
-  - Masquerades. Two class cannot implicitly duck type to each other even if 
+  - Masquerades. Two classes cannot implicitly duck type to each other even if 
     they have matching methods. However, there should be a "masquerade" function
     that will take an instance of one class and return it typed to another if
     they have compatible methods. This will allow things like mocks without
     forcing users to make everything an interface up front.
   - Figure out how to type-check defined (not declared) fields.
 - Interfaces
-  + Core imperative system to create and extend them.
-  + Typing rules for them that allow other types to be assignable to them if 
-    they implement all of its methods.
-  + Declarative syntax to create an interface.
   - Declarative syntax to extend an interface.
   - Determine if something like C#'s explicit interface implementation is
     useful. It may be nice for cases where a class implements multiple
@@ -60,15 +56,6 @@ Syntax
 - Some kind of message cascade syntax? User-defined operators can handle most
   cases (i.e. a string builder in Magpie could just have a + operator), but it
   may be nice for some things?
-- Keyword arguments. Something like:
-    dictionary add(key: 123 value: "hey")
-  which desugars to:
-    dictionary add:key:value(123, "hey")
-  Also allow no keyword for the first argument:
-    list insert("item" at: 3)
-  which desugars to:
-    list insert:at("item", 3)
-- Object literals?
 - Map and/or set literals?
 - Pattern-matching or switch?
 - Parsewords
@@ -91,11 +78,29 @@ Library
 - Conversion and casting methods (is, as, explicit cast).
 
 Other
+- Bytecode compiler. Will make coroutines and TCO simpler.
 - A well-defined package/import/namespace system including nice syntax.
-- Interop with Java. Should be able to instantiate Java types and call arbitrary
-  methods on those objects.
+- Interop with Java.
+  + Call Java methods on primitive types.
+  - Wrap arbitrary Java objects in Magpie objects.
+  - Automatically Magpie class to match Java class?
+  - Construct instances of arbitrary Java classes.
 - Coroutines and/or CSP-style concurrency. Some way to easily hop between
   different callstacks, basically.
 - TCO.
 - Exceptions. (Or, ideally, something closer to CL's condition system.)
 - Implement test infrastructure in Magpie (at least for as much as possible).
+- Write build scripts in Magpie.
+- Call methodNotFound on an object if method lookup failed so it can dynamically
+  resolve missing methods.
+
+Done
++ Object literals?
++ Keyword arguments. Something like:
+    dictionary add(key: 123 value: "hey")
+  (Just pass an object literal)
+- Interfaces
+  + Core imperative system to create and extend them.
+  + Typing rules for them that allow other types to be assignable to them if 
+    they implement all of its methods.
+  + Declarative syntax to create an interface.

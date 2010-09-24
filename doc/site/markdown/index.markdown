@@ -79,9 +79,8 @@ There are a slew of languages out there already. What's so interesting about thi
     during type-checking.
 
 *   **It runs on your OS.** The Magpie interpreter is written in Java and runs 
-    on the JVM, so wherever you go, Magpie can probably go with you. At some
-    point soon, it should be able to talk directly to existing Java libraries.
-    One intended use case is as a scripting language for JVM apps.
+    on the JVM, so wherever you go, Magpie can probably go with you. Magpie can
+    interoperate with existing JVM classes.
     
 ### No, Really, Why Another Language?
 

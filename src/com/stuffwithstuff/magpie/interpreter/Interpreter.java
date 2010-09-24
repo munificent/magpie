@@ -1,5 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 
 import com.stuffwithstuff.magpie.Identifiers;
@@ -381,11 +383,95 @@ public class Interpreter {
       return field;
     }
     
+    // If all else fails, try finding a matching native Java method on the
+    // primitive value.
+    Obj result = callJavaMethod(receiver, name, arg);
+    if (result != null) return result;
+    
     runtimeError(position,
         "Could not find a variable or method named \"%s\" on %s.",
         name, receiver.getClassObj());
     
     return mNothing;
+  }
+  
+  private Obj callJavaMethod(Obj receiver, String name, Obj arg) {
+    if (receiver.getValue() != null) {
+      Class<?> klass = receiver.getValue().getClass();
+      
+      // Convert the argument types to their Java equivalents.
+      Class<?>[] argClasses;
+      Object[] args;
+      if (arg == mNothing) {
+        argClasses = new Class<?>[0];
+        args = new Object[0];
+      } else if (arg.getClassObj() == mTupleClass) {
+        int count = arg.getField(Identifiers.COUNT).asInt();
+        argClasses = new Class<?>[count];
+        args = new Object[count];
+        for (int i = 0; i < count; i++) {
+          Obj field = arg.getTupleField(i);
+          argClasses[i] = getJavaClass(field);
+          args[i] = field.getValue();
+        }
+      } else {
+        argClasses = new Class<?>[1];
+        args = new Object[1];
+        argClasses[0] = getJavaClass(arg);
+        args[0] = arg.getValue();
+      }
+      
+      try {
+        Method javaMethod = klass.getMethod(name, argClasses);
+        Object result = javaMethod.invoke(receiver.getValue(), args);
+        
+        return convertToMagpieObject(result);
+      } catch (SecurityException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (NoSuchMethodException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (IllegalArgumentException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (IllegalAccessException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (InvocationTargetException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
+    
+    // Failed to find a method.
+    return null;
+  }
+  
+  private Class<?> getJavaClass(Obj object) {
+    if (object.getValue() != null) {
+      return object.getValue().getClass();
+    } else {
+      return Object.class;
+    }
+  }
+  
+  private Obj convertToMagpieObject(Object value) {
+    // Figure out what Magpie class to use.
+    ClassObj classObj = mObjectClass;
+    if (value != null) {
+      if (value.getClass().equals(Boolean.class)) {
+        classObj = mBoolClass;
+      } else if (value.getClass().equals(Integer.class)) {
+        classObj = mIntClass;
+      } else if (value.getClass().equals(String.class)) {
+        classObj = mStringClass;
+      }
+    } else {
+      classObj = mNothingClass;
+    }
+    
+    return classObj.instantiate(value);
   }
   
   private void runtimeError(Position position, String format, Object... args) {
