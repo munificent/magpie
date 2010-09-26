@@ -1,4 +1,5 @@
 ^title Welcome
+^index 1
 
 Thanks for coming. Let's get started. Magpie is an object-oriented programming language for the JVM that combines the safety of dynamic typing with the flexibility of static typing. Maybe I have that backwards.
 
@@ -18,70 +19,82 @@ It looks a bit like this:
 
 There are a slew of languages out there already. What's so interesting about this one? Here's the stuff that gets me excited about it:
 
-*   **It's dynamic.** It duck types and lets you pass around objects freely. 
-    It's a nice loose language for prototyping and tinkering. It doesn't have
-    the boilerplate and ceremony of straightjacket enterprise languages.   
-    Here's a complete program in Magpie:
-    
-        print("Hi!")
+#### It's dynamic
 
-*   **It type checks.** On the other hand, sometimes it's really nice to be able
-    to say, "Anything you pass to this method is gonna need to support X, Y, and 
-    Z" and not have to write exhaustive unit tests to ensure that. So Magpie 
-    lets you optionally provide type annotations to methods. If you do, it will 
-    *statically* check that you're doing the right thing before ever calling 
-    `main()`.
-    
-    The goal is to give you all of the safety of a static language, but only
-    where you actually want it.
-    
-    The type system is pretty neat too.
-    [Tuples](http://journal.stuffwithstuff.com/2009/05/05/one-and-only-one/) and
-    union types are built-in and, unlike most languages, `null` is [not a valid
-    value](http://journal.stuffwithstuff.com/2010/08/23/void-null-maybe-and-nothing/)
-    of all types: no more [checking for `null`
-    everywhere](http://lambda-the-ultimate.org/node/3186). It has interfaces
-    which duck type like
-    [Go](http://golang.org/doc/effective_go.html#interfaces_and_types).
-    Generics, intersection types, and structural types are on the to-do list.
+It duck types and lets you pass around objects freely. It's a nice loose
+language for prototyping and tinkering. It doesn't have the boilerplate and
+ceremony of straightjacket enterprise languages. Here's a complete program in
+Magpie:
 
-*   **It's an open language.** Classes and objects are freely open to extension 
-    in Magpie. You should never need to create abominations like:
-    
-        MyStringUtils.wishIWasAMethodOnString(someString)
-    
-    Just add it to the `String` class. Unlike other highly flexible languages,
-    Magpie tries to make this safe and manageable by providing other features
-    like static checking to make sure you don't accidentally break things.
+    print("Hi!")
 
-*   **It reads easy and writes flexibly.** Magpie's core syntax is based on
-    simple message sends with a minimum of punctuation. By example:
-    
-        var items = Array new
-        items add("zero")
-        for i = 1 to(10) do items = items ++ i toString
-        print(items)
-        
-    There are no predefined operators in Magpie: any sequence of punctuation
-    characters is valid. (Punctuation characters are also fine in regular
-    identifiers too). Operator precedence is flat as in Smalltalk. Sometime 
-    soon, you should even be able to define your own custom keywords and control
-    structures (although the default ones are pretty nice too).
+#### It type checks
 
-*   **It's functional.** Closures, higher-order functions, and the other fun 
-    toys you like from functional languages are available in Magpie.
-    
-*   **It has an extensible type system.** All types (the "things" that the 
-    static type-checker uses) are first-class objects in Magpie. Most of 
-    Magpie's type system is implemented itself in Magpie. (And it type-checks
-    itself.) This gives you the flexibility to extend the type system, and it
-    means that type annotations are just regular Magpie expressions evaluated
-    during type-checking.
+On the other hand, sometimes it's really nice to be able to say, "Anything you
+pass to this method is gonna need to support X, Y, and Z" and not have to write
+exhaustive unit tests to ensure that. So Magpie lets you optionally provide type
+annotations to methods. If you do, it will *statically* check that you're doing
+the right thing before ever calling `main()`.
 
-*   **It runs on your OS.** The Magpie interpreter is written in Java and runs 
-    on the JVM, so wherever you go, Magpie can probably go with you. Magpie can
-    interoperate with existing JVM classes.
-    
+The goal is to give you all of the safety of a static language, but only where
+you actually want it.
+
+The type system is pretty neat too.
+[Tuples](http://journal.stuffwithstuff.com/2009/05/05/one-and-only-one/) and
+union types are built-in and, unlike most languages, `null` is [not a valid
+value](http://journal.stuffwithstuff.com/2010/08/23/void-null-maybe-and-nothing/)
+of all types: no more [checking for `null`
+everywhere](http://lambda-the-ultimate.org/node/3186). It has interfaces which
+duck type like
+[Go](http://golang.org/doc/effective_go.html#interfaces_and_types). Generics,
+intersection types, and structural types are on the to-do list.
+
+#### It's an open language
+
+Classes and objects are freely open to extension in Magpie. You should never
+need to create abominations like:
+
+    MyStringUtils.wishIWasAMethodOnString(someString)
+
+Just add it to the `String` class. Unlike other highly flexible languages,
+Magpie tries to make this safe and manageable by providing other features like
+static checking to make sure you don't accidentally break things.
+
+#### It reads easy and writes flexibly
+
+Magpie's core syntax is based on simple message sends with a minimum of
+punctuation. By example:
+
+    var items = Array new
+    items add("zero")
+    for i = 1 to(10) do items = items ++ i
+    toString print(items)
+
+There are no predefined operators in Magpie: any sequence of punctuation
+characters is valid. (Punctuation characters are also fine in regular
+identifiers too). Operator precedence is flat as in Smalltalk. Sometime soon,
+you should even be able to define your own custom keywords and control
+structures (although the default ones are pretty nice too).
+
+#### It's functional
+
+Closures, higher-order functions, and the other fun toys you like from
+functional languages are available in Magpie.
+
+#### It has an extensible type system
+
+All types (the "things" that the static type-checker uses) are first-class
+objects in Magpie. Most of Magpie's type system is implemented itself in Magpie.
+(And it type-checks itself.) This gives you the flexibility to extend the type
+system, and it means that type annotations are just regular Magpie expressions
+evaluated during type-checking.
+
+#### It runs on your OS
+
+The Magpie interpreter is written in Java and runs on the JVM, so wherever you
+go, Magpie can probably go with you. Magpie can interoperate with existing JVM
+classes.
+
 ### No, Really, Why Another Language?
 
 That bullet list covers the points, but I don't think it captures the essence.
@@ -99,9 +112,9 @@ If that sounds like the way you'd like to code, Magpie might be the language for
 ### Now the Bad Part
 
 Here's the deal. It's still very early days for Magpie. It isn't
-vaporware&mdash; everything described here is implemented and working now. But
-it's still really early and lots of stuff is missing, buggy, or likely to
-change. I wouldn't put my bank account in it if I were you.
+vaporware&mdash; everything described here is implemented and working now&mdash;
+but lots of stuff is missing, buggy, or likely to change. I wouldn't put my bank
+account in it if I were you.
 
 If you just want a language to *use*, this is bad news. But if you want a
 language to *contribute to*, this is great news! Lots of interesting important

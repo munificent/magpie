@@ -1,4 +1,5 @@
 ^title Motivation
+^index 3
 
 The pages in this section answer "why" questions about Magpie:
 

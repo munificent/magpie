@@ -4,6 +4,7 @@ Should methods always be declared inside some `class` or `extend` block, or just
 be declared individually using `def`? There are two basic syntaxes for adding a
 method to a class. The conventional OOP style is:
 
+    :::magpie
     class SomeClass
         def someMethod(arg Int ->)
             // ...

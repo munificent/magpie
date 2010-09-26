@@ -12,18 +12,22 @@ def build_nav(path):
         dirname = os.path.splitext(f)[0]
         # get the relative path to the html file
         relpath = os.path.relpath(dirname, 'markdown') + '.html'
-        info = [relpath, get_title(f)]
+        info = [relpath, get_info(f)]
         if os.path.isdir(dirname):
             info.append(build_nav(dirname))
         nav.append(info)
+    # sort by the indices
+    nav.sort(key=lambda i: i[1]['index'])
     return nav
 
-def get_title(path):
+def get_info(path):
     basename = os.path.basename(path)
     basename = basename.split('.')[0]
-    
+
     # read the markdown file
-    title = path
+    info = dict()
+    info['title'] = path
+    info['index'] = path
     with open(path, 'r') as input:
         # read each line, ignoring everything but the special codes
         for line in input:
@@ -31,18 +35,19 @@ def get_title(path):
             if stripped.startswith('^'):
                 command,_,args = stripped.rstrip('\n').lstrip('^').partition(' ')
                 args = args.strip()
-                
-                if command == 'title':
-                    title = args
-                else:
-                    print "UNKNOWN COMMAND:", command, args
-    return title
+
+                info[command] = args
+    return info
+
+def get_title(path):
+    info = get_info(path)
+    return info['title']
 
 def make_nav_html(nav, thisfile):
     html = ""
     thisdir = os.path.dirname(thisfile)
     for item in nav:
-        link = item[1]
+        link = item[1]['title']
         linkpath = os.path.relpath(item[0], thisdir)
         if thisfile != item[0]:
             link = '<a href={0}>{1}</a>'.format(linkpath, link)
@@ -65,7 +70,8 @@ def format_file(path, nav):
     basename = os.path.relpath(path, 'markdown')
     basename = basename.split('.')[0]
     
-    title = '<unknown title>'
+    info = get_info(path)
+    title = info['title']
     
     # read the markdown file and preprocess it
     contents = ''
@@ -75,16 +81,8 @@ def format_file(path, nav):
             stripped = line.lstrip()
             indentation = line[:len(line) - len(stripped)]
             
-            if stripped.startswith('^'):
-                command,_,args = stripped.rstrip('\n').lstrip('^').partition(' ')
-                args = args.strip()
-                
-                if command == 'title':
-                    title = args
-                else:
-                    print "UNKNOWN COMMAND:", command, args
-                    
-            else:
+            # ignore commands
+            if not stripped.startswith('^'):
                 contents = contents + line
     
     modified = datetime.fromtimestamp(os.path.getmtime(path))

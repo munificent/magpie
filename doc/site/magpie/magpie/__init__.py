@@ -8,7 +8,7 @@ from pygments.token import *
 
 class MagpieLexer(RegexLexer):
     name = 'Magpie'
-    aliases = ['mag']
+    aliases = ['mag', 'magpie']
     filenames = ['*.mag']
 
     flags = re.MULTILINE | re.DOTALL
@@ -20,12 +20,15 @@ class MagpieLexer(RegexLexer):
             # keywords
             (r'(and|break|case|class|def|do|else|end|extend|false|fn|for|if|'
              r'interface|let|match|namespace|nothing|or|return|shared|'
-             r'struct|then|union|using|this|true|typeof|var|while|\<\-|\-\>|\.)', Keyword),
+             r'struct|then|union|using|this|true|typeof|var|while)\b', Keyword),
+            
+            # keywords
+            (r'(\<\-|\-\>|\.)', Keyword),
              
             (r'[,()\\\[\]{}]', Punctuation),
             
             # comments
-            (r'//.*?\n', Comment.Single),
+            (r'//[^\n]*?\n', Comment.Single),
             (r'/\*.*?\*/', Comment.Multiline),
 
             # user-defined names

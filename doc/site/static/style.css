@@ -70,7 +70,7 @@ li + li {
 }
 
 pre, code {
-  background: #e6edf2;
+  background: #ecf3f8; /* e6edf2 */
   color: #70777d;
   font: 12px "Droid Sans Mono", Consolas, Monaco, monospace;
 }
