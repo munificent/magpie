@@ -16,6 +16,17 @@ The simplest example is a point. A point in 2D space doesn't *hold* an X and a Y
 
 Tuples are a core part of Magpie. When you call a message with multiple arguments, you're actually passing a single one: a tuple.
 
+#### Accessing Fields
+
+Once you have a tuple, fields can be pulled out by sending it a message whose name is `_` followed by the zero-based index of the field:
+
+    :::magpie
+    var a = "one", 2
+    print(a _0) // prints "one"
+    print(a _1) // prints "2"
+
+(Tuple fields are also implicitly decomposed when passed to a function with multiple named arguments.)
+
 ### Object Literals
 
 An object literal builds a new object from scratch. Its class will be `Object`, and it will have the given fields defined on it. The syntax is:
@@ -25,6 +36,15 @@ An object literal builds a new object from scratch. Its class will be `Object`, 
     // creates an object with fields "x" and "y"
 
 Note that no separators are needed between the fields. The field names (followed by a colon) are enough to distinguish them.
+
+#### Accessing Fields
+
+The fields in an object literal can be accessed like any other field on an object, by their name:
+
+    :::magpie
+    var point = x: 1 y: 2
+    print(point x) // prints "1"
+    print(point y) // prints "2"
 
 ### Expression Literals
 
