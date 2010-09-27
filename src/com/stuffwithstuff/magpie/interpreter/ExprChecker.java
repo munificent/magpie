@@ -329,10 +329,33 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(VariableExpr expr, EvalContext context) {
-    Obj varType = check(expr.getValue(), context);
+    Obj valueType = check(expr.getValue(), context);
 
-    context.define(expr.getName(), varType);
-    return varType;
+    // See if there is already a variable in this scope with that name. If so,
+    // we'll treat this declaration like an assignment.
+    Obj existingType = context.lookUpHere(expr.getName());
+    if (existingType == null) {
+      // Not already defined, so define it.
+      context.define(expr.getName(), valueType);
+      return valueType;
+    } else {
+      // Make sure the new value is compatible with the variable's type.
+      Obj matches = mInterpreter.invokeMethod(existingType,
+          Identifiers.CAN_ASSIGN_FROM, valueType);
+      
+      if (!matches.asBool()) {
+        String expectedText = mInterpreter.invokeMethod(existingType,
+            Identifiers.TO_STRING).asString();
+        String actualText = mInterpreter.invokeMethod(valueType,
+            Identifiers.TO_STRING).asString();
+        mChecker.addError(expr.getPosition(),
+            "Variable \"%s\" of type %s cannot be assigned a value of type %s.",
+            expr.getName(), expectedText, actualText);
+      }
+
+      // The type doesn't change.
+      return existingType;
+    }
   }
   
   private Obj orTypes(Obj first, Obj... types) {

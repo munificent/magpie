@@ -31,8 +31,8 @@ end)        //: String
 print(typeof while true do 4) //: Nothing
 
 // Variable definitions.
-print(typeof var b = 234) //: Int
-print(typeof var c = true) //: Bool
+print(typeof var c = 234) //: Int
+print(typeof var d = true) //: Bool
 
 // Return expressions never actually evaluate to a result since they
 // immediately unwind the stack.

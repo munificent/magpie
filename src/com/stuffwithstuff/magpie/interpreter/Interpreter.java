@@ -402,7 +402,7 @@ public class Interpreter {
       // Convert the argument types to their Java equivalents.
       Class<?>[] argClasses;
       Object[] args;
-      if (arg == mNothing) {
+      if ((arg == null) || (arg == mNothing)) {
         argClasses = new Class<?>[0];
         args = new Object[0];
       } else if (arg.getClassObj() == mTupleClass) {
@@ -426,13 +426,11 @@ public class Interpreter {
         Object result = javaMethod.invoke(receiver.getValue(), args);
         
         return convertToMagpieObject(result);
-      } catch (SecurityException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
       } catch (NoSuchMethodException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        // OK, method not found.
       } catch (IllegalArgumentException e) {
+        // OK, no method with the right argument types found.
+      } catch (SecurityException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
       } catch (IllegalAccessException e) {

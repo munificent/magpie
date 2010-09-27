@@ -38,6 +38,16 @@ public class EvalContext {
   public Obj   getThis()  { return mThis; }
   
   /**
+   * Looks up the given name in current local scope. Does not walk up the
+   * lexical scope chain.
+   * @param   name The name of the variable to look up.
+   * @return       The value bound to that name, or null if not found.
+   */
+  public Obj lookUpHere(String name) {
+    return mScope.get(name);
+  }
+  
+  /**
    * Looks up the given name in the context's lexical scope chain.
    * @param   name The name of the variable to look up.
    * @return       The value bound to that name, or null if not found.
