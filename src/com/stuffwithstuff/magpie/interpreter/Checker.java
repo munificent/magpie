@@ -146,25 +146,9 @@ public class Checker {
     // return value. Type annotations don't affect the behavior at all. It just
     // means that the checker will ignore any returned type if Nothing is
     // expected.
-    boolean validReturnType;
-    if (expectedReturn == mInterpreter.getNothingType()) {
-      validReturnType = true;
-    } else {
-      Obj matches = mInterpreter.invokeMethod(expectedReturn,
-          Identifiers.CAN_ASSIGN_FROM, returnType);
-      
-      validReturnType = matches.asBool();
-    }
-    
-    if (!validReturnType) {
-      String expectedText = mInterpreter.invokeMethod(expectedReturn,
-          Identifiers.TO_STRING).asString();
-      String actualText = mInterpreter.invokeMethod(returnType,
-          Identifiers.TO_STRING).asString();
-      addError(function.getType().getReturnType().getPosition(),
-          "Function is declared to return %s but is returning %s.",
-          expectedText, actualText);
-    }
+    checkTypes(expectedReturn, returnType, true,
+        function.getType().getReturnType().getPosition(),
+        "Function is declared to return %s but is returning %s.");
     
     // TODO(bob): If this function is a method (i.e. 'this' isn't nothing), then
     // we also need to check that any assignment to a field matches the declared
@@ -197,6 +181,55 @@ public class Checker {
     }
     
     return scope;
+  }
+  
+  /**
+   * Checks to see if a given type is compatible (i.e. can be assigned to) a
+   * given expected type. If not, reports an error using the given message. The
+   * message is expected to be a format string with two "%s" arguments: one for
+   * the expected type and one for the actual type, in that order.
+   * 
+   * @param expected          The type expected at this point.
+   * @param actual            The actual type found.
+   * @param nothingOverrides  If true, then any actual type will be allowed if
+   *                          the expected type is Nothing.
+   * @param position          The position in the source where the type is being
+   *                          checked.
+   * @param message           A format string for the error message.
+   */
+  public void checkTypes(Obj expected, Obj actual,
+      boolean nothingOverrides, Position position, String message) {
+    
+    boolean success;
+    if (nothingOverrides && (expected == mInterpreter.getNothingType())) {
+      success = true;
+    } else {
+      Obj matches = mInterpreter.invokeMethod(expected,
+          Identifiers.CAN_ASSIGN_FROM, actual);
+      success = matches.asBool();
+    }
+    
+    if (!success) {
+      String expectedText = mInterpreter.evaluateToString(expected);
+      String actualText = mInterpreter.evaluateToString(actual);
+      addError(position, message, expectedText, actualText);
+    }
+  }
+  
+  /**
+   * Checks to see if a given type is compatible (i.e. can be assigned to) a
+   * given expected type. If not, reports an error using the given message. The
+   * message is expected to be a format string with two "%s" arguments: one for
+   * the expected type and one for the actual type, in that order.
+   * 
+   * @param expected          The type expected at this point.
+   * @param actual            The actual type found.
+   * @param position          The position in the source where the type is being
+   *                          checked.
+   * @param message           A format string for the error message.
+   */
+  public void checkTypes(Obj expected, Obj actual, Position position, String message) {
+    checkTypes(expected, actual, false, position, message);
   }
 
   /**

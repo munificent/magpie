@@ -301,6 +301,10 @@ public class Interpreter {
     return evaluator.evaluate(expr, context);
   }
   
+  public String evaluateToString(Obj value) {
+    return invokeMethod(value, Identifiers.TO_STRING).asString();
+  }
+
   public void pushScriptPath(String path) {
     mScriptPaths.push(path);
   }

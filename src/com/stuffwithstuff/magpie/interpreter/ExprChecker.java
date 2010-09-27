@@ -72,18 +72,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     if (existingType != null) {
       
       // Make sure the new value is compatible with the variable's type.
-      Obj matches = mInterpreter.invokeMethod(existingType,
-          Identifiers.CAN_ASSIGN_FROM, valueType);
-      
-      if (!matches.asBool()) {
-        String expectedText = mInterpreter.invokeMethod(existingType,
-            Identifiers.TO_STRING).asString();
-        String actualText = mInterpreter.invokeMethod(valueType,
-            Identifiers.TO_STRING).asString();
-        mChecker.addError(expr.getPosition(),
-            "Variable \"%s\" of type %s cannot be assigned a value of type %s.",
-            name, expectedText, actualText);
-      }
+      mChecker.checkTypes(existingType, valueType, expr.getPosition(),
+          "Variable of type %s cannot be assigned a value of type %s.");
 
       // The type doesn't change.
       return existingType;
@@ -340,18 +330,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       return valueType;
     } else {
       // Make sure the new value is compatible with the variable's type.
-      Obj matches = mInterpreter.invokeMethod(existingType,
-          Identifiers.CAN_ASSIGN_FROM, valueType);
-      
-      if (!matches.asBool()) {
-        String expectedText = mInterpreter.invokeMethod(existingType,
-            Identifiers.TO_STRING).asString();
-        String actualText = mInterpreter.invokeMethod(valueType,
-            Identifiers.TO_STRING).asString();
-        mChecker.addError(expr.getPosition(),
-            "Variable \"%s\" of type %s cannot be assigned a value of type %s.",
-            expr.getName(), expectedText, actualText);
-      }
+      mChecker.checkTypes(existingType, valueType, expr.getPosition(),
+          "Variable of type %s cannot be redeclared as type %s.");
 
       // The type doesn't change.
       return existingType;
@@ -404,18 +384,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     }
     
     // Make sure the argument type matches the declared parameter type.
-    Obj matches = mInterpreter.invokeMethod(paramType,
-        Identifiers.CAN_ASSIGN_FROM, argType);
-    
-    if (!matches.asBool()) {
-      String expectedText = mInterpreter.invokeMethod(paramType,
-          Identifiers.TO_STRING).asString();
-      String actualText = mInterpreter.invokeMethod(argType,
-          Identifiers.TO_STRING).asString();
-      mChecker.addError(expr.getPosition(),
-          "Function is declared to take %s but is being passed %s.",
-          expectedText, actualText);
-    }
+    mChecker.checkTypes(paramType, argType, expr.getPosition(), 
+        "Function is declared to take %s but is being passed %s.");
     
     // Return the return type.
     return returnType;
