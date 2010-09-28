@@ -64,6 +64,7 @@ public final class Token {
       case FOR: return "for";
       case FN: return "fn";
       case IF: return "if";
+      case IN: return "in";
       case INTERFACE: return "interface";
       case LET: return "let";
       case MATCH: return "match";

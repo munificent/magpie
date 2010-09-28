@@ -256,6 +256,7 @@ public class Lexer {
     if (text.equals("fn")) return new Token(position, TokenType.FN);
     if (text.equals("for")) return new Token(position, TokenType.FOR);
     if (text.equals("if")) return new Token(position, TokenType.IF);
+    if (text.equals("in")) return new Token(position, TokenType.IN);
     if (text.equals("interface")) return new Token(position, TokenType.INTERFACE);
     if (text.equals("let")) return new Token(position, TokenType.LET);
     if (text.equals("match")) return new Token(position, TokenType.MATCH);

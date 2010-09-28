@@ -1,0 +1,50 @@
+var noArg(block)
+    print("noArg before")
+    block("it")
+    print("noArg after")
+end
+
+noArg in
+    print("in block")
+    print(it)
+end
+//: noArg before
+//: in block
+//: it
+//: noArg after
+
+var oneArg(arg, block)
+    print("oneArg before")
+    print(arg)
+    block("it")
+    print("oneArg after")
+end
+
+oneArg("arg") in
+    print("in block")
+    print(it)
+end
+//: oneArg before
+//: arg
+//: in block
+//: it
+//: oneArg after
+
+var twoArg(arg1, arg2, block)
+    print("twoArg before")
+    print(arg1)
+    print(arg2)
+    block("it")
+    print("twoArg after")
+end
+
+twoArg("arg1", "arg2") in
+    print("in block")
+    print(it)
+end
+//: twoArg before
+//: arg1
+//: arg2
+//: in block
+//: it
+//: twoArg after

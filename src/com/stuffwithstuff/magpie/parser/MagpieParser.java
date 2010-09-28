@@ -350,9 +350,28 @@ public class MagpieParser extends Parser {
           staticArg = parseExpression();
           consume(TokenType.RIGHT_BRACKET);
         }
-        
       } else {
         break;
+      }
+      
+      // Look for a following block argument.
+      if (match(TokenType.IN)) {
+        Expr blockArg = parseBlock();
+        
+        // Wrap it in a function with a single "it" parameter.
+        blockArg = new FnExpr(blockArg.getPosition(),
+            new FunctionType(Collections.singletonList(Identifiers.IT),
+                Expr.name("Dynamic"), Expr.name("Dynamic")),
+            blockArg);
+        
+        // Tack it on to the regular argument.
+        if (arg == null) {
+          arg = blockArg;
+        } else if (arg instanceof TupleExpr) {
+          ((TupleExpr)arg).getFields().add(blockArg);
+        } else {
+          arg = Expr.tuple(arg, blockArg);
+        }
       }
       
       position = position.union(last(1).getPosition());

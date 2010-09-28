@@ -1,3 +1,29 @@
+/*
+specify("An 'and' expression") in
+    it should("return the first argument if it is false") in
+        (0 and false) shouldBe(0)
+    end
+    
+    it should("return the second argument if the first is true") in
+        (0 and 1) shouldBe(1)
+    end
+    
+    it should("not evaluate the second argument if the first is false") in
+        var called = false
+        false and (called = true)
+        called shouldBe(false)
+    end
+    
+    it should("call 'true?' on the arguments to determine truth") in
+    end
+end
+
+
+var specify(description, block)
+    block
+end
+*/
+
 class Counter
     this() value = 0
     
