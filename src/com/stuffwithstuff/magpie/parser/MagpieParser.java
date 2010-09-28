@@ -355,7 +355,7 @@ public class MagpieParser extends Parser {
       }
       
       // Look for a following block argument.
-      if (match(TokenType.IN)) {
+      if (match(TokenType.WITH)) {
         Expr blockArg = parseBlock();
         
         // Wrap it in a function with a single "it" parameter.

@@ -4,7 +4,7 @@ var noArg(block)
     print("noArg after")
 end
 
-noArg in
+noArg with
     print("in block")
     print(it)
 end
@@ -20,7 +20,7 @@ var oneArg(arg, block)
     print("oneArg after")
 end
 
-oneArg("arg") in
+oneArg("arg") with
     print("in block")
     print(it)
 end
@@ -38,7 +38,7 @@ var twoArg(arg1, arg2, block)
     print("twoArg after")
 end
 
-twoArg("arg1", "arg2") in
+twoArg("arg1", "arg2") with
     print("in block")
     print(it)
 end

@@ -1,28 +1,45 @@
-/*
+
 specify("An 'and' expression") in
-    it should("return the first argument if it is false") in
+    it should("return the first argument if it is false.") in
         (0 and false) shouldBe(0)
     end
     
-    it should("return the second argument if the first is true") in
+    it should("return the second argument if the first is true.") in
         (0 and 1) shouldBe(1)
     end
     
-    it should("not evaluate the second argument if the first is false") in
+    it should("not evaluate the second argument if the first is false.") in
         var called = false
         false and (called = true)
         called shouldBe(false)
     end
     
-    it should("call 'true?' on the arguments to determine truth") in
+    it should("call 'true?' on the arguments to determine truth.") in
     end
 end
 
+var testFailures = Array of()
+
+def Object shouldBe(expected)
+    if this != expected then
+        // TODO(bob): Exceptions would be good here.
+        testFailures add("Expected " + expected + " but was " + this)
+    end
+end
+
+class Tester
+    should(description, block)
+        testFailures = Array of()
+        block()
+        // TODO(bob): look at testFailures
+    end
+end
 
 var specify(description, block)
-    block
+    var tester = Tester new
+    block(TestRunner new)
 end
-*/
+
 
 class Counter
     this() value = 0

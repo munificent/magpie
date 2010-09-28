@@ -37,7 +37,6 @@ public enum TokenType {
   FN,
   FOR,
   IF,
-  IN,
   INTERFACE,
   LET,
   MATCH,
@@ -50,6 +49,7 @@ public enum TokenType {
   TYPEOF,
   VAR,
   WHILE,
+  WITH,
   
   // spacing
   LINE,

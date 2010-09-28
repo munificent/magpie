@@ -256,7 +256,6 @@ public class Lexer {
     if (text.equals("fn")) return new Token(position, TokenType.FN);
     if (text.equals("for")) return new Token(position, TokenType.FOR);
     if (text.equals("if")) return new Token(position, TokenType.IF);
-    if (text.equals("in")) return new Token(position, TokenType.IN);
     if (text.equals("interface")) return new Token(position, TokenType.INTERFACE);
     if (text.equals("let")) return new Token(position, TokenType.LET);
     if (text.equals("match")) return new Token(position, TokenType.MATCH);
@@ -270,6 +269,7 @@ public class Lexer {
     if (text.equals("typeof")) return new Token(position, TokenType.TYPEOF);
     if (text.equals("var")) return new Token(position, TokenType.VAR);
     if (text.equals("while")) return new Token(position, TokenType.WHILE);
+    if (text.equals("with")) return new Token(position, TokenType.WITH);
     if (text.equals("=")) return new Token(position, TokenType.EQUALS);
     if (text.equals("->")) return new Token(position, TokenType.ARROW);
     
