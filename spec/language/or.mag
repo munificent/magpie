@@ -1,0 +1,32 @@
+// Note: implicitly depends on non-zero ints being truthy.
+
+specify("An 'or' expression") with
+    it should("return the first true argument") with
+        (true or 0) shouldBe(true)
+        (0 or 1 or false) shouldBe(1)
+        (0 or false or 2) shouldBe(2)
+    end
+    
+    it should("return the last argument if all are false") with
+        (0 or false) shouldBe(false)
+        (false or false or 0) shouldBe(0)
+    end
+    
+    it should("short-circuit at the first true argument") with
+        var a = TruthTest new(false)
+        var b = TruthTest new(true)
+        var c = TruthTest new(true)
+        a or b or c
+        a called shouldBe(true)
+        b called shouldBe(true)
+        c called shouldBe(false)
+    end
+    
+    it should("call 'true?' on the arguments to determine truth") with
+        var left = TruthTest new(false)
+        var right = TruthTest new(false)
+        left or right
+        left called shouldBe(true)
+        right called shouldBe(false)
+    end
+end

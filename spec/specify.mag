@@ -1,0 +1,54 @@
+var specify(description String, block Function(Nothing, Nothing) ->)
+    block(TestSuite new(description))
+end
+
+class TestSuite
+    this(name)
+        this name = name
+        currentTestSuite = this
+        currentTest = ""
+        tests = 0
+        failures = 0
+    end
+    
+    should(description String, block Function(Nothing, Nothing) ->)
+        currentTest = description
+        failures = 0
+        tests = 0
+        block()
+        if tests == 0 then
+            print("NONE: " + name + " should " + currentTest + ".")
+        else if failures == 0 then
+            print("PASS: " + name + " should " + currentTest + ".")
+        end
+    end
+    
+    fail(message String ->)
+        if failures == 0 then
+            print("FAIL: " + name + " " + currentTest + ".")
+        end
+        tests = tests + 1
+        failures = failures + 1
+        print("      " + message)
+    end
+    
+    pass()
+        tests = tests + 1
+    end
+    
+    name String
+    currentTest String
+    tests Int
+    failures Int
+end
+
+var currentTestSuite = nothing
+
+def Object shouldBe(expected)
+    if this != expected then
+        // TODO(bob): Exceptions would be good here.
+        currentTestSuite fail("Expected " + expected + " but was " + this)
+    else
+        currentTestSuite pass
+    end
+end
