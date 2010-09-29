@@ -1,0 +1,15 @@
+// A vanilla iterative solution.
+var fibs(n)
+    if n < 2 then n
+    else
+        var pair = 0, 1
+        for i = 2 to(n) do
+            pair = pair _1, (pair _0 + pair _1)
+        end
+        pair _1
+    end
+end
+
+for i = 0 until(20) do
+    print(i toString + ": " + fibs(i))
+end
