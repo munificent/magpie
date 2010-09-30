@@ -1,7 +1,7 @@
 ^title Messages
 ^index 5
 
-Like any true-blue OOP language, the heart of Magpie syntax is messages: things you tell objects to do. In Magpie almost everything is a message. There are two flavors of messages in Magpie: regular and operators.
+Like any true-blue OOP language, the heart of Magpie is messages: things you tell objects to do. In Magpie almost everything is a message. There are two flavors of messages in Magpie: regular and operators.
 
 ### Regular Messages 
 
@@ -32,6 +32,8 @@ If there are multiple arguments, they're separated with commas:
 
     :::magpie
     dictionary add("key", "value")
+
+(Technically, all messages in Magpie take a single argument. In the above example, we're passing one argument to `add` a tuple with fields "key" and "value". In practice, it works like you'd expect.)
 
 #### Implicit Receiver
 
@@ -69,5 +71,24 @@ Unlike most languages (but like Smalltalk), Magpie does not have a fixed set of 
     1 + 2 * 3
 
 evaluates to *9* and not *7*. Parentheses are your friend here. This may take some getting used to, but I think the simplicity (no complicated operator precedence to remember) and flexibility (define your own operators for DSLs) are worth it.
+
+### Chaining
+
+Message sends associate from left to right, so when you chain a series of sends together, each subsequent message will be sent to the value returned by the previous one. In other words, this:
+
+    :::magpie
+    first second(arg) third fourth
+
+is equivalent to:
+
+    var a = first second(arg)
+    var b = a third
+    var c = b fourth
+
+In C++/Java-style OOP syntax, that would be:
+
+    first().second(arg).third().fourth();
+
+Magpie just ditches a lot of the punctuation.
 
 **TODO: callables, associativity**

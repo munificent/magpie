@@ -1,7 +1,7 @@
-^title Code Structure
+^title Program Structure
 ^index 1
 
-Before we get into the details of the different kinds of expressions in Magpie, there are a couple of rules that affect how Magpie code is formatted overall.
+Magpie programs are stored in plain text files with a <tt>.mag</tt> file extension. Magpie does not compile ahead of time: programs are interpreted directly from source, from top to bottom like a typical scripting language.
 
 ### Expressions
 
@@ -79,3 +79,28 @@ the block ends (unless they're captured in a closure, of course). For example:
     end
 
 After evaluating that, `a` will be 6 and `temp` will no longer exist.
+
+### Precedence
+
+Magpie's syntax has fewer distinct levels of precedence than most languages. Many constructs start with a unique keyword (i.e. `var`, `class`, `if`, etc.) so don't need special precedence rules. For the core expression syntax, the precendence levels (from loosest to tightest) are:
+
+1. Assigment (`=`)
+2. Tuples (`,`)
+3. Conjunctions (`and`, `or`)
+4. Operators (`+`, `-`, `?$!`, etc.)
+5. Messages (`print(foo)`, `count`, etc.)
+
+Some examples will clarify. The comment after each line is how the parser interprets that expression:
+
+    :::magpie
+    a = b, c            // a = (b, c)
+    a and b, c or d     // (a and b), (c or d)
+    a or b + c          // a or (b + c)
+    a b + c             // (a b()) + c
+    a = b c, d - e or f // a = ((b c()), ((d - e) or f))
+
+Parentheses can be used for grouping to override this as you'd expect:
+
+    :::magpie
+    a or b + c    // a or (b + c)
+    (a or b) + c  // (a or b) + c

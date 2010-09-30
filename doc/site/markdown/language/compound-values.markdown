@@ -1,7 +1,7 @@
-^title Compound Literals
+^title Compound Values
 ^index 3
 
-The previous section covered *atomic* literals in Magpie: the smallest building blocks that Magpie data is built out of. Magpie also has a few kinds of *compound literals*. These build values out of smaller pieces. (Technically, function expressions could be considered literals too, but they're important enough to warrant their own section.)
+If the previous section covered [atoms](atomic-values.html), then this section covers "molecules": values that are built by combining other values. Technically, since everything is an object in Magpie, *all* values are compound: you can slap additional fields onto anything if you want. But for the sake of usefulness, Magpie also includes a couple of built-in compound values with their own literal syntax.
 
 ### Tuples
 
@@ -25,15 +25,28 @@ Once you have a tuple, fields can be pulled out by sending it a message whose na
     print(a _0) // prints "one"
     print(a _1) // prints "2"
 
-(Tuple fields are also implicitly decomposed when passed to a function with multiple named arguments.)
+Tuple fields are also implicitly decomposed when passed to a function with multiple named arguments. For example:
+
+    :::magpie
+    // define a function that takes two values
+    var takeTwo(a, b)
+        print(a + " + " b)
+    end
+    
+    // make a tuple
+    var tuple = "peanut butter", "jelly"
+    
+    // pass it to the function
+    takeTwo(tuple) // prints "peanut butter + jelly"
 
 ### Object Literals
 
 An object literal builds a new object from scratch. Its class will be `Object`, and it will have the given fields defined on it. The syntax is:
 
     :::magpie
-    var point = x: 1 y: 1
+    x: 1 y: 2
     // creates an object with fields "x" and "y"
+    // with values 1 and 2 respectively
 
 Note that no separators are needed between the fields. The field names (followed by a colon) are enough to distinguish them.
 
@@ -46,13 +59,17 @@ The fields in an object literal can be accessed like any other field on an objec
     print(point x) // prints "1"
     print(point y) // prints "2"
 
-### Expression Literals
+### Expression Object
 
-An expression literal is a chunk of code that isn't evaluated. Instead, it's just bundled up into a data structure that you can pass around. You can't do much with them yet, but they will eventually be used for metaprogramming. To create an expression literal, just enclose any expression in curly braces:
+An expression object is a chunk of code that isn't evaluated. Instead, it's just
+bundled up into a data structure that you can pass around. You can't do much
+with them yet, but they will eventually be used for metaprogramming. To create
+an expression literal (as opposed to creating an expression that's evaluated
+in-place), just enclose any expression in curly braces:
 
     :::magpie
     var a = { print("hi") }
 
 That will create an expression object containing the code `print("hi")` and store a reference to it in `a`. It won't print anything.
 
-Expression literals are similar to functions: they both contain a chunk of code. The main difference is that a function carries with it enough context (i.e. its closure and its parameters) so that it can be invoked. An expression literal strips that out: it's just a piece of code stored as data.
+Expression objects are similar to [functions](functions.html): they both contain a chunk of code. The main difference is that a function carries with it enough context (i.e. its closure and its parameters) so that it can be invoked. An expression literal strips that out: it's just a piece of code stored as data. You can't directly evaluate an expression object.
