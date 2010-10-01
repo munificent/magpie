@@ -26,6 +26,11 @@ A function can also take a block for its body:
         print(i)
     end
 
+If a function doesn't take any arguments, you can leave off the `()`:
+
+    :::magpie
+    fn print("hi")
+
 ### Returning Values
 
 A function will implicitly return the value that its body evaluates to:
@@ -65,5 +70,3 @@ can access variables defined outside of their scope. They will hold onto closed 
     
     var f = foo("hi")
     f() // prints "hi"
-
-**TODO: Callable**

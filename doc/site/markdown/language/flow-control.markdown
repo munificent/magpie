@@ -115,6 +115,10 @@ This is a handy convenience when we're just considering Magpie as a dynamic lang
         definitelyNumber abs
     end
 
+<p class="future">
+Magpie doesn't currently have anything like "switch". Open classes and dynamic dispatch cover a little bit of that ground, but it could still use something in that area. The plan is for full pattern matching instead of just switch (the old C# Magpie has that), but it will probably be a while before that's in place. It's... trickier... in a dynamic language.
+</p>
+
 ### Loops
 
 Many languages have three distinct loop structures: `for`, `while`, and `foreach` or something similar for generators. Magpie only has a single loop construct, but it subsumes all three of those. A simple loop looks like this:
@@ -219,7 +223,11 @@ Inside the body of a loop, you can exit early using a `break` expression:
 
 #### Return Value
 
-Because loops are expressions, they return a value. Right now, a loop will always return `nothing`, but that may change in the future.
+Because loops are expressions, they return a value.
+
+<p class="future">
+Right now, a loop will always return `nothing`, but that will likely change. It will be possible to define an `else` clause for a loop and then the expression will return the last result of evaluating the body, the expression passed to `break` or the expression after `else` if the body was never entered.
+</p>
 
 ### Conjunctions
 
@@ -239,3 +247,7 @@ An `and` conjunction evaluates the left-hand argument. If it's not true, it retu
 Note that logical negation is *not* a built-in flow control expression. Instead, `not` is simply a method on booleans:
 
     if happy not then print("sad")
+
+<p class="future">
+"xor" doesn't really need to be a conjunction since it doesn't short circuit, but it (and maybe "not") likely will be at some point just to be consistent.
+</p>

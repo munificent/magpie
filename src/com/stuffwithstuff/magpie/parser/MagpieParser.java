@@ -15,6 +15,7 @@ public class MagpieParser extends Parser {
     mParsers.put(TokenType.CLASS, new ClassExprParser());
     mParsers.put(TokenType.DEF, new DefineExprParser());
     mParsers.put(TokenType.EXTEND, new ExtendExprParser());
+    mParsers.put(TokenType.FN, new FnExprParser());
     mParsers.put(TokenType.FOR, new LoopExprParser());
     mParsers.put(TokenType.IF, new ConditionalExprParser());
     mParsers.put(TokenType.INTERFACE, new InterfaceExprParser());
@@ -42,13 +43,6 @@ public class MagpieParser extends Parser {
   }
   
   public Expr parseExpression() {
-    // See if we're at a keyword we know how to parse.
-    ExprParser parser = mParsers.get(current().getType());
-    if (parser != null) {
-      return parser.parse(this);
-    }
-    
-    // Otherwise parse a built-in expression type.
     return assignment();
   }
 
@@ -114,8 +108,13 @@ public class MagpieParser extends Parser {
 
   // fn (a) print "hi"
   public FnExpr parseFunction() {
-    FunctionType type = parseFunctionType();
-    
+    // If () is omitted, infer it.
+    FunctionType type;
+    if (lookAhead(TokenType.LEFT_PAREN)) {
+      type = parseFunctionType();
+    } else {
+      type = FunctionType.nothingToDynamic();
+    }
     Expr body = parseBlock();
     
     return new FnExpr(body.getPosition(), type, body);
@@ -403,8 +402,6 @@ public class MagpieParser extends Parser {
       return new StringExpr(last(1));
     } else if (match(TokenType.THIS)) {
       return new ThisExpr(last(1).getPosition());
-    } else if (match(TokenType.FN)) {
-      return parseFunction();
     } else if (match(TokenType.NOTHING)) {
       return new NothingExpr(last(1).getPosition());
     } else if (match(TokenType.LEFT_PAREN)) {
@@ -421,6 +418,13 @@ public class MagpieParser extends Parser {
       return parseObjectLiteral();
     }
     
+    // See if we're at a keyword we know how to parse.
+    ExprParser parser = mParsers.get(current().getType());
+    if (parser != null) {
+      return parser.parse(this);
+    }
+    
+    // Otherwise fail.
     return null;
   }
   

@@ -21,7 +21,11 @@ Magpie doesn't have floating point numbers yet. (I know, I know. I'm working on 
     1234
     -5678
 
-Their class is `Int` (though this will likely change).
+Their class is `Int`.
+
+<p class="future">
+The eventual goal is for the runtime behavior of numbers to be arbitrary precision "correct" numbers ala Scheme or Python. Meanwhile, the type system will have a stricter set of numeric types so that you can annotate when you expect something to be integral or floating point.
+</p>
 
 ### Strings
 
@@ -38,6 +42,10 @@ A couple of escape characters are supported:
     "\\" // a backslash
 
 Their class is `String`. Magpie strings are implemented internally using Java strings, so they are represented in UTF-16 format, although that shouldn't generally affect you. Most string operations in Magpie deal in logical characters, not bytes.
+
+<p class="future">
+Right now, getting a character out of a string returns another single-character string. Eventually, character will be an atomic type in Magpie too.
+</p>
 
 ### Nothing
 

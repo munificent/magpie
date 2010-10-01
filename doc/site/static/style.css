@@ -16,12 +16,12 @@ h1 {
 }
 
 h1 a {
-  color: #ccc;
+  color: #ccd;
   text-decoration: none;
 }
 
 h1 a:hover {
-  color: #eee;
+  color: #eef;
 }
 
 h2 {
@@ -151,6 +151,11 @@ td {
   margin: 20px 40px;
 }
 
+p.future {
+  color: #cc997a;
+  font: normal 20px/20px "Reenie Beanie", sans-serif;
+  padding: 10px 0;
+}
 
 /* syntax highlighting */
 pre .k  { color: #4b81ab; }

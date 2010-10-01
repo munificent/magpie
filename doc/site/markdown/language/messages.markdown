@@ -91,4 +91,6 @@ In C++/Java-style OOP syntax, that would be:
 
 Magpie just ditches a lot of the punctuation.
 
-**TODO: callables, associativity**
+<p class="future">
+I need to document callables here.
+</p>

@@ -98,4 +98,6 @@ Like variable definition, an assignment expression returns the assigned value:
     var a = "before"
     print(a = "after") // prints "after"
 
-**TODO: assignment messages**
+<p class="future">
+I need to document assigment messages here. Also Magpie will have multiple assignment (i.e. tuple and object destructuring) at some point.
+</p>

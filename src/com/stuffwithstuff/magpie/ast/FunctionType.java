@@ -1,5 +1,6 @@
 package com.stuffwithstuff.magpie.ast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -9,6 +10,11 @@ import java.util.List;
 // TODO(bob): Get rid of all of the static stuff here. Should be handled outside
 // of this.
 public class FunctionType {
+  public static FunctionType nothingToDynamic() {
+    return new FunctionType(new ArrayList<String>(),
+        Expr.name("Nothing"), Expr.name("Dynamic"));
+  }
+  
   public FunctionType(List<String> paramNames, Expr paramType, Expr returnType) {
     mParamNames = paramNames;
     mParamType = paramType;
