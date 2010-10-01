@@ -1,0 +1,23 @@
+interface Foo
+    bar(->)
+end
+
+extend interface Foo
+    frob(->)
+end
+
+class FirstFoo
+    bar(->) print("bar")
+end
+
+class FullFoo
+    bar(->) print("bar")
+    frob(->) print("frob")
+end
+
+var takeFoo(foo Foo) print("done")
+
+var main(->)
+    takeFoo(FirstFoo new) //!
+    takeFoo(FullFoo new) // ok
+end

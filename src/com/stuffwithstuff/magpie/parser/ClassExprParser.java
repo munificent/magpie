@@ -10,22 +10,18 @@ import com.stuffwithstuff.magpie.ast.FnExpr;
 import com.stuffwithstuff.magpie.ast.VariableExpr;
 
 public class ClassExprParser implements ExprParser {
-
-  @Override
-  public Expr parse(MagpieParser parser) {
-    // Parse the class name line.
-    boolean isExtend = parser.match(TokenType.EXTEND);
-    if (!isExtend) parser.consume(TokenType.CLASS);
-    
+  public static Expr parseClass(MagpieParser parser, boolean isExtend) {
     List<Expr> exprs = new ArrayList<Expr>();
 
     String name = parser.consume(TokenType.NAME).getString();
     Position position = parser.last(1).getPosition();
     
     // Declare the class:
-    // var Foo = Class newClass("Foo")
-    exprs.add(new VariableExpr(position, name,
-        Expr.message(Expr.name("Class"), "newClass", Expr.string(name))));
+    if (!isExtend) {
+      // var Foo = Class newClass("Foo")
+      exprs.add(new VariableExpr(position, name,
+          Expr.message(Expr.name("Class"), "newClass", Expr.string(name))));
+    }
     
     // Parse the inherits clause, if any.
     if (parser.match(TokenType.COLON)) {
@@ -97,5 +93,11 @@ public class ClassExprParser implements ExprParser {
     }
     
     return new BlockExpr(position, exprs, false);
+  }
+  
+  @Override
+  public Expr parse(MagpieParser parser) {
+    parser.consume(TokenType.CLASS);
+    return parseClass(parser, false);
   }
 }

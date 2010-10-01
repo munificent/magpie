@@ -10,11 +10,7 @@ import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.ast.VariableExpr;
 
 public class InterfaceExprParser implements ExprParser {
-
-  @Override
-  public Expr parse(MagpieParser parser) {
-    parser.consume(TokenType.INTERFACE);
-    
+  public static Expr parseInterface(MagpieParser parser, boolean isExtend) {
     String name = parser.consume(TokenType.NAME).getString();
     Position position = parser.last(1).getPosition();
     
@@ -50,5 +46,11 @@ public class InterfaceExprParser implements ExprParser {
     }
     
     return new BlockExpr(position, exprs, false);
+  }
+  
+  @Override
+  public Expr parse(MagpieParser parser) {
+    parser.consume(TokenType.INTERFACE);
+    return parseInterface(parser, false);
   }
 }

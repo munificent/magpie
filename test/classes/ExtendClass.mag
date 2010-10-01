@@ -1,0 +1,16 @@
+class Foo
+    originalMethod() print("original")
+    originalField = "original"
+end
+
+extend class Foo
+    extendedMethod() print("extended")
+    extendedField = "extended"
+end
+
+var foo = Foo new
+foo originalMethod       //: original
+print(foo originalField) //: original
+
+foo extendedMethod       //: extended
+print(foo extendedField) //: extended

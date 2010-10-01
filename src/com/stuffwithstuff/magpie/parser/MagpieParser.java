@@ -12,18 +12,18 @@ public class MagpieParser extends Parser {
     
     // Register the parsers for the different keywords.
     mParsers.put(TokenType.BREAK, new BreakExprParser());
-    mParsers.put(TokenType.RETURN, new ReturnExprParser());
-    mParsers.put(TokenType.IF, new ConditionalExprParser());
-    mParsers.put(TokenType.LET, new ConditionalExprParser());
-    mParsers.put(TokenType.FOR, new LoopExprParser());
-    mParsers.put(TokenType.WHILE, new LoopExprParser());
-    mParsers.put(TokenType.VAR, new VariableExprParser());
     mParsers.put(TokenType.CLASS, new ClassExprParser());
-    mParsers.put(TokenType.EXTEND, new ClassExprParser());
-    mParsers.put(TokenType.INTERFACE, new InterfaceExprParser());
     mParsers.put(TokenType.DEF, new DefineExprParser());
+    mParsers.put(TokenType.EXTEND, new ExtendExprParser());
+    mParsers.put(TokenType.FOR, new LoopExprParser());
+    mParsers.put(TokenType.IF, new ConditionalExprParser());
+    mParsers.put(TokenType.INTERFACE, new InterfaceExprParser());
+    mParsers.put(TokenType.LET, new ConditionalExprParser());
+    mParsers.put(TokenType.RETURN, new ReturnExprParser());
     mParsers.put(TokenType.SHARED, new DefineExprParser());
     mParsers.put(TokenType.TYPEOF, new TypeofExprParser());
+    mParsers.put(TokenType.VAR, new VariableExprParser());
+    mParsers.put(TokenType.WHILE, new LoopExprParser());
   }
   
   public List<Expr> parse() {
