@@ -1,7 +1,7 @@
 ^title Compound Values
 ^index 3
 
-If the previous section covered [atoms](atomic-values.html), then this section covers "molecules": values that are built by combining other values. Technically, since everything is an object in Magpie, *all* values are compound: you can slap additional fields onto anything if you want. But for the sake of usefulness, Magpie also includes a couple of built-in compound values with their own literal syntax.
+If the previous section covered [atoms](atomic-values.html), then this section covers "molecules": values that are built by combining other values. Technically, since everything is an object in Magpie, *all* values are compound. You can slap additional fields onto anything if you want. But for the sake of usefulness, Magpie also includes a couple of built-in compound values with their own literal syntax.
 
 ### Tuples
 

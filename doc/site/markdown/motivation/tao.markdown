@@ -23,9 +23,9 @@ logical operators or comparisons, bitwise or arithmetic.
 
 The C programmer looks at Lisp and cannot follow the parentheses.
 
-Many levels of precedence is hard to remember. Few is hard to read.
+Many levels of precedence is hard to remember. Few is hard to read. What is the right number?
 
-What is the right number? Five. More or less.
+Five. More or less.
 
 ### 4
 
