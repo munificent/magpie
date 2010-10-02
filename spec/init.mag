@@ -4,4 +4,5 @@ import("utility/TruthTest.mag")
 
 // The individual test cases.
 import("language/and.mag")
+import("language/if.mag")
 import("language/or.mag")

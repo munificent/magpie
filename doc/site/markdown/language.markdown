@@ -28,3 +28,4 @@ This section is broken down into:
 1. [Messages](language/messages.html)
 1. [Variables](language/variables.html)
 1. [Flow Control](language/flow-control.html)
+1. [Classes](language/classes.html)
