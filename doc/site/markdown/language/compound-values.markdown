@@ -41,7 +41,8 @@ Tuple fields are also implicitly decomposed when passed to a function with multi
 
 ### Object Literals
 
-An object literal builds a new object from scratch. Its class will be `Object`, and it will have the given fields defined on it. The syntax is:
+An object literal builds a new object from a given set of named fields. The
+syntax is:
 
     :::magpie
     x: 1 y: 2
@@ -49,6 +50,10 @@ An object literal builds a new object from scratch. Its class will be `Object`, 
     // with values 1 and 2 respectively
 
 Note that no separators are needed between the fields. The field names (followed by a colon) are enough to distinguish them.
+
+<p class="future">
+Currently, object literals just have the static type "Object". Eventually, they will have a distinct structural type so that they are more visible to the type checker.
+</p>
 
 #### Accessing Fields
 
@@ -59,7 +64,7 @@ The fields in an object literal can be accessed like any other field on an objec
     print(point x) // prints "1"
     print(point y) // prints "2"
 
-### Expression Object
+### Expression Objects
 
 An expression object is a chunk of code that isn't evaluated. Instead, it's just
 bundled up into a data structure that you can pass around. You can't do much
@@ -73,3 +78,7 @@ in-place), just enclose any expression in curly braces:
 That will create an expression object containing the code `print("hi")` and store a reference to it in `a`. It won't print anything.
 
 Expression objects are similar to [functions](functions.html): they both contain a chunk of code. The main difference is that a function carries with it enough context (i.e. its closure and its parameters) so that it can be invoked. An expression literal strips that out: it's just a piece of code stored as data. You can't directly evaluate an expression object.
+
+<p class="future">
+The syntax for these may change depending on how useful they turn out to be. There may be more valuable things to use {} for if metaprogramming is something rarely used in practice.
+</p>

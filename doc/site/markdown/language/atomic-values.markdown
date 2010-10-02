@@ -1,9 +1,9 @@
 ^title Atomic Values
 ^index 2
 
-*Atomic Values* are the smallest built-in kinds of objects in the language. They
+*Atomic values* are the smallest built-in kinds of objects in the language. They
 are represented in code using *literals*. All atomic values in Magpie are
-*immutable*: once created, their value cannot be changed.
+*immutable*: once created, their value cannot be changed. This includes strings.
 
 Magpie currently doesn't have a very wide range of atomic values, but it's
 getting there. It supports:

@@ -5,7 +5,10 @@ Magpie programs are stored in plain text files with a <tt>.mag</tt> file extensi
 
 ### Expressions
 
-Unlike most imperative languages, but like most functional languages, Magpie does not have *statements*, only *expressions*. Flow control, blocks, and variable declarations are all expressions. This is valid in Magpie:
+Unlike most imperative languages, but like most functional languages, Magpie
+does not have *statements*, only *expressions*. Flow control, blocks, and
+variable declarations are all expressions which return values. This is valid in
+Magpie:
 
     :::magpie
     print(if result then "yes" else "no")
@@ -33,7 +36,7 @@ Like many scripting languages, newlines are significant in Magpie and are used t
     print("bye")
 
 To make things easier, Magpie will ignore a newline in any place where it
-wouldn't make sense. Specifically that means newlines following a comma (`,`),
+doesn't make sense. Specifically, that means newlines following a comma (`,`),
 colon (`:`), operator (`+`, `-`, etc.), or open brace (`(`, `[`, `{`) will be
 discarded:
 
@@ -68,17 +71,6 @@ Blocks are allowed most places where an expression is expected. In fact, blocks 
     end
 
 This will print "hi" and then define `a` with the value 3.
-
-A block creates a nested local scope. Variables declared inside disappear when
-the block ends (unless they're captured in a closure, of course). For example:
-
-    :::magpie
-    var a =
-        var temp = 1 + 2
-        temp * temp
-    end
-
-After evaluating that, `a` will be 6 and `temp` will no longer exist.
 
 ### Precedence
 
