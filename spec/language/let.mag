@@ -1,0 +1,112 @@
+specify("A 'let then' expression") with
+    it should("evaluate the 'then' expression if the condition is not nothing") with
+        var evaluated = false
+        let a = "something" then evaluated = true
+        evaluated shouldBe(true)
+        
+        evaluated = false
+        let a = nothing then evaluated = true
+        evaluated shouldBe(false)
+    end
+    
+    it should("return the 'then' expression if the condition is not nothing") with
+        (let a = "something" then "then") shouldBe("then")
+    end
+
+    it should("return nothing if the condition is nothing") with
+        (let a = nothing then "then") shouldBe(nothing)
+    end
+
+    it should("allow a block for the 'then' expression") with
+        var a = 0
+        let b = "something" then
+            a = a + 1
+            a = a + 2
+        end
+        a shouldBe(3)
+    end
+
+    it should("bind the condition to a variable") with
+        var bound = "not bound"
+        let a = "something" then bound = a
+        bound shouldBe("something")
+    end
+    
+    
+    it should("scope the bound variable to the 'then' expression") with
+        var a = "outside"
+        let a = "shadow" then
+            a shouldBe("shadow")
+        end
+        a shouldBe("outside")
+    end
+end
+
+specify("A 'let then else' expression") with
+    it should("evaluate the 'then' expression if the condition is not nothing") with
+        var evaluated = false
+        let a = "something" then evaluated = true else "ignored"
+        evaluated shouldBe(true)
+        
+        evaluated = false
+        let a = nothing then evaluated = true else "ignored"
+        evaluated shouldBe(false)
+    end
+    
+    it should("evaluate the 'else' expression if the condition is nothing") with
+        var evaluated = false
+        let a = "something" then "ignored" else evaluated = true
+        evaluated shouldBe(false)
+        
+        evaluated = false
+        let a = nothing then "ignored" else evaluated = true
+        evaluated shouldBe(true)
+    end
+    
+    it should("return the 'then' expression if the condition is not nothing") with
+        (let a = "something" then "then" else "else") shouldBe("then")
+    end
+
+    it should("return then 'else' expression if the condition is nothing") with
+        (let a = nothing then "then" else "else") shouldBe("else")
+    end
+
+    it should("allow a block for the 'then' expression") with
+        var a = 0
+        let b = "something" then
+            a = a + 1
+            a = a + 2
+        else "ignored"
+        a shouldBe(3)
+    end
+
+    it should("allow a block for the 'else' expression") with
+        var a = 0
+        let b = nothing then "ignored" else
+            a = a + 1
+            a = a + 2
+        end
+        a shouldBe(3)
+    end
+    
+    it should("bind the condition to a variable") with
+        var bound = "not bound"
+        let a = "something" then bound = a else "ignored"
+        bound shouldBe("something")
+    end
+    
+    it should("scope the bound variable to the 'then' expression") with
+        var a = "outside"
+        let a = "shadow" then
+            a shouldBe("shadow")
+        else "ignored"
+        a shouldBe("outside")
+    end
+    
+    it should("not scope the bound variable to the 'else' expression") with
+        var a = "outside"
+        let a = nothing then "ignored" else
+            a shouldBe("outside")
+        end
+    end
+end

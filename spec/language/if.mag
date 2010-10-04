@@ -1,5 +1,5 @@
 specify("An 'if then' expression") with
-    it should("evaluate the body if the condition is true") with
+    it should("evaluate the 'then' expression if the condition is true") with
         var evaluated = false
         if true then evaluated = true
         evaluated shouldBe(true)
@@ -9,15 +9,15 @@ specify("An 'if then' expression") with
         evaluated shouldBe(false)
     end
 
-    it should("return the body if the condition is true") with
-        (if true then "body") shouldBe("body")
+    it should("return the 'then' expression if the condition is true") with
+        (if true then "then") shouldBe("then")
     end
 
     it should("return nothing if the condition is non-true") with
-        (if false then "body") shouldBe(nothing)
+        (if false then "then") shouldBe(nothing)
     end
 
-    it should("allow a block for the body") with
+    it should("allow a block for the 'then' expression") with
         var a = 0
         if true then
             a = a + 1
@@ -32,7 +32,7 @@ specify("An 'if then else' expression") with
         var evaluated = false
         if true then evaluated = true else "ignored"
         evaluated shouldBe(true)
-        
+
         evaluated = false
         if false then evaluated = true else "ignored"
         evaluated shouldBe(false)

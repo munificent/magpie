@@ -1,5 +1,26 @@
+var totalTests = 0
+var totalFailures = 0
+
+var currentTestSuite = nothing
+
+var startTests(->)
+    totalTests = 0
+    totalFailures = 0
+    currentTestSuite = nothing
+    print("Executing specification...")
+end
+
+var endTests(->)
+    print("")
+    print("Passed " + (totalTests - totalFailures) + " out of " + totalTests + " tests.")
+end
+
 var specify(description String, block Function(Nothing, Nothing) ->)
-    block(TestSuite new(description))
+    var suite = TestSuite new(description)
+    block(suite)
+    
+    totalTests = totalTests + suite tests
+    totalFailures = totalFailures + suite failures
 end
 
 class TestSuite
@@ -13,13 +34,11 @@ class TestSuite
     
     should(description String, block Function(Nothing, Nothing) ->)
         currentTest = description
-        failures = 0
-        tests = 0
+        var testsBefore = tests
+        var failuresBefore = failures
         block()
-        if tests == 0 then
+        if tests == testsBefore then
             print("NONE: " + name + " should " + currentTest + ".")
-        else if failures == 0 then
-            print("PASS: " + name + " should " + currentTest + ".")
         end
     end
     
@@ -41,8 +60,6 @@ class TestSuite
     tests Int
     failures Int
 end
-
-var currentTestSuite = nothing
 
 def Object shouldBe(expected)
     if this != expected then
