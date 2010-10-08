@@ -188,7 +188,7 @@ Once one of those `while` clauses returns false, the loop ends. With `for` loops
     for j = 100 to(400) do
         print(i + j)
     end
-    // prints 101, 102, 103, 104
+    // prints 101, 103, 105, 107
     
     for i = 1 to(4) do
         for j = 100 to(400) do

@@ -5,12 +5,10 @@ import com.stuffwithstuff.magpie.parser.TokenType;
 
 public class Lexer {
 
-  public Lexer(String sourceFile, String text) {
+  public Lexer(String sourceFile, CharacterReader text) {
     mSourceFile = sourceFile;
     mText = text;
     mState = LexState.DEFAULT;
-    mIndex = 0;
-    mTokenStart = 0;
     mLine = 1;
     mCol = 1;
     
@@ -61,7 +59,7 @@ public class Lexer {
     // Tack on a '\0' to the end of the string and lex it. That will let
     // us conveniently have a place to end any token that goes to the
     // end of the string.
-    char c = (mIndex < mText.length()) ? mText.charAt(mIndex) : '\0';
+    char c = mText.current();
 
     // Adjust the current position.
     
@@ -139,7 +137,7 @@ public class Lexer {
       }
 
       // Rollback to reprocess the dot.
-      mIndex--;
+      // TODO(bob): Rollback CharacterReader.
       mCol--;
       return createIntToken(TokenType.INT);
       
@@ -167,7 +165,7 @@ public class Lexer {
     case IN_STRING:
       if (match("\"")) {
         // Get the contained string without the quotes.
-        String text = mText.substring(mTokenStart + 1, mIndex - 1);
+        String text = mRead.substring(1, mRead.length() - 1);
         mState = LexState.DEFAULT;
         return new Token(currentPosition(), TokenType.STRING, text);
       }
@@ -196,14 +194,7 @@ public class Lexer {
   }
   
   private boolean lookAhead(String text) {
-    // See if all of the characters match.
-    for (int i = 0; i < text.length(); i++) {
-      if (mIndex + i >= mText.length()) return false;
-      if (mText.charAt(mIndex + i) != text.charAt(i)) return false;
-    }
-    
-    // If we got here, they did.
-    return true;
+    return mText.lookAhead(text.length()).equals(text);
   }
 
   private boolean match(String text) {
@@ -214,13 +205,14 @@ public class Lexer {
   }
   
   private String last(int count) {
-    return mText.substring(mIndex - count, mIndex);
+    return mRead.substring(mRead.length() - count, mRead.length());
   }
   
   private Token startToken(LexState state) {
-    mTokenStart = mIndex;
     mStartLine = mLine;
     mStartCol = mCol;
+    
+    mRead = "";
     
     changeToken(state);
     return null;
@@ -237,7 +229,7 @@ public class Lexer {
   }
 
   private Token createStringToken(TokenType type) {
-    String text = mText.substring(mTokenStart, mIndex);
+    String text = mRead;
     mState = LexState.DEFAULT;
     
     Position position = currentPosition();
@@ -277,15 +269,13 @@ public class Lexer {
   }
 
   private Token createIntToken(TokenType type) {
-    String text = mText.substring(mTokenStart, mIndex);
-    int value = Integer.parseInt(text);
+    int value = Integer.parseInt(mRead);
     mState = LexState.DEFAULT;
     return new Token(currentPosition(), type, value);
   }
 
   private Token createDoubleToken(TokenType type) {
-    String text = mText.substring(mTokenStart, mIndex);
-    double value = Double.parseDouble(text);
+    double value = Double.parseDouble(mRead);
     mState = LexState.DEFAULT;
     return new Token(currentPosition(), type, value);
   }
@@ -299,20 +289,29 @@ public class Lexer {
   }
   
   private Token advance() {
-    mIndex++;
+    if (mText.current() == '\0') {
+      return new Token(Position.none(), TokenType.EOF);
+    }
+    
+    mRead += mText.current();
 
     // Update the position.
-    if ((mIndex < mText.length()) && last(1).equals("\n")) {
+    if (mText.current() == '\n') {
       mLine++;
       mCol = 1;
     } else {
       mCol++;
     }
     
+    mText.advance();
+
+    return null;
+    /*
     // Return whether or not we've advanced to the end (+1 so that we can
     // process a trailing \0 and close the last Token).
-    if (mIndex < mText.length() + 1) return null;
+    if (mText.lookAhead(1).length() == 1) return null;
     return new Token(Position.none(), TokenType.EOF);
+    */
   }
   
   private void advance(int count) {
@@ -340,12 +339,11 @@ public class Lexer {
   }
 
   private final String mSourceFile;
-  private final String mText;
+  private final CharacterReader mText;
+  private String mRead;
   private LexState mState;
-  private int mTokenStart;
   private int mStartLine;
   private int mStartCol;
-  private int mIndex;
   private boolean mEatLines;
   private int mLine;
   private int mCol;

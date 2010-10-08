@@ -5,10 +5,8 @@ import java.util.*;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
-import com.stuffwithstuff.magpie.interpreter.InterpreterException;
 import com.stuffwithstuff.magpie.parser.Lexer;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
-import com.stuffwithstuff.magpie.parser.ParseException;
 
 public class Magpie {
 
@@ -18,11 +16,9 @@ public class Magpie {
   public static void main(String[] args) {
     if (args.length == 0) {
       // With no command line args, runs the REPL.
-      System.out.println("magpie");
-      System.out.println("------");
       runRepl();
     } else if (args.length == 1) {
-      if (args[0].equals("test")) {
+      if (args[0].equals("-t")) {
         System.out.println("Running test suite...");
         runTestScripts();
       } else {
@@ -33,47 +29,33 @@ public class Magpie {
   }
   
   private static void runRepl() {
-    InputStreamReader converter = new InputStreamReader(System.in);
-    BufferedReader in = new BufferedReader(converter);
-
-    Interpreter interpreter = new Interpreter(new ScriptInterpreterHost());
+    System.out.println();
+    System.out.println("      _/Oo>");
+    System.out.println("     /__/     magpie v0.0.0");
+    System.out.println("____//hh___________________");
+    System.out.println("   //");
+    System.out.println();
     
+    Interpreter interpreter = new Interpreter(new ScriptInterpreterHost());
     try {
       Script.loadBase(interpreter);
       
       while (true) {
-        String code = "";
-        while (true) {
-          System.out.print("> ");
-          String line = in.readLine();
-
-          if (line.equals("quit")) break;
-          
-          if (code.length() > 0) code += "\n";
-          code += line;
-
-          if (line.equals("")) break;
-        }
-
-        if (code.equals("quit")) break;
-        
-        Lexer lexer = new Lexer("<repl>", code);
+        ReplCharacterReader reader = new ReplCharacterReader();
+        Lexer lexer = new Lexer("REPL", reader);
         MagpieParser parser = new MagpieParser(lexer);
         
-        try {
-          List<Expr> exprs = parser.parse();
-          for (Expr expr : exprs) {
-            String result = interpreter.evaluate(expr);
-            System.out.print("= ");
-            System.out.println(result);
-          }
-        } catch (ParseException ex) {
-          System.out.println("! " + ex.toString());
-        } catch (InterpreterException ex) {
-          System.out.println("! " + ex.toString());
+        Expr expr = parser.parseExpression();
+        
+        String result = interpreter.evaluate(expr);
+        if (result != null) {
+          System.out.print(":: ");
+          System.out.println(result);
         }
       }
-    } catch (IOException ex) {
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
   }
   

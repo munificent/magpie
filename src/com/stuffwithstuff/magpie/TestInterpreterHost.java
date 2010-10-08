@@ -50,7 +50,7 @@ public class TestInterpreterHost implements InterpreterHost {
         lineNumber++;
       }
 
-      Lexer lexer = new Lexer(mPath, source);
+      Lexer lexer = new Lexer(mPath, new StringCharacterReader(source));
       MagpieParser parser = new MagpieParser(lexer);
 
       try {

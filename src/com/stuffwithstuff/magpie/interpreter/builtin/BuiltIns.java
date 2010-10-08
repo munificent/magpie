@@ -2,10 +2,12 @@ package com.stuffwithstuff.magpie.interpreter.builtin;
 
 import java.lang.reflect.Method;
 
+import com.stuffwithstuff.magpie.StringCharacterReader;
 import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.parser.Lexer;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
+import com.stuffwithstuff.magpie.parser.ParseException;
 
 public abstract class BuiltIns {
   @SuppressWarnings("unchecked")
@@ -24,7 +26,7 @@ public abstract class BuiltIns {
     try {
       // Process the annotation to get the method's Magpie name and type
       // signature.
-      Lexer lexer = new Lexer("", signature.value());
+      Lexer lexer = new Lexer("", new StringCharacterReader(signature.value()));
       MagpieParser parser = new MagpieParser(lexer);
       String methodName = parser.parseFunctionName();
       FunctionType type = parser.parseFunctionType();
@@ -39,7 +41,10 @@ public abstract class BuiltIns {
       } else {
         classObj.addMethod(methodName, builtIn);
       }
-      
+    } catch (ParseException e) {
+      // TODO(bob): Hack. Better error handling.
+      System.out.println("Could not parse built-in signature \"" +
+          signature.value() + "\".");
     } catch (SecurityException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

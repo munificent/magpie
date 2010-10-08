@@ -133,12 +133,12 @@ It should be pretty easy to get it up and running. You'll need to:
    have opinions about this.
    
 3. **Run it.** Magpie is a command line app. If you run it with no arguments,
-   it drops you into a primitive [REPL](http://en.wikipedia.org/wiki/REPL). 
-   Enter Magpie a expression (type <tt>Enter</tt> twice to complete it) and it
-   will immediately evaluate it. Since everything is an expression, you can even
-   build classes this way.
+   it drops you into a primitive [REPL](http://en.wikipedia.org/wiki/REPL).
+   Enter Magpie a expression and it will immediately evaluate it. Since
+   everything is an expression, even things like class definitions, you can
+   build entire programs incrementally this way.
    
-   If you run it with a single argument "test", it will run the test suite.
+   If you run it with a single argument "-t", it will run the test suite.
    Otherwise, it will assume the argument is a path to a script file and it will
    load and execute it.
 

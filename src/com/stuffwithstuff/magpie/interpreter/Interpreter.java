@@ -112,6 +112,9 @@ public class Interpreter {
     EvalContext context = createTopLevelContext();
     Obj result = evaluate(expr, context);
     
+    // A null string means "nothing to output".
+    if (result == mNothing) return null;
+    
     // Convert it to a string.
     result = invokeMethod(expr, result, "toString", mNothing);
     return result.asString();

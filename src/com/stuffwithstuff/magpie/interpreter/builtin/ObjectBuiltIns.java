@@ -5,8 +5,8 @@ import java.io.IOException;
 
 import com.stuffwithstuff.magpie.Script;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
-import com.stuffwithstuff.magpie.interpreter.InterpreterException;
 import com.stuffwithstuff.magpie.interpreter.Obj;
+import com.stuffwithstuff.magpie.parser.ParseException;
 
 public class ObjectBuiltIns {
 
@@ -34,8 +34,12 @@ public class ObjectBuiltIns {
     try {
       Script script = Script.fromPath(scriptFile.getPath());
       script.execute(interpreter);
+    } catch (ParseException e) {
+      interpreter.runtimeError(
+          "Could not parse script \"%s\".\nError: %s",
+          relativePath, e.getMessage());
     } catch (IOException e) {
-      throw new InterpreterException("Could not load script \"" + relativePath + "\".");
+      interpreter.runtimeError("Could not load script \"%s\".", relativePath);
     }
     
     return interpreter.nothing();

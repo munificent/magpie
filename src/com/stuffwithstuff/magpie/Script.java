@@ -40,7 +40,7 @@ public class Script {
   
   public void execute(Interpreter interpreter) {
     interpreter.pushScriptPath(mPath);
-    Lexer lexer = new Lexer(mPath, mText);
+    Lexer lexer = new Lexer(mPath, new StringCharacterReader(mText));
     MagpieParser parser = new MagpieParser(lexer);
 
     interpreter.load(parser.parse());
