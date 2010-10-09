@@ -355,13 +355,19 @@ public class MagpieParser extends Parser {
       
       // Look for a following block argument.
       if (match(TokenType.WITH)) {
+        // Parse the parameter list if given.
+        FunctionType blockType;
+        if (lookAhead(TokenType.LEFT_PAREN)) {
+          blockType = parseFunctionType();
+        } else {
+          // Else just assume a single "it" parameter.
+          blockType = new FunctionType(Collections.singletonList(Identifiers.IT),
+              Expr.name("Dynamic"), Expr.name("Dynamic"));
+        }
+
+        // Parse the block and wrap it in a function.
         Expr blockArg = parseBlock();
-        
-        // Wrap it in a function with a single "it" parameter.
-        blockArg = new FnExpr(blockArg.getPosition(),
-            new FunctionType(Collections.singletonList(Identifiers.IT),
-                Expr.name("Dynamic"), Expr.name("Dynamic")),
-            blockArg);
+        blockArg = new FnExpr(blockArg.getPosition(), blockType, blockArg);
         
         // Tack it on to the regular argument.
         if (arg == null) {

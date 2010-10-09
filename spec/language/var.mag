@@ -1,0 +1,43 @@
+// TODO(bob):
+// - runtime error on redefinition
+// - static function definition
+
+specify("A 'var' expression") with
+    it should("bind a value to a name") with
+        var i = "value"
+        i shouldBe("value")
+    end
+    
+    it should("shadow a variable in an outer scope") with
+        var i = "outer"
+        if true then
+            var i = "inner"
+            i shouldBe("inner")
+        end
+        i shouldBe("outer")
+    end
+    
+    it should("allow a block initializer") with
+        var i =
+            var temp = "a"
+            temp = temp + "b"
+            temp + "c"
+        end
+        i shouldBe("abc")
+    end
+end
+
+specify("A 'var' shorthand function expression") with
+    it should("define a function if given a type declaration") with
+        var f(arg) arg + arg
+        f("a") shouldBe("aa")
+    end
+    
+    it should("allow a block for the function body") with
+        var f(arg)
+            arg = arg + "b"
+            arg + arg
+        end
+        f("a") shouldBe("abab")
+    end
+end

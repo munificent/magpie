@@ -45,7 +45,7 @@ public class VariableExprParser implements ExprParser {
       // Just a regular variable definition.
       parser.consume(TokenType.EQUALS);
       
-      value = parser.parseExpression();
+      value = parser.parseBlock();
     }
     
     position = position.union(value.getPosition());

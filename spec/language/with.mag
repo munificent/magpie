@@ -1,0 +1,69 @@
+specify("A 'with' block argument") with
+    it should("pass the body as a function to the method") with
+        var f(block) block()
+        var called = false
+        f with
+            called = true
+        end
+        called shouldBe(true)
+    end
+    
+    it should("allow a block body") with
+        var f(block) block()
+        
+        var result = ""
+        f with
+            result = "a"
+            result = result + "b"
+        end
+        result shouldBe("ab")
+    end
+    
+    it should("allow a single expression body") with
+        var f(block) block()
+        
+        var result = ""
+        f with result = "ab"
+        result shouldBe("ab")
+    end
+    
+    it should("concatenate the fn with other arguments") with
+        var f(arg1, arg2, block)
+            arg1 shouldBe("arg1")
+            arg2 shouldBe("arg2")
+            block()
+        end
+        
+        var called = false
+        f("arg1", "arg2") with
+            called = true
+        end
+        called shouldBe(true)
+    end
+    
+    it should("create an 'it' parameter if not is provided") with
+        var f(block) block("it")
+        f with it shouldBe("it")
+    end
+    
+    it should("allow a parameter list") with
+        var f(block) block("a", "b")
+        f with(a, b)
+            a shouldBe("a")
+            b shouldBe("b")
+        end
+    end
+    
+    it should("only do a local return") with
+        var f(block) block()
+        
+        var called = false
+        var result = f with
+            called = true
+            if true then return "returned"
+            "no return"
+        end
+        called shouldBe(true)
+        result shouldBe("returned")
+    end
+end

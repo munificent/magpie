@@ -9,5 +9,7 @@ import("language/and.mag")
 import("language/if.mag")
 import("language/let.mag")
 import("language/or.mag")
+import("language/var.mag")
+import("language/with.mag")
 
 endTests()
