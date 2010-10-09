@@ -49,10 +49,11 @@ public class Script {
     if (interpreter.hasMain()) {
       // Do the static analysis and see if we got the errors we expect.
       Checker checker = new Checker(interpreter);
-      List<CheckError> errors = checker.checkAll();
-
+      checker.checkAll();
+      List<CheckError> errors = checker.getErrors();
+      
       // Show the user any check errors.
-      for (CheckError error : checker.checkAll()) {
+      for (CheckError error : errors) {
         System.out.println(error);
       }
       

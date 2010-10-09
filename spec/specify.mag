@@ -61,11 +61,24 @@ class TestSuite
     failures Int
 end
 
-def Object shouldBe(expected)
+def Object shouldBe(expected, message)
     if this != expected then
+        if message == nothing then
+            message = "Expected " + expected + " but was " + this
+        end
         // TODO(bob): Exceptions would be good here.
-        currentTestSuite fail("Expected " + expected + " but was " + this)
+        currentTestSuite fail(message)
     else
         currentTestSuite pass
     end
+end
+
+def Function shouldCheckOK()
+    Runtime checkFunction(this) count shouldBe(0,
+        "Function should not have any check errors but did.")
+end
+
+def Function shouldNotCheck()
+    (Runtime checkFunction(this) count > 0) shouldBe(true,
+        "Function should have a check error but did not.")
 end

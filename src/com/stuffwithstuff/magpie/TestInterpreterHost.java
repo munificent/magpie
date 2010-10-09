@@ -60,7 +60,8 @@ public class TestInterpreterHost implements InterpreterHost {
         if (mInterpreter.hasMain()) {
           // Do the static analysis and see if we got the errors we expect.
           Checker checker = new Checker(mInterpreter);
-          List<CheckError> errors = checker.checkAll();
+          checker.checkAll();
+          List<CheckError> errors = checker.getErrors();
   
           // Go through each error we got.
           for (CheckError error : errors) {

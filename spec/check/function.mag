@@ -1,0 +1,6 @@
+specify("A function") with
+    it should("return the declared type") with
+        (fn(-> Int) 123) shouldCheckOK
+        (fn(-> Int) "string") shouldNotCheck
+    end
+end

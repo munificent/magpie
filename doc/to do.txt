@@ -1,3 +1,19 @@
+My current to-do list in inverse prerequisite order. In other words, between
+each item in this list, insert, "But before I can do that, I need to...":
+1. Tell everyone about Magpie and get contributors.
+2. Get class semantics figured out: multiple inheritance, constructor chaining,
+   properties.
+3. Write spec scripts for classes.
+4. Figure out how to spec out things that should generate runtime errors or
+   check time errors.
+5. Get exceptions/conditions working. (Because runtime errors throw an
+   exception that the spec will need to catch.)
+6. Compile to bytecode. (If we're going to do restartable conditions, we'll need
+   to be able to save and restore the stack. If we skip that for now and just do
+   regular exceptions, we can skip this step.)
+7. Make type-checking user-invokable. (So that the check error specs can call
+   the type-checker directly and get errors back.)
+
 Types
 - Classes
   - If we're going to keep inheritance, then we need to make sure you can't add

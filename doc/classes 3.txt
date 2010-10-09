@@ -1,0 +1,151 @@
+classes
+
+Inside a class definition, we need to be able to:
+- Define superclasses
+- Define a constructor
+- Declare fields
+- Define fields
+- Declare methods (i.e. abstract methods)
+- Define methods
+- Define shared methods
+- Define shared fields
+- Send arbitrary messages to the class object
+
+Constructors
+Each class can have a single constructor. Its primary responsibilities are:
+- To call the base class constructor with appropriate arguments
+- To initialize any declared fields to their declared type
+
+Failure to do either is a check error
+
+Q: What is mixing in?
+A: Dynamically taking one class, and adding all of its contents (method
+   definitions, field definitions, field declarations, etc.) to another.
+
+   Magpie does not need mixins as first class entities. Mixing-in is a *verb*:
+   something you do with one class into another. Since this happens before
+   checking, little special sauce is needed to support them. Mixins are just
+   another way to fill out a class.
+
+Q: What's the difference between mixins and multiple inheritance?
+A: Multiple inheritance implies identity. A class's base classes also define its
+   subtype relation: if a class inherits from A, it is a subtype of A.
+
+   Ideally, Magpie should allow both cases: where you want to import all of the
+   contents of another class *without* allowing subtyping, and where you *do*
+   want to also subtype.
+
+Q: What is the use case for mixing in without subtyping? If you know you've
+   added every single method from B to A, why not allow A where B is expected?
+A: Honestly, I can't think of a case right now. So maybe the solution for now
+   is to focus on multiple inheritance and not worry about mixins without an
+   implied subtype relation.
+
+Q: What is the use case for abstract methods?
+A: Classes are type-checked by themselves. It's valid to define a class that is
+   not *used* by itself, though. So there may be classes that would work fine
+   dynamically because by the time they are used, methods that they rely on
+   have also been added to the class using them. 
+   
+   However, at check time, when that class is checked in isolation, it will be
+   referencing methods that don't exist. So declaring an abstract method is one
+   way to address that.
+   
+   An abstract method is basically a method that's visible to the checker, but
+   has no runtime behavior. As a side-effect, declaring a method abstract should
+   also prevent the class from being constructed.
+
+Q: OK, so what's the plan?
+A: Let's try straight multiple inheritance. The semantics are:
+
+A class is two things: a set of base classes, and a set of definitions. The
+total set of definitions for a class is the union of all of its base classes and
+its own definitions.
+
+#### Class Members
+
+A few kinds of things can be declared or defined in a class. They are:
+
+A **field declaration** states that any instance of the class will have a field
+and it must be of the given type (or `Dynamic` if the type is omitted.) This
+baseically places a requirement on the constructor: the constructor must
+initialize the field to a value of the declared type.
+
+A **field definition** states that any instance of the class will have a field
+and it will be initialized to the given value when the instance is created. This
+is basically shorthand for declaring the field and then initializing it in the
+first line of the constructor. All field initializers will be executed before 
+the constructor is evaluated.
+
+A **method declaration** states that any concrete class inheriting from this one
+must have a method with the given name and type. This is basically an abstract
+or pure virtual method declaration. It lets us correctly type-check classes that
+rely on behavior provided by their subclasses.
+
+A **method definition** provides a function that will be evaluated when a
+message with the given name is sent to an instance of the class.
+
+A **shared method definition** is like a regular method definition, but it is
+applied to the class's metaclass. Likewise, a **shared field definition** is
+applied on the metaclass. It will be evaluated before the class object is
+created.
+
+A **constructor** defines a function that will be evaluated when a new instance
+of the class is created. Its primary responsibility is to initialize all
+declared fields. It can take parameters, which will be passed to it from the
+call to `new` on the class. (In other words, defining a constructor creates a
+matching shared `new` method on the class object.)
+
+The other job of a constructor is to call its base class's constructors with
+appropriate argument types.
+
+#### Collision
+
+There are a few kinds of definition collisions:
+- Two method definitions with the same name.
+- Two field declarations with the same name but different types.
+- A field declaration that is also defined and initialized to a different type.
+- Two field definitions with the same name.
+
+A collision here is a check time error.
+
+#### Typing
+
+Unlike interfaces, which are structurally typed, classes are nominally typed.
+Two classes with identical methods are not implicitly compatible with each
+other. Classes follow the normal subtyping rules of C++ or other OOP languages:
+an instance of a class is assignable to a variable of its type, or any of its
+superclasses.
+
+
+q:
+- how are base class ctors called
+- how does overriding work
+
+   A
+  / \
+ B   C
+  \ /
+   D
+
+class D(B, C)
+    this(b, c, d)
+        super B(b)
+        super C(c)
+        print(d)
+    end
+end
+
+class B : A
+    this(value)
+        super(value)
+    end
+end
+
+class C : A
+    this(value)
+        super(value + 5)
+    end
+end
+
+

@@ -5,6 +5,8 @@ import("utility/TruthTest.mag")
 // The individual test cases.
 startTests()
 
+import("check/function.mag")
+
 import("language/and.mag")
 import("language/if.mag")
 import("language/let.mag")

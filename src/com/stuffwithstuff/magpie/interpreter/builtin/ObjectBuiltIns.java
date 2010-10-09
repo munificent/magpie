@@ -39,7 +39,8 @@ public class ObjectBuiltIns {
           "Could not parse script \"%s\".\nError: %s",
           relativePath, e.getMessage());
     } catch (IOException e) {
-      interpreter.runtimeError("Could not load script \"%s\".", relativePath);
+      interpreter.runtimeError("Could not load script \"%s\"\n%s.",
+          relativePath, e);
     }
     
     return interpreter.nothing();
