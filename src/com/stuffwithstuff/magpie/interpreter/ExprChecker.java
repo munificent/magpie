@@ -34,7 +34,10 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     Obj evaluatedType = body.accept(this, context);
     
     // And include any early returned types as well.
-    return orTypes(evaluatedType, mReturnedTypes.toArray(new Obj[mReturnedTypes.size()]));
+    for (int i = 0; i < mReturnedTypes.size(); i++) {
+      evaluatedType = orTypes(evaluatedType, mReturnedTypes.get(i));
+    }
+    return evaluatedType;
   }
   
   public Obj check(Expr expr, EvalContext context) {
@@ -57,7 +60,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     // TODO(bob): Should eventually check that both arms implement ITrueable
     // so that you can only use truthy stuff in a conjunction.
     Obj left = check(expr.getLeft(), context);
-    Obj right = check(expr.getRight(), context);
+    Obj right = check(expr.getRight(), context, true);
     
     return orTypes(left, right);
   }
@@ -142,14 +145,6 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       // If it's a "let" condition, bind and type the variable, stripping out
       // Nothing.
       if (condition.isLet()) {
-        // If the condition's type evaluates to Nothing (and only Nothing), this
-        // is an error, since that means we've statically determined that the
-        // condition can never be entered.
-        if (conditionType == mInterpreter.getNothingType()) {
-          mChecker.addError(condition.getBody().getPosition(),
-              "Let expression's type is Nothing which means it can never be entered.");
-        }
-        
         conditionType = mInterpreter.invokeMethod(conditionType,
             Identifiers.UNSAFE_REMOVE_NOTHING);
         context.define(condition.getName(), conditionType);
@@ -271,7 +266,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     // TODO(bob): Should eventually check that both arms implement ITrueable
     // so that you can only use truthy stuff in a conjunction.
     Obj left = check(expr.getLeft(), context);
-    Obj right = check(expr.getRight(), context);
+    Obj right = check(expr.getRight(), context, true);
     
     return orTypes(left, right);
   }
@@ -338,14 +333,13 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     }
   }
   
-  private Obj orTypes(Obj first, Obj... types) {
-    Obj result = first;
-    for (int i = 0; i < types.length; i++) {
-      // TODO(bob): Should we use a static arg here?
-      result = mInterpreter.invokeMethod(result, Identifiers.OR, types[i]);
-    }
+  private Obj orTypes(Obj left, Obj right) {
+    // Never is omitted.
+    if (left == mInterpreter.getNeverType()) return right;
+    if (right == mInterpreter.getNeverType()) return left;
     
-    return result;
+      // TODO(bob): Should we use a static arg here?
+    return mInterpreter.invokeMethod(left, Identifiers.OR, right);
   }
 
   public Obj getMethodReturn(Expr expr, Obj receiverType, String name,
