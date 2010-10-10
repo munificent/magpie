@@ -98,10 +98,8 @@ public class ClassBuiltIns {
     return interpreter.createString(classObj.getName());
   }
   
-  // TODO(bob): This shouldn't be an instance method on class. Instead, we
-  // should have a metaclass for Class, so that you can create a new class
-  // by doing Class new("Foo").
-  @Signature("newClass(name String -> Class)")
+  @Shared
+  @Signature("new(name String -> Class)")
   public static Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
     // Get the name of the class.
     String name = arg.asString();

@@ -27,4 +27,6 @@ import("check/or.mag")
 import("check/return.mag")
 import("check/var.mag")
 
+import("core/class/new.mag")
+
 endTests()

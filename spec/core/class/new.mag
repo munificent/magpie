@@ -1,0 +1,7 @@
+specify("'Class new'") with
+    it should("return a new class with the given name") with
+        var c = Class new("Foo")
+        c is(Class) shouldBe(true)
+        c name shouldBe("Foo")
+    end
+end

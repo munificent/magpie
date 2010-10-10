@@ -19,7 +19,7 @@ public class ClassObj extends Obj {
     mName = name;
     mParent = parent;
     mFieldInitializers = new HashMap<String, Expr>();
-  }
+  }  
 
   public Map<String, Expr> getFieldInitializers() {
     return mFieldInitializers;

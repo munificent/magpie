@@ -20,7 +20,7 @@ public class ClassExprParser implements ExprParser {
     if (!isExtend) {
       // var Foo = Class newClass("Foo")
       exprs.add(new VariableExpr(position, name,
-          Expr.message(Expr.name("Class"), "newClass", Expr.string(name))));
+          Expr.message(Expr.name("Class"), "new", Expr.string(name))));
     }
     
     // Parse the inherits clause, if any.

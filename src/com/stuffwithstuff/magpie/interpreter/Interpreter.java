@@ -22,16 +22,41 @@ public class Interpreter {
     // an object *always* come from its class. So, when you call a shared
     // method like "Foo bar", you are actually calling an *instance* method on
     // the class of of the object "Foo", its metaclass: FooClass.
+    //
+    // Given some hypothetical class Foo, here's how it will be wired up with
+    // the three core classes:
+    //
+    // Single line: "inherits from"
+    // Double line: "class"
+    //
+    //                       +------------+
+    //                       | ClassClass |
+    //                       +------------+
+    //                           |   /\
+    //                           |   ||
+    //                           v   \/
+    //    +------------+     +------------+<====+------------+
+    //    |    Foo     |---->|   Class    |---->|   Object   |
+    //    +------------+     +------------+     +------------+
+    //          ||               ^   /\
+    //           \\              |   ||
+    //            \\         +------------+
+    //             \\=======>|  FooClass  |
+    //                       +------------+
+
     
     // Create a top-level scope.
     mGlobalScope = new Scope();
 
+    // The metaclass for Class. Contains the shared methods on Class.
+    ClassObj classClass = new ClassObj("ClassClass", null);
+    
     // The class of all class objects. Given a class Foo, it's class will be a
     // singleton instance of its metaclass FooClass. The class of FooClass will
     // in turn be this class, Class. FooClass will also *inherit* from Class, so
     // that all of the methods defined on Class are available in FooClass (i.e.
     // "name", "parent", etc.)
-    mClass = new ClassObj("Class", null);
+    mClass = new ClassObj("Class", classClass);
     mGlobalScope.define("Class", mClass);
     
     // Object is the root class of all objects. All parent chains eventually
@@ -43,7 +68,8 @@ public class Interpreter {
     // Add a constructor so you can create new Objects.
     mObjectClass.addMethod(Identifiers.NEW, new ClassNew("Object"));
 
-    // Now that both Class and Object exist, wire them up.
+    // Now that ClassClass, Class and Object exist, wire them up.
+    classClass.bindClass(mClass);
     mClass.setParent(mObjectClass);
     
     mArrayClass = createGlobalClass("Array");

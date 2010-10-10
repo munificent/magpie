@@ -2,6 +2,8 @@ package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.List;
 
+import com.stuffwithstuff.magpie.util.Expect;
+
 
 public class Obj {  
   public Obj(ClassObj classObj, Object value) {
@@ -27,6 +29,12 @@ public class Obj {
   
   public ClassObj getClassObj() { return mClass; }
   
+  public void bindClass(ClassObj classObj) {
+    Expect.notNull(classObj);
+    
+    mClass = classObj;
+  }
+
   /**
    * Gets the value of a given field.
    * @param name   The name of the field.
@@ -107,7 +115,7 @@ public class Obj {
     return "Instance of " + mClass.getName();
   }
   
-  private final ClassObj mClass;
+  private ClassObj mClass;
   private Object mValue;
   private final Scope mFields = new Scope();
 }

@@ -13,6 +13,8 @@ import("OrType.mag")
 import("Function.mag")
 import("Interface.mag")
 
+def Object is(type) type canAssignFrom(this type)
+
 // No type except Nothing is allowed where Nothing is expected.
 shared Nothing canAssignFrom(other -> Bool) other == Nothing
 
