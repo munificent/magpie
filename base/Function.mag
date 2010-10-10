@@ -2,18 +2,16 @@
 
 // Make "Function" a functor that you can call to instantiate function types.
 // Type annotations of function types look like Function(Int, String) 
-shared Function call(staticConstraint, paramType, returnType)
-    FunctionType new(staticConstraint, paramType, returnType)
+shared Function call(paramType, returnType)
+    FunctionType new(paramType, returnType)
 end
 
 class FunctionType
-    this(staticConstraint, paramType, returnType)
-        this staticConstraint = staticConstraint
+    this(paramType, returnType)
         this paramType = paramType
         this returnType = returnType
     end
     
-    staticConstraint Dynamic
     paramType Dynamic
     returnType Dynamic
 end
@@ -24,8 +22,6 @@ def FunctionType canAssignFrom(other -> Bool)
     // Both must be functions.
     if other type != FunctionType then return false
 
-    // TODO(bob): What about static arguments?
-    
     // Parameter must be contravariant.
     if other paramType canAssignFrom(paramType) not then return false
     
@@ -46,6 +42,19 @@ end
 def FunctionType toString()
     paramType toString + " -> " + returnType toString
 end
+
+def FunctionType ==(other -> Bool)
+    if other type != FunctionType then return false
+
+    var funcType = FunctionType unsafeCast(other)
+    
+    if paramType != funcType paramType then return false
+    if returnType != funcType returnType then return false
+    
+    true
+end
+
+def FunctionType !=(other -> Bool) (this == other) not
 
 class StaticFunctionType
     this(params, body)

@@ -86,39 +86,6 @@ public class Checker {
   }
   
   /**
-   * Gets the collection of errors that have been found by this checker so far.
-   * It isn't guaranteed that all errors will be found in a single pass since
-   * some errors may prevent others from being determined.
-   * 
-   * @return The errors found.
-   */
-  public List<CheckError> getErrors() { return mErrors; }
-  
-  /**
-   * Evaluates the type of the given expression. Evaluates it in the context of
-   * the global scope, so any local variables or other state where the
-   * expression appears will not be known here.
-   * 
-   * @param   expr The expression to evaluate.
-   * @return       The type of the expression.
-   */
-  public Obj evaluateExpressionType(Expr expr) {
-    ExprChecker checker = new ExprChecker(mInterpreter, this, 
-        mInterpreter.createTopLevelContext());
-
-    Scope globals = typeScope(mInterpreter.getGlobals());
-    EvalContext context = new EvalContext(globals, mInterpreter.getNothingType());
-
-    // Get the expression's type.
-    Obj type = checker.check(expr, context, true);
-    
-    // But if there are any type errors, don't return it.
-    if (mErrors.size() > 0) return mInterpreter.nothing();
-    
-    return type;
-  }
-  
-  /**
    * Type-checks the given function.
    * 
    * @param function  The function to type-check.
@@ -188,6 +155,39 @@ public class Checker {
     // we also need to check that any assignment to a field matches the declared
     // type.
     return mInterpreter.evaluateFunctionType(function.getType(), staticContext);
+  }
+  
+  /**
+   * Gets the collection of errors that have been found by this checker so far.
+   * It isn't guaranteed that all errors will be found in a single pass since
+   * some errors may prevent others from being determined.
+   * 
+   * @return The errors found.
+   */
+  public List<CheckError> getErrors() { return mErrors; }
+  
+  /**
+   * Evaluates the type of the given expression. Evaluates it in the context of
+   * the global scope, so any local variables or other state where the
+   * expression appears will not be known here.
+   * 
+   * @param   expr The expression to evaluate.
+   * @return       The type of the expression.
+   */
+  public Obj evaluateExpressionType(Expr expr) {
+    ExprChecker checker = new ExprChecker(mInterpreter, this, 
+        mInterpreter.createTopLevelContext());
+
+    Scope globals = typeScope(mInterpreter.getGlobals());
+    EvalContext context = new EvalContext(globals, mInterpreter.getNothingType());
+
+    // Get the expression's type.
+    Obj type = checker.check(expr, context, true);
+    
+    // But if there are any type errors, don't return it.
+    if (mErrors.size() > 0) return mInterpreter.nothing();
+    
+    return type;
   }
   
   /**

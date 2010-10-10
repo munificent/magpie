@@ -1,0 +1,6 @@
+specify("An 'or' expression") with
+    it should("have the type of both operands") with
+        (typeof 0 or false) shouldBe(Bool | Int)
+        (typeof 1 or 2)     shouldBe(Int)
+    end
+end

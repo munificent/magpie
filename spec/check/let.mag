@@ -1,0 +1,13 @@
+specify("A 'let then' expression") with
+    it should("have the type of the 'then' expression or Nothing") with
+        (typeof let a = "cond" then 123)     shouldBe(Int | Nothing)
+        (typeof let a = "cond" then nothing) shouldBe(Nothing)
+    end
+end
+
+specify("A 'let then else' expression") with
+    it should("have the type of both arms") with
+        (typeof let a = "cond" then 123 else "s") shouldBe(Int | String)
+        (typeof let a = "cond" then "s" else "s") shouldBe(String)
+    end
+end

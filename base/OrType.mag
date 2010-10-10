@@ -19,6 +19,21 @@ def OrType |(other -> Object)
     Class orTypes(this, other)
 end
 
+def OrType ==(other -> Bool)
+    if other type != OrType then return false
+
+    var orType = OrType unsafeCast(other)
+    if cases count != orType cases count then return false
+    
+    for thisCase = cases
+    for otherCase = orType cases do
+        if thisCase != otherCase then return false
+    end
+    true
+end
+
+def OrType !=(other -> Bool) (this == other) not
+
 def OrType canAssignFrom(other -> Bool)
     if other type == OrType then
         // It's also an or, so see if all of its cases are matched by one of

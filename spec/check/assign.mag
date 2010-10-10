@@ -1,0 +1,27 @@
+// TODO(bob):
+// - Assignment messages.
+
+specify("An assignment ('=') expression") with
+    it should("have the type of the assigned value") with
+        (typeof
+            var i = 234
+            i = 123
+        end) shouldBe(Int)
+        (typeof
+            var s = "t"
+            s = "s"
+        end) shouldBe(String)
+    end
+
+    it should("not allow assigning a different type") with
+        expectCheckOK with
+            var i = 123
+            i = 345
+        end
+        
+        expectCheckError with
+            var i = 123
+            i = "string"
+        end
+    end
+end

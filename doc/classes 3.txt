@@ -102,11 +102,12 @@ appropriate argument types.
 #### Collision
 
 There are a few kinds of definition collisions:
-- Two method definitions with the same name.
+- Two method definitions with the same name. This is a check error.
 - Two field declarations with the same name but different types.
 - A field declaration that is also defined and initialized to a different type.
 - Two field definitions with the same name.
 
+If two method names collide, it is a check 
 A collision here is a check time error.
 
 #### Typing
@@ -117,35 +118,49 @@ other. Classes follow the normal subtyping rules of C++ or other OOP languages:
 an instance of a class is assignable to a variable of its type, or any of its
 superclasses.
 
+### Inheritance
 
-q:
-- how are base class ctors called
-- how does overriding work
+Inheritance, especially multiple inheritance, brings up a lot of complex cases.
+Magpie takes a flatter approach to inheritance than most languages.
 
-   A
-  / \
- B   C
-  \ /
-   D
+Q: What happens if field names collide?
+A: They can't. Fields are scoped within a single class. If a base and derived
+class have fields with the same name, they each get their own version of the
+field. An intentional side-effect of this is that classes cannot directly access
+fields of their super- or subclasses: they must go through methods.
 
-class D(B, C)
-    this(b, c, d)
-        super B(b)
-        super C(c)
-        print(d)
+If a class, through multiple inheritance, ends up inheriting the same class
+twice, there will only be one copy of the fields defined in that class.
+
+Q: What happens if methods collide?
+A: This is a check error. The only allowed collision is that a *declared* method
+can collide with a *defined* method as long as they have compatible types. This
+is how abstract methods are implemented.
+
+You cannot redefine or override methods. (I know that seems crazy. It may be.
+We'll try it for now and see how it works out.)
+
+Q: How are base class constructors called?
+A: Maybe something like:
+
+    class D(B, C)
+        this(b, c, d)
+            super B(b)
+            super C(c)
+            print(d)
+        end
     end
-end
 
-class B : A
-    this(value)
-        super(value)
+    class B : A
+        this(value)
+            super(value)
+        end
     end
-end
 
-class C : A
-    this(value)
-        super(value + 5)
+    class C : A
+        this(value)
+            super(value + 5)
+        end
     end
-end
 
 

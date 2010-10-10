@@ -1,0 +1,13 @@
+specify("An 'if then' expression") with
+    it should("have the 'then' expression's type or Nothing") with
+        (typeof if "cond" then 123)     shouldBe(Int | Nothing)
+        (typeof if "cond" then nothing) shouldBe(Nothing)
+    end
+end
+
+specify("An 'if then else' expression") with
+    it should("have the type of both arms") with
+        (typeof if "cond" then 123 else "s") shouldBe(Int | String)
+        (typeof if "cond" then "s" else "s") shouldBe(String)
+    end
+end

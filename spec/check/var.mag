@@ -1,0 +1,27 @@
+// TODO(bob):
+// - static function definition
+
+specify("A 'var' expression") with
+    it should("have the type of the initializer") with
+        (typeof var i = 123) shouldBe(Int)
+        (typeof var s = "s") shouldBe(String)
+    end
+
+    it should("not allow redefining a name in the same scope") with
+        expectCheckOK with
+            var a = 123
+            var b = 234
+        end
+        
+        expectCheckError with
+            var a = 123
+            var a = 234
+        end
+    end
+end
+
+specify("A 'var' shorthand function expression") with
+    it should("have the type of the function") with
+        (typeof var f(a Int -> String) a toString) shouldBe(Function(Int, String))
+    end
+end

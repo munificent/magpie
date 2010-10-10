@@ -34,7 +34,7 @@ public class RuntimeBuiltIns {
     
     return translateErrors(interpreter, checker.getErrors());
   }
-  
+
   private static Obj translateErrors(Interpreter interpreter, List<CheckError> errors) {
     List<Obj> errorObjs = new ArrayList<Obj>();
     for (CheckError error : errors) {

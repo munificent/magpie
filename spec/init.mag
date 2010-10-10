@@ -5,13 +5,22 @@ import("utility/TruthTest.mag")
 // The individual test cases.
 startTests()
 
-import("check/function.mag")
-
 import("language/and.mag")
+import("language/assign.mag")
+import("language/block.mag")
 import("language/if.mag")
 import("language/let.mag")
 import("language/or.mag")
 import("language/var.mag")
 import("language/with.mag")
+
+import("check/and.mag")
+import("check/assign.mag")
+import("check/block.mag")
+import("check/function.mag")
+import("check/if.mag")
+import("check/let.mag")
+import("check/or.mag")
+import("check/var.mag")
 
 endTests()

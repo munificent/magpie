@@ -124,9 +124,6 @@ public class Interpreter {
   
   public Obj evaluateFunctionType(FunctionType type, EvalContext context) {
     // Create the function type for the function.
-    // TODO(bob): Support static param constraints.
-    Obj staticParamConstraint = mDynamicClass;
-    
     Obj paramType = evaluate(type.getParamType(), context);
     Obj returnType = evaluate(type.getReturnType(), context);
     
@@ -140,7 +137,7 @@ public class Interpreter {
     }
     
     return invokeMethod(mFnClass, Identifiers.CALL,
-        createTuple(staticParamConstraint, paramType, returnType));
+        createTuple(paramType, returnType));
   }
   
   public Obj evaluateStaticFunctionType(StaticFnExpr expr, EvalContext context) {

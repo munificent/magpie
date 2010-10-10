@@ -329,9 +329,9 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       context.define(expr.getName(), valueType);
       return valueType;
     } else {
-      // Make sure the new value is compatible with the variable's type.
-      mChecker.checkTypes(existingType, valueType, expr.getPosition(),
-          "Variable of type %s cannot be redeclared as type %s.");
+      mChecker.addError(expr.getPosition(),
+          "There is already a variable named \"%s\" declared in this scope.",
+          expr.getName());
 
       // The type doesn't change.
       return existingType;

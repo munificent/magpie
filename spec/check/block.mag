@@ -1,0 +1,13 @@
+specify("A block expression") with
+    it should("return the type of the last expression") with
+        (typeof
+            123
+            "string"
+        end) shouldBe(String)
+
+        (typeof
+            123
+            true
+        end) shouldBe(Bool)
+    end
+end
