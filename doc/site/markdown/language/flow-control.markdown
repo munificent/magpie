@@ -115,6 +115,17 @@ This is a handy convenience when we're just considering Magpie as a dynamic lang
         definitelyNumber abs
     end
 
+There is another bit of syntactic sugar `let` provides. If you leave off the conditional expression, it will infer it to be a variable with the same as the one being defined. This lets you take an existing variable that may be `nothing` and create a new shadowed one that will definitely not be:
+
+    :::magpie
+    var num = Int parse(someString)
+    let num then
+        // in here we've created a new variable "num" with
+        // the same value as the outer one, but the type-
+        // checker knows its type cannot be Nothing
+        num abs
+    end
+
 <p class="future">
 Magpie doesn't currently have anything like "switch". Open classes and dynamic dispatch cover a little bit of that ground, but it could still use something in that area. The plan is for full pattern matching instead of just switch (the old C# Magpie has that), but it will probably be a while before that's in place. It's... trickier... in a dynamic language.
 </p>

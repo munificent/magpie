@@ -1,7 +1,7 @@
 specify("A block expression") with
     var doBlock(block) block()
 
-    it should("should evaluate the expressions in order") with
+    it should("evaluate the expressions in order") with
         var result = ""
         doBlock with
             result = result + "1"

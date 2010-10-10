@@ -138,17 +138,15 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     
     // TODO(bob): Should eventually check that conditions implement ITrueable
     // so that you can only use truthy stuff in an if.
-    // Check the conditions for errors.
-    for (Condition condition : expr.getConditions()) {
-      Obj conditionType = check(condition.getBody(), context);
-      
-      // If it's a "let" condition, bind and type the variable, stripping out
-      // Nothing.
-      if (condition.isLet()) {
-        conditionType = mInterpreter.invokeMethod(conditionType,
-            Identifiers.UNSAFE_REMOVE_NOTHING);
-        context.define(condition.getName(), conditionType);
-      }
+    // Check the condition for errors.
+    Obj conditionType = check(expr.getCondition(), context);
+    
+    // If it's a "let" condition, bind and type the variable, stripping out
+    // Nothing.
+    if (expr.isLet()) {
+      conditionType = mInterpreter.invokeMethod(conditionType,
+          Identifiers.UNSAFE_REMOVE_NOTHING);
+      context.define(expr.getName(), conditionType);
     }
     
     // Get the types of the arms.

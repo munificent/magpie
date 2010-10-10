@@ -2,10 +2,8 @@ package com.stuffwithstuff.magpie.parser;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 import com.stuffwithstuff.magpie.ast.BlockExpr;
-import com.stuffwithstuff.magpie.ast.Condition;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.IfExpr;
 import com.stuffwithstuff.magpie.ast.NothingExpr;
@@ -14,7 +12,7 @@ public class ConditionalExprParser implements ExprParser {
 
   @Override
   public Expr parse(MagpieParser parser) {
-    Position startPos = parser.current().getPosition();
+    Position startPos = parser.consume().getPosition();
     
     // If expressions have their condition wrapped in a truthiness test. This
     // lets you use arbitrary types in conditions and let the types themselves
@@ -49,19 +47,22 @@ public class ConditionalExprParser implements ExprParser {
     // end
     //
     
-    // Parse the conditions.
-    Stack<Condition> conditions = new Stack<Condition>();
-    while (true) {
-      if (parser.match(TokenType.IF)) {
-        Expr condition = parser.parseIfBlock();
-        conditions.add(new Condition(condition));
-      } else if (parser.match(TokenType.LET)) {
-        // TODO(bob): Eventually allow tuple decomposition here.
-        String name = parser.consume(TokenType.NAME).getString();
-        parser.consume(TokenType.EQUALS);
-        conditions.add(new Condition(name, parser.parseIfBlock()));
+    // Parse the condition.
+    String name = null;
+    Expr condition;
+    if (parser.last(1).getType() == TokenType.IF) {
+      condition = parser.parseIfBlock();
+    } else {
+      // TODO(bob): Eventually allow tuple decomposition here.
+      name = parser.consume(TokenType.NAME).getString();
+      
+      // See if there is an expression for the let condition.
+      if (parser.lookAhead(TokenType.THEN)) {
+        // let a then --> let a = a then
+        condition = Expr.name(name);
       } else {
-        break;
+        parser.consume(TokenType.EQUALS);
+        condition = parser.parseIfBlock();
       }
     }
     
@@ -110,6 +111,6 @@ public class ConditionalExprParser implements ExprParser {
     */
     
     return new IfExpr(startPos.union(elseExpr.getPosition()),
-        conditions, thenExpr, elseExpr);
+        name, condition, thenExpr, elseExpr);
   }
 }

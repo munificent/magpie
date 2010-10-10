@@ -117,9 +117,12 @@ public abstract class Parser {
   
   /**
    * Consumes the current token and advances to the next one.
+   *
+   * @return  The consumed token.
    */
-  public void consume() {
+  public Token consume() {
     mConsumed.add(0, mRead.remove(0));
+    return last(1);
   }
 
   /**

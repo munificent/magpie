@@ -40,6 +40,13 @@ specify("A 'let then' expression") with
         end
         a shouldBe("outside")
     end
+
+    it should("bind to a shadowed variable if the expression is omitted") with
+        var bound = "not bound"
+        var a = "something"
+        let a then bound = a
+        bound shouldBe("something")
+    end
 end
 
 specify("A 'let then else' expression") with
@@ -108,5 +115,12 @@ specify("A 'let then else' expression") with
         let a = nothing then "ignored" else
             a shouldBe("outside")
         end
+    end
+
+    it should("bind to a shadowed variable if the expression is omitted") with
+        var bound = "not bound"
+        var a = "something"
+        let a then bound = a else "ignored"
+        bound shouldBe("something")
     end
 end

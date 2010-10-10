@@ -92,32 +92,23 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     // if expression ends.
     context = context.pushScope();
     
-    // Evaluate all of the conditions.
+    // Evaluate the condition.
     boolean passed = true;
-    for (Condition condition : expr.getConditions()) {
-      if (condition.isLet()) {
-        // "let" condition.
-        Obj result = evaluate(condition.getBody(), context);
-        
-        // If it evaluates to nothing, the condition fails. Otherwise, bind the
-        // result to a name and continue.
-        if (result != mInterpreter.nothing()) {
-          // Success, bind the result.
-          context.define(condition.getName(), result);
-        } else {
-          // Condition failed.
-          passed = false;
-          break;
-        }
+    Obj result = evaluate(expr.getCondition(), context);
+    if (expr.isLet()) {
+      // "let" condition.
+      // If it evaluates to nothing, the condition fails. Otherwise, bind the
+      // result to a name and continue.
+      if (result != mInterpreter.nothing()) {
+        // Success, bind the result.
+        context.define(expr.getName(), result);
       } else {
-        // Regular "if" condition.
-        Obj result = evaluate(condition.getBody(), context);
-        if (!isTruthy(expr, result)) {
-          // Condition failed.
-          passed = false;
-          break;
-        }
+        // Condition failed.
+        passed = false;
       }
+    } else {
+      // Regular "if" condition.
+      passed = isTruthy(expr, result);
     }
     
     // Evaluate the body.

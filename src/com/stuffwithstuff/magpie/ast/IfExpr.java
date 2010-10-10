@@ -1,20 +1,21 @@
 package com.stuffwithstuff.magpie.ast;
 
-import java.util.*;
-
 import com.stuffwithstuff.magpie.parser.Position;
 
 public class IfExpr extends Expr {
-  public IfExpr(Position position, List<Condition> conditions,
+  public IfExpr(Position position, String name, Expr condition,
       Expr thenExpr, Expr elseExpr) {
     super(position);
     
-    mConditions = conditions;
+    mName = name;
+    mCondition = condition;
     mThen = thenExpr;
     mElse = elseExpr;
   }
   
-  public List<Condition> getConditions() { return mConditions; }
+  public boolean isLet() { return mName != null; }
+  public String getName() { return mName; }
+  public Expr getCondition() { return mCondition; }
   public Expr getThen() { return mThen; }
   public Expr getElse() { return mElse; }
   
@@ -25,9 +26,12 @@ public class IfExpr extends Expr {
 
   @Override
   public void toString(StringBuilder builder, String indent) {
-    for (Condition condition : mConditions) {
-      builder.append(condition).append("\n").append(indent);
+    if (isLet()) {
+      builder.append("let ").append(mName).append(" = ");
+    } else {
+      builder.append("if ");
     }
+    builder.append(mCondition);
     builder.append("then\n").append(indent);
     mThen.toString(builder, indent + "    ");
     builder.append("else\n").append(indent);
@@ -35,7 +39,8 @@ public class IfExpr extends Expr {
     builder.append("\n").append(indent).append("end");
   }
 
-  private final List<Condition> mConditions;
+  private final String mName;
+  private final Expr mCondition;
   private final Expr mThen;
   private final Expr mElse;
 }

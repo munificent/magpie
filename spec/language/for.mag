@@ -1,0 +1,9 @@
+specify("A 'for' expression") with
+    it should("create a fresh variable each iteration") with
+        var closures = Array new
+        for a = 1 to(3) do closures add(fn a)
+        closures(0)() shouldBe(1)
+        closures(1)() shouldBe(2)
+        closures(2)() shouldBe(3)
+    end
+end
