@@ -1,0 +1,62 @@
+// This specifies how newlines are handled, when they are ignored, and when
+// they are significant.
+
+specify("A newline") with
+    it should("be ignored after an operator") with
+        var i = 1 +
+            2
+        i shouldBe(3)
+    end
+
+    it should("be ignored after a comma") with
+        var i = 1,
+            2
+        i _0 shouldBe(1)
+        i _1 shouldBe(2)
+    end
+
+    it should("be ignored after a colon") with
+        var a = x:
+            1 y: 2
+        a x shouldBe(1)
+        a y shouldBe(2)
+    end
+    
+    // TODO(bob): Skip for now. Periods are not used by the grammar.
+    /*
+    it should("be ignored after a period") with
+    end
+    */
+
+    it should("be ignored after an open parenthesis") with
+        var i = (
+            1)
+        i shouldBe(1)
+    end
+
+    it should("be ignored after an open bracket") with
+        var f[
+            T]() T
+        f[Int]() shouldBe(Int)
+    end
+
+    it should("be ignored after an open brace") with
+        var e = {
+            123 }
+        e toString shouldBe("{ 123 }")
+    end
+end
+
+specify("A semicolon") with
+    it should("do work like a newline") with
+        1 shouldBe(1); 2 shouldBe(2)
+    end
+end
+
+specify("A backslash") with
+    it should("consume the following newline") with
+        var a = true \
+            toString
+        a shouldBe("true")
+    end
+end

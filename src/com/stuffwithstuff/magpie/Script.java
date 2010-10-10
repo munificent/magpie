@@ -40,30 +40,32 @@ public class Script {
   
   public void execute(Interpreter interpreter) {
     interpreter.pushScriptPath(mPath);
-    Lexer lexer = new Lexer(mPath, new StringCharacterReader(mText));
-    MagpieParser parser = new MagpieParser(lexer);
-
-    interpreter.load(parser.parse());
-
-    // If there is a main() function, then we need to type-check first:
-    if (interpreter.hasMain()) {
-      // Do the static analysis and see if we got the errors we expect.
-      Checker checker = new Checker(interpreter);
-      checker.checkAll();
-      List<CheckError> errors = checker.getErrors();
-      
-      // Show the user any check errors.
-      for (CheckError error : errors) {
-        System.out.println(error);
+    try {
+      Lexer lexer = new Lexer(mPath, new StringCharacterReader(mText));
+      MagpieParser parser = new MagpieParser(lexer);
+  
+      interpreter.load(parser.parse());
+  
+      // If there is a main() function, then we need to type-check first:
+      if (interpreter.hasMain()) {
+        // Do the static analysis and see if we got the errors we expect.
+        Checker checker = new Checker(interpreter);
+        checker.checkAll();
+        List<CheckError> errors = checker.getErrors();
+        
+        // Show the user any check errors.
+        for (CheckError error : errors) {
+          System.out.println(error);
+        }
+        
+        // Only run main if there were no errors.
+        if (errors.size() == 0) {
+          interpreter.runMain();
+        }
       }
-      
-      // Only run main if there were no errors.
-      if (errors.size() == 0) {
-        interpreter.runMain();
-      }
+    } finally {
+      interpreter.popScriptPath();
     }
-    
-    interpreter.popScriptPath();
   }
 
   private static String readFile(String path) throws IOException {

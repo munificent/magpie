@@ -34,6 +34,10 @@ public class Position {
   public int getEndCol() { return mEndCol; }
   
   public String toString() {
+    if (mStartLine == -1) {
+      return "(Unknown position)";
+    }
+    
     if (mStartLine == mEndLine) {
       return String.format("%s (line %d, col %d-%d)", mSourceFile, mStartLine,
           mStartCol, mEndCol);

@@ -90,6 +90,9 @@ public class Lexer {
       if (isAlpha(c)) return startToken(LexState.IN_NAME);
       if (isOperator(c)) return startToken(LexState.IN_OPERATOR);
       if (isDigit(c)) return startToken(LexState.IN_NUMBER);
+      
+      // Line continuation.
+      if (lookAhead("\\")) return startToken(LexState.IN_LINE_CONTINUATION);
 
       // Ignore whitespace.
       if (match(" ")) return null;
@@ -187,6 +190,17 @@ public class Lexer {
       }
       // Ignore everything else.
       return advance();
+      
+    case IN_LINE_CONTINUATION:
+      // Ignore whitespace.
+      if (match(" ")) return null;
+      if (match("\t")) return null;
+
+      // Eat the newline.
+      if (lookAhead("\n") || lookAhead("\r")) {
+        return changeToken(LexState.DEFAULT);
+      }
+      throw new ParseException("Unexpected character " + c + " after line continuation.");
       
     default:
       throw new ParseException("Unexpected lex state.");
@@ -330,12 +344,12 @@ public class Lexer {
   }
 
   private boolean isOperator(final char c) {
-    return "`~!$%^&*-=+\\|/?<>".indexOf(c) != -1;
+    return "`~!$%^&*-=+|/?<>".indexOf(c) != -1;
   }
 
   private enum LexState {
     DEFAULT, IN_NAME, IN_OPERATOR, IN_NUMBER, IN_DECIMAL, IN_FRACTION, IN_MINUS,
-    IN_STRING, IN_LINE_COMMENT, IN_BLOCK_COMMENT
+    IN_STRING, IN_LINE_COMMENT, IN_BLOCK_COMMENT, IN_LINE_CONTINUATION
   }
 
   private final String mSourceFile;
