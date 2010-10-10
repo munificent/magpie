@@ -8,4 +8,16 @@ specify("A function") with
             fn(-> Int) "string"
         end
     end
+
+    it should("take the declared parameter type") with
+        expectCheckOK with
+            var f(a Int ->) nothing
+            f(123)
+        end
+        
+        expectCheckError with
+            var f(a Int ->) nothing
+            f("string")
+        end
+    end
 end

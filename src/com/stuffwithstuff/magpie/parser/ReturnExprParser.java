@@ -10,7 +10,8 @@ public class ReturnExprParser implements ExprParser {
   public Expr parse(MagpieParser parser) {
     parser.consume(TokenType.RETURN);
     Position position = parser.last(1).getPosition();
-    if (parser.lookAhead(TokenType.LINE)) {
+    if (parser.lookAheadAny(TokenType.LINE, TokenType.RIGHT_PAREN,
+        TokenType.RIGHT_BRACE, TokenType.RIGHT_BRACKET)) {
       return new ReturnExpr(position, new NothingExpr(position));
     } else {
       return new ReturnExpr(position, parser.parseExpression());

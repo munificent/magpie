@@ -1,0 +1,53 @@
+specify("A 'return' expression") with
+    it should("evaluate to the Never type") with
+        (typeof return) shouldBe(Never)
+    end
+    
+    it should("have its value included in the function's return type") with
+        expectCheckError with
+            var f(-> Int)
+                if true then return "string"
+                if true then return true
+                123
+            end
+        end
+
+        expectCheckOK with
+            var f(-> Bool | Int | String)
+                if true then return "string"
+                if true then return true
+                123
+            end
+        end
+
+        expectCheckError with
+            var f(-> Int)
+                if true then return
+                123
+            end
+        end
+
+        expectCheckOK with
+            var f(-> Int | Nothing)
+                if true then return
+                123
+            end
+        end
+    end
+    
+    it should("generate an error for unreachable code") with
+        expectCheckError with
+            return "value"
+            "unreachable"
+        end
+    end
+
+    it should("exit the function immediately") with
+        var reached = false
+        var f()
+            return "value"
+            reached = true
+        end
+        reached shouldBe(false)
+    end
+end

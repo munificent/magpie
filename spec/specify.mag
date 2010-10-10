@@ -45,7 +45,7 @@ class TestSuite
     
     fail(message String ->)
         if failures == 0 then
-            print("FAIL: " + name + " " + currentTest + ".")
+            print("FAIL: " + name + " should " + currentTest + ".")
         end
         tests = tests + 1
         failures = failures + 1

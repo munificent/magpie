@@ -1,0 +1,24 @@
+specify("A 'return' expression") with
+    it should("return the returned value") with
+        var f()
+            return "value"
+        end
+        f() shouldBe("value")
+    end
+        
+    it should("return nothing if no value is provided") with
+        var f()
+            return
+        end
+        f() shouldBe(nothing)
+    end
+
+    it should("exit the function immediately") with
+        var reached = false
+        var f()
+            return "value"
+            reached = true
+        end
+        reached shouldBe(false)
+    end
+end
