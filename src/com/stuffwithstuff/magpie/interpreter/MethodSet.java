@@ -6,10 +6,6 @@ import java.util.*;
 public class MethodSet {
   
   public void add(String name, Callable method) {
-    if (mMethods.containsKey(name)) {
-      throw new InterpreterException("There is already a method named \"" + name + "\".");
-    }
-    
     mMethods.put(name, method);
   }
   

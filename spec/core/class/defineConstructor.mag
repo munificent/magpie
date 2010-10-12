@@ -1,0 +1,26 @@
+specify("The 'defineConstructor' method on Class") with
+    it should("define a method called when an object is instantiated") with
+        var called = false
+        var c = Class new("c")
+        c defineConstructor(fn() called = true)
+        c new
+        called shouldBe(true)
+    end
+
+    it should("pass the arguments from 'new'") with
+        var passed = ""
+        var c = Class new("c")
+        c defineConstructor(fn(arg) passed = arg)
+        c new("arg")
+        passed shouldBe("arg")
+    end
+
+    it should("replace an existing definition") with
+        var called = ""
+        var c = Class new("c")
+        c defineConstructor(fn() called = "before")
+        c defineConstructor(fn() called = "after")
+        c new
+        called shouldBe("after")
+    end
+end

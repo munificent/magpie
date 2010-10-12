@@ -1,0 +1,87 @@
+class Foo
+    // specify superclasses
+    inherit(Base1)
+    inherit(Base2)
+    
+    // define ctor
+    this(arg1, arg2, arg3) =
+        super Base1(arg1)
+        super Base2(arg2)
+        print(arg3)
+        x = 4
+    end
+    
+    // declare field
+    def x Int
+    
+    // define field
+    def y = 123
+    
+    // abstract method
+    def someAbstract(z Int ->)
+    
+    // define method
+    def doSomething() = 
+        print("something")
+    end
+    
+    // define shared field
+    shared bar = 234
+    
+    // abstract shared method
+    shared someShared()
+    
+    // define shared method
+    shared classMethod() = print("on class")
+    
+    // abstract getter
+    get happy Int
+    
+    // define getter
+    get sad =
+        "sad"
+    end
+        
+    // abstract setter
+    set mad String
+    
+    // define setter
+    set sleepy = print(it)
+    
+    // abstract shared getter
+    shared get xyz String
+    
+    // define shared getter
+    shared get zyx = 345
+    
+    // abstract shared setter
+    shared set mmm Int
+    
+    // define shared setter
+    shared set nnn bar = it
+    
+    // call arbitrary method on class
+    someClassMethod(123, 456)
+    print("building class " + name)
+end
+
+class PropertyExamples
+    get oneLine = "one" set print("set to " + it)
+    
+    get readOnly = "read"
+    
+    set writeOnly = print("write")
+    
+    get multiline =
+        "here is the getter"
+    set
+        print(it)
+        "this is the setter"
+    end
+    
+    shared get sharedProp =
+        "here is the getter"
+    set
+        "this is the setter"
+    end
+end

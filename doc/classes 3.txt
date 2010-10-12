@@ -9,6 +9,10 @@ Inside a class definition, we need to be able to:
 - Define methods
 - Define shared methods
 - Define shared fields
+- Declare property getter
+- Define property getter
+- Declare property setter
+- Define property setter
 - Send arbitrary messages to the class object
 
 Constructors
@@ -164,3 +168,4 @@ A: Maybe something like:
     end
 
 
+- Send arbitrary messages to the class object

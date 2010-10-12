@@ -2,7 +2,7 @@ package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.*;
 
-import com.stuffwithstuff.magpie.ast.Expr;
+import com.stuffwithstuff.magpie.util.Expect;
 
 /**
  * A runtime object representing a class.
@@ -12,16 +12,16 @@ public class ClassObj extends Obj {
     super(metaclass);
     mName = name;
     mParent = parent;
-    mFieldInitializers = new HashMap<String, Expr>();
+    mFieldInitializers = new HashMap<String, FnObj>();
   }
 
   public ClassObj(String name, ClassObj parent) {
     mName = name;
     mParent = parent;
-    mFieldInitializers = new HashMap<String, Expr>();
+    mFieldInitializers = new HashMap<String, FnObj>();
   }  
 
-  public Map<String, Expr> getFieldInitializers() {
+  public Map<String, FnObj> getFieldInitializers() {
     return mFieldInitializers;
   }
 
@@ -63,9 +63,7 @@ public class ClassObj extends Obj {
   }
   
   public void addConstructor(FnObj constructor) {
-    if (mConstructor != null) {
-      throw new InterpreterException("Cannot overload constructors.");
-    }
+    Expect.notNull(constructor);
     
     mConstructor = constructor;
   }
@@ -74,8 +72,8 @@ public class ClassObj extends Obj {
     return mConstructor;
   }
   
-  public void defineField(String name, Expr body) {
-    mFieldInitializers.put(name, body);
+  public void defineField(String name, FnObj initializer) {
+    mFieldInitializers.put(name, initializer);
   }
   
   @Override
@@ -86,6 +84,6 @@ public class ClassObj extends Obj {
   private final String mName;
   private ClassObj mParent;
   private Callable mConstructor;
-  private final Map<String, Expr> mFieldInitializers;
+  private final Map<String, FnObj> mFieldInitializers;
   private final MethodSet mMethods = new MethodSet();
 }

@@ -43,7 +43,7 @@ public class ClassBuiltIns {
     FnObj initializer = (FnObj)arg.getTupleField(1);
     
     ClassObj classObj = (ClassObj)thisObj;
-    classObj.defineField(name, initializer.getFunction().getBody());
+    classObj.defineField(name, initializer);
     
     return interpreter.nothing();
   }
