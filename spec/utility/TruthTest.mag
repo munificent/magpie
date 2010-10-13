@@ -2,11 +2,11 @@
 class TruthTest
     this(value Bool) this value = value
     
-    true?()
-        called = true
-        value
-    end
-    
     value Bool
     called = false
 end
+
+TruthTest defineGetter("true?", fn(-> Bool)
+    called = true
+    value
+end)

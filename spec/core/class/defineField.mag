@@ -2,7 +2,7 @@ specify("The 'defineField' method on Class") with
     it should("define an initialized field on the class") with
         var c = Class new("c")
         c defineField("foo", fn() "value")
-        c new foo shouldBe("value")
+        c new() foo shouldBe("value")
     end
 
     it should("initialize the field before the constructor is called") with
@@ -10,7 +10,7 @@ specify("The 'defineField' method on Class") with
         var called = ""
         c defineField("foo", fn() called = called + "init")
         c defineConstructor(fn() called = called + "ctor")
-        c new
+        c new()
         called shouldBe("initctor")
     end
 
@@ -18,6 +18,6 @@ specify("The 'defineField' method on Class") with
         var c = Class new("c")
         c defineField("foo", fn() "before")
         c defineField("foo", fn() "after")
-        c new foo shouldBe("after")
+        c new() foo shouldBe("after")
     end
 end

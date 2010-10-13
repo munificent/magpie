@@ -52,7 +52,7 @@ class TestSuite
         print("      " + message)
     end
     
-    pass()
+    pass(->)
         tests = tests + 1
     end
     
@@ -70,7 +70,7 @@ def Object shouldBe(expected, message)
         // TODO(bob): Exceptions would be good here.
         currentTestSuite fail(message)
     else
-        currentTestSuite pass
+        currentTestSuite pass()
     end
 end
 

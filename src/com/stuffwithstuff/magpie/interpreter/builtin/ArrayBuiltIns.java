@@ -8,8 +8,8 @@ import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class ArrayBuiltIns {
-  @Signature("of(items -> Array newType(Object))")
   @Shared
+  @Signature("of(items -> Array newType(Object))")
   public static Obj of(Interpreter interpreter, Obj thisObj, Obj arg) {
     List<Obj> elements = new ArrayList<Obj>();
     if (arg == interpreter.nothing()) {
@@ -33,7 +33,7 @@ public class ArrayBuiltIns {
     return interpreter.createArray(elements);
   }
 
-  @Signature("count(-> Int)")
+  @Getter("count(-> Int)")
   public static Obj count(Interpreter interpreter, Obj thisObj, Obj arg) {
     List<Obj> elements = thisObj.asArray();
     return interpreter.createInt(elements.size());

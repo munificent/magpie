@@ -24,7 +24,7 @@ public class StringBuiltIns {
     return interpreter.createString(left + right);
   }
 
-  @Signature("count(-> Int)")
+  @Getter("count(-> Int)")
   public static Obj count(Interpreter interpreter, Obj thisObj, Obj arg) {
     return interpreter.createInt(thisObj.asString().length());
   }

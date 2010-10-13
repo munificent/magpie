@@ -60,7 +60,7 @@ public class LoopExprParser implements ExprParser {
         
         // In the body of the loop, we need to initialize the variable.
         initializers.add(new VariableExpr(position, variable,
-            Expr.message(Expr.name(generatorVar), Identifiers.CURRENT, new NothingExpr(position))));
+            Expr.message(Expr.name(generatorVar), Identifiers.CURRENT)));
       }
       parser.match(TokenType.LINE); // Optional line after a clause.
     }

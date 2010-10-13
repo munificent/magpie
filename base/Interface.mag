@@ -6,7 +6,7 @@
 class Interface
     this(name String)
         this name = name
-        this methods = Array new
+        this methods = Array new()
     end
     
     name    String

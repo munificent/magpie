@@ -26,7 +26,7 @@ end
 // TODO(bob): Return Dynamic here is lame. Need type interface.
 shared Class orTypes(left, right -> Dynamic)
     // combine the cases of both arms
-    var cases = Array new
+    var cases = Array new()
 
     if left type == OrType then
         for item = left cases do cases add(item)
@@ -41,7 +41,7 @@ shared Class orTypes(left, right -> Dynamic)
     end
 
     // Sort and remove the duplicates.
-    cases = cases sortByString unique
+    cases = cases sortByString() unique()
 
     // If just one case remains, there's no union.
     if cases count == 1 then return cases(0)

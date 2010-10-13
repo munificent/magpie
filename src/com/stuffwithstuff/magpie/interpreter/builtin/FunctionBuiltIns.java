@@ -6,7 +6,7 @@ import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class FunctionBuiltIns {
-  @Signature("type()")
+  @Getter("type(-> Class)")
   public static Obj type(Interpreter interpreter, Obj thisObj, Obj arg) {
     FnObj function = (FnObj)thisObj;
     

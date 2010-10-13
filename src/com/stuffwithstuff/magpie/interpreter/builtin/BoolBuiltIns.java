@@ -13,12 +13,12 @@ public class BoolBuiltIns {
     }
   }
 
-  @Signature("not(-> Bool)")
+  @Getter("not(-> Bool)")
   public static Obj not(Interpreter interpreter, Obj thisObj, Obj arg) {
     return interpreter.createBool(!thisObj.asBool());
   }
   
-  @Signature("toString(-> String)")
+  @Getter("toString(-> String)")
   public static Obj toString(Interpreter interpreter, Obj thisObj, Obj arg) {
     return interpreter.createString(Boolean.toString(thisObj.asBool()));
   }

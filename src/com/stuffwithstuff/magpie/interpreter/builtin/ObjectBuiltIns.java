@@ -52,7 +52,7 @@ public class ObjectBuiltIns {
     return interpreter.nothing();
   }
   
-  @Signature("type()")
+  @Getter("type()")
   public static Obj type(Interpreter interpreter, Obj thisObj, Obj arg) {
     return thisObj.getClassObj();
   }

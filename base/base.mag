@@ -7,17 +7,17 @@ import("Types.mag")
 // Extend the built-in classes.
 def Object !=(other -> Bool) (this == other) not
 
-def Object toString(-> String) "object"
-def String toString(-> String) this
-def Nothing toString(-> String) "nothing"
-def Class toString(-> String) name
+Object defineGetter("toString", fn(-> String) "object")
+String defineGetter("toString", fn(-> String) this)
+Nothing defineGetter("toString", fn(-> String) "nothing")
+Class defineGetter("toString", fn(-> String) name)
 
 // Provide a generic print that converts arg to string first.
 def Object print(arg Object ->) printRaw(arg toString)
 
 // Truthiness.
-def Object true?(-> Bool) true
-def Bool true?(-> Bool) this
-def Int true?(-> Bool) this != 0
-def String true?(-> Bool) this count > 0
-def Nothing true?(-> Bool) false
+Object defineGetter("true?", fn(-> Bool) true)
+Bool defineGetter("true?", fn(-> Bool) this)
+Int defineGetter("true?", fn(-> Bool) this != 0)
+String defineGetter("true?", fn(-> Bool) this count > 0)
+Nothing defineGetter("true?", fn(-> Bool) false)

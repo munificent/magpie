@@ -97,7 +97,7 @@ public class IntBuiltIns {
     return interpreter.createBool(left >= right);
   }
 
-  @Signature("toString(-> String)")
+  @Getter("toString(-> String)")
   public static Obj toString(Interpreter interpreter, Obj thisObj, Obj arg) {
     return interpreter.createString(Integer.toString(thisObj.asInt()));
   }

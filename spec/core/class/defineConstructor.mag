@@ -3,7 +3,7 @@ specify("The 'defineConstructor' method on Class") with
         var called = false
         var c = Class new("c")
         c defineConstructor(fn() called = true)
-        c new
+        c new()
         called shouldBe(true)
     end
 
@@ -20,7 +20,7 @@ specify("The 'defineConstructor' method on Class") with
         var c = Class new("c")
         c defineConstructor(fn() called = "before")
         c defineConstructor(fn() called = "after")
-        c new
+        c new()
         called shouldBe("after")
     end
 end

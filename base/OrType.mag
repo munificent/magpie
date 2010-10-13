@@ -72,7 +72,7 @@ def OrType getMethodType(name String, arg)
 end
 
 def OrType unsafeRemoveNothing(-> Dynamic)
-    var remaining = Array new
+    var remaining = Array new()
     for type = cases do
         if type != Nothing then remaining add(type)
     end

@@ -13,14 +13,14 @@ public class ClassObj extends Obj {
     mName = name;
     mParent = parent;
     mFieldInitializers = new HashMap<String, FnObj>();
-    mGetters = new HashMap<String, FnObj>();
+    mGetters = new HashMap<String, Callable>();
   }
 
   public ClassObj(String name, ClassObj parent) {
     mName = name;
     mParent = parent;
     mFieldInitializers = new HashMap<String, FnObj>();
-    mGetters = new HashMap<String, FnObj>();
+    mGetters = new HashMap<String, Callable>();
   }
 
   public Map<String, FnObj> getFieldInitializers() {
@@ -91,7 +91,7 @@ public class ClassObj extends Obj {
     mFieldInitializers.put(name, initializer);
   }
   
-  public void defineGetter(String name, FnObj body) {
+  public void defineGetter(String name, Callable body) {
     mGetters.put(name, body);
   }
   
@@ -104,6 +104,6 @@ public class ClassObj extends Obj {
   private ClassObj mParent;
   private Callable mConstructor;
   private final Map<String, FnObj> mFieldInitializers;
-  private final Map<String, FnObj> mGetters;
+  private final Map<String, Callable> mGetters;
   private final MethodSet mMethods = new MethodSet();
 }

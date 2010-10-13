@@ -33,5 +33,6 @@ import("core/class/defineGetter.mag")
 import("core/class/defineMethod.mag")
 import("core/class/name.mag")
 import("core/class/new.mag")
+import("core/Int/toString.mag")
 
 endTests()

@@ -300,6 +300,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     Obj truthy = mInterpreter.invokeMethod(receiver, Identifiers.IS_TRUE);
     return truthy.asBool();
   }
-  
+
   private final Interpreter mInterpreter;
 }

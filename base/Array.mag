@@ -13,29 +13,29 @@ def ArrayIterator next(-> Bool)
     index < array count
 end
 
-def ArrayIterator current() array(index)
+ArrayIterator defineGetter("current", fn(-> Int) array(index))
 
 shared Array new(-> ArrayType new(Object)) Array of()
 
 def Array iterate(-> ArrayIterator) ArrayIterator new(this)
 
-def Array toString(-> String)
+Array defineGetter("toString", fn(-> String)
     var text = "["
     for i = 0 until(count) do
         text = text + this(i) toString
         if i < (count - 1) then text = text + ", "
     end
     text + "]"
-end
+end)
 
 def Array copy(-> Array)
-    var result = Array new
+    var result = Array new()
     for item = this do result add(item)
     result
 end
 
 def Array sortByString(-> Array)
-    var result = copy
+    var result = copy()
     
     // TODO(bob): Awful bubble sort FTW!
     for i = 0 until(result count) do
@@ -52,7 +52,7 @@ def Array sortByString(-> Array)
 end
 
 def Array unique(-> ArrayType new(Object))
-    var result = Array new
+    var result = Array new()
     for item = this do
         if result count == 0 then result add(item)
         else
@@ -86,9 +86,9 @@ def Array swap(a Int, b Int ->)
 end
 
 // TODO(bob): Need generics to use for return type.
-def Array last(-> Dynamic)
+Array defineGetter("last", fn(-> Dynamic)
     this(count - 1)
-end
+end)
 
 // TODO(bob): This is kind of hokey.
 shared Array newType(elementType -> ArrayType)
@@ -111,9 +111,9 @@ end
 
 ArrayType parent = Array
 
-def ArrayType toString(-> String)
+ArrayType defineGetter("toString", fn(-> String)
     String unsafeCast(elementType toString + "[]")
-end
+end)
 
 def ArrayType canAssignFrom(other -> Bool)
     // Element type must match exactly (not variant).

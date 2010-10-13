@@ -17,7 +17,7 @@ public class ClassBuiltIns {
     ClassObj classObj = (ClassObj)thisObj;
 
     // Add a getter.
-    classObj.addMethod(name,
+    classObj.defineGetter(name,
         new FieldGetter(name, type.getFunction().getBody()));
     
     // Add a setter.
@@ -102,7 +102,7 @@ public class ClassBuiltIns {
     return interpreter.createTuple(paramType, returnType);
   }
   
-  @Signature("name(-> String)")
+  @Getter("name(-> String)")
   public static Obj name(Interpreter interpreter, Obj thisObj, Obj arg) {
     ClassObj classObj = (ClassObj)thisObj;
     
@@ -134,7 +134,7 @@ public class ClassBuiltIns {
     return classObj;
   }
 
-  @Signature("parent(-> Class)")
+  @Getter("parent(-> Class)")
   public static Obj parent(Interpreter interpreter, Obj thisObj, Obj arg) {
     ClassObj classObj = (ClassObj)thisObj;
     

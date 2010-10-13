@@ -89,14 +89,14 @@ public class Interpreter {
     // TODO(bob): At some point, may want different tuple types based on the
     // types of the fields.
     mTupleClass = createGlobalClass("Tuple");
-    mTupleClass.addMethod("count", new FieldGetter("count", Expr.name("Int")));
+    mTupleClass.defineGetter("count", new FieldGetter("count", Expr.name("Int")));
     // TODO(bob): Hackish.
     for (int i = 0; i < 20; i++) {
       String name = "_" + Integer.toString(i);
       // TODO(bob): Using dynamic as the type here is lame. Ideally, there would
       // be a separate tuple class for each set of tuple field types and it
       // would have field getters that were typed to match the fields.
-      mTupleClass.addMethod(name, new FieldGetter(name, Expr.name("Dynamic")));
+      mTupleClass.defineGetter(name, new FieldGetter(name, Expr.name("Dynamic")));
     }
     
     mNothingClass = createGlobalClass("Nothing");
@@ -242,7 +242,6 @@ public class Interpreter {
     return invokeMethod(receiver, name, mNothing);
   }
 
-
   public void print(String text) {
     mHost.print(text);
   }
@@ -359,73 +358,72 @@ public class Interpreter {
     
     return classObj;
   }
+    // TODO(bob): This is hackish in-progress.
+  
+  public Obj resolveName(Position position, Obj receiver, String name) {
+    // Look for a getter.
+    Callable getter = receiver.getClassObj().findGetter(name);
+    if (getter != null) {
+      return getter.invoke(this, receiver, mNothing);
+    }
+    
+    // Look for a method.
+    Callable method = receiver.getClassObj().findMethod(name);
+    if (method != null) {
+      // Bind it to the receiver.
+      return new BoundFnObj(mFnClass, method, receiver);
+    }
+    
+    // Look for a field.
+    Obj field = receiver.getField(name);
+    if (field != null) {
+      return field;
+    }
+
+    return null;
+  }
   
   private Obj invokeMethod(Position position, Obj receiver, String name,
       Obj arg) {
     
-    // TODO(bob): This is hackish in-progress.
-    // Look for a getter.
-    Callable getter = receiver.getClassObj().findGetter(name);
-    if (getter != null) {
-      Obj value = getter.invoke(this, receiver, mNothing);
-      
-      if (arg != null) {
-        throw new InterpreterException("Getters shouldn't get an arg. Bound methods aren't implemented yet!");
-      }
-      return value;
-    }
-    
-    // Look up the member.
-    Callable method = receiver.getClassObj().findMethod(name);
-    
-    if (method != null) {
-      // There's a special case we need to handle here. Consider:
-      //
-      //    foo bar(123)
-      //
-      // There are actually two ways to interpret it:
-      // 1. Call a method 'bar' on foo, passing 123.
-      // 2. Call a method 'bar' on foo with no argument, then call 'call' on the
-      //    result, passing 123.
-      // Scenario 2 comes up when 'bar' is a field getter and the field is
-      // a callable, like an array. To avoid having to do foo bar()(123), we'll
-      // do something a little sneaky: If the method being called doesn't take
-      // an argument, we'll invoke it without one, then immediately call the
-      // result with the argument.
-      if ((method.getType().getParamNames().size() == 0) &&
-          (arg != null) && (arg != mNothing)) {
-        Obj result = method.invoke(this, receiver, null);
-        
-        // Now invoke the result of the method with the argument.
-        if (arg != null) {
-          result = invokeMethod(position, result, Identifiers.CALL, arg);
+    // TODO(bob): This is hackish in-progress. It should get much simpler once
+    // message exprs don't have args.
+    Obj resolved = resolveName(position, receiver, name);
+    if (resolved != null) {
+      if (arg == null) {
+        // Sanity check.
+        if (resolved instanceof BoundFnObj) {
+          // TODO(bob): Temp. Should not be leaking any bound fns right now
+          System.out.println();
         }
+        // No argument, so we're done.
+        return resolved;
         
-        return result;
+      } else if (resolved instanceof Callable) {
+        // Apply the argument.
+        Callable callable = (Callable) resolved;
+        return callable.invoke(this, receiver, arg);
+      } else if(arg != mNothing) {
+        // We have an argument, but the receiver isn't a function, so send it a
+        // call message instead.
+        return invokeMethod(position, resolved, Identifiers.CALL, arg);
       } else {
-        // Just a regular method call.
-        return method.invoke(this, receiver, arg);
+        // Sanity check.
+        if (resolved instanceof BoundFnObj) {
+          // TODO(bob): Temp. Should not be leaking any bound fns right now
+          System.out.println();
+        }
+        return resolved;
       }
     }
-    
+
+    // TODO(bob): Get rid of this and have real setters.
     // If there isn't an actual method, then calling a setter defaults to
     // creating a field with the given name.
     if (Identifiers.isSetter(name)) {
       String field = Identifiers.getSetterBaseName(name);
       receiver.setField(field, arg);
       return arg;
-    }
-    
-    // If that fails, see if we can find a field with the name.
-    Obj field = receiver.getField(name);
-    if (field != null) {
-      // If we have an argument, treat the field like a callable.
-      if (arg != null) {
-        return invokeMethod(position, field, Identifiers.CALL, arg);
-      }
-      
-      // Otherwise just return the field itself.
-      return field;
     }
     
     // If all else fails, try finding a matching native Java method on the

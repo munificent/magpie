@@ -39,9 +39,9 @@ def FunctionType getMethodType(name String, arg)
     Function getMethodType(name, arg)
 end
 
-def FunctionType toString()
+FunctionType defineGetter("toString", fn(-> String)
     paramType toString + " -> " + returnType toString
-end
+end)
 
 def FunctionType ==(other -> Bool)
     if other type != FunctionType then return false
