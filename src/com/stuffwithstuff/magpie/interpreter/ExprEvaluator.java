@@ -37,6 +37,23 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
+  public Obj visit(ApplyExpr expr, EvalContext context) {
+    Obj target = evaluate(expr.getTarget(), context);
+    Obj arg = evaluate(expr.getArg(), context);
+    
+    if (target instanceof Callable) {
+      Callable function = (Callable)target;
+      // TODO(bob): Should not pass in this.
+      return function.invoke(mInterpreter, context.getThis(), arg);
+    }
+    // TODO(bob): If the target isn't a callable, should see if it has a "call"
+    // property that can be invoked.
+    
+    // TODO(bob): Implement me.
+    return mInterpreter.nothing();
+  }
+
+  @Override
   public Obj visit(AssignExpr expr, EvalContext context) {
     String name = expr.getName();
     

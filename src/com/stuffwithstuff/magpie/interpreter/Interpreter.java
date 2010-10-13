@@ -362,6 +362,19 @@ public class Interpreter {
   
   private Obj invokeMethod(Position position, Obj receiver, String name,
       Obj arg) {
+    
+    // TODO(bob): This is hackish in-progress.
+    // Look for a getter.
+    Callable getter = receiver.getClassObj().findGetter(name);
+    if (getter != null) {
+      Obj value = getter.invoke(this, receiver, mNothing);
+      
+      if (arg != null) {
+        throw new InterpreterException("Getters shouldn't get an arg. Bound methods aren't implemented yet!");
+      }
+      return value;
+    }
+    
     // Look up the member.
     Callable method = receiver.getClassObj().findMethod(name);
     

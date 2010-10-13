@@ -1,0 +1,22 @@
+specify("The 'defineGetter' method on Class") with
+    it should("define a readable property on the class") with
+        var c = Class new("c")
+        c defineGetter("foo", fn() "prop")
+        c new() foo shouldBe("prop")
+    end
+
+    it should("evaluate the body each time the property is read") with
+        var c = Class new("c")
+        var prop = ""
+        c defineGetter("foo", fn() prop = prop + "get")
+        c new() foo shouldBe("get")
+        c new() foo shouldBe("getget")
+    end
+
+    it should("replace an existing definition") with
+        var c = Class new("c")
+        c defineGetter("foo", fn() "before")
+        c defineGetter("foo", fn() "after")
+        c new() foo shouldBe("after")
+    end
+end

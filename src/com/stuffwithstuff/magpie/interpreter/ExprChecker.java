@@ -66,6 +66,12 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
+  public Obj visit(ApplyExpr expr, EvalContext context) {
+    // TODO(bob): Implement me.
+    return mInterpreter.getNothingType();
+  }
+  
+  @Override
   public Obj visit(AssignExpr expr, EvalContext context) {
     String name = expr.getName();
     

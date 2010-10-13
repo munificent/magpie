@@ -422,6 +422,12 @@ public class MagpieParser extends Parser {
       return new ExpressionExpr(position, expr);
     } else if (lookAhead(TokenType.NAME, TokenType.COLON)) {
       return parseObjectLiteral();
+      // TODO(bob): Temp for testing apply!
+    } else if (match(TokenType.DOT)) {
+      Expr target = parseExpression();
+      consume(TokenType.DOT);
+      Expr arg = parseExpression();
+      return new ApplyExpr(target, arg);
     }
     
     // See if we're at a keyword we know how to parse.

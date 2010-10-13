@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.Identifiers;
-import com.stuffwithstuff.magpie.ast.MessageExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.StringExpr;
 import com.stuffwithstuff.magpie.ast.TupleExpr;
@@ -42,11 +41,9 @@ public class DefineExprParser implements ExprParser {
     Token method = names.get(names.size() - 1);
     
     // The others form an expression.
-    Expr message = new MessageExpr(names.get(0).getPosition(), null,
-        names.get(0).getString(), null);
+    Expr message = Expr.name(names.get(0).getString());
     for (int i = 1; i < names.size() - 1; i++) {
-      message = new MessageExpr(names.get(i).getPosition(), message,
-          names.get(i).getString(), null);
+      message = Expr.message(message, names.get(i).getString());
     }
     
     Expr function = parser.parseFunction();
@@ -58,6 +55,6 @@ public class DefineExprParser implements ExprParser {
       message = Expr.message(message, "type");
     }
     
-    return new MessageExpr(startPos, message, Identifiers.DEFINE_METHOD, arg);
+    return Expr.message(message, Identifiers.DEFINE_METHOD, arg);
   }
 }

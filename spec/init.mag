@@ -29,6 +29,7 @@ import("check/var.mag")
 
 import("core/class/defineConstructor.mag")
 import("core/class/defineField.mag")
+import("core/class/defineGetter.mag")
 import("core/class/defineMethod.mag")
 import("core/class/name.mag")
 import("core/class/new.mag")

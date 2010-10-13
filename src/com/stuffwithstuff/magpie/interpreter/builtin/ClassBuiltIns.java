@@ -58,7 +58,18 @@ public class ClassBuiltIns {
     
     return interpreter.nothing();
   }
-  
+
+  @Signature("defineGetter(name String, body ->)")
+  public static Obj defineGetter(Interpreter interpreter, Obj thisObj, Obj arg) {
+    String name = arg.getTupleField(0).asString();
+    FnObj body = (FnObj)arg.getTupleField(1);
+    
+    ClassObj classObj = (ClassObj)thisObj;
+    classObj.defineGetter(name, body);
+    
+    return interpreter.nothing();
+  }
+
   @Signature("getMethodType(name)")
   public static Obj getMethodType(Interpreter interpreter, Obj thisObj, Obj arg) {
     String name = arg.getTupleField(0).asString();
