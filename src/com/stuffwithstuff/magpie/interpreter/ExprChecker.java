@@ -226,6 +226,9 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(MessageExpr expr, EvalContext context) {
+    // TODO(bob): Fix to work with ApplyExpr.
+    return mInterpreter.getNothingType();
+    /*
     Obj receiver = (expr.getReceiver() == null) ? null :
         check(expr.getReceiver(), context);
     
@@ -251,6 +254,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     
     if (arg == null) arg = mInterpreter.getNothingType();
     return getMethodReturn(expr, receiver, expr.getName(), arg);
+    */
   }
 
   @Override

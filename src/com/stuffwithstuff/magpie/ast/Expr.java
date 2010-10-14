@@ -7,16 +7,20 @@ public abstract class Expr {
     return new FnExpr(Position.none(), FunctionType.nothingToDynamic(), body);
   }
   
-  public static MessageExpr message(Expr receiver, String name, Expr arg) {
-    return new MessageExpr(Position.none(), receiver, name, arg);
+  public static ApplyExpr message(Position position, Expr receiver, String name, Expr arg) {
+    return new ApplyExpr(new MessageExpr(position, receiver, name), arg);
+  }
+  
+  public static ApplyExpr message(Expr receiver, String name, Expr arg) {
+    return new ApplyExpr(new MessageExpr(Position.none(), receiver, name), arg);
   }
   
   public static MessageExpr message(Expr receiver, String name) {
-    return new MessageExpr(Position.none(), receiver, name, null);
+    return new MessageExpr(Position.none(), receiver, name);
   }
   
   public static MessageExpr name(String name) {
-    return new MessageExpr(Position.none(), null, name, null);
+    return new MessageExpr(Position.none(), null, name);
   }
   
   public static StringExpr string(String text) {

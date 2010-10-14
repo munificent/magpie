@@ -196,6 +196,15 @@ public class MagpieParser extends Parser {
 
       Position position = expr.getPosition().union(value.getPosition());
       
+      // name = value              -->  Set('name', value)
+      // name(arg) = value         -->  Set(name(arg), '', value)
+      // target name = value       -->  Set(target, 'name', value)
+      // target name(arg) = value  -->  Set(target name(arg), '', value)
+
+      // 1. assign to local 'a = b'   --> assign
+      // 2. named setter 'a prop = b'  --> set
+      // 3. indexed setter 'array(0) = b'  --> call=
+      
       // TODO(bob): Need to handle tuples here too.
       if (expr instanceof MessageExpr) {
         MessageExpr message = (MessageExpr) expr;
@@ -210,32 +219,33 @@ public class MagpieParser extends Parser {
         // The other cases all desugar to a regular method call like so:
         //
         // name = value              -->  name = value
-        // name(arg) = value         -->  name call=(arg, value)
         // target name = value       -->  target name=(value)
-        // target name(arg) = value  -->  target name=(arg, value)
 
         if (message.getReceiver() == null) {
-          if (message.getArg() == null) {
-            // name = value
-            return new AssignExpr(position, message.getName(), value);
-          } else {
-            // name(arg) = value  -->  name call=(arg, value)
-            return new MessageExpr(position, Expr.name(message.getName()),
-                Identifiers.CALL_ASSIGN, Expr.tuple(message.getArg(), value));
-          }
+          // name = value
+          return new AssignExpr(position, message.getName(), value);
         } else {
-          if (message.getArg() == null) {
-            // target name = value  -->  target name=(value)
-            return new MessageExpr(position, message.getReceiver(),
-                Identifiers.makeSetter(message.getName()), value);
-          } else {
-            // target name(arg) = value  -->  target name=(arg, value)
-            return new MessageExpr(position, message.getReceiver(),
-                Identifiers.makeSetter(message.getName()),
-                Expr.tuple(message.getArg(), value));
-          }
+          // target name = value  -->  target name=(value)
+          return Expr.message(position, message.getReceiver(),
+              Identifiers.makeSetter(message.getName()), value);
         }
+      } else if (expr instanceof ApplyExpr) {
+        // name(arg) = value         -->  name call=(arg, value)
+        // target name(arg) = value  -->  target name=(arg, value)
+        ApplyExpr apply = (ApplyExpr) expr;
+        // TODO(bob): Hack. doesn't handle foo()() = bar
+        MessageExpr message = (MessageExpr) apply.getTarget();
         
+        if (message.getReceiver() == null) {
+          // name(arg) = value  -->  name call=(arg, value)
+          return Expr.message(position, Expr.name(message.getName()),
+              Identifiers.CALL_ASSIGN, Expr.tuple(apply.getArg(), value));
+        } else {
+          // target name(arg) = value  -->  target name=(arg, value)
+          return Expr.message(position, message.getReceiver(),
+              Identifiers.makeSetter(message.getName()),
+              Expr.tuple(apply.getArg(), value));
+        }
       } else {
         throw new ParseException("Expression \"" + expr +
         "\" is not a valid target for assignment.");
@@ -290,7 +300,7 @@ public class MagpieParser extends Parser {
       String op = last(1).getString();
       Expr right = message();
 
-      left = new MessageExpr(left.getPosition().union(right.getPosition()),
+      left = Expr.message(left.getPosition().union(right.getPosition()),
           left, op, right);
     }
     
@@ -384,7 +394,13 @@ public class MagpieParser extends Parser {
       if (staticArg != null) {
         message = new InstantiateExpr(position, message, staticArg);
       } else {
-        message = new MessageExpr(position, message, name, arg);
+        // TODO(bob): Hack temp refactoring. Should parse arg separately.
+        if (arg != null) {
+          message = new ApplyExpr(new MessageExpr(position, message,
+              name), arg);
+        } else {
+          message = new MessageExpr(position, message, name);
+        }
       }
     }
     

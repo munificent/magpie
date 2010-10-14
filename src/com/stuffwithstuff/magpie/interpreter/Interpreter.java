@@ -391,11 +391,6 @@ public class Interpreter {
     Obj resolved = resolveName(position, receiver, name);
     if (resolved != null) {
       if (arg == null) {
-        // Sanity check.
-        if (resolved instanceof BoundFnObj) {
-          // TODO(bob): Temp. Should not be leaking any bound fns right now
-          System.out.println();
-        }
         // No argument, so we're done.
         return resolved;
         
@@ -408,15 +403,14 @@ public class Interpreter {
         // call message instead.
         return invokeMethod(position, resolved, Identifiers.CALL, arg);
       } else {
-        // Sanity check.
-        if (resolved instanceof BoundFnObj) {
-          // TODO(bob): Temp. Should not be leaking any bound fns right now
-          System.out.println();
-        }
         return resolved;
       }
     }
 
+    // TODO(bob):
+    // * Create setters.
+    // * Add property support to checker.
+    
     // TODO(bob): Get rid of this and have real setters.
     // If there isn't an actual method, then calling a setter defaults to
     // creating a field with the given name.

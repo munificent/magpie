@@ -45,12 +45,11 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       Callable function = (Callable)target;
       // TODO(bob): Should not pass in this.
       return function.invoke(mInterpreter, context.getThis(), arg);
+    } else {
+      // We have an argument, but the receiver isn't a function, so send it a
+      // call message instead.
+      return mInterpreter.invokeMethod(expr, target, Identifiers.CALL, arg);
     }
-    // TODO(bob): If the target isn't a callable, should see if it has a "call"
-    // property that can be invoked.
-    
-    // TODO(bob): Implement me.
-    return mInterpreter.nothing();
   }
 
   @Override
@@ -196,27 +195,21 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(MessageExpr expr, EvalContext context) {
     Obj receiver = evaluate(expr.getReceiver(), context);
-    Obj arg = evaluate(expr.getArg(), context);
     
     if (receiver == null) {
       // Just a name, so maybe it's a variable.
       Obj variable = context.lookUp(expr.getName());
 
       if (variable != null) {
-        // If we have an argument, apply it.
-        if (arg != null) {
-          return mInterpreter.invokeMethod(
-              expr, variable, Identifiers.CALL, arg);
-        }
         return variable;
       }
       
       // Otherwise it must be a method on this.
       return mInterpreter.invokeMethod(
-          expr, context.getThis(), expr.getName(), arg);
+          expr, context.getThis(), expr.getName(), null);
     }
     
-    return mInterpreter.invokeMethod(expr, receiver, expr.getName(), arg);
+    return mInterpreter.invokeMethod(expr, receiver, expr.getName(), null);
   }
   
   @Override
