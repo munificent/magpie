@@ -196,15 +196,6 @@ public class MagpieParser extends Parser {
 
       Position position = expr.getPosition().union(value.getPosition());
       
-      // name = value              -->  Set('name', value)
-      // name(arg) = value         -->  Set(name(arg), '', value)
-      // target name = value       -->  Set(target, 'name', value)
-      // target name(arg) = value  -->  Set(target name(arg), '', value)
-
-      // 1. assign to local 'a = b'   --> assign
-      // 2. named setter 'a prop = b'  --> set
-      // 3. indexed setter 'array(0) = b'  --> call=
-      
       // TODO(bob): Need to handle tuples here too.
       if (expr instanceof MessageExpr) {
         MessageExpr message = (MessageExpr) expr;

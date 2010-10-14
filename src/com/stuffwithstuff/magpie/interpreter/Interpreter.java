@@ -144,7 +144,7 @@ public class Interpreter {
     if (result == mNothing) return null;
     
     // Convert it to a string.
-    result = invokeMethod(expr, result, "toString", mNothing);
+    result = resolveName(result, Identifiers.TO_STRING);
     return result.asString();
   }
   
@@ -204,19 +204,38 @@ public class Interpreter {
     Callable mainFn = (Callable)main;
     mainFn.invoke(this, mNothing, mNothing);
   }
+  
+  public Obj resolveName(Obj receiver, String name) {
+    // Look for a getter.
+    Callable getter = receiver.getClassObj().findGetter(name);
+    if (getter != null) {
+      return getter.invoke(this, receiver, mNothing);
+    }
+    
+    // Look for a method.
+    Callable method = receiver.getClassObj().findMethod(name);
+    if (method != null) {
+      // Bind it to the receiver.
+      return new BoundFnObj(mFnClass, method, receiver);
+    }
+    
+    // Look for a field.
+    Obj field = receiver.getField(name);
+    if (field != null) {
+      return field;
+    }
 
-  /**
-   * Invokes a named method on an object, passing in the given argument.
-   * 
-   * @param expr       The expression where this method invocation occurs. Just
-   *                   used for position information if an error occurs.
-   * @param receiver   The object the method is being invoked on.
-   * @param name       The name of the method to invoke.
-   * @param arg        The argument passed to the method.
-   * @return           The result of invoking the method.
-   */
-  public Obj invokeMethod(Expr expr, Obj receiver, String name, Obj arg) {
-    return invokeMethod(expr.getPosition(), receiver, name, arg);
+    return null;
+  }
+  
+  public Obj apply(Obj receiver, Obj target, Obj arg) {
+    if (target instanceof Callable) {
+      // Apply the argument.
+      Callable callable = (Callable) target;
+      return callable.invoke(this, receiver, arg);
+    }
+    
+    return invokeMethod(target, Identifiers.CALL, arg);
   }
 
   /**
@@ -231,15 +250,43 @@ public class Interpreter {
     return invokeMethod(Position.none(), receiver, name, arg);
   }
   
-  /**
-   * Invokes a named method on an object, passing in nothing as the argument.
-   * 
-   * @param receiver  The object the method is being invoked on.
-   * @param name      The name of the method to invoke.
-   * @return          The result of invoking the method.
-   */
-  public Obj invokeMethod(Obj receiver, String name) {
-    return invokeMethod(receiver, name, mNothing);
+  public Obj invokeMethod(Position position, Obj receiver, String name,
+      Obj arg) {
+    
+    // TODO(bob): This is hackish in-progress. It should get much simpler once
+    // message exprs don't have args.
+    Obj resolved = resolveName(receiver, name);
+    if (resolved != null) {
+      if (arg == null) {
+        // No argument, so we're done.
+        return resolved;
+      }
+      return apply(receiver, resolved, arg);
+    }
+
+    // TODO(bob):
+    // * Create setters.
+    // * Add property support to checker.
+    
+    // TODO(bob): Get rid of this and have real setters.
+    // If there isn't an actual method, then calling a setter defaults to
+    // creating a field with the given name.
+    if (Identifiers.isSetter(name)) {
+      String field = Identifiers.getSetterBaseName(name);
+      receiver.setField(field, arg);
+      return arg;
+    }
+    
+    // If all else fails, try finding a matching native Java method on the
+    // primitive value.
+    Obj result = callJavaMethod(receiver, name, arg);
+    if (result != null) return result;
+    
+    runtimeError(position,
+        "Could not find a variable or method named \"%s\" on %s.",
+        name, receiver.getClassObj());
+    
+    return mNothing;
   }
 
   public void print(String text) {
@@ -329,7 +376,7 @@ public class Interpreter {
   }
   
   public String evaluateToString(Obj value) {
-    return invokeMethod(value, Identifiers.TO_STRING).asString();
+    return resolveName(value, Identifiers.TO_STRING).asString();
   }
 
   public void pushScriptPath(String path) {
@@ -359,79 +406,7 @@ public class Interpreter {
     return classObj;
   }
     // TODO(bob): This is hackish in-progress.
-  
-  public Obj resolveName(Position position, Obj receiver, String name) {
-    // Look for a getter.
-    Callable getter = receiver.getClassObj().findGetter(name);
-    if (getter != null) {
-      return getter.invoke(this, receiver, mNothing);
-    }
-    
-    // Look for a method.
-    Callable method = receiver.getClassObj().findMethod(name);
-    if (method != null) {
-      // Bind it to the receiver.
-      return new BoundFnObj(mFnClass, method, receiver);
-    }
-    
-    // Look for a field.
-    Obj field = receiver.getField(name);
-    if (field != null) {
-      return field;
-    }
-
-    return null;
-  }
-  
-  private Obj invokeMethod(Position position, Obj receiver, String name,
-      Obj arg) {
-    
-    // TODO(bob): This is hackish in-progress. It should get much simpler once
-    // message exprs don't have args.
-    Obj resolved = resolveName(position, receiver, name);
-    if (resolved != null) {
-      if (arg == null) {
-        // No argument, so we're done.
-        return resolved;
-        
-      } else if (resolved instanceof Callable) {
-        // Apply the argument.
-        Callable callable = (Callable) resolved;
-        return callable.invoke(this, receiver, arg);
-      } else if(arg != mNothing) {
-        // We have an argument, but the receiver isn't a function, so send it a
-        // call message instead.
-        return invokeMethod(position, resolved, Identifiers.CALL, arg);
-      } else {
-        return resolved;
-      }
-    }
-
-    // TODO(bob):
-    // * Create setters.
-    // * Add property support to checker.
-    
-    // TODO(bob): Get rid of this and have real setters.
-    // If there isn't an actual method, then calling a setter defaults to
-    // creating a field with the given name.
-    if (Identifiers.isSetter(name)) {
-      String field = Identifiers.getSetterBaseName(name);
-      receiver.setField(field, arg);
-      return arg;
-    }
-    
-    // If all else fails, try finding a matching native Java method on the
-    // primitive value.
-    Obj result = callJavaMethod(receiver, name, arg);
-    if (result != null) return result;
-    
-    runtimeError(position,
-        "Could not find a variable or method named \"%s\" on %s.",
-        name, receiver.getClassObj());
-    
-    return mNothing;
-  }
-  
+   
   private Obj callJavaMethod(Obj receiver, String name, Obj arg) {
     if (receiver.getValue() != null) {
       Class<?> klass = receiver.getValue().getClass();

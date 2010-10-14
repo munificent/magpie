@@ -48,7 +48,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     } else {
       // We have an argument, but the receiver isn't a function, so send it a
       // call message instead.
-      return mInterpreter.invokeMethod(expr, target, Identifiers.CALL, arg);
+      return mInterpreter.invokeMethod(expr.getPosition(), target, Identifiers.CALL, arg);
     }
   }
 
@@ -62,7 +62,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     
     // Otherwise, it must be a setter on this.
     String setter = Identifiers.makeSetter(name);
-    return mInterpreter.invokeMethod(expr, context.getThis(), setter, value);
+    return mInterpreter.invokeMethod(expr.getPosition(), context.getThis(), setter, value);
   }
 
   @Override
@@ -204,12 +204,11 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
         return variable;
       }
       
-      // Otherwise it must be a method on this.
-      return mInterpreter.invokeMethod(
-          expr, context.getThis(), expr.getName(), null);
+      // Otherwise it must be a property on this.
+      return mInterpreter.resolveName(context.getThis(), expr.getName());
     }
     
-    return mInterpreter.invokeMethod(expr, receiver, expr.getName(), null);
+    return mInterpreter.resolveName(receiver, expr.getName());
   }
   
   @Override
@@ -290,7 +289,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
   
   private boolean isTruthy(Expr expr, Obj receiver) {
-    Obj truthy = mInterpreter.invokeMethod(receiver, Identifiers.IS_TRUE);
+    Obj truthy = mInterpreter.resolveName(receiver, Identifiers.IS_TRUE);
     return truthy.asBool();
   }
 

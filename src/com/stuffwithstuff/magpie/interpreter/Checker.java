@@ -210,7 +210,7 @@ public class Checker {
 
     Scope scope = new Scope(parent);
     for (Entry<String, Obj> entry : valueScope.entries()) {
-      Obj type = mInterpreter.invokeMethod(entry.getValue(), Identifiers.TYPE);
+      Obj type = mInterpreter.resolveName(entry.getValue(), Identifiers.TYPE);
       scope.define(entry.getKey(), type);
     }
     

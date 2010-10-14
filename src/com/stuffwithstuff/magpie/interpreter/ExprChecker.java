@@ -151,7 +151,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     // Nothing.
     if (expr.isLet()) {
       conditionType = mInterpreter.invokeMethod(conditionType,
-          Identifiers.UNSAFE_REMOVE_NOTHING);
+          Identifiers.UNSAFE_REMOVE_NOTHING, mInterpreter.nothing());
       context.define(expr.getName(), conditionType);
     }
     
