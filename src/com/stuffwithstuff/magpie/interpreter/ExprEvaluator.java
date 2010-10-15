@@ -41,10 +41,9 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     Obj target = evaluate(expr.getTarget(), context);
     Obj arg = evaluate(expr.getArg(), context);
     
-    if (target instanceof Callable) {
-      Callable function = (Callable)target;
-      // TODO(bob): Should not pass in this.
-      return function.invoke(mInterpreter, context.getThis(), arg);
+    if (target instanceof FnObj) {
+      FnObj function = (FnObj)target;
+      return function.invoke(mInterpreter, arg);
     } else {
       // We have an argument, but the receiver isn't a function, so send it a
       // call message instead.
@@ -99,7 +98,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   
   @Override
   public Obj visit(FnExpr expr, EvalContext context) {
-    return mInterpreter.createFn(expr, context.getScope());
+    return mInterpreter.createFn(expr, context);
   }
 
   @Override

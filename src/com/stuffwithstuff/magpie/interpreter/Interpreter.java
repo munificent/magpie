@@ -174,7 +174,7 @@ public class Interpreter {
     }
     
     // TODO(bob): Should this be closing here?
-    Obj body = createFn(Expr.fn(expr.getBody()), context.getScope());
+    Obj body = createFn(Expr.fn(expr.getBody()), context);
     
     // Create a StaticFunctionType object.
     Obj staticFunctionTypeClass = context.lookUp("StaticFunctionType");
@@ -216,7 +216,7 @@ public class Interpreter {
     Callable method = receiver.getClassObj().findMethod(name);
     if (method != null) {
       // Bind it to the receiver.
-      return new BoundFnObj(mFnClass, method, receiver);
+      return new FnObj(mFnClass, receiver, method);
     }
     
     // Look for a field.
@@ -228,11 +228,11 @@ public class Interpreter {
     return null;
   }
   
-  public Obj apply(Obj receiver, Obj target, Obj arg) {
-    if (target instanceof Callable) {
+  public Obj apply(Obj target, Obj arg) {
+    if (target instanceof FnObj) {
       // Apply the argument.
-      Callable callable = (Callable) target;
-      return callable.invoke(this, receiver, arg);
+      FnObj function = (FnObj) target;
+      return function.invoke(this, arg);
     }
     
     return invokeMethod(target, Identifiers.CALL, arg);
@@ -261,7 +261,7 @@ public class Interpreter {
         // No argument, so we're done.
         return resolved;
       }
-      return apply(receiver, resolved, arg);
+      return apply(resolved, arg);
     }
 
     // TODO(bob):
@@ -343,14 +343,15 @@ public class Interpreter {
     return mStringClass.instantiate(value);
   }
   
-  public FnObj createFn(FnExpr expr, Scope closure) {
+  public FnObj createFn(FnExpr expr, EvalContext context) {
     // Create a new subclass just for this function so that it's implementation
     // of "call" has the correct return and parameter types.
     // TODO(bob): Figure out a simpler way to do this.
     ClassObj fnClass = new ClassObj(mClass, "FunctionType", mFnClass);
     fnClass.addMethod("call", new FunctionCall(expr.getType()));
     
-    return new FnObj(fnClass, closure, expr);
+    return new FnObj(fnClass, context.getThis(),
+        new Function(context.getScope(), expr));
   }
   
   public Obj createTuple(Obj... fields) {

@@ -32,9 +32,9 @@ public class ClassNew implements Callable {
     
     // Initialize its fields.
     for (Entry<String, FnObj> field : classObj.getFieldInitializers().entrySet()) {
-      EvalContext fieldContext = new EvalContext(field.getValue().getClosure(),
+      EvalContext fieldContext = new EvalContext(field.getValue().getFunction().getClosure(),
           interpreter.nothing()).pushScope();
-      Obj value = interpreter.evaluate(field.getValue().getFunction().getBody(),
+      Obj value = interpreter.evaluate(field.getValue().getFunction().getFunction().getBody(),
           fieldContext);
       obj.setField(field.getKey(), value);
     }

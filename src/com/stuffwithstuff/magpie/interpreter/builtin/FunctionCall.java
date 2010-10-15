@@ -21,7 +21,7 @@ public class FunctionCall implements Callable {
   public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
     FnObj function = (FnObj)thisObj;
     
-    return function.invoke(interpreter, interpreter.nothing(), arg);
+    return function.invoke(interpreter, arg);
   }
   
   public FunctionType getType() { return mType; }

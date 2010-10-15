@@ -41,7 +41,7 @@ public class FunctionBuiltIns {
     //    every time you ask for its type. My hunch is that a better solution is
     //    to evaluate it when the function is defined and then "type" just
     //    returns that.
-    EvalContext context = new EvalContext(function.getClosure(),
+    EvalContext context = new EvalContext(function.getFunction().getClosure(),
         interpreter.nothing());
     return interpreter.evaluateFunctionType(function.getType(), context);
   }

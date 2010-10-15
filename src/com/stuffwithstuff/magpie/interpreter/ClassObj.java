@@ -77,7 +77,7 @@ public class ClassObj extends Obj {
     return null;
   }
   
-  public void addConstructor(FnObj constructor) {
+  public void addConstructor(Callable constructor) {
     Expect.notNull(constructor);
     
     mConstructor = constructor;

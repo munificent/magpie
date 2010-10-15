@@ -47,18 +47,17 @@ public class Checker {
     for (Entry<String, Obj> entry : mInterpreter.getGlobals().entries()) {
       if (entry.getValue() instanceof FnObj) {
         FnObj function = (FnObj)entry.getValue();
-        checkFunction(function.getFunction(), function.getClosure(),
-            mInterpreter.getNothingType(), staticContext);
+        checkFunction(function.getFunction(), mInterpreter.getNothingType(),
+            staticContext);
       } else if (entry.getValue() instanceof ClassObj) {
         ClassObj classObj = (ClassObj)entry.getValue();
         
         // Check all of the methods.
         for (Entry<String, Callable> method : classObj.getMethods().entrySet()) {
           // Only check user-defined methods.
-          if (method.getValue() instanceof FnObj) {
-            FnObj function = (FnObj)method.getValue();
-            checkFunction(function.getFunction(), function.getClosure(),
-                classObj, staticContext);
+          if (method.getValue() instanceof Function) {
+            Function function = (Function)method.getValue();
+            checkFunction(function, classObj, staticContext);
           }
         }
       }
@@ -79,8 +78,7 @@ public class Checker {
       // Only check user-defined methods.
       if (method.getValue() instanceof FnObj) {
         FnObj function = (FnObj)method.getValue();
-        checkFunction(function.getFunction(), function.getClosure(),
-            classObj, staticContext);
+        checkFunction(function.getFunction(), classObj, staticContext);
       }
     }
   }
@@ -94,10 +92,13 @@ public class Checker {
    *                  the class that this a method on.
    * @return          The evaluated type of the function.
    */
-  public Obj checkFunction(FnExpr function, Scope closure, Obj thisType) {
-    EvalContext staticContext = mInterpreter.createTopLevelContext();
-
-    return checkFunction(function, closure, thisType, staticContext);
+  public void checkFunction(Function function, Obj thisType,
+      EvalContext staticContext) {
+    // Nothing to check if it's built-in.
+    if (function == null) return;
+    
+    checkFunction(function.getFunction(), function.getClosure(),
+        thisType, staticContext);
   }
   
    /**

@@ -6,6 +6,7 @@ import java.util.List;
 import com.stuffwithstuff.magpie.interpreter.CheckError;
 import com.stuffwithstuff.magpie.interpreter.Checker;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
+import com.stuffwithstuff.magpie.interpreter.EvalContext;
 import com.stuffwithstuff.magpie.interpreter.FnObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
@@ -29,8 +30,9 @@ public class RuntimeBuiltIns {
     Checker checker = new Checker(interpreter);
     
     FnObj function = (FnObj)arg;
-    checker.checkFunction(function.getFunction(), function.getClosure(),
-        interpreter.getNothingType());
+    EvalContext staticContext = interpreter.createTopLevelContext();
+    checker.checkFunction(function.getFunction(), interpreter.getNothingType(),
+        staticContext);
     
     return translateErrors(interpreter, checker.getErrors());
   }

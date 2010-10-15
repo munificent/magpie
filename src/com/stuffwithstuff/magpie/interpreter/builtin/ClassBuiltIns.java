@@ -18,11 +18,11 @@ public class ClassBuiltIns {
 
     // Add a getter.
     classObj.defineGetter(name,
-        new FieldGetter(name, type.getFunction().getBody()));
+        new FieldGetter(name, type.getFunction().getFunction().getBody()));
     
     // Add a setter.
     classObj.addMethod(Identifiers.makeSetter(name),
-        new FieldSetter(name, type.getFunction().getBody()));
+        new FieldSetter(name, type.getFunction().getFunction().getBody()));
 
     return interpreter.nothing();
   }
@@ -32,7 +32,7 @@ public class ClassBuiltIns {
     FnObj method = (FnObj)arg;
     
     ClassObj classObj = (ClassObj)thisObj;
-    classObj.addConstructor(method);
+    classObj.addConstructor(method.getCallable());
     
     return interpreter.nothing();
   }
@@ -54,7 +54,7 @@ public class ClassBuiltIns {
     FnObj method = (FnObj)arg.getTupleField(1);
     
     ClassObj classObj = (ClassObj)thisObj;
-    classObj.addMethod(name, method);
+    classObj.addMethod(name, method.getCallable());
     
     return interpreter.nothing();
   }
@@ -65,7 +65,7 @@ public class ClassBuiltIns {
     FnObj body = (FnObj)arg.getTupleField(1);
     
     ClassObj classObj = (ClassObj)thisObj;
-    classObj.defineGetter(name, body);
+    classObj.defineGetter(name, body.getCallable());
     
     return interpreter.nothing();
   }
@@ -89,7 +89,7 @@ public class ClassBuiltIns {
     // outer scope and just evaluate it in a top-level context.
     EvalContext staticContext;
     if (method instanceof FnObj) {
-      staticContext = new EvalContext(((FnObj)method).getClosure(),
+      staticContext = new EvalContext(((FnObj)method).getFunction().getClosure(),
           interpreter.nothing());
     } else {
       staticContext = interpreter.createTopLevelContext();
