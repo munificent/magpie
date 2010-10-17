@@ -6,6 +6,7 @@ import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.interpreter.builtin.*;
 import com.stuffwithstuff.magpie.parser.Position;
+import com.stuffwithstuff.magpie.util.Expect;
 
 public class Interpreter {
   public Interpreter(InterpreterHost host) {
@@ -229,7 +230,21 @@ public class Interpreter {
         name, receiver.getClassObj());
     return mNothing;
   }
-  
+
+  public Obj apply(Position position, Obj target, Obj arg) {
+    Expect.notNull(target);
+    Expect.notNull(arg);
+    
+    if (target instanceof FnObj) {
+      FnObj function = (FnObj)target;
+      return function.invoke(this, arg);
+    } else {
+      // We have an argument, but the receiver isn't a function, so send it a
+      // call message instead.
+      return invokeMethod(position, target, Identifiers.CALL, arg);
+    }
+  }
+
   /**
    * Invokes a named method on an object, passing in the given argument.
    * 
@@ -244,23 +259,11 @@ public class Interpreter {
   
   public Obj invokeMethod(Position position, Obj receiver, String name,
       Obj arg) {
+    Expect.notNull(receiver);
+    Expect.notNull(arg);
     
-    // TODO(bob): This whole method is basically a copy/paste of ExprEvaluator
-    // for MessageExpr and ApplyExpr. Clean up!
     Obj resolved = getProperty(position, receiver, name);
-
-    if (arg == null) {
-      // No argument, so we're done.
-      return resolved;
-    }
-    
-    if (resolved instanceof FnObj) {
-      // Apply the argument.
-      FnObj function = (FnObj) resolved;
-      return function.invoke(this, arg);
-    }
-    
-    return invokeMethod(resolved, Identifiers.CALL, arg);
+    return apply(position, resolved, arg);
   }
 
   public void print(String text) {

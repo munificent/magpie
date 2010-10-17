@@ -41,16 +41,9 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     Obj target = evaluate(expr.getTarget(), context);
     Obj arg = evaluate(expr.getArg(), context);
     
-    if (target instanceof FnObj) {
-      FnObj function = (FnObj)target;
-      return function.invoke(mInterpreter, arg);
-    } else {
-      // We have an argument, but the receiver isn't a function, so send it a
-      // call message instead.
-      return mInterpreter.invokeMethod(expr.getPosition(), target, Identifiers.CALL, arg);
-    }
+    return mInterpreter.apply(expr.getPosition(), target, arg);
   }
-
+  
   @Override
   public Obj visit(AssignExpr expr, EvalContext context) {
     Obj receiver = evaluate(expr.getReceiver(), context);
@@ -215,7 +208,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       receiver = context.getThis();
     }
     
-    return mInterpreter.getProperty(expr.getPosition(), receiver, expr.getName());
+    return mInterpreter.getProperty(expr.getPosition(), receiver,
+        expr.getName());
   }
   
   @Override
