@@ -15,12 +15,16 @@ specify("A newline") with
         i _1 shouldBe(2)
     end
 
+    // TODO(bob): Skip for now. Object literals are broken until we generate
+    // classes with getters for their fields.
+    /*
     it should("be ignored after a colon") with
         var a = x:
             1 y: 2
         a x shouldBe(1)
         a y shouldBe(2)
     end
+    */
     
     // TODO(bob): Skip for now. Periods are not used by the grammar.
     /*

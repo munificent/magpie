@@ -196,47 +196,24 @@ public class MagpieParser extends Parser {
 
       Position position = expr.getPosition().union(value.getPosition());
       
+      // Translate the left-hand side of the assignment into an appropriate
+      // form. This basically avoids the need for explicit L-values.
       // TODO(bob): Need to handle tuples here too.
       if (expr instanceof MessageExpr) {
+        // example: point x = 2
+        // before:  Msg(      Msg(null, "point"), "x")
+        // after:   AssignMsg(Msg(null, "point"), "x", Int(2))
         MessageExpr message = (MessageExpr) expr;
-        
-        // Based on whether or not the left-hand side has a target or an
-        // argument, there are four different flavors of assignment. The
-        // simplest is no target and no target argument, like:
-        //
-        //    name = value
-        //
-        // This is the only case that actually becomes an assignment expression.
-        // The other cases all desugar to a regular method call like so:
-        //
-        // name = value              -->  name = value
-        // target name = value       -->  target name=(value)
-
-        if (message.getReceiver() == null) {
-          // name = value
-          return new AssignExpr(position, message.getName(), value);
-        } else {
-          // target name = value  -->  target name=(value)
-          return Expr.message(position, message.getReceiver(),
-              Identifiers.makeSetter(message.getName()), value);
-        }
+        return new AssignExpr(position, message.getReceiver(),
+            message.getName(), value);
       } else if (expr instanceof ApplyExpr) {
-        // name(arg) = value         -->  name call=(arg, value)
-        // target name(arg) = value  -->  target name=(arg, value)
+        // example: array(3) = 4
+        // before:  Apply(    Msg(null, "array"),                  Int(3))
+        // after:   Apply(Msg(Msg(null, "array"), "assign"), Tuple(Int(3), Int(4)))
         ApplyExpr apply = (ApplyExpr) expr;
-        // TODO(bob): Hack. doesn't handle foo()() = bar
-        MessageExpr message = (MessageExpr) apply.getTarget();
-        
-        if (message.getReceiver() == null) {
-          // name(arg) = value  -->  name call=(arg, value)
-          return Expr.message(position, Expr.name(message.getName()),
-              Identifiers.CALL_ASSIGN, Expr.tuple(apply.getArg(), value));
-        } else {
-          // target name(arg) = value  -->  target name=(arg, value)
-          return Expr.message(position, message.getReceiver(),
-              Identifiers.makeSetter(message.getName()),
-              Expr.tuple(apply.getArg(), value));
-        }
+        return new ApplyExpr(new MessageExpr(position, apply.getTarget(),
+            Identifiers.ASSIGN),
+            Expr.tuple(apply.getArg(), value));
       } else {
         throw new ParseException("Expression \"" + expr +
         "\" is not a valid target for assignment.");
@@ -429,12 +406,6 @@ public class MagpieParser extends Parser {
       return new ExpressionExpr(position, expr);
     } else if (lookAhead(TokenType.NAME, TokenType.COLON)) {
       return parseObjectLiteral();
-      // TODO(bob): Temp for testing apply!
-    } else if (match(TokenType.DOT)) {
-      Expr target = parseExpression();
-      consume(TokenType.DOT);
-      Expr arg = parseExpression();
-      return new ApplyExpr(target, arg);
     }
     
     // See if we're at a keyword we know how to parse.

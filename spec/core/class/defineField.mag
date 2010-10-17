@@ -1,3 +1,8 @@
+// Defined fields are temporarily dead. The current plan is that all field
+// access goes through getters and setters. To do that, we need the type
+// declaration Expr for each field, and a defined field doesn't provide that.
+nothing
+/*
 specify("The 'defineField' method on Class") with
     it should("define an initialized field on the class") with
         var c = Class new("c")
@@ -21,3 +26,4 @@ specify("The 'defineField' method on Class") with
         c new() foo shouldBe("after")
     end
 end
+*/

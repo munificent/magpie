@@ -1,9 +1,12 @@
 // A simple class that implements truthiness and tracks when it was called.
 class TruthTest
-    this(value Bool) this value = value
+    this(value Bool)
+        this value = value
+        this called = false
+    end
     
     value Bool
-    called = false
+    called Bool
 end
 
 TruthTest defineGetter("true?", fn(-> Bool)

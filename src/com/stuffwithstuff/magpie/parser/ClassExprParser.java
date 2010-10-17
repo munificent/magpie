@@ -54,6 +54,9 @@ public class ClassExprParser implements ExprParser {
         boolean isOperator = parser.last(1).getType() == TokenType.OPERATOR;
         
         // See what kind of member it is.
+        // TODO(bob): Field definitions are disabled right now. See defineField
+        // spec for more.
+        /*
         if (parser.match(TokenType.EQUALS)) {
           if (isOperator) throw new ParseException(
               "The operator \"" + member + "\" is not a valid name for a field.");
@@ -68,7 +71,7 @@ public class ClassExprParser implements ExprParser {
             exprs.add(Expr.message(Expr.name(name), Identifiers.DEFINE_FIELD,
                 Expr.tuple(Expr.string(member), Expr.fn(body))));
           }
-        } else if (parser.lookAhead(TokenType.LEFT_PAREN)) {
+        } else*/ if (parser.lookAhead(TokenType.LEFT_PAREN)) {
           // Method definition.
           Expr receiver = Expr.name(name);
           if (isShared) {

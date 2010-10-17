@@ -53,8 +53,8 @@ public class ArrayBuiltIns {
     return elements.get(index);
   }
   
-  @Signature("call=(index Int, item)")
-  public static Obj call_eq_(Interpreter interpreter, Obj thisObj, Obj arg) {
+  @Signature("assign(index Int, item)")
+  public static Obj assign(Interpreter interpreter, Obj thisObj, Obj arg) {
     List<Obj> elements = thisObj.asArray();
     
     int index = arg.getTupleField(0).asInt();

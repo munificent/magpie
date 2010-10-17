@@ -21,7 +21,7 @@ public class ClassBuiltIns {
         new FieldGetter(name, type.getFunction().getFunction().getBody()));
     
     // Add a setter.
-    classObj.addMethod(Identifiers.makeSetter(name),
+    classObj.defineSetter(name,
         new FieldSetter(name, type.getFunction().getFunction().getBody()));
 
     return interpreter.nothing();
@@ -37,6 +37,7 @@ public class ClassBuiltIns {
     return interpreter.nothing();
   }
 
+  /*
   @Signature("defineField(name String, initializer ->)")
   public static Obj defineField(Interpreter interpreter, Obj thisObj, Obj arg) {
     String name = arg.getTupleField(0).asString();
@@ -44,9 +45,10 @@ public class ClassBuiltIns {
     
     ClassObj classObj = (ClassObj)thisObj;
     classObj.defineField(name, initializer);
-    
+
     return interpreter.nothing();
   }
+  */
   
   @Signature("defineMethod(name String, body ->)")
   public static Obj defineMethod(Interpreter interpreter, Obj thisObj, Obj arg) {
@@ -66,6 +68,17 @@ public class ClassBuiltIns {
     
     ClassObj classObj = (ClassObj)thisObj;
     classObj.defineGetter(name, body.getCallable());
+    
+    return interpreter.nothing();
+  }
+
+  @Signature("defineSetter(name String, body ->)")
+  public static Obj defineSetter(Interpreter interpreter, Obj thisObj, Obj arg) {
+    String name = arg.getTupleField(0).asString();
+    FnObj body = (FnObj)arg.getTupleField(1);
+    
+    ClassObj classObj = (ClassObj)thisObj;
+    classObj.defineSetter(name, body.getCallable());
     
     return interpreter.nothing();
   }
@@ -146,7 +159,7 @@ public class ClassBuiltIns {
     return parent;
   }
   
-  @Signature("parent=(parent Class -> Class)")
+  @Setter("parent(parent Class -> Class)")
   public static Obj parent_eq_(Interpreter interpreter, Obj thisObj, Obj arg) {
     ClassObj classObj = (ClassObj)thisObj;
     

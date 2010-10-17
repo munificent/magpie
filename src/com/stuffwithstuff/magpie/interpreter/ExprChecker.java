@@ -73,6 +73,9 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   
   @Override
   public Obj visit(AssignExpr expr, EvalContext context) {
+    // TODO(bob): Fix to work with setters.
+    return mInterpreter.getNothingType();
+    /*
     String name = expr.getName();
     
     // Try to assign to a local.
@@ -91,6 +94,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     // Otherwise, it must be a setter on this.
     String setter = Identifiers.makeSetter(name);
     return getMethodReturn(expr, context.getThis(), setter, valueType);
+    */
   }
 
   @Override

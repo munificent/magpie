@@ -211,7 +211,8 @@ public class Checker {
 
     Scope scope = new Scope(parent);
     for (Entry<String, Obj> entry : valueScope.entries()) {
-      Obj type = mInterpreter.resolveName(entry.getValue(), Identifiers.TYPE);
+      Obj type = mInterpreter.getProperty(Position.none(), entry.getValue(),
+          Identifiers.TYPE);
       scope.define(entry.getKey(), type);
     }
     

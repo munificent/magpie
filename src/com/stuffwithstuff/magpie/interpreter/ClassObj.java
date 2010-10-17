@@ -12,21 +12,29 @@ public class ClassObj extends Obj {
     super(metaclass);
     mName = name;
     mParent = parent;
+    /*
     mFieldInitializers = new HashMap<String, FnObj>();
+    */
     mGetters = new HashMap<String, Callable>();
+    mSetters = new HashMap<String, Callable>();
   }
 
   public ClassObj(String name, ClassObj parent) {
     mName = name;
     mParent = parent;
+    /*
     mFieldInitializers = new HashMap<String, FnObj>();
+    */
     mGetters = new HashMap<String, Callable>();
+    mSetters = new HashMap<String, Callable>();
   }
-
+  
+  /*
   public Map<String, FnObj> getFieldInitializers() {
     return mFieldInitializers;
   }
-
+  */
+  
   public Obj instantiate() {
     return new Obj(this);
   }
@@ -77,6 +85,19 @@ public class ClassObj extends Obj {
     return null;
   }
   
+  public Callable findSetter(String name) {
+    // Walk up the inheritance chain.
+    ClassObj classObj = this;
+    while (classObj != null) {
+      Callable setter = classObj.mSetters.get(name);
+      if (setter != null) return setter;
+      classObj = classObj.mParent;
+    }
+    
+    // If we got here, it wasn't found.
+    return null;
+  }
+  
   public void addConstructor(Callable constructor) {
     Expect.notNull(constructor);
     
@@ -87,12 +108,18 @@ public class ClassObj extends Obj {
     return mConstructor;
   }
   
+  /*
   public void defineField(String name, FnObj initializer) {
     mFieldInitializers.put(name, initializer);
   }
+  */
   
   public void defineGetter(String name, Callable body) {
     mGetters.put(name, body);
+  }
+  
+  public void defineSetter(String name, Callable body) {
+    mSetters.put(name, body);
   }
   
   @Override
@@ -103,7 +130,10 @@ public class ClassObj extends Obj {
   private final String mName;
   private ClassObj mParent;
   private Callable mConstructor;
+  /*
   private final Map<String, FnObj> mFieldInitializers;
+  */
   private final Map<String, Callable> mGetters;
+  private final Map<String, Callable> mSetters;
   private final MethodSet mMethods = new MethodSet();
 }

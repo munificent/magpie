@@ -1,14 +1,11 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
 import java.util.Collections;
-import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
-import com.stuffwithstuff.magpie.interpreter.EvalContext;
-import com.stuffwithstuff.magpie.interpreter.FnObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.util.Expect;
@@ -30,6 +27,7 @@ public class ClassNew implements Callable {
     
     Obj obj = classObj.instantiate();
     
+    /*
     // Initialize its fields.
     for (Entry<String, FnObj> field : classObj.getFieldInitializers().entrySet()) {
       EvalContext fieldContext = new EvalContext(field.getValue().getFunction().getClosure(),
@@ -38,6 +36,7 @@ public class ClassNew implements Callable {
           fieldContext);
       obj.setField(field.getKey(), value);
     }
+    */
     
     // TODO(bob): Needs to call parent constructors too!
     

@@ -53,15 +53,26 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(AssignExpr expr, EvalContext context) {
-    String name = expr.getName();
-    
-    // Try to assign to a local.
+    Obj receiver = evaluate(expr.getReceiver(), context);
     Obj value = evaluate(expr.getValue(), context);    
-    if (context.assign(name, value)) return value;
+
+    if (receiver == null) {
+      // Just a name, so maybe it's a local variable.
+      if (context.assign(expr.getName(), value)) return value;
+      // Otherwise it must be a property on this.
+      receiver = context.getThis();
+    }
     
-    // Otherwise, it must be a setter on this.
-    String setter = Identifiers.makeSetter(name);
-    return mInterpreter.invokeMethod(expr.getPosition(), context.getThis(), setter, value);
+    // Look for a setter.
+    Callable setter = receiver.getClassObj().findSetter(expr.getName());
+    if (setter == null) {
+      mInterpreter.runtimeError(expr.getPosition(),
+          "Could not find a setter \"%s\" on %s.",
+          expr.getName(), receiver.getClassObj());
+    }
+    
+    setter.invoke(mInterpreter, receiver, value);
+    return value;
   }
 
   @Override
@@ -198,16 +209,13 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     if (receiver == null) {
       // Just a name, so maybe it's a variable.
       Obj variable = context.lookUp(expr.getName());
-
-      if (variable != null) {
-        return variable;
-      }
+      if (variable != null) return variable;
       
       // Otherwise it must be a property on this.
-      return mInterpreter.resolveName(context.getThis(), expr.getName());
+      receiver = context.getThis();
     }
     
-    return mInterpreter.resolveName(receiver, expr.getName());
+    return mInterpreter.getProperty(expr.getPosition(), receiver, expr.getName());
   }
   
   @Override
@@ -288,7 +296,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
   
   private boolean isTruthy(Expr expr, Obj receiver) {
-    Obj truthy = mInterpreter.resolveName(receiver, Identifiers.IS_TRUE);
+    Obj truthy = mInterpreter.getProperty(expr.getPosition(), receiver,
+        Identifiers.IS_TRUE);
     return truthy.asBool();
   }
 

@@ -1,7 +1,5 @@
 package com.stuffwithstuff.magpie.interpreter;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 
 import com.stuffwithstuff.magpie.Identifiers;
@@ -144,8 +142,7 @@ public class Interpreter {
     if (result == mNothing) return null;
     
     // Convert it to a string.
-    result = resolveName(result, Identifiers.TO_STRING);
-    return result.asString();
+    return evaluateToString(result);
   }
   
   public Obj evaluateFunctionType(FunctionType type, EvalContext context) {
@@ -205,7 +202,7 @@ public class Interpreter {
     mainFn.invoke(this, mNothing, mNothing);
   }
   
-  public Obj resolveName(Obj receiver, String name) {
+  public Obj getProperty(Position position, Obj receiver, String name) {
     // Look for a getter.
     Callable getter = receiver.getClassObj().findGetter(name);
     if (getter != null) {
@@ -218,26 +215,21 @@ public class Interpreter {
       // Bind it to the receiver.
       return new FnObj(mFnClass, receiver, method);
     }
-    
-    // Look for a field.
-    Obj field = receiver.getField(name);
-    if (field != null) {
-      return field;
-    }
+   
+    // If all else fails, try finding a matching native Java method on the
+    // primitive value.
+    // TODO(bob): The bound method refactoring broke this. Unbreak.
+    /*
+    Obj result = callJavaMethod(receiver, name, arg);
+    if (result != null) return result;
+    */
 
-    return null;
+    runtimeError(position,
+        "Could not find a member named \"%s\" on %s.",
+        name, receiver.getClassObj());
+    return mNothing;
   }
   
-  public Obj apply(Obj target, Obj arg) {
-    if (target instanceof FnObj) {
-      // Apply the argument.
-      FnObj function = (FnObj) target;
-      return function.invoke(this, arg);
-    }
-    
-    return invokeMethod(target, Identifiers.CALL, arg);
-  }
-
   /**
    * Invokes a named method on an object, passing in the given argument.
    * 
@@ -253,40 +245,22 @@ public class Interpreter {
   public Obj invokeMethod(Position position, Obj receiver, String name,
       Obj arg) {
     
-    // TODO(bob): This is hackish in-progress. It should get much simpler once
-    // message exprs don't have args.
-    Obj resolved = resolveName(receiver, name);
-    if (resolved != null) {
-      if (arg == null) {
-        // No argument, so we're done.
-        return resolved;
-      }
-      return apply(resolved, arg);
-    }
+    // TODO(bob): This whole method is basically a copy/paste of ExprEvaluator
+    // for MessageExpr and ApplyExpr. Clean up!
+    Obj resolved = getProperty(position, receiver, name);
 
-    // TODO(bob):
-    // * Create setters.
-    // * Add property support to checker.
-    
-    // TODO(bob): Get rid of this and have real setters.
-    // If there isn't an actual method, then calling a setter defaults to
-    // creating a field with the given name.
-    if (Identifiers.isSetter(name)) {
-      String field = Identifiers.getSetterBaseName(name);
-      receiver.setField(field, arg);
-      return arg;
+    if (arg == null) {
+      // No argument, so we're done.
+      return resolved;
     }
     
-    // If all else fails, try finding a matching native Java method on the
-    // primitive value.
-    Obj result = callJavaMethod(receiver, name, arg);
-    if (result != null) return result;
+    if (resolved instanceof FnObj) {
+      // Apply the argument.
+      FnObj function = (FnObj) resolved;
+      return function.invoke(this, arg);
+    }
     
-    runtimeError(position,
-        "Could not find a variable or method named \"%s\" on %s.",
-        name, receiver.getClassObj());
-    
-    return mNothing;
+    return invokeMethod(resolved, Identifiers.CALL, arg);
   }
 
   public void print(String text) {
@@ -377,7 +351,7 @@ public class Interpreter {
   }
   
   public String evaluateToString(Obj value) {
-    return resolveName(value, Identifiers.TO_STRING).asString();
+    return getProperty(Position.none(), value, Identifiers.TO_STRING).asString();
   }
 
   public void pushScriptPath(String path) {
@@ -406,8 +380,9 @@ public class Interpreter {
     
     return classObj;
   }
-    // TODO(bob): This is hackish in-progress.
-   
+  
+  // TODO(bob): This is hackish in-progress.
+  /* 
   private Obj callJavaMethod(Obj receiver, String name, Obj arg) {
     if (receiver.getValue() != null) {
       Class<?> klass = receiver.getValue().getClass();
@@ -484,8 +459,9 @@ public class Interpreter {
     
     return classObj.instantiate(value);
   }
+  */
   
-  private void runtimeError(Position position, String format, Object... args) {
+  void runtimeError(Position position, String format, Object... args) {
     mHost.runtimeError(position, String.format(format, args));
   }
 

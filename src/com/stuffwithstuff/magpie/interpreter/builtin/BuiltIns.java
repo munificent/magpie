@@ -24,6 +24,11 @@ public abstract class BuiltIns {
       if (getter != null) {
         registerGetter(magpieClass, method, getter.value());
       }
+      
+      Setter setter = method.getAnnotation(Setter.class);
+      if (setter != null) {
+        registerSetter(magpieClass, method, setter.value());
+      }
     }
   }
   
@@ -73,6 +78,29 @@ public abstract class BuiltIns {
     }
   }
 
+  private static void registerSetter(ClassObj classObj, Method method,
+      String signature) {
+    try {
+      Pair<String, FunctionType> parsed = parseSignature(signature);
+      String methodName = parsed.getKey();
+      FunctionType type = parsed.getValue();
+      
+      // See if it's shared.
+      boolean isShared = method.getAnnotation(Shared.class) != null;
+      
+      // Define the setter.
+      BuiltIn builtIn = new BuiltIn(type, method);
+      if (isShared) {
+        classObj.getClassObj().defineSetter(methodName, builtIn);
+      } else {
+        classObj.defineSetter(methodName, builtIn);
+      }
+    } catch (SecurityException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+  
   private static Pair<String, FunctionType> parseSignature(String signature) {
     try {
       // Process the annotation to get the method's Magpie name and type
