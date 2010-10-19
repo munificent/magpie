@@ -4,7 +4,7 @@
 
 class PriorityQueue
     this()
-        this heap = Array new
+        this heap = Array new()
     end
 
     // The following methods "traverse" the tree stored in the heap array. The tree
@@ -68,12 +68,14 @@ class PriorityQueue
     addAll(items)
         for item = items do add(item)
     end
+    
+    heap Array newType(Dynamic)
 end
 
 var expect(queue, items)
     var success = true
     for item = items do
-        var top = queue dequeue
+        var top = queue dequeue()
         if top != item then
             print("FAIL: Expected " + item + " and got " + top)
             success = false
@@ -83,10 +85,10 @@ var expect(queue, items)
     if success then print("Got all expected: " + items);
 end
 
-var queue = PriorityQueue new
+var queue = PriorityQueue new()
 queue addAll(Array of(5, 2, 3, 4, 1))
 expect(queue, Array of(1, 2, 3, 4, 5))
 
-queue = PriorityQueue new
+queue = PriorityQueue new()
 queue addAll(Array of("e", "a", "c", "g", "h", "b", "d", "i", "f"))
 expect(queue, Array of("a", "b", "c", "d", "e", "f", "g", "h", "i"))

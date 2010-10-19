@@ -262,11 +262,11 @@ public class MagpieParser extends Parser {
    * Parses a series of operator expressions like "a + b - c".
    */
   private Expr operator() {
-    Expr left = message();
+    Expr left = blockArgument();
     
     while (match(TokenType.OPERATOR)) {
       String op = last(1).getString();
-      Expr right = message();
+      Expr right = blockArgument();
 
       left = Expr.message(left.getPosition().union(right.getPosition()),
           left, op, right);
@@ -276,104 +276,75 @@ public class MagpieParser extends Parser {
   }
   
   /**
-   * Parses a series of messages sends (which may or may not start with a
-   * receiver like "obj message(1) andThen finally(3, 4)"
+   * Parse series of block arguments (i.e. a "with" block).
+   */
+  private Expr blockArgument() {
+    Expr expr = message();
+    
+    while(match(TokenType.WITH)) {
+      // Parse the parameter list if given.
+      FunctionType blockType;
+      if (lookAhead(TokenType.LEFT_PAREN)) {
+        blockType = parseFunctionType();
+      } else {
+        // Else just assume a single "it" parameter.
+        blockType = new FunctionType(Collections.singletonList(Identifiers.IT),
+            Expr.name("Dynamic"), Expr.name("Dynamic"));
+      }
+
+      // Parse the block and wrap it in a function.
+      Expr block = parseBlock();
+      block = new FnExpr(block.getPosition(), blockType, block);
+      
+      // Apply it to the previous expression.
+      if (expr instanceof ApplyExpr) {
+        // foo(123) with ...  --> Apply(Msg(foo), Tuple(123, block))
+        ApplyExpr apply = (ApplyExpr)expr;
+        Expr arg = addTupleField(apply.getArg(), block);
+        expr = new ApplyExpr(apply.getTarget(), arg);
+      } else {
+        // 123 with ...  --> Apply(Int(123), block)
+        expr = new ApplyExpr(expr, block);
+      }
+    }
+    
+    return expr;
+  }
+  
+  /**
+   * Parse a series of message sends, argument applies, and static argument
+   * applies. Basically everything in the core syntax that works left-to-right.
    */
   private Expr message() {
     Expr message = primary();
     
     while (true) {
-      String name;
-      Position position = current().getPosition();
-      Expr staticArg = null;
-      Expr arg = null;
+      Position start = current().getPosition();
       
-      // TODO(bob): Hackish. If we encounter a name: pair, then we're in the
-      // middle of an object literal, so don't treat the name as a message.
-      if (lookAhead(TokenType.NAME, TokenType.COLON)) break;
-      
-      // TODO(bob): This is kind of gross. The static arg stuff is just jammed
-      // in here awkwardly. Should refactor.
       if (match(TokenType.NAME)) {
-        // A normal named message.
-        name = last(1).getString();
-        
-        // See if it has an argument.
-        if (match(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)) {
-          arg = new NothingExpr(last(2).getPosition().union(last(1).getPosition()));
-        } else if (match(TokenType.LEFT_PAREN)) {
-          arg = parseExpression();
-          consume(TokenType.RIGHT_PAREN);
-        }
-      } else if (lookAhead(TokenType.LEFT_PAREN)) {
-        // A call (i.e. an unnamed message like 123(345) or (foo bar)[baz](bang).
-        name = "call";
-        
-        // Pass the argument if present.
-        if (match(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)) {
-          arg = new NothingExpr(last(2).getPosition().union(last(1).getPosition()));
-        } else if(match(TokenType.LEFT_PAREN)) {
-          arg = parseExpression();
-          consume(TokenType.RIGHT_PAREN);
-        }
-        
+        message = new MessageExpr(last(1).getPosition(), message,
+            last(1).getString());
       } else if (match(TokenType.LEFT_BRACKET)) {
-        // A static function call (i.e. foo[123]).
-        name = "not used";
-
+        // A static apply (i.e. foo[123]).
+        Expr staticArg;
         if (match(TokenType.RIGHT_BRACKET)) {
           staticArg = new NothingExpr(last(2).getPosition().union(last(1).getPosition()));
         } else {
           staticArg = parseExpression();
           consume(TokenType.RIGHT_BRACKET);
         }
+        message = new InstantiateExpr(start.union(current().getPosition()),
+            message, staticArg);
       } else {
-        break;
-      }
-      
-      // Look for a following block argument.
-      if (match(TokenType.WITH)) {
-        // Parse the parameter list if given.
-        FunctionType blockType;
-        if (lookAhead(TokenType.LEFT_PAREN)) {
-          blockType = parseFunctionType();
-        } else {
-          // Else just assume a single "it" parameter.
-          blockType = new FunctionType(Collections.singletonList(Identifiers.IT),
-              Expr.name("Dynamic"), Expr.name("Dynamic"));
-        }
-
-        // Parse the block and wrap it in a function.
-        Expr blockArg = parseBlock();
-        blockArg = new FnExpr(blockArg.getPosition(), blockType, blockArg);
-        
-        // Tack it on to the regular argument.
-        if (arg == null) {
-          arg = blockArg;
-        } else if (arg instanceof TupleExpr) {
-          ((TupleExpr)arg).getFields().add(blockArg);
-        } else {
-          arg = Expr.tuple(arg, blockArg);
-        }
-      }
-      
-      position = position.union(last(1).getPosition());
-      
-      if (staticArg != null) {
-        message = new InstantiateExpr(position, message, staticArg);
-      } else {
-        // TODO(bob): Hack temp refactoring. Should parse arg separately.
-        if (arg != null) {
-          message = new ApplyExpr(new MessageExpr(position, message,
-              name), arg);
-        } else {
-          message = new MessageExpr(position, message, name);
-        }
+        Expr arg = primary();
+        if (arg == null) break;
+        message = new ApplyExpr(message, arg);
       }
     }
     
     if (message == null) {
-      throw new ParseException("Could not parse expression at " + current().getPosition());
+      throw new ParseException("Could not parse expression at " +
+          current().getPosition());
     }
     
     return message;
@@ -394,6 +365,8 @@ public class MagpieParser extends Parser {
       return new ThisExpr(last(1).getPosition());
     } else if (match(TokenType.NOTHING)) {
       return new NothingExpr(last(1).getPosition());
+    } else if (match(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)) {
+      return new NothingExpr(last(2).getPosition().union(last(1).getPosition()));
     } else if (match(TokenType.LEFT_PAREN)) {
       Expr expr = parseExpression();
       consume(TokenType.RIGHT_PAREN);
@@ -443,6 +416,19 @@ public class MagpieParser extends Parser {
     return exprs;
   }
 
+  private Expr addTupleField(Expr expr, Expr field) {
+    if (expr instanceof NothingExpr) {
+      return field;
+    } else if (expr instanceof TupleExpr) {
+      TupleExpr tuple = (TupleExpr)expr;
+      List<Expr> fields = new ArrayList<Expr>(tuple.getFields());
+      fields.add(field);
+      return new TupleExpr(fields);
+    } else {
+      return Expr.tuple(expr, field);
+    }
+  }
+  
   private final Map<TokenType, ExprParser> mParsers =
     new HashMap<TokenType, ExprParser>();
 }
