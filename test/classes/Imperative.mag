@@ -1,7 +1,7 @@
 // Tests the core imperative syntax for working with classes. The declarative
 // stuff is desugared to this.
 
-var Foo = Class newClass("Foo")
+var Foo = Class new("Foo")
 
 Foo defineConstructor(fn (arg) print("ctor " + arg))
 Foo defineMethod("method", fn (arg) print("method " + arg))

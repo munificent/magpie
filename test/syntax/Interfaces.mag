@@ -18,8 +18,6 @@ interface ISubset
     bar(a Int -> Int)
 end
 
-// TODO(bob): Need syntax for adding methods to an existing interface.
-
 var main(->)
     print(IFoo canAssignFrom(Foo))     //: true
     print(ITooMany canAssignFrom(Foo)) //: false

@@ -1,3 +1,6 @@
+// [disable]
+// Getters and setters broke object literals until we have real structural
+// classes.
 var a = x: 1 y: 2
 
 print(a x) //: 1

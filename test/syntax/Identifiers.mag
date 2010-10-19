@@ -28,7 +28,7 @@ def Foo ^abc (other) "letters"
 
 def Foo ~!$%^&*-=+|/?<> (other) "everything"
 
-var foo = Foo new
+var foo = Foo new()
 print(foo +    foo)              //: plus
 print(foo ?!   foo)              //: wha?
 print(foo $___ foo)              //: underscore

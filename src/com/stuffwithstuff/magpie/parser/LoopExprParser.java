@@ -26,7 +26,7 @@ public class LoopExprParser implements ExprParser {
     // To:
     //
     //   do
-    //     def __a_gen = foo.generate
+    //     def __a_gen = foo.iterate()
     //     while __a_gen.next do
     //       def a = __a_gen.current
     //       print a

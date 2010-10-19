@@ -6,14 +6,14 @@ class OrType
     cases ArrayType new(Dynamic) // TODO(bob): IType[Int]
 end
 
-def OrType toString(-> String)
+OrType defineGetter("toString", fn(-> String)
     var result = ""
     for index = 0 until(cases count) do
         result = result + cases(index) toString
         if index < (cases count - 1) then result = result + " | "
     end
     result
-end
+end)
 
 def OrType |(other -> Object)
     Class orTypes(this, other)
@@ -53,19 +53,37 @@ def OrType canAssignFrom(other -> Bool)
     end
 end
 
-def OrType getMethodType(name String, arg)
-    var firstType = cases(0) getMethodType(name, arg)
+def OrType getMemberType(name String)
+    var firstType = cases(0) getMemberType(name)
     
     for type = cases do
-        var method = type getMethodType(name, arg)
+        var method = type getMemberType(name)
         // The method must be present in all cases
         if method == nothing then return nothing
         
         // And all types must match.
-        // TODO(bob): Right now, the arg and return types of all cases must
-        // match exactly. We could at some point loosen this to allow subtypes.
-        if firstType _0 != method _0 then return nothing
-        if firstType _1 != method _1 then return nothing
+        // TODO(bob): Right now, the types of all cases must match exactly.
+        // We could at some point loosen this to allow subtypes.
+        if firstType canAssignFrom(method) not then return nothing
+        if method canAssignFrom(firstType) not then return nothing
+    end
+    
+    firstType
+end
+
+def OrType getSetterType(name String)
+    var firstType = cases(0) getMemberType(name)
+    
+    for type = cases do
+        var method = type getSetterType(name)
+        // The setter must be present in all cases
+        if method == nothing then return nothing
+        
+        // And all types must match.
+        // TODO(bob): Right now, the types of all cases must match exactly.
+        // We could at some point loosen this to allow subtypes.
+        if firstType canAssignFrom(method) not then return nothing
+        if method canAssignFrom(firstType) not then return nothing
     end
     
     firstType

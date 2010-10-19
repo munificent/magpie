@@ -1,20 +1,28 @@
 class Bar
-    bang = "b"
+    this()
+        bang = "b"
+    end
+    
+    bang String
 end
 
 class Foo
-    bar = Bar new
+    this()
+        bar = Bar new()
+    end
+    
+    bar Bar
 end
 
 def Foo change()
     this bar bang = "d"
 end
 
-var foo = Foo new
+var foo = Foo new()
 print(foo bar bang)    //: b
 
 foo bar bang = "c"
 print(foo bar bang)    //: c
 
-foo change
+foo change()
 print(foo bar bang)    //: d

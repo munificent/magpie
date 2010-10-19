@@ -31,5 +31,5 @@ print(a(1))    //: set
 a(-2) = "neg"
 print(a(-2))   //: neg
 
-a clear
+a clear()
 print(a count) //: 0

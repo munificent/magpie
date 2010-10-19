@@ -41,7 +41,7 @@ public class RuntimeBuiltIns {
     List<Obj> errorObjs = new ArrayList<Obj>();
     for (CheckError error : errors) {
       // TODO(bob): Should eventually return more than just the error message.
-      errorObjs.add(interpreter.createString(error.getMessage()));
+      errorObjs.add(interpreter.createString(error.toString()));
     }
 
     return interpreter.createArray(errorObjs);

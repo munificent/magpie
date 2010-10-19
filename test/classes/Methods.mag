@@ -8,7 +8,7 @@ def Foo twoArgs(arg1 String, arg2 String)
     print(arg1 + arg2)
 end
 
-var foo = Foo new
-foo noArgs              //: noArgs
+var foo = Foo new()
+foo noArgs()              //: noArgs
 foo oneArg("one")       //: oneArg one
 foo twoArgs("a", "b")   //: ab

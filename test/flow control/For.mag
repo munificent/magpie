@@ -14,7 +14,7 @@ end
 
 // parallel iterators
 for i = 10 to(60) for j = 5 to(12)
-for k = 3 times do
+for k = 3 times() do
     print(i)
     print(j)
     print(k)

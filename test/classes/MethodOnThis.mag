@@ -5,11 +5,11 @@ def Foo noArgs() print("noArgs")
 def Foo oneArg(arg String) print("oneArg " + arg)
 
 def Foo someMethod()
-    noArgs              //: noArgs
+    noArgs()              //: noArgs
     oneArg("foo")       //: oneArg foo
-    this noArgs             //: noArgs
+    this noArgs()             //: noArgs
     this oneArg("foo")      //: oneArg foo
 end
 
-var foo = Foo new
-foo someMethod
+var foo = Foo new()
+foo someMethod()

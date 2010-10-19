@@ -58,7 +58,7 @@ public class Function implements Callable {
         context.define(names.get(0), arg);
         
         for (int i = 1; i < names.size(); i++) {
-          context.define(names.get(1), interpreter.nothing());
+          context.define(names.get(i), interpreter.nothing());
         }
       } else {
         // Destructure the tuple.

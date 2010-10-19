@@ -2,16 +2,16 @@ class Foo
 end
 
 def Foo defined()
-    notDefined
+    notDefined()
 end
 
-var foo = Foo new
+var foo = Foo new()
 
 // calling an undefined method returns Nothing
-print(foo notDefined) //: nothing
+print(foo notDefined()) //: nothing
 
 // calling an undefined method from within this returns Nothing
-print(foo defined) //: nothing
+print(foo defined()) //: nothing
 
 // but still evaluates arg
 foo notDefined(print("hi")) //: hi

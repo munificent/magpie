@@ -1,4 +1,4 @@
-print(Array new)                //: []
+print(Array new())              //: []
 print(Array of(1))              //: [1]
 print(Array of("a", "b"))       //: [a, b]
 print(Array of("a", "b", 3))    //: [a, b, 3]

@@ -1,18 +1,26 @@
 class Foo
-    prop = "old"
+    this()
+        prop = "old"
+    end
+    
+    prop String
 end
 
 def Foo change() prop = "new"
 
 class Bar
-    foo = Foo new
+    this()
+        foo = Foo new()
+    end
+    
+    foo Foo
 end
 
-var a = Bar new
-var b = Bar new
+var a = Bar new()
+var b = Bar new()
 
 print(a foo prop) //: old
 print(b foo prop) //: old
-a foo change
+a foo change()
 print(a foo prop) //: new
 print(b foo prop) //: old

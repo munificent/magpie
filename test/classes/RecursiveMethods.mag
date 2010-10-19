@@ -15,7 +15,7 @@ def Foo even?(n Int -> Bool)
     if n == 0 then true else odd?(n - 1)
 end
 
-var foo = Foo new
+var foo = Foo new()
 print(foo fib(10)) //: 55
 
 print(foo odd?(9)) //: true

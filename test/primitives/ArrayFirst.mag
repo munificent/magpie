@@ -1,3 +1,3 @@
 print(Array of(1, 2, 3) first(fn (e) e == 2)) //: 2
 print(Array of(1, 2, 3) first(fn (e) e == 5)) //: nothing
-print(Array new         first(fn (e) e == 5)) //: nothing
+print(Array new()       first(fn (e) e == 5)) //: nothing

@@ -21,6 +21,8 @@ public class TestInterpreterHost implements InterpreterHost {
   public boolean skipped() { return mSkipped; }
 
   public void run() {
+    System.out.println(mPath);
+    
     try {
       // Load the runtime library.
       loadScript("base/base.mag");

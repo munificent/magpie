@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.*;
+import com.stuffwithstuff.magpie.parser.Position;
 
 /**
  * Implements the visitor pattern on AST nodes. For any given expression,
@@ -41,6 +42,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   }
   
   public Obj check(Expr expr, EvalContext context) {
+    if (expr == null) return null;
     return check(expr, context, false);
   }
 
@@ -67,34 +69,68 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(ApplyExpr expr, EvalContext context) {
-    // TODO(bob): Implement me.
-    return mInterpreter.getNothingType();
+    Obj targetType = check(expr.getTarget(), context);
+    Obj argType = check(expr.getArg(), context);
+    
+    // See if the target is an actual function, or a functor.
+    // TODO(bob): Using the class name for this is gross!
+    if (targetType.getClassObj().getName().equals(Identifiers.FUNCTION_TYPE)) {
+      // It's a real function, so the type of apply is the function's return
+      // type.
+      Obj paramType = targetType.getField(Identifiers.PARAM_TYPE);
+      Obj returnType = targetType.getField(Identifiers.RETURN_TYPE);
+      
+      // Make sure the argument type matches the declared parameter type.
+      mChecker.checkTypes(paramType, argType, expr.getPosition(), 
+          "Function is declared to take %s but is being passed %s.");
+      
+      // Calling a function results in the function's return type.
+      return returnType;
+    } else {
+      // It's a functor, so look up the "call" member.
+      // TODO(bob): Implement me!
+      return mInterpreter.getNothingType();
+    }
   }
   
   @Override
   public Obj visit(AssignExpr expr, EvalContext context) {
-    // TODO(bob): Fix to work with setters.
-    return mInterpreter.getNothingType();
-    /*
-    String name = expr.getName();
-    
-    // Try to assign to a local.
-    Obj valueType = check(expr.getValue(), context);
-    Obj existingType = context.lookUp(name);
-    if (existingType != null) {
+    Obj receiverType = check(expr.getReceiver(), context);
+    Obj valueType = check(expr.getValue(), context);    
+
+    if (receiverType == null) {
+      // Just a name, so maybe it's a local variable.
+      Obj existingType = context.lookUp(expr.getName());
+      if (existingType != null) {
+        
+        // Make sure the new value is compatible with the variable's type.
+        mChecker.checkTypes(existingType, valueType, expr.getPosition(),
+            "Variable of type %s cannot be assigned a value of type %s.");
+
+        // The type doesn't change.
+        return existingType;
+      }
       
-      // Make sure the new value is compatible with the variable's type.
-      mChecker.checkTypes(existingType, valueType, expr.getPosition(),
-          "Variable of type %s cannot be assigned a value of type %s.");
-
-      // The type doesn't change.
-      return existingType;
+      // Otherwise it must be a property on this.
+      receiverType = context.getThis();
     }
+    
+    Obj setterType = mInterpreter.invokeMethod(receiverType,
+        Identifiers.GET_SETTER_TYPE, mInterpreter.createString(expr.getName()));
+    
+    if (setterType == mInterpreter.nothing()) {
+      mChecker.addError(expr.getPosition(),
+          "Could not find a setter \"%s\" on %s when checking.",
+          expr.getName(), receiverType);
 
-    // Otherwise, it must be a setter on this.
-    String setter = Identifiers.makeSetter(name);
-    return getMethodReturn(expr, context.getThis(), setter, valueType);
-    */
+      return mInterpreter.getNothingType();
+    }
+    
+    // Make sure the assigned value if compatible with the setter.
+    mChecker.checkTypes(setterType, valueType, expr.getPosition(),
+        "Setter of type %s cannot be assigned a value of type %s.");
+
+    return setterType;
   }
 
   @Override
@@ -230,35 +266,18 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(MessageExpr expr, EvalContext context) {
-    // TODO(bob): Fix to work with ApplyExpr.
-    return mInterpreter.getNothingType();
-    /*
-    Obj receiver = (expr.getReceiver() == null) ? null :
-        check(expr.getReceiver(), context);
-    
-    Obj arg = (expr.getArg() == null) ? null :
-        check(expr.getArg(), context);
+    Obj receiver = check(expr.getReceiver(), context);
     
     if (receiver == null) {
       // Just a name, so maybe it's a variable.
       Obj variableType = context.lookUp(expr.getName());
-  
-      if (variableType != null) {
-        // If we have an argument, apply it.
-        if (arg != null) {
-          return getMethodReturn(expr, variableType, Identifiers.CALL, arg);
-        }
-        return variableType;
-      }
+      if (variableType != null) return variableType;
       
-      // Otherwise it must be a method on this.
-      if (arg == null) arg = mInterpreter.getNothingType();
-      return getMethodReturn(expr, context.getThis(), expr.getName(), arg);
+      // Otherwise it must be a property on this.
+      receiver = context.getThis();
     }
     
-    if (arg == null) arg = mInterpreter.getNothingType();
-    return getMethodReturn(expr, receiver, expr.getName(), arg);
-    */
+    return getMemberType(expr.getPosition(), receiver, expr.getName());
   }
 
   @Override
@@ -353,7 +372,27 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       // TODO(bob): Should we use a static arg here?
     return mInterpreter.invokeMethod(left, Identifiers.OR, right);
   }
+  
+  public Obj getMemberType(Position position, Obj receiverType, String name) {
+    Obj memberType = mInterpreter.invokeMethod(receiverType,
+        Identifiers.GET_MEMBER_TYPE, mInterpreter.createString(name));
+    
+    if (memberType == mInterpreter.nothing()) {
+      mChecker.addError(position,
+          "Could not find a member named \"%s\" on %s when checking.",
+          name, receiverType);
 
+      // TODO(bob): Temp!
+      memberType = mInterpreter.invokeMethod(receiverType,
+          Identifiers.GET_MEMBER_TYPE, mInterpreter.createString(name));
+      
+      return mInterpreter.getNothingType();
+    }
+
+    return memberType;
+  }
+    
+  /*
   public Obj getMethodReturn(Expr expr, Obj receiverType, String name,
       Obj argType) {
 
@@ -396,6 +435,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     // Return the return type.
     return returnType;
   }
+  */
 
   private final Interpreter mInterpreter;
   private final Checker mChecker;

@@ -1,6 +1,6 @@
 var a = Array of(1, true, "three")
-var b = a copy
-a clear
+var b = a copy()
+a clear()
 
 print(a count) //: 0
 print(b count) //: 3

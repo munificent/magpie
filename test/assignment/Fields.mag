@@ -1,6 +1,11 @@
 class Foo
-    bar = "a"
-    bang = "b"
+    this()
+        bar = "a"
+        bang = "b"
+    end
+    
+    bar String
+    bang String
 end
     
 def Foo change()
@@ -8,8 +13,8 @@ def Foo change()
     this bang = "d"
 end
 
-var foo = Foo new
-foo change
+var foo = Foo new()
+foo change()
 
 print(foo bar)         //: c
 print(foo bang)        //: d

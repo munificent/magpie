@@ -5,10 +5,10 @@ end
 class Derived : Base
 end
 
-var d = Derived new
-d sayHi //: hi
+var d = Derived new()
+d sayHi() //: hi
 
 // override the method
 def Derived sayHi() print("in derived")
 
-d sayHi //: in derived
+d sayHi() //: in derived

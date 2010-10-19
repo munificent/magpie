@@ -31,12 +31,9 @@ def FunctionType canAssignFrom(other -> Bool)
     true
 end
 
-def FunctionType getMethodType(name String, arg)
-    // Yield call with the appropriate types.
-    if name == "call" then return (paramType, returnType)
-    
-    // For other methods, just defer to the base function class.
-    Function getMethodType(name, arg)
+def FunctionType getMemberType(name String)
+    // Just defer to the base function class.
+    Function getMemberType(name)
 end
 
 FunctionType defineGetter("toString", fn(-> String)

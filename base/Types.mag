@@ -105,8 +105,7 @@ shared Dynamic canAssignFrom(other -> Bool)
     true
 end
 
+// From the static perspective, a dynamic object has all possible members and
+// their type is always "Dynamic".
 // TODO(bob): Should return IType
-shared Dynamic getMethodType(name String, argType -> Dynamic)
-    // A dynamic object accepts all methods and they all take and return Dynamic
-    Dynamic, Dynamic
-end
+shared Dynamic getMemberType(name String) Dynamic

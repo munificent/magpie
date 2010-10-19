@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.Identifiers;
+import com.stuffwithstuff.magpie.ast.AssignExpr;
 import com.stuffwithstuff.magpie.ast.BlockExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
@@ -26,7 +27,7 @@ public class ClassExprParser implements ExprParser {
     // Parse the inherits clause, if any.
     if (parser.match(TokenType.COLON)) {
       String baseClass = parser.consume(TokenType.NAME).getString();
-      exprs.add(Expr.message(Expr.name(name), "parent=", Expr.name(baseClass)));
+      exprs.add(new AssignExpr(position, Expr.name(name), "parent", Expr.name(baseClass)));
     }
     
     parser.consume(TokenType.LINE);

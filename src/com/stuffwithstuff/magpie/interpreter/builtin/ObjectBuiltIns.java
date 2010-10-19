@@ -10,7 +10,7 @@ import com.stuffwithstuff.magpie.parser.ParseException;
 
 public class ObjectBuiltIns {
 
-  @Signature("==(other Object -> Bool)")
+  @Signature("==(other Object | Nothing -> Bool)")
   public static Obj _eqeq_(Interpreter interpreter, Obj thisObj, Obj arg) {
     return interpreter.createBool(thisObj == arg);
   }

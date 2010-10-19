@@ -1,4 +1,4 @@
-def Tuple toString(-> String)
+Tuple defineGetter("toString", fn(-> String)
     var s = "("
     
     // TODO(bob): This is pretty gross right now. :(
@@ -23,7 +23,7 @@ def Tuple toString(-> String)
     if count > 18 then s = s + ", " + this _18
     if count > 19 then s = s + ", " + this _19
     s + ")"
-end
+end)
 
 /*
 def Tuple type()
@@ -56,7 +56,7 @@ def TupleIterator next(-> Bool)
     index < tuple count
 end
 
-def TupleIterator current()
+TupleIterator defineGetter("current", fn()
     if index == 0 then tuple _0
     else if index == 1 then tuple _1
     else if index == 2 then tuple _2
@@ -67,7 +67,7 @@ def TupleIterator current()
     else if index == 7 then tuple _7
     else if index == 8 then tuple _8
     else if index == 9 then tuple _9
-end
+end)
     
 def Tuple iterate(-> TupleIterator)
     TupleIterator new(this)

@@ -1,7 +1,7 @@
 class Foo
 end
 
-var foo = Foo new
+var foo = Foo new()
 
 // Walk up the class chain until it loops 
 print(foo type name) //: Foo

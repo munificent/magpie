@@ -18,7 +18,9 @@ public final class Identifiers {
   */
   public static final String DEFINE_METHOD = "defineMethod";
   public static final String EQUALS = "==";
-  public static final String GET_METHOD_TYPE = "getMethodType";
+  public static final String FUNCTION_TYPE = "FunctionType";
+  public static final String GET_MEMBER_TYPE = "getMemberType";
+  public static final String GET_SETTER_TYPE = "getSetterType";
   public static final String IS_TRUE = "true?";
   public static final String IT = "it";
   public static final String ITERATE = "iterate";
@@ -26,6 +28,8 @@ public final class Identifiers {
   public static final String NEW_TYPE = "newType";
   public static final String NEXT = "next";
   public static final String OR = "|";
+  public static final String PARAM_TYPE = "paramType";
+  public static final String RETURN_TYPE = "returnType";
   public static final String TO_STRING = "toString";
   public static final String TYPE = "type";
   public static final String UNSAFE_REMOVE_NOTHING = "unsafeRemoveNothing";

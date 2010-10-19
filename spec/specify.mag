@@ -80,6 +80,7 @@ def Object expectCheckError(block)
 end
 
 def Object expectCheckOK(block)
-    Runtime checkFunction(block) count shouldBe(0,
-        "Should not have any check errors but did.")
+    var errors = Runtime checkFunction(block)
+    errors count shouldBe(0, "Should not have any check errors but had:")
+    for error = errors do print("      - " + error)
 end

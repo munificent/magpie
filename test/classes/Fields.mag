@@ -1,6 +1,10 @@
 class Foo
-    bar = "a"
-    bang = "b"
+    this()
+        bar = "a"
+        bang = "b"
+    end
+    bar String
+    bang String
 end
 
 def Foo printFields()
@@ -8,9 +12,9 @@ def Foo printFields()
     print(this bang)
 end
 
-var foo = Foo new
+var foo = Foo new()
 print(foo bar)        //: a
 print(foo bang)       //: b
 
-foo printFields       //: a
+foo printFields()     //: a
                       //: b

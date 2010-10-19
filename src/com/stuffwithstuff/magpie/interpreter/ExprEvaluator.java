@@ -62,6 +62,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       mInterpreter.runtimeError(expr.getPosition(),
           "Could not find a setter \"%s\" on %s.",
           expr.getName(), receiver.getClassObj());
+      
+      return value;
     }
     
     setter.invoke(mInterpreter, receiver, value);

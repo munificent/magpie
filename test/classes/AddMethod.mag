@@ -1,18 +1,18 @@
 class Foo
 end
 
-var foo = Foo new
+var foo = Foo new()
 
 // Call primitive class manipulation methods.
 Foo defineMethod("sayHi", fn () print("hi"))
 Foo type defineMethod("sayHi", fn () print("shared hi"))
 
-foo sayHi   //: hi
-Foo sayHi   //: shared hi
+foo sayHi()   //: hi
+Foo sayHi()   //: shared hi
 
 def Foo sayHi2() print("hi2")
 shared Foo sayHi2() print("shared hi2")
 
 // Use the syntactic sugar.
-foo sayHi2   //: hi2
-Foo sayHi2   //: shared hi2
+foo sayHi2()   //: hi2
+Foo sayHi2()   //: shared hi2

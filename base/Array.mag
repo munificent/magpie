@@ -13,7 +13,8 @@ def ArrayIterator next(-> Bool)
     index < array count
 end
 
-ArrayIterator defineGetter("current", fn(-> Int) array(index))
+// TODO(bob): Need generics for return type.
+ArrayIterator defineGetter("current", fn array(index))
 
 shared Array new(-> ArrayType new(Object)) Array of()
 
@@ -120,6 +121,6 @@ def ArrayType canAssignFrom(other -> Bool)
     this elementType == (ArrayType unsafeCast(other)) elementType
 end
 
-def ArrayType getMethodType(name String, arg)
-    Array getMethodType(name, arg)
+def ArrayType getMemberType(name String)
+    Array getMemberType(name)
 end
