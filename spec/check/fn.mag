@@ -1,0 +1,11 @@
+specify("A function expression") with
+    it should("return the declared type") with
+        expectCheckOK with
+            fn(-> Int) 123
+        end
+        
+        expectCheckError with
+            fn(-> Int) "string"
+        end
+    end
+end
