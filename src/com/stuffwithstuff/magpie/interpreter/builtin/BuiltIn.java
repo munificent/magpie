@@ -17,7 +17,7 @@ public class BuiltIn implements Callable {
     mType = type;
     mMethod = method;
   }
-  
+
   @Override
   public FunctionType getType() {
     return mType;

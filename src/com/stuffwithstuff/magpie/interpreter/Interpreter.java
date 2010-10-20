@@ -146,6 +146,34 @@ public class Interpreter {
     return evaluateToString(result);
   }
   
+  public Obj evaluateCallableType(Callable callable, boolean justReturnType) {
+    // TODO(bob): Hackish.
+    // Figure out a context to evaluate the method's type signature in. If it's
+    // a user-defined method we'll evaluate it the method's closure so that
+    // outer static arguments are available. Otherwise, we'll assume it has no
+    // outer scope and just evaluate it in a top-level context.
+    EvalContext staticContext;
+    if (callable instanceof Function) {
+      staticContext = new EvalContext(
+          ((Function)callable).getClosure(), mNothing);
+    } else {
+      staticContext = createTopLevelContext();
+    }
+    
+    FunctionType type = callable.getType();
+    
+    if (justReturnType) {
+      return evaluate(type.getReturnType(), staticContext);
+    } else {
+      Obj paramType = evaluate(type.getParamType(), staticContext);
+      Obj returnType = evaluate(type.getReturnType(), staticContext);
+      
+      // Create a FunctionType object.
+      return invokeMethod(mFnClass, Identifiers.CALL,
+          createTuple(paramType, returnType));
+    }
+  }
+
   public Obj evaluateFunctionType(FunctionType type, EvalContext context) {
     // Create the function type for the function.
     Obj paramType = evaluate(type.getParamType(), context);

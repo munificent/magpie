@@ -33,7 +33,7 @@ public class UnsafeCast implements Callable {
       return interpreter.nothing();
     }
     
-    // Just echo the argument back. The important part is tha the annotated
+    // Just echo the argument back. The important part is that the annotated
     // type has changed.
     return arg;
   }

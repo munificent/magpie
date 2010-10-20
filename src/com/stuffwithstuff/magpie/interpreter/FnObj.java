@@ -1,7 +1,5 @@
 package com.stuffwithstuff.magpie.interpreter;
 
-import com.stuffwithstuff.magpie.ast.FunctionType;
-
 /**
  * Object type for a function object.
  */
@@ -26,8 +24,6 @@ public class FnObj extends Obj {
   public Obj invoke(Interpreter interpreter, Obj arg) {
     return mCallable.invoke(interpreter, mThis, arg);
   }
-  
-  public FunctionType getType() { return mCallable.getType(); }
   
   private final Obj mThis;
   private final Callable mCallable;

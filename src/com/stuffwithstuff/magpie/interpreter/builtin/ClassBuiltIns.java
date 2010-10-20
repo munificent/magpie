@@ -1,11 +1,8 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
 import com.stuffwithstuff.magpie.Identifiers;
-import com.stuffwithstuff.magpie.ast.Expr;
-import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
-import com.stuffwithstuff.magpie.interpreter.EvalContext;
 import com.stuffwithstuff.magpie.interpreter.FnObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
@@ -94,39 +91,13 @@ public class ClassBuiltIns {
     // Look for a getter.
     Callable getter = thisClass.findGetter(name);
     if (getter != null) {
-      Expr typeExpr = getter.getType().getReturnType();
-      
-      // TODO(bob): Hackish. Will need to take into account generics at some
-      // point.
-      EvalContext staticContext = interpreter.createTopLevelContext();
-      return interpreter.evaluate(typeExpr, staticContext);
+      return interpreter.evaluateCallableType(getter, true);
     }
     
     // Look for a method.
     Callable method = thisClass.findMethod(name);
     if (method != null) {
-      // TODO(bob): Hackish.
-      // Figure out a context to evaluate the method's type signature in. If it's
-      // a user-defined method we'll evaluate it the method's closure so that
-      // outer static arguments are available. Otherwise, we'll assume it has no
-      // outer scope and just evaluate it in a top-level context.
-      EvalContext staticContext;
-      if (method instanceof FnObj) {
-        staticContext = new EvalContext(
-            ((FnObj)method).getFunction().getClosure(), interpreter.nothing());
-      } else {
-        staticContext = interpreter.createTopLevelContext();
-      }
-      
-      FunctionType methodType = method.getType();
-      Obj paramType = interpreter.evaluate(methodType.getParamType(),
-          staticContext);
-      Obj returnType = interpreter.evaluate(methodType.getReturnType(),
-          staticContext);
-      
-      // Create a FunctionType object.
-      return interpreter.invokeMethod(interpreter.getFunctionType(),
-          Identifiers.CALL, interpreter.createTuple(paramType, returnType));
+      return interpreter.evaluateCallableType(method, false);
     }
 
     // Member not found.
@@ -142,12 +113,7 @@ public class ClassBuiltIns {
     // Look for a setter.
     Callable setter = thisClass.findSetter(name);
     if (setter != null) {
-      Expr typeExpr = setter.getType().getReturnType();
-      
-      // TODO(bob): Hackish. Will need to take into account generics at some
-      // point.
-      EvalContext staticContext = interpreter.createTopLevelContext();
-      return interpreter.evaluate(typeExpr, staticContext);
+      return interpreter.evaluateCallableType(setter, true);
     }
 
     // Setter not found.

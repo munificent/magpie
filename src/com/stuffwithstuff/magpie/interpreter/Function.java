@@ -18,6 +18,7 @@ public class Function implements Callable {
   public Scope getClosure() { return mClosure; }
   public FnExpr getFunction() { return mFunction; }
   
+  @Override
   public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
     // Create a new local scope for the function.
     EvalContext context = new EvalContext(mClosure, thisObj).pushScope();
@@ -37,6 +38,7 @@ public class Function implements Callable {
     }
   }
   
+  @Override
   public FunctionType getType() { return mFunction.getType(); }
   
   // TODO(bob): There are a couple of places where we bind an object to names.

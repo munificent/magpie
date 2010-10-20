@@ -24,6 +24,7 @@ public class FunctionCall implements Callable {
     return function.invoke(interpreter, arg);
   }
   
+  @Override
   public FunctionType getType() { return mType; }
   
   private final FunctionType mType;

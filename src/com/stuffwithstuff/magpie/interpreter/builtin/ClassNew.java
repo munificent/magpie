@@ -48,7 +48,7 @@ public class ClassNew implements Callable {
     
     return obj;
   }
-  
+
   public FunctionType getType() {
     return new FunctionType(Collections.singletonList("arg"),
         Expr.name("Dynamic"), Expr.name(mClassName));
