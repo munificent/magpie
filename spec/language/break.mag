@@ -1,0 +1,30 @@
+specify("A 'break' expression") with
+    it should("exit a loop") with
+        var i = ""
+        for a = 1 to(5) do
+            i = i + a
+            if a == 2 then break
+        end
+        i shouldBe("12")
+    end
+
+    it should("exit the nearest enclosing loop") with
+        var i = ""
+        for a = 1 to(5) do
+            for b = 1 to(5) do
+                i = i + a
+                if b == 2 then break
+            end
+        end
+        i shouldBe("1122334455")
+    end
+
+    it should("do nothing if not inside a loop") with
+        var result = fn
+            1
+            break
+            2
+        end()
+        result shouldBe(2)
+    end
+end

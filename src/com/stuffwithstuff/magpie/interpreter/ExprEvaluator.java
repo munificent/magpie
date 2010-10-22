@@ -94,7 +94,11 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(BreakExpr expr, EvalContext context) {
-    throw new BreakException();
+    // Outside of a loop, "break" does nothing.
+    if (context.isInLoop()) {
+      throw new BreakException();
+    }
+    return mInterpreter.nothing();
   }
 
   @Override
@@ -171,6 +175,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(LoopExpr expr, EvalContext context) {
     try {
+      context = context.enterLoop();
+      
       boolean done = false;
       while (true) {
         // Evaluate the conditions.

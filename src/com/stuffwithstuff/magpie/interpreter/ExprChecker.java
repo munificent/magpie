@@ -160,7 +160,13 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   
   @Override
   public Obj visit(BreakExpr expr, EvalContext context) {
-    return mInterpreter.getNeverType();
+    if (context.isInLoop()) {
+      return mInterpreter.getNeverType();
+    }
+    
+    mChecker.addError(expr.getPosition(),
+        "A break expression should not appear outside of a for loop.");
+    return mInterpreter.getNothingType();
   }
   
   @Override
@@ -250,6 +256,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(LoopExpr expr, EvalContext context) {
+    context = context.enterLoop();
+    
     // TODO(bob): Should eventually check that conditions implement ITrueable
     // so that you can only use truthy stuff in a while.
     // Check the conditions for errors.
@@ -369,7 +377,6 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     if (left == mInterpreter.getNeverType()) return right;
     if (right == mInterpreter.getNeverType()) return left;
     
-      // TODO(bob): Should we use a static arg here?
     return mInterpreter.invokeMethod(left, Identifiers.OR, right);
   }
   
@@ -381,61 +388,12 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       mChecker.addError(position,
           "Could not find a member named \"%s\" on %s when checking.",
           name, receiverType);
-
-      // TODO(bob): Temp!
-      memberType = mInterpreter.invokeMethod(receiverType,
-          Identifiers.GET_MEMBER_TYPE, mInterpreter.createString(name));
       
       return mInterpreter.getNothingType();
     }
 
     return memberType;
   }
-    
-  /*
-  public Obj getMethodReturn(Expr expr, Obj receiverType, String name,
-      Obj argType) {
-
-    Obj methodType = mInterpreter.invokeMethod(receiverType,
-        Identifiers.GET_METHOD_TYPE,
-        mInterpreter.createTuple(mInterpreter.createString(name), argType));
-    
-    if (methodType == mInterpreter.nothing()) {
-      mChecker.addError(expr.getPosition(),
-          "Could not find a variable or method named \"%s\" on %s when checking.",
-          name, receiverType);
-
-      return mInterpreter.getNothingType();
-    }
-    
-    // getMethodType in Magpie is expected to return a tuple of the param and
-    // return type, or nothing if the method cannot be handled by the object.
-    Obj paramType = methodType.getTupleField(0);
-    Obj returnType = methodType.getTupleField(1);
-    
-    // If the paramType is Nothing and the argType is not, then we'll treat the
-    // return type as callable and call it with the argType. For example, given:
-    //
-    //    foo bar(123)
-    //
-    // If bar is declared to take Nothing then that expression is shorthand for
-    //
-    //    foo bar()(123)
-    //
-    // So we'll make that translation here.
-    if ((paramType == mInterpreter.getNothingType()) &&
-        (argType != mInterpreter.getNothingType())) {
-      return getMethodReturn(expr, returnType, Identifiers.CALL, argType);
-    }
-    
-    // Make sure the argument type matches the declared parameter type.
-    mChecker.checkTypes(paramType, argType, expr.getPosition(), 
-        "Function is declared to take %s but is being passed %s.");
-    
-    // Return the return type.
-    return returnType;
-  }
-  */
 
   private final Interpreter mInterpreter;
   private final Checker mChecker;

@@ -10,20 +10,21 @@ public class EvalContext {
   public EvalContext(Scope scope, Obj thisObj) {
     mScope = scope;
     mThis = thisObj;
+    mIsInLoop = false;
   }
   
   /**
    * Creates an EvalContext for a new lexical block scope within this one.
    */
   public EvalContext pushScope() {
-    return new EvalContext(new Scope(mScope), mThis);
+    return new EvalContext(new Scope(mScope), mThis, mIsInLoop);
   }
   
   /**
    * Creates an EvalContext that discards the current innermost lexical scope.
    */
   public EvalContext popScope() {
-    return new EvalContext(mScope.getParent(), mThis);
+    return new EvalContext(mScope.getParent(), mThis, mIsInLoop);
   }
   
   /**
@@ -31,11 +32,20 @@ public class EvalContext {
    * different this reference.
    */
   public EvalContext withThis(Obj thisObj) {
-    return new EvalContext(mScope, thisObj);
+    return new EvalContext(mScope, thisObj, mIsInLoop);
   }
   
-  public Scope getScope() { return mScope; }
-  public Obj   getThis()  { return mThis; }
+  /**
+   * Creates a new EvalContext with the same scope as this one, but inside a
+   * loop.
+   */
+  public EvalContext enterLoop() {
+    return new EvalContext(mScope, mThis, true);
+  }
+  
+  public Scope   getScope() { return mScope; }
+  public Obj     getThis()  { return mThis; }
+  public boolean isInLoop() { return mIsInLoop; }
   
   /**
    * Looks up the given name in current local scope. Does not walk up the
@@ -117,6 +127,13 @@ public class EvalContext {
     return builder.toString();
   }
   
-  private final Scope mScope;
-  private final Obj   mThis;
+  private EvalContext(Scope scope, Obj thisObj, boolean isInLoop) {
+    mScope = scope;
+    mThis = thisObj;
+    mIsInLoop = isInLoop;
+  }
+  
+  private final Scope   mScope;
+  private final Obj     mThis;
+  private final boolean mIsInLoop;
 }
