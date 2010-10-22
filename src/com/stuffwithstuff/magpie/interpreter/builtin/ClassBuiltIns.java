@@ -36,18 +36,25 @@ public class ClassBuiltIns {
     return interpreter.nothing();
   }
 
-  /*
-  @Signature("defineField(name String, initializer ->)")
+  @Signature("defineField(name String, type, initializer ->)")
   public static Obj defineField(Interpreter interpreter, Obj thisObj, Obj arg) {
     String name = arg.getTupleField(0).asString();
-    FnObj initializer = (FnObj)arg.getTupleField(1);
+    FnObj type = (FnObj)arg.getTupleField(1);
+    FnObj initializer = (FnObj)arg.getTupleField(2);
     
     ClassObj classObj = (ClassObj)thisObj;
     classObj.defineField(name, initializer);
 
+    // Add a getter.
+    classObj.defineGetter(name,
+        new FieldGetter(name, type.getFunction().getFunction().getBody()));
+    
+    // Add a setter.
+    classObj.defineSetter(name,
+        new FieldSetter(name, type.getFunction().getFunction().getBody()));
+
     return interpreter.nothing();
   }
-  */
   
   @Signature("defineMethod(name String, body ->)")
   public static Obj defineMethod(Interpreter interpreter, Obj thisObj, Obj arg) {

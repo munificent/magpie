@@ -15,7 +15,7 @@ class Foo
     def x Int
     
     // define field
-    def y = 123
+    def y Int = 123
     
     // abstract method
     def someAbstract(z Int ->)
@@ -26,6 +26,7 @@ class Foo
     end
     
     // define shared field
+    // TODO(bob): Should a type declaration be needed here too?
     shared bar = 234
     
     // abstract shared method
@@ -38,7 +39,7 @@ class Foo
     get happy Int
     
     // define getter
-    get sad =
+    get sad Int =
         "sad"
     end
         
@@ -46,7 +47,7 @@ class Foo
     set mad String
     
     // define setter
-    set sleepy = print(it)
+    set sleepy String = print(it)
     
     // abstract shared getter
     shared get xyz String
