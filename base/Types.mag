@@ -108,4 +108,7 @@ end
 // From the static perspective, a dynamic object has all possible members and
 // their type is always "Dynamic".
 // TODO(bob): Should return IType
-shared Dynamic getMemberType(name String) Dynamic
+shared Dynamic getMemberType(name String)
+    if name == "call" then return Function(Dynamic, Dynamic)
+    Dynamic
+end

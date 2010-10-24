@@ -11,12 +11,14 @@ public class StringBuiltIns {
     return interpreter.createString(c);
   }
 
-  @Signature("compareTo(other String -> Int)")
+  // TODO(bob): May want to strongly-type arg at some point.
+  @Signature("compareTo(other -> Int)")
   public static Obj compareTo(Interpreter interpreter, Obj thisObj, Obj arg) {
     return interpreter.createInt(thisObj.asString().compareTo(arg.asString()));
   }
 
-  @Signature("concatenate(other String -> String)")
+  // TODO(bob): May want to strongly-type arg at some point.
+  @Signature("concatenate(other -> String)")
   public static Obj concatenate(Interpreter interpreter, Obj thisObj, Obj arg) {
     String left = thisObj.asString();
     String right = arg.asString();

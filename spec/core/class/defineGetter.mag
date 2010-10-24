@@ -20,36 +20,39 @@ specify("The 'defineGetter' method on Class") with
         c new() foo shouldBe("after")
     end
 
-    // TODO(bob): These can't work as current written. We need to stratify the
-    // code that builds the types (i.e. "var c = Class new...") from the code
-    // that is statically checked against them.
-    /*
     it should("create a property with the declared type") with
-        expectCheckOK with
+        envExpectCheckOK with
+            var C = Class new("C")
+            C defineGetter("foo", fn(-> Int) 123)
+        
             var takesInt(arg Int) nothing
-            var c = Class new("c")
-            c defineGetter("foo", fn(-> Int) 123)
-            takesInt(c new() foo)
+            var main(->)
+                takesInt(C new() foo)
+            end
         end
-
-        expectCheckError with
+        
+        envExpectCheckError with
+            var C = Class new("C")
+            C defineGetter("foo", fn(-> String) "str")
+        
             var takesInt(arg Int) nothing
-            var c = Class new("c")
-            c defineGetter("foo", fn(-> String) "not int")
-            takesInt(c new() foo)
+            var main(->)
+                takesInt(C new() foo)
+            end
         end
     end
 
     it should("ensure the getter body returns the declared type") with
-        expectCheckOK with
+        envExpectCheckOK with
             var c = Class new("c")
             c defineGetter("foo", fn(-> Int) 123)
+            var main(->) nothing
         end
 
-        expectCheckError with
+        envExpectCheckError with
             var c = Class new("c")
             c defineGetter("foo", fn(-> Int) "not int")
+            var main(->) nothing
         end
     end
-    */
 end

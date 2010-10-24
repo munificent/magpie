@@ -72,25 +72,32 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     Obj targetType = check(expr.getTarget(), context);
     Obj argType = check(expr.getArg(), context);
     
+    // If the target is not an actual function, get the type of its "call"
+    // message instead of the target itself.
     // See if the target is an actual function, or a functor.
     // TODO(bob): Using the class name for this is gross!
-    if (targetType.getClassObj().getName().equals(Identifiers.FUNCTION_TYPE)) {
-      // It's a real function, so the type of apply is the function's return
-      // type.
-      Obj paramType = targetType.getField(Identifiers.PARAM_TYPE);
-      Obj returnType = targetType.getField(Identifiers.RETURN_TYPE);
-      
-      // Make sure the argument type matches the declared parameter type.
-      mChecker.checkTypes(paramType, argType, expr.getPosition(), 
-          "Function is declared to take %s but is being passed %s.");
-      
-      // Calling a function results in the function's return type.
-      return returnType;
-    } else {
+    if (!targetType.getClassObj().getName().equals(Identifiers.FUNCTION_TYPE)) {
       // It's a functor, so look up the "call" member.
-      // TODO(bob): Implement me!
-      return mInterpreter.getNothingType();
+      targetType = getMemberType(expr.getPosition(), targetType,
+          Identifiers.CALL);
+
+      if (targetType == mInterpreter.nothing()) {
+        mChecker.addError(expr.getPosition(),
+            "Target of type %s is not a function and does not have a 'call' method.",
+            targetType);
+        return mInterpreter.getNothingType();
+      }
     }
+    
+    Obj paramType = targetType.getField(Identifiers.PARAM_TYPE);
+    Obj returnType = targetType.getField(Identifiers.RETURN_TYPE);
+    
+    // Make sure the argument type matches the declared parameter type.
+    mChecker.checkTypes(paramType, argType, expr.getPosition(), 
+        "Function is declared to take %s but is being passed %s.");
+    
+    // Calling a function results in the function's return type.
+    return returnType;
   }
   
   @Override

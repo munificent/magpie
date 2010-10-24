@@ -16,7 +16,7 @@ var endTests(->)
         totalTests + " tests.")
 end
 
-var specify(description String, block Function(Nothing, Nothing) ->)
+var specify(description String, block Function(TestSuite, Nothing) ->)
     var suite = TestSuite new(description)
     block(suite)
     
@@ -62,7 +62,7 @@ class TestSuite
     failures Int
 end
 
-def Object shouldBe(expected, message)
+def Object shouldBe(expected, message String ->)
     if this != expected then
         if message == nothing then
             message = "Expected " + expected + " but was " + this
@@ -81,6 +81,17 @@ end
 
 def Object expectCheckOK(block)
     var errors = Runtime checkFunction(block)
+    errors count shouldBe(0, "Should not have any check errors but had:")
+    for error = errors do print("      - " + error)
+end
+
+def Object envExpectCheckError(block)
+    (Runtime checkExpression(block) count > 0) shouldBe(true,
+        "Should have a check error but did not.")
+end
+
+def Object envExpectCheckOK(block)
+    var errors = Runtime checkExpression(block)
     errors count shouldBe(0, "Should not have any check errors but had:")
     for error = errors do print("      - " + error)
 end

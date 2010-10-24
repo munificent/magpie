@@ -134,7 +134,7 @@ public class Interpreter {
       evaluate(expr, context);
     }
   }
-  
+
   public String evaluate(Expr expr) {
     EvalContext context = createTopLevelContext();
     Obj result = evaluate(expr, context);

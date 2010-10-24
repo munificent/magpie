@@ -35,7 +35,7 @@ public class Scope {
   public void define(String name, Obj value) {
     Expect.notEmpty(name);
     Expect.notNull(value);
-    
+
     mVariables.put(name, value);
   }
 
