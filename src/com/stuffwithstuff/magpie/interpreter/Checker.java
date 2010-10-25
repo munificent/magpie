@@ -50,16 +50,7 @@ public class Checker {
         checkFunction(function.getFunction(), mInterpreter.getNothingType(),
             staticContext);
       } else if (entry.getValue() instanceof ClassObj) {
-        ClassObj classObj = (ClassObj)entry.getValue();
-        
-        // Check all of the methods.
-        for (Entry<String, Callable> method : classObj.getMethods().entrySet()) {
-          // Only check user-defined methods.
-          if (method.getValue() instanceof Function) {
-            Function function = (Function)method.getValue();
-            checkFunction(function, classObj, staticContext);
-          }
-        }
+        checkClass((ClassObj)entry.getValue());
       }
     }
   }
@@ -76,9 +67,18 @@ public class Checker {
     // Check all of the methods.
     for (Entry<String, Callable> method : classObj.getMethods().entrySet()) {
       // Only check user-defined methods.
-      if (method.getValue() instanceof FnObj) {
-        FnObj function = (FnObj)method.getValue();
-        checkFunction(function.getFunction(), classObj, staticContext);
+      if (method.getValue() instanceof Function) {
+        Function function = (Function)method.getValue();
+        checkFunction(function, classObj, staticContext);
+      }
+    }
+    
+    // Check all of the getters.
+    for (Entry<String, Callable> getter : classObj.getGetters().entrySet()) {
+      // Only check user-defined methods.
+      if (getter.getValue() instanceof Function) {
+        Function function = (Function)getter.getValue();
+        checkFunction(function, classObj, staticContext);
       }
     }
   }

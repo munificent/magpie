@@ -53,6 +53,10 @@ public class ClassObj extends Obj {
     return mMethods.getMethods();
   }
   
+  public Map<String, Callable> getGetters() {
+    return mGetters;
+  }
+  
   public Callable findMethod(String name) {
     // Walk up the inheritance chain.
     ClassObj classObj = this;

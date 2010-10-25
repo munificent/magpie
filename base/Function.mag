@@ -36,7 +36,7 @@ def FunctionType getMemberType(name String)
     Function getMemberType(name)
 end
 
-FunctionType defineGetter("toString", fn(-> String)
+FunctionType defineGetter("toString", fn
     paramType toString + " -> " + returnType toString
 end)
 
