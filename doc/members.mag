@@ -86,3 +86,24 @@ class PropertyExamples
         "this is the setter"
     end
 end
+
+class PropertyExamples
+    def oneLine get "one" set print("set to " + it)
+    
+    def readOnly get "read"
+    
+    def writeOnly set print(it)
+    
+    def multiline get
+        "here is the getter"
+    set
+        print(it)
+        "this is the setter"
+    end
+    
+    shared sharedProp get
+        "here is the getter"
+    set
+        "this is the setter"
+    end
+end

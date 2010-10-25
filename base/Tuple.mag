@@ -1,3 +1,7 @@
+extend class Tuple
+    iterate(-> TupleIterator) TupleIterator new(this)
+end
+
 Tuple defineGetter("string", fn(-> String)
     var s = "("
     
@@ -46,14 +50,14 @@ class TupleIterator
         // rollback so the first call to next advances to the first
         index = -1
     end
+
+    next(-> Bool)
+        index = index + 1
+        index < tuple count
+    end
     
     tuple   Tuple
     index   Int
-end
-
-def TupleIterator next(-> Bool)
-    index = index + 1
-    index < tuple count
 end
 
 TupleIterator defineGetter("current", fn()
@@ -68,7 +72,3 @@ TupleIterator defineGetter("current", fn()
     else if index == 8 then tuple _8
     else if index == 9 then tuple _9
 end)
-    
-def Tuple iterate(-> TupleIterator)
-    TupleIterator new(this)
-end

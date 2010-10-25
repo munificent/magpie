@@ -13,102 +13,112 @@ import("OrType.mag")
 import("Function.mag")
 import("Interface.mag")
 
-def Object is(type) type canAssignFrom(this type)
-
-// No type except Nothing is allowed where Nothing is expected.
-shared Nothing canAssignFrom(other -> Bool) other == Nothing
-
-shared Class unsafeRemoveNothing(-> Class)
-    // Doesn't have Nothing to begin with, so we're good.
-    this
+extend class Object
+    is(type) type canAssignFrom(this type)
 end
 
-// TODO(bob): Return Dynamic here is lame. Need type interface.
-shared Class orTypes(left, right -> Dynamic)
-    // combine the cases of both arms
-    var cases = Array new()
-
-    if left type == OrType then
-        for item = left cases do cases add(item)
-    else
-        cases add(left)
-    end
-
-    if right type == OrType then
-        for item = right cases do cases add(item)
-    else
-        cases add(right)
-    end
-
-    // Sort and remove the duplicates.
-    cases = cases sortByString() unique()
-
-    // If just one case remains, there's no union.
-    if cases count == 1 then return cases(0)
-    
-    OrType new(cases)
+extend class Nothing
+    // No type except Nothing is allowed where Nothing is expected.
+    shared canAssignFrom(other -> Bool) other == Nothing
 end
 
-def Class canAssignFrom(other -> Bool)
-    // Not even object can assign from Nothing.
-    if other == Nothing then return false
-    
-    // If it's an Or type, just check the arms.
-    if other type == OrType then
-        var orType = OrType unsafeCast(other)
-        for otherCase = orType cases do
-            if canAssignFrom(otherCase) not then return false
+extend class Class
+    shared unsafeRemoveNothing(-> Class)
+        // Doesn't have Nothing to begin with, so we're good.
+        this
+    end
+
+    // TODO(bob): Return Dynamic here is lame. Need type interface.
+    orTypes(left, right -> Dynamic)
+        // combine the cases of both arms
+        var cases = Array new()
+
+        if left type == OrType then
+            for item = left cases do cases add(item)
+        else
+            cases add(left)
         end
-        return true
+
+        if right type == OrType then
+            for item = right cases do cases add(item)
+        else
+            cases add(right)
+        end
+
+        // Sort and remove the duplicates.
+        cases = cases sortByString() unique()
+
+        // If just one case remains, there's no union.
+        if cases count == 1 then return cases(0)
+    
+        OrType new(cases)
     end
+
+    canAssignFrom(other -> Bool)
+        // Not even object can assign from Nothing.
+        if other == Nothing then return false
     
-    // A derived type can be assigned to a base type, so walk up the chain
-    // looking for this type.
-    while other != Object do
-        if this == other then return true
-        // Bail if got stuck in an infinite loop.
-        if other == nothing then return false
-        other = other parent
+        // If it's an Or type, just check the arms.
+        if other type == OrType then
+            var orType = OrType unsafeCast(other)
+            for otherCase = orType cases do
+                if canAssignFrom(otherCase) not then return false
+            end
+            return true
+        end
+    
+        // A derived type can be assigned to a base type, so walk up the chain
+        // looking for this type.
+        while other != Object do
+            if this == other then return true
+            // Bail if got stuck in an infinite loop.
+            if other == nothing then return false
+            other = other parent
+        end
+    
+        // If we got here, the only thing other has in common is Object, so see if
+        // that's us.
+        this == Object
     end
-    
-    // If we got here, the only thing other has in common is Object, so see if
-    // that's us.
-    this == Object
-end
 
-def Class |(other -> Dynamic)
-    Class orTypes(this, other)
-end
-
-def Tuple canAssignFrom(other -> Bool)
-    // Both must be tuples.
-    if other type != Tuple then return false
-    
-    // With the same number of fields.
-    if count != Int unsafeCast(other count) then return false
-    
-    // And the fields must be assignable.
-    for field = this
-    for otherField = other do
-        if field canAssignFrom(otherField) not then return false
+    |(other -> Dynamic)
+        Class orTypes(this, other)
     end
+end
+
+extend class Tuple
+    canAssignFrom(other -> Bool)
+        // Both must be tuples.
+        if other type != Tuple then return false
     
-    true
+        // With the same number of fields.
+        if count != Int unsafeCast(other count) then return false
+    
+        // And the fields must be assignable.
+        for field = this
+        for otherField = other do
+            if field canAssignFrom(otherField) not then return false
+        end
+    
+        true
+    end
+
+    |(other -> Dynamic)
+        Class orTypes(this, other)
+    end
 end
 
-def Tuple |(other -> Dynamic)
-    Class orTypes(this, other)
-end
+extend class Dynamic
+    shared canAssignFrom(other -> Bool)
+        // Everything goes with Dynamic.
+        true
+    end
 
-shared Dynamic canAssignFrom(other -> Bool)
-    // Everything goes with Dynamic.
-    true
-end
-
-// From the static perspective, a dynamic object has all possible members and
-// their type is always "Dynamic".
-// TODO(bob): Should return IType
-shared Dynamic getMemberType(name String)
-    if name == "call" then return Function(Dynamic, Dynamic)
-    Dynamic
+    // From the static perspective, a dynamic object has all possible members
+    // and their type is always "Dynamic".
+    // TODO(bob): Should return IType
+    shared getMemberType(name String)
+        if name == "call" then return Function(Dynamic, Dynamic)
+        Dynamic
+    end
 end
