@@ -1,7 +1,9 @@
 // Add iterator methods on Ints.
-def Int times (-> Range) Range new(0, this - 1)
-def Int to (last Int -> Range) Range new(this, last)
-def Int until (last Int -> Range) Range new(this, last - 1)
+extend class Int
+    times(-> Range) Range new(0, this - 1)
+    to(last Int -> Range) Range new(this, last)
+    until(last Int -> Range) Range new(this, last - 1)
+end
 
 // Define an int iterator.
 class RangeIterator
@@ -10,26 +12,24 @@ class RangeIterator
         current = start - 1
         this stop = stop
     end
-    
+
+    next(-> Bool)
+        current = current + 1
+        current <= stop
+    end
+
     current Int
     stop    Int
 end
 
-def RangeIterator next(-> Bool)
-    current = current + 1
-    current <= stop
-end
-
-class Range
+class Range    
     this(start Int, stop Int)
         this start = start
         this stop = stop
     end
     
+    iterate(-> RangeIterator) RangeIterator new(start, stop)
+
     start Int
     stop  Int
-end
-    
-def Range iterate(-> RangeIterator)
-    RangeIterator new(start, stop)
 end

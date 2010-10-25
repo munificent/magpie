@@ -8,54 +8,54 @@ class Interface
         this name = name
         this methods = Array new()
     end
+
+    declareMethod(name String, paramType, returnType ->)
+        methods add(Method new(name, paramType, returnType))
+    end
+
+    canAssignFrom(other -> Bool)
+        for method = methods do
+            var otherMethod = other getMemberType(method name)
+        
+            // Must have method
+            if otherMethod == nothing then return false
+        
+            // Invoke the type expressions
+            var paramType = method paramType()
+            var returnType = method returnType()
+        
+            // TODO(bob): This is basically copied from Function. If methods stored
+            // an actual function type, and getMethodType returned a function type,
+            // we should be able to just compare them directly and have this logic
+            // in one place.
+            var otherParam = otherMethod paramType()
+            var otherReturn = otherMethod returnType()
+        
+            // Parameter must be contravariant.
+            if otherParam canAssignFrom(paramType) not then return false
+
+            // Return must be covariant.
+            if returnType canAssignFrom(otherReturn) not then return false
+        end
     
+        // If we got here, every method was found and matched.
+        true
+    end
+
+    getMemberType(name String)
+        let method = methods first(fn (m) m name == name) then
+            Function(method paramType, method returnType)
+        else
+            // No method by that name
+            nothing
+        end
+    end
+
     name    String
     methods ArrayType new(Method)
 end
 
-def Interface string(-> String) name
-
-def Interface declareMethod(name String, paramType, returnType ->)
-    methods add(Method new(name, paramType, returnType))
-end
-
-def Interface canAssignFrom(other -> Bool)
-    for method = methods do
-        var otherMethod = other getMemberType(method name)
-        
-        // Must have method
-        if otherMethod == nothing then return false
-        
-        // Invoke the type expressions
-        var paramType = method paramType()
-        var returnType = method returnType()
-        
-        // TODO(bob): This is basically copied from Function. If methods stored
-        // an actual function type, and getMethodType returned a function type,
-        // we should be able to just compare them directly and have this logic
-        // in one place.
-        var otherParam = otherMethod paramType()
-        var otherReturn = otherMethod returnType()
-        
-        // Parameter must be contravariant.
-        if otherParam canAssignFrom(paramType) not then return false
-
-        // Return must be covariant.
-        if returnType canAssignFrom(otherReturn) not then return false
-    end
-    
-    // If we got here, every method was found and matched.
-    true
-end
-
-def Interface getMemberType(name String)
-    let method = methods first(fn (m) m name == name) then
-        Function(method paramType, method returnType)
-    else
-        // No method by that name
-        nothing
-    end
-end
+Interface defineGetter("string", fn(-> String) name)
 
 class Method
     this(name String, paramType Function(Nothing, Dynamic),
@@ -64,7 +64,7 @@ class Method
          this paramType = paramType
          this returnType = returnType
     end
-    
+
     name       String
     paramType  Function(Nothing, Dynamic) // should return IType eventually
     returnType Function(Nothing, Dynamic) // should return IType eventually

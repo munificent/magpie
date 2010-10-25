@@ -1,9 +1,11 @@
 // Comparisons.
-def String ==(other -> Bool) this compareTo(other string) == 0
-def String !=(other -> Bool) this compareTo(other string) != 0
-def String <(other -> Bool) this compareTo(other string) < 0
-def String >(other -> Bool) this compareTo(other string) > 0
-def String <=(other -> Bool) this compareTo(other string) <= 0
-def String >=(other -> Bool) this compareTo(other string) >= 0
+extend class String
+    ==(other -> Bool) compareTo(other string) == 0
+    !=(other -> Bool) compareTo(other string) != 0
+    <(other -> Bool) compareTo(other string) < 0
+    >(other -> Bool) compareTo(other string) > 0
+    <=(other -> Bool) compareTo(other string) <= 0
+    >=(other -> Bool) compareTo(other string) >= 0
 
-def String +(other -> String) this concatenate(other string)
+    +(other -> String) concatenate(other string)
+end

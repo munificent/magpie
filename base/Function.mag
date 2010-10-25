@@ -1,9 +1,9 @@
-// Defines the base Function type constructor.
-
-// Make "Function" a functor that you can call to instantiate function types.
-// Type annotations of function types look like Function(Int, String) 
-shared Function call(paramType, returnType)
-    FunctionType new(paramType, returnType)
+extend class Function
+    // Make "Function" a functor that you can call to instantiate function types.
+    // Type annotations of function types look like Function(Int, String) 
+    shared call(paramType, returnType)
+        FunctionType new(paramType, returnType)
+    end
 end
 
 class FunctionType
@@ -11,47 +11,47 @@ class FunctionType
         this paramType = paramType
         this returnType = returnType
     end
+
+    // TODO(bob): Once interfaces are in, function types can just become sugar for
+    // creating ICallable(Arg, Return) instances.
+    canAssignFrom(other -> Bool)
+        // Both must be functions.
+        if other type != FunctionType then return false
+
+        // Parameter must be contravariant.
+        if other paramType canAssignFrom(paramType) not then return false
     
+        // Return must be covariant.
+        if returnType canAssignFrom(other returnType) not then return false
+    
+        true
+    end
+
+    getMemberType(name String)
+        // Just defer to the base function class.
+        Function getMemberType(name)
+    end
+
+    ==(other -> Bool)
+        if other type != FunctionType then return false
+
+        var funcType = FunctionType unsafeCast(other)
+    
+        if paramType != funcType paramType then return false
+        if returnType != funcType returnType then return false
+    
+        true
+    end
+
+    !=(other -> Bool) (this == other) not
+
     paramType Dynamic
     returnType Dynamic
-end
-
-// TODO(bob): Once interfaces are in, function types can just become sugar for
-// creating ICallable(Arg, Return) instances.
-def FunctionType canAssignFrom(other -> Bool)
-    // Both must be functions.
-    if other type != FunctionType then return false
-
-    // Parameter must be contravariant.
-    if other paramType canAssignFrom(paramType) not then return false
-    
-    // Return must be covariant.
-    if returnType canAssignFrom(other returnType) not then return false
-    
-    true
-end
-
-def FunctionType getMemberType(name String)
-    // Just defer to the base function class.
-    Function getMemberType(name)
 end
 
 FunctionType defineGetter("string", fn
     paramType string + " -> " + returnType string
 end)
-
-def FunctionType ==(other -> Bool)
-    if other type != FunctionType then return false
-
-    var funcType = FunctionType unsafeCast(other)
-    
-    if paramType != funcType paramType then return false
-    if returnType != funcType returnType then return false
-    
-    true
-end
-
-def FunctionType !=(other -> Bool) (this == other) not
 
 class StaticFunctionType
     this(params, body)

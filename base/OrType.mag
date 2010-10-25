@@ -3,6 +3,93 @@ class OrType
         this cases = cases
     end
     
+    |(other -> Object)
+        Class orTypes(this, other)
+    end
+
+    ==(other -> Bool)
+        if other type != OrType then return false
+
+        var orType = OrType unsafeCast(other)
+        if cases count != orType cases count then return false
+    
+        for thisCase = cases
+        for otherCase = orType cases do
+            if thisCase != otherCase then return false
+        end
+        true
+    end
+
+    !=(other -> Bool) (this == other) not
+
+    canAssignFrom(other -> Bool)
+        if other type == OrType then
+            // It's also an or, so see if all of its cases are matched by one of
+            // the ones here.
+            // TODO(bob): Should use let instead of raw unsafeCast.
+            var orType = OrType unsafeCast(other)
+            for otherCase = orType cases do
+                if canAssignFrom(otherCase) not then return false
+            end
+            true
+        else
+            // It's a regular class, so see if any of the cases match it.
+            for type = cases do
+                if type canAssignFrom(other) then return true
+            end
+            false
+        end
+    end
+
+    getMemberType(name String)
+        var firstType = cases(0) getMemberType(name)
+    
+        for type = cases do
+            var method = type getMemberType(name)
+            // The method must be present in all cases
+            if method == nothing then return nothing
+        
+            // And all types must match.
+            // TODO(bob): Right now, the types of all cases must match exactly.
+            // We could at some point loosen this to allow subtypes.
+            if firstType canAssignFrom(method) not then return nothing
+            if method canAssignFrom(firstType) not then return nothing
+        end
+    
+        firstType
+    end
+
+    getSetterType(name String)
+        var firstType = cases(0) getMemberType(name)
+    
+        for type = cases do
+            var method = type getSetterType(name)
+            // The setter must be present in all cases
+            if method == nothing then return nothing
+        
+            // And all types must match.
+            // TODO(bob): Right now, the types of all cases must match exactly.
+            // We could at some point loosen this to allow subtypes.
+            if firstType canAssignFrom(method) not then return nothing
+            if method canAssignFrom(firstType) not then return nothing
+        end
+    
+        firstType
+    end
+
+    unsafeRemoveNothing(-> Dynamic)
+        var remaining = Array new()
+        for type = cases do
+            if type != Nothing then remaining add(type)
+        end
+
+        // If just one case remains, there's no or.
+        if remaining count == 1 then return remaining(0)
+    
+        // Create a new OrType with what's left.
+        OrType new(remaining)
+    end
+    
     cases ArrayType new(Dynamic) // TODO(bob): IType[Int]
 end
 
@@ -15,89 +102,3 @@ OrType defineGetter("string", fn(-> String)
     result
 end)
 
-def OrType |(other -> Object)
-    Class orTypes(this, other)
-end
-
-def OrType ==(other -> Bool)
-    if other type != OrType then return false
-
-    var orType = OrType unsafeCast(other)
-    if cases count != orType cases count then return false
-    
-    for thisCase = cases
-    for otherCase = orType cases do
-        if thisCase != otherCase then return false
-    end
-    true
-end
-
-def OrType !=(other -> Bool) (this == other) not
-
-def OrType canAssignFrom(other -> Bool)
-    if other type == OrType then
-        // It's also an or, so see if all of its cases are matched by one of
-        // the ones here.
-        // TODO(bob): Should use let instead of raw unsafeCast.
-        var orType = OrType unsafeCast(other)
-        for otherCase = orType cases do
-            if canAssignFrom(otherCase) not then return false
-        end
-        true
-    else
-        // It's a regular class, so see if any of the cases match it.
-        for type = cases do
-            if type canAssignFrom(other) then return true
-        end
-        false
-    end
-end
-
-def OrType getMemberType(name String)
-    var firstType = cases(0) getMemberType(name)
-    
-    for type = cases do
-        var method = type getMemberType(name)
-        // The method must be present in all cases
-        if method == nothing then return nothing
-        
-        // And all types must match.
-        // TODO(bob): Right now, the types of all cases must match exactly.
-        // We could at some point loosen this to allow subtypes.
-        if firstType canAssignFrom(method) not then return nothing
-        if method canAssignFrom(firstType) not then return nothing
-    end
-    
-    firstType
-end
-
-def OrType getSetterType(name String)
-    var firstType = cases(0) getMemberType(name)
-    
-    for type = cases do
-        var method = type getSetterType(name)
-        // The setter must be present in all cases
-        if method == nothing then return nothing
-        
-        // And all types must match.
-        // TODO(bob): Right now, the types of all cases must match exactly.
-        // We could at some point loosen this to allow subtypes.
-        if firstType canAssignFrom(method) not then return nothing
-        if method canAssignFrom(firstType) not then return nothing
-    end
-    
-    firstType
-end
-
-def OrType unsafeRemoveNothing(-> Dynamic)
-    var remaining = Array new()
-    for type = cases do
-        if type != Nothing then remaining add(type)
-    end
-
-    // If just one case remains, there's no or.
-    if remaining count == 1 then return remaining(0)
-    
-    // Create a new OrType with what's left.
-    OrType new(remaining)
-end

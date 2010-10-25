@@ -1,24 +1,76 @@
-class ArrayIterator
-    this(array Array ->)
-        this array = array
-        this index = -1
+extend class Array
+    shared new(-> ArrayType new(Object)) Array of()
+    
+    // TODO(bob): This is kind of hokey.
+    shared newType(elementType -> ArrayType)
+        ArrayType new(elementType)
+    end
+
+    shared canAssignFrom(other -> Bool)
+        if this == other then true
+        else if other type == ArrayType then true
+        else false
     end
     
-    array Array
-    index Int
+    iterate(-> ArrayIterator) ArrayIterator new(this)
+
+    copy(-> Array)
+        var result = Array new()
+        for item = this do result add(item)
+        result
+    end
+
+    sortByString(-> Array)
+        var result = copy()
+    
+        // TODO(bob): Awful bubble sort FTW!
+        for i = 0 until(result count) do
+            for j = (i + 1) until(result count) do
+                if result(i) string > result(j) string then
+                    var temp = result(i)
+                    result(i) = result(j)
+                    result(j) = temp
+                end
+            end
+        end
+    
+        result
+    end
+
+    unique(-> ArrayType new(Object))
+        var result = Array new()
+        for item = this do
+            if result count == 0 then result add(item)
+            else
+                if result(-1) != item then result add(item)
+            end
+        end
+    
+        result
+    end
+
+    contains(item -> Bool)
+        for element = this do
+            if item == element then return true
+        end
+        false
+    end
+
+    // TODO(bob): Need generics to use for return type.
+    first(predicate -> Dynamic)
+        for element = this do
+            if predicate(element) then return element
+        end
+        nothing
+    end
+
+    swap(a Int, b Int ->)
+        // TODO(bob): Bounds check
+        var temp = this(a)
+        this(a) = this(b)
+        this(b) = temp
+    end
 end
-
-def ArrayIterator next(-> Bool)
-    index = index + 1
-    index < array count
-end
-
-// TODO(bob): Need generics for return type.
-ArrayIterator defineGetter("current", fn array(index))
-
-shared Array new(-> ArrayType new(Object)) Array of()
-
-def Array iterate(-> ArrayIterator) ArrayIterator new(this)
 
 Array defineGetter("string", fn(-> String)
     var text = "["
@@ -29,98 +81,46 @@ Array defineGetter("string", fn(-> String)
     text + "]"
 end)
 
-def Array copy(-> Array)
-    var result = Array new()
-    for item = this do result add(item)
-    result
-end
-
-def Array sortByString(-> Array)
-    var result = copy()
-    
-    // TODO(bob): Awful bubble sort FTW!
-    for i = 0 until(result count) do
-        for j = (i + 1) until(result count) do
-            if result(i) string > result(j) string then
-                var temp = result(i)
-                result(i) = result(j)
-                result(j) = temp
-            end
-        end
-    end
-    
-    result
-end
-
-def Array unique(-> ArrayType new(Object))
-    var result = Array new()
-    for item = this do
-        if result count == 0 then result add(item)
-        else
-            if result(-1) != item then result add(item)
-        end
-    end
-    
-    result
-end
-
-def Array contains(item -> Bool)
-    for element = this do
-        if item == element then return true
-    end
-    false
-end
-
-// TODO(bob): Need generics to use for return type.
-def Array first(predicate -> Dynamic)
-    for element = this do
-        if predicate(element) then return element
-    end
-    nothing
-end
-
-def Array swap(a Int, b Int ->)
-    // TODO(bob): Bounds check
-    var temp = this(a)
-    this(a) = this(b)
-    this(b) = temp
-end
-
 // TODO(bob): Need generics to use for return type.
 Array defineGetter("last", fn(-> Dynamic)
     this(count - 1)
 end)
 
-// TODO(bob): This is kind of hokey.
-shared Array newType(elementType -> ArrayType)
-    ArrayType new(elementType)
-end
-
-shared Array canAssignFrom(other -> Bool)
-    if this == other then true
-    else if other type == ArrayType then true
-    else false
-end
-
-class ArrayType
+class ArrayType : Array
     this(elementType Object)
         this elementType = elementType
     end
     
+    canAssignFrom(other -> Bool)
+        // Element type must match exactly (not variant).
+        this elementType == (ArrayType unsafeCast(other)) elementType
+    end
+
+    getMemberType(name String)
+        Array getMemberType(name)
+    end
+
     elementType Object
 end
-
-ArrayType parent = Array
 
 ArrayType defineGetter("string", fn(-> String)
     String unsafeCast(elementType string + "[]")
 end)
 
-def ArrayType canAssignFrom(other -> Bool)
-    // Element type must match exactly (not variant).
-    this elementType == (ArrayType unsafeCast(other)) elementType
+class ArrayIterator
+    this(array Array ->)
+        this array = array
+        this index = -1
+    end
+    
+    next(-> Bool)
+        index = index + 1
+        index < array count
+    end
+
+    array Array
+    index Int
 end
 
-def ArrayType getMemberType(name String)
-    Array getMemberType(name)
-end
+// TODO(bob): Need generics for return type.
+ArrayIterator defineGetter("current", fn array(index))
