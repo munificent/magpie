@@ -38,6 +38,6 @@ import("core/Class/defineSetter.mag")
 import("core/Class/defineMethod.mag")
 import("core/Class/name.mag")
 import("core/Class/new.mag")
-import("core/Int/toString.mag")
+import("core/Int/string.mag")
 
 endTests()

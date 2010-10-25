@@ -13,7 +13,7 @@ class Interface
     methods ArrayType new(Method)
 end
 
-def Interface toString(-> String) name
+def Interface string(-> String) name
 
 def Interface declareMethod(name String, paramType, returnType ->)
     methods add(Method new(name, paramType, returnType))
@@ -70,6 +70,6 @@ class Method
     returnType Function(Nothing, Dynamic) // should return IType eventually
 end
 
-Method defineGetter("toString", fn(-> String)
-    name + " " + paramType toString + " -> " + returnType toString
+Method defineGetter("string", fn(-> String)
+    name + " " + paramType string + " -> " + returnType string
 end)

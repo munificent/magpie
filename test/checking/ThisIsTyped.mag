@@ -1,7 +1,7 @@
 class Foo
 end
 
-def Foo bar(a Int -> String) a toString
+def Foo bar(a Int -> String) a string
 
 def Foo test(->)
     this bar(123)

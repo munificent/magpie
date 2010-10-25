@@ -4,7 +4,7 @@ end
 
 var bar[A]()
     var nested[B]()
-        print(A toString + " " + B)
+        print(A string + " " + B)
     end
     nested[Int]()
 end

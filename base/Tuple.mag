@@ -1,4 +1,4 @@
-Tuple defineGetter("toString", fn(-> String)
+Tuple defineGetter("string", fn(-> String)
     var s = "("
     
     // TODO(bob): This is pretty gross right now. :(

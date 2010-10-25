@@ -22,7 +22,7 @@ But should also be directly available in the same way that you can do `typeof(T)
 in C#:
 
     def List[E] displayItemType()
-        print(E toString)
+        print(E string)
     end
     
 This is fine if you only instantiate generics with class type arguments. But

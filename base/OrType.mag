@@ -6,10 +6,10 @@ class OrType
     cases ArrayType new(Dynamic) // TODO(bob): IType[Int]
 end
 
-OrType defineGetter("toString", fn(-> String)
+OrType defineGetter("string", fn(-> String)
     var result = ""
     for index = 0 until(cases count) do
-        result = result + cases(index) toString
+        result = result + cases(index) string
         if index < (cases count - 1) then result = result + " | "
     end
     result

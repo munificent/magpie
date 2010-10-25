@@ -25,7 +25,7 @@ oneArg(1)       //: 1
 oneArg(1, 2, 3) //: (1, 2, 3)
 
 var twoArgs(a, b)
-    print(a toString + " " + b toString)
+    print(a string + " " + b string)
 end
 
 twoArgs()        //: nothing nothing
@@ -33,7 +33,7 @@ twoArgs(1)       //: 1 nothing
 twoArgs(1, 2, 3) //: 1 2
 
 var threeArgs(a, b, c)
-    print(a toString + " " + b toString + " " + c toString)
+    print(a string + " " + b string + " " + c string)
 end
 
 threeArgs()        //: nothing nothing nothing

@@ -20,10 +20,10 @@ shared Array new(-> ArrayType new(Object)) Array of()
 
 def Array iterate(-> ArrayIterator) ArrayIterator new(this)
 
-Array defineGetter("toString", fn(-> String)
+Array defineGetter("string", fn(-> String)
     var text = "["
     for i = 0 until(count) do
-        text = text + this(i) toString
+        text = text + this(i) string
         if i < (count - 1) then text = text + ", "
     end
     text + "]"
@@ -41,7 +41,7 @@ def Array sortByString(-> Array)
     // TODO(bob): Awful bubble sort FTW!
     for i = 0 until(result count) do
         for j = (i + 1) until(result count) do
-            if result(i) toString > result(j) toString then
+            if result(i) string > result(j) string then
                 var temp = result(i)
                 result(i) = result(j)
                 result(j) = temp
@@ -112,8 +112,8 @@ end
 
 ArrayType parent = Array
 
-ArrayType defineGetter("toString", fn(-> String)
-    String unsafeCast(elementType toString + "[]")
+ArrayType defineGetter("string", fn(-> String)
+    String unsafeCast(elementType string + "[]")
 end)
 
 def ArrayType canAssignFrom(other -> Bool)

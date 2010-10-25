@@ -68,7 +68,7 @@ punctuation. By example:
     var items = Array new
     items add("zero")
     for i = 1 to(10) do items = items ++ i
-    toString print(items)
+    print(items)
 
 There are no predefined operators in Magpie: any sequence of punctuation
 characters is valid. (Punctuation characters are also fine in regular

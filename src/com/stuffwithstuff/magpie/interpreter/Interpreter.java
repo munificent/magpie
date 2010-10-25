@@ -382,7 +382,7 @@ public class Interpreter {
   }
   
   public String evaluateToString(Obj value) {
-    return getProperty(Position.none(), value, Identifiers.TO_STRING).asString();
+    return getProperty(Position.none(), value, Identifiers.STRING).asString();
   }
 
   public void pushScriptPath(String path) {

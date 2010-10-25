@@ -24,9 +24,9 @@ print(e("e1", "e2")) //: e1e2
 
 // nested local function
 var f = fn (arg Int ->)
-        print("outer " + arg toString)
+        print("outer " + arg string)
         var g = fn (arg2 String ->) print("inner " + arg2)
-        g(arg toString)
+        g(arg string)
     end
 f(2) //: outer 2
      //: inner 2

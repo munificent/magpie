@@ -7,7 +7,7 @@ end
 class Derived2 : Base
 end
 
-// toString. Note: branches are sorted, duplicates are removed, and a
+// string. Note: branches are sorted, duplicates are removed, and a
 // hierarchy gets flattened.
 print(Int | Bool) //: Bool | Int
 print(Int | Bool | String) //: Bool | Int | String

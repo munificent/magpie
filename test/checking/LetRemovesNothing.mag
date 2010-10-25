@@ -2,7 +2,7 @@
 // create a new variable whose type is the same minus the "| Nothing" branch.
 
 var foo(a Int | String ->)
-    print(a toString)
+    print(a string)
 end
 
 var main(->)

@@ -1,6 +1,6 @@
-print(true toString) //: true
-print(false toString) //: false
+print(true string) //: true
+print(false string) //: false
 
-print(123 toString) //: 123
+print(123 string) //: 123
 
-print("hi" toString) //: hi
+print("hi" string) //: hi

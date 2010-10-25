@@ -34,6 +34,6 @@ list filter(fn (item String -> Bool) item == "needle")
 
 list filter(-> it == "needle")
 
-list sort((a, b) -> a toString compareTo(b toString))
+list sort((a, b) -> a string compareTo(b string))
 
 list sort(fn a b = a < b)

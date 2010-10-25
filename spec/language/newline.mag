@@ -47,7 +47,7 @@ specify("A newline") with
     it should("be ignored after an open brace") with
         var e = {
             123 }
-        e toString shouldBe("{ 123 }")
+        e string shouldBe("{ 123 }")
     end
 end
 
@@ -60,7 +60,7 @@ end
 specify("A backslash") with
     it should("consume the following newline") with
         var a = true \
-            toString
+            string
         a shouldBe("true")
     end
 end

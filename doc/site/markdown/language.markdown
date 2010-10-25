@@ -9,7 +9,7 @@ To give you a preview, here's a (thoroughly useless) chunk of code that contains
     var everything = fn()
         for i = 1 to(5)
         while i * i < 10 do
-            print(i toString(base: 10 pad: 6)
+            print(i string(base: 10 pad: 6)
             if i < 3 then break
             let a = Int parse("1" + i) then
                 return { an expression }

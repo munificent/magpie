@@ -18,8 +18,8 @@ public class BoolBuiltIns {
     return interpreter.createBool(!thisObj.asBool());
   }
   
-  @Getter("toString(-> String)")
-  public static Obj toString(Interpreter interpreter, Obj thisObj, Obj arg) {
+  @Getter("string(-> String)")
+  public static Obj string(Interpreter interpreter, Obj thisObj, Obj arg) {
     return interpreter.createString(Boolean.toString(thisObj.asBool()));
   }
 }

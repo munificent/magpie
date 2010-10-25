@@ -1,5 +1,5 @@
 let a = nothing then print("should not")
-let a = 1 then print(a toString) //: 1
+let a = 1 then print(a string) //: 1
 
 let a = nothing
 then print("should not")

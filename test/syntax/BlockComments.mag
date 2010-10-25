@@ -18,7 +18,7 @@ print("/* in string */") //: /* in string */
 
 print("a" +/* after op */ "b") //: ab
 print("a" /* before op */+ "b") //: ab
-print((4 -/* after minus */ 3) toString) //: 1
+print((4 -/* after minus */ 3) string) //: 1
 
 var a = "a"
 print(a/* after identifier */) //: a

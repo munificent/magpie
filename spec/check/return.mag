@@ -50,7 +50,7 @@ specify("A 'return' expression") with
         end
         
         expectCheckError with
-            (return) toString
+            (return) string
         end
     end
     
