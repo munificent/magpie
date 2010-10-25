@@ -42,6 +42,20 @@ specify("The 'defineGetter' method on Class") with
         end
     end
 
+    it should("ensure the getter body takes no arguments") with
+        envExpectCheckOK with
+            var c = Class new("c")
+            c defineGetter("foo", fn(-> Int) 123)
+            var main(->) nothing
+        end
+
+        envExpectCheckError with
+            var c = Class new("c")
+            c defineGetter("foo", fn(arg -> Int) 123)
+            var main(->) nothing
+        end
+    end
+    
     it should("ensure the getter body returns the declared type") with
         envExpectCheckOK with
             var c = Class new("c")

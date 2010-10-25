@@ -79,6 +79,14 @@ public class Checker {
       if (getter.getValue() instanceof Function) {
         Function function = (Function)getter.getValue();
         checkFunction(function, classObj, staticContext);
+        
+        // Getter functions should not take any arguments.
+        if (function.getType().getParamNames().size() > 0) {
+          addError(function.getFunction().getPosition(),
+              "The getter \"%s\" is declared to take one or more arguments, " +
+              "but arguments are not allowed for a getter.",
+              getter.getKey());
+        }
       }
     }
   }
