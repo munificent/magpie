@@ -17,7 +17,7 @@ A message name starts with a letter or underscore followed by any number of othe
     :::magpie
     _   a   item1   punctuation?!   i$feel%FUNNY^*
 
-Note that because punctuation characters are allowed in messages, it's important to use whitespace to separate things. Also it makes your code easier to read:
+Note that because punctuation characters are allowed in messages, it's important to use whitespace to separate things. (It also makes your code easier to read):
 
     :::magpie
     a+b   // the name "a+b"
@@ -33,7 +33,7 @@ If there are multiple arguments, they're separated with commas:
     :::magpie
     dictionary add("key", "value")
 
-(Technically, all messages in Magpie take a single argument. In the above example, we're passing one argument to `add` a tuple with fields "key" and "value". In practice, it works like you'd expect.)
+(Technically, all messages in Magpie take a single argument. In the above example, we're passing one argument to `add` a [tuple](compound-values.html) with fields "key" and "value". In practice, it works like you'd expect.)
 
 #### Implicit Receiver
 
@@ -92,5 +92,5 @@ In C++/Java-style OOP syntax, that would be:
 Magpie just ditches a lot of the punctuation.
 
 <p class="future">
-I need to document callables here.
+I need to document callables, getters and setters here.
 </p>

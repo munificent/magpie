@@ -9,15 +9,15 @@ Flow control is about evaluating an expression and then choosing an action based
 
 Most languages handle this by having a set of rules for what values of any given type are "true" or not. Magpie calls this "truthiness". By default, the rules are:
 
-* For booleans: `true` is true, and `false` is not, of course.
-* Non-zero numbers are true.
-* Non-empty strings are true.
-* `nothing` is false.
-* All other objects are true.
+* For booleans: `true` is truthy, and `false` is not, of course.
+* Non-zero numbers are truthy.
+* Non-empty strings are truthy.
+* `nothing` is not truthy.
+* All other objects are truthy.
 
 However, this behavior isn't fixed. Truthiness is determined by sending a `true?` message to the object. The value returned by that is used to determine if a condition is met or not. So, if you define your own type, you can control how it behaves when used in a conditional expression by simply defining `true?` to do what you want. (To avoid the [turtles-all-the-way-down](http://en.wikipedia.org/wiki/Turtles_all_the_way_down) problem, the result from `true?` *does* have a fixed interpretation: a boolean `true` is the only truthy value.)
 
-When reading the rest of this section, understand that any time a condition is evaluated, there is an implicit call to `true?` inserted too. So this:
+When reading the rest of this section, understand that any time a condition is evaluated, there is an implicit call to `true?` inserted. So this:
 
     :::magpie
     if something(other) then ...
@@ -34,7 +34,7 @@ The simplest flow control structure, `if` lets you conditionally skip a chunk of
     :::magpie
     if ready then go!
 
-That will evaluate the expression after `if`. If it's true, then the expression after `then` is evaluated. Otherwise it is skipped. You can also use a block:
+That will evaluate the expression after `if`. If it's true, then the expression after `then` is evaluated. Otherwise it is skipped. The `then` expression can be a block:
 
     :::magpie
     if ready then
@@ -42,7 +42,7 @@ That will evaluate the expression after `if`. If it's true, then the expression 
         go!
     end
 
-You can also provide an `else` expression. It will be evaluated if the condition is false:
+You may also provide an `else` expression. It will be evaluated if the condition is false:
 
     :::magpie
     if ready then go! else notReady
@@ -57,7 +57,7 @@ And, of course, it can take a block too. Note that if you have an `else` clause,
         notReady
     end
 
-Since Magpie does not have statements, even flow control structures are expressions and return values. An `if` expression returns the value of the `then` block if the condition was true, or the `else` block if false. If there is no `else` block and the condition was false, it returns `nothing`.
+Since Magpie does not have statements, even flow control structures are expressions and return values. An `if` expression returns the value of the `then` expression if the condition was true, or the `else` expression if false. If there is no `else` block and the condition was false, it returns `nothing`.
 
     :::magpie
     print(if true then "yes" else "no") // prints "yes"
@@ -66,7 +66,7 @@ Since Magpie does not have statements, even flow control structures are expressi
 
 ### let/then/else
 
-Magpie has another flow control structure similar to `if` called `let`. It binds a couple of sequential actions together into a single step:
+Magpie has another flow control structure similar to `if` called `let`. It lumps a couple of sequential actions together into a single operation:
 
 1.  It evaluates an expression.
 2.  If the result is not `nothing`, then it:
@@ -94,9 +94,9 @@ A `let` expression simplifies that:
         // do something with the number
     end
 
-The nice thing about this is that if that variable exists at all, we know for certain that it will not be `nothing`. If it was, `let` would have skipped it entirely.
+The nice thing about this is that if that variable exists at all, we know for certain that it will not be `nothing`. If it was, `let` would have skipped it entirely. Think of it as a variable that is scoped to within the success of an operation.
 
-This is a handy convenience when we're just considering Magpie as a dynamic language. When we take into account its static typing too, it gets much more helpful:
+This is a handy convenience when we're just considering Magpie as a dynamic language. When we take into account its static typing, it gets more useful:
 
     :::magpie
     var maybeNumber = Int parse(someString)
@@ -155,9 +155,9 @@ The other loop clause is `for`. It looks like:
 
 The expression after `for` is evaluated *once* before the loop starts. The result of that should be an object that implements the `Iterable` interface. `Iterable` has one method, `iterate`, that is expected to return an object that implements `Iterator`.
 
-An iterator generates a series of values. It has two methods, `next` and `current`. `next` will be called before each loop iteration (including the first) and advances the iterator to its next position. If the iterator is out of values, it returns `false` and the clause fails, otherwise it returns `true`. `current` returns the current value that the iterator is sitting on.
+An iterator generates a series of values. It has two members, a `next()` method and a `current` getter. `next()` will be called before each loop iteration (including the first) and advances the iterator to its next position. If the iterator is out of values, it returns `false` and the clause fails, otherwise it returns `true`. `current` returns the current value that the iterator is sitting on.
 
-Each iteration of the loop, Magpie will advance the iterator and bind the current value to a variable. That variable will only be in scope inside the body of the loop. What this means is that a loop like:
+Each iteration of the loop, Magpie will advance the iterator and bind the current value to a variable. The variable is scoped within the body of the loop. What this means is that a loop like:
 
     :::magpie
     for item = collection do print(item)
@@ -220,6 +220,17 @@ Allowing multiple `for` clauses like this enables some handy idioms:
     for item = collection do
         // here 'item' is the item and 'i' is its index
     end
+    
+    // iterate through the first N items in a collection
+    for i = 1 to(n)
+    for item = collection do print(item)
+    
+    // iterate through a collection until an item is found
+    var found = nothing
+    while found == nothing
+    for item = collection do
+        if test(item) then found = item
+    end
 
 #### Exiting Early
 
@@ -242,13 +253,13 @@ Right now, a loop will always return `nothing`, but that will likely change. It 
 
 ### Conjunctions
 
-What other languages call "logical operators", Magpie calls "conjunctions". They are considered flow control expressions and not operators because they conditionally execute some code: they short-circuit. There are two conjunctions in Magpie: `and` and `or`. Both of them are infix operators, like so:
+What other languages call "logical operators", Magpie calls "conjunctions". They are considered flow control expressions and not operators because they conditionally execute some code&mdash; they short-circuit. There are two conjunctions in Magpie: `and` and `or`. Both of them are infix operators, like so:
 
     :::magpie
     happy and knowIt
     ready or not
 
-An `and` conjunction evaluates the left-hand argument. If it's not true, it returns that value. Otherwise it evaluates and returns the right-hand argument. An `or` conjunction is reversed. If the left-hand argument is *true*, it's returned, otherwise the right-hand argument is evaluated and returned:
+An `and` conjunction evaluates the left-hand argument. If it's not true, it returns that value. Otherwise it evaluates and returns the right-hand argument. An `or` conjunction is reversed. If the left-hand argument *is* true, its returned, otherwise the right-hand argument is evaluated and returned:
 
     print(0 and 1) // prints 0
     print(1 and 2) // prints 2

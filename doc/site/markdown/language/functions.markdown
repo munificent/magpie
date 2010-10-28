@@ -6,7 +6,7 @@ A language can't call itself "functional" without having first-class functions: 
     :::magpie
     fn() print("I'm a fn!")
 
-That creates an anonymous function that prints when it's invoked. You can invoke a function like you would in math class: by putting the argument to it in parentheses after it:
+That creates an anonymous function that prints some text when invoked. You can invoke a function like you would in math class: by putting the argument to it in parentheses after it:
 
     :::magpie
     (fn(a) print("My arg is " + a)("bananas!")
@@ -33,15 +33,15 @@ If a function doesn't take any arguments, you can leave off the `()`:
 
 ### Returning Values
 
-A function will implicitly return the value that its body evaluates to:
+A function automatically returns the value that its body evaluates to. An explicit `return` is not required:
 
     :::magpie
-    fn() 123 // returns 123 when called
+    fn 123 // returns 123 when called
 
-If the body is a block, that will be the last expression in the block:
+If the body is a block, the result will be the last expression in the block:
 
     :::magpie
-    fn()
+    fn
         print("hi")
         "result"
     end
@@ -65,7 +65,7 @@ can access variables defined outside of their scope. They will hold onto closed 
     var foo(i)
         // return a function that references a variable
         // defined outside of itself (i)
-        fn() print(i)
+        fn print(i)
     end
     
     var f = foo("hi")
