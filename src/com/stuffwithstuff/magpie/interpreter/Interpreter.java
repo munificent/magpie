@@ -70,7 +70,7 @@ public class Interpreter {
     // Now that ClassClass, Class and Object exist, wire them up.
     classClass.bindClass(mClass);
     mClass.setParent(mObjectClass);
-    
+
     mArrayClass = createGlobalClass("Array");
     // TODO(bob): Should really be type and not class, I think?
     //mArrayClass.setParent(mClass);
@@ -401,9 +401,6 @@ public class Interpreter {
     // Create the metaclass. This will hold shared methods on the class.
     ClassObj metaclass = new ClassObj(mClass, name + "Class", mClass);
     
-    // Define a method to cheat the type-checker.
-    metaclass.addMethod("unsafeCast", new UnsafeCast(name));
-
     // Create the class object itself. This will hold the instance methods for
     // objects of the class.
     ClassObj classObj = new ClassObj(metaclass, name, mObjectClass);

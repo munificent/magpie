@@ -359,6 +359,16 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
+  public Obj visit(UnsafeCastExpr expr, EvalContext context) {
+    Obj type = mInterpreter.evaluate(expr.getType(), mStaticContext);
+    
+    // Check the value, but ignore it's evaluated type.
+    check(expr.getValue(), context);
+    
+    return type;
+  }
+
+  @Override
   public Obj visit(VariableExpr expr, EvalContext context) {
     Obj valueType = check(expr.getValue(), context);
 

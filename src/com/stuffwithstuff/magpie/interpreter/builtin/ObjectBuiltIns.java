@@ -10,8 +10,8 @@ import com.stuffwithstuff.magpie.parser.ParseException;
 
 public class ObjectBuiltIns {
 
-  @Signature("==(other Object | Nothing -> Bool)")
-  public static Obj _eqeq_(Interpreter interpreter, Obj thisObj, Obj arg) {
+  @Signature("==(other -> Bool)")
+  public static Obj _eqeqeq_(Interpreter interpreter, Obj thisObj, Obj arg) {
     return interpreter.createBool(thisObj == arg);
   }
 
@@ -52,7 +52,7 @@ public class ObjectBuiltIns {
     return interpreter.nothing();
   }
   
-  @Getter("type()")
+  @Getter("type(-> Type)")
   public static Obj type(Interpreter interpreter, Obj thisObj, Obj arg) {
     return thisObj.getClassObj();
   }

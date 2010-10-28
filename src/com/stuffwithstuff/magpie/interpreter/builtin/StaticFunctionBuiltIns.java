@@ -6,7 +6,7 @@ import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class StaticFunctionBuiltIns {
-  @Signature("type()")
+  @Getter("type(-> Type)")
   public static Obj type(Interpreter interpreter, Obj thisObj, Obj arg) {
     // TODO(bob): Hackish. We're just cramming the StaticFnExpr in a vanilla
     // Obj right now. Dirty!

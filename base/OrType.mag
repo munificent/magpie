@@ -1,33 +1,55 @@
 class OrType
-    this(cases)
+    this(cases ArrayType new(Type))
         this cases = cases
     end
     
-    |(other -> Object)
-        Class orTypes(this, other)
+    shared combine(left Type, right Type -> Type)
+        // combine the cases of both arms
+        var cases = Array new()
+
+        let leftOr = as[OrType](left) then
+            for item = leftOr cases do cases add(item)
+        else
+            cases add(left)
+        end
+
+        let rightOr = as[OrType](right) then
+            for item = rightOr cases do cases add(item)
+        else
+            cases add(right)
+        end
+
+        // Sort and remove the duplicates.
+        cases = cases sortByString() unique()
+
+        // If just one case remains, there's no union.
+        if cases count == 1 then return cases(0)
+    
+        OrType new(cases)
+    end
+
+    |(other Type -> Type)
+        OrType combine(this, other)
     end
 
     ==(other -> Bool)
-        if other type != OrType then return false
-
-        var orType = OrType unsafeCast(other)
-        if cases count != orType cases count then return false
+        let orType = as[OrType](other) then
+            if cases count != orType cases count then return false
     
-        for thisCase = cases
-        for otherCase = orType cases do
-            if thisCase != otherCase then return false
-        end
-        true
+            for thisCase = cases
+            for otherCase = orType cases do
+                if thisCase != otherCase then return false
+            end
+            true
+        else false
     end
 
     !=(other -> Bool) (this == other) not
 
-    canAssignFrom(other -> Bool)
-        if other type == OrType then
+    canAssignFrom(other Type -> Bool)
+        let orType = as[OrType](other) then
             // It's also an or, so see if all of its cases are matched by one of
             // the ones here.
-            // TODO(bob): Should use let instead of raw unsafeCast.
-            var orType = OrType unsafeCast(other)
             for otherCase = orType cases do
                 if canAssignFrom(otherCase) not then return false
             end
@@ -41,44 +63,61 @@ class OrType
         end
     end
 
-    getMemberType(name String)
-        var firstType = cases(0) getMemberType(name)
-    
-        for type = cases do
-            var method = type getMemberType(name)
-            // The method must be present in all cases
-            if method == nothing then return nothing
-        
-            // And all types must match.
-            // TODO(bob): Right now, the types of all cases must match exactly.
-            // We could at some point loosen this to allow subtypes.
-            if firstType canAssignFrom(method) not then return nothing
-            if method canAssignFrom(firstType) not then return nothing
+    getMemberType(name String -> Type | Nothing)
+        let firstType = cases(0) getMemberType(name) then
+            for type = cases do
+                // The method must be present in all cases.
+                let method = type getMemberType(name) then
+                    // All types must match.
+                    // TODO(bob): Right now, the types of all cases must match
+                    // exactly. We could loosen this to allow subtypes.
+                    if firstType canAssignFrom(method) not then
+                        return nothing
+                    end
+                    if method canAssignFrom(firstType) not then
+                        return nothing
+                    end
+                else
+                    return nothing
+                end
+            end
+            return firstType
+        else
+            return nothing
         end
-    
-        firstType
     end
 
-    getSetterType(name String)
-        var firstType = cases(0) getMemberType(name)
+    getSetterType(name String -> Type | Nothing)
+        let firstType = cases(0) getMemberType(name) then
+            for type = cases do
+                let method = type getSetterType(name) then
+                    // All types must match.
+                    // TODO(bob): Right now, the types of all cases must match
+                    // exactly. We could loosen this to allow subtypes.
+                    if firstType canAssignFrom(method) not then return nothing
+                    // TODO(bob): Block if here is to get around grammar
+                    // confusing 'else' with being for this 'if'.
+                    if method canAssignFrom(firstType) not then
+                        return nothing
+                    end
+                else
+                    // The setter must be present in all cases
+                    return nothing
+                end
+            end
     
-        for type = cases do
-            var method = type getSetterType(name)
-            // The setter must be present in all cases
-            if method == nothing then return nothing
-        
-            // And all types must match.
-            // TODO(bob): Right now, the types of all cases must match exactly.
-            // We could at some point loosen this to allow subtypes.
-            if firstType canAssignFrom(method) not then return nothing
-            if method canAssignFrom(firstType) not then return nothing
+            return firstType
+        else
+            return nothing
         end
-    
-        firstType
     end
 
-    unsafeRemoveNothing(-> Dynamic)
-        var remaining = Array new()
+    unsafeRemoveNothing(-> Type)
+        // TODO(bob): Total hack. We need remaining to have the right element
+        // type.
+        var remaining = cases copy()
+        remaining clear()
+        
         for type = cases do
             if type != Nothing then remaining add(type)
         end
@@ -90,7 +129,7 @@ class OrType
         OrType new(remaining)
     end
     
-    cases ArrayType new(Dynamic) // TODO(bob): IType[Int]
+    cases ArrayType new(Type)
 end
 
 OrType defineGetter("string", fn(-> String)
@@ -101,4 +140,3 @@ OrType defineGetter("string", fn(-> String)
     end
     result
 end)
-

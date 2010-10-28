@@ -25,22 +25,34 @@ public class InterfaceExprParser implements ExprParser {
     
     // Parse the body.
     while (!parser.match(TokenType.END)) {
-      // An interface contains method declarations: i.e. names and signatures
+      // An interface contains member declarations: i.e. names and signatures
       // with no body:
       //
       //    foo(a Int -> Int)
+      //    bar Int
       //
       // They get desugared to:
       //
-      //    Foo declareMethod("foo", (fn() Int), (fn() Int))
+      //    Foo declareMember("foo", fn() Function(Int, Int))
+      //    Foo declareMember("bar", fn() Int)
       
-      String method = parser.consumeAny(TokenType.NAME, TokenType.OPERATOR).getString();
-      FunctionType type = parser.parseFunctionType();
-
-      exprs.add(Expr.message(Expr.name(name), Identifiers.DECLARE_METHOD,
-          Expr.tuple(Expr.string(method),
-              Expr.fn(type.getParamType()),
-              Expr.fn(type.getReturnType()))));
+      String member = parser.consumeAny(
+          TokenType.NAME, TokenType.OPERATOR).getString();
+      
+      // Parse the member's type.
+      Expr type;
+      if (parser.lookAhead(TokenType.LEFT_PAREN)) {
+        // It's a method.
+        FunctionType function = parser.parseFunctionType();
+        type = Expr.message(Expr.name("Function"), Identifiers.CALL,
+            Expr.tuple(function.getParamType(), function.getReturnType()));
+      } else {
+        // It's a getter.
+        type = parser.parseTypeExpression();
+      }
+      
+      exprs.add(Expr.message(Expr.name(name), Identifiers.DECLARE_MEMBER,
+          Expr.tuple(Expr.string(member), Expr.fn(type))));
       
       parser.consume(TokenType.LINE);
     }

@@ -11,13 +11,12 @@ public final class Identifiers {
   public static final String COUNT = "count";
   public static final String CURRENT = "current";
   public static final String DECLARE_FIELD = "declareField";
-  public static final String DECLARE_METHOD = "declareMethod";
+  public static final String DECLARE_MEMBER = "declareMember";
   public static final String DEFINE_CONSTRUCTOR = "defineConstructor";
   /*
-  public static final String DEFINE_FIELD = "defineField";
-  */
+   * public static final String DEFINE_FIELD = "defineField";
+   */
   public static final String DEFINE_METHOD = "defineMethod";
-  public static final String EQUALS = "==";
   public static final String FUNCTION_TYPE = "FunctionType";
   public static final String GET_MEMBER_TYPE = "getMemberType";
   public static final String GET_SETTER_TYPE = "getSetterType";
@@ -33,6 +32,7 @@ public final class Identifiers {
   public static final String STRING = "string";
   public static final String TYPE = "type";
   public static final String UNSAFE_REMOVE_NOTHING = "unsafeRemoveNothing";
-  
-  private Identifiers() {}
+
+  private Identifiers() {
+  }
 }

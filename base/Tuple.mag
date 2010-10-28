@@ -2,6 +2,60 @@ extend class Tuple
     iterate(-> TupleIterator) TupleIterator new(this)
 end
 
+// A tuple of Types is itself a Type.
+extend class Tuple
+    canAssignFrom(other Type -> Bool)
+        let otherTuple = as[Tuple](other) then
+            // With the same number of fields.
+            if count != otherTuple count then return false
+    
+            // And the fields must be assignable.
+            for field = this
+            for otherField = otherTuple do
+                let otherTypeField = as[Type](otherField) then
+                    if field canAssignFrom(otherTypeField) not then
+                        return false
+                    end
+                else
+                    print("Field " + otherField + " is not a type.")
+                    return false
+                end
+            end
+    
+            true
+        else false
+    end
+
+    getMemberType(name String -> Type | Nothing)
+        // TODO(bob): Hack. Should at the very least strongly-type the field
+        // getters.
+        Tuple getMemberType(name)
+    end
+    
+    getSetterType(name String -> Type | Nothing)
+        Tuple getMemberType(name)
+    end
+    
+    ==(other -> Bool)
+        let otherTuple = as[Tuple](other) then
+            if count != otherTuple count then return false
+    
+            // And the fields must be assignable.
+            for field = this
+            for otherField = otherTuple do
+                if field != otherField then return false
+            end
+            true
+        else false
+    end
+    
+    !=(other -> Bool) (this == other) not
+    
+    |(other Type -> Type)
+        OrType combine(this, other)
+    end
+end
+
 Tuple defineGetter("string", fn(-> String)
     var s = "("
     

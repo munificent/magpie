@@ -290,6 +290,12 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
+  public Obj visit(UnsafeCastExpr expr, EvalContext context) {
+    // No type-checking at all, just yield the value.
+    return evaluate(expr.getValue(), context);
+  }
+
+  @Override
   public Obj visit(VariableExpr expr, EvalContext context) {
     Obj value = evaluate(expr.getValue(), context);
 

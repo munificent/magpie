@@ -2,11 +2,11 @@ extend class Array
     shared new(-> ArrayType new(Object)) Array of()
     
     // TODO(bob): This is kind of hokey.
-    shared newType(elementType -> ArrayType)
+    shared newType(elementType Type -> ArrayType)
         ArrayType new(elementType)
     end
 
-    shared canAssignFrom(other -> Bool)
+    shared canAssignFrom(other Type -> Bool)
         if this == other then true
         else if other type == ArrayType then true
         else false
@@ -49,6 +49,7 @@ extend class Array
         result
     end
 
+    // TODO(bob): rename contains?
     contains(item -> Bool)
         for element = this do
             if item == element then return true
@@ -86,25 +87,59 @@ Array defineGetter("last", fn(-> Dynamic)
     this(count - 1)
 end)
 
-class ArrayType : Array
-    this(elementType Object)
+Array defineGetter("type", fn(-> Type)
+    // TODO(bob): Hack!
+    var elementType = this(0) type
+    ArrayType new(elementType)
+end)
+
+class ArrayType
+    this(elementType Type)
         this elementType = elementType
     end
     
-    canAssignFrom(other -> Bool)
-        // Element type must match exactly (not variant).
-        this elementType == (ArrayType unsafeCast(other)) elementType
+    canAssignFrom(other Type -> Bool)
+        let otherArray = as[ArrayType](other) then
+            // Element type must match exactly (not variant).
+            elementType == otherArray elementType
+        else false
     end
 
-    getMemberType(name String)
-        Array getMemberType(name)
+    getMemberType(name String -> Type | Nothing)
+        // TODO(bob): Hackish. Strongly-type the array members based on the
+        // element type.
+        if name == "assign" then Function(elementType, elementType)
+        else if name == "copy" then Function(Nothing, this)
+        else if name == "contains" then Function(elementType, Bool)
+        else if name == "call" then Function(Int, elementType)
+        else if name == "first" then Function(Function(elementType, Bool), elementType | Nothing)
+        else if name == "iterate" then Function(Nothing,
+            ArrayIteratorType new(elementType))
+        else Array getMemberType(name)
+    end
+    
+    getSetterType(name String -> Type | Nothing)
+        nothing
     end
 
-    elementType Object
+    ==(other -> Bool)
+        let otherArray = as[ArrayType](other) then
+            // Element type must match exactly (not variant).
+            elementType == otherArray elementType
+        else false
+    end
+    
+    !=(other -> Bool) (this == other) not
+    
+    |(other Type -> Type)
+        OrType combine(this, other)
+    end
+
+    elementType Type
 end
 
 ArrayType defineGetter("string", fn(-> String)
-    String unsafeCast(elementType string + "[]")
+    "array of " + elementType
 end)
 
 class ArrayIterator
@@ -124,3 +159,51 @@ end
 
 // TODO(bob): Need generics for return type.
 ArrayIterator defineGetter("current", fn array(index))
+
+ArrayIterator defineGetter("type", fn(-> Type)
+    // TODO(bob): Hack!
+    var elementType = array(0) type
+    ArrayIteratorType new(elementType)
+end)
+
+class ArrayIteratorType
+    this(elementType)
+        this elementType = elementType
+    end
+    
+    canAssignFrom(other Type -> Bool)
+        let otherArray = as[ArrayIteratorType](other) then
+            // Array iterators are covariant with their element type.
+            elementType canAssignFrom(otherArray elementType)
+        else false
+    end
+    
+    getMemberType(name String -> Type | Nothing)
+        // Strongly-type the iterator.
+        if name == "current" then return elementType
+        // Use the generic type of the other methods.
+        ArrayIterator getMemberType(name)
+    end
+    
+    getSetterType(name String -> Type | Nothing)
+        nothing
+    end
+    
+    ==(other -> Bool)
+        let otherArray = as[ArrayIteratorType](other) then
+            elementType == otherArray elementType
+        else false
+    end
+    
+    !=(other -> Bool) (this == other) not
+    
+    |(other Type -> Type)
+        OrType combine(this, other)
+    end
+    
+    elementType Type
+end
+
+ArrayIteratorType defineGetter("string", fn(-> String)
+    "array of " + elementType + " iterator"
+end)

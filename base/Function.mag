@@ -1,55 +1,59 @@
 extend class Function
     // Make "Function" a functor that you can call to instantiate function types.
     // Type annotations of function types look like Function(Int, String) 
-    shared call(paramType, returnType)
+    shared call(paramType Type, returnType Type -> Type)
         FunctionType new(paramType, returnType)
     end
 end
 
 class FunctionType
-    this(paramType, returnType)
+    this(paramType Type, returnType Type)
         this paramType = paramType
         this returnType = returnType
     end
 
     // TODO(bob): Once interfaces are in, function types can just become sugar for
     // creating ICallable(Arg, Return) instances.
-    canAssignFrom(other -> Bool)
+    canAssignFrom(other Type -> Bool)
         // Both must be functions.
-        if other type != FunctionType then return false
-
-        // Parameter must be contravariant.
-        if other paramType canAssignFrom(paramType) not then return false
+        let otherFn = as[FunctionType](other) then
+            // Parameter must be contravariant.
+            if otherFn paramType canAssignFrom(paramType) not then return false
     
-        // Return must be covariant.
-        if returnType canAssignFrom(other returnType) not then return false
+            // Return must be covariant.
+            if returnType canAssignFrom(otherFn returnType) not then return false
     
-        true
+            true
+        else false
     end
 
-    getMemberType(name String)
+    getMemberType(name String -> Type | Nothing)
         // Just defer to the base function class.
         Function getMemberType(name)
     end
 
-    ==(other -> Bool)
-        if other type != FunctionType then return false
+    getSetterType(name String -> Type | Nothing)
+        // Just defer to the base function class.
+        Function getSetterType(name)
+    end
 
-        var funcType = FunctionType unsafeCast(other)
-    
-        if paramType != funcType paramType then return false
-        if returnType != funcType returnType then return false
-    
-        true
+    |(other Type -> Type)
+        OrType combine(this, other)
+    end
+
+    ==(other -> Bool)
+        let fnType = as[FunctionType](other) then
+            paramType == fnType paramType and returnType == fnType returnType
+        else false
     end
 
     !=(other -> Bool) (this == other) not
 
-    paramType Dynamic
-    returnType Dynamic
+    paramType Type
+    returnType Type
 end
 
-FunctionType defineGetter("string", fn
+FunctionType defineGetter("string", fn(-> String)
     paramType string + " -> " + returnType string
 end)
 
@@ -58,4 +62,7 @@ class StaticFunctionType
         this params = params
         this body = body
     end
+    
+    params Dynamic
+    body Dynamic
 end

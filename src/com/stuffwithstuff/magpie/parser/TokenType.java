@@ -47,6 +47,7 @@ public enum TokenType {
   THEN,
   THIS,
   TYPEOF,
+  UNSAFECAST,
   VAR,
   WHILE,
   WITH,

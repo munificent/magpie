@@ -1,75 +1,75 @@
 // Defines interface types. An interface is a collection of named typed methods.
 // Interfaces are duck-typed like Go: any type that has methods with the names
-// of the methods in the interface with matching types, then that type
+// of the members in the interface with matching types, then that type
 // implicitly implements the interface.
 
 class Interface
     this(name String)
         this name = name
-        this methods = Array new()
+        this members = Array new()
+    end
+    
+    |(other Type -> Type)
+        OrType combine(this, other)
     end
 
-    declareMethod(name String, paramType, returnType ->)
-        methods add(Method new(name, paramType, returnType))
+    declareMember(name String, type Function(Nothing, Type) ->)
+        members add(Member new(name, type))
     end
 
-    canAssignFrom(other -> Bool)
-        for method = methods do
-            var otherMethod = other getMemberType(method name)
-        
-            // Must have method
-            if otherMethod == nothing then return false
-        
-            // Invoke the type expressions
-            var paramType = method paramType()
-            var returnType = method returnType()
-        
-            // TODO(bob): This is basically copied from Function. If methods stored
-            // an actual function type, and getMethodType returned a function type,
-            // we should be able to just compare them directly and have this logic
-            // in one place.
-            var otherParam = otherMethod paramType()
-            var otherReturn = otherMethod returnType()
-        
-            // Parameter must be contravariant.
-            if otherParam canAssignFrom(paramType) not then return false
+    canAssignFrom(other Type -> Bool)
+        // An interface can always assign from itself. This is critical to
+        // allow an interface that references itself in a member from causing a
+        // stack overflow during checking.
+        if other == this then return true
 
-            // Return must be covariant.
-            if returnType canAssignFrom(otherReturn) not then return false
+        for member = members do
+            var type = member memberType()
+            let otherMember = other getMemberType(member name) then
+                // Must be assignable.
+                if type canAssignFrom(otherMember) not then
+                    return false
+                end
+            else
+                // Must have members
+                return false
+            end
         end
     
         // If we got here, every method was found and matched.
         true
     end
 
-    getMemberType(name String)
-        let method = methods first(fn (m) m name == name) then
-            Function(method paramType, method returnType)
+    getMemberType(name String -> Type | Nothing)
+        let member = members first(fn (m Member -> Bool) m name == name) then
+            member memberType()
         else
             // No method by that name
             nothing
         end
     end
 
+    getSetterType(name String -> Type | Nothing)
+        // No setters in interfaces yet.
+        nothing
+    end
+
     name    String
-    methods ArrayType new(Method)
+    members ArrayType new(Member)
 end
 
 Interface defineGetter("string", fn(-> String) name)
 
-class Method
-    this(name String, paramType Function(Nothing, Dynamic),
-         returnType(Nothing, Dynamic))
+class Member
+    this(name String, type Function(Nothing, Type))
          this name = name
-         this paramType = paramType
-         this returnType = returnType
+         this memberType = type
     end
 
     name       String
-    paramType  Function(Nothing, Dynamic) // should return IType eventually
-    returnType Function(Nothing, Dynamic) // should return IType eventually
+    memberType Function(Nothing, Type)
 end
 
-Method defineGetter("string", fn(-> String)
-    name + " " + paramType string + " -> " + returnType string
+Member defineGetter("string", fn(-> String)
+    name + " " + memberType() string
 end)

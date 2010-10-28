@@ -89,7 +89,7 @@ public class ClassBuiltIns {
     return interpreter.nothing();
   }
 
-  @Signature("getMemberType(name String)")
+  @Signature("getMemberType(name String -> Type | Nothing)")
   public static Obj getMemberType(Interpreter interpreter, Obj thisObj, Obj arg) {
     String name = arg.asString();
     
@@ -111,7 +111,7 @@ public class ClassBuiltIns {
     return interpreter.nothing();
   }
 
-  @Signature("getSetterType(name String)")
+  @Signature("getSetterType(name String -> Type | Nothing)")
   public static Obj getSetterType(Interpreter interpreter, Obj thisObj, Obj arg) {
     String name = arg.asString();
     
@@ -146,10 +146,6 @@ public class ClassBuiltIns {
     
     // Add the constructor method.
     metaclass.addMethod(Identifiers.NEW, new ClassNew(name));
-
-    // TODO(bob): Get rid of this.
-    // Define a method to cheat the type-checker.
-    metaclass.addMethod("unsafeCast", new UnsafeCast(name));
 
     // Create the class object itself. This will hold the instance methods for
     // objects of the class.

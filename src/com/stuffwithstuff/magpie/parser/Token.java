@@ -73,6 +73,7 @@ public final class Token {
       case THEN: return "then";
       case THIS: return "this";
       case TYPEOF: return "typeof";
+      case UNSAFECAST: return "unsafecast";
       case VAR: return "var";
       case WHILE: return "while";
       case WITH: return "with";
