@@ -1,0 +1,27 @@
+specify("The 'defineSetter' method on Class") with
+    it should("define a writable property on the class") with
+        var c = Class new("c")
+        var assigned = "none"
+        c defineSetter("foo", fn(value) assigned = value)
+        c new() foo = "prop"
+        assigned shouldBe("prop")
+    end
+
+    it should("evaluate the body each time the property is set") with
+        var c = Class new("c")
+        var assigned = ""
+        c defineSetter("foo", fn(value) assigned = assigned + value)
+        c new() foo = "one"
+        c new() foo = "two"
+        assigned shouldBe("onetwo")
+    end
+
+    it should("replace an existing definition") with
+        var c = Class new("c")
+        var assigned = ""
+        c defineSetter("foo", fn(value) assigned = "before")
+        c defineSetter("foo", fn(value) assigned = "after")
+        c new() foo = "ignored"
+        assigned shouldBe("after")
+    end
+end
