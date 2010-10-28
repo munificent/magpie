@@ -1,7 +1,0 @@
-specify("The 'name' method on Class") with
-    it should("return the name of the class") with
-        Int name shouldBe("Int")
-        String name shouldBe("String")
-        Class new("Foo") name shouldBe("Foo")
-    end
-end
