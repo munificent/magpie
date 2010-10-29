@@ -13,13 +13,8 @@ extend class Tuple
             for field = this
             for otherField = otherTuple do
                 let otherTypeField = as[Type](otherField) then
-                    if field canAssignFrom(otherTypeField) not then
-                        return false
-                    end
-                else
-                    print("Field " + otherField + " is not a type.")
-                    return false
-                end
+                    if field canAssignFrom(otherTypeField) not then return false
+                else return false
             end
     
             true
@@ -115,14 +110,25 @@ class TupleIterator
 end
 
 TupleIterator defineGetter("current", fn()
-    if index == 0 then tuple _0
-    else if index == 1 then tuple _1
-    else if index == 2 then tuple _2
-    else if index == 3 then tuple _3
-    else if index == 4 then tuple _4
-    else if index == 5 then tuple _5
-    else if index == 6 then tuple _6
-    else if index == 7 then tuple _7
-    else if index == 8 then tuple _8
-    else if index == 9 then tuple _9
+    if index == 0 then
+        tuple _0
+    else if index == 1 then
+        tuple _1
+    else if index == 2 then
+        tuple _2
+    else if index == 3 then
+        tuple _3
+    else if index == 4 then
+        tuple _4
+    else if index == 5 then
+        tuple _5
+    else if index == 6 then
+        tuple _6
+    else if index == 7 then
+        tuple _7
+    else if index == 8 then
+        tuple _8
+    else if index == 9 then
+        tuple _9
+    end
 end)

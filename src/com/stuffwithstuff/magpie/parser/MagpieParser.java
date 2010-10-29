@@ -48,58 +48,19 @@ public class MagpieParser extends Parser {
     return assignment();
   }
 
-  // TODO(bob): There's a lot of overlap in the next four functions, but,
-  //            unfortunately also some slight differences. It would be cool to
-  //            unify these somehow.
-  
   public Expr parseBlock() {
+    return parseBlock(TokenType.END);
+  }
+  
+  public Expr parseBlock(TokenType endToken) {
     if (match(TokenType.LINE)){
       Position position = last(1).getPosition();
       List<Expr> exprs = new ArrayList<Expr>();
       
-      while (!match(TokenType.END)) {
+      while (!match(endToken)) {
         exprs.add(parseExpression());
         consume(TokenType.LINE);
       }
-      
-      position = position.union(last(1).getPosition());
-      return new BlockExpr(position, exprs, true);
-    } else {
-      return parseExpression();
-    }
-  }
-
-  public Expr parseIfBlock() {
-    if (match(TokenType.LINE)){
-      Position position = last(1).getPosition();
-      List<Expr> exprs = new ArrayList<Expr>();
-      
-      do {
-        exprs.add(parseExpression());
-        consume(TokenType.LINE);
-      } while (!lookAhead(TokenType.THEN));
-      
-      match(TokenType.LINE);
-
-      position = position.union(last(1).getPosition());
-      return new BlockExpr(position, exprs, true);
-    } else {
-      Expr expr = parseExpression();
-      // Each if expression may be on its own line.
-      match(TokenType.LINE);
-      return expr;
-    }
-  }
-  
-  public Expr parseElseBlock() {
-    if (match(TokenType.LINE)){
-      Position position = last(1).getPosition();
-      List<Expr> exprs = new ArrayList<Expr>();
-      
-      do {
-        exprs.add(parseExpression());
-        consume(TokenType.LINE);
-      } while (!match(TokenType.END));
       
       position = position.union(last(1).getPosition());
       return new BlockExpr(position, exprs, true);

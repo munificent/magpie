@@ -7,8 +7,10 @@ extend class Array
     end
 
     shared canAssignFrom(other Type -> Bool)
-        if this == other then true
-        else if other type == ArrayType then true
+        if this == other then
+            true
+        else if other type == ArrayType then
+            true
         else false
     end
     
@@ -40,10 +42,9 @@ extend class Array
     unique(-> ArrayType new(Object))
         var result = Array new()
         for item = this do
-            if result count == 0 then result add(item)
-            else
-                if result(-1) != item then result add(item)
-            end
+            if result count == 0 then
+                result add(item)
+            else if result(-1) != item then result add(item)
         end
     
         result
@@ -108,13 +109,18 @@ class ArrayType
     getMemberType(name String -> Type | Nothing)
         // TODO(bob): Hackish. Strongly-type the array members based on the
         // element type.
-        if name == "assign" then Function(elementType, elementType)
-        else if name == "copy" then Function(Nothing, this)
-        else if name == "contains" then Function(elementType, Bool)
-        else if name == "call" then Function(Int, elementType)
-        else if name == "first" then Function(Function(elementType, Bool), elementType | Nothing)
-        else if name == "iterate" then Function(Nothing,
-            ArrayIteratorType new(elementType))
+        if name == "assign" then
+            Function(elementType, elementType)
+        else if name == "copy" then
+            Function(Nothing, this)
+        else if name == "contains" then
+            Function(elementType, Bool)
+        else if name == "call" then
+            Function(Int, elementType)
+        else if name == "first" then
+            Function(Function(elementType, Bool), elementType | Nothing)
+        else if name == "iterate" then
+            Function(Nothing, ArrayIteratorType new(elementType))
         else Array getMemberType(name)
     end
     

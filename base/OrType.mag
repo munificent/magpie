@@ -9,15 +9,11 @@ class OrType
 
         let leftOr = as[OrType](left) then
             for item = leftOr cases do cases add(item)
-        else
-            cases add(left)
-        end
+        else cases add(left)
 
         let rightOr = as[OrType](right) then
             for item = rightOr cases do cases add(item)
-        else
-            cases add(right)
-        end
+        else cases add(right)
 
         // Sort and remove the duplicates.
         cases = cases sortByString() unique()
@@ -71,19 +67,12 @@ class OrType
                     // All types must match.
                     // TODO(bob): Right now, the types of all cases must match
                     // exactly. We could loosen this to allow subtypes.
-                    if firstType canAssignFrom(method) not then
-                        return nothing
-                    end
-                    if method canAssignFrom(firstType) not then
-                        return nothing
-                    end
-                else
-                    return nothing
-                end
+                    if firstType canAssignFrom(method) not then return nothing
+                    if method canAssignFrom(firstType) not then return nothing
+                else return nothing
             end
+            
             return firstType
-        else
-            return nothing
         end
     end
 
@@ -97,9 +86,7 @@ class OrType
                     if firstType canAssignFrom(method) not then return nothing
                     // TODO(bob): Block if here is to get around grammar
                     // confusing 'else' with being for this 'if'.
-                    if method canAssignFrom(firstType) not then
-                        return nothing
-                    end
+                    if method canAssignFrom(firstType) not then return nothing
                 else
                     // The setter must be present in all cases
                     return nothing
@@ -107,8 +94,6 @@ class OrType
             end
     
             return firstType
-        else
-            return nothing
         end
     end
 

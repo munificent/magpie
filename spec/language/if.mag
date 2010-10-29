@@ -25,6 +25,15 @@ specify("An 'if then' expression") with
         end
         a shouldBe(3)
     end
+
+    it should("not associate an 'else' on the next line with a previous " +
+              "single-line 'then'") with
+        (if true then
+            if false then "then"
+        else
+            "else"
+        end) shouldBe(nothing)
+    end
 end
 
 specify("An 'if then else' expression") with

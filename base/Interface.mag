@@ -27,13 +27,8 @@ class Interface
             var type = member memberType()
             let otherMember = other getMemberType(member name) then
                 // Must be assignable.
-                if type canAssignFrom(otherMember) not then
-                    return false
-                end
-            else
-                // Must have members
-                return false
-            end
+                if type canAssignFrom(otherMember) not then return false
+            else return false // Must have members
         end
     
         // If we got here, every method was found and matched.
@@ -43,9 +38,6 @@ class Interface
     getMemberType(name String -> Type | Nothing)
         let member = members first(fn (m Member -> Bool) m name == name) then
             member memberType()
-        else
-            // No method by that name
-            nothing
         end
     end
 
