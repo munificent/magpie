@@ -73,12 +73,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(BlockExpr expr, EvalContext context) {
     Obj result = null;
-    
-    // Create a lexical scope.
-    if (expr.createScope()) {
-      context = context.pushScope();
-    }
-    
+
     // Evaluate all of the expressions and return the last.
     for (Expr thisExpr : expr.getExpressions()) {
       result = evaluate(thisExpr, context);
@@ -191,6 +186,9 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
         
         // If any clause failed, stop the loop.
         if (done) break;
+        
+        // Evaluate the body in its own scope.
+        context = context.pushScope();
         
         evaluate(expr.getBody(), context);
       }

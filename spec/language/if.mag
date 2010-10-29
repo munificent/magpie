@@ -17,6 +17,21 @@ specify("An 'if then' expression") with
         (if false then "then") shouldBe(nothing)
     end
 
+    it should("create a local scope for the 'if' expression that is visible " +
+              "the 'then' expression") with
+        var a = "outside"
+        var b = "outside"
+        if var a = "inside" then b = a
+        a shouldBe("outside")
+        b shouldBe("inside")
+    end
+
+    it should("create a local scope for the 'then' expression") with
+        var a = "outside"
+        if true then var a = "inside"
+        a shouldBe("outside")
+    end
+    
     it should("allow a block for the 'then' expression") with
         var a = 0
         if true then
@@ -24,15 +39,6 @@ specify("An 'if then' expression") with
             a = a + 2
         end
         a shouldBe(3)
-    end
-
-    it should("not associate an 'else' on the next line with a previous " +
-              "single-line 'then'") with
-        (if true then
-            if false then "then"
-        else
-            "else"
-        end) shouldBe(nothing)
     end
 end
 
@@ -65,6 +71,21 @@ specify("An 'if then else' expression") with
         (if false then "then" else "else") shouldBe("else")
     end
 
+    it should("create a local scope for the 'if' expression that is visible " +
+              "the 'else' expression") with
+        var a = "outside"
+        var b = "outside"
+        if (var a = "inside") and false then "ignored" else b = a
+        a shouldBe("outside")
+        b shouldBe("inside")
+    end
+    
+    it should("create a local scope for the 'else' expression") with
+        var a = "outside"
+        if false then "ignored" else var a = "shadow"
+        a shouldBe("outside")
+    end
+
     it should("allow a block for the 'then' expression") with
         var a = 0
         if true then
@@ -81,5 +102,14 @@ specify("An 'if then else' expression") with
             a = a + 2
         end
         a shouldBe(3)
+    end
+
+    it should("not associate an 'else' on the next line with a previous " +
+              "single-line 'then'") with
+        (if true then
+            if false then "then"
+        else
+            "else"
+        end) shouldBe(nothing)
     end
 end

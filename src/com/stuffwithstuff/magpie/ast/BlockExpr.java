@@ -5,16 +5,13 @@ import java.util.*;
 import com.stuffwithstuff.magpie.parser.Position;
 
 public class BlockExpr extends Expr {
-  public BlockExpr(Position position, List<Expr> expressions,
-      boolean createScope) {
+  public BlockExpr(Position position, List<Expr> expressions) {
     super(position);
     
     mExpressions = expressions;
-    mCreateScope = createScope;
   }
   
   public List<Expr> getExpressions() { return mExpressions; }
-  public boolean createScope() { return mCreateScope; }
   
   @Override
   public <R, C> R accept(ExprVisitor<R, C> visitor, C context) {
@@ -33,5 +30,4 @@ public class BlockExpr extends Expr {
   }
 
   private final List<Expr> mExpressions;
-  private final boolean mCreateScope;
 }

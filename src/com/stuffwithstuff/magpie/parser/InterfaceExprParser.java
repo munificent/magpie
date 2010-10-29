@@ -57,7 +57,7 @@ public class InterfaceExprParser implements ExprParser {
       parser.consume(TokenType.LINE);
     }
     
-    return new BlockExpr(position, exprs, false);
+    return new BlockExpr(position, exprs);
   }
   
   @Override

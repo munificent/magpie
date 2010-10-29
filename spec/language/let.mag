@@ -32,6 +32,11 @@ specify("A 'let then' expression") with
         bound shouldBe("something")
     end
     
+    it should("create a local scope for the 'then' expression") with
+        var a = "outside"
+        if true then var a = "shadow"
+        a shouldBe("outside")
+    end
     
     it should("scope the bound variable to the 'then' expression") with
         var a = "outside"
@@ -101,7 +106,13 @@ specify("A 'let then else' expression") with
         let a = "something" then bound = a else "ignored"
         bound shouldBe("something")
     end
-    
+        
+    it should("create a local scope for the 'else' expression") with
+        var a = "outside"
+        let b = nothing then "ignored" else var a = "shadow"
+        a shouldBe("outside")
+    end
+
     it should("scope the bound variable to the 'then' expression") with
         var a = "outside"
         let a = "shadow" then
@@ -109,7 +120,7 @@ specify("A 'let then else' expression") with
         else "ignored"
         a shouldBe("outside")
     end
-    
+
     it should("not scope the bound variable to the 'else' expression") with
         var a = "outside"
         let a = nothing then "ignored" else

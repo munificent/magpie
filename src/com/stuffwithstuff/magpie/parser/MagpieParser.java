@@ -63,7 +63,7 @@ public class MagpieParser extends Parser {
       }
       
       position = position.union(last(1).getPosition());
-      return new BlockExpr(position, exprs, true);
+      return new BlockExpr(position, exprs);
     } else {
       return parseExpression();
     }

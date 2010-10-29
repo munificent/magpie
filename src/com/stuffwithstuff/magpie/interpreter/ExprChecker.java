@@ -144,11 +144,6 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(BlockExpr expr, EvalContext context) {
     Obj result = null;
     
-    // Create a lexical scope.
-    if (expr.createScope()) {
-      context = context.pushScope();
-    }
-    
     // Evaluate all of the expressions and return the last.
     for (int i = 0; i < expr.getExpressions().size(); i++) {
       Expr thisExpr = expr.getExpressions().get(i);
@@ -273,6 +268,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     }
     
     // Check the body for errors.
+    context = context.pushScope();
     check(expr.getBody(), context);
     
     // Loops always return nothing.
