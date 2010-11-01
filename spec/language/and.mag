@@ -29,4 +29,9 @@ specify("An 'and' expression") with
         left called shouldBe(true)
         right called shouldBe(false)
     end
+    
+    it should("swallow a trailing newline") with
+        true and
+            true shouldBe(true)
+    end
 end

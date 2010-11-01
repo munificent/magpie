@@ -29,4 +29,9 @@ specify("An 'or' expression") with
         left called shouldBe(true)
         right called shouldBe(false)
     end
+    
+    it should("swallow a trailing newline") with
+        false or
+            false shouldBe(false)
+    end
 end

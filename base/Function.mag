@@ -17,13 +17,9 @@ class FunctionType
     canAssignFrom(other Type -> Bool)
         // Both must be functions.
         let otherFn = as[FunctionType](other) then
-            // Parameter must be contravariant.
-            if otherFn paramType canAssignFrom(paramType) not then return false
-    
-            // Return must be covariant.
-            if returnType canAssignFrom(otherFn returnType) not then return false
-    
-            true
+            // Parameter must be contravariant and return must be covariant.
+            otherFn paramType canAssignFrom(paramType) and
+                returnType canAssignFrom(otherFn returnType)
         else false
     end
 
