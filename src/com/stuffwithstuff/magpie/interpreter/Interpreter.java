@@ -396,7 +396,7 @@ public class Interpreter {
   public void popScriptPath() {
     mScriptPaths.pop();
   }
-
+  
   private ClassObj createGlobalClass(String name) {
     // Create the metaclass. This will hold shared methods on the class.
     ClassObj metaclass = new ClassObj(mClass, name + "Class", mClass);

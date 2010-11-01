@@ -19,9 +19,11 @@ public class InterfaceExprParser implements ExprParser {
     List<Expr> exprs = new ArrayList<Expr>();
 
     // Declare the interface:
-    // var Foo = Interface new("Foo")
-    exprs.add(new VariableExpr(position, name,
-        Expr.message(Expr.name("Interface"), Identifiers.NEW, Expr.string(name))));
+    if (!isExtend) {
+      // var Foo = Interface new("Foo")
+      exprs.add(new VariableExpr(position, name,
+          Expr.message(Expr.name("Interface"), Identifiers.NEW, Expr.string(name))));
+    }
     
     // Parse the body.
     while (!parser.match(TokenType.END)) {

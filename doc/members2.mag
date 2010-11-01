@@ -1,0 +1,75 @@
+// Class member syntax.
+// Scope:
+// - Instance
+// - Shared
+// Abstract:
+// - Define
+// - Declare
+// Member types:
+// - Field
+// - Method
+// - Getter
+// - Setter
+// Of these possible 16 combinations, not all are valid. The valid ones are:
+class Example
+    // define instance field
+    def foo Int = 123
+
+    // define instance method
+    def foo(arg Int) -> Bool = body
+    
+    // define instance getter
+    def foo get Int = 123
+    
+    // define instance setter
+    def foo set Int = print(it)
+    
+    // declare instance field
+    def foo Int
+    
+    // declare instance method
+    def foo(arg Int) -> Bool
+    
+    // declare instance getter
+    def foo get Int
+    
+    // declare instance setter
+    def foo set Int
+
+    // define shared field
+    shared foo Int = 123
+    
+    // define shared method
+    shared foo(arg Int) -> Bool = body
+    
+    // define shared getter
+    shared foo get Int = 123
+    
+    // define shared setter
+    shared foo set Int = print(it)
+    
+    // edge cases:
+    // declare a tuple field
+    def foo (Int, String) // XXX: Won't work.
+    
+    // declare a field of function type
+    def foo Int -> String
+end
+
+// Keep in mind:
+// How do we distinguish a method from a field of tuple type?
+// How do we distinguish a method from a field of function type?
+// Can we make it more terse to define a getter and setter together?
+// How does it degrade to allow omitting type annotations?
+// What happens if we create a new member type or scope in the future?
+// How can we make -> an operator in a type annotation?
+// How does function type declaration syntax mesh with pattern-matching syntax?
+
+class Foo
+    def method(i Int -> Int) = i
+    def function Int -> Int = fn(i Int -> Int) i
+    
+    def method(i Int, b Bool) = "whatever"
+    def tupleField (Int, Bool) = (1, true)
+    
+end

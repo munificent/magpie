@@ -6,5 +6,4 @@ interface Type
     type Type
     ==(other -> Bool)
     !=(other -> Bool)
-    |(other Type -> Type)
 end

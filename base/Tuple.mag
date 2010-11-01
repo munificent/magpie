@@ -45,10 +45,6 @@ extend class Tuple
     end
     
     !=(other -> Bool) (this == other) not
-    
-    |(other Type -> Type)
-        OrType combine(this, other)
-    end
 end
 
 Tuple defineGetter("string", fn(-> String)

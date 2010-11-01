@@ -9,10 +9,6 @@ class Interface
         this members = Array new()
     end
     
-    |(other Type -> Type)
-        OrType combine(this, other)
-    end
-
     declareMember(name String, type Function(Nothing, Type) ->)
         members add(Member new(name, type))
     end

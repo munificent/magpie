@@ -33,10 +33,6 @@ class FunctionType
         Function getSetterType(name)
     end
 
-    |(other Type -> Type)
-        OrType combine(this, other)
-    end
-
     ==(other -> Bool)
         let fnType = as[FunctionType](other) then
             paramType == fnType paramType and returnType == fnType returnType

@@ -24,10 +24,6 @@ class OrType
         OrType new(cases)
     end
 
-    |(other Type -> Type)
-        OrType combine(this, other)
-    end
-
     ==(other -> Bool)
         let orType = as[OrType](other) then
             if cases count != orType cases count then return false
@@ -125,3 +121,45 @@ OrType defineGetter("string", fn(-> String)
     end
     result
 end)
+
+// Extend all types to support unioning:
+
+extend interface Type
+    |(other Type -> Type)
+end
+
+extend class ArrayType
+    |(other Type -> Type)
+        OrType combine(this, other)
+    end
+end
+
+extend class ArrayIteratorType
+    |(other Type -> Type)
+        OrType combine(this, other)
+    end
+end
+
+extend class FunctionType
+    |(other Type -> Type)
+        OrType combine(this, other)
+    end
+end
+
+extend class Interface
+    |(other Type -> Type)
+        OrType combine(this, other)
+    end
+end
+
+extend class OrType
+    |(other Type -> Type)
+        OrType combine(this, other)
+    end
+end
+
+extend class Tuple
+    |(other Type -> Type)
+        OrType combine(this, other)
+    end
+end

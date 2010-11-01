@@ -2,11 +2,11 @@ import("Array.mag")
 import("Function.mag")
 import("Int.mag")
 import("Interface.mag")
-import("OrType.mag")
 import("String.mag")
 import("Tuple.mag")
-import("Type.mag")
 import("Types.mag")
+import("Type.mag")
+import("OrType.mag")
 
 // Returns the argument cast to the given type if it's type is an exact match
 // and not a subtype, otherwise returns nothing.

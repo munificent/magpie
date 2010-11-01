@@ -170,7 +170,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
         "A break expression should not appear outside of a for loop.");
     return mInterpreter.getNothingType();
   }
-  
+
   @Override
   public Obj visit(ExpressionExpr expr, EvalContext context) {
     return mInterpreter.getExpressionType();

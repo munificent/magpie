@@ -137,10 +137,6 @@ class ArrayType
     
     !=(other -> Bool) (this == other) not
     
-    |(other Type -> Type)
-        OrType combine(this, other)
-    end
-
     elementType Type
 end
 
@@ -202,10 +198,6 @@ class ArrayIteratorType
     end
     
     !=(other -> Bool) (this == other) not
-    
-    |(other Type -> Type)
-        OrType combine(this, other)
-    end
     
     elementType Type
 end
