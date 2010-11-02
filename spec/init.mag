@@ -5,6 +5,7 @@ import("utility/TruthTest.mag")
 // The individual test cases.
 startTests()
 
+/*
 import("language/and.mag")
 import("language/apply.mag")
 import("language/assign.mag")
@@ -13,7 +14,9 @@ import("language/break.mag")
 import("language/for.mag")
 import("language/if.mag")
 import("language/let.mag")
+*/
 import("language/match.mag")
+/*
 import("language/newline.mag")
 import("language/or.mag")
 import("language/return.mag")
@@ -40,5 +43,6 @@ import("core/Class/defineMethod.mag")
 import("core/Class/name.mag")
 import("core/Class/new.mag")
 import("core/Int/string.mag")
+*/
 
 endTests()

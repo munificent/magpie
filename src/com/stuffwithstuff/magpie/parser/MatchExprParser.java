@@ -8,7 +8,6 @@ import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.IfExpr;
 import com.stuffwithstuff.magpie.ast.NothingExpr;
 import com.stuffwithstuff.magpie.ast.VariableExpr;
-import com.stuffwithstuff.magpie.util.Pair;
 
 // TODO(bob): This whole implementation is pretty hideous. Just slapping
 // something together so I can start getting it working. Will refactor and clean
@@ -31,20 +30,15 @@ public class MatchExprParser implements ExprParser {
     parser.consume(TokenType.LINE);
         
     // Parse the cases.
-    List<Pair<Expr, Expr>> cases = new ArrayList<Pair<Expr, Expr>>();
+    List<Pattern> patterns = new ArrayList<Pattern>();
     while (parser.match(TokenType.CASE)) {
-      // TODO(bob): Temp! Should do pattern parsing.
-      Expr pattern = parser.parseExpression();
-      parser.consume(TokenType.THEN);
-      Expr body = parseCase(parser);
-      
-      cases.add(new Pair<Expr, Expr>(pattern, body));
+      patterns.add(parsePattern(parser));
     }
     
     // Parse the else case, if present.
     Expr elseCase;
     if (parser.match(TokenType.ELSE)) {
-      elseCase = parseCase(parser);
+      elseCase = parseBody(parser);
     } else {
       elseCase = new NothingExpr(position);
     }
@@ -53,21 +47,52 @@ public class MatchExprParser implements ExprParser {
     
     // Desugar the cases to a series of chained if/thens.
     Expr chained = elseCase;
-    for (int i = cases.size() - 1; i >= 0; i--) {
-      Pair<Expr, Expr> thisCase = cases.get(i);
-      Position casePos = thisCase.getKey().getPosition().union(
-          thisCase.getValue().getPosition());
+    for (int i = patterns.size() - 1; i >= 0; i--) {
+      Pattern pattern = patterns.get(i);
+      Position casePos = pattern.pattern.getPosition().union(
+          pattern.body.getPosition());
       
-      Expr condition = Expr.message(Expr.name("__value__"), "==", thisCase.getKey());
+      Expr condition = Expr.message(Expr.name("__value__"), "==",
+          pattern.pattern);
       
-      chained = new IfExpr(casePos, null, condition, thisCase.getValue(),
-          chained);
+      Expr body = pattern.body;
+      
+      // Bind a name if there is one.
+      if (pattern.binding != null) {
+        List<Expr> bodyExprs = new ArrayList<Expr>();
+        bodyExprs.add(new VariableExpr(body.getPosition(), pattern.binding,
+            Expr.name("__value__")));
+        bodyExprs.add(body);
+        body = new BlockExpr(body.getPosition(), bodyExprs);
+      }
+      
+      chained = new IfExpr(casePos, null, condition, body, chained);
     }
 
     exprs.add(chained);
     
     position = position.union(parser.last(1).getPosition());
     return new BlockExpr(position, exprs);
+  }
+  
+  private Pattern parsePattern(MagpieParser parser) {
+    String name = parseBinding(parser);
+    Expr pattern = parser.parseExpression();
+
+    parser.consume(TokenType.THEN);
+    Expr body = parseBody(parser);
+
+    return new Pattern(name, pattern, body);
+  }
+  
+  private String parseBinding(MagpieParser parser) {
+    if ((parser.current().getType() == TokenType.NAME) &&
+        Character.isLowerCase(parser.current().getString().charAt(0))) {
+      return parser.consume().getString();
+    }
+    
+    // The token isn't a valid variable binding name.
+    return null;
   }
   
   /**
@@ -79,7 +104,7 @@ public class MatchExprParser implements ExprParser {
    * @param   parser  The parser.
    * @return          The parsed case body.
    */
-  private Expr parseCase(MagpieParser parser) {
+  private Expr parseBody(MagpieParser parser) {
     if (parser.match(TokenType.LINE)){
       Position position = parser.last(1).getPosition();
       List<Expr> exprs = new ArrayList<Expr>();
@@ -97,5 +122,17 @@ public class MatchExprParser implements ExprParser {
       parser.consume(TokenType.LINE);
       return body;
     }
+  }
+  
+  private static class Pattern {
+    public Pattern(String binding, Expr pattern, Expr body) {
+      this.binding = binding;
+      this.pattern = pattern;
+      this.body = body;
+    }
+    
+    public final String binding;
+    public final Expr pattern;
+    public final Expr body;
   }
 }

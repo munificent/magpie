@@ -13,6 +13,7 @@ specify("A 'match' expression") with
         
         called shouldBe(1)
     end
+    
     it should("return the value of the matched case") with
         (match 2
         case 1 then "one"
@@ -43,6 +44,20 @@ specify("A 'match' expression") with
         case "b" then "bad"
         else "good"
         end) shouldBe("good")
+    end
+    
+    it should("bind a variable to the matched value") with
+        (match 1
+        case a 1 then a
+        end) shouldBe(1)
+    end
+    
+    it should("scope a binding to just the matched case") with
+        var a = "outer"
+        match "match"
+        case a "match" then a = "inner"
+        end
+        a shouldBe("outer")
     end
 end
 
