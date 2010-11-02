@@ -18,7 +18,7 @@ class Foo
     def y Int = 123
     
     // abstract method
-    def someAbstract(z Int ->)
+    def someAbstract(z Int) ->
     
     // define method
     def doSomething() = 

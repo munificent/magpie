@@ -49,6 +49,6 @@ public abstract class Expr {
   
   public abstract void toString(StringBuilder builder, String indent);
   
-  private Position mPosition;
+  private final Position mPosition;
 }
 
