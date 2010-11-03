@@ -1,5 +1,5 @@
 ^title Flow Control
-^index 7
+^index 8
 
 Magpie doesn't shy away from imperative programming, so it supports the usual flow control structures you know and love, although it does try to spice them up a bit. Before we cover them, there's one minor point to cover first:
 
@@ -195,18 +195,18 @@ I said earlier that Magpie only has a single loop expression. That's because cla
 Once one of those `while` clauses returns false, the loop ends. With `for` loops, the iterators are iterated in *parallel*, unlike nested loops:
 
     :::magpie
-    for i = 1 to(4)
-    for j = 100 to(400) do
-        print(i + j)
+    for i = 1 to(3)
+    for j = 6 to(10) do
+        print(i + ":" + j)
     end
-    // prints 101, 103, 105, 107
+    // prints 1:6, 2:7, 3:8
     
     for i = 1 to(4) do
-        for j = 100 to(400) do
-            print(i + j)
+        for j = 6 to(10) do
+            print(i + ":" + j)
         end
     end
-    // prints 101, 102, 103, ... 402, 403, 404
+    // prints 1:6, 1:7, 1:8, 1:9, 1:10, 2:7 ... 4:10
 
 The key difference is `do`. That's the keyword that indicates the end of the
 clauses and the beginning of the body. No matter how many clauses you have, a

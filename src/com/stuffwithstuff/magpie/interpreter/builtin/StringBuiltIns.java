@@ -4,7 +4,7 @@ import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class StringBuiltIns {
-  @Signature("at(index Int -> String)")
+  @Signature("call(index Int -> String)")
   public static Obj at(Interpreter interpreter, Obj thisObj, Obj arg) {
     int index = arg.asInt();
     String c = thisObj.asString().substring(index, index + 1);

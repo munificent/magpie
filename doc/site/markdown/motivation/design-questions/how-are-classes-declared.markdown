@@ -63,7 +63,7 @@ A complete sample that shows everything is:
 
 ### Why have separate keywords for fields and methods?
 
-A: We need to be able to distinguish a method from a field of tuple or function type. Consider:
+We need to be able to distinguish a method from a field of tuple or function type. Consider:
 
     :::magpie
     foo(a, b)

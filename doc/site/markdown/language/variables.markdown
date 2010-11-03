@@ -1,5 +1,5 @@
 ^title Variables
-^index 6
+^index 7
 
 Variables are named slots for storing values.
 
@@ -41,7 +41,7 @@ In Magpie, you can do:
                 if also then 2 else 3
             else 4
 
-In return for this limitation, Magpie will give you something back: you don't have to declare the types of variables. It will infer from the initializing expression. Even though all variables are declared using `var`, from the type-checker's perspective, they are still strongly statically typed.
+In return for this limitation, Magpie will give you something back: you don't have to declare the types of variables. It will infer them from the initializing expression. Even though all variables are declared using `var`, from the type-checker's perspective, they are still strongly statically typed.
 
 #### Scope
 
