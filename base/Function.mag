@@ -1,20 +1,22 @@
 extend class Function
     // Make "Function" a functor that you can call to instantiate function types.
     // Type annotations of function types look like Function(Int, String) 
-    shared call(paramType Type, returnType Type -> Type)
+    shared def call(paramType Type, returnType Type -> Type) =
         FunctionType new(paramType, returnType)
     end
 end
 
 class FunctionType
-    this(paramType Type, returnType Type)
+    this(paramType Type, returnType Type) =
         this paramType = paramType
         this returnType = returnType
     end
 
+    get string String = paramType string + " -> " + returnType
+
     // TODO(bob): Once interfaces are in, function types can just become sugar for
     // creating ICallable(Arg, Return) instances.
-    canAssignFrom(other Type -> Bool)
+    def canAssignFrom(other Type -> Bool) =
         // Both must be functions.
         let otherFn = as[FunctionType](other) then
             // Parameter must be contravariant and return must be covariant.
@@ -23,38 +25,34 @@ class FunctionType
         else false
     end
 
-    getMemberType(name String -> Type | Nothing)
+    def getMemberType(name String -> Type | Nothing) =
         // Just defer to the base function class.
         Function getMemberType(name)
     end
 
-    getSetterType(name String -> Type | Nothing)
+    def getSetterType(name String -> Type | Nothing) =
         // Just defer to the base function class.
         Function getSetterType(name)
     end
 
-    ==(other -> Bool)
+    def ==(other -> Bool) =
         let fnType = as[FunctionType](other) then
             paramType == fnType paramType and returnType == fnType returnType
         else false
     end
 
-    !=(other -> Bool) (this == other) not
+    def !=(other -> Bool) = (this == other) not
 
-    paramType Type
-    returnType Type
+    var paramType Type
+    var returnType Type
 end
 
-FunctionType defineGetter("string", fn(-> String)
-    paramType string + " -> " + returnType string
-end)
-
 class StaticFunctionType
-    this(params, body)
+    this(params, body) =
         this params = params
         this body = body
     end
     
-    params Dynamic
-    body Dynamic
+    var params Dynamic
+    var body Dynamic
 end

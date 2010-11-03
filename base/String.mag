@@ -1,11 +1,11 @@
 // Comparisons.
 extend class String
-    ==(other -> Bool) compareTo(other string) == 0
-    !=(other -> Bool) compareTo(other string) != 0
-    <(other -> Bool) compareTo(other string) < 0
-    >(other -> Bool) compareTo(other string) > 0
-    <=(other -> Bool) compareTo(other string) <= 0
-    >=(other -> Bool) compareTo(other string) >= 0
+    def ==(other -> Bool) = compareTo(other string) == 0
+    def !=(other -> Bool) = compareTo(other string) != 0
+    def <(other  -> Bool) = compareTo(other string) < 0
+    def >(other  -> Bool) = compareTo(other string) > 0
+    def <=(other -> Bool) = compareTo(other string) <= 0
+    def >=(other -> Bool) = compareTo(other string) >= 0
 
-    +(other -> String) concatenate(other string)
+    def +(other  -> String) = concatenate(other string)
 end

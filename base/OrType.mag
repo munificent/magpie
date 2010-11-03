@@ -1,9 +1,9 @@
 class OrType
-    this(cases ArrayType new(Type))
+    this(cases ArrayType new(Type)) =
         this cases = cases
     end
     
-    shared combine(left Type, right Type -> Type)
+    shared def combine(left Type, right Type -> Type) =
         // combine the cases of both arms
         var cases = Array new()
 
@@ -24,7 +24,16 @@ class OrType
         OrType new(cases)
     end
 
-    ==(other -> Bool)
+    get string String =
+        var result = ""
+        for index = 0 until(cases count) do
+            result = result + cases(index) string
+            if index < (cases count - 1) then result = result + " | "
+        end
+        result
+    end
+
+    def ==(other -> Bool) =
         let orType = as[OrType](other) then
             if cases count != orType cases count then return false
     
@@ -36,9 +45,9 @@ class OrType
         else false
     end
 
-    !=(other -> Bool) (this == other) not
+    def !=(other -> Bool) = (this == other) not
 
-    canAssignFrom(other Type -> Bool)
+    def canAssignFrom(other Type -> Bool) =
         let orType = as[OrType](other) then
             // It's also an or, so see if all of its cases are matched by one of
             // the ones here.
@@ -55,7 +64,7 @@ class OrType
         end
     end
 
-    getMemberType(name String -> Type | Nothing)
+    def getMemberType(name String -> Type | Nothing) =
         let firstType = cases(0) getMemberType(name) then
             for type = cases do
                 // The method must be present in all cases.
@@ -72,7 +81,7 @@ class OrType
         end
     end
 
-    getSetterType(name String -> Type | Nothing)
+    def getSetterType(name String -> Type | Nothing) =
         let firstType = cases(0) getMemberType(name) then
             for type = cases do
                 let method = type getSetterType(name) then
@@ -93,7 +102,7 @@ class OrType
         end
     end
 
-    unsafeRemoveNothing(-> Type)
+    def unsafeRemoveNothing(-> Type) =
         // TODO(bob): Total hack. We need remaining to have the right element
         // type.
         var remaining = cases copy()
@@ -110,56 +119,39 @@ class OrType
         OrType new(remaining)
     end
     
-    cases ArrayType new(Type)
+    var cases ArrayType new(Type)
 end
-
-OrType defineGetter("string", fn(-> String)
-    var result = ""
-    for index = 0 until(cases count) do
-        result = result + cases(index) string
-        if index < (cases count - 1) then result = result + " | "
-    end
-    result
-end)
 
 // Extend all types to support unioning:
 
 extend interface Type
-    |(other Type -> Type)
+    def |(other Type -> Type)
 end
 
 extend class ArrayType
-    |(other Type -> Type)
-        OrType combine(this, other)
-    end
+    def |(other Type -> Type) = OrType combine(this, other)
 end
 
 extend class ArrayIteratorType
-    |(other Type -> Type)
-        OrType combine(this, other)
-    end
+    def |(other Type -> Type) = OrType combine(this, other)
+end
+
+extend class Class
+    def |(other Type -> Type) = OrType combine(this, other)
 end
 
 extend class FunctionType
-    |(other Type -> Type)
-        OrType combine(this, other)
-    end
+    def |(other Type -> Type) = OrType combine(this, other)
 end
 
 extend class Interface
-    |(other Type -> Type)
-        OrType combine(this, other)
-    end
+    def |(other Type -> Type) = OrType combine(this, other)
 end
 
 extend class OrType
-    |(other Type -> Type)
-        OrType combine(this, other)
-    end
+    def |(other Type -> Type) = OrType combine(this, other)
 end
 
 extend class Tuple
-    |(other Type -> Type)
-        OrType combine(this, other)
-    end
+    def |(other Type -> Type) = OrType combine(this, other)
 end

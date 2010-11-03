@@ -26,23 +26,48 @@ end
 
 // Extend the built-in classes.
 extend class Object
-    !=(other -> Bool) (this == other) not
+    def !=(other -> Bool) = (this == other) not
 
     // Provide a generic print that converts arg to string first.
-    print(arg Object ->) printRaw(arg string)
+    def print(arg Object ->) = printRaw(arg string)
 end
 
-Object defineGetter("string", fn(-> String) "object")
-String defineGetter("string", fn(-> String) this)
-Nothing defineGetter("string", fn(-> String) "nothing")
-Class defineGetter("string", fn(-> String) name)
+extend class Object
+    get string String = "object"
+end
+
+extend class String
+    get string String = this
+end
+
+extend class Nothing
+    get string String = "nothing"
+end
+
+extend class Class
+    get string String = name
+end
 
 // Truthiness.
-Object defineGetter("true?", fn(-> Bool) true)
-Bool defineGetter("true?", fn(-> Bool) this)
-Int defineGetter("true?", fn(-> Bool) this != 0)
-String defineGetter("true?", fn(-> Bool) this count > 0)
-Nothing defineGetter("true?", fn(-> Bool) false)
+extend class Object
+    get true? Bool = true
+end
+
+extend class Bool
+    get true? Bool = this
+end
+
+extend class Int
+    get true? Bool = this != 0
+end
+
+extend class String
+    get true? Bool = this count > 0
+end
+
+extend class Nothing
+    get true? Bool = false
+end
 
 // TODO(bob): Hack. This fixes a weird infinite regress problem. Let's say you
 // have an expression like:
@@ -57,5 +82,5 @@ Nothing defineGetter("true?", fn(-> Bool) false)
 //
 // This short-circuits that by actually making nothing callable.
 extend class Nothing
-    call(arg) nothing
+    def call(arg) = nothing
 end

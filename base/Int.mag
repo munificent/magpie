@@ -1,35 +1,35 @@
 // Add iterator methods on Ints.
 extend class Int
-    times(-> Range) Range new(0, this - 1)
-    to(last Int -> Range) Range new(this, last)
-    until(last Int -> Range) Range new(this, last - 1)
+    def times(-> Range) = Range new(0, this - 1)
+    def to(last Int -> Range) = Range new(this, last)
+    def until(last Int -> Range) = Range new(this, last - 1)
 end
 
 // Define an int iterator.
 class RangeIterator
-    this(start Int, stop Int)
+    this(first Int, last Int) =
         // rollback so the first call to next advances to the first
-        current = start - 1
-        this stop = stop
+        current = first - 1
+        this last = last
     end
 
-    next(-> Bool)
+    def next(-> Bool) =
         current = current + 1
-        current <= stop
+        current <= last
     end
 
-    current Int
-    stop    Int
+    var current Int
+    var last    Int
 end
 
 class Range    
-    this(start Int, stop Int)
+    this(start Int, last Int) =
         this start = start
-        this stop = stop
+        this last = last
     end
     
-    iterate(-> RangeIterator) RangeIterator new(start, stop)
+    def iterate(-> RangeIterator) = RangeIterator new(start, last)
 
-    start Int
-    stop  Int
+    var start Int
+    var last  Int
 end

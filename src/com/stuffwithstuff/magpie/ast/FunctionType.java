@@ -11,8 +11,12 @@ import java.util.List;
 // of this.
 public class FunctionType {
   public static FunctionType nothingToDynamic() {
+    return returningType(Expr.name("Dynamic"));
+  }
+  
+  public static FunctionType returningType(Expr type) {
     return new FunctionType(new ArrayList<String>(),
-        Expr.name("Nothing"), Expr.name("Dynamic"));
+        Expr.name("Nothing"), type);
   }
   
   public FunctionType(List<String> paramNames, Expr paramType, Expr returnType) {

@@ -4,16 +4,22 @@
 // implicitly implements the interface.
 
 class Interface
-    this(name String)
+    this(name String) =
         this name = name
         this members = Array new()
     end
     
-    declareMember(name String, type Function(Nothing, Type) ->)
+    get string String = name
+
+    def declareMethod(name String, type Function(Nothing, Type) ->) =
+        members add(Member new(name, type))
+    end
+    
+    def declareGetter(name String, type Function(Nothing, Type) ->) =
         members add(Member new(name, type))
     end
 
-    canAssignFrom(other Type -> Bool)
+    def canAssignFrom(other Type -> Bool) =
         // An interface can always assign from itself. This is critical to
         // allow an interface that references itself in a member from causing a
         // stack overflow during checking.
@@ -23,41 +29,46 @@ class Interface
             var type = member memberType()
             let otherMember = other getMemberType(member name) then
                 // Must be assignable.
-                if type canAssignFrom(otherMember) not then return false
-            else return false // Must have members
+                if type canAssignFrom(otherMember) not then
+                    print(other string + " does not implement " + name +
+                        " because " + member name + " is the wrong type")
+                    print("expected " + type + " but got " + otherMember)
+                    return false
+                end
+            else
+                print(other string + " does not implement " + name +
+                    " because it lacks " + member name)
+                return false // Must have members
+            end
         end
     
         // If we got here, every method was found and matched.
         true
     end
 
-    getMemberType(name String -> Type | Nothing)
+    def getMemberType(name String -> Type | Nothing) =
         let member = members first(fn (m Member -> Bool) m name == name) then
             member memberType()
         end
     end
 
-    getSetterType(name String -> Type | Nothing)
+    def getSetterType(name String -> Type | Nothing) =
         // No setters in interfaces yet.
         nothing
     end
 
-    name    String
-    members ArrayType new(Member)
+    var name    String
+    var members ArrayType new(Member)
 end
 
-Interface defineGetter("string", fn(-> String) name)
-
 class Member
-    this(name String, type Function(Nothing, Type))
+    this(name String, type Function(Nothing, Type)) =
          this name = name
          this memberType = type
     end
 
-    name       String
-    memberType Function(Nothing, Type)
+    get string String = name + " " + memberType()
+    
+    var name       String
+    var memberType Function(Nothing, Type)
 end
-
-Member defineGetter("string", fn(-> String)
-    name + " " + memberType() string
-end)

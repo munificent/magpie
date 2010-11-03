@@ -10,22 +10,22 @@
 // Base.
 
 extend class Object
-    is(type Type -> Bool) type canAssignFrom(this type)
+    def is(type Type -> Bool) = type canAssignFrom(this type)
 end
 
 extend class Nothing
     // No type except Nothing is allowed where Nothing is expected.
-    shared canAssignFrom(other Type -> Bool) other == Nothing
+    shared def canAssignFrom(other Type -> Bool) = other == Nothing
 end
 
 extend class Class
     // TODO(bob): Should this be part of Type?
-    shared unsafeRemoveNothing(-> Class)
+    shared def unsafeRemoveNothing(-> Class) =
         // Doesn't have Nothing to begin with, so we're good.
         this
     end
 
-    canAssignFrom(other Type -> Bool)
+    def canAssignFrom(other Type -> Bool) =
         // Short-circuit on self-assignment.
         if other == this then return true
 
@@ -54,21 +54,17 @@ extend class Class
         // if that's us.
         this == Object
     end
-
-    |(other Type -> Type)
-        OrType combine(this, other)
-    end
 end
 
 extend class Dynamic
-    shared canAssignFrom(other Type -> Bool)
+    shared def canAssignFrom(other Type -> Bool) =
         // Everything goes with Dynamic.
         true
     end
 
     // From the static perspective, a dynamic object has all possible members
     // and their type is always "Dynamic".
-    shared getMemberType(name String -> Type | Nothing)
+    shared def getMemberType(name String -> Type | Nothing) =
         // TODO(bob): This stuff is super hackish.
         if name == "canAssignFrom" then return Function(Type, Bool)
         if name == "getMemberType" then return Function(String, Type | Nothing)

@@ -1,10 +1,38 @@
 extend class Tuple
-    iterate(-> TupleIterator) TupleIterator new(this)
+    def iterate(-> TupleIterator) = TupleIterator new(this)
 end
 
 // A tuple of Types is itself a Type.
 extend class Tuple
-    canAssignFrom(other Type -> Bool)
+
+    get string String =
+        var s = "("
+    
+        // TODO(bob): This is pretty gross right now. :(
+        if count > 0 then s = s + this _0
+        if count > 1 then s = s + ", " + this _1
+        if count > 2 then s = s + ", " + this _2
+        if count > 3 then s = s + ", " + this _3
+        if count > 4 then s = s + ", " + this _4
+        if count > 5 then s = s + ", " + this _5
+        if count > 6 then s = s + ", " + this _6
+        if count > 7 then s = s + ", " + this _7
+        if count > 8 then s = s + ", " + this _8
+        if count > 9 then s = s + ", " + this _9
+        if count > 10 then s = s + ", " + this _10
+        if count > 11 then s = s + ", " + this _11
+        if count > 12 then s = s + ", " + this _12
+        if count > 13 then s = s + ", " + this _13
+        if count > 14 then s = s + ", " + this _14
+        if count > 15 then s = s + ", " + this _15
+        if count > 16 then s = s + ", " + this _16
+        if count > 17 then s = s + ", " + this _17
+        if count > 18 then s = s + ", " + this _18
+        if count > 19 then s = s + ", " + this _19
+        s + ")"
+    end
+
+    def canAssignFrom(other Type -> Bool) =
         let otherTuple = as[Tuple](other) then
             // With the same number of fields.
             if count != otherTuple count then return false
@@ -21,17 +49,17 @@ extend class Tuple
         else false
     end
 
-    getMemberType(name String -> Type | Nothing)
+    def getMemberType(name String -> Type | Nothing) =
         // TODO(bob): Hack. Should at the very least strongly-type the field
         // getters.
         Tuple getMemberType(name)
     end
     
-    getSetterType(name String -> Type | Nothing)
+    def getSetterType(name String -> Type | Nothing) =
         Tuple getMemberType(name)
     end
     
-    ==(other -> Bool)
+    def ==(other -> Bool) =
         let otherTuple = as[Tuple](other) then
             if count != otherTuple count then return false
     
@@ -44,35 +72,8 @@ extend class Tuple
         else false
     end
     
-    !=(other -> Bool) (this == other) not
+    def !=(other -> Bool) = (this == other) not
 end
-
-Tuple defineGetter("string", fn(-> String)
-    var s = "("
-    
-    // TODO(bob): This is pretty gross right now. :(
-    if count > 0 then s = s + this _0
-    if count > 1 then s = s + ", " + this _1
-    if count > 2 then s = s + ", " + this _2
-    if count > 3 then s = s + ", " + this _3
-    if count > 4 then s = s + ", " + this _4
-    if count > 5 then s = s + ", " + this _5
-    if count > 6 then s = s + ", " + this _6
-    if count > 7 then s = s + ", " + this _7
-    if count > 8 then s = s + ", " + this _8
-    if count > 9 then s = s + ", " + this _9
-    if count > 10 then s = s + ", " + this _10
-    if count > 11 then s = s + ", " + this _11
-    if count > 12 then s = s + ", " + this _12
-    if count > 13 then s = s + ", " + this _13
-    if count > 14 then s = s + ", " + this _14
-    if count > 15 then s = s + ", " + this _15
-    if count > 16 then s = s + ", " + this _16
-    if count > 17 then s = s + ", " + this _17
-    if count > 18 then s = s + ", " + this _18
-    if count > 19 then s = s + ", " + this _19
-    s + ")"
-end)
 
 /*
 def Tuple type()
@@ -90,41 +91,41 @@ end
 */
 
 class TupleIterator
-    this(tuple Tuple)
+    this(tuple Tuple) =
         this tuple = tuple
         // rollback so the first call to next advances to the first
         index = -1
     end
 
-    next(-> Bool)
+    get current =
+        if index == 0 then
+            tuple _0
+        else if index == 1 then
+            tuple _1
+        else if index == 2 then
+            tuple _2
+        else if index == 3 then
+            tuple _3
+        else if index == 4 then
+            tuple _4
+        else if index == 5 then
+            tuple _5
+        else if index == 6 then
+            tuple _6
+        else if index == 7 then
+            tuple _7
+        else if index == 8 then
+            tuple _8
+        else if index == 9 then
+            tuple _9
+        end
+    end
+
+    def next(-> Bool) =
         index = index + 1
         index < tuple count
     end
     
-    tuple   Tuple
-    index   Int
+    var tuple Tuple
+    var index Int
 end
-
-TupleIterator defineGetter("current", fn()
-    if index == 0 then
-        tuple _0
-    else if index == 1 then
-        tuple _1
-    else if index == 2 then
-        tuple _2
-    else if index == 3 then
-        tuple _3
-    else if index == 4 then
-        tuple _4
-    else if index == 5 then
-        tuple _5
-    else if index == 6 then
-        tuple _6
-    else if index == 7 then
-        tuple _7
-    else if index == 8 then
-        tuple _8
-    else if index == 9 then
-        tuple _9
-    end
-end)

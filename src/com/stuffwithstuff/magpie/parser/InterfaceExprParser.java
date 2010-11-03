@@ -27,35 +27,51 @@ public class InterfaceExprParser implements ExprParser {
     
     // Parse the body.
     while (!parser.match(TokenType.END)) {
-      // An interface contains member declarations: i.e. names and signatures
-      // with no body:
+      // An interface contains declarations of methods, getters, and setters:
       //
-      //    foo(a Int -> Int)
-      //    bar Int
+      //    interface Foo
+      //        def someMethod(a Int -> Int)
+      //        get someGetter Int
+      //        set someSetter Int
+      //    end
       //
       // They get desugared to:
       //
-      //    Foo declareMember("foo", fn() Function(Int, Int))
-      //    Foo declareMember("bar", fn() Int)
+      //    Foo declareMethod("someMethod", fn Function(Int, Int))
+      //    Foo declareGetter("someGetter", fn Int)
+      //    Foo declareSetter("someSetter", fn Int)
       
+      // Parse the declaration keyword.
+      TokenType memberType = parser.consumeAny(
+          TokenType.DEF, TokenType.GET, TokenType.SET).getType();
+      
+      // Parse the name.
       String member = parser.consumeAny(
           TokenType.NAME, TokenType.OPERATOR).getString();
       
-      // Parse the member's type.
-      Expr type;
-      if (parser.lookAhead(TokenType.LEFT_PAREN)) {
-        // It's a method.
+      switch (memberType) {
+      case DEF:
+        
         FunctionType function = parser.parseFunctionType();
-        type = Expr.message(Expr.name("Function"), Identifiers.CALL,
+        Expr methodType = Expr.message(Expr.name("Function"), Identifiers.CALL,
             Expr.tuple(function.getParamType(), function.getReturnType()));
-      } else {
-        // It's a getter.
-        type = parser.parseTypeExpression();
+        exprs.add(Expr.message(Expr.name(name), Identifiers.DECLARE_METHOD,
+            Expr.tuple(Expr.string(member), Expr.fn(methodType))));
+        break;
+        
+      case GET:
+        Expr getterType = parser.parseTypeExpression();
+        exprs.add(Expr.message(Expr.name(name), Identifiers.DECLARE_GETTER,
+            Expr.tuple(Expr.string(member), Expr.fn(getterType))));
+        break;
+        
+      case SET:
+        Expr setterType = parser.parseTypeExpression();
+        exprs.add(Expr.message(Expr.name(name), Identifiers.DECLARE_SETTER,
+            Expr.tuple(Expr.string(member), Expr.fn(setterType))));
+        break;
       }
-      
-      exprs.add(Expr.message(Expr.name(name), Identifiers.DECLARE_MEMBER,
-          Expr.tuple(Expr.string(member), Expr.fn(type))));
-      
+
       parser.consume(TokenType.LINE);
     }
     

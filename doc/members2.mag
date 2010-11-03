@@ -6,70 +6,88 @@
 // - Define
 // - Declare
 // Member types:
+// - Ctor
 // - Field
 // - Method
 // - Getter
 // - Setter
 // Of these possible 16 combinations, not all are valid. The valid ones are:
 class Example
+    // define ctor
+    this(x Int)
+        doSomething()
+    end
+    
     // define instance field
-    def foo Int = 123
+    var foo Int = 123
 
     // define instance method
-    def foo(arg Int) -> Bool = body
+    def foo(arg Int -> Bool) = body
     
     // define instance getter
-    def foo get Int = 123
+    get foo Int = 123
     
     // define instance setter
-    def foo set Int = print(it)
+    set foo Int = print(it)
     
     // declare instance field
-    def foo Int
+    var foo Int
     
     // declare instance method
-    def foo(arg Int) -> Bool
+    def foo(arg Int -> Bool)
     
     // declare instance getter
-    def foo get Int
+    get foo Int
     
     // declare instance setter
-    def foo set Int
+    set foo Int
 
     // define shared field
-    shared foo Int = 123
+    shared var foo Int = 123
     
     // define shared method
-    shared foo(arg Int) -> Bool = body
+    shared foo(arg Int -> Bool) = body
     
     // define shared getter
-    shared foo get Int = 123
+    shared get foo Int = 123
     
     // define shared setter
-    shared foo set Int = print(it)
-    
-    // edge cases:
-    // declare a tuple field
-    def foo (Int, String) // XXX: Won't work.
-    
-    // declare a field of function type
-    def foo Int -> String
+    shared set foo Int = print(it)
 end
+
+interface Type
+    def canAssignFrom(other Type -> Bool)
+    def getMemberType(name String -> Type | Nothing)
+    def getSetterType(name String -> Type | Nothing)
+    get string String
+    get type Type
+    def ==(other -> Bool)
+    def !=(other -> Bool)
+end
+
 
 // Keep in mind:
 // How do we distinguish a method from a field of tuple type?
 // How do we distinguish a method from a field of function type?
-// Can we make it more terse to define a getter and setter together?
 // How does it degrade to allow omitting type annotations?
 // What happens if we create a new member type or scope in the future?
 // How can we make -> an operator in a type annotation?
 // How does function type declaration syntax mesh with pattern-matching syntax?
 
 class Foo
-    def method(i Int -> Int) = i
-    def function Int -> Int = fn(i Int -> Int) i
+    def method(x Int, y Int -> Int) = i
+    var function (Int, Int) -> Int = fn(i Int -> Int) i
     
     def method(i Int, b Bool) = "whatever"
-    def tupleField (Int, Bool) = (1, true)
-    
+    var tupleField (Int, Bool) = (1, true)
+end
+
+class MethodSet
+    def add(name String, method Callable ->) _methods(name) = method
+  
+    def find(name String -> Callable) _methods(name)
+  
+    get methods Map[String, Callable] = _methods
+  
+    var _methods = HashMap[String, Callable] new()
 end
