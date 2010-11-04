@@ -82,7 +82,7 @@ You can create a function and assign it to a variable like any other value:
 But, since this is something you do frequently, Magpie has a shorter form that accomplishes the same thing:
 
     :::magpie
-    var double(i) i * 2
+    def double(i) i * 2
 
 ### Assignment
 

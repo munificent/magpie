@@ -22,6 +22,12 @@ Because functions are first-class, you'd be more likely to put them in a variabl
     var printArg = fn(a) print("My arg is " + a)
     printArg("bananas!")
 
+Defining named functions is so command that there is a special keyword, `def` for doing just that. The above example would be more naturally expressed like:
+
+    :::magpie
+    def printArg(a) print("My arg is " + a)
+    printArg("bananas!")
+
 A function can also take a block for its body:
 
     :::magpie
@@ -92,7 +98,7 @@ As you would expect, functions are
 [closures](http://en.wikipedia.org/wiki/Closure_%28computer_science%29): they
 can access variables defined outside of their scope. They will hold onto closed over variables even after leaving the scope where they are defined:
 
-    var makeFn(i)
+    def makeFn(i)
         // return a function that references a variable
         // defined outside of itself (i)
         fn print(i)

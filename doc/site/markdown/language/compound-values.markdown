@@ -29,7 +29,7 @@ Tuple fields are also implicitly decomposed when passed to a function with multi
 
     :::magpie
     // define a function that takes two values
-    var takeTwo(a, b)
+    def takeTwo(a, b)
         print(a + " + " b)
     end
     

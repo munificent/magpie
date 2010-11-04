@@ -7,7 +7,7 @@ It looks a bit like this:
 
     // generates the sequence of turns needed to draw a dragon curve
     // see: http://en.wikipedia.org/wiki/Dragon_curve
-    var dragon(n, turn)
+    def dragon(n, turn)
         if n > 0 then
             dragon(n - 1, "R") + turn + dragon(n - 1, "L")
         else ""
