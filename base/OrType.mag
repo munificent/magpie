@@ -1,9 +1,9 @@
 class OrType
-    this(cases ArrayType new(Type)) =
+    this(cases ArrayType new(Type))
         this cases = cases
     end
     
-    shared def combine(left Type, right Type -> Type) =
+    shared def combine(left Type, right Type -> Type)
         // combine the cases of both arms
         var cases = Array new()
 
@@ -33,7 +33,7 @@ class OrType
         result
     end
 
-    def ==(other -> Bool) =
+    def ==(other -> Bool)
         let orType = as[OrType](other) then
             if cases count != orType cases count then return false
     
@@ -45,9 +45,9 @@ class OrType
         else false
     end
 
-    def !=(other -> Bool) = (this == other) not
+    def !=(other -> Bool) (this == other) not
 
-    def canAssignFrom(other Type -> Bool) =
+    def canAssignFrom(other Type -> Bool)
         let orType = as[OrType](other) then
             // It's also an or, so see if all of its cases are matched by one of
             // the ones here.
@@ -64,7 +64,7 @@ class OrType
         end
     end
 
-    def getMemberType(name String -> Type | Nothing) =
+    def getMemberType(name String -> Type | Nothing)
         let firstType = cases(0) getMemberType(name) then
             for type = cases do
                 // The method must be present in all cases.
@@ -81,7 +81,7 @@ class OrType
         end
     end
 
-    def getSetterType(name String -> Type | Nothing) =
+    def getSetterType(name String -> Type | Nothing)
         let firstType = cases(0) getMemberType(name) then
             for type = cases do
                 let method = type getSetterType(name) then
@@ -102,7 +102,7 @@ class OrType
         end
     end
 
-    def unsafeRemoveNothing(-> Type) =
+    def unsafeRemoveNothing(-> Type)
         // TODO(bob): Total hack. We need remaining to have the right element
         // type.
         var remaining = cases copy()

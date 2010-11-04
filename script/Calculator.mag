@@ -3,21 +3,21 @@
 // Define a basic tokenizer for splitting a string into chunks -----------------
 
 class Tokenizer
-    this(text String) = this text = text
+    this(text String) this text = text
 
-    def iterate(-> TokenIterator) = TokenIterator new(text)
+    def iterate(-> TokenIterator) TokenIterator new(text)
         
     var text String
 end
 
 class TokenIterator
-    this(text String) =
+    this(text String)
         this text = text
         this current = ""
         this start = 0
     end
     
-    def next(-> Bool) =
+    def next(-> Bool)
         if start >= text count then return false
 
         // skip over whitespace
@@ -49,15 +49,15 @@ end
 // Implement a simple stack using a linked list --------------------------------
 
 class Stack
-    this() =
+    this()
         top = nothing
     end
     
-    def push(item Int ->) =
+    def push(item Int ->)
         top = StackItem new(item, top)
     end
 
-    def pop(-> Int) =
+    def pop(-> Int)
         let inner = top then
             var item = inner item
             top = inner rest
@@ -65,7 +65,7 @@ class Stack
         else 0
     end
 
-    def count(-> Int) =
+    def count(-> Int)
         var count = 0
         var stack = this top
         while true do
@@ -81,7 +81,7 @@ class Stack
 end
 
 class StackItem
-    this(item Int, rest StackItem) =
+    this(item Int, rest StackItem)
         this item = item
         this rest = rest
     end

@@ -3,9 +3,7 @@
 // implemented.)
 
 class PriorityQueue
-    this() =
-        this heap = Array new()
-    end
+    this() heap = Array new()
 
     // The following methods "traverse" the tree stored in the heap array. The tree
     // nodes are laid out in the array like the following:
@@ -17,11 +15,11 @@ class PriorityQueue
     // Because of this, given the index of a node, we can find its parent and
     // children using simple integer arithmetic.
     // TODO(bob): Note, presumes integer division.
-    def parent(index Int -> Int)     = (index - 1) / 2
-    def leftChild(index Int -> Int)  = (index * 2) + 1
-    def rightChild(index Int -> Int) = (index * 2) + 2
+    def parent(index Int -> Int)     (index - 1) / 2
+    def leftChild(index Int -> Int)  (index * 2) + 1
+    def rightChild(index Int -> Int) (index * 2) + 2
 
-    def add(item) =
+    def add(item)
         // Add to the end of the heap.
         heap add(item)
     
@@ -35,7 +33,7 @@ class PriorityQueue
         end
     end
 
-    def dequeue(item) =
+    def dequeue(item)
         // Remove the top item.
         var top = heap(0)
         heap(0) = heap last
@@ -65,7 +63,7 @@ class PriorityQueue
         top
     end
 
-    def addAll(items) =
+    def addAll(items)
         for item = items do add(item)
     end
     

@@ -26,10 +26,10 @@ end
 
 // Extend the built-in classes.
 extend class Object
-    def !=(other -> Bool) = (this == other) not
+    def !=(other -> Bool) (this == other) not
 
     // Provide a generic print that converts arg to string first.
-    def print(arg Object ->) = printRaw(arg string)
+    def print(arg Object ->) printRaw(arg string)
 end
 
 extend class Object

@@ -100,11 +100,7 @@ public class ClassExprParser implements ExprParser {
   }
   
   private static Expr parseConstructor(MagpieParser parser, Expr theClass) {
-    FunctionType type = parser.parseFunctionType();
-    parser.consume(TokenType.EQUALS);
-    Expr body = parser.parseBlock();
-    Expr function = new FnExpr(body.getPosition(), type, body);
-
+    Expr function = parser.parseFunction();
     return Expr.message(theClass, Identifiers.DEFINE_CONSTRUCTOR, function);
   }
   
@@ -127,21 +123,9 @@ public class ClassExprParser implements ExprParser {
   
   private static Expr parseMethod(MagpieParser parser, Expr theClass) {
     String name = parser.consumeAny(TokenType.NAME, TokenType.OPERATOR).getString();
-    FunctionType type = parser.parseFunctionType();
-    
-    if (parser.match(TokenType.EQUALS)) {
-      // Defining it.
-      Expr body = parser.parseBlock();
-      Expr function = new FnExpr(body.getPosition(), type, body);
-      return Expr.message(theClass, Identifiers.DEFINE_METHOD,
-          Expr.tuple(Expr.string(name), function));
-    } else {
-      // Just declaring it.
-      Expr typeExpr = new ApplyExpr(Expr.name("Function"),
-          Expr.tuple(type.getParamType(), type.getReturnType()));
-      return Expr.message(theClass, Identifiers.DECLARE_METHOD,
-          Expr.tuple(Expr.string(name), Expr.fn(typeExpr)));
-    }
+    Expr function = parser.parseFunction();
+    return Expr.message(theClass, Identifiers.DEFINE_METHOD,
+        Expr.tuple(Expr.string(name), function));
   }
   
   private static Expr parseGetter(MagpieParser parser, Expr theClass) {

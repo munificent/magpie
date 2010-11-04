@@ -22,7 +22,7 @@ class Example
     var foo Int = 123
 
     // define instance method
-    def foo(arg Int -> Bool) = body
+    def foo(arg Int -> Bool) body
     
     // define instance getter
     get foo Int = 123
@@ -34,7 +34,7 @@ class Example
     var foo Int
     
     // declare instance method
-    def foo(arg Int -> Bool)
+    def foo(arg Int -> Bool) // ??? do what here ???
     
     // declare instance getter
     get foo Int
@@ -46,7 +46,7 @@ class Example
     shared var foo Int = 123
     
     // define shared method
-    shared foo(arg Int -> Bool) = body
+    shared def foo(arg Int -> Bool) body
     
     // define shared getter
     shared get foo Int = 123

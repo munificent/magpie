@@ -25,7 +25,7 @@ def specify(description String, block Function(TestSuite, Nothing) ->)
 end
 
 class TestSuite
-    this(name String) =
+    this(name String)
         this name = name
         currentTestSuite = this
         currentTest = ""
@@ -33,7 +33,7 @@ class TestSuite
         failures = 0
     end
     
-    def should(description String, block Function(Nothing, Nothing) ->) =
+    def should(description String, block Function(Nothing, Nothing) ->)
         currentTest = description
         var testsBefore = tests
         var failuresBefore = failures
@@ -43,7 +43,7 @@ class TestSuite
         end
     end
     
-    def fail(message String ->) =
+    def fail(message String ->)
         if failures == 0 then
             print("FAIL: " + name + " should " + currentTest + ".")
         end
@@ -52,7 +52,7 @@ class TestSuite
         print("      " + message)
     end
     
-    def pass(->) = tests = tests + 1
+    def pass(->) tests = tests + 1
     
     var name        String
     var currentTest String
@@ -61,7 +61,7 @@ class TestSuite
 end
 
 extend class Object
-    def shouldBe(expected, message String ->) =
+    def shouldBe(expected, message String ->)
         if this != expected then
             if message == nothing then
                 message = "Expected " + expected + " but was " + this
@@ -73,23 +73,23 @@ extend class Object
         end
     end
 
-    def expectCheckError(block) =
+    def expectCheckError(block)
         (Runtime checkFunction(block) count > 0) shouldBe(true,
             "Should have a check error but did not.")
     end
 
-    def expectCheckOK(block) =
+    def expectCheckOK(block)
         var errors = Runtime checkFunction(block)
         errors count shouldBe(0, "Should not have any check errors but had:")
         for error = errors do print("      - " + error)
     end
 
-    def envExpectCheckError(block) =
+    def envExpectCheckError(block)
         (Runtime checkExpression(block) count > 0) shouldBe(true,
             "Should have a check error but did not.")
     end
 
-    def envExpectCheckOK(block) =
+    def envExpectCheckOK(block)
         var errors = Runtime checkExpression(block)
         errors count shouldBe(0, "Should not have any check errors but had:")
         for error = errors do print("      - " + error)

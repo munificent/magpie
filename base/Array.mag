@@ -1,12 +1,12 @@
 extend class Array
-    shared def new(-> ArrayType new(Object)) = Array of()
+    shared def new(-> ArrayType new(Object)) Array of()
     
     // TODO(bob): This is kind of hokey.
-    shared def newType(elementType Type -> ArrayType) =
+    shared def newType(elementType Type -> ArrayType)
         ArrayType new(elementType)
     end
 
-    shared def canAssignFrom(other Type -> Bool) =
+    shared def canAssignFrom(other Type -> Bool)
         if this == other then
             true
         else if other type == ArrayType then
@@ -32,15 +32,15 @@ extend class Array
         ArrayType new(elementType)
     end
 
-    def iterate(-> ArrayIterator) = ArrayIterator new(this)
+    def iterate(-> ArrayIterator) ArrayIterator new(this)
 
-    def copy(-> Array) =
+    def copy(-> Array)
         var result = Array new()
         for item = this do result add(item)
         result
     end
 
-    def sortByString(-> Array) =
+    def sortByString(-> Array)
         var result = copy()
     
         // TODO(bob): Awful bubble sort FTW!
@@ -57,7 +57,7 @@ extend class Array
         result
     end
 
-    def unique(-> ArrayType new(Object)) =
+    def unique(-> ArrayType new(Object))
         var result = Array new()
         for item = this do
             if result count == 0 then
@@ -69,7 +69,7 @@ extend class Array
     end
 
     // TODO(bob): rename contains?
-    def contains(item -> Bool) =
+    def contains(item -> Bool)
         for element = this do
             if item == element then return true
         end
@@ -77,14 +77,14 @@ extend class Array
     end
 
     // TODO(bob): Need generics to use for return type.
-    def first(predicate -> Dynamic) =
+    def first(predicate -> Dynamic)
         for element = this do
             if predicate(element) then return element
         end
         nothing
     end
 
-    def swap(a Int, b Int ->) =
+    def swap(a Int, b Int ->)
         // TODO(bob): Bounds check
         var temp = this(a)
         this(a) = this(b)
@@ -93,20 +93,20 @@ extend class Array
 end
 
 class ArrayType
-    this(elementType Type) =
+    this(elementType Type)
         this elementType = elementType
     end
     
     get string String = "array of " + elementType
 
-    def canAssignFrom(other Type -> Bool) =
+    def canAssignFrom(other Type -> Bool)
         let otherArray = as[ArrayType](other) then
             // Element type must match exactly (not variant).
             elementType == otherArray elementType
         else false
     end
 
-    def getMemberType(name String -> Type | Nothing) =
+    def getMemberType(name String -> Type | Nothing)
         // TODO(bob): Hackish. Strongly-type the array members based on the
         // element type.
         if name == "assign" then
@@ -124,24 +124,24 @@ class ArrayType
         else Array getMemberType(name)
     end
     
-    def getSetterType(name String -> Type | Nothing) =
+    def getSetterType(name String -> Type | Nothing)
         nothing
     end
 
-    def ==(other -> Bool) =
+    def ==(other -> Bool)
         let otherArray = as[ArrayType](other) then
             // Element type must match exactly (not variant).
             elementType == otherArray elementType
         else false
     end
     
-    def !=(other -> Bool) = (this == other) not
+    def !=(other -> Bool) (this == other) not
     
     var elementType Type
 end
 
 class ArrayIterator
-    this(array Array) =
+    this(array Array)
         this array = array
         this index = -1
     end
@@ -155,7 +155,7 @@ class ArrayIterator
         ArrayIteratorType new(elementType)
     end
 
-    def next(-> Bool) =
+    def next(-> Bool)
         index = index + 1
         index < array count
     end
@@ -165,37 +165,37 @@ class ArrayIterator
 end
 
 class ArrayIteratorType
-    this(elementType) =
+    this(elementType)
         this elementType = elementType
     end
     
     get string String = "array of " + elementType + " iterator"
 
-    def canAssignFrom(other Type -> Bool) =
+    def canAssignFrom(other Type -> Bool)
         let otherArray = as[ArrayIteratorType](other) then
             // Array iterators are covariant with their element type.
             elementType canAssignFrom(otherArray elementType)
         else false
     end
     
-    def getMemberType(name String -> Type | Nothing) =
+    def getMemberType(name String -> Type | Nothing)
         // Strongly-type the iterator.
         if name == "current" then return elementType
         // Use the generic type of the other methods.
         ArrayIterator getMemberType(name)
     end
     
-    def getSetterType(name String -> Type | Nothing) =
+    def getSetterType(name String -> Type | Nothing)
         nothing
     end
     
-    def ==(other -> Bool) =
+    def ==(other -> Bool)
         let otherArray = as[ArrayIteratorType](other) then
             elementType == otherArray elementType
         else false
     end
     
-    def !=(other -> Bool) = (this == other) not
+    def !=(other -> Bool) (this == other) not
     
     var elementType Type
 end
