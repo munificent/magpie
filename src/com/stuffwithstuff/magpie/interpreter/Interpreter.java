@@ -223,11 +223,11 @@ public class Interpreter {
     Obj main = context.lookUp("main");
     if (main == null) return;
     
-    if (!(main instanceof Callable)) {
+    if (!(main instanceof FnObj)) {
       throw new InterpreterException("Member \"main\" is not a function.");
     }
     
-    Callable mainFn = (Callable)main;
+    Callable mainFn = ((FnObj)main).getCallable();
     mainFn.invoke(this, mNothing, mNothing);
   }
   

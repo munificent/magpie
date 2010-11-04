@@ -65,7 +65,7 @@ static checking to make sure you don't accidentally break things.
 Magpie's core syntax is based on simple message sends with a minimum of
 punctuation. By example:
 
-    var items = Array new
+    var items = Array new()
     items add("zero")
     for i = 1 to(10) do items = items ++ i
     print(items)

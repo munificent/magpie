@@ -3,105 +3,111 @@
 // Define a basic tokenizer for splitting a string into chunks -----------------
 
 class Tokenizer
-    this(text String)
-        this text = text
-    end
+    this(text String) = this text = text
+
+    def iterate(-> TokenIterator) = TokenIterator new(text)
         
-    text String
+    var text String
 end
 
-def Tokenizer iterate(-> TokenIterator) TokenIterator new(text)
-
 class TokenIterator
-    this(text String)
+    this(text String) =
         this text = text
         this current = ""
         this start = 0
     end
     
-    text    String
-    current String
-    start   Int
-end
+    def next(-> Bool) =
+        if start >= text count then return false
 
-def TokenIterator next(-> Bool)
-    if start >= text count then return false
+        // skip over whitespace
+        while start < text count and text(start) == " " do
+            start = start + 1
+        end
 
-    // skip over whitespace
-    while start < text count and text at(start) == " " do
-        start = start + 1
-    end
+        // if we had whitespace until the very end, just stop
+        if start >= text count then return false
 
-    // if we had whitespace until the very end, just stop
-    if start >= text count then return false
-
-    // now walk the stop forward until we hit whitespace or the end
-    var stop = start
-    while stop < text count and text at(stop) != " " do
-        stop = stop + 1
-    end
+        // now walk the stop forward until we hit whitespace or the end
+        var stop = start
+        while stop < text count and text(stop) != " " do
+            stop = stop + 1
+        end
     
-    // store the token we got
-    current = text substring(start, stop)
-    // and move past it
-    start = stop
-    true
+        // store the token we got
+        current = text substring(start, stop)
+        // and move past it
+        start = stop
+        true
+    end
+
+    var text    String
+    var current String
+    var start   Int
 end
 
 // Implement a simple stack using a linked list --------------------------------
 
-class Stack    
-    top StackItem
-end
-
-def Stack push(item Int ->)
-    top = StackItem new(item, top)
-end
-
-def Stack pop(-> Int)
-    var item = top item
-    top = top rest
-    item
-end
-
-def Stack count(-> Int)
-    var count = 0
-    var stack = this top
-    while stack != nothing do
-        stack = stack rest
-        count = count + 1
+class Stack
+    this() =
+        top = nothing
     end
-    count
+    
+    def push(item Int ->) =
+        top = StackItem new(item, top)
+    end
+
+    def pop(-> Int) =
+        let inner = top then
+            var item = inner item
+            top = inner rest
+            item
+        else 0
+    end
+
+    def count(-> Int) =
+        var count = 0
+        var stack = this top
+        while true do
+            let inner = stack then
+                stack = inner rest
+                count = count + 1
+            else break
+        end
+        count
+    end
+
+    var top StackItem | Nothing
 end
 
 class StackItem
-    this(item Int, rest StackItem)
+    this(item Int, rest StackItem) =
         this item = item
         this rest = rest
     end
     
-    item Int
-    rest StackItem
+    var item Int
+    var rest StackItem | Nothing
 end
 
 // Define the actual calculation function --------------------------------------
 
 var calculate(text String -> Int)
-    var stack = Stack new
+    var stack = Stack new()
 
     for token = Tokenizer new(text) do
         let i = Int parse(token) then
             stack push(i)
             print("push " + i)
         else if token == "+" then
-            var right = stack pop
-            var left  = stack pop
+            var right = stack pop()
+            var left  = stack pop()
             var sum   = left + right
             print("add  " + left + " + " + right + " = " + sum)
             stack push(sum)
         else if token == "*" then
-            var right   = stack pop
-            var left    = stack pop
+            var right   = stack pop()
+            var left    = stack pop()
             var product = left * right
             print("mult " + left + " * " + right + " = " + product)
             stack push(product)
@@ -110,7 +116,7 @@ var calculate(text String -> Int)
         end
     end
     
-    stack pop
+    stack pop()
 end
 
 // Now let's try it out --------------------------------------------------------

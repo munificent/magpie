@@ -16,8 +16,9 @@ Magpie lives on [bitbucket](http://bitbucket.org). To work on the source, just c
 * `/doc/site`: The markdown text and python script used to build this site.
 * `/old`: The old pre-Java, C# statically-typed version of Magpie.
 * `/script`: Example Magpie scripts.
+* `/spec`: The Magpie spec, the executable specification that defines and verifies the language.
 * `/src/com/stuffwithstuff/magpie`: The Java source code of the interpreter.
-* `/test`: The test suite, the set of Magpie scripts used to verify the interpreter works correctly.
+* `/test`: The old test suite, which was used before I started the spec. It's probably horribly broken now.
 
 ### The Namespaces
 
