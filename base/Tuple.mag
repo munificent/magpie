@@ -1,10 +1,7 @@
-extend class Tuple
-    def iterate(-> TupleIterator) = TupleIterator new(this)
-end
+def Tuple iterate(-> TupleIterator) TupleIterator new(this)
 
 // A tuple of Types is itself a Type.
 extend class Tuple
-
     get string String =
         var s = "("
     

@@ -128,30 +128,10 @@ extend interface Type
     def |(other Type -> Type)
 end
 
-extend class ArrayType
-    def |(other Type -> Type) = OrType combine(this, other)
-end
-
-extend class ArrayIteratorType
-    def |(other Type -> Type) = OrType combine(this, other)
-end
-
-extend class Class
-    def |(other Type -> Type) = OrType combine(this, other)
-end
-
-extend class FunctionType
-    def |(other Type -> Type) = OrType combine(this, other)
-end
-
-extend class Interface
-    def |(other Type -> Type) = OrType combine(this, other)
-end
-
-extend class OrType
-    def |(other Type -> Type) = OrType combine(this, other)
-end
-
-extend class Tuple
-    def |(other Type -> Type) = OrType combine(this, other)
-end
+def ArrayType |(other Type -> Type) OrType combine(this, other)
+def ArrayIteratorType |(other Type -> Type) OrType combine(this, other)
+def Class |(other Type -> Type) OrType combine(this, other)
+def FunctionType |(other Type -> Type) OrType combine(this, other)
+def Interface |(other Type -> Type) OrType combine(this, other)
+def OrType |(other Type -> Type) OrType combine(this, other)
+def Tuple |(other Type -> Type) OrType combine(this, other)

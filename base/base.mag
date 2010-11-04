@@ -81,6 +81,4 @@ end
 // to evaluate "nothing()"... stack overflow.
 //
 // This short-circuits that by actually making nothing callable.
-extend class Nothing
-    def call(arg) = nothing
-end
+def Nothing call(arg) nothing

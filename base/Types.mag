@@ -9,9 +9,7 @@
 // "Base canAssignFrom(Derived)" returns true since every Derived is also a
 // Base.
 
-extend class Object
-    def is(type Type -> Bool) = type canAssignFrom(this type)
-end
+def Object is(type Type -> Bool) type canAssignFrom(this type)
 
 extend class Nothing
     // No type except Nothing is allowed where Nothing is expected.

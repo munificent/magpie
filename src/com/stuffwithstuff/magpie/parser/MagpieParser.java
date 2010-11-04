@@ -13,8 +13,7 @@ public class MagpieParser extends Parser {
     // Register the parsers for the different keywords.
     mParsers.put(TokenType.BREAK, new BreakExprParser());
     mParsers.put(TokenType.CLASS, new ClassExprParser());
-    // TODO(bob): This is going away...
-//    mParsers.put(TokenType.DEF, new DefineExprParser());
+    mParsers.put(TokenType.DEF, new DefineExprParser());
     mParsers.put(TokenType.EXTEND, new ExtendExprParser());
     mParsers.put(TokenType.FN, new FnExprParser());
     mParsers.put(TokenType.FOR, new LoopExprParser());

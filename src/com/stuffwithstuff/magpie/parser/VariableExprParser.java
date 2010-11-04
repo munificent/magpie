@@ -18,6 +18,9 @@ public class VariableExprParser implements ExprParser {
     // TODO(bob): support multiple definitions and tuple decomposition here
     String name = parser.consume(TokenType.NAME).getString();
     
+    // TODO(bob): This should go away once everything is using def. var should
+    // just be for non-function variables.
+    
     // See if we're defining a static function in shorthand notation:
     // var foo[] blah
     List<String> staticParams = new ArrayList<String>();
