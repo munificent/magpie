@@ -28,8 +28,6 @@ import com.stuffwithstuff.magpie.parser.Position;
  * towards the root. It calculates the type of the expression on its way up and
  * tests that that type is valid there.
  */
-// TODO(bob): There's a fourth thing to check: that modifications to an objects
-// fields obey their declared type.
 public class Checker {
   public Checker(Interpreter interpreter) {
     mInterpreter = interpreter;

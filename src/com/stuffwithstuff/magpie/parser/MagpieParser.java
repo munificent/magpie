@@ -17,6 +17,7 @@ public class MagpieParser extends Parser {
     mParsers.put(TokenType.EXTEND, new ExtendExprParser());
     mParsers.put(TokenType.FN, new FnExprParser());
     mParsers.put(TokenType.FOR, new LoopExprParser());
+    mParsers.put(TokenType.GET, new GetExprParser());
     mParsers.put(TokenType.IF, new ConditionalExprParser());
     mParsers.put(TokenType.INTERFACE, new InterfaceExprParser());
     mParsers.put(TokenType.LET, new ConditionalExprParser());

@@ -25,49 +25,22 @@ def as[T](arg -> T | Nothing)
 end
 
 // Extend the built-in classes.
-extend class Object
-    def !=(other -> Bool) (this == other) not
+def Object !=(other -> Bool) (this == other) not
 
-    // Provide a generic print that converts arg to string first.
-    def print(arg Object ->) printRaw(arg string)
-end
+// Provide a generic print that converts arg to string first.
+def Object print(arg Object ->) printRaw(arg string)
 
-extend class Object
-    get string String = "object"
-end
-
-extend class String
-    get string String = this
-end
-
-extend class Nothing
-    get string String = "nothing"
-end
-
-extend class Class
-    get string String = name
-end
+get Object string String = "object"
+get String string String = this
+get Nothing string String = "nothing"
+get Class string String = name
 
 // Truthiness.
-extend class Object
-    get true? Bool = true
-end
-
-extend class Bool
-    get true? Bool = this
-end
-
-extend class Int
-    get true? Bool = this != 0
-end
-
-extend class String
-    get true? Bool = this count > 0
-end
-
-extend class Nothing
-    get true? Bool = false
-end
+get Object true? Bool = true
+get Bool true? Bool = this
+get Int true? Bool = this != 0
+get String true? Bool = this count > 0
+get Nothing true? Bool = false
 
 // TODO(bob): Hack. This fixes a weird infinite regress problem. Let's say you
 // have an expression like:

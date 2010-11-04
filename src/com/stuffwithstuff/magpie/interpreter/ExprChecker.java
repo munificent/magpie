@@ -325,6 +325,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(StaticFnExpr expr, EvalContext context) {
     return mInterpreter.evaluateStaticFunctionType(expr, mStaticContext);
+    // TODO(bob): Once constraints are in, should check the body here.
   }
 
   @Override
