@@ -1,7 +1,7 @@
 specify("A 'match' expression") with
     it should("evaluate the value expression once") with
         var called = 0
-        var eval()
+        def eval()
             called = called + 1
             "value"
         end

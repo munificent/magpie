@@ -19,9 +19,3 @@ specify("A 'var' expression") with
         end
     end
 end
-
-specify("A 'var' shorthand function expression") with
-    it should("have the type of the function") with
-        (typeof var f(a Int -> String) a string) shouldBe(Function(Int, String))
-    end
-end

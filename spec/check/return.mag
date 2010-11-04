@@ -5,7 +5,7 @@ specify("A 'return' expression") with
     
     it should("have its value included in the function's return type") with
         expectCheckError with
-            var f(-> Int)
+            def f(-> Int)
                 if true then return "string"
                 if true then return true
                 123
@@ -13,7 +13,7 @@ specify("A 'return' expression") with
         end
 
         expectCheckOK with
-            var f(-> Bool | Int | String)
+            def f(-> Bool | Int | String)
                 if true then return "string"
                 if true then return true
                 123
@@ -21,14 +21,14 @@ specify("A 'return' expression") with
         end
 
         expectCheckError with
-            var f(-> Int)
+            def f(-> Int)
                 if true then return
                 123
             end
         end
 
         expectCheckOK with
-            var f(-> Int | Nothing)
+            def f(-> Int | Nothing)
                 if true then return
                 123
             end

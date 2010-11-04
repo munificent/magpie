@@ -1,5 +1,5 @@
 specify("A block expression") with
-    var doBlock(block) block()
+    def doBlock(block) block()
 
     it should("evaluate the expressions in order") with
         var result = ""

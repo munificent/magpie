@@ -3,20 +3,20 @@ var totalFailures = 0
 
 var currentTestSuite = nothing
 
-var startTests(->)
+def startTests(->)
     totalTests = 0
     totalFailures = 0
     currentTestSuite = nothing
     print("Executing specification...")
 end
 
-var endTests(->)
+def endTests(->)
     print("")
     print("Passed " + (totalTests - totalFailures) + " out of " +
         totalTests + " tests.")
 end
 
-var specify(description String, block Function(TestSuite, Nothing) ->)
+def specify(description String, block Function(TestSuite, Nothing) ->)
     var suite = TestSuite new(description)
     block(suite)
     

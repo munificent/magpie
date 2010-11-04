@@ -1,13 +1,13 @@
 specify("A 'return' expression") with
     it should("return the returned value") with
-        var f()
+        def f()
             return "value"
         end
         f() shouldBe("value")
     end
         
     it should("return nothing if no value is provided") with
-        var f()
+        def f()
             return
         end
         f() shouldBe(nothing)
@@ -15,7 +15,7 @@ specify("A 'return' expression") with
 
     it should("exit the function immediately") with
         var reached = false
-        var f()
+        def f()
             return "value"
             reached = true
         end

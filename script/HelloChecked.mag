@@ -2,6 +2,6 @@
 // type-checks before printing "Hello, world!". If a script contains a "main"
 // function, then Magpie executes the entire script, type-checks everything in
 // global scope, then calls main if there were no errors.
-var main(->)
+def main(->)
     print("Hello, world!")
 end

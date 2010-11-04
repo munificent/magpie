@@ -39,7 +39,7 @@ specify("A newline") with
     end
 
     it should("be ignored after an open bracket") with
-        var f[
+        def f[
             T]() T
         f[Int]() shouldBe(Int)
     end

@@ -92,7 +92,7 @@ end
 
 // Define the actual calculation function --------------------------------------
 
-var calculate(text String -> Int)
+def calculate(text String -> Int)
     var stack = Stack new()
 
     for token = Tokenizer new(text) do
@@ -121,7 +121,7 @@ end
 
 // Now let's try it out --------------------------------------------------------
 
-var main(->)
+def main(->)
     var result = calculate("3 2 * 4 2 * +")
     print("result: " + result)
 end

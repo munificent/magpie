@@ -72,7 +72,7 @@ class PriorityQueue
     var heap Array newType(Dynamic)
 end
 
-var expect(queue, items)
+def expect(queue, items)
     var success = true
     for item = items do
         var top = queue dequeue()
@@ -85,7 +85,7 @@ var expect(queue, items)
     if success then print("Got all expected: " + items);
 end
 
-var main(->)
+def main(->)
     var queue = PriorityQueue new()
     queue addAll(Array of(5, 2, 3, 4, 1))
     expect(queue, Array of(1, 2, 3, 4, 5))

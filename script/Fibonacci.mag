@@ -1,5 +1,5 @@
 // A vanilla iterative solution.
-var fibs(n)
+def fibs(n)
     if n < 2 then n
     else
         var pair = 0, 1

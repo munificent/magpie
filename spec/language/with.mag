@@ -1,6 +1,6 @@
 specify("A 'with' block argument") with
     it should("pass the body as a function to the method") with
-        var f(block) block()
+        def f(block) block()
         var called = false
         f with
             called = true
@@ -9,7 +9,7 @@ specify("A 'with' block argument") with
     end
     
     it should("allow a block body") with
-        var f(block) block()
+        def f(block) block()
         
         var result = ""
         f with
@@ -20,7 +20,7 @@ specify("A 'with' block argument") with
     end
     
     it should("allow a single expression body") with
-        var f(block) block()
+        def f(block) block()
         
         var result = ""
         f with result = "ab"
@@ -28,7 +28,7 @@ specify("A 'with' block argument") with
     end
     
     it should("concatenate the fn with other arguments") with
-        var f(arg1, arg2, block)
+        def f(arg1, arg2, block)
             arg1 shouldBe("arg1")
             arg2 shouldBe("arg2")
             block()
@@ -42,12 +42,12 @@ specify("A 'with' block argument") with
     end
     
     it should("create an 'it' parameter if not is provided") with
-        var f(block) block("it")
+        def f(block) block("it")
         f with it shouldBe("it")
     end
     
     it should("allow a parameter list") with
-        var f(block) block("a", "b")
+        def f(block) block("a", "b")
         f with(a, b)
             a shouldBe("a")
             b shouldBe("b")
@@ -55,7 +55,7 @@ specify("A 'with' block argument") with
     end
     
     it should("only do a local return") with
-        var f(block) block()
+        def f(block) block()
         
         var called = false
         var result = f with

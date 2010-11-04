@@ -6,7 +6,7 @@ specify("A 'let then' expression") with
 
     it should("create a variable of the condition's type without Nothing") with
         expectCheckOK with
-            var takesInt(arg Int) nothing
+            def takesInt(arg Int) nothing
             var cond = if true then 1
             let a = cond then takesInt(a)
         end
@@ -21,7 +21,7 @@ specify("A 'let then else' expression") with
 
     it should("create a variable of the condition's type without Nothing") with
         expectCheckOK with
-            var takesInt(arg Int) nothing
+            def takesInt(arg Int) nothing
             var cond = if true then 1
             let a = cond then takesInt(a) else "ignored"
         end

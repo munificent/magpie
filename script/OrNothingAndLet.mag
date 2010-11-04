@@ -21,7 +21,7 @@ class File
     end
 end
 
-var main(->)
+def main(->)
     // Open a valid file.
     var maybeFile = File open("some/path")
     // Note: the script won't type-check if this line is uncommented out:
