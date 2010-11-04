@@ -11,14 +11,14 @@ import("OrType.mag")
 // Returns the argument cast to the given type if it's type is an exact match
 // and not a subtype, otherwise returns nothing.
 // TODO(bob): Make this a method on Object so you can do: foo asExactly[Bar]
-var asExactly[T](arg -> T | Nothing)
+def asExactly[T](arg -> T | Nothing)
     if arg type == T then unsafecast[T](arg)
 end
 
 // Returns the argument cast to the given type if it can be safely assigned to
 // that type, otherwise returns nothing.
 // TODO(bob): Make this a method on Object so you can do: foo as[Bar]
-var as[T](arg -> T | Nothing)
+def as[T](arg -> T | Nothing)
     var type = unsafecast[Type](arg type)
     if type == T then return unsafecast[T](arg)
     if T canAssignFrom(type) then unsafecast[T](arg)
