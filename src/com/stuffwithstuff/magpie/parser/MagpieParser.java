@@ -299,10 +299,18 @@ public class MagpieParser extends Parser {
         }
         message = new InstantiateExpr(start.union(current().getPosition()),
             message, staticArg);
-      } else {
-        Expr arg = primary();
-        if (arg == null) break;
+      } else if (match(TokenType.LEFT_PAREN)) {
+        // A function application like foo(123).
+        Expr arg;
+        if (match(TokenType.RIGHT_PAREN)) {
+          arg = new NothingExpr(last(2).getPosition().union(last(1).getPosition()));
+        } else {
+          arg = parseExpression();
+          consume(TokenType.RIGHT_PAREN);
+        }
         message = new ApplyExpr(message, arg);
+      } else {
+        break;
       }
     }
     
