@@ -158,9 +158,6 @@ public class Checker {
         function.getType().getReturnType().getPosition(),
         "Function is declared to return %s but is returning %s.");
     
-    // TODO(bob): If this function is a method (i.e. 'this' isn't nothing), then
-    // we also need to check that any assignment to a field matches the declared
-    // type.
     return mInterpreter.evaluateFunctionType(function.getType(), staticContext);
   }
   

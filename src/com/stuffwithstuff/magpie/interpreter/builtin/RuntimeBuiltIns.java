@@ -21,6 +21,14 @@ public class RuntimeBuiltIns {
   // the scope for these and clean them up.
   
   @Shared
+  @Signature("now(-> Int)")
+  public static Obj now(Interpreter interpreter, Obj thisObj, Obj arg) {
+    // TODO(bob): Total hack to fit in an int.
+    int time = (int)(System.currentTimeMillis() - 1289000000000L);
+    return interpreter.createInt(time);
+  }
+  
+  @Shared
   // TODO(bob): Should be declared to return array of strings.
   @Signature("checkClass(classObj Class)")
   public static Obj checkClass(Interpreter interpreter, Obj thisObj, Obj arg) {

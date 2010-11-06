@@ -211,7 +211,7 @@ public class Interpreter {
     // when type checking. So dirty.
     type.setValue(expr);
     
-    return type;    
+    return type;
   }
   
   public boolean hasMain() {

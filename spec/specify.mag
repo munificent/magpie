@@ -2,18 +2,21 @@ var totalTests = 0
 var totalFailures = 0
 
 var currentTestSuite = nothing
+var startTimeMs = 0
 
 def startTests(->)
     totalTests = 0
     totalFailures = 0
     currentTestSuite = nothing
     print("Executing specification...")
+    startTimeMs = Runtime now()
 end
 
 def endTests(->)
+    var endTimeMs = Runtime now()
     print("")
     print("Passed " + (totalTests - totalFailures) + " out of " +
-        totalTests + " tests.")
+        totalTests + " tests in " + (endTimeMs - startTimeMs) + "ms.")
 end
 
 def specify(description String, block Function(TestSuite, Nothing) ->)
