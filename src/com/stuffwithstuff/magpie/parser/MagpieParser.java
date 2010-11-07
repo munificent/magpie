@@ -70,18 +70,51 @@ public class MagpieParser extends Parser {
     }
   }
 
+  // TODO(bob): Eventually all places should allow statics and allowStatic
+  // should go away.
   // fn (a) print "hi"
-  public FnExpr parseFunction() {
-    // If () is omitted, infer it.
-    FunctionType type;
+  public Expr parseFunction() {
+    Position position = current().getPosition();
+    
+    // Parse the static parameters if present.
+    List<String> staticParams = new ArrayList<String>();
+    if (match(TokenType.LEFT_BRACKET)) {
+      while (true) {
+        String staticParam = consume(TokenType.NAME).getString();
+        staticParams.add(staticParam);
+        if (!match(TokenType.COMMA)) break;
+      }
+      consume(TokenType.RIGHT_BRACKET);
+    }
+
+    // Parse the dynamic parameters if present.
+    FunctionType type = null;
     if (lookAhead(TokenType.LEFT_PAREN)) {
       type = parseFunctionType();
-    } else {
+    }
+    
+    // Parse the body.
+    Expr expr = parseBlock();
+    
+    position = position.union(last(1).getPosition());
+    
+    // If neither dynamic nor static parameters were provided, infer a dynamic
+    // signature.
+    if ((type == null) && (staticParams.size() == 0)) {
       type = FunctionType.nothingToDynamic();
     }
-    Expr body = parseBlock();
     
-    return new FnExpr(body.getPosition(), type, body);
+    // Wrap the body in a dynamic function.
+    if (type != null) {
+      expr = new FnExpr(position, type, expr);
+    }
+    
+    // Wrap it in a static function.
+    if (staticParams.size() > 0) {
+      expr = new StaticFnExpr(position, staticParams, expr);
+    }
+    
+    return expr;
   }
 
   /**

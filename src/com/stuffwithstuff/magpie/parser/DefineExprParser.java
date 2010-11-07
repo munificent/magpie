@@ -1,12 +1,7 @@
 package com.stuffwithstuff.magpie.parser;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.Expr;
-import com.stuffwithstuff.magpie.ast.FnExpr;
-import com.stuffwithstuff.magpie.ast.StaticFnExpr;
 import com.stuffwithstuff.magpie.ast.VariableExpr;
 
 public class DefineExprParser implements ExprParser {
@@ -28,24 +23,8 @@ public class DefineExprParser implements ExprParser {
       // Local function.
       String name = parser.consume().getString();
       
-      // See if it's a static function.
-      List<String> staticParams = new ArrayList<String>();
-      if (parser.match(TokenType.LEFT_BRACKET)) {
-        while (true) {
-          String staticParam = parser.consume(TokenType.NAME).getString();
-          staticParams.add(staticParam);
-          if (!parser.match(TokenType.COMMA)) break;
-        }
-        parser.consume(TokenType.RIGHT_BRACKET);
-      }
-      
       // Parse the function.
       Expr value = parser.parseFunction();
-      
-      // Wrap it in a static function if we have static parameters.
-      if (staticParams.size() > 0) {
-        value = new StaticFnExpr(position, staticParams, value);
-      }
       
       return new VariableExpr(position.union(value.getPosition()), name, value);
     }
@@ -64,7 +43,7 @@ public class DefineExprParser implements ExprParser {
     
     String name = parser.consumeAny(
         TokenType.NAME, TokenType.OPERATOR).getString();
-    FnExpr function = parser.parseFunction();
+    Expr function = parser.parseFunction();
       
     return Expr.message(receiver, Identifiers.DEFINE_METHOD,
         Expr.tuple(Expr.string(name), function));

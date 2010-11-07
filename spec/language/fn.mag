@@ -1,0 +1,23 @@
+specify("A 'fn' expression") with
+    it should("bind the argument to the parameter") with
+        var result = nothing
+        var f = fn(a) result = a
+        f("one")
+        result shouldBe("one")
+        
+        f("two")
+        result shouldBe("two")
+    end
+end
+
+specify("A static 'fn' expression") with
+    it should("bind the argument to the parameter at runtime") with
+        var result = nothing
+        def f[A] result = A
+        f[Int]
+        result shouldBe(Int)
+        
+        f[Bool]
+        result shouldBe(Bool)
+    end
+end
