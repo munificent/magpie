@@ -178,10 +178,15 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(FnExpr expr, EvalContext context) {
-    // Check the body and create a context containing any static arguments the
-    // function defines.
-    return mChecker.checkFunction(expr, context.getScope(), context.getThis(),
-        mStaticContext);
+    if (expr.isStatic()) {
+      // TODO(bob): Once constraints are in, should check the body here.
+      return mInterpreter.evaluateStaticFunctionType(expr, mStaticContext);
+    } else {
+      // Check the body and create a context containing any static arguments the
+      // function defines.
+      return mChecker.checkFunction(expr, context.getScope(), context.getThis(),
+          mStaticContext);
+    }
   }
 
   @Override
@@ -217,14 +222,14 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     Obj fn = mInterpreter.evaluate(expr.getFn(), context);
     Obj arg = mInterpreter.evaluate(expr.getArg(), mStaticContext);
     
-    if (!(fn.getValue() instanceof StaticFnExpr)) {
+    if (!(fn.getValue() instanceof FnExpr)) {
       mChecker.addError(expr.getFn().getPosition(),
           "The expression \"%s\" does not evaluate to a static function.",
           expr.getFn());
       return mInterpreter.getNothingType();
     }
     
-    StaticFnExpr staticFn = (StaticFnExpr)fn.getValue();
+    FnExpr staticFn = (FnExpr)fn.getValue();
     
     // Push a new static context with the bound static arguments.
     EvalContext staticContext = mStaticContext.pushScope();
@@ -234,15 +239,16 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     // is so that static arguments can be used in subsequent type annotations
     // (this is the motivation to even *have* static functions). The latter is
     // so that the static arguments are also available at runtime.
-    if (staticFn.getParams().size() > 1) {
+    List<String> params = staticFn.getType().getParamNames();
+    if (params.size() > 1) {
       // TODO(bob): Gross, assume arg is a tuple.
-      for (int i = 0; i < staticFn.getParams().size(); i++) {
-        staticContext.define(staticFn.getParams().get(i), arg.getTupleField(i));
-        context.define(staticFn.getParams().get(i), arg.getTupleField(i));
+      for (int i = 0; i < params.size(); i++) {
+        staticContext.define(params.get(i), arg.getTupleField(i));
+        context.define(params.get(i), arg.getTupleField(i));
       }
-    } else if (staticFn.getParams().size() == 1) {
-      staticContext.define(staticFn.getParams().get(0), arg);
-      context.define(staticFn.getParams().get(0), arg);
+    } else if (params.size() == 1) {
+      staticContext.define(params.get(0), arg);
+      context.define(params.get(0), arg);
     }
     
     // Now that we have a context where the static parameters are bound to
@@ -321,13 +327,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     
     return mInterpreter.getNeverType();
   }
-
-  @Override
-  public Obj visit(StaticFnExpr expr, EvalContext context) {
-    return mInterpreter.evaluateStaticFunctionType(expr, mStaticContext);
-    // TODO(bob): Once constraints are in, should check the body here.
-  }
-
+  
   @Override
   public Obj visit(StringExpr expr, EvalContext context) {
     return mInterpreter.getStringType();

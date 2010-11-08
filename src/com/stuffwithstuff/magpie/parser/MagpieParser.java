@@ -106,12 +106,15 @@ public class MagpieParser extends Parser {
     
     // Wrap the body in a dynamic function.
     if (type != null) {
-      expr = new FnExpr(position, type, expr);
+      expr = new FnExpr(position, type, expr, false);
     }
     
     // Wrap it in a static function.
     if (staticParams.size() > 0) {
-      expr = new StaticFnExpr(position, staticParams, expr);
+      // TODO(bob): When constraints are supported, don't use nothing here.
+      FunctionType staticType = new FunctionType(staticParams, Expr.nothing(),
+          Expr.nothing());
+      expr = new FnExpr(position, staticType, expr, true);
     }
     
     return expr;
@@ -291,7 +294,7 @@ public class MagpieParser extends Parser {
 
       // Parse the block and wrap it in a function.
       Expr block = parseBlock();
-      block = new FnExpr(block.getPosition(), blockType, block);
+      block = new FnExpr(block.getPosition(), blockType, block, false);
       
       // Apply it to the previous expression.
       if (expr instanceof ApplyExpr) {

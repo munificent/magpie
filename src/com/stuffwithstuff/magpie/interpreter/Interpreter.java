@@ -192,10 +192,10 @@ public class Interpreter {
         createTuple(paramType, returnType));
   }
   
-  public Obj evaluateStaticFunctionType(StaticFnExpr expr, EvalContext context) {
+  public Obj evaluateStaticFunctionType(FnExpr expr, EvalContext context) {
     // Convert the object to a first-class Magpie object.
     List<Obj> names = new ArrayList<Obj>();
-    for (String name : expr.getParams()) {
+    for (String name : expr.getType().getParamNames()) {
       names.add(createString(name));
     }
     

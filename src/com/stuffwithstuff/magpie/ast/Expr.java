@@ -4,7 +4,7 @@ import com.stuffwithstuff.magpie.parser.Position;
 
 public abstract class Expr {
   public static FnExpr fn(Expr body) {
-    return new FnExpr(Position.none(), FunctionType.nothingToDynamic(), body);
+    return new FnExpr(Position.none(), FunctionType.nothingToDynamic(), body, false);
   }
   
   public static ApplyExpr message(Position position, Expr receiver, String name, Expr arg) {
@@ -21,6 +21,10 @@ public abstract class Expr {
   
   public static MessageExpr name(String name) {
     return new MessageExpr(Position.none(), null, name);
+  }
+  
+  public static NothingExpr nothing() {
+    return new NothingExpr(Position.none());  
   }
   
   public static StringExpr string(String text) {

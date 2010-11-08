@@ -143,7 +143,7 @@ public class ClassExprParser implements ExprParser {
     if (parser.match(TokenType.EQUALS)) {
       // Defining it.
       Expr body = parser.parseBlock();
-      Expr function = new FnExpr(body.getPosition(), type, body);
+      Expr function = new FnExpr(body.getPosition(), type, body, false);
       return Expr.message(theClass, Identifiers.DEFINE_GETTER,
           Expr.tuple(Expr.string(name), function));
     } else {

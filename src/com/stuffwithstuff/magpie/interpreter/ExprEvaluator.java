@@ -1,5 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import java.util.List;
+
 import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.util.Pair;
@@ -103,7 +105,14 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   
   @Override
   public Obj visit(FnExpr expr, EvalContext context) {
-    return mInterpreter.createFn(expr, context);
+    // TODO(bob): Move this into createFn?
+    if (expr.isStatic()) {
+      // TODO(bob): Ghetto! Should have a real class and probably close over the
+      // current context.
+      return new Obj(mInterpreter.getStaticFunctionType(), expr);
+    } else {
+      return mInterpreter.createFn(expr, context);
+    }
   }
 
   @Override
@@ -141,21 +150,23 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(InstantiateExpr expr, EvalContext context) {
+    // TODO(bob): Merge this with ApplyExpr...
     Obj fn = evaluate(expr.getFn(), context);
     Obj arg = evaluate(expr.getArg(), context);
     
     // TODO(bob): Unchecked cast = lame!
-    StaticFnExpr staticFn = (StaticFnExpr)fn.getValue();
+    FnExpr staticFn = (FnExpr)fn.getValue();
     
     // Bind the argument(s) to the static parameter(s).
     context = context.pushScope();
-    if (staticFn.getParams().size() > 1) {
+    List<String> params = staticFn.getType().getParamNames();
+    if (params.size() > 1) {
       // TODO(bob): Gross, assume arg is a tuple.
-      for (int i = 0; i < staticFn.getParams().size(); i++) {
-        context.define(staticFn.getParams().get(i), arg.getTupleField(i));
+      for (int i = 0; i < params.size(); i++) {
+        context.define(params.get(i), arg.getTupleField(i));
       }
-    } else if (staticFn.getParams().size() == 1) {
-      context.define(staticFn.getParams().get(0), arg);
+    } else if (params.size() == 1) {
+      context.define(params.get(0), arg);
     }
     
     // Now evaluate the body in that context.
@@ -251,13 +262,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(ReturnExpr expr, EvalContext context) {
     Obj value = evaluate(expr.getValue(), context);
     throw new ReturnException(value);
-  }
-
-  @Override
-  public Obj visit(StaticFnExpr expr, EvalContext context) {
-    // TODO(bob): Ghetto! Should have a real class and probably close over the
-    // current context.
-    return new Obj(mInterpreter.getStaticFunctionType(), expr);
   }
 
   @Override
