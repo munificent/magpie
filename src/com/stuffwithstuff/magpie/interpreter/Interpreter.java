@@ -169,7 +169,7 @@ public class Interpreter {
       Obj returnType = evaluate(type.getReturnType(), staticContext);
       
       // Create a FunctionType object.
-      return invokeMethod(mFnClass, Identifiers.CALL,
+      return invokeMethod(mFnClass, Identifiers.NEW_TYPE,
           createTuple(paramType, returnType));
     }
   }
@@ -188,7 +188,7 @@ public class Interpreter {
           "Could not evaluate return type %s.", type.getReturnType()));
     }
     
-    return invokeMethod(mFnClass, Identifiers.CALL,
+    return invokeMethod(mFnClass, Identifiers.NEW_TYPE,
         createTuple(paramType, returnType));
   }
   

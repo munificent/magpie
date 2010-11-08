@@ -109,19 +109,15 @@ class ArrayType
     def getMemberType(name String -> Type | Nothing)
         // TODO(bob): Hackish. Strongly-type the array members based on the
         // element type.
-        if name == "assign" then
-            Function(elementType, elementType)
-        else if name == "copy" then
-            Function(Nothing, this)
-        else if name == "contains" then
-            Function(elementType, Bool)
-        else if name == "call" then
-            Function(Int, elementType)
-        else if name == "first" then
-            Function(Function(elementType, Bool), elementType | Nothing)
-        else if name == "iterate" then
-            Function(Nothing, ArrayIteratorType new(elementType))
-        else Array getMemberType(name)
+        match name
+        case "assign"   then elementType => elementType
+        case "copy"     then Nothing => this
+        case "contains" then elementType => Bool
+        case "call"     then Int => elementType
+        case "first"    then (elementType => Bool) => (elementType | Nothing)
+        case "iterate"  then Nothing => ArrayIteratorType new(elementType)
+        else                 Array getMemberType(name)
+        end
     end
     
     def getSetterType(name String -> Type | Nothing)

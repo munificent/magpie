@@ -63,13 +63,13 @@ extend class Dynamic
     // From the static perspective, a dynamic object has all possible members
     // and their type is always "Dynamic".
     shared def getMemberType(name String -> Type | Nothing)
-        // TODO(bob): This stuff is super hackish.
-        if name == "canAssignFrom" then return Function(Type, Bool)
-        if name == "getMemberType" then return Function(String, Type | Nothing)
-        if name == "getSetterType" then return Function(String, Type | Nothing)
-        if name == "call" then return Function(Dynamic, Dynamic)
-        if type == "type" then return Type
-        
-        Dynamic
+        match name
+        case "canAssignFrom" then Type => Bool
+        case "getMemberType" then String => (Type | Nothing)
+        case "getSetterType" then String => (Type | Nothing)
+        case "call"          then Dynamic => Dynamic
+        case "type"          then Type
+        else                      Dynamic
+        end
     end
 end

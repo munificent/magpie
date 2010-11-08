@@ -24,6 +24,19 @@ def as[T](arg -> T | Nothing)
     if T canAssignFrom(type) then unsafecast[T](arg)
 end
 
+// Add an arrow operator to make function types out of other types:
+extend interface Type
+    def =>(other Type -> Type)
+end
+
+def ArrayType         =>(other Type -> Type) FunctionType new(this, other)
+def ArrayIteratorType =>(other Type -> Type) FunctionType new(this, other)
+def Class             =>(other Type -> Type) FunctionType new(this, other)
+def FunctionType      =>(other Type -> Type) FunctionType new(this, other)
+def Interface         =>(other Type -> Type) FunctionType new(this, other)
+def OrType            =>(other Type -> Type) FunctionType new(this, other)
+def Tuple             =>(other Type -> Type) FunctionType new(this, other)
+
 // Extend the built-in classes.
 def Object !=(other -> Bool) (this == other) not
 

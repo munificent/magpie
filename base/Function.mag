@@ -1,7 +1,8 @@
 extend class Function
-    // Make "Function" a functor that you can call to instantiate function types.
-    // Type annotations of function types look like Function(Int, String) 
-    shared def call(paramType Type, returnType Type -> Type)
+    // Add a shared to Function so that it's easily visible from the interpreter
+    // (which already has a reference to Function) so that it can create
+    // FunctionType objects.
+    shared def newType(paramType Type, returnType Type -> Type)
         FunctionType new(paramType, returnType)
     end
 end

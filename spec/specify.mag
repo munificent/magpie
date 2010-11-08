@@ -19,7 +19,7 @@ def endTests(->)
         totalTests + " tests in " + (endTimeMs - startTimeMs) + "ms.")
 end
 
-def specify(description String, block Function(TestSuite, Nothing) ->)
+def specify(description String, block TestSuite => Nothing ->)
     var suite = TestSuite new(description)
     block(suite)
     
@@ -36,7 +36,7 @@ class TestSuite
         failures = 0
     end
     
-    def should(description String, block Function(Nothing, Nothing) ->)
+    def should(description String, block Nothing => Nothing ->)
         currentTest = description
         var testsBefore = tests
         var failuresBefore = failures

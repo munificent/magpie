@@ -11,11 +11,11 @@ class Interface
     
     get string String = name
 
-    def declareMethod(name String, type Function(Nothing, Type) ->)
+    def declareMethod(name String, type Nothing => Type ->)
         members add(Member new(name, type))
     end
     
-    def declareGetter(name String, type Function(Nothing, Type) ->)
+    def declareGetter(name String, type Nothing => Type ->)
         members add(Member new(name, type))
     end
 
@@ -62,7 +62,7 @@ class Interface
 end
 
 class Member
-    this(name String, type Function(Nothing, Type))
+    this(name String, type Nothing => Type)
          this name = name
          this memberType = type
     end
@@ -70,5 +70,5 @@ class Member
     get string String = name + " " + memberType()
     
     var name       String
-    var memberType Function(Nothing, Type)
+    var memberType Nothing => Type
 end
