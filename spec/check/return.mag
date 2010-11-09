@@ -4,54 +4,46 @@ specify("A 'return' expression") with
     end
     
     it should("have its value included in the function's return type") with
-        expectCheckError with
-            def f(-> Int)
-                if true then return "string"
-                if true then return true
-                123
-            end
-        end
+        fn(-> Int)
+            if true then return "string"
+            if true then return true
+            123
+        end shouldNotCheck()
 
-        expectCheckOK with
-            def f(-> Bool | Int | String)
-                if true then return "string"
-                if true then return true
-                123
-            end
-        end
+        fn(-> Bool | Int | String)
+            if true then return "string"
+            if true then return true
+            123
+        end shouldCheck()
 
-        expectCheckError with
-            def f(-> Int)
-                if true then return
-                123
-            end
-        end
+        fn(-> Int)
+            if true then return
+            123
+        end shouldNotCheck()
 
-        expectCheckOK with
-            def f(-> Int | Nothing)
-                if true then return
-                123
-            end
-        end
+        fn(-> Int | Nothing)
+            if true then return
+            123
+        end shouldCheck()
     end
     
     it should("generate an error for unreachable code") with
-        expectCheckError with
+        fn
             return "value"
             "unreachable"
-        end
+        end shouldNotCheck()
 
-        expectCheckError with
+        fn
             (return) and "value"
-        end
+        end shouldNotCheck()
         
-        expectCheckError with
+        fn
             (return) or "value"
-        end
+        end shouldNotCheck()
         
-        expectCheckError with
+        fn
             (return) string
-        end
+        end shouldNotCheck()
     end
     
     it should("be omitted from the type of a surrounding 'if then'") with

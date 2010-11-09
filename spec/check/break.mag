@@ -1,22 +1,20 @@
 specify("A 'break' expression") with
     it should("not be allowed outside of a loop") with
-        expectCheckError with
-            break
-        end
+        (fn break) shouldNotCheck()
     end
     
     it should("not allow unreachable code") with
-        expectCheckOK with
+        fn
             for i = 1 to(5) do
                 if i == 2 then break
             end
-        end
+        end shouldCheck()
         
-        expectCheckError with
+        fn
             for i = 1 to(5) do
                 break
                 print("unreachable")
             end
-        end
+        end shouldNotCheck()
     end
 end

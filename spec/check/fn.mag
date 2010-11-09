@@ -1,12 +1,7 @@
 specify("A dynamic 'fn' expression") with
     it should("return the declared type") with
-        expectCheckOK with
-            fn(-> Int) 123
-        end
-        
-        expectCheckError with
-            fn(-> Int) "string"
-        end
+        (fn(-> Int) 123) shouldCheck()        
+        (fn(-> Int) "string") shouldNotCheck()
     end
 end
 

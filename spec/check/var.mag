@@ -8,14 +8,14 @@ specify("A 'var' expression") with
     end
 
     it should("not allow redefining a name in the same scope") with
-        expectCheckOK with
+        fn
             var a = 123
             var b = 234
-        end
+        end shouldCheck()
         
-        expectCheckError with
+        fn
             var a = 123
             var a = 234
-        end
+        end shouldNotCheck()
     end
 end

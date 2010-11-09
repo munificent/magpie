@@ -14,14 +14,14 @@ specify("An assignment ('=') expression") with
     end
 
     it should("not allow assigning a different type") with
-        expectCheckOK with
+        fn
             var i = 123
             i = 345
-        end
+        end shouldCheck()
         
-        expectCheckError with
+        fn
             var i = 123
             i = "string"
-        end
+        end shouldNotCheck()
     end
 end

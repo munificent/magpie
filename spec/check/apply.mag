@@ -1,13 +1,13 @@
 specify("An apply expression") with
     it should("ensure the argument matches the parameter type") with
-        expectCheckOK with
+        fn
             var f = fn(a Int ->) nothing
             f(123)
-        end
+        end shouldCheck()
         
-        expectCheckError with
+        fn
             var f = fn(a Int ->) nothing
             f("string")
-        end
+        end shouldNotCheck()
     end
 end

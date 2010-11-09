@@ -76,17 +76,6 @@ extend class Object
         end
     end
 
-    def expectCheckError(block)
-        (Runtime checkFunction(block) count > 0) shouldBe(true,
-            "Should have a check error but did not.")
-    end
-
-    def expectCheckOK(block)
-        var errors = Runtime checkFunction(block)
-        errors count shouldBe(0, "Should not have any check errors but had:")
-        for error = errors do print("      - " + error)
-    end
-
     def envExpectCheckError(block)
         (Runtime checkExpression(block) count > 0) shouldBe(true,
             "Should have a check error but did not.")
@@ -97,4 +86,28 @@ extend class Object
         errors count shouldBe(0, "Should not have any check errors but had:")
         for error = errors do print("      - " + error)
     end
+end
+
+// Add methods to check functions.
+def Function shouldCheck()
+    var errors = Runtime checkFunction(this)
+    errors count shouldBe(0, "Function should not have any check errors but had:")
+    for error = errors do print("      - " + error)
+end
+
+def Function shouldNotCheck()
+    (Runtime checkFunction(this) count > 0) shouldBe(true,
+        "Function should have one or more check errors but did not.")
+end
+
+// Add methods to check classes.
+def Class shouldCheck()
+    var errors = Runtime checkClass(this)
+    errors count shouldBe(0, "Class should not have any check errors but had:")
+    for error = errors do print("      - " + error)
+end
+
+def Class shouldNotCheck()
+    (Runtime checkClass(this) count > 0) shouldBe(true,
+        "Class should have one or more check errors but did not.")
 end

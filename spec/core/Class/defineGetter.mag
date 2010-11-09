@@ -20,56 +20,35 @@ specify("The 'defineGetter' method on Class") with
         c new() foo shouldBe("after")
     end
 
-    // TODO(bob): Commented out because these are really slow!
-    /*
     it should("create a property with the declared type") with
-        envExpectCheckOK with
-            var C = Class new("C")
-            C defineGetter("foo", fn(-> Int) 123)
+        var c = Class new("c")
+        c defineGetter("foo", fn(-> Int) 123)
+        c defineMethod("test", fn(-> Int) this foo)
+        c shouldCheck()
         
-            def takesInt(arg Int) nothing
-            def main(->)
-                takesInt(C new() foo)
-            end
-        end
-        
-        envExpectCheckError with
-            var C = Class new("C")
-            C defineGetter("foo", fn(-> String) "str")
-        
-            def takesInt(arg Int) nothing
-            def main(->)
-                takesInt(C new() foo)
-            end
-        end
+        var d = Class new("d")
+        d defineGetter("foo", fn(-> Int) 123)
+        d defineMethod("test", fn(-> String) this foo)
+        d shouldNotCheck()
     end
-
+    
     it should("ensure the getter body takes no arguments") with
-        envExpectCheckOK with
-            var c = Class new("c")
-            c defineGetter("foo", fn(-> Int) 123)
-            def main(->) nothing
-        end
+        var c = Class new("c")
+        c defineGetter("foo", fn(-> Int) 123)
+        c shouldCheck()
 
-        envExpectCheckError with
-            var c = Class new("c")
-            c defineGetter("foo", fn(arg -> Int) 123)
-            def main(->) nothing
-        end
+        var d = Class new("d")
+        d defineGetter("foo", fn(arg -> Int) 123)
+        d shouldNotCheck()
     end
     
     it should("ensure the getter body returns the declared type") with
-        envExpectCheckOK with
-            var c = Class new("c")
-            c defineGetter("foo", fn(-> Int) 123)
-            def main(->) nothing
-        end
+        var c = Class new("c")
+        c defineGetter("foo", fn(-> Int) 123)
+        c shouldCheck()
 
-        envExpectCheckError with
-            var c = Class new("c")
-            c defineGetter("foo", fn(-> Int) "not int")
-            def main(->) nothing
-        end
+        var d = Class new("d")
+        d defineGetter("foo", fn(arg -> Int) "not int")
+        d shouldNotCheck()
     end
-    */
 end
