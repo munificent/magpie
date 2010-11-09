@@ -2,8 +2,4 @@ interface Type
     def canAssignFrom(other Type -> Bool)
     def getMemberType(name String -> Type | Nothing)
     def getSetterType(name String -> Type | Nothing)
-    get string String
-    get type Type
-    def ==(other -> Bool)
-    def !=(other -> Bool)
 end

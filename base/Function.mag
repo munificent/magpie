@@ -24,7 +24,7 @@ class FunctionType
     // creating ICallable(Arg, Return) instances.
     def canAssignFrom(other Type -> Bool)
         // Both must be functions.
-        let otherFn = as[FunctionType](other) then
+        let otherFn = other as[FunctionType] then
             // Parameter must be contravariant and return must be covariant.
             if static? != otherFn static? then return false
             if otherFn paramType canAssignFrom(paramType) not then return false
@@ -45,7 +45,7 @@ class FunctionType
     end
 
     def ==(other -> Bool)
-        let fnType = as[FunctionType](other) then
+        let fnType = other as[FunctionType] then
             static? == fnType static? and
                 paramType == fnType paramType and
                 returnType == fnType returnType

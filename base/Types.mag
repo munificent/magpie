@@ -63,18 +63,21 @@ extend class Dynamic
     // From the static perspective, a dynamic object has all possible members
     // and their type is always "Dynamic".
     shared def getMemberType(name String -> Type | Nothing)
-        match name
-        case "canAssignFrom" then Type => Bool
-        case "getMemberType" then String => (Type | Nothing)
-        case "getSetterType" then String => (Type | Nothing)
-        case "call"          then Dynamic => Dynamic
-        case "string"        then String
-        case "type"          then Type
-        case "=="            then Dynamic => Bool
-        case "!="            then Dynamic => Bool
-        case "|"             then Type => Type
-        case "=>"            then Type => Type
-        else                      Dynamic
+        // If the member is defined in Object then go ahead and strongly-type
+        // it.
+        let objMemberType = Object getMemberType(name) then
+            objMemberType
+        else
+            // TODO(bob): This is really gross.
+            match name
+            case "canAssignFrom" then Type => Bool
+            case "getMemberType" then String => (Type | Nothing)
+            case "getSetterType" then String => (Type | Nothing)
+            case "call"          then Dynamic => Dynamic
+            case "|"             then Type => Type
+            case "=>"            then Type => Type
+            else                      Dynamic
+            end
         end
     end
 end

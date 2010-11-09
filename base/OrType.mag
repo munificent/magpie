@@ -7,11 +7,11 @@ class OrType
         // combine the cases of both arms
         var cases = Array new()
 
-        let leftOr = as[OrType](left) then
+        let leftOr = left as[OrType] then
             for item = leftOr cases do cases add(item)
         else cases add(left)
 
-        let rightOr = as[OrType](right) then
+        let rightOr = right as[OrType] then
             for item = rightOr cases do cases add(item)
         else cases add(right)
 
@@ -34,7 +34,7 @@ class OrType
     end
 
     def ==(other -> Bool)
-        let orType = as[OrType](other) then
+        let orType = other as[OrType] then
             if cases count != orType cases count then return false
     
             for thisCase = cases
@@ -48,7 +48,7 @@ class OrType
     def !=(other -> Bool) (this == other) not
 
     def canAssignFrom(other Type -> Bool)
-        let orType = as[OrType](other) then
+        let orType = other as[OrType] then
             // It's also an or, so see if all of its cases are matched by one of
             // the ones here.
             for otherCase = orType cases do

@@ -34,7 +34,7 @@ extend class Tuple
         // narrower ones (like (Int, String) <: (Int, String, Bool), we could
         // also allow narrow ones to subtype to wider ones if the extra fields
         // allow nothing: (Int, Bool, String | Nothing) <: (Int, Bool).
-        let otherTuple = as[Tuple](other) then
+        let otherTuple = other as[Tuple] then
             // TODO (bob): Can change this to 'count < otherType count' to
             // allow tuples with extra fields to be a subtype of others:
             // With the same number of fields.
@@ -43,7 +43,7 @@ extend class Tuple
             // And the fields must be assignable.
             for field = this
             for otherField = otherTuple do
-                let otherTypeField = as[Type](otherField) then
+                let otherTypeField = otherField as[Type] then
                     if field canAssignFrom(otherTypeField) not then return false
                 else return false
             end
@@ -63,7 +63,7 @@ extend class Tuple
     end
     
     def ==(other -> Bool)
-        let otherTuple = as[Tuple](other) then
+        let otherTuple = other as[Tuple] then
             if count != otherTuple count then return false
     
             // And the fields must be assignable.

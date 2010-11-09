@@ -73,7 +73,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     if (expr.isStatic()) {
       // TODO(bob): Almost all of this is copied from ExprEvaluator. Should unify.
       // Evaluate the static argument.
-      Obj target = mInterpreter.evaluate(expr.getTarget(), context);
+      Obj target = check(expr.getTarget(), context);
       Obj arg = mInterpreter.evaluate(expr.getArg(), mStaticContext);
       
       if (!(target.getValue() instanceof FnExpr)) {

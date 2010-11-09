@@ -49,6 +49,10 @@ class Interface
     def getMemberType(name String -> Type | Nothing)
         let member = members first(fn (m Member -> Bool) m name == name) then
             member memberType()
+        else
+            // Every instance of an interface is also an object, so support its
+            // methods too.
+            Object getMemberType(name)
         end
     end
 

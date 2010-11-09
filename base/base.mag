@@ -15,15 +15,8 @@ def asExactly[T](arg -> T | Nothing)
     if arg type == T then unsafecast[T](arg)
 end
 
-// Returns the argument cast to the given type if it can be safely assigned to
+// Returns the object cast to the given type if it can be safely assigned to
 // that type, otherwise returns nothing.
-// TODO(bob): Make this a method on Object so you can do: foo as[Bar]
-def as[T](arg -> T | Nothing)
-    var type = unsafecast[Type](arg type)
-    if type == T then return unsafecast[T](arg)
-    if T canAssignFrom(type) then unsafecast[T](arg)
-end
-
 def Object as[T -> T | Nothing]
     var type = unsafecast[Type](this type)
     if type == T then return unsafecast[T](this)
