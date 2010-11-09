@@ -1,0 +1,21 @@
+interface SomeConstraint
+    def blah(->)
+end
+
+class Bad
+    def blarg(->) print("blarg")
+end
+
+class Good
+    def blah(->) print("blah")
+end
+
+def foo[T SomeConstraint]
+    var obj = T new()
+    obj blah()
+end
+
+def main(->)
+    //foo[Bad]
+    foo[Good]
+end

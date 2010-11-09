@@ -168,6 +168,15 @@ public class Interpreter {
       return evaluate(type.getReturnType(), staticContext);
     } else {
       Obj paramType = evaluate(type.getParamType(), staticContext);
+      
+      // If it's a static function like foo[T Int -> T], then bind the
+      // constraint to the parameter name(s) so that it can be used in the
+      // return type.
+      if (isStatic) {
+        staticContext = staticContext.pushScope();
+        staticContext.bind(this, type.getParamNames(), paramType);
+      }
+      
       Obj returnType = evaluate(type.getReturnType(), staticContext);
       
       // Create a FunctionType object.

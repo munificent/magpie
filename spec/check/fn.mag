@@ -1,4 +1,4 @@
-specify("A function expression") with
+specify("A dynamic 'fn' expression") with
     it should("return the declared type") with
         expectCheckOK with
             fn(-> Int) 123
@@ -6,6 +6,55 @@ specify("A function expression") with
         
         expectCheckError with
             fn(-> Int) "string"
+        end
+    end
+end
+
+specify("A static 'fn' expression") with
+    it should("ensure the argument matches the constraint") with
+        envExpectCheckOK with
+            interface SomeConstraint
+                def blah(->)
+            end
+
+            class Good
+                def blah(->) print("blah")
+            end
+
+            def foo[T SomeConstraint] T new() blah()
+            def main(->) foo[Good]
+        end
+        
+        envExpectCheckError with
+            interface SomeConstraint
+                def blah(->)
+            end
+
+            class Bad
+            end
+
+            def foo[T SomeConstraint] T new() blah()
+            def main(->) foo[Bad]
+        end
+    end
+
+    it should("check the body against its constraint") with
+        envExpectCheckOK with
+            interface SomeConstraint
+                def blah(->)
+            end
+
+            def foo[T SomeConstraint] T new() blah()
+            def main(->) nothing
+        end
+        
+        envExpectCheckError with
+            interface SomeConstraint
+                def blah(->)
+            end
+
+            def foo[T SomeConstraint] T new() notDefined()
+            def main(->) foo[Bad]
         end
     end
 end

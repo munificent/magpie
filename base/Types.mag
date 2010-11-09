@@ -68,7 +68,12 @@ extend class Dynamic
         case "getMemberType" then String => (Type | Nothing)
         case "getSetterType" then String => (Type | Nothing)
         case "call"          then Dynamic => Dynamic
+        case "string"        then String
         case "type"          then Type
+        case "=="            then Dynamic => Bool
+        case "!="            then Dynamic => Bool
+        case "|"             then Type => Type
+        case "=>"            then Type => Type
         else                      Dynamic
         end
     end

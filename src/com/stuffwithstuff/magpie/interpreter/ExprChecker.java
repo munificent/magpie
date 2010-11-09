@@ -73,35 +73,37 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     if (expr.isStatic()) {
       // TODO(bob): Almost all of this is copied from ExprEvaluator. Should unify.
       // Evaluate the static argument.
-      Obj fn = mInterpreter.evaluate(expr.getTarget(), context);
+      Obj target = mInterpreter.evaluate(expr.getTarget(), context);
       Obj arg = mInterpreter.evaluate(expr.getArg(), mStaticContext);
       
-      if (!(fn.getValue() instanceof FnExpr)) {
+      if (!(target.getValue() instanceof FnExpr)) {
         mChecker.addError(expr.getTarget().getPosition(),
             "The expression \"%s\" does not evaluate to a static function.",
             expr.getTarget());
         return mInterpreter.getNothingType();
       }
       
-      FnExpr staticFn = (FnExpr)fn.getValue();
+      FnExpr staticFn = (FnExpr)target.getValue();
       
-      // TODO(bob): Need to test static argument against declared constraints.
-      // Push a new static context with the bound static arguments.
+      // Evaluate the constraint.
+      Obj constraint = mInterpreter.evaluate(staticFn.getType().getParamType(),
+          mStaticContext);
+      
+      // See if the evaluated argument matches its constraint.
+      mChecker.checkTypes(constraint, arg, expr.getPosition(), 
+          "Static function is constrained to take %s but is being passed %s.");
+
+      // Evaluate the return type in a context where the type arguments have
+      // been applied. That way, a static type like [T -> T] will be able to
+      // correctly determine the return type by accessing T.
       EvalContext staticContext = mStaticContext.pushScope();
       
-      // Bind the argument(s) to the static parameter(s). Note that the names are
-      // bound in both the static context and the regular type context. The former
-      // is so that static arguments can be used in subsequent type annotations
-      // (this is the motivation to even *have* static functions). The latter is
-      // so that the static arguments are also available at runtime.
-      List<String> params = staticFn.getType().getParamNames();
-      context.bind(mInterpreter, params, arg);
-      staticContext.bind(mInterpreter, params, arg);
+      staticContext.bind(mInterpreter, staticFn.getType().getParamNames(), arg);
       
-      // Now that we have a context where the static parameters are bound to
-      // concrete values, we can check the body of the original static function.
-      ExprChecker checker = new ExprChecker(mInterpreter, mChecker, staticContext);
-      return checker.check(staticFn.getBody(), context);
+      Obj returnType = mInterpreter.evaluate(staticFn.getType().getReturnType(),
+          staticContext);
+      
+      return returnType;
     } else {
       Obj targetType = check(expr.getTarget(), context);
       Obj argType = check(expr.getArg(), context);

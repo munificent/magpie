@@ -130,11 +130,6 @@ public class Checker {
     Obj paramType = mInterpreter.evaluate(function.getType().getParamType(),
         staticContext);
 
-    // TODO(bob): Should evaluate return type after updating static scope so
-    // that a static fn can a type arg in the return type.
-    Obj returnType = mInterpreter.evaluate(
-        function.getType().getReturnType(), staticContext);
-
     // Bind the parameter names to their evaluated types.
     List<String> params = function.getType().getParamNames();
     functionContext.bind(mInterpreter, params, paramType);
@@ -144,7 +139,12 @@ public class Checker {
       staticContext = staticContext.pushScope();
       staticContext.bind(mInterpreter, params, paramType);
     }
-    
+
+    // Evaluate the return type after binding the static parameters so that they
+    // can in turn be used in the return type's signature, like foo[T -> T].
+    Obj returnType = mInterpreter.evaluate(
+        function.getType().getReturnType(), staticContext);
+
     // TODO(bob): Hack! Don't check bodies of static functions. Need constraints
     // to do that.
     if (!function.isStatic()) {
