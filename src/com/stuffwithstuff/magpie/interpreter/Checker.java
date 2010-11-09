@@ -145,23 +145,19 @@ public class Checker {
     Obj returnType = mInterpreter.evaluate(
         function.getType().getReturnType(), staticContext);
 
-    // TODO(bob): Hack! Don't check bodies of static functions. Need constraints
-    // to do that.
-    if (!function.isStatic()) {
-      // Check the body of the function.
-      ExprChecker checker = new ExprChecker(mInterpreter, this, staticContext);
-      Obj actualReturn = checker.checkFunction(function.getBody(),
-          functionContext);
-      
-      // If it's declared to return Nothing, then we'll also allow (and ignore)
-      // any other return type. Note that this doesn't mean we'll discard the
-      // return value. Type annotations don't affect the behavior at all. It just
-      // means that the checker will ignore any returned type if Nothing is
-      // expected.
-      checkTypes(returnType, actualReturn, true,
-          function.getType().getReturnType().getPosition(),
-          "Function is declared to return %s but is returning %s.");
-    }
+    // Check the body of the function.
+    ExprChecker checker = new ExprChecker(mInterpreter, this, staticContext);
+    Obj actualReturn = checker.checkFunction(function.getBody(),
+        functionContext);
+    
+    // If it's declared to return Nothing, then we'll also allow (and ignore)
+    // any other return type. Note that this doesn't mean we'll discard the
+    // return value. Type annotations don't affect the behavior at all. It just
+    // means that the checker will ignore any returned type if Nothing is
+    // expected.
+    checkTypes(returnType, actualReturn, true,
+        function.getType().getReturnType().getPosition(),
+        "Function is declared to return %s but is returning %s.");
     
     // Create the function type for the function.
     if (paramType == mInterpreter.nothing()) {

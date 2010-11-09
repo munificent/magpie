@@ -16,7 +16,7 @@ specify("A static 'fn' expression") with
                 def blah(->) print("blah")
             end
 
-            def foo[T SomeConstraint] T new() blah()
+            def foo[T SomeConstraint](arg T) arg blah()
             def main(->) foo[Good]
         end
         
@@ -28,7 +28,7 @@ specify("A static 'fn' expression") with
             class Bad
             end
 
-            def foo[T SomeConstraint] T new() blah()
+            def foo[T SomeConstraint](arg T) arg blah()
             def main(->) foo[Bad]
         end
     end
@@ -39,7 +39,7 @@ specify("A static 'fn' expression") with
                 def blah(->)
             end
 
-            def foo[T SomeConstraint] T new() blah()
+            def foo[T SomeConstraint](arg T) arg blah()
             def main(->) nothing
         end
         
@@ -48,8 +48,8 @@ specify("A static 'fn' expression") with
                 def blah(->)
             end
 
-            def foo[T SomeConstraint] T new() notDefined()
-            def main(->) foo[Bad]
+            def foo[T SomeConstraint](arg T) arg notDefined()
+            def main(->) nothing
         end
     end
 end
