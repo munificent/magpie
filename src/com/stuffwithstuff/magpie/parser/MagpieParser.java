@@ -104,6 +104,18 @@ public class MagpieParser extends Parser {
     
     // Wrap it in a static function.
     if (staticType != null) {
+      // If the static function is wrapping a dynamic one, we can infer the
+      // return type of the static function from it.
+      // TODO(bob): Ugly!
+      if ((type != null) &&
+          (staticType.getReturnType() instanceof MessageExpr) &&
+          (((MessageExpr)staticType.getReturnType()).getReceiver() == null) &&
+          (((MessageExpr)staticType.getReturnType()).getName().equals("Dynamic"))) {
+        staticType = new FunctionType(staticType.getParamNames(),
+            staticType.getParamType(),
+            Expr.message(type.getParamType(), "=>", type.getReturnType()));
+      }
+        
       expr = new FnExpr(position, staticType, expr, true);
     }
     
