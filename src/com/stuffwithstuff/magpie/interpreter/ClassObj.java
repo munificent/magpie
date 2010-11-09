@@ -46,11 +46,11 @@ public class ClassObj extends Obj {
   }
   
   public void addMethod(String name, Callable method) {
-    mMethods.add(name, method);
+    mMethods.put(name, method);
   }
   
   public Map<String, Callable> getMethods() {
-    return mMethods.getMethods();
+    return mMethods;
   }
   
   public Map<String, Callable> getGetters() {
@@ -61,7 +61,7 @@ public class ClassObj extends Obj {
     // Walk up the inheritance chain.
     ClassObj classObj = this;
     while (classObj != null) {
-      Callable method = classObj.mMethods.find(name);
+      Callable method = classObj.mMethods.get(name);
       if (method != null) return method;
       classObj = classObj.mParent;
     }
@@ -129,5 +129,5 @@ public class ClassObj extends Obj {
   private final Map<String, FnObj> mFieldInitializers;
   private final Map<String, Callable> mGetters;
   private final Map<String, Callable> mSetters;
-  private final MethodSet mMethods = new MethodSet();
+  private final Map<String, Callable> mMethods = new HashMap<String, Callable>();
 }
