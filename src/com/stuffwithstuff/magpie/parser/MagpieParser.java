@@ -75,15 +75,9 @@ public class MagpieParser extends Parser {
     Position position = current().getPosition();
     
     // Parse the static parameters if present.
-    List<String> staticParams = new ArrayList<String>();
-    if (match(TokenType.LEFT_BRACKET)) {
-      while (true) {
-        // TODO(bob): Support parsing constraints here.
-        String staticParam = consume(TokenType.NAME).getString();
-        staticParams.add(staticParam);
-        if (!match(TokenType.COMMA)) break;
-      }
-      consume(TokenType.RIGHT_BRACKET);
+    FunctionType staticType = null;
+    if (lookAhead(TokenType.LEFT_BRACKET)) {
+      staticType = parseFunctionType(true);
     }
 
     // Parse the dynamic parameters if present.
@@ -99,7 +93,7 @@ public class MagpieParser extends Parser {
     
     // If neither dynamic nor static parameters were provided, infer a dynamic
     // signature.
-    if ((type == null) && (staticParams.size() == 0)) {
+    if ((type == null) && (staticType == null)) {
       type = FunctionType.nothingToDynamic();
     }
     
@@ -109,10 +103,7 @@ public class MagpieParser extends Parser {
     }
     
     // Wrap it in a static function.
-    if (staticParams.size() > 0) {
-      // TODO(bob): When constraints are supported, don't use nothing here.
-      FunctionType staticType = new FunctionType(staticParams,
-          Expr.name("Nothing"), Expr.name("Nothing"));
+    if (staticType != null) {
       expr = new FnExpr(position, staticType, expr, true);
     }
     
@@ -131,16 +122,27 @@ public class MagpieParser extends Parser {
    * @return The parsed function type.
    */
   public FunctionType parseFunctionType() {
+    return parseFunctionType(false);
+  }
+  
+  public FunctionType parseFunctionType(boolean isStatic) {
+    TokenType left = TokenType.LEFT_PAREN;
+    TokenType right = TokenType.RIGHT_PAREN;
+    if (isStatic) {
+      left = TokenType.LEFT_BRACKET;
+      right = TokenType.RIGHT_BRACKET;
+    }
+    
     // Parse the prototype: (foo Foo, bar Bar -> Bang)
-    consume(TokenType.LEFT_PAREN);
+    consume(left);
     
     // Parse the parameters, if any.
     List<String> paramNames = new ArrayList<String>();
     List<Expr> paramTypes = new ArrayList<Expr>();
-    while (!lookAheadAny(TokenType.ARROW, TokenType.RIGHT_PAREN)){
+    while (!lookAheadAny(TokenType.ARROW, right)){
       paramNames.add(consume(TokenType.NAME).getString());
       
-      if (!lookAheadAny(TokenType.ARROW, TokenType.COMMA, TokenType.RIGHT_PAREN)) {
+      if (!lookAheadAny(TokenType.ARROW, TokenType.COMMA, right)) {
         paramTypes.add(parseTypeExpression());
       } else {
         paramTypes.add(Expr.name("Dynamic"));
@@ -159,19 +161,19 @@ public class MagpieParser extends Parser {
     
     // Parse the return type, if any.
     Expr returnType = null;
-    if (match(TokenType.RIGHT_PAREN)) {
+    if (match(right)) {
       // No return type, so infer dynamic.
       returnType = Expr.name("Dynamic");
     } else {
       consume(TokenType.ARROW);
       
-      if (lookAhead(TokenType.RIGHT_PAREN)) {
+      if (lookAhead(right)) {
         // An arrow, but no return type, so infer nothing.
         returnType = Expr.name("Nothing");
       } else {
         returnType = parseTypeExpression();
       }
-      consume(TokenType.RIGHT_PAREN);
+      consume(right);
     }
     
     return new FunctionType(paramNames, paramType, returnType);

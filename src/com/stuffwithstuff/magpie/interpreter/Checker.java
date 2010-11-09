@@ -130,6 +130,8 @@ public class Checker {
     Obj paramType = mInterpreter.evaluate(function.getType().getParamType(),
         staticContext);
 
+    // TODO(bob): Should evaluate return type after updating static scope so
+    // that a static fn can a type arg in the return type.
     Obj returnType = mInterpreter.evaluate(
         function.getType().getReturnType(), staticContext);
 
