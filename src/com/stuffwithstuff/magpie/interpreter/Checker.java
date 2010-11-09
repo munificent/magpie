@@ -130,17 +130,17 @@ public class Checker {
     Obj paramType = mInterpreter.evaluate(function.getType().getParamType(),
         staticContext);
 
-    Obj expectedReturn = mInterpreter.evaluate(
+    Obj returnType = mInterpreter.evaluate(
         function.getType().getReturnType(), staticContext);
 
     // Bind the parameter names to their evaluated types.
     List<String> params = function.getType().getParamNames();
-    bindParameters(functionContext, params, paramType);
+    functionContext.bind(mInterpreter, params, paramType);
     
     // If it's a static function, bind them in the static context too.
     if (function.isStatic()) {
       staticContext = staticContext.pushScope();
-      bindParameters(staticContext, params, paramType);
+      staticContext.bind(mInterpreter, params, paramType);
     }
     
     // TODO(bob): Hack! Don't check bodies of static functions. Need constraints
@@ -148,33 +148,35 @@ public class Checker {
     if (!function.isStatic()) {
       // Check the body of the function.
       ExprChecker checker = new ExprChecker(mInterpreter, this, staticContext);
-      Obj returnType = checker.checkFunction(function.getBody(), functionContext);
+      Obj actualReturn = checker.checkFunction(function.getBody(),
+          functionContext);
       
       // If it's declared to return Nothing, then we'll also allow (and ignore)
       // any other return type. Note that this doesn't mean we'll discard the
       // return value. Type annotations don't affect the behavior at all. It just
       // means that the checker will ignore any returned type if Nothing is
       // expected.
-      checkTypes(expectedReturn, returnType, true,
+      checkTypes(returnType, actualReturn, true,
           function.getType().getReturnType().getPosition(),
           "Function is declared to return %s but is returning %s.");
     }
     
-    return mInterpreter.evaluateFunctionType(function.getType(), staticContext,
-        function.isStatic());
-  }
-  
-  private void bindParameters(EvalContext context, List<String> names,
-      Obj value) {
-    if (names.size() == 1) {
-      context.define(names.get(0), value);
-    } else if (names.size() > 1) {
-      // TODO(bob): Hack. Assume the parameter is a tuple with the right number of
-      // fields.
-      for (int i = 0; i < names.size(); i++) {
-        context.define(names.get(i), value.getTupleField(i));
-      }
+    // Create the function type for the function.
+    if (paramType == mInterpreter.nothing()) {
+      throw new InterpreterException(String.format(
+          "Could not evaluate parameter type %s.",
+          function.getType().getParamType()));
     }
+    if (returnType == mInterpreter.nothing()) {
+      throw new InterpreterException(String.format(
+          "Could not evaluate return type %s.",
+          function.getType().getReturnType()));
+    }
+    
+    return mInterpreter.invokeMethod(mInterpreter.getFunctionType(),
+        Identifiers.NEW_TYPE, mInterpreter.createTuple(
+            paramType, returnType,
+            mInterpreter.createBool(function.isStatic())));
   }
   
   /**

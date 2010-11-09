@@ -181,25 +181,6 @@ public class Interpreter {
       return result;
     }
   }
-
-  public Obj evaluateFunctionType(FunctionType type, EvalContext context,
-      boolean isStatic) {
-    // Create the function type for the function.
-    Obj paramType = evaluate(type.getParamType(), context);
-    Obj returnType = evaluate(type.getReturnType(), context);
-    
-    if (paramType == mNothing) {
-      throw new InterpreterException(String.format(
-          "Could not evaluate parameter type %s.", type.getParamType()));
-    }
-    if (returnType == mNothing) {
-      throw new InterpreterException(String.format(
-          "Could not evaluate return type %s.", type.getReturnType()));
-    }
-    
-    return invokeMethod(mFnClass, Identifiers.NEW_TYPE,
-        createTuple(paramType, returnType, createBool(isStatic)));
-  }
   
   public boolean hasMain() {
     return mGlobalScope.get("main") != null;

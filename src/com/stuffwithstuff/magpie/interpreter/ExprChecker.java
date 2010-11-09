@@ -95,16 +95,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       // (this is the motivation to even *have* static functions). The latter is
       // so that the static arguments are also available at runtime.
       List<String> params = staticFn.getType().getParamNames();
-      if (params.size() > 1) {
-        // TODO(bob): Gross, assume arg is a tuple.
-        for (int i = 0; i < params.size(); i++) {
-          staticContext.define(params.get(i), arg.getTupleField(i));
-          context.define(params.get(i), arg.getTupleField(i));
-        }
-      } else if (params.size() == 1) {
-        staticContext.define(params.get(0), arg);
-        context.define(params.get(0), arg);
-      }
+      context.bind(mInterpreter, params, arg);
+      staticContext.bind(mInterpreter, params, arg);
       
       // Now that we have a context where the static parameters are bound to
       // concrete values, we can check the body of the original static function.
