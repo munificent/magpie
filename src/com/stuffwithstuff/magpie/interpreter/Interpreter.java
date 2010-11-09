@@ -81,7 +81,6 @@ public class Interpreter {
     mFnClass = createGlobalClass("Function");
     mIntClass = createGlobalClass("Int");
     mRuntimeClass = createGlobalClass("Runtime");
-    mStaticFnClass = createGlobalClass("StaticFunction");
 
     mStringClass = createGlobalClass("String");
 
@@ -122,7 +121,6 @@ public class Interpreter {
     BuiltIns.register(IntBuiltIns.class, mIntClass);
     BuiltIns.register(ObjectBuiltIns.class, mObjectClass);
     BuiltIns.register(RuntimeBuiltIns.class, mRuntimeClass);
-    BuiltIns.register(StaticFunctionBuiltIns.class, mStaticFnClass);
     BuiltIns.register(StringBuiltIns.class, mStringClass);
   }
   
@@ -153,9 +151,13 @@ public class Interpreter {
     // outer static arguments are available. Otherwise, we'll assume it has no
     // outer scope and just evaluate it in a top-level context.
     EvalContext staticContext;
+    boolean isStatic = false;
+    Object value = null;
     if (callable instanceof Function) {
-      staticContext = new EvalContext(
-          ((Function)callable).getClosure(), mNothing);
+      Function function = (Function)callable;
+      staticContext = new EvalContext(function.getClosure(), mNothing);
+      isStatic = function.getFunction().isStatic();
+      value = function.getFunction();
     } else {
       staticContext = createTopLevelContext();
     }
@@ -169,12 +171,19 @@ public class Interpreter {
       Obj returnType = evaluate(type.getReturnType(), staticContext);
       
       // Create a FunctionType object.
-      return invokeMethod(mFnClass, Identifiers.NEW_TYPE,
-          createTuple(paramType, returnType));
+      Obj result = invokeMethod(mFnClass, Identifiers.NEW_TYPE,
+          createTuple(paramType, returnType, createBool(isStatic)));
+      
+      // TODO(bob): Hackish. Cram the original function body in there too. That
+      // way, if it's a static function, we have access to it during check time.
+      result.setValue(value);
+      
+      return result;
     }
   }
 
-  public Obj evaluateFunctionType(FunctionType type, EvalContext context) {
+  public Obj evaluateFunctionType(FunctionType type, EvalContext context,
+      boolean isStatic) {
     // Create the function type for the function.
     Obj paramType = evaluate(type.getParamType(), context);
     Obj returnType = evaluate(type.getReturnType(), context);
@@ -189,29 +198,7 @@ public class Interpreter {
     }
     
     return invokeMethod(mFnClass, Identifiers.NEW_TYPE,
-        createTuple(paramType, returnType));
-  }
-  
-  public Obj evaluateStaticFunctionType(FnExpr expr, EvalContext context) {
-    // Convert the object to a first-class Magpie object.
-    List<Obj> names = new ArrayList<Obj>();
-    for (String name : expr.getType().getParamNames()) {
-      names.add(createString(name));
-    }
-    
-    // TODO(bob): Should this be closing here?
-    Obj body = createFn(Expr.fn(expr.getBody()), context);
-    
-    // Create a StaticFunctionType object.
-    Obj staticFunctionTypeClass = context.lookUp("StaticFunctionType");
-    Obj type = invokeMethod(staticFunctionTypeClass,
-        Identifiers.NEW, createTuple(createArray(names), body));
-    
-    // TODO(bob): Cram the original expr in there so we can get it back out
-    // when type checking. So dirty.
-    type.setValue(expr);
-    
-    return type;
+        createTuple(paramType, returnType, createBool(isStatic)));
   }
   
   public boolean hasMain() {
@@ -326,7 +313,6 @@ public class Interpreter {
   public ClassObj getIntType() { return mIntClass; }
   public ClassObj getNothingType() { return mNothingClass; }
   public ClassObj getObjectType() { return mObjectClass; }
-  public ClassObj getStaticFunctionType() { return mStaticFnClass; }
   public ClassObj getStringType() { return mStringClass; }
   public ClassObj getTupleType() { return mTupleClass; }
   public ClassObj getNeverType() { return mNeverClass; }
@@ -352,7 +338,7 @@ public class Interpreter {
     // Create a new subclass just for this function so that it's implementation
     // of "call" has the correct return and parameter types.
     // TODO(bob): Figure out a simpler way to do this.
-    ClassObj fnClass = new ClassObj(mClass, "FunctionType", mFnClass);
+    ClassObj fnClass = new ClassObj(mClass, "FunctionClass", mFnClass);
     fnClass.addMethod("call", new FunctionCall(expr.getType()));
     
     return new FnObj(fnClass, context.getThis(),
@@ -506,7 +492,6 @@ public class Interpreter {
   private final ClassObj mNeverClass;
   private final ClassObj mObjectClass;
   private final ClassObj mRuntimeClass;
-  private final ClassObj mStaticFnClass;
   private final ClassObj mStringClass;
   private final ClassObj mTupleClass;
   

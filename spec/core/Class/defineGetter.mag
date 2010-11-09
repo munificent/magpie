@@ -20,8 +20,6 @@ specify("The 'defineGetter' method on Class") with
         c new() foo shouldBe("after")
     end
 
-    // TODO(bob): Commented out because these are really slow!
-    /*
     it should("create a property with the declared type") with
         envExpectCheckOK with
             var C = Class new("C")
@@ -44,6 +42,8 @@ specify("The 'defineGetter' method on Class") with
         end
     end
 
+    // TODO(bob): Commented out because these are really slow!
+    /*
     it should("ensure the getter body takes no arguments") with
         envExpectCheckOK with
             var c = Class new("c")

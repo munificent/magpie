@@ -32,6 +32,8 @@ public abstract class BuiltIns {
     }
   }
   
+  // TODO(bob): These are all almost identical. Refactor.
+  
   private static void registerMethod(ClassObj classObj, Method method,
       String signature) {
     try {

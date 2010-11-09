@@ -30,7 +30,13 @@ extend class Tuple
     end
 
     def canAssignFrom(other Type -> Bool)
+        // TODO(bob): In addition to allowing wider tuples to subtype to
+        // narrower ones (like (Int, String) <: (Int, String, Bool), we could
+        // also allow narrow ones to subtype to wider ones if the extra fields
+        // allow nothing: (Int, Bool, String | Nothing) <: (Int, Bool).
         let otherTuple = as[Tuple](other) then
+            // TODO (bob): Can change this to 'count < otherType count' to
+            // allow tuples with extra fields to be a subtype of others:
             // With the same number of fields.
             if count != otherTuple count then return false
     

@@ -70,8 +70,6 @@ public class MagpieParser extends Parser {
     }
   }
 
-  // TODO(bob): Eventually all places should allow statics and allowStatic
-  // should go away.
   // fn (a) print "hi"
   public Expr parseFunction() {
     Position position = current().getPosition();
@@ -80,6 +78,7 @@ public class MagpieParser extends Parser {
     List<String> staticParams = new ArrayList<String>();
     if (match(TokenType.LEFT_BRACKET)) {
       while (true) {
+        // TODO(bob): Support parsing constraints here.
         String staticParam = consume(TokenType.NAME).getString();
         staticParams.add(staticParam);
         if (!match(TokenType.COMMA)) break;
@@ -112,8 +111,8 @@ public class MagpieParser extends Parser {
     // Wrap it in a static function.
     if (staticParams.size() > 0) {
       // TODO(bob): When constraints are supported, don't use nothing here.
-      FunctionType staticType = new FunctionType(staticParams, Expr.nothing(),
-          Expr.nothing());
+      FunctionType staticType = new FunctionType(staticParams,
+          Expr.name("Nothing"), Expr.name("Nothing"));
       expr = new FnExpr(position, staticType, expr, true);
     }
     
@@ -213,7 +212,7 @@ public class MagpieParser extends Parser {
         ApplyExpr apply = (ApplyExpr) expr;
         return new ApplyExpr(new MessageExpr(position, apply.getTarget(),
             Identifiers.ASSIGN),
-            Expr.tuple(apply.getArg(), value));
+            Expr.tuple(apply.getArg(), value), false);
       } else {
         throw new ParseException("Expression \"" + expr +
         "\" is not a valid target for assignment.");
@@ -301,10 +300,10 @@ public class MagpieParser extends Parser {
         // foo(123) with ...  --> Apply(Msg(foo), Tuple(123, block))
         ApplyExpr apply = (ApplyExpr)expr;
         Expr arg = addTupleField(apply.getArg(), block);
-        expr = new ApplyExpr(apply.getTarget(), arg);
+        expr = new ApplyExpr(apply.getTarget(), arg, false);
       } else {
         // 123 with ...  --> Apply(Int(123), block)
-        expr = new ApplyExpr(expr, block);
+        expr = new ApplyExpr(expr, block, false);
       }
     }
     
@@ -319,22 +318,19 @@ public class MagpieParser extends Parser {
     Expr message = primary();
     
     while (true) {
-      Position start = current().getPosition();
-      
       if (match(TokenType.NAME)) {
         message = new MessageExpr(last(1).getPosition(), message,
             last(1).getString());
       } else if (match(TokenType.LEFT_BRACKET)) {
         // A static apply (i.e. foo[123]).
-        Expr staticArg;
+        Expr arg;
         if (match(TokenType.RIGHT_BRACKET)) {
-          staticArg = new NothingExpr(last(2).getPosition().union(last(1).getPosition()));
+          arg = new NothingExpr(last(2).getPosition().union(last(1).getPosition()));
         } else {
-          staticArg = parseExpression();
+          arg = parseExpression();
           consume(TokenType.RIGHT_BRACKET);
         }
-        message = new InstantiateExpr(start.union(current().getPosition()),
-            message, staticArg);
+        message = new ApplyExpr(message, arg, true);
       } else if (match(TokenType.LEFT_PAREN)) {
         // A function application like foo(123).
         Expr arg;
@@ -344,7 +340,7 @@ public class MagpieParser extends Parser {
           arg = parseExpression();
           consume(TokenType.RIGHT_PAREN);
         }
-        message = new ApplyExpr(message, arg);
+        message = new ApplyExpr(message, arg, false);
       } else {
         break;
       }

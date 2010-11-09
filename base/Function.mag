@@ -2,18 +2,23 @@ extend class Function
     // Add a shared to Function so that it's easily visible from the interpreter
     // (which already has a reference to Function) so that it can create
     // FunctionType objects.
-    shared def newType(paramType Type, returnType Type -> Type)
-        FunctionType new(paramType, returnType)
+    shared def newType(paramType Type, returnType Type, static? Bool -> Type)
+        FunctionType new(paramType, returnType, static?)
     end
 end
 
 class FunctionType
-    this(paramType Type, returnType Type)
+    this(paramType Type, returnType Type, static? Bool)
         this paramType = paramType
         this returnType = returnType
+        this static? = static?
     end
 
-    get string String = paramType string + " -> " + returnType
+    get string String =
+        var result = paramType string + " -> " + returnType
+        if static? then result = "[" + result + "]"
+        result
+    end
 
     // TODO(bob): Once interfaces are in, function types can just become sugar for
     // creating ICallable(Arg, Return) instances.
@@ -21,8 +26,11 @@ class FunctionType
         // Both must be functions.
         let otherFn = as[FunctionType](other) then
             // Parameter must be contravariant and return must be covariant.
-            otherFn paramType canAssignFrom(paramType) and
-                returnType canAssignFrom(otherFn returnType)
+            if static? != otherFn static? then return false
+            if otherFn paramType canAssignFrom(paramType) not then return false
+            if returnType canAssignFrom(otherFn returnType) not then return false
+            
+            true
         else false
     end
 
@@ -38,22 +46,15 @@ class FunctionType
 
     def ==(other -> Bool)
         let fnType = as[FunctionType](other) then
-            paramType == fnType paramType and returnType == fnType returnType
+            static? == fnType static? and
+                paramType == fnType paramType and
+                returnType == fnType returnType
         else false
     end
 
     def !=(other -> Bool) (this == other) not
 
-    var paramType Type
+    var paramType  Type
     var returnType Type
-end
-
-class StaticFunctionType
-    this(params, body)
-        this params = params
-        this body = body
-    end
-    
-    var params Dynamic
-    var body Dynamic
+    var static?    Bool
 end

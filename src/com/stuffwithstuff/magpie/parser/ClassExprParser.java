@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.Identifiers;
-import com.stuffwithstuff.magpie.ast.ApplyExpr;
 import com.stuffwithstuff.magpie.ast.AssignExpr;
 import com.stuffwithstuff.magpie.ast.BlockExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
@@ -148,8 +147,8 @@ public class ClassExprParser implements ExprParser {
           Expr.tuple(Expr.string(name), function));
     } else {
       // Just declaring it.
-      Expr typeExpr = new ApplyExpr(Expr.name("Function"),
-          Expr.tuple(type.getParamType(), type.getReturnType()));
+      Expr typeExpr = Expr.message(Expr.name("Function"), Identifiers.NEW_TYPE,
+          Expr.tuple(type.getParamType(), type.getReturnType(), Expr.bool(false)));
       return Expr.message(theClass, Identifiers.DECLARE_GETTER,
           Expr.tuple(Expr.string(name), Expr.fn(typeExpr)));
     }

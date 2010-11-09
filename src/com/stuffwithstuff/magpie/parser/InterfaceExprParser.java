@@ -53,9 +53,9 @@ public class InterfaceExprParser implements ExprParser {
       case DEF:
         
         FunctionType function = parser.parseFunctionType();
-        Expr methodType = Expr.message(Expr.name("FunctionType"),
-            Identifiers.NEW,
-            Expr.tuple(function.getParamType(), function.getReturnType()));
+        Expr methodType = Expr.message(Expr.name("Function"),
+            Identifiers.NEW_TYPE, Expr.tuple(function.getParamType(),
+                function.getReturnType(), Expr.bool(false)));
         exprs.add(Expr.message(Expr.name(name), Identifiers.DECLARE_METHOD,
             Expr.tuple(Expr.string(member), Expr.fn(methodType))));
         break;

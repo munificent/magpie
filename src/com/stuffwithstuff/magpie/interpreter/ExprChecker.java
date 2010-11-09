@@ -69,35 +69,78 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(ApplyExpr expr, EvalContext context) {
-    Obj targetType = check(expr.getTarget(), context);
-    Obj argType = check(expr.getArg(), context);
-    
-    // If the target is not an actual function, get the type of its "call"
-    // message instead of the target itself.
-    // See if the target is an actual function, or a functor.
-    // TODO(bob): Using the class name for this is gross!
-    if (!targetType.getClassObj().getName().equals(Identifiers.FUNCTION_TYPE)) {
-      // It's a functor, so look up the "call" member.
-      targetType = getMemberType(expr.getPosition(), targetType,
-          Identifiers.CALL);
-
-      if (targetType == mInterpreter.nothing()) {
-        mChecker.addError(expr.getPosition(),
-            "Target of type %s is not a function and does not have a 'call' method.",
-            targetType);
+    // TODO(bob): Clean this up!
+    if (expr.isStatic()) {
+      // TODO(bob): Almost all of this is copied from ExprEvaluator. Should unify.
+      // Evaluate the static argument.
+      Obj fn = mInterpreter.evaluate(expr.getTarget(), context);
+      Obj arg = mInterpreter.evaluate(expr.getArg(), mStaticContext);
+      
+      if (!(fn.getValue() instanceof FnExpr)) {
+        mChecker.addError(expr.getTarget().getPosition(),
+            "The expression \"%s\" does not evaluate to a static function.",
+            expr.getTarget());
         return mInterpreter.getNothingType();
       }
+      
+      FnExpr staticFn = (FnExpr)fn.getValue();
+      
+      // TODO(bob): Need to test static argument against declared constraints.
+      // Push a new static context with the bound static arguments.
+      EvalContext staticContext = mStaticContext.pushScope();
+      
+      // Bind the argument(s) to the static parameter(s). Note that the names are
+      // bound in both the static context and the regular type context. The former
+      // is so that static arguments can be used in subsequent type annotations
+      // (this is the motivation to even *have* static functions). The latter is
+      // so that the static arguments are also available at runtime.
+      List<String> params = staticFn.getType().getParamNames();
+      if (params.size() > 1) {
+        // TODO(bob): Gross, assume arg is a tuple.
+        for (int i = 0; i < params.size(); i++) {
+          staticContext.define(params.get(i), arg.getTupleField(i));
+          context.define(params.get(i), arg.getTupleField(i));
+        }
+      } else if (params.size() == 1) {
+        staticContext.define(params.get(0), arg);
+        context.define(params.get(0), arg);
+      }
+      
+      // Now that we have a context where the static parameters are bound to
+      // concrete values, we can check the body of the original static function.
+      ExprChecker checker = new ExprChecker(mInterpreter, mChecker, staticContext);
+      return checker.check(staticFn.getBody(), context);
+    } else {
+      Obj targetType = check(expr.getTarget(), context);
+      Obj argType = check(expr.getArg(), context);
+      
+      // If the target is not an actual function, get the type of its "call"
+      // message instead of the target itself.
+      // See if the target is an actual function, or a functor.
+      // TODO(bob): Using the class name for this is gross!
+      if (!targetType.getClassObj().getName().equals(Identifiers.FUNCTION_TYPE)) {
+        // It's a functor, so look up the "call" member.
+        targetType = getMemberType(expr.getPosition(), targetType,
+            Identifiers.CALL);
+  
+        if (targetType == mInterpreter.nothing()) {
+          mChecker.addError(expr.getPosition(),
+              "Target of type %s is not a function and does not have a 'call' method.",
+              targetType);
+          return mInterpreter.getNothingType();
+        }
+      }
+      
+      Obj paramType = targetType.getField(Identifiers.PARAM_TYPE);
+      Obj returnType = targetType.getField(Identifiers.RETURN_TYPE);
+      
+      // Make sure the argument type matches the declared parameter type.
+      mChecker.checkTypes(paramType, argType, expr.getPosition(), 
+          "Function is declared to take %s but is being passed %s.");
+      
+      // Calling a function results in the function's return type.
+      return returnType;
     }
-    
-    Obj paramType = targetType.getField(Identifiers.PARAM_TYPE);
-    Obj returnType = targetType.getField(Identifiers.RETURN_TYPE);
-    
-    // Make sure the argument type matches the declared parameter type.
-    mChecker.checkTypes(paramType, argType, expr.getPosition(), 
-        "Function is declared to take %s but is being passed %s.");
-    
-    // Calling a function results in the function's return type.
-    return returnType;
   }
   
   @Override
@@ -178,15 +221,10 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(FnExpr expr, EvalContext context) {
-    if (expr.isStatic()) {
-      // TODO(bob): Once constraints are in, should check the body here.
-      return mInterpreter.evaluateStaticFunctionType(expr, mStaticContext);
-    } else {
-      // Check the body and create a context containing any static arguments the
-      // function defines.
-      return mChecker.checkFunction(expr, context.getScope(), context.getThis(),
-          mStaticContext);
-    }
+    // Check the body and create a context containing any static arguments the
+    // function defines.
+    return mChecker.checkFunction(expr, context.getScope(), context.getThis(),
+        mStaticContext);
   }
 
   @Override
@@ -213,48 +251,6 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     Obj elseArm = check(expr.getElse(), context, true);
     
     return orTypes(thenArm, elseArm);
-  }
-
-  @Override
-  public Obj visit(InstantiateExpr expr, EvalContext context) {
-    // TODO(bob): Almost all of this is copied from ExprEvaluator. Should unify.
-    // Evaluate the static argument.
-    Obj fn = mInterpreter.evaluate(expr.getFn(), context);
-    Obj arg = mInterpreter.evaluate(expr.getArg(), mStaticContext);
-    
-    if (!(fn.getValue() instanceof FnExpr)) {
-      mChecker.addError(expr.getFn().getPosition(),
-          "The expression \"%s\" does not evaluate to a static function.",
-          expr.getFn());
-      return mInterpreter.getNothingType();
-    }
-    
-    FnExpr staticFn = (FnExpr)fn.getValue();
-    
-    // Push a new static context with the bound static arguments.
-    EvalContext staticContext = mStaticContext.pushScope();
-    
-    // Bind the argument(s) to the static parameter(s). Note that the names are
-    // bound in both the static context and the regular type context. The former
-    // is so that static arguments can be used in subsequent type annotations
-    // (this is the motivation to even *have* static functions). The latter is
-    // so that the static arguments are also available at runtime.
-    List<String> params = staticFn.getType().getParamNames();
-    if (params.size() > 1) {
-      // TODO(bob): Gross, assume arg is a tuple.
-      for (int i = 0; i < params.size(); i++) {
-        staticContext.define(params.get(i), arg.getTupleField(i));
-        context.define(params.get(i), arg.getTupleField(i));
-      }
-    } else if (params.size() == 1) {
-      staticContext.define(params.get(0), arg);
-      context.define(params.get(0), arg);
-    }
-    
-    // Now that we have a context where the static parameters are bound to
-    // concrete values, we can check the body of the original static function.
-    ExprChecker checker = new ExprChecker(mInterpreter, mChecker, staticContext);
-    return checker.check(staticFn.getBody(), context);
   }
 
   @Override
@@ -351,7 +347,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(TypeofExpr expr, EvalContext context) {
-    // TODO(bob): This should eventually return IType | Nothing
+    // TODO(bob): This should eventually return Type | Nothing
     return mInterpreter.getNothingType();
   }
 

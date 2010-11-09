@@ -3,16 +3,20 @@ package com.stuffwithstuff.magpie.ast;
 import com.stuffwithstuff.magpie.parser.Position;
 
 public abstract class Expr {
+  public static BoolExpr bool(boolean value) {
+    return new BoolExpr(Position.none(), false);
+  }
+  
   public static FnExpr fn(Expr body) {
     return new FnExpr(Position.none(), FunctionType.nothingToDynamic(), body, false);
   }
   
   public static ApplyExpr message(Position position, Expr receiver, String name, Expr arg) {
-    return new ApplyExpr(new MessageExpr(position, receiver, name), arg);
+    return new ApplyExpr(new MessageExpr(position, receiver, name), arg, false);
   }
   
   public static ApplyExpr message(Expr receiver, String name, Expr arg) {
-    return new ApplyExpr(new MessageExpr(Position.none(), receiver, name), arg);
+    return new ApplyExpr(new MessageExpr(Position.none(), receiver, name), arg, false);
   }
   
   public static MessageExpr message(Expr receiver, String name) {
