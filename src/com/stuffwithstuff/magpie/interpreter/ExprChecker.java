@@ -319,6 +319,12 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   }
   
   @Override
+  public Obj visit(ScopeExpr expr, EvalContext context) {
+    context = context.pushScope();
+    return check(expr.getBody(), context);
+  }
+  
+  @Override
   public Obj visit(StringExpr expr, EvalContext context) {
     return mInterpreter.getStringType();
   }

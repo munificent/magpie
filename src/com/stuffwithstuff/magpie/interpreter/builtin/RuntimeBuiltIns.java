@@ -10,6 +10,7 @@ import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.CheckError;
 import com.stuffwithstuff.magpie.interpreter.Checker;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
+import com.stuffwithstuff.magpie.interpreter.ErrorException;
 import com.stuffwithstuff.magpie.interpreter.EvalContext;
 import com.stuffwithstuff.magpie.interpreter.FnObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
@@ -26,6 +27,12 @@ public class RuntimeBuiltIns {
     // TODO(bob): Total hack to fit in an int.
     int time = (int)(System.currentTimeMillis() - 1289000000000L);
     return interpreter.createInt(time);
+  }
+  
+  @Shared
+  @Signature("throw(obj -> Never)")
+  public static Obj throw_(Interpreter interpreter, Obj thisObj, Obj arg) {
+    throw new ErrorException(arg);
   }
   
   @Shared

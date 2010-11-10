@@ -1,0 +1,7 @@
+specify("A 'catch' clause in a block") with
+    it should("receive the error thrown by the block") with
+        Runtime throw("error")
+    catch(err)
+        err shouldBe("error")
+    end
+end

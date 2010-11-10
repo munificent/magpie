@@ -1,11 +1,7 @@
-// TODO(bob): This is really kind of redundant with 'do'.
-
-specify("A block expression") with
-    def doBlock(block) block()
-
+specify("A 'do' expression") with
     it should("evaluate the expressions in order") with
         var result = ""
-        doBlock with
+        do
             result = result + "1"
             result = result + "2"
             result = result + "3"
@@ -14,21 +10,21 @@ specify("A block expression") with
     end
 
     it should("return the value of the last expression") with
-        (doBlock with
+        do
             1
             2
-        end) shouldBe(2)
+        end shouldBe(2)
 
-        (doBlock with
+        do
             "first"
             "second"
             "last"
-        end) shouldBe("last")
+        end shouldBe("last")
     end
 
     it should("define a local variable scope") with
         var a = "outer"
-        doBlock with
+        do
             var a = "inner"
             a shouldBe("inner")
         end

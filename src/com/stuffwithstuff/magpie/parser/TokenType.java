@@ -28,6 +28,7 @@ public enum TokenType {
   ARROW,
   BREAK,
   CASE,
+  CATCH,
   CLASS,
   DEF,
   DO,

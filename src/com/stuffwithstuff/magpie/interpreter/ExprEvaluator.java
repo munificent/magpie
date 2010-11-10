@@ -72,14 +72,27 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(BlockExpr expr, EvalContext context) {
-    Obj result = null;
-
-    // Evaluate all of the expressions and return the last.
-    for (Expr thisExpr : expr.getExpressions()) {
-      result = evaluate(thisExpr, context);
+    try {
+      Obj result = null;
+      
+      // Evaluate all of the expressions and return the last.
+      for (Expr thisExpr : expr.getExpressions()) {
+        result = evaluate(thisExpr, context);
+      }
+      
+      return result;
+    } catch (ErrorException err) {
+      // TODO(bob): Not implemented yet. Need pattern matching to select
+      // catch clauses.
+      /*
+      // See if any of the block's catches can catch this error.
+      for (CatchClause catcher : expr.getCatches()) {
+      }
+      // If we got here, we didn't catch it.
+      throw err;
+      */
+      return mInterpreter.nothing();
     }
-    
-    return result;
   }
 
   @Override
@@ -229,7 +242,13 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     Obj value = evaluate(expr.getValue(), context);
     throw new ReturnException(value);
   }
-
+  
+  @Override
+  public Obj visit(ScopeExpr expr, EvalContext context) {
+    context = context.pushScope();
+    return evaluate(expr.getBody(), context);
+  }
+  
   @Override
   public Obj visit(StringExpr expr, EvalContext context) {
     return mInterpreter.createString(expr.getValue());

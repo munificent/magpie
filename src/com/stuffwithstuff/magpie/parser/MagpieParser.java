@@ -14,6 +14,7 @@ public class MagpieParser extends Parser {
     mParsers.put(TokenType.BREAK, new BreakExprParser());
     mParsers.put(TokenType.CLASS, new ClassExprParser());
     mParsers.put(TokenType.DEF, new DefineExprParser());
+    mParsers.put(TokenType.DO, new DoExprParser());
     mParsers.put(TokenType.EXTEND, new ExtendExprParser());
     mParsers.put(TokenType.FN, new FnExprParser());
     mParsers.put(TokenType.FOR, new LoopExprParser());
@@ -57,17 +58,47 @@ public class MagpieParser extends Parser {
     if (match(TokenType.LINE)){
       Position position = last(1).getPosition();
       List<Expr> exprs = new ArrayList<Expr>();
+      List<CatchClause> catches = new ArrayList<CatchClause>();
       
-      while (!match(endToken)) {
+      while (!match(endToken) && !lookAhead(TokenType.CATCH)) {
         exprs.add(parseExpression());
         consume(TokenType.LINE);
       }
       
+      while (match(TokenType.CATCH)) {
+        catches.add(parseCatch());
+      }
+      
       position = position.union(last(1).getPosition());
-      return new BlockExpr(position, exprs);
+      return new BlockExpr(position, exprs, catches);
     } else {
       return parseExpression();
     }
+  }
+  
+  public CatchClause parseCatch() {
+    FunctionType type = parseFunctionType();
+    
+    Expr body;
+    if (match(TokenType.LINE)){
+      Position position = last(1).getPosition();
+      List<Expr> exprs = new ArrayList<Expr>();
+      
+      while (!lookAheadAny(TokenType.END, TokenType.CATCH)) {
+        exprs.add(parseExpression());
+        consume(TokenType.LINE);
+      }
+      
+      // Consume the last end if there is one.
+      match(TokenType.END);
+      
+      position = position.union(last(1).getPosition());
+      body = new BlockExpr(position, exprs);
+    } else {
+      body = parseExpression();
+    }
+    
+    return new CatchClause(type, body);
   }
 
   // fn (a) print "hi"
