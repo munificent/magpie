@@ -25,14 +25,15 @@ public class MatchExprParser implements ExprParser {
     // TODO(bob): Need to make sure name is unique, and put it scope local to
     // match expr.
     exprs.add(new VariableExpr(value.getPosition(), "__value__", value));
+    Expr valueExpr = Expr.name("__value__");
     
     // Require a newline between the value and the first case.
     parser.consume(TokenType.LINE);
         
     // Parse the cases.
-    List<Pattern> patterns = new ArrayList<Pattern>();
+    List<MatchCase> cases = new ArrayList<MatchCase>();
     while (parser.match(TokenType.CASE)) {
-      patterns.add(parsePattern(parser));
+      cases.add(parseCase(parser));
     }
     
     // Parse the else case, if present.
@@ -47,26 +48,22 @@ public class MatchExprParser implements ExprParser {
     
     // Desugar the cases to a series of chained if/thens.
     Expr chained = elseCase;
-    for (int i = patterns.size() - 1; i >= 0; i--) {
-      Pattern pattern = patterns.get(i);
-      Position casePos = pattern.pattern.getPosition().union(
-          pattern.body.getPosition());
-      
-      Expr condition = Expr.message(Expr.name("__value__"), "==",
-          pattern.pattern);
-      
-      Expr body = pattern.body;
+    for (int i = cases.size() - 1; i >= 0; i--) {
+      MatchCase thisCase = cases.get(i);
+
+      Expr condition = thisCase.pattern.createPredicate(valueExpr);
+      Expr body = thisCase.body;
       
       // Bind a name if there is one.
-      if (pattern.binding != null) {
+      if (thisCase.binding != null) {
         List<Expr> bodyExprs = new ArrayList<Expr>();
-        bodyExprs.add(new VariableExpr(body.getPosition(), pattern.binding,
-            Expr.name("__value__")));
+        bodyExprs.add(new VariableExpr(body.getPosition(), thisCase.binding,
+            valueExpr));
         bodyExprs.add(body);
         body = new BlockExpr(body.getPosition(), bodyExprs);
       }
       
-      chained = new IfExpr(casePos, null, condition, body, chained);
+      chained = new IfExpr(body.getPosition(), null, condition, body, chained);
     }
 
     exprs.add(chained);
@@ -75,14 +72,24 @@ public class MatchExprParser implements ExprParser {
     return new BlockExpr(position, exprs);
   }
   
-  private Pattern parsePattern(MagpieParser parser) {
+  private MatchCase parseCase(MagpieParser parser) {
+    // Valid patterns:
+    // 1
+    // a 1
+    // b true
+    // c
+    // d Int
+    // e Int | String
+    // f (Int, String)
+    // g (Int => String) => Bool
+    
     String name = parseBinding(parser);
-    Expr pattern = parser.parseExpression();
+    Pattern pattern = parsePattern(parser);
 
     parser.consume(TokenType.THEN);
     Expr body = parseBody(parser);
 
-    return new Pattern(name, pattern, body);
+    return new MatchCase(name, pattern, body);
   }
   
   private String parseBinding(MagpieParser parser) {
@@ -93,6 +100,19 @@ public class MatchExprParser implements ExprParser {
     
     // The token isn't a valid variable binding name.
     return null;
+  }
+  
+  private Pattern parsePattern(MagpieParser parser) {
+    if (parser.match(TokenType.BOOL)) {
+      return new LiteralPattern(Expr.bool(parser.last(1).getBool()));
+    } else if (parser.match(TokenType.INT)) {
+      return new LiteralPattern(Expr.integer(parser.last(1).getInt()));
+    } else if (parser.match(TokenType.STRING)) {
+      return new LiteralPattern(Expr.string(parser.last(1).getString()));
+    } else {
+      Expr typeAnnotation = parser.parseTypeExpression();
+      return new TypePattern(typeAnnotation);
+    }
   }
   
   /**
@@ -124,15 +144,43 @@ public class MatchExprParser implements ExprParser {
     }
   }
   
-  private static class Pattern {
-    public Pattern(String binding, Expr pattern, Expr body) {
+  private static class MatchCase {
+    public MatchCase(String binding, Pattern pattern, Expr body) {
       this.binding = binding;
       this.pattern = pattern;
       this.body = body;
     }
     
     public final String binding;
-    public final Expr pattern;
+    public final Pattern pattern;
     public final Expr body;
+  }
+  
+  private interface Pattern {
+    Expr createPredicate(Expr value);
+  }
+  
+  private static class LiteralPattern implements Pattern {
+    public LiteralPattern(Expr value) {
+      mValue = value;
+    }
+    
+    public Expr createPredicate(Expr value) {
+      return Expr.message(value, "==", mValue);
+    }
+
+    private final Expr mValue;
+  }
+  
+  private static class TypePattern implements Pattern {
+    public TypePattern(Expr type) {
+      mType = type;
+    }
+    
+    public Expr createPredicate(Expr value) {
+      return Expr.staticMessage(value, "is", mType);
+    }
+    
+    private final Expr mType;
   }
 }

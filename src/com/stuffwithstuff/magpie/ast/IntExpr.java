@@ -1,11 +1,16 @@
 package com.stuffwithstuff.magpie.ast;
 
+import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.parser.Token;
 
 public class IntExpr extends Expr {
   public IntExpr(Token token) {
-    super(token.getPosition());
-    mValue = token.getInt();
+    this(token.getPosition(), token.getInt());
+  }
+  
+  public IntExpr(Position position, int value) {
+    super(position);
+    mValue = value;
   }
   
   public int getValue() { return mValue; }

@@ -4,11 +4,15 @@ import com.stuffwithstuff.magpie.parser.Position;
 
 public abstract class Expr {
   public static BoolExpr bool(boolean value) {
-    return new BoolExpr(Position.none(), false);
+    return new BoolExpr(Position.none(), value);
   }
   
   public static FnExpr fn(Expr body) {
     return new FnExpr(Position.none(), FunctionType.nothingToDynamic(), body, false);
+  }
+  
+  public static IntExpr integer(int value) {
+    return new IntExpr(Position.none(), value);
   }
   
   public static ApplyExpr message(Position position, Expr receiver, String name, Expr arg) {
@@ -31,6 +35,10 @@ public abstract class Expr {
     return new NothingExpr(Position.none());  
   }
   
+  public static ApplyExpr staticMessage(Expr receiver, String name, Expr arg) {
+    return new ApplyExpr(new MessageExpr(Position.none(), receiver, name), arg, true);
+  }
+
   public static StringExpr string(String text) {
     return new StringExpr(Position.none(), text);
   }

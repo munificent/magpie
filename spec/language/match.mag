@@ -61,6 +61,36 @@ specify("A 'match' expression") with
     end
 end
 
+specify("A 'case' in a 'match' expression") with
+    it should("match a literal bool value") with
+        (match true
+        case true then "yes"
+        case false then "no"
+        end) shouldBe("yes")
+    end
+
+    it should("match a literal int value") with
+        (match 2
+        case 1 then "no"
+        case 2 then "yes"
+        end) shouldBe("yes")
+    end
+
+    it should("match a literal string value") with
+        (match "a"
+        case "a" then "yes"
+        case "b" then "no"
+        end) shouldBe("yes")
+    end
+
+    it should("match a type") with
+        (match 123
+        case Bool then "no"
+        case Int then "yes"
+        end) shouldBe("yes")
+    end
+end
+
 specify("The grammar for a 'match' expression") with
     it should("allow a block for a case body") with
         var result = ""
