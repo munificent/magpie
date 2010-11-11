@@ -15,11 +15,11 @@ specify("A 'match' expression") with
     end
     
     it should("return the value of the matched case") with
-        (match 2
+        match 2
         case 1 then "one"
         case 2 then "two"
         case 3 then "three"
-        end) shouldBe("two")
+        end shouldBe("two")
     end
 
     it should("only evaluate the first matched case") with
@@ -32,24 +32,24 @@ specify("A 'match' expression") with
     end
 
     it should("return nothing if no case matches") with
-        (match "not found"
+        match "not found"
         case "a" then "bad"
         case "b" then "bad"
-        end) shouldBe(nothing)
+        end shouldBe(nothing)
     end
 
     it should("match an else case if nothing else matches") with
-        (match "not found"
+        match "not found"
         case "a" then "bad"
         case "b" then "bad"
         else "good"
-        end) shouldBe("good")
+        end shouldBe("good")
     end
     
     it should("bind a variable to the matched value") with
-        (match 1
+        match 1
         case a 1 then a
-        end) shouldBe(1)
+        end shouldBe(1)
     end
     
     it should("scope a binding to just the matched case") with
@@ -63,31 +63,31 @@ end
 
 specify("A 'case' in a 'match' expression") with
     it should("match a literal bool value") with
-        (match true
+        match true
         case true then "yes"
         case false then "no"
-        end) shouldBe("yes")
+        end shouldBe("yes")
     end
 
     it should("match a literal int value") with
-        (match 2
+        match 2
         case 1 then "no"
         case 2 then "yes"
-        end) shouldBe("yes")
+        end shouldBe("yes")
     end
 
     it should("match a literal string value") with
-        (match "a"
+        match "a"
         case "a" then "yes"
         case "b" then "no"
-        end) shouldBe("yes")
+        end shouldBe("yes")
     end
 
     it should("match a type") with
-        (match 123
+        match 123
         case Bool then "no"
         case Int then "yes"
-        end) shouldBe("yes")
+        end shouldBe("yes")
     end
 end
 
