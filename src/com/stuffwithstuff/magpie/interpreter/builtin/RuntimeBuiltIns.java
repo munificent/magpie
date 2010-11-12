@@ -23,77 +23,87 @@ public class RuntimeBuiltIns {
   
   @Shared
   @Signature("now(-> Int)")
-  public static Obj now(Interpreter interpreter, Obj thisObj, Obj arg) {
-    // TODO(bob): Total hack to fit in an int.
-    int time = (int)(System.currentTimeMillis() - 1289000000000L);
-    return interpreter.createInt(time);
+  public static class Now implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      // TODO(bob): Total hack to fit in an int.
+      int time = (int)(System.currentTimeMillis() - 1289000000000L);
+      return interpreter.createInt(time);
+    }
   }
   
   @Shared
   @Signature("throw(obj -> Never)")
-  public static Obj throw_(Interpreter interpreter, Obj thisObj, Obj arg) {
-    throw new ErrorException(arg);
+  public static class Throw_ implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      throw new ErrorException(arg);
+    }
   }
   
   @Shared
   // TODO(bob): Should be declared to return array of strings.
   @Signature("checkClass(classObj Class)")
-  public static Obj checkClass(Interpreter interpreter, Obj thisObj, Obj arg) {
-    Checker checker = new Checker(interpreter);
-    
-    checker.checkClass((ClassObj)arg);
-    
-    return translateErrors(interpreter, checker.getErrors());
+  public static class CheckClass implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      Checker checker = new Checker(interpreter);
+      
+      checker.checkClass((ClassObj)arg);
+      
+      return translateErrors(interpreter, checker.getErrors());
+    }
   }
 
   @Shared
   // TODO(bob): Should be declared to return array of strings.
   @Signature("checkFunction(function)")
-  public static Obj checkFunction(Interpreter interpreter, Obj thisObj, Obj arg) {
-    Checker checker = new Checker(interpreter);
-    
-    FnObj function = (FnObj)arg;
-    EvalContext staticContext = interpreter.createTopLevelContext();
-    checker.checkFunction(function.getFunction(), interpreter.getNothingType(),
-        staticContext);
-    
-    return translateErrors(interpreter, checker.getErrors());
+  public static class CheckFunction implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      Checker checker = new Checker(interpreter);
+      
+      FnObj function = (FnObj)arg;
+      EvalContext staticContext = interpreter.createTopLevelContext();
+      checker.checkFunction(function.getFunction(), interpreter.getNothingType(),
+          staticContext);
+      
+      return translateErrors(interpreter, checker.getErrors());
+    }
   }
 
   @Shared
   // TODO(bob): Should be declared to return array of strings.
   @Signature("checkExpression(function)")
-  public static Obj checkFunction2(Interpreter interpreter, Obj thisObj, Obj arg) {
-    FnObj function = (FnObj)arg;
-    Expr expr = function.getFunction().getFunction().getBody();
+  public static class CheckExpression implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      FnObj function = (FnObj)arg;
+      Expr expr = function.getFunction().getFunction().getBody();
+      
+      Interpreter inner = new Interpreter(new NullInterpreterHost());
+      try {
+        Script.loadBase(inner);
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      
+      // Pull out the list of expressions. If it's a BlockExpr, we do this so that
+      // it doesn't evaluate the body in a nested scope.
+      List<Expr> exprs;
+      if (expr instanceof BlockExpr) {
+        exprs = ((BlockExpr)expr).getExpressions();
+      } else {
+        exprs = new ArrayList<Expr>();
+        exprs.add(expr);
+      }
+      
+      inner.load(exprs);
     
-    Interpreter inner = new Interpreter(new NullInterpreterHost());
-    try {
-      Script.loadBase(inner);
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      // Do the static analysis and see if we got the errors we expect.
+      Checker checker = new Checker(inner);
+      checker.checkAll();
+      
+      return translateErrors(interpreter, checker.getErrors());
     }
-    
-    // Pull out the list of expressions. If it's a BlockExpr, we do this so that
-    // it doesn't evaluate the body in a nested scope.
-    List<Expr> exprs;
-    if (expr instanceof BlockExpr) {
-      exprs = ((BlockExpr)expr).getExpressions();
-    } else {
-      exprs = new ArrayList<Expr>();
-      exprs.add(expr);
-    }
-    
-    inner.load(exprs);
-  
-    // Do the static analysis and see if we got the errors we expect.
-    Checker checker = new Checker(inner);
-    checker.checkAll();
-    
-    return translateErrors(interpreter, checker.getErrors());
   }
-
+  
   private static Obj translateErrors(Interpreter interpreter, List<CheckError> errors) {
     List<Obj> errorObjs = new ArrayList<Obj>();
     for (CheckError error : errors) {

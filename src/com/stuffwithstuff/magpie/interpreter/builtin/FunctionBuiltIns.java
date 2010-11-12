@@ -6,9 +6,11 @@ import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class FunctionBuiltIns {
   @Getter("type(-> Class)")
-  public static Obj type(Interpreter interpreter, Obj thisObj, Obj arg) {
-    FnObj function = (FnObj)thisObj;
-    
-    return interpreter.evaluateCallableType(function.getCallable(), false);
+  public static class Type implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      FnObj function = (FnObj)thisObj;
+      
+      return interpreter.evaluateCallableType(function.getCallable(), false);
+    }
   }
 }

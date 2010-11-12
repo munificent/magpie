@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
-import java.lang.reflect.Method;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import com.stuffwithstuff.magpie.StringCharacterReader;
 import com.stuffwithstuff.magpie.ast.FunctionType;
@@ -14,27 +15,28 @@ public abstract class BuiltIns {
   @SuppressWarnings("unchecked")
   public static void register(Class javaClass, ClassObj magpieClass)
   {
-    for (Method method : javaClass.getDeclaredMethods()) {
-      Signature signature = method.getAnnotation(Signature.class);
+    for (Class innerClass : javaClass.getDeclaredClasses()) {
+      Signature signature = (Signature) innerClass.getAnnotation(Signature.class);
       if (signature != null) {
-        registerMethod(magpieClass, method, signature.value());
+        registerMethod(magpieClass, innerClass, signature.value());
       }
       
-      Getter getter = method.getAnnotation(Getter.class);
+      Getter getter = (Getter) innerClass.getAnnotation(Getter.class);
       if (getter != null) {
-        registerGetter(magpieClass, method, getter.value());
+        registerGetter(magpieClass, innerClass, getter.value());
       }
       
-      Setter setter = method.getAnnotation(Setter.class);
+      Setter setter = (Setter) innerClass.getAnnotation(Setter.class);
       if (setter != null) {
-        registerSetter(magpieClass, method, setter.value());
+        registerSetter(magpieClass, innerClass, setter.value());
       }
     }
   }
   
   // TODO(bob): These are all almost identical. Refactor.
   
-  private static void registerMethod(ClassObj classObj, Method method,
+  @SuppressWarnings("unchecked")
+  private static void registerMethod(ClassObj classObj, Class innerClass,
       String signature) {
     try {
       Pair<String, FunctionType> parsed = parseSignature(signature);
@@ -42,10 +44,14 @@ public abstract class BuiltIns {
       FunctionType type = parsed.getValue();
       
       // See if it's shared.
-      boolean isShared = method.getAnnotation(Shared.class) != null;
+      boolean isShared = innerClass.getAnnotation(Shared.class) != null;
+      
+      // Construct the object.
+      Constructor ctor = innerClass.getConstructor();
+      BuiltInCallable callable = (BuiltInCallable) ctor.newInstance();
       
       // Define the method.
-      BuiltIn builtIn = new BuiltIn(type, method);
+      BuiltIn builtIn = new BuiltIn(type, callable);
       if (isShared) {
         classObj.getClassObj().addMethod(methodName, builtIn);
       } else {
@@ -54,10 +60,26 @@ public abstract class BuiltIns {
     } catch (SecurityException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
+    } catch (NoSuchMethodException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IllegalArgumentException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (InstantiationException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IllegalAccessException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (InvocationTargetException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
   }
 
-  private static void registerGetter(ClassObj classObj, Method method,
+  @SuppressWarnings("unchecked")
+  private static void registerGetter(ClassObj classObj, Class innerClass,
       String signature) {
     try {
       Pair<String, FunctionType> parsed = parseSignature(signature);
@@ -65,10 +87,14 @@ public abstract class BuiltIns {
       FunctionType type = parsed.getValue();
       
       // See if it's shared.
-      boolean isShared = method.getAnnotation(Shared.class) != null;
+      boolean isShared = innerClass.getAnnotation(Shared.class) != null;
       
+      // Construct the object.
+      Constructor ctor = innerClass.getConstructor();
+      BuiltInCallable callable = (BuiltInCallable) ctor.newInstance();
+
       // Define the getter.
-      BuiltIn builtIn = new BuiltIn(type, method);
+      BuiltIn builtIn = new BuiltIn(type, callable);
       if (isShared) {
         classObj.getClassObj().defineGetter(methodName, builtIn);
       } else {
@@ -77,10 +103,26 @@ public abstract class BuiltIns {
     } catch (SecurityException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
+    } catch (NoSuchMethodException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IllegalArgumentException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (InstantiationException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IllegalAccessException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (InvocationTargetException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
   }
 
-  private static void registerSetter(ClassObj classObj, Method method,
+  @SuppressWarnings("unchecked")
+  private static void registerSetter(ClassObj classObj, Class innerClass,
       String signature) {
     try {
       Pair<String, FunctionType> parsed = parseSignature(signature);
@@ -88,16 +130,35 @@ public abstract class BuiltIns {
       FunctionType type = parsed.getValue();
       
       // See if it's shared.
-      boolean isShared = method.getAnnotation(Shared.class) != null;
+      boolean isShared = innerClass.getAnnotation(Shared.class) != null;
       
+      // Construct the object.
+      Constructor ctor = innerClass.getConstructor();
+      BuiltInCallable callable = (BuiltInCallable) ctor.newInstance();
+
       // Define the setter.
-      BuiltIn builtIn = new BuiltIn(type, method);
+      BuiltIn builtIn = new BuiltIn(type, callable);
       if (isShared) {
         classObj.getClassObj().defineSetter(methodName, builtIn);
       } else {
         classObj.defineSetter(methodName, builtIn);
       }
     } catch (SecurityException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (NoSuchMethodException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IllegalArgumentException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (InstantiationException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IllegalAccessException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (InvocationTargetException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }

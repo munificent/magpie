@@ -6,99 +6,123 @@ import com.stuffwithstuff.magpie.interpreter.Obj;
 public class IntBuiltIns {
   @Shared
   @Signature("parse(text String -> Int)")
-  public static Obj parse(Interpreter interpreter, Obj thisObj, Obj arg) {
-    String text = arg.asString();
-    
-    try {
-      int value = Integer.parseInt(text);
-      return interpreter.createInt(value);
-    } catch (NumberFormatException ex) {
-      return interpreter.nothing();
+  public static class Parse implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      String text = arg.asString();
+      
+      try {
+        int value = Integer.parseInt(text);
+        return interpreter.createInt(value);
+      } catch (NumberFormatException ex) {
+        return interpreter.nothing();
+      }
     }
   }
-
+  
   @Signature("+(other Int -> Int)")
-  public static Obj _plus_(Interpreter interpreter, Obj thisObj, Obj arg) {
-    int left = thisObj.asInt();
-    int right = arg.asInt();
-    
-    return interpreter.createInt(left + right);
+  public static class Add implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = thisObj.asInt();
+      int right = arg.asInt();
+      
+      return interpreter.createInt(left + right);
+    }
   }
-
+  
   @Signature("-(other Int -> Int)")
-  public static Obj _sub_(Interpreter interpreter, Obj thisObj, Obj arg) {
-    int left = thisObj.asInt();
-    int right = arg.asInt();
-    
-    return interpreter.createInt(left - right);
+  public static class Subtract implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = thisObj.asInt();
+      int right = arg.asInt();
+      
+      return interpreter.createInt(left - right);
+    }
   }
-
+  
   @Signature("*(other Int -> Int)")
-  public static Obj _mult_(Interpreter interpreter, Obj thisObj, Obj arg) {
-    int left = thisObj.asInt();
-    int right = arg.asInt();
-    
-    return interpreter.createInt(left * right);
+  public static class Multiply implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = thisObj.asInt();
+      int right = arg.asInt();
+      
+      return interpreter.createInt(left * right);
+    }
   }
-
+  
   @Signature("/(other Int -> Int)")
-  public static Obj _div_(Interpreter interpreter, Obj thisObj, Obj arg) {
-    int left = thisObj.asInt();
-    int right = arg.asInt();
-    
-    return interpreter.createInt(left / right);
+  public static class Divide implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = thisObj.asInt();
+      int right = arg.asInt();
+      
+      return interpreter.createInt(left / right);
+    }
   }
-
+  
   @Signature("==(other Int -> Bool)")
-  public static Obj _eqeq_(Interpreter interpreter, Obj thisObj, Obj arg) {
-    int left = thisObj.asInt();
-    int right = arg.asInt();
-    
-    return interpreter.createBool(left == right);
+  public static class EqEq implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = thisObj.asInt();
+      int right = arg.asInt();
+      
+      return interpreter.createBool(left == right);
+    }
   }
-
+  
   @Signature("!=(other Int -> Bool)")
-  public static Obj _nteq_(Interpreter interpreter, Obj thisObj, Obj arg) {
-    int left = thisObj.asInt();
-    int right = arg.asInt();
-    
-    return interpreter.createBool(left != right);
+  public static class NotEqual implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = thisObj.asInt();
+      int right = arg.asInt();
+      
+      return interpreter.createBool(left != right);
+    }
   }
-
+  
   @Signature("<(other Int -> Bool)")
-  public static Obj _lt_(Interpreter interpreter, Obj thisObj, Obj arg) {
-    int left = thisObj.asInt();
-    int right = arg.asInt();
-    
-    return interpreter.createBool(left < right);
+  public static class Less implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = thisObj.asInt();
+      int right = arg.asInt();
+      
+      return interpreter.createBool(left < right);
+    }
   }
-
+  
   @Signature(">(other Int -> Bool)")
-  public static Obj _gt_(Interpreter interpreter, Obj thisObj, Obj arg) {
-    int left = thisObj.asInt();
-    int right = arg.asInt();
-    
-    return interpreter.createBool(left > right);
+  public static class Greater implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = thisObj.asInt();
+      int right = arg.asInt();
+      
+      return interpreter.createBool(left > right);
+    }
   }
-
+  
   @Signature("<=(other Int -> Bool)")
-  public static Obj _lteq_(Interpreter interpreter, Obj thisObj, Obj arg) {
-    int left = thisObj.asInt();
-    int right = arg.asInt();
-    
-    return interpreter.createBool(left <= right);
+  public static class LessOrEqual implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = thisObj.asInt();
+      int right = arg.asInt();
+      
+      return interpreter.createBool(left <= right);
+    }
   }
-
+  
   @Signature(">=(other Int -> Bool)")
-  public static Obj _gteq_(Interpreter interpreter, Obj thisObj, Obj arg) {
-    int left = thisObj.asInt();
-    int right = arg.asInt();
-    
-    return interpreter.createBool(left >= right);
+  public static class GreaterOrEqual implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = thisObj.asInt();
+      int right = arg.asInt();
+      
+      return interpreter.createBool(left >= right);
+    }
   }
-
+  
   @Getter("string(-> String)")
-  public static Obj string(Interpreter interpreter, Obj thisObj, Obj arg) {
-    return interpreter.createString(Integer.toString(thisObj.asInt()));
+  public static class String_ implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      return interpreter.createString(Integer.toString(thisObj.asInt()));
+    }
   }
 }

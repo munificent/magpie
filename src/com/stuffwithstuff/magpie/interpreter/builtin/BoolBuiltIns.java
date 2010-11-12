@@ -5,21 +5,27 @@ import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class BoolBuiltIns {
   @Signature("==(other Object -> Bool)")
-  public static Obj _eqeq_(Interpreter interpreter, Obj thisObj, Obj arg) {
-    if (arg.getValue() instanceof Boolean) {
-      return interpreter.createBool(thisObj.asBool() == arg.asBool());
-    } else {
-      return interpreter.createBool(false);
+  public static class EqEq implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      if (arg.getValue() instanceof Boolean) {
+        return interpreter.createBool(thisObj.asBool() == arg.asBool());
+      } else {
+        return interpreter.createBool(false);
+      }
     }
   }
-
+  
   @Getter("not(-> Bool)")
-  public static Obj not(Interpreter interpreter, Obj thisObj, Obj arg) {
-    return interpreter.createBool(!thisObj.asBool());
+  public static class Not implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      return interpreter.createBool(!thisObj.asBool());
+    }
   }
   
   @Getter("string(-> String)")
-  public static Obj string(Interpreter interpreter, Obj thisObj, Obj arg) {
-    return interpreter.createString(Boolean.toString(thisObj.asBool()));
+  public static class String_ implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      return interpreter.createString(Boolean.toString(thisObj.asBool()));
+    }
   }
 }

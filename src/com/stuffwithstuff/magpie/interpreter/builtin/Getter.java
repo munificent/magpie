@@ -3,7 +3,7 @@ package com.stuffwithstuff.magpie.interpreter.builtin;
 import java.lang.annotation.*;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Target(ElementType.TYPE)
 public @interface Getter {
   String value();
 }

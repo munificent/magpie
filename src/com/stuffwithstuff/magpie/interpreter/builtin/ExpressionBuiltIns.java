@@ -5,7 +5,9 @@ import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class ExpressionBuiltIns {
   @Getter("string(-> String)")
-  public static Obj toString(Interpreter interpreter, Obj thisObj, Obj arg) {
-    return interpreter.createString("{ " + thisObj.getValue().toString() + " }");
+  public static class String_ implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      return interpreter.createString("{ " + thisObj.getValue().toString() + " }");
+    }
   }
 }

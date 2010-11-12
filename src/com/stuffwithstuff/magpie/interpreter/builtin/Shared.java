@@ -7,5 +7,5 @@ import java.lang.annotation.*;
  * instead of the main class when processed.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Target(ElementType.TYPE)
 public @interface Shared { }
