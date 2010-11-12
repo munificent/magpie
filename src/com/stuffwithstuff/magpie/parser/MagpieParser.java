@@ -78,7 +78,7 @@ public class MagpieParser extends Parser {
       if (catches.size() > 0) {
         Expr valueExpr = Expr.name("__err__");
         Expr elseExpr = Expr.message(Expr.name("Runtime"), "throw", valueExpr);
-        MatchExprParser.desugarCases(valueExpr, catches, elseExpr);
+        catchExpr = MatchExprParser.desugarCases(valueExpr, catches, elseExpr);
       }
       
       position = position.union(last(1).getPosition());
