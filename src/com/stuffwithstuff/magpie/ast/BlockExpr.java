@@ -5,16 +5,11 @@ import java.util.*;
 import com.stuffwithstuff.magpie.parser.Position;
 
 public class BlockExpr extends Expr {
-  public BlockExpr(Position position, List<Expr> expressions,
-      List<CatchClause> catches) {
+  public BlockExpr(Position position, List<Expr> expressions, Expr catchExpr) {
     super(position);
     
     mExpressions = expressions;
-    if (catches != null) {
-      mCatches = catches;
-    } else {
-      mCatches = new ArrayList<CatchClause>();
-    }
+    mCatchExpr = catchExpr;
   }
   
   public BlockExpr(Position position, List<Expr> expressions) {
@@ -22,7 +17,7 @@ public class BlockExpr extends Expr {
   }
   
   public List<Expr> getExpressions() { return mExpressions; }
-  public List<CatchClause> getCatches() { return mCatches; }
+  public Expr getCatch() { return mCatchExpr; }
   
   @Override
   public <R, C> R accept(ExprVisitor<R, C> visitor, C context) {
@@ -41,5 +36,5 @@ public class BlockExpr extends Expr {
   }
 
   private final List<Expr> mExpressions;
-  private final List<CatchClause> mCatches;
+  private final Expr mCatchExpr;
 }

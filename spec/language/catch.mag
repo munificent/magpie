@@ -1,7 +1,17 @@
 specify("A 'catch' clause in a block") with
+    it should("execute a catch block when an error is thrown") with
+        var caught = false
+        do
+            Runtime throw("error")
+        catch(err String)
+            caught = true
+        end
+        caught shouldBe(true)
+    end
+    
     it should("receive the error thrown by the block") with
         Runtime throw("error")
-    catch(err)
+    catch(err String)
         err shouldBe("error")
     end
 end

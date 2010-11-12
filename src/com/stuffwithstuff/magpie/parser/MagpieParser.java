@@ -4,6 +4,8 @@ import java.util.*;
 
 import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.*;
+import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
+import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.util.Pair;
 
 public class MagpieParser extends Parser {
@@ -58,49 +60,62 @@ public class MagpieParser extends Parser {
     if (match(TokenType.LINE)){
       Position position = last(1).getPosition();
       List<Expr> exprs = new ArrayList<Expr>();
-      List<CatchClause> catches = new ArrayList<CatchClause>();
       
-      while (!match(endToken) && !lookAhead(TokenType.CATCH)) {
+      while (!lookAheadAny(endToken, TokenType.CATCH)) {
         exprs.add(parseExpression());
         consume(TokenType.LINE);
       }
       
+      List<MatchCase> catches = new ArrayList<MatchCase>();
       while (match(TokenType.CATCH)) {
         catches.add(parseCatch());
       }
       
+      consume(endToken);
+      
+      // TODO(bob): This is all pretty hokey.
+      Expr catchExpr = null;
+      if (catches.size() > 0) {
+        Expr valueExpr = Expr.name("__err__");
+        Expr elseExpr = Expr.message(Expr.name("Runtime"), "throw", valueExpr);
+        MatchExprParser.desugarCases(valueExpr, catches, elseExpr);
+      }
+      
       position = position.union(last(1).getPosition());
-      return new BlockExpr(position, exprs, catches);
+      return new BlockExpr(position, exprs, catchExpr);
     } else {
       return parseExpression();
     }
   }
   
-  public CatchClause parseCatch() {
-    FunctionType type = parseFunctionType();
+  private MatchCase parseCatch() {
+    consume(TokenType.LEFT_PAREN);
+    
+    String name = MatchExprParser.parseBinding(this);
+    Pattern pattern = MatchExprParser.parsePattern(this);
+
+    consume(TokenType.RIGHT_PAREN);
     
     Expr body;
     if (match(TokenType.LINE)){
       Position position = last(1).getPosition();
       List<Expr> exprs = new ArrayList<Expr>();
       
-      while (!lookAheadAny(TokenType.END, TokenType.CATCH)) {
+      while (!lookAheadAny(TokenType.CATCH, TokenType.END)) {
         exprs.add(parseExpression());
         consume(TokenType.LINE);
       }
-      
-      // Consume the last end if there is one.
-      match(TokenType.END);
       
       position = position.union(last(1).getPosition());
       body = new BlockExpr(position, exprs);
     } else {
       body = parseExpression();
+      consume(TokenType.LINE);
     }
-    
-    return new CatchClause(type, body);
-  }
 
+    return new MatchCase(name, pattern, body);
+  }
+  
   // fn (a) print "hi"
   public Expr parseFunction() {
     Position position = current().getPosition();

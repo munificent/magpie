@@ -72,7 +72,30 @@ public class MatchExprParser implements ExprParser {
 
     return new MatchCase(name, pattern, body);
   }
-
+  
+  public static String parseBinding(MagpieParser parser) {
+    if ((parser.current().getType() == TokenType.NAME) &&
+        Character.isLowerCase(parser.current().getString().charAt(0))) {
+      return parser.consume().getString();
+    }
+    
+    // The token isn't a valid variable binding name.
+    return null;
+  }
+  
+  public static Pattern parsePattern(MagpieParser parser) {
+    if (parser.match(TokenType.BOOL)) {
+      return new LiteralPattern(Expr.bool(parser.last(1).getBool()));
+    } else if (parser.match(TokenType.INT)) {
+      return new LiteralPattern(Expr.integer(parser.last(1).getInt()));
+    } else if (parser.match(TokenType.STRING)) {
+      return new LiteralPattern(Expr.string(parser.last(1).getString()));
+    } else {
+      Expr typeAnnotation = parser.parseTypeExpression();
+      return new TypePattern(typeAnnotation);
+    }
+  }
+  
   @Override
   public Expr parse(MagpieParser parser) {
     parser.consume(TokenType.MATCH);
@@ -108,29 +131,6 @@ public class MatchExprParser implements ExprParser {
     exprs.add(desugarCases(valueExpr, cases, elseCase));
     
     return new BlockExpr(position, exprs);
-  }
-    
-  private static String parseBinding(MagpieParser parser) {
-    if ((parser.current().getType() == TokenType.NAME) &&
-        Character.isLowerCase(parser.current().getString().charAt(0))) {
-      return parser.consume().getString();
-    }
-    
-    // The token isn't a valid variable binding name.
-    return null;
-  }
-  
-  private static Pattern parsePattern(MagpieParser parser) {
-    if (parser.match(TokenType.BOOL)) {
-      return new LiteralPattern(Expr.bool(parser.last(1).getBool()));
-    } else if (parser.match(TokenType.INT)) {
-      return new LiteralPattern(Expr.integer(parser.last(1).getInt()));
-    } else if (parser.match(TokenType.STRING)) {
-      return new LiteralPattern(Expr.string(parser.last(1).getString()));
-    } else {
-      Expr typeAnnotation = parser.parseTypeExpression();
-      return new TypePattern(typeAnnotation);
-    }
   }
   
   /**
