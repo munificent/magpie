@@ -64,7 +64,7 @@ class TestSuite
 end
 
 extend class Object
-    def shouldBe(expected, message String ->)
+    def shouldBe(expected, message String | Nothing ->)
         if this != expected then
             if message == nothing then
                 message = "Expected " + expected + " but was " + this
@@ -75,38 +75,53 @@ extend class Object
             currentTestSuite pass()
         end
     end
-
-    def envExpectCheckError(block)
-        (Runtime checkExpression(block) count > 0) shouldBe(true,
-            "Should have a check error but did not.")
-    end
-
-    def envExpectCheckOK(block)
-        var errors = Runtime checkExpression(block)
-        errors count shouldBe(0, "Should not have any check errors but had:")
-        for error = errors do print("      - " + error)
-    end
 end
 
-// Add methods to check functions.
+def envExpectCheckError(block)
+    (Runtime checkExpression(block) count > 0) shouldBe(true,
+        "Should have a check error but did not.")
+end
+
+def envExpectCheckOK(block)
+    var errors = Runtime checkExpression(block)
+    errors count shouldBe(0, "Should not have any check errors but had:")
+    for error = errors do print("      - " + error)
+end
+
+// Verifies that the function has no type check errors.
 def Function shouldCheck()
     var errors = Runtime checkFunction(this)
     errors count shouldBe(0, "Function should not have any check errors but had:")
     for error = errors do print("      - " + error)
 end
 
+// Verifies that the given function does have one or more type check errors.
 def Function shouldNotCheck()
     (Runtime checkFunction(this) count > 0) shouldBe(true,
         "Function should have one or more check errors but did not.")
 end
 
-// Add methods to check classes.
+// Verifies that a function throws an error of the given class. Will execute the
+// function. 
+def Function shouldThrow(errorClass Class ->)
+    var caught = false
+    do
+        this()
+    catch(err Error)
+        err type shouldBe(errorClass)
+        caught = true
+    end
+    caught shouldBe(true)
+end
+
+// Verifies that the class has no type check errors.
 def Class shouldCheck()
     var errors = Runtime checkClass(this)
     errors count shouldBe(0, "Class should not have any check errors but had:")
     for error = errors do print("      - " + error)
 end
 
+// Verifies that the class has one or more type check errors.
 def Class shouldNotCheck()
     (Runtime checkClass(this) count > 0) shouldBe(true,
         "Class should have one or more check errors but did not.")

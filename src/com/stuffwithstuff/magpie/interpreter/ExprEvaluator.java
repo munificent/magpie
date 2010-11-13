@@ -288,8 +288,13 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(VariableExpr expr, EvalContext context) {
     Obj value = evaluate(expr.getValue(), context);
 
-    context.define(expr.getName(), value);
-    return value;
+    if (context.lookUpHere(expr.getName()) == null) {
+      context.define(expr.getName(), value);
+      return value;
+    } else {
+      // Cannot redefine a variable in the same scope.
+      return mInterpreter.throwError("RedefinitionError");
+    }
   }
   
   private boolean isTruthy(Expr expr, Obj receiver) {

@@ -1,0 +1,5 @@
+class Error
+end
+
+class RedefinitionError : Error
+end

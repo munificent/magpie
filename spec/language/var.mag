@@ -1,6 +1,3 @@
-// TODO(bob):
-// - runtime error on redefinition
-
 specify("A 'var' expression") with
     it should("bind a value to a name") with
         var i = "value"
@@ -14,6 +11,13 @@ specify("A 'var' expression") with
             i shouldBe("inner")
         end
         i shouldBe("outer")
+    end
+        
+    it should("not allow redefining in the same scope") with
+        fn
+            var i = "first"
+            var i = "second"
+        end shouldThrow(RedefinitionError)
     end
     
     it should("allow a block initializer") with

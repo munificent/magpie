@@ -275,6 +275,12 @@ public class Interpreter {
     mHost.print(text);
   }
   
+  public Obj throwError(String errorClassName) {
+    // Look up the error class.
+    ClassObj classObj = (ClassObj) mGlobalScope.get(errorClassName);
+    throw new ErrorException(classObj.instantiate());
+  }
+  
   public void runtimeError(Expr expr, String format, Object... args) {
     mHost.runtimeError(expr.getPosition(), String.format(format, args));
   }

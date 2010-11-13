@@ -7,6 +7,7 @@ import("Tuple.mag")
 import("Types.mag")
 import("Type.mag")
 import("OrType.mag")
+import("Error.mag")
 
 // Returns the argument cast to the given type if it's type is an exact match
 // and not a subtype, otherwise returns nothing.
