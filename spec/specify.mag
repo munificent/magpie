@@ -107,7 +107,7 @@ def Function shouldThrow(errorClass Class ->)
     var caught = false
     do
         this()
-    catch(err Error)
+    catch err Error then
         err type shouldBe(errorClass)
         caught = true
     end

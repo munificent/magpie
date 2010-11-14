@@ -89,12 +89,11 @@ public class MagpieParser extends Parser {
   }
   
   private MatchCase parseCatch() {
-    consume(TokenType.LEFT_PAREN);
     
     String name = MatchExprParser.parseBinding(this);
     Pattern pattern = MatchExprParser.parsePattern(this);
 
-    consume(TokenType.RIGHT_PAREN);
+    consume(TokenType.THEN);
     
     Expr body;
     if (match(TokenType.LINE)){
