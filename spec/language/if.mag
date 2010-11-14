@@ -31,6 +31,18 @@ specify("An 'if then' expression") with
         if true then var a = "inside"
         a shouldBe("outside")
     end
+        
+    it should("allow a block for the 'if' expression") with
+        var a = 0
+        if
+            a = a + 1
+            a = a + 2
+            true
+        then
+            true
+        end
+        a shouldBe(3)
+    end
     
     it should("allow a block for the 'then' expression") with
         var a = 0
@@ -85,7 +97,19 @@ specify("An 'if then else' expression") with
         if false then "ignored" else var a = "shadow"
         a shouldBe("outside")
     end
-
+        
+    it should("allow a block for the 'if' expression") with
+        var a = 0
+        if
+            a = a + 1
+            a = a + 2
+            true
+        then
+            true
+        else "ignored"
+        a shouldBe(3)
+    end
+    
     it should("allow a block for the 'then' expression") with
         var a = 0
         if true then

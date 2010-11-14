@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie.parser;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.BlockExpr;
@@ -11,6 +12,7 @@ import com.stuffwithstuff.magpie.ast.pattern.LiteralPattern;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.TypePattern;
+import com.stuffwithstuff.magpie.parser.MagpieParser.BlockOptions;
 
 // TODO(bob): This whole implementation is pretty hideous. Just slapping
 // something together so I can start getting it working. Will refactor and clean
@@ -53,7 +55,7 @@ public class MatchExprParser implements ExprParser {
     return chained;
   }
   
-  public static MatchCase parseCase(MagpieParser parser, TokenType caseStart) {
+  private static MatchCase parseCase(MagpieParser parser) {
     // Valid patterns:
     // 1
     // a 1
@@ -68,8 +70,11 @@ public class MatchExprParser implements ExprParser {
     Pattern pattern = parsePattern(parser);
 
     parser.consume(TokenType.THEN);
-    Expr body = parseBody(parser, caseStart);
-
+    
+    Expr body = parser.parseBlock(
+        EnumSet.of(BlockOptions.CONSUME_LINE_AFTER_EXPRESSION),
+        TokenType.CASE, TokenType.ELSE, TokenType.END);
+    
     return new MatchCase(name, pattern, body);
   }
   
@@ -116,13 +121,15 @@ public class MatchExprParser implements ExprParser {
     // Parse the cases.
     List<MatchCase> cases = new ArrayList<MatchCase>();
     while (parser.match(TokenType.CASE)) {
-      cases.add(parseCase(parser, TokenType.CASE));
+      cases.add(parseCase(parser));
     }
     
     // Parse the else case, if present.
     Expr elseCase = null;
     if (parser.match(TokenType.ELSE)) {
-      elseCase = parseBody(parser, TokenType.END);
+      elseCase = parser.parseBlock(
+          EnumSet.of(BlockOptions.CONSUME_LINE_AFTER_EXPRESSION),
+          TokenType.END);
     }
     
     parser.consume(TokenType.END);
@@ -131,33 +138,5 @@ public class MatchExprParser implements ExprParser {
     exprs.add(desugarCases(valueExpr, cases, elseCase));
     
     return new BlockExpr(position, exprs);
-  }
-  
-  /**
-   * Parses the body of a single case: the expression after "then" or "else".
-   * Handles both single expression and block bodies. Will leave the parser
-   * sitting on the "case", "else", or "end" token that indicates the end of
-   * this case.
-   * 
-   * @param   parser  The parser.
-   * @return          The parsed case body.
-   */
-  private static Expr parseBody(MagpieParser parser, TokenType caseStart) {
-    if (parser.match(TokenType.LINE)){
-      Position position = parser.last(1).getPosition();
-      List<Expr> exprs = new ArrayList<Expr>();
-      
-      while (!parser.lookAheadAny(caseStart, TokenType.ELSE, TokenType.END)) {
-        exprs.add(parser.parseExpression());
-        parser.consume(TokenType.LINE);
-      }
-      
-      position = position.union(parser.last(1).getPosition());
-      return new BlockExpr(position, exprs);
-    } else {
-      Expr body = parser.parseExpression();
-      parser.consume(TokenType.LINE);
-      return body;
-    }
   }
 }

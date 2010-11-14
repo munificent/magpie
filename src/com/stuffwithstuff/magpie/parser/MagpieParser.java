@@ -7,8 +7,14 @@ import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.util.Pair;
+import com.stuffwithstuff.magpie.util.Ref;
 
-public class MagpieParser extends Parser {
+public class MagpieParser extends Parser {  
+  public static enum BlockOptions {
+    CONSUME_END,
+    CONSUME_LINE_AFTER_EXPRESSION
+  }
+
   public MagpieParser(Lexer lexer) {
     super(lexer);
     
@@ -53,15 +59,26 @@ public class MagpieParser extends Parser {
   }
 
   public Expr parseBlock() {
-    return parseBlock(TokenType.END);
+    return parseBlock(EnumSet.of(BlockOptions.CONSUME_END));
+  }
+
+  public Expr parseBlock(EnumSet<BlockOptions> options,
+      TokenType... endTokenTypes) {
+    return parseBlock(new Ref<Boolean>(), options, endTokenTypes);
   }
   
-  public Expr parseBlock(TokenType endToken) {
+  public Expr parseBlock(Ref<Boolean> consumedEnd, EnumSet<BlockOptions> options,
+      TokenType... endTokenTypes) {
     if (match(TokenType.LINE)){
       Position position = last(1).getPosition();
       List<Expr> exprs = new ArrayList<Expr>();
       
-      while (!lookAheadAny(endToken, TokenType.CATCH)) {
+      while (true) {
+        if (options.contains(BlockOptions.CONSUME_END) &&
+            lookAhead(TokenType.END)) break;
+        if (lookAheadAny(endTokenTypes)) break;
+        if (lookAhead(TokenType.CATCH)) break;
+        
         exprs.add(parseExpression());
         consume(TokenType.LINE);
       }
@@ -71,7 +88,14 @@ public class MagpieParser extends Parser {
         catches.add(parseCatch());
       }
       
-      consume(endToken);
+      // If the block ends with 'end', then we want to consume that token,
+      // otherwise we want to leave it unconsumed to be consistent with the
+      // single-expression block case.
+      if (options.contains(BlockOptions.CONSUME_END) && match(TokenType.END)) {
+        consumedEnd.set(true);
+      } else {
+        consumedEnd.set(false);
+      }
       
       // TODO(bob): This is all pretty hokey.
       Expr catchExpr = null;
@@ -84,7 +108,12 @@ public class MagpieParser extends Parser {
       position = position.union(last(1).getPosition());
       return new BlockExpr(position, exprs, catchExpr);
     } else {
-      return parseExpression();
+      Expr body = parseExpression();
+      if (options.contains(BlockOptions.CONSUME_LINE_AFTER_EXPRESSION)) {
+        consume(TokenType.LINE);
+      }
+      consumedEnd.set(false);
+      return body;
     }
   }
   
