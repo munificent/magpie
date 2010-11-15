@@ -44,5 +44,6 @@ import("core/Class/name.mag")
 import("core/Class/new.mag")
 import("core/Int/string.mag")
 import("core/Object/as.mag")
+import("core/Object/expecting.mag")
 
 endTests()

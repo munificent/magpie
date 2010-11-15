@@ -129,7 +129,12 @@ public class Interpreter {
     
     // Evaluate the expressions. This is the load time evaluation.
     for (Expr expr : expressions) {
-      evaluate(expr, context);
+      try {
+        evaluate(expr, context);
+      } catch(ErrorException err) {
+        // TODO(bob): Better error message here!
+        mHost.runtimeError(expr.getPosition(), "Uncaught error.");
+      }
     }
   }
 

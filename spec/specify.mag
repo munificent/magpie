@@ -40,7 +40,13 @@ class TestSuite
         currentTest = description
         var testsBefore = tests
         var failuresBefore = failures
-        block()
+        
+        do
+            block()
+        catch Error then
+            fail("Unexpected error: " + it)
+        end
+        
         if tests == testsBefore then
             print("NONE: " + name + " should " + currentTest + ".")
         end

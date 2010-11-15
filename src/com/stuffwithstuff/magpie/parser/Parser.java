@@ -163,7 +163,7 @@ public abstract class Parser {
 
       if (i < types.length - 2) {
         builder.append(", ");
-      } else if (i < types.length - 2) {
+      } else if (i < types.length - 1) {
         builder.append(" or ");
       }
     }

@@ -19,9 +19,14 @@ end
 // Returns the object cast to the given type if it can be safely assigned to
 // that type, otherwise returns nothing.
 def Object as[T -> T | Nothing]
-    var type = unsafecast[Type](this type)
-    if type == T then return unsafecast[T](this)
-    if T canAssignFrom(type) then unsafecast[T](this)
+    if type == T or T canAssignFrom(type) then unsafecast[T](this)
+end
+
+// Returns the object cast to the given type if it can be safely assigned to
+// that type, otherwise throws an UnexpectedTypeError.
+def Object expecting[T -> T]
+    if type == T or T canAssignFrom(type) then return unsafecast[T](this)
+    UnexpectedTypeError throw(T, type)
 end
 
 // Add an arrow operator to make function types out of other types:
