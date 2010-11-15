@@ -47,21 +47,24 @@ class TestSuite
     end
     
     def pass(->) tests = tests + 1
-    
+        
+    def fail(message String ->)
+        if failures == 0 then
+            print("FAIL: " + name + " should " + currentTest + ".")
+        end
+        tests = tests + 1
+        failures = failures + 1
+        print("      " + message)
+    end
+
     var name        String
     var currentTest String
     var tests       Int
     var failures    Int
 end
-    
+        
 def fail(message String ->)
-    if currentTestSuite failures == 0 then
-        print("FAIL: " + currentTestSuite name + " should " +
-            currentTestSuite currentTest + ".")
-    end
-    currentTestSuite tests = currentTestSuite tests + 1
-    currentTestSuite failures = currentTestSuite failures + 1
-    print("      " + message)
+    currentTestSuite fail(message)
 end
 
 extend class Object

@@ -3,7 +3,7 @@ specify("A 'catch' clause in a block") with
         var caught = false
         do
             Runtime throw("error")
-        catch err String then
+        catch String then
             caught = true
         end
         caught shouldBe(true)
@@ -12,7 +12,7 @@ specify("A 'catch' clause in a block") with
     it should("evaluate to the caught expression") with
         do
             Runtime throw("error")
-        catch err String then "caught"
+        catch String then "caught"
         end shouldBe("caught")
     end
      
@@ -21,15 +21,21 @@ specify("A 'catch' clause in a block") with
     catch err String then
         err shouldBe("error")
     end
-        
+     
+    it should("bind the error to 'it' if no name is provided") with
+        Runtime throw("error")
+    catch String then
+        it shouldBe("error")
+    end
+
     it should("unwind past uncaught error types") with
         var caught = false
         do
             do
                 Runtime throw("error")
-            catch err Int then fail("Should not be caught here.")
+            catch Int then fail("Should not be caught here.")
             end
-        catch err String then
+        catch String then
             caught = true
         end
         caught shouldBe(true)

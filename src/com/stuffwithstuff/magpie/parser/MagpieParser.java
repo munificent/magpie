@@ -122,6 +122,9 @@ public class MagpieParser extends Parser {
     String name = MatchExprParser.parseBinding(this);
     Pattern pattern = MatchExprParser.parsePattern(this);
 
+    // Infer 'it' for the matched value if no name is provided.
+    if (name == null) name = "it";
+    
     consume(TokenType.THEN);
     
     Expr body;
