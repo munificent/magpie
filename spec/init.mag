@@ -20,6 +20,7 @@ import("language/match.mag")
 import("language/newline.mag")
 import("language/or.mag")
 import("language/return.mag")
+import("language/string.mag")
 import("language/var.mag")
 import("language/with.mag")
 

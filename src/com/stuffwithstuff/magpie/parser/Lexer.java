@@ -173,9 +173,32 @@ public class Lexer {
         String text = mRead.substring(1, mRead.length() - 1);
         mState = LexState.DEFAULT;
         return new Token(currentPosition(), TokenType.STRING, text);
+      } else if (lookAhead("\\")) {
+        mState = LexState.IN_STRING_ESCAPE;
+        advance(false);
+        return null;
       }
       // Consume other characters.
       return advance();
+      
+    case IN_STRING_ESCAPE:
+      if (lookAhead("\\")) {
+        mRead += "\\";
+        mState = LexState.IN_STRING;
+        advance(false);
+        return null;
+      } else if (lookAhead("\"")) {
+        mRead += "\"";
+        mState = LexState.IN_STRING;
+        advance(false);
+        return null;
+      } else if (lookAhead("n")) {
+        mRead += "\n";
+        mState = LexState.IN_STRING;
+        advance(false);
+        return null;
+      }
+      throw new ParseException("Unknown string escape character " + c + ".");
 
     case IN_LINE_COMMENT:
       if (match("\n") || match("\r")) {
@@ -309,12 +332,18 @@ public class Lexer {
   }
   
   private Token advance() {
+    return advance(true);
+  }
+  
+  private Token advance(boolean addToRead) {
     if (mText.current() == '\0') {
       return new Token(Position.none(), TokenType.EOF);
     }
     
-    mRead += mText.current();
-
+    if (addToRead) {
+      mRead += mText.current();
+    }
+    
     // Update the position.
     if (mText.current() == '\n') {
       mLine++;
@@ -326,12 +355,6 @@ public class Lexer {
     mText.advance();
 
     return null;
-    /*
-    // Return whether or not we've advanced to the end (+1 so that we can
-    // process a trailing \0 and close the last Token).
-    if (mText.lookAhead(1).length() == 1) return null;
-    return new Token(Position.none(), TokenType.EOF);
-    */
   }
   
   private void advance(int count) {
@@ -355,7 +378,8 @@ public class Lexer {
 
   private enum LexState {
     DEFAULT, IN_NAME, IN_OPERATOR, IN_NUMBER, IN_DECIMAL, IN_FRACTION, IN_MINUS,
-    IN_STRING, IN_LINE_COMMENT, IN_BLOCK_COMMENT, IN_LINE_CONTINUATION
+    IN_STRING, IN_STRING_ESCAPE, IN_LINE_COMMENT, IN_BLOCK_COMMENT,
+    IN_LINE_CONTINUATION
   }
 
   private final String mSourceFile;
