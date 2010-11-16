@@ -1,0 +1,64 @@
+specify("A class constructor") with
+    def testClass(block)
+        var c = Class new("c")
+        c defineConstructor(block)
+        c declareField("f", fn Int)
+        c
+    end
+    
+    it should("definitely assign all non-initialized fields") with
+        testClass with
+            nothing
+        end shouldNotCheck()
+
+        testClass with
+            f = 123
+        end shouldCheck()
+
+        // if
+        testClass with
+            if true then
+                f = 123
+            end
+        end shouldNotCheck()
+
+        testClass with
+            if true then
+                f = 123
+            else
+                f = 123
+            end
+        end shouldCheck()
+
+        // and
+        testClass with
+            (f = 123) and false
+        end shouldNotCheck()
+
+        testClass with
+            true and (f = 123)
+        end shouldNotCheck()
+
+        testClass with
+            (f = 123) and (f = 123)
+        end shouldCheck()
+
+        // or
+        testClass with
+            (f = 123) or false
+        end shouldNotCheck()
+
+        testClass with
+            true or (f = 123)
+        end shouldNotCheck()
+
+        testClass with
+            (f = 123) or (f = 123)
+        end shouldCheck()
+    end
+    
+    // TODO(bob):
+    // - Make sure you can't read from an uninitialized field
+    // - Test with local variable shadowing a field
+    // - What about calling methods before all fields are assigned?
+end

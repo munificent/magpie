@@ -12,6 +12,7 @@ public class ClassObj extends Obj {
     super(metaclass);
     mName = name;
     mParent = parent;
+    mFieldDeclarations = new HashMap<String, FnObj>();
     mFieldInitializers = new HashMap<String, FnObj>();
     mGetters = new HashMap<String, Callable>();
     mSetters = new HashMap<String, Callable>();
@@ -20,9 +21,14 @@ public class ClassObj extends Obj {
   public ClassObj(String name, ClassObj parent) {
     mName = name;
     mParent = parent;
+    mFieldDeclarations = new HashMap<String, FnObj>();
     mFieldInitializers = new HashMap<String, FnObj>();
     mGetters = new HashMap<String, Callable>();
     mSetters = new HashMap<String, Callable>();
+  }
+  
+  public Map<String, FnObj> getFieldDeclarations() {
+    return mFieldDeclarations;
   }
   
   public Map<String, FnObj> getFieldInitializers() {
@@ -106,6 +112,10 @@ public class ClassObj extends Obj {
     return mConstructor;
   }
   
+  public void declareField(String name, FnObj type) {
+    mFieldDeclarations.put(name, type);
+  }
+  
   public void defineField(String name, FnObj initializer) {
     mFieldInitializers.put(name, initializer);
   }
@@ -126,6 +136,7 @@ public class ClassObj extends Obj {
   private final String mName;
   private ClassObj mParent;
   private Callable mConstructor;
+  private final Map<String, FnObj> mFieldDeclarations;
   private final Map<String, FnObj> mFieldInitializers;
   private final Map<String, Callable> mGetters;
   private final Map<String, Callable> mSetters;

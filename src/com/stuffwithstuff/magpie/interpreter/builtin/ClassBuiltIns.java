@@ -16,6 +16,9 @@ public class ClassBuiltIns {
       
       ClassObj classObj = (ClassObj)thisObj;
   
+      // Declare the field.
+      classObj.declareField(name, type);
+      
       // Add a getter.
       classObj.defineGetter(name,
           new FieldGetter(name, type.getFunction().getFunction().getBody()));

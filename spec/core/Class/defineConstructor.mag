@@ -23,19 +23,4 @@ specify("The 'defineConstructor' method on Class") with
         c new()
         called shouldBe("after")
     end
-
-    // TODO(bob): Definite assignment isn't implemented yet.
-    /*
-    it should("definitely assign all non-initialized fields") with
-        var c = Class new("c")
-        c defineConstructor(fn() nothing)
-        c declareField("f", fn Int)
-        c shouldNotCheck()
-
-        var d = Class new("c")
-        d defineConstructor(fn() f = 123)
-        d declareField("f", fn Int)
-        d shouldCheck()
-    end
-    */
 end

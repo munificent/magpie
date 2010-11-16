@@ -352,53 +352,17 @@ public class MagpieParser extends Parser {
    * Parses a series of operator expressions like "a + b - c".
    */
   private Expr operator() {
-    Expr left = blockArgument();
+    Expr left = message();
     
     while (match(TokenType.OPERATOR)) {
       String op = last(1).getString();
-      Expr right = blockArgument();
+      Expr right = message();
 
       left = Expr.message(left.getPosition().union(right.getPosition()),
           left, op, right);
     }
     
     return left;
-  }
-  
-  /**
-   * Parse series of block arguments (i.e. a "with" block).
-   */
-  private Expr blockArgument() {
-    Expr expr = message();
-    
-    while(match(TokenType.WITH)) {
-      // Parse the parameter list if given.
-      FunctionType blockType;
-      if (lookAhead(TokenType.LEFT_PAREN)) {
-        blockType = parseFunctionType();
-      } else {
-        // Else just assume a single "it" parameter.
-        blockType = new FunctionType(Collections.singletonList(Identifiers.IT),
-            Expr.name("Dynamic"), Expr.name("Dynamic"));
-      }
-
-      // Parse the block and wrap it in a function.
-      Expr block = parseBlock();
-      block = new FnExpr(block.getPosition(), blockType, block, false);
-      
-      // Apply it to the previous expression.
-      if (expr instanceof ApplyExpr) {
-        // foo(123) with ...  --> Apply(Msg(foo), Tuple(123, block))
-        ApplyExpr apply = (ApplyExpr)expr;
-        Expr arg = addTupleField(apply.getArg(), block);
-        expr = new ApplyExpr(apply.getTarget(), arg, false);
-      } else {
-        // 123 with ...  --> Apply(Int(123), block)
-        expr = new ApplyExpr(expr, block, false);
-      }
-    }
-    
-    return expr;
   }
   
   /**
@@ -432,6 +396,31 @@ public class MagpieParser extends Parser {
           consume(TokenType.RIGHT_PAREN);
         }
         message = new ApplyExpr(message, arg, false);
+      } else if (match(TokenType.WITH)) {
+        // Parse the parameter list if given.
+        FunctionType blockType;
+        if (lookAhead(TokenType.LEFT_PAREN)) {
+          blockType = parseFunctionType();
+        } else {
+          // Else just assume a single "it" parameter.
+          blockType = new FunctionType(Collections.singletonList(Identifiers.IT),
+              Expr.name("Dynamic"), Expr.name("Dynamic"));
+        }
+
+        // Parse the block and wrap it in a function.
+        Expr block = parseBlock();
+        block = new FnExpr(block.getPosition(), blockType, block, false);
+        
+        // Apply it to the previous expression.
+        if (message instanceof ApplyExpr) {
+          // foo(123) with ...  --> Apply(Msg(foo), Tuple(123, block))
+          ApplyExpr apply = (ApplyExpr)message;
+          Expr arg = addTupleField(apply.getArg(), block);
+          message = new ApplyExpr(apply.getTarget(), arg, false);
+        } else {
+          // 123 with ...  --> Apply(Int(123), block)
+          message = new ApplyExpr(message, block, false);
+        }
       } else {
         break;
       }

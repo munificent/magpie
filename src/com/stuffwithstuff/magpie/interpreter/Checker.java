@@ -62,6 +62,10 @@ public class Checker {
   public void checkClass(ClassObj classObj) {
     EvalContext staticContext = mInterpreter.createTopLevelContext();
     
+    // Check the constructor.
+    DefiniteFieldAssignment assignment = new DefiniteFieldAssignment();
+    assignment.check(this, classObj);
+    
     // Check all of the methods.
     for (Entry<String, Callable> method : classObj.getMethods().entrySet()) {
       // Only check user-defined methods.

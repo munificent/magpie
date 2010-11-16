@@ -69,7 +69,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     setter.invoke(mInterpreter, receiver, value);
     return value;
   }
-
+  
   @Override
   public Obj visit(BlockExpr expr, EvalContext context) {
     try {
