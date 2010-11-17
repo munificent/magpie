@@ -1,5 +1,5 @@
 interface Type
-    def canAssignFrom(other Type -> Bool)
+    def assignsFrom?(other Type -> Bool)
     def getMemberType(name String -> Type | Nothing)
     def getSetterType(name String -> Type | Nothing)
 end

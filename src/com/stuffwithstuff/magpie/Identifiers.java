@@ -7,7 +7,7 @@ package com.stuffwithstuff.magpie;
 public final class Identifiers {
   public static final String ASSIGN = "assign";
   public static final String CALL = "call";
-  public static final String CAN_ASSIGN_FROM = "canAssignFrom";
+  public static final String ASSIGNS_FROM = "assignsFrom?";
   public static final String COUNT = "count";
   public static final String CURRENT = "current";
   public static final String DECLARE_FIELD = "declareField";

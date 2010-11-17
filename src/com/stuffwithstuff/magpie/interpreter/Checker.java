@@ -264,7 +264,7 @@ public class Checker {
       success = true;
     } else {
       Obj matches = mInterpreter.invokeMethod(expected,
-          Identifiers.CAN_ASSIGN_FROM, actual);
+          Identifiers.ASSIGNS_FROM, actual);
       success = matches.asBool();
     }
     

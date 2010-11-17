@@ -29,7 +29,7 @@ extend class Tuple
         s + ")"
     end
 
-    def canAssignFrom(other Type -> Bool)
+    def assignsFrom?(other Type -> Bool)
         // TODO(bob): In addition to allowing wider tuples to subtype to
         // narrower ones (like (Int, String) <: (Int, String, Bool), we could
         // also allow narrow ones to subtype to wider ones if the extra fields
@@ -44,7 +44,7 @@ extend class Tuple
             for field = this
             for otherField = otherTuple do
                 let otherTypeField = otherField as[Type] then
-                    if field canAssignFrom(otherTypeField) not then return false
+                    if field assignsFrom?(otherTypeField) not then return false
                 else return false
             end
     

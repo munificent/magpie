@@ -19,7 +19,7 @@ class Interface
         members add(Member new(name, type))
     end
 
-    def canAssignFrom(other Type -> Bool)
+    def assignsFrom?(other Type -> Bool)
         // An interface can always assign from itself. This is critical to
         // allow an interface that references itself in a member from causing a
         // stack overflow during checking.
@@ -29,7 +29,7 @@ class Interface
             var type = member memberType()
             let otherMember = other getMemberType(member name) then
                 // Must be assignable.
-                if type canAssignFrom(otherMember) not then
+                if type assignsFrom?(otherMember) not then
                     print(other string + " does not implement " + name +
                         " because " + member name + " is the wrong type")
                     print("expected " + type + " but got " + otherMember)

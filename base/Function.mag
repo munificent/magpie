@@ -20,15 +20,13 @@ class FunctionType
         result
     end
 
-    // TODO(bob): Once interfaces are in, function types can just become sugar for
-    // creating ICallable(Arg, Return) instances.
-    def canAssignFrom(other Type -> Bool)
+    def assignsFrom?(other Type -> Bool)
         // Both must be functions.
         let otherFn = other as[FunctionType] then
             // Parameter must be contravariant and return must be covariant.
             if static? != otherFn static? then return false
-            if otherFn paramType canAssignFrom(paramType) not then return false
-            if returnType canAssignFrom(otherFn returnType) not then return false
+            if otherFn paramType assignsFrom?(paramType) not then return false
+            if returnType assignsFrom?(otherFn returnType) not then return false
             
             true
         else false

@@ -6,7 +6,7 @@ extend class Array
         ArrayType new(elementType)
     end
 
-    shared def canAssignFrom(other Type -> Bool)
+    shared def assignsFrom?(other Type -> Bool)
         if this == other then
             true
         else if other type == ArrayType then
@@ -99,7 +99,7 @@ class ArrayType
     
     get string String = "array of " + elementType
 
-    def canAssignFrom(other Type -> Bool)
+    def assignsFrom?(other Type -> Bool)
         let otherArray = other as[ArrayType] then
             // Element type must match exactly (not variant).
             elementType == otherArray elementType
@@ -167,10 +167,10 @@ class ArrayIteratorType
     
     get string String = "array of " + elementType + " iterator"
 
-    def canAssignFrom(other Type -> Bool)
+    def assignsFrom?(other Type -> Bool)
         let otherArray = other as[ArrayIteratorType] then
             // Array iterators are covariant with their element type.
-            elementType canAssignFrom(otherArray elementType)
+            elementType assignsFrom?(otherArray elementType)
         else false
     end
     

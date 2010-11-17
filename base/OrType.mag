@@ -47,18 +47,18 @@ class OrType
 
     def !=(other -> Bool) (this == other) not
 
-    def canAssignFrom(other Type -> Bool)
+    def assignsFrom?(other Type -> Bool)
         let orType = other as[OrType] then
             // It's also an or, so see if all of its cases are matched by one of
             // the ones here.
             for otherCase = orType cases do
-                if canAssignFrom(otherCase) not then return false
+                if assignsFrom?(otherCase) not then return false
             end
             true
         else
             // It's a regular class, so see if any of the cases match it.
             for type = cases do
-                if type canAssignFrom(other) then return true
+                if type assignsFrom?(other) then return true
             end
             false
         end
@@ -72,8 +72,8 @@ class OrType
                     // All types must match.
                     // TODO(bob): Right now, the types of all cases must match
                     // exactly. We could loosen this to allow subtypes.
-                    if firstType canAssignFrom(method) not then return nothing
-                    if method canAssignFrom(firstType) not then return nothing
+                    if firstType assignsFrom?(method) not then return nothing
+                    if method assignsFrom?(firstType) not then return nothing
                 else return nothing
             end
             
@@ -88,10 +88,10 @@ class OrType
                     // All types must match.
                     // TODO(bob): Right now, the types of all cases must match
                     // exactly. We could loosen this to allow subtypes.
-                    if firstType canAssignFrom(method) not then return nothing
+                    if firstType assignsFrom?(method) not then return nothing
                     // TODO(bob): Block if here is to get around grammar
                     // confusing 'else' with being for this 'if'.
-                    if method canAssignFrom(firstType) not then return nothing
+                    if method assignsFrom?(firstType) not then return nothing
                 else
                     // The setter must be present in all cases
                     return nothing
