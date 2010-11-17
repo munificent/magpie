@@ -143,7 +143,7 @@ public class DefiniteFieldAssignment implements ExprVisitor<Set<String>, EvalCon
   }
   
   @Override
-  public Set<String> visit(ObjectExpr expr, EvalContext context) {
+  public Set<String> visit(RecordExpr expr, EvalContext context) {
     Set<String> assigned = emptySet();
     
     for (Pair<String, Expr> field : expr.getFields()) {

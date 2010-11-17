@@ -462,7 +462,7 @@ public class MagpieParser extends Parser {
       position = position.union(last(1).getPosition());
       return new ExpressionExpr(position, expr);
     } else if (lookAhead(TokenType.NAME, TokenType.COLON)) {
-      return parseObjectLiteral();
+      return parseRecord();
     }
     
     // See if we're at a keyword we know how to parse.
@@ -476,9 +476,9 @@ public class MagpieParser extends Parser {
   }
   
   /**
-   * Parses an object literal like "x: 1 y: 2"
+   * Parses a record like "x: 1 y: 2"
    */
-  private Expr parseObjectLiteral() {
+  private Expr parseRecord() {
     Position position = current().getPosition();
     List<Pair<String, Expr>> fields = new ArrayList<Pair<String, Expr>>();
     while (match(TokenType.NAME, TokenType.COLON)) {
@@ -487,7 +487,7 @@ public class MagpieParser extends Parser {
       fields.add(new Pair<String, Expr>(name, value));
     }
     
-    return new ObjectExpr(position, fields);
+    return new RecordExpr(position, fields);
   }
   
   private List<Expr> parseCommaList() {

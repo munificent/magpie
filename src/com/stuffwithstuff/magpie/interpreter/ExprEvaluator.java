@@ -216,7 +216,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
   
   @Override
-  public Obj visit(ObjectExpr expr, EvalContext context) {
+  public Obj visit(RecordExpr expr, EvalContext context) {
     Obj obj = mInterpreter.getObjectType().instantiate();
     
     // Define the fields.

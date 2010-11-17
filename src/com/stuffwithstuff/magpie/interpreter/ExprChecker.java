@@ -292,7 +292,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   }
   
   @Override
-  public Obj visit(ObjectExpr expr, EvalContext context) {
+  public Obj visit(RecordExpr expr, EvalContext context) {
     // TODO(bob): Need to create a structural type here.
     // Also, should check for duplicate fields?
     return mInterpreter.getObjectType();

@@ -5,15 +5,15 @@ import java.util.*;
 import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.util.Pair;
 
-public class ObjectExpr extends Expr {
-  public ObjectExpr(Position position, List<Pair<String, Expr>> fields) {
+public class RecordExpr extends Expr {
+  public RecordExpr(Position position, List<Pair<String, Expr>> fields) {
     super(position);
     
     mFields = fields;
   }
   
   /**
-   * Gets the fields for the object. We're using a list of entries instead of a
+   * Gets the fields for the record. We're using a list of entries instead of a
    * map because we need to ensure that fields are evaluated in the order that
    * they appear in the source.
    */
