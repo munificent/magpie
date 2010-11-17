@@ -1,5 +1,6 @@
 // The test infrastructure.
 import("specify.mag")
+import("utility/TestCallable.mag")
 import("utility/TruthTest.mag")
 
 // The individual test cases.
@@ -30,7 +31,7 @@ import("check/assign.mag")
 import("check/block.mag")
 import("check/break.mag")
 import("check/class.mag")
-import("check/fn.mag")
+import("check/function.mag")
 import("check/if.mag")
 import("check/let.mag")
 import("check/or.mag")

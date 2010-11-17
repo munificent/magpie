@@ -69,21 +69,22 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(ApplyExpr expr, EvalContext context) {
+    Obj targetType = check(expr.getTarget(), context);
+    
     // TODO(bob): Clean this up!
     if (expr.isStatic()) {
       // TODO(bob): Almost all of this is copied from ExprEvaluator. Should unify.
       // Evaluate the static argument.
-      Obj target = check(expr.getTarget(), context);
       Obj arg = mInterpreter.evaluate(expr.getArg(), mStaticContext);
       
-      if (!(target.getValue() instanceof FnExpr)) {
+      if (!(targetType.getValue() instanceof FnExpr)) {
         mChecker.addError(expr.getTarget().getPosition(),
             "The expression \"%s\" does not evaluate to a static function.",
             expr.getTarget());
         return mInterpreter.getNothingType();
       }
       
-      FnExpr staticFn = (FnExpr)target.getValue();
+      FnExpr staticFn = (FnExpr)targetType.getValue();
       
       // Evaluate the constraint.
       Obj constraint = mInterpreter.evaluate(staticFn.getType().getParamType(),
@@ -105,12 +106,10 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       
       return returnType;
     } else {
-      Obj targetType = check(expr.getTarget(), context);
       Obj argType = check(expr.getArg(), context);
       
       // If the target is not an actual function, get the type of its "call"
       // message instead of the target itself.
-      // See if the target is an actual function, or a functor.
       // TODO(bob): Using the class name for this is gross!
       if (!targetType.getClassObj().getName().equals(Identifiers.FUNCTION_TYPE)) {
         // It's a functor, so look up the "call" member.

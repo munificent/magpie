@@ -1,0 +1,18 @@
+// A simple class that is callable and tracks when it was called.
+class TestCallable
+    this(returnValue)
+        this arg = nothing
+        this returnValue = returnValue
+        this called = false
+    end
+    
+    def call(arg)
+        this arg = arg
+        called = true
+        returnValue
+    end
+    
+    var arg         Dynamic
+    var returnValue Dynamic
+    var called      Bool
+end

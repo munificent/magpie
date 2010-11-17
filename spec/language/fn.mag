@@ -19,6 +19,10 @@ specify("A 'fn' expression") with
         var f = fn(a) a _0 + a _1
         f("one", "two") shouldBe("onetwo")
     end
+    
+    it should("allow omitting the parameter declaration") with
+        (fn "return")() shouldBe("return")
+    end
 end
 
 specify("A static 'fn' expression") with
