@@ -64,25 +64,18 @@ class OrType
         end
     end
 
-    def getMemberType(name String -> Type | Nothing)
-        let firstType = cases(0) getMemberType(name) then
-            for type = cases do
-                // The method must be present in all cases.
-                let method = type getMemberType(name) then
-                    // All types must match.
-                    // TODO(bob): Right now, the types of all cases must match
-                    // exactly. We could loosen this to allow subtypes.
-                    if firstType assignsFrom?(method) not then return nothing
-                    if method assignsFrom?(firstType) not then return nothing
-                else return nothing
-            end
-            
-            return firstType
+    def getMemberType(name String -> Type)
+        // Union the member types of all of the cases.
+        var memberType = cases(0) getMemberType(name)
+        for i = 1 until(cases count) do
+            memberType = memberType | cases(i) getMemberType(name)
         end
+        
+        memberType
     end
 
     def getSetterType(name String -> Type | Nothing)
-        let firstType = cases(0) getMemberType(name) then
+        let firstType = cases(0) getSetterType(name) then
             for type = cases do
                 let method = type getSetterType(name) then
                     // All types must match.

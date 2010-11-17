@@ -27,18 +27,13 @@ class Interface
 
         for member = members do
             var type = member memberType()
-            let otherMember = other getMemberType(member name) then
-                // Must be assignable.
-                if type assignsFrom?(otherMember) not then
-                    print(other string + " does not implement " + name +
-                        " because " + member name + " is the wrong type")
-                    print("expected " + type + " but got " + otherMember)
-                    return false
-                end
-            else
+            var otherType = other getMemberType(member name)
+            // Must be assignable.
+            if type assignsFrom?(otherType) not then
                 print(other string + " does not implement " + name +
-                    " because it lacks " + member name)
-                return false // Must have members
+                    " because " + member name + " is the wrong type")
+                print("expected " + type + " but got " + otherType)
+                return false
             end
         end
     
@@ -46,7 +41,7 @@ class Interface
         true
     end
 
-    def getMemberType(name String -> Type | Nothing)
+    def getMemberType(name String -> Type)
         let member = members first(fn (m Member -> Bool) m name == name) then
             member memberType()
         else

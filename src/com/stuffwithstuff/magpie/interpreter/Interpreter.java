@@ -235,9 +235,6 @@ public class Interpreter {
     if (result != null) return result;
     */
 
-    runtimeError(position,
-        "Could not find a member named \"%s\" on %s.",
-        name, receiver.getClassObj());
     return mNothing;
   }
 

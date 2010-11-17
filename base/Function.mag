@@ -32,7 +32,7 @@ class FunctionType
         else false
     end
 
-    def getMemberType(name String -> Type | Nothing)
+    def getMemberType(name String -> Type)
         // Just defer to the base function class.
         Function getMemberType(name)
     end

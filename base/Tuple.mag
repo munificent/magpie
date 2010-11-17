@@ -52,7 +52,7 @@ extend class Tuple
         else false
     end
 
-    def getMemberType(name String -> Type | Nothing)
+    def getMemberType(name String -> Type)
         // TODO(bob): Hack. Should at the very least strongly-type the field
         // getters.
         Tuple getMemberType(name)

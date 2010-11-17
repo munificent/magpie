@@ -106,7 +106,7 @@ class ArrayType
         else false
     end
 
-    def getMemberType(name String -> Type | Nothing)
+    def getMemberType(name String -> Type)
         // TODO(bob): Hackish. Strongly-type the array members based on the
         // element type.
         match name
@@ -174,7 +174,7 @@ class ArrayIteratorType
         else false
     end
     
-    def getMemberType(name String -> Type | Nothing)
+    def getMemberType(name String -> Type)
         // Strongly-type the iterator.
         if name == "current" then return elementType
         // Use the generic type of the other methods.

@@ -104,7 +104,7 @@ public class ClassBuiltIns {
     }
   }
   
-  @Signature("getMemberType(name String -> Type | Nothing)")
+  @Signature("getMemberType(name String -> Type)")
   public static class GetMemberType implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.asString();
@@ -124,7 +124,7 @@ public class ClassBuiltIns {
       }
   
       // Member not found.
-      return interpreter.nothing();
+      return interpreter.getNothingType();
     }
   }
   
