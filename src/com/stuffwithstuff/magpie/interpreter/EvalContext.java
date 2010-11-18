@@ -98,7 +98,7 @@ public class EvalContext {
       // Make sure the argument's structure matches our expected parameter list.
       // If it doesn't, ignore extra tuple fields and pad missing ones with
       // nothing.
-      if (value.getClassObj() != interpreter.getTupleType()) {
+      if (value.getClassObj() != interpreter.getTupleClass()) {
         // Not a tuple and we're expecting it to be, so just bind it to the
         // first parameter and define the others as nothing.
         define(names.get(0), value);

@@ -46,7 +46,7 @@ public class Checker {
     for (Entry<String, Obj> entry : mInterpreter.getGlobals().entries()) {
       if (entry.getValue() instanceof FnObj) {
         FnObj function = (FnObj)entry.getValue();
-        checkFunction(function.getFunction(), mInterpreter.getNothingType(),
+        checkFunction(function.getFunction(), mInterpreter.getNothingClass(),
             staticContext);
       } else if (entry.getValue() instanceof ClassObj) {
         checkClass((ClassObj)entry.getValue());
@@ -176,7 +176,7 @@ public class Checker {
           function.getType().getReturnType()));
     }
     
-    return mInterpreter.invokeMethod(mInterpreter.getFunctionType(),
+    return mInterpreter.invokeMethod(mInterpreter.getFunctionClass(),
         Identifiers.NEW_TYPE, mInterpreter.createTuple(
             paramType, returnType,
             mInterpreter.createBool(function.isStatic())));
@@ -204,7 +204,8 @@ public class Checker {
         mInterpreter.createTopLevelContext());
 
     Scope globals = typeScope(mInterpreter.getGlobals());
-    EvalContext context = new EvalContext(globals, mInterpreter.getNothingType());
+    EvalContext context = new EvalContext(globals,
+        mInterpreter.getNothingClass());
 
     // Get the expression's type.
     Obj type = checker.check(expr, context, true);
@@ -235,7 +236,7 @@ public class Checker {
 
     Scope scope = new Scope(parent);
     for (Entry<String, Obj> entry : valueScope.entries()) {
-      Obj type = mInterpreter.getProperty(Position.none(), entry.getValue(),
+      Obj type = mInterpreter.getMember(Position.none(), entry.getValue(),
           Identifiers.TYPE);
       scope.define(entry.getKey(), type);
     }
@@ -263,7 +264,7 @@ public class Checker {
     Expect.notNull(actual);
     
     boolean success;
-    if (nothingOverrides && (expected == mInterpreter.getNothingType())) {
+    if (nothingOverrides && (expected == mInterpreter.getNothingClass())) {
       success = true;
     } else {
       Obj matches = mInterpreter.invokeMethod(expected,

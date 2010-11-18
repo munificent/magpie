@@ -49,7 +49,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   public Obj check(Expr expr, EvalContext context, boolean allowNever) {
     Obj result = expr.accept(this, context);
     
-    if (!allowNever && result == mInterpreter.getNeverType()) {
+    if (!allowNever && result == mInterpreter.getNeverClass()) {
       mChecker.addError(expr.getPosition(),
           "An early return here will cause unreachable code.");
     }
@@ -81,7 +81,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
         mChecker.addError(expr.getTarget().getPosition(),
             "The expression \"%s\" does not evaluate to a static function.",
             expr.getTarget());
-        return mInterpreter.getNothingType();
+        return mInterpreter.getNothingClass();
       }
       
       FnExpr staticFn = (FnExpr)targetType.getValue();
@@ -116,11 +116,11 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
         targetType = getMemberType(expr.getPosition(), targetType,
             Identifiers.CALL);
   
-        if (targetType == mInterpreter.getNothingType()) {
+        if (targetType == mInterpreter.getNothingClass()) {
           mChecker.addError(expr.getPosition(),
               "Target of type %s is not a function and does not have a 'call' method.",
               targetType);
-          return mInterpreter.getNothingType();
+          return mInterpreter.getNothingClass();
         }
       }
       
@@ -166,7 +166,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
           "Could not find a setter \"%s\" on %s when checking.",
           expr.getName(), receiverType);
 
-      return mInterpreter.getNothingType();
+      return mInterpreter.getNothingClass();
     }
     
     // Make sure the assigned value if compatible with the setter.
@@ -193,23 +193,23 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(BoolExpr expr, EvalContext context) {
-    return mInterpreter.getBoolType();
+    return mInterpreter.getBoolClass();
   }
   
   @Override
   public Obj visit(BreakExpr expr, EvalContext context) {
     if (context.isInLoop()) {
-      return mInterpreter.getNeverType();
+      return mInterpreter.getNeverClass();
     }
     
     mChecker.addError(expr.getPosition(),
         "A break expression should not appear outside of a for loop.");
-    return mInterpreter.getNothingType();
+    return mInterpreter.getNothingClass();
   }
 
   @Override
   public Obj visit(ExpressionExpr expr, EvalContext context) {
-    return mInterpreter.getExpressionType();
+    return mInterpreter.getExpressionClass();
   }
 
   @Override
@@ -248,7 +248,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(IntExpr expr, EvalContext context) {
-    return mInterpreter.getIntType();
+    return mInterpreter.getIntClass();
   }
 
   @Override
@@ -267,7 +267,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     check(expr.getBody(), context);
     
     // Loops always return nothing.
-    return mInterpreter.getNothingType();
+    return mInterpreter.getNothingClass();
   }
 
   @Override
@@ -288,7 +288,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(NothingExpr expr, EvalContext context) {
-    return mInterpreter.getNothingType();
+    return mInterpreter.getNothingClass();
   }
     
   @Override
@@ -305,7 +305,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(RecordExpr expr, EvalContext context) {
     // TODO(bob): Need to create a structural type here.
     // Also, should check for duplicate fields?
-    return mInterpreter.getObjectType();
+    return mInterpreter.getRecordClass();
   }
 
   @Override
@@ -314,7 +314,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     Obj returnedType = check(expr.getValue(), context);
     mReturnedTypes.add(returnedType);
     
-    return mInterpreter.getNeverType();
+    return mInterpreter.getNeverClass();
   }
   
   @Override
@@ -325,7 +325,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   
   @Override
   public Obj visit(StringExpr expr, EvalContext context) {
-    return mInterpreter.getStringType();
+    return mInterpreter.getStringClass();
   }
 
   @Override
@@ -347,7 +347,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(TypeofExpr expr, EvalContext context) {
     // TODO(bob): This should eventually return Type | Nothing
-    return mInterpreter.getNothingType();
+    return mInterpreter.getNothingClass();
   }
 
   @Override
@@ -383,8 +383,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   
   private Obj orTypes(Obj left, Obj right) {
     // Never is omitted.
-    if (left == mInterpreter.getNeverType()) return right;
-    if (right == mInterpreter.getNeverType()) return left;
+    if (left == mInterpreter.getNeverClass()) return right;
+    if (right == mInterpreter.getNeverClass()) return left;
     
     return mInterpreter.invokeMethod(left, Identifiers.OR, right);
   }
@@ -398,7 +398,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
           "Could not find a member named \"%s\" on %s when checking.",
           name, receiverType);
       
-      return mInterpreter.getNothingType();
+      return mInterpreter.getNothingClass();
     }
 
     return memberType;
