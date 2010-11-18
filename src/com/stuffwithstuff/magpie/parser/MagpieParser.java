@@ -373,7 +373,11 @@ public class MagpieParser extends Parser {
     Expr message = primary();
     
     while (true) {
-      if (match(TokenType.NAME)) {
+      if (lookAhead(TokenType.NAME, TokenType.COLON)) {
+        // Do nothing. This ensures we don't consume a name and think it's a
+        // message when it's really a field name in a record.
+        break;
+      } else if (match(TokenType.NAME)) {
         message = new MessageExpr(last(1).getPosition(), message,
             last(1).getString());
       } else if (match(TokenType.LEFT_BRACKET)) {

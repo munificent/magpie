@@ -290,14 +290,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(NothingExpr expr, EvalContext context) {
     return mInterpreter.getNothingType();
   }
-  
-  @Override
-  public Obj visit(RecordExpr expr, EvalContext context) {
-    // TODO(bob): Need to create a structural type here.
-    // Also, should check for duplicate fields?
-    return mInterpreter.getObjectType();
-  }
-  
+    
   @Override
   public Obj visit(OrExpr expr, EvalContext context) {
     // TODO(bob): Should eventually check that both arms implement ITrueable
@@ -306,6 +299,13 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     Obj right = check(expr.getRight(), context, true);
     
     return orTypes(left, right);
+  }
+
+  @Override
+  public Obj visit(RecordExpr expr, EvalContext context) {
+    // TODO(bob): Need to create a structural type here.
+    // Also, should check for duplicate fields?
+    return mInterpreter.getObjectType();
   }
 
   @Override

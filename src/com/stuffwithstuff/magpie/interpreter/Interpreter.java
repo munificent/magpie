@@ -80,6 +80,7 @@ public class Interpreter {
     mExpressionClass = createGlobalClass("Expression");
     mFnClass = createGlobalClass("Function");
     mIntClass = createGlobalClass("Int");
+    mRecordClass = createGlobalClass("Record");
     mRuntimeClass = createGlobalClass("Runtime");
 
     mStringClass = createGlobalClass("String");
@@ -120,6 +121,7 @@ public class Interpreter {
     BuiltIns.register(FunctionBuiltIns.class, mFnClass);
     BuiltIns.register(IntBuiltIns.class, mIntClass);
     BuiltIns.register(ObjectBuiltIns.class, mObjectClass);
+    BuiltIns.register(RecordBuiltIns.class, mRecordClass);
     BuiltIns.register(RuntimeBuiltIns.class, mRuntimeClass);
     BuiltIns.register(StringBuiltIns.class, mStringClass);
   }
@@ -311,6 +313,7 @@ public class Interpreter {
   public ClassObj getIntType() { return mIntClass; }
   public ClassObj getNothingType() { return mNothingClass; }
   public ClassObj getObjectType() { return mObjectClass; }
+  public ClassObj getRecordType() { return mRecordClass; }
   public ClassObj getStringType() { return mStringClass; }
   public ClassObj getTupleType() { return mTupleClass; }
   public ClassObj getNeverType() { return mNeverClass; }
@@ -489,6 +492,7 @@ public class Interpreter {
   private final ClassObj mNothingClass;
   private final ClassObj mNeverClass;
   private final ClassObj mObjectClass;
+  private final ClassObj mRecordClass;
   private final ClassObj mRuntimeClass;
   private final ClassObj mStringClass;
   private final ClassObj mTupleClass;

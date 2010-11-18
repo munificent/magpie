@@ -216,19 +216,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
   
   @Override
-  public Obj visit(RecordExpr expr, EvalContext context) {
-    Obj obj = mInterpreter.getObjectType().instantiate();
-    
-    // Define the fields.
-    for (Pair<String, Expr> entry : expr.getFields()) {
-      Obj value = evaluate(entry.getValue(), context);
-      obj.setField(entry.getKey(), value);
-    }
-    
-    return obj;
-  }
-
-  @Override
   public Obj visit(OrExpr expr, EvalContext context) {
     Obj left = evaluate(expr.getLeft(), context);
     
@@ -237,6 +224,19 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     } else {
       return evaluate(expr.getRight(), context);
     }
+  }
+
+  @Override
+  public Obj visit(RecordExpr expr, EvalContext context) {
+    Obj obj = mInterpreter.getRecordType().instantiate();
+    
+    // Define the fields.
+    for (Pair<String, Expr> entry : expr.getFields()) {
+      Obj value = evaluate(entry.getValue(), context);
+      obj.setField(entry.getKey(), value);
+    }
+    
+    return obj;
   }
 
   @Override
