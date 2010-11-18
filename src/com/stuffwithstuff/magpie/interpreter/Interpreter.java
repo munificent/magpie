@@ -229,6 +229,10 @@ public class Interpreter {
       return new FnObj(mFnClass, receiver, method);
     }
    
+    // Look for a field.
+    Obj value = receiver.getField(name);
+    if (value != null) return value;
+    
     // If all else fails, try finding a matching native Java method on the
     // primitive value.
     // TODO(bob): The bound method refactoring broke this. Unbreak.
