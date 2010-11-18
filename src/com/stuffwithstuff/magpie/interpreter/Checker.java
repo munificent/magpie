@@ -7,6 +7,7 @@ import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
 import com.stuffwithstuff.magpie.parser.Position;
+import com.stuffwithstuff.magpie.util.Expect;
 
 /**
  * The type checker. Given an interpreter this walks through the entire global
@@ -258,6 +259,8 @@ public class Checker {
    */
   public void checkTypes(Obj expected, Obj actual,
       boolean nothingOverrides, Position position, String message) {
+    Expect.notNull(expected);
+    Expect.notNull(actual);
     
     boolean success;
     if (nothingOverrides && (expected == mInterpreter.getNothingType())) {

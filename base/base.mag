@@ -59,17 +59,3 @@ get Bool true? Bool = this
 get Int true? Bool = this != 0
 get String true? Bool = this count > 0
 get Nothing true? Bool = false
-
-// TODO(bob): Hack. This fixes a weird infinite regress problem. Let's say you
-// have an expression like:
-//
-//   foo()
-//
-// It turns out "foo" is undefined. So when we evaluate "foo" , we fail to find
-// it and return nothing. Then we try to evaluate "nothing()" (the apply).
-// nothing is not a function, so that gets translated to "nothing call()". So
-// we look up "call" on nothing, which fails, returning "nothing". Now we try
-// to evaluate "nothing()"... stack overflow.
-//
-// This short-circuits that by actually making nothing callable.
-def Nothing call(arg) nothing

@@ -116,7 +116,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
         targetType = getMemberType(expr.getPosition(), targetType,
             Identifiers.CALL);
   
-        if (targetType == mInterpreter.nothing()) {
+        if (targetType == mInterpreter.getNothingType()) {
           mChecker.addError(expr.getPosition(),
               "Target of type %s is not a function and does not have a 'call' method.",
               targetType);
