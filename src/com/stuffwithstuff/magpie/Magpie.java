@@ -37,6 +37,10 @@ public class Magpie {
     System.out.println();
     
     Interpreter interpreter = new Interpreter(new ScriptInterpreterHost());
+    
+    // The REPL runs and imports relative to the current directory.
+    interpreter.pushScriptPath(".");
+    
     try {
       Script.loadBase(interpreter);
       
