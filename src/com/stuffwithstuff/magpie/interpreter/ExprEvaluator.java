@@ -113,7 +113,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(ExpressionExpr expr, EvalContext context) {
-    return mInterpreter.getExpressionType().instantiate(expr.getBody());
+    return mInterpreter.getExpressionClass().instantiate(expr.getBody());
   }
   
   @Override
@@ -197,6 +197,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(MessageExpr expr, EvalContext context) {
     Obj receiver = evaluate(expr.getReceiver(), context);
     
+    // If there is an implicit receiver, try to determine who to send the
+    // message to.
     if (receiver == null) {
       // Just a name, so maybe it's a variable.
       Obj variable = context.lookUp(expr.getName());
@@ -206,8 +208,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       receiver = context.getThis();
     }
     
-    return mInterpreter.getProperty(expr.getPosition(), receiver,
-        expr.getName());
+    return mInterpreter.getMember(expr.getPosition(), receiver, expr.getName());
   }
   
   @Override
@@ -215,19 +216,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     return mInterpreter.nothing();
   }
   
-  @Override
-  public Obj visit(RecordExpr expr, EvalContext context) {
-    Obj obj = mInterpreter.getObjectType().instantiate();
-    
-    // Define the fields.
-    for (Pair<String, Expr> entry : expr.getFields()) {
-      Obj value = evaluate(entry.getValue(), context);
-      obj.setField(entry.getKey(), value);
-    }
-    
-    return obj;
-  }
-
   @Override
   public Obj visit(OrExpr expr, EvalContext context) {
     Obj left = evaluate(expr.getLeft(), context);
@@ -237,6 +225,19 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     } else {
       return evaluate(expr.getRight(), context);
     }
+  }
+
+  @Override
+  public Obj visit(RecordExpr expr, EvalContext context) {
+    Obj obj = mInterpreter.getRecordClass().instantiate();
+    
+    // Define the fields.
+    for (Pair<String, Expr> entry : expr.getFields()) {
+      Obj value = evaluate(entry.getValue(), context);
+      obj.setField(entry.getKey(), value);
+    }
+    
+    return obj;
   }
 
   @Override
@@ -298,7 +299,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
   
   private boolean isTruthy(Expr expr, Obj receiver) {
-    Obj truthy = mInterpreter.getProperty(expr.getPosition(), receiver,
+    Obj truthy = mInterpreter.getMember(expr.getPosition(), receiver,
         Identifiers.IS_TRUE);
     return truthy.asBool();
   }

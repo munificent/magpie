@@ -61,8 +61,8 @@ public class RuntimeBuiltIns {
       
       FnObj function = (FnObj)arg;
       EvalContext staticContext = interpreter.createTopLevelContext();
-      checker.checkFunction(function.getFunction(), interpreter.getNothingType(),
-          staticContext);
+      checker.checkFunction(function.getFunction(),
+          interpreter.getNothingClass(), staticContext);
       
       return translateErrors(interpreter, checker.getErrors());
     }

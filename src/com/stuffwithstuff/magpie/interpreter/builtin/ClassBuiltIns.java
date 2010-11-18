@@ -124,7 +124,7 @@ public class ClassBuiltIns {
       }
   
       // Member not found.
-      return interpreter.getNothingType();
+      return interpreter.getNothingClass();
     }
   }
   
@@ -172,7 +172,7 @@ public class ClassBuiltIns {
       // Create the class object itself. This will hold the instance methods for
       // objects of the class.
       ClassObj classObj = new ClassObj(metaclass, name,
-          interpreter.getObjectType());
+          interpreter.getObjectClass());
       
       return classObj;
     }
@@ -186,7 +186,7 @@ public class ClassBuiltIns {
       ClassObj parent = classObj.getParent();
       
       // If a class has no parent, its parent is implicitly Object.
-      if (parent == null) return interpreter.getObjectType();
+      if (parent == null) return interpreter.getObjectClass();
       
       return parent;
     }

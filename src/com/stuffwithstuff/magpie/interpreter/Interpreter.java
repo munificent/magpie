@@ -80,6 +80,7 @@ public class Interpreter {
     mExpressionClass = createGlobalClass("Expression");
     mFnClass = createGlobalClass("Function");
     mIntClass = createGlobalClass("Int");
+    mRecordClass = createGlobalClass("Record");
     mRuntimeClass = createGlobalClass("Runtime");
 
     mStringClass = createGlobalClass("String");
@@ -120,6 +121,7 @@ public class Interpreter {
     BuiltIns.register(FunctionBuiltIns.class, mFnClass);
     BuiltIns.register(IntBuiltIns.class, mIntClass);
     BuiltIns.register(ObjectBuiltIns.class, mObjectClass);
+    BuiltIns.register(RecordBuiltIns.class, mRecordClass);
     BuiltIns.register(RuntimeBuiltIns.class, mRuntimeClass);
     BuiltIns.register(StringBuiltIns.class, mStringClass);
   }
@@ -213,7 +215,7 @@ public class Interpreter {
     mainFn.invoke(this, mNothing, mNothing);
   }
   
-  public Obj getProperty(Position position, Obj receiver, String name) {
+  public Obj getMember(Position position, Obj receiver, String name) {
     // Look for a getter.
     Callable getter = receiver.getClassObj().findGetter(name);
     if (getter != null) {
@@ -227,6 +229,10 @@ public class Interpreter {
       return new FnObj(mFnClass, receiver, method);
     }
    
+    // Look for a field.
+    Obj value = receiver.getField(name);
+    if (value != null) return value;
+    
     // If all else fails, try finding a matching native Java method on the
     // primitive value.
     // TODO(bob): The bound method refactoring broke this. Unbreak.
@@ -269,7 +275,7 @@ public class Interpreter {
     Expect.notNull(receiver);
     Expect.notNull(arg);
     
-    Obj resolved = getProperty(position, receiver, name);
+    Obj resolved = getMember(position, receiver, name);
     return apply(position, resolved, arg);
   }
 
@@ -303,18 +309,19 @@ public class Interpreter {
    */
   public Obj nothing() { return mNothing; }
 
+  public ClassObj getArrayClass() { return mArrayClass; }
+  public ClassObj getBoolClass() { return mBoolClass; }
+  public ClassObj getDynamicClass() { return mDynamicClass; }
+  public ClassObj getExpressionClass() { return mExpressionClass; }
+  public ClassObj getFunctionClass() { return mFnClass; }
+  public ClassObj getIntClass() { return mIntClass; }
   public ClassObj getMetaclass() { return mClass; }
-  public ClassObj getBoolType() { return mBoolClass; }
-  public ClassObj getDynamicType() { return mDynamicClass; }
-  public ClassObj getExpressionType() { return mExpressionClass; }
-  public ClassObj getFunctionType() { return mFnClass; }
-  public ClassObj getIntType() { return mIntClass; }
-  public ClassObj getNothingType() { return mNothingClass; }
-  public ClassObj getObjectType() { return mObjectClass; }
-  public ClassObj getStringType() { return mStringClass; }
-  public ClassObj getTupleType() { return mTupleClass; }
-  public ClassObj getNeverType() { return mNeverClass; }
-  public ClassObj getArrayType() { return mArrayClass; }
+  public ClassObj getNeverClass() { return mNeverClass; }
+  public ClassObj getNothingClass() { return mNothingClass; }
+  public ClassObj getObjectClass() { return mObjectClass; }
+  public ClassObj getRecordClass() { return mRecordClass; }
+  public ClassObj getStringClass() { return mStringClass; }
+  public ClassObj getTupleClass() { return mTupleClass; }
   
   public Obj createArray(List<Obj> elements) {
     return mArrayClass.instantiate(elements);
@@ -366,7 +373,7 @@ public class Interpreter {
   }
   
   public String evaluateToString(Obj value) {
-    return getProperty(Position.none(), value, Identifiers.STRING).asString();
+    return getMember(Position.none(), value, Identifiers.STRING).asString();
   }
 
   public void pushScriptPath(String path) {
@@ -489,6 +496,7 @@ public class Interpreter {
   private final ClassObj mNothingClass;
   private final ClassObj mNeverClass;
   private final ClassObj mObjectClass;
+  private final ClassObj mRecordClass;
   private final ClassObj mRuntimeClass;
   private final ClassObj mStringClass;
   private final ClassObj mTupleClass;

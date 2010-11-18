@@ -42,7 +42,7 @@ public class ClassObj extends Obj {
   public Obj instantiate(Object primitiveValue) {
     return new Obj(this, primitiveValue);
   }
-  
+    
   public String getName() { return mName; }
   
   public ClassObj getParent() { return mParent; }
