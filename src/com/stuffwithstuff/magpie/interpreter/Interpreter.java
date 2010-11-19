@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.*;
+import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.*;
@@ -248,13 +249,27 @@ public class Interpreter {
     Expect.notNull(target);
     Expect.notNull(arg);
     
-    if (target instanceof FnObj) {
-      FnObj function = (FnObj)target;
-      return function.invoke(this, arg);
-    } else {
-      // We have an argument, but the receiver isn't a function, so send it a
-      // call message instead.
-      return invokeMethod(position, target, Identifiers.CALL, arg);
+    while(true) {
+      if (target instanceof FnObj) {
+        FnObj function = (FnObj)target;
+        return function.invoke(this, arg);
+      } else {
+        // We have an argument, but the receiver isn't a function, so send it a
+        // "call" message instead. We'll in turn try to apply the result of
+        // that.
+        Obj newTarget = getMember(position, target, Identifiers.CALL);
+        
+        if (target == newTarget) {
+          // If we get here, we're in an infinite regress. Since we can't call
+          // the target directly, we're sending it a "call" message, but that's
+          // returning the exact same object (most likely 'nothing'), so we
+          // aren't making any progress. If that happens, just bail.
+          return mNothing;
+        }
+        
+        // Loop and try to apply the new target.
+        target = newTarget;
+      }
     }
   }
 
@@ -365,6 +380,16 @@ public class Interpreter {
     tuple.setField(Identifiers.COUNT, createInt(fields.size()));
     
     return tuple;
+  }
+  
+  public Obj createRecord(Map<String, Obj> fields) {
+    Obj record = mRecordClass.instantiate();
+    
+    for (Entry<String, Obj> field : fields.entrySet()) {
+      record.setField(field.getKey(), field.getValue());
+    }
+    
+    return record;
   }
   
   public Obj evaluate(Expr expr, EvalContext context) {

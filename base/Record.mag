@@ -1,0 +1,45 @@
+// A record of Types is itself a Type.
+extend class Record
+    def assignsFrom?(other Type -> Bool)
+        // As long as the other type has assignable getters for all of the
+        // record's fields, we're good.
+        for field = fields do
+            // TODO(bob): Get rid of these when tuple fields are typed.
+            var name = field _0 expecting[String]
+            var fieldType = field _1 expecting[Type]
+            if fieldType assignsFrom?(other getMemberType(name)) not then
+                return false
+            end
+        end
+        
+        true
+    end
+
+    def getMemberType(name String -> Type)
+        // Each field in a record type is a getter of that type.
+        if hasField?(name) then
+            getField(name)
+        else
+            // Not a field, so just fallback to what's built in to Record.
+            Record getMemberType(name)
+        end
+    end
+    
+    def getSetterType(name String -> Type | Nothing)
+        Record getSetterType(name)
+    end
+    
+    def ==(other -> Bool)
+        let otherRecord = other as[Record] then
+            if fields count != otherRecord fields count then return false
+            
+            for field = fields
+            for otherField = otherRecord fields do
+                if field != otherField then return false
+            end
+            true
+        else false
+    end
+    
+    def !=(other -> Bool) (this == other) not
+end

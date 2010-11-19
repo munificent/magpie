@@ -35,6 +35,8 @@ public class Obj {
     mClass = classObj;
   }
 
+  public Scope getFields() { return mFields; }
+  
   /**
    * Gets the value of a given field.
    * @param name   The name of the field.

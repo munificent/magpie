@@ -1,11 +1,14 @@
 package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.parser.Position;
+import com.stuffwithstuff.magpie.util.Pair;
 
 /**
  * Implements the visitor pattern on AST nodes. For any given expression,
@@ -303,9 +306,14 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(RecordExpr expr, EvalContext context) {
-    // TODO(bob): Need to create a structural type here.
-    // Also, should check for duplicate fields?
-    return mInterpreter.getRecordClass();
+    // The type of a record is a record of its types.
+    Map<String, Obj> fields = new HashMap<String, Obj>();
+    for (Pair<String, Expr> entry : expr.getFields()) {
+      Obj type = check(entry.getValue(), context);
+      fields.put(entry.getKey(), type);
+    }
+    
+    return mInterpreter.createRecord(fields);
   }
 
   @Override

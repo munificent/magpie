@@ -4,4 +4,10 @@ specify("A record expression") with
         var rec = z: (e = e + "1") x: (e = e + "2") y: (e = e + "3")
         e shouldBe("123")
     end
+
+    it should("define fields on the object") with
+        var rec = x: 1 y: 2
+        rec x shouldBe(1)
+        rec y shouldBe(2)
+    end
 end

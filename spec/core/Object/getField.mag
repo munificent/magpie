@@ -1,0 +1,9 @@
+specify("The 'getField' method on Object") with
+    it should("return a field value if it exists") with
+        (x: 123) getField("x") shouldBe(123)
+    end
+
+    it should("return nothing if it does not exist") with
+        (x: 123) getField("unknown") shouldBe(nothing)
+    end
+end
