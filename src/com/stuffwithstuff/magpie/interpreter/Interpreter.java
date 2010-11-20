@@ -86,18 +86,8 @@ public class Interpreter {
 
     mStringClass = createGlobalClass("String");
 
-    // TODO(bob): At some point, may want different tuple types based on the
-    // types of the fields.
     mTupleClass = createGlobalClass("Tuple");
     mTupleClass.defineGetter("count", new FieldGetter("count", Expr.name("Int")));
-    // TODO(bob): Hackish.
-    for (int i = 0; i < 20; i++) {
-      String name = "_" + Integer.toString(i);
-      // TODO(bob): Using dynamic as the type here is lame. Ideally, there would
-      // be a separate tuple class for each set of tuple field types and it
-      // would have field getters that were typed to match the fields.
-      mTupleClass.defineGetter(name, new FieldGetter(name, Expr.name("Dynamic")));
-    }
     
     mNothingClass = createGlobalClass("Nothing");
     mNothing = mNothingClass.instantiate();

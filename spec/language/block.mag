@@ -34,4 +34,9 @@ specify("A block expression") with
         end
         a shouldBe("outer")
     end
+
+    it should("evaluate to nothing if the block is empty") with
+        do
+        end shouldBe(nothing)
+    end
 end

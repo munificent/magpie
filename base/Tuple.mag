@@ -30,32 +30,24 @@ extend class Tuple
     end
 
     def assignsFrom?(other Type -> Bool)
-        // TODO(bob): In addition to allowing wider tuples to subtype to
-        // narrower ones (like (Int, String) <: (Int, String, Bool), we could
-        // also allow narrow ones to subtype to wider ones if the extra fields
-        // allow nothing: (Int, Bool, String | Nothing) <: (Int, Bool).
-        let otherTuple = other as[Tuple] then
-            // TODO (bob): Can change this to 'count < otherType count' to
-            // allow tuples with extra fields to be a subtype of others:
-            // With the same number of fields.
-            if count != otherTuple count then return false
-    
-            // And the fields must be assignable.
-            for field = this
-            for otherField = otherTuple do
-                let otherTypeField = otherField as[Type] then
-                    if field assignsFrom?(otherTypeField) not then return false
-                else return false
-            end
-    
-            true
-        else false
+        for i = 0 until(count) do
+            var name = "_" + i
+            var field = getField(name)
+            var otherField = other getMemberType(name)
+            if field assignsFrom?(otherField) not then return false
+        end
+        
+        true
     end
 
     def getMemberType(name String -> Type)
-        // TODO(bob): Hack. Should at the very least strongly-type the field
-        // getters.
-        Tuple getMemberType(name)
+        // An instance of a Tuple used as a type has fields whose values are the
+        // types of the fields for the tuple this type describes.
+        if hasField?(name) then
+            getField(name)
+        else
+            Tuple getMemberType(name)
+        end
     end
     
     def getSetterType(name String -> Type | Nothing)

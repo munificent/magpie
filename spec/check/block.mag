@@ -10,4 +10,9 @@ specify("A block expression") with
             true
         end shouldBe(Bool)
     end
+    
+    it should("return Nothing if the block is empty") with
+        typeof
+        end shouldBe(Nothing)
+    end
 end

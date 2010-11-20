@@ -181,7 +181,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(BlockExpr expr, EvalContext context) {
-    Obj result = null;
+    Obj result = mInterpreter.getNothingClass();
     
     // Evaluate all of the expressions and return the last.
     for (int i = 0; i < expr.getExpressions().size(); i++) {

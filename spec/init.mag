@@ -57,5 +57,6 @@ import("core/Object/getField.mag")
 import("core/Object/hasField.mag")
 import("core/OrType/getMemberType.mag")
 import("core/Record/type.mag")
+import("core/Tuple/assignsFrom.mag")
 
 endTests()
