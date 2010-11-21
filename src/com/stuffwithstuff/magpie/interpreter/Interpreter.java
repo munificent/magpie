@@ -345,13 +345,7 @@ public class Interpreter {
   }
   
   public FnObj createFn(FnExpr expr, EvalContext context) {
-    // Create a new subclass just for this function so that it's implementation
-    // of "call" has the correct return and parameter types.
-    // TODO(bob): Figure out a simpler way to do this.
-    ClassObj fnClass = new ClassObj(mClass, "FunctionClass", mFnClass);
-    fnClass.addMethod("call", new FunctionCall(expr.getType()));
-    
-    return new FnObj(fnClass, context.getThis(),
+    return new FnObj(mFnClass, context.getThis(),
         new Function(context.getScope(), expr));
   }
   
