@@ -243,8 +243,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     }
     
     // Get the types of the arms.
-    Obj thenArm = check(expr.getThen(), context, true);
-    Obj elseArm = check(expr.getElse(), context, true);
+    Obj thenArm = check(expr.getThen(), context.pushScope(), true);
+    Obj elseArm = check(expr.getElse(), context.pushScope(), true);
     
     return orTypes(thenArm, elseArm);
   }
