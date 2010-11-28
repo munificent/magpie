@@ -42,4 +42,13 @@ extend class Record
     end
     
     def !=(other -> Bool) (this == other) not
+    
+    get string String =
+        var result = ""
+        for field = fields do
+            if result count > 0 then result = result + " "
+            result = result + field _0 + ": " + field _1
+        end
+        result
+    end
 end

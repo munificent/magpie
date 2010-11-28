@@ -32,6 +32,7 @@ public final class Identifiers {
   public static final String OR = "|";
   public static final String PARAM_TYPE = "paramType";
   public static final String RETURN_TYPE = "returnType";
+  public static final String SIGNIFY = "signify";
   public static final String STRING = "string";
   public static final String TYPE = "type";
   public static final String UNSAFE_REMOVE_NOTHING = "unsafeRemoveNothing";

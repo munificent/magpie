@@ -9,7 +9,7 @@ import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.parser.Position;
 
-public class RecordBuiltIns {  
+public class RecordBuiltIns {
   @Getter("type(-> Type)")
   public static class Type implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {

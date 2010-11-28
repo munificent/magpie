@@ -1,0 +1,12 @@
+class Point
+    var x Int
+    var y Int
+    var z Int = 4
+end
+
+def main(->)
+    var point = Point signify(x: 2 y: 3)
+    print(point x)
+    print(point y)
+    print(point z)
+end

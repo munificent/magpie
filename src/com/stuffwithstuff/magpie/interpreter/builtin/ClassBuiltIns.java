@@ -165,14 +165,15 @@ public class ClassBuiltIns {
       // Create the metaclass. This will hold shared methods on the class.
       ClassObj metaclass = new ClassObj(interpreter.getMetaclass(),
           name + "Class", interpreter.getMetaclass());
-      
-      // Add the constructor method.
-      metaclass.addMethod(Identifiers.NEW, new ClassNew(name));
   
       // Create the class object itself. This will hold the instance methods for
       // objects of the class.
       ClassObj classObj = new ClassObj(metaclass, name,
           interpreter.getObjectClass());
+      
+      // Add the constructor method.
+      metaclass.addMethod(Identifiers.NEW, new ClassNew(name));
+      metaclass.addMethod(Identifiers.SIGNIFY, new ClassSignify(classObj));
       
       return classObj;
     }

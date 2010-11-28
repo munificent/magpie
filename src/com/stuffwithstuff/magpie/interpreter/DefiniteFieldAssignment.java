@@ -22,19 +22,18 @@ public class DefiniteFieldAssignment implements ExprVisitor<Set<String>, EvalCon
     }
     
     Position position = Position.none();
-    Set<String> assigned = null;
     if (classObj.getConstructor() instanceof Function) {
       Expr constructor = ((Function)classObj.getConstructor()).getFunction().getBody();
       position = constructor.getPosition();
       
-      assigned = visit(constructor, null);
-    }
-    
-    for (String field : mFields) {
-      if (!assigned.contains(field)) {
-        checker.addError(position,
-            "Field \"%s\" in class %s may not have been assigned.",
-            field, classObj.getName());
+      Set<String> assigned = visit(constructor, null);
+      
+      for (String field : mFields) {
+        if (!assigned.contains(field)) {
+          checker.addError(position,
+              "Field \"%s\" in class %s may not have been assigned.",
+              field, classObj.getName());
+        }
       }
     }
   }
