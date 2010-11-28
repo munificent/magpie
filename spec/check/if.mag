@@ -10,4 +10,16 @@ specify("An 'if then else' expression") with
         (typeof if "cond" then 123 else "s") shouldBe(Int | String)
         (typeof if "cond" then "s" else "s") shouldBe(String)
     end
+        
+    it should("create a local scope for the 'then' expression that is not " +
+              "visible to the 'else' expression") with
+        fn
+            if true then var a = "s" else a = "a string"
+        end shouldNotCheck()
+
+        fn
+            var a = "s"
+            if true then (var a = 123) else a = "a string"
+        end shouldCheck()
+    end
 end

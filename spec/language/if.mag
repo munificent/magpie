@@ -84,14 +84,14 @@ specify("An 'if then else' expression") with
     end
 
     it should("create a local scope for the 'if' expression that is visible " +
-              "the 'else' expression") with
+              "to the 'else' expression") with
         var a = "outside"
         var b = "outside"
         if (var a = "inside") and false then "ignored" else b = a
         a shouldBe("outside")
         b shouldBe("inside")
     end
-    
+
     it should("create a local scope for the 'else' expression") with
         var a = "outside"
         if false then "ignored" else var a = "shadow"
