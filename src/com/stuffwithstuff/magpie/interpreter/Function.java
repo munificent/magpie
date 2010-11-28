@@ -21,11 +21,7 @@ public class Function implements Callable {
     // Create a new local scope for the function.
     EvalContext context = new EvalContext(mClosure, thisObj).pushScope();
     
-    // A missing argument is implied nothing.
-    if (arg == null) arg = interpreter.nothing();
-    
     // Bind arguments to their parameter names.
-    if (arg == null) arg = interpreter.nothing();
     context.bind(interpreter, mFunction.getType().getParamNames(), arg);
     
     try {
