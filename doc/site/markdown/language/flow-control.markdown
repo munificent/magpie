@@ -15,7 +15,7 @@ Most languages handle this by having a set of rules for what values of any given
 * `nothing` is not truthy.
 * All other objects are truthy.
 
-However, this behavior isn't fixed. Truthiness is determined by sending a `true?` message to the object. The value returned by that is used to determine if a condition is met or not. So, if you define your own type, you can control how it behaves when used in a conditional expression by simply defining `true?` to do what you want. (To avoid the [turtles-all-the-way-down](http://en.wikipedia.org/wiki/Turtles_all_the_way_down) problem, the result from `true?` *does* have a fixed interpretation: a boolean `true` is the only truthy value.)
+However, this behavior isn't fixed. Truthiness is determined by sending a `true?` message to the object. The value returned by that is used to determine if a condition is met or not. So, if you define your own class, you can control how it behaves when used in a conditional expression by simply defining `true?` to do what you want. (To avoid the [turtles-all-the-way-down](http://en.wikipedia.org/wiki/Turtles_all_the_way_down) problem, the result from `true?` *does* have a fixed interpretation: a boolean `true` is the only truthy value.)
 
 When reading the rest of this section, understand that any time a condition is evaluated, there is an implicit call to `true?` inserted. So this:
 
@@ -60,7 +60,7 @@ And, of course, it can take a block too. Note that if you have an `else` clause,
 Since Magpie does not have statements, even flow control structures are expressions and return values. An `if` expression returns the value of the `then` expression if the condition was true, or the `else` expression if false. If there is no `else` block and the condition was false, it returns `nothing`.
 
     :::magpie
-    print(if true then "yes" else "no") // prints "yes"
+    print(if true then "yes" else "no") // Prints "yes".
 
 (This also means that Magpie has no need for a C-style ternary operator. `if` *is* the ternary operator.)
 
@@ -77,21 +77,21 @@ Magpie has another flow control structure similar to `if` called `let`. It lumps
 That probably sounds kind of arbitrary. An example will help. The `Int` class has a static method for parsing strings to numbers, like so:
 
     :::magpie
-    var i = Int parse("123") // i will be 123
+    var i = Int parse("123") // i will be 123.
 
 If the parse fails (i.e. the string isn't a valid number), then it returns `nothing`. Normally, you'd need to check this manually, like so:
 
     :::magpie
     var maybeNumber = Int parse(someString)
     if maybeNumber != nothing then
-        // do something with the number
+        // Do something with the number...
     end
 
 A `let` expression simplifies that:
 
     :::magpie
     let definitelyNumber = Int parse(someString) then
-        // do something with the number
+        // Do something with the number...
     end
 
 The nice thing about this is that if that variable exists at all, we know for certain that it will not be `nothing`. If it was, `let` would have skipped it entirely. Think of it as a variable that is scoped to within the success of an operation.
@@ -101,16 +101,16 @@ This is a handy convenience when we're just considering Magpie as a dynamic lang
     :::magpie
     var maybeNumber = Int parse(someString)
     if maybeNumber != nothing then
-        // here's maybeNumber's type is Int | Nothing
-        // that means that we can't do:
+        // Here, maybeNumber's type is Int | Nothing.
+        // That means that we can't do...
         maybeNumber abs
-        // because "abs" isn't a method on Nothing
-        // we would have to explicitly cast first
+        // ...because "abs" isn't a method on Nothing.
+        // We would have to explicitly cast first.
     end
     
     let definitelyNumber = Int parse(someString) then
-        // but here, definitelyNumber's type is just Int
-        // the type-checker knows it cannot be Nothing
+        // But here, definitelyNumber's type is just Int.
+        // The type-checker knows it cannot be Nothing,
         // so this is fine:
         definitelyNumber abs
     end
@@ -120,14 +120,14 @@ There is another bit of syntactic sugar `let` provides. If you leave off the con
     :::magpie
     var num = Int parse(someString)
     let num then
-        // in here we've created a new variable "num" with
+        // In here we've created a new variable "num" with
         // the same value as the outer one, but the type-
-        // checker knows its type cannot be Nothing
+        // checker knows its type cannot be Nothing.
         num abs
     end
 
 <p class="future">
-Magpie doesn't currently have anything like "switch". Open classes and dynamic dispatch cover a little bit of that ground, but it could still use something in that area. The plan is for full pattern matching instead of just switch (the old C# Magpie has that), but it will probably be a while before that's in place. It's... trickier... in a dynamic language.
+Need to document pattern-matching syntax here.
 </p>
 
 ### Loops
@@ -171,16 +171,16 @@ Is really just syntactic sugar for:
         print(item)
     end
 
-In other words, Magpie *only* has a `foreach`-like for loop. To get the classic "iterate through a range of numbers" behavior, the standard library provides methods on numbers that return iterators:
+All of this means that Magpie *only* has a `foreach`-like for loop. It doesn't have a primitive C-style `for` loop. To get the classic "iterate through a range of numbers" behavior, the standard library provides methods on numbers that return iterators:
 
     :::magpie
     for i = 1 to(5) do print(i)
-    // prints 1, 2, 3, 4, 5
+    // Prints "1", "2", "3", "4", "5".
     
     for i = 1 until(5) do print(1)
-    // prints 1, 2, 3, 4
+    // Prints "1", "2", "3", "4".
 
-Here, `to` and `until` are just regular methods and not built-in keywords.
+Here, `to` and `until` are just regular methods and not built-in keywords. They each return iterators that will iterate through a series of numbers.
 
 #### Multiple Clauses
 
@@ -199,14 +199,14 @@ Once one of those `while` clauses returns false, the loop ends. With `for` loops
     for j = 6 to(10) do
         print(i + ":" + j)
     end
-    // prints 1:6, 2:7, 3:8
+    // Prints "1:6", "2:7", "3:8".
     
     for i = 1 to(4) do
         for j = 6 to(10) do
             print(i + ":" + j)
         end
     end
-    // prints 1:6, 1:7, 1:8, 1:9, 1:10, 2:7 ... 4:10
+    // Prints "1:6", "1:7", "1:8", "1:9", "1:10", "2:7" ... "4:10".
 
 The key difference is `do`. That's the keyword that indicates the end of the
 clauses and the beginning of the body. No matter how many clauses you have, a
@@ -215,17 +215,17 @@ single `do` means a single loop.
 Allowing multiple `for` clauses like this enables some handy idioms:
 
     :::magpie
-    // iterate through a collection with indexes
+    // Iterate through a collection with indexes
     for i = 0 countingUp
     for item = collection do
-        // here 'item' is the item and 'i' is its index
+        // Here 'item' is the item and 'i' is its index.
     end
     
-    // iterate through the first N items in a collection
+    // Iterate through the first N items in a collection.
     for i = 1 to(n)
     for item = collection do print(item)
     
-    // iterate through a collection until an item is found
+    // Iterate through a collection until an item is found.
     var found = nothing
     while found == nothing
     for item = collection do
@@ -259,7 +259,7 @@ What other languages call "logical operators", Magpie calls "conjunctions". They
     happy and knowIt
     ready or not
 
-An `and` conjunction evaluates the left-hand argument. If it's not true, it returns that value. Otherwise it evaluates and returns the right-hand argument. An `or` conjunction is reversed. If the left-hand argument *is* true, its returned, otherwise the right-hand argument is evaluated and returned:
+An `and` conjunction evaluates the left-hand argument. If it's not true, it returns that value. Otherwise it evaluates and returns the right-hand argument. An `or` conjunction is reversed. If the left-hand argument *is* true, it's returned, otherwise the right-hand argument is evaluated and returned:
 
     print(0 and 1) // prints 0
     print(1 and 2) // prints 2

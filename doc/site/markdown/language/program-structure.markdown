@@ -18,20 +18,20 @@ Magpie:
 Comments are as in C, C++, Java, etc.:
 
     :::magpie
-    some code // this is a line comment
-    // a line comment ends at the end of the line
+    some code // This is a line comment.
+    // A line comment ends at the end of the line.
     
-    some more /* this is a block comment */ code code
+    some more /* This is a block comment. */ code code
     
-    /* block comments
-       can span multiple lines */
+    /* Block comments
+       can span multiple lines. */
 
 ### Newlines
 
 Like many scripting languages, newlines are significant in Magpie and are used to separate expressions. You can keep your semicolons safely tucked away.
 
     :::magpie
-    // two expressions
+    // Two expressions:
     print("hi")
     print("bye")
 
@@ -42,25 +42,37 @@ discarded:
 
     :::magpie
     var a = 1,
-            2 // a will be the tuple (1, 2)
+            2 // a will be the tuple (1, 2).
     
     var b = 1 + 
-            2 // b will be 3
+            2 // b will be 3.
     
     print(
-        "hi") // prints "hi"
+        "hi") // Prints "hi".
+
+If you specifically want to ignore a newline where it otherwise *would* separate two expressions, you can end the line with a backslash (`\`):
+
+    :::magpie
+    var a = foo
+    bar()
+    // Sets a to foo then calls bar()
+    
+    var a = foo \
+    bar()
+    // Equivalent to:
+    // var a = foo bar()
 
 ### Blocks
 
-If you want to evaluate several expressions where only a single one is expected, you can create a *block*. Many languages use curly braces (`{ }`) for blocks. In Magpie, a block starts with a newline and ends with `end` (or occasionally another keyword like `else`):
+To evaluate several expressions where only a single one is expected, you can create a *block*. Many languages use curly braces (`{ }`) for blocks. In Magpie, a block starts with a newline and ends with `end` (or occasionally another keyword like `else`):
 
     :::magpie
-    if happy? then print("I'm happy!") // no block
+    if happy? then print("I'm happy!") // No block.
     
-    if happy? then // <- a newline here starts the block
+    if happy? then // <- A newline here starts the block.
         print("I'm happy!")
         print("Really happy!")
-    end // <- and this ends it
+    end // <- And this ends it.
 
 Blocks are allowed most places where an expression is expected. In fact, blocks *are* expressions: they evaluate to the last expression in the block:
 
@@ -88,8 +100,8 @@ Some examples will clarify. The comment after each line is how the parser interp
     a = b, c            // a = (b, c)
     a and b, c or d     // (a and b), (c or d)
     a or b + c          // a or (b + c)
-    a b + c             // (a b()) + c
-    a = b c, d - e or f // a = ((b c()), ((d - e) or f))
+    a b + c             // (a b) + c
+    a = b c, d - e or f // a = ((b c), ((d - e) or f))
 
 Parentheses can be used for grouping to override this as you'd expect:
 

@@ -18,13 +18,13 @@ result of the expression following the `=`. A variable definition expression ret
 
 #### Initialization
 
-You cannot declare a variable in Magpie without initializing it to a value. This helps avoid errors from forgetting to initialize a variable. Because Magpie doesn't have statements, this is less of a limitation that it might be in other languages. Where in C, you might do:
+You cannot declare a variable in Magpie without initializing it to a value. This helps avoid errors from forgetting to initialize a variable. Because Magpie doesn't have statements, this is less of a limitation than it might be in other languages. Where in C, you might do:
 
     :::c
     int i;
     if (something || other) {
       i = 1;
-    else if (another) {
+    } else if (another) {
       if (also) {
         i = 2;
       } else {
@@ -41,7 +41,7 @@ In Magpie, you can do:
                 if also then 2 else 3
             else 4
 
-In return for this limitation, Magpie will give you something back: you don't have to declare the types of variables. It will infer them from the initializing expression. Even though all variables are declared using `var`, from the type-checker's perspective, they are still strongly statically typed.
+In return for the limitation of having to always initialize your variables, Magpie will give you something back: you don't have to declare the types of variables. It will infer them from the initializing expression. Even though all variables are declared using `var`, from the type-checker's perspective, they are still strongly statically typed.
 
 #### Scope
 
@@ -49,10 +49,10 @@ Variables in Magpie have true block scope: the exist from the point they are def
 
     :::magpie
     if true then
-        // a does not exist here
+        // a does not exist here.
         var a = 123
-        // a exists here
-    end // a does not exist here
+        // a exists here.
+    end // a does not exist here.
 
 #### Shadowing
 
@@ -62,15 +62,15 @@ Declaring a variable in an inner scope with the same name as an outer one is cal
     var a = "outer"
     if true then
         var a = "inner"
-        print(a) // prints inner
+        print(a) // Prints "inner".
     end
-    print(a) // prints outer
+    print(a) // Prints "outer".
 
 Declaring a variable with the same name in the *same* scope *is* an error:
 
     :::magpie
     var a = "hi"
-    var a = "again" // error!
+    var a = "again" // Error!
 
 #### Named Functions
 
@@ -99,5 +99,5 @@ Like variable definition, an assignment expression returns the assigned value:
     print(a = "after") // prints "after"
 
 <p class="future">
-I need to document assigment messages here. Also Magpie will have multiple assignment (i.e. tuple and object destructuring) at some point.
+I need to document assigment messages here. Also, Magpie will have multiple assignment (i.e. tuple and record destructuring) at some point.
 </p>

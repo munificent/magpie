@@ -24,7 +24,7 @@ Magpie doesn't have floating point numbers yet. (I know, I know. I'm working on 
 Their class is `Int`.
 
 <p class="future">
-The eventual goal is for the runtime behavior of numbers to be arbitrary precision "correct" numbers ala Scheme or Python. Meanwhile, the type system will have a stricter set of numeric types so that you can annotate when you expect something to be integral or floating point.
+The long-term goal here is to have a pretty complete numeric tower &agrave; la Scheme or Python.
 </p>
 
 ### Strings
@@ -37,14 +37,14 @@ Strings are surrounded in double quotes:
 A couple of escape characters are supported:
 
     :::magpie
-    "\n" // newline
-    "\"" // a quote
-    "\\" // a backslash
+    "\n" // Newline.
+    "\"" // A double quote character.
+    "\\" // A backslash.
 
 Their class is `String`. Magpie strings are implemented internally using Java strings, so they are represented in UTF-16 format, although that shouldn't generally affect you. Most string operations in Magpie deal in logical characters, not bytes.
 
 <p class="future">
-Right now, getting a character out of a string returns another single-character string. Eventually, character will be an atomic type in Magpie too.
+Right now, getting a character out of a string returns another single-character string. Eventually, characters will be an atomic type in Magpie too.
 </p>
 
 ### Nothing
@@ -58,5 +58,4 @@ function like `print` that doesn't return anything actually returns `nothing`.
 It's also similar to `null` in some ways, but it doesn't have [the
 problems](http://journal.stuffwithstuff.com/2010/08/23/void-null-maybe-and-nothing/)
 that `null` has in most other languages. It's rare that you'll actually need to
-write `nothing` in code. Most of the time the interpreter will infer it or let
-you omit it, but it's there if you need it.
+write `nothing` in code since it can usually be inferred from context but it's there if you need it.

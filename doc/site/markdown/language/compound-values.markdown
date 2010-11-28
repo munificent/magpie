@@ -8,7 +8,7 @@ If the previous section covered [atoms](atomic-values.html), then this section c
 A series of expressions separated by commas creates a *tuple*:
 
     :::magpie
-    1, 2, "three"  // creates a tuple of two ints and a string
+    1, 2, "three"  // Creates a tuple of two ints and a string.
 
 If you aren't familiar with tuples, it may be a bit hard to wrap your head around them. A tuple is a *compound* value, but it isn't quite a *container*. A tuple doesn't *hold* values, it *is* values.
 
@@ -39,30 +39,30 @@ Tuple fields are also implicitly decomposed when passed to a function with multi
     // pass it to the function
     takeTwo(tuple) // prints "peanut butter + jelly"
 
-### Object Literals
+### Records
 
-An object literal builds a new object from a given set of named fields. The
+A record is similar to a tuple but where the fields are identified by name instead of number. Another way to look at them is as anonymous structures. The
 syntax is:
 
     :::magpie
     x: 1 y: 2
-    // creates an object with fields "x" and "y"
-    // with values 1 and 2 respectively
+    // Creates a record with fields "x" and "y"
+    // Whose values are 1 and 2, respectively.
 
 Note that no separators are needed between the fields. The field names (followed by a colon) are enough to distinguish them.
 
-<p class="future">
-Currently, object literals just have the static type "Object". Eventually, they will have a distinct structural type so that they are more visible to the type checker.
-</p>
+While records look like dictionaries or maps in some languages, they are have one important difference: they are strongly-typed. The set of fields and their types is part of the *type* of a record. A record `x: 1 y: 1` has a different static type than `x: 1 y: 1 z: 1` or even `x: 1 y: "a string"`. (If you're familiar with any of the ML languages, this is familiar territory.)
 
 #### Accessing Fields
 
-The fields in an object literal can be accessed like any other field on an object, by their name:
+Fields in a record can be accessed like any other field on an object, by name:
 
     :::magpie
     var point = x: 1 y: 2
-    print(point x) // prints "1"
-    print(point y) // prints "2"
+    print(point x) // Prints "1".
+    print(point y) // Prints "2".
+
+Records are immutable, so fields cannot be assigned to.
 
 ### Expression Objects
 
@@ -77,7 +77,7 @@ in-place), just enclose any expression in curly braces:
 
 That will create an expression object containing the code `print("hi")` and store a reference to it in `a`. It won't print anything.
 
-Expression objects are similar to [functions](functions.html): they both contain a chunk of code. The main difference is that a function carries with it enough context (i.e. its closure and its parameters) so that it can be invoked. An expression literal strips that out: it's just a piece of code stored as data. You can't directly evaluate an expression object.
+Expression objects are similar to [functions](functions.html)&mdash; they both contain a chunk of code. The main difference is that a function carries with it enough context (i.e. its closure and its parameters) so that it can be invoked. An expression literal strips that out: it's just a piece of code stored as data. You can't directly evaluate an expression object.
 
 <p class="future">
 The syntax for these may change depending on how useful they turn out to be. There may be more valuable things to use {} for if metaprogramming is something rarely used in practice.

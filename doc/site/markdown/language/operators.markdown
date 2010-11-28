@@ -6,14 +6,14 @@ Like Smalltalk and Lisp, but unlike most other languages, Magpie does not have a
     :::magpie
     +   -   /   *#$%   +something    *3
 
-The only difference between an operator and a regular identifier is that operators appear in infix (between two arguments) position.
+The only difference between an operator and a regular identifier is that operators appear in infix position&mdash; the two arguments to them surround the operator.
 
 ### Using Operators
 
 Operators are used just like you'd expect:
 
     :::magpie
-    1 + 2 // evaluates to three
+    1 + 2 // Evaluates to three.
 
 Under the hood, that gets translated to calling the `+` method on `1`, passing in `2` as the argument. This means that operators aren't totally symmetric: the left-hand argument becomes the receiver, so it has greater control over how the operator is handled.
 
