@@ -119,7 +119,7 @@ It should be pretty easy to get it up and running. You'll need to:
    everything is an expression, even things like class definitions, you can
    build entire programs incrementally this way. Here's one to get you started:
    
-       for i = 1 to(20) do print("<your name> is awesome!")
+        for i = 1 to(20) do print("<your name> is awesome!")
    
    If you pass an argument to the app, it will assume it's a path to a script 
    file and it will load and execute it.
