@@ -39,7 +39,7 @@ class TestSuite
     def should(description String, block Nothing => Nothing ->)
         currentTest = description
         var testsBefore = tests
-        var failuresBefore = failures
+        failedTest = false
         
         do
             block()
@@ -55,18 +55,20 @@ class TestSuite
     def pass(->) tests = tests + 1
         
     def fail(message String ->)
-        if failures == 0 then
+        if failedTest not then
             print("FAIL: " + name + " should " + currentTest + ".")
         end
         tests = tests + 1
         failures = failures + 1
         print("      " + message)
+        failedTest = true
     end
 
     var name        String
     var currentTest String
     var tests       Int
     var failures    Int
+    var failedTest  Bool
 end
         
 def fail(message String ->)
