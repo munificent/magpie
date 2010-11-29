@@ -1,17 +1,13 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
 
-import com.stuffwithstuff.magpie.Script;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
-import com.stuffwithstuff.magpie.parser.ParseException;
 
 public class ObjectBuiltIns {
 
@@ -66,29 +62,6 @@ public class ObjectBuiltIns {
       
       Obj field = thisObj.getField(name);
       return interpreter.createBool(field != null);
-    }
-  }
-
-  @Signature("import(path String ->)")
-  public static class Import_ implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      String currentDir = new File(interpreter.getCurrentScript()).getParent();
-      String relativePath = arg.asString();
-      File scriptFile = new File(currentDir, relativePath);
-      
-      try {
-        Script script = Script.fromPath(scriptFile.getPath());
-        script.execute(interpreter);
-      } catch (ParseException e) {
-        interpreter.runtimeError(
-            "Could not parse script \"%s\".\nError: %s",
-            relativePath, e.getMessage());
-      } catch (IOException e) {
-        interpreter.runtimeError("Could not load script \"%s\"\n%s.",
-            relativePath, e);
-      }
-      
-      return interpreter.nothing();
     }
   }
     
