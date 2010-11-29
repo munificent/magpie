@@ -2,6 +2,7 @@ package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.parser.Position;
@@ -17,8 +18,10 @@ public class DefiniteFieldAssignment implements ExprVisitor<Set<String>, EvalCon
   }
   
   public void check(Checker checker, ClassObj classObj) {
-    for (String field : classObj.getFieldDeclarations().keySet()) {
-      mFields.add(field);
+    for (Entry<String, Field> field : classObj.getFieldDefinitions().entrySet()) {
+      if (!field.getValue().hasInitializer()) {
+        mFields.add(field.getKey());
+      }
     }
     
     Position position = Position.none();

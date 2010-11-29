@@ -12,8 +12,7 @@ public class ClassObj extends Obj {
     super(metaclass);
     mName = name;
     mParent = parent;
-    mFieldDeclarations = new HashMap<String, FnObj>();
-    mFieldInitializers = new HashMap<String, FnObj>();
+    mFields = new HashMap<String, Field>();
     mGetters = new HashMap<String, Callable>();
     mSetters = new HashMap<String, Callable>();
   }
@@ -21,18 +20,13 @@ public class ClassObj extends Obj {
   public ClassObj(String name, ClassObj parent) {
     mName = name;
     mParent = parent;
-    mFieldDeclarations = new HashMap<String, FnObj>();
-    mFieldInitializers = new HashMap<String, FnObj>();
+    mFields = new HashMap<String, Field>();
     mGetters = new HashMap<String, Callable>();
     mSetters = new HashMap<String, Callable>();
   }
   
-  public Map<String, FnObj> getFieldDeclarations() {
-    return mFieldDeclarations;
-  }
-  
-  public Map<String, FnObj> getFieldInitializers() {
-    return mFieldInitializers;
+  public Map<String, Field> getFieldDefinitions() {
+    return mFields;
   }
   
   public Obj instantiate() {
@@ -113,11 +107,11 @@ public class ClassObj extends Obj {
   }
   
   public void declareField(String name, FnObj type) {
-    mFieldDeclarations.put(name, type);
+    mFields.put(name, new Field(false, type));
   }
   
   public void defineField(String name, FnObj initializer) {
-    mFieldInitializers.put(name, initializer);
+    mFields.put(name, new Field(true, initializer));
   }
   
   public void defineGetter(String name, Callable body) {
@@ -136,8 +130,7 @@ public class ClassObj extends Obj {
   private final String mName;
   private ClassObj mParent;
   private Callable mConstructor;
-  private final Map<String, FnObj> mFieldDeclarations;
-  private final Map<String, FnObj> mFieldInitializers;
+  private final Map<String, Field> mFields;
   private final Map<String, Callable> mGetters;
   private final Map<String, Callable> mSetters;
   private final Map<String, Callable> mMethods = new HashMap<String, Callable>();

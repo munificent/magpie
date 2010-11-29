@@ -8,7 +8,8 @@ import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.EvalContext;
-import com.stuffwithstuff.magpie.interpreter.FnObj;
+import com.stuffwithstuff.magpie.interpreter.Field;
+import com.stuffwithstuff.magpie.interpreter.Function;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.util.Expect;
@@ -31,12 +32,15 @@ public class ClassNew implements Callable {
     Obj obj = classObj.instantiate();
     
     // Initialize its fields.
-    for (Entry<String, FnObj> field : classObj.getFieldInitializers().entrySet()) {
-      EvalContext fieldContext = new EvalContext(field.getValue().getFunction().getClosure(),
-          interpreter.nothing()).pushScope();
-      Obj value = interpreter.evaluate(field.getValue().getFunction().getFunction().getBody(),
-          fieldContext);
-      obj.setField(field.getKey(), value);
+    for (Entry<String, Field> field : classObj.getFieldDefinitions().entrySet()) {
+      if (field.getValue().hasInitializer()) {
+        Function initializer = field.getValue().getDefinition().getFunction();
+        EvalContext fieldContext = new EvalContext(initializer.getClosure(),
+            interpreter.nothing()).pushScope();
+        Obj value = interpreter.evaluate(initializer.getFunction().getBody(),
+            fieldContext);
+        obj.setField(field.getKey(), value);
+      }
     }
     
     // TODO(bob): Needs to call parent constructors too!
