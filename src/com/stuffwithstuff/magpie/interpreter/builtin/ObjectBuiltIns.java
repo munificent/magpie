@@ -91,15 +91,7 @@ public class ObjectBuiltIns {
       return interpreter.nothing();
     }
   }
-  
-  @Signature("printRaw(text String ->)")
-  public static class PrintRaw implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      interpreter.print(arg.asString());
-      return interpreter.nothing();
-    }
-  }
-  
+    
   @Getter("type(-> Type)")
   public static class Type implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {

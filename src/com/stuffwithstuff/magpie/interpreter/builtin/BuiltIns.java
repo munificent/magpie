@@ -6,6 +6,8 @@ import java.lang.reflect.InvocationTargetException;
 import com.stuffwithstuff.magpie.StringCharacterReader;
 import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
+import com.stuffwithstuff.magpie.interpreter.FnObj;
+import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.parser.Lexer;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
 import com.stuffwithstuff.magpie.parser.ParseException;
@@ -13,7 +15,7 @@ import com.stuffwithstuff.magpie.util.Pair;
 
 public abstract class BuiltIns {
   @SuppressWarnings("unchecked")
-  public static void register(Class javaClass, ClassObj magpieClass)
+  public static void registerClass(Class javaClass, ClassObj magpieClass)
   {
     for (Class innerClass : javaClass.getDeclaredClasses()) {
       Signature signature = (Signature) innerClass.getAnnotation(Signature.class);
@@ -33,7 +35,57 @@ public abstract class BuiltIns {
     }
   }
   
+  @SuppressWarnings("unchecked")
+  public static void registerFunctions(Class javaClass,
+      Interpreter interpreter) {
+    for (Class innerClass : javaClass.getDeclaredClasses()) {
+      Signature signature = (Signature) innerClass.getAnnotation(Signature.class);
+      if (signature != null) {
+        registerFunction(interpreter, innerClass, signature.value());
+      }
+    }
+  }
+  
   // TODO(bob): These are all almost identical. Refactor.
+  
+  @SuppressWarnings("unchecked")
+  private static void registerFunction(Interpreter interpreter,
+      Class innerClass, String signature) {
+    try {
+      Pair<String, FunctionType> parsed = parseSignature(signature);
+      String functionName = parsed.getKey();
+      FunctionType type = parsed.getValue();
+      
+      // Construct the object.
+      Constructor ctor = innerClass.getConstructor();
+      BuiltInCallable callable = (BuiltInCallable) ctor.newInstance();
+      
+      // Define the function.
+      BuiltIn builtIn = new BuiltIn(type, callable);
+      FnObj function = new FnObj(interpreter.getFunctionClass(),
+          interpreter.nothing(), builtIn);
+      interpreter.getGlobals().define(functionName, function);
+      
+    } catch (SecurityException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (NoSuchMethodException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IllegalArgumentException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (InstantiationException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IllegalAccessException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (InvocationTargetException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
   
   @SuppressWarnings("unchecked")
   private static void registerMethod(ClassObj classObj, Class innerClass,

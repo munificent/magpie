@@ -105,16 +105,17 @@ public class Interpreter {
     mNeverClass = createGlobalClass("Never");
 
     // Register the built-in methods.
-    BuiltIns.register(ArrayBuiltIns.class, mArrayClass);
-    BuiltIns.register(BoolBuiltIns.class, mBoolClass);
-    BuiltIns.register(ClassBuiltIns.class, mClass);
-    BuiltIns.register(ExpressionBuiltIns.class, mExpressionClass);
-    BuiltIns.register(FunctionBuiltIns.class, mFnClass);
-    BuiltIns.register(IntBuiltIns.class, mIntClass);
-    BuiltIns.register(ObjectBuiltIns.class, mObjectClass);
-    BuiltIns.register(RecordBuiltIns.class, mRecordClass);
-    BuiltIns.register(RuntimeBuiltIns.class, mRuntimeClass);
-    BuiltIns.register(StringBuiltIns.class, mStringClass);
+    BuiltIns.registerClass(ArrayBuiltIns.class, mArrayClass);
+    BuiltIns.registerClass(BoolBuiltIns.class, mBoolClass);
+    BuiltIns.registerClass(ClassBuiltIns.class, mClass);
+    BuiltIns.registerClass(ExpressionBuiltIns.class, mExpressionClass);
+    BuiltIns.registerClass(FunctionBuiltIns.class, mFnClass);
+    BuiltIns.registerClass(IntBuiltIns.class, mIntClass);
+    BuiltIns.registerClass(ObjectBuiltIns.class, mObjectClass);
+    BuiltIns.registerClass(RecordBuiltIns.class, mRecordClass);
+    BuiltIns.registerClass(RuntimeBuiltIns.class, mRuntimeClass);
+    BuiltIns.registerClass(StringBuiltIns.class, mStringClass);
+    BuiltIns.registerFunctions(BuiltInFunctions.class, this);
   }
   
   public void load(List<Expr> expressions) {

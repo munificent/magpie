@@ -47,7 +47,7 @@ def Tuple             =>(other Type -> Type) FunctionType new(this, other, false
 def Object !=(other -> Bool) (this == other) not
 
 // Provide a generic print that converts arg to string first.
-def Object print(arg Object ->) printRaw(arg string)
+def print(arg Object ->) printString(arg string)
 
 get Object string String = "object"
 get String string String = this
