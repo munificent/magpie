@@ -9,7 +9,7 @@ import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class ArrayBuiltIns {
   @Shared
-  @Signature("of(items -> Array newType(Object))")
+  @Signature("of(items -> Array newType(Any))")
   public static class Of implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       List<Obj> elements = new ArrayList<Obj>();

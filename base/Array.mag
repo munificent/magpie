@@ -1,5 +1,5 @@
 extend class Array
-    shared def new(-> ArrayType new(Object)) Array of()
+    shared def new(-> ArrayType new(Any)) Array of()
     
     // TODO(bob): This is kind of hokey.
     shared def newType(elementType Type -> ArrayType)
@@ -57,7 +57,7 @@ extend class Array
         result
     end
 
-    def unique(-> ArrayType new(Object))
+    def unique(-> ArrayType new(Any))
         var result = Array new()
         for item = this do
             if result count == 0 then
