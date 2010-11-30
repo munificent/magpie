@@ -6,8 +6,10 @@ package com.stuffwithstuff.magpie.interpreter;
  * particular instance of a class. (Those just use a regular Scope.)
  */
 public class Field {
-  public Field(boolean hasInitializer, FnObj definition) {
+  public Field(boolean hasInitializer, boolean isDelegate,
+      Callable definition) {
     mHasInitializer = hasInitializer;
+    mIsDelegate = isDelegate;
     mDefinition = definition;
   }
   
@@ -20,14 +22,22 @@ public class Field {
   public boolean hasInitializer() { return mHasInitializer; }
   
   /**
+   * Gets whether this field is a delegate for unhandled messages.
+   * 
+   * @return true if the field is a delegate.
+   */
+  public boolean isDelegate() { return mIsDelegate; }
+  
+  /**
    * Gets the definition for this field. If it has an initializer, this will
    * return the initializing expression. If not, this will return the type
    * annotation expression.
    * 
    * @return The definition for the field.
    */
-  public FnObj getDefinition() { return mDefinition; }
+  public Callable getDefinition() { return mDefinition; }
   
-  private final boolean mHasInitializer;
-  private final FnObj   mDefinition;
+  private final boolean  mHasInitializer;
+  private final boolean  mIsDelegate;
+  private final Callable mDefinition;
 }

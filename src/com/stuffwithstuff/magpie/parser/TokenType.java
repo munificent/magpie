@@ -31,6 +31,7 @@ public enum TokenType {
   CATCH,
   CLASS,
   DEF,
+  DELEGATE,
   DO,
   ELSE,
   END,

@@ -58,6 +58,7 @@ public final class Token {
       case CATCH: return "catch";
       case CLASS: return "class";
       case DEF: return "def";
+      case DELEGATE: return "delegate";
       case DO: return "do";
       case ELSE: return "else";
       case END: return "end";

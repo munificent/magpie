@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.stuffwithstuff.magpie.util.Expect;
 
-
 public class Obj {  
   public Obj(ClassObj classObj, Object value) {
     mClass = classObj;

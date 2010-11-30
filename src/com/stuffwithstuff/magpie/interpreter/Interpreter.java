@@ -209,13 +209,13 @@ public class Interpreter {
   
   public Obj getMember(Position position, Obj receiver, String name) {
     // Look for a getter.
-    Callable getter = receiver.getClassObj().findGetter(name);
+    Callable getter = ClassObj.findGetter(receiver, name);
     if (getter != null) {
       return getter.invoke(this, receiver, mNothing);
     }
     
     // Look for a method.
-    Callable method = receiver.getClassObj().findMethod(name);
+    Callable method = ClassObj.findMethod(receiver, name);
     if (method != null) {
       // Bind it to the receiver.
       return new FnObj(mFnClass, receiver, method);
@@ -401,7 +401,7 @@ public class Interpreter {
   private ClassObj createGlobalClass(String name) {
     // Create the metaclass. This will hold shared methods on the class.
     ClassObj metaclass = new ClassObj(mClass, name + "Class", mClass);
-    
+
     // Create the class object itself. This will hold the instance methods for
     // objects of the class.
     ClassObj classObj = new ClassObj(metaclass, name, mObjectClass);

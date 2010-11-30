@@ -7,9 +7,7 @@ import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
-import com.stuffwithstuff.magpie.interpreter.EvalContext;
 import com.stuffwithstuff.magpie.interpreter.Field;
-import com.stuffwithstuff.magpie.interpreter.Function;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.util.Expect;
@@ -34,11 +32,9 @@ public class ClassNew implements Callable {
     // Initialize its fields.
     for (Entry<String, Field> field : classObj.getFieldDefinitions().entrySet()) {
       if (field.getValue().hasInitializer()) {
-        Function initializer = field.getValue().getDefinition().getFunction();
-        EvalContext fieldContext = new EvalContext(initializer.getClosure(),
-            interpreter.nothing()).pushScope();
-        Obj value = interpreter.evaluate(initializer.getFunction().getBody(),
-            fieldContext);
+        Callable initializer = field.getValue().getDefinition();
+        Obj value = initializer.invoke(interpreter, interpreter.nothing(),
+            interpreter.nothing());
         obj.setField(field.getKey(), value);
       }
     }

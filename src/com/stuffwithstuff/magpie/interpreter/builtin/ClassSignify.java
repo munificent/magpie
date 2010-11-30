@@ -10,7 +10,6 @@ import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.ast.RecordExpr;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
-import com.stuffwithstuff.magpie.interpreter.EvalContext;
 import com.stuffwithstuff.magpie.interpreter.Field;
 import com.stuffwithstuff.magpie.interpreter.Function;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
@@ -40,11 +39,9 @@ public class ClassSignify implements Callable {
     for (Entry<String, Field> field : classObj.getFieldDefinitions().entrySet()) {
       if (field.getValue().hasInitializer()) {
         // Call the initializer if the field has one.
-        Function initializer = field.getValue().getDefinition().getFunction();
-        EvalContext fieldContext = new EvalContext(initializer.getClosure(),
-            interpreter.nothing()).pushScope();
-        Obj value = interpreter.evaluate(initializer.getFunction().getBody(),
-            fieldContext);
+        Callable initializer = field.getValue().getDefinition();
+        Obj value = initializer.invoke(interpreter, interpreter.nothing(),
+            interpreter.nothing());
         obj.setField(field.getKey(), value);
       } else {
         // Doesn't self initialize, so assign it from the record.
@@ -66,7 +63,9 @@ public class ClassSignify implements Callable {
     List<Pair<String, Expr>> fields = new ArrayList<Pair<String, Expr>>();
     for (Entry<String, Field> field : mClass.getFieldDefinitions().entrySet()) {
       if (!field.getValue().hasInitializer()) {
-        Expr type = field.getValue().getDefinition().getFunction().getFunction().getBody();
+        Callable typeDeclaration = field.getValue().getDefinition();
+        // TODO(bob): This cast here is gross!
+        Expr type = ((Function)typeDeclaration).getFunction().getBody();
         fields.add(new Pair<String, Expr>(field.getKey(), type));
       }
     }

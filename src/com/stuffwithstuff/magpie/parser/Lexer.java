@@ -280,6 +280,7 @@ public class Lexer {
     if (text.equals("catch")) return new Token(position, TokenType.CATCH);
     if (text.equals("class")) return new Token(position, TokenType.CLASS);
     if (text.equals("def")) return new Token(position, TokenType.DEF);
+    if (text.equals("delegate")) return new Token(position, TokenType.DELEGATE);
     if (text.equals("do")) return new Token(position, TokenType.DO);
     if (text.equals("else")) return new Token(position, TokenType.ELSE);
     if (text.equals("end")) return new Token(position, TokenType.END);

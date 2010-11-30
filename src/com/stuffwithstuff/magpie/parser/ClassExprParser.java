@@ -61,8 +61,10 @@ public class ClassExprParser implements ExprParser {
       
       if (parser.match(TokenType.THIS)) {
         exprs.add(parseConstructor(parser, theClass));
+      } else if (parser.match(TokenType.DELEGATE, TokenType.VAR)) {
+        exprs.add(parseField(parser, true, theClass));
       } else if (parser.match(TokenType.VAR)) {
-        exprs.add(parseField(parser, theClass));
+        exprs.add(parseField(parser, false, theClass));
       } else if (parser.match(TokenType.DEF)) {
         exprs.add(parseMethod(parser, theClass));
       } else if (parser.match(TokenType.GET)) {
@@ -72,9 +74,12 @@ public class ClassExprParser implements ExprParser {
       } else if (parser.match(TokenType.SHARED)) {
         Expr metaclass = Expr.message(theClass, Identifiers.TYPE);
         // TODO(bob): Need to prevent declaring shared members: can only define.
-        if (parser.match(TokenType.VAR)) {
+        if (parser.match(TokenType.DELEGATE, TokenType.VAR)) {
           // TODO(bob): Need to handle defining class fields specially.
-          exprs.add(parseField(parser, metaclass));
+          exprs.add(parseField(parser, true, metaclass));
+        } else if (parser.match(TokenType.VAR)) {
+          // TODO(bob): Need to handle defining class fields specially.
+          exprs.add(parseField(parser, false, metaclass));
         } else if (parser.match(TokenType.DEF)) {
           exprs.add(parseMethod(parser, metaclass));
         } else if (parser.match(TokenType.GET)) {
@@ -103,7 +108,8 @@ public class ClassExprParser implements ExprParser {
     return Expr.message(theClass, Identifiers.DEFINE_CONSTRUCTOR, function);
   }
   
-  private static Expr parseField(MagpieParser parser, Expr theClass) {
+  private static Expr parseField(MagpieParser parser, boolean isDelegate,
+      Expr theClass) {
     String name = parser.consume(TokenType.NAME).getString();
     Expr type = parser.parseTypeExpression();
     
@@ -111,12 +117,12 @@ public class ClassExprParser implements ExprParser {
       // Defining it.
       Expr initializer = parser.parseBlock();
       return Expr.message(theClass, Identifiers.DEFINE_FIELD,
-          Expr.tuple(Expr.string(name), Expr.fn(type),
+          Expr.tuple(Expr.string(name), Expr.bool(isDelegate), Expr.fn(type),
               Expr.fn(initializer)));
     } else {
       // Just declaring it.
       return Expr.message(theClass, Identifiers.DECLARE_FIELD,
-          Expr.tuple(Expr.string(name), Expr.fn(type)));
+          Expr.tuple(Expr.string(name), Expr.bool(isDelegate), Expr.fn(type)));
     }
   }
   

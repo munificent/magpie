@@ -1,0 +1,15 @@
+class Monster
+    def attack()
+        print("The " + name + " attacks you!")
+    end
+    
+    get name String = "monster"
+end
+
+class Troll
+    delegate var monster Monster = Monster new()
+    get name String = "troll"
+end
+
+var troll = Troll new()
+troll attack()

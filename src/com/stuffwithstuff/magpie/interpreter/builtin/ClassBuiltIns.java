@@ -8,16 +8,17 @@ import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class ClassBuiltIns {
-  @Signature("declareField(name String, type ->)")
+  @Signature("declareField(name String, delegate? Bool, type ->)")
   public static class DeclareField implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();
-      FnObj type = (FnObj)arg.getTupleField(1);
+      boolean isDelegate = arg.getTupleField(1).asBool();
+      FnObj type = (FnObj)arg.getTupleField(2);
       
       ClassObj classObj = (ClassObj)thisObj;
   
       // Declare the field.
-      classObj.declareField(name, type);
+      classObj.declareField(name, isDelegate, type.getFunction());
       
       // Add a getter.
       classObj.defineGetter(name,
@@ -43,15 +44,16 @@ public class ClassBuiltIns {
     }
   }
   
-  @Signature("defineField(name String, type, initializer ->)")
+  @Signature("defineField(name String, delegate? Bool, type, initializer ->)")
   public static class DefineField implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();
-      FnObj type = (FnObj)arg.getTupleField(1);
-      FnObj initializer = (FnObj)arg.getTupleField(2);
+      boolean isDelegate = arg.getTupleField(1).asBool();
+      FnObj type = (FnObj)arg.getTupleField(2);
+      FnObj initializer = (FnObj)arg.getTupleField(3);
       
       ClassObj classObj = (ClassObj)thisObj;
-      classObj.defineField(name, initializer);
+      classObj.defineField(name, isDelegate, initializer.getFunction());
   
       // Add a getter.
       classObj.defineGetter(name,
@@ -165,12 +167,12 @@ public class ClassBuiltIns {
       // Create the metaclass. This will hold shared methods on the class.
       ClassObj metaclass = new ClassObj(interpreter.getMetaclass(),
           name + "Class", interpreter.getMetaclass());
-  
+
       // Create the class object itself. This will hold the instance methods for
       // objects of the class.
       ClassObj classObj = new ClassObj(metaclass, name,
           interpreter.getObjectClass());
-      
+
       // Add the constructor method.
       metaclass.addMethod(Identifiers.NEW, new ClassNew(name));
       metaclass.addMethod(Identifiers.SIGNIFY, new ClassSignify(classObj));

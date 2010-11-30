@@ -18,7 +18,7 @@ public class ObjectBuiltIns {
     }
   }
 
-  @Getter("fields(Array newType(String, Dynamic))")
+  @Getter("fields(-> Array newType(String, Dynamic))")
   public static class Fields implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       List<Entry<String, Obj>> fields = new ArrayList<Entry<String, Obj>>(

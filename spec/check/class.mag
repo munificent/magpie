@@ -2,7 +2,7 @@ specify("A class constructor") with
     def testClass(block)
         var c = Class new("c")
         c defineConstructor(block)
-        c declareField("f", fn Int)
+        c declareField("f", false, fn Int)
         c
     end
     

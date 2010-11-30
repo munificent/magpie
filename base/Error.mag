@@ -1,10 +1,10 @@
-class Error
+interface Error
 end
 
-class RedefinitionError : Error
+class RedefinitionError
 end
 
-class UnexpectedTypeError : Error
+class UnexpectedTypeError
     this(expectedType Type, actualType Type)
         this expectedType = expectedType
         this actualType = actualType
