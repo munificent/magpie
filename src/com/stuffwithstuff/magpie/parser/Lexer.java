@@ -122,7 +122,10 @@ public class Lexer {
       if (lookAhead("/*")) {
         return createStringToken(TokenType.OPERATOR);
       }
-      if (isOperator(c) || isAlpha(c) || isDigit(c)) {
+      if (isAlpha(c) || isDigit(c)) {
+        return changeToken(LexState.IN_NAME);
+      }
+      if (isOperator(c)) {
         return advance();
       }
       return createStringToken(TokenType.OPERATOR);
