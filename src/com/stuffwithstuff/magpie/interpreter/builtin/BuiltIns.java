@@ -105,9 +105,9 @@ public abstract class BuiltIns {
       // Define the method.
       BuiltIn builtIn = new BuiltIn(type, callable);
       if (isShared) {
-        classObj.getClassObj().addMethod(methodName, builtIn);
+        classObj.getClassObj().getMethods().put(methodName, builtIn);
       } else {
-        classObj.addMethod(methodName, builtIn);
+        classObj.getMethods().put(methodName, builtIn);
       }
     } catch (SecurityException e) {
       // TODO Auto-generated catch block
@@ -148,9 +148,9 @@ public abstract class BuiltIns {
       // Define the getter.
       BuiltIn builtIn = new BuiltIn(type, callable);
       if (isShared) {
-        classObj.getClassObj().defineGetter(methodName, builtIn);
+        classObj.getClassObj().getGetters().put(methodName, builtIn);
       } else {
-        classObj.defineGetter(methodName, builtIn);
+        classObj.getGetters().put(methodName, builtIn);
       }
     } catch (SecurityException e) {
       // TODO Auto-generated catch block
@@ -191,9 +191,9 @@ public abstract class BuiltIns {
       // Define the setter.
       BuiltIn builtIn = new BuiltIn(type, callable);
       if (isShared) {
-        classObj.getClassObj().defineSetter(methodName, builtIn);
+        classObj.getClassObj().getSetters().put(methodName, builtIn);
       } else {
-        classObj.defineSetter(methodName, builtIn);
+        classObj.getSetters().put(methodName, builtIn);
       }
     } catch (SecurityException e) {
       // TODO Auto-generated catch block

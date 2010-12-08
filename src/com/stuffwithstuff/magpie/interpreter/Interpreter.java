@@ -60,7 +60,7 @@ public class Interpreter {
     // it's parent. This means that Object new("foo") and Class new("foo") are
     // indistinguishable.
     mClass = new ClassObj(null, "Class");
-    mClass.addMixin(classClass);
+    mClass.getMixins().add(classClass);
     mGlobalScope.define("Class", mClass);
     
     // Object is the root class of all objects. All parent chains eventually
@@ -70,11 +70,11 @@ public class Interpreter {
     mGlobalScope.define("Object", mObjectClass);
 
     // Add a constructor so you can create new Objects.
-    mObjectClass.addMethod(Identifiers.NEW, new ClassNew("Object"));
+    mObjectClass.getMethods().put(Identifiers.NEW, new ClassNew("Object"));
 
     // Now that ClassClass, Class and Object exist, wire them up.
     classClass.bindClass(mClass);
-    mClass.addMixin(mObjectClass);
+    mClass.getMixins().add(mObjectClass);
 
     mArrayClass = createGlobalClass("Array");
     mBoolClass = createGlobalClass("Bool");
@@ -86,7 +86,8 @@ public class Interpreter {
     mRuntimeClass = createGlobalClass("Runtime");
     mStringClass = createGlobalClass("String");
     mTupleClass = createGlobalClass("Tuple");
-    mTupleClass.defineGetter("count", new FieldGetter("count", Expr.name("Int")));
+    mTupleClass.getGetters().put("count",
+        new FieldGetter("count", Expr.name("Int")));
     
     mNothingClass = createGlobalClass("Nothing");
     mNothing = instantiate(mNothingClass, null);
@@ -208,13 +209,13 @@ public class Interpreter {
   
   public Obj getMember(Position position, Obj receiver, String name) {
     // Look for a getter.
-    Callable getter = ClassObj.findObjectGetter(receiver, name);
+    Callable getter = ClassObj.findGetter(null, receiver, name);
     if (getter != null) {
       return getter.invoke(this, receiver, mNothing);
     }
     
     // Look for a method.
-    Callable method = ClassObj.findObjectMethod(receiver, name);
+    Callable method = ClassObj.findMethod(null, receiver, name);
     if (method != null) {
       // Bind it to the receiver.
       return new FnObj(mFnClass, receiver, method);
@@ -417,12 +418,12 @@ public class Interpreter {
   private ClassObj createGlobalClass(String name) {
     // Create the metaclass. This will hold shared methods on the class.
     ClassObj metaclass = new ClassObj(mClass, name + "Class");
-    metaclass.addMixin(mClass);
+    metaclass.getMixins().add(mClass);
     
     // Create the class object itself. This will hold the instance methods for
     // objects of the class.
     ClassObj classObj = new ClassObj(metaclass, name);
-    classObj.addMixin(mObjectClass);
+    classObj.getMixins().add(mObjectClass);
     
     mGlobalScope.define(name, classObj);
     

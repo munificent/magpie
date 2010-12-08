@@ -27,7 +27,7 @@ public class Obj {
     
     mClass = classObj;
   }
-
+    
   public Scope getFields() { return mFields; }
   
   /**

@@ -3,6 +3,7 @@ package com.stuffwithstuff.magpie.interpreter.builtin;
 import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
+import com.stuffwithstuff.magpie.interpreter.Field;
 import com.stuffwithstuff.magpie.interpreter.FnObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
@@ -18,14 +19,15 @@ public class ClassBuiltIns {
       ClassObj classObj = (ClassObj)thisObj;
   
       // Declare the field.
-      classObj.declareField(name, isDelegate, type.getFunction());
+      classObj.getFieldDefinitions().put(name,
+          new Field(false, isDelegate, type.getFunction()));
       
       // Add a getter.
-      classObj.defineGetter(name,
+      classObj.getGetters().put(name,
           new FieldGetter(name, type.getFunction().getFunction().getBody()));
       
       // Add a setter.
-      classObj.defineSetter(name,
+      classObj.getSetters().put(name,
           new FieldSetter(name, type.getFunction().getFunction().getBody()));
   
       return interpreter.nothing();
@@ -53,14 +55,15 @@ public class ClassBuiltIns {
       FnObj initializer = (FnObj)arg.getTupleField(3);
       
       ClassObj classObj = (ClassObj)thisObj;
-      classObj.defineField(name, isDelegate, initializer.getFunction());
+      classObj.getFieldDefinitions().put(name,
+          new Field(true, isDelegate, initializer.getFunction()));
   
       // Add a getter.
-      classObj.defineGetter(name,
+      classObj.getGetters().put(name,
           new FieldGetter(name, type.getFunction().getFunction().getBody()));
       
       // Add a setter.
-      classObj.defineSetter(name,
+      classObj.getSetters().put(name,
           new FieldSetter(name, type.getFunction().getFunction().getBody()));
   
       return interpreter.nothing();
@@ -74,7 +77,7 @@ public class ClassBuiltIns {
       FnObj method = (FnObj)arg.getTupleField(1);
       
       ClassObj classObj = (ClassObj)thisObj;
-      classObj.addMethod(name, method.getCallable());
+      classObj.getMethods().put(name, method.getCallable());
       
       return interpreter.nothing();
     }
@@ -87,7 +90,7 @@ public class ClassBuiltIns {
       FnObj body = (FnObj)arg.getTupleField(1);
       
       ClassObj classObj = (ClassObj)thisObj;
-      classObj.defineGetter(name, body.getCallable());
+      classObj.getGetters().put(name, body.getCallable());
       
       return interpreter.nothing();
     }
@@ -100,7 +103,7 @@ public class ClassBuiltIns {
       FnObj body = (FnObj)arg.getTupleField(1);
       
       ClassObj classObj = (ClassObj)thisObj;
-      classObj.defineSetter(name, body.getCallable());
+      classObj.getSetters().put(name, body.getCallable());
       
       return interpreter.nothing();
     }
@@ -114,13 +117,13 @@ public class ClassBuiltIns {
       ClassObj thisClass = (ClassObj)thisObj;
       
       // Look for a getter.
-      Callable getter = thisClass.findGetter(name);
+      Callable getter = ClassObj.findGetter(thisClass, null, name);
       if (getter != null) {
         return interpreter.evaluateCallableType(getter, true);
       }
       
       // Look for a method.
-      Callable method = thisClass.findMethod(name);
+      Callable method = ClassObj.findMethod(thisClass, null, name);
       if (method != null) {
         return interpreter.evaluateCallableType(method, false);
       }
@@ -138,7 +141,7 @@ public class ClassBuiltIns {
       ClassObj thisClass = (ClassObj)thisObj;
       
       // Look for a setter.
-      Callable setter = thisClass.findSetter(name);
+      Callable setter = ClassObj.findSetter(thisClass, null, name);
       if (setter != null) {
         return interpreter.evaluateCallableType(setter, true);
       }
@@ -148,12 +151,12 @@ public class ClassBuiltIns {
     }
   }
 
-  @Signature("mixin(classObj Class ->)")
+  @Getter("mixins(-> Array newType(Class))")
   public static class Mixin implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       ClassObj classObj = (ClassObj)thisObj;
       
-      classObj.addMixin((ClassObj)arg);
+      classObj.getMixins().add((ClassObj)arg);
       return interpreter.nothing();
     }
   }
@@ -167,6 +170,9 @@ public class ClassBuiltIns {
     }
   }
   
+  // TODO(bob): If mixins don't subtype, then this doesn't actually return the
+  // right type (since the class of the object returned (a metaclass) isn't an
+  // instance of Class, it just mixes it in). Make Class an interface?
   @Shared
   @Signature("new(name String -> Class)")
   public static class New implements BuiltInCallable {
@@ -177,16 +183,16 @@ public class ClassBuiltIns {
       // Create the metaclass. This will hold shared methods on the class.
       ClassObj metaclass = new ClassObj(interpreter.getMetaclass(),
           name + "Class");
-      metaclass.addMixin(interpreter.getMetaclass());
+      metaclass.getMixins().add(interpreter.getMetaclass());
       
       // Create the class object itself. This will hold the instance methods for
       // objects of the class.
       ClassObj classObj = new ClassObj(metaclass, name);
-      classObj.addMixin(interpreter.getObjectClass());
+      classObj.getMixins().add(interpreter.getObjectClass());
       
       // Add the constructor method.
-      metaclass.addMethod(Identifiers.NEW, new ClassNew(name));
-      metaclass.addMethod(Identifiers.SIGNIFY, new ClassSignify(classObj));
+      metaclass.getMethods().put(Identifiers.NEW, new ClassNew(name));
+      metaclass.getMethods().put(Identifiers.SIGNIFY, new ClassSignify(classObj));
       
       return classObj;
     }
