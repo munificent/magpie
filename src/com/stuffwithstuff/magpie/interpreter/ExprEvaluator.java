@@ -60,7 +60,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     }
     
     // Look for a setter.
-    Callable setter = ClassObj.findSetter(receiver, expr.getName());
+    Callable setter = ClassObj.findObjectSetter(receiver, expr.getName());
     if (setter == null) {
       mInterpreter.runtimeError(expr.getPosition(),
           "Could not find a setter \"%s\" on %s.",
@@ -116,7 +116,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(ExpressionExpr expr, EvalContext context) {
-    return mInterpreter.getExpressionClass().instantiate(expr.getBody());
+    return mInterpreter.instantiate(mInterpreter.getExpressionClass(),
+        expr.getBody());
   }
   
   @Override

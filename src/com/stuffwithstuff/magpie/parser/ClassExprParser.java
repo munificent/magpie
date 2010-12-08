@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.Identifiers;
-import com.stuffwithstuff.magpie.ast.AssignExpr;
 import com.stuffwithstuff.magpie.ast.BlockExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
@@ -26,13 +25,6 @@ public class ClassExprParser implements ExprParser {
       // var Foo = Class newClass("Foo")
       exprs.add(new VariableExpr(position, className,
           Expr.message(Expr.name("Class"), "new", Expr.string(className))));
-    }
-    
-    // Parse the inherits clause, if any.
-    if (parser.match(TokenType.COLON)) {
-      String baseClass = parser.consume(TokenType.NAME).getString();
-      exprs.add(new AssignExpr(position, theClass, "parent",
-          Expr.name(baseClass)));
     }
     
     parser.consume(TokenType.LINE);

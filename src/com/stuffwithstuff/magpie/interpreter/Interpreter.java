@@ -49,20 +49,24 @@ public class Interpreter {
     mGlobalScope = new Scope();
 
     // The metaclass for Class. Contains the shared methods on Class.
-    ClassObj classClass = new ClassObj("ClassClass", null);
-    
+    ClassObj classClass = new ClassObj(null, "ClassClass");
+
     // The class of all class objects. Given a class Foo, it's class will be a
     // singleton instance of its metaclass FooClass. The class of FooClass will
     // in turn be this class, Class. FooClass will also *inherit* from Class, so
     // that all of the methods defined on Class are available in FooClass (i.e.
     // "name", "parent", etc.)
-    mClass = new ClassObj("Class", classClass);
+    // TODO(bob): This isn't right. ClassClass should be the class of Class, not
+    // it's parent. This means that Object new("foo") and Class new("foo") are
+    // indistinguishable.
+    mClass = new ClassObj(null, "Class");
+    mClass.addMixin(classClass);
     mGlobalScope.define("Class", mClass);
     
     // Object is the root class of all objects. All parent chains eventually
     // end here. Note that there is no distinct metaclass for class Object: its
     // metaclass is the main metaclass Class.
-    mObjectClass = new ClassObj(mClass, "Object", null);
+    mObjectClass = new ClassObj(mClass, "Object");
     mGlobalScope.define("Object", mObjectClass);
 
     // Add a constructor so you can create new Objects.
@@ -70,12 +74,9 @@ public class Interpreter {
 
     // Now that ClassClass, Class and Object exist, wire them up.
     classClass.bindClass(mClass);
-    mClass.setParent(mObjectClass);
+    mClass.addMixin(mObjectClass);
 
     mArrayClass = createGlobalClass("Array");
-    // TODO(bob): Should really be type and not class, I think?
-    //mArrayClass.setParent(mClass);
-    
     mBoolClass = createGlobalClass("Bool");
     mDynamicClass = createGlobalClass("Dynamic");
     mExpressionClass = createGlobalClass("Expression");
@@ -83,14 +84,12 @@ public class Interpreter {
     mIntClass = createGlobalClass("Int");
     mRecordClass = createGlobalClass("Record");
     mRuntimeClass = createGlobalClass("Runtime");
-
     mStringClass = createGlobalClass("String");
-
     mTupleClass = createGlobalClass("Tuple");
     mTupleClass.defineGetter("count", new FieldGetter("count", Expr.name("Int")));
     
     mNothingClass = createGlobalClass("Nothing");
-    mNothing = mNothingClass.instantiate();
+    mNothing = instantiate(mNothingClass, null);
 
     // "Never" is the evaluated type of an expression that can never yield a
     // result. It's equivalent to the bottom type. More concretely, it's the
@@ -209,13 +208,13 @@ public class Interpreter {
   
   public Obj getMember(Position position, Obj receiver, String name) {
     // Look for a getter.
-    Callable getter = ClassObj.findGetter(receiver, name);
+    Callable getter = ClassObj.findObjectGetter(receiver, name);
     if (getter != null) {
       return getter.invoke(this, receiver, mNothing);
     }
     
     // Look for a method.
-    Callable method = ClassObj.findMethod(receiver, name);
+    Callable method = ClassObj.findObjectMethod(receiver, name);
     if (method != null) {
       // Bind it to the receiver.
       return new FnObj(mFnClass, receiver, method);
@@ -292,7 +291,7 @@ public class Interpreter {
   public Obj throwError(String errorClassName) {
     // Look up the error class.
     ClassObj classObj = (ClassObj) mGlobalScope.get(errorClassName);
-    throw new ErrorException(classObj.instantiate());
+    throw new ErrorException(instantiate(classObj, null));
   }
   
   public void runtimeError(Expr expr, String format, Object... args) {
@@ -330,19 +329,19 @@ public class Interpreter {
   public ClassObj getTupleClass() { return mTupleClass; }
   
   public Obj createArray(List<Obj> elements) {
-    return mArrayClass.instantiate(elements);
+    return instantiate(mArrayClass, elements);
   }
   
   public Obj createBool(boolean value) {
-    return mBoolClass.instantiate(value);
+    return instantiate(mBoolClass, value);
   }
 
   public Obj createInt(int value) {
-    return mIntClass.instantiate(value);
+    return instantiate(mIntClass, value);
   }
   
   public Obj createString(String value) {
-    return mStringClass.instantiate(value);
+    return instantiate(mStringClass, value);
   }
   
   public FnObj createFn(FnExpr expr, EvalContext context) {
@@ -356,7 +355,7 @@ public class Interpreter {
   
   public Obj createTuple(List<Obj> fields) {
     // A tuple is an object with fields whose names are zero-based numbers.
-    Obj tuple = mTupleClass.instantiate();
+    Obj tuple = instantiate(mTupleClass, null);
     for (int i = 0; i < fields.size(); i++) {
       String name = "_" + Integer.toString(i);
       tuple.setField(name, fields.get(i));
@@ -368,13 +367,30 @@ public class Interpreter {
   }
   
   public Obj createRecord(Map<String, Obj> fields) {
-    Obj record = mRecordClass.instantiate();
+    Obj record = instantiate(mRecordClass, null);
     
     for (Entry<String, Obj> field : fields.entrySet()) {
       record.setField(field.getKey(), field.getValue());
     }
     
     return record;
+  }
+  
+  public Obj instantiate(ClassObj classObj, Object primitiveValue) {
+    Obj object = new Obj(classObj, primitiveValue);
+    
+    // Initialize its fields.
+    for (Entry<String, Field> field : classObj.getFieldDefinitions().entrySet()) {
+      if (field.getValue().hasInitializer()) {
+        Callable initializer = field.getValue().getDefinition();
+        Obj value = initializer.invoke(this, mNothing, mNothing);
+        object.setField(field.getKey(), value);
+      }
+    }
+    
+    // TODO(bob): Needs to call constructors too!
+    
+    return object;
   }
   
   public Obj evaluate(Expr expr, EvalContext context) {
@@ -400,11 +416,14 @@ public class Interpreter {
   
   private ClassObj createGlobalClass(String name) {
     // Create the metaclass. This will hold shared methods on the class.
-    ClassObj metaclass = new ClassObj(mClass, name + "Class", mClass);
-
+    ClassObj metaclass = new ClassObj(mClass, name + "Class");
+    metaclass.addMixin(mClass);
+    
     // Create the class object itself. This will hold the instance methods for
     // objects of the class.
-    ClassObj classObj = new ClassObj(metaclass, name, mObjectClass);
+    ClassObj classObj = new ClassObj(metaclass, name);
+    classObj.addMixin(mObjectClass);
+    
     mGlobalScope.define(name, classObj);
     
     return classObj;

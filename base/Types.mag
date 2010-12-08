@@ -38,19 +38,9 @@ extend class Class
             return true
         end
         
-        // A derived type can be assigned to a base type, so walk up the chain
-        // looking for this type.
-        var otherClass = unsafecast[Class](other)
-        while otherClass != Object do
-            if this == otherClass then return true
-            // Bail if got stuck in an infinite loop.
-            if otherClass == nothing then return false
-            otherClass = otherClass parent
-        end
-    
-        // If we got here, the only thing other has in common is Object, so see
-        // if that's us.
-        this == Object
+        // TODO(bob): Should mixins subtype? What about delegates?
+
+        false
     end
 end
 

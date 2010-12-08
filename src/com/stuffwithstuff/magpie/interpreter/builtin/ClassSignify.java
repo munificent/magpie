@@ -33,18 +33,12 @@ public class ClassSignify implements Callable {
   public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
     ClassObj classObj = (ClassObj)thisObj;
     
-    Obj obj = classObj.instantiate();
+    Obj obj = interpreter.instantiate(classObj, null);
 
     // Initialize or assign the fields.
     for (Entry<String, Field> field : classObj.getFieldDefinitions().entrySet()) {
-      if (field.getValue().hasInitializer()) {
-        // Call the initializer if the field has one.
-        Callable initializer = field.getValue().getDefinition();
-        Obj value = initializer.invoke(interpreter, interpreter.nothing(),
-            interpreter.nothing());
-        obj.setField(field.getKey(), value);
-      } else {
-        // Doesn't self initialize, so assign it from the record.
+      if (!field.getValue().hasInitializer()) {
+        // Assign it from the record.
         Obj value = arg.getField(field.getKey());
         if (value != null) {
           obj.setField(field.getKey(), arg.getField(field.getKey()));

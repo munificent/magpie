@@ -147,7 +147,17 @@ public class ClassBuiltIns {
       return interpreter.nothing();
     }
   }
-  
+
+  @Signature("mixin(classObj Class ->)")
+  public static class Mixin implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      ClassObj classObj = (ClassObj)thisObj;
+      
+      classObj.addMixin((ClassObj)arg);
+      return interpreter.nothing();
+    }
+  }
+
   @Getter("name(-> String)")
   public static class Name implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
@@ -156,7 +166,7 @@ public class ClassBuiltIns {
       return interpreter.createString(classObj.getName());
     }
   }
-    
+  
   @Shared
   @Signature("new(name String -> Class)")
   public static class New implements BuiltInCallable {
@@ -166,50 +176,19 @@ public class ClassBuiltIns {
       
       // Create the metaclass. This will hold shared methods on the class.
       ClassObj metaclass = new ClassObj(interpreter.getMetaclass(),
-          name + "Class", interpreter.getMetaclass());
-
+          name + "Class");
+      metaclass.addMixin(interpreter.getMetaclass());
+      
       // Create the class object itself. This will hold the instance methods for
       // objects of the class.
-      ClassObj classObj = new ClassObj(metaclass, name,
-          interpreter.getObjectClass());
-
+      ClassObj classObj = new ClassObj(metaclass, name);
+      classObj.addMixin(interpreter.getObjectClass());
+      
       // Add the constructor method.
       metaclass.addMethod(Identifiers.NEW, new ClassNew(name));
       metaclass.addMethod(Identifiers.SIGNIFY, new ClassSignify(classObj));
       
       return classObj;
-    }
-  }
-  
-  @Getter("parent(-> Class)")
-  public static class Parent implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      ClassObj classObj = (ClassObj)thisObj;
-      
-      ClassObj parent = classObj.getParent();
-      
-      // If a class has no parent, its parent is implicitly Object.
-      if (parent == null) return interpreter.getObjectClass();
-      
-      return parent;
-    }
-  }
-  
-  @Setter("parent(parent Class -> Class)")
-  public static class SetParent implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      ClassObj classObj = (ClassObj)thisObj;
-      
-      if (!(arg instanceof ClassObj)) {
-        interpreter.runtimeError(
-            "Cannot assign %s as the base class for %s because it is not a class.",
-            arg, thisObj);
-        
-        return interpreter.nothing();
-      }
-      
-      classObj.setParent((ClassObj)arg);
-      return arg;
     }
   }
 }

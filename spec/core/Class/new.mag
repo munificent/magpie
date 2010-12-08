@@ -1,7 +1,7 @@
 specify("The 'new' shared method on Class") with
     it should("return a new class") with
         var c = Class new("Foo")
-        c is(Class) shouldBe(true)
+        c is(c type) shouldBe(true)
     end
 
     it should("create a class with the given name") with

@@ -44,66 +44,40 @@ public class ClassObj extends Obj {
   // At type-check time, though, there is no instance state. Instead, all we'll
   // be doing is looking at the declared type of the delegate fields directly
   // on the class and type-check against that. Hence: two code paths.
-  public static Callable findMethod(Obj receiver, final String name) {
-    return findMember(receiver, new Fn<ClassObj, Callable>() {
+  public static Callable findObjectMethod(Obj receiver, final String name) {
+    return findObjectMember(receiver, new Fn<ClassObj, Callable>() {
       public Callable apply(ClassObj classObj) {
         return classObj.mMethods.get(name);
       }
     });
   }
   
-  public static Callable findGetter(Obj receiver, final String name) {
-    return findMember(receiver, new Fn<ClassObj, Callable>() {
+  public static Callable findObjectGetter(Obj receiver, final String name) {
+    return findObjectMember(receiver, new Fn<ClassObj, Callable>() {
       public Callable apply(ClassObj classObj) {
         return classObj.mGetters.get(name);
       }
     });
   }
   
-  public static Callable findSetter(Obj receiver, final String name) {
-    return findMember(receiver, new Fn<ClassObj, Callable>() {
+  public static Callable findObjectSetter(Obj receiver, final String name) {
+    return findObjectMember(receiver, new Fn<ClassObj, Callable>() {
       public Callable apply(ClassObj classObj) {
         return classObj.mSetters.get(name);
       }
     });
   }
   
-  public ClassObj(ClassObj metaclass, String name, ClassObj parent) {
+  public ClassObj(ClassObj metaclass, String name) {
     super(metaclass);
     mName = name;
-    mParent = parent;
-    mFields = new HashMap<String, Field>();
-    mGetters = new HashMap<String, Callable>();
-    mSetters = new HashMap<String, Callable>();
-  }
-  
-  public ClassObj(String name, ClassObj parent) {
-    mName = name;
-    mParent = parent;
-    mFields = new HashMap<String, Field>();
-    mGetters = new HashMap<String, Callable>();
-    mSetters = new HashMap<String, Callable>();
   }
   
   public Map<String, Field> getFieldDefinitions() {
     return mFields;
   }
   
-  public Obj instantiate() {
-    return new Obj(this);
-  }
-  
-  public Obj instantiate(Object primitiveValue) {
-    return new Obj(this, primitiveValue);
-  }
-  
   public String getName() { return mName; }
-  
-  public ClassObj getParent() { return mParent; }
-  
-  public void setParent(ClassObj parent) {
-    mParent = parent;
-  }
   
   public void addMethod(String name, Callable method) {
     mMethods.put(name, method);
@@ -127,38 +101,35 @@ public class ClassObj extends Obj {
     return mConstructor;
   }
   
+  public void addMixin(ClassObj classObj) {
+    mMixins.add(classObj);
+  }
+  
   // TODO(bob): These non-static find_ methods just do the old parent lookup.
   // Eventually, these need to do the delegate lookup that the static
   // find___() methods do.
-  
-  public Callable findMethod(String name) {
-    ClassObj classObj = this;
-    while (classObj != null) {
-      Callable member = classObj.mMethods.get(name);
-      if (member != null) return member;
-      classObj = classObj.mParent;
-    }
-    return null;
+  public Callable findMethod(final String name) {
+    return findMember(this, new Fn<ClassObj, Callable>() {
+      public Callable apply(ClassObj classObj) {
+        return classObj.mMethods.get(name);
+      }
+    });
   }
   
-  public Callable findGetter(String name) {
-    ClassObj classObj = this;
-    while (classObj != null) {
-      Callable member = classObj.mGetters.get(name);
-      if (member != null) return member;
-      classObj = classObj.mParent;
-    }
-    return null;
+  public Callable findGetter(final String name) {
+    return findMember(this, new Fn<ClassObj, Callable>() {
+      public Callable apply(ClassObj classObj) {
+        return classObj.mGetters.get(name);
+      }
+    });
   }
   
-  public Callable findSetter(String name) {
-    ClassObj classObj = this;
-    while (classObj != null) {
-      Callable member = classObj.mSetters.get(name);
-      if (member != null) return member;
-      classObj = classObj.mParent;
-    }
-    return null;
+  public Callable findSetter(final String name) {
+    return findMember(this, new Fn<ClassObj, Callable>() {
+      public Callable apply(ClassObj classObj) {
+        return classObj.mSetters.get(name);
+      }
+    });
   }
 
   public void declareField(String name, boolean isDelegate, Function type) {
@@ -181,8 +152,10 @@ public class ClassObj extends Obj {
   public String toString() {
     return mName;
   }
-  
-  private static <T> T findMember(Obj receiver, Fn<ClassObj, T> lookup) {
+
+  private static <T> T findObjectMember(Obj receiver, Fn<ClassObj, T> lookup) {
+    Expect.notNull(receiver);
+    
     ClassObj classObj = receiver.getClassObj();
     
     // Try this class.
@@ -193,30 +166,60 @@ public class ClassObj extends Obj {
     for (Entry<String, Field> field : classObj.mFields.entrySet()) {
       if (field.getValue().isDelegate()) {
         Obj delegate = receiver.getField(field.getKey());
-        member = findMember(delegate, lookup);
+        member = findObjectMember(delegate, lookup);
         if (member != null) return member;
       }
     }
     
-    // Old parent lookup:
-    // TODO(bob): Get rid of this once delegation is used for everything.
-    classObj = receiver.getClassObj();
-    while (classObj != null) {
-      member = lookup.apply(classObj);
+    // Try the mixins.
+    member = findMemberInMixins(classObj, lookup, new HashSet<ClassObj>());
+    if (member != null) return member;
+    
+    // Not found.
+    return null;
+  }
+  
+  private static <T> T findMember(ClassObj classObj, Fn<ClassObj, T> lookup) {
+    // Try this class.
+    T member = lookup.apply(classObj);
+    if (member != null) return member;
+    
+    // Try the delegates.
+    // TODO(bob): Need to check against the members in the delegate vars
+    // declared type.
+    
+    // Try the mixins.
+    member = findMemberInMixins(classObj, lookup, new HashSet<ClassObj>());
+    if (member != null) return member;
+    
+    // Not found.
+    return null;
+  }
+
+  private static <T> T findMemberInMixins(ClassObj classObj,
+      Fn<ClassObj, T> lookup, Set<ClassObj> tried) {
+    
+    // Try this class.
+    T member = lookup.apply(classObj);
+    if (member != null) return member;
+
+    tried.add(classObj);
+    
+    // Try the mixins.
+    for (ClassObj mixin : classObj.mMixins) {
+      member = findMemberInMixins(mixin, lookup, tried);
       if (member != null) return member;
-      classObj = classObj.mParent;
     }
     
-    // New delegate hotness:
     // Not found.
     return null;
   }
   
   private final String mName;
   private Callable mConstructor;
-  private ClassObj mParent;
-  private final Map<String, Field> mFields;
-  private final Map<String, Callable> mGetters;
-  private final Map<String, Callable> mSetters;
+  private final List<ClassObj> mMixins = new ArrayList<ClassObj>();
+  private final Map<String, Field> mFields = new HashMap<String, Field>();
+  private final Map<String, Callable> mGetters = new HashMap<String, Callable>();;
+  private final Map<String, Callable> mSetters = new HashMap<String, Callable>();;
   private final Map<String, Callable> mMethods = new HashMap<String, Callable>();
 }

@@ -6,24 +6,18 @@ import com.stuffwithstuff.magpie.util.Expect;
 
 public class Obj {  
   public Obj(ClassObj classObj, Object value) {
-    mClass = classObj;
+    if (classObj == null) {
+      // If we are a class, we're our own class.
+      mClass = (this instanceof ClassObj) ? (ClassObj)this : null;
+    } else {
+      mClass = classObj;
+    }
+    
     mValue = value;
   }
   
   public Obj(ClassObj classObj) {
     this(classObj, null);
-  }
-  
-  /**
-   * This gets called in one of two contexts. It will either be instantiating
-   * the ClassObj that represents ths class of classes, or it will be a
-   * NativeMethodObj. For the former, it is its own class, for the latter it
-   * will have no class at all.
-   */
-  public Obj() {
-    // If we are a class, we're our own class.
-    mClass = (this instanceof ClassObj) ? (ClassObj)this : null;
-    mValue = null;
   }
   
   public ClassObj getClassObj() { return mClass; }
