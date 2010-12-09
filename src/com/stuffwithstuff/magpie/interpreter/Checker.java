@@ -63,28 +63,22 @@ public class Checker {
   public void checkClass(ClassObj classObj) {
     EvalContext staticContext = mInterpreter.createTopLevelContext();
     
-    // Check all of the methods.
-    for (Entry<String, Callable> method : classObj.getMethods().entrySet()) {
-      // Only check user-defined methods.
-      if (method.getValue() instanceof Function) {
-        Function function = (Function)method.getValue();
-        checkFunction(function, classObj, staticContext);
-      }
-    }
-    
-    // Check all of the getters.
-    for (Entry<String, Callable> getter : classObj.getGetters().entrySet()) {
-      // Only check user-defined methods.
-      if (getter.getValue() instanceof Function) {
-        Function function = (Function)getter.getValue();
+    // Check all of the members.
+    for (Entry<String, Member> entry : classObj.getMembers().entrySet()) {
+      Member member = entry.getValue();
+      // Only check user-defined members.
+      if (member.getDefinition() instanceof Function) {
+        Function function = (Function)member.getDefinition();
         checkFunction(function, classObj, staticContext);
         
-        // Getter functions should not take any arguments.
-        if (function.getType().getParamNames().size() > 0) {
-          addError(function.getFunction().getPosition(),
-              "The getter \"%s\" is declared to take one or more arguments, " +
-              "but arguments are not allowed for a getter.",
-              getter.getKey());
+        if (member.getType() == MemberType.GETTER) {
+          // Getter functions should not take any arguments.
+          if (function.getType().getParamNames().size() > 0) {
+            addError(function.getFunction().getPosition(),
+                "The getter \"%s\" is declared to take one or more arguments, " +
+                "but arguments are not allowed for a getter.",
+                entry.getKey());
+          }
         }
       }
     }

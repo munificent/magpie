@@ -88,8 +88,8 @@ public class ClassObj extends Obj {
   public String getName() { return mName; }
   public List<ClassObj> getMixins() { return mMixins; }
   public Map<String, Field> getFieldDefinitions() { return mFields; }
-  public Map<String, Callable> getMethods() { return mMethods; }
-  public Map<String, Callable> getGetters() { return mGetters; }
+  public Map<String, Member> getMembers() { return mMembers; }
+  // TODO(bob): Merge with members.
   public Map<String, Callable> getSetters() { return mSetters; }
 
   @Override
@@ -198,7 +198,12 @@ public class ClassObj extends Obj {
    */
   private static class MethodLookup implements MemberLookup {
     public Callable find(ClassObj classObj, String name) {
-      return classObj.mMethods.get(name);
+      Member member = classObj.mMembers.get(name);
+      if ((member != null) && 
+          (member.getType() == MemberType.METHOD)) {
+        return member.getDefinition();
+      }
+      return null;
     }
   }
   
@@ -207,7 +212,12 @@ public class ClassObj extends Obj {
    */
   private static class GetterLookup implements MemberLookup {
     public Callable find(ClassObj classObj, String name) {
-      return classObj.mGetters.get(name);
+      Member member = classObj.mMembers.get(name);
+      if ((member != null) &&
+          (member.getType() == MemberType.GETTER)) {
+        return member.getDefinition();
+      }
+      return null;
     }
   }
   
@@ -216,6 +226,8 @@ public class ClassObj extends Obj {
    */
   private static class SetterLookup implements MemberLookup {
     public Callable find(ClassObj classObj, String name) {
+      // TODO(bob): Use members. Can't do this yet because setter names collide
+      // with getters.
       return classObj.mSetters.get(name);
     }
   }
@@ -223,10 +235,7 @@ public class ClassObj extends Obj {
   private final String mName;
   private final List<ClassObj> mMixins = new ArrayList<ClassObj>();
   private final Map<String, Field> mFields = new HashMap<String, Field>();
-  private final Map<String, Callable> mGetters =
-      new HashMap<String, Callable>();
+  private final Map<String, Member> mMembers = new HashMap<String, Member>();
   private final Map<String, Callable> mSetters =
-      new HashMap<String, Callable>();
-  private final Map<String, Callable> mMethods =
       new HashMap<String, Callable>();
 }
