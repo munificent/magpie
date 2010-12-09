@@ -8,8 +8,6 @@ import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.FnObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
-import com.stuffwithstuff.magpie.interpreter.Member;
-import com.stuffwithstuff.magpie.interpreter.MemberType;
 import com.stuffwithstuff.magpie.parser.Lexer;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
 import com.stuffwithstuff.magpie.parser.ParseException;
@@ -107,11 +105,9 @@ public abstract class BuiltIns {
       // Define the method.
       BuiltIn builtIn = new BuiltIn(type, callable);
       if (isShared) {
-        classObj.getClassObj().getMembers().put(methodName,
-            new Member(MemberType.METHOD, builtIn));
+        classObj.getClassObj().getMembers().defineMethod(methodName, builtIn);
       } else {
-        classObj.getMembers().put(methodName,
-            new Member(MemberType.METHOD, builtIn));
+        classObj.getMembers().defineMethod(methodName, builtIn);
       }
     } catch (SecurityException e) {
       // TODO Auto-generated catch block
@@ -152,11 +148,9 @@ public abstract class BuiltIns {
       // Define the getter.
       BuiltIn builtIn = new BuiltIn(type, callable);
       if (isShared) {
-        classObj.getClassObj().getMembers().put(methodName,
-            new Member(MemberType.GETTER, builtIn));
+        classObj.getClassObj().getMembers().defineGetter(methodName, builtIn);
       } else {
-        classObj.getMembers().put(methodName,
-            new Member(MemberType.GETTER, builtIn));
+        classObj.getMembers().defineGetter(methodName, builtIn);
       }
     } catch (SecurityException e) {
       // TODO Auto-generated catch block

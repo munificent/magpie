@@ -6,8 +6,6 @@ import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.Field;
 import com.stuffwithstuff.magpie.interpreter.FnObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
-import com.stuffwithstuff.magpie.interpreter.Member;
-import com.stuffwithstuff.magpie.interpreter.MemberType;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class ClassBuiltIns {
@@ -25,10 +23,8 @@ public class ClassBuiltIns {
           new Field(false, isDelegate, type.getFunction()));
       
       // Add a getter.
-      classObj.getMembers().put(name,
-          new Member(MemberType.GETTER,
-              new FieldGetter(name, 
-                  type.getFunction().getFunction().getBody())));
+      classObj.getMembers().defineGetter(name, new FieldGetter(name, 
+          type.getFunction().getFunction().getBody()));
       
       // Add a setter.
       classObj.getSetters().put(name,
@@ -51,10 +47,8 @@ public class ClassBuiltIns {
           new Field(true, isDelegate, initializer.getFunction()));
   
       // Add a getter.
-      classObj.getMembers().put(name,
-          new Member(MemberType.GETTER,
-              new FieldGetter(name,
-                  type.getFunction().getFunction().getBody())));
+      classObj.getMembers().defineGetter(name, new FieldGetter(name,
+          type.getFunction().getFunction().getBody()));
       
       // Add a setter.
       classObj.getSetters().put(name,
@@ -71,8 +65,7 @@ public class ClassBuiltIns {
       FnObj method = (FnObj)arg.getTupleField(1);
       
       ClassObj classObj = (ClassObj)thisObj;
-      classObj.getMembers().put(name,
-          new Member(MemberType.METHOD, method.getCallable()));
+      classObj.getMembers().defineMethod(name, method.getCallable());
       
       return interpreter.nothing();
     }
@@ -85,8 +78,7 @@ public class ClassBuiltIns {
       FnObj body = (FnObj)arg.getTupleField(1);
       
       ClassObj classObj = (ClassObj)thisObj;
-      classObj.getMembers().put(name,
-          new Member(MemberType.GETTER, body.getCallable()));
+      classObj.getMembers().defineGetter(name, body.getCallable());
       
       return interpreter.nothing();
     }
@@ -188,11 +180,9 @@ public class ClassBuiltIns {
       
       // Add the factory methods.
       Callable signify = new ClassSignify(classObj);
-      metaclass.getMembers().put(Identifiers.SIGNIFY, 
-          new Member(MemberType.METHOD, signify));
+      metaclass.getMembers().defineMethod(Identifiers.SIGNIFY, signify);
       // By default, "new" just signifies too.
-      metaclass.getMembers().put(Identifiers.NEW, 
-          new Member(MemberType.METHOD, signify));
+      metaclass.getMembers().defineMethod(Identifiers.NEW, signify);
       
       return classObj;
     }

@@ -88,7 +88,7 @@ public class ClassObj extends Obj {
   public String getName() { return mName; }
   public List<ClassObj> getMixins() { return mMixins; }
   public Map<String, Field> getFieldDefinitions() { return mFields; }
-  public Map<String, Member> getMembers() { return mMembers; }
+  public MemberSet getMembers() { return mMembers; }
   // TODO(bob): Merge with members.
   public Map<String, Callable> getSetters() { return mSetters; }
 
@@ -235,7 +235,7 @@ public class ClassObj extends Obj {
   private final String mName;
   private final List<ClassObj> mMixins = new ArrayList<ClassObj>();
   private final Map<String, Field> mFields = new HashMap<String, Field>();
-  private final Map<String, Member> mMembers = new HashMap<String, Member>();
+  private final MemberSet mMembers = new MemberSet();
   private final Map<String, Callable> mSetters =
       new HashMap<String, Callable>();
 }

@@ -70,8 +70,8 @@ public class Interpreter {
     mGlobalScope.define("Object", mObjectClass);
 
     // Add a constructor so you can create new Objects.
-    mObjectClass.getMembers().put(Identifiers.NEW,
-        new Member(MemberType.METHOD, new ClassSignify(mObjectClass)));
+    mObjectClass.getMembers().defineMethod(Identifiers.NEW,
+        new ClassSignify(mObjectClass));
 
     // Now that ClassClass, Class and Object exist, wire them up.
     classClass.bindClass(mClass);
@@ -87,9 +87,8 @@ public class Interpreter {
     mRuntimeClass = createGlobalClass("Runtime");
     mStringClass = createGlobalClass("String");
     mTupleClass = createGlobalClass("Tuple");
-    mTupleClass.getMembers().put("count",
-        new Member(MemberType.GETTER,
-            new FieldGetter("count", Expr.name("Int"))));
+    mTupleClass.getMembers().defineGetter("count",
+        new FieldGetter("count", Expr.name("Int")));
     
     mNothingClass = createGlobalClass("Nothing");
     mNothing = instantiate(mNothingClass, null);
