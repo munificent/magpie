@@ -1,9 +1,7 @@
 // A simple class that is callable and tracks when it was called.
 class TestCallable
-    this(returnValue)
-        this arg = nothing
-        this returnValue = returnValue
-        this called = false
+    shared def new(returnValue -> TestCallable)
+        signify(returnValue: returnValue)
     end
     
     def call(arg)
@@ -12,7 +10,7 @@ class TestCallable
         returnValue
     end
     
-    var arg         Dynamic
+    var arg         Dynamic = nothing
     var returnValue Dynamic
-    var called      Bool
+    var called      Bool    = false
 end

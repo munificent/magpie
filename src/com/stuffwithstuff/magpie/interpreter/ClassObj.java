@@ -3,8 +3,6 @@ package com.stuffwithstuff.magpie.interpreter;
 import java.util.*;
 import java.util.Map.Entry;
 
-import com.stuffwithstuff.magpie.util.Expect;
-
 /**
  * A runtime object representing a class.
  */
@@ -97,18 +95,6 @@ public class ClassObj extends Obj {
   @Override
   public String toString() {
     return mName;
-  }
-
-  // TODO(bob): This should go away.
-  public void addConstructor(Callable constructor) {
-    Expect.notNull(constructor);
-
-    mConstructor = constructor;
-  }
-  
-  // TODO(bob): This should go away.
-  public Callable getConstructor() {
-    return mConstructor;
   }
 
   /**
@@ -235,8 +221,6 @@ public class ClassObj extends Obj {
   }
   
   private final String mName;
-  // TODO(bob): Get rid of this.
-  private Callable mConstructor;
   private final List<ClassObj> mMixins = new ArrayList<ClassObj>();
   private final Map<String, Field> mFields = new HashMap<String, Field>();
   private final Map<String, Callable> mGetters =

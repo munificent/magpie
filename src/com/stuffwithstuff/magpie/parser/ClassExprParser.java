@@ -22,9 +22,10 @@ public class ClassExprParser implements ExprParser {
     
     // Declare the class:
     if (!isExtend) {
-      // var Foo = Class newClass("Foo")
+      // var Foo = Class new("Foo")
       exprs.add(new VariableExpr(position, className,
-          Expr.message(Expr.name("Class"), "new", Expr.string(className))));
+          Expr.message(Expr.name("Class"), Identifiers.NEW,
+              Expr.string(className))));
     }
     
     parser.consume(TokenType.LINE);
@@ -34,7 +35,6 @@ public class ClassExprParser implements ExprParser {
       // There are a bunch of different members that can be added to a class.
       // Each gets desugared to an imperative call:
       //
-      // this(x Int) ...                  -->  Foo defineConstructor(...)
       // var foo Int = ...                -->  Foo defineField(...)
       // def foo(arg Int -> Bool) ...     -->  Foo defineMethod(...)
       // get foo Int = ...                -->  Foo defineGetter(...)
@@ -51,9 +51,7 @@ public class ClassExprParser implements ExprParser {
       // If none of these match, then it's presumed that we're parsing a regular
       // message send on the class object itself.
       
-      if (parser.match(TokenType.THIS)) {
-        exprs.add(parseConstructor(parser, theClass));
-      } else if (parser.match(TokenType.DELEGATE, TokenType.VAR)) {
+      if (parser.match(TokenType.DELEGATE, TokenType.VAR)) {
         exprs.add(parseField(parser, true, theClass));
       } else if (parser.match(TokenType.VAR)) {
         exprs.add(parseField(parser, false, theClass));
@@ -93,11 +91,6 @@ public class ClassExprParser implements ExprParser {
   public Expr parse(MagpieParser parser) {
     parser.consume(TokenType.CLASS);
     return parseClass(parser, false);
-  }
-  
-  private static Expr parseConstructor(MagpieParser parser, Expr theClass) {
-    Expr function = parser.parseFunction();
-    return Expr.message(theClass, Identifiers.DEFINE_CONSTRUCTOR, function);
   }
   
   private static Expr parseField(MagpieParser parser, boolean isDelegate,

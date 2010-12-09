@@ -7,10 +7,9 @@ end
 
 // Define an int iterator.
 class RangeIterator
-    this(first Int, last Int)
+    shared def new(first Int, last Int -> RangeIterator)
         // rollback so the first call to next advances to the first
-        current = first - 1
-        this last = last
+        signify(current: first - 1 last: last)
     end
 
     def next(-> Bool)
@@ -23,9 +22,8 @@ class RangeIterator
 end
 
 class Range    
-    this(start Int, last Int)
-        this start = start
-        this last = last
+    shared def new(start Int, last Int -> Range)
+        signify(start: start last: last)
     end
     
     def iterate(-> RangeIterator) RangeIterator new(start, last)

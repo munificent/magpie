@@ -5,9 +5,8 @@ class RedefinitionError
 end
 
 class UnexpectedTypeError
-    this(expectedType Type, actualType Type)
-        this expectedType = expectedType
-        this actualType = actualType
+    shared def new(expectedType Type, actualType Type -> UnexpectedTypeError)
+        signify(expectedType: expectedType actualType: actualType)
     end
     
     shared def throw(expectedType Type, actualType Type)

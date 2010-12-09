@@ -1,6 +1,6 @@
 class OrType
-    this(cases ArrayType new(Type))
-        this cases = cases
+    shared def new(cases ArrayType new(Type) -> OrType)
+        signify(cases: cases)
     end
     
     shared def combine(left Type, right Type -> Type)

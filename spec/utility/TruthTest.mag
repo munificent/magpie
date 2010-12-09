@@ -1,8 +1,7 @@
 // A simple class that implements truthiness and tracks when it was called.
 class TruthTest
-    this(value Bool)
-        this value = value
-        this called = false
+    shared def new(value Bool -> TruthTest)
+        signify(value: value)
     end
     
     get true? Bool =
@@ -11,5 +10,5 @@ class TruthTest
     end
 
     var value  Bool
-    var called Bool
+    var called Bool = false
 end

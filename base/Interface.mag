@@ -4,19 +4,18 @@
 // implicitly implements the interface.
 
 class Interface
-    this(name String)
-        this name = name
-        this members = Array new()
+    shared def new(name String -> Interface)
+        signify(name: name)
     end
     
     get string String = name
 
     def declareMethod(name String, type Nothing => Type ->)
-        members add(Member new(name, type))
+        members add(Member new(name: name memberType: type))
     end
     
     def declareGetter(name String, type Nothing => Type ->)
-        members add(Member new(name, type))
+        members add(Member new(name: name memberType: type))
     end
 
     def assignsFrom?(other Type -> Bool)
@@ -57,15 +56,10 @@ class Interface
     end
 
     var name    String
-    var members ArrayType new(Member)
+    var members ArrayType new(Member) = Array new()
 end
 
 class Member
-    this(name String, type Nothing => Type)
-         this name = name
-         this memberType = type
-    end
-
     get string String = name + " " + memberType()
     
     var name       String

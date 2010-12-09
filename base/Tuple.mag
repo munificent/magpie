@@ -86,10 +86,8 @@ end
 */
 
 class TupleIterator
-    this(tuple Tuple)
-        this tuple = tuple
-        // rollback so the first call to next advances to the first
-        index = -1
+    shared def new(tuple Tuple -> TupleIterator)
+        signify(tuple: tuple)
     end
 
     get current =
@@ -122,5 +120,6 @@ class TupleIterator
     end
     
     var tuple Tuple
-    var index Int
+    var index Int   = -1 // the first call to next advances to the first
+
 end

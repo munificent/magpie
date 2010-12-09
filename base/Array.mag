@@ -93,8 +93,8 @@ extend class Array
 end
 
 class ArrayType
-    this(elementType Type)
-        this elementType = elementType
+    shared def new(elementType Type -> ArrayType)
+        signify(elementType: elementType)
     end
     
     get string String = "array of " + elementType
@@ -137,9 +137,8 @@ class ArrayType
 end
 
 class ArrayIterator
-    this(array Array)
-        this array = array
-        this index = -1
+    shared def new(array Array -> ArrayIterator)
+        signify(array: array)
     end
     
     // TODO(bob): Need generics for return type.
@@ -157,12 +156,12 @@ class ArrayIterator
     end
 
     var array Array
-    var index Int
+    var index Int   = -1
 end
 
 class ArrayIteratorType
-    this(elementType)
-        this elementType = elementType
+    shared def new(elementType Type -> ArrayIteratorType)
+        signify(elementType: elementType)
     end
     
     get string String = "array of " + elementType + " iterator"

@@ -34,18 +34,6 @@ public class ClassBuiltIns {
     }
   }
   
-  @Signature("defineConstructor(body ->)")
-  public static class DefineConstructor implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      FnObj method = (FnObj)arg;
-      
-      ClassObj classObj = (ClassObj)thisObj;
-      classObj.addConstructor(method.getCallable());
-      
-      return interpreter.nothing();
-    }
-  }
-  
   @Signature("defineField(name String, delegate? Bool, type, initializer ->)")
   public static class DefineField implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
@@ -190,9 +178,11 @@ public class ClassBuiltIns {
       ClassObj classObj = new ClassObj(metaclass, name);
       classObj.getMixins().add(interpreter.getObjectClass());
       
-      // Add the constructor method.
-      metaclass.getMethods().put(Identifiers.NEW, new ClassNew(name));
-      metaclass.getMethods().put(Identifiers.SIGNIFY, new ClassSignify(classObj));
+      // Add the factory methods.
+      Callable signify = new ClassSignify(classObj);
+      metaclass.getMethods().put(Identifiers.SIGNIFY, signify);
+      // By default, "new" just signifies too.
+      metaclass.getMethods().put(Identifiers.NEW, signify);
       
       return classObj;
     }

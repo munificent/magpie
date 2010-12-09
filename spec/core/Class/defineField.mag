@@ -5,15 +5,6 @@ specify("The 'defineField' method on Class") with
         c new() foo shouldBe("value")
     end
 
-    it should("initialize the field before the constructor is called") with
-        var c = Class new("c")
-        var called = ""
-        c defineField("foo", false, (fn String), (fn called = called + "init"))
-        c defineConstructor(fn called = called + "ctor")
-        c new()
-        called shouldBe("initctor")
-    end
-
     it should("replace an existing definition") with
         var c = Class new("c")
         c defineField("foo", false, (fn String), (fn "before"))

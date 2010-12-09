@@ -28,12 +28,10 @@ def specify(description String, block TestSuite => Nothing ->)
 end
 
 class TestSuite
-    this(name String)
-        this name = name
-        currentTestSuite = this
-        currentTest = ""
-        tests = 0
-        failures = 0
+    shared def new(name String -> TestSuit)
+        var suite = signify(name: name)
+        currentTestSuite = suite
+        suite
     end
     
     def should(description String, block Nothing => Nothing ->)
@@ -65,10 +63,10 @@ class TestSuite
     end
 
     var name        String
-    var currentTest String
-    var tests       Int
-    var failures    Int
-    var failedTest  Bool
+    var currentTest String = ""
+    var tests       Int    = 0
+    var failures    Int    = 0
+    var failedTest  Bool   = false
 end
         
 def fail(message String ->)

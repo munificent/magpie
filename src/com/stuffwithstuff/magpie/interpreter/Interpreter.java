@@ -70,7 +70,8 @@ public class Interpreter {
     mGlobalScope.define("Object", mObjectClass);
 
     // Add a constructor so you can create new Objects.
-    mObjectClass.getMethods().put(Identifiers.NEW, new ClassNew("Object"));
+    mObjectClass.getMethods().put(Identifiers.NEW,
+        new ClassSignify(mObjectClass));
 
     // Now that ClassClass, Class and Object exist, wire them up.
     classClass.bindClass(mClass);

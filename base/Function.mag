@@ -8,10 +8,8 @@ extend class Function
 end
 
 class FunctionType
-    this(paramType Type, returnType Type, static? Bool)
-        this paramType = paramType
-        this returnType = returnType
-        this static? = static?
+    shared def new(paramType Type, returnType Type, static? Bool -> FunctionType)
+        signify(paramType: paramType returnType: returnType static?: static?)
     end
 
     get string String =
