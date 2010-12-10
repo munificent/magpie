@@ -6,18 +6,12 @@
 // - Define
 // - Declare
 // Member types:
-// - Ctor
 // - Field
 // - Method
 // - Getter
 // - Setter
 // Of these possible 16 combinations, not all are valid. The valid ones are:
 class Example
-    // define ctor
-    this(x Int)
-        doSomething()
-    end
-    
     // define instance field
     var foo Int = 123
 

@@ -25,10 +25,6 @@ extend class Record
         end
     end
     
-    def getSetterType(name String -> Type | Nothing)
-        Record getSetterType(name)
-    end
-    
     def ==(other -> Bool)
         let otherRecord = other as[Record] then
             if fields count != otherRecord fields count then return false

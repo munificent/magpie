@@ -120,10 +120,6 @@ class ArrayType
         end
     end
     
-    def getSetterType(name String -> Type | Nothing)
-        nothing
-    end
-
     def ==(other -> Bool)
         let otherArray = other as[ArrayType] then
             // Element type must match exactly (not variant).
@@ -178,10 +174,6 @@ class ArrayIteratorType
         if name == "current" then return elementType
         // Use the generic type of the other methods.
         ArrayIterator getMemberType(name)
-    end
-    
-    def getSetterType(name String -> Type | Nothing)
-        nothing
     end
     
     def ==(other -> Bool)

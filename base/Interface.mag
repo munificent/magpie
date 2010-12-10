@@ -50,11 +50,6 @@ class Interface
         end
     end
 
-    def getSetterType(name String -> Type | Nothing)
-        // No setters in interfaces yet.
-        nothing
-    end
-
     var name    String
     var members ArrayType new(Member) = Array new()
 end

@@ -50,10 +50,6 @@ extend class Tuple
         end
     end
     
-    def getSetterType(name String -> Type | Nothing)
-        Tuple getMemberType(name)
-    end
-    
     def ==(other -> Bool)
         let otherTuple = other as[Tuple] then
             if count != otherTuple count then return false

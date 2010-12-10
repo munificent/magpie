@@ -210,16 +210,18 @@ public class Interpreter {
   
   public Obj getMember(Position position, Obj receiver, String name) {
     // Look for a getter.
-    Callable getter = ClassObj.findGetter(null, receiver, name);
-    if (getter != null) {
-      return getter.invoke(this, receiver, mNothing);
-    }
-    
-    // Look for a method.
-    Callable method = ClassObj.findMethod(null, receiver, name);
-    if (method != null) {
-      // Bind it to the receiver.
-      return new FnObj(mFnClass, receiver, method);
+    Member member = ClassObj.findMember(null, receiver, name);
+    if (member != null) {
+      switch (member.getType()) {
+      case GETTER:
+        return member.getDefinition().invoke(this, receiver, mNothing);
+        
+      case METHOD:
+        // Bind it to the receiver.
+        return new FnObj(mFnClass, receiver, member.getDefinition());
+        
+      // TODO(bob): What about setters here?
+      }
     }
    
     // Look for a field.

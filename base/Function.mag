@@ -35,11 +35,6 @@ class FunctionType
         Function getMemberType(name)
     end
 
-    def getSetterType(name String -> Type | Nothing)
-        // Just defer to the base function class.
-        Function getSetterType(name)
-    end
-
     def ==(other -> Bool)
         let fnType = other as[FunctionType] then
             static? == fnType static? and

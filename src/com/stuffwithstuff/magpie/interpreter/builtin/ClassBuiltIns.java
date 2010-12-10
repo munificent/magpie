@@ -6,6 +6,8 @@ import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.Field;
 import com.stuffwithstuff.magpie.interpreter.FnObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
+import com.stuffwithstuff.magpie.interpreter.Member;
+import com.stuffwithstuff.magpie.interpreter.MemberType;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class ClassBuiltIns {
@@ -27,7 +29,7 @@ public class ClassBuiltIns {
           type.getFunction().getFunction().getBody()));
       
       // Add a setter.
-      classObj.getSetters().put(name,
+      classObj.getMembers().defineSetter(name,
           new FieldSetter(name, type.getFunction().getFunction().getBody()));
   
       return interpreter.nothing();
@@ -51,7 +53,7 @@ public class ClassBuiltIns {
           type.getFunction().getFunction().getBody()));
       
       // Add a setter.
-      classObj.getSetters().put(name,
+      classObj.getMembers().defineSetter(name,
           new FieldSetter(name, type.getFunction().getFunction().getBody()));
   
       return interpreter.nothing();
@@ -91,7 +93,7 @@ public class ClassBuiltIns {
       FnObj body = (FnObj)arg.getTupleField(1);
       
       ClassObj classObj = (ClassObj)thisObj;
-      classObj.getSetters().put(name, body.getCallable());
+      classObj.getMembers().defineSetter(name, body.getCallable());
       
       return interpreter.nothing();
     }
@@ -104,16 +106,11 @@ public class ClassBuiltIns {
       
       ClassObj thisClass = (ClassObj)thisObj;
       
-      // Look for a getter.
-      Callable getter = ClassObj.findGetter(thisClass, null, name);
-      if (getter != null) {
-        return interpreter.evaluateCallableType(getter, true);
-      }
-      
-      // Look for a method.
-      Callable method = ClassObj.findMethod(thisClass, null, name);
-      if (method != null) {
-        return interpreter.evaluateCallableType(method, false);
+      // Look for a member.
+      Member member = ClassObj.findMember(thisClass, null, name);
+      if (member != null) {
+        return interpreter.evaluateCallableType(
+            member.getDefinition(), member.getType() != MemberType.METHOD);
       }
   
       // Member not found.
@@ -121,24 +118,6 @@ public class ClassBuiltIns {
     }
   }
   
-  @Signature("getSetterType(name String -> Type | Nothing)")
-  public static class GetSetterType implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      String name = arg.asString();
-      
-      ClassObj thisClass = (ClassObj)thisObj;
-      
-      // Look for a setter.
-      Callable setter = ClassObj.findSetter(thisClass, null, name);
-      if (setter != null) {
-        return interpreter.evaluateCallableType(setter, true);
-      }
-  
-      // Setter not found.
-      return interpreter.nothing();
-    }
-  }
-
   @Getter("mixins(-> Array newType(Class))")
   public static class Mixin implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {

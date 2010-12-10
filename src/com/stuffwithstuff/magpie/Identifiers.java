@@ -21,7 +21,6 @@ public final class Identifiers {
   public static final String DEFINE_SETTER = "defineSetter";
   public static final String FUNCTION_TYPE = "FunctionType";
   public static final String GET_MEMBER_TYPE = "getMemberType";
-  public static final String GET_SETTER_TYPE = "getSetterType";
   public static final String IS_TRUE = "true?";
   public static final String IT = "it";
   public static final String ITERATE = "iterate";

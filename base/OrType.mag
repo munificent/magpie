@@ -74,27 +74,6 @@ class OrType
         memberType
     end
 
-    def getSetterType(name String -> Type | Nothing)
-        let firstType = cases(0) getSetterType(name) then
-            for type = cases do
-                let method = type getSetterType(name) then
-                    // All types must match.
-                    // TODO(bob): Right now, the types of all cases must match
-                    // exactly. We could loosen this to allow subtypes.
-                    if firstType assignsFrom?(method) not then return nothing
-                    // TODO(bob): Block if here is to get around grammar
-                    // confusing 'else' with being for this 'if'.
-                    if method assignsFrom?(firstType) not then return nothing
-                else
-                    // The setter must be present in all cases
-                    return nothing
-                end
-            end
-    
-            return firstType
-        end
-    end
-
     def unsafeRemoveNothing(-> Type)
         // TODO(bob): Total hack. We need remaining to have the right element
         // type.

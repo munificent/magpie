@@ -191,9 +191,9 @@ public abstract class BuiltIns {
       // Define the setter.
       BuiltIn builtIn = new BuiltIn(type, callable);
       if (isShared) {
-        classObj.getClassObj().getSetters().put(methodName, builtIn);
+        classObj.getClassObj().getMembers().defineSetter(methodName, builtIn);
       } else {
-        classObj.getSetters().put(methodName, builtIn);
+        classObj.getMembers().defineSetter(methodName, builtIn);
       }
     } catch (SecurityException e) {
       // TODO Auto-generated catch block

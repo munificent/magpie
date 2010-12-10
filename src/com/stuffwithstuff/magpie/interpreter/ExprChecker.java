@@ -162,7 +162,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     }
     
     Obj setterType = mInterpreter.invokeMethod(receiverType,
-        Identifiers.GET_SETTER_TYPE, mInterpreter.createString(expr.getName()));
+        Identifiers.GET_MEMBER_TYPE,
+        mInterpreter.createString(expr.getName() + "_="));
     
     if (setterType == mInterpreter.nothing()) {
       mChecker.addError(expr.getPosition(),
