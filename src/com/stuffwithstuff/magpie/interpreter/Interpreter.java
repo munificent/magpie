@@ -392,8 +392,6 @@ public class Interpreter {
       }
     }
     
-    // TODO(bob): Needs to call constructors too!
-    
     return object;
   }
   
