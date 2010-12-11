@@ -79,6 +79,15 @@ public class Obj {
         "The object \"%s\" is not a boolean.", this));
   }
   
+  public FnObj asFn() {
+    if (this instanceof FnObj) {
+      return (FnObj)this;
+    }
+    
+    throw new InterpreterException(String.format(
+        "The object \"%s\" is not a function.", this));
+  }
+  
   public int asInt() {
     if (mValue instanceof Integer) {
       return ((Integer)mValue).intValue();

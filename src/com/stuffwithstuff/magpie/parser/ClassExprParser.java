@@ -9,26 +9,50 @@ import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
 import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.ast.NothingExpr;
+import com.stuffwithstuff.magpie.ast.ThisExpr;
 import com.stuffwithstuff.magpie.ast.VariableExpr;
 
 public class ClassExprParser implements ExprParser {
   public static Expr parseClass(MagpieParser parser, boolean isExtend) {
-    List<Expr> exprs = new ArrayList<Expr>();
-
     String className = parser.consume(TokenType.NAME).getString();
     Position position = parser.last(1).getPosition();
     
-    Expr theClass = Expr.name(className);
+    // A class expression is desugared to a call to "receiving" on the class
+    // object. For a new class, that's like:
+    //
+    //  class Foo
+    //      var bar Int = 123
+    //  end
+    //
+    //  (var Foo = Class new("Foo")) receiving with
+    //      this defineField("bar", ...)
+    //  end
+    //
+    // For an extended class, it's simply:
+    //
+    //  extend class Foo
+    //      var bar Int = 123
+    //  end
+    //
+    //  Foo receiving with
+    //      this defineField("bar", ...)
+    //  end
     
-    // Declare the class:
-    if (!isExtend) {
+    Expr classReceiver;
+    if (isExtend) {
+      // Foo
+      classReceiver = Expr.name(position, className);
+    } else {
       // var Foo = Class new("Foo")
-      exprs.add(new VariableExpr(position, className,
-          Expr.message(Expr.name("Class"), Identifiers.NEW,
-              Expr.string(className))));
+      classReceiver = new VariableExpr(position, className,
+          Expr.message(position, Expr.name(position, "Class"),
+          Identifiers.NEW, Expr.string(className)));
     }
-    
+
     parser.consume(TokenType.LINE);
+    
+    List<Expr> exprs = new ArrayList<Expr>();
+    Expr theClass = new ThisExpr(position);
     
     // Parse the body.
     while (!parser.match(TokenType.END)) {
@@ -49,7 +73,7 @@ public class ClassExprParser implements ExprParser {
       // shared set foo Int = ...         -->  Foo type defineSetter(...)
       //
       // If none of these match, then it's presumed that we're parsing a regular
-      // message send on the class object itself.
+      // expression evaluated in a context where "this" is the class.
       
       if (parser.match(TokenType.DELEGATE, TokenType.VAR)) {
         exprs.add(parseField(parser, true, theClass));
@@ -78,15 +102,17 @@ public class ClassExprParser implements ExprParser {
           exprs.add(parseSetter(parser, metaclass));
         }
       } else {
-        // Anything else appearing in a class body is presumed to be a message
-        // sent to the class itself.
-        // TODO(bob): Implement me!
+        exprs.add(parser.parseExpression());
       }
       
       parser.consume(TokenType.LINE);
     }
     
-    return new BlockExpr(position, exprs);
+    // Wrap the body in a function.
+    Expr body = Expr.fn(new BlockExpr(position, exprs));
+    
+    // Make the class receive it.
+    return Expr.message(classReceiver, Identifiers.RECEIVING, body);
   }
   
   @Override

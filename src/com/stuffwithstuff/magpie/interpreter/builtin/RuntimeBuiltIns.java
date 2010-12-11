@@ -59,7 +59,7 @@ public class RuntimeBuiltIns {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       Checker checker = new Checker(interpreter);
       
-      FnObj function = (FnObj)arg;
+      FnObj function = arg.asFn();
       EvalContext staticContext = interpreter.createTopLevelContext();
       checker.checkFunction(function.getFunction(),
           interpreter.getNothingClass(), staticContext);
@@ -73,7 +73,7 @@ public class RuntimeBuiltIns {
   @Signature("checkExpression(function)")
   public static class CheckExpression implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      FnObj function = (FnObj)arg;
+      FnObj function = arg.asFn();
       Expr expr = function.getFunction().getFunction().getBody();
       
       Interpreter inner = new Interpreter(new NullInterpreterHost());

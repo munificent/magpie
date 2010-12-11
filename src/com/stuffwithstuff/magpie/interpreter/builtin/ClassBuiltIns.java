@@ -16,7 +16,7 @@ public class ClassBuiltIns {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();
       boolean isDelegate = arg.getTupleField(1).asBool();
-      FnObj type = (FnObj)arg.getTupleField(2);
+      FnObj type = arg.getTupleField(2).asFn();
       
       ClassObj classObj = (ClassObj)thisObj;
   
@@ -41,8 +41,8 @@ public class ClassBuiltIns {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();
       boolean isDelegate = arg.getTupleField(1).asBool();
-      FnObj type = (FnObj)arg.getTupleField(2);
-      FnObj initializer = (FnObj)arg.getTupleField(3);
+      FnObj type = arg.getTupleField(2).asFn();
+      FnObj initializer = arg.getTupleField(3).asFn();
       
       ClassObj classObj = (ClassObj)thisObj;
       classObj.getFieldDefinitions().put(name,
@@ -64,7 +64,7 @@ public class ClassBuiltIns {
   public static class DefineMethod implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();
-      FnObj method = (FnObj)arg.getTupleField(1);
+      FnObj method = arg.getTupleField(1).asFn();
       
       ClassObj classObj = (ClassObj)thisObj;
       classObj.getMembers().defineMethod(name, method.getCallable());
@@ -77,7 +77,7 @@ public class ClassBuiltIns {
   public static class DefineGetter implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();
-      FnObj body = (FnObj)arg.getTupleField(1);
+      FnObj body = arg.getTupleField(1).asFn();
       
       ClassObj classObj = (ClassObj)thisObj;
       classObj.getMembers().defineGetter(name, body.getCallable());
@@ -90,7 +90,7 @@ public class ClassBuiltIns {
   public static class DefineSetter implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();
-      FnObj body = (FnObj)arg.getTupleField(1);
+      FnObj body = arg.getTupleField(1).asFn();
       
       ClassObj classObj = (ClassObj)thisObj;
       classObj.getMembers().defineSetter(name, body.getCallable());

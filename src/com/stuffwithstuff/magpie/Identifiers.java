@@ -29,6 +29,7 @@ public final class Identifiers {
   public static final String NEXT = "next";
   public static final String OR = "|";
   public static final String PARAM_TYPE = "paramType";
+  public static final String RECEIVING = "receiving";
   public static final String RETURN_TYPE = "returnType";
   public static final String SIGNIFY = "signify";
   public static final String STRING = "string";

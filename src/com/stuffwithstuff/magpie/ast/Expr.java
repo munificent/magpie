@@ -27,6 +27,10 @@ public abstract class Expr {
     return new MessageExpr(Position.none(), receiver, name);
   }
   
+  public static MessageExpr name(Position position, String name) {
+    return new MessageExpr(position, null, name);
+  }
+  
   public static MessageExpr name(String name) {
     return new MessageExpr(Position.none(), null, name);
   }

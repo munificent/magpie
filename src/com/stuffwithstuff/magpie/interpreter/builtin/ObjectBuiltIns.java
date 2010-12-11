@@ -66,16 +66,14 @@ public class ObjectBuiltIns {
     }
   }
 
-  // TODO(bob): Make generic and allow returning something?
-  @Signature("receiving(block Nothing => Nothing)")
+  // TODO(bob): Make generic and allow returning something more specific?
+  @Signature("receiving(block Nothing => Dynamic)")
   public static class Receiving implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      FnObj block = (FnObj)arg;
+      FnObj block = arg.asFn();
       
       // Ignore the function's bound receiver and use this object instead.
-      block.getCallable().invoke(interpreter, thisObj, arg);
-      
-      return interpreter.nothing();
+      return block.getCallable().invoke(interpreter, thisObj, arg);
     }
   }
   

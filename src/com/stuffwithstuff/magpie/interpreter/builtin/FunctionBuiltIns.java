@@ -8,7 +8,7 @@ public class FunctionBuiltIns {
   @Getter("type(-> Class)")
   public static class Type implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      FnObj function = (FnObj)thisObj;
+      FnObj function = thisObj.asFn();
       
       return interpreter.evaluateCallableType(function.getCallable(), false);
     }
