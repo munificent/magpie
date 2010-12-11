@@ -1,0 +1,11 @@
+specify("The 'receiving' method on Object") with
+    it should("evaluate the given function") with
+        var called = false
+        "obj" receiving with called = true
+        called shouldBe(true)
+    end
+
+    it should("bind 'this' to the receiver in the function") with
+        "obj" receiving with this shouldBe("obj")
+    end
+end

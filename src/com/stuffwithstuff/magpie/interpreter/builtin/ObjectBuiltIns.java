@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import com.stuffwithstuff.magpie.interpreter.FnObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
@@ -64,7 +65,20 @@ public class ObjectBuiltIns {
       return interpreter.createBool(field != null);
     }
   }
-    
+
+  // TODO(bob): Make generic and allow returning something?
+  @Signature("receiving(block Nothing => Nothing)")
+  public static class Receiving implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      FnObj block = (FnObj)arg;
+      
+      // Ignore the function's bound receiver and use this object instead.
+      block.getCallable().invoke(interpreter, thisObj, arg);
+      
+      return interpreter.nothing();
+    }
+  }
+  
   @Getter("type(-> Type)")
   public static class Type implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {

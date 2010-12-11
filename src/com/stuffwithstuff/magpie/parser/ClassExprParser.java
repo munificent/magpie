@@ -77,9 +77,11 @@ public class ClassExprParser implements ExprParser {
         } else if (parser.match(TokenType.SET)) {
           exprs.add(parseSetter(parser, metaclass));
         }
+      } else {
+        // Anything else appearing in a class body is presumed to be a message
+        // sent to the class itself.
+        // TODO(bob): Implement me!
       }
-      
-      // TODO(bob): arbitrary messages on class...
       
       parser.consume(TokenType.LINE);
     }
@@ -99,6 +101,13 @@ public class ClassExprParser implements ExprParser {
     Expr type = parser.parseTypeExpression();
     
     if (parser.match(TokenType.EQUALS)) {
+      // TODO(bob): Having to declare a type when we have an initializer is
+      // lame. It should be able to infer it. The reason it can't right now is
+      // because the mirroring getters and setters declared with the field need
+      // type annotations, but that should be solvable by just storing the
+      // initializer with them too so they can evaluate its type to get their
+      // type.
+      
       // Defining it.
       Expr initializer = parser.parseBlock();
       return Expr.message(theClass, Identifiers.DEFINE_FIELD,
