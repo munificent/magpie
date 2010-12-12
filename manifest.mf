@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Created-By: Marcus Martin
+Main-Class: com.stuffwithstuff.magpie.Magpie
