@@ -15,6 +15,7 @@ csharp/Unit Tests.VisualState.xml
 
 # java output files
 bin/**.*
+magpie.jar
 
 # the generated site html
 doc/site/html/**.*
