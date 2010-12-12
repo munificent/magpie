@@ -1,0 +1,13 @@
+specify("The 'mixin' method on Class") with
+    it should("add a class to the list of mixin classes") with
+        class Bar
+        end
+        
+        class Foo
+            mixin(Bar)
+        end
+        
+        Foo mixins count shouldBe(2) // Classes always mixin Object by default.
+        Foo mixins(1) shouldBe(Bar)
+    end
+end

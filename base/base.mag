@@ -67,3 +67,5 @@ get Bool true? Bool = this
 get Int true? Bool = this != 0
 get String true? Bool = this count > 0
 get Nothing true? Bool = false
+
+def Class mixin(mixin Class ->) mixins add(mixin)

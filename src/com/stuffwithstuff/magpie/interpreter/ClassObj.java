@@ -73,7 +73,7 @@ public class ClassObj extends Obj {
   }
   
   public String getName() { return mName; }
-  public List<ClassObj> getMixins() { return mMixins; }
+  public List<Obj> getMixins() { return mMixins; }
   public Map<String, Field> getFieldDefinitions() { return mFields; }
   public MemberSet getMembers() { return mMembers; }
 
@@ -103,8 +103,8 @@ public class ClassObj extends Obj {
     tried.add(classObj);
     
     // Try the mixins.
-    for (ClassObj mixin : classObj.mMixins) {
-      member = findMemberInMixins(mixin, name, tried);
+    for (Obj mixin : classObj.mMixins) {
+      member = findMemberInMixins((ClassObj)mixin, name, tried);
       if (member != null) return member;
     }
     
@@ -113,7 +113,11 @@ public class ClassObj extends Obj {
   }
   
   private final String mName;
-  private final List<ClassObj> mMixins = new ArrayList<ClassObj>();
+  
+  // Note: This is List<Obj> instead of List<ClassObj> so that we can directly
+  // expose it to Magpie code as a Magpie array.
+  private final List<Obj> mMixins = new ArrayList<Obj>();
+  
   private final Map<String, Field> mFields = new HashMap<String, Field>();
   private final MemberSet mMembers = new MemberSet();
 }

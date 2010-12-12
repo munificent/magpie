@@ -1,0 +1,62 @@
+specify("The 'mixins' getter on Class") with
+    it should("get the list of mixins on the class") with
+        class Foo
+        end
+        
+        // By default, a class mixes in Object.
+        Foo mixins count shouldBe(1)
+        Foo mixins(0) shouldBe(Object)
+    end
+
+    it should("allow modification") with
+        class Foo
+        end
+        
+        // By default, a class mixes in Object.
+        Foo mixins count shouldBe(1)
+        Foo mixins clear()
+        Foo mixins count shouldBe(0)
+    end
+
+    it should("affect method dispatch on the class") with
+        class Foo
+        end
+        
+        class Mixin
+            def method(-> String) "received"
+        end
+        
+        // Not mixed in.
+        var foo = Foo new()
+        foo method() shouldBe(nothing)
+        
+        // Mix it in.
+        Foo mixins add(Mixin)
+        foo method() shouldBe("received")
+    end
+
+    it should("dispatch according to the order classes appear in the list") with
+        class Foo
+        end
+        
+        class Mixin1
+            def method(-> String) "one"
+        end
+        
+        class Mixin2
+            def method(-> String) "two"
+        end
+
+        var foo = Foo new()
+        
+        Foo mixins clear()
+        Foo mixins add(Mixin1)
+        Foo mixins add(Mixin2)
+        foo method() shouldBe("one")
+        
+        Foo mixins clear()
+        Foo mixins add(Mixin2)
+        Foo mixins add(Mixin1)
+        foo method() shouldBe("two")
+    end
+end

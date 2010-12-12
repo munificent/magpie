@@ -119,12 +119,11 @@ public class ClassBuiltIns {
   }
   
   @Getter("mixins(-> Array newType(Class))")
-  public static class Mixin implements BuiltInCallable {
+  public static class Mixins implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       ClassObj classObj = (ClassObj)thisObj;
       
-      classObj.getMixins().add((ClassObj)arg);
-      return interpreter.nothing();
+      return interpreter.createArray(classObj.getMixins());
     }
   }
 
