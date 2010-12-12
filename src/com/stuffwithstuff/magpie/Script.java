@@ -24,7 +24,7 @@ public class Script {
   }
   
   public static void loadBase(Interpreter interpreter) throws IOException {
-    Script script = Script.fromPath("base/base.mag");
+    Script script = Script.fromPath("base/init.mag");
     script.execute(interpreter);
   }
   

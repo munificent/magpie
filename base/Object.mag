@@ -1,0 +1,18 @@
+// Provides additional functionality on Object.
+
+
+// Returns the object cast to the given type if it can be safely assigned to
+// that type, otherwise returns nothing.
+def Object as[T -> T | Nothing]
+    if type == T or T assignsFrom?(type) then unsafecast[T](this)
+end
+
+// Returns the object cast to the given type if it can be safely assigned to
+// that type, otherwise throws an UnexpectedTypeError.
+def Object expecting[T -> T]
+    if type == T or T assignsFrom?(type) then return unsafecast[T](this)
+    UnexpectedTypeError throw(T, type)
+end
+
+// Inequality is just the opposite of equality.
+def Object !=(other -> Bool) (this == other) not

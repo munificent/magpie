@@ -1,0 +1,14 @@
+// An interface for objects that can be converted to or have some string
+// representation.
+interface Stringable
+    get string String
+end
+
+// Provide a generic print that converts arg to string first.
+def print(arg Stringable ->) printString(arg string)
+
+// Implement it for the built-in classes.
+get Object string String = "object"
+get String string String = this
+get Nothing string String = "nothing"
+get Class string String = name

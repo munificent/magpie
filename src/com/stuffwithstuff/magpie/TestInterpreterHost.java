@@ -25,7 +25,7 @@ public class TestInterpreterHost implements InterpreterHost {
     
     try {
       // Load the runtime library.
-      loadScript("base/base.mag");
+      loadScript("base/init.mag");
 
       Script script = Script.fromPath(mPath);
       String source = script.getText();

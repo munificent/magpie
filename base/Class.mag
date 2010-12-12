@@ -1,0 +1,4 @@
+// Provides additional functionality on Class.
+
+// Adds the given class to the class's mixins.
+def Class mixin(mixin Class ->) mixins add(mixin)

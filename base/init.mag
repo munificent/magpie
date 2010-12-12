@@ -1,4 +1,5 @@
 import("Array.mag")
+import("Class.mag")
 import("Function.mag")
 import("Int.mag")
 import("Interface.mag")
@@ -9,12 +10,11 @@ import("Types.mag")
 import("Type.mag")
 import("OrType.mag")
 import("Error.mag")
+import("Object.mag")
+import("Stringable.mag")
+import("Trueable.mag")
 
 interface Any
-end
-
-interface Stringable
-    get string String
 end
 
 // Returns the argument cast to the given type if it's type is an exact match
@@ -22,19 +22,6 @@ end
 // TODO(bob): Make this a method on Object so you can do: foo asExactly[Bar]
 def asExactly[T](arg -> T | Nothing)
     if arg type == T then unsafecast[T](arg)
-end
-
-// Returns the object cast to the given type if it can be safely assigned to
-// that type, otherwise returns nothing.
-def Object as[T -> T | Nothing]
-    if type == T or T assignsFrom?(type) then unsafecast[T](this)
-end
-
-// Returns the object cast to the given type if it can be safely assigned to
-// that type, otherwise throws an UnexpectedTypeError.
-def Object expecting[T -> T]
-    if type == T or T assignsFrom?(type) then return unsafecast[T](this)
-    UnexpectedTypeError throw(T, type)
 end
 
 // Add an arrow operator to make function types out of other types:
@@ -49,23 +36,3 @@ def FunctionType      =>(other Type -> Type) FunctionType new(this, other, false
 def Interface         =>(other Type -> Type) FunctionType new(this, other, false)
 def OrType            =>(other Type -> Type) FunctionType new(this, other, false)
 def Tuple             =>(other Type -> Type) FunctionType new(this, other, false)
-
-// Extend the built-in classes.
-def Object !=(other -> Bool) (this == other) not
-
-// Provide a generic print that converts arg to string first.
-def print(arg Stringable ->) printString(arg string)
-
-get Object string String = "object"
-get String string String = this
-get Nothing string String = "nothing"
-get Class string String = name
-
-// Truthiness.
-get Object true? Bool = true
-get Bool true? Bool = this
-get Int true? Bool = this != 0
-get String true? Bool = this count > 0
-get Nothing true? Bool = false
-
-def Class mixin(mixin Class ->) mixins add(mixin)
