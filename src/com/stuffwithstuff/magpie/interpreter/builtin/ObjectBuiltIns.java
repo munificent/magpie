@@ -67,6 +67,12 @@ public class ObjectBuiltIns {
   }
 
   // TODO(bob): Make generic and allow returning something more specific?
+  // TODO(bob): As neat as this is, it isn't type-safe in its current
+  // incarnation. The problem is that the function passed to this was type-
+  // checked with 'this' bound to a type based on where that function was
+  // defined but now it's being evaluated with 'this' bound to a different type.
+  // We'll either need to get rid of this (the easy solution), or come up with
+  // a way to annotate what 'this' should be in a function type annotation.
   @Signature("receiving(block Nothing => Dynamic)")
   public static class Receiving implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
