@@ -60,5 +60,7 @@ import("core/Object/receiving.mag")
 import("core/OrType/getMemberType.mag")
 import("core/Record/type.mag")
 import("core/Tuple/assignsFrom.mag")
+import("core/Tuple/iterate.mag")
+import("core/Tuple/string.mag")
 
 endTests()
