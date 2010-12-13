@@ -1,8 +1,0 @@
-print(Array of(1) contains(1)) //: true
-print(Array of(1) contains(2)) //: false
-
-print(Array of(1, 2) contains(1)) //: true
-print(Array of(1, 2) contains(2)) //: true
-
-print(Array of("s", "b") contains("s")) //: true
-print(Array of("f", "b") contains("s")) //: false

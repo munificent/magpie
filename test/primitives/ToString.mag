@@ -1,6 +1,0 @@
-print(true string) //: true
-print(false string) //: false
-
-print(123 string) //: 123
-
-print("hi" string) //: hi

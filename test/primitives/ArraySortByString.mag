@@ -1,7 +1,0 @@
-print(Array new() sortByString()) //: []
-print(Array of(1) sortByString()) //: [1]
-
-print(Array of(1, 2) sortByString()) //: [1, 2]
-print(Array of(2, 1) sortByString()) //: [1, 2]
-
-print(Array of("3", 1, 2) sortByString()) //: [1, 2, 3]

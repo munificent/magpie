@@ -1,8 +1,0 @@
-class Foo
-end
-
-def Foo call(arg) print("call " + arg)
-
-var foo = Foo new()
-
-foo("hey") //: call hey

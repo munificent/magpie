@@ -1,8 +1,0 @@
-// toString
-print(123) //: 123
-
-// integer arithmetic
-print(1 + 2) //: 3
-print(5 - 3) //: 2
-print(3 * 4) //: 12
-print(6 / 3) //: 2

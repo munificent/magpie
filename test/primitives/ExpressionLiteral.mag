@@ -1,2 +1,0 @@
-var a = { print("hi") }
-print(a) //: { print("hi") }

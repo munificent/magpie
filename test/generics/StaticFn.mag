@@ -1,9 +1,0 @@
-// create a static function
-var f[A](arg A) print(arg)
-
-// instantiate it with a type, should yield: fn(arg Int) print(arg)
-var i = f[Int]
-
-// call the function
-i call(123) //: 123
-i call("hi") //: hi

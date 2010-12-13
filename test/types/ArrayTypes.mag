@@ -1,2 +1,0 @@
-print(ArrayType new(Int))              //: Int[]
-print(ArrayType new(Bool) elementType) //: Bool

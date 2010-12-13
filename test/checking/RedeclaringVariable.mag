@@ -1,9 +1,0 @@
-var main(->)
-    // not changing the type is ok
-    var a = 123
-    var a = 234
-    
-    // changing the type is bad
-    var b = 123
-    var b = "str" //!
-end

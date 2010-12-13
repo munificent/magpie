@@ -1,3 +1,0 @@
-var f = fn print("hi")
-
-f() //: hi

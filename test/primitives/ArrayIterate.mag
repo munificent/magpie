@@ -1,5 +1,0 @@
-var a = Array of(1, true, "three")
-for i = a do print(i)
-//: 1
-//: true
-//: three
