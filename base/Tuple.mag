@@ -83,7 +83,7 @@ end
 
 class TupleIterator
     shared def new(tuple Tuple -> TupleIterator)
-        signify(tuple: tuple)
+        construct(tuple: tuple)
     end
 
     get current =

@@ -8,6 +8,7 @@ public final class Identifiers {
   public static final String ASSIGN = "assign";
   public static final String CALL = "call";
   public static final String ASSIGNS_FROM = "assignsFrom?";
+  public static final String CONSTRUCT = "construct";
   public static final String COUNT = "count";
   public static final String CURRENT = "current";
   public static final String DECLARE_FIELD = "declareField";
@@ -31,7 +32,6 @@ public final class Identifiers {
   public static final String PARAM_TYPE = "paramType";
   public static final String RECEIVING = "receiving";
   public static final String RETURN_TYPE = "returnType";
-  public static final String SIGNIFY = "signify";
   public static final String STRING = "string";
   public static final String TYPE = "type";
   public static final String UNSAFE_REMOVE_NOTHING = "unsafeRemoveNothing";

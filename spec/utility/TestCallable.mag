@@ -1,7 +1,7 @@
 // A simple class that is callable and tracks when it was called.
 class TestCallable
     shared def new(returnValue -> TestCallable)
-        signify(returnValue: returnValue)
+        construct(returnValue: returnValue)
     end
     
     def call(arg)

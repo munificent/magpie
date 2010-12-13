@@ -5,7 +5,7 @@
 
 class Interface
     shared def new(name String -> Interface)
-        signify(name: name)
+        construct(name: name)
     end
     
     get string String = name

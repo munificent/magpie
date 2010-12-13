@@ -163,8 +163,8 @@ public class ClassBuiltIns {
       classObj.getMixins().add(interpreter.getObjectClass());
       
       // Add the factory methods.
-      Callable signify = new ClassSignify(classObj);
-      metaclass.getMembers().defineMethod(Identifiers.SIGNIFY, signify);
+      Callable signify = new ClassConstruct(classObj);
+      metaclass.getMembers().defineMethod(Identifiers.CONSTRUCT, signify);
       // By default, "new" just signifies too.
       metaclass.getMembers().defineMethod(Identifiers.NEW, signify);
       

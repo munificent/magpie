@@ -94,7 +94,7 @@ end
 
 class ArrayType
     shared def new(elementType Type -> ArrayType)
-        signify(elementType: elementType)
+        construct(elementType: elementType)
     end
     
     get string String = "array of " + elementType
@@ -134,7 +134,7 @@ end
 
 class ArrayIterator
     shared def new(array Array -> ArrayIterator)
-        signify(array: array)
+        construct(array: array)
     end
     
     // TODO(bob): Need generics for return type.
@@ -157,7 +157,7 @@ end
 
 class ArrayIteratorType
     shared def new(elementType Type -> ArrayIteratorType)
-        signify(elementType: elementType)
+        construct(elementType: elementType)
     end
     
     get string String = "array of " + elementType + " iterator"

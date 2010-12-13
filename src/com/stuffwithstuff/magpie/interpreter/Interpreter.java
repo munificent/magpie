@@ -71,7 +71,7 @@ public class Interpreter {
 
     // Add a constructor so you can create new Objects.
     mObjectClass.getMembers().defineMethod(Identifiers.NEW,
-        new ClassSignify(mObjectClass));
+        new ClassConstruct(mObjectClass));
 
     // Now that ClassClass, Class and Object exist, wire them up.
     classClass.bindClass(mClass);

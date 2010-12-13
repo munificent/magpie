@@ -23,7 +23,7 @@ specify("The default 'new' shared method on a class") with
     it should("accept nothing if the class has no declared fields") with
         class Foo
         end
-        var foo = Foo signify()
+        var foo = Foo new()
         foo is(Foo) shouldBe(true)
     end
     

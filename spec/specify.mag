@@ -29,7 +29,7 @@ end
 
 class TestSuite
     shared def new(name String -> TestSuit)
-        var suite = signify(name: name)
+        var suite = construct(name: name)
         currentTestSuite = suite
         suite
     end

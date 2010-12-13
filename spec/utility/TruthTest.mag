@@ -1,7 +1,7 @@
 // A simple class that implements truthiness and tracks when it was called.
 class TruthTest
     shared def new(value Bool -> TruthTest)
-        signify(value: value)
+        construct(value: value)
     end
     
     get true? Bool =

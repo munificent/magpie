@@ -22,8 +22,8 @@ import com.stuffwithstuff.magpie.util.Pair;
  * Built-in callable that takes a record and creates an instance of a class
  * whose fields are initialized with the record's fields.
  */
-public class ClassSignify implements Callable {
-  public ClassSignify(ClassObj classObj) {
+public class ClassConstruct implements Callable {
+  public ClassConstruct(ClassObj classObj) {
     Expect.notNull(classObj);
     
     mClass = classObj;

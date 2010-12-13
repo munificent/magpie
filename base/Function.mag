@@ -9,7 +9,7 @@ end
 
 class FunctionType
     shared def new(paramType Type, returnType Type, static? Bool -> FunctionType)
-        signify(paramType: paramType returnType: returnType static?: static?)
+        construct(paramType: paramType returnType: returnType static?: static?)
     end
 
     get string String =
