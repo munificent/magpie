@@ -1,4 +1,75 @@
+// These define the key operations on types that type checking is implemented
+// in terms of. The most important part is "assignsFrom?". All types (objects
+// that can be the result of a type expression) are expected to implement this
+// and return true if an argument of the given type would be OK in a variable
+// defined to be that type.
+// 
+// For example, "Int assignsFrom?(Bool)" returns false since an Int variable
+// can't hold a Bool.
 interface Type
     def assignsFrom?(other Type -> Bool)
     def getMemberType(name String -> Type)
+end
+
+// Make Class implement it.
+extend class Class
+    // TODO(bob): Should this be part of Type?
+    shared def unsafeRemoveNothing(-> Class)
+        // Doesn't have Nothing to begin with, so we're good.
+        this
+    end
+
+    def assignsFrom?(other Type -> Bool)
+        // Short-circuit on self-assignment.
+        if other == this then return true
+
+        // Not even object can assign from Nothing.
+        if other == Nothing then return false
+    
+        // If it's an Or type, just check the arms.
+        let orType = other asExactly[OrType] then
+            for otherCase = orType cases do
+                if assignsFrom?(otherCase) not then return false
+            end
+            return true
+        end
+        
+        // TODO(bob): Should mixins subtype? What about delegates?
+
+        false
+    end
+end
+
+extend class Nothing
+    // No type except Nothing is allowed where Nothing is expected.
+    shared def assignsFrom?(other Type -> Bool) other == Nothing
+end
+
+extend class Dynamic
+    shared def assignsFrom?(other Type -> Bool)
+        // Everything goes with Dynamic.
+        true
+    end
+
+    // From the static perspective, a dynamic object has all possible members
+    // and their type is always "Dynamic".
+    shared def getMemberType(name String -> Type)
+        // If the member is defined in Object then go ahead and strongly-type
+        // it.
+        var objMemberType = Object getMemberType(name)
+        if objMemberType != Nothing then
+            objMemberType
+        else
+            // TODO(bob): This is really gross.
+            match name
+            case "assignsFrom?"  then Type => Bool
+            case "getMemberType" then String => Type
+            case "getSetterType" then String => (Type | Nothing)
+            case "call"          then Dynamic => Dynamic
+            case "|"             then Type => Type
+            case "=>"            then Type => Type
+            else                      Dynamic
+            end
+        end
+    end
 end
