@@ -82,6 +82,17 @@ public class Checker {
         }
       }
     }
+    
+    // Make sure all mixins are stateless.
+    for (Obj mixinObj : classObj.getMixins()) {
+      ClassObj mixin = (ClassObj)mixinObj;
+      if (mixin.getFieldDefinitions().size() > 0) {
+        addError(Position.none(),
+            "The class \"%s\" mixes in \"%s\" which is not stateless. Only " +
+            "stateless classes (i.e. without fields) can be used as mixins.",
+            classObj.getName(), mixin.getName());
+      }
+    }
   }
   
   /**

@@ -59,4 +59,23 @@ specify("The 'mixins' getter on Class") with
         Foo mixins add(Mixin1)
         foo method() shouldBe("two")
     end
+
+    it should("not allow mixing in a stateful class") with
+        class Stateless
+        end
+        
+        class Stateful
+            var state Int = 123
+        end
+        
+        class Good
+            mixin(Stateless)
+        end
+        Good shouldCheck()
+        
+        class Bad
+            mixin(Stateful)
+        end
+        Bad shouldNotCheck()
+    end
 end
