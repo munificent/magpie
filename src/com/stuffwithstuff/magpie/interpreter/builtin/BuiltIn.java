@@ -16,8 +16,8 @@ public class BuiltIn implements Callable {
   }
 
   @Override
-  public FunctionType getType() {
-    return mType;
+  public Obj getType(Interpreter interpreter) {
+    return interpreter.evaluateFunctionType(mType, null);
   }
 
   @Override

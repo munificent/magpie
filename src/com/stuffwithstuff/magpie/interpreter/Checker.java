@@ -73,7 +73,7 @@ public class Checker {
         
         if (member.getType() == MemberType.GETTER) {
           // Getter functions should not take any arguments.
-          if (function.getType().getParamNames().size() > 0) {
+          if (function.getFunction().getType().getParamNames().size() > 0) {
             addError(function.getFunction().getPosition(),
                 "The getter \"%s\" is declared to take one or more arguments, " +
                 "but arguments are not allowed for a getter.",
@@ -130,7 +130,7 @@ public class Checker {
     functionContext.bind(mInterpreter, params, paramType);
     
     // If it's a static function, bind them in the static context too.
-    if (function.isStatic()) {
+    if (function.getType().isStatic()) {
       staticContext = staticContext.pushScope();
       staticContext.bind(mInterpreter, params, paramType);
     }
@@ -169,7 +169,7 @@ public class Checker {
     return mInterpreter.invokeMethod(mInterpreter.getFunctionClass(),
         Identifiers.NEW_TYPE, mInterpreter.createTuple(
             paramType, returnType,
-            mInterpreter.createBool(function.isStatic())));
+            mInterpreter.createBool(function.getType().isStatic())));
   }
   
   /**

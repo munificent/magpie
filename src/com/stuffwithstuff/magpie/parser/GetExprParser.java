@@ -43,7 +43,7 @@ public class GetExprParser implements ExprParser {
     
     parser.consume(TokenType.EQUALS);
     Expr body = parser.parseBlock();
-    Expr function = new FnExpr(body.getPosition(), type, body, false);
+    Expr function = new FnExpr(body.getPosition(), type, body);
     return Expr.message(receiver, Identifiers.DEFINE_GETTER,
         Expr.tuple(Expr.string(name), function));
   }

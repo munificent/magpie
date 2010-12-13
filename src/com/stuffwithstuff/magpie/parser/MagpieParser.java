@@ -176,7 +176,7 @@ public class MagpieParser extends Parser {
     
     // Wrap the body in a dynamic function.
     if (type != null) {
-      expr = new FnExpr(position, type, expr, false);
+      expr = new FnExpr(position, type, expr);
     }
     
     // Wrap it in a static function.
@@ -190,10 +190,10 @@ public class MagpieParser extends Parser {
           (((MessageExpr)staticType.getReturnType()).getName().equals("Dynamic"))) {
         staticType = new FunctionType(staticType.getParamNames(),
             staticType.getParamType(),
-            Expr.message(type.getParamType(), "=>", type.getReturnType()));
+            Expr.message(type.getParamType(), "=>", type.getReturnType()), true);
       }
         
-      expr = new FnExpr(position, staticType, expr, true);
+      expr = new FnExpr(position, staticType, expr);
     }
     
     return expr;
@@ -265,7 +265,7 @@ public class MagpieParser extends Parser {
       consume(right);
     }
     
-    return new FunctionType(paramNames, paramType, returnType);
+    return new FunctionType(paramNames, paramType, returnType, isStatic);
   }
   
   public String parseFunctionName() {
@@ -408,12 +408,12 @@ public class MagpieParser extends Parser {
         } else {
           // Else just assume a single "it" parameter.
           blockType = new FunctionType(Collections.singletonList(Identifiers.IT),
-              Expr.name("Dynamic"), Expr.name("Dynamic"));
+              Expr.name("Dynamic"), Expr.name("Dynamic"), false);
         }
 
         // Parse the block and wrap it in a function.
         Expr block = parseBlock();
-        block = new FnExpr(block.getPosition(), blockType, block, false);
+        block = new FnExpr(block.getPosition(), blockType, block);
         
         // Apply it to the previous expression.
         if (message instanceof ApplyExpr) {

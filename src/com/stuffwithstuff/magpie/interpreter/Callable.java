@@ -1,7 +1,5 @@
 package com.stuffwithstuff.magpie.interpreter;
 
-import com.stuffwithstuff.magpie.ast.FunctionType;
-
 /**
  * Interface for an executable chunk of behavior. Implemented by Function for
  * user-defined functions and BuiltIn for built-in behavior.
@@ -9,5 +7,5 @@ import com.stuffwithstuff.magpie.ast.FunctionType;
 public interface Callable {
   Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg);
   
-  FunctionType getType();
+  Obj getType(Interpreter interpreter);
 }

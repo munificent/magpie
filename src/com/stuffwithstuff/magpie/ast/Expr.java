@@ -8,7 +8,7 @@ public abstract class Expr {
   }
   
   public static FnExpr fn(Expr body) {
-    return new FnExpr(Position.none(), FunctionType.nothingToDynamic(), body, false);
+    return new FnExpr(Position.none(), FunctionType.nothingToDynamic(), body);
   }
   
   public static IntExpr integer(int value) {

@@ -51,7 +51,7 @@ public class ClassSignify implements Callable {
     return obj;
   }
 
-  public FunctionType getType() {
+  public Obj getType(Interpreter interpreter) {
     // The signify method expects a record with fields for each declared field
     // in the class.
     List<Pair<String, Expr>> fields = new ArrayList<Pair<String, Expr>>();
@@ -66,8 +66,10 @@ public class ClassSignify implements Callable {
 
     Expr recordType = new RecordExpr(Position.none(), fields);
     
-    return new FunctionType(Collections.singletonList("arg"),
-        recordType, Expr.name(mClass.getName()));
+    FunctionType type = new FunctionType(Collections.singletonList("arg"),
+        recordType, Expr.name(mClass.getName()), false);
+    
+    return interpreter.evaluateFunctionType(type, null);
   }
   
   private final ClassObj mClass;

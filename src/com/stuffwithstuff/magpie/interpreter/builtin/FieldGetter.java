@@ -27,10 +27,12 @@ public class FieldGetter implements Callable {
     if (value == null) return interpreter.nothing();
     return value;
   }
-  
-  public FunctionType getType() {
-    return new FunctionType(Collections.<String>emptyList(),
-        Expr.name("Nothing"), mType);
+
+  public Obj getType(Interpreter interpreter) {
+    FunctionType type = new FunctionType(Collections.<String>emptyList(),
+        Expr.name("Nothing"), mType, false);
+    
+    return interpreter.evaluateFunctionType(type, null);
   }
 
   private final String mName;

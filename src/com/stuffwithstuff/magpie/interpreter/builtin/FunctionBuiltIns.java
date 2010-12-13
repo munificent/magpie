@@ -9,8 +9,7 @@ public class FunctionBuiltIns {
   public static class Type implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       FnObj function = thisObj.asFn();
-      
-      return interpreter.evaluateCallableType(function.getCallable(), false);
+      return function.getCallable().getType(interpreter);
     }
   }
 }

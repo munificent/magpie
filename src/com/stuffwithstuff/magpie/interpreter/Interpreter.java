@@ -144,53 +144,30 @@ public class Interpreter {
     return evaluateToString(result);
   }
   
-  public Obj evaluateCallableType(Callable callable, boolean justReturnType) {
-    // TODO(bob): Hackish.
-    // Figure out a context to evaluate the method's type signature in. If it's
-    // a user-defined method we'll evaluate it the method's closure so that
-    // outer static arguments are available. Otherwise, we'll assume it has no
-    // outer scope and just evaluate it in a top-level context.
-    EvalContext staticContext;
-    boolean isStatic = false;
-    Object value = null;
-    if (callable instanceof Function) {
-      Function function = (Function)callable;
-      staticContext = new EvalContext(function.getClosure(), mNothing);
-      isStatic = function.getFunction().isStatic();
-      value = function.getFunction();
-    } else {
-      staticContext = createTopLevelContext();
+  public Obj evaluateFunctionType(FunctionType type, EvalContext context) {
+    if (context == null) {
+      context = createTopLevelContext();
     }
     
-    FunctionType type = callable.getType();
+    Obj paramType = evaluate(type.getParamType(), context);
     
-    if (justReturnType) {
-      return evaluate(type.getReturnType(), staticContext);
-    } else {
-      Obj paramType = evaluate(type.getParamType(), staticContext);
-      
-      // If it's a static function like foo[T Int -> T], then bind the
-      // constraint to the parameter name(s) so that it can be used in the
-      // return type.
-      if (isStatic) {
-        staticContext = staticContext.pushScope();
-        staticContext.bind(this, type.getParamNames(), paramType);
-      }
-      
-      Obj returnType = evaluate(type.getReturnType(), staticContext);
-      
-      // Create a FunctionType object.
-      Obj result = invokeMethod(mFnClass, Identifiers.NEW_TYPE,
-          createTuple(paramType, returnType, createBool(isStatic)));
-      
-      // TODO(bob): Hackish. Cram the original function body in there too. That
-      // way, if it's a static function, we have access to it during check time.
-      result.setValue(value);
-      
-      return result;
+    // If it's a static function like foo[T Int -> T], then bind the
+    // constraint to the parameter name(s) so that it can be used in the
+    // return type.
+    if (type.isStatic()) {
+      context = context.pushScope();
+      context.bind(this, type.getParamNames(), paramType);
     }
+    
+    Obj returnType = evaluate(type.getReturnType(), context);
+    
+    // Create a FunctionType object.
+    Obj result = invokeMethod(mFnClass, Identifiers.NEW_TYPE,
+        createTuple(paramType, returnType, createBool(type.isStatic())));
+    
+    return result;
   }
-  
+
   public boolean hasMain() {
     return mGlobalScope.get("main") != null;
   }

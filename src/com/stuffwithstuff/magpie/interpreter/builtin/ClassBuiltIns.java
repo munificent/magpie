@@ -109,8 +109,14 @@ public class ClassBuiltIns {
       // Look for a member.
       Member member = ClassObj.findMember(thisClass, null, name);
       if (member != null) {
-        return interpreter.evaluateCallableType(
-            member.getDefinition(), member.getType() != MemberType.METHOD);
+        Obj type = member.getDefinition().getType(interpreter);
+        
+        // If it's a getter or setter, we just care about the return type.
+        if (member.getType() != MemberType.METHOD) {
+          type = type.getField(Identifiers.RETURN_TYPE);
+        }
+        
+        return type;
       }
   
       // Member not found.
