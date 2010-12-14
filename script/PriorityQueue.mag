@@ -3,8 +3,6 @@
 // implemented.)
 
 class PriorityQueue
-    this() heap = Array new()
-
     // The following methods "traverse" the tree stored in the heap array. The tree
     // nodes are laid out in the array like the following:
     //    0
@@ -67,7 +65,7 @@ class PriorityQueue
         for item = items do add(item)
     end
     
-    var heap Array newType(Dynamic)
+    var heap Array newType(Dynamic) = Array new()
 end
 
 def expect(queue, items)

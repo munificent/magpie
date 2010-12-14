@@ -1,6 +1,7 @@
 // A vanilla iterative solution.
 def fibs(n)
-    if n < 2 then n
+    if n < 2 then
+        n
     else
         var pair = 0, 1
         for i = 2 to(n) do

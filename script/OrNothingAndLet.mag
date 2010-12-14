@@ -5,8 +5,6 @@
 // Define a "File" class. This represents a handle to an open file, so you
 // shouldn't be able to have an instance of this if open fails.
 class File
-    this(path String) this path = path
-    
     var path String
 
     // Define a fake method to read a line from the file.
@@ -17,7 +15,7 @@ class File
     // example here, it will fail if the path is empty.) Note the return type of
     // the function makes this explicit.
     shared def open(path String -> File | Nothing)
-        if path count > 0 then File new(path)
+        if path count > 0 then File new(path: path)
     end
 end
 

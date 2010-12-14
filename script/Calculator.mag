@@ -3,18 +3,18 @@
 // Define a basic tokenizer for splitting a string into chunks -----------------
 
 class Tokenizer
-    this(text String) this text = text
-
+    shared def new(text String -> Tokenizer)
+        construct(text: text)
+    end
+    
     def iterate(-> TokenIterator) TokenIterator new(text)
         
     var text String
 end
 
 class TokenIterator
-    this(text String)
-        this text = text
-        this current = ""
-        this start = 0
+    shared def new(text String -> TokenIterator)
+        construct(text: text)
     end
     
     def next(-> Bool)
@@ -42,17 +42,13 @@ class TokenIterator
     end
 
     var text    String
-    var current String
-    var start   Int
+    var current String = ""
+    var start   Int    = 0
 end
 
 // Implement a simple stack using a linked list --------------------------------
 
 class Stack
-    this()
-        top = nothing
-    end
-    
     def push(item Int ->)
         top = StackItem new(item, top)
     end
@@ -77,13 +73,12 @@ class Stack
         count
     end
 
-    var top StackItem | Nothing
+    var top StackItem | Nothing = nothing
 end
 
 class StackItem
-    this(item Int, rest StackItem)
-        this item = item
-        this rest = rest
+    shared def new(item Int, rest StackItem | Nothing -> StackItem)
+        construct(item: item rest: rest)
     end
     
     var item Int
