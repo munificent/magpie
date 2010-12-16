@@ -35,7 +35,7 @@ public class ArrayBuiltIns {
     }
   }
   
-  @Getter("count(-> Int)")
+  @Getter("count Int")
   public static class Count implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       List<Obj> elements = thisObj.asArray();

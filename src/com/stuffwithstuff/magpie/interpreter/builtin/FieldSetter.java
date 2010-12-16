@@ -29,8 +29,8 @@ public class FieldSetter implements Callable {
   
   public Obj getType(Interpreter interpreter)
   {
-    FunctionType type = new FunctionType(Collections.singletonList("value"), mType, mType,
-        false);
+    FunctionType type = new FunctionType(Collections.singletonList("value"),
+        mType, mType, false);
     
     return interpreter.evaluateFunctionType(type, null);
   }

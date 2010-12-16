@@ -7,7 +7,6 @@ import com.stuffwithstuff.magpie.interpreter.Field;
 import com.stuffwithstuff.magpie.interpreter.FnObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Member;
-import com.stuffwithstuff.magpie.interpreter.MemberType;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class ClassBuiltIns {
@@ -109,14 +108,7 @@ public class ClassBuiltIns {
       // Look for a member.
       Member member = ClassObj.findMember(thisClass, null, name);
       if (member != null) {
-        Obj type = member.getDefinition().getType(interpreter);
-        
-        // If it's a getter or setter, we just care about the return type.
-        if (member.getType() != MemberType.METHOD) {
-          type = type.getField(Identifiers.RETURN_TYPE);
-        }
-        
-        return type;
+        return member.evaluateType(interpreter);
       }
   
       // Member not found.
@@ -124,7 +116,7 @@ public class ClassBuiltIns {
     }
   }
   
-  @Getter("mixins(-> Array newType(Class))")
+  @Getter("mixins Array newType(Class)")
   public static class Mixins implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       ClassObj classObj = (ClassObj)thisObj;
@@ -133,7 +125,7 @@ public class ClassBuiltIns {
     }
   }
 
-  @Getter("name(-> String)")
+  @Getter("name String")
   public static class Name implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       ClassObj classObj = (ClassObj)thisObj;

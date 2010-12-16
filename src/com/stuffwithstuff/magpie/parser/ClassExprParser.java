@@ -156,27 +156,25 @@ public class ClassExprParser implements ExprParser {
   private static Expr parseGetter(MagpieParser parser, Expr theClass) {
     String name = parser.consume(TokenType.NAME).getString();
     
-    FunctionType type;
+    Expr type;
     if (parser.lookAheadAny(TokenType.EQUALS, TokenType.LINE)) {
       // If no type is provided, default to Dynamic.
-      type = FunctionType.nothingToDynamic();
+      type = Expr.name("Dynamic");
     } else {
-      Expr valueType = parser.parseTypeExpression();
-      type = FunctionType.returningType(valueType);
+      type = parser.parseTypeExpression();
     }
     
     if (parser.match(TokenType.EQUALS)) {
       // Defining it.
       Expr body = parser.parseBlock();
-      Expr function = new FnExpr(body.getPosition(), type, body);
+      FunctionType fnType = FunctionType.returningType(type);
+      Expr function = new FnExpr(body.getPosition(), fnType, body);
       return Expr.message(theClass, Identifiers.DEFINE_GETTER,
           Expr.tuple(Expr.string(name), function));
     } else {
       // Just declaring it.
-      Expr typeExpr = Expr.message(Expr.name("Function"), Identifiers.NEW_TYPE,
-          Expr.tuple(type.getParamType(), type.getReturnType(), Expr.bool(false)));
       return Expr.message(theClass, Identifiers.DECLARE_GETTER,
-          Expr.tuple(Expr.string(name), Expr.fn(typeExpr)));
+          Expr.tuple(Expr.string(name), Expr.fn(type)));
     }
   }
   

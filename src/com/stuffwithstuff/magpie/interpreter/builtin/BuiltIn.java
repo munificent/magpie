@@ -1,5 +1,6 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
+import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
@@ -11,13 +12,27 @@ public class BuiltIn implements Callable {
     Expect.notNull(type);
     Expect.notNull(callable);
     
+    mFnType = type;
+    mType = null;
+    mCallable = callable;
+  }
+
+  public BuiltIn(Expr type, BuiltInCallable callable) {
+    Expect.notNull(type);
+    Expect.notNull(callable);
+    
+    mFnType = null;
     mType = type;
     mCallable = callable;
   }
 
   @Override
   public Obj getType(Interpreter interpreter) {
-    return interpreter.evaluateFunctionType(mType, null);
+    if (mFnType != null) {
+      return interpreter.evaluateFunctionType(mFnType, null);
+    } else {
+      return interpreter.evaluate(mType, interpreter.createTopLevelContext());
+    }
   }
 
   @Override
@@ -25,6 +40,7 @@ public class BuiltIn implements Callable {
     return mCallable.invoke(interpreter, thisObj, arg);
   }
 
-  private final FunctionType    mType;
+  private final FunctionType    mFnType;
+  private final Expr            mType;
   private final BuiltInCallable mCallable;
 }

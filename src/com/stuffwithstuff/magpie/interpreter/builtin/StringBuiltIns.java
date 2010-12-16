@@ -32,7 +32,7 @@ public class StringBuiltIns {
     }
   }
   
-  @Getter("count(-> Int)")
+  @Getter("count Int")
   public static class Count implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       return interpreter.createInt(thisObj.asString().length());

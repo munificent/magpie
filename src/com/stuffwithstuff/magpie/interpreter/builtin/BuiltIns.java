@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import com.stuffwithstuff.magpie.StringCharacterReader;
+import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.FnObj;
@@ -134,9 +135,9 @@ public abstract class BuiltIns {
   private static void registerGetter(ClassObj classObj, Class innerClass,
       String signature) {
     try {
-      Pair<String, FunctionType> parsed = parseSignature(signature);
+      Pair<String, Expr> parsed = parseGetter(signature);
       String methodName = parsed.getKey();
-      FunctionType type = parsed.getValue();
+      Expr type = parsed.getValue();
       
       // See if it's shared.
       boolean isShared = innerClass.getAnnotation(Shared.class) != null;
@@ -226,6 +227,25 @@ public abstract class BuiltIns {
       FunctionType type = parser.parseFunctionType();
       
       return new Pair<String, FunctionType>(name, type);
+    } catch (ParseException e) {
+      // TODO(bob): Hack. Better error handling.
+      System.out.println("Could not parse built-in signature \"" +
+          signature + "\".");
+    }
+    
+    return null;
+  }
+  
+  private static Pair<String, Expr> parseGetter(String signature) {
+    try {
+      // Process the annotation to get the method's Magpie name and type
+      // signature.
+      Lexer lexer = new Lexer("", new StringCharacterReader(signature));
+      MagpieParser parser = new MagpieParser(lexer);
+      String name = parser.parseFunctionName();
+      Expr type = parser.parseTypeExpression();
+      
+      return new Pair<String, Expr>(name, type);
     } catch (ParseException e) {
       // TODO(bob): Hack. Better error handling.
       System.out.println("Could not parse built-in signature \"" +

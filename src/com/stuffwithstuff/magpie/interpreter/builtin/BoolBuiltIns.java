@@ -15,14 +15,14 @@ public class BoolBuiltIns {
     }
   }
   
-  @Getter("not(-> Bool)")
+  @Getter("not Bool")
   public static class Not implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       return interpreter.createBool(!thisObj.asBool());
     }
   }
   
-  @Getter("string(-> String)")
+  @Getter("string String")
   public static class String_ implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       return interpreter.createString(Boolean.toString(thisObj.asBool()));

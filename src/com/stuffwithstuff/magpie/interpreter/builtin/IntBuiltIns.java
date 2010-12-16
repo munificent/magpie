@@ -119,7 +119,7 @@ public class IntBuiltIns {
     }
   }
   
-  @Getter("string(-> String)")
+  @Getter("string String")
   public static class String_ implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       return interpreter.createString(Integer.toString(thisObj.asInt()));

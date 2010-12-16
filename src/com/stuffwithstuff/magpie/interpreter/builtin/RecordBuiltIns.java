@@ -10,7 +10,7 @@ import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.parser.Position;
 
 public class RecordBuiltIns {
-  @Getter("type(-> Type)")
+  @Getter("type Type")
   public static class Type implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       // Much like a tuple, the type of a record is a record of the types of its
