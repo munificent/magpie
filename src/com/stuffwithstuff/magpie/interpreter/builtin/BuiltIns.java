@@ -135,7 +135,7 @@ public abstract class BuiltIns {
   private static void registerGetter(ClassObj classObj, Class innerClass,
       String signature) {
     try {
-      Pair<String, Expr> parsed = parseGetter(signature);
+      Pair<String, Expr> parsed = parseProperty(signature);
       String methodName = parsed.getKey();
       Expr type = parsed.getValue();
       
@@ -178,9 +178,9 @@ public abstract class BuiltIns {
   private static void registerSetter(ClassObj classObj, Class innerClass,
       String signature) {
     try {
-      Pair<String, FunctionType> parsed = parseSignature(signature);
+      Pair<String, Expr> parsed = parseProperty(signature);
       String methodName = parsed.getKey();
-      FunctionType type = parsed.getValue();
+      Expr type = parsed.getValue();
       
       // See if it's shared.
       boolean isShared = innerClass.getAnnotation(Shared.class) != null;
@@ -236,7 +236,7 @@ public abstract class BuiltIns {
     return null;
   }
   
-  private static Pair<String, Expr> parseGetter(String signature) {
+  private static Pair<String, Expr> parseProperty(String signature) {
     try {
       // Process the annotation to get the method's Magpie name and type
       // signature.

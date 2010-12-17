@@ -1,9 +1,6 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
-import java.util.Collections;
-
 import com.stuffwithstuff.magpie.ast.Expr;
-import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
@@ -29,10 +26,7 @@ public class FieldSetter implements Callable {
   
   public Obj getType(Interpreter interpreter)
   {
-    FunctionType type = new FunctionType(Collections.singletonList("value"),
-        mType, mType, false);
-    
-    return interpreter.evaluateFunctionType(type, null);
+    return interpreter.evaluate(mType, interpreter.createTopLevelContext());
   }
 
   private final String mName;
