@@ -4,31 +4,22 @@ import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
-import com.stuffwithstuff.magpie.util.Expect;
 
 /**
  * Built-in callable that assigns a value to a named field.
  */
-public class FieldSetter implements Callable {
+public class FieldSetter extends FieldProperty implements Callable {
+  public FieldSetter(String name, Expr type, boolean isInitializer) {
+    super(name, type, isInitializer);
+  }
+  
   public FieldSetter(String name, Expr type) {
-    Expect.notEmpty(name);
-    Expect.notNull(type);
-    
-    mName = name;
-    mType = type;
+    super(name, type, false);
   }
   
   @Override
   public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-    thisObj.setField(mName, arg);
+    thisObj.setField(getName(), arg);
     return arg;
   }
-  
-  public Obj getType(Interpreter interpreter)
-  {
-    return interpreter.evaluate(mType, interpreter.createTopLevelContext());
-  }
-
-  private final String mName;
-  private final Expr mType;
 }

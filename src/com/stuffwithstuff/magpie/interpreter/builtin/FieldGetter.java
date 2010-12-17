@@ -4,31 +4,23 @@ import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
-import com.stuffwithstuff.magpie.util.Expect;
 
 /**
  * Built-in callable that returns the value of a named field.
  */
-public class FieldGetter implements Callable {
-  public FieldGetter(String name, Expr type) {
-    Expect.notEmpty(name);
-    Expect.notNull(type);
-    
-    mName = name;
-    mType = type;
+public class FieldGetter extends FieldProperty implements Callable {
+  public FieldGetter(String name, Expr expr, boolean isInitializer) {
+    super(name, expr, isInitializer);
+  }
+  
+  public FieldGetter(String name, Expr expr) {
+    super(name, expr, false);
   }
   
   @Override
   public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-    Obj value = thisObj.getField(mName);
+    Obj value = thisObj.getField(getName());
     if (value == null) return interpreter.nothing();
     return value;
   }
-
-  public Obj getType(Interpreter interpreter) {
-    return interpreter.evaluate(mType, interpreter.createTopLevelContext());
-  }
-  
-  private final String mName;
-  private final Expr mType;
 }

@@ -124,25 +124,25 @@ public class ClassExprParser implements ExprParser {
   private static Expr parseField(MagpieParser parser, boolean isDelegate,
       Expr theClass) {
     String name = parser.consume(TokenType.NAME).getString();
-    Expr type = parser.parseTypeExpression();
+    
+    // Parse the type annotation if there is one.
+    Expr type;
+    if (parser.lookAhead(TokenType.EQUALS)) {
+      type = Expr.nothing();
+    } else {
+      type = Expr.fn(parser.parseTypeExpression());
+    }
     
     if (parser.match(TokenType.EQUALS)) {
-      // TODO(bob): Having to declare a type when we have an initializer is
-      // lame. It should be able to infer it. The reason it can't right now is
-      // because the mirroring getters and setters declared with the field need
-      // type annotations, but that should be solvable by just storing the
-      // initializer with them too so they can evaluate its type to get their
-      // type.
-      
       // Defining it.
       Expr initializer = parser.parseBlock();
       return Expr.message(theClass, Identifiers.DEFINE_FIELD,
-          Expr.tuple(Expr.string(name), Expr.bool(isDelegate), Expr.fn(type),
+          Expr.tuple(Expr.string(name), Expr.bool(isDelegate), type,
               Expr.fn(initializer)));
     } else {
       // Just declaring it.
       return Expr.message(theClass, Identifiers.DECLARE_FIELD,
-          Expr.tuple(Expr.string(name), Expr.bool(isDelegate), Expr.fn(type)));
+          Expr.tuple(Expr.string(name), Expr.bool(isDelegate), type));
     }
   }
   

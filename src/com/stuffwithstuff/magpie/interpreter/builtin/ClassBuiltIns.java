@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
 import com.stuffwithstuff.magpie.Identifiers;
+import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.Field;
@@ -40,20 +41,35 @@ public class ClassBuiltIns {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();
       boolean isDelegate = arg.getTupleField(1).asBool();
-      FnObj type = arg.getTupleField(2).asFn();
+      Obj optionalType = arg.getTupleField(2);
       FnObj initializer = arg.getTupleField(3).asFn();
       
+      // Define the field itself.
       ClassObj classObj = (ClassObj)thisObj;
       classObj.getFieldDefinitions().put(name,
           new Field(true, isDelegate, initializer.getFunction()));
   
+      // Determine if the field is implicitly typed (we have an initializer but
+      // no type annotation) or explicitly.
+      Expr expr;
+      boolean isInitializer;
+      if (optionalType == interpreter.nothing()) {
+        // No type annotation, so use the initializer.
+        expr = initializer.getFunction().getFunction().getBody();
+        isInitializer = true;
+      } else {
+        // Have a type annotation.
+        expr = optionalType.asFn().getFunction().getFunction().getBody();
+        isInitializer = false;
+      }
+      
       // Add a getter.
-      classObj.getMembers().defineGetter(name, new FieldGetter(name,
-          type.getFunction().getFunction().getBody()));
+      classObj.getMembers().defineGetter(name,
+          new FieldGetter(name, expr, isInitializer));
       
       // Add a setter.
       classObj.getMembers().defineSetter(name,
-          new FieldSetter(name, type.getFunction().getFunction().getBody()));
+          new FieldSetter(name, expr, isInitializer));
   
       return interpreter.nothing();
     }
