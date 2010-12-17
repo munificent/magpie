@@ -152,7 +152,7 @@ class ArrayIterator
     end
 
     var array Array
-    var index Int   = -1
+    var index = -1
 end
 
 class ArrayIteratorType

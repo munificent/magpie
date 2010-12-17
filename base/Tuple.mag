@@ -96,5 +96,5 @@ class TupleIterator
     end
     
     var tuple Tuple
-    var index Int   = -1 // the first call to next advances to the first
+    var index = -1 // the first call to next advances to the first
 end
