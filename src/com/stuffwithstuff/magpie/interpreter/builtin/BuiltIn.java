@@ -31,7 +31,7 @@ public class BuiltIn implements Callable {
     if (mFnType != null) {
       return interpreter.evaluateFunctionType(mFnType, null);
     } else {
-      return interpreter.evaluate(mType, interpreter.createTopLevelContext());
+      return interpreter.evaluate(mType);
     }
   }
 

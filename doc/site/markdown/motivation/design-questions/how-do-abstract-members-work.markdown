@@ -112,6 +112,10 @@ Even if we don't forget to give it a parent object, there's an equivalent proble
 
 Ideas to resolve this:
 
+#### Don't allow abstract delegates
+
+The simplest and harshest solution. Just don't allow abstract methods in delegates. In practice, I don't think this will work well. I've got lots of examples in Amaranth and other code of classes with both state and abstract members.
+
 #### Define two types for an abstract class
 
 Given an abstract class like `ContentBase`, there will be *two* types: `ContentBase` and `AbstractContentBase`. The first is the "normal" type and can be used like you'd expect. The only objects that will have this type are places where the abstract members have been correctly implemented by a delegating parent object. So, in the above example, `WidgetContent` is a subtype of `ContentBase` because it has a delegate field of that class.
@@ -124,7 +128,78 @@ When a class has a delegate field (with abstract members), its `construct` metho
 
 In other words, an instance of an abstract class has a special not-very-useful `AbstractFoo` type. But a class that has a delegate field of that class is correctly a subtype of the full-featured `Foo` type.
 
-#### Don't allow abstract delegates
+#### Make the type useless
 
-The simplest and harshest solution. Just don't allow abstract methods in delegates. In practice, I don't think this will work well. I've got lots of examples in Amaranth and other code of classes with both state and abstract members.
+This is a refinement of the previous idea. Instead of defining two types, just
+have one. But that type will be the equivalent of the `Abstract__` up there: it
+will have no members. It's assignable to itself, but aside from that, there 
+isn't anything useful you can do with it. That just gives you enough to get it
+into a delegate field for class that's using it, which is all you need.
+
+This implies that abstract classes do not define any usable type. They provide
+stateful behavior that can be mixed into another class, but don't define a type
+that describes all classes that do that. For example:
+
+    :::magpie
+    class Named
+        def sayName(->) print("Hi, I'm " + name + (if excited? then "!" else "."))
+        get excited? Bool // abstract
+        var name String
+    end
+
+    class Dave
+        get excited? Bool = true
+        delegate var name Named
+    end
+
+Given these, you can create a new `Dave` like this:
+
+    :::magpie
+    var dave = Dave new(name: Named new(name: "Dave"))
+
+What you can't do is define functions that act on the `Named` interface alone:
+
+    :::magpie
+    def sayTwice(named Named ->)
+        named sayName()
+        named sayName()
+    end
+
+The problem is that the `Named` type has no members, not even `sayName`. That
+ensures that you don't try to use a standalone instance of an abstract class,
+but also prevents the above.
+
+This seems like enough of a limitation that it probably isn't worth pursuing.
+
+#### Implicitly construct delegate fields
+
+Consider the above example:
+
+    :::magpie
+    var dave = Dave new(name: Named new(name: "Dave"))
+
+The key bit here, and the cause of our problems, is that we're passing in an
+instance of `Named` to that constructor. But we can't safely create one of those
+outside of the context of a parent class. So maybe the solution is to not do
+that. Instead, the containing class's `construct` function will have the magic
+required to promote a *record* for the delegate field to the real deal. The
+above would become:
+
+    :::magpie
+    var dave = Dave new(name: (name: "Dave"))
+
+And then, internally, it will take that `name: "Dave"` record and promote it to
+the delegate field's type.
+
+This neatly solves the problem of dangling delegates. Abstract classes simply
+won't have constructors and cannot be created on their own. They can still be
+used as types. We'll just have to modify the class subtyping rules to allow a
+class A to be assignable to class B if A has a delegate field of type B.
+
+#### Don't worry about it
+
+Remember, Magpie is optionally typed. It isn't perfectly sound. Maybe the
+simplest solution is to not worry about it. You can instantiate an abstract
+class just fine. If you try to use it, it'll do weird (but defined!) things when
+it tries to call abstract members. Don't sweat it.
 

@@ -51,7 +51,7 @@ public class Magpie {
         
         Expr expr = parser.parseExpression();
         
-        String result = interpreter.evaluate(expr);
+        String result = interpreter.evaluateToString(expr);
         if (result != null) {
           System.out.print(":: ");
           System.out.println(result);

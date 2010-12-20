@@ -133,9 +133,12 @@ public class Interpreter {
     }
   }
 
-  public String evaluate(Expr expr) {
-    EvalContext context = createTopLevelContext();
-    Obj result = evaluate(expr, context);
+  public Obj evaluate(Expr expr) {
+    return evaluate(expr, createTopLevelContext());
+  }
+
+  public String evaluateToString(Expr expr) {
+    Obj result = evaluate(expr);
     
     // A null string means "nothing to output".
     if (result == mNothing) return null;

@@ -28,7 +28,7 @@ public abstract class FieldProperty implements Callable {
       Checker checker = new Checker(interpreter);
       return checker.evaluateExpressionType(mExpr);
     } else {
-      return interpreter.evaluate(mExpr, interpreter.createTopLevelContext());
+      return interpreter.evaluate(mExpr);
     }
   }
   

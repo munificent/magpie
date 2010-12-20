@@ -42,7 +42,7 @@ public class Member {
         (mDefinition instanceof Function)) {
       Function function = (Function)mDefinition;
       Expr type = function.getFunction().getType().getReturnType();
-      return interpreter.evaluate(type, interpreter.createTopLevelContext());
+      return interpreter.evaluate(type);
     }
 
     Obj type = mDefinition.getType(interpreter);
