@@ -32,7 +32,7 @@ specify("The default 'new' shared method on a class") with
             var a Int
             var b String
         end
-        var foo = Foo new(a: 123 b: "text")
+        var foo = Foo new(a: 123, b: "text")
         foo a shouldBe(123)
         foo b shouldBe("text")
     end

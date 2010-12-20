@@ -9,7 +9,7 @@ end
 class RangeIterator
     shared def new(first Int, last Int -> RangeIterator)
         // rollback so the first call to next advances to the first
-        construct(current: first - 1 last: last)
+        construct(current: first - 1, last: last)
     end
 
     def next(-> Bool)
@@ -23,7 +23,7 @@ end
 
 class Range    
     shared def new(start Int, last Int -> Range)
-        construct(start: start last: last)
+        construct(start: start, last: last)
     end
     
     def iterate(-> RangeIterator) RangeIterator new(start, last)

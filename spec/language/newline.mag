@@ -15,9 +15,9 @@ specify("A newline") with
         i _1 shouldBe(2)
     end
 
-    it should("be ignored after a colon") with
+    it should("be ignored after a field") with
         var a = x:
-            1 y: 2
+            1, y: 2
         a x shouldBe(1)
         a y shouldBe(2)
     end

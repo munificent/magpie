@@ -8,13 +8,13 @@ public enum TokenType {
   RIGHT_BRACKET,
   LEFT_BRACE,
   RIGHT_BRACE,
-  COLON,
   COMMA,
   DOT,
   EQUALS,
   
   // identifiers
   NAME,
+  FIELD, // a record field like "x:"
   OPERATOR,
 
   // literals

@@ -1,6 +1,6 @@
 specify("The 'type' getter on Record") with
     it should("return a record whose fields are the types of the fields") with
-        var t = (x: 1 y: "s") type
+        var t = (x: 1, y: "s") type
         t x shouldBe(Int)
         t y shouldBe(String)
     end

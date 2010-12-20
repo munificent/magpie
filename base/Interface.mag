@@ -11,11 +11,11 @@ class Interface
     get string String = name
 
     def declareMethod(name String, type Nothing => Type ->)
-        members add(Member new(name: name memberType: type))
+        members add(Member new(name: name, memberType: type))
     end
     
     def declareGetter(name String, type Nothing => Type ->)
-        members add(Member new(name: name memberType: type))
+        members add(Member new(name: name, memberType: type))
     end
 
     def assignsFrom?(other Type -> Bool)

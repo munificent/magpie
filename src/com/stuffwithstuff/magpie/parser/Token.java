@@ -38,13 +38,13 @@ public final class Token {
       case RIGHT_BRACKET: return "]";
       case LEFT_BRACE: return "{";
       case RIGHT_BRACE: return "}";
-      case COLON: return ":";
       case COMMA: return ",";
       case DOT: return ".";
       case EQUALS: return "=";
       case LINE: return "(line)";
 
       case NAME: return getString() + " (name)";
+      case FIELD: return getString() + ":";
       case OPERATOR: return getString() + " (op)";
 
       case BOOL: return Boolean.toString(getBool());

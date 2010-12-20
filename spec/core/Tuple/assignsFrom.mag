@@ -18,7 +18,7 @@ specify("The 'assignsFrom?' method on Tuple") with
     end
         
     it should("allow a tuple-like type") with
-        (Bool, Int) assignsFrom?(_0: Bool _1: Int) shouldBe(true)
+        (Bool, Int) assignsFrom?(_0: Bool, _1: Int) shouldBe(true)
     end
     
     // TODO(bob): Check for field subtypes

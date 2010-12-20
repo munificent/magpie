@@ -278,7 +278,7 @@ public class MagpieParser extends Parser {
   }
   
   private Expr assignment() {
-    Expr expr = tuple();
+    Expr expr = composite();
     
     if (match(TokenType.EQUALS)) {
       // Parse the value being assigned.
@@ -314,15 +314,30 @@ public class MagpieParser extends Parser {
   }
 
   /**
-   * Parses a tuple expression like "a, b, c".
+   * Parses a composite literal: a tuple ("a, b") or a record ("x: 1, y: 2").
    */
-  private Expr tuple() {
-    List<Expr> fields = parseCommaList();
-        
-    // Only wrap in a tuple if there are multiple fields.
-    if (fields.size() == 1) return fields.get(0);
-    
-    return new TupleExpr(fields);
+  private Expr composite() {
+    if (lookAhead(TokenType.FIELD)) {
+      Position position = current().getPosition();
+      List<Pair<String, Expr>> fields = new ArrayList<Pair<String, Expr>>();
+      do {
+        String name = consume(TokenType.FIELD).getString();
+        Expr value = conjunction();
+        fields.add(new Pair<String, Expr>(name, value));
+      } while (match(TokenType.COMMA));
+      
+      return new RecordExpr(position, fields);
+    } else {
+      List<Expr> fields = new ArrayList<Expr>();
+      do {
+        fields.add(conjunction());
+      } while (match(TokenType.COMMA));
+      
+      // Only wrap in a tuple if there are multiple fields.
+      if (fields.size() == 1) return fields.get(0);
+      
+      return new TupleExpr(fields);
+    }
   }
   
   /**
@@ -373,11 +388,7 @@ public class MagpieParser extends Parser {
     Expr message = primary();
     
     while (true) {
-      if (lookAhead(TokenType.NAME, TokenType.COLON)) {
-        // Do nothing. This ensures we don't consume a name and think it's a
-        // message when it's really a field name in a record.
-        break;
-      } else if (match(TokenType.NAME)) {
+      if (match(TokenType.NAME)) {
         message = new MessageExpr(last(1).getPosition(), message,
             last(1).getString());
       } else if (match(TokenType.LEFT_BRACKET)) {
@@ -465,8 +476,6 @@ public class MagpieParser extends Parser {
       consume(TokenType.RIGHT_BRACE);
       position = position.union(last(1).getPosition());
       return new ExpressionExpr(position, expr);
-    } else if (lookAhead(TokenType.NAME, TokenType.COLON)) {
-      return parseRecord();
     }
     
     // See if we're at a keyword we know how to parse.
@@ -477,31 +486,6 @@ public class MagpieParser extends Parser {
     
     // Otherwise fail.
     return null;
-  }
-  
-  /**
-   * Parses a record like "x: 1 y: 2"
-   */
-  private Expr parseRecord() {
-    Position position = current().getPosition();
-    List<Pair<String, Expr>> fields = new ArrayList<Pair<String, Expr>>();
-    while (match(TokenType.NAME, TokenType.COLON)) {
-      String name = last(2).getString();
-      Expr value = parseExpression();
-      fields.add(new Pair<String, Expr>(name, value));
-    }
-    
-    return new RecordExpr(position, fields);
-  }
-  
-  private List<Expr> parseCommaList() {
-    List<Expr> exprs = new ArrayList<Expr>();
-    
-    do {
-      exprs.add(conjunction());
-    } while (match(TokenType.COMMA));
-    
-    return exprs;
   }
 
   private Expr addTupleField(Expr expr, Expr field) {

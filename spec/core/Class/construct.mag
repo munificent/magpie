@@ -18,7 +18,7 @@ specify("The 'construct' shared method on a class") with
             var a Int
             var b String
         end
-        var foo = Foo construct(a: 123 b: "text")
+        var foo = Foo construct(a: 123, b: "text")
         foo a shouldBe(123)
         foo b shouldBe("text")
     end

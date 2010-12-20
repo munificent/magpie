@@ -3,7 +3,7 @@ specify("A record") with
         fn
             def takeInt(i Int) nothing
             def takeString(s String) nothing
-            var rec = int: 1 str: "two"
+            var rec = int: 1, str: "two"
             takeInt(rec int)
             takeString(rec str)
         end shouldCheck()
@@ -11,7 +11,7 @@ specify("A record") with
         fn
             def takeInt(i Int) nothing
             def takeString(s String) nothing
-            var rec = int: 1 str: "two"
+            var rec = int: 1, str: "two"
             takeInt(rec str)
             takeString(rec int)
         end shouldNotCheck()

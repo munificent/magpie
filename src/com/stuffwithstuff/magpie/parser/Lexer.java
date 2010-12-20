@@ -35,7 +35,7 @@ public class Lexer {
     case COMMA:
     case DOT:
     case OPERATOR:
-    case COLON:
+    case FIELD:
     case AND:
     case OR:
       mEatLines = true;
@@ -75,7 +75,6 @@ public class Lexer {
       if (match("}")) return characterToken(TokenType.RIGHT_BRACE);
       if (match(",")) return characterToken(TokenType.COMMA);
       if (match(".")) return characterToken(TokenType.DOT);
-      if (match(":")) return characterToken(TokenType.COLON);
 
       // Match line ending characters.
       if (match(";"))  return characterToken(TokenType.LINE);
@@ -109,6 +108,15 @@ public class Lexer {
       }
       if (lookAhead("/*")) {
         return createStringToken(TokenType.NAME);
+      }
+      if (c == ':') {
+        String text = mRead;
+
+        advance();
+        mState = LexState.DEFAULT;
+        
+        Position position = currentPosition();        
+        return new Token(position, TokenType.FIELD, text);
       }
       if (isAlpha(c) || isDigit(c) || isOperator(c)) {
         return advance();

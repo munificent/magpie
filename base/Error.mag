@@ -6,7 +6,7 @@ end
 
 class UnexpectedTypeError
     shared def new(expectedType Type, actualType Type -> UnexpectedTypeError)
-        construct(expectedType: expectedType actualType: actualType)
+        construct(expectedType: expectedType, actualType: actualType)
     end
     
     shared def throw(expectedType Type, actualType Type)
