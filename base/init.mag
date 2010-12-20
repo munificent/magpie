@@ -13,6 +13,8 @@ import("Object.mag")
 import("Stringable.mag")
 import("Trueable.mag")
 
+import("syntax/init.mag")
+
 interface Any
 end
 

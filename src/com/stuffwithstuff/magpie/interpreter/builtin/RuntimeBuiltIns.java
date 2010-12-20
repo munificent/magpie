@@ -40,8 +40,18 @@ public class RuntimeBuiltIns {
   }
   
   @Shared
-  // TODO(bob): Should be declared to return array of strings.
-  @Signature("checkClass(classObj Class)")
+  @Signature("checkAll(-> Array newType(String))")
+  public static class CheckAll implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      Checker checker = new Checker(interpreter);
+      
+      checker.checkAll();
+      return translateErrors(interpreter, checker.getErrors());
+    }
+  }
+  
+  @Shared
+  @Signature("checkClass(classObj Class-> Array newType(String))")
   public static class CheckClass implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       Checker checker = new Checker(interpreter);
@@ -53,8 +63,7 @@ public class RuntimeBuiltIns {
   }
 
   @Shared
-  // TODO(bob): Should be declared to return array of strings.
-  @Signature("checkFunction(function)")
+  @Signature("checkFunction(function -> Array newType(String))")
   public static class CheckFunction implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       Checker checker = new Checker(interpreter);
@@ -69,8 +78,7 @@ public class RuntimeBuiltIns {
   }
 
   @Shared
-  // TODO(bob): Should be declared to return array of strings.
-  @Signature("checkExpression(function)")
+  @Signature("checkExpression(function -> Array newType(String))")
   public static class CheckExpression implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       FnObj function = arg.asFn();

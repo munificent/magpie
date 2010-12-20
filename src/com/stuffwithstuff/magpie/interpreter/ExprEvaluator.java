@@ -116,8 +116,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(ExpressionExpr expr, EvalContext context) {
-    return mInterpreter.instantiate(mInterpreter.getExpressionClass(),
-        expr.getBody());
+    return ExprConverter.convert(mInterpreter, expr.getBody());
   }
   
   @Override

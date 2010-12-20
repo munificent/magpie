@@ -80,7 +80,6 @@ public class Interpreter {
     mArrayClass = createGlobalClass("Array");
     mBoolClass = createGlobalClass("Bool");
     mDynamicClass = createGlobalClass("Dynamic");
-    mExpressionClass = createGlobalClass("Expression");
     mFnClass = createGlobalClass("Function");
     mIntClass = createGlobalClass("Int");
     mRecordClass = createGlobalClass("Record");
@@ -109,7 +108,6 @@ public class Interpreter {
     BuiltIns.registerClass(ArrayBuiltIns.class, mArrayClass);
     BuiltIns.registerClass(BoolBuiltIns.class, mBoolClass);
     BuiltIns.registerClass(ClassBuiltIns.class, mClass);
-    BuiltIns.registerClass(ExpressionBuiltIns.class, mExpressionClass);
     BuiltIns.registerClass(FunctionBuiltIns.class, mFnClass);
     BuiltIns.registerClass(IntBuiltIns.class, mIntClass);
     BuiltIns.registerClass(ObjectBuiltIns.class, mObjectClass);
@@ -169,6 +167,10 @@ public class Interpreter {
         createTuple(paramType, returnType, createBool(type.isStatic())));
     
     return result;
+  }
+  
+  public Obj getGlobal(String name) {
+    return mGlobalScope.get(name);
   }
 
   public boolean hasMain() {
@@ -301,7 +303,6 @@ public class Interpreter {
   public ClassObj getArrayClass() { return mArrayClass; }
   public ClassObj getBoolClass() { return mBoolClass; }
   public ClassObj getDynamicClass() { return mDynamicClass; }
-  public ClassObj getExpressionClass() { return mExpressionClass; }
   public ClassObj getFunctionClass() { return mFnClass; }
   public ClassObj getIntClass() { return mIntClass; }
   public ClassObj getMetaclass() { return mClass; }
@@ -501,7 +502,6 @@ public class Interpreter {
   private final ClassObj mArrayClass;
   private final ClassObj mBoolClass;
   private final ClassObj mDynamicClass;
-  private final ClassObj mExpressionClass;
   private final ClassObj mFnClass;
   private final ClassObj mIntClass;
   private final ClassObj mNothingClass;

@@ -102,8 +102,10 @@ public class ClassObj extends Obj {
 
     tried.add(classObj);
     
-    // Try the mixins.
-    for (Obj mixin : classObj.mMixins) {
+    // Try the mixins. Look in reverse order so that the most-recently mixed-in
+    // class take priority over older mixins.
+    for (int i = classObj.mMixins.size() - 1; i >= 0; i--) {
+      ClassObj mixin = (ClassObj)classObj.mMixins.get(i);
       member = findMemberInMixins((ClassObj)mixin, name, tried);
       if (member != null) return member;
     }

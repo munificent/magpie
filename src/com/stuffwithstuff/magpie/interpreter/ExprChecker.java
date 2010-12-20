@@ -213,7 +213,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(ExpressionExpr expr, EvalContext context) {
-    return mInterpreter.getExpressionClass();
+    return mInterpreter.getGlobal(Identifiers.EXPRESSION);
   }
 
   @Override

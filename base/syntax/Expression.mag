@@ -1,0 +1,195 @@
+// An interface for an AST node.
+interface Expression
+    get string String
+end
+
+class AndExpression
+    shared def new(left Expression, right Expression -> OrExpression)
+        construct(left: left, right: right)
+    end
+        
+    get string String =
+        left string + " and " + right string
+    end
+    
+    var left  Expression
+    var right Expression
+end
+
+class ApplyExpression
+    shared def new(target Expression, argument Expression -> ApplyExpression)
+        construct(target: target, argument: argument)
+    end
+    
+    get string String =
+        target string + "(" + argument string + ")"
+    end
+    
+    var target Expression
+    var argument Expression
+end
+
+class AssignExpression
+    shared def new(receiver Expression | Nothing,
+                   name String,
+                   value Expression -> AssignExpression)
+        construct(receiver: receiver, name: name, value: value)
+    end
+        
+    get string String =
+        let receiver then
+            receiver string + " " + name + " = " + value string
+        else
+            name + " = " + value string
+        end
+    end
+    
+    var receiver Expression | Nothing
+    var name     String
+    var value    Expression
+end
+
+class BoolExpression
+    shared def new(value Bool -> BoolExpression) construct(value: value)
+    
+    get string String = value string
+
+    var value Bool
+end
+
+class BlockExpression
+    shared def new(expressions ArrayType new(Expression) -> BlockExpression)
+        construct(expressions: expressions)
+    end
+    
+    get string String =
+        var result = ""
+        for expression = expressions do
+            result = result + "\n" + expression string
+        end
+        result
+    end
+    
+    var expressions ArrayType new(Expression)
+end
+
+class BreakExpression
+    get string String = "break"
+end
+
+class ExpressionExpression
+    shared def new(body Expression -> ExpressionExpression)
+        construct(body: body)
+    end
+        
+    get string String =
+        "{ " + body string + " }"
+    end
+    
+    var body Expression
+end
+
+class IntExpression
+    shared def new(value Int -> IntExpression) construct(value: value)
+    
+    get string String = value string
+    
+    var value Int
+end
+
+class MessageExpression
+    shared def new(receiver Expression | Nothing,
+                   name String -> MessageExpression)
+        construct(receiver: receiver, name: name)
+    end
+        
+    get string String =
+        let receiver then receiver string + " " + name else name
+    end
+    
+    var receiver Expression | Nothing
+    var name     String
+end
+
+class NothingExpression
+    get string String = "nothing"
+end
+
+class OrExpression
+    shared def new(left Expression, right Expression -> OrExpression)
+        construct(left: left, right: right)
+    end
+        
+    get string String =
+        left string + " or " + right string
+    end
+    
+    var left  Expression
+    var right Expression
+end
+
+class ReturnExpression
+    shared def new(value Expression -> ReturnExpression)
+        construct(value: value)
+    end
+        
+    get string String =
+        "return " + value string
+    end
+    
+    var value Expression
+end
+
+class ScopeExpression
+    shared def new(body Expression -> ScopeExpression)
+        construct(body: body)
+    end
+        
+    get string String =
+        "do " + body string
+    end
+    
+    var body Expression
+end
+
+class StringExpression
+    shared def new(value String -> StringExpression) construct(value: value)
+    
+    get string String = "\"" + value string + "\""
+
+    var value String
+end
+
+class ThisExpression
+    get string String = "this"
+end
+
+class TupleExpression
+    shared def new(fields ArrayType new(Expression) -> TupleExpression)
+        construct(fields: fields)
+    end
+    
+    get string String =
+        var result = ""
+        for field = fields do
+            if result != "" then result = result + ", "
+            result = result + field string
+        end
+        result
+    end
+    
+    var fields ArrayType new(Expression)
+end
+
+class VariableExpression
+    shared def new(name String, value Expression -> VariableExpression)
+        construct(name: name, value: value)
+    end
+    
+    get string String =
+        "var " + name + " = " + value string
+    end
+
+    var name  String
+    var value Expression
+end

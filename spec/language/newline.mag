@@ -43,12 +43,12 @@ specify("A newline") with
     it should("be ignored after an open brace") with
         var e = {
             123 }
-        e string shouldBe("{ 123 }")
+        e string shouldBe("123")
     end
 end
 
 specify("A semicolon") with
-    it should("do work like a newline") with
+    it should("work like a newline") with
         1 shouldBe(1); 2 shouldBe(2)
     end
 end

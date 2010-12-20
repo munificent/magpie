@@ -35,7 +35,7 @@ specify("The 'mixins' getter on Class") with
         foo method() shouldBe("received")
     end
 
-    it should("dispatch according to the order classes appear in the list") with
+    it should("lookup methods in mixins from last to first") with
         class Foo
         end
         
@@ -52,12 +52,12 @@ specify("The 'mixins' getter on Class") with
         Foo mixins clear()
         Foo mixins add(Mixin1)
         Foo mixins add(Mixin2)
-        foo method() shouldBe("one")
+        foo method() shouldBe("two")
         
         Foo mixins clear()
         Foo mixins add(Mixin2)
         Foo mixins add(Mixin1)
-        foo method() shouldBe("two")
+        foo method() shouldBe("one")
     end
 
     it should("not allow mixing in a stateful class") with
