@@ -8,4 +8,16 @@ extend class String
     def >=(other -> Bool) compareTo(other string) >= 0
 
     def +(other  -> String) concatenate(other string)
+
+    // TODO(bob): Should just take Iterable[Stringable]
+    shared def join(elements ArrayType new(Stringable),
+                    separator String | Nothing -> String)
+        var knownSeparator = let separator then separator else ", "
+        var result = ""
+        for element = elements do
+            if result != "" then result = result + knownSeparator
+            result = result + element
+        end
+        result
+    end
 end

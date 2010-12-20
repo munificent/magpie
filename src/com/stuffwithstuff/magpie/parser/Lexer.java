@@ -37,6 +37,7 @@ public class Lexer {
     case OPERATOR:
     case FIELD:
     case AND:
+    case ARROW:
     case OR:
       mEatLines = true;
       return token;

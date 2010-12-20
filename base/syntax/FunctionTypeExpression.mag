@@ -1,0 +1,34 @@
+class FunctionTypeExpression
+    shared def new(names      ArrayType new(String),
+                   paramType  Expression,
+                   returnType Expression,
+                   static?    Bool -> FunctionTypeExpression)
+        construct(names: names, paramType: paramType, returnType: returnType,
+                  static?: static?)
+    end
+    
+    get string String =
+        var params = paramType as[TupleExpr]
+
+        var result = if static? then "[" else "("
+        for i = 0 until(names count)
+        for name = names do
+            result = result + name + " "
+            let params then
+                result = result + params fields(i)
+            else
+                result = result + paramType
+            end
+            
+            if i < (names count - 1) then result = result + ", "
+        end
+        
+        result = result + " -> " + returnType
+        result + if static? then "]" else ")"
+    end
+    
+    var names      ArrayType new(String)
+    var paramType  Expression
+    var returnType Expression
+    var static?    Bool
+end

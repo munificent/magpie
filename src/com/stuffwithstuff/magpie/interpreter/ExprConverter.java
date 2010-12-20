@@ -31,13 +31,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   
   @Override
   public Obj visit(AssignExpr expr, Void dummy) {
-    Obj receiver;
-    if (expr.getReceiver() != null) {
-      receiver = convert(expr.getReceiver());
-    } else {
-      receiver = mInterpreter.nothing();
-    }
-    
+    Obj receiver = convert(expr.getReceiver());
     Obj value = convert(expr.getValue());
     return construct("Assign",
         receiver, mInterpreter.createString(expr.getName()), value);
@@ -71,14 +65,27 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
 
   @Override
   public Obj visit(FnExpr expr, Void dummy) {
-    // TODO Auto-generated method stub
-    return null;
+    Obj paramType = convert(expr.getType().getParamType());
+    Obj returnType = convert(expr.getType().getReturnType());
+    List<Obj> paramNames = new ArrayList<Obj>();
+    for (String name : expr.getType().getParamNames()) {
+      paramNames.add(mInterpreter.createString(name));
+    }
+    Obj type = construct("FunctionType", mInterpreter.createArray(paramNames),
+        paramType, returnType,
+        mInterpreter.createBool(expr.getType().isStatic()));
+    Obj body = convert(expr.getBody());
+    return construct("Function", type, body);
   }
 
   @Override
   public Obj visit(IfExpr expr, Void dummy) {
-    // TODO Auto-generated method stub
-    return null;
+    Obj name = (expr.getName() != null) ?
+        mInterpreter.createString(expr.getName()) : mInterpreter.nothing();
+    Obj condition = convert(expr.getCondition());
+    Obj thenArm = convert(expr.getThen());
+    Obj elseArm = convert(expr.getElse());
+    return construct("If", name, condition, thenArm, elseArm);
   }
 
   @Override
@@ -88,19 +95,18 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
 
   @Override
   public Obj visit(LoopExpr expr, Void dummy) {
-    // TODO Auto-generated method stub
-    return null;
+    List<Obj> conditions = new ArrayList<Obj>();
+    for (Expr condition : expr.getConditions()) {
+      conditions.add(convert(condition));
+    }
+    Obj body = convert(expr.getBody());
+    
+    return construct("Loop", mInterpreter.createArray(conditions), body);
   }
 
   @Override
   public Obj visit(MessageExpr expr, Void dummy) {
-    Obj receiver;
-    if (expr.getReceiver() != null) {
-      receiver = convert(expr.getReceiver());
-    } else {
-      receiver = mInterpreter.nothing();
-    }
-    
+    Obj receiver = convert(expr.getReceiver());
     return construct("Message", receiver,
         mInterpreter.createString(expr.getName()));
   }
@@ -156,14 +162,15 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
 
   @Override
   public Obj visit(TypeofExpr expr, Void dummy) {
-    // TODO Auto-generated method stub
-    return null;
+    return construct("Typeof", convert(expr.getBody()));
   }
 
   @Override
   public Obj visit(UnsafeCastExpr expr, Void dummy) {
-    // TODO Auto-generated method stub
-    return null;
+    Obj type = convert(expr.getType());
+    Obj value = convert(expr.getValue());
+    
+    return construct("UnsafeCast", type, value);
   }
 
   @Override
@@ -177,6 +184,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   }
   
   private Obj convert(Expr expr) {
+    if (expr == null) return mInterpreter.nothing();
     return expr.accept(this, null);
   }
   

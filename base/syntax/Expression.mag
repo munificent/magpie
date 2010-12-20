@@ -62,13 +62,7 @@ class BlockExpression
         construct(expressions: expressions)
     end
     
-    get string String =
-        var result = ""
-        for expression = expressions do
-            result = result + "\n" + expression string
-        end
-        result
-    end
+    get string String = String join(expressions, "\n")
     
     var expressions ArrayType new(Expression)
 end
@@ -89,12 +83,74 @@ class ExpressionExpression
     var body Expression
 end
 
+class FunctionExpression
+    shared def new(type FunctionTypeExpression, body Expression ->
+                   FunctionExpression)
+        construct(type: type, body: body)
+    end
+        
+    get string String = "fn " + type + " " + body
+    
+    var type FunctionTypeExpression
+    var body Expression
+end
+
+class IfExpression
+    shared def new(name String | Nothing,
+                   condition Expression,
+                   thenArm Expression,
+                   elseArm Expression -> IfExpression)
+        construct(name: name, condition: condition,
+                  thenArm: thenArm, elseArm: elseArm)
+    end
+    
+    get let? Bool = name != nothing
+    
+    get string String =
+        if let? then
+            "let " + name + " "
+        else
+            "if "
+        end + condition + " then " + thenArm + " else " + elseArm
+    end
+    
+    var name String | Nothing
+    var condition Expression
+    var thenArm   Expression
+    var elseArm   Expression
+end
+
 class IntExpression
     shared def new(value Int -> IntExpression) construct(value: value)
     
     get string String = value string
     
     var value Int
+end
+
+class LoopExpression
+    shared def new(conditions ArrayType new(Expression), body Expression ->
+                   LoopExpression)
+        construct(conditions: conditions, body: body)
+    end
+    
+    get string String =
+        var result = ""
+        for i = 0 until(conditions count)
+        for condition = conditions do
+            result = result + "while " + condition
+      
+            if i < (conditions count - 1) then
+                result = result + "\n"
+            else
+                result = result + " do\n"
+            end
+        end
+        result + body
+    end
+    
+    var conditions ArrayType new(Expression)
+    var body       Expression
 end
 
 class MessageExpression
@@ -133,9 +189,7 @@ class ReturnExpression
         construct(value: value)
     end
         
-    get string String =
-        "return " + value string
-    end
+    get string String = "return " + value
     
     var value Expression
 end
@@ -145,9 +199,7 @@ class ScopeExpression
         construct(body: body)
     end
         
-    get string String =
-        "do " + body string
-    end
+    get string String = "do " + body
     
     var body Expression
 end
@@ -155,7 +207,7 @@ end
 class StringExpression
     shared def new(value String -> StringExpression) construct(value: value)
     
-    get string String = "\"" + value string + "\""
+    get string String = "\"" + value + "\""
 
     var value String
 end
@@ -169,16 +221,30 @@ class TupleExpression
         construct(fields: fields)
     end
     
-    get string String =
-        var result = ""
-        for field = fields do
-            if result != "" then result = result + ", "
-            result = result + field string
-        end
-        result
-    end
+    get string String = String join(fields)
     
     var fields ArrayType new(Expression)
+end
+
+class TypeofExpression
+    shared def new(body Expression -> TypeofExpression)
+        construct(body: body)
+    end
+        
+    get string String = "typeof " + body
+    
+    var body Expression
+end
+
+class UnsafeCastExpression
+    shared def new(type Expression, value Expression -> UnsafeCastExpression)
+        construct(type: type, value: value)
+    end
+        
+    get string String = "unsafecast[" + type + "](" + value + ")"
+    
+    var type  Expression
+    var value Expression
 end
 
 class VariableExpression
