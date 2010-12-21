@@ -1,7 +1,7 @@
 ^title Welcome
 ^index 1
 
-Thanks for coming. Let's get started. Magpie is an object-oriented programming language for the [JVM](http://en.wikipedia.org/wiki/Java_Virtual_Machine) that combines the safety of dynamic typing with the flexibility of static typing. Maybe I have that backwards.
+Thanks for coming. Let's get started. Magpie is fledgling programming language. If you like buzzwords, it is [object-oriented](http://en.wikipedia.org/wiki/Object-oriented_programming), [optionally-typed](http://lambda-the-ultimate.org/node/1311), and runs on the [JVM](http://en.wikipedia.org/wiki/Java_Virtual_Machine).
 
 It looks a bit like this:
 
@@ -14,6 +14,12 @@ It looks a bit like this:
     end
 
     print(dragon(5))
+
+The goal is to combine the flexibility and expressiveness of a dynamic language
+with the safety and maintainability of a static one. My hope is that its
+dynamic side will make it easy to start little scripts and small programs, and
+that its static checking and other features will allow those to grow into bigger
+reliable software.
 
 ### Why Another Language?
 
@@ -107,22 +113,32 @@ I'd love to have you involved.
 
 It should be pretty easy to get it up and running. You'll need to:
 
-1. **Pull down the code.** It lives here: <tt><a href="http://bitbucket.org/munificent/magpie">http://bitbucket.org/munificent/magpie</a></tt>
+1. **Pull down the code.** It lives here: <tt><a href="https://github.com/munificent/magpie">https://github.com/munificent/magpie</a></tt>
 
-2. **Build it.** Right now I just have the Eclipse project in there. Hopefully 
-   sometime soon I'll have a less IDE-centric build process. Let me know if you
-   have opinions about this.
-   
-3. **Run it.** Magpie is a command line app. If you run it with no arguments,
-   it drops you into a primitive [REPL](http://en.wikipedia.org/wiki/REPL).
-   Enter a Magpie expression and it will immediately evaluate it. Since
-   everything is an expression, even things like class definitions, you can
-   build entire programs incrementally this way. Here's one to get you started:
-   
+2. **Build it.** The repo includes an Eclipse project if that's your thing. If
+   you rock the command-line, you can just do:
+
+        $ cd magpie
+        $ ant
+        $ ./jar_build.sh
+
+3. **Run it.** Magpie is a command line app. After building the jar, you can
+   run it by doing:
+
+        $ ./magpie
+
+   If you run it with no arguments, it drops you into a primitive
+   [REPL](http://en.wikipedia.org/wiki/REPL). Enter a Magpie expression and it
+   will immediately evaluate it. Since everything is an expression, even things
+   like class definitions, you can build entire programs incrementally this way.
+   Here's one to get you started:
+
         for i = 1 to(20) do print("<your name> is awesome!")
-   
-   If you pass an argument to the app, it will assume it's a path to a script 
-   file and it will load and execute it.
+
+   If you pass an argument to the app, it will assume it's a path to a script
+   file and it will load and execute it:
+
+        $ ./magpie script/Hello.mag
 
 ### Where to Go From Here
 
@@ -133,7 +149,7 @@ To get a sense of the language itself, take a look at some [sample scripts](http
 
 If you have questions or comments, I've created a mailing list
 [here](http://groups.google.com/group/magpie-lang), or you can file issues or
-send me a message on bitbucket. You can also email me directly using my name
+send me a message on github. You can also email me directly using my name
 (<tt>Bob</tt>) at my personal domain, <tt>stuffwithstuff.com</tt>.
 
 Cheers, and have fun playing with it!

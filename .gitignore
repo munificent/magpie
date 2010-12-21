@@ -1,2 +1,5 @@
 # Ignore output files
 bin/
+magpie.jar
+doc/site/html/
+doc/site/magpie/magpie/__init__.pyc
