@@ -1,0 +1,23 @@
+specify("An expression literal") with
+    it should("return a BoolExpression when containing a boolean literal") with
+        { true } type shouldBe(BoolExpression)
+        { true } value shouldBe(true)
+        { false } value shouldBe(false)
+    end
+    
+    it should("return a IntExpression when containing an int literal") with
+        { 1 } type shouldBe(IntExpression)
+        { 2 } value shouldBe(2)
+        { 3 } value shouldBe(3)
+    end
+
+    it should("return a NothingExpression when containing nothing") with
+        { nothing } type shouldBe(NothingExpression)
+    end
+
+    it should("return a StringExpression when containing a string literal") with
+        { "a" } type shouldBe(StringExpression)
+        { "b" } value shouldBe("b")
+        { "c" } value shouldBe("c")
+    end
+end

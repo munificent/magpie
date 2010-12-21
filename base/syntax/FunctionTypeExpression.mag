@@ -8,7 +8,7 @@ class FunctionTypeExpression
     end
     
     get string String =
-        var params = paramType as[TupleExpr]
+        var params = paramType as[TupleExpression]
 
         var result = if static? then "[" else "("
         for i = 0 until(names count)
