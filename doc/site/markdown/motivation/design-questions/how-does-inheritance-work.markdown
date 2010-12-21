@@ -1,4 +1,4 @@
-How Does Inheritance Work?
+^title How Does Inheritance Work?
 
 Inheritance can be a nice feature, but it adds a *lot* of complexity to the language. In particular, all of these have to be addressed:
 
@@ -65,7 +65,7 @@ This is the trickier question. If we pass a method on to a delegate, what is `th
         def method() print(name)
         var name = "Foo"
     end
-    
+
     class Bar
         delegate var foo = Foo new()
         var name = "Bar"
@@ -89,11 +89,11 @@ One way we could possible address that issue is by having the delegating object 
         def method(receiver Bar) print(receiver name)
         var name = "Foo"
     end
-    
+
     class Bar
         var foo = Foo new()
         var name = "Bar"
-        
+
         def method()
             // Explicitly forward.
             foo method(this)
@@ -111,7 +111,7 @@ work:
         def method(receiver Bar) print(receiver name)
         var name = "Foo"
     end
-    
+
     class Bar
         delegate var foo = Foo new()
         var name = "Bar"
@@ -136,12 +136,12 @@ For this to work as expected, `m` here needs to be a reference to Foo's `method`
             print(receiver name + " greets " + name)
         end
     end
-    
+
     class Bar
         var name = "Bar"
         delegate var foo = Foo new()
     end
-    
+
     var bar = Bar new()
     bar greet("Bob") // prints "Bar greets Bob"
 

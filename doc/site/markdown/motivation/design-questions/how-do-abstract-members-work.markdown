@@ -1,4 +1,4 @@
-Q: How Do We Handle Abstract Methods?
+^title How Do We Handle Abstract Methods?
 
 ### Use Cases
 
@@ -9,7 +9,7 @@ those in terms of `iterate()`, which it does *not* define. In the context of the
 mixin, `iterate()` is an abstract member.
 
 2.  "Base class"-style delegate fields. For example, Amaranth has a class like this:
-    
+
         :::csharp
         abstract class ContentBase
         {
@@ -22,7 +22,7 @@ mixin, `iterate()` is an abstract member.
                 this.content = content;
             }
         }
-    
+
     In Magpie, this would be a delegate field since it has state, but we need
     to be able to support that abstract "Name" property.
 
@@ -40,7 +40,7 @@ mixin, `iterate()` is an abstract member.
     that wasn't given a concrete implementation. If there's a member they need
     to implement, it should tell them this at check time.
 
-3.  You should be able to "forward" abstract members. For example, class A may 
+3.  You should be able to "forward" abstract members. For example, class A may
     define an abstract member `foo`. Class B mixes in A but is also intended to
     be used as a mixin. It should be able to declare an abstract member `foo`
     that passes the buck onto the class that mixins *it* in.
@@ -68,7 +68,7 @@ Now we come to the challenge. Lets say we wanted to implement the ContentBase us
         def shared new(content Content -> ContentBase)
             construct(content: content)
         end
-        
+
         get name String
 
         var content Content
@@ -81,7 +81,7 @@ A class using it would be something like:
         def shared new(content ContentBase)
             construct(content: content)
         end
-        
+
         delegate var content ContentBase
     end
 
@@ -132,7 +132,7 @@ In other words, an instance of an abstract class has a special not-very-useful `
 
 This is a refinement of the previous idea. Instead of defining two types, just
 have one. But that type will be the equivalent of the `Abstract__` up there: it
-will have no members. It's assignable to itself, but aside from that, there 
+will have no members. It's assignable to itself, but aside from that, there
 isn't anything useful you can do with it. That just gives you enough to get it
 into a delegate field for class that's using it, which is all you need.
 
