@@ -57,3 +57,17 @@ specify("An apply expression on a non-function") with
         c arg shouldBe("arg")
     end
 end
+
+specify("A static apply expression on a non-function") with    
+    it should("send a 'call' message") with
+        var c = TestCallable new("result")
+        c[] shouldBe("result")
+        c called shouldBe(true)
+    end
+
+    it should("pass the argument to 'call'") with
+        var c = TestCallable new()
+        c["arg"]
+        c arg shouldBe("arg")
+    end
+end

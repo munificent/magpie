@@ -3,6 +3,18 @@ specify("A function") with
         (fn(-> Int) 123) shouldCheck()        
         (fn(-> Int) "string") shouldNotCheck()
     end
+
+    it should("know the types of variables in its closure") with
+        fn
+            var s = "string"
+            fn(-> String) s
+        end shouldCheck()
+
+        fn
+            var s = "string"
+            fn(-> Int) s
+        end shouldNotCheck()
+    end
 end
 
 specify("A static function") with

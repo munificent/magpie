@@ -109,7 +109,12 @@ public class Checker {
     // Nothing to check if it's built-in.
     if (function == null) return;
     
-    checkFunction(function.getFunction(), function.getClosure(),
+    // Create a new local scope for the function.
+    // TODO(bob): Walking the entire closure and getting its type could be
+    // painfully slow here.
+    Scope closureTypes = typeScope(function.getClosure());
+
+    checkFunction(function.getFunction(), closureTypes,
         thisType, staticContext);
   }
   
@@ -117,7 +122,8 @@ public class Checker {
    * Type-checks the given function.
    * 
    * @param function  The function to type-check.
-   * @param closure   The lexical scope where the function was defined.
+   * @param closure   The lexical scope where the function was defined. Note
+   *                  that this should be a type scope, not a value scope.
    * @param thisType  The type of "this" within the function. In other words,
    *                  the class that this a method on.
    * @return          The evaluated type of the function.
@@ -125,13 +131,9 @@ public class Checker {
   public Obj checkFunction(FnExpr function, Scope closure, Obj thisType,
       EvalContext staticContext) {
     
-    // Create a new local scope for the function.
-    // TODO(bob): Walking the entire closure and getting its type could be
-    // painfully slow here.
-    Scope closureTypes = typeScope(closure);
     EvalContext functionContext = new EvalContext(
-        closureTypes, thisType).pushScope();
-    
+        closure, thisType).pushScope();
+
     // Evaluate the function's type annotations in the static value scope.
     Obj paramType = mInterpreter.evaluate(function.getType().getParamType(),
         staticContext);

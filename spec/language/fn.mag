@@ -23,6 +23,13 @@ specify("A 'fn' expression") with
     it should("allow omitting the parameter declaration") with
         (fn "return")() shouldBe("return")
     end
+    
+    it should("close over surrounding variables") with
+        var outer = "outer"
+        var assigned = ""
+        (fn assigned = outer)()
+        assigned shouldBe("outer")
+    end
 end
 
 specify("A static 'fn' expression") with
