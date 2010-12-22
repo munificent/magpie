@@ -1,4 +1,10 @@
 specify("An expression literal") with
+    it should("return a AndExpression when containing an 'and' expression") with
+        { 1 and 2 } type shouldBe(AndExpression)
+        { 1 and 2 } left string shouldBe("1")
+        { 1 and 2 } right string shouldBe("2")
+    end
+    
     it should("return a BoolExpression when containing a boolean literal") with
         { true } type shouldBe(BoolExpression)
         { true } value shouldBe(true)
@@ -15,6 +21,12 @@ specify("An expression literal") with
         { nothing } type shouldBe(NothingExpression)
     end
 
+    it should("return a OrExpression when containing an 'or' expression") with
+        { 1 or 2 } type shouldBe(OrExpression)
+        { 1 or 2 } left string shouldBe("1")
+        { 1 or 2 } right string shouldBe("2")
+    end
+    
     it should("return a StringExpression when containing a string literal") with
         { "a" } type shouldBe(StringExpression)
         { "b" } value shouldBe("b")
