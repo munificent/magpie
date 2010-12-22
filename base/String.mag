@@ -10,7 +10,7 @@ extend class String
     def +(other  -> String) concatenate(other string)
 
     // TODO(bob): Should just take Iterable[Stringable]
-    shared def join(elements ArrayType new(Stringable),
+    shared def join(elements,
                     separator String | Nothing -> String)
         var knownSeparator = let separator then separator else ", "
         var result = ""
