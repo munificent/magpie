@@ -1,0 +1,42 @@
+class GenericInterface
+    shared def new(name String, typeParams ArrayType new(String) ->
+                   GenericInterface)
+        construct(name: name, typeParams: typeParams)
+    end
+    
+    def call(typeArgs -> Interface)
+        var instance = Interface new(name)
+        for member = members do
+            var type = fn(-> Type) member memberType(typeArgs)
+            instance members add(Member new(name: member name,
+                memberType: type))
+        end
+        instance
+    end
+    
+    get string String =
+        var result = name + "["
+        result = result + String join(typeParams)
+        result + "]"
+    end
+    
+    def declareMethod(name String, type ->)
+        members add(GenericMember new(name: name, memberType: type))
+    end
+    
+    def declareGetter(name String, type ->)
+        members add(GenericMember new(name: name, memberType: type))
+    end
+
+    var name       String
+    var typeParams ArrayType new(String)
+    var members    ArrayType new(GenericMember) = Array new()
+end
+
+class GenericMember
+    var name       String
+    // TODO(bob): Dynamic because it will be a function that takes an unknown
+    // number of parameters based on the number of type parameters in the
+    // generic type.
+    var memberType Dynamic
+end

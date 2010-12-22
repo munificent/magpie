@@ -1,6 +1,4 @@
-// TODO(bob): Is this the best place to put this stuff?
-
-specify("An interface type") with
+specify("Checking an Interface") with
     it should("assign from a missing member if its type allows nothing") with
         envExpectCheckOK with
             interface Super

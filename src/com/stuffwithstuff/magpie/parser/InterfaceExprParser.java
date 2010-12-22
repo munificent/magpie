@@ -6,6 +6,7 @@ import java.util.List;
 import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.BlockExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
+import com.stuffwithstuff.magpie.ast.FnExpr;
 import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.ast.VariableExpr;
 
@@ -14,16 +15,52 @@ public class InterfaceExprParser implements ExprParser {
     String name = parser.consume(TokenType.NAME).getString();
     Position position = parser.last(1).getPosition();
     
+    // See if it's generic.
+    List<String> typeParams = new ArrayList<String>();
+    if (parser.match(TokenType.LEFT_BRACKET)) {
+      do {
+        typeParams.add(parser.consume(TokenType.NAME).getString());
+      } while (parser.match(TokenType.COMMA));
+      parser.consume(TokenType.RIGHT_BRACKET);
+    }
+    
     parser.consume(TokenType.LINE);
     
     List<Expr> exprs = new ArrayList<Expr>();
 
     // Declare the interface:
     if (!isExtend) {
-      // var Foo = Interface new("Foo")
-      exprs.add(new VariableExpr(position, name,
-          Expr.message(Expr.name("Interface"), Identifiers.NEW, Expr.string(name))));
+      if (typeParams.size() == 0) {
+        // var Foo = Interface new("Foo")
+        exprs.add(new VariableExpr(position, name,
+            Expr.message(Expr.name("Interface"), Identifiers.NEW, Expr.string(name))));
+      } else {
+        // var Foo = GenericInterface new("Foo", Array of("A", "B"))
+        Expr[] paramExprs = new Expr[typeParams.size()];
+        for (int i = 0; i < typeParams.size(); i++) {
+          paramExprs[i] = Expr.string(typeParams.get(i));
+        }
+        
+        Expr paramArray = Expr.message(Expr.name("Array"), "of",
+            Expr.tuple(paramExprs));
+        
+        exprs.add(new VariableExpr(position, name,
+            Expr.message(Expr.name("GenericInterface"), Identifiers.NEW,
+                Expr.tuple(Expr.string(name), paramArray))));
+      }
     }
+    
+    // TODO(bob): If we are extending an interface, and it's a generic one, we
+    // should check that we're extending it with the same number of type
+    // arguments as the original definition. This would be bad:
+    //
+    // interface IFoo[A, B]
+    //    ...
+    // end
+    //
+    // extend interface IFoo[C]
+    //    ...
+    // end
     
     // Parse the body.
     while (!parser.match(TokenType.END)) {
@@ -51,25 +88,27 @@ public class InterfaceExprParser implements ExprParser {
       
       switch (memberType) {
       case DEF:
-        
         FunctionType function = parser.parseFunctionType();
         Expr methodType = Expr.message(Expr.name("Function"),
             Identifiers.NEW_TYPE, Expr.tuple(function.getParamType(),
                 function.getReturnType(), Expr.bool(false)));
         exprs.add(Expr.message(Expr.name(name), Identifiers.DECLARE_METHOD,
-            Expr.tuple(Expr.string(member), Expr.fn(methodType))));
+            Expr.tuple(Expr.string(member),
+             makeTypeFunction(typeParams, methodType))));
         break;
         
       case GET:
         Expr getterType = parser.parseTypeExpression();
         exprs.add(Expr.message(Expr.name(name), Identifiers.DECLARE_GETTER,
-            Expr.tuple(Expr.string(member), Expr.fn(getterType))));
+            Expr.tuple(Expr.string(member),
+            makeTypeFunction(typeParams, getterType))));
         break;
         
       case SET:
         Expr setterType = parser.parseTypeExpression();
         exprs.add(Expr.message(Expr.name(name), Identifiers.DECLARE_SETTER,
-            Expr.tuple(Expr.string(member), Expr.fn(setterType))));
+            Expr.tuple(Expr.string(member),
+            makeTypeFunction(typeParams, setterType))));
         break;
       }
 
@@ -83,5 +122,23 @@ public class InterfaceExprParser implements ExprParser {
   public Expr parse(MagpieParser parser) {
     parser.consume(TokenType.INTERFACE);
     return parseInterface(parser, false);
+  }
+  
+  private static Expr makeTypeFunction(List<String> typeParams, Expr type) {
+    Expr paramType;
+    
+    if (typeParams.size() == 0) {
+      paramType = Expr.nothing();
+    } else {
+      Expr[] paramExprs = new Expr[typeParams.size()];
+      for (int i = 0; i < typeParams.size(); i++) {
+        paramExprs[i] = Expr.name("Type");
+      }
+      paramType = Expr.tuple(paramExprs);
+    }
+    
+    FunctionType functionType = new FunctionType(typeParams, paramType,
+        Expr.name("Type"), false);
+    return new FnExpr(Position.none(), functionType, type);
   }
 }

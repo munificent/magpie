@@ -1,6 +1,7 @@
 import("Array.mag")
 import("Class.mag")
 import("Function.mag")
+import("GenericInterface.mag")
 import("Int.mag")
 import("Interface.mag")
 import("Record.mag")
