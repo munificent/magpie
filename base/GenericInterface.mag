@@ -1,11 +1,22 @@
 class GenericInterface
-    shared def new(name String, typeParams ArrayType new(String) ->
+    shared def new(name String, typeParams List(String) ->
                    GenericInterface)
         construct(name: name, typeParams: typeParams)
     end
     
     def call(typeArgs -> Interface)
+        // See if we've already instantiated it first.
+        var typeArgString = typeArgs string
+        for instance = instances do
+            if instance _0 == typeArgString then return instance _1
+        end
+        
         var instance = Interface new(name)
+        
+        // Add it to the cache immediately. This is necessary to be able to
+        // instantiate recursive interfaces.
+        instances add(typeArgString, instance)
+        
         for member = members do
             var type = fn(-> Type) member memberType(typeArgs)
             instance members add(Member new(name: member name,
@@ -29,8 +40,10 @@ class GenericInterface
     end
 
     var name       String
-    var typeParams ArrayType new(String)
-    var members    ArrayType new(GenericMember) = Array new()
+    var typeParams List(String)
+    var members    List(GenericMember) = Array new()
+    // TODO(bob): Use a map instead. Don't key off string either.
+    var instances  List(String, Interface) = Array new()
 end
 
 class GenericMember

@@ -1,5 +1,5 @@
 class OrType
-    shared def new(cases ArrayType new(Type) -> OrType)
+    shared def new(cases List(Type) -> OrType)
         construct(cases: cases)
     end
     
@@ -91,7 +91,7 @@ class OrType
         OrType new(remaining)
     end
     
-    var cases ArrayType new(Type)
+    var cases List(Type)
 end
 
 // Extend all types to support unioning:
@@ -100,8 +100,6 @@ extend interface Type
     def |(other Type -> Type)
 end
 
-def ArrayType         |(other Type -> Type) OrType combine(this, other)
-def ArrayIteratorType |(other Type -> Type) OrType combine(this, other)
 def Class             |(other Type -> Type) OrType combine(this, other)
 def FunctionType      |(other Type -> Type) OrType combine(this, other)
 def Interface         |(other Type -> Type) OrType combine(this, other)

@@ -1,0 +1,12 @@
+interface List[T]
+    get count Int
+    
+    def add(value T ->)
+    def assign(value T -> T)
+    def clear(->)
+    def copy(-> List[T])
+    def contains(value T -> Bool)
+    def call(index Int -> T)
+    def first(predicate (T => Bool) -> T | Nothing)
+    def iterate(-> Iterator(T))
+end

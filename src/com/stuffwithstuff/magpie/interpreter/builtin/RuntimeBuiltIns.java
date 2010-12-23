@@ -9,7 +9,6 @@ import com.stuffwithstuff.magpie.ast.BlockExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.CheckError;
 import com.stuffwithstuff.magpie.interpreter.Checker;
-import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.ErrorException;
 import com.stuffwithstuff.magpie.interpreter.EvalContext;
 import com.stuffwithstuff.magpie.interpreter.FnObj;
@@ -40,7 +39,7 @@ public class RuntimeBuiltIns {
   }
   
   @Shared
-  @Signature("checkAll(-> Array newType(String))")
+  @Signature("checkAll(-> List(String))")
   public static class CheckAll implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       Checker checker = new Checker(interpreter);
@@ -51,19 +50,19 @@ public class RuntimeBuiltIns {
   }
   
   @Shared
-  @Signature("checkClass(classObj Class-> Array newType(String))")
+  @Signature("checkClass(classObj Class-> List(String))")
   public static class CheckClass implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       Checker checker = new Checker(interpreter);
       
-      checker.checkClass((ClassObj)arg);
+      checker.checkClass(arg.asClass());
       
       return translateErrors(interpreter, checker.getErrors());
     }
   }
 
   @Shared
-  @Signature("checkFunction(function -> Array newType(String))")
+  @Signature("checkFunction(function -> List(String))")
   public static class CheckFunction implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       Checker checker = new Checker(interpreter);
@@ -78,7 +77,7 @@ public class RuntimeBuiltIns {
   }
 
   @Shared
-  @Signature("checkExpression(function -> Array newType(String))")
+  @Signature("checkExpression(function -> List(String))")
   public static class CheckExpression implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       FnObj function = arg.asFn();

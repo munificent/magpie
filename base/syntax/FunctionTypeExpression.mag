@@ -1,5 +1,5 @@
 class FunctionTypeExpression
-    shared def new(names      ArrayType new(String),
+    shared def new(names      List(String),
                    paramType  Expression,
                    returnType Expression,
                    static?    Bool -> FunctionTypeExpression)
@@ -27,7 +27,7 @@ class FunctionTypeExpression
         result + if static? then "]" else ")"
     end
     
-    var names      ArrayType new(String)
+    var names      List(String)
     var paramType  Expression
     var returnType Expression
     var static?    Bool

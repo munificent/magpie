@@ -18,7 +18,7 @@ public class ClassBuiltIns {
       boolean isDelegate = arg.getTupleField(1).asBool();
       FnObj type = arg.getTupleField(2).asFn();
       
-      ClassObj classObj = (ClassObj)thisObj;
+      ClassObj classObj = thisObj.asClass();
   
       // Declare the field.
       classObj.getFieldDefinitions().put(name,
@@ -45,7 +45,7 @@ public class ClassBuiltIns {
       FnObj initializer = arg.getTupleField(3).asFn();
       
       // Define the field itself.
-      ClassObj classObj = (ClassObj)thisObj;
+      ClassObj classObj = thisObj.asClass();
       classObj.getFieldDefinitions().put(name,
           new Field(true, isDelegate, initializer.getFunction()));
   
@@ -81,7 +81,7 @@ public class ClassBuiltIns {
       String name = arg.getTupleField(0).asString();
       FnObj method = arg.getTupleField(1).asFn();
       
-      ClassObj classObj = (ClassObj)thisObj;
+      ClassObj classObj = thisObj.asClass();
       classObj.getMembers().defineMethod(name, method.getCallable());
       
       return interpreter.nothing();
@@ -94,7 +94,7 @@ public class ClassBuiltIns {
       String name = arg.getTupleField(0).asString();
       FnObj body = arg.getTupleField(1).asFn();
       
-      ClassObj classObj = (ClassObj)thisObj;
+      ClassObj classObj = thisObj.asClass();
       classObj.getMembers().defineGetter(name, body.getCallable());
       
       return interpreter.nothing();
@@ -107,7 +107,7 @@ public class ClassBuiltIns {
       String name = arg.getTupleField(0).asString();
       FnObj body = arg.getTupleField(1).asFn();
       
-      ClassObj classObj = (ClassObj)thisObj;
+      ClassObj classObj = thisObj.asClass();
       classObj.getMembers().defineSetter(name, body.getCallable());
       
       return interpreter.nothing();
@@ -132,10 +132,10 @@ public class ClassBuiltIns {
     }
   }
   
-  @Getter("mixins Array newType(Class)")
+  @Getter("mixins List(Class)")
   public static class Mixins implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      ClassObj classObj = (ClassObj)thisObj;
+      ClassObj classObj = thisObj.asClass();
       
       return interpreter.createArray(classObj.getMixins());
     }
@@ -144,7 +144,7 @@ public class ClassBuiltIns {
   @Getter("name String")
   public static class Name implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      ClassObj classObj = (ClassObj)thisObj;
+      ClassObj classObj = thisObj.asClass();
       
       return interpreter.createString(classObj.getName());
     }

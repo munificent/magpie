@@ -276,7 +276,7 @@ public class Interpreter {
   
   public Obj throwError(String errorClassName) {
     // Look up the error class.
-    ClassObj classObj = (ClassObj) mGlobalScope.get(errorClassName);
+    ClassObj classObj = mGlobalScope.get(errorClassName).asClass();
     throw new ErrorException(instantiate(classObj, null));
   }
   

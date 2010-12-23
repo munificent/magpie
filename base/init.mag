@@ -1,8 +1,8 @@
 import("Array.mag")
 import("Class.mag")
 import("Function.mag")
-import("GenericInterface.mag")
 import("Int.mag")
+import("GenericInterface.mag")
 import("Interface.mag")
 import("Record.mag")
 import("String.mag")
@@ -14,6 +14,9 @@ import("Object.mag")
 import("Stringable.mag")
 import("Trueable.mag")
 
+import("Iterator.mag")
+import("List.mag")
+
 import("syntax/init.mag")
 
 interface Any
@@ -24,8 +27,6 @@ extend interface Type
     def =>(other Type -> Type)
 end
 
-def ArrayType         =>(other Type -> Type) FunctionType new(this, other, false)
-def ArrayIteratorType =>(other Type -> Type) FunctionType new(this, other, false)
 def Class             =>(other Type -> Type) FunctionType new(this, other, false)
 def FunctionType      =>(other Type -> Type) FunctionType new(this, other, false)
 def Interface         =>(other Type -> Type) FunctionType new(this, other, false)

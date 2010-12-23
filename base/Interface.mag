@@ -51,7 +51,7 @@ class Interface
     end
 
     var name    String
-    var members ArrayType new(Member) = Array new()
+    var members List(Member) = Array new()
 end
 
 class Member

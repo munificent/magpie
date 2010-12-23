@@ -1,15 +1,10 @@
 extend class Array
-    shared def new(-> ArrayType new(Any)) Array of()
+    shared def new(-> Array) Array of()
     
-    // TODO(bob): This is kind of hokey.
-    shared def newType(elementType Type -> ArrayType)
-        ArrayType new(elementType)
-    end
-
     shared def assignsFrom?(other Type -> Bool)
         if this == other then
             true
-        else if other type == ArrayType then
+        else if other type == type then
             true
         else false
     end
@@ -29,7 +24,7 @@ extend class Array
     get type Type =
         // TODO(bob): Hack!
         var elementType = this(0) type
-        ArrayType new(elementType)
+        List(elementType)
     end
 
     def iterate(-> ArrayIterator) ArrayIterator new(this)
@@ -57,7 +52,7 @@ extend class Array
         result
     end
 
-    def unique(-> ArrayType new(Any))
+    def unique(-> Array)
         var result = Array new()
         for item = this do
             if result count == 0 then
@@ -92,46 +87,6 @@ extend class Array
     end
 end
 
-class ArrayType
-    shared def new(elementType Type -> ArrayType)
-        construct(elementType: elementType)
-    end
-    
-    get string String = "array of " + elementType
-
-    def assignsFrom?(other Type -> Bool)
-        let otherArray = other as[ArrayType] then
-            // Element type must match exactly (not variant).
-            elementType == otherArray elementType
-        else false
-    end
-
-    def getMemberType(name String -> Type)
-        // TODO(bob): Hackish. Strongly-type the array members based on the
-        // element type.
-        match name
-        case "assign"   then elementType => elementType
-        case "copy"     then Nothing => this
-        case "contains" then elementType => Bool
-        case "call"     then Int => elementType
-        case "first"    then (elementType => Bool) => (elementType | Nothing)
-        case "iterate"  then Nothing => ArrayIteratorType new(elementType)
-        else                 Array getMemberType(name)
-        end
-    end
-    
-    def ==(other -> Bool)
-        let otherArray = other as[ArrayType] then
-            // Element type must match exactly (not variant).
-            elementType == otherArray elementType
-        else false
-    end
-    
-    def !=(other -> Bool) (this == other) not
-    
-    var elementType Type
-end
-
 class ArrayIterator
     shared def new(array Array -> ArrayIterator)
         construct(array: array)
@@ -143,7 +98,7 @@ class ArrayIterator
     get type Type =
         // TODO(bob): Hack!
         var elementType = array(0) type
-        ArrayIteratorType new(elementType)
+        Iterator(elementType)
     end
 
     def next(-> Bool)
@@ -153,36 +108,4 @@ class ArrayIterator
 
     var array Array
     var index = -1
-end
-
-class ArrayIteratorType
-    shared def new(elementType Type -> ArrayIteratorType)
-        construct(elementType: elementType)
-    end
-    
-    get string String = "array of " + elementType + " iterator"
-
-    def assignsFrom?(other Type -> Bool)
-        let otherArray = other as[ArrayIteratorType] then
-            // Array iterators are covariant with their element type.
-            elementType assignsFrom?(otherArray elementType)
-        else false
-    end
-    
-    def getMemberType(name String -> Type)
-        // Strongly-type the iterator.
-        if name == "current" then return elementType
-        // Use the generic type of the other methods.
-        ArrayIterator getMemberType(name)
-    end
-    
-    def ==(other -> Bool)
-        let otherArray = other as[ArrayIteratorType] then
-            elementType == otherArray elementType
-        else false
-    end
-    
-    def !=(other -> Bool) (this == other) not
-    
-    var elementType Type
 end

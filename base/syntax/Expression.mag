@@ -58,13 +58,13 @@ class BoolExpression
 end
 
 class BlockExpression
-    shared def new(expressions ArrayType new(Expression) -> BlockExpression)
+    shared def new(expressions List(Expression) -> BlockExpression)
         construct(expressions: expressions)
     end
     
     get string String = String join(expressions, "\n")
     
-    var expressions ArrayType new(Expression)
+    var expressions List(Expression)
 end
 
 class BreakExpression
@@ -129,7 +129,7 @@ class IntExpression
 end
 
 class LoopExpression
-    shared def new(conditions ArrayType new(Expression), body Expression ->
+    shared def new(conditions List(Expression), body Expression ->
                    LoopExpression)
         construct(conditions: conditions, body: body)
     end
@@ -149,7 +149,7 @@ class LoopExpression
         result + body
     end
     
-    var conditions ArrayType new(Expression)
+    var conditions List(Expression)
     var body       Expression
 end
 
@@ -217,13 +217,13 @@ class ThisExpression
 end
 
 class TupleExpression
-    shared def new(fields ArrayType new(Expression) -> TupleExpression)
+    shared def new(fields List(Expression) -> TupleExpression)
         construct(fields: fields)
     end
     
     get string String = String join(fields)
     
-    var fields ArrayType new(Expression)
+    var fields List(Expression)
 end
 
 class TypeofExpression
