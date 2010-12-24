@@ -6,6 +6,7 @@ import java.io.IOException;
 import com.stuffwithstuff.magpie.Script;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
+import com.stuffwithstuff.magpie.interpreter.QuitException;
 import com.stuffwithstuff.magpie.parser.ParseException;
 
 /**
@@ -43,6 +44,13 @@ public class BuiltInFunctions {
     }
   }
 
+  @Signature("quit(->)")
+  public static class Quit implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      throw new QuitException();
+    }
+  }
+  
   @Signature("-(left Int, right Int -> Int)")
   public static class Subtract implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {

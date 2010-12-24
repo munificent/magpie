@@ -11,7 +11,13 @@ import java.util.Stack;
 import com.stuffwithstuff.magpie.parser.Position;
 
 public class Profiler {
+  public static void setEnabled(boolean enable) {
+    sEnabled = enable;
+  }
+  
   public static void display() {
+    if (!sEnabled) return;
+    
     List<Profile> profiles = new ArrayList<Profile>(sTimes.values());
     Collections.sort(profiles, new Comparator<Profile>() {
       public int compare(Profile e1, Profile e2) {
@@ -35,6 +41,8 @@ public class Profiler {
   }
   
   public static void push(Position position) {
+    if (!sEnabled) return;
+    
     FunctionCall call = new FunctionCall();
     call.label = position.getSourceFile() + ":" + position.getStartLine();
     call.start = System.currentTimeMillis();
@@ -42,6 +50,8 @@ public class Profiler {
   }
   
   public static void pop() {
+    if (!sEnabled) return;
+    
     FunctionCall call = sOngoing.pop();
     long elapsed = System.currentTimeMillis() - call.start;
     
@@ -76,6 +86,7 @@ public class Profiler {
     public int    calls;
   }
   
+  private static boolean sEnabled = false;
   private static final Stack<FunctionCall> sOngoing = new Stack<FunctionCall>();
   private static final Map<String, Profile> sTimes = new HashMap<String, Profile>();
 }
