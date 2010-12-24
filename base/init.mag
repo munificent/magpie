@@ -30,7 +30,7 @@ def ==(left, right -> Bool)
     // Must be the same class.
     var leftClass = Runtime getClass(left)
     var rightClass = Runtime getClass(right)
-    if leftClass != rightClass then return false
+    if Runtime same?(leftClass, rightClass) not then return false
     
     // Leave it up to the class to decide.
     let equalFunc = leftClass equal? then
@@ -49,7 +49,7 @@ def <(left, right -> Bool)
     // Leave it up to the class to decide.
     let lessFunc = Runtime getClass(left) lessThan? then
         var less = lessFunc(left, right)
-        less expecting[Bool]
+        unsafecast[Bool](less)
     else
         false
     end
