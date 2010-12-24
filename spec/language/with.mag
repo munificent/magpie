@@ -14,7 +14,7 @@ specify("A 'with' block argument") with
         var result = ""
         f with
             result = "a"
-            result = result + "b"
+            result = result ~ "b"
         end
         result shouldBe("ab")
     end

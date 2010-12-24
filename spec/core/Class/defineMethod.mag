@@ -15,7 +15,7 @@ specify("The 'defineMethod' method on Class") with
 
     it should("pass the arguments to the method function") with
         var c = Class new("c")
-        c defineMethod("foo", fn(arg) "arg=" + arg)
+        c defineMethod("foo", fn(arg) "arg=" ~ arg)
         c new() foo("arg") shouldBe("arg=arg")
     end
 

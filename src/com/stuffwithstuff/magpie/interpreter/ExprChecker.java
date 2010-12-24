@@ -113,18 +113,20 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       
       // If the target is not an actual function, get the type of its "call"
       // message instead of the target itself.
-      // TODO(bob): Using the class name for this is gross!
-      if (!targetType.getClassObj().getName().equals(Identifiers.FUNCTION_TYPE)) {
+      Obj functionType = mInterpreter.getGlobal(Identifiers.FUNCTION_TYPE);
+      if (targetType.getClassObj() != functionType) {
         // It's a functor, so look up the "call" member.
-        targetType = getMemberType(expr.getPosition(), targetType,
+        Obj callTargetType = getMemberType(expr.getPosition(), targetType,
             Identifiers.CALL);
   
-        if (targetType == mInterpreter.getNothingClass()) {
+        if (callTargetType.getClassObj() != functionType) {
           mChecker.addError(expr.getPosition(),
               "Target of type %s is not a function and does not have a 'call' method.",
               targetType);
           return mInterpreter.getNothingClass();
         }
+        
+        targetType = callTargetType;
       }
       
       Obj paramType = targetType.getField(Identifiers.PARAM_TYPE);
@@ -238,9 +240,10 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     // If it's a "let" condition, bind and type the variable, stripping out
     // Nothing.
     if (expr.isLet()) {
-      conditionType = mInterpreter.invokeMethod(conditionType,
-          Identifiers.UNSAFE_REMOVE_NOTHING, mInterpreter.nothing());
-      context.define(expr.getName(), conditionType);
+      Obj removeNothing = mInterpreter.getGlobal(Identifiers.UNSAFE_REMOVE_NOTHING);
+      Obj letType =  mInterpreter.apply(Position.none(), removeNothing,
+          conditionType);
+      context.define(expr.getName(), letType);
     }
     
     // Get the types of the arms.
@@ -395,7 +398,9 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     if (left == mInterpreter.getNeverClass()) return right;
     if (right == mInterpreter.getNeverClass()) return left;
     
-    return mInterpreter.invokeMethod(left, Identifiers.OR, right);
+    Obj orFunction = mInterpreter.getGlobal(Identifiers.OR);
+    return mInterpreter.apply(Position.none(), orFunction,
+        mInterpreter.createTuple(left, right));
   }
   
   public Obj getMemberType(Position position, Obj receiverType, String name) {

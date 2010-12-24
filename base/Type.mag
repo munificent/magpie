@@ -13,12 +13,6 @@ end
 
 // Make Class implement it.
 extend class Class
-    // TODO(bob): Should this be part of Type?
-    shared def unsafeRemoveNothing(-> Class)
-        // Doesn't have Nothing to begin with, so we're good.
-        this
-    end
-
     def assignsFrom?(other Type -> Bool)
         // Short-circuit on self-assignment.
         if other == this then return true

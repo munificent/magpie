@@ -11,14 +11,6 @@ import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class ObjectBuiltIns {
-
-  @Signature("==(other -> Bool)")
-  public static class EqEq implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      return interpreter.createBool(thisObj == arg);
-    }
-  }
-
   @Getter("fields List(String, Dynamic)")
   public static class Fields implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {

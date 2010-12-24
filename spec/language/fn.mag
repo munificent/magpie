@@ -16,7 +16,7 @@ specify("A 'fn' expression") with
     end
     
     it should("bind a tuple argument to the parameter") with
-        var f = fn(a) a _0 + a _1
+        var f = fn(a) a _0 ~ a _1
         f("one", "two") shouldBe("onetwo")
     end
     
@@ -50,7 +50,7 @@ specify("A static 'fn' expression") with
     end
 
     it should("bind a tuple argument to the parameter at runtime") with
-        var f = fn[A] A _0 + A _1
+        var f = fn[A] A _0 ~ A _1
         f["one", "two"] shouldBe("onetwo")
     end
 end

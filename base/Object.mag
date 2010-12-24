@@ -21,6 +21,3 @@ def Object expecting[T -> T]
     if type == T or T assignsFrom?(type) then return unsafecast[T](this)
     UnexpectedTypeError throw(T, type)
 end
-
-// Inequality is just the opposite of equality.
-def Object !=(other -> Bool) (this == other) not

@@ -17,7 +17,7 @@ specify("An 'if then' expression") with
         (if false then "then") shouldBe(nothing)
     end
 
-    it should("create a local scope for the 'if' expression that is visible " +
+    it should("create a local scope for the 'if' expression that is visible " ~
               "the 'then' expression") with
         var a = "outside"
         var b = "outside"
@@ -83,7 +83,7 @@ specify("An 'if then else' expression") with
         (if false then "then" else "else") shouldBe("else")
     end
 
-    it should("create a local scope for the 'if' expression that is visible " +
+    it should("create a local scope for the 'if' expression that is visible " ~
               "to the 'else' expression") with
         var a = "outside"
         var b = "outside"
@@ -128,7 +128,7 @@ specify("An 'if then else' expression") with
         a shouldBe(3)
     end
 
-    it should("not associate an 'else' on the next line with a previous " +
+    it should("not associate an 'else' on the next line with a previous " ~
               "single-line 'then'") with
         (if true then
             if false then "then"

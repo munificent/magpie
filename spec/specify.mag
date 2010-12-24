@@ -15,8 +15,8 @@ end
 def endTests(->)
     var endTimeMs = Runtime now()
     print("")
-    print("Passed " + (totalTests - totalFailures) + " out of " +
-        totalTests + " tests in " + (endTimeMs - startTimeMs) + "ms.")
+    print("Passed " ~ (totalTests - totalFailures) ~ " out of " ~
+        totalTests ~ " tests in " ~ (endTimeMs - startTimeMs) ~ "ms.")
 end
 
 def specify(description String, block TestSuite => Nothing ->)
@@ -42,11 +42,11 @@ class TestSuite
         do
             block()
         catch Error then
-            fail("Unexpected error: " + it)
+            fail("Unexpected error: " ~ it)
         end
         
         if tests == testsBefore then
-            print("NONE: " + name + " should " + currentTest + ".")
+            print("NONE: " ~ name ~ " should " ~ currentTest ~ ".")
         end
     end
     
@@ -54,11 +54,11 @@ class TestSuite
         
     def fail(message String ->)
         if failedTest not then
-            print("FAIL: " + name + " should " + currentTest + ".")
+            print("FAIL: " ~ name ~ " should " ~ currentTest ~ ".")
         end
         tests = tests + 1
         failures = failures + 1
-        print("      " + message)
+        print("      " ~ message)
         failedTest = true
     end
 
@@ -77,7 +77,7 @@ extend class Object
     def shouldBe(expected, message String | Nothing ->)
         if this != expected then
             if message == nothing then
-                message = "Expected " + expected + " but was " + this
+                message = "Expected " ~ expected ~ " but was " ~ this
             end
             // TODO(bob): Exceptions would be good here.
             currentTestSuite fail(message)
@@ -95,14 +95,14 @@ end
 def envExpectCheckOK(block)
     var errors = Runtime checkExpression(block)
     errors count shouldBe(0, "Should not have any check errors but had:")
-    for error = errors do print("      - " + error)
+    for error = errors do print("      - " ~ error)
 end
 
 // Verifies that the function has no type check errors.
 def Function shouldCheck()
     var errors = Runtime checkFunction(this)
     errors count shouldBe(0, "Function should not have any check errors but had:")
-    for error = errors do print("      - " + error)
+    for error = errors do print("      - " ~ error)
 end
 
 // Verifies that the given function does have one or more type check errors.
@@ -128,7 +128,7 @@ end
 def Class shouldCheck()
     var errors = Runtime checkClass(this)
     errors count shouldBe(0, "Class should not have any check errors but had:")
-    for error = errors do print("      - " + error)
+    for error = errors do print("      - " ~ error)
 end
 
 // Verifies that the class has one or more type check errors.

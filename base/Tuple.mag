@@ -7,14 +7,14 @@ extend class Tuple
     
         for field = this
         for index = 0 to(count) do
-            result = result + field + if index < (count - 1) then ", " else ")"
+            result = result ~ field ~ if index < (count - 1) then ", " else ")"
         end
         result
     end
 
     def assignsFrom?(other Type -> Bool)
         for i = 0 until(count) do
-            var name = "_" + i
+            var name = "_" ~ i
             var field = getField(name)
             var otherField = other getMemberType(name)
             if field assignsFrom?(otherField) not then return false
@@ -33,17 +33,14 @@ extend class Tuple
         end
     end
     
-    def ==(other -> Bool)
-        let otherTuple = other as[Tuple] then
-            if count != otherTuple count then return false
-    
-            // And the fields must be assignable.
-            for field = this
-            for otherField = otherTuple do
-                if field != otherField then return false
-            end
-            true
-        else false
+    shared def equal?(left Tuple, right Tuple -> Bool)
+        if left count != right count then return false
+
+        for leftField = left
+        for rightField = right do
+            if leftField != rightField then return false
+        end
+        true
     end
 
     /*

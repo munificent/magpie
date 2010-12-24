@@ -9,7 +9,7 @@ class AndExpression
     end
         
     get string String =
-        left string + " and " + right string
+        left string ~ " and " ~ right string
     end
     
     var left  Expression
@@ -22,7 +22,7 @@ class ApplyExpression
     end
     
     get string String =
-        target string + "(" + argument string + ")"
+        target string ~ "(" ~ argument string ~ ")"
     end
     
     var target Expression
@@ -38,9 +38,9 @@ class AssignExpression
         
     get string String =
         let receiver then
-            receiver string + " " + name + " = " + value string
+            receiver string ~ " " ~ name ~ " = " ~ value string
         else
-            name + " = " + value string
+            name ~ " = " ~ value string
         end
     end
     
@@ -77,7 +77,7 @@ class ExpressionExpression
     end
         
     get string String =
-        "{ " + body string + " }"
+        "{ " ~ body string ~ " }"
     end
     
     var body Expression
@@ -89,7 +89,7 @@ class FunctionExpression
         construct(type: type, body: body)
     end
         
-    get string String = "fn " + type + " " + body
+    get string String = "fn " ~ type ~ " " ~ body
     
     var type FunctionTypeExpression
     var body Expression
@@ -108,10 +108,10 @@ class IfExpression
     
     get string String =
         if let? then
-            "let " + name + " "
+            "let " ~ name ~ " "
         else
             "if "
-        end + condition + " then " + thenArm + " else " + elseArm
+        end ~ condition ~ " then " ~ thenArm ~ " else " ~ elseArm
     end
     
     var name String | Nothing
@@ -138,15 +138,15 @@ class LoopExpression
         var result = ""
         for i = 0 until(conditions count)
         for condition = conditions do
-            result = result + "while " + condition
+            result = result ~ "while " ~ condition
       
             if i < (conditions count - 1) then
-                result = result + "\n"
+                result = result ~ "\n"
             else
-                result = result + " do\n"
+                result = result ~ " do\n"
             end
         end
-        result + body
+        result ~ body
     end
     
     var conditions List(Expression)
@@ -160,7 +160,7 @@ class MessageExpression
     end
         
     get string String =
-        let receiver then receiver string + " " + name else name
+        let receiver then receiver string ~ " " ~ name else name
     end
     
     var receiver Expression | Nothing
@@ -177,7 +177,7 @@ class OrExpression
     end
         
     get string String =
-        left string + " or " + right string
+        left string ~ " or " ~ right string
     end
     
     var left  Expression
@@ -189,7 +189,7 @@ class ReturnExpression
         construct(value: value)
     end
         
-    get string String = "return " + value
+    get string String = "return " ~ value
     
     var value Expression
 end
@@ -199,7 +199,7 @@ class ScopeExpression
         construct(body: body)
     end
         
-    get string String = "do " + body
+    get string String = "do " ~ body
     
     var body Expression
 end
@@ -207,7 +207,7 @@ end
 class StringExpression
     shared def new(value String -> StringExpression) construct(value: value)
     
-    get string String = "\"" + value + "\""
+    get string String = "\"" ~ value ~ "\""
 
     var value String
 end
@@ -231,7 +231,7 @@ class TypeofExpression
         construct(body: body)
     end
         
-    get string String = "typeof " + body
+    get string String = "typeof " ~ body
     
     var body Expression
 end
@@ -241,7 +241,7 @@ class UnsafeCastExpression
         construct(type: type, value: value)
     end
         
-    get string String = "unsafecast[" + type + "](" + value + ")"
+    get string String = "unsafecast[" ~ type ~ "](" ~ value ~ ")"
     
     var type  Expression
     var value Expression
@@ -253,7 +253,7 @@ class VariableExpression
     end
     
     get string String =
-        "var " + name + " = " + value string
+        "var " ~ name ~ " = " ~ value string
     end
 
     var name  String

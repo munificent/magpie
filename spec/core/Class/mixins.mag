@@ -81,7 +81,7 @@ specify("The 'mixins' getter on Class") with
 
     // TODO(bob): Abstract methods aren't supported yet.
     /*
-    it should("require the mixing class to implement any declared methods " +
+    it should("require the mixing class to implement any declared methods " ~
               "in the mixin") with
         class Mixin
             def provided(->) print("provided")

@@ -13,8 +13,8 @@ class FunctionType
     end
 
     get string String =
-        var result = paramType string + " -> " + returnType
-        if static? then result = "[" + result + "]"
+        var result = paramType string ~ " -> " ~ returnType
+        if static? then result = "[" ~ result ~ "]"
         result
     end
 
@@ -35,15 +35,11 @@ class FunctionType
         Function getMemberType(name)
     end
 
-    def ==(other -> Bool)
-        let fnType = other as[FunctionType] then
-            static? == fnType static? and
-                paramType == fnType paramType and
-                returnType == fnType returnType
-        else false
+    shared def equal?(left FunctionType, right FunctionType -> Bool)
+        left static? == right static? and
+        left paramType == right paramType and
+        left returnType == right returnType
     end
-
-    def !=(other -> Bool) (this == other) not
 
     var paramType  Type
     var returnType Type

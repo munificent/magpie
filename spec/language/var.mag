@@ -23,8 +23,8 @@ specify("A 'var' expression") with
     it should("allow a block initializer") with
         var i =
             var temp = "a"
-            temp = temp + "b"
-            temp + "c"
+            temp = temp ~ "b"
+            temp ~ "c"
         end
         i shouldBe("abc")
     end

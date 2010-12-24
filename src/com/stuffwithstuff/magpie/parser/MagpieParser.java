@@ -190,7 +190,9 @@ public class MagpieParser extends Parser {
           (((MessageExpr)staticType.getReturnType()).getName().equals("Dynamic"))) {
         staticType = new FunctionType(staticType.getParamNames(),
             staticType.getParamType(),
-            Expr.message(type.getParamType(), "=>", type.getReturnType()), true);
+            Expr.message(null, Identifiers.FAT_ARROW,
+                Expr.tuple(type.getParamType(), type.getReturnType())),
+                true);
       }
         
       expr = new FnExpr(position, staticType, expr);
@@ -373,8 +375,7 @@ public class MagpieParser extends Parser {
       String op = last(1).getString();
       Expr right = message();
 
-      left = Expr.message(left.getPosition().union(right.getPosition()),
-          left, op, right);
+      left = Expr.message(null, op, Expr.tuple(left, right));
     }
     
     return left;

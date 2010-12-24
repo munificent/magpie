@@ -11,7 +11,7 @@ specify("An 'if then else' expression") with
         (typeof if "cond" then "s" else "s") shouldBe(String)
     end
         
-    it should("create a local scope for the condition expression that ends " +
+    it should("create a local scope for the condition expression that ends " ~
               "after the entire 'if' expression") with
         fn
             if var a = true then nothing else nothing
@@ -23,7 +23,7 @@ specify("An 'if then else' expression") with
         end shouldCheck()
     end
     
-    it should("create a local scope for the 'then' expression that is not " +
+    it should("create a local scope for the 'then' expression that is not " ~
               "visible to the 'else' expression") with
         fn
             if true then var a = "s" else a = "a string"

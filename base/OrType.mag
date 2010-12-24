@@ -27,25 +27,21 @@ class OrType
     get string String =
         var result = ""
         for index = 0 until(cases count) do
-            result = result + cases(index) string
-            if index < (cases count - 1) then result = result + " | "
+            result = result ~ cases(index) string
+            if index < (cases count - 1) then result = result ~ " | "
         end
         result
     end
 
-    def ==(other -> Bool)
-        let orType = other as[OrType] then
-            if cases count != orType cases count then return false
-    
-            for thisCase = cases
-            for otherCase = orType cases do
-                if thisCase != otherCase then return false
-            end
-            true
-        else false
-    end
+    shared def equal?(left OrType, right OrType -> Bool)
+        if left cases count != right cases count then return false
 
-    def !=(other -> Bool) (this == other) not
+        for leftCase = left cases
+        for rightCase = right cases do
+            if leftCase != rightCase then return false
+        end
+        true
+    end
 
     def assignsFrom?(other Type -> Bool)
         let orType = other as[OrType] then
@@ -73,15 +69,22 @@ class OrType
         
         memberType
     end
+    
+    var cases List(Type)
+end
 
-    def unsafeRemoveNothing(-> Type)
+// Define a union operator for types:
+def |(left Type, right Type -> Type) OrType combine(left, right)
+
+def unsafeRemoveNothing(type Type -> Type)
+    let orType = type as[OrType] then 
         // TODO(bob): Total hack. We need remaining to have the right element
         // type.
-        var remaining = cases copy()
+        var remaining = orType cases copy()
         remaining clear()
         
-        for type = cases do
-            if type != Nothing then remaining add(type)
+        for caseType = orType cases do
+            if caseType != Nothing then remaining add(caseType)
         end
 
         // If just one case remains, there's no or.
@@ -89,19 +92,9 @@ class OrType
     
         // Create a new OrType with what's left.
         OrType new(remaining)
+    else
+        // Doesn't have Nothing to begin with, so we're good.
+        type
+        // TODO(bob): What if the type is Nothing?
     end
-    
-    var cases List(Type)
 end
-
-// Extend all types to support unioning:
-
-extend interface Type
-    def |(other Type -> Type)
-end
-
-def Class             |(other Type -> Type) OrType combine(this, other)
-def FunctionType      |(other Type -> Type) OrType combine(this, other)
-def Interface         |(other Type -> Type) OrType combine(this, other)
-def OrType            |(other Type -> Type) OrType combine(this, other)
-def Tuple             |(other Type -> Type) OrType combine(this, other)

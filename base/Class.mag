@@ -2,3 +2,21 @@
 
 // Adds the given class to the class's mixins.
 def Class mixin(mixin Class ->) mixins add(mixin)
+
+// TODO(bob): Kinda gross.
+extend class Class
+    // By default, two instances of the same class are only equal if they're
+    // the same object. This behavior can be "overridden" by providing a
+    // different shared method named "equal?" in another class.
+    shared def equal?(left, right -> Bool)
+        Runtime same?(left, right)
+    end
+
+    // This is needed just so that we can type-check the < operator. Should
+    // never actually be called. It's gross. Ideally, < should check that the
+    // class implements an interface or something so that it only attempts to
+    // compare comparable objects.
+    shared def lessThan?(left, right -> Bool)
+        false
+    end
+end

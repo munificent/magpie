@@ -16,7 +16,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   public ExprEvaluator(Interpreter interpreter) {
     mInterpreter = interpreter;
   }
-  
+
   /**
    * Evaluates the given expression in the given context.
    * @param   expr     The expression to evaluate.
@@ -31,7 +31,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(AndExpr expr, EvalContext context) {
     Obj left = evaluate(expr.getLeft(), context);
-        
+
     if (isTruthy(expr, left)) {
       return evaluate(expr.getRight(), context);
     } else {
@@ -43,14 +43,14 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(ApplyExpr expr, EvalContext context) {
     Obj target = evaluate(expr.getTarget(), context);
     Obj arg = evaluate(expr.getArg(), context);
-    
+
     return mInterpreter.apply(expr.getPosition(), target, arg);
   }
-  
+
   @Override
   public Obj visit(AssignExpr expr, EvalContext context) {
     Obj receiver = evaluate(expr.getReceiver(), context);
-    Obj value = evaluate(expr.getValue(), context);    
+    Obj value = evaluate(expr.getValue(), context);
 
     if (receiver == null) {
       // Just a name, so maybe it's a local variable.
@@ -58,31 +58,31 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       // Otherwise it must be a property on this.
       receiver = context.getThis();
     }
-    
+
     // Look for a setter.
     Member setter = ClassObj.findMember(null, receiver, expr.getName() + "_=");
     if (setter == null) {
       mInterpreter.runtimeError(expr.getPosition(),
           "Could not find a setter \"%s\" on %s.",
           expr.getName(), receiver.getClassObj());
-      
+
       return value;
     }
-    
+
     setter.getDefinition().invoke(mInterpreter, receiver, value);
     return value;
   }
-  
+
   @Override
   public Obj visit(BlockExpr expr, EvalContext context) {
     try {
       Obj result = null;
-      
+
       // Evaluate all of the expressions and return the last.
       for (Expr thisExpr : expr.getExpressions()) {
         result = evaluate(thisExpr, context);
       }
-      
+
       return result;
     } catch (ErrorException err) {
       // TODO(bob): Really hokey implementation.
@@ -118,7 +118,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(ExpressionExpr expr, EvalContext context) {
     return ExprConverter.convert(mInterpreter, expr.getBody());
   }
-  
+
   @Override
   public Obj visit(FnExpr expr, EvalContext context) {
     return mInterpreter.createFn(expr, context);
@@ -129,7 +129,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     // Put it in a block so that variables declared in conditions end when the
     // if expression ends.
     context = context.pushScope();
-    
+
     // Evaluate the condition.
     boolean passed = true;
     Obj result = evaluate(expr.getCondition(), context);
@@ -148,7 +148,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       // Regular "if" condition.
       passed = isTruthy(expr, result);
     }
-    
+
     // Evaluate the body.
     if (passed) {
       return evaluate(expr.getThen(), context);
@@ -166,7 +166,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(LoopExpr expr, EvalContext context) {
     try {
       context = context.enterLoop();
-      
+
       boolean done = false;
       while (true) {
         // Evaluate the conditions.
@@ -178,19 +178,19 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
             break;
           }
         }
-        
+
         // If any clause failed, stop the loop.
         if (done) break;
-        
+
         // Evaluate the body in its own scope.
         context = context.pushScope();
-        
+
         evaluate(expr.getBody(), context);
       }
     } catch (BreakException ex) {
       // Nothing to do.
     }
-    
+
     // TODO(bob): It would be cool if loops could have "else" clauses and then
     // reliably return a value.
     return mInterpreter.nothing();
@@ -199,30 +199,30 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(MessageExpr expr, EvalContext context) {
     Obj receiver = evaluate(expr.getReceiver(), context);
-    
+
     // If there is an implicit receiver, try to determine who to send the
     // message to.
     if (receiver == null) {
       // Just a name, so maybe it's a variable.
       Obj variable = context.lookUp(expr.getName());
       if (variable != null) return variable;
-      
+
       // Otherwise it must be a property on this.
       receiver = context.getThis();
     }
-    
+
     return mInterpreter.getMember(expr.getPosition(), receiver, expr.getName());
   }
-  
+
   @Override
   public Obj visit(NothingExpr expr, EvalContext context) {
     return mInterpreter.nothing();
   }
-  
+
   @Override
   public Obj visit(OrExpr expr, EvalContext context) {
     Obj left = evaluate(expr.getLeft(), context);
-    
+
     if (isTruthy(expr, left)) {
       return left;
     } else {
@@ -238,7 +238,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       Obj value = evaluate(entry.getValue(), context);
       fields.put(entry.getKey(), value);
     }
-    
+
     return mInterpreter.createRecord(fields);
   }
 
@@ -247,13 +247,13 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     Obj value = evaluate(expr.getValue(), context);
     throw new ReturnException(value);
   }
-  
+
   @Override
   public Obj visit(ScopeExpr expr, EvalContext context) {
     context = context.pushScope();
     return evaluate(expr.getBody(), context);
   }
-  
+
   @Override
   public Obj visit(StringExpr expr, EvalContext context) {
     return mInterpreter.createString(expr.getValue());
@@ -299,7 +299,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       return mInterpreter.throwError("RedefinitionError");
     }
   }
-  
+
   private boolean isTruthy(Expr expr, Obj receiver) {
     Obj truthy = mInterpreter.getMember(expr.getPosition(), receiver,
         Identifiers.IS_TRUE);

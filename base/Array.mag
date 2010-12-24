@@ -12,10 +12,10 @@ extend class Array
     get string String =
         var text = "["
         for i = 0 until(count) do
-            text = text + this(i) string
-            if i < (count - 1) then text = text + ", "
+            text = text ~ this(i) string
+            if i < (count - 1) then text = text ~ ", "
         end
-        text + "]"
+        text ~ "]"
     end
 
     // TODO(bob): Need generics to use for return type.

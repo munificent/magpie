@@ -130,7 +130,6 @@ public class Checker {
    */
   public Obj checkFunction(FnExpr function, Scope closure, Obj thisType,
       EvalContext staticContext) {
-    
     EvalContext functionContext = new EvalContext(
         closure, thisType).pushScope();
 

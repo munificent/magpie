@@ -25,25 +25,21 @@ extend class Record
         end
     end
     
-    def ==(other -> Bool)
-        let otherRecord = other as[Record] then
-            if fields count != otherRecord fields count then return false
-            
-            for field = fields
-            for otherField = otherRecord fields do
-                if field != otherField then return false
-            end
-            true
-        else false
+    shared def equal?(left Record, right Record -> Bool)
+        if left fields count != right fields count then return false
+        
+        for leftField = left fields
+        for rightField = right fields do
+            if leftField != rightField then return false
+        end
+        true
     end
-    
-    def !=(other -> Bool) (this == other) not
     
     get string String =
         var result = ""
         for field = fields do
-            if result count > 0 then result = result + " "
-            result = result + field _0 + ": " + field _1
+            if result count > 0 then result = result ~ " "
+            result = result ~ field _0 ~ ": " ~ field _1
         end
         result
     end

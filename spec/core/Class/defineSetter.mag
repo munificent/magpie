@@ -10,7 +10,7 @@ specify("The 'defineSetter' method on Class") with
     it should("evaluate the body each time the property is set") with
         var c = Class new("c")
         var assigned = ""
-        c defineSetter("foo", fn(value) assigned = assigned + value)
+        c defineSetter("foo", fn(value) assigned = assigned ~ value)
         c new() foo = "one"
         c new() foo = "two"
         assigned shouldBe("onetwo")

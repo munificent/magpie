@@ -26,9 +26,9 @@ class GenericInterface
     end
     
     get string String =
-        var result = name + "["
-        result = result + String join(typeParams)
-        result + "]"
+        var result = name ~ "["
+        result = result ~ String join(typeParams)
+        result ~ "]"
     end
     
     def declareMethod(name String, type ->)

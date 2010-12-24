@@ -3,15 +3,15 @@ package com.stuffwithstuff.magpie.interpreter.builtin;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
-public class BoolBuiltIns {
-  @Signature("==(other Any -> Bool)")
+public class BoolBuiltIns {  
+  @Shared
+  @Signature("equal?(left Bool, right Bool -> Bool)")
   public static class EqEq implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      if (arg.getValue() instanceof Boolean) {
-        return interpreter.createBool(thisObj.asBool() == arg.asBool());
-      } else {
-        return interpreter.createBool(false);
-      }
+      boolean left = arg.getTupleField(0).asBool();
+      boolean right = arg.getTupleField(1).asBool();
+      
+      return interpreter.createBool(left == right);
     }
   }
   

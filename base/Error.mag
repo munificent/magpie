@@ -14,8 +14,8 @@ class UnexpectedTypeError
     end
     
     get string String =
-        "Expected a value of type " + expectedType + " but was " +
-        actualType + "."
+        "Expected a value of type " ~ expectedType ~ " but was " ~
+        actualType ~ "."
     end
     
     var expectedType Type

@@ -13,18 +13,18 @@ class FunctionTypeExpression
         var result = if static? then "[" else "("
         for i = 0 until(names count)
         for name = names do
-            result = result + name + " "
+            result = result ~ name ~ " "
             let params then
-                result = result + params fields(i)
+                result = result ~ params fields(i)
             else
-                result = result + paramType
+                result = result ~ paramType
             end
             
-            if i < (names count - 1) then result = result + ", "
+            if i < (names count - 1) then result = result ~ ", "
         end
         
-        result = result + " -> " + returnType
-        result + if static? then "]" else ")"
+        result = result ~ " -> " ~ returnType
+        result ~ if static? then "]" else ")"
     end
     
     var names      List(String)

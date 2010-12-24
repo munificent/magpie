@@ -19,7 +19,9 @@ public class DefineExprParser implements ExprParser {
     Position position = parser.consume(TokenType.DEF).getPosition();
     
     if (parser.lookAhead(TokenType.NAME, TokenType.LEFT_PAREN) ||
-        parser.lookAhead(TokenType.NAME, TokenType.LEFT_BRACKET)) {
+        parser.lookAhead(TokenType.NAME, TokenType.LEFT_BRACKET) ||
+        parser.lookAhead(TokenType.OPERATOR, TokenType.LEFT_PAREN) ||
+        parser.lookAhead(TokenType.OPERATOR, TokenType.LEFT_BRACKET)) {
       // Local function.
       String name = parser.consume().getString();
       

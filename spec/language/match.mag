@@ -25,8 +25,8 @@ specify("A 'match' expression") with
     it should("only evaluate the first matched case") with
         var called = ""
         match true
-        case true then called = called + "1"
-        case true then called = called + "2"
+        case true then called = called ~ "1"
+        case true then called = called ~ "2"
         end
         called shouldBe("1")
     end
@@ -97,10 +97,10 @@ specify("The grammar for a 'match' expression") with
         match "first"
         case "first" then
             result = "a"
-            result = result + "b"
+            result = result ~ "b"
         case "second" then
             result = "bad"
-            result = result + "d"
+            result = result ~ "d"
         end
         result shouldBe("ab")
     end
@@ -111,7 +111,7 @@ specify("The grammar for a 'match' expression") with
         case "first" then
         else
             result = "a"
-            result = result + "b"
+            result = result ~ "b"
         end
         result shouldBe("ab")
     end

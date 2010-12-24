@@ -16,7 +16,28 @@ import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.NullInterpreterHost;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
-public class RuntimeBuiltIns {  
+public class RuntimeBuiltIns {
+  // TODO(bob): Move into reflection class.
+  @Shared
+  @Signature("same?(a, b -> Bool)")
+  public static class Same implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      Obj left = arg.getTupleField(0);
+      Obj right = arg.getTupleField(1);
+      
+      return interpreter.createBool(left == right);
+    }
+  }
+
+  // TODO(bob): Move into reflection class.
+  @Shared
+  @Signature("getClass(obj -> Class)")
+  public static class GetClass implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      return arg.getClassObj();
+    }
+  }
+
   // TODO(bob): All of these are pretty hacked together. Need to rationalize
   // the scope for these and clean them up.
   
