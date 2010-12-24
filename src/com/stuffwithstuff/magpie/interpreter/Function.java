@@ -18,7 +18,7 @@ public class Function implements Callable {
   @Override
   public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
     try {
-      //Profiler.push(mFunction.getPosition());
+      Profiler.push(mFunction.getPosition());
       
       // Create a new local scope for the function.
       EvalContext context = new EvalContext(mClosure, thisObj).pushScope();
@@ -33,7 +33,7 @@ public class Function implements Callable {
         return ex.getValue();
       }
     } finally {
-      //Profiler.pop();
+      Profiler.pop();
     }
   }
   
