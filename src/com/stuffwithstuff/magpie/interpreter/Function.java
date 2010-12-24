@@ -17,17 +17,23 @@ public class Function implements Callable {
   
   @Override
   public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-    // Create a new local scope for the function.
-    EvalContext context = new EvalContext(mClosure, thisObj).pushScope();
-    
-    // Bind arguments to their parameter names.
-    context.bind(interpreter, mFunction.getType().getParamNames(), arg);
-    
     try {
-      return interpreter.evaluate(mFunction.getBody(), context);
-    } catch (ReturnException ex) {
-      // There was an early return in the function, so return the value of that.
-      return ex.getValue();
+      //Profiler.push(mFunction.getPosition());
+      
+      // Create a new local scope for the function.
+      EvalContext context = new EvalContext(mClosure, thisObj).pushScope();
+      
+      // Bind arguments to their parameter names.
+      context.bind(interpreter, mFunction.getType().getParamNames(), arg);
+      
+      try {
+        return interpreter.evaluate(mFunction.getBody(), context);
+      } catch (ReturnException ex) {
+        // There was an early return in the function, so return the value of that.
+        return ex.getValue();
+      }
+    } finally {
+      //Profiler.pop();
     }
   }
   

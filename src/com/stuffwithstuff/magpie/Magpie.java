@@ -26,6 +26,8 @@ public class Magpie {
         runScript(args[0]);
       }
     }
+    
+    //Profiler.display();
   }
   
   private static void runRepl() {

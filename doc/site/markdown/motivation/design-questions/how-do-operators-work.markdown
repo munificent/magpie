@@ -53,3 +53,18 @@ like the `?!` example above.
 Because Magpie is mutable (at load time at least), you can always redefine an
 operator function if the existing definition doesn't do what you want.
 
+### Addendum
+
+After implementing this, I've stumbled onto one other limitation of this 
+approach: the type signature of the operator can now no longer vary based on the
+argument type. With the previous approach, we could define `+` on Ints to return
+and Int, and `+` on String to return a String. Now there's a single `+` function
+with a single return type.
+
+Generics may help here, but it will likely be an inevitable limitation of the
+approach. In the specific example above, I fixed it by just making `+` no longer
+used for string concatenation. Instead, `~` is used.
+
+
+
+
