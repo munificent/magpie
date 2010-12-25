@@ -25,12 +25,12 @@ end
 // TODO(bob): Hackish. Need to figure out what the semantics for this should be.
 def ==(left, right -> Bool)
     // Must be equal if they're the same object.
-    if Runtime same?(left, right) then return true
+    if Reflect same?(left, right) then return true
     
     // Must be the same class.
-    var leftClass = Runtime getClass(left)
-    var rightClass = Runtime getClass(right)
-    if Runtime same?(leftClass, rightClass) not then return false
+    var leftClass = Reflect getClass(left)
+    var rightClass = Reflect getClass(right)
+    if Reflect same?(leftClass, rightClass) not then return false
     
     // Leave it up to the class to decide.
     let equalFunc = leftClass equal? then
@@ -47,7 +47,7 @@ def !=(left, right -> Bool) (left == right) not
 
 def <(left, right -> Bool)
     // Leave it up to the class to decide.
-    let lessFunc = Runtime getClass(left) lessThan? then
+    let lessFunc = Reflect getClass(left) lessThan? then
         var less = lessFunc(left, right)
         unsafecast[Bool](less)
     else

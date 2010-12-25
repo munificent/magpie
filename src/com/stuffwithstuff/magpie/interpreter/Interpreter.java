@@ -104,12 +104,15 @@ public class Interpreter {
     // stack.
     mNeverClass = createGlobalClass("Never");
 
+    ClassObj reflectClass = createGlobalClass("Reflect");
+    
     // Register the built-in methods.
     BuiltIns.registerClass(ArrayBuiltIns.class, mArrayClass);
     BuiltIns.registerClass(BoolBuiltIns.class, mBoolClass);
     BuiltIns.registerClass(ClassBuiltIns.class, mClass);
     BuiltIns.registerClass(FunctionBuiltIns.class, mFnClass);
     BuiltIns.registerClass(IntBuiltIns.class, mIntClass);
+    BuiltIns.registerClass(ReflectBuiltIns.class, reflectClass);
     BuiltIns.registerClass(ObjectBuiltIns.class, mObjectClass);
     BuiltIns.registerClass(RecordBuiltIns.class, mRecordClass);
     BuiltIns.registerClass(RuntimeBuiltIns.class, mRuntimeClass);

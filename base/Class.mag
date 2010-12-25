@@ -9,7 +9,7 @@ extend class Class
     // the same object. This behavior can be "overridden" by providing a
     // different shared method named "equal?" in another class.
     shared def equal?(left, right -> Bool)
-        Runtime same?(left, right)
+        Reflect same?(left, right)
     end
 
     // This is needed just so that we can type-check the < operator. Should
