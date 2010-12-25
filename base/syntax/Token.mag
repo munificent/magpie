@@ -1,0 +1,64 @@
+class Token
+    get string String = tokenType ~~ value
+    
+    var tokenType TokenType
+    var value     Bool | Int | Nothing | String
+end
+
+class TokenType
+    shared def equal?(left TokenType, right TokenType)
+        left value == right value
+    end
+    
+    get string String = name
+    
+    var value Int
+    var name  String
+end
+
+// Turn TokenType in an enum-like class by defining a bunch of shared getters on
+// it that return instances of TokenType. This way, you can do "TokenType dot"
+// and get back the dot TokenType.
+do
+    var types = Array of(
+        ("leftParen", nothing),
+        ("rightParen", nothing),
+        ("leftBracket", nothing),
+        ("rightBracket", nothing),
+        ("leftBrace", nothing),
+        ("rightBrace", nothing),
+        ("comma", nothing),
+        ("dot", nothing),
+        ("equals", nothing),
+        ("name", String),
+        ("field", String),
+        ("operator", String),
+        ("boolLiteral", Bool),
+        ("intLiteral", Int),
+        ("stringLiteral", String))
+    for type = types
+    for i = 0 to(types count) do
+        // Define a TokenType "enum" for the type.
+        var tokenType = TokenType new(name: type _0, value: i)
+        Reflect getClass(TokenType) defineGetter(type _0, fn(-> TokenType) tokenType)
+        
+        // Also make a Token constructor for it.
+        var tokenMetaclass = Reflect getClass(Token)
+        if type _1 == nothing then
+            var token = Token new(tokenType: tokenType)
+            tokenMetaclass defineGetter(type _0, fn(-> Token) token)
+        else if type _1 == Bool then
+            tokenMetaclass defineMethod(type _0, fn(value Bool -> Token)
+                Token new(tokenType: tokenType, value: value)
+            end)
+        else if type _1 == Int then
+            tokenMetaclass defineMethod(type _0, fn(value Int -> Token)
+                Token new(tokenType: tokenType, value: value)
+            end)
+        else if type_1 == String then
+            tokenMetaclass defineMethod(type _0, fn(value String -> Token)
+                Token new(tokenType: tokenType, value: value)
+            end)
+        end
+    end
+end

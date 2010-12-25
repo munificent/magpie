@@ -25,7 +25,7 @@ public class RuntimeBuiltIns {
   public static class Now implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       // TODO(bob): Total hack to fit in an int.
-      int time = (int)(System.currentTimeMillis() - 1289000000000L);
+      int time = (int) (System.currentTimeMillis() - 1289000000000L);
       return interpreter.createInt(time);
     }
   }
