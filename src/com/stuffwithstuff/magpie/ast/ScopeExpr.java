@@ -19,7 +19,9 @@ public class ScopeExpr extends Expr {
 
   @Override
   public void toString(StringBuilder builder, String indent) {
-    mBody.toString(builder, indent);
+    builder.append("do\n");
+    mBody.toString(builder, indent + "    ");
+    builder.append("\n").append(indent).append("end");
   }
 
   private final Expr mBody;

@@ -124,6 +124,17 @@ def Function shouldThrow(errorClass Class ->)
     caught shouldBe(true)
 end
 
+// Verifies that a function does not throw an error. Will execute the function. 
+def Function shouldNotThrow()
+    var caught = false
+    do
+        this()
+    catch err Error then
+        caught = true
+    end
+    caught shouldBe(false)
+end
+
 // Verifies that the class has no type check errors.
 def Class shouldCheck()
     var errors = Runtime checkClass(this)

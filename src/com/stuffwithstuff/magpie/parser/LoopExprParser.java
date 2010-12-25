@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.BlockExpr;
+import com.stuffwithstuff.magpie.ast.ScopeExpr;
 import com.stuffwithstuff.magpie.ast.VariableExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.LoopExpr;
@@ -67,6 +68,8 @@ public class LoopExprParser implements ExprParser {
     
     parser.consume(TokenType.DO);
     Expr body = parser.parseBlock();
+
+    Position position = startPos.union(body.getPosition());
     
     // If there are "for" loops, mix in the generators and variables.
     if (generators.size() > 0) {
@@ -83,10 +86,10 @@ public class LoopExprParser implements ExprParser {
       for (Expr generator : generators) outerBlock.add(generator);
       
       // Then execute the loop.
-      outerBlock.add(new LoopExpr(startPos.union(body.getPosition()), conditions, body));
-      return new BlockExpr(Position.none(), outerBlock);
+      outerBlock.add(new LoopExpr(position, conditions, body));
+      return new ScopeExpr(new BlockExpr(position, outerBlock));
     }
     
-    return new LoopExpr(startPos.union(body.getPosition()), conditions, body);
+    return new ScopeExpr(new LoopExpr(position, conditions, body));
   }
 }

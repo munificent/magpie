@@ -176,12 +176,12 @@ public abstract class Parser {
   }
 
   private Token lookAhead(int distance) {
-    // read in as many as needed
+    // Read in as many as needed.
     while (distance >= mRead.size()) {
       mRead.add(mLexer.readToken());
     }
 
-    // get the queued token
+    // Get the queued token.
     return mRead.get(distance);
   }
 
