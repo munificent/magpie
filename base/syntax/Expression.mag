@@ -38,7 +38,7 @@ class AssignExpression
         
     get string String =
         let receiver then
-            receiver string ~ " " ~ name ~ " = " ~ value string
+            receiver string ~~ name ~ " = " ~ value string
         else
             name ~ " = " ~ value string
         end
@@ -89,7 +89,7 @@ class FunctionExpression
         construct(type: type, body: body)
     end
         
-    get string String = "fn " ~ type ~ " " ~ body
+    get string String = "fn " ~ type ~~ body
     
     var type FunctionTypeExpression
     var body Expression
@@ -160,7 +160,7 @@ class MessageExpression
     end
         
     get string String =
-        let receiver then receiver string ~ " " ~ name else name
+        let receiver then receiver string ~~ name else name
     end
     
     var receiver Expression | Nothing

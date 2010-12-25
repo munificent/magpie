@@ -1,3 +1,7 @@
+// WARNING. This file and the files it imports bootstrap low-level things like
+// the type system and basic operators like == and <. The order that code is
+// evaluated here is significant, and subtle.
+
 import("Array.mag")
 import("Class.mag")
 import("Function.mag")
@@ -16,8 +20,6 @@ import("Trueable.mag")
 
 import("Iterator.mag")
 import("List.mag")
-
-import("syntax/init.mag")
 
 interface Any
 end
@@ -71,9 +73,7 @@ def +(left Int, right Int -> Int)
     Int add(left, right)
 end
 
-def ~(left Stringable, right Stringable -> String)
-    left string concatenate(right string)
-end
-
 // Add an arrow operator to make function types out of other types:
 def =>(left Type, right Type -> Type) FunctionType new(left, right, false)
+
+import("syntax/init.mag")
