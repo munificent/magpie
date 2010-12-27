@@ -22,6 +22,7 @@ public interface ExprVisitor<R, C> {
   R visit(ThisExpr expr, C context);
   R visit(TupleExpr expr, C context);
   R visit(TypeofExpr expr, C context);
+  R visit(UnquoteExpr expr, C context);
   R visit(UnsafeCastExpr expr, C context);
   R visit(VariableExpr expr, C context);
 }

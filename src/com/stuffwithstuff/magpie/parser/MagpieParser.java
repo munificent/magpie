@@ -465,15 +465,33 @@ public class MagpieParser extends Parser {
       return new ThisExpr(last(1).getPosition());
     } else if (match(TokenType.NOTHING)) {
       return new NothingExpr(last(1).getPosition());
+    } else if ((mExpressionDepth > 0) && match(TokenType.BACKTICK)) {
+      Position position = last(1).getPosition();
+      Expr body;
+      if (match(TokenType.NAME)) {
+        body = new MessageExpr(last(1).getPosition(), null,
+            last(1).getString());
+      } else if (match(TokenType.LEFT_BRACE)) {
+        body = parseExpression();
+        body = new ExpressionExpr(body.getPosition(), body);
+        consume(TokenType.RIGHT_BRACE);
+      } else {
+        consume(TokenType.LEFT_PAREN);
+        body = parseExpression();
+        consume(TokenType.RIGHT_PAREN);
+      }
+      return new UnquoteExpr(position, body);
     } else if (match(TokenType.LEFT_PAREN)) {
       Expr expr = parseExpression();
       consume(TokenType.RIGHT_PAREN);
       return expr;
     } else if (match(TokenType.LEFT_BRACE)) {
+      mExpressionDepth++;
       Position position = last(1).getPosition();
       Expr expr = parseExpression();
       consume(TokenType.RIGHT_BRACE);
       position = position.union(last(1).getPosition());
+      mExpressionDepth--;
       return new ExpressionExpr(position, expr);
     }
     
@@ -502,4 +520,9 @@ public class MagpieParser extends Parser {
   
   private final Map<TokenType, ExprParser> mParsers =
     new HashMap<TokenType, ExprParser>();
+  // Counts the number of nested expression literals the parser is currently
+  // within. Zero means the parser is not inside an expression literal at all
+  // (i.e. in regular code). It will be one at the "here" token in "{ here }".
+  // Used to determine when an unquote expression is allowed.
+  private int mExpressionDepth;
 }

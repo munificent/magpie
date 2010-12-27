@@ -10,8 +10,9 @@ import com.stuffwithstuff.magpie.ast.*;
  * out of it for interacting with code at runtime.
  */
 public class ExprConverter implements ExprVisitor<Obj, Void> {
-  public static Obj convert(Interpreter interpreter, Expr expr) {
-    ExprConverter converter = new ExprConverter(interpreter);
+  public static Obj convert(Interpreter interpreter, Expr expr,
+      EvalContext context) {
+    ExprConverter converter = new ExprConverter(interpreter, context);
     return converter.convert(expr);
   }
   
@@ -166,6 +167,12 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   }
 
   @Override
+  public Obj visit(UnquoteExpr expr, Void dummy) {
+    // TODO(bob): Check that it evaluates to an expression?
+    return mInterpreter.evaluate(expr.getBody(), mContext);
+  }
+
+  @Override
   public Obj visit(UnsafeCastExpr expr, Void dummy) {
     Obj type = convert(expr.getType());
     Obj value = convert(expr.getValue());
@@ -179,8 +186,9 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
         convert(expr.getValue()));
   }
   
-  private ExprConverter(Interpreter interpreter) {
+  private ExprConverter(Interpreter interpreter, EvalContext context) {
     mInterpreter = interpreter;
+    mContext = context;
   }
   
   private Obj convert(Expr expr) {
@@ -204,4 +212,5 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   }
 
   private final Interpreter mInterpreter;
+  private final EvalContext mContext;
 }

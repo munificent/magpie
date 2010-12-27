@@ -8,6 +8,7 @@ public enum TokenType {
   RIGHT_BRACKET,
   LEFT_BRACE,
   RIGHT_BRACE,
+  BACKTICK,
   COMMA,
   DOT,
   EQUALS,

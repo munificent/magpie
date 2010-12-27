@@ -32,6 +32,7 @@ public class Lexer {
     case LEFT_PAREN:
     case LEFT_BRACKET:
     case LEFT_BRACE:
+    case BACKTICK:
     case COMMA:
     case DOT:
     case OPERATOR:
@@ -74,6 +75,7 @@ public class Lexer {
       if (match("]")) return characterToken(TokenType.RIGHT_BRACKET);
       if (match("{")) return characterToken(TokenType.LEFT_BRACE);
       if (match("}")) return characterToken(TokenType.RIGHT_BRACE);
+      if (match("`")) return characterToken(TokenType.BACKTICK);
       if (match(",")) return characterToken(TokenType.COMMA);
       if (match(".")) return characterToken(TokenType.DOT);
 
@@ -386,7 +388,7 @@ public class Lexer {
   }
 
   private boolean isOperator(final char c) {
-    return "`~!$%^&*-=+|/?<>".indexOf(c) != -1;
+    return "~!$%^&*-=+|/?<>".indexOf(c) != -1;
   }
 
   private enum LexState {

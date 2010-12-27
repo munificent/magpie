@@ -116,7 +116,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(ExpressionExpr expr, EvalContext context) {
-    return ExprConverter.convert(mInterpreter, expr.getBody());
+    return ExprConverter.convert(mInterpreter, expr.getBody(), context);
   }
 
   @Override
@@ -279,6 +279,12 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     }
 
     return mInterpreter.createTuple(fields);
+  }
+
+  @Override
+  public Obj visit(UnquoteExpr expr, EvalContext context) {
+    throw new UnsupportedOperationException(
+        "An unquoted expression cannot be directly evaluated.");
   }
 
   @Override

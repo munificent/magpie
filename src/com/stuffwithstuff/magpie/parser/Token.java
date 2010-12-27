@@ -38,6 +38,7 @@ public final class Token {
       case RIGHT_BRACKET: return "]";
       case LEFT_BRACE: return "{";
       case RIGHT_BRACE: return "}";
+      case BACKTICK: return "`";
       case COMMA: return ",";
       case DOT: return ".";
       case EQUALS: return "=";

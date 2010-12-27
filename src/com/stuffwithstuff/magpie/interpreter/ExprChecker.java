@@ -363,6 +363,12 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
+  public Obj visit(UnquoteExpr expr, EvalContext context) {
+    // TODO(bob): Check that it evaluates to an expression?
+    throw new RuntimeException("Not implemented yet!");
+  }
+
+  @Override
   public Obj visit(UnsafeCastExpr expr, EvalContext context) {
     Obj type = mInterpreter.evaluate(expr.getType(), mStaticContext);
     
