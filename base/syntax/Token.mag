@@ -34,25 +34,21 @@ do
         // Also make a Token constructor for it.
         var tokenMetaclass = Reflect getClass(Token)
         if type == "boolLiteral" then
-            print("bool method" ~~ type)
             // Define a Token constructor that takes a Bool value.
             tokenMetaclass defineMethod(type, fn(value Bool -> Token)
                 Token new(tokenType: tokenType, value: value)
             end)
         else if type == "intLiteral" then
-            print("int method" ~~ type)
             // Define a Token constructor that takes an Int value.
             tokenMetaclass defineMethod(type, fn(value Int -> Token)
                 Token new(tokenType: tokenType, value: value)
             end)
         else if "name field operator stringLiteral" contains?(type) then
-            print("string method" ~~ type)
             // Define a Token constructor that takes a String value.
             tokenMetaclass defineMethod(type, fn(value String -> Token)
                 Token new(tokenType: tokenType, value: value)
             end)
         else
-            print("getter" ~~ type)
             // Token doesn't have a value, so just define a getter to return a
             // singleton instance of it.
             var token = Token new(tokenType: tokenType)
