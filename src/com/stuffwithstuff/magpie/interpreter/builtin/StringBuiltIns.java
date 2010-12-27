@@ -1,5 +1,8 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
@@ -21,8 +24,7 @@ public class StringBuiltIns {
     }
   }
   
-  // TODO(bob): May want to strongly-type arg at some point.
-  @Signature("concatenate(other -> String)")
+  @Signature("concatenate(other String -> String)")
   public static class Concatenate implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String left = thisObj.asString();
@@ -39,6 +41,33 @@ public class StringBuiltIns {
     }
   }
   
+  @Signature("split(delimiter String -> List(String))")
+  public static class Split implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      String string = thisObj.asString();
+      String delimiter = arg.asString();
+      
+      // Note: We're not using String#split because we don't want to split on
+      // a regex, just a literal delimiter.
+      List<Obj> substrings = new ArrayList<Obj>();
+      int start = 0;
+      while (start != -1) {
+        int end = string.indexOf(delimiter, start);
+        String substring;
+        if (end != -1) {
+          substring = string.substring(start, end);
+          start = end + delimiter.length();
+        } else {
+          substring = string.substring(start);
+          start = -1;
+        }
+        substrings.add(interpreter.createString(substring));
+      }
+      
+      return interpreter.createArray(substrings);
+    }
+  }
+
   @Signature("substring(arg -> String)")
   public static class Substring implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
