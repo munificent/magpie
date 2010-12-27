@@ -465,8 +465,6 @@ public class MagpieParser extends Parser {
       return new ThisExpr(last(1).getPosition());
     } else if (match(TokenType.NOTHING)) {
       return new NothingExpr(last(1).getPosition());
-    } else if (match(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)) {
-      return new NothingExpr(last(2).getPosition().union(last(1).getPosition()));
     } else if (match(TokenType.LEFT_PAREN)) {
       Expr expr = parseExpression();
       consume(TokenType.RIGHT_PAREN);
