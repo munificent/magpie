@@ -23,7 +23,6 @@ do
     var types = ("leftParen rightParen leftBracket rightBracket leftBrace " ~
                 "rightBrace comma dot equals name field operator boolLiteral " ~
                 "intLiteral stringLiteral") split(" ")
-    print(types)
     for type = types
     for i = 0 to(types count) do
         // Define a TokenType "enum" for the type.
