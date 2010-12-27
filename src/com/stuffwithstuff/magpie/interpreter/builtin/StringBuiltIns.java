@@ -24,6 +24,16 @@ public class StringBuiltIns {
     }
   }
   
+  @Signature("contains?(other String -> Bool)")
+  public static class Contains implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      String left = thisObj.asString();
+      String right = arg.asString();
+      
+      return interpreter.createBool(left.contains(right));
+    }
+  }
+
   @Signature("concatenate(other String -> String)")
   public static class Concatenate implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
