@@ -1,5 +1,5 @@
 ^title Operators
-^index 6
+^index 5
 
 Like Smalltalk and Lisp, but unlike most other languages, Magpie does not have any built-in operators. Any name that starts with a punctuation character defines an *operator*. These are all valid operators:
 
@@ -7,6 +7,10 @@ Like Smalltalk and Lisp, but unlike most other languages, Magpie does not have a
     +   -   /   *#$%   +something    *3
 
 The only difference between an operator and a regular identifier is that operators appear in infix position&mdash; the two arguments to them surround the operator.
+
+<p class="future">
+This is out-of-date. Operators don't work this way any more!
+</p>
 
 ### Using Operators
 

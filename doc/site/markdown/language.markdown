@@ -10,10 +10,10 @@ members of classes, etc.
 This section is broken down into:
 
 1. [Program Structure](language/program-structure.html)
-1. [Atomic Values](language/atomic-values.html)
-1. [Compound Values](language/compound-values.html)
+1. [Objects](language/objects.html)
 1. [Functions](language/functions.html)
 1. [Messages](language/messages.html)
+1. [Operators](language/operators.html)
 1. [Variables](language/variables.html)
 1. [Flow Control](language/flow-control.html)
 1. [Classes](language/classes.html)

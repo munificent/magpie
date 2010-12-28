@@ -1,5 +1,5 @@
 ^title Functions
-^index 4
+^index 3
 
 Some purist OOP languages don't have functions at all&mdash; everything is objects and message sends. Magpie isn't quite so dogmatic. Its functions *are* objects, but they work more or less like you'd expect a normal function to behave.
 

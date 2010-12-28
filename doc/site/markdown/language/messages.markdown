@@ -1,5 +1,5 @@
 ^title Messages
-^index 5
+^index 4
 
 Like any true-blue OOP language, the heart of Magpie is *messages*: things you tell objects to do. Almost everywhere you see an identifier like `foo`, you're seeing a message. Here's a simple example:
 
