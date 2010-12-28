@@ -308,7 +308,6 @@ public class Lexer {
     if (text.equals("match")) return new Token(position, TokenType.MATCH);
     if (text.equals("nothing")) return new Token(position, TokenType.NOTHING);
     if (text.equals("or")) return new Token(position, TokenType.OR);
-    if (text.equals("return")) return new Token(position, TokenType.RETURN);
     if (text.equals("set")) return new Token(position, TokenType.SET);
     if (text.equals("shared")) return new Token(position, TokenType.SHARED);
     if (text.equals("then")) return new Token(position, TokenType.THEN);

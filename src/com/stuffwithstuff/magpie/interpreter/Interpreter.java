@@ -197,6 +197,8 @@ public class Interpreter {
   }
   
   public Obj getMember(Position position, Obj receiver, String name) {
+    Expect.notNull(receiver);
+    
     // Look for a getter.
     Member member = ClassObj.findMember(null, receiver, name);
     if (member != null) {

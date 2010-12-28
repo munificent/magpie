@@ -59,6 +59,12 @@ public abstract class Parser {
     for (int i = 0; i < types.length; i++) {
       if (!lookAhead(i).getType().equals(types[i]))
         return false;
+      
+      // TODO(bob): Kinda gross. If we're looking for a NAME, we need to make
+      // sure that it is *not* a claimed keyword.
+      if ((types[i] == TokenType.NAME) && isKeyword(lookAhead(i).getString())) {
+        return false;
+      }
     }
 
     return true;
@@ -175,6 +181,8 @@ public abstract class Parser {
     throw new ParseException(builder.toString());
   }
 
+  protected abstract boolean isKeyword(String name);
+  
   private Token lookAhead(int distance) {
     // Read in as many as needed.
     while (distance >= mRead.size()) {

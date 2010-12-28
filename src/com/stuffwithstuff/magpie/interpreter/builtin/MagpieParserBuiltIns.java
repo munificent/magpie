@@ -29,42 +29,82 @@ public class MagpieParserBuiltIns {
       
       if (arg.getClassObj() == interpreter.getStringClass()) {
         // Parsing a name token with the given name.
-        parser.consume(TokenType.NAME);
-        if (!parser.last(1).getString().equals(arg.asString())) {
+        // Note: we're doing this explicitly instead of just calling
+        //   parser.consume(TokenType.NAME);
+        // because that explicitly does *not* consume keyword tokens, which are
+        // exactly the tokens we *do* want to consume here.
+        if (parser.current().getType() != TokenType.NAME) {
           // TODO(bob): Better error reporting.
           return interpreter.throwError("ParseError");
         }
+        if (!parser.current().getString().equals(arg.asString())) {
+          // TODO(bob): Better error reporting.
+          return interpreter.throwError("ParseError");
+        }
+        parser.consume();
       } else {
-        // Note: the values here must be kept in sync with the order that they
-        // are defined in Token.mag.
-        TokenType type;
-        switch (arg.getField("value").asInt()) {
-        case 0: type = TokenType.LEFT_PAREN; break;
-        case 1: type = TokenType.RIGHT_PAREN; break;
-        case 2: type = TokenType.LEFT_BRACKET; break;
-        case 3: type = TokenType.RIGHT_BRACKET; break;
-        case 4: type = TokenType.LEFT_BRACE; break;
-        case 5: type = TokenType.RIGHT_BRACE; break;
-        case 6: type = TokenType.COMMA; break;
-        case 7: type = TokenType.DOT; break;
-        case 8: type = TokenType.EQUALS; break;
-        case 9: type = TokenType.NAME; break;
-        case 10: type = TokenType.FIELD; break;
-        case 11: type = TokenType.OPERATOR; break;
-        case 12: type = TokenType.BOOL; break;
-        case 13: type = TokenType.INT; break;
-        case 14: type = TokenType.STRING; break;
-        default:
-          // TODO(bob): Better error reporting.
-          return interpreter.throwError("ParseError");
-        }
-        
-        parser.consume(type);
+        parser.consume(convertType(interpreter, arg));
       }
       return interpreter.nothing();
     }
   }
+
+  @Signature("lookAheadAny(tokens -> Bool)")
+  public static class LookAheadAny implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      MagpieParser parser = (MagpieParser) thisObj.getValue();
+      
+      // TODO(bob): Hackish. Assumes arg is tuple.
+      int count = arg.getField("count").asInt();
+      TokenType[] types = new TokenType[count];
+      for (int i = 0; i < count; i++) {
+        types[i] = convertType(interpreter, arg.getTupleField(i));
+      }
+      
+      return interpreter.createBool(parser.lookAheadAny(types));
+    }
+  }
   
+  private static TokenType convertType(Interpreter interpreter, Obj tokenType) {
+    // Note: the values here must be kept in sync with the order that they
+    // are defined in Token.mag.
+    TokenType type;
+    switch (tokenType.getField("value").asInt()) {
+    case 0: type = TokenType.LEFT_PAREN; break;
+    case 1: type = TokenType.RIGHT_PAREN; break;
+    case 2: type = TokenType.LEFT_BRACKET; break;
+    case 3: type = TokenType.RIGHT_BRACKET; break;
+    case 4: type = TokenType.LEFT_BRACE; break;
+    case 5: type = TokenType.RIGHT_BRACE; break;
+    case 6: type = TokenType.COMMA; break;
+    case 7: type = TokenType.DOT; break;
+    case 8: type = TokenType.EQUALS; break;
+    case 9: type = TokenType.LINE; break;
+    case 10: type = TokenType.NAME; break;
+    case 11: type = TokenType.FIELD; break;
+    case 12: type = TokenType.OPERATOR; break;
+    case 13: type = TokenType.BOOL; break;
+    case 14: type = TokenType.INT; break;
+    case 15: type = TokenType.STRING; break;
+    default:
+      // TODO(bob): Better error reporting.
+      interpreter.throwError("ParseError");
+      type = TokenType.EOF;
+    }
+    
+    return type;
+  }
+  
+  @Signature("parseExpression(-> Expression)")
+  public static class ParseExpression implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      MagpieParser parser = (MagpieParser) thisObj.getValue();
+      
+      return ExprConverter.convert(interpreter, parser.parseExpression(), 
+          interpreter.createTopLevelContext());
+    }
+  }
+
   private static class MagpieExprParser implements ExprParser {
     public MagpieExprParser(Interpreter interpreter, Obj parser) {
       mInterpreter = interpreter;

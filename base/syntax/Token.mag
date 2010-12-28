@@ -1,6 +1,24 @@
 class Token
     get string String = tokenType ~~ value
     
+    shared get leftParen     Token = Token new(TokenType leftParen)
+    shared get rightParen    Token = Token new(TokenType rightParen)
+    shared get leftBracket   Token = Token new(TokenType leftBracket)
+    shared get rightBracket  Token = Token new(TokenType rightBracket)
+    shared get leftBrace     Token = Token new(TokenType leftBrace)
+    shared get rightBrace    Token = Token new(TokenType rightBrace)
+    shared get comma         Token = Token new(TokenType comma)
+    shared get dot           Token = Token new(TokenType dot)
+    shared get equals        Token = Token new(TokenType equals)
+    shared get line          Token = Token new(TokenType line)
+    
+    shared def name(name String -> Token) Token new(TokenType name, name)
+    shared def field(name String -> Token) Token new(TokenType field, name)
+    shared def operator(name String -> Token) Token new(TokenType operator, name)
+    shared def boolLiteral(value Bool -> Token) Token new(TokenType boolLiteral, value)
+    shared def intLiteral(value Int -> Token) Token new(TokenType intLiteral, value)
+    shared def stringLiteral(value String -> Token) Token new(TokenType stringLiteral, value)
+
     var tokenType TokenType
     var value     Bool | Int | Nothing | String
 end
@@ -10,12 +28,36 @@ class TokenType
         left value == right value
     end
     
+    shared def new(value Int, name String) construct(value: value, name: name)
+    
+    shared get leftParen     TokenType = TokenType new(0, "leftParen")
+    shared get rightParen    TokenType = TokenType new(1, "rightParen")
+    shared get leftBracket   TokenType = TokenType new(2, "leftBracket")
+    shared get rightBracket  TokenType = TokenType new(3, "rightBracket")
+    shared get leftBrace     TokenType = TokenType new(4, "leftBrace")
+    shared get rightBrace    TokenType = TokenType new(5, "rightBrace")
+    shared get comma         TokenType = TokenType new(6, "comma")
+    shared get dot           TokenType = TokenType new(7, "dot")
+    shared get equals        TokenType = TokenType new(8, "equals")
+    shared get line          TokenType = TokenType new(9, "line")
+    shared get name          TokenType = TokenType new(10, "name")
+    shared get field         TokenType = TokenType new(11, "field")
+    shared get operator      TokenType = TokenType new(12, "operator")
+    shared get boolLiteral   TokenType = TokenType new(13, "boolLiteral")
+    shared get intLiteral    TokenType = TokenType new(14, "intLiteral")
+    shared get stringLiteral TokenType = TokenType new(15, "stringLiteral")
+
     get string String = name
     
     var value Int
     var name  String
 end
 
+// Unfortunately, we can't be this clever here. Token needs to be evaluated
+// before any of the parsers can be evaluated. That means it can't use anything
+// fancy like... uh... "to" because that would require importing "Int.mag"
+// before this, but then Int.mag in turn couldn't use any parse words.
+/*
 // Turn TokenType in an enum-like class by defining a bunch of shared getters on
 // it that return instances of TokenType. This way, you can do "TokenType dot"
 // and get back the dot TokenType.
@@ -57,3 +99,4 @@ do
         end
     end
 end
+*/

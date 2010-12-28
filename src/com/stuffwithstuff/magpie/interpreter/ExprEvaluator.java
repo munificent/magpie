@@ -133,6 +133,9 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     // Evaluate the condition.
     boolean passed = true;
     Obj result = evaluate(expr.getCondition(), context);
+    if (result == null) {
+      result = evaluate(expr.getCondition(), context);
+    }
     if (expr.isLet()) {
       // "let" condition.
       // If it evaluates to nothing, the condition fails. Otherwise, bind the

@@ -45,7 +45,6 @@ public enum TokenType {
   MATCH,
   NOTHING,
   OR,
-  RETURN,
   SET,
   SHARED,
   THEN,

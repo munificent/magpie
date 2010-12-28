@@ -31,7 +31,6 @@ public class MagpieParser extends Parser {
     mParsers.put(TokenType.INTERFACE, new InterfaceExprParser());
     mParsers.put(TokenType.LET, new ConditionalExprParser());
     mParsers.put(TokenType.MATCH, new MatchExprParser());
-    mParsers.put(TokenType.RETURN, new ReturnExprParser());
     mParsers.put(TokenType.SHARED, new DefineExprParser());
     mParsers.put(TokenType.TYPEOF, new TypeofExprParser());
     mParsers.put(TokenType.UNSAFECAST, new UnsafeCastExprParser());
@@ -285,7 +284,12 @@ public class MagpieParser extends Parser {
     // Any Magpie expression can be used as a type declaration.
     return operator();
   }
-  
+
+  @Override
+  protected boolean isKeyword(String name) {
+    return (mKeywordParsers != null) && mKeywordParsers.containsKey(name);
+  }
+
   private Expr assignment() {
     Expr expr = composite();
     

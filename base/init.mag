@@ -2,88 +2,45 @@
 // the type system and basic operators like == and <. The order that code is
 // evaluated here is significant, and subtle.
 
-// TODO(bob): Move somewhere better.
-class BreakParser
-    def parse(parser MagpieParser -> Expression)
-        parser consume("break")
-        BreakExpression new()
-    end
-end
+// Implement Trueable for the built-in classes so we can evaluate conditionals.
+import("true.mag")
 
-MagpieParser registerKeyword("break", BreakParser new())
+// Import the base classes used to implement the keyword parsers.
+import("syntax/Token.mag")
+import("syntax/expressions.mag")
+import("syntax/FunctionTypeExpression.mag")
 
+// Register the keyword parsers. Do this here so that the full Magpie syntax is
+// available when defining the rest of the stuff. 
+import("syntax/BreakParser.mag")
+import("syntax/ReturnParser.mag")
+
+// Define the interface classes. Need to do this relatively early so that
+// subsequent files can define interface types.
+import("GenericInterface.mag")
+import("Interface.mag")
+
+// Define the "regular" base library stuff. This chunk should be relatively
+// straightforward.
 import("Array.mag")
 import("Class.mag")
 import("Function.mag")
 import("Int.mag")
-import("GenericInterface.mag")
-import("Interface.mag")
 import("Record.mag")
 import("String.mag")
 import("Tuple.mag")
 import("Type.mag")
+import("operators.mag")
 import("OrType.mag")
 import("Error.mag")
 import("Object.mag")
-import("Stringable.mag")
-import("Trueable.mag")
 
+// Finally, import stuff that just defines interfaces since they are only used
+// during type-checking.
+import("Any.mag")
 import("Iterator.mag")
 import("List.mag")
-
-interface Any
-end
-
-// TODO(bob): Hackish. Need to figure out what the semantics for this should be.
-def ==(left, right -> Bool)
-    // Must be equal if they're the same object.
-    if Reflect same?(left, right) then return true
-    
-    // Must be the same class.
-    var leftClass = Reflect getClass(left)
-    var rightClass = Reflect getClass(right)
-    if Reflect same?(leftClass, rightClass) not then return false
-    
-    // Leave it up to the class to decide.
-    let equalFunc = leftClass equal? then
-        var equal = equalFunc(left, right)
-        unsafecast[Bool](equal)
-    else
-        // Class doesn't provide an equality function, and they aren't the
-        // same object, so default to not equal.
-        false
-    end
-end
-
-def !=(left, right -> Bool) (left == right) not
-
-def <(left, right -> Bool)
-    // Leave it up to the class to decide.
-    let lessFunc = Reflect getClass(left) lessThan? then
-        var less = lessFunc(left, right)
-        unsafecast[Bool](less)
-    else
-        false
-    end
-end
-
-def >(left, right -> Bool)
-    (left < right) not and left != right
-end
-
-def <=(left, right -> Bool)
-    (left < right) or left == right
-end
-
-def >=(left, right -> Bool)
-    (left < right) not
-end
-
-def +(left Int, right Int -> Int)
-    Int add(left, right)
-end
-
-// Add an arrow operator to make function types out of other types:
-def =>(left Type, right Type -> Type) FunctionType new(left, right, false)
-
-import("syntax/init.mag")
+import("Stringable.mag")
+import("Trueable.mag")
+import("syntax/Expression.mag")
+import("syntax/KeywordParser.mag")

@@ -1,0 +1,6 @@
+// Implement Trueable for the built-in classes.
+get Object true? Bool = true
+get Bool true? Bool = this
+get Int true? Bool = this != 0
+get String true? Bool = this count > 0
+get Nothing true? Bool = false

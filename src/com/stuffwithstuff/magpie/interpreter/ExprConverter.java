@@ -20,16 +20,51 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   /**
    * Converts a Magpie expression object into a corresponding Java Expr.
    */
-  public static Expr convert(Interpreter interpreter, Obj expressionObj) {
-    ClassObj exprClass = expressionObj.getClassObj();
+  public static Expr convert(Interpreter interpreter, Obj expr) {
+    ClassObj exprClass = expr.getClassObj();
     // TODO(bob): Fill in other expression types.
     // TODO(bob): Support position information in Magpie parser.
-    if (exprClass == interpreter.getGlobal("BreakExpression")) {
+    if (exprClass == interpreter.getGlobal("ApplyExpression")) {
+      Expr target = convert(interpreter, expr.getField("target"));
+      Expr argument = convert(interpreter, expr.getField("argument"));
+      return new ApplyExpr(target, argument, false);
+    } else if (exprClass == interpreter.getGlobal("BoolExpression")) {
+      boolean value = expr.getField("value").asBool();
+      return new BoolExpr(Position.none(), value);
+    } else if (exprClass == interpreter.getGlobal("BreakExpression")) {
       return new BreakExpr(Position.none());
+    } else if (exprClass == interpreter.getGlobal("IntExpression")) {
+      int value = expr.getField("value").asInt();
+      return new IntExpr(Position.none(), value);
+    } else if (exprClass == interpreter.getGlobal("MessageExpression")) {
+      Obj receiverObj = expr.getField("receiver");
+      Expr receiver;
+      if (receiverObj == interpreter.nothing()) {
+        receiver = null;
+      } else {
+        receiver = convert(interpreter, receiverObj);
+      }
+      String name = expr.getField("name").asString();
+      return new MessageExpr(Position.none(), receiver, name);
+    } else if (exprClass == interpreter.getGlobal("NothingExpression")) {
+      return new NothingExpr(Position.none());
+    } else if (exprClass == interpreter.getGlobal("ReturnExpression")) {
+      Expr value = convert(interpreter, expr.getField("value"));
+      return new ReturnExpr(Position.none(), value);
+    } else if (exprClass == interpreter.getGlobal("StringExpression")) {
+      String value = expr.getField("value").asString();
+      return new StringExpr(Position.none(), value);
+    } else if (exprClass == interpreter.getGlobal("ThisExpression")) {
+      return new ThisExpr(Position.none());
+    } else if (exprClass == interpreter.getGlobal("UnsafeCastExpression")) {
+      Expr type = convert(interpreter, expr.getField("type"));
+      Expr value = convert(interpreter, expr.getField("value"));
+      return new UnsafeCastExpr(Position.none(), type, value);
     }
     
     // TODO(bob): Add better error-handling.
-    return null;
+    throw new UnsupportedOperationException(
+        "Other expression types not implemented yet!");
   }
   
   @Override

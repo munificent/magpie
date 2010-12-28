@@ -1,0 +1,51 @@
+// TODO(bob): Hackish. Need to figure out what the semantics for this should be.
+def ==(left, right -> Bool)
+    // Must be equal if they're the same object.
+    if Reflect same?(left, right) then return true
+    
+    // Must be the same class.
+    var leftClass = Reflect getClass(left)
+    var rightClass = Reflect getClass(right)
+    if Reflect same?(leftClass, rightClass) not then return false
+    
+    // Leave it up to the class to decide.
+    let equalFunc = leftClass equal? then
+        var equal = equalFunc(left, right)
+        unsafecast[Bool](equal)
+    else
+        // Class doesn't provide an equality function, and they aren't the
+        // same object, so default to not equal.
+        false
+    end
+end
+
+def !=(left, right -> Bool) (left == right) not
+
+def <(left, right -> Bool)
+    // Leave it up to the class to decide.
+    let lessFunc = Reflect getClass(left) lessThan? then
+        var less = lessFunc(left, right)
+        unsafecast[Bool](less)
+    else
+        false
+    end
+end
+
+def >(left, right -> Bool)
+    (left < right) not and left != right
+end
+
+def <=(left, right -> Bool)
+    (left < right) or left == right
+end
+
+def >=(left, right -> Bool)
+    (left < right) not
+end
+
+def +(left Int, right Int -> Int)
+    Int add(left, right)
+end
+
+// Add an arrow operator to make function types out of other types:
+def =>(left Type, right Type -> Type) FunctionType new(left, right, false)
