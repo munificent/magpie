@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.*;
+import com.stuffwithstuff.magpie.parser.Position;
 
 /**
  * Takes an expression in Java form and creates a first-class Magpie Expr object
@@ -14,6 +15,21 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
       EvalContext context) {
     ExprConverter converter = new ExprConverter(interpreter, context);
     return converter.convert(expr);
+  }
+  
+  /**
+   * Converts a Magpie expression object into a corresponding Java Expr.
+   */
+  public static Expr convert(Interpreter interpreter, Obj expressionObj) {
+    ClassObj exprClass = expressionObj.getClassObj();
+    // TODO(bob): Fill in other expression types.
+    // TODO(bob): Support position information in Magpie parser.
+    if (exprClass == interpreter.getGlobal("BreakExpression")) {
+      return new BreakExpr(Position.none());
+    }
+    
+    // TODO(bob): Add better error-handling.
+    return null;
   }
   
   @Override

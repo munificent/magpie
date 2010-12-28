@@ -20,6 +20,8 @@ end
 // it that return instances of TokenType. This way, you can do "TokenType dot"
 // and get back the dot TokenType.
 do
+    // Note: The order that these appear must be kept-in sync with the values
+    // used in MagpieParserBuiltIns.java.
     var types = ("leftParen rightParen leftBracket rightBracket leftBrace " ~
                 "rightBrace comma dot equals name field operator boolLiteral " ~
                 "intLiteral stringLiteral") split(" ")

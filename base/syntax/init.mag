@@ -1,3 +1,4 @@
 import("Expression.mag")
 import("FunctionTypeExpression.mag")
+import("KeywordParser.mag")
 import("Token.mag")

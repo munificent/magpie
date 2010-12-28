@@ -15,11 +15,11 @@ public class MagpieParser extends Parser {
     CONSUME_LINE_AFTER_EXPRESSION
   }
 
-  public MagpieParser(Lexer lexer) {
+  public MagpieParser(Lexer lexer, Map<String, ExprParser> keywordParsers) {
     super(lexer);
     
     // Register the parsers for the different keywords.
-    mParsers.put(TokenType.BREAK, new BreakExprParser());
+    // TODO(bob): Eventually these should all go away.
     mParsers.put(TokenType.CLASS, new ClassExprParser());
     mParsers.put(TokenType.DEF, new DefineExprParser());
     mParsers.put(TokenType.DO, new DoExprParser());
@@ -37,6 +37,13 @@ public class MagpieParser extends Parser {
     mParsers.put(TokenType.UNSAFECAST, new UnsafeCastExprParser());
     mParsers.put(TokenType.VAR, new VariableExprParser());
     mParsers.put(TokenType.WHILE, new LoopExprParser());
+    
+    // Register the provided parsers.
+    mKeywordParsers = keywordParsers;
+  }
+  
+  public MagpieParser(Lexer lexer) {
+    this(lexer, null);
   }
   
   public List<Expr> parse() {
@@ -496,6 +503,12 @@ public class MagpieParser extends Parser {
     }
     
     // See if we're at a keyword we know how to parse.
+    if ((mKeywordParsers != null) && (current().getType() == TokenType.NAME)) {
+      ExprParser parser = mKeywordParsers.get(current().getString());
+      if (parser != null) {
+        return parser.parse(this);
+      }
+    }
     ExprParser parser = mParsers.get(current().getType());
     if (parser != null) {
       return parser.parse(this);
@@ -520,6 +533,8 @@ public class MagpieParser extends Parser {
   
   private final Map<TokenType, ExprParser> mParsers =
     new HashMap<TokenType, ExprParser>();
+  private final Map<String, ExprParser> mKeywordParsers;
+  
   // Counts the number of nested expression literals the parser is currently
   // within. Zero means the parser is not inside an expression literal at all
   // (i.e. in regular code). It will be one at the "here" token in "{ here }".

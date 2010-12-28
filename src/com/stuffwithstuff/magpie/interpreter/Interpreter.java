@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.interpreter.builtin.*;
+import com.stuffwithstuff.magpie.parser.ExprParser;
 import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.util.Expect;
 
@@ -82,6 +83,7 @@ public class Interpreter {
     mDynamicClass = createGlobalClass("Dynamic");
     mFnClass = createGlobalClass("Function");
     mIntClass = createGlobalClass("Int");
+    mMagpieParserClass = createGlobalClass("MagpieParser");
     mRecordClass = createGlobalClass("Record");
     mRuntimeClass = createGlobalClass("Runtime");
     mStringClass = createGlobalClass("String");
@@ -112,9 +114,10 @@ public class Interpreter {
     BuiltIns.registerClass(ClassBuiltIns.class, mClass);
     BuiltIns.registerClass(FunctionBuiltIns.class, mFnClass);
     BuiltIns.registerClass(IntBuiltIns.class, mIntClass);
-    BuiltIns.registerClass(ReflectBuiltIns.class, reflectClass);
+    BuiltIns.registerClass(MagpieParserBuiltIns.class, mMagpieParserClass);
     BuiltIns.registerClass(ObjectBuiltIns.class, mObjectClass);
     BuiltIns.registerClass(RecordBuiltIns.class, mRecordClass);
+    BuiltIns.registerClass(ReflectBuiltIns.class, reflectClass);
     BuiltIns.registerClass(RuntimeBuiltIns.class, mRuntimeClass);
     BuiltIns.registerClass(StringBuiltIns.class, mStringClass);
     BuiltIns.registerFunctions(BuiltInFunctions.class, this);
@@ -309,6 +312,7 @@ public class Interpreter {
   public ClassObj getFunctionClass() { return mFnClass; }
   public ClassObj getIntClass() { return mIntClass; }
   public ClassObj getMetaclass() { return mClass; }
+  public ClassObj getMagpieParserClass() { return mMagpieParserClass; }
   public ClassObj getNeverClass() { return mNeverClass; }
   public ClassObj getNothingClass() { return mNothingClass; }
   public ClassObj getObjectClass() { return mObjectClass; }
@@ -398,6 +402,14 @@ public class Interpreter {
   
   public void popScriptPath() {
     mScriptPaths.pop();
+  }
+  
+  public Map<String, ExprParser> getKeywordParsers() {
+    return mKeywordParsers;
+  }
+  
+  public void registerKeywordParser(String keyword, ExprParser parser) {
+    mKeywordParsers.put(keyword, parser);
   }
   
   private ClassObj createGlobalClass(String name) {
@@ -507,6 +519,7 @@ public class Interpreter {
   private final ClassObj mDynamicClass;
   private final ClassObj mFnClass;
   private final ClassObj mIntClass;
+  private final ClassObj mMagpieParserClass;
   private final ClassObj mNothingClass;
   private final ClassObj mNeverClass;
   private final ClassObj mObjectClass;
@@ -517,4 +530,6 @@ public class Interpreter {
   
   private final Obj mNothing;
   private final Stack<String> mScriptPaths = new Stack<String>();
+  private final Map<String, ExprParser> mKeywordParsers =
+    new HashMap<String, ExprParser>();
 }
