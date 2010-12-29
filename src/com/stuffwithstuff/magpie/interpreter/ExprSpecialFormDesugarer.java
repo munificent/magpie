@@ -232,11 +232,20 @@ public class ExprSpecialFormDesugarer implements ExprVisitor<Expr, Void> {
       return new BreakExpr(expr.getPosition());
     } else if (name.equals("%return%")) {
       return new ReturnExpr(expr.getPosition(), expr.getArg());
+    } else if (name.equals("%unsafecast%")) {
+      return specialFormUnsafeCast(expr.getPosition(), expr.getArg());
     } else if (name.equals("%var%")) {
       return specialFormVar(expr.getPosition(), expr.getArg());
     }
     
     return null;
+  }
+  
+  Expr specialFormUnsafeCast(Position position, Expr arg) {
+    Expr type = ((TupleExpr)arg).getFields().get(0);
+    Expr value = ((TupleExpr)arg).getFields().get(1);
+    
+    return new UnsafeCastExpr(position, type, value);
   }
   
   Expr specialFormVar(Position position, Expr arg) {

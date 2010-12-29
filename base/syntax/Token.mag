@@ -5,9 +5,9 @@ class Token
     get string String = tokenType ~~ value
     
     // Using unsafecast here because "as" hasn't been defined yet.
-    get boolValue   Bool   = unsafecast[Bool](value)
-    get intValue    Int    = unsafecast[Int](value)
-    get stringValue String = unsafecast[String](value)
+    get boolValue   Bool   = %unsafecast%(Bool, value)
+    get intValue    Int    = %unsafecast%(Int, value)
+    get stringValue String = %unsafecast%(String, value)
     
     shared get leftParen     Token = Token new(TokenType leftParen)
     shared get rightParen    Token = Token new(TokenType rightParen)

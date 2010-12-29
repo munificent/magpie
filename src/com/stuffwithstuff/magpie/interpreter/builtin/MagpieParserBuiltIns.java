@@ -179,7 +179,20 @@ public class MagpieParserBuiltIns {
           interpreter.createTopLevelContext());
     }
   }
-
+  
+  @Signature("parseTypeExpression(-> Expression)")
+  public static class ParseTypeExpression implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      MagpieParser parser = (MagpieParser) thisObj.getValue();
+      
+      Expr expr = parser.parseTypeExpression();
+      expr = ExprSpecialFormDesugarer.desugar(expr);
+      
+      return ExprConverter.convert(interpreter, expr, 
+          interpreter.createTopLevelContext());
+    }
+  }
+  
   private static class MagpieExprParser implements ExprParser {
     public MagpieExprParser(Interpreter interpreter, Obj parser) {
       mInterpreter = interpreter;
