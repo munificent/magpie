@@ -85,6 +85,28 @@ public abstract class Parser {
     return false;
   }
 
+  // TODO(bob): Hack temp until all keyword parsing is moved into Magpie.
+  public boolean match(String keyword) {
+    if (current().getType() != TokenType.NAME) return false;
+    if (!current().getString().equals(keyword)) return false;
+
+    consume();
+    
+    return true;
+  }
+
+  // TODO(bob): Hack temp until all keyword parsing is moved into Magpie.
+  public boolean match(TokenType type, String keyword) {
+    if (!lookAhead(type)) return false;
+    if (lookAhead(1).getType() != TokenType.NAME) return false;
+    if (!lookAhead(1).getString().equals(keyword)) return false;
+
+    consume();
+    consume();
+    
+    return true;
+  }
+  
   /**
    * Looks ahead at the token stream to see if the next tokens match the
    * expected types, in order. If so, they are all consumed.

@@ -1,3 +1,6 @@
+// Note: This file is parsed before any of the parsewords have been defined, so
+// it only uses core syntax.
+
 class FunctionTypeExpression
     shared def new(names      List(String),
                    paramType  Expression,
@@ -8,6 +11,8 @@ class FunctionTypeExpression
     end
     
     get string String =
+        "not implemented!"
+        /*
         var params = paramType as[TupleExpression]
 
         var result = if static? then "[" else "("
@@ -25,10 +30,11 @@ class FunctionTypeExpression
         
         result = result ~ " -> " ~ returnType
         result ~ if static? then "]" else ")"
+        */
     end
-    
-    var names      List(String)
-    var paramType  Expression
-    var returnType Expression
-    var static?    Bool
 end
+
+FunctionTypeExpression declareField("names", false, fn List(String))
+FunctionTypeExpression declareField("paramType", false, fn Expression)
+FunctionTypeExpression declareField("returnType", false, fn Expression)
+FunctionTypeExpression declareField("static?", false, fn Bool)

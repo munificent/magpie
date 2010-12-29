@@ -1,3 +1,6 @@
+// Note: This file is parsed before any of the parsewords have been defined, so
+// it only uses core syntax.
+
 class AndExpression
     shared def new(left Expression, right Expression -> OrExpression)
         construct(left: left, right: right)
@@ -6,10 +9,10 @@ class AndExpression
     get string String =
         left string ~ " and " ~ right string
     end
-    
-    var left  Expression
-    var right Expression
 end
+
+AndExpression declareField("left", false, fn Expression)
+AndExpression declareField("right", false, fn Expression)
 
 class ApplyExpression
     shared def new(target Expression, argument Expression -> ApplyExpression)
@@ -19,10 +22,10 @@ class ApplyExpression
     get string String =
         target string ~ "(" ~ argument string ~ ")"
     end
-    
-    var target Expression
-    var argument Expression
 end
+
+ApplyExpression declareField("target", false, fn Expression)
+ApplyExpression declareField("argument", false, fn Expression)
 
 class AssignExpression
     shared def new(receiver Expression | Nothing,
@@ -38,29 +41,30 @@ class AssignExpression
             name ~ " = " ~ value string
         end
     end
-    
-    var receiver Expression | Nothing
-    var name     String
-    var value    Expression
 end
+
+AssignExpression declareField("receiver", false, fn Expression | Nothing)
+AssignExpression declareField("name", false, fn String)
+AssignExpression declareField("value", false, fn Expression)
 
 class BoolExpression
     shared def new(value Bool -> BoolExpression) construct(value: value)
     
     get string String = value string
-
-    var value Bool
 end
 
+BoolExpression declareField("value", false, fn Bool)
+
+// TODO(bob): Support catch expression.
 class BlockExpression
     shared def new(expressions List(Expression) -> BlockExpression)
         construct(expressions: expressions)
     end
     
     get string String = String join(expressions, "\n")
-    
-    var expressions List(Expression)
 end
+
+BlockExpression declareField("expressions", false, fn List(Expression))
 
 class BreakExpression
     get string String = "break"
@@ -74,21 +78,21 @@ class ExpressionExpression
     get string String =
         "{ " ~ body string ~ " }"
     end
-    
-    var body Expression
 end
+
+ExpressionExpression declareField("body", false, fn Expression)
 
 class FunctionExpression
     shared def new(type FunctionTypeExpression, body Expression ->
                    FunctionExpression)
-        construct(type: type, body: body)
+        construct(functionType: type, body: body)
     end
         
-    get string String = "fn " ~ type ~~ body
-    
-    var type FunctionTypeExpression
-    var body Expression
+    get string String = "fn " ~ functionType ~~ body
 end
+
+FunctionExpression declareField("functionType", false, fn FunctionTypeExpression)
+FunctionExpression declareField("body", false, fn Expression)
 
 class IfExpression
     shared def new(name String | Nothing,
@@ -108,20 +112,20 @@ class IfExpression
             "if "
         end ~ condition ~ " then " ~ thenArm ~ " else " ~ elseArm
     end
-    
-    var name String | Nothing
-    var condition Expression
-    var thenArm   Expression
-    var elseArm   Expression
 end
+
+IfExpression declareField("name", false, fn String | Nothing)
+IfExpression declareField("condition", false, fn Expression)
+IfExpression declareField("thenArm", false, fn Expression)
+IfExpression declareField("elseArm", false, fn Expression)
 
 class IntExpression
     shared def new(value Int -> IntExpression) construct(value: value)
     
     get string String = value string
-    
-    var value Int
 end
+
+IntExpression declareField("value", false, fn Int)
 
 class LoopExpression
     shared def new(conditions List(Expression), body Expression ->
@@ -130,6 +134,8 @@ class LoopExpression
     end
     
     get string String =
+        "not implemented!"
+        /*
         var result = ""
         for i = 0 until(conditions count)
         for condition = conditions do
@@ -142,11 +148,12 @@ class LoopExpression
             end
         end
         result ~ body
+        */
     end
-    
-    var conditions List(Expression)
-    var body       Expression
 end
+
+LoopExpression declareField("conditions", false, fn List(Expression))
+LoopExpression declareField("body", false, fn Expression)
 
 class MessageExpression
     shared def new(receiver Expression | Nothing,
@@ -157,10 +164,10 @@ class MessageExpression
     get string String =
         let receiver then receiver string ~~ name else name
     end
-    
-    var receiver Expression | Nothing
-    var name     String
 end
+
+MessageExpression declareField("receiver", false, fn Expression | Nothing)
+MessageExpression declareField("name", false, fn String)
 
 class NothingExpression
     get string String = "nothing"
@@ -174,10 +181,20 @@ class OrExpression
     get string String =
         left string ~ " or " ~ right string
     end
-    
-    var left  Expression
-    var right Expression
 end
+
+OrExpression declareField("left", false, fn Expression)
+OrExpression declareField("right", false, fn Expression)
+
+class RecordExpression
+    shared def new(fields List(String, Expression) -> RecordExpression)
+        construct(fields: fields)
+    end
+    
+    get string String = "record"
+end
+
+RecordExpression declareField("fields", false, fn List(String, Expression))
 
 class ReturnExpression
     shared def new(value Expression -> ReturnExpression)
@@ -185,9 +202,9 @@ class ReturnExpression
     end
         
     get string String = "return " ~ value
-    
-    var value Expression
 end
+
+ReturnExpression declareField("value", false, fn Expression)
 
 class ScopeExpression
     shared def new(body Expression -> ScopeExpression)
@@ -195,17 +212,17 @@ class ScopeExpression
     end
         
     get string String = "do " ~ body
-    
-    var body Expression
 end
+
+ScopeExpression declareField("body", false, fn Expression)
 
 class StringExpression
     shared def new(value String -> StringExpression) construct(value: value)
     
     get string String = "\"" ~ value ~ "\""
-
-    var value String
 end
+
+StringExpression declareField("value", false, fn String)
 
 class ThisExpression
     get string String = "this"
@@ -217,9 +234,9 @@ class TupleExpression
     end
     
     get string String = String join(fields)
-    
-    var fields List(Expression)
 end
+
+TupleExpression declareField("fields", false, fn List(Expression))
 
 class TypeofExpression
     shared def new(body Expression -> TypeofExpression)
@@ -227,9 +244,9 @@ class TypeofExpression
     end
         
     get string String = "typeof " ~ body
-    
-    var body Expression
 end
+
+TypeofExpression declareField("body", false, fn Expression)
 
 class UnsafeCastExpression
     shared def new(type Expression, value Expression -> UnsafeCastExpression)
@@ -237,10 +254,10 @@ class UnsafeCastExpression
     end
         
     get string String = "unsafecast[" ~ type ~ "](" ~ value ~ ")"
-    
-    var type  Expression
-    var value Expression
 end
+
+UnsafeCastExpression declareField("type", false, fn Expression)
+UnsafeCastExpression declareField("value", false, fn Expression)
 
 class VariableExpression
     shared def new(name String, value Expression -> VariableExpression)
@@ -250,7 +267,7 @@ class VariableExpression
     get string String =
         "var " ~ name ~ " = " ~ value string
     end
-
-    var name  String
-    var value Expression
 end
+
+VariableExpression declareField("name", false, fn String)
+VariableExpression declareField("value", false, fn Expression)

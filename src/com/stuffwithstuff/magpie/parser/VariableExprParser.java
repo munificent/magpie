@@ -1,5 +1,6 @@
 package com.stuffwithstuff.magpie.parser;
 
+/*
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.VariableExpr;
 
@@ -19,3 +20,4 @@ public class VariableExprParser implements ExprParser {
     return new VariableExpr(position, name, value);
   }
 }
+*/

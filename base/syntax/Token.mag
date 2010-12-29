@@ -1,5 +1,13 @@
+// Note: This file is parsed before any of the parsewords have been defined, so
+// it only uses core syntax.
+
 class Token
     get string String = tokenType ~~ value
+    
+    // Using unsafecast here because "as" hasn't been defined yet.
+    get boolValue   Bool   = unsafecast[Bool](value)
+    get intValue    Int    = unsafecast[Int](value)
+    get stringValue String = unsafecast[String](value)
     
     shared get leftParen     Token = Token new(TokenType leftParen)
     shared get rightParen    Token = Token new(TokenType rightParen)
@@ -18,10 +26,10 @@ class Token
     shared def boolLiteral(value Bool -> Token) Token new(TokenType boolLiteral, value)
     shared def intLiteral(value Int -> Token) Token new(TokenType intLiteral, value)
     shared def stringLiteral(value String -> Token) Token new(TokenType stringLiteral, value)
-
-    var tokenType TokenType
-    var value     Bool | Int | Nothing | String
 end
+
+Token declareField("tokenType", false, fn TokenType)
+Token declareField("value", false, fn Bool | Int | Nothing | String)
 
 class TokenType
     shared def equal?(left TokenType, right TokenType)
@@ -48,55 +56,7 @@ class TokenType
     shared get stringLiteral TokenType = TokenType new(15, "stringLiteral")
 
     get string String = name
-    
-    var value Int
-    var name  String
 end
 
-// Unfortunately, we can't be this clever here. Token needs to be evaluated
-// before any of the parsers can be evaluated. That means it can't use anything
-// fancy like... uh... "to" because that would require importing "Int.mag"
-// before this, but then Int.mag in turn couldn't use any parse words.
-/*
-// Turn TokenType in an enum-like class by defining a bunch of shared getters on
-// it that return instances of TokenType. This way, you can do "TokenType dot"
-// and get back the dot TokenType.
-do
-    // Note: The order that these appear must be kept-in sync with the values
-    // used in MagpieParserBuiltIns.java.
-    var types = ("leftParen rightParen leftBracket rightBracket leftBrace " ~
-                "rightBrace comma dot equals name field operator boolLiteral " ~
-                "intLiteral stringLiteral") split(" ")
-    for type = types
-    for i = 0 to(types count) do
-        // Define a TokenType "enum" for the type.
-        var tokenType = TokenType new(name: type, value: i)
-        Reflect getClass(TokenType) defineGetter(type,
-                fn(-> TokenType) tokenType)
-        
-        // Also make a Token constructor for it.
-        var tokenMetaclass = Reflect getClass(Token)
-        if type == "boolLiteral" then
-            // Define a Token constructor that takes a Bool value.
-            tokenMetaclass defineMethod(type, fn(value Bool -> Token)
-                Token new(tokenType: tokenType, value: value)
-            end)
-        else if type == "intLiteral" then
-            // Define a Token constructor that takes an Int value.
-            tokenMetaclass defineMethod(type, fn(value Int -> Token)
-                Token new(tokenType: tokenType, value: value)
-            end)
-        else if "name field operator stringLiteral" contains?(type) then
-            // Define a Token constructor that takes a String value.
-            tokenMetaclass defineMethod(type, fn(value String -> Token)
-                Token new(tokenType: tokenType, value: value)
-            end)
-        else
-            // Token doesn't have a value, so just define a getter to return a
-            // singleton instance of it.
-            var token = Token new(tokenType: tokenType)
-            tokenMetaclass defineGetter(type, fn(-> Token) token)
-        end
-    end
-end
-*/
+TokenType declareField("value", false, fn Int)
+TokenType declareField("name", false, fn String)

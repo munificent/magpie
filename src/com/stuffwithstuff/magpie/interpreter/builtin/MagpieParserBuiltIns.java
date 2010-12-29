@@ -1,11 +1,14 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
 import com.stuffwithstuff.magpie.ast.Expr;
+import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.ExprConverter;
+import com.stuffwithstuff.magpie.interpreter.ExprSpecialFormDesugarer;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.parser.ExprParser;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
+import com.stuffwithstuff.magpie.parser.Token;
 import com.stuffwithstuff.magpie.parser.TokenType;
 
 public class MagpieParserBuiltIns {
@@ -22,11 +25,12 @@ public class MagpieParserBuiltIns {
     }
   }
   
-  @Signature("consume(token TokenType | String ->)")
+  @Signature("consume(token TokenType | String -> Token)")
   public static class Consume implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       MagpieParser parser = (MagpieParser) thisObj.getValue();
       
+      Token token;
       if (arg.getClassObj() == interpreter.getStringClass()) {
         // Parsing a name token with the given name.
         // Note: we're doing this explicitly instead of just calling
@@ -41,11 +45,12 @@ public class MagpieParserBuiltIns {
           // TODO(bob): Better error reporting.
           return interpreter.throwError("ParseError");
         }
-        parser.consume();
+        token = parser.consume();
       } else {
-        parser.consume(convertType(interpreter, arg));
+        token = parser.consume(convertType(interpreter, arg));
       }
-      return interpreter.nothing();
+      
+      return convertToken(interpreter, token);
     }
   }
 
@@ -95,12 +100,82 @@ public class MagpieParserBuiltIns {
     return type;
   }
   
+  private static Obj convertToken(Interpreter interpreter, Token token) {
+    // Note: the values here must be kept in sync with the order that they
+    // are defined in Token.mag.
+    int tokenTypeValue;
+    String tokenTypeName;
+    switch (token.getType()) {
+    case LEFT_PAREN: tokenTypeValue = 0; tokenTypeName = "leftParen"; break;
+    case RIGHT_PAREN: tokenTypeValue = 1; tokenTypeName = "rightParen"; break;
+    case LEFT_BRACKET: tokenTypeValue = 2; tokenTypeName = "leftBracket"; break;
+    case RIGHT_BRACKET: tokenTypeValue = 3; tokenTypeName = "rightBracket"; break;
+    case LEFT_BRACE: tokenTypeValue = 4; tokenTypeName = "leftBrace"; break;
+    case RIGHT_BRACE: tokenTypeValue = 5; tokenTypeName = "leftBrace"; break;
+    case COMMA: tokenTypeValue = 6; tokenTypeName = "comma"; break;
+    case DOT: tokenTypeValue = 7; tokenTypeName = "dot"; break;
+    case EQUALS: tokenTypeValue = 8; tokenTypeName = "equals"; break;
+    case LINE: tokenTypeValue = 9; tokenTypeName = "line"; break;
+
+    case NAME: tokenTypeValue = 10; tokenTypeName = "name"; break;
+    case FIELD: tokenTypeValue = 11; tokenTypeName = "field"; break;
+    case OPERATOR: tokenTypeValue = 12; tokenTypeName = "operator"; break;
+
+    case BOOL: tokenTypeValue = 13; tokenTypeName = "boolLiteral"; break;
+    case INT: tokenTypeValue = 14; tokenTypeName = "intLiteral"; break;
+    case STRING: tokenTypeValue = 15; tokenTypeName = "stringLiteral"; break;
+
+    default:
+      // TODO(bob): Better error reporting.
+      interpreter.throwError("ParseError");
+      tokenTypeValue = -1;    
+      tokenTypeName = "";
+    }
+    
+    ClassObj tokenTypeClass = (ClassObj) interpreter.getGlobal("TokenType");
+    Obj tokenType = interpreter.instantiate(tokenTypeClass, null);
+    tokenType.setField("value", interpreter.createInt(tokenTypeValue));
+    tokenType.setField("name", interpreter.createString(tokenTypeName));
+    
+    ClassObj tokenClass = (ClassObj) interpreter.getGlobal("Token");
+    Obj tokenObj = interpreter.instantiate(tokenClass, null);
+    tokenObj.setField("tokenType", tokenType);
+    
+    if (token.getValue() instanceof Boolean) {
+      tokenObj.setField("value", interpreter.createBool(token.getBool()));
+    } else if (token.getValue() instanceof Integer) {
+      tokenObj.setField("value", interpreter.createInt(token.getInt()));
+    } else if (token.getValue() instanceof String) {
+      tokenObj.setField("value", interpreter.createString(token.getString()));
+    } else {
+      tokenObj.setField("value", interpreter.nothing());
+    }
+    
+    return tokenObj;
+  }
+  
+  @Signature("parseBlock(-> Expression)")
+  public static class ParseBlock implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      MagpieParser parser = (MagpieParser) thisObj.getValue();
+      
+      Expr expr = parser.parseBlock();
+      expr = ExprSpecialFormDesugarer.desugar(expr);
+      
+      return ExprConverter.convert(interpreter, expr, 
+          interpreter.createTopLevelContext());
+    }
+  }
+  
   @Signature("parseExpression(-> Expression)")
   public static class ParseExpression implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       MagpieParser parser = (MagpieParser) thisObj.getValue();
       
-      return ExprConverter.convert(interpreter, parser.parseExpression(), 
+      Expr expr = parser.parseExpression();
+      expr = ExprSpecialFormDesugarer.desugar(expr);
+      
+      return ExprConverter.convert(interpreter, expr, 
           interpreter.createTopLevelContext());
     }
   }

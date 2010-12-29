@@ -34,7 +34,6 @@ public class MagpieParser extends Parser {
     mParsers.put(TokenType.SHARED, new DefineExprParser());
     mParsers.put(TokenType.TYPEOF, new TypeofExprParser());
     mParsers.put(TokenType.UNSAFECAST, new UnsafeCastExprParser());
-    mParsers.put(TokenType.VAR, new VariableExprParser());
     mParsers.put(TokenType.WHILE, new LoopExprParser());
     
     // Register the provided parsers.

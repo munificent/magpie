@@ -8,8 +8,10 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.CheckError;
 import com.stuffwithstuff.magpie.interpreter.Checker;
+import com.stuffwithstuff.magpie.interpreter.ExprSpecialFormDesugarer;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.parser.Lexer;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
@@ -45,7 +47,12 @@ public class Script {
       MagpieParser parser = new MagpieParser(lexer,
           interpreter.getKeywordParsers());
   
-      interpreter.load(parser.parse());
+      List<Expr> parsed = parser.parse();
+      for (int i = 0; i < parsed.size(); i++) {
+        parsed.set(i, ExprSpecialFormDesugarer.desugar(parsed.get(i)));
+      }
+      
+      interpreter.load(parsed);
   
       // If there is a main() function, then we need to type-check first:
       if (interpreter.hasMain()) {

@@ -315,7 +315,6 @@ public class Lexer {
     if (text.equals("true")) return new Token(position, TokenType.BOOL, true);
     if (text.equals("typeof")) return new Token(position, TokenType.TYPEOF);
     if (text.equals("unsafecast")) return new Token(position, TokenType.UNSAFECAST);
-    if (text.equals("var")) return new Token(position, TokenType.VAR);
     if (text.equals("while")) return new Token(position, TokenType.WHILE);
     if (text.equals("with")) return new Token(position, TokenType.WITH);
     if (text.equals("=")) return new Token(position, TokenType.EQUALS);

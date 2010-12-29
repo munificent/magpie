@@ -398,7 +398,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       return existingType;
     }
   }
-  
+
   private Obj orTypes(Obj left, Obj right) {
     // Never is omitted.
     if (left == mInterpreter.getNeverClass()) return right;

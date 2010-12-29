@@ -3,6 +3,7 @@ package com.stuffwithstuff.magpie;
 import java.io.*;
 
 import com.stuffwithstuff.magpie.ast.Expr;
+import com.stuffwithstuff.magpie.interpreter.ExprSpecialFormDesugarer;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Profiler;
 import com.stuffwithstuff.magpie.interpreter.QuitException;
@@ -65,6 +66,7 @@ public class Magpie {
             interpreter.getKeywordParsers());
         
         Expr expr = parser.parseExpression();
+        expr = ExprSpecialFormDesugarer.desugar(expr);
         
         String result = interpreter.evaluateToString(expr);
         if (result != null) {

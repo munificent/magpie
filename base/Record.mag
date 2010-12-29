@@ -5,8 +5,8 @@ extend class Record
         // record's fields, we're good.
         for field = fields do
             // TODO(bob): Get rid of these when tuple fields are typed.
-            var name = field _0 expecting[String]
-            var fieldType = field _1 expecting[Type]
+            var name = unsafecast[String](field _0)
+            var fieldType = unsafecast[Type](field _1)
             if fieldType assignsFrom?(other getMemberType(name)) not then
                 return false
             end

@@ -24,6 +24,7 @@ public final class Token {
   
   public TokenType getType() { return mType; }
   
+  public Object  getValue()  { return mValue; }
   public boolean getBool()   { return ((Boolean)mValue).booleanValue(); }
   public int     getInt()    { return ((Integer)mValue).intValue(); }
   public double  getDouble() { return ((Double)mValue).doubleValue(); }
@@ -77,7 +78,6 @@ public final class Token {
       case THIS: return "this";
       case TYPEOF: return "typeof";
       case UNSAFECAST: return "unsafecast";
-      case VAR: return "var";
       case WHILE: return "while";
       case WITH: return "with";
 
