@@ -76,7 +76,6 @@ public final class Token {
       case SHARED: return "shared";
       case THEN: return "then";
       case THIS: return "this";
-      case TYPEOF: return "typeof";
       case WHILE: return "while";
       case WITH: return "with";
 

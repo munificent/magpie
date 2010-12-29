@@ -16,6 +16,7 @@ import("syntax/FunctionTypeExpression.mag")
 import("syntax/VarParser.mag")
 import("syntax/BreakParser.mag")
 import("syntax/ReturnParser.mag")
+import("syntax/TypeofParser.mag")
 import("syntax/UnsafeCastParser.mag")
 
 // Define the interface classes. Need to do this relatively early so that

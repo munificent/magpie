@@ -28,7 +28,9 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     ClassObj exprClass = expr.getClassObj();
     // TODO(bob): Fill in other expression types.
     // TODO(bob): Support position information in Magpie parser.
-    if (exprClass == interpreter.getGlobal("ApplyExpression")) {
+    if (exprClass == interpreter.getGlobal("AndExpression")) {
+      return convertAndExpr(interpreter, expr);
+    } else if (exprClass == interpreter.getGlobal("ApplyExpression")) {
       return convertApplyExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("AssignExpression")) {
       return convertAssignExpr(interpreter, expr);
@@ -50,6 +52,8 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
       return convertMessageExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("NothingExpression")) {
       return convertNothingExpr(interpreter, expr);
+    } else if (exprClass == interpreter.getGlobal("OrExpression")) {
+      return convertOrExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("RecordExpression")) {
       return convertRecordExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("ReturnExpression")) {
@@ -60,6 +64,8 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
       return convertThisExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("TupleExpression")) {
       return convertTupleExpr(interpreter, expr);
+    } else if (exprClass == interpreter.getGlobal("TypeofExpression")) {
+      return convertTypeofExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("UnsafeCastExpression")) {
       return convertUnsafeCastExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("VariableExpression")) {
@@ -69,6 +75,12 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     // TODO(bob): Add better error-handling.
     throw new UnsupportedOperationException(
         "Other expression types not implemented yet!");
+  }
+
+  private static Expr convertAndExpr(Interpreter interpreter, Obj expr) {
+    Expr left = convert(interpreter, expr.getField("left"));
+    Expr right = convert(interpreter, expr.getField("right"));
+    return new AndExpr(Position.none(), left, right);
   }
 
   private static Expr convertApplyExpr(Interpreter interpreter, Obj expr) {
@@ -165,6 +177,12 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     return new NothingExpr(Position.none());
   }
   
+  private static Expr convertOrExpr(Interpreter interpreter, Obj expr) {
+    Expr left = convert(interpreter, expr.getField("left"));
+    Expr right = convert(interpreter, expr.getField("right"));
+    return new OrExpr(Position.none(), left, right);
+  }
+
   private static Expr convertRecordExpr(Interpreter interpreter, Obj expr) {
     List<Obj> fieldObjs = expr.getField("fields").asArray();
     List<Pair<String, Expr>> fields = new ArrayList<Pair<String, Expr>>();
@@ -197,6 +215,11 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
       fields.add(convert(interpreter, field));
     }
     return new TupleExpr(fields);
+  }
+
+  private static Expr convertTypeofExpr(Interpreter interpreter, Obj expr) {
+    Expr body = convert(interpreter, expr.getField("body"));
+    return new TypeofExpr(Position.none(), body);
   }
 
   private static Expr convertUnsafeCastExpr(Interpreter interpreter, Obj expr) {
