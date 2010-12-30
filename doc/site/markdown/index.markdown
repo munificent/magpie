@@ -1,5 +1,4 @@
 ^title Welcome
-^index 1
 
 Thanks for coming. Let's get started. Magpie is fledgling programming language. If you like buzzwords, it is [object-oriented](http://en.wikipedia.org/wiki/Object-oriented_programming), [optionally-typed](http://lambda-the-ultimate.org/node/1311), and runs on the [JVM](http://en.wikipedia.org/wiki/Java_Virtual_Machine).
 
@@ -21,11 +20,11 @@ dynamic side will make it easy to start little scripts and small programs, and
 that its static checking and other features will allow those to grow into bigger
 reliable software.
 
-### Why Another Language?
+## Why Another Language?
 
 There are a slew of languages out there already. What's so interesting about this one? Here's the stuff that gets me excited about it:
 
-#### It's dynamic
+### It's dynamic
 
 It duck types and lets you pass around objects freely. It's a nice loose
 language for prototyping and tinkering. It doesn't have the boilerplate and
@@ -34,7 +33,7 @@ Magpie:
 
     print("Hi!")
 
-#### It type checks
+### It type checks
 
 On the other hand, sometimes it's really nice to be able to say, "anything you
 pass to this method is gonna need to support X, Y, and Z," and not have to write
@@ -52,7 +51,7 @@ everywhere](http://lambda-the-ultimate.org/node/3186). It has interfaces which
 duck type like
 [Go](http://golang.org/doc/effective_go.html#interfaces_and_types). Generics are in-progress.
 
-#### It's an open language
+### It's an open language
 
 Classes and objects are freely open to extension in Magpie. You should never
 need to create abominations like:
@@ -63,19 +62,19 @@ Just add it to the `String` class. Unlike other highly flexible languages,
 Magpie tries to make this safer and more manageable by providing other features
 like static checking to make sure you don't accidentally break things.
 
-#### It reads easy and writes flexibly
+### It reads easy and writes flexibly
 
 Magpie's core syntax is based on simple message sends with a minimum of
 ceremony. It looks a bit like Ruby or your favorite OOP language with a lot of the `.` and `;` stripped out.
 
 It was designed to be DSL-friendly. Names can freely use punctuation characters. You can define any binary operator you want. It supports Ruby-style block arguments to define your own scoped behavior and will at some point even let you define your own syntax extensions.
 
-#### It's functional
+### It's functional
 
 Closures, higher-order functions, and the other fun toys you like from
 functional languages are available in Magpie. You're free to define functions outside of classes and escape from the [kingdom of nouns](http://steve-yegge.blogspot.com/2006/03/execution-in-kingdom-of-nouns.html).
 
-#### It has an extensible type system
+### It has an extensible type system
 
 All types (the "things" that the static type-checker uses) are first-class
 objects in Magpie. Most of Magpie's type system is implemented itself in Magpie.
@@ -83,7 +82,7 @@ objects in Magpie. Most of Magpie's type system is implemented itself in Magpie.
 system, and it means that type annotations are just regular Magpie expressions
 evaluated during type-checking.
 
-### No, Really, Why Another Language?
+## No, Really, Why Another Language?
 
 That bullet list covers the points, but I don't think it captures the essence.
 There's a certain *way* that I want to be able to program, and Magpie is my
@@ -97,7 +96,7 @@ But but *but!* Once that's done, I want some guarantee that I didn't screw up. A
 
 If that sounds like the way you'd like to code, Magpie might be the language for you.
 
-### Now the Bad Part
+## Now the Bad Part
 
 Here's the deal. Magpie is very young. The egg has been laid, but still hasn't
 quite cracked open yet. Everything described here is implemented and working
@@ -109,7 +108,7 @@ language to *contribute to*, this is great news! Lots of interesting important
 decisions have yet to be made, and there's lots of fun stuff that needs coding.
 I'd love to have you involved.
 
-### Getting Started
+## Getting Started
 
 It should be pretty easy to get it up and running. You'll need to:
 
@@ -140,7 +139,7 @@ It should be pretty easy to get it up and running. You'll need to:
 
         $ ./magpie script/Hello.mag
 
-### Where to Go From Here
+## Where to Go From Here
 
 Since you've made it this far, you must be interested. You can learn more about
 the language from the [Magpie posts](http://journal.stuffwithstuff.com/category/magpie/) on my blog. (Take anything from before 2010 with a grain of salt. It used to be... different.)
