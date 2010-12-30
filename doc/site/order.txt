@@ -14,6 +14,7 @@ expressions/messages
 expressions/calls
 expressions/operators
 expressions/variables
+expressions/blocks
 expressions/flow-control
 classes
 classes/constructors

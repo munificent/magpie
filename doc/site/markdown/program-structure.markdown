@@ -2,16 +2,6 @@
 
 Magpie programs are stored in plain text files with a <tt>.mag</tt> file extension. Magpie does not compile ahead of time: programs are interpreted directly from source, from top to bottom like a typical scripting language.
 
-## Expressions
-
-Unlike most imperative languages, but like most functional languages, Magpie
-does not have *statements*, only *expressions*. Flow control, blocks, and
-variable declarations are all expressions which return values. This is valid in
-Magpie:
-
-    :::magpie
-    print(if result then "yes" else "no")
-
 ## Comments
 
 Comments are as in C, C++, Java, etc.:
@@ -60,28 +50,6 @@ If you specifically want to ignore a newline where it otherwise *would* separate
     bar()
     // Equivalent to:
     // var a = foo bar()
-
-## Blocks
-
-To evaluate several expressions where only a single one is expected, you can create a *block*. Many languages use curly braces (`{ }`) for blocks. In Magpie, a block starts with a newline and ends with `end` (or occasionally another keyword like `else`):
-
-    :::magpie
-    if happy? then print("I'm happy!") // No block.
-
-    if happy? then // <- A newline here starts the block.
-        print("I'm happy!")
-        print("Really happy!")
-    end // <- And this ends it.
-
-Blocks are allowed most places where an expression is expected. In fact, blocks *are* expressions: they evaluate to the last expression in the block:
-
-    :::magpie
-    var a =
-        print("hi")
-        3
-    end
-
-This will print "hi" and then define `a` with the value 3.
 
 ## Precedence
 

@@ -2,7 +2,7 @@
 
 Magpie doesn't shy away from imperative programming, so it supports the usual flow control structures you know and love, although it does try to spice them up a bit. Before we cover them, there's one minor point to cover first:
 
-### Truthiness
+## Truthiness
 
 Flow control is about evaluating an expression and then choosing an action based on whether or not the result is "true". That's easy if the value happens to be a boolean, but what if it's some other class?
 
@@ -26,7 +26,7 @@ Is really:
     :::magpie
     if something(other) true? then ...
 
-### if/then/else
+## if/then/else
 
 The simplest flow control structure, `if` lets you conditionally skip a chunk of code. It looks like this:
 
@@ -63,7 +63,7 @@ Since Magpie does not have statements, even flow control structures are expressi
 
 (This also means that Magpie has no need for a C-style ternary operator. `if` *is* the ternary operator.)
 
-### let/then/else
+## let/then/else
 
 Magpie has another flow control structure similar to `if` called `let`. It lumps a couple of sequential actions together into a single operation:
 
@@ -129,7 +129,7 @@ There is another bit of syntactic sugar `let` provides. If you leave off the con
 Need to document pattern-matching syntax here.
 </p>
 
-### Loops
+## Loops
 
 Many languages have three distinct loop structures: `for`, `while`, and `foreach` or something similar for generators. Magpie only has a single loop construct, but it subsumes all three of those. A simple loop looks like this:
 
@@ -140,13 +140,13 @@ Many languages have three distinct loop structures: `for`, `while`, and `foreach
 
 The `while something` part is the *clause*, and the expression after `do` (here a block) is the *body*. The clause is evaluated at the beginning of each loop iteration (including before the first). If it fails, the loop body is skipped and the loop ends. There are two kinds of clauses:
 
-#### while
+### while
 
 The simplest is `while`. It evaluates a condition expression. If it evaluates to false, the loop ends, otherwise it continues. For example:
 
     while 1 < 2 do print("forever...")
 
-#### for
+### for
 
 The other loop clause is `for`. It looks like:
 
@@ -181,7 +181,7 @@ All of this means that Magpie *only* has a `foreach`-like for loop. It doesn't h
 
 Here, `to` and `until` are just regular methods and not built-in keywords. They each return iterators that will iterate through a series of numbers.
 
-#### Multiple Clauses
+### Multiple Clauses
 
 I said earlier that Magpie only has a single loop expression. That's because clauses can actually be combined. A single loop can have as many clauses as you want, of either type, in any order. At the beginning of each iteration of a loop (including before the first one), *all* of the clauses are evaluated in the order they appear. If *any* clause fails, the loop body is skipped and the loop ends. For example:
 
@@ -231,7 +231,7 @@ Allowing multiple `for` clauses like this enables some handy idioms:
         if test(item) then found = item
     end
 
-#### Exiting Early
+### Exiting Early
 
 Inside the body of a loop, you can exit early using a `break` expression:
 
@@ -242,7 +242,7 @@ Inside the body of a loop, you can exit early using a `break` expression:
         somethingElse
     end
 
-#### Return Value
+### Return Value
 
 Because loops are expressions, they return a value.
 
@@ -250,7 +250,7 @@ Because loops are expressions, they return a value.
 Right now, a loop will always return `nothing`, but that will likely change. It will be possible to define an `else` clause for a loop and then the expression will return the last result of evaluating the body, the expression passed to `break` or the expression after `else` if the body was never entered.
 </p>
 
-### Conjunctions
+## Conjunctions
 
 What other languages call "logical operators", Magpie calls "conjunctions". They are considered flow control expressions and not operators because they conditionally execute some code&mdash; they short-circuit. There are two conjunctions in Magpie: `and` and `or`. Both of them are infix operators, like so:
 
