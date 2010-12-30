@@ -1,6 +1,5 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
-import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
@@ -8,6 +7,7 @@ import com.stuffwithstuff.magpie.interpreter.Field;
 import com.stuffwithstuff.magpie.interpreter.FnObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Member;
+import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class ClassBuiltIns {
@@ -142,7 +142,7 @@ public class ClassBuiltIns {
   }
 
   @Getter("name String")
-  public static class Name implements BuiltInCallable {
+  public static class GetName implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       ClassObj classObj = thisObj.asClass();
       
@@ -172,9 +172,9 @@ public class ClassBuiltIns {
       
       // Add the factory methods.
       Callable signify = new ClassConstruct(classObj);
-      metaclass.getMembers().defineMethod(Identifiers.CONSTRUCT, signify);
+      metaclass.getMembers().defineMethod(Name.CONSTRUCT, signify);
       // By default, "new" just signifies too.
-      metaclass.getMembers().defineMethod(Identifiers.NEW, signify);
+      metaclass.getMembers().defineMethod(Name.NEW, signify);
       
       return classObj;
     }

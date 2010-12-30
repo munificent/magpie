@@ -3,13 +3,13 @@ package com.stuffwithstuff.magpie.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.BlockExpr;
 import com.stuffwithstuff.magpie.ast.ScopeExpr;
 import com.stuffwithstuff.magpie.ast.VariableExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.LoopExpr;
 import com.stuffwithstuff.magpie.ast.NothingExpr;
+import com.stuffwithstuff.magpie.interpreter.Name;
 
 public class LoopExprParser implements ExprParser {
 
@@ -53,15 +53,15 @@ public class LoopExprParser implements ExprParser {
         // Initialize the generator before the loop.
         String generatorVar = variable + " gen";
         generators.add(new VariableExpr(position, generatorVar,
-            Expr.message(generator, Identifiers.ITERATE, new NothingExpr(position))));
+            Expr.message(generator, Name.ITERATE, new NothingExpr(position))));
         
         // The the condition expression just increments the generator.
         conditions.add(Expr.message(
-            Expr.name(generatorVar), Identifiers.NEXT, new NothingExpr(position)));
+            Expr.name(generatorVar), Name.NEXT, new NothingExpr(position)));
         
         // In the body of the loop, we need to initialize the variable.
         initializers.add(new VariableExpr(position, variable,
-            Expr.message(Expr.name(generatorVar), Identifiers.CURRENT)));
+            Expr.message(Expr.name(generatorVar), Name.CURRENT)));
       }
       parser.match(TokenType.LINE); // Optional line after a clause.
     }

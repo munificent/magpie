@@ -3,7 +3,6 @@ package com.stuffwithstuff.magpie.interpreter;
 import java.util.*;
 import java.util.Map.Entry;
 
-import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
 import com.stuffwithstuff.magpie.parser.Position;
@@ -179,7 +178,7 @@ public class Checker {
     }
     
     return mInterpreter.invokeMethod(mInterpreter.getFunctionClass(),
-        Identifiers.NEW_TYPE, mInterpreter.createTuple(
+        Name.NEW_TYPE, mInterpreter.createTuple(
             paramType, returnType,
             mInterpreter.createBool(function.getType().isStatic())));
   }
@@ -239,7 +238,7 @@ public class Checker {
     Scope scope = new Scope(parent);
     for (Entry<String, Obj> entry : valueScope.entries()) {
       Obj type = mInterpreter.getMember(Position.none(), entry.getValue(),
-          Identifiers.TYPE);
+          Name.TYPE);
       scope.define(entry.getKey(), type);
     }
     
@@ -270,7 +269,7 @@ public class Checker {
       success = true;
     } else {
       Obj matches = mInterpreter.invokeMethod(expected,
-          Identifiers.ASSIGNS_FROM, actual);
+          Name.ASSIGNS_FROM, actual);
       success = matches.asBool();
     }
     

@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.util.Pair;
@@ -113,11 +112,11 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       
       // If the target is not an actual function, get the type of its "call"
       // message instead of the target itself.
-      Obj functionType = mInterpreter.getGlobal(Identifiers.FUNCTION_TYPE);
+      Obj functionType = mInterpreter.getGlobal(Name.FUNCTION_TYPE);
       if (targetType.getClassObj() != functionType) {
         // It's a functor, so look up the "call" member.
         Obj callTargetType = getMemberType(expr.getPosition(), targetType,
-            Identifiers.CALL);
+            Name.CALL);
   
         if (callTargetType.getClassObj() != functionType) {
           mChecker.addError(expr.getPosition(),
@@ -129,8 +128,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
         targetType = callTargetType;
       }
       
-      Obj paramType = targetType.getField(Identifiers.PARAM_TYPE);
-      Obj returnType = targetType.getField(Identifiers.RETURN_TYPE);
+      Obj paramType = targetType.getField(Name.PARAM_TYPE);
+      Obj returnType = targetType.getField(Name.RETURN_TYPE);
       
       // Make sure the argument type matches the declared parameter type.
       mChecker.checkTypes(paramType, argType, expr.getPosition(), 
@@ -164,7 +163,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     }
     
     Obj setterType = mInterpreter.invokeMethod(receiverType,
-        Identifiers.GET_MEMBER_TYPE,
+        Name.GET_MEMBER_TYPE,
         mInterpreter.createString(expr.getName() + "_="));
     
     if (setterType == mInterpreter.nothing()) {
@@ -235,7 +234,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     // If it's a "let" condition, bind and type the variable, stripping out
     // Nothing.
     if (expr.isLet()) {
-      Obj removeNothing = mInterpreter.getGlobal(Identifiers.UNSAFE_REMOVE_NOTHING);
+      Obj removeNothing = mInterpreter.getGlobal(Name.UNSAFE_REMOVE_NOTHING);
       Obj letType =  mInterpreter.apply(Position.none(), removeNothing,
           conditionType);
       context.define(expr.getName(), letType);
@@ -305,7 +304,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(QuotationExpr expr, EvalContext context) {
-    return mInterpreter.getGlobal(Identifiers.EXPRESSION);
+    return mInterpreter.getGlobal(Name.EXPRESSION);
   }
 
   @Override
@@ -404,14 +403,14 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     if (left == mInterpreter.getNeverClass()) return right;
     if (right == mInterpreter.getNeverClass()) return left;
     
-    Obj orFunction = mInterpreter.getGlobal(Identifiers.OR);
+    Obj orFunction = mInterpreter.getGlobal(Name.OR);
     return mInterpreter.apply(Position.none(), orFunction,
         mInterpreter.createTuple(left, right));
   }
   
   public Obj getMemberType(Position position, Obj receiverType, String name) {
     Obj memberType = mInterpreter.invokeMethod(receiverType,
-        Identifiers.GET_MEMBER_TYPE, mInterpreter.createString(name));
+        Name.GET_MEMBER_TYPE, mInterpreter.createString(name));
     
     if (memberType == mInterpreter.nothing()) {
       mChecker.addError(position,

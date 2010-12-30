@@ -3,12 +3,12 @@ package com.stuffwithstuff.magpie.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.BlockExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
 import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.ast.VariableExpr;
+import com.stuffwithstuff.magpie.interpreter.Name;
 
 public class InterfaceExprParser implements ExprParser {
   public static Expr parseInterface(MagpieParser parser, boolean isExtend) {
@@ -33,7 +33,7 @@ public class InterfaceExprParser implements ExprParser {
       if (typeParams.size() == 0) {
         // var Foo = Interface new("Foo")
         exprs.add(new VariableExpr(position, name,
-            Expr.message(Expr.name("Interface"), Identifiers.NEW, Expr.string(name))));
+            Expr.message(Expr.name("Interface"), Name.NEW, Expr.string(name))));
       } else {
         // var Foo = GenericInterface new("Foo", Array of("A", "B"))
         Expr[] paramExprs = new Expr[typeParams.size()];
@@ -45,7 +45,7 @@ public class InterfaceExprParser implements ExprParser {
             Expr.tuple(paramExprs));
         
         exprs.add(new VariableExpr(position, name,
-            Expr.message(Expr.name("GenericInterface"), Identifiers.NEW,
+            Expr.message(Expr.name("GenericInterface"), Name.NEW,
                 Expr.tuple(Expr.string(name), paramArray))));
       }
     }
@@ -90,23 +90,23 @@ public class InterfaceExprParser implements ExprParser {
       case DEF:
         FunctionType function = parser.parseFunctionType();
         Expr methodType = Expr.message(Expr.name("Function"),
-            Identifiers.NEW_TYPE, Expr.tuple(function.getParamType(),
+            Name.NEW_TYPE, Expr.tuple(function.getParamType(),
                 function.getReturnType(), Expr.bool(false)));
-        exprs.add(Expr.message(Expr.name(name), Identifiers.DECLARE_METHOD,
+        exprs.add(Expr.message(Expr.name(name), Name.DECLARE_METHOD,
             Expr.tuple(Expr.string(member),
              makeTypeFunction(typeParams, methodType))));
         break;
         
       case GET:
         Expr getterType = parser.parseTypeExpression();
-        exprs.add(Expr.message(Expr.name(name), Identifiers.DECLARE_GETTER,
+        exprs.add(Expr.message(Expr.name(name), Name.DECLARE_GETTER,
             Expr.tuple(Expr.string(member),
             makeTypeFunction(typeParams, getterType))));
         break;
         
       case SET:
         Expr setterType = parser.parseTypeExpression();
-        exprs.add(Expr.message(Expr.name(name), Identifiers.DECLARE_SETTER,
+        exprs.add(Expr.message(Expr.name(name), Name.DECLARE_SETTER,
             Expr.tuple(Expr.string(member),
             makeTypeFunction(typeParams, setterType))));
         break;

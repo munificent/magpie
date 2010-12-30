@@ -3,7 +3,6 @@ package com.stuffwithstuff.magpie.interpreter;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.util.Pair;
 
@@ -311,7 +310,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   private boolean isTruthy(Expr expr, Obj receiver) {
     Obj truthy = mInterpreter.getMember(expr.getPosition(), receiver,
-        Identifiers.IS_TRUE);
+        Name.IS_TRUE);
     return truthy.asBool();
   }
 

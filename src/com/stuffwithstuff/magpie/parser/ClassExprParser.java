@@ -3,7 +3,6 @@ package com.stuffwithstuff.magpie.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.BlockExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
@@ -11,6 +10,7 @@ import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.ast.NothingExpr;
 import com.stuffwithstuff.magpie.ast.ThisExpr;
 import com.stuffwithstuff.magpie.ast.VariableExpr;
+import com.stuffwithstuff.magpie.interpreter.Name;
 
 public class ClassExprParser implements ExprParser {
   public static Expr parseClass(MagpieParser parser, boolean isExtend) {
@@ -46,7 +46,7 @@ public class ClassExprParser implements ExprParser {
       // var Foo = Class new("Foo")
       classReceiver = new VariableExpr(position, className,
           Expr.message(position, Expr.name(position, "Class"),
-          Identifiers.NEW, Expr.string(className)));
+          Name.NEW, Expr.string(className)));
     }
 
     parser.consume(TokenType.LINE);
@@ -86,7 +86,7 @@ public class ClassExprParser implements ExprParser {
       } else if (parser.match(TokenType.SET)) {
         exprs.add(parseSetter(parser, theClass));
       } else if (parser.match(TokenType.SHARED)) {
-        Expr metaclass = Expr.message(theClass, Identifiers.TYPE);
+        Expr metaclass = Expr.message(theClass, Name.TYPE);
         // TODO(bob): Need to prevent declaring shared members: can only define.
         if (parser.match(TokenType.DELEGATE, "var")) {
           // TODO(bob): Need to handle defining class fields specially.
@@ -112,7 +112,7 @@ public class ClassExprParser implements ExprParser {
     Expr body = Expr.fn(new BlockExpr(position, exprs));
     
     // Make the class receive it.
-    return Expr.message(classReceiver, Identifiers.RECEIVING, body);
+    return Expr.message(classReceiver, Name.RECEIVING, body);
   }
   
   @Override
@@ -136,12 +136,12 @@ public class ClassExprParser implements ExprParser {
     if (parser.match(TokenType.EQUALS)) {
       // Defining it.
       Expr initializer = parser.parseBlock();
-      return Expr.message(theClass, Identifiers.DEFINE_FIELD,
+      return Expr.message(theClass, Name.DEFINE_FIELD,
           Expr.tuple(Expr.string(name), Expr.bool(isDelegate), type,
               Expr.fn(initializer)));
     } else {
       // Just declaring it.
-      return Expr.message(theClass, Identifiers.DECLARE_FIELD,
+      return Expr.message(theClass, Name.DECLARE_FIELD,
           Expr.tuple(Expr.string(name), Expr.bool(isDelegate), type));
     }
   }
@@ -149,7 +149,7 @@ public class ClassExprParser implements ExprParser {
   private static Expr parseMethod(MagpieParser parser, Expr theClass) {
     String name = parser.consumeAny(TokenType.NAME, TokenType.OPERATOR).getString();
     Expr function = parser.parseFunction();
-    return Expr.message(theClass, Identifiers.DEFINE_METHOD,
+    return Expr.message(theClass, Name.DEFINE_METHOD,
         Expr.tuple(Expr.string(name), function));
   }
   
@@ -169,11 +169,11 @@ public class ClassExprParser implements ExprParser {
       Expr body = parser.parseBlock();
       FunctionType fnType = FunctionType.returningType(type);
       Expr function = new FnExpr(body.getPosition(), fnType, body);
-      return Expr.message(theClass, Identifiers.DEFINE_GETTER,
+      return Expr.message(theClass, Name.DEFINE_GETTER,
           Expr.tuple(Expr.string(name), function));
     } else {
       // Just declaring it.
-      return Expr.message(theClass, Identifiers.DECLARE_GETTER,
+      return Expr.message(theClass, Name.DECLARE_GETTER,
           Expr.tuple(Expr.string(name), Expr.fn(type)));
     }
   }

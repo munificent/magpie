@@ -1,8 +1,8 @@
 package com.stuffwithstuff.magpie.parser;
 
-import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.VariableExpr;
+import com.stuffwithstuff.magpie.interpreter.Name;
 
 public class DefineExprParser implements ExprParser {
 
@@ -47,7 +47,7 @@ public class DefineExprParser implements ExprParser {
         TokenType.NAME, TokenType.OPERATOR).getString();
     Expr function = parser.parseFunction();
       
-    return Expr.message(receiver, Identifiers.DEFINE_METHOD,
+    return Expr.message(receiver, Name.DEFINE_METHOD,
         Expr.tuple(Expr.string(name), function));
   }
 }

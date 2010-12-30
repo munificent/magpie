@@ -3,8 +3,8 @@ package com.stuffwithstuff.magpie.interpreter.builtin;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
+import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class ArrayBuiltIns {
@@ -16,7 +16,7 @@ public class ArrayBuiltIns {
       if (arg == interpreter.nothing()) {
         // zero element array
       } else {
-        Obj countObj = arg.getField(Identifiers.COUNT);
+        Obj countObj = arg.getField(Name.COUNT);
         // TODO(bob): Hackish. Checks for "count" to decide if arg is a tuple.
         // Should do something smarter.
         if (countObj != null) {

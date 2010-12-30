@@ -2,10 +2,10 @@ package com.stuffwithstuff.magpie.parser;
 
 import java.util.*;
 
-import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
+import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.util.Pair;
 import com.stuffwithstuff.magpie.util.Ref;
 
@@ -193,7 +193,7 @@ public class MagpieParser extends Parser {
           (((MessageExpr)staticType.getReturnType()).getName().equals("Dynamic"))) {
         staticType = new FunctionType(staticType.getParamNames(),
             staticType.getParamType(),
-            Expr.message(null, Identifiers.FAT_ARROW,
+            Expr.message(null, Name.FAT_ARROW,
                 Expr.tuple(type.getParamType(), type.getReturnType())),
                 true);
       }
@@ -312,7 +312,7 @@ public class MagpieParser extends Parser {
         // after:   Apply(Msg(Msg(null, "array"), "assign"), Tuple(Int(3), Int(4)))
         ApplyExpr apply = (ApplyExpr) expr;
         return new ApplyExpr(new MessageExpr(position, apply.getTarget(),
-            Identifiers.ASSIGN),
+            Name.ASSIGN),
             Expr.tuple(apply.getArg(), value), false);
       } else {
         throw new ParseException("Expression \"" + expr +
@@ -427,7 +427,7 @@ public class MagpieParser extends Parser {
           blockType = parseFunctionType();
         } else {
           // Else just assume a single "it" parameter.
-          blockType = new FunctionType(Collections.singletonList(Identifiers.IT),
+          blockType = new FunctionType(Collections.singletonList(Name.IT),
               Expr.name("Dynamic"), Expr.name("Dynamic"), false);
         }
 

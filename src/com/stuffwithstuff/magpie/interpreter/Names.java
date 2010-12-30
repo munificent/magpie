@@ -1,10 +1,10 @@
-package com.stuffwithstuff.magpie;
+package com.stuffwithstuff.magpie.interpreter;
 
 /**
  * This defines identifiers that are defined or used within Magpie but also
  * referenced directly by the Java code.
  */
-public final class Identifiers {
+public final class Names {
   public static final String ASSIGN = "assign";
   public static final String CALL = "call";
   public static final String ASSIGNS_FROM = "assignsFrom?";
@@ -39,6 +39,6 @@ public final class Identifiers {
   public static final String TYPE = "type";
   public static final String UNSAFE_REMOVE_NOTHING = "unsafeRemoveNothing";
 
-  private Identifiers() {
+  private Names() {
   }
 }

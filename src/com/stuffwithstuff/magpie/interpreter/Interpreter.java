@@ -3,7 +3,6 @@ package com.stuffwithstuff.magpie.interpreter;
 import java.util.*;
 import java.util.Map.Entry;
 
-import com.stuffwithstuff.magpie.Identifiers;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.interpreter.builtin.*;
 import com.stuffwithstuff.magpie.parser.ExprParser;
@@ -71,7 +70,7 @@ public class Interpreter {
     mGlobalScope.define("Object", mObjectClass);
 
     // Add a constructor so you can create new Objects.
-    mObjectClass.getMembers().defineMethod(Identifiers.NEW,
+    mObjectClass.getMembers().defineMethod(Name.NEW,
         new ClassConstruct(mObjectClass));
 
     // Now that ClassClass, Class and Object exist, wire them up.
@@ -169,7 +168,7 @@ public class Interpreter {
     Obj returnType = evaluate(type.getReturnType(), context);
     
     // Create a FunctionType object.
-    Obj result = invokeMethod(mFnClass, Identifiers.NEW_TYPE,
+    Obj result = invokeMethod(mFnClass, Name.NEW_TYPE,
         createTuple(paramType, returnType, createBool(type.isStatic())));
     
     return result;
@@ -241,7 +240,7 @@ public class Interpreter {
         // We have an argument, but the receiver isn't a function, so send it a
         // "call" message instead. We'll in turn try to apply the result of
         // that.
-        Obj newTarget = getMember(position, target, Identifiers.CALL);
+        Obj newTarget = getMember(position, target, Name.CALL);
         
         if (target == newTarget) {
           // If we get here, we're in an infinite regress. Since we can't call
@@ -355,7 +354,7 @@ public class Interpreter {
       tuple.setField(name, fields.get(i));
     }
     
-    tuple.setField(Identifiers.COUNT, createInt(fields.size()));
+    tuple.setField(Name.COUNT, createInt(fields.size()));
     
     return tuple;
   }
@@ -391,7 +390,7 @@ public class Interpreter {
   }
   
   public String evaluateToString(Obj value) {
-    return getMember(Position.none(), value, Identifiers.STRING).asString();
+    return getMember(Position.none(), value, Name.STRING).asString();
   }
 
   public void pushScriptPath(String path) {
