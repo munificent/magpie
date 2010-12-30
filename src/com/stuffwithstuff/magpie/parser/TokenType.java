@@ -32,7 +32,6 @@ public enum TokenType {
   CLASS,
   DEF,
   DELEGATE,
-  DO,
   ELSE,
   END,
   EXTEND,

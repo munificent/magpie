@@ -55,32 +55,21 @@ end
 
 BoolExpression declareField("value", false, fn Bool)
 
-// TODO(bob): Support catch expression.
 class BlockExpression
-    shared def new(expressions List(Expression) -> BlockExpression)
-        construct(expressions: expressions)
+    shared def new(expressions List(Expression), catchExpression Expression ->
+            BlockExpression)
+        construct(expressions: expressions, catchExpression: catchExpression)
     end
     
     get string String = String join(expressions, "\n")
 end
 
 BlockExpression declareField("expressions", false, fn List(Expression))
+BlockExpression declareField("catchExpression", false, fn Expression | Nothing)
 
 class BreakExpression
     get string String = "break"
 end
-
-class QuotationExpression
-    shared def new(body Expression -> QuotationExpression)
-        construct(body: body)
-    end
-        
-    get string String =
-        "{ " ~ body string ~ " }"
-    end
-end
-
-QuotationExpression declareField("body", false, fn Expression)
 
 class FunctionExpression
     shared def new(type FunctionTypeExpression, body Expression ->
@@ -185,6 +174,18 @@ end
 
 OrExpression declareField("left", false, fn Expression)
 OrExpression declareField("right", false, fn Expression)
+
+class QuotationExpression
+    shared def new(body Expression -> QuotationExpression)
+        construct(body: body)
+    end
+        
+    get string String =
+        "{ " ~ body string ~ " }"
+    end
+end
+
+QuotationExpression declareField("body", false, fn Expression)
 
 class RecordExpression
     shared def new(fields List(String, Expression) -> RecordExpression)

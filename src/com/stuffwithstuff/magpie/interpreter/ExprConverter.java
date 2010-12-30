@@ -58,6 +58,8 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
       return convertRecordExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("ReturnExpression")) {
       return convertReturnExpr(interpreter, expr);
+    } else if (exprClass == interpreter.getGlobal("ScopeExpression")) {
+      return convertScopeExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("StringExpression")) {
       return convertStringExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("ThisExpression")) {
@@ -108,7 +110,15 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     for (Obj blockExpr : exprObjs) {
       exprs.add(convert(interpreter, blockExpr));
     }
-    return new BlockExpr(Position.none(), exprs);
+    
+    Obj catchObj = expr.getField("catchExpression");
+    Expr catchExpr;
+    if (catchObj == interpreter.nothing()) {
+      catchExpr = null;
+    } else {
+      catchExpr = convert(interpreter, catchObj);
+    }
+    return new BlockExpr(Position.none(), exprs, catchExpr);
   }
 
   private static Expr convertBoolExpr(Interpreter interpreter, Obj expr) {
@@ -198,6 +208,11 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     Expr value = convert(interpreter, expr.getField("value"));
     return new ReturnExpr(Position.none(), value);
   }
+
+  private static Expr convertScopeExpr(Interpreter interpreter, Obj expr) {
+    Expr body = convert(interpreter, expr.getField("body"));
+    return new ScopeExpr(body);
+  }
   
   private static Expr convertStringExpr(Interpreter interpreter, Obj expr) {
     String value = expr.getField("value").asString();
@@ -263,8 +278,9 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
       exprs.add(convert(blockExpr));
     }
     Obj exprsArray = mInterpreter.createArray(exprs);
+    Obj catchExpr = convert(expr.getCatch());
     
-    return construct("Block", exprsArray);
+    return construct("Block", exprsArray, catchExpr);
   }
 
   @Override

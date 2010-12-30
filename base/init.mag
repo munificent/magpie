@@ -15,6 +15,7 @@ import("syntax/FunctionTypeExpression.mag")
 // annoying it is to write code without that keyword.
 import("syntax/VarParser.mag")
 import("syntax/BreakParser.mag")
+import("syntax/DoParser.mag")
 import("syntax/ReturnParser.mag")
 import("syntax/TypeofParser.mag")
 import("syntax/UnsafeCastParser.mag")

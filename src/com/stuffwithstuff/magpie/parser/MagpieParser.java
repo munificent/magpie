@@ -22,7 +22,6 @@ public class MagpieParser extends Parser {
     // TODO(bob): Eventually these should all go away.
     mParsers.put(TokenType.CLASS, new ClassExprParser());
     mParsers.put(TokenType.DEF, new DefineExprParser());
-    mParsers.put(TokenType.DO, new DoExprParser());
     mParsers.put(TokenType.EXTEND, new ExtendExprParser());
     mParsers.put(TokenType.FN, new FnExprParser());
     mParsers.put(TokenType.FOR, new LoopExprParser());

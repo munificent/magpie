@@ -66,7 +66,7 @@ public class LoopExprParser implements ExprParser {
       parser.match(TokenType.LINE); // Optional line after a clause.
     }
     
-    parser.consume(TokenType.DO);
+    parser.consume("do");
     Expr body = parser.parseBlock();
 
     Position position = startPos.union(body.getPosition());

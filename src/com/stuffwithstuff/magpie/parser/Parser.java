@@ -86,6 +86,17 @@ public abstract class Parser {
   }
 
   // TODO(bob): Hack temp until all keyword parsing is moved into Magpie.
+  public Token consume(String keyword) {
+    if (!match(keyword)) {
+      String message = String.format("Expected keyword %s at %s, found %s.",
+          keyword, current().getPosition(), current());
+      throw new ParseException(message);
+    }
+
+    return last(1);
+  }
+  
+  // TODO(bob): Hack temp until all keyword parsing is moved into Magpie.
   public boolean match(String keyword) {
     if (current().getType() != TokenType.NAME) return false;
     if (!current().getString().equals(keyword)) return false;

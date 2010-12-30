@@ -1,0 +1,9 @@
+// Keyword parser for "do" expressions.
+class DoParser
+    def parse(parser MagpieParser -> Expression)
+        parser consume("do")
+        ScopeExpression new(parser parseBlock())
+    end
+end
+
+MagpieParser registerKeyword("do", DoParser new())
