@@ -13,7 +13,7 @@ class UnsafeCastParser
         %var%("value", parser parseExpression())
         parser consume(TokenType rightParen)
     
-        UnsafeCastExpression new(type, value)
+        { %unsafecast%(`type, `value) }
     end
 end
 
