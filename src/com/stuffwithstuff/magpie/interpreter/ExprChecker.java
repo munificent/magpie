@@ -214,11 +214,6 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
-  public Obj visit(ExpressionExpr expr, EvalContext context) {
-    return mInterpreter.getGlobal(Identifiers.EXPRESSION);
-  }
-
-  @Override
   public Obj visit(FnExpr expr, EvalContext context) {
     // Check the body and create a context containing any static arguments the
     // function defines.
@@ -306,6 +301,11 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     Obj right = check(expr.getRight(), context, true);
     
     return orTypes(left, right);
+  }
+
+  @Override
+  public Obj visit(QuotationExpr expr, EvalContext context) {
+    return mInterpreter.getGlobal(Identifiers.EXPRESSION);
   }
 
   @Override

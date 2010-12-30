@@ -40,8 +40,6 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
       return convertBoolExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("BreakExpression")) {
       return convertBreakExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("ExpressionExpression")) {
-      return convertExpressionExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("FunctionExpression")) {
       return convertFunctionExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("IfExpression")) {
@@ -54,6 +52,8 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
       return convertNothingExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("OrExpression")) {
       return convertOrExpr(interpreter, expr);
+    } else if (exprClass == interpreter.getGlobal("QuotationExpression")) {
+      return convertQuotationExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("RecordExpression")) {
       return convertRecordExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("ReturnExpression")) {
@@ -120,11 +120,6 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     return new BreakExpr(Position.none());
   }
 
-  private static Expr convertExpressionExpr(Interpreter interpreter, Obj expr) {
-    Expr body = convert(interpreter, expr.getField("body"));
-    return new ExpressionExpr(Position.none(), body);
-  }
-
   private static Expr convertFunctionExpr(Interpreter interpreter, Obj expr) {
     Obj typeObj = expr.getField("functionType");
     List<Obj> nameObjs = typeObj.getField("names").asArray();
@@ -181,6 +176,11 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     Expr left = convert(interpreter, expr.getField("left"));
     Expr right = convert(interpreter, expr.getField("right"));
     return new OrExpr(Position.none(), left, right);
+  }
+
+  private static Expr convertQuotationExpr(Interpreter interpreter, Obj expr) {
+    Expr body = convert(interpreter, expr.getField("body"));
+    return new QuotationExpr(Position.none(), body);
   }
 
   private static Expr convertRecordExpr(Interpreter interpreter, Obj expr) {
@@ -278,11 +278,6 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   }
 
   @Override
-  public Obj visit(ExpressionExpr expr, Void dummy) {
-    return construct("Expression", convert(expr.getBody()));
-  }
-
-  @Override
   public Obj visit(FnExpr expr, Void dummy) {
     Obj paramType = convert(expr.getType().getParamType());
     Obj returnType = convert(expr.getType().getReturnType());
@@ -340,6 +335,11 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     Obj left  = convert(expr.getLeft());
     Obj right = convert(expr.getRight());
     return construct("Or", left, right);
+  }
+
+  @Override
+  public Obj visit(QuotationExpr expr, Void dummy) {
+    return construct("Quotation", convert(expr.getBody()));
   }
 
   @Override

@@ -3,11 +3,10 @@ package com.stuffwithstuff.magpie.ast;
 import com.stuffwithstuff.magpie.parser.Position;
 
 /**
- * This confusingly named class represents an expression that defines an
- * expression literal: a chunk of AST as a value in Magpie.
+ * A non-evaluated chunk of Magpie code as a first-class value.
  */
-public class ExpressionExpr extends Expr {
-  public ExpressionExpr(Position position, Expr body) {
+public class QuotationExpr extends Expr {
+  public QuotationExpr(Position position, Expr body) {
     super(position);
     mBody = body;
   }

@@ -473,7 +473,7 @@ public class MagpieParser extends Parser {
       return new ThisExpr(last(1).getPosition());
     } else if (match(TokenType.NOTHING)) {
       return new NothingExpr(last(1).getPosition());
-    } else if ((mExpressionDepth > 0) && match(TokenType.BACKTICK)) {
+    } else if ((mQuoteDepth > 0) && match(TokenType.BACKTICK)) {
       Position position = last(1).getPosition();
       Expr body;
       if (match(TokenType.NAME)) {
@@ -481,7 +481,7 @@ public class MagpieParser extends Parser {
             last(1).getString());
       } else if (match(TokenType.LEFT_BRACE)) {
         body = parseExpression();
-        body = new ExpressionExpr(body.getPosition(), body);
+        body = new QuotationExpr(body.getPosition(), body);
         consume(TokenType.RIGHT_BRACE);
       } else {
         consume(TokenType.LEFT_PAREN);
@@ -494,13 +494,13 @@ public class MagpieParser extends Parser {
       consume(TokenType.RIGHT_PAREN);
       return expr;
     } else if (match(TokenType.LEFT_BRACE)) {
-      mExpressionDepth++;
+      mQuoteDepth++;
       Position position = last(1).getPosition();
       Expr expr = parseExpression();
       consume(TokenType.RIGHT_BRACE);
       position = position.union(last(1).getPosition());
-      mExpressionDepth--;
-      return new ExpressionExpr(position, expr);
+      mQuoteDepth--;
+      return new QuotationExpr(position, expr);
     }
     
     // See if we're at a keyword we know how to parse.
@@ -540,5 +540,5 @@ public class MagpieParser extends Parser {
   // within. Zero means the parser is not inside an expression literal at all
   // (i.e. in regular code). It will be one at the "here" token in "{ here }".
   // Used to determine when an unquote expression is allowed.
-  private int mExpressionDepth;
+  private int mQuoteDepth;
 }

@@ -87,12 +87,6 @@ public class ExprSpecialFormDesugarer implements ExprVisitor<Expr, Void> {
   }
 
   @Override
-  public Expr visit(ExpressionExpr expr, Void dummy) {
-    Expr body = desugarExpr(expr.getBody());
-    return new ExpressionExpr(expr.getPosition(), body);
-  }
-
-  @Override
   public Expr visit(FnExpr expr, Void dummy) {
     Expr paramType = desugarExpr(expr.getType().getParamType());
     Expr returnType = desugarExpr(expr.getType().getReturnType());
@@ -143,6 +137,12 @@ public class ExprSpecialFormDesugarer implements ExprVisitor<Expr, Void> {
     Expr left  = desugarExpr(expr.getLeft());
     Expr right = desugarExpr(expr.getRight());
     return new OrExpr(expr.getPosition(), left, right);
+  }
+
+  @Override
+  public Expr visit(QuotationExpr expr, Void dummy) {
+    Expr body = desugarExpr(expr.getBody());
+    return new QuotationExpr(expr.getPosition(), body);
   }
 
   @Override

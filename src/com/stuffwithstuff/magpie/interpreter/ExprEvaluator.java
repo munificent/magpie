@@ -115,11 +115,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
-  public Obj visit(ExpressionExpr expr, EvalContext context) {
-    return ExprConverter.convert(mInterpreter, expr.getBody(), context);
-  }
-
-  @Override
   public Obj visit(FnExpr expr, EvalContext context) {
     return mInterpreter.createFn(expr, context);
   }
@@ -231,6 +226,11 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     } else {
       return evaluate(expr.getRight(), context);
     }
+  }
+
+  @Override
+  public Obj visit(QuotationExpr expr, EvalContext context) {
+    return ExprConverter.convert(mInterpreter, expr.getBody(), context);
   }
 
   @Override

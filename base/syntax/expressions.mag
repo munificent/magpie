@@ -70,8 +70,8 @@ class BreakExpression
     get string String = "break"
 end
 
-class ExpressionExpression
-    shared def new(body Expression -> ExpressionExpression)
+class QuotationExpression
+    shared def new(body Expression -> QuotationExpression)
         construct(body: body)
     end
         
@@ -80,7 +80,7 @@ class ExpressionExpression
     end
 end
 
-ExpressionExpression declareField("body", false, fn Expression)
+QuotationExpression declareField("body", false, fn Expression)
 
 class FunctionExpression
     shared def new(type FunctionTypeExpression, body Expression ->
