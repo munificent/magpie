@@ -34,7 +34,6 @@ public enum TokenType {
   ELSE,
   END,
   EXTEND,
-  FN,
   FOR,
   IF,
   INTERFACE,

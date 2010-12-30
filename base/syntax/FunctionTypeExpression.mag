@@ -36,7 +36,7 @@ class FunctionTypeExpression
     end
 end
 
-FunctionTypeExpression declareField("names", false, fn List(String))
-FunctionTypeExpression declareField("paramType", false, fn Expression)
-FunctionTypeExpression declareField("returnType", false, fn Expression)
-FunctionTypeExpression declareField("static?", false, fn Bool)
+FunctionTypeExpression declareField("names", false, %fn%(List(String)))
+FunctionTypeExpression declareField("paramType", false, %fn%(Expression))
+FunctionTypeExpression declareField("returnType", false, %fn%(Expression))
+FunctionTypeExpression declareField("static?", false, %fn%(Bool))

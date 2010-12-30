@@ -1,0 +1,9 @@
+// Keyword parser for "fn" expressions.
+class FnParser
+    def parse(parser MagpieParser -> Expression)
+        parser consume("fn")
+        parser parseFunction()
+    end
+end
+
+MagpieParser registerKeyword("fn", FnParser new())

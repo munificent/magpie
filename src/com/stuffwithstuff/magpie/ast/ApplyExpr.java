@@ -1,5 +1,8 @@
 package com.stuffwithstuff.magpie.ast;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.stuffwithstuff.magpie.parser.Position;
 
 /**
@@ -15,6 +18,8 @@ public class ApplyExpr extends Expr {
       
       if (name.equals("%break%")) {
         return new BreakExpr(target.getPosition());
+      } else if (name.equals("%fn%")) {
+        return specialFormFn(target.getPosition(), arg);
       } else if (name.equals("%return%")) {
         return new ReturnExpr(target.getPosition(), arg);
       } else if (name.equals("%unsafecast%")) {
@@ -28,6 +33,78 @@ public class ApplyExpr extends Expr {
     return new ApplyExpr(target, arg, isStatic);
   }
   
+  private static Expr specialFormFn(Position position, Expr arg) {
+    List<Expr> args;
+    if (arg instanceof TupleExpr) {
+      args = ((TupleExpr)arg).getFields();
+    } else {
+      args = new ArrayList<Expr>();
+      args.add(arg);
+    }
+    
+    // This special form allows omitting certain arguments, so the
+    // interpretation of it is based on how many are provided.
+    List<String> paramNames = new ArrayList<String>();
+    Expr paramType;
+    Expr returnType;
+    boolean hasNames = false;
+    boolean isStatic = false;
+
+    switch (args.size()) {
+    case 1: // fn(body) Nothing -> Dynamic
+      paramType = Expr.name("Nothing");
+      returnType = Expr.name("Dynamic");
+      break;
+      
+    case 2: // fn(returnType, body) Nothing -> returnType
+      paramType = Expr.name("Nothing");
+      returnType = args.get(0);
+      break;
+      
+    case 3: // fn(names, returnType, body) Dynamic -> returnType
+      hasNames = true;
+      paramType = Expr.name("Dynamic");
+      returnType = args.get(0);
+      break;
+      
+    case 4: // fn(names, paramType, returnType, body)
+      hasNames = true;
+      paramType = args.get(1);
+      returnType = args.get(2);
+      break;
+      
+    case 5: // fn(names, paramType, returnType, isStatic, body)
+      hasNames = true;
+      paramType = args.get(1);
+      returnType = args.get(2);
+      isStatic = ((BoolExpr)args.get(3)).getValue();
+      break;
+      
+    default:
+        throw new IllegalArgumentException(
+            "The %fn% special form requires 1 to 5 arguments.");
+    }
+    
+    if (hasNames) {
+      if (args.get(0) instanceof TupleExpr) {
+        List<Expr> paramNameExprs = ((TupleExpr)args.get(0)).getFields();
+        for (Expr paramName : paramNameExprs) {
+          paramNames.add(((StringExpr)paramName).getValue());
+        }
+      } else {
+        // Just a single name.
+        paramNames.add(((StringExpr)args.get(0)).getValue());
+      }
+    }
+    
+    // Body is always the last argument.
+    Expr body = args.get(args.size() - 1);
+    
+    FunctionType type = new FunctionType(paramNames, paramType, returnType,
+        isStatic);
+    return new FnExpr(position, type, body);
+  }
+
   private static Expr specialFormUnsafeCast(Position position, Expr arg) {
     Expr type = ((TupleExpr)arg).getFields().get(0);
     Expr value = ((TupleExpr)arg).getFields().get(1);
