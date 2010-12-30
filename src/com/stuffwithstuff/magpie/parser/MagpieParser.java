@@ -21,7 +21,6 @@ public class MagpieParser extends Parser {
     // Register the parsers for the different keywords.
     // TODO(bob): Eventually these should all go away.
     mParsers.put(TokenType.CLASS, new ClassExprParser());
-    mParsers.put(TokenType.DEF, new DefineExprParser());
     mParsers.put(TokenType.EXTEND, new ExtendExprParser());
     mParsers.put(TokenType.FN, new FnExprParser());
     mParsers.put(TokenType.FOR, new LoopExprParser());
@@ -29,7 +28,6 @@ public class MagpieParser extends Parser {
     mParsers.put(TokenType.INTERFACE, new InterfaceExprParser());
     mParsers.put(TokenType.LET, new ConditionalExprParser());
     mParsers.put(TokenType.MATCH, new MatchExprParser());
-    mParsers.put(TokenType.SHARED, new DefineExprParser());
     mParsers.put(TokenType.WHILE, new LoopExprParser());
     
     // Register the provided parsers.

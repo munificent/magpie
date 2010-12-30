@@ -46,6 +46,8 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
       return convertIfExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("IntExpression")) {
       return convertIntExpr(interpreter, expr);
+    } else if (exprClass == interpreter.getGlobal("LoopExpression")) {
+      return convertLoopExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("MessageExpression")) {
       return convertMessageExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("NothingExpression")) {
@@ -88,7 +90,8 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   private static Expr convertApplyExpr(Interpreter interpreter, Obj expr) {
     Expr target = convert(interpreter, expr.getField("target"));
     Expr argument = convert(interpreter, expr.getField("argument"));
-    return ApplyExpr.create(target, argument, false);
+    boolean isStatic = expr.getField("static?").asBool();
+    return ApplyExpr.create(target, argument, isStatic);
   }
 
   private static Expr convertAssignExpr(Interpreter interpreter, Obj expr) {
@@ -164,6 +167,17 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   private static Expr convertIntExpr(Interpreter interpreter, Obj expr) {
     int value = expr.getField("value").asInt();
     return new IntExpr(Position.none(), value);
+  }
+  
+  private static Expr convertLoopExpr(Interpreter interpreter, Obj expr) {
+    List<Obj> conditionObjs = expr.getField("conditions").asArray();
+    List<Expr> conditions = new ArrayList<Expr>();
+    for (Obj condition : conditionObjs) {
+      conditions.add(convert(interpreter, condition));
+    }
+    
+    Expr body = convert(interpreter, expr.getField("body"));
+    return new LoopExpr(Position.none(), conditions, body);
   }
   
   private static Expr convertMessageExpr(Interpreter interpreter, Obj expr) {
@@ -260,7 +274,8 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   public Obj visit(ApplyExpr expr, Void dummy) {
     Obj target = convert(expr.getTarget());
     Obj arg = convert(expr.getArg());
-    return construct("Apply", target, arg);
+    return construct("Apply", target, arg,
+        mInterpreter.createBool(expr.isStatic()));
   }
   
   @Override
@@ -301,7 +316,8 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     for (String name : expr.getType().getParamNames()) {
       paramNames.add(mInterpreter.createString(name));
     }
-    Obj type = construct("FunctionType", mInterpreter.createArray(paramNames),
+    Obj type = construct("FunctionType",
+        mInterpreter.createArray(paramNames),
         paramType, returnType,
         mInterpreter.createBool(expr.getType().isStatic()));
     Obj body = convert(expr.getBody());

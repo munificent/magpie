@@ -78,10 +78,8 @@ def |(left Type, right Type -> Type) OrType combine(left, right)
 
 def unsafeRemoveNothing(type Type -> Type)
     let orType = type as[OrType] then 
-        // TODO(bob): Total hack. We need remaining to have the right element
-        // type.
-        var remaining = orType cases copy()
-        remaining clear()
+        // TODO(bob): Hack. Need generic array ctor.
+        var remaining = unsafecast[List(Type)](Array new())
         
         for caseType = orType cases do
             if caseType != Nothing then remaining add(caseType)

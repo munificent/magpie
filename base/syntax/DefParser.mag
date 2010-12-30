@@ -1,0 +1,37 @@
+// Outside of a class expression (which handles "def") directly, a def can
+// have a couple of forms:
+//
+//    def foo(a) ...     // defines a local function "foo"
+//    def Bar foo(a) ... // defines a method "foo" on class "Bar"
+//    def (a b) foo(a) ... // defines a method "foo" on the result of "a b"
+class DefParser
+    def parse(parser MagpieParser -> Expression)
+        parser consume("def")
+        
+        if  parser lookAhead(TokenType identifier, TokenType leftParen) or
+            parser lookAhead(TokenType identifier, TokenType leftBracket) or
+            parser lookAhead(TokenType operator, TokenType leftParen) or
+            parser lookAhead(TokenType operator, TokenType leftBracket) then
+            
+            // Local function.
+            %var%("name", parser consume() stringValue)
+
+            // Parse the function.
+            %var%("function", parser parseFunction())
+
+            VariableExpression new(name, function)
+        else
+            %var%("receiver", parseReceiver(parser))
+            %var%("name", parser consumeAny(TokenType identifier,
+                TokenType operator) stringValue)
+            %var%("function", parser parseFunction())
+      
+            { `receiver defineMethod(`(StringExpression new(name)), `function) }
+        end
+    end
+end
+
+MagpieParser registerKeyword("def", DefParser new())
+// TODO(bob): Not sure why this is registering "shared" but the old Java one
+// did.
+MagpieParser registerKeyword("shared", DefParser new())

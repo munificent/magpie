@@ -9,6 +9,7 @@ import com.stuffwithstuff.magpie.parser.ExprParser;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
 import com.stuffwithstuff.magpie.parser.Token;
 import com.stuffwithstuff.magpie.parser.TokenType;
+import com.stuffwithstuff.magpie.util.Expect;
 
 public class MagpieParserBuiltIns {
   @Shared
@@ -54,14 +55,41 @@ public class MagpieParserBuiltIns {
       return convertToken(interpreter, token);
     }
   }
+  
+  @Signature("consumeAny(tokenTypes -> Token)")
+  public static class ConsumeAny implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      MagpieParser parser = (MagpieParser) thisObj.getValue();
+      
+      int numTypes = arg.getField("count").asInt();
+      TokenType[] types = new TokenType[numTypes];
+      for (int i = 0; i < numTypes; i++) {
+        types[i] = convertType(interpreter, arg.getTupleField(i));
+      }
 
+      Token token = parser.consumeAny(types);
+      return convertToken(interpreter, token);
+    }
+  }
+  
   @Signature("lookAhead(tokens -> Bool)")
   public static class LookAhead implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       MagpieParser parser = (MagpieParser) thisObj.getValue();
       
-      TokenType type = convertType(interpreter, arg);
-      return interpreter.createBool(parser.lookAhead(type));
+      TokenType[] types;
+      if (arg.getClassObj() == interpreter.getTupleClass()) {
+        int numTypes = arg.getField("count").asInt();
+        types = new TokenType[numTypes];
+        for (int i = 0; i < numTypes; i++) {
+          types[i] = convertType(interpreter, arg.getTupleField(i));
+        }
+      } else {
+        // Just one token type.
+        types = new TokenType[1];
+        types[0] = convertType(interpreter, arg);
+      }
+      return interpreter.createBool(parser.lookAhead(types));
     }
   }
   
@@ -105,6 +133,18 @@ public class MagpieParserBuiltIns {
     }
   }
   
+  @Signature("parseFunction(-> Expression)")
+  public static class ParseFunction implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      MagpieParser parser = (MagpieParser) thisObj.getValue();
+      
+      Expr expr = parser.parseFunction();
+      
+      return ExprConverter.convert(interpreter, expr, 
+          interpreter.createTopLevelContext());
+    }
+  }
+  
   @Signature("parseTypeExpression(-> Expression)")
   public static class ParseTypeExpression implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
@@ -118,10 +158,13 @@ public class MagpieParserBuiltIns {
   }
   
   private static TokenType convertType(Interpreter interpreter, Obj tokenType) {
+    Obj value = tokenType.getField("value");
+    Expect.notNull(value);
+    
     // Note: the values here must be kept in sync with the order that they
     // are defined in Token.mag.
     TokenType type;
-    switch (tokenType.getField("value").asInt()) {
+    switch (value.asInt()) {
     case 0: type = TokenType.LEFT_PAREN; break;
     case 1: type = TokenType.RIGHT_PAREN; break;
     case 2: type = TokenType.LEFT_BRACKET; break;

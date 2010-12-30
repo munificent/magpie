@@ -58,7 +58,6 @@ public final class Token {
       case CASE: return "case";
       case CATCH: return "catch";
       case CLASS: return "class";
-      case DEF: return "def";
       case DELEGATE: return "delegate";
       case ELSE: return "else";
       case END: return "end";
@@ -71,7 +70,6 @@ public final class Token {
       case MATCH: return "match";
       case NOTHING: return "nothing";
       case SET: return "set";
-      case SHARED: return "shared";
       case THEN: return "then";
       case THIS: return "this";
       case WHILE: return "while";

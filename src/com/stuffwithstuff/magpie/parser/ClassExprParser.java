@@ -79,13 +79,13 @@ public class ClassExprParser implements ExprParser {
         exprs.add(parseField(parser, true, theClass));
       } else if (parser.match("var")) {
         exprs.add(parseField(parser, false, theClass));
-      } else if (parser.match(TokenType.DEF)) {
+      } else if (parser.match("def")) {
         exprs.add(parseMethod(parser, theClass));
       } else if (parser.match("get")) {
         exprs.add(parseGetter(parser, theClass));
       } else if (parser.match(TokenType.SET)) {
         exprs.add(parseSetter(parser, theClass));
-      } else if (parser.match(TokenType.SHARED)) {
+      } else if (parser.match("shared")) {
         Expr metaclass = Expr.message(theClass, Name.TYPE);
         // TODO(bob): Need to prevent declaring shared members: can only define.
         if (parser.match(TokenType.DELEGATE, "var")) {
@@ -94,7 +94,7 @@ public class ClassExprParser implements ExprParser {
         } else if (parser.match("var")) {
           // TODO(bob): Need to handle defining class fields specially.
           exprs.add(parseField(parser, false, metaclass));
-        } else if (parser.match(TokenType.DEF)) {
+        } else if (parser.match("def")) {
           exprs.add(parseMethod(parser, metaclass));
         } else if (parser.match("get")) {
           exprs.add(parseGetter(parser, metaclass));

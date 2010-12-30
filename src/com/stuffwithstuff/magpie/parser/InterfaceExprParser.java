@@ -79,42 +79,39 @@ public class InterfaceExprParser implements ExprParser {
       //    Foo declareSetter("someSetter", fn Int)
       
       // Parse the declaration keyword.
-      TokenType memberType;
+      String memberType;
       // TODO(bob): Hack temp. Will go away when this is moved into Magpie.
       if (parser.match("get")) {
-        memberType = TokenType.NAME;
+        memberType = "get";
+      } else if (parser.match("def")) {
+        memberType = "def";
       } else {
-        memberType = parser.consumeAny(TokenType.DEF, TokenType.SET).getType();
+        parser.consume(TokenType.SET);
+        memberType = "set";
       }
       
       // Parse the name.
       String member = parser.consumeAny(
           TokenType.NAME, TokenType.OPERATOR).getString();
       
-      switch (memberType) {
-      case DEF:
+      if (memberType.equals("def")) {
         FunctionType function = parser.parseFunctionType();
         Expr methodType = Expr.message(Expr.name("Function"),
             Name.NEW_TYPE, Expr.tuple(function.getParamType(),
                 function.getReturnType(), Expr.bool(false)));
         exprs.add(Expr.message(Expr.name(name), Name.DECLARE_METHOD,
             Expr.tuple(Expr.string(member),
-             makeTypeFunction(typeParams, methodType))));
-        break;
-        
-      case NAME:
+                makeTypeFunction(typeParams, methodType))));
+      } else if (memberType.equals("get")) {
         Expr getterType = parser.parseTypeExpression();
         exprs.add(Expr.message(Expr.name(name), Name.DECLARE_GETTER,
             Expr.tuple(Expr.string(member),
-            makeTypeFunction(typeParams, getterType))));
-        break;
-        
-      case SET:
+                makeTypeFunction(typeParams, getterType))));
+      } else if (memberType.equals("set")) {
         Expr setterType = parser.parseTypeExpression();
         exprs.add(Expr.message(Expr.name(name), Name.DECLARE_SETTER,
             Expr.tuple(Expr.string(member),
-            makeTypeFunction(typeParams, setterType))));
-        break;
+                makeTypeFunction(typeParams, setterType))));
       }
 
       parser.consume(TokenType.LINE);

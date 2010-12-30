@@ -8,21 +8,8 @@ class GetParser
         //    get (a b) foo Int = ... // defines a getter "foo" on the result of "a b"
         parser consume("get")
     
-        %var%("receiver", if parser lookAhead(TokenType identifier) then
-            // Getter on a class.
-            %var%("token", parser consume())
-            %var%("className", token stringValue)
-            MessageExpression new(nothing, className)
-        else
-            // Getter on a complex expression.
-            parser consume(TokenType leftParen)
-            %var%("receiver", parser parseExpression())
-            parser consume(TokenType rightParen)
-            receiver
-        end)
-    
+        %var%("receiver", parseReceiver(parser))
         %var%("name", parser consume(TokenType identifier) stringValue)
-
         %var%("valueType", if parser lookAheadAny(TokenType equals, TokenType line) then
             { Dynamic }
         else

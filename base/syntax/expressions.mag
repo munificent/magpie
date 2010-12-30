@@ -15,8 +15,8 @@ AndExpression declareField("left", false, fn Expression)
 AndExpression declareField("right", false, fn Expression)
 
 class ApplyExpression
-    shared def new(target Expression, argument Expression -> ApplyExpression)
-        construct(target: target, argument: argument)
+    shared def new(target Expression, argument Expression, static? Bool -> ApplyExpression)
+        construct(target: target, argument: argument, static?: static?)
     end
     
     get string String =
@@ -26,6 +26,7 @@ end
 
 ApplyExpression declareField("target", false, fn Expression)
 ApplyExpression declareField("argument", false, fn Expression)
+ApplyExpression declareField("static?", false, fn Bool)
 
 class AssignExpression
     shared def new(receiver Expression | Nothing,
