@@ -8,32 +8,15 @@ import com.stuffwithstuff.magpie.ast.NothingExpr;
 import com.stuffwithstuff.magpie.parser.MagpieParser.BlockOptions;
 import com.stuffwithstuff.magpie.util.Ref;
 
-public class ConditionalExprParser implements ExprParser {
+public class IfExprParser implements ExprParser {
 
   @Override
   public Expr parse(MagpieParser parser) {
-    Position startPos = parser.consume().getPosition();
+    Position startPos = parser.consume(TokenType.IF).getPosition();
     
     // Parse the condition.
-    String name = null;
-    Expr condition;
-    if (parser.last(1).getType() == TokenType.IF) {
-      condition = parser.parseBlock(EnumSet.of(BlockOptions.CONSUME_END),
-          TokenType.THEN);
-    } else {
-      // TODO(bob): Eventually allow tuple decomposition here.
-      name = parser.consume(TokenType.NAME).getString();
-      
-      // See if there is an expression for the let condition.
-      if (parser.lookAhead(TokenType.THEN)) {
-        // let a then --> let a = a then
-        condition = Expr.name(name);
-      } else {
-        parser.consume(TokenType.EQUALS);
-        condition = parser.parseBlock(EnumSet.noneOf(BlockOptions.class),
-            TokenType.THEN);
-      }
-    }
+    Expr condition = parser.parseBlock(EnumSet.of(BlockOptions.CONSUME_END),
+        TokenType.THEN);
     
     // Parse the then body.
     parser.consume(TokenType.THEN);
@@ -50,6 +33,6 @@ public class ConditionalExprParser implements ExprParser {
     }
     
     return new IfExpr(startPos.union(elseExpr.getPosition()),
-        name, condition, thenExpr, elseExpr);
+        null, condition, thenExpr, elseExpr);
   }
 }
