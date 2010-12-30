@@ -3,7 +3,6 @@ package com.stuffwithstuff.magpie.interpreter.builtin;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.ExprConverter;
-import com.stuffwithstuff.magpie.interpreter.ExprSpecialFormDesugarer;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.parser.ExprParser;
@@ -25,7 +24,7 @@ public class MagpieParserBuiltIns {
     }
   }
   
-  @Signature("consume(token TokenType | String -> Token)")
+  @Signature("consume(token TokenType | String | Nothing -> Token)")
   public static class Consume implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       MagpieParser parser = (MagpieParser) thisObj.getValue();
@@ -46,6 +45,8 @@ public class MagpieParserBuiltIns {
           return interpreter.throwError("ParseError");
         }
         token = parser.consume();
+      } else if (arg == interpreter.nothing()) {
+        token = parser.consume();
       } else {
         token = parser.consume(convertType(interpreter, arg));
       }
@@ -54,6 +55,16 @@ public class MagpieParserBuiltIns {
     }
   }
 
+  @Signature("lookAhead(tokens -> Bool)")
+  public static class LookAhead implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      MagpieParser parser = (MagpieParser) thisObj.getValue();
+      
+      TokenType type = convertType(interpreter, arg);
+      return interpreter.createBool(parser.lookAhead(type));
+    }
+  }
+  
   @Signature("lookAheadAny(tokens -> Bool)")
   public static class LookAheadAny implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
@@ -67,6 +78,42 @@ public class MagpieParserBuiltIns {
       }
       
       return interpreter.createBool(parser.lookAheadAny(types));
+    }
+  }
+  
+  @Signature("parseBlock(-> Expression)")
+  public static class ParseBlock implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      MagpieParser parser = (MagpieParser) thisObj.getValue();
+      
+      Expr expr = parser.parseBlock();
+      
+      return ExprConverter.convert(interpreter, expr, 
+          interpreter.createTopLevelContext());
+    }
+  }
+  
+  @Signature("parseExpression(-> Expression)")
+  public static class ParseExpression implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      MagpieParser parser = (MagpieParser) thisObj.getValue();
+      
+      Expr expr = parser.parseExpression();
+      
+      return ExprConverter.convert(interpreter, expr, 
+          interpreter.createTopLevelContext());
+    }
+  }
+  
+  @Signature("parseTypeExpression(-> Expression)")
+  public static class ParseTypeExpression implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      MagpieParser parser = (MagpieParser) thisObj.getValue();
+      
+      Expr expr = parser.parseTypeExpression();
+      
+      return ExprConverter.convert(interpreter, expr, 
+          interpreter.createTopLevelContext());
     }
   }
   
@@ -117,7 +164,7 @@ public class MagpieParserBuiltIns {
     case EQUALS: tokenTypeValue = 8; tokenTypeName = "equals"; break;
     case LINE: tokenTypeValue = 9; tokenTypeName = "line"; break;
 
-    case NAME: tokenTypeValue = 10; tokenTypeName = "name"; break;
+    case NAME: tokenTypeValue = 10; tokenTypeName = "identifier"; break;
     case FIELD: tokenTypeValue = 11; tokenTypeName = "field"; break;
     case OPERATOR: tokenTypeValue = 12; tokenTypeName = "operator"; break;
 
@@ -152,45 +199,6 @@ public class MagpieParserBuiltIns {
     }
     
     return tokenObj;
-  }
-  
-  @Signature("parseBlock(-> Expression)")
-  public static class ParseBlock implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      MagpieParser parser = (MagpieParser) thisObj.getValue();
-      
-      Expr expr = parser.parseBlock();
-      expr = ExprSpecialFormDesugarer.desugar(expr);
-      
-      return ExprConverter.convert(interpreter, expr, 
-          interpreter.createTopLevelContext());
-    }
-  }
-  
-  @Signature("parseExpression(-> Expression)")
-  public static class ParseExpression implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      MagpieParser parser = (MagpieParser) thisObj.getValue();
-      
-      Expr expr = parser.parseExpression();
-      expr = ExprSpecialFormDesugarer.desugar(expr);
-      
-      return ExprConverter.convert(interpreter, expr, 
-          interpreter.createTopLevelContext());
-    }
-  }
-  
-  @Signature("parseTypeExpression(-> Expression)")
-  public static class ParseTypeExpression implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      MagpieParser parser = (MagpieParser) thisObj.getValue();
-      
-      Expr expr = parser.parseTypeExpression();
-      expr = ExprSpecialFormDesugarer.desugar(expr);
-      
-      return ExprConverter.convert(interpreter, expr, 
-          interpreter.createTopLevelContext());
-    }
   }
   
   private static class MagpieExprParser implements ExprParser {

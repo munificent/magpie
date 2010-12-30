@@ -1,6 +1,9 @@
+// Note: This file is parsed before any of the parsewords have been defined, so
+// it only uses core syntax.
+
 // Implement Trueable for the built-in classes.
-get Object true? Bool = true
-get Bool true? Bool = this
-get Int true? Bool = this != 0
-get String true? Bool = this count > 0
-get Nothing true? Bool = false
+Object  defineGetter("true?", fn(-> Bool) true)
+Bool    defineGetter("true?", fn(-> Bool) this)
+Int     defineGetter("true?", fn(-> Bool) this != 0)
+String  defineGetter("true?", fn(-> Bool) this count > 0)
+Nothing defineGetter("true?", fn(-> Bool) false)

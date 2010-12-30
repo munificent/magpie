@@ -37,7 +37,6 @@ public enum TokenType {
   EXTEND,
   FN,
   FOR,
-  GET,
   IF,
   INTERFACE,
   LET,

@@ -15,12 +15,12 @@ public abstract class Expr {
     return new IntExpr(Position.none(), value);
   }
   
-  public static ApplyExpr message(Position position, Expr receiver, String name, Expr arg) {
-    return new ApplyExpr(new MessageExpr(position, receiver, name), arg, false);
+  public static Expr message(Position position, Expr receiver, String name, Expr arg) {
+    return ApplyExpr.create(new MessageExpr(position, receiver, name), arg, false);
   }
   
-  public static ApplyExpr message(Expr receiver, String name, Expr arg) {
-    return new ApplyExpr(new MessageExpr(Position.none(), receiver, name), arg, false);
+  public static Expr message(Expr receiver, String name, Expr arg) {
+    return ApplyExpr.create(new MessageExpr(Position.none(), receiver, name), arg, false);
   }
   
   public static MessageExpr message(Expr receiver, String name) {
@@ -39,8 +39,8 @@ public abstract class Expr {
     return new NothingExpr(Position.none());  
   }
   
-  public static ApplyExpr staticMessage(Expr receiver, String name, Expr arg) {
-    return new ApplyExpr(new MessageExpr(Position.none(), receiver, name), arg, true);
+  public static Expr staticMessage(Expr receiver, String name, Expr arg) {
+    return ApplyExpr.create(new MessageExpr(Position.none(), receiver, name), arg, true);
   }
 
   public static StringExpr string(String text) {

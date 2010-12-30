@@ -88,7 +88,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   private static Expr convertApplyExpr(Interpreter interpreter, Obj expr) {
     Expr target = convert(interpreter, expr.getField("target"));
     Expr argument = convert(interpreter, expr.getField("argument"));
-    return new ApplyExpr(target, argument, false);
+    return ApplyExpr.create(target, argument, false);
   }
 
   private static Expr convertAssignExpr(Interpreter interpreter, Obj expr) {

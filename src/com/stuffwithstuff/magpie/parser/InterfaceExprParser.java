@@ -79,8 +79,13 @@ public class InterfaceExprParser implements ExprParser {
       //    Foo declareSetter("someSetter", fn Int)
       
       // Parse the declaration keyword.
-      TokenType memberType = parser.consumeAny(
-          TokenType.DEF, TokenType.GET, TokenType.SET).getType();
+      TokenType memberType;
+      // TODO(bob): Hack temp. Will go away when this is moved into Magpie.
+      if (parser.match("get")) {
+        memberType = TokenType.NAME;
+      } else {
+        memberType = parser.consumeAny(TokenType.DEF, TokenType.SET).getType();
+      }
       
       // Parse the name.
       String member = parser.consumeAny(
@@ -97,7 +102,7 @@ public class InterfaceExprParser implements ExprParser {
              makeTypeFunction(typeParams, methodType))));
         break;
         
-      case GET:
+      case NAME:
         Expr getterType = parser.parseTypeExpression();
         exprs.add(Expr.message(Expr.name(name), Name.DECLARE_GETTER,
             Expr.tuple(Expr.string(member),

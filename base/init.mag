@@ -11,14 +11,14 @@ import("syntax/expressions.mag")
 import("syntax/FunctionTypeExpression.mag")
 
 // Register the keyword parsers. Do this here so that the full Magpie syntax is
-// available when defining the rest of the stuff. These are in order of how
-// annoying it is to write code without that keyword.
-import("syntax/VarParser.mag")
+// available when defining the rest of the stuff.
 import("syntax/BreakParser.mag")
 import("syntax/DoParser.mag")
+import("syntax/GetParser.mag")
 import("syntax/ReturnParser.mag")
 import("syntax/TypeofParser.mag")
 import("syntax/UnsafeCastParser.mag")
+import("syntax/VarParser.mag")
 
 // Define the interface classes. Need to do this relatively early so that
 // subsequent files can define interface types.

@@ -25,7 +25,6 @@ public class MagpieParser extends Parser {
     mParsers.put(TokenType.EXTEND, new ExtendExprParser());
     mParsers.put(TokenType.FN, new FnExprParser());
     mParsers.put(TokenType.FOR, new LoopExprParser());
-    mParsers.put(TokenType.GET, new GetExprParser());
     mParsers.put(TokenType.IF, new ConditionalExprParser());
     mParsers.put(TokenType.INTERFACE, new InterfaceExprParser());
     mParsers.put(TokenType.LET, new ConditionalExprParser());
@@ -310,7 +309,7 @@ public class MagpieParser extends Parser {
         // before:  Apply(    Msg(null, "array"),                  Int(3))
         // after:   Apply(Msg(Msg(null, "array"), "assign"), Tuple(Int(3), Int(4)))
         ApplyExpr apply = (ApplyExpr) expr;
-        return new ApplyExpr(new MessageExpr(position, apply.getTarget(),
+        return ApplyExpr.create(new MessageExpr(position, apply.getTarget(),
             Name.ASSIGN),
             Expr.tuple(apply.getArg(), value), false);
       } else {
@@ -408,7 +407,7 @@ public class MagpieParser extends Parser {
           arg = parseExpression();
           consume(TokenType.RIGHT_BRACKET);
         }
-        message = new ApplyExpr(message, arg, true);
+        message = ApplyExpr.create(message, arg, true);
       } else if (match(TokenType.LEFT_PAREN)) {
         // A function application like foo(123).
         Expr arg;
@@ -418,7 +417,7 @@ public class MagpieParser extends Parser {
           arg = parseExpression();
           consume(TokenType.RIGHT_PAREN);
         }
-        message = new ApplyExpr(message, arg, false);
+        message = ApplyExpr.create(message, arg, false);
       } else if (match(TokenType.WITH)) {
         // Parse the parameter list if given.
         FunctionType blockType;
@@ -439,10 +438,10 @@ public class MagpieParser extends Parser {
           // foo(123) with ...  --> Apply(Msg(foo), Tuple(123, block))
           ApplyExpr apply = (ApplyExpr)message;
           Expr arg = addTupleField(apply.getArg(), block);
-          message = new ApplyExpr(apply.getTarget(), arg, false);
+          message = ApplyExpr.create(apply.getTarget(), arg, false);
         } else {
           // 123 with ...  --> Apply(Int(123), block)
-          message = new ApplyExpr(message, block, false);
+          message = ApplyExpr.create(message, block, false);
         }
       } else {
         break;

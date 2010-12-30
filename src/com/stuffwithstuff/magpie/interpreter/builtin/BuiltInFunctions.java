@@ -37,7 +37,7 @@ public class BuiltInFunctions {
   }
 
   @Signature("printString(text String ->)")
-  public static class PrintRaw implements BuiltInCallable {
+  public static class PrintString implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       interpreter.print(arg.asString());
       return interpreter.nothing();

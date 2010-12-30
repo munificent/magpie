@@ -12,7 +12,7 @@ end
 // Returns the argument cast to the given type if it's type is an exact match
 // and not a subtype, otherwise returns nothing.
 def Object asExactly[T -> T | Nothing]
-    if arg type == T then unsafecast[T](arg)
+    if type == T then unsafecast[T](this)
 end
 
 // Returns the object cast to the given type if it can be safely assigned to

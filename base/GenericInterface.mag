@@ -11,7 +11,7 @@ class GenericInterface
             if instance _0 == typeArgString then return instance _1
         end
         
-        var instance = Interface new(name)
+        var instance = Interface new(name ~ "[" ~ typeArgs string ~ "]")
         
         // Add it to the cache immediately. This is necessary to be able to
         // instantiate recursive interfaces.

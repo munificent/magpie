@@ -81,7 +81,7 @@ public class ClassExprParser implements ExprParser {
         exprs.add(parseField(parser, false, theClass));
       } else if (parser.match(TokenType.DEF)) {
         exprs.add(parseMethod(parser, theClass));
-      } else if (parser.match(TokenType.GET)) {
+      } else if (parser.match("get")) {
         exprs.add(parseGetter(parser, theClass));
       } else if (parser.match(TokenType.SET)) {
         exprs.add(parseSetter(parser, theClass));
@@ -96,7 +96,7 @@ public class ClassExprParser implements ExprParser {
           exprs.add(parseField(parser, false, metaclass));
         } else if (parser.match(TokenType.DEF)) {
           exprs.add(parseMethod(parser, metaclass));
-        } else if (parser.match(TokenType.GET)) {
+        } else if (parser.match("get")) {
           exprs.add(parseGetter(parser, metaclass));
         } else if (parser.match(TokenType.SET)) {
           exprs.add(parseSetter(parser, metaclass));
