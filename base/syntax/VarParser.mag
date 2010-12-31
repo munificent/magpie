@@ -10,4 +10,4 @@ class VarParser
     end
 end
 
-MagpieParser registerKeyword("var", VarParser new())
+MagpieParser registerParseword("var", VarParser new())

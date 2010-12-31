@@ -13,14 +13,25 @@ import com.stuffwithstuff.magpie.util.Expect;
 
 public class MagpieParserBuiltIns {
   @Shared
-  @Signature("registerKeyword(keyword String, parser KeywordParser ->)")
-  public static class RegisterKeyword implements BuiltInCallable {
+  @Signature("registerParseword(keyword String, parser KeywordParser ->)")
+  public static class RegisterParseword implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String keyword = arg.getTupleField(0).asString();
       Obj parser = arg.getTupleField(1);
       
-      interpreter.registerKeywordParser(keyword,
+      interpreter.registerParseword(keyword,
           new MagpieExprParser(interpreter, parser));
+      return interpreter.nothing();
+    }
+  }
+  
+  @Shared
+  @Signature("registerKeyword(keyword String ->)")
+  public static class RegisterKeyword implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      String keyword = arg.asString();
+      
+      interpreter.registerKeyword(keyword);
       return interpreter.nothing();
     }
   }

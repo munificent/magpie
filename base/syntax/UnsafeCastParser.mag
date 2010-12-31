@@ -17,4 +17,4 @@ class UnsafeCastParser
     end
 end
 
-MagpieParser registerKeyword("unsafecast", UnsafeCastParser new())
+MagpieParser registerParseword("unsafecast", UnsafeCastParser new())

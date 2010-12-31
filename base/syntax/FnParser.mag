@@ -6,4 +6,4 @@ class FnParser
     end
 end
 
-MagpieParser registerKeyword("fn", FnParser new())
+MagpieParser registerParseword("fn", FnParser new())

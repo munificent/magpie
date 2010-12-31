@@ -15,7 +15,8 @@ public class MagpieParser extends Parser {
     CONSUME_LINE_AFTER_EXPRESSION
   }
 
-  public MagpieParser(Lexer lexer, Map<String, ExprParser> keywordParsers) {
+  public MagpieParser(Lexer lexer, Map<String, ExprParser> parsewords,
+      Set<String> keywords) {
     super(lexer);
     
     // Register the parsers for the different keywords.
@@ -29,12 +30,12 @@ public class MagpieParser extends Parser {
     mParsers.put(TokenType.MATCH, new MatchExprParser());
     mParsers.put(TokenType.WHILE, new LoopExprParser());
     
-    // Register the provided parsers.
-    mKeywordParsers = keywordParsers;
+    mKeywordParsers = parsewords;
+    mKeywords = keywords;
   }
   
   public MagpieParser(Lexer lexer) {
-    this(lexer, null);
+    this(lexer, null, null);
   }
   
   public List<Expr> parse() {
@@ -279,7 +280,8 @@ public class MagpieParser extends Parser {
 
   @Override
   protected boolean isKeyword(String name) {
-    return (mKeywordParsers != null) && mKeywordParsers.containsKey(name);
+    return ((mKeywordParsers != null) && mKeywordParsers.containsKey(name)) ||
+           ((mKeywords != null) && mKeywords.contains(name));
   }
 
   private Expr assignment() {
@@ -530,6 +532,7 @@ public class MagpieParser extends Parser {
   private final Map<TokenType, ExprParser> mParsers =
     new HashMap<TokenType, ExprParser>();
   private final Map<String, ExprParser> mKeywordParsers;
+  private final Set<String> mKeywords;
   
   // Counts the number of nested expression literals the parser is currently
   // within. Zero means the parser is not inside an expression literal at all

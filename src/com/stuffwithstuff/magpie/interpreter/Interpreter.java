@@ -405,12 +405,20 @@ public class Interpreter {
     mScriptPaths.pop();
   }
   
-  public Map<String, ExprParser> getKeywordParsers() {
-    return mKeywordParsers;
+  public Map<String, ExprParser> getParsewords() {
+    return mParsewords;
   }
   
-  public void registerKeywordParser(String keyword, ExprParser parser) {
-    mKeywordParsers.put(keyword, parser);
+  public Set<String> getKeywords() {
+    return mKeywords;
+  }
+  
+  public void registerParseword(String keyword, ExprParser parser) {
+    mParsewords.put(keyword, parser);
+  }
+  
+  public void registerKeyword(String keyword) {
+    mKeywords.add(keyword);
   }
   
   private ClassObj createGlobalClass(String name) {
@@ -531,6 +539,7 @@ public class Interpreter {
   
   private final Obj mNothing;
   private final Stack<String> mScriptPaths = new Stack<String>();
-  private final Map<String, ExprParser> mKeywordParsers =
+  private final Map<String, ExprParser> mParsewords =
       new HashMap<String, ExprParser>();
+  private final Set<String> mKeywords = new HashSet<String>();
 }

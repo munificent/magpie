@@ -16,10 +16,14 @@ public class ApplyExpr extends Expr {
       MessageExpr message = (MessageExpr) target;
       String name = message.getName();
       
-      if (name.equals("%break%")) {
+      if (name.equals("%block%")) {
+        return specialFormBlock(target.getPosition(), arg);
+      } else if (name.equals("%break%")) {
         return new BreakExpr(target.getPosition());
       } else if (name.equals("%fn%")) {
         return specialFormFn(target.getPosition(), arg);
+      } else if (name.equals("%if%")) {
+        return specialFormIf(target.getPosition(), arg);
       } else if (name.equals("%return%")) {
         return new ReturnExpr(target.getPosition(), arg);
       } else if (name.equals("%unsafecast%")) {
@@ -33,14 +37,13 @@ public class ApplyExpr extends Expr {
     return new ApplyExpr(target, arg, isStatic);
   }
   
+  private static Expr specialFormBlock(Position position, Expr arg) {
+    List<Expr> args = splitArg(arg);
+    return new BlockExpr(position, args);
+  }
+
   private static Expr specialFormFn(Position position, Expr arg) {
-    List<Expr> args;
-    if (arg instanceof TupleExpr) {
-      args = ((TupleExpr)arg).getFields();
-    } else {
-      args = new ArrayList<Expr>();
-      args.add(arg);
-    }
+    List<Expr> args = splitArg(arg);
     
     // This special form allows omitting certain arguments, so the
     // interpretation of it is based on how many are provided.
@@ -105,6 +108,27 @@ public class ApplyExpr extends Expr {
     return new FnExpr(position, type, body);
   }
 
+  private static Expr specialFormIf(Position position, Expr arg) {
+    List<Expr> args = splitArg(arg);
+    
+    if ((args.size() < 2) || (args.size() > 3)) {
+      throw new IllegalArgumentException(
+      "The %if% special form requires 2 or 3 arguments.");
+    }
+    
+    Expr condition = args.get(0);
+    Expr thenExpr = args.get(1);
+
+    Expr elseExpr;
+    if (args.size() == 3) {
+      elseExpr = args.get(2);
+    } else {
+      elseExpr = Expr.nothing();
+    }
+    
+    return new IfExpr(position, null, condition, thenExpr, elseExpr);
+  }
+
   private static Expr specialFormUnsafeCast(Position position, Expr arg) {
     Expr type = ((TupleExpr)arg).getFields().get(0);
     Expr value = ((TupleExpr)arg).getFields().get(1);
@@ -117,6 +141,18 @@ public class ApplyExpr extends Expr {
     Expr valueExpr = ((TupleExpr)arg).getFields().get(1);
     
     return new VariableExpr(position, name, valueExpr);
+  }
+  
+  private static List<Expr> splitArg(Expr arg) {
+    List<Expr> args;
+    if (arg instanceof TupleExpr) {
+      args = ((TupleExpr)arg).getFields();
+    } else {
+      args = new ArrayList<Expr>();
+      args.add(arg);
+    }
+    
+    return args;
   }
   
   private ApplyExpr(Expr target, Expr arg, boolean isStatic) {

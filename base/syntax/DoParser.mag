@@ -6,4 +6,4 @@ class DoParser
     end
 end
 
-MagpieParser registerKeyword("do", DoParser new())
+MagpieParser registerParseword("do", DoParser new())

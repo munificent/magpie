@@ -1,0 +1,13 @@
+// Keyword parser for "if" expressions.
+/*
+class IfParser
+    def parse(parser MagpieParser -> Expression)
+        parser consume("do")
+        ScopeExpression new(parser parseBlock())
+    end
+end
+
+MagpieParser registerParseword("if", IfParser new())
+MagpieParser registerKeyword("then")
+MagpieParser registerKeyword("else")
+*/

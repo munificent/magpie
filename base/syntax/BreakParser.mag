@@ -6,4 +6,4 @@ class BreakParser
     end
 end
 
-MagpieParser registerKeyword("break", BreakParser new())
+MagpieParser registerParseword("break", BreakParser new())

@@ -2,13 +2,11 @@
 class ReturnParser
     def parse(parser MagpieParser -> Expression)
         parser consume("return")
-        if parser lookAheadAny(TokenType line, TokenType rightParen,
-                TokenType rightBrace, TokenType rightBracket) then
-            ReturnExpression new(NothingExpression new())
-        else
-            ReturnExpression new(parser parseExpression())
-        end
+        %if%(parser lookAheadAny(TokenType line, TokenType rightParen,
+                TokenType rightBrace, TokenType rightBracket),
+            ReturnExpression new(NothingExpression new()),
+            ReturnExpression new(parser parseExpression()))
     end
 end
 
-MagpieParser registerKeyword("return", ReturnParser new())
+MagpieParser registerParseword("return", ReturnParser new())

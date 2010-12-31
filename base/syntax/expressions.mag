@@ -90,17 +90,14 @@ class IfExpression
                    thenArm Expression,
                    elseArm Expression -> IfExpression)
         construct(name: name, condition: condition,
-                  thenArm: thenArm, elseArm: elseArm)
+            thenArm: thenArm, elseArm: elseArm)
     end
     
     get let? Bool = name != nothing
     
     get string String =
-        if let? then
-            "let " ~ name ~ " "
-        else
-            "if "
-        end ~ condition ~ " then " ~ thenArm ~ " else " ~ elseArm
+        %if%(let?, "let " ~ name ~ " ", "if ") ~
+            condition ~ " then " ~ thenArm ~ " else " ~ elseArm
     end
 end
 

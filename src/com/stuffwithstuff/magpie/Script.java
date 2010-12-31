@@ -43,7 +43,8 @@ public class Script {
     try {
       Lexer lexer = new Lexer(mPath, new StringCharacterReader(mText));
       MagpieParser parser = new MagpieParser(lexer,
-          interpreter.getKeywordParsers());
+          interpreter.getParsewords(),
+          interpreter.getKeywords());
   
       interpreter.load(parser.parse());
   

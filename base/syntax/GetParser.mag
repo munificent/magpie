@@ -10,11 +10,9 @@ class GetParser
     
         %var%("receiver", parseReceiver(parser))
         %var%("name", parser consume(TokenType identifier) stringValue)
-        %var%("valueType", if parser lookAheadAny(TokenType equals, TokenType line) then
-            { Dynamic }
-        else
-            parser parseTypeExpression()
-        end)
+        %var%("valueType", %if%(parser lookAheadAny(TokenType equals, TokenType line),
+            { Dynamic },
+            parser parseTypeExpression()))
         
         %var%("type", FunctionTypeExpression new(
             %unsafecast%(List(String), Array of()),
@@ -27,4 +25,4 @@ class GetParser
     end
 end
 
-MagpieParser registerKeyword("get", GetParser new())
+MagpieParser registerParseword("get", GetParser new())

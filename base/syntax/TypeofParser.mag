@@ -6,4 +6,4 @@ class TypeofParser
     end
 end
 
-MagpieParser registerKeyword("typeof", TypeofParser new())
+MagpieParser registerParseword("typeof", TypeofParser new())

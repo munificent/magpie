@@ -8,30 +8,28 @@ class DefParser
     def parse(parser MagpieParser -> Expression)
         parser consume("def")
         
-        if  parser lookAhead(TokenType identifier, TokenType leftParen) or
+        %if%(parser lookAhead(TokenType identifier, TokenType leftParen) or
             parser lookAhead(TokenType identifier, TokenType leftBracket) or
             parser lookAhead(TokenType operator, TokenType leftParen) or
-            parser lookAhead(TokenType operator, TokenType leftBracket) then
-            
+            parser lookAhead(TokenType operator, TokenType leftBracket), %block%(
             // Local function.
-            %var%("name", parser consume() stringValue)
+            %var%("name", parser consume() stringValue),
 
             // Parse the function.
-            %var%("function", parser parseFunction())
+            %var%("function", parser parseFunction()),
 
-            VariableExpression new(name, function)
-        else
-            %var%("receiver", parseReceiver(parser))
+            VariableExpression new(name, function)),
+        %block%(
+            %var%("receiver", parseReceiver(parser)),
             %var%("name", parser consumeAny(TokenType identifier,
-                TokenType operator) stringValue)
-            %var%("function", parser parseFunction())
+                TokenType operator) stringValue),
+            %var%("function", parser parseFunction()),
       
-            { `receiver defineMethod(`(StringExpression new(name)), `function) }
-        end
+            { `receiver defineMethod(`(StringExpression new(name)), `function) }))
     end
 end
 
-MagpieParser registerKeyword("def", DefParser new())
+MagpieParser registerParseword("def", DefParser new())
 // TODO(bob): Not sure why this is registering "shared" but the old Java one
 // did.
-MagpieParser registerKeyword("shared", DefParser new())
+MagpieParser registerParseword("shared", DefParser new())
