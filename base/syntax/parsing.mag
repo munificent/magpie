@@ -1,14 +1,19 @@
 // Utility functions used by the parsers.
 
-%var%("parseReceiver", %fn%("parser", MagpieParser, Expression,
-%if%(parser lookAhead(TokenType identifier),
-%block%(
-    // Getter on a class.
-    %var%("className", parser consume() stringValue),
-    MessageExpression new(nothing, className)), 
-%block%(
-    // Getter on a complex expression.
-    parser consume(TokenType leftParen),
-    %var%("receiver", parser parseExpression()),
-    parser consume(TokenType rightParen),
-    receiver))))
+%var%("parseReceiver",
+    %fn%("parser", MagpieParser, Expression,
+        %if%(parser lookAhead(TokenType identifier),
+            (
+                // Getter on a class.
+                %var%("className", parser consume() stringValue)
+                MessageExpression new(nothing, className)
+            ), (
+                // Getter on a complex expression.
+                parser consume(TokenType leftParen)
+                %var%("receiver", parser parseExpression())
+                parser consume(TokenType rightParen)
+                receiver
+            )
+        )
+    )
+)

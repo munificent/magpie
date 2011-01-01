@@ -16,9 +16,7 @@ public class ApplyExpr extends Expr {
       MessageExpr message = (MessageExpr) target;
       String name = message.getName();
       
-      if (name.equals("%block%")) {
-        return specialFormBlock(target.getPosition(), arg);
-      } else if (name.equals("%break%")) {
+      if (name.equals("%break%")) {
         return new BreakExpr(target.getPosition());
       } else if (name.equals("%fn%")) {
         return specialFormFn(target.getPosition(), arg);
@@ -26,6 +24,8 @@ public class ApplyExpr extends Expr {
         return specialFormIf(target.getPosition(), arg);
       } else if (name.equals("%return%")) {
         return new ReturnExpr(target.getPosition(), arg);
+      } else if (name.equals("%scope%")) {
+        return new ScopeExpr(arg);
       } else if (name.equals("%unsafecast%")) {
         return specialFormUnsafeCast(target.getPosition(), arg);
       } else if (name.equals("%var%")) {
@@ -37,11 +37,6 @@ public class ApplyExpr extends Expr {
     return new ApplyExpr(target, arg, isStatic);
   }
   
-  private static Expr specialFormBlock(Position position, Expr arg) {
-    List<Expr> args = splitArg(arg);
-    return new BlockExpr(position, args);
-  }
-
   private static Expr specialFormFn(Position position, Expr arg) {
     List<Expr> args = splitArg(arg);
     

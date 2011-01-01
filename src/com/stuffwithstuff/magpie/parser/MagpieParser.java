@@ -407,15 +407,9 @@ public class MagpieParser extends Parser {
           consume(TokenType.RIGHT_BRACKET);
         }
         message = ApplyExpr.create(message, arg, true);
-      } else if (match(TokenType.LEFT_PAREN)) {
+      } else if (lookAhead(TokenType.LEFT_PAREN)) {
         // A function application like foo(123).
-        Expr arg;
-        if (match(TokenType.RIGHT_PAREN)) {
-          arg = new NothingExpr(last(2).getPosition().union(last(1).getPosition()));
-        } else {
-          arg = parseExpression();
-          consume(TokenType.RIGHT_PAREN);
-        }
+        Expr arg = parenthesizedExpression(BraceType.PAREN);
         message = ApplyExpr.create(message, arg, false);
       } else if (match(TokenType.WITH)) {
         // Parse the parameter list if given.
@@ -476,25 +470,19 @@ public class MagpieParser extends Parser {
       if (match(TokenType.NAME)) {
         body = new MessageExpr(last(1).getPosition(), null,
             last(1).getString());
-      } else if (match(TokenType.LEFT_BRACE)) {
-        body = parseExpression();
+      } else if (lookAhead(TokenType.LEFT_BRACE)) {
+        body = parenthesizedExpression(BraceType.CURLY);
         body = new QuotationExpr(body.getPosition(), body);
-        consume(TokenType.RIGHT_BRACE);
       } else {
-        consume(TokenType.LEFT_PAREN);
-        body = parseExpression();
-        consume(TokenType.RIGHT_PAREN);
+        body = parenthesizedExpression(BraceType.PAREN);
       }
       return new UnquoteExpr(position, body);
-    } else if (match(TokenType.LEFT_PAREN)) {
-      Expr expr = parseExpression();
-      consume(TokenType.RIGHT_PAREN);
-      return expr;
-    } else if (match(TokenType.LEFT_BRACE)) {
+    } else if (lookAhead(TokenType.LEFT_PAREN)) {
+      return parenthesizedExpression(BraceType.PAREN);
+    } else if (lookAhead(TokenType.LEFT_BRACE)) {
       mQuoteDepth++;
-      Position position = last(1).getPosition();
-      Expr expr = parseExpression();
-      consume(TokenType.RIGHT_BRACE);
+      Position position = current().getPosition();
+      Expr expr = parenthesizedExpression(BraceType.CURLY);
       position = position.union(last(1).getPosition());
       mQuoteDepth--;
       return new QuotationExpr(position, expr);
@@ -516,6 +504,50 @@ public class MagpieParser extends Parser {
     return null;
   }
 
+  private Expr parenthesizedExpression(BraceType braceType) {
+    TokenType leftBrace = TokenType.LEFT_PAREN;
+    TokenType rightBrace = TokenType.RIGHT_PAREN;
+    switch (braceType) {
+    case SQUARE:
+      leftBrace = TokenType.LEFT_BRACKET;
+      rightBrace = TokenType.RIGHT_BRACKET;
+      break;
+    case CURLY:
+      leftBrace = TokenType.LEFT_BRACE;
+      rightBrace = TokenType.RIGHT_BRACE;
+      break;
+    }
+    
+    consume(leftBrace);
+    
+    // Ignore a leading newline.
+    match(TokenType.LINE);
+    
+    if (match(rightBrace)) {
+      return new NothingExpr(last(2).getPosition().union(last(1).getPosition()));
+    }
+    
+    Position position = last(2).getPosition();
+    List<Expr> exprs = new ArrayList<Expr>();
+    while (true) {
+      exprs.add(parseExpression());
+      if (!match(TokenType.LINE)) break;
+      // Allow the closing ) to be on its own line.
+      if (lookAhead(rightBrace)) break;
+    }
+    
+    // Allow a newline before the final ).
+    match(TokenType.LINE);
+    consume(rightBrace);
+    
+    if (exprs.size() > 1) {
+      return new BlockExpr(position, exprs);
+    } else {
+      // Just a single expression, so don't wrap it in a block.
+      return exprs.get(0);
+    }
+  }
+  
   private Expr addTupleField(Expr expr, Expr field) {
     if (expr instanceof NothingExpr) {
       return field;
@@ -529,6 +561,11 @@ public class MagpieParser extends Parser {
     }
   }
   
+  private static enum BraceType {
+    PAREN,
+    SQUARE,
+    CURLY
+  }
   private final Map<TokenType, ExprParser> mParsers =
     new HashMap<TokenType, ExprParser>();
   private final Map<String, ExprParser> mKeywordParsers;

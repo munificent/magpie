@@ -29,9 +29,6 @@ public class Lexer {
   private Token normalizeLines(Token token) {
     switch (token.getType()) {
     // Ignore lines after tokens that can't end an expression.
-    case LEFT_PAREN:
-    case LEFT_BRACKET:
-    case LEFT_BRACE:
     case BACKTICK:
     case COMMA:
     case DOT:

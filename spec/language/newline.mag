@@ -27,24 +27,6 @@ specify("A newline") with
     it should("be ignored after a period") with
     end
     */
-
-    it should("be ignored after an open parenthesis") with
-        var i = (
-            1)
-        i shouldBe(1)
-    end
-
-    it should("be ignored after an open bracket") with
-        def f[
-            T]() T
-        f[Int]() shouldBe(Int)
-    end
-
-    it should("be ignored after an open brace") with
-        var e = {
-            123 }
-        e string shouldBe("123")
-    end
 end
 
 specify("A semicolon") with
