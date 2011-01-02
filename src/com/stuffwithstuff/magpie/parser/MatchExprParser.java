@@ -1,7 +1,6 @@
 package com.stuffwithstuff.magpie.parser;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.BlockExpr;
@@ -12,7 +11,7 @@ import com.stuffwithstuff.magpie.ast.pattern.LiteralPattern;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.TypePattern;
-import com.stuffwithstuff.magpie.parser.MagpieParser.BlockOptions;
+import com.stuffwithstuff.magpie.util.Pair;
 
 // TODO(bob): This whole implementation is pretty hideous. Just slapping
 // something together so I can start getting it working. Will refactor and clean
@@ -71,11 +70,17 @@ public class MatchExprParser implements ExprParser {
 
     parser.consume(TokenType.THEN);
     
-    Expr body = parser.parseBlock(
-        EnumSet.of(BlockOptions.CONSUME_LINE_AFTER_EXPRESSION),
+    Pair<Expr, TokenType> bodyParse = parser.parseBlock(
         TokenType.CASE, TokenType.ELSE, TokenType.END);
     
-    return new MatchCase(name, pattern, body);
+    // Allow newlines to separate single-line case and else cases.
+    if ((bodyParse.getValue() == TokenType.EOF) &&
+        (parser.lookAhead(TokenType.LINE, TokenType.CASE) ||
+         parser.lookAhead(TokenType.LINE, TokenType.ELSE))) {
+      parser.consume(TokenType.LINE);
+    }
+    
+    return new MatchCase(name, pattern, bodyParse.getKey());
   }
   
   public static String parseBinding(MagpieParser parser) {
@@ -127,13 +132,13 @@ public class MatchExprParser implements ExprParser {
     // Parse the else case, if present.
     Expr elseCase = null;
     if (parser.match(TokenType.ELSE)) {
-      elseCase = parser.parseBlock(
-          EnumSet.of(BlockOptions.CONSUME_LINE_AFTER_EXPRESSION),
-          TokenType.END);
+      elseCase = parser.parseEndBlock();
     }
     
-    parser.consume(TokenType.END);
     position = position.union(parser.last(1).getPosition());
+    
+    parser.consume(TokenType.LINE);
+    parser.consume(TokenType.END);
     
     exprs.add(desugarCases(valueExpr, cases, elseCase));
     

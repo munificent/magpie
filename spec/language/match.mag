@@ -7,8 +7,8 @@ specify("A 'match' expression") with
         end
         
         match eval()
-        case "a" then "one"
-        case "b" then "two"
+            case "a" then "one"
+            case "b" then "two"
         end
         
         called shouldBe(1)
@@ -16,46 +16,46 @@ specify("A 'match' expression") with
     
     it should("return the value of the matched case") with
         match 2
-        case 1 then "one"
-        case 2 then "two"
-        case 3 then "three"
+            case 1 then "one"
+            case 2 then "two"
+            case 3 then "three"
         end shouldBe("two")
     end
 
     it should("only evaluate the first matched case") with
         var called = ""
         match true
-        case true then called = called ~ "1"
-        case true then called = called ~ "2"
+            case true then called = called ~ "1"
+            case true then called = called ~ "2"
         end
         called shouldBe("1")
     end
 
     it should("return nothing if no case matches") with
         match "not found"
-        case "a" then "bad"
-        case "b" then "bad"
+            case "a" then "bad"
+            case "b" then "bad"
         end shouldBe(nothing)
     end
 
     it should("match an else case if nothing else matches") with
         match "not found"
-        case "a" then "bad"
-        case "b" then "bad"
-        else "good"
+            case "a" then "bad"
+            case "b" then "bad"
+            else "good"
         end shouldBe("good")
     end
     
     it should("bind a variable to the matched value") with
         match 1
-        case a 1 then a
+            case a 1 then a
         end shouldBe(1)
     end
     
     it should("scope a binding to just the matched case") with
         var a = "outer"
         match "match"
-        case a "match" then a = "inner"
+            case a "match" then a = "inner"
         end
         a shouldBe("outer")
     end
@@ -64,29 +64,29 @@ end
 specify("A 'case' in a 'match' expression") with
     it should("match a literal bool value") with
         match true
-        case true then "yes"
-        case false then "no"
+            case true then "yes"
+            case false then "no"
         end shouldBe("yes")
     end
 
     it should("match a literal int value") with
         match 2
-        case 1 then "no"
-        case 2 then "yes"
+            case 1 then "no"
+            case 2 then "yes"
         end shouldBe("yes")
     end
 
     it should("match a literal string value") with
         match "a"
-        case "a" then "yes"
-        case "b" then "no"
+            case "a" then "yes"
+            case "b" then "no"
         end shouldBe("yes")
     end
 
     it should("match a type") with
         match 123
-        case Bool then "no"
-        case Int then "yes"
+            case Bool then "no"
+            case Int then "yes"
         end shouldBe("yes")
     end
 end
@@ -95,12 +95,13 @@ specify("The grammar for a 'match' expression") with
     it should("allow a block for a case body") with
         var result = ""
         match "first"
-        case "first" then
-            result = "a"
-            result = result ~ "b"
-        case "second" then
-            result = "bad"
-            result = result ~ "d"
+            case "first" then
+                result = "a"
+                result = result ~ "b"
+            case "second" then
+                result = "bad"
+                result = result ~ "d"
+            end
         end
         result shouldBe("ab")
     end
@@ -108,10 +109,11 @@ specify("The grammar for a 'match' expression") with
     it should("allow a block for the else body") with
         var result = ""
         match "second"
-        case "first" then
-        else
-            result = "a"
-            result = result ~ "b"
+            case "first" then
+            else
+                result = "a"
+                result = result ~ "b"
+            end
         end
         result shouldBe("ab")
     end

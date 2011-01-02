@@ -74,16 +74,16 @@ class TupleIterator
 
     get current =
         match index
-        case 0 then tuple _0
-        case 1 then tuple _1
-        case 2 then tuple _2
-        case 3 then tuple _3
-        case 4 then tuple _4
-        case 5 then tuple _5
-        case 6 then tuple _6
-        case 7 then tuple _7
-        case 8 then tuple _8
-        case 9 then tuple _9
+            case 0 then tuple _0
+            case 1 then tuple _1
+            case 2 then tuple _2
+            case 3 then tuple _3
+            case 4 then tuple _4
+            case 5 then tuple _5
+            case 6 then tuple _6
+            case 7 then tuple _7
+            case 8 then tuple _8
+            case 9 then tuple _9
         end
     end
 

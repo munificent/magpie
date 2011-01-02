@@ -7,14 +7,8 @@ import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.util.Pair;
-import com.stuffwithstuff.magpie.util.Ref;
 
 public class MagpieParser extends Parser {  
-  public static enum BlockOptions {
-    CONSUME_END,
-    CONSUME_LINE_AFTER_EXPRESSION
-  }
-
   public MagpieParser(Lexer lexer, Map<String, ExprParser> parsewords,
       Set<String> keywords) {
     super(lexer);
@@ -57,67 +51,63 @@ public class MagpieParser extends Parser {
     return assignment();
   }
 
-  public Expr parseBlock() {
-    return parseBlock(EnumSet.of(BlockOptions.CONSUME_END));
+  public Expr parseEndBlock() {
+    return parseBlock(TokenType.END).getKey();
   }
 
-  public Expr parseBlock(EnumSet<BlockOptions> options,
-      TokenType... endTokenTypes) {
-    return parseBlock(new Ref<Boolean>(), options, endTokenTypes);
+  public Pair<Expr, TokenType> parseBlock(TokenType... endTokens) {
+    return parseBlock(true, endTokens);
   }
   
-  public Expr parseBlock(Ref<Boolean> consumedEnd, EnumSet<BlockOptions> options,
-      TokenType... endTokenTypes) {
+  public Pair<Expr, TokenType> parseBlock(boolean parseCatch,
+      TokenType... endTokens) {
     if (match(TokenType.LINE)){
       Position position = last(1).getPosition();
       List<Expr> exprs = new ArrayList<Expr>();
       
       while (true) {
-        if (options.contains(BlockOptions.CONSUME_END) &&
-            lookAhead(TokenType.END)) break;
-        if (lookAheadAny(endTokenTypes)) break;
+        if (lookAheadAny(endTokens)) break;
         if (lookAhead(TokenType.CATCH)) break;
         
         exprs.add(parseExpression());
         consume(TokenType.LINE);
       }
       
-      List<MatchCase> catches = new ArrayList<MatchCase>();
-      while (match(TokenType.CATCH)) {
-        catches.add(parseCatch());
-      }
+      TokenType endToken = current().getType();
       
       // If the block ends with 'end', then we want to consume that token,
       // otherwise we want to leave it unconsumed to be consistent with the
       // single-expression block case.
-      if (options.contains(BlockOptions.CONSUME_END) && match(TokenType.END)) {
-        consumedEnd.set(true);
-      } else {
-        consumedEnd.set(false);
+      if (endToken == TokenType.END) {
+        consume();
       }
       
-      // TODO(bob): This is all pretty hokey.
+      // Parse any catch clauses.
       Expr catchExpr = null;
-      if (catches.size() > 0) {
-        Expr valueExpr = Expr.name("__err__");
-        Expr elseExpr = Expr.message(Expr.name("Runtime"), "throw", valueExpr);
-        catchExpr = MatchExprParser.desugarCases(valueExpr, catches, elseExpr);
+      if (parseCatch) {
+        List<MatchCase> catches = new ArrayList<MatchCase>();
+        while (match(TokenType.CATCH)) {
+          catches.add(parseCatch(endTokens));
+        }
+        
+        // TODO(bob): This is all pretty hokey.
+        if (catches.size() > 0) {
+          Expr valueExpr = Expr.name("__err__");
+          Expr elseExpr = Expr.message(Expr.name("Runtime"), "throw", valueExpr);
+          catchExpr = MatchExprParser.desugarCases(valueExpr, catches, elseExpr);
+        }
       }
       
       position = position.union(last(1).getPosition());
-      return new BlockExpr(position, exprs, catchExpr);
+      return new Pair<Expr, TokenType>(
+          new BlockExpr(position, exprs, catchExpr), endToken);
     } else {
       Expr body = parseExpression();
-      if (options.contains(BlockOptions.CONSUME_LINE_AFTER_EXPRESSION)) {
-        consume(TokenType.LINE);
-      }
-      consumedEnd.set(false);
-      return body;
+      return new Pair<Expr, TokenType>(body, TokenType.EOF);
     }
   }
-  
-  private MatchCase parseCatch() {
-    
+
+  private MatchCase parseCatch(TokenType... endTokens) {
     String name = MatchExprParser.parseBinding(this);
     Pattern pattern = MatchExprParser.parsePattern(this);
 
@@ -126,24 +116,15 @@ public class MagpieParser extends Parser {
     
     consume(TokenType.THEN);
     
-    Expr body;
-    if (match(TokenType.LINE)){
-      Position position = last(1).getPosition();
-      List<Expr> exprs = new ArrayList<Expr>();
-      
-      while (!lookAheadAny(TokenType.CATCH, TokenType.END)) {
-        exprs.add(parseExpression());
-        consume(TokenType.LINE);
-      }
-      
-      position = position.union(last(1).getPosition());
-      body = new BlockExpr(position, exprs);
-    } else {
-      body = parseExpression();
-      consume(TokenType.LINE);
+    Pair<Expr, TokenType> body = parseBlock(false, endTokens);
+    
+    // Allow newlines to separate single-line catches.
+    if ((body.getValue() == TokenType.EOF) &&
+        lookAhead(TokenType.LINE, TokenType.CATCH)) {
+      consume();
     }
-
-    return new MatchCase(name, pattern, body);
+    
+    return new MatchCase(name, pattern, body.getKey());
   }
   
   // fn (a) print "hi"
@@ -163,7 +144,7 @@ public class MagpieParser extends Parser {
     }
     
     // Parse the body.
-    Expr expr = parseBlock();
+    Expr expr = parseEndBlock();
     
     position = position.union(last(1).getPosition());
     
@@ -423,7 +404,7 @@ public class MagpieParser extends Parser {
         }
 
         // Parse the block and wrap it in a function.
-        Expr block = parseBlock();
+        Expr block = parseEndBlock();
         block = new FnExpr(block.getPosition(), blockType, block);
         
         // Apply it to the previous expression.

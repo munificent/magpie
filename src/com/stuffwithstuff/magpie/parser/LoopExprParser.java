@@ -67,7 +67,7 @@ public class LoopExprParser implements ExprParser {
     }
     
     parser.consume("do");
-    Expr body = parser.parseBlock();
+    Expr body = parser.parseEndBlock();
 
     Position position = startPos.union(body.getPosition());
     

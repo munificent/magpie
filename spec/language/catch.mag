@@ -12,7 +12,8 @@ specify("A 'catch' clause in a block") with
     it should("evaluate to the caught expression") with
         do
             Runtime throw("error")
-        catch String then "caught"
+        catch String then
+            "caught"
         end shouldBe("caught")
     end
      
@@ -33,7 +34,8 @@ specify("A 'catch' clause in a block") with
         do
             do
                 Runtime throw("error")
-            catch Int then fail("Should not be caught here.")
+            catch Int then
+                fail("Should not be caught here.")
             end
         catch String then
             caught = true
@@ -44,13 +46,11 @@ specify("A 'catch' clause in a block") with
     it should("allow a single line catch expression") with
         Runtime throw("error")
     catch err String then err shouldBe("error")
-    end
     
     it should("allow catch clauses in an if/then block") with
         if true then
             Runtime throw("error")
         catch err String then err shouldBe("error")
-        end
     end
     
     it should("allow catch clauses in an else block") with
@@ -59,6 +59,5 @@ specify("A 'catch' clause in a block") with
         else
             Runtime throw("error")
         catch err String then err shouldBe("error")
-        end
     end
 end

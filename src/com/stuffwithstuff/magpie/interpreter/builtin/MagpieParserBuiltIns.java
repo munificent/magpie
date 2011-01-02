@@ -125,7 +125,7 @@ public class MagpieParserBuiltIns {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       MagpieParser parser = (MagpieParser) thisObj.getValue();
       
-      Expr expr = parser.parseBlock();
+      Expr expr = parser.parseEndBlock();
       
       return ExprConverter.convert(interpreter, expr, 
           interpreter.createTopLevelContext());

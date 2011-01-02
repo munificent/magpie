@@ -135,7 +135,7 @@ public class ClassExprParser implements ExprParser {
     
     if (parser.match(TokenType.EQUALS)) {
       // Defining it.
-      Expr initializer = parser.parseBlock();
+      Expr initializer = parser.parseEndBlock();
       return Expr.message(theClass, Name.DEFINE_FIELD,
           Expr.tuple(Expr.string(name), Expr.bool(isDelegate), type,
               Expr.fn(initializer)));
@@ -166,7 +166,7 @@ public class ClassExprParser implements ExprParser {
     
     if (parser.match(TokenType.EQUALS)) {
       // Defining it.
-      Expr body = parser.parseBlock();
+      Expr body = parser.parseEndBlock();
       FunctionType fnType = FunctionType.returningType(type);
       Expr function = new FnExpr(body.getPosition(), fnType, body);
       return Expr.message(theClass, Name.DEFINE_GETTER,
