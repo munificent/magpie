@@ -84,7 +84,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   private static Expr convertAndExpr(Interpreter interpreter, Obj expr) {
     Expr left = convert(interpreter, expr.getField("left"));
     Expr right = convert(interpreter, expr.getField("right"));
-    return new AndExpr(Position.none(), left, right);
+    return Expr.and(left, right);
   }
 
   private static Expr convertApplyExpr(Interpreter interpreter, Obj expr) {
@@ -130,7 +130,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   }
 
   private static Expr convertBreakExpr(Interpreter interpreter, Obj expr) {
-    return new BreakExpr(Position.none());
+    return Expr.break_(Position.none());
   }
 
   private static Expr convertFunctionExpr(Interpreter interpreter, Obj expr) {
@@ -199,7 +199,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   private static Expr convertOrExpr(Interpreter interpreter, Obj expr) {
     Expr left = convert(interpreter, expr.getField("left"));
     Expr right = convert(interpreter, expr.getField("right"));
-    return new OrExpr(Position.none(), left, right);
+    return Expr.or(left, right);
   }
 
   private static Expr convertQuotationExpr(Interpreter interpreter, Obj expr) {
@@ -234,7 +234,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   }
   
   private static Expr convertThisExpr(Interpreter interpreter, Obj expr) {
-    return new ThisExpr(Position.none());
+    return Expr.this_(Position.none());
   }
   
   private static Expr convertTupleExpr(Interpreter interpreter, Obj expr) {
@@ -243,7 +243,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     for (Obj field : fieldObjs) {
       fields.add(convert(interpreter, field));
     }
-    return new TupleExpr(fields);
+    return Expr.tuple(fields);
   }
 
   private static Expr convertTypeofExpr(Interpreter interpreter, Obj expr) {

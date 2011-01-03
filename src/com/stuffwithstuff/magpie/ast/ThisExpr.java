@@ -3,7 +3,7 @@ package com.stuffwithstuff.magpie.ast;
 import com.stuffwithstuff.magpie.parser.Position;
 
 public class ThisExpr extends Expr {
-  public ThisExpr(Position position) {
+  ThisExpr(Position position) {
     super(position);
   }
   

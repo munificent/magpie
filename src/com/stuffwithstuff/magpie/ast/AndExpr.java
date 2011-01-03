@@ -3,8 +3,8 @@ package com.stuffwithstuff.magpie.ast;
 import com.stuffwithstuff.magpie.parser.Position;
 
 public class AndExpr extends Expr {
-  public AndExpr(Position position, Expr left, Expr right) {
-    super(position);
+  AndExpr(Expr left, Expr right) {
+    super(Position.surrounding(left, right));
     mLeft = left;
     mRight = right;
   }

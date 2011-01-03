@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie.ast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.parser.Position;
@@ -16,6 +17,10 @@ import com.stuffwithstuff.magpie.parser.Position;
  * @author bob
  */
 public abstract class Expr {
+  public static Expr and(Expr left, Expr right) {
+    return new AndExpr(left, right);
+  }
+  
   public static Expr apply(Expr target, Expr arg, boolean isStatic) {
     // Immediately handle special forms.
     if (target instanceof MessageExpr) {
@@ -71,6 +76,10 @@ public abstract class Expr {
     }
   }
   
+  public static Expr break_(Position position) {
+    return new BreakExpr(position);
+  }
+  
   public static FnExpr fn(Expr body) {
     return new FnExpr(Position.none(), FunctionType.nothingToDynamic(), body);
   }
@@ -103,14 +112,18 @@ public abstract class Expr {
     return new MessageExpr(Position.none(), null, name);
   }
   
-  public static NothingExpr nothing() {
+  public static Expr nothing() {
     return nothing(Position.none());  
   }
   
-  public static NothingExpr nothing(Position position) {
+  public static Expr nothing(Position position) {
     return new NothingExpr(Position.none());  
   }
 
+  public static Expr or(Expr left, Expr right) {
+    return new OrExpr(left, right);
+  }
+  
   public static Expr scope(Expr body) {
     // Unwrap redundant scopes.
     if (body instanceof ScopeExpr) return body;
@@ -129,8 +142,16 @@ public abstract class Expr {
     return new StringExpr(position, text);
   }
   
-  public static TupleExpr tuple(Expr... fields) {
+  public static Expr this_(Position position) {
+    return new ThisExpr(position);  
+  }
+
+  public static TupleExpr tuple(List<Expr> fields) {
     return new TupleExpr(fields);
+  }
+
+  public static TupleExpr tuple(Expr... fields) {
+    return new TupleExpr(Arrays.asList(fields));
   }
   
   public Expr(Position position) {

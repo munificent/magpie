@@ -5,14 +5,10 @@ import java.util.*;
 import com.stuffwithstuff.magpie.parser.Position;
 
 public class TupleExpr extends Expr {
-  public TupleExpr(List<Expr> fields) {
+  TupleExpr(List<Expr> fields) {
     super(Position.surrounding(fields));
     
     mFields = fields;
-  }
-  
-  public TupleExpr(Expr... fields) {
-    this(Arrays.asList(fields));
   }
   
   public List<Expr> getFields() { return mFields; }

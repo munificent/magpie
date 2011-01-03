@@ -3,7 +3,7 @@ package com.stuffwithstuff.magpie.ast;
 import com.stuffwithstuff.magpie.parser.Position;
 
 public class BreakExpr extends Expr {
-  public BreakExpr(Position position) {
+  BreakExpr(Position position) {
     super(position);
   }
   

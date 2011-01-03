@@ -12,6 +12,10 @@ public class Position {
     return new Position("", -1, -1, -1, -1);
   }
   
+  public static Position surrounding(Expr begin, Expr end) {
+    return begin.getPosition().union(end.getPosition());
+  }
+  
   public static Position surrounding(Token begin, Token end) {
     return begin.getPosition().union(end.getPosition());
   }

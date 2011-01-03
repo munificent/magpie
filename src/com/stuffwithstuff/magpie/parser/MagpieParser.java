@@ -236,7 +236,7 @@ public class MagpieParser extends Parser {
     switch (paramTypes.size()) {
     case 0:  paramType = Expr.name("Nothing"); break;
     case 1:  paramType = paramTypes.get(0); break;
-    default: paramType = new TupleExpr(paramTypes);
+    default: paramType = Expr.tuple(paramTypes);
     }
     
     // Parse the return type, if any.
@@ -333,7 +333,7 @@ public class MagpieParser extends Parser {
       // Only wrap in a tuple if there are multiple fields.
       if (fields.size() == 1) return fields.get(0);
       
-      return new TupleExpr(fields);
+      return Expr.tuple(fields);
     }
   }
   
@@ -348,12 +348,10 @@ public class MagpieParser extends Parser {
       Token conjunction = last(1);
       Expr right = operator();
 
-      Position position = left.getPosition().union(right.getPosition());
-
       if (conjunction.getType() == TokenType.AND) {
-        left = new AndExpr(position, left, right);
+        left = Expr.and(left, right);
       } else {
-        left = new OrExpr(position, left, right);
+        left = Expr.or(left, right);
       }
     }
     
@@ -451,7 +449,7 @@ public class MagpieParser extends Parser {
     } else if (match(TokenType.STRING)) {
       return Expr.string(last(1).getPosition(), last(1).getString());
     } else if (match(TokenType.THIS)) {
-      return new ThisExpr(last(1).getPosition());
+      return Expr.this_(last(1).getPosition());
     } else if (match(TokenType.NOTHING)) {
       return Expr.nothing(last(1).getPosition());
     } else if ((mQuoteDepth > 0) && match(TokenType.BACKTICK)) {
@@ -544,7 +542,7 @@ public class MagpieParser extends Parser {
       TupleExpr tuple = (TupleExpr)expr;
       List<Expr> fields = new ArrayList<Expr>(tuple.getFields());
       fields.add(field);
-      return new TupleExpr(fields);
+      return Expr.tuple(fields);
     } else {
       return Expr.tuple(expr, field);
     }

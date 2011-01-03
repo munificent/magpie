@@ -6,7 +6,6 @@ import java.util.List;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
 import com.stuffwithstuff.magpie.ast.FunctionType;
-import com.stuffwithstuff.magpie.ast.ThisExpr;
 import com.stuffwithstuff.magpie.ast.VariableExpr;
 import com.stuffwithstuff.magpie.interpreter.Name;
 
@@ -50,7 +49,7 @@ public class ClassExprParser implements ExprParser {
     parser.consume(TokenType.LINE);
     
     List<Expr> exprs = new ArrayList<Expr>();
-    Expr theClass = new ThisExpr(position);
+    Expr theClass = Expr.this_(position);
     
     // Parse the body.
     while (!parser.match("end")) {
