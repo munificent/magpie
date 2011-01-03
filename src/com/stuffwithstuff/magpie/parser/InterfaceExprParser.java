@@ -3,7 +3,6 @@ package com.stuffwithstuff.magpie.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.stuffwithstuff.magpie.ast.BlockExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
 import com.stuffwithstuff.magpie.ast.FunctionType;
@@ -117,7 +116,7 @@ public class InterfaceExprParser implements ExprParser {
       parser.consume(TokenType.LINE);
     }
     
-    return new BlockExpr(position, exprs);
+    return Expr.block(exprs);
   }
   
   @Override

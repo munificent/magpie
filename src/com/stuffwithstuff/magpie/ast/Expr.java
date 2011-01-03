@@ -5,6 +5,16 @@ import java.util.List;
 
 import com.stuffwithstuff.magpie.parser.Position;
 
+/**
+ * Base class for AST expression node classes. Any chunk of Magpie code can be
+ * represented by an instance of one of the subclasses of this class.
+ * 
+ * <p>Also includes factory methods to create the appropriate nodes. Aside from
+ * being a bit more terse, these methods perform some basic desugaring and
+ * simplification such as expanding special forms and discarding useless nodes.
+ * 
+ * @author bob
+ */
 public abstract class Expr {
   public static Expr apply(Expr target, Expr arg, boolean isStatic) {
     // Immediately handle special forms.
@@ -35,6 +45,25 @@ public abstract class Expr {
   
   public static BoolExpr bool(boolean value) {
     return new BoolExpr(Position.none(), value);
+  }
+  
+  public static Expr block(List<Expr> exprs) {
+    return block(exprs, null);
+  }
+  
+  public static Expr block(List<Expr> exprs, Expr catchExpr) {
+    if (catchExpr == null) {
+      switch (exprs.size()) {
+      case 0:
+        return nothing();
+      case 1:
+        return exprs.get(0);
+      default:
+        return new BlockExpr(exprs, null);
+      }
+    } else {
+      return new BlockExpr(exprs, catchExpr);
+    }
   }
   
   public static FnExpr fn(Expr body) {

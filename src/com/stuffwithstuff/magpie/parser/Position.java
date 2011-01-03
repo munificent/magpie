@@ -1,5 +1,9 @@
 package com.stuffwithstuff.magpie.parser;
 
+import java.util.List;
+
+import com.stuffwithstuff.magpie.ast.Expr;
+
 /**
  * Describes the location of a piece of text in a source file.
  */
@@ -8,6 +12,11 @@ public class Position {
     return new Position("", -1, -1, -1, -1);
   }
   
+  public static Position surrounding(List<Expr> expressions) {
+    return expressions.get(0).getPosition().union(
+        expressions.get(expressions.size() - 1).getPosition());
+  }
+
   public Position(String sourceFile, int startLine, int startCol,
       int endLine, int endCol) {
     mSourceFile = sourceFile;

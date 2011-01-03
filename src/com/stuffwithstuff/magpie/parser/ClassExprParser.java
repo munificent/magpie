@@ -3,7 +3,6 @@ package com.stuffwithstuff.magpie.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.stuffwithstuff.magpie.ast.BlockExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
 import com.stuffwithstuff.magpie.ast.FunctionType;
@@ -109,7 +108,7 @@ public class ClassExprParser implements ExprParser {
     }
     
     // Wrap the body in a function.
-    Expr body = Expr.fn(new BlockExpr(position, exprs));
+    Expr body = Expr.fn(Expr.block(exprs));
     
     // Make the class receive it.
     return Expr.message(classReceiver, Name.RECEIVING, body);

@@ -69,7 +69,6 @@ public class MagpieParser extends Parser {
   private Pair<Expr, Token> parseBlock(boolean parseCatch, String keyword1,
       String keyword2, TokenType... endTokens) {
     if (match(TokenType.LINE)){
-      Position position = last(1).getPosition();
       List<Expr> exprs = new ArrayList<Expr>();
       
       while (true) {
@@ -109,9 +108,8 @@ public class MagpieParser extends Parser {
         }
       }
       
-      position = position.union(last(1).getPosition());
       return new Pair<Expr, Token>(
-          new BlockExpr(position, exprs, catchExpr), endToken);
+          Expr.block(exprs, catchExpr), endToken);
     } else {
       Expr body = parseExpression();
       return new Pair<Expr, Token>(body, null);
@@ -519,7 +517,6 @@ public class MagpieParser extends Parser {
       return new NothingExpr(last(2).getPosition().union(last(1).getPosition()));
     }
     
-    Position position = last(2).getPosition();
     List<Expr> exprs = new ArrayList<Expr>();
     while (true) {
       exprs.add(parseExpression());
@@ -533,7 +530,7 @@ public class MagpieParser extends Parser {
     consume(rightBrace);
     
     if (exprs.size() > 1) {
-      return new BlockExpr(position, exprs);
+      return Expr.block(exprs);
     } else {
       // Just a single expression, so don't wrap it in a block.
       return exprs.get(0);

@@ -3,7 +3,6 @@ package com.stuffwithstuff.magpie.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.stuffwithstuff.magpie.ast.BlockExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.IfExpr;
 import com.stuffwithstuff.magpie.ast.VariableExpr;
@@ -45,7 +44,7 @@ public class MatchExprParser implements ExprParser {
         bodyExprs.add(new VariableExpr(body.getPosition(),
             thisCase.getBinding(), valueExpr));
         bodyExprs.add(body);
-        body = new BlockExpr(body.getPosition(), bodyExprs);
+        body = Expr.block(bodyExprs);
       }
       
       chained = new IfExpr(body.getPosition(), null, condition, body, chained);
@@ -109,7 +108,6 @@ public class MatchExprParser implements ExprParser {
   @Override
   public Expr parse(MagpieParser parser) {
     parser.consume(TokenType.MATCH);
-    Position position = parser.last(1).getPosition();
     
     List<Expr> exprs = new ArrayList<Expr>();
     
@@ -135,13 +133,11 @@ public class MatchExprParser implements ExprParser {
       elseCase = parser.parseEndBlock();
     }
     
-    position = position.union(parser.last(1).getPosition());
-    
     parser.consume(TokenType.LINE);
     parser.consume("end");
     
     exprs.add(desugarCases(valueExpr, cases, elseCase));
     
-    return new BlockExpr(position, exprs);
+    return Expr.block(exprs);
   }
 }

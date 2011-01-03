@@ -3,7 +3,6 @@ package com.stuffwithstuff.magpie.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.stuffwithstuff.magpie.ast.BlockExpr;
 import com.stuffwithstuff.magpie.ast.ScopeExpr;
 import com.stuffwithstuff.magpie.ast.VariableExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
@@ -79,7 +78,7 @@ public class LoopExprParser implements ExprParser {
 
       // Then execute the main body.
       innerBlock.add(body);
-      body = new BlockExpr(Position.none(), innerBlock);
+      body = Expr.block(innerBlock);
       
       // Create the generators outside the loop.
       List<Expr> outerBlock = new ArrayList<Expr>();
@@ -87,7 +86,7 @@ public class LoopExprParser implements ExprParser {
       
       // Then execute the loop.
       outerBlock.add(new LoopExpr(position, conditions, body));
-      return new ScopeExpr(new BlockExpr(position, outerBlock));
+      return new ScopeExpr(Expr.block(outerBlock));
     }
     
     return new ScopeExpr(new LoopExpr(position, conditions, body));

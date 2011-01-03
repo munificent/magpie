@@ -4,16 +4,18 @@ import java.util.*;
 
 import com.stuffwithstuff.magpie.parser.Position;
 
+// TODO(bob): The "catch" stuff really shouldn't be here. It should be its own
+// node or, better, be part of ScopeExpr.
 public class BlockExpr extends Expr {
-  public BlockExpr(Position position, List<Expr> expressions, Expr catchExpr) {
-    super(position);
+  BlockExpr(List<Expr> expressions, Expr catchExpr) {
+    super(Position.surrounding(expressions));
     
     mExpressions = expressions;
     mCatchExpr = catchExpr;
   }
   
-  public BlockExpr(Position position, List<Expr> expressions) {
-    this(position, expressions, null);
+  BlockExpr(List<Expr> expressions) {
+    this(expressions, null);
   }
   
   public List<Expr> getExpressions() { return mExpressions; }

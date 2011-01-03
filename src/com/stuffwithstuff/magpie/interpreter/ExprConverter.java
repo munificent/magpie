@@ -121,7 +121,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     } else {
       catchExpr = convert(interpreter, catchObj);
     }
-    return new BlockExpr(Position.none(), exprs, catchExpr);
+    return Expr.block(exprs, catchExpr);
   }
 
   private static Expr convertBoolExpr(Interpreter interpreter, Obj expr) {
