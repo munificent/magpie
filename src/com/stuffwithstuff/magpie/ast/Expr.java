@@ -44,7 +44,11 @@ public abstract class Expr {
   }
   
   public static BoolExpr bool(boolean value) {
-    return new BoolExpr(Position.none(), value);
+    return bool(Position.none(), value);
+  }
+  
+  public static BoolExpr bool(Position position, boolean value) {
+    return new BoolExpr(position, value);
   }
   
   public static Expr block(List<Expr> exprs) {
@@ -71,8 +75,12 @@ public abstract class Expr {
     return new FnExpr(Position.none(), FunctionType.nothingToDynamic(), body);
   }
   
-  public static IntExpr integer(int value) {
-    return new IntExpr(Position.none(), value);
+  public static IntExpr int_(int value) {
+    return int_(Position.none(), value);
+  }
+  
+  public static IntExpr int_(Position position, int value) {
+    return new IntExpr(position, value);
   }
   
   public static Expr message(Position position, Expr receiver, String name, Expr arg) {
@@ -114,7 +122,11 @@ public abstract class Expr {
   }
 
   public static StringExpr string(String text) {
-    return new StringExpr(Position.none(), text);
+    return string(Position.none(), text);
+  }
+
+  public static StringExpr string(Position position, String text) {
+    return new StringExpr(position, text);
   }
   
   public static TupleExpr tuple(Expr... fields) {

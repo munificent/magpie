@@ -126,7 +126,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
 
   private static Expr convertBoolExpr(Interpreter interpreter, Obj expr) {
     boolean value = expr.getField("value").asBool();
-    return new BoolExpr(Position.none(), value);
+    return Expr.bool(value);
   }
 
   private static Expr convertBreakExpr(Interpreter interpreter, Obj expr) {
@@ -166,7 +166,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
 
   private static Expr convertIntExpr(Interpreter interpreter, Obj expr) {
     int value = expr.getField("value").asInt();
-    return new IntExpr(Position.none(), value);
+    return Expr.int_(value);
   }
   
   private static Expr convertLoopExpr(Interpreter interpreter, Obj expr) {
@@ -230,7 +230,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   
   private static Expr convertStringExpr(Interpreter interpreter, Obj expr) {
     String value = expr.getField("value").asString();
-    return new StringExpr(Position.none(), value);
+    return Expr.string(value);
   }
   
   private static Expr convertThisExpr(Interpreter interpreter, Obj expr) {

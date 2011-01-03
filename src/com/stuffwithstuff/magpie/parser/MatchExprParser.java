@@ -96,7 +96,7 @@ public class MatchExprParser implements ExprParser {
     if (parser.match(TokenType.BOOL)) {
       return new LiteralPattern(Expr.bool(parser.last(1).getBool()));
     } else if (parser.match(TokenType.INT)) {
-      return new LiteralPattern(Expr.integer(parser.last(1).getInt()));
+      return new LiteralPattern(Expr.int_(parser.last(1).getInt()));
     } else if (parser.match(TokenType.STRING)) {
       return new LiteralPattern(Expr.string(parser.last(1).getString()));
     } else {
