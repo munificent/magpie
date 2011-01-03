@@ -20,6 +20,8 @@ Reflect getClass(Token) defineGetter("comma",         %fn%(Token, Token new(Toke
 Reflect getClass(Token) defineGetter("dot",           %fn%(Token, Token new(TokenType dot)))
 Reflect getClass(Token) defineGetter("equals",        %fn%(Token, Token new(TokenType equals)))
 Reflect getClass(Token) defineGetter("line",          %fn%(Token, Token new(TokenType line)))
+Reflect getClass(Token) defineGetter("catchToken",    %fn%(Token, Token new(TokenType catchToken)))
+Reflect getClass(Token) defineGetter("eof",           %fn%(Token, Token new(TokenType eof)))
 
 Token defineGetter("string", %fn%(String, tokenType ~~ value))
 
@@ -29,14 +31,20 @@ Token defineGetter("stringValue", %fn%(String, %unsafecast%(String, value)))
 Token declareField("tokenType", false, %fn%(TokenType))
 Token declareField("value", false, %fn%(Bool | Int | Nothing | String))
 
+Token defineMethod("keyword?",
+    // Note: no comparison operators are available yet.
+    %fn%("keyword", String, Bool,
+        TokenType equal?(tokenType, TokenType identifier) and
+        Int equal?(stringValue compareTo(keyword), 0)))
+
 class TokenType
-    shared def equal?(left TokenType, right TokenType)
-        left value == right value
+    shared def equal?(left TokenType, right TokenType -> Bool)
+        Int equal?(left value, right value)
     end
     
     shared def new(value Int, name String) construct(value: value, name: name)
 end
-    
+
 Reflect getClass(TokenType) defineGetter("leftParen",     %fn%(TokenType, TokenType new(0, "leftParen")))
 Reflect getClass(TokenType) defineGetter("rightParen",    %fn%(TokenType, TokenType new(1, "rightParen")))
 Reflect getClass(TokenType) defineGetter("leftBracket",   %fn%(TokenType, TokenType new(2, "leftBracket")))
@@ -56,6 +64,8 @@ Reflect getClass(TokenType) defineGetter("operator",      %fn%(TokenType, TokenT
 Reflect getClass(TokenType) defineGetter("boolLiteral",   %fn%(TokenType, TokenType new(13, "boolLiteral")))
 Reflect getClass(TokenType) defineGetter("intLiteral",    %fn%(TokenType, TokenType new(14, "intLiteral")))
 Reflect getClass(TokenType) defineGetter("stringLiteral", %fn%(TokenType, TokenType new(15, "stringLiteral")))
+Reflect getClass(TokenType) defineGetter("catchToken",    %fn%(TokenType, TokenType new(16, "catch")))
+Reflect getClass(TokenType) defineGetter("eof",           %fn%(TokenType, TokenType new(17, "eof")))
 
 TokenType defineGetter("string", %fn%(String, name))
 TokenType declareField("value", false, %fn%(Int))

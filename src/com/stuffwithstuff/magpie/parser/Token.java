@@ -30,6 +30,11 @@ public final class Token {
   public double  getDouble() { return ((Double)mValue).doubleValue(); }
   public String  getString() { return (String)mValue; }
   
+  public boolean isKeyword(String name) {
+    if (mType != TokenType.NAME) return false;
+    return name.equals(getString());
+  }
+  
   public String toString() {
     switch (mType)
     {
@@ -59,17 +64,13 @@ public final class Token {
       case CATCH: return "catch";
       case CLASS: return "class";
       case DELEGATE: return "delegate";
-      case ELSE: return "else";
-      case END: return "end";
       case EXTEND: return "extend";
       case FOR: return "for";
-      case IF: return "if";
       case INTERFACE: return "interface";
       case LET: return "let";
       case MATCH: return "match";
       case NOTHING: return "nothing";
       case SET: return "set";
-      case THEN: return "then";
       case THIS: return "this";
       case WHILE: return "while";
       case WITH: return "with";

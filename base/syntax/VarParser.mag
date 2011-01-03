@@ -4,7 +4,7 @@ class VarParser
         parser consume("var")
         %var%("name", parser consume(TokenType identifier) stringValue)
         parser consume(TokenType equals)
-        %var%("value", parser parseBlock())
+        %var%("value", parser parseEndBlock())
         
         VariableExpression new(name, value)
     end

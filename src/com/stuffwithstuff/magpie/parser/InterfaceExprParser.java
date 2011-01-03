@@ -63,7 +63,7 @@ public class InterfaceExprParser implements ExprParser {
     // end
     
     // Parse the body.
-    while (!parser.match(TokenType.END)) {
+    while (!parser.match("end")) {
       // An interface contains declarations of methods, getters, and setters:
       //
       //    interface Foo

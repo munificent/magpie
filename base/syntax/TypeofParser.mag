@@ -2,7 +2,7 @@
 class TypeofParser
     def parse(parser MagpieParser -> Expression)
         parser consume("typeof")
-        TypeofExpression new(parser parseBlock())
+        TypeofExpression new(parser parseEndBlock())
     end
 end
 

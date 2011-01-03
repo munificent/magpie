@@ -55,7 +55,7 @@ public class ClassExprParser implements ExprParser {
     Expr theClass = new ThisExpr(position);
     
     // Parse the body.
-    while (!parser.match(TokenType.END)) {
+    while (!parser.match("end")) {
       // There are a bunch of different members that can be added to a class.
       // Each gets desugared to an imperative call:
       //

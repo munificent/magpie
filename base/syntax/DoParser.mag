@@ -2,7 +2,7 @@
 class DoParser
     def parse(parser MagpieParser -> Expression)
         parser consume("do")
-        ScopeExpression new(parser parseBlock())
+        ScopeExpression new(parser parseEndBlock())
     end
 end
 

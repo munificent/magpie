@@ -2,6 +2,8 @@ package com.stuffwithstuff.magpie.ast;
 
 import com.stuffwithstuff.magpie.parser.Position;
 
+// TODO(bob): Instead of supporting "let" directly, that should just desugar to
+// more primitive if expression using unsafecast.
 public class IfExpr extends Expr {
   public IfExpr(Position position, String name, Expr condition,
       Expr thenExpr, Expr elseExpr) {

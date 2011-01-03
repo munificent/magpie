@@ -18,7 +18,6 @@ public class MagpieParser extends Parser {
     mParsers.put(TokenType.CLASS, new ClassExprParser());
     mParsers.put(TokenType.EXTEND, new ExtendExprParser());
     mParsers.put(TokenType.FOR, new LoopExprParser());
-    mParsers.put(TokenType.IF, new IfExprParser());
     mParsers.put(TokenType.INTERFACE, new InterfaceExprParser());
     mParsers.put(TokenType.LET, new LetExprParser());
     mParsers.put(TokenType.MATCH, new MatchExprParser());
@@ -52,20 +51,32 @@ public class MagpieParser extends Parser {
   }
 
   public Expr parseEndBlock() {
-    return parseBlock(TokenType.END).getKey();
+    return parseBlock("end").getKey();
   }
 
-  public Pair<Expr, TokenType> parseBlock(TokenType... endTokens) {
-    return parseBlock(true, endTokens);
+  public Pair<Expr, Token> parseBlock(TokenType... endTokens) {
+    return parseBlock(true, null, null, endTokens);
+  }
+
+  public Pair<Expr, Token> parseBlock(String keyword, TokenType... endTokens) {
+    return parseBlock(true, keyword, null, endTokens);
+  }
+
+  public Pair<Expr, Token> parseBlock(String keyword1, String keyword2, TokenType... endTokens) {
+    return parseBlock(true, keyword1, keyword2, endTokens);
   }
   
-  public Pair<Expr, TokenType> parseBlock(boolean parseCatch,
-      TokenType... endTokens) {
+  private Pair<Expr, Token> parseBlock(boolean parseCatch, String keyword1,
+      String keyword2, TokenType... endTokens) {
     if (match(TokenType.LINE)){
       Position position = last(1).getPosition();
       List<Expr> exprs = new ArrayList<Expr>();
       
       while (true) {
+        // TODO(bob): This keyword stuff is temporary until all keywords are
+        // moved into Magpie.
+        if (lookAhead(keyword1)) break;
+        if (lookAhead(keyword2)) break;
         if (lookAheadAny(endTokens)) break;
         if (lookAhead(TokenType.CATCH)) break;
         
@@ -73,12 +84,12 @@ public class MagpieParser extends Parser {
         consume(TokenType.LINE);
       }
       
-      TokenType endToken = current().getType();
+      Token endToken = current();
       
       // If the block ends with 'end', then we want to consume that token,
       // otherwise we want to leave it unconsumed to be consistent with the
       // single-expression block case.
-      if (endToken == TokenType.END) {
+      if (endToken.isKeyword("end")) {
         consume();
       }
       
@@ -87,7 +98,7 @@ public class MagpieParser extends Parser {
       if (parseCatch) {
         List<MatchCase> catches = new ArrayList<MatchCase>();
         while (match(TokenType.CATCH)) {
-          catches.add(parseCatch(endTokens));
+          catches.add(parseCatch(keyword1, keyword2, endTokens));
         }
         
         // TODO(bob): This is all pretty hokey.
@@ -99,27 +110,27 @@ public class MagpieParser extends Parser {
       }
       
       position = position.union(last(1).getPosition());
-      return new Pair<Expr, TokenType>(
+      return new Pair<Expr, Token>(
           new BlockExpr(position, exprs, catchExpr), endToken);
     } else {
       Expr body = parseExpression();
-      return new Pair<Expr, TokenType>(body, TokenType.EOF);
+      return new Pair<Expr, Token>(body, null);
     }
   }
 
-  private MatchCase parseCatch(TokenType... endTokens) {
+  private MatchCase parseCatch(String keyword1, String keyword2, TokenType... endTokens) {
     String name = MatchExprParser.parseBinding(this);
     Pattern pattern = MatchExprParser.parsePattern(this);
 
     // Infer 'it' for the matched value if no name is provided.
     if (name == null) name = "it";
     
-    consume(TokenType.THEN);
+    consume("then");
     
-    Pair<Expr, TokenType> body = parseBlock(false, endTokens);
+    Pair<Expr, Token> body = parseBlock(false, keyword1, keyword2, endTokens);
     
     // Allow newlines to separate single-line catches.
-    if ((body.getValue() == TokenType.EOF) &&
+    if ((body.getValue() == null) &&
         lookAhead(TokenType.LINE, TokenType.CATCH)) {
       consume();
     }

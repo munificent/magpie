@@ -68,15 +68,15 @@ public class MatchExprParser implements ExprParser {
     String name = parseBinding(parser);
     Pattern pattern = parsePattern(parser);
 
-    parser.consume(TokenType.THEN);
+    parser.consume("then");
     
-    Pair<Expr, TokenType> bodyParse = parser.parseBlock(
-        TokenType.CASE, TokenType.ELSE, TokenType.END);
+    Pair<Expr, Token> bodyParse = parser.parseBlock("else", "end",
+        TokenType.CASE);
     
     // Allow newlines to separate single-line case and else cases.
-    if ((bodyParse.getValue() == TokenType.EOF) &&
+    if ((bodyParse.getValue() == null) &&
         (parser.lookAhead(TokenType.LINE, TokenType.CASE) ||
-         parser.lookAhead(TokenType.LINE, TokenType.ELSE))) {
+         parser.lookAhead(TokenType.LINE, "else"))) {
       parser.consume(TokenType.LINE);
     }
     
@@ -131,14 +131,14 @@ public class MatchExprParser implements ExprParser {
     
     // Parse the else case, if present.
     Expr elseCase = null;
-    if (parser.match(TokenType.ELSE)) {
+    if (parser.match("else")) {
       elseCase = parser.parseEndBlock();
     }
     
     position = position.union(parser.last(1).getPosition());
     
     parser.consume(TokenType.LINE);
-    parser.consume(TokenType.END);
+    parser.consume("end");
     
     exprs.add(desugarCases(valueExpr, cases, elseCase));
     

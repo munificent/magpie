@@ -10,6 +10,7 @@ import com.stuffwithstuff.magpie.parser.MagpieParser;
 import com.stuffwithstuff.magpie.parser.Token;
 import com.stuffwithstuff.magpie.parser.TokenType;
 import com.stuffwithstuff.magpie.util.Expect;
+import com.stuffwithstuff.magpie.util.Pair;
 
 public class MagpieParserBuiltIns {
   @Shared
@@ -88,18 +89,7 @@ public class MagpieParserBuiltIns {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       MagpieParser parser = (MagpieParser) thisObj.getValue();
       
-      TokenType[] types;
-      if (arg.getClassObj() == interpreter.getTupleClass()) {
-        int numTypes = arg.getField("count").asInt();
-        types = new TokenType[numTypes];
-        for (int i = 0; i < numTypes; i++) {
-          types[i] = convertType(interpreter, arg.getTupleField(i));
-        }
-      } else {
-        // Just one token type.
-        types = new TokenType[1];
-        types[0] = convertType(interpreter, arg);
-      }
+      TokenType[] types = convertTokenTypes(interpreter, arg);
       return interpreter.createBool(parser.lookAhead(types));
     }
   }
@@ -109,19 +99,46 @@ public class MagpieParserBuiltIns {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       MagpieParser parser = (MagpieParser) thisObj.getValue();
       
-      // TODO(bob): Hackish. Assumes arg is tuple.
-      int count = arg.getField("count").asInt();
-      TokenType[] types = new TokenType[count];
-      for (int i = 0; i < count; i++) {
-        types[i] = convertType(interpreter, arg.getTupleField(i));
-      }
-      
+      TokenType[] types = convertTokenTypes(interpreter, arg);
       return interpreter.createBool(parser.lookAheadAny(types));
     }
   }
   
-  @Signature("parseBlock(-> Expression)")
+  @Signature("matchKeyword(keyword -> Bool)")
+  public static class MatchKeyword implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      MagpieParser parser = (MagpieParser) thisObj.getValue();
+      
+      String keyword = arg.asString();
+      return interpreter.createBool(parser.match(keyword));
+    }
+  }
+  
+  @Signature("parseBlock(keywords -> (Expression, Token | Nothing))")
   public static class ParseBlock implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      MagpieParser parser = (MagpieParser) thisObj.getValue();
+      
+      // TODO(bob): Hokey.
+      Pair<Expr, Token> result;
+      if (arg.getClassObj() == interpreter.getTupleClass()) {
+        String keyword1 = arg.getTupleField(0).asString();
+        String keyword2 = arg.getTupleField(1).asString();
+        result = parser.parseBlock(keyword1, keyword2);
+      } else {
+        String keyword = arg.asString();
+        result = parser.parseBlock(keyword);
+      }
+      
+      Obj expr = ExprConverter.convert(interpreter, result.getKey(), 
+          interpreter.createTopLevelContext());
+      Obj token = convertToken(interpreter, result.getValue());
+      return interpreter.createTuple(expr, token);
+    }
+  }
+  
+  @Signature("parseEndBlock(-> Expression)")
+  public static class ParseEndBlock implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       MagpieParser parser = (MagpieParser) thisObj.getValue();
       
@@ -168,6 +185,23 @@ public class MagpieParserBuiltIns {
     }
   }
   
+  private static TokenType[] convertTokenTypes(Interpreter interpreter, Obj arg) {
+    TokenType[] types;
+    if (arg.getClassObj() == interpreter.getTupleClass()) {
+      int numTypes = arg.getField("count").asInt();
+      types = new TokenType[numTypes];
+      for (int i = 0; i < numTypes; i++) {
+        types[i] = convertType(interpreter, arg.getTupleField(i));
+      }
+    } else {
+      // Just one token type.
+      types = new TokenType[1];
+      types[0] = convertType(interpreter, arg);
+    }
+    
+    return types;
+  }
+
   private static TokenType convertType(Interpreter interpreter, Obj tokenType) {
     Obj value = tokenType.getField("value");
     Expect.notNull(value);
@@ -192,6 +226,8 @@ public class MagpieParserBuiltIns {
     case 13: type = TokenType.BOOL; break;
     case 14: type = TokenType.INT; break;
     case 15: type = TokenType.STRING; break;
+    case 16: type = TokenType.CATCH; break;
+    case 17: type = TokenType.EOF; break;
     default:
       // TODO(bob): Better error reporting.
       interpreter.throwError("ParseError");
@@ -202,11 +238,35 @@ public class MagpieParserBuiltIns {
   }
   
   private static Obj convertToken(Interpreter interpreter, Token token) {
+    if (token == null) {
+      return interpreter.nothing();
+    }
+    
+    Obj tokenType = convertTokenType(interpreter, token.getType());
+    
+    ClassObj tokenClass = (ClassObj) interpreter.getGlobal("Token");
+    Obj tokenObj = interpreter.instantiate(tokenClass, null);
+    tokenObj.setField("tokenType", tokenType);
+    
+    if (token.getValue() instanceof Boolean) {
+      tokenObj.setField("value", interpreter.createBool(token.getBool()));
+    } else if (token.getValue() instanceof Integer) {
+      tokenObj.setField("value", interpreter.createInt(token.getInt()));
+    } else if (token.getValue() instanceof String) {
+      tokenObj.setField("value", interpreter.createString(token.getString()));
+    } else {
+      tokenObj.setField("value", interpreter.nothing());
+    }
+    
+    return tokenObj;
+  }
+  
+  private static Obj convertTokenType(Interpreter interpreter, TokenType type) {
     // Note: the values here must be kept in sync with the order that they
     // are defined in Token.mag.
     int tokenTypeValue;
     String tokenTypeName;
-    switch (token.getType()) {
+    switch (type) {
     case LEFT_PAREN: tokenTypeValue = 0; tokenTypeName = "leftParen"; break;
     case RIGHT_PAREN: tokenTypeValue = 1; tokenTypeName = "rightParen"; break;
     case LEFT_BRACKET: tokenTypeValue = 2; tokenTypeName = "leftBracket"; break;
@@ -226,6 +286,9 @@ public class MagpieParserBuiltIns {
     case INT: tokenTypeValue = 14; tokenTypeName = "intLiteral"; break;
     case STRING: tokenTypeValue = 15; tokenTypeName = "stringLiteral"; break;
 
+    case CATCH: tokenTypeValue = 16; tokenTypeName = "catch"; break;
+    case EOF: tokenTypeValue = 17; tokenTypeName = "eof"; break;
+
     default:
       // TODO(bob): Better error reporting.
       interpreter.throwError("ParseError");
@@ -238,21 +301,7 @@ public class MagpieParserBuiltIns {
     tokenType.setField("value", interpreter.createInt(tokenTypeValue));
     tokenType.setField("name", interpreter.createString(tokenTypeName));
     
-    ClassObj tokenClass = (ClassObj) interpreter.getGlobal("Token");
-    Obj tokenObj = interpreter.instantiate(tokenClass, null);
-    tokenObj.setField("tokenType", tokenType);
-    
-    if (token.getValue() instanceof Boolean) {
-      tokenObj.setField("value", interpreter.createBool(token.getBool()));
-    } else if (token.getValue() instanceof Integer) {
-      tokenObj.setField("value", interpreter.createInt(token.getInt()));
-    } else if (token.getValue() instanceof String) {
-      tokenObj.setField("value", interpreter.createString(token.getString()));
-    } else {
-      tokenObj.setField("value", interpreter.nothing());
-    }
-    
-    return tokenObj;
+    return tokenType;
   }
   
   private static class MagpieExprParser implements ExprParser {

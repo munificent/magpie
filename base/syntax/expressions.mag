@@ -149,7 +149,8 @@ class MessageExpression
     end
         
     get string String =
-        let receiver then receiver string ~~ name else name
+        %if%(Reflect same?(receiver, nothing) not,
+            %unsafecast%(Expression, receiver) string ~~ name, name)
     end
 end
 
