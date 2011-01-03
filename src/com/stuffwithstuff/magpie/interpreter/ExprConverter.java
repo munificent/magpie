@@ -91,7 +91,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     Expr target = convert(interpreter, expr.getField("target"));
     Expr argument = convert(interpreter, expr.getField("argument"));
     boolean isStatic = expr.getField("static?").asBool();
-    return ApplyExpr.create(target, argument, isStatic);
+    return Expr.apply(target, argument, isStatic);
   }
 
   private static Expr convertAssignExpr(Interpreter interpreter, Obj expr) {
