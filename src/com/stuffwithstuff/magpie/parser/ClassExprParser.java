@@ -6,7 +6,6 @@ import java.util.List;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
 import com.stuffwithstuff.magpie.ast.FunctionType;
-import com.stuffwithstuff.magpie.ast.NothingExpr;
 import com.stuffwithstuff.magpie.ast.ThisExpr;
 import com.stuffwithstuff.magpie.ast.VariableExpr;
 import com.stuffwithstuff.magpie.interpreter.Name;
@@ -179,6 +178,6 @@ public class ClassExprParser implements ExprParser {
   
   private static Expr parseSetter(MagpieParser parser, Expr theClass) {
     // TODO(bob): Implement me!
-    return new NothingExpr(Position.none());
+    return Expr.nothing();
   }
 }

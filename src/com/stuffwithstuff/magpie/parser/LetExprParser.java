@@ -2,7 +2,6 @@ package com.stuffwithstuff.magpie.parser;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.IfExpr;
-import com.stuffwithstuff.magpie.ast.NothingExpr;
 import com.stuffwithstuff.magpie.util.Pair;
 
 public class LetExprParser implements ExprParser {
@@ -37,7 +36,7 @@ public class LetExprParser implements ExprParser {
     if (!consumedEnd && parser.match("else")) {
       elseExpr = parser.parseEndBlock();
     } else {
-      elseExpr = new NothingExpr(parser.last(1).getPosition());
+      elseExpr = Expr.nothing(parser.last(1).getPosition());
     }
     
     return new IfExpr(startPos.union(elseExpr.getPosition()),

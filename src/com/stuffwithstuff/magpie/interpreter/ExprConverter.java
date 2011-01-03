@@ -193,7 +193,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   }
   
   private static Expr convertNothingExpr(Interpreter interpreter, Obj expr) {
-    return new NothingExpr(Position.none());
+    return Expr.nothing();
   }
   
   private static Expr convertOrExpr(Interpreter interpreter, Obj expr) {

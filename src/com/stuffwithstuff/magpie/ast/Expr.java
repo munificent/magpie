@@ -95,6 +95,10 @@ public abstract class Expr {
   }
   
   public static NothingExpr nothing() {
+    return nothing(Position.none());  
+  }
+  
+  public static NothingExpr nothing(Position position) {
     return new NothingExpr(Position.none());  
   }
   

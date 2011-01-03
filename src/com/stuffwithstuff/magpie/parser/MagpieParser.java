@@ -391,7 +391,7 @@ public class MagpieParser extends Parser {
         // A static apply (i.e. foo[123]).
         Expr arg;
         if (match(TokenType.RIGHT_BRACKET)) {
-          arg = new NothingExpr(last(2).getPosition().union(last(1).getPosition()));
+          arg = Expr.nothing(Position.surrounding(last(2), last(1)));
         } else {
           arg = parseExpression();
           consume(TokenType.RIGHT_BRACKET);
@@ -453,7 +453,7 @@ public class MagpieParser extends Parser {
     } else if (match(TokenType.THIS)) {
       return new ThisExpr(last(1).getPosition());
     } else if (match(TokenType.NOTHING)) {
-      return new NothingExpr(last(1).getPosition());
+      return Expr.nothing(last(1).getPosition());
     } else if ((mQuoteDepth > 0) && match(TokenType.BACKTICK)) {
       Position position = last(1).getPosition();
       Expr body;
@@ -514,7 +514,7 @@ public class MagpieParser extends Parser {
     match(TokenType.LINE);
     
     if (match(rightBrace)) {
-      return new NothingExpr(last(2).getPosition().union(last(1).getPosition()));
+      return Expr.nothing(Position.surrounding(last(2), last(1)));
     }
     
     List<Expr> exprs = new ArrayList<Expr>();
