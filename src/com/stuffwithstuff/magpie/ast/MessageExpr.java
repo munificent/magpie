@@ -3,7 +3,7 @@ package com.stuffwithstuff.magpie.ast;
 import com.stuffwithstuff.magpie.parser.Position;
 
 public class MessageExpr extends Expr {
-  public MessageExpr(Position position, Expr receiver, String name) {
+  MessageExpr(Position position, Expr receiver, String name) {
     super(position);
     
     mReceiver = receiver;

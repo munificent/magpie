@@ -6,7 +6,7 @@ import com.stuffwithstuff.magpie.parser.Position;
  * A non-evaluated chunk of Magpie code as a first-class value.
  */
 public class QuotationExpr extends Expr {
-  public QuotationExpr(Position position, Expr body) {
+  QuotationExpr(Position position, Expr body) {
     super(position);
     mBody = body;
   }

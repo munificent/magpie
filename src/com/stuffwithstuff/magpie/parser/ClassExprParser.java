@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.Expr;
-import com.stuffwithstuff.magpie.ast.FnExpr;
 import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.ast.VariableExpr;
 import com.stuffwithstuff.magpie.interpreter.Name;
@@ -165,7 +164,7 @@ public class ClassExprParser implements ExprParser {
       // Defining it.
       Expr body = parser.parseEndBlock();
       FunctionType fnType = FunctionType.returningType(type);
-      Expr function = new FnExpr(body.getPosition(), fnType, body);
+      Expr function = Expr.fn(body.getPosition(), fnType, body);
       return Expr.message(theClass, Name.DEFINE_GETTER,
           Expr.tuple(Expr.string(name), function));
     } else {

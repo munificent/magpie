@@ -6,7 +6,7 @@ import com.stuffwithstuff.magpie.parser.Position;
  * AST node class for an function definition.
  */
 public class FnExpr extends Expr {
-  public FnExpr(Position position, FunctionType type, Expr body) {
+  FnExpr(Position position, FunctionType type, Expr body) {
     super(position);
     
     mType = type;

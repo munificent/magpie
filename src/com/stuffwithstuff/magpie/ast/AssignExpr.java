@@ -3,7 +3,7 @@ package com.stuffwithstuff.magpie.ast;
 import com.stuffwithstuff.magpie.parser.Position;
 
 public class AssignExpr extends Expr {
-  public AssignExpr(Position position, Expr receiver, String name, Expr value) {
+  AssignExpr(Position position, Expr receiver, String name, Expr value) {
     super(position);
     
     mReceiver = receiver;

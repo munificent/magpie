@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.Expr;
-import com.stuffwithstuff.magpie.ast.FnExpr;
 import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.ast.VariableExpr;
 import com.stuffwithstuff.magpie.interpreter.Name;
@@ -140,6 +139,6 @@ public class InterfaceExprParser implements ExprParser {
     
     FunctionType functionType = new FunctionType(typeParams, paramType,
         Expr.name("Type"), false);
-    return new FnExpr(Position.none(), functionType, type);
+    return Expr.fn(Position.none(), functionType, type);
   }
 }

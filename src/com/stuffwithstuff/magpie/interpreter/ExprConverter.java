@@ -104,7 +104,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     }
     String name = expr.getField("name").asString();
     Expr value = convert(interpreter, expr.getField("value"));
-    return new AssignExpr(Position.none(), receiver, name, value);
+    return Expr.assign(Position.none(), receiver, name, value);
   }
   
   private static Expr convertBlockExpr(Interpreter interpreter, Obj expr) {
@@ -147,7 +147,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     FunctionType type = new FunctionType(names, paramType, returnType, isStatic);
     
     Expr body = convert(interpreter, expr.getField("body"));
-    return new FnExpr(Position.none(), type, body);
+    return Expr.fn(Position.none(), type, body);
   }
 
   private static Expr convertIfExpr(Interpreter interpreter, Obj expr) {
@@ -189,7 +189,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
       receiver = convert(interpreter, receiverObj);
     }
     String name = expr.getField("name").asString();
-    return new MessageExpr(Position.none(), receiver, name);
+    return Expr.message(receiver, name);
   }
   
   private static Expr convertNothingExpr(Interpreter interpreter, Obj expr) {
@@ -204,7 +204,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
 
   private static Expr convertQuotationExpr(Interpreter interpreter, Obj expr) {
     Expr body = convert(interpreter, expr.getField("body"));
-    return new QuotationExpr(Position.none(), body);
+    return Expr.quote(Position.none(), body);
   }
 
   private static Expr convertRecordExpr(Interpreter interpreter, Obj expr) {

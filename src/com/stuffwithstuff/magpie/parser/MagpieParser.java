@@ -165,7 +165,7 @@ public class MagpieParser extends Parser {
     
     // Wrap the body in a dynamic function.
     if (type != null) {
-      expr = new FnExpr(position, type, expr);
+      expr = Expr.fn(position, type, expr);
     }
     
     // Wrap it in a static function.
@@ -184,7 +184,7 @@ public class MagpieParser extends Parser {
                 true);
       }
         
-      expr = new FnExpr(position, staticType, expr);
+      expr = Expr.fn(position, staticType, expr);
     }
     
     return expr;
@@ -291,16 +291,15 @@ public class MagpieParser extends Parser {
         // before:  Msg(      Msg(null, "point"), "x")
         // after:   AssignMsg(Msg(null, "point"), "x", Int(2))
         MessageExpr message = (MessageExpr) expr;
-        return new AssignExpr(position, message.getReceiver(),
+        return Expr.assign(position, message.getReceiver(),
             message.getName(), value);
       } else if (expr instanceof ApplyExpr) {
         // example: array(3) = 4
         // before:  Apply(    Msg(null, "array"),                  Int(3))
         // after:   Apply(Msg(Msg(null, "array"), "assign"), Tuple(Int(3), Int(4)))
         ApplyExpr apply = (ApplyExpr) expr;
-        return Expr.apply(new MessageExpr(position, apply.getTarget(),
-            Name.ASSIGN),
-            Expr.tuple(apply.getArg(), value), false);
+        return Expr.message(position, apply.getTarget(), Name.ASSIGN,
+            Expr.tuple(apply.getArg(), value));
       } else {
         throw new ParseException("Expression \"" + expr +
         "\" is not a valid target for assignment.");
@@ -383,7 +382,7 @@ public class MagpieParser extends Parser {
     
     while (true) {
       if (match(TokenType.NAME)) {
-        message = new MessageExpr(last(1).getPosition(), message,
+        message = Expr.message(last(1).getPosition(), message,
             last(1).getString());
       } else if (match(TokenType.LEFT_BRACKET)) {
         // A static apply (i.e. foo[123]).
@@ -412,7 +411,7 @@ public class MagpieParser extends Parser {
 
         // Parse the block and wrap it in a function.
         Expr block = parseEndBlock();
-        block = new FnExpr(block.getPosition(), blockType, block);
+        block = Expr.fn(block.getPosition(), blockType, block);
         
         // Apply it to the previous expression.
         if (message instanceof ApplyExpr) {
@@ -456,11 +455,10 @@ public class MagpieParser extends Parser {
       Position position = last(1).getPosition();
       Expr body;
       if (match(TokenType.NAME)) {
-        body = new MessageExpr(last(1).getPosition(), null,
-            last(1).getString());
+        body = Expr.message(last(1).getPosition(), null, last(1).getString());
       } else if (lookAhead(TokenType.LEFT_BRACE)) {
         body = parenthesizedExpression(BraceType.CURLY);
-        body = new QuotationExpr(body.getPosition(), body);
+        body = Expr.quote(body.getPosition(), body);
       } else {
         body = parenthesizedExpression(BraceType.PAREN);
       }
@@ -473,7 +471,7 @@ public class MagpieParser extends Parser {
       Expr expr = parenthesizedExpression(BraceType.CURLY);
       position = position.union(last(1).getPosition());
       mQuoteDepth--;
-      return new QuotationExpr(position, expr);
+      return Expr.quote(position, expr);
     }
     
     // See if we're at a keyword we know how to parse.
@@ -492,6 +490,11 @@ public class MagpieParser extends Parser {
     return null;
   }
 
+  // TODO(bob): Having two ways to create blocks (this, or using a "do"
+  // expression) is redundant. Parenthesized blocks are nice because they're
+  // part of the core syntax. "do" blocks match the rest of the language and
+  // allow catch blocks. If the only reason to have these is for the core
+  // syntax, it may be better to just have a %block% special form.
   private Expr parenthesizedExpression(BraceType braceType) {
     TokenType leftBrace = TokenType.LEFT_PAREN;
     TokenType rightBrace = TokenType.RIGHT_PAREN;

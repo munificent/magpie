@@ -48,11 +48,16 @@ public abstract class Expr {
     return new ApplyExpr(target, arg, isStatic);
   }
   
-  public static BoolExpr bool(boolean value) {
+  public static Expr assign(Position position, Expr receiver, String name,
+      Expr value) {
+    return new AssignExpr(position, receiver, name, value);
+  }
+  
+  public static Expr bool(boolean value) {
     return bool(Position.none(), value);
   }
   
-  public static BoolExpr bool(Position position, boolean value) {
+  public static Expr bool(Position position, boolean value) {
     return new BoolExpr(position, value);
   }
   
@@ -81,34 +86,42 @@ public abstract class Expr {
   }
   
   public static FnExpr fn(Expr body) {
-    return new FnExpr(Position.none(), FunctionType.nothingToDynamic(), body);
+    return fn(Position.none(), FunctionType.nothingToDynamic(), body);
   }
   
-  public static IntExpr int_(int value) {
+  public static FnExpr fn(Position position, FunctionType type, Expr body) {
+    return new FnExpr(position, type, body);
+  }
+  
+  public static Expr int_(int value) {
     return int_(Position.none(), value);
   }
   
-  public static IntExpr int_(Position position, int value) {
+  public static Expr int_(Position position, int value) {
     return new IntExpr(position, value);
   }
   
   public static Expr message(Position position, Expr receiver, String name, Expr arg) {
-    return apply(new MessageExpr(position, receiver, name), arg, false);
+    return apply(message(position, receiver, name), arg, false);
   }
   
   public static Expr message(Expr receiver, String name, Expr arg) {
-    return apply(new MessageExpr(Position.none(), receiver, name), arg, false);
+    return apply(message(receiver, name), arg, false);
   }
   
-  public static MessageExpr message(Expr receiver, String name) {
-    return new MessageExpr(Position.none(), receiver, name);
+  public static Expr message(Expr receiver, String name) {
+    return message(Position.none(), receiver, name);
   }
   
-  public static MessageExpr name(Position position, String name) {
+  public static Expr message(Position position, Expr receiver, String name) {
+    return new MessageExpr(position, receiver, name);
+  }
+  
+  public static Expr name(Position position, String name) {
     return new MessageExpr(position, null, name);
   }
   
-  public static MessageExpr name(String name) {
+  public static Expr name(String name) {
     return new MessageExpr(Position.none(), null, name);
   }
   
@@ -124,6 +137,10 @@ public abstract class Expr {
     return new OrExpr(left, right);
   }
   
+  public static Expr quote(Position position, Expr body) {
+    return new QuotationExpr(position, body);
+  }
+
   public static Expr scope(Expr body) {
     // Unwrap redundant scopes.
     if (body instanceof ScopeExpr) return body;
@@ -134,11 +151,11 @@ public abstract class Expr {
     return apply(new MessageExpr(Position.none(), receiver, name), arg, true);
   }
 
-  public static StringExpr string(String text) {
+  public static Expr string(String text) {
     return string(Position.none(), text);
   }
 
-  public static StringExpr string(Position position, String text) {
+  public static Expr string(Position position, String text) {
     return new StringExpr(position, text);
   }
   
@@ -146,11 +163,11 @@ public abstract class Expr {
     return new ThisExpr(position);  
   }
 
-  public static TupleExpr tuple(List<Expr> fields) {
+  public static Expr tuple(List<Expr> fields) {
     return new TupleExpr(fields);
   }
 
-  public static TupleExpr tuple(Expr... fields) {
+  public static Expr tuple(Expr... fields) {
     return new TupleExpr(Arrays.asList(fields));
   }
   
