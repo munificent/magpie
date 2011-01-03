@@ -225,7 +225,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
 
   private static Expr convertScopeExpr(Interpreter interpreter, Obj expr) {
     Expr body = convert(interpreter, expr.getField("body"));
-    return new ScopeExpr(body);
+    return Expr.scope(body);
   }
   
   private static Expr convertStringExpr(Interpreter interpreter, Obj expr) {

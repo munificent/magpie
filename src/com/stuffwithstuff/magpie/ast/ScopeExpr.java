@@ -1,7 +1,7 @@
 package com.stuffwithstuff.magpie.ast;
 
 public class ScopeExpr extends Expr {
-  public ScopeExpr(Expr body) {
+  ScopeExpr(Expr body) {
     super(body.getPosition());
     mBody = body;
   }

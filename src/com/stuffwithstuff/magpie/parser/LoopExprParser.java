@@ -3,7 +3,6 @@ package com.stuffwithstuff.magpie.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.stuffwithstuff.magpie.ast.ScopeExpr;
 import com.stuffwithstuff.magpie.ast.VariableExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.LoopExpr;
@@ -85,9 +84,9 @@ public class LoopExprParser implements ExprParser {
       
       // Then execute the loop.
       outerBlock.add(new LoopExpr(position, conditions, body));
-      return new ScopeExpr(Expr.block(outerBlock));
+      return Expr.scope(Expr.block(outerBlock));
     }
     
-    return new ScopeExpr(new LoopExpr(position, conditions, body));
+    return Expr.scope(new LoopExpr(position, conditions, body));
   }
 }

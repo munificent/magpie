@@ -52,6 +52,7 @@ public abstract class Expr {
   }
   
   public static Expr block(List<Expr> exprs, Expr catchExpr) {
+    // Discard unneeded blocks.
     if (catchExpr == null) {
       switch (exprs.size()) {
       case 0:
@@ -101,7 +102,13 @@ public abstract class Expr {
   public static NothingExpr nothing(Position position) {
     return new NothingExpr(Position.none());  
   }
-  
+
+  public static Expr scope(Expr body) {
+    // Unwrap redundant scopes.
+    if (body instanceof ScopeExpr) return body;
+    return new ScopeExpr(body);
+  }
+
   public static Expr staticMessage(Expr receiver, String name, Expr arg) {
     return apply(new MessageExpr(Position.none(), receiver, name), arg, true);
   }
