@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FunctionType;
-import com.stuffwithstuff.magpie.ast.VariableExpr;
 import com.stuffwithstuff.magpie.interpreter.Name;
 
 public class ClassExprParser implements ExprParser {
@@ -40,7 +39,7 @@ public class ClassExprParser implements ExprParser {
       classReceiver = Expr.name(position, className);
     } else {
       // var Foo = Class new("Foo")
-      classReceiver = new VariableExpr(position, className,
+      classReceiver = Expr.var(position, className,
           Expr.message(position, Expr.name(position, "Class"),
           Name.NEW, Expr.string(className)));
     }

@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FunctionType;
-import com.stuffwithstuff.magpie.ast.VariableExpr;
 import com.stuffwithstuff.magpie.interpreter.Name;
 
 public class InterfaceExprParser implements ExprParser {
@@ -30,7 +29,7 @@ public class InterfaceExprParser implements ExprParser {
     if (!isExtend) {
       if (typeParams.size() == 0) {
         // var Foo = Interface new("Foo")
-        exprs.add(new VariableExpr(position, name,
+        exprs.add(Expr.var(position, name,
             Expr.message(Expr.name("Interface"), Name.NEW, Expr.string(name))));
       } else {
         // var Foo = GenericInterface new("Foo", Array of("A", "B"))
@@ -42,7 +41,7 @@ public class InterfaceExprParser implements ExprParser {
         Expr paramArray = Expr.message(Expr.name("Array"), "of",
             Expr.tuple(paramExprs));
         
-        exprs.add(new VariableExpr(position, name,
+        exprs.add(Expr.var(position, name,
             Expr.message(Expr.name("GenericInterface"), Name.NEW,
                 Expr.tuple(Expr.string(name), paramArray))));
       }

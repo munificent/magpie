@@ -260,7 +260,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   private static Expr convertVarExpr(Interpreter interpreter, Obj expr) {
     String name = expr.getField("name").asString();
     Expr value = convert(interpreter, expr.getField("value"));
-    return new VariableExpr(Position.none(), name, value);
+    return Expr.var(name, value);
   }
   
   @Override

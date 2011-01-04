@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.IfExpr;
-import com.stuffwithstuff.magpie.ast.VariableExpr;
 import com.stuffwithstuff.magpie.ast.pattern.LiteralPattern;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
@@ -41,7 +40,7 @@ public class MatchExprParser implements ExprParser {
       // Bind a name if there is one.
       if (thisCase.hasBinding()) {
         List<Expr> bodyExprs = new ArrayList<Expr>();
-        bodyExprs.add(new VariableExpr(body.getPosition(),
+        bodyExprs.add(Expr.var(body.getPosition(),
             thisCase.getBinding(), valueExpr));
         bodyExprs.add(body);
         body = Expr.block(bodyExprs);
@@ -115,7 +114,7 @@ public class MatchExprParser implements ExprParser {
     Expr value = parser.parseExpression();
     // TODO(bob): Need to make sure name is unique, and put it scope local to
     // match expr.
-    exprs.add(new VariableExpr(value.getPosition(), "__value__", value));
+    exprs.add(Expr.var(value.getPosition(), "__value__", value));
     Expr valueExpr = Expr.name("__value__");
     
     // Require a newline between the value and the first case.

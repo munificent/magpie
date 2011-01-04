@@ -80,7 +80,7 @@ public abstract class Expr {
       return new BlockExpr(exprs, catchExpr);
     }
   }
-  
+
   public static Expr break_(Position position) {
     return new BreakExpr(position);
   }
@@ -169,6 +169,14 @@ public abstract class Expr {
 
   public static Expr tuple(Expr... fields) {
     return new TupleExpr(Arrays.asList(fields));
+  }
+
+  public static Expr var(String name, Expr value) {
+    return var(value.getPosition(), name, value);
+  }
+
+  public static Expr var(Position position, String name, Expr value) {
+    return new VariableExpr(position, name, value);
   }
   
   public Expr(Position position) {
