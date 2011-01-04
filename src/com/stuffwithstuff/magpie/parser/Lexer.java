@@ -57,12 +57,7 @@ public class Lexer {
   }
   
   private Token readRawToken() {
-    // Tack on a '\0' to the end of the string and lex it. That will let
-    // us conveniently have a place to end any token that goes to the
-    // end of the string.
     char c = mText.current();
-
-    // Adjust the current position.
     
     switch (mState) {
     case DEFAULT:
@@ -91,6 +86,8 @@ public class Lexer {
       if (isAlpha(c)) return startToken(LexState.IN_NAME);
       if (isOperator(c)) return startToken(LexState.IN_OPERATOR);
       if (isDigit(c)) return startToken(LexState.IN_NUMBER);
+      
+      if (lookAhead("'")) return startToken(LexState.IN_SYMBOL);
       
       // Line continuation.
       if (lookAhead("\\")) return startToken(LexState.IN_LINE_CONTINUATION);
@@ -211,6 +208,22 @@ public class Lexer {
       }
       throw new ParseException("Unknown string escape character " + c + ".");
 
+    case IN_SYMBOL:
+      if (lookAhead("//")) {
+        return createStringToken(TokenType.SYMBOL);
+      }
+      if (lookAhead("/*")) {
+        return createStringToken(TokenType.SYMBOL);
+      }
+      if (isAlpha(c) || isDigit(c) || isOperator(c)) {
+        return advance();
+      }
+      
+      // Get the symbol name without the leading '.
+      String text = mRead.substring(1);
+      mState = LexState.DEFAULT;
+      return new Token(currentPosition(), TokenType.SYMBOL, text);
+      
     case IN_LINE_COMMENT:
       if (match("\n") || match("\r")) {
         mState = LexState.DEFAULT;
@@ -363,7 +376,7 @@ public class Lexer {
   
   private boolean isAlpha(final char c) {
     return ((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'))
-        || (c == '_') || (c == '\'');
+        || (c == '_');
   }
 
   private boolean isDigit(final char c) {
@@ -375,8 +388,18 @@ public class Lexer {
   }
 
   private enum LexState {
-    DEFAULT, IN_NAME, IN_OPERATOR, IN_NUMBER, IN_DECIMAL, IN_FRACTION, IN_MINUS,
-    IN_STRING, IN_STRING_ESCAPE, IN_LINE_COMMENT, IN_BLOCK_COMMENT,
+    DEFAULT,
+    IN_NAME,
+    IN_OPERATOR,
+    IN_NUMBER,
+    IN_DECIMAL,
+    IN_FRACTION,
+    IN_MINUS,
+    IN_STRING,
+    IN_STRING_ESCAPE,
+    IN_SYMBOL,
+    IN_LINE_COMMENT,
+    IN_BLOCK_COMMENT,
     IN_LINE_CONTINUATION
   }
 

@@ -447,6 +447,11 @@ public class MagpieParser extends Parser {
       return Expr.int_(last(1).getPosition(), last(1).getInt());
     } else if (match(TokenType.STRING)) {
       return Expr.string(last(1).getPosition(), last(1).getString());
+    } else if (match(TokenType.SYMBOL)) {
+      // TODO(bob): Hackish. Need to decide if symbols should be a first-class
+      // AST node.
+      return Expr.message(Expr.name("Symbol"), "new",
+          Expr.string(last(1).getPosition(), last(1).getString()));
     } else if (match(TokenType.THIS)) {
       return Expr.this_(last(1).getPosition());
     } else if (match(TokenType.NOTHING)) {

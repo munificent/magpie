@@ -1,0 +1,21 @@
+// Note: This file is parsed before any of the parsewords have been defined, so
+// it only uses core syntax.
+
+class Symbol
+    shared def new(name String -> Symbol) construct(name: name)
+    
+    var name String
+end
+
+Symbol declareField("name", false, %fn%(String))
+Symbol defineGetter("string", %fn%(String, "'" ~ name))
+
+// TODO(bob): This is still in the very early prototype phase. I added these
+// mostly so that you can do 'T in a type signature. Symbols just happen to be
+// syntactically useful outside of a type expression. The main problem with them
+// is that they aren't interchangable with strings. For example, this won't work
+// yet:
+//
+// Foo defineMethod('methodName, fn whatever)
+//
+// Need to figure out how to resolve that.

@@ -5,6 +5,9 @@
 // Implement Trueable for the built-in classes so we can evaluate conditionals.
 import("true.mag")
 
+// Import this so we can parse source files containing symbols.
+import("Symbol.mag")
+
 // Import the base classes used to implement the keyword parsers.
 import("syntax/Token.mag")
 import("syntax/expressions.mag")

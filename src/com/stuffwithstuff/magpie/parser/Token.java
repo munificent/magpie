@@ -53,6 +53,7 @@ public final class Token {
       case NAME: return getString() + " (name)";
       case FIELD: return getString() + ":";
       case OPERATOR: return getString() + " (op)";
+      case SYMBOL: return getString() + " (sym)";
 
       case BOOL: return Boolean.toString(getBool());
       case INT: return Integer.toString(getInt());

@@ -17,6 +17,7 @@ public enum TokenType {
   NAME,
   FIELD, // a record field like "x:"
   OPERATOR,
+  SYMBOL, // 'foo
 
   // literals
   BOOL,
