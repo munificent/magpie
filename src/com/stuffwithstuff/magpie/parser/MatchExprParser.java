@@ -9,6 +9,7 @@ import com.stuffwithstuff.magpie.ast.pattern.LiteralPattern;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.TypePattern;
+import com.stuffwithstuff.magpie.ast.pattern.WildcardPattern;
 import com.stuffwithstuff.magpie.util.Pair;
 
 // TODO(bob): This whole implementation is pretty hideous. Just slapping
@@ -98,6 +99,10 @@ public class MatchExprParser implements ExprParser {
       return new LiteralPattern(Expr.int_(parser.last(1).getInt()));
     } else if (parser.match(TokenType.STRING)) {
       return new LiteralPattern(Expr.string(parser.last(1).getString()));
+    } else if (parser.lookAhead(TokenType.NAME) &&
+        parser.current().getString().equals("_")) {
+      parser.consume();
+      return new WildcardPattern();
     } else {
       Expr typeAnnotation = parser.parseTypeExpression();
       return new TypePattern(typeAnnotation);

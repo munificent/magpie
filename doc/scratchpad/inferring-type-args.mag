@@ -1,0 +1,72 @@
+// define
+def max(a 'T, b 'T -> 'T)
+
+// call
+max(2, 3)
+
+// At type check time, the checker sees:
+// 1. Expected type: ('T, 'T)
+// 2. Actual type:   (Int, Int)
+// 
+// It needs to calculate the value of 'T in order to evaluate the return type. It
+// calls "inferTypes" on the expected type:
+
+def Tuple inferTypes(actual Type, typeParams TypeParamMap ->)
+    let actualTuple = actual as[Tuple] then
+        for field = fields
+        for actualField = actualTuple fields do
+            field inferTypes(actualField, typeParams)
+        end
+    else
+        throw TypeError()
+    end
+end
+
+def TypeParam inferTypes(actual Type, typeParams TypeParamMap ->)
+    typeParams bind(name, actual)
+end
+
+// After this, we now have an instance of TypeParamMap with "T" mapped to Int.
+// (And it was mapped twice to the same type, which is OK. If it had had a type
+// collision, it's either an error or we need to determine the base type they
+// share.
+
+// Now we need to instantiate the concrete return type by applying the type
+// argument. To do that, we take the expected return type (just 'T) and call
+// applyTypes on it:
+
+def Tuple applyTypes(typeParams TypeParamMap -> Type)
+    Tuple new(fields map with it applyTypes(typeParams))
+end
+
+def TypeParam applyTypes(typeParams TypeParamMap -> Type)
+    typeParams lookUp(name)
+end
+
+// Now we've got a concrete return type (Int). If there are any non-inferred
+// type parameters, we'll have gotten an error in "lookUp".
+
+// A more complex example:
+
+def firstTwo(list List('T) -> ('T, 'T))
+    list(0), list(1)
+end
+
+firstTwo(List(String) new())
+
+def GenericClass inferTypes(actual Type, typeParams TypeParamMap ->)
+    let actualClass = actual as[GenericClass] then
+        // TODO(bob): Handle variance.
+        if rootClass != actualClass rootClass then throw TypeError("Class mismatch.")
+        typeArg inferTypes(actualClass typeArg, typeParams)
+    else
+        throw TypeError()
+    end
+end
+
+// An example that infers a type from a type object:
+def Object expecting(expected Type('T) -> 'T)
+    if type == expected or expected assignsFrom?(type) then return unsafecast(T, this)
+    UnexpectedTypeError throw(T, type)
+end
+

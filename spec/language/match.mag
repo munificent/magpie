@@ -89,6 +89,13 @@ specify("A 'case' in a 'match' expression") with
             case Int then "yes"
         end shouldBe("yes")
     end
+
+    it should("match a wildcard") with
+        match "whatever"
+            case _      then "yes"
+            case "else" then "no"
+        end shouldBe("yes")
+    end
 end
 
 specify("The grammar for a 'match' expression") with

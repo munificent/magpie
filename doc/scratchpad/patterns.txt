@@ -1,0 +1,188 @@
+/*
+In Haskell, a pattern can be a variable, constructor, wildcard (_), or "as" expression. Variables are lowercase names. Constructors are:
+
+    []     // empty list
+    a:b    // list destructure
+    (a, b) // tuple
+    
+Also, constructors of algebraic data types:
+
+    // given:
+    data Foo = Bar | Baz Int
+    
+    // then these constructors can be used in patterns:
+    Bar
+    Baz(...)
+
+Haskell uses patterns to define functions, but distinguished between the 
+patterns and the type signature of the function:
+
+    contrived :: ([a], Char, (Int, Float), String, Bool) -> Bool
+    contrived    ([],  'b',  (1,   2.0),   "hi",   True) = False
+
+The distinction here can be thought of as separating "static" matching from dynamic. The first line identifies what types that functions expects at compile
+time. It's used to type-check the program. The second identifies what *values*
+will be matched at runtime.
+*/
+
+/*
+
+F# has a much richer set of pattern expressions:
+http://msdn.microsoft.com/en-us/library/dd547125.aspx
+
+Constant pattern        1.0, "test", 30, Color.Red
+Identifier pattern      Some(x)
+                        Failure(msg)
+Variable pattern        identifier
+                        a
+as pattern              (a, b) as tuple1
+OR pattern              ([h] | [h; _])
+AND pattern             (a, b) & (_, "test")
+Cons pattern            h :: t
+List pattern            [ a; b; c ]
+Array pattern           [| a; b; c |]
+Parenthesized pattern   ( a )
+Tuple pattern           ( a, b )
+Record pattern          { Name = name; }
+Wildcard pattern        _
+Pattern with type       a : int
+Type test pattern       :? System.DateTime as dt
+(as part is optional)
+*/
+
+// Magpie pattern-matching use cases:
+
+// 1. Switch on value:
+match numFriends
+    case 0 then "FOREVER ALONE"
+    case 1 then "BFF"
+    else "Bizarre Love Triangle"
+end
+
+match name
+    case "John"   then "Lennon"
+    case "Paul"   then "McCartney"
+    case "George" then "Harrison"
+    case "Ringo"  then "Starr"
+end
+
+// 2. Decompose tuple:
+match x, y
+    case 0, 0 then "at origin"
+    case 0, _ then "on y axis"
+    case _, 0 then "on x axis"
+    case v      then "at " ~ v
+end
+
+// 3. Decompose record:
+match x: 1, y: 2
+    case x: 0, y: 0 then "at origin"
+    case x: 0, y: _ then "on y axis"
+    case x: _, y: 0 then "on x axis"
+    case v          then "at " ~ v
+end
+
+// 4. Decompose object?
+match Point new(2, 3)
+    case Point(0, 0) then "at origin"
+    case Point(0, _) then "on y axis"
+    case Point(_, 0) then "on x axis"
+    case Point(x, y) then "at " ~ x ~ ", " ~ y
+end
+// Remarks:
+// - Not as meaningful in Magpie since it doesn't mirror ctor syntax:
+//   Point new(1, 2)
+// - Repeats the class name a bunch
+
+// 5. Decompose an object by field?
+match Point new(2, 3)
+    case x: 0, y: 0 then "at origin"
+    case x: 0, y: _ then "on y axis"
+    case x: _, y: 0 then "on x axis"
+    case v          then "at " ~ v
+end
+// Remarks:
+// - Nice in that it works with records and classes.
+// - Can still be type-checked by making sure the matched value type has members
+//   with those names and types.
+
+// 6. Select by type?
+match expr
+    case lit Literal then lit value
+    case add Add     then add left + add right
+end
+
+match optional
+    case _ None then "nuttin'"
+    case s Some then "value = " ~ s value
+end
+
+// 7. Select an exception handler?
+do
+    // ...
+catch err ParseError                 then "parse error" ~ err
+catch TypeError                      then "type error" // don't bind name
+catch err RuntimeError | SystemError then "bad!"
+
+// 8. Dynamic dispatch of multimethods?
+
+def foo(a Int) // ...
+def foo(a String) // ...
+
+// 9. Bind to type argument?
+match someIterator
+    case Iterator(Int)    then "generates ints"
+    case Iterator(String) then "generates strings"
+    case Iterator(t)      then "generates " ~ t
+end
+
+/*
+
+Challenges:
+Q: How do we distinguish between variables and things like class names?
+A: Lowercase is a variable, uppercase is a class.
+
+Q: How do we tell when we're matching on type versus matching on a value stored
+   in a named constant?
+
+    match foo
+        case Bar then // does this mean "foo is[Bar]" or "foo == Bar"?
+    end
+A:  F# uses :?
+
+    match foo
+        case ?: Bar then // foo is[Bar]
+        case Bar    then // foo == Bar
+    end
+
+    But note that F# also has unions which don't use that. Magpie has to make
+    type tests work for unions too.
+
+    One option: a variable or wildcard *before* the Capitalized identifier means
+    it's a type test, otherwise it's a value test:
+    
+    match foo
+        case b Bar then // foo is[Bar]
+        case Bar   then // foo == Bar
+    end
+
+    The trick here is figuring out how that composes into larger patterns:
+    
+    case a (Int, b String)
+    case a (Int | b String)
+    
+    I'm guessing we could make the first work, but not the latter.
+    
+    name     = lowercase identifier
+    Name     = capitalized identifier
+    typeExpr = Magpie expression starting at operator precedence
+    field    = field name like "x:"
+    
+    pattern ::=
+      (name | "_") typeExpr  // type test
+      "_"                    // wildcard
+      name                   // variable
+      pattern ("," pattern)* // tuple
+      constant               // constant 0, true, etc.
+      
+*/
