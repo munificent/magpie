@@ -81,6 +81,10 @@ public abstract class Expr {
     }
   }
 
+  public static Expr block(Expr... exprs) {
+    return new BlockExpr(Arrays.asList(exprs));
+  }
+
   public static Expr break_(Position position) {
     return new BreakExpr(position);
   }
@@ -93,12 +97,21 @@ public abstract class Expr {
     return new FnExpr(position, type, body);
   }
   
+  public static Expr if_(Expr condition, Expr thenExpr, Expr elseExpr) {
+    return new IfExpr(Position.surrounding(condition, elseExpr), null,
+        condition, thenExpr, elseExpr);
+  }
+  
   public static Expr int_(int value) {
     return int_(Position.none(), value);
   }
   
   public static Expr int_(Position position, int value) {
     return new IntExpr(position, value);
+  }
+  
+  public static Expr loop(Position position, Expr body) {
+    return new LoopExpr(position, body);
   }
   
   public static Expr message(Position position, Expr receiver, String name, Expr arg) {

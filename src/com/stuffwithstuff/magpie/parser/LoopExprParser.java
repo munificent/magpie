@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.Expr;
-import com.stuffwithstuff.magpie.ast.LoopExpr;
 import com.stuffwithstuff.magpie.interpreter.Name;
 
 public class LoopExprParser implements ExprParser {
@@ -14,31 +13,39 @@ public class LoopExprParser implements ExprParser {
     // "while" and "for" loop.
     Position startPos = parser.current().getPosition();
     
-    // A for loop is desugared from this:
+    // A loop is desugared from this:
     //
-    //   for a <- foo do
-    //     print a
+    //   while bar
+    //   for a = foo do
+    //       print(a)
     //   end
     //
     // To:
     //
     //   do
-    //     def __a_gen = foo.iterate()
-    //     while __a_gen.next do
-    //       def a = __a_gen.current
-    //       print a
-    //     end
+    //       // beforeLoop:
+    //       var __a_gen = foo iterate()
+    //       // end beforeLoop
+    //       loop
+    //           // eachLoop:
+    //           if bar then nothing else break
+    //           if __a_gen next() then nothing else break
+    //           var a = __a_gen current
+    //           // end eachLoop
+    //           // body:
+    //           print(a)
+    //       end
     //   end
     
-    List<Expr> generators = new ArrayList<Expr>();
-    List<Expr> initializers = new ArrayList<Expr>();
-    
-    List<Expr> conditions = new ArrayList<Expr>();
+    List<Expr> beforeLoop = new ArrayList<Expr>();
+    List<Expr> eachLoop = new ArrayList<Expr>();
     
     while (parser.match(TokenType.WHILE) || parser.match(TokenType.FOR)) {
       if (parser.last(1).getType() == TokenType.WHILE) {
         Expr condition = parser.parseExpression();
-        conditions.add(condition);
+        eachLoop.add(Expr.if_(condition,
+            Expr.nothing(),
+            Expr.break_(condition.getPosition())));
       } else {
         Token nameToken = parser.consume(TokenType.NAME);
         String variable = nameToken.getString();
@@ -48,15 +55,17 @@ public class LoopExprParser implements ExprParser {
         
         // Initialize the generator before the loop.
         String generatorVar = variable + " gen";
-        generators.add(Expr.var(position, generatorVar,
+        beforeLoop.add(Expr.var(position, generatorVar,
             Expr.message(generator, Name.ITERATE, Expr.nothing(position))));
         
-        // The the condition expression just increments the generator.
-        conditions.add(Expr.message(
-            Expr.name(generatorVar), Name.NEXT, Expr.nothing(position)));
+        // Each iteration, advance the iterator and break if done.
+        eachLoop.add(Expr.if_(
+            Expr.message(Expr.name(generatorVar), Name.NEXT, Expr.nothing(position)),
+            Expr.nothing(),
+            Expr.break_(position)));
         
-        // In the body of the loop, we need to initialize the variable.
-        initializers.add(Expr.var(position, variable,
+        // If not done, create the loop variable.
+        eachLoop.add(Expr.var(position, variable,
             Expr.message(Expr.name(generatorVar), Name.CURRENT)));
       }
       parser.match(TokenType.LINE); // Optional line after a clause.
@@ -67,25 +76,22 @@ public class LoopExprParser implements ExprParser {
 
     Position position = startPos.union(body.getPosition());
     
-    // If there are "for" loops, mix in the generators and variables.
-    if (generators.size() > 0) {
-      // Create the variables inside the loop.
-      List<Expr> innerBlock = new ArrayList<Expr>();
-      for (Expr initializer : initializers) innerBlock.add(initializer);
+    // Build the loop body.
+    List<Expr> loopBlock = new ArrayList<Expr>();
+    for (Expr expr : eachLoop) loopBlock.add(expr);
 
-      // Then execute the main body.
-      innerBlock.add(body);
-      body = Expr.block(innerBlock);
-      
-      // Create the generators outside the loop.
-      List<Expr> outerBlock = new ArrayList<Expr>();
-      for (Expr generator : generators) outerBlock.add(generator);
-      
-      // Then execute the loop.
-      outerBlock.add(new LoopExpr(position, conditions, body));
-      return Expr.scope(Expr.block(outerBlock));
-    }
+    // Then execute the main body.
+    loopBlock.add(body);
+    Expr loopBody = Expr.block(loopBlock);
     
-    return Expr.scope(new LoopExpr(position, conditions, body));
+    // Add the iterators outside of the loop.
+    List<Expr> outerBlock = new ArrayList<Expr>();
+    for (Expr expr : beforeLoop) outerBlock.add(expr);
+
+    // Add the main loop.
+    outerBlock.add(Expr.loop(position, loopBody));
+
+    // Wrap the iterators in their own scope.
+    return Expr.scope(Expr.block(outerBlock));
   }
 }

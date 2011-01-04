@@ -208,7 +208,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     }
     
     mChecker.addError(expr.getPosition(),
-        "A break expression should not appear outside of a for loop.");
+        "A break expression should not appear outside of a loop.");
     return mInterpreter.getNothingClass();
   }
 
@@ -255,13 +255,6 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(LoopExpr expr, EvalContext context) {
     context = context.enterLoop();
-    
-    // TODO(bob): Should eventually check that conditions implement ITrueable
-    // so that you can only use truthy stuff in a while.
-    // Check the conditions for errors.
-    for (Expr condition : expr.getConditions()) {
-      check(condition, context);
-    }
     
     // Check the body for errors.
     context = context.pushScope();

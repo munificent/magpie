@@ -115,31 +115,15 @@ end
 IntExpression declareField("value", false, %fn%(Int))
 
 class LoopExpression
-    shared def new(conditions List(Expression), body Expression ->
-                   LoopExpression)
-        construct(conditions: conditions, body: body)
+    shared def new(body Expression -> LoopExpression)
+        construct(body: body)
     end
     
     get string String =
         "not implemented!"
-        /*
-        var result = ""
-        for i = 0 until(conditions count)
-        for condition = conditions do
-            result = result ~ "while " ~ condition
-      
-            if i < (conditions count - 1) then
-                result = result ~ "\n"
-            else
-                result = result ~ " do\n"
-            end
-        end
-        result ~ body
-        */
     end
 end
 
-LoopExpression declareField("conditions", false, %fn%(List(Expression)))
 LoopExpression declareField("body", false, %fn%(Expression))
 
 class MessageExpression

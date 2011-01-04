@@ -164,21 +164,9 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     try {
       context = context.enterLoop();
 
-      boolean done = false;
+      // Loop forever. A "break" expression will throw a BreakException to
+      // escape this loop.
       while (true) {
-        // Evaluate the conditions.
-        for (Expr conditionExpr : expr.getConditions()) {
-          // See if the while clause is still true.
-          Obj condition = evaluate(conditionExpr, context);
-          if (!isTruthy(conditionExpr, condition)) {
-            done = true;
-            break;
-          }
-        }
-
-        // If any clause failed, stop the loop.
-        if (done) break;
-
         // Evaluate the body in its own scope.
         context = context.pushScope();
 

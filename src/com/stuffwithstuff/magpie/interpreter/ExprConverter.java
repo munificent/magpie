@@ -170,14 +170,8 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   }
   
   private static Expr convertLoopExpr(Interpreter interpreter, Obj expr) {
-    List<Obj> conditionObjs = expr.getField("conditions").asArray();
-    List<Expr> conditions = new ArrayList<Expr>();
-    for (Obj condition : conditionObjs) {
-      conditions.add(convert(interpreter, condition));
-    }
-    
     Expr body = convert(interpreter, expr.getField("body"));
-    return new LoopExpr(Position.none(), conditions, body);
+    return Expr.loop(body.getPosition(), body);
   }
   
   private static Expr convertMessageExpr(Interpreter interpreter, Obj expr) {
@@ -341,13 +335,8 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
 
   @Override
   public Obj visit(LoopExpr expr, Void dummy) {
-    List<Obj> conditions = new ArrayList<Obj>();
-    for (Expr condition : expr.getConditions()) {
-      conditions.add(convert(condition));
-    }
     Obj body = convert(expr.getBody());
-    
-    return construct("Loop", mInterpreter.createArray(conditions), body);
+    return construct("Loop", body);
   }
 
   @Override
