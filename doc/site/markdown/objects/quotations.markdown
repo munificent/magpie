@@ -49,63 +49,53 @@ doesn't look very much like the code it represents:
     :::magpie
     var age = 32
 
-To fix that, Magpie supports *quotations*. A quotation is a chunk of code
-surrounded by curly braces. When evaluated, instead of evaluating that code
-directly, it just creates an expression object that represents the code. In
-other words, these two lines of code are equivalent:
+To remedy that, Magpie supports *quotations*. A quotation looks like a chunk of
+code surrounded by curly braces. When evaluated, instead of evaluating that code
+directly, it just creates an expression object that represents the code. It's a
+literal notation for expression object. In other words, these two lines of code
+are equivalent:
 
     :::magpie
     var expr = VarExpression new("age", IntExpression new(32))
     var expr = { var age = 32 }
 
-After evaluating a quotation, you can treat the result like any regular object.
-For example:
+After creating a quotation, you can treat the result like any regular object. For example, a `VarExpression` has a `name` getter to get the name of the field being defined. You can access it like this:
 
     :::magpie
     var expr = { var someVariable = "the value" }
     print(expr name) // prints "someVariable"
 
-## Quasiquoting
+## Unquoting
 
-This gets us a lot farther. Now we've got a pretty simple syntax to build chunks
-of fixed code, but what if the code objects we're building have parts that vary?
-What if you want to do:
+Quotations let us build expressions in a readable just like string literals let us create strings more easily than concatenating a series of characters together. But that still only covers the simple case of creating a fixed expression object from scratch. What if we want to compose an expression object or insert pieces of other expressions into one? Say we have:
 
     :::magpie
-    var expr = { var age = 32 }
+    var expr = { if zombie then print("Brains!") }
 
-But instead of always initializing `age` to `32`, you want to be able to vary
-that value? To address that, quotations support *quasiquoting*. Quasiquoting is
-very similar to string interpolation. The basic idea is that within a quotation,
-you can indicate an expression that should be *evaluated* right then instead of
-just treated like a chunk of code. For example:
+But instead of always initializing having the body of the `if` expression be
+`print("Brains!")`, we want to be able to provide an expression that will be
+inserted into there? To address that, quotations support *unquoting*. Unquoting
+is very similar to string interpolation. The basic idea is that within a
+quotation, you can indicate an expression that should be *evaluated* right then
+instead of just treated like a chunk of code. For example:
 
     :::magpie
-    var age = { 23 }
-    var expr = { print("You are " ~ `age ~ " years old!") }
+    var action = { shamble(around) }
+    var expr = { if zombie then `action }
 
 The backtick (<code>\`</code>) character there tells Magpie that the following
 expression should be evaluated in place. In other words, the value of `expr`
 will be an object that represents the chunk of code:
 
     :::magpie
-    print("You are " ~ 23 ~ " years old!")
+    print(if zombie then shamble(around))
 
-The value of the `age` variable has been inserted into our quotation.
+The value of the `action` variable&mdash;itself an expression object&mdash; has
+been inserted into the quotation.
 
-It's important to note that the value of `age` was itself an quotation&mdash; `{
-23 }`&mdash; and not just the raw number `23`. That's because we're inserting an
-*expression object* into our expression literal. The *number* 23 isn't a valid
-expression object in Magpie (though it is a valid expression, and a valid
-object!). If you want an expression representing the *literal* 23, you need an
-instance of `IntExpression`, which is what `{ 23 }` will evaluate to.
+### Unquote Syntax
 
-It's a bit confusing, I'll admit. The short summary is that when you use
-quasiquoting, the values you insert will generally be quotations too.
-
-## Quasiquote Expressions
-
-There are a couple of ways you can quasiquote. The simplest one we have already
+There are a couple of ways you can unquote. The simplest one we have already
 seen: you can follow the backtick immediately with a name:
 
     :::magpie
@@ -117,12 +107,35 @@ use parentheses:
     :::magpie
     { `(call some method(passing, args)) }
 
-Since the result of a quasiquote must be an expression object, you can also use
-curly braces immediately after the backtick to immediately quote the result:
+### Unquoting Primitive Values
+
+It's important to note that result of an unquote must be an expression object.
+Attempting to do this is an error:
 
     :::magpie
-    var age = 23 // note: not an expression
-    var expr = { print("You are " ~ `{ age } ~ " years old!") }
+    var foo = Foo new() // make some random object
+    var expr = { print(`foo) }
+
+Since `Foo` presumably isn't a valid expression class, this won't work. One
+common case where occurs is with primitive values. Let's say you want to create
+a function that will return an expression print a given person's name and age. You might try:
+
+    :::magpie
+    def makeExpression(name String, age Int -> Expression)
+        { print(`name ~~ "is" ~~ `age ~~ "years old.")
+    end
+
+But there's a problem. We're unquoting `name` and `age`, but those aren't expressions, they're just primitive values. What we actually intend to do is insert *literal expressions* for those values, like so:
+
+    :::magpie
+    def makeExpression(name String, age Int -> Expression)
+        var nameExpr = StringExpression(name)
+        var ageExpr  = IntExpression(age)
+        { print(`nameExpr ~~ "is" ~~ `ageExpr ~~ "years old.")
+    end
+
+This is correct, but tedious and unnecessarily verbose. To help here, Magpie will automatically convert a primitive value to a literal expression of the
+appropriate type when it's used in an unquote. So our first `makeExpression` example will work and do what you expect.
 
 <p class="future"> The syntax for quotations (i.e. using curlies) may
 change. Metaprogramming isn't something that users are likely to do often

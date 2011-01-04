@@ -452,9 +452,6 @@ public class MagpieParser extends Parser {
       Expr body;
       if (match(TokenType.NAME)) {
         body = Expr.message(last(1).getPosition(), null, last(1).getString());
-      } else if (lookAhead(TokenType.LEFT_BRACE)) {
-        body = parenthesizedExpression(BraceType.CURLY);
-        body = Expr.quote(body.getPosition(), body);
       } else {
         body = parenthesizedExpression(BraceType.PAREN);
       }

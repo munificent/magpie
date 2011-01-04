@@ -415,7 +415,21 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   @Override
   public Obj visit(UnquoteExpr expr, Void dummy) {
     // TODO(bob): Check that it evaluates to an expression?
-    return mInterpreter.evaluate(expr.getBody(), mContext);
+    Obj value = mInterpreter.evaluate(expr.getBody(), mContext);
+    
+    // If the unquoted value is a primitive object, automatically promote it to
+    // a corresponding literal.
+    if (value.getClassObj() == mInterpreter.getBoolClass()) {
+      value = construct("Bool", value);
+    } else if (value.getClassObj() == mInterpreter.getIntClass()) {
+      value = construct("Int", value);
+    } else if (value.getClassObj() == mInterpreter.getStringClass()) {
+      value = construct("String", value);
+    } else if (value.getClassObj() == mInterpreter.getNothingClass()) {
+      value = construct("Nothing", value);
+    }
+    
+    return value;
   }
 
   @Override

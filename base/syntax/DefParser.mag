@@ -25,7 +25,7 @@ class DefParser
                     TokenType operator) stringValue)
                 %var%("function", parser parseFunction())
       
-                { `receiver defineMethod(`(StringExpression new(name)), `function) }
+                { `receiver defineMethod(`name, `function) }
             )
         )
     end

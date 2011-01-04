@@ -21,7 +21,7 @@ class GetParser
         parser consume(TokenType equals)
         %var%("body", parser parseEndBlock())
         %var%("function", FunctionExpression new(type, body))
-        { `receiver defineGetter(`(StringExpression new(name)), `function ) }
+        { `receiver defineGetter(`name, `function ) }
     end
 end
 
