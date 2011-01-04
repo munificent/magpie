@@ -9,6 +9,7 @@ specify("A 'match' expression") with
         match eval()
             case "a" then "one"
             case "b" then "two"
+            else "three"
         end
         
         called shouldBe(1)
@@ -31,11 +32,13 @@ specify("A 'match' expression") with
         called shouldBe("1")
     end
 
-    it should("return nothing if no case matches") with
-        match "not found"
-            case "a" then "bad"
-            case "b" then "bad"
-        end shouldBe(nothing)
+    it should("throw an error if no case matches") with
+        fn
+            match "not found"
+                case "a" then "bad"
+                case "b" then "bad"
+            end
+        end shouldThrow(NoMatchError)
     end
 
     it should("match an else case if nothing else matches") with
@@ -83,10 +86,24 @@ specify("A 'case' in a 'match' expression") with
         end shouldBe("yes")
     end
 
-    it should("match a type") with
-        match 123
+    it should("match a class object as a value") with
+        match Int
             case Bool then "no"
             case Int then "yes"
+        end shouldBe("yes")
+    end
+
+    it should("match against the value's type using a wildcard") with
+        match 123
+            case _ Bool then "no"
+            case _ Int then "yes"
+        end shouldBe("yes")
+    end
+
+    it should("match against the value's type using a name") with
+        match 123
+            case a Bool then "no"
+            case a Int then "yes"
         end shouldBe("yes")
     end
 

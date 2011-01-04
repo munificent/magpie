@@ -5,11 +5,13 @@ import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.IfExpr;
-import com.stuffwithstuff.magpie.ast.pattern.LiteralPattern;
+import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.TypePattern;
+import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.ast.pattern.WildcardPattern;
+import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.util.Pair;
 
 // TODO(bob): This whole implementation is pretty hideous. Just slapping
@@ -28,7 +30,11 @@ public class MatchExprParser implements ExprParser {
    */
   public static Expr desugarCases(Expr valueExpr, List<MatchCase> cases,
       Expr elseExpr) {
-    if (elseExpr == null) elseExpr = Expr.nothing();
+    // By default if no case matches, an error will be thrown.
+    if (elseExpr == null) {
+      elseExpr = Expr.message(Expr.name("Runtime"), "throw",
+          Expr.message(Expr.name("NoMatchError"), Name.NEW, Expr.nothing()));
+    }
     
     // Desugar the cases to a series of chained if/thens.
     Expr chained = elseExpr;
@@ -38,14 +44,11 @@ public class MatchExprParser implements ExprParser {
       Expr condition = thisCase.getPattern().createPredicate(valueExpr);
       Expr body = thisCase.getBody();
       
-      // Bind a name if there is one.
-      if (thisCase.hasBinding()) {
-        List<Expr> bodyExprs = new ArrayList<Expr>();
-        bodyExprs.add(Expr.var(body.getPosition(),
-            thisCase.getBinding(), valueExpr));
-        bodyExprs.add(body);
-        body = Expr.block(bodyExprs);
-      }
+      // Bind the names.
+      List<Expr> bodyExprs = new ArrayList<Expr>();
+      thisCase.getPattern().createBindings(bodyExprs, valueExpr);
+      bodyExprs.add(body);
+      body = Expr.block(bodyExprs);
       
       chained = new IfExpr(body.getPosition(), null, condition, body, chained);
     }
@@ -54,17 +57,6 @@ public class MatchExprParser implements ExprParser {
   }
   
   private static MatchCase parseCase(MagpieParser parser) {
-    // Valid patterns:
-    // 1
-    // a 1
-    // b true
-    // c
-    // d Int
-    // e Int | String
-    // f (Int, String)
-    // g (Int => String) => Bool
-    
-    String name = parseBinding(parser);
     Pattern pattern = parsePattern(parser);
 
     parser.consume("then");
@@ -79,34 +71,85 @@ public class MatchExprParser implements ExprParser {
       parser.consume(TokenType.LINE);
     }
     
-    return new MatchCase(name, pattern, bodyParse.getKey());
-  }
-  
-  public static String parseBinding(MagpieParser parser) {
-    if ((parser.current().getType() == TokenType.NAME) &&
-        Character.isLowerCase(parser.current().getString().charAt(0))) {
-      return parser.consume().getString();
-    }
-    
-    // The token isn't a valid variable binding name.
-    return null;
+    return new MatchCase(pattern, bodyParse.getKey());
   }
   
   public static Pattern parsePattern(MagpieParser parser) {
-    if (parser.match(TokenType.BOOL)) {
-      return new LiteralPattern(Expr.bool(parser.last(1).getBool()));
-    } else if (parser.match(TokenType.INT)) {
-      return new LiteralPattern(Expr.int_(parser.last(1).getInt()));
-    } else if (parser.match(TokenType.STRING)) {
-      return new LiteralPattern(Expr.string(parser.last(1).getString()));
-    } else if (parser.lookAhead(TokenType.NAME) &&
-        parser.current().getString().equals("_")) {
-      parser.consume();
-      return new WildcardPattern();
-    } else {
-      Expr typeAnnotation = parser.parseTypeExpression();
-      return new TypePattern(typeAnnotation);
+    // Valid patterns:
+    // 1
+    // a 1
+    // b true
+    // c
+    // _
+    // d Int
+    // _ Int | String
+    // f (Int, String)
+    // g (Int => String) => Bool
+    
+    // See if there is a binding for the pattern.
+    String name = null;
+    if (parser.current().getType() == TokenType.NAME) {
+      String token = parser.current().getString();
+      if (token.equals("_") ||
+          Character.isLowerCase(token.charAt(0))) {
+        name = parser.consume().getString();
+      }
     }
+
+    // Parse the pattern itself.
+    Pattern pattern = null;
+    if (parser.match(TokenType.BOOL)) {
+      pattern = new ValuePattern(Expr.bool(parser.last(1).getBool()));
+    } else if (parser.match(TokenType.INT)) {
+      pattern = new ValuePattern(Expr.int_(parser.last(1).getInt()));
+    } else if (parser.match(TokenType.STRING)) {
+      pattern = new ValuePattern(Expr.string(parser.last(1).getString()));
+    } else if (parser.lookAheadAny(TokenType.NAME, TokenType.LEFT_PAREN)) {
+      Expr expr = parser.parseTypeExpression();
+      
+      // The rule is, a name (or _) before a pattern indicates that it matches
+      // against the value's type. Otherwise it does a straight equality test
+      // against the value.
+      if (name != null) {
+        pattern = new TypePattern(expr);
+      } else {
+        pattern = new ValuePattern(expr);
+      }
+    }
+    
+    // A pattern may have a name, no name, or a wildcard name.
+    // It may also have a further pattern expression, or not.
+    // Each of those combinations has a different interpretation:
+    //
+    // no name,  no pattern -> Oops, error!
+    // no name,  pattern    -> Just use the pattern.
+    // name,     no pattern -> Straight variable pattern.
+    // name,     pattern    -> Variable pattern with embedded pattern.
+    // wildcard, no pattern -> Wildcard pattern.
+    // wildcard, pattern    -> Use the pattern.
+    //
+    // The last case is a bit special since the wildcard is there but doesn't
+    // affect the pattern. It's used to distinguish matching on the value's
+    // *type* versus matching the value as *equal to a type*. For example:
+    //
+    // match foo
+    //     case Int   then print("foo is the Int class object")
+    //     case _ Int then print("foo's type is Int")
+    // end
+    
+    if (name == null) {
+      if (pattern == null) throw new ParseException(
+          "Could not parse pattern.");
+      
+      return pattern;
+    }
+    
+    if (name.equals("_")) {
+      if (pattern == null) return new WildcardPattern();
+      return pattern;
+    }
+    
+    return new VariablePattern(name, pattern);
   }
   
   @Override

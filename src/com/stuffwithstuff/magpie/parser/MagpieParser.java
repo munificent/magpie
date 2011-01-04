@@ -5,6 +5,7 @@ import java.util.*;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
+import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.util.Pair;
 
@@ -117,12 +118,8 @@ public class MagpieParser extends Parser {
   }
 
   private MatchCase parseCatch(String keyword1, String keyword2, TokenType... endTokens) {
-    String name = MatchExprParser.parseBinding(this);
     Pattern pattern = MatchExprParser.parsePattern(this);
 
-    // Infer 'it' for the matched value if no name is provided.
-    if (name == null) name = "it";
-    
     consume("then");
     
     Pair<Expr, Token> body = parseBlock(false, keyword1, keyword2, endTokens);
@@ -133,7 +130,7 @@ public class MagpieParser extends Parser {
       consume();
     }
     
-    return new MatchCase(name, pattern, body.getKey());
+    return new MatchCase(pattern, body.getKey());
   }
   
   // fn (a) print "hi"

@@ -7,6 +7,9 @@ end
 class ParseError
 end
 
+class NoMatchError
+end
+
 class UnexpectedTypeError
     shared def new(expectedType Type, actualType Type -> UnexpectedTypeError)
         construct(expectedType: expectedType, actualType: actualType)
