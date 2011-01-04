@@ -8,20 +8,6 @@ body {
   background: #f4f4f4;
 }
 
-.prev {
-  text-align: left;
-  width: 80px;
-}
-
-.breadcrumb {
-  text-align: left;
-}
-
-.next {
-  text-align: right;
-  width: 80px;
-}
-
 h1 {
   color: #27a;
   font: normal 48px "Reenie Beanie", "Lucida Sans Unicode", "Lucida Grande", sans-serif;
@@ -111,11 +97,8 @@ td {
   font: normal 12px Verdana, sans-serif;
   background: #777;
   color: #aaa;
-  padding: 10px;
+  padding: 0 10px 10px 10px;
   white-space: nowrap;
-}
-
-.top {
   border-bottom-left-radius: 5px;
   -moz-border-radius-bottomleft: 5px;
   -webkit-border-bottom-left-radius: 5px;
@@ -125,19 +108,25 @@ td {
   margin: 0 0 20px 0;
 }
 
-.bottom {
-  border-top-left-radius: 5px;
-  -moz-border-radius-topleft: 5px;
-  -webkit-border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
-  -moz-border-radius-topright: 5px;
-  -webkit-border-top-right-radius: 5px;
-  margin: 20px 0 0 0;
+.left {
+  text-align: left;
+}
+
+.right {
+  text-align: right;
+  font-size: 11px;
+  width: 120px;
+}
+
+.header td {
+  padding-top: 10px;
+  vertical-align: baseline;
 }
 
 .nav a {
   color: #ccc;
   text-decoration: none;
+  outline: none;
 }
 
 .nav a:hover {
@@ -170,10 +159,37 @@ td {
   content: "\0203a\00a0";
 }
 
+#directory {
+  display: none;
+  overflow: hidden;
+  -margin-bottom: 10px;
+}
+
+#directory table {
+  border-bottom: solid 1px #888;
+}
+
+#directory td {
+  padding: 10px 0;
+}
+
 .content {
   max-width: 700px;
   margin: 0 auto;
   padding: 0 20px;
+}
+
+.footer {
+  font: normal 11px Verdana, sans-serif;
+  background: #777;
+  color: #aaa;
+  padding: 10px;
+  white-space: nowrap;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  margin: 20px 0;
+  text-align: center;
 }
 
 p.future {

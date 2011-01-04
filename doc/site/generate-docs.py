@@ -62,7 +62,6 @@ def format_file(path):
     root = os.path.relpath('html/', dir) + '/'
     if root == './':
         root = ''
-    stylerel = os.path.relpath('html/style.css', dir)
 
     html = markdown.markdown(contents, ['def_list', 'codehilite'])
 
@@ -79,7 +78,6 @@ def format_file(path):
 
     # insert the content
     template = template.replace('$(title)', title)
-    template = template.replace('$(style url)', stylerel)
     template = template.replace('$(prev)', prev)
     template = template.replace('$(next)', next)
     template = template.replace('$(breadcrumb)', breadcrumb(basename))
