@@ -19,25 +19,46 @@ class Interface
     end
 
     def assignsFrom?(other Type -> Bool)
-        // An interface can always assign from itself. This is critical to
-        // allow an interface that references itself in a member from causing a
-        // stack overflow during checking.
+        // An interface can always assign from itself.
+        // TODO(bob): Since all types should do this check, would be good to
+        // move this to a higher level of evaluation. Either in the interpreter
+        // itself or in a standard "assignsFrom?" function that type-checking
+        // goes through.
         if other == this then return true
+        
+        // Make sure we aren't currently type-checking this type against this
+        // interface. If we are, just return true. This handles interfaces that
+        // refer to themselves, like:
+        // interface Foo
+        //     get bar Foo
+        // end
+        // class SomeClass
+        //     get bar SomeClass
+        // end
+        for checkingType = checking do
+            if Reflect same?(other, checkingType) then return true
+        end
 
+        // See if the type implements all of the interface's members.
+        checking add(other)
+        
+        var implements = true
         for member = members do
-            var type = member memberType()
+            var thisType = member memberType()
             var otherType = other getMemberType(member name)
+
             // Must be assignable.
-            if type assignsFrom?(otherType) not then
-                print(other string ~ " does not implement " ~ name ~
-                    " because " ~ member name ~ " is the wrong type")
-                print("expected " ~ type ~ " but got " ~ otherType)
-                return false
+            if thisType assignsFrom?(otherType) not then
+                print(other ~ " does not implement " ~ name ~ " because " ~
+                    member name ~ " is the wrong type")
+                implements = false
+                break
             end
         end
     
-        // If we got here, every method was found and matched.
-        true
+        // We aren't checking this type anymore.
+        checking removeAt(-1)
+        implements
     end
 
     def getMemberType(name String -> Type)
@@ -50,8 +71,9 @@ class Interface
         end
     end
 
-    var name    String
-    var members List(Member) = Array new()
+    var name     String
+    var members  List(Member) = Array new()
+    var checking List(Type) = Array new()
 end
 
 class Member

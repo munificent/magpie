@@ -2,11 +2,10 @@
 // it only uses core syntax.
 
 class FunctionTypeExpression
-    shared def new(names      List(String),
-                   paramType  Expression,
+    shared def new(pattern    Pattern,
                    returnType Expression,
                    static?    Bool -> FunctionTypeExpression)
-        construct(names: names, paramType: paramType, returnType: returnType,
+        construct(pattern: pattern, returnType: returnType,
                   static?: static?)
     end
     
@@ -36,7 +35,6 @@ class FunctionTypeExpression
     end
 end
 
-FunctionTypeExpression declareField("names", false, %fn%(List(String)))
-FunctionTypeExpression declareField("paramType", false, %fn%(Expression))
-FunctionTypeExpression declareField("returnType", false, %fn%(Expression))
-FunctionTypeExpression declareField("static?", false, %fn%(Bool))
+FunctionTypeExpression declareField("pattern", false, fn Pattern)
+FunctionTypeExpression declareField("returnType", false, fn Expression)
+FunctionTypeExpression declareField("static?", false, fn Bool)

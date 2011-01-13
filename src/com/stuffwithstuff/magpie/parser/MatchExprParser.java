@@ -46,8 +46,14 @@ public class MatchExprParser implements ExprParser {
       Expr body = thisCase.getBody();
       
       // Bind the names.
+      List<Pair<String, Expr>> bindings = new ArrayList<Pair<String, Expr>>();
+      thisCase.getPattern().createBindings(bindings, valueExpr);
+
       List<Expr> bodyExprs = new ArrayList<Expr>();
-      thisCase.getPattern().createBindings(bodyExprs, valueExpr);
+      for (Pair<String, Expr> binding : bindings) {
+        bodyExprs.add(Expr.var(binding.getKey(), binding.getValue()));
+      }
+      
       bodyExprs.add(body);
       body = Expr.block(bodyExprs);
       
@@ -75,6 +81,7 @@ public class MatchExprParser implements ExprParser {
     return new MatchCase(pattern, bodyParse.getKey());
   }
   
+  // TODO(bob): Move into MagpieParser or into its own class.
   public static Pattern parsePattern(MagpieParser parser) {
     return parseTuplePattern(parser);
   }
@@ -133,6 +140,12 @@ public class MatchExprParser implements ExprParser {
     } else if (parser.match(TokenType.STRING)) {
       pattern = new ValuePattern(Expr.string(parser.last(1).getString()));
     } else if (parser.match(TokenType.LEFT_PAREN)) {
+      // TODO(bob): This may not be ideal. This means that:
+      // foo (A => B)
+      // will be parsed as VarPattern("foo", ValuePattern(A => B))
+      // but this:
+      // foo A => B
+      // will be parsed as VarPattern("foo", TypePattern(A => B))
       pattern = parsePattern(parser);
       parser.consume(TokenType.RIGHT_PAREN);
     } else if (parser.lookAhead(TokenType.NAME)) {
@@ -149,8 +162,9 @@ public class MatchExprParser implements ExprParser {
     }
     
     if (name == null) {
-      if (pattern == null) throw new ParseException(
-      "Could not parse pattern.");
+      if (pattern == null) {
+        throw new ParseException("Could not parse pattern.");
+      }
       
       return pattern;
     }

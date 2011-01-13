@@ -1,0 +1,47 @@
+// Note: This file is parsed before any of the parsewords have been defined, so
+// it only uses core syntax.
+
+class TuplePattern
+    shared def new(fields List(Pattern) -> TuplePattern)
+        construct(fields: fields)
+    end
+    
+    get string String = String join(fields)
+end
+
+TuplePattern declareField("fields", false, fn List(Pattern))
+
+class TypePattern
+    shared def new(typeExpr Expression -> TypePattern)
+        construct(typeExpr: typeExpr)
+    end
+    
+    get string String = typeExpr string
+end
+
+TypePattern declareField("typeExpr", false, fn Expression)
+
+class ValuePattern
+    shared def new(value Expression -> ValuePattern)
+        construct(value: value)
+    end
+    
+    get string String = value string
+end
+
+ValuePattern declareField("value", false, fn Expression)
+
+class VariablePattern
+    shared def new(name String, pattern Pattern | Nothing -> VariablePattern)
+        construct(name: name, pattern: pattern)
+    end
+    
+    get string String = name ~~ pattern
+end
+
+VariablePattern declareField("name", false, fn String)
+VariablePattern declareField("pattern", false, fn Pattern | Nothing)
+
+class WildcardPattern
+    get string String = "_"
+end

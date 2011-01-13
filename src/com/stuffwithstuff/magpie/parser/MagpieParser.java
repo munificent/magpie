@@ -5,6 +5,8 @@ import java.util.*;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
+import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
+import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.util.Pair;
 
@@ -173,8 +175,7 @@ public class MagpieParser extends Parser {
           (staticType.getReturnType() instanceof MessageExpr) &&
           (((MessageExpr)staticType.getReturnType()).getReceiver() == null) &&
           (((MessageExpr)staticType.getReturnType()).getName().equals("Dynamic"))) {
-        staticType = new FunctionType(staticType.getParamNames(),
-            staticType.getParamType(),
+        staticType = new FunctionType(staticType.getPattern(),
             Expr.message(null, Name.FAT_ARROW,
                 Expr.tuple(type.getParamType(), type.getReturnType())),
                 true);
@@ -212,29 +213,15 @@ public class MagpieParser extends Parser {
     // Parse the prototype: (foo Foo, bar Bar -> Bang)
     consume(left);
     
-    // Parse the parameters, if any.
-    List<String> paramNames = new ArrayList<String>();
-    List<Expr> paramTypes = new ArrayList<Expr>();
-    while (!lookAheadAny(TokenType.ARROW, right)){
-      paramNames.add(consume(TokenType.NAME).getString());
-      
-      if (!lookAheadAny(TokenType.ARROW, TokenType.COMMA, right)) {
-        paramTypes.add(parseTypeExpression());
-      } else {
-        paramTypes.add(Expr.name("Dynamic"));
-      }
-      
-      if (!match(TokenType.COMMA)) break;
+    // Parse the parameter pattern, if any.
+    Pattern pattern = null;
+    if (!lookAheadAny(TokenType.ARROW, right)) {
+      pattern = MatchExprParser.parsePattern(this);
+    } else {
+      // No pattern, so expect nothing.
+      pattern = new ValuePattern(Expr.nothing());
     }
-    
-    // Aggregate the parameter types into a single type.
-    Expr paramType = null;
-    switch (paramTypes.size()) {
-    case 0:  paramType = Expr.name("Nothing"); break;
-    case 1:  paramType = paramTypes.get(0); break;
-    default: paramType = Expr.tuple(paramTypes);
-    }
-    
+
     // Parse the return type, if any.
     Expr returnType = null;
     if (match(right)) {
@@ -252,7 +239,7 @@ public class MagpieParser extends Parser {
       consume(right);
     }
     
-    return new FunctionType(paramNames, paramType, returnType, isStatic);
+    return new FunctionType(pattern, returnType, isStatic);
   }
   
   public String parseFunctionName() {
@@ -401,8 +388,8 @@ public class MagpieParser extends Parser {
           blockType = parseFunctionType();
         } else {
           // Else just assume a single "it" parameter.
-          blockType = new FunctionType(Collections.singletonList(Name.IT),
-              Expr.name("Dynamic"), Expr.name("Dynamic"), false);
+          blockType = (new FunctionType(new VariablePattern(Name.IT, null),
+              Expr.name("Dynamic"), false));
         }
 
         // Parse the block and wrap it in a function.
@@ -438,16 +425,26 @@ public class MagpieParser extends Parser {
    */
   private Expr primary() {
     if (match(TokenType.BOOL)){
-    return Expr.bool(last(1).getPosition(), last(1).getBool());
-    } else if (match(TokenType.INT)) {
+      return Expr.bool(last(1).getPosition(), last(1).getBool());
+    }
+
+    if (match(TokenType.INT)) {
       return Expr.int_(last(1).getPosition(), last(1).getInt());
-    } else if (match(TokenType.STRING)) {
+    }
+
+    if (match(TokenType.STRING)) {
       return Expr.string(last(1).getPosition(), last(1).getString());
-    } else if (match(TokenType.THIS)) {
+    }
+
+    if (match(TokenType.THIS)) {
       return Expr.this_(last(1).getPosition());
-    } else if (match(TokenType.NOTHING)) {
+    }
+
+    if (match(TokenType.NOTHING)) {
       return Expr.nothing(last(1).getPosition());
-    } else if ((mQuoteDepth > 0) && match(TokenType.BACKTICK)) {
+    }
+
+    if ((mQuoteDepth > 0) && match(TokenType.BACKTICK)) {
       Position position = last(1).getPosition();
       Expr body;
       if (match(TokenType.NAME)) {
@@ -456,15 +453,24 @@ public class MagpieParser extends Parser {
         body = parenthesizedExpression(BraceType.PAREN);
       }
       return new UnquoteExpr(position, body);
-    } else if (lookAhead(TokenType.LEFT_PAREN)) {
+    }
+
+    if (lookAhead(TokenType.LEFT_PAREN)) {
       return parenthesizedExpression(BraceType.PAREN);
-    } else if (lookAhead(TokenType.LEFT_BRACE)) {
+    }
+
+    if (lookAhead(TokenType.LEFT_BRACE)) {
       mQuoteDepth++;
       Position position = current().getPosition();
       Expr expr = parenthesizedExpression(BraceType.CURLY);
       position = position.union(last(1).getPosition());
       mQuoteDepth--;
       return Expr.quote(position, expr);
+    }
+    
+    // TODO(bob): "fn" should become a real TokenType again.
+    if (match("fn")) {
+      return parsePatternFunction();
     }
     
     // See if we're at a keyword we know how to parse.
@@ -481,6 +487,54 @@ public class MagpieParser extends Parser {
     
     // Otherwise fail.
     return null;
+  }
+
+  private Expr parsePatternFunction() {
+    FunctionType type;
+    
+    // TODO(bob): Fallback to old stuff for static functions. Once patterns are
+    // working, I can implement 'T-style generics, and static functions can go
+    // away completely.
+    if (lookAhead(TokenType.LEFT_BRACKET)) {
+      return parseFunction();
+    }
+    
+    // Parse the type signature.
+    if (match(TokenType.LEFT_PAREN)) {
+      Pattern pattern = null;
+      if (!lookAheadAny(TokenType.ARROW, TokenType.RIGHT_PAREN)) {
+        pattern = MatchExprParser.parsePattern(this);
+      } else {
+        // No pattern, so expect nothing.
+        pattern = new ValuePattern(Expr.nothing());
+      }
+      
+      // Parse the return type, if any.
+      Expr returnType = null;
+      if (match(TokenType.RIGHT_PAREN)) {
+        // No return type, so infer dynamic.
+        returnType = Expr.name("Dynamic");
+      } else {
+        consume(TokenType.ARROW);
+        
+        if (lookAhead(TokenType.RIGHT_PAREN)) {
+          // An arrow, but no return type, so infer nothing.
+          returnType = Expr.name("Nothing");
+        } else {
+          returnType = parseTypeExpression();
+        }
+        consume(TokenType.RIGHT_PAREN);
+      }
+      
+      type = new FunctionType(pattern, returnType, false);
+    } else {
+      // No type signature provided, so infer (_ -> Dynamic)
+      type = FunctionType.nothingToDynamic();
+    }
+    
+    Expr body = parseEndBlock();
+    
+    return Expr.fn(body.getPosition(), type, body);
   }
 
   // TODO(bob): Having two ways to create blocks (this, or using a "do"

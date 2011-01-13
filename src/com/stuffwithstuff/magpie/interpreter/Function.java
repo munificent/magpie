@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter;
 
 import com.stuffwithstuff.magpie.ast.FnExpr;
+import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 
 /**
  * Wraps a raw FnExpr in the data and logic needed to execute a user-defined
@@ -24,8 +25,9 @@ public class Function implements Callable {
       EvalContext context = new EvalContext(mClosure, thisObj).pushScope();
       
       // Bind arguments to their parameter names.
-      context.bind(interpreter, mFunction.getType().getParamNames(), arg);
-      
+      Pattern pattern = mFunction.getType().getPattern();
+      interpreter.bindPattern(pattern, arg, context);
+
       try {
         return interpreter.evaluate(mFunction.getBody(), context);
       } catch (ReturnException ex) {

@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
+import com.stuffwithstuff.magpie.util.Pair;
 
 public class VariablePattern implements Pattern {
   /**
@@ -18,6 +19,9 @@ public class VariablePattern implements Pattern {
     mPattern = pattern;
   }
   
+  public String getName() { return mName; }
+  public Pattern getPattern() { return mPattern; }
+  
   public Expr createPredicate(Expr value) {
     if (mPattern != null) {
       return mPattern.createPredicate(value);
@@ -26,8 +30,19 @@ public class VariablePattern implements Pattern {
     }
   }
   
-  public void createBindings(List<Expr> bindings, Expr root) {
-    bindings.add(Expr.var(mName, root));
+  public void createBindings(List<Pair<String, Expr>> bindings, Expr root) {
+    bindings.add(new Pair<String, Expr>(mName, root));
+  }
+
+  @Override
+  public <R, C> R accept(PatternVisitor<R, C> visitor, C context) {
+    return visitor.visit(this, context);
+  }
+
+  @Override
+  public String toString() {
+    if (mPattern == null) return mName;
+    return mName + " " + mPattern.toString();
   }
 
   private final String mName;

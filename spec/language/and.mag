@@ -1,5 +1,4 @@
 // Note: implicitly depends on non-zero ints being truthy.
-
 specify("An 'and' expression") with
     it should("return the first non-true argument") with
         (0 and false) shouldBe(0)

@@ -22,12 +22,40 @@ class FunctionType
         // Both must be functions.
         let otherFn = other as[FunctionType] then
             // Parameter must be contravariant and return must be covariant.
-            if static? != otherFn static? then return false
-            if otherFn paramType assignsFrom?(paramType) not then return false
-            if returnType assignsFrom?(otherFn returnType) not then return false
+            if static? != otherFn static? then
+                if static? then
+                    print("Cannot assign " ~ other ~ " to " ~ this ~
+                        " because it is not static.")
+                else
+                    print("Cannot assign " ~ other ~ " to " ~ this ~
+                        " because it is static.")
+                end
+                return false
+            end                           // v
+            if otherFn paramType assignsFrom?(paramType) not then
+                print("Cannot assign " ~ other ~ " to " ~ this ~
+                    " the parameter type is not assignable.")
+                return false
+            end
+            if returnType assignsFrom?(otherFn returnType) not then
+                print("Cannot assign " ~ other ~ " to " ~ this ~
+                    " the return type is not assignable.")
+                return false
+            end
             
             true
-        else false
+        else
+            print("Cannot assign " ~ other ~ " to " ~ this ~
+                " because it is a " ~ Reflect getClass(other) ~
+                ", not a function.")
+            if (type == FunctionType) not then
+                print(type ~ " is not equal to " ~ FunctionType)
+            end
+            if FunctionType assignsFrom?(type) not then
+                print(type ~ " is not assignable to " ~ FunctionType)
+            end
+            false
+        end
     end
 
     def getMemberType(name String -> Type)

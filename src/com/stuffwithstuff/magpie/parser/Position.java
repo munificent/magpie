@@ -3,6 +3,7 @@ package com.stuffwithstuff.magpie.parser;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.Expr;
+import com.stuffwithstuff.magpie.util.Expect;
 
 /**
  * Describes the location of a piece of text in a source file.
@@ -21,6 +22,8 @@ public class Position {
   }
   
   public static Position surrounding(List<Expr> expressions) {
+    Expect.notNull(expressions.get(0));
+    
     return expressions.get(0).getPosition().union(
         expressions.get(expressions.size() - 1).getPosition());
   }

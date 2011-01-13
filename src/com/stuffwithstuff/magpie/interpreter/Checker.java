@@ -5,6 +5,8 @@ import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
+import com.stuffwithstuff.magpie.ast.pattern.Pattern;
+import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.util.Expect;
 
@@ -72,7 +74,10 @@ public class Checker {
         
         if (member.getType() == MemberType.GETTER) {
           // Getter functions should not take any arguments.
-          if (function.getFunction().getType().getParamNames().size() > 0) {
+          // TODO(bob): Hack way to do this. :(
+          String pattern = function.getFunction().getType().getPattern().toString();
+          boolean takesArgs = !pattern.equals("nothing") && !pattern.equals("Nothing");
+          if (takesArgs) {
             addError(function.getFunction().getPosition(),
                 "The getter \"%s\" is declared to take one or more arguments, " +
                 "but arguments are not allowed for a getter.",
@@ -135,21 +140,41 @@ public class Checker {
     // Evaluate the function's type annotations in the static value scope.
     Obj paramType = mInterpreter.evaluate(function.getType().getParamType(),
         staticContext);
-
-    // Bind the parameter names to their evaluated types.
-    List<String> params = function.getType().getParamNames();
-    functionContext.bind(mInterpreter, params, paramType);
     
+    if (paramType == mInterpreter.nothing()) {
+      throw new InterpreterException(String.format(
+          "Could not evaluate parameter type %s.",
+          function.getType().getParamType()));
+    }
+    
+    // Bind the parameter names to their evaluated types.
+    mInterpreter.bindPattern(function.getType().getPattern(), paramType,
+        functionContext);
+
     // If it's a static function, bind them in the static context too.
     if (function.getType().isStatic()) {
       staticContext = staticContext.pushScope();
-      staticContext.bind(mInterpreter, params, paramType);
+      
+      // TODO(bob): TERRIBLE HACK. This is temporary until we get rid of static
+      // functions and use inferred type parameters instead. This is awful. I
+      // am a bad bad person.
+      Pattern pattern = function.getType().getPattern();
+      if ((pattern instanceof VariablePattern) &&
+          ((VariablePattern)pattern).getName().equals("t_")) {
+        staticContext.define("t_", paramType);
+      }
     }
-
+    
     // Evaluate the return type after binding the static parameters so that they
-    // can in turn be used in the return type's signature, like foo[T -> T].
+    // can in turn be used in the return type's signature, like foo[t -> t].
     Obj returnType = mInterpreter.evaluate(
         function.getType().getReturnType(), staticContext);
+    
+    if (returnType == mInterpreter.nothing()) {
+      throw new InterpreterException(String.format(
+          "Could not evaluate return type %s.",
+          function.getType().getReturnType()));
+    }
 
     // Check the body of the function.
     ExprChecker checker = new ExprChecker(mInterpreter, this, staticContext);
@@ -166,17 +191,6 @@ public class Checker {
         "Function is declared to return %s but is returning %s.");
     
     // Create the function type for the function.
-    if (paramType == mInterpreter.nothing()) {
-      throw new InterpreterException(String.format(
-          "Could not evaluate parameter type %s.",
-          function.getType().getParamType()));
-    }
-    if (returnType == mInterpreter.nothing()) {
-      throw new InterpreterException(String.format(
-          "Could not evaluate return type %s.",
-          function.getType().getReturnType()));
-    }
-    
     return mInterpreter.invokeMethod(mInterpreter.getFunctionClass(),
         Name.NEW_TYPE, mInterpreter.createTuple(
             paramType, returnType,

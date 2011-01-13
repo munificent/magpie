@@ -1,6 +1,5 @@
 package com.stuffwithstuff.magpie.interpreter;
 
-import java.util.List;
 import java.util.Map.Entry;
 
 /**
@@ -84,37 +83,6 @@ public class EvalContext {
    */
   public void define(String name, Obj value) {
     mScope.define(name, value);
-  }
-  
-  /**
-   * Defines a list of names by decomposing the given value tuple if needed.
-   * @param names  The names of the parameters to bind.
-   * @param value  The value to bind the names to.
-   */
-  public void bind(Interpreter interpreter, List<String> names, Obj value) {
-    if (names.size() == 1) {
-      define(names.get(0), value);
-    } else if (names.size() > 1) {
-      // Make sure the argument's structure matches our expected parameter list.
-      // If it doesn't, ignore extra tuple fields and pad missing ones with
-      // nothing.
-      if (value.getClassObj() != interpreter.getTupleClass()) {
-        // Not a tuple and we're expecting it to be, so just bind it to the
-        // first parameter and define the others as nothing.
-        define(names.get(0), value);
-        
-        for (int i = 1; i < names.size(); i++) {
-          define(names.get(i), interpreter.nothing());
-        }
-      } else {
-        // Destructure the tuple.
-        for (int i = 0; i < names.size(); i++) {
-          Obj field = value.getTupleField(i);
-          if (field == null) field = interpreter.nothing();
-          define(names.get(i), field);
-        }
-      }
-    }
   }
   
   /**

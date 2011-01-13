@@ -5,6 +5,11 @@ import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FunctionType;
+import com.stuffwithstuff.magpie.ast.pattern.Pattern;
+import com.stuffwithstuff.magpie.ast.pattern.TuplePattern;
+import com.stuffwithstuff.magpie.ast.pattern.TypePattern;
+import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
+import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.interpreter.Name;
 
 public class InterfaceExprParser implements ExprParser {
@@ -93,6 +98,7 @@ public class InterfaceExprParser implements ExprParser {
       
       if (memberType.equals("def")) {
         FunctionType function = parser.parseFunctionType();
+        
         Expr methodType = Expr.message(Expr.name("Function"),
             Name.NEW_TYPE, Expr.tuple(function.getParamType(),
                 function.getReturnType(), Expr.bool(false)));
@@ -124,20 +130,24 @@ public class InterfaceExprParser implements ExprParser {
   }
   
   private static Expr makeTypeFunction(List<String> typeParams, Expr type) {
-    Expr paramType;
-    
+    Pattern pattern;
     if (typeParams.size() == 0) {
-      paramType = Expr.nothing();
+      pattern = new ValuePattern(Expr.nothing());
+    } else if (typeParams.size() == 1) {
+      pattern = new VariablePattern(typeParams.get(0),
+          new TypePattern(Expr.name("Type")));
     } else {
-      Expr[] paramExprs = new Expr[typeParams.size()];
+      List<Pattern> fields = new ArrayList<Pattern>();
       for (int i = 0; i < typeParams.size(); i++) {
-        paramExprs[i] = Expr.name("Type");
+        fields.add(new VariablePattern(typeParams.get(i),
+            new TypePattern(Expr.name("Type"))));
       }
-      paramType = Expr.tuple(paramExprs);
+      pattern = new TuplePattern(fields);
     }
     
-    FunctionType functionType = new FunctionType(typeParams, paramType,
-        Expr.name("Type"), false);
+    FunctionType functionType = new FunctionType(pattern, Expr.name("Type"),
+        false);
+
     return Expr.fn(Position.none(), functionType, type);
   }
 }

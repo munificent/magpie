@@ -1,7 +1,9 @@
 package com.stuffwithstuff.magpie.ast;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.stuffwithstuff.magpie.ast.pattern.Pattern;
+import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
+import com.stuffwithstuff.magpie.interpreter.PatternTyper;
+import com.stuffwithstuff.magpie.util.Expect;
 
 /**
  * Describes a function's type declaration, including its parameter and return
@@ -13,54 +15,39 @@ public class FunctionType {
   }
   
   public static FunctionType returningType(Expr type) {
-    return new FunctionType(new ArrayList<String>(),
-        Expr.name("Nothing"), type, false);
+    return new FunctionType(new ValuePattern(Expr.nothing()), type, false);
   }
   
-  public FunctionType(List<String> paramNames, Expr paramType, Expr returnType,
-      boolean isStatic) {
-    mParamNames = paramNames;
-    mParamType = paramType;
+  public FunctionType(Pattern pattern, Expr returnType, boolean isStatic) {
+    Expect.notNull(pattern);
+    Expect.notNull(returnType);
+    
     mReturnType = returnType;
+    mPattern = pattern;
     mIsStatic = isStatic;
   }
   
-  public List<String> getParamNames()   { return mParamNames; }
-  public Expr         getParamType()    { return mParamType; }
+  public Pattern      getPattern()      { return mPattern; }
   public Expr         getReturnType()   { return mReturnType; }
   public boolean      isStatic()        { return mIsStatic; }
 
+  public Expr getParamType() {
+    // Evaluate the static type of the pattern.
+    return PatternTyper.evaluate(mPattern);
+  }
+  
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
     
-    TupleExpr params = null;
-    if (mParamNames.size() > 1) {
-      params = (TupleExpr)mParamType;
-    }
-    
-    builder.append("(");
-    for (int i = 0; i < mParamNames.size(); i++) {
-      builder.append(mParamNames.get(i)).append(" ");
-      if (params != null) {
-        builder.append(params.getFields().get(i));
-      } else {
-        builder.append(mParamType);
-      }
-      
-      if (i < mParamNames.size() - 1) {
-        builder.append(", ");
-      }
-    }
-    
+    builder.append("(").append(mPattern);
     builder.append(" -> ").append(mReturnType).append(")");
     
     return builder.toString();
   }
   
-  private final List<String> mParamNames;
-  private final Expr         mParamType;
-  private final Expr         mReturnType;
-  private final boolean      mIsStatic;
+  private final Pattern mPattern;
+  private final Expr    mReturnType;
+  private final boolean mIsStatic;
   
 }

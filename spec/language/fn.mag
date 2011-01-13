@@ -35,7 +35,7 @@ end
 specify("A static 'fn' expression") with
     it should("bind the argument to the parameter at runtime") with
         var result = nothing
-        var f = fn[A] result = A
+        var f = fn[a] result = a
         f[Int]
         result shouldBe(Int)
         
@@ -50,7 +50,7 @@ specify("A static 'fn' expression") with
     end
 
     it should("bind a tuple argument to the parameter at runtime") with
-        var f = fn[A] A _0 ~ A _1
+        var f = fn[a] a _0 ~ a _1
         f["one", "two"] shouldBe("onetwo")
     end
 end

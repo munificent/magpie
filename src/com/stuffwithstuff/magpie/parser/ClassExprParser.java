@@ -6,6 +6,7 @@ import java.util.List;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.interpreter.Name;
+import com.stuffwithstuff.magpie.util.NotImplementedException;
 
 public class ClassExprParser implements ExprParser {
   public static Expr parseClass(MagpieParser parser, boolean isExtend) {
@@ -174,7 +175,6 @@ public class ClassExprParser implements ExprParser {
   }
   
   private static Expr parseSetter(MagpieParser parser, Expr theClass) {
-    // TODO(bob): Implement me!
-    return Expr.nothing();
+    throw new NotImplementedException();
   }
 }

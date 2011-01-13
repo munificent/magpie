@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.parser.Position;
+import com.stuffwithstuff.magpie.util.NotImplementedException;
 import com.stuffwithstuff.magpie.util.Pair;
 
 /**
@@ -101,7 +102,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       // correctly determine the return type by accessing T.
       EvalContext staticContext = mStaticContext.pushScope();
       
-      staticContext.bind(mInterpreter, staticFn.getType().getParamNames(), arg);
+      mInterpreter.bindPattern(staticFn.getType().getPattern(), arg,
+          staticContext);
       
       Obj returnType = mInterpreter.evaluate(staticFn.getType().getReturnType(),
           staticContext);
@@ -357,7 +359,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(UnquoteExpr expr, EvalContext context) {
     // TODO(bob): Check that it evaluates to an expression?
-    throw new RuntimeException("Not implemented yet!");
+    throw new NotImplementedException();
   }
 
   @Override

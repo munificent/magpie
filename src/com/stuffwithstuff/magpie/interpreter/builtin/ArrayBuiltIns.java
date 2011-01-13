@@ -103,7 +103,15 @@ public class ArrayBuiltIns {
   public static class RemoveAt implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       List<Obj> elements = thisObj.asArray();
-      return elements.remove(arg.asInt());
+      
+      int index = arg.asInt();
+      
+      // Negative indices count backwards from the end.
+      if (index < 0) {
+        index = elements.size() + index;
+      }
+      
+      return elements.remove(index);
     }
   }
   

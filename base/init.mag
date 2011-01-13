@@ -8,6 +8,7 @@ import("true.mag")
 // Import the base classes used to implement the keyword parsers.
 import("syntax/Token.mag")
 import("syntax/expressions.mag")
+import("syntax/patterns.mag")
 import("syntax/FunctionTypeExpression.mag")
 
 // Register the keyword parsers. Do this here so that the full Magpie syntax is
@@ -52,4 +53,5 @@ import("List.mag")
 import("Stringable.mag")
 import("Trueable.mag")
 import("syntax/Expression.mag")
+import("syntax/Pattern.mag")
 import("syntax/KeywordParser.mag")

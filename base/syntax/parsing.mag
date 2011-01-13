@@ -1,7 +1,7 @@
 // Utility functions used by the parsers.
 
 %var%("parseReceiver",
-    %fn%("parser", MagpieParser, Expression,
+    fn(parser MagpieParser -> Expression)
         %if%(parser lookAhead(TokenType identifier),
             (
                 // Getter on a class.
@@ -15,5 +15,5 @@
                 receiver
             )
         )
-    )
+    end
 )

@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.*;
+import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.util.Expect;
+import com.stuffwithstuff.magpie.util.NotImplementedException;
 import com.stuffwithstuff.magpie.util.Pair;
 
 /**
@@ -24,6 +26,8 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
    */
   public static Expr convert(Interpreter interpreter, Obj expr) {
     Expect.notNull(expr);
+    
+    if (expr == interpreter.nothing()) return null;
     
     ClassObj exprClass = expr.getClassObj();
     // TODO(bob): Fill in other expression types.
@@ -77,7 +81,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     }
     
     // TODO(bob): Add better error-handling.
-    throw new UnsupportedOperationException(
+    throw new NotImplementedException(
         "Other expression types not implemented yet!");
   }
 
@@ -135,16 +139,14 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
 
   private static Expr convertFunctionExpr(Interpreter interpreter, Obj expr) {
     Obj typeObj = expr.getField("functionType");
-    List<Obj> nameObjs = typeObj.getField("names").asArray();
-    List<String> names = new ArrayList<String>();
-    for (Obj name : nameObjs) {
-      names.add(name.asString());
-    }
-    Expr paramType = convert(interpreter, typeObj.getField("paramType"));
     Expr returnType = convert(interpreter, typeObj.getField("returnType"));
+
+    Obj patternObj = typeObj.getField("pattern");
+    Pattern pattern = PatternConverter.convert(interpreter, patternObj);
+    
     boolean isStatic = typeObj.getField("static?").asBool();
     
-    FunctionType type = new FunctionType(names, paramType, returnType, isStatic);
+    FunctionType type = new FunctionType(pattern, returnType, isStatic);
     
     Expr body = convert(interpreter, expr.getField("body"));
     return Expr.fn(Position.none(), type, body);
@@ -304,15 +306,12 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
 
   @Override
   public Obj visit(FnExpr expr, Void dummy) {
-    Obj paramType = convert(expr.getType().getParamType());
+    Obj pattern = PatternConverter.convert(expr.getType().getPattern(),
+        mInterpreter, mContext);
     Obj returnType = convert(expr.getType().getReturnType());
-    List<Obj> paramNames = new ArrayList<Obj>();
-    for (String name : expr.getType().getParamNames()) {
-      paramNames.add(mInterpreter.createString(name));
-    }
     Obj type = construct("FunctionType",
-        mInterpreter.createArray(paramNames),
-        paramType, returnType,
+        pattern,
+        returnType, 
         mInterpreter.createBool(expr.getType().isStatic()));
     Obj body = convert(expr.getBody());
     return construct("Function", type, body);
@@ -446,6 +445,10 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
         convert(expr.getValue()));
   }
   
+  private Obj construct(String className, Obj... args) {
+    return mInterpreter.construct(className + "Expression", args);
+  }
+  
   private ExprConverter(Interpreter interpreter, EvalContext context) {
     mInterpreter = interpreter;
     mContext = context;
@@ -454,21 +457,6 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   private Obj convert(Expr expr) {
     if (expr == null) return mInterpreter.nothing();
     return expr.accept(this, null);
-  }
-  
-  private Obj construct(String className, Obj... args) {
-    Obj classObj = mInterpreter.getGlobal(className + "Expression");
-    
-    Obj arg;
-    if (args.length == 0) {
-      arg = mInterpreter.nothing();
-    } else if (args.length == 1) {
-      arg = args[0];
-    } else {
-      arg = mInterpreter.createTuple(args);
-    }
-    
-    return mInterpreter.invokeMethod(classObj, "new", arg);
   }
 
   private final Interpreter mInterpreter;

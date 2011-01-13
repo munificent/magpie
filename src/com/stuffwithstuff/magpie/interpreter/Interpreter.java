@@ -4,10 +4,12 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.*;
+import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.builtin.*;
 import com.stuffwithstuff.magpie.parser.ExprParser;
 import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.util.Expect;
+import com.stuffwithstuff.magpie.util.Pair;
 
 public class Interpreter {
   public Interpreter(InterpreterHost host) {
@@ -162,7 +164,7 @@ public class Interpreter {
     // return type.
     if (type.isStatic()) {
       context = context.pushScope();
-      context.bind(this, type.getParamNames(), paramType);
+      bindPattern(type.getPattern(), paramType, context);
     }
     
     Obj returnType = evaluate(type.getReturnType(), context);
@@ -172,6 +174,40 @@ public class Interpreter {
         createTuple(paramType, returnType, createBool(type.isStatic())));
     
     return result;
+  }
+  
+  public void bindPattern(Pattern pattern, Obj value, EvalContext context) {
+    // TODO(bob): Also hacked in that this doesn't distinguish between types
+    // and values. This works for tuple and value patterns, but won't work
+    // when field patterns are in. (Those will need to do "getMemberType()"
+    // for types and just look up the field for values.)
+    List<Pair<String, Expr>> bindings = new ArrayList<Pair<String, Expr>>();
+    pattern.createBindings(bindings, Expr.name("__arg__"));
+
+    context.define("__arg__", value);
+    for (Pair<String, Expr> binding : bindings) {
+      Obj variable = evaluate(binding.getValue(), context);
+      context.define(binding.getKey(), variable);
+    }
+    // TODO(bob): Get rid of __arg__. Instead of generating a bind expr and
+    // evaluating it, could just add a pattern visitor that does the
+    // destructuring directly. Then this and AssignExpr could use that for all
+    // variable binding.
+  }
+
+  public Obj construct(String className, Obj... args) {
+    Obj classObj = getGlobal(className);
+    
+    Obj arg;
+    if (args.length == 0) {
+      arg = mNothing;
+    } else if (args.length == 1) {
+      arg = args[0];
+    } else {
+      arg = createTuple(args);
+    }
+    
+    return invokeMethod(classObj, "new", arg);
   }
   
   public Obj getGlobal(String name) {
@@ -216,6 +252,14 @@ public class Interpreter {
     // Look for a field.
     Obj value = receiver.getField(name);
     if (value != null) return value;
+    
+    // Hackish. If we're looking for _0 and we haven't found it yet, just
+    // return the object. That lets objects act like tuples of arity 1 and
+    // allows them where a tuple is expected.
+    // TODO(bob): Cleaner solution.
+    if (name.equals("_0")) {
+      return receiver;
+    }
     
     // If all else fails, try finding a matching native Java method on the
     // primitive value.

@@ -17,6 +17,8 @@ specify("A function") with
     end
 end
 
+// TODO(bob): Commented out because static functions are going away.
+/*
 specify("A static function") with
     it should("ensure the argument matches the constraint") with
         envExpectCheckOK with
@@ -65,3 +67,4 @@ specify("A static function") with
         end
     end
 end
+*/
