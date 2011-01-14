@@ -1,0 +1,79 @@
+specify("A tuple pattern") with
+    it should("match subpatterns against fields") with
+        match 1, 2
+            case 1, 3 then "no"
+            case 3, 2 then "no"
+            case 1, 2 then "yes"
+        end shouldBe("yes")
+    end
+    
+    it should("bind a variable to a field") with
+        match "one", ("two", "three")
+            case a, (b, c) then a ~ b ~ c
+        end shouldBe("onetwothree")
+    end
+end
+
+specify("A type pattern") with
+    it should("be created if there is a leading variable") with
+        match 123
+            case a Bool then "no"
+            case a Int then "yes"
+        end shouldBe("yes")
+    end
+
+    it should("be created if there is a leading wildcard") with
+        match 123
+            case _ Bool then "no"
+            case _ Int then "yes"
+        end shouldBe("yes")
+    end
+end
+
+specify("A value pattern") with
+    it should("match a literal bool value") with
+        match true
+            case true then "yes"
+            case false then "no"
+        end shouldBe("yes")
+    end
+
+    it should("match a literal int value") with
+        match 2
+            case 1 then "no"
+            case 2 then "yes"
+        end shouldBe("yes")
+    end
+
+    it should("match a literal string value") with
+        match "a"
+            case "a" then "yes"
+            case "b" then "no"
+        end shouldBe("yes")
+    end
+
+    it should("match a class object as a value") with
+        match Int
+            case Bool then "no"
+            case Int then "yes"
+        end shouldBe("yes")
+    end
+end
+
+specify("A variable pattern") with
+    it should("always match if it has no subpattern") with
+        match "whatever"
+            case a      then "yes"
+            case "else" then "no"
+        end shouldBe("yes")
+    end
+end
+
+specify("A wildcard pattern") with
+    it should("always match") with
+        match "whatever"
+            case _      then "yes"
+            case "else" then "no"
+        end shouldBe("yes")
+    end
+end

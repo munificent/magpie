@@ -1,0 +1,13 @@
+specify("A call expression") with
+    it should("ensure the argument matches the parameter type") with
+        fn
+            var f = fn(a Int, b String, (c Bool, d Int) ->) nothing
+            f(123, "b", (true, 234))
+        end shouldCheck()
+        
+        fn
+            var f = fn(a Int, b String, (c Bool, d Int) ->) nothing
+            f(123, "b", (true, "not int"))
+        end shouldNotCheck()
+    end
+end

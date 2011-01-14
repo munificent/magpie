@@ -1,4 +1,4 @@
-specify("An apply expression on a function") with
+specify("A call expression on a function") with
     it should("invoke the target") with
         var called = false
         var f = fn() called = true
@@ -44,7 +44,7 @@ specify("An apply expression on a function") with
     end
 end
 
-specify("An apply expression on a non-function") with    
+specify("A call expression on a non-function") with    
     it should("send a 'call' message") with
         var c = TestCallable new("result")
         c() shouldBe("result")
@@ -58,7 +58,7 @@ specify("An apply expression on a non-function") with
     end
 end
 
-specify("A static apply expression on a non-function") with    
+specify("A static call expression on a non-function") with    
     it should("send a 'call' message") with
         var c = TestCallable new("result")
         c[] shouldBe("result")
