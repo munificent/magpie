@@ -468,8 +468,7 @@ public class MagpieParser extends Parser {
       return Expr.quote(position, expr);
     }
     
-    // TODO(bob): "fn" should become a real TokenType again.
-    if (match("fn")) {
+    if (match(TokenType.FN)) {
       return parsePatternFunction();
     }
     
