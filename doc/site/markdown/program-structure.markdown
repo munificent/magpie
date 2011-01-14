@@ -15,6 +15,36 @@ Comments are as in C, C++, Java, etc.:
     /* Block comments
        can span multiple lines. */
 
+## Names
+
+One goal of Magpie is be more syntactically flexible than many other languages,
+and this extends to even humble names. Its identifier rules are looser than you
+may expect. Operator characters like `+` and `-` are not only valid operators,
+but can also be used within regular names. Any of the following could be used to
+name a variable, function or other entity:
+
+    :::magpie
+    hi
+    using-hyphens
+    numb3r5_r_0k_2
+    even_!$%_this_^&*_is_<>=_valid
+
+As with anything, this can of course be overused. Punctuation characters should be a light seasoning on your names (if at all), not the main dish.
+
+This flexibility has a side effect that will likely trip you up at first (but I
+hope only at first): whitespace *must* be used to separate names, operators, and
+literals. These examples will not be parsed like they would be in other
+languages:
+
+    a+b
+    true==false
+    count=3
+
+Each line here is actually a single identifier with no operator calls. The
+solution is make sure to separate names with spaces. Many would agree that that's good style anyway.
+
+<p class="future">Note that the syntax highlighting is actually wrong in these examples here. Sorry. If you've got skill at hacking Pygments lexers, feel free to lend a hand.</p>
+
 ## Newlines
 
 Like many scripting languages, newlines are significant in Magpie and are used to separate expressions. You can keep your semicolons safely tucked away.
@@ -26,8 +56,7 @@ Like many scripting languages, newlines are significant in Magpie and are used t
 
 To make things easier, Magpie will ignore a newline in any place where it
 doesn't make sense. Specifically, that means newlines following a comma (`,`),
-colon (`:`), operator (`+`, `-`, etc.), or open brace (`(`, `[`, `{`) will be
-discarded:
+colon (`:`), operator (`+`, `-`, etc.), backtick (<code>\`</code>), arrow (`->`), or conjunction (`and` or `or`) will be discarded:
 
     :::magpie
     var a = 1,
@@ -36,8 +65,8 @@ discarded:
     var b = 1 +
             2 // b will be 3.
 
-    print(
-        "hi") // Prints "hi".
+    var c = true and
+            false // c will be false.
 
 If you specifically want to ignore a newline where it otherwise *would* separate two expressions, you can end the line with a backslash (`\`):
 
