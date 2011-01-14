@@ -1,0 +1,27 @@
+// Namespace expression.
+// When a "namespace" expression is evaluated, it does two things:
+
+// 1. Defines a prefix. Any subsequent variables declared in the current scope
+// will be qualified with that prefix. For example:
+do
+    namespace Foo
+
+    var bar = "123"    // Declares a variable "Foo.bar"
+
+    class Blah         // Declares a class "Foo.Blah"
+    end
+
+    def func() nothing // Declares a function "Foo.func"
+end
+
+// 2. Implicitly imports the namespace.
+// This way, unqualified names used in that scope can find names in that scope
+// since they'll now have the namespace prefix.
+
+// Qualify expression.
+// When a "qualify" expression is evaluated, it adds the given name to the list
+// of prefixes to search when looking up a name.
+
+qualify Foo
+
+print(bar) // will look for 'bar', then 'Foo.bar'

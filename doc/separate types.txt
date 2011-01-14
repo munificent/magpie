@@ -1,0 +1,36 @@
+Move types into separate namespace from runtime objects?
+
+I've got a couple of cases where it would be nice to add shared methods to 
+something that happens to be an interface, like `List[T] new`. The problem is
+that this is conflating two concepts: the List type, which is used during
+static checking, and the List class, which is used at runtime. In Bracha's
+terminology, this is also mixing the meta level into the base level, which is
+kind of dirty.
+
+One possible solution would be to completely separate the type system names and
+objects from the runtime ones. So a type annotation would be evaluated in a
+completely separate global name scope. That scope would only contain types
+(which may eliminate the really slow `typeScope` step we perform during
+checking). Defining a class would simultaneously install the class object in the
+runtime scope, and an interface for the class in the type scope. (We'd add the
+concept of interfaces that are not structurally typed to make classes still
+nominally typed here.)
+
+To more fully separate the two, it may also be a good idea to move the
+reflection-like out of the runtime stuff (the Object and Class mixins, with
+members like 'type', 'is', etc.) and into a separate mirrors-like system.
+Instead of:
+
+    :::magpie
+    foo type
+
+You'd do:
+
+    :::magpie
+    Mirror getType(foo)
+
+I'd started refactoring things like this when I was working on mixins because
+it simplified how objects are defined, and maybe this will be a good idea for
+other reasons now too.
+
+I still need to think about this more, but it may simplify a lot of stuff.

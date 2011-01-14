@@ -1,6 +1,6 @@
 ^title Messages
 
-Like any true-blue OOP language, the heart of Magpie is *messages*: things you tell objects to do. Almost everywhere you see an identifier like `foo`, you're seeing a message. Here's a simple example:
+The yin and yang of Magpie's syntax are *messages* and [calls](calls.html). Messages are the object-oriented face of Magpie: they are things you tell an object to do. Any time you see an identifier in Magpie, you're seeing a message. Here's a simple example:
 
     :::magpie
     "some string" count
