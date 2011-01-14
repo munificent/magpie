@@ -41,16 +41,9 @@ public class MatchExprParser implements ExprParser {
       Expr body = thisCase.getBody();
       
       // Bind the names.
-      List<Pair<String, Expr>> bindings = new ArrayList<Pair<String, Expr>>();
-      thisCase.getPattern().createBindings(bindings, valueExpr);
-
-      List<Expr> bodyExprs = new ArrayList<Expr>();
-      for (Pair<String, Expr> binding : bindings) {
-        bodyExprs.add(Expr.var(binding.getKey(), binding.getValue()));
-      }
-      
-      bodyExprs.add(body);
-      body = Expr.block(bodyExprs);
+      Expr binding = Expr.var(body.getPosition(), thisCase.getPattern(),
+          valueExpr);
+      body = Expr.block(binding, body);
       
       chained = new IfExpr(body.getPosition(), null, condition, body, chained);
     }

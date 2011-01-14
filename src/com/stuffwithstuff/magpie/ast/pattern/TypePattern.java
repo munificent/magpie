@@ -1,10 +1,7 @@
 package com.stuffwithstuff.magpie.ast.pattern;
 
-import java.util.List;
-
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
-import com.stuffwithstuff.magpie.util.Pair;
 
 public class TypePattern implements Pattern {
   public TypePattern(Expr type) {
@@ -15,10 +12,6 @@ public class TypePattern implements Pattern {
 
   public Expr createPredicate(Expr value) {
     return Expr.staticMessage(value, "is", mType);
-  }
-  
-  public void createBindings(List<Pair<String, Expr>> bindings, Expr root) {
-    // Do nothing.
   }
 
   @Override

@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
-import com.stuffwithstuff.magpie.util.Pair;
 
 public class TuplePattern implements Pattern {
   public TuplePattern(List<Pattern> fields) {
@@ -29,15 +28,6 @@ public class TuplePattern implements Pattern {
     return predicate;
   }
   
-  public void createBindings(List<Pair<String, Expr>> bindings, Expr root) {
-    // Give each field a chance to bind.
-    for (int i = 0; i < mFields.size(); i++) {
-      // Destructure the field.
-      Expr field = Expr.message(root, "_" + i);
-      mFields.get(i).createBindings(bindings, field);
-    }
-  }
-
   @Override
   public <R, C> R accept(PatternVisitor<R, C> visitor, C context) {
     return visitor.visit(this, context);

@@ -1,10 +1,7 @@
 package com.stuffwithstuff.magpie.ast.pattern;
 
-import java.util.List;
-
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
-import com.stuffwithstuff.magpie.util.Pair;
 
 public class VariablePattern implements Pattern {
   /**
@@ -28,10 +25,6 @@ public class VariablePattern implements Pattern {
     } else {
       return Expr.bool(true);
     }
-  }
-  
-  public void createBindings(List<Pair<String, Expr>> bindings, Expr root) {
-    bindings.add(new Pair<String, Expr>(mName, root));
   }
 
   @Override
