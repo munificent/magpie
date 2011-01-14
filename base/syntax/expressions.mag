@@ -244,14 +244,14 @@ UnsafeCastExpression declareField("type", false, fn Expression)
 UnsafeCastExpression declareField("value", false, fn Expression)
 
 class VariableExpression
-    shared def new(name String, value Expression -> VariableExpression)
-        construct(name: name, value: value)
+    shared def new(pattern Pattern, value Expression -> VariableExpression)
+        construct(pattern: pattern, value: value)
     end
     
     get string String =
-        "var " ~ name ~ " = " ~ value string
+        "var " ~ pattern ~ " = " ~ value string
     end
 end
 
-VariableExpression declareField("name", false, fn String)
+VariableExpression declareField("pattern", false, fn Pattern)
 VariableExpression declareField("value", false, fn Expression)

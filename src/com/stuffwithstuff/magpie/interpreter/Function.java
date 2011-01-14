@@ -24,8 +24,8 @@ public class Function implements Callable {
       // Create a local scope for the function with the arguments bounds to
       // the pattern.
       Pattern pattern = mFunction.getType().getPattern();
-      EvalContext context = PatternBinder.bind(interpreter, pattern, arg, 
-          new EvalContext(mClosure, thisObj));
+      EvalContext context = new EvalContext(mClosure, thisObj).pushScope();
+      PatternBinder.bind(interpreter, pattern, arg, context);
       
       try {
         return interpreter.evaluate(mFunction.getBody(), context);

@@ -1,15 +1,16 @@
 package com.stuffwithstuff.magpie.ast;
 
+import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.parser.Position;
 
 public class VariableExpr extends Expr {
-  VariableExpr(Position position, String name, Expr value) {
+  VariableExpr(Position position, Pattern pattern, Expr value) {
     super(position);
-    mName = name;
+    mPattern = pattern;
     mValue = value;
   }
   
-  public String getName() { return mName; }
+  public Pattern getPattern() { return mPattern; }
   public Expr getValue() { return mValue; }
   
   @Override
@@ -19,10 +20,10 @@ public class VariableExpr extends Expr {
 
   @Override
   public void toString(StringBuilder builder, String indent) {
-    builder.append("var ").append(mName).append(" = ");
+    builder.append("var ").append(mPattern).append(" = ");
     mValue.toString(builder, indent);
   }
 
-  private final String mName;
+  private final Pattern mPattern;
   private final Expr mValue;
 }

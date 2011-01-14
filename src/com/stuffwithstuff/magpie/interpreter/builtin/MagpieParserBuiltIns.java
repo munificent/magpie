@@ -1,12 +1,15 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
 import com.stuffwithstuff.magpie.ast.Expr;
+import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.ExprConverter;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
+import com.stuffwithstuff.magpie.interpreter.PatternConverter;
 import com.stuffwithstuff.magpie.parser.ExprParser;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
+import com.stuffwithstuff.magpie.parser.PatternParser;
 import com.stuffwithstuff.magpie.parser.Token;
 import com.stuffwithstuff.magpie.parser.TokenType;
 import com.stuffwithstuff.magpie.util.Expect;
@@ -169,6 +172,18 @@ public class MagpieParserBuiltIns {
       Expr expr = parser.parseFunction();
       
       return ExprConverter.convert(interpreter, expr, 
+          interpreter.createTopLevelContext());
+    }
+  }
+  
+  @Signature("parsePattern(-> Pattern)")
+  public static class ParsePattern implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      MagpieParser parser = (MagpieParser) thisObj.getValue();
+      
+      Pattern pattern = PatternParser.parse(parser);
+      
+      return PatternConverter.convert(pattern, interpreter, 
           interpreter.createTopLevelContext());
     }
   }

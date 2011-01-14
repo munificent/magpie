@@ -161,7 +161,8 @@ public class Interpreter {
     // constraint to the parameter name(s) so that it can be used in the
     // return type.
     if (type.isStatic()) {
-      context = PatternBinder.bind(this, type.getPattern(), paramType, context);
+      context = context.pushScope();
+      PatternBinder.bind(this, type.getPattern(), paramType, context);
     }
     
     Obj returnType = evaluate(type.getReturnType(), context);

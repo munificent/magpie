@@ -18,7 +18,8 @@ class DefParser
                 // Parse the function.
                 %var%("function", parser parseFunction())
 
-                VariableExpression new(name, function)
+                VariableExpression new(VariablePattern new(name, nothing),
+                    function)
             ), (
                 %var%("receiver", parseReceiver(parser))
                 %var%("name", parser consumeAny(TokenType identifier,

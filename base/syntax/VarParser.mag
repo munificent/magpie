@@ -2,11 +2,11 @@
 class VarParser
     def parse(parser MagpieParser -> Expression)
         parser consume("var")
-        %var%("name", parser consume(TokenType identifier) stringValue)
+        %var%("pattern", parser parsePattern())
         parser consume(TokenType equals)
         %var%("value", parser parseEndBlock())
         
-        VariableExpression new(name, value)
+        VariableExpression new(pattern, value)
     end
 end
 

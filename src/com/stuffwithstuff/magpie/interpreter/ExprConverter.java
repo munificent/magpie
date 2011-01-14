@@ -254,9 +254,10 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   }
   
   private static Expr convertVarExpr(Interpreter interpreter, Obj expr) {
-    String name = expr.getField("name").asString();
+    Pattern pattern = PatternConverter.convert(interpreter,
+        expr.getField("pattern"));
     Expr value = convert(interpreter, expr.getField("value"));
-    return Expr.var(name, value);
+    return Expr.var(Position.none(), pattern, value);
   }
   
   @Override
@@ -441,8 +442,10 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
 
   @Override
   public Obj visit(VariableExpr expr, Void dummy) {
-    return construct("Variable", mInterpreter.createString(expr.getName()),
-        convert(expr.getValue()));
+    Obj pattern = PatternConverter.convert(
+        expr.getPattern(), mInterpreter, mContext);
+    
+    return construct("Variable", pattern, convert(expr.getValue()));
   }
   
   private Obj construct(String className, Obj... args) {

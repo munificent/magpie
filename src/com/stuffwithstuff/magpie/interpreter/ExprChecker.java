@@ -100,8 +100,9 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       // Evaluate the return type in a context where the type arguments have
       // been applied. That way, a static type like [T -> T] will be able to
       // correctly determine the return type by accessing T.
-      EvalContext staticContext = PatternBinder.bind(mInterpreter,
-          staticFn.getType().getPattern(), arg, mStaticContext);
+      EvalContext staticContext = mStaticContext.pushScope();
+      PatternBinder.bind(mInterpreter,
+          staticFn.getType().getPattern(), arg, staticContext);
       
       Obj returnType = mInterpreter.evaluate(staticFn.getType().getReturnType(),
           staticContext);
@@ -374,21 +375,9 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(VariableExpr expr, EvalContext context) {
     Obj valueType = check(expr.getValue(), context);
 
-    // See if there is already a variable in this scope with that name. If so,
-    // we'll treat this declaration like an assignment.
-    Obj existingType = context.lookUpHere(expr.getName());
-    if (existingType == null) {
-      // Not already defined, so define it.
-      context.define(expr.getName(), valueType);
-      return valueType;
-    } else {
-      mChecker.addError(expr.getPosition(),
-          "There is already a variable named \"%s\" declared in this scope.",
-          expr.getName());
-
-      // The type doesn't change.
-      return existingType;
-    }
+    PatternBinder.bind(mChecker, expr.getPosition(), expr.getPattern(),
+        valueType, context);
+    return valueType;
   }
 
   private Obj orTypes(Obj left, Obj right) {

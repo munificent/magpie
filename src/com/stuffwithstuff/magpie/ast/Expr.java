@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.stuffwithstuff.magpie.ast.pattern.Pattern;
+import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.util.Expect;
 
@@ -191,7 +193,11 @@ public abstract class Expr {
   }
 
   public static Expr var(Position position, String name, Expr value) {
-    return new VariableExpr(position, name, value);
+    return var(position, new VariablePattern(name, null), value);
+  }
+  
+  public static Expr var(Position position, Pattern pattern, Expr value) {
+    return new VariableExpr(position, pattern, value);
   }
   
   public Expr(Position position) {
@@ -244,7 +250,7 @@ public abstract class Expr {
     String name = ((StringExpr)(((TupleExpr)arg).getFields().get(0))).getValue();
     Expr valueExpr = ((TupleExpr)arg).getFields().get(1);
     
-    return new VariableExpr(position, name, valueExpr);
+    return var(position, name, valueExpr);
   }
   
   private static List<Expr> splitArg(Expr arg) {

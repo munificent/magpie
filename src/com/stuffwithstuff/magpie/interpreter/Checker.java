@@ -145,9 +145,10 @@ public class Checker {
     }
     
     // Bind the parameter names to their evaluated types.
-    EvalContext functionContext = PatternBinder.bind(mInterpreter,
-        function.getType().getPattern(), paramType,
-        new EvalContext(closure, thisType));
+    EvalContext functionContext = new EvalContext(closure, thisType);
+    functionContext = functionContext.pushScope();
+    PatternBinder.bind(mInterpreter, function.getType().getPattern(), paramType,
+        functionContext);
 
     // If it's a static function, bind them in the static context too.
     if (function.getType().isStatic()) {
@@ -194,6 +195,11 @@ public class Checker {
             paramType, returnType,
             mInterpreter.createBool(function.getType().isStatic())));
   }
+  
+  /**
+   * Gets the Interpreter this Checker is associated with.
+   */
+  public Interpreter getInterpreter() { return mInterpreter; }
   
   /**
    * Gets the collection of errors that have been found by this checker so far.
