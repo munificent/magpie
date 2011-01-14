@@ -17,11 +17,7 @@ Comments are as in C, C++, Java, etc.:
 
 ## Names
 
-One goal of Magpie is be more syntactically flexible than many other languages,
-and this extends to even humble names. Its identifier rules are looser than you
-may expect. Operator characters like `+` and `-` are not only valid operators,
-but can also be used within regular names. Any of the following could be used to
-name a variable, function or other entity:
+Magpie is more ended when it comes to names than most other languages. Regular identifiers, used for things like [variables](expressions/variables.html) and [messages](expressions/messages.html) can consist of letters, numbers, underscores, and even most punctuation characters. These are all valid names:
 
     :::magpie
     hi
@@ -29,10 +25,8 @@ name a variable, function or other entity:
     numb3r5_r_0k_2
     even_!$%_this_^&*_is_<>=_valid
 
-As with anything, this can of course be overused. Punctuation characters should be a light seasoning on your names (if at all), not the main dish.
-
-This flexibility has a side effect that will likely trip you up at first (but I
-hope only at first): whitespace *must* be used to separate names, operators, and
+This flexibility has a side effect that might trip you up at first (but I
+hope only at first): whitespace must be used to separate names, operators, and
 literals. These examples will not be parsed like they would be in other
 languages:
 
@@ -40,10 +34,10 @@ languages:
     true==false
     count=3
 
-Each line here is actually a single identifier with no operator calls. The
-solution is make sure to separate names with spaces. Many would agree that that's good style anyway.
+Each line here is actually a single identifier. The solution is to make sure to
+separate names with spaces, like `a + b`.
 
-<p class="future">Note that the syntax highlighting is actually wrong in these examples here. Sorry. If you've got skill at hacking Pygments lexers, feel free to lend a hand.</p>
+<p class="future">Note that the syntax highlighting is actually wrong in the examples here. Sorry. If you've got skill at hacking Pygments lexers, feel free to lend a hand.</p>
 
 ## Newlines
 
