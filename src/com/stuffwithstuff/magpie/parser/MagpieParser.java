@@ -68,72 +68,8 @@ public class MagpieParser extends Parser {
     return parseBlock(true, keyword1, keyword2, endTokens);
   }
   
-  private Pair<Expr, Token> parseBlock(boolean parseCatch, String keyword1,
-      String keyword2, TokenType... endTokens) {
-    if (match(TokenType.LINE)){
-      List<Expr> exprs = new ArrayList<Expr>();
-      
-      while (true) {
-        // TODO(bob): This keyword stuff is temporary until all keywords are
-        // moved into Magpie.
-        if (lookAhead(keyword1)) break;
-        if (lookAhead(keyword2)) break;
-        if (lookAheadAny(endTokens)) break;
-        if (lookAhead(TokenType.CATCH)) break;
-        
-        exprs.add(parseExpression());
-        consume(TokenType.LINE);
-      }
-      
-      Token endToken = current();
-      
-      // If the block ends with 'end', then we want to consume that token,
-      // otherwise we want to leave it unconsumed to be consistent with the
-      // single-expression block case.
-      if (endToken.isKeyword("end")) {
-        consume();
-      }
-      
-      // Parse any catch clauses.
-      Expr catchExpr = null;
-      if (parseCatch) {
-        List<MatchCase> catches = new ArrayList<MatchCase>();
-        while (match(TokenType.CATCH)) {
-          catches.add(parseCatch(keyword1, keyword2, endTokens));
-        }
-        
-        // TODO(bob): This is all pretty hokey.
-        if (catches.size() > 0) {
-          Expr valueExpr = Expr.name("__err__");
-          Expr elseExpr = Expr.message(Expr.name("Runtime"), "throw", valueExpr);
-          catchExpr = MatchExprParser.desugarCases(valueExpr, catches, elseExpr);
-        }
-      }
-      
-      return new Pair<Expr, Token>(
-          Expr.block(exprs, catchExpr), endToken);
-    } else {
-      Expr body = parseExpression();
-      return new Pair<Expr, Token>(body, null);
-    }
-  }
-
-  private MatchCase parseCatch(String keyword1, String keyword2, TokenType... endTokens) {
-    Pattern pattern = MatchExprParser.parsePattern(this);
-
-    consume("then");
-    
-    Pair<Expr, Token> body = parseBlock(false, keyword1, keyword2, endTokens);
-    
-    // Allow newlines to separate single-line catches.
-    if ((body.getValue() == null) &&
-        lookAhead(TokenType.LINE, TokenType.CATCH)) {
-      consume();
-    }
-    
-    return new MatchCase(pattern, body.getKey());
-  }
-  
+  // TODO(bob): Get rid of this when static functions go and use the pattern one
+  // for everything.
   // fn (a) print "hi"
   public Expr parseFunction() {
     Position position = current().getPosition();
@@ -216,7 +152,7 @@ public class MagpieParser extends Parser {
     // Parse the parameter pattern, if any.
     Pattern pattern = null;
     if (!lookAheadAny(TokenType.ARROW, right)) {
-      pattern = MatchExprParser.parsePattern(this);
+      pattern = PatternParser.parse(this);
     } else {
       // No pattern, so expect nothing.
       pattern = new ValuePattern(Expr.nothing());
@@ -256,7 +192,73 @@ public class MagpieParser extends Parser {
     return ((mKeywordParsers != null) && mKeywordParsers.containsKey(name)) ||
            ((mKeywords != null) && mKeywords.contains(name));
   }
+  
+  private Pair<Expr, Token> parseBlock(boolean parseCatch, String keyword1,
+      String keyword2, TokenType... endTokens) {
+    if (match(TokenType.LINE)){
+      List<Expr> exprs = new ArrayList<Expr>();
+      
+      while (true) {
+        // TODO(bob): This keyword stuff is temporary until all keywords are
+        // moved into Magpie.
+        if (lookAhead(keyword1)) break;
+        if (lookAhead(keyword2)) break;
+        if (lookAheadAny(endTokens)) break;
+        if (lookAhead(TokenType.CATCH)) break;
+        
+        exprs.add(parseExpression());
+        consume(TokenType.LINE);
+      }
+      
+      Token endToken = current();
+      
+      // If the block ends with 'end', then we want to consume that token,
+      // otherwise we want to leave it unconsumed to be consistent with the
+      // single-expression block case.
+      if (endToken.isKeyword("end")) {
+        consume();
+      }
+      
+      // Parse any catch clauses.
+      Expr catchExpr = null;
+      if (parseCatch) {
+        List<MatchCase> catches = new ArrayList<MatchCase>();
+        while (match(TokenType.CATCH)) {
+          catches.add(parseCatch(keyword1, keyword2, endTokens));
+        }
+        
+        // TODO(bob): This is all pretty hokey.
+        if (catches.size() > 0) {
+          Expr valueExpr = Expr.name("__err__");
+          Expr elseExpr = Expr.message(Expr.name("Runtime"), "throw", valueExpr);
+          catchExpr = MatchExprParser.desugarCases(valueExpr, catches, elseExpr);
+        }
+      }
+      
+      return new Pair<Expr, Token>(
+          Expr.block(exprs, catchExpr), endToken);
+    } else {
+      Expr body = parseExpression();
+      return new Pair<Expr, Token>(body, null);
+    }
+  }
 
+  private MatchCase parseCatch(String keyword1, String keyword2, TokenType... endTokens) {
+    Pattern pattern = PatternParser.parse(this);
+
+    consume("then");
+    
+    Pair<Expr, Token> body = parseBlock(false, keyword1, keyword2, endTokens);
+    
+    // Allow newlines to separate single-line catches.
+    if ((body.getValue() == null) &&
+        lookAhead(TokenType.LINE, TokenType.CATCH)) {
+      consume();
+    }
+    
+    return new MatchCase(pattern, body.getKey());
+  }
+  
   private Expr assignment() {
     Expr expr = composite();
     
@@ -502,7 +504,7 @@ public class MagpieParser extends Parser {
     if (match(TokenType.LEFT_PAREN)) {
       Pattern pattern = null;
       if (!lookAheadAny(TokenType.ARROW, TokenType.RIGHT_PAREN)) {
-        pattern = MatchExprParser.parsePattern(this);
+        pattern = PatternParser.parse(this);
       } else {
         // No pattern, so expect nothing.
         pattern = new ValuePattern(Expr.nothing());
@@ -540,7 +542,8 @@ public class MagpieParser extends Parser {
   // expression) is redundant. Parenthesized blocks are nice because they're
   // part of the core syntax. "do" blocks match the rest of the language and
   // allow catch blocks. If the only reason to have these is for the core
-  // syntax, it may be better to just have a %block% special form.
+  // syntax, it may be better to just have a %block% special form, or only
+  // enable this in .magc files that just use core syntax.
   private Expr parenthesizedExpression(BraceType braceType) {
     TokenType leftBrace = TokenType.LEFT_PAREN;
     TokenType rightBrace = TokenType.RIGHT_PAREN;
@@ -602,6 +605,7 @@ public class MagpieParser extends Parser {
     SQUARE,
     CURLY
   }
+  
   private final Map<TokenType, ExprParser> mParsers =
     new HashMap<TokenType, ExprParser>();
   private final Map<String, ExprParser> mKeywordParsers;
