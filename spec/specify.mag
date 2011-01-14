@@ -14,7 +14,7 @@ end
 
 def endTests(->)
     var endTimeMs = Runtime now()
-    print("")
+    print()
     print("Passed " ~ (totalTests - totalFailures) ~ " out of " ~
         totalTests ~ " tests in " ~ (endTimeMs - startTimeMs) ~ "ms.")
 end
@@ -22,9 +22,6 @@ end
 def specify(description String, block TestSuite => Nothing ->)
     var suite = TestSuite new(description)
     block(suite)
-    
-    totalTests = totalTests + suite tests
-    totalFailures = totalFailures + suite failures
 end
 
 class TestSuite
@@ -36,7 +33,7 @@ class TestSuite
     
     def should(description String, block Nothing => Nothing ->)
         currentTest = description
-        var testsBefore = tests
+        var testsBefore = totalTests
         failedTest = false
         
         do
@@ -45,27 +42,31 @@ class TestSuite
             fail("Unexpected error: " ~ it)
         end
         
-        if tests == testsBefore then
+        if totalTests == testsBefore then
             print("NONE: " ~ name ~ " should " ~ currentTest ~ ".")
         end
     end
     
-    def pass(->) tests = tests + 1
+    def pass(->) advance()
         
     def fail(message String ->)
         if failedTest not then
             print("FAIL: " ~ name ~ " should " ~ currentTest ~ ".")
         end
-        tests = tests + 1
-        failures = failures + 1
+        advance()
+        totalFailures = totalFailures + 1
         print("      " ~ message)
         failedTest = true
     end
 
+    def advance(->)
+        totalTests = totalTests + 1
+        // Show the progress.
+        if (totalTests % 10) == 0 then prints(".")
+    end
+    
     var name        String
     var currentTest String = ""
-    var tests       Int    = 0
-    var failures    Int    = 0
     var failedTest  Bool   = false
 end
         

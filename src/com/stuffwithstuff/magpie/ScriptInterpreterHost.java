@@ -7,7 +7,7 @@ public class ScriptInterpreterHost implements InterpreterHost {
 
   @Override
   public void print(String text) {
-    System.out.println(text);
+    System.out.print(text);
   }
 
   @Override

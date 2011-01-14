@@ -80,4 +80,14 @@ public class BuiltInFunctions {
       return interpreter.createInt(left / right);
     }
   }
+  
+  @Signature("%(left Int, right Int -> Int)")
+  public static class Modulo implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = arg.getTupleField(0).asInt();
+      int right = arg.getTupleField(1).asInt();
+      
+      return interpreter.createInt(left % right);
+    }
+  }
 }

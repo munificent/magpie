@@ -5,7 +5,17 @@ interface Stringable
 end
 
 // Provide a generic print that converts arg to string first.
-def print(arg Stringable ->) printString(arg string)
+def print(arg Stringable | Nothing ->)
+    let arg then
+        printString(arg string ~ "\n")
+    else
+        // Just an empty line.
+        printString("\n")
+    end
+end
+
+// Provide a generic print that converts arg to string first.
+def prints(arg Stringable ->) printString(arg string)
 
 // Implement it for the built-in classes.
 get Object string String = "object"
