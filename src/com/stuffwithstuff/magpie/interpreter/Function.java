@@ -21,13 +21,12 @@ public class Function implements Callable {
     try {
       Profiler.push(mFunction.getPosition());
       
-      // Create a new local scope for the function.
-      EvalContext context = new EvalContext(mClosure, thisObj).pushScope();
-      
-      // Bind arguments to their parameter names.
+      // Create a local scope for the function with the arguments bounds to
+      // the pattern.
       Pattern pattern = mFunction.getType().getPattern();
-      interpreter.bindPattern(pattern, arg, context);
-
+      EvalContext context = PatternBinder.bind(interpreter, pattern, arg, 
+          new EvalContext(mClosure, thisObj));
+      
       try {
         return interpreter.evaluate(mFunction.getBody(), context);
       } catch (ReturnException ex) {

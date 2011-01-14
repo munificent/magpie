@@ -100,10 +100,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       // Evaluate the return type in a context where the type arguments have
       // been applied. That way, a static type like [T -> T] will be able to
       // correctly determine the return type by accessing T.
-      EvalContext staticContext = mStaticContext.pushScope();
-      
-      mInterpreter.bindPattern(staticFn.getType().getPattern(), arg,
-          staticContext);
+      EvalContext staticContext = PatternBinder.bind(mInterpreter,
+          staticFn.getType().getPattern(), arg, mStaticContext);
       
       Obj returnType = mInterpreter.evaluate(staticFn.getType().getReturnType(),
           staticContext);

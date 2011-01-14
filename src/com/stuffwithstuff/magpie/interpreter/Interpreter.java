@@ -4,12 +4,10 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.*;
-import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.builtin.*;
 import com.stuffwithstuff.magpie.parser.ExprParser;
 import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.util.Expect;
-import com.stuffwithstuff.magpie.util.Pair;
 
 public class Interpreter {
   public Interpreter(InterpreterHost host) {
@@ -163,8 +161,7 @@ public class Interpreter {
     // constraint to the parameter name(s) so that it can be used in the
     // return type.
     if (type.isStatic()) {
-      context = context.pushScope();
-      bindPattern(type.getPattern(), paramType, context);
+      context = PatternBinder.bind(this, type.getPattern(), paramType, context);
     }
     
     Obj returnType = evaluate(type.getReturnType(), context);
@@ -176,25 +173,6 @@ public class Interpreter {
     return result;
   }
   
-  public void bindPattern(Pattern pattern, Obj value, EvalContext context) {
-    // TODO(bob): Also hacked in that this doesn't distinguish between types
-    // and values. This works for tuple and value patterns, but won't work
-    // when field patterns are in. (Those will need to do "getMemberType()"
-    // for types and just look up the field for values.)
-    List<Pair<String, Expr>> bindings = new ArrayList<Pair<String, Expr>>();
-    pattern.createBindings(bindings, Expr.name("__arg__"));
-
-    context.define("__arg__", value);
-    for (Pair<String, Expr> binding : bindings) {
-      Obj variable = evaluate(binding.getValue(), context);
-      context.define(binding.getKey(), variable);
-    }
-    // TODO(bob): Get rid of __arg__. Instead of generating a bind expr and
-    // evaluating it, could just add a pattern visitor that does the
-    // destructuring directly. Then this and AssignExpr could use that for all
-    // variable binding.
-  }
-
   public Obj construct(String className, Obj... args) {
     Obj classObj = getGlobal(className);
     

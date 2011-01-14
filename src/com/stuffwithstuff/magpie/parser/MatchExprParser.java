@@ -10,9 +10,9 @@ import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.util.Pair;
 
-// TODO(bob): This whole implementation is pretty hideous. Just slapping
-// something together so I can start getting it working. Will refactor and clean
-// up once it does stuff and there's a spec.
+// TODO(bob): Instead of desugaring patterns, they should be first-class
+// constructs in the interpreter and type-checker. (In fact, if expressions
+// should desugar to *them*).
 public class MatchExprParser implements ExprParser {
   /**
    * Converts a series of match cases down to a primitive if/then expression

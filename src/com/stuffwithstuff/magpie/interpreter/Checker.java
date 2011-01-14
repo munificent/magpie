@@ -134,9 +134,6 @@ public class Checker {
    */
   public Obj checkFunction(FnExpr function, Scope closure, Obj thisType,
       EvalContext staticContext) {
-    EvalContext functionContext = new EvalContext(
-        closure, thisType).pushScope();
-
     // Evaluate the function's type annotations in the static value scope.
     Obj paramType = mInterpreter.evaluate(function.getType().getParamType(),
         staticContext);
@@ -148,8 +145,9 @@ public class Checker {
     }
     
     // Bind the parameter names to their evaluated types.
-    mInterpreter.bindPattern(function.getType().getPattern(), paramType,
-        functionContext);
+    EvalContext functionContext = PatternBinder.bind(mInterpreter,
+        function.getType().getPattern(), paramType,
+        new EvalContext(closure, thisType));
 
     // If it's a static function, bind them in the static context too.
     if (function.getType().isStatic()) {
