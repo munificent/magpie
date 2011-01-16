@@ -1,0 +1,63 @@
+I think we can make multimethods work.
+
+One sticking point with them is how to get them to play nice with static typing,
+in particular return types. For example, consider a method named "double". If you call that on a number, it should return a number. If you call it on a string, it should return a string. How can a multimethod do that?
+
+The key insight is that even though the complete method dispatch is done at
+runtime based on the argument value, *some* of the dispatch selection can be done at type-check time, based just on the *type* of the argument. Consider:
+
+def double(a Int -> Int) a * 2
+def double(a String -> String) a ~ a
+
+With multimethods, that is equivalent to something like:
+
+match arg
+    case a Int then a * 2
+    case a String then a ~ a
+end
+
+Note that both cases are type patterns. That means that *statically*, we can
+tell which case will be matched based on the type of the argument. So we could
+actually select the right method here and type check it too.
+
+There are, of course, some cases where multiple patterns could match:
+
+def foo(1) "first"
+def foo(2) true
+def foo(3) 333
+
+Which is:
+
+match arg
+    case 1 then "first"
+    case 2 then true
+    case 3 then 333
+end
+
+In this case, given an argument of type Int, there are multiple patterns that could match. This can work too. It just means that statically, all we know is that the return type is Bool | Int | String. Yay for union types.
+
+Getting this to work would be fantastic. There are other issues:
+
+## How are the cases ordered?
+
+Since methods can be defined pretty much anywhere in Magpie it's hard to figure out which order the patterns should be tested. CLOS handles this by prefering the most specialized methods first, but "most specialized" probably isn't well-defined in Magpie with interfaces.
+
+## How do we ensure at least one pattern will match?
+
+One of the basic and most useful features of the static checker is catching errors like:
+
+    def foo(i Int) ...
+    foo("not int")
+
+In the presence of multimethods testing that gets a little funkier. I think this case will actually be easy. All we do is the same logic to statically determine which cases *could* match. If the set is empty, then we report an error. That should cover cases like the above.
+
+## How do interfaces work?
+
+Multimethods or generally detaching methods from classes makes the idea of interfaces a lot more... confusing. How do we define something like:
+
+    def printList(list List)
+        for item = list do print(item)
+    end
+
+In this case, List is an interface, and it needs to have an `iterate()` method. How is this expressed in multimethods?
+
