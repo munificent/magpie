@@ -7,7 +7,6 @@ import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.TuplePattern;
-import com.stuffwithstuff.magpie.ast.pattern.TypePattern;
 import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
 import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.interpreter.Name;
@@ -134,13 +133,11 @@ public class InterfaceExprParser implements ExprParser {
     if (typeParams.size() == 0) {
       pattern = new ValuePattern(Expr.nothing());
     } else if (typeParams.size() == 1) {
-      pattern = new VariablePattern(typeParams.get(0),
-          new TypePattern(Expr.name("Type")));
+      pattern = new VariablePattern(typeParams.get(0), Expr.name("Type"));
     } else {
       List<Pattern> fields = new ArrayList<Pattern>();
       for (int i = 0; i < typeParams.size(); i++) {
-        fields.add(new VariablePattern(typeParams.get(i),
-            new TypePattern(Expr.name("Type"))));
+        fields.add(new VariablePattern(typeParams.get(i), Expr.name("Type")));
       }
       pattern = new TuplePattern(fields);
     }

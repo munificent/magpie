@@ -1,6 +1,5 @@
 package com.stuffwithstuff.magpie.interpreter;
 
-import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.*;
 import com.stuffwithstuff.magpie.parser.Position;
 
@@ -38,19 +37,6 @@ public class PatternBinder implements PatternVisitor<Void, Obj> {
   }
 
   @Override
-  public Void visit(TypePattern pattern, Obj value) {
-    // If we're type-checking, make sure the type of the pattern's value is
-    // compatible with the type being matched.
-    if (mChecker != null) {
-      Obj matchedType = mInterpreter.evaluate(pattern.getType());
-      mChecker.checkTypes(value, matchedType, Position.none(),
-          "Cannot match a value of type %s against type %s.");
-    }
-
-    return null;
-  }
-
-  @Override
   public Void visit(ValuePattern pattern, Obj value) {
     // If we're type-checking, make sure the type of the pattern's value is
     // compatible with the type being matched.
@@ -65,21 +51,24 @@ public class PatternBinder implements PatternVisitor<Void, Obj> {
 
   @Override
   public Void visit(VariablePattern pattern, Obj value) {
-    // If we have a pattern for the variable, recurse into it.
-    if (pattern.getPattern() != null) {
-      pattern.getPattern().accept(this, value);
-    }
-    
     // Bind the variable.
     if (mContext.lookUpHere(pattern.getName()) == null) {
-      // If the variable has a type, and we're type-checking, use that type
-      // instead.
-      if ((mChecker != null) && (pattern.getPattern() instanceof TypePattern)) {
-        Expr type = ((TypePattern)pattern.getPattern()).getType();
-        value = mInterpreter.evaluate(type);
+      // Type-check if we have a type.
+      if ((mChecker != null) && (pattern.getType() != null)) {
+        // Make sure the type of the pattern's value is compatible with the type
+        // being matched.
+        Obj matchedType = mInterpreter.evaluate(pattern.getType());
+        mChecker.checkTypes(value, matchedType, Position.none(),
+            "Cannot match a value of type %s against type %s.");
+
+        // Cast the variable to the matched type.
+        value = matchedType;
       }
       
-      mContext.define(pattern.getName(), value);
+      // Ignore the wildcard name.
+      if (!pattern.getName().equals("_")) {
+        mContext.define(pattern.getName(), value);
+      }
     } else {
       // Cannot redefine a variable in the same scope.
       if (mChecker != null) {
@@ -94,12 +83,6 @@ public class PatternBinder implements PatternVisitor<Void, Obj> {
     return null;
   }
 
-  @Override
-  public Void visit(WildcardPattern pattern, Obj value) {
-    // Do nothing.
-    return null;
-  }
-  
   private PatternBinder(Checker checker, Interpreter interpreter,
       Position position, EvalContext context) {
     mChecker = checker;

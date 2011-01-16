@@ -6,10 +6,8 @@ import java.util.List;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.TuplePattern;
-import com.stuffwithstuff.magpie.ast.pattern.TypePattern;
 import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
 import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
-import com.stuffwithstuff.magpie.ast.pattern.WildcardPattern;
 
 /**
  * Parses patterns. Patterns are used for match cases, function parameter
@@ -73,15 +71,9 @@ public class PatternParser {
     }
     
     // See if there is a type for the variable.
-    Pattern type = null;
+    Expr type = null;
     if (parser.lookAheadAny(TokenType.NAME, TokenType.LEFT_PAREN)) {
-      Expr expr = TypeParser.parse(parser);
-      type = new TypePattern(expr);
-    }
-    
-    if (name.equals("_")) {
-      if (type == null) return new WildcardPattern();
-      return type;
+      type = TypeParser.parse(parser);
     }
     
     return new VariablePattern(name, type);

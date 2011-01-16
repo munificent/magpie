@@ -7,10 +7,8 @@ import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.PatternVisitor;
 import com.stuffwithstuff.magpie.ast.pattern.TuplePattern;
-import com.stuffwithstuff.magpie.ast.pattern.TypePattern;
 import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
 import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
-import com.stuffwithstuff.magpie.ast.pattern.WildcardPattern;
 import com.stuffwithstuff.magpie.util.NotImplementedException;
 
 public class PatternConverter implements PatternVisitor<Obj, EvalContext> {
@@ -20,14 +18,10 @@ public class PatternConverter implements PatternVisitor<Obj, EvalContext> {
     ClassObj patternClass = pattern.getClassObj();
     if (patternClass == interpreter.getGlobal("TuplePattern")) {
       return convertTuplePattern(interpreter, pattern);
-    } else if (patternClass == interpreter.getGlobal("TypePattern")) {
-      return convertTypePattern(interpreter, pattern);
     } else if (patternClass == interpreter.getGlobal("ValuePattern")) {
       return convertValuePattern(interpreter, pattern);
     } else if (patternClass == interpreter.getGlobal("VariablePattern")) {
       return convertVariablePattern(interpreter, pattern);
-    } else if (patternClass == interpreter.getGlobal("WildcardPattern")) {
-      return new WildcardPattern();
     }
     
     // TODO(bob): Add better error-handling.
@@ -46,13 +40,6 @@ public class PatternConverter implements PatternVisitor<Obj, EvalContext> {
     return new TuplePattern(fields);
   }
   
-  private static Pattern convertTypePattern(Interpreter interpreter,
-      Obj pattern) {
-    Obj type = pattern.getField("typeExpr");
-    Expr expr = ExprConverter.convert(interpreter, type);
-    return new TypePattern(expr);
-  }
-  
   private static Pattern convertValuePattern(Interpreter interpreter,
       Obj pattern) {
     Obj value = pattern.getField("value");
@@ -63,12 +50,12 @@ public class PatternConverter implements PatternVisitor<Obj, EvalContext> {
   private static Pattern convertVariablePattern(Interpreter interpreter,
       Obj pattern) {
     String name = pattern.getField("name").asString();
-    Obj patternObj = pattern.getField("pattern");
-    Pattern innerPattern = null;
-    if (patternObj != interpreter.nothing()) {
-      innerPattern = convert(interpreter, patternObj);
+    Obj type = pattern.getField("typeExpr");
+    Expr expr = null;
+    if (type != interpreter.nothing()) {
+      expr = ExprConverter.convert(interpreter, type);
     }
-    return new VariablePattern(name, innerPattern);
+    return new VariablePattern(name, expr);
   }
   
   public static Obj convert(Pattern pattern, Interpreter interpreter,
@@ -85,12 +72,7 @@ public class PatternConverter implements PatternVisitor<Obj, EvalContext> {
     }
     Obj fieldsArray = mInterpreter.createArray(fields);
     
-    return mInterpreter.construct("TuplePattern", fieldsArray);  }
-
-  @Override
-  public Obj visit(TypePattern pattern, EvalContext context) {
-    Obj type = ExprConverter.convert(mInterpreter, pattern.getType(), context);
-    return mInterpreter.construct("TypePattern", type);
+    return mInterpreter.construct("TuplePattern", fieldsArray);
   }
 
   @Override
@@ -102,15 +84,10 @@ public class PatternConverter implements PatternVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(VariablePattern pattern, EvalContext context) {
     Obj name = mInterpreter.createString(pattern.getName());
-    Obj innerPattern = convert(pattern.getPattern(), context);
-    return mInterpreter.construct("VariablePattern", name, innerPattern);
+    Obj type = ExprConverter.convert(mInterpreter, pattern.getType(), context);
+    return mInterpreter.construct("VariablePattern", name, type);
   }
 
-  @Override
-  public Obj visit(WildcardPattern pattern, EvalContext context) {
-    return mInterpreter.construct("WildcardPattern");
-  }
-  
   private Obj convert(Pattern pattern, EvalContext context) {
     if (pattern == null) return mInterpreter.nothing();
     

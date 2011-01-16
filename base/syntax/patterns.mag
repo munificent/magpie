@@ -11,16 +11,6 @@ end
 
 TuplePattern declareField("fields", false, fn List(Pattern))
 
-class TypePattern
-    shared def new(typeExpr Expression -> TypePattern)
-        construct(typeExpr: typeExpr)
-    end
-    
-    get string String = typeExpr string
-end
-
-TypePattern declareField("typeExpr", false, fn Expression)
-
 class ValuePattern
     shared def new(value Expression -> ValuePattern)
         construct(value: value)
@@ -32,16 +22,12 @@ end
 ValuePattern declareField("value", false, fn Expression)
 
 class VariablePattern
-    shared def new(name String, pattern Pattern | Nothing -> VariablePattern)
-        construct(name: name, pattern: pattern)
+    shared def new(name String, typeExpr Expression | Nothing -> VariablePattern)
+        construct(name: name, typeExpr: typeExpr)
     end
     
-    get string String = name ~~ pattern
+    get string String = name ~~ typeExpr
 end
 
 VariablePattern declareField("name", false, fn String)
-VariablePattern declareField("pattern", false, fn Pattern | Nothing)
-
-class WildcardPattern
-    get string String = "_"
-end
+VariablePattern declareField("typeExpr", false, fn Expression | Nothing)

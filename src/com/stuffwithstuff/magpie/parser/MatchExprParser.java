@@ -6,7 +6,7 @@ import java.util.List;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
-import com.stuffwithstuff.magpie.ast.pattern.WildcardPattern;
+import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.util.Pair;
 
 public class MatchExprParser implements ExprParser {
@@ -48,7 +48,7 @@ public class MatchExprParser implements ExprParser {
     // Parse the else case, if present.
     if (parser.match("else")) {
       Expr elseCase = parser.parseEndBlock();
-      cases.add(new MatchCase(new WildcardPattern(), elseCase));
+      cases.add(new MatchCase(new VariablePattern("_", null), elseCase));
     }
     
     parser.consume(TokenType.LINE);

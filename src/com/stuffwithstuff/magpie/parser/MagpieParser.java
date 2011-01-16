@@ -7,7 +7,6 @@ import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
 import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
-import com.stuffwithstuff.magpie.ast.pattern.WildcardPattern;
 import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.util.Pair;
 
@@ -232,7 +231,7 @@ public class MagpieParser extends Parser {
         if (catches.size() > 0) {
           Expr valueExpr = Expr.name("__err__");
           Expr elseExpr = Expr.message(Expr.name("Runtime"), "throw", valueExpr);
-          catches.add(new MatchCase(new WildcardPattern(), elseExpr));
+          catches.add(new MatchCase(new VariablePattern("_", null), elseExpr));
           
           position = position.union(last(1).getPosition());
           catchExpr = Expr.match(position, valueExpr, catches);

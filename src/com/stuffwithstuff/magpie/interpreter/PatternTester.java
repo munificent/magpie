@@ -30,16 +30,6 @@ public class PatternTester implements PatternVisitor<Boolean, Obj> {
   }
 
   @Override
-  public Boolean visit(TypePattern pattern, Obj value) {
-    // TODO(bob): Should this be evaluated in the regular context even though
-    // it's a type?
-    Obj expected = mInterpreter.evaluate(pattern.getType(), mContext);
-    Obj result = mInterpreter.invokeMethod(value, "is", expected);
-    
-    return result.asBool();
-  }
-
-  @Override
   public Boolean visit(ValuePattern pattern, Obj value) {
     Obj expected = mInterpreter.evaluate(pattern.getValue(), mContext);
     
@@ -52,20 +42,20 @@ public class PatternTester implements PatternVisitor<Boolean, Obj> {
 
   @Override
   public Boolean visit(VariablePattern pattern, Obj value) {
-    // If we have a pattern for the variable, recurse into it.
-    if (pattern.getPattern() != null) {
-      return pattern.getPattern().accept(this, value);
+    // If we have a type for the variable, check it.
+    if (pattern.getType() != null) {
+      // TODO(bob): Should this be evaluated in the regular context even though
+      // it's a type?
+      Obj expected = mInterpreter.evaluate(pattern.getType(), mContext);
+      Obj result = mInterpreter.invokeMethod(value, "is", expected);
+      
+      return result.asBool();
     }
     
-    // A variable matches anything.
+    // An untyped variable matches anything.
     return true;
   }
 
-  @Override
-  public Boolean visit(WildcardPattern pattern, Obj value) {
-    return true;
-  }
-  
   private PatternTester(Interpreter interpreter, EvalContext context) {
     mInterpreter = interpreter;
     mContext = context;

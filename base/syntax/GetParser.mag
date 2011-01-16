@@ -15,7 +15,7 @@ class GetParser
             parser parseTypeExpression()))
         
         %var%("type", FunctionTypeExpression new(
-            TypePattern new({ Nothing }), valueType, false))
+            ValuePattern new({ nothing }), valueType, false))
     
         parser consume(TokenType equals)
         %var%("body", parser parseEndBlock())
