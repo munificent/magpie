@@ -5,7 +5,7 @@ specify("Checking a GenericInterface") with
                 def id(value T -> T)
             end
             
-            def takeStringId(identity Identity[String] -> String)
+            def takeStringId(identity Identity(String) -> String)
                 identity id("hi")
             end
             
@@ -21,7 +21,7 @@ specify("Checking a GenericInterface") with
                 def id(value T -> T)
             end
             
-            def takeStringId(identity Identity[String] -> String)
+            def takeStringId(identity Identity(String) -> String)
                 identity id("hi")
             end
             
