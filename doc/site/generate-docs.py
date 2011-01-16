@@ -101,12 +101,12 @@ def breadcrumb(path):
     for part in os.path.dirname(path).split('/'):
         if part == '': break
         dir = os.path.join(dir, part)
-        title = get_title('markdown/{0}.markdown'.format(dir))
+        title = get_title('markdown/{0}.md'.format(dir))
         relpath = os.path.relpath('html/{0}.html'.format(dir), outdir)
         breadcrumb += ' / <a href="{0}">{1}</a>'.format(relpath, title)
 
     # include the name of the page itself
-    title = get_title('markdown/{0}.markdown'.format(path))
+    title = get_title('markdown/{0}.md'.format(path))
     breadcrumb += ' / ' + title
 
     return breadcrumb
@@ -124,7 +124,7 @@ def walk(dir, callback):
 count = 0
 def do_format(path):
     global count
-    if os.path.splitext(path)[1] == '.markdown':
+    if os.path.splitext(path)[1] == '.md':
         count += 1
         format_file(path)
 
