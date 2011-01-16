@@ -126,6 +126,28 @@ end
 
 LoopExpression declareField("body", false, fn Expression)
 
+class MatchCase
+    shared def new(pattern Pattern, body Expression -> MatchCase)
+        construct(pattern: pattern, body: body)
+    end
+end
+
+MatchCase declareField("pattern", false, fn Pattern)
+MatchCase declareField("body", false, fn Expression)
+
+class MatchExpression
+    shared def new(value Expression, cases List(MatchCase) -> MatchExpression)
+        construct(value: value, cases: cases)
+    end
+        
+    get string String =
+        "not implemented!"
+    end
+end
+
+MatchExpression declareField("value", false, fn Expression)
+MatchExpression declareField("cases", false, fn List(MatchCase))
+
 class MessageExpression
     shared def new(receiver Expression | Nothing,
                    name String -> MessageExpression)

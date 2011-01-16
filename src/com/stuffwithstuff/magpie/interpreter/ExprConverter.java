@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.*;
+import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.util.Expect;
@@ -52,6 +53,8 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
       return convertIntExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("LoopExpression")) {
       return convertLoopExpr(interpreter, expr);
+    } else if (exprClass == interpreter.getGlobal("MatchExpression")) {
+      return convertMatchExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("MessageExpression")) {
       return convertMessageExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("NothingExpression")) {
@@ -176,6 +179,19 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     return Expr.loop(body.getPosition(), body);
   }
   
+  private static Expr convertMatchExpr(Interpreter interpreter, Obj expr) {
+    Expr value = convert(interpreter, expr.getField("value"));
+    List<MatchCase> cases = new ArrayList<MatchCase>();
+    for (Obj matchCase : expr.getField("cases").asArray()) {
+      Pattern pattern = PatternConverter.convert(
+          interpreter, matchCase.getField("pattern"));
+      Expr body = convert(interpreter, matchCase.getField("body"));
+      cases.add(new MatchCase(pattern, body));
+    }
+    
+    return Expr.match(Position.none(), value, cases);
+  }
+  
   private static Expr convertMessageExpr(Interpreter interpreter, Obj expr) {
     Obj receiverObj = expr.getField("receiver");
     Expr receiver;
@@ -264,14 +280,14 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   public Obj visit(AndExpr expr, Void dummy) {
     Obj left  = convert(expr.getLeft());
     Obj right = convert(expr.getRight());
-    return construct("And", left, right);
+    return construct("AndExpression", left, right);
   }
 
   @Override
   public Obj visit(ApplyExpr expr, Void dummy) {
     Obj target = convert(expr.getTarget());
     Obj arg = convert(expr.getArg());
-    return construct("Apply", target, arg,
+    return construct("ApplyExpression", target, arg,
         mInterpreter.createBool(expr.isStatic()));
   }
   
@@ -279,7 +295,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   public Obj visit(AssignExpr expr, Void dummy) {
     Obj receiver = convert(expr.getReceiver());
     Obj value = convert(expr.getValue());
-    return construct("Assign",
+    return construct("AssignExpression",
         receiver, mInterpreter.createString(expr.getName()), value);
   }
 
@@ -292,17 +308,18 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     Obj exprsArray = mInterpreter.createArray(exprs);
     Obj catchExpr = convert(expr.getCatch());
     
-    return construct("Block", exprsArray, catchExpr);
+    return construct("BlockExpression", exprsArray, catchExpr);
   }
 
   @Override
   public Obj visit(BoolExpr expr, Void dummy) {
-    return construct("Bool", mInterpreter.createBool(expr.getValue()));
+    return construct("BoolExpression",
+        mInterpreter.createBool(expr.getValue()));
   }
 
   @Override
   public Obj visit(BreakExpr expr, Void dummy) {
-    return construct("Break");
+    return construct("BreakExpression");
   }
 
   @Override
@@ -310,12 +327,12 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     Obj pattern = PatternConverter.convert(expr.getType().getPattern(),
         mInterpreter, mContext);
     Obj returnType = convert(expr.getType().getReturnType());
-    Obj type = construct("FunctionType",
+    Obj type = construct("FunctionTypeExpression",
         pattern,
         returnType, 
         mInterpreter.createBool(expr.getType().isStatic()));
     Obj body = convert(expr.getBody());
-    return construct("Function", type, body);
+    return construct("FunctionExpression", type, body);
   }
 
   @Override
@@ -325,42 +342,56 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     Obj condition = convert(expr.getCondition());
     Obj thenArm = convert(expr.getThen());
     Obj elseArm = convert(expr.getElse());
-    return construct("If", name, condition, thenArm, elseArm);
+    return construct("IfExpression", name, condition, thenArm, elseArm);
   }
 
   @Override
   public Obj visit(IntExpr expr, Void dummy) {
-    return construct("Int", mInterpreter.createInt(expr.getValue()));
+    return construct("IntExpression", mInterpreter.createInt(expr.getValue()));
   }
 
   @Override
   public Obj visit(LoopExpr expr, Void dummy) {
     Obj body = convert(expr.getBody());
-    return construct("Loop", body);
+    return construct("LoopExpression", body);
+  }
+
+  @Override
+  public Obj visit(MatchExpr expr, Void dummy) {
+    Obj value = convert(expr.getValue());
+    List<Obj> cases = new ArrayList<Obj>();
+    for (MatchCase matchCase : expr.getCases()) {
+      Obj pattern = PatternConverter.convert(matchCase.getPattern(),
+          mInterpreter, mContext);
+      Obj body = convert(matchCase.getBody());
+      cases.add(construct("MatchCase", pattern, body));
+    }
+    
+    return construct("MatchExpression", value, mInterpreter.createArray(cases));
   }
 
   @Override
   public Obj visit(MessageExpr expr, Void dummy) {
     Obj receiver = convert(expr.getReceiver());
-    return construct("Message", receiver,
+    return construct("MessageExpression", receiver,
         mInterpreter.createString(expr.getName()));
   }
 
   @Override
   public Obj visit(NothingExpr expr, Void dummy) {
-    return construct("Nothing");
+    return construct("NothingExpression");
   }
 
   @Override
   public Obj visit(OrExpr expr, Void dummy) {
     Obj left  = convert(expr.getLeft());
     Obj right = convert(expr.getRight());
-    return construct("Or", left, right);
+    return construct("OrExpression", left, right);
   }
 
   @Override
   public Obj visit(QuotationExpr expr, Void dummy) {
-    return construct("Quotation", convert(expr.getBody()));
+    return construct("QuotationExpression", convert(expr.getBody()));
   }
 
   @Override
@@ -373,27 +404,28 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     }
     Obj fieldsArray = mInterpreter.createArray(fields);
     
-    return construct("Record", fieldsArray);
+    return construct("RecordExpression", fieldsArray);
   }
 
   @Override
   public Obj visit(ReturnExpr expr, Void dummy) {
-    return construct("Return", convert(expr.getValue()));
+    return construct("ReturnExpression", convert(expr.getValue()));
   }
 
   @Override
   public Obj visit(ScopeExpr expr, Void dummy) {
-    return construct("Scope", convert(expr.getBody()));
+    return construct("ScopeExpression", convert(expr.getBody()));
   }
 
   @Override
   public Obj visit(StringExpr expr, Void dummy) {
-    return construct("String", mInterpreter.createString(expr.getValue()));
+    return construct("StringExpression",
+        mInterpreter.createString(expr.getValue()));
   }
 
   @Override
   public Obj visit(ThisExpr expr, Void dummy) {
-    return construct("This");
+    return construct("ThisExpression");
   }
 
   @Override
@@ -404,12 +436,12 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     }
     Obj fieldsArray = mInterpreter.createArray(fields);
     
-    return construct("Tuple", fieldsArray);
+    return construct("TupleExpression", fieldsArray);
   }
 
   @Override
   public Obj visit(TypeofExpr expr, Void dummy) {
-    return construct("Typeof", convert(expr.getBody()));
+    return construct("TypeofExpression", convert(expr.getBody()));
   }
 
   @Override
@@ -420,13 +452,13 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     // If the unquoted value is a primitive object, automatically promote it to
     // a corresponding literal.
     if (value.getClassObj() == mInterpreter.getBoolClass()) {
-      value = construct("Bool", value);
+      value = construct("BoolExpression", value);
     } else if (value.getClassObj() == mInterpreter.getIntClass()) {
-      value = construct("Int", value);
+      value = construct("IntExpression", value);
     } else if (value.getClassObj() == mInterpreter.getStringClass()) {
-      value = construct("String", value);
+      value = construct("StringExpression", value);
     } else if (value.getClassObj() == mInterpreter.getNothingClass()) {
-      value = construct("Nothing", value);
+      value = construct("NothingExpression", value);
     }
     
     return value;
@@ -437,7 +469,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     Obj type = convert(expr.getType());
     Obj value = convert(expr.getValue());
     
-    return construct("UnsafeCast", type, value);
+    return construct("UnsafeCastExpression", type, value);
   }
 
   @Override
@@ -445,11 +477,11 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     Obj pattern = PatternConverter.convert(
         expr.getPattern(), mInterpreter, mContext);
     
-    return construct("Variable", pattern, convert(expr.getValue()));
+    return construct("VariableExpression", pattern, convert(expr.getValue()));
   }
   
   private Obj construct(String className, Obj... args) {
-    return mInterpreter.construct(className + "Expression", args);
+    return mInterpreter.construct(className, args);
   }
   
   private ExprConverter(Interpreter interpreter, EvalContext context) {

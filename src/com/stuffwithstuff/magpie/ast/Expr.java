@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.parser.Position;
@@ -116,6 +117,11 @@ public abstract class Expr {
   
   public static Expr loop(Position position, Expr body) {
     return new LoopExpr(position, body);
+  }
+  
+  public static Expr match(Position position,
+      Expr value, List<MatchCase> cases) {
+    return new MatchExpr(position, value, cases);
   }
   
   public static Expr message(Position position, Expr receiver, String name, Expr arg) {

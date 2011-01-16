@@ -7,6 +7,7 @@ import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
 import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
+import com.stuffwithstuff.magpie.ast.pattern.WildcardPattern;
 import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.util.Pair;
 
@@ -222,16 +223,20 @@ public class MagpieParser extends Parser {
       // Parse any catch clauses.
       Expr catchExpr = null;
       if (parseCatch) {
+        Position position = current().getPosition();
         List<MatchCase> catches = new ArrayList<MatchCase>();
         while (match(TokenType.CATCH)) {
           catches.add(parseCatch(keyword1, keyword2, endTokens));
         }
         
-        // TODO(bob): This is all pretty hokey.
+        // TODO(bob): This is kind of hokey.
         if (catches.size() > 0) {
           Expr valueExpr = Expr.name("__err__");
           Expr elseExpr = Expr.message(Expr.name("Runtime"), "throw", valueExpr);
-          catchExpr = MatchExprParser.desugarCases(valueExpr, catches, elseExpr);
+          catches.add(new MatchCase(new WildcardPattern(), elseExpr));
+          
+          position = position.union(last(1).getPosition());
+          catchExpr = Expr.match(position, valueExpr, catches);
         }
       }
       

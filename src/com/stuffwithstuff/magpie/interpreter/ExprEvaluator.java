@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.stuffwithstuff.magpie.ast.*;
+import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
+import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.util.Pair;
 
 /**
@@ -179,6 +181,28 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     // TODO(bob): It would be cool if loops could have "else" clauses and then
     // reliably return a value.
     return mInterpreter.nothing();
+  }
+
+  @Override
+  public Obj visit(MatchExpr expr, EvalContext context) {
+    Obj value = evaluate(expr.getValue(), context);
+    
+    // Try each pattern until we get a match.
+    for (MatchCase matchCase : expr.getCases()) {
+      Pattern pattern = matchCase.getPattern();
+      
+      if (PatternTester.test(mInterpreter, pattern,
+          value, context)) {
+        // Matched. Bind variables and evaluate the body.
+        context = context.pushScope();
+        PatternBinder.bind(mInterpreter, pattern, value, context);
+        
+        return evaluate(matchCase.getBody(), context);
+      }
+    }
+    
+    // If we got here, no patterns matched.
+    return mInterpreter.throwError("NoMatchError");
   }
 
   @Override

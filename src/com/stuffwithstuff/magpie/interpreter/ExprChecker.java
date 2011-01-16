@@ -266,6 +266,12 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
+  public Obj visit(MatchExpr expr, EvalContext context) {
+    // TODO(bob): Not implemented. Need to spec match type-check behavior first.
+    return mInterpreter.nothing();
+  }
+
+  @Override
   public Obj visit(MessageExpr expr, EvalContext context) {
     Obj receiver = check(expr.getReceiver(), context);
     

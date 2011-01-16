@@ -11,6 +11,7 @@ public interface ExprVisitor<R, C> {
   R visit(IfExpr expr, C context);
   R visit(IntExpr expr, C context);
   R visit(LoopExpr expr, C context);
+  R visit(MatchExpr expr, C context);
   R visit(MessageExpr expr, C context);
   R visit(NothingExpr expr, C context);
   R visit(OrExpr expr, C context);
