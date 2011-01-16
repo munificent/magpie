@@ -9,6 +9,7 @@ import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.util.Expect;
+import com.stuffwithstuff.magpie.util.Pair;
 
 /**
  * Base class for AST expression node classes. Any chunk of Magpie code can be
@@ -162,6 +163,11 @@ public abstract class Expr {
   
   public static Expr quote(Position position, Expr body) {
     return new QuotationExpr(position, body);
+  }
+
+  public static Expr record(Position position,
+      List<Pair<String, Expr>> fields) {
+    return new RecordExpr(position, fields);
   }
 
   public static Expr scope(Expr body) {

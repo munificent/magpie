@@ -227,7 +227,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
       Expr value = convert(interpreter, field.getTupleField(1));
       fields.add(new Pair<String, Expr>(name, value));
     }
-    return new RecordExpr(Position.none(), fields);
+    return Expr.record(Position.none(), fields);
   }
 
   private static Expr convertReturnExpr(Interpreter interpreter, Obj expr) {

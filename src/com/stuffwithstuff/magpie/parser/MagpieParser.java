@@ -171,7 +171,7 @@ public class MagpieParser extends Parser {
         // An arrow, but no return type, so infer nothing.
         returnType = Expr.name("Nothing");
       } else {
-        returnType = parseTypeExpression();
+        returnType = TypeParser.parse(this);
       }
       consume(right);
     }
@@ -183,11 +183,10 @@ public class MagpieParser extends Parser {
     return consumeAny(TokenType.NAME, TokenType.OPERATOR).getString();
   }
   
-  public Expr parseTypeExpression() {
-    // Any Magpie expression can be used as a type declaration.
+  public Expr parseOperator() {
     return operator();
   }
-
+  
   @Override
   protected boolean isKeyword(String name) {
     return ((mKeywordParsers != null) && mKeywordParsers.containsKey(name)) ||
@@ -312,7 +311,7 @@ public class MagpieParser extends Parser {
         fields.add(new Pair<String, Expr>(name, value));
       } while (match(TokenType.COMMA));
       
-      return new RecordExpr(position, fields);
+      return Expr.record(position, fields);
     } else {
       List<Expr> fields = new ArrayList<Expr>();
       do {
@@ -527,7 +526,7 @@ public class MagpieParser extends Parser {
           // An arrow, but no return type, so infer nothing.
           returnType = Expr.name("Nothing");
         } else {
-          returnType = parseTypeExpression();
+          returnType = TypeParser.parse(this);
         }
         consume(TokenType.RIGHT_PAREN);
       }

@@ -106,12 +106,12 @@ public class InterfaceExprParser implements ExprParser {
             Expr.tuple(Expr.string(member),
                 makeTypeFunction(typeParams, methodType))));
       } else if (memberType.equals("get")) {
-        Expr getterType = parser.parseTypeExpression();
+        Expr getterType = TypeParser.parse(parser);
         exprs.add(Expr.message(Expr.name(name), Name.DECLARE_GETTER,
             Expr.tuple(Expr.string(member),
                 makeTypeFunction(typeParams, getterType))));
       } else if (memberType.equals("set")) {
-        Expr setterType = parser.parseTypeExpression();
+        Expr setterType = TypeParser.parse(parser);
         exprs.add(Expr.message(Expr.name(name), Name.DECLARE_SETTER,
             Expr.tuple(Expr.string(member),
                 makeTypeFunction(typeParams, setterType))));

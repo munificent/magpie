@@ -6,7 +6,6 @@ import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FunctionType;
-import com.stuffwithstuff.magpie.ast.RecordExpr;
 import com.stuffwithstuff.magpie.ast.pattern.TypePattern;
 import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.interpreter.Callable;
@@ -65,7 +64,7 @@ public class ClassConstruct implements Callable {
       }
     }
 
-    Expr recordType = new RecordExpr(Position.none(), fields);
+    Expr recordType = Expr.record(Position.none(), fields);
     
     FunctionType type = new FunctionType(new VariablePattern("arg", 
         new TypePattern(recordType)), Expr.name(mClass.getName()), false);

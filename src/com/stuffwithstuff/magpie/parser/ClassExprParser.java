@@ -126,7 +126,7 @@ public class ClassExprParser implements ExprParser {
     if (parser.lookAhead(TokenType.EQUALS)) {
       type = Expr.nothing();
     } else {
-      type = Expr.fn(parser.parseTypeExpression());
+      type = Expr.fn(TypeParser.parse(parser));
     }
     
     if (parser.match(TokenType.EQUALS)) {
@@ -157,7 +157,7 @@ public class ClassExprParser implements ExprParser {
       // If no type is provided, default to Dynamic.
       type = Expr.name("Dynamic");
     } else {
-      type = parser.parseTypeExpression();
+      type = TypeParser.parse(parser);
     }
     
     if (parser.match(TokenType.EQUALS)) {

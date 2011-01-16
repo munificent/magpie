@@ -43,20 +43,20 @@ public class PatternParser {
    * @return
    */
   public static Pattern parse(MagpieParser parser) {
-    return parseTuplePattern(parser);
+    return composite(parser);
   }
   
-  private static Pattern parseTuplePattern(MagpieParser parser) {
+  private static Pattern composite(MagpieParser parser) {
     List<Pattern> patterns = new ArrayList<Pattern>();
     do {
-      patterns.add(parsePrimaryPattern(parser));
+      patterns.add(variable(parser));
     } while(parser.match(TokenType.COMMA));
     
     if (patterns.size() == 1) return patterns.get(0);
     return new TuplePattern(patterns);
   }
   
-  private static Pattern parsePrimaryPattern(MagpieParser parser) {
+  private static Pattern variable(MagpieParser parser) {
     // See if there is a binding for the pattern.
     String name = null;
     if (parser.current().getType() == TokenType.NAME) {
@@ -67,50 +67,37 @@ public class PatternParser {
       }
     }
     
-    // Parse the pattern itself.
-    Pattern pattern = null;
-    if (parser.match(TokenType.BOOL)) {
-      pattern = new ValuePattern(Expr.bool(parser.last(1).getBool()));
-    } else if (parser.match(TokenType.INT)) {
-      pattern = new ValuePattern(Expr.int_(parser.last(1).getInt()));
-    } else if (parser.match(TokenType.STRING)) {
-      pattern = new ValuePattern(Expr.string(parser.last(1).getString()));
-    } else if (parser.match(TokenType.LEFT_PAREN)) {
-      // TODO(bob): This may not be ideal. This means that:
-      // foo (A => B)
-      // will be parsed as VarPattern("foo", ValuePattern(A => B))
-      // but this:
-      // foo A => B
-      // will be parsed as VarPattern("foo", TypePattern(A => B))
-      pattern = parse(parser);
-      parser.consume(TokenType.RIGHT_PAREN);
-    } else if (parser.lookAhead(TokenType.NAME)) {
-      Expr expr = parser.parseTypeExpression();
-      
-      // The rule is, a name (or _) before a pattern indicates that it matches
-      // against the value's type. Otherwise it does a straight equality test
-      // against the value.
-      if (name != null) {
-        pattern = new TypePattern(expr);
-      } else {
-        pattern = new ValuePattern(expr);
-      }
+    // If we don't have a name, it must be a value pattern.
+    if (name == null) {
+      return value(parser);
     }
     
-    if (name == null) {
-      if (pattern == null) {
-        throw new ParseException("Could not parse pattern.");
-      }
-      
-      return pattern;
+    // See if there is a type for the variable.
+    Pattern type = null;
+    if (parser.lookAheadAny(TokenType.NAME, TokenType.LEFT_PAREN)) {
+      Expr expr = TypeParser.parse(parser);
+      type = new TypePattern(expr);
     }
     
     if (name.equals("_")) {
-      if (pattern == null) return new WildcardPattern();
-      return pattern;
+      if (type == null) return new WildcardPattern();
+      return type;
     }
     
-    return new VariablePattern(name, pattern);
+    return new VariablePattern(name, type);
+  }
+  
+  private static Pattern value(MagpieParser parser) {
+    // See if it's a nested pattern.
+    if (parser.match(TokenType.LEFT_PAREN)) {
+      Pattern inner = composite(parser);
+      parser.consume(TokenType.RIGHT_PAREN);
+      return inner;
+    }
+    
+    // Must just be a value.
+    Expr expr = parser.parseOperator();
+    return new ValuePattern(expr);
   }
   
   private PatternParser() {}

@@ -6,7 +6,7 @@ import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.util.Pair;
 
 public class RecordExpr extends Expr {
-  public RecordExpr(Position position, List<Pair<String, Expr>> fields) {
+  RecordExpr(Position position, List<Pair<String, Expr>> fields) {
     super(position);
     
     mFields = fields;
