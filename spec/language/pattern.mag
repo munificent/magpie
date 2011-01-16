@@ -14,22 +14,6 @@ specify("A tuple pattern") with
     end
 end
 
-specify("A type pattern") with
-    it should("be created if there is a leading variable") with
-        match 123
-            case a Bool then "no"
-            case a Int then "yes"
-        end shouldBe("yes")
-    end
-
-    it should("be created if there is a leading wildcard") with
-        match 123
-            case _ Bool then "no"
-            case _ Int then "yes"
-        end shouldBe("yes")
-    end
-end
-
 specify("A value pattern") with
     it should("match a literal bool value") with
         match true
@@ -61,19 +45,24 @@ specify("A value pattern") with
 end
 
 specify("A variable pattern") with
-    it should("always match if it has no subpattern") with
+    it should("always match if it has no type") with
         match "whatever"
             case a      then "yes"
             case "else" then "no"
         end shouldBe("yes")
     end
-end
-
-specify("A wildcard pattern") with
-    it should("always match") with
-        match "whatever"
-            case _      then "yes"
-            case "else" then "no"
+    
+    it should("allow a type after the name") with
+        match 123
+            case a Bool then "no"
+            case a Int then "yes"
         end shouldBe("yes")
+    end
+
+    it should("not bind if the name is a wildcard") with
+        match "whatever"
+            case _      then _
+            case "else" then "no"
+        end shouldBe(nothing)
     end
 end
