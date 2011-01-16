@@ -1,0 +1,101 @@
+specify("A 'match' expression") with
+    it should("have the type of the union of the case body types") with
+        (typeof match 1
+            case 1 then 123
+            case 2 then "str"
+            else true
+        end) shouldBe(Bool | Int | String)
+    end
+        
+    it should("should not have Never in the type if there is no else case") with
+        (typeof match 1
+            case 1 then 123
+            case 2 then "str"
+        end) shouldBe(Int | String)
+    end
+
+    it should("use the tuple's field type when decomposing a tuple") with
+        (typeof match 1, "two"
+            case a, b then a
+        end) shouldBe(Int)
+
+        (typeof match 1, "two"
+            case a, b then b
+        end) shouldBe(String)
+    end
+    
+    it should("type a bound variable if given a type") with
+        fn
+            def expectString(s String) nothing
+            def expectInt(i Int) nothing
+            match unsafecast[Any]("s")
+                case s String then expectString(s)
+                case i Int    then expectInt(i)
+            end
+        end shouldCheck()
+        
+        fn
+            def expectString(s String) nothing
+            match unsafecast[Any]("s")
+                case i Int then expectString(i)
+            end
+        end shouldNotCheck()
+    end
+    
+    it should("not allow a literal that isn't compatible with the value") with
+        fn
+            match "s"
+                case true then "ignore"
+            end
+        end shouldNotCheck()
+        
+        fn
+            match "s"
+                case 1 then "ignore"
+            end
+        end shouldNotCheck()
+
+        fn
+            match 123
+                case "s" then "ignore"
+            end
+        end shouldNotCheck()
+    end
+        
+    it should("not allow a type that isn't a subtype of the value") with
+        envExpectCheckOK with
+            interface Super
+                def member()
+            end
+            
+            class Sub
+                def member() nothing
+            end
+            
+            def main(->)
+                match unsafecast[Super](nothing)
+                    case _ Sub then "dummy"
+                end
+            end
+        end
+
+        envExpectCheckError with
+            interface Super
+                def member()
+            end
+            
+            class NotSub
+            end
+            
+            def main(->)
+                match unsafecast[Super](nothing)
+                    case _ NotSub then "dummy"
+                end
+            end
+        end
+    end
+    
+    // todo:
+    // can't have tuple patterns if the value doesn't have _1, _2, etc.
+    // can't match on types that aren't subtypes of the value type
+end

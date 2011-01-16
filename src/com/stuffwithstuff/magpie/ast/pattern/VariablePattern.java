@@ -1,6 +1,5 @@
 package com.stuffwithstuff.magpie.ast.pattern;
 
-import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 
 public class VariablePattern implements Pattern {
@@ -19,14 +18,6 @@ public class VariablePattern implements Pattern {
   public String getName() { return mName; }
   public Pattern getPattern() { return mPattern; }
   
-  public Expr createPredicate(Expr value) {
-    if (mPattern != null) {
-      return mPattern.createPredicate(value);
-    } else {
-      return Expr.bool(true);
-    }
-  }
-
   @Override
   public <R, C> R accept(PatternVisitor<R, C> visitor, C context) {
     return visitor.visit(this, context);

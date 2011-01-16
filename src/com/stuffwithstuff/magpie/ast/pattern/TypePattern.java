@@ -10,10 +10,6 @@ public class TypePattern implements Pattern {
   
   public Expr getType() { return mType; }
 
-  public Expr createPredicate(Expr value) {
-    return Expr.staticMessage(value, "is", mType);
-  }
-
   @Override
   public <R, C> R accept(PatternVisitor<R, C> visitor, C context) {
     return visitor.visit(this, context);

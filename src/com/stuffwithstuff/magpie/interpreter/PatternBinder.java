@@ -1,5 +1,6 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.*;
 import com.stuffwithstuff.magpie.parser.Position;
 
@@ -12,31 +13,15 @@ import com.stuffwithstuff.magpie.parser.Position;
 public class PatternBinder implements PatternVisitor<Void, Obj> {
   public static void bind(final Interpreter interpreter, Pattern pattern,
       Obj value, EvalContext context) {
-
-    RedefinitionHandler handler = new RedefinitionHandler() {
-      public void handle(String name) {
-        // Cannot redefine a variable in the same scope.
-        interpreter.throwError("RedefinitionError");
-      }
-    };
-    
-    PatternBinder binder = new PatternBinder(interpreter, context, handler);
+    PatternBinder binder = new PatternBinder(null, interpreter,
+        Position.none(), context);
     pattern.accept(binder, value);
   }
 
   public static void bind(final Checker checker, final Position position,
       Pattern pattern, Obj value, EvalContext context) {
-
-    RedefinitionHandler handler = new RedefinitionHandler() {
-      public void handle(String name) {
-        checker.addError(position,
-            "There is already a variable named \"%s\" declared in this scope.",
-            name);
-      }
-    };
-
-    PatternBinder binder = new PatternBinder(checker.getInterpreter(),
-        context, handler);
+    PatternBinder binder = new PatternBinder(checker, checker.getInterpreter(),
+        position, context);
     pattern.accept(binder, value);
   }
 
@@ -54,13 +39,27 @@ public class PatternBinder implements PatternVisitor<Void, Obj> {
 
   @Override
   public Void visit(TypePattern pattern, Obj value) {
-    // Do nothing.
+    // If we're type-checking, make sure the type of the pattern's value is
+    // compatible with the type being matched.
+    if (mChecker != null) {
+      Obj matchedType = mInterpreter.evaluate(pattern.getType());
+      mChecker.checkTypes(value, matchedType, Position.none(),
+          "Cannot match a value of type %s against type %s.");
+    }
+
     return null;
   }
 
   @Override
   public Void visit(ValuePattern pattern, Obj value) {
-    // Do nothing.
+    // If we're type-checking, make sure the type of the pattern's value is
+    // compatible with the type being matched.
+    if (mChecker != null) {
+      Obj matchedType = mChecker.evaluateExpressionType(pattern.getValue());
+      mChecker.checkTypes(value, matchedType, Position.none(),
+          "Cannot match a value of type %s against a pattern of type %s.");
+    }
+
     return null;
   }
 
@@ -73,10 +72,23 @@ public class PatternBinder implements PatternVisitor<Void, Obj> {
     
     // Bind the variable.
     if (mContext.lookUpHere(pattern.getName()) == null) {
+      // If the variable has a type, and we're type-checking, use that type
+      // instead.
+      if ((mChecker != null) && (pattern.getPattern() instanceof TypePattern)) {
+        Expr type = ((TypePattern)pattern.getPattern()).getType();
+        value = mInterpreter.evaluate(type);
+      }
+      
       mContext.define(pattern.getName(), value);
     } else {
       // Cannot redefine a variable in the same scope.
-      mErrorHandler.handle(pattern.getName());
+      if (mChecker != null) {
+        mChecker.addError(mPosition,
+            "There is already a variable named \"%s\" declared in this scope.",
+            pattern.getName());
+      } else {
+        mInterpreter.throwError("RedefinitionError");
+      }
     }
 
     return null;
@@ -88,18 +100,16 @@ public class PatternBinder implements PatternVisitor<Void, Obj> {
     return null;
   }
   
-  private interface RedefinitionHandler {
-    void handle(String name);
-  }
-  
-  private PatternBinder(Interpreter interpreter, EvalContext context,
-      RedefinitionHandler errorHandler) {
+  private PatternBinder(Checker checker, Interpreter interpreter,
+      Position position, EvalContext context) {
+    mChecker = checker;
     mInterpreter = interpreter;
+    mPosition = position;
     mContext = context;
-    mErrorHandler = errorHandler;
   }
   
+  private final Checker mChecker;
   private final Interpreter mInterpreter;
+  private final Position mPosition;
   private final EvalContext mContext;
-  private final RedefinitionHandler mErrorHandler;
 }

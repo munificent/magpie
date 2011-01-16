@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.stuffwithstuff.magpie.ast.*;
+import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.util.NotImplementedException;
 import com.stuffwithstuff.magpie.util.Pair;
@@ -194,6 +195,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       result = check(thisExpr, context, allowReturn);
     }
     
+    // TODO(bob): Need to check catch clauses.
+    
     return result;
   }
 
@@ -267,8 +270,26 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(MatchExpr expr, EvalContext context) {
-    // TODO(bob): Not implemented. Need to spec match type-check behavior first.
-    return mInterpreter.nothing();
+    Obj valueType = check(expr.getValue(), context);
+    
+    Obj returnType = null;
+    for (MatchCase matchCase : expr.getCases()) {
+      // Bind the pattern's variable types in a new scope for the case body.
+      EvalContext caseContext = context.pushScope();
+      PatternBinder.bind(mChecker, expr.getPosition(), matchCase.getPattern(),
+          valueType, caseContext);
+      
+      Obj caseType = check(matchCase.getBody(), caseContext);
+      
+      // A match expression's return type includes all of the case body types.
+      if (returnType == null) {
+        returnType = caseType;
+      } else {
+        returnType = orTypes(returnType, caseType);
+      }
+    }
+    
+    return returnType;
   }
 
   @Override
