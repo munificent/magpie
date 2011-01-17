@@ -16,7 +16,7 @@ Messages are also used to look up methods. When you do a method call in Magpie, 
     :::magpie
     list add("item")
 
-Two operations are actually occurring here. First, we send the `add` message to `list`. That returns a reference to the method [function](functions.html) with `this` bound to `list`. Then we call that function, passing in `"item"`. In other words, like C++, Magpie has no special syntax for calling methods, it just uses messages to look them up and function application to call them.
+Two operations are actually occurring here. First, we send the `add` message to `list`. That returns a reference to the method [function](functions.html) with `this` bound to `list`. Then we call that function, passing in `"item"`. In other words, like Python, Magpie has no special syntax for calling methods, it just uses messages to look them up and function application to call them.
 
 It also means that you can grab a reference to a method and invoke it later. This is perfectly valid:
 
@@ -55,7 +55,3 @@ In C++/Java-style OOP syntax, that would be:
     first().second().third();
 
 Magpie just ditches a lot of the punctuation.
-
-<p class="future">
-I need to document getters and setters either here or under classes.
-</p>
