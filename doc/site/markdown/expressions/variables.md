@@ -54,14 +54,15 @@ are still strongly statically typed.
 
 ### Scope
 
-Variables in Magpie have true block scope: the exist from the point they are defined until the end of the scope in which they are defined.
+Variables in Magpie have true block scope: the exist from the point they are defined until the end of the [block](blocks.html) in which they are defined.
 
     :::magpie
-    if true then
-        // a does not exist here.
+    do
+        print(a) // "nothing"
         var a = 123
-        // a exists here.
-    end // a does not exist here.
+        print(a) // "123"
+    end
+    print(a) // "nothing"
 
 ### Shadowing
 
@@ -108,5 +109,5 @@ Like variable definition, an assignment expression returns the assigned value:
     print(a = "after") // prints "after"
 
 <p class="future">
-I need to document assigment messages here. Also, Magpie will have multiple assignment (i.e. tuple and record destructuring) at some point.
+I need to document assigment messages here. Need to update now that patterns are used.
 </p>

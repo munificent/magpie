@@ -17,13 +17,17 @@ Comments are as in C, C++, Java, etc.:
 
 ## Names
 
-Magpie is more ended when it comes to names than most other languages. Regular identifiers, used for things like [variables](expressions/variables.html) and [messages](expressions/messages.html) can consist of letters, numbers, underscores, and even most punctuation characters. These are all valid names:
+Magpie is more ended when it comes to names than most other languages. Regular identifiers, used for things like [variables](expressions/variables.html) and [messages](expressions/messages.html) can consist of letters, numbers, underscores, and even many punctuation characters. These are all valid names:
 
     :::magpie
     hi
+    +
     using-hyphens
     numb3r5_r_0k_2
     even_!$%_this_^&*_is_<>=_valid
+    $%^*
+
+### Whitespace
 
 This flexibility has a side effect that might trip you up at first (but I
 hope only at first): whitespace must be used to separate names, operators, and

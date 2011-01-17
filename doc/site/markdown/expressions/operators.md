@@ -1,24 +1,44 @@
 ^title Operators
 
-Like Smalltalk and Lisp, but unlike most other languages, Magpie does not have any built-in operators. Any name that starts with a punctuation character defines an *operator*. These are all valid operators:
+Like Smalltalk and Lisp, but unlike most other languages, Magpie does not have any built-in operators. Any name that contains *only* punctuation characters is considered an *operator*. These are all valid operators:
 
     :::magpie
-    +   -   /   *#$%   +something    *3
+    +   -   /   *#$%    *3
 
-The only difference between an operator and a regular identifier is that operators appear in infix position&mdash; the two arguments to them surround the operator.
-
-<p class="future">
-This is out-of-date. Operators don't work this way any more!
-</p>
+The only difference between an operator and a regular [message](messages.html) is that operators appear in infix position&mdash; the two arguments to them surround the operator.
 
 ## Using Operators
 
 Operators are used just like you'd expect:
 
     :::magpie
-    1 + 2 // Evaluates to three.
+    1 + 2 // Evaluates to 3.
 
-Under the hood, that gets translated to calling the `+` method on `1`, passing in `2` as the argument. This means that operators aren't totally symmetric: the left-hand argument becomes the receiver, so it has greater control over how the operator is handled.
+Under the hood, the parser will simplify that to a regular function [call](calls.html). The above example will be spit out by the parser like:
+
+    :::magpie
+    +(1, 2)
+
+This means that defining your own operators is just defining a function that takes two arguments. If we wanted to create an operator that repeats a given string a certain number of times, we could define it like this:
+
+    :::magpie
+    def **(string String, count Int -> String)
+        var result = ""
+        for i = 1 to(count) do result = result ~ string
+        result
+    end
+    
+    var thrice = "beep" ** 3 // "beepbeepbeep"
+
+## Overloading Operators
+
+An operator is just a function bound to a variable whose happens to be punctuation. This means there's no real way to overload operators. If you define an operator with the same name as an existing one, it will either replace or shadow it.
+
+<p class="future">This may change if I can get multimethods working.</p>
+
+To get around this limitation, the common operators defined in the base library that you would need to be able to overload, such as equality (`==`) work by calling a method on one or both of their operands. In order to allow your class to be used with `==`, you just need to add a shared `equal?` method on your class that compares the two instances, and the `==` operator will call that when the operands are of your class's type.
+
+## Precedence and Associativity
 
 Because Magpie doesn't have a fixed set of operators, it also doesn't have a complex precedence or associativity table for them either. Instead, all operators have the same precedence and associate left to right. In other words, this in Magpie:
 

@@ -1,6 +1,6 @@
 class Monster
     def attack()
-        print("The " + name + " attacks you!")
+        print("The " ~ name ~ " attacks you!")
     end
     
     get name String = "monster"
