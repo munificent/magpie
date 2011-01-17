@@ -12,5 +12,5 @@ def fibs(n)
 end
 
 for i = 0 until(20) do
-    print(i string + ": " + fibs(i))
+    print(i ~ ": " ~ fibs(i))
 end

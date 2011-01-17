@@ -78,7 +78,7 @@ end
 
 class StackItem
     shared def new(item Int, rest StackItem | Nothing -> StackItem)
-        construct(item: item rest: rest)
+        construct(item: item, rest: rest)
     end
     
     var item Int
@@ -93,21 +93,21 @@ def calculate(text String -> Int)
     for token = Tokenizer new(text) do
         let i = Int parse(token) then
             stack push(i)
-            print("push " + i)
+            print("push " ~ i)
         else if token == "+" then
             var right = stack pop()
             var left  = stack pop()
             var sum   = left + right
-            print("add  " + left + " + " + right + " = " + sum)
+            print("add  " ~ left ~ " + " ~ right ~ " = " ~ sum)
             stack push(sum)
         else if token == "*" then
             var right   = stack pop()
             var left    = stack pop()
             var product = left * right
-            print("mult " + left + " * " + right + " = " + product)
+            print("mult " ~ left ~ " * " ~ right ~ " = " ~ product)
             stack push(product)
         else
-            print("unknown op " + token)
+            print("unknown op " ~ token)
         end
     end
     
@@ -118,5 +118,5 @@ end
 
 def main(->)
     var result = calculate("3 2 * 4 2 * +")
-    print("result: " + result)
+    print("result: " ~ result)
 end

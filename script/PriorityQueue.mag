@@ -65,7 +65,7 @@ class PriorityQueue
         for item = items do add(item)
     end
     
-    var heap Array newType(Dynamic) = Array new()
+    var heap List(Dynamic) = Array new()
 end
 
 def expect(queue, items)
@@ -73,12 +73,12 @@ def expect(queue, items)
     for item = items do
         var top = queue dequeue()
         if top != item then
-            print("FAIL: Expected " + item + " and got " + top)
+            print("FAIL: Expected " ~ item ~ " and got " ~ top)
             success = false
         end
     end
     
-    if success then print("Got all expected: " + items);
+    if success then print("Got all expected: " ~ items);
 end
 
 def main(->)
