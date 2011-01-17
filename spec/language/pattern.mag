@@ -1,3 +1,19 @@
+specify("A record pattern") with
+    it should("match subpatterns against fields") with
+        match a: 1, b: 2
+            case a: 1, b: 3 then "no"
+            case a: 3, b: 2 then "no"
+            case a: 1, b: 2 then "yes"
+        end shouldBe("yes")
+    end
+
+    it should("bind a variable to a field") with
+        match a: "one", b: (c: "two", d: "three")
+            case a: a, b: (c: b, d: c) then a ~ b ~ c
+        end shouldBe("onetwothree")
+    end
+end
+
 specify("A tuple pattern") with
     it should("match subpatterns against fields") with
         match 1, 2
@@ -6,7 +22,7 @@ specify("A tuple pattern") with
             case 1, 2 then "yes"
         end shouldBe("yes")
     end
-    
+
     it should("bind a variable to a field") with
         match "one", ("two", "three")
             case a, (b, c) then a ~ b ~ c
@@ -51,7 +67,7 @@ specify("A variable pattern") with
             case "else" then "no"
         end shouldBe("yes")
     end
-    
+
     it should("allow a type after the name") with
         match 123
             case a Bool then "no"

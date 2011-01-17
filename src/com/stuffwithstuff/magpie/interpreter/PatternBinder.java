@@ -2,6 +2,7 @@ package com.stuffwithstuff.magpie.interpreter;
 
 import com.stuffwithstuff.magpie.ast.pattern.*;
 import com.stuffwithstuff.magpie.parser.Position;
+import com.stuffwithstuff.magpie.util.Pair;
 
 /**
  * Given a pattern, a value, and a context, destructures the value and binds
@@ -24,6 +25,18 @@ public class PatternBinder implements PatternVisitor<Void, Obj> {
     pattern.accept(binder, value);
   }
 
+  @Override
+  public Void visit(RecordPattern pattern, Obj value) {
+    // Destructure each field.
+    for (int i = 0; i < pattern.getFields().size(); i++) {
+      Pair<String, Pattern> field = pattern.getFields().get(i);
+      Obj fieldValue = mInterpreter.getMember(Position.none(), value, field.getKey());
+      field.getValue().accept(this, fieldValue);
+    }
+    
+    return null;
+  }
+  
   @Override
   public Void visit(TuplePattern pattern, Obj value) {
     // Destructure each field.

@@ -16,7 +16,7 @@ import com.stuffwithstuff.magpie.parser.TypeParser;
 import com.stuffwithstuff.magpie.util.Pair;
 
 public abstract class BuiltIns {
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   public static void registerClass(Class javaClass, ClassObj magpieClass)
   {
     for (Class innerClass : javaClass.getDeclaredClasses()) {
@@ -37,7 +37,7 @@ public abstract class BuiltIns {
     }
   }
   
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   public static void registerFunctions(Class javaClass,
       Interpreter interpreter) {
     for (Class innerClass : javaClass.getDeclaredClasses()) {
@@ -50,7 +50,7 @@ public abstract class BuiltIns {
   
   // TODO(bob): These are all almost identical. Refactor.
   
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   private static void registerFunction(Interpreter interpreter,
       Class innerClass, String signature) {
     try {
@@ -89,7 +89,7 @@ public abstract class BuiltIns {
     }
   }
   
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   private static void registerMethod(ClassObj classObj, Class innerClass,
       String signature) {
     try {
@@ -132,7 +132,7 @@ public abstract class BuiltIns {
     }
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   private static void registerGetter(ClassObj classObj, Class innerClass,
       String signature) {
     try {
@@ -175,7 +175,7 @@ public abstract class BuiltIns {
     }
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   private static void registerSetter(ClassObj classObj, Class innerClass,
       String signature) {
     try {

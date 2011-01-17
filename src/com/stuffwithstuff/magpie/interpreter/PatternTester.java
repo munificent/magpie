@@ -2,6 +2,7 @@ package com.stuffwithstuff.magpie.interpreter;
 
 import com.stuffwithstuff.magpie.ast.pattern.*;
 import com.stuffwithstuff.magpie.parser.Position;
+import com.stuffwithstuff.magpie.util.Pair;
 
 /**
  * Determines if a pattern matches a given value.
@@ -14,6 +15,19 @@ public class PatternTester implements PatternVisitor<Boolean, Obj> {
     
     PatternTester binder = new PatternTester(interpreter, context);
     return pattern.accept(binder, value);
+  }
+  
+  @Override
+  public Boolean visit(RecordPattern pattern, Obj value) {
+    // Test each field.
+    for (int i = 0; i < pattern.getFields().size(); i++) {
+      Pair<String, Pattern> field = pattern.getFields().get(i);
+      Obj fieldValue = mInterpreter.getMember(Position.none(), value, field.getKey());
+      if (!field.getValue().accept(this, fieldValue)) return false;
+    }
+    
+    // If we got here, the fields all passed.
+    return true;
   }
 
   @Override

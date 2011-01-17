@@ -6,17 +6,21 @@ import java.util.List;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.PatternVisitor;
+import com.stuffwithstuff.magpie.ast.pattern.RecordPattern;
 import com.stuffwithstuff.magpie.ast.pattern.TuplePattern;
 import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
 import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.util.NotImplementedException;
+import com.stuffwithstuff.magpie.util.Pair;
 
 public class PatternConverter implements PatternVisitor<Obj, EvalContext> {
   public static Pattern convert(Interpreter interpreter, Obj pattern) {
     if (pattern == interpreter.nothing()) return null;
     
     ClassObj patternClass = pattern.getClassObj();
-    if (patternClass == interpreter.getGlobal("TuplePattern")) {
+    if (patternClass == interpreter.getGlobal("RecordPattern")) {
+      return convertRecordPattern(interpreter, pattern);
+    } else if (patternClass == interpreter.getGlobal("TuplePattern")) {
       return convertTuplePattern(interpreter, pattern);
     } else if (patternClass == interpreter.getGlobal("ValuePattern")) {
       return convertValuePattern(interpreter, pattern);
@@ -27,6 +31,19 @@ public class PatternConverter implements PatternVisitor<Obj, EvalContext> {
     // TODO(bob): Add better error-handling.
     throw new NotImplementedException(
         "Other pattern types not implemented yet!");
+  }
+  
+  private static Pattern convertRecordPattern(Interpreter interpreter,
+      Obj pattern) {
+    List<Obj> fieldObjs = pattern.getField("fields").asArray();
+    List<Pair<String, Pattern>> fields = new ArrayList<Pair<String, Pattern>>();
+    for (Obj field : fieldObjs) {
+      String name = field.getTupleField(0).asString();
+      Pattern fieldPattern = convert(interpreter, field.getTupleField(1));
+      fields.add(new Pair<String, Pattern>(name, fieldPattern));
+    }
+    
+    return new RecordPattern(fields);
   }
   
   private static Pattern convertTuplePattern(Interpreter interpreter,
@@ -64,6 +81,19 @@ public class PatternConverter implements PatternVisitor<Obj, EvalContext> {
     return converter.convert(pattern, context);
   }
   
+  @Override
+  public Obj visit(RecordPattern pattern, EvalContext context) {
+    List<Obj> fields = new ArrayList<Obj>();
+    for (Pair<String, Pattern> field : pattern.getFields()) {
+      Obj name = mInterpreter.createString(field.getKey());
+      Obj fieldPattern = convert(field.getValue(), context);
+      fields.add(mInterpreter.createTuple(name, fieldPattern));
+    }
+    Obj fieldsArray = mInterpreter.createArray(fields);
+    
+    return mInterpreter.construct("RecordPattern", fieldsArray);
+  }
+
   @Override
   public Obj visit(TuplePattern pattern, EvalContext context) {
     List<Obj> fields = new ArrayList<Obj>();

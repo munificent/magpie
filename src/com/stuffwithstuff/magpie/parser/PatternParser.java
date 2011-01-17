@@ -5,9 +5,11 @@ import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
+import com.stuffwithstuff.magpie.ast.pattern.RecordPattern;
 import com.stuffwithstuff.magpie.ast.pattern.TuplePattern;
 import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
 import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
+import com.stuffwithstuff.magpie.util.Pair;
 
 /**
  * Parses patterns. Patterns are used for match cases, function parameter
@@ -45,13 +47,25 @@ public class PatternParser {
   }
   
   private static Pattern composite(MagpieParser parser) {
-    List<Pattern> patterns = new ArrayList<Pattern>();
-    do {
-      patterns.add(variable(parser));
-    } while(parser.match(TokenType.COMMA));
-    
-    if (patterns.size() == 1) return patterns.get(0);
-    return new TuplePattern(patterns);
+    if (parser.lookAhead(TokenType.FIELD)) {
+      List<Pair<String, Pattern>> fields = new ArrayList<Pair<String, Pattern>>();
+      do {
+        String name = parser.consume(TokenType.FIELD).getString();
+        Pattern value = variable(parser);
+        fields.add(new Pair<String, Pattern>(name, value));
+      } while (parser.match(TokenType.COMMA));
+      
+      return new RecordPattern(fields);
+    } else {
+      List<Pattern> patterns = new ArrayList<Pattern>();
+      do {
+        patterns.add(variable(parser));
+      } while(parser.match(TokenType.COMMA));
+      
+      // Only wrap in a tuple if there are multiple fields.
+      if (patterns.size() == 1) return patterns.get(0);
+      return new TuplePattern(patterns);
+    }
   }
   
   private static Pattern variable(MagpieParser parser) {
