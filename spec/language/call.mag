@@ -22,29 +22,29 @@ specify("A call expression on a function") with
     end
 
     it should("fill missing parameters with nothing") with
-        var f = fn(a, b, c) 
+        var f = fn(a, b, c)
             a shouldBe("a")
             b shouldBe(nothing)
             c shouldBe(nothing)
         end
         f("a")
     end
-    
+
     it should("bind the entire tuple if there is only a single parameter") with
-        var f = fn(a) 
+        var f = fn(a)
             a _0 shouldBe(1)
             a _1 shouldBe(2)
         end
         f(1, 2)
     end
-    
+
     it should("return the result") with
         var f = fn() "result"
         f() shouldBe("result")
     end
 end
 
-specify("A call expression on a non-function") with    
+specify("A call expression on a non-function") with
     it should("send a 'call' message") with
         var c = TestCallable new("result")
         c() shouldBe("result")
@@ -56,9 +56,17 @@ specify("A call expression on a non-function") with
         c("arg")
         c arg shouldBe("arg")
     end
+
+    it should("throw a BadCallError if the object is not callable") with
+        fn
+            nothing()
+        end shouldThrow(BadCallError)
+    end
 end
 
-specify("A static call expression on a non-function") with    
+// TODO(bob): Commented out because static functions are going away.
+/*
+specify("A static call expression on a non-function") with
     it should("send a 'call' message") with
         var c = TestCallable new("result")
         c[] shouldBe("result")
@@ -71,3 +79,4 @@ specify("A static call expression on a non-function") with
         c arg shouldBe("arg")
     end
 end
+*/

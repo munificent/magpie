@@ -269,8 +269,8 @@ public class Interpreter {
           // If we get here, we're in an infinite regress. Since we can't call
           // the target directly, we're sending it a "call" message, but that's
           // returning the exact same object (most likely 'nothing'), so we
-          // aren't making any progress. If that happens, just bail.
-          return mNothing;
+          // aren't making any progress. If that happens, fail.
+          return throwError("BadCallError");
         }
         
         // Loop and try to apply the new target.
