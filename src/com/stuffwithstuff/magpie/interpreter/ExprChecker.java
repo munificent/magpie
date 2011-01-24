@@ -238,7 +238,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     if (expr.isLet()) {
       Obj removeNothing = mInterpreter.getGlobal(Name.UNSAFE_REMOVE_NOTHING);
       Obj letType =  mInterpreter.apply(Position.none(), removeNothing,
-          new ArrayList<Obj>(), conditionType);
+          null, conditionType);
       context.define(expr.getName(), letType);
     }
     

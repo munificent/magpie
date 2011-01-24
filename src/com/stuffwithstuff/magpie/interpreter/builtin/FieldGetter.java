@@ -1,5 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
+import java.util.List;
+
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
@@ -18,7 +20,8 @@ public class FieldGetter extends FieldProperty implements Callable {
   }
   
   @Override
-  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+  public Obj invoke(Interpreter interpreter, Obj thisObj, 
+      List<Obj> typeArgs, Obj arg) {
     Obj value = thisObj.getField(getName());
     if (value == null) return interpreter.nothing();
     return value;

@@ -78,7 +78,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       return value;
     }
 
-    setter.getDefinition().invoke(mInterpreter, receiver, value);
+    setter.getDefinition().invoke(mInterpreter, receiver, null, value);
     return value;
   }
 

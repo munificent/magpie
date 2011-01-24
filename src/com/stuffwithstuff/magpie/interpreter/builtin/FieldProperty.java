@@ -1,5 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
+import java.util.List;
+
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.Checker;
@@ -21,7 +23,8 @@ public abstract class FieldProperty implements Callable {
   }
   
   @Override
-  public abstract Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg);
+  public abstract Obj invoke(Interpreter interpreter, Obj thisObj,
+      List<Obj> typeArgs, Obj arg);
 
   public Obj getType(Interpreter interpreter) {
     if (mIsInitializer) {

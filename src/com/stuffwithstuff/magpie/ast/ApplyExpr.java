@@ -1,5 +1,6 @@
 package com.stuffwithstuff.magpie.ast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -10,7 +11,7 @@ public class ApplyExpr extends Expr {
   ApplyExpr(Expr target, List<Expr> typeArgs, Expr arg) {
     super(target.getPosition().union(arg.getPosition()));
     mTarget = target;
-    mTypeArgs = typeArgs;
+    mTypeArgs = (typeArgs == null) ? new ArrayList<Expr>() : typeArgs;
     mArg = arg;
   }
   

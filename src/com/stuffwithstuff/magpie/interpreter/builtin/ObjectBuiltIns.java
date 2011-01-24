@@ -71,7 +71,7 @@ public class ObjectBuiltIns {
       FnObj block = arg.asFn();
       
       // Ignore the function's bound receiver and use this object instead.
-      return block.getCallable().invoke(interpreter, thisObj, arg);
+      return block.getCallable().invoke(interpreter, thisObj, null, arg);
     }
   }
   

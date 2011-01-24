@@ -60,7 +60,7 @@ public abstract class Expr {
     }
     
     // If we got here, it's not a special form.
-    return new ApplyExpr(target, new ArrayList<Expr>(), arg);
+    return new ApplyExpr(target, null, arg);
   }
   
   public static Expr assign(Position position, Expr receiver, String name,

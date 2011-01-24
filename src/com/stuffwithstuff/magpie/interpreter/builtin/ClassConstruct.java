@@ -29,7 +29,8 @@ public class ClassConstruct implements Callable {
   }
   
   @Override
-  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+  public Obj invoke(Interpreter interpreter, Obj thisObj,
+      List<Obj> typeArgs, Obj arg) {
     ClassObj classObj = thisObj.asClass();
     
     Obj obj = interpreter.instantiate(classObj, null);

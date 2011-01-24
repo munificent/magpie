@@ -200,7 +200,7 @@ public class Interpreter {
     }
     
     Callable mainFn = ((FnObj)main).getCallable();
-    mainFn.invoke(this, mNothing, mNothing);
+    mainFn.invoke(this, mNothing, null, mNothing);
   }
   
   public Obj getMember(Position position, Obj receiver, String name) {
@@ -211,7 +211,7 @@ public class Interpreter {
     if (member != null) {
       switch (member.getType()) {
       case GETTER:
-        return member.getDefinition().invoke(this, receiver, mNothing);
+        return member.getDefinition().invoke(this, receiver, null, mNothing);
         
       case METHOD:
         // Bind it to the receiver.
@@ -246,7 +246,6 @@ public class Interpreter {
 
   public Obj apply(Position position, Obj target, List<Obj> typeArgs, Obj arg) {
     Expect.notNull(target);
-    Expect.notNull(typeArgs);
     Expect.notNull(arg);
     
     while(true) {
@@ -291,7 +290,7 @@ public class Interpreter {
     Expect.notNull(arg);
     
     Obj resolved = getMember(position, receiver, name);
-    return apply(position, resolved, new ArrayList<Obj>(), arg);
+    return apply(position, resolved, null, arg);
   }
 
   public void print(String text) {
@@ -393,7 +392,7 @@ public class Interpreter {
     for (Entry<String, Field> field : classObj.getFieldDefinitions().entrySet()) {
       if (field.getValue().hasInitializer()) {
         Callable initializer = field.getValue().getDefinition();
-        Obj value = initializer.invoke(this, mNothing, mNothing);
+        Obj value = initializer.invoke(this, mNothing, null, mNothing);
         object.setField(field.getKey(), value);
       }
     }
@@ -416,8 +415,7 @@ public class Interpreter {
     if (right == mNeverClass) return left;
     
     Obj orFunction = getGlobal(Name.OR);
-    return apply(Position.none(), orFunction,
-        new ArrayList<Obj>(), createTuple(left, right));
+    return apply(Position.none(), orFunction, null, createTuple(left, right));
   }
 
   public void pushScriptPath(String path) {

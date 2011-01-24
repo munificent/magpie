@@ -22,14 +22,7 @@ public class FnObj extends Obj {
   }
   
   public Obj invoke(Interpreter interpreter, List<Obj> typeArgs, Obj arg) {
-    // See if it handles the type args.
-    if (mCallable instanceof TypeArgCallable) {
-      return ((TypeArgCallable) mCallable).invoke(
-          interpreter, mThis, typeArgs, arg);
-    } else {
-      // Doesn't care about type args.
-      return mCallable.invoke(interpreter, mThis, arg);
-    }
+    return mCallable.invoke(interpreter, mThis, typeArgs, arg);
   }
   
   private final Obj mThis;

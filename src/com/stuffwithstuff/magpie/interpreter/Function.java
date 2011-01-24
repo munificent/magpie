@@ -1,6 +1,5 @@
 package com.stuffwithstuff.magpie.interpreter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.Expr;
@@ -12,7 +11,7 @@ import com.stuffwithstuff.magpie.util.Pair;
  * Wraps a raw FnExpr in the data and logic needed to execute a user-defined
  * function given the context to do it in.
  */
-public class Function implements TypeArgCallable {
+public class Function implements Callable {
   public Function(Scope closure, FnExpr function) {
     mClosure = closure;
     mFunction = function;
@@ -21,12 +20,6 @@ public class Function implements TypeArgCallable {
   public Scope getClosure() { return mClosure; }
   public FnExpr getFunction() { return mFunction; }
   
-  @Override
-  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-    // TODO(bob): Total hack. Should be calling the type arg one.
-    return invoke(interpreter, thisObj, new ArrayList<Obj>(), arg);
-  }
-
   @Override
   public Obj invoke(Interpreter interpreter, Obj thisObj,
       List<Obj> typeArgs, Obj arg) {
@@ -40,7 +33,7 @@ public class Function implements TypeArgCallable {
       List<Pair<String, Expr>> typeParams = mFunction.getType().getTypeParams();
       for (int i = 0; i < typeParams.size(); i++) {
         Obj typeArg;
-        if (i < typeArgs.size()) {
+        if ((typeArgs != null) && (i < typeArgs.size())) {
           typeArg = typeArgs.get(i);
         } else {
           typeArg = interpreter.nothing();
