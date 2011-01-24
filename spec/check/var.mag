@@ -1,6 +1,3 @@
-// TODO(bob):
-// - static function definition
-
 specify("A 'var' expression") with
     it should("have the type of the initializer") with
         (typeof var i = 123) shouldBe(Int)
@@ -12,7 +9,7 @@ specify("A 'var' expression") with
             var a = 123
             var b = 234
         end shouldCheck()
-        
+
         fn
             var a = 123
             var a = 234

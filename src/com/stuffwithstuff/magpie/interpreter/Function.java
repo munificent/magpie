@@ -1,13 +1,18 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
+import com.stuffwithstuff.magpie.util.Pair;
 
 /**
  * Wraps a raw FnExpr in the data and logic needed to execute a user-defined
  * function given the context to do it in.
  */
-public class Function implements Callable {
+public class Function implements TypeArgCallable {
   public Function(Scope closure, FnExpr function) {
     mClosure = closure;
     mFunction = function;
@@ -18,13 +23,33 @@ public class Function implements Callable {
   
   @Override
   public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+    // TODO(bob): Total hack. Should be calling the type arg one.
+    return invoke(interpreter, thisObj, new ArrayList<Obj>(), arg);
+  }
+
+  @Override
+  public Obj invoke(Interpreter interpreter, Obj thisObj,
+      List<Obj> typeArgs, Obj arg) {
     try {
       Profiler.push(mFunction.getPosition());
       
-      // Create a local scope for the function with the arguments bounds to
-      // the pattern.
-      Pattern pattern = mFunction.getType().getPattern();
+      // Create a local scope for the function.
       EvalContext context = new EvalContext(mClosure, thisObj).pushScope();
+      
+      // Bind the type arguments.
+      List<Pair<String, Expr>> typeParams = mFunction.getType().getTypeParams();
+      for (int i = 0; i < typeParams.size(); i++) {
+        Obj typeArg;
+        if (i < typeArgs.size()) {
+          typeArg = typeArgs.get(i);
+        } else {
+          typeArg = interpreter.nothing();
+        }
+        context.define(typeParams.get(i).getKey(), typeArg);
+      }
+      
+      // Bind the arguments bounds to the pattern.
+      Pattern pattern = mFunction.getType().getPattern();
       PatternBinder.bind(interpreter, pattern, arg, context);
       
       try {
@@ -45,6 +70,8 @@ public class Function implements Callable {
     // annotation.
     EvalContext context = new EvalContext(mClosure, interpreter.nothing());
    
+    // TODO(bob): Should not do this if the function has type parameters
+    // since we don't know what their values are.
     Obj type = interpreter.evaluateFunctionType(mFunction.getType(), context);
 
     // TODO(bob): Hackish. Cram the original function body in there too. That

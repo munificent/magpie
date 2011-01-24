@@ -4,7 +4,7 @@ specify("A 'fn' expression") with
         var f = fn(a) result = a
         f("one")
         result shouldBe("one")
-        
+
         f("two")
         result shouldBe("two")
     end
@@ -14,43 +14,20 @@ specify("A 'fn' expression") with
         f("one") shouldBe("ignore")
         f("one", "two") shouldBe("ignore")
     end
-    
+
     it should("bind a tuple argument to the parameter") with
         var f = fn(a) a _0 ~ a _1
         f("one", "two") shouldBe("onetwo")
     end
-    
+
     it should("allow omitting the parameter declaration") with
         (fn "return")() shouldBe("return")
     end
-    
+
     it should("close over surrounding variables") with
         var outer = "outer"
         var assigned = ""
         (fn assigned = outer)()
         assigned shouldBe("outer")
-    end
-end
-
-specify("A static 'fn' expression") with
-    it should("bind the argument to the parameter at runtime") with
-        var result = nothing
-        var f = fn[a] result = a
-        f[Int]
-        result shouldBe(Int)
-        
-        f[Bool]
-        result shouldBe(Bool)
-    end
-
-    it should("ignore the argument if there is no parameter") with
-        var f = fn[] "ignore"
-        f["one"] shouldBe("ignore")
-        f["one", "two"] shouldBe("ignore")
-    end
-
-    it should("bind a tuple argument to the parameter at runtime") with
-        var f = fn[a] a _0 ~ a _1
-        f["one", "two"] shouldBe("onetwo")
     end
 end

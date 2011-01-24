@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
@@ -40,7 +41,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     
     // And include any early returned types as well.
     for (int i = 0; i < mReturnedTypes.size(); i++) {
-      evaluatedType = orTypes(evaluatedType, mReturnedTypes.get(i));
+      evaluatedType = mInterpreter.orTypes(
+          evaluatedType, mReturnedTypes.get(i));
     }
     return evaluatedType;
   }
@@ -68,78 +70,74 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     Obj left = check(expr.getLeft(), context);
     Obj right = check(expr.getRight(), context, true);
     
-    return orTypes(left, right);
+    return mInterpreter.orTypes(left, right);
   }
 
   @Override
   public Obj visit(ApplyExpr expr, EvalContext context) {
     Obj targetType = check(expr.getTarget(), context);
+    Obj argType = check(expr.getArg(), context);
     
-    // TODO(bob): Clean this up!
-    if (expr.isStatic()) {
-      // TODO(bob): Almost all of this is copied from ExprEvaluator. Should unify.
-      // Evaluate the static argument.
-      Obj arg = mInterpreter.evaluate(expr.getArg(), mStaticContext);
-      
-      if (!(targetType.getValue() instanceof FnExpr)) {
-        mChecker.addError(expr.getTarget().getPosition(),
-            "The expression \"%s\" does not evaluate to a static function.",
-            expr.getTarget());
+    // If the target is not an actual function, get the type of its "call"
+    // message instead of the target itself.
+    Obj functionType = mInterpreter.getGlobal(Name.FUNCTION_TYPE);
+    if (targetType.getClassObj() != functionType) {
+      // It's a functor, so look up the "call" member.
+      Obj callTargetType = getMemberType(expr.getPosition(), targetType,
+          Name.CALL);
+
+      if (callTargetType.getClassObj() != functionType) {
+        mChecker.addError(expr.getPosition(),
+            "Target of type %s is not a function and does not have a 'call' method.",
+            targetType);
         return mInterpreter.getNothingClass();
       }
       
-      FnExpr staticFn = (FnExpr)targetType.getValue();
+      targetType = callTargetType;
+    }
+    
+    // Handle the type parameters.
+    // TODO(bob): This check here is gross.
+    if ((targetType.getValue() instanceof FnExpr) &&
+        ((FnExpr)targetType.getValue()).getType().getTypeParams().size() > 0) {
+      FunctionType type = ((FnExpr)targetType.getValue()).getType();
       
-      // Evaluate the constraint.
-      Obj constraint = mInterpreter.evaluate(staticFn.getType().getParamType(),
-          mStaticContext);
-      
-      // See if the evaluated argument matches its constraint.
-      mChecker.checkTypes(constraint, arg, expr.getPosition(), 
-          "Static function is constrained to take %s but is being passed %s.");
+      Map<String, Obj> typeArgs = new HashMap<String, Obj>();
+      // Add empty entries for all of the type parameter names.
+      for (Pair<String, Expr> typeParam : type.getTypeParams()) {
+        typeArgs.put(typeParam.getKey(), null);
+      }
 
-      // Evaluate the return type in a context where the type arguments have
-      // been applied. That way, a static type like [T -> T] will be able to
-      // correctly determine the return type by accessing T.
-      EvalContext staticContext = mStaticContext.pushScope();
-      PatternBinder.bind(mInterpreter,
-          staticFn.getType().getPattern(), arg, staticContext);
-      
-      Obj returnType = mInterpreter.evaluate(staticFn.getType().getReturnType(),
-          staticContext);
-      
-      return returnType;
-    } else {
-      Obj argType = check(expr.getArg(), context);
-      
-      // If the target is not an actual function, get the type of its "call"
-      // message instead of the target itself.
-      Obj functionType = mInterpreter.getGlobal(Name.FUNCTION_TYPE);
-      if (targetType.getClassObj() != functionType) {
-        // It's a functor, so look up the "call" member.
-        Obj callTargetType = getMemberType(expr.getPosition(), targetType,
-            Name.CALL);
-  
-        if (callTargetType.getClassObj() != functionType) {
-          mChecker.addError(expr.getPosition(),
-              "Target of type %s is not a function and does not have a 'call' method.",
-              targetType);
-          return mInterpreter.getNothingClass();
-        }
-        
-        targetType = callTargetType;
+      // Apply the explicit type arguments.
+      for (int i = 0; i < expr.getTypeArgs().size(); i++) {
+        Obj typeArg = mInterpreter.evaluate(expr.getTypeArgs().get(i),
+            mStaticContext);
+        typeArgs.put(type.getTypeParams().get(i).getKey(), typeArg);
       }
       
-      Obj paramType = targetType.getField(Name.PARAM_TYPE);
-      Obj returnType = targetType.getField(Name.RETURN_TYPE);
+      // Infer the type parameters.
+      PatternTypeParamInferrer.infer(mInterpreter, type, argType, typeArgs);
+
+      // Create a new static scope for the type arguments.
+      EvalContext staticContext = mStaticContext.pushScope();
+      for (Entry<String, Obj> entry : typeArgs.entrySet()) {
+        staticContext.define(entry.getKey(), entry.getValue());
+      }
       
-      // Make sure the argument type matches the declared parameter type.
-      mChecker.checkTypes(paramType, argType, expr.getPosition(), 
-          "Function is declared to take %s but is being passed %s.");
-      
-      // Calling a function results in the function's return type.
-      return returnType;
+      // Now we can actually evaluate the function's type.
+      targetType = mInterpreter.evaluateFunctionType(type, staticContext);
     }
+
+    // Just a regular function.
+    Obj paramType = targetType.getField(Name.PARAM_TYPE);
+    Obj returnType = targetType.getField(Name.RETURN_TYPE);
+    
+    // Make sure the argument type matches the declared parameter type.
+    mChecker.checkTypes(paramType, argType, expr.getPosition(), 
+        "Function is declared to take %s but is being passed %s.");
+    
+    // Calling a function results in the function's return type.
+    return returnType;
   }
   
   @Override
@@ -240,7 +238,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     if (expr.isLet()) {
       Obj removeNothing = mInterpreter.getGlobal(Name.UNSAFE_REMOVE_NOTHING);
       Obj letType =  mInterpreter.apply(Position.none(), removeNothing,
-          conditionType);
+          new ArrayList<Obj>(), conditionType);
       context.define(expr.getName(), letType);
     }
     
@@ -248,7 +246,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     Obj thenArm = check(expr.getThen(), context.pushScope(), true);
     Obj elseArm = check(expr.getElse(), context.pushScope(), true);
     
-    return orTypes(thenArm, elseArm);
+    return mInterpreter.orTypes(thenArm, elseArm);
   }
 
   @Override
@@ -276,8 +274,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     for (MatchCase matchCase : expr.getCases()) {
       // Bind the pattern's variable types in a new scope for the case body.
       EvalContext caseContext = context.pushScope();
-      PatternBinder.bind(mChecker, expr.getPosition(), matchCase.getPattern(),
-          valueType, caseContext);
+      PatternCheckingBinder.bind(mChecker, expr.getPosition(),
+          matchCase.getPattern(), valueType, caseContext);
       
       Obj caseType = check(matchCase.getBody(), caseContext);
       
@@ -285,7 +283,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       if (returnType == null) {
         returnType = caseType;
       } else {
-        returnType = orTypes(returnType, caseType);
+        returnType = mInterpreter.orTypes(returnType, caseType);
       }
     }
     
@@ -320,7 +318,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     Obj left = check(expr.getLeft(), context);
     Obj right = check(expr.getRight(), context, true);
     
-    return orTypes(left, right);
+    return mInterpreter.orTypes(left, right);
   }
 
   @Override
@@ -402,19 +400,9 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(VariableExpr expr, EvalContext context) {
     Obj valueType = check(expr.getValue(), context);
 
-    PatternBinder.bind(mChecker, expr.getPosition(), expr.getPattern(),
+    PatternCheckingBinder.bind(mChecker, expr.getPosition(), expr.getPattern(),
         valueType, context);
     return valueType;
-  }
-
-  private Obj orTypes(Obj left, Obj right) {
-    // Never is omitted.
-    if (left == mInterpreter.getNeverClass()) return right;
-    if (right == mInterpreter.getNeverClass()) return left;
-    
-    Obj orFunction = mInterpreter.getGlobal(Name.OR);
-    return mInterpreter.apply(Position.none(), orFunction,
-        mInterpreter.createTuple(left, right));
   }
   
   public Obj getMemberType(Position position, Obj receiverType, String name) {

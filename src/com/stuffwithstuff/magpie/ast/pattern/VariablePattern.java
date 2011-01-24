@@ -27,7 +27,7 @@ public class VariablePattern implements Pattern {
   @Override
   public String toString() {
     if (mType == null) return mName;
-    return mType + " " + mType.toString();
+    return mName + " " + mType.toString();
   }
 
   private final String mName;

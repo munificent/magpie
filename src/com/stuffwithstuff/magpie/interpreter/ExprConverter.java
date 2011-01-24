@@ -96,9 +96,9 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
 
   private static Expr convertApplyExpr(Interpreter interpreter, Obj expr) {
     Expr target = convert(interpreter, expr.getField("target"));
+    List<Expr> typeArgs = convertArray(interpreter, expr.getField("typeArgs"));
     Expr argument = convert(interpreter, expr.getField("argument"));
-    boolean isStatic = expr.getField("static?").asBool();
-    return Expr.apply(target, argument, isStatic);
+    return Expr.apply(target, typeArgs, argument);
   }
 
   private static Expr convertAssignExpr(Interpreter interpreter, Obj expr) {
@@ -115,11 +115,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   }
   
   private static Expr convertBlockExpr(Interpreter interpreter, Obj expr) {
-    List<Obj> exprObjs = expr.getField("expressions").asArray();
-    List<Expr> exprs = new ArrayList<Expr>();
-    for (Obj blockExpr : exprObjs) {
-      exprs.add(convert(interpreter, blockExpr));
-    }
+    List<Expr> exprs = convertArray(interpreter, expr.getField("expressions"));
     
     Obj catchObj = expr.getField("catchExpression");
     Expr catchExpr;
@@ -142,19 +138,30 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
 
   private static Expr convertFunctionExpr(Interpreter interpreter, Obj expr) {
     Obj typeObj = expr.getField("functionType");
-    Expr returnType = convert(interpreter, typeObj.getField("returnType"));
-
-    Obj patternObj = typeObj.getField("pattern");
-    Pattern pattern = PatternConverter.convert(interpreter, patternObj);
-    
-    boolean isStatic = typeObj.getField("static?").asBool();
-    
-    FunctionType type = new FunctionType(pattern, returnType, isStatic);
+    FunctionType type = convertFunctionType(interpreter, typeObj);
     
     Expr body = convert(interpreter, expr.getField("body"));
     return Expr.fn(Position.none(), type, body);
   }
 
+  private static FunctionType convertFunctionType(
+      Interpreter interpreter, Obj typeObj) {
+    Expr returnType = convert(interpreter, typeObj.getField("returnType"));
+
+    List<Pair<String, Expr>> typeParams = new ArrayList<Pair<String, Expr>>();
+    Obj typeParamsObj = typeObj.getField("typeParams");
+    for (Obj typeParam : typeParamsObj.asArray()) {
+      String name = typeParam.getTupleField(0).asString();
+      Expr constraint = convert(interpreter, typeParam.getTupleField(1));
+      typeParams.add(new Pair<String, Expr>(name, constraint));
+    }
+    
+    Obj patternObj = typeObj.getField("pattern");
+    Pattern pattern = PatternConverter.convert(interpreter, patternObj);
+    
+    return new FunctionType(typeParams, pattern, returnType);
+  }
+  
   private static Expr convertIfExpr(Interpreter interpreter, Obj expr) {
     Obj nameObj = expr.getField("name");
     String name;
@@ -250,11 +257,8 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   }
   
   private static Expr convertTupleExpr(Interpreter interpreter, Obj expr) {
-    List<Obj> fieldObjs = expr.getField("fields").asArray();
-    List<Expr> fields = new ArrayList<Expr>();
-    for (Obj field : fieldObjs) {
-      fields.add(convert(interpreter, field));
-    }
+    List<Expr> fields = convertArray(interpreter, expr.getField("fields"));
+
     return Expr.tuple(fields);
   }
 
@@ -276,6 +280,15 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     return Expr.var(Position.none(), pattern, value);
   }
   
+  private static List<Expr> convertArray(Interpreter interpreter, Obj array) {
+    List<Expr> exprs = new ArrayList<Expr>();
+    for (Obj blockExpr : array.asArray()) {
+      exprs.add(convert(interpreter, blockExpr));
+    }
+    return exprs;
+  }
+
+  
   @Override
   public Obj visit(AndExpr expr, Void dummy) {
     Obj left  = convert(expr.getLeft());
@@ -286,9 +299,9 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   @Override
   public Obj visit(ApplyExpr expr, Void dummy) {
     Obj target = convert(expr.getTarget());
+    Obj typeArgs = convert(expr.getTypeArgs());
     Obj arg = convert(expr.getArg());
-    return construct("ApplyExpression", target, arg,
-        mInterpreter.createBool(expr.isStatic()));
+    return construct("ApplyExpression", target, typeArgs, arg);
   }
   
   @Override
@@ -301,14 +314,10 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
 
   @Override
   public Obj visit(BlockExpr expr, Void dummy) {
-    List<Obj> exprs = new ArrayList<Obj>();
-    for (Expr blockExpr : expr.getExpressions()) {
-      exprs.add(convert(blockExpr));
-    }
-    Obj exprsArray = mInterpreter.createArray(exprs);
+    Obj exprs = convert(expr.getExpressions());
     Obj catchExpr = convert(expr.getCatch());
     
-    return construct("BlockExpression", exprsArray, catchExpr);
+    return construct("BlockExpression", exprs, catchExpr);
   }
 
   @Override
@@ -324,15 +333,25 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
 
   @Override
   public Obj visit(FnExpr expr, Void dummy) {
-    Obj pattern = PatternConverter.convert(expr.getType().getPattern(),
+    FunctionType type = expr.getType();
+    List<Obj> typeParams = new ArrayList<Obj>();
+    for (Pair<String, Expr> typeParam : type.getTypeParams()) {
+      Obj name = mInterpreter.createString(typeParam.getKey());
+      Obj constraint = convert(typeParam.getValue());
+      typeParams.add(mInterpreter.createTuple(name, constraint));
+    }
+    Obj typeParamsObj = mInterpreter.createArray(typeParams);
+    
+    Obj pattern = PatternConverter.convert(type.getPattern(),
         mInterpreter, mContext);
-    Obj returnType = convert(expr.getType().getReturnType());
-    Obj type = construct("FunctionTypeExpression",
+    Obj returnType = convert(type.getReturnType());
+    Obj typeObj = construct("FunctionTypeExpression",
+        typeParamsObj,
         pattern,
-        returnType, 
-        mInterpreter.createBool(expr.getType().isStatic()));
+        returnType);
+    
     Obj body = convert(expr.getBody());
-    return construct("FunctionExpression", type, body);
+    return construct("FunctionExpression", typeObj, body);
   }
 
   @Override
@@ -492,6 +511,14 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   private Obj convert(Expr expr) {
     if (expr == null) return mInterpreter.nothing();
     return expr.accept(this, null);
+  }
+  
+  private Obj convert(List<Expr> exprs) {
+    List<Obj> exprObjs = new ArrayList<Obj>();
+    for (Expr expr : exprs) {
+      exprObjs.add(convert(expr));
+    }
+    return mInterpreter.createArray(exprObjs);
   }
 
   private final Interpreter mInterpreter;

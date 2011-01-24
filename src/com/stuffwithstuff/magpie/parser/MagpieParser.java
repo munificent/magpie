@@ -74,15 +74,9 @@ public class MagpieParser extends Parser {
   public Expr parseFunction() {
     Position position = current().getPosition();
     
-    // Parse the static parameters if present.
-    FunctionType staticType = null;
-    if (lookAhead(TokenType.LEFT_BRACKET)) {
-      staticType = parseFunctionType(true);
-    }
-
-    // Parse the dynamic parameters if present.
+    // Parse the type signature if present.
     FunctionType type = null;
-    if (lookAhead(TokenType.LEFT_PAREN)) {
+    if (lookAheadAny(TokenType.LEFT_PAREN, TokenType.LEFT_BRACKET)) {
       type = parseFunctionType();
     }
     
@@ -91,33 +85,15 @@ public class MagpieParser extends Parser {
     
     position = position.union(last(1).getPosition());
     
-    // If neither dynamic nor static parameters were provided, infer a dynamic
+    // If neither dynamic nor type parameters were provided, infer a dynamic
     // signature.
-    if ((type == null) && (staticType == null)) {
+    if (type == null) {
       type = FunctionType.nothingToDynamic();
     }
     
     // Wrap the body in a dynamic function.
     if (type != null) {
       expr = Expr.fn(position, type, expr);
-    }
-    
-    // Wrap it in a static function.
-    if (staticType != null) {
-      // If the static function is wrapping a dynamic one, we can infer the
-      // return type of the static function from it.
-      // TODO(bob): Ugly!
-      if ((type != null) &&
-          (staticType.getReturnType() instanceof MessageExpr) &&
-          (((MessageExpr)staticType.getReturnType()).getReceiver() == null) &&
-          (((MessageExpr)staticType.getReturnType()).getName().equals("Dynamic"))) {
-        staticType = new FunctionType(staticType.getPattern(),
-            Expr.message(null, Name.FAT_ARROW,
-                Expr.tuple(type.getParamType(), type.getReturnType())),
-                true);
-      }
-        
-      expr = Expr.fn(position, staticType, expr);
     }
     
     return expr;
@@ -135,23 +111,31 @@ public class MagpieParser extends Parser {
    * @return The parsed function type.
    */
   public FunctionType parseFunctionType() {
-    return parseFunctionType(false);
-  }
-  
-  public FunctionType parseFunctionType(boolean isStatic) {
-    TokenType left = TokenType.LEFT_PAREN;
-    TokenType right = TokenType.RIGHT_PAREN;
-    if (isStatic) {
-      left = TokenType.LEFT_BRACKET;
-      right = TokenType.RIGHT_BRACKET;
+    // Parse the type parameters, if any.
+    List<Pair<String, Expr>> typeParams = new ArrayList<Pair<String, Expr>>();
+    if (match(TokenType.LEFT_BRACKET)) {
+      do {
+        String name = consume(TokenType.NAME).getString();
+        
+        // Infer "Any" if no constraint is given.
+        Expr constraint;
+        if (lookAheadAny(TokenType.COMMA, TokenType.RIGHT_BRACKET)) {
+          constraint = Expr.name("Any");
+        } else {
+          constraint = TypeParser.parse(this);
+        }
+        typeParams.add(new Pair<String, Expr>(name, constraint));
+      } while (match(TokenType.COMMA));
+      
+      consume(TokenType.RIGHT_BRACKET);
     }
     
     // Parse the prototype: (foo Foo, bar Bar -> Bang)
-    consume(left);
+    consume(TokenType.LEFT_PAREN);
     
     // Parse the parameter pattern, if any.
     Pattern pattern = null;
-    if (!lookAheadAny(TokenType.ARROW, right)) {
+    if (!lookAheadAny(TokenType.ARROW, TokenType.RIGHT_PAREN)) {
       pattern = PatternParser.parse(this);
     } else {
       // No pattern, so expect nothing.
@@ -160,22 +144,22 @@ public class MagpieParser extends Parser {
 
     // Parse the return type, if any.
     Expr returnType = null;
-    if (match(right)) {
+    if (match(TokenType.RIGHT_PAREN)) {
       // No return type, so infer dynamic.
       returnType = Expr.name("Dynamic");
     } else {
       consume(TokenType.ARROW);
       
-      if (lookAhead(right)) {
+      if (lookAhead(TokenType.RIGHT_PAREN)) {
         // An arrow, but no return type, so infer nothing.
         returnType = Expr.name("Nothing");
       } else {
         returnType = TypeParser.parse(this);
       }
-      consume(right);
+      consume(TokenType.RIGHT_PAREN);
     }
     
-    return new FunctionType(pattern, returnType, isStatic);
+    return new FunctionType(typeParams, pattern, returnType);
   }
   
   public String parseFunctionName() {
@@ -269,29 +253,7 @@ public class MagpieParser extends Parser {
       // Parse the value being assigned.
       Expr value = parseExpression();
 
-      Position position = expr.getPosition().union(value.getPosition());
-      
-      // Translate the left-hand side of the assignment into an appropriate
-      // form. This basically avoids the need for explicit L-values.
-      // TODO(bob): Need to handle tuples here too.
-      if (expr instanceof MessageExpr) {
-        // example: point x = 2
-        // before:  Msg(      Msg(null, "point"), "x")
-        // after:   AssignMsg(Msg(null, "point"), "x", Int(2))
-        MessageExpr message = (MessageExpr) expr;
-        return Expr.assign(position, message.getReceiver(),
-            message.getName(), value);
-      } else if (expr instanceof ApplyExpr) {
-        // example: array(3) = 4
-        // before:  Apply(    Msg(null, "array"),                  Int(3))
-        // after:   Apply(Msg(Msg(null, "array"), "assign"), Tuple(Int(3), Int(4)))
-        ApplyExpr apply = (ApplyExpr) expr;
-        return Expr.message(position, apply.getTarget(), Name.ASSIGN,
-            Expr.tuple(apply.getArg(), value));
-      } else {
-        throw new ParseException("Expression \"" + expr +
-        "\" is not a valid target for assignment.");
-      }
+      return ConvertAssignmentExpr.convert(expr, value);
     }
     
     return expr;
@@ -373,19 +335,26 @@ public class MagpieParser extends Parser {
         message = Expr.message(last(1).getPosition(), message,
             last(1).getString());
       } else if (match(TokenType.LEFT_BRACKET)) {
-        // A static apply (i.e. foo[123]).
+        // A call with type arguments.
+        List<Expr> typeArgs = new ArrayList<Expr>();
+        do {
+          typeArgs.add(TypeParser.parse(this));
+        } while(match(TokenType.COMMA));
+        consume(TokenType.RIGHT_BRACKET);
+        
+        // See if there is a regular argument too.
         Expr arg;
-        if (match(TokenType.RIGHT_BRACKET)) {
-          arg = Expr.nothing(Position.surrounding(last(2), last(1)));
-        } else {
+        if (match(TokenType.LEFT_PAREN)) {
           arg = parseExpression();
-          consume(TokenType.RIGHT_BRACKET);
+          consume(TokenType.RIGHT_PAREN);
+        } else {
+          arg = Expr.nothing();
         }
-        message = Expr.apply(message, arg, true);
+        message = Expr.apply(message, typeArgs, arg);
       } else if (lookAhead(TokenType.LEFT_PAREN)) {
-        // A function application like foo(123).
+        // A function call like foo(123).
         Expr arg = parenthesizedExpression(BraceType.PAREN);
-        message = Expr.apply(message, arg, false);
+        message = Expr.apply(message, arg);
       } else if (match(TokenType.WITH)) {
         // Parse the parameter list if given.
         FunctionType blockType;
@@ -394,7 +363,7 @@ public class MagpieParser extends Parser {
         } else {
           // Else just assume a single "it" parameter.
           blockType = (new FunctionType(new VariablePattern(Name.IT, null),
-              Expr.name("Dynamic"), false));
+              Expr.name("Dynamic")));
         }
 
         // Parse the block and wrap it in a function.
@@ -406,10 +375,10 @@ public class MagpieParser extends Parser {
           // foo(123) with ...  --> Apply(Msg(foo), Tuple(123, block))
           ApplyExpr apply = (ApplyExpr)message;
           Expr arg = addTupleField(apply.getArg(), block);
-          message = Expr.apply(apply.getTarget(), arg, false);
+          message = Expr.apply(apply.getTarget(), arg);
         } else {
           // 123 with ...  --> Apply(Int(123), block)
-          message = Expr.apply(message, block, false);
+          message = Expr.apply(message, block);
         }
       } else {
         break;
@@ -530,7 +499,7 @@ public class MagpieParser extends Parser {
         consume(TokenType.RIGHT_PAREN);
       }
       
-      type = new FunctionType(pattern, returnType, false);
+      type = new FunctionType(pattern, returnType);
     } else {
       // No type signature provided, so infer (_ -> Dynamic)
       type = FunctionType.nothingToDynamic();

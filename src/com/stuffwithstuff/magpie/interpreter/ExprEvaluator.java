@@ -1,6 +1,8 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.stuffwithstuff.magpie.ast.*;
@@ -43,9 +45,15 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(ApplyExpr expr, EvalContext context) {
     Obj target = evaluate(expr.getTarget(), context);
+    
+    List<Obj> typeArgs = new ArrayList<Obj>();
+    for (Expr typeArg : expr.getTypeArgs()) {
+      typeArgs.add(evaluate(typeArg, context));
+    }
+    
     Obj arg = evaluate(expr.getArg(), context);
 
-    return mInterpreter.apply(expr.getPosition(), target, arg);
+    return mInterpreter.apply(expr.getPosition(), target, typeArgs, arg);
   }
 
   @Override

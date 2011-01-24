@@ -2,12 +2,12 @@
 def ==(left, right -> Bool)
     // Must be equal if they're the same object.
     if Reflect same?(left, right) then return true
-    
+
     // Must be the same class.
     var leftClass = Reflect getClass(left)
     var rightClass = Reflect getClass(right)
     if Reflect same?(leftClass, rightClass) not then return false
-    
+
     // Leave it up to the class to decide.
     let equalFunc = leftClass equal? then
         var equal = equalFunc(left, right)
@@ -48,4 +48,4 @@ def +(left Int, right Int -> Int)
 end
 
 // Add an arrow operator to make function types out of other types:
-def =>(left Type, right Type -> Type) FunctionType new(left, right, false)
+def =>(left Type, right Type -> Type) FunctionType new(left, right)

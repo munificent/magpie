@@ -2,39 +2,20 @@
 // it only uses core syntax.
 
 class FunctionTypeExpression
-    shared def new(pattern    Pattern,
-                   returnType Expression,
-                   static?    Bool -> FunctionTypeExpression)
-        construct(pattern: pattern, returnType: returnType,
-                  static?: static?)
+    shared def new(typeParams List(String, Expression),
+                   pattern    Pattern,
+                   returnType Expression -> FunctionTypeExpression)
+        construct(typeParams: typeParams, pattern: pattern,
+                  returnType: returnType)
     end
-    
+
     // TODO(bob): Move this into a separate file that extends
     // FunctionTypeExpression after the parsers have all been loaded.
     get string String =
         "not implemented!"
-        /*
-        var params = paramType as[TupleExpression]
-
-        var result = if static? then "[" else "("
-        for i = 0 until(names count)
-        for name = names do
-            result = result ~ name ~ " "
-            let params then
-                result = result ~ params fields(i)
-            else
-                result = result ~ paramType
-            end
-            
-            if i < (names count - 1) then result = result ~ ", "
-        end
-        
-        result = result ~ " -> " ~ returnType
-        result ~ if static? then "]" else ")"
-        */
     end
 end
 
+FunctionTypeExpression declareField("typeParams", false, fn List(String, Expression))
 FunctionTypeExpression declareField("pattern", false, fn Pattern)
 FunctionTypeExpression declareField("returnType", false, fn Expression)
-FunctionTypeExpression declareField("static?", false, fn Bool)

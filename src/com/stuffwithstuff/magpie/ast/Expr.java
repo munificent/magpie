@@ -2,6 +2,7 @@ package com.stuffwithstuff.magpie.ast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
@@ -26,7 +27,15 @@ public abstract class Expr {
     return new AndExpr(left, right);
   }
   
-  public static Expr apply(Expr target, Expr arg, boolean isStatic) {
+  public static Expr apply(Expr target, List<Expr> typeArgs, Expr arg) {
+    Expect.notNull(target);
+    Expect.notNull(typeArgs);
+    Expect.notNull(arg);
+
+    return new ApplyExpr(target, typeArgs, arg);
+  }
+  
+  public static Expr apply(Expr target, Expr arg) {
     Expect.notNull(target);
     Expect.notNull(arg);
     
@@ -51,7 +60,7 @@ public abstract class Expr {
     }
     
     // If we got here, it's not a special form.
-    return new ApplyExpr(target, arg, isStatic);
+    return new ApplyExpr(target, new ArrayList<Expr>(), arg);
   }
   
   public static Expr assign(Position position, Expr receiver, String name,
@@ -126,11 +135,11 @@ public abstract class Expr {
   }
   
   public static Expr message(Position position, Expr receiver, String name, Expr arg) {
-    return apply(message(position, receiver, name), arg, false);
+    return apply(message(position, receiver, name), arg);
   }
   
   public static Expr message(Expr receiver, String name, Expr arg) {
-    return apply(message(receiver, name), arg, false);
+    return apply(message(receiver, name), arg);
   }
   
   public static Expr message(Expr receiver, String name) {
@@ -177,7 +186,8 @@ public abstract class Expr {
   }
 
   public static Expr staticMessage(Expr receiver, String name, Expr arg) {
-    return apply(new MessageExpr(Position.none(), receiver, name), arg, true);
+    return apply(new MessageExpr(Position.none(), receiver, name), 
+        Collections.singletonList(arg), nothing());
   }
 
   public static Expr string(String text) {

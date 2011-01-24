@@ -15,6 +15,7 @@ class GetParser
             parser parseTypeExpression()))
         
         %var%("type", FunctionTypeExpression new(
+            %unsafecast%(List(String, Expression), Array of()),
             ValuePattern new({ nothing }), valueType, false))
     
         parser consume(TokenType equals)

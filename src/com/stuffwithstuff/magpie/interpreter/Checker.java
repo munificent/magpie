@@ -5,10 +5,10 @@ import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
-import com.stuffwithstuff.magpie.ast.pattern.Pattern;
-import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
+import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.util.Expect;
+import com.stuffwithstuff.magpie.util.Pair;
 
 /**
  * The type checker. Given an interpreter this walks through the entire global
@@ -134,45 +134,44 @@ public class Checker {
    */
   public Obj checkFunction(FnExpr function, Scope closure, Obj thisType,
       EvalContext staticContext) {
+    FunctionType type = function.getType();
+    
+    // Create a scope for the body of the function.
+    EvalContext functionContext = new EvalContext(closure, thisType);
+    functionContext = functionContext.pushScope();
+    
+    // Bind any type parameters to their constraints.
+    if (function.getType().getTypeParams().size() > 0) {
+      staticContext = staticContext.pushScope();
+      for (Pair<String, Expr> typeParam : type.getTypeParams()) {
+        Obj constraint = mInterpreter.evaluate(typeParam.getValue(),
+            staticContext);
+        staticContext.define(typeParam.getKey(), constraint);
+        functionContext.define(typeParam.getKey(), constraint);
+      }
+    }
+    
     // Evaluate the function's type annotations in the static value scope.
-    Obj paramType = mInterpreter.evaluate(function.getType().getParamType(),
+    Obj paramType = mInterpreter.evaluate(type.getParamType(),
         staticContext);
     
     if (paramType == mInterpreter.nothing()) {
       throw new InterpreterException(String.format(
           "Could not evaluate parameter type %s.",
-          function.getType().getParamType()));
+          type.getParamType()));
     }
     
     // Bind the parameter names to their evaluated types.
-    EvalContext functionContext = new EvalContext(closure, thisType);
-    functionContext = functionContext.pushScope();
-    PatternBinder.bind(mInterpreter, function.getType().getPattern(), paramType,
+    PatternBinder.bind(mInterpreter, type.getPattern(), paramType,
         functionContext);
 
-    // If it's a static function, bind them in the static context too.
-    if (function.getType().isStatic()) {
-      staticContext = staticContext.pushScope();
-      
-      // TODO(bob): TERRIBLE HACK. This is temporary until we get rid of static
-      // functions and use inferred type parameters instead. This is awful. I
-      // am a bad bad person.
-      Pattern pattern = function.getType().getPattern();
-      if ((pattern instanceof VariablePattern) &&
-          ((VariablePattern)pattern).getName().equals("t_")) {
-        staticContext.define("t_", paramType);
-      }
-    }
-    
-    // Evaluate the return type after binding the static parameters so that they
-    // can in turn be used in the return type's signature, like foo[t -> t].
     Obj returnType = mInterpreter.evaluate(
-        function.getType().getReturnType(), staticContext);
+        type.getReturnType(), staticContext);
     
     if (returnType == mInterpreter.nothing()) {
       throw new InterpreterException(String.format(
           "Could not evaluate return type %s.",
-          function.getType().getReturnType()));
+          type.getReturnType()));
     }
 
     // Check the body of the function.
@@ -186,14 +185,18 @@ public class Checker {
     // means that the checker will ignore any returned type if Nothing is
     // expected.
     checkTypes(returnType, actualReturn, true,
-        function.getType().getReturnType().getPosition(),
+        type.getReturnType().getPosition(),
         "Function is declared to return %s but is returning %s.");
     
     // Create the function type for the function.
-    return mInterpreter.invokeMethod(mInterpreter.getFunctionClass(),
+    Obj functionType = mInterpreter.invokeMethod(mInterpreter.getFunctionClass(),
         Name.NEW_TYPE, mInterpreter.createTuple(
-            paramType, returnType,
-            mInterpreter.createBool(function.getType().isStatic())));
+            paramType, returnType));
+
+    // TODO(bob): Hackish. Copied from function.
+    functionType.setValue(function);
+    
+    return functionType;
   }
   
   /**

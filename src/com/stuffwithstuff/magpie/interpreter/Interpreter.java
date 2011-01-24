@@ -155,21 +155,14 @@ public class Interpreter {
       context = createTopLevelContext();
     }
     
+    // TODO(bob): Do we need to track type parameters here?
+    
     Obj paramType = evaluate(type.getParamType(), context);
-    
-    // If it's a static function like foo[T Int -> T], then bind the
-    // constraint to the parameter name(s) so that it can be used in the
-    // return type.
-    if (type.isStatic()) {
-      context = context.pushScope();
-      PatternBinder.bind(this, type.getPattern(), paramType, context);
-    }
-    
     Obj returnType = evaluate(type.getReturnType(), context);
     
     // Create a FunctionType object.
     Obj result = invokeMethod(mFnClass, Name.NEW_TYPE,
-        createTuple(paramType, returnType, createBool(type.isStatic())));
+        createTuple(paramType, returnType));
     
     return result;
   }
@@ -251,14 +244,15 @@ public class Interpreter {
     return mNothing;
   }
 
-  public Obj apply(Position position, Obj target, Obj arg) {
+  public Obj apply(Position position, Obj target, List<Obj> typeArgs, Obj arg) {
     Expect.notNull(target);
+    Expect.notNull(typeArgs);
     Expect.notNull(arg);
     
     while(true) {
       if (target instanceof FnObj) {
         FnObj function = (FnObj)target;
-        return function.invoke(this, arg);
+        return function.invoke(this, typeArgs, arg);
       } else {
         // We have an argument, but the receiver isn't a function, so send it a
         // "call" message instead. We'll in turn try to apply the result of
@@ -297,7 +291,7 @@ public class Interpreter {
     Expect.notNull(arg);
     
     Obj resolved = getMember(position, receiver, name);
-    return apply(position, resolved, arg);
+    return apply(position, resolved, new ArrayList<Obj>(), arg);
   }
 
   public void print(String text) {
@@ -414,6 +408,16 @@ public class Interpreter {
   
   public String evaluateToString(Obj value) {
     return getMember(Position.none(), value, Name.STRING).asString();
+  }
+
+  public Obj orTypes(Obj left, Obj right) {
+    // Never is omitted.
+    if (left == mNeverClass) return right;
+    if (right == mNeverClass) return left;
+    
+    Obj orFunction = getGlobal(Name.OR);
+    return apply(Position.none(), orFunction,
+        new ArrayList<Obj>(), createTuple(left, right));
   }
 
   public void pushScriptPath(String path) {

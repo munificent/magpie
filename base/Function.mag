@@ -2,19 +2,18 @@ extend class Function
     // Add a shared to Function so that it's easily visible from the interpreter
     // (which already has a reference to Function) so that it can create
     // FunctionType objects.
-    shared def newType(paramType Type, returnType Type, static? Bool -> Type)
-        FunctionType new(paramType, returnType, static?)
+    shared def newType(paramType Type, returnType Type -> Type)
+        FunctionType new(paramType, returnType)
     end
 end
 
 class FunctionType
-    shared def new(paramType Type, returnType Type, static? Bool -> FunctionType)
-        construct(paramType: paramType, returnType: returnType, static?: static?)
+    shared def new(paramType Type, returnType Type -> FunctionType)
+        construct(paramType: paramType, returnType: returnType)
     end
 
     get string String =
         var result = paramType string ~ " -> " ~ returnType
-        if static? then result = "[" ~ result ~ "]"
         result
     end
 
@@ -22,16 +21,6 @@ class FunctionType
         // Both must be functions.
         let otherFn = other as[FunctionType] then
             // Parameter must be contravariant and return must be covariant.
-            if static? != otherFn static? then
-                if static? then
-                    print("Cannot assign " ~ other ~ " to " ~ this ~
-                        " because it is not static.")
-                else
-                    print("Cannot assign " ~ other ~ " to " ~ this ~
-                        " because it is static.")
-                end
-                return false
-            end                           // v
             if otherFn paramType assignsFrom?(paramType) not then
                 print("Cannot assign " ~ other ~ " to " ~ this ~
                     " the parameter type is not assignable.")
@@ -42,7 +31,7 @@ class FunctionType
                     " the return type is not assignable.")
                 return false
             end
-            
+
             true
         else
             print("Cannot assign " ~ other ~ " to " ~ this ~
@@ -64,12 +53,10 @@ class FunctionType
     end
 
     shared def equal?(left FunctionType, right FunctionType -> Bool)
-        left static? == right static? and
         left paramType == right paramType and
         left returnType == right returnType
     end
 
     var paramType  Type
     var returnType Type
-    var static?    Bool
 end

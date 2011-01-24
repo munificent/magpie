@@ -81,7 +81,7 @@ public class TypeParser {
           // No receiver, so it's just parentheses for grouping.
           message = arg;
         } else {
-          message = Expr.apply(message, arg, false);
+          message = Expr.apply(message, arg);
         }
       } else {
         break;

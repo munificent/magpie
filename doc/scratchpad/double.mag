@@ -1,0 +1,84 @@
+// Implement double dispatch through fake currying. Dispatch first on the first
+// argument, which then calls an argument-specific method on the second
+// argument.
+
+interface Thing
+  def collide(thing Thing)
+
+  def collideWithRocket(Rocket rocket)
+  def collideWithAsteroid(Asteroid asteroid)
+end
+
+class Rocket
+  def collide(thing Thing) thing collideWithRocket(this)
+
+  def collideWithRocket(Rocket rocket) print("rocket -> rocket")
+  def collideWithAsteroid(Asteroid asteroid) print("rocket -> asteroid")
+end
+
+class Asteroid
+  def collide(thing Thing) thing collideWithAsteroid(this)
+
+  def collideWithRocket(Rocket rocket) print("asteroid -> rocket")
+  def collideWithAsteroid(Asteroid asteroid) print("asteroid -> asteroid")
+end
+
+def collide(Thing a, Thing b)
+    a collide(b)
+end
+
+// A less symmetric but more complex example:
+
+interface Shape
+    def draw(brush Brush, pen Pen)
+end
+
+interface Brush
+    def drawCircle(circle Circle, pen Pen)
+    def drawSquare(square Square, pen Pen)
+end
+
+interface Pen
+    def drawSolidCircle(circle Circle, SolidBrush brush)
+    def drawHatchCircle(circle Circle, HatchBrush brush)
+    def drawSolidSquare(square Square, SolidBrush brush)
+    def drawHatchSquare(square Square, HatchBrush brush)
+end
+
+class Circle
+    def draw(brush Brush, pen Pen) brush drawCircle(this, pen)
+end
+
+class Square
+    def draw(brush Brush, pen Pen) brush drawSquare(this, pen)
+end
+
+
+class SolidBrush
+    def drawCircle(circle Circle, pen Pen) pen drawSolidCircle(circle, this)
+    def drawSquare(square Square, pen Pen) pen drawSolidSquare(square, this)
+end
+
+class HatchBrush
+    def drawCircle(circle Circle, pen Pen) pen drawHatchCircle(circle, this)
+    def drawSquare(square Square, pen Pen) pen drawHatchSquare(square, this)
+end
+
+
+class LinePen
+    def drawSolidCircle(circle Circle, SolidBrush brush) print("line solid circle")
+    def drawHatchCircle(circle Circle, HatchBrush brush) print("line solid circle")
+    def drawSolidSquare(square Square, SolidBrush brush) print("line solid circle")
+    def drawHatchSquare(square Square, HatchBrush brush) print("line solid circle")
+end
+
+class DashPen
+    def drawSolidCircle(circle Circle, SolidBrush brush) print("dash solid circle")
+    def drawHatchCircle(circle Circle, HatchBrush brush) print("dash solid circle")
+    def drawSolidSquare(square Square, SolidBrush brush) print("dash solid circle")
+    def drawHatchSquare(square Square, HatchBrush brush) print("dash solid circle")
+end
+
+def draw(shape Shape, brush Brush, pen Pen)
+    shape draw(brush, pen)
+end

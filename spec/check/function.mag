@@ -1,6 +1,6 @@
 specify("A function") with
     it should("return the declared type") with
-        (fn(-> Int) 123) shouldCheck()        
+        (fn(-> Int) 123) shouldCheck()
         (fn(-> Int) "string") shouldNotCheck()
     end
 
@@ -17,54 +17,38 @@ specify("A function") with
     end
 end
 
-// TODO(bob): Commented out because static functions are going away.
-/*
-specify("A static function") with
-    it should("ensure the argument matches the constraint") with
-        envExpectCheckOK with
-            interface SomeConstraint
-                def blah(->)
-            end
+specify("A generic function") with
+    it should("infer type parameters from the argument types") with
+        fn
+            def id[T](a T -> T) a
 
-            class Good
-                def blah(->) print("blah")
-            end
+            def expectInt(a Int ->) nothing
+            def expectString(a String ->) nothing
 
-            def foo[T SomeConstraint](arg T) arg blah()
-            def main(->) foo[Good]
-        end
-        
-        envExpectCheckError with
-            interface SomeConstraint
-                def blah(->)
-            end
+            expectInt(id(123))
+            expectString(id("s"))
+        end shouldCheck()
 
-            class Bad
-            end
+        fn
+            def id[T](a T -> T) a
 
-            def foo[T SomeConstraint](arg T) arg blah()
-            def main(->) foo[Bad]
-        end
+            def expectInt(a Int ->) nothing
+            def expectString(a String ->) nothing
+
+            expectInt(id("s"))
+            expectString(id(123))
+        end shouldNotCheck()
     end
 
-    it should("check the body against its constraint") with
-        envExpectCheckOK with
-            interface SomeConstraint
-                def blah(->)
-            end
+    it should("type check the body using the constraints") with
+        fn
+            def foo[T Int](arg T) arg + arg
+            foo(123)
+        end shouldCheck()
 
-            def foo[T SomeConstraint](arg T) arg blah()
-            def main(->) nothing
-        end
-        
-        envExpectCheckError with
-            interface SomeConstraint
-                def blah(->)
-            end
-
-            def foo[T SomeConstraint](arg T) arg notDefined()
-            def main(->) nothing
-        end
+        fn
+            def foo[T Bool](arg T) arg + arg
+            foo(true)
+        end shouldNotCheck()
     end
 end
-*/

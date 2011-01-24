@@ -1,0 +1,43 @@
+interface Barkable {
+  String bark();
+}
+
+class Dog implements Barkable {
+  public String bark() { return "ruff!"; }
+}
+
+class Tree implements Barkable {
+  public String bark() { return "rough!"; }
+}
+
+void makeBark(Barkable barkable) {
+  System.out.println(barkable.bark());
+}
+
+void test() {
+  makeBark(new Dog());
+  makeBark(new Tree());
+  makeBark("not barkable"); // ERROR
+}
+
+
+interface Barkable
+
+multimethod String bark(Barkable barkable);
+
+class Dog {}
+class Tree {}
+
+String bark(Dog dog) { return "ruff!"; }
+String bark(Tree tree) { return "rough!"; }
+
+
+void makeBark(Barkable barkable) {
+  System.out.println(bark(barkable));
+}
+
+void test() {
+  makeBark(new Dog());
+  makeBark(new Tree());
+  makeBark("not barkable"); // ERROR
+}

@@ -142,8 +142,7 @@ public class InterfaceExprParser implements ExprParser {
       pattern = new TuplePattern(fields);
     }
     
-    FunctionType functionType = new FunctionType(pattern, Expr.name("Type"),
-        false);
+    FunctionType functionType = new FunctionType(pattern, Expr.name("Type"));
 
     return Expr.fn(Position.none(), functionType, type);
   }

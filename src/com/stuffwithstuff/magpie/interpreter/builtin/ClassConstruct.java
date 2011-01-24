@@ -66,7 +66,7 @@ public class ClassConstruct implements Callable {
     Expr recordType = Expr.record(Position.none(), fields);
     
     FunctionType type = new FunctionType(new VariablePattern("arg", recordType),
-        Expr.name(mClass.getName()), false);
+        Expr.name(mClass.getName()));
     
     return interpreter.evaluateFunctionType(type, null);
   }

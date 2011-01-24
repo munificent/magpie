@@ -1,5 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import java.util.ArrayList;
+
 import com.stuffwithstuff.magpie.ast.pattern.*;
 import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.util.Pair;
@@ -49,7 +51,7 @@ public class PatternTester implements PatternVisitor<Boolean, Obj> {
     
     Obj equals = mContext.lookUp(Name.EQEQ);
     Obj result = mInterpreter.apply(Position.none(), equals,
-        mInterpreter.createTuple(value, expected));
+        new ArrayList<Obj>(), mInterpreter.createTuple(value, expected));
     
     return result.asBool();
   }
