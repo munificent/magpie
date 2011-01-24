@@ -3,6 +3,10 @@ package com.stuffwithstuff.magpie.interpreter;
 import java.util.*;
 import java.util.Map.Entry;
 
+import com.stuffwithstuff.magpie.ast.Expr;
+import com.stuffwithstuff.magpie.interpreter.builtin.FieldGetter;
+import com.stuffwithstuff.magpie.interpreter.builtin.FieldSetter;
+
 /**
  * A runtime object representing a class.
  */
@@ -77,6 +81,15 @@ public class ClassObj extends Obj {
   public Map<String, Field> getFieldDefinitions() { return mFields; }
   public MemberSet getMembers() { return mMembers; }
 
+  public void declareField(String name, boolean isDelegate, Expr type) {
+    // Declare the field.
+    mFields.put(name, new Field(isDelegate, null, type));
+    
+    // Add a getter and setter.
+    mMembers.defineGetter(name, new FieldGetter(name, type));
+    mMembers.defineSetter(name, new FieldSetter(name, type));
+  }
+  
   @Override
   public String toString() {
     return mName;

@@ -1,13 +1,12 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
 import com.stuffwithstuff.magpie.ast.Expr;
-import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
+import com.stuffwithstuff.magpie.interpreter.ExprConverter;
 import com.stuffwithstuff.magpie.interpreter.Field;
 import com.stuffwithstuff.magpie.interpreter.FnObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Member;
-import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class ClassBuiltIns {
@@ -16,26 +15,16 @@ public class ClassBuiltIns {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();
       boolean isDelegate = arg.getTupleField(1).asBool();
-      FnObj type = arg.getTupleField(2).asFn();
+      Expr type = ExprConverter.convert(interpreter, arg.getTupleField(2));
       
       ClassObj classObj = thisObj.asClass();
-  
-      // Declare the field.
-      classObj.getFieldDefinitions().put(name,
-          new Field(false, isDelegate, type.getFunction()));
-      
-      // Add a getter.
-      classObj.getMembers().defineGetter(name, new FieldGetter(name, 
-          type.getFunction().getFunction().getBody()));
-      
-      // Add a setter.
-      classObj.getMembers().defineSetter(name,
-          new FieldSetter(name, type.getFunction().getFunction().getBody()));
+      classObj.declareField(name, isDelegate, type);
   
       return interpreter.nothing();
     }
   }
   
+  // TODO(bob): Get rid of type.
   @Signature("defineField(name String, delegate? Bool, type, initializer ->)")
   public static class DefineField implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
@@ -47,7 +36,7 @@ public class ClassBuiltIns {
       // Define the field itself.
       ClassObj classObj = thisObj.asClass();
       classObj.getFieldDefinitions().put(name,
-          new Field(true, isDelegate, initializer.getFunction()));
+          new Field(isDelegate, initializer.getFunction(), null));
   
       // Determine if the field is implicitly typed (we have an initializer but
       // no type annotation) or explicitly.
@@ -59,7 +48,7 @@ public class ClassBuiltIns {
         isInitializer = true;
       } else {
         // Have a type annotation.
-        expr = optionalType.asFn().getFunction().getFunction().getBody();
+        expr = ExprConverter.convert(interpreter, optionalType);
         isInitializer = false;
       }
       
@@ -160,23 +149,7 @@ public class ClassBuiltIns {
       // Get the name of the class.
       String name = arg.asString();
       
-      // Create the metaclass. This will hold shared methods on the class.
-      ClassObj metaclass = new ClassObj(interpreter.getMetaclass(),
-          name + "Class");
-      metaclass.getMixins().add(interpreter.getMetaclass());
-      
-      // Create the class object itself. This will hold the instance methods for
-      // objects of the class.
-      ClassObj classObj = new ClassObj(metaclass, name);
-      classObj.getMixins().add(interpreter.getObjectClass());
-      
-      // Add the factory methods.
-      Callable signify = new ClassConstruct(classObj);
-      metaclass.getMembers().defineMethod(Name.CONSTRUCT, signify);
-      // By default, "new" just signifies too.
-      metaclass.getMembers().defineMethod(Name.NEW, signify);
-      
-      return classObj;
+      return interpreter.createClass(name);
     }
   }
 }

@@ -126,7 +126,8 @@ public class ClassExprParser implements ExprParser {
     if (parser.lookAhead(TokenType.EQUALS)) {
       type = Expr.nothing();
     } else {
-      type = Expr.fn(TypeParser.parse(parser));
+      Expr typeExpr = TypeParser.parse(parser);
+      type = Expr.quote(typeExpr.getPosition(), typeExpr);
     }
     
     if (parser.match(TokenType.EQUALS)) {

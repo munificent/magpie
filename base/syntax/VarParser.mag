@@ -5,8 +5,8 @@ class VarParser
         %var%("pattern", parser parsePattern())
         parser consume(TokenType equals)
         %var%("value", parser parseEndBlock())
-        
-        VariableExpression new(pattern, value)
+
+        VariableExpression new(pattern: pattern, value: value)
     end
 end
 

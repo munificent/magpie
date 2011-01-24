@@ -10,8 +10,8 @@ public class MatchCase {
   }
   
   public Pattern getPattern() { return mPattern; }
-  public Expr getBody() { return mBody; }
+  public Expr    getBody()    { return mBody; }
   
-  public final Pattern mPattern;
-  public final Expr mBody;
+  private final Pattern mPattern;
+  private final Expr mBody;
 }

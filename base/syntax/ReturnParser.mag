@@ -4,8 +4,8 @@ class ReturnParser
         parser consume("return")
         %if%(parser lookAheadAny(TokenType line, TokenType rightParen,
                 TokenType rightBrace, TokenType rightBracket),
-            ReturnExpression new(NothingExpression new()),
-            ReturnExpression new(parser parseExpression()))
+            ReturnExpression new(value: NothingExpression new()),
+            ReturnExpression new(value: parser parseExpression()))
     end
 end
 

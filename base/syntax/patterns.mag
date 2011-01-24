@@ -9,7 +9,7 @@ class RecordPattern
     get string String = "not impl"
 end
 
-RecordPattern declareField("fields", false, fn List(String, Pattern))
+RecordPattern declareField("fields", false, { List(String, Pattern) })
 
 class TuplePattern
     shared def new(fields List(Pattern) -> TuplePattern)
@@ -19,7 +19,7 @@ class TuplePattern
     get string String = String join(fields)
 end
 
-TuplePattern declareField("fields", false, fn List(Pattern))
+TuplePattern declareField("fields", false, { List(Pattern) })
 
 class ValuePattern
     shared def new(value Expression -> ValuePattern)
@@ -29,7 +29,7 @@ class ValuePattern
     get string String = value string
 end
 
-ValuePattern declareField("value", false, fn Expression)
+ValuePattern declareField("value", false, { Expression })
 
 class VariablePattern
     shared def new(name String, typeExpr Expression | Nothing -> VariablePattern)
@@ -39,5 +39,5 @@ class VariablePattern
     get string String = name ~~ typeExpr
 end
 
-VariablePattern declareField("name", false, fn String)
-VariablePattern declareField("typeExpr", false, fn Expression | Nothing)
+VariablePattern declareField("name", false, { String })
+VariablePattern declareField("typeExpr", false, { Expression | Nothing })

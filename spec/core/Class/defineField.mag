@@ -1,14 +1,14 @@
 specify("The 'defineField' method on Class") with
     it should("define an initialized field on the class") with
         var c = Class new("c")
-        c defineField("foo", false, (fn String), (fn "value"))
+        c defineField("foo", false, { String }, (fn "value"))
         c new() foo shouldBe("value")
     end
 
     it should("replace an existing definition") with
         var c = Class new("c")
-        c defineField("foo", false, (fn String), (fn "before"))
-        c defineField("foo", false, (fn String), (fn "after"))
+        c defineField("foo", false, { String }, (fn "before"))
+        c defineField("foo", false, { String }, (fn "after"))
         c new() foo shouldBe("after")
     end
 
@@ -23,9 +23,9 @@ specify("The 'defineField' method on Class") with
             class C
                 var foo String
             end
-            
+
             def expectString(s String) nothing
-            
+
             def main(->)
                 expectString(C new(foo: "s") foo)
             end
@@ -35,9 +35,9 @@ specify("The 'defineField' method on Class") with
             class C
                 var foo String
             end
-            
+
             def expectInt(i Int) nothing
-            
+
             def main(->)
                 expectInt(C new(foo: "s") foo)
             end
@@ -49,9 +49,9 @@ specify("The 'defineField' method on Class") with
             class C
                 var foo = "s"
             end
-            
+
             def expectString(s String) nothing
-            
+
             def main(->)
                 expectString(C new() foo)
             end
@@ -61,9 +61,9 @@ specify("The 'defineField' method on Class") with
             class C
                 var foo = "s"
             end
-            
+
             def expectInt(i Int) nothing
-            
+
             def main(->)
                 expectInt(C new() foo)
             end

@@ -10,7 +10,6 @@ import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.Field;
-import com.stuffwithstuff.magpie.interpreter.Function;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.parser.Position;
@@ -46,8 +45,6 @@ public class ClassConstruct implements Callable {
       }
     }
     
-    // TODO(bob): Needs to call parent constructors too!
-    
     return obj;
   }
 
@@ -57,9 +54,7 @@ public class ClassConstruct implements Callable {
     List<Pair<String, Expr>> fields = new ArrayList<Pair<String, Expr>>();
     for (Entry<String, Field> field : mClass.getFieldDefinitions().entrySet()) {
       if (!field.getValue().hasInitializer()) {
-        Callable typeDeclaration = field.getValue().getDefinition();
-        // TODO(bob): This cast here is gross!
-        Expr type = ((Function)typeDeclaration).getFunction().getBody();
+        Expr type = field.getValue().getType();
         fields.add(new Pair<String, Expr>(field.getKey(), type));
       }
     }

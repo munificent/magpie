@@ -1,0 +1,69 @@
+// Generics use cases:
+
+// 1. Infer the return type from the argument type.
+def id(a 'T -> 'T) a
+
+// Given the above, this should be a type error:
+expectInt(id("not int"))
+
+
+// 2. Infer the return type from the argument *value*.
+def make(type Type('T) -> 'T)
+    type new()
+end
+
+
+// 3. Pull out a type parameter from a parametric type.
+def showItemType(list List('T))
+    print(T name)
+    // Is this needed? Could you just do:
+    // list itemType?
+end
+
+
+// 4. Constrain the type parameter so we can check operations on it.
+def memoize(arg 'T: Hashable -> 'T)
+    if cache contains(arg hashCode) then
+        cache(arg hashCode)
+    else
+        cache insert(arg hashCode, arg)
+        arg
+    end
+end
+
+
+// Generics syntax options:
+def id(a 'T -> 'T) a
+def make(type Type('T) -> 'T)
+def showItemType(list List('T))
+def memoize(arg 'T: Hashable -> 'T)
+
+def id[T](a T -> T) a
+def make[T](type Type(T) -> T)
+def showItemType[T](list List(T))
+def memoize[T Hashable](arg T -> T)
+
+def id 'T (a T -> T) a
+def make 'T (type Type(T) -> T)
+def showItemType 'T (list List(T))
+def memoize 'T Hashable (arg T -> T)
+
+def id'(T) (a T -> T) a
+def make'(T) (type Type(T) -> T)
+def showItemType'(T) (list List(T))
+def memoize'(T Hashable) (arg T -> T)
+
+
+// Generic operations:
+
+// When checking a call, if the called function has type parameters, we need to
+// infer them from the argument type so that the return type can be evaluated
+// in a scope containing them. (For example, the id function.)
+//
+// When checking a generic function, we need to bind the type parameters to
+// their constraints so that the parameter pattern can be bound to its type.
+// (For example, the memoize function.)
+// To do this, we just bind the type parameters to their constraints and then
+// bind the parameter pattern.
+
+

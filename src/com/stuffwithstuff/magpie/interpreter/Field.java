@@ -1,16 +1,17 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import com.stuffwithstuff.magpie.ast.Expr;
+
 /**
  * Represents a declared or defined field in a class. This describes the field
  * itself from the class's perspective. It is not a field *value* in a
  * particular instance of a class. (Those just use a regular Scope.)
  */
 public class Field {
-  public Field(boolean hasInitializer, boolean isDelegate,
-      Callable definition) {
-    mHasInitializer = hasInitializer;
+  public Field(boolean isDelegate, Callable initializer, Expr type) {
     mIsDelegate = isDelegate;
-    mDefinition = definition;
+    mInitializer = initializer;
+    mType = type;
   }
   
   /**
@@ -19,7 +20,7 @@ public class Field {
    * 
    * @return true if the field has an initializer.
    */
-  public boolean hasInitializer() { return mHasInitializer; }
+  public boolean hasInitializer() { return mInitializer != null; }
   
   /**
    * Gets whether this field is a delegate for unhandled messages.
@@ -29,15 +30,18 @@ public class Field {
   public boolean isDelegate() { return mIsDelegate; }
   
   /**
-   * Gets the definition for this field. If it has an initializer, this will
-   * return the initializing expression. If not, this will return the type
-   * annotation expression.
-   * 
-   * @return The definition for the field.
+   * Gets the initializer for this field. Returns null if the field is just
+   * declared.
    */
-  public Callable getDefinition() { return mDefinition; }
+  public Callable getInitializer() { return mInitializer; }
   
-  private final boolean  mHasInitializer;
+  /**
+   * Gets the type annotation for this field. Will be null if the field has an
+   * initializer.
+   */
+  public Expr getType() { return mType; }
+  
   private final boolean  mIsDelegate;
-  private final Callable mDefinition;
+  private final Callable mInitializer;
+  private final Expr     mType;
 }

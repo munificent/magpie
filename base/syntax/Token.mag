@@ -1,7 +1,7 @@
 // Note: This file is parsed before any of the parsewords have been defined, so
 // it only uses core syntax.
 
-class Token    
+class Token
     shared def identifier(name String -> Token) Token new(TokenType identifier, name)
     shared def field(name String -> Token) Token new(TokenType field, name)
     shared def operator(name String -> Token) Token new(TokenType operator, name)
@@ -28,8 +28,8 @@ Token defineGetter("string", fn(-> String) tokenType ~~ value)
 Token defineGetter("boolValue", fn(-> Bool) %unsafecast%(Bool, value))
 Token defineGetter("intValue", fn(-> Int) %unsafecast%(Int, value))
 Token defineGetter("stringValue", fn(-> String) %unsafecast%(String, value))
-Token declareField("tokenType", false, fn TokenType)
-Token declareField("value", false, fn Bool | Int | Nothing | String)
+Token declareField("tokenType", false, { TokenType })
+Token declareField("value", false, { Bool | Int | Nothing | String })
 
 Token defineMethod("keyword?",
     // Note: no comparison operators are available yet.
@@ -42,7 +42,7 @@ class TokenType
     shared def equal?(left TokenType, right TokenType -> Bool)
         Int equal?(left value, right value)
     end
-    
+
     shared def new(value Int, name String) construct(value: value, name: name)
 end
 
@@ -69,5 +69,5 @@ Reflect getClass(TokenType) defineGetter("catchToken",    fn(-> TokenType) Token
 Reflect getClass(TokenType) defineGetter("eof",           fn(-> TokenType) TokenType new(17, "eof"))
 
 TokenType defineGetter("string", fn(-> String) name)
-TokenType declareField("value", false, fn Int)
-TokenType declareField("name", false, fn String)
+TokenType declareField("value", false, { Int })
+TokenType declareField("name", false, { String })

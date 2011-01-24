@@ -120,6 +120,8 @@ public class Interpreter {
     BuiltIns.registerClass(RuntimeBuiltIns.class, mRuntimeClass);
     BuiltIns.registerClass(StringBuiltIns.class, mStringClass);
     BuiltIns.registerFunctions(BuiltInFunctions.class, this);
+    
+    EnvironmentBuilder.initialize(this);
   }
   
   public void load(List<Expr> expressions) {
@@ -290,6 +292,7 @@ public class Interpreter {
     Expect.notNull(arg);
     
     Obj resolved = getMember(position, receiver, name);
+    
     return apply(position, resolved, null, arg);
   }
 
@@ -391,7 +394,7 @@ public class Interpreter {
     // Initialize its fields.
     for (Entry<String, Field> field : classObj.getFieldDefinitions().entrySet()) {
       if (field.getValue().hasInitializer()) {
-        Callable initializer = field.getValue().getDefinition();
+        Callable initializer = field.getValue().getInitializer();
         Obj value = initializer.invoke(this, mNothing, null, mNothing);
         object.setField(field.getKey(), value);
       }
@@ -446,7 +449,7 @@ public class Interpreter {
     mKeywords.add(keyword);
   }
   
-  private ClassObj createGlobalClass(String name) {
+  public ClassObj createClass(String name) {
     // Create the metaclass. This will hold shared methods on the class.
     ClassObj metaclass = new ClassObj(mClass, name + "Class");
     metaclass.getMixins().add(mClass);
@@ -456,8 +459,18 @@ public class Interpreter {
     ClassObj classObj = new ClassObj(metaclass, name);
     classObj.getMixins().add(mObjectClass);
     
+    // Add the factory methods.
+    Callable construct = new ClassConstruct(classObj);
+    metaclass.getMembers().defineMethod(Name.CONSTRUCT, construct);
+    // By default, "new" just constructs too.
+    metaclass.getMembers().defineMethod(Name.NEW, construct);
+
+    return classObj;
+  }
+
+  private ClassObj createGlobalClass(String name) {
+    ClassObj classObj = createClass(name);
     mGlobalScope.define(name, classObj);
-    
     return classObj;
   }
   

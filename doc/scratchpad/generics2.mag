@@ -1,0 +1,31 @@
+def Object as[T](expected Type(T) -> T | Nothing)
+    if type == expected or expected assignsFrom?(type) then unsafecast[T](this)
+end
+
+foo as(Int)
+
+valueType = IntClass
+typeExpr  = Apply(Msg(null, "Type"), Msg(null, "T"))
+
+// So we go to infer the ApplyExpr. To do that, we call "unapply" on the
+// valueType:
+var result = IntClass unapply()
+// For a metaclass, that should return the type
+assert(result == Int)
+
+// Now we go to infer the argument to Type(T):
+valueType = Int
+typeExpr  = T
+
+// It's a message expr whose name is a type param, so we're good.
+
+
+def |[T1 Type, T2 Type](left Type(T1), right Type(T2) -> T1 | T2) ...
+
+
+foo as(Int | String)
+
+valueType = Type // that's the type returned by |.
+typeExpr = Type(T)
+
+var result = valueType unapply()

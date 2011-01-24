@@ -6,7 +6,7 @@
             (
                 // Getter on a class.
                 %var%("className", parser consume() stringValue)
-                MessageExpression new(nothing, className)
+                MessageExpression new(receiver: nothing, name: className)
             ), (
                 // Getter on a complex expression.
                 parser consume(TokenType leftParen)
