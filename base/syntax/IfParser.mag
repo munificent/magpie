@@ -4,10 +4,10 @@ class IfParser
         parser consume("if")
 
         // Parse the condition.
-        %var%("condition", parser parseBlock("then") _0)
-    
+        %var%("condition", parser parseBlock(TokenType thenToken) _0)
+
         // Parse the then body.
-        parser consume("then")
+        parser consume(TokenType thenToken)
         %var%("thenParse", parser parseBlock("else", "end"))
         %var%("thenExpr", thenParse _0)
 

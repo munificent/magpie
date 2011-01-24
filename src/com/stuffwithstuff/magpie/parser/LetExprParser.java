@@ -15,16 +15,16 @@ public class LetExprParser implements ExprParser {
     
     // See if there is an expression for the let condition.
     Expr condition;
-    if (parser.lookAhead("then")) {
+    if (parser.lookAhead(TokenType.THEN)) {
       // let a then --> let a = a then
       condition = Expr.name(name);
     } else {
       parser.consume(TokenType.EQUALS);
-      condition = parser.parseBlock("then").getKey();
+      condition = parser.parseBlock(TokenType.THEN).getKey();
     }
     
     // Parse the then body.
-    parser.consume("then");
+    parser.consume(TokenType.THEN);
     Pair<Expr, Token> thenParse = parser.parseBlock("else", "end");
     Expr thenExpr = thenParse.getKey();
 

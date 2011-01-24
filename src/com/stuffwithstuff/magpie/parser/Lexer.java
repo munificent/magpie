@@ -313,6 +313,7 @@ public class Lexer {
     if (text.equals("nothing")) return new Token(position, TokenType.NOTHING);
     if (text.equals("or")) return new Token(position, TokenType.OR);
     if (text.equals("set")) return new Token(position, TokenType.SET);
+    if (text.equals("then")) return new Token(position, TokenType.THEN);
     if (text.equals("this")) return new Token(position, TokenType.THIS);
     if (text.equals("true")) return new Token(position, TokenType.BOOL, true);
     if (text.equals("while")) return new Token(position, TokenType.WHILE);

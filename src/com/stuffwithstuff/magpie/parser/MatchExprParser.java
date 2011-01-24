@@ -13,7 +13,7 @@ public class MatchExprParser implements ExprParser {
   private static MatchCase parseCase(MagpieParser parser) {
     Pattern pattern = PatternParser.parse(parser);
 
-    parser.consume("then");
+    parser.consume(TokenType.THEN);
     
     Pair<Expr, Token> bodyParse = parser.parseBlock("else", "end",
         TokenType.CASE);

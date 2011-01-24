@@ -21,6 +21,7 @@ Reflect getClass(Token) defineGetter("dot",           fn(-> Token) Token new(Tok
 Reflect getClass(Token) defineGetter("equals",        fn(-> Token) Token new(TokenType equals))
 Reflect getClass(Token) defineGetter("line",          fn(-> Token) Token new(TokenType line))
 Reflect getClass(Token) defineGetter("catchToken",    fn(-> Token) Token new(TokenType catchToken))
+Reflect getClass(Token) defineGetter("thenToken",     fn(-> Token) Token new(TokenType thenToken))
 Reflect getClass(Token) defineGetter("eof",           fn(-> Token) Token new(TokenType eof))
 
 Token defineGetter("string", fn(-> String) tokenType ~~ value)
@@ -66,7 +67,8 @@ Reflect getClass(TokenType) defineGetter("boolLiteral",   fn(-> TokenType) Token
 Reflect getClass(TokenType) defineGetter("intLiteral",    fn(-> TokenType) TokenType new(14, "intLiteral"))
 Reflect getClass(TokenType) defineGetter("stringLiteral", fn(-> TokenType) TokenType new(15, "stringLiteral"))
 Reflect getClass(TokenType) defineGetter("catchToken",    fn(-> TokenType) TokenType new(16, "catch"))
-Reflect getClass(TokenType) defineGetter("eof",           fn(-> TokenType) TokenType new(17, "eof"))
+Reflect getClass(TokenType) defineGetter("thenToken",     fn(-> TokenType) TokenType new(17, "then"))
+Reflect getClass(TokenType) defineGetter("eof",           fn(-> TokenType) TokenType new(18, "eof"))
 
 TokenType defineGetter("string", fn(-> String) name)
 TokenType declareField("value", false, { Int })

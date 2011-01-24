@@ -233,7 +233,7 @@ public class MagpieParser extends Parser {
   private MatchCase parseCatch(String keyword1, String keyword2, TokenType... endTokens) {
     Pattern pattern = PatternParser.parse(this);
 
-    consume("then");
+    consume(TokenType.THEN);
     
     Pair<Expr, Token> body = parseBlock(false, keyword1, keyword2, endTokens);
     

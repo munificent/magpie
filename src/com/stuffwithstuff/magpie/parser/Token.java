@@ -73,6 +73,7 @@ public final class Token {
       case MATCH: return "match";
       case NOTHING: return "nothing";
       case SET: return "set";
+      case THEN: return "then";
       case THIS: return "this";
       case WHILE: return "while";
       case WITH: return "with";

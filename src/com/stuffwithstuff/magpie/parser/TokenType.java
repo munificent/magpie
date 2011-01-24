@@ -41,6 +41,7 @@ public enum TokenType {
   NOTHING,
   OR,
   SET,
+  THEN,
   THIS,
   WHILE,
   WITH,
