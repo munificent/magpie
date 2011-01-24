@@ -78,7 +78,11 @@ public class Interpreter {
     mClass.getMixins().add(mObjectClass);
 
     mArrayClass = createGlobalClass("Array");
+    
     mBoolClass = createGlobalClass("Bool");
+    mTrue = instantiate(mBoolClass, true);
+    mFalse = instantiate(mBoolClass, false);
+    
     mDynamicClass = createGlobalClass("Dynamic");
     mFnClass = createGlobalClass("Function");
     mIntClass = createGlobalClass("Int");
@@ -326,6 +330,9 @@ public class Interpreter {
    */
   public Obj nothing() { return mNothing; }
 
+  public Obj getTrue() { return mTrue; }
+  public Obj getFalse() { return mFalse; }
+
   public ClassObj getArrayClass() { return mArrayClass; }
   public ClassObj getBoolClass() { return mBoolClass; }
   public ClassObj getDynamicClass() { return mDynamicClass; }
@@ -345,7 +352,7 @@ public class Interpreter {
   }
   
   public Obj createBool(boolean value) {
-    return instantiate(mBoolClass, value);
+    return value ? mTrue : mFalse;
   }
 
   public Obj createInt(int value) {
@@ -576,6 +583,8 @@ public class Interpreter {
   private final ClassObj mTupleClass;
   
   private final Obj mNothing;
+  private final Obj mTrue;
+  private final Obj mFalse;
   private final Stack<String> mScriptPaths = new Stack<String>();
   private final Map<String, ExprParser> mParsewords =
       new HashMap<String, ExprParser>();
