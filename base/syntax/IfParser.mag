@@ -26,7 +26,6 @@ class IfParser
 end
 
 MagpieParser registerParseword("if", IfParser new())
-MagpieParser registerKeyword("then")
 MagpieParser registerKeyword("else")
 
 // TODO(bob): Put this somewhere appropriate...
