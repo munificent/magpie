@@ -9,12 +9,6 @@ extend class AndExpression
     end
 end
 
-extend class ApplyExpression
-    get string String =
-        target string ~ "(" ~ argument ~ ")"
-    end
-end
-
 extend class AssignExpression
     get string String =
         let receiver then
@@ -35,6 +29,12 @@ end
 
 extend class BreakExpression
     get string String = "break"
+end
+
+extend class CallExpression
+    get string String =
+        target string ~ "(" ~ argument ~ ")"
+    end
 end
 
 extend class FunctionExpression

@@ -97,6 +97,8 @@ public class Checker {
             classObj.getName(), mixin.getName());
       }
     }
+    
+    // TODO(bob): Need to check metaclasses too!
   }
   
   /**

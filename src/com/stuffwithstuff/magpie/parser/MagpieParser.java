@@ -350,11 +350,11 @@ public class MagpieParser extends Parser {
         } else {
           arg = Expr.nothing();
         }
-        message = Expr.apply(message, typeArgs, arg);
+        message = Expr.call(message, typeArgs, arg);
       } else if (lookAhead(TokenType.LEFT_PAREN)) {
         // A function call like foo(123).
         Expr arg = parenthesizedExpression(BraceType.PAREN);
-        message = Expr.apply(message, arg);
+        message = Expr.call(message, arg);
       } else if (match(TokenType.WITH)) {
         // Parse the parameter list if given.
         FunctionType blockType;
@@ -371,14 +371,14 @@ public class MagpieParser extends Parser {
         block = Expr.fn(block.getPosition(), blockType, block);
         
         // Apply it to the previous expression.
-        if (message instanceof ApplyExpr) {
-          // foo(123) with ...  --> Apply(Msg(foo), Tuple(123, block))
-          ApplyExpr apply = (ApplyExpr)message;
-          Expr arg = addTupleField(apply.getArg(), block);
-          message = Expr.apply(apply.getTarget(), arg);
+        if (message instanceof CallExpr) {
+          // foo(123) with ...  --> Call(Msg(foo), Tuple(123, block))
+          CallExpr call = (CallExpr)message;
+          Expr arg = addTupleField(call.getArg(), block);
+          message = Expr.call(call.getTarget(), arg);
         } else {
-          // 123 with ...  --> Apply(Int(123), block)
-          message = Expr.apply(message, block);
+          // 123 with ...  --> Call(Int(123), block)
+          message = Expr.call(message, block);
         }
       } else {
         break;

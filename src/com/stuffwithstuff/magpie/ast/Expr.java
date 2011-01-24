@@ -27,42 +27,6 @@ public abstract class Expr {
     return new AndExpr(left, right);
   }
   
-  public static Expr apply(Expr target, List<Expr> typeArgs, Expr arg) {
-    Expect.notNull(target);
-    Expect.notNull(typeArgs);
-    Expect.notNull(arg);
-
-    return new ApplyExpr(target, typeArgs, arg);
-  }
-  
-  public static Expr apply(Expr target, Expr arg) {
-    Expect.notNull(target);
-    Expect.notNull(arg);
-    
-    // Immediately handle special forms.
-    if (target instanceof MessageExpr) {
-      MessageExpr message = (MessageExpr) target;
-      String name = message.getName();
-      
-      if (name.equals("%break%")) {
-        return new BreakExpr(target.getPosition());
-      } else if (name.equals("%if%")) {
-        return specialFormIf(target.getPosition(), arg);
-      } else if (name.equals("%return%")) {
-        return new ReturnExpr(target.getPosition(), arg);
-      } else if (name.equals("%scope%")) {
-        return new ScopeExpr(arg);
-      } else if (name.equals("%unsafecast%")) {
-        return specialFormUnsafeCast(target.getPosition(), arg);
-      } else if (name.equals("%var%")) {
-        return specialFormVar(target.getPosition(), arg);
-      }
-    }
-    
-    // If we got here, it's not a special form.
-    return new ApplyExpr(target, null, arg);
-  }
-  
   public static Expr assign(Position position, Expr receiver, String name,
       Expr value) {
     return new AssignExpr(position, receiver, name, value);
@@ -104,6 +68,42 @@ public abstract class Expr {
     return new BreakExpr(position);
   }
   
+  public static Expr call(Expr target, List<Expr> typeArgs, Expr arg) {
+    Expect.notNull(target);
+    Expect.notNull(typeArgs);
+    Expect.notNull(arg);
+    
+    return new CallExpr(target, typeArgs, arg);
+  }
+  
+  public static Expr call(Expr target, Expr arg) {
+    Expect.notNull(target);
+    Expect.notNull(arg);
+    
+    // Immediately handle special forms.
+    if (target instanceof MessageExpr) {
+      MessageExpr message = (MessageExpr) target;
+      String name = message.getName();
+      
+      if (name.equals("%break%")) {
+        return new BreakExpr(target.getPosition());
+      } else if (name.equals("%if%")) {
+        return specialFormIf(target.getPosition(), arg);
+      } else if (name.equals("%return%")) {
+        return new ReturnExpr(target.getPosition(), arg);
+      } else if (name.equals("%scope%")) {
+        return new ScopeExpr(arg);
+      } else if (name.equals("%unsafecast%")) {
+        return specialFormUnsafeCast(target.getPosition(), arg);
+      } else if (name.equals("%var%")) {
+        return specialFormVar(target.getPosition(), arg);
+      }
+    }
+    
+    // If we got here, it's not a special form.
+    return new CallExpr(target, null, arg);
+  }
+  
   public static FnExpr fn(Expr body) {
     return fn(Position.none(), FunctionType.nothingToDynamic(), body);
   }
@@ -135,11 +135,11 @@ public abstract class Expr {
   }
   
   public static Expr message(Position position, Expr receiver, String name, Expr arg) {
-    return apply(message(position, receiver, name), arg);
+    return call(message(position, receiver, name), arg);
   }
   
   public static Expr message(Expr receiver, String name, Expr arg) {
-    return apply(message(receiver, name), arg);
+    return call(message(receiver, name), arg);
   }
   
   public static Expr message(Expr receiver, String name) {
@@ -186,7 +186,7 @@ public abstract class Expr {
   }
 
   public static Expr staticMessage(Expr receiver, String name, Expr arg) {
-    return apply(new MessageExpr(Position.none(), receiver, name), 
+    return call(new MessageExpr(Position.none(), receiver, name), 
         Collections.singletonList(arg), nothing());
   }
 

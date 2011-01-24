@@ -37,8 +37,6 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     // TODO(bob): Support position information in Magpie parser.
     if (exprClass == interpreter.getGlobal("AndExpression")) {
       return convertAndExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("ApplyExpression")) {
-      return convertApplyExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("AssignExpression")) {
       return convertAssignExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("BlockExpression")) {
@@ -47,6 +45,8 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
       return convertBoolExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("BreakExpression")) {
       return convertBreakExpr(interpreter, expr);
+    } else if (exprClass == interpreter.getGlobal("CallExpression")) {
+      return convertCallExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("FunctionExpression")) {
       return convertFunctionExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("IfExpression")) {
@@ -96,13 +96,6 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     return Expr.and(left, right);
   }
 
-  private static Expr convertApplyExpr(Interpreter interpreter, Obj expr) {
-    Expr target = convert(interpreter, expr.getField("target"));
-    List<Expr> typeArgs = convertArray(interpreter, expr.getField("typeArgs"));
-    Expr argument = convert(interpreter, expr.getField("argument"));
-    return Expr.apply(target, typeArgs, argument);
-  }
-
   private static Expr convertAssignExpr(Interpreter interpreter, Obj expr) {
     Obj receiverObj = expr.getField("receiver");
     Expr receiver;
@@ -136,6 +129,13 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
 
   private static Expr convertBreakExpr(Interpreter interpreter, Obj expr) {
     return Expr.break_(Position.none());
+  }
+
+  private static Expr convertCallExpr(Interpreter interpreter, Obj expr) {
+    Expr target = convert(interpreter, expr.getField("target"));
+    List<Expr> typeArgs = convertArray(interpreter, expr.getField("typeArgs"));
+    Expr argument = convert(interpreter, expr.getField("argument"));
+    return Expr.call(target, typeArgs, argument);
   }
 
   private static Expr convertFunctionExpr(Interpreter interpreter, Obj expr) {
@@ -297,14 +297,6 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
         "left",  expr.getLeft(),
         "right", expr.getRight());
   }
-
-  @Override
-  public Obj visit(ApplyExpr expr, Void dummy) {
-    return construct("ApplyExpression",
-        "target",   expr.getTarget(),
-        "typeArgs", convert(expr.getTypeArgs()),
-        "argument", expr.getArg());
-  }
   
   @Override
   public Obj visit(AssignExpr expr, Void dummy) {
@@ -330,6 +322,14 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   @Override
   public Obj visit(BreakExpr expr, Void dummy) {
     return construct("BreakExpression");
+  }
+
+  @Override
+  public Obj visit(CallExpr expr, Void dummy) {
+    return construct("CallExpression",
+        "target",   expr.getTarget(),
+        "typeArgs", convert(expr.getTypeArgs()),
+        "argument", expr.getArg());
   }
 
   @Override

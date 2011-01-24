@@ -16,11 +16,6 @@ public class EnvironmentBuilder {
         .field("left",  name("Expression"))
         .field("right", name("Expression"));
 
-    newClass("ApplyExpression")
-        .field("target",   name("Expression"))
-        .field("typeArgs", list(name("Expression")))
-        .field("argument", name("Expression"));
-
     newClass("AssignExpression")
         .field("receiver", or(name("Expression"), name("Nothing")))
         .field("name",     name("String"))
@@ -34,6 +29,11 @@ public class EnvironmentBuilder {
         .field("value", name("Bool"));
 
     newClass("BreakExpression");
+
+    newClass("CallExpression")
+        .field("target",   name("Expression"))
+        .field("typeArgs", list(name("Expression")))
+        .field("argument", name("Expression"));
 
     newClass("FunctionTypeExpression")
         .field("typeParams", list(name("String"), name("Expression")))
@@ -124,7 +124,7 @@ public class EnvironmentBuilder {
       arg = exprs[0];
     }
     
-    return Expr.apply(Expr.name("List"), arg);
+    return Expr.call(Expr.name("List"), arg);
   }
   
   private Expr name(String name) {

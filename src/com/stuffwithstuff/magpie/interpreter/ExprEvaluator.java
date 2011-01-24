@@ -43,20 +43,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
-  public Obj visit(ApplyExpr expr, EvalContext context) {
-    Obj target = evaluate(expr.getTarget(), context);
-    
-    List<Obj> typeArgs = new ArrayList<Obj>();
-    for (Expr typeArg : expr.getTypeArgs()) {
-      typeArgs.add(evaluate(typeArg, context));
-    }
-    
-    Obj arg = evaluate(expr.getArg(), context);
-
-    return mInterpreter.apply(expr.getPosition(), target, typeArgs, arg);
-  }
-
-  @Override
   public Obj visit(AssignExpr expr, EvalContext context) {
     Obj receiver = evaluate(expr.getReceiver(), context);
     Obj value = evaluate(expr.getValue(), context);
@@ -121,6 +107,20 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       throw new BreakException();
     }
     return mInterpreter.nothing();
+  }
+
+  @Override
+  public Obj visit(CallExpr expr, EvalContext context) {
+    Obj target = evaluate(expr.getTarget(), context);
+    
+    List<Obj> typeArgs = new ArrayList<Obj>();
+    for (Expr typeArg : expr.getTypeArgs()) {
+      typeArgs.add(evaluate(typeArg, context));
+    }
+    
+    Obj arg = evaluate(expr.getArg(), context);
+
+    return mInterpreter.apply(expr.getPosition(), target, typeArgs, arg);
   }
 
   @Override

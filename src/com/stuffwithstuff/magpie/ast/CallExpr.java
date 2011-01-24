@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * AST node for a function application: applies an argument to a function-like
- * target.
+ * AST node for a function call: applies an argument to a function-like target.
  */
-public class ApplyExpr extends Expr {
-  ApplyExpr(Expr target, List<Expr> typeArgs, Expr arg) {
+public class CallExpr extends Expr {
+  CallExpr(Expr target, List<Expr> typeArgs, Expr arg) {
     super(target.getPosition().union(arg.getPosition()));
     mTarget = target;
     mTypeArgs = (typeArgs == null) ? new ArrayList<Expr>() : typeArgs;

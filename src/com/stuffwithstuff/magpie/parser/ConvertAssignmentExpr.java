@@ -21,15 +21,6 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
   }
 
   @Override
-  public Expr visit(ApplyExpr expr, Expr value) {
-    // example: array(3) = 4
-    // before:  Apply(    Msg(null, "array"),                  Int(3))
-    // after:   Apply(Msg(Msg(null, "array"), "assign"), Tuple(Int(3), Int(4)))
-    return Expr.message(expr.getPosition(), expr.getTarget(), Name.ASSIGN,
-        Expr.tuple(expr.getArg(), value));
-  }
-
-  @Override
   public Expr visit(AssignExpr expr, Expr value) {
     return invalidExpression(expr);
   }
@@ -47,6 +38,15 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
   @Override
   public Expr visit(BreakExpr expr, Expr value) {
     return invalidExpression(expr);
+  }
+
+  @Override
+  public Expr visit(CallExpr expr, Expr value) {
+    // example: array(3) = 4
+    // before:  Call(    Msg(null, "array"),                  Int(3))
+    // after:   Call(Msg(Msg(null, "array"), "assign"), Tuple(Int(3), Int(4)))
+    return Expr.message(expr.getPosition(), expr.getTarget(), Name.ASSIGN,
+        Expr.tuple(expr.getArg(), value));
   }
 
   @Override

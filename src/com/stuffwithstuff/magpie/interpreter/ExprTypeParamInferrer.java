@@ -2,33 +2,7 @@ package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.Map;
 
-import com.stuffwithstuff.magpie.ast.AndExpr;
-import com.stuffwithstuff.magpie.ast.ApplyExpr;
-import com.stuffwithstuff.magpie.ast.AssignExpr;
-import com.stuffwithstuff.magpie.ast.BlockExpr;
-import com.stuffwithstuff.magpie.ast.BoolExpr;
-import com.stuffwithstuff.magpie.ast.BreakExpr;
-import com.stuffwithstuff.magpie.ast.Expr;
-import com.stuffwithstuff.magpie.ast.ExprVisitor;
-import com.stuffwithstuff.magpie.ast.FnExpr;
-import com.stuffwithstuff.magpie.ast.IfExpr;
-import com.stuffwithstuff.magpie.ast.IntExpr;
-import com.stuffwithstuff.magpie.ast.LoopExpr;
-import com.stuffwithstuff.magpie.ast.MatchExpr;
-import com.stuffwithstuff.magpie.ast.MessageExpr;
-import com.stuffwithstuff.magpie.ast.NothingExpr;
-import com.stuffwithstuff.magpie.ast.OrExpr;
-import com.stuffwithstuff.magpie.ast.QuotationExpr;
-import com.stuffwithstuff.magpie.ast.RecordExpr;
-import com.stuffwithstuff.magpie.ast.ReturnExpr;
-import com.stuffwithstuff.magpie.ast.ScopeExpr;
-import com.stuffwithstuff.magpie.ast.StringExpr;
-import com.stuffwithstuff.magpie.ast.ThisExpr;
-import com.stuffwithstuff.magpie.ast.TupleExpr;
-import com.stuffwithstuff.magpie.ast.TypeofExpr;
-import com.stuffwithstuff.magpie.ast.UnquoteExpr;
-import com.stuffwithstuff.magpie.ast.UnsafeCastExpr;
-import com.stuffwithstuff.magpie.ast.VariableExpr;
+import com.stuffwithstuff.magpie.ast.*;
 
 public class ExprTypeParamInferrer implements ExprVisitor<Void, Obj> {
   public static void infer(Interpreter interpreter, Map<String, Obj> typeArgs,
@@ -40,11 +14,6 @@ public class ExprTypeParamInferrer implements ExprVisitor<Void, Obj> {
   
   @Override
   public Void visit(AndExpr expr, Obj valueType) {
-    return invalidExpression();
-  }
-
-  @Override
-  public Void visit(ApplyExpr expr, Obj valueType) {
     return invalidExpression();
   }
 
@@ -65,6 +34,11 @@ public class ExprTypeParamInferrer implements ExprVisitor<Void, Obj> {
 
   @Override
   public Void visit(BreakExpr expr, Obj valueType) {
+    return invalidExpression();
+  }
+
+  @Override
+  public Void visit(CallExpr expr, Obj valueType) {
     return invalidExpression();
   }
 

@@ -74,73 +74,6 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
-  public Obj visit(ApplyExpr expr, EvalContext context) {
-    Obj targetType = check(expr.getTarget(), context);
-    Obj argType = check(expr.getArg(), context);
-    
-    // If the target is not an actual function, get the type of its "call"
-    // message instead of the target itself.
-    Obj functionType = mInterpreter.getGlobal(Name.FUNCTION_TYPE);
-    if (targetType.getClassObj() != functionType) {
-      // It's a functor, so look up the "call" member.
-      Obj callTargetType = getMemberType(expr.getPosition(), targetType,
-          Name.CALL);
-
-      if (callTargetType.getClassObj() != functionType) {
-        mChecker.addError(expr.getPosition(),
-            "Target of type %s is not a function and does not have a 'call' method.",
-            targetType);
-        return mInterpreter.getNothingClass();
-      }
-      
-      targetType = callTargetType;
-    }
-    
-    // Handle the type parameters.
-    // TODO(bob): This check here is gross.
-    if ((targetType.getValue() instanceof FnExpr) &&
-        ((FnExpr)targetType.getValue()).getType().getTypeParams().size() > 0) {
-      FunctionType type = ((FnExpr)targetType.getValue()).getType();
-      
-      Map<String, Obj> typeArgs = new HashMap<String, Obj>();
-      // Add empty entries for all of the type parameter names.
-      for (Pair<String, Expr> typeParam : type.getTypeParams()) {
-        typeArgs.put(typeParam.getKey(), null);
-      }
-
-      // Apply the explicit type arguments.
-      for (int i = 0; i < expr.getTypeArgs().size(); i++) {
-        Obj typeArg = mInterpreter.evaluate(expr.getTypeArgs().get(i),
-            mStaticContext);
-        typeArgs.put(type.getTypeParams().get(i).getKey(), typeArg);
-      }
-      
-      // Infer the type parameters.
-      PatternTypeParamInferrer.infer(mInterpreter, type, argType, typeArgs);
-
-      // Create a new static scope for the type arguments.
-      EvalContext staticContext = mStaticContext.pushScope();
-      for (Entry<String, Obj> entry : typeArgs.entrySet()) {
-        staticContext.define(entry.getKey(), entry.getValue());
-      }
-      
-      // Now we can actually evaluate the function's type.
-      targetType = mInterpreter.evaluateFunctionType(type, staticContext);
-    }
-
-    // Just a regular function.
-    Obj paramType = targetType.getField(Name.PARAM_TYPE);
-    Obj returnType = targetType.getField(Name.RETURN_TYPE);
-    
-    // Make sure the argument type matches the declared parameter type.
-    mChecker.checkTypes(paramType, argType, expr.getPosition(), 
-        "Function is declared to take %s but is being passed %s.");
-    
-    // Calling a function results in the function's return type.
-    return returnType;
-  }
-  
-  @Override
   public Obj visit(AssignExpr expr, EvalContext context) {
     Obj receiverType = check(expr.getReceiver(), context);
     Obj valueType = check(expr.getValue(), context);    
@@ -214,6 +147,73 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     return mInterpreter.getNothingClass();
   }
 
+  @Override
+  public Obj visit(CallExpr expr, EvalContext context) {
+    Obj targetType = check(expr.getTarget(), context);
+    Obj argType = check(expr.getArg(), context);
+    
+    // If the target is not an actual function, get the type of its "call"
+    // message instead of the target itself.
+    Obj functionType = mInterpreter.getGlobal(Name.FUNCTION_TYPE);
+    if (targetType.getClassObj() != functionType) {
+      // It's a functor, so look up the "call" member.
+      Obj callTargetType = getMemberType(expr.getPosition(), targetType,
+          Name.CALL);
+
+      if (callTargetType.getClassObj() != functionType) {
+        mChecker.addError(expr.getPosition(),
+            "Target of type %s is not a function and does not have a 'call' method.",
+            targetType);
+        return mInterpreter.getNothingClass();
+      }
+      
+      targetType = callTargetType;
+    }
+    
+    // Handle the type parameters.
+    // TODO(bob): This check here is gross.
+    if ((targetType.getValue() instanceof FnExpr) &&
+        ((FnExpr)targetType.getValue()).getType().getTypeParams().size() > 0) {
+      FunctionType type = ((FnExpr)targetType.getValue()).getType();
+      
+      Map<String, Obj> typeArgs = new HashMap<String, Obj>();
+      // Add empty entries for all of the type parameter names.
+      for (Pair<String, Expr> typeParam : type.getTypeParams()) {
+        typeArgs.put(typeParam.getKey(), null);
+      }
+
+      // Apply the explicit type arguments.
+      for (int i = 0; i < expr.getTypeArgs().size(); i++) {
+        Obj typeArg = mInterpreter.evaluate(expr.getTypeArgs().get(i),
+            mStaticContext);
+        typeArgs.put(type.getTypeParams().get(i).getKey(), typeArg);
+      }
+      
+      // Infer the type parameters.
+      PatternTypeParamInferrer.infer(mInterpreter, type, argType, typeArgs);
+
+      // Create a new static scope for the type arguments.
+      EvalContext staticContext = mStaticContext.pushScope();
+      for (Entry<String, Obj> entry : typeArgs.entrySet()) {
+        staticContext.define(entry.getKey(), entry.getValue());
+      }
+      
+      // Now we can actually evaluate the function's type.
+      targetType = mInterpreter.evaluateFunctionType(type, staticContext);
+    }
+
+    // Just a regular function.
+    Obj paramType = targetType.getField(Name.PARAM_TYPE);
+    Obj returnType = targetType.getField(Name.RETURN_TYPE);
+    
+    // Make sure the argument type matches the declared parameter type.
+    mChecker.checkTypes(paramType, argType, expr.getPosition(), 
+        "Function is declared to take %s but is being passed %s.");
+    
+    // Calling a function results in the function's return type.
+    return returnType;
+  }
+  
   @Override
   public Obj visit(FnExpr expr, EvalContext context) {
     // Check the body and create a context containing any static arguments the
