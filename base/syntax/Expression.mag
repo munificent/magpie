@@ -2,3 +2,129 @@
 interface Expression
     get string String
 end
+
+extend class AndExpression
+    get string String =
+        left string ~ " and " ~ right
+    end
+end
+
+extend class ApplyExpression
+    get string String =
+        target string ~ "(" ~ argument ~ ")"
+    end
+end
+
+extend class AssignExpression
+    get string String =
+        let receiver then
+            receiver string ~~ name ~ " = " ~ value
+        else
+            name ~ " = " ~ value
+        end
+    end
+end
+
+extend class BoolExpression
+    get string String = value string
+end
+
+extend class BlockExpression
+    get string String = String join(expressions, "\n")
+end
+
+extend class BreakExpression
+    get string String = "break"
+end
+
+extend class FunctionExpression
+    get string String = "fn " ~ functionType ~~ body
+end
+
+extend class IfExpression
+    get let? Bool = name != nothing
+
+    get string String =
+        var result = if let? then "let " ~ name ~ " " else "if "
+        result ~ condition ~ " then " ~ thenArm ~ " else " ~ elseArm
+    end
+end
+
+extend class IntExpression
+    get string String = value string
+end
+
+extend class LoopExpression
+    get string String =
+        "not implemented!"
+    end
+end
+
+extend class MatchCase
+end
+
+extend class MatchExpression
+    get string String =
+        "not implemented!"
+    end
+end
+
+extend class MessageExpression
+    get string String =
+        if receiver != nothing then
+            receiver ~~ name
+        else name
+    end
+end
+
+extend class NothingExpression
+    get string String = "nothing"
+end
+
+extend class OrExpression
+    get string String =
+        left ~ " or " ~ right
+    end
+end
+
+extend class QuotationExpression
+    get string String = "{ " ~ body ~ " }"
+end
+
+extend class RecordExpression
+    get string String = "record"
+end
+
+extend class ReturnExpression
+    get string String = "return " ~ value
+end
+
+extend class ScopeExpression
+    get string String = "do " ~ body
+end
+
+extend class StringExpression
+    get string String = "\"" ~ value ~ "\""
+end
+
+extend class ThisExpression
+    get string String = "this"
+end
+
+extend class TupleExpression
+    get string String = String join(fields)
+end
+
+extend class TypeofExpression
+    get string String = "typeof " ~ body
+end
+
+extend class UnsafeCastExpression
+    get string String = "unsafecast[" ~ type ~ "](" ~ value ~ ")"
+end
+
+extend class VariableExpression
+    get string String =
+        "var " ~ pattern ~ " = " ~ value
+    end
+end
