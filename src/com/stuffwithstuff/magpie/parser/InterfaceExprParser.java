@@ -18,11 +18,11 @@ public class InterfaceExprParser implements ExprParser {
     
     // See if it's generic.
     List<String> typeParams = new ArrayList<String>();
-    if (parser.match(TokenType.LEFT_BRACKET)) {
+    if (parser.match(TokenType.LEFT_PAREN)) {
       do {
         typeParams.add(parser.consume(TokenType.NAME).getString());
       } while (parser.match(TokenType.COMMA));
-      parser.consume(TokenType.RIGHT_BRACKET);
+      parser.consume(TokenType.RIGHT_PAREN);
     }
     
     parser.consume(TokenType.LINE);
@@ -55,11 +55,11 @@ public class InterfaceExprParser implements ExprParser {
     // should check that we're extending it with the same number of type
     // arguments as the original definition. This would be bad:
     //
-    // interface IFoo[A, B]
+    // interface IFoo(A, B)
     //    ...
     // end
     //
-    // extend interface IFoo[C]
+    // extend interface IFoo(C)
     //    ...
     // end
     

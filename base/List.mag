@@ -1,6 +1,6 @@
-interface List[T]
+interface List(T)
     get count Int
-    
+
     def add(value T ->)
     def assign(value T -> T)
     def clear(->)

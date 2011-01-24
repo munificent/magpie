@@ -1,4 +1,4 @@
-interface Iterator[T]
+interface Iterator(T)
     get current T
     def next(-> Bool)
 end

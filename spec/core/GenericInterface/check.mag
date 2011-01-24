@@ -1,34 +1,34 @@
 specify("Checking a GenericInterface") with
     it should("instantiate it with a type argument") with
         envExpectCheckOK with
-            interface Identity[T]
+            interface Identity(T)
                 def id(value T -> T)
             end
-            
+
             def takeStringId(identity Identity(String) -> String)
                 identity id("hi")
             end
-            
+
             class StringIdentity
                 def id(value String -> String) value
             end
-            
+
             def main(->) takeStringId(StringIdentity new())
         end
-        
+
         envExpectCheckError with
-            interface Identity[T]
+            interface Identity(T)
                 def id(value T -> T)
             end
-            
+
             def takeStringId(identity Identity(String) -> String)
                 identity id("hi")
             end
-            
+
             class NotStringIdentity
                 def id(value Int -> Int) value
             end
-            
+
             def main(->) takeStringId(StringIdentity new())
         end
     end
