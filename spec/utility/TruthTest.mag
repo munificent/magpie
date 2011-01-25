@@ -3,7 +3,7 @@ class TruthTest
     shared def new(value Bool -> TruthTest)
         construct(value: value)
     end
-    
+
     get true? Bool =
         called = true
         value
@@ -11,4 +11,8 @@ class TruthTest
 
     var value  Bool
     var called Bool = false
+end
+
+class NotTruable
+    var true? = nothing
 end

@@ -7,13 +7,13 @@ class Interface
     shared def new(name String -> Interface)
         construct(name: name)
     end
-    
+
     get string String = name
 
     def declareMethod(name String, type Nothing => Type ->)
         members add(Member new(name: name, memberType: type))
     end
-    
+
     def declareGetter(name String, type Nothing => Type ->)
         members add(Member new(name: name, memberType: type))
     end
@@ -25,7 +25,7 @@ class Interface
         // itself or in a standard "assignsFrom?" function that type-checking
         // goes through.
         if other == this then return true
-        
+
         // Make sure we aren't currently type-checking this type against this
         // interface. If we are, just return true. This handles interfaces that
         // refer to themselves, like:
@@ -41,7 +41,7 @@ class Interface
 
         // See if the type implements all of the interface's members.
         checking add(other)
-        
+
         var implements = true
         for member = members do
             var thisType = member memberType()
@@ -55,7 +55,7 @@ class Interface
                 break
             end
         end
-    
+
         // We aren't checking this type anymore.
         checking removeAt(-1)
         implements
@@ -78,7 +78,7 @@ end
 
 class Member
     get string String = name ~~ memberType()
-    
+
     var name       String
     var memberType Nothing => Type
 end

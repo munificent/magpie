@@ -3,4 +3,18 @@ specify("An 'or' expression") with
         (typeof 0 or false) shouldBe(Bool | Int)
         (typeof 1 or 2)     shouldBe(Int)
     end
+
+    it should("require the left operand to be Trueable") with
+        fn
+            true or false
+        end shouldCheck()
+
+        fn
+            NotTruable new() or false
+        end shouldNotCheck()
+
+        fn
+            false or NotTruable new()
+        end shouldCheck()
+    end
 end

@@ -65,10 +65,13 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(AndExpr expr, EvalContext context) {
-    // TODO(bob): Should eventually check that both arms implement ITrueable
-    // so that you can only use truthy stuff in a conjunction.
     Obj left = check(expr.getLeft(), context);
     Obj right = check(expr.getRight(), context, true);
+    
+    // Make sure the left operand is truthy.
+    Obj trueable = mStaticContext.lookUp("Trueable");
+    mChecker.checkTypes(trueable, left, expr.getPosition(),
+        "The left operand of an 'and' expression must implement Trueable.");
     
     return mInterpreter.orTypes(left, right);
   }
@@ -313,11 +316,14 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     
   @Override
   public Obj visit(OrExpr expr, EvalContext context) {
-    // TODO(bob): Should eventually check that both arms implement ITrueable
-    // so that you can only use truthy stuff in a conjunction.
     Obj left = check(expr.getLeft(), context);
     Obj right = check(expr.getRight(), context, true);
     
+    // Make sure the left operand is truthy.
+    Obj trueable = mStaticContext.lookUp("Trueable");
+    mChecker.checkTypes(trueable, left, expr.getPosition(),
+        "The left operand of an 'and' expression must implement Trueable.");
+
     return mInterpreter.orTypes(left, right);
   }
 
