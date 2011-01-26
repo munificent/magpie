@@ -49,8 +49,10 @@ class Interface
 
             // Must be assignable.
             if thisType assignsFrom?(otherType) not then
+                /*
                 print(other ~ " does not implement " ~ name ~ " because " ~
                     member name ~ " is the wrong type")
+                */
                 implements = false
                 break
             end

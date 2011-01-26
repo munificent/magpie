@@ -31,3 +31,10 @@ specify("A 'fn' expression") with
         assigned shouldBe("outer")
     end
 end
+
+specify("A generic 'fn' expression") with
+    it should("allow omitting () if it only takes type arguments") with
+        def f[T](-> T) 123
+        f[Int] shouldBe(123)
+    end
+end
