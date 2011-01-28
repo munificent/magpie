@@ -49,7 +49,7 @@ public class Magpie {
     System.out.println("   //");
     System.out.println();
     System.out.println("Type 'quit()' and press <Enter> to exit.");
-    
+
     Interpreter interpreter = new Interpreter(new ScriptInterpreterHost());
     
     // The REPL runs and imports relative to the current directory.
