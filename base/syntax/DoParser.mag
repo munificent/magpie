@@ -1,9 +1,0 @@
-// Keyword parser for "do" expressions.
-class DoParser
-    def parse(parser MagpieParser -> Expression)
-        parser consume("do")
-        ScopeExpression new(body: parser parseEndBlock())
-    end
-end
-
-MagpieParser registerParseword("do", DoParser new())

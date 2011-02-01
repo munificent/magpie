@@ -30,6 +30,10 @@ public class MagpieParser extends Parser {
       mKeywordParsers.put("extend", new ExtendExprParser());
       mKeywordParsers.put("interface", new InterfaceExprParser());
     }
+    
+    if (mKeywords != null) {
+      mKeywords.add("do");
+    }
   }
   
   public MagpieParser(Lexer lexer) {
@@ -356,7 +360,7 @@ public class MagpieParser extends Parser {
         message = Expr.call(message, typeArgs, arg);
       } else if (lookAhead(TokenType.LEFT_PAREN)) {
         // A function call like foo(123).
-        Expr arg = parenthesizedExpression(BraceType.PAREN);
+        Expr arg = groupExpression(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN);
         message = Expr.call(message, arg);
       } else if (match(TokenType.WITH)) {
         // Parse the parameter list if given.
@@ -420,6 +424,15 @@ public class MagpieParser extends Parser {
     if (match(TokenType.NOTHING)) {
       return Expr.nothing(last(1).getPosition());
     }
+    
+    if (match(TokenType.FN)) {
+      return parsePatternFunction();
+    }
+    
+    if (match("do")) {
+      Expr body = parseEndBlock();
+      return Expr.scope(body);
+    }
 
     if ((mQuoteDepth > 0) && match(TokenType.BACKTICK)) {
       Position position = last(1).getPosition();
@@ -427,26 +440,24 @@ public class MagpieParser extends Parser {
       if (match(TokenType.NAME)) {
         body = Expr.message(last(1).getPosition(), null, last(1).getString());
       } else {
-        body = parenthesizedExpression(BraceType.PAREN);
+        body = groupExpression(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN);
       }
       return new UnquoteExpr(position, body);
     }
 
-    if (lookAhead(TokenType.LEFT_PAREN)) {
-      return parenthesizedExpression(BraceType.PAREN);
+    if (match(TokenType.LEFT_PAREN)) {
+      Expr expr = parseExpression();
+      consume(TokenType.RIGHT_PAREN);
+      return expr;
     }
 
     if (lookAhead(TokenType.LEFT_BRACE)) {
       mQuoteDepth++;
       Position position = current().getPosition();
-      Expr expr = parenthesizedExpression(BraceType.CURLY);
+      Expr expr = groupExpression(TokenType.LEFT_BRACE, TokenType.RIGHT_BRACE);
       position = position.union(last(1).getPosition());
       mQuoteDepth--;
       return Expr.quote(position, expr);
-    }
-    
-    if (match(TokenType.FN)) {
-      return parsePatternFunction();
     }
     
     // See if we're at a keyword we know how to parse.
@@ -513,53 +524,20 @@ public class MagpieParser extends Parser {
     return Expr.fn(body.getPosition(), type, body);
   }
 
-  // TODO(bob): Having two ways to create blocks (this, or using a "do"
-  // expression) is redundant. Parenthesized blocks are nice because they're
-  // part of the core syntax. "do" blocks match the rest of the language and
-  // allow catch blocks. If the only reason to have these is for the core
-  // syntax, it may be better to just have a %block% special form, or only
-  // enable this in .magc files that just use core syntax.
-  private Expr parenthesizedExpression(BraceType braceType) {
-    TokenType leftBrace = TokenType.LEFT_PAREN;
-    TokenType rightBrace = TokenType.RIGHT_PAREN;
-    switch (braceType) {
-    case SQUARE:
-      leftBrace = TokenType.LEFT_BRACKET;
-      rightBrace = TokenType.RIGHT_BRACKET;
-      break;
-    case CURLY:
-      leftBrace = TokenType.LEFT_BRACE;
-      rightBrace = TokenType.RIGHT_BRACE;
-      break;
-    }
+  private Expr groupExpression(TokenType left, TokenType right) {
+    consume(left);
     
-    consume(leftBrace);
-    
-    // Ignore a leading newline.
-    match(TokenType.LINE);
-    
-    if (match(rightBrace)) {
+    if (match(right)) {
       return Expr.nothing(Position.surrounding(last(2), last(1)));
     }
     
-    List<Expr> exprs = new ArrayList<Expr>();
-    while (true) {
-      exprs.add(parseExpression());
-      if (!match(TokenType.LINE)) break;
-      // Allow the closing ) to be on its own line.
-      if (lookAhead(rightBrace)) break;
-    }
+    Expr expr = parseExpression();
     
     // Allow a newline before the final ).
     match(TokenType.LINE);
-    consume(rightBrace);
+    consume(right);
     
-    if (exprs.size() > 1) {
-      return Expr.block(exprs);
-    } else {
-      // Just a single expression, so don't wrap it in a block.
-      return exprs.get(0);
-    }
+    return expr;
   }
   
   private Expr addTupleField(Expr expr, Expr field) {
@@ -573,12 +551,6 @@ public class MagpieParser extends Parser {
     } else {
       return Expr.tuple(expr, field);
     }
-  }
-  
-  private static enum BraceType {
-    PAREN,
-    SQUARE,
-    CURLY
   }
   
   private final Map<TokenType, ExprParser> mParsers =

@@ -4,5 +4,4 @@
 MagpieParser reserveWord("class")
 MagpieParser reserveWord("delegate")
 MagpieParser reserveWord("extend")
-MagpieParser reserveWord("interface")
 MagpieParser reserveWord("set")

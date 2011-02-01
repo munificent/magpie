@@ -11,7 +11,7 @@ class DefParser
         %if%(parser lookAhead(TokenType identifier, TokenType leftParen) or
             parser lookAhead(TokenType identifier, TokenType leftBracket) or
             parser lookAhead(TokenType operator, TokenType leftParen) or
-            parser lookAhead(TokenType operator, TokenType leftBracket), (
+            parser lookAhead(TokenType operator, TokenType leftBracket), do
                 // Local function.
                 %var%("name", parser consume() stringValue)
 
@@ -20,14 +20,14 @@ class DefParser
 
                 VariableExpression new(pattern: VariablePattern new(name, nothing),
                     value: function)
-            ), (
+            end, do
                 %var%("receiver", parseReceiver(parser))
                 %var%("name", parser consumeAny(TokenType identifier,
                     TokenType operator) stringValue)
                 %var%("function", parser parseFunction())
 
                 { `receiver defineMethod(`name, `function) }
-            )
+            end
         )
     end
 end
