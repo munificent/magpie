@@ -71,7 +71,7 @@ public class ClassExprParser implements ExprParser {
       // If none of these match, then it's presumed that we're parsing a regular
       // expression evaluated in a context where "this" is the class.
       
-      if (parser.match(TokenType.DELEGATE, "var")) {
+      if (parser.match("delegate", "var")) {
         exprs.add(parseField(parser, true, theClass));
       } else if (parser.match("var")) {
         exprs.add(parseField(parser, false, theClass));
@@ -79,12 +79,12 @@ public class ClassExprParser implements ExprParser {
         exprs.add(parseMethod(parser, theClass));
       } else if (parser.match("get")) {
         exprs.add(parseGetter(parser, theClass));
-      } else if (parser.match(TokenType.SET)) {
+      } else if (parser.match("set")) {
         exprs.add(parseSetter(parser, theClass));
       } else if (parser.match("shared")) {
         Expr metaclass = Expr.message(theClass, Name.TYPE);
         // TODO(bob): Need to prevent declaring shared members: can only define.
-        if (parser.match(TokenType.DELEGATE, "var")) {
+        if (parser.match("delegate", "var")) {
           // TODO(bob): Need to handle defining class fields specially.
           exprs.add(parseField(parser, true, metaclass));
         } else if (parser.match("var")) {
@@ -94,7 +94,7 @@ public class ClassExprParser implements ExprParser {
           exprs.add(parseMethod(parser, metaclass));
         } else if (parser.match("get")) {
           exprs.add(parseGetter(parser, metaclass));
-        } else if (parser.match(TokenType.SET)) {
+        } else if (parser.match("set")) {
           exprs.add(parseSetter(parser, metaclass));
         }
       } else {
@@ -113,7 +113,7 @@ public class ClassExprParser implements ExprParser {
   
   @Override
   public Expr parse(MagpieParser parser) {
-    parser.consume(TokenType.CLASS);
+    parser.consume("class");
     return parseClass(parser, false);
   }
   

@@ -81,13 +81,12 @@ public class InterfaceExprParser implements ExprParser {
       
       // Parse the declaration keyword.
       String memberType;
-      // TODO(bob): Hack temp. Will go away when this is moved into Magpie.
       if (parser.match("get")) {
         memberType = "get";
       } else if (parser.match("def")) {
         memberType = "def";
       } else {
-        parser.consume(TokenType.SET);
+        parser.consume("set");
         memberType = "set";
       }
       
@@ -124,7 +123,7 @@ public class InterfaceExprParser implements ExprParser {
   
   @Override
   public Expr parse(MagpieParser parser) {
-    parser.consume(TokenType.INTERFACE);
+    parser.consume("interface");
     return parseInterface(parser, false);
   }
   

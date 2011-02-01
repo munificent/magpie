@@ -301,18 +301,13 @@ public class Lexer {
     if (text.equals("and")) return new Token(position, TokenType.AND);
     if (text.equals("case")) return new Token(position, TokenType.CASE);
     if (text.equals("catch")) return new Token(position, TokenType.CATCH);
-    if (text.equals("class")) return new Token(position, TokenType.CLASS);
-    if (text.equals("delegate")) return new Token(position, TokenType.DELEGATE);
-    if (text.equals("extend")) return new Token(position, TokenType.EXTEND);
     if (text.equals("false")) return new Token(position, TokenType.BOOL, false);
     if (text.equals("fn")) return new Token(position, TokenType.FN);
     if (text.equals("for")) return new Token(position, TokenType.FOR);
-    if (text.equals("interface")) return new Token(position, TokenType.INTERFACE);
     if (text.equals("let")) return new Token(position, TokenType.LET);
     if (text.equals("match")) return new Token(position, TokenType.MATCH);
     if (text.equals("nothing")) return new Token(position, TokenType.NOTHING);
     if (text.equals("or")) return new Token(position, TokenType.OR);
-    if (text.equals("set")) return new Token(position, TokenType.SET);
     if (text.equals("then")) return new Token(position, TokenType.THEN);
     if (text.equals("this")) return new Token(position, TokenType.THIS);
     if (text.equals("true")) return new Token(position, TokenType.BOOL, true);

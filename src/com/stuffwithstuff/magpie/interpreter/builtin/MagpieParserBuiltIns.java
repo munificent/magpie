@@ -31,12 +31,12 @@ public class MagpieParserBuiltIns {
   }
   
   @Shared
-  @Signature("registerKeyword(keyword String ->)")
-  public static class RegisterKeyword implements BuiltInCallable {
+  @Signature("reserveWord(keyword String ->)")
+  public static class ReserveWord implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String keyword = arg.asString();
       
-      interpreter.registerKeyword(keyword);
+      interpreter.reserveWord(keyword);
       return interpreter.nothing();
     }
   }

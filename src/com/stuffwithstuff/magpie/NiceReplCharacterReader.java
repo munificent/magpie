@@ -141,16 +141,11 @@ public class NiceReplCharacterReader implements CharacterReader {
         case ARROW:
         case CASE:
         case CATCH:
-        case CLASS:
-        case DELEGATE:
-        case EXTEND:
         case FN:
         case FOR:
-        case INTERFACE:
         case LET:
         case MATCH:
         case OR:
-        case SET:
         case THEN:
         case WHILE:
         case WITH:

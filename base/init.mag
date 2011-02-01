@@ -13,6 +13,7 @@ import("syntax/patterns.mag")
 // available when defining the rest of the stuff.
 import("syntax/parsing.mag")
 import("syntax/BreakParser.mag")
+import("syntax/ClassParser.mag")
 import("syntax/DoParser.mag")
 import("syntax/DefParser.mag")
 import("syntax/GetParser.mag")

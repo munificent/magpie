@@ -456,7 +456,7 @@ public class Interpreter {
     mParsewords.put(keyword, parser);
   }
   
-  public void registerKeyword(String keyword) {
+  public void reserveWord(String keyword) {
     mKeywords.add(keyword);
   }
   

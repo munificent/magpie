@@ -1,0 +1,8 @@
+// TODO(bob): Class parsing is still in Java for now. Just reserve the keywords
+// here.
+
+MagpieParser reserveWord("class")
+MagpieParser reserveWord("delegate")
+MagpieParser reserveWord("extend")
+MagpieParser reserveWord("interface")
+MagpieParser reserveWord("set")

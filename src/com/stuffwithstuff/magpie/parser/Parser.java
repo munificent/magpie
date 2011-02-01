@@ -97,10 +97,14 @@ public abstract class Parser {
   }
   
   // TODO(bob): Hack temp until all keyword parsing is moved into Magpie.
-  public boolean match(String keyword) {
-    if (!lookAhead(keyword)) return false;
+  public boolean match(String... keywords) {
+    // See if they match.
+    if (!lookAhead(keywords)) return false;
 
-    consume();
+    // Consume the matched tokens.
+    for (int i = 0; i < keywords.length; i++) {
+      consume();
+    }
     
     return true;
   }

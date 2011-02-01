@@ -64,17 +64,12 @@ public final class Token {
       case ARROW: return "->";
       case CASE: return "case";
       case CATCH: return "catch";
-      case CLASS: return "class";
-      case DELEGATE: return "delegate";
-      case EXTEND: return "extend";
       case FN: return "fn";
       case FOR: return "for";
-      case INTERFACE: return "interface";
       case LET: return "let";
       case MATCH: return "match";
       case NOTHING: return "nothing";
       case OR: return "or";
-      case SET: return "set";
       case THEN: return "then";
       case THIS: return "this";
       case WHILE: return "while";
