@@ -44,14 +44,10 @@ public class ReplCharacterReader implements CharacterReader {
 
   private void readLine() {
     if (mFirstLine) {
-      Term.set(Term.ForeColor.GRAY);
       System.out.print(">> ");
-      Term.restoreColor();
       mFirstLine = false;
     } else {
-      Term.set(Term.ForeColor.GRAY);
       System.out.print(" | ");
-      Term.restoreColor();
     }
     
     try {

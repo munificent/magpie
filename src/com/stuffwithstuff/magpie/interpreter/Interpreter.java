@@ -440,6 +440,10 @@ public class Interpreter {
     mScriptPaths.pop();
   }
   
+  public boolean isKeyword(String word) {
+    return mParsewords.containsKey(word) || mKeywords.contains(word);
+  }
+  
   public Map<String, ExprParser> getParsewords() {
     return mParsewords;
   }

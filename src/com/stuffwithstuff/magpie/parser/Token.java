@@ -48,11 +48,11 @@ public final class Token {
       case COMMA: return ",";
       case DOT: return ".";
       case EQUALS: return "=";
-      case LINE: return "(line)";
+      case LINE: return "\n";
 
-      case NAME: return getString() + " (name)";
+      case NAME: return getString();
       case FIELD: return getString() + ":";
-      case OPERATOR: return getString() + " (op)";
+      case OPERATOR: return getString();
       case TYPE_PARAM: return "'" + getString();
 
       case BOOL: return Boolean.toString(getBool());
@@ -60,6 +60,7 @@ public final class Token {
       case DOUBLE: return Double.toString(getDouble());
       case STRING: return "\"" + getString() + "\"";
 
+      case AND: return "and";
       case ARROW: return "->";
       case CASE: return "case";
       case CATCH: return "catch";
@@ -72,6 +73,7 @@ public final class Token {
       case LET: return "let";
       case MATCH: return "match";
       case NOTHING: return "nothing";
+      case OR: return "or";
       case SET: return "set";
       case THEN: return "then";
       case THIS: return "this";
