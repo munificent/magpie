@@ -2,7 +2,6 @@ package com.stuffwithstuff.magpie;
 
 import java.io.IOException;
 
-import com.stuffwithstuff.magpie.Term.ForeColor;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.QuitException;
@@ -18,12 +17,6 @@ public class NiceRepl {
     System.out.println("   //");
     System.out.println();
     System.out.println("Type 'quit()' and press <Enter> to exit.");
-
-    for (ForeColor c : Term.ForeColor.values()) {
-      Term.set(c);
-      System.out.println(c.name());
-      Term.restoreColor();
-    }
     
     Interpreter interpreter = new Interpreter(new ScriptInterpreterHost());
     
