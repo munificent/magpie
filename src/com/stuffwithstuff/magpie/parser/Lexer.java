@@ -307,7 +307,6 @@ public class Lexer {
     if (text.equals("false")) return new Token(position, TokenType.BOOL, false);
     if (text.equals("fn")) return new Token(position, TokenType.FN);
     if (text.equals("for")) return new Token(position, TokenType.FOR);
-    if (text.equals("let")) return new Token(position, TokenType.LET);
     if (text.equals("match")) return new Token(position, TokenType.MATCH);
     if (text.equals("nothing")) return new Token(position, TokenType.NOTHING);
     if (text.equals("or")) return new Token(position, TokenType.OR);

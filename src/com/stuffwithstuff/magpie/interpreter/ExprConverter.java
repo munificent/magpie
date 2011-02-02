@@ -49,8 +49,6 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
       return convertCallExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("FunctionExpression")) {
       return convertFunctionExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("IfExpression")) {
-      return convertIfExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("IntExpression")) {
       return convertIntExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("LoopExpression")) {
@@ -164,20 +162,6 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     return new FunctionType(typeParams, pattern, returnType);
   }
   
-  private static Expr convertIfExpr(Interpreter interpreter, Obj expr) {
-    Obj nameObj = expr.getField("name");
-    String name;
-    if (nameObj == interpreter.nothing()) {
-      name = null;
-    } else {
-      name = nameObj.asString();
-    }
-    Expr condition = convert(interpreter, expr.getField("condition"));
-    Expr thenArm = convert(interpreter, expr.getField("thenArm"));
-    Expr elseArm = convert(interpreter, expr.getField("elseArm"));
-    return new IfExpr(Position.none(), name, condition, thenArm, elseArm);
-  }
-
   private static Expr convertIntExpr(Interpreter interpreter, Obj expr) {
     int value = expr.getField("value").asInt();
     return Expr.int_(value);
@@ -351,15 +335,6 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     return construct("FunctionExpression",
         "functionType", typeObj,
         "body",         expr.getBody());
-  }
-
-  @Override
-  public Obj visit(IfExpr expr, Void dummy) {
-    return construct("IfExpression",
-        "name",      expr.getName(),
-        "condition", expr.getCondition(),
-        "thenArm",   expr.getThen(),
-        "elseArm",   expr.getElse());
   }
 
   @Override

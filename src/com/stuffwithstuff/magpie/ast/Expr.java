@@ -1,11 +1,13 @@
 package com.stuffwithstuff.magpie.ast;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
+import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
 import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.util.Expect;
@@ -109,9 +111,15 @@ public abstract class Expr {
     return new FnExpr(position, type, body);
   }
   
+  // TODO(bob): Hackish. Eliminate.
   public static Expr if_(Expr condition, Expr thenExpr, Expr elseExpr) {
-    return new IfExpr(Position.surrounding(condition, elseExpr), null,
-        condition, thenExpr, elseExpr);
+    List<MatchCase> cases = new ArrayList<MatchCase>();
+    cases.add(new MatchCase(new ValuePattern(Expr.bool(true)), thenExpr));
+    cases.add(new MatchCase(new VariablePattern("_", null), elseExpr));
+    
+    return match(Position.surrounding(condition, elseExpr),
+        condition,
+        cases);
   }
   
   public static Expr int_(int value) {

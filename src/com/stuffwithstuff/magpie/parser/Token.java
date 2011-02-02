@@ -66,7 +66,6 @@ public final class Token {
       case CATCH: return "catch";
       case FN: return "fn";
       case FOR: return "for";
-      case LET: return "let";
       case MATCH: return "match";
       case NOTHING: return "nothing";
       case OR: return "or";

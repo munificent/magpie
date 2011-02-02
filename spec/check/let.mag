@@ -1,3 +1,6 @@
+// TODO(bob): For now, "let" is removed from the language.
+nothing
+/*
 specify("A 'let then' expression") with
     it should("have the type of the 'then' expression or Nothing") with
         (typeof let a = "cond" then 123)     shouldBe(Int | Nothing)
@@ -27,3 +30,4 @@ specify("A 'let then else' expression") with
         end shouldCheck()
     end
 end
+*/

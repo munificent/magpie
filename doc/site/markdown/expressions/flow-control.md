@@ -65,6 +65,11 @@ Since Magpie does not have statements, even flow control structures are expressi
 
 ## let/then/else
 
+<p class="future">
+This has been taken out of the language for the moment. I may add it back in,
+but for now <code>match</code> expressions should be used instead.
+</p>
+
 Magpie has another flow control structure similar to `if` called `let`. It lumps a couple of sequential actions together into a single operation:
 
 1.  It evaluates an expression.

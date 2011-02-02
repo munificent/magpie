@@ -11,10 +11,9 @@ end
 
 extend class AssignExpression
     get string String =
-        let receiver then
-            receiver string ~~ name ~ " = " ~ value
-        else
-            name ~ " = " ~ value
+        match receiver
+            case receiver Expression then receiver string ~~ name ~ " = " ~ value
+            else name ~ " = " ~ value
         end
     end
 end
@@ -39,15 +38,6 @@ end
 
 extend class FunctionExpression
     get string String = "fn " ~ functionType ~~ body
-end
-
-extend class IfExpression
-    get let? Bool = name != nothing
-
-    get string String =
-        var result = if let? then "let " ~ name ~ " " else "if "
-        result ~ condition ~ " then " ~ thenArm ~ " else " ~ elseArm
-    end
 end
 
 extend class IntExpression

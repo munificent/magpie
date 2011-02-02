@@ -53,12 +53,7 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
   public Expr visit(FnExpr expr, Expr value) {
     return invalidExpression(expr);
   }
-
-  @Override
-  public Expr visit(IfExpr expr, Expr value) {
-    return invalidExpression(expr);
-  }
-
+  
   @Override
   public Expr visit(IntExpr expr, Expr value) {
     return invalidExpression(expr);

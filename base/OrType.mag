@@ -2,25 +2,27 @@ class OrType
     shared def new(cases List(Type) -> OrType)
         construct(cases: cases)
     end
-    
+
     shared def combine(left Type, right Type -> Type)
         // combine the cases of both arms
         var cases = Array new()
 
-        let leftOr = left as[OrType] then
-            for item = leftOr cases do cases add(item)
-        else cases add(left)
+        match left
+            case leftOr OrType then for item = leftOr cases do cases add(item)
+            else cases add(left)
+        end
 
-        let rightOr = right as[OrType] then
-            for item = rightOr cases do cases add(item)
-        else cases add(right)
+        match right
+            case rightOr OrType then for item = rightOr cases do cases add(item)
+            else cases add(right)
+        end
 
         // Sort and remove the duplicates.
         cases = cases sortByString() unique()
 
         // If just one case remains, there's no union.
         if cases count == 1 then return cases(0)
-    
+
         OrType new(cases)
     end
 
@@ -44,19 +46,21 @@ class OrType
     end
 
     def assignsFrom?(other Type -> Bool)
-        let orType = other as[OrType] then
-            // It's also an or, so see if all of its cases are matched by one of
-            // the ones here.
-            for otherCase = orType cases do
-                if assignsFrom?(otherCase) not then return false
+        match other
+            case orType OrType then
+                // It's also an or, so see if all of its cases are matched by one of
+                // the ones here.
+                for otherCase = orType cases do
+                    if assignsFrom?(otherCase) not then return false
+                end
+                true
+            else
+                // It's a regular class, so see if any of the cases match it.
+                for type = cases do
+                    if type assignsFrom?(other) then return true
+                end
+                false
             end
-            true
-        else
-            // It's a regular class, so see if any of the cases match it.
-            for type = cases do
-                if type assignsFrom?(other) then return true
-            end
-            false
         end
     end
 
@@ -66,10 +70,10 @@ class OrType
         for i = 1 until(cases count) do
             memberType = memberType | cases(i) getMemberType(name)
         end
-        
+
         memberType
     end
-    
+
     var cases List(Type)
 end
 
@@ -77,22 +81,24 @@ end
 def |(left Type, right Type -> Type) OrType combine(left, right)
 
 def unsafeRemoveNothing(type Type -> Type)
-    let orType = type as[OrType] then 
-        // TODO(bob): Hack. Need generic array ctor.
-        var remaining = unsafecast[List(Type)](Array new())
-        
-        for caseType = orType cases do
-            if caseType != Nothing then remaining add(caseType)
-        end
+    match type
+        case orType OrType then
+            // TODO(bob): Hack. Need generic array ctor.
+            var remaining = unsafecast[List(Type)](Array new())
 
-        // If just one case remains, there's no or.
-        if remaining count == 1 then return remaining(0)
-    
-        // Create a new OrType with what's left.
-        OrType new(remaining)
-    else
-        // Doesn't have Nothing to begin with, so we're good.
-        type
-        // TODO(bob): What if the type is Nothing?
+            for caseType = orType cases do
+                if caseType != Nothing then remaining add(caseType)
+            end
+
+            // If just one case remains, there's no or.
+            if remaining count == 1 then return remaining(0)
+
+            // Create a new OrType with what's left.
+            OrType new(remaining)
+        else
+            // Doesn't have Nothing to begin with, so we're good.
+            type
+            // TODO(bob): What if the type is Nothing?
+        end
     end
 end

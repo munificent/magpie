@@ -143,7 +143,6 @@ public class NiceReplCharacterReader implements CharacterReader {
         case CATCH:
         case FN:
         case FOR:
-        case LET:
         case MATCH:
         case OR:
         case THEN:

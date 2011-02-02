@@ -32,7 +32,6 @@ public enum TokenType {
   CATCH,
   FN,
   FOR,
-  LET,
   MATCH,
   NOTHING,
   OR,

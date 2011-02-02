@@ -226,33 +226,6 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
-  public Obj visit(IfExpr expr, EvalContext context) {
-    // Put it in a block so that variables declared in conditions end when the
-    // if expression ends.
-    context = context.pushScope();
-    
-    // TODO(bob): Should eventually check that conditions implement ITrueable
-    // so that you can only use truthy stuff in an if.
-    // Check the condition for errors.
-    Obj conditionType = check(expr.getCondition(), context);
-    
-    // If it's a "let" condition, bind and type the variable, stripping out
-    // Nothing.
-    if (expr.isLet()) {
-      Obj removeNothing = mInterpreter.getGlobal(Name.UNSAFE_REMOVE_NOTHING);
-      Obj letType =  mInterpreter.apply(Position.none(), removeNothing,
-          null, conditionType);
-      context.define(expr.getName(), letType);
-    }
-    
-    // Get the types of the arms.
-    Obj thenArm = check(expr.getThen(), context.pushScope(), true);
-    Obj elseArm = check(expr.getElse(), context.pushScope(), true);
-    
-    return mInterpreter.orTypes(thenArm, elseArm);
-  }
-
-  @Override
   public Obj visit(IntExpr expr, EvalContext context) {
     return mInterpreter.getIntClass();
   }

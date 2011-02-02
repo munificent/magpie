@@ -18,7 +18,6 @@ public class MagpieParser extends Parser {
     // Register the parsers for the different keywords.
     // TODO(bob): Eventually these should all go away.
     mParsers.put(TokenType.FOR, new LoopExprParser());
-    mParsers.put(TokenType.LET, new LetExprParser());
     mParsers.put(TokenType.MATCH, new MatchExprParser());
     mParsers.put(TokenType.WHILE, new LoopExprParser());
     

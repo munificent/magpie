@@ -3,7 +3,7 @@
 // that can be the result of a type expression) are expected to implement this
 // and return true if an argument of the given type would be OK in a variable
 // defined to be that type.
-// 
+//
 // For example, "Int assignsFrom?(Bool)" returns false since an Int variable
 // can't hold a Bool.
 interface Type
@@ -19,15 +19,16 @@ extend class Class
 
         // Not even object can assign from Nothing.
         if other == Nothing then return false
-    
+
         // If it's an Or type, just check the arms.
-        let orType = other asExactly[OrType] then
+        if other type == OrType then
+            var orType = unsafecast[OrType](other)
             for otherCase = orType cases do
                 if assignsFrom?(otherCase) not then return false
             end
             return true
         end
-        
+
         // TODO(bob): Should mixins subtype? What about delegates?
 
         false

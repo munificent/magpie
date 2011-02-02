@@ -129,42 +129,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
-  public Obj visit(IfExpr expr, EvalContext context) {
-    // Put it in a block so that variables declared in conditions end when the
-    // if expression ends.
-    context = context.pushScope();
-
-    // Evaluate the condition.
-    boolean passed = true;
-    Obj result = evaluate(expr.getCondition(), context);
-    if (result == null) {
-      result = evaluate(expr.getCondition(), context);
-    }
-    if (expr.isLet()) {
-      // "let" condition.
-      // If it evaluates to nothing, the condition fails. Otherwise, bind the
-      // result to a name and continue.
-      if (result != mInterpreter.nothing()) {
-        // Success, bind the result.
-        context.define(expr.getName(), result);
-      } else {
-        // Condition failed.
-        passed = false;
-      }
-    } else {
-      // Regular "if" condition.
-      passed = isTruthy(expr, result);
-    }
-
-    // Evaluate the body.
-    if (passed) {
-      return evaluate(expr.getThen(), context);
-    } else {
-      return evaluate(expr.getElse(), context);
-    }
-  }
-
-  @Override
   public Obj visit(IntExpr expr, EvalContext context) {
     return mInterpreter.createInt(expr.getValue());
   }

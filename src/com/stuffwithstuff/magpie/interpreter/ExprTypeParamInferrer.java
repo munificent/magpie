@@ -48,11 +48,6 @@ public class ExprTypeParamInferrer implements ExprVisitor<Void, Obj> {
   }
 
   @Override
-  public Void visit(IfExpr expr, Obj valueType) {
-    return invalidExpression();
-  }
-
-  @Override
   public Void visit(IntExpr expr, Obj valueType) {
     return invalidExpression();
   }

@@ -1,14 +1,17 @@
+// TODO(bob): For now, "let" is removed from the language.
+nothing
+/*
 specify("A 'let then' expression") with
     it should("evaluate the 'then' expression if the condition is not nothing") with
         var evaluated = false
         let a = "something" then evaluated = true
         evaluated shouldBe(true)
-        
+
         evaluated = false
         let a = nothing then evaluated = true
         evaluated shouldBe(false)
     end
-    
+
     it should("return the 'then' expression if the condition is not nothing") with
         (let a = "something" then "then") shouldBe("then")
     end
@@ -31,13 +34,13 @@ specify("A 'let then' expression") with
         let a = "something" then bound = a
         bound shouldBe("something")
     end
-    
+
     it should("create a local scope for the 'then' expression") with
         var a = "outside"
         if true then var a = "shadow"
         a shouldBe("outside")
     end
-    
+
     it should("scope the bound variable to the 'then' expression") with
         var a = "outside"
         let a = "shadow" then
@@ -59,22 +62,22 @@ specify("A 'let then else' expression") with
         var evaluated = false
         let a = "something" then evaluated = true else "ignored"
         evaluated shouldBe(true)
-        
+
         evaluated = false
         let a = nothing then evaluated = true else "ignored"
         evaluated shouldBe(false)
     end
-    
+
     it should("evaluate the 'else' expression if the condition is nothing") with
         var evaluated = false
         let a = "something" then "ignored" else evaluated = true
         evaluated shouldBe(false)
-        
+
         evaluated = false
         let a = nothing then "ignored" else evaluated = true
         evaluated shouldBe(true)
     end
-    
+
     it should("return the 'then' expression if the condition is not nothing") with
         (let a = "something" then "then" else "else") shouldBe("then")
     end
@@ -100,13 +103,13 @@ specify("A 'let then else' expression") with
         end
         a shouldBe(3)
     end
-    
+
     it should("bind the condition to a variable") with
         var bound = "not bound"
         let a = "something" then bound = a else "ignored"
         bound shouldBe("something")
     end
-        
+
     it should("create a local scope for the 'else' expression") with
         var a = "outside"
         let b = nothing then "ignored" else var a = "shadow"
@@ -135,3 +138,4 @@ specify("A 'let then else' expression") with
         bound shouldBe("something")
     end
 end
+*/

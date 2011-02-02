@@ -6,11 +6,9 @@ end
 
 // Provide a generic print that converts arg to string first.
 def print(arg Stringable | Nothing ->)
-    let arg then
-        printString(arg string ~ "\n")
-    else
-        // Just an empty line.
-        printString("\n")
+    match arg
+        case arg Stringable then printString(arg string ~ "\n")
+        else printString("\n")
     end
 end
 

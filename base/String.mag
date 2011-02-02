@@ -3,15 +3,15 @@ extend class String
     shared def equal?(left String, right String -> Bool)
         left compareTo(right) == 0
     end
-    
+
     shared def lessThan?(left String, right String -> Bool)
         left compareTo(right) < 0
     end
-    
+
     // TODO(bob): Should just take Iterable[Stringable]
     shared def join(elements,
                     separator String | Nothing -> String)
-        var knownSeparator = let separator then separator else ", "
+        var knownSeparator = separator or ", "
         var result = ""
         for element = elements do
             if result != "" then result = result ~ knownSeparator

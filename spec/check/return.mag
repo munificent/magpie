@@ -2,7 +2,7 @@ specify("A 'return' expression") with
     it should("evaluate to the Never type") with
         (typeof return) shouldBe(Never)
     end
-    
+
     it should("have its value included in the function's return type") with
         fn(-> Int)
             if true then return "string"
@@ -26,7 +26,7 @@ specify("A 'return' expression") with
             123
         end shouldCheck()
     end
-    
+
     it should("generate an error for unreachable code") with
         fn
             return "value"
@@ -36,16 +36,16 @@ specify("A 'return' expression") with
         fn
             (return) and "value"
         end shouldNotCheck()
-        
+
         fn
             (return) or "value"
         end shouldNotCheck()
-        
+
         fn
             (return) string
         end shouldNotCheck()
     end
-    
+
     it should("be omitted from the type of a surrounding 'if then'") with
         (typeof if true then return 123) shouldBe(Nothing)
         (typeof if true then return 123 else "str") shouldBe(String)
@@ -53,7 +53,9 @@ specify("A 'return' expression") with
 
         (typeof if true then return 123 else return "str") shouldBe(Never)
     end
-    
+
+    // TODO(bob): For now, "let" is removed from the language.
+    /*
     it should("be omitted from the type of a surrounding 'let then'") with
         (typeof let a = 1 then return 123) shouldBe(Nothing)
         (typeof let a = 1 then return 123 else "str") shouldBe(String)
@@ -61,11 +63,12 @@ specify("A 'return' expression") with
 
         (typeof let a = 1 then return 123 else return "str") shouldBe(Never)
     end
-    
+    */
+
     it should("be omitted from the type of a surrounding 'and'") with
         (typeof "string" and (return 123)) shouldBe(String)
     end
-    
+
     it should("be omitted from the type of a surrounding 'or'") with
         (typeof "string" or (return 123)) shouldBe(String)
     end
