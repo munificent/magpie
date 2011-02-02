@@ -8,10 +8,11 @@ class DefParser
     def parse(parser MagpieParser -> Expression)
         parser consume("def")
 
-        %if%(parser lookAhead(TokenType identifier, TokenType leftParen) or
+        match parser lookAhead(TokenType identifier, TokenType leftParen) or
             parser lookAhead(TokenType identifier, TokenType leftBracket) or
             parser lookAhead(TokenType operator, TokenType leftParen) or
-            parser lookAhead(TokenType operator, TokenType leftBracket), do
+            parser lookAhead(TokenType operator, TokenType leftBracket)
+            case true then
                 // Local function.
                 %var%("name", parser consume() stringValue)
 
@@ -20,7 +21,7 @@ class DefParser
 
                 VariableExpression new(pattern: VariablePattern new(name, nothing),
                     value: function)
-            end, do
+            else
                 %var%("receiver", parseReceiver(parser))
                 %var%("name", parser consumeAny(TokenType identifier,
                     TokenType operator) stringValue)
@@ -28,7 +29,7 @@ class DefParser
 
                 { `receiver defineMethod(`name, `function) }
             end
-        )
+        end
     end
 end
 

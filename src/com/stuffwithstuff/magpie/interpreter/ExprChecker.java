@@ -271,6 +271,14 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(MatchExpr expr, EvalContext context) {
+    // Push a new context so that a variable declared in the value expression
+    // itself disappears after the match, i.e.:
+    // match var i = 123
+    // ...
+    // end
+    // i should be gone here
+    context = context.pushScope();
+    
     Obj valueType = check(expr.getValue(), context);
     
     Obj returnType = null;
@@ -280,7 +288,7 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
       PatternCheckingBinder.bind(mChecker, expr.getPosition(),
           matchCase.getPattern(), valueType, caseContext);
       
-      Obj caseType = check(matchCase.getBody(), caseContext);
+      Obj caseType = check(matchCase.getBody(), caseContext, true);
       
       // A match expression's return type includes all of the case body types.
       if (returnType == null) {

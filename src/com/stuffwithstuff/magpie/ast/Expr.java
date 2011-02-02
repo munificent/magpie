@@ -1,6 +1,5 @@
 package com.stuffwithstuff.magpie.ast;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -87,8 +86,6 @@ public abstract class Expr {
       
       if (name.equals("%break%")) {
         return new BreakExpr(target.getPosition());
-      } else if (name.equals("%if%")) {
-        return specialFormIf(target.getPosition(), arg);
       } else if (name.equals("%return%")) {
         return new ReturnExpr(target.getPosition(), arg);
       } else if (name.equals("%scope%")) {
@@ -240,27 +237,6 @@ public abstract class Expr {
   
   public abstract void toString(StringBuilder builder, String indent);
   
-  private static Expr specialFormIf(Position position, Expr arg) {
-    List<Expr> args = splitArg(arg);
-    
-    if ((args.size() < 2) || (args.size() > 3)) {
-      throw new IllegalArgumentException(
-      "The %if% special form requires 2 or 3 arguments.");
-    }
-    
-    Expr condition = args.get(0);
-    Expr thenExpr = args.get(1);
-
-    Expr elseExpr;
-    if (args.size() == 3) {
-      elseExpr = args.get(2);
-    } else {
-      elseExpr = Expr.nothing();
-    }
-    
-    return new IfExpr(position, null, condition, thenExpr, elseExpr);
-  }
-
   private static Expr specialFormUnsafeCast(Position position, Expr arg) {
     Expr type = ((TupleExpr)arg).getFields().get(0);
     Expr value = ((TupleExpr)arg).getFields().get(1);
@@ -273,18 +249,6 @@ public abstract class Expr {
     Expr valueExpr = ((TupleExpr)arg).getFields().get(1);
     
     return var(position, name, valueExpr);
-  }
-  
-  private static List<Expr> splitArg(Expr arg) {
-    List<Expr> args;
-    if (arg instanceof TupleExpr) {
-      args = ((TupleExpr)arg).getFields();
-    } else {
-      args = new ArrayList<Expr>();
-      args.add(arg);
-    }
-    
-    return args;
   }
   
   private final Position mPosition;

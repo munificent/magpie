@@ -2,18 +2,18 @@
 
 %var%("parseReceiver",
     fn(parser MagpieParser -> Expression)
-        %if%(parser lookAhead(TokenType identifier),
-            do
+        match parser lookAhead(TokenType identifier)
+            case true then
                 // Getter on a class.
                 %var%("className", parser consume() stringValue)
                 MessageExpression new(receiver: nothing, name: className)
-            end, do
+            else
                 // Getter on a complex expression.
                 parser consume(TokenType leftParen)
                 %var%("receiver", parser parseExpression())
                 parser consume(TokenType rightParen)
                 receiver
             end
-        )
+        end
     end
 )

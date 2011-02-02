@@ -10,9 +10,10 @@ class GetParser
 
         %var%("receiver", parseReceiver(parser))
         %var%("name", parser consume(TokenType identifier) stringValue)
-        %var%("valueType", %if%(parser lookAheadAny(TokenType equals, TokenType line),
-            { Dynamic },
-            parser parseTypeExpression()))
+        %var%("valueType", match parser lookAheadAny(TokenType equals, TokenType line)
+            case true then { Dynamic }
+            else parser parseTypeExpression()
+        end)
 
         %var%("type", FunctionTypeExpression new(
             typeParams: %unsafecast%(List(String, Expression), Array of()),

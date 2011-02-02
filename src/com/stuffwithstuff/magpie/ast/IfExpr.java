@@ -4,6 +4,9 @@ import com.stuffwithstuff.magpie.parser.Position;
 
 // TODO(bob): Instead of supporting "let" directly, that should just desugar to
 // more primitive if expression using unsafecast.
+// TODO(bob): Note that this is *only* used for let expressions now. Regular
+// if expressions are just desugared to a match. Get rid of this completely if
+// we can figure out how to desugar let expressions to matches too.
 public class IfExpr extends Expr {
   public IfExpr(Position position, String name, Expr condition,
       Expr thenExpr, Expr elseExpr) {

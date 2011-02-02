@@ -193,14 +193,20 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(MatchExpr expr, EvalContext context) {
+    // Push a new context so that a variable declared in the value expression
+    // itself disappears after the match, i.e.:
+    // match var i = 123
+    // ...
+    // end
+    // i should be gone here
+    context = context.pushScope();
+    
     Obj value = evaluate(expr.getValue(), context);
     
     // Try each pattern until we get a match.
     for (MatchCase matchCase : expr.getCases()) {
       Pattern pattern = matchCase.getPattern();
-      
-      if (PatternTester.test(mInterpreter, pattern,
-          value, context)) {
+      if (PatternTester.test(mInterpreter, pattern, value, context)) {
         // Matched. Bind variables and evaluate the body.
         context = context.pushScope();
         PatternBinder.bind(mInterpreter, pattern, value, context);

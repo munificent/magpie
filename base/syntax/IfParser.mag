@@ -17,11 +17,18 @@ class IfParser
             %unsafecast%(Token, thenParse _1) keyword?("end"))
 
         %var%("elseExpr",
-            %if%(consumedEnd? not and parser matchKeyword("else"),
-                parser parseEndBlock(),
-                { nothing }))
+            match consumedEnd? not and parser matchKeyword("else")
+                case true then parser parseEndBlock()
+                else { nothing }
+            end
+        )
 
-        { %if%(`condition, `thenExpr, `elseExpr) }
+        {
+            match `condition true?
+                case true then `thenExpr
+                else `elseExpr
+            end
+        }
     end
 end
 
