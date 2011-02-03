@@ -11,7 +11,7 @@ import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
 import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.interpreter.Name;
 
-public class InterfaceExprParser implements ExprParser {
+public class InterfaceParser extends TokenParser {
   public static Expr parseInterface(MagpieParser parser, boolean isExtend) {
     String name = parser.consume(TokenType.NAME).getString();
     Position position = parser.last(1).getPosition();
@@ -122,8 +122,7 @@ public class InterfaceExprParser implements ExprParser {
   }
   
   @Override
-  public Expr parse(MagpieParser parser) {
-    parser.consume("interface");
+  public Expr parseBefore(MagpieParser parser, Token token) {
     return parseInterface(parser, false);
   }
   

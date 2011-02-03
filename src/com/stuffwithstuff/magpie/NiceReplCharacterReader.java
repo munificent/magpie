@@ -100,7 +100,7 @@ public class NiceReplCharacterReader implements CharacterReader {
         
         // identifiers
         case NAME:
-          if (mInterpreter.isKeyword(token.getString())) {
+          if (mInterpreter.isReservedWord(token.getString())) {
             Term.set(ForeColor.CYAN);
           } else {
             Term.set(ForeColor.WHITE);

@@ -149,5 +149,3 @@ public Expr parse(MagpieParser parser) {
 end
 
 //MagpieParser registerParseword("interface", InterfaceParser new())
-
-MagpieParser reserveWord("interface")

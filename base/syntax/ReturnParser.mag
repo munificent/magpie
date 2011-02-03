@@ -1,7 +1,6 @@
 // Keyword parser for "return" expressions.
 class ReturnParser
     def parse(parser MagpieParser -> Expression)
-        parser consume("return")
         match parser lookAheadAny(TokenType line, TokenType rightParen,
                                   TokenType rightBrace, TokenType rightBracket)
             case true then ReturnExpression new(value: NothingExpression new())

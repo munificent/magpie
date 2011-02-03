@@ -6,12 +6,12 @@ import java.util.List;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.Name;
 
-public class LoopExprParser implements ExprParser {
+public class LoopParser extends TokenParser {
 
   @Override
-  public Expr parse(MagpieParser parser) {
+  public Expr parseBefore(MagpieParser parser, Token token) {
     // "while" and "for" loop.
-    Position startPos = parser.current().getPosition();
+    Position startPos = token.getPosition();
     
     // A loop is desugared from this:
     //
@@ -40,8 +40,8 @@ public class LoopExprParser implements ExprParser {
     List<Expr> beforeLoop = new ArrayList<Expr>();
     List<Expr> eachLoop = new ArrayList<Expr>();
     
-    while (parser.match(TokenType.WHILE) || parser.match(TokenType.FOR)) {
-      if (parser.last(1).getType() == TokenType.WHILE) {
+    while (true) {
+      if (token.getType() == TokenType.WHILE) {
         Expr condition = parser.parseExpression();
         eachLoop.add(Expr.if_(condition,
             Expr.nothing(),
@@ -69,6 +69,12 @@ public class LoopExprParser implements ExprParser {
             Expr.message(Expr.name(generatorVar), Name.CURRENT)));
       }
       parser.match(TokenType.LINE); // Optional line after a clause.
+      
+      if (parser.match(TokenType.WHILE) || parser.match(TokenType.FOR)) {
+        token = parser.last(1);
+      } else {
+        break;
+      }
     }
     
     parser.consume("do");

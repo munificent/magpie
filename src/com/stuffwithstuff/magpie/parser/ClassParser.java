@@ -8,7 +8,7 @@ import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.util.NotImplementedException;
 
-public class ClassExprParser implements ExprParser {
+public class ClassParser extends TokenParser {
   public static Expr parseClass(MagpieParser parser, boolean isExtend) {
     String className = parser.consume(TokenType.NAME).getString();
     Position position = parser.last(1).getPosition();
@@ -112,8 +112,7 @@ public class ClassExprParser implements ExprParser {
   }
   
   @Override
-  public Expr parse(MagpieParser parser) {
-    parser.consume("class");
+  public Expr parseBefore(MagpieParser parser, Token token) {
     return parseClass(parser, false);
   }
   

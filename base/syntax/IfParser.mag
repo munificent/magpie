@@ -1,8 +1,6 @@
 // Keyword parser for "if" expressions.
 class IfParser
     def parse(parser MagpieParser -> Expression)
-        parser consume("if")
-
         // Parse the condition.
         %var%("condition", parser parseBlock(TokenType thenToken) _0)
 

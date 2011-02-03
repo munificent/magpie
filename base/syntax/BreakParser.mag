@@ -1,7 +1,6 @@
 // Keyword parser for "break" expressions.
 class BreakParser
     def parse(parser MagpieParser -> Expression)
-        parser consume("break")
         BreakExpression new()
     end
 end

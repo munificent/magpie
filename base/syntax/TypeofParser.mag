@@ -1,7 +1,6 @@
 // Keyword parser for "typeof" expressions.
 class TypeofParser
     def parse(parser MagpieParser -> Expression)
-        parser consume("typeof")
         TypeofExpression new(body: parser parseEndBlock())
     end
 end

@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie.parser;
 
 import java.util.*;
+import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
@@ -11,32 +12,40 @@ import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.util.Pair;
 
 public class MagpieParser extends Parser {  
-  public MagpieParser(Lexer lexer, Map<String, ExprParser> parsewords,
-      Set<String> keywords) {
+  public MagpieParser(Lexer lexer, Map<String, TokenParser> parsers) {
     super(lexer);
-    
+        
+    TokenParser singleTokenParser = new SingleTokenParser();
+    mParserTable.define(TokenType.BOOL, singleTokenParser);
+    mParserTable.define(TokenType.INT, singleTokenParser);
+    mParserTable.define(TokenType.NOTHING, singleTokenParser);
+    mParserTable.define(TokenType.STRING, singleTokenParser);
+    mParserTable.define(TokenType.THIS, singleTokenParser);
+    mParserTable.define(TokenType.LEFT_PAREN, new ParenthesisParser());
+    mParserTable.define(TokenType.LEFT_BRACE, new BraceParser());
+    mParserTable.define(TokenType.BACKTICK, new BacktickParser());
+    mParserTable.define(TokenType.FN, new FnParser());
+
     // Register the parsers for the different keywords.
     // TODO(bob): Eventually these should all go away.
-    mParsers.put(TokenType.FOR, new LoopExprParser());
-    mParsers.put(TokenType.MATCH, new MatchExprParser());
-    mParsers.put(TokenType.WHILE, new LoopExprParser());
+    mParserTable.define(TokenType.MATCH, new MatchParser());
+    mParserTable.define(TokenType.FOR, new LoopParser());
+    mParserTable.define(TokenType.WHILE, new LoopParser());
+
+    mParserTable.define("do", new DoParser());
+    mParserTable.define("class", new ClassParser());
+    mParserTable.define("extend", new ExtendParser());
+    mParserTable.define("interface", new InterfaceParser());
     
-    mKeywordParsers = parsewords;
-    mKeywords = keywords;
-    
-    if (mKeywordParsers != null) {
-      mKeywordParsers.put("class", new ClassExprParser());
-      mKeywordParsers.put("extend", new ExtendExprParser());
-      mKeywordParsers.put("interface", new InterfaceExprParser());
-    }
-    
-    if (mKeywords != null) {
-      mKeywords.add("do");
+    if (parsers != null) {
+      for (Entry<String, TokenParser> parser : parsers.entrySet()) {
+        mParserTable.define(parser.getKey(), parser.getValue());
+      }
     }
   }
   
   public MagpieParser(Lexer lexer) {
-    this(lexer, null, null);
+    this(lexer, null);
   }
   
   public List<Expr> parse() {
@@ -97,12 +106,7 @@ public class MagpieParser extends Parser {
       type = FunctionType.nothingToDynamic();
     }
     
-    // Wrap the body in a dynamic function.
-    if (type != null) {
-      expr = Expr.fn(position, type, expr);
-    }
-    
-    return expr;
+    return Expr.fn(position, type, expr);
   }
 
   /**
@@ -178,8 +182,7 @@ public class MagpieParser extends Parser {
   
   @Override
   protected boolean isKeyword(String name) {
-    return ((mKeywordParsers != null) && mKeywordParsers.containsKey(name)) ||
-           ((mKeywords != null) && mKeywords.contains(name));
+    return mParserTable.isReserved(name);
   }
   
   private Pair<Expr, Token> parseBlock(boolean parseCatch, String keyword1,
@@ -404,127 +407,37 @@ public class MagpieParser extends Parser {
    * @return The parsed expression or null if unsuccessful.
    */
   private Expr primary() {
-    if (match(TokenType.BOOL)){
-      return Expr.bool(last(1).getPosition(), last(1).getBool());
+    TokenParser tokenParser = mParserTable.get(current());
+    if (tokenParser != null) {
+      return tokenParser.parseBefore(this, consume());
     }
 
-    if (match(TokenType.INT)) {
-      return Expr.int_(last(1).getPosition(), last(1).getInt());
-    }
-
-    if (match(TokenType.STRING)) {
-      return Expr.string(last(1).getPosition(), last(1).getString());
-    }
-
-    if (match(TokenType.THIS)) {
-      return Expr.this_(last(1).getPosition());
-    }
-
-    if (match(TokenType.NOTHING)) {
-      return Expr.nothing(last(1).getPosition());
-    }
-    
-    if (match(TokenType.FN)) {
-      return parsePatternFunction();
-    }
-    
-    if (match("do")) {
-      Expr body = parseEndBlock();
-      return Expr.scope(body);
-    }
-
-    if ((mQuoteDepth > 0) && match(TokenType.BACKTICK)) {
-      Position position = last(1).getPosition();
-      Expr body;
-      if (match(TokenType.NAME)) {
-        body = Expr.message(last(1).getPosition(), null, last(1).getString());
-      } else {
-        body = groupExpression(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN);
-      }
-      return new UnquoteExpr(position, body);
-    }
-
-    if (match(TokenType.LEFT_PAREN)) {
-      Expr expr = parseExpression();
-      consume(TokenType.RIGHT_PAREN);
-      return expr;
-    }
-
-    if (lookAhead(TokenType.LEFT_BRACE)) {
-      mQuoteDepth++;
-      Position position = current().getPosition();
-      Expr expr = groupExpression(TokenType.LEFT_BRACE, TokenType.RIGHT_BRACE);
-      position = position.union(last(1).getPosition());
-      mQuoteDepth--;
-      return Expr.quote(position, expr);
-    }
-    
-    // See if we're at a keyword we know how to parse.
-    if ((mKeywordParsers != null) && (current().getType() == TokenType.NAME)) {
-      ExprParser parser = mKeywordParsers.get(current().getString());
-      if (parser != null) {
-        return parser.parse(this);
-      }
-    }
-    ExprParser parser = mParsers.get(current().getType());
-    if (parser != null) {
-      return parser.parse(this);
-    }
-    
     // Otherwise fail.
     return null;
   }
-
-  private Expr parsePatternFunction() {
-    FunctionType type;
-    
-    // TODO(bob): Fallback to old stuff for static functions. Once patterns are
-    // working, I can implement 'T-style generics, and static functions can go
-    // away completely.
-    if (lookAhead(TokenType.LEFT_BRACKET)) {
-      return parseFunction();
-    }
-    
-    // Parse the type signature.
-    if (match(TokenType.LEFT_PAREN)) {
-      Pattern pattern = null;
-      if (!lookAheadAny(TokenType.ARROW, TokenType.RIGHT_PAREN)) {
-        pattern = PatternParser.parse(this);
-      } else {
-        // No pattern, so expect nothing.
-        pattern = new ValuePattern(Expr.nothing());
-      }
-      
-      // Parse the return type, if any.
-      Expr returnType = null;
-      if (match(TokenType.RIGHT_PAREN)) {
-        // No return type, so infer dynamic.
-        returnType = Expr.name("Dynamic");
-      } else {
-        consume(TokenType.ARROW);
-        
-        if (lookAhead(TokenType.RIGHT_PAREN)) {
-          // An arrow, but no return type, so infer nothing.
-          returnType = Expr.name("Nothing");
-        } else {
-          returnType = TypeParser.parse(this);
-        }
-        consume(TokenType.RIGHT_PAREN);
-      }
-      
-      type = new FunctionType(pattern, returnType);
-    } else {
-      // No type signature provided, so infer (_ -> Dynamic)
-      type = FunctionType.nothingToDynamic();
-    }
-    
-    Expr body = parseEndBlock();
-    
-    return Expr.fn(body.getPosition(), type, body);
+  
+  public boolean inQuotation() {
+    return mQuoteDepth > 0;
+  }
+  
+  public void pushQuote() {
+    mQuoteDepth++;
+  }
+  
+  public void popQuote() {
+    mQuoteDepth--;
   }
 
   private Expr groupExpression(TokenType left, TokenType right) {
-    consume(left);
+    return groupExpression(left, right, true);
+  }
+  
+  public Expr groupExpression(TokenType left, TokenType right,
+      boolean consumeLeft) {
+    
+    if (consumeLeft) {
+      consume(left);
+    }
     
     if (match(right)) {
       return Expr.nothing(Position.surrounding(last(2), last(1)));
@@ -552,10 +465,7 @@ public class MagpieParser extends Parser {
     }
   }
   
-  private final Map<TokenType, ExprParser> mParsers =
-    new HashMap<TokenType, ExprParser>();
-  private final Map<String, ExprParser> mKeywordParsers;
-  private final Set<String> mKeywords;
+  private final ParserTable mParserTable = new ParserTable();
   
   // Counts the number of nested expression literals the parser is currently
   // within. Zero means the parser is not inside an expression literal at all

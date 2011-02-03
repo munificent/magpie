@@ -5,8 +5,8 @@ import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.interpreter.builtin.*;
-import com.stuffwithstuff.magpie.parser.ExprParser;
 import com.stuffwithstuff.magpie.parser.Position;
+import com.stuffwithstuff.magpie.parser.TokenParser;
 import com.stuffwithstuff.magpie.util.Expect;
 
 public class Interpreter {
@@ -440,24 +440,16 @@ public class Interpreter {
     mScriptPaths.pop();
   }
   
-  public boolean isKeyword(String word) {
-    return mParsewords.containsKey(word) || mKeywords.contains(word);
+  public boolean isReservedWord(String word) {
+    return mParsers.containsKey(word);
   }
   
-  public Map<String, ExprParser> getParsewords() {
-    return mParsewords;
+  public Map<String, TokenParser> getParsers() {
+    return mParsers;
   }
   
-  public Set<String> getKeywords() {
-    return mKeywords;
-  }
-  
-  public void registerParseword(String keyword, ExprParser parser) {
-    mParsewords.put(keyword, parser);
-  }
-  
-  public void reserveWord(String keyword) {
-    mKeywords.add(keyword);
+  public void registerParser(String keyword, TokenParser parser) {
+    mParsers.put(keyword, parser);
   }
   
   public ClassObj createClass(String name) {
@@ -590,7 +582,6 @@ public class Interpreter {
   private final Obj mTrue;
   private final Obj mFalse;
   private final Stack<String> mScriptPaths = new Stack<String>();
-  private final Map<String, ExprParser> mParsewords =
-      new HashMap<String, ExprParser>();
-  private final Set<String> mKeywords = new HashSet<String>();
+  private final Map<String, TokenParser> mParsers =
+      new HashMap<String, TokenParser>();
 }

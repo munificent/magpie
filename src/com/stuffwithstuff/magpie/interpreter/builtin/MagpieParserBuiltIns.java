@@ -7,10 +7,10 @@ import com.stuffwithstuff.magpie.interpreter.ExprConverter;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.PatternConverter;
-import com.stuffwithstuff.magpie.parser.ExprParser;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
 import com.stuffwithstuff.magpie.parser.PatternParser;
 import com.stuffwithstuff.magpie.parser.Token;
+import com.stuffwithstuff.magpie.parser.TokenParser;
 import com.stuffwithstuff.magpie.parser.TokenType;
 import com.stuffwithstuff.magpie.parser.TypeParser;
 import com.stuffwithstuff.magpie.util.Expect;
@@ -24,8 +24,8 @@ public class MagpieParserBuiltIns {
       String keyword = arg.getTupleField(0).asString();
       Obj parser = arg.getTupleField(1);
       
-      interpreter.registerParseword(keyword,
-          new MagpieExprParser(interpreter, parser));
+      interpreter.registerParser(keyword,
+          new MagpieTokenParser(interpreter, parser));
       return interpreter.nothing();
     }
   }
@@ -36,7 +36,7 @@ public class MagpieParserBuiltIns {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String keyword = arg.asString();
       
-      interpreter.reserveWord(keyword);
+      interpreter.registerParser(keyword, null);
       return interpreter.nothing();
     }
   }
@@ -325,14 +325,15 @@ public class MagpieParserBuiltIns {
     return tokenType;
   }
   
-  private static class MagpieExprParser implements ExprParser {
-    public MagpieExprParser(Interpreter interpreter, Obj parser) {
+  private static class MagpieTokenParser extends TokenParser {
+    public MagpieTokenParser(Interpreter interpreter, Obj parser) {
       mInterpreter = interpreter;
       mParser = parser;
     }
     
     @Override
-    public Expr parse(MagpieParser parser) {
+    public Expr parseBefore(MagpieParser parser, Token token) {
+      // TODO(bob): Pass Token in.
       // Parser is assumed to implement:
       // interface KeywordParser
       //     def parse(parser MagpieParser -> Expression)

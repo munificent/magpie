@@ -6,8 +6,6 @@
 //    def (a b) foo(a) ... // defines a method "foo" on the result of "a b"
 class DefParser
     def parse(parser MagpieParser -> Expression)
-        parser consume("def")
-
         match parser lookAhead(TokenType identifier, TokenType leftParen) or
             parser lookAhead(TokenType identifier, TokenType leftBracket) or
             parser lookAhead(TokenType operator, TokenType leftParen) or
