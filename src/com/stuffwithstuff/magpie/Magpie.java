@@ -37,7 +37,7 @@ public class Magpie {
     // If no script is given, just spin up the REPL.
     if (path == null) {
       if (niceRepl) {
-      NiceRepl.run();
+        NiceRepl.run();
       } else {
         runRepl();
       }
@@ -74,9 +74,7 @@ public class Magpie {
         
         String result = interpreter.evaluateToString(expr);
         if (result != null) {
-          Term.set(Term.ForeColor.CYAN);
-          System.out.print(":: ");
-          Term.restoreColor();
+          System.out.print(" = ");
           System.out.println(result);
         }
       }

@@ -6,10 +6,9 @@ import java.util.List;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.Name;
 
-public class LoopParser extends TokenParser {
-
+public class LoopParser extends PrefixParser {
   @Override
-  public Expr parseBefore(MagpieParser parser, Token token) {
+  public Expr parse(MagpieParser parser, Token token) {
     // "while" and "for" loop.
     Position startPos = token.getPosition();
     

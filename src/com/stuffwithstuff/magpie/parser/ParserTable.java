@@ -10,20 +10,24 @@ import java.util.Map;
  * have its own parsing behavior. This is for keywords like "then" or "else"
  * that are used in the middle of a mixfix expression.
  */
-public class ParserTable {
-  public void define(String name, TokenParser parser) {
+public class ParserTable<T> {
+  public void define(String name, T parser) {
     mNameTable.put(name, parser);
   }
   
-  public void define(TokenType type, TokenParser parser) {
+  public void define(TokenType type, T parser) {
     mTypeTable.put(type, parser);
   }
   
-  public TokenParser get(Token token) {
+  public T get(Token token) {
     if (token.getType() == TokenType.NAME ||
         token.getType() == TokenType.OPERATOR) {
-      TokenParser named = mNameTable.get(token.toString());
-      if (named != null) return named;
+      // Note that we do this instead of checking if the value is null to
+      // indicate key absence because we may have registered a key with no
+      // parser to reserve the word.
+      if (mNameTable.containsKey(token.toString())) {
+        return mNameTable.get(token.toString());
+      }
     }
     
     return mTypeTable.get(token.getType());
@@ -33,8 +37,6 @@ public class ParserTable {
     return mNameTable.containsKey(name);
   }
   
-  private final Map<String, TokenParser> mNameTable =
-      new HashMap<String, TokenParser>();
-  private final Map<TokenType, TokenParser> mTypeTable =
-      new HashMap<TokenType, TokenParser>();
+  private final Map<String, T> mNameTable = new HashMap<String, T>();
+  private final Map<TokenType, T> mTypeTable = new HashMap<TokenType, T>();
 }

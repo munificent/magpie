@@ -180,6 +180,9 @@ public abstract class Parser {
    * @return  The consumed token.
    */
   public Token consume() {
+    // Make sure we've read the token.
+    lookAhead(0);
+    
     mConsumed.add(0, mRead.remove(0));
     return last(1);
   }

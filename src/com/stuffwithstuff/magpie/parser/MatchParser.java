@@ -9,7 +9,7 @@ import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.util.Pair;
 
-public class MatchParser extends TokenParser {
+public class MatchParser extends PrefixParser {
   private static MatchCase parseCase(MagpieParser parser) {
     Pattern pattern = PatternParser.parse(parser);
 
@@ -29,7 +29,7 @@ public class MatchParser extends TokenParser {
   }
   
   @Override
-  public Expr parseBefore(MagpieParser parser, Token token) {
+  public Expr parse(MagpieParser parser, Token token) {
     Position position = parser.last(1).getPosition();
     
     // Parse the value.

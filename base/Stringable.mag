@@ -5,10 +5,10 @@ interface Stringable
 end
 
 // Provide a generic print that converts arg to string first.
-def print(arg Stringable | Nothing ->)
+def print(arg Stringable ->)
     match arg
-        case arg Stringable then printString(arg string ~ "\n")
-        else printString("\n")
+        case nothing then printString("\n")
+        else printString(arg string ~ "\n")
     end
 end
 

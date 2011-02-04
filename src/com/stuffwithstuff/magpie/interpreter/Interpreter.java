@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.interpreter.builtin.*;
 import com.stuffwithstuff.magpie.parser.Position;
-import com.stuffwithstuff.magpie.parser.TokenParser;
+import com.stuffwithstuff.magpie.parser.PrefixParser;
 import com.stuffwithstuff.magpie.util.Expect;
 
 public class Interpreter {
@@ -444,11 +444,11 @@ public class Interpreter {
     return mParsers.containsKey(word);
   }
   
-  public Map<String, TokenParser> getParsers() {
+  public Map<String, PrefixParser> getParsers() {
     return mParsers;
   }
   
-  public void registerParser(String keyword, TokenParser parser) {
+  public void registerParser(String keyword, PrefixParser parser) {
     mParsers.put(keyword, parser);
   }
   
@@ -582,6 +582,6 @@ public class Interpreter {
   private final Obj mTrue;
   private final Obj mFalse;
   private final Stack<String> mScriptPaths = new Stack<String>();
-  private final Map<String, TokenParser> mParsers =
-      new HashMap<String, TokenParser>();
+  private final Map<String, PrefixParser> mParsers =
+      new HashMap<String, PrefixParser>();
 }

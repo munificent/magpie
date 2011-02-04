@@ -3,9 +3,9 @@ package com.stuffwithstuff.magpie.parser;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.UnquoteExpr;
 
-public class BacktickParser extends TokenParser {
+public class BacktickParser extends PrefixParser {
   @Override
-  public Expr parseBefore(MagpieParser parser, Token token) {
+  public Expr parse(MagpieParser parser, Token token) {
     if (!parser.inQuotation()) {
       throw new ParseException("Cannot unquote outside of a quotation.");
     }
@@ -16,8 +16,8 @@ public class BacktickParser extends TokenParser {
       body = Expr.message(parser.last(1).getPosition(), null,
           parser.last(1).getString());
     } else {
-      body = parser.groupExpression(
-          TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN, true);
+      parser.consume(TokenType.LEFT_PAREN);
+      body = parser.groupExpression(TokenType.RIGHT_PAREN);
     }
     
     return new UnquoteExpr(position, body);
