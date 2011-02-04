@@ -1,7 +1,6 @@
 package com.stuffwithstuff.magpie.ast;
 
 public interface ExprVisitor<R, C> {
-  R visit(AndExpr expr, C context);
   R visit(AssignExpr expr, C context);
   R visit(BlockExpr expr, C context);
   R visit(BoolExpr expr, C context);
@@ -13,7 +12,6 @@ public interface ExprVisitor<R, C> {
   R visit(MatchExpr expr, C context);
   R visit(MessageExpr expr, C context);
   R visit(NothingExpr expr, C context);
-  R visit(OrExpr expr, C context);
   R visit(QuotationExpr expr, C context);
   R visit(RecordExpr expr, C context);
   R visit(ReturnExpr expr, C context);

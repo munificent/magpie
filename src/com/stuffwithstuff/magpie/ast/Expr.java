@@ -24,10 +24,6 @@ import com.stuffwithstuff.magpie.util.Pair;
  * @author bob
  */
 public abstract class Expr {
-  public static Expr and(Expr left, Expr right) {
-    return new AndExpr(left, right);
-  }
-  
   public static Expr assign(Position position, Expr receiver, String name,
       Expr value) {
     return new AssignExpr(position, receiver, name, value);
@@ -171,10 +167,6 @@ public abstract class Expr {
     return new NothingExpr(Position.none());  
   }
 
-  public static Expr or(Expr left, Expr right) {
-    return new OrExpr(left, right);
-  }
-  
   public static Expr quote(Position position, Expr body) {
     return new QuotationExpr(position, body);
   }

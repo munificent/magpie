@@ -35,9 +35,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     ClassObj exprClass = expr.getClassObj();
     // TODO(bob): Fill in other expression types.
     // TODO(bob): Support position information in Magpie parser.
-    if (exprClass == interpreter.getGlobal("AndExpression")) {
-      return convertAndExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("AssignExpression")) {
+    if (exprClass == interpreter.getGlobal("AssignExpression")) {
       return convertAssignExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("BlockExpression")) {
       return convertBlockExpr(interpreter, expr);
@@ -59,8 +57,6 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
       return convertMessageExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("NothingExpression")) {
       return convertNothingExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("OrExpression")) {
-      return convertOrExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("QuotationExpression")) {
       return convertQuotationExpr(interpreter, expr);
     } else if (exprClass == interpreter.getGlobal("RecordExpression")) {
@@ -86,12 +82,6 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     // TODO(bob): Add better error-handling.
     throw new NotImplementedException(
         "Other expression types not implemented yet!");
-  }
-
-  private static Expr convertAndExpr(Interpreter interpreter, Obj expr) {
-    Expr left = convert(interpreter, expr.getField("left"));
-    Expr right = convert(interpreter, expr.getField("right"));
-    return Expr.and(left, right);
   }
 
   private static Expr convertAssignExpr(Interpreter interpreter, Obj expr) {
@@ -201,12 +191,6 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     return Expr.nothing();
   }
   
-  private static Expr convertOrExpr(Interpreter interpreter, Obj expr) {
-    Expr left = convert(interpreter, expr.getField("left"));
-    Expr right = convert(interpreter, expr.getField("right"));
-    return Expr.or(left, right);
-  }
-
   private static Expr convertQuotationExpr(Interpreter interpreter, Obj expr) {
     Expr body = convert(interpreter, expr.getField("body"));
     return Expr.quote(Position.none(), body);
@@ -275,13 +259,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   }
 
   
-  @Override
-  public Obj visit(AndExpr expr, Void dummy) {
-    return construct("AndExpression",
-        "left",  expr.getLeft(),
-        "right", expr.getRight());
-  }
-  
+
   @Override
   public Obj visit(AssignExpr expr, Void dummy) {
     return construct("AssignExpression",
@@ -373,13 +351,6 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   @Override
   public Obj visit(NothingExpr expr, Void dummy) {
     return construct("NothingExpression");
-  }
-
-  @Override
-  public Obj visit(OrExpr expr, Void dummy) {
-    return construct("OrExpression",
-        "left",  expr.getLeft(),
-        "right", expr.getRight());
   }
 
   @Override

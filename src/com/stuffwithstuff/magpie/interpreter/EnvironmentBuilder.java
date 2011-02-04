@@ -12,10 +12,6 @@ public class EnvironmentBuilder {
     // Define the core AST classes. We set these up here instead of in base
     // because they will need to be available immediately by the parser so that
     // quotations can be converted to Magpie.
-    newClass("AndExpression")
-        .field("left",  name("Expression"))
-        .field("right", name("Expression"));
-
     newClass("AssignExpression")
         .field("receiver", or(name("Expression"), name("Nothing")))
         .field("name",     name("String"))
@@ -70,10 +66,6 @@ public class EnvironmentBuilder {
     
     newClass("NothingExpression");
 
-    newClass("OrExpression")
-        .field("left",  name("Expression"))
-        .field("right", name("Expression"));
-    
     newClass("QuotationExpression")
         .field("body", name("Expression"));
     

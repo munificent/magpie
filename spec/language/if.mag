@@ -3,7 +3,7 @@ specify("An 'if then' expression") with
         var evaluated = false
         if true then evaluated = true
         evaluated shouldBe(true)
-        
+
         evaluated = false
         if false then evaluated = true
         evaluated shouldBe(false)
@@ -31,7 +31,7 @@ specify("An 'if then' expression") with
         if true then var a = "inside"
         a shouldBe("outside")
     end
-        
+
     it should("allow a block for the 'if' expression") with
         var a = 0
         if
@@ -43,7 +43,7 @@ specify("An 'if then' expression") with
         end
         a shouldBe(3)
     end
-    
+
     it should("allow a block for the 'then' expression") with
         var a = 0
         if true then
@@ -64,12 +64,12 @@ specify("An 'if then else' expression") with
         if false then evaluated = true else "ignored"
         evaluated shouldBe(false)
     end
-    
+
     it should("evaluate the 'else' expression if the condition is false") with
         var evaluated = false
         if true then "ignored" else evaluated = true
         evaluated shouldBe(false)
-        
+
         evaluated = false
         if false then "ignored" else evaluated = true
         evaluated shouldBe(true)
@@ -87,9 +87,9 @@ specify("An 'if then else' expression") with
               "to the 'else' expression") with
         var a = "outside"
         var b = "outside"
-        if (var a = "inside") and false then "ignored" else b = a
+        if var a = "" then "ignored" else b = a
         a shouldBe("outside")
-        b shouldBe("inside")
+        b shouldBe("")
     end
 
     it should("create a local scope for the 'else' expression") with
@@ -97,7 +97,7 @@ specify("An 'if then else' expression") with
         if false then "ignored" else var a = "shadow"
         a shouldBe("outside")
     end
-        
+
     it should("allow a block for the 'if' expression") with
         var a = 0
         if
@@ -109,7 +109,7 @@ specify("An 'if then else' expression") with
         else "ignored"
         a shouldBe(3)
     end
-    
+
     it should("allow a block for the 'then' expression") with
         var a = 0
         if true then

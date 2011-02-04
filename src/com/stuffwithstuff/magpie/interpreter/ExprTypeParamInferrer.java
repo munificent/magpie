@@ -13,11 +13,6 @@ public class ExprTypeParamInferrer implements ExprVisitor<Void, Obj> {
   }
   
   @Override
-  public Void visit(AndExpr expr, Obj valueType) {
-    return invalidExpression();
-  }
-
-  @Override
   public Void visit(AssignExpr expr, Obj valueType) {
     return invalidExpression();
   }
@@ -81,11 +76,6 @@ public class ExprTypeParamInferrer implements ExprVisitor<Void, Obj> {
 
   @Override
   public Void visit(NothingExpr expr, Obj valueType) {
-    return invalidExpression();
-  }
-
-  @Override
-  public Void visit(OrExpr expr, Obj valueType) {
     return invalidExpression();
   }
 

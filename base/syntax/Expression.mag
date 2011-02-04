@@ -3,12 +3,6 @@ interface Expression
     get string String
 end
 
-extend class AndExpression
-    get string String =
-        left string ~ " and " ~ right
-    end
-end
-
 extend class AssignExpression
     get string String =
         match receiver
@@ -69,12 +63,6 @@ end
 
 extend class NothingExpression
     get string String = "nothing"
-end
-
-extend class OrExpression
-    get string String =
-        left ~ " or " ~ right
-    end
 end
 
 extend class QuotationExpression

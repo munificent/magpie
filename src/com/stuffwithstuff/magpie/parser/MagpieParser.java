@@ -8,7 +8,6 @@ import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
 import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
-import com.stuffwithstuff.magpie.util.Expect;
 import com.stuffwithstuff.magpie.util.Pair;
 
 public class MagpieParser extends Parser {  
@@ -233,6 +232,12 @@ public class MagpieParser extends Parser {
     return expr;
   }
   
+  public String generateName() {
+    // Include a space in the name to avoid colliding with any user-defined
+    // names.
+    return "gen " + (++mUniqueSymbolId);
+  }
+  
   @Override
   protected boolean isKeyword(String name) {
     return mPrefixParsers.isReserved(name) || mInfixParsers.isReserved(name);
@@ -335,4 +340,6 @@ public class MagpieParser extends Parser {
   // (i.e. in regular code). It will be one at the "here" token in "{ here }".
   // Used to determine when an unquote expression is allowed.
   private int mQuoteDepth;
+  
+  private int mUniqueSymbolId = 0;
 }

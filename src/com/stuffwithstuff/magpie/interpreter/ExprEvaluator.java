@@ -32,17 +32,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
-  public Obj visit(AndExpr expr, EvalContext context) {
-    Obj left = evaluate(expr.getLeft(), context);
-
-    if (isTruthy(expr, left)) {
-      return evaluate(expr.getRight(), context);
-    } else {
-      return left;
-    }
-  }
-
-  @Override
   public Obj visit(AssignExpr expr, EvalContext context) {
     Obj receiver = evaluate(expr.getReceiver(), context);
     Obj value = evaluate(expr.getValue(), context);
@@ -207,17 +196,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
-  public Obj visit(OrExpr expr, EvalContext context) {
-    Obj left = evaluate(expr.getLeft(), context);
-
-    if (isTruthy(expr, left)) {
-      return left;
-    } else {
-      return evaluate(expr.getRight(), context);
-    }
-  }
-
-  @Override
   public Obj visit(QuotationExpr expr, EvalContext context) {
     return ExprConverter.convert(mInterpreter, expr.getBody(), context);
   }
@@ -291,12 +269,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
     PatternBinder.bind(mInterpreter, expr.getPattern(), value, context);
     return value;
-  }
-
-  private boolean isTruthy(Expr expr, Obj receiver) {
-    Obj truthy = mInterpreter.getMember(expr.getPosition(), receiver,
-        Name.IS_TRUE);
-    return truthy.asBool();
   }
 
   private final Interpreter mInterpreter;
