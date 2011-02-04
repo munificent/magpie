@@ -137,17 +137,11 @@ public class NiceReplCharacterReader implements CharacterReader {
           break;
           
         // keywords
-        case AND:
         case ARROW:
         case CASE:
         case CATCH:
         case FN:
-        case FOR:
-        case MATCH:
-        case OR:
         case THEN:
-        case WHILE:
-        case WITH:
           Term.set(Term.ForeColor.CYAN);
           break;
           

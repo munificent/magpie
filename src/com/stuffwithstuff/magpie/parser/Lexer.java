@@ -34,9 +34,7 @@ public class Lexer {
     case DOT:
     case OPERATOR:
     case FIELD:
-    case AND:
     case ARROW:
-    case OR:
     case LEFT_PAREN:
     case LEFT_BRACKET:
     case LEFT_BRACE:
@@ -301,20 +299,14 @@ public class Lexer {
     Position position = currentPosition();
     
     // Handle reserved words.
-    if (text.equals("and")) return new Token(position, TokenType.AND);
     if (text.equals("case")) return new Token(position, TokenType.CASE);
     if (text.equals("catch")) return new Token(position, TokenType.CATCH);
     if (text.equals("false")) return new Token(position, TokenType.BOOL, false);
     if (text.equals("fn")) return new Token(position, TokenType.FN);
-    if (text.equals("for")) return new Token(position, TokenType.FOR);
-    if (text.equals("match")) return new Token(position, TokenType.MATCH);
     if (text.equals("nothing")) return new Token(position, TokenType.NOTHING);
-    if (text.equals("or")) return new Token(position, TokenType.OR);
     if (text.equals("then")) return new Token(position, TokenType.THEN);
     if (text.equals("this")) return new Token(position, TokenType.THIS);
     if (text.equals("true")) return new Token(position, TokenType.BOOL, true);
-    if (text.equals("while")) return new Token(position, TokenType.WHILE);
-    if (text.equals("with")) return new Token(position, TokenType.WITH);
     if (text.equals("=")) return new Token(position, TokenType.EQUALS);
     if (text.equals("->")) return new Token(position, TokenType.ARROW);
     

@@ -8,6 +8,7 @@ import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
 import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
+import com.stuffwithstuff.magpie.util.Expect;
 import com.stuffwithstuff.magpie.util.Pair;
 
 public class MagpieParser extends Parser {  
@@ -30,18 +31,18 @@ public class MagpieParser extends Parser {
     mInfixParsers.define(TokenType.LEFT_PAREN, new ParenthesisInfixParser());
     mInfixParsers.define(TokenType.NAME, new MessageInfixParser());
     mInfixParsers.define(TokenType.LEFT_BRACKET, new BracketParser());
-    mInfixParsers.define(TokenType.WITH, new WithParser());
     mInfixParsers.define(TokenType.OPERATOR, new OperatorParser());
-    mInfixParsers.define(TokenType.AND, new ConjunctionParser());
-    mInfixParsers.define(TokenType.OR, new ConjunctionParser());
+    mInfixParsers.define("with", new WithParser());
+    mInfixParsers.define("and", new ConjunctionParser());
+    mInfixParsers.define("or", new ConjunctionParser());
     mInfixParsers.define(TokenType.COMMA, new CommaParser());
     mInfixParsers.define(TokenType.EQUALS, new EqualsParser());
 
     // Register the parsers for the different keywords.
     // TODO(bob): Eventually these should all go away.
-    mPrefixParsers.define(TokenType.MATCH, new MatchParser());
-    mPrefixParsers.define(TokenType.FOR, new LoopParser());
-    mPrefixParsers.define(TokenType.WHILE, new LoopParser());
+    mPrefixParsers.define("match", new MatchParser());
+    mPrefixParsers.define("for", new LoopParser());
+    mPrefixParsers.define("while", new LoopParser());
 
     mPrefixParsers.define("do", new DoParser());
     mPrefixParsers.define("class", new ClassParser());

@@ -32,6 +32,7 @@ public class MatchExpr extends Expr {
       builder.append(matchCase.getPattern());
       builder.append(" then ");
       matchCase.getBody().toString(builder, indent + "        ");
+      builder.append("\n");
     }
     
     builder.append(indent).append("end");

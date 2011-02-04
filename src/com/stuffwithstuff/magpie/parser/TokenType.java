@@ -26,19 +26,13 @@ public enum TokenType {
   STRING,
   
   // keywords
-  AND,
   ARROW,
   CASE,
   CATCH,
   FN,
-  FOR,
-  MATCH,
   NOTHING,
-  OR,
   THEN,
   THIS,
-  WHILE,
-  WITH,
   
   // spacing
   LINE,

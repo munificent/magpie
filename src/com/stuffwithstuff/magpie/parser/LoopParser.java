@@ -40,7 +40,7 @@ public class LoopParser extends PrefixParser {
     List<Expr> eachLoop = new ArrayList<Expr>();
     
     while (true) {
-      if (token.getType() == TokenType.WHILE) {
+      if (token.isKeyword("while")) {
         Expr condition = parser.parseExpression();
         eachLoop.add(Expr.if_(condition,
             Expr.nothing(),
@@ -69,7 +69,7 @@ public class LoopParser extends PrefixParser {
       }
       parser.match(TokenType.LINE); // Optional line after a clause.
       
-      if (parser.match(TokenType.WHILE) || parser.match(TokenType.FOR)) {
+      if (parser.match("while") || parser.match("for")) {
         token = parser.last(1);
       } else {
         break;
