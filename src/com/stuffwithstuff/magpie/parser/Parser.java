@@ -138,6 +138,14 @@ public abstract class Parser {
     return true;
   }
   
+  public boolean lookAheadAny(String... keywords) {
+    for (String keyword : keywords) {
+      if (lookAhead(keyword)) return true;
+    }
+    
+    return false;
+  }
+
   /**
    * Looks ahead at the token stream to see if the next tokens match the
    * expected types, in order. If so, they are all consumed.

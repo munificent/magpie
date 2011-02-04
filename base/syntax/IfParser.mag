@@ -2,10 +2,10 @@
 class IfParser
     def parse(parser MagpieParser -> Expression)
         // Parse the condition.
-        %var%("condition", parser parseBlock(TokenType thenToken) _0)
+        %var%("condition", parser parseBlock("then") _0)
 
         // Parse the then body.
-        parser consume(TokenType thenToken)
+        parser consume("then")
         %var%("thenParse", parser parseBlock("else", "end"))
         %var%("thenExpr", thenParse _0)
 

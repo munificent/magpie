@@ -61,9 +61,6 @@ public final class Token {
       case STRING: return "\"" + getString() + "\"";
 
       case ARROW: return "->";
-      case CASE: return "case";
-      case CATCH: return "catch";
-      case THEN: return "then";
 
       case EOF: return "(eof)";
 

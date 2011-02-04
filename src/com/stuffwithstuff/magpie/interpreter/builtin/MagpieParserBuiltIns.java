@@ -245,9 +245,7 @@ public class MagpieParserBuiltIns {
     case 13: type = TokenType.BOOL; break;
     case 14: type = TokenType.INT; break;
     case 15: type = TokenType.STRING; break;
-    case 16: type = TokenType.CATCH; break;
-    case 17: type = TokenType.THEN; break;
-    case 18: type = TokenType.EOF; break;
+    case 16: type = TokenType.EOF; break;
     default:
       // TODO(bob): Better error reporting.
       interpreter.throwError("ParseError");
@@ -306,9 +304,7 @@ public class MagpieParserBuiltIns {
     case INT: tokenTypeValue = 14; tokenTypeName = "intLiteral"; break;
     case STRING: tokenTypeValue = 15; tokenTypeName = "stringLiteral"; break;
 
-    case CATCH: tokenTypeValue = 16; tokenTypeName = "catch"; break;
-    case THEN: tokenTypeValue = 17; tokenTypeName = "then"; break;
-    case EOF: tokenTypeValue = 18; tokenTypeName = "eof"; break;
+    case EOF: tokenTypeValue = 16; tokenTypeName = "eof"; break;
 
     default:
       // TODO(bob): Better error reporting.

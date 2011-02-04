@@ -299,10 +299,7 @@ public class Lexer {
     Position position = currentPosition();
     
     // Handle reserved words.
-    if (text.equals("case")) return new Token(position, TokenType.CASE);
-    if (text.equals("catch")) return new Token(position, TokenType.CATCH);
     if (text.equals("false")) return new Token(position, TokenType.BOOL, false);
-    if (text.equals("then")) return new Token(position, TokenType.THEN);
     if (text.equals("true")) return new Token(position, TokenType.BOOL, true);
     if (text.equals("=")) return new Token(position, TokenType.EQUALS);
     if (text.equals("->")) return new Token(position, TokenType.ARROW);

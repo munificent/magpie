@@ -13,14 +13,13 @@ public class MatchParser extends PrefixParser {
   private static MatchCase parseCase(MagpieParser parser) {
     Pattern pattern = PatternParser.parse(parser);
 
-    parser.consume(TokenType.THEN);
+    parser.consume("then");
     
-    Pair<Expr, Token> bodyParse = parser.parseBlock("else", "end",
-        TokenType.CASE);
+    Pair<Expr, Token> bodyParse = parser.parseBlock("else", "end", "case");
     
     // Allow newlines to separate single-line case and else cases.
     if ((bodyParse.getValue() == null) &&
-        (parser.lookAhead(TokenType.LINE, TokenType.CASE) ||
+        (parser.lookAhead(TokenType.LINE, "case") ||
          parser.lookAhead(TokenType.LINE, "else"))) {
       parser.consume(TokenType.LINE);
     }
@@ -40,7 +39,7 @@ public class MatchParser extends PrefixParser {
         
     // Parse the cases.
     List<MatchCase> cases = new ArrayList<MatchCase>();
-    while (parser.match(TokenType.CASE)) {
+    while (parser.match("case")) {
       cases.add(parseCase(parser));
     }
     

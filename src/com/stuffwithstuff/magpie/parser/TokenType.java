@@ -27,9 +27,6 @@ public enum TokenType {
   
   // keywords
   ARROW,
-  CASE,
-  CATCH,
-  THEN,
   
   // spacing
   LINE,
