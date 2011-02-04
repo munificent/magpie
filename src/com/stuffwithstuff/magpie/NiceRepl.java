@@ -29,7 +29,9 @@ public class NiceRepl {
       while (true) {
         NiceReplCharacterReader reader = new NiceReplCharacterReader(interpreter);
         Lexer lexer = new Lexer("REPL", reader);
-        MagpieParser parser = new MagpieParser(lexer, interpreter.getParsers());
+        MagpieParser parser = new MagpieParser(lexer,
+            interpreter.getParsers(),
+            interpreter.getReservedWords());
         
         Expr expr = parser.parseExpression();
         

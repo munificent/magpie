@@ -100,11 +100,11 @@ public class NiceReplCharacterReader implements CharacterReader {
         
         // identifiers
         case NAME:
-          if (mInterpreter.isReservedWord(token.getString())) {
-            Term.set(ForeColor.CYAN);
-          } else if (token.isKeyword("this") || token.isKeyword("nothing")) {
+          if (token.isKeyword("this") || token.isKeyword("nothing")) {
             // special identifiers
             Term.set(ForeColor.LIGHT_BLUE);
+          } else if (mInterpreter.isKeyword(token.getString())) {
+            Term.set(ForeColor.CYAN);
           } else {
             Term.set(ForeColor.WHITE);
           }

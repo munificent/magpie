@@ -11,7 +11,8 @@ import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.util.Pair;
 
 public class MagpieParser extends Parser {  
-  public MagpieParser(Lexer lexer, Map<String, PrefixParser> parsers) {
+  public MagpieParser(Lexer lexer, Map<String, PrefixParser> parsers,
+      Set<String> reservedWords) {
     super(lexer);
     
     // Register the built-in parsers.
@@ -54,10 +55,15 @@ public class MagpieParser extends Parser {
         mPrefixParsers.define(parser.getKey(), parser.getValue());
       }
     }
+    
+    // Register the user-defined reserved words.
+    if (reservedWords != null) {
+      mReservedWords.addAll(reservedWords);
+    }
   }
   
   public MagpieParser(Lexer lexer) {
-    this(lexer, null);
+    this(lexer, null, null);
   }
   
   public List<Expr> parse() {
@@ -84,6 +90,7 @@ public class MagpieParser extends Parser {
     
     while (stickiness < getStickiness()) {
       token = consume();
+      
       InfixParser infix = mInfixParsers.get(token);
       left = infix.parse(this, left, token);
     }
@@ -238,19 +245,28 @@ public class MagpieParser extends Parser {
     return "gen " + (++mUniqueSymbolId);
   }
   
+  /**
+   * Gets whether or not the name is a "keyword". A keyword is any name that
+   * has special meaning to the parser: it's either a reserved word, or it has
+   * a prefix or infix parser registered to the name.
+   */
   @Override
   protected boolean isKeyword(String name) {
-    return mPrefixParsers.isReserved(name) || mInfixParsers.isReserved(name);
+    return mPrefixParsers.isReserved(name) ||
+        mInfixParsers.isReserved(name) ||
+        mReservedWords.contains(name);
   }
   
   private int getStickiness() {
     int stickiness = 0;
     
+    // A reserved word can't start an infix expression. Prevents us from
+    // parsing a keyword as an identifier.
+    if (isReserved(current())) return 0;
+    
     // If we have a prefix parser for this token's name, then that takes
-    // precedence. Prevents us from parsing a reserved word as an identifier.
-    if (mPrefixParsers.isReserved(current().getString())) {
-      return 0;
-    }
+    // precedence. Prevents us from parsing a keyword as an identifier.
+    if (mPrefixParsers.isReserved(current().getString())) return 0;
 
     InfixParser parser = mInfixParsers.get(current());
     if (parser != null) {
@@ -260,6 +276,23 @@ public class MagpieParser extends Parser {
     return stickiness;
   }
 
+  /**
+   * Gets whether or not this token is a reserved word. Reserved words like
+   * "else" and "then" are claimed for special use by mixfix parsers, so can't
+   * be parsed on their own.
+   * 
+   * @param   token  The token to test
+   * @return         True if the token is a reserved name token.
+   */
+  private boolean isReserved(Token token) {
+    if ((token.getType() == TokenType.NAME) ||
+        (token.getType() == TokenType.OPERATOR)) {
+      return mReservedWords.contains(token.getString());
+    }
+    
+    return false;
+  }
+  
   private Pair<Expr, Token> parseBlock(boolean parseCatch, String keyword1,
       String keyword2, TokenType... endTokens) {
     if (match(TokenType.LINE)){
@@ -334,6 +367,7 @@ public class MagpieParser extends Parser {
       new ParserTable<PrefixParser>();
   private final ParserTable<InfixParser> mInfixParsers =
       new ParserTable<InfixParser>();
+  private final Set<String> mReservedWords = new HashSet<String>();
   
   // Counts the number of nested expression literals the parser is currently
   // within. Zero means the parser is not inside an expression literal at all

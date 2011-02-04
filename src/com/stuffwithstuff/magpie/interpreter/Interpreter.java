@@ -440,16 +440,24 @@ public class Interpreter {
     mScriptPaths.pop();
   }
   
-  public boolean isReservedWord(String word) {
-    return mParsers.containsKey(word);
+  public boolean isKeyword(String word) {
+    return mParsers.containsKey(word) || mReservedWords.contains(word);
   }
   
   public Map<String, PrefixParser> getParsers() {
     return mParsers;
   }
   
+  public Set<String> getReservedWords() {
+    return mReservedWords;
+  }
+  
   public void registerParser(String keyword, PrefixParser parser) {
     mParsers.put(keyword, parser);
+  }
+  
+  public void reserveWord(String name) {
+    mReservedWords.add(name);
   }
   
   public ClassObj createClass(String name) {
@@ -584,4 +592,5 @@ public class Interpreter {
   private final Stack<String> mScriptPaths = new Stack<String>();
   private final Map<String, PrefixParser> mParsers =
       new HashMap<String, PrefixParser>();
+  private final Set<String> mReservedWords = new HashSet<String>();
 }

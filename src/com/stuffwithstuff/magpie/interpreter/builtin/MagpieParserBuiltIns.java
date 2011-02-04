@@ -36,7 +36,7 @@ public class MagpieParserBuiltIns {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String keyword = arg.asString();
       
-      interpreter.registerParser(keyword, null);
+      interpreter.reserveWord(keyword);
       return interpreter.nothing();
     }
   }

@@ -68,7 +68,9 @@ public class Magpie {
       while (true) {
         ReplCharacterReader reader = new ReplCharacterReader();
         Lexer lexer = new Lexer("REPL", reader);
-        MagpieParser parser = new MagpieParser(lexer, interpreter.getParsers());
+        MagpieParser parser = new MagpieParser(lexer,
+            interpreter.getParsers(),
+            interpreter.getReservedWords());
         
         Expr expr = parser.parseExpression();
         
