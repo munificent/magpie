@@ -63,10 +63,7 @@ public final class Token {
       case ARROW: return "->";
       case CASE: return "case";
       case CATCH: return "catch";
-      case FN: return "fn";
-      case NOTHING: return "nothing";
       case THEN: return "then";
-      case THIS: return "this";
 
       case EOF: return "(eof)";
 

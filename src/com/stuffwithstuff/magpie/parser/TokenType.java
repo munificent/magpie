@@ -29,10 +29,7 @@ public enum TokenType {
   ARROW,
   CASE,
   CATCH,
-  FN,
-  NOTHING,
   THEN,
-  THIS,
   
   // spacing
   LINE,

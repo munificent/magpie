@@ -71,7 +71,9 @@ public class PatternParser {
   private static Pattern variable(MagpieParser parser) {
     // See if there is a binding for the pattern.
     String name = null;
-    if (parser.current().getType() == TokenType.NAME) {
+    // TODO(bob): Explicitly checking for nothing here is gross.
+    if ((parser.current().getType() == TokenType.NAME) &&
+        !parser.current().isKeyword("nothing")) {
       String token = parser.current().getString();
       if (token.equals("_") ||
           Character.isLowerCase(token.charAt(0))) {

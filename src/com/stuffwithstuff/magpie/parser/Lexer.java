@@ -302,10 +302,7 @@ public class Lexer {
     if (text.equals("case")) return new Token(position, TokenType.CASE);
     if (text.equals("catch")) return new Token(position, TokenType.CATCH);
     if (text.equals("false")) return new Token(position, TokenType.BOOL, false);
-    if (text.equals("fn")) return new Token(position, TokenType.FN);
-    if (text.equals("nothing")) return new Token(position, TokenType.NOTHING);
     if (text.equals("then")) return new Token(position, TokenType.THEN);
-    if (text.equals("this")) return new Token(position, TokenType.THIS);
     if (text.equals("true")) return new Token(position, TokenType.BOOL, true);
     if (text.equals("=")) return new Token(position, TokenType.EQUALS);
     if (text.equals("->")) return new Token(position, TokenType.ARROW);

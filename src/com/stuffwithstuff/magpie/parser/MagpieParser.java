@@ -15,17 +15,17 @@ public class MagpieParser extends Parser {
     super(lexer);
     
     // Register the built-in parsers.
-    mPrefixParsers.define(TokenType.BOOL, new SingleTokenParser());
-    mPrefixParsers.define(TokenType.INT, new SingleTokenParser());
-    mPrefixParsers.define(TokenType.NOTHING, new SingleTokenParser());
-    mPrefixParsers.define(TokenType.STRING, new SingleTokenParser());
-    mPrefixParsers.define(TokenType.THIS, new SingleTokenParser());
+    mPrefixParsers.define(TokenType.BOOL, new LiteralParser());
+    mPrefixParsers.define(TokenType.INT, new LiteralParser());
+    mPrefixParsers.define(TokenType.STRING, new LiteralParser());
     mPrefixParsers.define(TokenType.LEFT_PAREN, new ParenthesisPrefixParser());
     mPrefixParsers.define(TokenType.LEFT_BRACE, new BraceParser());
     mPrefixParsers.define(TokenType.BACKTICK, new BacktickParser());
-    mPrefixParsers.define(TokenType.FN, new FnParser());
     mPrefixParsers.define(TokenType.NAME, new MessagePrefixParser());
     mPrefixParsers.define(TokenType.FIELD, new FieldParser());
+    mPrefixParsers.define("fn", new FnParser());
+    mPrefixParsers.define("nothing", new NothingParser());
+    mPrefixParsers.define("this", new ThisParser());
 
     mInfixParsers.define(TokenType.LEFT_PAREN, new ParenthesisInfixParser());
     mInfixParsers.define(TokenType.NAME, new MessageInfixParser());

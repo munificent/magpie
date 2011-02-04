@@ -102,6 +102,9 @@ public class NiceReplCharacterReader implements CharacterReader {
         case NAME:
           if (mInterpreter.isReservedWord(token.getString())) {
             Term.set(ForeColor.CYAN);
+          } else if (token.isKeyword("this") || token.isKeyword("nothing")) {
+            // special identifiers
+            Term.set(ForeColor.LIGHT_BLUE);
           } else {
             Term.set(ForeColor.WHITE);
           }
@@ -129,18 +132,11 @@ public class NiceReplCharacterReader implements CharacterReader {
         case STRING:
           Term.set(Term.ForeColor.YELLOW);
           break;
-        
-        // special identifiers
-        case NOTHING:
-        case THIS:
-          Term.set(Term.ForeColor.LIGHT_BLUE);
-          break;
           
         // keywords
         case ARROW:
         case CASE:
         case CATCH:
-        case FN:
         case THEN:
           Term.set(Term.ForeColor.CYAN);
           break;
