@@ -6,21 +6,23 @@ class GetParser
         //
         //    get Bar foo Int = ... // defines a getter "foo" on class "Bar"
         //    get (a b) foo Int = ... // defines a getter "foo" on the result of "a b"
-        %var%("receiver", parseReceiver(parser))
-        %var%("name", parser consume(TokenType identifier) stringValue)
-        %var%("valueType", match parser lookAheadAny(TokenType equals, TokenType line)
-            case true then { Dynamic }
-            else parser parseTypeExpression()
-        end)
+        var receiver = parseReceiver(parser)
+        var name = parser consume(TokenType identifier) stringValue
+        var valueType =
+            match parser lookAheadAny(TokenType equals, TokenType line)
+                case true then { Dynamic }
+                else parser parseTypeExpression()
+            end
+        end
 
-        %var%("type", FunctionTypeExpression new(
+        var type = FunctionTypeExpression new(
             typeParams: %unsafecast%(List(String, Expression), Array of()),
             pattern:    ValuePattern new({ nothing }),
-            returnType: valueType))
+            returnType: valueType)
 
         parser consume(TokenType equals)
-        %var%("body", parser parseEndBlock())
-        %var%("function", FunctionExpression new(functionType: type, body: body))
+        var body = parser parseEndBlock()
+        var function = FunctionExpression new(functionType: type, body: body)
         { `receiver defineGetter(`name, `function ) }
     end
 end

@@ -2,8 +2,10 @@ class AndParser
     def parse(parser MagpieParser, left Expression, token Token -> Expression)
         // Ignore a newline after "and".
         parser matchToken(TokenType line)
-        %var%("right", parser parseExpression(stickiness))
+        var right = parser parseExpression(stickiness)
         { do
+            // TODO(bob): Need to figure out why using a real var expression
+            // barfs here.
             %var%("temp__", `left)
             match temp__ true?
                 case true then `right

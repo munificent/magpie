@@ -3,12 +3,12 @@ class UnsafeCastParser
     def parse(parser MagpieParser, token Token -> Expression)
         // Parse the type.
         parser consume(TokenType leftBracket)
-        %var%("type", parser parseTypeExpression())
+        var type = parser parseTypeExpression()
         parser consume(TokenType rightBracket)
 
         // Parse the value.
         parser consume(TokenType leftParen)
-        %var%("value", parser parseExpression())
+        var value = parser parseExpression()
         parser consume(TokenType rightParen)
 
         { %unsafecast%(`type, `value) }

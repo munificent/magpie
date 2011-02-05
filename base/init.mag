@@ -9,12 +9,13 @@ import("true.mag")
 import("syntax/Token.mag")
 import("syntax/patterns.mag")
 
-// Register the keyword parsers. Do this here so that the full Magpie syntax is
-// available when defining the rest of the stuff.
+// Define the parsers for the full Magpie syntax. Do these as early as possible
+// since it's a pain to not have them. These are ordered roughly in order of
+// what's most useful to have.
 import("syntax/parsing.mag")
+import("syntax/VarParser.mag")
 import("syntax/AndParser.mag")
 import("syntax/OrParser.mag")
-
 import("syntax/BreakParser.mag")
 import("syntax/ClassParser.mag")
 import("syntax/DefParser.mag")
@@ -23,7 +24,11 @@ import("syntax/IfParser.mag")
 import("syntax/ReturnParser.mag")
 import("syntax/TypeofParser.mag")
 import("syntax/UnsafeCastParser.mag")
-import("syntax/VarParser.mag")
+
+// Need these so that we have == available as early as possible. Match
+// expressions use that to evaluate, and some of the parsers use those, so we
+// will need it to parse some files.
+import("operators.mag")
 
 // Define the interface classes. Need to do this relatively early so that
 // subsequent files can define interface types.
@@ -40,7 +45,6 @@ import("Record.mag")
 import("String.mag")
 import("Tuple.mag")
 import("Type.mag")
-import("operators.mag")
 import("OrType.mag")
 import("Error.mag")
 import("Object.mag")

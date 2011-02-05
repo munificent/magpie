@@ -2,7 +2,7 @@ class OrParser
     def parse(parser MagpieParser, left Expression, token Token -> Expression)
         // Ignore a newline after "or".
         parser matchToken(TokenType line)
-        %var%("right", parser parseExpression(stickiness))
+        var right = parser parseExpression(stickiness)
         { do
             %var%("temp__", `left)
             match temp__ true?

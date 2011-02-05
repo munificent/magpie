@@ -2,24 +2,25 @@
 class IfParser
     def parse(parser MagpieParser, token Token -> Expression)
         // Parse the condition.
-        %var%("condition", parser parseBlock("then") _0)
+        var condition = parser parseBlock("then") _0
 
         // Parse the then body.
         parser consume("then")
-        %var%("thenParse", parser parseBlock("else", "end"))
-        %var%("thenExpr", thenParse _0)
+        var thenParse = parser parseBlock("else", "end")
+        var thenExpr = thenParse _0
 
         // Parse the else body.
-        %var%("consumedEnd?",
+        var consumedEnd? =
             Reflect same?(thenParse _1, nothing) not and
-            %unsafecast%(Token, thenParse _1) keyword?("end"))
+            %unsafecast%(Token, thenParse _1) keyword?("end")
+        end
 
-        %var%("elseExpr",
+        var elseExpr =
             match consumedEnd? not and parser matchKeyword("else")
                 case true then parser parseEndBlock()
                 else { nothing }
             end
-        )
+        end
 
         {
             match `condition true?
