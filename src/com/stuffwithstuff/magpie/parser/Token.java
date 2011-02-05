@@ -60,8 +60,6 @@ public final class Token {
       case DOUBLE: return Double.toString(getDouble());
       case STRING: return "\"" + getString() + "\"";
 
-      case ARROW: return "->";
-
       case EOF: return "(eof)";
 
       default: return "(unknown token?!)";

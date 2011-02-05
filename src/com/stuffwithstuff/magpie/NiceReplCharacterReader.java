@@ -133,11 +133,6 @@ public class NiceReplCharacterReader implements CharacterReader {
           Term.set(Term.ForeColor.YELLOW);
           break;
           
-        // keywords
-        case ARROW:
-          Term.set(Term.ForeColor.CYAN);
-          break;
-          
         default:
           Term.restoreColor();
       }

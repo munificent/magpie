@@ -62,7 +62,8 @@ public abstract class Parser {
       
       // TODO(bob): Kinda gross. If we're looking for a NAME, we need to make
       // sure that it is *not* a claimed keyword.
-      if ((types[i] == TokenType.NAME) && isKeyword(lookAhead(i).getString())) {
+      if (((types[i] == TokenType.NAME) || (types[i] == TokenType.OPERATOR)) &&
+          isKeyword(lookAhead(i).getString())) {
         return false;
       }
     }
@@ -131,7 +132,8 @@ public abstract class Parser {
   public boolean lookAhead(String... keywords) {
     // make sure all of the types match before we start consuming
     for (int i = 0; i < keywords.length; i++) {
-      if (lookAhead(i).getType() != TokenType.NAME) return false;
+      if ((lookAhead(i).getType() != TokenType.NAME) &&
+          (lookAhead(i).getType() != TokenType.OPERATOR)) return false;
       if (!lookAhead(i).getString().equals(keywords[i])) return false;
     }
 

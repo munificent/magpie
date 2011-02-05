@@ -50,6 +50,7 @@ public class MagpieParser extends Parser {
     mPrefixParsers.define("extend", new ExtendParser());
     mPrefixParsers.define("interface", new InterfaceParser());
     
+    mReservedWords.add("->");
     mReservedWords.add("case");
     mReservedWords.add("catch");
     mReservedWords.add("then");
@@ -194,7 +195,7 @@ public class MagpieParser extends Parser {
     
     // Parse the parameter pattern, if any.
     Pattern pattern = null;
-    if (!lookAheadAny(TokenType.ARROW, TokenType.RIGHT_PAREN)) {
+    if (!lookAhead("->") && !lookAhead(TokenType.RIGHT_PAREN)) {
       pattern = PatternParser.parse(this);
     } else {
       // No pattern, so expect nothing.
@@ -207,7 +208,10 @@ public class MagpieParser extends Parser {
       // No return type, so infer dynamic.
       returnType = Expr.name("Dynamic");
     } else {
-      consume(TokenType.ARROW);
+      consume("->");
+      
+      // Ignore a newline after the arrow.
+      match(TokenType.LINE);
       
       if (lookAhead(TokenType.RIGHT_PAREN)) {
         // An arrow, but no return type, so infer nothing.

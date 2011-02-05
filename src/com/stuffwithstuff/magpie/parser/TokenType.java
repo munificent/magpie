@@ -25,9 +25,6 @@ public enum TokenType {
   DOUBLE,
   STRING,
   
-  // keywords
-  ARROW,
-  
   // spacing
   LINE,
   EOF

@@ -34,7 +34,6 @@ public class Lexer {
     case DOT:
     case OPERATOR:
     case FIELD:
-    case ARROW:
     case LEFT_PAREN:
     case LEFT_BRACKET:
     case LEFT_BRACE:
@@ -302,7 +301,6 @@ public class Lexer {
     if (text.equals("false")) return new Token(position, TokenType.BOOL, false);
     if (text.equals("true")) return new Token(position, TokenType.BOOL, true);
     if (text.equals("=")) return new Token(position, TokenType.EQUALS);
-    if (text.equals("->")) return new Token(position, TokenType.ARROW);
     
     return new Token(position, type, text);
   }
