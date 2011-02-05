@@ -11,7 +11,9 @@ import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.util.Pair;
 
 public class MagpieParser extends Parser {  
-  public MagpieParser(Lexer lexer, Map<String, PrefixParser> parsers,
+  public MagpieParser(Lexer lexer,
+      Map<String, PrefixParser> prefixParsers,
+      Map<String, InfixParser> infixParsers,
       Set<String> reservedWords) {
     super(lexer);
     
@@ -54,12 +56,18 @@ public class MagpieParser extends Parser {
     mReservedWords.add("then");
     
     // Register the user-defined parsers.
-    if (parsers != null) {
-      for (Entry<String, PrefixParser> parser : parsers.entrySet()) {
+    if (prefixParsers != null) {
+      for (Entry<String, PrefixParser> parser : prefixParsers.entrySet()) {
         mPrefixParsers.define(parser.getKey(), parser.getValue());
       }
     }
-    
+
+    if (infixParsers != null) {
+      for (Entry<String, InfixParser> parser : infixParsers.entrySet()) {
+        mInfixParsers.define(parser.getKey(), parser.getValue());
+      }
+    }
+
     // Register the user-defined reserved words.
     if (reservedWords != null) {
       mReservedWords.addAll(reservedWords);
@@ -67,7 +75,7 @@ public class MagpieParser extends Parser {
   }
   
   public MagpieParser(Lexer lexer) {
-    this(lexer, null, null);
+    this(lexer, null, null, null);
   }
   
   public List<Expr> parse() {

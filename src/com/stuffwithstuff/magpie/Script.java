@@ -42,9 +42,7 @@ public class Script {
     interpreter.pushScriptPath(mPath);
     try {
       Lexer lexer = new Lexer(mPath, new StringCharacterReader(mText));
-      MagpieParser parser = new MagpieParser(lexer,
-          interpreter.getParsers(),
-          interpreter.getReservedWords());
+      MagpieParser parser = interpreter.createParser(lexer);
   
       interpreter.load(parser.parse());
   

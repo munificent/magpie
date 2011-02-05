@@ -7,8 +7,10 @@ import com.stuffwithstuff.magpie.interpreter.ExprConverter;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.PatternConverter;
+import com.stuffwithstuff.magpie.parser.InfixParser;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
 import com.stuffwithstuff.magpie.parser.PatternParser;
+import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.parser.PrefixParser;
 import com.stuffwithstuff.magpie.parser.Token;
 import com.stuffwithstuff.magpie.parser.TokenType;
@@ -26,6 +28,19 @@ public class MagpieParserBuiltIns {
       
       interpreter.registerParser(keyword,
           new MagpiePrefixParser(interpreter, parser));
+      return interpreter.nothing();
+    }
+  }
+  
+  @Shared
+  @Signature("registerInfixParser(keyword String, parser PrefixParser ->)")
+  public static class RegisterInfixParser implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      String keyword = arg.getTupleField(0).asString();
+      Obj parser = arg.getTupleField(1);
+      
+      interpreter.registerParser(keyword,
+          new MagpieInfixParser(interpreter, parser));
       return interpreter.nothing();
     }
   }
@@ -340,6 +355,40 @@ public class MagpieParserBuiltIns {
       
       // Marshall it back to Java format.
       return ExprConverter.convert(mInterpreter, expr);
+    }
+    
+    private Interpreter mInterpreter;
+    private Obj mParser;
+  }
+  
+  private static class MagpieInfixParser extends InfixParser {
+    public MagpieInfixParser(Interpreter interpreter, Obj parser) {
+      mInterpreter = interpreter;
+      mParser = parser;
+    }
+    
+    @Override
+    public Expr parse(MagpieParser parser, Expr left, Token token) {
+      // Wrap the Java parser in a Magpie one.
+      Obj parserObj = mInterpreter.instantiate(
+          mInterpreter.getMagpieParserClass(), parser);
+      Obj exprObj = ExprConverter.convert(mInterpreter, left,
+          mInterpreter.createTopLevelContext());
+      Obj tokenObj = convertToken(mInterpreter, token);
+      Obj arg = mInterpreter.createTuple(parserObj, exprObj, tokenObj);
+      
+      // Let the Magpie code do the parsing.
+      Obj expr = mInterpreter.invokeMethod(mParser, "parse", arg);
+      
+      // Marshall it back to Java format.
+      return ExprConverter.convert(mInterpreter, expr);
+    }
+    
+    @Override
+    public int getStickiness() {
+      // Ask the Magpie object.
+      Obj stickiness = mInterpreter.getMember(Position.none(), mParser, "stickiness");
+      return stickiness.asInt();
     }
     
     private Interpreter mInterpreter;
