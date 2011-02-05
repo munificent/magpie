@@ -1,0 +1,18 @@
+class AndParser
+    def parse(parser MagpieParser, left Expression, token Token -> Expression)
+        // Ignore a newline after "and".
+        parser matchToken(TokenType line)
+        %var%("right", parser parseExpression(stickiness))
+        { do
+            %var%("temp__", `left)
+            match temp__ true?
+                case true then `right
+                else temp__
+            end
+        end }
+    end
+
+    get stickiness Int = 60
+end
+
+MagpieParser registerInfixParser("and", AndParser new())

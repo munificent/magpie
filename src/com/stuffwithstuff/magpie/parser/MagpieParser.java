@@ -8,6 +8,7 @@ import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
 import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
+import com.stuffwithstuff.magpie.util.Expect;
 import com.stuffwithstuff.magpie.util.Pair;
 
 public class MagpieParser extends Parser {  
@@ -35,8 +36,6 @@ public class MagpieParser extends Parser {
     mInfixParsers.define(TokenType.LEFT_BRACKET, new BracketParser());
     mInfixParsers.define(TokenType.OPERATOR, new OperatorParser());
     mInfixParsers.define("with", new WithParser());
-    mInfixParsers.define("and", new ConjunctionParser());
-    mInfixParsers.define("or", new ConjunctionParser());
     mInfixParsers.define(TokenType.COMMA, new CommaParser());
     mInfixParsers.define(TokenType.EQUALS, new EqualsParser());
 
@@ -98,6 +97,7 @@ public class MagpieParser extends Parser {
     // http://javascript.crockford.com/tdop/tdop.html
     Token token = consume();
     PrefixParser prefix = mPrefixParsers.get(token);
+    Expect.notNull(prefix);
     Expr left = prefix.parse(this, token);
     
     while (stickiness < getStickiness()) {
@@ -278,7 +278,8 @@ public class MagpieParser extends Parser {
     
     // If we have a prefix parser for this token's name, then that takes
     // precedence. Prevents us from parsing a keyword as an identifier.
-    if (mPrefixParsers.isReserved(current().getString())) return 0;
+    if ((current().getValue() instanceof String) &&
+        mPrefixParsers.isReserved(current().getString())) return 0;
 
     InfixParser parser = mInfixParsers.get(current());
     if (parser != null) {

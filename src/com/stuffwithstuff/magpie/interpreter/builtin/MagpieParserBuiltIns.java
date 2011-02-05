@@ -133,6 +133,16 @@ public class MagpieParserBuiltIns {
     }
   }
   
+  @Signature("matchToken(token TokenType -> Bool)")
+  public static class MatchToken implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      MagpieParser parser = (MagpieParser) thisObj.getValue();
+      
+      TokenType tokenType = convertType(interpreter, arg);
+      return interpreter.createBool(parser.match(tokenType));
+    }
+  }
+  
   @Signature("parseBlock(keywords -> (Expression, Token | Nothing))")
   public static class ParseBlock implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
@@ -171,12 +181,17 @@ public class MagpieParserBuiltIns {
     }
   }
   
-  @Signature("parseExpression(-> Expression)")
+  @Signature("parseExpression(stickiness Int | Nothing -> Expression)")
   public static class ParseExpression implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       MagpieParser parser = (MagpieParser) thisObj.getValue();
       
-      Expr expr = parser.parseExpression();
+      int stickiness = 0;
+      if (arg.getValue() instanceof Integer) {
+        stickiness = arg.asInt();
+      }
+      
+      Expr expr = parser.parseExpression(stickiness);
       
       return ExprConverter.convert(interpreter, expr, 
           interpreter.createTopLevelContext());
