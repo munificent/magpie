@@ -1,6 +1,6 @@
 // Keyword parser for "unsafecast" expressions.
 class UnsafeCastParser
-    def parse(parser MagpieParser -> Expression)
+    def parse(parser MagpieParser, token Token -> Expression)
         // Parse the type.
         parser consume(TokenType leftBracket)
         %var%("type", parser parseTypeExpression())
@@ -15,4 +15,4 @@ class UnsafeCastParser
     end
 end
 
-MagpieParser registerParseword("unsafecast", UnsafeCastParser new())
+MagpieParser registerPrefixParser("unsafecast", UnsafeCastParser new())

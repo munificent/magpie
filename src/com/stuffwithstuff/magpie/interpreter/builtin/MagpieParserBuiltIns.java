@@ -18,14 +18,14 @@ import com.stuffwithstuff.magpie.util.Pair;
 
 public class MagpieParserBuiltIns {
   @Shared
-  @Signature("registerParseword(keyword String, parser KeywordParser ->)")
-  public static class RegisterParseword implements BuiltInCallable {
+  @Signature("registerPrefixParser(keyword String, parser PrefixParser ->)")
+  public static class RegisterPrefixParser implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String keyword = arg.getTupleField(0).asString();
       Obj parser = arg.getTupleField(1);
       
       interpreter.registerParser(keyword,
-          new MagpieTokenParser(interpreter, parser));
+          new MagpiePrefixParser(interpreter, parser));
       return interpreter.nothing();
     }
   }
@@ -321,26 +321,22 @@ public class MagpieParserBuiltIns {
     return tokenType;
   }
   
-  private static class MagpieTokenParser extends PrefixParser {
-    public MagpieTokenParser(Interpreter interpreter, Obj parser) {
+  private static class MagpiePrefixParser extends PrefixParser {
+    public MagpiePrefixParser(Interpreter interpreter, Obj parser) {
       mInterpreter = interpreter;
       mParser = parser;
     }
     
     @Override
     public Expr parse(MagpieParser parser, Token token) {
-      // TODO(bob): Pass Token in.
-      // Parser is assumed to implement:
-      // interface KeywordParser
-      //     def parse(parser MagpieParser -> Expression)
-      // end
-
       // Wrap the Java parser in a Magpie one.
       Obj parserObj = mInterpreter.instantiate(
           mInterpreter.getMagpieParserClass(), parser);
+      Obj tokenObj = convertToken(mInterpreter, token);
+      Obj arg = mInterpreter.createTuple(parserObj, tokenObj);
       
       // Let the Magpie code do the parsing.
-      Obj expr = mInterpreter.invokeMethod(mParser, "parse", parserObj);
+      Obj expr = mInterpreter.invokeMethod(mParser, "parse", arg);
       
       // Marshall it back to Java format.
       return ExprConverter.convert(mInterpreter, expr);

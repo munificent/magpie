@@ -1,6 +1,6 @@
 // Keyword parser for "if" expressions.
 class IfParser
-    def parse(parser MagpieParser -> Expression)
+    def parse(parser MagpieParser, token Token -> Expression)
         // Parse the condition.
         %var%("condition", parser parseBlock("then") _0)
 
@@ -30,7 +30,7 @@ class IfParser
     end
 end
 
-MagpieParser registerParseword("if", IfParser new())
+MagpieParser registerPrefixParser("if", IfParser new())
 MagpieParser reserveWord("else")
 
 // TODO(bob): Put this somewhere appropriate...

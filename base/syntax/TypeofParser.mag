@@ -1,8 +1,8 @@
 // Keyword parser for "typeof" expressions.
 class TypeofParser
-    def parse(parser MagpieParser -> Expression)
+    def parse(parser MagpieParser, token Token -> Expression)
         TypeofExpression new(body: parser parseEndBlock())
     end
 end
 
-MagpieParser registerParseword("typeof", TypeofParser new())
+MagpieParser registerPrefixParser("typeof", TypeofParser new())

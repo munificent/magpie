@@ -1,3 +1,0 @@
-interface KeywordParser
-    def parse(parser MagpieParser -> Expression)
-end

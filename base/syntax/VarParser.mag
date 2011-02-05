@@ -1,6 +1,6 @@
 // Keyword parser for "var" expressions.
 class VarParser
-    def parse(parser MagpieParser -> Expression)
+    def parse(parser MagpieParser, token Token -> Expression)
         %var%("pattern", parser parsePattern())
         parser consume(TokenType equals)
         %var%("value", parser parseEndBlock())
@@ -9,4 +9,4 @@ class VarParser
     end
 end
 
-MagpieParser registerParseword("var", VarParser new())
+MagpieParser registerPrefixParser("var", VarParser new())

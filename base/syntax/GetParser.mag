@@ -1,6 +1,6 @@
 // Keyword parser for standalone "get" expressions.
 class GetParser
-    def parse(parser MagpieParser -> Expression)
+    def parse(parser MagpieParser, token Token -> Expression)
         // Outside of a class expression (which handles "get") directly, a get can
         // have a couple of forms:
         //
@@ -25,4 +25,4 @@ class GetParser
     end
 end
 
-MagpieParser registerParseword("get", GetParser new())
+MagpieParser registerPrefixParser("get", GetParser new())

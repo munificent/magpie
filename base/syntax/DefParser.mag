@@ -5,7 +5,7 @@
 //    def Bar foo(a) ... // defines a method "foo" on class "Bar"
 //    def (a b) foo(a) ... // defines a method "foo" on the result of "a b"
 class DefParser
-    def parse(parser MagpieParser -> Expression)
+    def parse(parser MagpieParser, token Token -> Expression)
         match parser lookAhead(TokenType identifier, TokenType leftParen) or
             parser lookAhead(TokenType identifier, TokenType leftBracket) or
             parser lookAhead(TokenType operator, TokenType leftParen) or
@@ -31,7 +31,7 @@ class DefParser
     end
 end
 
-MagpieParser registerParseword("def", DefParser new())
+MagpieParser registerPrefixParser("def", DefParser new())
 // TODO(bob): Not sure why this is registering "shared" but the old Java one
 // did.
-MagpieParser registerParseword("shared", DefParser new())
+MagpieParser registerPrefixParser("shared", DefParser new())

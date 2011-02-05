@@ -1,8 +1,8 @@
 // Keyword parser for "break" expressions.
 class BreakParser
-    def parse(parser MagpieParser -> Expression)
+    def parse(parser MagpieParser, token Token -> Expression)
         BreakExpression new()
     end
 end
 
-MagpieParser registerParseword("break", BreakParser new())
+MagpieParser registerPrefixParser("break", BreakParser new())
