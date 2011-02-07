@@ -22,7 +22,12 @@ class GetParser
 
         parser consume(TokenType equals)
         var body = parser parseEndBlock()
-        var function = FunctionExpression new(functionType: type, body: body)
+        // TODO(bob): Get position from Token.
+        var function = FunctionExpression new(
+            position: Position new(file: "see GetParser.mag",
+                startLine: -1, startCol: -1, endLine: -1, endCol: -1),
+            functionType: type,
+            body: body)
         { `receiver defineGetter(`name, `function ) }
     end
 end

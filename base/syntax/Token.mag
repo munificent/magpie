@@ -9,6 +9,7 @@ Token defineGetter("string", fn(-> String) tokenType ~~ value)
 Token defineGetter("boolValue", fn(-> Bool) %unsafecast%(Bool, value))
 Token defineGetter("intValue", fn(-> Int) %unsafecast%(Int, value))
 Token defineGetter("stringValue", fn(-> String) %unsafecast%(String, value))
+Token declareField("position", false, { Position })
 Token declareField("tokenType", false, { TokenType })
 Token declareField("value", false, { Bool | Int | Nothing | String })
 

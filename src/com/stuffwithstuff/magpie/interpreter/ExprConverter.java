@@ -83,8 +83,20 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     throw new NotImplementedException(
         "Other expression types not implemented yet!");
   }
+  
+  private static Position convertPosition(Interpreter interpreter, Obj expr) {
+    Obj position = expr.getField("position");
+    Expect.notNull(position);
+    String file   = position.getField("file").asString();
+    int startLine = position.getField("startLine").asInt();
+    int startCol  = position.getField("startCol").asInt();
+    int endLine   = position.getField("endLine").asInt();
+    int endCol    = position.getField("endCol").asInt();
+    return new Position(file, startLine, startCol, endLine, endCol);
+  }
 
   private static Expr convertAssignExpr(Interpreter interpreter, Obj expr) {
+    Position position = convertPosition(interpreter, expr);
     Obj receiverObj = expr.getField("receiver");
     Expr receiver;
     if (receiverObj == interpreter.nothing()) {
@@ -94,7 +106,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     }
     String name = expr.getField("name").asString();
     Expr value = convert(interpreter, expr.getField("value"));
-    return Expr.assign(Position.none(), receiver, name, value);
+    return Expr.assign(position, receiver, name, value);
   }
   
   private static Expr convertBlockExpr(Interpreter interpreter, Obj expr) {
@@ -111,12 +123,14 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   }
 
   private static Expr convertBoolExpr(Interpreter interpreter, Obj expr) {
+    Position position = convertPosition(interpreter, expr);
     boolean value = expr.getField("value").asBool();
-    return Expr.bool(value);
+    return Expr.bool(position, value);
   }
 
   private static Expr convertBreakExpr(Interpreter interpreter, Obj expr) {
-    return Expr.break_(Position.none());
+    Position position = convertPosition(interpreter, expr);
+    return Expr.break_(position);
   }
 
   private static Expr convertCallExpr(Interpreter interpreter, Obj expr) {
@@ -127,11 +141,12 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   }
 
   private static Expr convertFunctionExpr(Interpreter interpreter, Obj expr) {
+    Position position = convertPosition(interpreter, expr);
     Obj typeObj = expr.getField("functionType");
     FunctionType type = convertFunctionType(interpreter, typeObj);
     
     Expr body = convert(interpreter, expr.getField("body"));
-    return Expr.fn(Position.none(), type, body);
+    return Expr.fn(position, type, body);
   }
 
   private static FunctionType convertFunctionType(
@@ -153,8 +168,9 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   }
   
   private static Expr convertIntExpr(Interpreter interpreter, Obj expr) {
+    Position position = convertPosition(interpreter, expr);
     int value = expr.getField("value").asInt();
-    return Expr.int_(value);
+    return Expr.int_(position, value);
   }
   
   private static Expr convertLoopExpr(Interpreter interpreter, Obj expr) {
@@ -188,7 +204,8 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   }
   
   private static Expr convertNothingExpr(Interpreter interpreter, Obj expr) {
-    return Expr.nothing();
+    Position position = convertPosition(interpreter, expr);
+    return Expr.nothing(position);
   }
   
   private static Expr convertQuotationExpr(Interpreter interpreter, Obj expr) {
@@ -218,12 +235,14 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   }
   
   private static Expr convertStringExpr(Interpreter interpreter, Obj expr) {
+    Position position = convertPosition(interpreter, expr);
     String value = expr.getField("value").asString();
-    return Expr.string(value);
+    return Expr.string(position, value);
   }
   
   private static Expr convertThisExpr(Interpreter interpreter, Obj expr) {
-    return Expr.this_(Position.none());
+    Position position = convertPosition(interpreter, expr);
+    return Expr.this_(position);
   }
   
   private static Expr convertTupleExpr(Interpreter interpreter, Obj expr) {
@@ -263,6 +282,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   @Override
   public Obj visit(AssignExpr expr, Void dummy) {
     return construct("AssignExpression",
+        "position", expr.getPosition(),
         "receiver", expr.getReceiver(),
         "name",     expr.getName(),
         "value",    expr.getValue());
@@ -278,12 +298,14 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   @Override
   public Obj visit(BoolExpr expr, Void dummy) {
     return construct("BoolExpression",
-        "value", expr.getValue());
+        "position", expr.getPosition(),
+        "value",    expr.getValue());
   }
 
   @Override
   public Obj visit(BreakExpr expr, Void dummy) {
-    return construct("BreakExpression");
+    return construct("BreakExpression",
+        "position", expr.getPosition());
   }
 
   @Override
@@ -311,6 +333,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
         "returnType", type.getReturnType());
     
     return construct("FunctionExpression",
+        "position",     expr.getPosition(),
         "functionType", typeObj,
         "body",         expr.getBody());
   }
@@ -318,7 +341,8 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   @Override
   public Obj visit(IntExpr expr, Void dummy) {
     return construct("IntExpression",
-        "value", expr.getValue());
+        "position", expr.getPosition(),
+        "value",    expr.getValue());
   }
 
   @Override
@@ -350,7 +374,8 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
 
   @Override
   public Obj visit(NothingExpr expr, Void dummy) {
-    return construct("NothingExpression");
+    return construct("NothingExpression",
+        "position", expr.getPosition());
   }
 
   @Override
@@ -387,12 +412,14 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   @Override
   public Obj visit(StringExpr expr, Void dummy) {
     return construct("StringExpression",
-        "value", expr.getValue());
+        "position", expr.getPosition(),
+        "value",    expr.getValue());
   }
 
   @Override
   public Obj visit(ThisExpr expr, Void dummy) {
-    return construct("ThisExpression");
+    return construct("ThisExpression",
+        "position", expr.getPosition());
   }
 
   @Override
@@ -415,13 +442,20 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     // If the unquoted value is a primitive object, automatically promote it to
     // a corresponding literal.
     if (value.getClassObj() == mInterpreter.getBoolClass()) {
-      value = construct("BoolExpression", "value", value);
+      value = construct("BoolExpression",
+          "position", expr.getPosition(),
+          "value",    value);
     } else if (value.getClassObj() == mInterpreter.getIntClass()) {
-      value = construct("IntExpression", "value", value);
+      value = construct("IntExpression",
+          "position", expr.getPosition(),
+          "value",    value);
     } else if (value.getClassObj() == mInterpreter.getStringClass()) {
-      value = construct("StringExpression", "value", value);
+      value = construct("StringExpression",
+          "position", expr.getPosition(),
+          "value",    value);
     } else if (value.getClassObj() == mInterpreter.getNothingClass()) {
-      value = construct("NothingExpression");
+      value = construct("NothingExpression",
+          "position", expr.getPosition());
     }
     
     return value;
@@ -459,6 +493,8 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
         value = mInterpreter.createString((String) rawValue);
       } else if (rawValue instanceof Expr) {
         value = convert((Expr) rawValue);
+      } else if (rawValue instanceof Position) {
+        value = convert((Position) rawValue);
       } else if (rawValue instanceof Pattern) {
         value = PatternConverter.convert(
             (Pattern) rawValue, mInterpreter, mContext);
@@ -476,6 +512,15 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   private ExprConverter(Interpreter interpreter, EvalContext context) {
     mInterpreter = interpreter;
     mContext = context;
+  }
+  
+  private Obj convert(Position position) {
+    return construct("Position",
+        "file",      position.getSourceFile(),
+        "startLine", position.getStartLine(),
+        "startCol",  position.getStartCol(),
+        "endLine",   position.getEndLine(),
+        "endCol",    position.getEndCol());
   }
   
   private Obj convert(Expr expr) {

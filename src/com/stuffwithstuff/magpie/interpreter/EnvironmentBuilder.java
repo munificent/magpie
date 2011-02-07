@@ -12,7 +12,15 @@ public class EnvironmentBuilder {
     // Define the core AST classes. We set these up here instead of in base
     // because they will need to be available immediately by the parser so that
     // quotations can be converted to Magpie.
+    newClass("Position")
+        .field("file",       name("String"))
+        .field("startLine",  name("Int"))
+        .field("startCol",   name("Int"))
+        .field("endLine",    name("Int"))
+        .field("endCol",     name("Int"));
+
     newClass("AssignExpression")
+        .field("position", name("Position"))
         .field("receiver", or(name("Expression"), name("Nothing")))
         .field("name",     name("String"))
         .field("value",    name("Expression"));
@@ -22,9 +30,11 @@ public class EnvironmentBuilder {
         .field("catchExpression", or(name("Expression"), name("Nothing")));
     
     newClass("BoolExpression")
+        .field("position", name("Position"))
         .field("value", name("Bool"));
 
-    newClass("BreakExpression");
+    newClass("BreakExpression")
+        .field("position", name("Position"));
 
     newClass("CallExpression")
         .field("target",   name("Expression"))
@@ -37,6 +47,7 @@ public class EnvironmentBuilder {
         .field("returnType", name("Expression"));
     
     newClass("FunctionExpression")
+        .field("position",     name("Position"))
         .field("functionType", name("FunctionTypeExpression"))
         .field("body",         name("Expression"));
 
@@ -47,7 +58,8 @@ public class EnvironmentBuilder {
         .field("elseArm",   name("Expression"));
 
     newClass("IntExpression")
-        .field("value", name("Int"));
+        .field("position", name("Position"))
+        .field("value",    name("Int"));
     
     newClass("LoopExpression")
         .field("body", name("Expression"));
@@ -64,7 +76,8 @@ public class EnvironmentBuilder {
         .field("receiver", or(name("Expression"), name("Nothing")))
         .field("name",     Expr.name("String"));
     
-    newClass("NothingExpression");
+    newClass("NothingExpression")
+        .field("position", name("Position"));
 
     newClass("QuotationExpression")
         .field("body", name("Expression"));
@@ -79,9 +92,11 @@ public class EnvironmentBuilder {
         .field("body", name("Expression"));
     
     newClass("StringExpression")
-        .field("value", name("String"));
+        .field("position", name("Position"))
+        .field("value",    name("String"));
 
-    newClass("ThisExpression");
+    newClass("ThisExpression")
+        .field("position", name("Position"));
 
     newClass("TupleExpression")
         .field("fields", list(name("Expression")));
