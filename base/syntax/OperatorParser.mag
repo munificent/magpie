@@ -24,13 +24,13 @@ class OperatorParser
 end
 
 // TODO(bob): Move into separate file.
-// Parses a declarative "defop" syntax for creating an infix operator. For
+// Parses a declarative "defoperator" syntax for creating an infix operator. For
 // example:
 //
-//   defop ~ 50 (left Stringable, right Strinable -> String)
+//   defoperator ~ 50 (left Stringable, right Strinable -> String)
 //       left string concatenate(right string)
 //   end
-class DefOpParser
+class DefOperatorParser
     def parse(parser MagpieParser, token Token -> Expression)
         var name = parser consume(TokenType identifier) stringValue
         var stickiness = parser consume(TokenType intLiteral) intValue
@@ -48,4 +48,4 @@ class DefOpParser
     end
 end
 
-MagpieParser registerPrefixParser("defop", DefOpParser new())
+MagpieParser registerPrefixParser("defoperator", DefOperatorParser new())
