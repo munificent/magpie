@@ -2,25 +2,7 @@
 // it only uses core syntax.
 
 class Token
-    shared def identifier(name String -> Token) Token new(TokenType identifier, name)
-    shared def field(name String -> Token) Token new(TokenType field, name)
-    shared def operator(name String -> Token) Token new(TokenType operator, name)
-    shared def boolLiteral(value Bool -> Token) Token new(TokenType boolLiteral, value)
-    shared def intLiteral(value Int -> Token) Token new(TokenType intLiteral, value)
-    shared def stringLiteral(value String -> Token) Token new(TokenType stringLiteral, value)
 end
-
-Reflect getClass(Token) defineGetter("leftParen",     fn(-> Token) Token new(TokenType leftParen))
-Reflect getClass(Token) defineGetter("rightParen",    fn(-> Token) Token new(TokenType rightParen))
-Reflect getClass(Token) defineGetter("leftBracket",   fn(-> Token) Token new(TokenType leftBracket))
-Reflect getClass(Token) defineGetter("rightBracket",  fn(-> Token) Token new(TokenType rightBracket))
-Reflect getClass(Token) defineGetter("leftBrace",     fn(-> Token) Token new(TokenType leftBrace))
-Reflect getClass(Token) defineGetter("rightBrace",    fn(-> Token) Token new(TokenType rightBrace))
-Reflect getClass(Token) defineGetter("comma",         fn(-> Token) Token new(TokenType comma))
-Reflect getClass(Token) defineGetter("dot",           fn(-> Token) Token new(TokenType dot))
-Reflect getClass(Token) defineGetter("equals",        fn(-> Token) Token new(TokenType equals))
-Reflect getClass(Token) defineGetter("line",          fn(-> Token) Token new(TokenType line))
-Reflect getClass(Token) defineGetter("eof",           fn(-> Token) Token new(TokenType eof))
 
 Token defineGetter("string", fn(-> String) tokenType ~~ value)
 
@@ -45,27 +27,33 @@ class TokenType
     shared def new(value Int, name String) construct(value: value, name: name)
 end
 
-Reflect getClass(TokenType) defineGetter("leftParen",     fn(-> TokenType) TokenType new(0, "leftParen"))
-Reflect getClass(TokenType) defineGetter("rightParen",    fn(-> TokenType) TokenType new(1, "rightParen"))
-Reflect getClass(TokenType) defineGetter("leftBracket",   fn(-> TokenType) TokenType new(2, "leftBracket"))
-Reflect getClass(TokenType) defineGetter("rightBracket",  fn(-> TokenType) TokenType new(3, "rightBracket"))
-Reflect getClass(TokenType) defineGetter("leftBrace",     fn(-> TokenType) TokenType new(4, "leftBrace"))
-Reflect getClass(TokenType) defineGetter("rightBrace",    fn(-> TokenType) TokenType new(5, "rightBrace"))
-Reflect getClass(TokenType) defineGetter("comma",         fn(-> TokenType) TokenType new(6, "comma"))
-Reflect getClass(TokenType) defineGetter("dot",           fn(-> TokenType) TokenType new(7, "dot"))
-Reflect getClass(TokenType) defineGetter("equals",        fn(-> TokenType) TokenType new(8, "equals"))
-Reflect getClass(TokenType) defineGetter("line",          fn(-> TokenType) TokenType new(9, "line"))
-// TODO(bob): Ideally, this token type would be called "name", but that collides
-// with the "name" getter on the class itself. if we move getting a class name
-// out of the class and into Reflect, we can change this to "name" here.
-Reflect getClass(TokenType) defineGetter("identifier",    fn(-> TokenType) TokenType new(10, "identifier"))
-Reflect getClass(TokenType) defineGetter("field",         fn(-> TokenType) TokenType new(11, "field"))
-Reflect getClass(TokenType) defineGetter("operator",      fn(-> TokenType) TokenType new(12, "operator"))
-Reflect getClass(TokenType) defineGetter("boolLiteral",   fn(-> TokenType) TokenType new(13, "boolLiteral"))
-Reflect getClass(TokenType) defineGetter("intLiteral",    fn(-> TokenType) TokenType new(14, "intLiteral"))
-Reflect getClass(TokenType) defineGetter("stringLiteral", fn(-> TokenType) TokenType new(15, "stringLiteral"))
-Reflect getClass(TokenType) defineGetter("eof",           fn(-> TokenType) TokenType new(16, "eof"))
-
 TokenType defineGetter("string", fn(-> String) name)
 TokenType declareField("value", false, { Int })
 TokenType declareField("name", false, { String })
+
+do
+    %var%("defToken", fn(name String, value Int)
+        Reflect getClass(TokenType) defineGetter(name,
+            fn(-> TokenType) TokenType new(value, name))
+    end)
+    defToken("leftParen",     0)
+    defToken("rightParen",    1)
+    defToken("leftBracket",   2)
+    defToken("rightBracket",  3)
+    defToken("leftBrace",     4)
+    defToken("rightBrace",    5)
+    defToken("comma",         6)
+    defToken("dot",           7)
+    defToken("equals",        8)
+    defToken("line",          9)
+    // TODO(bob): Ideally, this token type would be called "name", but that collides
+    // with the "name" getter on the class itself. if we move getting a class name
+    // out of the class and into Reflect, we can change this to "name" here.
+    defToken("identifier",    10)
+    defToken("field",         11)
+    defToken("operator",      12)
+    defToken("boolLiteral",   13)
+    defToken("intLiteral",    14)
+    defToken("stringLiteral", 15)
+    defToken("eof",           16)
+end
