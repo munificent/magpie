@@ -1,3 +1,6 @@
+// Parser for desugaring infix "or" operators to an appropriate match
+// expression. Note that this isn't using "defop" because "or" needs to
+// short-circuit, and a normal operator always evaluates both arguments.
 class OrParser
     def parse(parser MagpieParser, left Expression, token Token -> Expression)
         // Ignore a newline after "or".

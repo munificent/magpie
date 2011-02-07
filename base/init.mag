@@ -14,8 +14,12 @@ import("syntax/patterns.mag")
 // what's most useful to have.
 import("syntax/parsing.mag")
 import("syntax/VarParser.mag")
+
+import("syntax/OperatorParser.mag")
+
 import("syntax/AndParser.mag")
 import("syntax/OrParser.mag")
+
 import("syntax/BreakParser.mag")
 import("syntax/ClassParser.mag")
 import("syntax/DefParser.mag")

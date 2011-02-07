@@ -1,0 +1,51 @@
+// Generic class for parsing an infix operator with a given name and stickiness.
+// Simply desugars to a call a function with the same name:
+//
+//   // from:
+//   a +% b
+//   // to:
+//   +%(a, b)
+//
+// This class is not usually used directly. Instead, the "defop" syntax uses
+// this when it desugars.
+class OperatorParser
+    def parse(parser MagpieParser, left Expression, token Token -> Expression)
+        // Ignore a newline after "operator".
+        parser matchToken(TokenType line)
+
+        var right = parser parseExpression(stickiness)
+
+        var operator = MessageExpression new(receiver: nothing, name: name)
+        { `operator(`left, `right) }
+    end
+
+    var name           String
+    var stickiness     Int
+end
+
+// TODO(bob): Move into separate file.
+// Parses a declarative "defop" syntax for creating an infix operator. For
+// example:
+//
+//   defop ~ 50 (left Stringable, right Strinable -> String)
+//       left string concatenate(right string)
+//   end
+class DefOpParser
+    def parse(parser MagpieParser, token Token -> Expression)
+        var name = parser consume(TokenType identifier) stringValue
+        var stickiness = parser consume(TokenType intLiteral) intValue
+        var function = parser parseFunction()
+
+        var makeFn = VariableExpression new(
+            pattern: VariablePattern new(name, nothing),
+            value:   function)
+
+        {
+            `makeFn
+            MagpieParser registerInfixParser(`name,
+                OperatorParser new(name: `name, stickiness: `stickiness))
+        }
+    end
+end
+
+MagpieParser registerPrefixParser("defop", DefOpParser new())

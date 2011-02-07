@@ -5,12 +5,12 @@ specify("An 'and' expression") with
         (1 and 0) shouldBe(0)
         (1 and 2 and 0) shouldBe(0)
     end
-    
+
     it should("return the last argument if all are true") with
         (1 and 2 and 3) shouldBe(3)
         (1 and true) shouldBe(true)
     end
-    
+
     it should("short-circuit at the first false argument") with
         var a = TruthTest new(true)
         var b = TruthTest new(false)
@@ -20,7 +20,7 @@ specify("An 'and' expression") with
         b called shouldBe(true)
         c called shouldBe(false)
     end
-    
+
     it should("call 'true?' on the arguments to determine truth") with
         var left = TruthTest new(false)
         var right = TruthTest new(false)
@@ -28,7 +28,7 @@ specify("An 'and' expression") with
         left called shouldBe(true)
         right called shouldBe(false)
     end
-    
+
     it should("swallow a trailing newline") with
         true and
             true shouldBe(true)

@@ -1,3 +1,6 @@
+// Parser for desugaring infix "and" operators to an appropriate match
+// expression. Note that this isn't using "defop" because "and" needs to
+// short-circuit, and a normal operator always evaluates both arguments.
 class AndParser
     def parse(parser MagpieParser, left Expression, token Token -> Expression)
         // Ignore a newline after "and".
