@@ -3,8 +3,9 @@ package com.stuffwithstuff.magpie.interpreter.builtin;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
-import com.stuffwithstuff.magpie.interpreter.ExprConverter;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
+import com.stuffwithstuff.magpie.interpreter.JavaToMagpie;
+import com.stuffwithstuff.magpie.interpreter.MagpieToJava;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.PatternConverter;
 import com.stuffwithstuff.magpie.parser.InfixParser;
@@ -162,7 +163,7 @@ public class MagpieParserBuiltIns {
         result = parser.parseBlock(keyword);
       }
       
-      Obj expr = ExprConverter.convert(interpreter, result.getKey(), 
+      Obj expr = JavaToMagpie.convert(interpreter, result.getKey(), 
           interpreter.createTopLevelContext());
       Obj token = convertToken(interpreter, result.getValue());
       return interpreter.createTuple(expr, token);
@@ -176,7 +177,7 @@ public class MagpieParserBuiltIns {
       
       Expr expr = parser.parseEndBlock();
       
-      return ExprConverter.convert(interpreter, expr, 
+      return JavaToMagpie.convert(interpreter, expr, 
           interpreter.createTopLevelContext());
     }
   }
@@ -193,7 +194,7 @@ public class MagpieParserBuiltIns {
       
       Expr expr = parser.parseExpression(stickiness);
       
-      return ExprConverter.convert(interpreter, expr, 
+      return JavaToMagpie.convert(interpreter, expr, 
           interpreter.createTopLevelContext());
     }
   }
@@ -205,7 +206,7 @@ public class MagpieParserBuiltIns {
       
       Expr expr = parser.parseFunction();
       
-      return ExprConverter.convert(interpreter, expr, 
+      return JavaToMagpie.convert(interpreter, expr, 
           interpreter.createTopLevelContext());
     }
   }
@@ -229,7 +230,7 @@ public class MagpieParserBuiltIns {
       
       Expr expr = TypeParser.parse(parser);
       
-      return ExprConverter.convert(interpreter, expr, 
+      return JavaToMagpie.convert(interpreter, expr, 
           interpreter.createTopLevelContext());
     }
   }
@@ -369,7 +370,7 @@ public class MagpieParserBuiltIns {
       Obj expr = mInterpreter.invokeMethod(mParser, "parse", arg);
       
       // Marshall it back to Java format.
-      return ExprConverter.convert(mInterpreter, expr);
+      return MagpieToJava.convert(mInterpreter, expr);
     }
     
     private Interpreter mInterpreter;
@@ -387,7 +388,7 @@ public class MagpieParserBuiltIns {
       // Wrap the Java parser in a Magpie one.
       Obj parserObj = mInterpreter.instantiate(
           mInterpreter.getMagpieParserClass(), parser);
-      Obj exprObj = ExprConverter.convert(mInterpreter, left,
+      Obj exprObj = JavaToMagpie.convert(mInterpreter, left,
           mInterpreter.createTopLevelContext());
       Obj tokenObj = convertToken(mInterpreter, token);
       Obj arg = mInterpreter.createTuple(parserObj, exprObj, tokenObj);
@@ -396,7 +397,7 @@ public class MagpieParserBuiltIns {
       Obj expr = mInterpreter.invokeMethod(mParser, "parse", arg);
       
       // Marshall it back to Java format.
-      return ExprConverter.convert(mInterpreter, expr);
+      return MagpieToJava.convert(mInterpreter, expr);
     }
     
     @Override

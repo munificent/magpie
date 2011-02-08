@@ -197,7 +197,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(QuotationExpr expr, EvalContext context) {
-    return ExprConverter.convert(mInterpreter, expr.getBody(), context);
+    return JavaToMagpie.convert(mInterpreter, expr.getBody(), context);
   }
 
   @Override

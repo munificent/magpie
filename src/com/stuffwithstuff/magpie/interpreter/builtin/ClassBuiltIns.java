@@ -2,7 +2,7 @@ package com.stuffwithstuff.magpie.interpreter.builtin;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
-import com.stuffwithstuff.magpie.interpreter.ExprConverter;
+import com.stuffwithstuff.magpie.interpreter.MagpieToJava;
 import com.stuffwithstuff.magpie.interpreter.Field;
 import com.stuffwithstuff.magpie.interpreter.FnObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
@@ -15,7 +15,7 @@ public class ClassBuiltIns {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();
       boolean isDelegate = arg.getTupleField(1).asBool();
-      Expr type = ExprConverter.convert(interpreter, arg.getTupleField(2));
+      Expr type = MagpieToJava.convert(interpreter, arg.getTupleField(2));
       
       ClassObj classObj = thisObj.asClass();
       classObj.declareField(name, isDelegate, type);
@@ -48,7 +48,7 @@ public class ClassBuiltIns {
         isInitializer = true;
       } else {
         // Have a type annotation.
-        expr = ExprConverter.convert(interpreter, optionalType);
+        expr = MagpieToJava.convert(interpreter, optionalType);
         isInitializer = false;
       }
       

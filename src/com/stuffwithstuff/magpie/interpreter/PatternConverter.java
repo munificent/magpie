@@ -60,7 +60,7 @@ public class PatternConverter implements PatternVisitor<Obj, EvalContext> {
   private static Pattern convertValuePattern(Interpreter interpreter,
       Obj pattern) {
     Obj value = pattern.getField("value");
-    Expr expr = ExprConverter.convert(interpreter, value);
+    Expr expr = MagpieToJava.convert(interpreter, value);
     return new ValuePattern(expr);
   }
   
@@ -70,7 +70,7 @@ public class PatternConverter implements PatternVisitor<Obj, EvalContext> {
     Obj type = pattern.getField("typeExpr");
     Expr expr = null;
     if (type != interpreter.nothing()) {
-      expr = ExprConverter.convert(interpreter, type);
+      expr = MagpieToJava.convert(interpreter, type);
     }
     return new VariablePattern(name, expr);
   }
@@ -107,14 +107,14 @@ public class PatternConverter implements PatternVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(ValuePattern pattern, EvalContext context) {
-    Obj value = ExprConverter.convert(mInterpreter, pattern.getValue(), context);
+    Obj value = JavaToMagpie.convert(mInterpreter, pattern.getValue(), context);
     return mInterpreter.construct("ValuePattern", value);
   }
 
   @Override
   public Obj visit(VariablePattern pattern, EvalContext context) {
     Obj name = mInterpreter.createString(pattern.getName());
-    Obj type = ExprConverter.convert(mInterpreter, pattern.getType(), context);
+    Obj type = JavaToMagpie.convert(mInterpreter, pattern.getType(), context);
     return mInterpreter.construct("VariablePattern", name, type);
   }
 
