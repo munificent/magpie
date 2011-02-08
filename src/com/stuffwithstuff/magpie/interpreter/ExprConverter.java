@@ -174,11 +174,13 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   }
   
   private static Expr convertLoopExpr(Interpreter interpreter, Obj expr) {
+    Position position = convertPosition(interpreter, expr);
     Expr body = convert(interpreter, expr.getField("body"));
-    return Expr.loop(body.getPosition(), body);
+    return Expr.loop(position, body);
   }
   
   private static Expr convertMatchExpr(Interpreter interpreter, Obj expr) {
+    Position position = convertPosition(interpreter, expr);
     Expr value = convert(interpreter, expr.getField("value"));
     List<MatchCase> cases = new ArrayList<MatchCase>();
     for (Obj matchCase : expr.getField("cases").asArray()) {
@@ -188,7 +190,7 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
       cases.add(new MatchCase(pattern, body));
     }
     
-    return Expr.match(Position.none(), value, cases);
+    return Expr.match(position, value, cases);
   }
   
   private static Expr convertMessageExpr(Interpreter interpreter, Obj expr) {
@@ -209,11 +211,13 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   }
   
   private static Expr convertQuotationExpr(Interpreter interpreter, Obj expr) {
+    Position position = convertPosition(interpreter, expr);
     Expr body = convert(interpreter, expr.getField("body"));
-    return Expr.quote(Position.none(), body);
+    return Expr.quote(position, body);
   }
 
   private static Expr convertRecordExpr(Interpreter interpreter, Obj expr) {
+    Position position = convertPosition(interpreter, expr);
     List<Obj> fieldObjs = expr.getField("fields").asArray();
     List<Pair<String, Expr>> fields = new ArrayList<Pair<String, Expr>>();
     for (Obj field : fieldObjs) {
@@ -221,12 +225,13 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
       Expr value = convert(interpreter, field.getTupleField(1));
       fields.add(new Pair<String, Expr>(name, value));
     }
-    return Expr.record(Position.none(), fields);
+    return Expr.record(position, fields);
   }
 
   private static Expr convertReturnExpr(Interpreter interpreter, Obj expr) {
+    Position position = convertPosition(interpreter, expr);
     Expr value = convert(interpreter, expr.getField("value"));
-    return new ReturnExpr(Position.none(), value);
+    return new ReturnExpr(position, value);
   }
 
   private static Expr convertScopeExpr(Interpreter interpreter, Obj expr) {
@@ -252,21 +257,24 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   }
 
   private static Expr convertTypeofExpr(Interpreter interpreter, Obj expr) {
+    Position position = convertPosition(interpreter, expr);
     Expr body = convert(interpreter, expr.getField("body"));
-    return new TypeofExpr(Position.none(), body);
+    return new TypeofExpr(position, body);
   }
 
   private static Expr convertUnsafeCastExpr(Interpreter interpreter, Obj expr) {
+    Position position = convertPosition(interpreter, expr);
     Expr type = convert(interpreter, expr.getField("type"));
     Expr value = convert(interpreter, expr.getField("value"));
-    return new UnsafeCastExpr(Position.none(), type, value);
+    return new UnsafeCastExpr(position, type, value);
   }
   
   private static Expr convertVarExpr(Interpreter interpreter, Obj expr) {
+    Position position = convertPosition(interpreter, expr);
     Pattern pattern = PatternConverter.convert(interpreter,
         expr.getField("pattern"));
     Expr value = convert(interpreter, expr.getField("value"));
-    return Expr.var(Position.none(), pattern, value);
+    return Expr.var(position, pattern, value);
   }
   
   private static List<Expr> convertArray(Interpreter interpreter, Obj array) {
@@ -348,7 +356,8 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   @Override
   public Obj visit(LoopExpr expr, Void dummy) {
     return construct("LoopExpression",
-        "body", expr.getBody());
+        "position", expr.getPosition(),
+        "body",     expr.getBody());
   }
 
   @Override
@@ -361,8 +370,9 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     }
     
     return construct("MatchExpression",
-        "value", expr.getValue(),
-        "cases", mInterpreter.createArray(cases));
+        "position", expr.getPosition(),
+        "value",    expr.getValue(),
+        "cases",    mInterpreter.createArray(cases));
   }
 
   @Override
@@ -381,7 +391,8 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   @Override
   public Obj visit(QuotationExpr expr, Void dummy) {
     return construct("QuotationExpression",
-        "body", expr.getBody());
+        "position", expr.getPosition(),
+        "body",     expr.getBody());
   }
 
   @Override
@@ -394,13 +405,15 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
     }
 
     return construct("RecordExpression",
-        "fields", mInterpreter.createArray(fields));
+        "position", expr.getPosition(),
+        "fields",   mInterpreter.createArray(fields));
   }
 
   @Override
   public Obj visit(ReturnExpr expr, Void dummy) {
     return construct("ReturnExpression",
-        "value", expr.getValue());
+        "position", expr.getPosition(),
+        "value",    expr.getValue());
   }
 
   @Override
@@ -431,7 +444,8 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   @Override
   public Obj visit(TypeofExpr expr, Void dummy) {
     return construct("TypeofExpression",
-        "body", expr.getBody());
+        "position", expr.getPosition(),
+        "body",     expr.getBody());
   }
 
   @Override
@@ -464,15 +478,17 @@ public class ExprConverter implements ExprVisitor<Obj, Void> {
   @Override
   public Obj visit(UnsafeCastExpr expr, Void dummy) {
     return construct("UnsafeCastExpression",
-        "type",  expr.getType(),
-        "value", expr.getValue());
+        "position", expr.getPosition(),
+        "type",     expr.getType(),
+        "value",    expr.getValue());
   }
 
   @Override
   public Obj visit(VariableExpr expr, Void dummy) {
     return construct("VariableExpression",
-        "pattern", expr.getPattern(),
-        "value",   expr.getValue());
+        "position", expr.getPosition(),
+        "pattern",  expr.getPattern(),
+        "value",    expr.getValue());
   }
   
   private Obj construct(String className, Object... args) {

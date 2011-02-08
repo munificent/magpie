@@ -51,26 +51,22 @@ public class EnvironmentBuilder {
         .field("functionType", name("FunctionTypeExpression"))
         .field("body",         name("Expression"));
 
-    newClass("IfExpression")
-        .field("name",      or(name("String"), name("Nothing")))
-        .field("condition", name("Expression"))
-        .field("thenArm",   name("Expression"))
-        .field("elseArm",   name("Expression"));
-
     newClass("IntExpression")
         .field("position", name("Position"))
         .field("value",    name("Int"));
     
     newClass("LoopExpression")
-        .field("body", name("Expression"));
+        .field("position", name("Position"))
+        .field("body",     name("Expression"));
 
     newClass("MatchCase")
         .field("pattern", name("Pattern"))
         .field("body",    name("Expression"));
 
     newClass("MatchExpression")
-        .field("value", name("Expression"))
-        .field("cases", list(name("MatchCase")));
+        .field("position", name("Position"))
+        .field("value",    name("Expression"))
+        .field("cases",    list(name("MatchCase")));
 
     newClass("MessageExpression")
         .field("receiver", or(name("Expression"), name("Nothing")))
@@ -80,13 +76,16 @@ public class EnvironmentBuilder {
         .field("position", name("Position"));
 
     newClass("QuotationExpression")
-        .field("body", name("Expression"));
+        .field("position", name("Position"))
+        .field("body",     name("Expression"));
     
     newClass("RecordExpression")
-        .field("fields", list(name("String"), name("Expression")));
+        .field("position", name("Position"))
+        .field("fields",   list(name("String"), name("Expression")));
 
     newClass("ReturnExpression")
-        .field("value", name("Expression"));
+        .field("position", name("Position"))
+        .field("value",    name("Expression"));
     
     newClass("ScopeExpression")
         .field("body", name("Expression"));
@@ -102,15 +101,18 @@ public class EnvironmentBuilder {
         .field("fields", list(name("Expression")));
     
     newClass("TypeofExpression")
-        .field("body", name("Expression"));
+        .field("position", name("Position"))
+        .field("body",     name("Expression"));
 
     newClass("UnsafeCastExpression")
-        .field("type",  name("Expression"))
-        .field("value", name("Expression"));
+        .field("position", name("Position"))
+        .field("type",     name("Expression"))
+        .field("value",    name("Expression"));
 
     newClass("VariableExpression")
-        .field("pattern", name("Pattern"))
-        .field("value",   name("Expression"));
+        .field("position", name("Position"))
+        .field("pattern",  name("Pattern"))
+        .field("value",    name("Expression"));
   }
   
   private EnvironmentBuilder(Interpreter interpreter) {

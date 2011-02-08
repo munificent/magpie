@@ -1,7 +1,11 @@
 // Keyword parser for "typeof" expressions.
 class TypeofParser
     def parse(parser MagpieParser, token Token -> Expression)
-        TypeofExpression new(body: parser parseEndBlock())
+        // TODO(bob): Get position from token.
+        TypeofExpression new(
+            position: Position new(file: "see TypeofParser.mag",
+                startLine: -1, startCol: -1, endLine: -1, endCol: -1),
+            body: parser parseEndBlock())
     end
 end
 

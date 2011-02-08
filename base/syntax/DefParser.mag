@@ -17,7 +17,11 @@ class DefParser
                 // Parse the function.
                 var function = parser parseFunction()
 
-                VariableExpression new(pattern: VariablePattern new(name, nothing),
+                // TODO(bob): Get position from token.
+                VariableExpression new(
+                    position: Position new(file: "see DefParser.mag",
+                        startLine: -1, startCol: -1, endLine: -1, endCol: -1),
+                    pattern: VariablePattern new(name, nothing),
                     value: function)
             else
                 var receiver = parseReceiver(parser)

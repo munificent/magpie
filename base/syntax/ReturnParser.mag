@@ -4,11 +4,16 @@ class ReturnParser
         match parser lookAheadAny(TokenType line, TokenType rightParen,
                                   TokenType rightBrace, TokenType rightBracket)
             case true then ReturnExpression new(
+                position: Position new(file: "see ReturnParser.mag",
+                    startLine: -1, startCol: -1, endLine: -1, endCol: -1),
                 value: NothingExpression new(
                     position: Position new(file: "see ReturnParser.mag",
                         startLine: -1, startCol: -1, endLine: -1, endCol: -1)))
                 // TODO(bob): Get position from Token.
-            else ReturnExpression new(value: parser parseExpression())
+            else ReturnExpression new(
+                position: Position new(file: "see ReturnParser.mag",
+                    startLine: -1, startCol: -1, endLine: -1, endCol: -1),
+                value: parser parseExpression())
         end
     end
 end
