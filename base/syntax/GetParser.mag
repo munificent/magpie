@@ -17,7 +17,7 @@ class GetParser
 
         var type = FunctionTypeExpression new(
             typeParams: %unsafecast%(List(String, Expression), Array of()),
-            pattern:    ValuePattern new({ nothing }),
+            pattern:    ValuePattern new(value: { nothing }),
             returnType: valueType)
 
         parser consume(TokenType equals)

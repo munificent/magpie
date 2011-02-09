@@ -242,36 +242,31 @@ public class JavaToMagpie {
       List<Obj> fields = new ArrayList<Obj>();
       for (Pair<String, Pattern> field : pattern.getFields()) {
         Obj name = mInterpreter.createString(field.getKey());
-        Obj fieldPattern = convert(field.getValue());
-        fields.add(mInterpreter.createTuple(name, fieldPattern));
+        Obj value = convert(field.getValue());
+        fields.add(mInterpreter.createTuple(name, value));
       }
-      Obj fieldsArray = mInterpreter.createArray(fields);
-      
-      return mInterpreter.construct("RecordPattern", fieldsArray);
+
+      return construct("RecordPattern",
+          "fields", mInterpreter.createArray(fields));
     }
 
     @Override
     public Obj visit(TuplePattern pattern, Void dummy) {
-      List<Obj> fields = new ArrayList<Obj>();
-      for (Pattern field : pattern.getFields()) {
-        fields.add(convert(field));
-      }
-      Obj fieldsArray = mInterpreter.createArray(fields);
-      
-      return mInterpreter.construct("TuplePattern", fieldsArray);
+      return construct("TuplePattern",
+          "fields", convert(pattern.getFields()));
     }
 
     @Override
     public Obj visit(ValuePattern pattern, Void dummy) {
-      Obj value = convert(pattern.getValue());
-      return mInterpreter.construct("ValuePattern", value);
+      return construct("ValuePattern",
+          "value", pattern.getValue());
     }
 
     @Override
     public Obj visit(VariablePattern pattern, Void dummy) {
-      Obj name = mInterpreter.createString(pattern.getName());
-      Obj type = convert(pattern.getType());
-      return mInterpreter.construct("VariablePattern", name, type);
+      return construct("VariablePattern",
+          "name",     pattern.getName(),
+          "typeExpr", pattern.getType());
     }
   }  
   
@@ -330,12 +325,21 @@ public class JavaToMagpie {
     return pattern.accept(converter, null);
   }
   
-  private Obj convert(List<Expr> exprs) {
-    List<Obj> exprObjs = new ArrayList<Obj>();
-    for (Expr expr : exprs) {
-      exprObjs.add(convert(expr));
+  private Obj convert(Object object) {
+    if (object == null) return mInterpreter.nothing();
+    if (object instanceof Expr) return convert((Expr) object);
+    if (object instanceof Pattern) return convert((Pattern) object);
+    
+    throw new UnsupportedOperationException("Don't know how to convert an " +
+        "object of type " + object.getClass().getSimpleName() + ".");
+  }
+  
+  private Obj convert(List<?> values) {
+    List<Obj> objs = new ArrayList<Obj>();
+    for (Object value : values) {
+      objs.add(convert(value));
     }
-    return mInterpreter.createArray(exprObjs);
+    return mInterpreter.createArray(objs);
   }
   
   private JavaToMagpie(Interpreter interpreter, EvalContext context) {

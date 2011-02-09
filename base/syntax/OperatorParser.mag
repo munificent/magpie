@@ -40,7 +40,7 @@ class DefOperatorParser
         var makeFn = VariableExpression new(
             position: Position new(file: "see VarParser.mag",
                 startLine: -1, startCol: -1, endLine: -1, endCol: -1),
-            pattern: VariablePattern new(name, nothing),
+            pattern: VariablePattern new(name: name, typeExpr: nothing),
             value:   function)
 
         {
