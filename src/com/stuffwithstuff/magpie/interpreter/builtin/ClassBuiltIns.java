@@ -15,7 +15,7 @@ public class ClassBuiltIns {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();
       boolean isDelegate = arg.getTupleField(1).asBool();
-      Expr type = MagpieToJava.convert(interpreter, arg.getTupleField(2));
+      Expr type = MagpieToJava.convertExpr(interpreter, arg.getTupleField(2));
       
       ClassObj classObj = thisObj.asClass();
       classObj.declareField(name, isDelegate, type);
@@ -48,7 +48,7 @@ public class ClassBuiltIns {
         isInitializer = true;
       } else {
         // Have a type annotation.
-        expr = MagpieToJava.convert(interpreter, optionalType);
+        expr = MagpieToJava.convertExpr(interpreter, optionalType);
         isInitializer = false;
       }
       

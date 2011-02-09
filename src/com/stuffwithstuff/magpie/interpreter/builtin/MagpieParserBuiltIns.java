@@ -7,7 +7,6 @@ import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.JavaToMagpie;
 import com.stuffwithstuff.magpie.interpreter.MagpieToJava;
 import com.stuffwithstuff.magpie.interpreter.Obj;
-import com.stuffwithstuff.magpie.interpreter.PatternConverter;
 import com.stuffwithstuff.magpie.parser.InfixParser;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
 import com.stuffwithstuff.magpie.parser.PatternParser;
@@ -218,7 +217,7 @@ public class MagpieParserBuiltIns {
       
       Pattern pattern = PatternParser.parse(parser);
       
-      return PatternConverter.convert(pattern, interpreter, 
+      return JavaToMagpie.convert(interpreter, pattern, 
           interpreter.createTopLevelContext());
     }
   }
@@ -370,7 +369,7 @@ public class MagpieParserBuiltIns {
       Obj expr = mInterpreter.invokeMethod(mParser, "parse", arg);
       
       // Marshall it back to Java format.
-      return MagpieToJava.convert(mInterpreter, expr);
+      return MagpieToJava.convertExpr(mInterpreter, expr);
     }
     
     private Interpreter mInterpreter;
@@ -397,7 +396,7 @@ public class MagpieParserBuiltIns {
       Obj expr = mInterpreter.invokeMethod(mParser, "parse", arg);
       
       // Marshall it back to Java format.
-      return MagpieToJava.convert(mInterpreter, expr);
+      return MagpieToJava.convertExpr(mInterpreter, expr);
     }
     
     @Override
