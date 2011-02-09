@@ -4,15 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.*;
-import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
-import com.stuffwithstuff.magpie.ast.pattern.Pattern;
-import com.stuffwithstuff.magpie.ast.pattern.RecordPattern;
-import com.stuffwithstuff.magpie.ast.pattern.TuplePattern;
-import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
-import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
+import com.stuffwithstuff.magpie.ast.pattern.*;
 import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.util.Expect;
-import com.stuffwithstuff.magpie.util.NotImplementedException;
 import com.stuffwithstuff.magpie.util.Pair;
 
 /**
@@ -24,321 +18,339 @@ public class MagpieToJava {
    * Converts a Magpie expression object into a corresponding Java Expr.
    */
   public static Expr convertExpr(Interpreter interpreter, Obj expr) {
-    Expect.notNull(expr);
-    
-    if (expr == interpreter.nothing()) return null;
-    
-    ClassObj exprClass = expr.getClassObj();
-    // TODO(bob): Fill in other expression types.
-    // TODO(bob): Support position information in Magpie parser.
-    if (exprClass == interpreter.getGlobal("AssignExpression")) {
-      return convertAssignExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("BlockExpression")) {
-      return convertBlockExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("BoolExpression")) {
-      return convertBoolExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("BreakExpression")) {
-      return convertBreakExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("CallExpression")) {
-      return convertCallExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("FunctionExpression")) {
-      return convertFunctionExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("IntExpression")) {
-      return convertIntExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("LoopExpression")) {
-      return convertLoopExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("MatchExpression")) {
-      return convertMatchExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("MessageExpression")) {
-      return convertMessageExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("NothingExpression")) {
-      return convertNothingExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("QuotationExpression")) {
-      return convertQuotationExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("RecordExpression")) {
-      return convertRecordExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("ReturnExpression")) {
-      return convertReturnExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("ScopeExpression")) {
-      return convertScopeExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("StringExpression")) {
-      return convertStringExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("ThisExpression")) {
-      return convertThisExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("TupleExpression")) {
-      return convertTupleExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("TypeofExpression")) {
-      return convertTypeofExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("UnsafeCastExpression")) {
-      return convertUnsafeCastExpr(interpreter, expr);
-    } else if (exprClass == interpreter.getGlobal("VariableExpression")) {
-      return convertVarExpr(interpreter, expr);
-    }
-    
-    // TODO(bob): Add better error-handling.
-    throw new NotImplementedException(
-        "Other expression types not implemented yet!");
+    MagpieToJava converter = new MagpieToJava(interpreter);
+    return converter.convertExpr(expr);
   }
   
   public static Pattern convertPattern(Interpreter interpreter, Obj pattern) {
-    if (pattern == interpreter.nothing()) return null;
+    MagpieToJava converter = new MagpieToJava(interpreter);
+    return converter.convertPattern(pattern);
+  }
+  
+  private MagpieToJava(Interpreter interpreter) {
+    mInterpreter = interpreter;
+  }
+
+  /**
+   * Converts a Magpie expression object into a corresponding Java Expr.
+   */
+  private Expr convertExpr(Obj expr) {
+    Expect.notNull(expr);
+    
+    if (expr == mInterpreter.nothing()) return null;
+    
+    ClassObj exprClass = expr.getClassObj();
+    if (exprClass == mInterpreter.getGlobal("AssignExpression")) {
+      return convertAssignExpr(expr);
+    } else if (exprClass == mInterpreter.getGlobal("BlockExpression")) {
+      return convertBlockExpr(expr);
+    } else if (exprClass == mInterpreter.getGlobal("BoolExpression")) {
+      return convertBoolExpr(expr);
+    } else if (exprClass == mInterpreter.getGlobal("BreakExpression")) {
+      return convertBreakExpr(expr);
+    } else if (exprClass == mInterpreter.getGlobal("CallExpression")) {
+      return convertCallExpr(expr);
+    } else if (exprClass == mInterpreter.getGlobal("FunctionExpression")) {
+      return convertFunctionExpr(expr);
+    } else if (exprClass == mInterpreter.getGlobal("IntExpression")) {
+      return convertIntExpr(expr);
+    } else if (exprClass == mInterpreter.getGlobal("LoopExpression")) {
+      return convertLoopExpr(expr);
+    } else if (exprClass == mInterpreter.getGlobal("MatchExpression")) {
+      return convertMatchExpr(expr);
+    } else if (exprClass == mInterpreter.getGlobal("MessageExpression")) {
+      return convertMessageExpr(expr);
+    } else if (exprClass == mInterpreter.getGlobal("NothingExpression")) {
+      return convertNothingExpr(expr);
+    } else if (exprClass == mInterpreter.getGlobal("QuotationExpression")) {
+      return convertQuotationExpr(expr);
+    } else if (exprClass == mInterpreter.getGlobal("RecordExpression")) {
+      return convertRecordExpr(expr);
+    } else if (exprClass == mInterpreter.getGlobal("ReturnExpression")) {
+      return convertReturnExpr(expr);
+    } else if (exprClass == mInterpreter.getGlobal("ScopeExpression")) {
+      return convertScopeExpr(expr);
+    } else if (exprClass == mInterpreter.getGlobal("StringExpression")) {
+      return convertStringExpr(expr);
+    } else if (exprClass == mInterpreter.getGlobal("ThisExpression")) {
+      return convertThisExpr(expr);
+    } else if (exprClass == mInterpreter.getGlobal("TupleExpression")) {
+      return convertTupleExpr(expr);
+    } else if (exprClass == mInterpreter.getGlobal("TypeofExpression")) {
+      return convertTypeofExpr(expr);
+    } else if (exprClass == mInterpreter.getGlobal("UnsafeCastExpression")) {
+      return convertUnsafeCastExpr(expr);
+    } else if (exprClass == mInterpreter.getGlobal("VariableExpression")) {
+      return convertVarExpr(expr);
+    }
+    
+    throw new IllegalArgumentException("Not a valid expression object.");
+  }
+  
+  private Pattern convertPattern(Obj pattern) {
+    if (pattern == mInterpreter.nothing()) return null;
     
     ClassObj patternClass = pattern.getClassObj();
-    if (patternClass == interpreter.getGlobal("RecordPattern")) {
-      return convertRecordPattern(interpreter, pattern);
-    } else if (patternClass == interpreter.getGlobal("TuplePattern")) {
-      return convertTuplePattern(interpreter, pattern);
-    } else if (patternClass == interpreter.getGlobal("ValuePattern")) {
-      return convertValuePattern(interpreter, pattern);
-    } else if (patternClass == interpreter.getGlobal("VariablePattern")) {
-      return convertVariablePattern(interpreter, pattern);
+    if (patternClass == mInterpreter.getGlobal("RecordPattern")) {
+      return convertRecordPattern(pattern);
+    } else if (patternClass == mInterpreter.getGlobal("TuplePattern")) {
+      return convertTuplePattern(pattern);
+    } else if (patternClass == mInterpreter.getGlobal("ValuePattern")) {
+      return convertValuePattern(pattern);
+    } else if (patternClass == mInterpreter.getGlobal("VariablePattern")) {
+      return convertVariablePattern(pattern);
     }
     
-    // TODO(bob): Add better error-handling.
-    throw new NotImplementedException(
-        "Other pattern types not implemented yet!");
+    throw new IllegalArgumentException("Not a valid expression object.");
   }
 
-  private static Position convertPosition(Interpreter interpreter, Obj expr) {
-    Obj position = expr.getField("position");
-    Expect.notNull(position);
-    String file   = position.getField("file").asString();
-    int startLine = position.getField("startLine").asInt();
-    int startCol  = position.getField("startCol").asInt();
-    int endLine   = position.getField("endLine").asInt();
-    int endCol    = position.getField("endCol").asInt();
-    return new Position(file, startLine, startCol, endLine, endCol);
-  }
-
-  private static Expr convertAssignExpr(Interpreter interpreter, Obj expr) {
-    Position position = convertPosition(interpreter, expr);
-    Obj receiverObj = expr.getField("receiver");
-    Expr receiver;
-    if (receiverObj == interpreter.nothing()) {
-      receiver = null;
-    } else {
-      receiver = convertExpr(interpreter, receiverObj);
-    }
-    String name = expr.getField("name").asString();
-    Expr value = convertExpr(interpreter, expr.getField("value"));
-    return Expr.assign(position, receiver, name, value);
+  private Expr convertAssignExpr(Obj expr) {
+    return Expr.assign(
+        getPosition(expr),
+        getExpr(expr, "receiver"),
+        getString(expr, "name"),
+        getExpr(expr, "value"));
   }
   
-  private static Expr convertBlockExpr(Interpreter interpreter, Obj expr) {
-    List<Expr> exprs = convertArray(interpreter, expr.getField("expressions"));
+  private Expr convertBlockExpr(Obj expr) {
+    return Expr.block(
+        getExprArray(expr, "expressions"),
+        getExpr(expr, "catchExpression"));
+  }
+
+  private Expr convertBoolExpr(Obj expr) {
+    return Expr.bool(
+        getPosition(expr),
+        getBool(expr, "value"));
+  }
+
+  private Expr convertBreakExpr(Obj expr) {
+    return Expr.break_(
+        getPosition(expr));
+  }
+
+  private Expr convertCallExpr(Obj expr) {
+    return Expr.call(
+        getExpr(expr, "target"),
+        getExprArray(expr, "typeArgs"),
+        getExpr(expr, "argument"));
+  }
+
+  private Expr convertFunctionExpr(Obj expr) {
+    Obj typeObj = getMember(expr, "functionType");
+    FunctionType type = convertFunctionType(typeObj);
     
-    Obj catchObj = expr.getField("catchExpression");
-    Expr catchExpr;
-    if (catchObj == interpreter.nothing()) {
-      catchExpr = null;
-    } else {
-      catchExpr = convertExpr(interpreter, catchObj);
-    }
-    return Expr.block(exprs, catchExpr);
-  }
-
-  private static Expr convertBoolExpr(Interpreter interpreter, Obj expr) {
-    Position position = convertPosition(interpreter, expr);
-    boolean value = expr.getField("value").asBool();
-    return Expr.bool(position, value);
-  }
-
-  private static Expr convertBreakExpr(Interpreter interpreter, Obj expr) {
-    Position position = convertPosition(interpreter, expr);
-    return Expr.break_(position);
-  }
-
-  private static Expr convertCallExpr(Interpreter interpreter, Obj expr) {
-    Expr target = convertExpr(interpreter, expr.getField("target"));
-    List<Expr> typeArgs = convertArray(interpreter, expr.getField("typeArgs"));
-    Expr argument = convertExpr(interpreter, expr.getField("argument"));
-    return Expr.call(target, typeArgs, argument);
-  }
-
-  private static Expr convertFunctionExpr(Interpreter interpreter, Obj expr) {
-    Position position = convertPosition(interpreter, expr);
-    Obj typeObj = expr.getField("functionType");
-    FunctionType type = convertFunctionType(interpreter, typeObj);
-    
-    Expr body = convertExpr(interpreter, expr.getField("body"));
-    return Expr.fn(position, type, body);
-  }
-
-  private static FunctionType convertFunctionType(
-      Interpreter interpreter, Obj typeObj) {
-    Expr returnType = convertExpr(interpreter, typeObj.getField("returnType"));
-
-    List<Pair<String, Expr>> typeParams = new ArrayList<Pair<String, Expr>>();
-    Obj typeParamsObj = typeObj.getField("typeParams");
-    for (Obj typeParam : typeParamsObj.asArray()) {
-      String name = typeParam.getTupleField(0).asString();
-      Expr constraint = convertExpr(interpreter, typeParam.getTupleField(1));
-      typeParams.add(new Pair<String, Expr>(name, constraint));
-    }
-    
-    Obj patternObj = typeObj.getField("pattern");
-    Pattern pattern = convertPattern(interpreter, patternObj);
-    
-    return new FunctionType(typeParams, pattern, returnType);
+    return Expr.fn(
+        getPosition(expr),
+        type,
+        getExpr(expr, "body"));
   }
   
-  private static Expr convertIntExpr(Interpreter interpreter, Obj expr) {
-    Position position = convertPosition(interpreter, expr);
-    int value = expr.getField("value").asInt();
-    return Expr.int_(position, value);
+  private Expr convertIntExpr(Obj expr) {
+    return Expr.int_(
+        getPosition(expr),
+        getInt(expr, "value"));
   }
   
-  private static Expr convertLoopExpr(Interpreter interpreter, Obj expr) {
-    Position position = convertPosition(interpreter, expr);
-    Expr body = convertExpr(interpreter, expr.getField("body"));
-    return Expr.loop(position, body);
+  private Expr convertLoopExpr(Obj expr) {
+    return Expr.loop(
+        getPosition(expr),
+        getExpr(expr, "body"));
   }
   
-  private static Expr convertMatchExpr(Interpreter interpreter, Obj expr) {
-    Position position = convertPosition(interpreter, expr);
-    Expr value = convertExpr(interpreter, expr.getField("value"));
+  private Expr convertMatchExpr(Obj expr) {
     List<MatchCase> cases = new ArrayList<MatchCase>();
-    for (Obj matchCase : expr.getField("cases").asArray()) {
-      Pattern pattern = convertPattern(
-          interpreter, matchCase.getField("pattern"));
-      Expr body = convertExpr(interpreter, matchCase.getField("body"));
+    for (Obj matchCase : getArray(expr, "cases")) {
+      Pattern pattern = convertPattern(matchCase.getField("pattern"));
+      Expr body = convertExpr(matchCase.getField("body"));
       cases.add(new MatchCase(pattern, body));
     }
     
-    return Expr.match(position, value, cases);
+    return Expr.match(
+        getPosition(expr),
+        getExpr(expr, "value"),
+        cases);
   }
   
-  private static Expr convertMessageExpr(Interpreter interpreter, Obj expr) {
-    Obj receiverObj = expr.getField("receiver");
-    Expr receiver;
-    if (receiverObj == interpreter.nothing()) {
-      receiver = null;
-    } else {
-      receiver = convertExpr(interpreter, receiverObj);
-    }
-    String name = expr.getField("name").asString();
-    return Expr.message(receiver, name);
+  private Expr convertMessageExpr(Obj expr) {
+    return Expr.message(
+        getExpr(expr, "receiver"),
+        getString(expr, "name"));
   }
   
-  private static Expr convertNothingExpr(Interpreter interpreter, Obj expr) {
-    Position position = convertPosition(interpreter, expr);
-    return Expr.nothing(position);
+  private Expr convertNothingExpr(Obj expr) {
+    return Expr.nothing(
+        getPosition(expr));
   }
   
-  private static Expr convertQuotationExpr(Interpreter interpreter, Obj expr) {
-    Position position = convertPosition(interpreter, expr);
-    Expr body = convertExpr(interpreter, expr.getField("body"));
-    return Expr.quote(position, body);
+  private Expr convertQuotationExpr(Obj expr) {
+    return Expr.quote(
+        getPosition(expr),
+        getExpr(expr, "body"));
   }
 
-  private static Expr convertRecordExpr(Interpreter interpreter, Obj expr) {
-    Position position = convertPosition(interpreter, expr);
-    List<Obj> fieldObjs = expr.getField("fields").asArray();
+  private Expr convertRecordExpr(Obj expr) {
     List<Pair<String, Expr>> fields = new ArrayList<Pair<String, Expr>>();
-    for (Obj field : fieldObjs) {
+    for (Obj field : getArray(expr, "fields")) {
       String name = field.getTupleField(0).asString();
-      Expr value = convertExpr(interpreter, field.getTupleField(1));
+      Expr value = convertExpr(field.getTupleField(1));
       fields.add(new Pair<String, Expr>(name, value));
     }
-    return Expr.record(position, fields);
+    return Expr.record(
+        getPosition(expr),
+        fields);
   }
 
-  private static Expr convertReturnExpr(Interpreter interpreter, Obj expr) {
-    Position position = convertPosition(interpreter, expr);
-    Expr value = convertExpr(interpreter, expr.getField("value"));
-    return new ReturnExpr(position, value);
+  private Expr convertReturnExpr(Obj expr) {
+    return new ReturnExpr(
+        getPosition(expr),
+        getExpr(expr, "value"));
   }
 
-  private static Expr convertScopeExpr(Interpreter interpreter, Obj expr) {
-    Expr body = convertExpr(interpreter, expr.getField("body"));
-    return Expr.scope(body);
+  private Expr convertScopeExpr(Obj expr) {
+    return Expr.scope(
+        getExpr(expr, "body"));
   }
   
-  private static Expr convertStringExpr(Interpreter interpreter, Obj expr) {
-    Position position = convertPosition(interpreter, expr);
-    String value = expr.getField("value").asString();
-    return Expr.string(position, value);
+  private Expr convertStringExpr(Obj expr) {
+    return Expr.string(
+        getPosition(expr),
+        getString(expr, "value"));
   }
   
-  private static Expr convertThisExpr(Interpreter interpreter, Obj expr) {
-    Position position = convertPosition(interpreter, expr);
-    return Expr.this_(position);
+  private Expr convertThisExpr(Obj expr) {
+    return Expr.this_(
+        getPosition(expr));
   }
   
-  private static Expr convertTupleExpr(Interpreter interpreter, Obj expr) {
-    List<Expr> fields = convertArray(interpreter, expr.getField("fields"));
-
-    return Expr.tuple(fields);
-  }
-
-  private static Expr convertTypeofExpr(Interpreter interpreter, Obj expr) {
-    Position position = convertPosition(interpreter, expr);
-    Expr body = convertExpr(interpreter, expr.getField("body"));
-    return new TypeofExpr(position, body);
+  private Expr convertTupleExpr(Obj expr) {
+    return Expr.tuple(
+        getExprArray(expr, "fields"));
   }
 
-  private static Expr convertUnsafeCastExpr(Interpreter interpreter, Obj expr) {
-    Position position = convertPosition(interpreter, expr);
-    Expr type = convertExpr(interpreter, expr.getField("type"));
-    Expr value = convertExpr(interpreter, expr.getField("value"));
-    return new UnsafeCastExpr(position, type, value);
+  private Expr convertTypeofExpr(Obj expr) {
+    return new TypeofExpr(
+        getPosition(expr),
+        getExpr(expr, "body"));
+  }
+
+  private Expr convertUnsafeCastExpr(Obj expr) {
+    return new UnsafeCastExpr(
+        getPosition(expr),
+        // TODO(bob): Should be "typeExpr".
+        getExpr(expr, "type"),
+        getExpr(expr, "value"));
   }
   
-  private static Expr convertVarExpr(Interpreter interpreter, Obj expr) {
-    Position position = convertPosition(interpreter, expr);
-    Pattern pattern = convertPattern(interpreter,
-        expr.getField("pattern"));
-    Expr value = convertExpr(interpreter, expr.getField("value"));
-    return Expr.var(position, pattern, value);
+  private Expr convertVarExpr(Obj expr) {
+    return Expr.var(
+        getPosition(expr),
+        getPattern(expr, "pattern"),
+        getExpr(expr, "value"));
   }
   
-  private static Pattern convertRecordPattern(Interpreter interpreter,
-      Obj pattern) {
-    List<Obj> fieldObjs = pattern.getField("fields").asArray();
+  private Pattern convertRecordPattern(Obj pattern) {
+    List<Obj> fieldObjs = getArray(pattern, "fields");
     List<Pair<String, Pattern>> fields = new ArrayList<Pair<String, Pattern>>();
     for (Obj field : fieldObjs) {
       String name = field.getTupleField(0).asString();
-      Pattern fieldPattern = convertPattern(interpreter, field.getTupleField(1));
+      Pattern fieldPattern = convertPattern(field.getTupleField(1));
       fields.add(new Pair<String, Pattern>(name, fieldPattern));
     }
     
     return new RecordPattern(fields);
   }
   
-  private static Pattern convertTuplePattern(Interpreter interpreter,
-      Obj pattern) {
-    List<Obj> fieldObjs = pattern.getField("fields").asArray();
+  private Pattern convertTuplePattern(Obj pattern) {
+    List<Obj> fieldObjs = getArray(pattern, "fields");
     List<Pattern> fields = new ArrayList<Pattern>();
     for (Obj field : fieldObjs) {
-      fields.add(convertPattern(interpreter, field));
+      fields.add(convertPattern(field));
     }
     
     return new TuplePattern(fields);
   }
   
-  private static Pattern convertValuePattern(Interpreter interpreter,
-      Obj pattern) {
-    Obj value = pattern.getField("value");
-    Expr expr = MagpieToJava.convertExpr(interpreter, value);
-    return new ValuePattern(expr);
+  private Pattern convertValuePattern(Obj pattern) {
+    return new ValuePattern(
+        getExpr(pattern, "value"));
   }
   
-  private static Pattern convertVariablePattern(Interpreter interpreter,
-      Obj pattern) {
-    String name = pattern.getField("name").asString();
-    Obj type = pattern.getField("typeExpr");
-    Expr expr = null;
-    if (type != interpreter.nothing()) {
-      expr = MagpieToJava.convertExpr(interpreter, type);
+  private Pattern convertVariablePattern(Obj pattern) {
+    return new VariablePattern(
+        getString(pattern, "name"),
+        getExpr(pattern, "typeExpr"));
+  }
+
+  private Position convertPosition(Obj position) {
+    return new Position(
+        getString(position, "file"),
+        getInt(position, "startLine"),
+        getInt(position, "startCol"),
+        getInt(position, "endLine"),
+        getInt(position, "endCol"));
+  }
+  
+  private FunctionType convertFunctionType(Obj typeObj) {
+    Expr returnType = convertExpr(typeObj.getField("returnType"));
+
+    List<Pair<String, Expr>> typeParams = new ArrayList<Pair<String, Expr>>();
+    Obj typeParamsObj = typeObj.getField("typeParams");
+    for (Obj typeParam : typeParamsObj.asArray()) {
+      String name = typeParam.getTupleField(0).asString();
+      Expr constraint = convertExpr(typeParam.getTupleField(1));
+      typeParams.add(new Pair<String, Expr>(name, constraint));
     }
-    return new VariablePattern(name, expr);
+    
+    Obj patternObj = typeObj.getField("pattern");
+    Pattern pattern = convertPattern(patternObj);
+    
+    return new FunctionType(typeParams, pattern, returnType);
+  }
+
+  private List<Obj> getArray(Obj obj, String name) {
+    return getMember(obj, name).asArray();
   }
   
-  private static List<Expr> convertArray(Interpreter interpreter, Obj array) {
+  private List<Expr> getExprArray(Obj obj, String name) {
+    List<Obj> array = getMember(obj, name).asArray();
     List<Expr> exprs = new ArrayList<Expr>();
-    for (Obj blockExpr : array.asArray()) {
-      exprs.add(convertExpr(interpreter, blockExpr));
+    for (Obj blockExpr : array) {
+      exprs.add(convertExpr(blockExpr));
     }
     return exprs;
   }
+
+  private boolean getBool(Obj obj, String member) {
+    Obj value = getMember(obj, member);
+    return value.asBool();
+  }
+
+  private int getInt(Obj obj, String member) {
+    Obj value = getMember(obj, member);
+    return value.asInt();
+  }
+  
+  private String getString(Obj obj, String member) {
+    Obj value = getMember(obj, member);
+    return value.asString();
+  }
+  
+  private Position getPosition(Obj obj) {
+    return convertPosition(getMember(obj, "position"));
+  }
+  
+  private Expr getExpr(Obj obj, String name) {
+    return convertExpr(getMember(obj, name));
+  }
+  
+  private Pattern getPattern(Obj obj, String name) {
+    return convertPattern(getMember(obj, name));
+  }
+  
+  private Obj getMember(Obj obj, String name) {
+    return mInterpreter.getMember(Position.none(), obj, name);
+  }
+  
+  private Interpreter mInterpreter;
 }
