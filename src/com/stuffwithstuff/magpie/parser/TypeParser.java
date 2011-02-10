@@ -55,7 +55,8 @@ public class TypeParser {
       String op = parser.last(1).getString();
       Expr right = message(parser);
 
-      left = Expr.message(null, op, Expr.tuple(left, right));
+      left = Expr.message(left.getPosition().union(right.getPosition()),
+          null, op, Expr.tuple(left, right));
     }
     
     return left;

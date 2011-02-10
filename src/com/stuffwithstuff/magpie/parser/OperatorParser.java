@@ -8,7 +8,7 @@ public class OperatorParser extends InfixParser {
     String op = token.getString();
     Expr right = parser.parseExpression(getStickiness());
 
-    return Expr.message(null, op, Expr.tuple(left, right));
+    return Expr.message(token.getPosition(), null, op, Expr.tuple(left, right));
   }
   
   @Override

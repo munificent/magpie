@@ -69,6 +69,7 @@ public class EnvironmentBuilder {
         .field("cases",    list(name("MatchCase")));
 
     newClass("MessageExpression")
+        .field("position", name("Position"))
         .field("receiver", or(name("Expression"), name("Nothing")))
         .field("name",     Expr.name("String"));
     
@@ -143,7 +144,7 @@ public class EnvironmentBuilder {
   private Expr or(Expr... exprs) {
     Expr result = exprs[0];
     for (int i = 1; i < exprs.length; i++) {
-      result = Expr.message(null, "|", Expr.tuple(result, exprs[i]));
+      result = Expr.message(exprs[i].getPosition(), null, "|", Expr.tuple(result, exprs[i]));
     }
     return result;
   }

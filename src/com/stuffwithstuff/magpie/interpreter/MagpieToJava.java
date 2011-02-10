@@ -174,6 +174,7 @@ public class MagpieToJava {
   
   private Expr convertMessageExpr(Obj expr) {
     return Expr.message(
+        getPosition(expr),
         getExpr(expr, "receiver"),
         getString(expr, "name"));
   }

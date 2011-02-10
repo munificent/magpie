@@ -122,6 +122,7 @@ public class JavaToMagpie {
     @Override
     public Obj visit(MessageExpr expr, Void dummy) {
       return construct("MessageExpression",
+          "position", expr.getPosition(),
           "receiver", expr.getReceiver(),
           "name",     expr.getName());
     }

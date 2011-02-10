@@ -15,7 +15,12 @@ class OperatorParser
 
         var right = parser parseExpression(stickiness)
 
-        var operator = MessageExpression new(receiver: nothing, name: name)
+        // TODO(bob): Get position from token.
+        var operator = MessageExpression new(
+            position: Position new(file: "see OperatorParser.mag",
+                startLine: -1, startCol: -1, endLine: -1, endCol: -1),
+            receiver: nothing,
+            name: name)
         { `operator(`left, `right) }
     end
 

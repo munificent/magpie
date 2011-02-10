@@ -139,14 +139,6 @@ public abstract class Expr {
     return call(message(position, receiver, name), arg);
   }
   
-  public static Expr message(Expr receiver, String name, Expr arg) {
-    return call(message(receiver, name), arg);
-  }
-  
-  public static Expr message(Expr receiver, String name) {
-    return message(Position.none(), receiver, name);
-  }
-  
   public static Expr message(Position position, Expr receiver, String name) {
     return new MessageExpr(position, receiver, name);
   }

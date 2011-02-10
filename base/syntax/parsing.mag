@@ -6,7 +6,12 @@
             case true then
                 // Getter on a class.
                 %var%("className", parser consume() stringValue)
-                MessageExpression new(receiver: nothing, name: className)
+                // TODO(bob): Get position from token.
+                MessageExpression new(
+                    position: Position new(file: "see parsing.mag",
+                        startLine: -1, startCol: -1, endLine: -1, endCol: -1),
+                    receiver: nothing,
+                    name: className)
             else
                 // Getter on a complex expression.
                 parser consume(TokenType leftParen)

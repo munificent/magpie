@@ -82,7 +82,7 @@ public class ClassParser extends PrefixParser {
       } else if (parser.match("set")) {
         exprs.add(parseSetter(parser, theClass));
       } else if (parser.match("shared")) {
-        Expr metaclass = Expr.message(theClass, Name.TYPE);
+        Expr metaclass = Expr.message(parser.last(1).getPosition(), theClass, Name.TYPE);
         // TODO(bob): Need to prevent declaring shared members: can only define.
         if (parser.match("delegate", "var")) {
           // TODO(bob): Need to handle defining class fields specially.
@@ -108,7 +108,7 @@ public class ClassParser extends PrefixParser {
     Expr body = Expr.fn(Expr.block(exprs));
     
     // Make the class receive it.
-    return Expr.message(classReceiver, Name.RECEIVING, body);
+    return Expr.message(position, classReceiver, Name.RECEIVING, body);
   }
   
   @Override
@@ -119,6 +119,7 @@ public class ClassParser extends PrefixParser {
   private static Expr parseField(MagpieParser parser, boolean isDelegate,
       Expr theClass) {
     String name = parser.consume(TokenType.NAME).getString();
+    Position position = parser.last(1).getPosition();
     
     // Parse the type annotation if there is one.
     Expr type;
@@ -132,26 +133,28 @@ public class ClassParser extends PrefixParser {
     if (parser.match(TokenType.EQUALS)) {
       // Defining it.
       Expr initializer = parser.parseEndBlock();
-      return Expr.message(theClass, Name.DEFINE_FIELD,
+      return Expr.message(position, theClass, Name.DEFINE_FIELD,
           Expr.tuple(Expr.string(name), Expr.bool(isDelegate), type,
               Expr.fn(initializer)));
     } else {
       // Just declaring it.
-      return Expr.message(theClass, Name.DECLARE_FIELD,
+      return Expr.message(position, theClass, Name.DECLARE_FIELD,
           Expr.tuple(Expr.string(name), Expr.bool(isDelegate), type));
     }
   }
   
   private static Expr parseMethod(MagpieParser parser, Expr theClass) {
     String name = parser.consumeAny(TokenType.NAME, TokenType.OPERATOR).getString();
+    Position position = parser.last(1).getPosition();
     Expr function = parser.parseFunction();
-    return Expr.message(theClass, Name.DEFINE_METHOD,
+    return Expr.message(position, theClass, Name.DEFINE_METHOD,
         Expr.tuple(Expr.string(name), function));
   }
   
   private static Expr parseGetter(MagpieParser parser, Expr theClass) {
     String name = parser.consume(TokenType.NAME).getString();
-    
+    Position position = parser.last(1).getPosition();
+
     Expr type;
     if (parser.lookAheadAny(TokenType.EQUALS, TokenType.LINE)) {
       // If no type is provided, default to Dynamic.
@@ -165,11 +168,11 @@ public class ClassParser extends PrefixParser {
       Expr body = parser.parseEndBlock();
       FunctionType fnType = FunctionType.returningType(type);
       Expr function = Expr.fn(body.getPosition(), fnType, body);
-      return Expr.message(theClass, Name.DEFINE_GETTER,
+      return Expr.message(position, theClass, Name.DEFINE_GETTER,
           Expr.tuple(Expr.string(name), function));
     } else {
       // Just declaring it.
-      return Expr.message(theClass, Name.DECLARE_GETTER,
+      return Expr.message(position, theClass, Name.DECLARE_GETTER,
           Expr.tuple(Expr.string(name), Expr.fn(type)));
     }
   }

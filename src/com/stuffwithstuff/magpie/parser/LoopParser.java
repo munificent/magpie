@@ -55,17 +55,17 @@ public class LoopParser extends PrefixParser {
         // Initialize the generator before the loop.
         String generatorVar = variable + " gen";
         beforeLoop.add(Expr.var(position, generatorVar,
-            Expr.message(generator, Name.ITERATE, Expr.nothing(position))));
+            Expr.message(position, generator, Name.ITERATE, Expr.nothing(position))));
         
         // Each iteration, advance the iterator and break if done.
         eachLoop.add(Expr.if_(
-            Expr.message(Expr.name(generatorVar), Name.NEXT, Expr.nothing(position)),
+            Expr.message(position, Expr.name(generatorVar), Name.NEXT, Expr.nothing(position)),
             Expr.nothing(),
             Expr.break_(position)));
         
         // If not done, create the loop variable.
         eachLoop.add(Expr.var(position, variable,
-            Expr.message(Expr.name(generatorVar), Name.CURRENT)));
+            Expr.message(position, Expr.name(position, generatorVar), Name.CURRENT)));
       }
       parser.match(TokenType.LINE); // Optional line after a clause.
       

@@ -34,7 +34,7 @@ public class InterfaceParser extends PrefixParser {
       if (typeParams.size() == 0) {
         // var Foo = Interface new("Foo")
         exprs.add(Expr.var(position, name,
-            Expr.message(Expr.name("Interface"), Name.NEW, Expr.string(name))));
+            Expr.message(position, Expr.name("Interface"), Name.NEW, Expr.string(name))));
       } else {
         // var Foo = GenericInterface new("Foo", Array of("A", "B"))
         Expr[] paramExprs = new Expr[typeParams.size()];
@@ -42,11 +42,11 @@ public class InterfaceParser extends PrefixParser {
           paramExprs[i] = Expr.string(typeParams.get(i));
         }
         
-        Expr paramArray = Expr.message(Expr.name("Array"), "of",
+        Expr paramArray = Expr.message(position, Expr.name("Array"), "of",
             Expr.tuple(paramExprs));
         
         exprs.add(Expr.var(position, name,
-            Expr.message(Expr.name("GenericInterface"), Name.NEW,
+            Expr.message(position, Expr.name("GenericInterface"), Name.NEW,
                 Expr.tuple(Expr.string(name), paramArray))));
       }
     }
@@ -91,26 +91,35 @@ public class InterfaceParser extends PrefixParser {
       }
       
       // Parse the name.
+      Position startPos = parser.current().getPosition();
       String member = parser.consumeAny(
           TokenType.NAME, TokenType.OPERATOR).getString();
       
       if (memberType.equals("def")) {
         FunctionType function = parser.parseFunctionType();
         
-        Expr methodType = Expr.message(Expr.name("Function"),
+        Expr methodType = Expr.message(
+            startPos.union(parser.last(1).getPosition()),
+            Expr.name("Function"),
             Name.NEW_TYPE, Expr.tuple(function.getParamType(),
                 function.getReturnType(), Expr.bool(false)));
-        exprs.add(Expr.message(Expr.name(name), Name.DECLARE_METHOD,
+        exprs.add(Expr.message(
+            startPos.union(parser.last(1).getPosition()),
+            Expr.name(name), Name.DECLARE_METHOD,
             Expr.tuple(Expr.string(member),
                 makeTypeFunction(typeParams, methodType))));
       } else if (memberType.equals("get")) {
         Expr getterType = TypeParser.parse(parser);
-        exprs.add(Expr.message(Expr.name(name), Name.DECLARE_GETTER,
+        exprs.add(Expr.message(
+            startPos.union(parser.last(1).getPosition()),
+            Expr.name(name), Name.DECLARE_GETTER,
             Expr.tuple(Expr.string(member),
                 makeTypeFunction(typeParams, getterType))));
       } else if (memberType.equals("set")) {
         Expr setterType = TypeParser.parse(parser);
-        exprs.add(Expr.message(Expr.name(name), Name.DECLARE_SETTER,
+        exprs.add(Expr.message(
+            startPos.union(parser.last(1).getPosition()),
+            Expr.name(name), Name.DECLARE_SETTER,
             Expr.tuple(Expr.string(member),
                 makeTypeFunction(typeParams, setterType))));
       }
