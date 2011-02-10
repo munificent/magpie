@@ -6,6 +6,7 @@ import java.util.List;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.ast.pattern.*;
 import com.stuffwithstuff.magpie.parser.Position;
+import com.stuffwithstuff.magpie.parser.TokenType;
 import com.stuffwithstuff.magpie.util.Expect;
 import com.stuffwithstuff.magpie.util.Pair;
 
@@ -25,6 +26,11 @@ public class MagpieToJava {
   public static Pattern convertPattern(Interpreter interpreter, Obj pattern) {
     MagpieToJava converter = new MagpieToJava(interpreter);
     return converter.convertPattern(pattern);
+  }
+  
+  public static TokenType convertTokenType(Interpreter interpreter, Obj tokenType) {
+    MagpieToJava converter = new MagpieToJava(interpreter);
+    return converter.convertTokenType(tokenType);
   }
   
   private MagpieToJava(Interpreter interpreter) {
@@ -309,6 +315,39 @@ public class MagpieToJava {
     return new FunctionType(typeParams, pattern, returnType);
   }
 
+  private TokenType convertTokenType(Obj tokenType) {
+    Obj value = getMember(tokenType, "value");
+    
+    // Note: the values here must be kept in sync with the order that they
+    // are defined in Token.mag.
+    TokenType type;
+    switch (value.asInt()) {
+    case 0: type = TokenType.LEFT_PAREN; break;
+    case 1: type = TokenType.RIGHT_PAREN; break;
+    case 2: type = TokenType.LEFT_BRACKET; break;
+    case 3: type = TokenType.RIGHT_BRACKET; break;
+    case 4: type = TokenType.LEFT_BRACE; break;
+    case 5: type = TokenType.RIGHT_BRACE; break;
+    case 6: type = TokenType.COMMA; break;
+    case 7: type = TokenType.DOT; break;
+    case 8: type = TokenType.EQUALS; break;
+    case 9: type = TokenType.LINE; break;
+    case 10: type = TokenType.NAME; break;
+    case 11: type = TokenType.FIELD; break;
+    case 12: type = TokenType.OPERATOR; break;
+    case 13: type = TokenType.BOOL; break;
+    case 14: type = TokenType.INT; break;
+    case 15: type = TokenType.STRING; break;
+    case 16: type = TokenType.EOF; break;
+    default:
+      // TODO(bob): Better error reporting.
+      mInterpreter.throwError("ParseError");
+      type = TokenType.EOF;
+    }
+    
+    return type;
+  }
+  
   private List<Obj> getArray(Obj obj, String name) {
     return getMember(obj, name).asArray();
   }

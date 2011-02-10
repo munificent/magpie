@@ -14,6 +14,8 @@ import com.stuffwithstuff.magpie.ast.pattern.TuplePattern;
 import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
 import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.parser.Position;
+import com.stuffwithstuff.magpie.parser.Token;
+import com.stuffwithstuff.magpie.parser.TokenType;
 import com.stuffwithstuff.magpie.util.Pair;
 
 public class JavaToMagpie {
@@ -21,15 +23,25 @@ public class JavaToMagpie {
       EvalContext context) {
     
     JavaToMagpie javaToMagpie = new JavaToMagpie(interpreter, context);
-    return javaToMagpie.convert(expr);
+    return javaToMagpie.convertExpr(expr);
   }
   
   public static Obj convert(Interpreter interpreter, Pattern pattern,
       EvalContext context) {
     JavaToMagpie javaToMagpie = new JavaToMagpie(interpreter, context);
-    return javaToMagpie.convert(pattern);
+    return javaToMagpie.convertPattern(pattern);
   }
 
+  public static Obj convert(Interpreter interpreter, TokenType type) {
+    JavaToMagpie javaToMagpie = new JavaToMagpie(interpreter, null);
+    return javaToMagpie.convertTokenType(type);
+  }
+  
+  public static Obj convert(Interpreter interpreter, Token token) {
+    JavaToMagpie javaToMagpie = new JavaToMagpie(interpreter, null);
+    return javaToMagpie.convertToken(token);
+  }
+  
   private class ExprConverter implements ExprVisitor<Obj, Void> {
     @Override
     public Obj visit(AssignExpr expr, Void dummy) {
@@ -43,7 +55,7 @@ public class JavaToMagpie {
     @Override
     public Obj visit(BlockExpr expr, Void dummy) {
       return construct("BlockExpression",
-          "expressions",     convert(expr.getExpressions()),
+          "expressions",     convertList(expr.getExpressions()),
           "catchExpression", expr.getCatch());
     }
 
@@ -64,7 +76,7 @@ public class JavaToMagpie {
     public Obj visit(CallExpr expr, Void dummy) {
       return construct("CallExpression",
           "target",   expr.getTarget(),
-          "typeArgs", convert(expr.getTypeArgs()),
+          "typeArgs", convertList(expr.getTypeArgs()),
           "argument", expr.getArg());
     }
 
@@ -74,7 +86,7 @@ public class JavaToMagpie {
       List<Obj> typeParams = new ArrayList<Obj>();
       for (Pair<String, Expr> typeParam : type.getTypeParams()) {
         Obj name = mInterpreter.createString(typeParam.getKey());
-        Obj constraint = convert(typeParam.getValue());
+        Obj constraint = convertObject(typeParam.getValue());
         typeParams.add(mInterpreter.createTuple(name, constraint));
       }
       Obj typeParamsObj = mInterpreter.createArray(typeParams);
@@ -145,7 +157,7 @@ public class JavaToMagpie {
       List<Obj> fields = new ArrayList<Obj>();
       for (Pair<String, Expr> field : expr.getFields()) {
         Obj name = mInterpreter.createString(field.getKey());
-        Obj value = convert(field.getValue());
+        Obj value = convertObject(field.getValue());
         fields.add(mInterpreter.createTuple(name, value));
       }
 
@@ -183,7 +195,7 @@ public class JavaToMagpie {
     @Override
     public Obj visit(TupleExpr expr, Void dummy) {
       return construct("TupleExpression",
-          "fields", convert(expr.getFields()));
+          "fields", convertList(expr.getFields()));
     }
 
     @Override
@@ -243,7 +255,7 @@ public class JavaToMagpie {
       List<Obj> fields = new ArrayList<Obj>();
       for (Pair<String, Pattern> field : pattern.getFields()) {
         Obj name = mInterpreter.createString(field.getKey());
-        Obj value = convert(field.getValue());
+        Obj value = convertObject(field.getValue());
         fields.add(mInterpreter.createTuple(name, value));
       }
 
@@ -254,7 +266,7 @@ public class JavaToMagpie {
     @Override
     public Obj visit(TuplePattern pattern, Void dummy) {
       return construct("TuplePattern",
-          "fields", convert(pattern.getFields()));
+          "fields", convertList(pattern.getFields()));
     }
 
     @Override
@@ -275,36 +287,14 @@ public class JavaToMagpie {
     Map<String, Obj> fields = new HashMap<String, Obj>();
     
     for (int i = 0; i < args.length; i += 2) {
-      String name = (String) args[i];
-      
-      Obj value;
-      Object rawValue = args[i + 1];
-      if (rawValue == null) {
-        value = mInterpreter.nothing();
-      } else if (rawValue instanceof Boolean) {
-        value = mInterpreter.createBool((Boolean) rawValue);
-      } else if (rawValue instanceof Integer) {
-        value = mInterpreter.createInt((Integer) rawValue);
-      } else if (rawValue instanceof String) {
-        value = mInterpreter.createString((String) rawValue);
-      } else if (rawValue instanceof Expr) {
-        value = convert((Expr) rawValue);
-      } else if (rawValue instanceof Position) {
-        value = convert((Position) rawValue);
-      } else if (rawValue instanceof Pattern) {
-        value = convert((Pattern) rawValue);
-      } else {
-        value = (Obj) rawValue;
-      }
-      
-      fields.put(name, value);
+      fields.put((String) args[i], convertObject(args[i + 1]));
     }
     
     return mInterpreter.invokeMethod(mInterpreter.getGlobal(className),
         "construct", mInterpreter.createRecord(fields));
   }
   
-  private Obj convert(Position position) {
+  private Obj convertPosition(Position position) {
     return construct("Position",
         "file",      position.getSourceFile(),
         "startLine", position.getStartLine(),
@@ -313,32 +303,86 @@ public class JavaToMagpie {
         "endCol",    position.getEndCol());
   }
   
-  private Obj convert(Expr expr) {
+  private Obj convertExpr(Expr expr) {
     if (expr == null) return mInterpreter.nothing();
     ExprConverter converter = new ExprConverter();
     return expr.accept(converter, null);
   }
 
-  private Obj convert(Pattern pattern) {
+  private Obj convertPattern(Pattern pattern) {
     if (pattern == null) return mInterpreter.nothing();
     
     PatternConverter converter = new PatternConverter();
     return pattern.accept(converter, null);
   }
   
-  private Obj convert(Object object) {
+  private Obj convertToken(Token token) {
+    if (token == null) return mInterpreter.nothing();
+    
+    return construct("Token",
+        "tokenType", token.getType(),
+        "value",     token.getValue());
+  }
+  
+  private Obj convertTokenType(TokenType type) {
+    // Note: the values here must be kept in sync with the order that they
+    // are defined in Token.mag.
+    int tokenTypeValue;
+    String tokenTypeName;
+    switch (type) {
+    case LEFT_PAREN: tokenTypeValue = 0; tokenTypeName = "leftParen"; break;
+    case RIGHT_PAREN: tokenTypeValue = 1; tokenTypeName = "rightParen"; break;
+    case LEFT_BRACKET: tokenTypeValue = 2; tokenTypeName = "leftBracket"; break;
+    case RIGHT_BRACKET: tokenTypeValue = 3; tokenTypeName = "rightBracket"; break;
+    case LEFT_BRACE: tokenTypeValue = 4; tokenTypeName = "leftBrace"; break;
+    case RIGHT_BRACE: tokenTypeValue = 5; tokenTypeName = "leftBrace"; break;
+    case COMMA: tokenTypeValue = 6; tokenTypeName = "comma"; break;
+    case DOT: tokenTypeValue = 7; tokenTypeName = "dot"; break;
+    case EQUALS: tokenTypeValue = 8; tokenTypeName = "equals"; break;
+    case LINE: tokenTypeValue = 9; tokenTypeName = "line"; break;
+
+    case NAME: tokenTypeValue = 10; tokenTypeName = "identifier"; break;
+    case FIELD: tokenTypeValue = 11; tokenTypeName = "field"; break;
+    case OPERATOR: tokenTypeValue = 12; tokenTypeName = "operator"; break;
+
+    case BOOL: tokenTypeValue = 13; tokenTypeName = "boolLiteral"; break;
+    case INT: tokenTypeValue = 14; tokenTypeName = "intLiteral"; break;
+    case STRING: tokenTypeValue = 15; tokenTypeName = "stringLiteral"; break;
+
+    case EOF: tokenTypeValue = 16; tokenTypeName = "eof"; break;
+
+    default:
+      // TODO(bob): Better error reporting.
+      mInterpreter.throwError("ParseError");
+      tokenTypeValue = -1;    
+      tokenTypeName = "";
+    }
+    
+    return construct("TokenType",
+        "name", tokenTypeName,
+        "value", tokenTypeValue);    
+  }
+  
+  private Obj convertObject(Object object) {
     if (object == null) return mInterpreter.nothing();
-    if (object instanceof Expr) return convert((Expr) object);
-    if (object instanceof Pattern) return convert((Pattern) object);
+    if (object instanceof Obj) return (Obj) object;
+    if (object instanceof Boolean) return mInterpreter.createBool((Boolean) object);
+    if (object instanceof Integer) return mInterpreter.createInt((Integer) object);
+    if (object instanceof String) return mInterpreter.createString((String) object);
+    if (object instanceof Expr) return convertExpr((Expr) object);
+    if (object instanceof Pattern) return convertPattern((Pattern) object);
+    if (object instanceof Position) return convertPosition((Position) object);
+    if (object instanceof Token) return convertToken((Token) object);
+    if (object instanceof TokenType) return convertTokenType((TokenType) object);
     
     throw new UnsupportedOperationException("Don't know how to convert an " +
         "object of type " + object.getClass().getSimpleName() + ".");
   }
   
-  private Obj convert(List<?> values) {
+  private Obj convertList(List<?> values) {
     List<Obj> objs = new ArrayList<Obj>();
     for (Object value : values) {
-      objs.add(convert(value));
+      objs.add(convertObject(value));
     }
     return mInterpreter.createArray(objs);
   }

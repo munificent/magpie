@@ -2,7 +2,6 @@ package com.stuffwithstuff.magpie.interpreter.builtin;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
-import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.JavaToMagpie;
 import com.stuffwithstuff.magpie.interpreter.MagpieToJava;
@@ -15,7 +14,6 @@ import com.stuffwithstuff.magpie.parser.PrefixParser;
 import com.stuffwithstuff.magpie.parser.Token;
 import com.stuffwithstuff.magpie.parser.TokenType;
 import com.stuffwithstuff.magpie.parser.TypeParser;
-import com.stuffwithstuff.magpie.util.Expect;
 import com.stuffwithstuff.magpie.util.Pair;
 
 public class MagpieParserBuiltIns {
@@ -80,10 +78,10 @@ public class MagpieParserBuiltIns {
       } else if (arg == interpreter.nothing()) {
         token = parser.consume();
       } else {
-        token = parser.consume(convertType(interpreter, arg));
+        token = parser.consume(MagpieToJava.convertTokenType(interpreter, arg));
       }
       
-      return convertToken(interpreter, token);
+      return JavaToMagpie.convert(interpreter, token);
     }
   }
   
@@ -95,11 +93,11 @@ public class MagpieParserBuiltIns {
       int numTypes = arg.getField("count").asInt();
       TokenType[] types = new TokenType[numTypes];
       for (int i = 0; i < numTypes; i++) {
-        types[i] = convertType(interpreter, arg.getTupleField(i));
+        types[i] = MagpieToJava.convertTokenType(interpreter, arg.getTupleField(i));
       }
 
       Token token = parser.consumeAny(types);
-      return convertToken(interpreter, token);
+      return JavaToMagpie.convert(interpreter, token);
     }
   }
   
@@ -138,7 +136,7 @@ public class MagpieParserBuiltIns {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       MagpieParser parser = (MagpieParser) thisObj.getValue();
       
-      TokenType tokenType = convertType(interpreter, arg);
+      TokenType tokenType = MagpieToJava.convertTokenType(interpreter, arg);
       return interpreter.createBool(parser.match(tokenType));
     }
   }
@@ -155,7 +153,7 @@ public class MagpieParserBuiltIns {
         String keyword2 = arg.getTupleField(1).asString();
         result = parser.parseBlock(keyword1, keyword2);
       } else if (arg.getClassObj() == interpreter.getGlobal("TokenType")) {
-        TokenType token = convertType(interpreter, arg);
+        TokenType token = MagpieToJava.convertTokenType(interpreter, arg);
         result = parser.parseBlock(token);
       } else {
         String keyword = arg.asString();
@@ -164,7 +162,7 @@ public class MagpieParserBuiltIns {
       
       Obj expr = JavaToMagpie.convert(interpreter, result.getKey(), 
           interpreter.createTopLevelContext());
-      Obj token = convertToken(interpreter, result.getValue());
+      Obj token = JavaToMagpie.convert(interpreter, result.getValue());
       return interpreter.createTuple(expr, token);
     }
   }
@@ -240,115 +238,15 @@ public class MagpieParserBuiltIns {
       int numTypes = arg.getField("count").asInt();
       types = new TokenType[numTypes];
       for (int i = 0; i < numTypes; i++) {
-        types[i] = convertType(interpreter, arg.getTupleField(i));
+        types[i] = MagpieToJava.convertTokenType(interpreter, arg.getTupleField(i));
       }
     } else {
       // Just one token type.
       types = new TokenType[1];
-      types[0] = convertType(interpreter, arg);
+      types[0] = MagpieToJava.convertTokenType(interpreter, arg);
     }
     
     return types;
-  }
-
-  private static TokenType convertType(Interpreter interpreter, Obj tokenType) {
-    Obj value = tokenType.getField("value");
-    Expect.notNull(value);
-    
-    // Note: the values here must be kept in sync with the order that they
-    // are defined in Token.mag.
-    TokenType type;
-    switch (value.asInt()) {
-    case 0: type = TokenType.LEFT_PAREN; break;
-    case 1: type = TokenType.RIGHT_PAREN; break;
-    case 2: type = TokenType.LEFT_BRACKET; break;
-    case 3: type = TokenType.RIGHT_BRACKET; break;
-    case 4: type = TokenType.LEFT_BRACE; break;
-    case 5: type = TokenType.RIGHT_BRACE; break;
-    case 6: type = TokenType.COMMA; break;
-    case 7: type = TokenType.DOT; break;
-    case 8: type = TokenType.EQUALS; break;
-    case 9: type = TokenType.LINE; break;
-    case 10: type = TokenType.NAME; break;
-    case 11: type = TokenType.FIELD; break;
-    case 12: type = TokenType.OPERATOR; break;
-    case 13: type = TokenType.BOOL; break;
-    case 14: type = TokenType.INT; break;
-    case 15: type = TokenType.STRING; break;
-    case 16: type = TokenType.EOF; break;
-    default:
-      // TODO(bob): Better error reporting.
-      interpreter.throwError("ParseError");
-      type = TokenType.EOF;
-    }
-    
-    return type;
-  }
-  
-  private static Obj convertToken(Interpreter interpreter, Token token) {
-    if (token == null) {
-      return interpreter.nothing();
-    }
-    
-    Obj tokenType = convertTokenType(interpreter, token.getType());
-    
-    ClassObj tokenClass = (ClassObj) interpreter.getGlobal("Token");
-    Obj tokenObj = interpreter.instantiate(tokenClass, null);
-    tokenObj.setField("tokenType", tokenType);
-    
-    if (token.getValue() instanceof Boolean) {
-      tokenObj.setField("value", interpreter.createBool(token.getBool()));
-    } else if (token.getValue() instanceof Integer) {
-      tokenObj.setField("value", interpreter.createInt(token.getInt()));
-    } else if (token.getValue() instanceof String) {
-      tokenObj.setField("value", interpreter.createString(token.getString()));
-    } else {
-      tokenObj.setField("value", interpreter.nothing());
-    }
-    
-    return tokenObj;
-  }
-  
-  private static Obj convertTokenType(Interpreter interpreter, TokenType type) {
-    // Note: the values here must be kept in sync with the order that they
-    // are defined in Token.mag.
-    int tokenTypeValue;
-    String tokenTypeName;
-    switch (type) {
-    case LEFT_PAREN: tokenTypeValue = 0; tokenTypeName = "leftParen"; break;
-    case RIGHT_PAREN: tokenTypeValue = 1; tokenTypeName = "rightParen"; break;
-    case LEFT_BRACKET: tokenTypeValue = 2; tokenTypeName = "leftBracket"; break;
-    case RIGHT_BRACKET: tokenTypeValue = 3; tokenTypeName = "rightBracket"; break;
-    case LEFT_BRACE: tokenTypeValue = 4; tokenTypeName = "leftBrace"; break;
-    case RIGHT_BRACE: tokenTypeValue = 5; tokenTypeName = "leftBrace"; break;
-    case COMMA: tokenTypeValue = 6; tokenTypeName = "comma"; break;
-    case DOT: tokenTypeValue = 7; tokenTypeName = "dot"; break;
-    case EQUALS: tokenTypeValue = 8; tokenTypeName = "equals"; break;
-    case LINE: tokenTypeValue = 9; tokenTypeName = "line"; break;
-
-    case NAME: tokenTypeValue = 10; tokenTypeName = "identifier"; break;
-    case FIELD: tokenTypeValue = 11; tokenTypeName = "field"; break;
-    case OPERATOR: tokenTypeValue = 12; tokenTypeName = "operator"; break;
-
-    case BOOL: tokenTypeValue = 13; tokenTypeName = "boolLiteral"; break;
-    case INT: tokenTypeValue = 14; tokenTypeName = "intLiteral"; break;
-    case STRING: tokenTypeValue = 15; tokenTypeName = "stringLiteral"; break;
-
-    case EOF: tokenTypeValue = 16; tokenTypeName = "eof"; break;
-
-    default:
-      // TODO(bob): Better error reporting.
-      interpreter.throwError("ParseError");
-      tokenTypeValue = -1;    
-      tokenTypeName = "";
-    }
-    
-    ClassObj tokenTypeClass = (ClassObj) interpreter.getGlobal("TokenType");
-    Obj tokenType = interpreter.instantiate(tokenTypeClass, null);
-    tokenType.setField("value", interpreter.createInt(tokenTypeValue));
-    tokenType.setField("name", interpreter.createString(tokenTypeName));
-    
-    return tokenType;
   }
   
   private static class MagpiePrefixParser extends PrefixParser {
@@ -362,7 +260,7 @@ public class MagpieParserBuiltIns {
       // Wrap the Java parser in a Magpie one.
       Obj parserObj = mInterpreter.instantiate(
           mInterpreter.getMagpieParserClass(), parser);
-      Obj tokenObj = convertToken(mInterpreter, token);
+      Obj tokenObj = JavaToMagpie.convert(mInterpreter, token);
       Obj arg = mInterpreter.createTuple(parserObj, tokenObj);
       
       // Let the Magpie code do the parsing.
@@ -389,7 +287,7 @@ public class MagpieParserBuiltIns {
           mInterpreter.getMagpieParserClass(), parser);
       Obj exprObj = JavaToMagpie.convert(mInterpreter, left,
           mInterpreter.createTopLevelContext());
-      Obj tokenObj = convertToken(mInterpreter, token);
+      Obj tokenObj = JavaToMagpie.convert(mInterpreter, token);
       Obj arg = mInterpreter.createTuple(parserObj, exprObj, tokenObj);
       
       // Let the Magpie code do the parsing.
