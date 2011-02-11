@@ -6,7 +6,7 @@
 //   // to:
 //   +%(a, b)
 //
-// This class is not usually used directly. Instead, the "defop" syntax uses
+// This class is not usually used directly. Instead, the "definfix" syntax uses
 // this when it desugars.
 class OperatorParser
     def parse(parser MagpieParser, left Expression, token Token -> Expression)
@@ -15,10 +15,8 @@ class OperatorParser
 
         var right = parser parseExpression(stickiness)
 
-        // TODO(bob): Get position from token.
         var operator = MessageExpression new(
-            position: Position new(file: "see OperatorParser.mag",
-                startLine: -1, startCol: -1, endLine: -1, endCol: -1),
+            position: token position,
             receiver: nothing,
             name: name)
         { `operator(`left, `right) }
@@ -32,19 +30,19 @@ end
 // Parses a declarative "defoperator" syntax for creating an infix operator. For
 // example:
 //
-//   defoperator ~ 50 (left Stringable, right Strinable -> String)
+//   definfix ~ 50 (left Stringable, right Strinable -> String)
 //       left string concatenate(right string)
 //   end
-class DefOperatorParser
+class DefInfixParser
     def parse(parser MagpieParser, token Token -> Expression)
-        var name = parser consume(TokenType identifier) stringValue
+        // TODO(bob): Change token type to identifier when operator tokens are
+        // gone.
+        var name = parser consume(TokenType operator) stringValue
         var stickiness = parser consume(TokenType intLiteral) intValue
         var function = parser parseFunction()
 
-        // TODO(bob): Get position from token.
         var makeFn = VariableExpression new(
-            position: Position new(file: "see VarParser.mag",
-                startLine: -1, startCol: -1, endLine: -1, endCol: -1),
+            position: token position,
             pattern: VariablePattern new(name: name, typeExpr: nothing),
             value:   function)
 
@@ -56,4 +54,4 @@ class DefOperatorParser
     end
 end
 
-MagpieParser registerPrefixParser("defoperator", DefOperatorParser new())
+MagpieParser registerPrefixParser("definfix", DefInfixParser new())

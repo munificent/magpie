@@ -1,9 +1,7 @@
 // Keyword parser for "break" expressions.
 class BreakParser
     def parse(parser MagpieParser, token Token -> Expression)
-        // TODO(bob): Get position from Token.
-        BreakExpression new(position: Position new(file: "see BreakParser.mag",
-            startLine: -1, startCol: -1, endLine: -1, endCol: -1))
+        BreakExpression new(position: token position)
     end
 end
 

@@ -320,6 +320,7 @@ public class JavaToMagpie {
     if (token == null) return mInterpreter.nothing();
     
     return construct("Token",
+        "position",  token.getPosition(),
         "tokenType", token.getType(),
         "value",     token.getValue());
   }

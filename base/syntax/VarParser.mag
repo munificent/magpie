@@ -5,10 +5,8 @@ class VarParser
         parser consume(TokenType equals)
         %var%("value", parser parseEndBlock())
 
-        // TODO(bob): Get position from Token.
         VariableExpression new(
-            position: Position new(file: "see VarParser.mag",
-                startLine: -1, startCol: -1, endLine: -1, endCol: -1),
+            position: token position,
             pattern: pattern, value: value)
     end
 end
