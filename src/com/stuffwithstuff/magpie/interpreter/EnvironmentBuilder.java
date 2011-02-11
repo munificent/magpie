@@ -105,6 +105,10 @@ public class EnvironmentBuilder {
         .field("position", name("Position"))
         .field("body",     name("Expression"));
 
+    newClass("UnquoteExpression")
+        .field("position", name("Position"))
+        .field("body",     name("Expression"));
+
     newClass("UnsafeCastExpression")
         .field("position", name("Position"))
         .field("type",     name("Expression"))

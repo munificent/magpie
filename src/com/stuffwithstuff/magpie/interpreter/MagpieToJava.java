@@ -84,6 +84,8 @@ public class MagpieToJava {
       return convertTupleExpr(expr);
     } else if (exprClass == mInterpreter.getGlobal("TypeofExpression")) {
       return convertTypeofExpr(expr);
+    } else if (exprClass == mInterpreter.getGlobal("UnquoteExpression")) {
+      return convertUnquoteExpr(expr);
     } else if (exprClass == mInterpreter.getGlobal("UnsafeCastExpression")) {
       return convertUnsafeCastExpr(expr);
     } else if (exprClass == mInterpreter.getGlobal("VariableExpression")) {
@@ -241,6 +243,12 @@ public class MagpieToJava {
         getExpr(expr, "body"));
   }
 
+  private Expr convertUnquoteExpr(Obj expr) {
+    return new TypeofExpr(
+        getPosition(expr),
+        getExpr(expr, "body"));
+  }
+  
   private Expr convertUnsafeCastExpr(Obj expr) {
     return new UnsafeCastExpr(
         getPosition(expr),

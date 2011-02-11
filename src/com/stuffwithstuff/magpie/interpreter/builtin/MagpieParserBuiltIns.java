@@ -160,8 +160,7 @@ public class MagpieParserBuiltIns {
         result = parser.parseBlock(keyword);
       }
       
-      Obj expr = JavaToMagpie.convert(interpreter, result.getKey(), 
-          interpreter.createTopLevelContext());
+      Obj expr = JavaToMagpie.convert(interpreter, result.getKey());
       Obj token = JavaToMagpie.convert(interpreter, result.getValue());
       return interpreter.createTuple(expr, token);
     }
@@ -174,8 +173,7 @@ public class MagpieParserBuiltIns {
       
       Expr expr = parser.parseEndBlock();
       
-      return JavaToMagpie.convert(interpreter, expr, 
-          interpreter.createTopLevelContext());
+      return JavaToMagpie.convert(interpreter, expr);
     }
   }
   
@@ -191,8 +189,7 @@ public class MagpieParserBuiltIns {
       
       Expr expr = parser.parseExpression(stickiness);
       
-      return JavaToMagpie.convert(interpreter, expr, 
-          interpreter.createTopLevelContext());
+      return JavaToMagpie.convert(interpreter, expr);
     }
   }
   
@@ -203,8 +200,7 @@ public class MagpieParserBuiltIns {
       
       Expr expr = parser.parseFunction();
       
-      return JavaToMagpie.convert(interpreter, expr, 
-          interpreter.createTopLevelContext());
+      return JavaToMagpie.convert(interpreter, expr);
     }
   }
   
@@ -215,8 +211,7 @@ public class MagpieParserBuiltIns {
       
       Pattern pattern = PatternParser.parse(parser);
       
-      return JavaToMagpie.convert(interpreter, pattern, 
-          interpreter.createTopLevelContext());
+      return JavaToMagpie.convert(interpreter, pattern);
     }
   }
   
@@ -227,8 +222,7 @@ public class MagpieParserBuiltIns {
       
       Expr expr = TypeParser.parse(parser);
       
-      return JavaToMagpie.convert(interpreter, expr, 
-          interpreter.createTopLevelContext());
+      return JavaToMagpie.convert(interpreter, expr);
     }
   }
   
@@ -285,8 +279,7 @@ public class MagpieParserBuiltIns {
       // Wrap the Java parser in a Magpie one.
       Obj parserObj = mInterpreter.instantiate(
           mInterpreter.getMagpieParserClass(), parser);
-      Obj exprObj = JavaToMagpie.convert(mInterpreter, left,
-          mInterpreter.createTopLevelContext());
+      Obj exprObj = JavaToMagpie.convert(mInterpreter, left);
       Obj tokenObj = JavaToMagpie.convert(mInterpreter, token);
       Obj arg = mInterpreter.createTuple(parserObj, exprObj, tokenObj);
       
