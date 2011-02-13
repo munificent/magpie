@@ -51,12 +51,10 @@ public class ArrayBuiltIns {
       int index = arg.asInt();
       
       // Negative indices count backwards from the end.
-      if (index < 0) {
-        index = elements.size() + index;
-      }
+      if (index < 0) index = elements.size() + index;
       
-      if (index >= elements.size()) {
-        System.out.println();
+      if ((index < 0) || (index >= elements.size())) {
+        interpreter.throwError("OutOfBoundsError");
       }
       
       return elements.get(index);

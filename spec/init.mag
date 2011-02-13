@@ -43,6 +43,7 @@ import("check/record.mag")
 import("check/return.mag")
 import("check/var.mag")
 
+import("core/Array/call.mag")
 import("core/Class/construct.mag")
 import("core/Class/defineField.mag")
 import("core/Class/defineGetter.mag")

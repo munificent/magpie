@@ -30,25 +30,25 @@ class TestSuite
         currentTestSuite = suite
         suite
     end
-    
+
     def should(description String, block Nothing => Nothing ->)
         currentTest = description
         var testsBefore = totalTests
         failedTest = false
-        
+
         do
             block()
         catch Error then
             fail("Unexpected error: " ~ it)
         end
-        
+
         if totalTests == testsBefore then
             print("NONE: " ~ name ~ " should " ~ currentTest ~ ".")
         end
     end
-    
+
     def pass(->) advance()
-        
+
     def fail(message String ->)
         if failedTest not then
             print("FAIL: " ~ name ~ " should " ~ currentTest ~ ".")
@@ -64,12 +64,12 @@ class TestSuite
         // Show the progress.
         if (totalTests % 10) == 0 then prints(".")
     end
-    
+
     var name        String
     var currentTest String = ""
     var failedTest  Bool   = false
 end
-        
+
 def fail(message String ->)
     currentTestSuite fail(message)
 end
@@ -113,19 +113,22 @@ def Function shouldNotCheck()
 end
 
 // Verifies that a function throws an error of the given class. Will execute the
-// function. 
+// function.
 def Function shouldThrow(errorClass Class ->)
     var caught = false
     do
         this()
     catch err Error then
-        err type shouldBe(errorClass)
+        err type shouldBe(errorClass, "Should have thrown an error of class " ~
+            errorClass ~ " but got an error of class " ~ Reflect getClass(err) ~
+            " instead.")
         caught = true
     end
-    caught shouldBe(true)
+    caught shouldBe(true, "Should have thrown an error of class " ~ errorClass ~
+        " but no error was thrown.")
 end
 
-// Verifies that a function does not throw an error. Will execute the function. 
+// Verifies that a function does not throw an error. Will execute the function.
 def Function shouldNotThrow()
     var caught = false
     do

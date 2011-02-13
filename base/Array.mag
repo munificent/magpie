@@ -1,6 +1,6 @@
 extend class Array
     shared def new(-> Array) Array of()
-    
+
     shared def assignsFrom?(other Type -> Bool)
         if this == other then
             true
@@ -8,7 +8,7 @@ extend class Array
             true
         else false
     end
-    
+
     get string String =
         var text = "["
         for i = 0 until(count) do
@@ -37,7 +37,7 @@ extend class Array
 
     def sortByString(-> Array)
         var result = copy()
-    
+
         // TODO(bob): Awful bubble sort FTW!
         for i = 0 until(result count) do
             for j = (i + 1) until(result count) do
@@ -48,7 +48,7 @@ extend class Array
                 end
             end
         end
-    
+
         result
     end
 
@@ -59,7 +59,7 @@ extend class Array
                 result add(item)
             else if result(-1) != item then result add(item)
         end
-    
+
         result
     end
 
@@ -91,7 +91,7 @@ class ArrayIterator
     shared def new(array Array -> ArrayIterator)
         construct(array: array)
     end
-    
+
     // TODO(bob): Need generics for return type.
     get current Dynamic = array(index)
 

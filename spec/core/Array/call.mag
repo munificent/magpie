@@ -1,0 +1,25 @@
+specify("Calling an Array") with
+    it should("return the item at the given index") with
+        var a = Array of("a", "b", "c")
+        a(0) shouldBe("a")
+        a(1) shouldBe("b")
+        a(2) shouldBe("c")
+    end
+
+    it should("count backwards from the end if the index is negative") with
+        var a = Array of("a", "b", "c")
+        a(-1) shouldBe("c")
+        a(-2) shouldBe("b")
+        a(-3) shouldBe("a")
+    end
+
+    it should("throw an OutOfBoundsError if the index is out of bounds") with
+        var a = Array of("a", "b", "c")
+        fn
+            a(3)
+        end shouldThrow(OutOfBoundsError)
+        fn
+            a(-4)
+        end shouldThrow(OutOfBoundsError)
+    end
+end
