@@ -6,6 +6,7 @@ import java.util.List;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.ast.pattern.*;
 import com.stuffwithstuff.magpie.parser.Position;
+import com.stuffwithstuff.magpie.parser.Token;
 import com.stuffwithstuff.magpie.parser.TokenType;
 import com.stuffwithstuff.magpie.util.Expect;
 import com.stuffwithstuff.magpie.util.Pair;
@@ -26,6 +27,11 @@ public class MagpieToJava {
   public static Pattern convertPattern(Interpreter interpreter, Obj pattern) {
     MagpieToJava converter = new MagpieToJava(interpreter);
     return converter.convertPattern(pattern);
+  }
+  
+  public static Token convertToken(Interpreter interpreter, Obj token) {
+    MagpieToJava converter = new MagpieToJava(interpreter);
+    return converter.convertToken(token);
   }
   
   public static TokenType convertTokenType(Interpreter interpreter, Obj tokenType) {
@@ -321,6 +327,14 @@ public class MagpieToJava {
     Pattern pattern = convertPattern(patternObj);
     
     return new FunctionType(typeParams, pattern, returnType);
+  }
+
+  private Token convertToken(Obj token) {
+    Position position = getPosition(token);
+    TokenType type = convertTokenType(getMember(token, "tokenType"));
+    Object value = getMember(token, "value").getValue();
+    
+    return new Token(position, type, value);
   }
 
   private TokenType convertTokenType(Obj tokenType) {
