@@ -1,7 +1,6 @@
 package com.stuffwithstuff.magpie.parser;
 
 import java.util.*;
-import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
@@ -12,70 +11,14 @@ import com.stuffwithstuff.magpie.util.Expect;
 import com.stuffwithstuff.magpie.util.Pair;
 
 public class MagpieParser extends Parser {  
-  public MagpieParser(Lexer lexer,
-      Map<String, PrefixParser> prefixParsers,
-      Map<String, InfixParser> infixParsers,
-      Set<String> reservedWords) {
+  public MagpieParser(Lexer lexer, Grammar grammar) {
     super(lexer);
     
-    // Register the built-in parsers.
-    mPrefixParsers.define(TokenType.BOOL, new LiteralParser());
-    mPrefixParsers.define(TokenType.INT, new LiteralParser());
-    mPrefixParsers.define(TokenType.STRING, new LiteralParser());
-    mPrefixParsers.define(TokenType.LEFT_PAREN, new ParenthesisPrefixParser());
-    mPrefixParsers.define(TokenType.LEFT_BRACE, new BraceParser());
-    mPrefixParsers.define(TokenType.BACKTICK, new BacktickParser());
-    mPrefixParsers.define(TokenType.NAME, new MessagePrefixParser());
-    mPrefixParsers.define(TokenType.FIELD, new FieldParser());
-    mPrefixParsers.define("fn", new FnParser());
-    mPrefixParsers.define("nothing", new NothingParser());
-    mPrefixParsers.define("this", new ThisParser());
-
-    mInfixParsers.define(TokenType.LEFT_PAREN, new ParenthesisInfixParser());
-    mInfixParsers.define(TokenType.NAME, new MessageInfixParser());
-    mInfixParsers.define(TokenType.LEFT_BRACKET, new BracketParser());
-    mInfixParsers.define(TokenType.OPERATOR, new OperatorParser());
-    mInfixParsers.define("with", new WithParser());
-    mInfixParsers.define(TokenType.COMMA, new CommaParser());
-    mInfixParsers.define(TokenType.EQUALS, new EqualsParser());
-
-    // Register the parsers for the different keywords.
-    // TODO(bob): Eventually these should all go away.
-    mPrefixParsers.define("match", new MatchParser());
-    mPrefixParsers.define("for", new LoopParser());
-    mPrefixParsers.define("while", new LoopParser());
-
-    mPrefixParsers.define("do", new DoParser());
-    mPrefixParsers.define("class", new ClassParser());
-    mPrefixParsers.define("extend", new ExtendParser());
-    mPrefixParsers.define("interface", new InterfaceParser());
-    
-    mReservedWords.add("->");
-    mReservedWords.add("case");
-    mReservedWords.add("catch");
-    mReservedWords.add("then");
-    
-    // Register the user-defined parsers.
-    if (prefixParsers != null) {
-      for (Entry<String, PrefixParser> parser : prefixParsers.entrySet()) {
-        mPrefixParsers.define(parser.getKey(), parser.getValue());
-      }
-    }
-
-    if (infixParsers != null) {
-      for (Entry<String, InfixParser> parser : infixParsers.entrySet()) {
-        mInfixParsers.define(parser.getKey(), parser.getValue());
-      }
-    }
-
-    // Register the user-defined reserved words.
-    if (reservedWords != null) {
-      mReservedWords.addAll(reservedWords);
-    }
+    mGrammar = grammar;
   }
   
   public MagpieParser(Lexer lexer) {
-    this(lexer, null, null, null);
+    this(lexer, new Grammar());
   }
   
   public Expr parseTopLevelExpression() {
@@ -96,14 +39,14 @@ public class MagpieParser extends Parser {
     // Top down operator precedence parser based on:
     // http://javascript.crockford.com/tdop/tdop.html
     Token token = consume();
-    PrefixParser prefix = mPrefixParsers.get(token);
+    PrefixParser prefix = mGrammar.getPrefixParser(token);
     Expect.notNull(prefix);
     Expr left = prefix.parse(this, token);
     
-    while (stickiness < getStickiness()) {
+    while (stickiness < mGrammar.getStickiness(current())) {
       token = consume();
       
-      InfixParser infix = mInfixParsers.get(token);
+      InfixParser infix = mGrammar.getInfixParser(token);
       left = infix.parse(this, left, token);
     }
     
@@ -224,10 +167,6 @@ public class MagpieParser extends Parser {
     return new FunctionType(typeParams, pattern, returnType);
   }
   
-  public String parseFunctionName() {
-    return consumeAny(TokenType.NAME, TokenType.OPERATOR).getString();
-  }
-  
   public boolean inQuotation() {
     return mQuoteDepth > 0;
   }
@@ -267,46 +206,7 @@ public class MagpieParser extends Parser {
    */
   @Override
   protected boolean isKeyword(String name) {
-    return mPrefixParsers.isReserved(name) ||
-        mInfixParsers.isReserved(name) ||
-        mReservedWords.contains(name);
-  }
-  
-  private int getStickiness() {
-    int stickiness = 0;
-    
-    // A reserved word can't start an infix expression. Prevents us from
-    // parsing a keyword as an identifier.
-    if (isReserved(current())) return 0;
-    
-    // If we have a prefix parser for this token's name, then that takes
-    // precedence. Prevents us from parsing a keyword as an identifier.
-    if ((current().getValue() instanceof String) &&
-        mPrefixParsers.isReserved(current().getString())) return 0;
-
-    InfixParser parser = mInfixParsers.get(current());
-    if (parser != null) {
-      stickiness = parser.getStickiness();
-    }
-    
-    return stickiness;
-  }
-
-  /**
-   * Gets whether or not this token is a reserved word. Reserved words like
-   * "else" and "then" are claimed for special use by mixfix parsers, so can't
-   * be parsed on their own.
-   * 
-   * @param   token  The token to test
-   * @return         True if the token is a reserved name token.
-   */
-  private boolean isReserved(Token token) {
-    if ((token.getType() == TokenType.NAME) ||
-        (token.getType() == TokenType.OPERATOR)) {
-      return mReservedWords.contains(token.getString());
-    }
-    
-    return false;
+    return mGrammar.isKeyword(name);
   }
   
   private Pair<Expr, Token> parseBlock(boolean parseCatch,
@@ -379,11 +279,7 @@ public class MagpieParser extends Parser {
     return new MatchCase(pattern, body.getKey());
   }
 
-  private final ParserTable<PrefixParser> mPrefixParsers =
-      new ParserTable<PrefixParser>();
-  private final ParserTable<InfixParser> mInfixParsers =
-      new ParserTable<InfixParser>();
-  private final Set<String> mReservedWords = new HashSet<String>();
+  private final Grammar mGrammar;
   
   // Counts the number of nested expression literals the parser is currently
   // within. Zero means the parser is not inside an expression literal at all

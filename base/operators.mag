@@ -36,8 +36,29 @@ definfix + 80 (left Int, right Int -> Int)
     Int add(left, right)
 end
 
+definfix - 80 (left Int, right Int -> Int)
+    Int subtract(left, right)
+end
+
+definfix * 80 (left Int, right Int -> Int)
+    Int multiply(left, right)
+end
+
+definfix / 80 (left Int, right Int -> Int)
+    Int divide(left, right)
+end
+
+definfix % 80 (left Int, right Int -> Int)
+    Int modulo(left, right)
+end
+
+
 definfix ~ 80 (left Stringable, right Stringable -> String)
     left string concatenate(right string)
+end
+
+definfix ~~ 80 (left Stringable, right Stringable -> String)
+    left ~ " " ~ right
 end
 
 // Add an arrow operator to make function types out of other types:

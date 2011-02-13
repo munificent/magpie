@@ -90,7 +90,7 @@ extend class ThisExpression
 end
 
 extend class TupleExpression
-    get string String = String join(fields)
+    get string String = String join(fields, ", ")
 end
 
 extend class TypeofExpression

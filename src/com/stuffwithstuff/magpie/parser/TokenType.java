@@ -16,7 +16,6 @@ public enum TokenType {
   // identifiers
   NAME,
   FIELD,      // a record field like "x:"
-  OPERATOR,
   TYPE_PARAM, // a type parameter in a pattern like 'T
 
   // literals

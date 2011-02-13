@@ -4,6 +4,6 @@
 // Implement Trueable for the built-in classes.
 Object  defineGetter("true?", fn(-> Bool) true)
 Bool    defineGetter("true?", fn(-> Bool) this)
-Int     defineGetter("true?", fn(-> Bool) this != 0)
-String  defineGetter("true?", fn(-> Bool) this count > 0)
+Int     defineGetter("true?", fn(-> Bool) !=(this, 0))
+String  defineGetter("true?", fn(-> Bool) >(this count, 0))
 Nothing defineGetter("true?", fn(-> Bool) false)

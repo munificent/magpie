@@ -55,6 +55,10 @@ public class ArrayBuiltIns {
         index = elements.size() + index;
       }
       
+      if (index >= elements.size()) {
+        System.out.println();
+      }
+      
       return elements.get(index);
     }
   }

@@ -35,9 +35,7 @@ end
 //   end
 class DefInfixParser
     def parse(parser MagpieParser, token Token -> Expression)
-        // TODO(bob): Change token type to identifier when operator tokens are
-        // gone.
-        var name = parser consume(TokenType operator) stringValue
+        var name = parser consume(TokenType identifier) stringValue
         var stickiness = parser consume(TokenType intLiteral) intValue
         var function = parser parseFunction()
 

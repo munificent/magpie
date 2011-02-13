@@ -5,7 +5,7 @@ end
 RecordPattern declareField("fields", false, { List(String, Pattern) })
 
 class TuplePattern
-    get string String = String join(fields)
+    get string String = String join(fields, ", ")
 end
 
 TuplePattern declareField("fields", false, { List(Pattern) })
@@ -17,8 +17,9 @@ end
 ValuePattern declareField("value", false, { Expression })
 
 class VariablePattern
-    get string String = name ~~ typeExpr
+    get string String = name concatenate(" ") concatenate(typeExpr string)
 end
 
 VariablePattern declareField("name", false, { String })
-VariablePattern declareField("typeExpr", false, { Expression | Nothing })
+VariablePattern declareField("typeExpr", false,
+    { OrType combine(Expression, Nothing) })

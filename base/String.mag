@@ -9,8 +9,7 @@ extend class String
     end
 
     // TODO(bob): Should just take Iterable[Stringable]
-    shared def join(elements,
-                    separator String | Nothing -> String)
+    shared def join(elements, separator String -> String)
         var knownSeparator = separator or ", "
         var result = ""
         for element = elements do

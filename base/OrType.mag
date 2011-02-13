@@ -68,7 +68,7 @@ class OrType
         // Union the member types of all of the cases.
         var memberType = cases(0) getMemberType(name)
         for i = 1 until(cases count) do
-            memberType = memberType | cases(i) getMemberType(name)
+            memberType = OrType combine(memberType, cases(i) getMemberType(name))
         end
 
         memberType

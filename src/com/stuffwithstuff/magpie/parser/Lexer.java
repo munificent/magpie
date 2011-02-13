@@ -32,7 +32,6 @@ public class Lexer {
     case BACKTICK:
     case COMMA:
     case DOT:
-    case OPERATOR:
     case FIELD:
     case LEFT_PAREN:
     case LEFT_BRACKET:
@@ -122,10 +121,10 @@ public class Lexer {
 
     case IN_OPERATOR:
       if (lookAhead("//")) {
-        return createStringToken(TokenType.OPERATOR);
+        return createStringToken(TokenType.NAME);
       }
       if (lookAhead("/*")) {
-        return createStringToken(TokenType.OPERATOR);
+        return createStringToken(TokenType.NAME);
       }
       if (isAlpha(c) || isDigit(c)) {
         return changeToken(LexState.IN_NAME);
@@ -133,7 +132,7 @@ public class Lexer {
       if (isOperator(c)) {
         return advance();
       }
-      return createStringToken(TokenType.OPERATOR);
+      return createStringToken(TokenType.NAME);
 
     case IN_NUMBER:
       if (isDigit(c)) {
@@ -162,10 +161,10 @@ public class Lexer {
       
     case IN_MINUS:
       if (lookAhead("//")) {
-        return createStringToken(TokenType.OPERATOR);
+        return createStringToken(TokenType.NAME);
       }
       if (lookAhead("/*")) {
-        return createStringToken(TokenType.OPERATOR);
+        return createStringToken(TokenType.NAME);
       }
       if (isDigit(c)) {
         return changeToken(LexState.IN_NUMBER);
@@ -173,7 +172,7 @@ public class Lexer {
       if (isOperator(c) || isAlpha(c)) {
         return changeToken(LexState.IN_OPERATOR);
       }
-      return createStringToken(TokenType.OPERATOR);
+      return createStringToken(TokenType.NAME);
 
     case IN_STRING:
       if (match("\"")) {

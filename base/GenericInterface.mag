@@ -3,20 +3,20 @@ class GenericInterface
                    GenericInterface)
         construct(name: name, typeParams: typeParams)
     end
-    
+
     def call(typeArgs -> Interface)
         // See if we've already instantiated it first.
         var typeArgString = typeArgs string
         for instance = instances do
             if instance _0 == typeArgString then return instance _1
         end
-        
+
         var instance = Interface new(name ~ "[" ~ typeArgs string ~ "]")
-        
+
         // Add it to the cache immediately. This is necessary to be able to
         // instantiate recursive interfaces.
         instances add(typeArgString, instance)
-        
+
         for member = members do
             var type = fn(-> Type) member memberType(typeArgs)
             instance members add(Member new(name: member name,
@@ -24,17 +24,17 @@ class GenericInterface
         end
         instance
     end
-    
+
     get string String =
         var result = name ~ "["
-        result = result ~ String join(typeParams)
+        result = result ~ String join(typeParams, ", ")
         result ~ "]"
     end
-    
+
     def declareMethod(name String, type ->)
         members add(GenericMember new(name: name, memberType: type))
     end
-    
+
     def declareGetter(name String, type ->)
         members add(GenericMember new(name: name, memberType: type))
     end

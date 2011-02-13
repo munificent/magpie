@@ -40,6 +40,50 @@ public class IntBuiltIns {
       return interpreter.createInt(left + right);
     }
   }
+
+  @Shared
+  @Signature("subtract(left Int, right Int -> Int)")
+  public static class Subtract implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = arg.getTupleField(0).asInt();
+      int right = arg.getTupleField(1).asInt();
+      
+      return interpreter.createInt(left - right);
+    }
+  }
+  
+  @Shared
+  @Signature("multiply(left Int, right Int -> Int)")
+  public static class Multiply implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = arg.getTupleField(0).asInt();
+      int right = arg.getTupleField(1).asInt();
+      
+      return interpreter.createInt(left * right);
+    }
+  }
+  
+  @Shared
+  @Signature("divide(left Int, right Int -> Int)")
+  public static class Divide implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = arg.getTupleField(0).asInt();
+      int right = arg.getTupleField(1).asInt();
+      
+      return interpreter.createInt(left / right);
+    }
+  }
+  
+  @Shared
+  @Signature("modulo(left Int, right Int -> Int)")
+  public static class Modulo implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      int left = arg.getTupleField(0).asInt();
+      int right = arg.getTupleField(1).asInt();
+      
+      return interpreter.createInt(left % right);
+    }
+  }
   
   @Shared
   @Signature("lessThan?(left Int, right Int -> Bool)")

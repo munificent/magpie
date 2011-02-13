@@ -23,7 +23,7 @@ public class MagpieParserBuiltIns {
       String keyword = arg.getTupleField(0).asString();
       Obj parser = arg.getTupleField(1);
       
-      interpreter.registerParser(keyword,
+      interpreter.getGrammar().registerParser(keyword,
           new MagpiePrefixParser(interpreter, parser));
       return interpreter.nothing();
     }
@@ -36,7 +36,7 @@ public class MagpieParserBuiltIns {
       String keyword = arg.getTupleField(0).asString();
       Obj parser = arg.getTupleField(1);
       
-      interpreter.registerParser(keyword,
+      interpreter.getGrammar().registerParser(keyword,
           new MagpieInfixParser(interpreter, parser));
       return interpreter.nothing();
     }
@@ -48,12 +48,12 @@ public class MagpieParserBuiltIns {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String keyword = arg.asString();
       
-      interpreter.reserveWord(keyword);
+      interpreter.getGrammar().reserveWord(keyword);
       return interpreter.nothing();
     }
   }
   
-  @Signature("consume(token TokenType | String | Nothing -> Token)")
+  @Signature("consume(token OrType combine(OrType combine(TokenType, String), Nothing) -> Token)")
   public static class Consume implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       MagpieParser parser = (MagpieParser) thisObj.getValue();
@@ -140,7 +140,7 @@ public class MagpieParserBuiltIns {
     }
   }
   
-  @Signature("parseBlock(keywords -> (Expression, Token | Nothing))")
+  @Signature("parseBlock(keywords -> (Expression, OrType combine(Token, Nothing)))")
   public static class ParseBlock implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       MagpieParser parser = (MagpieParser) thisObj.getValue();
@@ -176,7 +176,7 @@ public class MagpieParserBuiltIns {
     }
   }
   
-  @Signature("parseExpression(stickiness Int | Nothing -> Expression)")
+  @Signature("parseExpression(stickiness OrType combine(Int, Nothing) -> Expression)")
   public static class ParseExpression implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       MagpieParser parser = (MagpieParser) thisObj.getValue();

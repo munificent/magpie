@@ -4,14 +4,13 @@
 class Token
 end
 
-Token defineGetter("string", fn(-> String) tokenType ~~ value)
-
 Token defineGetter("boolValue", fn(-> Bool) %unsafecast%(Bool, value))
 Token defineGetter("intValue", fn(-> Int) %unsafecast%(Int, value))
 Token defineGetter("stringValue", fn(-> String) %unsafecast%(String, value))
 Token declareField("position", false, { Position })
 Token declareField("tokenType", false, { TokenType })
-Token declareField("value", false, { Bool | Int | Nothing | String })
+Token declareField("value", false,
+    { OrType combine(OrType combine(OrType combine(Bool, Int), Nothing), String) })
 
 Token defineMethod("keyword?",
     // Note: no comparison operators are available yet.
@@ -52,9 +51,8 @@ do
     // out of the class and into Reflect, we can change this to "name" here.
     defToken("identifier",    10)
     defToken("field",         11)
-    defToken("operator",      12)
-    defToken("boolLiteral",   13)
-    defToken("intLiteral",    14)
-    defToken("stringLiteral", 15)
-    defToken("eof",           16)
+    defToken("boolLiteral",   12)
+    defToken("intLiteral",    13)
+    defToken("stringLiteral", 14)
+    defToken("eof",           15)
 end

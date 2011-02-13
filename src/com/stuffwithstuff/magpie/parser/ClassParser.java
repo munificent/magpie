@@ -144,7 +144,7 @@ public class ClassParser extends PrefixParser {
   }
   
   private static Expr parseMethod(MagpieParser parser, Expr theClass) {
-    String name = parser.consumeAny(TokenType.NAME, TokenType.OPERATOR).getString();
+    String name = parser.consume(TokenType.NAME).getString();
     Position position = parser.last(1).getPosition();
     Expr function = parser.parseFunction();
     return Expr.message(position, theClass, Name.DEFINE_METHOD,

@@ -5,16 +5,17 @@ import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.interpreter.builtin.*;
-import com.stuffwithstuff.magpie.parser.InfixParser;
+import com.stuffwithstuff.magpie.parser.Grammar;
 import com.stuffwithstuff.magpie.parser.Lexer;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
 import com.stuffwithstuff.magpie.parser.Position;
-import com.stuffwithstuff.magpie.parser.PrefixParser;
 import com.stuffwithstuff.magpie.util.Expect;
 
 public class Interpreter {
   public Interpreter(InterpreterHost host) {
     mHost = host;
+    
+    mGrammar = new Grammar();
     
     // The class hierarchy is a bit confusing in a language where classes are
     // first class and inheritance is supported. Every object has a class.
@@ -138,7 +139,9 @@ public class Interpreter {
       evaluate(expression, context);
     } catch(ErrorException err) {
       // TODO(bob): Better error message here!
-      mHost.runtimeError(expression.getPosition(), "Uncaught error.");
+      mHost.runtimeError(expression.getPosition(),
+          "Uncaught error of class " + err.getError().getClassObj().getName() +
+          ".");
     }
   }
   
@@ -441,24 +444,11 @@ public class Interpreter {
   }
   
   public MagpieParser createParser(Lexer lexer) {
-    return new MagpieParser(lexer,
-        mPrefixParsers, mInfixParsers, mReservedWords);
-  }
-    
-  public boolean isKeyword(String word) {
-    return mPrefixParsers.containsKey(word) || mReservedWords.contains(word);
+    return new MagpieParser(lexer, mGrammar);
   }
   
-  public void registerParser(String keyword, PrefixParser parser) {
-    mPrefixParsers.put(keyword, parser);
-  }
-  
-  public void registerParser(String keyword, InfixParser parser) {
-    mInfixParsers.put(keyword, parser);
-  }
-  
-  public void reserveWord(String name) {
-    mReservedWords.add(name);
+  public Grammar getGrammar() {
+    return mGrammar;
   }
   
   public ClassObj createClass(String name) {
@@ -591,9 +581,5 @@ public class Interpreter {
   private final Obj mTrue;
   private final Obj mFalse;
   private final Stack<String> mScriptPaths = new Stack<String>();
-  private final Map<String, PrefixParser> mPrefixParsers =
-      new HashMap<String, PrefixParser>();
-  private final Map<String, InfixParser> mInfixParsers =
-      new HashMap<String, InfixParser>();
-  private final Set<String> mReservedWords = new HashSet<String>();
+  private final Grammar mGrammar;
 }

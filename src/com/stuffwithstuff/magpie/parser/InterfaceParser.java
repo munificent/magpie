@@ -92,8 +92,7 @@ public class InterfaceParser extends PrefixParser {
       
       // Parse the name.
       Position startPos = parser.current().getPosition();
-      String member = parser.consumeAny(
-          TokenType.NAME, TokenType.OPERATOR).getString();
+      String member = parser.consumeAny(TokenType.NAME).getString();
       
       if (memberType.equals("def")) {
         FunctionType function = parser.parseFunctionType();

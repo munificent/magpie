@@ -103,7 +103,7 @@ public class NiceReplCharacterReader implements CharacterReader {
           if (token.isKeyword("this") || token.isKeyword("nothing")) {
             // special identifiers
             Term.set(ForeColor.LIGHT_BLUE);
-          } else if (mInterpreter.isKeyword(token.getString())) {
+          } else if (mInterpreter.getGrammar().isKeyword(token.getString())) {
             Term.set(ForeColor.CYAN);
           } else {
             Term.set(ForeColor.WHITE);
@@ -114,10 +114,6 @@ public class NiceReplCharacterReader implements CharacterReader {
           Term.set(Term.ForeColor.GRAY);
           break;
           
-        case OPERATOR:
-          Term.set(Term.ForeColor.WHITE);
-          break;
-  
         case TYPE_PARAM:
           Term.set(Term.ForeColor.GREEN);
           break;

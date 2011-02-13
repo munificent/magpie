@@ -7,9 +7,7 @@
 class DefParser
     def parse(parser MagpieParser, token Token -> Expression)
         match parser lookAhead(TokenType identifier, TokenType leftParen) or
-            parser lookAhead(TokenType identifier, TokenType leftBracket) or
-            parser lookAhead(TokenType operator, TokenType leftParen) or
-            parser lookAhead(TokenType operator, TokenType leftBracket)
+            parser lookAhead(TokenType identifier, TokenType leftBracket)
             case true then
                 // Local function.
                 var name = parser consume() stringValue
@@ -23,8 +21,7 @@ class DefParser
                     value: function)
             else
                 var receiver = parseReceiver(parser)
-                var name = parser consumeAny(TokenType identifier,
-                    TokenType operator) stringValue
+                var name = parser consume(TokenType identifier) stringValue
                 var function = parser parseFunction()
 
                 { `receiver defineMethod(`name, `function) }
