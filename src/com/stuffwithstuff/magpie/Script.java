@@ -8,6 +8,7 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.CheckError;
 import com.stuffwithstuff.magpie.interpreter.Checker;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
@@ -44,8 +45,15 @@ public class Script {
       Lexer lexer = new Lexer(mPath, new StringCharacterReader(mText));
       MagpieParser parser = interpreter.createParser(lexer);
   
-      interpreter.load(parser.parse());
-  
+      // Evaluate every expression in the file. We do this incrementally so
+      // that expressions that define parsers can be used to parse the rest of
+      // the file.
+      while (true) {
+        Expr expr = parser.parseTopLevelExpression();
+        if (expr == null) break;
+        interpreter.interpret(expr);
+      }
+      
       // If there is a main() function, then we need to type-check first:
       if (interpreter.hasMain()) {
         // Do the static analysis and see if we got the errors we expect.

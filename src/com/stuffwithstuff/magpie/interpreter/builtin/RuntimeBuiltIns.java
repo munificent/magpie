@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.Script;
-import com.stuffwithstuff.magpie.ast.BlockExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.CheckError;
 import com.stuffwithstuff.magpie.interpreter.Checker;
@@ -91,18 +90,8 @@ public class RuntimeBuiltIns {
         e.printStackTrace();
       }
       
-      // Pull out the list of expressions. If it's a BlockExpr, we do this so that
-      // it doesn't evaluate the body in a nested scope.
-      List<Expr> exprs;
-      if (expr instanceof BlockExpr) {
-        exprs = ((BlockExpr)expr).getExpressions();
-      } else {
-        exprs = new ArrayList<Expr>();
-        exprs.add(expr);
-      }
+      inner.interpret(expr);
       
-      inner.load(exprs);
-    
       // Do the static analysis and see if we got the errors we expect.
       Checker checker = new Checker(inner);
       checker.checkAll();

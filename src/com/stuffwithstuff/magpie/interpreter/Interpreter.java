@@ -131,20 +131,17 @@ public class Interpreter {
     EnvironmentBuilder.initialize(this);
   }
   
-  public void load(List<Expr> expressions) {
+  public void interpret(Expr expression) {
     EvalContext context = createTopLevelContext();
     
-    // Evaluate the expressions. This is the load time evaluation.
-    for (Expr expr : expressions) {
-      try {
-        evaluate(expr, context);
-      } catch(ErrorException err) {
-        // TODO(bob): Better error message here!
-        mHost.runtimeError(expr.getPosition(), "Uncaught error.");
-      }
+    try {
+      evaluate(expression, context);
+    } catch(ErrorException err) {
+      // TODO(bob): Better error message here!
+      mHost.runtimeError(expression.getPosition(), "Uncaught error.");
     }
   }
-
+  
   public Obj evaluate(Expr expr) {
     return evaluate(expr, createTopLevelContext());
   }

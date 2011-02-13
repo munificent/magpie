@@ -78,19 +78,12 @@ public class MagpieParser extends Parser {
     this(lexer, null, null, null);
   }
   
-  public List<Expr> parse() {
-    // Parse the entire file.
-    List<Expr> expressions = new ArrayList<Expr>();
-    do {
-      expressions.add(parseExpression());
-      
-      // Allow files with no trailing newline.
-      if (match(TokenType.EOF)) break;
-      
-      consume(TokenType.LINE);
-    } while (!match(TokenType.EOF));
-
-    return expressions;
+  public Expr parseTopLevelExpression() {
+    if (lookAhead(TokenType.EOF)) return null;
+    
+    Expr expr = parseExpression();
+    if (!lookAhead(TokenType.EOF)) consume(TokenType.LINE);
+    return expr;
   }
   
   public Expr parseExpression(int stickiness) {
