@@ -244,7 +244,7 @@ public class MagpieToJava {
   }
 
   private Expr convertUnquoteExpr(Obj expr) {
-    return new TypeofExpr(
+    return new UnquoteExpr(
         getPosition(expr),
         getExpr(expr, "body"));
   }
