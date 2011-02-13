@@ -78,7 +78,7 @@ class OrType
 end
 
 // Define a union operator for types:
-def |(left Type, right Type -> Type) OrType combine(left, right)
+definfix | 80 (left Type, right Type -> Type) OrType combine(left, right)
 
 def unsafeRemoveNothing(type Type -> Type)
     match type

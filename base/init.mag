@@ -15,8 +15,6 @@ import("syntax/patterns.mag")
 import("syntax/parsing.mag")
 import("syntax/VarParser.mag")
 
-import("syntax/OperatorParser.mag")
-
 import("syntax/AndParser.mag")
 import("syntax/OrParser.mag")
 
@@ -28,6 +26,8 @@ import("syntax/IfParser.mag")
 import("syntax/ReturnParser.mag")
 import("syntax/TypeofParser.mag")
 import("syntax/UnsafeCastParser.mag")
+
+import("syntax/OperatorParser.mag")
 
 // Need these so that we have == available as early as possible. Match
 // expressions use that to evaluate, and some of the parsers use those, so we

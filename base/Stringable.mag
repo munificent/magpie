@@ -21,10 +21,6 @@ get String string String = this
 get Nothing string String = "nothing"
 get Class string String = name
 
-def ~(left Stringable, right Stringable -> String)
-    left string concatenate(right string)
-end
-
-def ~~(left Stringable, right Stringable -> String)
+definfix ~~ 80 (left Stringable, right Stringable -> String)
     left ~ " " ~ right
 end

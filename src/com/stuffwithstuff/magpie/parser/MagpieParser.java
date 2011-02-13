@@ -86,6 +86,12 @@ public class MagpieParser extends Parser {
     return expr;
   }
   
+  public Expr parseTypeAnnotation() {
+    // Start at just about tuple precedence so that those don't get consumed
+    // by the type.
+    return parseExpression(50);
+  }
+  
   public Expr parseExpression(int stickiness) {
     // Top down operator precedence parser based on:
     // http://javascript.crockford.com/tdop/tdop.html
@@ -175,7 +181,7 @@ public class MagpieParser extends Parser {
         if (lookAheadAny(TokenType.COMMA, TokenType.RIGHT_BRACKET)) {
           constraint = Expr.name("Any");
         } else {
-          constraint = TypeParser.parse(this);
+          constraint = parseTypeAnnotation();
         }
         typeParams.add(new Pair<String, Expr>(name, constraint));
       } while (match(TokenType.COMMA));
@@ -210,7 +216,7 @@ public class MagpieParser extends Parser {
         // An arrow, but no return type, so infer nothing.
         returnType = Expr.name("Nothing");
       } else {
-        returnType = TypeParser.parse(this);
+        returnType = parseTypeAnnotation();
       }
       consume(TokenType.RIGHT_PAREN);
     }

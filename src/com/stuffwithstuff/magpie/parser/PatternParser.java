@@ -89,7 +89,7 @@ public class PatternParser {
     // See if there is a type for the variable.
     Expr type = null;
     if (parser.lookAheadAny(TokenType.NAME, TokenType.LEFT_PAREN)) {
-      type = TypeParser.parse(parser);
+      type = parser.parseTypeAnnotation();
     }
     
     return new VariablePattern(name, type);

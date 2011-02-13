@@ -12,7 +12,6 @@ import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.parser.Lexer;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
 import com.stuffwithstuff.magpie.parser.ParseException;
-import com.stuffwithstuff.magpie.parser.TypeParser;
 import com.stuffwithstuff.magpie.util.Pair;
 
 public abstract class BuiltIns {
@@ -244,7 +243,7 @@ public abstract class BuiltIns {
       Lexer lexer = new Lexer("", new StringCharacterReader(signature));
       MagpieParser parser = new MagpieParser(lexer);
       String name = parser.parseFunctionName();
-      Expr type = TypeParser.parse(parser);
+      Expr type = parser.parseTypeAnnotation();
       
       return new Pair<String, Expr>(name, type);
     } catch (ParseException e) {

@@ -126,7 +126,7 @@ public class ClassParser extends PrefixParser {
     if (parser.lookAhead(TokenType.EQUALS)) {
       type = Expr.nothing();
     } else {
-      Expr typeExpr = TypeParser.parse(parser);
+      Expr typeExpr = parser.parseTypeAnnotation();
       type = Expr.quote(typeExpr.getPosition(), typeExpr);
     }
     
@@ -160,7 +160,7 @@ public class ClassParser extends PrefixParser {
       // If no type is provided, default to Dynamic.
       type = Expr.name("Dynamic");
     } else {
-      type = TypeParser.parse(parser);
+      type = parser.parseTypeAnnotation();
     }
     
     if (parser.match(TokenType.EQUALS)) {

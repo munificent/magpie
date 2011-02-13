@@ -1,0 +1,10 @@
+10 call, message, with
+90 not, unary negate
+80 * / %
+70 + -
+60 ~ concatenate
+50 and or
+40 < > <= >=
+30 == !=
+20 tuple, record
+10 assignment

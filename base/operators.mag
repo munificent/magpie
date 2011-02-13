@@ -1,5 +1,5 @@
 // TODO(bob): Hackish. Need to figure out what the semantics for this should be.
-def ==(left, right -> Bool)
+definfix == 80 (left, right -> Bool)
     // Must be equal if they're the same object.
     if Reflect same?(left, right) then return true
 
@@ -9,45 +9,36 @@ def ==(left, right -> Bool)
     if Reflect same?(leftClass, rightClass) not then return false
 
     // Leave it up to the class to decide.
-    var equalFunc = leftClass equal?
-    if equalFunc != nothing then
-        var equal = equalFunc(left, right)
-        unsafecast[Bool](equal)
-    else
-        // Class doesn't provide an equality function, and they aren't the
-        // same object, so default to not equal.
-        false
-    end
+    leftClass equal?(left, right)
 end
 
-def !=(left, right -> Bool) (left == right) not
+definfix != 80 (left, right -> Bool) (left == right) not
 
-def <(left, right -> Bool)
+definfix < 80 (left, right -> Bool)
     // Leave it up to the class to decide.
-    var lessFunc = Reflect getClass(left) lessThan?
-    if lessFunc != nothing then
-        var less = lessFunc(left, right)
-        unsafecast[Bool](less)
-    else
-        false
-    end
+    // TODO(bob): Figure out better semantics for this.
+    Reflect getClass(left) lessThan?(left, right)
 end
 
-def >(left, right -> Bool)
+definfix > 80 (left, right -> Bool)
     (left < right) not and left != right
 end
 
-def <=(left, right -> Bool)
+definfix <= 80 (left, right -> Bool)
     (left < right) or left == right
 end
 
-def >=(left, right -> Bool)
+definfix >= 80 (left, right -> Bool)
     (left < right) not
 end
 
-def +(left Int, right Int -> Int)
+definfix + 80 (left Int, right Int -> Int)
     Int add(left, right)
 end
 
+definfix ~ 80 (left Stringable, right Stringable -> String)
+    left string concatenate(right string)
+end
+
 // Add an arrow operator to make function types out of other types:
-def =>(left Type, right Type -> Type) FunctionType new(left, right)
+definfix => 80 (left Type, right Type -> Type) FunctionType new(left, right)

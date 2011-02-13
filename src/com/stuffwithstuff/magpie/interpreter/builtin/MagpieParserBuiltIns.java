@@ -13,7 +13,6 @@ import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.parser.PrefixParser;
 import com.stuffwithstuff.magpie.parser.Token;
 import com.stuffwithstuff.magpie.parser.TokenType;
-import com.stuffwithstuff.magpie.parser.TypeParser;
 import com.stuffwithstuff.magpie.util.Pair;
 
 public class MagpieParserBuiltIns {
@@ -220,7 +219,7 @@ public class MagpieParserBuiltIns {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       MagpieParser parser = (MagpieParser) thisObj.getValue();
       
-      Expr expr = TypeParser.parse(parser);
+      Expr expr = parser.parseTypeAnnotation();
       
       return JavaToMagpie.convert(interpreter, expr);
     }

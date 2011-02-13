@@ -11,7 +11,7 @@ public class BracketParser extends InfixParser {
     // A call with type arguments.
     List<Expr> typeArgs = new ArrayList<Expr>();
     do {
-      typeArgs.add(TypeParser.parse(parser));
+      typeArgs.add(parser.parseTypeAnnotation());
     } while(parser.match(TokenType.COMMA));
     parser.consume(TokenType.RIGHT_BRACKET);
     

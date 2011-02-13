@@ -109,14 +109,14 @@ public class InterfaceParser extends PrefixParser {
             Expr.tuple(Expr.string(member),
                 makeTypeFunction(typeParams, methodType))));
       } else if (memberType.equals("get")) {
-        Expr getterType = TypeParser.parse(parser);
+        Expr getterType = parser.parseTypeAnnotation();
         exprs.add(Expr.message(
             startPos.union(parser.last(1).getPosition()),
             Expr.name(name), Name.DECLARE_GETTER,
             Expr.tuple(Expr.string(member),
                 makeTypeFunction(typeParams, getterType))));
       } else if (memberType.equals("set")) {
-        Expr setterType = TypeParser.parse(parser);
+        Expr setterType = parser.parseTypeAnnotation();
         exprs.add(Expr.message(
             startPos.union(parser.last(1).getPosition()),
             Expr.name(name), Name.DECLARE_SETTER,
