@@ -19,6 +19,7 @@ public class PatternCheckingBinder extends PatternBinderBase {
     // Make sure the type of the pattern's value is compatible with the type
     // being matched.
     Obj matchedType = mChecker.evaluateExpressionType(pattern.getValue());
+    
     mChecker.checkTypes(value, matchedType, Position.none(),
         "Cannot match a value of type %s against a pattern of type %s.");
 

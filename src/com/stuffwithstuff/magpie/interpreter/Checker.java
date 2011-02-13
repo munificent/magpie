@@ -232,12 +232,7 @@ public class Checker {
         mInterpreter.getNothingClass());
 
     // Get the expression's type.
-    Obj type = checker.check(expr, context, true);
-    
-    // But if there are any type errors, don't return it.
-    if (mErrors.size() > 0) return mInterpreter.nothing();
-    
-    return type;
+    return checker.check(expr, context, true);
   }
   
   /**

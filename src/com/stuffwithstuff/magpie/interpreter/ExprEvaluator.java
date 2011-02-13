@@ -238,7 +238,12 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(TypeofExpr expr, EvalContext context) {
     Checker checker = new Checker(mInterpreter);
-    return checker.evaluateExpressionType(expr.getBody());
+    Obj type = checker.evaluateExpressionType(expr.getBody());
+
+    // If there are any type errors, don't return the type.
+    if (checker.getErrors().size() > 0) return mInterpreter.nothing();
+    
+    return type;
   }
 
   @Override
