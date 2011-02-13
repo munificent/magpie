@@ -82,8 +82,7 @@ public class Lexer {
       if (lookAhead("\"")) return startToken(LexState.IN_STRING);
       if (lookAhead("-")) return startToken(LexState.IN_MINUS);
       
-      if (isAlpha(c)) return startToken(LexState.IN_NAME);
-      if (isOperator(c)) return startToken(LexState.IN_OPERATOR);
+      if (isName(c)) return startToken(LexState.IN_NAME);
       if (isDigit(c)) return startToken(LexState.IN_NUMBER);
       
       if (lookAhead("'")) return startToken(LexState.IN_TYPE_PARAM);
@@ -114,22 +113,7 @@ public class Lexer {
         Position position = currentPosition();        
         return new Token(position, TokenType.FIELD, text);
       }
-      if (isAlpha(c) || isDigit(c) || isOperator(c)) {
-        return advance();
-      }
-      return createStringToken(TokenType.NAME);
-
-    case IN_OPERATOR:
-      if (lookAhead("//")) {
-        return createStringToken(TokenType.NAME);
-      }
-      if (lookAhead("/*")) {
-        return createStringToken(TokenType.NAME);
-      }
-      if (isAlpha(c) || isDigit(c)) {
-        return changeToken(LexState.IN_NAME);
-      }
-      if (isOperator(c)) {
+      if (isName(c) || isDigit(c)) {
         return advance();
       }
       return createStringToken(TokenType.NAME);
@@ -169,8 +153,8 @@ public class Lexer {
       if (isDigit(c)) {
         return changeToken(LexState.IN_NUMBER);
       }
-      if (isOperator(c) || isAlpha(c)) {
-        return changeToken(LexState.IN_OPERATOR);
+      if (isName(c)) {
+        return changeToken(LexState.IN_NAME);
       }
       return createStringToken(TokenType.NAME);
 
@@ -214,7 +198,7 @@ public class Lexer {
       if (lookAhead("/*")) {
         return createStringToken(TokenType.TYPE_PARAM);
       }
-      if (isAlpha(c) || isDigit(c) || isOperator(c)) {
+      if (isName(c) || isDigit(c)) {
         return advance();
       }
       
@@ -356,23 +340,20 @@ public class Lexer {
     }
   }
   
-  private boolean isAlpha(final char c) {
-    return ((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'))
-        || (c == '_');
-  }
-
   private boolean isDigit(final char c) {
     return (c >= '0') && (c <= '9');
   }
-
-  private boolean isOperator(final char c) {
-    return "~!$%^&*-=+|/?<>".indexOf(c) != -1;
+  
+  private boolean isName(final char c) {
+    return ((c >= 'a') && (c <= 'z'))
+        || ((c >= 'A') && (c <= 'Z'))
+        || (c == '_')
+        || ("~!$%^&*-=+|/?<>".indexOf(c) != -1);
   }
 
   private enum LexState {
     DEFAULT,
     IN_NAME,
-    IN_OPERATOR,
     IN_NUMBER,
     IN_DECIMAL,
     IN_FRACTION,
