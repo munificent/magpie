@@ -22,5 +22,5 @@ public class CommaParser extends InfixParser {
   }
   
   @Override
-  public int getStickiness() { return 40; }
+  public int getStickiness() { return 20; }
 }

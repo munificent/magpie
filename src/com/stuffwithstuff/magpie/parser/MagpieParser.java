@@ -30,9 +30,9 @@ public class MagpieParser extends Parser {
   }
   
   public Expr parseTypeAnnotation() {
-    // Start at just about tuple precedence so that those don't get consumed
+    // Start at just above tuple precedence so that those don't get consumed
     // by the type.
-    return parseExpression(50);
+    return parseExpression(21);
   }
   
   public Expr parseExpression(int stickiness) {
@@ -55,11 +55,6 @@ public class MagpieParser extends Parser {
   
   public Expr parseExpression() {
     return parseExpression(0);
-  }
-  
-  // TODO(bob): Hackish. Do we need this?
-  public Expr parseOperator() {
-    return parseExpression(80);
   }
 
   public Expr parseEndBlock() {

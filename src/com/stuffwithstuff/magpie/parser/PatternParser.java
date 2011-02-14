@@ -104,7 +104,7 @@ public class PatternParser {
     }
     
     // Must just be a value.
-    Expr expr = parser.parseOperator();
+    Expr expr = parser.parseTypeAnnotation();
     return new ValuePattern(expr);
   }
   

@@ -11,5 +11,5 @@ public class EqualsParser extends InfixParser {
   }
   
   @Override
-  public int getStickiness() { return 20; }
+  public int getStickiness() { return 10; }
 }

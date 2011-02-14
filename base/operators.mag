@@ -1,5 +1,25 @@
+// Here's the operator precedence table for the operators defined in the base
+// library, from highest to lowest:
+// 100 - Function call, message send, "with" block
+//  90 - "not", unary negate (not implemented yet)
+//  80 - Multiplication (*), division (/), modulo (%)
+//  70 - Addition (+), subtraction (infix -)
+//  60 - String operations (~, ~~)
+//  50 - Comparison (<, >, <=, >=)
+//  40 - Equality (==, !=)
+//  30 - Conjunctions (and, or)
+//  20 - Composition (tuple "," operator, records)
+//  10 - Assignment (=)
+
+// Type annotations, which generally don't share operators with normal
+// expressions use:
+// 100 - Function call, message send
+//  60 - Or type (|)
+//  40 - Function type (=>)
+//  20 - Composition (tuple "," operator, records)
+
 // TODO(bob): Hackish. Need to figure out what the semantics for this should be.
-definfix == 80 (left, right -> Bool)
+definfix == 40 (left, right -> Bool)
     // Must be equal if they're the same object.
     if Reflect same?(left, right) then return true
 
@@ -12,54 +32,40 @@ definfix == 80 (left, right -> Bool)
     leftClass equal?(left, right)
 end
 
-definfix != 80 (left, right -> Bool) (left == right) not
+definfix != 40 (left, right -> Bool) (left == right) not
 
-definfix < 80 (left, right -> Bool)
+definfix < 50 (left, right -> Bool)
     // Leave it up to the class to decide.
     // TODO(bob): Figure out better semantics for this.
     Reflect getClass(left) lessThan?(left, right)
 end
 
-definfix > 80 (left, right -> Bool)
+definfix > 50 (left, right -> Bool)
     (left < right) not and left != right
 end
 
-definfix <= 80 (left, right -> Bool)
-    (left < right) or left == right
+definfix <= 50 (left, right -> Bool)
+    left < right or left == right
 end
 
-definfix >= 80 (left, right -> Bool)
+definfix >= 50 (left, right -> Bool)
     (left < right) not
 end
 
-definfix + 80 (left Int, right Int -> Int)
-    Int add(left, right)
-end
+definfix * 80 (left Int, right Int -> Int) Int multiply(left, right)
+definfix / 80 (left Int, right Int -> Int) Int divide(left, right)
+definfix % 80 (left Int, right Int -> Int) Int modulo(left, right)
 
-definfix - 80 (left Int, right Int -> Int)
-    Int subtract(left, right)
-end
+definfix + 70 (left Int, right Int -> Int) Int add(left, right)
+definfix - 70 (left Int, right Int -> Int) Int subtract(left, right)
 
-definfix * 80 (left Int, right Int -> Int)
-    Int multiply(left, right)
-end
-
-definfix / 80 (left Int, right Int -> Int)
-    Int divide(left, right)
-end
-
-definfix % 80 (left Int, right Int -> Int)
-    Int modulo(left, right)
-end
-
-
-definfix ~ 80 (left Stringable, right Stringable -> String)
+definfix ~ 60 (left Stringable, right Stringable -> String)
     left string concatenate(right string)
 end
 
-definfix ~~ 80 (left Stringable, right Stringable -> String)
+definfix ~~ 60 (left Stringable, right Stringable -> String)
     left ~ " " ~ right
 end
 
 // Add an arrow operator to make function types out of other types:
-definfix => 80 (left Type, right Type -> Type) FunctionType new(left, right)
+definfix => 40 (left Type, right Type -> Type) FunctionType new(left, right)

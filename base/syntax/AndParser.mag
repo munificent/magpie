@@ -17,7 +17,7 @@ class AndParser
         end }
     end
 
-    get stickiness Int = 60
+    get stickiness Int = 30
 end
 
 MagpieParser registerInfixParser("and", AndParser new())

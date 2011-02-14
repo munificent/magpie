@@ -15,7 +15,7 @@ class OrParser
         end }
     end
 
-    get stickiness Int = 60
+    get stickiness Int = 30
 end
 
 MagpieParser registerInfixParser("or", OrParser new())
