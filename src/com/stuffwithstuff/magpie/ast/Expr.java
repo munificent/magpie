@@ -86,8 +86,6 @@ public abstract class Expr {
         return new BreakExpr(target.getPosition());
       } else if (name.equals("%return%")) {
         return new ReturnExpr(target.getPosition(), arg);
-      } else if (name.equals("%scope%")) {
-        return new ScopeExpr(arg);
       } else if (name.equals("%unsafecast%")) {
         return specialFormUnsafeCast(target.getPosition(), arg);
       } else if (name.equals("%var%")) {
