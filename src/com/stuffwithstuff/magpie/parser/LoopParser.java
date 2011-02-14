@@ -49,7 +49,7 @@ public class LoopParser extends PrefixParser {
         Token nameToken = parser.consume(TokenType.NAME);
         String variable = nameToken.getString();
         Position position = nameToken.getPosition();
-        parser.consume(TokenType.EQUALS);
+        parser.consume("=");
         Expr generator = parser.parseExpression();
         
         // Initialize the generator before the loop.

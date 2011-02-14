@@ -23,7 +23,7 @@ public class Grammar {
     mInfixParsers.define(TokenType.LEFT_BRACKET, new BracketParser());
     mInfixParsers.define("with", new WithParser());
     mInfixParsers.define(TokenType.COMMA, new CommaParser());
-    mInfixParsers.define(TokenType.EQUALS, new EqualsParser());
+    mInfixParsers.define("=", new EqualsParser());
 
     // Register the parsers for the different keywords.
     // TODO(bob): Eventually these should all go away.

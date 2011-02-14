@@ -352,14 +352,13 @@ public class JavaToMagpie {
     case RIGHT_BRACE: tokenTypeValue = 5; tokenTypeName = "leftBrace"; break;
     case COMMA: tokenTypeValue = 6; tokenTypeName = "comma"; break;
     case DOT: tokenTypeValue = 7; tokenTypeName = "dot"; break;
-    case EQUALS: tokenTypeValue = 8; tokenTypeName = "equals"; break;
-    case LINE: tokenTypeValue = 9; tokenTypeName = "line"; break;
-    case NAME: tokenTypeValue = 10; tokenTypeName = "identifier"; break;
-    case FIELD: tokenTypeValue = 11; tokenTypeName = "field"; break;
-    case BOOL: tokenTypeValue = 12; tokenTypeName = "boolLiteral"; break;
-    case INT: tokenTypeValue = 13; tokenTypeName = "intLiteral"; break;
-    case STRING: tokenTypeValue = 14; tokenTypeName = "stringLiteral"; break;
-    case EOF: tokenTypeValue = 13; tokenTypeName = "eof"; break;
+    case LINE: tokenTypeValue = 8; tokenTypeName = "line"; break;
+    case NAME: tokenTypeValue = 9; tokenTypeName = "identifier"; break;
+    case FIELD: tokenTypeValue = 10; tokenTypeName = "field"; break;
+    case BOOL: tokenTypeValue = 11; tokenTypeName = "boolLiteral"; break;
+    case INT: tokenTypeValue = 12; tokenTypeName = "intLiteral"; break;
+    case STRING: tokenTypeValue = 13; tokenTypeName = "stringLiteral"; break;
+    case EOF: tokenTypeValue = 14; tokenTypeName = "eof"; break;
 
     default:
       // TODO(bob): Better error reporting.

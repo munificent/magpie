@@ -94,7 +94,6 @@ public class NiceReplCharacterReader implements CharacterReader {
         case BACKTICK:
         case COMMA:
         case DOT:
-        case EQUALS:
           Term.set(Term.ForeColor.GRAY);
           break;
         

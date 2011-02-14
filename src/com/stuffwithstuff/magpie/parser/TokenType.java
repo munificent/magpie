@@ -11,7 +11,6 @@ public enum TokenType {
   BACKTICK,
   COMMA,
   DOT,
-  EQUALS,
   
   // identifiers
   NAME,

@@ -47,7 +47,6 @@ public final class Token {
       case BACKTICK: return "`";
       case COMMA: return ",";
       case DOT: return ".";
-      case EQUALS: return "=";
       case LINE: return "\n";
 
       case NAME: return getString();

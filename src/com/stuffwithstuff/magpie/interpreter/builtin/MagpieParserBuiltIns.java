@@ -105,6 +105,11 @@ public class MagpieParserBuiltIns {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       MagpieParser parser = (MagpieParser) thisObj.getValue();
       
+      // TODO(bob): Hackish.
+      if (arg.getClassObj() == interpreter.getStringClass()) {
+        return interpreter.createBool(parser.lookAhead(arg.asString()));
+      }
+      
       TokenType[] types = convertTokenTypes(interpreter, arg);
       return interpreter.createBool(parser.lookAhead(types));
     }

@@ -123,14 +123,14 @@ public class ClassParser extends PrefixParser {
     
     // Parse the type annotation if there is one.
     Expr type;
-    if (parser.lookAhead(TokenType.EQUALS)) {
+    if (parser.lookAhead("=")) {
       type = Expr.nothing();
     } else {
       Expr typeExpr = parser.parseTypeAnnotation();
       type = Expr.quote(typeExpr.getPosition(), typeExpr);
     }
     
-    if (parser.match(TokenType.EQUALS)) {
+    if (parser.match("=")) {
       // Defining it.
       Expr initializer = parser.parseEndBlock();
       return Expr.message(position, theClass, Name.DEFINE_FIELD,
@@ -156,14 +156,14 @@ public class ClassParser extends PrefixParser {
     Position position = parser.last(1).getPosition();
 
     Expr type;
-    if (parser.lookAheadAny(TokenType.EQUALS, TokenType.LINE)) {
+    if (parser.lookAhead("=") || parser.lookAhead(TokenType.LINE)) {
       // If no type is provided, default to Dynamic.
       type = Expr.name("Dynamic");
     } else {
       type = parser.parseTypeAnnotation();
     }
     
-    if (parser.match(TokenType.EQUALS)) {
+    if (parser.match("=")) {
       // Defining it.
       Expr body = parser.parseEndBlock();
       FunctionType fnType = FunctionType.returningType(type);
