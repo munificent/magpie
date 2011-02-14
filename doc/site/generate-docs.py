@@ -66,6 +66,8 @@ def format_file(path):
     html = markdown.markdown(contents, ['def_list', 'codehilite'])
 
     # determine the next and previous pages based on the ordering list
+    if not basename in ordering:
+        print 'Don\'t have an ordering for', basename
     this_index = ordering.index(basename)
     prev = ordering[(this_index + len(ordering) - 1) % len(ordering)]
     next = ordering[(this_index + 1) % len(ordering)]

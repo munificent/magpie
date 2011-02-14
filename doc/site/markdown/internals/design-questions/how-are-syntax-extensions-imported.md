@@ -1,4 +1,4 @@
-How Do You Import a Syntax Extension and Use It?
+^title How Are Syntax Extensions Imported?
 
 There's a weird little problem with extending Magpie's syntax. Consider this
 example:

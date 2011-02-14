@@ -16,17 +16,17 @@ class MagpieLexer(RegexLexer):
     tokens = {
         'root': [
             (r'\s+', Text),
-            
+
             # keywords
-            (r'(and|break|case|class|def|do|else|end|extend|false|fn|for|get|if|'
+            (r'(and|break|case|class|def|definfix|do|else|end|extend|false|fn|for|get|if|'
              r'interface|let|match|namespace|nothing|or|return|set|shared|'
              r'struct|then|union|using|this|true|typeof|var|while)\b', Keyword),
-            
+
             # keywords
             (r'(\<\-|\-\>|\.)', Keyword),
-             
+
             (r'[,()\\\[\]{}]', Punctuation),
-            
+
             # comments
             (r'//[^\n]*?\n', Comment.Single),
             (r'/\*.*?\*/', Comment.Multiline),
@@ -34,15 +34,15 @@ class MagpieLexer(RegexLexer):
             # user-defined names
             (r'[a-zA-Z_][a-zA-Z_0-9`~!$%^&*\-=+\\|/?<>]*', Name),
             #(r'[`~!$%^&*\-=+\\|/?<>][a-zA-Z_0-9`~!$%^&*\-=+\\|/?<>]*', Operator),
-            
+
             # literals
-            
+
             # numbers
             (r'(\d+\.\d*|\.\d+|\d+)[eE][+-]?\d+[lL]?', Number.Float),
             (r'(\d+\.\d*|\.\d+|\d+[fF])[fF]?', Number.Float),
             (r'0x[0-9a-fA-F]+[Ll]?', Number.Hex),
             (r'\d+[Ll]?', Number.Integer),
-            
+
             # strings
             (r'L?"', String, 'string'),
         ],
@@ -54,7 +54,7 @@ class MagpieLexer(RegexLexer):
             (r'\\', String), # stray backslash
         ],
     }
-    
+
     # bob: hack. i know i want it to guess magpie
     def analyse_text(text):
         return 1.0
