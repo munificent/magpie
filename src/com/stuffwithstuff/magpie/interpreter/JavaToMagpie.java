@@ -20,18 +20,21 @@ import com.stuffwithstuff.magpie.util.Pair;
 
 public class JavaToMagpie {
   public static Obj convert(Interpreter interpreter, Expr expr) {
-    
     JavaToMagpie javaToMagpie = new JavaToMagpie(interpreter, null);
     return javaToMagpie.convertExpr(expr);
   }
   
   public static Obj convertAndUnquote(Interpreter interpreter, Expr expr,
       EvalContext context) {
-    
     JavaToMagpie javaToMagpie = new JavaToMagpie(interpreter, context);
     return javaToMagpie.convertExpr(expr);
   }
   
+  public static Obj convert(Interpreter interpreter, FunctionType type) {
+    JavaToMagpie javaToMagpie = new JavaToMagpie(interpreter, null);
+    return javaToMagpie.convertFunctionType(type);
+  }
+
   public static Obj convert(Interpreter interpreter, Pattern pattern) {
     JavaToMagpie javaToMagpie = new JavaToMagpie(interpreter, null);
     return javaToMagpie.convertPattern(pattern);
@@ -87,26 +90,12 @@ public class JavaToMagpie {
 
     @Override
     public Obj visit(FnExpr expr, Void dummy) {
-      FunctionType type = expr.getType();
-      List<Obj> typeParams = new ArrayList<Obj>();
-      for (Pair<String, Expr> typeParam : type.getTypeParams()) {
-        Obj name = mInterpreter.createString(typeParam.getKey());
-        Obj constraint = convertObject(typeParam.getValue());
-        typeParams.add(mInterpreter.createTuple(name, constraint));
-      }
-      Obj typeParamsObj = mInterpreter.createArray(typeParams);
-      
-      Obj typeObj = construct("FunctionTypeExpression",
-          "typeParams", typeParamsObj,
-          "pattern",    type.getPattern(),
-          "returnType", type.getReturnType());
-      
       return construct("FunctionExpression",
           "position",     expr.getPosition(),
-          "functionType", typeObj,
+          "functionType", expr.getType(),
           "body",         expr.getBody());
     }
-
+    
     @Override
     public Obj visit(IntExpr expr, Void dummy) {
       return construct("IntExpression",
@@ -322,6 +311,21 @@ public class JavaToMagpie {
     return expr.accept(converter, null);
   }
 
+  private Obj convertFunctionType(FunctionType type) {
+    List<Obj> typeParams = new ArrayList<Obj>();
+    for (Pair<String, Expr> typeParam : type.getTypeParams()) {
+      Obj name = mInterpreter.createString(typeParam.getKey());
+      Obj constraint = convertObject(typeParam.getValue());
+      typeParams.add(mInterpreter.createTuple(name, constraint));
+    }
+    Obj typeParamsObj = mInterpreter.createArray(typeParams);
+    
+    return construct("FunctionTypeExpression",
+        "typeParams", typeParamsObj,
+        "pattern",    type.getPattern(),
+        "returnType", type.getReturnType());
+  }
+
   private Obj convertPattern(Pattern pattern) {
     if (pattern == null) return mInterpreter.nothing();
     
@@ -379,6 +383,7 @@ public class JavaToMagpie {
     if (object instanceof Integer) return mInterpreter.createInt((Integer) object);
     if (object instanceof String) return mInterpreter.createString((String) object);
     if (object instanceof Expr) return convertExpr((Expr) object);
+    if (object instanceof FunctionType) return convertFunctionType((FunctionType) object);
     if (object instanceof Pattern) return convertPattern((Pattern) object);
     if (object instanceof Position) return convertPosition((Position) object);
     if (object instanceof Token) return convertToken((Token) object);
