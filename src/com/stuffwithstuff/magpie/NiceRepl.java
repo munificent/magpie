@@ -7,6 +7,7 @@ import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.QuitException;
 import com.stuffwithstuff.magpie.parser.Lexer;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
+import com.stuffwithstuff.magpie.parser.ParseException;
 
 public class NiceRepl {
   public static void run() {
@@ -27,6 +28,7 @@ public class NiceRepl {
       Script.loadBase(interpreter);
       
       while (true) {
+        try {
         NiceReplCharacterReader reader = new NiceReplCharacterReader(interpreter);
         Lexer lexer = new Lexer("REPL", reader);
         MagpieParser parser = interpreter.createParser(lexer);
@@ -43,6 +45,11 @@ public class NiceRepl {
           System.out.print(" = ");
           Term.set(Term.ForeColor.GREEN);
           System.out.println(result);
+          Term.restoreColor();
+        }
+        } catch(ParseException ex) {
+          Term.set(Term.ForeColor.RED);
+          System.out.println("!! Parse error: " + ex.getMessage());
           Term.restoreColor();
         }
       }

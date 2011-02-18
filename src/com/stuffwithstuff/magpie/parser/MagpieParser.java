@@ -40,6 +40,12 @@ public class MagpieParser extends Parser {
     // http://javascript.crockford.com/tdop/tdop.html
     Token token = consume();
     PrefixParser prefix = mGrammar.getPrefixParser(token);
+    
+    if (prefix == null) {
+      throw new ParseException(String.format(
+          "Cannot parse an expression that starts with \"%s\".", token));
+    }
+    
     Expect.notNull(prefix);
     Expr left = prefix.parse(this, token);
     

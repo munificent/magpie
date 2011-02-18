@@ -8,6 +8,7 @@ import com.stuffwithstuff.magpie.Term.ForeColor;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.parser.CharacterReader;
 import com.stuffwithstuff.magpie.parser.Lexer;
+import com.stuffwithstuff.magpie.parser.ParseException;
 import com.stuffwithstuff.magpie.parser.Token;
 import com.stuffwithstuff.magpie.parser.TokenType;
 
@@ -77,68 +78,68 @@ public class NiceReplCharacterReader implements CharacterReader {
   }
   
   private void colorLine(String prompt, String line) {
-    Lexer lexer = new Lexer("", new StringCharacterReader(line));
-
-    Term.moveUp();
-
-    // Redraw the prompt.
-    Term.set(Term.ForeColor.GRAY);
-    System.out.print(prompt);
-    
-    int length = 1;
-    while (true) {
-      Token token = lexer.readToken();
-      if (token.getType() == TokenType.EOF) break;
-      
-      switch (token.getType()) {
-        case BACKTICK:
-        case COMMA:
-        case DOT:
-          Term.set(Term.ForeColor.GRAY);
-          break;
-        
-        // identifiers
-        case NAME:
-          if (token.isKeyword("this") || token.isKeyword("nothing")) {
-            // special identifiers
-            Term.set(ForeColor.LIGHT_BLUE);
-          } else if (mInterpreter.getGrammar().isKeyword(token.getString())) {
-            Term.set(ForeColor.CYAN);
-          } else {
-            Term.set(ForeColor.WHITE);
-          }
-          break;
-          
-        case FIELD:
-          Term.set(Term.ForeColor.GRAY);
-          break;
-          
-        case TYPE_PARAM:
-          Term.set(Term.ForeColor.GREEN);
-          break;
+    try {
+      Lexer lexer = new Lexer("", new StringCharacterReader(line));
   
-        // literals
-        case BOOL:
-        case INT:
-          Term.set(Term.ForeColor.LIGHT_BLUE);
-          break;
-          
-        case DOUBLE:
-        case STRING:
-          Term.set(Term.ForeColor.YELLOW);
-          break;
-          
-        default:
-          Term.restoreColor();
-      }
+      Term.moveUp();
+  
+      // Redraw the prompt.
+      Term.set(Term.ForeColor.GRAY);
+      System.out.print(prompt);
       
-      while (length < token.getPosition().getStartCol()) {
-        System.out.print(" ");
-        length++;
+      int length = 1;
+      while (true) {
+        Token token = lexer.readToken();
+        if (token.getType() == TokenType.EOF) break;
+        
+        switch (token.getType()) {
+          case BACKTICK:
+          case COMMA:
+          case DOT:
+            Term.set(Term.ForeColor.GRAY);
+            break;
+          
+          // identifiers
+          case NAME:
+            if (token.isKeyword("this") || token.isKeyword("nothing")) {
+              // special identifiers
+              Term.set(ForeColor.LIGHT_BLUE);
+            } else if (mInterpreter.getGrammar().isKeyword(token.getString())) {
+              Term.set(ForeColor.CYAN);
+            } else {
+              Term.set(ForeColor.WHITE);
+            }
+            break;
+            
+          case FIELD:
+            Term.set(Term.ForeColor.GRAY);
+            break;
+    
+          // literals
+          case BOOL:
+          case INT:
+            Term.set(Term.ForeColor.LIGHT_BLUE);
+            break;
+            
+          case DOUBLE:
+          case STRING:
+            Term.set(Term.ForeColor.YELLOW);
+            break;
+            
+          default:
+            Term.restoreColor();
+        }
+        
+        while (length < token.getPosition().getStartCol()) {
+          System.out.print(" ");
+          length++;
+        }
+        
+        System.out.print(token);
+        length += token.toString().length();
       }
-      
-      System.out.print(token);
-      length += token.toString().length();
+    } catch(ParseException ex) {
+      // Do nothing, just eat it.
     }
     
     System.out.println();

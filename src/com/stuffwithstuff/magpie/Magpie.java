@@ -8,6 +8,7 @@ import com.stuffwithstuff.magpie.interpreter.Profiler;
 import com.stuffwithstuff.magpie.interpreter.QuitException;
 import com.stuffwithstuff.magpie.parser.Lexer;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
+import com.stuffwithstuff.magpie.parser.ParseException;
 
 public class Magpie {
 
@@ -70,12 +71,16 @@ public class Magpie {
         Lexer lexer = new Lexer("REPL", reader);
         MagpieParser parser = interpreter.createParser(lexer);
         
-        Expr expr = parser.parseExpression();
-        
-        String result = interpreter.evaluateToString(expr);
-        if (result != null) {
-          System.out.print(" = ");
-          System.out.println(result);
+        try {
+          Expr expr = parser.parseExpression();
+          
+          String result = interpreter.evaluateToString(expr);
+          if (result != null) {
+            System.out.print(" = ");
+            System.out.println(result);
+          }
+        } catch(ParseException ex) {
+          System.out.println("!! Parse error: " + ex.getMessage());
         }
       }
     } catch (QuitException e) {

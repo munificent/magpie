@@ -85,8 +85,6 @@ public class Lexer {
       if (isName(c)) return startToken(LexState.IN_NAME);
       if (isDigit(c)) return startToken(LexState.IN_NUMBER);
       
-      if (lookAhead("'")) return startToken(LexState.IN_TYPE_PARAM);
-      
       // Line continuation.
       if (lookAhead("\\")) return startToken(LexState.IN_LINE_CONTINUATION);
 
@@ -94,8 +92,11 @@ public class Lexer {
       if (match(" ")) return null;
       if (match("\t")) return null;
       
-      // TODO(bob): Hack temp. Unexpected character
-      return new Token(lastCharacterPosition(), TokenType.EOF);
+      // Handle the end of the file.
+      if (c == '\0') return new Token(lastCharacterPosition(), TokenType.EOF);
+      
+      // Any other character can't be handled.
+      throw new ParseException("Character \"" + c + "\" is not allowed.");
 
     case IN_NAME:
       if (lookAhead("//")) {
@@ -191,22 +192,6 @@ public class Lexer {
       }
       throw new ParseException("Unknown string escape character " + c + ".");
 
-    case IN_TYPE_PARAM:
-      if (lookAhead("//")) {
-        return createStringToken(TokenType.TYPE_PARAM);
-      }
-      if (lookAhead("/*")) {
-        return createStringToken(TokenType.TYPE_PARAM);
-      }
-      if (isName(c) || isDigit(c)) {
-        return advance();
-      }
-      
-      // Get the symbol name without the leading '.
-      String text = mRead.substring(1);
-      mState = LexState.DEFAULT;
-      return new Token(currentPosition(), TokenType.TYPE_PARAM, text);
-      
     case IN_LINE_COMMENT:
       if (match("\n") || match("\r")) {
         mState = LexState.DEFAULT;
@@ -359,7 +344,6 @@ public class Lexer {
     IN_MINUS,
     IN_STRING,
     IN_STRING_ESCAPE,
-    IN_TYPE_PARAM,
     IN_LINE_COMMENT,
     IN_BLOCK_COMMENT,
     IN_LINE_CONTINUATION
