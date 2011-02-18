@@ -17,70 +17,91 @@ public class Interpreter {
     
     mGrammar = new Grammar();
     
-    // The class hierarchy is a bit confusing in a language where classes are
-    // first class and inheritance is supported. Every object has a class.
-    // However, classes are objects, which means they also have a class. In
-    // addition, a class may also have a parent class.
+    // Every object in Magpie has a class. Every class is an object, which
+    // means it also has a class (a metaclass). In addition, a class may mixin
+    // one or more other classes to get additional methods.
     //
-    // One key piece that it's important to understand is that the methods on
-    // an object *always* come from its class. So, when you call a shared
-    // method like "Foo bar", you are actually calling an *instance* method on
-    // the class of of the object "Foo", its metaclass: FooClass.
+    // To figure out what these relationships look like for classes and their
+    // metaclasses is a bit tricky. The basic way to answer this is to look at
+    // the methods that different objects should support. Those will in turn
+    // dictate what classes those objects should be. Given a hypothetical class
+    // Foo:
     //
-    // Given some hypothetical class Foo, here's how it will be wired up with
-    // the three core classes:
+    // class Foo
+    //     def hi() print("hi")
+    //     shared def hello() print("hello")
+    // end
     //
-    // Single line: "inherits from"
-    // Double line: "class"
+    // Member call               Class where it's defined
+    // --------------------------------------------------
+    // foo hi()                  Foo
+    // foo type                  Object
+    // Foo construct()           FooMetaclass
+    // Foo hello()               FooMetaclass
+    // Foo defineMethod()        Class
+    // Class new("Foo")          ClassMetaclass
     //
-    //                       +------------+
-    //                       | ClassClass |
-    //                       +------------+
-    //                           |   /\
-    //                           |   ||
-    //                           v   \/
-    //    +------------+     +------------+<====+------------+
-    //    |    Foo     |---->|   Class    |---->|   Object   |
-    //    +------------+     +------------+     +------------+
-    //          ||               ^   /\
-    //           \\              |   ||
-    //            \\         +------------+
-    //             \\=======>|  FooClass  |
-    //                       +------------+
-
+    // "construct()" should be defined on the class of Foo, FooMetaclass.
+    // "hi()" should be defined on the class of foo, Foo.
+    // "hello()" should be defined on the class of Foo, FooMetaclass.
+    // "new()" (for creating a new class) should be on the class of Class,
+    // ClassMetaclass.
+    // "type" should be available on all objects, so it should be in Object and
+    // the class of foo, Foo, should mix that in.
+    // "name" should be available on all class objects, so it should be in
+    // Class and the class of Foo, FooMetaclass, should mix that in.
+    //
+    // In diagram form, the class chain is (where the arrow means "has class"):
+    //
+    // [Foo]----->[FooMetaclass]--------.     .----.
+    //                                  v     v    |
+    // [Class]--->[ClassMetaclass]--->[Metaclass]--'
+    //                                  ^
+    // [Object]-->[ObjectMetaclass]-----'
+    //
+    // The mixins are:
+    //
+    // FooMetaclass    --> Class
+    // ClassMetaclass  --> Class
+    // ObjectMetaclass --> Class
+    // Metaclass       --> Class
+    // Class           --> Object
+    // Foo             --> Object
     
     // Create a top-level scope.
     mGlobalScope = new Scope();
 
-    // The metaclass for Class. Contains the shared methods on Class.
-    ClassObj classClass = new ClassObj(null, "ClassClass");
-
-    // The class of all class objects. Given a class Foo, it's class will be a
-    // singleton instance of its metaclass FooClass. The class of FooClass will
-    // in turn be this class, Class. FooClass will also *inherit* from Class, so
-    // that all of the methods defined on Class are available in FooClass (i.e.
-    // "name", "parent", etc.)
-    // TODO(bob): This isn't right. ClassClass should be the class of Class, not
-    // it's parent. This means that Object new("foo") and Class new("foo") are
-    // indistinguishable.
-    mClass = new ClassObj(null, "Class");
-    mClass.getMixins().add(classClass);
-    mGlobalScope.define("Class", mClass);
+    // The special class "Metaclass" is the ultimate metaclass of all
+    // metaclasses, including itself.
+    mMetaclass = new ClassObj(null, "Metaclass");
+    mMetaclass.bindClass(mMetaclass);
     
-    // Object is the root class of all objects. All parent chains eventually
-    // end here. Note that there is no distinct metaclass for class Object: its
-    // metaclass is the main metaclass Class.
-    mObjectClass = new ClassObj(mClass, "Object");
+    // Define the main Object mixin. All classes will mix this in so that the
+    // common methods like "string" are available everywhere.
+    ClassObj objectMetaclass = new ClassObj(mMetaclass, "ObjectMetaclass");
+    mObjectClass = new ClassObj(objectMetaclass, "Object");
     mGlobalScope.define("Object", mObjectClass);
 
     // Add a constructor so you can create new Objects.
     mObjectClass.getMembers().defineMethod(Name.NEW,
         new ClassConstruct(mObjectClass));
-
-    // Now that ClassClass, Class and Object exist, wire them up.
-    classClass.bindClass(mClass);
+    
+    // The metaclass for Class. Contains the shared methods on Class, like "new"
+    // for creating a new class.
+    ClassObj classMetaclass = new ClassObj(mMetaclass, "ClassMetaclass");
+    
+    // The class that all class objects mix in. Given a class Foo, FooMetaclass
+    // will mix this in so that the methods available on all classes (like
+    // "defineMethod") are available on Foo.
+    mClass = new ClassObj(classMetaclass, "Class");
     mClass.getMixins().add(mObjectClass);
+    mGlobalScope.define("Class", mClass);
 
+    // Now that we have Class, we can go back and mix it into the metaclasses.
+    mMetaclass.getMixins().add(mClass);
+    classMetaclass.getMixins().add(mClass);
+    objectMetaclass.getMixins().add(mClass);
+    
     mArrayClass = createGlobalClass("Array");
     
     mBoolClass = createGlobalClass("Bool");
@@ -453,7 +474,7 @@ public class Interpreter {
   
   public ClassObj createClass(String name) {
     // Create the metaclass. This will hold shared methods on the class.
-    ClassObj metaclass = new ClassObj(mClass, name + "Class");
+    ClassObj metaclass = new ClassObj(mClass, name + "Metaclass");
     metaclass.getMixins().add(mClass);
     
     // Create the class object itself. This will hold the instance methods for
@@ -568,6 +589,7 @@ public class Interpreter {
   private final ClassObj mDynamicClass;
   private final ClassObj mFnClass;
   private final ClassObj mIntClass;
+  private final ClassObj mMetaclass;
   private final ClassObj mMagpieParserClass;
   private final ClassObj mNothingClass;
   private final ClassObj mNeverClass;

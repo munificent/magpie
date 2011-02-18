@@ -15,6 +15,7 @@ Token declareField("value", false,
 Token defineMethod("keyword?",
     // Note: no comparison operators are available yet.
     fn(keyword String -> Bool)
+        // TODO(bob): Error here. We haven't defined the "and" parser yet.
         TokenType equal?(tokenType, TokenType identifier) and
         Int equal?(stringValue compareTo(keyword), 0)
     end)

@@ -29,8 +29,6 @@ This raises the question, "What's the class of a class object?" The answer is a 
 
 (This of course raises the further question of what the class of a metaclass object is. It's just `Metaclass`, the class of metaclasses. There's no need to have distinct metametaclasses because there are no shared methods on metaclass objects.)
 
-<p class="future">Actually right now the class of a metaclass is <code>Class</code> which is a little bit wrong.</p>
-
 ## Imperative and Declarative Syntax
 
 Statically-typed languages like Java and C++ have a declarative syntax for defining classes. These definitions aren't "executed" at runtime, they just define the class *a priori*. When your Java program starts up the classes are magically already there.

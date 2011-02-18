@@ -186,7 +186,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       // Otherwise it must be a property on this.
       receiver = context.getThis();
     }
-
+    
     return mInterpreter.getMember(expr.getPosition(), receiver, expr.getName());
   }
 
