@@ -24,12 +24,11 @@ public class BuiltInFunctions {
         Script script = Script.fromPath(scriptFile.getPath());
         script.execute(interpreter);
       } catch (ParseException e) {
-        interpreter.runtimeError(
-            "Could not parse script \"%s\".\nError: %s",
-            relativePath, e.getMessage());
+        // TODO(bob): Include more information.
+        interpreter.throwError("ParseError");
       } catch (IOException e) {
-        interpreter.runtimeError("Could not load script \"%s\"\n%s.",
-            relativePath, e);
+        // TODO(bob): Include more information.
+        interpreter.throwError("IOError");
       }
       
       return interpreter.nothing();

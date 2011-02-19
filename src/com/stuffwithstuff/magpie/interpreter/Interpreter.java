@@ -156,14 +156,7 @@ public class Interpreter {
   public void interpret(Expr expression) {
     EvalContext context = createTopLevelContext();
     
-    try {
-      evaluate(expression, context);
-    } catch(ErrorException err) {
-      // TODO(bob): Better error message here!
-      mHost.runtimeError(expression.getPosition(),
-          "Uncaught error of class " + err.getError().getClassObj().getName() +
-          ".");
-    }
+    evaluate(expression, context);
   }
   
   public Obj evaluate(Expr expr) {
@@ -328,18 +321,23 @@ public class Interpreter {
     mHost.print(text);
   }
   
+  // TODO(bob): Get rid of this once everything is including a friendly message.
   public Obj throwError(String errorClassName) {
+    return throwError(errorClassName, "");
+  }
+  
+  public Obj throwError(String errorClassName, String message) {
     // Look up the error class.
     ClassObj classObj = mGlobalScope.get(errorClassName).asClass();
-    throw new ErrorException(instantiate(classObj, null));
-  }
-  
-  public void runtimeError(Expr expr, String format, Object... args) {
-    mHost.runtimeError(expr.getPosition(), String.format(format, args));
-  }
-  
-  public void runtimeError(String format, Object... args) {
-    mHost.runtimeError(Position.none(), String.format(format, args));
+
+    // TODO(bob): Putting the message in here as the value is kind of hackish,
+    // but it ensures we can display an error message even if we aren't able
+    // to evaluate any code (like calling "string" on the error).
+    Obj error = instantiate(classObj, message);
+    
+    error.setValue(message);
+    
+    throw new ErrorException(error);
   }
   
   public EvalContext createTopLevelContext() {
@@ -576,10 +574,6 @@ public class Interpreter {
     return classObj.instantiate(value);
   }
   */
-  
-  void runtimeError(Position position, String format, Object... args) {
-    mHost.runtimeError(position, String.format(format, args));
-  }
 
   private final InterpreterHost mHost;
   private Scope mGlobalScope;

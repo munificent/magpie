@@ -1,63 +1,33 @@
 package com.stuffwithstuff.magpie;
 
-import java.io.IOException;
+import com.stuffwithstuff.magpie.parser.CharacterReader;
 
-import com.stuffwithstuff.magpie.ast.Expr;
-import com.stuffwithstuff.magpie.interpreter.Interpreter;
-import com.stuffwithstuff.magpie.interpreter.QuitException;
-import com.stuffwithstuff.magpie.parser.Lexer;
-import com.stuffwithstuff.magpie.parser.MagpieParser;
-import com.stuffwithstuff.magpie.parser.ParseException;
-
-public class NiceRepl {
-  public static void run() {
-    System.out.println();
-    System.out.println("      _/Oo>");
-    System.out.println("     /__/     magpie v0.0.0");
-    System.out.println("____//hh___________________");
-    System.out.println("   //");
-    System.out.println();
-    System.out.println("Type 'quit()' and press <Enter> to exit.");
-    
-    Interpreter interpreter = new Interpreter(new ScriptInterpreterHost());
-    
-    // The REPL runs and imports relative to the current directory.
-    interpreter.pushScriptPath(".");
-    
-    try {
-      Script.loadBase(interpreter);
-      
-      while (true) {
-        try {
-        NiceReplCharacterReader reader = new NiceReplCharacterReader(interpreter);
-        Lexer lexer = new Lexer("REPL", reader);
-        MagpieParser parser = interpreter.createParser(lexer);
-        
-        Expr expr = parser.parseExpression();
-        
-        // Set to white in case the expression does any printing.
-        Term.set(Term.ForeColor.WHITE);
-        
-        String result = interpreter.evaluateToString(expr);
-        
-        if (result != null) {
-          Term.set(Term.ForeColor.GRAY);
-          System.out.print(" = ");
-          Term.set(Term.ForeColor.GREEN);
-          System.out.println(result);
-          Term.restoreColor();
-        }
-        } catch(ParseException ex) {
-          Term.set(Term.ForeColor.RED);
-          System.out.println("!! Parse error: " + ex.getMessage());
-          Term.restoreColor();
-        }
-      }
-    } catch (QuitException e) {
-      // Do nothing.
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+public class NiceRepl extends Repl {
+  @Override
+  public void print(String text) {
+    Term.set(Term.ForeColor.WHITE);
+    System.out.print(text);
+    Term.restoreColor();
+  }
+  
+  @Override
+  protected CharacterReader createReader() {
+    return new ReplCharacterReader();
+  }
+  
+  @Override
+  protected void printResult(String result) {
+    Term.set(Term.ForeColor.GRAY);
+    System.out.print(" = ");
+    Term.set(Term.ForeColor.GREEN);
+    System.out.println(result);
+    Term.restoreColor();
+  }
+  
+  @Override
+  protected void printError(String message) {
+    Term.set(Term.ForeColor.RED);
+    System.out.println("!! " + message);
+    Term.restoreColor();
   }
 }

@@ -1,6 +1,9 @@
 interface Error
 end
 
+class BadAssignError
+end
+
 class BadCallError
 end
 
@@ -8,6 +11,9 @@ class RedefinitionError
 end
 
 class ParseError
+end
+
+class IOError
 end
 
 class NoMatchError
