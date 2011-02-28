@@ -1,9 +1,14 @@
 package com.stuffwithstuff.magpie.interpreter;
 
-import com.stuffwithstuff.magpie.parser.Position;
-
 public class NullInterpreterHost implements InterpreterHost {
-  public void print(String text) {}
+  @Override
+  public boolean allowTopLevelRedefinition() {
+    // Do nothing.
+    return false;
+  }
   
-  public void runtimeError(Position position, String message) {}
+  @Override
+  public void print(String text) {
+    // Do nothing.
+  }
 }

@@ -69,7 +69,7 @@ public class Interpreter {
     // Foo             --> Object
     
     // Create a top-level scope.
-    mGlobalScope = new Scope();
+    mGlobalScope = new Scope(host.allowTopLevelRedefinition());
 
     // The special class "Metaclass" is the ultimate metaclass of all
     // metaclasses, including itself.

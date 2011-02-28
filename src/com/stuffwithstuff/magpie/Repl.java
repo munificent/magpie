@@ -55,6 +55,11 @@ public class Repl implements InterpreterHost {
   }
 
   @Override
+  public boolean allowTopLevelRedefinition() {
+    return true;
+  }
+
+  @Override
   public void print(String text) {
     System.out.print(text);
   }

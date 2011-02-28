@@ -11,11 +11,17 @@ import com.stuffwithstuff.magpie.util.Expect;
  */
 public class Scope {
   public Scope(Scope parent) {
+    mAllowRedefinition = false;
     mParent = parent;
   }
   
+  public Scope(boolean allowRedefinition) {
+    mAllowRedefinition = allowRedefinition;
+    mParent = null;
+  }
+  
   public Scope() {
-    this(null);
+    this(false);
   }
   
   public Scope getParent() {
@@ -32,6 +38,10 @@ public class Scope {
     return true;
   }
 
+  public boolean canDefine(String name) {
+    return mAllowRedefinition || (get(name) == null);
+  }
+  
   public void define(String name, Obj value) {
     Expect.notEmpty(name);
     Expect.notNull(value);
@@ -71,6 +81,7 @@ public class Scope {
     return namespaces;
   }
   
+  private final boolean mAllowRedefinition;
   private final Scope mParent;
   private final Map<String, Obj> mVariables = new HashMap<String, Obj>();
   private final List<String> mNamespaces = new ArrayList<String>();

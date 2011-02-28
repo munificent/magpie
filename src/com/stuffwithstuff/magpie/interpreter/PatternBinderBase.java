@@ -51,17 +51,11 @@ public abstract class PatternBinderBase implements PatternVisitor<Void, Obj> {
   protected Interpreter getInterpreter() { return mInterpreter; }
   
   protected boolean bindNewVariable(String name, Obj value) {
-    // Bind the variable.
-    if (mContext.lookUpHere(name) == null) {
-      // Ignore the wildcard name.
-      if (!name.equals("_")) {
-        mContext.define(name, value);
-      }
-      
-      return true;
-    }
+    // Ignore the wildcard name.
+    if (name.equals("_")) return true;
     
-    return false;
+    // Bind the variable.
+    return mContext.define(name, value);
   }
   
   private final Interpreter mInterpreter;  

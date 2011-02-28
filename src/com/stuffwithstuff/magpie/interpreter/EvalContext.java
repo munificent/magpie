@@ -48,16 +48,6 @@ public class EvalContext {
   public boolean isInLoop() { return mIsInLoop; }
   
   /**
-   * Looks up the given name in current local scope. Does not walk up the
-   * lexical scope chain.
-   * @param   name The name of the variable to look up.
-   * @return       The value bound to that name, or null if not found.
-   */
-  public Obj lookUpHere(String name) {
-    return mScope.get(name);
-  }
-  
-  /**
    * Looks up the given name in the context's lexical scope chain.
    * @param   name The name of the variable to look up.
    * @return       The value bound to that name, or null if not found.
@@ -77,14 +67,19 @@ public class EvalContext {
   }
 
   /**
-   * Defines (or redefines) a variable with the given name in this context's
-   * current scope.
+   * Defines a new variable with the given name in this context's current scope.
    * 
    * @param name  Name of the variable to define.
    * @param value The variable's value.
+   * @return      True if it was a new name and was defined, false if there is
+   *              already a variable with that name in this scope and no new
+   *              definition was created.
    */
-  public void define(String name, Obj value) {
+  public boolean define(String name, Obj value) {
+    if (!mScope.canDefine(name)) return false;
+    
     mScope.define(name, value);
+    return true;
   }
   
   /**
