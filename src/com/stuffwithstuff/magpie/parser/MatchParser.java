@@ -29,7 +29,7 @@ public class MatchParser extends PrefixParser {
   
   @Override
   public Expr parse(MagpieParser parser, Token token) {
-    Position position = parser.last(1).getPosition();
+    PositionSpan span = parser.startBefore();
     
     // Parse the value.
     Expr value = parser.parseExpression();
@@ -52,7 +52,6 @@ public class MatchParser extends PrefixParser {
     parser.consume(TokenType.LINE);
     parser.consume("end");
     
-    position = position.union(parser.last(1).getPosition());
-    return Expr.match(position, value, cases);
+    return Expr.match(span.end(), value, cases);
   }
 }

@@ -10,7 +10,7 @@ public class LoopParser extends PrefixParser {
   @Override
   public Expr parse(MagpieParser parser, Token token) {
     // "while" and "for" loop.
-    Position startPos = token.getPosition();
+    PositionSpan span = parser.startBefore();
     
     // A loop is desugared from this:
     //
@@ -79,8 +79,6 @@ public class LoopParser extends PrefixParser {
     parser.consume("do");
     Expr body = parser.parseEndBlock();
 
-    Position position = startPos.union(body.getPosition());
-    
     // Build the loop body.
     List<Expr> loopBlock = new ArrayList<Expr>();
     for (Expr expr : eachLoop) loopBlock.add(expr);
@@ -94,7 +92,7 @@ public class LoopParser extends PrefixParser {
     for (Expr expr : beforeLoop) outerBlock.add(expr);
 
     // Add the main loop.
-    outerBlock.add(Expr.loop(position, loopBody));
+    outerBlock.add(Expr.loop(span.end(), loopBody));
 
     // Wrap the iterators in their own scope.
     return Expr.scope(Expr.block(outerBlock));

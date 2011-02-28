@@ -102,18 +102,18 @@ public class MagpieParser extends Parser {
     } else {
       name = consume(TokenType.NAME).getString();
     }
-    Position position = last(1).getPosition();
+    
+    PositionSpan span = startBefore();
 
     while (match(TokenType.DOT)) {
       name += "." + consume(TokenType.NAME).getString();
-      position = position.union(last(1).getPosition());
     }
     
-    return new Token(position, TokenType.NAME, name);
+    return new Token(span.end(), TokenType.NAME, name);
   }
   
   public Expr parseFunction() {
-    Position position = current().getPosition();
+    PositionSpan span = startAfter();
     
     // Parse the type signature if present.
     FunctionType type = null;
@@ -124,15 +124,13 @@ public class MagpieParser extends Parser {
     // Parse the body.
     Expr expr = parseEndBlock();
     
-    position = position.union(last(1).getPosition());
-    
     // If neither dynamic nor type parameters were provided, infer a dynamic
     // signature.
     if (type == null) {
       type = FunctionType.nothingToDynamic();
     }
     
-    return Expr.fn(position, type, expr);
+    return Expr.fn(span.end(), type, expr);
   }
 
   /**
@@ -214,8 +212,9 @@ public class MagpieParser extends Parser {
   }
 
   public Expr groupExpression(TokenType right) {
+    PositionSpan span = startBefore();
     if (match(right)) {
-      return Expr.nothing(Position.surrounding(last(2), last(1)));
+      return Expr.nothing(span.end());
     }
     
     Expr expr = parseExpression();
@@ -271,7 +270,7 @@ public class MagpieParser extends Parser {
       // Parse any catch clauses.
       Expr catchExpr = null;
       if (parseCatch) {
-        Position position = current().getPosition();
+        PositionSpan span = startAfter();
         List<MatchCase> catches = new ArrayList<MatchCase>();
         while (match("catch")) {
           catches.add(parseCatch(endKeywords, endTokens));
@@ -284,8 +283,7 @@ public class MagpieParser extends Parser {
               Expr.name("Runtime"), "throw", valueExpr);
           catches.add(new MatchCase(new VariablePattern("_", null), elseExpr));
           
-          position = position.union(last(1).getPosition());
-          catchExpr = Expr.match(position, valueExpr, catches);
+          catchExpr = Expr.match(span.end(), valueExpr, catches);
         }
       }
       

@@ -6,6 +6,7 @@ import com.stuffwithstuff.magpie.ast.ReturnExpr;
 public class ReturnParser extends PrefixParser {
   @Override
   public Expr parse(MagpieParser parser, Token token) {
+    PositionSpan span = parser.startBefore();
     Expr value;
     if (parser.lookAheadAny(TokenType.LINE, TokenType.RIGHT_PAREN,
         TokenType.RIGHT_BRACKET, TokenType.RIGHT_BRACE)) {
@@ -15,7 +16,6 @@ public class ReturnParser extends PrefixParser {
       value = parser.parseExpression();
     }
     
-    return new ReturnExpr(
-        token.getPosition().union(parser.last(1).getPosition()), value);
+    return new ReturnExpr(span.end(), value);
   }
 }

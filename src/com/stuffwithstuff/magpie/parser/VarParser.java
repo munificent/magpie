@@ -6,12 +6,11 @@ import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 public class VarParser extends PrefixParser {
   @Override
   public Expr parse(MagpieParser parser, Token token) {
-    Position position = token.getPosition();
+    PositionSpan span = parser.startBefore();
     Pattern pattern = PatternParser.parse(parser);
     parser.consume("=");
     Expr value = parser.parseEndBlock();
     
-    position = position.union(parser.last(1).getPosition());
-    return Expr.var(position, pattern, value);
+    return Expr.var(span.end(), pattern, value);
   }
 }

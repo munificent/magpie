@@ -6,7 +6,7 @@ import com.stuffwithstuff.magpie.ast.UnsafeCastExpr;
 public class UnsafeCastParser extends PrefixParser {
   @Override
   public Expr parse(MagpieParser parser, Token token) {
-    Position position = token.getPosition();
+    PositionSpan span = parser.startBefore();
     
     // Parse the type.
     parser.consume(TokenType.LEFT_BRACKET);
@@ -18,7 +18,6 @@ public class UnsafeCastParser extends PrefixParser {
     Expr value = parser.parseExpression();
     parser.consume(TokenType.RIGHT_PAREN);
     
-    position = position.union(parser.last(1).getPosition());
-    return new UnsafeCastExpr(position, type, value);
+    return new UnsafeCastExpr(span.end(), type, value);
   }
 }

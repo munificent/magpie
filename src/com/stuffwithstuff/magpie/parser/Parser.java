@@ -17,6 +17,20 @@ public abstract class Parser {
     mRead = new LinkedList<Token>();
     mConsumed = new LinkedList<Token>();
   }
+  
+  /**
+   * Creates a new PositionSpan that starts before the last consumed Token.
+   */
+  public PositionSpan startBefore() {
+    return new PositionSpan(this, last(1).getPosition());
+  }
+  
+  /**
+   * Creates a new PositionSpan that starts at the current Token.
+   */
+  public PositionSpan startAfter() {
+    return new PositionSpan(this, current().getPosition());
+  }
 
   /**
    * Gets a previously consumed Token.

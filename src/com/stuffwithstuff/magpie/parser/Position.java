@@ -17,10 +17,6 @@ public class Position {
     return begin.getPosition().union(end.getPosition());
   }
   
-  public static Position surrounding(Token begin, Token end) {
-    return begin.getPosition().union(end.getPosition());
-  }
-  
   public static Position surrounding(List<Expr> expressions) {
     Expect.notNull(expressions.get(0));
     

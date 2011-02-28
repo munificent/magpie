@@ -10,7 +10,7 @@ public class BraceParser extends PrefixParser {
   public Expr parse(MagpieParser parser, Token token) {
     parser.pushQuote();
     
-    Position position = token.getPosition();
+    PositionSpan span = parser.startBefore();
     
     // Ignore a line after {
     parser.match(TokenType.LINE);
@@ -28,11 +28,10 @@ public class BraceParser extends PrefixParser {
       parser.consume(TokenType.LINE);
     }
     
-    position = position.union(parser.last(1).getPosition());
     parser.popQuote();
     
-    if (exprs.size() == 1) return Expr.quote(position, exprs.get(0));
+    if (exprs.size() == 1) return Expr.quote(span.end(), exprs.get(0));
     
-    return Expr.quote(position, Expr.block(exprs));
+    return Expr.quote(span.end(), Expr.block(exprs));
   }
 }

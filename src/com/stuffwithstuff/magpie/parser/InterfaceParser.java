@@ -92,34 +92,30 @@ public class InterfaceParser extends PrefixParser {
       }
       
       // Parse the name.
-      Position startPos = parser.current().getPosition();
+      PositionSpan span = parser.startAfter();
       String member = parser.parseName().getString();
       
       if (memberType.equals("def")) {
         FunctionType function = parser.parseFunctionType();
         
         Expr methodType = Expr.message(
-            startPos.union(parser.last(1).getPosition()),
-            Expr.name("Function"),
+            span.end(), Expr.name("Function"),
             Name.NEW_TYPE, Expr.tuple(function.getParamType(),
                 function.getReturnType(), Expr.bool(false)));
         exprs.add(Expr.message(
-            startPos.union(parser.last(1).getPosition()),
-            Expr.name(name), Name.DECLARE_METHOD,
+            span.end(), Expr.name(name), Name.DECLARE_METHOD,
             Expr.tuple(Expr.string(member),
                 makeTypeFunction(typeParams, methodType))));
       } else if (memberType.equals("get")) {
         Expr getterType = parser.parseTypeAnnotation();
         exprs.add(Expr.message(
-            startPos.union(parser.last(1).getPosition()),
-            Expr.name(name), Name.DECLARE_GETTER,
+            span.end(), Expr.name(name), Name.DECLARE_GETTER,
             Expr.tuple(Expr.string(member),
                 makeTypeFunction(typeParams, getterType))));
       } else if (memberType.equals("set")) {
         Expr setterType = parser.parseTypeAnnotation();
         exprs.add(Expr.message(
-            startPos.union(parser.last(1).getPosition()),
-            Expr.name(name), Name.DECLARE_SETTER,
+            span.end(), Expr.name(name), Name.DECLARE_SETTER,
             Expr.tuple(Expr.string(member),
                 makeTypeFunction(typeParams, setterType))));
       }

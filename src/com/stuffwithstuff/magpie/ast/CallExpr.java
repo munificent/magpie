@@ -3,12 +3,14 @@ package com.stuffwithstuff.magpie.ast;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.stuffwithstuff.magpie.parser.Position;
+
 /**
  * AST node for a function call: applies an argument to a function-like target.
  */
 public class CallExpr extends Expr {
   CallExpr(Expr target, List<Expr> typeArgs, Expr arg) {
-    super(target.getPosition().union(arg.getPosition()));
+    super(Position.surrounding(target, arg));
     mTarget = target;
     mTypeArgs = (typeArgs == null) ? new ArrayList<Expr>() : typeArgs;
     mArg = arg;
