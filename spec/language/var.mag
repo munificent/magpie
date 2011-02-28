@@ -3,7 +3,7 @@ specify("A 'var' expression") with
         var i = "value"
         i shouldBe("value")
     end
-    
+
     it should("shadow a variable in an outer scope") with
         var i = "outer"
         if true then
@@ -12,14 +12,14 @@ specify("A 'var' expression") with
         end
         i shouldBe("outer")
     end
-        
+
     it should("not allow redefining in the same scope") with
         fn
             var i = "first"
             var i = "second"
         end shouldThrow(RedefinitionError)
     end
-    
+
     it should("allow a block initializer") with
         var i =
             var temp = "a"
@@ -28,4 +28,15 @@ specify("A 'var' expression") with
         end
         i shouldBe("abc")
     end
+
+    it should("allow a fully-qualified name") with
+        var a.b.i = "abi"
+        var a.c.i = "aci"
+        var b.c.i = "bci"
+        a.b.i shouldBe("abi")
+        a.c.i shouldBe("aci")
+        b.c.i shouldBe("bci")
+    end
+
+    // TODO(bob): Spec pattern destructuring.
 end

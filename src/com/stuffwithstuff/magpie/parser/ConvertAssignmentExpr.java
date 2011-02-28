@@ -132,6 +132,11 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
   }
 
   @Override
+  public Expr visit(UsingExpr expr, Expr value) {
+    return invalidExpression(expr);
+  }
+
+  @Override
   public Expr visit(VariableExpr expr, Expr value) {
     return invalidExpression(expr);
   }

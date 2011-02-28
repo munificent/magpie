@@ -255,8 +255,9 @@ public class Checker {
 
     Scope scope = new Scope(parent);
     for (Entry<String, Obj> entry : valueScope.entries()) {
-      Obj type = mInterpreter.getMember(Position.none(), entry.getValue(),
-          Name.TYPE);
+      // TODO(bob): Type should be moved into a namespace.
+      Obj type = mInterpreter.getQualifiedMember(
+          Position.none(), entry.getValue(), Name.TYPE);
       scope.define(entry.getKey(), type);
     }
     

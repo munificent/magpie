@@ -5,7 +5,9 @@ import com.stuffwithstuff.magpie.ast.Expr;
 public class MessageInfixParser extends InfixParser {
   @Override
   public Expr parse(MagpieParser parser, Expr left, Token token) {
-    return Expr.message(token.getPosition(), left, token.getString());
+    // Parse the whole fully-qualified name.
+    Token fullName = parser.parseName(true);
+    return Expr.message(fullName.getPosition(), left, fullName.getString());
   }
   
   @Override

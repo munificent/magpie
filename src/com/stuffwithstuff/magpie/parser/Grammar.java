@@ -20,6 +20,7 @@ public class Grammar {
     mPrefixParsers.define("return", new ReturnParser());
     mPrefixParsers.define("this", new ThisParser());
     mPrefixParsers.define("unsafecast", new UnsafeCastParser());
+    mPrefixParsers.define("using", new UsingParser());
     mPrefixParsers.define("var", new VarParser());
 
     mInfixParsers.define(TokenType.LEFT_PAREN, new ParenthesisInfixParser());

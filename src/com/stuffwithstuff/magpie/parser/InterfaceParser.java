@@ -13,8 +13,9 @@ import com.stuffwithstuff.magpie.interpreter.Name;
 
 public class InterfaceParser extends PrefixParser {
   public static Expr parseInterface(MagpieParser parser, boolean isExtend) {
-    String name = parser.consume(TokenType.NAME).getString();
-    Position position = parser.last(1).getPosition();
+    Token token = parser.parseName();
+    String name = token.getString();
+    Position position = token.getPosition();
     
     // See if it's generic.
     List<String> typeParams = new ArrayList<String>();
@@ -92,7 +93,7 @@ public class InterfaceParser extends PrefixParser {
       
       // Parse the name.
       Position startPos = parser.current().getPosition();
-      String member = parser.consumeAny(TokenType.NAME).getString();
+      String member = parser.parseName().getString();
       
       if (memberType.equals("def")) {
         FunctionType function = parser.parseFunctionType();

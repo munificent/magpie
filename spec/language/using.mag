@@ -1,0 +1,38 @@
+specify("a using expression") with
+    it should("find an unqualified local variable in the used namespace") with
+        var a.b = "a.b"
+        b shouldBe(nothing)
+
+        using a
+        b shouldBe("a.b")
+    end
+
+    it should("find an unqualified member in the used namespace") with
+        class Foo
+            get name.space.bar String = "bar"
+        end
+
+        var foo = Foo new()
+        foo bar shouldBe(nothing)
+
+        using name.space
+        foo bar shouldBe("bar")
+    end
+
+    it should("give precedence to the last using expression") with
+        var a.name = "in a"
+        var b.name = "in b"
+        using a
+        name shouldBe("in a")
+        using b
+        name shouldBe("in b")
+    end
+
+    it should("search namespaces used in outer scopes") with
+        using a
+        do
+            var a.name = "in a"
+            name shouldBe("in a")
+        end
+    end
+end

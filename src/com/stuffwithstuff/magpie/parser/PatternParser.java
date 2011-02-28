@@ -77,7 +77,7 @@ public class PatternParser {
       String token = parser.current().getString();
       if (token.equals("_") ||
           Character.isLowerCase(token.charAt(0))) {
-        name = parser.consume().getString();
+        name = parser.parseName().getString();
       }
     }
     

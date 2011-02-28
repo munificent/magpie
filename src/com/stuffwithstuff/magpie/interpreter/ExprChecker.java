@@ -358,6 +358,12 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
+  public Obj visit(UsingExpr expr, EvalContext context) {
+    context.getScope().useNamespace(expr.getName());
+    return mInterpreter.nothing();
+  }
+
+  @Override
   public Obj visit(VariableExpr expr, EvalContext context) {
     Obj valueType = check(expr.getValue(), context);
 

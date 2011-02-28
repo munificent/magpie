@@ -94,6 +94,8 @@ public class MagpieToJava {
       return convertUnquoteExpr(expr);
     } else if (exprClass == mInterpreter.getGlobal("UnsafeCastExpression")) {
       return convertUnsafeCastExpr(expr);
+    } else if (exprClass == mInterpreter.getGlobal("UsingExpression")) {
+      return convertUsingExpr(expr);
     } else if (exprClass == mInterpreter.getGlobal("VariableExpression")) {
       return convertVarExpr(expr);
     }
@@ -263,6 +265,12 @@ public class MagpieToJava {
         getExpr(expr, "value"));
   }
   
+  private Expr convertUsingExpr(Obj expr) {
+    return Expr.string(
+        getPosition(expr),
+        getString(expr, "name"));
+  }
+
   private Expr convertVarExpr(Obj expr) {
     return Expr.var(
         getPosition(expr),
@@ -409,7 +417,7 @@ public class MagpieToJava {
   }
   
   private Obj getMember(Obj obj, String name) {
-    return mInterpreter.getMember(Position.none(), obj, name);
+    return mInterpreter.getQualifiedMember(Position.none(), obj, name);
   }
   
   private Interpreter mInterpreter;

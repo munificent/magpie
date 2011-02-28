@@ -180,6 +180,10 @@ public abstract class Expr {
     return new TupleExpr(Arrays.asList(fields));
   }
 
+  public static Expr using(Position position, String name) {
+    return new UsingExpr(position, name);
+  }
+
   public static Expr var(String name, Expr value) {
     return var(value.getPosition(), name, value);
   }

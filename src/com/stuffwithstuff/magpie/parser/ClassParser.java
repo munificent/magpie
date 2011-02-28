@@ -10,8 +10,9 @@ import com.stuffwithstuff.magpie.util.NotImplementedException;
 
 public class ClassParser extends PrefixParser {
   public static Expr parseClass(MagpieParser parser, boolean isExtend) {
-    String className = parser.consume(TokenType.NAME).getString();
-    Position position = parser.last(1).getPosition();
+    Token nameToken = parser.parseName();
+    String className = nameToken.getString();
+    Position position = nameToken.getPosition();
     
     // A class expression is desugared to a call to "receiving" on the class
     // object. For a new class, that's like:
@@ -118,8 +119,9 @@ public class ClassParser extends PrefixParser {
   
   private static Expr parseField(MagpieParser parser, boolean isDelegate,
       Expr theClass) {
-    String name = parser.consume(TokenType.NAME).getString();
-    Position position = parser.last(1).getPosition();
+    Token token = parser.parseName();
+    String name = token.getString();
+    Position position = token.getPosition();
     
     // Parse the type annotation if there is one.
     Expr type;
@@ -144,16 +146,18 @@ public class ClassParser extends PrefixParser {
   }
   
   private static Expr parseMethod(MagpieParser parser, Expr theClass) {
-    String name = parser.consume(TokenType.NAME).getString();
-    Position position = parser.last(1).getPosition();
+    Token token = parser.parseName();
+    String name = token.getString();
+    Position position = token.getPosition();
     Expr function = parser.parseFunction();
     return Expr.message(position, theClass, Name.DEFINE_METHOD,
         Expr.tuple(Expr.string(name), function));
   }
   
   private static Expr parseGetter(MagpieParser parser, Expr theClass) {
-    String name = parser.consume(TokenType.NAME).getString();
-    Position position = parser.last(1).getPosition();
+    Token token = parser.parseName();
+    String name = token.getString();
+    Position position = token.getPosition();
 
     Expr type;
     if (parser.lookAhead("=") || parser.lookAhead(TokenType.LINE)) {

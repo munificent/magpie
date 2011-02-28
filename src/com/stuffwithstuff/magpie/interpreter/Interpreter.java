@@ -226,44 +226,31 @@ public class Interpreter {
     mainFn.invoke(this, mNothing, null, mNothing);
   }
   
-  public Obj getMember(Position position, Obj receiver, String name) {
+  public Obj getQualifiedMember(Position position, Obj receiver, String name) {
+    Obj member = lookupMember(position, receiver, name);
+    if (member != null) return member;
+    
+    return mNothing;
+  }
+  
+  public Obj getMember(Position position, Obj receiver, String name,
+      Iterable<String> namespaces) {
     Expect.notNull(receiver);
     
-    // Look for a getter.
-    Member member = ClassObj.findMember(null, receiver, name);
-    if (member != null) {
-      switch (member.getType()) {
-      case GETTER:
-        return member.getDefinition().invoke(this, receiver, null, mNothing);
-        
-      case METHOD:
-        // Bind it to the receiver.
-        return new FnObj(mFnClass, receiver, member.getDefinition());
-        
-      // TODO(bob): What about setters here?
+    if (!name.contains(".")) {
+      // An unqualified name, so walk the used namespaces first.
+      for (String namespace : namespaces) {
+        Obj object = lookupMember(position, receiver,
+            namespace + "." + name);
+        if (object != null) return object;
       }
     }
-   
-    // Look for a field.
-    Obj value = receiver.getField(name);
-    if (value != null) return value;
     
-    // Hackish. If we're looking for _0 and we haven't found it yet, just
-    // return the object. That lets objects act like tuples of arity 1 and
-    // allows them where a tuple is expected.
-    // TODO(bob): Cleaner solution.
-    if (name.equals("_0")) {
-      return receiver;
-    }
+    // If we got here, it was already qualified, or wasn't in any namespace, so
+    // try the global one.
+    Obj object = lookupMember(position, receiver, name);
+    if (object != null) return object;
     
-    // If all else fails, try finding a matching native Java method on the
-    // primitive value.
-    // TODO(bob): The bound method refactoring broke this. Unbreak.
-    /*
-    Obj result = callJavaMethod(receiver, name, arg);
-    if (result != null) return result;
-    */
-
     return mNothing;
   }
 
@@ -279,7 +266,7 @@ public class Interpreter {
         // We have an argument, but the receiver isn't a function, so send it a
         // "call" message instead. We'll in turn try to apply the result of
         // that.
-        Obj newTarget = getMember(position, target, Name.CALL);
+        Obj newTarget = getQualifiedMember(position, target, Name.CALL);
         
         if (target == newTarget) {
           // If we get here, we're in an infinite regress. Since we can't call
@@ -312,7 +299,7 @@ public class Interpreter {
     Expect.notNull(receiver);
     Expect.notNull(arg);
     
-    Obj resolved = getMember(position, receiver, name);
+    Obj resolved = getQualifiedMember(position, receiver, name);
     
     return apply(position, resolved, null, arg);
   }
@@ -438,7 +425,7 @@ public class Interpreter {
   }
   
   public String evaluateToString(Obj value) {
-    return getMember(Position.none(), value, Name.STRING).asString();
+    return getQualifiedMember(Position.none(), value, Name.STRING).asString();
   }
 
   public Obj orTypes(Obj left, Obj right) {
@@ -495,86 +482,40 @@ public class Interpreter {
     return classObj;
   }
   
-  // TODO(bob): This is hackish in-progress.
-  /* 
-  private Obj callJavaMethod(Obj receiver, String name, Obj arg) {
-    if (receiver.getValue() != null) {
-      Class<?> klass = receiver.getValue().getClass();
-      
-      // Convert the argument types to their Java equivalents.
-      Class<?>[] argClasses;
-      Object[] args;
-      if ((arg == null) || (arg == mNothing)) {
-        argClasses = new Class<?>[0];
-        args = new Object[0];
-      } else if (arg.getClassObj() == mTupleClass) {
-        int count = arg.getField(Identifiers.COUNT).asInt();
-        argClasses = new Class<?>[count];
-        args = new Object[count];
-        for (int i = 0; i < count; i++) {
-          Obj field = arg.getTupleField(i);
-          argClasses[i] = getJavaClass(field);
-          args[i] = field.getValue();
-        }
-      } else {
-        argClasses = new Class<?>[1];
-        args = new Object[1];
-        argClasses[0] = getJavaClass(arg);
-        args[0] = arg.getValue();
-      }
-      
-      try {
-        Method javaMethod = klass.getMethod(name, argClasses);
-        Object result = javaMethod.invoke(receiver.getValue(), args);
+  private Obj lookupMember(Position position, Obj receiver, String name) {
+    Expect.notNull(receiver);
+    
+    // Look for a getter.
+    Member member = ClassObj.findMember(null, receiver, name);
+    if (member != null) {
+      switch (member.getType()) {
+      case GETTER:
+        return member.getDefinition().invoke(this, receiver, null, mNothing);
         
-        return convertToMagpieObject(result);
-      } catch (NoSuchMethodException e) {
-        // OK, method not found.
-      } catch (IllegalArgumentException e) {
-        // OK, no method with the right argument types found.
-      } catch (SecurityException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (IllegalAccessException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (InvocationTargetException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+      case METHOD:
+        // Bind it to the receiver.
+        return new FnObj(mFnClass, receiver, member.getDefinition());
+        
+      // TODO(bob): What about setters here?
       }
     }
+   
+    // Look for a field.
+    Obj value = receiver.getField(name);
+    if (value != null) return value;
     
-    // Failed to find a method.
+    // Hackish. If we're looking for _0 and we haven't found it yet, just
+    // return the object. That lets objects act like tuples of arity 1 and
+    // allows them where a tuple is expected.
+    // TODO(bob): Cleaner solution.
+    if (name.equals("_0")) {
+      return receiver;
+    }
+    
+    // If we get here, it wasn't found.
     return null;
   }
   
-  private Class<?> getJavaClass(Obj object) {
-    if (object.getValue() != null) {
-      return object.getValue().getClass();
-    } else {
-      return Object.class;
-    }
-  }
-  
-  private Obj convertToMagpieObject(Object value) {
-    // Figure out what Magpie class to use.
-    ClassObj classObj = mObjectClass;
-    if (value != null) {
-      if (value.getClass().equals(Boolean.class)) {
-        classObj = mBoolClass;
-      } else if (value.getClass().equals(Integer.class)) {
-        classObj = mIntClass;
-      } else if (value.getClass().equals(String.class)) {
-        classObj = mStringClass;
-      }
-    } else {
-      classObj = mNothingClass;
-    }
-    
-    return classObj.instantiate(value);
-  }
-  */
-
   private final InterpreterHost mHost;
   private Scope mGlobalScope;
   private final ClassObj mClass;

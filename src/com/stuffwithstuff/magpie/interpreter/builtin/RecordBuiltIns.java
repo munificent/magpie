@@ -18,8 +18,9 @@ public class RecordBuiltIns {
       Map<String, Obj> fieldTypes = new HashMap<String, Obj>();
       
       for (Entry<String, Obj> field : thisObj.getFields().entries()) {
-        Obj fieldType = interpreter.getMember(Position.none(), field.getValue(),
-            Name.TYPE);
+        // TODO(bob): Type should be moved into a namespace.
+        Obj fieldType = interpreter.getQualifiedMember(
+            Position.none(), field.getValue(), Name.TYPE);
         fieldTypes.put(field.getKey(), fieldType);
       }
       

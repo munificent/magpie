@@ -243,6 +243,13 @@ public class JavaToMagpie {
     }
 
     @Override
+    public Obj visit(UsingExpr expr, Void dummy) {
+      return construct("UsingExpression",
+          "position", expr.getPosition(),
+          "name",     expr.getName());
+    }
+
+    @Override
     public Obj visit(VariableExpr expr, Void dummy) {
       return construct("VariableExpression",
           "position", expr.getPosition(),

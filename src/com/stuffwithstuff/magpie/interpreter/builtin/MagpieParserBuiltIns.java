@@ -319,7 +319,8 @@ public class MagpieParserBuiltIns {
     @Override
     public int getStickiness() {
       // Ask the Magpie object.
-      Obj stickiness = mInterpreter.getMember(Position.none(), mParser, "stickiness");
+      Obj stickiness = mInterpreter.getQualifiedMember(
+          Position.none(), mParser, "stickiness");
       return stickiness.asInt();
     }
     

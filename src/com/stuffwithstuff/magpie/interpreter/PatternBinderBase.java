@@ -13,7 +13,7 @@ public abstract class PatternBinderBase implements PatternVisitor<Void, Obj> {
     // Destructure each field.
     for (int i = 0; i < pattern.getFields().size(); i++) {
       Pair<String, Pattern> field = pattern.getFields().get(i);
-      Obj fieldValue = mInterpreter.getMember(
+      Obj fieldValue = mInterpreter.getQualifiedMember(
           Position.none(), value, field.getKey());
       field.getValue().accept(this, fieldValue);
     }
@@ -26,7 +26,8 @@ public abstract class PatternBinderBase implements PatternVisitor<Void, Obj> {
     // Destructure each field.
     for (int i = 0; i < pattern.getFields().size(); i++) {
       Pattern fieldPattern = pattern.getFields().get(i);
-      Obj field = mInterpreter.getMember(Position.none(), value, "_" + i);
+      Obj field = mInterpreter.getQualifiedMember(
+          Position.none(), value, "_" + i);
       fieldPattern.accept(this, field);
     }
     

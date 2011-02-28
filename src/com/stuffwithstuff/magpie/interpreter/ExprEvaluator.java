@@ -184,7 +184,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       receiver = context.getThis();
     }
     
-    return mInterpreter.getMember(expr.getPosition(), receiver, expr.getName());
+    return mInterpreter.getMember(expr.getPosition(), receiver,
+        expr.getName(), context.getScope().getNamespaces());
   }
 
   @Override
@@ -264,6 +265,12 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(UnsafeCastExpr expr, EvalContext context) {
     // No type-checking at all, just yield the value.
     return evaluate(expr.getValue(), context);
+  }
+
+  @Override
+  public Obj visit(UsingExpr expr, EvalContext context) {
+    context.getScope().useNamespace(expr.getName());
+    return mInterpreter.nothing();
   }
 
   @Override

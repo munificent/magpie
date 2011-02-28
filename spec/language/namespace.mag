@@ -1,0 +1,3 @@
+specify("a namespace expression") with
+    // nothing yet...
+end

@@ -63,15 +63,17 @@ public class EvalContext {
    * @return       The value bound to that name, or null if not found.
    */
   public Obj lookUp(String name) {
-    // Walk up the scope chain until we find it.
-    Scope scope = mScope;
-    while (scope != null) {
-      Obj value = scope.get(name);
-      if (value != null) return value;
-      scope = scope.getParent();
+    if (!name.contains(".")) {
+      // An unqualified name, so walk the used namespaces first.
+      for (String namespace : mScope.getNamespaces()) {
+        Obj object = lookUpName(namespace + "." + name);
+        if (object != null) return object;
+      }
     }
     
-    return null;
+    // If we got here, it was already qualified, or wasn't in any namespace, so
+    // try the global one.
+    return lookUpName(name);
   }
 
   /**
@@ -106,7 +108,7 @@ public class EvalContext {
     
     return false;
   }
-
+  
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
@@ -127,12 +129,23 @@ public class EvalContext {
     return builder.toString();
   }
   
+  private Obj lookUpName(String name) {
+    // Walk up the scope chain until we find it.
+    Scope scope = mScope;
+    while (scope != null) {
+      Obj value = scope.get(name);
+      if (value != null) return value;
+      scope = scope.getParent();
+    }
+    
+    return null;
+  }
   private EvalContext(Scope scope, Obj thisObj, boolean isInLoop) {
     mScope = scope;
     mThis = thisObj;
     mIsInLoop = isInLoop;
   }
-  
+
   private final Scope   mScope;
   private final Obj     mThis;
   private final boolean mIsInLoop;

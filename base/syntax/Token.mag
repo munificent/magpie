@@ -47,9 +47,9 @@ do
     defToken("comma",         6)
     defToken("dot",           7)
     defToken("line",          8)
-    // TODO(bob): Ideally, this token type would be called "name", but that collides
-    // with the "name" getter on the class itself. if we move getting a class name
-    // out of the class and into Reflect, we can change this to "name" here.
+    // TODO(bob): Ideally, this token type would be called "name", but that
+    // collides with the "name" getter on the class itself. if we namespace
+    // "name" in Class, that will fix this.
     defToken("identifier",    9)
     defToken("field",         10)
     defToken("boolLiteral",   11)

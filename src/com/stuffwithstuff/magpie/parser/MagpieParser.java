@@ -79,6 +79,39 @@ public class MagpieParser extends Parser {
     return parseBlock(true, endTokens, null);
   }
   
+  /**
+   * Parses a name at the current parser position. Unlike a simple
+   * consume(TokenType.NAME), which will parse a fully-qualified name
+   * consisting of a series of NAME tokens separated by DOTs, like "foo.bar.c".
+   * @return A Token that merges the fully-qualified name.
+   */
+  public Token parseName() {
+    return parseName(false);
+  }
+  
+  /**
+   * Parses a name at the current parser position. Unlike a simple
+   * consume(TokenType.NAME), which will parse a fully-qualified name
+   * consisting of a series of NAME tokens separated by DOTs, like "foo.bar.c".
+   * @return A Token that merges the fully-qualified name.
+   */
+  public Token parseName(boolean consumedFirst) {
+    String name;
+    if (consumedFirst) {
+      name = last(1).getString();
+    } else {
+      name = consume(TokenType.NAME).getString();
+    }
+    Position position = last(1).getPosition();
+
+    while (match(TokenType.DOT)) {
+      name += "." + consume(TokenType.NAME).getString();
+      position = position.union(last(1).getPosition());
+    }
+    
+    return new Token(position, TokenType.NAME, name);
+  }
+  
   public Expr parseFunction() {
     Position position = current().getPosition();
     

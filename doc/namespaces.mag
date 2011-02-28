@@ -1,27 +1,37 @@
-// Namespace expression.
-// When a "namespace" expression is evaluated, it does two things:
+// A namespace expression specifies a name and a body. Within the body, all new
+// variables or members that aren't fully-qualified will be qualified with the
+// name of the namespace:
+namespace foo
+    var bar = "123"    // Declares a variable "foo.bar"
 
-// 1. Defines a prefix. Any subsequent variables declared in the current scope
-// will be qualified with that prefix. For example:
-do
-    namespace Foo
-
-    var bar = "123"    // Declares a variable "Foo.bar"
-
-    class Blah         // Declares a class "Foo.Blah"
+    class Blah         // Declares a class "foo.Blah"
+        def method()   // Declares a method "foo.method"
     end
 
-    def func() nothing // Declares a function "Foo.func"
+    def func() nothing // Declares a function "foo.func"
+
+    var other.bar      // Declares a variable "other.bar"
 end
 
-// 2. Implicitly imports the namespace.
-// This way, unqualified names used in that scope can find names in that scope
-// since they'll now have the namespace prefix.
+// A using specifies a name. Within the current scope, the name is added to
+// the list of available namespaces. Any unqualified name within that scope will
+// be looked up in that namespace before trying other namespaces:
+namespace first
+    var foo = "first.foo"
+    var bar = "first.bar"
+end
 
-// Qualify expression.
-// When a "qualify" expression is evaluated, it adds the given name to the list
-// of prefixes to search when looking up a name.
+namespace second
+    var foo = "second.foo"
+end
 
-qualify Foo
+do
+    using first
+    print(foo) // "first.foo"
+    print(bar) // "first.bar"
 
-print(bar) // will look for 'bar', then 'Foo.bar'
+    using second
+    print(foo) // "second.foo"
+    print(bar) // "second.bar"
+end
+

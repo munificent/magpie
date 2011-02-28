@@ -13,10 +13,6 @@ public class ScopeExpr extends Expr {
     return visitor.visit(this, context);
   }
 
-  @Override public String toString() {
-    return mBody.toString();
-  }
-
   @Override
   public void toString(StringBuilder builder, String indent) {
     builder.append("do\n");

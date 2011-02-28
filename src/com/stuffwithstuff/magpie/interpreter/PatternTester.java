@@ -22,7 +22,8 @@ public class PatternTester implements PatternVisitor<Boolean, Obj> {
     // Test each field.
     for (int i = 0; i < pattern.getFields().size(); i++) {
       Pair<String, Pattern> field = pattern.getFields().get(i);
-      Obj fieldValue = mInterpreter.getMember(Position.none(), value, field.getKey());
+      Obj fieldValue = mInterpreter.getQualifiedMember(
+          Position.none(), value, field.getKey());
       if (!field.getValue().accept(this, fieldValue)) return false;
     }
     
@@ -35,7 +36,8 @@ public class PatternTester implements PatternVisitor<Boolean, Obj> {
     // Test each field.
     for (int i = 0; i < pattern.getFields().size(); i++) {
       Pattern fieldPattern = pattern.getFields().get(i);
-      Obj field = mInterpreter.getMember(Position.none(), value, "_" + i);
+      Obj field = mInterpreter.getQualifiedMember(
+          Position.none(), value, "_" + i);
       if (!fieldPattern.accept(this, field)) return false;
     }
     

@@ -113,6 +113,10 @@ public class EnvironmentBuilder {
         .field("position", name("Position"))
         .field("type",     name("Expression"))
         .field("value",    name("Expression"));
+    
+    newClass("UsingExpression")
+        .field("position", name("Position"))
+        .field("name",     name("String"));
 
     newClass("VariableExpression")
         .field("position", name("Position"))
