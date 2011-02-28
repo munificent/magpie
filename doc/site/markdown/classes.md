@@ -40,7 +40,7 @@ script is evaluated.
 
 Both have their advantages. Declarative class syntax is generally easier to read and reason about and makes things like mututally recursion and circular references less tricky. On the other hand, imperative class creation makes it easier to do dynamic things like extend an existing class, or add a method whose name is determined at runtime. Ruby's Active Record pattern would be impossible with a static class declaration system.
 
-Magpie (as it does in many things) doesn't take sides. It has a core imperative API for building classes procedurally, then it layers a nice declarative syntax that the parser translates that down to. Most of the time, you'll work at the declarative level:
+Magpie believes different problems have different solutions. It has a core imperative API for building classes procedurally, then it layers a nice declarative syntax that the parser translates that down to. Most of the time, you'll work at the declarative level:
 
     :::magpie
     class Friend

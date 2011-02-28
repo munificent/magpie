@@ -46,7 +46,7 @@ mostly in pleasant ways).
 
 ## Prefer defining things in the library over in the language.
 
-One test of a languages power and expressiveness is seeing how many useful abstractions can be implemented just at the library level and don't require specific language support. The more you can do at the library level, the more power you've put in the hands of all users instead of just giving magical abilities to the language designers. Pushing things out to the library also gives a few very practical benefits:
+One test of a language's power and expressiveness is seeing how many useful abstractions can be implemented just at the library level and don't require specific language support. The more you can do at the library level, the more power you've put in the hands of all users instead of just giving magical abilities to the language designers. Pushing things out to the library also gives a few very practical benefits:
 
 * This simplifies the core language, which makes it easier to specify and
   implement.
