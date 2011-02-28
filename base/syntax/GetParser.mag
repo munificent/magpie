@@ -15,7 +15,7 @@ class GetParser
         end
 
         var type = FunctionTypeExpression new(
-            typeParams: %unsafecast%(List(String, Expression), Array of()),
+            typeParams: unsafecast[List(String, Expression)](Array of()),
             pattern:    ValuePattern new(value: { nothing }),
             returnType: valueType)
 

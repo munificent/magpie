@@ -1,11 +1,10 @@
 // Utility functions used by the parsers.
 
-%var%("parseReceiver",
-    fn(parser MagpieParser -> Expression)
+var parseReceiver = fn(parser MagpieParser -> Expression)
         match parser lookAhead(TokenType identifier)
             case true then
                 // Getter on a class.
-                %var%("className", parser consume())
+                var className = parser consume()
                 MessageExpression new(
                     position: className position,
                     receiver: nothing,
@@ -13,10 +12,9 @@
             else
                 // Getter on a complex expression.
                 parser consume(TokenType leftParen)
-                %var%("receiver", parser parseExpression())
+                var receiver = parser parseExpression()
                 parser consume(TokenType rightParen)
                 receiver
             end
         end
     end
-)

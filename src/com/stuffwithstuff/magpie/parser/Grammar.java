@@ -14,9 +14,13 @@ public class Grammar {
     mPrefixParsers.define(TokenType.BACKTICK, new BacktickParser());
     mPrefixParsers.define(TokenType.NAME, new MessagePrefixParser());
     mPrefixParsers.define(TokenType.FIELD, new FieldParser());
+    mPrefixParsers.define("break", new BreakParser());
     mPrefixParsers.define("fn", new FnParser());
     mPrefixParsers.define("nothing", new NothingParser());
+    mPrefixParsers.define("return", new ReturnParser());
     mPrefixParsers.define("this", new ThisParser());
+    mPrefixParsers.define("unsafecast", new UnsafeCastParser());
+    mPrefixParsers.define("var", new VarParser());
 
     mInfixParsers.define(TokenType.LEFT_PAREN, new ParenthesisInfixParser());
     mInfixParsers.define(TokenType.NAME, new MessageInfixParser());

@@ -12,7 +12,7 @@ class IfParser
         // Parse the else body.
         var consumedEnd? =
             Reflect same?(thenParse _1, nothing) not and
-            %unsafecast%(Token, thenParse _1) keyword?("end")
+            unsafecast[Token](thenParse _1) keyword?("end")
         end
 
         var elseExpr =

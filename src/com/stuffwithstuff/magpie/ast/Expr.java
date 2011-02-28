@@ -77,23 +77,6 @@ public abstract class Expr {
     Expect.notNull(target);
     Expect.notNull(arg);
     
-    // Immediately handle special forms.
-    if (target instanceof MessageExpr) {
-      MessageExpr message = (MessageExpr) target;
-      String name = message.getName();
-      
-      if (name.equals("%break%")) {
-        return new BreakExpr(target.getPosition());
-      } else if (name.equals("%return%")) {
-        return new ReturnExpr(target.getPosition(), arg);
-      } else if (name.equals("%unsafecast%")) {
-        return specialFormUnsafeCast(target.getPosition(), arg);
-      } else if (name.equals("%var%")) {
-        return specialFormVar(target.getPosition(), arg);
-      }
-    }
-    
-    // If we got here, it's not a special form.
     return new CallExpr(target, null, arg);
   }
   
@@ -226,20 +209,6 @@ public abstract class Expr {
   }
   
   public abstract void toString(StringBuilder builder, String indent);
-  
-  private static Expr specialFormUnsafeCast(Position position, Expr arg) {
-    Expr type = ((TupleExpr)arg).getFields().get(0);
-    Expr value = ((TupleExpr)arg).getFields().get(1);
-    
-    return new UnsafeCastExpr(position, type, value);
-  }
-  
-  private static Expr specialFormVar(Position position, Expr arg) {
-    String name = ((StringExpr)(((TupleExpr)arg).getFields().get(0))).getValue();
-    Expr valueExpr = ((TupleExpr)arg).getFields().get(1);
-    
-    return var(position, name, valueExpr);
-  }
   
   private final Position mPosition;
 }

@@ -13,19 +13,15 @@ import("syntax/patterns.mag")
 // since it's a pain to not have them. These are ordered roughly in order of
 // what's most useful to have.
 import("syntax/parsing.mag")
-import("syntax/VarParser.mag")
 
 import("syntax/AndParser.mag")
 import("syntax/OrParser.mag")
 
-import("syntax/BreakParser.mag")
 import("syntax/ClassParser.mag")
 import("syntax/DefParser.mag")
 import("syntax/IfParser.mag")
 import("syntax/GetParser.mag")
-import("syntax/ReturnParser.mag")
 import("syntax/TypeofParser.mag")
-import("syntax/UnsafeCastParser.mag")
 
 import("syntax/OperatorParser.mag")
 

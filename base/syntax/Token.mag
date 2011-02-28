@@ -4,9 +4,9 @@
 class Token
 end
 
-Token defineGetter("boolValue", fn(-> Bool) %unsafecast%(Bool, value))
-Token defineGetter("intValue", fn(-> Int) %unsafecast%(Int, value))
-Token defineGetter("stringValue", fn(-> String) %unsafecast%(String, value))
+Token defineGetter("boolValue", fn(-> Bool) unsafecast[Bool](value))
+Token defineGetter("intValue", fn(-> Int) unsafecast[Int](value))
+Token defineGetter("stringValue", fn(-> String) unsafecast[String](value))
 Token declareField("position", false, { Position })
 Token declareField("tokenType", false, { TokenType })
 Token declareField("value", false,
@@ -33,10 +33,11 @@ TokenType declareField("value", false, { Int })
 TokenType declareField("name", false, { String })
 
 do
-    %var%("defToken", fn(name String, value Int)
+    var defToken = fn(name String, value Int)
         Reflect getClass(TokenType) defineGetter(name,
             fn(-> TokenType) TokenType new(value, name))
-    end)
+        end
+
     defToken("leftParen",     0)
     defToken("rightParen",    1)
     defToken("leftBracket",   2)

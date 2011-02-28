@@ -7,7 +7,7 @@ class OrParser
         parser matchToken(TokenType line)
         var right = parser parseExpression(stickiness)
         { do
-            %var%("temp__", `left)
+            var temp__ = `left
             match temp__ true?
                 case true then temp__
                 else `right
