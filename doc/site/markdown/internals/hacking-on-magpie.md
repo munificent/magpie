@@ -8,7 +8,7 @@ The Magpie interpreter is written in straight Java. It has no external dependenc
 
 ### Cloning the Repo
 
-Magpie lives on [bitbucket](http://bitbucket.org). To work on the source, just clone the repository from: [http://bitbucket.org/munificent/magpie](http://bitbucket.org/munificent/magpie). That will give you a source tree with:
+Magpie lives on [github](http://github.com). To work on the source, just clone [the repository](http://github.com/munificent/magpie). That will give you a source tree with:
 
 * `/base`: Contains the base library: the Magpie code automatically run at startup.
 * `/doc`: Documentation, of course. Lots of notes to myself and stuff that may be outdated, but may be useful.
@@ -17,7 +17,6 @@ Magpie lives on [bitbucket](http://bitbucket.org). To work on the source, just c
 * `/script`: Example Magpie scripts.
 * `/spec`: The Magpie spec, the executable specification that defines and verifies the language.
 * `/src/com/stuffwithstuff/magpie`: The Java source code of the interpreter.
-* `/test`: The old test suite, which was used before I started the spec. It's probably horribly broken now.
 
 ## The Namespaces
 

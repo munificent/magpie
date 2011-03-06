@@ -13,20 +13,14 @@ That creates an anonymous function that prints some text when invoked. You can i
 
     :::magpie
     // Create a function and store it in a variable:
-    var printArg = fn(a) print("My arg is " + a)
+    var printArg = fn(a) print("My arg is " ~ a)
     // Call it:
     printArg("bananas!") // Prints "My arg is bananas!"
 
 You don't have to store a function in a variable to use it. The following example does the same as the above one:
 
     :::magpie
-    (fn(a) print("My arg is " + a))("bananas!")
-
-Defining named functions is so common that there is a special keyword, `def` for doing just that. The above example would be more naturally expressed like:
-
-    :::magpie
-    def printArg(a) print("My arg is " + a)
-    printArg("bananas!")
+    (fn(a) print("My arg is " ~ a))("bananas!")
 
 A function can also take a block for its body:
 
@@ -39,7 +33,7 @@ A function can also take a block for its body:
 If a function takes multiple arguments, they are separated by commas:
 
     :::magpie
-    fn sum(a, b, c) a + b + c
+    fn(a, b, c) a + b + c
 
 (More precisely, the function still takes a single argument: a [tuple](compound-values.html). But, if you define a function with a list of comma-separated parameters like the above example, it will automatically pull the fields out of the tuple passed to the function and bind them to the listed names.)
 
@@ -47,6 +41,14 @@ If a function doesn't take any arguments, you can leave off the `()` when defini
 
     :::magpie
     fn print("hi")
+
+Because defining named functions is so common, there is a special keyword, `def` for doing just that:
+
+    :::magpie
+    // This:
+    def printArg(a) print("My arg is " ~ a)
+    // Is the same as:
+    var printArg = fn(a) print("My arg is " ~ a)
 
 ## Calling Functions
 
@@ -72,12 +74,13 @@ In Magpie all functions take a single argument. To pass multiple arguments, you 
 A function automatically returns the value that its body evaluates to. An explicit `return` is not required:
 
     :::magpie
-    fn 123 // Returns 123 when called.
+    def name() "Fred"
+    print(name()) // Fred
 
 If the body is a block, the result will be the last expression in the block:
 
     :::magpie
-    fn
+    def sayHi()
         print("hi")
         "result"
     end
@@ -85,7 +88,8 @@ If the body is a block, the result will be the last expression in the block:
 
 You can also explicitly return early from a function using a `return` expression:
 
-    fn(arg)
+    :::magpie
+    def earlyReturn(arg)
         if arg == "no!" then return "bailed"
         "ok"
     end
