@@ -115,9 +115,18 @@ public class Interpreter {
     mRecordClass = createGlobalClass("Record");
     mRuntimeClass = createGlobalClass("Runtime");
     mStringClass = createGlobalClass("String");
+    
     mTupleClass = createGlobalClass("Tuple");
     mTupleClass.getMembers().defineGetter("count",
         new FieldGetter("count", Expr.name("Int")));
+    for (int i = 0; i < 20; i++) {
+      // Note that field types default to "Nothing" here because when you call
+      // "type" on a tuple, it will create a new tuple representing its type.
+      // The only time these getter types will be accessed directly the tuple
+      // lacks that field, in which case Nothing is the correct type.
+      mTupleClass.getMembers().defineGetter(Name.getTupleField(i),
+          new FieldGetter(Name.getTupleField(i), Expr.name("Nothing")));
+    }
     
     mNothingClass = createGlobalClass("Nothing");
     mNothing = instantiate(mNothingClass, null);
@@ -148,6 +157,7 @@ public class Interpreter {
     BuiltIns.registerClass(ReflectBuiltIns.class, reflectClass);
     BuiltIns.registerClass(RuntimeBuiltIns.class, mRuntimeClass);
     BuiltIns.registerClass(StringBuiltIns.class, mStringClass);
+    BuiltIns.registerClass(TupleBuiltIns.class, mTupleClass);
     BuiltIns.registerFunctions(BuiltInFunctions.class, this);
     
     EnvironmentBuilder.initialize(this);

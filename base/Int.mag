@@ -3,6 +3,8 @@ extend class Int
     def times(-> Range) Range new(0, this - 1)
     def to(last Int -> Range) Range new(this, last)
     def until(last Int -> Range) Range new(this, last - 1)
+    // TODO(bob): Use real int max.
+    get countingUp Range = Range new(this, 99999999)
 end
 
 // Define an int iterator.
@@ -21,11 +23,11 @@ class RangeIterator
     var last    Int
 end
 
-class Range    
+class Range
     shared def new(start Int, last Int -> Range)
         construct(start: start, last: last)
     end
-    
+
     def iterate(-> RangeIterator) RangeIterator new(start, last)
 
     var start Int

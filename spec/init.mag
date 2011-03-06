@@ -69,5 +69,6 @@ import("core/Record/type.mag")
 import("core/Tuple/assignsFrom.mag")
 import("core/Tuple/iterate.mag")
 import("core/Tuple/string.mag")
+import("core/Tuple/type.mag")
 
 endTests()

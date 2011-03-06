@@ -1,15 +1,11 @@
 To clean up tuples and records:
 
-- Come up with new naming scheme for tuple fields so that a "_" prefix can be
++ Come up with new naming scheme for tuple fields so that a "_" prefix can be
   used for private members.
-- Change code and base lib to use new field names.
-- Create distinct classes for each tuple arity with getters for the fields.
-- Create distinct class on demand for a record with getters for each field.
++ Change code and base lib to use new field names.
++ Create getters for the fields on the Tuple class.
++ Implement Tuple#type. It currently has no implementation at all.
 - Get rid of direct field lookup in Interpreter#lookupMember. All fields should
   be accessed through getters.
 - Make sure Record#type also creates a record with an appropriate class and
   doesn't just set raw fields.
-- Figure out if the type objects for tuples and records should themselves be
-  tuples and records or just interfaces. Since they'll have unique classes
-  anyway, it may be simpler to just make them interfaces.
-- Implement Tuple#type. It currently has no implementation at all.
