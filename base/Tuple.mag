@@ -4,7 +4,7 @@ def Tuple iterate(-> TupleIterator) TupleIterator new(this)
 extend class Tuple
     get string String =
         var result = "("
-    
+
         for field = this
         for index = 0 to(count) do
             result = result ~ field ~ if index < (count - 1) then ", " else ")"
@@ -19,7 +19,7 @@ extend class Tuple
             var otherField = other getMemberType(name)
             if field assignsFrom?(otherField) not then return false
         end
-        
+
         true
     end
 
@@ -32,7 +32,7 @@ extend class Tuple
             Tuple getMemberType(name)
         end
     end
-    
+
     shared def equal?(left Tuple, right Tuple -> Bool)
         if left count != right count then return false
 
@@ -42,29 +42,6 @@ extend class Tuple
         end
         true
     end
-
-    /*
-    get type Type =
-        // TODO(bob): This is pretty gross right now. :(
-        match count
-        case  1 then (_0 type)
-        case  2 then (_0 type, _1 type)
-        case  3 then (_0 type, _1 type, _2 type)
-        case  4 then (_0 type, _1 type, _2 type, _3 type)
-        case  5 then (_0 type, _1 type, _2 type, _3 type, _4 type)
-        case  6 then (_0 type, _1 type, _2 type, _3 type, _4 type, _5 type)
-        case  7 then (_0 type, _1 type, _2 type, _3 type, _4 type, _5 type,
-                      _6 type)
-        case  8 then (_0 type, _1 type, _2 type, _3 type, _4 type, _5 type,
-                      _6 type, _7 type)
-        case  9 then (_0 type, _1 type, _2 type, _3 type, _4 type, _5 type,
-                      _6 type, _7 type, _8 type)
-        case 10 then (_0 type, _1 type, _2 type, _3 type, _4 type, _5 type,
-                      _6 type, _7 type, _8 type, _9 type)
-        else Tuple
-        end
-    end
-    */
 end
 
 class TupleIterator
@@ -91,7 +68,7 @@ class TupleIterator
         index = index + 1
         index < tuple count
     end
-    
+
     var tuple Tuple
     var index = -1 // the first call to next advances to the first
 end

@@ -3,15 +3,14 @@ extend class Record
     def assignsFrom?(other Type -> Bool)
         // As long as the other type has assignable getters for all of the
         // record's fields, we're good.
-        for field = fields do
-            // TODO(bob): Get rid of these when tuple fields are typed.
-            var name = unsafecast[String](field _0)
-            var fieldType = unsafecast[Type](field _1)
-            if fieldType assignsFrom?(other getMemberType(name)) not then
+        for name, fieldType = fields do
+            // TODO(bob): Get rid of unsafecast when tuple fields are typed.
+            if unsafecast[Type](fieldType) assignsFrom?(
+                    other getMemberType(unsafecast[String](name))) not then
                 return false
             end
         end
-        
+
         true
     end
 
@@ -24,22 +23,22 @@ extend class Record
             Record getMemberType(name)
         end
     end
-    
+
     shared def equal?(left Record, right Record -> Bool)
         if left fields count != right fields count then return false
-        
+
         for leftField = left fields
         for rightField = right fields do
             if leftField != rightField then return false
         end
         true
     end
-    
+
     get string String =
         var result = ""
-        for field = fields do
+        for name, fieldType = fields do
             if result count > 0 then result = result ~ " "
-            result = result ~ field _0 ~ ": " ~ field _1
+            result = result ~ name ~ ": " ~ fieldType
         end
         result
     end

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.Expr;
+import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.Name;
 
 public class LoopParser extends PrefixParser {
@@ -46,26 +47,27 @@ public class LoopParser extends PrefixParser {
             Expr.nothing(),
             Expr.break_(condition.getPosition())));
       } else {
-        Token nameToken = parser.consume(TokenType.NAME);
-        String variable = nameToken.getString();
-        Position position = nameToken.getPosition();
+        PositionSpan iteratorSpan = parser.startBefore();
+        Pattern pattern = PatternParser.parse(parser);
         parser.consume("=");
         Expr generator = parser.parseExpression();
+        Position position = iteratorSpan.end();
         
-        // Initialize the generator before the loop.
-        String generatorVar = variable + " gen";
-        beforeLoop.add(Expr.var(position, generatorVar,
-            Expr.message(position, generator, Name.ITERATE, Expr.nothing(position))));
+        // Initialize the iterator before the loop.
+        String iteratorVar = parser.generateName();
+        beforeLoop.add(Expr.var(position, iteratorVar,
+            Expr.message(position, generator, Name.ITERATE,
+                Expr.nothing(position))));
         
         // Each iteration, advance the iterator and break if done.
         eachLoop.add(Expr.if_(
-            Expr.message(position, Expr.name(generatorVar), Name.NEXT, Expr.nothing(position)),
+            Expr.message(position, Expr.name(iteratorVar), Name.NEXT, Expr.nothing(position)),
             Expr.nothing(),
             Expr.break_(position)));
         
         // If not done, create the loop variable.
-        eachLoop.add(Expr.var(position, variable,
-            Expr.message(position, Expr.name(position, generatorVar), Name.CURRENT)));
+        eachLoop.add(Expr.var(position, pattern,
+            Expr.message(position, Expr.name(position, iteratorVar), Name.CURRENT)));
       }
       parser.match(TokenType.LINE); // Optional line after a clause.
       

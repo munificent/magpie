@@ -7,8 +7,8 @@ class GenericInterface
     def call(typeArgs -> Interface)
         // See if we've already instantiated it first.
         var typeArgString = typeArgs string
-        for instance = instances do
-            if instance _0 == typeArgString then return instance _1
+        for name, instance = instances do
+            if name == typeArgString then return instance
         end
 
         var instance = Interface new(name ~ "[" ~ typeArgs string ~ "]")
