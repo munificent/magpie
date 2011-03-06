@@ -39,6 +39,10 @@ public final class Name {
   public static final String TYPE = "type";
   public static final String UNSAFE_REMOVE_NOTHING = "unsafeRemoveNothing";
 
+  public static String getTupleField(int index) {
+    return "field" + index;
+  }
+  
   private Name() {
   }
 }

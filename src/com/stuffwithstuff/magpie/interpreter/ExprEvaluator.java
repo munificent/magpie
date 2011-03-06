@@ -70,9 +70,9 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       Expr catchExpr = expr.getCatch();
       if (catchExpr != null) {
         // The catch expression expects to be evaluated in its own scope where
-        // __err__ is bound to the exception value.
+        // err__ is bound to the exception value.
         context = context.pushScope();
-        context.define("__err__", err.getError());
+        context.define("err__", err.getError());
         return evaluate(catchExpr, context);
       } else {
         // Not caught here, so just keep unwinding.

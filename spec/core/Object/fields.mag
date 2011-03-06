@@ -7,8 +7,8 @@ specify("The 'fields' getter on Object") with
 
     it should("return the fields sorted alphabetically") with
         var fields = (y: 2, z: 3, x: 1) fields
-        fields(0) _0 shouldBe("x")
-        fields(1) _0 shouldBe("y")
-        fields(2) _0 shouldBe("z")
+        fields(0) field0 shouldBe("x")
+        fields(1) field0 shouldBe("y")
+        fields(2) field0 shouldBe("z")
     end
 end

@@ -385,8 +385,7 @@ public class Interpreter {
     // A tuple is an object with fields whose names are zero-based numbers.
     Obj tuple = instantiate(mTupleClass, null);
     for (int i = 0; i < fields.size(); i++) {
-      String name = "_" + Integer.toString(i);
-      tuple.setField(name, fields.get(i));
+      tuple.setField(Name.getTupleField(i), fields.get(i));
     }
     
     tuple.setField(Name.COUNT, createInt(fields.size()));
@@ -504,11 +503,10 @@ public class Interpreter {
     Obj value = receiver.getField(name);
     if (value != null) return value;
     
-    // Hackish. If we're looking for _0 and we haven't found it yet, just
-    // return the object. That lets objects act like tuples of arity 1 and
-    // allows them where a tuple is expected.
+    // Hackish. Let objects act like tuples of arity 1 by having a member with
+    // the name of the first tuple field just default to returning the object.
     // TODO(bob): Cleaner solution.
-    if (name.equals("_0")) {
+    if (name.equals(Name.getTupleField(0))) {
       return receiver;
     }
     

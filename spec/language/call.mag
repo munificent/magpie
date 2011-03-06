@@ -32,8 +32,8 @@ specify("A call expression on a function") with
 
     it should("bind the entire tuple if there is only a single parameter") with
         var f = fn(a)
-            a _0 shouldBe(1)
-            a _1 shouldBe(2)
+            a field0 shouldBe(1)
+            a field1 shouldBe(2)
         end
         f(1, 2)
     end

@@ -14,7 +14,7 @@ extend class Tuple
 
     def assignsFrom?(other Type -> Bool)
         for i = 0 until(count) do
-            var name = "_" ~ i
+            var name = "field" ~ i
             var field = getField(name)
             var otherField = other getMemberType(name)
             if field assignsFrom?(otherField) not then return false
@@ -51,16 +51,16 @@ class TupleIterator
 
     get current =
         match index
-            case 0 then tuple _0
-            case 1 then tuple _1
-            case 2 then tuple _2
-            case 3 then tuple _3
-            case 4 then tuple _4
-            case 5 then tuple _5
-            case 6 then tuple _6
-            case 7 then tuple _7
-            case 8 then tuple _8
-            case 9 then tuple _9
+            case 0 then tuple field0
+            case 1 then tuple field1
+            case 2 then tuple field2
+            case 3 then tuple field3
+            case 4 then tuple field4
+            case 5 then tuple field5
+            case 6 then tuple field6
+            case 7 then tuple field7
+            case 8 then tuple field8
+            case 9 then tuple field9
         end
     end
 

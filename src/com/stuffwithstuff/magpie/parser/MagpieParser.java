@@ -275,20 +275,19 @@ public class MagpieParser extends Parser {
         while (match("catch")) {
           catches.add(parseCatch(endKeywords, endTokens));
         }
-        
+
         // TODO(bob): This is kind of hokey.
         if (catches.size() > 0) {
-          Expr valueExpr = Expr.name("__err__");
+          Expr valueExpr = Expr.name("err__");
           Expr elseExpr = Expr.message(valueExpr.getPosition(),
               Expr.name("Runtime"), "throw", valueExpr);
           catches.add(new MatchCase(new VariablePattern("_", null), elseExpr));
-          
+
           catchExpr = Expr.match(span.end(), valueExpr, catches);
         }
       }
-      
-      return new Pair<Expr, Token>(
-          Expr.block(exprs, catchExpr), endToken);
+
+      return new Pair<Expr, Token>(Expr.block(exprs, catchExpr), endToken);
     } else {
       Expr body = parseExpression();
       return new Pair<Expr, Token>(body, null);
@@ -299,25 +298,24 @@ public class MagpieParser extends Parser {
     Pattern pattern = PatternParser.parse(this);
 
     consume("then");
-    
+
     Pair<Expr, Token> body = parseBlock(false, endKeywords, endTokens);
-    
+
     // Allow newlines to separate single-line catches.
-    if ((body.getValue() == null) &&
-        lookAhead(TokenType.LINE, "catch")) {
+    if ((body.getValue() == null) && lookAhead(TokenType.LINE, "catch")) {
       consume();
     }
-    
+
     return new MatchCase(pattern, body.getKey());
   }
 
   private final Grammar mGrammar;
-  
+
   // Counts the number of nested expression literals the parser is currently
   // within. Zero means the parser is not inside an expression literal at all
   // (i.e. in regular code). It will be one at the "here" token in "{ here }".
   // Used to determine when an unquote expression is allowed.
   private int mQuoteDepth;
-  
+
   private int mUniqueSymbolId = 0;
 }

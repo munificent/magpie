@@ -11,8 +11,8 @@ specify("A newline") with
     it should("be ignored after a comma") with
         var i = 1,
             2
-        i _0 shouldBe(1)
-        i _1 shouldBe(2)
+        i field0 shouldBe(1)
+        i field1 shouldBe(2)
     end
 
     it should("be ignored after a field") with
@@ -21,7 +21,7 @@ specify("A newline") with
         a x shouldBe(1)
         a y shouldBe(2)
     end
-    
+
     // TODO(bob): Skip for now. Periods are not used by the grammar.
     /*
     it should("be ignored after a period") with

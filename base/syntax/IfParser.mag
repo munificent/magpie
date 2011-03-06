@@ -6,13 +6,12 @@ class IfParser
 
         // Parse the then body.
         parser consume("then")
-        var thenParse = parser parseBlock("else", "end")
-        var thenExpr, _ = thenParse
+        var thenExpr, endToken = parser parseBlock("else", "end")
 
         // Parse the else body.
         var consumedEnd? =
-            Reflect same?(thenParse _1, nothing) not and
-            unsafecast[Token](thenParse _1) keyword?("end")
+            Reflect same?(endToken, nothing) not and
+            unsafecast[Token](endToken) keyword?("end")
         end
 
         var elseExpr =
