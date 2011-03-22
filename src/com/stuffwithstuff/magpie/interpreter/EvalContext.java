@@ -7,9 +7,10 @@ import java.util.Map.Entry;
  * lexical scope and the object that "this" refers to.
  */
 public class EvalContext {
-  public EvalContext(Scope scope, Obj thisObj) {
+  public EvalContext(Scope scope, Obj thisObj, ClassObj containingClass) {
     mScope = scope;
     mThis = thisObj;
+    mContainingClass = containingClass;
     mIsInLoop = false;
   }
   
@@ -17,34 +18,28 @@ public class EvalContext {
    * Creates an EvalContext for a new lexical block scope within this one.
    */
   public EvalContext pushScope() {
-    return new EvalContext(new Scope(mScope), mThis, mIsInLoop);
+    return new EvalContext(new Scope(mScope), mThis, mContainingClass, mIsInLoop);
   }
   
   /**
    * Creates an EvalContext that discards the current innermost lexical scope.
    */
   public EvalContext popScope() {
-    return new EvalContext(mScope.getParent(), mThis, mIsInLoop);
+    return new EvalContext(mScope.getParent(), mThis, mContainingClass, mIsInLoop);
   }
-  
-  /**
-   * Creates a new EvalContext with the same scope as this one, but bound to a
-   * different this reference.
-   */
-  public EvalContext withThis(Obj thisObj) {
-    return new EvalContext(mScope, thisObj, mIsInLoop);
-  }
-  
+
   /**
    * Creates a new EvalContext with the same scope as this one, but inside a
    * loop.
    */
   public EvalContext enterLoop() {
-    return new EvalContext(mScope, mThis, true);
+    return new EvalContext(mScope, mThis, mContainingClass, true);
   }
   
   public Scope   getScope() { return mScope; }
   public Obj     getThis()  { return mThis; }
+  public ClassObj getContainingClass() { return mContainingClass; }
+  
   public boolean isInLoop() { return mIsInLoop; }
   
   /**
@@ -135,13 +130,16 @@ public class EvalContext {
     
     return null;
   }
-  private EvalContext(Scope scope, Obj thisObj, boolean isInLoop) {
+  
+  private EvalContext(Scope scope, Obj thisObj, ClassObj containingClass, boolean isInLoop) {
     mScope = scope;
     mThis = thisObj;
+    mContainingClass = containingClass;
     mIsInLoop = isInLoop;
   }
 
   private final Scope   mScope;
   private final Obj     mThis;
+  private final ClassObj mContainingClass;
   private final boolean mIsInLoop;
 }

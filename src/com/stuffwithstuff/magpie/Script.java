@@ -11,6 +11,7 @@ import java.util.List;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.CheckError;
 import com.stuffwithstuff.magpie.interpreter.Checker;
+import com.stuffwithstuff.magpie.interpreter.ErrorException;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.parser.Lexer;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
@@ -34,9 +35,14 @@ public class Script {
   public void execute() throws IOException {
     Interpreter interpreter = new Interpreter(new ScriptInterpreterHost());
     
-    // Load the base script first.
-    loadBase(interpreter);
-    execute(interpreter);
+    try {
+      // Load the base script first.
+      loadBase(interpreter);
+      execute(interpreter);
+    } catch(ErrorException ex) {
+      System.out.println(String.format("Uncaught %s: %s",
+          ex.getError().getClassObj().getName(), ex.getError().getValue()));
+    }
   }
   
   public void execute(Interpreter interpreter) {

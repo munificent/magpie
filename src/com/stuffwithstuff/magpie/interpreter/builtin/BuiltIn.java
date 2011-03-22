@@ -5,6 +5,7 @@ import java.util.List;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.interpreter.Callable;
+import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.util.Expect;
@@ -26,6 +27,13 @@ public class BuiltIn implements Callable {
     mFnType = null;
     mType = type;
     mCallable = callable;
+  }
+
+  @Override
+  public Callable bindTo(ClassObj classObj) {
+    // Since built-ins don't look up any members within their bodies, they
+    // don't need to rebind.
+    return this;
   }
 
   @Override

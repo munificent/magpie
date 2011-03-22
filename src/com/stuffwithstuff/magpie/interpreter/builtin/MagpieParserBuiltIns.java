@@ -320,7 +320,7 @@ public class MagpieParserBuiltIns {
     public int getStickiness() {
       // Ask the Magpie object.
       Obj stickiness = mInterpreter.getQualifiedMember(
-          Position.none(), mParser, "stickiness");
+          Position.none(), mParser, null, "stickiness");
       return stickiness.asInt();
     }
     

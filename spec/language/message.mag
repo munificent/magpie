@@ -3,3 +3,121 @@ specify("A message expression") with
         "s" someUndefinedMessage shouldBe(nothing)
     end
 end
+
+specify("A private message") with
+    it should("be accessible from members of the same class") with
+        class C
+            var _private = "private"
+            get private = _private
+        end
+
+        C new() private shouldBe("private")
+    end
+
+    it should("not be accessible from outside the class") with
+        class C
+            var _private = "private"
+        end
+
+        C new() _private shouldBe(nothing)
+
+        class D
+            get fromC = C new() _private
+        end
+
+        D new() fromC shouldBe(nothing)
+    end
+
+    it should("not be accessible from mixing-in classes") with
+        class M
+            get _private = "private"
+        end
+
+        class C
+            mixin(M)
+            get private = _private
+        end
+
+        C new() private shouldBe(nothing)
+    end
+
+    it should("not override an mixed-in one") with
+        class M
+            get _privateM = "m"
+            get privateM = _privateM
+        end
+
+        class C
+            mixin(M)
+            var _private = "c"
+            get privateC = _private
+        end
+
+        var obj = C new()
+        obj privateM shouldBe("m")
+        obj privateC shouldBe("c")
+    end
+
+    it should("not be accessible from delegating classes") with
+        class D
+            var _private = "private"
+        end
+
+        class C
+            delegate var d = D new()
+            get private = _private
+        end
+
+        C new() private shouldBe(nothing)
+    end
+
+    // TODO(bob): Not working yet and delegates may be going away.
+    /*
+    it should("not override a delegated one") with
+        class D
+            var _private1 = "d"
+            get privateD = _private1
+        end
+
+        class C
+            delegate var d = D new()
+            var _private1 = "c"
+            get privateC = _private1
+        end
+
+        var obj = C new()
+        obj privateD shouldBe("d")
+        obj privateC shouldBe("c")
+    end
+    */
+
+    it should("be able to call an overridden member from a mixin") with
+        class M
+            get overridable = "m"
+            get _private = overridable
+            get private = _private
+        end
+
+        class C
+            mixin(M)
+            get overridable = "c"
+        end
+
+        C new() overridable shouldBe("c")
+    end
+
+    it should("be able to call an overridden member from a delegate") with
+        class D
+            var overridable = "d"
+            get _private = overridable
+            get private = _private
+        end
+
+        class C
+            delegate var d = D new()
+            var overridable = "c"
+        end
+
+        C new() overridable shouldBe("c")
+    end
+end

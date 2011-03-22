@@ -71,7 +71,8 @@ public class ClassBuiltIns {
       FnObj method = arg.getTupleField(1).asFn();
       
       ClassObj classObj = thisObj.asClass();
-      classObj.getMembers().defineMethod(name, method.getCallable());
+      classObj.getMembers().defineMethod(name,
+          method.getCallable().bindTo(classObj));
       
       return interpreter.nothing();
     }
@@ -84,7 +85,8 @@ public class ClassBuiltIns {
       FnObj body = arg.getTupleField(1).asFn();
       
       ClassObj classObj = thisObj.asClass();
-      classObj.getMembers().defineGetter(name, body.getCallable());
+      classObj.getMembers().defineGetter(name,
+          body.getCallable().bindTo(classObj));
       
       return interpreter.nothing();
     }
@@ -97,7 +99,8 @@ public class ClassBuiltIns {
       FnObj body = arg.getTupleField(1).asFn();
       
       ClassObj classObj = thisObj.asClass();
-      classObj.getMembers().defineSetter(name, body.getCallable());
+      classObj.getMembers().defineSetter(name,
+          body.getCallable().bindTo(classObj));
       
       return interpreter.nothing();
     }
@@ -111,7 +114,7 @@ public class ClassBuiltIns {
       ClassObj thisClass = (ClassObj)thisObj;
       
       // Look for a member.
-      Member member = ClassObj.findMember(thisClass, null, name);
+      Member member = ClassObj.findMember(thisClass, null, null, name);
       if (member != null) {
         return member.evaluateType(interpreter);
       }

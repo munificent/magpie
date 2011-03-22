@@ -20,7 +20,7 @@ public class RecordBuiltIns {
       for (Entry<String, Obj> field : thisObj.getFields().entries()) {
         // TODO(bob): Type should be moved into a namespace.
         Obj fieldType = interpreter.getQualifiedMember(
-            Position.none(), field.getValue(), Name.TYPE);
+            Position.none(), field.getValue(), null, Name.TYPE);
         fieldTypes.put(field.getKey(), fieldType);
       }
       

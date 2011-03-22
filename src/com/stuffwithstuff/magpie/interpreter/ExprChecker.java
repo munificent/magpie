@@ -208,8 +208,8 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(FnExpr expr, EvalContext context) {
     // Check the body and create a context containing any static arguments the
     // function defines.
-    return mChecker.checkFunction(expr, context.getScope(), context.getThis(),
-        mStaticContext);
+    return mChecker.checkFunction(expr, context.getScope(),
+        (ClassObj)context.getThis(), mStaticContext);
   }
 
   @Override

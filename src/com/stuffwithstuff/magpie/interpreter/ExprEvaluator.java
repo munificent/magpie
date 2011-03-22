@@ -44,7 +44,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     }
 
     // Look for a setter.
-    Member setter = ClassObj.findMember(null, receiver, expr.getName() + "_=");
+    Member setter = ClassObj.findMember(null, receiver,
+        context.getContainingClass(), expr.getName() + "_=");
     if (setter == null) {
       // TODO(bob): Include more information here.
       mInterpreter.throwError("BadAssignError");
@@ -185,6 +186,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     }
     
     return mInterpreter.getMember(expr.getPosition(), receiver,
+        context.getContainingClass(),
         expr.getName(), context.getScope().getNamespaces());
   }
 

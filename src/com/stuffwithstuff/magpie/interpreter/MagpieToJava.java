@@ -417,7 +417,7 @@ public class MagpieToJava {
   }
   
   private Obj getMember(Obj obj, String name) {
-    return mInterpreter.getQualifiedMember(Position.none(), obj, name);
+    return mInterpreter.getQualifiedMember(Position.none(), obj, null, name);
   }
   
   private Interpreter mInterpreter;

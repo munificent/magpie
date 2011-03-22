@@ -7,7 +7,7 @@ import java.util.List;
  * user-defined functions and BuiltIn for built-in behavior.
  */
 public interface Callable {
+  Callable bindTo(ClassObj classObj);
   Obj invoke(Interpreter interpreter, Obj thisObj, List<Obj> typeArgs, Obj arg);
-  
   Obj getType(Interpreter interpreter);
 }

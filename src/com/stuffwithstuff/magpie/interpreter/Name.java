@@ -39,6 +39,14 @@ public final class Name {
   public static final String TYPE = "type";
   public static final String UNSAFE_REMOVE_NOTHING = "unsafeRemoveNothing";
 
+  public static boolean isPrivate(String name) {
+    return name.startsWith("_");
+  }
+  
+  public static String makeClassPrivate(String className, String member) {
+    return className + ".private." + member;
+  }
+  
   public static String getTupleField(int index) {
     return "field" + index;
   }

@@ -15,7 +15,7 @@ public class TupleBuiltIns {
       for (int i = 0; i < numFields; i++) {
         // TODO(bob): Type should be moved into a namespace.
         Obj fieldType = interpreter.getQualifiedMember(
-            Position.none(), thisObj.getTupleField(i), thisObj, Name.TYPE);
+            Position.none(), thisObj.getTupleField(i), null, Name.TYPE);
         fieldTypes[i] = fieldType;
       }
       

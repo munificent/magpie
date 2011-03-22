@@ -28,7 +28,7 @@ public class ClassObj extends Obj {
    * @param name      The name of the member.
    * @return          The member if found, otherwise null.
    */
-  public static Member findMember(ClassObj classObj, Obj receiver,
+  public static Member findMember(ClassObj classObj, Obj receiver, ClassObj containingClass,
       String name) {
     // If we aren't given the class because we're doing runtime lookup, just
     // infer it from the receiver.
@@ -46,7 +46,7 @@ public class ClassObj extends Obj {
       for (Entry<String, Field> field : classObj.mFields.entrySet()) {
         if (field.getValue().isDelegate()) {
           Obj delegate = receiver.getField(field.getKey());
-          member = findMember(null, delegate, name);
+          member = findMember(null, delegate, containingClass, name);
           if (member != null) return member;
         }
       }
@@ -70,10 +70,10 @@ public class ClassObj extends Obj {
    * @param metaclass  The class of this class (its metaclass).
    * @param name       The name of the class.
    */
-  // TODO(bob): Get rid of name?
   public ClassObj(ClassObj metaclass, String name) {
     super(metaclass);
     mName = name;
+    mMembers = new MemberSet(this);
   }
   
   public String getName() { return mName; }
@@ -134,5 +134,5 @@ public class ClassObj extends Obj {
   private final List<Obj> mMixins = new ArrayList<Obj>();
   
   private final Map<String, Field> mFields = new HashMap<String, Field>();
-  private final MemberSet mMembers = new MemberSet();
+  private final MemberSet mMembers;
 }

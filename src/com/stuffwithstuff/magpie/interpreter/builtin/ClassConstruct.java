@@ -26,7 +26,12 @@ public class ClassConstruct implements Callable {
     
     mClass = classObj;
   }
-  
+
+  @Override
+  public Callable bindTo(ClassObj classObj) {
+    return this;
+  }
+
   @Override
   public Obj invoke(Interpreter interpreter, Obj thisObj,
       List<Obj> typeArgs, Obj arg) {

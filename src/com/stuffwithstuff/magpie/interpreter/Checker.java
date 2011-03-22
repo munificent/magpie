@@ -104,13 +104,13 @@ public class Checker {
   /**
    * Type-checks the given function.
    * 
-   * @param function  The function to type-check.
-   * @param closure   The lexical scope where the function was defined.
-   * @param thisType  The type of "this" within the function. In other words,
-   *                  the class that this a method on.
-   * @return          The evaluated type of the function.
+   * @param function   The function to type-check.
+   * @param closure    The lexical scope where the function was defined.
+   * @param thisClass  The type of "this" within the function. In other words,
+   *                   the class that this a method on.
+   * @return           The evaluated type of the function.
    */
-  public void checkFunction(Function function, Obj thisType,
+  public void checkFunction(Function function, ClassObj thisClass,
       EvalContext staticContext) {
     // Nothing to check if it's built-in.
     if (function == null) return;
@@ -121,7 +121,7 @@ public class Checker {
     Scope closureTypes = typeScope(function.getClosure());
 
     checkFunction(function.getFunction(), closureTypes,
-        thisType, staticContext);
+        thisClass, staticContext);
   }
   
    /**
@@ -134,12 +134,12 @@ public class Checker {
    *                  the class that this a method on.
    * @return          The evaluated type of the function.
    */
-  public Obj checkFunction(FnExpr function, Scope closure, Obj thisType,
+  public Obj checkFunction(FnExpr function, Scope closure, ClassObj thisClass,
       EvalContext staticContext) {
     FunctionType type = function.getType();
     
     // Create a scope for the body of the function.
-    EvalContext functionContext = new EvalContext(closure, thisType);
+    EvalContext functionContext = new EvalContext(closure, thisClass, thisClass);
     functionContext = functionContext.pushScope();
     
     // Bind any type parameters to their constraints.
@@ -229,7 +229,7 @@ public class Checker {
 
     Scope globals = typeScope(mInterpreter.getGlobals());
     EvalContext context = new EvalContext(globals,
-        mInterpreter.getNothingClass());
+        mInterpreter.getNothingClass(), null);
 
     // Get the expression's type.
     return checker.check(expr, context, true);
@@ -257,7 +257,7 @@ public class Checker {
     for (Entry<String, Obj> entry : valueScope.entries()) {
       // TODO(bob): Type should be moved into a namespace.
       Obj type = mInterpreter.getQualifiedMember(
-          Position.none(), entry.getValue(), Name.TYPE);
+          Position.none(), entry.getValue(), null, Name.TYPE);
       scope.define(entry.getKey(), type);
     }
     

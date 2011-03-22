@@ -5,6 +5,7 @@ import java.util.List;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.Checker;
+import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.util.Expect;
@@ -21,7 +22,11 @@ public abstract class FieldProperty implements Callable {
     mExpr = expr;
     mIsInitializer = isInitializer;
   }
-  
+
+  public Callable bindTo(ClassObj classObj) {
+    return this;
+  }
+
   @Override
   public abstract Obj invoke(Interpreter interpreter, Obj thisObj,
       List<Obj> typeArgs, Obj arg);

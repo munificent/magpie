@@ -1,0 +1,50 @@
+A member name that starts with an underscore is a *private* member. Private
+members have a few important characteristics:
+
+1. They cannot be accessed from anywhere but within members on the same class
+where the private member is defined.
+
+    class Pyle
+        var _gomer = "ayup"
+        def method(other Pyle)
+            print(_gomer) // ok
+        end
+    end
+
+    var pyle = Pyle new()
+    pyle _gomer // error: returns nothing as if the member didn't exist
+
+2. They cannot be overridden by an inheriting or mixing-in class.
+
+    class Topping
+        var _flavor = "chocolate"
+    end
+
+    class IceCream
+        mixin(Topping)
+        def taste()
+            print(_flavor) // error: returns nothing
+        end
+    end
+
+Not only are they hidden from the inheriting class, they are non-virtual:
+
+    class Topping
+        var _flavor = "chocolate"
+        get toppingFlavor = _flavor
+    end
+
+    class IceCream
+        mixin(Topping)
+        var _flavor = "vanilla"
+        def taste()
+            print(toppingFlavor) // "chocolate"
+            print(_flavor)       // "vanilla"
+        end
+    end
+
+Q: Are instance variables class private or instance private?
+A: I think class private would be preferred, but we'll have to see how
+   implementing this actually works out.
+
+Q: How is this implemented?

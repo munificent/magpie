@@ -119,15 +119,7 @@ public class Interpreter {
     mTupleClass = createGlobalClass("Tuple");
     mTupleClass.getMembers().defineGetter("count",
         new FieldGetter("count", Expr.name("Int")));
-    for (int i = 0; i < 20; i++) {
-      // Note that field types default to "Nothing" here because when you call
-      // "type" on a tuple, it will create a new tuple representing its type.
-      // The only time these getter types will be accessed directly the tuple
-      // lacks that field, in which case Nothing is the correct type.
-      mTupleClass.getMembers().defineGetter(Name.getTupleField(i),
-          new FieldGetter(Name.getTupleField(i), Expr.name("Nothing")));
-    }
-    
+
     mNothingClass = createGlobalClass("Nothing");
     mNothing = instantiate(mNothingClass, null);
 
@@ -236,21 +228,29 @@ public class Interpreter {
     mainFn.invoke(this, mNothing, null, mNothing);
   }
   
-  public Obj getQualifiedMember(Position position, Obj receiver, String name) {
-    Obj member = lookupMember(position, receiver, name);
+  public Obj getQualifiedMember(Position position, Obj receiver, ClassObj containingClass,
+      String name) {
+    Obj member = lookupMember(position, receiver, containingClass, name);
     if (member != null) return member;
     
     return mNothing;
   }
   
-  public Obj getMember(Position position, Obj receiver, String name,
+  public Obj getMember(Position position, Obj receiver, ClassObj containingClass, String name,
       Iterable<String> namespaces) {
     Expect.notNull(receiver);
+    
+    if (Name.isPrivate(name)) {
+      // TODO(bob): Hackish.
+      String className = "__noClass__";
+      if (containingClass != null) className = containingClass.getName();
+      name = Name.makeClassPrivate(className, name);
+    }
     
     if (!name.contains(".")) {
       // An unqualified name, so walk the used namespaces first.
       for (String namespace : namespaces) {
-        Obj object = lookupMember(position, receiver,
+        Obj object = lookupMember(position, receiver, containingClass,
             namespace + "." + name);
         if (object != null) return object;
       }
@@ -258,7 +258,7 @@ public class Interpreter {
     
     // If we got here, it was already qualified, or wasn't in any namespace, so
     // try the global one.
-    Obj object = lookupMember(position, receiver, name);
+    Obj object = lookupMember(position, receiver, containingClass, name);
     if (object != null) return object;
     
     return mNothing;
@@ -276,14 +276,14 @@ public class Interpreter {
         // We have an argument, but the receiver isn't a function, so send it a
         // "call" message instead. We'll in turn try to apply the result of
         // that.
-        Obj newTarget = getQualifiedMember(position, target, Name.CALL);
+        Obj newTarget = getQualifiedMember(position, target, null, Name.CALL);
         
         if (target == newTarget) {
           // If we get here, we're in an infinite regress. Since we can't call
           // the target directly, we're sending it a "call" message, but that's
           // returning the exact same object (most likely 'nothing'), so we
           // aren't making any progress. If that happens, fail.
-          return throwError("BadCallError");
+          return throwError("BadCallError", position.toString());
         }
         
         // Loop and try to apply the new target.
@@ -300,18 +300,14 @@ public class Interpreter {
    * @param arg        The argument passed to the method.
    * @return           The result of invoking the method.
    */
-  public Obj invokeMethod(Obj receiver, String name, Obj arg) {
-    return invokeMethod(Position.none(), receiver, name, arg);
-  }
-  
-  public Obj invokeMethod(Position position, Obj receiver, String name,
+  public Obj invokeMethod(Obj receiver, String name,
       Obj arg) {
     Expect.notNull(receiver);
     Expect.notNull(arg);
     
-    Obj resolved = getQualifiedMember(position, receiver, name);
+    Obj resolved = getQualifiedMember(Position.none(), receiver, null, name);
     
-    return apply(position, resolved, null, arg);
+    return apply(Position.none(), resolved, null, arg);
   }
 
   public void print(String text) {
@@ -338,7 +334,7 @@ public class Interpreter {
   }
   
   public EvalContext createTopLevelContext() {
-    return new EvalContext(mGlobalScope, mNothing);
+    return new EvalContext(mGlobalScope, mNothing, null);
   }
   
   public Scope getGlobals() { return mGlobalScope; }
@@ -384,7 +380,7 @@ public class Interpreter {
   
   public FnObj createFn(FnExpr expr, EvalContext context) {
     return new FnObj(mFnClass, context.getThis(),
-        new Function(context.getScope(), expr));
+        new Function(context.getScope(), context.getContainingClass(), expr));
   }
   
   public Obj createTuple(Obj... fields) {
@@ -434,7 +430,7 @@ public class Interpreter {
   }
   
   public String evaluateToString(Obj value) {
-    return getQualifiedMember(Position.none(), value, Name.STRING).asString();
+    return getQualifiedMember(Position.none(), value, null, Name.STRING).asString();
   }
 
   public Obj orTypes(Obj left, Obj right) {
@@ -491,11 +487,12 @@ public class Interpreter {
     return classObj;
   }
   
-  private Obj lookupMember(Position position, Obj receiver, String name) {
+  private Obj lookupMember(Position position, Obj receiver, ClassObj containingClass,
+      String name) {
     Expect.notNull(receiver);
     
     // Look for a getter.
-    Member member = ClassObj.findMember(null, receiver, name);
+    Member member = ClassObj.findMember(null, receiver, containingClass, name);
     if (member != null) {
       switch (member.getType()) {
       case GETTER:
@@ -510,8 +507,10 @@ public class Interpreter {
     }
    
     // Look for a field.
-    Obj value = receiver.getField(name);
-    if (value != null) return value;
+    if (!Name.isPrivate(name)) {
+      Obj value = receiver.getField(name);
+      if (value != null) return value;
+    }
     
     // Hackish. Let objects act like tuples of arity 1 by having a member with
     // the name of the first tuple field just default to returning the object.
