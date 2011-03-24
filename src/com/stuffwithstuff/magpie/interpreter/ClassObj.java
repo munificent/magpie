@@ -1,7 +1,6 @@
 package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.*;
-import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.builtin.FieldGetter;
@@ -40,22 +39,6 @@ public class ClassObj extends Obj {
     Member member = classObj.mMembers.findMember(name);
     if (member != null) return member;
     
-    // Try the delegates.
-    if (receiver != null) {
-      // Looking up a member at runtime, so look at the actual delegate values.
-      for (Entry<String, Field> field : classObj.mFields.entrySet()) {
-        if (field.getValue().isDelegate()) {
-          Obj delegate = receiver.getField(field.getKey());
-          member = findMember(null, delegate, containingClass, name);
-          if (member != null) return member;
-        }
-      }
-    } else {
-      // Looking up a member during type-checking, so look at the declared
-      // delegate field types.
-      // TODO(bob): Implement me!
-    }
-    
     // Try the mixins.
     member = findMemberInMixins(classObj, name, new HashSet<ClassObj>());
     if (member != null) return member;
@@ -81,9 +64,9 @@ public class ClassObj extends Obj {
   public Map<String, Field> getFieldDefinitions() { return mFields; }
   public MemberSet getMembers() { return mMembers; }
 
-  public void declareField(String name, boolean isDelegate, Expr type) {
+  public void declareField(String name, Expr type) {
     // Declare the field.
-    mFields.put(name, new Field(isDelegate, null, type));
+    mFields.put(name, new Field(null, type));
     
     // Add a getter and setter.
     mMembers.defineGetter(name, new FieldGetter(name, type));

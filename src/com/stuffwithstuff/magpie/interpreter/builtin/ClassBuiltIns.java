@@ -10,33 +10,31 @@ import com.stuffwithstuff.magpie.interpreter.Member;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class ClassBuiltIns {
-  @Signature("declareField(name String, delegate? Bool, type ->)")
+  @Signature("declareField(name String, type Expression ->)")
   public static class DeclareField implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();
-      boolean isDelegate = arg.getTupleField(1).asBool();
-      Expr type = MagpieToJava.convertExpr(interpreter, arg.getTupleField(2));
+      Expr type = MagpieToJava.convertExpr(interpreter, arg.getTupleField(1));
       
       ClassObj classObj = thisObj.asClass();
-      classObj.declareField(name, isDelegate, type);
+      classObj.declareField(name, type);
   
       return interpreter.nothing();
     }
   }
   
   // TODO(bob): Get rid of type.
-  @Signature("defineField(name String, delegate? Bool, type, initializer ->)")
+  @Signature("defineField(name String, type Expression | Nothing, initializer ->)")
   public static class DefineField implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();
-      boolean isDelegate = arg.getTupleField(1).asBool();
-      Obj optionalType = arg.getTupleField(2);
-      FnObj initializer = arg.getTupleField(3).asFn();
+      Obj optionalType = arg.getTupleField(1);
+      FnObj initializer = arg.getTupleField(2).asFn();
       
       // Define the field itself.
       ClassObj classObj = thisObj.asClass();
       classObj.getFieldDefinitions().put(name,
-          new Field(isDelegate, initializer.getFunction(), null));
+          new Field(initializer.getFunction(), null));
   
       // Determine if the field is implicitly typed (we have an initializer but
       // no type annotation) or explicitly.

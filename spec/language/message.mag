@@ -58,39 +58,6 @@ specify("A private message") with
         obj privateC shouldBe("c")
     end
 
-    it should("not be accessible from delegating classes") with
-        class D
-            var _private = "private"
-        end
-
-        class C
-            delegate var d = D new()
-            get private = _private
-        end
-
-        C new() private shouldBe(nothing)
-    end
-
-    // TODO(bob): Not working yet and delegates may be going away.
-    /*
-    it should("not override a delegated one") with
-        class D
-            var _private1 = "d"
-            get privateD = _private1
-        end
-
-        class C
-            delegate var d = D new()
-            var _private1 = "c"
-            get privateC = _private1
-        end
-
-        var obj = C new()
-        obj privateD shouldBe("d")
-        obj privateC shouldBe("c")
-    end
-    */
-
     it should("be able to call an overridden member from a mixin") with
         class M
             get overridable = "m"
@@ -101,21 +68,6 @@ specify("A private message") with
         class C
             mixin(M)
             get overridable = "c"
-        end
-
-        C new() overridable shouldBe("c")
-    end
-
-    it should("be able to call an overridden member from a delegate") with
-        class D
-            var overridable = "d"
-            get _private = overridable
-            get private = _private
-        end
-
-        class C
-            delegate var d = D new()
-            var overridable = "c"
         end
 
         C new() overridable shouldBe("c")

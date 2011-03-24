@@ -7,9 +7,9 @@ end
 Token defineGetter("boolValue", fn(-> Bool) unsafecast[Bool](value))
 Token defineGetter("intValue", fn(-> Int) unsafecast[Int](value))
 Token defineGetter("stringValue", fn(-> String) unsafecast[String](value))
-Token declareField("position", false, { Position })
-Token declareField("tokenType", false, { TokenType })
-Token declareField("value", false,
+Token declareField("position", { Position })
+Token declareField("tokenType", { TokenType })
+Token declareField("value",
     { OrType combine(OrType combine(OrType combine(Bool, Int), Nothing), String) })
 
 Token defineMethod("keyword?",
@@ -29,8 +29,8 @@ class TokenType
 end
 
 TokenType defineGetter("string", fn(-> String) name)
-TokenType declareField("value", false, { Int })
-TokenType declareField("name", false, { String })
+TokenType declareField("value", { Int })
+TokenType declareField("name", { String })
 
 do
     var defToken = fn(name String, value Int)
