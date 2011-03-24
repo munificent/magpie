@@ -11,43 +11,6 @@ import com.stuffwithstuff.magpie.interpreter.builtin.FieldSetter;
  */
 public class ClassObj extends Obj {
   /**
-   * Looks for a member with the given name on the given class. If the class is
-   * not given, it will be inferred from the class of the receiver. The receiver
-   * is optional. If not given, this will do "static" member lookup based on the
-   * declared types of any delegate fields. This is used during type-checking.
-   * If the receiver is given, it will look at the actual value's stored in the
-   * receiver's delegate fields and delegate to this. This is used during
-   * runtime evaluation.
-   * 
-   * @param classObj  The class where we're looking for the member. Should be
-   *                  null if we want to infer it from the receiver.
-   * @param receiver  The receiving object that the member is being invoked on.
-   *                  Can be null if we're just looking up a member for type-
-   *                  checking.
-   * @param name      The name of the member.
-   * @return          The member if found, otherwise null.
-   */
-  public static Member findMember(ClassObj classObj, Obj receiver, ClassObj containingClass,
-      String name) {
-    // If we aren't given the class because we're doing runtime lookup, just
-    // infer it from the receiver.
-    if (classObj == null) {
-      classObj = receiver.getClassObj();
-    }
-    
-    // Try this class.
-    Member member = classObj.mMembers.findMember(name);
-    if (member != null) return member;
-    
-    // Try the mixins.
-    member = findMemberInMixins(classObj, name, new HashSet<ClassObj>());
-    if (member != null) return member;
-    
-    // Not found.
-    return null;
-  }
-
-  /**
    * Creates a new class object.
    * 
    * @param metaclass  The class of this class (its metaclass).
@@ -63,6 +26,26 @@ public class ClassObj extends Obj {
   public List<Obj> getMixins() { return mMixins; }
   public Map<String, Field> getFieldDefinitions() { return mFields; }
   public MemberSet getMembers() { return mMembers; }
+  
+  /**
+   * Looks for a member with the given name on the given class.
+   * 
+   * @param classObj  The class where we're looking for the member.
+   * @param name      The name of the member.
+   * @return          The member if found, otherwise null.
+   */
+  public Member findMember(ClassObj containingClass, String name) {
+    // Try this class.
+    Member member = mMembers.findMember(name);
+    if (member != null) return member;
+    
+    // Try the mixins.
+    member = findMemberInMixins(this, name, new HashSet<ClassObj>());
+    if (member != null) return member;
+    
+    // Not found.
+    return null;
+  }
 
   public void declareField(String name, Expr type) {
     // Declare the field.

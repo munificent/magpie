@@ -492,7 +492,7 @@ public class Interpreter {
     Expect.notNull(receiver);
     
     // Look for a getter.
-    Member member = ClassObj.findMember(null, receiver, containingClass, name);
+    Member member = receiver.getClassObj().findMember(containingClass, name);
     if (member != null) {
       switch (member.getType()) {
       case GETTER:
