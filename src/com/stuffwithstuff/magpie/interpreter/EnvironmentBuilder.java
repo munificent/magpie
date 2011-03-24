@@ -163,7 +163,7 @@ public class EnvironmentBuilder {
     }
     
     public ClassBuilder field(String name, Expr type) {
-      mClassObj.declareField(name, false, type);
+      mClassObj.declareField(name, type);
       return this;
     }
     

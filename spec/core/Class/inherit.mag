@@ -1,0 +1,13 @@
+specify("The 'inherit' method on Class") with
+    it should("add a class to the list of parent classes") with
+        class Bar
+        end
+
+        class Foo
+            inherit(Bar)
+        end
+
+        Foo parents count shouldBe(1)
+        Foo parents(0) shouldBe(Bar)
+    end
+end

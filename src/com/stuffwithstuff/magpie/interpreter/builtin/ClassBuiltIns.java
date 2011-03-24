@@ -10,33 +10,31 @@ import com.stuffwithstuff.magpie.interpreter.Member;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class ClassBuiltIns {
-  @Signature("declareField(name String, delegate? Bool, type ->)")
+  @Signature("declareField(name String, type Expression ->)")
   public static class DeclareField implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();
-      boolean isDelegate = arg.getTupleField(1).asBool();
-      Expr type = MagpieToJava.convertExpr(interpreter, arg.getTupleField(2));
+      Expr type = MagpieToJava.convertExpr(interpreter, arg.getTupleField(1));
       
       ClassObj classObj = thisObj.asClass();
-      classObj.declareField(name, isDelegate, type);
+      classObj.declareField(name, type);
   
       return interpreter.nothing();
     }
   }
   
   // TODO(bob): Get rid of type.
-  @Signature("defineField(name String, delegate? Bool, type, initializer ->)")
+  @Signature("defineField(name String, type Expression | Nothing, initializer ->)")
   public static class DefineField implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();
-      boolean isDelegate = arg.getTupleField(1).asBool();
-      Obj optionalType = arg.getTupleField(2);
-      FnObj initializer = arg.getTupleField(3).asFn();
+      Obj optionalType = arg.getTupleField(1);
+      FnObj initializer = arg.getTupleField(2).asFn();
       
       // Define the field itself.
       ClassObj classObj = thisObj.asClass();
       classObj.getFieldDefinitions().put(name,
-          new Field(isDelegate, initializer.getFunction(), null));
+          new Field(initializer.getFunction(), null));
   
       // Determine if the field is implicitly typed (we have an initializer but
       // no type annotation) or explicitly.
@@ -114,7 +112,7 @@ public class ClassBuiltIns {
       ClassObj thisClass = (ClassObj)thisObj;
       
       // Look for a member.
-      Member member = ClassObj.findMember(thisClass, null, null, name);
+      Member member = interpreter.findMember(thisClass, null, name);
       if (member != null) {
         return member.evaluateType(interpreter);
       }
@@ -124,12 +122,12 @@ public class ClassBuiltIns {
     }
   }
   
-  @Getter("mixins List(Class)")
-  public static class Mixins implements BuiltInCallable {
+  @Getter("parents List(Class)")
+  public static class Parents implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       ClassObj classObj = thisObj.asClass();
       
-      return interpreter.createArray(classObj.getMixins());
+      return interpreter.createArray(classObj.getParents());
     }
   }
 
@@ -142,9 +140,6 @@ public class ClassBuiltIns {
     }
   }
   
-  // TODO(bob): If mixins don't subtype, then this doesn't actually return the
-  // right type (since the class of the object returned (a metaclass) isn't an
-  // instance of Class, it just mixes it in). Make Class an interface?
   @Shared
   @Signature("new(name String -> Class)")
   public static class New implements BuiltInCallable {

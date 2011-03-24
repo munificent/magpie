@@ -29,7 +29,7 @@ extend class Class
             return true
         end
 
-        // TODO(bob): Should mixins subtype? What about delegates?
+        // TODO(bob): Should parents subtype?
 
         false
     end

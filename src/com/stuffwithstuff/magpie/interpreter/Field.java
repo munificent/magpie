@@ -8,8 +8,7 @@ import com.stuffwithstuff.magpie.ast.Expr;
  * particular instance of a class. (Those just use a regular Scope.)
  */
 public class Field {
-  public Field(boolean isDelegate, Callable initializer, Expr type) {
-    mIsDelegate = isDelegate;
+  public Field(Callable initializer, Expr type) {
     mInitializer = initializer;
     mType = type;
   }
@@ -23,13 +22,6 @@ public class Field {
   public boolean hasInitializer() { return mInitializer != null; }
   
   /**
-   * Gets whether this field is a delegate for unhandled messages.
-   * 
-   * @return true if the field is a delegate.
-   */
-  public boolean isDelegate() { return mIsDelegate; }
-  
-  /**
    * Gets the initializer for this field. Returns null if the field is just
    * declared.
    */
@@ -41,7 +33,6 @@ public class Field {
    */
   public Expr getType() { return mType; }
   
-  private final boolean  mIsDelegate;
   private final Callable mInitializer;
   private final Expr     mType;
 }
