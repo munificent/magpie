@@ -110,6 +110,7 @@ public class Interpreter {
     
     mDynamicClass = createGlobalClass("Dynamic");
     mFnClass = createGlobalClass("Function");
+    mMultimethodClass = createGlobalClass("Multimethod");
     mIntClass = createGlobalClass("Int");
     mMagpieParserClass = createGlobalClass("MagpieParser");
     mRecordClass = createGlobalClass("Record");
@@ -272,6 +273,10 @@ public class Interpreter {
       if (target instanceof FnObj) {
         FnObj function = (FnObj)target;
         return function.invoke(this, typeArgs, arg);
+      } else if (target instanceof MultimethodObj) {
+        MultimethodObj method = (MultimethodObj)target;
+        // TODO(bob): What about type args?
+        return method.invoke(this, arg);
       } else {
         // We have an argument, but the receiver isn't a function, so send it a
         // "call" message instead. We'll in turn try to apply the result of
@@ -362,6 +367,25 @@ public class Interpreter {
   public ClassObj getStringClass() { return mStringClass; }
   public ClassObj getTupleClass() { return mTupleClass; }
   
+  public void defineMethod(String name, Callable method) {
+    Obj existing = mGlobalScope.get(name);
+    if (existing != null && !(existing instanceof MultimethodObj)) {
+      throwError("RedefinitionError", "Cannot define a method \"" + name +
+          "\" since there is already a variable with that name that is not a multimethod.");
+    }
+    
+    // Create the multimethod if this is the first one.
+    MultimethodObj multimethod;
+    if (existing != null) {
+      multimethod = (MultimethodObj)existing;
+    } else {
+      multimethod = new MultimethodObj(mMultimethodClass);
+      mGlobalScope.define(name, multimethod);
+    }
+    
+    multimethod.addMethod(method);
+  }
+
   public Obj createArray(List<Obj> elements) {
     return instantiate(mArrayClass, elements);
   }
@@ -530,6 +554,7 @@ public class Interpreter {
   private final ClassObj mBoolClass;
   private final ClassObj mDynamicClass;
   private final ClassObj mFnClass;
+  private final ClassObj mMultimethodClass;
   private final ClassObj mIntClass;
   private final ClassObj mMetaclass;
   private final ClassObj mMagpieParserClass;

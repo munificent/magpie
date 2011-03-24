@@ -1,0 +1,76 @@
+^title How Are Specialized Methods Ordered?
+
+Given a set of method specializations and an argument type, we need to select the most specialized method. This is independent of the order in which methods are declared (unlike a `match` expression, for example, which is top-down), so we need to have an algorithm for ordering methods from most to least specialized. This is that algorithm.
+
+Note that an argument's "type" will always be some concrete *class*, but a
+method can be specialized to a *type*. At runtime, you can't have an argument of
+type `Foo | Bar`, but you can have a method specialized to that.
+
+**TODO(bob): Need to clarify this. We need both a static and dynamic algorithm here. The static one *will* have arguments of any type (and may in turn select multiple methods "simultaneously". The dynamic (runtime) will not.**
+
+## Select Applicable Methods
+
+Before a set of methods need to be linearized, we need to winnow the set down to ones that are even possible. This is to discard methods that cannot match at all. For example, given this method:
+
+    :::magpie
+    def foo(a Int, b String)
+
+a call like:
+
+    :::magpie
+    foo(123)
+
+cannot match at all. This makes rest of linearization simpler because it means we don't need an ordering for wildly different types.
+
+Right now, the simplest way to select applicable methods is:
+
+1.  If the argument is an instance of a class, only methods specialized to that
+    class or one of its superclasses are applicable.
+
+2.  If the argument is a tuple, only methods specialized to tuples whose fields
+    are applicable is applicable.
+
+    If the argument has fewer fields, a method may be applicable if the method's
+    field type is `Nothing` or an `OrType` containing `Nothing`. If the argument
+    has more fields, a method may still be applicable. Extra fields will be
+    ignored.
+
+    If the argument is a tuple and the method is not, it may still be applicable
+    if the first field of the tuple is applicable to the method. (I.e. a
+    non-tuple can be considered a 1-uple.)
+
+4.  If the method is an `OrType`, it is applicable if any of the branches are
+    applicable.
+
+**TODO: records, Nothing, functions**
+
+## How Are Classes Linearized?
+
+Note that unlike CLOS and Dylan, there cannot be more than one path to the same base class. In other words, the class hierarchy must be a tree, not a graph. That makes some stuff easier.
+
+Given a class hierarchy like:
+
+    A   B   C
+     \ /   / \
+      D   E   F
+     / \ / \
+    G   H   I
+
+They will be linearized like (from most specific to most general):
+
+    F C
+    G D B A
+    H E C D B A
+    I E C
+
+In other words, linearization is just a depth-first search with siblings search from last to first (so that the last declared superclass can override previous ones as expected). This preserves the same goals of C3 but is much simpler since we require class hierarchies to be a tree.
+
+## How Are Tuples Linearized?
+
+To linearize two tuples, the fields of both are linearized. The tuple whose fields come before the other comes first.
+
+**TODO: Figure out how inconsistent field orderings are resolved.**
+
+## How Is Any Linearized?
+
+A method specialized to `Any` comes last, always.

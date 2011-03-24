@@ -86,3 +86,106 @@ It would look something like:
     Int extends(Stringable)
 
     def string(arg Int -> String) ...
+
+## How Do Constructors Work?
+
+CLOS doesn't really place much emphasis on constructors. When you define a class, you instantiate it by calling:
+
+    :::lisp
+    (make-instance 'my-class :slot1 "blah" :slot2 "boof")
+
+So basically you specify the class and all of the slot values, much like `construct()` in Magpie. We can take that and make it nicer by having a class
+define a `new` method that specializes the `new` generic function with the class being constructed, and a record of its fields. That would get us to what CLOS supports. If you want to define your own ctor, just create a different `new` method that specializes on the class and a different set of arguments, like so:
+
+    :::magpie
+    class Point
+        var x Int
+        var y Int
+    end
+
+    // The above gives us:
+    Point new(x: 1, y: 2) // i.e. new(Point, (x: 1, y: 2))
+
+    // If we want a different ctor, just do:
+    def class method Point new() new(0, 0)
+
+    Point new() // i.e. new(Point, ())
+
+## How Do Chained Constructors Work?
+
+The above handles classes with no inheritance (or at least no base classes that in turn require construction). What about ones that do?
+
+The CLOS answer is to just union the fields together. If `Base` has field `a` and `Derived` has `b`, to instantiate a derived, you'd do this:
+
+    :::magpie
+    Derived new(a: "a", b: "b")
+
+This is because CLOS doesn't emphasize encapsulating state, but I'm really not crazy about that, especially when it comes to private fields. A class should own its internal state and should be able to use its constructor as the interface for that.
+
+One option would be to chain constructors like this:
+
+    :::magpie
+    class Base1
+        var a
+    end
+
+    class Base2
+        var d
+    end
+
+    class Derived : Base1, Base2
+        var f
+    end
+
+    // By default, this defines:
+    Derived new(Base1: (a: 123), Base2: (d: 234), f: 345 -> Derived)
+
+    // If we want to use different ctors for base:
+    def class method Base1 new(b Int, c Int -> Base1) new(b + c)
+    def class method Base2 new(e String -> Base2) new(Int parse(e))
+
+    // Now we can do:
+    Derived new(Base1: (100, 23), Base2: "234", f: 345)
+
+This is a little fishy though because constructors *create* objects instead of *initializing* them. So when we call the constructors for `Base1` and `Base2`, we'll create two objects and then, I guess, have to copy those fields over to the "real" one. That feels kind of gross. Ignoring that for now, though, the semantics for built-in `new` would be:
+
+    obj = new empty object
+    obj.class = the class
+    for each property in arg record
+        if property name is a base class name
+            invoke new with the base class and the property's value
+            get the resulting object and copy its fields to obj
+        else if property name is a field on the class
+            initialize the field with the property value
+        end
+    end
+
+### Initialize Instead of Construct
+
+Now that I think about it, we may be able to resolve the fishiness by making `new` just initialize `this` instead of returning a new one. In the above examples, all of the `new` methods return their class type, and the ultimate built-in `new` does too. Instead of that, we could replace `new` with `init`. That doesn't return anything. Instead, the expectation is that any `init` method will eventually bottom out on the built-in one.
+
+The built-in `init`, like `new`, takes a record of field values and base class values. Now there is a single built-in `new` method. Its semantics are:
+
+    create an empty object, _newObj
+    call init(), passing in the argument passed to new()
+    return _newObj
+
+The built-in `init()` does:
+
+    for each property in arg record
+        if property name is a base class name
+            invoke init() with the base class and the property's value
+        else if property name is a field on the class
+            initialize the field on _newObj with the property value
+        end
+    end
+
+Problem solved, I think. This also cleans things up a bit. It always felt tedious to have explicitly declare the return type of `new()` to be the created class.
+
+### What About Factories?
+
+What intended nice feature of the existing `new()` semantics is that a constructor doesn't have to always create and return a new object. It can return a cached one or a subclass or pretty much anything. That's a nice feature to maintain.
+
+I *think* we can support this with the above idea too. All you would need to do is specialize `new()` with a different argument type and you'll hit that method instead. If you want to swap out the "real" `new()` with one that takes the *same* argument type, well... we'll have to see if it's possible to replace a method.
+
+

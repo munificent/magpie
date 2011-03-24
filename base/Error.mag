@@ -19,6 +19,9 @@ end
 class NoMatchError
 end
 
+class NoMethodError
+end
+
 class OutOfBoundsError
 end
 
