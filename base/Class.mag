@@ -1,7 +1,7 @@
 // Provides additional functionality on Class.
 
-// Adds the given class to the class's mixins.
-def Class mixin(mixin Class ->) mixins add(mixin)
+// Adds the given class to the class's parents.
+def Class inherit(parent Class ->) parents add(parent)
 
 // TODO(bob): Kinda gross.
 extend class Class

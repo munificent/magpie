@@ -18,8 +18,8 @@ public class Interpreter {
     mGrammar = new Grammar();
     
     // Every object in Magpie has a class. Every class is an object, which
-    // means it also has a class (a metaclass). In addition, a class may mixin
-    // one or more other classes to get additional methods.
+    // means it also has a class (a metaclass). In addition, a class may inherit
+    // from one or more parent classes to get additional methods.
     //
     // To figure out what these relationships look like for classes and their
     // metaclasses is a bit tricky. The basic way to answer this is to look at
@@ -47,9 +47,9 @@ public class Interpreter {
     // "new()" (for creating a new class) should be on the class of Class,
     // ClassMetaclass.
     // "type" should be available on all objects, so it should be in Object and
-    // the class of foo, Foo, should mix that in.
+    // the class of foo, Foo, should inherit it.
     // "name" should be available on all class objects, so it should be in
-    // Class and the class of Foo, FooMetaclass, should mix that in.
+    // Class and the class of Foo, FooMetaclass, should inherit it.
     //
     // In diagram form, the class chain is (where the arrow means "has class"):
     //
@@ -59,7 +59,7 @@ public class Interpreter {
     //                                  ^
     // [Object]-->[ObjectMetaclass]-----'
     //
-    // The mixins are:
+    // The parent classes are:
     //
     // FooMetaclass    --> Class
     // ClassMetaclass  --> Class
@@ -76,8 +76,8 @@ public class Interpreter {
     mMetaclass = new ClassObj(null, "Metaclass");
     mMetaclass.bindClass(mMetaclass);
     
-    // Define the main Object mixin. All classes will mix this in so that the
-    // common methods like "string" are available everywhere.
+    // Define the main Object parent class. All classes will inherit this in so
+    // that the common methods like "string" are available everywhere.
     ClassObj objectMetaclass = new ClassObj(mMetaclass, "ObjectMetaclass");
     mObjectClass = new ClassObj(objectMetaclass, "Object");
     mGlobalScope.define("Object", mObjectClass);
@@ -90,17 +90,18 @@ public class Interpreter {
     // for creating a new class.
     ClassObj classMetaclass = new ClassObj(mMetaclass, "ClassMetaclass");
     
-    // The class that all class objects mix in. Given a class Foo, FooMetaclass
-    // will mix this in so that the methods available on all classes (like
-    // "defineMethod") are available on Foo.
+    // The class that all class objects inherit. Given a class Foo,
+    // FooMetaclass will inherit this in so that the methods available on all
+    // classes (like "defineMethod") are available on Foo.
     mClass = new ClassObj(classMetaclass, "Class");
-    mClass.getMixins().add(mObjectClass);
+    mClass.getParents().add(mObjectClass);
     mGlobalScope.define("Class", mClass);
 
-    // Now that we have Class, we can go back and mix it into the metaclasses.
-    mMetaclass.getMixins().add(mClass);
-    classMetaclass.getMixins().add(mClass);
-    objectMetaclass.getMixins().add(mClass);
+    // Now that we have Class, we can go back and have the metaclasses inherit
+    // it.
+    mMetaclass.getParents().add(mClass);
+    classMetaclass.getParents().add(mClass);
+    objectMetaclass.getParents().add(mClass);
     
     mArrayClass = createGlobalClass("Array");
     
@@ -465,12 +466,12 @@ public class Interpreter {
   public ClassObj createClass(String name) {
     // Create the metaclass. This will hold shared methods on the class.
     ClassObj metaclass = new ClassObj(mClass, name + "Metaclass");
-    metaclass.getMixins().add(mClass);
+    metaclass.getParents().add(mClass);
     
     // Create the class object itself. This will hold the instance methods for
     // objects of the class.
     ClassObj classObj = new ClassObj(metaclass, name);
-    classObj.getMixins().add(mObjectClass);
+    classObj.getParents().add(mObjectClass);
     
     // Add the factory methods.
     Callable construct = new ClassConstruct(classObj);

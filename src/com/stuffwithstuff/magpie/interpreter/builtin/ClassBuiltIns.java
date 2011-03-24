@@ -122,12 +122,12 @@ public class ClassBuiltIns {
     }
   }
   
-  @Getter("mixins List(Class)")
-  public static class Mixins implements BuiltInCallable {
+  @Getter("parents List(Class)")
+  public static class Parents implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       ClassObj classObj = thisObj.asClass();
       
-      return interpreter.createArray(classObj.getMixins());
+      return interpreter.createArray(classObj.getParents());
     }
   }
 
@@ -140,9 +140,6 @@ public class ClassBuiltIns {
     }
   }
   
-  // TODO(bob): If mixins don't subtype, then this doesn't actually return the
-  // right type (since the class of the object returned (a metaclass) isn't an
-  // instance of Class, it just mixes it in). Make Class an interface?
   @Shared
   @Signature("new(name String -> Class)")
   public static class New implements BuiltInCallable {
