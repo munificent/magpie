@@ -112,7 +112,7 @@ public class ClassBuiltIns {
       ClassObj thisClass = (ClassObj)thisObj;
       
       // Look for a member.
-      Member member = thisClass.findMember(null, name);
+      Member member = interpreter.findMember(thisClass, null, name);
       if (member != null) {
         return member.evaluateType(interpreter);
       }

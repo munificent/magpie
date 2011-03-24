@@ -1,18 +1,24 @@
 specify("The 'parents' getter on Class") with
     it should("get the list of parents on the class") with
-        class Foo
+        class Parent
         end
 
-        // By default, a class mixes in Object.
+        class Foo
+            inherit(Parent)
+        end
+
         Foo parents count shouldBe(1)
-        Foo parents(0) shouldBe(Object)
+        Foo parents(0) shouldBe(Parent)
     end
 
     it should("allow modification") with
-        class Foo
+        class Parent
         end
 
-        // By default, a class mixes in Object.
+        class Foo
+            inherit(Parent)
+        end
+
         Foo parents count shouldBe(1)
         Foo parents clear()
         Foo parents count shouldBe(0)
@@ -22,7 +28,7 @@ specify("The 'parents' getter on Class") with
         class Foo
         end
 
-        class Mixin
+        class Parent
             def method(-> String) "received"
         end
 
@@ -32,8 +38,8 @@ specify("The 'parents' getter on Class") with
             foo method() shouldBe(nothing)
         end shouldThrow(BadCallError)
 
-        // Mix it in.
-        Foo parents add(Mixin)
+        // Inherit it.
+        Foo parents add(Parent)
         foo method() shouldBe("received")
     end
 
@@ -41,24 +47,24 @@ specify("The 'parents' getter on Class") with
         class Foo
         end
 
-        class Mixin1
+        class Parent1
             def method(-> String) "one"
         end
 
-        class Mixin2
+        class Parent2
             def method(-> String) "two"
         end
 
         var foo = Foo new()
 
         Foo parents clear()
-        Foo parents add(Mixin1)
-        Foo parents add(Mixin2)
+        Foo parents add(Parent1)
+        Foo parents add(Parent2)
         foo method() shouldBe("two")
 
         Foo parents clear()
-        Foo parents add(Mixin2)
-        Foo parents add(Mixin1)
+        Foo parents add(Parent2)
+        Foo parents add(Parent1)
         foo method() shouldBe("one")
     end
 end

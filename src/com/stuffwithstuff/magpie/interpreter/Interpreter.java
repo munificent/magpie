@@ -18,8 +18,8 @@ public class Interpreter {
     mGrammar = new Grammar();
     
     // Every object in Magpie has a class. Every class is an object, which
-    // means it also has a class (a metaclass). In addition, a class may inherit
-    // from one or more parent classes to get additional methods.
+    // means it also has a class (a metaclass). In addition, a class may
+    // inherit from one or more parent classes to get additional methods.
     //
     // To figure out what these relationships look like for classes and their
     // metaclasses is a bit tricky. The basic way to answer this is to look at
@@ -46,8 +46,7 @@ public class Interpreter {
     // "hello()" should be defined on the class of Foo, FooMetaclass.
     // "new()" (for creating a new class) should be on the class of Class,
     // ClassMetaclass.
-    // "type" should be available on all objects, so it should be in Object and
-    // the class of foo, Foo, should inherit it.
+    // "type" should be available on all objects, so it should be in Object.
     // "name" should be available on all class objects, so it should be in
     // Class and the class of Foo, FooMetaclass, should inherit it.
     //
@@ -65,8 +64,15 @@ public class Interpreter {
     // ClassMetaclass  --> Class
     // ObjectMetaclass --> Class
     // Metaclass       --> Class
-    // Class           --> Object
-    // Foo             --> Object
+    //
+    // There is one big of "magic" here. A class does not need to inherit from
+    // Object to get its methods. Instead, all classes implicitly have access
+    // to those methods. That enables us to have a conceptual top type (Object)
+    // without having all classes inherit from it. That lets us make our class
+    // hierarchy be a strict tree, which simplifies all sorts of stuff.
+    //
+    // Once we're using multimethods that can be specialized on Any, that magic
+    // will mostly go away.
     
     // Create a top-level scope.
     mGlobalScope = new Scope(host.allowTopLevelRedefinition());
@@ -94,7 +100,6 @@ public class Interpreter {
     // FooMetaclass will inherit this in so that the methods available on all
     // classes (like "defineMethod") are available on Foo.
     mClass = new ClassObj(classMetaclass, "Class");
-    mClass.getParents().add(mObjectClass);
     mGlobalScope.define("Class", mClass);
 
     // Now that we have Class, we can go back and have the metaclasses inherit
@@ -471,7 +476,6 @@ public class Interpreter {
     // Create the class object itself. This will hold the instance methods for
     // objects of the class.
     ClassObj classObj = new ClassObj(metaclass, name);
-    classObj.getParents().add(mObjectClass);
     
     // Add the factory methods.
     Callable construct = new ClassConstruct(classObj);
@@ -488,12 +492,24 @@ public class Interpreter {
     return classObj;
   }
   
+  public Member findMember(ClassObj classObj, ClassObj containingClass,
+      String name) {
+    Member member = classObj.findMember(containingClass, name);
+    if (member != null) return member;
+    
+    // Not found on the class or its parents, so default to Object.
+    // TODO(bob): Once we've got multimethods working all of the methods on
+    // Object should become methods specialized on Any, and this can go away
+    // completely.
+    return mObjectClass.findMember(containingClass, name);
+  }
+  
   private Obj lookupMember(Position position, Obj receiver, ClassObj containingClass,
       String name) {
     Expect.notNull(receiver);
     
     // Look for a getter.
-    Member member = receiver.getClassObj().findMember(containingClass, name);
+    Member member = findMember(receiver.getClassObj(), containingClass, name);
     if (member != null) {
       switch (member.getType()) {
       case GETTER:

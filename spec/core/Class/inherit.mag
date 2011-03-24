@@ -7,7 +7,7 @@ specify("The 'inherit' method on Class") with
             inherit(Bar)
         end
 
-        Foo parents count shouldBe(2) // Classes always inherit Object.
-        Foo parents(1) shouldBe(Bar)
+        Foo parents count shouldBe(1)
+        Foo parents(0) shouldBe(Bar)
     end
 end
