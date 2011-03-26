@@ -369,7 +369,7 @@ public class MagpieToJava {
     case 14: type = TokenType.EOF; break;
     default:
       // TODO(bob): Better error reporting.
-      mInterpreter.throwError("ParseError");
+      mInterpreter.error("ParseError");
       type = TokenType.EOF;
     }
     

@@ -373,7 +373,7 @@ public class JavaToMagpie {
 
     default:
       // TODO(bob): Better error reporting.
-      mInterpreter.throwError("ParseError");
+      mInterpreter.error("ParseError");
       tokenTypeValue = -1;    
       tokenTypeName = "";
     }

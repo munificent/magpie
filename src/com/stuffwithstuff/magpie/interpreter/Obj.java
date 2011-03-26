@@ -59,7 +59,11 @@ public class Obj {
   public void setValue(Object value) {
     mValue = value;
   }
-  
+
+  public boolean isClass() {
+    return mValue instanceof ClassObj;
+  }
+
   @SuppressWarnings("unchecked")
   public List<Obj> asArray() {
     if (mValue instanceof List<?>) {

@@ -68,11 +68,11 @@ public class MagpieParserBuiltIns {
         // exactly the tokens we *do* want to consume here.
         if (parser.current().getType() != TokenType.NAME) {
           // TODO(bob): Better error reporting.
-          return interpreter.throwError("ParseError");
+          throw interpreter.error("ParseError");
         }
         if (!parser.current().getString().equals(arg.asString())) {
           // TODO(bob): Better error reporting.
-          return interpreter.throwError("ParseError");
+          throw interpreter.error("ParseError");
         }
         token = parser.consume();
       } else if (arg == interpreter.nothing()) {

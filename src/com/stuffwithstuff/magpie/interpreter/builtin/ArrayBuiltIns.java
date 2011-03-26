@@ -54,7 +54,7 @@ public class ArrayBuiltIns {
       if (index < 0) index = elements.size() + index;
       
       if ((index < 0) || (index >= elements.size())) {
-        interpreter.throwError("OutOfBoundsError");
+        interpreter.error("OutOfBoundsError");
       }
       
       return elements.get(index);

@@ -59,18 +59,6 @@ definfix % 80 (left Int, right Int -> Int) Int modulo(left, right)
 definfix + 70 (left Int, right Int -> Int) Int add(left, right)
 definfix - 70 (left Int, right Int -> Int) Int subtract(left, right)
 
-
-MagpieParser registerInfixParser("+",
-    OperatorParser new(name: "+", stickiness: 70))
-
-defineMethod("++", fn(left Int, right Int) Int add(left, right))
-defineMethod("++", fn(left Stringable, right Stringable)
-    left concatenate(right)
-end)
-
-
-
-
 definfix ~ 60 (left Stringable, right Stringable -> String)
     left string concatenate(right string)
 end

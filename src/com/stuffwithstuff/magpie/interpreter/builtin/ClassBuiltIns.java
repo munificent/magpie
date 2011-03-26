@@ -150,4 +150,19 @@ public class ClassBuiltIns {
       return interpreter.createClass(name);
     }
   }
+  
+  @Shared
+  @Signature("subclass?(derived, base -> Bool)")
+  public static class Subclass implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+      // Make sure the arguments are classes.
+      if (!arg.getTupleField(0).isClass()) return interpreter.createBool(false);
+      if (!arg.getTupleField(1).isClass()) return interpreter.createBool(false);
+      
+      ClassObj derived = arg.getTupleField(0).asClass();
+      ClassObj base = arg.getTupleField(1).asClass();
+      
+      return interpreter.createBool(derived.isSubclassOf(base));
+    }
+  }
 }

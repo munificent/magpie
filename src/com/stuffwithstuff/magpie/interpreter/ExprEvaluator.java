@@ -8,6 +8,7 @@ import java.util.Map;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
+import com.stuffwithstuff.magpie.util.Expect;
 import com.stuffwithstuff.magpie.util.Pair;
 
 /**
@@ -48,7 +49,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
         context.getContainingClass(), expr.getName() + "_=");
     if (setter == null) {
       // TODO(bob): Include more information here.
-      mInterpreter.throwError("BadAssignError");
+      mInterpreter.error("BadAssignError");
     }
 
     setter.getDefinition().invoke(mInterpreter, receiver, null, value);
@@ -167,11 +168,13 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     }
     
     // If we got here, no patterns matched.
-    return mInterpreter.throwError("NoMatchError");
+    throw mInterpreter.error("NoMatchError");
   }
 
   @Override
   public Obj visit(MessageExpr expr, EvalContext context) {
+    Expect.notNull(context);
+    
     Obj receiver = evaluate(expr.getReceiver(), context);
 
     // If there is an implicit receiver, try to determine who to send the

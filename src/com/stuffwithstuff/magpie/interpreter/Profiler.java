@@ -47,6 +47,10 @@ public class Profiler {
     call.label = position.getSourceFile() + ":" + position.getStartLine();
     call.start = System.currentTimeMillis();
     sOngoing.push(call);
+    
+    if (sOngoing.size() > 100) {
+      System.out.println();
+    }
   }
   
   public static void pop() {
@@ -77,6 +81,11 @@ public class Profiler {
     public String label;
     public long   start;
     public long   excluded;
+    
+    @Override
+    public String toString() {
+      return label;
+    }
   }
   
   private static class Profile {

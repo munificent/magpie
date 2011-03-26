@@ -18,7 +18,7 @@ public class PatternBinder extends PatternBinderBase {
     // Bind the variable.
     if (!bindNewVariable(pattern.getName(), value)) {
       // Cannot redefine a variable in the same scope.
-      getInterpreter().throwError("RedefinitionError",
+      getInterpreter().error("RedefinitionError",
           String.format("There is already a variable named \"%s\" in this scope.", pattern.getName()));
     }
 

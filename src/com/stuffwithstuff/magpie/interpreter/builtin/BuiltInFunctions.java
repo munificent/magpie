@@ -20,7 +20,7 @@ public class BuiltInFunctions {
       String name = arg.getTupleField(0).asString();
       FnObj body = arg.getTupleField(1).asFn();
       
-      interpreter.defineMethod(name, body.getCallable());
+      interpreter.defineMethod(name, body.getFunction().getFunction());
       
       return interpreter.nothing();
     }
@@ -38,10 +38,10 @@ public class BuiltInFunctions {
         script.execute(interpreter);
       } catch (ParseException e) {
         // TODO(bob): Include more information.
-        interpreter.throwError("ParseError");
+        interpreter.error("ParseError");
       } catch (IOException e) {
         // TODO(bob): Include more information.
-        interpreter.throwError("IOError");
+        interpreter.error("IOError");
       }
       
       return interpreter.nothing();

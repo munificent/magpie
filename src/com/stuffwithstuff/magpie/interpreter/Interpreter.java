@@ -151,6 +151,7 @@ public class Interpreter {
     BuiltIns.registerClass(FunctionBuiltIns.class, mFnClass);
     BuiltIns.registerClass(IntBuiltIns.class, mIntClass);
     BuiltIns.registerClass(MagpieParserBuiltIns.class, mMagpieParserClass);
+    BuiltIns.registerClass(MultimethodBuiltIns.class, mMultimethodClass);
     BuiltIns.registerClass(ObjectBuiltIns.class, mObjectClass);
     BuiltIns.registerClass(RecordBuiltIns.class, mRecordClass);
     BuiltIns.registerClass(ReflectBuiltIns.class, reflectClass);
@@ -294,7 +295,7 @@ public class Interpreter {
           // the target directly, we're sending it a "call" message, but that's
           // returning the exact same object (most likely 'nothing'), so we
           // aren't making any progress. If that happens, fail.
-          return throwError("BadCallError", position.toString());
+          throw error("BadCallError", position.toString());
         }
         
         // Loop and try to apply the new target.
@@ -326,11 +327,11 @@ public class Interpreter {
   }
   
   // TODO(bob): Get rid of this once everything is including a friendly message.
-  public Obj throwError(String errorClassName) {
-    return throwError(errorClassName, "");
+  public ErrorException error(String errorClassName) {
+    throw error(errorClassName, "");
   }
   
-  public Obj throwError(String errorClassName, String message) {
+  public ErrorException error(String errorClassName, String message) {
     // Look up the error class.
     ClassObj classObj = mGlobalScope.get(errorClassName).asClass();
 
@@ -373,10 +374,10 @@ public class Interpreter {
   public ClassObj getStringClass() { return mStringClass; }
   public ClassObj getTupleClass() { return mTupleClass; }
   
-  public void defineMethod(String name, Callable method) {
+  public void defineMethod(String name, FnExpr method) {
     Obj existing = mGlobalScope.get(name);
     if (existing != null && !(existing instanceof MultimethodObj)) {
-      throwError("RedefinitionError", "Cannot define a method \"" + name +
+      error("RedefinitionError", "Cannot define a method \"" + name +
           "\" since there is already a variable with that name that is not a multimethod.");
     }
     

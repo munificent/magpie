@@ -29,7 +29,8 @@ extend class Class
             return true
         end
 
-        // TODO(bob): Should parents subtype?
+        // If it's a class that is a subclass of this one, it's a subtype too.
+        if Class subclass?(other, this) then return true
 
         false
     end

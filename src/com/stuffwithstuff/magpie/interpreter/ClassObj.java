@@ -28,6 +28,20 @@ public class ClassObj extends Obj {
   public MemberSet getMembers() { return mMembers; }
   
   /**
+   * Gets whether or not this class is a subclass (or same class) as the given
+   * parent.
+   */
+  public boolean isSubclassOf(ClassObj parent) {
+    if (this == parent) return true;
+    
+    for (Obj myParent : mParents) {
+      if (((ClassObj)myParent).isSubclassOf(parent)) return true;
+    }
+    
+    return false;
+  }
+  
+  /**
    * Looks for a member with the given name on the given class.
    * 
    * @param classObj  The class where we're looking for the member.

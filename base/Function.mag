@@ -62,3 +62,7 @@ class FunctionType
     var paramType  Type
     var returnType Type
 end
+
+// TODO(bob): Move to own file
+class MultimethodType
+end
