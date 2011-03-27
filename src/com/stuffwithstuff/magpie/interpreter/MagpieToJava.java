@@ -358,15 +358,16 @@ public class MagpieToJava {
     case 3: type = TokenType.RIGHT_BRACKET; break;
     case 4: type = TokenType.LEFT_BRACE; break;
     case 5: type = TokenType.RIGHT_BRACE; break;
-    case 6: type = TokenType.COMMA; break;
-    case 7: type = TokenType.DOT; break;
-    case 8: type = TokenType.LINE; break;
-    case 9: type = TokenType.NAME; break;
-    case 10: type = TokenType.FIELD; break;
-    case 11: type = TokenType.BOOL; break;
-    case 12: type = TokenType.INT; break;
-    case 13: type = TokenType.STRING; break;
-    case 14: type = TokenType.EOF; break;
+    case 6: type = TokenType.COLON; break;
+    case 7: type = TokenType.COMMA; break;
+    case 8: type = TokenType.DOT; break;
+    case 9: type = TokenType.LINE; break;
+    case 10: type = TokenType.NAME; break;
+    case 11: type = TokenType.FIELD; break;
+    case 12: type = TokenType.BOOL; break;
+    case 13: type = TokenType.INT; break;
+    case 14: type = TokenType.STRING; break;
+    case 15: type = TokenType.EOF; break;
     default:
       // TODO(bob): Better error reporting.
       mInterpreter.error("ParseError");

@@ -31,6 +31,7 @@ public class Lexer {
     // Ignore lines after tokens that can't end an expression.
     case BACKTICK:
     case COMMA:
+    case COLON:
     case DOT:
     case FIELD:
     case LEFT_PAREN:
@@ -67,6 +68,7 @@ public class Lexer {
       if (match("{")) return characterToken(TokenType.LEFT_BRACE);
       if (match("}")) return characterToken(TokenType.RIGHT_BRACE);
       if (match("`")) return characterToken(TokenType.BACKTICK);
+      if (match(":")) return characterToken(TokenType.COLON);
       if (match(",")) return characterToken(TokenType.COMMA);
       if (match(".")) return characterToken(TokenType.DOT);
 

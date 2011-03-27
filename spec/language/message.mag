@@ -33,8 +33,7 @@ specify("A private message") with
             get _private = "private"
         end
 
-        class Child
-            inherit(Parent)
+        class Child : Parent
             get private = _private
         end
 
@@ -47,8 +46,7 @@ specify("A private message") with
             get privateParent = _private
         end
 
-        class Child
-            inherit(Parent)
+        class Child : Parent
             var _private = "c"
             get privateChild = _private
         end
@@ -65,8 +63,7 @@ specify("A private message") with
             get private = _private
         end
 
-        class Child
-            inherit(Parent)
+        class Child : Parent
             get overridable = "c"
         end
 
