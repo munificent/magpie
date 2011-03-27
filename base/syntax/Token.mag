@@ -44,16 +44,17 @@ do
     defToken("rightBracket",  3)
     defToken("leftBrace",     4)
     defToken("rightBrace",    5)
-    defToken("comma",         6)
-    defToken("dot",           7)
-    defToken("line",          8)
+    defToken("colon",         6)
+    defToken("comma",         7)
+    defToken("dot",           8)
+    defToken("line",          9)
     // TODO(bob): Ideally, this token type would be called "name", but that
     // collides with the "name" getter on the class itself. if we namespace
     // "name" in Class, that will fix this.
-    defToken("identifier",    9)
-    defToken("field",         10)
-    defToken("boolLiteral",   11)
-    defToken("intLiteral",    12)
-    defToken("stringLiteral", 13)
-    defToken("eof",           14)
+    defToken("identifier",    10)
+    defToken("field",         11)
+    defToken("boolLiteral",   12)
+    defToken("intLiteral",    13)
+    defToken("stringLiteral", 14)
+    defToken("eof",           15)
 end

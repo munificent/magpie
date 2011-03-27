@@ -17,13 +17,15 @@ public class ClassParser extends PrefixParser {
     // A class expression is desugared to a call to "receiving" on the class
     // object. For a new class, that's like:
     //
-    //  class Foo
+    //  class Foo : Parent, Other
     //      var bar Int = 123
     //  end
     //
     //  (var Foo = Class new("Foo")) receiving with
+    //      this inherit(Parent)
+    //      this inherit(Other)
     //      this defineField("bar", ...)
-    //  end
+    //  end)
     //
     // For an extended class, it's simply:
     //
@@ -36,6 +38,8 @@ public class ClassParser extends PrefixParser {
     //  end
     
     Expr classReceiver;
+    List<Expr> exprs = new ArrayList<Expr>();
+    
     if (isExtend) {
       // Foo
       classReceiver = Expr.name(position, className);
@@ -44,11 +48,21 @@ public class ClassParser extends PrefixParser {
       classReceiver = Expr.var(position, className,
           Expr.message(position, Expr.name(position, "Class"),
           Name.NEW, Expr.string(className)));
+      
+      // Parse the parent classes, if any.
+      if (parser.match(TokenType.COLON)) {
+        do {
+          // TODO(bob): Class new() should take array of parent classes instead
+          // of calling inherit manually.
+          String parent = parser.consume(TokenType.NAME).getString();
+          exprs.add(Expr.message(parser.last(1).getPosition(), null,
+              "inherit", Expr.name(parent)));
+        } while (parser.match(TokenType.COMMA));
+      }
     }
 
     parser.consume(TokenType.LINE);
     
-    List<Expr> exprs = new ArrayList<Expr>();
     Expr theClass = Expr.this_(position);
     
     // Parse the body.
