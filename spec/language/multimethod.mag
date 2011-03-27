@@ -44,17 +44,13 @@ end
 class A2
 end
 
-class B1
-    inherit(A1)
+class B1 : A1
 end
 
-class B2
-    inherit(A1)
-    inherit(A2)
+class B2 : A1, A2
 end
 
-class C1
-    inherit(B1)
+class C1 : B1
 end
 
 class Foo
@@ -83,6 +79,13 @@ specify("The linearization of a multimethod") with
     defineMethod("linear5", fn(foo Foo) "class")
     defineMethod("linear5", fn(foo: _, bar: _) "record")
 
+    defineMethod("linear6", fn(a A1, b A1) "a1 a1")
+    defineMethod("linear6", fn(a B1, b A1) "b1 a1")
+    defineMethod("linear6", fn(a B1, b B1) "b1 b1")
+
+    defineMethod("linear7", fn(a B1, b A1) "b1 a1")
+    defineMethod("linear7", fn(a A1, b B1) "a1 b1")
+
     it should("prefer the most-derived class") with
         linear1(A1 new()) shouldBe("a1")
         linear1(B1 new()) shouldBe("b1")
@@ -105,7 +108,23 @@ specify("The linearization of a multimethod") with
         linear4(123) shouldBe("value")
     end
 
+    // TODO(bob): Implement me!
+    /*
     it should("prefer a class over a record") with
         linear5(Foo new()) shouldBe("class")
+    end
+    */
+
+    it should("order tuples by their fields") with
+        linear6(A1 new(), A1 new()) shouldBe("a1 a1")
+        linear6(C1 new(), A1 new()) shouldBe("b1 a1")
+        linear6(A1 new(), C1 new()) shouldBe("a1 a1")
+        linear6(C1 new(), C1 new()) shouldBe("b1 b1")
+    end
+
+    it should("be ambiguous if tuple fields don't agree") with
+        fn
+            linear7(B1 new(), B1 new())
+        end shouldThrow(AmbiguousMethodError)
     end
 end

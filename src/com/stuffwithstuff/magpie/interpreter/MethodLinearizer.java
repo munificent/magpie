@@ -81,7 +81,7 @@ public class MethodLinearizer implements Comparator<FnExpr> {
     } else if (isTuple(pattern1)) {
       if      (isAny(pattern2))    return firstWins;
       else if (isRecord(pattern2)) throw new NotImplementedException();
-      else if (isTuple(pattern2))  throw new NotImplementedException();
+      else if (isTuple(pattern2))  return compareTuples(pattern1, pattern2);
       else if (isType(pattern2))   return compareTypes(pattern1, pattern2);
       else if (isValue(pattern2))  return secondWins;
       else throw new UnsupportedOperationException("Unknown pattern type.");
@@ -104,6 +104,33 @@ public class MethodLinearizer implements Comparator<FnExpr> {
     }
   }
 
+  private int compareTuples(Pattern pattern1, Pattern pattern2) {
+    TuplePattern tuple1 = (TuplePattern)pattern1;
+    TuplePattern tuple2 = (TuplePattern)pattern2;
+    
+    // TODO(bob): Eventually should handle different-sized tuples.
+    if (tuple1.getFields().size() != tuple2.getFields().size()) {
+      throw ambiguous(pattern1, pattern2);
+    }
+    
+    int currentComparison = 0;
+    for (int i = 0; i < tuple1.getFields().size(); i++) {
+      int compare = compare(tuple1.getFields().get(i),
+                            tuple2.getFields().get(i));
+      
+      if (currentComparison == 0) {
+        currentComparison = compare;
+      } else if (compare == 0) {
+        // Do nothing.
+      } else if (compare != currentComparison) {
+        // If we get here, the fields don't agree.
+        throw ambiguous(pattern1, pattern2);
+      }
+    }
+    
+    return currentComparison;
+  }
+  
   private int compareTypes(Pattern pattern1, Pattern pattern2) {
     Obj type1 = mInterpreter.evaluate(PatternTyper.evaluate(pattern1));
     Obj type2 = mInterpreter.evaluate(PatternTyper.evaluate(pattern2));

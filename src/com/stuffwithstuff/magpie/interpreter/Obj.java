@@ -61,7 +61,7 @@ public class Obj {
   }
 
   public boolean isClass() {
-    return mValue instanceof ClassObj;
+    return this instanceof ClassObj;
   }
 
   @SuppressWarnings("unchecked")

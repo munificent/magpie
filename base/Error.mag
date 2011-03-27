@@ -19,6 +19,9 @@ end
 class NoMatchError
 end
 
+class AmbiguousMethodError
+end
+
 class NoMethodError
 end
 
