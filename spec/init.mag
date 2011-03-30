@@ -33,6 +33,7 @@ import("language/var.mag")
 import("language/with.mag")
 
 import("core/Array/call.mag")
+import("core/Array/contains.mag")
 import("core/Class/construct.mag")
 import("core/Class/defineField.mag")
 import("core/Class/defineGetter.mag")

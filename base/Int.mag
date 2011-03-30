@@ -23,13 +23,13 @@ class RangeIterator
         construct(current: first - 1, last: last)
     end
 
-    def next()
-        current = current + 1
-        current <= last
-    end
-
     var current Int
     var last    Int
+end
+
+defmethod RangeIterator next()
+    current = current + 1
+    current <= last
 end
 
 class Range
@@ -37,8 +37,10 @@ class Range
         construct(start: start, last: last)
     end
 
-    def iterate() RangeIterator new(start, last)
-
     var start Int
     var last  Int
+end
+
+defmethod Range iterate()
+    RangeIterator new(start, last)
 end

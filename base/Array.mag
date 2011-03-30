@@ -12,64 +12,47 @@ extend class Array
 
     // TODO(bob): Need generics to use for return type.
     get last = this(count - 1)
+end
 
-    def iterate() ArrayIterator new(this)
+defmethod Array iterate() ArrayIterator new(this)
 
-    def copy()
-        var result = Array new()
-        for item = this do result add(item)
-        result
+defmethod Array copy()
+    var result = Array new()
+    for item = this do result add(item)
+    result
+end
+
+
+defmethod Array unique()
+    var result = Array new()
+    for item = this do
+        if result count == 0 then
+            result add(item)
+        else if result(-1) != item then result add(item)
     end
 
-    def sortByString()
-        var result = copy()
+    result
+end
 
-        // TODO(bob): Awful bubble sort FTW!
-        for i = 0 until(result count) do
-            for j = (i + 1) until(result count) do
-                if result(i) string > result(j) string then
-                    var temp = result(i)
-                    result(i) = result(j)
-                    result(j) = temp
-                end
-            end
-        end
-
-        result
+defmethod Array contains?(item)
+    for element = this do
+        if item == element then return true
     end
+    false
+end
 
-    def unique()
-        var result = Array new()
-        for item = this do
-            if result count == 0 then
-                result add(item)
-            else if result(-1) != item then result add(item)
-        end
-
-        result
+defmethod Array first(predicate)
+    for element = this do
+        if predicate(element) then return element
     end
+    nothing
+end
 
-    // TODO(bob): rename contains?
-    def contains(item)
-        for element = this do
-            if item == element then return true
-        end
-        false
-    end
-
-    def first(predicate)
-        for element = this do
-            if predicate(element) then return element
-        end
-        nothing
-    end
-
-    def swap(a Int, b Int)
-        // TODO(bob): Bounds check
-        var temp = this(a)
-        this(a) = this(b)
-        this(b) = temp
-    end
+defmethod Array swap(a Int, b Int)
+    // TODO(bob): Bounds check
+    var temp = this(a)
+    this(a) = this(b)
+    this(b) = temp
 end
 
 class ArrayIterator
@@ -79,11 +62,12 @@ class ArrayIterator
 
     get current = array(index)
 
-    def next()
-        index = index + 1
-        index < array count
-    end
-
     var array Array
     var index = -1
 end
+
+defmethod ArrayIterator next()
+    index = index + 1
+    index < array count
+end
+

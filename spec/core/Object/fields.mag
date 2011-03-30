@@ -1,8 +1,8 @@
 specify("The 'fields' getter on Object") with
     it should("return a list of the fields on the object") with
         var fields = (x: 1, y: 2) fields
-        fields contains("x", 1) shouldEqual(true)
-        fields contains("y", 2) shouldEqual(true)
+        fields contains?("x", 1) shouldEqual(true)
+        fields contains?("y", 2) shouldEqual(true)
     end
 
     it should("return the fields sorted alphabetically") with

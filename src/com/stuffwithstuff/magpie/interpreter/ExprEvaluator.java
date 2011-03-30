@@ -119,7 +119,15 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
         }
         Obj arg = evaluate(expr.getArg(), context);
         
-        return multimethod.invoke(mInterpreter, receiver, arg);
+        try {
+          return multimethod.invoke(mInterpreter, receiver, arg);
+        } catch (ErrorException error) {
+          // If we didn't find a matching multimethod, call back to the old
+          // code path.
+          if (!error.getError().getClassObj().getName().equals("NoMethodError")) {
+            throw error;
+          }
+        }
       }
     }
     

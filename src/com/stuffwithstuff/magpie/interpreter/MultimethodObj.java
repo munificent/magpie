@@ -32,6 +32,11 @@ public class MultimethodObj extends Obj {
     Obj fullArg = interpreter.createTuple(receiver, arg);
     FnExpr method = select(interpreter, fullArg);
     
+    if (method == null) {
+      interpreter.error("NoMethodError", 
+          "Could not find a method to match argument " + arg + ".");
+    }
+
     // TODO(bob): In-progress. Once everything is using multimethods, the
     // receiver won't need to be explicitly passed.
     Function function = new Function(interpreter.getGlobals(), null, method);
@@ -48,10 +53,7 @@ public class MultimethodObj extends Obj {
       }
     }
     
-    if (applicable.size() == 0) {
-      interpreter.error("NoMethodError", 
-          "Could not find a method to match argument " + arg + ".");
-    }
+    if (applicable.size() == 0) return null;
 
     linearize(interpreter, applicable);
     

@@ -4,7 +4,7 @@ var totalFailures = 0
 var currentTestSuite = nothing
 var startTimeMs = 0
 
-def startTests()
+defmethod startTests()
     totalTests = 0
     totalFailures = 0
     currentTestSuite = nothing
@@ -12,14 +12,15 @@ def startTests()
     startTimeMs = Runtime now()
 end
 
-def endTests()
+defmethod endTests()
     var endTimeMs = Runtime now()
     print()
     print("Passed " ~ (totalTests - totalFailures) ~ " out of " ~
         totalTests ~ " tests in " ~ (endTimeMs - startTimeMs) ~ "ms.")
 end
 
-def specify(description String, block TestSuite => Nothing)
+// TODO(bob): Need function types.
+defmethod specify(description String, block /*TestSuite => Nothing*/)
     var suite = TestSuite new(description)
     block(suite)
 end
@@ -31,78 +32,77 @@ class TestSuite
         suite
     end
 
-    def should(description String, block Nothing => Nothing)
-        currentTest = description
-        var testsBefore = totalTests
-        failedTest = false
-
-        do
-            block()
-        catch error then
-            fail("Unexpected error: " ~ error type)
-        end
-
-        if totalTests == testsBefore then
-            print("NONE: " ~ name ~ " should " ~ currentTest ~ ".")
-        end
-    end
-
-    def pass() advance()
-
-    def fail(message String)
-        if failedTest not then
-            print("FAIL: " ~ name ~ " should " ~ currentTest ~ ".")
-        end
-        advance()
-        totalFailures = totalFailures + 1
-        print("      " ~ message)
-        failedTest = true
-    end
-
-    def advance()
-        totalTests = totalTests + 1
-        // Show the progress.
-        if (totalTests % 10) == 0 then prints(".")
-    end
-
     var name        String
     var currentTest String = ""
     var failedTest  Bool   = false
 end
 
-def fail(message String)
+// TODO(bob): Need function types.
+defmethod TestSuite should(description String, block /*Nothing => Nothing*/)
+    currentTest = description
+    var testsBefore = totalTests
+    failedTest = false
+
+    do
+        block()
+    catch error then
+        fail("Unexpected error: " ~ error type)
+    end
+
+    if totalTests == testsBefore then
+        print("NONE: " ~ name ~ " should " ~ currentTest ~ ".")
+    end
+end
+
+defmethod TestSuite pass() advance()
+
+defmethod TestSuite advance()
+    totalTests = totalTests + 1
+    // Show the progress.
+    if (totalTests % 10) == 0 then prints(".")
+end
+
+defmethod TestSuite fail(message String)
+    if failedTest not then
+        print("FAIL: " ~ name ~ " should " ~ currentTest ~ ".")
+    end
+    advance()
+    totalFailures = totalFailures + 1
+    print("      " ~ message)
+    failedTest = true
+end
+
+defmethod fail(message String)
     currentTestSuite fail(message)
 end
 
-extend class Object
-    def shouldEqual(expected, message String | Nothing)
-        if this != expected then
-            if message == nothing then
-                message = "Expected " ~ expected ~ " but was " ~ this
-            end
-            // TODO(bob): Exceptions would be good here.
-            currentTestSuite fail(message)
-        else
-            currentTestSuite pass()
-        end
+defmethod this shouldEqual(expected, message String)
+    if this != expected then
+        currentTestSuite fail(message)
+    else
+        currentTestSuite pass()
     end
+end
 
-    def shouldBe(expected, message)
-        if is(expected) then
-            currentTestSuite pass()
-        else
-            if message == nothing then
-                message = "Expected type " ~ expected ~ " but was " ~ this
-            end
-            // TODO(bob): Exceptions would be good here.
-            currentTestSuite fail(message)
+defmethod this shouldEqual(expected)
+    shouldEqual(expected, "Expected " ~ expected ~ " but was " ~ this)
+end
+
+defmethod this shouldBe(expected, message)
+    if is(expected) then
+        currentTestSuite pass()
+    else
+        if message == nothing then
+            message = "Expected type " ~ expected ~ " but was " ~ this
         end
+        // TODO(bob): Exceptions would be good here.
+        currentTestSuite fail(message)
     end
 end
 
 // Verifies that a function throws an error of the given class. Will execute the
 // function.
-def Function shouldThrow(errorClass Class)
+defmethod Function shouldThrow(errorClass Class)
     var caught = false
     do
         this()
@@ -117,7 +117,7 @@ def Function shouldThrow(errorClass Class)
 end
 
 // Verifies that a function does not throw an error. Will execute the function.
-def Function shouldNotThrow()
+defmethod Function shouldNotThrow()
     var caught = false
     do
         this()
