@@ -4,7 +4,7 @@ var totalFailures = 0
 var currentTestSuite = nothing
 var startTimeMs = 0
 
-defmethod startTests()
+def startTests()
     totalTests = 0
     totalFailures = 0
     currentTestSuite = nothing
@@ -12,7 +12,7 @@ defmethod startTests()
     startTimeMs = Runtime now()
 end
 
-defmethod endTests()
+def endTests()
     var endTimeMs = Runtime now()
     print()
     print("Passed " ~ (totalTests - totalFailures) ~ " out of " ~
@@ -20,7 +20,7 @@ defmethod endTests()
 end
 
 // TODO(bob): Need function types.
-defmethod specify(description String, block /*TestSuite => Nothing*/)
+def specify(description String, block /*TestSuite => Nothing*/)
     var suite = TestSuite new(description)
     block(suite)
 end
@@ -38,7 +38,7 @@ class TestSuite
 end
 
 // TODO(bob): Need function types.
-defmethod TestSuite should(description String, block /*Nothing => Nothing*/)
+def TestSuite should(description String, block /*Nothing => Nothing*/)
     currentTest = description
     var testsBefore = totalTests
     failedTest = false
@@ -54,15 +54,15 @@ defmethod TestSuite should(description String, block /*Nothing => Nothing*/)
     end
 end
 
-defmethod TestSuite pass() advance()
+def TestSuite pass() advance()
 
-defmethod TestSuite advance()
+def TestSuite advance()
     totalTests = totalTests + 1
     // Show the progress.
     if (totalTests % 10) == 0 then prints(".")
 end
 
-defmethod TestSuite fail(message String)
+def TestSuite fail(message String)
     if failedTest not then
         print("FAIL: " ~ name ~ " should " ~ currentTest ~ ".")
     end
@@ -72,11 +72,11 @@ defmethod TestSuite fail(message String)
     failedTest = true
 end
 
-defmethod fail(message String)
+def fail(message String)
     currentTestSuite fail(message)
 end
 
-defmethod this shouldEqual(expected, message String)
+def this shouldEqual(expected, message String)
     if this != expected then
         currentTestSuite fail(message)
     else
@@ -84,11 +84,11 @@ defmethod this shouldEqual(expected, message String)
     end
 end
 
-defmethod this shouldEqual(expected)
+def this shouldEqual(expected)
     shouldEqual(expected, "Expected " ~ expected ~ " but was " ~ this)
 end
 
-defmethod this shouldBe(expected, message)
+def this shouldBe(expected, message)
     if is(expected) then
         currentTestSuite pass()
     else
@@ -102,7 +102,7 @@ end
 
 // Verifies that a function throws an error of the given class. Will execute the
 // function.
-defmethod Function shouldThrow(errorClass Class)
+def Function shouldThrow(errorClass Class)
     var caught = false
     do
         this()
@@ -117,7 +117,7 @@ defmethod Function shouldThrow(errorClass Class)
 end
 
 // Verifies that a function does not throw an error. Will execute the function.
-defmethod Function shouldNotThrow()
+def Function shouldNotThrow()
     var caught = false
     do
         this()

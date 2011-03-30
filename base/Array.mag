@@ -14,16 +14,16 @@ extend class Array
     get last = this(count - 1)
 end
 
-defmethod Array iterate() ArrayIterator new(this)
+def Array iterate() ArrayIterator new(this)
 
-defmethod Array copy()
+def Array copy()
     var result = Array new()
     for item = this do result add(item)
     result
 end
 
 
-defmethod Array unique()
+def Array unique()
     var result = Array new()
     for item = this do
         if result count == 0 then
@@ -34,21 +34,21 @@ defmethod Array unique()
     result
 end
 
-defmethod Array contains?(item)
+def Array contains?(item)
     for element = this do
         if item == element then return true
     end
     false
 end
 
-defmethod Array first(predicate)
+def Array first(predicate)
     for element = this do
         if predicate(element) then return element
     end
     nothing
 end
 
-defmethod Array swap(a Int, b Int)
+def Array swap(a Int, b Int)
     // TODO(bob): Bounds check
     var temp = this(a)
     this(a) = this(b)
@@ -66,7 +66,7 @@ class ArrayIterator
     var index = -1
 end
 
-defmethod ArrayIterator next()
+def ArrayIterator next()
     index = index + 1
     index < array count
 end

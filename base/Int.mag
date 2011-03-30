@@ -4,15 +4,15 @@ extend class Int
     get countingUp Range = Range new(this, 99999999)
 end
 
-defmethod Int times()
+def Int times()
     Range new(0, this - 1)
 end
 
-defmethod Int to(last Int)
+def Int to(last Int)
     Range new(this, last)
 end
 
-defmethod Int until(last Int)
+def Int until(last Int)
     Range new(this, last - 1)
 end
 
@@ -27,7 +27,7 @@ class RangeIterator
     var last    Int
 end
 
-defmethod RangeIterator next()
+def RangeIterator next()
     current = current + 1
     current <= last
 end
@@ -41,6 +41,6 @@ class Range
     var last  Int
 end
 
-defmethod Range iterate()
+def Range iterate()
     RangeIterator new(start, last)
 end

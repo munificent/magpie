@@ -18,7 +18,6 @@ import("syntax/AndParser.mag")
 import("syntax/OrParser.mag")
 
 import("syntax/ClassParser.mag")
-import("syntax/DefParser.mag")
 import("syntax/IfParser.mag")
 import("syntax/GetParser.mag")
 

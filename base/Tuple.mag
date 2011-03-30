@@ -43,11 +43,11 @@ class TupleIterator
         end
     end
 
-    def next()
-        index = index + 1
-        index < tuple count
-    end
-
     var tuple Tuple
     var index = -1 // the first call to next advances to the first
+end
+
+def TupleIterator next()
+    index = index + 1
+    index < tuple count
 end

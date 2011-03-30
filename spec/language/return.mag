@@ -1,13 +1,13 @@
 specify("A 'return' expression") with
     it should("return the returned value") with
-        def f()
+        var f = fn
             return "value"
         end
         f() shouldEqual("value")
     end
-        
+
     it should("return nothing if no value is provided") with
-        def f()
+        var f = fn
             return
         end
         f() shouldEqual(nothing)
@@ -15,7 +15,7 @@ specify("A 'return' expression") with
 
     it should("exit the function immediately") with
         var reached = false
-        def f()
+        var f = fn
             return "value"
             reached = true
         end
