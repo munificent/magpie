@@ -130,50 +130,22 @@ public class MagpieParser extends Parser {
   }
 
   /**
-   * Parses a function type declaration. Valid examples
-   * include:
-   * (->)           // takes nothing, returns nothing
-   * ()             // takes nothing, returns dynamic
-   * (a)            // takes a single dynamic, returns dynamic
-   * (a ->)         // takes a single dynamic, returns nothing
-   * (a Int -> Int) // takes and returns an int
-   * 
-   * @return The parsed function type.
+   * Parses a function type declaration.
    */
   public Pattern parseFunctionType() {
-    // Parse the prototype: (foo Foo, bar Bar -> Bang)
+    // Parse the prototype: (foo Foo, bar Bar)
     consume(TokenType.LEFT_PAREN);
     
     // Parse the parameter pattern, if any.
     Pattern pattern = null;
-    if (!lookAhead("->") && !lookAhead(TokenType.RIGHT_PAREN)) {
+    if (!lookAhead(TokenType.RIGHT_PAREN)) {
       pattern = PatternParser.parse(this);
     } else {
       // No pattern, so expect nothing.
       pattern = new ValuePattern(Expr.nothing());
     }
 
-    // Parse the return type, if any.
-    Expr returnType = null;
-    if (match(TokenType.RIGHT_PAREN)) {
-      // No return type, so infer dynamic.
-      returnType = Expr.name("Dynamic");
-    } else {
-      consume("->");
-      
-      // Ignore a newline after the arrow.
-      match(TokenType.LINE);
-      
-      if (lookAhead(TokenType.RIGHT_PAREN)) {
-        // An arrow, but no return type, so infer nothing.
-        returnType = Expr.name("Nothing");
-      } else {
-        returnType = parseTypeAnnotation();
-      }
-      consume(TokenType.RIGHT_PAREN);
-    }
-    
-    // TODO(bob): Remove return type since it's ignored.
+    consume(TokenType.RIGHT_PAREN);
     
     return pattern;
   }

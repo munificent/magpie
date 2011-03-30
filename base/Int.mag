@@ -4,26 +4,26 @@ extend class Int
     get countingUp Range = Range new(this, 99999999)
 end
 
-defmethod Int times() Range
+defmethod Int times()
     Range new(0, this - 1)
 end
 
-defmethod Int to(last Int) Range
+defmethod Int to(last Int)
     Range new(this, last)
 end
 
-defmethod Int until(last Int) Range
+defmethod Int until(last Int)
     Range new(this, last - 1)
 end
 
 // Define an int iterator.
 class RangeIterator
-    shared def new(first Int, last Int -> RangeIterator)
+    shared def new(first Int, last Int)
         // rollback so the first call to next advances to the first
         construct(current: first - 1, last: last)
     end
 
-    def next(-> Bool)
+    def next()
         current = current + 1
         current <= last
     end
@@ -33,11 +33,11 @@ class RangeIterator
 end
 
 class Range
-    shared def new(start Int, last Int -> Range)
+    shared def new(start Int, last Int)
         construct(start: start, last: last)
     end
 
-    def iterate(-> RangeIterator) RangeIterator new(start, last)
+    def iterate() RangeIterator new(start, last)
 
     var start Int
     var last  Int

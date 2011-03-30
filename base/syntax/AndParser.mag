@@ -2,7 +2,7 @@
 // expression. Note that this isn't using "defop" because "and" needs to
 // short-circuit, and a normal operator always evaluates both arguments.
 class AndParser
-    def parse(parser MagpieParser, left Expression, token Token -> Expression)
+    def parse(parser MagpieParser, left Expression, token Token)
         // Ignore a newline after "and".
         parser matchToken(TokenType line)
         var right = parser parseExpression(stickiness)

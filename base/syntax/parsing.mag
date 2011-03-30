@@ -1,6 +1,6 @@
 // Utility functions used by the parsers.
 
-var parseReceiver = fn(parser MagpieParser -> Expression)
+var parseReceiver = fn(parser MagpieParser)
         match parser lookAhead(TokenType identifier)
             case true then
                 // Getter on a class.

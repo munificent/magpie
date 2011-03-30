@@ -1,4 +1,4 @@
-def Tuple iterate(-> TupleIterator) TupleIterator new(this)
+def Tuple iterate() TupleIterator new(this)
 
 // A tuple of Types is itself a Type.
 extend class Tuple
@@ -12,7 +12,7 @@ extend class Tuple
         result
     end
 
-    shared def equal?(left Tuple, right Tuple -> Bool)
+    shared def equal?(left Tuple, right Tuple)
         if left count != right count then return false
 
         for leftField = left
@@ -24,7 +24,7 @@ extend class Tuple
 end
 
 class TupleIterator
-    shared def new(tuple Tuple -> TupleIterator)
+    shared def new(tuple Tuple)
         construct(tuple: tuple)
     end
 
@@ -43,7 +43,7 @@ class TupleIterator
         end
     end
 
-    def next(-> Bool)
+    def next()
         index = index + 1
         index < tuple count
     end

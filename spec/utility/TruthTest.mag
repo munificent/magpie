@@ -1,6 +1,6 @@
 // A simple class that implements truthiness and tracks when it was called.
 class TruthTest
-    shared def new(value Bool -> TruthTest)
+    shared def new(value Bool)
         construct(value: value)
     end
 

@@ -1,6 +1,6 @@
 // Keyword parser for "if" expressions.
 class IfParser
-    def parse(parser MagpieParser, token Token -> Expression)
+    def parse(parser MagpieParser, token Token)
         // Parse the condition.
         var condition, _ = parser parseBlock("then")
 

@@ -9,7 +9,7 @@
 // This class is not usually used directly. Instead, the "definfix" syntax uses
 // this when it desugars.
 class OperatorParser
-    def parse(parser MagpieParser, left Expression, token Token -> Expression)
+    def parse(parser MagpieParser, left Expression, token Token)
         // Ignore a newline after "operator".
         parser matchToken(TokenType line)
 
@@ -30,11 +30,11 @@ end
 // Parses a declarative "defoperator" syntax for creating an infix operator. For
 // example:
 //
-//   definfix ~ 50 (left Stringable, right Strinable -> String)
+//   definfix ~ 50 (left Stringable, right Stringable)
 //       left string concatenate(right string)
 //   end
 class DefInfixParser
-    def parse(parser MagpieParser, token Token -> Expression)
+    def parse(parser MagpieParser, token Token)
         var name = parser consume(TokenType identifier) stringValue
         var stickiness = parser consume(TokenType intLiteral) intValue
         var function = parser parseFunction()

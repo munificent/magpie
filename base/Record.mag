@@ -1,5 +1,5 @@
 extend class Record
-    shared def equal?(left Record, right Record -> Bool)
+    shared def equal?(left Record, right Record)
         if left fields count != right fields count then return false
 
         for leftField = left fields

@@ -1,14 +1,14 @@
 // Provides additional functionality on Class.
 
 // Adds the given class to the class's parents.
-def Class inherit(parent Class ->) parents add(parent)
+def Class inherit(parent Class) parents add(parent)
 
 // TODO(bob): Kinda gross.
 extend class Class
     // By default, two instances of the same class are only equal if they're
     // the same object. This behavior can be "overridden" by providing a
     // different shared method named "equal?" in another class.
-    def equal?(left, right -> Bool)
+    def equal?(left, right)
         Reflect same?(left, right)
     end
 
@@ -16,7 +16,7 @@ extend class Class
     // never actually be called. It's gross. Ideally, < should check that the
     // class implements an interface or something so that it only attempts to
     // compare comparable objects.
-    def lessThan?(left, right -> Bool)
+    def lessThan?(left, right)
         false
     end
 end

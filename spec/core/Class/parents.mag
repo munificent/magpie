@@ -29,7 +29,7 @@ specify("The 'parents' getter on Class") with
         end
 
         class Parent
-            def method(-> String) "received"
+            def method() "received"
         end
 
         // Not mixed in.
@@ -48,11 +48,11 @@ specify("The 'parents' getter on Class") with
         end
 
         class Parent1
-            def method(-> String) "one"
+            def method() "one"
         end
 
         class Parent2
-            def method(-> String) "two"
+            def method() "two"
         end
 
         var foo = Foo new()

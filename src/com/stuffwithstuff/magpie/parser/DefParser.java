@@ -56,15 +56,6 @@ public class DefParser extends PrefixParser {
     }
     parser.consume(TokenType.RIGHT_PAREN);
     
-    // Parse the return type (if any).
-    Expr returnType;
-    if (!parser.lookAhead(TokenType.LINE)) {
-      returnType = parser.parseTypeAnnotation();
-    } else {
-      // TODO(bob): Try to infer return type for non-recursive methods.
-      returnType = Expr.name("Dynamic");
-    }
-    
     // Parse the body.
     Expr body = parser.parseEndBlock();
     

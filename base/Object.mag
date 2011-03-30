@@ -1,6 +1,6 @@
 // Provides additional functionality on Object.
 
 // Returns true if the object can be assigned to the given class.
-def Object is(classObj Class -> Bool)
+def Object is(classObj Class)
     Class subclass?(Reflect getClass(this), classObj)
 end

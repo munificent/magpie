@@ -40,7 +40,6 @@ public class Grammar {
     mPrefixParsers.define("class", new ClassParser());
     mPrefixParsers.define("extend", new ExtendParser());
     
-    mReservedWords.add("->");
     mReservedWords.add("case");
     mReservedWords.add("catch");
     mReservedWords.add("then");    

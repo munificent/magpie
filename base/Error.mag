@@ -40,7 +40,7 @@ end
 class UnexpectedTypeError
     inherit(Error)
 
-    shared def new(expectedType Type, actualType Type -> UnexpectedTypeError)
+    shared def new(expectedType Type, actualType Type)
         construct(expectedType: expectedType, actualType: actualType)
     end
 

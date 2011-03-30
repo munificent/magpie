@@ -19,7 +19,7 @@
 //  20 - Composition (tuple "," operator, records)
 
 // TODO(bob): Hackish. Need to figure out what the semantics for this should be.
-definfix == 40 (left, right -> Bool)
+definfix == 40 (left, right)
     // Must be equal if they're the same object.
     if Reflect same?(left, right) then return true
 
@@ -32,40 +32,40 @@ definfix == 40 (left, right -> Bool)
     leftClass equal?(left, right)
 end
 
-definfix != 40 (left, right -> Bool) (left == right) not
+definfix != 40 (left, right) (left == right) not
 
-definfix < 50 (left, right -> Bool)
+definfix < 50 (left, right)
     // Leave it up to the class to decide.
     // TODO(bob): Figure out better semantics for this.
     Reflect getClass(left) lessThan?(left, right)
 end
 
-definfix > 50 (left, right -> Bool)
+definfix > 50 (left, right)
     (left < right) not and left != right
 end
 
-definfix <= 50 (left, right -> Bool)
+definfix <= 50 (left, right)
     left < right or left == right
 end
 
-definfix >= 50 (left, right -> Bool)
+definfix >= 50 (left, right)
     (left < right) not
 end
 
-definfix * 80 (left Int, right Int -> Int) Int multiply(left, right)
-definfix / 80 (left Int, right Int -> Int) Int divide(left, right)
-definfix % 80 (left Int, right Int -> Int) Int modulo(left, right)
+definfix * 80 (left Int, right Int) Int multiply(left, right)
+definfix / 80 (left Int, right Int) Int divide(left, right)
+definfix % 80 (left Int, right Int) Int modulo(left, right)
 
-definfix + 70 (left Int, right Int -> Int) Int add(left, right)
-definfix - 70 (left Int, right Int -> Int) Int subtract(left, right)
+definfix + 70 (left Int, right Int) Int add(left, right)
+definfix - 70 (left Int, right Int) Int subtract(left, right)
 
-definfix ~ 60 (left Stringable, right Stringable -> String)
+definfix ~ 60 (left Stringable, right Stringable)
     left string concatenate(right string)
 end
 
-definfix ~~ 60 (left Stringable, right Stringable -> String)
+definfix ~~ 60 (left Stringable, right Stringable)
     left ~ " " ~ right
 end
 
 // Add an arrow operator to make function types out of other types:
-definfix => 40 (left Type, right Type -> Type) FunctionType new(left, right)
+definfix => 40 (left Type, right Type) FunctionType new(left, right)

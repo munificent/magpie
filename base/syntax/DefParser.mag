@@ -5,7 +5,7 @@
 //    def Bar foo(a) ... // defines a method "foo" on class "Bar"
 //    def (a b) foo(a) ... // defines a method "foo" on the result of "a b"
 class DefParser
-    def parse(parser MagpieParser, token Token -> Expression)
+    def parse(parser MagpieParser, token Token)
         match parser lookAhead(TokenType identifier, TokenType leftParen) or
             parser lookAhead(TokenType identifier, TokenType leftBracket)
             case true then

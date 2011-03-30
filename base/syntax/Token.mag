@@ -4,9 +4,9 @@
 class Token
 end
 
-Token defineGetter("boolValue", fn(-> Bool) value)
-Token defineGetter("intValue", fn(-> Int) value)
-Token defineGetter("stringValue", fn(-> String) value)
+Token defineGetter("boolValue", fn value)
+Token defineGetter("intValue", fn value)
+Token defineGetter("stringValue", fn value)
 Token declareField("position", { Position })
 Token declareField("tokenType", { TokenType })
 Token declareField("value",
@@ -14,28 +14,28 @@ Token declareField("value",
 
 Token defineMethod("keyword?",
     // Note: no comparison operators are available yet.
-    fn(keyword String -> Bool)
+    fn(keyword String)
         // TODO(bob): Error here. We haven't defined the "and" parser yet.
         TokenType equal?(tokenType, TokenType identifier) and
         Int equal?(stringValue compareTo(keyword), 0)
     end)
 
 class TokenType
-    shared def equal?(left TokenType, right TokenType -> Bool)
+    shared def equal?(left TokenType, right TokenType)
         Int equal?(left value, right value)
     end
 
     shared def new(value Int, name String) construct(value: value, name: name)
 end
 
-TokenType defineGetter("string", fn(-> String) name)
+TokenType defineGetter("string", fn name)
 TokenType declareField("value", { Int })
 TokenType declareField("name", { String })
 
 do
     var defToken = fn(name String, value Int)
         Reflect getClass(TokenType) defineGetter(name,
-            fn(-> TokenType) TokenType new(value, name))
+            fn TokenType new(value, name))
         end
 
     defToken("leftParen",     0)

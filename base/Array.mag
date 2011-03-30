@@ -1,5 +1,5 @@
 extend class Array
-    shared def new(-> Array) Array of()
+    shared def new() Array of()
 
     get string String =
         var text = "["
@@ -13,15 +13,15 @@ extend class Array
     // TODO(bob): Need generics to use for return type.
     get last = this(count - 1)
 
-    def iterate(-> ArrayIterator) ArrayIterator new(this)
+    def iterate() ArrayIterator new(this)
 
-    def copy(-> Array)
+    def copy()
         var result = Array new()
         for item = this do result add(item)
         result
     end
 
-    def sortByString(-> Array)
+    def sortByString()
         var result = copy()
 
         // TODO(bob): Awful bubble sort FTW!
@@ -38,7 +38,7 @@ extend class Array
         result
     end
 
-    def unique(-> Array)
+    def unique()
         var result = Array new()
         for item = this do
             if result count == 0 then
@@ -50,22 +50,21 @@ extend class Array
     end
 
     // TODO(bob): rename contains?
-    def contains(item -> Bool)
+    def contains(item)
         for element = this do
             if item == element then return true
         end
         false
     end
 
-    // TODO(bob): Need generics to use for return type.
-    def first(predicate -> Dynamic)
+    def first(predicate)
         for element = this do
             if predicate(element) then return element
         end
         nothing
     end
 
-    def swap(a Int, b Int ->)
+    def swap(a Int, b Int)
         // TODO(bob): Bounds check
         var temp = this(a)
         this(a) = this(b)
@@ -74,13 +73,13 @@ extend class Array
 end
 
 class ArrayIterator
-    shared def new(array Array -> ArrayIterator)
+    shared def new(array Array)
         construct(array: array)
     end
 
     get current = array(index)
 
-    def next(-> Bool)
+    def next()
         index = index + 1
         index < array count
     end
