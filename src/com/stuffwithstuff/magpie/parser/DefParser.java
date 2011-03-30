@@ -28,7 +28,15 @@ public class DefParser extends PrefixParser {
     Pattern leftHandPattern;
     String name;
     
-    if (parser.lookAhead(TokenType.NAME, TokenType.LEFT_PAREN)) {
+    if (parser.match("shared")) {
+      // def shared Foo blah() ...
+      // Defines a shared method on Foo by specializing it on the value of the
+      // class object.
+      // TODO(bob): Mostly temp syntax...
+      Expr classObj = Expr.name(parser.consume(TokenType.NAME).getString());
+      leftHandPattern = new ValuePattern(classObj);
+      name = parser.consume(TokenType.NAME).getString();
+    } else if (parser.lookAhead(TokenType.NAME, TokenType.LEFT_PAREN)) {
       // No receiver.
       leftHandPattern = new VariablePattern("_", null);
       name = parser.consume().getString();

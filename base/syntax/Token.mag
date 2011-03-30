@@ -21,12 +21,13 @@ Token defineMethod("keyword?",
     end)
 
 class TokenType
-    shared def equal?(left TokenType, right TokenType)
-        Int equal?(left value, right value)
-    end
-
-    shared def new(value Int, name String) construct(value: value, name: name)
 end
+
+def shared TokenType equal?(left TokenType, right TokenType)
+    Int equal?(left value, right value)
+end
+
+def shared TokenType new(value Int, name String) construct(value: value, name: name)
 
 TokenType defineGetter("string", fn name)
 TokenType declareField("value", { Int })

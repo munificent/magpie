@@ -70,6 +70,11 @@ public class PatternTester implements PatternVisitor<Boolean, Obj> {
    }
 
     Obj equals = mContext.lookUp(Name.EQEQ);
+    
+    // Dodge circularity issue. If we haven't defined == yet, default to
+    // reference equality.
+    if (equals == null) return value == expected;
+    
     Obj result = mInterpreter.apply(Position.none(), equals,
         mInterpreter.createTuple(value, expected));
     

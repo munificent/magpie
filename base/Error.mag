@@ -1,11 +1,4 @@
-class Error
-end
-
 class BadAssignError
-    inherit(Error)
-end
-
-class BadCallError
     inherit(Error)
 end
 
@@ -29,24 +22,12 @@ class AmbiguousMethodError
     inherit(Error)
 end
 
-class NoMethodError
-inherit(Error)
-end
-
 class OutOfBoundsError
     inherit(Error)
 end
 
 class UnexpectedTypeError
     inherit(Error)
-
-    shared def new(expectedType Type, actualType Type)
-        construct(expectedType: expectedType, actualType: actualType)
-    end
-
-    shared def throw(expectedType Type, actualType Type)
-        Runtime throw(this new(expectedType, actualType))
-    end
 
     get string String =
         "Expected a value of type " ~ expectedType ~ " but was " ~
@@ -55,4 +36,12 @@ class UnexpectedTypeError
 
     var expectedType Type
     var actualType   Type
+end
+
+def shared UnexpectedTypeError new(expectedType Type, actualType Type)
+    construct(expectedType: expectedType, actualType: actualType)
+end
+
+def shared UnexpectedTypeError throw(expectedType Type, actualType Type)
+    Runtime throw(this new(expectedType, actualType))
 end

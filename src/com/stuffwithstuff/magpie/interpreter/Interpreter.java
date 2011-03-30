@@ -480,7 +480,7 @@ public class Interpreter {
     return classObj;
   }
 
-  private ClassObj createGlobalClass(String name) {
+  public ClassObj createGlobalClass(String name) {
     ClassObj classObj = createClass(name);
     mGlobalScope.define(name, classObj);
     return classObj;

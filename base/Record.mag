@@ -1,14 +1,4 @@
 extend class Record
-    shared def equal?(left Record, right Record)
-        if left fields count != right fields count then return false
-
-        for leftField = left fields
-        for rightField = right fields do
-            if leftField != rightField then return false
-        end
-        true
-    end
-
     get string String =
         var result = ""
         for name, fieldType = fields do
@@ -17,4 +7,14 @@ extend class Record
         end
         result
     end
+end
+
+def shared Record equal?(left Record, right Record)
+    if left fields count != right fields count then return false
+
+    for leftField = left fields
+    for rightField = right fields do
+        if leftField != rightField then return false
+    end
+    true
 end

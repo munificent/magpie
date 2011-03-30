@@ -1,6 +1,4 @@
 extend class Array
-    shared def new() Array of()
-
     get string String =
         var text = "["
         for i = 0 until(count) do
@@ -10,9 +8,10 @@ extend class Array
         text ~ "]"
     end
 
-    // TODO(bob): Need generics to use for return type.
     get last = this(count - 1)
 end
+
+def shared Array new() Array of()
 
 def Array iterate() ArrayIterator new(this)
 
@@ -56,15 +55,16 @@ def Array swap(a Int, b Int)
 end
 
 class ArrayIterator
-    shared def new(array Array)
-        construct(array: array)
-    end
-
     get current = array(index)
 
     var array Array
     var index = -1
 end
+
+def shared ArrayIterator new(array Array)
+    construct(array: array)
+end
+
 
 def ArrayIterator next()
     index = index + 1

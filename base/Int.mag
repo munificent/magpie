@@ -18,13 +18,13 @@ end
 
 // Define an int iterator.
 class RangeIterator
-    shared def new(first Int, last Int)
-        // rollback so the first call to next advances to the first
-        construct(current: first - 1, last: last)
-    end
-
     var current Int
     var last    Int
+end
+
+def shared RangeIterator new(first Int, last Int)
+    // rollback so the first call to next advances to the first
+    construct(current: first - 1, last: last)
 end
 
 def RangeIterator next()
@@ -33,12 +33,12 @@ def RangeIterator next()
 end
 
 class Range
-    shared def new(start Int, last Int)
-        construct(start: start, last: last)
-    end
-
     var start Int
     var last  Int
+end
+
+def shared Range new(start Int, last Int)
+    construct(start: start, last: last)
 end
 
 def Range iterate()

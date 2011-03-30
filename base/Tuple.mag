@@ -11,23 +11,19 @@ extend class Tuple
         end
         result
     end
+end
 
-    shared def equal?(left Tuple, right Tuple)
-        if left count != right count then return false
+def shared Tuple equal?(left Tuple, right Tuple)
+    if left count != right count then return false
 
-        for leftField = left
-        for rightField = right do
-            if leftField != rightField then return false
-        end
-        true
+    for leftField = left
+    for rightField = right do
+        if leftField != rightField then return false
     end
+    true
 end
 
 class TupleIterator
-    shared def new(tuple Tuple)
-        construct(tuple: tuple)
-    end
-
     get current =
         match index
             case 0 then tuple field0
@@ -45,6 +41,10 @@ class TupleIterator
 
     var tuple Tuple
     var index = -1 // the first call to next advances to the first
+end
+
+def shared TupleIterator new(tuple Tuple)
+    construct(tuple: tuple)
 end
 
 def TupleIterator next()

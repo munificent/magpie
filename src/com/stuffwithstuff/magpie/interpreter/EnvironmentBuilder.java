@@ -9,6 +9,15 @@ public class EnvironmentBuilder {
   }
   
   public void initialize() {
+    // Define the core error classes.
+    newClass("Error");
+    
+    newClass("BadCallError")
+        .inherit("Error");
+    
+    newClass("NoMethodError")
+        .inherit("Error");
+    
     // Define the core AST classes. We set these up here instead of in base
     // because they will need to be available immediately by the parser so that
     // quotations can be converted to Magpie.
@@ -113,10 +122,7 @@ public class EnvironmentBuilder {
     mInterpreter = interpreter;
   }
   private ClassBuilder newClass(String name) {
-    ClassObj classObj = mInterpreter.createClass(name);
-    mInterpreter.getGlobals().define(name, classObj);
-    
-    return new ClassBuilder(classObj);
+    return new ClassBuilder(mInterpreter.createGlobalClass(name));
   }
   
   private Expr list(Expr... exprs) {
@@ -142,9 +148,15 @@ public class EnvironmentBuilder {
     return result;
   }
 
-  private static class ClassBuilder {
+  private class ClassBuilder {
     public ClassBuilder(ClassObj classObj) {
       mClassObj = classObj;
+    }
+    
+    public ClassBuilder inherit(String name) {
+      Obj parent = mInterpreter.getGlobal(name);
+      mClassObj.getParents().add(parent);
+      return this;
     }
     
     public ClassBuilder field(String name, Expr type) {

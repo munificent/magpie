@@ -1,9 +1,5 @@
 // A simple class that is callable and tracks when it was called.
 class TestCallable
-    shared def new(returnValue)
-        construct(returnValue: returnValue)
-    end
-
     def call(arg)
         this arg = arg
         called = true
@@ -14,3 +10,8 @@ class TestCallable
     var returnValue Dynamic
     var called      Bool    = false
 end
+
+def shared TestCallable new(returnValue)
+    construct(returnValue: returnValue)
+end
+

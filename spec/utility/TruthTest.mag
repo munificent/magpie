@@ -1,9 +1,5 @@
 // A simple class that implements truthiness and tracks when it was called.
 class TruthTest
-    shared def new(value Bool)
-        construct(value: value)
-    end
-
     get true? Bool =
         called = true
         value
@@ -11,6 +7,10 @@ class TruthTest
 
     var value  Bool
     var called Bool = false
+end
+
+def shared TruthTest new(value Bool)
+    construct(value: value)
 end
 
 class NotTruable

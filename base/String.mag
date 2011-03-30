@@ -1,20 +1,18 @@
 // Comparisons.
-extend class String
-    shared def equal?(left String, right String)
-        left compareTo(right) == 0
-    end
+def shared String equal?(left String, right String)
+    left compareTo(right) == 0
+end
 
-    shared def lessThan?(left String, right String)
-        left compareTo(right) < 0
-    end
+def shared String lessThan?(left String, right String)
+    left compareTo(right) < 0
+end
 
-    shared def join(elements, separator String)
-        var knownSeparator = separator or ", "
-        var result = ""
-        for element = elements do
-            if result != "" then result = result ~ knownSeparator
-            result = result ~ element
-        end
-        result
+def shared String join(elements, separator String)
+    var knownSeparator = separator or ", "
+    var result = ""
+    for element = elements do
+        if result != "" then result = result ~ knownSeparator
+        result = result ~ element
     end
+    result
 end

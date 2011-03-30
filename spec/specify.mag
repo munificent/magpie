@@ -26,16 +26,17 @@ def specify(description String, block /*TestSuite => Nothing*/)
 end
 
 class TestSuite
-    shared def new(name String)
-        var suite = construct(name: name)
-        currentTestSuite = suite
-        suite
-    end
-
     var name        String
     var currentTest String = ""
     var failedTest  Bool   = false
 end
+
+def shared TestSuite new(name String)
+    var suite = construct(name: name)
+    currentTestSuite = suite
+    suite
+end
+
 
 // TODO(bob): Need function types.
 def TestSuite should(description String, block /*Nothing => Nothing*/)
