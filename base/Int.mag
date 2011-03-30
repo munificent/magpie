@@ -1,10 +1,19 @@
 // Add iterator methods on Ints.
 extend class Int
-    def times(-> Range) Range new(0, this - 1)
-    def to(last Int -> Range) Range new(this, last)
-    def until(last Int -> Range) Range new(this, last - 1)
     // TODO(bob): Use real int max.
     get countingUp Range = Range new(this, 99999999)
+end
+
+defmethod Int times() Range
+    Range new(0, this - 1)
+end
+
+defmethod Int to(last Int) Range
+    Range new(this, last)
+end
+
+defmethod Int until(last Int) Range
+    Range new(this, last - 1)
 end
 
 // Define an int iterator.

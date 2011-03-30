@@ -39,7 +39,7 @@ class TestSuite
         do
             block()
         catch error then
-            fail("Unexpected error: " ~ error)
+            fail("Unexpected error: " ~ error type)
         end
 
         if totalTests == testsBefore then

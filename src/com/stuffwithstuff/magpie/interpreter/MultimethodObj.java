@@ -27,15 +27,18 @@ public class MultimethodObj extends Obj {
     mMethods.add(method);
   }
   
-  public Obj invoke(Interpreter interpreter, Obj arg) {
-    FnExpr method = select(interpreter, arg);
+  public Obj invoke(Interpreter interpreter, Obj receiver, Obj arg) {
+    // Combine the receiver and argument into a single object for the method.
+    Obj fullArg = interpreter.createTuple(receiver, arg);
+    FnExpr method = select(interpreter, fullArg);
     
-    // TODO(bob): Hackish!
+    // TODO(bob): In-progress. Once everything is using multimethods, the
+    // receiver won't need to be explicitly passed.
     Function function = new Function(interpreter.getGlobals(), null, method);
-    return function.invoke(interpreter, interpreter.nothing(), null, arg);
+    return function.invoke(interpreter, receiver, null, fullArg);
   }
   
-  public FnExpr select(Interpreter interpreter, Obj arg) {
+  private FnExpr select(Interpreter interpreter, Obj arg) {
     List<FnExpr> applicable = new ArrayList<FnExpr>();
     for (FnExpr method : mMethods) {
       // TODO(bob): Should this be a top level context?

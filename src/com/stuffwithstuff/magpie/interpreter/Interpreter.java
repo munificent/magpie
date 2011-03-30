@@ -283,7 +283,7 @@ public class Interpreter {
       } else if (target instanceof MultimethodObj) {
         MultimethodObj method = (MultimethodObj)target;
         // TODO(bob): What about type args?
-        return method.invoke(this, arg);
+        return method.invoke(this, mNothing, arg);
       } else {
         // We have an argument, but the receiver isn't a function, so send it a
         // "call" message instead. We'll in turn try to apply the result of
@@ -367,6 +367,7 @@ public class Interpreter {
   public ClassObj getIntClass() { return mIntClass; }
   public ClassObj getMetaclass() { return mClass; }
   public ClassObj getMagpieParserClass() { return mMagpieParserClass; }
+  public ClassObj getMultimethodClass() { return mMultimethodClass; }
   public ClassObj getNeverClass() { return mNeverClass; }
   public ClassObj getNothingClass() { return mNothingClass; }
   public ClassObj getObjectClass() { return mObjectClass; }

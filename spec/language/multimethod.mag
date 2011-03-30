@@ -3,13 +3,29 @@
 // test completes. Need locally scoped multimethods.
 
 specify("A multimethod") with
-    defineMethod("multi1", fn(a Int) "int")
-    defineMethod("multi1", fn(a String) "str")
+    defmethod multi1(a Int)
+        "int"
+    end
 
-    defineMethod("multi2", fn(a Int, b Int) "int int")
-    defineMethod("multi2", fn(a Int, b String) "int str")
-    defineMethod("multi2", fn(a String, b Int) "str int")
-    defineMethod("multi2", fn(a String, b String) "str str")
+    defmethod multi1(a String)
+        "str"
+    end
+
+    defmethod multi2(a Int, b Int)
+        "int int"
+    end
+
+    defmethod multi2(a Int, b String)
+        "int str"
+    end
+
+    defmethod multi2(a String, b Int)
+        "str int"
+    end
+
+    defmethod multi2(a String, b String)
+        "str str"
+    end
 
     it should("select a method that matches the argument type") with
         multi1(123) shouldBe("int")
@@ -58,33 +74,89 @@ class Foo
 end
 
 specify("The linearization of a multimethod") with
-    defineMethod("linear1", fn(a B1) "b1")
-    defineMethod("linear1", fn(a A1) "a1")
-    defineMethod("linear1", fn(a C1) "c1")
+    defmethod linear1(a B1)
+        "b1"
+    end
 
-    defineMethod("linear2", fn(a String) "class")
-    defineMethod("linear2", fn("string") "value")
-    defineMethod("linear2", fn(123) "value")
-    defineMethod("linear2", fn(a Int) "class")
+    defmethod linear1(a A1)
+        "a1"
+    end
 
-    defineMethod("linear3", fn(a String) "class")
-    defineMethod("linear3", fn(anything) "any")
-    defineMethod("linear3", fn(a Int) "class")
+    defmethod linear1(a C1)
+        "c1"
+    end
 
-    defineMethod("linear4", fn("string") "value")
-    defineMethod("linear4", fn(anything) "any")
-    defineMethod("linear4", fn(123) "value")
+    defmethod linear2(a String)
+        "class"
+    end
 
-    defineMethod("linear5", fn(foo: _) "record")
-    defineMethod("linear5", fn(foo Foo) "class")
-    defineMethod("linear5", fn(foo: _, bar: _) "record")
+    defmethod linear2("string")
+        "value"
+    end
 
-    defineMethod("linear6", fn(a A1, b A1) "a1 a1")
-    defineMethod("linear6", fn(a B1, b A1) "b1 a1")
-    defineMethod("linear6", fn(a B1, b B1) "b1 b1")
+    defmethod linear2(123)
+        "value"
+    end
 
-    defineMethod("linear7", fn(a B1, b A1) "b1 a1")
-    defineMethod("linear7", fn(a A1, b B1) "a1 b1")
+    defmethod linear2(a Int)
+        "class"
+    end
+
+    defmethod linear3(a String)
+        "class"
+    end
+
+    defmethod linear3(anything)
+        "any"
+    end
+
+    defmethod linear3(a Int)
+        "class"
+    end
+
+    defmethod linear4("string")
+        "value"
+    end
+
+    defmethod linear4(anything)
+        "any"
+    end
+
+    defmethod linear4(123)
+        "value"
+    end
+
+    defmethod linear5(foo: _)
+        "record"
+    end
+
+    defmethod linear5(foo Foo)
+        "class"
+    end
+
+    defmethod linear5(foo: _, bar: _)
+        "record"
+    end
+
+    defmethod linear6(a A1, b A1)
+        "a1 a1"
+    end
+
+    defmethod linear6(a B1, b A1)
+        "b1 a1"
+    end
+
+    defmethod linear6(a B1, b B1)
+        "b1 b1"
+    end
+
+    defmethod linear7(a B1, b A1)
+        "b1 a1"
+    end
+
+    defmethod linear7(a A1, b B1)
+        "a1 b1"
+    end
 
     it should("prefer the most-derived class") with
         linear1(A1 new()) shouldBe("a1")

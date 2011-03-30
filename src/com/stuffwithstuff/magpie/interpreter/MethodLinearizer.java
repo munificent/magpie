@@ -65,7 +65,7 @@ public class MethodLinearizer implements Comparator<FnExpr> {
     
     // Ironically, this bit of code would really benefit from multiple dispatch.
     if (isAny(pattern1)) {
-      if      (isAny(pattern2))    throw ambiguous(pattern1, pattern2);
+      if      (isAny(pattern2))    return 0;
       else if (isRecord(pattern2)) return secondWins;
       else if (isTuple(pattern2))  return secondWins;
       else if (isType(pattern2))   return secondWins;

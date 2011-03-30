@@ -139,17 +139,35 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(CallExpr expr, EvalContext context) {
+    // TODO(bob): This is temp code for transitioning to multimethods. Once
+    // those are fully working, the AST should change and this should go away.
+    // See if we can find a matching multimethod first.
+    if (expr.getTarget() instanceof MessageExpr) {
+      MessageExpr target = (MessageExpr)expr.getTarget();
+      
+      // Try to treat foo(bar, bang) as a multimethod call.
+      // Also, foo bar(bang) -> bar(foo, (bang))
+      
+      Obj variable = context.lookUp(target.getName());
+      if (variable != null) {
+        Obj multimethodType = mInterpreter.getGlobal("MultimethodType");
+        if (variable.getClassObj() == multimethodType) {
+          // Figure out the receiver.
+          Obj receiver;
+          if (target.getReceiver() == null) {
+            receiver = context.getThis();
+          } else {
+            receiver = check(target.getReceiver(), context);
+          }
+          Obj arg = check(expr.getArg(), context);
+          return checkMultimethod((MultimethodObj)variable.getValue(), receiver, arg);
+        }
+      }
+    }
+    
+    
     Obj targetType = check(expr.getTarget(), context);
     Obj argType = check(expr.getArg(), context);
-    
-    // TODO(bob): Work-in-progress.
-    /*
-    Obj multimethodType = mInterpreter.getGlobal("MultimethodType");
-    if (targetType.getClassObj() == multimethodType) {
-      return checkMultimethodCall((MultimethodObj)targetType.getValue(),
-          argType, context);
-    }
-    */
     
     // If the target is not an actual function, get the type of its "call"
     // message instead of the target itself.
@@ -213,61 +231,35 @@ public class ExprChecker implements ExprVisitor<Obj, EvalContext> {
     return returnType;
   }
   
-  /*
-  private Obj checkMultimethodCall(MultimethodObj multimethod, Obj argType,
-      EvalContext context) {
-    MethodSelector selector = new MethodSelector(mInterpreter, multimethod.getMethods());
+  private Obj checkMultimethod(MultimethodObj multimethod, Obj receiver, Obj arg) {
+    // Combine the receiver and argument into a single object for the method.
+    Obj fullArg = mInterpreter.createTuple(receiver, arg);
     
-    // TODO(bob): This isn't correct. :( Consider:
-    // def foo(a Base) ...
-    // def foo(a Derived) ...
-    //
-    // foo(Base new())
-    //
-    // At runtime, only the first method is applicable because we know the
-    // argument is *not* a Derived. At type check time, we know the argument is
-    // a Base *or some subtype of it*, which includes Derived, so both are
-    // statically applicable.
-
-    List<Callable> applicable = selector.selectAll(argType);
-    if (applicable.size() == 0) {
-      // TODO(bob): Better error.
-      mChecker.addError(Position.none(), "Could not find a method to match %s.", argType);
-      return mInterpreter.nothing();
-    }
-    
-    // TODO(bob): Should linearize applicable and omit method return types for
-    // covered methods. For example, given:
-    //
-    // def id(a Int -> Int) a
-    // def id(a Any -> Any) a
-    //
-    // The return type of "id(123)" will be "Int | Any" since both are
-    // applicable. We want it to be "Int" since the first method covers the
-    // second if the arg type is Int.
-    //
-    // If method A's type is a subtype of method B (and both are applicable),
-    // then we know statically that method A will cover method B. The fact that
-    // it's applicable means we know the argument type is restricted to that
-    // subtype, in which case it won't bleed past that and need to hit the
-    // supertype of method B.
+    // TODO(bob): Need to ignore methods that are completely covered by a more
+    // specific one.
     
     // The static return type is the union of all possible selected methods.
     Obj returnType = null;
-    for (Callable method : applicable) {
-      Obj methodType = method.getType(mInterpreter);
-      Obj methodReturnType = methodType.getField(Name.RETURN_TYPE);
+    for (FnExpr method : multimethod.getMethods()) {
+      if (PatternCheckingTester.test(mChecker, method.getType().getPattern(),
+          fullArg)) {
+        Obj methodReturnType = mInterpreter.evaluate(method.getType().getReturnType());
 
-      if (returnType == null) {
-        returnType = methodReturnType;
-      } else {
-        returnType = mInterpreter.orTypes(returnType, methodReturnType);
+        if (returnType == null) {
+          returnType = methodReturnType;
+        } else {
+          returnType = mInterpreter.orTypes(returnType, methodReturnType);
+        }
       }
+    }
+    
+    if (returnType == null) {
+      mChecker.addError(Position.none(),
+          "No methods can match a value of type %s.", fullArg);
     }
     
     return returnType;
   }
-  */
   
   @Override
   public Obj visit(FnExpr expr, EvalContext context) {

@@ -15,6 +15,8 @@ public class Grammar {
     mPrefixParsers.define(TokenType.NAME, new MessagePrefixParser());
     mPrefixParsers.define(TokenType.FIELD, new FieldParser());
     mPrefixParsers.define("break", new BreakParser());
+    // TODO(bob): Rename to just "def" when old def parser is no longer needed.
+    mPrefixParsers.define("defmethod", new DefParser());
     mPrefixParsers.define("fn", new FnParser());
     mPrefixParsers.define("nothing", new NothingParser());
     mPrefixParsers.define("return", new ReturnParser());

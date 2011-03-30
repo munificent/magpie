@@ -37,8 +37,17 @@ public class EvalContext {
   }
   
   public Scope   getScope() { return mScope; }
-  public Obj     getThis()  { return mThis; }
   public ClassObj getContainingClass() { return mContainingClass; }
+
+  public Obj getThis() {
+    // TODO(bob): Temp work-in-progress. Right now, multimethods bind the
+    // receiver to "this_". Once they are used for everything, the special
+    // "this" AST node can go away completely, and they can just bind to "this".
+    Obj tempThis = lookUp("this_");
+    if (tempThis != null) return tempThis;
+    
+    return mThis;
+  }
   
   public boolean isInLoop() { return mIsInLoop; }
   

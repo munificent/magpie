@@ -99,6 +99,32 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(CallExpr expr, EvalContext context) {
+    // TODO(bob): This is temp code for transitioning to multimethods. Once
+    // those are fully working, the AST should change and this should go away.
+    // See if we can find a matching multimethod first.
+    if (expr.getTarget() instanceof MessageExpr) {
+      MessageExpr target = (MessageExpr)expr.getTarget();
+      
+      // Try to treat foo(bar, bang) as a multimethod call.
+      // Also, foo bar(bang) -> bar(foo, (bang))
+      
+      Obj variable = context.lookUp(target.getName());
+      if (variable instanceof MultimethodObj) {
+        MultimethodObj multimethod = (MultimethodObj)variable;
+        
+        // Figure out the receiver.
+        Obj receiver;
+        if (target.getReceiver() == null) {
+          receiver = context.getThis();
+        } else {
+          receiver = evaluate(target.getReceiver(), context);
+        }
+        Obj arg = evaluate(expr.getArg(), context);
+        
+        return multimethod.invoke(mInterpreter, receiver, arg);
+      }
+    }
+    
     Obj target = evaluate(expr.getTarget(), context);
     
     List<Obj> typeArgs = new ArrayList<Obj>();
