@@ -1,20 +1,27 @@
 package com.stuffwithstuff.magpie.ast;
 
+import com.stuffwithstuff.magpie.ast.pattern.Pattern;
+import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
 import com.stuffwithstuff.magpie.parser.Position;
+import com.stuffwithstuff.magpie.util.Expect;
 
 /**
  * AST node class for an function definition.
  */
 public class FnExpr extends Expr {
-  FnExpr(Position position, FunctionType type, Expr body) {
+  FnExpr(Position position, Expr body) {
+    this(position, new ValuePattern(Expr.name("nothing")), body);
+  }
+  
+  FnExpr(Position position, Pattern pattern, Expr body) {
     super(position);
-    
-    mType = type;
+    Expect.notNull(pattern);
+    mPattern = pattern;
     mBody = body;
   }
   
-  public FunctionType getType()  { return mType; }
-  public Expr         getBody()  { return mBody; }
+  public Pattern getPattern() { return mPattern; }
+  public Expr    getBody()    { return mBody; }
 
   @Override
   public <R, C> R accept(ExprVisitor<R, C> visitor, C context) {
@@ -23,10 +30,10 @@ public class FnExpr extends Expr {
   
   @Override
   public void toString(StringBuilder builder, String indent) {
-    builder.append("fn ").append(mType).append(" ");
+    builder.append("fn ").append(mPattern).append(" ");
     mBody.toString(builder, indent);
   }
 
-  private final FunctionType  mType;
-  private final Expr          mBody;
+  private final Pattern  mPattern;
+  private final Expr     mBody;
 }

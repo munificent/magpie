@@ -5,7 +5,7 @@ specify("A 'with' block argument") with
         f with
             called = true
         end
-        called shouldBe(true)
+        called shouldEqual(true)
     end
     
     it should("allow a block body") with
@@ -16,7 +16,7 @@ specify("A 'with' block argument") with
             result = "a"
             result = result ~ "b"
         end
-        result shouldBe("ab")
+        result shouldEqual("ab")
     end
     
     it should("allow a single expression body") with
@@ -24,13 +24,13 @@ specify("A 'with' block argument") with
         
         var result = ""
         f with result = "ab"
-        result shouldBe("ab")
+        result shouldEqual("ab")
     end
     
     it should("concatenate the fn with other arguments") with
         def f(arg1, arg2, block)
-            arg1 shouldBe("arg1")
-            arg2 shouldBe("arg2")
+            arg1 shouldEqual("arg1")
+            arg2 shouldEqual("arg2")
             block()
         end
         
@@ -38,19 +38,19 @@ specify("A 'with' block argument") with
         f("arg1", "arg2") with
             called = true
         end
-        called shouldBe(true)
+        called shouldEqual(true)
     end
     
     it should("create an 'it' parameter if not is provided") with
         def f(block) block("it")
-        f with it shouldBe("it")
+        f with it shouldEqual("it")
     end
     
     it should("allow a parameter list") with
         def f(block) block("a", "b")
         f with(a, b)
-            a shouldBe("a")
-            b shouldBe("b")
+            a shouldEqual("a")
+            b shouldEqual("b")
         end
     end
     
@@ -63,7 +63,7 @@ specify("A 'with' block argument") with
             if true then return "returned"
             "no return"
         end
-        called shouldBe(true)
-        result shouldBe("returned")
+        called shouldEqual(true)
+        result shouldEqual("returned")
     end
 end

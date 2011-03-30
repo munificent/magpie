@@ -38,17 +38,11 @@ public class EnvironmentBuilder {
 
     newClass("CallExpression")
         .field("target",   name("Expression"))
-        .field("typeArgs", list(name("Expression")))
         .field("argument", name("Expression"));
 
-    newClass("FunctionTypeExpression")
-        .field("typeParams", list(name("String"), name("Expression")))
-        .field("pattern",    name("Pattern"))
-        .field("returnType", name("Expression"));
-    
     newClass("FunctionExpression")
         .field("position",     name("Position"))
-        .field("functionType", name("FunctionTypeExpression"))
+        .field("pattern",      name("Pattern"))
         .field("body",         name("Expression"));
 
     newClass("IntExpression")
@@ -101,18 +95,9 @@ public class EnvironmentBuilder {
     newClass("TupleExpression")
         .field("fields", list(name("Expression")));
     
-    newClass("TypeofExpression")
-        .field("position", name("Position"))
-        .field("body",     name("Expression"));
-
     newClass("UnquoteExpression")
         .field("position", name("Position"))
         .field("body",     name("Expression"));
-
-    newClass("UnsafeCastExpression")
-        .field("position", name("Position"))
-        .field("type",     name("Expression"))
-        .field("value",    name("Expression"));
     
     newClass("UsingExpression")
         .field("position", name("Position"))

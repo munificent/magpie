@@ -21,13 +21,11 @@ public class Grammar {
     mPrefixParsers.define("nothing", new NothingParser());
     mPrefixParsers.define("return", new ReturnParser());
     mPrefixParsers.define("this", new ThisParser());
-    mPrefixParsers.define("unsafecast", new UnsafeCastParser());
     mPrefixParsers.define("using", new UsingParser());
     mPrefixParsers.define("var", new VarParser());
 
     mInfixParsers.define(TokenType.LEFT_PAREN, new ParenthesisInfixParser());
     mInfixParsers.define(TokenType.NAME, new MessageInfixParser());
-    mInfixParsers.define(TokenType.LEFT_BRACKET, new BracketParser());
     mInfixParsers.define("with", new WithParser());
     mInfixParsers.define(TokenType.COMMA, new CommaParser());
     mInfixParsers.define("=", new EqualsParser());
@@ -41,7 +39,6 @@ public class Grammar {
     mPrefixParsers.define("do", new DoParser());
     mPrefixParsers.define("class", new ClassParser());
     mPrefixParsers.define("extend", new ExtendParser());
-    mPrefixParsers.define("interface", new InterfaceParser());
     
     mReservedWords.add("->");
     mReservedWords.add("case");

@@ -2,7 +2,6 @@ package com.stuffwithstuff.magpie.ast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
@@ -65,27 +64,23 @@ public abstract class Expr {
     return new BreakExpr(position);
   }
   
-  public static Expr call(Expr target, List<Expr> typeArgs, Expr arg) {
-    Expect.notNull(target);
-    Expect.notNull(typeArgs);
-    Expect.notNull(arg);
-    
-    return new CallExpr(target, typeArgs, arg);
-  }
-  
   public static Expr call(Expr target, Expr arg) {
     Expect.notNull(target);
     Expect.notNull(arg);
     
-    return new CallExpr(target, null, arg);
+    return new CallExpr(target, arg);
   }
   
   public static FnExpr fn(Expr body) {
-    return fn(Position.none(), FunctionType.nothingToDynamic(), body);
+    return new FnExpr(Position.none(), body);
   }
   
-  public static FnExpr fn(Position position, FunctionType type, Expr body) {
-    return new FnExpr(position, type, body);
+  public static FnExpr fn(Position position, Expr body) {
+    return new FnExpr(position, body);
+  }
+  
+  public static FnExpr fn(Position position, Pattern pattern, Expr body) {
+    return new FnExpr(position, pattern, body);
   }
   
   // TODO(bob): Hackish. Eliminate.
@@ -153,11 +148,6 @@ public abstract class Expr {
     // Unwrap redundant scopes.
     if (body instanceof ScopeExpr) return body;
     return new ScopeExpr(body);
-  }
-
-  public static Expr staticMessage(Expr receiver, String name, Expr arg) {
-    return call(new MessageExpr(Position.none(), receiver, name), 
-        Collections.singletonList(arg), nothing());
   }
 
   public static Expr string(String text) {

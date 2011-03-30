@@ -1,4 +1,0 @@
-// An interface for objects that can be used in a conditional expression.
-interface Trueable
-    get true? Bool
-end

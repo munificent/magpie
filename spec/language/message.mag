@@ -1,6 +1,6 @@
 specify("A message expression") with
     it should("return nothing if not handled") with
-        "s" someUndefinedMessage shouldBe(nothing)
+        "s" someUndefinedMessage shouldEqual(nothing)
     end
 end
 
@@ -11,7 +11,7 @@ specify("A private message") with
             get private = _private
         end
 
-        C new() private shouldBe("private")
+        C new() private shouldEqual("private")
     end
 
     it should("not be accessible from outside the class") with
@@ -19,13 +19,13 @@ specify("A private message") with
             var _private = "private"
         end
 
-        C new() _private shouldBe(nothing)
+        C new() _private shouldEqual(nothing)
 
         class D
             get fromC = C new() _private
         end
 
-        D new() fromC shouldBe(nothing)
+        D new() fromC shouldEqual(nothing)
     end
 
     it should("not be accessible from child classes") with
@@ -37,7 +37,7 @@ specify("A private message") with
             get private = _private
         end
 
-        Child new() private shouldBe(nothing)
+        Child new() private shouldEqual(nothing)
     end
 
     it should("not override a parent one") with
@@ -52,8 +52,8 @@ specify("A private message") with
         end
 
         var obj = Child new()
-        obj privateParent shouldBe("p")
-        obj privateChild shouldBe("c")
+        obj privateParent shouldEqual("p")
+        obj privateChild shouldEqual("c")
     end
 
     it should("be able to call an overridden member from a parent") with
@@ -67,6 +67,6 @@ specify("A private message") with
             get overridable = "c"
         end
 
-        Child new() overridable shouldBe("c")
+        Child new() overridable shouldEqual("c")
     end
 end

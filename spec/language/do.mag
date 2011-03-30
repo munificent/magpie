@@ -6,28 +6,28 @@ specify("A 'do' expression") with
             result = result ~ "2"
             result = result ~ "3"
         end
-        result shouldBe("123")
+        result shouldEqual("123")
     end
 
     it should("return the value of the last expression") with
         do
             1
             2
-        end shouldBe(2)
+        end shouldEqual(2)
 
         do
             "first"
             "second"
             "last"
-        end shouldBe("last")
+        end shouldEqual("last")
     end
 
     it should("define a local variable scope") with
         var a = "outer"
         do
             var a = "inner"
-            a shouldBe("inner")
+            a shouldEqual("inner")
         end
-        a shouldBe("outer")
+        a shouldEqual("outer")
     end
 end

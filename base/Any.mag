@@ -1,3 +1,0 @@
-// TODO(bob): This should go away once multimethods are being used.
-interface Any
-end

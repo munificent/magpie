@@ -6,11 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
-import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.Expr;
-import com.stuffwithstuff.magpie.interpreter.CheckError;
-import com.stuffwithstuff.magpie.interpreter.Checker;
 import com.stuffwithstuff.magpie.interpreter.ErrorException;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.parser.Lexer;
@@ -62,20 +59,7 @@ public class Script {
       
       // If there is a main() function, then we need to type-check first:
       if (interpreter.hasMain()) {
-        // Do the static analysis and see if we got the errors we expect.
-        Checker checker = new Checker(interpreter);
-        checker.checkAll();
-        List<CheckError> errors = checker.getErrors();
-        
-        // Show the user any check errors.
-        for (CheckError error : errors) {
-          System.out.println(error);
-        }
-        
-        // Only run main if there were no errors.
-        if (errors.size() == 0) {
           interpreter.runMain();
-        }
       }
     } finally {
       interpreter.popScriptPath();

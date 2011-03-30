@@ -3,14 +3,14 @@ specify("A 'return' expression") with
         def f()
             return "value"
         end
-        f() shouldBe("value")
+        f() shouldEqual("value")
     end
         
     it should("return nothing if no value is provided") with
         def f()
             return
         end
-        f() shouldBe(nothing)
+        f() shouldEqual(nothing)
     end
 
     it should("exit the function immediately") with
@@ -19,6 +19,6 @@ specify("A 'return' expression") with
             return "value"
             reached = true
         end
-        reached shouldBe(false)
+        reached shouldEqual(false)
     end
 end

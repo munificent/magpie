@@ -117,17 +117,7 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
   }
 
   @Override
-  public Expr visit(TypeofExpr expr, Expr value) {
-    return invalidExpression(expr);
-  }
-
-  @Override
   public Expr visit(UnquoteExpr expr, Expr value) {
-    return invalidExpression(expr);
-  }
-
-  @Override
-  public Expr visit(UnsafeCastExpr expr, Expr value) {
     return invalidExpression(expr);
   }
 

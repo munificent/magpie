@@ -1,11 +1,11 @@
 specify("A string literal") with
     it should("be delimited by double quotes") with
-        "some string" shouldBe("some string")
+        "some string" shouldEqual("some string")
     end
 
     it should("allow backslash-prefixed escape sequences") with
-        "(\")"(1) shouldBe("\"")
-        "(\\)"(1) shouldBe("\\")
-        "(\n)"(1) shouldBe("\n")
+        "(\")"(1) shouldEqual("\"")
+        "(\\)"(1) shouldEqual("\\")
+        "(\n)"(1) shouldEqual("\n")
     end
 end

@@ -6,7 +6,6 @@ import com.stuffwithstuff.magpie.interpreter.MagpieToJava;
 import com.stuffwithstuff.magpie.interpreter.Field;
 import com.stuffwithstuff.magpie.interpreter.FnObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
-import com.stuffwithstuff.magpie.interpreter.Member;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class ClassBuiltIns {
@@ -24,39 +23,22 @@ public class ClassBuiltIns {
   }
   
   // TODO(bob): Get rid of type.
-  @Signature("defineField(name String, type Expression | Nothing, initializer ->)")
+  @Signature("defineField(name String, initializer ->)")
   public static class DefineField implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();
-      Obj optionalType = arg.getTupleField(1);
-      FnObj initializer = arg.getTupleField(2).asFn();
+      FnObj initializer = arg.getTupleField(1).asFn();
       
       // Define the field itself.
       ClassObj classObj = thisObj.asClass();
       classObj.getFieldDefinitions().put(name,
           new Field(initializer.getFunction(), null));
-  
-      // Determine if the field is implicitly typed (we have an initializer but
-      // no type annotation) or explicitly.
-      Expr expr;
-      boolean isInitializer;
-      if (optionalType == interpreter.nothing()) {
-        // No type annotation, so use the initializer.
-        expr = initializer.getFunction().getFunction().getBody();
-        isInitializer = true;
-      } else {
-        // Have a type annotation.
-        expr = MagpieToJava.convertExpr(interpreter, optionalType);
-        isInitializer = false;
-      }
       
       // Add a getter.
-      classObj.getMembers().defineGetter(name,
-          new FieldGetter(name, expr, isInitializer));
+      classObj.getMembers().defineGetter(name, new FieldGetter(name));
       
       // Add a setter.
-      classObj.getMembers().defineSetter(name,
-          new FieldSetter(name, expr, isInitializer));
+      classObj.getMembers().defineSetter(name, new FieldSetter(name));
   
       return interpreter.nothing();
     }
@@ -101,24 +83,6 @@ public class ClassBuiltIns {
           body.getCallable().bindTo(classObj));
       
       return interpreter.nothing();
-    }
-  }
-  
-  @Signature("getMemberType(name String -> Type)")
-  public static class GetMemberType implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      String name = arg.asString();
-      
-      ClassObj thisClass = (ClassObj)thisObj;
-      
-      // Look for a member.
-      Member member = interpreter.findMember(thisClass, null, name);
-      if (member != null) {
-        return member.evaluateType(interpreter);
-      }
-  
-      // Member not found.
-      return interpreter.getNothingClass();
     }
   }
   

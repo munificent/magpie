@@ -2,19 +2,19 @@ specify("An 'if then' expression") with
     it should("evaluate the 'then' expression if the condition is true") with
         var evaluated = false
         if true then evaluated = true
-        evaluated shouldBe(true)
+        evaluated shouldEqual(true)
 
         evaluated = false
         if false then evaluated = true
-        evaluated shouldBe(false)
+        evaluated shouldEqual(false)
     end
 
     it should("return the 'then' expression if the condition is true") with
-        (if true then "then") shouldBe("then")
+        (if true then "then") shouldEqual("then")
     end
 
     it should("return nothing if the condition is non-true") with
-        (if false then "then") shouldBe(nothing)
+        (if false then "then") shouldEqual(nothing)
     end
 
     it should("create a local scope for the 'if' expression that is visible " ~
@@ -22,14 +22,14 @@ specify("An 'if then' expression") with
         var a = "outside"
         var b = "outside"
         if var a = "inside" then b = a
-        a shouldBe("outside")
-        b shouldBe("inside")
+        a shouldEqual("outside")
+        b shouldEqual("inside")
     end
 
     it should("create a local scope for the 'then' expression") with
         var a = "outside"
         if true then var a = "inside"
-        a shouldBe("outside")
+        a shouldEqual("outside")
     end
 
     it should("allow a block for the 'if' expression") with
@@ -41,7 +41,7 @@ specify("An 'if then' expression") with
         then
             true
         end
-        a shouldBe(3)
+        a shouldEqual(3)
     end
 
     it should("allow a block for the 'then' expression") with
@@ -50,7 +50,7 @@ specify("An 'if then' expression") with
             a = a + 1
             a = a + 2
         end
-        a shouldBe(3)
+        a shouldEqual(3)
     end
 end
 
@@ -58,29 +58,29 @@ specify("An 'if then else' expression") with
     it should("evaluate the 'then' expression if the condition is true") with
         var evaluated = false
         if true then evaluated = true else "ignored"
-        evaluated shouldBe(true)
+        evaluated shouldEqual(true)
 
         evaluated = false
         if false then evaluated = true else "ignored"
-        evaluated shouldBe(false)
+        evaluated shouldEqual(false)
     end
 
     it should("evaluate the 'else' expression if the condition is false") with
         var evaluated = false
         if true then "ignored" else evaluated = true
-        evaluated shouldBe(false)
+        evaluated shouldEqual(false)
 
         evaluated = false
         if false then "ignored" else evaluated = true
-        evaluated shouldBe(true)
+        evaluated shouldEqual(true)
     end
 
     it should("return the 'then' expression if the condition is true") with
-        (if true then "then" else "else") shouldBe("then")
+        (if true then "then" else "else") shouldEqual("then")
     end
 
     it should("return the 'else' expression if the condition is non-true") with
-        (if false then "then" else "else") shouldBe("else")
+        (if false then "then" else "else") shouldEqual("else")
     end
 
     it should("create a local scope for the 'if' expression that is visible " ~
@@ -88,14 +88,14 @@ specify("An 'if then else' expression") with
         var a = "outside"
         var b = "outside"
         if var a = "" then "ignored" else b = a
-        a shouldBe("outside")
-        b shouldBe("")
+        a shouldEqual("outside")
+        b shouldEqual("")
     end
 
     it should("create a local scope for the 'else' expression") with
         var a = "outside"
         if false then "ignored" else var a = "shadow"
-        a shouldBe("outside")
+        a shouldEqual("outside")
     end
 
     it should("allow a block for the 'if' expression") with
@@ -107,7 +107,7 @@ specify("An 'if then else' expression") with
         then
             true
         else "ignored"
-        a shouldBe(3)
+        a shouldEqual(3)
     end
 
     it should("allow a block for the 'then' expression") with
@@ -116,7 +116,7 @@ specify("An 'if then else' expression") with
             a = a + 1
             a = a + 2
         else "ignored"
-        a shouldBe(3)
+        a shouldEqual(3)
     end
 
     it should("allow a block for the 'else' expression") with
@@ -125,7 +125,7 @@ specify("An 'if then else' expression") with
             a = a + 1
             a = a + 2
         end
-        a shouldBe(3)
+        a shouldEqual(3)
     end
 
     it should("not associate an 'else' on the next line with a previous " ~
@@ -134,6 +134,6 @@ specify("An 'if then else' expression") with
             if false then "then"
         else
             "else"
-        end) shouldBe(nothing)
+        end) shouldEqual(nothing)
     end
 end

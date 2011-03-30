@@ -2,9 +2,9 @@ specify("A 'for' expression") with
     it should("create a fresh variable each iteration") with
         var closures = Array new()
         for a = 1 to(3) do closures add(fn a)
-        closures(0)() shouldBe(1)
-        closures(1)() shouldBe(2)
-        closures(2)() shouldBe(3)
+        closures(0)() shouldEqual(1)
+        closures(1)() shouldEqual(2)
+        closures(2)() shouldEqual(3)
     end
 
     it should("create a local scope for the hidden iterator variable") with
@@ -17,6 +17,6 @@ specify("A 'for' expression") with
     it should("create a local scope for the 'do' expression") with
         var a = "outer"
         for b = 1 to(3) do var a = "inner"
-        a shouldBe("outer")
+        a shouldEqual("outer")
     end
 end

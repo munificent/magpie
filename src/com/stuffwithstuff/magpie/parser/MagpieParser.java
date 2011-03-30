@@ -91,7 +91,7 @@ public class MagpieParser extends Parser {
   
   /**
    * Parses a name at the current parser position. Unlike a simple
-   * consume(TokenType.NAME), which will parse a fully-qualified name
+   * consume(TokenType.NAME), this will parse a fully-qualified name
    * consisting of a series of NAME tokens separated by DOTs, like "foo.bar.c".
    * @return A Token that merges the fully-qualified name.
    */
@@ -115,22 +115,18 @@ public class MagpieParser extends Parser {
   public Expr parseFunction() {
     PositionSpan span = startAfter();
     
-    // Parse the type signature if present.
-    FunctionType type = null;
-    if (lookAheadAny(TokenType.LEFT_PAREN, TokenType.LEFT_BRACKET)) {
-      type = parseFunctionType();
+    // Parse the pattern if present.
+    Pattern pattern = null;
+    if (lookAheadAny(TokenType.LEFT_PAREN)) {
+      pattern = parseFunctionType();
+    } else {
+      pattern = new VariablePattern("_", null);
     }
     
     // Parse the body.
     Expr expr = parseEndBlock();
-    
-    // If neither dynamic nor type parameters were provided, infer a dynamic
-    // signature.
-    if (type == null) {
-      type = FunctionType.nothingToDynamic();
-    }
-    
-    return Expr.fn(span.end(), type, expr);
+        
+    return Expr.fn(span.end(), pattern, expr);
   }
 
   /**
@@ -144,26 +140,7 @@ public class MagpieParser extends Parser {
    * 
    * @return The parsed function type.
    */
-  public FunctionType parseFunctionType() {
-    // Parse the type parameters, if any.
-    List<Pair<String, Expr>> typeParams = new ArrayList<Pair<String, Expr>>();
-    if (match(TokenType.LEFT_BRACKET)) {
-      do {
-        String name = consume(TokenType.NAME).getString();
-        
-        // Infer "Any" if no constraint is given.
-        Expr constraint;
-        if (lookAheadAny(TokenType.COMMA, TokenType.RIGHT_BRACKET)) {
-          constraint = Expr.name("Any");
-        } else {
-          constraint = parseTypeAnnotation();
-        }
-        typeParams.add(new Pair<String, Expr>(name, constraint));
-      } while (match(TokenType.COMMA));
-      
-      consume(TokenType.RIGHT_BRACKET);
-    }
-    
+  public Pattern parseFunctionType() {
     // Parse the prototype: (foo Foo, bar Bar -> Bang)
     consume(TokenType.LEFT_PAREN);
     
@@ -196,7 +173,9 @@ public class MagpieParser extends Parser {
       consume(TokenType.RIGHT_PAREN);
     }
     
-    return new FunctionType(typeParams, pattern, returnType);
+    // TODO(bob): Remove return type since it's ignored.
+    
+    return pattern;
   }
   
   public boolean inQuotation() {

@@ -12,27 +12,6 @@ extend class Tuple
         result
     end
 
-    def assignsFrom?(other Type -> Bool)
-        for i = 0 until(count) do
-            var name = "field" ~ i
-            var field = getField(name)
-            var otherField = other getMemberType(name)
-            if field assignsFrom?(otherField) not then return false
-        end
-
-        true
-    end
-
-    def getMemberType(name String -> Type)
-        // An instance of a Tuple used as a type has fields whose values are the
-        // types of the fields for the tuple this type describes.
-        if hasField?(name) then
-            getField(name)
-        else
-            Tuple getMemberType(name)
-        end
-    end
-
     shared def equal?(left Tuple, right Tuple -> Bool)
         if left count != right count then return false
 

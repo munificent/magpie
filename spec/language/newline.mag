@@ -5,21 +5,21 @@ specify("A newline") with
     it should("be ignored after an operator") with
         var i = 1 +
             2
-        i shouldBe(3)
+        i shouldEqual(3)
     end
 
     it should("be ignored after a comma") with
         var i = 1,
             2
-        i field0 shouldBe(1)
-        i field1 shouldBe(2)
+        i field0 shouldEqual(1)
+        i field1 shouldEqual(2)
     end
 
     it should("be ignored after a field") with
         var a = x:
             1, y: 2
-        a x shouldBe(1)
-        a y shouldBe(2)
+        a x shouldEqual(1)
+        a y shouldEqual(2)
     end
 
     // TODO(bob): Skip for now. Periods are not used by the grammar.
@@ -31,7 +31,7 @@ end
 
 specify("A semicolon") with
     it should("work like a newline") with
-        1 shouldBe(1); 2 shouldBe(2)
+        1 shouldEqual(1); 2 shouldEqual(2)
     end
 end
 
@@ -39,6 +39,6 @@ specify("A backslash") with
     it should("consume the following newline") with
         var a = true \
             string
-        a shouldBe("true")
+        a shouldEqual("true")
     end
 end

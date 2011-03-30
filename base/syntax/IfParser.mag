@@ -10,8 +10,7 @@ class IfParser
 
         // Parse the else body.
         var consumedEnd? =
-            Reflect same?(endToken, nothing) not and
-            unsafecast[Token](endToken) keyword?("end")
+            Reflect same?(endToken, nothing) not and endToken keyword?("end")
         end
 
         var elseExpr =

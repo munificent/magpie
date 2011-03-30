@@ -1,5 +1,5 @@
 specify("The 'string' getter on Int") with
     it should("converts the value to a string") with
-        123 string shouldBe("123")
+        123 string shouldEqual("123")
     end
 end

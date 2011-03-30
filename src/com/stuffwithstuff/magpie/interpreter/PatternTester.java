@@ -71,7 +71,7 @@ public class PatternTester implements PatternVisitor<Boolean, Obj> {
 
     Obj equals = mContext.lookUp(Name.EQEQ);
     Obj result = mInterpreter.apply(Position.none(), equals,
-        null, mInterpreter.createTuple(value, expected));
+        mInterpreter.createTuple(value, expected));
     
     return result.asBool();
   }
@@ -83,9 +83,11 @@ public class PatternTester implements PatternVisitor<Boolean, Obj> {
       // TODO(bob): Should this be evaluated in the regular context even though
       // it's a type?
       Obj expected = mInterpreter.evaluate(pattern.getType(), mContext);
-      Obj result = mInterpreter.invokeMethod(value, "is", expected);
       
-      return result.asBool();
+      // TODO(bob): Hack temp getting rid of types.
+      if (!(expected instanceof ClassObj)) throw new UnsupportedOperationException("should be class");
+      
+      return value.getClassObj().isSubclassOf((ClassObj)expected);
     }
     
     // An untyped variable matches anything.

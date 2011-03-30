@@ -55,8 +55,8 @@ public class MethodLinearizer implements Comparator<FnExpr> {
 
   @Override
   public int compare(FnExpr method1, FnExpr method2) {
-    return compare(method1.getType().getPattern(),
-                   method2.getType().getPattern());
+    return compare(method1.getPattern(),
+                   method2.getPattern());
   }
 
   private int compare(Pattern pattern1, Pattern pattern2) {
@@ -135,26 +135,27 @@ public class MethodLinearizer implements Comparator<FnExpr> {
     Obj type1 = mInterpreter.evaluate(PatternTyper.evaluate(pattern1));
     Obj type2 = mInterpreter.evaluate(PatternTyper.evaluate(pattern2));
     
-    Obj assigns1 = mInterpreter.invokeMethod(type1, Name.ASSIGNS_FROM, type2);
-    Obj assigns2 = mInterpreter.invokeMethod(type2, Name.ASSIGNS_FROM, type1);
-    
-    if (assigns1.asBool()) {
-      if (assigns2.asBool()) {
-        // Both are subtypes of each other: i.e. they are the same.
-        return 0;
-      } else {
-        // Type 2 is a subtype, so it's more specific.
-        return 1;
-      }
-    } else {
-      if (assigns2.asBool()) {
-        // Type 1 is a subtype, so it's more specific.
+    // TODO(bob): WIP getting rid of types.
+    if (type1 instanceof ClassObj && type2 instanceof ClassObj) {
+      ClassObj class1 = (ClassObj)type1;
+      ClassObj class2 = (ClassObj)type2;
+      
+      // Same class.
+      if (class1 == class2) return 0;
+      
+      if (class1.isSubclassOf(class2)) {
+        // Class1 is a subclass, so it's more specific.
         return -1;
+      } else if (class2.isSubclassOf(class1)) {
+        // Class2 is a subclass, so it's more specific.
+        return 1;
       } else {
-        // No type relation between the two, so they can't be linearized.
+        // No class relation between the two, so they can't be linearized.
         throw ambiguous(pattern1, pattern2);
       }
     }
+    
+    throw new UnsupportedOperationException("Must be class now!");
   }
   
   private ErrorException ambiguous(Pattern pattern1, Pattern pattern2) {

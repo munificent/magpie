@@ -14,16 +14,11 @@ class GetParser
             else parser parseTypeExpression()
         end
 
-        var type = FunctionTypeExpression new(
-            typeParams: unsafecast[List(String, Expression)](Array of()),
-            pattern:    ValuePattern new(value: { nothing }),
-            returnType: valueType)
-
         parser consume("=")
         var body = parser parseEndBlock()
         var function = FunctionExpression new(
             position: token position,
-            functionType: type,
+            pattern: ValuePattern new(value: { nothing }),
             body: body)
         { `receiver defineGetter(`name, `function ) }
     end

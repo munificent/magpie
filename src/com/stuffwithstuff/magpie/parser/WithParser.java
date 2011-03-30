@@ -5,9 +5,9 @@ import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.CallExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
-import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.ast.NothingExpr;
 import com.stuffwithstuff.magpie.ast.TupleExpr;
+import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.interpreter.Name;
 
@@ -15,13 +15,12 @@ public class WithParser extends InfixParser {
   @Override
   public Expr parse(MagpieParser parser, Expr left, Token token) {
     // Parse the parameter list if given.
-    FunctionType blockType;
+    Pattern blockType;
     if (parser.lookAhead(TokenType.LEFT_PAREN)) {
       blockType = parser.parseFunctionType();
     } else {
       // Else just assume a single "it" parameter.
-      blockType = new FunctionType(new VariablePattern(Name.IT, null),
-          Expr.name("Dynamic"));
+      blockType = new VariablePattern(Name.IT, null);
     }
 
     // Parse the block and wrap it in a function.

@@ -6,7 +6,7 @@ specify("A 'catch' clause in a block") with
         catch _ String then
             caught = true
         end
-        caught shouldBe(true)
+        caught shouldEqual(true)
     end
        
     it should("evaluate to the caught expression") with
@@ -14,13 +14,13 @@ specify("A 'catch' clause in a block") with
             Runtime throw("error")
         catch _ String then
             "caught"
-        end shouldBe("caught")
+        end shouldEqual("caught")
     end
      
     it should("receive the error thrown by the block") with
         Runtime throw("error")
     catch err String then
-        err shouldBe("error")
+        err shouldEqual("error")
     end
      
     it should("unwind past uncaught error types") with
@@ -34,17 +34,17 @@ specify("A 'catch' clause in a block") with
         catch _ String then
             caught = true
         end
-        caught shouldBe(true)
+        caught shouldEqual(true)
     end
     
     it should("allow a single line catch expression") with
         Runtime throw("error")
-    catch err String then err shouldBe("error")
+    catch err String then err shouldEqual("error")
     
     it should("allow catch clauses in an if/then block") with
         if true then
             Runtime throw("error")
-        catch err String then err shouldBe("error")
+        catch err String then err shouldEqual("error")
     end
     
     it should("allow catch clauses in an else block") with
@@ -52,6 +52,6 @@ specify("A 'catch' clause in a block") with
             nothing
         else
             Runtime throw("error")
-        catch err String then err shouldBe("error")
+        catch err String then err shouldEqual("error")
     end
 end

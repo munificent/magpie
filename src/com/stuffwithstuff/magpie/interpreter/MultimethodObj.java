@@ -35,14 +35,14 @@ public class MultimethodObj extends Obj {
     // TODO(bob): In-progress. Once everything is using multimethods, the
     // receiver won't need to be explicitly passed.
     Function function = new Function(interpreter.getGlobals(), null, method);
-    return function.invoke(interpreter, receiver, null, fullArg);
+    return function.invoke(interpreter, receiver, fullArg);
   }
   
   private FnExpr select(Interpreter interpreter, Obj arg) {
     List<FnExpr> applicable = new ArrayList<FnExpr>();
     for (FnExpr method : mMethods) {
       // TODO(bob): Should this be a top level context?
-      if (PatternTester.test(interpreter, method.getType().getPattern(), arg,
+      if (PatternTester.test(interpreter, method.getPattern(), arg,
             interpreter.createTopLevelContext())) {
         applicable.add(method);
       }

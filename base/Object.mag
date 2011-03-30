@@ -1,23 +1,6 @@
 // Provides additional functionality on Object.
 
-// Returns true if the object can be assigned to the given type.
-def Object is(type Type -> Bool) type assignsFrom?(this type)
-
-// Returns the object cast to the given type if it can be safely assigned to
-// that type, otherwise returns nothing.
-def Object as[T Type](-> T | Nothing)
-    if type == T or T assignsFrom?(type) then unsafecast[T](this)
-end
-
-// Returns the argument cast to the given type if it's type is an exact match
-// and not a subtype, otherwise returns nothing.
-def Object asExactly[T Type](-> T | Nothing)
-    if type == T then unsafecast[T](this)
-end
-
-// Returns the object cast to the given type if it can be safely assigned to
-// that type, otherwise throws an UnexpectedTypeError.
-def Object expecting[T Type](-> T)
-    if type == T or T assignsFrom?(type) then return unsafecast[T](this)
-    UnexpectedTypeError throw(T, type)
+// Returns true if the object can be assigned to the given class.
+def Object is(classObj Class -> Bool)
+    Class subclass?(Reflect getClass(this), classObj)
 end

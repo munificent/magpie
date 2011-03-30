@@ -1,8 +1,6 @@
 package com.stuffwithstuff.magpie.interpreter;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.stuffwithstuff.magpie.ast.*;
@@ -52,7 +50,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       mInterpreter.error("BadAssignError");
     }
 
-    setter.getDefinition().invoke(mInterpreter, receiver, null, value);
+    setter.getDefinition().invoke(mInterpreter, receiver, value);
     return value;
   }
 
@@ -126,15 +124,9 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     }
     
     Obj target = evaluate(expr.getTarget(), context);
-    
-    List<Obj> typeArgs = new ArrayList<Obj>();
-    for (Expr typeArg : expr.getTypeArgs()) {
-      typeArgs.add(evaluate(typeArg, context));
-    }
-    
     Obj arg = evaluate(expr.getArg(), context);
 
-    return mInterpreter.apply(expr.getPosition(), target, typeArgs, arg);
+    return mInterpreter.apply(expr.getPosition(), target, arg);
   }
 
   @Override
@@ -265,17 +257,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
-  public Obj visit(TypeofExpr expr, EvalContext context) {
-    Checker checker = new Checker(mInterpreter);
-    Obj type = checker.evaluateExpressionType(expr.getBody());
-
-    // If there are any type errors, don't return the type.
-    if (checker.getErrors().size() > 0) return mInterpreter.nothing();
-    
-    return type;
-  }
-
-  @Override
   public Obj visit(TupleExpr expr, EvalContext context) {
     // Evaluate the fields.
     Obj[] fields = new Obj[expr.getFields().size()];
@@ -290,12 +271,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(UnquoteExpr expr, EvalContext context) {
     throw new UnsupportedOperationException(
         "An unquoted expression cannot be directly evaluated.");
-  }
-
-  @Override
-  public Obj visit(UnsafeCastExpr expr, EvalContext context) {
-    // No type-checking at all, just yield the value.
-    return evaluate(expr.getValue(), context);
   }
 
   @Override

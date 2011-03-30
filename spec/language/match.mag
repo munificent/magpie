@@ -12,7 +12,7 @@ specify("A 'match' expression") with
             else "three"
         end
         
-        called shouldBe(1)
+        called shouldEqual(1)
     end
     
     it should("return the value of the matched case") with
@@ -20,7 +20,7 @@ specify("A 'match' expression") with
             case 1 then "one"
             case 2 then "two"
             case 3 then "three"
-        end shouldBe("two")
+        end shouldEqual("two")
     end
 
     it should("only evaluate the first matched case") with
@@ -29,7 +29,7 @@ specify("A 'match' expression") with
             case true then called = called ~ "1"
             case true then called = called ~ "2"
         end
-        called shouldBe("1")
+        called shouldEqual("1")
     end
 
     it should("throw an error if no case matches") with
@@ -46,13 +46,13 @@ specify("A 'match' expression") with
             case "a" then "bad"
             case "b" then "bad"
             else "good"
-        end shouldBe("good")
+        end shouldEqual("good")
     end
     
     it should("bind pattern variables") with
         match 1, 2
             case a, b then a ~ b
-        end shouldBe("12")
+        end shouldEqual("12")
     end
     
     it should("scope a binding to just the matched case") with
@@ -60,7 +60,7 @@ specify("A 'match' expression") with
         match "match"
             case a then a = "inner"
         end
-        a shouldBe("outer")
+        a shouldEqual("outer")
     end
 end
 
@@ -76,7 +76,7 @@ specify("The grammar for a 'match' expression") with
                 result = result ~ "d"
             end
         end
-        result shouldBe("ab")
+        result shouldEqual("ab")
     end
 
     it should("allow a block for the else body") with
@@ -88,6 +88,6 @@ specify("The grammar for a 'match' expression") with
                 result = result ~ "b"
             end
         end
-        result shouldBe("ab")
+        result shouldEqual("ab")
     end
 end

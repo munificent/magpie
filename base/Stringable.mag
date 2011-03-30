@@ -1,9 +1,3 @@
-// An interface for objects that can be converted to or have some string
-// representation.
-interface Stringable
-    get string String
-end
-
 // Provide a generic print that converts arg to string first.
 def print(arg Stringable ->)
     match arg

@@ -70,8 +70,8 @@ public class ClassObj extends Obj {
     mFields.put(name, new Field(null, type));
     
     // Add a getter and setter.
-    mMembers.defineGetter(name, new FieldGetter(name, type));
-    mMembers.defineSetter(name, new FieldSetter(name, type));
+    mMembers.defineGetter(name, new FieldGetter(name));
+    mMembers.defineSetter(name, new FieldSetter(name));
   }
   
   @Override

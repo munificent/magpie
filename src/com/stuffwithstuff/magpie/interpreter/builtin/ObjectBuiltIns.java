@@ -71,14 +71,7 @@ public class ObjectBuiltIns {
       FnObj block = arg.asFn();
       
       // Ignore the function's bound receiver and use this object instead.
-      return block.getCallable().invoke(interpreter, thisObj, null, arg);
-    }
-  }
-  
-  @Getter("type Type")
-  public static class Type implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      return thisObj.getClassObj();
+      return block.getCallable().invoke(interpreter, thisObj, arg);
     }
   }
 }

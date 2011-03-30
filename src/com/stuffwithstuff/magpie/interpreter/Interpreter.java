@@ -89,8 +89,7 @@ public class Interpreter {
     mGlobalScope.define("Object", mObjectClass);
 
     // Add a constructor so you can create new Objects.
-    mObjectClass.getMembers().defineMethod(Name.NEW,
-        new ClassConstruct(mObjectClass));
+    mObjectClass.getMembers().defineMethod(Name.NEW, new ClassConstruct());
     
     // The metaclass for Class. Contains the shared methods on Class, like "new"
     // for creating a new class.
@@ -114,7 +113,6 @@ public class Interpreter {
     mTrue = instantiate(mBoolClass, true);
     mFalse = instantiate(mBoolClass, false);
     
-    mDynamicClass = createGlobalClass("Dynamic");
     mFnClass = createGlobalClass("Function");
     mMultimethodClass = createGlobalClass("Multimethod");
     mIntClass = createGlobalClass("Int");
@@ -124,8 +122,7 @@ public class Interpreter {
     mStringClass = createGlobalClass("String");
     
     mTupleClass = createGlobalClass("Tuple");
-    mTupleClass.getMembers().defineGetter("count",
-        new FieldGetter("count", Expr.name("Int")));
+    mTupleClass.getMembers().defineGetter("count", new FieldGetter("count"));
 
     mNothingClass = createGlobalClass("Nothing");
     mNothing = instantiate(mNothingClass, null);
@@ -153,11 +150,9 @@ public class Interpreter {
     BuiltIns.registerClass(MagpieParserBuiltIns.class, mMagpieParserClass);
     BuiltIns.registerClass(MultimethodBuiltIns.class, mMultimethodClass);
     BuiltIns.registerClass(ObjectBuiltIns.class, mObjectClass);
-    BuiltIns.registerClass(RecordBuiltIns.class, mRecordClass);
     BuiltIns.registerClass(ReflectBuiltIns.class, reflectClass);
     BuiltIns.registerClass(RuntimeBuiltIns.class, mRuntimeClass);
     BuiltIns.registerClass(StringBuiltIns.class, mStringClass);
-    BuiltIns.registerClass(TupleBuiltIns.class, mTupleClass);
     BuiltIns.registerFunctions(BuiltInFunctions.class, this);
     
     EnvironmentBuilder.initialize(this);
@@ -182,24 +177,7 @@ public class Interpreter {
     // Convert it to a string.
     return evaluateToString(result);
   }
-  
-  public Obj evaluateFunctionType(FunctionType type, EvalContext context) {
-    if (context == null) {
-      context = createTopLevelContext();
-    }
-    
-    // TODO(bob): Do we need to track type parameters here?
-    
-    Obj paramType = evaluate(type.getParamType(), context);
-    Obj returnType = evaluate(type.getReturnType(), context);
-    
-    // Create a FunctionType object.
-    Obj result = invokeMethod(mFnClass, Name.NEW_TYPE,
-        createTuple(paramType, returnType));
-    
-    return result;
-  }
-  
+
   public Obj construct(String className, Obj... args) {
     Obj classObj = getGlobal(className);
     
@@ -233,7 +211,7 @@ public class Interpreter {
     }
     
     Callable mainFn = ((FnObj)main).getCallable();
-    mainFn.invoke(this, mNothing, null, mNothing);
+    mainFn.invoke(this, mNothing, mNothing);
   }
   
   public Obj getQualifiedMember(Position position, Obj receiver, ClassObj containingClass,
@@ -272,14 +250,14 @@ public class Interpreter {
     return mNothing;
   }
 
-  public Obj apply(Position position, Obj target, List<Obj> typeArgs, Obj arg) {
+  public Obj apply(Position position, Obj target, Obj arg) {
     Expect.notNull(target);
     Expect.notNull(arg);
     
     while(true) {
       if (target instanceof FnObj) {
         FnObj function = (FnObj)target;
-        return function.invoke(this, typeArgs, arg);
+        return function.invoke(this, arg);
       } else if (target instanceof MultimethodObj) {
         MultimethodObj method = (MultimethodObj)target;
         // TODO(bob): What about type args?
@@ -319,7 +297,7 @@ public class Interpreter {
     
     Obj resolved = getQualifiedMember(Position.none(), receiver, null, name);
     
-    return apply(Position.none(), resolved, null, arg);
+    return apply(Position.none(), resolved, arg);
   }
 
   public void print(String text) {
@@ -362,7 +340,6 @@ public class Interpreter {
 
   public ClassObj getArrayClass() { return mArrayClass; }
   public ClassObj getBoolClass() { return mBoolClass; }
-  public ClassObj getDynamicClass() { return mDynamicClass; }
   public ClassObj getFunctionClass() { return mFnClass; }
   public ClassObj getIntClass() { return mIntClass; }
   public ClassObj getMetaclass() { return mClass; }
@@ -448,7 +425,7 @@ public class Interpreter {
     for (Entry<String, Field> field : classObj.getFieldDefinitions().entrySet()) {
       if (field.getValue().hasInitializer()) {
         Callable initializer = field.getValue().getInitializer();
-        Obj value = initializer.invoke(this, mNothing, null, mNothing);
+        Obj value = initializer.invoke(this, mNothing, mNothing);
         object.setField(field.getKey(), value);
       }
     }
@@ -463,15 +440,6 @@ public class Interpreter {
   
   public String evaluateToString(Obj value) {
     return getQualifiedMember(Position.none(), value, null, Name.STRING).asString();
-  }
-
-  public Obj orTypes(Obj left, Obj right) {
-    // Never is omitted.
-    if (left == mNeverClass) return right;
-    if (right == mNeverClass) return left;
-    
-    Obj orFunction = getGlobal(Name.OR);
-    return apply(Position.none(), orFunction, null, createTuple(left, right));
   }
 
   public void pushScriptPath(String path) {
@@ -504,7 +472,7 @@ public class Interpreter {
     ClassObj classObj = new ClassObj(metaclass, name);
     
     // Add the factory methods.
-    Callable construct = new ClassConstruct(classObj);
+    Callable construct = new ClassConstruct();
     metaclass.getMembers().defineMethod(Name.CONSTRUCT, construct);
     // By default, "new" just constructs too.
     metaclass.getMembers().defineMethod(Name.NEW, construct);
@@ -539,7 +507,7 @@ public class Interpreter {
     if (member != null) {
       switch (member.getType()) {
       case GETTER:
-        return member.getDefinition().invoke(this, receiver, null, mNothing);
+        return member.getDefinition().invoke(this, receiver, mNothing);
         
       case METHOD:
         // Bind it to the receiver.
@@ -571,7 +539,6 @@ public class Interpreter {
   private final ClassObj mClass;
   private final ClassObj mArrayClass;
   private final ClassObj mBoolClass;
-  private final ClassObj mDynamicClass;
   private final ClassObj mFnClass;
   private final ClassObj mMultimethodClass;
   private final ClassObj mIntClass;

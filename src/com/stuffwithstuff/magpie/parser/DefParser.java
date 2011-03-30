@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
-import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.TuplePattern;
 import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
@@ -75,8 +74,7 @@ public class DefParser extends PrefixParser {
     fields.add(rightHandPattern);
     Pattern pattern = new TuplePattern(fields);
     
-    FunctionType type = new FunctionType(pattern, returnType);
-    FnExpr function = Expr.fn(token.getPosition(), type, body);
+    FnExpr function = Expr.fn(token.getPosition(), pattern, body);
     
     return Expr.message(token.getPosition(), null, "defineMethod",
         Expr.tuple(Expr.string(name), function));

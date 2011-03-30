@@ -1,7 +1,0 @@
-specify("The 'type' getter on Tuple") with
-    it should("return a tuple whose fields are the types of the fields") with
-        var t = (1, "s") type
-        t field0 shouldBe(Int)
-        t field1 shouldBe(String)
-    end
-end

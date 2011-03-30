@@ -1,8 +1,3 @@
-// An interface for an AST node.
-interface Expression
-    get string String
-end
-
 extend class AssignExpression
     get string String =
         match receiver
@@ -91,14 +86,6 @@ end
 
 extend class TupleExpression
     get string String = String join(fields, ", ")
-end
-
-extend class TypeofExpression
-    get string String = "typeof " ~ body
-end
-
-extend class UnsafeCastExpression
-    get string String = "unsafecast[" ~ type ~ "](" ~ value ~ ")"
 end
 
 extend class VariableExpression

@@ -3,14 +3,14 @@ specify("The 'construct' shared method on a class") with
         class Foo
         end
         var foo = Foo construct()
-        foo is(Foo) shouldBe(true)
+        foo is(Foo) shouldEqual(true)
     end
 
     it should("accept nothing if the class has no declared fields") with
         class Foo
         end
         var foo = Foo construct()
-        foo is(Foo) shouldBe(true)
+        foo is(Foo) shouldEqual(true)
     end
 
     it should("initialize fields with the record fields passed to it") with
@@ -19,7 +19,7 @@ specify("The 'construct' shared method on a class") with
             var b String
         end
         var foo = Foo construct(a: 123, b: "text")
-        foo a shouldBe(123)
-        foo b shouldBe("text")
+        foo a shouldEqual(123)
+        foo b shouldEqual("text")
     end
 end

@@ -1,29 +1,4 @@
-// A record of Types is itself a Type.
 extend class Record
-    def assignsFrom?(other Type -> Bool)
-        // As long as the other type has assignable getters for all of the
-        // record's fields, we're good.
-        for name, fieldType = fields do
-            // TODO(bob): Get rid of unsafecast when tuple fields are typed.
-            if unsafecast[Type](fieldType) assignsFrom?(
-                    other getMemberType(unsafecast[String](name))) not then
-                return false
-            end
-        end
-
-        true
-    end
-
-    def getMemberType(name String -> Type)
-        // Each field in a record type is a getter of that type.
-        if hasField?(name) then
-            getField(name)
-        else
-            // Not a field, so just fallback to what's built in to Record.
-            Record getMemberType(name)
-        end
-    end
-
     shared def equal?(left Record, right Record -> Bool)
         if left fields count != right fields count then return false
 

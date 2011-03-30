@@ -1,4 +1,0 @@
-// An interface for a match pattern.
-interface Pattern
-    get string String
-end

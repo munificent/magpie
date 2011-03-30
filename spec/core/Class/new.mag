@@ -1,12 +1,12 @@
 specify("The 'new' shared method on Class") with
     it should("return a new class") with
         var c = Class new("Foo")
-        c is(c type) shouldBe(true)
+        c is(Reflect getClass(c)) shouldEqual(true)
     end
 
     it should("create a class with the given name") with
         var c = Class new("Foo")
-        c name shouldBe("Foo")
+        c name shouldEqual("Foo")
     end
 end
 
@@ -17,23 +17,23 @@ specify("The default 'new' shared method on a class") with
         class Foo
         end
         var foo = Foo new()
-        foo is(Foo) shouldBe(true)
+        foo is(Foo) shouldEqual(true)
     end
 
     it should("accept nothing if the class has no declared fields") with
         class Foo
         end
         var foo = Foo new()
-        foo is(Foo) shouldBe(true)
+        foo is(Foo) shouldEqual(true)
     end
-    
+
     it should("initialize fields with the record fields passed to it") with
         class Foo
             var a Int
             var b String
         end
         var foo = Foo new(a: 123, b: "text")
-        foo a shouldBe(123)
-        foo b shouldBe("text")
+        foo a shouldEqual(123)
+        foo b shouldEqual("text")
     end
 end

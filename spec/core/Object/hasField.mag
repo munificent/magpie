@@ -1,6 +1,6 @@
 specify("The 'hasField?' method on Object") with
     it should("return true if it exists") with
-        (x: 123) hasField?("x") shouldBe(true)
-        (x: 123) hasField?("y") shouldBe(false)
+        (x: 123) hasField?("x") shouldEqual(true)
+        (x: 123) hasField?("y") shouldEqual(false)
     end
 end

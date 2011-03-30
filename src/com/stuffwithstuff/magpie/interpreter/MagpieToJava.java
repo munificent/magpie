@@ -88,12 +88,8 @@ public class MagpieToJava {
       return convertThisExpr(expr);
     } else if (exprClass == mInterpreter.getGlobal("TupleExpression")) {
       return convertTupleExpr(expr);
-    } else if (exprClass == mInterpreter.getGlobal("TypeofExpression")) {
-      return convertTypeofExpr(expr);
     } else if (exprClass == mInterpreter.getGlobal("UnquoteExpression")) {
       return convertUnquoteExpr(expr);
-    } else if (exprClass == mInterpreter.getGlobal("UnsafeCastExpression")) {
-      return convertUnsafeCastExpr(expr);
     } else if (exprClass == mInterpreter.getGlobal("UsingExpression")) {
       return convertUsingExpr(expr);
     } else if (exprClass == mInterpreter.getGlobal("VariableExpression")) {
@@ -148,17 +144,16 @@ public class MagpieToJava {
   private Expr convertCallExpr(Obj expr) {
     return Expr.call(
         getExpr(expr, "target"),
-        getExprArray(expr, "typeArgs"),
         getExpr(expr, "argument"));
   }
 
   private Expr convertFunctionExpr(Obj expr) {
-    Obj typeObj = getMember(expr, "functionType");
-    FunctionType type = convertFunctionType(typeObj);
+    Obj patternObj = getMember(expr, "pattern");
+    Pattern pattern = convertPattern(patternObj);
     
     return Expr.fn(
         getPosition(expr),
-        type,
+        pattern,
         getExpr(expr, "body"));
   }
   
@@ -245,24 +240,10 @@ public class MagpieToJava {
         getExprArray(expr, "fields"));
   }
 
-  private Expr convertTypeofExpr(Obj expr) {
-    return new TypeofExpr(
-        getPosition(expr),
-        getExpr(expr, "body"));
-  }
-
   private Expr convertUnquoteExpr(Obj expr) {
     return new UnquoteExpr(
         getPosition(expr),
         getExpr(expr, "body"));
-  }
-  
-  private Expr convertUnsafeCastExpr(Obj expr) {
-    return new UnsafeCastExpr(
-        getPosition(expr),
-        // TODO(bob): Should be "typeExpr".
-        getExpr(expr, "type"),
-        getExpr(expr, "value"));
   }
   
   private Expr convertUsingExpr(Obj expr) {
@@ -320,23 +301,6 @@ public class MagpieToJava {
         getInt(position, "endCol"));
   }
   
-  private FunctionType convertFunctionType(Obj typeObj) {
-    Expr returnType = convertExpr(typeObj.getField("returnType"));
-
-    List<Pair<String, Expr>> typeParams = new ArrayList<Pair<String, Expr>>();
-    Obj typeParamsObj = typeObj.getField("typeParams");
-    for (Obj typeParam : typeParamsObj.asArray()) {
-      String name = typeParam.getTupleField(0).asString();
-      Expr constraint = convertExpr(typeParam.getTupleField(1));
-      typeParams.add(new Pair<String, Expr>(name, constraint));
-    }
-    
-    Obj patternObj = typeObj.getField("pattern");
-    Pattern pattern = convertPattern(patternObj);
-    
-    return new FunctionType(typeParams, pattern, returnType);
-  }
-
   private Token convertToken(Obj token) {
     Position position = getPosition(token);
     TokenType type = convertTokenType(getMember(token, "tokenType"));

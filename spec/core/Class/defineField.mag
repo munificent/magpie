@@ -1,72 +1,14 @@
 specify("The 'defineField' method on Class") with
     it should("define an initialized field on the class") with
         var c = Class new("c")
-        c defineField("foo", { String }, (fn "value"))
-        c new() foo shouldBe("value")
+        c defineField("foo", (fn "value"))
+        c new() foo shouldEqual("value")
     end
 
     it should("replace an existing definition") with
         var c = Class new("c")
-        c defineField("foo", { String }, (fn "before"))
-        c defineField("foo", { String }, (fn "after"))
-        c new() foo shouldBe("after")
-    end
-
-    it should("allow omitting the type annotation") with
-        var c = Class new("c")
-        c defineField("foo", nothing, (fn "value"))
-        c new() foo shouldBe("value")
-    end
-
-    it should("use the type annotation to type the getter") with
-        envExpectCheckOK with
-            class C
-                var foo String
-            end
-
-            def expectString(s String) nothing
-
-            def main(->)
-                expectString(C new(foo: "s") foo)
-            end
-        end
-
-        envExpectCheckError with
-            class C
-                var foo String
-            end
-
-            def expectInt(i Int) nothing
-
-            def main(->)
-                expectInt(C new(foo: "s") foo)
-            end
-        end
-    end
-
-    it should("infer the type from the initializer if there is no type") with
-        envExpectCheckOK with
-            class C
-                var foo = "s"
-            end
-
-            def expectString(s String) nothing
-
-            def main(->)
-                expectString(C new() foo)
-            end
-        end
-
-        envExpectCheckError with
-            class C
-                var foo = "s"
-            end
-
-            def expectInt(i Int) nothing
-
-            def main(->)
-                expectInt(C new() foo)
-            end
-        end
+        c defineField("foo", (fn "before"))
+        c defineField("foo", (fn "after"))
+        c new() foo shouldEqual("after")
     end
 end

@@ -7,8 +7,8 @@ specify("The 'parents' getter on Class") with
             inherit(Parent)
         end
 
-        Foo parents count shouldBe(1)
-        Foo parents(0) shouldBe(Parent)
+        Foo parents count shouldEqual(1)
+        Foo parents(0) shouldEqual(Parent)
     end
 
     it should("allow modification") with
@@ -19,9 +19,9 @@ specify("The 'parents' getter on Class") with
             inherit(Parent)
         end
 
-        Foo parents count shouldBe(1)
+        Foo parents count shouldEqual(1)
         Foo parents clear()
-        Foo parents count shouldBe(0)
+        Foo parents count shouldEqual(0)
     end
 
     it should("affect method dispatch on the class") with
@@ -35,12 +35,12 @@ specify("The 'parents' getter on Class") with
         // Not mixed in.
         var foo = Foo new()
         fn
-            foo method() shouldBe(nothing)
+            foo method() shouldEqual(nothing)
         end shouldThrow(BadCallError)
 
         // Inherit it.
         Foo parents add(Parent)
-        foo method() shouldBe("received")
+        foo method() shouldEqual("received")
     end
 
     it should("lookup methods in parents from last to first") with
@@ -60,11 +60,11 @@ specify("The 'parents' getter on Class") with
         Foo parents clear()
         Foo parents add(Parent1)
         Foo parents add(Parent2)
-        foo method() shouldBe("two")
+        foo method() shouldEqual("two")
 
         Foo parents clear()
         Foo parents add(Parent2)
         Foo parents add(Parent1)
-        foo method() shouldBe("one")
+        foo method() shouldEqual("one")
     end
 end

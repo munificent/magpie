@@ -3,58 +3,58 @@ specify("A call expression on a function") with
         var called = false
         var f = fn() called = true
         f()
-        called shouldBe(true)
+        called shouldEqual(true)
     end
 
     it should("pass the argument") with
-        var f = fn(arg) arg shouldBe("value")
+        var f = fn(arg) arg shouldEqual("value")
         f("value")
     end
 
     it should("decompose a tuple argument") with
         var passed = ""
         var f = fn(a, b, c)
-            a shouldBe("1")
-            b shouldBe("2")
-            c shouldBe("3")
+            a shouldEqual("1")
+            b shouldEqual("2")
+            c shouldEqual("3")
         end
         f("1", "2", "3")
     end
 
     it should("fill missing parameters with nothing") with
         var f = fn(a, b, c)
-            a shouldBe("a")
-            b shouldBe(nothing)
-            c shouldBe(nothing)
+            a shouldEqual("a")
+            b shouldEqual(nothing)
+            c shouldEqual(nothing)
         end
         f("a")
     end
 
     it should("bind the entire tuple if there is only a single parameter") with
         var f = fn(a)
-            a field0 shouldBe(1)
-            a field1 shouldBe(2)
+            a field0 shouldEqual(1)
+            a field1 shouldEqual(2)
         end
         f(1, 2)
     end
 
     it should("return the result") with
         var f = fn() "result"
-        f() shouldBe("result")
+        f() shouldEqual("result")
     end
 end
 
 specify("A call expression on a non-function") with
     it should("send a 'call' message") with
         var c = TestCallable new("result")
-        c() shouldBe("result")
-        c called shouldBe(true)
+        c() shouldEqual("result")
+        c called shouldEqual(true)
     end
 
     it should("pass the argument to 'call'") with
         var c = TestCallable new()
         c("arg")
-        c arg shouldBe("arg")
+        c arg shouldEqual("arg")
     end
 
     it should("throw a BadCallError if the object is not callable") with

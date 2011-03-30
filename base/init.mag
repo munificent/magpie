@@ -21,7 +21,6 @@ import("syntax/ClassParser.mag")
 import("syntax/DefParser.mag")
 import("syntax/IfParser.mag")
 import("syntax/GetParser.mag")
-import("syntax/TypeofParser.mag")
 
 import("syntax/OperatorParser.mag")
 
@@ -30,32 +29,18 @@ import("syntax/OperatorParser.mag")
 // will need it to parse some files.
 import("operators.mag")
 
-// Define the interface classes. Need to do this relatively early so that
-// subsequent files can define interface types.
-import("GenericInterface.mag")
-import("Interface.mag")
-
 // Define the "regular" base library stuff. This chunk should be relatively
 // straightforward.
 import("Array.mag")
 import("Class.mag")
-import("Function.mag")
 import("Int.mag")
 import("Record.mag")
 import("String.mag")
 import("Tuple.mag")
-import("Type.mag")
-import("OrType.mag")
 import("Error.mag")
 import("Object.mag")
 
 // Finally, import stuff that just defines interfaces since they are only used
 // during type-checking.
-import("Any.mag")
-import("Iterator.mag")
-import("List.mag")
 import("Stringable.mag")
-import("Trueable.mag")
 import("syntax/Expression.mag")
-import("syntax/Pattern.mag")
-import("syntax/PrefixParser.mag")

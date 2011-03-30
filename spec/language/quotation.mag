@@ -1,54 +1,54 @@
 specify("A quotation expression") with
     it should("return a BoolExpression when containing a boolean literal") with
-        { true } type shouldBe(BoolExpression)
-        { true } value shouldBe(true)
-        { false } value shouldBe(false)
+        { true } shouldBe(BoolExpression)
+        { true } value shouldEqual(true)
+        { false } value shouldEqual(false)
     end
 
     it should("return a IntExpression when containing an int literal") with
-        { 1 } type shouldBe(IntExpression)
-        { 2 } value shouldBe(2)
-        { 3 } value shouldBe(3)
+        { 1 } shouldBe(IntExpression)
+        { 2 } value shouldEqual(2)
+        { 3 } value shouldEqual(3)
     end
 
     it should("return a NothingExpression when containing nothing") with
-        { nothing } type shouldBe(NothingExpression)
+        { nothing } shouldBe(NothingExpression)
     end
 
     it should("return a StringExpression when containing a string literal") with
-        { "a" } type shouldBe(StringExpression)
-        { "b" } value shouldBe("b")
-        { "c" } value shouldBe("c")
+        { "a" } shouldBe(StringExpression)
+        { "b" } value shouldEqual("b")
+        { "c" } value shouldEqual("c")
     end
 end
 
 specify("An unquote in a quotation") with
     it should("insert the value of a named identifier into the quotation") with
         var foo = { a(b) }
-        { c(`foo) } string shouldBe("c(a(b))")
+        { c(`foo) } string shouldEqual("c(a(b))")
     end
 
     it should("allow a parenthesized expression after the backtick") with
         def make(value) IntExpression new(value: value)
-        { print(`(make(123))) } string shouldBe("print(123)")
+        { print(`(make(123))) } string shouldEqual("print(123)")
     end
 
     it should("wrap an unquoted nothing in a NothingExpression") with
-        { `(nothing) } type shouldBe(NothingExpression)
+        { `(nothing) } shouldBe(NothingExpression)
     end
 
     it should("wrap an unquoted bool in a BoolExpression") with
-        { `(true) } type shouldBe(BoolExpression)
-        { `(true) } value shouldBe(true)
+        { `(true) } shouldBe(BoolExpression)
+        { `(true) } value shouldEqual(true)
     end
 
     it should("wrap an unquoted int in an IntExpression") with
-        { `(123) } type shouldBe(IntExpression)
-        { `(123) } value shouldBe(123)
+        { `(123) } shouldBe(IntExpression)
+        { `(123) } value shouldEqual(123)
     end
 
     it should("wrap an unquoted string in a StringExpression") with
-        { `("foo") } type shouldBe(StringExpression)
-        { `("foo") } value shouldBe("foo")
+        { `("foo") } shouldBe(StringExpression)
+        { `("foo") } value shouldEqual("foo")
     end
 end

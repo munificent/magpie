@@ -3,38 +3,31 @@ specify("A 'fn' expression") with
         var result = nothing
         var f = fn(a) result = a
         f("one")
-        result shouldBe("one")
+        result shouldEqual("one")
 
         f("two")
-        result shouldBe("two")
+        result shouldEqual("two")
     end
 
     it should("ignore the argument if there is no parameter") with
         var f = fn() "ignore"
-        f("one") shouldBe("ignore")
-        f("one", "two") shouldBe("ignore")
+        f("one") shouldEqual("ignore")
+        f("one", "two") shouldEqual("ignore")
     end
 
     it should("bind a tuple argument to the parameter") with
         var f = fn(a) a field0 ~ a field1
-        f("one", "two") shouldBe("onetwo")
+        f("one", "two") shouldEqual("onetwo")
     end
 
     it should("allow omitting the parameter declaration") with
-        (fn "return")() shouldBe("return")
+        (fn "return")() shouldEqual("return")
     end
 
     it should("close over surrounding variables") with
         var outer = "outer"
         var assigned = ""
         (fn assigned = outer)()
-        assigned shouldBe("outer")
-    end
-end
-
-specify("A generic 'fn' expression") with
-    it should("allow omitting () if it only takes type arguments") with
-        def f[T](-> T) 123
-        f[Int] shouldBe(123)
+        assigned shouldEqual("outer")
     end
 end

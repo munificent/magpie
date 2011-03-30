@@ -1,7 +1,5 @@
 package com.stuffwithstuff.magpie.interpreter;
 
-import java.util.List;
-
 /**
  * Object type for a function object.
  */
@@ -30,8 +28,8 @@ public class FnObj extends Obj {
     return null;
   }
   
-  public Obj invoke(Interpreter interpreter, List<Obj> typeArgs, Obj arg) {
-    return mCallable.invoke(interpreter, mThis, typeArgs, arg);
+  public Obj invoke(Interpreter interpreter, Obj arg) {
+    return mCallable.invoke(interpreter, mThis, arg);
   }
   
   private final Obj mThis;

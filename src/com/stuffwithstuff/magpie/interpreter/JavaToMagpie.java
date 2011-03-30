@@ -30,11 +30,6 @@ public class JavaToMagpie {
     return javaToMagpie.convertExpr(expr);
   }
   
-  public static Obj convert(Interpreter interpreter, FunctionType type) {
-    JavaToMagpie javaToMagpie = new JavaToMagpie(interpreter, null);
-    return javaToMagpie.convertFunctionType(type);
-  }
-
   public static Obj convert(Interpreter interpreter, Pattern pattern) {
     JavaToMagpie javaToMagpie = new JavaToMagpie(interpreter, null);
     return javaToMagpie.convertPattern(pattern);
@@ -84,7 +79,6 @@ public class JavaToMagpie {
     public Obj visit(CallExpr expr, Void dummy) {
       return construct("CallExpression",
           "target",   expr.getTarget(),
-          "typeArgs", convertList(expr.getTypeArgs()),
           "argument", expr.getArg());
     }
 
@@ -92,7 +86,7 @@ public class JavaToMagpie {
     public Obj visit(FnExpr expr, Void dummy) {
       return construct("FunctionExpression",
           "position",     expr.getPosition(),
-          "functionType", expr.getType(),
+          "pattern",      expr.getPattern(),
           "body",         expr.getBody());
     }
     
@@ -193,13 +187,6 @@ public class JavaToMagpie {
     }
 
     @Override
-    public Obj visit(TypeofExpr expr, Void dummy) {
-      return construct("TypeofExpression",
-          "position", expr.getPosition(),
-          "body",     expr.getBody());
-    }
-
-    @Override
     public Obj visit(UnquoteExpr expr, Void dummy) {
       // If we have an EvalContext, then we're converting a quotation and we
       // should evaluate the unquote.
@@ -232,14 +219,6 @@ public class JavaToMagpie {
             "position", expr.getPosition(),
             "body",     expr.getBody());
       }
-    }
-
-    @Override
-    public Obj visit(UnsafeCastExpr expr, Void dummy) {
-      return construct("UnsafeCastExpression",
-          "position", expr.getPosition(),
-          "type",     expr.getType(),
-          "value",    expr.getValue());
     }
 
     @Override
@@ -318,21 +297,6 @@ public class JavaToMagpie {
     return expr.accept(converter, null);
   }
 
-  private Obj convertFunctionType(FunctionType type) {
-    List<Obj> typeParams = new ArrayList<Obj>();
-    for (Pair<String, Expr> typeParam : type.getTypeParams()) {
-      Obj name = mInterpreter.createString(typeParam.getKey());
-      Obj constraint = convertObject(typeParam.getValue());
-      typeParams.add(mInterpreter.createTuple(name, constraint));
-    }
-    Obj typeParamsObj = mInterpreter.createArray(typeParams);
-    
-    return construct("FunctionTypeExpression",
-        "typeParams", typeParamsObj,
-        "pattern",    type.getPattern(),
-        "returnType", type.getReturnType());
-  }
-
   private Obj convertPattern(Pattern pattern) {
     if (pattern == null) return mInterpreter.nothing();
     
@@ -391,7 +355,6 @@ public class JavaToMagpie {
     if (object instanceof Integer) return mInterpreter.createInt((Integer) object);
     if (object instanceof String) return mInterpreter.createString((String) object);
     if (object instanceof Expr) return convertExpr((Expr) object);
-    if (object instanceof FunctionType) return convertFunctionType((FunctionType) object);
     if (object instanceof Pattern) return convertPattern((Pattern) object);
     if (object instanceof Position) return convertPosition((Position) object);
     if (object instanceof Token) return convertToken((Token) object);

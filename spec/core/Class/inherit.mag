@@ -7,7 +7,7 @@ specify("The 'inherit' method on Class") with
             inherit(Bar)
         end
 
-        Foo parents count shouldBe(1)
-        Foo parents(0) shouldBe(Bar)
+        Foo parents count shouldEqual(1)
+        Foo parents(0) shouldEqual(Bar)
     end
 end

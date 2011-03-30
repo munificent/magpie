@@ -1,9 +1,0 @@
-specify("The 'as' method on Object") with
-    it should("return this if it is the given type") with
-        123 as[Int] shouldBe(123)
-    end
-
-    it should("return nothing if it is not the given type") with
-        123 as[Bool] shouldBe(nothing)
-    end
-end

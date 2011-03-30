@@ -4,9 +4,9 @@
 class Token
 end
 
-Token defineGetter("boolValue", fn(-> Bool) unsafecast[Bool](value))
-Token defineGetter("intValue", fn(-> Int) unsafecast[Int](value))
-Token defineGetter("stringValue", fn(-> String) unsafecast[String](value))
+Token defineGetter("boolValue", fn(-> Bool) value)
+Token defineGetter("intValue", fn(-> Int) value)
+Token defineGetter("stringValue", fn(-> String) value)
 Token declareField("position", { Position })
 Token declareField("tokenType", { TokenType })
 Token declareField("value",

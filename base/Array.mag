@@ -1,14 +1,6 @@
 extend class Array
     shared def new(-> Array) Array of()
 
-    shared def assignsFrom?(other Type -> Bool)
-        if this == other then
-            true
-        else if other type == type then
-            true
-        else false
-    end
-
     get string String =
         var text = "["
         for i = 0 until(count) do
@@ -20,12 +12,6 @@ extend class Array
 
     // TODO(bob): Need generics to use for return type.
     get last = this(count - 1)
-
-    get type Type =
-        // TODO(bob): Hack!
-        var elementType = this(0) type
-        List(elementType)
-    end
 
     def iterate(-> ArrayIterator) ArrayIterator new(this)
 
@@ -92,14 +78,7 @@ class ArrayIterator
         construct(array: array)
     end
 
-    // TODO(bob): Need generics for return type.
-    get current Dynamic = array(index)
-
-    get type Type =
-        // TODO(bob): Hack!
-        var elementType = array(0) type
-        Iterator(elementType)
-    end
+    get current = array(index)
 
     def next(-> Bool)
         index = index + 1

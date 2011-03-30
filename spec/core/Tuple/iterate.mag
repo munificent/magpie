@@ -4,6 +4,6 @@ specify("The 'iterate' method on Tuple") with
         for field = ("one", "two", "three") do
             result = result ~ field
         end
-        result shouldBe("onetwothree")
+        result shouldEqual("onetwothree")
     end
 end

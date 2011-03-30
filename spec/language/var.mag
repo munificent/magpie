@@ -1,16 +1,16 @@
 specify("A 'var' expression") with
     it should("bind a value to a name") with
         var i = "value"
-        i shouldBe("value")
+        i shouldEqual("value")
     end
 
     it should("shadow a variable in an outer scope") with
         var i = "outer"
         if true then
             var i = "inner"
-            i shouldBe("inner")
+            i shouldEqual("inner")
         end
-        i shouldBe("outer")
+        i shouldEqual("outer")
     end
 
     it should("not allow redefining in the same scope") with
@@ -26,16 +26,16 @@ specify("A 'var' expression") with
             temp = temp ~ "b"
             temp ~ "c"
         end
-        i shouldBe("abc")
+        i shouldEqual("abc")
     end
 
     it should("allow a fully-qualified name") with
         var a.b.i = "abi"
         var a.c.i = "aci"
         var b.c.i = "bci"
-        a.b.i shouldBe("abi")
-        a.c.i shouldBe("aci")
-        b.c.i shouldBe("bci")
+        a.b.i shouldEqual("abi")
+        a.c.i shouldEqual("aci")
+        b.c.i shouldEqual("bci")
     end
 
     // TODO(bob): Spec pattern destructuring.

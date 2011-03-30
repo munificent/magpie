@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.Expr;
-import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.util.NotImplementedException;
 
@@ -95,7 +94,8 @@ public class ClassParser extends PrefixParser {
       } else if (parser.match("set")) {
         exprs.add(parseSetter(parser, theClass));
       } else if (parser.match("shared")) {
-        Expr metaclass = Expr.message(parser.last(1).getPosition(), theClass, Name.TYPE);
+        Position pos = parser.last(1).getPosition();
+        Expr metaclass = Expr.message(pos, Expr.name("Reflect"), "getClass", theClass);
         // TODO(bob): Need to prevent declaring shared members: can only define.
         if (parser.match("var")) {
           // TODO(bob): Need to handle defining class fields specially.
@@ -144,7 +144,7 @@ public class ClassParser extends PrefixParser {
       // Defining it.
       Expr initializer = parser.parseEndBlock();
       return Expr.message(position, theClass, Name.DEFINE_FIELD,
-          Expr.tuple(Expr.string(name), type, Expr.fn(initializer)));
+          Expr.tuple(Expr.string(name), Expr.fn(initializer)));
     } else {
       // Just declaring it.
       return Expr.message(position, theClass, Name.DECLARE_FIELD,
@@ -177,8 +177,7 @@ public class ClassParser extends PrefixParser {
     if (parser.match("=")) {
       // Defining it.
       Expr body = parser.parseEndBlock();
-      FunctionType fnType = FunctionType.returningType(type);
-      Expr function = Expr.fn(body.getPosition(), fnType, body);
+      Expr function = Expr.fn(body.getPosition(), body);
       return Expr.message(position, theClass, Name.DEFINE_GETTER,
           Expr.tuple(Expr.string(name), function));
     } else {

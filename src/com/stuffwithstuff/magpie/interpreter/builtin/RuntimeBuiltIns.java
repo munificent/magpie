@@ -1,19 +1,9 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map.Entry;
 
-import com.stuffwithstuff.magpie.Script;
-import com.stuffwithstuff.magpie.ast.Expr;
-import com.stuffwithstuff.magpie.interpreter.CheckError;
-import com.stuffwithstuff.magpie.interpreter.Checker;
 import com.stuffwithstuff.magpie.interpreter.ErrorException;
-import com.stuffwithstuff.magpie.interpreter.EvalContext;
-import com.stuffwithstuff.magpie.interpreter.FnObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
-import com.stuffwithstuff.magpie.interpreter.NullInterpreterHost;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class RuntimeBuiltIns {
@@ -35,69 +25,6 @@ public class RuntimeBuiltIns {
   public static class Throw_ implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       throw new ErrorException(arg);
-    }
-  }
-  
-  @Shared
-  @Signature("checkAll(-> List(String))")
-  public static class CheckAll implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      Checker checker = new Checker(interpreter);
-      
-      checker.checkAll();
-      return translateErrors(interpreter, checker.getErrors());
-    }
-  }
-  
-  @Shared
-  @Signature("checkClass(classObj Class-> List(String))")
-  public static class CheckClass implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      Checker checker = new Checker(interpreter);
-      
-      checker.checkClass(arg.asClass());
-      
-      return translateErrors(interpreter, checker.getErrors());
-    }
-  }
-
-  @Shared
-  @Signature("checkFunction(function -> List(String))")
-  public static class CheckFunction implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      Checker checker = new Checker(interpreter);
-      
-      FnObj function = arg.asFn();
-      EvalContext staticContext = interpreter.createTopLevelContext();
-      checker.checkFunction(function.getFunction(),
-          interpreter.getNothingClass(), staticContext);
-      
-      return translateErrors(interpreter, checker.getErrors());
-    }
-  }
-
-  @Shared
-  @Signature("checkExpression(function -> List(String))")
-  public static class CheckExpression implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      FnObj function = arg.asFn();
-      Expr expr = function.getFunction().getFunction().getBody();
-      
-      Interpreter inner = new Interpreter(new NullInterpreterHost());
-      try {
-        Script.loadBase(inner);
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-      
-      inner.interpret(expr);
-      
-      // Do the static analysis and see if we got the errors we expect.
-      Checker checker = new Checker(inner);
-      checker.checkAll();
-      
-      return translateErrors(interpreter, checker.getErrors());
     }
   }
   
@@ -134,15 +61,5 @@ public class RuntimeBuiltIns {
     for (Entry<String, Obj> field : object.getFields().entries()) {
       dumpObject(builder, field.getValue(), field.getKey(), indent + "  ");
     }
-  }
-
-  private static Obj translateErrors(Interpreter interpreter, List<CheckError> errors) {
-    List<Obj> errorObjs = new ArrayList<Obj>();
-    for (CheckError error : errors) {
-      // TODO(bob): Should eventually return more than just the error message.
-      errorObjs.add(interpreter.createString(error.toString()));
-    }
-
-    return interpreter.createArray(errorObjs);
   }
 }

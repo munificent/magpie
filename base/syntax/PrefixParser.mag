@@ -1,3 +1,0 @@
-interface PrefixParser
-    def parse(parser MagpieParser, token Token -> Expression)
-end

@@ -5,7 +5,7 @@ specify("A 'break' expression") with
             i = i ~ a
             if a == 2 then break
         end
-        i shouldBe("12")
+        i shouldEqual("12")
     end
 
     it should("exit the nearest enclosing loop") with
@@ -16,7 +16,7 @@ specify("A 'break' expression") with
                 if b == 2 then break
             end
         end
-        i shouldBe("1122334455")
+        i shouldEqual("1122334455")
     end
 
     it should("do nothing if not inside a loop") with
@@ -25,6 +25,6 @@ specify("A 'break' expression") with
             break
             2
         end()
-        result shouldBe(2)
+        result shouldEqual(2)
     end
 end

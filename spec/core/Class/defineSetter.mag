@@ -4,7 +4,7 @@ specify("The 'defineSetter' method on Class") with
         var assigned = "none"
         c defineSetter("foo", fn(value) assigned = value)
         c new() foo = "prop"
-        assigned shouldBe("prop")
+        assigned shouldEqual("prop")
     end
 
     it should("evaluate the body each time the property is set") with
@@ -13,7 +13,7 @@ specify("The 'defineSetter' method on Class") with
         c defineSetter("foo", fn(value) assigned = assigned ~ value)
         c new() foo = "one"
         c new() foo = "two"
-        assigned shouldBe("onetwo")
+        assigned shouldEqual("onetwo")
     end
 
     it should("replace an existing definition") with
@@ -22,6 +22,6 @@ specify("The 'defineSetter' method on Class") with
         c defineSetter("foo", fn(value) assigned = "before")
         c defineSetter("foo", fn(value) assigned = "after")
         c new() foo = "ignored"
-        assigned shouldBe("after")
+        assigned shouldEqual("after")
     end
 end

@@ -1,34 +1,45 @@
-interface Error
+class Error
 end
 
 class BadAssignError
+    inherit(Error)
 end
 
 class BadCallError
+    inherit(Error)
 end
 
 class RedefinitionError
+    inherit(Error)
 end
 
 class ParseError
+    inherit(Error)
 end
 
 class IOError
+    inherit(Error)
 end
 
 class NoMatchError
+    inherit(Error)
 end
 
 class AmbiguousMethodError
+    inherit(Error)
 end
 
 class NoMethodError
+inherit(Error)
 end
 
 class OutOfBoundsError
+    inherit(Error)
 end
 
 class UnexpectedTypeError
+    inherit(Error)
+
     shared def new(expectedType Type, actualType Type -> UnexpectedTypeError)
         construct(expectedType: expectedType, actualType: actualType)
     end

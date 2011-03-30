@@ -1,7 +1,6 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
 import com.stuffwithstuff.magpie.ast.Expr;
-import com.stuffwithstuff.magpie.ast.FunctionType;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.JavaToMagpie;
@@ -216,17 +215,6 @@ public class MagpieParserBuiltIns {
       Expr expr = parser.parseFunction();
       
       return JavaToMagpie.convert(interpreter, expr);
-    }
-  }
-  
-  @Signature("parseFunctionType(-> FunctionTypeExpression)")
-  public static class ParseFunctionType implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      MagpieParser parser = (MagpieParser) thisObj.getValue();
-      
-      FunctionType type = parser.parseFunctionType();
-      
-      return JavaToMagpie.convert(interpreter, type);
     }
   }
   
