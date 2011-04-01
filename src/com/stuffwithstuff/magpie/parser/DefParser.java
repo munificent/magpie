@@ -38,7 +38,7 @@ public class DefParser extends PrefixParser {
       name = parser.consume(TokenType.NAME).getString();
     } else if (parser.lookAhead(TokenType.NAME, TokenType.LEFT_PAREN)) {
       // No receiver.
-      leftHandPattern = new VariablePattern("_", null);
+      leftHandPattern = new ValuePattern(Expr.name("nothing"));
       name = parser.consume().getString();
     } else if (parser.match("this")) {
       // Any receiver.
@@ -75,7 +75,7 @@ public class DefParser extends PrefixParser {
     
     FnExpr function = Expr.fn(token.getPosition(), pattern, body);
     
-    return Expr.message(token.getPosition(), null, "defineMethod",
+    return Expr.message(token.getPosition(), null, "defineMultimethod",
         Expr.tuple(Expr.string(name), function));
   }
 }

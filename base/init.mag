@@ -19,7 +19,6 @@ import("syntax/OrParser.mag")
 
 import("syntax/ClassParser.mag")
 import("syntax/IfParser.mag")
-import("syntax/GetParser.mag")
 
 import("syntax/OperatorParser.mag")
 

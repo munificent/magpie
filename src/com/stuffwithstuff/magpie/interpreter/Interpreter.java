@@ -260,8 +260,7 @@ public class Interpreter {
         return function.invoke(this, arg);
       } else if (target instanceof MultimethodObj) {
         MultimethodObj method = (MultimethodObj)target;
-        // TODO(bob): What about type args?
-        return method.invoke(this, mNothing, arg);
+        return method.invoke(this, mNothing, true, arg);
       } else {
         // We have an argument, but the receiver isn't a function, so send it a
         // "call" message instead. We'll in turn try to apply the result of
@@ -300,6 +299,25 @@ public class Interpreter {
     return apply(Position.none(), resolved, arg);
   }
 
+  public boolean objectsEqual(Obj a, Obj b) {
+    // Short-cuts to avoid infinite regress. Identical values always match, and
+    // "true" and "false" never match each other. This lets us match on values
+    // before truthiness or "==" have been bootstrapped.
+    if (a == b) return true;
+
+    if (a == mTrue && b == mFalse) return false;
+    if (a == mFalse && b == mTrue) return false;
+
+    Obj equals = getGlobal(Name.EQEQ);
+    
+    // Bootstrap short-cut. If we haven't defined "==" yet, default to identity.
+    if (equals == null) return a == b;
+    
+    Obj result = apply(Position.none(), equals, createTuple(a, b));
+    
+    return result.asBool();
+  }
+  
   public void print(String text) {
     mHost.print(text);
   }
@@ -334,9 +352,6 @@ public class Interpreter {
    * @return
    */
   public Obj nothing() { return mNothing; }
-
-  public Obj getTrue() { return mTrue; }
-  public Obj getFalse() { return mFalse; }
 
   public ClassObj getArrayClass() { return mArrayClass; }
   public ClassObj getBoolClass() { return mBoolClass; }

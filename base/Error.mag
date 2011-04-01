@@ -29,14 +29,13 @@ end
 class UnexpectedTypeError
     inherit(Error)
 
-    get string String =
-        "Expected a value of type " ~ expectedType ~ " but was " ~
-        actualType ~ "."
-    end
-
     var expectedType Type
     var actualType   Type
 end
+
+defineMultimethod("string", fn(this_ UnexpectedTypeError)
+    "Expected a value of type " ~ expectedType ~ " but was " ~ actualType ~ "."
+end)
 
 def shared UnexpectedTypeError new(expectedType Type, actualType Type)
     construct(expectedType: expectedType, actualType: actualType)

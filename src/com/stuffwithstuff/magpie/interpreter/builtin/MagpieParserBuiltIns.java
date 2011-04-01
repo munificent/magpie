@@ -5,6 +5,7 @@ import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.JavaToMagpie;
 import com.stuffwithstuff.magpie.interpreter.MagpieToJava;
+import com.stuffwithstuff.magpie.interpreter.MultimethodObj;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.parser.InfixParser;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
@@ -309,6 +310,13 @@ public class MagpieParserBuiltIns {
       // Ask the Magpie object.
       Obj stickiness = mInterpreter.getQualifiedMember(
           Position.none(), mParser, null, "stickiness");
+      
+      // TODO(bob): Hack temp for multimethods.
+      if (stickiness == mInterpreter.nothing()) {
+        MultimethodObj multi = (MultimethodObj)mInterpreter.getGlobal("stickiness");
+        stickiness = multi.invoke(mInterpreter, mParser, true, null);
+      }
+      
       return stickiness.asInt();
     }
     

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.FnExpr;
+import com.stuffwithstuff.magpie.util.Expect;
 
 // TODO(bob): This class is completely hacked together and comically slow. It's
 // barely even a proof of concept.
@@ -27,23 +28,39 @@ public class MultimethodObj extends Obj {
     mMethods.add(method);
   }
   
-  public Obj invoke(Interpreter interpreter, Obj receiver, Obj arg) {
-    // Combine the receiver and argument into a single object for the method.
-    Obj fullArg = interpreter.createTuple(receiver, arg);
-    FnExpr method = select(interpreter, fullArg);
+  public Obj invoke(Interpreter interpreter, Obj receiver, boolean isExplicit, Obj arg) {
+    // If we're given a right-hand argument, combine it with the receiver.
+    // If not, this is a getter-style multimethod.
+    Obj argTuple;
+    if (arg != null) {
+      argTuple = interpreter.createTuple(receiver, arg);
+    } else {
+      // The receiver is the entire argument.
+      argTuple = receiver;
+    }
+    FnExpr method = select(interpreter, argTuple);
+    
+    // If we couldn't find a method on the implicit receiver, see if there's a
+    // receiverless method available.
+    if ((method == null) && !isExplicit && (arg != null)) {
+      argTuple = interpreter.createTuple(interpreter.nothing(), arg);
+      method = select(interpreter, argTuple);
+    }
     
     if (method == null) {
       interpreter.error("NoMethodError", 
-          "Could not find a method to match argument " + arg + ".");
+          "Could not find a method to match argument " + argTuple + ".");
     }
 
     // TODO(bob): In-progress. Once everything is using multimethods, the
     // receiver won't need to be explicitly passed.
     Function function = new Function(interpreter.getGlobals(), null, method);
-    return function.invoke(interpreter, receiver, fullArg);
+    return function.invoke(interpreter, receiver, argTuple);
   }
   
   private FnExpr select(Interpreter interpreter, Obj arg) {
+    Expect.notNull(arg);
+    
     List<FnExpr> applicable = new ArrayList<FnExpr>();
     for (FnExpr method : mMethods) {
       // TODO(bob): Should this be a top level context?

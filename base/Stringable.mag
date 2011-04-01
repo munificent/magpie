@@ -12,7 +12,9 @@ end
 def prints(arg /*Stringable*/) printString(arg string)
 
 // Implement it for the built-in classes.
-get Object string String = "object"
-get String string String = this
-get Nothing string String = "nothing"
-get Class string String = name
+// TODO(bob): Uncomment this once we aren't using old style getters for any
+// other class's string property.
+//defineMultimethod("string", fn(any) "object")
+defineMultimethod("string", fn(this_ String) this)
+defineMultimethod("string", fn(this_ Nothing) "nothing")
+defineMultimethod("string", fn(this_ Class) name)

@@ -111,16 +111,19 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
         MultimethodObj multimethod = (MultimethodObj)variable;
         
         // Figure out the receiver.
+        boolean isExplicit;
         Obj receiver;
         if (target.getReceiver() == null) {
           receiver = context.getThis();
+          isExplicit = false;
         } else {
           receiver = evaluate(target.getReceiver(), context);
+          isExplicit = true;
         }
         Obj arg = evaluate(expr.getArg(), context);
         
         try {
-          return multimethod.invoke(mInterpreter, receiver, arg);
+          return multimethod.invoke(mInterpreter, receiver, isExplicit, arg);
         } catch (ErrorException error) {
           // If we didn't find a matching multimethod, call back to the old
           // code path.
@@ -129,6 +132,10 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
           }
         }
       }
+    }
+    
+    if (expr.getArg().toString().equals("TokenType line name")) {
+      System.out.println();
     }
     
     Obj target = evaluate(expr.getTarget(), context);
@@ -199,7 +206,34 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(MessageExpr expr, EvalContext context) {
-    Expect.notNull(context);
+    // TODO(bob): This is temp code for transitioning to multimethods. Once
+    // those are fully working, the AST should change and this should go away.
+    // See if we can find a matching multimethod first.
+    Obj maybeMulti = context.lookUp(expr.getName());
+    if (maybeMulti instanceof MultimethodObj) {
+      MultimethodObj multimethod = (MultimethodObj)maybeMulti;
+      
+      // Figure out the receiver.
+      Obj receiver;
+      boolean isExplicit;
+      if (expr.getReceiver() == null) {
+        receiver = context.getThis();
+        isExplicit = false;
+      } else {
+        receiver = evaluate(expr.getReceiver(), context);
+        isExplicit = true;
+      }
+      
+      try {
+        return multimethod.invoke(mInterpreter, receiver, isExplicit, null);
+      } catch (ErrorException error) {
+        // If we didn't find a matching multimethod, call back to the old
+        // code path.
+        if (!error.getError().getClassObj().getName().equals("NoMethodError")) {
+          throw error;
+        }
+      }
+    }
     
     Obj receiver = evaluate(expr.getReceiver(), context);
 
@@ -208,6 +242,10 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     if (receiver == null) {
       // Just a name, so maybe it's a variable.
       Obj variable = context.lookUp(expr.getName());
+      
+      // TODO(bob): Hack temp multimethods.
+      if (variable instanceof MultimethodObj) variable = null;
+      
       if (variable != null) return variable;
 
       // Otherwise it must be a property on this.

@@ -14,7 +14,7 @@ import com.stuffwithstuff.magpie.parser.ParseException;
  * Defines built-in methods that are available as top-level global functions.
  */
 public class BuiltInFunctions {
-  @Signature("defineMethod(name String, body ->)")
+  @Signature("defineMultimethod(name String, body ->)")
   public static class DefineMethod implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();

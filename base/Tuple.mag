@@ -1,17 +1,14 @@
 def Tuple iterate() TupleIterator new(this)
 
-// A tuple of Types is itself a Type.
-extend class Tuple
-    get string String =
-        var result = "("
+defineMultimethod("string", fn(this_ Tuple)
+    var result = "("
 
-        for field = this
-        for index = 0 to(count) do
-            result = result ~ field ~ if index < (count - 1) then ", " else ")"
-        end
-        result
+    for field = this
+    for index = 0 to(count) do
+        result = result ~ field ~ if index < (count - 1) then ", " else ")"
     end
-end
+    result
+end)
 
 def shared Tuple equal?(left Tuple, right Tuple)
     if left count != right count then return false

@@ -1,23 +1,19 @@
 class RecordPattern
-    get string String = "not impl"
 end
 
 RecordPattern declareField("fields", { List(String, Pattern) })
 
 class TuplePattern
-    get string String = String join(fields, ", ")
 end
 
 TuplePattern declareField("fields", { List(Pattern) })
 
 class ValuePattern
-    get string String = value string
 end
 
 ValuePattern declareField("value", { Expression })
 
 class VariablePattern
-    get string String = name concatenate(" ") concatenate(typeExpr string)
 end
 
 VariablePattern declareField("name", { String })

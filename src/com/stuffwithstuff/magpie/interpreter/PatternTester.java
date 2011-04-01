@@ -49,36 +49,7 @@ public class PatternTester implements PatternVisitor<Boolean, Obj> {
   public Boolean visit(ValuePattern pattern, Obj value) {
     Obj expected = mInterpreter.evaluate(pattern.getValue(), mContext);
     
-    // Special short-cut. If we're comparing to true or false and the value
-    // is the literal true or false, don't do a truthiness check at all. This
-    // short-cut is important because the implementation of "==" needs to be
-    // able to use conditional logic in it, which in turn becomes a pattern
-    // match leading to an infinite regress. With this short-cut, we can safely
-    // compare values boolean values to each other inside ==.
-    if ((expected == mInterpreter.getTrue() &&
-         value    == mInterpreter.getTrue()) ||
-        (expected == mInterpreter.getFalse() &&
-         value    == mInterpreter.getFalse())) {
-      return true;
-    }
-
-    if ((expected == mInterpreter.getTrue() &&
-         value    == mInterpreter.getFalse()) ||
-        (expected == mInterpreter.getFalse() &&
-         value    == mInterpreter.getTrue())) {
-     return false;
-   }
-
-    Obj equals = mContext.lookUp(Name.EQEQ);
-    
-    // Dodge circularity issue. If we haven't defined == yet, default to
-    // reference equality.
-    if (equals == null) return value == expected;
-    
-    Obj result = mInterpreter.apply(Position.none(), equals,
-        mInterpreter.createTuple(value, expected));
-    
-    return result.asBool();
+    return mInterpreter.objectsEqual(expected, value);
   }
 
   @Override
@@ -90,7 +61,9 @@ public class PatternTester implements PatternVisitor<Boolean, Obj> {
       Obj expected = mInterpreter.evaluate(pattern.getType(), mContext);
       
       // TODO(bob): Hack temp getting rid of types.
-      if (!(expected instanceof ClassObj)) throw new UnsupportedOperationException("should be class");
+      if (!(expected instanceof ClassObj)) {
+        throw new UnsupportedOperationException("should be class");
+      }
       
       return value.getClassObj().isSubclassOf((ClassObj)expected);
     }

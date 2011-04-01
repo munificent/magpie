@@ -97,7 +97,7 @@ public class MethodLinearizer implements Comparator<FnExpr> {
       else if (isRecord(pattern2)) return firstWins;
       else if (isTuple(pattern2))  return firstWins;
       else if (isType(pattern2))   return firstWins;
-      else if (isValue(pattern2))  throw ambiguous(pattern1, pattern2);
+      else if (isValue(pattern2))  return compareValues(pattern1, pattern2);
       else throw new UnsupportedOperationException("Unknown pattern type.");
     } else {
       throw new UnsupportedOperationException("Unknown pattern type.");
@@ -156,6 +156,19 @@ public class MethodLinearizer implements Comparator<FnExpr> {
     }
     
     throw new UnsupportedOperationException("Must be class now!");
+  }
+
+  private int compareValues(Pattern pattern1, Pattern pattern2) {
+    Obj value1 = mInterpreter.evaluate(PatternTyper.evaluate(pattern1));
+    Obj value2 = mInterpreter.evaluate(PatternTyper.evaluate(pattern2));
+    
+    // Identical values are ordered the same. This lets us have tuples with
+    // some identical value fields (like nothing) which are then sorted by
+    // other fields.
+    if (mInterpreter.objectsEqual(value1, value2)) return 0;
+    
+    // Any other paid of values can't be sorted.
+    throw ambiguous(pattern1, pattern2);
   }
   
   private ErrorException ambiguous(Pattern pattern1, Pattern pattern2) {

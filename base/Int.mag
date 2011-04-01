@@ -1,8 +1,7 @@
 // Add iterator methods on Ints.
-extend class Int
-    // TODO(bob): Use real int max.
-    get countingUp Range = Range new(this, 99999999)
-end
+// TODO(bob): Use real int max.
+// TODO(bob): Actual syntax for defining getters.
+defineMultimethod("countingUp", fn(this_ Int) Range new(this, 99999999))
 
 def Int times()
     Range new(0, this - 1)
