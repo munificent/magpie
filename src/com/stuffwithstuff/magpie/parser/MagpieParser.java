@@ -5,8 +5,6 @@ import java.util.*;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
-import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
-import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.util.Expect;
 import com.stuffwithstuff.magpie.util.Pair;
 
@@ -120,7 +118,7 @@ public class MagpieParser extends Parser {
     if (lookAheadAny(TokenType.LEFT_PAREN)) {
       pattern = parseFunctionType();
     } else {
-      pattern = new VariablePattern("_", null);
+      pattern = Pattern.wildcard();
     }
     
     // Parse the body.
@@ -142,7 +140,7 @@ public class MagpieParser extends Parser {
       pattern = PatternParser.parse(this);
     } else {
       // No pattern, so expect nothing.
-      pattern = new ValuePattern(Expr.nothing());
+      pattern = Pattern.nothing();
     }
 
     consume(TokenType.RIGHT_PAREN);
@@ -232,7 +230,7 @@ public class MagpieParser extends Parser {
           Expr valueExpr = Expr.name("err__");
           Expr elseExpr = Expr.message(valueExpr.getPosition(),
               Expr.name("Runtime"), "throw", valueExpr);
-          catches.add(new MatchCase(new VariablePattern("_", null), elseExpr));
+          catches.add(new MatchCase(elseExpr));
 
           catchExpr = Expr.match(span.end(), valueExpr, catches);
         }

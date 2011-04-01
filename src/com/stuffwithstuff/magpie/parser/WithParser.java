@@ -8,7 +8,6 @@ import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.NothingExpr;
 import com.stuffwithstuff.magpie.ast.TupleExpr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
-import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.interpreter.Name;
 
 public class WithParser extends InfixParser {
@@ -20,7 +19,7 @@ public class WithParser extends InfixParser {
       blockType = parser.parseFunctionType();
     } else {
       // Else just assume a single "it" parameter.
-      blockType = new VariablePattern(Name.IT, null);
+      blockType = Pattern.variable(Name.IT);
     }
 
     // Parse the block and wrap it in a function.

@@ -3,8 +3,8 @@ package com.stuffwithstuff.magpie.ast.pattern;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 
-public class ValuePattern implements Pattern {
-  public ValuePattern(Expr value) {
+public class ValuePattern extends Pattern {
+  ValuePattern(Expr value) {
     mValue = value;
   }
   

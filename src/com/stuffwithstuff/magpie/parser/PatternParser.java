@@ -5,10 +5,6 @@ import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
-import com.stuffwithstuff.magpie.ast.pattern.RecordPattern;
-import com.stuffwithstuff.magpie.ast.pattern.TuplePattern;
-import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
-import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.util.Pair;
 
 /**
@@ -55,7 +51,7 @@ public class PatternParser {
         fields.add(new Pair<String, Pattern>(name, value));
       } while (parser.match(TokenType.COMMA));
       
-      return new RecordPattern(fields);
+      return Pattern.record(fields);
     } else {
       List<Pattern> patterns = new ArrayList<Pattern>();
       do {
@@ -64,7 +60,7 @@ public class PatternParser {
       
       // Only wrap in a tuple if there are multiple fields.
       if (patterns.size() == 1) return patterns.get(0);
-      return new TuplePattern(patterns);
+      return Pattern.tuple(patterns);
     }
   }
   
@@ -92,7 +88,7 @@ public class PatternParser {
       type = parser.parseTypeAnnotation();
     }
     
-    return new VariablePattern(name, type);
+    return Pattern.variable(name, type);
   }
   
   private static Pattern value(MagpieParser parser) {
@@ -105,7 +101,7 @@ public class PatternParser {
     
     // Must just be a value.
     Expr expr = parser.parseTypeAnnotation();
-    return new ValuePattern(expr);
+    return Pattern.value(expr);
   }
   
   private PatternParser() {}

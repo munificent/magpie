@@ -26,6 +26,7 @@ public final class Name {
   public static final String ITERATE = "iterate";
   public static final String NEW = "new";
   public static final String NEXT = "next";
+  public static final String NOTHING = "nothing";
   public static final String RECEIVING = "receiving";
   public static final String STRING = "string";
 

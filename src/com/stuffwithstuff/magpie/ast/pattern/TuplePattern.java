@@ -4,8 +4,8 @@ import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 
-public class TuplePattern implements Pattern {
-  public TuplePattern(List<Pattern> fields) {
+public class TuplePattern extends Pattern {
+  TuplePattern(List<Pattern> fields) {
     mFields = fields;
   }
   

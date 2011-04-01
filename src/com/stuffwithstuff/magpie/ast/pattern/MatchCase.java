@@ -4,6 +4,10 @@ import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 
 public class MatchCase {
+  public MatchCase(Expr body) {
+    this(Pattern.wildcard(), body);
+  }
+  
   public MatchCase(Pattern pattern, Expr body) {
     mPattern = pattern;
     mBody = body;

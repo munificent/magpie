@@ -1,7 +1,6 @@
 package com.stuffwithstuff.magpie.ast;
 
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
-import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
 import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.util.Expect;
 
@@ -10,7 +9,7 @@ import com.stuffwithstuff.magpie.util.Expect;
  */
 public class FnExpr extends Expr {
   FnExpr(Position position, Expr body) {
-    this(position, new ValuePattern(Expr.name("nothing")), body);
+    this(position, Pattern.nothing(), body);
   }
   
   FnExpr(Position position, Pattern pattern, Expr body) {

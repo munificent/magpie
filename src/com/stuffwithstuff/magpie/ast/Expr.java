@@ -6,8 +6,6 @@ import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
-import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
-import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.util.Expect;
 import com.stuffwithstuff.magpie.util.Pair;
@@ -86,8 +84,8 @@ public abstract class Expr {
   // TODO(bob): Hackish. Eliminate.
   public static Expr if_(Expr condition, Expr thenExpr, Expr elseExpr) {
     List<MatchCase> cases = new ArrayList<MatchCase>();
-    cases.add(new MatchCase(new ValuePattern(Expr.bool(true)), thenExpr));
-    cases.add(new MatchCase(new VariablePattern("_", null), elseExpr));
+    cases.add(new MatchCase(Pattern.value(Expr.bool(true)), thenExpr));
+    cases.add(new MatchCase(elseExpr));
     
     return match(Position.surrounding(condition, elseExpr),
         condition,
@@ -179,7 +177,7 @@ public abstract class Expr {
   }
 
   public static Expr var(Position position, String name, Expr value) {
-    return var(position, new VariablePattern(name, null), value);
+    return var(position, Pattern.variable(name), value);
   }
   
   public static Expr var(Position position, Pattern pattern, Expr value) {

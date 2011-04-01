@@ -6,7 +6,6 @@ import java.lang.reflect.InvocationTargetException;
 import com.stuffwithstuff.magpie.StringCharacterReader;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
-import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.FnObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
@@ -244,7 +243,7 @@ public abstract class BuiltIns {
       Expr type = parser.parseTypeAnnotation();
       
       // TODO(bob): Hack temp multimethod stuff.
-      Pattern pattern = new VariablePattern("_", type);
+      Pattern pattern = Pattern.type(type);
       
       return new Pair<String, Pattern>(name, pattern);
     } catch (ParseException e) {

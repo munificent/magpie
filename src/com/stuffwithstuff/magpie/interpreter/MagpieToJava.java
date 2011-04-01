@@ -268,7 +268,7 @@ public class MagpieToJava {
       fields.add(new Pair<String, Pattern>(name, fieldPattern));
     }
     
-    return new RecordPattern(fields);
+    return Pattern.record(fields);
   }
   
   private Pattern convertTuplePattern(Obj pattern) {
@@ -278,16 +278,16 @@ public class MagpieToJava {
       fields.add(convertPattern(field));
     }
     
-    return new TuplePattern(fields);
+    return Pattern.tuple(fields);
   }
   
   private Pattern convertValuePattern(Obj pattern) {
-    return new ValuePattern(
+    return Pattern.value(
         getExpr(pattern, "value"));
   }
   
   private Pattern convertVariablePattern(Obj pattern) {
-    return new VariablePattern(
+    return Pattern.variable(
         getString(pattern, "name"),
         getExpr(pattern, "typeExpr"));
   }

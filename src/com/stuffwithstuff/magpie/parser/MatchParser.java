@@ -6,7 +6,6 @@ import java.util.List;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
-import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.util.Pair;
 
 public class MatchParser extends PrefixParser {
@@ -46,7 +45,7 @@ public class MatchParser extends PrefixParser {
     // Parse the else case, if present.
     if (parser.match("else")) {
       Expr elseCase = parser.parseEndBlock();
-      cases.add(new MatchCase(new VariablePattern("_", null), elseCase));
+      cases.add(new MatchCase(elseCase));
     }
     
     parser.consume(TokenType.LINE);

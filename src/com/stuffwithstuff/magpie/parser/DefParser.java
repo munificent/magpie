@@ -6,9 +6,6 @@ import java.util.List;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
-import com.stuffwithstuff.magpie.ast.pattern.TuplePattern;
-import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
-import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 
 /**
  * Parses a method definition.
@@ -34,19 +31,19 @@ public class DefParser extends PrefixParser {
       // class object.
       // TODO(bob): Mostly temp syntax...
       Expr classObj = Expr.name(parser.consume(TokenType.NAME).getString());
-      leftHandPattern = new ValuePattern(classObj);
+      leftHandPattern = Pattern.value(classObj);
       name = parser.consume(TokenType.NAME).getString();
     } else if (parser.lookAhead(TokenType.NAME, TokenType.LEFT_PAREN)) {
       // No receiver.
-      leftHandPattern = new ValuePattern(Expr.name("nothing"));
+      leftHandPattern = Pattern.nothing();
       name = parser.consume().getString();
     } else if (parser.match("this")) {
       // Any receiver.
-      leftHandPattern = new VariablePattern("this_", null);
+      leftHandPattern = Pattern.variable("this_");
       name = parser.consume(TokenType.NAME).getString();
     } else if (parser.match(TokenType.NAME)) {
       // Simple type receiver.
-      leftHandPattern = new VariablePattern("this_",
+      leftHandPattern = Pattern.variable("this_",
           Expr.name(parser.last(1).getString()));
       name = parser.consume(TokenType.NAME).getString();
     } else {
@@ -60,7 +57,7 @@ public class DefParser extends PrefixParser {
       rightHandPattern = PatternParser.parse(parser);
     } else {
       // () means no arguments allowed.
-      rightHandPattern = new ValuePattern(Expr.nothing());
+      rightHandPattern = Pattern.nothing();
     }
     parser.consume(TokenType.RIGHT_PAREN);
     
@@ -71,7 +68,7 @@ public class DefParser extends PrefixParser {
     List<Pattern> fields = new ArrayList<Pattern>();
     fields.add(leftHandPattern);
     fields.add(rightHandPattern);
-    Pattern pattern = new TuplePattern(fields);
+    Pattern pattern = Pattern.tuple(fields);
     
     FnExpr function = Expr.fn(token.getPosition(), pattern, body);
     

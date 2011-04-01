@@ -5,8 +5,8 @@ import java.util.List;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.util.Pair;
 
-public class RecordPattern implements Pattern {
-  public RecordPattern(List<Pair<String, Pattern>> fields) {
+public class RecordPattern extends Pattern {
+  RecordPattern(List<Pair<String, Pattern>> fields) {
     mFields = fields;
   }
   

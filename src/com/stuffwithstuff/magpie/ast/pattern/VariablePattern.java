@@ -3,7 +3,7 @@ package com.stuffwithstuff.magpie.ast.pattern;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 
-public class VariablePattern implements Pattern {
+public class VariablePattern extends Pattern {
   /**
    * A pattern that binds a variable. It may optionally require a pattern
    * to also match, for example "a Int" where "Int" is the pattern.
@@ -11,7 +11,7 @@ public class VariablePattern implements Pattern {
    * @param name
    * @param pattern
    */
-  public VariablePattern(String name, Expr type) {
+  VariablePattern(String name, Expr type) {
     mName = name;
     mType = type;
   }
