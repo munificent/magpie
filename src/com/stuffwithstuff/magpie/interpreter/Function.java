@@ -48,6 +48,9 @@ public class Function implements Callable {
     }
   }
   
+  @Override
+  public Pattern getPattern() { return mFunction.getPattern(); }
+  
   private final Scope mClosure;
   private final ClassObj mContainingClass;
   private final FnExpr mFunction;

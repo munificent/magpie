@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.stuffwithstuff.magpie.ast.FnExpr;
 import com.stuffwithstuff.magpie.util.Expect;
 
 // TODO(bob): This class is completely hacked together and comically slow. It's
@@ -22,9 +21,9 @@ public class MultimethodObj extends Obj {
     super(classObj);
   }
   
-  public List<FnExpr> getMethods() { return mMethods; }
+  public List<Callable> getMethods() { return mMethods; }
   
-  public void addMethod(FnExpr method) {
+  public void addMethod(Callable method) {
     mMethods.add(method);
   }
   
@@ -38,7 +37,7 @@ public class MultimethodObj extends Obj {
       // The receiver is the entire argument.
       argTuple = receiver;
     }
-    FnExpr method = select(interpreter, argTuple);
+    Callable method = select(interpreter, argTuple);
     
     // If we couldn't find a method on the implicit receiver, see if there's a
     // receiverless method available.
@@ -54,15 +53,14 @@ public class MultimethodObj extends Obj {
 
     // TODO(bob): In-progress. Once everything is using multimethods, the
     // receiver won't need to be explicitly passed.
-    Function function = new Function(interpreter.getGlobals(), null, method);
-    return function.invoke(interpreter, receiver, argTuple);
+    return method.invoke(interpreter, receiver, argTuple);
   }
   
-  private FnExpr select(Interpreter interpreter, Obj arg) {
+  private Callable select(Interpreter interpreter, Obj arg) {
     Expect.notNull(arg);
     
-    List<FnExpr> applicable = new ArrayList<FnExpr>();
-    for (FnExpr method : mMethods) {
+    List<Callable> applicable = new ArrayList<Callable>();
+    for (Callable method : mMethods) {
       // TODO(bob): Should this be a top level context?
       if (PatternTester.test(interpreter, method.getPattern(), arg,
             interpreter.createTopLevelContext())) {
@@ -77,10 +75,10 @@ public class MultimethodObj extends Obj {
     return applicable.get(0);
   }
 
-  private void linearize(Interpreter interpreter, List<FnExpr> methods) {
+  private void linearize(Interpreter interpreter, List<Callable> methods) {
     if (methods.size() <= 1) return;
     Collections.sort(methods, new MethodLinearizer(interpreter));
   }
   
-  private final List<FnExpr> mMethods = new ArrayList<FnExpr>();
+  private final List<Callable> mMethods = new ArrayList<Callable>();
 }

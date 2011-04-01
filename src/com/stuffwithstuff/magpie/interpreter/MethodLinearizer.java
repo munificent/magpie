@@ -2,7 +2,6 @@ package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.Comparator;
 
-import com.stuffwithstuff.magpie.ast.FnExpr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.RecordPattern;
 import com.stuffwithstuff.magpie.ast.pattern.TuplePattern;
@@ -48,13 +47,13 @@ import com.stuffwithstuff.magpie.util.NotImplementedException;
  * TODO(bob): What about OrTypes, function types, generics, and user-defined
  * types?
  */
-public class MethodLinearizer implements Comparator<FnExpr> {
+public class MethodLinearizer implements Comparator<Callable> {
   public MethodLinearizer(Interpreter interpreter) {
     mInterpreter = interpreter;
   }
 
   @Override
-  public int compare(FnExpr method1, FnExpr method2) {
+  public int compare(Callable method1, Callable method2) {
     return compare(method1.getPattern(),
                    method2.getPattern());
   }

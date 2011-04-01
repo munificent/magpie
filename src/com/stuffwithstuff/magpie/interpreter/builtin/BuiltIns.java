@@ -6,6 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import com.stuffwithstuff.magpie.StringCharacterReader;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
+import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.FnObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
@@ -62,7 +63,7 @@ public abstract class BuiltIns {
       BuiltInCallable callable = (BuiltInCallable) ctor.newInstance();
       
       // Define the function.
-      BuiltIn builtIn = new BuiltIn(callable);
+      BuiltIn builtIn = new BuiltIn(parsed.getValue(), callable);
       FnObj function = new FnObj(interpreter.getFunctionClass(),
           interpreter.nothing(), builtIn);
       interpreter.getGlobals().define(functionName, function);
@@ -103,7 +104,7 @@ public abstract class BuiltIns {
       BuiltInCallable callable = (BuiltInCallable) ctor.newInstance();
       
       // Define the method.
-      BuiltIn builtIn = new BuiltIn(callable);
+      BuiltIn builtIn = new BuiltIn(parsed.getValue(), callable);
       if (isShared) {
         classObj.getClassObj().getMembers().defineMethod(methodName, builtIn);
       } else {
@@ -134,9 +135,8 @@ public abstract class BuiltIns {
   private static void registerGetter(ClassObj classObj, Class innerClass,
       String signature) {
     try {
-      Pair<String, Expr> parsed = parseProperty(signature);
+      Pair<String, Pattern> parsed = parseProperty(signature);
       String methodName = parsed.getKey();
-      Expr type = parsed.getValue();
       
       // See if it's shared.
       boolean isShared = innerClass.getAnnotation(Shared.class) != null;
@@ -146,7 +146,7 @@ public abstract class BuiltIns {
       BuiltInCallable callable = (BuiltInCallable) ctor.newInstance();
 
       // Define the getter.
-      BuiltIn builtIn = new BuiltIn(callable);
+      BuiltIn builtIn = new BuiltIn(parsed.getValue(), callable);
       if (isShared) {
         classObj.getClassObj().getMembers().defineGetter(methodName, builtIn);
       } else {
@@ -177,9 +177,8 @@ public abstract class BuiltIns {
   private static void registerSetter(ClassObj classObj, Class innerClass,
       String signature) {
     try {
-      Pair<String, Expr> parsed = parseProperty(signature);
+      Pair<String, Pattern> parsed = parseProperty(signature);
       String methodName = parsed.getKey();
-      Expr type = parsed.getValue();
       
       // See if it's shared.
       boolean isShared = innerClass.getAnnotation(Shared.class) != null;
@@ -189,7 +188,7 @@ public abstract class BuiltIns {
       BuiltInCallable callable = (BuiltInCallable) ctor.newInstance();
 
       // Define the setter.
-      BuiltIn builtIn = new BuiltIn(callable);
+      BuiltIn builtIn = new BuiltIn(parsed.getValue(), callable);
       if (isShared) {
         classObj.getClassObj().getMembers().defineSetter(methodName, builtIn);
       } else {
@@ -235,7 +234,7 @@ public abstract class BuiltIns {
     return null;
   }
   
-  private static Pair<String, Expr> parseProperty(String signature) {
+  private static Pair<String, Pattern> parseProperty(String signature) {
     try {
       // Process the annotation to get the method's Magpie name and type
       // signature.
@@ -244,7 +243,10 @@ public abstract class BuiltIns {
       String name = parser.consume(TokenType.NAME).getString();
       Expr type = parser.parseTypeAnnotation();
       
-      return new Pair<String, Expr>(name, type);
+      // TODO(bob): Hack temp multimethod stuff.
+      Pattern pattern = new VariablePattern("_", type);
+      
+      return new Pair<String, Pattern>(name, pattern);
     } catch (ParseException e) {
       // TODO(bob): Hack. Better error handling.
       System.out.println("Could not parse built-in signature \"" +

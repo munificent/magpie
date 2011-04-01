@@ -20,7 +20,7 @@ public class BuiltInFunctions {
       String name = arg.getTupleField(0).asString();
       FnObj body = arg.getTupleField(1).asFn();
       
-      interpreter.defineMethod(name, body.getFunction().getFunction());
+      interpreter.defineMethod(name, body.getCallable());
       
       return interpreter.nothing();
     }

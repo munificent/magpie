@@ -88,9 +88,6 @@ public class Interpreter {
     mObjectClass = new ClassObj(objectMetaclass, "Object");
     mGlobalScope.define("Object", mObjectClass);
 
-    // Add a constructor so you can create new Objects.
-    mObjectClass.getMembers().defineMethod(Name.NEW, new ClassConstruct());
-    
     // The metaclass for Class. Contains the shared methods on Class, like "new"
     // for creating a new class.
     ClassObj classMetaclass = new ClassObj(mMetaclass, "ClassMetaclass");
@@ -367,7 +364,7 @@ public class Interpreter {
   public ClassObj getStringClass() { return mStringClass; }
   public ClassObj getTupleClass() { return mTupleClass; }
   
-  public void defineMethod(String name, FnExpr method) {
+  public void defineMethod(String name, Callable method) {
     Obj existing = mGlobalScope.get(name);
     if (existing != null && !(existing instanceof MultimethodObj)) {
       error("RedefinitionError", "Cannot define a method \"" + name +
@@ -487,7 +484,7 @@ public class Interpreter {
     ClassObj classObj = new ClassObj(metaclass, name);
     
     // Add the factory methods.
-    Callable construct = new ClassConstruct();
+    Callable construct = new ClassConstruct(classObj);
     metaclass.getMembers().defineMethod(Name.CONSTRUCT, construct);
     // By default, "new" just constructs too.
     metaclass.getMembers().defineMethod(Name.NEW, construct);
