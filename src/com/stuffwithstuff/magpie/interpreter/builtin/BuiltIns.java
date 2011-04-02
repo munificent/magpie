@@ -7,10 +7,10 @@ import com.stuffwithstuff.magpie.StringCharacterReader;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.MultimethodObj;
+import com.stuffwithstuff.magpie.parser.DefParser;
 import com.stuffwithstuff.magpie.parser.Lexer;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
 import com.stuffwithstuff.magpie.parser.ParseException;
-import com.stuffwithstuff.magpie.parser.TokenType;
 import com.stuffwithstuff.magpie.util.Pair;
 
 public abstract class BuiltIns {
@@ -65,20 +65,17 @@ public abstract class BuiltIns {
     }
   }
   
-  private static Pair<String, Pattern> parseSignature(String signature) {
+  private static Pair<String, Pattern> parseSignature(String text) {
     try {
       // Process the annotation to get the method's Magpie name and type
       // signature.
-      Lexer lexer = new Lexer("", new StringCharacterReader(signature));
+      Lexer lexer = new Lexer("", new StringCharacterReader(text));
       MagpieParser parser = new MagpieParser(lexer);
-      String name = parser.consume(TokenType.NAME).getString();
-      Pattern pattern = parser.parseFunctionType();
-      
-      return new Pair<String, Pattern>(name, pattern);
+      return DefParser.parseSignature(parser);
     } catch (ParseException e) {
       // TODO(bob): Hack. Better error handling.
       System.out.println("Could not parse built-in signature \"" +
-          signature + "\".");
+          text + "\".");
     }
     
     return null;

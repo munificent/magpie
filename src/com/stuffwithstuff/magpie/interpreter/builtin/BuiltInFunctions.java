@@ -33,14 +33,14 @@ public class BuiltInFunctions {
   }
   */
 
-  @Signature("string(any)")
+  @Signature("(this) string")
   public static class String_ implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       return interpreter.createString("<" + arg.getClassObj().getName() + ">");
     }
   }
 
-  @Signature("prints(nothing, text String)")
+  @Signature("prints(text String)")
   public static class Print implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       interpreter.print(arg.getTupleField(1).asString());
@@ -48,7 +48,7 @@ public class BuiltInFunctions {
     }
   }
   
-  @Signature("quit(nothing, nothing)")
+  @Signature("quit()")
   public static class Quit implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       throw new QuitException();

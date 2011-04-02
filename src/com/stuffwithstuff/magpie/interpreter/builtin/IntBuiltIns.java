@@ -32,7 +32,7 @@ public class IntBuiltIns {
   }
   */
   
-  @Signature("+(left Int, right Int)")
+  @Signature("(this Int) +(right Int)")
   public static class Add implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       int left = arg.getTupleField(0).asInt();
@@ -99,7 +99,7 @@ public class IntBuiltIns {
   }
   */
 
-  @Signature("string(this Int)")
+  @Signature("(this Int) string")
   public static class String_ implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       return interpreter.createString(Integer.toString(arg.asInt()));

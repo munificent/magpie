@@ -1,19 +1,14 @@
 package com.stuffwithstuff.magpie.parser;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
+import com.stuffwithstuff.magpie.util.Pair;
 
 /**
  * Parses a method definition.
  */
 public class DefParser implements PrefixParser {
-  @Override
-  public Expr parse(MagpieParser parser, Token token) {
-    PositionSpan span = parser.startBefore();
-    
+  public static Pair<String, Pattern> parseSignature(MagpieParser parser) {
     // No receiver:        def print(text String) -> ...
     // No arg method:      def (this String) reverse() -> ...
     // Shared method:      def (Int) parse(text String) -> ...
@@ -51,9 +46,6 @@ public class DefParser implements PrefixParser {
     if (parser.match("=")) {
       setValue = parsePattern(parser);
     }
-    
-    parser.consume("->");
-    Expr body = parser.parseEndBlock();
 
     // Combine into a single multimethod pattern.
     // def m(a)         -> m(nothing, a)
@@ -83,39 +75,28 @@ public class DefParser implements PrefixParser {
       }
     }
     
-    return Expr.method(span.end(), name, pattern, body);
+    return new Pair<String, Pattern>(name, pattern);
   }
   
-  private Pattern parsePattern(MagpieParser parser) {
+  @Override
+  public Expr parse(MagpieParser parser, Token token) {
+    PositionSpan span = parser.startBefore();
+    
+    Pair<String, Pattern> signature = parseSignature(parser);
+
+    parser.consume("->");
+    Expr body = parser.parseEndBlock();
+    
+    return Expr.method(span.end(), signature.getKey(), signature.getValue(),
+        body);
+  }
+  
+  private static Pattern parsePattern(MagpieParser parser) {
     parser.consume(TokenType.LEFT_PAREN);
     if (parser.match(TokenType.RIGHT_PAREN)) return Pattern.nothing();
     
     Pattern pattern = PatternParser.parse(parser);
     parser.consume(TokenType.RIGHT_PAREN);
     return pattern;
-  }
-  
-  private Expr parseBody(MagpieParser parser) {
-    parser.consume(TokenType.LEFT_BRACE);
-    
-    List<Expr> exprs = new ArrayList<Expr>();
-    
-    while (true) {
-      exprs.add(parser.parseExpression());
-      
-      if (parser.lookAhead(TokenType.RIGHT_BRACE)) break;
-      parser.consume(TokenType.LINE);
-      if (parser.lookAhead(TokenType.RIGHT_BRACE)) break;
-    }
-    
-    parser.consume(TokenType.RIGHT_BRACE);
-    
-    // TODO(bob): Catch clauses.
-
-    switch (exprs.size()) {
-    case 0: return Expr.nothing();
-    case 1: return exprs.get(0);
-    default: return Expr.block(exprs);
-    }
   }
 }

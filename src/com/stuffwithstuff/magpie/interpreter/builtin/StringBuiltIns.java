@@ -4,7 +4,7 @@ import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class StringBuiltIns {  
-  @Signature("+(left String, right String)")
+  @Signature("(this String) +(right String)")
   public static class Add implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       String left = arg.getTupleField(0).asString();
