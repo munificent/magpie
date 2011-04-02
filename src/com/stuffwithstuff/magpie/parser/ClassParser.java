@@ -133,7 +133,7 @@ public class ClassParser extends PrefixParser {
     
     // Parse the type annotation if there is one.
     Expr type;
-    if (parser.lookAhead("=")) {
+    if (parser.lookAhead("=") || parser.lookAhead(TokenType.LINE)) {
       type = Expr.nothing();
     } else {
       Expr typeExpr = parser.parseTypeAnnotation();

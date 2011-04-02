@@ -1,21 +1,28 @@
+class Pattern
+end
+
 class RecordPattern
 end
 
-RecordPattern declareField("fields", { List(String, Pattern) })
+RecordPattern parents add(Pattern)
+RecordPattern declareField("fields", nothing /*{ List(String, Pattern) }*/)
 
 class TuplePattern
 end
 
-TuplePattern declareField("fields", { List(Pattern) })
+TuplePattern parents add(Pattern)
+TuplePattern declareField("fields", nothing /*{ List(Pattern) }*/)
 
 class ValuePattern
 end
 
+ValuePattern parents add(Pattern)
 ValuePattern declareField("value", { Expression })
 
 class VariablePattern
 end
 
+VariablePattern parents add(Pattern)
 VariablePattern declareField("name", { String })
 VariablePattern declareField("typeExpr",
-    { OrType combine(Expression, Nothing) })
+    nothing /*{ OrType combine(Expression, Nothing) }*/)

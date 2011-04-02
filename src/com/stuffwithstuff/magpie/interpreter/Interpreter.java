@@ -291,6 +291,13 @@ public class Interpreter {
     Expect.notNull(receiver);
     Expect.notNull(arg);
     
+    // TODO(bob): Hack temp while moving to multimethods. Look for a
+    // multimethod first.
+    if (mGlobalScope.get(name) instanceof MultimethodObj) {
+      MultimethodObj multimethod = (MultimethodObj)mGlobalScope.get(name);
+      return multimethod.invoke(this, receiver, true, arg);
+    }
+    
     Obj resolved = getQualifiedMember(Position.none(), receiver, null, name);
     
     return apply(Position.none(), resolved, arg);
@@ -475,6 +482,9 @@ public class Interpreter {
   }
   
   public ClassObj createClass(String name) {
+    // TODO(bob): Since we can do value methods, metaclasses probably aren't
+    // needed. To make a "static method", just make a method that takes the
+    // class as a value.
     // Create the metaclass. This will hold shared methods on the class.
     ClassObj metaclass = new ClassObj(mClass, name + "Metaclass");
     metaclass.getParents().add(mClass);
@@ -485,13 +495,35 @@ public class Interpreter {
     
     // Add the factory methods.
     Callable construct = new ClassConstruct(classObj);
+    
+    MultimethodObj newMultimethod = getMultimethod("new");
+    newMultimethod.addMethod(construct);
+    
+    // TODO(bob): Now that methods can be overloaded, this can go away...
+    MultimethodObj constructMultimethod = getMultimethod("construct");
+    constructMultimethod.addMethod(construct);
+    
+    /*
     metaclass.getMembers().defineMethod(Name.CONSTRUCT, construct);
     // By default, "new" just constructs too.
     metaclass.getMembers().defineMethod(Name.NEW, construct);
-
+    */
+    
     return classObj;
   }
 
+  private MultimethodObj getMultimethod(String name) {
+    Obj obj = mGlobalScope.get(name);
+    
+    // Define it the first time if not found.
+    if (obj == null) {
+      obj = new MultimethodObj(mMultimethodClass);
+      mGlobalScope.define(name, obj);
+    }
+    
+    return (MultimethodObj)obj;
+  }
+  
   public ClassObj createGlobalClass(String name) {
     ClassObj classObj = createClass(name);
     mGlobalScope.define(name, classObj);

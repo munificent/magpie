@@ -6,9 +6,9 @@ class TestCallable
         returnValue
     end
 
-    var arg         Dynamic = nothing
-    var returnValue Dynamic
-    var called      Bool    = false
+    var arg = nothing
+    var returnValue
+    var called      Bool = false
 end
 
 def shared TestCallable new(returnValue)

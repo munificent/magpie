@@ -13,7 +13,14 @@ public class ClassBuiltIns {
   public static class DeclareField implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
       String name = arg.getTupleField(0).asString();
-      Expr type = MagpieToJava.convertExpr(interpreter, arg.getTupleField(1));
+      
+      Obj maybeType = arg.getTupleField(1);
+      Expr type;
+      if (maybeType != interpreter.nothing()) {
+        type = MagpieToJava.convertExpr(interpreter, maybeType);
+      } else {
+        type = null;
+      }
       
       ClassObj classObj = thisObj.asClass();
       classObj.declareField(name, type);

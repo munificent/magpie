@@ -9,8 +9,8 @@ Token defineGetter("intValue", fn value)
 Token defineGetter("stringValue", fn value)
 Token declareField("position", { Position })
 Token declareField("tokenType", { TokenType })
-Token declareField("value",
-    { OrType combine(OrType combine(OrType combine(Bool, Int), Nothing), String) })
+Token declareField("value", nothing
+    /*{ OrType combine(OrType combine(OrType combine(Bool, Int), Nothing), String) }*/)
 
 Token defineMethod("keyword?",
     // Note: no comparison operators are available yet.
