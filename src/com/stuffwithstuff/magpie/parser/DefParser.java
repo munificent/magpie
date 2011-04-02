@@ -4,75 +4,118 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.Expr;
-import com.stuffwithstuff.magpie.ast.FnExpr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 
 /**
  * Parses a method definition.
  */
-public class DefParser extends PrefixParser {
+public class DefParser implements PrefixParser {
   @Override
   public Expr parse(MagpieParser parser, Token token) {
-    // Receiver-less function:  def abs(value Int) Int
-    // Method on any receiver:  def this is(type Type) Bool
-    // No-arg method:           def String reverse() String
-    // Getter:                  def Point magnitude Int
-    // Setter:                  def Rect width Int =
-    // Assignment method:       def Array call(index Int) = Int
-    // Callable:                def String call(index Int) Char
+    PositionSpan span = parser.startBefore();
     
-    // TODO(bob): Support other method flavors...
-    Pattern leftHandPattern;
-    String name;
+    // No receiver:        def print(text String) -> ...
+    // No arg method:      def (this String) reverse() -> ...
+    // Shared method:      def (Int) parse(text String) -> ...
+    // Getter:             def (this String) count -> ...
+    // Method on anything: def (this) debugDump() -> ...
+    // Value receiver:     def (true) not() -> ...
+    // Value arg:          def fib(0) -> ...
+    // Constant receiver:  def (LEFT_PAREN) not() -> ...
+    // Constant arg:       def string(LEFT_PAREN) -> ...
+    // Setter:             def (this Person) name = (name String) -> ...
+    // Setter with arg:    def (this List) at(index Int) = (item) -> ...
+    // Complex receiver:   def (a Int, b Int) sum() -> ...
     
-    if (parser.match("shared")) {
-      // def shared Foo blah() ...
-      // Defines a shared method on Foo by specializing it on the value of the
-      // class object.
-      // TODO(bob): Mostly temp syntax...
-      Expr classObj = Expr.name(parser.consume(TokenType.NAME).getString());
-      leftHandPattern = Pattern.value(classObj);
-      name = parser.consume(TokenType.NAME).getString();
-    } else if (parser.lookAhead(TokenType.NAME, TokenType.LEFT_PAREN)) {
-      // No receiver.
-      leftHandPattern = Pattern.nothing();
-      name = parser.consume().getString();
-    } else if (parser.match("this")) {
-      // Any receiver.
-      leftHandPattern = Pattern.variable("this_");
-      name = parser.consume(TokenType.NAME).getString();
-    } else if (parser.match(TokenType.NAME)) {
-      // Simple type receiver.
-      leftHandPattern = Pattern.variable("this_",
-          Expr.name(parser.last(1).getString()));
-      name = parser.consume(TokenType.NAME).getString();
+    // Parse the receiver, if any.
+    Pattern receiver;
+    if (parser.lookAhead(TokenType.LEFT_PAREN)) {
+      receiver = parsePattern(parser);
     } else {
-      throw new ParseException("Don't know how to parse method.");
+      receiver = Pattern.nothing();
     }
-
-    // Parse the right-hand type signature.
-    parser.consume(TokenType.LEFT_PAREN);
-    Pattern rightHandPattern;
-    if (!parser.lookAhead(TokenType.RIGHT_PAREN)) {
-      rightHandPattern = PatternParser.parse(parser);
-    } else {
-      // () means no arguments allowed.
-      rightHandPattern = Pattern.nothing();
-    }
-    parser.consume(TokenType.RIGHT_PAREN);
     
-    // Parse the body.
+    // Parse the message.
+    String name = parser.consume(TokenType.NAME).getString();
+    
+    // Parse the argument, if any.
+    Pattern arg;
+    if (parser.lookAhead(TokenType.LEFT_PAREN)) {
+      arg = parsePattern(parser);
+    } else {
+      arg = null;
+    }
+    
+    // Parse the setter's rvalue type, if any.
+    Pattern setValue = null;
+    if (parser.match("=")) {
+      setValue = parsePattern(parser);
+    }
+    
+    parser.consume("->");
     Expr body = parser.parseEndBlock();
+
+    // Combine into a single multimethod pattern.
+    // def m(a)         -> m(nothing, a)
+    // def (r) m(a)     -> m(r, a)
+    // def (r) g        -> g(r)
+    // def (r) s = v    -> s=(r, v)
+    // def (r) s(a) = v -> s=(r, (a, v))
     
-    // Combine the left and right patterns.
-    List<Pattern> fields = new ArrayList<Pattern>();
-    fields.add(leftHandPattern);
-    fields.add(rightHandPattern);
-    Pattern pattern = Pattern.tuple(fields);
+    Pattern pattern;
+    if (arg == null) {
+      if (setValue == null) {
+        // Getter.
+        pattern = receiver;
+      } else {
+        // Setter.
+        pattern = Pattern.tuple(receiver, setValue);
+        name = name + "=";
+      }
+    } else {
+      if (setValue == null) {
+        // Method.
+        pattern = Pattern.tuple(receiver, arg);
+      } else {
+        // Setter with argument.
+        pattern = Pattern.tuple(receiver, Pattern.tuple(arg, setValue));
+        name = name + "=";
+      }
+    }
     
-    FnExpr function = Expr.fn(token.getPosition(), pattern, body);
+    return Expr.method(span.end(), name, pattern, body);
+  }
+  
+  private Pattern parsePattern(MagpieParser parser) {
+    parser.consume(TokenType.LEFT_PAREN);
+    if (parser.match(TokenType.RIGHT_PAREN)) return Pattern.nothing();
     
-    return Expr.message(token.getPosition(), null, "defineMultimethod",
-        Expr.tuple(Expr.string(name), function));
+    Pattern pattern = PatternParser.parse(parser);
+    parser.consume(TokenType.RIGHT_PAREN);
+    return pattern;
+  }
+  
+  private Expr parseBody(MagpieParser parser) {
+    parser.consume(TokenType.LEFT_BRACE);
+    
+    List<Expr> exprs = new ArrayList<Expr>();
+    
+    while (true) {
+      exprs.add(parser.parseExpression());
+      
+      if (parser.lookAhead(TokenType.RIGHT_BRACE)) break;
+      parser.consume(TokenType.LINE);
+      if (parser.lookAhead(TokenType.RIGHT_BRACE)) break;
+    }
+    
+    parser.consume(TokenType.RIGHT_BRACE);
+    
+    // TODO(bob): Catch clauses.
+
+    switch (exprs.size()) {
+    case 0: return Expr.nothing();
+    case 1: return exprs.get(0);
+    default: return Expr.block(exprs);
+    }
   }
 }

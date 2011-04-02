@@ -1,7 +1,6 @@
 package com.stuffwithstuff.magpie.parser;
 
-import com.stuffwithstuff.magpie.ast.Expr;
-
+/*
 public class ExtendParser extends PrefixParser {
   @Override
   public Expr parse(MagpieParser parser, Token token) {
@@ -9,3 +8,4 @@ public class ExtendParser extends PrefixParser {
     return ClassParser.parseClass(parser, true);
   }
 }
+*/

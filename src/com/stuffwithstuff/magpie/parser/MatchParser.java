@@ -8,11 +8,11 @@ import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.util.Pair;
 
-public class MatchParser extends PrefixParser {
+public class MatchParser implements PrefixParser {
   private static MatchCase parseCase(MagpieParser parser) {
     Pattern pattern = PatternParser.parse(parser);
 
-    parser.consume("then");
+    parser.consume("->");
     
     Pair<Expr, Token> bodyParse = parser.parseBlock("else", "end", "case");
     

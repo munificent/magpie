@@ -1,7 +1,6 @@
 package com.stuffwithstuff.magpie.parser;
 
 import com.stuffwithstuff.magpie.ast.*;
-import com.stuffwithstuff.magpie.interpreter.Name;
 
 /**
  * Converts an Expr to a Pattern with (more or less) the same structure. Used
@@ -36,15 +35,6 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
   }
 
   @Override
-  public Expr visit(CallExpr expr, Expr value) {
-    // example: array(3) = 4
-    // before:  Call(    Msg(null, "array"),                  Int(3))
-    // after:   Call(Msg(Msg(null, "array"), "assign"), Tuple(Int(3), Int(4)))
-    return Expr.message(expr.getPosition(), expr.getTarget(), Name.ASSIGN,
-        Expr.tuple(expr.getArg(), value));
-  }
-
-  @Override
   public Expr visit(FnExpr expr, Expr value) {
     return invalidExpression(expr);
   }
@@ -74,12 +64,12 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
   }
 
   @Override
-  public Expr visit(NothingExpr expr, Expr value) {
+  public Expr visit(MethodExpr expr, Expr value) {
     return invalidExpression(expr);
   }
 
   @Override
-  public Expr visit(QuotationExpr expr, Expr value) {
+  public Expr visit(NothingExpr expr, Expr value) {
     return invalidExpression(expr);
   }
 
@@ -105,25 +95,9 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
   }
 
   @Override
-  public Expr visit(ThisExpr expr, Expr value) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
   public Expr visit(TupleExpr expr, Expr value) {
     // TODO Auto-generated method stub
     return null;
-  }
-
-  @Override
-  public Expr visit(UnquoteExpr expr, Expr value) {
-    return invalidExpression(expr);
-  }
-
-  @Override
-  public Expr visit(UsingExpr expr, Expr value) {
-    return invalidExpression(expr);
   }
 
   @Override

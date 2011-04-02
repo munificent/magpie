@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 
-public class CommaParser extends InfixParser {
+public class CommaParser implements InfixParser {
   @Override
   public Expr parse(MagpieParser parser, Expr left, Token token) {
     // This gets called when the first "," so we have one field already and

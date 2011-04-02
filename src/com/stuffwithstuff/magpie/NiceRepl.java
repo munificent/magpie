@@ -18,7 +18,7 @@ public class NiceRepl extends Repl {
   @Override
   protected void printResult(String result) {
     Term.set(Term.ForeColor.GRAY);
-    System.out.print(" = ");
+    System.out.print("= ");
     Term.set(Term.ForeColor.GREEN);
     System.out.println(result);
     Term.restoreColor();
@@ -27,7 +27,7 @@ public class NiceRepl extends Repl {
   @Override
   protected void printError(String message) {
     Term.set(Term.ForeColor.RED);
-    System.out.println("!! " + message);
+    System.out.println("! " + message);
     Term.restoreColor();
   }
 }

@@ -23,7 +23,7 @@ public abstract class FieldProperty implements Callable {
   }
 
   @Override
-  public abstract Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg);
+  public abstract Obj invoke(Interpreter interpreter, Obj arg);
   
   @Override
   public Pattern getPattern() {

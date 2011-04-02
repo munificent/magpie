@@ -8,6 +8,6 @@ import com.stuffwithstuff.magpie.ast.pattern.Pattern;
  */
 public interface Callable {
   Callable bindTo(ClassObj classObj);
-  Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg);
+  Obj invoke(Interpreter interpreter, Obj arg);
   Pattern getPattern();
 }

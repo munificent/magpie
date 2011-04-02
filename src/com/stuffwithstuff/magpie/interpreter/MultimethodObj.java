@@ -51,9 +51,7 @@ public class MultimethodObj extends Obj {
           "Could not find a method to match argument " + argTuple + ".");
     }
 
-    // TODO(bob): In-progress. Once everything is using multimethods, the
-    // receiver won't need to be explicitly passed.
-    return method.invoke(interpreter, receiver, argTuple);
+    return method.invoke(interpreter, argTuple);
   }
   
   private Callable select(Interpreter interpreter, Obj arg) {

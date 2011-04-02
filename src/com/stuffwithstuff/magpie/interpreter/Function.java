@@ -26,12 +26,12 @@ public class Function implements Callable {
   }
 
   @Override
-  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+  public Obj invoke(Interpreter interpreter, Obj arg) {
     try {
       Profiler.push(mFunction.getPosition());
       
       // Create a local scope for the function.
-      EvalContext context = new EvalContext(mClosure, thisObj, mContainingClass).pushScope();
+      EvalContext context = new EvalContext(mClosure, mContainingClass).pushScope();
       
       // Bind the arguments bounds to the pattern.
       Pattern pattern = mFunction.getPattern();

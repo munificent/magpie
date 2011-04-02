@@ -6,6 +6,7 @@ import java.util.Map;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
+import com.stuffwithstuff.magpie.util.NotImplementedException;
 import com.stuffwithstuff.magpie.util.Pair;
 
 /**
@@ -38,9 +39,10 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       // Just a name, so maybe it's a local variable.
       if (context.assign(expr.getName(), value)) return value;
       // Otherwise it must be a property on this.
-      receiver = context.getThis();
+      receiver = context.lookUp("this");
     }
 
+    /*
     // Look for a setter.
     Member setter = mInterpreter.findMember(receiver.getClassObj(),
         context.getContainingClass(), expr.getName() + "_=");
@@ -51,6 +53,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
     setter.getDefinition().invoke(mInterpreter, receiver, value);
     return value;
+    */
+    throw new NotImplementedException();
   }
 
   @Override
@@ -94,6 +98,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     return mInterpreter.nothing();
   }
 
+  /*
   @Override
   public Obj visit(CallExpr expr, EvalContext context) {
     // TODO(bob): This is temp code for transitioning to multimethods. Once
@@ -142,7 +147,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
     return mInterpreter.apply(expr.getPosition(), target, arg);
   }
-
+  */
+  
   @Override
   public Obj visit(FnExpr expr, EvalContext context) {
     return mInterpreter.createFn(expr, context);
@@ -208,63 +214,63 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     // TODO(bob): This is temp code for transitioning to multimethods. Once
     // those are fully working, the AST should change and this should go away.
     // See if we can find a matching multimethod first.
-    Obj maybeMulti = context.lookUp(expr.getName());
-    if (maybeMulti instanceof MultimethodObj) {
-      MultimethodObj multimethod = (MultimethodObj)maybeMulti;
+    Obj variable = context.lookUp(expr.getName());
+    
+    if (variable instanceof MultimethodObj) {
+      MultimethodObj multimethod = (MultimethodObj)variable;
       
       // Figure out the receiver.
       Obj receiver;
       boolean isExplicit;
       if (expr.getReceiver() == null) {
-        receiver = context.getThis();
+        receiver = context.lookUp("this");
+        if (receiver == null) receiver = mInterpreter.nothing();
+        
         isExplicit = false;
       } else {
         receiver = evaluate(expr.getReceiver(), context);
         isExplicit = true;
       }
       
-      try {
-        return multimethod.invoke(mInterpreter, receiver, isExplicit, null);
-      } catch (ErrorException error) {
-        // If we didn't find a matching multimethod, call back to the old
-        // code path.
-        if (!error.getError().getClassObj().getName().equals("NoMethodError")) {
-          throw error;
-        }
-      }
+      Obj arg = evaluate(expr.getArg(), context);
+      
+      return multimethod.invoke(mInterpreter, receiver, isExplicit, arg);
     }
     
-    Obj receiver = evaluate(expr.getReceiver(), context);
-
-    // If there is an implicit receiver, try to determine who to send the
-    // message to.
-    if (receiver == null) {
-      // Just a name, so maybe it's a variable.
-      Obj variable = context.lookUp(expr.getName());
-      
-      // TODO(bob): Hack temp multimethods.
-      if (variable instanceof MultimethodObj) variable = null;
-      
-      if (variable != null) return variable;
-
-      // Otherwise it must be a property on this.
-      receiver = context.getThis();
+    // If it's a bare name, just return it.
+    if ((variable != null) &&
+        (expr.getReceiver() == null) &&
+        (expr.getArg() == null)) {
+      return variable;
     }
     
-    return mInterpreter.getMember(expr.getPosition(), receiver,
-        context.getContainingClass(),
-        expr.getName(), context.getScope().getNamespaces());
+    return mInterpreter.nothing();
+  }
+
+  @Override
+  public Obj visit(MethodExpr expr, EvalContext context) {
+    Obj existing = context.lookUpHere(expr.getName());
+    
+    MultimethodObj multimethod;    
+    if (existing == null) {
+      multimethod = mInterpreter.createMultimethod();
+      context.define(expr.getName(), multimethod);
+    } else if (!(existing instanceof MultimethodObj)) {
+      throw mInterpreter.error("RedefinitionError");
+    } else {
+      multimethod = (MultimethodObj)existing;
+    }
+    
+    Function function = new Function(context.getScope(), null,
+        Expr.fn(expr.getPosition(), expr.getPattern(), expr.getBody()));
+    multimethod.addMethod(function);
+    
+    return multimethod;
   }
 
   @Override
   public Obj visit(NothingExpr expr, EvalContext context) {
     return mInterpreter.nothing();
-  }
-
-  @Override
-  public Obj visit(QuotationExpr expr, EvalContext context) {
-    return JavaToMagpie.convertAndUnquote(
-        mInterpreter, expr.getBody(), context);
   }
 
   @Override
@@ -297,11 +303,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
-  public Obj visit(ThisExpr expr, EvalContext context) {
-    return context.getThis();
-  }
-
-  @Override
   public Obj visit(TupleExpr expr, EvalContext context) {
     // Evaluate the fields.
     Obj[] fields = new Obj[expr.getFields().size()];
@@ -310,18 +311,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     }
 
     return mInterpreter.createTuple(fields);
-  }
-
-  @Override
-  public Obj visit(UnquoteExpr expr, EvalContext context) {
-    throw new UnsupportedOperationException(
-        "An unquoted expression cannot be directly evaluated.");
-  }
-
-  @Override
-  public Obj visit(UsingExpr expr, EvalContext context) {
-    context.getScope().useNamespace(expr.getName());
-    return mInterpreter.nothing();
   }
 
   @Override

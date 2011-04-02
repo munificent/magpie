@@ -7,6 +7,7 @@ import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.util.NotImplementedException;
 
+/*
 public class ClassParser extends PrefixParser {
   public static Expr parseClass(MagpieParser parser, boolean isExtend) {
     Token nameToken = parser.parseName();
@@ -191,3 +192,4 @@ public class ClassParser extends PrefixParser {
     throw new NotImplementedException();
   }
 }
+*/

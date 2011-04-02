@@ -1,7 +1,6 @@
 package com.stuffwithstuff.magpie.interpreter;
 
 import com.stuffwithstuff.magpie.ast.pattern.*;
-import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.util.Pair;
 
 /**
@@ -13,8 +12,7 @@ public abstract class PatternBinderBase implements PatternVisitor<Void, Obj> {
     // Destructure each field.
     for (int i = 0; i < pattern.getFields().size(); i++) {
       Pair<String, Pattern> field = pattern.getFields().get(i);
-      Obj fieldValue = mInterpreter.getQualifiedMember(
-          Position.none(), value, null, field.getKey());
+      Obj fieldValue = value.getField(field.getKey());
       field.getValue().accept(this, fieldValue);
     }
     
@@ -26,8 +24,7 @@ public abstract class PatternBinderBase implements PatternVisitor<Void, Obj> {
     // Destructure each field.
     for (int i = 0; i < pattern.getFields().size(); i++) {
       Pattern fieldPattern = pattern.getFields().get(i);
-      Obj field = mInterpreter.getQualifiedMember(
-          Position.none(), value, null, Name.getTupleField(i));
+      Obj field = value.getTupleField(i);
       fieldPattern.accept(this, field);
     }
     

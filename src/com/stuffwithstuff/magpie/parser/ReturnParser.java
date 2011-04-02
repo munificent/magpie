@@ -3,7 +3,7 @@ package com.stuffwithstuff.magpie.parser;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.ReturnExpr;
 
-public class ReturnParser extends PrefixParser {
+public class ReturnParser implements PrefixParser {
   @Override
   public Expr parse(MagpieParser parser, Token token) {
     PositionSpan span = parser.startBefore();

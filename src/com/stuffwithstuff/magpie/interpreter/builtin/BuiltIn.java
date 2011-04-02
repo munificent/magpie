@@ -20,8 +20,8 @@ public class BuiltIn implements Callable {
   }
 
   @Override
-  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-    return mCallable.invoke(interpreter, thisObj, arg);
+  public Obj invoke(Interpreter interpreter, Obj arg) {
+    return mCallable.invoke(interpreter, arg);
   }
   
   @Override

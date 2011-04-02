@@ -7,7 +7,6 @@ import java.util.List;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.parser.Position;
-import com.stuffwithstuff.magpie.util.Expect;
 import com.stuffwithstuff.magpie.util.Pair;
 
 /**
@@ -62,13 +61,6 @@ public abstract class Expr {
     return new BreakExpr(position);
   }
   
-  public static Expr call(Expr target, Expr arg) {
-    Expect.notNull(target);
-    Expect.notNull(arg);
-    
-    return new CallExpr(target, arg);
-  }
-  
   public static FnExpr fn(Expr body) {
     return new FnExpr(Position.none(), body);
   }
@@ -110,19 +102,23 @@ public abstract class Expr {
   }
   
   public static Expr message(Position position, Expr receiver, String name, Expr arg) {
-    return call(message(position, receiver, name), arg);
+    return new MessageExpr(position, receiver, name, arg);
   }
   
   public static Expr message(Position position, Expr receiver, String name) {
-    return new MessageExpr(position, receiver, name);
+    return message(position, receiver, name, Expr.nothing());
+  }
+  
+  public static Expr method(Position position, String name, Pattern pattern, Expr body) {
+    return new MethodExpr(position, name, pattern, body);
   }
   
   public static Expr name(Position position, String name) {
-    return new MessageExpr(position, null, name);
+    return message(position, null, name, null);
   }
   
   public static Expr name(String name) {
-    return new MessageExpr(Position.none(), null, name);
+    return name(Position.none(), name);
   }
   
   public static Expr nothing() {
@@ -131,10 +127,6 @@ public abstract class Expr {
   
   public static Expr nothing(Position position) {
     return new NothingExpr(Position.none());  
-  }
-
-  public static Expr quote(Position position, Expr body) {
-    return new QuotationExpr(position, body);
   }
 
   public static Expr record(Position position,
@@ -156,20 +148,12 @@ public abstract class Expr {
     return new StringExpr(position, text);
   }
   
-  public static Expr this_(Position position) {
-    return new ThisExpr(position);  
-  }
-
   public static Expr tuple(List<Expr> fields) {
     return new TupleExpr(fields);
   }
 
   public static Expr tuple(Expr... fields) {
     return new TupleExpr(Arrays.asList(fields));
-  }
-
-  public static Expr using(Position position, String name) {
-    return new UsingExpr(position, name);
   }
 
   public static Expr var(String name, Expr value) {

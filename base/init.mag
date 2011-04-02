@@ -1,44 +1,15 @@
-// WARNING. This file and the files it imports bootstrap low-level things like
-// the type system and basic operators like == and <. The order that code is
-// evaluated here is significant, and subtle.
+def (this String) string -> this
+def (nothing)     string -> "nothing"
+def (true)        string -> "true"
+def (false)       string -> "false"
 
-// Implement Trueable for the built-in classes so we can evaluate conditionals.
-import("true.mag")
+def print()            -> prints("\n")
+def print(text String) -> prints(text +("\n"))
+def print(any)         -> print(any string)
 
-// Import the base classes used to implement the keyword parsers.
-import("syntax/Token.mag")
-import("syntax/patterns.mag")
+def not(true)  -> false
+def not(false) -> true
 
-// Define the parsers for the full Magpie syntax. Do these as early as possible
-// since it's a pain to not have them. These are ordered roughly in order of
-// what's most useful to have.
-import("syntax/parsing.mag")
-
-import("syntax/AndParser.mag")
-import("syntax/OrParser.mag")
-
-import("syntax/ClassParser.mag")
-import("syntax/IfParser.mag")
-
-import("syntax/OperatorParser.mag")
-
-// Need these so that we have == available as early as possible. Match
-// expressions use that to evaluate, and some of the parsers use those, so we
-// will need it to parse some files.
-import("operators.mag")
-
-// Define the "regular" base library stuff. This chunk should be relatively
-// straightforward.
-import("Array.mag")
-import("Class.mag")
-import("Int.mag")
-import("Record.mag")
-import("String.mag")
-import("Tuple.mag")
-import("Error.mag")
-import("Object.mag")
-
-// Finally, import stuff that just defines interfaces since they are only used
-// during type-checking.
-import("Stringable.mag")
-import("syntax/Expression.mag")
+// Make + default to string concatenation. We'll only hit this if both
+// arguments are not Ints.
+def (this) +(other) -> this string +(other string)

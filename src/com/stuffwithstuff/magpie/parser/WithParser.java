@@ -3,13 +3,13 @@ package com.stuffwithstuff.magpie.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.stuffwithstuff.magpie.ast.CallExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.NothingExpr;
 import com.stuffwithstuff.magpie.ast.TupleExpr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.Name;
 
+/*
 public class WithParser extends InfixParser {
   @Override
   public Expr parse(MagpieParser parser, Expr left, Token token) {
@@ -54,3 +54,4 @@ public class WithParser extends InfixParser {
     }
   }
 }
+*/

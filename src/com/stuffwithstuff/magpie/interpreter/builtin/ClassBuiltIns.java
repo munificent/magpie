@@ -1,34 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
-import com.stuffwithstuff.magpie.ast.Expr;
-import com.stuffwithstuff.magpie.interpreter.ClassObj;
-import com.stuffwithstuff.magpie.interpreter.MagpieToJava;
-import com.stuffwithstuff.magpie.interpreter.Field;
-import com.stuffwithstuff.magpie.interpreter.FnObj;
-import com.stuffwithstuff.magpie.interpreter.Interpreter;
-import com.stuffwithstuff.magpie.interpreter.Obj;
-
 public class ClassBuiltIns {
-  @Signature("declareField(name String, type Expression ->)")
-  public static class DeclareField implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      String name = arg.getTupleField(0).asString();
-      
-      Obj maybeType = arg.getTupleField(1);
-      Expr type;
-      if (maybeType != interpreter.nothing()) {
-        type = MagpieToJava.convertExpr(interpreter, maybeType);
-      } else {
-        type = null;
-      }
-      
-      ClassObj classObj = thisObj.asClass();
-      classObj.declareField(name, type);
-  
-      return interpreter.nothing();
-    }
-  }
-  
+  /*
   // TODO(bob): Get rid of type.
   @Signature("defineField(name String, initializer ->)")
   public static class DefineField implements BuiltInCallable {
@@ -136,4 +109,5 @@ public class ClassBuiltIns {
       return interpreter.createBool(derived.isSubclassOf(base));
     }
   }
+  */
 }

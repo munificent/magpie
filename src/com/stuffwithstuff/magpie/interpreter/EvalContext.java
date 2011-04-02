@@ -7,9 +7,8 @@ import java.util.Map.Entry;
  * lexical scope and the object that "this" refers to.
  */
 public class EvalContext {
-  public EvalContext(Scope scope, Obj thisObj, ClassObj containingClass) {
+  public EvalContext(Scope scope, ClassObj containingClass) {
     mScope = scope;
-    mThis = thisObj;
     mContainingClass = containingClass;
     mIsInLoop = false;
   }
@@ -18,14 +17,14 @@ public class EvalContext {
    * Creates an EvalContext for a new lexical block scope within this one.
    */
   public EvalContext pushScope() {
-    return new EvalContext(new Scope(mScope), mThis, mContainingClass, mIsInLoop);
+    return new EvalContext(new Scope(mScope), mContainingClass, mIsInLoop);
   }
   
   /**
    * Creates an EvalContext that discards the current innermost lexical scope.
    */
   public EvalContext popScope() {
-    return new EvalContext(mScope.getParent(), mThis, mContainingClass, mIsInLoop);
+    return new EvalContext(mScope.getParent(), mContainingClass, mIsInLoop);
   }
 
   /**
@@ -33,22 +32,12 @@ public class EvalContext {
    * loop.
    */
   public EvalContext enterLoop() {
-    return new EvalContext(mScope, mThis, mContainingClass, true);
+    return new EvalContext(mScope, mContainingClass, true);
   }
   
   public Scope   getScope() { return mScope; }
   public ClassObj getContainingClass() { return mContainingClass; }
 
-  public Obj getThis() {
-    // TODO(bob): Temp work-in-progress. Right now, multimethods bind the
-    // receiver to "this_". Once they are used for everything, the special
-    // "this" AST node can go away completely, and they can just bind to "this".
-    Obj tempThis = lookUp("this_");
-    if (tempThis != null) return tempThis;
-    
-    return mThis;
-  }
-  
   public boolean isInLoop() { return mIsInLoop; }
   
   /**
@@ -57,17 +46,19 @@ public class EvalContext {
    * @return       The value bound to that name, or null if not found.
    */
   public Obj lookUp(String name) {
-    if (!name.contains(".")) {
-      // An unqualified name, so walk the used namespaces first.
-      for (String namespace : mScope.getNamespaces()) {
-        Obj object = lookUpName(namespace + "." + name);
-        if (object != null) return object;
-      }
+    // Walk up the scope chain until we find it.
+    Scope scope = mScope;
+    while (scope != null) {
+      Obj value = scope.get(name);
+      if (value != null) return value;
+      scope = scope.getParent();
     }
     
-    // If we got here, it was already qualified, or wasn't in any namespace, so
-    // try the global one.
-    return lookUpName(name);
+    return null;
+  }
+  
+  public Obj lookUpHere(String name) {
+    return mScope.get(name);
   }
 
   /**
@@ -111,7 +102,6 @@ public class EvalContext {
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
-    builder.append("this -> ").append(mThis).append("\n");
     
     String indent = "";
     Scope scope = mScope;
@@ -128,27 +118,13 @@ public class EvalContext {
     return builder.toString();
   }
   
-  private Obj lookUpName(String name) {
-    // Walk up the scope chain until we find it.
-    Scope scope = mScope;
-    while (scope != null) {
-      Obj value = scope.get(name);
-      if (value != null) return value;
-      scope = scope.getParent();
-    }
-    
-    return null;
-  }
-  
-  private EvalContext(Scope scope, Obj thisObj, ClassObj containingClass, boolean isInLoop) {
+  private EvalContext(Scope scope, ClassObj containingClass, boolean isInLoop) {
     mScope = scope;
-    mThis = thisObj;
     mContainingClass = containingClass;
     mIsInLoop = isInLoop;
   }
 
-  private final Scope   mScope;
-  private final Obj     mThis;
+  private final Scope    mScope;
   private final ClassObj mContainingClass;
-  private final boolean mIsInLoop;
+  private final boolean  mIsInLoop;
 }

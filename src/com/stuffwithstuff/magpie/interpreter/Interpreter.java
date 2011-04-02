@@ -8,8 +8,6 @@ import com.stuffwithstuff.magpie.interpreter.builtin.*;
 import com.stuffwithstuff.magpie.parser.Grammar;
 import com.stuffwithstuff.magpie.parser.Lexer;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
-import com.stuffwithstuff.magpie.parser.Position;
-import com.stuffwithstuff.magpie.util.Expect;
 
 public class Interpreter {
   public Interpreter(InterpreterHost host) {
@@ -81,12 +79,6 @@ public class Interpreter {
     // metaclasses, including itself.
     mMetaclass = new ClassObj(null, "Metaclass");
     mMetaclass.bindClass(mMetaclass);
-    
-    // Define the main Object parent class. All classes will inherit this in so
-    // that the common methods like "string" are available everywhere.
-    ClassObj objectMetaclass = new ClassObj(mMetaclass, "ObjectMetaclass");
-    mObjectClass = new ClassObj(objectMetaclass, "Object");
-    mGlobalScope.define("Object", mObjectClass);
 
     // The metaclass for Class. Contains the shared methods on Class, like "new"
     // for creating a new class.
@@ -102,7 +94,6 @@ public class Interpreter {
     // it.
     mMetaclass.getParents().add(mClass);
     classMetaclass.getParents().add(mClass);
-    objectMetaclass.getParents().add(mClass);
     
     mArrayClass = createGlobalClass("Array");
     
@@ -113,44 +104,29 @@ public class Interpreter {
     mFnClass = createGlobalClass("Function");
     mMultimethodClass = createGlobalClass("Multimethod");
     mIntClass = createGlobalClass("Int");
-    mMagpieParserClass = createGlobalClass("MagpieParser");
     mRecordClass = createGlobalClass("Record");
-    mRuntimeClass = createGlobalClass("Runtime");
     mStringClass = createGlobalClass("String");
     
     mTupleClass = createGlobalClass("Tuple");
-    mTupleClass.getMembers().defineGetter("count", new FieldGetter("count"));
-
+    
     mNothingClass = createGlobalClass("Nothing");
     mNothing = instantiate(mNothingClass, null);
-
-    // "Never" is the evaluated type of an expression that can never yield a
-    // result. It's equivalent to the bottom type. More concretely, it's the
-    // type of a "return" expression, since a return will always unwind the
-    // stack instead of actually yielding a result. In other words, if you do:
-    //
-    //   foo(return 123)
-    //
-    // The type of value passed to "foo" is "Never", meaning that in this case,
-    // the call to "foo" will never occur since the return will unwind the
-    // stack.
-    mNeverClass = createGlobalClass("Never");
-
-    ClassObj reflectClass = createGlobalClass("Reflect");
     
     // Register the built-in methods.
+    /*
     BuiltIns.registerClass(ArrayBuiltIns.class, mArrayClass);
     BuiltIns.registerClass(BoolBuiltIns.class, mBoolClass);
     BuiltIns.registerClass(ClassBuiltIns.class, mClass);
     BuiltIns.registerClass(FunctionBuiltIns.class, mFnClass);
-    BuiltIns.registerClass(IntBuiltIns.class, mIntClass);
-    BuiltIns.registerClass(MagpieParserBuiltIns.class, mMagpieParserClass);
+    */
+    BuiltIns.registerMethods(IntBuiltIns.class, this);
+    /*
     BuiltIns.registerClass(MultimethodBuiltIns.class, mMultimethodClass);
-    BuiltIns.registerClass(ObjectBuiltIns.class, mObjectClass);
     BuiltIns.registerClass(ReflectBuiltIns.class, reflectClass);
     BuiltIns.registerClass(RuntimeBuiltIns.class, mRuntimeClass);
-    BuiltIns.registerClass(StringBuiltIns.class, mStringClass);
-    BuiltIns.registerFunctions(BuiltInFunctions.class, this);
+     */
+    BuiltIns.registerMethods(StringBuiltIns.class, this);
+    BuiltIns.registerMethods(BuiltInFunctions.class, this);
     
     EnvironmentBuilder.initialize(this);
   }
@@ -187,7 +163,7 @@ public class Interpreter {
       arg = createTuple(args);
     }
     
-    return invokeMethod(classObj, "new", arg);
+    return invoke(classObj, "new", arg);
   }
   
   public Obj getGlobal(String name) {
@@ -208,101 +184,14 @@ public class Interpreter {
     }
     
     Callable mainFn = ((FnObj)main).getCallable();
-    mainFn.invoke(this, mNothing, mNothing);
+    mainFn.invoke(this, mNothing);
   }
   
-  public Obj getQualifiedMember(Position position, Obj receiver, ClassObj containingClass,
-      String name) {
-    Obj member = lookupMember(position, receiver, containingClass, name);
-    if (member != null) return member;
-    
-    return mNothing;
+  public Obj invoke(Obj receiver, String method, Obj arg) {
+    MultimethodObj multimethod = (MultimethodObj)mGlobalScope.get(method);
+    return multimethod.invoke(this, receiver, true, arg);
   }
   
-  public Obj getMember(Position position, Obj receiver, ClassObj containingClass, String name,
-      Iterable<String> namespaces) {
-    Expect.notNull(receiver);
-    
-    if (Name.isPrivate(name)) {
-      // TODO(bob): Hackish.
-      String className = "__noClass__";
-      if (containingClass != null) className = containingClass.getName();
-      name = Name.makeClassPrivate(className, name);
-    }
-    
-    if (!name.contains(".")) {
-      // An unqualified name, so walk the used namespaces first.
-      for (String namespace : namespaces) {
-        Obj object = lookupMember(position, receiver, containingClass,
-            namespace + "." + name);
-        if (object != null) return object;
-      }
-    }
-    
-    // If we got here, it was already qualified, or wasn't in any namespace, so
-    // try the global one.
-    Obj object = lookupMember(position, receiver, containingClass, name);
-    if (object != null) return object;
-    
-    return mNothing;
-  }
-
-  public Obj apply(Position position, Obj target, Obj arg) {
-    Expect.notNull(target);
-    Expect.notNull(arg);
-    
-    while(true) {
-      if (target instanceof FnObj) {
-        FnObj function = (FnObj)target;
-        return function.invoke(this, arg);
-      } else if (target instanceof MultimethodObj) {
-        MultimethodObj method = (MultimethodObj)target;
-        return method.invoke(this, mNothing, true, arg);
-      } else {
-        // We have an argument, but the receiver isn't a function, so send it a
-        // "call" message instead. We'll in turn try to apply the result of
-        // that.
-        Obj newTarget = getQualifiedMember(position, target, null, Name.CALL);
-        
-        if (target == newTarget) {
-          // If we get here, we're in an infinite regress. Since we can't call
-          // the target directly, we're sending it a "call" message, but that's
-          // returning the exact same object (most likely 'nothing'), so we
-          // aren't making any progress. If that happens, fail.
-          throw error("BadCallError", position.toString());
-        }
-        
-        // Loop and try to apply the new target.
-        target = newTarget;
-      }
-    }
-  }
-
-  /**
-   * Invokes a named method on an object, passing in the given argument.
-   * 
-   * @param receiver   The object the method is being invoked on.
-   * @param name       The name of the method to invoke.
-   * @param arg        The argument passed to the method.
-   * @return           The result of invoking the method.
-   */
-  public Obj invokeMethod(Obj receiver, String name,
-      Obj arg) {
-    Expect.notNull(receiver);
-    Expect.notNull(arg);
-    
-    // TODO(bob): Hack temp while moving to multimethods. Look for a
-    // multimethod first.
-    if (mGlobalScope.get(name) instanceof MultimethodObj) {
-      MultimethodObj multimethod = (MultimethodObj)mGlobalScope.get(name);
-      return multimethod.invoke(this, receiver, true, arg);
-    }
-    
-    Obj resolved = getQualifiedMember(Position.none(), receiver, null, name);
-    
-    return apply(Position.none(), resolved, arg);
-  }
-
   public boolean objectsEqual(Obj a, Obj b) {
     // Short-cuts to avoid infinite regress. Identical values always match, and
     // "true" and "false" never match each other. This lets us match on values
@@ -317,7 +206,7 @@ public class Interpreter {
     // Bootstrap short-cut. If we haven't defined "==" yet, default to identity.
     if (equals == null) return a == b;
     
-    Obj result = apply(Position.none(), equals, createTuple(a, b));
+    Obj result = ((MultimethodObj)equals).invoke(this, null, false, createTuple(a, b));
     
     return result.asBool();
   }
@@ -346,7 +235,7 @@ public class Interpreter {
   }
   
   public EvalContext createTopLevelContext() {
-    return new EvalContext(mGlobalScope, mNothing, null);
+    return new EvalContext(mGlobalScope, null);
   }
   
   public Scope getGlobals() { return mGlobalScope; }
@@ -362,11 +251,8 @@ public class Interpreter {
   public ClassObj getFunctionClass() { return mFnClass; }
   public ClassObj getIntClass() { return mIntClass; }
   public ClassObj getMetaclass() { return mClass; }
-  public ClassObj getMagpieParserClass() { return mMagpieParserClass; }
   public ClassObj getMultimethodClass() { return mMultimethodClass; }
-  public ClassObj getNeverClass() { return mNeverClass; }
   public ClassObj getNothingClass() { return mNothingClass; }
-  public ClassObj getObjectClass() { return mObjectClass; }
   public ClassObj getRecordClass() { return mRecordClass; }
   public ClassObj getStringClass() { return mStringClass; }
   public ClassObj getTupleClass() { return mTupleClass; }
@@ -401,13 +287,17 @@ public class Interpreter {
   public Obj createInt(int value) {
     return instantiate(mIntClass, value);
   }
+
+  public MultimethodObj createMultimethod() {
+    return new MultimethodObj(mMultimethodClass);
+  }
   
   public Obj createString(String value) {
     return instantiate(mStringClass, value);
   }
   
   public FnObj createFn(FnExpr expr, EvalContext context) {
-    return new FnObj(mFnClass, context.getThis(),
+    return new FnObj(mFnClass,
         new Function(context.getScope(), context.getContainingClass(), expr));
   }
   
@@ -444,7 +334,7 @@ public class Interpreter {
     for (Entry<String, Field> field : classObj.getFieldDefinitions().entrySet()) {
       if (field.getValue().hasInitializer()) {
         Callable initializer = field.getValue().getInitializer();
-        Obj value = initializer.invoke(this, mNothing, mNothing);
+        Obj value = initializer.invoke(this, mNothing);
         object.setField(field.getKey(), value);
       }
     }
@@ -458,7 +348,7 @@ public class Interpreter {
   }
   
   public String evaluateToString(Obj value) {
-    return getQualifiedMember(Position.none(), value, null, Name.STRING).asString();
+    return invoke(value, Name.STRING, null).asString();
   }
 
   public void pushScriptPath(String path) {
@@ -503,16 +393,10 @@ public class Interpreter {
     MultimethodObj constructMultimethod = getMultimethod("construct");
     constructMultimethod.addMethod(construct);
     
-    /*
-    metaclass.getMembers().defineMethod(Name.CONSTRUCT, construct);
-    // By default, "new" just constructs too.
-    metaclass.getMembers().defineMethod(Name.NEW, construct);
-    */
-    
     return classObj;
   }
 
-  private MultimethodObj getMultimethod(String name) {
+  public MultimethodObj getMultimethod(String name) {
     Obj obj = mGlobalScope.get(name);
     
     // Define it the first time if not found.
@@ -530,54 +414,6 @@ public class Interpreter {
     return classObj;
   }
   
-  public Member findMember(ClassObj classObj, ClassObj containingClass,
-      String name) {
-    Member member = classObj.findMember(containingClass, name);
-    if (member != null) return member;
-    
-    // Not found on the class or its parents, so default to Object.
-    // TODO(bob): Once we've got multimethods working all of the methods on
-    // Object should become methods specialized on Any, and this can go away
-    // completely.
-    return mObjectClass.findMember(containingClass, name);
-  }
-  
-  private Obj lookupMember(Position position, Obj receiver, ClassObj containingClass,
-      String name) {
-    Expect.notNull(receiver);
-    
-    // Look for a getter.
-    Member member = findMember(receiver.getClassObj(), containingClass, name);
-    if (member != null) {
-      switch (member.getType()) {
-      case GETTER:
-        return member.getDefinition().invoke(this, receiver, mNothing);
-        
-      case METHOD:
-        // Bind it to the receiver.
-        return new FnObj(mFnClass, receiver, member.getDefinition());
-        
-      // TODO(bob): What about setters here?
-      }
-    }
-   
-    // Look for a field.
-    if (!Name.isPrivate(name)) {
-      Obj value = receiver.getField(name);
-      if (value != null) return value;
-    }
-    
-    // Hackish. Let objects act like tuples of arity 1 by having a member with
-    // the name of the first tuple field just default to returning the object.
-    // TODO(bob): Cleaner solution.
-    if (name.equals(Name.getTupleField(0))) {
-      return receiver;
-    }
-    
-    // If we get here, it wasn't found.
-    return null;
-  }
-  
   private final InterpreterHost mHost;
   private Scope mGlobalScope;
   private final ClassObj mClass;
@@ -587,12 +423,8 @@ public class Interpreter {
   private final ClassObj mMultimethodClass;
   private final ClassObj mIntClass;
   private final ClassObj mMetaclass;
-  private final ClassObj mMagpieParserClass;
   private final ClassObj mNothingClass;
-  private final ClassObj mNeverClass;
-  private final ClassObj mObjectClass;
   private final ClassObj mRecordClass;
-  private final ClassObj mRuntimeClass;
   private final ClassObj mStringClass;
   private final ClassObj mTupleClass;
   

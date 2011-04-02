@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie.parser;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
@@ -147,18 +148,6 @@ public class MagpieParser extends Parser {
     
     return pattern;
   }
-  
-  public boolean inQuotation() {
-    return mQuoteDepth > 0;
-  }
-  
-  public void pushQuote() {
-    mQuoteDepth++;
-  }
-  
-  public void popQuote() {
-    mQuoteDepth--;
-  }
 
   public Expr groupExpression(TokenType right) {
     PositionSpan span = startBefore();
@@ -246,7 +235,7 @@ public class MagpieParser extends Parser {
   private MatchCase parseCatch(String[] endKeywords, TokenType[] endTokens) {
     Pattern pattern = PatternParser.parse(this);
 
-    consume("then");
+    consume("->");
 
     Pair<Expr, Token> body = parseBlock(false, endKeywords, endTokens);
 
@@ -259,12 +248,5 @@ public class MagpieParser extends Parser {
   }
 
   private final Grammar mGrammar;
-
-  // Counts the number of nested expression literals the parser is currently
-  // within. Zero means the parser is not inside an expression literal at all
-  // (i.e. in regular code). It will be one at the "here" token in "{ here }".
-  // Used to determine when an unquote expression is allowed.
-  private int mQuoteDepth;
-
   private int mUniqueSymbolId = 0;
 }

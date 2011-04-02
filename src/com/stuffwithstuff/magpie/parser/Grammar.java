@@ -10,35 +10,26 @@ public class Grammar {
     mPrefixParsers.define(TokenType.INT, new LiteralParser());
     mPrefixParsers.define(TokenType.STRING, new LiteralParser());
     mPrefixParsers.define(TokenType.LEFT_PAREN, new ParenthesisPrefixParser());
-    mPrefixParsers.define(TokenType.LEFT_BRACE, new BraceParser());
-    mPrefixParsers.define(TokenType.BACKTICK, new BacktickParser());
-    mPrefixParsers.define(TokenType.NAME, new MessagePrefixParser());
+    mPrefixParsers.define(TokenType.NAME, new MessageParser());
     mPrefixParsers.define(TokenType.FIELD, new FieldParser());
     mPrefixParsers.define("break", new BreakParser());
     mPrefixParsers.define("def", new DefParser());
     mPrefixParsers.define("fn", new FnParser());
     mPrefixParsers.define("nothing", new NothingParser());
     mPrefixParsers.define("return", new ReturnParser());
-    mPrefixParsers.define("this", new ThisParser());
-    mPrefixParsers.define("using", new UsingParser());
     mPrefixParsers.define("var", new VarParser());
 
-    mInfixParsers.define(TokenType.LEFT_PAREN, new ParenthesisInfixParser());
-    mInfixParsers.define(TokenType.NAME, new MessageInfixParser());
-    mInfixParsers.define("with", new WithParser());
+    mInfixParsers.define(TokenType.NAME, new MessageParser());
     mInfixParsers.define(TokenType.COMMA, new CommaParser());
     mInfixParsers.define("=", new EqualsParser());
 
-    // Register the parsers for the different keywords.
-    // TODO(bob): Eventually these should all go away.
     mPrefixParsers.define("match", new MatchParser());
     mPrefixParsers.define("for", new LoopParser());
     mPrefixParsers.define("while", new LoopParser());
 
     mPrefixParsers.define("do", new DoParser());
-    mPrefixParsers.define("class", new ClassParser());
-    mPrefixParsers.define("extend", new ExtendParser());
     
+    mReservedWords.add("->");
     mReservedWords.add("case");
     mReservedWords.add("catch");
     mReservedWords.add("then");    

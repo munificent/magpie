@@ -44,10 +44,10 @@ public class ReplCharacterReader implements CharacterReader {
 
   private void readLine() {
     if (mFirstLine) {
-      System.out.print(">> ");
+      System.out.print("> ");
       mFirstLine = false;
     } else {
-      System.out.print(" | ");
+      System.out.print("| ");
     }
     
     try {

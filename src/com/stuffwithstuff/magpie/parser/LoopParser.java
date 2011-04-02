@@ -7,7 +7,7 @@ import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.Name;
 
-public class LoopParser extends PrefixParser {
+public class LoopParser implements PrefixParser {
   @Override
   public Expr parse(MagpieParser parser, Token token) {
     // "while" and "for" loop.
@@ -79,7 +79,7 @@ public class LoopParser extends PrefixParser {
     }
     
     parser.consume("do");
-    Expr body = parser.parseEndBlock();
+    Expr body = parser.parseExpression();
 
     // Build the loop body.
     List<Expr> loopBlock = new ArrayList<Expr>();

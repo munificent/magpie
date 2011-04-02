@@ -13,8 +13,8 @@ public class FieldSetter extends FieldProperty implements Callable {
   }
   
   @Override
-  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-    thisObj.setField(getName(), arg);
+  public Obj invoke(Interpreter interpreter, Obj arg) {
+    arg.getTupleField(0).setField(getName(), arg.getTupleField(1));
     return arg;
   }
 }

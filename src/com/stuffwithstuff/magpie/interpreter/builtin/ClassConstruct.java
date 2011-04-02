@@ -28,17 +28,15 @@ public class ClassConstruct implements Callable {
   }
 
   @Override
-  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+  public Obj invoke(Interpreter interpreter, Obj arg) {
     // TODO(bob): Hack temp. This is called from multimethod, so arg is a tuple
     // of both receiver and right-hand arg. We just want right-hand.
     arg = arg.getTupleField(1);
     
-    ClassObj classObj = thisObj.asClass();
-    
-    Obj obj = interpreter.instantiate(classObj, null);
+    Obj obj = interpreter.instantiate(mClass, null);
 
     // Initialize or assign the fields.
-    for (Entry<String, Field> field : classObj.getFieldDefinitions().entrySet()) {
+    for (Entry<String, Field> field : mClass.getFieldDefinitions().entrySet()) {
       if (!field.getValue().hasInitializer()) {
         // Assign it from the record.
         Obj value = arg.getField(field.getKey());

@@ -77,27 +77,37 @@ public class PatternParser {
       }
     }
     
-    // If we don't have a name, it must be a value pattern.
+    // If we don't have a name, it must be a primary pattern.
     if (name == null) {
-      return value(parser);
+      return primary(parser);
     }
     
     // See if there is a type for the variable.
     Expr type = null;
-    if (parser.lookAheadAny(TokenType.NAME, TokenType.LEFT_PAREN)) {
-      type = parser.parseTypeAnnotation();
+    if (parser.match(TokenType.NAME)) {
+      type = Expr.name(parser.last(1).getString());
     }
     
     return Pattern.variable(name, type);
   }
   
-  private static Pattern value(MagpieParser parser) {
-    // See if it's a nested pattern.
-    if (parser.match(TokenType.LEFT_PAREN)) {
+  private static Pattern primary(MagpieParser parser) {
+    if (parser.match(TokenType.BOOL)) {
+      return Pattern.value(Expr.bool(parser.last(1).getBool()));
+    } else if (parser.match(TokenType.INT)) {
+      return Pattern.value(Expr.int_(parser.last(1).getInt()));
+    } else if (parser.match(TokenType.STRING)) {
+      return Pattern.value(Expr.string(parser.last(1).getString()));
+    } else if (parser.match(TokenType.NAME)) {
+      return Pattern.value(Expr.name(parser.last(1).getString()));
+    } else if (parser.match(TokenType.LEFT_PAREN)) {
+      // Nested pattern.
       Pattern inner = composite(parser);
       parser.consume(TokenType.RIGHT_PAREN);
       return inner;
     }
+    
+    // TODO(bob): Figure out how constants should be handled.
     
     // Must just be a value.
     Expr expr = parser.parseTypeAnnotation();

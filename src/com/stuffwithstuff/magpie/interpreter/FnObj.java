@@ -13,10 +13,9 @@ public class FnObj extends Obj {
    *                     a method, this will be the receiver.
    * @param callable
    */
-  public FnObj(ClassObj classObj, Obj thisObj, Callable callable) {
+  public FnObj(ClassObj classObj, Callable callable) {
     super(classObj);
     
-    mThis = thisObj;
     mCallable = callable;
   }
 
@@ -29,9 +28,8 @@ public class FnObj extends Obj {
   }
   
   public Obj invoke(Interpreter interpreter, Obj arg) {
-    return mCallable.invoke(interpreter, mThis, arg);
+    return mCallable.invoke(interpreter, arg);
   }
   
-  private final Obj mThis;
   private final Callable mCallable;
 }

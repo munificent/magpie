@@ -59,30 +59,7 @@ public class Scope {
     return mVariables.entrySet();
   }
   
-  public void useNamespace(String name) {
-    mNamespaces.add(name);
-  }
-
-  public Iterable<String> getNamespaces() {
-    List<String> namespaces = new ArrayList<String>();
-    
-    // Check the namespaces in reverse order that they were added, and walking
-    // up from child to parent scope.
-    Scope scope = this;
-    while (scope != null) {
-      // Iterate in reverse order so that the last added namespace gets
-      // searched first.
-      for (int i = scope.mNamespaces.size() - 1; i >= 0; i--) {
-        namespaces.add(scope.mNamespaces.get(i));
-      }
-      scope = scope.mParent;
-    }
-    
-    return namespaces;
-  }
-  
   private final boolean mAllowRedefinition;
   private final Scope mParent;
   private final Map<String, Obj> mVariables = new HashMap<String, Obj>();
-  private final List<String> mNamespaces = new ArrayList<String>();
 }

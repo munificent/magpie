@@ -1,12 +1,20 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
-public class StringBuiltIns {
+public class StringBuiltIns {  
+  @Signature("+(left String, right String)")
+  public static class Add implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj arg) {
+      String left = arg.getTupleField(0).asString();
+      String right = arg.getTupleField(1).asString();
+      
+      return interpreter.createString(left + right);
+    }
+  }
+
+  /*
   @Signature("call(index Int -> String)")
   public static class Call implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
@@ -94,4 +102,5 @@ public class StringBuiltIns {
       }
     }
   }
+  */
 }

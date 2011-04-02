@@ -2,7 +2,7 @@ package com.stuffwithstuff.magpie.parser;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 
-public class LiteralParser extends PrefixParser {
+public class LiteralParser implements PrefixParser {
   @Override
   public Expr parse(MagpieParser parser, Token token) {
     switch (token.getType()) {

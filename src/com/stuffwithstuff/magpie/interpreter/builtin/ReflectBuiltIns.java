@@ -1,9 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
-import com.stuffwithstuff.magpie.interpreter.Interpreter;
-import com.stuffwithstuff.magpie.interpreter.Obj;
-
 public class ReflectBuiltIns {
+  /*
   @Shared
   @Signature("same?(a, b -> Bool)")
   public static class Same implements BuiltInCallable {
@@ -22,4 +20,5 @@ public class ReflectBuiltIns {
       return arg.getClassObj();
     }
   }
+  */
 }

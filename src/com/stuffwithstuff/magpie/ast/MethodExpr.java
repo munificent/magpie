@@ -1,13 +1,18 @@
 package com.stuffwithstuff.magpie.ast;
 
+import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.parser.Position;
 
-public class UnquoteExpr extends Expr {
-  public UnquoteExpr(Position position, Expr body) {
+public class MethodExpr extends Expr {
+  MethodExpr(Position position, String name, Pattern pattern, Expr body) {
     super(position);
+    mName = name;
+    mPattern = pattern;
     mBody = body;
   }
   
+  public String getName() { return mName; }
+  public Pattern getPattern() { return mPattern; }
   public Expr getBody() { return mBody; }
   
   @Override
@@ -17,10 +22,10 @@ public class UnquoteExpr extends Expr {
 
   @Override
   public void toString(StringBuilder builder, String indent) {
-    builder.append("`(");
-    mBody.toString(builder, indent);
-    builder.append(")");
+    builder.append("not impl");
   }
-  
+
+  private final String mName;
+  private final Pattern mPattern;
   private final Expr mBody;
 }

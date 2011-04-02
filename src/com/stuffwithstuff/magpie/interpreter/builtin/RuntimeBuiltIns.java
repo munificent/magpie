@@ -1,12 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
-import java.util.Map.Entry;
-
-import com.stuffwithstuff.magpie.interpreter.ErrorException;
-import com.stuffwithstuff.magpie.interpreter.Interpreter;
-import com.stuffwithstuff.magpie.interpreter.Obj;
-
 public class RuntimeBuiltIns {
+  /*
   // TODO(bob): All of these are pretty hacked together. Need to rationalize
   // the scope for these and clean them up.
   
@@ -62,4 +57,5 @@ public class RuntimeBuiltIns {
       dumpObject(builder, field.getValue(), field.getKey(), indent + "  ");
     }
   }
+  */
 }

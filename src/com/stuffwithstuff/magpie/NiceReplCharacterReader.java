@@ -51,11 +51,11 @@ public class NiceReplCharacterReader implements CharacterReader {
   }
 
   private void readLine() {
-    String prompt = ">> ";
+    String prompt = "> ";
     if (mFirstLine) {
       mFirstLine = false;
     } else {
-      prompt = " | ";
+      prompt = "| ";
     }
     
     Term.set(Term.ForeColor.GRAY);

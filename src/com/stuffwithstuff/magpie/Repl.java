@@ -69,11 +69,11 @@ public class Repl implements InterpreterHost {
   }
   
   protected void printResult(String result) {
-    System.out.print(" = ");
+    System.out.print("= ");
     System.out.println(result);
   }
   
   protected void printError(String message) {
-    System.out.println("!! " + message);
+    System.out.println("! " + message);
   }
 }

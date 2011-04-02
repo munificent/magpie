@@ -4,6 +4,7 @@ import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class IntBuiltIns {
+  /*
   @Shared
   @Signature("parse(text String -> Int)")
   public static class Parse implements BuiltInCallable {
@@ -29,11 +30,11 @@ public class IntBuiltIns {
       return interpreter.createBool(left == right);
     }
   }
+  */
   
-  @Shared
-  @Signature("add(left Int, right Int -> Int)")
+  @Signature("+(left Int, right Int)")
   public static class Add implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+    public Obj invoke(Interpreter interpreter, Obj arg) {
       int left = arg.getTupleField(0).asInt();
       int right = arg.getTupleField(1).asInt();
       
@@ -41,6 +42,7 @@ public class IntBuiltIns {
     }
   }
 
+  /*
   @Shared
   @Signature("subtract(left Int, right Int -> Int)")
   public static class Subtract implements BuiltInCallable {
@@ -95,11 +97,12 @@ public class IntBuiltIns {
       return interpreter.createBool(left < right);
     }
   }
+  */
 
-  @Getter("string String")
+  @Signature("string(this Int)")
   public static class String_ implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      return interpreter.createString(Integer.toString(thisObj.asInt()));
+    public Obj invoke(Interpreter interpreter, Obj arg) {
+      return interpreter.createString(Integer.toString(arg.asInt()));
     }
   }
 }

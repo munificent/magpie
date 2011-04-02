@@ -13,8 +13,8 @@ public class FieldGetter extends FieldProperty implements Callable {
   }
   
   @Override
-  public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-    Obj value = thisObj.getField(getName());
+  public Obj invoke(Interpreter interpreter, Obj arg) {
+    Obj value = arg.getField(getName());
     if (value == null) return interpreter.nothing();
     return value;
   }

@@ -3,15 +3,17 @@ package com.stuffwithstuff.magpie.ast;
 import com.stuffwithstuff.magpie.parser.Position;
 
 public class MessageExpr extends Expr {
-  MessageExpr(Position position, Expr receiver, String name) {
+  MessageExpr(Position position, Expr receiver, String name, Expr arg) {
     super(position);
     
     mReceiver = receiver;
     mName = name;
+    mArg = arg;
   }
 
   public Expr   getReceiver()  { return mReceiver; }
   public String getName()      { return mName; }
+  public Expr   getArg()       { return mArg; }
   
   @Override
   public <R, C> R accept(ExprVisitor<R, C> visitor, C context) {
@@ -30,4 +32,5 @@ public class MessageExpr extends Expr {
 
   private final Expr mReceiver;
   private final String mName;
+  private final Expr mArg;
 }

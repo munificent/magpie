@@ -1,13 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.stuffwithstuff.magpie.interpreter.Interpreter;
-import com.stuffwithstuff.magpie.interpreter.Name;
-import com.stuffwithstuff.magpie.interpreter.Obj;
-
 public class ArrayBuiltIns {
+  /*
   @Shared
   @Signature("of(items -> List(Any))")
   public static class Of implements BuiltInCallable {
@@ -125,4 +119,5 @@ public class ArrayBuiltIns {
       return interpreter.nothing();
     }
   }
+  */
 }

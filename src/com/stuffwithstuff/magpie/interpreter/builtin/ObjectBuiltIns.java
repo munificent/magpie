@@ -1,16 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map.Entry;
-
-import com.stuffwithstuff.magpie.interpreter.FnObj;
-import com.stuffwithstuff.magpie.interpreter.Interpreter;
-import com.stuffwithstuff.magpie.interpreter.Obj;
-
 public class ObjectBuiltIns {
+  /*
   @Getter("fields List(String, Dynamic)")
   public static class Fields implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
@@ -74,4 +65,5 @@ public class ObjectBuiltIns {
       return block.getCallable().invoke(interpreter, thisObj, arg);
     }
   }
+  */
 }

@@ -6,7 +6,7 @@ import java.util.List;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.util.Pair;
 
-public class FieldParser extends PrefixParser {
+public class FieldParser implements PrefixParser {
   @Override
   public Expr parse(MagpieParser parser, Token token) {
     Position position = token.getPosition();
