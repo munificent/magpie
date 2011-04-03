@@ -46,9 +46,7 @@ public class Interpreter {
     BuiltIns.registerClass(BoolBuiltIns.class, mBoolClass);
     */
     BuiltIns.register(ClassBuiltIns.class, this);
-    /*
-    BuiltIns.registerClass(FunctionBuiltIns.class, mFnClass);
-    */
+    BuiltIns.register(FunctionBuiltIns.class, this);
     BuiltIns.register(IntBuiltIns.class, this);
     /*
     BuiltIns.registerClass(MultimethodBuiltIns.class, mMultimethodClass);

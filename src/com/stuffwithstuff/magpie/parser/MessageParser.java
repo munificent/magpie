@@ -1,6 +1,13 @@
 package com.stuffwithstuff.magpie.parser;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.stuffwithstuff.magpie.ast.Expr;
+import com.stuffwithstuff.magpie.ast.NothingExpr;
+import com.stuffwithstuff.magpie.ast.TupleExpr;
+import com.stuffwithstuff.magpie.ast.pattern.Pattern;
+import com.stuffwithstuff.magpie.interpreter.Name;
 
 public class MessageParser implements PrefixParser, InfixParser {
   @Override
@@ -16,12 +23,26 @@ public class MessageParser implements PrefixParser, InfixParser {
     // Parse the argument, if any.
     Expr arg = null;
     if (parser.match(TokenType.LEFT_PAREN)) {
-      // TODO(bob): Allow block here, like:
-      // foo(
-      //     a
-      //     b
-      // )
       arg = parser.groupExpression(TokenType.RIGHT_PAREN);
+    }
+    
+    // Pass the block, if any.
+    if (parser.match("with")) {
+      // Parse the parameter list if given.
+      Pattern blockType;
+      if (parser.lookAhead(TokenType.LEFT_PAREN)) {
+        blockType = parser.parseFunctionType();
+      } else {
+        // Else just assume a single "it" parameter.
+        blockType = Pattern.variable(Name.IT);
+      }
+
+      // Parse the block and wrap it in a function.
+      Expr block = parser.parseEndBlock();
+      block = Expr.fn(block.getPosition(), blockType, block);
+      
+      // Add it to the argument list.
+      arg = addTupleField(arg, block);
     }
     
     return Expr.message(fullName.getPosition(), left, fullName.getString(), arg);
@@ -29,4 +50,19 @@ public class MessageParser implements PrefixParser, InfixParser {
   
   @Override
   public int getStickiness() { return Precedence.MESSAGE; }
+
+  private Expr addTupleField(Expr expr, Expr field) {
+    if (expr == null) {
+      return field;
+    } else if (expr instanceof NothingExpr) {
+      return field;
+    } else if (expr instanceof TupleExpr) {
+      TupleExpr tuple = (TupleExpr)expr;
+      List<Expr> fields = new ArrayList<Expr>(tuple.getFields());
+      fields.add(field);
+      return Expr.tuple(fields);
+    } else {
+      return Expr.tuple(expr, field);
+    }
+  }
 }

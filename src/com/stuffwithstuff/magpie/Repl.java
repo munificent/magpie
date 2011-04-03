@@ -11,6 +11,7 @@ import com.stuffwithstuff.magpie.parser.CharacterReader;
 import com.stuffwithstuff.magpie.parser.Lexer;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
 import com.stuffwithstuff.magpie.parser.ParseException;
+import com.stuffwithstuff.magpie.parser.TokenType;
 
 public class Repl implements InterpreterHost {
   public void run() {
@@ -36,6 +37,7 @@ public class Repl implements InterpreterHost {
         
         try {
           Expr expr = parser.parseExpression();
+          parser.consume(TokenType.LINE);
           
           String result = interpreter.evaluateToString(expr);
           if (result != null) printResult(result);
