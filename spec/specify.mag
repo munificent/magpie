@@ -30,35 +30,34 @@ def (this) should==(other) ->
     end
 end
 
-/*
 // TODO(bob): Need function types.
-def specify(description String, block)
+def specify(description String, block) ->
     var suite = TestSuite new(description)
-    block(suite)
+    block call(suite)
 end
 
-class TestSuite
+defclass TestSuite
     var name        String
     var currentTest String = ""
     var failedTest  Bool   = false
 end
 
-def shared TestSuite new(name String)
-    var suite = construct(name: name)
+def (TestSuite) new(name String) ->
+    var suite = new(name: name)
     currentTestSuite = suite
     suite
 end
 
-
+/*
 // TODO(bob): Need function types.
-def TestSuite should(description String, block)
+def (this TestSuite) should(description String, block) ->
     currentTest = description
     var testsBefore = totalTests
     failedTest = false
 
     do
-        block()
-    catch error then
+        block call()
+    catch error ->
         fail("Unexpected error: " ~ error type)
         debugDump(error)
     end
