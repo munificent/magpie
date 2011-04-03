@@ -66,5 +66,10 @@ public class ClassConstruct implements Callable {
     return Pattern.tuple(receiver, argument);
   }
   
+  @Override
+  public String toString() {
+    return mClass.getName() + " new(" + getPattern() + ")";
+  }
+  
   private final ClassObj mClass;
 }

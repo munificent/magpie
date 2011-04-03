@@ -34,28 +34,21 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(AssignExpr expr, EvalContext context) {
-    Obj receiver = evaluate(expr.getReceiver(), context);
     Obj value = evaluate(expr.getValue(), context);
 
-    if (receiver == null) {
-      // Just a name, so maybe it's a local variable.
-      if (context.assign(expr.getName(), value)) return value;
-      // Otherwise it must be a property on this.
-      receiver = context.lookUp("this");
-    }
+    // See if it's an assignment to a local variable.
+    if (context.assign(expr.getName(), value)) return value;
+    
+    // Otherwise it must be a property on this.
 
-    /*
-    // Look for a setter.
-    Member setter = mInterpreter.findMember(receiver.getClassObj(),
-        context.getContainingClass(), expr.getName() + "_=");
-    if (setter == null) {
-      // TODO(bob): Include more information here.
-      mInterpreter.error("BadAssignError");
-    }
-
-    setter.getDefinition().invoke(mInterpreter, receiver, value);
-    return value;
-    */
+    // TODO(bob): Need to figure out how implicit "this" works with setters.
+    // Consider:
+    //
+    //   prop = value
+    //
+    // If "this" has a field "prop", we'll never get to the setter case.
+    // Instead, that will be interpreted as a simple assignment to "prop", which
+    // is the multimethod object for the getter. :(
     throw new NotImplementedException();
   }
 

@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie.parser;
 
 import com.stuffwithstuff.magpie.ast.*;
+import com.stuffwithstuff.magpie.util.NotImplementedException;
 
 /**
  * Converts an Expr to a Pattern with (more or less) the same structure. Used
@@ -61,11 +62,29 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
 
   @Override
   public Expr visit(MessageExpr expr, Expr value) {
-    // example: point x = 2
-    // before:  Msg(      Msg(null, "point"), "x")
-    // after:   AssignMsg(Msg(null, "point"), "x", Int(2))
-    return Expr.assign(expr.getPosition(), expr.getReceiver(),
-        expr.getName(), value);
+    if (expr.getReceiver() == null) {
+      if (expr.getArg() == null) {
+        // message = value  -->  message = value
+        return Expr.assign(expr.getPosition(),
+            expr.getName(), value);
+      } else {
+        // message(arg) = value  -->  message_=(arg, value)
+        return Expr.message(expr.getPosition(),
+            null, expr.getName() + "_=",
+            Expr.tuple(expr.getArg(), value));
+      }
+    } else {
+      if (expr.getArg() == null) {
+        // receiver message = value  -->  receiver message_=(value)
+        return Expr.message(expr.getPosition(),
+            expr.getReceiver(), expr.getName() + "_=", value);
+      } else {
+        // receiver message(arg) = value  -->  receiver message_=(arg, value)
+        return Expr.message(expr.getPosition(),
+            expr.getReceiver(), expr.getName() + "_=",
+            Expr.tuple(expr.getArg(), value));
+      }
+    }
   }
 
   @Override
@@ -80,8 +99,7 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
 
   @Override
   public Expr visit(RecordExpr expr, Expr value) {
-    // TODO Auto-generated method stub
-    return null;
+    throw new NotImplementedException("Destructuring is only implemented on new vars for now.");
   }
 
   @Override
@@ -101,8 +119,7 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
 
   @Override
   public Expr visit(TupleExpr expr, Expr value) {
-    // TODO Auto-generated method stub
-    return null;
+    throw new NotImplementedException("Destructuring is only implemented on new vars for now.");
   }
 
   @Override

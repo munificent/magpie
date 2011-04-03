@@ -20,10 +20,13 @@ public class RecordPattern extends Pattern {
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
+    builder.append("(");
     for (int i = 0; i < mFields.size(); i++) {
-      builder.append(mFields.get(i));
-      if (i < mFields.size() - 1) builder.append(", ");
+      Pair<String, Pattern> field = mFields.get(i);
+      if (i > 0) builder.append(", ");
+      builder.append(field.getKey()).append(": ").append(field.getValue());
     }
+    builder.append(")");
     return builder.toString();
   }
   

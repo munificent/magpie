@@ -14,16 +14,13 @@ import com.stuffwithstuff.magpie.util.Pair;
  * Base class for AST expression node classes. Any chunk of Magpie code can be
  * represented by an instance of one of the subclasses of this class.
  * 
- * <p>Also includes factory methods to create the appropriate nodes. Aside from
- * being a bit more terse, these methods perform some basic desugaring and
- * simplification such as expanding special forms and discarding useless nodes.
+ * <p>Also includes factory methods to create the appropriate nodes.
  * 
  * @author bob
  */
 public abstract class Expr {
-  public static Expr assign(Position position, Expr receiver, String name,
-      Expr value) {
-    return new AssignExpr(position, receiver, name, value);
+  public static Expr assign(Position position, String name, Expr value) {
+    return new AssignExpr(position, name, value);
   }
   
   public static Expr bool(boolean value) {

@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.List;
+import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.util.Expect;
 
@@ -134,6 +135,32 @@ public class Obj {
       return "\"" + mValue + "\"";
     } else if (mValue != null) {
       return mValue.toString();
+    } else if (mClass.getName().equals("Record")) {
+      StringBuilder builder = new StringBuilder();
+      builder.append("(");
+      
+      for (Entry<String, Obj> field : mFields.entries()) {
+        if (builder.length() > 1) builder.append(", ");
+        builder.append(field.getKey()).append(": ").append(field.getValue());
+      }
+      
+      builder.append(")");
+      return builder.toString();
+      
+    } else if (mClass.getName().equals("Tuple")) {
+      StringBuilder builder = new StringBuilder();
+      builder.append("(");
+      
+      for (int i = 0; ; i++) {
+        Obj field = this.getTupleField(i);
+        if (field == null) break;
+        if (i > 0) builder.append(", ");
+        builder.append(field.toString());
+      }
+      
+      builder.append(")");
+      return builder.toString();
+      
     } else if (mClass.getName().equals("Nothing")) {
       return "nothing";
     }

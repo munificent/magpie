@@ -50,13 +50,13 @@ public class ClassParser implements PrefixParser {
     
     // Parse the initializer if there is one.
     Expr initializer;
-    if (parser.match("=")) {
+    if (parser.match(TokenType.EQUALS)) {
       initializer = parser.parseEndBlock();
     } else {
       initializer = null;
     }
     
-    fields.put(name, new Field(type, initializer));
+    fields.put(name, new Field(initializer, type));
   }
   
   /*

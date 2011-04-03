@@ -14,11 +14,13 @@ not(false) should==(true)
 
 defclass Foo
     var bar
+    var inity = "i"
 end
 
 Foo name should==("Foo")
 var foo = Foo new(bar: "b")
 foo bar should==("b")
+foo inity should==("i")
 foo bar = "b2"
 foo bar should==("b2")
 

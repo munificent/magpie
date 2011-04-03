@@ -22,6 +22,7 @@ public class PatternTester implements PatternVisitor<Boolean, Obj> {
     for (int i = 0; i < pattern.getFields().size(); i++) {
       Pair<String, Pattern> field = pattern.getFields().get(i);
       Obj fieldValue = value.getField(field.getKey());
+      if (fieldValue == null) return false;
       if (!field.getValue().accept(this, fieldValue)) return false;
     }
     

@@ -3,15 +3,13 @@ package com.stuffwithstuff.magpie.ast;
 import com.stuffwithstuff.magpie.parser.Position;
 
 public class AssignExpr extends Expr {
-  AssignExpr(Position position, Expr receiver, String name, Expr value) {
+  AssignExpr(Position position, String name, Expr value) {
     super(position);
     
-    mReceiver = receiver;
     mName = name;
     mValue = value;
   }
   
-  public Expr getReceiver() { return mReceiver; }
   public String getName() { return mName; }
   public Expr getValue() { return mValue; }
   
@@ -22,12 +20,10 @@ public class AssignExpr extends Expr {
 
   @Override
   public void toString(StringBuilder builder, String indent) {
-    if (mReceiver != null) mReceiver.toString(builder, indent);
     builder.append(mName).append(" = ");
     mValue.toString(builder, indent);
   }
 
-  private final Expr mReceiver;
   private final String mName;
   private final Expr mValue;
 }
