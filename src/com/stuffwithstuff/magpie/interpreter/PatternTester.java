@@ -35,6 +35,7 @@ public class PatternTester implements PatternVisitor<Boolean, Obj> {
     for (int i = 0; i < pattern.getFields().size(); i++) {
       Pattern fieldPattern = pattern.getFields().get(i);
       Obj field = value.getTupleField(i);
+      if (field == null) return false;
       if (!fieldPattern.accept(this, field)) return false;
     }
     

@@ -15,7 +15,7 @@ import com.stuffwithstuff.magpie.util.Pair;
 
 public abstract class BuiltIns {
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public static void registerMethods(Class javaClass,
+  public static void register(Class javaClass,
       Interpreter interpreter) {
 
     for (Class innerClass : javaClass.getDeclaredClasses()) {

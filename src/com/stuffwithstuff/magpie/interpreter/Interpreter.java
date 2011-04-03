@@ -15,88 +15,16 @@ public class Interpreter {
     
     mGrammar = new Grammar();
     
-    // Every object in Magpie has a class. Every class is an object, which
-    // means it also has a class (a metaclass). In addition, a class may
-    // inherit from one or more parent classes to get additional methods.
-    //
-    // To figure out what these relationships look like for classes and their
-    // metaclasses is a bit tricky. The basic way to answer this is to look at
-    // the methods that different objects should support. Those will in turn
-    // dictate what classes those objects should be. Given a hypothetical class
-    // Foo:
-    //
-    // class Foo
-    //     def hi() print("hi")
-    //     shared def hello() print("hello")
-    // end
-    //
-    // Member call               Class where it's defined
-    // --------------------------------------------------
-    // foo hi()                  Foo
-    // foo type                  Object
-    // Foo construct()           FooMetaclass
-    // Foo hello()               FooMetaclass
-    // Foo defineMethod()        Class
-    // Class new("Foo")          ClassMetaclass
-    //
-    // "construct()" should be defined on the class of Foo, FooMetaclass.
-    // "hi()" should be defined on the class of foo, Foo.
-    // "hello()" should be defined on the class of Foo, FooMetaclass.
-    // "new()" (for creating a new class) should be on the class of Class,
-    // ClassMetaclass.
-    // "type" should be available on all objects, so it should be in Object.
-    // "name" should be available on all class objects, so it should be in
-    // Class and the class of Foo, FooMetaclass, should inherit it.
-    //
-    // In diagram form, the class chain is (where the arrow means "has class"):
-    //
-    // [Foo]----->[FooMetaclass]--------.     .----.
-    //                                  v     v    |
-    // [Class]--->[ClassMetaclass]--->[Metaclass]--'
-    //                                  ^
-    // [Object]-->[ObjectMetaclass]-----'
-    //
-    // The parent classes are:
-    //
-    // FooMetaclass    --> Class
-    // ClassMetaclass  --> Class
-    // ObjectMetaclass --> Class
-    // Metaclass       --> Class
-    //
-    // There is one big of "magic" here. A class does not need to inherit from
-    // Object to get its methods. Instead, all classes implicitly have access
-    // to those methods. That enables us to have a conceptual top type (Object)
-    // without having all classes inherit from it. That lets us make our class
-    // hierarchy be a strict tree, which simplifies all sorts of stuff.
-    //
-    // Once we're using multimethods that can be specialized on Any, that magic
-    // will mostly go away.
-    
     // Create a top-level scope.
     mGlobalScope = new Scope(host.allowTopLevelRedefinition());
-
-    // The special class "Metaclass" is the ultimate metaclass of all
-    // metaclasses, including itself.
-    mMetaclass = new ClassObj(null, "Metaclass");
-    mMetaclass.bindClass(mMetaclass);
-
-    // The metaclass for Class. Contains the shared methods on Class, like "new"
-    // for creating a new class.
-    ClassObj classMetaclass = new ClassObj(mMetaclass, "ClassMetaclass");
     
-    // The class that all class objects inherit. Given a class Foo,
-    // FooMetaclass will inherit this in so that the methods available on all
-    // classes (like "defineMethod") are available on Foo.
-    mClass = new ClassObj(classMetaclass, "Class");
+    // The class of all classes. Its class is itself.
+    mClass = new ClassObj(null, "Class", null);
+    mClass.bindClass(mClass);
     mGlobalScope.define("Class", mClass);
 
-    // Now that we have Class, we can go back and have the metaclasses inherit
-    // it.
-    mMetaclass.getParents().add(mClass);
-    classMetaclass.getParents().add(mClass);
-    
     mArrayClass = createGlobalClass("Array");
-    
+
     mBoolClass = createGlobalClass("Bool");
     mTrue = instantiate(mBoolClass, true);
     mFalse = instantiate(mBoolClass, false);
@@ -116,17 +44,19 @@ public class Interpreter {
     /*
     BuiltIns.registerClass(ArrayBuiltIns.class, mArrayClass);
     BuiltIns.registerClass(BoolBuiltIns.class, mBoolClass);
-    BuiltIns.registerClass(ClassBuiltIns.class, mClass);
+    */
+    BuiltIns.register(ClassBuiltIns.class, this);
+    /*
     BuiltIns.registerClass(FunctionBuiltIns.class, mFnClass);
     */
-    BuiltIns.registerMethods(IntBuiltIns.class, this);
+    BuiltIns.register(IntBuiltIns.class, this);
     /*
     BuiltIns.registerClass(MultimethodBuiltIns.class, mMultimethodClass);
     BuiltIns.registerClass(ReflectBuiltIns.class, reflectClass);
     BuiltIns.registerClass(RuntimeBuiltIns.class, mRuntimeClass);
      */
-    BuiltIns.registerMethods(StringBuiltIns.class, this);
-    BuiltIns.registerMethods(BuiltInFunctions.class, this);
+    BuiltIns.register(StringBuiltIns.class, this);
+    BuiltIns.register(BuiltInFunctions.class, this);
     
     EnvironmentBuilder.initialize(this);
   }
@@ -250,7 +180,7 @@ public class Interpreter {
   public ClassObj getBoolClass() { return mBoolClass; }
   public ClassObj getFunctionClass() { return mFnClass; }
   public ClassObj getIntClass() { return mIntClass; }
-  public ClassObj getMetaclass() { return mClass; }
+  public ClassObj getClassClass() { return mClass; }
   public ClassObj getMultimethodClass() { return mMultimethodClass; }
   public ClassObj getNothingClass() { return mNothingClass; }
   public ClassObj getRecordClass() { return mRecordClass; }
@@ -371,27 +301,13 @@ public class Interpreter {
     return mGrammar;
   }
   
-  public ClassObj createClass(String name) {
-    // TODO(bob): Since we can do value methods, metaclasses probably aren't
-    // needed. To make a "static method", just make a method that takes the
-    // class as a value.
-    // Create the metaclass. This will hold shared methods on the class.
-    ClassObj metaclass = new ClassObj(mClass, name + "Metaclass");
-    metaclass.getParents().add(mClass);
+  public ClassObj createClass(String name, List<ClassObj> parents) {
+    // Create the class.
+    ClassObj classObj = new ClassObj(mClass, name, parents);
     
-    // Create the class object itself. This will hold the instance methods for
-    // objects of the class.
-    ClassObj classObj = new ClassObj(metaclass, name);
-    
-    // Add the factory methods.
+    // Add the constructor.
     Callable construct = new ClassConstruct(classObj);
-    
-    MultimethodObj newMultimethod = getMultimethod("new");
-    newMultimethod.addMethod(construct);
-    
-    // TODO(bob): Now that methods can be overloaded, this can go away...
-    MultimethodObj constructMultimethod = getMultimethod("construct");
-    constructMultimethod.addMethod(construct);
+    getMultimethod("new").addMethod(construct);
     
     return classObj;
   }
@@ -408,10 +324,14 @@ public class Interpreter {
     return (MultimethodObj)obj;
   }
   
-  public ClassObj createGlobalClass(String name) {
-    ClassObj classObj = createClass(name);
+  public ClassObj createGlobalClass(String name, List<ClassObj> parents) {
+    ClassObj classObj = createClass(name, parents);
     mGlobalScope.define(name, classObj);
     return classObj;
+  }
+
+  public ClassObj createGlobalClass(String name) {
+    return createGlobalClass(name, null);
   }
   
   private final InterpreterHost mHost;
@@ -422,7 +342,6 @@ public class Interpreter {
   private final ClassObj mFnClass;
   private final ClassObj mMultimethodClass;
   private final ClassObj mIntClass;
-  private final ClassObj mMetaclass;
   private final ClassObj mNothingClass;
   private final ClassObj mRecordClass;
   private final ClassObj mStringClass;

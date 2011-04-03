@@ -11,12 +11,18 @@ public class ClassObj extends Obj {
   /**
    * Creates a new class object.
    * 
-   * @param metaclass  The class of this class (its metaclass).
-   * @param name       The name of the class.
+   * @param classClass  The class of this class.
+   * @param name        The name of the class.
    */
-  public ClassObj(ClassObj metaclass, String name) {
-    super(metaclass);
+  public ClassObj(ClassObj classClass, String name, List<ClassObj> parents) {
+    super(classClass);
     mName = name;
+
+    if (parents != null) {
+      mParents = parents;
+    } else {
+      mParents = new ArrayList<ClassObj>();
+    }
   }
   
   public String getName() { return mName; }
@@ -30,8 +36,8 @@ public class ClassObj extends Obj {
   public boolean isSubclassOf(ClassObj parent) {
     if (this == parent) return true;
     
-    for (Obj myParent : mParents) {
-      if (((ClassObj)myParent).isSubclassOf(parent)) return true;
+    for (ClassObj myParent : mParents) {
+      if (myParent.isSubclassOf(parent)) return true;
     }
     
     return false;
@@ -55,7 +61,6 @@ public class ClassObj extends Obj {
   
   private final String mName;
   
-  private final List<ClassObj> mParents = new ArrayList<ClassObj>();
-  
+  private final List<ClassObj> mParents;
   private final Map<String, Field> mFields = new HashMap<String, Field>();
 }

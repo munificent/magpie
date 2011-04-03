@@ -2,6 +2,7 @@ def (this String) string -> this
 def (nothing)     string -> "nothing"
 def (true)        string -> "true"
 def (false)       string -> "false"
+def (this Class)  string -> name
 
 def print()            -> prints("\n")
 def print(text String) -> prints(text +("\n"))

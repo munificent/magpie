@@ -1,6 +1,51 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.stuffwithstuff.magpie.interpreter.ClassObj;
+import com.stuffwithstuff.magpie.interpreter.Interpreter;
+import com.stuffwithstuff.magpie.interpreter.Obj;
+
 public class ClassBuiltIns {
+  @Signature("(this Class) name")
+  public static class Name implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj arg) {
+      ClassObj classObj = arg.asClass();
+      
+      return interpreter.createString(classObj.getName());
+    }
+  }
+
+  @Signature("(Class) new(name String)")
+  public static class New implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj arg) {
+      // Get the name of the class.
+      String name = arg.getTupleField(1).asString();
+      return interpreter.createClass(name, null);
+    }
+  }
+  
+  // TODO(bob): Use list for parents.
+  @Signature("(Class) new(name String, parents)")
+  public static class NewWithParents implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj arg) {
+      // Get the name of the class.
+      String name = arg.getTupleField(1).getTupleField(0).asString();
+      
+      // Get the parent classes.
+      List<ClassObj> parents = new ArrayList<ClassObj>();
+      Obj parentsObj = arg.getTupleField(1).getTupleField(1);
+      for (int i = 0;; i++) {
+        Obj parent = parentsObj.getTupleField(i);
+        if (parent == null) break;
+        parents.add(parent.asClass());
+      }
+      
+      return interpreter.createClass(name, parents);
+    }
+  }
+
   /*
   // TODO(bob): Get rid of type.
   @Signature("defineField(name String, initializer ->)")
@@ -72,26 +117,6 @@ public class ClassBuiltIns {
       ClassObj classObj = thisObj.asClass();
       
       return interpreter.createArray(classObj.getParents());
-    }
-  }
-
-  @Getter("name String")
-  public static class GetName implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      ClassObj classObj = thisObj.asClass();
-      
-      return interpreter.createString(classObj.getName());
-    }
-  }
-  
-  @Shared
-  @Signature("new(name String -> Class)")
-  public static class New implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      // Get the name of the class.
-      String name = arg.asString();
-      
-      return interpreter.createClass(name);
     }
   }
   

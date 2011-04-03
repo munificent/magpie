@@ -1,5 +1,8 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.stuffwithstuff.magpie.ast.Expr;
 
 public class EnvironmentBuilder {
@@ -12,27 +15,29 @@ public class EnvironmentBuilder {
     // Define the core error classes.
     newClass("Error");
     
-    newClass("BadCallError").inherit("Error");
+    newClass("BadCallError", "Error");
     
-    newClass("NoMethodError").inherit("Error");
+    newClass("NoMethodError", "Error");
   }
   
   private EnvironmentBuilder(Interpreter interpreter) {
     mInterpreter = interpreter;
   }
+  
   private ClassBuilder newClass(String name) {
     return new ClassBuilder(mInterpreter.createGlobalClass(name));
+  }
+  
+  private ClassBuilder newClass(String name, String parentName) {
+    List<ClassObj> parents = new ArrayList<ClassObj>();
+    parents.add((ClassObj)mInterpreter.getGlobal(parentName));
+    
+    return new ClassBuilder(mInterpreter.createGlobalClass(name, parents));
   }
 
   private class ClassBuilder {
     public ClassBuilder(ClassObj classObj) {
       mClassObj = classObj;
-    }
-    
-    public ClassBuilder inherit(String name) {
-      ClassObj parent = (ClassObj)mInterpreter.getGlobal(name);
-      mClassObj.getParents().add(parent);
-      return this;
     }
     
     public ClassBuilder field(String name, Expr type) {
