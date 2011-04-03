@@ -136,13 +136,19 @@ public class Interpreter {
 
     if (a == mTrue && b == mFalse) return false;
     if (a == mFalse && b == mTrue) return false;
+    
+    // Recursion base case. If we're in the middle of dispatching a call to
+    // "==", don't call it again, just default to identity.
+    if (mInObjectsEqual) return a == b;
 
-    Obj equals = getGlobal(Name.EQEQ);
+    Obj equals = getGlobal(Name.EQEQ);   
     
     // Bootstrap short-cut. If we haven't defined "==" yet, default to identity.
     if (equals == null) return a == b;
     
-    Obj result = equals.asMultimethod().invoke(this, null, false, createTuple(a, b));
+    mInObjectsEqual = true;
+    Obj result = equals.asMultimethod().invoke(this, a, false, b);
+    mInObjectsEqual = false;
     
     return result.asBool();
   }
@@ -330,4 +336,6 @@ public class Interpreter {
   private final Obj mFalse;
   private final Stack<String> mScriptPaths = new Stack<String>();
   private final Grammar mGrammar;
+  
+  private boolean mInObjectsEqual = false;
 }

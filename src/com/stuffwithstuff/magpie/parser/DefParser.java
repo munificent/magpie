@@ -43,7 +43,7 @@ public class DefParser implements PrefixParser {
     
     // Parse the setter's rvalue type, if any.
     Pattern setValue = null;
-    if (parser.match("=")) {
+    if (parser.match(TokenType.EQUALS)) {
       setValue = parsePattern(parser);
     }
 

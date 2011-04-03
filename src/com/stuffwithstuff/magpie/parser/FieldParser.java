@@ -14,7 +14,7 @@ public class FieldParser implements PrefixParser {
     
     while (true) {
       String name = token.getString();
-      Expr value = parser.parseExpression(20);
+      Expr value = parser.parseExpression(Precedence.COMPOSITION);
       fields.add(new Pair<String, Expr>(name, value));
       
       if (!parser.match(TokenType.COMMA)) break;

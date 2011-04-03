@@ -12,6 +12,7 @@ public enum TokenType {
   COLON,
   COMMA,
   DOT,
+  EQUALS,
   
   // identifiers
   NAME,

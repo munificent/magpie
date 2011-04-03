@@ -49,7 +49,7 @@ public class LoopParser implements PrefixParser {
       } else {
         PositionSpan iteratorSpan = parser.startBefore();
         Pattern pattern = PatternParser.parse(parser);
-        parser.consume("=");
+        parser.consume(TokenType.EQUALS);
         Expr generator = parser.parseExpression();
         Position position = iteratorSpan.end();
         

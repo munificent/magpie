@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,6 +16,12 @@ import com.stuffwithstuff.magpie.parser.MagpieParser;
 
 public class Script {
   public static Script fromPath(String path) throws IOException {
+    // If we're given a directory, look for _init.mag in it.
+    File filePath = new File(path);
+    if (filePath.isDirectory()) {
+      path = new File(filePath, "_init.mag").getPath();
+    }
+    
     return new Script(path, readFile(path));
   }
 
@@ -23,7 +30,7 @@ public class Script {
   }
   
   public static void loadBase(Interpreter interpreter) throws IOException {
-    Script script = Script.fromPath("base/init.mag");
+    Script script = Script.fromPath("base");
     script.execute(interpreter);
   }
   

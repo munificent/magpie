@@ -1,11 +1,18 @@
 // The test infrastructure.
 import("specify.mag")
+
+/*
 import("utility/TestCallable.mag")
 import("utility/TruthTest.mag")
+*/
 
 // The individual test cases.
 startTests()
 
+not(true) should==(false)
+not(false) should==(true)
+
+/*
 import("language/and.mag")
 import("language/assign.mag")
 import("language/block.mag")
@@ -46,5 +53,6 @@ import("core/Object/hasField.mag")
 import("core/Object/receiving.mag")
 import("core/Tuple/iterate.mag")
 import("core/Tuple/string.mag")
+*/
 
 endTests()

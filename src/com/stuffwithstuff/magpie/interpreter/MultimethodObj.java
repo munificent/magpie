@@ -27,7 +27,10 @@ public class MultimethodObj extends Obj {
     mMethods.add(method);
   }
   
-  public Obj invoke(Interpreter interpreter, Obj receiver, boolean isExplicit, Obj arg) {
+  public Obj invoke(Interpreter interpreter, Obj receiver,
+      boolean isExplicit, Obj arg) {
+    Expect.notNull(receiver);
+    
     // If we're given a right-hand argument, combine it with the receiver.
     // If not, this is a getter-style multimethod.
     Obj argTuple;

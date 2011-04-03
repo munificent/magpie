@@ -33,59 +33,83 @@ public class IntBuiltIns {
   */
   
   @Signature("(this Int) +(right Int)")
-  public static class Add implements BuiltInCallable {
+  public static class Add extends ArithmeticOperator {
+    protected int perform(int left, int right) { return left + right; }
+  }
+  
+  @Signature("(this Int) -(right Int)")
+  public static class Subtract extends ArithmeticOperator {
+    protected int perform(int left, int right) { return left - right; }
+  }
+  
+  @Signature("(this Int) *(right Int)")
+  public static class Multiply extends ArithmeticOperator {
+    protected int perform(int left, int right) { return left * right; }
+  }
+  
+  @Signature("(this Int) /(right Int)")
+  public static class Divide extends ArithmeticOperator {
+    protected int perform(int left, int right) { return left / right; }
+  }
+  
+  @Signature("(this Int) %(right Int)")
+  public static class Modulo extends ArithmeticOperator {
+    protected int perform(int left, int right) { return left % right; }
+  }
+
+  private abstract static class ArithmeticOperator implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       int left = arg.getTupleField(0).asInt();
       int right = arg.getTupleField(1).asInt();
       
-      return interpreter.createInt(left + right);
+      return interpreter.createInt(perform(left, right));
     }
+    
+    protected abstract int perform(int left, int right);
   }
-
+  
+  @Signature("(this Int) ==(right Int)")
+  public static class Equals extends ComparisonOperator {
+    protected boolean perform(int left, int right) { return left == right; }
+  }
+  
+  @Signature("(this Int) !=(right Int)")
+  public static class NotEquals extends ComparisonOperator {
+    protected boolean perform(int left, int right) { return left != right; }
+  }
+  
+  @Signature("(this Int) <(right Int)")
+  public static class LessThan extends ComparisonOperator {
+    protected boolean perform(int left, int right) { return left < right; }
+  }
+  
+  @Signature("(this Int) >(right Int)")
+  public static class RightThan extends ComparisonOperator {
+    protected boolean perform(int left, int right) { return left > right; }
+  }
+  
+  @Signature("(this Int) <=(right Int)")
+  public static class LessThanOrEqual extends ComparisonOperator {
+    protected boolean perform(int left, int right) { return left <= right; }
+  }
+  
+  @Signature("(this Int) >=(right Int)")
+  public static class GreaterThanOrEqual extends ComparisonOperator {
+    protected boolean perform(int left, int right) { return left >= right; }
+  }
+  
+  private abstract static class ComparisonOperator implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj arg) {
+      int left = arg.getTupleField(0).asInt();
+      int right = arg.getTupleField(1).asInt();
+      
+      return interpreter.createBool(perform(left, right));
+    }
+    
+    protected abstract boolean perform(int left, int right);
+  }
+  
   /*
-  @Shared
-  @Signature("subtract(left Int, right Int -> Int)")
-  public static class Subtract implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      int left = arg.getTupleField(0).asInt();
-      int right = arg.getTupleField(1).asInt();
-      
-      return interpreter.createInt(left - right);
-    }
-  }
-  
-  @Shared
-  @Signature("multiply(left Int, right Int -> Int)")
-  public static class Multiply implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      int left = arg.getTupleField(0).asInt();
-      int right = arg.getTupleField(1).asInt();
-      
-      return interpreter.createInt(left * right);
-    }
-  }
-  
-  @Shared
-  @Signature("divide(left Int, right Int -> Int)")
-  public static class Divide implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      int left = arg.getTupleField(0).asInt();
-      int right = arg.getTupleField(1).asInt();
-      
-      return interpreter.createInt(left / right);
-    }
-  }
-  
-  @Shared
-  @Signature("modulo(left Int, right Int -> Int)")
-  public static class Modulo implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      int left = arg.getTupleField(0).asInt();
-      int right = arg.getTupleField(1).asInt();
-      
-      return interpreter.createInt(left % right);
-    }
-  }
   
   @Shared
   @Signature("lessThan?(left Int, right Int -> Bool)")

@@ -5,48 +5,44 @@ import java.util.Set;
 
 public class Grammar {
   public Grammar() {
-    // Register the built-in parsers.
-    mPrefixParsers.define(TokenType.BOOL, new LiteralParser());
-    mPrefixParsers.define(TokenType.INT, new LiteralParser());
-    mPrefixParsers.define(TokenType.STRING, new LiteralParser());
-    mPrefixParsers.define(TokenType.LEFT_PAREN, new ParenthesisPrefixParser());
-    mPrefixParsers.define(TokenType.NAME, new MessageParser());
-    mPrefixParsers.define(TokenType.FIELD, new FieldParser());
-    mPrefixParsers.define("break", new BreakParser());
-    mPrefixParsers.define("def", new DefParser());
-    mPrefixParsers.define("fn", new FnParser());
-    mPrefixParsers.define("nothing", new NothingParser());
-    mPrefixParsers.define("return", new ReturnParser());
-    mPrefixParsers.define("var", new VarParser());
-
-    mInfixParsers.define(TokenType.NAME, new MessageParser());
-    mInfixParsers.define(TokenType.COMMA, new CommaParser());
-    mInfixParsers.define("=", new EqualsParser());
-
-    mPrefixParsers.define("match", new MatchParser());
-    mPrefixParsers.define("for", new LoopParser());
-    mPrefixParsers.define("while", new LoopParser());
-
-    mPrefixParsers.define("do", new DoParser());
+    prefix(TokenType.BOOL,       new LiteralParser());
+    prefix(TokenType.INT,        new LiteralParser());
+    prefix(TokenType.STRING,     new LiteralParser());
+    prefix(TokenType.LEFT_PAREN, new ParenthesisPrefixParser());
+    prefix(TokenType.NAME,       new MessageParser());
+    prefix(TokenType.FIELD,      new FieldParser());
     
-    mReservedWords.add("->");
-    mReservedWords.add("case");
-    mReservedWords.add("catch");
-    mReservedWords.add("then");    
+    prefix("break",   new BreakParser());
+    prefix("def",     new DefParser());
+    prefix("do",      new DoParser());
+    prefix("fn",      new FnParser());
+    prefix("for",     new LoopParser());
+    prefix("match",   new MatchParser());
+    prefix("nothing", new NothingParser());
+    prefix("return",  new ReturnParser());
+    prefix("var",     new VarParser());
+    prefix("while",   new LoopParser());
+
+    infix(TokenType.NAME, new MessageParser());
+    infix(TokenType.COMMA, new CommaParser());
+    infix(TokenType.EQUALS, new EqualsParser());
+
+    infix("*",  Precedence.PRODUCT);
+    infix("/",  Precedence.PRODUCT);
+    infix("%",  Precedence.PRODUCT);
+    infix("+",  Precedence.TERM);
+    infix("-",  Precedence.TERM);
+    infix("<",  Precedence.COMPARISON);
+    infix(">",  Precedence.COMPARISON);
+    infix("<=", Precedence.COMPARISON);
+    infix(">=", Precedence.COMPARISON);
+    infix("==", Precedence.ASSIGNMENT);
+    infix("!=", Precedence.ASSIGNMENT);
+    
+    reserve("-> case catch else then");
+    reserve("break def do fn for match nothing return var while");
   }
   
-  public void registerParser(String keyword, PrefixParser parser) {
-    mPrefixParsers.define(keyword, parser);
-  }
-  
-  public void registerParser(String keyword, InfixParser parser) {
-    mInfixParsers.define(keyword, parser);
-  }
-
-  public void reserveWord(String name) {
-    mReservedWords.add(name);
-  }
-
   public PrefixParser getPrefixParser(Token token) {
     return mPrefixParsers.get(token);
   }
@@ -63,23 +59,21 @@ public class Grammar {
    * @param   token  The token to test
    * @return         True if the token is a reserved name token.
    */
-  public boolean isReserved(Token token) {
-    if (token.getType() == TokenType.NAME) {
-      return mReservedWords.contains(token.getString());
-    }
-    
-    return false;
+  public boolean isReserved(String name) {
+    return mReservedWords.contains(name);
   }
   
   /**
-   * Gets whether or not the name is a "keyword". A keyword is any name that
-   * has special meaning to the parser: it's either a reserved word, or it has
-   * a prefix or infix parser registered to the name.
+   * Gets whether or not this token is a reserved word. Reserved words like
+   * "else" and "then" are claimed for special use by mixfix parsers, so can't
+   * be parsed on their own.
+   * 
+   * @param   token  The token to test
+   * @return         True if the token is a reserved name token.
    */
-  public boolean isKeyword(String name) {
-    return mPrefixParsers.isReserved(name) ||
-        mInfixParsers.isReserved(name) ||
-        mReservedWords.contains(name);
+  public boolean isReserved(Token token) {
+    return (token.getType() == TokenType.NAME) &&
+        isReserved(token.getString());
   }
   
   public int getStickiness(Token token) {
@@ -100,6 +94,33 @@ public class Grammar {
     }
     
     return stickiness;
+  }
+  
+  private void prefix(TokenType type, PrefixParser parser) {
+    mPrefixParsers.define(type, parser);
+  }
+  
+  private void prefix(String keyword, PrefixParser parser) {
+    mPrefixParsers.define(keyword, parser);
+  }
+  
+  private void infix(TokenType type, InfixParser parser) {
+    mInfixParsers.define(type, parser);
+  }
+  
+  private void infix(String keyword, InfixParser parser) {
+    mInfixParsers.define(keyword, parser);
+  }
+
+  private void infix(String keyword, int stickiness) {
+    infix(keyword, new InfixOperatorParser(stickiness, false));
+  }
+  
+  private void reserve(String wordString) {
+    String[] words = wordString.split(" ");
+    for (int i = 0; i < words.length; i++) {
+      mReservedWords.add(words[i]);
+    }
   }
   
   private final ParserTable<PrefixParser> mPrefixParsers =

@@ -6,16 +6,6 @@ public class RuntimeBuiltIns {
   // the scope for these and clean them up.
   
   @Shared
-  @Signature("now(-> Int)")
-  public static class Now implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      // TODO(bob): Total hack to fit in an int.
-      int time = (int) (System.currentTimeMillis() - 1289000000000L);
-      return interpreter.createInt(time);
-    }
-  }
-  
-  @Shared
   @Signature("throw(obj -> Never)")
   public static class Throw_ implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {

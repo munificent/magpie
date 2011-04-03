@@ -22,5 +22,5 @@ public class CommaParser implements InfixParser {
   }
   
   @Override
-  public int getStickiness() { return 20; }
+  public int getStickiness() { return Precedence.COMPOSITION; }
 }

@@ -11,6 +11,9 @@ def print(any)         -> print(any string)
 def not(true)  -> false
 def not(false) -> true
 
+// By default, == just does identity comparison.
+def (this) ==(other) -> this sameAs?(other)
+
 // Make + default to string concatenation. We'll only hit this if both
 // arguments are not Ints.
 def (this) +(other) -> this string +(other string)

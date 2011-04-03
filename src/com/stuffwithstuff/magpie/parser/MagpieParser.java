@@ -176,8 +176,8 @@ public class MagpieParser extends Parser {
    * a prefix or infix parser registered to the name.
    */
   @Override
-  protected boolean isKeyword(String name) {
-    return mGrammar.isKeyword(name);
+  protected boolean isReserved(String name) {
+    return mGrammar.isReserved(name);
   }
   
   private Pair<Expr, Token> parseBlock(boolean parseCatch,

@@ -4,23 +4,35 @@ var totalFailures = 0
 var currentTestSuite = nothing
 var startTimeMs = 0
 
-def startTests()
+def startTests() ->
     totalTests = 0
     totalFailures = 0
     currentTestSuite = nothing
     print("Executing specification...")
-    startTimeMs = Runtime now()
+    startTimeMs = currentTime()
 end
 
-def endTests()
-    var endTimeMs = Runtime now()
+def endTests() ->
+    var endTimeMs = currentTime()
     print()
-    print("Passed " ~ (totalTests - totalFailures) ~ " out of " ~
-        totalTests ~ " tests in " ~ (endTimeMs - startTimeMs) ~ "ms.")
+    print("Passed " + (totalTests - totalFailures) + " out of " +
+        totalTests + " tests in " + (endTimeMs - startTimeMs) + "ms.")
 end
 
+def (this) should==(other) ->
+    totalTests = totalTests + 1
+    match this == other
+        case true -> nothing
+        case false ->
+            totalFailures = totalFailures + 1
+            print("FAIL: " + this + " should equal " + other)
+        end
+    end
+end
+
+/*
 // TODO(bob): Need function types.
-def specify(description String, block /*TestSuite => Nothing*/)
+def specify(description String, block)
     var suite = TestSuite new(description)
     block(suite)
 end
@@ -39,7 +51,7 @@ end
 
 
 // TODO(bob): Need function types.
-def TestSuite should(description String, block /*Nothing => Nothing*/)
+def TestSuite should(description String, block)
     currentTest = description
     var testsBefore = totalTests
     failedTest = false
@@ -128,3 +140,4 @@ def Function shouldNotThrow()
     end
     caught shouldEqual(false)
 end
+*/

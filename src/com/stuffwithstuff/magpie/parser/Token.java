@@ -48,6 +48,7 @@ public final class Token {
       case COLON: return ":";
       case COMMA: return ",";
       case DOT: return ".";
+      case EQUALS: return "=";
       case LINE: return "\n";
 
       case NAME: return getString();

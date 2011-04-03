@@ -11,5 +11,5 @@ public class EqualsParser implements InfixParser {
   }
   
   @Override
-  public int getStickiness() { return 10; }
+  public int getStickiness() { return Precedence.ASSIGNMENT; }
 }

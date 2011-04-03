@@ -270,6 +270,7 @@ public class Lexer {
     // Handle reserved words.
     if (text.equals("false")) return new Token(position, TokenType.BOOL, false);
     if (text.equals("true")) return new Token(position, TokenType.BOOL, true);
+    if (text.equals("=")) return new Token(position, TokenType.EQUALS);
     
     return new Token(position, type, text);
   }

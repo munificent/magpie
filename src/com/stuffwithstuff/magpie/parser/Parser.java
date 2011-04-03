@@ -76,7 +76,7 @@ public abstract class Parser {
       
       // TODO(bob): Kinda gross. If we're looking for a NAME, we need to make
       // sure that it is *not* a claimed keyword.
-      if ((types[i] == TokenType.NAME) && isKeyword(lookAhead(i).getString())) {
+      if ((types[i] == TokenType.NAME) && isReserved(lookAhead(i).getString())) {
         return false;
       }
     }
@@ -259,7 +259,7 @@ public abstract class Parser {
     throw new ParseException(builder.toString());
   }
 
-  protected abstract boolean isKeyword(String name);
+  protected abstract boolean isReserved(String name);
   
   private Token lookAhead(int distance) {
     // Read in as many as needed.

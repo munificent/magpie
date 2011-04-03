@@ -16,8 +16,11 @@ public class EnvironmentBuilder {
     newClass("Error");
     
     newClass("BadCallError", "Error");
-    
+    newClass("AmbiguousMethodError", "Error");
+    newClass("IOError", "Error");
+    newClass("NoMatchError", "Error");
     newClass("NoMethodError", "Error");
+    newClass("ParseError", "Error");
   }
   
   private EnvironmentBuilder(Interpreter interpreter) {

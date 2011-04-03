@@ -28,5 +28,5 @@ public class MessageParser implements PrefixParser, InfixParser {
   }
   
   @Override
-  public int getStickiness() { return 100; }
+  public int getStickiness() { return Precedence.MESSAGE; }
 }
