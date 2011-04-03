@@ -41,7 +41,8 @@ public abstract class BuiltIns {
       BuiltIn builtIn = new BuiltIn(pattern, callable);
       
       // Register it.
-      MultimethodObj multimethod = interpreter.getMultimethod(name);
+      MultimethodObj multimethod = interpreter.getMultimethod(
+          interpreter.getGlobals(), name);
       multimethod.addMethod(builtIn);
       
     } catch (SecurityException e) {

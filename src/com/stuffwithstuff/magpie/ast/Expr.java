@@ -3,6 +3,7 @@ package com.stuffwithstuff.magpie.ast;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
@@ -59,6 +60,11 @@ public abstract class Expr {
 
   public static Expr break_(Position position) {
     return new BreakExpr(position);
+  }
+  
+  public static Expr class_(Position position,
+      String name, List<String> parents, Map<String, Field> fields) {
+    return new ClassExpr(position, name, parents, fields);
   }
   
   public static FnExpr fn(Expr body) {

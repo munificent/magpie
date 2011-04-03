@@ -22,7 +22,7 @@ end
 def (this) should==(other) ->
     totalTests = totalTests + 1
     match this == other
-        case true -> nothing
+        case true -> print("PASS: " + this + " equals " + other)
         case false ->
             totalFailures = totalFailures + 1
             print("FAIL: " + this + " should equal " + other)

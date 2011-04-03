@@ -1,6 +1,7 @@
-package com.stuffwithstuff.magpie.interpreter;
+package com.stuffwithstuff.magpie.ast;
 
-import com.stuffwithstuff.magpie.ast.Expr;
+import com.stuffwithstuff.magpie.ast.pattern.Pattern;
+
 
 /**
  * Represents a declared or defined field in a class. This describes the field
@@ -8,24 +9,16 @@ import com.stuffwithstuff.magpie.ast.Expr;
  * particular instance of a class. (Those just use a regular Scope.)
  */
 public class Field {
-  public Field(Callable initializer, Expr type) {
+  public Field(Expr initializer, Expr type) {
     mInitializer = initializer;
     mType = type;
   }
-  
-  /**
-   * Gets whether this field is declared (only its type is specified) or defined
-   * (it has an initializer expression).
-   * 
-   * @return true if the field has an initializer.
-   */
-  public boolean hasInitializer() { return mInitializer != null; }
-  
+
   /**
    * Gets the initializer for this field. Returns null if the field is just
    * declared.
    */
-  public Callable getInitializer() { return mInitializer; }
+  public Expr getInitializer() { return mInitializer; }
   
   /**
    * Gets the type annotation for this field. Will be null if the field has an
@@ -33,6 +26,14 @@ public class Field {
    */
   public Expr getType() { return mType; }
   
-  private final Callable mInitializer;
+  public Pattern getPattern() {
+    if (mType != null) {
+      return Pattern.type(mType);
+    } else {
+      return Pattern.wildcard();
+    }
+  }
+  
+  private final Expr     mInitializer;
   private final Expr     mType;
 }

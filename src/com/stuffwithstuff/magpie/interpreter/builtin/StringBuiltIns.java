@@ -13,7 +13,17 @@ public class StringBuiltIns {
       return interpreter.createString(left + right);
     }
   }
-
+  
+  @Signature("(this String) ==(right String)")
+  public static class Equals implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj arg) {
+      String left = arg.getTupleField(0).asString();
+      String right = arg.getTupleField(1).asString();
+      
+      return interpreter.createBool(left.equals(right));
+    }
+  }
+  
   /*
   @Signature("call(index Int -> String)")
   public static class Call implements BuiltInCallable {

@@ -19,7 +19,7 @@ public class Interpreter {
     mGlobalScope = new Scope(host.allowTopLevelRedefinition());
     
     // The class of all classes. Its class is itself.
-    mClass = new ClassObj(null, "Class", null);
+    mClass = new ClassObj(null, "Class", null, new HashMap<String, Field>());
     mClass.bindClass(mClass);
     mGlobalScope.define("Class", mClass);
 
@@ -205,13 +205,24 @@ public class Interpreter {
     return value ? mTrue : mFalse;
   }
   
-  public ClassObj createClass(String name, List<ClassObj> parents) {
+  public ClassObj createClass(String name, List<ClassObj> parents,
+      Map<String, Field> fields, Scope scope) {
     // Create the class.
-    ClassObj classObj = new ClassObj(mClass, name, parents);
+    ClassObj classObj = new ClassObj(mClass, name, parents, fields);
     
     // Add the constructor.
     Callable construct = new ClassConstruct(classObj);
-    getMultimethod("new").addMethod(construct);
+    getMultimethod(scope, "new").addMethod(construct);
+    
+    // Add getters and setters for the fields.
+    for (Entry<String, Field> entry : fields.entrySet()) {
+      MultimethodObj getter = getMultimethod(scope, entry.getKey());
+      getter.addMethod(new FieldGetter(classObj, entry.getKey()));
+
+      MultimethodObj setter = getMultimethod(scope, entry.getKey() + "_=");
+      setter.addMethod(new FieldSetter(classObj,
+          entry.getKey(), entry.getValue()));
+    }
     
     return classObj;
   }
@@ -264,9 +275,9 @@ public class Interpreter {
     
     // Initialize its fields.
     for (Entry<String, Field> field : classObj.getFieldDefinitions().entrySet()) {
-      if (field.getValue().hasInitializer()) {
-        Callable initializer = field.getValue().getInitializer();
-        Obj value = initializer.invoke(this, mNothing);
+      Expr initializer = field.getValue().getInitializer();
+      if (initializer != null) {
+        Obj value = evaluate(initializer);
         object.setField(field.getKey(), value);
       }
     }
@@ -294,20 +305,21 @@ public class Interpreter {
     return mGrammar;
   }
 
-  public MultimethodObj getMultimethod(String name) {
-    Obj obj = mGlobalScope.get(name);
+  public MultimethodObj getMultimethod(Scope scope, String name) {
+    Obj obj = scope.get(name);
     
     // Define it the first time if not found.
     if (obj == null) {
       obj = new MultimethodObj(mMultimethodClass);
-      mGlobalScope.define(name, obj);
+      scope.define(name, obj);
     }
     
     return (MultimethodObj)obj;
   }
   
   public ClassObj createGlobalClass(String name, List<ClassObj> parents) {
-    ClassObj classObj = createClass(name, parents);
+    ClassObj classObj = createClass(name, parents, 
+        new HashMap<String, Field>(), mGlobalScope);
     mGlobalScope.define(name, classObj);
     return classObj;
   }

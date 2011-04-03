@@ -12,16 +12,17 @@ public class Grammar {
     prefix(TokenType.NAME,       new MessageParser());
     prefix(TokenType.FIELD,      new FieldParser());
     
-    prefix("break",   new BreakParser());
-    prefix("def",     new DefParser());
-    prefix("do",      new DoParser());
-    prefix("fn",      new FnParser());
-    prefix("for",     new LoopParser());
-    prefix("match",   new MatchParser());
-    prefix("nothing", new NothingParser());
-    prefix("return",  new ReturnParser());
-    prefix("var",     new VarParser());
-    prefix("while",   new LoopParser());
+    prefix("break",     new BreakParser());
+    prefix("def",       new DefParser());
+    prefix("defclass",  new ClassParser());
+    prefix("do",        new DoParser());
+    prefix("fn",        new FnParser());
+    prefix("for",       new LoopParser());
+    prefix("match",     new MatchParser());
+    prefix("nothing",   new NothingParser());
+    prefix("return",    new ReturnParser());
+    prefix("var",       new VarParser());
+    prefix("while",     new LoopParser());
 
     infix(TokenType.NAME, new MessageParser());
     infix(TokenType.COMMA, new CommaParser());

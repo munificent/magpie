@@ -12,6 +12,16 @@ startTests()
 not(true) should==(false)
 not(false) should==(true)
 
+defclass Foo
+    var bar
+end
+
+Foo name should==("Foo")
+var foo = Foo new(bar: "b")
+foo bar should==("b")
+foo bar = "b2"
+foo bar should==("b2")
+
 /*
 import("language/and.mag")
 import("language/assign.mag")

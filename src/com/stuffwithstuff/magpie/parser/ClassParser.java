@@ -1,14 +1,65 @@
 package com.stuffwithstuff.magpie.parser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.stuffwithstuff.magpie.ast.Expr;
-import com.stuffwithstuff.magpie.interpreter.Name;
-import com.stuffwithstuff.magpie.util.NotImplementedException;
+import com.stuffwithstuff.magpie.ast.Field;
 
-/*
-public class ClassParser extends PrefixParser {
+public class ClassParser implements PrefixParser {  
+  @Override
+  public Expr parse(MagpieParser parser, Token token) {
+    PositionSpan span = parser.startBefore();
+    String name = parser.consume(TokenType.NAME).getString();
+    
+    // Parse the parents, if any.
+    List<String> parents = new ArrayList<String>();
+    if (parser.match(TokenType.COLON)) {
+      do {
+        parents.add(parser.consume(TokenType.NAME).getString());
+      } while (parser.match(TokenType.COMMA));
+    }
+    
+    parser.consume(TokenType.LINE);
+
+    Map<String, Field> fields = new HashMap<String, Field>();
+    
+    // Parse the body.
+    while (!parser.match("end")) {
+      if (parser.match("var")) parseField(parser, fields);
+
+      parser.consume(TokenType.LINE);
+    }
+    
+    return Expr.class_(span.end(), name, parents, fields);
+  }
+
+  private void parseField(MagpieParser parser, Map<String, Field> fields) {
+    String name = parser.consume(TokenType.NAME).getString();
+    
+    // Parse the type if there is one.
+    Expr type;
+    if (parser.lookAhead(TokenType.EQUALS) ||
+        parser.lookAhead(TokenType.LINE)) {
+      type = null;
+    } else {
+      type = parser.parseTypeAnnotation();
+    }
+    
+    // Parse the initializer if there is one.
+    Expr initializer;
+    if (parser.match("=")) {
+      initializer = parser.parseEndBlock();
+    } else {
+      initializer = null;
+    }
+    
+    fields.put(name, new Field(type, initializer));
+  }
+  
+  /*
   public static Expr parseClass(MagpieParser parser, boolean isExtend) {
     Token nameToken = parser.parseName();
     String className = nameToken.getString();
@@ -191,5 +242,5 @@ public class ClassParser extends PrefixParser {
   private static Expr parseSetter(MagpieParser parser, Expr theClass) {
     throw new NotImplementedException();
   }
+  */
 }
-*/

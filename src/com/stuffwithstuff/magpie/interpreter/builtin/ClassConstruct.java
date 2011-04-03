@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.Expr;
+import com.stuffwithstuff.magpie.ast.Field;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
-import com.stuffwithstuff.magpie.interpreter.Field;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.util.Pair;
@@ -30,9 +30,10 @@ public class ClassConstruct implements Callable {
     
     Obj obj = interpreter.instantiate(mClass, null);
 
-    // Initialize or assign the fields.
+    // Assign the fields.
     for (Entry<String, Field> field : mClass.getFieldDefinitions().entrySet()) {
-      if (!field.getValue().hasInitializer()) {
+      // Only care about fields that don't have initializers.
+      if (field.getValue().getInitializer() == null) {
         // Assign it from the record.
         Obj value = arg.getField(field.getKey());
         if (value != null) {
@@ -53,14 +54,10 @@ public class ClassConstruct implements Callable {
     // in the class.
     List<Pair<String, Pattern>> fields = new ArrayList<Pair<String, Pattern>>();
     for (Entry<String, Field> field : mClass.getFieldDefinitions().entrySet()) {
-      if (!field.getValue().hasInitializer()) {
-        Pattern fieldPattern;
-        if (field.getValue().getType() != null) {
-          fieldPattern = Pattern.type(field.getValue().getType());
-        } else {
-          fieldPattern = Pattern.wildcard();
-        }
-        fields.add(new Pair<String, Pattern>(field.getKey(), fieldPattern));
+      // Only care about fields that don't have initializers.
+      if (field.getValue().getInitializer() == null) {
+        fields.add(new Pair<String, Pattern>(field.getKey(),
+            field.getValue().getPattern()));
       }
     }
 

@@ -1,6 +1,8 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.stuffwithstuff.magpie.ast.*;
@@ -96,6 +98,22 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       throw new BreakException();
     }
     return mInterpreter.nothing();
+  }
+
+  @Override
+  public Obj visit(ClassExpr expr, EvalContext context) {
+    // Look up the parents.
+    List<ClassObj> parents = new ArrayList<ClassObj>();
+    for (String parentName : expr.getParents()) {
+      parents.add(context.lookUp(parentName).asClass());
+    }
+    
+    ClassObj classObj = mInterpreter.createClass(expr.getName(), parents,
+        expr.getFields(), context.getScope());
+    
+    context.define(expr.getName(), classObj);
+    
+    return classObj;
   }
   
   @Override

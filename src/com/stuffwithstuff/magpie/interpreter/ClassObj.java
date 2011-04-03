@@ -3,6 +3,7 @@ package com.stuffwithstuff.magpie.interpreter;
 import java.util.*;
 
 import com.stuffwithstuff.magpie.ast.Expr;
+import com.stuffwithstuff.magpie.ast.Field;
 
 /**
  * A runtime object representing a class.
@@ -14,7 +15,8 @@ public class ClassObj extends Obj {
    * @param classClass  The class of this class.
    * @param name        The name of the class.
    */
-  public ClassObj(ClassObj classClass, String name, List<ClassObj> parents) {
+  public ClassObj(ClassObj classClass, String name, List<ClassObj> parents,
+      Map<String, Field> fields) {
     super(classClass);
     mName = name;
 
@@ -23,6 +25,8 @@ public class ClassObj extends Obj {
     } else {
       mParents = new ArrayList<ClassObj>();
     }
+    
+    mFields = fields;
   }
   
   public String getName() { return mName; }
@@ -62,5 +66,5 @@ public class ClassObj extends Obj {
   private final String mName;
   
   private final List<ClassObj> mParents;
-  private final Map<String, Field> mFields = new HashMap<String, Field>();
+  private final Map<String, Field> mFields;
 }
