@@ -52,7 +52,6 @@ public class Interpreter {
     BuiltIns.register(IntBuiltIns.class, this);
     /*
     BuiltIns.registerClass(MultimethodBuiltIns.class, mMultimethodClass);
-    BuiltIns.registerClass(ReflectBuiltIns.class, reflectClass);
     BuiltIns.registerClass(RuntimeBuiltIns.class, mRuntimeClass);
      */
     BuiltIns.register(StringBuiltIns.class, this);
@@ -62,13 +61,16 @@ public class Interpreter {
   }
   
   public void interpret(Expr expression) {
-    EvalContext context = createTopLevelContext();
-    
-    evaluate(expression, context);
+    evaluate(expression, createTopLevelContext());
   }
   
   public Obj evaluate(Expr expr) {
     return evaluate(expr, createTopLevelContext());
+  }
+  
+  public Obj evaluate(Expr expr, EvalContext context) {
+    ExprEvaluator evaluator = new ExprEvaluator(this);
+    return evaluator.evaluate(expr, context);
   }
 
   public String evaluateToString(Expr expr) {
@@ -79,6 +81,10 @@ public class Interpreter {
     
     // Convert it to a string.
     return evaluateToString(result);
+  }
+  
+  public String evaluateToString(Obj value) {
+    return invoke(value, Name.STRING, null).asString();
   }
 
   public Obj construct(String className, Obj... args) {
@@ -123,7 +129,7 @@ public class Interpreter {
   }
   
   public boolean objectsEqual(Obj a, Obj b) {
-    // Short-cuts to avoid infinite regress. Identical values always match, and
+    // Shortcuts to avoid infinite regress. Identical values always match, and
     // "true" and "false" never match each other. This lets us match on values
     // before truthiness or "==" have been bootstrapped.
     if (a == b) return true;
@@ -136,7 +142,7 @@ public class Interpreter {
     // Bootstrap short-cut. If we haven't defined "==" yet, default to identity.
     if (equals == null) return a == b;
     
-    Obj result = ((MultimethodObj)equals).invoke(this, null, false, createTuple(a, b));
+    Obj result = equals.asMultimethod().invoke(this, null, false, createTuple(a, b));
     
     return result.asBool();
   }
@@ -165,13 +171,13 @@ public class Interpreter {
   }
   
   public EvalContext createTopLevelContext() {
-    return new EvalContext(mGlobalScope, null);
+    return new EvalContext(mGlobalScope);
   }
   
   public Scope getGlobals() { return mGlobalScope; }
   
   /**
-   * Gets the single value () of type Nothing.
+   * Gets the single value "nothing" of type Nothing.
    * @return
    */
   public Obj nothing() { return mNothing; }
@@ -186,25 +192,6 @@ public class Interpreter {
   public ClassObj getRecordClass() { return mRecordClass; }
   public ClassObj getStringClass() { return mStringClass; }
   public ClassObj getTupleClass() { return mTupleClass; }
-  
-  public void defineMethod(String name, Callable method) {
-    Obj existing = mGlobalScope.get(name);
-    if (existing != null && !(existing instanceof MultimethodObj)) {
-      error("RedefinitionError", "Cannot define a method \"" + name +
-          "\" since there is already a variable with that name that is not a multimethod.");
-    }
-    
-    // Create the multimethod if this is the first one.
-    MultimethodObj multimethod;
-    if (existing != null) {
-      multimethod = (MultimethodObj)existing;
-    } else {
-      multimethod = new MultimethodObj(mMultimethodClass);
-      mGlobalScope.define(name, multimethod);
-    }
-    
-    multimethod.addMethod(method);
-  }
 
   public Obj createArray(List<Obj> elements) {
     return instantiate(mArrayClass, elements);
@@ -212,6 +199,17 @@ public class Interpreter {
   
   public Obj createBool(boolean value) {
     return value ? mTrue : mFalse;
+  }
+  
+  public ClassObj createClass(String name, List<ClassObj> parents) {
+    // Create the class.
+    ClassObj classObj = new ClassObj(mClass, name, parents);
+    
+    // Add the constructor.
+    Callable construct = new ClassConstruct(classObj);
+    getMultimethod("new").addMethod(construct);
+    
+    return classObj;
   }
 
   public Obj createInt(int value) {
@@ -228,7 +226,7 @@ public class Interpreter {
   
   public FnObj createFn(FnExpr expr, EvalContext context) {
     return new FnObj(mFnClass,
-        new Function(context.getScope(), context.getContainingClass(), expr));
+        new Function(context.getScope(), expr));
   }
   
   public Obj createTuple(Obj... fields) {
@@ -271,15 +269,6 @@ public class Interpreter {
     
     return object;
   }
-  
-  public Obj evaluate(Expr expr, EvalContext context) {
-    ExprEvaluator evaluator = new ExprEvaluator(this);
-    return evaluator.evaluate(expr, context);
-  }
-  
-  public String evaluateToString(Obj value) {
-    return invoke(value, Name.STRING, null).asString();
-  }
 
   public void pushScriptPath(String path) {
     mScriptPaths.push(path);
@@ -299,17 +288,6 @@ public class Interpreter {
   
   public Grammar getGrammar() {
     return mGrammar;
-  }
-  
-  public ClassObj createClass(String name, List<ClassObj> parents) {
-    // Create the class.
-    ClassObj classObj = new ClassObj(mClass, name, parents);
-    
-    // Add the constructor.
-    Callable construct = new ClassConstruct(classObj);
-    getMultimethod("new").addMethod(construct);
-    
-    return classObj;
   }
 
   public MultimethodObj getMultimethod(String name) {

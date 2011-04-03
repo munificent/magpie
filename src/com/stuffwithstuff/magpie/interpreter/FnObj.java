@@ -21,12 +21,6 @@ public class FnObj extends Obj {
 
   public Callable getCallable() { return mCallable; }
   
-  public Function getFunction() {
-    if (mCallable instanceof Function) return (Function) mCallable;
-    
-    return null;
-  }
-  
   public Obj invoke(Interpreter interpreter, Obj arg) {
     return mCallable.invoke(interpreter, arg);
   }

@@ -7,7 +7,6 @@ import com.stuffwithstuff.magpie.ast.pattern.Pattern;
  * user-defined functions and BuiltIn for built-in behavior.
  */
 public interface Callable {
-  Callable bindTo(ClassObj classObj);
   Obj invoke(Interpreter interpreter, Obj arg);
   Pattern getPattern();
 }

@@ -7,9 +7,8 @@ import java.util.Map.Entry;
  * lexical scope and the object that "this" refers to.
  */
 public class EvalContext {
-  public EvalContext(Scope scope, ClassObj containingClass) {
+  public EvalContext(Scope scope) {
     mScope = scope;
-    mContainingClass = containingClass;
     mIsInLoop = false;
   }
   
@@ -17,14 +16,14 @@ public class EvalContext {
    * Creates an EvalContext for a new lexical block scope within this one.
    */
   public EvalContext pushScope() {
-    return new EvalContext(new Scope(mScope), mContainingClass, mIsInLoop);
+    return new EvalContext(new Scope(mScope), mIsInLoop);
   }
   
   /**
    * Creates an EvalContext that discards the current innermost lexical scope.
    */
   public EvalContext popScope() {
-    return new EvalContext(mScope.getParent(), mContainingClass, mIsInLoop);
+    return new EvalContext(mScope.getParent(), mIsInLoop);
   }
 
   /**
@@ -32,11 +31,10 @@ public class EvalContext {
    * loop.
    */
   public EvalContext enterLoop() {
-    return new EvalContext(mScope, mContainingClass, true);
+    return new EvalContext(mScope, true);
   }
   
   public Scope   getScope() { return mScope; }
-  public ClassObj getContainingClass() { return mContainingClass; }
 
   public boolean isInLoop() { return mIsInLoop; }
   
@@ -118,13 +116,11 @@ public class EvalContext {
     return builder.toString();
   }
   
-  private EvalContext(Scope scope, ClassObj containingClass, boolean isInLoop) {
+  private EvalContext(Scope scope, boolean isInLoop) {
     mScope = scope;
-    mContainingClass = containingClass;
     mIsInLoop = isInLoop;
   }
 
   private final Scope    mScope;
-  private final ClassObj mContainingClass;
   private final boolean  mIsInLoop;
 }

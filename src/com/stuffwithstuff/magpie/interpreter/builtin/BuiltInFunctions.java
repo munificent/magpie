@@ -32,7 +32,14 @@ public class BuiltInFunctions {
     }
   }
   */
-
+  
+  @Signature("same?(a, b)")
+  public static class Same implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj arg) {
+      throw new QuitException();
+    }
+  }
+  
   @Signature("(this) string")
   public static class String_ implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {

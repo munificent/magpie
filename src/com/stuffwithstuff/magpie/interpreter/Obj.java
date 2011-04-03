@@ -100,6 +100,15 @@ public class Obj {
     throw new InterpreterException(String.format(
         "The object \"%s\" is not a function.", this));
   }
+
+  public MultimethodObj asMultimethod() {
+    if (this instanceof MultimethodObj) {
+      return (MultimethodObj)this;
+    }
+    
+    throw new InterpreterException(String.format(
+        "The object \"%s\" is not a multimethod.", this));
+  }
   
   public int asInt() {
     if (mValue instanceof Integer) {

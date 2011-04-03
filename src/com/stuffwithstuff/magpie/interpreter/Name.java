@@ -5,22 +5,11 @@ package com.stuffwithstuff.magpie.interpreter;
  * referenced directly by the Java code.
  */
 public final class Name {
-  public static final String ASSIGN = "assign";
   public static final String CALL = "call";
-  public static final String CONSTRUCT = "construct";
   public static final String COUNT = "count";
   public static final String CURRENT = "current";
   public static final String DECLARE_FIELD = "declareField";
-  public static final String DECLARE_GETTER = "declareGetter";
-  public static final String DECLARE_MEMBER = "declareMember";
-  public static final String DECLARE_METHOD = "declareMethod";
-  public static final String DECLARE_SETTER = "declareSetter";
-  public static final String DEFINE_FIELD = "defineField";
-  public static final String DEFINE_GETTER = "defineGetter";
-  public static final String DEFINE_METHOD = "defineMethod";
-  public static final String DEFINE_SETTER = "defineSetter";
   public static final String EQEQ = "==";
-  public static final String EXPRESSION = "Expression";
   public static final String IS_TRUE = "true?";
   public static final String IT = "it";
   public static final String ITERATE = "iterate";
