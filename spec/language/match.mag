@@ -6,9 +6,9 @@ specify("A 'match' expression") with
             "value"
         end
 
-        match eval()
-            case "a" then "one"
-            case "b" then "two"
+        match eval call()
+            case "a" -> "one"
+            case "b" -> "two"
             else "three"
         end
 
@@ -17,17 +17,17 @@ specify("A 'match' expression") with
 
     it should("return the value of the matched case") with
         match 2
-            case 1 then "one"
-            case 2 then "two"
-            case 3 then "three"
+            case 1 -> "one"
+            case 2 -> "two"
+            case 3 -> "three"
         end shouldEqual("two")
     end
 
     it should("only evaluate the first matched case") with
         var called = ""
         match true
-            case true then called = called ~ "1"
-            case true then called = called ~ "2"
+            case true -> called = called + "1"
+            case true -> called = called + "2"
         end
         called shouldEqual("1")
     end
@@ -35,30 +35,30 @@ specify("A 'match' expression") with
     it should("throw an error if no case matches") with
         fn
             match "not found"
-                case "a" then "bad"
-                case "b" then "bad"
+                case "a" -> "bad"
+                case "b" -> "bad"
             end
         end shouldThrow(NoMatchError)
     end
 
     it should("match an else case if nothing else matches") with
         match "not found"
-            case "a" then "bad"
-            case "b" then "bad"
+            case "a" -> "bad"
+            case "b" -> "bad"
             else "good"
         end shouldEqual("good")
     end
 
     it should("bind pattern variables") with
-        match 1, 2
-            case a, b then a ~ b
+        match "1", "2"
+            case a, b -> a + b
         end shouldEqual("12")
     end
 
     it should("scope a binding to just the matched case") with
         var a = "outer"
         match "match"
-            case a then a = "inner"
+            case a -> a = "inner"
         end
         a shouldEqual("outer")
     end
@@ -68,12 +68,12 @@ specify("The grammar for a 'match' expression") with
     it should("allow a block for a case body") with
         var result = ""
         match "first"
-            case "first" then
+            case "first" ->
                 result = "a"
-                result = result ~ "b"
-            case "second" then
+                result = result + "b"
+            case "second" ->
                 result = "bad"
-                result = result ~ "d"
+                result = result + "d"
             end
         end
         result shouldEqual("ab")
@@ -82,10 +82,10 @@ specify("The grammar for a 'match' expression") with
     it should("allow a block for the else body") with
         var result = ""
         match "second"
-            case "first" then
+            case "first" ->
             else
                 result = "a"
-                result = result ~ "b"
+                result = result + "b"
             end
         end
         result shouldEqual("ab")

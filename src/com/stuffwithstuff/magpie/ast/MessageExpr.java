@@ -28,6 +28,17 @@ public class MessageExpr extends Expr {
     }
     
     builder.append(mName);
+    
+    if (mArg == null) {
+      // Do nothing.
+    } else if (mArg instanceof NothingExpr) {
+      builder.append("()");
+    } else if (mArg instanceof TupleExpr) {
+      // Don't double (()).
+      builder.append(mArg);
+    } else {
+      builder.append("(").append(mArg).append(")");
+    }
   }
 
   private final Expr mReceiver;

@@ -11,6 +11,7 @@ import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
+import com.stuffwithstuff.magpie.interpreter.Scope;
 import com.stuffwithstuff.magpie.util.Pair;
 
 /**
@@ -18,8 +19,9 @@ import com.stuffwithstuff.magpie.util.Pair;
  * whose fields are initialized with the record's fields.
  */
 public class ClassConstruct implements Callable {
-  public ClassConstruct(ClassObj classObj) {
+  public ClassConstruct(ClassObj classObj, Scope closure) {
     mClass = classObj;
+    mClosure = closure;
   }
 
   @Override
@@ -65,11 +67,17 @@ public class ClassConstruct implements Callable {
     
     return Pattern.tuple(receiver, argument);
   }
-  
+
+  @Override
+  public Scope getClosure() {
+    return mClosure;
+  }
+
   @Override
   public String toString() {
     return mClass.getName() + " new(" + getPattern() + ")";
   }
   
   private final ClassObj mClass;
+  private final Scope mClosure;
 }

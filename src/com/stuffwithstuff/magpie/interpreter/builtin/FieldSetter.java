@@ -7,16 +7,18 @@ import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
+import com.stuffwithstuff.magpie.interpreter.Scope;
 
 /**
  * Built-in callable that assigns a value to a named field.
  */
 public class FieldSetter implements Callable {
-  public FieldSetter(ClassObj classObj, String name, Field field) {
+  public FieldSetter(ClassObj classObj, String name, Field field, Scope closure) {
     mName = name;
     mPattern = Pattern.tuple(
         Pattern.type(Expr.name(classObj.getName())),
         field.getPattern());
+    mClosure = closure;
   }
   
   @Override
@@ -29,7 +31,13 @@ public class FieldSetter implements Callable {
   public Pattern getPattern() {
     return mPattern;
   }
+
+  @Override
+  public Scope getClosure() {
+    return mClosure;
+  }
   
   private final String mName;
   private final Pattern mPattern;
+  private final Scope mClosure;
 }

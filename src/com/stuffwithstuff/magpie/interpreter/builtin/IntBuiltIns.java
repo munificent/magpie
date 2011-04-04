@@ -73,11 +73,6 @@ public class IntBuiltIns {
     protected boolean perform(int left, int right) { return left == right; }
   }
   
-  @Signature("(this Int) !=(right Int)")
-  public static class NotEquals extends ComparisonOperator {
-    protected boolean perform(int left, int right) { return left != right; }
-  }
-  
   @Signature("(this Int) <(right Int)")
   public static class LessThan extends ComparisonOperator {
     protected boolean perform(int left, int right) { return left < right; }

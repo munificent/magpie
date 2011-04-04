@@ -78,6 +78,8 @@ public abstract class Expr {
   
   // TODO(bob): Hackish. Eliminate.
   public static Expr if_(Expr condition, Expr thenExpr, Expr elseExpr) {
+    if (elseExpr == null) elseExpr = Expr.nothing();
+    
     List<MatchCase> cases = new ArrayList<MatchCase>();
     cases.add(new MatchCase(Pattern.value(Expr.bool(true)), thenExpr));
     cases.add(new MatchCase(elseExpr));

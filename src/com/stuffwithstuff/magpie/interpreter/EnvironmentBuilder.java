@@ -20,7 +20,9 @@ public class EnvironmentBuilder {
     newClass("IOError", "Error");
     newClass("NoMatchError", "Error");
     newClass("NoMethodError", "Error");
+    newClass("OutOfBoundsError", "Error");
     newClass("ParseError", "Error");
+    newClass("RedefinitionError", "Error");
   }
   
   private EnvironmentBuilder(Interpreter interpreter) {

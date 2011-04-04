@@ -218,8 +218,9 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       multimethod = (MultimethodObj)existing;
     }
     
-    Function function = new Function(context.getScope(),
-        Expr.fn(expr.getPosition(), expr.getPattern(), expr.getBody()));
+    Function function = new Function(
+        Expr.fn(expr.getPosition(), expr.getPattern(), expr.getBody()),
+        context.getScope());
     multimethod.addMethod(function);
     
     return multimethod;

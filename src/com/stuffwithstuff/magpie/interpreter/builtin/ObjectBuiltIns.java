@@ -1,6 +1,39 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
+import com.stuffwithstuff.magpie.interpreter.Interpreter;
+import com.stuffwithstuff.magpie.interpreter.Obj;
+
 public class ObjectBuiltIns {
+  @Signature("(this) class")
+  public static class Class_ implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj arg) {
+      return arg.getClassObj();
+    }
+  }
+  
+  @Signature("(this) is?(class Class)")
+  public static class Is implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj arg) {
+      return interpreter.createBool(
+          arg.getTupleField(0).getClassObj().isSubclassOf(arg.getTupleField(1).asClass()));
+    }
+  }
+
+  @Signature("(this) sameAs?(other)")
+  public static class Same implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj arg) {
+      return interpreter.createBool(
+          arg.getTupleField(0) == arg.getTupleField(1));
+    }
+  }
+  
+  @Signature("(this) string")
+  public static class String_ implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj arg) {
+      return interpreter.createString("<" + arg.getClassObj().getName() + ">");
+    }
+  }
+  
   /*
   @Getter("fields List(String, Dynamic)")
   public static class Fields implements BuiltInCallable {

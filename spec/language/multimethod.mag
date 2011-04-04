@@ -3,12 +3,12 @@
 // test completes. Need locally scoped multimethods.
 
 specify("A multimethod") with
-    def multi1(a Int) "int"
-    def multi1(a String) "str"
-    def multi2(a Int, b Int) "int int"
-    def multi2(a Int, b String) "int str"
-    def multi2(a String, b Int) "str int"
-    def multi2(a String, b String) "str str"
+    def multi1(a Int) -> "int"
+    def multi1(a String) -> "str"
+    def multi2(a Int, b Int) -> "int int"
+    def multi2(a Int, b String) -> "int str"
+    def multi2(a String, b Int) -> "str int"
+    def multi2(a String, b String) -> "str str"
 
     it should("select a method that matches the argument type") with
         multi1(123) shouldEqual("int")
@@ -29,55 +29,55 @@ specify("A multimethod") with
     end
 end
 
-// TODO(bob): Hack. Declared at top scope because multimethods evaluate method
-// types in global scope.
-//  A1 A2
-//  | \ |
-//  B1 B2
-//  |
-//  C1
-
-class A1
-end
-
-class A2
-end
-
-class B1 : A1
-end
-
-class B2 : A1, A2
-end
-
-class C1 : B1
-end
-
-class Foo
-    get prop = "prop"
-end
-
 specify("The linearization of a multimethod") with
-    def linear1(a B1) "b1"
-    def linear1(a A1) "a1"
-    def linear1(a C1) "c1"
-    def linear2(a String) "class"
-    def linear2("string") "value"
-    def linear2(123) "value"
-    def linear2(a Int) "class"
-    def linear3(a String) "class"
-    def linear3(anything) "any"
-    def linear3(a Int) "class"
-    def linear4("string") "value"
-    def linear4(anything) "any"
-    def linear4(123) "value"
-    def linear5(foo: _) "record"
-    def linear5(foo Foo) "class"
-    def linear5(foo: _, bar: _) "record"
-    def linear6(a A1, b A1) "a1 a1"
-    def linear6(a B1, b A1) "b1 a1"
-    def linear6(a B1, b B1) "b1 b1"
-    def linear7(a B1, b A1) "b1 a1"
-    def linear7(a A1, b B1) "a1 b1"
+
+    //  A1 A2
+    //  | \ |
+    //  B1 B2
+    //  |
+    //  C1
+
+    defclass A1
+    end
+
+    defclass A2
+    end
+
+    defclass B1 : A1
+    end
+
+    defclass B2 : A1, A2
+    end
+
+    defclass C1 : B1
+    end
+
+    defclass Foo
+    end
+
+    def (this Foo) prop -> "prop"
+
+    def linear1(a B1) -> "b1"
+    def linear1(a A1) -> "a1"
+    def linear1(a C1) -> "c1"
+    def linear2(a String) -> "class"
+    def linear2("string") -> "value"
+    def linear2(123) -> "value"
+    def linear2(a Int) -> "class"
+    def linear3(a String) -> "class"
+    def linear3(anything) -> "any"
+    def linear3(a Int) -> "class"
+    def linear4("string") -> "value"
+    def linear4(anything) -> "any"
+    def linear4(123) -> "value"
+    def linear5(foo: _) -> "record"
+    def linear5(foo Foo) -> "class"
+    def linear5(foo: _, bar: _) -> "record"
+    def linear6(a A1, b A1) -> "a1 a1"
+    def linear6(a B1, b A1) -> "b1 a1"
+    def linear6(a B1, b B1) -> "b1 b1"
+    def linear7(a B1, b A1) -> "b1 a1"
+    def linear7(a A1, b B1) -> "a1 b1"
 
     it should("prefer the most-derived class") with
         linear1(A1 new()) shouldEqual("a1")

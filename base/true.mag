@@ -1,9 +1,0 @@
-// Note: This file is parsed before any of the parsewords have been defined, so
-// it only uses core syntax.
-
-// Implement Trueable for the built-in classes.
-Object  defineGetter("true?", fn true)
-Bool    defineGetter("true?", fn this)
-Int     defineGetter("true?", fn !=(this, 0))
-String  defineGetter("true?", fn >(this count, 0))
-Nothing defineGetter("true?", fn false)

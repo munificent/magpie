@@ -9,21 +9,6 @@ import("utility/TruthTest.mag")
 // The individual test cases.
 startTests()
 
-not(true) should==(false)
-not(false) should==(true)
-
-defclass Foo
-    var bar
-    var inity = "i"
-end
-
-Foo name should==("Foo")
-var foo = Foo new(bar: "b")
-foo bar should==("b")
-foo inity should==("i")
-foo bar = "b2"
-foo bar should==("b2")
-
 /*
 import("language/and.mag")
 import("language/assign.mag")
@@ -31,31 +16,34 @@ import("language/block.mag")
 import("language/break.mag")
 import("language/call.mag")
 import("language/catch.mag")
+*/
 import("language/do.mag")
+/*
 import("language/fn.mag")
 import("language/for.mag")
+*/
 import("language/if.mag")
 import("language/let.mag")
 import("language/match.mag")
+/*
 import("language/message.mag")
+*/
 import("language/multimethod.mag")
+/*
 import("language/newline.mag")
 import("language/or.mag")
 import("language/pattern.mag")
 import("language/quotation.mag")
 import("language/record.mag")
+*/
 import("language/return.mag")
 import("language/string.mag")
 import("language/var.mag")
 import("language/with.mag")
-
+import("core/not.mag")
+/*
 import("core/Array/call.mag")
 import("core/Array/contains.mag")
-import("core/Class/construct.mag")
-import("core/Class/defineField.mag")
-import("core/Class/defineGetter.mag")
-import("core/Class/defineSetter.mag")
-import("core/Class/defineMethod.mag")
 import("core/Class/name.mag")
 import("core/Class/new.mag")
 import("core/Int/string.mag")

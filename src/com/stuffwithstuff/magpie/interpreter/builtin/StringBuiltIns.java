@@ -15,13 +15,22 @@ public class StringBuiltIns {
   }
   
   @Signature("(this String) ==(right String)")
-  public static class Equals implements BuiltInCallable {
+  public static class Equals extends ComparisonOperator {
+    @Override
+    protected boolean perform(String left, String right) {
+      return left.equals(right);
+    }
+  }
+  
+  private abstract static class ComparisonOperator implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       String left = arg.getTupleField(0).asString();
       String right = arg.getTupleField(1).asString();
       
-      return interpreter.createBool(left.equals(right));
+      return interpreter.createBool(perform(left, right));
     }
+    
+    protected abstract boolean perform(String left, String right);
   }
   
   /*

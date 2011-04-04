@@ -54,11 +54,12 @@ public class MethodLinearizer implements Comparator<Callable> {
 
   @Override
   public int compare(Callable method1, Callable method2) {
-    return compare(method1.getPattern(),
-                   method2.getPattern());
+    return compare(method1.getPattern(), new EvalContext(method1.getClosure()),
+                   method2.getPattern(), new EvalContext(method2.getClosure()));
   }
 
-  private int compare(Pattern pattern1, Pattern pattern2) {
+  private int compare(Pattern pattern1, EvalContext context1,
+      Pattern pattern2, EvalContext context2) {
     final int firstWins = -1;
     final int secondWins = 1;
     
@@ -74,21 +75,21 @@ public class MethodLinearizer implements Comparator<Callable> {
       if      (isAny(pattern2))    return firstWins;
       else if (isRecord(pattern2)) throw new NotImplementedException();
       else if (isTuple(pattern2))  throw new NotImplementedException();
-      else if (isType(pattern2))   return compareTypes(pattern1, pattern2);
+      else if (isType(pattern2))   return compareTypes(pattern1, context1, pattern2, context2);
       else if (isValue(pattern2))  return secondWins;
       else throw new UnsupportedOperationException("Unknown pattern type.");
     } else if (isTuple(pattern1)) {
       if      (isAny(pattern2))    return firstWins;
       else if (isRecord(pattern2)) throw new NotImplementedException();
-      else if (isTuple(pattern2))  return compareTuples(pattern1, pattern2);
-      else if (isType(pattern2))   return compareTypes(pattern1, pattern2);
+      else if (isTuple(pattern2))  return compareTuples(pattern1, context1, pattern2, context2);
+      else if (isType(pattern2))   return compareTypes(pattern1, context1, pattern2, context2);
       else if (isValue(pattern2))  return secondWins;
       else throw new UnsupportedOperationException("Unknown pattern type.");
     } else if (isType(pattern1)) {
       if      (isAny(pattern2))    return firstWins;
-      else if (isRecord(pattern2)) return compareTypes(pattern1, pattern2);
-      else if (isTuple(pattern2))  return compareTypes(pattern1, pattern2);
-      else if (isType(pattern2))   return compareTypes(pattern1, pattern2);
+      else if (isRecord(pattern2)) return compareTypes(pattern1, context1, pattern2, context2);
+      else if (isTuple(pattern2))  return compareTypes(pattern1, context1, pattern2, context2);
+      else if (isType(pattern2))   return compareTypes(pattern1, context1, pattern2, context2);
       else if (isValue(pattern2))  return secondWins;
       else throw new UnsupportedOperationException("Unknown pattern type.");
     } else if (isValue(pattern1)) {
@@ -96,14 +97,15 @@ public class MethodLinearizer implements Comparator<Callable> {
       else if (isRecord(pattern2)) return firstWins;
       else if (isTuple(pattern2))  return firstWins;
       else if (isType(pattern2))   return firstWins;
-      else if (isValue(pattern2))  return compareValues(pattern1, pattern2);
+      else if (isValue(pattern2))  return compareValues(pattern1, context1, pattern2, context2);
       else throw new UnsupportedOperationException("Unknown pattern type.");
     } else {
       throw new UnsupportedOperationException("Unknown pattern type.");
     }
   }
 
-  private int compareTuples(Pattern pattern1, Pattern pattern2) {
+  private int compareTuples(Pattern pattern1, EvalContext context1,
+      Pattern pattern2, EvalContext context2) {
     TuplePattern tuple1 = (TuplePattern)pattern1;
     TuplePattern tuple2 = (TuplePattern)pattern2;
     
@@ -114,8 +116,8 @@ public class MethodLinearizer implements Comparator<Callable> {
     
     int currentComparison = 0;
     for (int i = 0; i < tuple1.getFields().size(); i++) {
-      int compare = compare(tuple1.getFields().get(i),
-                            tuple2.getFields().get(i));
+      int compare = compare(tuple1.getFields().get(i), context1,
+                            tuple2.getFields().get(i), context2);
       
       if (currentComparison == 0) {
         currentComparison = compare;
@@ -130,9 +132,10 @@ public class MethodLinearizer implements Comparator<Callable> {
     return currentComparison;
   }
   
-  private int compareTypes(Pattern pattern1, Pattern pattern2) {
-    Obj type1 = mInterpreter.evaluate(PatternTyper.evaluate(pattern1));
-    Obj type2 = mInterpreter.evaluate(PatternTyper.evaluate(pattern2));
+  private int compareTypes(Pattern pattern1, EvalContext context1,
+      Pattern pattern2, EvalContext context2) {
+    Obj type1 = mInterpreter.evaluate(PatternTyper.evaluate(pattern1), context1);
+    Obj type2 = mInterpreter.evaluate(PatternTyper.evaluate(pattern2), context2);
     
     // TODO(bob): WIP getting rid of types.
     if (type1 instanceof ClassObj && type2 instanceof ClassObj) {
@@ -157,9 +160,10 @@ public class MethodLinearizer implements Comparator<Callable> {
     throw new UnsupportedOperationException("Must be class now!");
   }
 
-  private int compareValues(Pattern pattern1, Pattern pattern2) {
-    Obj value1 = mInterpreter.evaluate(PatternTyper.evaluate(pattern1));
-    Obj value2 = mInterpreter.evaluate(PatternTyper.evaluate(pattern2));
+  private int compareValues(Pattern pattern1, EvalContext context1,
+      Pattern pattern2, EvalContext context2) {
+    Obj value1 = mInterpreter.evaluate(PatternTyper.evaluate(pattern1), context1);
+    Obj value2 = mInterpreter.evaluate(PatternTyper.evaluate(pattern2), context2);
     
     // Identical values are ordered the same. This lets us have tuples with
     // some identical value fields (like nothing) which are then sorted by

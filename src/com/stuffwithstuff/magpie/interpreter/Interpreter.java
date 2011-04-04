@@ -48,8 +48,8 @@ public class Interpreter {
     BuiltIns.register(ClassBuiltIns.class, this);
     BuiltIns.register(FunctionBuiltIns.class, this);
     BuiltIns.register(IntBuiltIns.class, this);
+    BuiltIns.register(ObjectBuiltIns.class, this);
     /*
-    BuiltIns.registerClass(MultimethodBuiltIns.class, mMultimethodClass);
     BuiltIns.registerClass(RuntimeBuiltIns.class, mRuntimeClass);
      */
     BuiltIns.register(StringBuiltIns.class, this);
@@ -211,17 +211,17 @@ public class Interpreter {
     ClassObj classObj = new ClassObj(mClass, name, parents, fields);
     
     // Add the constructor.
-    Callable construct = new ClassConstruct(classObj);
+    Callable construct = new ClassConstruct(classObj, scope);
     getMultimethod(scope, "new").addMethod(construct);
     
     // Add getters and setters for the fields.
     for (Entry<String, Field> entry : fields.entrySet()) {
       MultimethodObj getter = getMultimethod(scope, entry.getKey());
-      getter.addMethod(new FieldGetter(classObj, entry.getKey()));
+      getter.addMethod(new FieldGetter(classObj, entry.getKey(), scope));
 
       MultimethodObj setter = getMultimethod(scope, entry.getKey() + "_=");
       setter.addMethod(new FieldSetter(classObj,
-          entry.getKey(), entry.getValue()));
+          entry.getKey(), entry.getValue(), scope));
     }
     
     return classObj;
@@ -240,8 +240,7 @@ public class Interpreter {
   }
   
   public FnObj createFn(FnExpr expr, EvalContext context) {
-    return new FnObj(mFnClass,
-        new Function(context.getScope(), expr));
+    return new FnObj(mFnClass, new Function(expr, context.getScope()));
   }
   
   public Obj createTuple(Obj... fields) {

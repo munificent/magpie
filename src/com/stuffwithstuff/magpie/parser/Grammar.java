@@ -18,6 +18,7 @@ public class Grammar {
     prefix("do",        new DoParser());
     prefix("fn",        new FnParser());
     prefix("for",       new LoopParser());
+    prefix("if",        new IfParser());
     prefix("match",     new MatchParser());
     prefix("nothing",   new NothingParser());
     prefix("return",    new ReturnParser());

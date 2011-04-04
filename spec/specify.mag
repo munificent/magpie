@@ -19,21 +19,10 @@ def endTests() ->
         totalTests + " tests in " + (endTimeMs - startTimeMs) + "ms.")
 end
 
-def (this) should==(other) ->
-    totalTests = totalTests + 1
-    match this == other
-        case true -> print("PASS: " + this + " equals " + other)
-        case false ->
-            totalFailures = totalFailures + 1
-            print("FAIL: " + this + " should equal " + other)
-        end
-    end
-end
-
 // TODO(bob): Need function types.
 def specify(description String, block) ->
-    var suite = TestSuite new(description)
-    block call(suite)
+    currentTestSuite = TestSuite new(name: description)
+    block call(currentTestSuite)
 end
 
 defclass TestSuite
@@ -42,13 +31,6 @@ defclass TestSuite
     var failedTest  Bool   = false
 end
 
-def (TestSuite) new(name String) ->
-    var suite = new(name: name)
-    currentTestSuite = suite
-    suite
-end
-
-/*
 // TODO(bob): Need function types.
 def (this TestSuite) should(description String, block) ->
     currentTest = description
@@ -58,38 +40,36 @@ def (this TestSuite) should(description String, block) ->
     do
         block call()
     catch error ->
-        fail("Unexpected error: " ~ error type)
+        fail("Unexpected error: " + error type)
         debugDump(error)
     end
 
     if totalTests == testsBefore then
-        print("NONE: " ~ name ~ " should " ~ currentTest ~ ".")
+        print("NONE: " + name + " should " + currentTest + ".")
     end
 end
 
-def TestSuite pass() advance()
+def (this TestSuite) pass() -> advance()
 
-def TestSuite advance()
+def (this TestSuite) advance() ->
     totalTests = totalTests + 1
-    // Show the progress.
-    if (totalTests % 10) == 0 then prints(".")
 end
 
-def TestSuite fail(message String)
-    if failedTest not then
-        print("FAIL: " ~ name ~ " should " ~ currentTest ~ ".")
+def (this TestSuite) fail(message String) ->
+    if not(failedTest) then
+        print("FAIL: " + name + " should " + currentTest + ".")
     end
     advance()
     totalFailures = totalFailures + 1
-    print("      " ~ message)
+    print("      " + message)
     failedTest = true
 end
 
-def fail(message String)
+def fail(message String) ->
     currentTestSuite fail(message)
 end
 
-def this shouldEqual(expected, message String)
+def (this) shouldEqual(expected, message String) ->
     if this != expected then
         currentTestSuite fail(message)
     else
@@ -97,46 +77,44 @@ def this shouldEqual(expected, message String)
     end
 end
 
-def this shouldEqual(expected)
-    shouldEqual(expected, "Expected " ~ expected ~ " but was " ~ this)
+def (this) shouldEqual(expected) ->
+    shouldEqual(expected, "Expected " + expected + " but was " + this)
 end
 
-def this shouldBe(expected, message)
-    if is(expected) then
+def (this) shouldBe(expected Class, message String) ->
+    if is?(expected) then
         currentTestSuite pass()
     else
-        if message == nothing then
-            message = "Expected type " ~ expected ~ " but was " ~ this
-        end
-        // TODO(bob): Exceptions would be good here.
         currentTestSuite fail(message)
     end
 end
 
+def (this) shouldBe(expected Class) ->
+    shouldBe(expected, "Expected class " + expected + " but was " + this class)
+end
+
 // Verifies that a function throws an error of the given class. Will execute the
 // function.
-def Function shouldThrow(errorClass Class)
+def (this Function) shouldThrow(errorClass Class) ->
     var caught = false
     do
-        this()
-    catch err Error then
-        Reflect getClass(err) shouldEqual(errorClass, "Should have thrown an error of class " ~
-            errorClass ~ " but got an error of class " ~ Reflect getClass(err) ~
-            " instead.")
+        call()
+    catch err Error ->
+        err shouldBe(errorClass, "Should have thrown an error of class " +
+            errorClass + " but got an error of class " + err class + ".")
         caught = true
     end
-    caught shouldEqual(true, "Should have thrown an error of class " ~ errorClass ~
-        " but no error was thrown.")
+    caught shouldEqual(true, "Should have thrown an error of class " +
+        errorClass + " but no error was thrown.")
 end
 
 // Verifies that a function does not throw an error. Will execute the function.
-def Function shouldNotThrow()
+def (this Function) shouldNotThrow() ->
     var caught = false
     do
         this()
-    catch err Error then
+    catch err Error ->
         caught = true
     end
-    caught shouldEqual(false)
+    caught shouldEqual(false, "Should not have thrown an error.")
 end
-*/

@@ -1,0 +1,6 @@
+specify("The 'not' method") with
+    it should("negate a boolean") with
+        not(true) shouldEqual(false)
+        not(false) shouldEqual(true)
+    end
+end

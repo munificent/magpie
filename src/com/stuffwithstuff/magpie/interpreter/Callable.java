@@ -9,4 +9,5 @@ import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 public interface Callable {
   Obj invoke(Interpreter interpreter, Obj arg);
   Pattern getPattern();
+  Scope getClosure();
 }

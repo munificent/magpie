@@ -45,21 +45,6 @@ public class BuiltInFunctions {
     }
   }
 
-  @Signature("(this) sameAs?(other)")
-  public static class Same implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj arg) {
-      return interpreter.createBool(
-          arg.getTupleField(0) == arg.getTupleField(1));
-    }
-  }
-  
-  @Signature("(this) string")
-  public static class String_ implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj arg) {
-      return interpreter.createString("<" + arg.getClassObj().getName() + ">");
-    }
-  }
-
   @Signature("prints(text String)")
   public static class Print implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {

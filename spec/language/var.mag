@@ -23,12 +23,13 @@ specify("A 'var' expression") with
     it should("allow a block initializer") with
         var i =
             var temp = "a"
-            temp = temp ~ "b"
-            temp ~ "c"
+            temp = temp + "b"
+            temp + "c"
         end
         i shouldEqual("abc")
     end
 
+    /*
     it should("allow a fully-qualified name") with
         var a.b.i = "abi"
         var a.c.i = "aci"
@@ -37,6 +38,7 @@ specify("A 'var' expression") with
         a.c.i shouldEqual("aci")
         b.c.i shouldEqual("bci")
     end
+    */
 
     // TODO(bob): Spec pattern destructuring.
 end

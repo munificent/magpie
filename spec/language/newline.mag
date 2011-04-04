@@ -21,12 +21,6 @@ specify("A newline") with
         a x shouldEqual(1)
         a y shouldEqual(2)
     end
-
-    // TODO(bob): Skip for now. Periods are not used by the grammar.
-    /*
-    it should("be ignored after a period") with
-    end
-    */
 end
 
 specify("A semicolon") with

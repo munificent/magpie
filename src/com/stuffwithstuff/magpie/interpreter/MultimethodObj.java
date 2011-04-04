@@ -62,9 +62,10 @@ public class MultimethodObj extends Obj {
     
     List<Callable> applicable = new ArrayList<Callable>();
     for (Callable method : mMethods) {
-      // TODO(bob): Should this be a top level context?
-      if (PatternTester.test(interpreter, method.getPattern(), arg,
-            interpreter.createTopLevelContext())) {
+      // If the callable has a lexical context, evaluate its pattern in that
+      // context. That way pattern names can refer to local variables.
+      EvalContext context = new EvalContext(method.getClosure());
+      if (PatternTester.test(interpreter, method.getPattern(), arg, context)) {
         applicable.add(method);
       }
     }

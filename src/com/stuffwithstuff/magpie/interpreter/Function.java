@@ -8,13 +8,10 @@ import com.stuffwithstuff.magpie.ast.pattern.Pattern;
  * function given the context to do it in.
  */
 public class Function implements Callable {
-  public Function(Scope closure, FnExpr function) {
-    mClosure = closure;
+  public Function(FnExpr function, Scope scope) {
     mFunction = function;
+    mScope = scope;
   }
-
-  public Scope getClosure() { return mClosure; }
-  public FnExpr getFunction() { return mFunction; }
 
   @Override
   public Obj invoke(Interpreter interpreter, Obj arg) {
@@ -22,7 +19,7 @@ public class Function implements Callable {
       Profiler.push(mFunction.getPosition());
       
       // Create a local scope for the function.
-      EvalContext context = new EvalContext(mClosure).pushScope();
+      EvalContext context = new EvalContext(mScope).pushScope();
       
       // Bind the arguments bounds to the pattern.
       Pattern pattern = mFunction.getPattern();
@@ -41,7 +38,10 @@ public class Function implements Callable {
   
   @Override
   public Pattern getPattern() { return mFunction.getPattern(); }
-  
-  private final Scope mClosure;
+
+  @Override
+  public Scope getClosure() { return mScope; }
+
   private final FnExpr mFunction;
+  private final Scope mScope;
 }

@@ -38,7 +38,7 @@ public abstract class BuiltIns {
       // Construct the method.
       Constructor ctor = innerClass.getConstructor();
       BuiltInCallable callable = (BuiltInCallable) ctor.newInstance();
-      BuiltIn builtIn = new BuiltIn(pattern, callable);
+      BuiltIn builtIn = new BuiltIn(pattern, callable, interpreter.getGlobals());
       
       // Register it.
       MultimethodObj multimethod = interpreter.getMultimethod(

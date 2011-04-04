@@ -3,14 +3,14 @@ specify("A 'return' expression") with
         var f = fn
             return "value"
         end
-        f() shouldEqual("value")
+        f call() shouldEqual("value")
     end
 
     it should("return nothing if no value is provided") with
         var f = fn
             return
         end
-        f() shouldEqual(nothing)
+        f call() shouldEqual(nothing)
     end
 
     it should("exit the function immediately") with
