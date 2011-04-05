@@ -1,6 +1,11 @@
 package com.stuffwithstuff.magpie.parser;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.stuffwithstuff.magpie.ast.Expr;
+import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
+import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.util.Pair;
 
 public class IfParser implements PrefixParser {
@@ -22,9 +27,17 @@ public class IfParser implements PrefixParser {
     if (!consumedEnd && parser.match("else")) {
       elseExpr = parser.parseEndBlock();
     } else {
-      elseExpr = null;
+      elseExpr = Expr.nothing();
     }
     
-    return Expr.if_(condition, thenExpr, elseExpr);
+    // Convert it to a pattern matching expression.
+    List<MatchCase> cases = new ArrayList<MatchCase>();
+    cases.add(new MatchCase(Pattern.value(Expr.bool(true)), thenExpr));
+    cases.add(new MatchCase(elseExpr));
+    
+    Expr truthy = Expr.message(condition.getPosition(), condition, "true?");
+    
+    return Expr.match(Position.surrounding(condition, elseExpr),
+        truthy, cases);
   }
 }

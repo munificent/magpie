@@ -111,7 +111,7 @@ public abstract class Expr {
   }
   
   public static Expr message(Position position, Expr receiver, String name) {
-    return message(position, receiver, name, Expr.nothing());
+    return message(position, receiver, name, null);
   }
   
   public static Expr method(Position position, String name, Pattern pattern, Expr body) {

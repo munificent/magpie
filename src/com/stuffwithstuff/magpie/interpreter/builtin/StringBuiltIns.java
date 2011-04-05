@@ -4,6 +4,14 @@ import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class StringBuiltIns {  
+  
+  @Signature("(this String) count")
+  public static class Count implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj arg) {
+      return interpreter.createInt(arg.asString().length());
+    }
+  }
+  
   @Signature("(this String) +(right String)")
   public static class Add implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
@@ -68,13 +76,6 @@ public class StringBuiltIns {
       String right = arg.asString();
       
       return interpreter.createString(left + right);
-    }
-  }
-  
-  @Getter("count Int")
-  public static class Count implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      return interpreter.createInt(thisObj.asString().length());
     }
   }
   
