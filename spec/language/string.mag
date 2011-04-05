@@ -4,8 +4,8 @@ specify("A string literal") with
     end
 
     it should("allow backslash-prefixed escape sequences") with
-        "(\")" call(1) shouldEqual("\"")
-        "(\\)" call(1) shouldEqual("\\")
-        "(\n)" call(1) shouldEqual("\n")
+        "(\")"[1] shouldEqual("\"")
+        "(\\)"[1] shouldEqual("\\")
+        "(\n)"[1] shouldEqual("\n")
     end
 end

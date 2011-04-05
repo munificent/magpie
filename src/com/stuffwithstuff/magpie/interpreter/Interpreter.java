@@ -23,15 +23,15 @@ public class Interpreter {
     mClass.bindClass(mClass);
     mGlobalScope.define("Class", mClass);
 
-    mArrayClass = createGlobalClass("Array");
 
     mBoolClass = createGlobalClass("Bool");
     mTrue = instantiate(mBoolClass, true);
     mFalse = instantiate(mBoolClass, false);
     
     mFnClass = createGlobalClass("Function");
-    mMultimethodClass = createGlobalClass("Multimethod");
     mIntClass = createGlobalClass("Int");
+    mListClass = createGlobalClass("List");
+    mMultimethodClass = createGlobalClass("Multimethod");
     mRecordClass = createGlobalClass("Record");
     mStringClass = createGlobalClass("String");
     
@@ -42,12 +42,12 @@ public class Interpreter {
     
     // Register the built-in methods.
     /*
-    BuiltIns.registerClass(ArrayBuiltIns.class, mArrayClass);
     BuiltIns.registerClass(BoolBuiltIns.class, mBoolClass);
     */
     BuiltIns.register(ClassBuiltIns.class, this);
     BuiltIns.register(FunctionBuiltIns.class, this);
     BuiltIns.register(IntBuiltIns.class, this);
+    BuiltIns.register(ListBuiltIns.class, this);
     BuiltIns.register(ObjectBuiltIns.class, this);
     /*
     BuiltIns.registerClass(RuntimeBuiltIns.class, mRuntimeClass);
@@ -186,21 +186,17 @@ public class Interpreter {
    */
   public Obj nothing() { return mNothing; }
 
-  public ClassObj getArrayClass() { return mArrayClass; }
+  public ClassObj getClassClass() { return mClass; }
   public ClassObj getBoolClass() { return mBoolClass; }
   public ClassObj getFunctionClass() { return mFnClass; }
   public ClassObj getIntClass() { return mIntClass; }
-  public ClassObj getClassClass() { return mClass; }
+  public ClassObj getListClass() { return mListClass; }
   public ClassObj getMultimethodClass() { return mMultimethodClass; }
   public ClassObj getNothingClass() { return mNothingClass; }
   public ClassObj getRecordClass() { return mRecordClass; }
   public ClassObj getStringClass() { return mStringClass; }
   public ClassObj getTupleClass() { return mTupleClass; }
 
-  public Obj createArray(List<Obj> elements) {
-    return instantiate(mArrayClass, elements);
-  }
-  
   public Obj createBool(boolean value) {
     return value ? mTrue : mFalse;
   }
@@ -225,6 +221,10 @@ public class Interpreter {
     }
     
     return classObj;
+  }
+
+  public Obj createList(List<Obj> elements) {
+    return instantiate(mListClass, elements);
   }
 
   public Obj createInt(int value) {
@@ -330,11 +330,11 @@ public class Interpreter {
   private final InterpreterHost mHost;
   private Scope mGlobalScope;
   private final ClassObj mClass;
-  private final ClassObj mArrayClass;
   private final ClassObj mBoolClass;
   private final ClassObj mFnClass;
-  private final ClassObj mMultimethodClass;
   private final ClassObj mIntClass;
+  private final ClassObj mListClass;
+  private final ClassObj mMultimethodClass;
   private final ClassObj mNothingClass;
   private final ClassObj mRecordClass;
   private final ClassObj mStringClass;

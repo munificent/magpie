@@ -1,6 +1,46 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
-public class ArrayBuiltIns {
+import java.util.List;
+
+import com.stuffwithstuff.magpie.interpreter.Interpreter;
+import com.stuffwithstuff.magpie.interpreter.Obj;
+
+public class ListBuiltIns {
+  @Signature("(this List)[index Int]")
+  public static class Index implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj arg) {
+      List<Obj> elements = arg.getTupleField(0).asList();
+      int index = arg.getTupleField(1).asInt();
+      
+      // Negative indices count backwards from the end.
+      if (index < 0) index = elements.size() + index;
+      
+      if ((index < 0) || (index >= elements.size())) {
+        interpreter.error("OutOfBoundsError");
+      }
+      
+      return elements.get(index);
+    }
+  }
+
+  @Signature("(this List) add(item)")
+  public static class Add implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj arg) {
+      List<Obj> elements = arg.getTupleField(0).asList();
+      elements.add(arg.getTupleField(1));
+      
+      return arg.getTupleField(1);
+    }
+  }
+  
+  @Signature("(this List) count")
+  public static class Count implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj arg) {
+      List<Obj> elements = arg.asList();
+      return interpreter.createInt(elements.size());
+    }
+  }
+
   /*
   @Shared
   @Signature("of(items -> List(Any))")
@@ -28,32 +68,7 @@ public class ArrayBuiltIns {
       return interpreter.createArray(elements);
     }
   }
-  
-  @Getter("count Int")
-  public static class Count implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      List<Obj> elements = thisObj.asArray();
-      return interpreter.createInt(elements.size());
-    }
-  }
-  
-  @Signature("call(index Int)")
-  public static class Call implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      List<Obj> elements = thisObj.asArray();
-      
-      int index = arg.asInt();
-      
-      // Negative indices count backwards from the end.
-      if (index < 0) index = elements.size() + index;
-      
-      if ((index < 0) || (index >= elements.size())) {
-        interpreter.error("OutOfBoundsError");
-      }
-      
-      return elements.get(index);
-    }
-  }
+
   
   @Signature("assign(index Int, item)")
   public static class Assign implements BuiltInCallable {
@@ -68,16 +83,6 @@ public class ArrayBuiltIns {
       }
       
       elements.set(index, arg.getTupleField(1));
-      return interpreter.nothing();
-    }
-  }
-  
-  @Signature("add(item ->)")
-  public static class Add implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      List<Obj> elements = thisObj.asArray();
-      elements.add(arg);
-      
       return interpreter.nothing();
     }
   }

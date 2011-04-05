@@ -65,16 +65,6 @@ public class Obj {
     return this instanceof ClassObj;
   }
 
-  @SuppressWarnings("unchecked")
-  public List<Obj> asArray() {
-    if (mValue instanceof List<?>) {
-      return (List<Obj>)mValue;
-    }
-    
-    throw new InterpreterException(String.format(
-        "The object \"%s\" is not an array.", this));
-  }
-
   public boolean asBool() {
     if (mValue instanceof Boolean) {
       return ((Boolean)mValue).booleanValue();
@@ -100,6 +90,16 @@ public class Obj {
     
     throw new InterpreterException(String.format(
         "The object \"%s\" is not a function.", this));
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<Obj> asList() {
+    if (mValue instanceof List<?>) {
+      return (List<Obj>)mValue;
+    }
+    
+    throw new InterpreterException(String.format(
+        "The object \"%s\" is not a List.", this));
   }
 
   public MultimethodObj asMultimethod() {

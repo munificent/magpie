@@ -120,6 +120,17 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
+  public Obj visit(ListExpr expr, EvalContext context) {
+    // Evaluate the elements.
+    List<Obj> elements = new ArrayList<Obj>();
+    for (Expr element : expr.getElements()) {
+      elements.add(evaluate(element, context));
+    }
+
+    return mInterpreter.createList(elements);
+  }
+  
+  @Override
   public Obj visit(LoopExpr expr, EvalContext context) {
     try {
       context = context.enterLoop();

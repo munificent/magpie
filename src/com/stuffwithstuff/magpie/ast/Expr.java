@@ -97,6 +97,10 @@ public abstract class Expr {
     return new IntExpr(position, value);
   }
   
+  public static Expr list(Position position, List<Expr> elements) {
+    return new ListExpr(position, elements);
+  }
+  
   public static Expr loop(Position position, Expr body) {
     return new LoopExpr(position, body);
   }

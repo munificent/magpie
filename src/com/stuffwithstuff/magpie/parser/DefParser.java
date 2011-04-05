@@ -33,14 +33,29 @@ public class DefParser implements PrefixParser {
     }
     
     // Parse the message.
-    String name = parser.consume(TokenType.NAME).getString();
-    
-    // Parse the argument, if any.
+    String name;
     Pattern arg;
-    if (parser.lookAhead(TokenType.LEFT_PAREN)) {
-      arg = parsePattern(parser);
+    if (parser.match(TokenType.NAME)) {
+      // Regular named message.
+      name = parser.last(1).getString();
+      
+      // Parse the argument, if any.
+      if (parser.lookAhead(TokenType.LEFT_PAREN)) {
+        arg = parsePattern(parser);
+      } else {
+        arg = null;
+      }
     } else {
-      arg = null;
+      // No name, so it must be an indexer.
+      name = "[]";
+      parser.consume(TokenType.LEFT_BRACKET);
+      
+      if (!parser.match(TokenType.RIGHT_BRACKET)) {
+        arg = PatternParser.parse(parser);
+        parser.consume(TokenType.RIGHT_BRACKET);
+      } else {
+        arg = Pattern.nothing();
+      }
     }
     
     // Parse the setter's rvalue type, if any.

@@ -1,10 +1,10 @@
 specify("A 'for' expression") with
     it should("create a fresh variable each iteration") with
-        var closures = Array new()
+        var closures = []
         for a = 1 to(3) do closures add(fn a)
-        closures(0) call() shouldEqual(1)
-        closures(1) call() shouldEqual(2)
-        closures(2) call() shouldEqual(3)
+        closures[0] call() shouldEqual(1)
+        closures[1] call() shouldEqual(2)
+        closures[2] call() shouldEqual(3)
     end
 
     it should("create a local scope for the hidden iterator variable") with

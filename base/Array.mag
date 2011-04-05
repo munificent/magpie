@@ -1,18 +1,3 @@
-extend class Array
-    get string String =
-        var text = "["
-        for i = 0 until(count) do
-            text = text ~ this(i) string
-            if i < (count - 1) then text = text ~ ", "
-        end
-        text ~ "]"
-    end
-
-    get last = this(count - 1)
-end
-
-def shared Array new() Array of()
-
 def Array iterate() ArrayIterator new(this)
 
 def Array copy()

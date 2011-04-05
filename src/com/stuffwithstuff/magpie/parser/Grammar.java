@@ -5,12 +5,13 @@ import java.util.Set;
 
 public class Grammar {
   public Grammar() {
-    prefix(TokenType.BOOL,       new LiteralParser());
-    prefix(TokenType.INT,        new LiteralParser());
-    prefix(TokenType.STRING,     new LiteralParser());
-    prefix(TokenType.LEFT_PAREN, new ParenthesisPrefixParser());
-    prefix(TokenType.NAME,       new MessageParser());
-    prefix(TokenType.FIELD,      new FieldParser());
+    prefix(TokenType.BOOL,          new LiteralParser());
+    prefix(TokenType.INT,           new LiteralParser());
+    prefix(TokenType.STRING,        new LiteralParser());
+    prefix(TokenType.LEFT_PAREN,    new ParenthesisPrefixParser());
+    prefix(TokenType.LEFT_BRACKET,  new BracketPrefixParser());
+    prefix(TokenType.NAME,          new MessageParser());
+    prefix(TokenType.FIELD,         new FieldParser());
     
     prefix("break",     new BreakParser());
     prefix("def",       new DefParser());
@@ -25,9 +26,10 @@ public class Grammar {
     prefix("var",       new VarParser());
     prefix("while",     new LoopParser());
 
-    infix(TokenType.NAME, new MessageParser());
-    infix(TokenType.COMMA, new CommaParser());
-    infix(TokenType.EQUALS, new EqualsParser());
+    infix(TokenType.NAME,         new MessageParser());
+    infix(TokenType.COMMA,        new CommaParser());
+    infix(TokenType.EQUALS,       new EqualsParser());
+    infix(TokenType.LEFT_BRACKET, new BracketInfixParser());
 
     infix("*",  Precedence.PRODUCT);
     infix("/",  Precedence.PRODUCT);

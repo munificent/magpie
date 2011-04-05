@@ -4,7 +4,23 @@ import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class StringBuiltIns {  
-  
+  @Signature("(this String)[index Int]")
+  public static class Index implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj arg) {
+      String string = arg.getTupleField(0).asString();
+      int index = arg.getTupleField(1).asInt();
+      
+      // Negative indices count backwards from the end.
+      if (index < 0) index = string.length() + index;
+      
+      if ((index < 0) || (index >= string.length())) {
+        interpreter.error("OutOfBoundsError");
+      }
+      
+      return interpreter.createString(string.substring(index, index + 1));
+    }
+  }
+
   @Signature("(this String) count")
   public static class Count implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
@@ -42,15 +58,6 @@ public class StringBuiltIns {
   }
   
   /*
-  @Signature("call(index Int -> String)")
-  public static class Call implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      int index = arg.asInt();
-      String c = thisObj.asString().substring(index, index + 1);
-      return interpreter.createString(c);
-    }
-  }
-  
   // TODO(bob): May want to strongly-type arg at some point.
   @Signature("compareTo(other -> Int)")
   public static class CompareTo implements BuiltInCallable {
@@ -66,16 +73,6 @@ public class StringBuiltIns {
       String right = arg.asString();
       
       return interpreter.createBool(left.contains(right));
-    }
-  }
-
-  @Signature("concatenate(other String -> String)")
-  public static class Concatenate implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      String left = thisObj.asString();
-      String right = arg.asString();
-      
-      return interpreter.createString(left + right);
     }
   }
   

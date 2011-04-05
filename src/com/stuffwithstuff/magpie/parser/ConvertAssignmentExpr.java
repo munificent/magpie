@@ -51,6 +51,11 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
   }
 
   @Override
+  public Expr visit(ListExpr expr, Expr value) {
+    throw new NotImplementedException("Destructuring is only implemented on new vars for now.");
+  }
+
+  @Override
   public Expr visit(LoopExpr expr, Expr value) {
     return invalidExpression(expr);
   }

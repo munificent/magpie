@@ -1,0 +1,70 @@
+specify("A list literal expression") with
+    it should("create a list containing the elements") with
+        var list = [1, "two", true]
+        list shouldBe(List)
+        list[0] shouldEqual(1)
+        list[1] shouldEqual("two")
+        list[2] shouldEqual(true)
+    end
+
+    it should("allow an empty list") with
+        var list = []
+        list shouldBe(List)
+        list count shouldEqual(0)
+    end
+
+    it should("evaluate the elements left to right") with
+        var e = ""
+        var list = [(e = e + "1"), (e = e + "2"), (e = e + "3")]
+        e shouldEqual("123")
+    end
+end
+
+specify("A list indexer") with
+    it should("return the element at the zero-based index") with
+        var list = [1, "two", true]
+        list[0] shouldEqual(1)
+        list[1] shouldEqual("two")
+        list[2] shouldEqual(true)
+    end
+
+    it should("count from the back if the index is negative") with
+        var list = [1, "two", true]
+        list[-1] shouldEqual(true)
+        list[-2] shouldEqual("two")
+        list[-3] shouldEqual(1)
+    end
+
+    it should("throw an OutOfBoundsError on a bad index") with
+        var list = [1, 2, 3]
+        fn
+            list[3]
+        end shouldThrow(OutOfBoundsError)
+
+        fn
+            list[-4]
+        end shouldThrow(OutOfBoundsError)
+    end
+
+    // TODO(bob): Assignment.
+end
+
+specify("The 'add' method on Lists") with
+    it should("add an element to the end of the list") with
+        var list = ["a"]
+        list add("b")
+        list add("c")
+
+        list[0] shouldEqual("a")
+        list[1] shouldEqual("b")
+        list[2] shouldEqual("c")
+    end
+end
+
+specify("The 'count' method on Lists") with
+    it should("return the number of elements in the list") with
+        [] count shouldEqual(0)
+        ["a"] count shouldEqual(1)
+        ["a", "b"] count shouldEqual(2)
+    end
+end
