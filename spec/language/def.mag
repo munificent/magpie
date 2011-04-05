@@ -1,0 +1,125 @@
+specify("A 'def' expression") with
+    it should("select a method that matches the argument type") with
+        def multi(a Int) -> "int"
+        def multi(a String) -> "str"
+
+        multi(123) shouldEqual("int")
+        multi("s") shouldEqual("str")
+    end
+
+    it should("select a method based on tuple field types") with
+        def multi(a Int, b Int) -> "int int"
+        def multi(a Int, b String) -> "int str"
+        def multi(a String, b Int) -> "str int"
+        def multi(a String, b String) -> "str str"
+
+        multi(123, 123) shouldEqual("int int")
+        multi(123, "s") shouldEqual("int str")
+        multi("s", 123) shouldEqual("str int")
+        multi("s", "s") shouldEqual("str str")
+    end
+
+    it should("throw an error if no method matches") with
+        def multi(a Int) -> "int"
+
+        fn
+            multi("not int")
+        end shouldThrow(NoMethodError)
+    end
+end
+
+specify("The linearization of a multimethod") with
+
+    //  A1 A2
+    //  | \ |
+    //  B1 B2
+    //  |
+    //  C1
+
+    defclass A1
+    end
+
+    defclass A2
+    end
+
+    defclass B1 : A1
+    end
+
+    defclass B2 : A1, A2
+    end
+
+    defclass C1 : B1
+    end
+
+    defclass Foo
+    end
+
+    it should("prefer the most-derived class") with
+        def multi(a B1) -> "b1"
+        def multi(a A1) -> "a1"
+        def multi(a C1) -> "c1"
+
+        multi(A1 new()) shouldEqual("a1")
+        multi(B1 new()) shouldEqual("b1")
+        multi(B2 new()) shouldEqual("a1")
+        multi(C1 new()) shouldEqual("c1")
+    end
+
+    it should("prefer a value over a class") with
+        def multi(a String) -> "class"
+        def multi("string") -> "value"
+        def multi(123) -> "value"
+        def multi(a Int) -> "class"
+
+        multi("string") shouldEqual("value")
+        multi(123) shouldEqual("value")
+    end
+
+    it should("prefer a class over an untyped variable") with
+        def multi(a String) -> "class"
+        def multi(anything) -> "any"
+        def multi(a Int) -> "class"
+
+        multi("string") shouldEqual("class")
+        multi(123) shouldEqual("class")
+    end
+
+    it should("prefer a value over an untyped variable") with
+        def multi("string") -> "value"
+        def multi(anything) -> "any"
+        def multi(123) -> "value"
+
+        multi("string") shouldEqual("value")
+        multi(123) shouldEqual("value")
+    end
+
+    // TODO(bob): Implement me!
+    /*
+    it should("prefer a class over a record") with
+        def multi(foo: _) -> "record"
+        def multi(foo Foo) -> "class"
+        def multi(foo: _, bar: _) -> "record"
+        multi(Foo new()) shouldEqual("class")
+    end
+    */
+
+    it should("order tuples by their fields") with
+        def multi(a A1, b A1) -> "a1 a1"
+        def multi(a B1, b A1) -> "b1 a1"
+        def multi(a B1, b B1) -> "b1 b1"
+
+        multi(A1 new(), A1 new()) shouldEqual("a1 a1")
+        multi(C1 new(), A1 new()) shouldEqual("b1 a1")
+        multi(A1 new(), C1 new()) shouldEqual("a1 a1")
+        multi(C1 new(), C1 new()) shouldEqual("b1 b1")
+    end
+
+    it should("be ambiguous if tuple fields don't agree") with
+        def multi(a B1, b A1) -> "b1 a1"
+        def multi(a A1, b B1) -> "a1 b1"
+
+        fn
+            multi(B1 new(), B1 new())
+        end shouldThrow(AmbiguousMethodError)
+    end
+end

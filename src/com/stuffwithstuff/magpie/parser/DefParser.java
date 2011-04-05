@@ -2,6 +2,7 @@ package com.stuffwithstuff.magpie.parser;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
+import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.util.Pair;
 
 /**
@@ -79,7 +80,7 @@ public class DefParser implements PrefixParser {
       } else {
         // Setter.
         pattern = Pattern.tuple(receiver, setValue);
-        name = name + "=";
+        name = Name.makeAssigner(name);
       }
     } else {
       if (setValue == null) {
@@ -88,7 +89,7 @@ public class DefParser implements PrefixParser {
       } else {
         // Setter with argument.
         pattern = Pattern.tuple(receiver, Pattern.tuple(arg, setValue));
-        name = name + "=";
+        name = Name.makeAssigner(name);
       }
     }
     

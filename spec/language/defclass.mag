@@ -1,7 +1,9 @@
-specify("The 'name' method on Class") with
+specify("The 'name' method on Classes") with
     it should("return the name of the class") with
         Int name shouldEqual("Int")
         String name shouldEqual("String")
-        Class new("Foo") name shouldEqual("Foo")
+        defclass Foo
+        end
+        Foo name shouldEqual("Foo")
     end
 end

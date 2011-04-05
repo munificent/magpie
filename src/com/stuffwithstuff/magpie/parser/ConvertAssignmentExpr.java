@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie.parser;
 
 import com.stuffwithstuff.magpie.ast.*;
+import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.util.NotImplementedException;
 
 /**
@@ -75,18 +76,18 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
       } else {
         // message(arg) = value  -->  message_=(arg, value)
         return Expr.message(expr.getPosition(),
-            null, expr.getName() + "_=",
+            null, Name.makeAssigner(expr.getName()),
             Expr.tuple(expr.getArg(), value));
       }
     } else {
       if (expr.getArg() == null) {
         // receiver message = value  -->  receiver message_=(value)
         return Expr.message(expr.getPosition(),
-            expr.getReceiver(), expr.getName() + "_=", value);
+            expr.getReceiver(), Name.makeAssigner(expr.getName()), value);
       } else {
         // receiver message(arg) = value  -->  receiver message_=(arg, value)
         return Expr.message(expr.getPosition(),
-            expr.getReceiver(), expr.getName() + "_=",
+            expr.getReceiver(), Name.makeAssigner(expr.getName()),
             Expr.tuple(expr.getArg(), value));
       }
     }

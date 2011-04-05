@@ -23,6 +23,10 @@ public final class Name {
     return name.startsWith("_");
   }
   
+  public static String makeAssigner(String name) {
+    return name + "_=";
+  }
+  
   public static String makeClassPrivate(String className, String member) {
     return className + ".private." + member;
   }

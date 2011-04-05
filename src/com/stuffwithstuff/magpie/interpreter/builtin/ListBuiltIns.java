@@ -10,19 +10,28 @@ public class ListBuiltIns {
   public static class Index implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       List<Obj> elements = arg.getTupleField(0).asList();
-      int index = arg.getTupleField(1).asInt();
-      
-      // Negative indices count backwards from the end.
-      if (index < 0) index = elements.size() + index;
-      
-      if ((index < 0) || (index >= elements.size())) {
-        interpreter.error("OutOfBoundsError");
-      }
+      int index = validateIndex(interpreter, elements,
+          arg.getTupleField(1).asInt());
       
       return elements.get(index);
     }
   }
 
+  @Signature("(this List)[index Int] = (item)")
+  public static class IndexAssign implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj arg) {
+      List<Obj> elements = arg.getTupleField(0).asList();
+      
+      int index = validateIndex(interpreter, elements,
+          arg.getTupleField(1).getTupleField(0).asInt());
+      
+      Obj value = arg.getTupleField(1).getTupleField(1);
+      
+      elements.set(index, value);
+      return value;
+    }
+  }
+  
   @Signature("(this List) add(item)")
   public static class Add implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
@@ -40,52 +49,24 @@ public class ListBuiltIns {
       return interpreter.createInt(elements.size());
     }
   }
+  
+  private static int validateIndex(Interpreter interpreter, List<Obj> list,
+      int index) {
+    // Negative indices count backwards from the end.
+    if (index < 0) {
+      index = list.size() + index;
+    }
+    
+    // Check the bounds.
+    if ((index < 0) || (index >= list.size())) {
+      interpreter.error("OutOfBoundsError");
+    }
+    
+    return index;
+  }
 
   /*
-  @Shared
-  @Signature("of(items -> List(Any))")
-  public static class Of implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      List<Obj> elements = new ArrayList<Obj>();
-      if (arg == interpreter.nothing()) {
-        // zero element array
-      } else {
-        Obj countObj = arg.getField(Name.COUNT);
-        // TODO(bob): Hackish. Checks for "count" to decide if arg is a tuple.
-        // Should do something smarter.
-        if (countObj != null) {
-          int count = countObj.asInt();
-          
-          for (int i = 0; i < count; i++) {
-            elements.add(arg.getTupleField(i));
-          }
-        } else {
-         // a non-tuple arg means a one-element array
-          elements.add(arg);
-        }
-      }
-      
-      return interpreter.createArray(elements);
-    }
-  }
 
-  
-  @Signature("assign(index Int, item)")
-  public static class Assign implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      List<Obj> elements = thisObj.asArray();
-      
-      int index = arg.getTupleField(0).asInt();
-      
-      // Negative indices count backwards from the end.
-      if (index < 0) {
-        index = elements.size() + index;
-      }
-      
-      elements.set(index, arg.getTupleField(1));
-      return interpreter.nothing();
-    }
-  }
   
   @Signature("insert(index Int, item ->)")
   public static class Insert implements BuiltInCallable {

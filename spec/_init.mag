@@ -2,7 +2,6 @@
 import("specify.mag")
 
 /*
-import("utility/TestCallable.mag")
 import("utility/TruthTest.mag")
 */
 
@@ -12,8 +11,9 @@ startTests()
 //import("language/and.mag")
 import("language/assign.mag")
 import("language/break.mag")
-//import("language/call.mag")
-//import("language/catch.mag")
+import("language/catch.mag")
+import("language/def.mag")
+import("language/defclass.mag")
 import("language/do.mag")
 //import("language/fn.mag")
 import("language/for.mag")
@@ -22,7 +22,6 @@ import("language/let.mag")
 import("language/list.mag")
 import("language/match.mag")
 //import("language/message.mag")
-import("language/multimethod.mag")
 //import("language/newline.mag")
 //import("language/or.mag")
 //import("language/pattern.mag")
@@ -38,10 +37,7 @@ import("core/Range.mag")
 import("core/RangeIterator.mag")
 
 /*
-import("core/Array/call.mag")
 import("core/Array/contains.mag")
-import("core/Class/name.mag")
-import("core/Class/new.mag")
 import("core/Object/fields.mag")
 import("core/Object/getField.mag")
 import("core/Object/hasField.mag")
