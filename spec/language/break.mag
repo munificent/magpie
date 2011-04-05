@@ -2,7 +2,7 @@ specify("A 'break' expression") with
     it should("exit a loop") with
         var i = ""
         for a = 1 to(5) do
-            i = i ~ a
+            i = i + a
             if a == 2 then break
         end
         i shouldEqual("12")
@@ -12,7 +12,7 @@ specify("A 'break' expression") with
         var i = ""
         for a = 1 to(5) do
             for b = 1 to(5) do
-                i = i ~ a
+                i = i + a
                 if b == 2 then break
             end
         end
@@ -24,7 +24,7 @@ specify("A 'break' expression") with
             1
             break
             2
-        end()
+        end call()
         result shouldEqual(2)
     end
 end

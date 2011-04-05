@@ -1,5 +1,5 @@
-specify("The 'not' method") with
-    it should("negate a boolean") with
+specify("The 'not' method on Bools") with
+    it should("negate") with
         not(true) shouldEqual(false)
         not(false) shouldEqual(true)
     end

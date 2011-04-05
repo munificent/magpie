@@ -1,3 +1,33 @@
+defclass Range
+    var first Int
+    var last  Int
+end
+
+def (this Int) to(last Int) ->
+    Range new(first: this, last: last)
+end
+
+def (this Range) iterate() ->
+    RangeIterator new(first, last)
+end
+
+defclass RangeIterator
+    var current Int
+    var last    Int
+end
+
+def (RangeIterator) new(first Int, last Int) ->
+    // Rollback so the first call to next() advances to the first value.
+    RangeIterator new(current: first - 1, last: last)
+end
+
+def (this RangeIterator) next() ->
+    // TODO(bob): Why is "this" required here?
+    this current = this current + 1
+    this current <= this last
+end
+
+/*
 // Add iterator methods on Ints.
 // TODO(bob): Use real int max.
 // TODO(bob): Actual syntax for defining getters.
@@ -32,14 +62,15 @@ def RangeIterator next()
 end
 
 class Range
-    var start Int
+    var first Int
     var last  Int
 end
 
-def shared Range new(start Int, last Int)
-    construct(start: start, last: last)
+def shared Range new(first Int, last Int)
+    construct(first: first, last: last)
 end
 
 def Range iterate()
-    RangeIterator new(start, last)
+    RangeIterator new(first, last)
 end
+*/

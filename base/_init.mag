@@ -26,3 +26,5 @@ def (this Bool)   true? -> this
 def (this Int)    true? -> this != 0
 def (this String) true? -> this count > 0
 def (nothing)     true? -> false
+
+import("Range.mag")

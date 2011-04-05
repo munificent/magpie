@@ -1,0 +1,14 @@
+specify("The 'string' getter on Ints") with
+    it should("convert the value to a string") with
+        0 string shouldEqual("0")
+        123 string shouldEqual("123")
+    end
+end
+
+specify("The 'to' method on Ints") with
+    it should("create a Range from the receiver to the given value") with
+        var range = 2 to(5)
+        range first shouldEqual(2)
+        range last shouldEqual(5)
+    end
+end

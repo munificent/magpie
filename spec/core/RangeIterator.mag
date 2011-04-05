@@ -1,0 +1,20 @@
+specify("The 'next' method on RangeIterators") with
+    it should("advance the current value") with
+        var iterator = RangeIterator new(2, 5)
+        iterator current shouldEqual(1)
+        iterator next()
+        iterator current shouldEqual(2)
+        iterator next()
+        iterator current shouldEqual(3)
+    end
+
+    it should("return false when the end of the range is reached") with
+        var iterator = RangeIterator new(2, 5)
+        iterator next() shouldEqual(true) // 2
+        iterator next() shouldEqual(true) // 3
+        iterator next() shouldEqual(true) // 4
+        iterator next() shouldEqual(true) // 5
+        iterator next() shouldEqual(false) // 6
+        iterator next() shouldEqual(false) // 6
+    end
+end

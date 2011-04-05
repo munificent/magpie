@@ -1,0 +1,8 @@
+specify("The 'iterate' method on Ranges") with
+    it should("create a RangeIterator for the Range") with
+        var iterator = Range new(first: 2, last: 5) iterate()
+        // 1 before the first since the first call to next() should advance.
+        iterator current shouldEqual(1)
+        iterator last shouldEqual(5)
+    end
+end

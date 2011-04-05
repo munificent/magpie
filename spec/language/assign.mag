@@ -8,27 +8,27 @@ specify("An assignment ('=') expression") with
         a = "after"
         a shouldEqual("after")
     end
-    
+
     it should("assign to a variable in an outer scope") with
         var a = "before"
-        if true then
+        do
             a = "after"
         end
         a shouldEqual("after")
     end
-    
+
     it should("assign to the innermost shadowed variable") with
         var a = "outer"
-        if true then
+        do
             var a = "shadow"
-            if true then
+            do
                 a = "after"
             end
             a shouldEqual("after")
         end
         a shouldEqual("outer")
     end
-    
+
     it should("return the assigned value") with
         var a = "before"
         (a = "after") shouldEqual("after")
