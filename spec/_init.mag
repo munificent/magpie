@@ -35,13 +35,10 @@ import("core/Range.mag")
 import("core/RangeIterator.mag")
 
 /*
-import("core/Array/contains.mag")
 import("core/Object/fields.mag")
 import("core/Object/getField.mag")
 import("core/Object/hasField.mag")
 import("core/Object/receiving.mag")
-import("core/Tuple/iterate.mag")
-import("core/Tuple/string.mag")
 */
 
 endTests()

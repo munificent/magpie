@@ -19,7 +19,8 @@ public class Interpreter {
     mGlobalScope = new Scope(host.allowTopLevelRedefinition());
     
     // The class of all classes. Its class is itself.
-    mClass = new ClassObj(null, "Class", null, new HashMap<String, Field>());
+    mClass = new ClassObj(null, "Class", null, new HashMap<String, Field>(),
+        mGlobalScope);
     mClass.bindClass(mClass);
     mGlobalScope.define("Class", mClass);
 
@@ -39,6 +40,9 @@ public class Interpreter {
     
     mNothingClass = createGlobalClass("Nothing");
     mNothing = instantiate(mNothingClass, null);
+    
+    // Create the default new() method for creating objects.
+    getMultimethod(mGlobalScope, "new").addMethod(new ClassNew(mGlobalScope));
     
     // Register the built-in methods.
     BuiltIns.register(ClassBuiltIns.class, this);
@@ -199,15 +203,18 @@ public class Interpreter {
   public ClassObj createClass(String name, List<ClassObj> parents,
       Map<String, Field> fields, Scope scope) {
     // Create the class.
-    ClassObj classObj = new ClassObj(mClass, name, parents, fields);
+    ClassObj classObj = new ClassObj(mClass, name, parents, fields, scope);
     
     if (classObj.checkForCollisions()) {
       error("ParentCollisionError");
     }
     
     // Add the constructor.
+    getMultimethod(scope, "init").addMethod(new ClassInit(classObj, scope));
+/*
     Callable construct = new ClassConstruct(classObj, scope);
     getMultimethod(scope, "new").addMethod(construct);
+  */
     
     // Add getters and setters for the fields.
     for (Entry<String, Field> entry : fields.entrySet()) {
@@ -307,6 +314,27 @@ public class Interpreter {
     return (MultimethodObj)obj;
   }
   
+  public Obj getConstructingObject() { return mConstructing.peek(); }
+  
+  public Obj constructNewObject(ClassObj classObj, Obj initArg) {
+    Obj newObj = instantiate(classObj, null);
+    
+    mConstructing.push(newObj);
+    // Call the init() multimethod.
+    initializeNewObject(classObj, initArg);
+    mConstructing.pop();
+    
+    return newObj;
+  }
+  
+  public void initializeNewObject(ClassObj classObj, Obj arg) {
+    MultimethodObj init = getMultimethod(classObj.getClosure(), "init");
+    // Note: the receiver for init() is the class itself, not the new instance
+    // which is considered to be in a hidden state since it isn't initialized
+    // yet.
+    init.invoke(this, classObj, true, arg);
+  }
+  
   public ClassObj createGlobalClass(String name, List<ClassObj> parents) {
     ClassObj classObj = createClass(name, parents, 
         new HashMap<String, Field>(), mGlobalScope);
@@ -337,5 +365,7 @@ public class Interpreter {
   private final Stack<String> mScriptPaths = new Stack<String>();
   private final Grammar mGrammar;
   
+  private final Stack<Obj> mConstructing = new Stack<Obj>();
+
   private boolean mInObjectsEqual = false;
 }

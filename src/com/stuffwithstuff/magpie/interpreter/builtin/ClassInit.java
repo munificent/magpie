@@ -15,24 +15,31 @@ import com.stuffwithstuff.magpie.interpreter.Scope;
 import com.stuffwithstuff.magpie.util.Pair;
 
 /**
- * Built-in callable that takes a record and creates an instance of a class
- * whose fields are initialized with the record's fields.
+ * Built-in callable that initializes an instance of a class from the given
+ * record of fields and parent class initializers.
  */
-public class ClassConstruct implements Callable {
-  public ClassConstruct(ClassObj classObj, Scope closure) {
+public class ClassInit implements Callable {
+  public ClassInit(ClassObj classObj, Scope closure) {
     mClass = classObj;
     mClosure = closure;
   }
 
   @Override
   public Obj invoke(Interpreter interpreter, Obj arg) {
-    // TODO(bob): Hack temp. This is called from multimethod, so arg is a tuple
-    // of both receiver and right-hand arg. We just want right-hand.
+    // We don't care about the receiver.
     arg = arg.getTupleField(1);
     
-    Obj obj = interpreter.instantiate(mClass, null);
+    Obj obj = interpreter.getConstructingObject();
 
-    // Assign the fields.
+    // Initialize the parent classes from the record.
+    for (ClassObj parent : mClass.getParents()) {
+      Obj value = arg.getField(parent.getName());
+      if (value != null) {
+        interpreter.initializeNewObject(parent, value);
+      }
+    }
+    
+    // Initialize the fields from the record.
     for (Entry<String, Field> field : mClass.getFieldDefinitions().entrySet()) {
       // Only care about fields that don't have initializers.
       if (field.getValue().getInitializer() == null) {
@@ -75,7 +82,7 @@ public class ClassConstruct implements Callable {
 
   @Override
   public String toString() {
-    return mClass.getName() + " new(" + getPattern() + ")";
+    return mClass.getName() + " init(" + getPattern() + ")";
   }
   
   private final ClassObj mClass;

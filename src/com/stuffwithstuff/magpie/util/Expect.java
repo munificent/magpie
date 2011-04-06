@@ -16,6 +16,12 @@ public final class Expect {
     }
   }
   
+  public static void isNull(Object arg) {
+    if (arg != null) {
+      throw new IllegalStateException("Value must be null.");
+    }
+  }
+  
   public static void positive(int arg) {
     if (arg <= 0) {
       throw new IllegalArgumentException("Argument must be positive.");

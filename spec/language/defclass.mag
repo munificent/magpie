@@ -44,3 +44,89 @@ specify("Inheritance") with
         end shouldThrow(ParentCollisionError)
     end
 end
+
+specify("A class's default constructor") with
+    it should("return an instance of the class") with
+        defclass C
+        end
+
+        C new() shouldBe(C)
+    end
+
+    it should("initialize fields from the given record") with
+        defclass C
+            var a
+            var b
+        end
+
+        var c = C new(a: "a", b: "b")
+        c a shouldEqual("a")
+        c b shouldEqual("b")
+    end
+
+    it should("run the initializers provided with fields") with
+        defclass C
+            var a = "a"
+            var b = "b"
+        end
+
+        var c = C new()
+        c a shouldEqual("a")
+        c b shouldEqual("b")
+    end
+
+    it should("initialize parent classes with record fields that match the " +
+              "parent class name") with
+        defclass A
+            var aa
+        end
+
+        defclass B
+            var bb
+        end
+
+        defclass C : A, B
+            var cc
+        end
+
+        var c = C new(A: (aa: "a"), B: (bb: "b"), cc: "c")
+        c aa shouldEqual("a")
+        c bb shouldEqual("b")
+        c cc shouldEqual("c")
+    end
+
+    it should("select an appropriate 'init()' method based on the arguments " +
+              "provided to 'new()'") with
+        defclass C
+            var a
+            var b
+        end
+
+        // TODO(bob): Can't rely on "this" here because the pattern doesn't
+        // define it. Ideally, should always bind "this" to the receiver.
+        def (C) init(string String) -> C init(a: string + "a", b: string + "b")
+
+        var c = C new("string ")
+        c a shouldEqual("string a")
+        c b shouldEqual("string b")
+    end
+
+    it should("select an appropriate parent 'init()' method based on the " +
+              "arguments provided to the child's 'init()'") with
+        defclass A
+            var aa
+        end
+
+        def (A) init(string String) -> A init(aa: "a " + string)
+
+        defclass B : A
+            var bb
+        end
+
+        def (B) init(string String) -> B init(A: string, bb: "b " + string)
+
+        var b = B new("string")
+        b aa shouldEqual("a string")
+        b bb shouldEqual("b string")
+    end
+end
