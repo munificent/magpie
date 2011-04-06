@@ -7,3 +7,40 @@ specify("The 'name' method on Classes") with
         Foo name shouldEqual("Foo")
     end
 end
+
+specify("Inheritance") with
+    it should("not allow the same class to be inherited more than once") with
+        //  A
+        // / \
+        // \ /
+        //  B
+        defclass A
+        end
+
+        fn
+            defclass B : A, A
+            end
+        end shouldThrow(ParentCollisionError)
+    end
+
+    it should("not allow multiple paths to the same class") with
+        //   A
+        //  / \
+        // B   C
+        //  \ /
+        //   D
+        defclass A
+        end
+
+        defclass B : A
+        end
+
+        defclass C : A
+        end
+
+        fn
+            defclass D : B, C
+            end
+        end shouldThrow(ParentCollisionError)
+    end
+end

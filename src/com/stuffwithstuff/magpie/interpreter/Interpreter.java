@@ -206,6 +206,10 @@ public class Interpreter {
     // Create the class.
     ClassObj classObj = new ClassObj(mClass, name, parents, fields);
     
+    if (classObj.checkForCollisions()) {
+      error("ParentCollisionError");
+    }
+    
     // Add the constructor.
     Callable construct = new ClassConstruct(classObj, scope);
     getMultimethod(scope, "new").addMethod(construct);

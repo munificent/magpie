@@ -2,7 +2,6 @@ package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.*;
 
-import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.Field;
 
 /**
@@ -46,21 +45,34 @@ public class ClassObj extends Obj {
     
     return false;
   }
-
-  public void declareField(String name, Expr type) {
-    // Declare the field.
-    mFields.put(name, new Field(null, type));
+  
+  /**
+   * Walks the inheritance tree to see if any class can be reached through more
+   * than one path.
+   */
+  public boolean checkForCollisions() {
+    Set<ClassObj> reachedClasses = new HashSet<ClassObj>();
+    reachedClasses.add(this);
     
-    // Add a getter and setter.
-    /*
-    mMembers.defineGetter(name, new FieldGetter(name));
-    mMembers.defineSetter(name, new FieldSetter(name));
-    */
+    return checkForCollisions(reachedClasses, this);
   }
   
   @Override
   public String toString() {
     return mName;
+  }
+  
+  private boolean checkForCollisions(Set<ClassObj> reachedClasses,
+      ClassObj classObj) {
+    for (ClassObj parent : classObj.getParents()) {
+      if (reachedClasses.contains(parent)) return true;
+      
+      reachedClasses.add(parent);
+      if (checkForCollisions(reachedClasses, parent)) return true;
+    }
+    
+    // If we got here, we didn't find a collision.
+    return false;
   }
   
   private final String mName;

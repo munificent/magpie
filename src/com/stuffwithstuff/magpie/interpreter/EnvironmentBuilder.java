@@ -3,8 +3,6 @@ package com.stuffwithstuff.magpie.interpreter;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.stuffwithstuff.magpie.ast.Expr;
-
 public class EnvironmentBuilder {
   public static void initialize(Interpreter interpreter) {
     EnvironmentBuilder builder = new EnvironmentBuilder(interpreter);
@@ -21,6 +19,7 @@ public class EnvironmentBuilder {
     newClass("NoMatchError", "Error");
     newClass("NoMethodError", "Error");
     newClass("OutOfBoundsError", "Error");
+    newClass("ParentCollisionError", "Error");
     newClass("ParseError", "Error");
     newClass("RedefinitionError", "Error");
   }
@@ -43,11 +42,6 @@ public class EnvironmentBuilder {
   private class ClassBuilder {
     public ClassBuilder(ClassObj classObj) {
       mClassObj = classObj;
-    }
-    
-    public ClassBuilder field(String name, Expr type) {
-      mClassObj.declareField(name, type);
-      return this;
     }
     
     private ClassObj mClassObj;
