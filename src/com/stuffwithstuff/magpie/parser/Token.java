@@ -55,8 +55,9 @@ public final class Token {
       case FIELD: return getString() + ":";
 
       case BOOL: return Boolean.toString(getBool());
-      case INT: return Integer.toString(getInt());
       case DOUBLE: return Double.toString(getDouble());
+      case INT: return Integer.toString(getInt());
+      case NOTHING: return "nothing";
       case STRING: return "\"" + getString() + "\"";
 
       case EOF: return "(eof)";

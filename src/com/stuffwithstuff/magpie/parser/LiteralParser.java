@@ -10,6 +10,8 @@ public class LiteralParser implements PrefixParser {
       return Expr.bool(token.getPosition(), token.getBool());
     case INT:
       return Expr.int_(token.getPosition(), token.getInt());
+    case NOTHING:
+      return Expr.nothing(token.getPosition());
     case STRING:
       return Expr.string(token.getPosition(), token.getString());
     }

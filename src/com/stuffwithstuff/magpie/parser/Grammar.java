@@ -7,6 +7,7 @@ public class Grammar {
   public Grammar() {
     prefix(TokenType.BOOL,          new LiteralParser());
     prefix(TokenType.INT,           new LiteralParser());
+    prefix(TokenType.NOTHING,       new LiteralParser());
     prefix(TokenType.STRING,        new LiteralParser());
     prefix(TokenType.LEFT_PAREN,    new ParenthesisPrefixParser());
     prefix(TokenType.LEFT_BRACKET,  new BracketPrefixParser());
@@ -21,7 +22,6 @@ public class Grammar {
     prefix("for",       new LoopParser());
     prefix("if",        new IfParser());
     prefix("match",     new MatchParser());
-    prefix("nothing",   new NothingParser());
     prefix("return",    new ReturnParser());
     prefix("var",       new VarParser());
     prefix("while",     new LoopParser());

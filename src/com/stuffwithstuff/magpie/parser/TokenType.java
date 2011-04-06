@@ -20,8 +20,9 @@ public enum TokenType {
 
   // literals
   BOOL,
-  INT,
   DOUBLE,
+  INT,
+  NOTHING,
   STRING,
   
   // spacing

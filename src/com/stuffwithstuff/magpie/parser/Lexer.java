@@ -268,6 +268,7 @@ public class Lexer {
     Position position = currentPosition();
     
     // Handle reserved words.
+    if (text.equals("nothing")) return new Token(position, TokenType.NOTHING);
     if (text.equals("false")) return new Token(position, TokenType.BOOL, false);
     if (text.equals("true")) return new Token(position, TokenType.BOOL, true);
     if (text.equals("=")) return new Token(position, TokenType.EQUALS);
