@@ -1,7 +1,7 @@
 specify("A record expression") with
     it should("evaluate the fields left to right") with
         var e = ""
-        var rec = z: (e = e ~ "1"), x: (e = e ~ "2"), y: (e = e ~ "3")
+        var rec = z: (e = e + "1"), x: (e = e + "2"), y: (e = e + "3")
         e shouldEqual("123")
     end
 

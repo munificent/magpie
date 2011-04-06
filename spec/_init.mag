@@ -1,32 +1,29 @@
 // The test infrastructure.
 import("specify.mag")
 
-/*
-import("utility/TruthTest.mag")
-*/
-
 // The individual test cases.
 startTests()
 
 //import("language/and.mag")
 import("language/assign.mag")
 import("language/break.mag")
+
 import("language/catch.mag")
 import("language/def.mag")
 import("language/defclass.mag")
 import("language/do.mag")
-//import("language/fn.mag")
+import("language/fn.mag")
 import("language/for.mag")
 import("language/if.mag")
 import("language/let.mag")
 import("language/list.mag")
 import("language/match.mag")
 //import("language/message.mag")
-//import("language/newline.mag")
+import("language/newline.mag")
 //import("language/or.mag")
 //import("language/pattern.mag")
 //import("language/quotation.mag")
-//import("language/record.mag")
+import("language/record.mag")
 import("language/return.mag")
 import("language/string.mag")
 import("language/var.mag")

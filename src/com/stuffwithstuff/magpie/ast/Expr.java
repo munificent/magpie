@@ -35,9 +35,9 @@ public abstract class Expr {
     return block(exprs, null);
   }
   
-  public static Expr block(List<Expr> exprs, Expr catchExpr) {
+  public static Expr block(List<Expr> exprs, List<MatchCase> catches) {
     // Discard unneeded blocks.
-    if (catchExpr == null) {
+    if ((catches == null) || (catches.size() == 0)) {
       switch (exprs.size()) {
       case 0:
         return nothing();
@@ -47,12 +47,12 @@ public abstract class Expr {
         return new BlockExpr(exprs, null);
       }
     } else {
-      return new BlockExpr(exprs, catchExpr);
+      return new BlockExpr(exprs, catches);
     }
   }
 
   public static Expr block(Expr... exprs) {
-    return new BlockExpr(Arrays.asList(exprs));
+    return new BlockExpr(Arrays.asList(exprs), null);
   }
 
   public static Expr break_(Position position) {

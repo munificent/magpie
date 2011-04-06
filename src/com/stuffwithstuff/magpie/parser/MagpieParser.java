@@ -206,26 +206,14 @@ public class MagpieParser extends Parser {
       }
       
       // Parse any catch clauses.
-      Expr catchExpr = null;
+      List<MatchCase> catches = new ArrayList<MatchCase>();
       if (parseCatch) {
-        PositionSpan span = startAfter();
-        List<MatchCase> catches = new ArrayList<MatchCase>();
         while (match("catch")) {
           catches.add(parseCatch(endKeywords, endTokens));
         }
-
-        // TODO(bob): This is kind of hokey.
-        if (catches.size() > 0) {
-          Expr valueExpr = Expr.name("err__");
-          Expr elseExpr = Expr.message(valueExpr.getPosition(),
-              Expr.name("Runtime"), "throw", valueExpr);
-          catches.add(new MatchCase(elseExpr));
-
-          catchExpr = Expr.match(span.end(), valueExpr, catches);
-        }
       }
 
-      return new Pair<Expr, Token>(Expr.block(exprs, catchExpr), endToken);
+      return new Pair<Expr, Token>(Expr.block(exprs, catches), endToken);
     } else {
       Expr body = parseExpression();
       return new Pair<Expr, Token>(body, null);

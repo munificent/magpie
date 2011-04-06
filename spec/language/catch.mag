@@ -2,7 +2,7 @@ specify("A 'catch' clause in a block") with
     it should("execute a catch block when an error is thrown") with
         var caught = false
         do
-            Runtime throw("error")
+            throw "error"
         catch _ String ->
             caught = true
         end
@@ -11,14 +11,14 @@ specify("A 'catch' clause in a block") with
 
     it should("evaluate to the caught expression") with
         do
-            Runtime throw("error")
+            throw "error"
         catch _ String ->
             "caught"
         end shouldEqual("caught")
     end
 
     it should("receive the error thrown by the block") with
-        Runtime throw("error")
+        throw "error"
     catch err String ->
         err shouldEqual("error")
     end
@@ -27,8 +27,8 @@ specify("A 'catch' clause in a block") with
         var caught = false
         do
             do
-                Runtime throw("error")
-            catch Int ->
+                throw "unwind error"
+            catch _ Int ->
                 fail("Should not be caught here.")
             end
         catch _ String ->
@@ -38,12 +38,12 @@ specify("A 'catch' clause in a block") with
     end
 
     it should("allow a single line catch expression") with
-        Runtime throw("error")
+        throw "error"
     catch err String -> err shouldEqual("error")
 
     it should("allow catch clauses in an if/then block") with
         if true then
-            Runtime throw("error")
+            throw "error"
         catch err String -> err shouldEqual("error")
     end
 
@@ -51,7 +51,7 @@ specify("A 'catch' clause in a block") with
         if false then
             nothing
         else
-            Runtime throw("error")
+            throw "error"
         catch err String -> err shouldEqual("error")
     end
 end

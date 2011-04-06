@@ -64,18 +64,12 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
       return result;
     } catch (ErrorException err) {
-      // TODO(bob): Really hokey implementation.
-      Expr catchExpr = expr.getCatch();
-      if (catchExpr != null) {
-        // The catch expression expects to be evaluated in its own scope where
-        // err__ is bound to the exception value.
-        context = context.pushScope();
-        context.define("err__", err.getError());
-        return evaluate(catchExpr, context);
-      } else {
-        // Not caught here, so just keep unwinding.
-        throw err;
-      }
+      // See if we can catch it here.
+      Obj result = this.evaluateCases(err.getError(), expr.getCatches(), context);
+      if (result != null) return result;
+
+      // Not caught here, so just keep unwinding.
+      throw err;
     }
   }
 
@@ -165,21 +159,13 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     Obj value = evaluate(expr.getValue(), context);
     
     // Try each pattern until we get a match.
-    for (MatchCase matchCase : expr.getCases()) {
-      Pattern pattern = matchCase.getPattern();
-      if (PatternTester.test(mInterpreter, pattern, value, context)) {
-        // Matched. Bind variables and evaluate the body.
-        context = context.pushScope();
-        PatternBinder.bind(mInterpreter, pattern, value, context);
-        
-        return evaluate(matchCase.getBody(), context);
-      }
-    }
+    Obj result = evaluateCases(value, expr.getCases(), context);
+    if (result != null) return result;
     
     // If we got here, no patterns matched.
     throw mInterpreter.error("NoMatchError");
   }
-
+  
   @Override
   public Obj visit(MessageExpr expr, EvalContext context) {
     Obj variable = context.lookUp(expr.getName());
@@ -288,6 +274,24 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
     PatternBinder.bind(mInterpreter, expr.getPattern(), value, context);
     return value;
+  }
+
+  private Obj evaluateCases(Obj value, List<MatchCase> cases,
+      EvalContext context) {
+    if (cases == null) return null;
+    
+    for (MatchCase matchCase : cases) {
+      Pattern pattern = matchCase.getPattern();
+      if (PatternTester.test(mInterpreter, pattern, value, context)) {
+        // Matched. Bind variables and evaluate the body.
+        context = context.pushScope();
+        PatternBinder.bind(mInterpreter, pattern, value, context);
+        
+        return evaluate(matchCase.getBody(), context);
+      }
+    }
+    
+    return null;
   }
 
   private final Interpreter mInterpreter;

@@ -1,5 +1,6 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
+import com.stuffwithstuff.magpie.interpreter.ErrorException;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
@@ -31,6 +32,13 @@ public class ObjectBuiltIns {
   public static class String_ implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       return interpreter.createString("<" + arg.getClassObj().getName() + ">");
+    }
+  }
+  
+  @Signature("(this) *throw*()")
+  public static class Throw implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj arg) {
+      throw new ErrorException(arg.getTupleField(0));
     }
   }
   

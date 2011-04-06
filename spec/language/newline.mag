@@ -2,12 +2,6 @@
 // they are significant.
 
 specify("A newline") with
-    it should("be ignored after an operator") with
-        var i = 1 +
-            2
-        i shouldEqual(3)
-    end
-
     it should("be ignored after a comma") with
         var i = 1,
             2

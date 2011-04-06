@@ -23,6 +23,7 @@ public class Grammar {
     prefix("if",        new IfParser());
     prefix("match",     new MatchParser());
     prefix("return",    new ReturnParser());
+    prefix("throw",     new ThrowParser());
     prefix("var",       new VarParser());
     prefix("while",     new LoopParser());
 
@@ -44,7 +45,7 @@ public class Grammar {
     infix("!=", Precedence.ASSIGNMENT);
     
     reserve("-> case catch else then");
-    reserve("break def do fn for match nothing return var while");
+    reserve("break def do fn for match nothing return throw var while");
   }
   
   public PrefixParser getPrefixParser(Token token) {
