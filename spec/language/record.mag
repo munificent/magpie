@@ -7,7 +7,9 @@ specify("A record expression") with
 
     it should("define fields on the object") with
         var rec = x: 1, y: 2
-        rec x shouldEqual(1)
-        rec y shouldEqual(2)
+        // Have to pattern match to get them out.
+        var x: x, y: y = rec
+        x shouldEqual(1)
+        y shouldEqual(2)
     end
 end

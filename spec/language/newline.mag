@@ -12,8 +12,9 @@ specify("A newline") with
     it should("be ignored after a field") with
         var a = x:
             1, y: 2
-        a x shouldEqual(1)
-        a y shouldEqual(2)
+        var x: x, y: y = a
+        x shouldEqual(1)
+        y shouldEqual(2)
     end
 end
 
