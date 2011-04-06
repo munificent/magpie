@@ -41,17 +41,12 @@ public class Interpreter {
     mNothing = instantiate(mNothingClass, null);
     
     // Register the built-in methods.
-    /*
-    BuiltIns.registerClass(BoolBuiltIns.class, mBoolClass);
-    */
     BuiltIns.register(ClassBuiltIns.class, this);
     BuiltIns.register(FunctionBuiltIns.class, this);
     BuiltIns.register(IntBuiltIns.class, this);
     BuiltIns.register(ListBuiltIns.class, this);
     BuiltIns.register(ObjectBuiltIns.class, this);
-    /*
-    BuiltIns.registerClass(RuntimeBuiltIns.class, mRuntimeClass);
-     */
+    BuiltIns.register(TupleBuiltIns.class, this);
     BuiltIns.register(StringBuiltIns.class, this);
     BuiltIns.register(BuiltInFunctions.class, this);
     
@@ -252,15 +247,7 @@ public class Interpreter {
   }
   
   public Obj createTuple(List<Obj> fields) {
-    // A tuple is an object with fields whose names are zero-based numbers.
-    Obj tuple = instantiate(mTupleClass, null);
-    for (int i = 0; i < fields.size(); i++) {
-      tuple.setField(Name.getTupleField(i), fields.get(i));
-    }
-    
-    tuple.setField(Name.COUNT, createInt(fields.size()));
-    
-    return tuple;
+    return instantiate(mTupleClass, fields);
   }
   
   public Obj createRecord(Map<String, Obj> fields) {
