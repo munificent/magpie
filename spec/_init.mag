@@ -31,6 +31,8 @@ import("language/var.mag")
 import("language/with.mag")
 import("core/Bool.mag")
 import("core/Int.mag")
+import("core/List.mag")
+import("core/ListIterator.mag")
 import("core/Range.mag")
 import("core/RangeIterator.mag")
 

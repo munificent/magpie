@@ -1,5 +1,22 @@
-def Array iterate() ArrayIterator new(this)
+def (this List) iterate() -> ListIterator new(list: this)
 
+defclass ListIterator
+    var list
+    var index = -1
+end
+
+// TODO(bob): Needing explicit "this" here is lame. The problem is there is
+// apparently a "list" or "index" in an outer scope somewhere that gets hit
+// instead of correctly inferring "this". Lame. :(
+
+def (this ListIterator) current -> this list[index]
+
+def (this ListIterator) next() ->
+    this index = this index + 1
+    this index < this list count
+end
+
+/*
 def Array copy()
     var result = Array new()
     for item = this do result add(item)
@@ -38,21 +55,4 @@ def Array swap(a Int, b Int)
     this(a) = this(b)
     this(b) = temp
 end
-
-class ArrayIterator
-    get current = array(index)
-
-    var array Array
-    var index = -1
-end
-
-def shared ArrayIterator new(array Array)
-    construct(array: array)
-end
-
-
-def ArrayIterator next()
-    index = index + 1
-    index < array count
-end
-
+*/

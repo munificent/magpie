@@ -1,0 +1,106 @@
+specify("The indexer on Lists") with
+    it should("return the element at the zero-based index") with
+        var list = [1, "two", true]
+        list[0] shouldEqual(1)
+        list[1] shouldEqual("two")
+        list[2] shouldEqual(true)
+    end
+
+    it should("count from the back if the index is negative") with
+        var list = [1, "two", true]
+        list[-1] shouldEqual(true)
+        list[-2] shouldEqual("two")
+        list[-3] shouldEqual(1)
+    end
+
+    it should("throw an OutOfBoundsError on a bad index") with
+        var list = [1, 2, 3]
+        fn
+            list[3]
+        end shouldThrow(OutOfBoundsError)
+
+        fn
+            list[-4]
+        end shouldThrow(OutOfBoundsError)
+    end
+
+    // TODO(bob): Assignment.
+end
+
+specify("The indexed assigner on Lists") with
+    it should("replace the item at the given index in the list") with
+        var list = [2, 3, 4]
+        list[0] = 5
+        list[2] = 6
+        list[0] shouldEqual(5)
+        list[1] shouldEqual(3)
+        list[2] shouldEqual(6)
+    end
+
+    it should("count from the back if the index is negative") with
+        var list = [2, 3, 4]
+        list[-1] = 5
+        list[-2] = 6
+        list[0] shouldEqual(2)
+        list[1] shouldEqual(6)
+        list[2] shouldEqual(5)
+    end
+
+    it should("throw an OutOfBoundsError on a bad index") with
+        var list = [1, 2, 3]
+        fn
+            list[3] = "dummy"
+        end shouldThrow(OutOfBoundsError)
+
+        fn
+            list[-4] = "dummy"
+        end shouldThrow(OutOfBoundsError)
+    end
+
+    it should("return the assigned value") with
+        ([1][0] = 3) shouldEqual(3)
+    end
+end
+
+specify("The 'add' method on Lists") with
+    it should("add an element to the end of the list") with
+        var list = ["a"]
+        list add("b")
+        list add("c")
+
+        list[0] shouldEqual("a")
+        list[1] shouldEqual("b")
+        list[2] shouldEqual("c")
+    end
+
+    it should("return the added item") with
+        [1, 2] add(3) shouldEqual(3)
+    end
+end
+
+specify("The 'clear' method on Lists") with
+    it should("remove all elements from the list") with
+        var list = ["a", "b"]
+        list clear()
+        list count shouldEqual(0)
+    end
+
+    it should("return nothing") with
+        [1, 2] clear() shouldEqual(nothing)
+    end
+end
+
+specify("The 'count' method on Lists") with
+    it should("return the number of elements in the list") with
+        [] count shouldEqual(0)
+        ["a"] count shouldEqual(1)
+        ["a", "b"] count shouldEqual(2)
+    end
+end
+
+specify("The 'iterate' method on Lists") with
+    it should("create a ListIterator for the list") with
+        var iterator = [1, 2, 3] iterate()
+        iterator shouldBe(ListIterator)
+    end
+end
