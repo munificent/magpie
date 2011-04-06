@@ -19,17 +19,6 @@ public class IntBuiltIns {
       }
     }
   }
-  
-  @Shared
-  @Signature("equal?(left Int, right Int -> Bool)")
-  public static class EqEq implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      int left = arg.getTupleField(0).asInt();
-      int right = arg.getTupleField(1).asInt();
-      
-      return interpreter.createBool(left == right);
-    }
-  }
   */
   
   @Signature("(this Int) +(right Int)")
@@ -69,55 +58,25 @@ public class IntBuiltIns {
   }
   
   @Signature("(this Int) ==(right Int)")
-  public static class Equals extends ComparisonOperator {
-    protected boolean perform(int left, int right) { return left == right; }
-  }
-  
-  @Signature("(this Int) <(right Int)")
-  public static class LessThan extends ComparisonOperator {
-    protected boolean perform(int left, int right) { return left < right; }
-  }
-  
-  @Signature("(this Int) >(right Int)")
-  public static class RightThan extends ComparisonOperator {
-    protected boolean perform(int left, int right) { return left > right; }
-  }
-  
-  @Signature("(this Int) <=(right Int)")
-  public static class LessThanOrEqual extends ComparisonOperator {
-    protected boolean perform(int left, int right) { return left <= right; }
-  }
-  
-  @Signature("(this Int) >=(right Int)")
-  public static class GreaterThanOrEqual extends ComparisonOperator {
-    protected boolean perform(int left, int right) { return left >= right; }
-  }
-  
-  private abstract static class ComparisonOperator implements BuiltInCallable {
+  public static class Equals implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       int left = arg.getTupleField(0).asInt();
       int right = arg.getTupleField(1).asInt();
       
-      return interpreter.createBool(perform(left, right));
+      return interpreter.createBool(left == right);
     }
-    
-    protected abstract boolean perform(int left, int right);
   }
   
-  /*
-  
-  @Shared
-  @Signature("lessThan?(left Int, right Int -> Bool)")
-  public static class LessThan implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+  @Signature("(this Int) compareTo(other Int)")
+  public static class Compare implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj arg) {
       int left = arg.getTupleField(0).asInt();
       int right = arg.getTupleField(1).asInt();
       
-      return interpreter.createBool(left < right);
+      return interpreter.createInt(((Integer)left).compareTo(right));
     }
   }
-  */
-
+  
   @Signature("(this Int) string")
   public static class String_ implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {

@@ -16,6 +16,12 @@ def (this) ==(other) -> this sameAs?(other)
 
 def (this) !=(other) -> not(this == other)
 
+// Implement comparison in terms of a master compareTo() method.
+def (this) <(other) -> compareTo(other) == -1
+def (this) >(other) -> compareTo(other) == 1
+def (this) <=(other) -> compareTo(other) != 1
+def (this) >=(other) -> compareTo(other) != -1
+
 // Make + default to string concatenation. We'll only hit this if both
 // arguments are not Ints.
 def (this) +(other) -> this string +(other string)

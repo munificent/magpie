@@ -1,6 +1,0 @@
-// Provides additional functionality on all objects.
-
-// Returns true if the object can be assigned to the given class.
-def this is(classObj Class)
-    Class subclass?(Reflect getClass(this), classObj)
-end

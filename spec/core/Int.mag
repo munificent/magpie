@@ -12,3 +12,23 @@ specify("The 'to' method on Ints") with
         range last shouldEqual(5)
     end
 end
+
+specify("The 'compareTo' method on Ints") with
+    it should("return -1 if this is less than the argument") with
+        -4 compareTo(-1) shouldEqual(-1)
+        0 compareTo(1) shouldEqual(-1)
+        100 compareTo(200) shouldEqual(-1)
+    end
+
+    it should("return 0 if this is equal to the argument") with
+        -4 compareTo(-4) shouldEqual(0)
+        0 compareTo(0) shouldEqual(0)
+        100 compareTo(100) shouldEqual(0)
+    end
+
+    it should("return 1 if this is greater than the argument") with
+        -1 compareTo(-4) shouldEqual(1)
+        1 compareTo(0) shouldEqual(1)
+        200 compareTo(100) shouldEqual(1)
+    end
+end
