@@ -41,6 +41,15 @@ public class ListBuiltIns {
       return arg.getTupleField(1);
     }
   }
+
+  @Signature("(this List) clear()")
+  public static class Clear implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj arg) {
+      List<Obj> elements = arg.getTupleField(0).asList();
+      elements.clear();
+      return interpreter.nothing();
+    }
+  }
   
   @Signature("(this List) count")
   public static class Count implements BuiltInCallable {
@@ -97,13 +106,5 @@ public class ListBuiltIns {
     }
   }
   
-  @Signature("clear(->)")
-  public static class Clear implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      List<Obj> elements = thisObj.asArray();
-      elements.clear();
-      return interpreter.nothing();
-    }
-  }
   */
 }

@@ -100,6 +100,18 @@ specify("The 'add' method on Lists") with
     end
 end
 
+specify("The 'clear' method on Lists") with
+    it should("remove all elements from the list") with
+        var list = ["a", "b"]
+        list clear()
+        list count shouldEqual(0)
+    end
+
+    it should("return nothing") with
+        [1, 2] clear() shouldEqual(nothing)
+    end
+end
+
 specify("The 'count' method on Lists") with
     it should("return the number of elements in the list") with
         [] count shouldEqual(0)
