@@ -1,9 +1,0 @@
-specify("The 'iterate' method on Tuple") with
-    it should("iterate through the fields") with
-        var result = ""
-        for field = ("one", "two", "three") do
-            result = result ~ field
-        end
-        result shouldEqual("onetwothree")
-    end
-end

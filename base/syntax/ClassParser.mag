@@ -1,4 +1,0 @@
-// TODO(bob): Class parsing is still in Java for now. Just reserve the keywords
-// here.
-
-MagpieParser reserveWord("set")

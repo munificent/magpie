@@ -1,5 +1,0 @@
-specify("The 'string' getter on Tuple") with
-    it should("convert the tuple to a string") with
-        (1, true, "three") string shouldEqual("(1, true, three)")
-    end
-end

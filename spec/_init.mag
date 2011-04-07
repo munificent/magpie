@@ -7,7 +7,6 @@ startTests()
 //import("language/and.mag")
 import("language/assign.mag")
 import("language/break.mag")
-
 import("language/catch.mag")
 import("language/def.mag")
 import("language/defclass.mag")
@@ -29,6 +28,7 @@ import("language/string.mag")
 import("language/tuple.mag")
 import("language/var.mag")
 import("language/with.mag")
+
 import("core/Bool.mag")
 import("core/Indexable.mag")
 import("core/IndexableIterator.mag")
@@ -37,12 +37,5 @@ import("core/List.mag")
 import("core/ListIterator.mag")
 import("core/Range.mag")
 import("core/Tuple.mag")
-
-/*
-import("core/Object/fields.mag")
-import("core/Object/getField.mag")
-import("core/Object/hasField.mag")
-import("core/Object/receiving.mag")
-*/
 
 endTests()
