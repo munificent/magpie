@@ -1,12 +1,49 @@
-defclass Range
+def (this Indexable) iterate() -> IndexableIterator new(indexable: this)
+
+def (this Indexable) validateIndex(index Int) ->
+    // Negative indexes count from the back.
+    if index < 0 then index = this count + index
+
+    // Check the bounds.
+    if index < 0 then throw OutOfBoundsError new()
+    if index >= this count then throw OutOfBoundsError new()
+
+    // Return the updated index.
+    index
+end
+
+defclass IndexableIterator
+    var indexable
+    var index = -1
+end
+
+def (this IndexableIterator) next() ->
+    this index = this index + 1
+    this index < this indexable count
+end
+
+def (this IndexableIterator) current ->
+    this indexable[this index]
+end
+
+
+defclass Range : Indexable
     var first Int
     var last  Int
 end
+
+def (this Range)[index Int] ->
+    index = this validateIndex(index)
+    this first + index
+end
+
+def (this Range) count -> this last - this first + 1
 
 def (this Int) to(last Int) ->
     Range new(first: this, last: last)
 end
 
+/*
 def (this Range) iterate() ->
     RangeIterator new(first, last)
 end
@@ -26,51 +63,5 @@ def (this RangeIterator) next() ->
     this current = this current + 1
     this current <= this last
 end
-
-/*
-// Add iterator methods on Ints.
-// TODO(bob): Use real int max.
-// TODO(bob): Actual syntax for defining getters.
-defineMultimethod("countingUp", fn(this_ Int) Range new(this, 99999999))
-
-def Int times()
-    Range new(0, this - 1)
-end
-
-def Int to(last Int)
-    Range new(this, last)
-end
-
-def Int until(last Int)
-    Range new(this, last - 1)
-end
-
-// Define an int iterator.
-class RangeIterator
-    var current Int
-    var last    Int
-end
-
-def shared RangeIterator new(first Int, last Int)
-    // rollback so the first call to next advances to the first
-    construct(current: first - 1, last: last)
-end
-
-def RangeIterator next()
-    current = current + 1
-    current <= last
-end
-
-class Range
-    var first Int
-    var last  Int
-end
-
-def shared Range new(first Int, last Int)
-    construct(first: first, last: last)
-end
-
-def Range iterate()
-    RangeIterator new(first, last)
-end
 */
+

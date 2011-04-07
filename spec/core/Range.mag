@@ -1,8 +1,42 @@
-specify("The 'iterate' method on Ranges") with
-    it should("create a RangeIterator for the Range") with
-        var iterator = Range new(first: 2, last: 5) iterate()
-        // 1 before the first since the first call to next() should advance.
-        iterator current shouldEqual(1)
-        iterator last shouldEqual(5)
+specify("The Range class") with
+    it should("inherit Indexable") with
+        Range new(first: 2, last: 5) shouldBe(Indexable)
+    end
+end
+
+specify("The indexer on Ranges") with
+    it should("return the value at the zero-based index in the range") with
+        var range = Range new(first: 2, last: 5)
+        range[0] shouldEqual(2)
+        range[1] shouldEqual(3)
+        range[2] shouldEqual(4)
+        range[3] shouldEqual(5)
+    end
+
+    it should("count from the back if the index is negative") with
+        var range = Range new(first: 2, last: 5)
+        range[-1] shouldEqual(5)
+        range[-2] shouldEqual(4)
+        range[-3] shouldEqual(3)
+        range[-4] shouldEqual(2)
+    end
+
+    it should("throw an OutOfBoundsError on a bad index") with
+    var range = Range new(first: 2, last: 5)
+        fn
+            range[4]
+        end shouldThrow(OutOfBoundsError)
+
+        fn
+            range[-5]
+        end shouldThrow(OutOfBoundsError)
+    end
+end
+
+specify("The 'count' method on Ranges") with
+    it should("return the number of values in the range") with
+        Range new(first: 2, last: 2) count shouldEqual(1)
+        Range new(first: 2, last: 3) count shouldEqual(2)
+        Range new(first: 2, last: 4) count shouldEqual(3)
     end
 end

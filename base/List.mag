@@ -1,20 +1,3 @@
-def (this List) iterate() -> ListIterator new(list: this)
-
-defclass ListIterator
-    var list
-    var index = -1
-end
-
-// TODO(bob): Needing explicit "this" here is lame. The problem is there is
-// apparently a "list" or "index" in an outer scope somewhere that gets hit
-// instead of correctly inferring "this". Lame. :(
-
-def (this ListIterator) current -> this list[index]
-
-def (this ListIterator) next() ->
-    this index = this index + 1
-    this index < this list count
-end
 
 /*
 def Array copy()

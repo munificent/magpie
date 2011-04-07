@@ -1,8 +1,5 @@
 package com.stuffwithstuff.magpie.interpreter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class EnvironmentBuilder {
   public static void initialize(Interpreter interpreter) {
     EnvironmentBuilder builder = new EnvironmentBuilder(interpreter);
@@ -33,8 +30,8 @@ public class EnvironmentBuilder {
   }
   
   private ClassBuilder newClass(String name, String parentName) {
-    List<ClassObj> parents = new ArrayList<ClassObj>();
-    parents.add((ClassObj)mInterpreter.getGlobal(parentName));
+    ClassObj[] parents = new ClassObj[1];
+    parents[0] = (ClassObj)mInterpreter.getGlobal(parentName);
     
     return new ClassBuilder(mInterpreter.createGlobalClass(name, parents));
   }

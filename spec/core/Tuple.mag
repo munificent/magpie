@@ -1,0 +1,66 @@
+specify("The Tuple class") with
+    it should("inherit Indexable") with
+        (1, 2) shouldBe(Indexable)
+    end
+end
+
+specify("The field accessors for a tuple") with
+    it should("allow up to 20 fields") with
+        var tuple = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                    11, 12, 13, 14, 15, 16, 17, 18, 19, 20
+        tuple field0 shouldEqual(1)
+        tuple field1 shouldEqual(2)
+        tuple field2 shouldEqual(3)
+        tuple field3 shouldEqual(4)
+        tuple field4 shouldEqual(5)
+        tuple field5 shouldEqual(6)
+        tuple field6 shouldEqual(7)
+        tuple field7 shouldEqual(8)
+        tuple field8 shouldEqual(9)
+        tuple field9 shouldEqual(10)
+        tuple field10 shouldEqual(11)
+        tuple field11 shouldEqual(12)
+        tuple field12 shouldEqual(13)
+        tuple field13 shouldEqual(14)
+        tuple field14 shouldEqual(15)
+        tuple field15 shouldEqual(16)
+        tuple field16 shouldEqual(17)
+        tuple field17 shouldEqual(18)
+        tuple field18 shouldEqual(19)
+        tuple field19 shouldEqual(20)
+    end
+
+    it should("return nothing on a missing field") with
+        (1, 2, 3) field3 shouldEqual(nothing)
+    end
+end
+
+specify("The indexer for a tuple") with
+    it should("get the field at the given index") with
+        var tuple = (1, "two", true)
+        tuple[0] shouldEqual(1)
+        tuple[1] shouldEqual("two")
+        tuple[2] shouldEqual(true)
+    end
+
+    it should("count from the back if the index is negative") with
+        var tuple = (1, "two", true)
+        tuple[-1] shouldEqual(true)
+        tuple[-2] shouldEqual("two")
+        tuple[-3] shouldEqual(1)
+    end
+
+    it should("return nothing on a bad index") with
+        var tuple = (1, 2, 3)
+        tuple[3] shouldEqual(nothing)
+        tuple[-4] shouldEqual(nothing)
+    end
+end
+
+specify("The 'count' method on a tuple") with
+    it should("get the number of fields in the tuple") with
+        (1, 2) count shouldEqual(2)
+        (1, 2, 3) count shouldEqual(3)
+        (1, 2, 3, 4) count shouldEqual(4)
+    end
+end

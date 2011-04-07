@@ -1,3 +1,9 @@
+specify("The List class") with
+    it should("inherit Indexable") with
+        [1] shouldBe(Indexable)
+    end
+end
+
 specify("The indexer on Lists") with
     it should("return the element at the zero-based index") with
         var list = [1, "two", true]
@@ -23,8 +29,6 @@ specify("The indexer on Lists") with
             list[-4]
         end shouldThrow(OutOfBoundsError)
     end
-
-    // TODO(bob): Assignment.
 end
 
 specify("The indexed assigner on Lists") with
@@ -95,12 +99,5 @@ specify("The 'count' method on Lists") with
         [] count shouldEqual(0)
         ["a"] count shouldEqual(1)
         ["a", "b"] count shouldEqual(2)
-    end
-end
-
-specify("The 'iterate' method on Lists") with
-    it should("create a ListIterator for the list") with
-        var iterator = [1, 2, 3] iterate()
-        iterator shouldBe(ListIterator)
     end
 end

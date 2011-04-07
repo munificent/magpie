@@ -24,19 +24,20 @@ public class Interpreter {
     mClass.bindClass(mClass);
     mGlobalScope.define("Class", mClass);
 
-
+    ClassObj indexable = createGlobalClass("Indexable");
+    
     mBoolClass = createGlobalClass("Bool");
     mTrue = instantiate(mBoolClass, true);
     mFalse = instantiate(mBoolClass, false);
     
     mFnClass = createGlobalClass("Function");
     mIntClass = createGlobalClass("Int");
-    mListClass = createGlobalClass("List");
+    mListClass = createGlobalClass("List", indexable);
     mMultimethodClass = createGlobalClass("Multimethod");
     mRecordClass = createGlobalClass("Record");
     mStringClass = createGlobalClass("String");
     
-    mTupleClass = createGlobalClass("Tuple");
+    mTupleClass = createGlobalClass("Tuple", indexable);
     
     mNothingClass = createGlobalClass("Nothing");
     mNothing = instantiate(mNothingClass, null);
@@ -211,10 +212,6 @@ public class Interpreter {
     
     // Add the constructor.
     getMultimethod(scope, "init").addMethod(new ClassInit(classObj, scope));
-/*
-    Callable construct = new ClassConstruct(classObj, scope);
-    getMultimethod(scope, "new").addMethod(construct);
-  */
     
     // Add getters and setters for the fields.
     for (Entry<String, Field> entry : fields.entrySet()) {
@@ -335,15 +332,11 @@ public class Interpreter {
     init.invoke(this, classObj, true, arg);
   }
   
-  public ClassObj createGlobalClass(String name, List<ClassObj> parents) {
-    ClassObj classObj = createClass(name, parents, 
+  public ClassObj createGlobalClass(String name, ClassObj... parents) {
+    ClassObj classObj = createClass(name, Arrays.asList(parents), 
         new HashMap<String, Field>(), mGlobalScope);
     mGlobalScope.define(name, classObj);
     return classObj;
-  }
-
-  public ClassObj createGlobalClass(String name) {
-    return createGlobalClass(name, null);
   }
   
   private final InterpreterHost mHost;
