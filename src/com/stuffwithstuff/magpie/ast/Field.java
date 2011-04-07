@@ -9,11 +9,17 @@ import com.stuffwithstuff.magpie.ast.pattern.Pattern;
  * particular instance of a class. (Those just use a regular Scope.)
  */
 public class Field {
-  public Field(Expr initializer, Expr type) {
+  public Field(boolean isMutable, Expr initializer, Expr type) {
+    mIsMutable = isMutable;
     mInitializer = initializer;
     mType = type;
   }
 
+  /**
+   * Gets whether or not the field is mutable.
+   */
+  public boolean isMutable() { return mIsMutable; }
+  
   /**
    * Gets the initializer for this field. Returns null if the field is just
    * declared.
@@ -34,6 +40,7 @@ public class Field {
     }
   }
   
+  private final boolean  mIsMutable;
   private final Expr     mInitializer;
   private final Expr     mType;
 }

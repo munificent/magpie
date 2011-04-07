@@ -162,8 +162,8 @@ public class MethodLinearizer implements Comparator<Callable> {
 
   private int compareValues(Pattern pattern1, EvalContext context1,
       Pattern pattern2, EvalContext context2) {
-    Obj value1 = mInterpreter.evaluate(PatternTyper.evaluate(pattern1), context1);
-    Obj value2 = mInterpreter.evaluate(PatternTyper.evaluate(pattern2), context2);
+    Obj value1 = mInterpreter.evaluate(((ValuePattern)pattern1).getValue(), context1);
+    Obj value2 = mInterpreter.evaluate(((ValuePattern)pattern2).getValue(), context2);
     
     // Identical values are ordered the same. This lets us have tuples with
     // some identical value fields (like nothing) which are then sorted by

@@ -1,0 +1,9 @@
+specify("The 'name' method on Classes") with
+    it should("return the name of the class") with
+        Int name shouldEqual("Int")
+        String name shouldEqual("String")
+        defclass Foo
+        end
+        Foo name shouldEqual("Foo")
+    end
+end

@@ -45,7 +45,7 @@ public class Grammar {
     infix("!=", Precedence.ASSIGNMENT);
     
     reserve("-> case catch else then");
-    reserve("break def do fn for match nothing return throw var while");
+    reserve("break def do fn for match nothing return throw val var while");
   }
   
   public PrefixParser getPrefixParser(Token token) {

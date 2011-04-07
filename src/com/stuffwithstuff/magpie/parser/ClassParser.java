@@ -28,7 +28,8 @@ public class ClassParser implements PrefixParser {
     
     // Parse the body.
     while (!parser.match("end")) {
-      if (parser.match("var")) parseField(parser, fields);
+      if (parser.match("var")) parseField(parser, true, fields);
+      else if (parser.match("val")) parseField(parser, false, fields);
 
       parser.consume(TokenType.LINE);
     }
@@ -36,7 +37,8 @@ public class ClassParser implements PrefixParser {
     return Expr.class_(span.end(), name, parents, fields);
   }
 
-  private void parseField(MagpieParser parser, Map<String, Field> fields) {
+  private void parseField(MagpieParser parser, boolean isMutable,
+      Map<String, Field> fields) {
     String name = parser.consume(TokenType.NAME).getString();
     
     // Parse the type if there is one.
@@ -56,7 +58,7 @@ public class ClassParser implements PrefixParser {
       initializer = null;
     }
     
-    fields.put(name, new Field(initializer, type));
+    fields.put(name, new Field(isMutable, initializer, type));
   }
   
   /*

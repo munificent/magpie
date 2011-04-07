@@ -170,9 +170,12 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(MessageExpr expr, EvalContext context) {
     Obj variable = context.lookUp(expr.getName());
     
-    if (variable instanceof MultimethodObj) {
+    if ((expr.getReceiver() != null) || (expr.getArg() != null)) {
+      // We have an argument on the left or right, so it must be a method call.
+      if (variable == null) throw mInterpreter.error("NoMethodError");
+      if (!(variable instanceof MultimethodObj)) throw mInterpreter.error("NoMethodError");
+
       MultimethodObj multimethod = (MultimethodObj)variable;
-      
       // Figure out the receiver.
       Obj receiver;
       boolean isExplicit;
@@ -189,16 +192,22 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       Obj arg = evaluate(expr.getArg(), context);
       
       return multimethod.invoke(mInterpreter, receiver, isExplicit, arg);
+    } else {
+      // Could be a local variable lookup, or a getter on this.
+      // TODO(bob): Should be an error.
+      if (variable == null) return mInterpreter.nothing();
+      
+      if (variable instanceof MultimethodObj) {
+        // It's a multimethod, so we must be calling "this".
+        MultimethodObj multimethod = (MultimethodObj)variable;
+        Obj receiver = context.lookUp("this");
+        if (receiver == null) receiver = mInterpreter.nothing();
+        return multimethod.invoke(mInterpreter, receiver, true, null);
+      } else {
+        // It's a variable.
+        return variable;
+      }
     }
-    
-    // If it's a bare name, just return it.
-    if ((variable != null) &&
-        (expr.getReceiver() == null) &&
-        (expr.getArg() == null)) {
-      return variable;
-    }
-    
-    return mInterpreter.nothing();
   }
 
   @Override

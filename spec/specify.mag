@@ -98,7 +98,7 @@ end
 def (this Function) shouldThrow(errorClass Class) ->
     var caught = false
     do
-        call()
+        this call()
     catch err Error ->
         err shouldBe(errorClass, "Should have thrown an error of class " +
             errorClass + " but got an error of class " + err class + ".")
@@ -110,11 +110,12 @@ end
 
 // Verifies that a function does not throw an error. Will execute the function.
 def (this Function) shouldNotThrow() ->
-    var caught = false
+    var caught = nothing
     do
-        this()
+        this call()
     catch err Error ->
-        caught = true
+        caught = err
     end
-    caught shouldEqual(false, "Should not have thrown an error.")
+    caught shouldEqual(nothing, "Should not have thrown an error but threw " +
+        "an error of class " + caught class + ".")
 end

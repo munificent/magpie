@@ -30,6 +30,7 @@ import("language/var.mag")
 import("language/with.mag")
 
 import("core/Bool.mag")
+import("core/Class.mag")
 import("core/Indexable.mag")
 import("core/IndexableIterator.mag")
 import("core/Int.mag")

@@ -215,12 +215,16 @@ public class Interpreter {
     
     // Add getters and setters for the fields.
     for (Entry<String, Field> entry : fields.entrySet()) {
+      // Getter.
       MultimethodObj getter = getMultimethod(scope, entry.getKey());
       getter.addMethod(new FieldGetter(classObj, entry.getKey(), scope));
 
-      MultimethodObj setter = getMultimethod(scope, entry.getKey() + "_=");
-      setter.addMethod(new FieldSetter(classObj,
-          entry.getKey(), entry.getValue(), scope));
+      // Setter, if the field is mutable ("var" instead of "val").
+      if (entry.getValue().isMutable()) {
+        MultimethodObj setter = getMultimethod(scope, entry.getKey() + "_=");
+        setter.addMethod(new FieldSetter(classObj,
+            entry.getKey(), entry.getValue(), scope));
+      }
     }
     
     return classObj;

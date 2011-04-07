@@ -1,14 +1,4 @@
-specify("The 'name' method on Classes") with
-    it should("return the name of the class") with
-        Int name shouldEqual("Int")
-        String name shouldEqual("String")
-        defclass Foo
-        end
-        Foo name shouldEqual("Foo")
-    end
-end
-
-specify("Inheritance") with
+specify("A class's parent classes") with
     it should("not allow the same class to be inherited more than once") with
         //  A
         // / \
@@ -42,6 +32,90 @@ specify("Inheritance") with
             defclass D : B, C
             end
         end shouldThrow(ParentCollisionError)
+    end
+end
+
+specify("A 'var' field in a class") with
+    it should("provide a getter for the field") with
+        defclass C
+            var field
+        end
+
+        C new(field: "value") field shouldEqual("value")
+    end
+
+    it should("provide a setter for the field") with
+        defclass C
+            var field
+        end
+
+        var c = C new(field: "old")
+        c field = "new"
+        c field shouldEqual("new")
+    end
+
+    it should("specialize the constructor using the type if given") with
+        defclass C
+            var field Int
+        end
+
+        fn
+            C new(field: 123)
+        end shouldNotThrow()
+
+        fn
+            C new(field: "not int")
+        end shouldThrow(NoMethodError)
+    end
+
+    it should("specialize the setter using the type if given") with
+        defclass C
+            var field Int
+        end
+
+        var c = C new(field: 123)
+
+        fn
+            c field = 234
+        end shouldNotThrow()
+
+        fn
+            c field = "not int"
+        end shouldThrow(NoMethodError)
+    end
+end
+
+specify("A 'val' field in a class") with
+    it should("provide a getter for the field") with
+        defclass C
+            val field
+        end
+
+        C new(field: "value") field shouldEqual("value")
+    end
+
+    it should("not provide a setter for the field") with
+        defclass C
+            val field
+        end
+
+        fn
+            C new(field: "value") field = "new"
+        end shouldThrow(NoMethodError)
+    end
+
+    it should("specialize the constructor using the type if given") with
+        defclass C
+            val field Int
+        end
+
+        fn
+            C new(field: 123)
+        end shouldNotThrow()
+
+        fn
+            C new(field: "not int")
+        end shouldThrow(NoMethodError)
     end
 end
 
