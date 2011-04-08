@@ -5,7 +5,7 @@ def (false)       string -> "false"
 def (this Class)  string -> name
 
 def print()            -> prints("\n")
-def print(text String) -> prints(text +("\n"))
+def print(text String) -> prints(text + "\n")
 def print(any)         -> print(any string)
 
 def not(true)  -> false

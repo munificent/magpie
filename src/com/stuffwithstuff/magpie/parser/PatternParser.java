@@ -81,12 +81,18 @@ public class PatternParser {
     }
     
     // See if there is a type for the variable.
-    Expr type = null;
+    Pattern inner = null;
     if (parser.match(TokenType.NAME)) {
-      type = Expr.variable(parser.last(1).getString());
+      inner = Pattern.type(Expr.variable(parser.last(1).getString()));
+    } else {
+      inner = Pattern.wildcard();
     }
     
-    return Pattern.variable(name, type);
+    if (name.equals("_")) {
+      return inner;
+    } else {
+      return Pattern.variable(name, inner);
+    }
   }
   
   private static Pattern primary(MagpieParser parser) {

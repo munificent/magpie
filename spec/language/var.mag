@@ -28,7 +28,6 @@ specify("A 'var' expression") with
         end
         i shouldEqual("abc")
     end
-
     /*
     it should("allow a fully-qualified name") with
         var a.b.i = "abi"

@@ -3,10 +3,13 @@ package com.stuffwithstuff.magpie.interpreter;
 import java.util.Comparator;
 
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
+import com.stuffwithstuff.magpie.ast.pattern.PatternVisitor;
 import com.stuffwithstuff.magpie.ast.pattern.RecordPattern;
 import com.stuffwithstuff.magpie.ast.pattern.TuplePattern;
+import com.stuffwithstuff.magpie.ast.pattern.TypePattern;
 import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
 import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
+import com.stuffwithstuff.magpie.ast.pattern.WildcardPattern;
 import com.stuffwithstuff.magpie.util.NotImplementedException;
 
 /**
@@ -63,44 +66,63 @@ public class MethodLinearizer implements Comparator<Callable> {
     final int firstWins = -1;
     final int secondWins = 1;
     
+    PatternKind kind1 = pattern1.accept(new PatternCategorizer(), null);
+    PatternKind kind2 = pattern2.accept(new PatternCategorizer(), null);
+    
     // Ironically, this bit of code would really benefit from multiple dispatch.
-    if (isAny(pattern1)) {
-      if      (isAny(pattern2))    return 0;
-      else if (isRecord(pattern2)) return secondWins;
-      else if (isTuple(pattern2))  return secondWins;
-      else if (isType(pattern2))   return secondWins;
-      else if (isValue(pattern2))  return secondWins;
-      else throw new UnsupportedOperationException("Unknown pattern type.");
-    } else if (isRecord(pattern1)) {
-      if      (isAny(pattern2))    return firstWins;
-      else if (isRecord(pattern2)) throw new NotImplementedException();
-      else if (isTuple(pattern2))  throw new NotImplementedException();
-      else if (isType(pattern2))   return compareTypes(pattern1, context1, pattern2, context2);
-      else if (isValue(pattern2))  return secondWins;
-      else throw new UnsupportedOperationException("Unknown pattern type.");
-    } else if (isTuple(pattern1)) {
-      if      (isAny(pattern2))    return firstWins;
-      else if (isRecord(pattern2)) throw new NotImplementedException();
-      else if (isTuple(pattern2))  return compareTuples(pattern1, context1, pattern2, context2);
-      else if (isType(pattern2))   return compareTypes(pattern1, context1, pattern2, context2);
-      else if (isValue(pattern2))  return secondWins;
-      else throw new UnsupportedOperationException("Unknown pattern type.");
-    } else if (isType(pattern1)) {
-      if      (isAny(pattern2))    return firstWins;
-      else if (isRecord(pattern2)) return compareTypes(pattern1, context1, pattern2, context2);
-      else if (isTuple(pattern2))  return compareTypes(pattern1, context1, pattern2, context2);
-      else if (isType(pattern2))   return compareTypes(pattern1, context1, pattern2, context2);
-      else if (isValue(pattern2))  return secondWins;
-      else throw new UnsupportedOperationException("Unknown pattern type.");
-    } else if (isValue(pattern1)) {
-      if      (isAny(pattern2))    return firstWins;
-      else if (isRecord(pattern2)) return firstWins;
-      else if (isTuple(pattern2))  return firstWins;
-      else if (isType(pattern2))   return firstWins;
-      else if (isValue(pattern2))  return compareValues(pattern1, context1, pattern2, context2);
-      else throw new UnsupportedOperationException("Unknown pattern type.");
-    } else {
-      throw new UnsupportedOperationException("Unknown pattern type.");
+    switch (kind1) {
+    case ANY:
+      switch (kind2) {
+      case ANY:     return 0;
+      case RECORD:  return secondWins;
+      case TUPLE:   return secondWins;
+      case TYPE:    return secondWins;
+      case VALUE:   return secondWins;
+      default:
+        throw new UnsupportedOperationException("Unknown pattern kind.");
+      }
+    case RECORD:
+      switch (kind2) {
+      case ANY:     return firstWins;
+      case RECORD:  throw new NotImplementedException();
+      case TUPLE:   throw new NotImplementedException();
+      case TYPE:    return compareTypes(pattern1, context1, pattern2, context2);
+      case VALUE:   return secondWins;
+      default:
+        throw new UnsupportedOperationException("Unknown pattern kind.");
+      }
+    case TUPLE:
+      switch (kind2) {
+      case ANY:     return firstWins;
+      case RECORD:  throw new NotImplementedException();
+      case TUPLE:   return compareTuples(pattern1, context1, pattern2, context2);
+      case TYPE:    return compareTypes(pattern1, context1, pattern2, context2);
+      case VALUE:   return secondWins;
+      default:
+        throw new UnsupportedOperationException("Unknown pattern kind.");
+      }
+    case TYPE:
+      switch (kind2) {
+      case ANY:     return firstWins;
+      case RECORD:  return compareTypes(pattern1, context1, pattern2, context2);
+      case TUPLE:   return compareTypes(pattern1, context1, pattern2, context2);
+      case TYPE:    return compareTypes(pattern1, context1, pattern2, context2);
+      case VALUE:   return secondWins;
+      default:
+        throw new UnsupportedOperationException("Unknown pattern kind.");
+      }
+    case VALUE:
+      switch (kind2) {
+      case ANY:     return firstWins;
+      case RECORD:  return firstWins;
+      case TUPLE:   return firstWins;
+      case TYPE:    return firstWins;
+      case VALUE:   return compareValues(pattern1, context1, pattern2, context2);
+      default:
+        throw new UnsupportedOperationException("Unknown pattern kind.");
+      }
+    default:
+      throw new UnsupportedOperationException("Unknown pattern kind.");
     }
   }
 
@@ -178,28 +200,46 @@ public class MethodLinearizer implements Comparator<Callable> {
     return mInterpreter.error("AmbiguousMethodError", 
         "Cannot choose a method between " + pattern1 + " and " + pattern2);
   }
-  
-  private boolean isAny(Pattern pattern) {
-    return (pattern instanceof VariablePattern) &&
-        (((VariablePattern)pattern).getType() == null);
-  }
-  
-  private boolean isRecord(Pattern pattern) {
-    return pattern instanceof RecordPattern;
-  }
-  
-  private boolean isTuple(Pattern pattern) {
-    return pattern instanceof TuplePattern;
-  }
-  
-  private boolean isType(Pattern pattern) {
-    return (pattern instanceof VariablePattern) &&
-        (((VariablePattern)pattern).getType() != null);
-  }
-  
-  private boolean isValue(Pattern pattern) {
-    return pattern instanceof ValuePattern;
-  }
 
+  private enum PatternKind {
+    ANY,
+    RECORD,
+    TUPLE,
+    TYPE,
+    VALUE
+  }
+  
+  private static class PatternCategorizer implements PatternVisitor<PatternKind, Void> {
+    @Override
+    public PatternKind visit(RecordPattern pattern, Void context) {
+      return PatternKind.RECORD;
+    }
+
+    @Override
+    public PatternKind visit(TuplePattern pattern, Void context) {
+      return PatternKind.TUPLE;
+    }
+
+    @Override
+    public PatternKind visit(TypePattern pattern, Void context) {
+      return PatternKind.TYPE;
+    }
+
+    @Override
+    public PatternKind visit(ValuePattern pattern, Void context) {
+      return PatternKind.VALUE;
+    }
+
+    @Override
+    public PatternKind visit(VariablePattern pattern, Void context) {
+      return pattern.getPattern().accept(this, context);
+    }
+
+    @Override
+    public PatternKind visit(WildcardPattern pattern, Void context) {
+      return PatternKind.ANY;
+    }
+  }
+  
   private final Interpreter mInterpreter;
 }

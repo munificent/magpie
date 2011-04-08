@@ -1,6 +1,5 @@
 package com.stuffwithstuff.magpie.ast.pattern;
 
-import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 
 public class VariablePattern extends Pattern {
@@ -11,13 +10,13 @@ public class VariablePattern extends Pattern {
    * @param name
    * @param pattern
    */
-  VariablePattern(String name, Expr type) {
+  VariablePattern(String name, Pattern pattern) {
     mName = name;
-    mType = type;
+    mPattern = pattern;
   }
   
-  public String getName() { return mName; }
-  public Expr   getType() { return mType; }
+  public String  getName() { return mName; }
+  public Pattern getPattern() { return mPattern; }
   
   @Override
   public <R, C> R accept(PatternVisitor<R, C> visitor, C context) {
@@ -26,10 +25,10 @@ public class VariablePattern extends Pattern {
 
   @Override
   public String toString() {
-    if (mType == null) return mName;
-    return mName + " " + mType.toString();
+    if (mPattern == null) return mName;
+    return mName + " " + mPattern.toString();
   }
 
-  private final String mName;
-  private final Expr   mType;
+  private final String  mName;
+  private final Pattern mPattern;
 }

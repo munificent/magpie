@@ -85,3 +85,24 @@ This gets more confusing because getters themselves are defined in the scope cha
     end
 
 Here we have three nested scopes (labelled `// 1`, `// 2`, `// 3`). The getter for `i` is defined in `1`, the outermost scope. There is a variable `i` declared in `2`. Inside `3`, we print `i`. The tricky bit is that it needs to find the getter first, so we need to give priority to the `i` in `1` over the nearer one in `2`. Confusing.
+
+## Not Interleaved
+
+Actually, the above isn't correct. When looking up a name, we never have to look at `this` in an outer method definition. At any point in code, there is only one `this`, and that's the one we need to consider. They don't cascade. So with:
+
+    :::magpie
+    def (this A) method1()
+        def (this B) method2()
+            def (this C) method3()
+                print(foo)
+            end
+        end
+    end
+
+When we're looking up `foo`, all we need to consider are:
+
+1.  The locals in `method3`.
+2.  Methods specialized to `this` in `method3`.
+3.  Variables in the closure of `method3`.
+
+The `this` definitions in `method2` and `method1` never come into play.

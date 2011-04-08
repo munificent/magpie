@@ -11,36 +11,36 @@ public abstract class Pattern {
     return new ValuePattern(Expr.nothing());
   }
   
-  public static RecordPattern record(List<Pair<String, Pattern>> fields) {
+  public static Pattern record(List<Pair<String, Pattern>> fields) {
     return new RecordPattern(fields);
   }
 
-  public static TuplePattern tuple(List<Pattern> fields) {
+  public static Pattern tuple(List<Pattern> fields) {
     return new TuplePattern(fields);
   }
 
-  public static TuplePattern tuple(Pattern... fields) {
+  public static Pattern tuple(Pattern... fields) {
     return new TuplePattern(Arrays.asList(fields));
   }
 
-  public static VariablePattern type(Expr type) {
-    return new VariablePattern("_", type);
+  public static Pattern type(Expr type) {
+    return new TypePattern(type);
   }
 
-  public static ValuePattern value(Expr value) {
+  public static Pattern value(Expr value) {
     return new ValuePattern(value);
   }
 
-  public static VariablePattern variable(String name) {
-    return new VariablePattern(name, null);
+  public static Pattern variable(String name) {
+    return new VariablePattern(name, wildcard());
   }
 
-  public static VariablePattern variable(String name, Expr type) {
-    return new VariablePattern(name, type);
+  public static Pattern variable(String name, Pattern pattern) {
+    return new VariablePattern(name, pattern);
   }
 
-  public static VariablePattern wildcard() {
-    return new VariablePattern("_", null);
+  public static Pattern wildcard() {
+    return new WildcardPattern();
   }
   
 
