@@ -5,7 +5,7 @@ import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class ClassBuiltIns {
-  @Signature("(this Class) name")
+  @Signature("(_ Class) name")
   public static class Name implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       ClassObj classObj = arg.asClass();

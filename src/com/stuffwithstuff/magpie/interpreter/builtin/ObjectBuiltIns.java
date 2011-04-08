@@ -5,14 +5,14 @@ import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class ObjectBuiltIns {
-  @Signature("(this) class")
+  @Signature("(_) class")
   public static class Class_ implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       return arg.getClassObj();
     }
   }
   
-  @Signature("(this) is?(class Class)")
+  @Signature("(_) is?(class Class)")
   public static class Is implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       return interpreter.createBool(
@@ -20,7 +20,7 @@ public class ObjectBuiltIns {
     }
   }
 
-  @Signature("(this) sameAs?(other)")
+  @Signature("(_) sameAs?(other)")
   public static class Same implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       return interpreter.createBool(
@@ -28,14 +28,14 @@ public class ObjectBuiltIns {
     }
   }
   
-  @Signature("(this) string")
+  @Signature("(_) string")
   public static class String_ implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       return interpreter.createString("<" + arg.getClassObj().getName() + ">");
     }
   }
   
-  @Signature("(this) *throw*()")
+  @Signature("(_) *throw*()")
   public static class Throw implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       throw new ErrorException(arg.getTupleField(0));

@@ -6,7 +6,7 @@ import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class ListBuiltIns {
-  @Signature("(this List)[index Int]")
+  @Signature("(_ List)[index Int]")
   public static class Index implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       List<Obj> elements = arg.getTupleField(0).asList();
@@ -17,7 +17,7 @@ public class ListBuiltIns {
     }
   }
 
-  @Signature("(this List)[index Int] = (item)")
+  @Signature("(_ List)[index Int] = (item)")
   public static class IndexAssign implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       List<Obj> elements = arg.getTupleField(0).asList();
@@ -32,7 +32,7 @@ public class ListBuiltIns {
     }
   }
   
-  @Signature("(this List) add(item)")
+  @Signature("(_ List) add(item)")
   public static class Add implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       List<Obj> elements = arg.getTupleField(0).asList();
@@ -42,7 +42,7 @@ public class ListBuiltIns {
     }
   }
 
-  @Signature("(this List) clear()")
+  @Signature("(_ List) clear()")
   public static class Clear implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       List<Obj> elements = arg.getTupleField(0).asList();
@@ -51,7 +51,7 @@ public class ListBuiltIns {
     }
   }
   
-  @Signature("(this List) count")
+  @Signature("(_ List) count")
   public static class Count implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       List<Obj> elements = arg.asList();

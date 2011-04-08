@@ -1,8 +1,8 @@
-def (this String) string -> this
-def (nothing)     string -> "nothing"
-def (true)        string -> "true"
-def (false)       string -> "false"
-def (this Class)  string -> name
+def (_ String)  string -> this
+def (nothing)   string -> "nothing"
+def (true)      string -> "true"
+def (false)     string -> "false"
+def (_ Class)   string -> name
 
 def print()            -> prints("\n")
 def print(text String) -> prints(text + "\n")
@@ -12,26 +12,26 @@ def not(true)  -> false
 def not(false) -> true
 
 // By default, == just does identity comparison.
-def (this) ==(other) -> this sameAs?(other)
+def (_) ==(other) -> sameAs?(other)
 
-def (this) !=(other) -> not(this == other)
+def (_) !=(other) -> not(this == other)
 
 // Implement comparison in terms of a master compareTo() method.
-def (this) <(other) -> compareTo(other) == -1
-def (this) >(other) -> compareTo(other) == 1
-def (this) <=(other) -> compareTo(other) != 1
-def (this) >=(other) -> compareTo(other) != -1
+def (_) <(other) -> compareTo(other) == -1
+def (_) >(other) -> compareTo(other) == 1
+def (_) <=(other) -> compareTo(other) != 1
+def (_) >=(other) -> compareTo(other) != -1
 
 // Make + default to string concatenation. We'll only hit this if both
 // arguments are not Ints.
-def (this) +(other) -> this string +(other string)
+def (_) +(other) -> this string +(other string)
 
 // Truthiness.
-def (this)        true? -> true
-def (this Bool)   true? -> this
-def (this Int)    true? -> this != 0
-def (this String) true? -> this count > 0
-def (nothing)     true? -> false
+def (_)        true? -> true
+def (_ Bool)   true? -> this
+def (_ Int)    true? -> this != 0
+def (_ String) true? -> this count > 0
+def (nothing)  true? -> false
 
 import("List.mag")
 import("Range.mag")

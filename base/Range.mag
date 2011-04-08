@@ -1,6 +1,6 @@
-def (this Indexable) iterate() -> IndexableIterator new(indexable: this)
+def (_ Indexable) iterate() -> IndexableIterator new(indexable: this)
 
-def (this Indexable) validateIndex(index Int) ->
+def (_ Indexable) validateIndex(index Int) ->
     // Negative indexes count from the back.
     if index < 0 then index = count + index
 
@@ -17,12 +17,12 @@ defclass IndexableIterator
     var index = -1
 end
 
-def (this IndexableIterator) next() ->
+def (_ IndexableIterator) next() ->
     this index = index + 1
     index < indexable count
 end
 
-def (this IndexableIterator) current ->
+def (_ IndexableIterator) current ->
     indexable[index]
 end
 
@@ -32,36 +32,13 @@ defclass Range : Indexable
     var last  Int
 end
 
-def (this Range)[index Int] ->
+def (_ Range)[index Int] ->
     index = validateIndex(index)
     this first + index
 end
 
-def (this Range) count -> last - first + 1
+def (_ Range) count -> last - first + 1
 
-def (this Int) to(last Int) ->
+def (_ Int) to(last Int) ->
     Range new(first: this, last: last)
 end
-
-/*
-def (this Range) iterate() ->
-    RangeIterator new(first, last)
-end
-
-defclass RangeIterator
-    var current Int
-    var last    Int
-end
-
-def (RangeIterator) new(first Int, last Int) ->
-    // Rollback so the first call to next() advances to the first value.
-    RangeIterator new(current: first - 1, last: last)
-end
-
-def (this RangeIterator) next() ->
-    // TODO(bob): Why is "this" required here?
-    this current = this current + 1
-    this current <= this last
-end
-*/
-

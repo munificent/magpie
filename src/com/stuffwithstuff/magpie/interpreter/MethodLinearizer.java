@@ -1,6 +1,8 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.PatternVisitor;
@@ -11,6 +13,7 @@ import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
 import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.ast.pattern.WildcardPattern;
 import com.stuffwithstuff.magpie.util.NotImplementedException;
+import com.stuffwithstuff.magpie.util.Pair;
 
 /**
  * Compares two methods to see which takes precedence over the other. It is
@@ -66,8 +69,11 @@ public class MethodLinearizer implements Comparator<Callable> {
     final int firstWins = -1;
     final int secondWins = 1;
     
-    PatternKind kind1 = pattern1.accept(new PatternCategorizer(), null);
-    PatternKind kind2 = pattern2.accept(new PatternCategorizer(), null);
+    pattern1 = pattern1.accept(new PatternSimplifier(), null);
+    pattern2 = pattern2.accept(new PatternSimplifier(), null);
+    
+    PatternKind kind1 = pattern1.accept(new PatternKinder(), null);
+    PatternKind kind2 = pattern2.accept(new PatternKinder(), null);
     
     // Ironically, this bit of code would really benefit from multiple dispatch.
     switch (kind1) {
@@ -209,34 +215,81 @@ public class MethodLinearizer implements Comparator<Callable> {
     VALUE
   }
   
-  private static class PatternCategorizer implements PatternVisitor<PatternKind, Void> {
+  /**
+   * Removes all variable patterns from a pattern since the linearizer doesn't
+   * care about them.
+   */
+  private static class PatternSimplifier implements PatternVisitor<Pattern, Void> {
     @Override
-    public PatternKind visit(RecordPattern pattern, Void context) {
+    public Pattern visit(RecordPattern pattern, Void dummy) {
+      List<Pair<String, Pattern>> fields = new ArrayList<Pair<String, Pattern>>();
+      for (Pair<String, Pattern> field : pattern.getFields()) {
+        fields.add(new Pair<String, Pattern>(
+            field.getKey(), field.getValue().accept(this, null)));
+      }
+      
+      return Pattern.record(fields);
+    }
+
+    @Override
+    public Pattern visit(TuplePattern pattern, Void dummy) {
+      List<Pattern> fields = new ArrayList<Pattern>();
+      for (Pattern field : pattern.getFields()) {
+        fields.add(field.accept(this, null));
+      }
+      
+      return Pattern.tuple(fields);
+    }
+
+    @Override
+    public Pattern visit(TypePattern pattern, Void dummy) {
+      return pattern;
+    }
+
+    @Override
+    public Pattern visit(ValuePattern pattern, Void dummy) {
+      return pattern;
+    }
+
+    @Override
+    public Pattern visit(VariablePattern pattern, Void dummy) {
+      return pattern.getPattern().accept(this, null);
+    }
+
+    @Override
+    public Pattern visit(WildcardPattern pattern, Void dummy) {
+      return pattern;
+    }
+  }
+  
+  private static class PatternKinder implements PatternVisitor<PatternKind, Void> {
+    @Override
+    public PatternKind visit(RecordPattern pattern, Void dummy) {
       return PatternKind.RECORD;
     }
 
     @Override
-    public PatternKind visit(TuplePattern pattern, Void context) {
+    public PatternKind visit(TuplePattern pattern, Void dummy) {
       return PatternKind.TUPLE;
     }
 
     @Override
-    public PatternKind visit(TypePattern pattern, Void context) {
+    public PatternKind visit(TypePattern pattern, Void dummy) {
       return PatternKind.TYPE;
     }
 
     @Override
-    public PatternKind visit(ValuePattern pattern, Void context) {
+    public PatternKind visit(ValuePattern pattern, Void dummy) {
       return PatternKind.VALUE;
     }
 
     @Override
-    public PatternKind visit(VariablePattern pattern, Void context) {
-      return pattern.getPattern().accept(this, context);
+    public PatternKind visit(VariablePattern pattern, Void dummy) {
+      return pattern.getPattern().accept(this, null);
     }
 
     @Override
-    public PatternKind visit(WildcardPattern pattern, Void context) {
+    public PatternKind visit(WildcardPattern pattern, Void dummy) {
       return PatternKind.ANY;
     }
   }

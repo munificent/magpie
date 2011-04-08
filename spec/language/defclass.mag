@@ -176,9 +176,7 @@ specify("A class's default constructor") with
             var b
         end
 
-        // TODO(bob): Can't rely on "this" here because the pattern doesn't
-        // define it. Ideally, should always bind "this" to the receiver.
-        def (C) init(string String) -> C init(a: string + "a", b: string + "b")
+        def (C) init(string String) -> init(a: string + "a", b: string + "b")
 
         var c = C new("string ")
         c a shouldEqual("string a")

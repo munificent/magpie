@@ -33,6 +33,9 @@ public class DefParser implements PrefixParser {
       receiver = Pattern.nothing();
     }
     
+    // Wrap the receiver in a variable pattern that binds "this" to it.
+    receiver = Pattern.variable("this", receiver);
+    
     // Parse the message.
     String name;
     Pattern arg;

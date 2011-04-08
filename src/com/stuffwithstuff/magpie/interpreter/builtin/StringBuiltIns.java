@@ -4,7 +4,7 @@ import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class StringBuiltIns {  
-  @Signature("(this String)[index Int]")
+  @Signature("(_ String)[index Int]")
   public static class Index implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       String string = arg.getTupleField(0).asString();
@@ -21,14 +21,14 @@ public class StringBuiltIns {
     }
   }
 
-  @Signature("(this String) count")
+  @Signature("(_ String) count")
   public static class Count implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       return interpreter.createInt(arg.asString().length());
     }
   }
   
-  @Signature("(this String) +(right String)")
+  @Signature("(_ String) +(right String)")
   public static class Add implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       String left = arg.getTupleField(0).asString();
@@ -38,7 +38,7 @@ public class StringBuiltIns {
     }
   }
   
-  @Signature("(this String) ==(right String)")
+  @Signature("(_ String) ==(right String)")
   public static class Equals extends ComparisonOperator {
     @Override
     protected boolean perform(String left, String right) {

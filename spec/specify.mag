@@ -32,7 +32,7 @@ defclass TestSuite
 end
 
 // TODO(bob): Need function types.
-def (this TestSuite) should(description String, block) ->
+def (_ TestSuite) should(description String, block) ->
     // TODO(bob): Should not need "this " before setting fields.
     this currentTest = description
     var testsBefore = totalTests
@@ -50,13 +50,13 @@ def (this TestSuite) should(description String, block) ->
     end
 end
 
-def (this TestSuite) pass() -> advance()
+def (_ TestSuite) pass() -> advance()
 
-def (this TestSuite) advance() ->
+def (_ TestSuite) advance() ->
     totalTests = totalTests + 1
 end
 
-def (this TestSuite) fail(message String) ->
+def (_ TestSuite) fail(message String) ->
     if not(failedTest) then
         print("FAIL: " + name + " should " + currentTest + ".")
     end
@@ -70,7 +70,7 @@ def fail(message String) ->
     currentTestSuite fail(message)
 end
 
-def (this) shouldEqual(expected, message String) ->
+def (_) shouldEqual(expected, message String) ->
     if this != expected then
         currentTestSuite fail(message)
     else
@@ -78,11 +78,11 @@ def (this) shouldEqual(expected, message String) ->
     end
 end
 
-def (this) shouldEqual(expected) ->
+def (_) shouldEqual(expected) ->
     shouldEqual(expected, "Expected " + expected + " but was " + this)
 end
 
-def (this) shouldBe(expected Class, message String) ->
+def (_) shouldBe(expected Class, message String) ->
     if is?(expected) then
         currentTestSuite pass()
     else
@@ -90,13 +90,13 @@ def (this) shouldBe(expected Class, message String) ->
     end
 end
 
-def (this) shouldBe(expected Class) ->
+def (_) shouldBe(expected Class) ->
     shouldBe(expected, "Expected class " + expected + " but was " + this class)
 end
 
 // Verifies that a function throws an error of the given class. Will execute the
 // function.
-def (this Function) shouldThrow(errorClass Class) ->
+def (_ Function) shouldThrow(errorClass Class) ->
     var caught = false
     do
         this call()
@@ -110,7 +110,7 @@ def (this Function) shouldThrow(errorClass Class) ->
 end
 
 // Verifies that a function does not throw an error. Will execute the function.
-def (this Function) shouldNotThrow() ->
+def (_ Function) shouldNotThrow() ->
     var caught = nothing
     do
         this call()
