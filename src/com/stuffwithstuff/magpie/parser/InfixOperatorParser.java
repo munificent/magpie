@@ -24,7 +24,7 @@ public class InfixOperatorParser implements InfixParser {
     
     Expr right = parser.parseExpression(getStickiness() -
         (mIsRightAssociative ? 1 : 0));
-    return Expr.message(token.getPosition(), left, token.getString(), right);
+    return Expr.call(token.getPosition(), left, token.getString(), right);
   }
   
   @Override

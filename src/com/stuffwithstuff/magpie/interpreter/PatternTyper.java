@@ -39,7 +39,7 @@ public class PatternTyper implements PatternVisitor<Expr, Void> {
 
   @Override
   public Expr visit(ValuePattern pattern, Void dummy) {
-    return Expr.message(Position.none(), pattern.getValue(), "type");
+    return Expr.call(Position.none(), pattern.getValue(), "type");
   }
 
   @Override
@@ -52,7 +52,7 @@ public class PatternTyper implements PatternVisitor<Expr, Void> {
     // Otherwise, we'll match any type.
     // TODO(bob): Should this be Dynamic or Any? I think Dynamic preserves the
     // existing interpretation of fn(foo) ...
-    return Expr.name("Dynamic");
+    return Expr.variable("Dynamic");
   }
   
   private PatternTyper() {

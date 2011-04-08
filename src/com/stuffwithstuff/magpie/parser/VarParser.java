@@ -11,6 +11,6 @@ public class VarParser implements PrefixParser {
     parser.consume(TokenType.EQUALS);
     Expr value = parser.parseEndBlock();
     
-    return Expr.var(span.end(), pattern, value);
+    return Expr.define(span.end(), pattern, value);
   }
 }

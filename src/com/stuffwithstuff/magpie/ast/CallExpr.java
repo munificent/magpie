@@ -2,9 +2,15 @@ package com.stuffwithstuff.magpie.ast;
 
 import com.stuffwithstuff.magpie.parser.Position;
 
-public class MessageExpr extends Expr {
-  MessageExpr(Position position, Expr receiver, String name, Expr arg) {
+/**
+ * A call to a multimethod. Includes method calls, getters, and setters.
+ */
+public class CallExpr extends Expr {
+  CallExpr(Position position, Expr receiver, String name, Expr arg) {
     super(position);
+    if ((receiver == null) && (arg == null)) {
+      throw new IllegalArgumentException();
+    }
     
     mReceiver = receiver;
     mName = name;

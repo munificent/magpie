@@ -18,6 +18,6 @@ public class ThrowParser implements PrefixParser {
   @Override
   public Expr parse(MagpieParser parser, Token token) {
     Expr body = parser.parseEndBlock();
-    return Expr.message(token.getPosition(), body, "*throw*", Expr.nothing());
+    return Expr.call(token.getPosition(), body, "*throw*", Expr.nothing());
   }
 }

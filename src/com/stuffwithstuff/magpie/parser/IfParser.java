@@ -35,7 +35,7 @@ public class IfParser implements PrefixParser {
     cases.add(new MatchCase(Pattern.value(Expr.bool(true)), thenExpr));
     cases.add(new MatchCase(elseExpr));
     
-    Expr truthy = Expr.message(condition.getPosition(), condition, "true?");
+    Expr truthy = Expr.call(condition.getPosition(), condition, "true?");
     
     return Expr.match(Position.surrounding(condition, elseExpr),
         truthy, cases);

@@ -16,7 +16,7 @@ public class FieldSetter implements Callable {
   public FieldSetter(ClassObj classObj, String name, Field field, Scope closure) {
     mName = name;
     mPattern = Pattern.tuple(
-        Pattern.type(Expr.name(classObj.getName())),
+        Pattern.type(Expr.variable(classObj.getName())),
         field.getPattern());
     mClosure = closure;
   }

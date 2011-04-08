@@ -40,15 +40,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     if (context.assign(expr.getName(), value)) return value;
     
     // Otherwise it must be a property on this.
-
-    // TODO(bob): Need to figure out how implicit "this" works with setters.
-    // Consider:
-    //
-    //   prop = value
-    //
-    // If "this" has a field "prop", we'll never get to the setter case.
-    // Instead, that will be interpreted as a simple assignment to "prop", which
-    // is the multimethod object for the getter. :(
+    // TODO(bob): Need to handle implicit "this" on setters. :(
     throw new NotImplementedException();
   }
 
@@ -86,7 +78,30 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     }
     return mInterpreter.nothing();
   }
+  
+  @Override
+  public Obj visit(CallExpr expr, EvalContext context) {
+    Multimethod multimethod = context.lookUpMultimethod(expr.getName());
+    if (multimethod == null) throw mInterpreter.error("NoMethodError");
 
+    // Figure out the receiver.
+    Obj receiver;
+    boolean isExplicit;
+    if (expr.getReceiver() == null) {
+      receiver = context.lookUp("this");
+      if (receiver == null) receiver = mInterpreter.nothing();
+      
+      isExplicit = false;
+    } else {
+      receiver = evaluate(expr.getReceiver(), context);
+      isExplicit = true;
+    }
+    
+    Obj arg = evaluate(expr.getArg(), context);
+    
+    return multimethod.invoke(mInterpreter, receiver, isExplicit, arg);
+  }
+  
   @Override
   public Obj visit(ClassExpr expr, EvalContext context) {
     // Look up the parents.
@@ -102,7 +117,15 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     
     return classObj;
   }
-  
+
+  @Override
+  public Obj visit(DefineExpr expr, EvalContext context) {
+    Obj value = evaluate(expr.getValue(), context);
+
+    PatternBinder.bind(mInterpreter, expr.getPattern(), value, context);
+    return value;
+  }
+
   @Override
   public Obj visit(FnExpr expr, EvalContext context) {
     return mInterpreter.createFn(expr, context);
@@ -167,47 +190,24 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
   
   @Override
-  public Obj visit(MessageExpr expr, EvalContext context) {
-    if ((expr.getReceiver() != null) || (expr.getArg() != null)) {
-      // We have an argument on the left or right, so it must be a method call.
-      Multimethod multimethod = context.lookUpMultimethod(expr.getName());
-      if (multimethod == null) throw mInterpreter.error("NoMethodError");
+  public Obj visit(VariableExpr expr, EvalContext context) {
+    // TODO(bob): This is hacked, temporary, and wrong. Process should be:
+    // 1. See if it's a local var. If so, return it.
+    // 2. Look for a multimethod. If found, invoke it on implicit this.
+    // 3. Look in the closure for a variable.
+    
+    // Look for a local variable.
+    // TODO(bob): Should only look up until we hit the function's closure.
+    Obj variable = context.lookUp(expr.getName());
+    if (variable != null) return variable;
+    
+    // Not a variable, so look for a method.
+    Multimethod multimethod = context.lookUpMultimethod(expr.getName());
+    if (multimethod == null) throw mInterpreter.error("NoMethodError");
 
-      // Figure out the receiver.
-      Obj receiver;
-      boolean isExplicit;
-      if (expr.getReceiver() == null) {
-        receiver = context.lookUp("this");
-        if (receiver == null) receiver = mInterpreter.nothing();
-        
-        isExplicit = false;
-      } else {
-        receiver = evaluate(expr.getReceiver(), context);
-        isExplicit = true;
-      }
-      
-      Obj arg = evaluate(expr.getArg(), context);
-      
-      return multimethod.invoke(mInterpreter, receiver, isExplicit, arg);
-    } else {
-      // TODO(bob): This is hacked, temporary, and wrong. Process should be:
-      // 1. See if it's a local var. If so, return it.
-      // 2. Look for a multimethod. If found, invoke it on implicit this.
-      // 3. Look in the closure for a variable.
-      
-      // Look for a local variable.
-      // TODO(bob): Should only look up until we hit the function's closure.
-      Obj variable = context.lookUp(expr.getName());
-      if (variable != null) return variable;
-      
-      // Not a variable, so look for a method.
-      Multimethod multimethod = context.lookUpMultimethod(expr.getName());
-      if (multimethod == null) throw mInterpreter.error("NoMethodError");
-
-      Obj receiver = context.lookUp("this");
-      if (receiver == null) receiver = mInterpreter.nothing();
-      return multimethod.invoke(mInterpreter, receiver, false, null);
-    }
+    Obj receiver = context.lookUp("this");
+    if (receiver == null) receiver = mInterpreter.nothing();
+    return multimethod.invoke(mInterpreter, receiver, false, null);
   }
 
   @Override
@@ -269,14 +269,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     }
 
     return mInterpreter.createTuple(fields);
-  }
-
-  @Override
-  public Obj visit(VariableExpr expr, EvalContext context) {
-    Obj value = evaluate(expr.getValue(), context);
-
-    PatternBinder.bind(mInterpreter, expr.getPattern(), value, context);
-    return value;
   }
 
   private Obj evaluateCases(Obj value, List<MatchCase> cases,

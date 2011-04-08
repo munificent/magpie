@@ -10,7 +10,7 @@ public class BracketInfixParser implements InfixParser {
   public Expr parse(MagpieParser parser, Expr left, Token token) {
     // Parse the argument, if any.
     Expr arg = parser.groupExpression(TokenType.RIGHT_BRACKET);
-    return Expr.message(token.getPosition(), left, "[]", arg);
+    return Expr.call(token.getPosition(), left, "[]", arg);
   }
   
   @Override

@@ -83,7 +83,7 @@ public class PatternParser {
     // See if there is a type for the variable.
     Expr type = null;
     if (parser.match(TokenType.NAME)) {
-      type = Expr.name(parser.last(1).getString());
+      type = Expr.variable(parser.last(1).getString());
     }
     
     return Pattern.variable(name, type);
@@ -99,7 +99,7 @@ public class PatternParser {
     } else if (parser.match(TokenType.STRING)) {
       return Pattern.value(Expr.string(parser.last(1).getString()));
     } else if (parser.match(TokenType.NAME)) {
-      return Pattern.value(Expr.name(parser.last(1).getString()));
+      return Pattern.value(Expr.variable(parser.last(1).getString()));
     } else if (parser.match(TokenType.LEFT_PAREN)) {
       // Nested pattern.
       Pattern inner = composite(parser);

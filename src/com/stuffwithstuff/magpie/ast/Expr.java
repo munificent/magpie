@@ -59,11 +59,31 @@ public abstract class Expr {
     return new BreakExpr(position);
   }
   
+  public static Expr call(Position position, Expr receiver, String name, Expr arg) {
+    return new CallExpr(position, receiver, name, arg);
+  }
+  
+  public static Expr call(Position position, Expr receiver, String name) {
+    return call(position, receiver, name, null);
+  }
+
   public static Expr class_(Position position,
       String name, List<String> parents, Map<String, Field> fields) {
     return new ClassExpr(position, name, parents, fields);
   }
+
+  public static Expr define(String name, Expr value) {
+    return define(value.getPosition(), name, value);
+  }
+
+  public static Expr define(Position position, String name, Expr value) {
+    return define(position, Pattern.variable(name), value);
+  }
   
+  public static Expr define(Position position, Pattern pattern, Expr value) {
+    return new DefineExpr(position, pattern, value);
+  }
+
   public static FnExpr fn(Expr body) {
     return new FnExpr(Position.none(), body);
   }
@@ -110,24 +130,8 @@ public abstract class Expr {
     return new MatchExpr(position, value, cases);
   }
   
-  public static Expr message(Position position, Expr receiver, String name, Expr arg) {
-    return new MessageExpr(position, receiver, name, arg);
-  }
-  
-  public static Expr message(Position position, Expr receiver, String name) {
-    return message(position, receiver, name, null);
-  }
-  
   public static Expr method(Position position, String name, Pattern pattern, Expr body) {
     return new MethodExpr(position, name, pattern, body);
-  }
-  
-  public static Expr name(Position position, String name) {
-    return message(position, null, name, null);
-  }
-  
-  public static Expr name(String name) {
-    return name(Position.none(), name);
   }
   
   public static Expr nothing() {
@@ -164,19 +168,15 @@ public abstract class Expr {
   public static Expr tuple(Expr... fields) {
     return new TupleExpr(Arrays.asList(fields));
   }
-
-  public static Expr var(String name, Expr value) {
-    return var(value.getPosition(), name, value);
-  }
-
-  public static Expr var(Position position, String name, Expr value) {
-    return var(position, Pattern.variable(name), value);
+  
+  public static Expr variable(Position position, String name) {
+    return new VariableExpr(position, name);
   }
   
-  public static Expr var(Position position, Pattern pattern, Expr value) {
-    return new VariableExpr(position, pattern, value);
+  public static Expr variable(String name) {
+    return variable(Position.none(), name);
   }
-  
+
   public Expr(Position position) {
     mPosition = position;
   }

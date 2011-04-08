@@ -37,7 +37,33 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
   }
 
   @Override
+  public Expr visit(CallExpr expr, Expr value) {
+    if (expr.getReceiver() == null) {
+      // message(arg) = value  -->  message_=(arg, value)
+      return Expr.call(expr.getPosition(),
+          null, Name.makeAssigner(expr.getName()),
+          Expr.tuple(expr.getArg(), value));
+    } else {
+      if (expr.getArg() == null) {
+        // receiver message = value  -->  receiver message_=(value)
+        return Expr.call(expr.getPosition(),
+            expr.getReceiver(), Name.makeAssigner(expr.getName()), value);
+      } else {
+        // receiver message(arg) = value  -->  receiver message_=(arg, value)
+        return Expr.call(expr.getPosition(),
+            expr.getReceiver(), Name.makeAssigner(expr.getName()),
+            Expr.tuple(expr.getArg(), value));
+      }
+    }
+  }
+  
+  @Override
   public Expr visit(ClassExpr expr, Expr value) {
+    return invalidExpression(expr);
+  }
+
+  @Override
+  public Expr visit(DefineExpr expr, Expr value) {
     return invalidExpression(expr);
   }
 
@@ -67,30 +93,9 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
   }
 
   @Override
-  public Expr visit(MessageExpr expr, Expr value) {
-    if (expr.getReceiver() == null) {
-      if (expr.getArg() == null) {
-        // message = value  -->  message = value
-        return Expr.assign(expr.getPosition(),
-            expr.getName(), value);
-      } else {
-        // message(arg) = value  -->  message_=(arg, value)
-        return Expr.message(expr.getPosition(),
-            null, Name.makeAssigner(expr.getName()),
-            Expr.tuple(expr.getArg(), value));
-      }
-    } else {
-      if (expr.getArg() == null) {
-        // receiver message = value  -->  receiver message_=(value)
-        return Expr.message(expr.getPosition(),
-            expr.getReceiver(), Name.makeAssigner(expr.getName()), value);
-      } else {
-        // receiver message(arg) = value  -->  receiver message_=(arg, value)
-        return Expr.message(expr.getPosition(),
-            expr.getReceiver(), Name.makeAssigner(expr.getName()),
-            Expr.tuple(expr.getArg(), value));
-      }
-    }
+  public Expr visit(VariableExpr expr, Expr value) {
+    // message = value  -->  message = value
+    return Expr.assign(expr.getPosition(), expr.getName(), value);
   }
 
   @Override
@@ -126,11 +131,6 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
   @Override
   public Expr visit(TupleExpr expr, Expr value) {
     throw new NotImplementedException("Destructuring is only implemented on new vars for now.");
-  }
-
-  @Override
-  public Expr visit(VariableExpr expr, Expr value) {
-    return invalidExpression(expr);
   }
 
   private Expr invalidExpression(Expr expr) {

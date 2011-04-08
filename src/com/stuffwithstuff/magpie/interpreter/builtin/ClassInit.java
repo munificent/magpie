@@ -57,7 +57,7 @@ public class ClassInit implements Callable {
   @Override
   public Pattern getPattern() {
     // The receiver should be the class object itself.
-    Pattern receiver = Pattern.value(Expr.name(mClass.getName()));
+    Pattern receiver = Pattern.value(Expr.variable(mClass.getName()));
     
     // The argument should be a record with fields for each declared field
     // in the class.

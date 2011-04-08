@@ -30,7 +30,7 @@ public class ClassNew implements Callable {
     // The receiver is any instance of Class, and it takes any argument, since
     // it will simply forward it onto 'init()'.
     return Pattern.tuple(
-        Pattern.type(Expr.name("Class")),
+        Pattern.type(Expr.variable("Class")),
         Pattern.wildcard());
   }
 

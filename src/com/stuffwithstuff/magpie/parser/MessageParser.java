@@ -45,7 +45,12 @@ public class MessageParser implements PrefixParser, InfixParser {
       arg = addTupleField(arg, block);
     }
     
-    return Expr.message(fullName.getPosition(), left, fullName.getString(), arg);
+    // See if this is a bare name, or a method call.
+    if ((left == null) && (arg == null)) {
+      return Expr.variable(token.getPosition(), fullName.getString());
+    } else {
+      return Expr.call(fullName.getPosition(), left, fullName.getString(), arg);
+    }
   }
   
   @Override

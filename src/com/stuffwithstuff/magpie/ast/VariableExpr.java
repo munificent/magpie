@@ -1,17 +1,18 @@
 package com.stuffwithstuff.magpie.ast;
 
-import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.parser.Position;
 
+/**
+ * A reference to a variable.
+ */
 public class VariableExpr extends Expr {
-  VariableExpr(Position position, Pattern pattern, Expr value) {
+  VariableExpr(Position position, String name) {
     super(position);
-    mPattern = pattern;
-    mValue = value;
+    
+    mName = name;
   }
-  
-  public Pattern getPattern() { return mPattern; }
-  public Expr getValue() { return mValue; }
+
+  public String getName()      { return mName; }
   
   @Override
   public <R, C> R accept(ExprVisitor<R, C> visitor, C context) {
@@ -20,10 +21,8 @@ public class VariableExpr extends Expr {
 
   @Override
   public void toString(StringBuilder builder, String indent) {
-    builder.append("var ").append(mPattern).append(" = ");
-    mValue.toString(builder, indent);
+    builder.append(mName);
   }
 
-  private final Pattern mPattern;
-  private final Expr mValue;
+  private final String mName;
 }

@@ -14,7 +14,7 @@ import com.stuffwithstuff.magpie.interpreter.Scope;
 public class FieldGetter implements Callable {
   public FieldGetter(ClassObj classObj, String name, Scope closure) {
     mName = name;
-    mPattern = Pattern.type(Expr.name(classObj.getName()));
+    mPattern = Pattern.type(Expr.variable(classObj.getName()));
     mClosure = closure;
   }
   
