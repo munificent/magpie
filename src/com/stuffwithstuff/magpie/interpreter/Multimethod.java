@@ -6,21 +6,7 @@ import java.util.List;
 
 import com.stuffwithstuff.magpie.util.Expect;
 
-// TODO(bob): This class is completely hacked together and comically slow. It's
-// barely even a proof of concept.
-/**
- * Object type for a multimethod object.
- */
-public class MultimethodObj extends Obj {
-  /**
-   * Creates a new MethodObj.
-   * 
-   * @param classObj     The class of the method object itself: Method.
-   */
-  public MultimethodObj(ClassObj classObj) {
-    super(classObj);
-  }
-  
+public class Multimethod {
   public List<Callable> getMethods() { return mMethods; }
   
   public void addMethod(Callable method) {

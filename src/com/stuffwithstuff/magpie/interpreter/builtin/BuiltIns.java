@@ -6,7 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import com.stuffwithstuff.magpie.StringCharacterReader;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
-import com.stuffwithstuff.magpie.interpreter.MultimethodObj;
+import com.stuffwithstuff.magpie.interpreter.Multimethod;
 import com.stuffwithstuff.magpie.parser.DefParser;
 import com.stuffwithstuff.magpie.parser.Lexer;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
@@ -41,7 +41,7 @@ public abstract class BuiltIns {
       BuiltIn builtIn = new BuiltIn(pattern, callable, interpreter.getGlobals());
       
       // Register it.
-      MultimethodObj multimethod = interpreter.getMultimethod(
+      Multimethod multimethod = interpreter.getMultimethod(
           interpreter.getGlobals(), name);
       multimethod.addMethod(builtIn);
       

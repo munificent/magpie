@@ -33,9 +33,10 @@ end
 
 // TODO(bob): Need function types.
 def (this TestSuite) should(description String, block) ->
-    currentTest = description
+    // TODO(bob): Should not need "this " before setting fields.
+    this currentTest = description
     var testsBefore = totalTests
-    failedTest = false
+    this failedTest = false
 
     do
         block call()

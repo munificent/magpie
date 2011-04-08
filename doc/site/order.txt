@@ -30,13 +30,16 @@ internals/design-questions
 internals/design-questions/are-all-types-first-class
 internals/design-questions/are-types-in-java-or-magpie
 internals/design-questions/can-all-generic-arguments-be-inferred
+internals/design-questions/how-are-bare-names-interpreted
 internals/design-questions/how-are-classes-declared
 internals/design-questions/how-are-generic-functions-checked
 internals/design-questions/how-are-methods-defined
 internals/design-questions/how-are-syntax-extensions-imported
 internals/design-questions/how-do-abstract-members-work
 internals/design-questions/how-do-callable-fields-work
+internals/design-questions/how-do-callables-work-with-multimethods
 internals/design-questions/how-do-fields-work
+internals/design-questions/how-do-multimethods-interact-with-modules
 internals/design-questions/how-do-multimethods-work
 internals/design-questions/how-do-operators-work
 internals/design-questions/how-does-inheritance-work

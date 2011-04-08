@@ -4,12 +4,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.Expr;
-import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.util.Pair;
 
 public abstract class Pattern {
   public static Pattern nothing() {
-    return new ValuePattern(Expr.name(Name.NOTHING));
+    return new ValuePattern(Expr.nothing());
   }
   
   public static RecordPattern record(List<Pair<String, Pattern>> fields) {

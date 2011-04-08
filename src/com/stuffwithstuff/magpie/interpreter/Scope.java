@@ -54,7 +54,18 @@ public class Scope {
     
     return mVariables.get(name);
   }
+  
+  public void defineMultimethod(String name, Multimethod method) {
+    Expect.notEmpty(name);
+    Expect.notNull(method);
 
+    mMultimethods.put(name, method);
+  }
+
+  public Multimethod getMultimethod(String name) {
+    return mMultimethods.get(name);
+  }
+  
   public Set<Entry<String, Obj>> entries() {
     return mVariables.entrySet();
   }
@@ -62,4 +73,5 @@ public class Scope {
   private final boolean mAllowRedefinition;
   private final Scope mParent;
   private final Map<String, Obj> mVariables = new HashMap<String, Obj>();
+  private final Map<String, Multimethod> mMultimethods = new HashMap<String, Multimethod>();
 }

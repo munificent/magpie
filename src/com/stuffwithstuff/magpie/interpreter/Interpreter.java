@@ -33,7 +33,6 @@ public class Interpreter {
     mFnClass = createGlobalClass("Function");
     mIntClass = createGlobalClass("Int");
     mListClass = createGlobalClass("List", indexable);
-    mMultimethodClass = createGlobalClass("Multimethod");
     mRecordClass = createGlobalClass("Record");
     mStringClass = createGlobalClass("String");
     
@@ -122,7 +121,7 @@ public class Interpreter {
   }
   
   public Obj invoke(Obj receiver, String method, Obj arg) {
-    MultimethodObj multimethod = (MultimethodObj)mGlobalScope.get(method);
+    Multimethod multimethod = mGlobalScope.getMultimethod(method);
     return multimethod.invoke(this, receiver, true, arg);
   }
   
@@ -139,13 +138,13 @@ public class Interpreter {
     // "==", don't call it again, just default to identity.
     if (mInObjectsEqual) return a == b;
 
-    Obj equals = getGlobal(Name.EQEQ);   
+    Multimethod equals = mGlobalScope.getMultimethod(Name.EQEQ);   
     
     // Bootstrap short-cut. If we haven't defined "==" yet, default to identity.
     if (equals == null) return a == b;
     
     mInObjectsEqual = true;
-    Obj result = equals.asMultimethod().invoke(this, a, false, b);
+    Obj result = equals.invoke(this, a, false, b);
     mInObjectsEqual = false;
     
     return result.asBool();
@@ -191,7 +190,6 @@ public class Interpreter {
   public ClassObj getFunctionClass() { return mFnClass; }
   public ClassObj getIntClass() { return mIntClass; }
   public ClassObj getListClass() { return mListClass; }
-  public ClassObj getMultimethodClass() { return mMultimethodClass; }
   public ClassObj getNothingClass() { return mNothingClass; }
   public ClassObj getRecordClass() { return mRecordClass; }
   public ClassObj getStringClass() { return mStringClass; }
@@ -216,12 +214,12 @@ public class Interpreter {
     // Add getters and setters for the fields.
     for (Entry<String, Field> entry : fields.entrySet()) {
       // Getter.
-      MultimethodObj getter = getMultimethod(scope, entry.getKey());
+      Multimethod getter = getMultimethod(scope, entry.getKey());
       getter.addMethod(new FieldGetter(classObj, entry.getKey(), scope));
 
       // Setter, if the field is mutable ("var" instead of "val").
       if (entry.getValue().isMutable()) {
-        MultimethodObj setter = getMultimethod(scope, entry.getKey() + "_=");
+        Multimethod setter = getMultimethod(scope, entry.getKey() + "_=");
         setter.addMethod(new FieldSetter(classObj,
             entry.getKey(), entry.getValue(), scope));
       }
@@ -238,10 +236,6 @@ public class Interpreter {
     return instantiate(mIntClass, value);
   }
 
-  public MultimethodObj createMultimethod() {
-    return new MultimethodObj(mMultimethodClass);
-  }
-  
   public Obj createString(String value) {
     return instantiate(mStringClass, value);
   }
@@ -303,16 +297,16 @@ public class Interpreter {
     return mGrammar;
   }
 
-  public MultimethodObj getMultimethod(Scope scope, String name) {
-    Obj obj = scope.get(name);
+  public Multimethod getMultimethod(Scope scope, String name) {
+    Multimethod multimethod = scope.getMultimethod(name);
     
     // Define it the first time if not found.
-    if (obj == null) {
-      obj = new MultimethodObj(mMultimethodClass);
-      scope.define(name, obj);
+    if (multimethod == null) {
+      multimethod = new Multimethod();
+      scope.defineMultimethod(name, multimethod);
     }
     
-    return (MultimethodObj)obj;
+    return multimethod;
   }
   
   public Obj getConstructingObject() { return mConstructing.peek(); }
@@ -329,7 +323,7 @@ public class Interpreter {
   }
   
   public void initializeNewObject(ClassObj classObj, Obj arg) {
-    MultimethodObj init = getMultimethod(classObj.getClosure(), "init");
+    Multimethod init = getMultimethod(classObj.getClosure(), "init");
     // Note: the receiver for init() is the class itself, not the new instance
     // which is considered to be in a hidden state since it isn't initialized
     // yet.
@@ -350,7 +344,6 @@ public class Interpreter {
   private final ClassObj mFnClass;
   private final ClassObj mIntClass;
   private final ClassObj mListClass;
-  private final ClassObj mMultimethodClass;
   private final ClassObj mNothingClass;
   private final ClassObj mRecordClass;
   private final ClassObj mStringClass;

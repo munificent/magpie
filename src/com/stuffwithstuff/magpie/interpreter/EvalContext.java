@@ -35,7 +35,6 @@ public class EvalContext {
   }
   
   public Scope   getScope() { return mScope; }
-
   public boolean isInLoop() { return mIsInLoop; }
   
   /**
@@ -55,10 +54,23 @@ public class EvalContext {
     return null;
   }
   
-  public Obj lookUpHere(String name) {
-    return mScope.get(name);
+  /**
+   * Looks up the given name in the context's lexical scope chain.
+   * @param   name The name of the multimethod to look up.
+   * @return       The multimethod bound to that name, or null if not found.
+   */
+  public Multimethod lookUpMultimethod(String name) {
+    // Walk up the scope chain until we find it.
+    Scope scope = mScope;
+    while (scope != null) {
+      Multimethod multimethod = scope.getMultimethod(name);
+      if (multimethod != null) return multimethod;
+      scope = scope.getParent();
+    }
+    
+    return null;
   }
-
+  
   /**
    * Defines a new variable with the given name in this context's current scope.
    * 
