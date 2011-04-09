@@ -4,9 +4,15 @@ import java.io.File;
 import java.io.IOException;
 
 import com.stuffwithstuff.magpie.Script;
+import com.stuffwithstuff.magpie.StringCharacterReader;
+import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
+import com.stuffwithstuff.magpie.interpreter.InterpreterHost;
+import com.stuffwithstuff.magpie.interpreter.NullInterpreterHost;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.QuitException;
+import com.stuffwithstuff.magpie.parser.Lexer;
+import com.stuffwithstuff.magpie.parser.MagpieParser;
 import com.stuffwithstuff.magpie.parser.ParseException;
 
 /**
@@ -57,6 +63,32 @@ public class BuiltInFunctions {
   public static class Quit implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       throw new QuitException();
+    }
+  }
+
+  // TODO(bob): More or less temporary.
+  @Signature("canParse?(source String)")
+  public static class CheckSyntax implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj arg) {
+      String source = arg.getTupleField(1).asString();
+      
+      boolean canParse = true;
+      
+      try {
+        InterpreterHost host = new NullInterpreterHost();
+        Interpreter tempInterpreter = new Interpreter(host);
+        Lexer lexer = new Lexer("", new StringCharacterReader(source));
+        MagpieParser parser = tempInterpreter.createParser(lexer);
+
+        while (true) {
+          Expr expr = parser.parseTopLevelExpression();
+          if (expr == null) break;
+        }
+      } catch (ParseException e) {
+        canParse = false;
+      }
+      
+      return interpreter.createBool(canParse);
     }
   }
 }

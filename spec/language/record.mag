@@ -12,4 +12,17 @@ specify("A record expression") with
         x shouldEqual(1)
         y shouldEqual(2)
     end
+
+    it should("allow reserved words as field names") with
+        var rec = var: "var", with: "with", end: "end"
+
+        var var: a, with: b, end: c = rec
+        a shouldEqual("var")
+        b shouldEqual("with")
+        c shouldEqual("end")
+    end
+
+    it should("fail to parse duplicate field names") with
+        canParse?("a: 1, a: 2") shouldEqual(false)
+    end
 end

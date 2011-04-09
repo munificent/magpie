@@ -63,7 +63,7 @@ def (_ TestSuite) fail(message String) ->
     advance()
     totalFailures = totalFailures + 1
     print("      " + message)
-    failedTest = true
+    this failedTest = true
 end
 
 def fail(message String) ->
