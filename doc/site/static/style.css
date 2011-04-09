@@ -3,29 +3,12 @@ body, h1, h2, h3, h4, li, ol, ul, tr, td, pre, code {
   padding: 0; }
 
 body {
-  color: #333;
-  background: #f3f3f3 url("background.gif") repeat-y center top; }
+  background: white url("background.gif") repeat-y top left;
+  color: #333; }
 
 h1 {
   font: normal 36px Georgia, serif;
   margin: 0 0 30px 0; }
-
-h2 {
-  font: normal 24px Georgia, serif;
-  margin: 30px 0 20px 0;
-  border-top: solid 1px #ddd;
-  padding-top: 20px; }
-
-h3 {
-  font: italic 18px Georgia, serif;
-  margin: 30px 0 10px 0; }
-
-p {
-  font: 15px/25px Georgia, serif;
-  margin: 0 0 10px 0; }
-
-p + p {
-  margin-top: 20px; }
 
 a {
   color: #0044cc;
@@ -35,53 +18,21 @@ a {
 a:hover {
   color: #3377ff; }
 
-ul, ol {
-  padding-left: 40px;
-  margin: 10px 0; }
-
-li {
-  font: 15px/25px Georgia, serif; }
-
-li + li {
-  margin-top: 10px; }
-
-pre, code, tt {
-  color: #666666;
-  font: 14px/20px Courier, monospace; }
-
-code {
-  white-space: nowrap;
-  font-size: 16px; }
-
-pre {
-  -moz-border-radius: 5px;
-  border-radius: 5px;
-  background: #f4f4f4;
-  margin: 0 0 10px 0;
-  padding: 10px; }
-
-hr {
-  margin: 20px 0;
-  border: none;
-  border-bottom: solid 1px #4b81ab; }
-
-.page {
-  width: 960px;
-  margin: 0 auto; }
-
 .nav {
-  float: left;
+  position: absolute;
   width: 160px;
   /* 240 - 80 pad */
   top: 0;
   bottom: 0;
-  padding: 100px 40px 40px 40px;
+  padding: 40px 40px 40px 80px;
   color: #aaa; }
   .nav a {
     color: #666; }
   .nav a:hover {
-    color: #333; }
-  .nav h4 {
+    color: #0044cc; }
+  .nav h1 {
+    font-style: italic; }
+  .nav h2 {
     font: bold 14px "Lucida Sans Unicode", "Lucida Grande", sans-serif;
     margin: 20px 0 5px;
     padding: 0; }
@@ -97,10 +48,45 @@ hr {
     content: "\0203a\00a0"; }
 
 .content {
-  width: 640px;
-  /* 720 - 80 pad */
-  margin: 0 0 0 240px;
+  max-width: 640px;
+  margin: 0 0 0 280px;
   padding: 40px; }
+  .content h2 {
+    font: normal 24px Georgia, serif;
+    margin: 30px 0 20px 0;
+    border-top: solid 1px #ddd;
+    padding-top: 20px; }
+  .content h3 {
+    font: italic 18px Georgia, serif;
+    margin: 30px 0 10px 0; }
+  .content p {
+    font: 15px/25px Georgia, serif;
+    margin: 0 0 10px 0; }
+  .content p + p {
+    margin-top: 20px; }
+  .content ul, .content ol {
+    padding-left: 40px;
+    margin: 10px 0; }
+  .content li {
+    font: 15px/25px Georgia, serif; }
+  .content li + li {
+    margin-top: 10px; }
+  .content pre, .content code, .content tt {
+    color: #666666;
+    font: 14px/20px Courier, monospace; }
+  .content code {
+    white-space: nowrap;
+    font-size: 16px; }
+  .content pre {
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    background: #f4f4f4;
+    margin: 0 0 10px 0;
+    padding: 10px; }
+  .content hr {
+    margin: 20px 0;
+    border: none;
+    border-bottom: solid 1px #4b81ab; }
 
 .footer {
   font: italic 15px Georgia, serif;

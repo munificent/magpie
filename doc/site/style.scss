@@ -3,7 +3,6 @@ $primary-light: lighten($primary, 20%);
 
 $sans: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 $serif: Georgia, serif;
-//$monospace: Consolas, Menlo, "Lucida Console", Monaco, monospace;
 $monospace: Courier, monospace;
 
 $syntax-default: #666;
@@ -22,34 +21,13 @@ body, h1, h2, h3, h4, li, ol, ul, tr, td, pre, code {
 }
 
 body {
+  background: #fff url('background.gif') repeat-y top left;
   color: #333;
-  background: #f3f3f3 url('background.gif') repeat-y center top;
 }
 
 h1 {
   font: normal 36px $serif;
   margin: 0 0 30px 0;
-}
-
-h2 {
-  font: normal 24px $serif;
-  margin: 30px 0 20px 0;
-  border-top: solid 1px #ddd;
-  padding-top: 20px;
-}
-
-h3 {
-  font: italic 18px $serif;
-  margin: 30px 0 10px 0;
-}
-
-p {
-  font: 15px/25px $serif;
-  margin: 0 0 10px 0;
-}
-
-p + p {
-  margin-top: 20px;
 }
 
 a {
@@ -62,53 +40,12 @@ a:hover {
   color: $primary-light;
 }
 
-ul, ol {
-  padding-left: 40px;
-  margin: 10px 0;
-}
-
-li {
-  font: 15px/25px $serif;
-}
-
-li + li {
-  margin-top: 10px;
-}
-
-pre, code, tt {
-  color: $syntax-default;
-  font: 14px/20px $monospace;
-}
-
-code {
-  white-space: nowrap;
-  font-size: 16px;
-}
-
-pre {
-  @include round;
-  background: #f4f4f4;
-  margin: 0 0 10px 0;
-  padding: 10px;
-}
-
-hr {
-  margin: 20px 0;
-  border: none;
-  border-bottom: solid 1px #4b81ab;
-}
-
-.page {
-  width: 960px;
-  margin: 0 auto;
-}
-
 .nav {
-  float: left;
+  position: absolute;
   width: 160px; /* 240 - 80 pad */
   top: 0;
   bottom: 0;
-  padding: 100px 40px 40px 40px;
+  padding: 40px 40px 40px 80px;
   color: #aaa;
 
   a {
@@ -116,10 +53,14 @@ hr {
   }
 
   a:hover {
-    color: #333;
+    color: $primary;
   }
 
-  h4 {
+  h1 {
+    font-style: italic;
+  }
+
+  h2 {
     font: bold 14px $sans;
     margin: 20px 0 5px;
     padding: 0;
@@ -143,9 +84,66 @@ hr {
 }
 
 .content {
-  width: 640px; /* 720 - 80 pad */
-  margin: 0 0 0 240px;
+  max-width: 640px;
+  margin: 0 0 0 280px;
   padding: 40px;
+
+  h2 {
+    font: normal 24px $serif;
+    margin: 30px 0 20px 0;
+    border-top: solid 1px #ddd;
+    padding-top: 20px;
+  }
+
+  h3 {
+    font: italic 18px $serif;
+    margin: 30px 0 10px 0;
+  }
+
+  p {
+    font: 15px/25px $serif;
+    margin: 0 0 10px 0;
+  }
+
+  p + p {
+    margin-top: 20px;
+  }
+
+  ul, ol {
+    padding-left: 40px;
+    margin: 10px 0;
+  }
+
+  li {
+    font: 15px/25px $serif;
+  }
+
+  li + li {
+    margin-top: 10px;
+  }
+
+  pre, code, tt {
+    color: $syntax-default;
+    font: 14px/20px $monospace;
+  }
+
+  code {
+    white-space: nowrap;
+    font-size: 16px;
+  }
+
+  pre {
+    @include round;
+    background: #f4f4f4;
+    margin: 0 0 10px 0;
+    padding: 10px;
+  }
+
+  hr {
+    margin: 20px 0;
+    border: none;
+    border-bottom: solid 1px #4b81ab;
+  }
 }
 
 .footer {
