@@ -1,0 +1,87 @@
+defclass TestComparable : Comparable
+    var result Int
+end
+
+def (_ TestComparable) compareTo(_ TestComparable)
+    this result
+end
+
+def makeTestPair(result Int)
+    TestComparable new(result: result), TestComparable new(result: 0)
+end
+
+specify("The '<' method on Comparables") with
+    it should("return true only if compareTo() returns -1") with
+        do
+            var left, right = makeTestPair(-1)
+            (left < right) shouldEqual(true)
+        end
+
+        do
+            var left, right = makeTestPair(0)
+            (left < right) shouldEqual(false)
+        end
+
+        do
+            var left, right = makeTestPair(1)
+            (left < right) shouldEqual(false)
+        end
+    end
+end
+
+specify("The '>' method on Comparables") with
+    it should("return true only if compareTo() returns 1") with
+        do
+            var left, right = makeTestPair(-1)
+            (left > right) shouldEqual(false)
+        end
+
+        do
+            var left, right = makeTestPair(0)
+            (left > right) shouldEqual(false)
+        end
+
+        do
+            var left, right = makeTestPair(1)
+            (left > right) shouldEqual(true)
+        end
+    end
+end
+
+specify("The '<=' method on Comparables") with
+    it should("return false only if compareTo() returns 1") with
+        do
+            var left, right = makeTestPair(-1)
+            (left <= right) shouldEqual(true)
+        end
+
+        do
+            var left, right = makeTestPair(0)
+            (left <= right) shouldEqual(true)
+        end
+
+        do
+            var left, right = makeTestPair(1)
+            (left <= right) shouldEqual(false)
+        end
+    end
+end
+
+specify("The '>=' method on Comparables") with
+    it should("return false only if compareTo() returns -1") with
+        do
+            var left, right = makeTestPair(-1)
+            (left >= right) shouldEqual(false)
+        end
+
+        do
+            var left, right = makeTestPair(0)
+            (left >= right) shouldEqual(true)
+        end
+
+        do
+            var left, right = makeTestPair(1)
+            (left >= right) shouldEqual(true)
+        end
+    end
+end

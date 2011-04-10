@@ -37,35 +37,24 @@ public class StringBuiltIns {
       return interpreter.createString(left + right);
     }
   }
-  
-  @Signature("(_ String) ==(right String)")
-  public static class Equals extends ComparisonOperator {
-    @Override
-    protected boolean perform(String left, String right) {
-      return left.equals(right);
+
+  @Signature("(_ String) ==(other String)")
+  public static class Equals implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj arg) {
+      return interpreter.createBool(arg.getTupleField(0).asString().equals(
+          arg.getTupleField(1).asString()));
     }
   }
   
-  private abstract static class ComparisonOperator implements BuiltInCallable {
+  @Signature("(_ String) compareTo(other String)")
+  public static class CompareTo implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
-      String left = arg.getTupleField(0).asString();
-      String right = arg.getTupleField(1).asString();
-      
-      return interpreter.createBool(perform(left, right));
+      return interpreter.createInt(arg.getTupleField(0).asString().compareTo(
+          arg.getTupleField(1).asString()));
     }
-    
-    protected abstract boolean perform(String left, String right);
   }
   
   /*
-  // TODO(bob): May want to strongly-type arg at some point.
-  @Signature("compareTo(other -> Int)")
-  public static class CompareTo implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
-      return interpreter.createInt(thisObj.asString().compareTo(arg.asString()));
-    }
-  }
-  
   @Signature("contains?(other String -> Bool)")
   public static class Contains implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {

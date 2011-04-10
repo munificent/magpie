@@ -47,23 +47,6 @@ def (_) != (other)
     not(this == other)
 end
 
-// Implement comparison in terms of a master compareTo() method.
-def (_) < (other)
-    this compareTo(other) == -1
-end
-
-def (_) > (other)
-    this compareTo(other) == 1
-end
-
-def (_) <= (other)
-    this compareTo(other) != 1
-end
-
-def (_) >= (other)
-    this compareTo(other) != -1
-end
-
 // Make + default to string concatenation. We'll only hit this if both
 // arguments are not Ints.
 def (_) + (other)
@@ -91,5 +74,6 @@ def (nothing) true?
     false
 end
 
+import("Comparable.mag")
 import("List.mag")
 import("Range.mag")

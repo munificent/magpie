@@ -24,17 +24,19 @@ public class Interpreter {
     mClass.bindClass(mClass);
     mGlobalScope.define("Class", mClass);
 
-    ClassObj indexable = createGlobalClass("Indexable");
     
     mBoolClass = createGlobalClass("Bool");
     mTrue = instantiate(mBoolClass, true);
     mFalse = instantiate(mBoolClass, false);
+
+    ClassObj indexable = createGlobalClass("Indexable");
+    ClassObj comparable = createGlobalClass("Comparable");
     
     mFnClass = createGlobalClass("Function");
-    mIntClass = createGlobalClass("Int");
+    mIntClass = createGlobalClass("Int", comparable);
     mListClass = createGlobalClass("List", indexable);
     mRecordClass = createGlobalClass("Record");
-    mStringClass = createGlobalClass("String");
+    mStringClass = createGlobalClass("String", comparable);
     
     mTupleClass = createGlobalClass("Tuple", indexable);
     

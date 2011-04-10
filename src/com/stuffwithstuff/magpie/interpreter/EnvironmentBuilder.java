@@ -8,42 +8,26 @@ public class EnvironmentBuilder {
   
   public void initialize() {
     // Define the core error classes.
-    newClass("Error");
+    ClassObj error = class_("Error");
     
-    newClass("BadCallError", "Error");
-    newClass("AmbiguousMethodError", "Error");
-    newClass("IOError", "Error");
-    newClass("NoMatchError", "Error");
-    newClass("NoMethodError", "Error");
-    newClass("OutOfBoundsError", "Error");
-    newClass("ParentCollisionError", "Error");
-    newClass("ParseError", "Error");
-    newClass("RedefinitionError", "Error");
-    newClass("UnknownVariableError", "Error");
+    class_("BadCallError", error);
+    class_("AmbiguousMethodError", error);
+    class_("IOError", error);
+    class_("NoMatchError", error);
+    class_("NoMethodError", error);
+    class_("OutOfBoundsError", error);
+    class_("ParentCollisionError", error);
+    class_("ParseError", error);
+    class_("RedefinitionError", error);
+    class_("UnknownVariableError", error);
   }
   
   private EnvironmentBuilder(Interpreter interpreter) {
     mInterpreter = interpreter;
   }
   
-  private ClassBuilder newClass(String name) {
-    return new ClassBuilder(mInterpreter.createGlobalClass(name));
-  }
-  
-  private ClassBuilder newClass(String name, String parentName) {
-    ClassObj[] parents = new ClassObj[1];
-    parents[0] = (ClassObj)mInterpreter.getGlobal(parentName);
-    
-    return new ClassBuilder(mInterpreter.createGlobalClass(name, parents));
-  }
-
-  private class ClassBuilder {
-    public ClassBuilder(ClassObj classObj) {
-      mClassObj = classObj;
-    }
-    
-    @SuppressWarnings("unused")
-    private ClassObj mClassObj;
+  private ClassObj class_(String name, ClassObj... parents) {
+    return mInterpreter.createGlobalClass(name, parents);
   }
   
   private final Interpreter mInterpreter;

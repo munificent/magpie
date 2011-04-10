@@ -1,0 +1,16 @@
+// Implement comparison in terms of a master compareTo() method.
+def (_ Comparable) < (other Comparable)
+    this compareTo(other) == -1
+end
+
+def (_ Comparable) > (other Comparable)
+    this compareTo(other) == 1
+end
+
+def (_ Comparable) <= (other Comparable)
+    this compareTo(other) != 1
+end
+
+def (_ Comparable) >= (other Comparable)
+    this compareTo(other) != -1
+end
