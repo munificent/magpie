@@ -1,37 +1,95 @@
-def (_ String)  string -> this
-def (nothing)   string -> "nothing"
-def (true)      string -> "true"
-def (false)     string -> "false"
-def (_ Class)   string -> this name
+def (_ String) string
+    this
+end
 
-def print()            -> prints("\n")
-def print(text String) -> prints(text + "\n")
-def print(any)         -> print(any string)
+def (nothing) string
+    "nothing"
+end
 
-def not(true)  -> false
-def not(false) -> true
+def (true) string
+    "true"
+end
+
+def (false) string
+    "false"
+end
+
+def (_ Class) string
+    this name
+end
+
+def print()
+    prints("\n")
+end
+
+def print(text String)
+    prints(text + "\n")
+end
+
+def print(any)
+    print(any string)
+end
+
+def not(true)
+    false
+end
+
+def not(false)
+    true
+end
 
 // By default, == just does identity comparison.
-def (_) ==(other) -> this sameAs?(other)
+def (_) == (other)
+    this sameAs?(other)
+end
 
-def (_) !=(other) -> not(this == other)
+def (_) != (other)
+    not(this == other)
+end
 
 // Implement comparison in terms of a master compareTo() method.
-def (_) <(other) -> this compareTo(other) == -1
-def (_) >(other) -> this compareTo(other) == 1
-def (_) <=(other) -> this compareTo(other) != 1
-def (_) >=(other) -> this compareTo(other) != -1
+def (_) < (other)
+    this compareTo(other) == -1
+end
+
+def (_) > (other)
+    this compareTo(other) == 1
+end
+
+def (_) <= (other)
+    this compareTo(other) != 1
+end
+
+def (_) >= (other)
+    this compareTo(other) != -1
+end
 
 // Make + default to string concatenation. We'll only hit this if both
 // arguments are not Ints.
-def (_) +(other) -> this string +(other string)
+def (_) + (other)
+    this string +(other string)
+end
 
 // Truthiness.
-def (_)        true? -> true
-def (_ Bool)   true? -> this
-def (_ Int)    true? -> this != 0
-def (_ String) true? -> this count > 0
-def (nothing)  true? -> false
+def (_) true?
+    true
+end
+
+def (_ Bool) true?
+    this
+end
+
+def (_ Int) true?
+    this != 0
+end
+
+def (_ String) true?
+    this count > 0
+end
+
+def (nothing) true?
+    false
+end
 
 import("List.mag")
 import("Range.mag")

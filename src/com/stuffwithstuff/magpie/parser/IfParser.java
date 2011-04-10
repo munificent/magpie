@@ -12,11 +12,11 @@ public class IfParser implements PrefixParser {
   @Override
   public Expr parse(MagpieParser parser, Token token) {
     // Parse the condition.
-    Expr condition = parser.parseBlock("then").getKey();
+    Expr condition = parser.parseExpressionOrBlock("then").getKey();
     
     // Parse the then arm.
     parser.consume("then");
-    Pair<Expr, Token> thenParse = parser.parseBlock("else", "end");
+    Pair<Expr, Token> thenParse = parser.parseExpressionOrBlock("else", "end");
     Expr thenExpr = thenParse.getKey();
     
     // Parse the else body.
@@ -25,7 +25,7 @@ public class IfParser implements PrefixParser {
     
     Expr elseExpr;
     if (!consumedEnd && parser.match("else")) {
-      elseExpr = parser.parseEndBlock();
+      elseExpr = parser.parseExpressionOrBlock();
     } else {
       elseExpr = Expr.nothing();
     }

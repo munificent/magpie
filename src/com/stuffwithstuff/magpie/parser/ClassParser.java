@@ -53,7 +53,7 @@ public class ClassParser implements PrefixParser {
     // Parse the initializer if there is one.
     Expr initializer;
     if (parser.match(TokenType.EQUALS)) {
-      initializer = parser.parseEndBlock();
+      initializer = parser.parseExpressionOrBlock();
     } else {
       initializer = null;
     }

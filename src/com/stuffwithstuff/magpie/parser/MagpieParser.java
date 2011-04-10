@@ -62,20 +62,16 @@ public class MagpieParser extends Parser {
     return parseExpression(0);
   }
 
-  public Expr parseEndBlock() {
-    return parseBlock("end").getKey();
+  public Expr parseBlock() {
+    return parseBlock(true, new String[] { "end" }).getKey();
+  }
+  
+  public Expr parseExpressionOrBlock() {
+    return parseExpressionOrBlock("end").getKey();
   }
 
-  public Pair<Expr, Token> parseBlock(TokenType... endTokens) {
-    return parseBlock(true, null, endTokens);
-  }
-
-  public Pair<Expr, Token> parseBlock(String keyword, TokenType[] endTokens) {
-    return parseBlock(true, new String[] { keyword }, endTokens);
-  }
-
-  public Pair<Expr, Token> parseBlock(String... endTokens) {
-    return parseBlock(true, endTokens, null);
+  public Pair<Expr, Token> parseExpressionOrBlock(String... endTokens) {
+    return parseExpressionOrBlock(true, endTokens);
   }
   
   /**
@@ -123,7 +119,7 @@ public class MagpieParser extends Parser {
     }
     
     // Parse the body.
-    Expr expr = parseEndBlock();
+    Expr expr = parseExpressionOrBlock();
         
     return Expr.fn(span.end(), pattern, expr);
   }
@@ -180,52 +176,58 @@ public class MagpieParser extends Parser {
     return mGrammar.isReserved(name);
   }
   
-  private Pair<Expr, Token> parseBlock(boolean parseCatch,
-      String[] endKeywords, TokenType[] endTokens) {
-    if (match(TokenType.LINE)){
-      List<Expr> exprs = new ArrayList<Expr>();
-      
-      while (true) {
-        // TODO(bob): This keyword stuff is temporary until all keywords are
-        // moved into Magpie.
-        if ((endKeywords != null) && lookAheadAny(endKeywords)) break;
-        if ((endTokens != null) && lookAheadAny(endTokens)) break;
-        if (lookAhead("catch")) break;
-        
-        exprs.add(parseExpression());
-        consume(TokenType.LINE);
-      }
-      
-      Token endToken = current();
-      
-      // If the block ends with 'end', then we want to consume that token,
-      // otherwise we want to leave it unconsumed to be consistent with the
-      // single-expression block case.
-      if (endToken.isKeyword("end")) {
-        consume();
-      }
-      
-      // Parse any catch clauses.
-      List<MatchCase> catches = new ArrayList<MatchCase>();
-      if (parseCatch) {
-        while (match("catch")) {
-          catches.add(parseCatch(endKeywords, endTokens));
-        }
-      }
-
-      return new Pair<Expr, Token>(Expr.block(exprs, catches), endToken);
+  private Pair<Expr, Token> parseExpressionOrBlock(boolean parseCatch,
+      String[] endKeywords) {
+    if (lookAhead(TokenType.LINE)){
+      return parseBlock(parseCatch, endKeywords);
     } else {
       Expr body = parseExpression();
       return new Pair<Expr, Token>(body, null);
     }
   }
+  
+  private Pair<Expr, Token> parseBlock(boolean parseCatch,
+      String[] endKeywords) {
+    consume(TokenType.LINE);
+    
+    List<Expr> exprs = new ArrayList<Expr>();
+    
+    while (true) {
+      // TODO(bob): This keyword stuff is temporary until all keywords are
+      // moved into Magpie.
+      if ((endKeywords != null) && lookAheadAny(endKeywords)) break;
+      if (lookAhead("catch")) break;
+      
+      exprs.add(parseExpression());
+      consume(TokenType.LINE);
+    }
+    
+    Token endToken = current();
+    
+    // If the block ends with 'end', then we want to consume that token,
+    // otherwise we want to leave it unconsumed to be consistent with the
+    // single-expression block case.
+    if (endToken.isKeyword("end")) {
+      consume();
+    }
+    
+    // Parse any catch clauses.
+    List<MatchCase> catches = new ArrayList<MatchCase>();
+    if (parseCatch) {
+      while (match("catch")) {
+        catches.add(parseCatch(endKeywords));
+      }
+    }
 
-  private MatchCase parseCatch(String[] endKeywords, TokenType[] endTokens) {
+    return new Pair<Expr, Token>(Expr.block(exprs, catches), endToken);
+  }
+  
+  private MatchCase parseCatch(String[] endKeywords) {
     Pattern pattern = PatternParser.parse(this);
 
-    consume("->");
+    consume("then");
 
-    Pair<Expr, Token> body = parseBlock(false, endKeywords, endTokens);
+    Pair<Expr, Token> body = parseExpressionOrBlock(false, endKeywords);
 
     // Allow newlines to separate single-line catches.
     if ((body.getValue() == null) && lookAhead(TokenType.LINE, "catch")) {

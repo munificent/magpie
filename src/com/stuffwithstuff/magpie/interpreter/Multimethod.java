@@ -20,6 +20,8 @@ public class Multimethod {
     // If not, this is a getter-style multimethod.
     if (arg != null) {
       arg = interpreter.createTuple(receiver, arg);
+    } else {
+      arg = receiver;
     }
     
     Callable method = select(interpreter, arg);

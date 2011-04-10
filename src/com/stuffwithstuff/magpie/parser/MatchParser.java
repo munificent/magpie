@@ -12,9 +12,9 @@ public class MatchParser implements PrefixParser {
   private static MatchCase parseCase(MagpieParser parser) {
     Pattern pattern = PatternParser.parse(parser);
 
-    parser.consume("->");
+    parser.consume("then");
     
-    Pair<Expr, Token> bodyParse = parser.parseBlock("else", "end", "case");
+    Pair<Expr, Token> bodyParse = parser.parseExpressionOrBlock("else", "end", "case");
     
     // Allow newlines to separate single-line case and else cases.
     if ((bodyParse.getValue() == null) &&
@@ -44,7 +44,7 @@ public class MatchParser implements PrefixParser {
     
     // Parse the else case, if present.
     if (parser.match("else")) {
-      Expr elseCase = parser.parseEndBlock();
+      Expr elseCase = parser.parseExpressionOrBlock();
       cases.add(new MatchCase(elseCase));
     }
     

@@ -38,7 +38,7 @@ public class NameParser implements PrefixParser, InfixParser {
       }
 
       // Parse the block and wrap it in a function.
-      Expr block = parser.parseEndBlock();
+      Expr block = parser.parseExpressionOrBlock();
       block = Expr.fn(block.getPosition(), blockType, block);
       
       // Add it to the argument list.

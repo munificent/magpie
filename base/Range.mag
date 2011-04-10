@@ -1,6 +1,8 @@
-def (_ Indexable) iterate() -> IndexableIterator new(indexable: this)
+def (_ Indexable) iterate()
+    IndexableIterator new(indexable: this)
+end
 
-def (_ Indexable) validateIndex(index Int) ->
+def (_ Indexable) validateIndex(index Int)
     // Negative indexes count from the back.
     if index < 0 then index = this count + index
 
@@ -17,12 +19,12 @@ defclass IndexableIterator
     var index = -1
 end
 
-def (_ IndexableIterator) next() ->
+def (_ IndexableIterator) next()
     this index = this index + 1
     this index < this indexable count
 end
 
-def (_ IndexableIterator) current ->
+def (_ IndexableIterator) current
     this indexable[this index]
 end
 
@@ -32,13 +34,15 @@ defclass Range : Indexable
     var last  Int
 end
 
-def (_ Range)[index Int] ->
+def (_ Range)[index Int]
     index = this validateIndex(index)
     this first + index
 end
 
-def (_ Range) count -> this last - this first + 1
+def (_ Range) count
+    this last - this first + 1
+end
 
-def (_ Int) to(last Int) ->
+def (_ Int) to(last Int)
     Range new(first: this, last: last)
 end

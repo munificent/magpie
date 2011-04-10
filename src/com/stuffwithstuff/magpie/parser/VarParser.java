@@ -9,7 +9,7 @@ public class VarParser implements PrefixParser {
     PositionSpan span = parser.startBefore();
     Pattern pattern = PatternParser.parse(parser);
     parser.consume(TokenType.EQUALS);
-    Expr value = parser.parseEndBlock();
+    Expr value = parser.parseExpressionOrBlock();
     
     return Expr.define(span.end(), pattern, value);
   }

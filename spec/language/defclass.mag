@@ -176,7 +176,9 @@ specify("A class's default constructor") with
             var b
         end
 
-        def (C) init(string String) -> this init(a: string + "a", b: string + "b")
+        def (C) init(string String)
+            this init(a: string + "a", b: string + "b")
+        end
 
         var c = C new("string ")
         c a shouldEqual("string a")
@@ -189,13 +191,17 @@ specify("A class's default constructor") with
             var aa
         end
 
-        def (A) init(string String) -> this init(aa: "a " + string)
+        def (A) init(string String)
+            this init(aa: "a " + string)
+        end
 
         defclass B : A
             var bb
         end
 
-        def (B) init(string String) -> this init(A: string, bb: "b " + string)
+        def (B) init(string String)
+            this init(A: string, bb: "b " + string)
+        end
 
         var b = B new("string")
         b aa shouldEqual("a string")

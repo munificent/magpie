@@ -10,20 +10,20 @@ import com.stuffwithstuff.magpie.util.Pair;
  */
 public class DefParser implements PrefixParser {
   public static Pair<String, Pattern> parseSignature(MagpieParser parser) {
-    // No receiver:        def print(text String) -> ...
-    // No arg method:      def (this String) reverse() -> ...
-    // Shared method:      def (Int) parse(text String) -> ...
-    // Getter:             def (this String) count -> ...
-    // Method on anything: def (this) debugDump() -> ...
-    // Value receiver:     def (true) not() -> ...
-    // Value arg:          def fib(0) -> ...
-    // Constant receiver:  def (LEFT_PAREN) not() -> ...
-    // Constant arg:       def string(LEFT_PAREN) -> ...
-    // Setter:             def (this Person) name = (name String) -> ...
-    // Setter with arg:    def (this List) at(index Int) = (item) -> ...
-    // Complex receiver:   def (a Int, b Int) sum() -> ...
-    // Indexer:            def (this String)[index Int] -> ...
-    // Index setter:       def (this String)[index Int] = (c Char) -> ...
+    // No receiver:        def print(text String)
+    // No arg method:      def (this String) reverse()
+    // Shared method:      def (Int) parse(text String)
+    // Getter:             def (this String) count
+    // Method on anything: def (this) debugDump()
+    // Value receiver:     def (true) not()
+    // Value arg:          def fib(0)
+    // Constant receiver:  def (LEFT_PAREN) not()
+    // Constant arg:       def string(LEFT_PAREN)
+    // Setter:             def (this Person) name = (name String)
+    // Setter with arg:    def (this List) at(index Int) = (item)
+    // Complex receiver:   def (a Int, b Int) sum()
+    // Indexer:            def (this String)[index Int]
+    // Index setter:       def (this String)[index Int] = (c Char)
 
     // Parse the receiver, if any.
     Pattern receiver;
@@ -105,8 +105,11 @@ public class DefParser implements PrefixParser {
     
     Pair<String, Pattern> signature = parseSignature(parser);
 
-    parser.consume("->");
-    Expr body = parser.parseEndBlock();
+    if (!parser.lookAhead(TokenType.LINE)) {
+      throw new ParseException("A method body must be a block.");
+    }
+    
+    Expr body = parser.parseBlock();
     
     return Expr.method(span.end(), signature.getKey(), signature.getValue(),
         body);

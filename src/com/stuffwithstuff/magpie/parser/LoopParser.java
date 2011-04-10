@@ -79,7 +79,7 @@ public class LoopParser implements PrefixParser {
     }
     
     parser.consume("do");
-    Expr body = parser.parseEndBlock();
+    Expr body = parser.parseExpressionOrBlock();
 
     // Build the loop body.
     List<Expr> loopBlock = new ArrayList<Expr>();
