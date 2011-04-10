@@ -20,8 +20,8 @@ import com.stuffwithstuff.magpie.parser.ParseException;
  */
 public class BuiltInFunctions {
   // TODO(bob): This is more or less temp until modules are figured out.
-  @Signature("import(path String)")
-  public static class Import_ implements BuiltInCallable {
+  @Signature("load(path String)")
+  public static class Load implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       String currentDir = new File(interpreter.getCurrentScript()).getParent();
       String relativePath = arg.getTupleField(1).asString();

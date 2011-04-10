@@ -14,16 +14,10 @@ public class Multimethod {
   }
   
   public Obj invoke(Interpreter interpreter, Obj receiver, Obj arg) {
-    Expect.notNull(receiver);
-    
-    // If we're given a right-hand argument, combine it with the receiver.
-    // If not, this is a getter-style multimethod.
-    if (arg != null) {
-      arg = interpreter.createTuple(receiver, arg);
-    } else {
-      arg = receiver;
-    }
-    
+    return invoke(interpreter, interpreter.createTuple(receiver, arg));
+  }
+  
+  public Obj invoke(Interpreter interpreter, Obj arg) {
     Callable method = select(interpreter, arg);
         
     if (method == null) {

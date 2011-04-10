@@ -92,9 +92,16 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
       receiver = evaluate(expr.getReceiver(), context);
     }
     
-    Obj arg = evaluate(expr.getArg(), context);
-    
-    return multimethod.invoke(mInterpreter, receiver, arg);
+    // If we're given a right-hand argument, combine it with the receiver.
+    // If not, this is a getter-style multimethod.
+    Obj arg;
+    if (expr.getArg() != null) {
+      arg = mInterpreter.createTuple(receiver, evaluate(expr.getArg(), context));
+    } else {
+      arg = receiver;
+    }
+
+    return multimethod.invoke(mInterpreter, arg);
   }
   
   @Override

@@ -10,6 +10,10 @@ Major features:
   with closures, so it will likely be necessary to do modules first.
 
 Minor features:
+- "val" local variables (especially for iterator variables).
+- Private names. Only private fields are really needed. (For private methods,
+  just don't export them from the module.) But probably do both to be
+  consistent.
 - String interpolation.
 - Cascade syntax?
 - "and" and "or".
@@ -18,6 +22,7 @@ Minor features:
 - Enums. Need to figure out the basic pattern for enum-like things. This is
   important because it may have implications for pattern syntax so you can match
   on enum values.
+- List patterns.
 
 Implementation:
 - Compile to bytecode. This will make tail call elimination easier, help with

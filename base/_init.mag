@@ -74,6 +74,6 @@ def (nothing) true?
     false
 end
 
-import("Comparable.mag")
-import("List.mag")
-import("Range.mag")
+load("Comparable.mag")
+load("List.mag")
+load("Range.mag")
