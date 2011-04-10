@@ -2,7 +2,7 @@ def (_ Indexable) iterate() -> IndexableIterator new(indexable: this)
 
 def (_ Indexable) validateIndex(index Int) ->
     // Negative indexes count from the back.
-    if index < 0 then index = count + index
+    if index < 0 then index = this count + index
 
     // Check the bounds.
     if index < 0 then throw OutOfBoundsError new()
@@ -18,12 +18,12 @@ defclass IndexableIterator
 end
 
 def (_ IndexableIterator) next() ->
-    this index = index + 1
-    index < indexable count
+    this index = this index + 1
+    this index < this indexable count
 end
 
 def (_ IndexableIterator) current ->
-    indexable[index]
+    this indexable[this index]
 end
 
 
@@ -33,11 +33,11 @@ defclass Range : Indexable
 end
 
 def (_ Range)[index Int] ->
-    index = validateIndex(index)
+    index = this validateIndex(index)
     this first + index
 end
 
-def (_ Range) count -> last - first + 1
+def (_ Range) count -> this last - this first + 1
 
 def (_ Int) to(last Int) ->
     Range new(first: this, last: last)

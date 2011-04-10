@@ -13,34 +13,23 @@ public class Multimethod {
     mMethods.add(method);
   }
   
-  public Obj invoke(Interpreter interpreter, Obj receiver,
-      boolean isExplicit, Obj arg) {
+  public Obj invoke(Interpreter interpreter, Obj receiver, Obj arg) {
     Expect.notNull(receiver);
     
     // If we're given a right-hand argument, combine it with the receiver.
     // If not, this is a getter-style multimethod.
-    Obj argTuple;
     if (arg != null) {
-      argTuple = interpreter.createTuple(receiver, arg);
-    } else {
-      // The receiver is the entire argument.
-      argTuple = receiver;
-    }
-    Callable method = select(interpreter, argTuple);
-    
-    // If we couldn't find a method on the implicit receiver, see if there's a
-    // receiverless method available.
-    if ((method == null) && !isExplicit && (arg != null)) {
-      argTuple = interpreter.createTuple(interpreter.nothing(), arg);
-      method = select(interpreter, argTuple);
+      arg = interpreter.createTuple(receiver, arg);
     }
     
+    Callable method = select(interpreter, arg);
+        
     if (method == null) {
       interpreter.error("NoMethodError", 
-          "Could not find a method to match argument " + argTuple + ".");
+          "Could not find a method to match argument " + arg + ".");
     }
 
-    return method.invoke(interpreter, argTuple);
+    return method.invoke(interpreter, arg);
   }
   
   private Callable select(Interpreter interpreter, Obj arg) {

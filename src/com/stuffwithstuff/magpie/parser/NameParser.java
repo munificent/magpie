@@ -9,7 +9,7 @@ import com.stuffwithstuff.magpie.ast.TupleExpr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.Name;
 
-public class MessageParser implements PrefixParser, InfixParser {
+public class NameParser implements PrefixParser, InfixParser {
   @Override
   public Expr parse(MagpieParser parser, Token token) {
     return parse(parser, null, token);

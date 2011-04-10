@@ -2,7 +2,7 @@ def (_ String)  string -> this
 def (nothing)   string -> "nothing"
 def (true)      string -> "true"
 def (false)     string -> "false"
-def (_ Class)   string -> name
+def (_ Class)   string -> this name
 
 def print()            -> prints("\n")
 def print(text String) -> prints(text + "\n")
@@ -12,15 +12,15 @@ def not(true)  -> false
 def not(false) -> true
 
 // By default, == just does identity comparison.
-def (_) ==(other) -> sameAs?(other)
+def (_) ==(other) -> this sameAs?(other)
 
 def (_) !=(other) -> not(this == other)
 
 // Implement comparison in terms of a master compareTo() method.
-def (_) <(other) -> compareTo(other) == -1
-def (_) >(other) -> compareTo(other) == 1
-def (_) <=(other) -> compareTo(other) != 1
-def (_) >=(other) -> compareTo(other) != -1
+def (_) <(other) -> this compareTo(other) == -1
+def (_) >(other) -> this compareTo(other) == 1
+def (_) <=(other) -> this compareTo(other) != 1
+def (_) >=(other) -> this compareTo(other) != -1
 
 // Make + default to string concatenation. We'll only hit this if both
 // arguments are not Ints.

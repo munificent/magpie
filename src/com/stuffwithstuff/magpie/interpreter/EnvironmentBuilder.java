@@ -19,6 +19,7 @@ public class EnvironmentBuilder {
     newClass("ParentCollisionError", "Error");
     newClass("ParseError", "Error");
     newClass("RedefinitionError", "Error");
+    newClass("UnknownVariableError", "Error");
   }
   
   private EnvironmentBuilder(Interpreter interpreter) {
@@ -41,6 +42,7 @@ public class EnvironmentBuilder {
       mClassObj = classObj;
     }
     
+    @SuppressWarnings("unused")
     private ClassObj mClassObj;
   }
   

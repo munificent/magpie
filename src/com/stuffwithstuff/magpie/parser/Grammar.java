@@ -11,7 +11,7 @@ public class Grammar {
     prefix(TokenType.STRING,        new LiteralParser());
     prefix(TokenType.LEFT_PAREN,    new ParenthesisPrefixParser());
     prefix(TokenType.LEFT_BRACKET,  new BracketPrefixParser());
-    prefix(TokenType.NAME,          new MessageParser());
+    prefix(TokenType.NAME,          new NameParser());
     prefix(TokenType.FIELD,         new FieldParser());
     
     prefix("break",     new BreakParser());
@@ -27,7 +27,7 @@ public class Grammar {
     prefix("var",       new VarParser());
     prefix("while",     new LoopParser());
 
-    infix(TokenType.NAME,         new MessageParser());
+    infix(TokenType.NAME,         new NameParser());
     infix(TokenType.COMMA,        new CommaParser());
     infix(TokenType.EQUALS,       new EqualsParser());
     infix(TokenType.LEFT_BRACKET, new BracketInfixParser());

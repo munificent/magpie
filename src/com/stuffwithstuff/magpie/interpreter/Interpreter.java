@@ -122,7 +122,7 @@ public class Interpreter {
   
   public Obj invoke(Obj receiver, String method, Obj arg) {
     Multimethod multimethod = mGlobalScope.getMultimethod(method);
-    return multimethod.invoke(this, receiver, true, arg);
+    return multimethod.invoke(this, receiver, arg);
   }
   
   public boolean objectsEqual(Obj a, Obj b) {
@@ -144,7 +144,7 @@ public class Interpreter {
     if (equals == null) return a == b;
     
     mInObjectsEqual = true;
-    Obj result = equals.invoke(this, a, false, b);
+    Obj result = equals.invoke(this, a, b);
     mInObjectsEqual = false;
     
     return result.asBool();
@@ -327,7 +327,7 @@ public class Interpreter {
     // Note: the receiver for init() is the class itself, not the new instance
     // which is considered to be in a hidden state since it isn't initialized
     // yet.
-    init.invoke(this, classObj, true, arg);
+    init.invoke(this, classObj, arg);
   }
   
   public ClassObj createGlobalClass(String name, ClassObj... parents) {

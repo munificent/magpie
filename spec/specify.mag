@@ -41,26 +41,26 @@ def (_ TestSuite) should(description String, block) ->
     do
         block call()
     catch error ->
-        fail("Unexpected error: " + error type)
+        fail("Unexpected error: " + error class)
         debugDump(error)
     end
 
     if totalTests == testsBefore then
-        print("NONE: " + name + " should " + currentTest + ".")
+        print("NONE: " + this name + " should " + this currentTest + ".")
     end
 end
 
-def (_ TestSuite) pass() -> advance()
+def (_ TestSuite) pass() -> this advance()
 
 def (_ TestSuite) advance() ->
     totalTests = totalTests + 1
 end
 
 def (_ TestSuite) fail(message String) ->
-    if not(failedTest) then
-        print("FAIL: " + name + " should " + currentTest + ".")
+    if not(this failedTest) then
+        print("FAIL: " + this name + " should " + this currentTest + ".")
     end
-    advance()
+    this advance()
     totalFailures = totalFailures + 1
     print("      " + message)
     this failedTest = true
@@ -79,11 +79,11 @@ def (_) shouldEqual(expected, message String) ->
 end
 
 def (_) shouldEqual(expected) ->
-    shouldEqual(expected, "Expected " + expected + " but was " + this)
+    this shouldEqual(expected, "Expected " + expected + " but was " + this)
 end
 
 def (_) shouldBe(expected Class, message String) ->
-    if is?(expected) then
+    if this is?(expected) then
         currentTestSuite pass()
     else
         currentTestSuite fail(message)
@@ -91,7 +91,7 @@ def (_) shouldBe(expected Class, message String) ->
 end
 
 def (_) shouldBe(expected Class) ->
-    shouldBe(expected, "Expected class " + expected + " but was " + this class)
+    this shouldBe(expected, "Expected class " + expected + " but was " + this class)
 end
 
 // Verifies that a function throws an error of the given class. Will execute the

@@ -86,20 +86,15 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
     // Figure out the receiver.
     Obj receiver;
-    boolean isExplicit;
     if (expr.getReceiver() == null) {
-      receiver = context.lookUp("this");
-      if (receiver == null) receiver = mInterpreter.nothing();
-      
-      isExplicit = false;
+      receiver = mInterpreter.nothing();
     } else {
       receiver = evaluate(expr.getReceiver(), context);
-      isExplicit = true;
     }
     
     Obj arg = evaluate(expr.getArg(), context);
     
-    return multimethod.invoke(mInterpreter, receiver, isExplicit, arg);
+    return multimethod.invoke(mInterpreter, receiver, arg);
   }
   
   @Override
@@ -191,23 +186,12 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   
   @Override
   public Obj visit(VariableExpr expr, EvalContext context) {
-    // TODO(bob): This is hacked, temporary, and wrong. Process should be:
-    // 1. See if it's a local var. If so, return it.
-    // 2. Look for a multimethod. If found, invoke it on implicit this.
-    // 3. Look in the closure for a variable.
-    
     // Look for a local variable.
-    // TODO(bob): Should only look up until we hit the function's closure.
     Obj variable = context.lookUp(expr.getName());
     if (variable != null) return variable;
     
-    // Not a variable, so look for a method.
-    Multimethod multimethod = context.lookUpMultimethod(expr.getName());
-    if (multimethod == null) throw mInterpreter.error("NoMethodError");
-
-    Obj receiver = context.lookUp("this");
-    if (receiver == null) receiver = mInterpreter.nothing();
-    return multimethod.invoke(mInterpreter, receiver, false, null);
+    throw mInterpreter.error("UnknownVariableError",
+        "Could not find a variable named \"" + expr.getName() + "\".");
   }
 
   @Override
