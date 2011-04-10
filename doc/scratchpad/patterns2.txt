@@ -1,0 +1,55 @@
+What kinds of patterns are needed?
+- Wildcard: matches anything.
+- Type: matches if the object is of that type.
+- Value: matches on ==. Need to figure out what kind of what expressions are
+  valid here.
+- Literal: matches on ==.
+- Tuple: decomposes a tuple.
+- Record: decomposes a record.
+- Grouping: to allow nested tuples and records.
+- Variable: binds a variable to a value. May also contain another pattern to
+  match on.
+- List?
+
+Which ones are most important:
+- Variable: all method arguments.
+- Type: most method arguments.
+- Value: especially for class names, to define "static" methods. Also constants
+  for match expressions.
+- Literal: for match expressions.
+
+Constraints:
+- It's hard to distinguish between "match this class name by value" and "match
+  this class name by type".
+- ":" is the logical answer for both records and type annotations.
+- We match on class type more than class value, so ideally that would be the
+  shorter form.
+- But, conversely, for non-class objects, we match on value more than type.
+
+Other stuff to keep in mind:
+- Extensible pattern syntax would be nice at some point, so this shouldn't be
+  too magical.
+
+
+There's an asymmetry in priorities. When the pattern being matched on is a
+class, it's most common to match by its type. But when it's some other named
+value (i.e. a constant) we likely want to match by value. That kind of implies
+that matching behavior should be polymorphic.
+
+So one option would be to try to get active patterns working.
+
+
+
+
+<pattern> ::=
+  _                                         wildcard
+  lowerCaseName (<pattern>)?                variable
+  ":" <expr>                                type test
+  literal                                   literal
+  "("<pattern>")"                           grouping
+  <pattern> ("," <pattern>)+                tuple
+  name":" <pattern> ("," name: <pattern>)*  record
+
+<expr> ::=
+  name
+  (<magpie expr>)

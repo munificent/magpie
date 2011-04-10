@@ -1,8 +1,0 @@
-use file <- File new("c:\foo") do
-    file write("hi")
-end
-
-// expands to
-def file <- File new("c:\foo")
-file write("hi")
-file close

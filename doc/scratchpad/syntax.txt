@@ -1,0 +1,51 @@
+Magpie's current syntax woes:
+
+- Expressions
+  1 No direct call syntax: (fn ...)(arg)
+  2 No way to statically disambiguate between a variable access and a getter on
+    this.
+    (solved with no implicit this)
+  3 No way to statically disambiguate between a nothing-receiver call and an
+    implicit this call.
+    (solved with no implicit this)
+  4 No way to statically disambiguate between a local variable name in a method
+    (which, if we knew that's what it was, we could statically ensure that the
+    variable existed) from an external (global, imported, whatever) one.
+- Patterns
+  5 No clean syntax for type-of patterns.
+  6 No syntax for arbitrary expressions (to evaluate to types or value matches).
+- Methods
+  7 Have to use ugly -> to indicate when getter body starts.
+    (solved with newlines)
+
+
+## Solutions for 1:
+
+### Leave it alone.
+
+Ruby doesn't have function call syntax either. It's not that bad to do without.
+
+## Solutions for 2:
+
+### No implicit this.
+
+Always require an explicit receiver for a getter, and a bare name is always a variable access.
+
+### Capitalization for scope.
+
+Capitalized names are variables defined in global scope (or imported from other
+modules into the global scope). Methods do not have lexical closures. Instead,
+they can access their locals and then straight to global scope.
+
+With that, we can solve 2 like:
+
+- If a bare name is lowercase, it must be either a local variable or a getter on
+  this. Since we statically know the names of currently defined locals, we can
+  tell which it is at parse time.
+- If a bare name is capitalized, it's a global variable.
+
+## Solutions for 3:
+
+### No implicit this.
+
+If there's no receiver, it's always interpreted as a `nothing` receiver.

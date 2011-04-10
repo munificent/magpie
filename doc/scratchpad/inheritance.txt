@@ -1,0 +1,87 @@
+Inheritance use cases:
+
+1. Full-on is-a subclassing.
+Example: Thing, Entity, Item, Monster, Hero in Amaranth.
+- Total polymorphism: we want to be able to pass a Hero to anything that expects
+  an Entity.
+- Base classes have lots of behavior and state.
+- Derived classes add more state and methods, and also implement a set of
+  required abstract methods (or punt to further derived classes).
+- May override some concrete methods, especially for optional behavior.
+
+2. Extension methods.
+Example: Defining extension methods on IEnumerable<T>.
+- No type or subtype relation defined at all. Just extends the existing
+  interface: any variable of type IEnumerable<T> now has extra things you can
+  do with it.
+- Extension class does not add state, or have access to anything private.
+- Extension class calls into the public interface of the mixing-in class.
+- No overriding. No dynamic dispatch at all.
+
+3. Mixins
+Example: Hideable in a component framework.
+- Defines a capability that can be added to multiple classes.
+- Can define a type too: it's meaningful to define a function that takes a
+  Hideable and only calls methods that mixin provides.
+- May or may not hook back into the class that's mixing it in. In the case of
+  Hideable, it may not care at all about the mixing in class. It's completely
+  separate.
+- May hook back into the mixing class. Hideable may need to call update() on its
+  mixing-in class when it's visibility changes.
+- Can add state to the class.
+- May need arguments at construction time, but hopefully not in most cases.
+
+Goals of class composition:
+1. Make as much behavior as possible accessed through calling methods on the
+   logical receiver. Should be `"foo" uppercase`, and not `StringUtils.uppercass("foo")`.
+2. Should allow behavior to be broken into small units and easily reused.
+3. Should avoid complex deep hierarchies or graphs.
+4. Composed classes should be open to live extension. It should be possible to
+   add a method like "filter()" to a single place and immediately be able to
+   call it on any object where that would make sense.
+5. Should be easy to understand what actual method will be called when you send
+   a message to an object, and name collisions should be easy to address,
+   prevent, or resolve.
+
+Prior art:
+- C++-style multiple inheritance
+- C#/Java-style single inheritance
+- C# extension methods (hard with Magpie's implicit interfaces)
+- Self-style multiple prototypes (why did they discard these?)
+- Mixins in Ruby
+- Traits in Scala
+- Multimethods in CLOS
+
+Every method has an implicit contract with "this": the members it accesses on
+it. The goal is to find the balance between making that method available on as
+many classes that happen to implement that "this contract" as possible while
+avoiding collisions and still being comprehensible.
+
+What is a mixin then? Maybe a named set of methods that share the same "this contract"?
+
+Imagine if you could do:
+
+mixin Iterable[T]
+    requires def iterate(-> Iterator[T])
+
+    get first T | Nothing =
+        var iterator = iterate()
+        if iterator moveNext() then iterator current
+    end
+end
+
+Then later you do:
+
+  someList first
+
+Then the interpreter does this:
+1. See if someList's class has that getter. It doesn't.
+2. Walk around and look at all of the mixins. See if they have one.
+3. Find 'first' in Iterable.
+4. See if someList's class matches Iterables requirements. It does.
+5. Invoke it.
+
+Eh, doing this implicitly is lame. If there's a collision (multiple mixins have
+the same method) there's no easy way to resolve it. It's better to have each class explicitly state which mixins they want. Since you can do that after that fact, it doesn't impose any kind of limitation.
+
+What about mixin state and constructors?

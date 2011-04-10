@@ -1,0 +1,128 @@
+How Does Message Syntax Map to Multimethods?
+
+What are the semantics of these:
+
+    :::magpie
+    receiver message(arg)          // 1
+    message(arg)                   // 2
+    receiver message               // 3
+    receiver message()             // 4
+    (thingThatReturnsMulti())(arg) // 5
+
+## A Single Multimethod Call with the Operands Tupled
+
+    :::magpie
+    message(receiver, arg)               // 1
+    message(this, arg)                   // 2
+    message(receiver)                    // 3
+    message(receiver, nothing)           // 4
+    (thingThatReturnsMulti())(this, arg) // 5
+
+### Pros
+
+*   Does a single multimethod dispatch for a complete conceptual method
+    invocation.
+
+### Cons
+
+*   Makes it harder to partially apply `this`. For example:
+
+        :::magpie
+        // If this works:
+        list add(123)
+
+        // Then it's convenient to be able to do:
+        var bound = list add
+        // Later...
+        bound(123)
+
+    We may be able to resolve this by coming up with a more general-purpose
+    partial application system.
+
+## Dispatch On the Receiver then the Argument
+
+    :::magpie
+    message(receiver)(arg) // 1
+    message()(arg)         // 2
+    message(receiver)      // 3
+    message(receiver)()    // 4
+
+### Pros
+
+*   Retains current "look up member, then invoke" semantics.
+*   Makes it easy to partially apply `this`.
+
+### Cons
+
+*   Has to dispatch twice.
+*   Might not generalize correctly. This means that the `this` argument will
+    dominate the right-hand side when linearizing, which isn't desireable.
+    Consider this (poorly designed, but still) example:
+
+        def this toString(builder StringBuilder)
+            builder append(this toString())
+        end
+
+        def Int toString() ...
+
+    Ideally, you should be able to do:
+
+        123 toString(StringBuilder new())
+
+    But that won't work with two-level dispatch. We'll look up `toString()` on
+    `Int`. Since we find on there (which is only specialized to `()`), we'll
+    never cascade down to the one available on all objects.
+
+## What is the Syntax for Defining Multimethods?
+
+    // Receiver-less function:
+    def abs(value Int) ...
+
+    // Method on any receiver:
+    def this is(type Type) ...
+
+    // No-arg method:
+    def String reverse() ...
+
+    // Getter:
+    def Point magnitude ...
+
+    // Setter:
+    def Rect width = ...
+
+    // Assignment method:
+    def Array call(index Int) = ...
+
+    // Callable:
+    def String call(index Int) ...
+
+    // Static method:
+    def IntClass parse(text String) ...
+    // or?
+    def Int class parse(text String) ...
+    // or?
+    def class Int parse(text String) ...
+
+## Questions?
+
+### How Do We Distinguish Between Receiver-less Methods and Ones on `this`?
+
+Consider:
+
+    abs(-123)
+    methodOnThis()
+
+How do we know that `this` should be applied to the method for the first line, but not for the second? It's important to distinguish, because we don't want to allow things like:
+
+    "ignored" abs(-123)
+
+One possible solution is two distinguish between two kinds of calls:
+
+1.  An explicit receiver is being passed, like `foo bar(arg)`.
+2.  An implicit receiver is being passed, like `bar(arg)`.
+
+When we invoke a multimethod, we give it the receiver, argument, and a flag saying whether or not the receiver was explicit. If it is explicit, we always use it (i.e. we dispatch on the tuple `(foo, arg)` in the above example.
+
+If it is implicit, we first try to select a method using `this`. If we don't find one, then we try to select a method without it (i.e. using `nothing` as `this`).
+
+Given that, `abs` would be defined to specialize on `(nothing, arg Int)`, which is not the same as `(_, arg Int)` (i.e. applicable to any receiver) or `(arg Int)` a getter named `abs` on ints.

@@ -1,122 +1,31 @@
-My current to-do list in inverse prerequisite order. In other words, between
-each item in this list, insert, "But before I can do that, I need to...":
-1. Tell everyone about Magpie and get contributors.
-2. Get class semantics figured out: multiple inheritance, constructor chaining,
-   properties.
-3. Write spec scripts for classes.
-4. Figure out how to spec out things that should generate runtime errors or
-   check time errors.
-5. Get exceptions/conditions working. (Because runtime errors throw an
-   exception that the spec will need to catch.)
-6. Compile to bytecode. (If we're going to do restartable conditions, we'll need
-   to be able to save and restore the stack. If we skip that for now and just do
-   regular exceptions, we can skip this step.)
-7. Make type-checking user-invokable. (So that the check error specs can call
-   the type-checker directly and get errors back.)
+Major features:
+- Modules.
+- Refine pattern syntax. The current way of specifying type and value patterns
+  is gross. Need to investigate first-class or extensible patterns.
+- Annotations. In order to be able to bolt on a type system later, this will be
+  necessary. Structured documentation (i.e. method comments) should in turn be
+  implemented using this.
+- Get the extensible syntax stuff working again, including quotations.
+- Concurrency. To avoid shared state, I'll have to figure out how this interacts
+  with closures, so it will likely be necessary to do modules first.
 
-Types
-- Classes
-  - If we're going to keep inheritance, then we need to make sure you can't add
-    a method to a sub- or super-class whose argument or return type is 
-    incompatible with an overridden method elsewhere in the hierarchy. (i.e. you
-    shouldn't be able to have Base foo(-> Int) and Derived foo(-> String)).
-  - Need to type-check that a class's declared fields are all definitely values
-    of allowed types by the end of the ctor.
-  - Figure out if there's some way constructors can be extended to a) add new
-    construction logic and/or b) add new fields.
-  - Masquerades. Two classes cannot implicitly duck type to each other even if 
-    they have matching methods. However, there should be a "masquerade" function
-    that will take an instance of one class and return it typed to another if
-    they have compatible methods. This will allow things like mocks without
-    forcing users to make everything an interface up front.
-  - Figure out how to type-check defined (not declared) fields.
-- Interfaces
-  - Declarative syntax to extend an interface.
-  - Determine if something like C#'s explicit interface implementation is
-    useful. It may be nice for cases where a class implements multiple
-    interfaces with overlapping names.
-  - Figure out how what happens if an interface references itself, like:
-    interface Foo
-        do(foo Foo)
-    end
-    Does the type-checker stack overflow when testing a type against that?
-- Generics
-  - Figure out variance for instantiated types.
-  - Get them working with classes and objects. If you instantiate a generic
-    *class*, how do methods see the static arguments on the class?
-  - Get constraints working.
-- Function types
-  - These need an expression syntax that evaluates to an ICallable interface
-    with type arguments for the function's argument and return types.
-- Unions
-  - Unlike or types, these would have named cases.
-- Enums
-  - Interfaces may cover this, but it might be nice to have some syntactic sugar
-    for it. Java's system where enums are essentially singleton instances is
-    interesting.
+Minor features:
+- String interpolation.
+- Cascade syntax?
+- "and" and "or".
+- Doubles and other atomic types.
+- Dictionaries.
+- Enums. Need to figure out the basic pattern for enum-like things. This is
+  important because it may have implications for pattern syntax so you can match
+  on enum values.
 
-Expressions
-- Scope guards
-  - Basically destructors, or some other way to execute code at the close of a
-    local scope. See also: using() in C#.
-- Closures
-  - In theory, they're there and work, but they need tests and probably have 
-    lots of bugs.
-- Floats, characters, and other atomic types
-  - Pretty much the full suite of what Java provides.
+Implementation:
+- Compile to bytecode. This will make tail call elimination easier, help with
+  concurrency, possibly allow restartable conditions, and maybe even make it
+  faster. Given quotations and first-class syntax, it may make sense to self-
+  host the compiler.
+- Ability to talk to Java code.
 
-Syntax
-- Function literals
-  - The syntax for these is kind of verbose, especially for use cases like
-    filter/map. A shorter lambda syntax would be nice.
-- Some kind of message cascade syntax? User-defined operators can handle most
-  cases (i.e. a string builder in Magpie could just have a + operator), but it
-  may be nice for some things?
-- Map and/or set literals?
-- Pattern-matching or switch?
-- Parsewords
-  Everything but the core message syntax should be moved out of Java into 
-  Magpie. In Magpie, you can register a parseword, a name keyword. When the
-  parser encounters that keyword, it calls a Magpie function that takes a parser
-  and returns an expression. Then things like if, for, class, etc. can be
-  implemented in Magpie. Users can then implement their own custom control
-  structures.
-- Annotations
-  Users should be able to attach annotations, arbitrary expressions attached to
-  other expressions. Those are executed and bound to the expression at check
-  time and runtime. There should then be an API to access those annotations.
-- Syntax literals and quasiquoting
-  An expression like { a + b } evaluates to a data structure for the AST. Useful
-  for metaprogramming and parsewords.
-  
-Library
-- Reorganize and clean up the type stuff.
-- Conversion and casting methods (is, as, explicit cast).
-
-Other
-- Bytecode compiler. Will make coroutines and TCO simpler.
-- A well-defined package/import/namespace system including nice syntax.
-- Interop with Java.
-  + Call Java methods on primitive types.
-  - Wrap arbitrary Java objects in Magpie objects.
-  - Automatically Magpie class to match Java class?
-  - Construct instances of arbitrary Java classes.
-- Coroutines and/or CSP-style concurrency. Some way to easily hop between
-  different callstacks, basically.
-- TCO.
-- Exceptions. (Or, ideally, something closer to CL's condition system.)
-- Implement test infrastructure in Magpie (at least for as much as possible).
-- Write build scripts in Magpie.
-- Call methodNotFound on an object if method lookup failed so it can dynamically
-  resolve missing methods.
-
-Done
-+ Object literals?
-+ Keyword arguments. Something like:
-    dictionary add(key: 123 value: "hey")
-  (Just pass an object literal)
-- Interfaces
-  + Core imperative system to create and extend them.
-  + Typing rules for them that allow other types to be assignable to them if 
-    they implement all of its methods.
-  + Declarative syntax to create an interface.
+Community:
+- Write Magpie guide.
+- Announce.

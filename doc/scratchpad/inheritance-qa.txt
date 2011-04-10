@@ -1,0 +1,90 @@
+If you consider a class A inheriting/composing/delegating/mixing-in another class B, each of which can talk to the outside world (W), there are four membranes of communication (ignoring A and B calling methods on outside world
+classes):
+
+W -> A
+W -> B
+A -> B
+B -> A
+
+These are modelled in different ways by different languages:
+
+C++:
+W -> A: public method in A
+W -> B: public method in B, public inheritance of B
+A -> B: protected method in B
+B -> A: virtual method in B
+
+
+Q: How does a mixin avoid having a method overridden?
+A: C++: Make it non-virtual and private.
+   Java: Make it private.
+
+Possible answers:
+
+Using "child" here to refer to inherited/delegated/mixed-in class/trait/mixin.
+"A" is the current implemented or planned solution. "P" are possible or proposed alternate solutions.
+
+Q: How does a parent resolve name collisions between children in the parent's
+   public interface? If a parent has two children that both provide foo(), how
+   does the parent control which one the outside world sees?
+A: Namespaced methods.
+P: Explicit renaming.
+
+Q: How does a parent disambiguate a call to a child versus a call to itself?
+   For example, in an overridden method, how do you *not* recursively just call
+   yourself and call the child method instead?
+A: Delegate: Call it directly on delegate object.
+A: Mixin: Cannot. Expectation is that parents will not collide with mixin
+   members.
+
+   Q: So if you call directly on the delegate, what happens when the delegate
+      in turn calls a method on itself that is abstract?
+   A: No answer. :(
+
+Q: How does a child avoid having a method overridden? How do you do the
+   equivalent of a non-virtual?
+A: Put them in a separate "private" namespace that only the child imports.
+P: Define a special "self" variable similar to "this" but that evaluates to the
+   object where a method is defined and not original receiver.
+
+Q: How do you ensure that an parent class doesn't need to know or care about the
+   child's private methods?
+A: Put them in a separate "private" namespace that only the child imports.
+
+Q: What happens if a parent member does collide with a child one?
+A: The parent overrides.
+P: It's a static error.
+P: It's a dynamic error. Collision is completely forbidden.
+
+Q: What happens if sibling children have a member collision?
+A: There's a resolution order based on delegate field name.
+P: It's a static error.
+P: It's a dynamic error. Collision is completely forbidden.
+
+Q: How are abstract members in children defined?
+A: Allow classes to declare (as opposed to define) members.
+
+Q: How do you prevent creating an instance of an abstract class?
+A: Don't. Because of the way constructors work, you kind of have to be able to
+   make one.
+
+Q: How do you ensure the parent implements all abstract members the child
+   requires?
+A: The type-checker will validate this?
+
+Q: Can a child implement the abstract members a sibling requires on behalf of
+   its parent?
+A: Yeah, I think that would work now.
+
+Q: How are stateful children constructed?
+A: Just like other fields.
+
+Q: How do you inherit behavior that the parent doesn't want to publicly expose
+   (i.e. protected methods)?
+A: Don't inherit, just use regular composition.
+
+Q: When determining if a class provides all required abstract methods, do we
+   check a delegate field's declared type, or the actual value stored in it?
+A: Not sure. Going by type seems weird since missing requires affects the
+   runtime semantics. Going by value means we can only validate objects, not
+   classes.

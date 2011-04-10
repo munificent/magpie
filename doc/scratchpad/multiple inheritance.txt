@@ -1,0 +1,115 @@
+Problems with Multiple Inheritance
+----------------------------------
+- Name collision. Two base classes unintentially have a member with the same
+  name. What happens?
+- Unintended overrides. You define a member in a derived class with the same
+  name as a base class member. Now base will hit that instead of its own if
+  everything is virtual by default.
+- Multiple paths to class. If there are multiple paths to the same base class,
+  does that mean those fields are duplicated? If so, how are they disambiguated?
+  If not, then they may violate the invariants of one of the intermediate
+  classes.
+
+Flat Style
+----------
+A class has a list of base classes, but there are several limitations in how a
+hierarchy is formed:
+1. Hierarchies must form a strict tree. It is an error to have multiple paths to
+   the same class.
+2. Only abstract or virtual members can be overridden. (A virtual member
+   provides default behavior if not overridden.)
+3. Abstract members must be overridden.
+
+Q: Can sibling A implement an abstract method from sibling B?
+
+Pros:
+- Builds on what class systems already do. They already have to check for
+  circular inheritance, so point 1 just refines that.
+- Avoids unintentional overrides.
+
+Cons:
+- May cause problems where an innocuous mixin is being mixed into multiple
+  levels of the hierarchy, which would be forbidden by this. (Think both List
+  and Queue which inherits List mixing in Iterable.) I don't think this would
+  be much of a problem: if your base class already mixes something in, you don't
+  need to.
+- How does the top type work here? If every class eventually inherits from
+  Object, then the tree limitation is broken. :(
+
+Composition
+-----------
+No inheritance at all. If you want to share some stateful code between two
+classes, give each one a field of some other type and add explicit forwarding
+members. If you want to share methods, write code that imperatively adds those
+members to multiple classes.
+
+Pros:
+- Dodges all inheritance problems completely.
+
+Cons:
+- Manual forwarding defeats the purpose of extensible mixins. If you add a new
+  member to Iterable, you'd still have to manually add that method to every
+  class that "mixes" that in.
+- Painfully tedious.
+- No class subtyping.
+
+Ruby Style
+----------
+A class can have a single base class and multiple mixins. Mixins are stateless.
+The parent ctor is chained by calling super(<args>) from within the derived
+ctor.
+
+Pros:
+- Addresses constructor chaining.
+- No stateful MI avoids problems with that.
+
+Cons:
+- Instance variables are all in the same namespace. Inherited classes (or
+  mixins) can stomp on each others fields. :(
+
+Python Style
+------------
+A class has a list of base classes. Constructors are chained by linearizing, the
+same way that methods are overridden. There doesn't seem to be a way to pass
+specific arguments to specific inherited classes.
+
+Pros:
+- Proven and understood (though apparently not widely used).
+
+Cons:
+- Virtual-by-default can cause unintended overrides.
+- No ability to call specific derived constructors.
+
+Mixins
+------
+A class has a list of mixin classes. When a member is not found on the class,
+its mixins are searched. A mixin class may not have any fields.
+
+Pros:
+- Solves constructor issues with MI: no need to construct mixins.
+- Solves problem of multiple paths to same base class: since mixins are
+  stateless, there's no duplication of state, so having the same mixin appear
+  twice just modifies override order.
+
+Cons:
+- Limiting. Mixing-in state is useful (think Hideable mixin that needs a
+  _visible flag).
+
+Delegates
+---------
+
+Pros:
+- Can do dynamic inheritance: by changing a delegate field's value, object can
+  apparently change class.
+- Can do shared inheritance. Multiple objects can delegate to the same object.
+  Might be useful for proxies, caching, or memoization.
+- Plays nice with Magpie's current create-from-record-of-fields style of
+  construction.
+
+Cons:
+- Field getters/setters need to know which object (the original or the delegated
+  one) to look at, which may be hard to do.
+- Makes static checking harder. If a delegated object has a method that the
+  delegate field's type doesn't declare, that method can be reached (and thus
+  shadowing another later one) without the type-checker being able to be aware
+  of it.
