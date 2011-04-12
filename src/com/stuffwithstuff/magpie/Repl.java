@@ -6,6 +6,7 @@ import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.ErrorException;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.InterpreterHost;
+import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.QuitException;
 import com.stuffwithstuff.magpie.parser.CharacterReader;
 import com.stuffwithstuff.magpie.parser.Lexer;
@@ -39,8 +40,9 @@ public class Repl implements InterpreterHost {
           Expr expr = parser.parseExpression();
           parser.consume(TokenType.LINE);
           
-          String result = interpreter.evaluateToString(expr);
-          if (result != null) printResult(result);
+          Obj result = interpreter.interpret(expr);
+          String text = interpreter.evaluateToString(result);
+          printResult(text);
         } catch(ParseException ex) {
           printError("Parse error: " + ex.getMessage());
         } catch(ErrorException ex) {

@@ -42,7 +42,6 @@ def (_ TestSuite) should(description String, block)
         block call()
     catch error then
         fail("Unexpected error: " + error class)
-        debugDump(error)
     end
 
     if totalTests == testsBefore then

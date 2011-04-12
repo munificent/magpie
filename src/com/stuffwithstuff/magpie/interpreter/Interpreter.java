@@ -15,115 +15,44 @@ public class Interpreter {
     
     mGrammar = new Grammar();
     
-    // Create a top-level scope.
-    mGlobalScope = new Scope(host.allowTopLevelRedefinition());
+    // Create the main module.
+    mMainModule = new Module("*main*", host.allowTopLevelRedefinition());
+    mModules.put(mMainModule.getName(), mMainModule);
     
-    // The class of all classes. Its class is itself.
-    mClass = new ClassObj(null, "Class", null, new HashMap<String, Field>(),
-        mGlobalScope);
-    mClass.bindClass(mClass);
-    mGlobalScope.define("Class", mClass);
-
+    Scope scope = mMainModule.getScope();
+    EnvironmentBuilder builder = new EnvironmentBuilder(this, scope);
+    mClass = builder.createClassClass();
+    builder.initialize();
     
-    mBoolClass = createGlobalClass("Bool");
+    mBoolClass = scope.get("Bool").asClass();
+    mFnClass = scope.get("Function").asClass();
+    mIntClass = scope.get("Int").asClass();
+    mListClass = scope.get("List").asClass();
+    mNothingClass = scope.get("Nothing").asClass();
+    mRecordClass = scope.get("Record").asClass();
+    mStringClass = scope.get("String").asClass();
+    mTupleClass = scope.get("Tuple").asClass();
+    
     mTrue = instantiate(mBoolClass, true);
     mFalse = instantiate(mBoolClass, false);
-
-    ClassObj indexable = createGlobalClass("Indexable");
-    ClassObj comparable = createGlobalClass("Comparable");
-    
-    mFnClass = createGlobalClass("Function");
-    mIntClass = createGlobalClass("Int", comparable);
-    mListClass = createGlobalClass("List", indexable);
-    mRecordClass = createGlobalClass("Record");
-    mStringClass = createGlobalClass("String", comparable);
-    
-    mTupleClass = createGlobalClass("Tuple", indexable);
-    
-    mNothingClass = createGlobalClass("Nothing");
     mNothing = instantiate(mNothingClass, null);
-    
-    // Create the default new() method for creating objects.
-    getMultimethod(mGlobalScope, "new").addMethod(new ClassNew(mGlobalScope));
-    
-    // Register the built-in methods.
-    BuiltIns.register(ClassBuiltIns.class, this);
-    BuiltIns.register(FunctionBuiltIns.class, this);
-    BuiltIns.register(IntBuiltIns.class, this);
-    BuiltIns.register(ListBuiltIns.class, this);
-    BuiltIns.register(ObjectBuiltIns.class, this);
-    BuiltIns.register(TupleBuiltIns.class, this);
-    BuiltIns.register(StringBuiltIns.class, this);
-    BuiltIns.register(BuiltInFunctions.class, this);
-    
-    EnvironmentBuilder.initialize(this);
   }
   
-  public void interpret(Expr expression) {
-    evaluate(expression, createTopLevelContext());
-  }
-  
-  public Obj evaluate(Expr expr) {
-    return evaluate(expr, createTopLevelContext());
+  public Obj interpret(Expr expression) {
+    return evaluate(expression, new EvalContext(mMainModule.getScope()));
   }
   
   public Obj evaluate(Expr expr, EvalContext context) {
     ExprEvaluator evaluator = new ExprEvaluator(this);
     return evaluator.evaluate(expr, context);
   }
-
-  public String evaluateToString(Expr expr) {
-    Obj result = evaluate(expr);
-    
-    // A null string means "nothing to output".
-    if (result == mNothing) return null;
-    
-    // Convert it to a string.
-    return evaluateToString(result);
-  }
   
   public String evaluateToString(Obj value) {
     return invoke(value, Name.STRING, null).asString();
   }
-
-  public Obj construct(String className, Obj... args) {
-    Obj classObj = getGlobal(className);
-    
-    Obj arg;
-    if (args.length == 0) {
-      arg = mNothing;
-    } else if (args.length == 1) {
-      arg = args[0];
-    } else {
-      arg = createTuple(args);
-    }
-    
-    return invoke(classObj, "new", arg);
-  }
-  
-  public Obj getGlobal(String name) {
-    return mGlobalScope.get(name);
-  }
-
-  public boolean hasMain() {
-    return mGlobalScope.get("main") != null;
-  }
-  
-  public void runMain() {
-    EvalContext context = createTopLevelContext();
-    Obj main = context.lookUp("main");
-    if (main == null) return;
-    
-    if (!(main instanceof FnObj)) {
-      throw new InterpreterException("Member \"main\" is not a function.");
-    }
-    
-    Callable mainFn = ((FnObj)main).getCallable();
-    mainFn.invoke(this, mNothing);
-  }
   
   public Obj invoke(Obj receiver, String method, Obj arg) {
-    Multimethod multimethod = mGlobalScope.getMultimethod(method);
+    Multimethod multimethod = mMainModule.getScope().getMultimethod(method);
     return multimethod.invoke(this, receiver, arg);
   }
   
@@ -140,7 +69,7 @@ public class Interpreter {
     // "==", don't call it again, just default to identity.
     if (mInObjectsEqual) return a == b;
 
-    Multimethod equals = mGlobalScope.getMultimethod(Name.EQEQ);   
+    Multimethod equals = mMainModule.getScope().getMultimethod(Name.EQEQ);   
     
     // Bootstrap short-cut. If we haven't defined "==" yet, default to identity.
     if (equals == null) return a == b;
@@ -163,7 +92,7 @@ public class Interpreter {
   
   public ErrorException error(String errorClassName, String message) {
     // Look up the error class.
-    ClassObj classObj = mGlobalScope.get(errorClassName).asClass();
+    ClassObj classObj = mMainModule.getScope().get(errorClassName).asClass();
 
     // TODO(bob): Putting the message in here as the value is kind of hackish,
     // but it ensures we can display an error message even if we aren't able
@@ -174,12 +103,6 @@ public class Interpreter {
     
     throw new ErrorException(error);
   }
-  
-  public EvalContext createTopLevelContext() {
-    return new EvalContext(mGlobalScope);
-  }
-  
-  public Scope getGlobals() { return mGlobalScope; }
   
   /**
    * Gets the single value "nothing" of type Nothing.
@@ -211,17 +134,17 @@ public class Interpreter {
     }
     
     // Add the constructor.
-    getMultimethod(scope, "init").addMethod(new ClassInit(classObj, scope));
+    Multimethod.define(scope, "init").addMethod(new ClassInit(classObj, scope));
     
     // Add getters and setters for the fields.
     for (Entry<String, Field> entry : fields.entrySet()) {
       // Getter.
-      Multimethod getter = getMultimethod(scope, entry.getKey());
+      Multimethod getter = Multimethod.define(scope, entry.getKey());
       getter.addMethod(new FieldGetter(classObj, entry.getKey(), scope));
 
       // Setter, if the field is mutable ("var" instead of "val").
       if (entry.getValue().isMutable()) {
-        Multimethod setter = getMultimethod(scope, entry.getKey() + "_=");
+        Multimethod setter = Multimethod.define(scope, entry.getKey() + "_=");
         setter.addMethod(new FieldSetter(classObj,
             entry.getKey(), entry.getValue(), scope));
       }
@@ -271,7 +194,7 @@ public class Interpreter {
     for (Entry<String, Field> field : classObj.getFieldDefinitions().entrySet()) {
       Expr initializer = field.getValue().getInitializer();
       if (initializer != null) {
-        Obj value = evaluate(initializer);
+        Obj value = evaluate(initializer, new EvalContext(classObj.getClosure()));
         object.setField(field.getKey(), value);
       }
     }
@@ -298,18 +221,6 @@ public class Interpreter {
   public Grammar getGrammar() {
     return mGrammar;
   }
-
-  public Multimethod getMultimethod(Scope scope, String name) {
-    Multimethod multimethod = scope.getMultimethod(name);
-    
-    // Define it the first time if not found.
-    if (multimethod == null) {
-      multimethod = new Multimethod();
-      scope.defineMultimethod(name, multimethod);
-    }
-    
-    return multimethod;
-  }
   
   public Obj getConstructingObject() { return mConstructing.peek(); }
   
@@ -325,22 +236,18 @@ public class Interpreter {
   }
   
   public void initializeNewObject(ClassObj classObj, Obj arg) {
-    Multimethod init = getMultimethod(classObj.getClosure(), "init");
+    Multimethod init = Multimethod.define(classObj.getClosure(), "init");
     // Note: the receiver for init() is the class itself, not the new instance
     // which is considered to be in a hidden state since it isn't initialized
     // yet.
     init.invoke(this, classObj, arg);
   }
   
-  public ClassObj createGlobalClass(String name, ClassObj... parents) {
-    ClassObj classObj = createClass(name, Arrays.asList(parents), 
-        new HashMap<String, Field>(), mGlobalScope);
-    mGlobalScope.define(name, classObj);
-    return classObj;
-  }
-  
   private final InterpreterHost mHost;
-  private Scope mGlobalScope;
+  
+  private final Map<String, Module> mModules = new HashMap<String, Module>();
+  private final Module mMainModule;
+  
   private final ClassObj mClass;
   private final ClassObj mBoolClass;
   private final ClassObj mFnClass;

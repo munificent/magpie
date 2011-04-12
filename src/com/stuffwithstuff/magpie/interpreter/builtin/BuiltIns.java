@@ -5,8 +5,8 @@ import java.lang.reflect.InvocationTargetException;
 
 import com.stuffwithstuff.magpie.StringCharacterReader;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
-import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Multimethod;
+import com.stuffwithstuff.magpie.interpreter.Scope;
 import com.stuffwithstuff.magpie.parser.DefParser;
 import com.stuffwithstuff.magpie.parser.Lexer;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
@@ -15,19 +15,18 @@ import com.stuffwithstuff.magpie.util.Pair;
 
 public abstract class BuiltIns {
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public static void register(Class javaClass,
-      Interpreter interpreter) {
+  public static void register(Class javaClass, Scope scope) {
 
     for (Class innerClass : javaClass.getDeclaredClasses()) {
       Signature signature = (Signature) innerClass.getAnnotation(Signature.class);
       if (signature != null) {
-        registerMethod(interpreter, innerClass, signature.value());
+        registerMethod(scope, innerClass, signature.value());
       }
     }
   }
   
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  private static void registerMethod(Interpreter interpreter,
+  private static void registerMethod(Scope scope,
       Class innerClass, String signature) {
     try {
       Pair<String, Pattern> parsed = parseSignature(signature);
@@ -38,11 +37,10 @@ public abstract class BuiltIns {
       // Construct the method.
       Constructor ctor = innerClass.getConstructor();
       BuiltInCallable callable = (BuiltInCallable) ctor.newInstance();
-      BuiltIn builtIn = new BuiltIn(pattern, callable, interpreter.getGlobals());
+      BuiltIn builtIn = new BuiltIn(pattern, callable, scope);
       
       // Register it.
-      Multimethod multimethod = interpreter.getMultimethod(
-          interpreter.getGlobals(), name);
+      Multimethod multimethod = Multimethod.define(scope, name);
       multimethod.addMethod(builtIn);
       
     } catch (SecurityException e) {

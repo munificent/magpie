@@ -63,11 +63,6 @@ public class Script {
         if (expr == null) break;
         interpreter.interpret(expr);
       }
-      
-      // If there is a main() function, then we need to type-check first:
-      if (interpreter.hasMain()) {
-          interpreter.runMain();
-      }
     } finally {
       interpreter.popScriptPath();
     }
