@@ -8,11 +8,9 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 
-import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.ErrorException;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
-import com.stuffwithstuff.magpie.parser.Lexer;
-import com.stuffwithstuff.magpie.parser.MagpieParser;
+import com.stuffwithstuff.magpie.parser.CharacterReader;
 
 public class Script {
   public static Script fromPath(String path) throws IOException {
@@ -31,40 +29,25 @@ public class Script {
   
   public static void loadBase(Interpreter interpreter) throws IOException {
     Script script = Script.fromPath("base");
-    script.execute(interpreter);
+    interpreter.interpret(script.getPath(), script.read());
   }
   
-  public String getText() { return mText; }
-
+  public String getPath() { return mPath; }
+  public String getSource() { return mSource; }
+  public CharacterReader read() {
+    return new StringCharacterReader(mSource);
+  }
+  
   public void execute() throws IOException {
     Interpreter interpreter = new Interpreter(new ScriptInterpreterHost());
     
     try {
       // Load the base script first.
       loadBase(interpreter);
-      execute(interpreter);
+      interpreter.interpret(mPath, read());
     } catch(ErrorException ex) {
       System.out.println(String.format("Uncaught %s: %s",
           ex.getError().getClassObj().getName(), ex.getError().getValue()));
-    }
-  }
-  
-  public void execute(Interpreter interpreter) {
-    interpreter.pushScriptPath(mPath);
-    try {
-      Lexer lexer = new Lexer(mPath, new StringCharacterReader(mText));
-      MagpieParser parser = interpreter.createParser(lexer);
-  
-      // Evaluate every expression in the file. We do this incrementally so
-      // that expressions that define parsers can be used to parse the rest of
-      // the file.
-      while (true) {
-        Expr expr = parser.parseTopLevelExpression();
-        if (expr == null) break;
-        interpreter.interpret(expr);
-      }
-    } finally {
-      interpreter.popScriptPath();
     }
   }
 
@@ -90,11 +73,11 @@ public class Script {
     }
   }
 
-  private Script(String path, String text) {
+  private Script(String path, String source) {
     mPath = path;
-    mText = text;
+    mSource = source;
   }
   
   private final String mPath;
-  private final String mText;
+  private final String mSource;
 }

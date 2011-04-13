@@ -29,7 +29,7 @@ public class BuiltInFunctions {
       
       try {
         Script script = Script.fromPath(scriptFile.getPath());
-        script.execute(interpreter);
+        interpreter.interpret(script.getPath(), script.read());
       } catch (ParseException e) {
         // TODO(bob): Include more information.
         interpreter.error("ParseError");

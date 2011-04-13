@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.interpreter.builtin.*;
+import com.stuffwithstuff.magpie.parser.CharacterReader;
 import com.stuffwithstuff.magpie.parser.Grammar;
 import com.stuffwithstuff.magpie.parser.Lexer;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
@@ -15,6 +16,9 @@ public class Interpreter {
     
     mGrammar = new Grammar();
     
+    // Start in the current directory.
+    mScriptPaths.push(".");
+
     // Create the main module.
     mMainModule = new Module("*main*", host.allowTopLevelRedefinition());
     mModules.put(mMainModule.getName(), mMainModule);
@@ -38,6 +42,25 @@ public class Interpreter {
     mNothing = instantiate(mNothingClass, null);
   }
   
+  public void interpret(String path, CharacterReader source) {
+    mScriptPaths.push(path);
+    try {
+      Lexer lexer = new Lexer(path, source);
+      MagpieParser parser = createParser(lexer);
+  
+      // Evaluate every expression in the file. We do this incrementally so
+      // that expressions that define parsers can be used to parse the rest of
+      // the file.
+      while (true) {
+        Expr expr = parser.parseTopLevelExpression();
+        if (expr == null) break;
+        interpret(expr);
+      }
+    } finally {
+      mScriptPaths.pop();
+    }
+  }
+
   public Obj interpret(Expr expression) {
     return evaluate(expression, new EvalContext(mMainModule.getScope()));
   }
@@ -201,17 +224,9 @@ public class Interpreter {
     
     return object;
   }
-
-  public void pushScriptPath(String path) {
-    mScriptPaths.push(path);
-  }
   
   public String getCurrentScript() {
     return mScriptPaths.peek();
-  }
-  
-  public void popScriptPath() {
-    mScriptPaths.pop();
   }
   
   public MagpieParser createParser(Lexer lexer) {

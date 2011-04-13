@@ -26,9 +26,6 @@ public class Repl implements InterpreterHost {
     
     Interpreter interpreter = new Interpreter(this);
     
-    // The REPL runs and imports relative to the current directory.
-    interpreter.pushScriptPath(".");
-    
     try {
       Script.loadBase(interpreter);
       
