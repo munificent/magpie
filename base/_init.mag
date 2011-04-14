@@ -74,6 +74,12 @@ def (nothing) true?
     false
 end
 
-load("Comparable.mag")
-load("List.mag")
-load("Range.mag")
+// TODO(bob): Need "base." here because it uses this to determine the module
+// name and a module with a given name is only loaded once. The modules here
+// are colliding with the same named ones in spec. To fix this, a module's name
+// should include its parent module if it was loaded from a parent-relative
+// path (so "List" here would become "base.List" and the one in spec would be
+// "spec.core.List").
+import base.Comparable
+import base.List
+import base.Range

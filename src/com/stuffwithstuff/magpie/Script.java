@@ -10,6 +10,7 @@ import java.nio.charset.Charset;
 
 import com.stuffwithstuff.magpie.interpreter.ErrorException;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
+import com.stuffwithstuff.magpie.interpreter.ModuleSource;
 import com.stuffwithstuff.magpie.parser.CharacterReader;
 
 public class Script {
@@ -30,6 +31,47 @@ public class Script {
   public static void loadBase(Interpreter interpreter) throws IOException {
     Script script = Script.fromPath("base");
     interpreter.interpret(script.getPath(), script.read());
+  }
+  
+  public static ModuleSource loadModule(String scriptPath, String name) {
+    try {
+      File module = findModule(scriptPath, name);
+      CharacterReader reader = fromPath(module.getPath()).read();
+      return new ModuleSource(module.getPath(), reader);
+    } catch (IOException e) {
+      e.printStackTrace();
+      // TODO(bob): Handle error!
+      return null;
+    }
+  }
+  
+  private static File findModule(String scriptPath, String name) throws IOException {
+    // Given name "foo.bar" and path "here/", we'll try:
+    // here/foo/bar.mag
+    // here/foo/bar/_init.mag
+    // $CWD/foo/bar.mag
+    // $CWD/foo/bar/_init.mag
+    
+    String scriptDir = new File(scriptPath).getParent();
+    String modulePath = name.replace('.', '/');
+    
+    // here/foo/bar.mag
+    File file = new File(scriptDir, modulePath + ".mag");
+    if (file.exists()) return file;
+    
+    // here/foo/bar/_init.mag
+    file = new File(scriptDir, modulePath + "/_init.mag");
+    if (file.exists()) return file;
+    
+    // $CWD/foo/bar.mag
+    file = new File(modulePath + ".mag");
+    if (file.exists()) return file;
+    
+    // $CWD/foo/bar/_init.mag
+    file = new File(modulePath + "/_init.mag");
+    if (file.exists()) return file;
+    
+    throw new IOException("Couldn't find module " + name);
   }
   
   public String getPath() { return mPath; }

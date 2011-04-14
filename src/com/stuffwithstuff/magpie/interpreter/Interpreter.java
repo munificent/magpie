@@ -15,27 +15,23 @@ public class Interpreter {
     mHost = host;
     
     mGrammar = new Grammar();
-    
-    // Start in the current directory.
-    mScriptPaths.push(".");
 
-    // Create the main module.
-    mMainModule = new Module("*main*", host.allowTopLevelRedefinition());
-    mModules.put(mMainModule.getName(), mMainModule);
+    mGlobals = new Scope(host.allowTopLevelRedefinition());
     
-    Scope scope = mMainModule.getScope();
-    EnvironmentBuilder builder = new EnvironmentBuilder(this, scope);
+    mScriptPath = ".";
+    
+    EnvironmentBuilder builder = new EnvironmentBuilder(this, mGlobals);
     mClass = builder.createClassClass();
     builder.initialize();
     
-    mBoolClass = scope.get("Bool").asClass();
-    mFnClass = scope.get("Function").asClass();
-    mIntClass = scope.get("Int").asClass();
-    mListClass = scope.get("List").asClass();
-    mNothingClass = scope.get("Nothing").asClass();
-    mRecordClass = scope.get("Record").asClass();
-    mStringClass = scope.get("String").asClass();
-    mTupleClass = scope.get("Tuple").asClass();
+    mBoolClass = mGlobals.get("Bool").asClass();
+    mFnClass = mGlobals.get("Function").asClass();
+    mIntClass = mGlobals.get("Int").asClass();
+    mListClass = mGlobals.get("List").asClass();
+    mNothingClass = mGlobals.get("Nothing").asClass();
+    mRecordClass = mGlobals.get("Record").asClass();
+    mStringClass = mGlobals.get("String").asClass();
+    mTupleClass = mGlobals.get("Tuple").asClass();
     
     mTrue = instantiate(mBoolClass, true);
     mFalse = instantiate(mBoolClass, false);
@@ -43,26 +39,24 @@ public class Interpreter {
   }
   
   public void interpret(String path, CharacterReader source) {
-    mScriptPaths.push(path);
-    try {
-      Lexer lexer = new Lexer(path, source);
-      MagpieParser parser = createParser(lexer);
-  
-      // Evaluate every expression in the file. We do this incrementally so
-      // that expressions that define parsers can be used to parse the rest of
-      // the file.
-      while (true) {
-        Expr expr = parser.parseTopLevelExpression();
-        if (expr == null) break;
-        interpret(expr);
-      }
-    } finally {
-      mScriptPaths.pop();
+    // TODO(bob): Hacked. Need to figure out how Script interacts with this.
+    mScriptPath = path;
+
+    Lexer lexer = new Lexer(path, source);
+    MagpieParser parser = createParser(lexer);
+
+    // Evaluate every expression in the file. We do this incrementally so
+    // that expressions that define parsers can be used to parse the rest of
+    // the file.
+    while (true) {
+      Expr expr = parser.parseTopLevelExpression();
+      if (expr == null) break;
+      interpret(expr);
     }
   }
 
   public Obj interpret(Expr expression) {
-    return evaluate(expression, new EvalContext(mMainModule.getScope()));
+    return evaluate(expression, new EvalContext(mGlobals));
   }
   
   public Obj evaluate(Expr expr, EvalContext context) {
@@ -75,7 +69,7 @@ public class Interpreter {
   }
   
   public Obj invoke(Obj receiver, String method, Obj arg) {
-    Multimethod multimethod = mMainModule.getScope().getMultimethod(method);
+    Multimethod multimethod = mGlobals.getMultimethod(method);
     return multimethod.invoke(this, receiver, arg);
   }
   
@@ -92,7 +86,7 @@ public class Interpreter {
     // "==", don't call it again, just default to identity.
     if (mInObjectsEqual) return a == b;
 
-    Multimethod equals = mMainModule.getScope().getMultimethod(Name.EQEQ);   
+    Multimethod equals = mGlobals.getMultimethod(Name.EQEQ);   
     
     // Bootstrap short-cut. If we haven't defined "==" yet, default to identity.
     if (equals == null) return a == b;
@@ -102,6 +96,46 @@ public class Interpreter {
     mInObjectsEqual = false;
     
     return result.asBool();
+  }
+  
+  public Module importModule(String name) {
+    // TODO(bob): Check for circular references.
+    
+    Module module = mModules.get(name);
+    
+    // Only load it once.
+    if (module == null) {
+      // TODO(bob): Hack. Unify once old import() stuff goes away.
+      String path;
+      if (mLoadingModules.size() > 0) {
+        path = mLoadingModules.peek().getPath();
+      } else {
+        path = mScriptPath;
+      }
+      
+      ModuleSource source = mHost.loadModule(path, name);
+      Lexer lexer = new Lexer(source.getPath(), source.getReader());
+      MagpieParser parser = createParser(lexer);
+      
+      module = new Module(name, source.getPath(), mGlobals);
+      mModules.put(name, module);
+      
+      mLoadingModules.push(module);
+      try {
+        // Evaluate every expression in the file. We do this incrementally so
+        // that expressions that define parsers can be used to parse the rest of
+        // the file.
+        while (true) {
+          Expr expr = parser.parseTopLevelExpression();
+          if (expr == null) break;
+          interpret(expr);
+        }
+      } finally {
+        mLoadingModules.pop();
+      }
+    }
+    
+    return module;
   }
   
   public void print(String text) {
@@ -115,7 +149,7 @@ public class Interpreter {
   
   public ErrorException error(String errorClassName, String message) {
     // Look up the error class.
-    ClassObj classObj = mMainModule.getScope().get(errorClassName).asClass();
+    ClassObj classObj = mGlobals.get(errorClassName).asClass();
 
     // TODO(bob): Putting the message in here as the value is kind of hackish,
     // but it ensures we can display an error message even if we aren't able
@@ -225,8 +259,8 @@ public class Interpreter {
     return object;
   }
   
-  public String getCurrentScript() {
-    return mScriptPaths.peek();
+  public Module getCurrentModule() {
+    return mLoadingModules.peek();
   }
   
   public MagpieParser createParser(Lexer lexer) {
@@ -261,7 +295,6 @@ public class Interpreter {
   private final InterpreterHost mHost;
   
   private final Map<String, Module> mModules = new HashMap<String, Module>();
-  private final Module mMainModule;
   
   private final ClassObj mClass;
   private final ClassObj mBoolClass;
@@ -276,7 +309,10 @@ public class Interpreter {
   private final Obj mNothing;
   private final Obj mTrue;
   private final Obj mFalse;
-  private final Stack<String> mScriptPaths = new Stack<String>();
+  
+  private final Scope mGlobals;
+  private String mScriptPath;
+  private final Stack<Module> mLoadingModules = new Stack<Module>();
   private final Grammar mGrammar;
   
   private final Stack<Obj> mConstructing = new Stack<Obj>();

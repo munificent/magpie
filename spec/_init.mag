@@ -1,43 +1,10 @@
 // The test infrastructure.
-load("specify.mag")
+import specify
 
 // The individual test cases.
 startTests()
 
-//load("language/and.mag")
-load("language/assign.mag")
-load("language/break.mag")
-load("language/catch.mag")
-load("language/def.mag")
-load("language/defclass.mag")
-load("language/do.mag")
-load("language/fn.mag")
-load("language/for.mag")
-load("language/if.mag")
-load("language/let.mag")
-load("language/list.mag")
-load("language/match.mag")
-//load("language/message.mag")
-load("language/newline.mag")
-//load("language/or.mag")
-//load("language/pattern.mag")
-//load("language/quotation.mag")
-load("language/record.mag")
-load("language/return.mag")
-load("language/string.mag")
-load("language/tuple.mag")
-load("language/var.mag")
-load("language/with.mag")
-
-load("core/Bool.mag")
-load("core/Class.mag")
-load("core/Comparable.mag")
-load("core/Indexable.mag")
-load("core/IndexableIterator.mag")
-load("core/Int.mag")
-load("core/List.mag")
-load("core/ListIterator.mag")
-load("core/Range.mag")
-load("core/Tuple.mag")
+import language
+import core
 
 endTests()

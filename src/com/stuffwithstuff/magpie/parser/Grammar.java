@@ -21,6 +21,7 @@ public class Grammar {
     prefix("fn",        new FnParser());
     prefix("for",       new LoopParser());
     prefix("if",        new IfParser());
+    prefix("import",    new ImportParser());
     prefix("match",     new MatchParser());
     prefix("return",    new ReturnParser());
     prefix("throw",     new ThrowParser());
@@ -45,7 +46,7 @@ public class Grammar {
     infix("!=", Precedence.ASSIGNMENT);
     
     reserve("-> case catch else then");
-    reserve("break def do fn for match nothing return throw val var while");
+    reserve("break def defclass do fn for if import match nothing return throw val var while");
   }
   
   public PrefixParser getPrefixParser(Token token) {

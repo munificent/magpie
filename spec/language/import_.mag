@@ -1,0 +1,7 @@
+specify("An 'import' expression") with
+    it should("import any top-level variables into the current scope") with
+        import import_test_1
+        external1 shouldEqual("external1")
+        external2 shouldEqual("external2")
+    end
+end

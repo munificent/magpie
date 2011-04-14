@@ -1,9 +1,5 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
-import java.io.File;
-import java.io.IOException;
-
-import com.stuffwithstuff.magpie.Script;
 import com.stuffwithstuff.magpie.StringCharacterReader;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
@@ -19,29 +15,6 @@ import com.stuffwithstuff.magpie.parser.ParseException;
  * Defines built-in methods that are available as top-level global functions.
  */
 public class BuiltInFunctions {
-  // TODO(bob): This is more or less temp until modules are figured out.
-  @Signature("load(path String)")
-  public static class Load implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj arg) {
-      String currentDir = new File(interpreter.getCurrentScript()).getParent();
-      String relativePath = arg.getTupleField(1).asString();
-      File scriptFile = new File(currentDir, relativePath);
-      
-      try {
-        Script script = Script.fromPath(scriptFile.getPath());
-        interpreter.interpret(script.getPath(), script.read());
-      } catch (ParseException e) {
-        // TODO(bob): Include more information.
-        interpreter.error("ParseError");
-      } catch (IOException e) {
-        // TODO(bob): Include more information.
-        interpreter.error("IOError");
-      }
-      
-      return interpreter.nothing();
-    }
-  }
-  
   @Signature("currentTime()")
   public static class CurrentTime implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {

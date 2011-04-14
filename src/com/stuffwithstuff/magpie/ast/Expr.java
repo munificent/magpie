@@ -109,6 +109,10 @@ public abstract class Expr {
         cases);
   }
   
+  public static Expr import_(Position position, String name) {
+    return new ImportExpr(position, name);
+  }
+  
   public static Expr int_(int value) {
     return int_(Position.none(), value);
   }

@@ -6,6 +6,7 @@ import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.ErrorException;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.InterpreterHost;
+import com.stuffwithstuff.magpie.interpreter.ModuleSource;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.QuitException;
 import com.stuffwithstuff.magpie.parser.CharacterReader;
@@ -63,6 +64,11 @@ public class Repl implements InterpreterHost {
   @Override
   public void print(String text) {
     System.out.print(text);
+  }
+
+  @Override
+  public ModuleSource loadModule(String scriptPath, String name) {
+    return Script.loadModule(scriptPath, name);
   }
 
   protected CharacterReader createReader() {

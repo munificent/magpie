@@ -11,4 +11,9 @@ public class NullInterpreterHost implements InterpreterHost {
   public void print(String text) {
     // Do nothing.
   }
+
+  @Override
+  public ModuleSource loadModule(String scriptPath, String name) {
+    throw new UnsupportedOperationException();
+  }
 }

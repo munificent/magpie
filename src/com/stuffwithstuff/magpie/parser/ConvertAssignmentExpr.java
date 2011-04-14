@@ -73,6 +73,11 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
   }
   
   @Override
+  public Expr visit(ImportExpr expr, Expr value) {
+    return invalidExpression(expr);
+  }
+
+  @Override
   public Expr visit(IntExpr expr, Expr value) {
     return invalidExpression(expr);
   }

@@ -134,6 +134,14 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
+  public Obj visit(ImportExpr expr, EvalContext context) {
+    Module module = mInterpreter.importModule(expr.getName());
+    module.importTo(context.getScope());
+    
+    return mInterpreter.nothing();
+  }
+
+  @Override
   public Obj visit(IntExpr expr, EvalContext context) {
     return mInterpreter.createInt(expr.getValue());
   }

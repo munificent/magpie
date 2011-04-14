@@ -24,6 +24,21 @@ public class Scope {
     this(false);
   }
   
+  public void importTo(Scope other) {
+    // Copy the variables.
+    for (Entry<String, Obj> entry : mVariables.entrySet()) {
+      other.define(entry.getKey(), entry.getValue());
+    }
+    
+    // Merge the multimethods.
+    for (Entry<String, Multimethod> entry : mMultimethods.entrySet()) {
+      Multimethod multimethod = Multimethod.define(other, entry.getKey());
+      for (Callable method : entry.getValue().getMethods()) {
+        multimethod.addMethod(method);
+      }
+    }
+  }
+  
   public Scope getParent() {
     return mParent;
   }

@@ -8,6 +8,7 @@ public interface ExprVisitor<R, C> {
   R visit(CallExpr expr, C context);
   R visit(ClassExpr expr, C context);
   R visit(FnExpr expr, C context);
+  R visit(ImportExpr expr, C context);
   R visit(IntExpr expr, C context);
   R visit(ListExpr expr, C context);
   R visit(LoopExpr expr, C context);
