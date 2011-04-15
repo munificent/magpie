@@ -9,6 +9,7 @@ import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.parser.CharacterReader;
 import com.stuffwithstuff.magpie.parser.Lexer;
 import com.stuffwithstuff.magpie.parser.ParseException;
+import com.stuffwithstuff.magpie.parser.StringCharacterReader;
 import com.stuffwithstuff.magpie.parser.Token;
 import com.stuffwithstuff.magpie.parser.TokenType;
 

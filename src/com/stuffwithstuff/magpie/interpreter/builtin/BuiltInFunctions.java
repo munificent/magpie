@@ -1,15 +1,13 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
-import com.stuffwithstuff.magpie.StringCharacterReader;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
-import com.stuffwithstuff.magpie.interpreter.InterpreterHost;
-import com.stuffwithstuff.magpie.interpreter.NullInterpreterHost;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.QuitException;
 import com.stuffwithstuff.magpie.parser.Lexer;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
 import com.stuffwithstuff.magpie.parser.ParseException;
+import com.stuffwithstuff.magpie.parser.StringCharacterReader;
 
 /**
  * Defines built-in methods that are available as top-level global functions.
@@ -48,8 +46,7 @@ public class BuiltInFunctions {
       boolean canParse = true;
       
       try {
-        InterpreterHost host = new NullInterpreterHost();
-        Interpreter tempInterpreter = new Interpreter(host);
+        Interpreter tempInterpreter = new Interpreter(interpreter.getHost());
         Lexer lexer = new Lexer("", new StringCharacterReader(source));
         MagpieParser parser = tempInterpreter.createParser(lexer);
 

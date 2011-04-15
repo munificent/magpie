@@ -73,14 +73,28 @@ public class Scope {
   public void defineMultimethod(String name, Multimethod method) {
     Expect.notEmpty(name);
     Expect.notNull(method);
-
+    
     mMultimethods.put(name, method);
   }
 
   public Multimethod getMultimethod(String name) {
     return mMultimethods.get(name);
   }
-  
+
+  public Multimethod findMultimethod(String name) {
+    Scope scope = this;
+    
+    // Walk up the parent scopes.
+    while (scope != null) {
+      Multimethod multimethod = scope.mMultimethods.get(name);
+      if (multimethod != null) return multimethod;
+      scope = scope.mParent;
+    }
+    
+    // Not found.
+    return null;
+  }
+
   public Set<Entry<String, Obj>> entries() {
     return mVariables.entrySet();
   }

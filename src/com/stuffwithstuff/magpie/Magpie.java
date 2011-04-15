@@ -43,8 +43,7 @@ public class Magpie {
   
   private static void runScript(String path) {
     try {
-      Script script = Script.fromPath(path);
-      script.execute();
+      Script.execute(path);
     } catch (QuitException e) {
       // Do nothing.
     } catch (IOException ex) {

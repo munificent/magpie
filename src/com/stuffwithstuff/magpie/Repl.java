@@ -1,12 +1,11 @@
 package com.stuffwithstuff.magpie;
 
-import java.io.IOException;
-
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.ErrorException;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.InterpreterHost;
-import com.stuffwithstuff.magpie.interpreter.ModuleSource;
+import com.stuffwithstuff.magpie.interpreter.Module;
+import com.stuffwithstuff.magpie.interpreter.ModuleInfo;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.QuitException;
 import com.stuffwithstuff.magpie.parser.CharacterReader;
@@ -25,10 +24,8 @@ public class Repl implements InterpreterHost {
     System.out.println();
     System.out.println("Type 'quit()' and press <Enter> to exit.");
     
-    Interpreter interpreter = new Interpreter(this);
-    
     try {
-      Script.loadBase(interpreter);
+      Interpreter interpreter = new Interpreter(this);
       
       while (true) {
         Lexer lexer = new Lexer("REPL", createReader());
@@ -50,9 +47,6 @@ public class Repl implements InterpreterHost {
       }
     } catch (QuitException e) {
       // Do nothing.
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
     }
   }
 
@@ -67,8 +61,8 @@ public class Repl implements InterpreterHost {
   }
 
   @Override
-  public ModuleSource loadModule(String scriptPath, String name) {
-    return Script.loadModule(scriptPath, name);
+  public ModuleInfo loadModule(Module loadingModule, String name) {
+    return Script.loadModule(loadingModule, name);
   }
 
   protected CharacterReader createReader() {

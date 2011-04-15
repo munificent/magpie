@@ -5,7 +5,6 @@ import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.interpreter.builtin.*;
-import com.stuffwithstuff.magpie.parser.CharacterReader;
 import com.stuffwithstuff.magpie.parser.Grammar;
 import com.stuffwithstuff.magpie.parser.Lexer;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
@@ -18,7 +17,9 @@ public class Interpreter {
 
     mGlobals = new Scope(host.allowTopLevelRedefinition());
     
-    mScriptPath = ".";
+    // TODO(bob): Hack. Push a fake module with . as the path for importing
+    // from the REPL.
+    mLoadingModules.push(new Module(new ModuleInfo("", ".", null), mGlobals));
     
     EnvironmentBuilder builder = new EnvironmentBuilder(this, mGlobals);
     mClass = builder.createClassClass();
@@ -36,26 +37,18 @@ public class Interpreter {
     mTrue = instantiate(mBoolClass, true);
     mFalse = instantiate(mBoolClass, false);
     mNothing = instantiate(mNothingClass, null);
+    
+    // Load the base library and dump it directly into the global scope.
+    importModule("base");
+    mModules.get("base").importTo(mGlobals);
   }
   
-  public void interpret(String path, CharacterReader source) {
-    // TODO(bob): Hacked. Need to figure out how Script interacts with this.
-    mScriptPath = path;
-
-    Lexer lexer = new Lexer(path, source);
-    MagpieParser parser = createParser(lexer);
-
-    // Evaluate every expression in the file. We do this incrementally so
-    // that expressions that define parsers can be used to parse the rest of
-    // the file.
-    while (true) {
-      Expr expr = parser.parseTopLevelExpression();
-      if (expr == null) break;
-      interpret(expr);
-    }
+  public void interpret(ModuleInfo info) {
+    evaluateModule(new Module(info, mGlobals));
   }
 
   public Obj interpret(Expr expression) {
+    // TODO(bob): Should be current module, not globals.
     return evaluate(expression, new EvalContext(mGlobals));
   }
   
@@ -65,12 +58,8 @@ public class Interpreter {
   }
   
   public String evaluateToString(Obj value) {
-    return invoke(value, Name.STRING, null).asString();
-  }
-  
-  public Obj invoke(Obj receiver, String method, Obj arg) {
-    Multimethod multimethod = mGlobals.getMultimethod(method);
-    return multimethod.invoke(this, receiver, arg);
+    Multimethod multimethod = getCurrentScope().findMultimethod(Name.STRING);
+    return multimethod.invoke(this, value).asString();
   }
   
   public boolean objectsEqual(Obj a, Obj b) {
@@ -86,7 +75,7 @@ public class Interpreter {
     // "==", don't call it again, just default to identity.
     if (mInObjectsEqual) return a == b;
 
-    Multimethod equals = mGlobals.getMultimethod(Name.EQEQ);   
+    Multimethod equals = getCurrentScope().findMultimethod(Name.EQEQ);   
     
     // Bootstrap short-cut. If we haven't defined "==" yet, default to identity.
     if (equals == null) return a == b;
@@ -101,38 +90,21 @@ public class Interpreter {
   public Module importModule(String name) {
     // TODO(bob): Check for circular references.
     
-    Module module = mModules.get(name);
+    // Figure out which actual module to load so we can determine its full name.
+    // TODO(bob): This is kind of gross. The problem is that we don't know if
+    // an import contains a relative name or an absolute one. If it's relative,
+    // we need to include the loading module's name (i.e. if you load "foo"
+    // from "bar", we need "bar.foo" to get an unambiguous name) and we only
+    // know that by hitting the filesystem.
+    ModuleInfo info = mHost.loadModule(mLoadingModules.peek(), name);
+    Module module = mModules.get(info.getName());
     
     // Only load it once.
     if (module == null) {
-      // TODO(bob): Hack. Unify once old import() stuff goes away.
-      String path;
-      if (mLoadingModules.size() > 0) {
-        path = mLoadingModules.peek().getPath();
-      } else {
-        path = mScriptPath;
-      }
+      module = new Module(info, mGlobals);
+      mModules.put(info.getName(), module);
       
-      ModuleSource source = mHost.loadModule(path, name);
-      Lexer lexer = new Lexer(source.getPath(), source.getReader());
-      MagpieParser parser = createParser(lexer);
-      
-      module = new Module(name, source.getPath(), mGlobals);
-      mModules.put(name, module);
-      
-      mLoadingModules.push(module);
-      try {
-        // Evaluate every expression in the file. We do this incrementally so
-        // that expressions that define parsers can be used to parse the rest of
-        // the file.
-        while (true) {
-          Expr expr = parser.parseTopLevelExpression();
-          if (expr == null) break;
-          interpret(expr);
-        }
-      } finally {
-        mLoadingModules.pop();
-      }
+      evaluateModule(module);
     }
     
     return module;
@@ -259,12 +231,16 @@ public class Interpreter {
     return object;
   }
   
-  public Module getCurrentModule() {
-    return mLoadingModules.peek();
+  public Scope getCurrentScope() {
+    return mLoadingModules.peek().getScope();
   }
   
   public MagpieParser createParser(Lexer lexer) {
     return new MagpieParser(lexer, mGrammar);
+  }
+  
+  public InterpreterHost getHost() {
+    return mHost;
   }
   
   public Grammar getGrammar() {
@@ -292,6 +268,25 @@ public class Interpreter {
     init.invoke(this, classObj, arg);
   }
   
+  private void evaluateModule(Module module) {
+    Lexer lexer = new Lexer(module.getPath(), module.getSource());
+    MagpieParser parser = createParser(lexer);
+    
+    mLoadingModules.push(module);
+    try {
+      // Evaluate every expression in the file. We do this incrementally so
+      // that expressions that define parsers can be used to parse the rest of
+      // the file.
+      while (true) {
+        Expr expr = parser.parseTopLevelExpression();
+        if (expr == null) break;
+        interpret(expr);
+      }
+    } finally {
+      mLoadingModules.pop();
+    }
+  }
+  
   private final InterpreterHost mHost;
   
   private final Map<String, Module> mModules = new HashMap<String, Module>();
@@ -311,7 +306,6 @@ public class Interpreter {
   private final Obj mFalse;
   
   private final Scope mGlobals;
-  private String mScriptPath;
   private final Stack<Module> mLoadingModules = new Stack<Module>();
   private final Grammar mGrammar;
   

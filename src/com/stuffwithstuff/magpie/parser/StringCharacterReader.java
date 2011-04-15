@@ -1,6 +1,5 @@
-package com.stuffwithstuff.magpie;
+package com.stuffwithstuff.magpie.parser;
 
-import com.stuffwithstuff.magpie.parser.CharacterReader;
 
 /**
  * Reads a string, one character at a time.

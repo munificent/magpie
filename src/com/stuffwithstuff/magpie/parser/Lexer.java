@@ -16,6 +16,10 @@ public class Lexer {
     mEatLines = true;
   }
 
+  public Lexer(String sourceFile, String text) {
+    this(sourceFile, new StringCharacterReader(text));
+  }
+
   public Token readToken() {
     Token token = null;
     while (token == null) {

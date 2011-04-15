@@ -10,34 +10,56 @@ import java.nio.charset.Charset;
 
 import com.stuffwithstuff.magpie.interpreter.ErrorException;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
-import com.stuffwithstuff.magpie.interpreter.ModuleSource;
-import com.stuffwithstuff.magpie.parser.CharacterReader;
+import com.stuffwithstuff.magpie.interpreter.Module;
+import com.stuffwithstuff.magpie.interpreter.ModuleInfo;
 
 public class Script {
-  public static Script fromPath(String path) throws IOException {
-    // If we're given a directory, look for _init.mag in it.
-    File filePath = new File(path);
-    if (filePath.isDirectory()) {
-      path = new File(filePath, "_init.mag").getPath();
-    }
-    
-    return new Script(path, readFile(path));
-  }
-
-  public static Script fromString(String text) {
-    return new Script("", text);
-  }
-  
-  public static void loadBase(Interpreter interpreter) throws IOException {
-    Script script = Script.fromPath("base");
-    interpreter.interpret(script.getPath(), script.read());
-  }
-  
-  public static ModuleSource loadModule(String scriptPath, String name) {
+  public static ModuleInfo loadModule(Module loadingModule, String name) {
     try {
-      File module = findModule(scriptPath, name);
-      CharacterReader reader = fromPath(module.getPath()).read();
-      return new ModuleSource(module.getPath(), reader);
+      // Given name "foo.bar" and path "here/", we'll try:
+      // here/foo/bar.mag
+      // here/foo/bar/_init.mag
+      // $CWD/foo/bar.mag
+      // $CWD/foo/bar/_init.mag
+      
+      File scriptPath = new File(loadingModule.getPath());
+      String scriptDir;
+      if (scriptPath.isDirectory()) {
+        scriptDir = scriptPath.getPath();
+      } else {
+        scriptDir = scriptPath.getParent();
+      }
+      String modulePath = name.replace('.', '/');
+      
+      // here/foo/bar.mag
+      File file = new File(scriptDir, modulePath + ".mag");
+      if (file.exists()) {
+        return new ModuleInfo(getModuleName(loadingModule.getName(), name),
+            file.getPath(), readFile(file.getPath()));
+      }
+      
+      // here/foo/bar/_init.mag
+      file = new File(scriptDir, modulePath + "/_init.mag");
+      if (file.exists()) {
+        return new ModuleInfo(getModuleName(loadingModule.getName(), name),
+            file.getPath(), readFile(file.getPath()));
+      }
+      
+      // $CWD/foo/bar.mag
+      file = new File(modulePath + ".mag");
+      if (file.exists()) {
+        return new ModuleInfo(name,
+            file.getPath(), readFile(file.getPath()));
+      }
+      
+      // $CWD/foo/bar/_init.mag
+      file = new File(modulePath + "/_init.mag");
+      if (file.exists()) {
+        return new ModuleInfo(name,
+            file.getPath(), readFile(file.getPath()));
+      }
+      
+      throw new IOException("Couldn't find module " + name);
     } catch (IOException e) {
       e.printStackTrace();
       // TODO(bob): Handle error!
@@ -45,48 +67,17 @@ public class Script {
     }
   }
   
-  private static File findModule(String scriptPath, String name) throws IOException {
-    // Given name "foo.bar" and path "here/", we'll try:
-    // here/foo/bar.mag
-    // here/foo/bar/_init.mag
-    // $CWD/foo/bar.mag
-    // $CWD/foo/bar/_init.mag
-    
-    String scriptDir = new File(scriptPath).getParent();
-    String modulePath = name.replace('.', '/');
-    
-    // here/foo/bar.mag
-    File file = new File(scriptDir, modulePath + ".mag");
-    if (file.exists()) return file;
-    
-    // here/foo/bar/_init.mag
-    file = new File(scriptDir, modulePath + "/_init.mag");
-    if (file.exists()) return file;
-    
-    // $CWD/foo/bar.mag
-    file = new File(modulePath + ".mag");
-    if (file.exists()) return file;
-    
-    // $CWD/foo/bar/_init.mag
-    file = new File(modulePath + "/_init.mag");
-    if (file.exists()) return file;
-    
-    throw new IOException("Couldn't find module " + name);
+  private static String getModuleName(String parent, String name) {
+    if (parent.length() == 0) return name;
+    return parent + "." + name;
   }
   
-  public String getPath() { return mPath; }
-  public String getSource() { return mSource; }
-  public CharacterReader read() {
-    return new StringCharacterReader(mSource);
-  }
-  
-  public void execute() throws IOException {
+  public static void execute(String path) throws IOException {
+    String script = readFile(path);
     Interpreter interpreter = new Interpreter(new ScriptInterpreterHost());
     
     try {
-      // Load the base script first.
-      loadBase(interpreter);
-      interpreter.interpret(mPath, read());
+      interpreter.interpret(new ModuleInfo(path, path, script));
     } catch(ErrorException ex) {
       System.out.println(String.format("Uncaught %s: %s",
           ex.getError().getClassObj().getName(), ex.getError().getValue()));
@@ -94,6 +85,12 @@ public class Script {
   }
 
   private static String readFile(String path) throws IOException {
+    // If we're given a directory, look for _init.mag in it.
+    File filePath = new File(path);
+    if (filePath.isDirectory()) {
+      path = new File(filePath, "_init.mag").getPath();
+    }
+    
     FileInputStream stream = new FileInputStream(path);
 
     try {
@@ -114,12 +111,4 @@ public class Script {
       stream.close();
     }
   }
-
-  private Script(String path, String source) {
-    mPath = path;
-    mSource = source;
-  }
-  
-  private final String mPath;
-  private final String mSource;
 }
