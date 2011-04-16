@@ -1,7 +1,6 @@
 package com.stuffwithstuff.magpie;
 
 import com.stuffwithstuff.magpie.interpreter.InterpreterHost;
-import com.stuffwithstuff.magpie.interpreter.Module;
 import com.stuffwithstuff.magpie.interpreter.ModuleInfo;
 
 public class ScriptInterpreterHost implements InterpreterHost {
@@ -16,7 +15,7 @@ public class ScriptInterpreterHost implements InterpreterHost {
   }
 
   @Override
-  public ModuleInfo loadModule(Module loadingModule, String name) {
-    return Script.loadModule(loadingModule, name);
+  public ModuleInfo loadModule(String name) {
+    return Script.loadModule(name);
   }
 }

@@ -1,3 +1,5 @@
+import spec.specify
+
 specify("A string literal") with
     it should("be delimited by double quotes") with
         "some string" shouldEqual("some string")

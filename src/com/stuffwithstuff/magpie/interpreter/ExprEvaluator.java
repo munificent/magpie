@@ -8,7 +8,6 @@ import java.util.Map;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
-import com.stuffwithstuff.magpie.util.NotImplementedException;
 import com.stuffwithstuff.magpie.util.Pair;
 
 /**
@@ -36,12 +35,12 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(AssignExpr expr, EvalContext context) {
     Obj value = evaluate(expr.getValue(), context);
 
-    // See if it's an assignment to a local variable.
-    if (context.assign(expr.getName(), value)) return value;
+    // Try to assign to a local variable.
+    if (context.getScope().assign(expr.getName(), value)) return value;
     
-    // Otherwise it must be a property on this.
-    // TODO(bob): Need to handle implicit "this" on setters. :(
-    throw new NotImplementedException();
+    // TODO(bob): Detect this statically.
+    throw mInterpreter.error("NoVariableError",
+        "Could not find a variable named \"" + expr.getName() + "\".");
   }
 
   @Override
@@ -81,8 +80,10 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   
   @Override
   public Obj visit(CallExpr expr, EvalContext context) {
-    Multimethod multimethod = context.lookUpMultimethod(expr.getName());
-    if (multimethod == null) throw mInterpreter.error("NoMethodError");
+    Multimethod multimethod = context.getScope().lookUpMultimethod(expr.getName());
+    if (multimethod == null) {
+      throw mInterpreter.error("NoMethodError");
+    }
 
     // Figure out the receiver.
     Obj receiver;
@@ -109,14 +110,14 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     // Look up the parents.
     List<ClassObj> parents = new ArrayList<ClassObj>();
     for (String parentName : expr.getParents()) {
-      parents.add(context.lookUp(parentName).asClass());
+      parents.add(context.getScope().lookUp(parentName).asClass());
     }
     
     ClassObj classObj = mInterpreter.createClass(expr.getName(), parents,
         expr.getFields(), context.getScope());
     
-    context.define(expr.getName(), classObj);
-    
+    context.getScope().define(expr.getName(), classObj);
+
     return classObj;
   }
 
@@ -136,7 +137,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(ImportExpr expr, EvalContext context) {
     Module module = mInterpreter.importModule(expr.getName());
-    module.importTo(context.getScope());
+    module.exportTo(context.getScope());
     
     return mInterpreter.nothing();
   }
@@ -198,24 +199,10 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     // If we got here, no patterns matched.
     throw mInterpreter.error("NoMatchError");
   }
-  
-  @Override
-  public Obj visit(VariableExpr expr, EvalContext context) {
-    // Look for a local variable.
-    Obj variable = context.lookUp(expr.getName());
-    if (variable != null) return variable;
-    
-    throw mInterpreter.error("UnknownVariableError",
-        "Could not find a variable named \"" + expr.getName() + "\".");
-  }
 
   @Override
   public Obj visit(MethodExpr expr, EvalContext context) {
-    Multimethod multimethod = context.getScope().getMultimethod(expr.getName());
-    if (multimethod == null) {
-      multimethod = new Multimethod();
-      context.getScope().defineMultimethod(expr.getName(), multimethod);
-    }
+    Multimethod multimethod = context.getScope().defineMultimethod(expr.getName());
     
     Function function = new Function(
         Expr.fn(expr.getPosition(), expr.getPattern(), expr.getBody()),
@@ -268,6 +255,17 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     }
 
     return mInterpreter.createTuple(fields);
+  }
+  
+  @Override
+  public Obj visit(VariableExpr expr, EvalContext context) {
+    // Look for a local variable.
+    Obj variable = context.getScope().lookUp(expr.getName());
+    if (variable != null) return variable;
+    
+    // TODO(bob): Detect this statically.
+    throw mInterpreter.error("NoVariableError",
+        "Could not find a variable named \"" + expr.getName() + "\".");
   }
 
   private Obj evaluateCases(Obj value, List<MatchCase> cases,

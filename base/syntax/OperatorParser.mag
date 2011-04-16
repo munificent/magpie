@@ -1,3 +1,4 @@
+/*
 // Generic class for parsing an infix operator with a given name and stickiness.
 // Simply desugars to a call a function with the same name:
 //
@@ -53,3 +54,4 @@ class DefInfixParser
 end
 
 MagpieParser registerPrefixParser("definfix", DefInfixParser new())
+*/

@@ -10,43 +10,15 @@ import java.nio.charset.Charset;
 
 import com.stuffwithstuff.magpie.interpreter.ErrorException;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
-import com.stuffwithstuff.magpie.interpreter.Module;
 import com.stuffwithstuff.magpie.interpreter.ModuleInfo;
 
 public class Script {
-  public static ModuleInfo loadModule(Module loadingModule, String name) {
+  public static ModuleInfo loadModule(String name) {
     try {
-      // Given name "foo.bar" and path "here/", we'll try:
-      // here/foo/bar.mag
-      // here/foo/bar/_init.mag
-      // $CWD/foo/bar.mag
-      // $CWD/foo/bar/_init.mag
-      
-      File scriptPath = new File(loadingModule.getPath());
-      String scriptDir;
-      if (scriptPath.isDirectory()) {
-        scriptDir = scriptPath.getPath();
-      } else {
-        scriptDir = scriptPath.getParent();
-      }
       String modulePath = name.replace('.', '/');
       
-      // here/foo/bar.mag
-      File file = new File(scriptDir, modulePath + ".mag");
-      if (file.exists()) {
-        return new ModuleInfo(getModuleName(loadingModule.getName(), name),
-            file.getPath(), readFile(file.getPath()));
-      }
-      
-      // here/foo/bar/_init.mag
-      file = new File(scriptDir, modulePath + "/_init.mag");
-      if (file.exists()) {
-        return new ModuleInfo(getModuleName(loadingModule.getName(), name),
-            file.getPath(), readFile(file.getPath()));
-      }
-      
       // $CWD/foo/bar.mag
-      file = new File(modulePath + ".mag");
+      File file = new File(modulePath + ".mag");
       if (file.exists()) {
         return new ModuleInfo(name,
             file.getPath(), readFile(file.getPath()));
@@ -65,11 +37,6 @@ public class Script {
       // TODO(bob): Handle error!
       return null;
     }
-  }
-  
-  private static String getModuleName(String parent, String name) {
-    if (parent.length() == 0) return name;
-    return parent + "." + name;
   }
   
   public static void execute(String path) throws IOException {

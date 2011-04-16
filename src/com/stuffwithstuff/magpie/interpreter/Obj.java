@@ -1,6 +1,8 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.util.Expect;
@@ -28,8 +30,6 @@ public class Obj {
     
     mClass = classObj;
   }
-    
-  public Scope getFields() { return mFields; }
   
   /**
    * Gets the value of a given field.
@@ -57,7 +57,7 @@ public class Obj {
    * @param member The fields's value.
    */
   public void setField(String name, Obj field) {
-    mFields.define(name, field);
+    mFields.put(name, field);
   }
   
   public Object getValue() {
@@ -137,7 +137,7 @@ public class Obj {
       StringBuilder builder = new StringBuilder();
       builder.append("(");
       
-      for (Entry<String, Obj> field : mFields.entries()) {
+      for (Entry<String, Obj> field : mFields.entrySet()) {
         if (builder.length() > 1) builder.append(", ");
         builder.append(field.getKey()).append(": ").append(field.getValue());
       }
@@ -168,5 +168,5 @@ public class Obj {
   
   private ClassObj mClass;
   private Object mValue;
-  private final Scope mFields = new Scope();
+  private final Map<String, Obj> mFields = new HashMap<String, Obj>();
 }

@@ -1,3 +1,5 @@
+import spec.specify
+
 // Note: implicitly depends on non-zero ints being truthy.
 
 specify("An 'or' expression") with
@@ -6,12 +8,12 @@ specify("An 'or' expression") with
         (0 or 1 or false) shouldEqual(1)
         (0 or false or 2) shouldEqual(2)
     end
-    
+
     it should("return the last argument if all are false") with
         (0 or false) shouldEqual(false)
         (false or false or 0) shouldEqual(0)
     end
-    
+
     it should("short-circuit at the first true argument") with
         var a = TruthTest new(false)
         var b = TruthTest new(true)
@@ -21,7 +23,7 @@ specify("An 'or' expression") with
         b called shouldEqual(true)
         c called shouldEqual(false)
     end
-    
+
     it should("call 'true?' on the arguments to determine truth") with
         var left = TruthTest new(false)
         var right = TruthTest new(false)
@@ -29,7 +31,7 @@ specify("An 'or' expression") with
         left called shouldEqual(true)
         right called shouldEqual(false)
     end
-    
+
     it should("swallow a trailing newline") with
         false or
             false shouldEqual(false)

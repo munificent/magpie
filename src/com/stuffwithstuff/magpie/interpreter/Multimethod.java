@@ -7,21 +7,13 @@ import java.util.List;
 import com.stuffwithstuff.magpie.util.Expect;
 
 public class Multimethod {
-  public static Multimethod define(Scope scope, String name) {
-    Multimethod multimethod = scope.getMultimethod(name);
-    
-    // Define it the first time if not found.
-    if (multimethod == null) {
-      multimethod = new Multimethod();
-      scope.defineMultimethod(name, multimethod);
-    }
-    
-    return multimethod;
-  }
-
   public List<Callable> getMethods() { return mMethods; }
   
   public void addMethod(Callable method) {
+    if (mMethods.contains(method)) {
+      throw new IllegalArgumentException("Lame. Shouldn't have dupe methods.");
+    }
+    
     mMethods.add(method);
   }
   

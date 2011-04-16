@@ -1,3 +1,5 @@
+import spec.specify
+
 specify("A 'break' expression") with
     it should("exit a loop") with
         var i = ""

@@ -1,3 +1,5 @@
+import spec.specify
+
 specify("A 'var' expression") with
     it should("bind a value to a name") with
         var i = "value"
@@ -28,16 +30,6 @@ specify("A 'var' expression") with
         end
         i shouldEqual("abc")
     end
-    /*
-    it should("allow a fully-qualified name") with
-        var a.b.i = "abi"
-        var a.c.i = "aci"
-        var b.c.i = "bci"
-        a.b.i shouldEqual("abi")
-        a.c.i shouldEqual("aci")
-        b.c.i shouldEqual("bci")
-    end
-    */
 
     // TODO(bob): Spec pattern destructuring.
 end

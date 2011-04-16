@@ -1,7 +1,37 @@
+import spec.specify
+
 specify("An 'import' expression") with
-    it should("import any top-level variables into the current scope") with
-        import import_test_1
-        external1 shouldEqual("external1")
-        external2 shouldEqual("external2")
+/*
+    it should("import variables using qualified names") with
+        import spec.language.import_test
+        spec.language.import_test.a shouldEqual("a")
+        spec.language.import_test.b shouldEqual("b")
     end
+
+    it should("import methods using qualified names") with
+        import spec.language.import_test
+        2 spec.language.import_test.add(3) shouldEqual(5)
+    end
+
+    it should("import methods using qualified names") with
+        import spec.language.import_test
+        2 spec.language.import_test.add(3) shouldEqual(5)
+    end
+
+    it should("use a relative path with a leading .") with
+        import .import_test
+        import_test.a shouldEqual("a")
+    end
+
+    it should("import just the specified names without qualifier") with
+        import .import_test a
+        a shouldEqual("a")
+        fn
+            spec.language.import_test.b
+        end shouldThrow(NoVariableError)
+        fn
+            b
+        end shouldThrow(NoVariableError)
+    end
+    */
 end

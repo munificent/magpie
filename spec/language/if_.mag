@@ -1,3 +1,5 @@
+import spec.specify
+
 specify("An 'if then' expression") with
     it should("evaluate the 'then' expression if the condition is true") with
         var evaluated = false

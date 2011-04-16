@@ -13,7 +13,7 @@ public class NullInterpreterHost implements InterpreterHost {
   }
 
   @Override
-  public ModuleInfo loadModule(Module loadingModule, String name) {
+  public ModuleInfo loadModule(String name) {
     throw new UnsupportedOperationException();
   }
 }

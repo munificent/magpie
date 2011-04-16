@@ -16,24 +16,28 @@ import com.stuffwithstuff.magpie.interpreter.builtin.StringBuiltIns;
 import com.stuffwithstuff.magpie.interpreter.builtin.TupleBuiltIns;
 
 public class EnvironmentBuilder {
-  public EnvironmentBuilder(Interpreter interpreter, Scope scope) {
+  public EnvironmentBuilder(Interpreter interpreter, Module module) {
     mInterpreter = interpreter;
-    mScope = scope;
+    mModule = module;
   }
 
   public ClassObj createClassClass() {
+    Scope scope = mModule.getScope();
+    
     // The class of all classes. Its class is itself.
     ClassObj classObj = new ClassObj(null, "Class", null,
-        new HashMap<String, Field>(), mScope);
+        new HashMap<String, Field>(), scope);
     classObj.bindClass(classObj);
-    mScope.define("Class", classObj);
+    scope.define("Class", classObj);
+    
     return classObj;
   }
   
-  public void initialize() {    
+  public void initialize() {
     // Create the default new() method for creating objects.
-    Multimethod.define(mScope, "new").addMethod(new ClassNew(mScope));
-
+    Callable newMethod = new ClassNew(mModule.getScope());
+    mModule.getScope().defineMultimethod("new").addMethod(newMethod);
+    
     ClassObj indexable = class_("Indexable");
     ClassObj comparable = class_("Comparable");
     
@@ -54,30 +58,31 @@ public class EnvironmentBuilder {
     class_("IOError", error);
     class_("NoMatchError", error);
     class_("NoMethodError", error);
+    class_("NoVariableError", error);
     class_("OutOfBoundsError", error);
     class_("ParentCollisionError", error);
     class_("ParseError", error);
     class_("RedefinitionError", error);
-    class_("UnknownVariableError", error);
     
     // Register the built-in methods.
-    BuiltIns.register(ClassBuiltIns.class, mScope);
-    BuiltIns.register(FunctionBuiltIns.class, mScope);
-    BuiltIns.register(IntBuiltIns.class, mScope);
-    BuiltIns.register(ListBuiltIns.class, mScope);
-    BuiltIns.register(ObjectBuiltIns.class, mScope);
-    BuiltIns.register(TupleBuiltIns.class, mScope);
-    BuiltIns.register(StringBuiltIns.class, mScope);
-    BuiltIns.register(BuiltInFunctions.class, mScope);
+    BuiltIns.register(ClassBuiltIns.class, mModule);
+    BuiltIns.register(FunctionBuiltIns.class, mModule);
+    BuiltIns.register(IntBuiltIns.class, mModule);
+    BuiltIns.register(ListBuiltIns.class, mModule);
+    BuiltIns.register(ObjectBuiltIns.class, mModule);
+    BuiltIns.register(TupleBuiltIns.class, mModule);
+    BuiltIns.register(StringBuiltIns.class, mModule);
+    BuiltIns.register(BuiltInFunctions.class, mModule);
   }
   
   private ClassObj class_(String name, ClassObj... parents) {
     ClassObj classObj = mInterpreter.createClass(name, Arrays.asList(parents), 
-        new HashMap<String, Field>(), mScope);
-    mScope.define(name, classObj);
+        new HashMap<String, Field>(), mModule.getScope());
+    mModule.getScope().define(name, classObj);
+    
     return classObj;
   }
   
   private final Interpreter mInterpreter;
-  private final Scope mScope;
+  private final Module mModule;
 }

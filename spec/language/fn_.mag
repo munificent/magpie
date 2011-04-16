@@ -1,3 +1,5 @@
+import spec.specify
+
 specify("A 'fn' expression") with
     it should("bind the argument to the parameter") with
         var result = nothing

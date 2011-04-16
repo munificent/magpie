@@ -6,7 +6,14 @@ public class ImportParser implements PrefixParser {
   @Override
   public Expr parse(MagpieParser parser, Token token) {
     PositionSpan span = parser.startBefore();
-    String name = parser.parseName().getString();
+    
+    // Allow a leading . for a relative path.
+    String name = "";
+    if (parser.match(TokenType.DOT)) {
+      name = ".";
+    }
+    
+    name += parser.parseName().getString();
     
     return Expr.import_(span.end(), name);
   }

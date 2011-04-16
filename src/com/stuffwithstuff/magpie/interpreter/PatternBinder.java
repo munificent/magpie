@@ -83,7 +83,7 @@ public class PatternBinder implements PatternVisitor<Void, Obj>  {
     if (name.equals("_")) return true;
     
     // Bind the variable.
-    return mContext.define(name, value);
+    return mContext.getScope().define(name, value);
   }
   
   private final Interpreter mInterpreter;  

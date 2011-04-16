@@ -15,41 +15,36 @@ public class Interpreter {
     
     mGrammar = new Grammar();
 
-    mGlobals = new Scope(host.allowTopLevelRedefinition());
+    mBaseModule = new Module(mHost.loadModule("base"));
+    mLoadingModules.push(mBaseModule);
     
-    // TODO(bob): Hack. Push a fake module with . as the path for importing
-    // from the REPL.
-    mLoadingModules.push(new Module(new ModuleInfo("", ".", null), mGlobals));
-    
-    EnvironmentBuilder builder = new EnvironmentBuilder(this, mGlobals);
+    EnvironmentBuilder builder = new EnvironmentBuilder(this, mBaseModule);
     mClass = builder.createClassClass();
     builder.initialize();
     
-    mBoolClass = mGlobals.get("Bool").asClass();
-    mFnClass = mGlobals.get("Function").asClass();
-    mIntClass = mGlobals.get("Int").asClass();
-    mListClass = mGlobals.get("List").asClass();
-    mNothingClass = mGlobals.get("Nothing").asClass();
-    mRecordClass = mGlobals.get("Record").asClass();
-    mStringClass = mGlobals.get("String").asClass();
-    mTupleClass = mGlobals.get("Tuple").asClass();
+    Scope scope = mBaseModule.getScope();
+    mBoolClass = scope.get("Bool").asClass();
+    mFnClass = scope.get("Function").asClass();
+    mIntClass = scope.get("Int").asClass();
+    mListClass = scope.get("List").asClass();
+    mNothingClass = scope.get("Nothing").asClass();
+    mRecordClass = scope.get("Record").asClass();
+    mStringClass = scope.get("String").asClass();
+    mTupleClass = scope.get("Tuple").asClass();
     
     mTrue = instantiate(mBoolClass, true);
     mFalse = instantiate(mBoolClass, false);
     mNothing = instantiate(mNothingClass, null);
     
-    // Load the base library and dump it directly into the global scope.
-    importModule("base");
-    mModules.get("base").importTo(mGlobals);
+    evaluateModule(mBaseModule);
   }
   
   public void interpret(ModuleInfo info) {
-    evaluateModule(new Module(info, mGlobals));
+    evaluateModule(new Module(info));
   }
 
   public Obj interpret(Expr expression) {
-    // TODO(bob): Should be current module, not globals.
-    return evaluate(expression, new EvalContext(mGlobals));
+    return evaluate(expression, new EvalContext(getCurrentScope()));
   }
   
   public Obj evaluate(Expr expr, EvalContext context) {
@@ -58,7 +53,7 @@ public class Interpreter {
   }
   
   public String evaluateToString(Obj value) {
-    Multimethod multimethod = getCurrentScope().findMultimethod(Name.STRING);
+    Multimethod multimethod = getCurrentScope().lookUpMultimethod(Name.STRING);
     return multimethod.invoke(this, value).asString();
   }
   
@@ -75,7 +70,7 @@ public class Interpreter {
     // "==", don't call it again, just default to identity.
     if (mInObjectsEqual) return a == b;
 
-    Multimethod equals = getCurrentScope().findMultimethod(Name.EQEQ);   
+    Multimethod equals = getCurrentScope().lookUpMultimethod(Name.EQEQ);   
     
     // Bootstrap short-cut. If we haven't defined "==" yet, default to identity.
     if (equals == null) return a == b;
@@ -90,19 +85,18 @@ public class Interpreter {
   public Module importModule(String name) {
     // TODO(bob): Check for circular references.
     
-    // Figure out which actual module to load so we can determine its full name.
-    // TODO(bob): This is kind of gross. The problem is that we don't know if
-    // an import contains a relative name or an absolute one. If it's relative,
-    // we need to include the loading module's name (i.e. if you load "foo"
-    // from "bar", we need "bar.foo" to get an unambiguous name) and we only
-    // know that by hitting the filesystem.
-    ModuleInfo info = mHost.loadModule(mLoadingModules.peek(), name);
-    Module module = mModules.get(info.getName());
+    // If it's a relative name, fully expand it.
+    if (name.startsWith(".")) {
+      name = mLoadingModules.peek().getName() + name;
+    }
+    
+    Module module = mModules.get(name);
     
     // Only load it once.
     if (module == null) {
-      module = new Module(info, mGlobals);
-      mModules.put(info.getName(), module);
+      ModuleInfo info = mHost.loadModule(name);
+      module = new Module(info);
+      mModules.put(name, module);
       
       evaluateModule(module);
     }
@@ -121,7 +115,7 @@ public class Interpreter {
   
   public ErrorException error(String errorClassName, String message) {
     // Look up the error class.
-    ClassObj classObj = mGlobals.get(errorClassName).asClass();
+    ClassObj classObj = mBaseModule.getScope().get(errorClassName).asClass();
 
     // TODO(bob): Putting the message in here as the value is kind of hackish,
     // but it ensures we can display an error message even if we aren't able
@@ -163,17 +157,17 @@ public class Interpreter {
     }
     
     // Add the constructor.
-    Multimethod.define(scope, "init").addMethod(new ClassInit(classObj, scope));
+    scope.defineMultimethod("init").addMethod(new ClassInit(classObj, scope));
     
     // Add getters and setters for the fields.
     for (Entry<String, Field> entry : fields.entrySet()) {
       // Getter.
-      Multimethod getter = Multimethod.define(scope, entry.getKey());
+      Multimethod getter = scope.defineMultimethod(entry.getKey());
       getter.addMethod(new FieldGetter(classObj, entry.getKey(), scope));
 
       // Setter, if the field is mutable ("var" instead of "val").
       if (entry.getValue().isMutable()) {
-        Multimethod setter = Multimethod.define(scope, entry.getKey() + "_=");
+        Multimethod setter = scope.defineMultimethod(entry.getKey() + "_=");
         setter.addMethod(new FieldSetter(classObj,
             entry.getKey(), entry.getValue(), scope));
       }
@@ -231,6 +225,10 @@ public class Interpreter {
     return object;
   }
   
+  public Module getCurrentModule() {
+    return mLoadingModules.peek();
+  }
+  
   public Scope getCurrentScope() {
     return mLoadingModules.peek().getScope();
   }
@@ -261,7 +259,7 @@ public class Interpreter {
   }
   
   public void initializeNewObject(ClassObj classObj, Obj arg) {
-    Multimethod init = Multimethod.define(classObj.getClosure(), "init");
+    Multimethod init = classObj.getClosure().defineMultimethod("init");
     // Note: the receiver for init() is the class itself, not the new instance
     // which is considered to be in a hidden state since it isn't initialized
     // yet.
@@ -274,13 +272,20 @@ public class Interpreter {
     
     mLoadingModules.push(module);
     try {
+      // Copy the base stuff in first.
+      if (module != mBaseModule) {
+        mBaseModule.exportTo(module.getScope());
+      }
+      
       // Evaluate every expression in the file. We do this incrementally so
       // that expressions that define parsers can be used to parse the rest of
       // the file.
+      EvalContext context = new EvalContext(module.getScope());
+      
       while (true) {
         Expr expr = parser.parseTopLevelExpression();
         if (expr == null) break;
-        interpret(expr);
+        evaluate(expr, context);
       }
     } finally {
       mLoadingModules.pop();
@@ -305,8 +310,8 @@ public class Interpreter {
   private final Obj mTrue;
   private final Obj mFalse;
   
-  private final Scope mGlobals;
   private final Stack<Module> mLoadingModules = new Stack<Module>();
+  private final Module mBaseModule;
   private final Grammar mGrammar;
   
   private final Stack<Obj> mConstructing = new Stack<Obj>();

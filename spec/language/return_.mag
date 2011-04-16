@@ -1,3 +1,5 @@
+import spec.specify
+
 specify("A 'return' expression") with
     it should("return the returned value") with
         var f = fn

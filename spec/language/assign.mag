@@ -1,3 +1,5 @@
+import spec.specify
+
 // TODO(bob):
 // - Assignment messages.
 // - Runtime error on assigning to undefined.

@@ -1,3 +1,4 @@
+/*
 // Keyword parser for "if" expressions.
 class IfParser
     def parse(parser MagpieParser, token Token)
@@ -34,3 +35,4 @@ MagpieParser reserveWord("else")
 
 // TODO(bob): Put this somewhere appropriate...
 MagpieParser reserveWord("end")
+*/

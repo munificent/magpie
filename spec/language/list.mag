@@ -1,3 +1,5 @@
+import spec.specify
+
 specify("A list literal expression") with
     it should("create a list containing the elements") with
         var list = [1, "two", true]

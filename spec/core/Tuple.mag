@@ -1,3 +1,5 @@
+import spec.specify
+
 specify("The Tuple class") with
     it should("inherit Indexable") with
         (1, 2) shouldBe(Indexable)

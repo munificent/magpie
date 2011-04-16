@@ -1,3 +1,5 @@
+import spec.specify
+
 specify("A 'catch' clause in a block") with
     it should("execute a catch block when an error is thrown") with
         var caught = false

@@ -1,10 +1,10 @@
 // The test infrastructure.
-import specify
+import .specify
 
 // The individual test cases.
 startTests()
 
-import language
-import core
+import .language
+import .core
 
 endTests()

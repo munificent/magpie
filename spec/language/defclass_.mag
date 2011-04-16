@@ -1,3 +1,5 @@
+import spec.specify
+
 specify("A class's parent classes") with
     it should("not allow the same class to be inherited more than once") with
         //  A

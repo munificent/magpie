@@ -1,3 +1,4 @@
+/*
 // Utility functions used by the parsers.
 
 var parseReceiver = fn(parser MagpieParser)
@@ -18,3 +19,4 @@ var parseReceiver = fn(parser MagpieParser)
             end
         end
     end
+*/

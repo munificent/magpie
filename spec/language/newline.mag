@@ -1,3 +1,5 @@
+import spec.specify
+
 // This specifies how newlines are handled, when they are ignored, and when
 // they are significant.
 

@@ -1,3 +1,5 @@
+import spec.specify
+
 specify("A quotation expression") with
     it should("return a BoolExpression when containing a boolean literal") with
         { true } shouldBe(BoolExpression)

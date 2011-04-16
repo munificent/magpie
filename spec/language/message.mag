@@ -1,3 +1,5 @@
+import spec.specify
+
 specify("A message expression") with
     it should("return nothing if not handled") with
         "s" someUndefinedMessage shouldEqual(nothing)

@@ -26,8 +26,10 @@ public class RecordExpr extends Expr {
 
   @Override
   public void toString(StringBuilder builder, String indent) {
+    int i = 0;
     for (Pair<String, Expr> Pair : mFields) {
-      builder.append(Pair.getKey()).append(":");
+      if (i++ > 0) builder.append(", ");
+      builder.append(Pair.getKey()).append(": ");
       Pair.getValue().toString(builder, indent);
     }
   }

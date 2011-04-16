@@ -1,3 +1,5 @@
+import spec.specify
+
 specify("The List class") with
     it should("inherit Indexable") with
         [1] shouldBe(Indexable)

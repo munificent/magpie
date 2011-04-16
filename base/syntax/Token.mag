@@ -1,3 +1,4 @@
+/*
 // Note: This file is parsed before any of the parsewords have been defined, so
 // it only uses core syntax.
 
@@ -9,8 +10,7 @@ Token defineGetter("intValue", fn value)
 Token defineGetter("stringValue", fn value)
 Token declareField("position", { Position })
 Token declareField("tokenType", { TokenType })
-Token declareField("value", nothing
-    /*{ OrType combine(OrType combine(OrType combine(Bool, Int), Nothing), String) }*/)
+Token declareField("value")
 
 Token defineMethod("keyword?",
     // Note: no comparison operators are available yet.
@@ -59,3 +59,4 @@ do
     defToken("stringLiteral", 14)
     defToken("eof",           15)
 end
+*/

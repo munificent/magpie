@@ -1,3 +1,5 @@
+import spec.specify
+
 specify("A 'match' expression") with
     it should("evaluate the value expression once") with
         var called = 0

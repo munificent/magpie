@@ -46,22 +46,13 @@ public class PatternTester implements PatternVisitor<Boolean, Obj> {
 
   @Override
   public Boolean visit(TypePattern pattern, Obj value) {
-    // TODO(bob): Should this be evaluated in the regular context even though
-    // it's a type?
     Obj expected = mInterpreter.evaluate(pattern.getType(), mContext);
-    
-    // TODO(bob): Hack temp getting rid of types.
-    if (!(expected instanceof ClassObj)) {
-      throw new UnsupportedOperationException("should be class");
-    }
-    
     return value.getClassObj().isSubclassOf((ClassObj)expected);
   }
   
   @Override
   public Boolean visit(ValuePattern pattern, Obj value) {
     Obj expected = mInterpreter.evaluate(pattern.getValue(), mContext);
-    
     return mInterpreter.objectsEqual(expected, value);
   }
 

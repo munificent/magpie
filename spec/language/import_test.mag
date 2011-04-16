@@ -1,0 +1,6 @@
+var a = "a"
+var b = "b"
+
+def (_ Int) add(other Int)
+    this + other
+end

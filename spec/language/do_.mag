@@ -1,3 +1,5 @@
+import spec.specify
+
 specify("A 'do' expression") with
     it should("evaluate the expressions in order") with
         var result = ""
