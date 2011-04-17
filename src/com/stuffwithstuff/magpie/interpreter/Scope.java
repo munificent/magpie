@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.util.Expect;
-import com.stuffwithstuff.magpie.util.NotImplementedException;
 
 /**
  * A scope for named variables. This is used to define the name environment
@@ -37,19 +36,26 @@ public class Scope {
     this(false);
   }
   
-  public void importFrom(Map<String, Obj> variables,
+  public void importAll(String prefix, Map<String, Obj> variables,
       Map<String, Multimethod> methods) {
     // Copy the variables.
     for (Entry<String, Obj> entry : variables.entrySet()) {
-      define(entry.getKey(), entry.getValue());
+      define(prefix + entry.getKey(), entry.getValue());
     }
     
     // Import the multimethods.
     for (Entry<String, Multimethod> entry : methods.entrySet()) {
-      if (mMultimethods.containsKey(entry.getKey())) {
-        throw new NotImplementedException("Bad! Need to handle multimethod collision!");
-      }
-      mMultimethods.put(entry.getKey(), entry.getValue());
+      mMultimethods.put(prefix + entry.getKey(), entry.getValue());
+    }
+  }
+  
+  public void importName(String name, Obj variable, Multimethod multimethod) {
+    if (variable != null) {
+      define(name, variable);
+    }
+    
+    if (multimethod != null) {
+      mMultimethods.put(name, multimethod);
     }
   }
   
@@ -122,7 +128,7 @@ public class Scope {
     return mVariables.get(name);
   }
   
-  public Multimethod defineMultimethod(String name) {
+  public void define(String name, Callable method) {
     Multimethod multimethod = mMultimethods.get(name);
     
     // Only define it the first time if not found.
@@ -136,7 +142,7 @@ public class Scope {
       }
     }
     
-    return multimethod;
+    multimethod.addMethod(method);
   }
 
   public Multimethod lookUpMultimethod(String name) {

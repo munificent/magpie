@@ -14,8 +14,13 @@ public class Module {
   public String getSource() { return mInfo.getSource(); }
   public Scope getScope() { return mScope; }
   
-  public void exportTo(Scope scope) {
-    scope.importFrom(mExportedVariables, mExportedMultimethods);
+  public void exportAll(String prefix, Scope scope) {
+    scope.importAll(prefix, mExportedVariables, mExportedMultimethods);
+  }
+  
+  public void exportName(String name, String rename, Scope scope) {
+    scope.importName(rename,
+        mExportedVariables.get(name), mExportedMultimethods.get(name));
   }
   
   public void addExport(String name, Obj value) {

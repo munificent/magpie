@@ -2,14 +2,29 @@ package com.stuffwithstuff.magpie.ast;
 
 import com.stuffwithstuff.magpie.parser.Position;
 
-// TODO(bob): Explicit imports and renames.
 public class ImportExpr extends Expr {
-  ImportExpr(Position position, String name) {
+  /**
+   * Creates a new ImportExpr.
+   * 
+   * @param module  The name of the module to import. Will start with "." for
+   *                a relative import.
+   * @param name    The name to import from the module, or null if all names
+   *                should be imported.
+   * @param rename  The name that the imported name should be imported as. If
+   *                name is null, than this is a prefix that will be applied to
+   *                all imported names (with a "." added). If "_", the module
+   *                will be used as a prefix.
+   */
+  ImportExpr(Position position, String module, String name, String rename) {
     super(position);
-    mName = name;
+    mModule = module;
+    mName   = name;
+    mRename = rename;
   }
   
+  public String getModule() { return mModule; }
   public String getName() { return mName; }
+  public String getRename() { return mRename; }
   
   @Override
   public <R, C> R accept(ExprVisitor<R, C> visitor, C context) {
@@ -18,8 +33,20 @@ public class ImportExpr extends Expr {
 
   @Override
   public void toString(StringBuilder builder, String indent) {
-    builder.append("not impl");
+    builder.append("import ").append(mModule);
+    
+    if (mName != null) {
+      builder.append(" ").append(mName);
+    }
+    
+    if (mRename != null) {
+      builder.append(" = ").append(mRename);
+    }
+    
+    builder.append("\n");
   }
 
+  private final String mModule;
   private final String mName;
+  private final String mRename;
 }

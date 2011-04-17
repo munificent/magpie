@@ -8,13 +8,26 @@ public class ImportParser implements PrefixParser {
     PositionSpan span = parser.startBefore();
     
     // Allow a leading . for a relative path.
-    String name = "";
+    String module = "";
     if (parser.match(TokenType.DOT)) {
-      name = ".";
+      module = ".";
     }
     
-    name += parser.parseName().getString();
+    // Parse the module name.
+    module += parser.parseName().getString();
     
-    return Expr.import_(span.end(), name);
+    // Parse the name, if any.
+    String name = null;
+    if (parser.lookAhead(TokenType.NAME)) {
+      name = parser.parseName().getString();
+    }
+    
+    // Parse the rename, if any.
+    String rename = null;
+    if (parser.match(TokenType.EQUALS)) {
+      rename = parser.parseName().getString();
+    }
+    
+    return Expr.import_(span.end(), module, name, rename);
   }
 }

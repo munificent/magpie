@@ -36,7 +36,7 @@ public class EnvironmentBuilder {
   public void initialize() {
     // Create the default new() method for creating objects.
     Callable newMethod = new ClassNew(mModule.getScope());
-    mModule.getScope().defineMultimethod("new").addMethod(newMethod);
+    mModule.getScope().define("new", newMethod);
     
     ClassObj indexable = class_("Indexable");
     ClassObj comparable = class_("Comparable");

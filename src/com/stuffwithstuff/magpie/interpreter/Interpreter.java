@@ -157,19 +157,18 @@ public class Interpreter {
     }
     
     // Add the constructor.
-    scope.defineMultimethod("init").addMethod(new ClassInit(classObj, scope));
+    scope.define("init", new ClassInit(classObj, scope));
     
     // Add getters and setters for the fields.
     for (Entry<String, Field> entry : fields.entrySet()) {
       // Getter.
-      Multimethod getter = scope.defineMultimethod(entry.getKey());
-      getter.addMethod(new FieldGetter(classObj, entry.getKey(), scope));
+      scope.define(entry.getKey(),
+          new FieldGetter(classObj, entry.getKey(), scope));
 
       // Setter, if the field is mutable ("var" instead of "val").
       if (entry.getValue().isMutable()) {
-        Multimethod setter = scope.defineMultimethod(entry.getKey() + "_=");
-        setter.addMethod(new FieldSetter(classObj,
-            entry.getKey(), entry.getValue(), scope));
+        scope.define(entry.getKey() + "_=",
+            new FieldSetter(classObj, entry.getKey(), entry.getValue(), scope));
       }
     }
     
@@ -259,7 +258,7 @@ public class Interpreter {
   }
   
   public void initializeNewObject(ClassObj classObj, Obj arg) {
-    Multimethod init = classObj.getClosure().defineMultimethod("init");
+    Multimethod init = classObj.getClosure().lookUpMultimethod("init");
     // Note: the receiver for init() is the class itself, not the new instance
     // which is considered to be in a hidden state since it isn't initialized
     // yet.
@@ -274,7 +273,7 @@ public class Interpreter {
     try {
       // Copy the base stuff in first.
       if (module != mBaseModule) {
-        mBaseModule.exportTo(module.getScope());
+        mBaseModule.exportAll("", module.getScope());
       }
       
       // Evaluate every expression in the file. We do this incrementally so

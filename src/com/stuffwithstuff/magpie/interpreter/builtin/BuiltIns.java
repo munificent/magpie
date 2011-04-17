@@ -39,7 +39,7 @@ public abstract class BuiltIns {
       BuiltIn builtIn = new BuiltIn(pattern, callable, module.getScope());
       
       // Register it.
-      module.getScope().defineMultimethod(name).addMethod(builtIn);
+      module.getScope().define(name, builtIn);
       
     } catch (SecurityException e) {
       // TODO Auto-generated catch block

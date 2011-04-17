@@ -136,8 +136,37 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(ImportExpr expr, EvalContext context) {
-    Module module = mInterpreter.importModule(expr.getName());
-    module.exportTo(context.getScope());
+    Module module = mInterpreter.importModule(expr.getModule());
+    
+    if (expr.getName() == null) {
+      // Not a specific name, so import all names.
+      String prefix;
+      if (expr.getRename() == null) {
+        // Just use the unqualified name.
+        prefix = "";
+      } else if (expr.getRename().equals("_")) {
+        // Use the module name as a prefix.
+        prefix = module.getName() + ".";
+      } else {
+        prefix = expr.getRename() + ".";
+      }
+      
+      module.exportAll(prefix, context.getScope());
+    } else {
+      // Importing just one name.
+      String rename;
+      if (expr.getRename() == null) {
+        // Just use the unqualified name.
+        rename = expr.getName();
+      } else if (expr.getRename().equals("_")) {
+        // Use the module name as a prefix.
+        rename = module.getName() + "." + expr.getName();
+      } else {
+        rename = expr.getRename();
+      }
+      
+      module.exportName(expr.getName(), rename, context.getScope());
+    }
     
     return mInterpreter.nothing();
   }
@@ -202,12 +231,11 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(MethodExpr expr, EvalContext context) {
-    Multimethod multimethod = context.getScope().defineMultimethod(expr.getName());
-    
-    Function function = new Function(
+    Function method = new Function(
         Expr.fn(expr.getPosition(), expr.getPattern(), expr.getBody()),
         context.getScope());
-    multimethod.addMethod(function);
+    
+    context.getScope().define(expr.getName(), method);
     
     return mInterpreter.nothing();
   }
