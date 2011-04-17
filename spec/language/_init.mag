@@ -12,10 +12,9 @@ import .import_
 import .let_
 import .list
 import .match_
-//import .message
 import .newline
 //import .or_
-//import .pattern
+import .pattern
 //import .quotation
 import .record
 import .return_

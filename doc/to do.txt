@@ -23,6 +23,7 @@ Minor features:
   important because it may have implications for pattern syntax so you can match
   on enum values.
 - List patterns.
+- String interpolation.
 
 Implementation:
 - Compile to bytecode. This will make tail call elimination easier, help with

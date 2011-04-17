@@ -11,7 +11,7 @@ specify("A record pattern") with
 
     it should("bind a variable to a field") with
         match a: "one", b: (c: "two", d: "three")
-            case a: a, b: (c: b, d: c) then a ~ b ~ c
+            case a: a, b: (c: b, d: c) then a + b + c
         end shouldEqual("onetwothree")
     end
 end
@@ -27,7 +27,7 @@ specify("A tuple pattern") with
 
     it should("bind a variable to a field") with
         match "one", ("two", "three")
-            case a, (b, c) then a ~ b ~ c
+            case a, (b, c) then a + b + c
         end shouldEqual("onetwothree")
     end
 end
@@ -78,9 +78,11 @@ specify("A variable pattern") with
     end
 
     it should("not bind if the name is a wildcard") with
-        match "whatever"
-            case _      then _
-            case "else" then "no"
-        end shouldEqual(nothing)
+        fn
+            match "whatever"
+                case _      then _
+                case "else" then "no"
+            end
+        end shouldThrow(NoVariableError)
     end
 end
