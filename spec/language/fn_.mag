@@ -11,12 +11,6 @@ specify("A 'fn' expression") with
         result shouldEqual("two")
     end
 
-    it should("ignore the argument if there is no parameter") with
-        var f = fn() "ignore"
-        f call("one") shouldEqual("ignore")
-        f call("one", "two") shouldEqual("ignore")
-    end
-
     it should("bind a tuple argument to the parameter") with
         var f = fn(a) a field0 + a field1
         f call("one", "two") shouldEqual("onetwo")
@@ -31,5 +25,13 @@ specify("A 'fn' expression") with
         var assigned = ""
         (fn assigned = outer) call()
         assigned shouldEqual("outer")
+    end
+
+    it should("throw a NoMethodError if the argument doesn't match the " +
+              "pattern") with
+        var f = fn (n Int) n
+        fn
+            f call("not int")
+        end shouldThrow(NoMethodError)
     end
 end
