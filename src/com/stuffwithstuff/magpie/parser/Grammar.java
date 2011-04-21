@@ -45,7 +45,7 @@ public class Grammar {
     infix("==", Precedence.ASSIGNMENT);
     infix("!=", Precedence.ASSIGNMENT);
     
-    reserve("-> case catch else then");
+    reserve("-> case catch else end then");
     reserve("break def defclass do fn for if import match nothing return throw val var while");
   }
   
