@@ -8,21 +8,21 @@ import com.stuffwithstuff.magpie.parser.TokenType;
  * lexer, and consumed by the parser.
  */
 public final class Token {
-  public Token(Position position, TokenType type) {
-    mPosition = position;
-    mType = type;
-    mValue = null;
+  public Token(Position position, TokenType type, String text) {
+    this(position, type, text, text);
   }
-
-  public Token(Position position, TokenType type, Object value) {
+  
+  public Token(Position position, TokenType type, String text, Object value) {
     mPosition = position;
     mType = type;
+    mText = text;
     mValue = value;
   }
 
   public Position getPosition() { return mPosition; }
   
   public TokenType getType() { return mType; }
+  public String    getText() { return mText; }
   
   public Object  getValue()  { return mValue; }
   public boolean getBool()   { return ((Boolean)mValue).booleanValue(); }
@@ -68,5 +68,6 @@ public final class Token {
   
   private final Position  mPosition;
   private final TokenType mType;
+  private final String    mText;
   private final Object    mValue;
 }

@@ -1,5 +1,5 @@
 Major features:
-- Modules.
++ Modules.
 - Refine pattern syntax. The current way of specifying type and value patterns
   is gross. Need to investigate first-class or extensible patterns.
 - Annotations. In order to be able to bolt on a type system later, this will be

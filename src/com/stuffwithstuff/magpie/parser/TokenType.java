@@ -25,7 +25,12 @@ public enum TokenType {
   NOTHING,
   STRING,
   
+  // comments
+  COMMENT,
+  
   // spacing
   LINE,
+  WHITESPACE,
+  LINE_CONTINUATION,
   EOF
 }

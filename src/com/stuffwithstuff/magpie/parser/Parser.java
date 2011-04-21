@@ -10,10 +10,10 @@ import com.stuffwithstuff.magpie.util.Expect;
  * specific grammars can then be built on top of those operations.
  */
 public abstract class Parser {
-  public Parser(Lexer lexer) {
-    Expect.notNull(lexer);
+  public Parser(TokenReader tokens) {
+    Expect.notNull(tokens);
     
-    mLexer = lexer;
+    mTokens = tokens;
     mRead = new LinkedList<Token>();
     mConsumed = new LinkedList<Token>();
   }
@@ -220,8 +220,9 @@ public abstract class Parser {
     if (match(type)) {
       return last(1);
     } else {
+      Token current = current();
       String message = String.format("Expected token %s at %s, found %s.",
-          type, current().getPosition(), current());
+          type, current.getPosition(), current);
       throw new ParseException(message);
     }
   }
@@ -264,14 +265,14 @@ public abstract class Parser {
   private Token lookAhead(int distance) {
     // Read in as many as needed.
     while (distance >= mRead.size()) {
-      mRead.add(mLexer.readToken());
+      mRead.add(mTokens.readToken());
     }
 
     // Get the queued token.
     return mRead.get(distance);
   }
 
-  private final Lexer mLexer;
+  private final TokenReader mTokens;
 
   private final List<Token> mRead;
   private final List<Token> mConsumed;

@@ -8,12 +8,15 @@ import com.stuffwithstuff.magpie.interpreter.ModuleInfo;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.QuitException;
 import com.stuffwithstuff.magpie.parser.CharacterReader;
-import com.stuffwithstuff.magpie.parser.Lexer;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
 import com.stuffwithstuff.magpie.parser.ParseException;
 import com.stuffwithstuff.magpie.parser.TokenType;
 
 public class Repl implements InterpreterHost {
+  public Repl() {
+    mInterpreter = new Interpreter(this);
+  }
+  
   public void run() {
     System.out.println();
     System.out.println("      _/Oo>");
@@ -24,18 +27,16 @@ public class Repl implements InterpreterHost {
     System.out.println("Type 'quit()' and press <Enter> to exit.");
     
     try {
-      Interpreter interpreter = new Interpreter(this);
       
       while (true) {
-        Lexer lexer = new Lexer("REPL", createReader());
-        MagpieParser parser = interpreter.createParser(lexer);
+        MagpieParser parser = mInterpreter.createParser(createReader());
         
         try {
           Expr expr = parser.parseExpression();
           parser.consume(TokenType.LINE);
           
-          Obj result = interpreter.interpret(expr);
-          String text = interpreter.evaluateToString(result);
+          Obj result = mInterpreter.interpret(expr);
+          String text = mInterpreter.evaluateToString(result);
           printResult(text);
         } catch(ParseException ex) {
           printError("Parse error: " + ex.getMessage());
@@ -76,4 +77,10 @@ public class Repl implements InterpreterHost {
   protected void printError(String message) {
     System.out.println("! " + message);
   }
+  
+  protected Interpreter getInterpreter() {
+    return mInterpreter;
+  }
+  
+  private final Interpreter mInterpreter;
 }

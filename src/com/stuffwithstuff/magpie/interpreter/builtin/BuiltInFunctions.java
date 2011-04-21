@@ -4,7 +4,6 @@ import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.QuitException;
-import com.stuffwithstuff.magpie.parser.Lexer;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
 import com.stuffwithstuff.magpie.parser.ParseException;
 import com.stuffwithstuff.magpie.parser.StringCharacterReader;
@@ -47,8 +46,8 @@ public class BuiltInFunctions {
       
       try {
         Interpreter tempInterpreter = new Interpreter(interpreter.getHost());
-        Lexer lexer = new Lexer("", new StringCharacterReader(source));
-        MagpieParser parser = tempInterpreter.createParser(lexer);
+        MagpieParser parser = tempInterpreter.createParser(
+            new StringCharacterReader("", source));
 
         while (true) {
           Expr expr = parser.parseTopLevelExpression();

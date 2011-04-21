@@ -6,10 +6,8 @@ import java.lang.reflect.InvocationTargetException;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.Module;
 import com.stuffwithstuff.magpie.parser.DefParser;
-import com.stuffwithstuff.magpie.parser.Lexer;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
 import com.stuffwithstuff.magpie.parser.ParseException;
-import com.stuffwithstuff.magpie.parser.StringCharacterReader;
 import com.stuffwithstuff.magpie.util.Pair;
 
 public abstract class BuiltIns {
@@ -66,8 +64,7 @@ public abstract class BuiltIns {
     try {
       // Process the annotation to get the method's Magpie name and type
       // signature.
-      Lexer lexer = new Lexer("", new StringCharacterReader(text));
-      MagpieParser parser = new MagpieParser(lexer);
+      MagpieParser parser = MagpieParser.create(text);
       return DefParser.parseSignature(parser);
     } catch (ParseException e) {
       // TODO(bob): Hack. Better error handling.

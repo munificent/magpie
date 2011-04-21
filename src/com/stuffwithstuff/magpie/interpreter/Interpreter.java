@@ -5,8 +5,8 @@ import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.interpreter.builtin.*;
+import com.stuffwithstuff.magpie.parser.CharacterReader;
 import com.stuffwithstuff.magpie.parser.Grammar;
-import com.stuffwithstuff.magpie.parser.Lexer;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
 
 public class Interpreter {
@@ -232,8 +232,8 @@ public class Interpreter {
     return mLoadingModules.peek().getScope();
   }
   
-  public MagpieParser createParser(Lexer lexer) {
-    return new MagpieParser(lexer, mGrammar);
+  public MagpieParser createParser(CharacterReader reader) {
+    return MagpieParser.create(reader, mGrammar);
   }
   
   public InterpreterHost getHost() {
@@ -266,8 +266,7 @@ public class Interpreter {
   }
   
   private void evaluateModule(Module module) {
-    Lexer lexer = new Lexer(module.getPath(), module.getSource());
-    MagpieParser parser = createParser(lexer);
+    MagpieParser parser = createParser(module.readSource());
     
     mLoadingModules.push(module);
     try {

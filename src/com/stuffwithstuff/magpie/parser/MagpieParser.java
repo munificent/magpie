@@ -9,15 +9,26 @@ import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.util.Expect;
 import com.stuffwithstuff.magpie.util.Pair;
 
-public class MagpieParser extends Parser {  
-  public MagpieParser(Lexer lexer, Grammar grammar) {
-    super(lexer);
-    
-    mGrammar = grammar;
+public class MagpieParser extends Parser {
+  public static MagpieParser create(String text) {
+    return create(new StringCharacterReader("", text));
   }
   
-  public MagpieParser(Lexer lexer) {
-    this(lexer, new Grammar());
+  public static MagpieParser create(CharacterReader reader) {
+    return create(reader, new Grammar());
+  }
+  
+  public static MagpieParser create(CharacterReader reader, Grammar grammar) {
+    TokenReader lexer = new Lexer(reader);
+    TokenReader morpher = new Morpher(lexer);
+    
+    return new MagpieParser(morpher, grammar);
+  }
+  
+  public MagpieParser(TokenReader tokens, Grammar grammar) {
+    super(tokens);
+    
+    mGrammar = grammar;
   }
   
   public Expr parseTopLevelExpression() {

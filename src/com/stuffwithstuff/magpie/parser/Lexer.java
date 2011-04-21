@@ -3,333 +3,288 @@ package com.stuffwithstuff.magpie.parser;
 import com.stuffwithstuff.magpie.parser.Token;
 import com.stuffwithstuff.magpie.parser.TokenType;
 
-public class Lexer {
+public class Lexer implements TokenReader {
 
-  public Lexer(String sourceFile, CharacterReader text) {
-    mSourceFile = sourceFile;
+  public Lexer(CharacterReader text) {
     mText = text;
-    mState = LexState.DEFAULT;
     mLine = 1;
     mCol = 1;
     
-    // Ignore starting lines.
-    mEatLines = true;
-  }
-
-  public Lexer(String sourceFile, String text) {
-    this(sourceFile, new StringCharacterReader(text));
+    mStartLine = 1;
+    mStartCol = 1;
+    mRead = "";
   }
 
   public Token readToken() {
-    Token token = null;
-    while (token == null) {
-      token = readRawToken();
-      if (token != null) token = normalizeLines(token);
-    }
-    
-    return token;
-  }
+    char c = advance();
+    switch (c) {
+      // Whitespace.
+    case ' ':
+    case '\t':
+      return readWhitespace();
 
-  private Token normalizeLines(Token token) {
-    switch (token.getType()) {
-    // Ignore lines after tokens that can't end an expression.
-    case BACKTICK:
-    case COMMA:
-    case COLON:
-    case DOT:
-    case FIELD:
-    case LEFT_PAREN:
-    case LEFT_BRACKET:
-    case LEFT_BRACE:
-      mEatLines = true;
-      return token;
-
-    case LINE:
-      if (mEatLines) return null;
-      
-      // Collapse multiple lines into one.
-      mEatLines = true;
-      break;
-
-    default:
-      // A line after any other token is significant.
-      mEatLines = false;
-      break;
-    }
-    
-    return token;
-  }
-  
-  private Token readRawToken() {
-    char c = mText.current();
-    
-    switch (mState) {
-    case DEFAULT:
-      if (match("(")) return characterToken(TokenType.LEFT_PAREN);
-      if (match(")")) return characterToken(TokenType.RIGHT_PAREN);
-      if (match("[")) return characterToken(TokenType.LEFT_BRACKET);
-      if (match("]")) return characterToken(TokenType.RIGHT_BRACKET);
-      if (match("{")) return characterToken(TokenType.LEFT_BRACE);
-      if (match("}")) return characterToken(TokenType.RIGHT_BRACE);
-      if (match("`")) return characterToken(TokenType.BACKTICK);
-      if (match(":")) return characterToken(TokenType.COLON);
-      if (match(",")) return characterToken(TokenType.COMMA);
-      if (match(".")) return characterToken(TokenType.DOT);
+      // Punctuators.
+    case '(': return makeToken(TokenType.LEFT_PAREN);
+    case ')': return makeToken(TokenType.RIGHT_PAREN);
+    case '[': return makeToken(TokenType.LEFT_BRACKET);
+    case ']': return makeToken(TokenType.RIGHT_BRACKET);
+    case '{': return makeToken(TokenType.LEFT_BRACE);
+    case '}': return makeToken(TokenType.RIGHT_BRACE);
+    case '`': return makeToken(TokenType.BACKTICK);
+    case ':': return makeToken(TokenType.COLON);
+    case ',': return makeToken(TokenType.COMMA);
+    case '.': return makeToken(TokenType.DOT);
 
       // Match line ending characters.
-      if (match(";"))  return characterToken(TokenType.LINE);
-      if (match("\n")) return characterToken(TokenType.LINE);
-      if (match("\r")) return characterToken(TokenType.LINE);
+    case ';':
+    case '\n':
+    case '\r':
+      return makeToken(TokenType.LINE);
+
+      // Strings.
+    case '"':
+      return readString();
       
       // Comments.
-      if (match("//")) return startToken(LexState.IN_LINE_COMMENT);
-      if (match("/*")) return startToken(LexState.IN_BLOCK_COMMENT);
+    case '/':
+      switch (peek()) {
+      case '/': return readLineComment();
+      case '*': return readBlockComment();
+      default:  return readName();
+      }
       
-      if (lookAhead("\"")) return startToken(LexState.IN_STRING);
-      if (lookAhead("-")) return startToken(LexState.IN_MINUS);
+      // Need to handle numeric literals.
+    case '-':
+      if (isDigit(peek())) {
+        // A negative number.
+        return readNumber();
+      } else if (isName(peek())) {
+        // A name starting with "-".
+        return readName();
+      } else {
+        // A "-" by itself.
+        return makeToken(TokenType.NAME);
+      }
       
-      if (isName(c)) return startToken(LexState.IN_NAME);
-      if (isDigit(c)) return startToken(LexState.IN_NUMBER);
+    case '\\':
+      return makeToken(TokenType.LINE_CONTINUATION);
       
-      // Line continuation.
-      if (lookAhead("\\")) return startToken(LexState.IN_LINE_CONTINUATION);
-
-      // Ignore whitespace.
-      if (match(" ")) return null;
-      if (match("\t")) return null;
-      
-      // Handle the end of the file.
-      if (c == '\0') return new Token(lastCharacterPosition(), TokenType.EOF);
-      
-      // Any other character can't be handled.
-      throw new ParseException("Character \"" + c + "\" is not allowed.");
-
-    case IN_NAME:
-      if (lookAhead("//")) {
-        return createStringToken(TokenType.NAME);
-      }
-      if (lookAhead("/*")) {
-        return createStringToken(TokenType.NAME);
-      }
-      if (c == ':') {
-        String text = mRead;
-
-        advance();
-        mState = LexState.DEFAULT;
-        
-        Position position = currentPosition();        
-        return new Token(position, TokenType.FIELD, text);
-      }
-      if (isName(c) || isDigit(c)) {
-        return advance();
-      }
-      return createStringToken(TokenType.NAME);
-
-    case IN_NUMBER:
-      if (isDigit(c)) {
-        return advance();
-      }
-      if (c == '.') {
-        return changeToken(LexState.IN_DECIMAL);
-      }
-      return createIntToken(TokenType.INT);
-
-    case IN_DECIMAL:
-      if (isDigit(c)) {
-        return changeToken(LexState.IN_FRACTION);
-      }
-
-      // Rollback to reprocess the dot.
-      // TODO(bob): Rollback CharacterReader.
-      mCol--;
-      return createIntToken(TokenType.INT);
-      
-    case IN_FRACTION:
-      if (isDigit(c)) {
-        return advance();
-      }
-      return createDoubleToken(TokenType.DOUBLE);
-      
-    case IN_MINUS:
-      if (lookAhead("//")) {
-        return createStringToken(TokenType.NAME);
-      }
-      if (lookAhead("/*")) {
-        return createStringToken(TokenType.NAME);
-      }
-      if (isDigit(c)) {
-        return changeToken(LexState.IN_NUMBER);
-      }
-      if (isName(c)) {
-        return changeToken(LexState.IN_NAME);
-      }
-      return createStringToken(TokenType.NAME);
-
-    case IN_STRING:
-      if (match("\"")) {
-        // Get the contained string without the quotes.
-        String text = mRead.substring(1, mRead.length() - 1);
-        mState = LexState.DEFAULT;
-        return new Token(currentPosition(), TokenType.STRING, text);
-      } else if (lookAhead("\\")) {
-        mState = LexState.IN_STRING_ESCAPE;
-        advance(false);
-        return null;
-      }
-      // Consume other characters.
-      return advance();
-      
-    case IN_STRING_ESCAPE:
-      if (lookAhead("\\")) {
-        mRead += "\\";
-        mState = LexState.IN_STRING;
-        advance(false);
-        return null;
-      } else if (lookAhead("\"")) {
-        mRead += "\"";
-        mState = LexState.IN_STRING;
-        advance(false);
-        return null;
-      } else if (lookAhead("n")) {
-        mRead += "\n";
-        mState = LexState.IN_STRING;
-        advance(false);
-        return null;
-      }
-      throw new ParseException("Unknown string escape character " + c + ".");
-
-    case IN_LINE_COMMENT:
-      if (match("\n") || match("\r")) {
-        mState = LexState.DEFAULT;
-        return new Token(lastCharacterPosition(), TokenType.LINE, last(1));
-      }
-      // Ignore everything else.
-      return advance();
-      
-    case IN_BLOCK_COMMENT:
-      if (match("*/")) {
-        mState = LexState.DEFAULT;
-        return null;
-      }
-      // Ignore everything else.
-      return advance();
-      
-    case IN_LINE_CONTINUATION:
-      // Ignore whitespace.
-      if (match(" ")) return null;
-      if (match("\t")) return null;
-
-      // Eat the newline.
-      if (lookAhead("\n") || lookAhead("\r")) {
-        return changeToken(LexState.DEFAULT);
-      }
-      throw new ParseException("Unexpected character " + c + " after line continuation.");
-      
+      // EOF.
+    case '\0': return makeToken(TokenType.EOF);
+    
     default:
-      throw new ParseException("Unexpected lex state.");
+      if (isName(c)) {
+        // Identifier.
+        return readName();
+      } else if (isDigit(c)) {
+        // Number.
+        return readNumber();
+      } else {
+        throw new ParseException("Unknown character.");
+      }
     }
   }
   
-  private boolean lookAhead(String text) {
-    return mText.lookAhead(text.length()).equals(text);
-  }
-
-  private boolean match(String text) {
-    boolean matched = lookAhead(text);
-    
-    if (matched) advance(text.length());
-    return matched;
-  }
-  
-  private String last(int count) {
-    return mRead.substring(mRead.length() - count, mRead.length());
-  }
-  
-  private Token startToken(LexState state) {
-    mStartLine = mLine;
-    mStartCol = mCol;
-    
-    mRead = "";
-    
-    changeToken(state);
-    return null;
-  }
-
-  private Token changeToken(LexState state) {
-    mState = state;
-    advance();
-    return null;
-  }
-  
-  private Token characterToken(TokenType type) {
-    return new Token(lastCharacterPosition(), type, last(1));
-  }
-
-  private Token createStringToken(TokenType type) {
-    String text = mRead;
-    mState = LexState.DEFAULT;
-    
-    Position position = currentPosition();
-    
-    // Handle reserved words.
-    if (text.equals("nothing")) return new Token(position, TokenType.NOTHING);
-    if (text.equals("false")) return new Token(position, TokenType.BOOL, false);
-    if (text.equals("true")) return new Token(position, TokenType.BOOL, true);
-    if (text.equals("=")) return new Token(position, TokenType.EQUALS);
-    
-    return new Token(position, type, text);
-  }
-
-  private Token createIntToken(TokenType type) {
-    int value = Integer.parseInt(mRead);
-    mState = LexState.DEFAULT;
-    return new Token(currentPosition(), type, value);
-  }
-
-  private Token createDoubleToken(TokenType type) {
-    double value = Double.parseDouble(mRead);
-    mState = LexState.DEFAULT;
-    return new Token(currentPosition(), type, value);
-  }
-
-  private Position currentPosition() {
-    return new Position(mSourceFile, mStartLine, mStartCol, mLine, mCol);
-  }
-  
-  private Position lastCharacterPosition() {
-    return new Position(mSourceFile, mLine, mCol - 1, mLine, mCol);
-  }
-  
-  private Token advance() {
-    return advance(true);
-  }
-  
-  private Token advance(boolean addToRead) {
-    if (mText.current() == '\0') {
-      return new Token(Position.none(), TokenType.EOF);
+  private Token readWhitespace() {
+    while (true) {
+      switch (peek()) {
+      case ' ':
+      case '\t':
+        advance();
+        break;
+        
+      default:
+        return makeToken(TokenType.WHITESPACE);
+      }
     }
-    
-    if (addToRead) {
-      mRead += mText.current();
+  }
+  
+  private Token readString() {
+    while (true) {
+      switch (advance()) {
+      case '\\':
+        // String escape.
+        switch (advance()) {
+        case 'n':
+        case 't':
+        case '"':
+        case '\\':
+          // Do nothing, valid escape.
+          break;
+          
+        default: throw new ParseException("Unknown string escape.");
+        }
+        break;
+        
+      case '"':
+        return makeToken(TokenType.STRING, ConvertTo.STRING);
+       
+      case '\0': throw new ParseException("Unterminated string.");
+      
+      default:
+        // Do nothing, already advanced.
+      }
     }
-    
+  }
+  
+  private Token readLineComment() {
+    while (true) {
+      switch (peek()) {
+      case '\n':
+      case '\r':
+      case '\0':
+        return makeToken(TokenType.COMMENT);
+        
+      default:
+        advance();
+      }
+    }
+  }
+
+  private Token readBlockComment() {
+    while (true) {
+      switch (advance()) {
+      case '*':
+        switch (advance()) {
+        case '/': return makeToken(TokenType.COMMENT);
+        case '\0': throw new ParseException("Unterminated block comment.");
+        default: // Do nothing, keep advancing.
+        }
+        break;
+        
+      case '\0': throw new ParseException("Unterminated block comment.");
+      default: // Do nothing, keep advancing.
+      }
+    }
+  }
+
+  private Token readName() {
+    while (true) {
+      if (isName(peek()) || isDigit(peek())) {
+        advance();
+      } else if (peek() == ':') {
+        advance();
+        return makeToken(TokenType.FIELD, ConvertTo.FIELD);
+      } else {
+        return makeToken(TokenType.NAME);
+      }
+    }
+  }
+  
+  private Token readNumber() {
+    while (true) {
+      if (isDigit(peek())) {
+        advance();
+      } else {
+        return makeToken(TokenType.INT, ConvertTo.INT);
+      }
+    }
+  }
+  
+  private char peek() {
+    return mText.current();
+  }
+  
+  private char advance() {
+    char c = mText.current();
+    mText.advance();
+
+    mRead += c;
+
     // Update the position.
-    if (mText.current() == '\n') {
+    if (c == '\n') {
       mLine++;
       mCol = 1;
     } else {
       mCol++;
     }
-    
-    mText.advance();
 
-    return null;
+    return c;
+  }
+
+  private Token makeToken(TokenType type, ConvertTo convert) {
+    Object value;
+    switch (convert) {
+    case TEXT:
+      value = mRead;
+      break;
+      
+    case STRING:
+      // Trim the quotes and convert the escapes.
+      StringBuilder builder = new StringBuilder();
+      
+      boolean inEscape = false;
+      for (int i = 1; i < mRead.length() - 1; i++) {
+        if (inEscape) {
+          switch (mRead.charAt(i)) {
+          case 'n': builder.append("\n"); break;
+          case 't': builder.append("\t"); break;
+          case '\\': builder.append("\\"); break;
+          case '"': builder.append("\""); break;
+          }
+          inEscape = false;
+        } else {
+          if (mRead.charAt(i) == '\\') {
+            inEscape = true;
+          } else {
+            builder.append(mRead.charAt(i));
+          }
+        }
+      }
+
+      value = builder.toString();
+      break;
+      
+    case INT:
+      value = Integer.parseInt(mRead);
+      break;
+      
+    case FIELD:
+      // Trim off the ":".
+      value = mRead.substring(0, mRead.length() - 1);
+      break;
+      
+    default: throw new IllegalArgumentException();
+    }
+    
+    // Handle reserved words.
+    if (type == TokenType.NAME) {
+      if (mRead.equals("nothing")) {
+        type = TokenType.NOTHING;
+      } else if (mRead.equals("false")) {
+        type = TokenType.BOOL;
+        value = false;
+      } else if (mRead.equals("true")) {
+        type = TokenType.BOOL;
+        value = true;
+      } else if (mRead.equals("=")) {
+        type = TokenType.EQUALS;
+      }
+    }
+    
+    Token token = new Token(currentPosition(), type, mRead, value);
+    
+    mStartLine = mLine;
+    mStartCol = mCol;
+    mRead = "";
+    
+    return token;
   }
   
-  private void advance(int count) {
-    for (int i = 0; i < count; i++) {
-      advance();
-    }
+  private Token makeToken(TokenType type) {
+    return makeToken(type, ConvertTo.TEXT);
+  }
+  
+  private enum ConvertTo {
+    TEXT,
+    STRING,
+    INT,
+    FIELD
+  }
+  
+  private Position currentPosition() {
+    return new Position(mText.getDescription(),
+        mStartLine, mStartCol, mLine, mCol);
   }
   
   private boolean isDigit(final char c) {
@@ -342,28 +297,11 @@ public class Lexer {
         || (c == '_')
         || ("~!$%^&*-=+|/?<>".indexOf(c) != -1);
   }
-
-  private enum LexState {
-    DEFAULT,
-    IN_NAME,
-    IN_NUMBER,
-    IN_DECIMAL,
-    IN_FRACTION,
-    IN_MINUS,
-    IN_STRING,
-    IN_STRING_ESCAPE,
-    IN_LINE_COMMENT,
-    IN_BLOCK_COMMENT,
-    IN_LINE_CONTINUATION
-  }
-
-  private final String mSourceFile;
+  
   private final CharacterReader mText;
   private String mRead;
-  private LexState mState;
   private int mStartLine;
   private int mStartCol;
-  private boolean mEatLines;
   private int mLine;
   private int mCol;
 }

@@ -5,10 +5,16 @@ package com.stuffwithstuff.magpie.parser;
  * Reads a string, one character at a time.
  */
 public class StringCharacterReader implements CharacterReader {
-  public StringCharacterReader(String text) {
+  public StringCharacterReader(String description, String text) {
+    mDescription = description;
     mText = text;
     mPosition = 0;
   }
+  
+  public String getText() { return mText; }
+  
+  @Override
+  public String getDescription() { return mDescription; }
   
   @Override
   public char current() {
@@ -21,14 +27,7 @@ public class StringCharacterReader implements CharacterReader {
     if (mPosition < mText.length()) mPosition++;
   }
 
-  @Override
-  public String lookAhead(int count) {
-    if (mPosition >= mText.length()) return "";
-    
-    int endIndex = Math.min(mPosition + count, mText.length());
-    return mText.substring(mPosition, endIndex);
-  }
-
+  private final String mDescription;
   private final String mText;
   private int mPosition;
 }

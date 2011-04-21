@@ -17,6 +17,11 @@ public class ReplCharacterReader implements CharacterReader {
   }
   
   @Override
+  public String getDescription() {
+    return "<repl>";
+  }
+
+  @Override
   public char current() {
     while (mPosition >= mLine.length()) {
       readLine();
@@ -34,24 +39,31 @@ public class ReplCharacterReader implements CharacterReader {
     }
   }
 
-  @Override
-  public String lookAhead(int count) {
-    if (mPosition >= mLine.length()) return "";
-    
-    int endIndex = Math.min(mPosition + count, mLine.length());
-    return mLine.substring(mPosition, endIndex);
+  protected void showPrompt(String prompt) {
+    System.out.print(prompt);
   }
-
+  
+  protected void afterReadLine(String prompt, String line) {
+    // Do nothing.
+  }
+  
   private void readLine() {
+    String prompt;
     if (mFirstLine) {
-      System.out.print("> ");
+      prompt = "> ";
       mFirstLine = false;
     } else {
-      System.out.print("| ");
+      prompt = "| ";
     }
     
+    showPrompt(prompt);
+    
     try {
-      mLine = mInput.readLine() + "\n";
+      mLine = mInput.readLine();
+      
+      afterReadLine(prompt, mLine);
+      
+      mLine = mLine + "\n";
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

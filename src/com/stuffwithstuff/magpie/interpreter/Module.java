@@ -3,6 +3,9 @@ package com.stuffwithstuff.magpie.interpreter;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.stuffwithstuff.magpie.parser.CharacterReader;
+import com.stuffwithstuff.magpie.parser.StringCharacterReader;
+
 public class Module {
   public Module(ModuleInfo info) {
     mInfo = info;
@@ -13,6 +16,11 @@ public class Module {
   public String getPath() { return mInfo.getPath(); }
   public String getSource() { return mInfo.getSource(); }
   public Scope getScope() { return mScope; }
+  
+  public CharacterReader readSource() {
+    return new StringCharacterReader(mInfo.getPath(), mInfo.getSource());
+
+  }
   
   public void exportAll(String prefix, Scope scope) {
     scope.importAll(prefix, mExportedVariables, mExportedMultimethods);

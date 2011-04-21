@@ -12,7 +12,7 @@ public class NiceRepl extends Repl {
   
   @Override
   protected CharacterReader createReader() {
-    return new ReplCharacterReader();
+    return new NiceReplCharacterReader(getInterpreter());
   }
   
   @Override
