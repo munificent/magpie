@@ -24,6 +24,7 @@ Minor features:
   on enum values.
 - List patterns.
 - String interpolation.
+- Destructuring assignment.
 
 Implementation:
 - Compile to bytecode. This will make tail call elimination easier, help with
