@@ -44,27 +44,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
-  public Obj visit(BlockExpr expr, EvalContext context) {
-    try {
-      Obj result = null;
-
-      // Evaluate all of the expressions and return the last.
-      for (Expr thisExpr : expr.getExpressions()) {
-        result = evaluate(thisExpr, context);
-      }
-
-      return result;
-    } catch (ErrorException err) {
-      // See if we can catch it here.
-      Obj result = this.evaluateCases(err.getError(), expr.getCatches(), context);
-      if (result != null) return result;
-
-      // Not caught here, so just keep unwinding.
-      throw err;
-    }
-  }
-
-  @Override
   public Obj visit(BoolExpr expr, EvalContext context) {
     return mInterpreter.createBool(expr.getValue());
   }
@@ -265,8 +244,28 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(ScopeExpr expr, EvalContext context) {
-    context = context.pushScope();
-    return evaluate(expr.getBody(), context);
+    try {
+      context = context.pushScope();
+      return evaluate(expr.getBody(), context);
+    } catch (ErrorException err) {
+      // See if we can catch it here.
+      Obj result = this.evaluateCases(err.getError(), expr.getCatches(), context);
+      if (result != null) return result;
+
+      // Not caught here, so just keep unwinding.
+      throw err;
+    }
+  }
+
+  @Override
+  public Obj visit(SequenceExpr expr, EvalContext context) {
+    // Evaluate all of the expressions and return the last.
+    Obj result = null;
+    for (Expr thisExpr : expr.getExpressions()) {
+      result = evaluate(thisExpr, context);
+    }
+
+    return result;
   }
 
   @Override

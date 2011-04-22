@@ -30,30 +30,6 @@ public abstract class Expr {
   public static Expr bool(Position position, boolean value) {
     return new BoolExpr(position, value);
   }
-  
-  public static Expr block(List<Expr> exprs) {
-    return block(exprs, null);
-  }
-  
-  public static Expr block(List<Expr> exprs, List<MatchCase> catches) {
-    // Discard unneeded blocks.
-    if ((catches == null) || (catches.size() == 0)) {
-      switch (exprs.size()) {
-      case 0:
-        return nothing();
-      case 1:
-        return exprs.get(0);
-      default:
-        return new BlockExpr(exprs, null);
-      }
-    } else {
-      return new BlockExpr(exprs, catches);
-    }
-  }
-
-  public static Expr block(Expr... exprs) {
-    return new BlockExpr(Arrays.asList(exprs), null);
-  }
 
   public static Expr break_(Position position) {
     return new BreakExpr(position);
@@ -152,9 +128,26 @@ public abstract class Expr {
   }
 
   public static Expr scope(Expr body) {
-    // Unwrap redundant scopes.
-    if (body instanceof ScopeExpr) return body;
-    return new ScopeExpr(body);
+    return scope(body, new ArrayList<MatchCase>());
+  }
+
+  public static Expr scope(Expr body, List<MatchCase> catches) {
+    return new ScopeExpr(body, catches);
+  }
+  
+  public static Expr sequence(List<Expr> exprs) {
+    switch (exprs.size()) {
+    case 0:
+      return nothing();
+    case 1:
+      return exprs.get(0);
+    default:
+      return new SequenceExpr(exprs);
+    }
+  }
+  
+  public static Expr sequence(Expr... exprs) {
+    return sequence(Arrays.asList(exprs));
   }
 
   public static Expr string(String text) {

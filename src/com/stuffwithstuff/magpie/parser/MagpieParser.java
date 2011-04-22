@@ -230,7 +230,12 @@ public class MagpieParser extends Parser {
       }
     }
 
-    return new Pair<Expr, Token>(Expr.block(exprs, catches), endToken);
+    Expr expr = Expr.sequence(exprs);
+    if (catches.size() > 0) {
+      expr = Expr.scope(expr, catches);
+    }
+    
+    return new Pair<Expr, Token>(expr, endToken);
   }
   
   private MatchCase parseCatch(String[] endKeywords) {

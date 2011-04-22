@@ -1,13 +1,19 @@
 package com.stuffwithstuff.magpie.ast;
 
+import java.util.List;
+
+import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
+
 public class ScopeExpr extends Expr {
-  ScopeExpr(Expr body) {
+  ScopeExpr(Expr body, List<MatchCase> catches) {
     super(body.getPosition());
     mBody = body;
+    mCatches = catches;
   }
   
   public Expr getBody() { return mBody; }
-  
+  public List<MatchCase> getCatches() { return mCatches; }
+
   @Override
   public <R, C> R accept(ExprVisitor<R, C> visitor, C context) {
     return visitor.visit(this, context);
@@ -21,4 +27,5 @@ public class ScopeExpr extends Expr {
   }
 
   private final Expr mBody;
+  private final List<MatchCase> mCatches;
 }

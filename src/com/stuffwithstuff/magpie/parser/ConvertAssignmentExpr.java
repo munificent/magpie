@@ -22,11 +22,6 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
   }
 
   @Override
-  public Expr visit(BlockExpr expr, Expr value) {
-    return invalidExpression(expr);
-  }
-
-  @Override
   public Expr visit(BoolExpr expr, Expr value) {
     return invalidExpression(expr);
   }
@@ -98,12 +93,6 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
   }
 
   @Override
-  public Expr visit(VariableExpr expr, Expr value) {
-    // message = value  -->  message = value
-    return Expr.assign(expr.getPosition(), expr.getName(), value);
-  }
-
-  @Override
   public Expr visit(MethodExpr expr, Expr value) {
     return invalidExpression(expr);
   }
@@ -129,6 +118,11 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
   }
 
   @Override
+  public Expr visit(SequenceExpr expr, Expr value) {
+    return invalidExpression(expr);
+  }
+
+  @Override
   public Expr visit(StringExpr expr, Expr value) {
     return invalidExpression(expr);
   }
@@ -136,6 +130,12 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
   @Override
   public Expr visit(TupleExpr expr, Expr value) {
     throw new NotImplementedException("Destructuring is only implemented on new vars for now.");
+  }
+
+  @Override
+  public Expr visit(VariableExpr expr, Expr value) {
+    // message = value  -->  message = value
+    return Expr.assign(expr.getPosition(), expr.getName(), value);
   }
 
   private Expr invalidExpression(Expr expr) {

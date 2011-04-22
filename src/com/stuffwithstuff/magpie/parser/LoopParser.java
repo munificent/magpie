@@ -87,7 +87,7 @@ public class LoopParser implements PrefixParser {
 
     // Then execute the main body.
     loopBlock.add(body);
-    Expr loopBody = Expr.block(loopBlock);
+    Expr loopBody = Expr.sequence(loopBlock);
     
     // Add the iterators outside of the loop.
     List<Expr> outerBlock = new ArrayList<Expr>();
@@ -97,6 +97,6 @@ public class LoopParser implements PrefixParser {
     outerBlock.add(Expr.loop(span.end(), loopBody));
 
     // Wrap the iterators in their own scope.
-    return Expr.scope(Expr.block(outerBlock));
+    return Expr.scope(Expr.sequence(outerBlock));
   }
 }
