@@ -2,6 +2,7 @@ package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.*;
@@ -18,23 +19,12 @@ public class PatternTyper implements PatternVisitor<Expr, Void> {
   @Override
   public Expr visit(RecordPattern pattern, Void dummy) {
     List<Pair<String, Expr>> fields = new ArrayList<Pair<String, Expr>>();
-    for (Pair<String, Pattern> field : pattern.getFields()) {
+    for (Entry<String, Pattern> field : pattern.getFields().entrySet()) {
       Expr fieldExpr = field.getValue().accept(this, null);
       fields.add(new Pair<String, Expr>(field.getKey(), fieldExpr));
     }
     
     return Expr.record(Position.none(), fields);
-  }
-
-  @Override
-  public Expr visit(TuplePattern pattern, Void dummy) {
-    List<Expr> fields = new ArrayList<Expr>();
-    for (Pattern fieldPattern : pattern.getFields()) {
-      Expr field = fieldPattern.accept(this, null);
-      fields.add(field);
-    }
-    
-    return Expr.tuple(fields);
   }
 
   @Override

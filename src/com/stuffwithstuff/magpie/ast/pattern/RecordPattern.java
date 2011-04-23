@@ -1,16 +1,16 @@
 package com.stuffwithstuff.magpie.ast.pattern;
 
-import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
-import com.stuffwithstuff.magpie.util.Pair;
 
 public class RecordPattern extends Pattern {
-  RecordPattern(List<Pair<String, Pattern>> fields) {
+  RecordPattern(Map<String, Pattern> fields) {
     mFields = fields;
   }
   
-  public List<Pair<String, Pattern>> getFields() { return mFields; }
+  public Map<String, Pattern> getFields() { return mFields; }
   
   @Override
   public <R, C> R accept(PatternVisitor<R, C> visitor, C context) {
@@ -21,14 +21,18 @@ public class RecordPattern extends Pattern {
   public String toString() {
     StringBuilder builder = new StringBuilder();
     builder.append("(");
-    for (int i = 0; i < mFields.size(); i++) {
-      Pair<String, Pattern> field = mFields.get(i);
-      if (i > 0) builder.append(", ");
+    
+    boolean first = true;
+    for (Entry<String, Pattern> field : mFields.entrySet()) {
+      if (!first) builder.append(", ");
+      first = false;
+      
       builder.append(field.getKey()).append(": ").append(field.getValue());
     }
+
     builder.append(")");
     return builder.toString();
   }
   
-  private final List<Pair<String, Pattern>> mFields;
+  private final Map<String, Pattern> mFields;
 }

@@ -7,4 +7,3 @@ import .Int
 import .List
 import .ListIterator
 import .Range
-import .Tuple

@@ -14,7 +14,7 @@ specify("A 'def' expression") with
         multi("s") shouldEqual("str")
     end
 
-    it should("select a method based on tuple field types") with
+    it should("select a method based on record field types") with
         def multi(a Int, b Int)
             "int int"
         end
@@ -148,17 +148,7 @@ specify("The linearization of a multimethod") with
         multi(123) shouldEqual("value")
     end
 
-    // TODO(bob): Implement me!
-    /*
-    it should("prefer a class over a record") with
-        def multi(foo: _) -> "record"
-        def multi(foo Foo) -> "class"
-        def multi(foo: _, bar: _) -> "record"
-        multi(Foo new()) shouldEqual("class")
-    end
-    */
-
-    it should("order tuples by their fields") with
+    it should("order record by their fields") with
         def multi(a A1, b A1)
             "a1 a1"
         end
@@ -177,7 +167,19 @@ specify("The linearization of a multimethod") with
         multi(C1 new(), C1 new()) shouldEqual("b1 b1")
     end
 
-    it should("be ambiguous if tuple fields don't agree") with
+    it should("ignore field order when comparing records") with
+        def multi(x: x A1, y: y A1)
+            "aa"
+        end
+
+        def multi(y: y B1, x: x B1)
+            "bb"
+        end
+
+        multi(x: B1 new(), y: B1 new()) shouldEqual("bb")
+    end
+
+    it should("be ambiguous if record fields don't agree") with
         def multi(a B1, b A1)
             "b1 a1"
         end

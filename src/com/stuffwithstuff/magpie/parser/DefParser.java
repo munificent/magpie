@@ -82,16 +82,16 @@ public class DefParser implements PrefixParser {
         pattern = receiver;
       } else {
         // Setter.
-        pattern = Pattern.tuple(receiver, setValue);
+        pattern = Pattern.record(receiver, setValue);
         name = Name.makeAssigner(name);
       }
     } else {
       if (setValue == null) {
         // Method.
-        pattern = Pattern.tuple(receiver, arg);
+        pattern = Pattern.record(receiver, arg);
       } else {
         // Setter with argument.
-        pattern = Pattern.tuple(receiver, Pattern.tuple(arg, setValue));
+        pattern = Pattern.record(receiver, Pattern.record(arg, setValue));
         name = Name.makeAssigner(name);
       }
     }

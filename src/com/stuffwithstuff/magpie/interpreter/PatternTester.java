@@ -1,12 +1,11 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import java.util.Map.Entry;
+
 import com.stuffwithstuff.magpie.ast.pattern.*;
-import com.stuffwithstuff.magpie.util.Pair;
 
 /**
  * Determines if a pattern matches a given value.
- * 
- * @author bob
  */
 public class PatternTester implements PatternVisitor<Boolean, Obj> {
   public static boolean test(final Interpreter interpreter, Pattern pattern,
@@ -19,8 +18,7 @@ public class PatternTester implements PatternVisitor<Boolean, Obj> {
   @Override
   public Boolean visit(RecordPattern pattern, Obj value) {
     // Test each field.
-    for (int i = 0; i < pattern.getFields().size(); i++) {
-      Pair<String, Pattern> field = pattern.getFields().get(i);
+    for (Entry<String, Pattern> field : pattern.getFields().entrySet()) {
       Obj fieldValue = value.getField(field.getKey());
       if (fieldValue == null) return false;
       if (!field.getValue().accept(this, fieldValue)) return false;
@@ -29,21 +27,7 @@ public class PatternTester implements PatternVisitor<Boolean, Obj> {
     // If we got here, the fields all passed.
     return true;
   }
-
-  @Override
-  public Boolean visit(TuplePattern pattern, Obj value) {
-    // Test each field.
-    for (int i = 0; i < pattern.getFields().size(); i++) {
-      Pattern fieldPattern = pattern.getFields().get(i);
-      Obj field = value.getTupleField(i);
-      if (field == null) return false;
-      if (!fieldPattern.accept(this, field)) return false;
-    }
-    
-    // If we got here, the fields all passed.
-    return true;
-  }
-
+  
   @Override
   public Boolean visit(TypePattern pattern, Obj value) {
     Obj expected = mInterpreter.evaluate(pattern.getType(), mContext);

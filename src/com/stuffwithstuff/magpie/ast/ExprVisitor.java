@@ -20,6 +20,5 @@ public interface ExprVisitor<R, C> {
   R visit(ReturnExpr expr, C context);
   R visit(ScopeExpr expr, C context);
   R visit(StringExpr expr, C context);
-  R visit(TupleExpr expr, C context);
   R visit(DefineExpr expr, C context);
 }

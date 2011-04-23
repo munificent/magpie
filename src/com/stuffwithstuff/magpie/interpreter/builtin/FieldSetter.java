@@ -15,7 +15,7 @@ import com.stuffwithstuff.magpie.interpreter.Scope;
 public class FieldSetter implements Callable {
   public FieldSetter(ClassObj classObj, String name, Field field, Scope closure) {
     mName = name;
-    mPattern = Pattern.tuple(
+    mPattern = Pattern.record(
         Pattern.type(Expr.variable(classObj.getName())),
         field.getPattern());
     mClosure = closure;
@@ -23,8 +23,8 @@ public class FieldSetter implements Callable {
   
   @Override
   public Obj invoke(Interpreter interpreter, Obj arg) {
-    arg.getTupleField(0).setField(mName, arg.getTupleField(1));
-    return arg.getTupleField(1);
+    arg.getField(0).setField(mName, arg.getField(1));
+    return arg.getField(1);
   }
 
   @Override

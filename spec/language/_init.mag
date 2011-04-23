@@ -19,6 +19,5 @@ import .pattern
 import .record
 import .return_
 import .string
-import .tuple
 import .var_
 import .with_

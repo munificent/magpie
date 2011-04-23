@@ -76,7 +76,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     // If not, this is a getter-style multimethod.
     Obj arg;
     if (expr.getArg() != null) {
-      arg = mInterpreter.createTuple(receiver, evaluate(expr.getArg(), context));
+      arg = mInterpreter.createRecord(
+          receiver, evaluate(expr.getArg(), context));
     } else {
       arg = receiver;
     }
@@ -271,17 +272,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(StringExpr expr, EvalContext context) {
     return mInterpreter.createString(expr.getValue());
-  }
-
-  @Override
-  public Obj visit(TupleExpr expr, EvalContext context) {
-    // Evaluate the fields.
-    Obj[] fields = new Obj[expr.getFields().size()];
-    for (int i = 0; i < fields.length; i++) {
-      fields[i] = evaluate(expr.getFields().get(i), context);
-    }
-
-    return mInterpreter.createTuple(fields);
   }
   
   @Override

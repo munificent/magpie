@@ -21,15 +21,15 @@ public class ClassNew implements Callable {
   @Override
   public Obj invoke(Interpreter interpreter, Obj arg) {
     // Get the class being constructed.
-    ClassObj classObj = arg.getTupleField(0).asClass();
-    return interpreter.constructNewObject(classObj, arg.getTupleField(1));
+    ClassObj classObj = arg.getField(0).asClass();
+    return interpreter.constructNewObject(classObj, arg.getField(1));
   }
   
   @Override
   public Pattern getPattern() {
     // The receiver is any instance of Class, and it takes any argument, since
     // it will simply forward it onto 'init()'.
-    return Pattern.tuple(
+    return Pattern.record(
         Pattern.type(Expr.variable("Class")),
         Pattern.wildcard());
   }

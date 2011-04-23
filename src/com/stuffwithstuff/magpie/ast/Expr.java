@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
+import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.util.Pair;
 
@@ -157,15 +158,20 @@ public abstract class Expr {
   public static Expr string(Position position, String text) {
     return new StringExpr(position, text);
   }
-  
-  public static Expr tuple(List<Expr> fields) {
-    return new TupleExpr(fields);
+
+  public static Expr record(Expr... fields) {
+    List<Pair<String, Expr>> recordFields =
+        new ArrayList<Pair<String, Expr>>();
+    
+    for (int i = 0; i < fields.length; i++) {
+      recordFields.add(new Pair<String, Expr>(
+          Name.getTupleField(i), fields[i]));
+    }
+    
+    return record(Position.surrounding(fields[0], fields[fields.length - 1]),
+        recordFields);
   }
 
-  public static Expr tuple(Expr... fields) {
-    return new TupleExpr(Arrays.asList(fields));
-  }
-  
   public static Expr variable(Position position, String name) {
     return new VariableExpr(position, name);
   }

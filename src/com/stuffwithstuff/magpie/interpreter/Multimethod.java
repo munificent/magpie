@@ -18,7 +18,7 @@ public class Multimethod {
   }
   
   public Obj invoke(Interpreter interpreter, Obj receiver, Obj arg) {
-    return invoke(interpreter, interpreter.createTuple(receiver, arg));
+    return invoke(interpreter, interpreter.createRecord(receiver, arg));
   }
   
   public Obj invoke(Interpreter interpreter, Obj arg) {

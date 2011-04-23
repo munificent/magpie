@@ -7,8 +7,8 @@ public class StringBuiltIns {
   @Signature("(_ String)[index Int]")
   public static class Index implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
-      String string = arg.getTupleField(0).asString();
-      int index = arg.getTupleField(1).asInt();
+      String string = arg.getField(0).asString();
+      int index = arg.getField(1).asInt();
       
       // Negative indices count backwards from the end.
       if (index < 0) index = string.length() + index;
@@ -31,8 +31,8 @@ public class StringBuiltIns {
   @Signature("(_ String) +(right String)")
   public static class Add implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
-      String left = arg.getTupleField(0).asString();
-      String right = arg.getTupleField(1).asString();
+      String left = arg.getField(0).asString();
+      String right = arg.getField(1).asString();
       
       return interpreter.createString(left + right);
     }
@@ -41,16 +41,16 @@ public class StringBuiltIns {
   @Signature("(_ String) ==(other String)")
   public static class Equals implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
-      return interpreter.createBool(arg.getTupleField(0).asString().equals(
-          arg.getTupleField(1).asString()));
+      return interpreter.createBool(arg.getField(0).asString().equals(
+          arg.getField(1).asString()));
     }
   }
   
   @Signature("(_ String) compareTo(other String)")
   public static class CompareTo implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
-      return interpreter.createInt(arg.getTupleField(0).asString().compareTo(
-          arg.getTupleField(1).asString()));
+      return interpreter.createInt(arg.getField(0).asString().compareTo(
+          arg.getField(1).asString()));
     }
   }
 }

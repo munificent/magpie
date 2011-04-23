@@ -15,6 +15,11 @@ public class Pair<K, V> {
   public K getKey() { return mKey; }
   public V getValue() { return mValue; }
   
+  @Override
+  public String toString() {
+    return mKey.toString() + " : " + mValue.toString();
+  }
+  
   private final K mKey;
   private final V mValue;
 }

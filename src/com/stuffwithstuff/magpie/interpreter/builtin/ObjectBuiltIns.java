@@ -16,7 +16,7 @@ public class ObjectBuiltIns {
   public static class Is implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       return interpreter.createBool(
-          arg.getTupleField(0).getClassObj().isSubclassOf(arg.getTupleField(1).asClass()));
+          arg.getField(0).getClassObj().isSubclassOf(arg.getField(1).asClass()));
     }
   }
 
@@ -24,7 +24,7 @@ public class ObjectBuiltIns {
   public static class Same implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       return interpreter.createBool(
-          arg.getTupleField(0) == arg.getTupleField(1));
+          arg.getField(0) == arg.getField(1));
     }
   }
   
@@ -38,7 +38,7 @@ public class ObjectBuiltIns {
   @Signature("(_) *throw*()")
   public static class Throw implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
-      throw new ErrorException(arg.getTupleField(0));
+      throw new ErrorException(arg.getField(0));
     }
   }
   

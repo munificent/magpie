@@ -1,7 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.Expr;
@@ -12,7 +12,6 @@ import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.Scope;
-import com.stuffwithstuff.magpie.util.Pair;
 
 /**
  * Built-in callable that initializes an instance of a class from the given
@@ -27,7 +26,7 @@ public class ClassInit implements Callable {
   @Override
   public Obj invoke(Interpreter interpreter, Obj arg) {
     // We don't care about the receiver.
-    arg = arg.getTupleField(1);
+    arg = arg.getField(1);
     
     Obj obj = interpreter.getConstructingObject();
 
@@ -61,18 +60,17 @@ public class ClassInit implements Callable {
     
     // The argument should be a record with fields for each declared field
     // in the class.
-    List<Pair<String, Pattern>> fields = new ArrayList<Pair<String, Pattern>>();
+    Map<String, Pattern> fields = new HashMap<String, Pattern>();
     for (Entry<String, Field> field : mClass.getFieldDefinitions().entrySet()) {
       // Only care about fields that don't have initializers.
       if (field.getValue().getInitializer() == null) {
-        fields.add(new Pair<String, Pattern>(field.getKey(),
-            field.getValue().getPattern()));
+        fields.put(field.getKey(), field.getValue().getPattern());
       }
     }
 
     Pattern argument = Pattern.record(fields);
     
-    return Pattern.tuple(receiver, argument);
+    return Pattern.record(receiver, argument);
   }
 
   @Override

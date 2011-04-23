@@ -32,7 +32,7 @@ public final class Name {
   }
   
   public static String getTupleField(int index) {
-    return "field" + index;
+    return Integer.toString(index);
   }
   
   private Name() {

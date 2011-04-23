@@ -5,9 +5,10 @@ import java.util.List;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.NothingExpr;
-import com.stuffwithstuff.magpie.ast.TupleExpr;
+import com.stuffwithstuff.magpie.ast.RecordExpr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.Name;
+import com.stuffwithstuff.magpie.util.Pair;
 
 public class NameParser implements PrefixParser, InfixParser {
   @Override
@@ -42,7 +43,7 @@ public class NameParser implements PrefixParser, InfixParser {
       block = Expr.fn(block.getPosition(), blockType, block);
       
       // Add it to the argument list.
-      arg = addTupleField(arg, block);
+      arg = appendField(arg, block);
     }
     
     // See if this is a bare name, or a method call.
@@ -56,18 +57,18 @@ public class NameParser implements PrefixParser, InfixParser {
   @Override
   public int getStickiness() { return Precedence.MESSAGE; }
 
-  private Expr addTupleField(Expr expr, Expr field) {
+  private Expr appendField(Expr expr, Expr field) {
     if (expr == null) {
       return field;
     } else if (expr instanceof NothingExpr) {
       return field;
-    } else if (expr instanceof TupleExpr) {
-      TupleExpr tuple = (TupleExpr)expr;
-      List<Expr> fields = new ArrayList<Expr>(tuple.getFields());
-      fields.add(field);
-      return Expr.tuple(fields);
+    } else if (expr instanceof RecordExpr) {
+      RecordExpr record = (RecordExpr)expr;
+      List<Pair<String, Expr>> fields = new ArrayList<Pair<String, Expr>>(record.getFields());
+      fields.add(new Pair<String, Expr>(Name.getTupleField(fields.size()), field));
+      return Expr.record(record.getPosition(), fields);
     } else {
-      return Expr.tuple(expr, field);
+      return Expr.record(expr, field);
     }
   }
 }

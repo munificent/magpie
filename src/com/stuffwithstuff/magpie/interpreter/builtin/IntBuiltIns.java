@@ -48,8 +48,8 @@ public class IntBuiltIns {
 
   private abstract static class ArithmeticOperator implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
-      int left = arg.getTupleField(0).asInt();
-      int right = arg.getTupleField(1).asInt();
+      int left = arg.getField(0).asInt();
+      int right = arg.getField(1).asInt();
       
       return interpreter.createInt(perform(left, right));
     }
@@ -60,8 +60,8 @@ public class IntBuiltIns {
   @Signature("(_ Int) ==(right Int)")
   public static class Equals implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
-      int left = arg.getTupleField(0).asInt();
-      int right = arg.getTupleField(1).asInt();
+      int left = arg.getField(0).asInt();
+      int right = arg.getField(1).asInt();
       
       return interpreter.createBool(left == right);
     }
@@ -70,8 +70,8 @@ public class IntBuiltIns {
   @Signature("(_ Int) compareTo(other Int)")
   public static class Compare implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
-      int left = arg.getTupleField(0).asInt();
-      int right = arg.getTupleField(1).asInt();
+      int left = arg.getField(0).asInt();
+      int right = arg.getField(1).asInt();
       
       return interpreter.createInt(((Integer)left).compareTo(right));
     }

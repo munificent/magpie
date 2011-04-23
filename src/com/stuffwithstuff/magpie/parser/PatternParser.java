@@ -1,11 +1,11 @@
 package com.stuffwithstuff.magpie.parser;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
-import com.stuffwithstuff.magpie.util.Pair;
+import com.stuffwithstuff.magpie.interpreter.Name;
 
 /**
  * Parses patterns. Patterns are used for match cases, function parameter
@@ -39,29 +39,36 @@ public class PatternParser {
    * @return
    */
   public static Pattern parse(MagpieParser parser) {
-    return composite(parser);
+    return record(parser);
   }
   
-  private static Pattern composite(MagpieParser parser) {
-    if (parser.lookAhead(TokenType.FIELD)) {
-      List<Pair<String, Pattern>> fields = new ArrayList<Pair<String, Pattern>>();
-      do {
-        String name = parser.consume(TokenType.FIELD).getString();
-        Pattern value = variable(parser);
-        fields.add(new Pair<String, Pattern>(name, value));
-      } while (parser.match(TokenType.COMMA));
+  private static Pattern record(MagpieParser parser) {
+    Map<String, Pattern> fields = new HashMap<String, Pattern>();
+    
+    int index = 0;
+    boolean isRecord = false;
+    Pattern field = null;
+    do {
+      String name;
+      if (parser.match(TokenType.FIELD)) {
+        name = parser.last(1).getString();
+        isRecord = true;
+      } else {
+        name = Name.getTupleField(index);
+      }
+      index++;
       
-      return Pattern.record(fields);
-    } else {
-      List<Pattern> patterns = new ArrayList<Pattern>();
-      do {
-        patterns.add(variable(parser));
-      } while(parser.match(TokenType.COMMA));
-      
-      // Only wrap in a tuple if there are multiple fields.
-      if (patterns.size() == 1) return patterns.get(0);
-      return Pattern.tuple(patterns);
+      field = variable(parser);
+      fields.put(name, field);
+    } while (parser.match(TokenType.COMMA));
+    
+    // TODO(bob): This code is ugly.
+    // If it's just a single pattern with no field name, just return it.
+    if (fields.size() == 1 && !isRecord) {
+      return field;
     }
+    
+    return Pattern.record(fields);
   }
   
   private static Pattern variable(MagpieParser parser) {
@@ -108,7 +115,7 @@ public class PatternParser {
       return Pattern.value(Expr.variable(parser.last(1).getString()));
     } else if (parser.match(TokenType.LEFT_PAREN)) {
       // Nested pattern.
-      Pattern inner = composite(parser);
+      Pattern inner = record(parser);
       parser.consume(TokenType.RIGHT_PAREN);
       return inner;
     }

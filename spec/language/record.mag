@@ -9,8 +9,16 @@ specify("A record expression") with
 
     it should("define fields on the object") with
         var rec = x: 1, y: 2
-        // Have to pattern match to get them out.
+
         var x: x, y: y = rec
+        x shouldEqual(1)
+        y shouldEqual(2)
+    end
+
+    it should("ignore the order of fields when matching") with
+        var rec = x: 1, y: 2
+
+        var y: y, x: x = rec
         x shouldEqual(1)
         y shouldEqual(2)
     end
@@ -22,6 +30,24 @@ specify("A record expression") with
         a shouldEqual("var")
         b shouldEqual("with")
         c shouldEqual("end")
+    end
+
+    it should("infer a positional name if omitted") with
+        var rec = a: "1", "2", c: "3"
+
+        var a: a, b, c: c = rec
+        a shouldEqual("1")
+        b shouldEqual("2")
+        c shouldEqual("3")
+    end
+
+    it should("allow omitting all names") with
+        var rec = "1", "2", "3"
+
+        var a, b, c = rec
+        a shouldEqual("1")
+        b shouldEqual("2")
+        c shouldEqual("3")
     end
 
     it should("fail to parse duplicate field names") with

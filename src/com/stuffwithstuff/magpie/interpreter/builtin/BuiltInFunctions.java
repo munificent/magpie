@@ -24,7 +24,7 @@ public class BuiltInFunctions {
   @Signature("prints(text String)")
   public static class Print implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
-      interpreter.print(arg.getTupleField(1).asString());
+      interpreter.print(arg.getField(1).asString());
       return interpreter.nothing();
     }
   }
@@ -40,7 +40,7 @@ public class BuiltInFunctions {
   @Signature("canParse?(source String)")
   public static class CheckSyntax implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
-      String source = arg.getTupleField(1).asString();
+      String source = arg.getField(1).asString();
       
       boolean canParse = true;
       

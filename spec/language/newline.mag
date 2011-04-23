@@ -7,8 +7,10 @@ specify("A newline") with
     it should("be ignored after a comma") with
         var i = 1,
             2
-        i field0 shouldEqual(1)
-        i field1 shouldEqual(2)
+
+        var a, b = i
+        a shouldEqual(1)
+        b shouldEqual(2)
     end
 
     it should("be ignored after a field") with

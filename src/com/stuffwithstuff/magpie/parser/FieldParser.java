@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Set;
 
 import com.stuffwithstuff.magpie.ast.Expr;
+import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.util.Pair;
 
+// TODO(bob): Merge this code with CommaParser.
 public class FieldParser implements PrefixParser {
   @Override
   public Expr parse(MagpieParser parser, Token token) {
@@ -16,8 +18,9 @@ public class FieldParser implements PrefixParser {
     List<Pair<String, Expr>> fields = new ArrayList<Pair<String, Expr>>();
     Set<String> usedNames = new HashSet<String>();
     
+    int index = 1;
+    String name = token.getString();
     while (true) {
-      String name = token.getString();
       Expr value = parser.parseExpression(Precedence.COMPOSITION);
       fields.add(new Pair<String, Expr>(name, value));
       
@@ -27,7 +30,13 @@ public class FieldParser implements PrefixParser {
       usedNames.add(name);
       
       if (!parser.match(TokenType.COMMA)) break;
-      token = parser.consume(TokenType.FIELD);
+      
+      if (parser.match(TokenType.FIELD)) {
+        name = parser.last(1).getString();
+      } else {
+        name = Name.getTupleField(index);
+      }
+      index++;
     }
     
     return Expr.record(position, fields);

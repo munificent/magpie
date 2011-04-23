@@ -9,9 +9,9 @@ public class ListBuiltIns {
   @Signature("(_ List)[index Int]")
   public static class Index implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
-      List<Obj> elements = arg.getTupleField(0).asList();
+      List<Obj> elements = arg.getField(0).asList();
       int index = validateIndex(interpreter, elements,
-          arg.getTupleField(1).asInt());
+          arg.getField(1).asInt());
       
       return elements.get(index);
     }
@@ -20,12 +20,12 @@ public class ListBuiltIns {
   @Signature("(_ List)[index Int] = (item)")
   public static class IndexAssign implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
-      List<Obj> elements = arg.getTupleField(0).asList();
+      List<Obj> elements = arg.getField(0).asList();
       
       int index = validateIndex(interpreter, elements,
-          arg.getTupleField(1).getTupleField(0).asInt());
+          arg.getField(1).getField(0).asInt());
       
-      Obj value = arg.getTupleField(1).getTupleField(1);
+      Obj value = arg.getField(1).getField(1);
       
       elements.set(index, value);
       return value;
@@ -35,17 +35,17 @@ public class ListBuiltIns {
   @Signature("(_ List) add(item)")
   public static class Add implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
-      List<Obj> elements = arg.getTupleField(0).asList();
-      elements.add(arg.getTupleField(1));
+      List<Obj> elements = arg.getField(0).asList();
+      elements.add(arg.getField(1));
       
-      return arg.getTupleField(1);
+      return arg.getField(1);
     }
   }
 
   @Signature("(_ List) clear()")
   public static class Clear implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
-      List<Obj> elements = arg.getTupleField(0).asList();
+      List<Obj> elements = arg.getField(0).asList();
       elements.clear();
       return interpreter.nothing();
     }

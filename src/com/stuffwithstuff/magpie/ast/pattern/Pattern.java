@@ -1,26 +1,28 @@
 package com.stuffwithstuff.magpie.ast.pattern;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.stuffwithstuff.magpie.ast.Expr;
-import com.stuffwithstuff.magpie.util.Pair;
+import com.stuffwithstuff.magpie.interpreter.Name;
 
 public abstract class Pattern {
   public static Pattern nothing() {
     return new ValuePattern(Expr.nothing());
   }
   
-  public static Pattern record(List<Pair<String, Pattern>> fields) {
+  public static Pattern record(Map<String, Pattern> fields) {
     return new RecordPattern(fields);
   }
 
-  public static Pattern tuple(List<Pattern> fields) {
-    return new TuplePattern(fields);
-  }
-
-  public static Pattern tuple(Pattern... fields) {
-    return new TuplePattern(Arrays.asList(fields));
+  public static Pattern record(Pattern... fields) {
+    Map<String, Pattern> recordFields = new HashMap<String, Pattern>();
+    
+    for (int i = 0; i < fields.length; i++) {
+      recordFields.put(Name.getTupleField(i), fields[i]);
+    }
+    
+    return record(recordFields);
   }
 
   public static Pattern type(Expr type) {

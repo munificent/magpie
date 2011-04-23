@@ -11,8 +11,8 @@ public class FunctionBuiltIns {
   @Signature("(_ Function) call(arg)")
   public static class Call implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
-      FnObj function = arg.getTupleField(0).asFn();
-      Obj fnArg = arg.getTupleField(1);
+      FnObj function = arg.getField(0).asFn();
+      Obj fnArg = arg.getField(1);
       
       // Make sure the argument matches the function's pattern.
       Callable callable = function.getCallable();

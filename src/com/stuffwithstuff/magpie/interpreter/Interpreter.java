@@ -30,7 +30,6 @@ public class Interpreter {
     mNothingClass = scope.get("Nothing").asClass();
     mRecordClass = scope.get("Record").asClass();
     mStringClass = scope.get("String").asClass();
-    mTupleClass = scope.get("Tuple").asClass();
     
     mTrue = instantiate(mBoolClass, true);
     mFalse = instantiate(mBoolClass, false);
@@ -141,8 +140,7 @@ public class Interpreter {
   public ClassObj getNothingClass() { return mNothingClass; }
   public ClassObj getRecordClass() { return mRecordClass; }
   public ClassObj getStringClass() { return mStringClass; }
-  public ClassObj getTupleClass() { return mTupleClass; }
-
+  
   public Obj createBool(boolean value) {
     return value ? mTrue : mFalse;
   }
@@ -191,12 +189,15 @@ public class Interpreter {
     return new FnObj(mFnClass, new Function(expr, context.getScope()));
   }
   
-  public Obj createTuple(Obj... fields) {
-    return createTuple(Arrays.asList(fields));
-  }
-  
-  public Obj createTuple(List<Obj> fields) {
-    return instantiate(mTupleClass, fields);
+  public Obj createRecord(Obj... fields) {
+    Obj record = instantiate(mRecordClass, null);
+    
+    int index = 0;
+    for (Obj field : fields) {
+      record.setField(Name.getTupleField(index++), field);
+    }
+    
+    return record;
   }
   
   public Obj createRecord(Map<String, Obj> fields) {
@@ -302,7 +303,6 @@ public class Interpreter {
   private final ClassObj mNothingClass;
   private final ClassObj mRecordClass;
   private final ClassObj mStringClass;
-  private final ClassObj mTupleClass;
   
   private final Obj mNothing;
   private final Obj mTrue;

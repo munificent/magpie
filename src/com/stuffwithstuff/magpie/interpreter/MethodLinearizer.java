@@ -1,19 +1,17 @@
 package com.stuffwithstuff.magpie.interpreter;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.PatternVisitor;
 import com.stuffwithstuff.magpie.ast.pattern.RecordPattern;
-import com.stuffwithstuff.magpie.ast.pattern.TuplePattern;
 import com.stuffwithstuff.magpie.ast.pattern.TypePattern;
 import com.stuffwithstuff.magpie.ast.pattern.ValuePattern;
 import com.stuffwithstuff.magpie.ast.pattern.VariablePattern;
 import com.stuffwithstuff.magpie.ast.pattern.WildcardPattern;
-import com.stuffwithstuff.magpie.util.NotImplementedException;
-import com.stuffwithstuff.magpie.util.Pair;
 
 /**
  * Compares two methods to see which takes precedence over the other. It is
@@ -81,7 +79,6 @@ public class MethodLinearizer implements Comparator<Callable> {
       switch (kind2) {
       case ANY:     return 0;
       case RECORD:  return secondWins;
-      case TUPLE:   return secondWins;
       case TYPE:    return secondWins;
       case VALUE:   return secondWins;
       default:
@@ -90,18 +87,7 @@ public class MethodLinearizer implements Comparator<Callable> {
     case RECORD:
       switch (kind2) {
       case ANY:     return firstWins;
-      case RECORD:  throw new NotImplementedException();
-      case TUPLE:   throw new NotImplementedException();
-      case TYPE:    return compareTypes(pattern1, context1, pattern2, context2);
-      case VALUE:   return secondWins;
-      default:
-        throw new UnsupportedOperationException("Unknown pattern kind.");
-      }
-    case TUPLE:
-      switch (kind2) {
-      case ANY:     return firstWins;
-      case RECORD:  throw new NotImplementedException();
-      case TUPLE:   return compareTuples(pattern1, context1, pattern2, context2);
+      case RECORD:  return compareRecords(pattern1, context1, pattern2, context2);
       case TYPE:    return compareTypes(pattern1, context1, pattern2, context2);
       case VALUE:   return secondWins;
       default:
@@ -111,7 +97,6 @@ public class MethodLinearizer implements Comparator<Callable> {
       switch (kind2) {
       case ANY:     return firstWins;
       case RECORD:  return compareTypes(pattern1, context1, pattern2, context2);
-      case TUPLE:   return compareTypes(pattern1, context1, pattern2, context2);
       case TYPE:    return compareTypes(pattern1, context1, pattern2, context2);
       case VALUE:   return secondWins;
       default:
@@ -121,7 +106,6 @@ public class MethodLinearizer implements Comparator<Callable> {
       switch (kind2) {
       case ANY:     return firstWins;
       case RECORD:  return firstWins;
-      case TUPLE:   return firstWins;
       case TYPE:    return firstWins;
       case VALUE:   return compareValues(pattern1, context1, pattern2, context2);
       default:
@@ -132,20 +116,28 @@ public class MethodLinearizer implements Comparator<Callable> {
     }
   }
 
-  private int compareTuples(Pattern pattern1, EvalContext context1,
+  private int compareRecords(Pattern pattern1, EvalContext context1,
       Pattern pattern2, EvalContext context2) {
-    TuplePattern tuple1 = (TuplePattern)pattern1;
-    TuplePattern tuple2 = (TuplePattern)pattern2;
+    Map<String, Pattern> record1 = ((RecordPattern)pattern1).getFields();
+    Map<String, Pattern> record2 = ((RecordPattern)pattern2).getFields();
     
-    // TODO(bob): Eventually should handle different-sized tuples.
-    if (tuple1.getFields().size() != tuple2.getFields().size()) {
+    if (record1.size() != record2.size()) {
       throw ambiguous(pattern1, pattern2);
     }
     
+    // TODO(bob): Records should be compared just by name, and ignore order
+    // of fields.
+    
     int currentComparison = 0;
-    for (int i = 0; i < tuple1.getFields().size(); i++) {
-      int compare = compare(tuple1.getFields().get(i), context1,
-                            tuple2.getFields().get(i), context2);
+    for (String name : record1.keySet()) {
+      Pattern field1 = record1.get(name);
+      Pattern field2 = record2.get(name);
+      
+      // Field should be present in both.
+      if (field1 == null) throw ambiguous(pattern1, pattern2);
+      if (field2 == null) throw ambiguous(pattern1, pattern2);
+      
+      int compare = compare(field1, context1, field2, context2);
       
       if (currentComparison == 0) {
         currentComparison = compare;
@@ -210,7 +202,6 @@ public class MethodLinearizer implements Comparator<Callable> {
   private enum PatternKind {
     ANY,
     RECORD,
-    TUPLE,
     TYPE,
     VALUE
   }
@@ -222,25 +213,14 @@ public class MethodLinearizer implements Comparator<Callable> {
   private static class PatternSimplifier implements PatternVisitor<Pattern, Void> {
     @Override
     public Pattern visit(RecordPattern pattern, Void dummy) {
-      List<Pair<String, Pattern>> fields = new ArrayList<Pair<String, Pattern>>();
-      for (Pair<String, Pattern> field : pattern.getFields()) {
-        fields.add(new Pair<String, Pattern>(
-            field.getKey(), field.getValue().accept(this, null)));
+      Map<String, Pattern> fields = new HashMap<String, Pattern>();
+      for (Entry<String, Pattern> field : pattern.getFields().entrySet()) {
+        fields.put(field.getKey(), field.getValue().accept(this, null));
       }
       
       return Pattern.record(fields);
     }
-
-    @Override
-    public Pattern visit(TuplePattern pattern, Void dummy) {
-      List<Pattern> fields = new ArrayList<Pattern>();
-      for (Pattern field : pattern.getFields()) {
-        fields.add(field.accept(this, null));
-      }
-      
-      return Pattern.tuple(fields);
-    }
-
+    
     @Override
     public Pattern visit(TypePattern pattern, Void dummy) {
       return pattern;
@@ -267,12 +247,7 @@ public class MethodLinearizer implements Comparator<Callable> {
     public PatternKind visit(RecordPattern pattern, Void dummy) {
       return PatternKind.RECORD;
     }
-
-    @Override
-    public PatternKind visit(TuplePattern pattern, Void dummy) {
-      return PatternKind.TUPLE;
-    }
-
+    
     @Override
     public PatternKind visit(TypePattern pattern, Void dummy) {
       return PatternKind.TYPE;

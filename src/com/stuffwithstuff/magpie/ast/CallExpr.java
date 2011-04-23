@@ -39,9 +39,6 @@ public class CallExpr extends Expr {
       // Do nothing.
     } else if (mArg instanceof NothingExpr) {
       builder.append("()");
-    } else if (mArg instanceof TupleExpr) {
-      // Don't double (()).
-      builder.append(mArg);
     } else {
       builder.append("(").append(mArg).append(")");
     }

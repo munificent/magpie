@@ -1,7 +1,8 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import java.util.Map.Entry;
+
 import com.stuffwithstuff.magpie.ast.pattern.*;
-import com.stuffwithstuff.magpie.util.Pair;
 
 /**
  * Given a pattern, a value, and a context, destructures the value and binds
@@ -17,27 +18,14 @@ public class PatternBinder implements PatternVisitor<Void, Obj>  {
   @Override
   public Void visit(RecordPattern pattern, Obj value) {
     // Destructure each field.
-    for (int i = 0; i < pattern.getFields().size(); i++) {
-      Pair<String, Pattern> field = pattern.getFields().get(i);
+    for (Entry<String, Pattern> field : pattern.getFields().entrySet()) {
       Obj fieldValue = value.getField(field.getKey());
       field.getValue().accept(this, fieldValue);
     }
     
     return null;
   }
-  
-  @Override
-  public Void visit(TuplePattern pattern, Obj value) {
-    // Destructure each field.
-    for (int i = 0; i < pattern.getFields().size(); i++) {
-      Pattern fieldPattern = pattern.getFields().get(i);
-      Obj field = value.getTupleField(i);
-      fieldPattern.accept(this, field);
-    }
     
-    return null;
-  }
-
   @Override
   public Void visit(TypePattern pattern, Obj value) {
     // Do nothing.

@@ -37,7 +37,7 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
       // message(arg) = value  -->  message_=(arg, value)
       return Expr.call(expr.getPosition(),
           null, Name.makeAssigner(expr.getName()),
-          Expr.tuple(expr.getArg(), value));
+          Expr.record(expr.getArg(), value));
     } else {
       if (expr.getArg() == null) {
         // receiver message = value  -->  receiver message_=(value)
@@ -47,7 +47,7 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
         // receiver message(arg) = value  -->  receiver message_=(arg, value)
         return Expr.call(expr.getPosition(),
             expr.getReceiver(), Name.makeAssigner(expr.getName()),
-            Expr.tuple(expr.getArg(), value));
+            Expr.record(expr.getArg(), value));
       }
     }
   }
@@ -125,11 +125,6 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
   @Override
   public Expr visit(StringExpr expr, Expr value) {
     return invalidExpression(expr);
-  }
-
-  @Override
-  public Expr visit(TupleExpr expr, Expr value) {
-    throw new NotImplementedException("Destructuring is only implemented on new vars for now.");
   }
 
   @Override
