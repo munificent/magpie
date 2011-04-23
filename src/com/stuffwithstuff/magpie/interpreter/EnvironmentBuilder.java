@@ -26,10 +26,10 @@ public class EnvironmentBuilder {
     Scope scope = mModule.getScope();
     
     // The class of all classes. Its class is itself.
-    ClassObj classObj = new ClassObj(null, "Class", null,
+    ClassObj classObj = new ClassObj(null, Name.CLASS, null,
         new HashMap<String, Field>(), scope);
     classObj.bindClass(classObj);
-    scope.define("Class", classObj);
+    scope.define(Name.CLASS, classObj);
     
     return classObj;
   }
@@ -54,16 +54,15 @@ public class EnvironmentBuilder {
     // Define the core error classes.
     ClassObj error = class_("Error").end();
     
-    class_("BadCallError", error).end();
-    class_("AmbiguousMethodError", error).end();
-    class_("IOError", error).end();
-    class_("NoMatchError", error).end();
-    class_("NoMethodError", error).end();
-    class_("NoVariableError", error).end();
-    class_("OutOfBoundsError", error).end();
-    class_("ParentCollisionError", error).end();
-    class_("ParseError", error).end();
-    class_("RedefinitionError", error).end();
+    class_(Name.AMBIGUOUS_METHOD_ERROR, error).end();
+    class_(Name.IO_ERROR, error).end();
+    class_(Name.NO_MATCH_ERROR, error).end();
+    class_(Name.NO_METHOD_ERROR, error).end();
+    class_(Name.NO_VARIABLE_ERROR, error).end();
+    class_(Name.OUT_OF_BOUNDS_ERROR, error).end();
+    class_(Name.PARENT_COLLISION_ERROR, error).end();
+    class_(Name.PARSE_ERROR, error).end();
+    class_(Name.REDEFINITION_ERROR, error).end();
     
     // TODO(bob): These should be in a different module.
     

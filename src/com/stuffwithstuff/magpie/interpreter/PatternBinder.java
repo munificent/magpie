@@ -43,8 +43,9 @@ public class PatternBinder implements PatternVisitor<Void, Obj>  {
     // Bind the variable.
     if (!bindNewVariable(pattern.getName(), value)) {
       // Cannot redefine a variable in the same scope.
-      mInterpreter.error("RedefinitionError",
-          String.format("There is already a variable named \"%s\" in this scope.", pattern.getName()));
+      mInterpreter.error(Name.REDEFINITION_ERROR, String.format(
+          "There is already a variable named \"%s\" in this scope.", 
+          pattern.getName()));
     }
     
     // Recurse into the inner pattern if there is one.

@@ -195,7 +195,7 @@ public class MethodLinearizer implements Comparator<Callable> {
   }
   
   private ErrorException ambiguous(Pattern pattern1, Pattern pattern2) {
-    return mInterpreter.error("AmbiguousMethodError", 
+    return mInterpreter.error(Name.AMBIGUOUS_METHOD_ERROR, 
         "Cannot choose a method between " + pattern1 + " and " + pattern2);
   }
 

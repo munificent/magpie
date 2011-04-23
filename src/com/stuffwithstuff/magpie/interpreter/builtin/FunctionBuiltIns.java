@@ -4,6 +4,7 @@ import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.EvalContext;
 import com.stuffwithstuff.magpie.interpreter.FnObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
+import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.PatternTester;
 
@@ -19,7 +20,7 @@ public class FunctionBuiltIns {
       EvalContext context = new EvalContext(callable.getClosure());
       if (!PatternTester.test(interpreter, callable.getPattern(), fnArg,
           context)) {
-        throw interpreter.error("NoMethodError");
+        throw interpreter.error(Name.NO_METHOD_ERROR);
       }
 
       return function.invoke(interpreter, fnArg);

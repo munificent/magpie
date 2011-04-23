@@ -151,11 +151,11 @@ public class Interpreter {
     ClassObj classObj = new ClassObj(mClass, name, parents, fields, scope);
     
     if (classObj.checkForCollisions()) {
-      error("ParentCollisionError");
+      error(Name.PARENT_COLLISION_ERROR);
     }
     
     // Add the constructor.
-    scope.define("init", new ClassInit(classObj, scope));
+    scope.define(Name.INIT, new ClassInit(classObj, scope));
     
     // Add getters and setters for the fields.
     for (Entry<String, Field> entry : fields.entrySet()) {
@@ -165,7 +165,7 @@ public class Interpreter {
 
       // Setter, if the field is mutable ("var" instead of "val").
       if (entry.getValue().isMutable()) {
-        scope.define(entry.getKey() + "_=",
+        scope.define(Name.makeAssigner(entry.getKey()),
             new FieldSetter(classObj, entry.getKey(), entry.getValue(), scope));
       }
     }
@@ -259,7 +259,7 @@ public class Interpreter {
   }
   
   public void initializeNewObject(ClassObj classObj, Obj arg) {
-    Multimethod init = classObj.getClosure().lookUpMultimethod("init");
+    Multimethod init = classObj.getClosure().lookUpMultimethod(Name.INIT);
     // Note: the receiver for init() is the class itself, not the new instance
     // which is considered to be in a hidden state since it isn't initialized
     // yet.

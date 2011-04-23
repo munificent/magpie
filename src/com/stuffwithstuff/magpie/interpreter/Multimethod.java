@@ -25,7 +25,7 @@ public class Multimethod {
     Callable method = select(interpreter, arg);
         
     if (method == null) {
-      interpreter.error("NoMethodError", 
+      interpreter.error(Name.NO_METHOD_ERROR, 
           "Could not find a method to match argument " + arg + ".");
     }
 

@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
+import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class StringBuiltIns {  
@@ -14,7 +15,7 @@ public class StringBuiltIns {
       if (index < 0) index = string.length() + index;
       
       if ((index < 0) || (index >= string.length())) {
-        interpreter.error("OutOfBoundsError");
+        interpreter.error(Name.OUT_OF_BOUNDS_ERROR);
       }
       
       return interpreter.createString(string.substring(index, index + 1));

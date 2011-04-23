@@ -5,6 +5,7 @@ import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
+import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.Scope;
 
@@ -30,7 +31,7 @@ public class ClassNew implements Callable {
     // The receiver is any instance of Class, and it takes any argument, since
     // it will simply forward it onto 'init()'.
     return Pattern.record(
-        Pattern.type(Expr.variable("Class")),
+        Pattern.type(Expr.variable(Name.CLASS)),
         Pattern.wildcard());
   }
 

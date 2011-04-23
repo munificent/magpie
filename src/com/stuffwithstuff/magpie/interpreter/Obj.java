@@ -144,20 +144,6 @@ public class Obj {
       builder.append(")");
       return builder.toString();
       
-    } else if (mClass.getName().equals("Tuple")) {
-      StringBuilder builder = new StringBuilder();
-      builder.append("(");
-      
-      for (int i = 0; ; i++) {
-        Obj field = this.getField(i);
-        if (field == null) break;
-        if (i > 0) builder.append(", ");
-        builder.append(field.toString());
-      }
-      
-      builder.append(")");
-      return builder.toString();
-      
     } else if (mClass.getName().equals("Nothing")) {
       return "nothing";
     }

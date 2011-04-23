@@ -3,6 +3,7 @@ package com.stuffwithstuff.magpie.interpreter.builtin;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
+import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class ListBuiltIns {
@@ -68,7 +69,7 @@ public class ListBuiltIns {
     
     // Check the bounds.
     if ((index < 0) || (index >= list.size())) {
-      interpreter.error("OutOfBoundsError");
+      interpreter.error(Name.OUT_OF_BOUNDS_ERROR);
     }
     
     return index;
