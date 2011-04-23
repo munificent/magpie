@@ -1,3 +1,6 @@
+// magpie.core is automatically loaded and imported into every module before it
+// is run.
+
 def (_ String) string
     this
 end

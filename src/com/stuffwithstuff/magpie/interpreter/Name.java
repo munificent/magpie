@@ -26,7 +26,6 @@ public final class Name {
   public static final String OUT_OF_BOUNDS_ERROR = "OutOfBoundsError";
   public static final String PARENT_COLLISION_ERROR = "ParentCollisionError";
   public static final String PARSE_ERROR = "ParseError";
-  public static final String RECEIVING = "receiving";
   public static final String REDEFINITION_ERROR = "RedefinitionError";
   public static final String STRING = "string";
 

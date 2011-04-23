@@ -1,0 +1,4 @@
+This directory contains the Magpie "standard library". When a module is
+imported, it will look for it starting in the current working directory (i.e
+the directory of the initial Magpie script that is being executed). If not
+found there, it will look here.

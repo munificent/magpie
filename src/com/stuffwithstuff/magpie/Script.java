@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URL;
 import java.nio.charset.Charset;
 
 import com.stuffwithstuff.magpie.interpreter.ErrorException;
@@ -31,6 +32,21 @@ public class Script {
             file.getPath(), readFile(file.getPath()));
       }
       
+      // $APPDIR/lib/foo/bar.mag
+      File appDir = new File(getAppDirectory(), "lib");
+      file = new File(appDir, modulePath + ".mag");
+      if (file.exists()) {
+        return new ModuleInfo(name,
+            file.getPath(), readFile(file.getPath()));
+      }
+      
+      // $APPDIR/lib/foo/bar/_init.mag
+      file = new File(appDir, modulePath + "/_init.mag");
+      if (file.exists()) {
+        return new ModuleInfo(name,
+            file.getPath(), readFile(file.getPath()));
+      }
+
       throw new IOException("Couldn't find module " + name);
     } catch (IOException e) {
       e.printStackTrace();
@@ -77,5 +93,11 @@ public class Script {
     } finally {
       stream.close();
     }
+  }
+  
+  public static File getAppDirectory() {
+    URL location = Magpie.class.getProtectionDomain().getCodeSource().getLocation();
+    // Back up one directory to get out of "bin/".
+    return new File(location.getFile()).getParentFile();
   }
 }

@@ -15,7 +15,7 @@ public class Interpreter {
     
     mGrammar = new Grammar();
 
-    mBaseModule = new Module(mHost.loadModule("base"));
+    mBaseModule = new Module(mHost.loadModule("magpie.core"));
     mLoadingModules.push(mBaseModule);
     
     EnvironmentBuilder builder = new EnvironmentBuilder(this, mBaseModule);
