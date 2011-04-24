@@ -20,5 +20,6 @@ public interface ExprVisitor<R, C> {
   R visit(ReturnExpr expr, C context);
   R visit(ScopeExpr expr, C context);
   R visit(StringExpr expr, C context);
+  R visit(ThrowExpr expr, C context);
   R visit(DefineExpr expr, C context);
 }

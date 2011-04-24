@@ -3,8 +3,8 @@ package com.stuffwithstuff.magpie.ast;
 import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.util.Expect;
 
-public class ReturnExpr extends Expr {
-  ReturnExpr(Position position, Expr value) {
+public class ThrowExpr extends Expr {
+  ThrowExpr(Position position, Expr value) {
     super(position);
     Expect.notNull(value);    
     
@@ -20,7 +20,7 @@ public class ReturnExpr extends Expr {
 
   @Override
   public void toString(StringBuilder builder, String indent) {
-    builder.append("return ");
+    builder.append("throw ");
     mValue.toString(builder, indent);
   }
 

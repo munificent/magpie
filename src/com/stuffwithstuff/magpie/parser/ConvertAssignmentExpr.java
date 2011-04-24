@@ -128,6 +128,11 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
   }
 
   @Override
+  public Expr visit(ThrowExpr expr, Expr value) {
+    return invalidExpression(expr);
+  }
+
+  @Override
   public Expr visit(VariableExpr expr, Expr value) {
     // message = value  -->  message = value
     return Expr.assign(expr.getPosition(), expr.getName(), value);

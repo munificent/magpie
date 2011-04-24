@@ -128,6 +128,23 @@ public abstract class Expr {
     return new RecordExpr(position, fields);
   }
 
+  public static Expr record(Expr... fields) {
+    List<Pair<String, Expr>> recordFields =
+        new ArrayList<Pair<String, Expr>>();
+    
+    for (int i = 0; i < fields.length; i++) {
+      recordFields.add(new Pair<String, Expr>(
+          Name.getTupleField(i), fields[i]));
+    }
+    
+    return record(Position.surrounding(fields[0], fields[fields.length - 1]),
+        recordFields);
+  }
+
+  public static Expr return_(Position position, Expr value) {
+    return new ReturnExpr(position, value);
+  }
+
   public static Expr scope(Expr body) {
     return scope(body, new ArrayList<MatchCase>());
   }
@@ -159,17 +176,8 @@ public abstract class Expr {
     return new StringExpr(position, text);
   }
 
-  public static Expr record(Expr... fields) {
-    List<Pair<String, Expr>> recordFields =
-        new ArrayList<Pair<String, Expr>>();
-    
-    for (int i = 0; i < fields.length; i++) {
-      recordFields.add(new Pair<String, Expr>(
-          Name.getTupleField(i), fields[i]));
-    }
-    
-    return record(Position.surrounding(fields[0], fields[fields.length - 1]),
-        recordFields);
+  public static Expr throw_(Position position, Expr value) {
+    return new ThrowExpr(position, value);
   }
 
   public static Expr variable(Position position, String name) {

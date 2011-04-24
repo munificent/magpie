@@ -274,7 +274,13 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(StringExpr expr, EvalContext context) {
     return mInterpreter.createString(expr.getValue());
   }
-  
+
+  @Override
+  public Obj visit(ThrowExpr expr, EvalContext context) {
+    Obj value = evaluate(expr.getValue(), context);
+    throw new ErrorException(value);
+  }
+
   @Override
   public Obj visit(VariableExpr expr, EvalContext context) {
     // Look for a local variable.

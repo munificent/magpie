@@ -1,7 +1,6 @@
 package com.stuffwithstuff.magpie.parser;
 
 import com.stuffwithstuff.magpie.ast.Expr;
-import com.stuffwithstuff.magpie.ast.ReturnExpr;
 
 public class ReturnParser implements PrefixParser {
   @Override
@@ -16,6 +15,6 @@ public class ReturnParser implements PrefixParser {
       value = parser.parseExpression();
     }
     
-    return new ReturnExpr(span.end(), value);
+    return Expr.return_(span.end(), value);
   }
 }
