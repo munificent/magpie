@@ -8,6 +8,7 @@ import java.util.Map;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
+import com.stuffwithstuff.magpie.interpreter.builtin.BuiltIns;
 import com.stuffwithstuff.magpie.util.Pair;
 
 /**
@@ -116,37 +117,50 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
 
   @Override
   public Obj visit(ImportExpr expr, EvalContext context) {
-    Module module = mInterpreter.importModule(expr.getModule());
-    
-    if (expr.getName() == null) {
-      // Not a specific name, so import all names.
-      String prefix;
-      if (expr.getRename() == null) {
-        // Just use the unqualified name.
-        prefix = "";
-      } else if (expr.getRename().equals("_")) {
-        // Use the module name as a prefix.
-        prefix = module.getName() + ".";
-      } else {
-        prefix = expr.getRename() + ".";
-      }
+    // TODO(bob): Eventually the schemes should be host-provided plug-ins.
+    if (expr.getScheme() == null) {
+      Module module = mInterpreter.importModule(expr.getModule());
       
-      context.getScope().importAll(mInterpreter, prefix, module);
-    } else {
-      // Importing just one name.
-      String rename;
-      if (expr.getRename() == null) {
-        // Just use the unqualified name.
-        rename = expr.getName();
-      } else if (expr.getRename().equals("_")) {
-        // Use the module name as a prefix.
-        rename = module.getName() + "." + expr.getName();
+      if (expr.getName() == null) {
+        // Not a specific name, so import all names.
+        String prefix;
+        if (expr.getRename() == null) {
+          // Just use the unqualified name.
+          prefix = "";
+        } else if (expr.getRename().equals("_")) {
+          // Use the module name as a prefix.
+          prefix = module.getName() + ".";
+        } else {
+          prefix = expr.getRename() + ".";
+        }
+        
+        context.getScope().importAll(mInterpreter, prefix, module);
       } else {
-        rename = expr.getRename();
+        // Importing just one name.
+        String rename;
+        if (expr.getRename() == null) {
+          // Just use the unqualified name.
+          rename = expr.getName();
+        } else if (expr.getRename().equals("_")) {
+          // Use the module name as a prefix.
+          rename = module.getName() + "." + expr.getName();
+        } else {
+          rename = expr.getRename();
+        }
+        
+        context.getScope().importName(mInterpreter,
+            expr.getName(), rename, module);
       }
-      
-      context.getScope().importName(mInterpreter,
-          expr.getName(), rename, module);
+    } else if (expr.getScheme().equals("classfile")) {
+      try {
+        ClassLoader classLoader = BuiltIns.class.getClassLoader();
+        @SuppressWarnings("rawtypes")
+        Class javaClass = classLoader.loadClass(expr.getModule());
+        BuiltIns.register(javaClass, context.getScope());
+      } catch (ClassNotFoundException e) {
+        // TODO(bob): Throw better error.
+        throw mInterpreter.error("Error");
+      }
     }
     
     return mInterpreter.nothing();

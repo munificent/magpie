@@ -6,8 +6,6 @@ import java.util.Map;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.Field;
-import com.stuffwithstuff.magpie.interpreter.builtin.BuiltInFunctions;
-import com.stuffwithstuff.magpie.interpreter.builtin.BuiltIns;
 import com.stuffwithstuff.magpie.interpreter.builtin.ClassNew;
 
 public class EnvironmentBuilder {
@@ -169,9 +167,6 @@ public class EnvironmentBuilder {
     .end();
     
     // TODO(bob): Other patterns, MatchCase
-    
-    // Register the built-in methods.
-    BuiltIns.register(BuiltInFunctions.class, scope);
   }
   
   private ClassBuilder class_(String name, ClassObj... parents) {

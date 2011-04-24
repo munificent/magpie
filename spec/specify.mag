@@ -1,3 +1,5 @@
+import magpie.reflect
+
 var totalTests = 0
 var totalFailures = 0
 

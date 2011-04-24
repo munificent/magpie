@@ -7,6 +7,11 @@ public class ImportParser implements PrefixParser {
   public Expr parse(MagpieParser parser, Token token) {
     PositionSpan span = parser.startBefore();
     
+    String scheme = null;
+    if (parser.match(TokenType.FIELD)) {
+      scheme = parser.last(1).getString();
+    }
+    
     // Allow a leading . for a relative path.
     String module = "";
     if (parser.match(TokenType.DOT)) {
@@ -28,6 +33,6 @@ public class ImportParser implements PrefixParser {
       rename = parser.parseName().getString();
     }
     
-    return Expr.import_(span.end(), module, name, rename);
+    return Expr.import_(span.end(), scheme, module, name, rename);
   }
 }

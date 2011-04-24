@@ -1,12 +1,14 @@
 // magpie.core is automatically loaded and imported into every module before it
 // is run.
+import magpie.reflect
 
-*importJvmClass*("com.stuffwithstuff.magpie.interpreter.builtin.ClassBuiltIns")
-*importJvmClass*("com.stuffwithstuff.magpie.interpreter.builtin.FunctionBuiltIns")
-*importJvmClass*("com.stuffwithstuff.magpie.interpreter.builtin.IntBuiltIns")
-*importJvmClass*("com.stuffwithstuff.magpie.interpreter.builtin.ListBuiltIns")
-*importJvmClass*("com.stuffwithstuff.magpie.interpreter.builtin.ObjectBuiltIns")
-*importJvmClass*("com.stuffwithstuff.magpie.interpreter.builtin.StringBuiltIns")
+import classfile:com.stuffwithstuff.magpie.interpreter.builtin.BuiltInFunctions
+import classfile:com.stuffwithstuff.magpie.interpreter.builtin.ClassBuiltIns
+import classfile:com.stuffwithstuff.magpie.interpreter.builtin.FunctionBuiltIns
+import classfile:com.stuffwithstuff.magpie.interpreter.builtin.IntBuiltIns
+import classfile:com.stuffwithstuff.magpie.interpreter.builtin.ListBuiltIns
+import classfile:com.stuffwithstuff.magpie.interpreter.builtin.ObjectBuiltIns
+import classfile:com.stuffwithstuff.magpie.interpreter.builtin.StringBuiltIns
 
 def (_ String) string
     this

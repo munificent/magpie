@@ -15,13 +15,15 @@ public class ImportExpr extends Expr {
    *                all imported names (with a "." added). If "_", the module
    *                will be used as a prefix.
    */
-  ImportExpr(Position position, String module, String name, String rename) {
+  ImportExpr(Position position, String scheme, String module, String name, String rename) {
     super(position);
+    mScheme = scheme;
     mModule = module;
     mName   = name;
     mRename = rename;
   }
   
+  public String getScheme() { return mScheme; }
   public String getModule() { return mModule; }
   public String getName() { return mName; }
   public String getRename() { return mRename; }
@@ -35,17 +37,14 @@ public class ImportExpr extends Expr {
   public void toString(StringBuilder builder, String indent) {
     builder.append("import ").append(mModule);
     
-    if (mName != null) {
-      builder.append(" ").append(mName);
-    }
-    
-    if (mRename != null) {
-      builder.append(" = ").append(mRename);
-    }
+    if (mScheme != null) builder.append(mScheme).append(":");
+    if (mName != null) builder.append(" ").append(mName);
+    if (mRename != null) builder.append(" = ").append(mRename);
     
     builder.append("\n");
   }
 
+  private final String mScheme;
   private final String mModule;
   private final String mName;
   private final String mRename;

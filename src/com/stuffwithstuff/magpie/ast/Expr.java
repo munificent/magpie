@@ -86,8 +86,9 @@ public abstract class Expr {
         cases);
   }
   
-  public static Expr import_(Position position, String module, String name, String rename) {
-    return new ImportExpr(position, module, name, rename);
+  public static Expr import_(Position position, String scheme, String module,
+      String name, String rename) {
+    return new ImportExpr(position, scheme, module, name, rename);
   }
   
   public static Expr int_(int value) {

@@ -12,25 +12,6 @@ import com.stuffwithstuff.magpie.parser.StringCharacterReader;
  * Defines built-in methods that are available as top-level global functions.
  */
 public class BuiltInFunctions {
-  @Signature("*importJvmClass*(name String)")
-  public static class ImportJvmClass implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj arg) {
-      String name = arg.getField(1).asString();
-
-      try {
-        ClassLoader classLoader = BuiltIns.class.getClassLoader();
-        @SuppressWarnings("rawtypes")
-        Class javaClass = classLoader.loadClass(name);
-        BuiltIns.register(javaClass, interpreter.getCurrentModule().getScope());
-      } catch (ClassNotFoundException e) {
-        // TODO(bob): Throw better error.
-        throw interpreter.error("Error");
-      }
-      
-      return interpreter.nothing();
-    }
-  }
-  
   @Signature("currentTime()")
   public static class CurrentTime implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
