@@ -8,13 +8,7 @@ import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.Field;
 import com.stuffwithstuff.magpie.interpreter.builtin.BuiltInFunctions;
 import com.stuffwithstuff.magpie.interpreter.builtin.BuiltIns;
-import com.stuffwithstuff.magpie.interpreter.builtin.ClassBuiltIns;
 import com.stuffwithstuff.magpie.interpreter.builtin.ClassNew;
-import com.stuffwithstuff.magpie.interpreter.builtin.FunctionBuiltIns;
-import com.stuffwithstuff.magpie.interpreter.builtin.IntBuiltIns;
-import com.stuffwithstuff.magpie.interpreter.builtin.ListBuiltIns;
-import com.stuffwithstuff.magpie.interpreter.builtin.ObjectBuiltIns;
-import com.stuffwithstuff.magpie.interpreter.builtin.StringBuiltIns;
 
 public class EnvironmentBuilder {
   public EnvironmentBuilder(Interpreter interpreter, Module module) {
@@ -36,8 +30,9 @@ public class EnvironmentBuilder {
   
   public void initialize() {
     // Create the default new() method for creating objects.
-    Callable newMethod = new ClassNew(mModule.getScope());
-    mModule.getScope().define("new", newMethod);
+    Scope scope = mModule.getScope();
+    Callable newMethod = new ClassNew(scope);
+    scope.define("new", newMethod);
     
     ClassObj indexable = class_("Indexable").end();
     ClassObj comparable = class_("Comparable").end();
@@ -176,13 +171,7 @@ public class EnvironmentBuilder {
     // TODO(bob): Other patterns, MatchCase
     
     // Register the built-in methods.
-    BuiltIns.register(ClassBuiltIns.class, mModule);
-    BuiltIns.register(FunctionBuiltIns.class, mModule);
-    BuiltIns.register(IntBuiltIns.class, mModule);
-    BuiltIns.register(ListBuiltIns.class, mModule);
-    BuiltIns.register(ObjectBuiltIns.class, mModule);
-    BuiltIns.register(StringBuiltIns.class, mModule);
-    BuiltIns.register(BuiltInFunctions.class, mModule);
+    BuiltIns.register(BuiltInFunctions.class, scope);
   }
   
   private ClassBuilder class_(String name, ClassObj... parents) {
