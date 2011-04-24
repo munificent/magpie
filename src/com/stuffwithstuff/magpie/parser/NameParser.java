@@ -40,7 +40,8 @@ public class NameParser implements PrefixParser, InfixParser {
 
       // Parse the block and wrap it in a function.
       Expr block = parser.parseExpressionOrBlock();
-      block = Expr.fn(block.getPosition(), blockType, block);
+      // TODO(bob): Parse doc comment.
+      block = Expr.fn(block.getPosition(), "", blockType, block);
       
       // Add it to the argument list.
       arg = appendField(arg, block);

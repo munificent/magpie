@@ -104,6 +104,12 @@ public class DefParser implements PrefixParser {
     PositionSpan span = parser.startBefore();
     
     Pair<String, Pattern> signature = parseSignature(parser);
+    
+    // Parse the doc comment if given.
+    String doc = "";
+    if (parser.match(TokenType.LINE, TokenType.DOC_COMMENT)) {
+      doc = parser.last(1).getString();
+    }
 
     if (!parser.lookAhead(TokenType.LINE)) {
       throw new ParseException("A method body must be a block.");
@@ -111,8 +117,8 @@ public class DefParser implements PrefixParser {
     
     Expr body = parser.parseBlock();
     
-    return Expr.method(span.end(), signature.getKey(), signature.getValue(),
-        body);
+    return Expr.method(span.end(), doc, 
+        signature.getKey(), signature.getValue(), body);
   }
   
   private static Pattern parsePattern(MagpieParser parser) {

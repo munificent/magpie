@@ -117,7 +117,7 @@ public class Lexer implements TokenReader {
         break;
         
       case '"':
-        return makeToken(TokenType.STRING, ConvertTo.STRING);
+        return makeToken(TokenType.STRING, convertStringLiteral(mRead));
        
       case '\0': throw new ParseException("Unterminated string.");
       
@@ -128,12 +128,19 @@ public class Lexer implements TokenReader {
   }
   
   private Token readLineComment() {
+    advance(); // Consume second "/".
+    
+    // See if it's a "///" doc comment.
+    boolean isDoc = (peek() == '/');
+      
     while (true) {
       switch (peek()) {
       case '\n':
       case '\r':
       case '\0':
-        return makeToken(TokenType.COMMENT);
+        String value = mRead.substring(isDoc ? 3 : 2).trim();
+        return makeToken(
+            isDoc ? TokenType.DOC_COMMENT : TokenType.LINE_COMMENT, value);
         
       default:
         advance();
@@ -146,7 +153,7 @@ public class Lexer implements TokenReader {
       switch (advance()) {
       case '*':
         switch (advance()) {
-        case '/': return makeToken(TokenType.COMMENT);
+        case '/': return makeToken(TokenType.BLOCK_COMMENT);
         case '\0': throw new ParseException("Unterminated block comment.");
         default: // Do nothing, keep advancing.
         }
@@ -164,7 +171,10 @@ public class Lexer implements TokenReader {
         advance();
       } else if (peek() == ':') {
         advance();
-        return makeToken(TokenType.FIELD, ConvertTo.FIELD);
+        
+        // Trim off the ":".
+        String value = mRead.substring(0, mRead.length() - 1);
+        return makeToken(TokenType.FIELD, value);
       } else {
         return makeToken(TokenType.NAME);
       }
@@ -176,9 +186,35 @@ public class Lexer implements TokenReader {
       if (isDigit(peek())) {
         advance();
       } else {
-        return makeToken(TokenType.INT, ConvertTo.INT);
+        return makeToken(TokenType.INT, Integer.parseInt(mRead));
       }
     }
+  }
+  
+  private String convertStringLiteral(String literal) {
+    // Trim the quotes and convert the escapes.
+    StringBuilder builder = new StringBuilder();
+    
+    boolean inEscape = false;
+    for (int i = 1; i < literal.length() - 1; i++) {
+      if (inEscape) {
+        switch (literal.charAt(i)) {
+        case 'n': builder.append("\n"); break;
+        case 't': builder.append("\t"); break;
+        case '\\': builder.append("\\"); break;
+        case '"': builder.append("\""); break;
+        }
+        inEscape = false;
+      } else {
+        if (literal.charAt(i) == '\\') {
+          inEscape = true;
+        } else {
+          builder.append(literal.charAt(i));
+        }
+      }
+    }
+
+    return builder.toString();
   }
   
   private char peek() {
@@ -202,51 +238,11 @@ public class Lexer implements TokenReader {
     return c;
   }
 
-  private Token makeToken(TokenType type, ConvertTo convert) {
-    Object value;
-    switch (convert) {
-    case TEXT:
-      value = mRead;
-      break;
-      
-    case STRING:
-      // Trim the quotes and convert the escapes.
-      StringBuilder builder = new StringBuilder();
-      
-      boolean inEscape = false;
-      for (int i = 1; i < mRead.length() - 1; i++) {
-        if (inEscape) {
-          switch (mRead.charAt(i)) {
-          case 'n': builder.append("\n"); break;
-          case 't': builder.append("\t"); break;
-          case '\\': builder.append("\\"); break;
-          case '"': builder.append("\""); break;
-          }
-          inEscape = false;
-        } else {
-          if (mRead.charAt(i) == '\\') {
-            inEscape = true;
-          } else {
-            builder.append(mRead.charAt(i));
-          }
-        }
-      }
-
-      value = builder.toString();
-      break;
-      
-    case INT:
-      value = Integer.parseInt(mRead);
-      break;
-      
-    case FIELD:
-      // Trim off the ":".
-      value = mRead.substring(0, mRead.length() - 1);
-      break;
-      
-    default: throw new IllegalArgumentException();
-    }
-    
+  private Token makeToken(TokenType type) {
+    return makeToken(type, mRead);
+  }
+  
+  private Token makeToken(TokenType type, Object value) {
     // Handle reserved words.
     if (type == TokenType.NAME) {
       if (mRead.equals("nothing")) {
@@ -269,17 +265,6 @@ public class Lexer implements TokenReader {
     mRead = "";
     
     return token;
-  }
-  
-  private Token makeToken(TokenType type) {
-    return makeToken(type, ConvertTo.TEXT);
-  }
-  
-  private enum ConvertTo {
-    TEXT,
-    STRING,
-    INT,
-    FIELD
   }
   
   private Position currentPosition() {

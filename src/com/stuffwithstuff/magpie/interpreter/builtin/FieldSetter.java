@@ -37,6 +37,12 @@ public class FieldSetter implements Callable {
     return mClosure;
   }
   
+  @Override
+  public String getDoc() {
+    // TODO(bob): Actual docs.
+    return "<FieldSetter>";
+  }
+
   private final String mName;
   private final Pattern mPattern;
   private final Scope mClosure;

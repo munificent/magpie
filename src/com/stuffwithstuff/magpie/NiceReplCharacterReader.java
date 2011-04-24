@@ -81,7 +81,9 @@ public class NiceReplCharacterReader extends ReplCharacterReader {
           Term.set(Term.ForeColor.YELLOW);
           break;
          
-        case COMMENT:
+        case BLOCK_COMMENT:
+        case DOC_COMMENT:
+        case LINE_COMMENT:
           Term.set(Term.ForeColor.GRAY);
           break;
           

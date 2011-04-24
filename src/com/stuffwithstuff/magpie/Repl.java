@@ -36,8 +36,10 @@ public class Repl implements InterpreterHost {
           parser.consume(TokenType.LINE);
           
           Obj result = mInterpreter.interpret(expr);
-          String text = mInterpreter.evaluateToString(result);
-          printResult(text);
+          if (result != mInterpreter.nothing()) {
+            String text = mInterpreter.evaluateToString(result);
+            printResult(text);
+          }
         } catch(ParseException ex) {
           printError("Parse error: " + ex.getMessage());
         } catch(ErrorException ex) {

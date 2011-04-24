@@ -77,6 +77,12 @@ public class ClassInit implements Callable {
   public Scope getClosure() {
     return mClosure;
   }
+  
+  @Override
+  public String getDoc() {
+    // TODO(bob): Actual docs.
+    return "<ClassInit>";
+  }
 
   @Override
   public String toString() {

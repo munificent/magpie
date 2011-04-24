@@ -26,6 +26,12 @@ public class BuiltIn implements Callable {
     return mClosure;
   }
   
+  @Override
+  public String getDoc() {
+    // TODO(bob): Define Java annotation to let built-ins provide this.
+    return "<built-in>";
+  }
+  
   private final Pattern mPattern;
   private final BuiltInCallable mCallable;
   private final Scope mClosure;

@@ -8,12 +8,12 @@ import com.stuffwithstuff.magpie.util.Expect;
  * AST node class for an function definition.
  */
 public class FnExpr extends Expr {
-  FnExpr(Position position, Expr body) {
-    this(position, Pattern.nothing(), body);
+  FnExpr(Position position, String doc, Expr body) {
+    this(position, doc, Pattern.nothing(), body);
   }
   
-  FnExpr(Position position, Pattern pattern, Expr body) {
-    super(position);
+  FnExpr(Position position, String doc, Pattern pattern, Expr body) {
+    super(position, doc);
     Expect.notNull(pattern);
     mPattern = pattern;
     mBody = body;

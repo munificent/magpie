@@ -36,34 +36,7 @@ public final class Token {
   }
   
   public String toString() {
-    switch (mType)
-    {
-      case LEFT_PAREN: return "(";
-      case RIGHT_PAREN: return ")";
-      case LEFT_BRACKET: return "[";
-      case RIGHT_BRACKET: return "]";
-      case LEFT_BRACE: return "{";
-      case RIGHT_BRACE: return "}";
-      case BACKTICK: return "`";
-      case COLON: return ":";
-      case COMMA: return ",";
-      case DOT: return ".";
-      case EQUALS: return "=";
-      case LINE: return "\n";
-
-      case NAME: return getString();
-      case FIELD: return getString() + ":";
-
-      case BOOL: return Boolean.toString(getBool());
-      case DOUBLE: return Double.toString(getDouble());
-      case INT: return Integer.toString(getInt());
-      case NOTHING: return "nothing";
-      case STRING: return "\"" + getString() + "\"";
-
-      case EOF: return "(eof)";
-
-      default: return "(unknown token?!)";
-    }
+    return mText;
   }
   
   private final Position  mPosition;

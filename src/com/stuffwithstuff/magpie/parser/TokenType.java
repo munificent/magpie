@@ -26,7 +26,9 @@ public enum TokenType {
   STRING,
   
   // comments
-  COMMENT,
+  BLOCK_COMMENT,
+  DOC_COMMENT,
+  LINE_COMMENT,
   
   // spacing
   LINE,

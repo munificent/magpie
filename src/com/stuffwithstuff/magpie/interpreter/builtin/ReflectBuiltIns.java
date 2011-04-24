@@ -3,6 +3,7 @@ package com.stuffwithstuff.magpie.interpreter.builtin;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.RecordPattern;
 import com.stuffwithstuff.magpie.interpreter.Callable;
+import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Multimethod;
 import com.stuffwithstuff.magpie.interpreter.Name;
@@ -37,6 +38,7 @@ public class ReflectBuiltIns {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       String name = arg.getField(1).asString();
       
+      // TODO(bob): Hackish, but works.
       Multimethod multimethod = interpreter.getCurrentModule().getScope()
           .lookUpMultimethod(name);
       
@@ -55,9 +57,26 @@ public class ReflectBuiltIns {
             interpreter.print(String.format("%s %s\n",
                 pattern, name));
           }
+          
+          interpreter.print("| " + method.getDoc().replace("\n", "\n| ") + "\n");
         }
       }
       
+      return interpreter.nothing();
+    }
+  }
+  
+  @Signature("(_ Class) doc")
+  public static class ClassDoc implements BuiltInCallable {
+    public Obj invoke(Interpreter interpreter, Obj arg) {
+      ClassObj classObj = arg.getField(1).asClass();
+      
+      interpreter.print(classObj.getName() + "\n");
+      if (classObj.getDoc().length() > 0) {
+        interpreter.print("| " + classObj.getDoc().replace("\n", "\n| ") + "\n");
+      } else {
+        interpreter.print("| <no doc>\n");
+      }
       return interpreter.nothing();
     }
   }

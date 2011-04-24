@@ -15,7 +15,7 @@ public class ClassObj extends Obj {
    * @param name        The name of the class.
    */
   public ClassObj(ClassObj classClass, String name, List<ClassObj> parents,
-      Map<String, Field> fields, Scope closure) {
+      Map<String, Field> fields, Scope closure, String doc) {
     super(classClass);
     mName = name;
 
@@ -27,12 +27,14 @@ public class ClassObj extends Obj {
     
     mFields = fields;
     mClosure = closure;
+    mDoc = doc;
   }
   
   public String getName() { return mName; }
   public List<ClassObj> getParents() { return mParents; }
   public Map<String, Field> getFieldDefinitions() { return mFields; }
   public Scope getClosure() { return mClosure; }
+  public String getDoc() { return mDoc; }
   
   /**
    * Gets whether or not this class is a subclass (or same class) as the given
@@ -82,4 +84,5 @@ public class ClassObj extends Obj {
   private final List<ClassObj> mParents;
   private final Map<String, Field> mFields;
   private final Scope mClosure;
+  private final String mDoc;
 }

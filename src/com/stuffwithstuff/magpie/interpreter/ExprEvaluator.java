@@ -95,7 +95,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     }
     
     ClassObj classObj = mInterpreter.createClass(expr.getName(), parents,
-        expr.getFields(), context.getScope());
+        expr.getFields(), context.getScope(), expr.getDoc());
     
     context.getScope().define(expr.getName(), classObj);
 
@@ -227,7 +227,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   @Override
   public Obj visit(MethodExpr expr, EvalContext context) {
     Function method = new Function(
-        Expr.fn(expr.getPosition(), expr.getPattern(), expr.getBody()),
+        Expr.fn(expr.getPosition(), expr.getDoc(),
+            expr.getPattern(), expr.getBody()),
         context.getScope());
     
     context.getScope().define(expr.getName(), method);

@@ -39,6 +39,12 @@ public class ClassNew implements Callable {
   public Scope getClosure() {
     return mClosure;
   }
+  
+  @Override
+  public String getDoc() {
+    // TODO(bob): Actual docs.
+    return "<ClassNew>";
+  }
 
   private final Scope mClosure;
 }

@@ -6,9 +6,9 @@ import java.util.Map;
 import com.stuffwithstuff.magpie.parser.Position;
 
 public class ClassExpr extends Expr {
-  ClassExpr(Position position, String name, List<String> parents,
+  ClassExpr(Position position, String doc, String name, List<String> parents,
       Map<String, Field> fields) {
-    super(position);
+    super(position, doc);
     mName = name;
     mParents = parents;
     mFields = fields;

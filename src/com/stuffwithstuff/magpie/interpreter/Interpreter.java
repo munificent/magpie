@@ -146,9 +146,9 @@ public class Interpreter {
   }
   
   public ClassObj createClass(String name, List<ClassObj> parents,
-      Map<String, Field> fields, Scope scope) {
+      Map<String, Field> fields, Scope scope, String doc) {
     // Create the class.
-    ClassObj classObj = new ClassObj(mClass, name, parents, fields, scope);
+    ClassObj classObj = new ClassObj(mClass, name, parents, fields, scope, doc);
     
     if (classObj.checkForCollisions()) {
       error(Name.PARENT_COLLISION_ERROR);

@@ -26,7 +26,8 @@ public class Morpher implements TokenReader {
       
       switch (token.getType()) {
       case WHITESPACE:
-      case COMMENT:
+      case BLOCK_COMMENT:
+      case LINE_COMMENT:
         // Ignore non-semantic tokens.
         continue;
         
@@ -62,7 +63,7 @@ public class Morpher implements TokenReader {
       return token;
     }
   }
-  
+
   private final TokenReader mTokens;
   private boolean mEatLines;
 }

@@ -24,6 +24,12 @@ public class ClassParser implements PrefixParser {
     
     parser.consume(TokenType.LINE);
 
+    // Parse the doc comment if given.
+    String doc = "";
+    if (parser.match(TokenType.DOC_COMMENT, TokenType.LINE)) {
+      doc = parser.last(2).getString();
+    }
+    
     Map<String, Field> fields = new HashMap<String, Field>();
     
     // Parse the body.
@@ -34,7 +40,7 @@ public class ClassParser implements PrefixParser {
       parser.consume(TokenType.LINE);
     }
     
-    return Expr.class_(span.end(), name, parents, fields);
+    return Expr.class_(span.end(), doc, name, parents, fields);
   }
 
   private void parseField(MagpieParser parser, boolean isMutable,

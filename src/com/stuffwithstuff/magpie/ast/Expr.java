@@ -44,9 +44,9 @@ public abstract class Expr {
     return call(position, receiver, name, null);
   }
 
-  public static Expr class_(Position position,
+  public static Expr class_(Position position, String doc,
       String name, List<String> parents, Map<String, Field> fields) {
-    return new ClassExpr(position, name, parents, fields);
+    return new ClassExpr(position, doc, name, parents, fields);
   }
 
   public static Expr define(String name, Expr value) {
@@ -61,16 +61,17 @@ public abstract class Expr {
     return new DefineExpr(position, pattern, value);
   }
 
-  public static FnExpr fn(Expr body) {
-    return new FnExpr(Position.none(), body);
+  public static FnExpr fn(Expr body, String doc) {
+    return new FnExpr(Position.none(), doc, body);
   }
   
-  public static FnExpr fn(Position position, Expr body) {
-    return new FnExpr(position, body);
+  public static FnExpr fn(Position position, String doc, Expr body) {
+    return new FnExpr(position, doc, body);
   }
   
-  public static FnExpr fn(Position position, Pattern pattern, Expr body) {
-    return new FnExpr(position, pattern, body);
+  public static FnExpr fn(Position position, String doc, Pattern pattern,
+      Expr body) {
+    return new FnExpr(position, doc, pattern, body);
   }
   
   // TODO(bob): Hackish. Eliminate.
@@ -112,8 +113,9 @@ public abstract class Expr {
     return new MatchExpr(position, value, cases);
   }
   
-  public static Expr method(Position position, String name, Pattern pattern, Expr body) {
-    return new MethodExpr(position, name, pattern, body);
+  public static Expr method(Position position, String doc, String name,
+      Pattern pattern, Expr body) {
+    return new MethodExpr(position, doc, name, pattern, body);
   }
   
   public static Expr nothing() {
@@ -189,11 +191,18 @@ public abstract class Expr {
     return variable(Position.none(), name);
   }
 
-  public Expr(Position position) {
+  public Expr(Position position, String doc) {
     mPosition = position;
+    mDoc = doc;
+  }
+  
+  public Expr(Position position) {
+    this(position, "");
   }
   
   public Position getPosition() { return mPosition; }
+  
+  public String getDoc() { return mDoc; }
   
   public abstract <TReturn, TContext> TReturn accept(
       ExprVisitor<TReturn, TContext> visitor, TContext context);
@@ -208,5 +217,6 @@ public abstract class Expr {
   public abstract void toString(StringBuilder builder, String indent);
   
   private final Position mPosition;
+  private final String mDoc;
 }
 

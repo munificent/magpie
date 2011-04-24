@@ -18,8 +18,9 @@ public class EnvironmentBuilder {
     Scope scope = mModule.getScope();
     
     // The class of all classes. Its class is itself.
+    // TODO(bob): Doc.
     ClassObj classObj = new ClassObj(null, Name.CLASS, null,
-        new HashMap<String, Field>(), scope);
+        new HashMap<String, Field>(), scope, "");
     classObj.bindClass(classObj);
     scope.define(Name.CLASS, classObj);
     
@@ -180,8 +181,9 @@ public class EnvironmentBuilder {
     }
     
     public ClassObj end() {
+      // TODO(bob): Doc.
       ClassObj classObj = mInterpreter.createClass(mName,
-          Arrays.asList(mParents), mFields, mModule.getScope());
+          Arrays.asList(mParents), mFields, mModule.getScope(), "");
       mModule.getScope().define(mName, classObj);
       
       return classObj;

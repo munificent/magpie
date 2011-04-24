@@ -4,8 +4,9 @@ import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.parser.Position;
 
 public class MethodExpr extends Expr {
-  MethodExpr(Position position, String name, Pattern pattern, Expr body) {
-    super(position);
+  MethodExpr(Position position, String doc, String name, Pattern pattern,
+      Expr body) {
+    super(position, doc);
     mName = name;
     mPattern = pattern;
     mBody = body;

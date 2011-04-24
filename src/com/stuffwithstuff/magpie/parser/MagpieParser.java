@@ -21,8 +21,9 @@ public class MagpieParser extends Parser {
   public static MagpieParser create(CharacterReader reader, Grammar grammar) {
     TokenReader lexer = new Lexer(reader);
     TokenReader morpher = new Morpher(lexer);
+    TokenReader annotator = new Annotator(morpher);
     
-    return new MagpieParser(morpher, grammar);
+    return new MagpieParser(annotator, grammar);
   }
   
   public MagpieParser(TokenReader tokens, Grammar grammar) {
@@ -129,10 +130,12 @@ public class MagpieParser extends Parser {
       pattern = Pattern.wildcard();
     }
     
+    // TODO(bob): Parse doc.
+    
     // Parse the body.
     Expr expr = parseExpressionOrBlock();
         
-    return Expr.fn(span.end(), pattern, expr);
+    return Expr.fn(span.end(), "", pattern, expr);
   }
 
   /**

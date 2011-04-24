@@ -10,4 +10,5 @@ public interface Callable {
   Obj invoke(Interpreter interpreter, Obj arg);
   Pattern getPattern();
   Scope getClosure();
+  String getDoc();
 }

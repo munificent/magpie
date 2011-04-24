@@ -31,22 +31,27 @@ def (_ Class) string
 end
 
 def print()
+    /// Prints a newline to standard output.
     prints("\n")
 end
 
 def print(text String)
+    /// Prints *text* to standard output.
     prints(text + "\n")
 end
 
 def print(any)
+    /// Converts *any* to a string and prints it to standard output.
     print(any string)
 end
 
 def not(true)
+    /// Returns `false`.
     false
 end
 
 def not(false)
+    /// Returns `true`.
     true
 end
 
@@ -119,6 +124,8 @@ def (_ Indexable) validateIndex(index Int)
 end
 
 defclass IndexableIterator
+    /// An iterator that can iterator over any class that inherits from
+    /// Indexable and provides a "count" getter, and a numeric indexer.
     var indexable
     var index = -1
 end
@@ -134,6 +141,8 @@ end
 
 
 defclass Range : Indexable
+    /// An Indexable, iterable range of sequential integers from a given
+    /// *first* to *last* (inclusive).
     var first Int
     var last  Int
 end

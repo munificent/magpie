@@ -42,6 +42,9 @@ public class Function implements Callable {
   @Override
   public Scope getClosure() { return mScope; }
 
+  @Override
+  public String getDoc() { return mFunction.getDoc(); }
+  
   private final FnExpr mFunction;
   private final Scope mScope;
 }
