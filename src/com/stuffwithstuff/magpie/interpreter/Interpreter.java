@@ -273,7 +273,7 @@ public class Interpreter {
     try {
       // Copy the base stuff in first.
       if (module != mBaseModule) {
-        mBaseModule.exportAll("", module.getScope());
+        module.getScope().importAll(this, "", mBaseModule);
       }
       
       // Evaluate every expression in the file. We do this incrementally so

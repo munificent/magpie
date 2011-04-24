@@ -131,7 +131,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
         prefix = expr.getRename() + ".";
       }
       
-      module.exportAll(prefix, context.getScope());
+      context.getScope().importAll(mInterpreter, prefix, module);
     } else {
       // Importing just one name.
       String rename;
@@ -145,7 +145,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
         rename = expr.getRename();
       }
       
-      module.exportName(expr.getName(), rename, context.getScope());
+      context.getScope().importName(mInterpreter,
+          expr.getName(), rename, module);
     }
     
     return mInterpreter.nothing();

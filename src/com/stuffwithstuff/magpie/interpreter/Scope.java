@@ -36,26 +36,53 @@ public class Scope {
     this(false);
   }
   
-  public void importAll(String prefix, Map<String, Obj> variables,
-      Map<String, Multimethod> methods) {
+  public void importAll(Interpreter interpreter, String prefix, Module module) {
     // Copy the variables.
-    for (Entry<String, Obj> entry : variables.entrySet()) {
-      define(prefix + entry.getKey(), entry.getValue());
+    for (Entry<String, Obj> entry : module.getExportedVariables().entrySet()) {
+      String name = prefix + entry.getKey();
+      
+      // Check for collision.
+      if (!mAllowRedefinition && (get(name) != null)) {
+        interpreter.error(Name.REDEFINITION_ERROR);
+      }
+
+      mVariables.put(name, entry.getValue());
     }
     
     // Import the multimethods.
-    for (Entry<String, Multimethod> entry : methods.entrySet()) {
-      mMultimethods.put(prefix + entry.getKey(), entry.getValue());
+    for (Entry<String, Multimethod> entry : module.getExportedMultimethods().entrySet()) {
+      String name = prefix + entry.getKey();
+      
+      // Check for collision.
+      if (!mAllowRedefinition && mMultimethods.containsKey(name)) {
+        interpreter.error(Name.REDEFINITION_ERROR);
+      }
+
+      mMultimethods.put(name, entry.getValue());
     }
   }
-  
-  public void importName(String name, Obj variable, Multimethod multimethod) {
+
+  public void importName(Interpreter interpreter, String name, String rename,
+      Module module) {
+    
+    Obj variable = module.getExportedVariables().get(name);
     if (variable != null) {
-      define(name, variable);
+      // Check for collision.
+      if (!mAllowRedefinition && (get(rename) != null)) {
+        interpreter.error(Name.REDEFINITION_ERROR);
+      }
+
+      mVariables.put(rename, variable);
     }
     
+    Multimethod multimethod = module.getExportedMultimethods().get(name);
     if (multimethod != null) {
-      mMultimethods.put(name, multimethod);
+      // Check for collision.
+      if (!mAllowRedefinition && mMultimethods.containsKey(rename)) {
+        interpreter.error(Name.REDEFINITION_ERROR);
+      }
+
+      mMultimethods.put(rename, multimethod);
     }
   }
   

@@ -22,13 +22,12 @@ public class Module {
 
   }
   
-  public void exportAll(String prefix, Scope scope) {
-    scope.importAll(prefix, mExportedVariables, mExportedMultimethods);
+  public Map<String, Obj> getExportedVariables() {
+    return mExportedVariables;
   }
-  
-  public void exportName(String name, String rename, Scope scope) {
-    scope.importName(rename,
-        mExportedVariables.get(name), mExportedMultimethods.get(name));
+
+  public Map<String, Multimethod> getExportedMultimethods() {
+    return mExportedMultimethods;
   }
   
   public void addExport(String name, Obj value) {
