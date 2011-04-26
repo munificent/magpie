@@ -43,26 +43,29 @@ public class ReflectBuiltIns {
           .lookUpMultimethod(name);
       
       if (multimethod == null) {
-        interpreter.print("Couldn't find a method named \"" + name + "\".\n");
+        return interpreter.createString(
+            "Couldn't find a method named \"" + name + "\".\n");
       } else {
+        StringBuilder builder = new StringBuilder();
+        
         for (Callable method : multimethod.getMethods()) {
           Pattern pattern = method.getPattern();
           if (pattern instanceof RecordPattern) {
             RecordPattern record = (RecordPattern)pattern;
-            interpreter.print(String.format("(%s) %s(%s)\n",
+            builder.append(String.format("(%s) %s(%s)\n",
                 record.getFields().get(Name.getTupleField(0)),
                 name,
                 record.getFields().get(Name.getTupleField(1))));
           } else {
-            interpreter.print(String.format("%s %s\n",
+            builder.append(String.format("%s %s\n",
                 pattern, name));
           }
           
-          interpreter.print("| " + method.getDoc().replace("\n", "\n| ") + "\n");
+          builder.append("| " + method.getDoc().replace("\n", "\n| ") + "\n");
         }
+        
+        return interpreter.createString(builder.toString());
       }
-      
-      return interpreter.nothing();
     }
   }
   
@@ -71,13 +74,14 @@ public class ReflectBuiltIns {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       ClassObj classObj = arg.getField(1).asClass();
       
-      interpreter.print(classObj.getName() + "\n");
+      StringBuilder builder = new StringBuilder();
+      builder.append(classObj.getName() + "\n");
       if (classObj.getDoc().length() > 0) {
-        interpreter.print("| " + classObj.getDoc().replace("\n", "\n| ") + "\n");
+        builder.append("| " + classObj.getDoc().replace("\n", "\n| ") + "\n");
       } else {
-        interpreter.print("| <no doc>\n");
+        builder.append("| <no doc>\n");
       }
-      return interpreter.nothing();
+      return interpreter.createString(builder.toString());
     }
   }
 }

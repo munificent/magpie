@@ -38,6 +38,10 @@ public class Repl implements InterpreterHost {
           Obj result = mInterpreter.interpret(expr);
           if (result != mInterpreter.nothing()) {
             String text = mInterpreter.evaluateToString(result);
+            
+            // Indent the lines.
+            text = text.replace("\n", "\n  ");
+            
             printResult(text);
           }
         } catch(ParseException ex) {
