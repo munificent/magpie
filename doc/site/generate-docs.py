@@ -66,22 +66,22 @@ def format_file(path):
     html = markdown.markdown(contents, ['def_list', 'codehilite'])
 
     # determine the next and previous pages based on the ordering list
-    if not basename in ordering:
-        print 'Don\'t have an ordering for', basename
-    this_index = ordering.index(basename)
-    prev = ordering[(this_index + len(ordering) - 1) % len(ordering)]
-    next = ordering[(this_index + 1) % len(ordering)]
-
-    prev = '<a href="{0}{1}.html">&laquo; Previous</a>'.format(root, prev)
-    next = '<a href="{0}{1}.html">Next &raquo;</a>'.format(root, next)
+#    if not basename in ordering:
+#        print 'Don\'t have an ordering for', basename
+#    this_index = ordering.index(basename)
+#    prev = ordering[(this_index + len(ordering) - 1) % len(ordering)]
+#    next = ordering[(this_index + 1) % len(ordering)]
+#
+#    prev = '<a href="{0}{1}.html">&laquo; Previous</a>'.format(root, prev)
+#    next = '<a href="{0}{1}.html">Next &raquo;</a>'.format(root, next)
 
     # load the template page
     template = open('template.html', 'r').read()
 
     # insert the content
     template = template.replace('$(title)', title)
-    template = template.replace('$(prev)', prev)
-    template = template.replace('$(next)', next)
+#    template = template.replace('$(prev)', prev)
+#    template = template.replace('$(next)', next)
     template = template.replace('$(breadcrumb)', breadcrumb(basename))
     template = template.replace('$(root)', root)
     template = template.replace('$(content)', html)
@@ -141,8 +141,8 @@ shutil.copytree('static', 'html')
 def strip_newline(line):
     return line.rstrip()
 
-ordering = open("order.txt", "r").readlines()
-ordering = map(strip_newline, ordering)
+#ordering = open("order.txt", "r").readlines()
+#ordering = map(strip_newline, ordering)
 
 walk('markdown', do_format)
 print 'Generated', count, 'HTML files.'

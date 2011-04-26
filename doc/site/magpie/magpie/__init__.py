@@ -18,9 +18,9 @@ class MagpieLexer(RegexLexer):
             (r'\s+', Text),
 
             # keywords
-            (r'(and|break|case|class|def|definfix|do|else|end|extend|false|fn|for|get|if|'
-             r'interface|let|match|namespace|nothing|or|return|set|shared|'
-             r'struct|then|union|using|this|true|typeof|var|while)\b', Keyword),
+            (r'(and|break|case|def|defclass|definfix|do|else|end|false|fn|for|'
+             r'if|import|match|nothing|or|return|'
+             r'then|using|this|true|var|while)\b', Keyword),
 
             # keywords
             (r'(\<\-|\-\>|\.)', Keyword),
@@ -54,7 +54,3 @@ class MagpieLexer(RegexLexer):
             (r'\\', String), # stray backslash
         ],
     }
-
-    # bob: hack. i know i want it to guess magpie
-    def analyse_text(text):
-        return 1.0
