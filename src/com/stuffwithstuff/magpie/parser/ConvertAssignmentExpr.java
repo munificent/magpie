@@ -104,6 +104,14 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
 
   @Override
   public Expr visit(RecordExpr expr, Expr value) {
+    // a, b = 1, 2
+    // becomes:
+    // match 1, 2
+    //     case temp1, temp2
+    //         a = temp1
+    //         b = temp2
+    //     end
+    // end
     throw new NotImplementedException("Destructuring is only implemented on new vars for now.");
   }
 

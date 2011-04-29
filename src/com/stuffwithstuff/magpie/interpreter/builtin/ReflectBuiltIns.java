@@ -17,7 +17,7 @@ public class ReflectBuiltIns {
     }
   }
 
-  @Signature("(_) is?(class Class)")
+  @Signature("(_) is?(class is Class)")
   public static class Is implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       return interpreter.createBool(arg.getField(0).getClassObj().isSubclassOf(
@@ -33,7 +33,7 @@ public class ReflectBuiltIns {
     }
   }
   
-  @Signature("docMethod(methodName String)")
+  @Signature("docMethod(methodName is String)")
   public static class DocMethod implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       String name = arg.getField(1).asString();
@@ -69,7 +69,7 @@ public class ReflectBuiltIns {
     }
   }
   
-  @Signature("(_ Class) doc")
+  @Signature("(is Class) doc")
   public static class ClassDoc implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       ClassObj classObj = arg.getField(1).asClass();

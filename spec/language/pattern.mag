@@ -63,17 +63,17 @@ specify("A value pattern") with
 end
 
 specify("A variable pattern") with
-    it should("always match if it has no type") with
+    it should("always match if it has no pattern") with
         match "whatever"
             case a      then "yes"
             case "else" then "no"
         end shouldEqual("yes")
     end
 
-    it should("allow a type after the name") with
+    it should("allow a pattern after the name") with
         match 123
-            case a Bool then "no"
-            case a Int then "yes"
+            case a is Bool then "no"
+            case a is Int then "yes"
         end shouldEqual("yes")
     end
 

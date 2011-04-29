@@ -7,7 +7,7 @@ import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class ListBuiltIns {
-  @Signature("(_ List)[index Int]")
+  @Signature("(is List)[index is Int]")
   public static class Index implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       List<Obj> elements = arg.getField(0).asList();
@@ -18,7 +18,7 @@ public class ListBuiltIns {
     }
   }
 
-  @Signature("(_ List)[index Int] = (item)")
+  @Signature("(is List)[index is Int] = (item)")
   public static class IndexAssign implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       List<Obj> elements = arg.getField(0).asList();
@@ -33,7 +33,7 @@ public class ListBuiltIns {
     }
   }
   
-  @Signature("(_ List) add(item)")
+  @Signature("(is List) add(item)")
   public static class Add implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       List<Obj> elements = arg.getField(0).asList();
@@ -43,7 +43,7 @@ public class ListBuiltIns {
     }
   }
 
-  @Signature("(_ List) clear()")
+  @Signature("(is List) clear()")
   public static class Clear implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       List<Obj> elements = arg.getField(0).asList();
@@ -52,7 +52,7 @@ public class ListBuiltIns {
     }
   }
   
-  @Signature("(_ List) count")
+  @Signature("(is List) count")
   public static class Count implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       List<Obj> elements = arg.asList();

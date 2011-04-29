@@ -10,7 +10,7 @@ import classfile:com.stuffwithstuff.magpie.interpreter.builtin.ListBuiltIns
 import classfile:com.stuffwithstuff.magpie.interpreter.builtin.ObjectBuiltIns
 import classfile:com.stuffwithstuff.magpie.interpreter.builtin.StringBuiltIns
 
-def (_ String) string
+def (is String) string
     this
 end
 
@@ -26,7 +26,7 @@ def (false) string
     "false"
 end
 
-def (_ Class) string
+def (is Class) string
     this name
 end
 
@@ -35,7 +35,7 @@ def print()
     prints("\n")
 end
 
-def print(text String)
+def print(text is String)
     /// Prints *text* to standard output.
     prints(text + "\n")
 end
@@ -73,15 +73,15 @@ def (_) true?
     true
 end
 
-def (_ Bool) true?
+def (is Bool) true?
     this
 end
 
-def (_ Int) true?
+def (is Int) true?
     this != 0
 end
 
-def (_ String) true?
+def (is String) true?
     this count > 0
 end
 
@@ -90,28 +90,28 @@ def (nothing) true?
 end
 
 // Implement comparison in terms of a master compareTo() method.
-def (_ Comparable) < (other Comparable)
+def (is Comparable) < (other is Comparable)
     this compareTo(other) == -1
 end
 
-def (_ Comparable) > (other Comparable)
+def (is Comparable) > (other is Comparable)
     this compareTo(other) == 1
 end
 
-def (_ Comparable) <= (other Comparable)
+def (is Comparable) <= (other is Comparable)
     this compareTo(other) != 1
 end
 
-def (_ Comparable) >= (other Comparable)
+def (is Comparable) >= (other is Comparable)
     this compareTo(other) != -1
 end
 
 // Ranges and indexable iteration.
-def (_ Indexable) iterate()
+def (is Indexable) iterate()
     IndexableIterator new(indexable: this)
 end
 
-def (_ Indexable) validateIndex(index Int)
+def (is Indexable) validateIndex(index is Int)
     // Negative indexes count from the back.
     if index < 0 then index = this count + index
 
@@ -130,12 +130,12 @@ defclass IndexableIterator
     var index = -1
 end
 
-def (_ IndexableIterator) next()
+def (is IndexableIterator) next()
     this index = this index + 1
     this index < this indexable count
 end
 
-def (_ IndexableIterator) current
+def (is IndexableIterator) current
     this indexable[this index]
 end
 
@@ -147,15 +147,15 @@ defclass Range : Indexable
     var last  Int
 end
 
-def (_ Range)[index Int]
+def (is Range)[index is Int]
     index = this validateIndex(index)
     this first + index
 end
 
-def (_ Range) count
+def (is Range) count
     this last - this first + 1
 end
 
-def (_ Int) to(last Int)
+def (is Int) to(last is Int)
     Range new(first: this, last: last)
 end

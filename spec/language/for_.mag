@@ -21,4 +21,11 @@ specify("A 'for' expression") with
         for b = 1 to(3) do var a = "inner"
         a shouldEqual("outer")
     end
+
+    it should("match a pattern against the iterator") with
+        var items = [(1, 2), (3, 4), (5, 6)]
+        var result = ""
+        for x, y = items do result = result + x + y
+        result shouldEqual("123456")
+    end
 end

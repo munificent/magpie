@@ -4,11 +4,11 @@ defclass TestComparable : Comparable
     var result Int
 end
 
-def (_ TestComparable) compareTo(_ TestComparable)
+def (is TestComparable) compareTo(is TestComparable)
     this result
 end
 
-def makeTestPair(result Int)
+def makeTestPair(result is Int)
     TestComparable new(result: result), TestComparable new(result: 0)
 end
 

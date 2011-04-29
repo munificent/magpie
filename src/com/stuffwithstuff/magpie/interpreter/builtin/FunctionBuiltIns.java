@@ -9,7 +9,7 @@ import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.PatternTester;
 
 public class FunctionBuiltIns {
-  @Signature("(_ Function) call(arg)")
+  @Signature("(is Function) call(arg)")
   public static class Call implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       FnObj function = arg.getField(0).asFn();

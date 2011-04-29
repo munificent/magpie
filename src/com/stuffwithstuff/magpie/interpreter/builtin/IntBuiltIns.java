@@ -21,27 +21,27 @@ public class IntBuiltIns {
   }
   */
   
-  @Signature("(_ Int) +(right Int)")
+  @Signature("(is Int) +(right is Int)")
   public static class Add extends ArithmeticOperator {
     protected int perform(int left, int right) { return left + right; }
   }
   
-  @Signature("(_ Int) -(right Int)")
+  @Signature("(is Int) -(right is Int)")
   public static class Subtract extends ArithmeticOperator {
     protected int perform(int left, int right) { return left - right; }
   }
   
-  @Signature("(_ Int) *(right Int)")
+  @Signature("(is Int) *(right is Int)")
   public static class Multiply extends ArithmeticOperator {
     protected int perform(int left, int right) { return left * right; }
   }
   
-  @Signature("(_ Int) /(right Int)")
+  @Signature("(is Int) /(right is Int)")
   public static class Divide extends ArithmeticOperator {
     protected int perform(int left, int right) { return left / right; }
   }
   
-  @Signature("(_ Int) %(right Int)")
+  @Signature("(is Int) %(right is Int)")
   public static class Modulo extends ArithmeticOperator {
     protected int perform(int left, int right) { return left % right; }
   }
@@ -57,7 +57,7 @@ public class IntBuiltIns {
     protected abstract int perform(int left, int right);
   }
   
-  @Signature("(_ Int) ==(right Int)")
+  @Signature("(is Int) ==(right is Int)")
   public static class Equals implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       int left = arg.getField(0).asInt();
@@ -67,7 +67,7 @@ public class IntBuiltIns {
     }
   }
   
-  @Signature("(_ Int) compareTo(other Int)")
+  @Signature("(is Int) compareTo(other is Int)")
   public static class Compare implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       int left = arg.getField(0).asInt();
@@ -77,7 +77,7 @@ public class IntBuiltIns {
     }
   }
   
-  @Signature("(_ Int) string")
+  @Signature("(is Int) string")
   public static class String_ implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       return interpreter.createString(Integer.toString(arg.asInt()));

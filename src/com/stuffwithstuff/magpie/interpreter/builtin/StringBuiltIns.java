@@ -5,7 +5,7 @@ import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class StringBuiltIns {  
-  @Signature("(_ String)[index Int]")
+  @Signature("(is String)[index is Int]")
   public static class Index implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       String string = arg.getField(0).asString();
@@ -22,14 +22,14 @@ public class StringBuiltIns {
     }
   }
 
-  @Signature("(_ String) count")
+  @Signature("(is String) count")
   public static class Count implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       return interpreter.createInt(arg.asString().length());
     }
   }
   
-  @Signature("(_ String) +(right String)")
+  @Signature("(is String) +(right is String)")
   public static class Add implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       String left = arg.getField(0).asString();
@@ -39,7 +39,7 @@ public class StringBuiltIns {
     }
   }
   
-  @Signature("(_ String) ==(other String)")
+  @Signature("(is String) ==(other is String)")
   public static class Equals implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       return interpreter.createBool(arg.getField(0).asString().equals(
@@ -47,7 +47,7 @@ public class StringBuiltIns {
     }
   }
   
-  @Signature("(_ String) compareTo(other String)")
+  @Signature("(is String) compareTo(other is String)")
   public static class CompareTo implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       return interpreter.createInt(arg.getField(0).asString().compareTo(

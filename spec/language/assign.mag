@@ -1,7 +1,7 @@
 import spec.specify
 
 // TODO(bob):
-// - Assignment messages.
+// - List destructuring.
 // - Runtime error on assigning to undefined.
 
 specify("An assignment ('=') expression") with
@@ -35,4 +35,36 @@ specify("An assignment ('=') expression") with
         var a = "before"
         (a = "after") shouldEqual("after")
     end
+
+    /*
+    it should("destructure a record") with
+        var a = "a"
+        var b = "b"
+        var c = "c"
+        var d = "d"
+
+        x: a, y: b, z: (c, d) = x: "1", y: "2", z: ("3", "4")
+        a shouldEqual("1")
+        b shouldEqual("2")
+        c shouldEqual("3")
+        d shouldEqual("4")
+    end
+
+    it should("call a setter") with
+        def withArg_=(arg, value)
+            arg + value
+        end
+        (withArg("arg") = "value") shouldEqual("argvalue")
+
+        def (_) noArg_=(value)
+            this + value
+        end
+        ("this" noArg = "value") shouldEqual("thisvalue")
+
+        def (_) withBoth_=(arg, value)
+            this + arg + value
+        end
+        ("this" withBoth("arg") = "value") shouldEqual("thisargvalue")
+    end
+    */
 end

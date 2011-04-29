@@ -58,7 +58,7 @@ public class PatternParser {
       }
       index++;
       
-      field = variable(parser);
+      field = primary(parser);
       fields.put(name, field);
     } while (parser.match(TokenType.COMMA));
     
@@ -71,39 +71,11 @@ public class PatternParser {
     return Pattern.record(fields);
   }
   
-  private static Pattern variable(MagpieParser parser) {
-    // See if there is a binding for the pattern.
-    String name = null;
-    if (parser.current().getType() == TokenType.NAME) {
-      String token = parser.current().getString();
-      if (token.equals("_") ||
-          Character.isLowerCase(token.charAt(0))) {
-        name = parser.parseName().getString();
-      }
-    }
-    
-    // If we don't have a name, it must be a primary pattern.
-    if (name == null) {
-      return primary(parser);
-    }
-    
-    // See if there is a type for the variable.
-    Pattern inner = null;
-    if (parser.match(TokenType.NAME)) {
-      inner = Pattern.type(Expr.variable(parser.last(1).getString()));
-    } else {
-      inner = Pattern.wildcard();
-    }
-    
-    if (name.equals("_")) {
-      return inner;
-    } else {
-      return Pattern.variable(name, inner);
-    }
-  }
-  
   private static Pattern primary(MagpieParser parser) {
-    if (parser.match(TokenType.BOOL)) {
+    if (parser.match("is")) {
+      Expr type = parser.parseTypeAnnotation();
+      return Pattern.type(type);
+    } if (parser.match(TokenType.BOOL)) {
       return Pattern.value(Expr.bool(parser.last(1).getBool()));
     } else if (parser.match(TokenType.INT)) {
       return Pattern.value(Expr.int_(parser.last(1).getInt()));
@@ -111,20 +83,30 @@ public class PatternParser {
       return Pattern.value(Expr.nothing(parser.last(1).getPosition()));
     } else if (parser.match(TokenType.STRING)) {
       return Pattern.value(Expr.string(parser.last(1).getString()));
-    } else if (parser.match(TokenType.NAME)) {
-      return Pattern.value(Expr.variable(parser.last(1).getString()));
     } else if (parser.match(TokenType.LEFT_PAREN)) {
       // Nested pattern.
       Pattern inner = record(parser);
       parser.consume(TokenType.RIGHT_PAREN);
       return inner;
+    } else if (parser.match(TokenType.NAME)) {
+      String name = parser.last(1).getString();
+      if (name.equals("_")) {
+        return Pattern.wildcard();
+      } else if (Character.isLowerCase(name.charAt(0))) {
+        // Variable pattern, see if it has a pattern after it.
+        Pattern pattern = primary(parser);
+        if (pattern == null) {
+          pattern = Pattern.wildcard();
+        }
+        return Pattern.variable(name, pattern);
+      } else {
+        // A capitalized name is a value pattern.
+        return Pattern.value(Expr.variable(
+            parser.last(1).getPosition(), name));
+      }
     }
     
-    // TODO(bob): Figure out how constants should be handled.
-    
-    // Must just be a value.
-    Expr expr = parser.parseTypeAnnotation();
-    return Pattern.value(expr);
+    return null;
   }
   
   private PatternParser() {}

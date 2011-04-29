@@ -178,7 +178,7 @@ specify("A class's default constructor") with
             var b
         end
 
-        def (C) init(string String)
+        def (C) init(string is String)
             this init(a: string + "a", b: string + "b")
         end
 
@@ -193,7 +193,7 @@ specify("A class's default constructor") with
             var aa
         end
 
-        def (A) init(string String)
+        def (A) init(string is String)
             this init(aa: "a " + string)
         end
 
@@ -201,7 +201,7 @@ specify("A class's default constructor") with
             var bb
         end
 
-        def (B) init(string String)
+        def (B) init(string is String)
             this init(A: string, bb: "b " + string)
         end
 

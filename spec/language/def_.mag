@@ -2,11 +2,11 @@ import spec.specify
 
 specify("A 'def' expression") with
     it should("select a method that matches the argument type") with
-        def multi(a Int)
+        def multi(a is Int)
             "int"
         end
 
-        def multi(a String)
+        def multi(a is String)
             "str"
         end
 
@@ -15,19 +15,19 @@ specify("A 'def' expression") with
     end
 
     it should("select a method based on record field types") with
-        def multi(a Int, b Int)
+        def multi(a is Int, b is Int)
             "int int"
         end
 
-        def multi(a Int, b String)
+        def multi(a is Int, b is String)
             "int str"
         end
 
-        def multi(a String, b Int)
+        def multi(a is String, b is Int)
             "str int"
         end
 
-        def multi(a String, b String)
+        def multi(a is String, b is String)
             "str str"
         end
 
@@ -38,7 +38,7 @@ specify("A 'def' expression") with
     end
 
     it should("throw an error if no method matches") with
-        def multi(a Int)
+        def multi(a is Int)
             "int"
         end
 
@@ -75,15 +75,15 @@ specify("The linearization of a multimethod") with
     end
 
     it should("prefer the most-derived class") with
-        def multi(a B1)
+        def multi(a is B1)
             "b1"
         end
 
-        def multi(a A1)
+        def multi(a is A1)
             "a1"
         end
 
-        def multi(a C1)
+        def multi(a is C1)
             "c1"
         end
 
@@ -94,7 +94,7 @@ specify("The linearization of a multimethod") with
     end
 
     it should("prefer a value over a class") with
-        def multi(a String)
+        def multi(a is String)
             "class"
         end
 
@@ -106,7 +106,7 @@ specify("The linearization of a multimethod") with
             "value"
         end
 
-        def multi(a Int)
+        def multi(a is Int)
             "class"
         end
 
@@ -115,7 +115,7 @@ specify("The linearization of a multimethod") with
     end
 
     it should("prefer a class over an untyped variable") with
-        def multi(a String)
+        def multi(a is String)
             "class"
         end
 
@@ -123,7 +123,7 @@ specify("The linearization of a multimethod") with
             "any"
         end
 
-        def multi(a Int)
+        def multi(a is Int)
             "class"
         end
 
@@ -149,15 +149,15 @@ specify("The linearization of a multimethod") with
     end
 
     it should("order record by their fields") with
-        def multi(a A1, b A1)
+        def multi(a is A1, b is A1)
             "a1 a1"
         end
 
-        def multi(a B1, b A1)
+        def multi(a is B1, b is A1)
             "b1 a1"
         end
 
-        def multi(a B1, b B1)
+        def multi(a is B1, b is B1)
             "b1 b1"
         end
 
@@ -168,11 +168,11 @@ specify("The linearization of a multimethod") with
     end
 
     it should("ignore field order when comparing records") with
-        def multi(x: x A1, y: y A1)
+        def multi(x: x is A1, y: y is A1)
             "aa"
         end
 
-        def multi(y: y B1, x: x B1)
+        def multi(y: y is B1, x: x is B1)
             "bb"
         end
 
@@ -180,11 +180,11 @@ specify("The linearization of a multimethod") with
     end
 
     it should("be ambiguous if record fields don't agree") with
-        def multi(a B1, b A1)
+        def multi(a is B1, b is A1)
             "b1 a1"
         end
 
-        def multi(a A1, b B1)
+        def multi(a is A1, b is B1)
             "a1 b1"
         end
 

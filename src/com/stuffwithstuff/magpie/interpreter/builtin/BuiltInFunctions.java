@@ -21,7 +21,7 @@ public class BuiltInFunctions {
     }
   }
 
-  @Signature("prints(text String)")
+  @Signature("prints(text is String)")
   public static class Print implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       interpreter.print(arg.getField(1).asString());
@@ -37,7 +37,7 @@ public class BuiltInFunctions {
   }
 
   // TODO(bob): More or less temporary.
-  @Signature("canParse?(source String)")
+  @Signature("canParse?(source is String)")
   public static class CheckSyntax implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       String source = arg.getField(1).asString();
