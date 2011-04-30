@@ -4,7 +4,7 @@ defclass TestComparable : Comparable
     var result Int
 end
 
-def (is TestComparable) compareTo(is TestComparable)
+def (this is TestComparable) compareTo(is TestComparable)
     this result
 end
 

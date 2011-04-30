@@ -34,7 +34,7 @@ defclass TestSuite
 end
 
 // TODO(bob): Need function types.
-def (is TestSuite) should(description is String, block)
+def (this is TestSuite) should(description is String, block)
     // TODO(bob): Should not need "this " before setting fields.
     this currentTest = description
     var testsBefore = totalTests
@@ -51,15 +51,15 @@ def (is TestSuite) should(description is String, block)
     end
 end
 
-def (is TestSuite) pass()
+def (this is TestSuite) pass()
     this advance()
 end
 
-def (is TestSuite) advance()
+def (this is TestSuite) advance()
     totalTests = totalTests + 1
 end
 
-def (is TestSuite) fail(message is String)
+def (this is TestSuite) fail(message is String)
     if not(this failedTest) then
         print("FAIL: " + this name + " should " + this currentTest + ".")
     end
@@ -73,7 +73,7 @@ def fail(message is String)
     currentTestSuite fail(message)
 end
 
-def (_) shouldEqual(expected, message is String)
+def (this) shouldEqual(expected, message is String)
     if this != expected then
         currentTestSuite fail(message)
     else
@@ -81,11 +81,11 @@ def (_) shouldEqual(expected, message is String)
     end
 end
 
-def (_) shouldEqual(expected)
+def (this) shouldEqual(expected)
     this shouldEqual(expected, "Expected " + expected + " but was " + this)
 end
 
-def (_) shouldBe(expected is Class, message is String)
+def (this) shouldBe(expected is Class, message is String)
     if this is?(expected) then
         currentTestSuite pass()
     else
@@ -93,13 +93,13 @@ def (_) shouldBe(expected is Class, message is String)
     end
 end
 
-def (_) shouldBe(expected is Class)
+def (this) shouldBe(expected is Class)
     this shouldBe(expected, "Expected class " + expected + " but was " + this class)
 end
 
 // Verifies that a function throws an error of the given class. Will execute the
 // function.
-def (is Function) shouldThrow(errorClass is Class)
+def (this is Function) shouldThrow(errorClass is Class)
     var caught = false
     do
         this call()
@@ -113,7 +113,7 @@ def (is Function) shouldThrow(errorClass is Class)
 end
 
 // Verifies that a function does not throw an error. Will execute the function.
-def (is Function) shouldNotThrow()
+def (this is Function) shouldNotThrow()
     var caught = nothing
     do
         this call()
