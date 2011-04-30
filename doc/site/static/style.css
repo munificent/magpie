@@ -111,13 +111,19 @@ pre .k {
   color: #0055ff; }
 
 pre .s {
-  color: #cc8800; }
+  color: #b37700; }
 
 pre .se {
-  color: #cc8800; }
+  color: #b37700; }
 
 pre .c1 {
   color: #999999; }
 
 pre .cm {
   color: #999999; }
+
+pre .nb {
+  color: #cc6600; }
+
+pre .bp {
+  color: #339900; }

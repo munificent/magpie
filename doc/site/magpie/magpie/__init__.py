@@ -18,9 +18,12 @@ class MagpieLexer(RegexLexer):
             (r'\s+', Text),
 
             # keywords
-            (r'(and|break|case|def|defclass|definfix|do|else|end|false|fn|for|'
-             r'if|import|match|nothing|or|return|'
-             r'then|using|this|true|var|while)\b', Keyword),
+            (r'(and|break|case|def|defclass|definfix|do|else|end|fn|for|'
+             r'if|import|is|match|or|return|then|var|while)\b', Keyword),
+
+            (r'(true|false|nothing)\b', Name.Builtin),
+
+            (r'(this|it)\b', Name.Builtin.Pseudo),
 
             # keywords
             (r'(\<\-|\-\>|\.)', Keyword),

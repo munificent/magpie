@@ -6,9 +6,6 @@ $serif: Georgia, serif;
 $monospace: Courier, monospace;
 
 $syntax-default: #666;
-$syntax-keyword: hsl(220, 100%, 50%);
-$syntax-string: hsl(40, 100%, 40%);
-$syntax-comment: lighten($syntax-default, 20%);
 
 @mixin round {
   -moz-border-radius: 5px;
@@ -166,8 +163,16 @@ p.future {
 }
 
 /* syntax highlighting */
+$syntax-keyword: hsl(220, 100%, 50%);
+$syntax-string:  hsl(40, 100%, 35%);
+$syntax-comment: lighten($syntax-default, 20%);
+$syntax-literal: hsl(30, 100%, 40%);
+$syntax-pseudo:  hsl(100, 100%, 30%);
+
 pre .k  { color: $syntax-keyword; }
 pre .s  { color: $syntax-string; }
 pre .se { color: $syntax-string; }
 pre .c1 { color: $syntax-comment; }
 pre .cm { color: $syntax-comment; }
+pre .nb { color: $syntax-literal; }
+pre .bp { color: $syntax-pseudo; }
