@@ -32,7 +32,7 @@ specify("A 'fn' expression") with
 
     it should("throw a NoMethodError if the argument doesn't match the " +
               "pattern") with
-        var f = fn (n Int) n
+        var f = fn (n is Int) n
         fn
             f call("not int")
         end shouldThrow(NoMethodError)

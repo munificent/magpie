@@ -73,8 +73,11 @@ public class PatternParser {
   
   private static Pattern primary(MagpieParser parser) {
     if (parser.match("is")) {
-      Expr type = parser.parseTypeAnnotation();
+      Expr type = parser.parseExpression(Precedence.COMPARISON);
       return Pattern.type(type);
+    } else if (parser.match("==")) {
+      Expr value = parser.parseExpression(Precedence.COMPARISON);
+      return Pattern.value(value);
     } if (parser.match(TokenType.BOOL)) {
       return Pattern.value(Expr.bool(parser.last(1).getBool()));
     } else if (parser.match(TokenType.INT)) {
@@ -92,17 +95,13 @@ public class PatternParser {
       String name = parser.last(1).getString();
       if (name.equals("_")) {
         return Pattern.wildcard();
-      } else if (Character.isLowerCase(name.charAt(0))) {
+      } else {
         // Variable pattern, see if it has a pattern after it.
         Pattern pattern = primary(parser);
         if (pattern == null) {
           pattern = Pattern.wildcard();
         }
         return Pattern.variable(name, pattern);
-      } else {
-        // A capitalized name is a value pattern.
-        return Pattern.value(Expr.variable(
-            parser.last(1).getPosition(), name));
       }
     }
     

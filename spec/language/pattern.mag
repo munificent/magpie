@@ -1,5 +1,7 @@
 import spec.specify
 
+// TODO(bob): This needs lots of clean up.
+
 specify("A record pattern") with
     it should("match subpatterns against fields") with
         match a: 1, b: 2
@@ -56,8 +58,8 @@ specify("A value pattern") with
 
     it should("match a class object as a value") with
         match Int
-            case Bool then "no"
-            case Int then "yes"
+            case == Bool then "no"
+            case == Int then "yes"
         end shouldEqual("yes")
     end
 end
