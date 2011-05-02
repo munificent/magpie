@@ -42,5 +42,6 @@ public class Field {
   
   private final boolean  mIsMutable;
   private final Expr     mInitializer;
+  // TODO(bob): Should just be pattern.
   private final Expr     mType;
 }

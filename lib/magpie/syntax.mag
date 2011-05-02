@@ -1,0 +1,179 @@
+import classfile:com.stuffwithstuff.magpie.interpreter.builtin.ParserBuiltIns
+
+defclass Parser
+end
+
+defclass PrefixParser
+end
+
+// TODO(bob): Abstract methods.
+def (this is PrefixParser) parse(parser is Parser, token is Token)
+    throw Error new("Must override.")
+end
+
+defclass Position
+    val file      String
+    val startLine Int
+    val startCol  Int
+    val endLine   Int
+    val endCol    Int
+end
+
+defclass TokenType
+    val name String
+end
+
+defclass Token
+    val position Position
+    val type     TokenType
+    val text     String
+    val value
+end
+
+// Expressions
+// ----------------------------------------------------------------------------
+
+defclass Expression
+    val position Position
+end
+
+defclass AssignExpression : Expression
+    val name  String
+    val value Expression
+end
+
+defclass BoolExpression : Expression
+    val value Bool
+end
+
+defclass BreakExpression : Expression
+end
+
+defclass ClassExpression : Expression
+    val doc     String
+    val name    String
+    val parents List // List of String
+    val fields  List // List of (String, Field)
+end
+
+defclass Field
+    val mutable? Bool
+    val initializer // Expression | Nothing
+    // TODO(bob): Make Pattern
+    val type        // Expression | Nothing
+end
+
+defclass CallExpression : Expression
+    val receiver Expression
+    val name     String
+    val argument Expression
+end
+
+defclass DefineExpression : Expression
+    val pattern Pattern
+    val value   Expression
+end
+
+defclass FunctionExpression : Expression
+    val doc     String // TODO(bob): Move doc into Expression?
+    val pattern Pattern
+    val body    Expression
+end
+
+defclass ImportExpression : Expression
+    val scheme String
+    val module String
+    val name   String
+    val rename String
+end
+
+defclass IntExpression : Expression
+    val value Int
+end
+
+defclass MatchExpression : Expression
+    val value Expression
+    val cases List // List of MatchCases
+end
+
+defclass ListExpression : Expression
+    val elements List // List of Expression
+end
+
+defclass LoopExpression : Expression
+    val body Expression
+end
+
+defclass MethodExpression : Expression
+    val doc     String
+    val name    String
+    val pattern Pattern
+    val body    Expression
+end
+
+defclass NothingExpression : Expression
+end
+
+defclass RecordExpression : Expression
+    val fields List // List of (String, Expression)
+end
+
+defclass ReturnExpression : Expression
+    val value Expression
+end
+
+defclass ScopeExpression : Expression
+    val body    Expression
+    val catches List // List of MatchCases
+end
+
+defclass SequenceExpression : Expression
+    val expressions List // List of Expression
+end
+
+defclass StringExpression : Expression
+    val value String
+end
+
+defclass ThrowExpression : Expression
+    val value Expression
+end
+
+defclass VariableExpression : Expression
+    val name String
+end
+
+// MatchCase
+// ----------------------------------------------------------------------------
+
+defclass MatchCase
+    val pattern Pattern
+    val body    Expression
+end
+
+// Patterns
+// ----------------------------------------------------------------------------
+
+defclass Pattern
+end
+
+defclass RecordPattern : Pattern
+    val fields List // List of (String, Pattern) pairs.
+                    // Ideally, would be String -> Pattern map.
+end
+
+defclass TypePattern : Pattern
+    val type Expression
+end
+
+defclass ValuePattern : Pattern
+    val value Expression
+end
+
+defclass VariablePattern : Pattern
+    val name    String
+    val pattern // Pattern | Nothing
+end
+
+defclass WildcardPattern : Pattern
+end

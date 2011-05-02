@@ -15,6 +15,7 @@ public class Interpreter {
     
     mGrammar = new Grammar();
 
+    // Bootstrap the base module with the core definitions.
     mBaseModule = new Module(mHost.loadModule("magpie.core"));
     mLoadingModules.push(mBaseModule);
     
@@ -36,6 +37,9 @@ public class Interpreter {
     mNothing = instantiate(mNothingClass, null);
     
     evaluateModule(mBaseModule);
+    
+    // Now load the syntax module so that quotations and metaprogramming work.
+    mSyntaxModule = importModule("magpie.syntax");
   }
   
   public void interpret(ModuleInfo info) {
@@ -140,6 +144,8 @@ public class Interpreter {
   public ClassObj getNothingClass() { return mNothingClass; }
   public ClassObj getRecordClass() { return mRecordClass; }
   public ClassObj getStringClass() { return mStringClass; }
+  
+  public Module getSyntaxModule() { return mSyntaxModule; }
   
   public Obj createBool(boolean value) {
     return value ? mTrue : mFalse;
@@ -310,6 +316,7 @@ public class Interpreter {
   
   private final Stack<Module> mLoadingModules = new Stack<Module>();
   private final Module mBaseModule;
+  private final Module mSyntaxModule;
   private final Grammar mGrammar;
   
   private final Stack<Obj> mConstructing = new Stack<Obj>();
