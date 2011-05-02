@@ -69,11 +69,6 @@ defclass CallExpression : Expression
     val argument Expression
 end
 
-defclass DefineExpression : Expression
-    val pattern Pattern
-    val value   Expression
-end
-
 defclass FunctionExpression : Expression
     val doc     String // TODO(bob): Move doc into Expression?
     val pattern Pattern
@@ -141,6 +136,11 @@ end
 
 defclass ThrowExpression : Expression
     val value Expression
+end
+
+defclass VarExpression : Expression
+    val pattern Pattern
+    val value   Expression
 end
 
 // MatchCase

@@ -9,7 +9,7 @@ import com.stuffwithstuff.magpie.ast.BoolExpr;
 import com.stuffwithstuff.magpie.ast.BreakExpr;
 import com.stuffwithstuff.magpie.ast.CallExpr;
 import com.stuffwithstuff.magpie.ast.ClassExpr;
-import com.stuffwithstuff.magpie.ast.DefineExpr;
+import com.stuffwithstuff.magpie.ast.VarExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.ExprVisitor;
 import com.stuffwithstuff.magpie.ast.Field;
@@ -208,14 +208,6 @@ public class JavaToMagpie {
     }
 
     @Override
-    public Obj visit(DefineExpr expr, Void context) {
-      return construct("DefineExpression",
-          "position", expr.getPosition(),
-          "pattern",  expr.getPattern(),
-          "value",    expr.getValue());
-    }
-
-    @Override
     public Obj visit(FnExpr expr, Void context) {
       return construct("FunctionExpression",
           "position", expr.getPosition(),
@@ -275,7 +267,7 @@ public class JavaToMagpie {
 
     @Override
     public Obj visit(NameExpr expr, Void context) {
-      return construct("VariableExpression",
+      return construct("NameExpression",
           "position", expr.getPosition(),
           "name",     expr.getName());
     }
@@ -333,6 +325,14 @@ public class JavaToMagpie {
     public Obj visit(ThrowExpr expr, Void context) {
       return construct("ThrowExpression",
           "position", expr.getPosition(),
+          "value",    expr.getValue());
+    }
+
+    @Override
+    public Obj visit(VarExpr expr, Void context) {
+      return construct("VarExpression",
+          "position", expr.getPosition(),
+          "pattern",  expr.getPattern(),
           "value",    expr.getValue());
     }
   }

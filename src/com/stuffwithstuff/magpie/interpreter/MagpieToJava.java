@@ -86,11 +86,6 @@ public class MagpieToJava {
           getExpr(expr, "receiver"),
           getString(expr, "name"),
           getExpr(expr, "argument"));
-    } else if (exprClass == getClass("DefineExpression")) {
-      return Expr.define(
-          getPosition(expr),
-          getPattern(expr, "pattern"),
-          getExpr(expr, "value"));
     } else if (exprClass == getClass("FunctionExpression")) {
       return Expr.fn(
           getPosition(expr),
@@ -165,6 +160,11 @@ public class MagpieToJava {
     } else if (exprClass == getClass("ThrowExpression")) {
       return Expr.throw_(
           getPosition(expr),
+          getExpr(expr, "value"));
+    } else if (exprClass == getClass("VarExpression")) {
+      return Expr.var(
+          getPosition(expr),
+          getPattern(expr, "pattern"),
           getExpr(expr, "value"));
     }
     

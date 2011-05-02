@@ -55,7 +55,7 @@ public class LoopParser implements PrefixParser {
         
         // Initialize the iterator before the loop.
         String iteratorVar = parser.generateName();
-        beforeLoop.add(Expr.define(position, iteratorVar,
+        beforeLoop.add(Expr.var(position, iteratorVar,
             Expr.call(position, generator, Name.ITERATE,
                 Expr.nothing(position))));
         
@@ -66,7 +66,7 @@ public class LoopParser implements PrefixParser {
             Expr.break_(position)));
         
         // If not done, create the loop variable.
-        eachLoop.add(Expr.define(position, pattern,
+        eachLoop.add(Expr.var(position, pattern,
             Expr.call(position, Expr.name(position, iteratorVar), Name.CURRENT)));
       }
       parser.match(TokenType.LINE); // Optional line after a clause.

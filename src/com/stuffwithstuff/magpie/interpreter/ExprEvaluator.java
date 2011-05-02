@@ -103,14 +103,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
-  public Obj visit(DefineExpr expr, EvalContext context) {
-    Obj value = evaluate(expr.getValue(), context);
-
-    PatternBinder.bind(mInterpreter, expr.getPattern(), value, context);
-    return value;
-  }
-
-  @Override
   public Obj visit(FnExpr expr, EvalContext context) {
     return mInterpreter.createFn(expr, context);
   }
@@ -304,6 +296,14 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(ThrowExpr expr, EvalContext context) {
     Obj value = evaluate(expr.getValue(), context);
     throw new ErrorException(value);
+  }
+
+  @Override
+  public Obj visit(VarExpr expr, EvalContext context) {
+    Obj value = evaluate(expr.getValue(), context);
+
+    PatternBinder.bind(mInterpreter, expr.getPattern(), value, context);
+    return value;
   }
 
   private Obj evaluateCases(Obj value, List<MatchCase> cases,

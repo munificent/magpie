@@ -49,18 +49,6 @@ public abstract class Expr {
     return new ClassExpr(position, doc, name, parents, fields);
   }
 
-  public static Expr define(String name, Expr value) {
-    return define(value.getPosition(), name, value);
-  }
-
-  public static Expr define(Position position, String name, Expr value) {
-    return define(position, Pattern.variable(name), value);
-  }
-  
-  public static Expr define(Position position, Pattern pattern, Expr value) {
-    return new DefineExpr(position, pattern, value);
-  }
-
   public static FnExpr fn(Expr body, String doc) {
     return new FnExpr(Position.none(), doc, body);
   }
@@ -189,6 +177,14 @@ public abstract class Expr {
 
   public static Expr throw_(Position position, Expr value) {
     return new ThrowExpr(position, value);
+  }
+
+  public static Expr var(Position position, String name, Expr value) {
+    return var(position, Pattern.variable(name), value);
+  }
+  
+  public static Expr var(Position position, Pattern pattern, Expr value) {
+    return new VarExpr(position, pattern, value);
   }
 
   public Expr(Position position, String doc) {

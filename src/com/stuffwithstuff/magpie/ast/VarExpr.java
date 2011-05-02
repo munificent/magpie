@@ -6,8 +6,8 @@ import com.stuffwithstuff.magpie.parser.Position;
 /**
  * A variable declaration.
  */
-public class DefineExpr extends Expr {
-  DefineExpr(Position position, Pattern pattern, Expr value) {
+public class VarExpr extends Expr {
+  VarExpr(Position position, Pattern pattern, Expr value) {
     super(position);
     mPattern = pattern;
     mValue = value;
