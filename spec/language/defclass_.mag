@@ -10,7 +10,7 @@ specify("A class's parent classes") with
         end
 
         fn
-            defclass B : A, A
+            defclass B is A, A
             end
         end shouldThrow(ParentCollisionError)
     end
@@ -24,14 +24,14 @@ specify("A class's parent classes") with
         defclass A
         end
 
-        defclass B : A
+        defclass B is A
         end
 
-        defclass C : A
+        defclass C is A
         end
 
         fn
-            defclass D : B, C
+            defclass D is B, C
             end
         end shouldThrow(ParentCollisionError)
     end
@@ -161,7 +161,7 @@ specify("A class's default constructor") with
             var bb
         end
 
-        defclass C : A, B
+        defclass C is A, B
             var cc
         end
 
@@ -197,7 +197,7 @@ specify("A class's default constructor") with
             this init(aa: "a " + string)
         end
 
-        defclass B : A
+        defclass B is A
             var bb
         end
 

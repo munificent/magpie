@@ -1,6 +1,6 @@
 import spec.specify
 
-defclass TestComparable : Comparable
+defclass TestComparable is Comparable
     var result is Int
 end
 

@@ -140,7 +140,7 @@ def (this is IndexableIterator) current
 end
 
 
-defclass Range : Indexable
+defclass Range is Indexable
     /// An Indexable, iterable range of sequential integers from a given
     /// *first* to *last* (inclusive).
     var first is Int

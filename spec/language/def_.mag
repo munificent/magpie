@@ -62,13 +62,13 @@ specify("The linearization of a multimethod") with
     defclass A2
     end
 
-    defclass B1 : A1
+    defclass B1 is A1
     end
 
-    defclass B2 : A1, A2
+    defclass B2 is A1, A2
     end
 
-    defclass C1 : B1
+    defclass C1 is B1
     end
 
     defclass Foo

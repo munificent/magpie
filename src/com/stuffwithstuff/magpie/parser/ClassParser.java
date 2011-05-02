@@ -17,7 +17,7 @@ public class ClassParser implements PrefixParser {
     
     // Parse the parents, if any.
     List<String> parents = new ArrayList<String>();
-    if (parser.match(TokenType.COLON)) {
+    if (parser.match("is")) {
       do {
         parents.add(parser.consume(TokenType.NAME).getString());
       } while (parser.match(TokenType.COMMA));

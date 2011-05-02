@@ -37,19 +37,19 @@ defclass Expression
     val position is Position
 end
 
-defclass AssignExpression : Expression
+defclass AssignExpression is Expression
     val name  is String
     val value is Expression
 end
 
-defclass BoolExpression : Expression
+defclass BoolExpression is Expression
     val value is Bool
 end
 
-defclass BreakExpression : Expression
+defclass BreakExpression is Expression
 end
 
-defclass ClassExpression : Expression
+defclass ClassExpression is Expression
     val doc     is String
     val name    is String
     val parents is List // List of String
@@ -62,82 +62,82 @@ defclass Field
     val pattern     // Pattern | Nothing
 end
 
-defclass CallExpression : Expression
+defclass CallExpression is Expression
     val receiver is Expression
     val name     is String
     val argument is Expression
 end
 
-defclass FunctionExpression : Expression
+defclass FunctionExpression is Expression
     val doc     is String // TODO(bob): Move doc into Expression?
     val pattern is Pattern
     val body    is Expression
 end
 
-defclass ImportExpression : Expression
+defclass ImportExpression is Expression
     val scheme is String
     val module is String
     val name   is String
     val rename is String
 end
 
-defclass IntExpression : Expression
+defclass IntExpression is Expression
     val value is Int
 end
 
-defclass MatchExpression : Expression
+defclass MatchExpression is Expression
     val value is Expression
     val cases is List // List of MatchCases
 end
 
-defclass ListExpression : Expression
+defclass ListExpression is Expression
     val elements is List // List of Expression
 end
 
-defclass LoopExpression : Expression
+defclass LoopExpression is Expression
     val body is Expression
 end
 
-defclass MethodExpression : Expression
+defclass MethodExpression is Expression
     val doc     is String
     val name    is String
     val pattern is Pattern
     val body    is Expression
 end
 
-defclass NameExpression : Expression
+defclass NameExpression is Expression
     val name is String
 end
 
-defclass NothingExpression : Expression
+defclass NothingExpression is Expression
 end
 
-defclass RecordExpression : Expression
+defclass RecordExpression is Expression
     val fields is List // List of (String, Expression)
 end
 
-defclass ReturnExpression : Expression
+defclass ReturnExpression is Expression
     val value is Expression
 end
 
-defclass ScopeExpression : Expression
+defclass ScopeExpression is Expression
     val body    is Expression
     val catches is List // List of MatchCases
 end
 
-defclass SequenceExpression : Expression
+defclass SequenceExpression is Expression
     val expressions is List // List of Expression
 end
 
-defclass StringExpression : Expression
+defclass StringExpression is Expression
     val value is String
 end
 
-defclass ThrowExpression : Expression
+defclass ThrowExpression is Expression
     val value is Expression
 end
 
-defclass VarExpression : Expression
+defclass VarExpression is Expression
     val pattern is Pattern
     val value   is Expression
 end
@@ -156,23 +156,23 @@ end
 defclass Pattern
 end
 
-defclass RecordPattern : Pattern
+defclass RecordPattern is Pattern
     val fields is List // List of (String, Pattern) pairs.
                     // Ideally, would be String -> Pattern map.
 end
 
-defclass TypePattern : Pattern
+defclass TypePattern is Pattern
     val type is Expression
 end
 
-defclass ValuePattern : Pattern
+defclass ValuePattern is Pattern
     val value is Expression
 end
 
-defclass VariablePattern : Pattern
+defclass VariablePattern is Pattern
     val name    is String
     val pattern // Pattern | Nothing
 end
 
-defclass WildcardPattern : Pattern
+defclass WildcardPattern is Pattern
 end
