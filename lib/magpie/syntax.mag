@@ -34,121 +34,120 @@ end
 // ----------------------------------------------------------------------------
 
 defclass Expression
-    val position Position
+    val position is Position
 end
 
 defclass AssignExpression : Expression
-    val name  String
-    val value Expression
+    val name  is String
+    val value is Expression
 end
 
 defclass BoolExpression : Expression
-    val value Bool
+    val value is Bool
 end
 
 defclass BreakExpression : Expression
 end
 
 defclass ClassExpression : Expression
-    val doc     String
-    val name    String
-    val parents List // List of String
-    val fields  List // List of (String, Field)
+    val doc     is String
+    val name    is String
+    val parents is List // List of String
+    val fields  is List // List of (String, Field)
 end
 
 defclass Field
-    val mutable? Bool
+    val mutable?    is Bool
     val initializer // Expression | Nothing
-    // TODO(bob): Make Pattern
-    val type        // Expression | Nothing
+    val pattern     // Pattern | Nothing
 end
 
 defclass CallExpression : Expression
-    val receiver Expression
-    val name     String
-    val argument Expression
+    val receiver is Expression
+    val name     is String
+    val argument is Expression
 end
 
 defclass FunctionExpression : Expression
-    val doc     String // TODO(bob): Move doc into Expression?
-    val pattern Pattern
-    val body    Expression
+    val doc     is String // TODO(bob): Move doc into Expression?
+    val pattern is Pattern
+    val body    is Expression
 end
 
 defclass ImportExpression : Expression
-    val scheme String
-    val module String
-    val name   String
-    val rename String
+    val scheme is String
+    val module is String
+    val name   is String
+    val rename is String
 end
 
 defclass IntExpression : Expression
-    val value Int
+    val value is Int
 end
 
 defclass MatchExpression : Expression
-    val value Expression
-    val cases List // List of MatchCases
+    val value is Expression
+    val cases is List // List of MatchCases
 end
 
 defclass ListExpression : Expression
-    val elements List // List of Expression
+    val elements is List // List of Expression
 end
 
 defclass LoopExpression : Expression
-    val body Expression
+    val body is Expression
 end
 
 defclass MethodExpression : Expression
-    val doc     String
-    val name    String
-    val pattern Pattern
-    val body    Expression
+    val doc     is String
+    val name    is String
+    val pattern is Pattern
+    val body    is Expression
 end
 
 defclass NameExpression : Expression
-    val name String
+    val name is String
 end
 
 defclass NothingExpression : Expression
 end
 
 defclass RecordExpression : Expression
-    val fields List // List of (String, Expression)
+    val fields is List // List of (String, Expression)
 end
 
 defclass ReturnExpression : Expression
-    val value Expression
+    val value is Expression
 end
 
 defclass ScopeExpression : Expression
-    val body    Expression
-    val catches List // List of MatchCases
+    val body    is Expression
+    val catches is List // List of MatchCases
 end
 
 defclass SequenceExpression : Expression
-    val expressions List // List of Expression
+    val expressions is List // List of Expression
 end
 
 defclass StringExpression : Expression
-    val value String
+    val value is String
 end
 
 defclass ThrowExpression : Expression
-    val value Expression
+    val value is Expression
 end
 
 defclass VarExpression : Expression
-    val pattern Pattern
-    val value   Expression
+    val pattern is Pattern
+    val value   is Expression
 end
 
 // MatchCase
 // ----------------------------------------------------------------------------
 
 defclass MatchCase
-    val pattern Pattern
-    val body    Expression
+    val pattern is Pattern
+    val body    is Expression
 end
 
 // Patterns
@@ -158,20 +157,20 @@ defclass Pattern
 end
 
 defclass RecordPattern : Pattern
-    val fields List // List of (String, Pattern) pairs.
+    val fields is List // List of (String, Pattern) pairs.
                     // Ideally, would be String -> Pattern map.
 end
 
 defclass TypePattern : Pattern
-    val type Expression
+    val type is Expression
 end
 
 defclass ValuePattern : Pattern
-    val value Expression
+    val value is Expression
 end
 
 defclass VariablePattern : Pattern
-    val name    String
+    val name    is String
     val pattern // Pattern | Nothing
 end
 

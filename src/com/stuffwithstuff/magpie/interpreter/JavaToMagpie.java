@@ -194,9 +194,9 @@ public class JavaToMagpie {
       
       for (Entry<String, Field> field : expr.getFields().entrySet()) {
         fields.add(construct("Field",
-            "mutable?", field.getValue().isMutable(),
+            "mutable?",    field.getValue().isMutable(),
             "initializer", field.getValue().getInitializer(),
-            "type",        field.getValue().getType()));
+            "pattern",     field.getValue().getPattern()));
       }
       
       return construct("ClassExpression",

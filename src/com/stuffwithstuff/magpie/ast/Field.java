@@ -9,10 +9,10 @@ import com.stuffwithstuff.magpie.ast.pattern.Pattern;
  * particular instance of a class. (Those just use a regular Scope.)
  */
 public class Field {
-  public Field(boolean isMutable, Expr initializer, Expr type) {
+  public Field(boolean isMutable, Expr initializer, Pattern pattern) {
     mIsMutable = isMutable;
     mInitializer = initializer;
-    mType = type;
+    mPattern = pattern;
   }
 
   /**
@@ -27,21 +27,12 @@ public class Field {
   public Expr getInitializer() { return mInitializer; }
   
   /**
-   * Gets the type annotation for this field. Will be null if the field has an
+   * Gets the pattern for this field. Will be null if the field has an
    * initializer.
    */
-  public Expr getType() { return mType; }
-  
-  public Pattern getPattern() {
-    if (mType != null) {
-      return Pattern.type(mType);
-    } else {
-      return Pattern.wildcard();
-    }
-  }
+  public Pattern getPattern() { return mPattern; }
   
   private final boolean  mIsMutable;
   private final Expr     mInitializer;
-  // TODO(bob): Should just be pattern.
-  private final Expr     mType;
+  private final Pattern  mPattern;
 }

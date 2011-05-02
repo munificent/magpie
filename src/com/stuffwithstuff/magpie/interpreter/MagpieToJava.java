@@ -70,7 +70,7 @@ public class MagpieToJava {
         Field field = new Field(
             getBool(fieldObj, "mutable?"),
             getExpr(fieldObj, "initializer"),
-            getExpr(fieldObj, "type"));
+            getPattern(fieldObj, "pattern"));
         fields.put(entry.getField(0).asString(), field);
       }
 

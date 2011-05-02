@@ -126,8 +126,8 @@ end
 defclass IndexableIterator
     /// An iterator that can iterator over any class that inherits from
     /// Indexable and provides a "count" getter, and a numeric indexer.
-    var indexable
-    var index = -1
+    var indexable is Indexable
+    var index     = -1
 end
 
 def (this is IndexableIterator) next()
@@ -143,8 +143,8 @@ end
 defclass Range : Indexable
     /// An Indexable, iterable range of sequential integers from a given
     /// *first* to *last* (inclusive).
-    var first Int
-    var last  Int
+    var first is Int
+    var last  is Int
 end
 
 def (this is Range)[index is Int]

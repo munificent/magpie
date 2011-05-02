@@ -1,7 +1,7 @@
 import spec.specify
 
 defclass TestComparable : Comparable
-    var result Int
+    var result is Int
 end
 
 def (this is TestComparable) compareTo(is TestComparable)

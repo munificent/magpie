@@ -28,9 +28,9 @@ def specify(description is String, block)
 end
 
 defclass TestSuite
-    var name        String
-    var currentTest String = ""
-    var failedTest  Bool   = false
+    var name        is String
+    var currentTest = ""
+    var failedTest  = false
 end
 
 // TODO(bob): Need function types.

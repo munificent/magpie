@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.Field;
+import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.builtin.ClassNew;
 
 public class EnvironmentBuilder {
@@ -190,7 +191,7 @@ public class EnvironmentBuilder {
     }
     
     public ClassBuilder val(String name, String type) {
-      mFields.put(name, new Field(false, null, Expr.name(type)));
+      mFields.put(name, new Field(false, null, Pattern.type(Expr.name(type))));
       
       return this;
     }

@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.Field;
+import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 
 public class ClassParser implements PrefixParser {  
   @Override
@@ -47,13 +48,13 @@ public class ClassParser implements PrefixParser {
       Map<String, Field> fields) {
     String name = parser.consume(TokenType.NAME).getString();
     
-    // Parse the type if there is one.
-    Expr type;
+    // Parse the pattern if there is one.
+    Pattern pattern;
     if (parser.lookAhead(TokenType.EQUALS) ||
         parser.lookAhead(TokenType.LINE)) {
-      type = null;
+      pattern = Pattern.wildcard();
     } else {
-      type = parser.parseTypeAnnotation();
+      pattern = PatternParser.parse(parser);
     }
     
     // Parse the initializer if there is one.
@@ -64,6 +65,6 @@ public class ClassParser implements PrefixParser {
       initializer = null;
     }
     
-    fields.put(name, new Field(isMutable, initializer, type));
+    fields.put(name, new Field(isMutable, initializer, pattern));
   }
 }
