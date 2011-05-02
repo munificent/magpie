@@ -237,6 +237,16 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
+  public Obj visit(NameExpr expr, EvalContext context) {
+    Obj variable = context.getScope().lookUp(expr.getName());
+    if (variable != null) return variable;
+    
+    // TODO(bob): Detect this statically.
+    throw mInterpreter.error("NoVariableError",
+        "Could not find a variable named \"" + expr.getName() + "\".");
+  }
+
+  @Override
   public Obj visit(NothingExpr expr, EvalContext context) {
     return mInterpreter.nothing();
   }
@@ -294,17 +304,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(ThrowExpr expr, EvalContext context) {
     Obj value = evaluate(expr.getValue(), context);
     throw new ErrorException(value);
-  }
-
-  @Override
-  public Obj visit(VariableExpr expr, EvalContext context) {
-    // Look for a local variable.
-    Obj variable = context.getScope().lookUp(expr.getName());
-    if (variable != null) return variable;
-    
-    // TODO(bob): Detect this statically.
-    throw mInterpreter.error("NoVariableError",
-        "Could not find a variable named \"" + expr.getName() + "\".");
   }
 
   private Obj evaluateCases(Obj value, List<MatchCase> cases,

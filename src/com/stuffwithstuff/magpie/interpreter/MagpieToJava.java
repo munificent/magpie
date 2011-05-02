@@ -128,6 +128,10 @@ public class MagpieToJava {
           getString(expr, "name"),
           getPattern(expr, "pattern"),
           getExpr(expr, "body"));
+    } else if (exprClass == getClass("NameExpression")) {
+      return Expr.name(
+          getPosition(expr),
+          getString(expr, "name"));
     } else if (exprClass == getClass("NothingExpression")) {
       return Expr.nothing(
           getPosition(expr));
@@ -162,10 +166,6 @@ public class MagpieToJava {
       return Expr.throw_(
           getPosition(expr),
           getExpr(expr, "value"));
-    } else if (exprClass == getClass("VariableExpression")) {
-      return Expr.variable(
-          getPosition(expr),
-          getString(expr, "name"));
     }
     
     throw new IllegalArgumentException("Not a valid expression object.");

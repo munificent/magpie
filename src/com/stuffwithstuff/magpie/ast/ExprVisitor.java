@@ -13,8 +13,8 @@ public interface ExprVisitor<R, C> {
   R visit(ListExpr expr, C context);
   R visit(LoopExpr expr, C context);
   R visit(MatchExpr expr, C context);
-  R visit(VariableExpr expr, C context);
   R visit(MethodExpr expr, C context);
+  R visit(NameExpr expr, C context);
   R visit(NothingExpr expr, C context);
   R visit(RecordExpr expr, C context);
   R visit(ReturnExpr expr, C context);

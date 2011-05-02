@@ -61,13 +61,13 @@ public class LoopParser implements PrefixParser {
         
         // Each iteration, advance the iterator and break if done.
         eachLoop.add(Expr.if_(
-            Expr.call(position, Expr.variable(iteratorVar), Name.NEXT, Expr.nothing(position)),
+            Expr.call(position, Expr.name(iteratorVar), Name.NEXT, Expr.nothing(position)),
             Expr.nothing(),
             Expr.break_(position)));
         
         // If not done, create the loop variable.
         eachLoop.add(Expr.define(position, pattern,
-            Expr.call(position, Expr.variable(position, iteratorVar), Name.CURRENT)));
+            Expr.call(position, Expr.name(position, iteratorVar), Name.CURRENT)));
       }
       parser.match(TokenType.LINE); // Optional line after a clause.
       

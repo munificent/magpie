@@ -111,6 +111,10 @@ defclass MethodExpression : Expression
     val body    Expression
 end
 
+defclass NameExpression : Expression
+    val name String
+end
+
 defclass NothingExpression : Expression
 end
 
@@ -137,10 +141,6 @@ end
 
 defclass ThrowExpression : Expression
     val value Expression
-end
-
-defclass VariableExpression : Expression
-    val name String
 end
 
 // MatchCase

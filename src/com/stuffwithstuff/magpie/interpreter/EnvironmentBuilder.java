@@ -190,7 +190,7 @@ public class EnvironmentBuilder {
     }
     
     public ClassBuilder val(String name, String type) {
-      mFields.put(name, new Field(false, null, Expr.variable(type)));
+      mFields.put(name, new Field(false, null, Expr.name(type)));
       
       return this;
     }

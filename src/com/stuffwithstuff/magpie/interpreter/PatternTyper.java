@@ -46,7 +46,7 @@ public class PatternTyper implements PatternVisitor<Expr, Void> {
   public Expr visit(WildcardPattern pattern, Void dummy) {
     // TODO(bob): Should this be Dynamic or Any? I think Dynamic preserves the
     // existing interpretation of fn(foo) ...
-    return Expr.variable("Dynamic");
+    return Expr.name("Dynamic");
   }
 
   private PatternTyper() {

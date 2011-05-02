@@ -49,7 +49,7 @@ public class NameParser implements PrefixParser, InfixParser {
     
     // See if this is a bare name, or a method call.
     if ((left == null) && (arg == null)) {
-      return Expr.variable(token.getPosition(), fullName.getString());
+      return Expr.name(token.getPosition(), fullName.getString());
     } else {
       return Expr.call(fullName.getPosition(), left, fullName.getString(), arg);
     }

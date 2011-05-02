@@ -27,7 +27,7 @@ import com.stuffwithstuff.magpie.ast.ScopeExpr;
 import com.stuffwithstuff.magpie.ast.SequenceExpr;
 import com.stuffwithstuff.magpie.ast.StringExpr;
 import com.stuffwithstuff.magpie.ast.ThrowExpr;
-import com.stuffwithstuff.magpie.ast.VariableExpr;
+import com.stuffwithstuff.magpie.ast.NameExpr;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.PatternVisitor;
@@ -264,13 +264,6 @@ public class JavaToMagpie {
     }
 
     @Override
-    public Obj visit(VariableExpr expr, Void context) {
-      return construct("VariableExpression",
-          "position", expr.getPosition(),
-          "name",     expr.getName());
-    }
-
-    @Override
     public Obj visit(MethodExpr expr, Void context) {
       return construct("MethodExpression",
           "position", expr.getPosition(),
@@ -278,6 +271,13 @@ public class JavaToMagpie {
           "name",     expr.getName(),
           "pattern",  expr.getPattern(),
           "body",     expr.getBody());
+    }
+
+    @Override
+    public Obj visit(NameExpr expr, Void context) {
+      return construct("VariableExpression",
+          "position", expr.getPosition(),
+          "name",     expr.getName());
     }
 
     @Override

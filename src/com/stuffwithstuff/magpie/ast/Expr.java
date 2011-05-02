@@ -117,7 +117,15 @@ public abstract class Expr {
       Pattern pattern, Expr body) {
     return new MethodExpr(position, doc, name, pattern, body);
   }
+
+  public static Expr name(Position position, String name) {
+    return new NameExpr(position, name);
+  }
   
+  public static Expr name(String name) {
+    return name(Position.none(), name);
+  }
+
   public static Expr nothing() {
     return nothing(Position.none());  
   }
@@ -181,14 +189,6 @@ public abstract class Expr {
 
   public static Expr throw_(Position position, Expr value) {
     return new ThrowExpr(position, value);
-  }
-
-  public static Expr variable(Position position, String name) {
-    return new VariableExpr(position, name);
-  }
-  
-  public static Expr variable(String name) {
-    return variable(Position.none(), name);
   }
 
   public Expr(Position position, String doc) {

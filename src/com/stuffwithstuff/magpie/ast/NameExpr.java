@@ -3,10 +3,10 @@ package com.stuffwithstuff.magpie.ast;
 import com.stuffwithstuff.magpie.parser.Position;
 
 /**
- * A reference to a variable.
+ * A named reference to a variable.
  */
-public class VariableExpr extends Expr {
-  VariableExpr(Position position, String name) {
+public class NameExpr extends Expr {
+  NameExpr(Position position, String name) {
     super(position);
     
     mName = name;
