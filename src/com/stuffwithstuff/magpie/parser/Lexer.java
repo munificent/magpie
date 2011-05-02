@@ -31,9 +31,7 @@ public class Lexer implements TokenReader {
     case '{': return makeToken(TokenType.LEFT_BRACE);
     case '}': return makeToken(TokenType.RIGHT_BRACE);
     case '`': return makeToken(TokenType.BACKTICK);
-    case ':': return makeToken(TokenType.COLON);
     case ',': return makeToken(TokenType.COMMA);
-    case '.': return makeToken(TokenType.DOT);
 
       // Match line ending characters.
     case ';':
@@ -280,7 +278,7 @@ public class Lexer implements TokenReader {
     return ((c >= 'a') && (c <= 'z'))
         || ((c >= 'A') && (c <= 'Z'))
         || (c == '_')
-        || ("~!$%^&*-=+|/?<>".indexOf(c) != -1);
+        || ("~!$%^&*-=+|/?<>.".indexOf(c) != -1);
   }
   
   private final CharacterReader mText;

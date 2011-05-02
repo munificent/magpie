@@ -47,9 +47,7 @@ public class NiceReplCharacterReader extends ReplCharacterReader {
         case LEFT_BRACE:
         case RIGHT_BRACE:
         case BACKTICK:
-        case COLON:
         case COMMA:
-        case DOT:
         case EQUALS:
           Term.set(Term.ForeColor.GRAY);
           break;

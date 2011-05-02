@@ -12,25 +12,19 @@ public class ImportParser implements PrefixParser {
       scheme = parser.last(1).getString();
     }
     
-    // Allow a leading . for a relative path.
-    String module = "";
-    if (parser.match(TokenType.DOT)) {
-      module = ".";
-    }
-    
     // Parse the module name.
-    module += parser.parseName().getString();
+    String module = parser.consume(TokenType.NAME).getString();
     
     // Parse the name, if any.
     String name = null;
-    if (parser.lookAhead(TokenType.NAME)) {
-      name = parser.parseName().getString();
+    if (parser.match(TokenType.NAME)) {
+      name = parser.last(1).getString();
     }
     
     // Parse the rename, if any.
     String rename = null;
     if (parser.match(TokenType.EQUALS)) {
-      rename = parser.parseName().getString();
+      rename = parser.consume(TokenType.NAME).getString();
     }
     
     return Expr.import_(span.end(), scheme, module, name, rename);

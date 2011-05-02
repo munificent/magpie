@@ -18,9 +18,6 @@ public class NameParser implements PrefixParser, InfixParser {
   
   @Override
   public Expr parse(MagpieParser parser, Expr left, Token token) {
-    // Parse the whole fully-qualified name.
-    Token fullName = parser.parseName(true);
-    
     // Parse the argument, if any.
     Expr arg = null;
     if (parser.match(TokenType.LEFT_PAREN)) {
@@ -49,9 +46,9 @@ public class NameParser implements PrefixParser, InfixParser {
     
     // See if this is a bare name, or a method call.
     if ((left == null) && (arg == null)) {
-      return Expr.name(token.getPosition(), fullName.getString());
+      return Expr.name(token.getPosition(), token.getString());
     } else {
-      return Expr.call(fullName.getPosition(), left, fullName.getString(), arg);
+      return Expr.call(token.getPosition(), left, token.getString(), arg);
     }
   }
   

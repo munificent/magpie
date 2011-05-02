@@ -34,8 +34,6 @@ public class Morpher implements TokenReader {
       // Ignore lines after tokens that can't end an expression.
       case BACKTICK:
       case COMMA:
-      case COLON:
-      case DOT:
       case FIELD:
       case LEFT_PAREN:
       case LEFT_BRACKET:
