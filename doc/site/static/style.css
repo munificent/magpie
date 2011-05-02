@@ -76,7 +76,8 @@ a:hover {
     font: 14px/20px Courier, monospace; }
   .content code {
     white-space: nowrap;
-    font-size: 16px; }
+    font-size: 16px;
+    padding: 0 2px; }
   .content pre {
     -moz-border-radius: 5px;
     border-radius: 5px;
