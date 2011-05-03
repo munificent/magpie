@@ -11,6 +11,8 @@ public class Grammar {
     prefix(TokenType.STRING,        new LiteralParser());
     prefix(TokenType.LEFT_PAREN,    new ParenthesisPrefixParser());
     prefix(TokenType.LEFT_BRACKET,  new BracketPrefixParser());
+    prefix(TokenType.LEFT_BRACE,    new BracePrefixParser());
+    prefix(TokenType.BACKTICK,      new BacktickParser());
     prefix(TokenType.NAME,          new NameParser());
     prefix(TokenType.FIELD,         new FieldParser());
     

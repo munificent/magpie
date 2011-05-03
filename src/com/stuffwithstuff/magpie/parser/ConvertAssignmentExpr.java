@@ -105,6 +105,11 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
   }
 
   @Override
+  public Expr visit(QuoteExpr expr, Expr value) {
+    return invalidExpression(expr);
+  }
+
+  @Override
   public Expr visit(RecordExpr expr, Expr value) {
     // a, b = 1, 2
     // becomes:
@@ -139,6 +144,11 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
 
   @Override
   public Expr visit(ThrowExpr expr, Expr value) {
+    return invalidExpression(expr);
+  }
+
+  @Override
+  public Expr visit(UnquoteExpr expr, Expr value) {
     return invalidExpression(expr);
   }
 

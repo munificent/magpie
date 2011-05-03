@@ -122,6 +122,10 @@ public abstract class Expr {
     return new NothingExpr(Position.none());  
   }
 
+  public static Expr quote(Position position, Expr body) {
+    return new QuoteExpr(position, body);
+  }
+
   public static Expr record(Position position,
       List<Pair<String, Expr>> fields) {
     return new RecordExpr(position, fields);
@@ -177,6 +181,10 @@ public abstract class Expr {
 
   public static Expr throw_(Position position, Expr value) {
     return new ThrowExpr(position, value);
+  }
+
+  public static Expr unquote(Position position, Expr value) {
+    return new UnquoteExpr(position, value);
   }
 
   public static Expr var(Position position, String name, Expr value) {

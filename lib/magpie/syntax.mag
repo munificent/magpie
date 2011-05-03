@@ -112,6 +112,10 @@ end
 defclass NothingExpression is Expression
 end
 
+defclass QuoteExpression is Expression
+    val body is Expression
+end
+
 defclass RecordExpression is Expression
     val fields is List // List of (String, Expression)
 end
@@ -134,6 +138,10 @@ defclass StringExpression is Expression
 end
 
 defclass ThrowExpression is Expression
+    val value is Expression
+end
+
+defclass UnquoteExpression is Expression
     val value is Expression
 end
 

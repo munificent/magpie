@@ -130,6 +130,10 @@ public class MagpieToJava {
     } else if (exprClass == getClass("NothingExpression")) {
       return Expr.nothing(
           getPosition(expr));
+    } else if (exprClass == getClass("QuoteExpression")) {
+      return Expr.quote(
+          getPosition(expr),
+          getExpr(expr, "body"));
     } else if (exprClass == getClass("RecordExpression")) {
       List<Pair<String, Expr>> fields = new ArrayList<Pair<String, Expr>>();
       for (Obj field : getList(expr, "fields")) {
@@ -159,6 +163,10 @@ public class MagpieToJava {
           getString(expr, "value"));
     } else if (exprClass == getClass("ThrowExpression")) {
       return Expr.throw_(
+          getPosition(expr),
+          getExpr(expr, "value"));
+    } else if (exprClass == getClass("UnquoteExpression")) {
+      return Expr.unquote(
           getPosition(expr),
           getExpr(expr, "value"));
     } else if (exprClass == getClass("VarExpression")) {

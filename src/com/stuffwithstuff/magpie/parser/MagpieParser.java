@@ -147,6 +147,18 @@ public class MagpieParser extends Parser {
     return "gen " + (++mUniqueSymbolId);
   }
   
+  public boolean inQuote() {
+    return mQuoteDepth > 0;
+  }
+  
+  public void pushQuote() {
+    mQuoteDepth++;
+  }
+  
+  public void popQuote() {
+    mQuoteDepth--;
+  }
+
   /**
    * Gets whether or not the name is a "keyword". A keyword is any name that
    * has special meaning to the parser: it's either a reserved word, or it has
@@ -225,4 +237,5 @@ public class MagpieParser extends Parser {
 
   private final Grammar mGrammar;
   private int mUniqueSymbolId = 0;
+  private int mQuoteDepth = 0;
 }

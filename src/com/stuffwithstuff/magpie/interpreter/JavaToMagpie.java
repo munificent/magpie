@@ -9,6 +9,8 @@ import com.stuffwithstuff.magpie.ast.BoolExpr;
 import com.stuffwithstuff.magpie.ast.BreakExpr;
 import com.stuffwithstuff.magpie.ast.CallExpr;
 import com.stuffwithstuff.magpie.ast.ClassExpr;
+import com.stuffwithstuff.magpie.ast.QuoteExpr;
+import com.stuffwithstuff.magpie.ast.UnquoteExpr;
 import com.stuffwithstuff.magpie.ast.VarExpr;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.ExprVisitor;
@@ -39,7 +41,6 @@ import com.stuffwithstuff.magpie.ast.pattern.WildcardPattern;
 import com.stuffwithstuff.magpie.parser.Position;
 import com.stuffwithstuff.magpie.parser.Token;
 import com.stuffwithstuff.magpie.parser.TokenType;
-import com.stuffwithstuff.magpie.util.NotImplementedException;
 import com.stuffwithstuff.magpie.util.Pair;
 
 public class JavaToMagpie {
@@ -279,6 +280,13 @@ public class JavaToMagpie {
     }
 
     @Override
+    public Obj visit(QuoteExpr expr, Void context) {
+      return construct("QuoteExpression",
+          "position", expr.getPosition(),
+          "body",     expr.getBody());
+    }
+
+    @Override
     public Obj visit(RecordExpr expr, Void context) {
       List<Obj> fields = new ArrayList<Obj>();
       for (Pair<String, Expr> field : expr.getFields()) {
@@ -326,6 +334,41 @@ public class JavaToMagpie {
       return construct("ThrowExpression",
           "position", expr.getPosition(),
           "value",    expr.getValue());
+    }
+
+    @Override
+    public Obj visit(UnquoteExpr expr, Void context) {
+      // If we have an EvalContext, then we're converting a quotation and we
+      // should evaluate the unquote.
+      if (mContext != null) {
+        // TODO(bob): Check that it evaluates to an expression?
+        Obj value = mInterpreter.evaluate(expr.getBody(), mContext);
+        
+        // If the unquoted value is a primitive object, automatically promote
+        // it to a corresponding literal.
+        if (value.getClassObj() == mInterpreter.getBoolClass()) {
+          value = construct("BoolExpression",
+              "position", expr.getPosition(),
+              "value",    value);
+        } else if (value.getClassObj() == mInterpreter.getIntClass()) {
+          value = construct("IntExpression",
+              "position", expr.getPosition(),
+              "value",    value);
+        } else if (value.getClassObj() == mInterpreter.getStringClass()) {
+          value = construct("StringExpression",
+              "position", expr.getPosition(),
+              "value",    value);
+        } else if (value.getClassObj() == mInterpreter.getNothingClass()) {
+          value = construct("NothingExpression",
+              "position", expr.getPosition());
+        }
+        return value;
+      } else {
+        // Just a straight conversion.
+        return construct("UnquoteExpression",
+            "position", expr.getPosition(),
+            "value",    expr.getBody());
+      }
     }
 
     @Override

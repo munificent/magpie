@@ -16,10 +16,12 @@ public interface ExprVisitor<R, C> {
   R visit(MethodExpr expr, C context);
   R visit(NameExpr expr, C context);
   R visit(NothingExpr expr, C context);
+  R visit(QuoteExpr expr, C context);
   R visit(RecordExpr expr, C context);
   R visit(ReturnExpr expr, C context);
   R visit(ScopeExpr expr, C context);
   R visit(StringExpr expr, C context);
   R visit(ThrowExpr expr, C context);
+  R visit(UnquoteExpr expr, C context);
   R visit(VarExpr expr, C context);
 }

@@ -9,6 +9,7 @@ import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.builtin.BuiltIns;
+import com.stuffwithstuff.magpie.util.NotImplementedException;
 import com.stuffwithstuff.magpie.util.Pair;
 
 /**
@@ -244,6 +245,12 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
+  public Obj visit(QuoteExpr expr, EvalContext context) {
+    return JavaToMagpie.convertAndUnquote(
+        mInterpreter, expr.getBody(), context);
+  }
+
+  @Override
   public Obj visit(RecordExpr expr, EvalContext context) {
     // Evaluate the fields.
     Map<String, Obj> fields = new HashMap<String, Obj>();
@@ -296,6 +303,12 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(ThrowExpr expr, EvalContext context) {
     Obj value = evaluate(expr.getValue(), context);
     throw new ErrorException(value);
+  }
+
+  @Override
+  public Obj visit(UnquoteExpr expr, EvalContext context) {
+    throw new UnsupportedOperationException(
+        "An unquoted expression cannot be directly evaluated.");
   }
 
   @Override

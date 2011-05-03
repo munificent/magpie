@@ -1,6 +1,7 @@
+import magpie.syntax
 import spec.specify
 
-specify("A quotation expression") with
+specify("A quote expression") with
     it should("return a BoolExpression when containing a boolean literal") with
         { true } shouldBe(BoolExpression)
         { true } value shouldEqual(true)
@@ -24,15 +25,22 @@ specify("A quotation expression") with
     end
 end
 
-specify("An unquote in a quotation") with
-    it should("insert the value of a named identifier into the quotation") with
+specify("An unquote in a quote") with
+    it should("insert the value of a named identifier into the quote") with
         var foo = { a(b) }
-        { c(`foo) } string shouldEqual("c(a(b))")
+        var result = { c(`foo) }
+        result name shouldEqual("c")
+        result argument name shouldEqual("a")
+        result argument argument name shouldEqual("b")
     end
 
     it should("allow a parenthesized expression after the backtick") with
-        def make(value) IntExpression new(value: value)
-        { print(`(make(123))) } string shouldEqual("print(123)")
+        def make(value)
+            IntExpression new(value: value)
+        end
+        var result = { print(`(make(123))) }
+        result name shouldEqual("print")
+        result argument value shouldEqual(123)
     end
 
     it should("wrap an unquoted nothing in a NothingExpression") with
