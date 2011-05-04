@@ -1,13 +1,14 @@
 import classfile:com.stuffwithstuff.magpie.interpreter.builtin.ParserBuiltIns
 
 defclass Parser
+    /// An instance of this class will be passed to a user-defined parse()
+    /// method. That can then call methods on this to consume tokens, do
+    /// lookahead, etc.
 end
 
-defclass PrefixParser
-end
-
+// Define this here so that there is a single "parse" multimethod.
 // TODO(bob): Abstract methods.
-def (this is PrefixParser) parse(parser is Parser, token is Token)
+def (this) parse(parser is Parser, token is Token)
     throw Error new("Must override.")
 end
 
@@ -22,6 +23,9 @@ end
 defclass TokenType
     val name String
 end
+
+// TODO(bob): Other TokenTypes.
+var TokenType.LINE = TokenType new(name: "LINE")
 
 defclass Token
     val position Position
@@ -166,7 +170,7 @@ end
 
 defclass RecordPattern is Pattern
     val fields is List // List of (String, Pattern) pairs.
-                    // Ideally, would be String -> Pattern map.
+                       // Ideally, would be String -> Pattern map.
 end
 
 defclass TypePattern is Pattern

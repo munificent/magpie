@@ -1,4 +1,4 @@
-//import and
+import .and_
 import .assign
 import .break_
 import .catch_
@@ -13,7 +13,7 @@ import .let_
 import .list
 import .match_
 import .newline
-//import .or_
+import .or_
 import .pattern
 import .quote
 import .record

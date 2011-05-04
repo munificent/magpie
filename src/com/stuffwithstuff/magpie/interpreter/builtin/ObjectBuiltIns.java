@@ -5,7 +5,7 @@ import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class ObjectBuiltIns {
   // TODO(bob): Rename toString.
-  @Signature("(_) string")
+  @Signature("(this) string")
   public static class String_ implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       return interpreter.createString("<" + arg.getClassObj().getName() + ">");

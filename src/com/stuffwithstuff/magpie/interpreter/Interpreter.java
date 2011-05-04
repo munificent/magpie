@@ -245,6 +245,8 @@ public class Interpreter {
     return mHost;
   }
   
+  // TODO(bob): Move this into Module. Each module should have its own grammar
+  // so that syntax extensions in one don't pollute others.
   public Grammar getGrammar() {
     return mGrammar;
   }

@@ -1,4 +1,5 @@
 import spec.specify
+import spec.truth_test
 
 // Note: implicitly depends on non-zero ints being truthy.
 specify("An 'and' expression") with

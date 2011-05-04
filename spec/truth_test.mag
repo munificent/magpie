@@ -1,0 +1,22 @@
+// A simple class that implements truthiness and tracks when it was called.
+defclass TruthTest
+    var value  is Bool
+    var called is Bool = false
+end
+
+def (this == TruthTest) init(value is Bool)
+    this init(value: value)
+end
+
+def (this is TruthTest) true?
+    this called = true
+    this value
+end
+
+
+defclass NotTruable
+end
+
+def (this is NotTruable) true?
+    nothing
+end

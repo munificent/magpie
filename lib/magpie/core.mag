@@ -1,6 +1,11 @@
 // magpie.core is automatically loaded and imported into every module before it
 // is run.
-import magpie.reflect
+import magpie.reflect sameAs?
+import magpie.syntax
+
+// TODO(bob): This file is getting kind of massive. Need to figure out how to
+// have multiple sources files define a single logical module. Maybe just an
+// easy way to re-export an imported name.
 
 import classfile:com.stuffwithstuff.magpie.interpreter.builtin.BuiltInFunctions
 import classfile:com.stuffwithstuff.magpie.interpreter.builtin.ClassBuiltIns
@@ -77,7 +82,7 @@ def (this is Bool) true?
     this
 end
 
-def (this this is Int) true?
+def (this is Int) true?
     this != 0
 end
 
@@ -159,3 +164,47 @@ end
 def (this is Int) to(last is Int)
     Range new(first: this, last: last)
 end
+
+// "and" Parser
+// ----------------------------------------------------------------------------
+
+// TODO(bob): Move into its own module.
+def (this == "and") parse(parser is Parser, left is Expression, token is Token)
+    // Ignore a newline after "and".
+    parser matchToken(TokenType.LINE)
+    var right = parser parseExpression(30)
+    {
+        do
+            // TODO(bob): Use generated symbol.
+            var temp__ = `left
+            match temp__ true?
+                case true then `right
+                else temp__
+            end
+        end
+    }
+end
+
+defineInfix("and", 30)
+
+// "or" Parser
+// ----------------------------------------------------------------------------
+
+// TODO(bob): Move into its own module.
+def (this == "or") parse(parser is Parser, left is Expression, token is Token)
+    // Ignore a newline after "or".
+    parser matchToken(TokenType.LINE)
+    var right = parser parseExpression(30)
+    {
+        do
+            // TODO(bob): Use generated symbol.
+            var temp__ = `left
+            match temp__ true?
+                case true then temp__
+                else `right
+            end
+        end
+    }
+end
+
+defineInfix("or", 30)

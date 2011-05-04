@@ -33,6 +33,11 @@ public class MagpieToJava {
     MagpieToJava converter = new MagpieToJava(interpreter);
     return converter.convertToken(token);
   }
+  
+  public static TokenType convertTokenType(Interpreter interpreter, Obj token) {
+    MagpieToJava converter = new MagpieToJava(interpreter);
+    return converter.convertTokenType(token);
+  }
 
   private MagpieToJava(Interpreter interpreter) {
     mInterpreter = interpreter;

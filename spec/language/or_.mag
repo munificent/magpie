@@ -1,7 +1,7 @@
 import spec.specify
+import spec.truth_test
 
 // Note: implicitly depends on non-zero ints being truthy.
-
 specify("An 'or' expression") with
     it should("return the first true argument") with
         (true or 0) shouldEqual(true)

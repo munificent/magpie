@@ -63,6 +63,10 @@ public class Grammar {
     prefix(keyword, parser);
   }
   
+  public void defineParser(String keyword, InfixParser parser) {
+    infix(keyword, parser);
+  }
+  
   /**
    * Gets whether or not this token is a reserved word. Reserved words like
    * "else" and "then" are claimed for special use by mixfix parsers, so can't
