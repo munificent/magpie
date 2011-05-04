@@ -1,44 +1,44 @@
 import magpie.reflect
 
-var totalTests = 0
-var totalFailures = 0
+var _totalTests = 0
+var _totalFailures = 0
 
-var currentTestSuite = nothing
-var startTimeMs = 0
+var _currentTestSuite = nothing
+var _startTimeMs = 0
 
 def startTests()
-    totalTests = 0
-    totalFailures = 0
-    currentTestSuite = nothing
+    _totalTests = 0
+    _totalFailures = 0
+    _currentTestSuite = nothing
     print("Executing specification...")
-    startTimeMs = currentTime()
+    _startTimeMs = currentTime()
 end
 
 def endTests()
     var endTimeMs = currentTime()
     print()
-    print("Passed " + (totalTests - totalFailures) + " out of " +
-        totalTests + " tests in " + (endTimeMs - startTimeMs) + "ms.")
+    print("Passed " + (_totalTests - _totalFailures) + " out of " +
+        _totalTests + " tests in " + (endTimeMs - _startTimeMs) + "ms.")
 end
 
 // TODO(bob): Need function types.
 def specify(description is String, block)
-    currentTestSuite = TestSuite new(name: description)
-    block call(currentTestSuite)
+    _currentTestSuite = _TestSuite new(_name: description)
+    block call(_currentTestSuite)
 end
 
-defclass TestSuite
-    var name        is String
-    var currentTest = ""
-    var failedTest  = false
+defclass _TestSuite
+    var _name        is String
+    var _currentTest = ""
+    var _failedTest  = false
 end
 
 // TODO(bob): Need function types.
-def (this is TestSuite) should(description is String, block)
+def (this is _TestSuite) should(description is String, block)
     // TODO(bob): Should not need "this " before setting fields.
-    this currentTest = description
-    var testsBefore = totalTests
-    this failedTest = false
+    this _currentTest = description
+    var testsBefore = _totalTests
+    this _failedTest = false
 
     do
         block call()
@@ -46,38 +46,38 @@ def (this is TestSuite) should(description is String, block)
         fail("Unexpected error: " + error class)
     end
 
-    if totalTests == testsBefore then
-        print("NONE: " + this name + " should " + this currentTest + ".")
+    if _totalTests == testsBefore then
+        print("NONE: " + this _name + " should " + this _currentTest + ".")
     end
 end
 
-def (this is TestSuite) pass()
-    this advance()
+def (this is _TestSuite) _pass()
+    this _advance()
 end
 
-def (this is TestSuite) advance()
-    totalTests = totalTests + 1
+def (this is _TestSuite) _advance()
+    _totalTests = _totalTests + 1
 end
 
-def (this is TestSuite) fail(message is String)
-    if not(this failedTest) then
-        print("FAIL: " + this name + " should " + this currentTest + ".")
+def (this is _TestSuite) _fail(message is String)
+    if not(this _failedTest) then
+        print("FAIL: " + this _name + " should " + this _currentTest + ".")
     end
-    this advance()
-    totalFailures = totalFailures + 1
+    this _advance()
+    _totalFailures = _totalFailures + 1
     print("      " + message)
-    this failedTest = true
+    this _failedTest = true
 end
 
 def fail(message is String)
-    currentTestSuite fail(message)
+    _currentTestSuite _fail(message)
 end
 
 def (this) shouldEqual(expected, message is String)
     if this != expected then
-        currentTestSuite fail(message)
+        _currentTestSuite _fail(message)
     else
-        currentTestSuite pass()
+        _currentTestSuite _pass()
     end
 end
 
@@ -87,9 +87,9 @@ end
 
 def (this) shouldBe(expected is Class, message is String)
     if this is?(expected) then
-        currentTestSuite pass()
+        _currentTestSuite _pass()
     else
-        currentTestSuite fail(message)
+        _currentTestSuite _fail(message)
     end
 end
 

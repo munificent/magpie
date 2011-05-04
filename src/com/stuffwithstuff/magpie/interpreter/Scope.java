@@ -119,8 +119,8 @@ public class Scope {
 
     mVariables.put(name, value);
     
-    // If we're defining a top-level variable, export it too.
-    if (mModule != null) {
+    // If we're defining a top-level public variable, export it too.
+    if ((mModule != null) && Name.isPublic(name)) {
       mModule.addExport(name, value);
     }
     
@@ -140,11 +140,15 @@ public class Scope {
     if (multimethod == null) {
       multimethod = new Multimethod();
       mMultimethods.put(name, multimethod);
-      
-      // If this is a top-level method, export it too.
-      if (mModule != null) {
-        mModule.addExport(name, multimethod);
-      }
+    }
+    
+    // If this is a top-level public method, export it too. Note that we do
+    // this outside of the above if() so that if you import a multimethod
+    // (which does not add it to the exports) and then add a new method to it,
+    // then that multimethod now becomes exported. That satisfies the user's
+    // expectation that all top-level defs are exported.
+    if ((mModule != null) && Name.isPublic(name)) {
+      mModule.addExport(name, multimethod);
     }
     
     multimethod.addMethod(method);
@@ -211,7 +215,10 @@ public class Scope {
   
   private void importMultimethod(Interpreter interpreter, String name,
       Multimethod multimethod, Module module) {
-    if (!mAllowRedefinition && mMultimethods.containsKey(name)) {
+    if (mAllowRedefinition) return;
+
+    Multimethod existing = mMultimethods.get(name);
+    if ((existing != null) && (existing != multimethod)) {
       interpreter.error(Name.REDEFINITION_ERROR,
           "Can not import multimethod \"" + name + "\" from " +
           module.getName() + " because there is already a multimethod with " +

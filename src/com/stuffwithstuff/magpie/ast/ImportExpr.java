@@ -35,9 +35,10 @@ public class ImportExpr extends Expr {
 
   @Override
   public void toString(StringBuilder builder, String indent) {
-    builder.append("import ").append(mModule);
+    builder.append("import ");
     
     if (mScheme != null) builder.append(mScheme).append(":");
+    builder.append(mModule);
     if (mName != null) builder.append(" ").append(mName);
     if (mRename != null) builder.append(" = ").append(mRename);
     

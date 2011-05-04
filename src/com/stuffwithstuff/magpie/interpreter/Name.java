@@ -29,8 +29,8 @@ public final class Name {
   public static final String REDEFINITION_ERROR = "RedefinitionError";
   public static final String STRING = "string";
 
-  public static boolean isPrivate(String name) {
-    return name.startsWith("_");
+  public static boolean isPublic(String name) {
+    return !name.startsWith("_");
   }
   
   public static String makeAssigner(String name) {
