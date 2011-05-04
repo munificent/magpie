@@ -2,8 +2,10 @@ package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.PatternVisitor;
@@ -116,26 +118,49 @@ public class MethodLinearizer implements Comparator<Callable> {
     }
   }
 
+  private Set<String> intersect(Set<String> a, Set<String> b) {
+    Set<String> intersect = new HashSet<String>();
+    for (String field : a) {
+      if (b.contains(field)) intersect.add(field);
+    }
+    
+    return intersect;
+  }
+
+  /**
+   * Returns true if a contains elements that are not in b.
+   */
+  private boolean containsOthers(Set<String> a, Set<String> b) {
+    for (String field : a) {
+      if (!b.contains(field)) return true;
+    }
+    
+    return false;
+  }
+  
   private int compareRecords(Pattern pattern1, EvalContext context1,
       Pattern pattern2, EvalContext context2) {
     Map<String, Pattern> record1 = ((RecordPattern)pattern1).getFields();
     Map<String, Pattern> record2 = ((RecordPattern)pattern2).getFields();
     
-    if (record1.size() != record2.size()) {
-      throw ambiguous(pattern1, pattern2);
+    // Take the intersection of their fields.
+    Set<String> intersect = intersect(record1.keySet(), record2.keySet());
+    
+    // If the records don't have the same number of fields, one must be a
+    // strict superset of the other.
+    if ((record1.size() != intersect.size()) ||
+        (record2.size() != intersect.size())) {
+      if (containsOthers(record1.keySet(), record2.keySet()) &&
+          containsOthers(record2.keySet(), record1.keySet())) {
+        throw ambiguous(pattern1, pattern2);
+      }
     }
-    
-    // TODO(bob): Records should be compared just by name, and ignore order
-    // of fields.
-    
+
+    // Fields that are common to the two cannot disagree on sort order.
     int currentComparison = 0;
-    for (String name : record1.keySet()) {
+    for (String name : intersect) {
       Pattern field1 = record1.get(name);
       Pattern field2 = record2.get(name);
-      
-      // Field should be present in both.
-      if (field1 == null) throw ambiguous(pattern1, pattern2);
-      if (field2 == null) throw ambiguous(pattern1, pattern2);
       
       int compare = compare(field1, context1, field2, context2);
       
