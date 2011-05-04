@@ -69,7 +69,8 @@ public class ListBuiltIns {
     
     // Check the bounds.
     if ((index < 0) || (index >= list.size())) {
-      interpreter.error(Name.OUT_OF_BOUNDS_ERROR);
+      interpreter.error(Name.OUT_OF_BOUNDS_ERROR, "Index " + index +
+          " is out of bounds [0, " + list.size() + "].");
     }
     
     return index;

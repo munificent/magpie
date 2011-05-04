@@ -15,7 +15,8 @@ public class StringBuiltIns {
       if (index < 0) index = string.length() + index;
       
       if ((index < 0) || (index >= string.length())) {
-        interpreter.error(Name.OUT_OF_BOUNDS_ERROR);
+        interpreter.error(Name.OUT_OF_BOUNDS_ERROR, "Index " + index +
+            " is out of bounds [0, " + string.length() + "].");
       }
       
       return interpreter.createString(string.substring(index, index + 1));

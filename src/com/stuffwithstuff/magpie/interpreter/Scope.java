@@ -39,26 +39,14 @@ public class Scope {
   public void importAll(Interpreter interpreter, String prefix, Module module) {
     // Copy the variables.
     for (Entry<String, Obj> entry : module.getExportedVariables().entrySet()) {
-      String name = prefix + entry.getKey();
-      
-      // Check for collision.
-      if (!mAllowRedefinition && (get(name) != null)) {
-        interpreter.error(Name.REDEFINITION_ERROR);
-      }
-
-      mVariables.put(name, entry.getValue());
+      importVariable(interpreter, prefix + entry.getKey(), entry.getValue(),
+          module);
     }
     
     // Import the multimethods.
     for (Entry<String, Multimethod> entry : module.getExportedMultimethods().entrySet()) {
       String name = prefix + entry.getKey();
-      
-      // Check for collision.
-      if (!mAllowRedefinition && mMultimethods.containsKey(name)) {
-        interpreter.error(Name.REDEFINITION_ERROR);
-      }
-
-      mMultimethods.put(name, entry.getValue());
+      importMultimethod(interpreter, name, entry.getValue(), module);
     }
   }
 
@@ -67,22 +55,12 @@ public class Scope {
     
     Obj variable = module.getExportedVariables().get(name);
     if (variable != null) {
-      // Check for collision.
-      if (!mAllowRedefinition && (get(rename) != null)) {
-        interpreter.error(Name.REDEFINITION_ERROR);
-      }
-
-      mVariables.put(rename, variable);
+      importVariable(interpreter, rename, variable, module);
     }
     
     Multimethod multimethod = module.getExportedMultimethods().get(name);
     if (multimethod != null) {
-      // Check for collision.
-      if (!mAllowRedefinition && mMultimethods.containsKey(rename)) {
-        interpreter.error(Name.REDEFINITION_ERROR);
-      }
-
-      mMultimethods.put(rename, multimethod);
+      importMultimethod(interpreter, rename, multimethod, module);
     }
   }
   
@@ -217,6 +195,30 @@ public class Scope {
     }
     
     return builder.toString();
+  }
+  
+  private void importVariable(Interpreter interpreter, String name, Obj value,
+      Module module) {
+    if (!mAllowRedefinition && (get(name) != null)) {
+      interpreter.error(Name.REDEFINITION_ERROR,
+          "Can not import variable \"" + name + "\" from " +
+          module.getName() + " because there is already a variable with " +
+          "that name defined.");
+    }
+    
+    mVariables.put(name, value);
+  }
+  
+  private void importMultimethod(Interpreter interpreter, String name,
+      Multimethod multimethod, Module module) {
+    if (!mAllowRedefinition && mMultimethods.containsKey(name)) {
+      interpreter.error(Name.REDEFINITION_ERROR,
+          "Can not import multimethod \"" + name + "\" from " +
+          module.getName() + " because there is already a multimethod with " +
+          "that name defined.");
+    }
+    
+    mMultimethods.put(name, multimethod);
   }
 
   private final boolean mAllowRedefinition;

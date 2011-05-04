@@ -20,7 +20,9 @@ public class FunctionBuiltIns {
       EvalContext context = new EvalContext(callable.getClosure());
       if (!PatternTester.test(interpreter, callable.getPattern(), fnArg,
           context)) {
-        throw interpreter.error(Name.NO_METHOD_ERROR);
+        throw interpreter.error(Name.NO_METHOD_ERROR, "The argument \"" +
+            interpreter.evaluateToString(fnArg) + "\" does not match the " +
+            "function's pattern " + callable.getPattern());
       }
 
       return function.invoke(interpreter, fnArg);

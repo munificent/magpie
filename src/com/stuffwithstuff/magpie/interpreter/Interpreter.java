@@ -111,11 +111,6 @@ public class Interpreter {
     mHost.print(text);
   }
   
-  // TODO(bob): Get rid of this once everything is including a friendly message.
-  public ErrorException error(String errorClassName) {
-    throw error(errorClassName, "");
-  }
-  
   public ErrorException error(String errorClassName, String message) {
     // Look up the error class.
     ClassObj classObj = mBaseModule.getScope().get(errorClassName).asClass();
@@ -156,8 +151,11 @@ public class Interpreter {
     // Create the class.
     ClassObj classObj = new ClassObj(mClass, name, parents, fields, scope, doc);
     
-    if (classObj.checkForCollisions()) {
-      error(Name.PARENT_COLLISION_ERROR);
+    ClassObj colliding = classObj.checkForCollisions();
+    if (colliding != null) {
+      error(Name.PARENT_COLLISION_ERROR, "Class \"" + name +
+          "\" is trying to inherit from \"" + colliding.getName() +
+          "\" more than once.");
     }
     
     // Add the constructor.

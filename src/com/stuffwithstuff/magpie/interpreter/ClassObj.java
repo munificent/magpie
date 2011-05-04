@@ -53,8 +53,10 @@ public class ClassObj extends Obj {
   /**
    * Walks the inheritance tree to see if any class can be reached through more
    * than one path.
+   * 
+   * @return The colliding class, if any, null otherwise.
    */
-  public boolean checkForCollisions() {
+  public ClassObj checkForCollisions() {
     Set<ClassObj> reachedClasses = new HashSet<ClassObj>();
     reachedClasses.add(this);
     
@@ -66,17 +68,18 @@ public class ClassObj extends Obj {
     return mName;
   }
   
-  private boolean checkForCollisions(Set<ClassObj> reachedClasses,
+  private ClassObj checkForCollisions(Set<ClassObj> reachedClasses,
       ClassObj classObj) {
     for (ClassObj parent : classObj.getParents()) {
-      if (reachedClasses.contains(parent)) return true;
+      if (reachedClasses.contains(parent)) return parent;
       
       reachedClasses.add(parent);
-      if (checkForCollisions(reachedClasses, parent)) return true;
+      ClassObj recursed = checkForCollisions(reachedClasses, parent);
+      if (recursed != null) return recursed;
     }
     
     // If we got here, we didn't find a collision.
-    return false;
+    return null;
   }
   
   private final String mName;

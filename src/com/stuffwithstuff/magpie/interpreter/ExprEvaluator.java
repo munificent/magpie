@@ -9,7 +9,6 @@ import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.builtin.BuiltIns;
-import com.stuffwithstuff.magpie.util.NotImplementedException;
 import com.stuffwithstuff.magpie.util.Pair;
 
 /**
@@ -63,7 +62,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   public Obj visit(CallExpr expr, EvalContext context) {
     Multimethod multimethod = context.getScope().lookUpMultimethod(expr.getName());
     if (multimethod == null) {
-      throw mInterpreter.error("NoMethodError");
+      throw mInterpreter.error("NoMethodError",
+          "Could not find a method named \"" + expr.getName() + "\".");
     }
 
     // Figure out the receiver.
@@ -152,7 +152,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
         BuiltIns.register(javaClass, context.getScope());
       } catch (ClassNotFoundException e) {
         // TODO(bob): Throw better error.
-        throw mInterpreter.error("Error");
+        throw mInterpreter.error("Error", "Could not load classfile \"" +
+            expr.getModule() + "\".");
       }
     }
     
@@ -214,7 +215,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
     if (result != null) return result;
     
     // If we got here, no patterns matched.
-    throw mInterpreter.error("NoMatchError");
+    throw mInterpreter.error("NoMatchError", "Could not find a match for \"" +
+        mInterpreter.evaluateToString(value) + "\".");
   }
 
   @Override
