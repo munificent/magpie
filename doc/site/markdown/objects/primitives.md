@@ -56,3 +56,15 @@ problems](http://journal.stuffwithstuff.com/2010/08/23/void-null-maybe-and-
 nothing/) that `null` has in most other languages. It's rare that you'll
 actually need to write `nothing` in code since it can usually be inferred from
 context but it's there if you need it.
+
+Since `nothing` is in its own class, that means that methods that are specialized to other types are guaranteed to never receiving `nothing` instead. In Magpie, you never need to do this:
+
+    :::magpie
+    def length(string is String)
+        // Make sure we got a string.
+        if string == nothing then return 0
+
+        string count
+    end
+
+If your method is selected, you are assured that the argument matches the types you require.

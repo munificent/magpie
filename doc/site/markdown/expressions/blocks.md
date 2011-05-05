@@ -17,7 +17,6 @@ If we want to evaluate a series of expressions when the condition is met, we nee
         print("Really happy!")
     end
 
-
 A block begins with a newline where an expression is expected. The parser knows that an expression must follow a `then`. If it sees a newline there instead, it knows that a block is being provided. It will then parse a series of expressions separated by newlines until it reaches the terminator for the block.
 
 Normally, the terminator is the `end` keyword, but it may be another keyword based on the context in which the block occurs. For example, you can terminate the `then` block in an `if` expression with `else`:
@@ -30,7 +29,7 @@ Normally, the terminator is the `end` keyword, but it may be another keyword bas
         print("I'm not happy")
     end
 
-This all sounds a bit fishy, but in practice it seems to work OK with a minimum of punctuation. There is one important bit to keep in mind with this: you cannot have an expression on the first line if you want to create a block:
+This all sounds a bit fishy, but in practice it works well with a minimum of punctuation. There is one important bit to keep in mind with this: you cannot have an expression on the first line if you want to create a block:
 
     :::magpie
     if happy? then print("I'm happy!") // ERROR
@@ -51,6 +50,6 @@ If you want to create a block in the middle of another block, you can create a `
     end
     print("four")
 
-This can be useful if you want to catch an error in the middle of another block, or limit the scope of a [variable](variables.html).
+This can be useful if you want to limit the scope of a [variable](variables.html) since they have block scope.
 
 <p class="future">Need to explain catch here.</p>

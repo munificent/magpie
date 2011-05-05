@@ -11,12 +11,12 @@ h1 {
   margin: 0 0 30px 0; }
 
 a {
-  color: #0044cc;
+  color: #cc0088;
   text-decoration: none;
   outline: none; }
 
 a:hover {
-  color: #3377ff; }
+  color: #ff33bb; }
 
 .nav {
   position: absolute;
@@ -29,7 +29,7 @@ a:hover {
   .nav a {
     color: #666; }
   .nav a:hover {
-    color: #0044cc; }
+    color: #cc0088; }
   .nav h1 {
     font-style: italic; }
   .nav h2 {
@@ -112,22 +112,20 @@ p.future {
 
 /* syntax highlighting */
 pre .k {
-  color: #0055ff; }
-
+  color: #cc0088; }
 pre .s {
-  color: #b37700; }
-
+  color: #0077b3; }
 pre .se {
-  color: #b37700; }
-
+  color: #0077b3; }
 pre .c1 {
   color: #999999; }
-
 pre .cm {
   color: #999999; }
-
 pre .nb {
-  color: #cc6600; }
-
+  color: #0077b3; }
+pre .mi {
+  color: #0077b3; }
 pre .bp {
-  color: #339900; }
+  color: #4400cc; }
+pre .p {
+  color: #999999; }

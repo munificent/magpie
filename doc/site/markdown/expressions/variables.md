@@ -4,52 +4,49 @@ Variables are named slots for storing values.
 
 ## Defining Variables
 
-Variables in Magpie must be explicitly declared. This avoids a lot of annoying
-issues that can crop up with typos in names and unintended variable scope
-without adding too much overhead. Variables are created using `var`:
+You can define a new variable in Magpie using the `var` keyword, like so:
 
     :::magpie
     var a = 1 + 2
 
 This creates a new variable `a` in the current scope and initializes it with the
-result of the expression following the `=`. A variable definition expression
-returns the defined value:
+result of the expression following the `=`. Like everything, a variable definition is an expression in Magpie. It evaluates to the initialized value:
 
     :::magpie
     print(var a = "hi") // prints "hi"
 
-### Initialization
+## Accessing Variables
 
-You cannot declare a variable in Magpie without initializing it to a value. This
-helps avoid errors from forgetting to initialize a variable. Because Magpie
-doesn't have statements, this is less of a limitation than it might be in other
-languages. Where in C, you might do:
+Once a variable has been defined, it can be accessed by name as you would expect. It is an error to attempt to access a variable whose name doesn't exist.
 
-    :::c
-    int i;
-    if (something || other) {
-      i = 1;
-    } else if (another) {
-      if (also) {
-        i = 2;
-      } else {
-        i = 3;
-      }
-    } else {
-      i = 4;
-    }
+<p class="future">Currently, this is a runtime error. Eventually, it will be a static error reported before the module begins executing.</p>
 
-In Magpie, you can do:
+## Patterns
+
+In our previous examples, the part between `var` and the `=` has always been a simple name, but what you're seeing there is actually a [pattern](../patterns.html). That means any pattern is allowed in a declaration. A simple case is what other languages call "multiple assignment":
 
     :::magpie
-    var i = if something or other then 1
-            else if another then
-                if also then 2 else 3
-            else 4
+    var x, y = 1, 2
+    print(x + ", " + y) // 1, 2
 
-### Scope
+Here, the record pattern `x, y` is used to destructure the record `1, 2`, pulling out the fields into separate variables. More complex nested records also work.
 
-Variables in Magpie have true block scope: the exist from the point they are defined until the end of the [block](blocks.html) in which they are defined.
+    :::magpie
+    var coloredPoint = (position: (2, 3), color: "red")
+    var position: (x, y), color: c = coloredPoint
+    print(x + ", " + y + " " + c) // 2, 3 red
+
+Here we're destructuring a nested record in the same way. Patterns that test values are supported as well.
+
+    :::magpie
+    var good is String = "a string"
+    var bad is String = 123
+
+The first line of this will execute without a problem, but the second line will throw a `NoMatchError` because `123` is not a string.
+
+## Scope
+
+Variables in Magpie have true block scope: they exist from the point they are defined until the end of the [block](blocks.html) where that definition appears.
 
     :::magpie
     do
@@ -59,7 +56,9 @@ Variables in Magpie have true block scope: the exist from the point they are def
     end
     print(a) // "nothing"
 
-### Shadowing
+All variables are lexically scoped. There is no top level global scope in Magpie. Each module has its own top-level scope that isn't shared with other modules.
+
+## Shadowing
 
 Declaring a variable in an inner scope with the same name as an outer one is called *shadowing* and is not an error (although it's not something you likely intend to do much):
 
@@ -77,17 +76,7 @@ Declaring a variable with the same name in the *same* scope *is* an error:
     var a = "hi"
     var a = "again" // Error!
 
-### Named Functions
-
-You can create a function and assign it to a variable like any other value:
-
-    :::magpie
-    var double = fn(i) i * 2
-
-But, since this is something you do frequently, Magpie has a shorter form that accomplishes the same thing:
-
-    :::magpie
-    def double(i) i * 2
+<p class="future">Currently, the second line will throw a <code>RedefinitionError</code> at runtime. In the future, this will be a statically detected error that will be reported before any code in the file is executed.</p>
 
 ## Assignment
 
@@ -104,5 +93,5 @@ Like variable definition, an assignment expression returns the assigned value:
     print(a = "after") // prints "after"
 
 <p class="future">
-I need to document assigment messages here. Need to update now that patterns are used.
+TODO: document setter methods here.
 </p>

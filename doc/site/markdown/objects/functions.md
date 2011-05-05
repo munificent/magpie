@@ -1,28 +1,20 @@
 ^title Functions
 
-Some purist OOP languages don't have functions at all&mdash; everything is objects and message sends. Magpie isn't quite so dogmatic. Its functions *are* objects, but they work more or less like you'd expect a normal function to behave.
+When you want to bundle up a reusable chunk of code in Magpie, you'll usually use a [method](../multimethods.html). But sometimes you want a chunk of code that you can pass around like a value. For that, you'll use a *functions*. Functions are first-class objects that encapsulate an executable chunk of code.
 
 ## Creating Functions
 
-A language can't call itself "functional" without having first-class functions: i.e. the ability to create functions and pass them around as values. To actually *be* functional, it also needs to have a nice syntax for doing so. Magpie uses the `fn` keyword for this. You can create a function like this:
+Functions are defined using the `fn` keyword followed by the expression that forms the body of the function.
 
     :::magpie
     fn print("I'm a fn!")
 
-That creates an anonymous function that prints some text when invoked. You can invoke a function like you would in math class: by putting the argument to it in parentheses after it:
+This creates an anonymous function that prints `"I'm a fn!"` when called. If a function takes an argument, the [pattern](../patterns.html) for it is placed in parentheses after the keyword.
 
     :::magpie
-    // Create a function and store it in a variable:
-    var printArg = fn(a) print("My arg is " ~ a)
-    // Call it:
-    printArg("bananas!") // Prints "My arg is bananas!"
+    fn(name, age) print("Hi, " + name + ". You are " + age + " years old.")
 
-You don't have to store a function in a variable to use it. The following example does the same as the above one:
-
-    :::magpie
-    (fn(a) print("My arg is " ~ a))("bananas!")
-
-A function can also take a block for its body:
+The body of a function can be a single expression as you've seen, but can also be a block.
 
     :::magpie
     fn(i)
@@ -30,106 +22,78 @@ A function can also take a block for its body:
         print(i)
     end
 
-If a function takes multiple arguments, they are separated by commas:
-
-    :::magpie
-    fn(a, b, c) a + b + c
-
-(More precisely, the function still takes a single argument: a [tuple](compound-values.html). But, if you define a function with a list of comma-separated parameters like the above example, it will automatically pull the fields out of the tuple passed to the function and bind them to the listed names.)
-
-If a function doesn't take any arguments, you can leave off the `()` when defining it:
-
-    :::magpie
-    fn print("hi")
-
-Because defining named functions is so common, there is a special keyword, `def` for doing just that:
-
-    :::magpie
-    // This:
-    def printArg(a) print("My arg is " ~ a)
-    // Is the same as:
-    var printArg = fn(a) print("My arg is " ~ a)
-
 ## Calling Functions
 
-Functions are called just like they were in your first algebra class: by putting the argument in parentheses after the function. Magpie has a built-in function called `print`. You can call it like:
+Once you have a function, you can call it by invoking the `call` method on it. The left-hand argument is the function, and the right-hand argument is the argument passed to the function.
 
     :::magpie
-    print("this is the argument")
+    var greeter = fn(who) print("Hi, " + who)
+    greeter call("Fred") // Hi, Fred
 
-If a function doesn't take any arguments, it still needs to be explicitly invoked using `()`:
-
-    :::magpie
-    var sayHi = fn print("hi")
-    sayHi   // Doesn't call it, just gets a reference to the fn.
-    sayHi() // Says hi.
-
-In Magpie all functions take a single argument. To pass multiple arguments, you actually create a [tuple](compound-values.html) of them, but the end result is that it looks like you'd expect:
+If a function doesn't take an argument, you should invoke `call` with `()`.
 
     :::magpie
-    sum(1, 2, 3)
+    var sayHi = fn print("Hi!")
+    sayHi call()
+
+Like methods, the argument pattern for a function may include tests. If the argument passed to `call` doesn't match the function's pattern, it throws a `NoMethodError`.
+
+    :::magpie
+    var expectInt = fn(n is Int) n * 2
+    expectInt call(123) // OK
+    expectInt call("not int") // Throws NoMethodError.
 
 ## Returning Values
+
+**TODO(bob): This applies to methods too. Move there.**
 
 A function automatically returns the value that its body evaluates to. An explicit `return` is not required:
 
     :::magpie
-    def name() "Fred"
-    print(name()) // Fred
+    var name = fn "Fred"
+    print(name call()) // Fred
 
-If the body is a block, the result will be the last expression in the block:
+If the body is a block, the result is the last expression in the block:
 
     :::magpie
-    def sayHi()
+    var sayHi = fn
         print("hi")
         "result"
     end
-    // Prints "hi" then returns "result" when called.
+    sayHi call() // Prints "hi" then returns "result".
 
-You can also explicitly return early from a function using a `return` expression:
+If you want to return before reaching the end of the function body, you can use an explicit `return` expression.
 
     :::magpie
-    def earlyReturn(arg)
+    var earlyReturn = fn(arg)
         if arg == "no!" then return "bailed"
+        print("got here")
         "ok"
     end
 
-If no expression follows the `return` keyword, then it implicitly returns `nothing`.
+This will return `"bailed"` and print nothing if the argument is `"no!"`. With any other argument, it will print `"got here"` and then return `"ok"`.
+
+A `return` expression with no expression following the keyword (in other words, a `return` on its own line) implicitly returns `nothing`.
 
 ## Closures
 
 As you would expect, functions are
 [closures](http://en.wikipedia.org/wiki/Closure_%28computer_science%29): they
-can access variables defined outside of their scope. They will hold onto closed over-variables even after leaving the scope where they are defined:
+can access variables defined outside of their scope. They will hold onto closed-over variables even after leaving the scope where the function is defined:
 
     :::magpie
     def makeCounter()
         var i = 0
-        fn i = i + 1 // References 'i' which is declared outside of itself.
+        fn i = i + 1
     end
 
+Here, the `makeCounter` method returns the function created on its second line. That function references a variable `i` declared outside of the function. Even after the function is returned from `makeCounter`, it is still able to access `i`.
+
     var counter = makeCounter()
-    print(counter()) // Prints 1.
-    print(counter()) // Prints 2.
-    print(counter()) // Prints 3.
+    print(counter call()) // Prints 1.
+    print(counter call()) // Prints 2.
+    print(counter call()) // Prints 3.
 
 ## Callables
 
-Everything you've read so far assumes the thing you're calling is a function. What if it's not? What does this do:
-
-    :::magpie
-    "hello"(3)
-
-If you try to apply an argument to an object that isn't a function, Magpie will implicitly translate that to a call to a method named `call` on that object with the given argument. So the above is equivalent to:
-
-    :::magpie
-    "hello" call(3)
-
-Classes are free to implement `call` to do what they want. This lets you define
-your own objects that can be called like functions. The String class implements
-`call` to get the character at the passed in index, so the above example returns
-"l".
-
-In general, indexable collections like strings and arrays will implement this to handle getting items from the collection. Magpie doesn't have a `[]` syntax for accessing elements from arrays (square brackets are used for generics), so array access just looks like:
-
-    someArray(2) // Get the third element.
+The `call` method used to invoke functions is a regular multimethod with a built-in specialization for functions. This means you can define your own "callable" types, and overload `call` to act on those. With that, you can use your own callable type where a function is expected and it will work seamlessly.

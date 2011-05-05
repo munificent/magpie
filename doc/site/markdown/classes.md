@@ -1,5 +1,7 @@
 ^title Classes
 
+**TODO: This is out of date now that multimethods are in.**
+
 Magpie is a class-based language. That means everything you can stick in a
 variable will be an *object* and every object is an instance of some *class*.
 Even primitive types like [numbers](objects/numbers.html) and [booleans](objects/booleans.html) are full-featured objects. Even [nothing](objects/nothing.html) is something, strictly speaking.

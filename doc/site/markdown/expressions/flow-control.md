@@ -257,6 +257,8 @@ Right now, a loop will always return `nothing`, but that will likely change. It 
 
 ## Conjunctions
 
+**TODO: These are part of the standard library now and not in the core language. Need to move the docs.**
+
 What other languages call "logical operators", Magpie calls "conjunctions". They are considered flow control expressions and not operators because they conditionally execute some code&mdash; they short-circuit. There are two conjunctions in Magpie: `and` and `or`. Both of them are infix operators, like so:
 
     :::magpie

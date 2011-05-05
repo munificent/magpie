@@ -1,4 +1,4 @@
-$primary: hsl(220, 100%, 40%);
+$primary: hsl(320, 100%, 40%);
 $primary-light: lighten($primary, 20%);
 
 $sans: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
@@ -169,16 +169,20 @@ p.future {
 }
 
 /* syntax highlighting */
-$syntax-keyword: hsl(220, 100%, 50%);
-$syntax-string:  hsl(40, 100%, 35%);
-$syntax-comment: lighten($syntax-default, 20%);
-$syntax-literal: hsl(30, 100%, 40%);
-$syntax-pseudo:  hsl(100, 100%, 30%);
+$syntax-keyword:     $primary;
+$syntax-comment:     lighten($syntax-default, 20%);
+$syntax-literal:     hsl(200, 100%, 35%);
+$syntax-pseudo:      hsl(260, 100%, 40%);
+$syntax-punctuation: lighten($syntax-default, 20%);
 
-pre .k  { color: $syntax-keyword; }
-pre .s  { color: $syntax-string; }
-pre .se { color: $syntax-string; }
-pre .c1 { color: $syntax-comment; }
-pre .cm { color: $syntax-comment; }
-pre .nb { color: $syntax-literal; }
-pre .bp { color: $syntax-pseudo; }
+pre {
+  .k  { color: $syntax-keyword; }
+  .s  { color: $syntax-literal; }
+  .se { color: $syntax-literal; }
+  .c1 { color: $syntax-comment; }
+  .cm { color: $syntax-comment; }
+  .nb { color: $syntax-literal; }
+  .mi { color: $syntax-literal; }
+  .bp { color: $syntax-pseudo; }
+  .p  { color: $syntax-punctuation; }
+}
