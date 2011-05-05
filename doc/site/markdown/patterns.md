@@ -1,8 +1,8 @@
 ^title Patterns
 
-If you've seen a few lines of Magpie code, you've likely seen patterns already. They are used everywhere in the language: `match` expressions use them, but so do variable declarations, method parameters, and `catch` clauses for handling exceptions.
+If you've seen a few lines of Magpie code, you've likely seen patterns already. They are used everywhere in the language: `match` expressions use them, but so do [variable declarations](expressions/variables.html), [method parameters](multimethods.html), and `catch` clauses for handling exceptions.
 
-Given an object, a pattern does two things: First, it tests if the object *matches* that pattern. Then, if and only if it does, it may bind new variables to parts of the object. By performing those operations together, it's able to safely pull data out of an object but only when the object has the data you're asking for.
+Given an object, a pattern does two things: First, it *tests* if the object *matches* that pattern. Then, if and only if it does, it may *bind new variables* to parts of the object. By performing those operations together, patterns can pull data out of an object but only when the object correctly has the data you're asking for.
 
 ## Kinds of Patterns
 
@@ -10,12 +10,7 @@ There are a few different basic patterns built in:
 
 ### Wildcard Patterns
 
-The simplest pattern is the wildcard. It looks like this:
-
-    :::magpie
-    _
-
-A single underscore defines a wildcard pattern. Wildcards always successfully match, but don't bind any variables.
+The simplest pattern is the wildcard, a single underscore (`_`). A wildcard always successfully matches, but doesn't bind any variables.
 
 ### Literal Patterns
 
@@ -28,11 +23,11 @@ To check if a value is equal to the result of some expression, you can use an *e
     :::magpie
     == math.Pi
 
-The above pattern will match the value &pi; and fail to match otherwise.
+The above pattern will match the value &pi; and fail to match otherwise. The value can be any Magpie [expression](expressions.html).
 
 ### Type Patterns
 
-Now we start to get to the interesting patterns. Often, you'll want to check to see if a value is of a certain class (or a subclass) in order to tell if an operation is valid. To do that, you can use a *type pattern*. A type pattern starts with the keyword `is` followed by a name:
+Now we start to get to the interesting patterns. Often, you'll want to check to see if a value is of a certain class (or a subclass) in order to tell if an operation is valid. To do that, you can use a *type pattern*. A type pattern starts with the keyword `is` followed by an expression:
 
     :::magpie
     is String
@@ -78,14 +73,3 @@ Like record expressions, record patterns can omit the field names in which case 
     x is Int, y is Int
 
 This matches a record with two positional fields that are integers and bind the fields. In other words, matching that pattern against `3, 4` will bind `x` to `3` and `y` is `4`.
-
-## Patterns in Expressions
-
-We've seen patterns in variable declarations, but they show up in other places too. The most obvious is `match` expressions:
-
-    :::magpie
-    match couple
-        case him: "Ralph", her: "Alice" then "Pow! Right in the kisser!"
-        case him: "Ricky", her: "Lucy"  then "Lucy! I'm home!"
-    end
-

@@ -56,6 +56,9 @@ a:hover {
     margin: 30px 0 20px 0;
     border-top: solid 1px #ddd;
     padding-top: 20px; }
+    .content h2 code {
+      color: #666666;
+      font: 24px Courier, monospace; }
   .content h3 {
     font: italic 18px Georgia, serif;
     margin: 30px 0 10px 0; }

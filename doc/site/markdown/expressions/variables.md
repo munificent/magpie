@@ -41,16 +41,11 @@ languages. Where in C, you might do:
 
 In Magpie, you can do:
 
+    :::magpie
     var i = if something or other then 1
             else if another then
                 if also then 2 else 3
             else 4
-
-In return for the limitation of having to always initialize your variables,
-Magpie will give you something back: you don't have to declare the types of
-variables. It will infer them from the initializing expression. Even though all
-variables are declared using `var`, from the type-checker's perspective, they
-are still strongly statically typed.
 
 ### Scope
 

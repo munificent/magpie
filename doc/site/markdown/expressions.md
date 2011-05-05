@@ -1,15 +1,12 @@
 ^title Expressions
 
-Expressions are the building blocks for programs. In fact, programs *are*
-expressions. Unlike most imperative languages, but like most functional
+Expressions are the building blocks for programs. In Magpie, a programs is simply a list of them. Unlike most imperative languages, but like most functional
 languages, Magpie does not have *statements*, only expressions. Flow control,
 blocks, and variable declarations are all expressions which return values. This
 is valid in Magpie:
 
     :::magpie
     print(if result then "yes" else "no")
-
-Coming from another imperative language, you should find that Magpie has fewer distinct kinds of expressions, but that each one is used for more different things. For example, instead of a distinct array element syntax like `array[index]`, Magpie just uses function calls: `array(index)`. Likewise, Magpie unifies `do`, `while`, `for`, and iterator loops under a single looping construct.
 
 The major types of expressions in Magpie are:
 

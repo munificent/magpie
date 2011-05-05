@@ -1,35 +1,69 @@
 ^title Calls
 
-The yin and yang of Magpie's syntax are [messages](messages.html) and *calls*. Calls are the functional face of Magpie: they invoke functions or other function-like objects. For example:
+Most of the expressions you'll write in Magpie will be *calls*. A call invokes a [multimethod](../multimethods.html) by name, passing in the provided argument. Method calls may have one of three different "fixities" in Magpie, which means the name of the method may appear before, after, or in the middle of the argument.
+
+It's important to note that the fixity distinction is purely syntactic. Semantically, all method calls are just calls that take a single argument. Magpie is flexible here is so that you can define methods that read most clearly when called.
+
+## Prefix Calls
+
+A prefix method call is a method name followed by an argument. The argument must be in parentheses.
 
     :::magpie
     print("Hello!")
 
-Here we're calling the `print` function, and passing it the string `"Hello!"`. A call always has a *target* which appears on the left (here a message), and an *argument*. The argument is always placed inside parentheses.
+This uses `nothing` as the implicit left-hand argument, so the above is identical to:
 
-The target can be any expression that evaluates to a function, or to a callable object. Consider this:
+    :::magpie
+    nothing print("Hello!")
+
+Prefix calls are most useful for operations where no argument is "special" and where the operation doesn't feel like an intrinsic property of the argument. The above *could* be `"Hello!" print` but that would feel a bit strange since printing doesn't seem like an intrinsic capability of strings.
+
+## Infix Calls
+
+An infix method call is a left-hand expression followed by the method name, followed by a right-hand argument. Like prefix calls, the right-hand argument must be in parentheses (but the left does not).
 
     :::magpie
     list add("item")
 
-Here, we're calling the `add` method on a list, and passing in `"item"`. The target in this case is the entire expression `list add`, which sends an `add` message to `list`, returning the method to add an item in the list. We then call that function with `("item")`.
+This is a single call that invokes the `add` method. The arguments are `list` and `"item"`. (More accurately, the argument is a single [record](records.html) `(list, "item")`, but the method definition syntax mostly spares you from worrying about it like that).
 
-## Callables
+If you're wondering where the `.` went, the answer is that Magpie doesn't use one between the left-hand argument and the method. In general, Magpie eschews punctuation when possible and this is an example of that. Instead, `.` is just another character that can be used in identifiers.
 
-The target of a call does not have to be a function. If the target isn't a function, Magpie will look for a `call` method on the object. If it can find one, it will invoke that instead. For example, you can get the character at a given index in a string like this:
+## Postfix Calls
 
-    :::magpie
-    "abcdefg"(2) // "c"
-
-Since `"abcdefg"` isn't a function, that will be interpreted like:
+An expression followed by a name defines a postfix method call.
 
     :::magpie
-    "abcdefg" call(2)
+    "a string" count
 
-Magpie doesn't have a distinct "array index" syntax for indexing into a collection, instead it just uses regular call syntax. To get an item from a list, you just do:
+This invokes the `count` method with `"a string"` as the lone argument. Method calls like this are called *getters*. While they look different, they are still just regular method calls.
+
+Note that in this case, the argument is just `"a string"` while a prefix call like `count("a string")` would have the argument `(nothing, "a string")`. Prepending `nothing` for postfix calls makes it possible for a multimethod to distinguish between a prefix and postfix method with the same name.
+
+A call expression may *not* omit *both* the left- and right-hand arguments. A name by itself is a [name expression](names.html). This lets Magpie statically (i.e. just from parsing) tell if a name is used to look up a variable or to call a method.
+
+## Implicit Receivers and `this`
+
+Many OOP languages like C++ and Java allow omitting the receiver in a method call. If omitted, it will be inferred to be `this`. In Magpie, there is no implicit receiver since methods aren't directly tied to classes. Instead, you have to manually specify the object you want to be the left-hand argument, even if it is the same object that was passed as the left-hand to the current method.
 
     :::magpie
-    var items = Array of("apple", "banana", "cherry")
-    items(1) // "banana"
+    def (this is String) doubleCount
+        this count * 2
+    end
 
-You can thus define your own indexable classes just by defining a `call` method on them.
+Here we're calling the `count` method and using the same left-hand argument as was passed to `doubleCount`. We still have to manually specify `this`. A reference to `count` by itself will be interpreted as a variable reference.
+
+The corollary to this is that `this` isn't anything special in Magpie. It's conventional to use it for the left-hand argument, but convention is all it is. From the language's perspective, `this` is just another variable.
+
+## Chaining Calls
+
+Call expressions are left-associative, which follows how method calls work in other object-oriented languages. This way, a series of method calls can be read from left to right.
+
+    :::magpie
+    addressBook names find("Waldo") email()
+
+This expression will be parsed like:
+
+    :::magpie
+    ((addressBook names) find("Waldo")) email()
+

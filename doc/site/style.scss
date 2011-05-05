@@ -90,6 +90,11 @@ a:hover {
     margin: 30px 0 20px 0;
     border-top: solid 1px #ddd;
     padding-top: 20px;
+
+    code {
+      color: $syntax-default;
+      font: 24px $monospace;
+    }
   }
 
   h3 {
