@@ -1,4 +1,4 @@
-package com.stuffwithstuff.magpie;
+package com.stuffwithstuff.magpie.app;
 
 import com.stuffwithstuff.magpie.interpreter.InterpreterHost;
 import com.stuffwithstuff.magpie.interpreter.ModuleInfo;

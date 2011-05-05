@@ -1,6 +1,6 @@
-package com.stuffwithstuff.magpie;
+package com.stuffwithstuff.magpie.app;
 
-import com.stuffwithstuff.magpie.Term.ForeColor;
+import com.stuffwithstuff.magpie.app.Term.ForeColor;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.parser.ParseException;
 import com.stuffwithstuff.magpie.parser.StringCharacterReader;

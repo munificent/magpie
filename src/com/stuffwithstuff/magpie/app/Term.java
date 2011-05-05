@@ -1,4 +1,4 @@
-package com.stuffwithstuff.magpie;
+package com.stuffwithstuff.magpie.app;
 
 // http://invisible-island.net/xterm/ctlseqs/ctlseqs.html
 

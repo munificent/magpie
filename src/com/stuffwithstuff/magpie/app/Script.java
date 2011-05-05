@@ -1,4 +1,4 @@
-package com.stuffwithstuff.magpie;
+package com.stuffwithstuff.magpie.app;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -96,7 +96,7 @@ public class Script {
   }
   
   public static File getAppDirectory() {
-    URL location = Magpie.class.getProtectionDomain().getCodeSource().getLocation();
+    URL location = MagpieApp.class.getProtectionDomain().getCodeSource().getLocation();
     // Back up one directory to get out of "bin/".
     return new File(location.getFile()).getParentFile();
   }

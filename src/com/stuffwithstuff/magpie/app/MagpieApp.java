@@ -1,11 +1,11 @@
-package com.stuffwithstuff.magpie;
+package com.stuffwithstuff.magpie.app;
 
 import java.io.*;
 
 import com.stuffwithstuff.magpie.interpreter.Profiler;
 import com.stuffwithstuff.magpie.interpreter.QuitException;
 
-public class Magpie {
+public class MagpieApp {
 
   /**
    * @param args

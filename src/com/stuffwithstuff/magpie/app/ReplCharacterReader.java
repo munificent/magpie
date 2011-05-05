@@ -1,4 +1,4 @@
-package com.stuffwithstuff.magpie;
+package com.stuffwithstuff.magpie.app;
 
 import java.io.BufferedReader;
 import java.io.IOException;
