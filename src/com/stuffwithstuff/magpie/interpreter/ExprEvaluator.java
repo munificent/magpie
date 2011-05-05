@@ -128,6 +128,11 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
         }
         
         context.getScope().importAll(mInterpreter, prefix, module);
+        
+        // TODO(bob): Need to import syntax extensions from imported module
+        // into this one once EvalContext knows module.
+        //module.importSyntax(mBaseModule);
+
       } else {
         // Importing just one name.
         String rename;

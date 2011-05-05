@@ -167,3 +167,43 @@ end
 def (this is Int) to(last is Int)
     Range new(first: this, last: last)
 end
+
+// "and" Parser
+// ----------------------------------------------------------------------------
+
+// TODO(bob): Move into its own module.
+defineInfix("and", 3, fn(parser is Parser, left is Expression, token is Token)
+    // Ignore a newline after "and".
+    parser matchToken(TokenType.LINE)
+    var right = parser parseExpression(3)
+    {
+        do
+            // TODO(bob): Use generated symbol.
+            var temp__ = `left
+            match temp__ true?
+                case true then `right
+                else temp__
+            end
+        end
+    }
+end)
+
+// "or" Parser
+// ----------------------------------------------------------------------------
+
+// TODO(bob): Move into its own module.
+defineInfix("or", 3, fn(parser is Parser, left is Expression, token is Token)
+    // Ignore a newline after "or".
+    parser matchToken(TokenType.LINE)
+    var right = parser parseExpression(3)
+    {
+        do
+            // TODO(bob): Use generated symbol.
+            var temp__ = `left
+            match temp__ true?
+                case true then temp__
+                else `right
+            end
+        end
+    }
+end)

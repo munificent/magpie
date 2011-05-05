@@ -189,63 +189,20 @@ end
 defclass WildcardPattern is Pattern
 end
 
-// "and" Parser
-// ----------------------------------------------------------------------------
-
-// TODO(bob): Move into its own module.
-defineInfix("and", 3)
-def ("and") parse(parser is Parser, left is Expression, token is Token)
-    // Ignore a newline after "and".
-    parser matchToken(TokenType.LINE)
-    var right = parser parseExpression(3)
-    {
-        do
-            // TODO(bob): Use generated symbol.
-            var temp__ = `left
-            match temp__ true?
-                case true then `right
-                else temp__
-            end
-        end
-    }
-end
-
-// "or" Parser
-// ----------------------------------------------------------------------------
-
-// TODO(bob): Move into its own module.
-defineInfix("or", 3)
-def ("or") parse(parser is Parser, left is Expression, token is Token)
-    // Ignore a newline after "or".
-    parser matchToken(TokenType.LINE)
-    var right = parser parseExpression(3)
-    {
-        do
-            // TODO(bob): Use generated symbol.
-            var temp__ = `left
-            match temp__ true?
-                case true then temp__
-                else `right
-            end
-        end
-    }
-end
-
 
 // "definfix" Parser and core operators
 // ----------------------------------------------------------------------------
 
 // TODO(bob): Doesn't work yet.
-definePrefix("definfix")
-def (== "definfix") parse(parser is Parser, token is Token)
-    /// Keyword for parsing an infix operator with a given name and stickiness.
-    /// Simply desugars to a call a function with the same name:
-    ///
-    ///     definfix + 5
-    ///     // from:
-    ///     a +% b
-    ///     // to:
-    ///     a +%(b)
+definePrefix("definfix", fn(parser is Parser, token is Token)
+    // Keyword for parsing an infix operator with a given name and stickiness.
+    // Simply desugars to a call a function with the same name:
+    //
+    //     definfix + 5
+    //     // from:
+    //     a +% b
+    //     // to:
+    //     a +%(b)
     var name = parser consume(TokenType.NAME) value
     var stickiness = parser consume(TokenType.INT) value
 
@@ -258,4 +215,4 @@ def (== "definfix") parse(parser is Parser, token is Token)
             CallExpression new(receiver: left, name: `name, argument: right)
         end
     }
-end
+end)

@@ -11,6 +11,11 @@ public class ModuleInfo {
   public String getPath() { return mPath; }
   public String getSource() { return mSource; }
   
+  @Override
+  public String toString() {
+    return mName;
+  }
+  
   private final String mName;
   private final String mPath;
   private final String mSource;

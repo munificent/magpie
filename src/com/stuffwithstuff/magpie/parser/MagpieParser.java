@@ -85,25 +85,6 @@ public class MagpieParser extends Parser {
   public Pair<Expr, Token> parseExpressionOrBlock(String... endTokens) {
     return parseExpressionOrBlock(true, endTokens);
   }
-  
-  public Expr parseFunction() {
-    PositionSpan span = startAfter();
-    
-    // Parse the pattern if present.
-    Pattern pattern = null;
-    if (lookAheadAny(TokenType.LEFT_PAREN)) {
-      pattern = parseFunctionType();
-    } else {
-      pattern = Pattern.wildcard();
-    }
-    
-    // TODO(bob): Parse doc.
-    
-    // Parse the body.
-    Expr expr = parseExpressionOrBlock();
-        
-    return Expr.fn(span.end(), "", pattern, expr);
-  }
 
   /**
    * Parses a function type declaration.

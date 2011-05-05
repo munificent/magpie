@@ -46,8 +46,9 @@ public class BuiltInFunctions {
       
       try {
         Interpreter tempInterpreter = new Interpreter(interpreter.getHost());
-        MagpieParser parser = tempInterpreter.createParser(
-            new StringCharacterReader("", source));
+        MagpieParser parser = MagpieParser.create(
+            new StringCharacterReader("", source),
+            tempInterpreter.getBaseModule().getGrammar());
 
         while (true) {
           Expr expr = parser.parseTopLevelExpression();

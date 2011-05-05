@@ -5,15 +5,11 @@ import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.interpreter.builtin.*;
-import com.stuffwithstuff.magpie.parser.CharacterReader;
-import com.stuffwithstuff.magpie.parser.Grammar;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
 
 public class Interpreter {
   public Interpreter(InterpreterHost host) {
     mHost = host;
-    
-    mGrammar = new Grammar();
 
     // Bootstrap the base module with the core definitions.
     mBaseModule = new Module(mHost.loadModule("magpie.core"));
@@ -58,6 +54,11 @@ public class Interpreter {
   public String evaluateToString(Obj value) {
     Multimethod multimethod = getCurrentScope().lookUpMultimethod(Name.STRING);
     return multimethod.invoke(this, value).asString();
+  }
+  
+  public Obj invoke(Obj leftArg, String method, Obj rightArg) {
+    Multimethod multimethod = mBaseModule.getScope().lookUpMultimethod(method);
+    return multimethod.invoke(this, leftArg, rightArg);
   }
   
   public boolean objectsEqual(Obj a, Obj b) {
@@ -140,6 +141,7 @@ public class Interpreter {
   public ClassObj getRecordClass() { return mRecordClass; }
   public ClassObj getStringClass() { return mStringClass; }
   
+  public Module getBaseModule() { return mBaseModule; }
   public Module getSyntaxModule() { return mSyntaxModule; }
   
   public Obj createBool(boolean value) {
@@ -229,26 +231,12 @@ public class Interpreter {
     return object;
   }
   
-  public Module getCurrentModule() {
-    return mLoadingModules.peek();
-  }
-  
   public Scope getCurrentScope() {
     return mLoadingModules.peek().getScope();
   }
   
-  public MagpieParser createParser(CharacterReader reader) {
-    return MagpieParser.create(reader, mGrammar);
-  }
-  
   public InterpreterHost getHost() {
     return mHost;
-  }
-  
-  // TODO(bob): Move this into Module. Each module should have its own grammar
-  // so that syntax extensions in one don't pollute others.
-  public Grammar getGrammar() {
-    return mGrammar;
   }
   
   public Obj getConstructingObject() { return mConstructing.peek(); }
@@ -273,13 +261,14 @@ public class Interpreter {
   }
   
   private void evaluateModule(Module module) {
-    MagpieParser parser = createParser(module.readSource());
+    MagpieParser parser = module.createParser();
     
     mLoadingModules.push(module);
     try {
       // Copy the base stuff in first.
       if (module != mBaseModule) {
         module.getScope().importAll(this, "", mBaseModule);
+        module.importSyntax(mBaseModule);
       }
       
       // Evaluate every expression in the file. We do this incrementally so
@@ -317,7 +306,6 @@ public class Interpreter {
   private final Stack<Module> mLoadingModules = new Stack<Module>();
   private final Module mBaseModule;
   private final Module mSyntaxModule;
-  private final Grammar mGrammar;
   
   private final Stack<Obj> mConstructing = new Stack<Obj>();
 

@@ -29,7 +29,8 @@ public class Repl implements InterpreterHost {
     try {
       
       while (true) {
-        MagpieParser parser = mInterpreter.createParser(createReader());
+        MagpieParser parser = MagpieParser.create(createReader(),
+            mInterpreter.getBaseModule().getGrammar());
         
         try {
           Expr expr = parser.parseExpression();

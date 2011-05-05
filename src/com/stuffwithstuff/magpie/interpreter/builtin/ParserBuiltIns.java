@@ -5,7 +5,6 @@ import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.JavaToMagpie;
 import com.stuffwithstuff.magpie.interpreter.MagpieToJava;
-import com.stuffwithstuff.magpie.interpreter.Multimethod;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.parser.InfixParser;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
@@ -14,25 +13,35 @@ import com.stuffwithstuff.magpie.parser.Token;
 import com.stuffwithstuff.magpie.parser.TokenType;
 
 public class ParserBuiltIns {
-  @Signature("definePrefix(keyword is String)")
+  @Signature("definePrefix(keyword is String, parser)")
   public static class DefinePrefix implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       String keyword = arg.getField(1).getField(0).asString();
+      Obj parser = arg.getField(1).getField(1);
       
-      interpreter.getGrammar().defineParser(keyword,
-          new MagpiePrefixParser(interpreter));
+      // TODO(bob): Hack! Wrong. Needs to define it in the module that's
+      // calling this. Once built-ins have access to the calling module, fix
+      // this.
+      interpreter.getBaseModule().defineSyntax(keyword,
+          new MagpiePrefixParser(interpreter, parser));
+      
       return interpreter.nothing();
     }
   }
   
-  @Signature("defineInfix(keyword is String, stickiness is Int)")
+  @Signature("defineInfix(keyword is String, stickiness is Int, parser)")
   public static class DefineInfix implements BuiltInCallable {
     public Obj invoke(Interpreter interpreter, Obj arg) {
       String keyword = arg.getField(1).getField(0).asString();
       int stickiness = arg.getField(1).getField(1).asInt();
+      Obj parser = arg.getField(1).getField(2);
+
+      // TODO(bob): Hack! Wrong. Needs to define it in the module that's
+      // calling this. Once built-ins have access to the calling module, fix
+      // this.
+      interpreter.getBaseModule().defineSyntax(keyword,
+          new MagpieInfixParser(interpreter, stickiness, parser));
       
-      interpreter.getGrammar().defineParser(keyword,
-          new MagpieInfixParser(interpreter, stickiness));
       return interpreter.nothing();
     }
   }
@@ -61,8 +70,9 @@ public class ParserBuiltIns {
   }
   
   private static class MagpiePrefixParser implements PrefixParser {
-    public MagpiePrefixParser(Interpreter interpreter) {
+    public MagpiePrefixParser(Interpreter interpreter, Obj parser) {
       mInterpreter = interpreter;
+      mParser = parser;
     }
     
     @Override
@@ -74,23 +84,22 @@ public class ParserBuiltIns {
       Obj tokenObj = JavaToMagpie.convert(mInterpreter, token);
       Obj arg = mInterpreter.createRecord(parserObj, tokenObj);
       
-      // Let the Magpie code do the parsing. Call parse with the keyword as
-      // the receiver. A parse method should then specialize to that keyword.
-      Multimethod parseMethod = mInterpreter.getSyntaxModule().getExportedMultimethods().get("parse");
-      Obj expr = parseMethod.invoke(mInterpreter,
-          mInterpreter.createString(token.getString()), arg);
+      // Let the Magpie code do the parsing. Call the parser.
+      Obj expr = mInterpreter.invoke(mParser, "call", arg);
       
       // Marshall it back to Java format.
       return MagpieToJava.convertExpr(mInterpreter, expr);
     }
     
-    private Interpreter mInterpreter;
+    private final Interpreter mInterpreter;
+    private final Obj mParser;
   }
   
   private static class MagpieInfixParser implements InfixParser {
-    public MagpieInfixParser(Interpreter interpreter, int stickiness) {
+    public MagpieInfixParser(Interpreter interpreter, int stickiness, Obj parser) {
       mInterpreter = interpreter;
       mStickiness = stickiness;
+      mParser = parser;
     }
     
     @Override
@@ -103,12 +112,9 @@ public class ParserBuiltIns {
       Obj leftObj = JavaToMagpie.convert(mInterpreter, left);
       Obj arg = mInterpreter.createRecord(parserObj, leftObj, tokenObj);
       
-      // Let the Magpie code do the parsing. Call parse with the keyword as
-      // the receiver. A parse method should then specialize to that keyword.
-      Multimethod parseMethod = mInterpreter.getSyntaxModule().getExportedMultimethods().get("parse");
-      Obj expr = parseMethod.invoke(mInterpreter,
-          mInterpreter.createString(token.getString()), arg);
-      
+      // Let the Magpie code do the parsing. Call the parser.
+      Obj expr = mInterpreter.invoke(mParser, "call", arg);
+       
       // Marshall it back to Java format.
       return MagpieToJava.convertExpr(mInterpreter, expr);
     }
@@ -120,5 +126,6 @@ public class ParserBuiltIns {
     
     private final Interpreter mInterpreter;
     private final int mStickiness;
+    private final Obj mParser;
   }
 }

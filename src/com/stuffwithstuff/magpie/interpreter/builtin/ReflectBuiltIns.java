@@ -39,7 +39,7 @@ public class ReflectBuiltIns {
       String name = arg.getField(1).asString();
       
       // TODO(bob): Hackish, but works.
-      Multimethod multimethod = interpreter.getCurrentModule().getScope()
+      Multimethod multimethod = interpreter.getBaseModule().getScope()
           .lookUpMultimethod(name);
       
       if (multimethod == null) {

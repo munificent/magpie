@@ -57,7 +57,7 @@ public class NiceReplCharacterReader extends ReplCharacterReader {
           if (token.isKeyword("this") || token.isKeyword("nothing")) {
             // special identifiers
             Term.set(ForeColor.LIGHT_BLUE);
-          } else if (mInterpreter.getGrammar().isReserved(token.getString())) {
+          } else if (mInterpreter.getBaseModule().getGrammar().isReserved(token.getString())) {
             Term.set(ForeColor.CYAN);
           } else {
             Term.set(ForeColor.WHITE);
