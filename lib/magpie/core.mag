@@ -15,6 +15,9 @@ import classfile:com.stuffwithstuff.magpie.interpreter.builtin.ListBuiltIns
 import classfile:com.stuffwithstuff.magpie.interpreter.builtin.ObjectBuiltIns
 import classfile:com.stuffwithstuff.magpie.interpreter.builtin.StringBuiltIns
 
+// String conversion for core classes
+// ----------------------------------------------------------------------------
+
 def (this is String) string
     this
 end
@@ -164,47 +167,3 @@ end
 def (this is Int) to(last is Int)
     Range new(first: this, last: last)
 end
-
-// "and" Parser
-// ----------------------------------------------------------------------------
-
-// TODO(bob): Move into its own module.
-def (this == "and") parse(parser is Parser, left is Expression, token is Token)
-    // Ignore a newline after "and".
-    parser matchToken(TokenType.LINE)
-    var right = parser parseExpression(30)
-    {
-        do
-            // TODO(bob): Use generated symbol.
-            var temp__ = `left
-            match temp__ true?
-                case true then `right
-                else temp__
-            end
-        end
-    }
-end
-
-defineInfix("and", 30)
-
-// "or" Parser
-// ----------------------------------------------------------------------------
-
-// TODO(bob): Move into its own module.
-def (this == "or") parse(parser is Parser, left is Expression, token is Token)
-    // Ignore a newline after "or".
-    parser matchToken(TokenType.LINE)
-    var right = parser parseExpression(30)
-    {
-        do
-            // TODO(bob): Use generated symbol.
-            var temp__ = `left
-            match temp__ true?
-                case true then temp__
-                else `right
-            end
-        end
-    }
-end
-
-defineInfix("or", 30)
