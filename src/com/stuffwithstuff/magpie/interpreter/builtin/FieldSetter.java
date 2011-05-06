@@ -5,7 +5,7 @@ import com.stuffwithstuff.magpie.ast.Field;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
-import com.stuffwithstuff.magpie.interpreter.Interpreter;
+import com.stuffwithstuff.magpie.interpreter.Context;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.Scope;
 
@@ -22,7 +22,7 @@ public class FieldSetter implements Callable {
   }
   
   @Override
-  public Obj invoke(Interpreter interpreter, Obj arg) {
+  public Obj invoke(Context context, Obj arg) {
     arg.getField(0).setField(mName, arg.getField(1));
     return arg.getField(1);
   }

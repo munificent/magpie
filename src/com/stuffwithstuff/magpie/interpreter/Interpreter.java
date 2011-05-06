@@ -12,7 +12,7 @@ public class Interpreter {
     mHost = host;
 
     // Bootstrap the base module with the core definitions.
-    mBaseModule = new Module(mHost.loadModule("magpie.core"));
+    mBaseModule = new Module(mHost.loadModule("magpie.core"), this);
     mLoadingModules.push(mBaseModule);
     
     EnvironmentBuilder builder = new EnvironmentBuilder(this, mBaseModule);
@@ -39,26 +39,26 @@ public class Interpreter {
   }
   
   public void interpret(ModuleInfo info) {
-    evaluateModule(new Module(info));
+    evaluateModule(new Module(info, this));
   }
 
   public Obj interpret(Expr expression) {
-    return evaluate(expression, new EvalContext(getCurrentScope()));
+    return evaluate(expression, mBaseModule, mBaseModule.getScope());
   }
   
-  public Obj evaluate(Expr expr, EvalContext context) {
-    ExprEvaluator evaluator = new ExprEvaluator(this);
-    return evaluator.evaluate(expr, context);
+  public Obj evaluate(Expr expr, Module module, Scope scope) {
+    ExprEvaluator evaluator = new ExprEvaluator(new Context(module));
+    return evaluator.evaluate(expr, scope);
   }
   
   public String evaluateToString(Obj value) {
-    Multimethod multimethod = getCurrentScope().lookUpMultimethod(Name.STRING);
-    return multimethod.invoke(this, value).asString();
+    Multimethod multimethod = mBaseModule.getScope().lookUpMultimethod(Name.STRING);
+    return multimethod.invoke(new Context(mBaseModule), value).asString();
   }
   
   public Obj invoke(Obj leftArg, String method, Obj rightArg) {
     Multimethod multimethod = mBaseModule.getScope().lookUpMultimethod(method);
-    return multimethod.invoke(this, leftArg, rightArg);
+    return multimethod.invoke(new Context(mBaseModule), leftArg, rightArg);
   }
   
   public boolean objectsEqual(Obj a, Obj b) {
@@ -74,13 +74,13 @@ public class Interpreter {
     // "==", don't call it again, just default to identity.
     if (mInObjectsEqual) return a == b;
 
-    Multimethod equals = getCurrentScope().lookUpMultimethod(Name.EQEQ);   
+    Multimethod equals = mBaseModule.getScope().lookUpMultimethod(Name.EQEQ);   
     
     // Bootstrap short-cut. If we haven't defined "==" yet, default to identity.
     if (equals == null) return a == b;
     
     mInObjectsEqual = true;
-    Obj result = equals.invoke(this, a, b);
+    Obj result = equals.invoke(new Context(mBaseModule), a, b);
     mInObjectsEqual = false;
     
     return result.asBool();
@@ -99,7 +99,7 @@ public class Interpreter {
     // Only load it once.
     if (module == null) {
       ModuleInfo info = mHost.loadModule(name);
-      module = new Module(info);
+      module = new Module(info, this);
       mModules.put(name, module);
       
       evaluateModule(module);
@@ -191,8 +191,8 @@ public class Interpreter {
     return instantiate(mStringClass, value);
   }
   
-  public FnObj createFn(FnExpr expr, EvalContext context) {
-    return new FnObj(mFnClass, new Function(expr, context.getScope()));
+  public FnObj createFn(FnExpr expr, Scope scope) {
+    return new FnObj(mFnClass, new Function(expr, scope));
   }
   
   public Obj createRecord(Obj... fields) {
@@ -223,16 +223,14 @@ public class Interpreter {
     for (Entry<String, Field> field : classObj.getFieldDefinitions().entrySet()) {
       Expr initializer = field.getValue().getInitializer();
       if (initializer != null) {
-        Obj value = evaluate(initializer, new EvalContext(classObj.getClosure()));
+        // Getting the module from the class's closure is a bit hackish.
+        Obj value = evaluate(initializer, classObj.getClosure().getModule(),
+            classObj.getClosure());
         object.setField(field.getKey(), value);
       }
     }
     
     return object;
-  }
-  
-  public Scope getCurrentScope() {
-    return mLoadingModules.peek().getScope();
   }
   
   public InterpreterHost getHost() {
@@ -241,23 +239,23 @@ public class Interpreter {
   
   public Obj getConstructingObject() { return mConstructing.peek(); }
   
-  public Obj constructNewObject(ClassObj classObj, Obj initArg) {
+  public Obj constructNewObject(Context context, ClassObj classObj, Obj initArg) {
     Obj newObj = instantiate(classObj, null);
     
     mConstructing.push(newObj);
     // Call the init() multimethod.
-    initializeNewObject(classObj, initArg);
+    initializeNewObject(context, classObj, initArg);
     mConstructing.pop();
     
     return newObj;
   }
   
-  public void initializeNewObject(ClassObj classObj, Obj arg) {
+  public void initializeNewObject(Context context, ClassObj classObj, Obj arg) {
     Multimethod init = classObj.getClosure().lookUpMultimethod(Name.INIT);
     // Note: the receiver for init() is the class itself, not the new instance
     // which is considered to be in a hidden state since it isn't initialized
     // yet.
-    init.invoke(this, classObj, arg);
+    init.invoke(context, classObj, arg);
   }
   
   private void evaluateModule(Module module) {
@@ -274,12 +272,10 @@ public class Interpreter {
       // Evaluate every expression in the file. We do this incrementally so
       // that expressions that define parsers can be used to parse the rest of
       // the file.
-      EvalContext context = new EvalContext(module.getScope());
-      
       while (true) {
         Expr expr = parser.parseTopLevelExpression();
         if (expr == null) break;
-        evaluate(expr, context);
+        evaluate(expr, module, module.getScope());
       }
     } finally {
       mLoadingModules.pop();

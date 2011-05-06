@@ -14,19 +14,19 @@ public class Function implements Callable {
   }
 
   @Override
-  public Obj invoke(Interpreter interpreter, Obj arg) {
+  public Obj invoke(Context context, Obj arg) {
     try {
       Profiler.push(mFunction.getPosition());
       
       // Create a local scope for the function.
-      EvalContext context = new EvalContext(mScope).pushScope();
+      Scope scope = mScope.push();
       
-      // Bind the arguments bounds to the pattern.
+      // Bind the arguments to the pattern.
       Pattern pattern = mFunction.getPattern();
-      PatternBinder.bind(interpreter, pattern, arg, context);
+      PatternBinder.bind(context, pattern, arg, scope);
       
       try {
-        return interpreter.evaluate(mFunction.getBody(), context);
+        return context.evaluate(mFunction.getBody(), scope);
       } catch (ReturnException ex) {
         // There was an early return in the function, so return the value of that.
         return ex.getValue();

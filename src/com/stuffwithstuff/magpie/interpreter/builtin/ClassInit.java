@@ -9,7 +9,7 @@ import com.stuffwithstuff.magpie.ast.Field;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
-import com.stuffwithstuff.magpie.interpreter.Interpreter;
+import com.stuffwithstuff.magpie.interpreter.Context;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.Scope;
 
@@ -24,17 +24,17 @@ public class ClassInit implements Callable {
   }
 
   @Override
-  public Obj invoke(Interpreter interpreter, Obj arg) {
+  public Obj invoke(Context context, Obj arg) {
     // We don't care about the receiver.
     arg = arg.getField(1);
     
-    Obj obj = interpreter.getConstructingObject();
+    Obj obj = context.getInterpreter().getConstructingObject();
 
     // Initialize the parent classes from the record.
     for (ClassObj parent : mClass.getParents()) {
       Obj value = arg.getField(parent.getName());
       if (value != null) {
-        interpreter.initializeNewObject(parent, value);
+        context.getInterpreter().initializeNewObject(context, parent, value);
       }
     }
     

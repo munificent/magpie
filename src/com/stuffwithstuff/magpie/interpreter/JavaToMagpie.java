@@ -44,39 +44,39 @@ import com.stuffwithstuff.magpie.parser.TokenType;
 import com.stuffwithstuff.magpie.util.Pair;
 
 public class JavaToMagpie {
-  public static Obj convert(Interpreter interpreter, Expr expr) {
-    JavaToMagpie javaToMagpie = new JavaToMagpie(interpreter, null);
+  public static Obj convert(Context context, Expr expr) {
+    JavaToMagpie javaToMagpie = new JavaToMagpie(context, null);
     return javaToMagpie.convertExpr(expr);
   }
   
-  public static Obj convertAndUnquote(Interpreter interpreter, Expr expr,
-      EvalContext context) {
-    JavaToMagpie javaToMagpie = new JavaToMagpie(interpreter, context);
+  public static Obj convertAndUnquote(Context context, Expr expr,
+      Scope scope) {
+    JavaToMagpie javaToMagpie = new JavaToMagpie(context, scope);
     return javaToMagpie.convertExpr(expr);
   }
   
-  public static Obj convert(Interpreter interpreter, Pattern pattern) {
-    JavaToMagpie javaToMagpie = new JavaToMagpie(interpreter, null);
+  public static Obj convert(Context context, Pattern pattern) {
+    JavaToMagpie javaToMagpie = new JavaToMagpie(context, null);
     return javaToMagpie.convertPattern(pattern);
   }
 
-  public static Obj convert(Interpreter interpreter, TokenType type) {
-    JavaToMagpie javaToMagpie = new JavaToMagpie(interpreter, null);
+  public static Obj convert(Context context, TokenType type) {
+    JavaToMagpie javaToMagpie = new JavaToMagpie(context, null);
     return javaToMagpie.convertTokenType(type);
   }
   
-  public static Obj convert(Interpreter interpreter, Token token) {
-    JavaToMagpie javaToMagpie = new JavaToMagpie(interpreter, null);
+  public static Obj convert(Context context, Token token) {
+    JavaToMagpie javaToMagpie = new JavaToMagpie(context, null);
     return javaToMagpie.convertToken(token);
   }
   
-  private JavaToMagpie(Interpreter interpreter, EvalContext context) {
-    mInterpreter = interpreter;
+  private JavaToMagpie(Context context, Scope scope) {
     mContext = context;
+    mScope = scope;
   }
 
   private Obj convertExpr(Expr expr) {
-    if (expr == null) return mInterpreter.nothing();
+    if (expr == null) return mContext.nothing();
     ExprConverter converter = new ExprConverter();
     return expr.accept(converter, null);
   }
@@ -86,11 +86,11 @@ public class JavaToMagpie {
     for (Object value : values) {
       objs.add(convertObject(value));
     }
-    return mInterpreter.createList(objs);
+    return mContext.toList(objs);
   }
   
   private Obj convertMatchCase(MatchCase matchCase) {
-    if (matchCase == null) return mInterpreter.nothing();
+    if (matchCase == null) return mContext.nothing();
     
     return construct("MatchCase",
         "pattern", matchCase.getPattern(),
@@ -98,7 +98,7 @@ public class JavaToMagpie {
   }
 
   private Obj convertPattern(Pattern pattern) {
-    if (pattern == null) return mInterpreter.nothing();
+    if (pattern == null) return mContext.nothing();
     
     PatternConverter converter = new PatternConverter();
     return pattern.accept(converter, null);
@@ -114,7 +114,7 @@ public class JavaToMagpie {
   }
   
   private Obj convertToken(Token token) {
-    if (token == null) return mInterpreter.nothing();
+    if (token == null) return mContext.nothing();
     
     return construct("Token",
         "position",  token.getPosition(),
@@ -129,11 +129,11 @@ public class JavaToMagpie {
   }
   
   private Obj convertObject(Object object) {
-    if (object == null) return mInterpreter.nothing();
+    if (object == null) return mContext.nothing();
     if (object instanceof Obj) return (Obj) object;
-    if (object instanceof Boolean) return mInterpreter.createBool((Boolean) object);
-    if (object instanceof Integer) return mInterpreter.createInt((Integer) object);
-    if (object instanceof String) return mInterpreter.createString((String) object);
+    if (object instanceof Boolean) return mContext.toObj((Boolean) object);
+    if (object instanceof Integer) return mContext.toObj((Integer) object);
+    if (object instanceof String) return mContext.toObj((String) object);
     if (object instanceof Expr) return convertExpr((Expr) object);
     if (object instanceof MatchCase) return convertMatchCase((MatchCase) object);
     if (object instanceof Pattern) return convertPattern((Pattern) object);
@@ -146,9 +146,9 @@ public class JavaToMagpie {
   }
 
   private Obj construct(String className, Object... args) {
-    ClassObj classObj = mInterpreter.getSyntaxModule().getExportedVariables()
+    ClassObj classObj = mContext.getInterpreter().getSyntaxModule().getExportedVariables()
         .get(className).asClass();
-    Obj object = mInterpreter.instantiate(classObj, null);
+    Obj object = mContext.getInterpreter().instantiate(classObj, null);
 
     // TODO(bob): Hackish. Goes around normal object construction process.
     for (int i = 0; i < args.length; i += 2) {
@@ -290,14 +290,14 @@ public class JavaToMagpie {
     public Obj visit(RecordExpr expr, Void context) {
       List<Obj> fields = new ArrayList<Obj>();
       for (Pair<String, Expr> field : expr.getFields()) {
-        Obj name = mInterpreter.createString(field.getKey());
+        Obj name = mContext.toObj(field.getKey());
         Obj value = convertObject(field.getValue());
-        fields.add(mInterpreter.createRecord(name, value));
+        fields.add(mContext.toObj(name, value));
       }
 
       return construct("RecordExpression",
           "position", expr.getPosition(),
-          "fields",   mInterpreter.createList(fields));
+          "fields",   mContext.toList(fields));
     }
 
     @Override
@@ -338,27 +338,27 @@ public class JavaToMagpie {
 
     @Override
     public Obj visit(UnquoteExpr expr, Void context) {
-      // If we have an EvalContext, then we're converting a quotation and we
+      // If we have a Scope, then we're converting a quotation and we
       // should evaluate the unquote.
-      if (mContext != null) {
+      if (mScope != null) {
         // TODO(bob): Check that it evaluates to an expression?
-        Obj value = mInterpreter.evaluate(expr.getBody(), mContext);
+        Obj value = mContext.evaluate(expr.getBody(), mScope);
         
         // If the unquoted value is a primitive object, automatically promote
         // it to a corresponding literal.
-        if (value.getClassObj() == mInterpreter.getBoolClass()) {
+        if (value.getClassObj() == mContext.getInterpreter().getBoolClass()) {
           value = construct("BoolExpression",
               "position", expr.getPosition(),
               "value",    value);
-        } else if (value.getClassObj() == mInterpreter.getIntClass()) {
+        } else if (value.getClassObj() == mContext.getInterpreter().getIntClass()) {
           value = construct("IntExpression",
               "position", expr.getPosition(),
               "value",    value);
-        } else if (value.getClassObj() == mInterpreter.getStringClass()) {
+        } else if (value.getClassObj() == mContext.getInterpreter().getStringClass()) {
           value = construct("StringExpression",
               "position", expr.getPosition(),
               "value",    value);
-        } else if (value.getClassObj() == mInterpreter.getNothingClass()) {
+        } else if (value.getClassObj() == mContext.getInterpreter().getNothingClass()) {
           value = construct("NothingExpression",
               "position", expr.getPosition());
         }
@@ -386,13 +386,13 @@ public class JavaToMagpie {
     public Obj visit(RecordPattern pattern, Void context) {
       List<Obj> fields = new ArrayList<Obj>();
       for (Entry<String, Pattern> field : pattern.getFields().entrySet()) {
-        Obj name = mInterpreter.createString(field.getKey());
+        Obj name = mContext.toObj(field.getKey());
         Obj value = convertObject(field.getValue());
-        fields.add(mInterpreter.createRecord(name, value));
+        fields.add(mContext.toObj(name, value));
       }
 
       return construct("RecordPattern",
-          "fields", mInterpreter.createList(fields));
+          "fields", mContext.toList(fields));
     }
 
     @Override
@@ -420,6 +420,6 @@ public class JavaToMagpie {
     }
   }
   
-  private final Interpreter mInterpreter;
-  private final EvalContext mContext;
+  private final Context mContext;
+  private final Scope mScope;
 }

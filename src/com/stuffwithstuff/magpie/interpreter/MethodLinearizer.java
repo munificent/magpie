@@ -54,18 +54,18 @@ import com.stuffwithstuff.magpie.ast.pattern.WildcardPattern;
  * types?
  */
 public class MethodLinearizer implements Comparator<Callable> {
-  public MethodLinearizer(Interpreter interpreter) {
-    mInterpreter = interpreter;
+  public MethodLinearizer(Context context) {
+    mContext = context;
   }
 
   @Override
   public int compare(Callable method1, Callable method2) {
-    return compare(method1.getPattern(), new EvalContext(method1.getClosure()),
-                   method2.getPattern(), new EvalContext(method2.getClosure()));
+    return compare(method1.getPattern(), method1.getClosure(),
+                   method2.getPattern(), method2.getClosure());
   }
 
-  private int compare(Pattern pattern1, EvalContext context1,
-      Pattern pattern2, EvalContext context2) {
+  private int compare(Pattern pattern1, Scope scope1,
+      Pattern pattern2, Scope scope2) {
     final int firstWins = -1;
     final int secondWins = 1;
     
@@ -89,8 +89,8 @@ public class MethodLinearizer implements Comparator<Callable> {
     case RECORD:
       switch (kind2) {
       case ANY:     return firstWins;
-      case RECORD:  return compareRecords(pattern1, context1, pattern2, context2);
-      case TYPE:    return compareTypes(pattern1, context1, pattern2, context2);
+      case RECORD:  return compareRecords(pattern1, scope1, pattern2, scope2);
+      case TYPE:    return compareTypes(pattern1, scope1, pattern2, scope2);
       case VALUE:   return secondWins;
       default:
         throw new UnsupportedOperationException("Unknown pattern kind.");
@@ -98,8 +98,8 @@ public class MethodLinearizer implements Comparator<Callable> {
     case TYPE:
       switch (kind2) {
       case ANY:     return firstWins;
-      case RECORD:  return compareTypes(pattern1, context1, pattern2, context2);
-      case TYPE:    return compareTypes(pattern1, context1, pattern2, context2);
+      case RECORD:  return compareTypes(pattern1, scope1, pattern2, scope2);
+      case TYPE:    return compareTypes(pattern1, scope1, pattern2, scope2);
       case VALUE:   return secondWins;
       default:
         throw new UnsupportedOperationException("Unknown pattern kind.");
@@ -109,7 +109,7 @@ public class MethodLinearizer implements Comparator<Callable> {
       case ANY:     return firstWins;
       case RECORD:  return firstWins;
       case TYPE:    return firstWins;
-      case VALUE:   return compareValues(pattern1, context1, pattern2, context2);
+      case VALUE:   return compareValues(pattern1, scope1, pattern2, scope2);
       default:
         throw new UnsupportedOperationException("Unknown pattern kind.");
       }
@@ -138,8 +138,8 @@ public class MethodLinearizer implements Comparator<Callable> {
     return false;
   }
   
-  private int compareRecords(Pattern pattern1, EvalContext context1,
-      Pattern pattern2, EvalContext context2) {
+  private int compareRecords(Pattern pattern1, Scope scope1,
+      Pattern pattern2, Scope scope2) {
     Map<String, Pattern> record1 = ((RecordPattern)pattern1).getFields();
     Map<String, Pattern> record2 = ((RecordPattern)pattern2).getFields();
     
@@ -162,7 +162,7 @@ public class MethodLinearizer implements Comparator<Callable> {
       Pattern field1 = record1.get(name);
       Pattern field2 = record2.get(name);
       
-      int compare = compare(field1, context1, field2, context2);
+      int compare = compare(field1, scope1, field2, scope2);
       
       if (currentComparison == 0) {
         currentComparison = compare;
@@ -177,10 +177,10 @@ public class MethodLinearizer implements Comparator<Callable> {
     return currentComparison;
   }
   
-  private int compareTypes(Pattern pattern1, EvalContext context1,
-      Pattern pattern2, EvalContext context2) {
-    Obj type1 = mInterpreter.evaluate(PatternTyper.evaluate(pattern1), context1);
-    Obj type2 = mInterpreter.evaluate(PatternTyper.evaluate(pattern2), context2);
+  private int compareTypes(Pattern pattern1, Scope scope1,
+      Pattern pattern2, Scope scope2) {
+    Obj type1 = mContext.evaluate(PatternTyper.evaluate(pattern1), scope1);
+    Obj type2 = mContext.evaluate(PatternTyper.evaluate(pattern2), scope2);
     
     // TODO(bob): WIP getting rid of types.
     if (type1 instanceof ClassObj && type2 instanceof ClassObj) {
@@ -205,22 +205,22 @@ public class MethodLinearizer implements Comparator<Callable> {
     throw new UnsupportedOperationException("Must be class now!");
   }
 
-  private int compareValues(Pattern pattern1, EvalContext context1,
-      Pattern pattern2, EvalContext context2) {
-    Obj value1 = mInterpreter.evaluate(((ValuePattern)pattern1).getValue(), context1);
-    Obj value2 = mInterpreter.evaluate(((ValuePattern)pattern2).getValue(), context2);
+  private int compareValues(Pattern pattern1, Scope scope1,
+      Pattern pattern2, Scope scope2) {
+    Obj value1 = mContext.evaluate(((ValuePattern)pattern1).getValue(), scope1);
+    Obj value2 = mContext.evaluate(((ValuePattern)pattern2).getValue(), scope2);
     
     // Identical values are ordered the same. This lets us have tuples with
     // some identical value fields (like nothing) which are then sorted by
     // other fields.
-    if (mInterpreter.objectsEqual(value1, value2)) return 0;
+    if (mContext.objectsEqual(value1, value2)) return 0;
     
     // Any other paid of values can't be sorted.
     throw ambiguous(pattern1, pattern2);
   }
   
   private ErrorException ambiguous(Pattern pattern1, Pattern pattern2) {
-    return mInterpreter.error(Name.AMBIGUOUS_METHOD_ERROR, 
+    return mContext.error(Name.AMBIGUOUS_METHOD_ERROR, 
         "Cannot choose a method between " + pattern1 + " and " + pattern2);
   }
 
@@ -294,5 +294,5 @@ public class MethodLinearizer implements Comparator<Callable> {
     }
   }
   
-  private final Interpreter mInterpreter;
+  private final Context mContext;
 }

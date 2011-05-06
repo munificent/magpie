@@ -12,14 +12,16 @@ import com.stuffwithstuff.magpie.parser.PrefixParser;
 import com.stuffwithstuff.magpie.parser.StringCharacterReader;
 
 public class Module {
-  public Module(ModuleInfo info) {
+  public Module(ModuleInfo info, Interpreter interpreter) {
     mInfo = info;
+    mInterpreter = interpreter;
     mScope = new Scope(this);
   }
   
   public String getName() { return mInfo.getName(); }
   public String getPath() { return mInfo.getPath(); }
   public String getSource() { return mInfo.getSource(); }
+  public Interpreter getInterpreter() { return mInterpreter; }
   public Scope getScope() { return mScope; }
   
   private CharacterReader readSource() {
@@ -80,6 +82,7 @@ public class Module {
   }
   
   private final ModuleInfo mInfo;
+  private final Interpreter mInterpreter;
   private final Scope mScope;
   private final Grammar mGrammar = new Grammar();
   private final Map<String, Obj> mExportedVariables =

@@ -14,15 +14,17 @@ public class Scope {
    * Creates a new top-level scope for the given module.
    * @param module
    */
+  // TODO(bob): Remove module from this. It's only needed to export stuff and
+  // the few places that do that should already have access to the module.
   public Scope(Module module) {
     mAllowRedefinition = false;
     mModule = module;
     mParent = null;
   }
   
-  public Scope(Scope parent) {
+  private Scope(Scope parent) {
     mAllowRedefinition = false;
-    mModule = null;
+    mModule = parent.mModule;
     mParent = parent;
   }
   
@@ -34,6 +36,14 @@ public class Scope {
   
   public Scope() {
     this(false);
+  }
+  
+  public Scope push() {
+    return new Scope(this);
+  }
+  
+  public Module getModule() {
+    return mModule;
   }
   
   public void importAll(Interpreter interpreter, String prefix, Module module) {
@@ -120,7 +130,7 @@ public class Scope {
     mVariables.put(name, value);
     
     // If we're defining a top-level public variable, export it too.
-    if ((mModule != null) && Name.isPublic(name)) {
+    if ((mParent == null) && Name.isPublic(name)) {
       mModule.addExport(name, value);
     }
     
@@ -147,7 +157,7 @@ public class Scope {
     // (which does not add it to the exports) and then add a new method to it,
     // then that multimethod now becomes exported. That satisfies the user's
     // expectation that all top-level defs are exported.
-    if ((mModule != null) && Name.isPublic(name)) {
+    if ((mParent == null) && Name.isPublic(name)) {
       mModule.addExport(name, multimethod);
     }
     

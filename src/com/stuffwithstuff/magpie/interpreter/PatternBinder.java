@@ -9,9 +9,9 @@ import com.stuffwithstuff.magpie.ast.pattern.*;
  * new variables in the context.
  */
 public class PatternBinder implements PatternVisitor<Void, Obj>  {
-  public static void bind(Interpreter interpreter, Pattern pattern,
-      Obj value, EvalContext context) {
-    PatternBinder binder = new PatternBinder(interpreter, context);
+  public static void bind(Context context, Pattern pattern,
+      Obj value, Scope scope) {
+    PatternBinder binder = new PatternBinder(context, scope);
     pattern.accept(binder, value);
   }
 
@@ -43,7 +43,7 @@ public class PatternBinder implements PatternVisitor<Void, Obj>  {
     // Bind the variable.
     if (!bindNewVariable(pattern.getName(), value)) {
       // Cannot redefine a variable in the same scope.
-      mInterpreter.error(Name.REDEFINITION_ERROR, String.format(
+      mContext.error(Name.REDEFINITION_ERROR, String.format(
           "There is already a variable named \"%s\" in this scope.", 
           pattern.getName()));
     }
@@ -62,9 +62,9 @@ public class PatternBinder implements PatternVisitor<Void, Obj>  {
     return null;
   }
 
-  private PatternBinder(Interpreter interpreter, EvalContext context) {
-    mInterpreter = interpreter;
+  private PatternBinder(Context context, Scope scope) {
     mContext = context;
+    mScope = scope;
   }
   
   private boolean bindNewVariable(String name, Obj value) {
@@ -72,9 +72,9 @@ public class PatternBinder implements PatternVisitor<Void, Obj>  {
     if (name.equals("_")) return true;
     
     // Bind the variable.
-    return mContext.getScope().define(name, value);
+    return mScope.define(name, value);
   }
   
-  private final Interpreter mInterpreter;  
-  private final EvalContext mContext;
+  private final Context mContext;  
+  private final Scope mScope;
 }

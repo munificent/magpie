@@ -21,8 +21,8 @@ public class FnObj extends Obj {
 
   public Callable getCallable() { return mCallable; }
   
-  public Obj invoke(Interpreter interpreter, Obj arg) {
-    return mCallable.invoke(interpreter, arg);
+  public Obj invoke(Context context, Obj arg) {
+    return mCallable.invoke(context, arg);
   }
   
   private final Callable mCallable;

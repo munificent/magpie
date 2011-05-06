@@ -4,7 +4,7 @@ import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
-import com.stuffwithstuff.magpie.interpreter.Interpreter;
+import com.stuffwithstuff.magpie.interpreter.Context;
 import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.Scope;
@@ -20,10 +20,10 @@ public class ClassNew implements Callable {
   }
 
   @Override
-  public Obj invoke(Interpreter interpreter, Obj arg) {
+  public Obj invoke(Context context, Obj arg) {
     // Get the class being constructed.
     ClassObj classObj = arg.getField(0).asClass();
-    return interpreter.constructNewObject(classObj, arg.getField(1));
+    return context.getInterpreter().constructNewObject(context, classObj, arg.getField(1));
   }
   
   @Override

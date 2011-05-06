@@ -2,16 +2,16 @@ package com.stuffwithstuff.magpie.interpreter.builtin;
 
 import java.util.List;
 
-import com.stuffwithstuff.magpie.interpreter.Interpreter;
+import com.stuffwithstuff.magpie.interpreter.Context;
 import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class ListBuiltIns {
   @Signature("(is List)[index is Int]")
   public static class Index implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj arg) {
+    public Obj invoke(Context context, Obj arg) {
       List<Obj> elements = arg.getField(0).asList();
-      int index = validateIndex(interpreter, elements,
+      int index = validateIndex(context, elements,
           arg.getField(1).asInt());
       
       return elements.get(index);
@@ -20,10 +20,10 @@ public class ListBuiltIns {
 
   @Signature("(is List)[index is Int] = (item)")
   public static class IndexAssign implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj arg) {
+    public Obj invoke(Context context, Obj arg) {
       List<Obj> elements = arg.getField(0).asList();
       
-      int index = validateIndex(interpreter, elements,
+      int index = validateIndex(context, elements,
           arg.getField(1).getField(0).asInt());
       
       Obj value = arg.getField(1).getField(1);
@@ -35,7 +35,7 @@ public class ListBuiltIns {
   
   @Signature("(is List) add(item)")
   public static class Add implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj arg) {
+    public Obj invoke(Context context, Obj arg) {
       List<Obj> elements = arg.getField(0).asList();
       elements.add(arg.getField(1));
       
@@ -45,22 +45,22 @@ public class ListBuiltIns {
 
   @Signature("(is List) clear()")
   public static class Clear implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj arg) {
+    public Obj invoke(Context context, Obj arg) {
       List<Obj> elements = arg.getField(0).asList();
       elements.clear();
-      return interpreter.nothing();
+      return context.nothing();
     }
   }
   
   @Signature("(is List) count")
   public static class Count implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj arg) {
+    public Obj invoke(Context context, Obj arg) {
       List<Obj> elements = arg.asList();
-      return interpreter.createInt(elements.size());
+      return context.toObj(elements.size());
     }
   }
   
-  private static int validateIndex(Interpreter interpreter, List<Obj> list,
+  private static int validateIndex(Context context, List<Obj> list,
       int index) {
     // Negative indices count backwards from the end.
     if (index < 0) {
@@ -69,7 +69,7 @@ public class ListBuiltIns {
     
     // Check the bounds.
     if ((index < 0) || (index >= list.size())) {
-      interpreter.error(Name.OUT_OF_BOUNDS_ERROR, "Index " + index +
+      context.error(Name.OUT_OF_BOUNDS_ERROR, "Index " + index +
           " is out of bounds [0, " + list.size() + "].");
     }
     
@@ -81,7 +81,7 @@ public class ListBuiltIns {
   
   @Signature("insert(index Int, item ->)")
   public static class Insert implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+    public Obj invoke(Context context, Obj thisObj, Obj arg) {
       int index = arg.getTupleField(0).asInt();
       Obj value = arg.getTupleField(1);
   
@@ -94,7 +94,7 @@ public class ListBuiltIns {
   
   @Signature("removeAt(index Int)")
   public static class RemoveAt implements BuiltInCallable {
-    public Obj invoke(Interpreter interpreter, Obj thisObj, Obj arg) {
+    public Obj invoke(Context context, Obj thisObj, Obj arg) {
       List<Obj> elements = thisObj.asArray();
       
       int index = arg.asInt();

@@ -17,44 +17,44 @@ public class Multimethod {
     mMethods.add(method);
   }
   
-  public Obj invoke(Interpreter interpreter, Obj receiver, Obj arg) {
-    return invoke(interpreter, interpreter.createRecord(receiver, arg));
+  public Obj invoke(Context context, Obj receiver, Obj arg) {
+    return invoke(context, context.toObj(receiver, arg));
   }
   
-  public Obj invoke(Interpreter interpreter, Obj arg) {
-    Callable method = select(interpreter, arg);
+  public Obj invoke(Context context, Obj arg) {
+    Callable method = select(context, arg);
         
     if (method == null) {
-      interpreter.error(Name.NO_METHOD_ERROR, 
+      context.error(Name.NO_METHOD_ERROR, 
           "Could not find a method to match argument " + arg + ".");
     }
 
-    return method.invoke(interpreter, arg);
+    return method.invoke(context, arg);
   }
   
-  private Callable select(Interpreter interpreter, Obj arg) {
+  private Callable select(Context context, Obj arg) {
     Expect.notNull(arg);
     
     List<Callable> applicable = new ArrayList<Callable>();
     for (Callable method : mMethods) {
       // If the callable has a lexical context, evaluate its pattern in that
       // context. That way pattern names can refer to local variables.
-      EvalContext context = new EvalContext(method.getClosure());
-      if (PatternTester.test(interpreter, method.getPattern(), arg, context)) {
+      if (PatternTester.test(context, method.getPattern(),
+          arg, method.getClosure())) {
         applicable.add(method);
       }
     }
     
     if (applicable.size() == 0) return null;
 
-    linearize(interpreter, applicable);
+    linearize(context, applicable);
     
     return applicable.get(0);
   }
 
-  private void linearize(Interpreter interpreter, List<Callable> methods) {
+  private void linearize(Context context, List<Callable> methods) {
     if (methods.size() <= 1) return;
-    Collections.sort(methods, new MethodLinearizer(interpreter));
+    Collections.sort(methods, new MethodLinearizer(context));
   }
   
   private final List<Callable> mMethods = new ArrayList<Callable>();

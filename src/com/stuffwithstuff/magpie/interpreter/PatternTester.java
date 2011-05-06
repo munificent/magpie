@@ -8,10 +8,10 @@ import com.stuffwithstuff.magpie.ast.pattern.*;
  * Determines if a pattern matches a given value.
  */
 public class PatternTester implements PatternVisitor<Boolean, Obj> {
-  public static boolean test(final Interpreter interpreter, Pattern pattern,
-      Obj value, EvalContext context) {
+  public static boolean test(Context context, Pattern pattern,
+      Obj value, Scope scope) {
     
-    PatternTester binder = new PatternTester(interpreter, context);
+    PatternTester binder = new PatternTester(context, scope);
     return pattern.accept(binder, value);
   }
   
@@ -30,14 +30,14 @@ public class PatternTester implements PatternVisitor<Boolean, Obj> {
   
   @Override
   public Boolean visit(TypePattern pattern, Obj value) {
-    Obj expected = mInterpreter.evaluate(pattern.getType(), mContext);
+    Obj expected = mContext.evaluate(pattern.getType(), mScope);
     return value.getClassObj().isSubclassOf((ClassObj)expected);
   }
   
   @Override
   public Boolean visit(ValuePattern pattern, Obj value) {
-    Obj expected = mInterpreter.evaluate(pattern.getValue(), mContext);
-    return mInterpreter.objectsEqual(expected, value);
+    Obj expected = mContext.evaluate(pattern.getValue(), mScope);
+    return mContext.objectsEqual(expected, value);
   }
 
   @Override
@@ -50,11 +50,11 @@ public class PatternTester implements PatternVisitor<Boolean, Obj> {
     return true;
   }
 
-  private PatternTester(Interpreter interpreter, EvalContext context) {
-    mInterpreter = interpreter;
+  private PatternTester(Context context, Scope scope) {
     mContext = context;
+    mScope = scope;
   }
   
-  private final Interpreter mInterpreter;
-  private final EvalContext mContext;
+  private final Context mContext;
+  private final Scope mScope;
 }

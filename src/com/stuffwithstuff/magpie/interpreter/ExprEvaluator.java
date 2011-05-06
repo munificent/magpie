@@ -16,9 +16,9 @@ import com.stuffwithstuff.magpie.util.Pair;
  * expressions. This is the heart of the interpreter and is where Magpie code is
  * actually executed.
  */
-public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
-  public ExprEvaluator(Interpreter interpreter) {
-    mInterpreter = interpreter;
+public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
+  public ExprEvaluator(Context context) {
+    mContext = context;
   }
 
   /**
@@ -27,92 +27,91 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
    * @param   context  The context in which to evaluate the expression.
    * @return           The result of evaluating the expression.
    */
-  public Obj evaluate(Expr expr, EvalContext context) {
+  public Obj evaluate(Expr expr, Scope scope) {
     if (expr == null) return null;
-    return expr.accept(this, context);
+    return expr.accept(this, scope);
   }
 
   @Override
-  public Obj visit(AssignExpr expr, EvalContext context) {
-    Obj value = evaluate(expr.getValue(), context);
+  public Obj visit(AssignExpr expr, Scope scope) {
+    Obj value = evaluate(expr.getValue(), scope);
 
     // Try to assign to a local variable.
-    if (context.getScope().assign(expr.getName(), value)) return value;
+    if (scope.assign(expr.getName(), value)) return value;
     
     // TODO(bob): Detect this statically.
-    throw mInterpreter.error("NoVariableError",
+    throw mContext.error("NoVariableError",
         "Could not find a variable named \"" + expr.getName() + "\".");
   }
 
   @Override
-  public Obj visit(BoolExpr expr, EvalContext context) {
-    return mInterpreter.createBool(expr.getValue());
+  public Obj visit(BoolExpr expr, Scope scope) {
+    return mContext.toObj(expr.getValue());
   }
 
   @Override
-  public Obj visit(BreakExpr expr, EvalContext context) {
+  public Obj visit(BreakExpr expr, Scope scope) {
     // Outside of a loop, "break" does nothing.
-    if (context.isInLoop()) {
+    if (mLoopDepth > 0) {
       throw new BreakException();
     }
-    return mInterpreter.nothing();
+    return mContext.nothing();
   }
   
   @Override
-  public Obj visit(CallExpr expr, EvalContext context) {
-    Multimethod multimethod = context.getScope().lookUpMultimethod(expr.getName());
+  public Obj visit(CallExpr expr, Scope scope) {
+    Multimethod multimethod = scope.lookUpMultimethod(expr.getName());
     if (multimethod == null) {
-      throw mInterpreter.error("NoMethodError",
+      throw mContext.error("NoMethodError",
           "Could not find a method named \"" + expr.getName() + "\".");
     }
 
     // Figure out the receiver.
     Obj receiver;
     if (expr.getReceiver() == null) {
-      receiver = mInterpreter.nothing();
+      receiver = mContext.nothing();
     } else {
-      receiver = evaluate(expr.getReceiver(), context);
+      receiver = evaluate(expr.getReceiver(), scope);
     }
     
     // If we're given a right-hand argument, combine it with the receiver.
     // If not, this is a getter-style multimethod.
     Obj arg;
     if (expr.getArg() != null) {
-      arg = mInterpreter.createRecord(
-          receiver, evaluate(expr.getArg(), context));
+      arg = mContext.toObj(receiver, evaluate(expr.getArg(), scope));
     } else {
       arg = receiver;
     }
 
-    return multimethod.invoke(mInterpreter, arg);
+    return multimethod.invoke(new Context(scope.getModule()), arg);
   }
   
   @Override
-  public Obj visit(ClassExpr expr, EvalContext context) {
+  public Obj visit(ClassExpr expr, Scope scope) {
     // Look up the parents.
     List<ClassObj> parents = new ArrayList<ClassObj>();
     for (String parentName : expr.getParents()) {
-      parents.add(context.getScope().lookUp(parentName).asClass());
+      parents.add(scope.lookUp(parentName).asClass());
     }
     
-    ClassObj classObj = mInterpreter.createClass(expr.getName(), parents,
-        expr.getFields(), context.getScope(), expr.getDoc());
+    ClassObj classObj = mContext.getInterpreter().createClass(expr.getName(),
+        parents, expr.getFields(), scope, expr.getDoc());
     
-    context.getScope().define(expr.getName(), classObj);
+    scope.define(expr.getName(), classObj);
 
     return classObj;
   }
 
   @Override
-  public Obj visit(FnExpr expr, EvalContext context) {
-    return mInterpreter.createFn(expr, context);
+  public Obj visit(FnExpr expr, Scope scope) {
+    return mContext.toFunction(expr, scope);
   }
 
   @Override
-  public Obj visit(ImportExpr expr, EvalContext context) {
+  public Obj visit(ImportExpr expr, Scope scope) {
     // TODO(bob): Eventually the schemes should be host-provided plug-ins.
     if (expr.getScheme() == null) {
-      Module module = mInterpreter.importModule(expr.getModule());
+      Module module = mContext.getInterpreter().importModule(expr.getModule());
       
       if (expr.getName() == null) {
         // Not a specific name, so import all names.
@@ -127,7 +126,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
           prefix = expr.getRename() + ".";
         }
         
-        context.getScope().importAll(mInterpreter, prefix, module);
+        scope.importAll(mContext.getInterpreter(), prefix, module);
         
         // TODO(bob): Need to import syntax extensions from imported module
         // into this one once EvalContext knows module.
@@ -146,7 +145,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
           rename = expr.getRename();
         }
         
-        context.getScope().importName(mInterpreter,
+        scope.importName(mContext.getInterpreter(),
             expr.getName(), rename, module);
       }
     } else if (expr.getScheme().equals("classfile")) {
@@ -154,135 +153,136 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
         ClassLoader classLoader = BuiltIns.class.getClassLoader();
         @SuppressWarnings("rawtypes")
         Class javaClass = classLoader.loadClass(expr.getModule());
-        BuiltIns.register(javaClass, context.getScope());
+        BuiltIns.register(javaClass, scope);
       } catch (ClassNotFoundException e) {
         // TODO(bob): Throw better error.
-        throw mInterpreter.error("Error", "Could not load classfile \"" +
+        throw mContext.error("Error", "Could not load classfile \"" +
             expr.getModule() + "\".");
       }
     }
     
-    return mInterpreter.nothing();
+    return mContext.nothing();
   }
 
   @Override
-  public Obj visit(IntExpr expr, EvalContext context) {
-    return mInterpreter.createInt(expr.getValue());
+  public Obj visit(IntExpr expr, Scope scope) {
+    return mContext.toObj(expr.getValue());
   }
 
   @Override
-  public Obj visit(ListExpr expr, EvalContext context) {
+  public Obj visit(ListExpr expr, Scope scope) {
     // Evaluate the elements.
     List<Obj> elements = new ArrayList<Obj>();
     for (Expr element : expr.getElements()) {
-      elements.add(evaluate(element, context));
+      elements.add(evaluate(element, scope));
     }
 
-    return mInterpreter.createList(elements);
+    return mContext.toList(elements);
   }
   
   @Override
-  public Obj visit(LoopExpr expr, EvalContext context) {
+  public Obj visit(LoopExpr expr, Scope scope) {
     try {
-      context = context.enterLoop();
+      mLoopDepth++;
 
       // Loop forever. A "break" expression will throw a BreakException to
       // escape this loop.
       while (true) {
         // Evaluate the body in its own scope.
-        context = context.pushScope();
+        scope = scope.push();
 
-        evaluate(expr.getBody(), context);
+        evaluate(expr.getBody(), scope);
       }
     } catch (BreakException ex) {
       // Nothing to do.
+    } finally {
+      mLoopDepth--;
     }
 
     // TODO(bob): It would be cool if loops could have "else" clauses and then
     // reliably return a value.
-    return mInterpreter.nothing();
+    return mContext.nothing();
   }
 
   @Override
-  public Obj visit(MatchExpr expr, EvalContext context) {
+  public Obj visit(MatchExpr expr, Scope scope) {
     // Push a new context so that a variable declared in the value expression
     // itself disappears after the match, i.e.:
     // match var i = 123
     // ...
     // end
     // i should be gone here
-    context = context.pushScope();
+    scope = scope.push();
     
-    Obj value = evaluate(expr.getValue(), context);
+    Obj value = evaluate(expr.getValue(), scope);
     
     // Try each pattern until we get a match.
-    Obj result = evaluateCases(value, expr.getCases(), context);
+    Obj result = evaluateCases(value, expr.getCases(), scope);
     if (result != null) return result;
     
     // If we got here, no patterns matched.
-    throw mInterpreter.error("NoMatchError", "Could not find a match for \"" +
-        mInterpreter.evaluateToString(value) + "\".");
+    throw mContext.error("NoMatchError", "Could not find a match for \"" +
+        mContext.getInterpreter().evaluateToString(value) + "\".");
   }
 
   @Override
-  public Obj visit(MethodExpr expr, EvalContext context) {
+  public Obj visit(MethodExpr expr, Scope scope) {
     Function method = new Function(
         Expr.fn(expr.getPosition(), expr.getDoc(),
             expr.getPattern(), expr.getBody()),
-        context.getScope());
+        scope);
     
-    context.getScope().define(expr.getName(), method);
+    scope.define(expr.getName(), method);
     
-    return mInterpreter.nothing();
+    return mContext.nothing();
   }
 
   @Override
-  public Obj visit(NameExpr expr, EvalContext context) {
-    Obj variable = context.getScope().lookUp(expr.getName());
+  public Obj visit(NameExpr expr, Scope scope) {
+    Obj variable = scope.lookUp(expr.getName());
     if (variable != null) return variable;
     
     // TODO(bob): Detect this statically.
-    throw mInterpreter.error("NoVariableError",
+    throw mContext.error("NoVariableError",
         "Could not find a variable named \"" + expr.getName() + "\".");
   }
 
   @Override
-  public Obj visit(NothingExpr expr, EvalContext context) {
-    return mInterpreter.nothing();
+  public Obj visit(NothingExpr expr, Scope scope) {
+    return mContext.nothing();
   }
 
   @Override
-  public Obj visit(QuoteExpr expr, EvalContext context) {
-    return JavaToMagpie.convertAndUnquote(
-        mInterpreter, expr.getBody(), context);
+  public Obj visit(QuoteExpr expr, Scope scope) {
+    return JavaToMagpie.convertAndUnquote(mContext, expr.getBody(), scope);
   }
 
   @Override
-  public Obj visit(RecordExpr expr, EvalContext context) {
+  public Obj visit(RecordExpr expr, Scope scope) {
     // Evaluate the fields.
     Map<String, Obj> fields = new HashMap<String, Obj>();
     for (Pair<String, Expr> entry : expr.getFields()) {
-      Obj value = evaluate(entry.getValue(), context);
+      Obj value = evaluate(entry.getValue(), scope);
       fields.put(entry.getKey(), value);
     }
 
-    return mInterpreter.createRecord(fields);
+    return mContext.toObj(fields);
   }
 
   @Override
-  public Obj visit(ReturnExpr expr, EvalContext context) {
-    Obj value = evaluate(expr.getValue(), context);
+  public Obj visit(ReturnExpr expr, Scope scope) {
+    Obj value = evaluate(expr.getValue(), scope);
     throw new ReturnException(value);
   }
 
   @Override
-  public Obj visit(ScopeExpr expr, EvalContext context) {
+  public Obj visit(ScopeExpr expr, Scope scope) {
     try {
-      context = context.pushScope();
-      return evaluate(expr.getBody(), context);
+      scope = scope.push();
+      return evaluate(expr.getBody(), scope);
     } catch (ErrorException err) {
       // See if we can catch it here.
-      Obj result = this.evaluateCases(err.getError(), expr.getCatches(), context);
+      Obj result = this.evaluateCases(err.getError(), expr.getCatches(), scope);
       if (result != null) return result;
 
       // Not caught here, so just keep unwinding.
@@ -291,58 +291,59 @@ public class ExprEvaluator implements ExprVisitor<Obj, EvalContext> {
   }
 
   @Override
-  public Obj visit(SequenceExpr expr, EvalContext context) {
+  public Obj visit(SequenceExpr expr, Scope scope) {
     // Evaluate all of the expressions and return the last.
     Obj result = null;
     for (Expr thisExpr : expr.getExpressions()) {
-      result = evaluate(thisExpr, context);
+      result = evaluate(thisExpr, scope);
     }
 
     return result;
   }
 
   @Override
-  public Obj visit(StringExpr expr, EvalContext context) {
-    return mInterpreter.createString(expr.getValue());
+  public Obj visit(StringExpr expr, Scope scope) {
+    return mContext.toObj(expr.getValue());
   }
 
   @Override
-  public Obj visit(ThrowExpr expr, EvalContext context) {
-    Obj value = evaluate(expr.getValue(), context);
+  public Obj visit(ThrowExpr expr, Scope scope) {
+    Obj value = evaluate(expr.getValue(), scope);
     throw new ErrorException(value);
   }
 
   @Override
-  public Obj visit(UnquoteExpr expr, EvalContext context) {
+  public Obj visit(UnquoteExpr expr, Scope scope) {
     throw new UnsupportedOperationException(
         "An unquoted expression cannot be directly evaluated.");
   }
 
   @Override
-  public Obj visit(VarExpr expr, EvalContext context) {
-    Obj value = evaluate(expr.getValue(), context);
+  public Obj visit(VarExpr expr, Scope scope) {
+    Obj value = evaluate(expr.getValue(), scope);
 
-    PatternBinder.bind(mInterpreter, expr.getPattern(), value, context);
+    PatternBinder.bind(mContext, expr.getPattern(), value, scope);
     return value;
   }
 
-  private Obj evaluateCases(Obj value, List<MatchCase> cases,
-      EvalContext context) {
+  private Obj evaluateCases(Obj value, List<MatchCase> cases, Scope scope) {
     if (cases == null) return null;
     
     for (MatchCase matchCase : cases) {
       Pattern pattern = matchCase.getPattern();
-      if (PatternTester.test(mInterpreter, pattern, value, context)) {
+      if (PatternTester.test(mContext, pattern, value, scope)) {
         // Matched. Bind variables and evaluate the body.
-        context = context.pushScope();
-        PatternBinder.bind(mInterpreter, pattern, value, context);
+        scope = scope.push();
+        PatternBinder.bind(mContext, pattern, value,
+            scope);
         
-        return evaluate(matchCase.getBody(), context);
+        return evaluate(matchCase.getBody(), scope);
       }
     }
     
     return null;
   }
 
-  private final Interpreter mInterpreter;
+  private final Context mContext;
+  private int mLoopDepth = 0;
 }
