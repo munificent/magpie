@@ -2,9 +2,7 @@
 import .specify
 
 // The individual test cases.
-startTests()
-
 import .language
 import .core
 
-endTests()
+runTests()

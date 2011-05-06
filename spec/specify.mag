@@ -6,25 +6,28 @@ var _totalFailures = 0
 var _currentTestSuite = nothing
 var _startTimeMs = 0
 
-def startTests()
+var _specs = []
+
+def runTests()
     _totalTests = 0
     _totalFailures = 0
     _currentTestSuite = nothing
     print("Executing specification...")
     _startTimeMs = currentTime()
-end
 
-def endTests()
+    for description, block = _specs do
+        _currentTestSuite = _TestSuite new(_name: description)
+        block call(_currentTestSuite)
+    end
+
     var endTimeMs = currentTime()
     print()
     print("Passed " + (_totalTests - _totalFailures) + " out of " +
         _totalTests + " tests in " + (endTimeMs - _startTimeMs) + "ms.")
 end
 
-// TODO(bob): Need function types.
-def specify(description is String, block)
-    _currentTestSuite = _TestSuite new(_name: description)
-    block call(_currentTestSuite)
+def specify(spec (description is String, block is Function))
+    _specs add(spec)
 end
 
 defclass _TestSuite
