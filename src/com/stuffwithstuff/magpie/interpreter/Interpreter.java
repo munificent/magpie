@@ -265,7 +265,7 @@ public class Interpreter {
     try {
       // Copy the base stuff in first.
       if (module != mBaseModule) {
-        module.getScope().importAll(this, "", mBaseModule);
+        module.getScope().importAll(new Context(module), "", mBaseModule);
         module.importSyntax(mBaseModule);
       }
       

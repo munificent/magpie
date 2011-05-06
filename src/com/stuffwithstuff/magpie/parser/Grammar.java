@@ -35,18 +35,6 @@ public class Grammar {
     infix(TokenType.EQUALS,       new EqualsParser());
     infix(TokenType.LEFT_BRACKET, new BracketInfixParser());
 
-    infix("*",  Precedence.PRODUCT);
-    infix("/",  Precedence.PRODUCT);
-    infix("%",  Precedence.PRODUCT);
-    infix("+",  Precedence.TERM);
-    infix("-",  Precedence.TERM);
-    infix("<",  Precedence.COMPARISON);
-    infix(">",  Precedence.COMPARISON);
-    infix("<=", Precedence.COMPARISON);
-    infix(">=", Precedence.COMPARISON);
-    infix("==", Precedence.ASSIGNMENT);
-    infix("!=", Precedence.ASSIGNMENT);
-    
     reserve("-> case catch else end then");
     reserve("break def defclass do fn for if import is match nothing return throw val var while");
   }
@@ -126,10 +114,6 @@ public class Grammar {
   
   private void infix(String keyword, InfixParser parser) {
     mInfixParsers.define(keyword, parser);
-  }
-
-  private void infix(String keyword, int stickiness) {
-    infix(keyword, new InfixOperatorParser(stickiness, false));
   }
   
   private void reserve(String wordString) {
