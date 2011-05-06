@@ -126,7 +126,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
           prefix = expr.getRename() + ".";
         }
         
-        scope.importAll(mContext.getInterpreter(), prefix, module);
+        scope.importAll(mContext, prefix, module);
         
         // TODO(bob): Need to import syntax extensions from imported module
         // into this one once EvalContext knows module.
@@ -145,8 +145,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
           rename = expr.getRename();
         }
         
-        scope.importName(mContext.getInterpreter(),
-            expr.getName(), rename, module);
+        scope.importName(mContext, expr.getName(), rename, module);
       }
     } else if (expr.getScheme().equals("classfile")) {
       try {

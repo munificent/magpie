@@ -148,7 +148,7 @@ public class JavaToMagpie {
   private Obj construct(String className, Object... args) {
     ClassObj classObj = mContext.getInterpreter().getSyntaxModule().getExportedVariables()
         .get(className).asClass();
-    Obj object = mContext.getInterpreter().instantiate(classObj, null);
+    Obj object = mContext.instantiate(classObj, null);
 
     // TODO(bob): Hackish. Goes around normal object construction process.
     for (int i = 0; i < args.length; i += 2) {
@@ -346,19 +346,19 @@ public class JavaToMagpie {
         
         // If the unquoted value is a primitive object, automatically promote
         // it to a corresponding literal.
-        if (value.getClassObj() == mContext.getInterpreter().getBoolClass()) {
+        if (mContext.isBool(value)) {
           value = construct("BoolExpression",
               "position", expr.getPosition(),
               "value",    value);
-        } else if (value.getClassObj() == mContext.getInterpreter().getIntClass()) {
+        } else if (mContext.isInt(value)) {
           value = construct("IntExpression",
               "position", expr.getPosition(),
               "value",    value);
-        } else if (value.getClassObj() == mContext.getInterpreter().getStringClass()) {
+        } else if (mContext.isString(value)) {
           value = construct("StringExpression",
               "position", expr.getPosition(),
               "value",    value);
-        } else if (value.getClassObj() == mContext.getInterpreter().getNothingClass()) {
+        } else if (mContext.isNothing(value)) {
           value = construct("NothingExpression",
               "position", expr.getPosition());
         }

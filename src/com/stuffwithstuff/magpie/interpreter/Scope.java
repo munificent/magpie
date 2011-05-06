@@ -46,31 +46,31 @@ public class Scope {
     return mModule;
   }
   
-  public void importAll(Interpreter interpreter, String prefix, Module module) {
+  public void importAll(Context context, String prefix, Module module) {
     // Copy the variables.
     for (Entry<String, Obj> entry : module.getExportedVariables().entrySet()) {
-      importVariable(interpreter, prefix + entry.getKey(), entry.getValue(),
+      importVariable(context, prefix + entry.getKey(), entry.getValue(),
           module);
     }
     
     // Import the multimethods.
     for (Entry<String, Multimethod> entry : module.getExportedMultimethods().entrySet()) {
       String name = prefix + entry.getKey();
-      importMultimethod(interpreter, name, entry.getValue(), module);
+      importMultimethod(context, name, entry.getValue(), module);
     }
   }
 
-  public void importName(Interpreter interpreter, String name, String rename,
+  public void importName(Context context, String name, String rename,
       Module module) {
     
     Obj variable = module.getExportedVariables().get(name);
     if (variable != null) {
-      importVariable(interpreter, rename, variable, module);
+      importVariable(context, rename, variable, module);
     }
     
     Multimethod multimethod = module.getExportedMultimethods().get(name);
     if (multimethod != null) {
-      importMultimethod(interpreter, rename, multimethod, module);
+      importMultimethod(context, rename, multimethod, module);
     }
   }
   
@@ -211,10 +211,10 @@ public class Scope {
     return builder.toString();
   }
   
-  private void importVariable(Interpreter interpreter, String name, Obj value,
+  private void importVariable(Context context, String name, Obj value,
       Module module) {
     if (!mAllowRedefinition && (get(name) != null)) {
-      interpreter.error(Name.REDEFINITION_ERROR,
+      context.error(Name.REDEFINITION_ERROR,
           "Can not import variable \"" + name + "\" from " +
           module.getName() + " because there is already a variable with " +
           "that name defined.");
@@ -223,13 +223,13 @@ public class Scope {
     mVariables.put(name, value);
   }
   
-  private void importMultimethod(Interpreter interpreter, String name,
+  private void importMultimethod(Context context, String name,
       Multimethod multimethod, Module module) {
     if (mAllowRedefinition) return;
 
     Multimethod existing = mMultimethods.get(name);
     if ((existing != null) && (existing != multimethod)) {
-      interpreter.error(Name.REDEFINITION_ERROR,
+      context.error(Name.REDEFINITION_ERROR,
           "Can not import multimethod \"" + name + "\" from " +
           module.getName() + " because there is already a multimethod with " +
           "that name defined.");

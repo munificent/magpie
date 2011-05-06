@@ -30,8 +30,28 @@ public class Context {
     return mModule.getInterpreter().evaluate(expression, mModule, scope);
   }
   
+  public boolean isBool(Obj object) {
+    return getInterpreter().getBoolClass() == object.getClassObj();
+  }
+  
+  public boolean isInt(Obj object) {
+    return getInterpreter().getIntClass() == object.getClassObj();
+  }
+  
+  public boolean isNothing(Obj object) {
+    return getInterpreter().nothing() == object;
+  }
+  
+  public boolean isString(Obj object) {
+    return getInterpreter().getStringClass() == object.getClassObj();
+  }
+  
   public boolean objectsEqual(Obj a, Obj b) {
     return getInterpreter().objectsEqual(a, b);
+  }
+  
+  public Obj instantiate(ClassObj classObj, Object primitiveValue) {
+    return getInterpreter().instantiate(classObj, primitiveValue);
   }
   
   public Obj nothing() {

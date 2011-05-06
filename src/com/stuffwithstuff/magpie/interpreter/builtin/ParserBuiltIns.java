@@ -48,8 +48,8 @@ public class ParserBuiltIns {
     public Obj invoke(Context context, Obj arg) {
       MagpieParser parser = (MagpieParser) arg.getField(0).getValue();
       
-      TokenType tokenType = MagpieToJava.convertTokenType(context.getInterpreter(),
-          arg.getField(1));
+      TokenType tokenType = MagpieToJava.convertTokenType(
+          context, arg.getField(1));
       return context.toObj(parser.match(tokenType));
     }
   }
@@ -85,7 +85,7 @@ public class ParserBuiltIns {
       Obj expr = mContext.getInterpreter().invoke(mParser, "call", arg);
       
       // Marshall it back to Java format.
-      return MagpieToJava.convertExpr(mContext.getInterpreter(), expr);
+      return MagpieToJava.convertExpr(mContext, expr);
     }
     
     private final Context mContext;
@@ -103,7 +103,7 @@ public class ParserBuiltIns {
     public Expr parse(MagpieParser parser, Expr left, Token token) {
       // Wrap the Java parser in a Magpie one.
       ClassObj parserClass = mContext.getInterpreter().getSyntaxModule().getExportedVariables().get("Parser").asClass();
-      Obj parserObj = mContext.getInterpreter().instantiate(parserClass, parser);
+      Obj parserObj = mContext.instantiate(parserClass, parser);
       
       Obj tokenObj = JavaToMagpie.convert(mContext, token);
       Obj leftObj = JavaToMagpie.convert(mContext, left);
@@ -113,7 +113,7 @@ public class ParserBuiltIns {
       Obj expr = mContext.getInterpreter().invoke(mParser, "call", arg);
        
       // Marshall it back to Java format.
-      return MagpieToJava.convertExpr(mContext.getInterpreter(), expr);
+      return MagpieToJava.convertExpr(mContext, expr);
     }
     
     @Override

@@ -19,28 +19,28 @@ public class MagpieToJava {
   /**
    * Converts a Magpie expression object into a corresponding Java Expr.
    */
-  public static Expr convertExpr(Interpreter interpreter, Obj expr) {
-    MagpieToJava converter = new MagpieToJava(interpreter);
+  public static Expr convertExpr(Context context, Obj expr) {
+    MagpieToJava converter = new MagpieToJava(context);
     return converter.convertExpr(expr);
   }
   
-  public static Pattern convertPattern(Interpreter interpreter, Obj pattern) {
-    MagpieToJava converter = new MagpieToJava(interpreter);
+  public static Pattern convertPattern(Context context, Obj pattern) {
+    MagpieToJava converter = new MagpieToJava(context);
     return converter.convertPattern(pattern);
   }
   
-  public static Token convertToken(Interpreter interpreter, Obj token) {
-    MagpieToJava converter = new MagpieToJava(interpreter);
+  public static Token convertToken(Context context, Obj token) {
+    MagpieToJava converter = new MagpieToJava(context);
     return converter.convertToken(token);
   }
   
-  public static TokenType convertTokenType(Interpreter interpreter, Obj token) {
-    MagpieToJava converter = new MagpieToJava(interpreter);
+  public static TokenType convertTokenType(Context context, Obj token) {
+    MagpieToJava converter = new MagpieToJava(context);
     return converter.convertTokenType(token);
   }
 
-  private MagpieToJava(Interpreter interpreter) {
-    mInterpreter = interpreter;
+  private MagpieToJava(Context context) {
+    mContext = context;
   }
   /**
    * Converts a Magpie expression object into a corresponding Java Expr.
@@ -48,7 +48,7 @@ public class MagpieToJava {
   private Expr convertExpr(Obj expr) {
     Expect.notNull(expr);
     
-    if (expr == mInterpreter.nothing()) return null;
+    if (mContext.isNothing(expr)) return null;
     
     ClassObj exprClass = expr.getClassObj();
     if (exprClass == getClass("AssignExpression")) {
@@ -191,7 +191,7 @@ public class MagpieToJava {
   }
 
   private Pattern convertPattern(Obj pattern) {
-    if (pattern == mInterpreter.nothing()) return null;
+    if (mContext.isNothing(pattern)) return null;
     
     ClassObj patternClass = pattern.getClassObj();
 
@@ -289,9 +289,9 @@ public class MagpieToJava {
   }
   
   private ClassObj getClass(String name) {
-    return mInterpreter.getSyntaxModule().getExportedVariables()
+    return mContext.getInterpreter().getSyntaxModule().getExportedVariables()
         .get(name).asClass();
   }
   
-  private final Interpreter mInterpreter;
+  private final Context mContext;
 }
