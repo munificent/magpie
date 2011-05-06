@@ -1,6 +1,6 @@
 ^title Functions
 
-When you want to bundle up a reusable chunk of code in Magpie, you'll usually use a [method](multimethods.html). But sometimes you want a chunk of code that you can pass around like a value. For that, you'll use a *functions*. Functions are first-class objects that encapsulate an executable chunk of code.
+When you want to bundle up a reusable chunk of code in Magpie, you'll usually use a [method](multimethods.html). But sometimes you want a chunk of code that you can pass around like a value. For that, you'll use a *functions*. Functions are first-class objects that encapsulate an executable expression.
 
 ## Creating Functions
 
@@ -14,7 +14,7 @@ This creates an anonymous function that prints `"I'm a fn!"` when called. If a f
     :::magpie
     fn(name, age) print("Hi, " + name + ". You are " + age + " years old.")
 
-The body of a function can be a single expression as you've seen, but can also be a block.
+The body of a function can be a single expression as we've seen, but can also be a block.
 
     :::magpie
     fn(i)

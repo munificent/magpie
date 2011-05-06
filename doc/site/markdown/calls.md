@@ -92,3 +92,5 @@ This expression will be parsed like:
 
     :::magpie
     ((addressBook names) find("Waldo")) email()
+
+**TODO: `with` block arguments**
