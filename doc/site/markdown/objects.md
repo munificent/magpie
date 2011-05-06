@@ -8,11 +8,8 @@ Every object in Magpie is an instance of some [class](classes.html). Magpie has
 several built-in classes that deserve special attention and that you'll use to
 as the building blocks for your own classes. They are:
 
-1. [Booleans](objects/booleans.html)
-1. [Numbers](objects/numbers.html)
-1. [Strings](objects/strings.html)
-1. [Nothing](objects/nothing.html)
-1. [Tuples](objects/tuples.html)
-1. [Records](objects/records.html)
-1. [Functions](objects/functions.html)
-1. [Quotations](objects/quotations.html)
+1. [Primitives](primitives.html)
+1. [Records](records.html)
+1. [Lists](lists.html)
+1. [Functions](functions.html)
+1. [Quotations](quotations.html)

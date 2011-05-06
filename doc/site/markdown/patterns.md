@@ -1,6 +1,6 @@
 ^title Patterns
 
-If you've seen a few lines of Magpie code, you've likely seen patterns already. They are used everywhere in the language: `match` expressions use them, but so do [variable declarations](expressions/variables.html), [method parameters](multimethods.html), and `catch` clauses for handling exceptions.
+If you've seen a few lines of Magpie code, you've likely seen patterns already. They are used everywhere in the language: `match` expressions use them, but so do [variable declarations](variables.html), [method parameters](multimethods.html), and `catch` clauses for handling exceptions.
 
 Given an object, a pattern does two things: First, it *tests* if the object *matches* that pattern. Then, if and only if it does, it may *bind new variables* to parts of the object. By performing those operations together, patterns can pull data out of an object but only when the object correctly has the data you're asking for.
 
@@ -50,7 +50,7 @@ This pattern will match if the value is a string. If it is, then it will bind th
 
 ### Record Patterns
 
-As you can imagine, these are the dual to [record expressions](expressions/records.html). A record pattern contains a series of fields. Each field may have a name, and must have a pattern. When it is tested, it looks for fields in the given value to match all of the pattern's fields. The entire record pattern matches if all of its field patterns match.
+As you can imagine, these are the dual to [record expressions](records.html). A record pattern contains a series of fields. Each field may have a name, and must have a pattern. When it is tested, it looks for fields in the given value to match all of the pattern's fields. The entire record pattern matches if all of its field patterns match.
 
     :::magpie
     x: _, y: _

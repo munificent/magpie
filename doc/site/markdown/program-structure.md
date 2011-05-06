@@ -15,9 +15,13 @@ Comments are as in C, C++, Java, etc.:
     /* Block comments
        can span multiple lines. */
 
+## Doc Comments
+
+**TODO**
+
 ## Names
 
-Magpie is more ended when it comes to names than most other languages. Regular identifiers, used for things like [variables](expressions/variables.html) and [messages](expressions/messages.html) can consist of letters, numbers, underscores, and even many punctuation characters. These are all valid names:
+Magpie is more open-ended when it comes to names than most other languages. Regular identifiers, used for things like [variables](variables.html) and [methods](multimethods.html) can consist of letters, numbers, underscores, and even many punctuation characters. These are all valid names:
 
     :::magpie
     hi
@@ -26,8 +30,9 @@ Magpie is more ended when it comes to names than most other languages. Regular i
     numb3r5_r_0k_2
     even_!$%_this_^&*_is_<>=_valid
     $%^*
+    a.b.c
 
-### Whitespace
+## Whitespace
 
 This flexibility has a side effect that might trip you up at first (but I
 hope only at first): whitespace must be used to separate names, operators, and
@@ -83,7 +88,7 @@ If you specifically want to ignore a newline where it otherwise *would* separate
 Magpie's syntax has fewer distinct levels of precedence than most languages. Many constructs start with a unique keyword (i.e. `var`, `class`, `if`, etc.) so don't need special precedence rules. For the core expression syntax, the precendence levels (from loosest to tightest) are:
 
 1. Assigment (`=`)
-2. Tuples and records (`,`)
+2. Records (`,`)
 3. Conjunctions (`and`, `or`)
 4. Operators (`+`, `-`, `?$!`, etc.)
 5. Messages (`print(foo)`, `list count`, etc.)

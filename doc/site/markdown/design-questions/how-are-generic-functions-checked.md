@@ -2,6 +2,7 @@
 
 Give a program like:
 
+    :::magpie
     var foo[A](arg A)
         arg bar
     end
@@ -31,6 +32,7 @@ one with no constraint would default to `Object` (or `Dynamic`?), meaning the
 above code won't check because `Object` doesn't have a method `bar`. To fix it,
 you'd have to do:
 
+    :::magpie
     var foo[A Baz](arg A)
         arg bar
     end
@@ -61,6 +63,7 @@ To check this, we just need to:
 
 The last question, inferring static type arguments. That's going to get tricky. Consider a function like:
 
+    :::magpie
     var foo[A, B, C](a List[A], b B | C, c (A, (B, C)))
 
 We need to answer two questions:
@@ -69,6 +72,7 @@ We need to answer two questions:
 
 The first one we can do statically independent of the actual type semantics by just walking the parameter type tree. The second one is hard because it's another core capability every type-like object will need to support. So the question is, given:
 
+    :::magpie
     var foo[A, B](a Dict[B, A])
     foo(Dict[String, Int] new)
 
@@ -76,14 +80,17 @@ Is there a way we can ask `Dict` to help us figure out what `A` and `B` are give
 
 Here's one idea. We'll create a special tag type that just represents a placeholder for a type parameter, so that we can treat "A" and "B" as fake types. Given those, we can evaluate:
 
+    :::magpie
     Dict[B, A] // which desugars to Dict call[B, A]
 
 And get a type object back (an instantiated `Dict`) with our special type tags embedded in it. Then we evaluate `Dict[String, Int]`, the actual argument type. Now we've got two objects we can line up, so we do:
 
+    :::magpie
     Dict[B, A] inferTypesFrom(typeMap, Dict[String, Int])
 
 That will take some sort of map that maps parameter names like "A" to their inferred type. Every type will be expected to implement this. An implementation would look something like:
 
+    :::magpie
     def Dict[K, V] inferTypesFrom(typeMap, other IType)
         let dict = other as(Dict) then
             let keyType = K as(TypeParam) then
@@ -102,6 +109,7 @@ That will take some sort of map that maps parameter names like "A" to their infe
 Note the recursive calls to `inferTypesFrom`. Those handle nested types like
 `Dict[(Int, String), List[String]]`. The `typeMap` will have to handle collisions where a type parameter appears more than once and is bound to conflicting types like:
 
+    :::magpie
     var foo[A](a A, b A)
     foo(1, true)
 

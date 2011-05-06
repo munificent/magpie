@@ -62,7 +62,7 @@ Errors are caught using a catch clause, which is `catch` followed by a [pattern]
         false // If we got here, an error occurred.
     end
 
-You can see here that unlike the exception-handling syntax in most languages, Magpie does not have an explicit `try` syntax. Instead, *any* [block](expressions/blocks.html) is implicitly a "try" block and may have catch clauses.
+You can see here that unlike the exception-handling syntax in most languages, Magpie does not have an explicit `try` syntax. Instead, *any* [block](blocks.html) is implicitly a "try" block and may have catch clauses.
 
 In `canDivide`, the block is the method body itself, but any block may have catch clauses. For example:
 

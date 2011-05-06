@@ -2,6 +2,7 @@
 
 Consider:
 
+    :::magpie
     module a
         def double(i Int) i * 2
     end

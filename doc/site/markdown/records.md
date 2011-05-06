@@ -1,5 +1,7 @@
 ^title Records
 
+**TODO: This is out of date now that tuples and records are unified.**
+
 A record is similar to a [tuple](tuples.html) but where the fields are
 identified by name instead of number. Another way to look at them is as
 anonymous structures. The syntax is:

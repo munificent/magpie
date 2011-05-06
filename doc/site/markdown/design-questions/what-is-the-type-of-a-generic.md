@@ -14,6 +14,7 @@ That should also simplify evaluation. We're essentially currying the static argu
 
 For example:
 
+    :::magpie
     var printAny[T](arg T ->) print(arg)
     var t1 = printAny type
     // t1 will be GenericFunctionType("T", (fn() T), (fn() Nothing))
@@ -28,17 +29,20 @@ For example:
 
 What we need are static function literals. They are just like regular function literals, except that they are *evaluated* at check-time instead of being checked. Its runtime semantics are identical to a regular function:
 
+    :::magpie
     var a = staticfn(T) (fn(t T) print(t))
     var b = a[Int] // b = fn(t Int) print(t)
     b(123) // prints 123
 
 The only difference is how the checker handles them. When a static function is checked, the checker does not evaluate the type of its body. (It can't: the body's type may have annotations which refer to the static parameters.) Instead, it stores the entire body as an expression, and the type of the static function literal becomes a special "StaticFunction" type that contains the static parameter names and the body.
 
+    :::magpie
     var a = staticfn(T) (fn(t T) print(t))
     // a's type is StaticFn("T", (fn() fn(t T) print(t) ))
 
 The type-checker then handles instantiating a static function "specially". Given:
 
+    :::magpie
     var b = a[Int] // b = fn(t Int) print(t)
     
 The type-checker will:

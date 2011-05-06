@@ -25,6 +25,7 @@ function can decide if any dispatch based on the arguments is appropriate. For
 example, if we wanted to keep the current behavior for a certain operator, it
 would be as easy as:
 
+    :::magpie
     def ?!(left, right)
         left op?!(right)
     end
@@ -32,12 +33,14 @@ would be as easy as:
 But if they *don't* want that behavior (which they actually don't), it can do
 whatever it wants. For example:
 
+    :::magpie
     def !=(left, right)
         (left == right) not
     end
 
 Now we never have to mixin a `!=` operator. And:
 
+    :::magpie
     def ++(left, right)
         concatenate(left string, right string)
     end

@@ -13,10 +13,12 @@ These are different from just an expression evaluated at runtime on objects that
 
 A: *Yes:* type arguments to generic methods. They need to be evaluated at type-check time so that they can statically affect the parameter and return types of the method. Passing the type as a regular value parameter would work at runtime, but doesn't work at type-check time:
 
+    :::magpie
     var makeList(elementType IType -> List(???))
 
 So, at a minimum, we'll need some syntax for passing type arguments to a method that is distinct from passing value arguments. One option:
 
+    :::magpie
     foo bar[typeArg](valueArg)
 
 The type-checker will process that like:
@@ -49,6 +51,7 @@ Generic methods should cover constructing generic types:
 A: *No.* Because we want to be able to access the type argument at runtime like
 you can in C#, the type argument will have a runtime effect. For example:
    
+    :::magpie
     var makeList[E](-> List[E])
         print("making a list of " + E)
         /// ...
@@ -65,6 +68,7 @@ arguments" and the latter "dynamic arguments".
 
 A: *Make them functors:*
 
+    :::magpie
     [1, 2, 3]    // becomes: Array of(1, 2, 3)
     array[1]     // becomes: array(1)
     array[1] = 2 // becomes: array(1) = 2

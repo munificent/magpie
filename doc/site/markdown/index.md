@@ -1,5 +1,7 @@
 ^title Welcome
 
+**TODO: This is all out of date now that multimethods are in.**
+
 Thanks for coming. Let's get started. Magpie is fledgling programming language. If you like buzzwords, it is [object-oriented](http://en.wikipedia.org/wiki/Object-oriented_programming), [optionally-typed](http://lambda-the-ultimate.org/node/1311), and runs on the [JVM](http://en.wikipedia.org/wiki/Java_Virtual_Machine).
 
 It looks a bit like this:

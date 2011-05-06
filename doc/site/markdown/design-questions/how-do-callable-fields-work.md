@@ -5,6 +5,7 @@ and a method that doesn't take an argument but returns a callable object?
 
 The scenario is this:
 
+    :::magpie
     class Foo
         this() this items = Array of(123)
         bar() items(123)

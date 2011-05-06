@@ -4,7 +4,7 @@
 
 Magpie is a class-based language. That means everything you can stick in a
 variable will be an *object* and every object is an instance of some *class*.
-Even primitive types like [numbers](objects/numbers.html) and [booleans](objects/booleans.html) are full-featured objects. Even [nothing](objects/nothing.html) is something, strictly speaking.
+Even [primitive types](primitives.html) like numbers and booleans are full-featured objects.
 
 Objects exist to *store data*, package it together, and let you pass it around.
 Objects also have *identity*&mdash; you can tell two objects apart even if they
@@ -25,7 +25,7 @@ share.
 
 ## Classes and Metaclasses
 
-Just about everything in Magpie is an object, and that includes classes. Classes are first-class objects that you can put into variables, pass around, and send messages. Much like Ruby or Smalltalk, you [construct](classes/constructors.html) new objects simply by sending a `new` message to the appropriate class.
+Just about everything in Magpie is an object, and that includes classes. Classes are first-class objects that you can put into variables, pass around, and send messages. Much like Ruby or Smalltalk, you construct new objects simply by sending a `new` message to the appropriate class.
 
 This raises the question, "What's the class of a class object?" The answer is a *metaclass*. Each class object (for example, `Int`, the class of integers) is an instance of a metaclass (in this case `IntClass`). Each metaclass will only have one instance: the class that it describes. When you send a message to a class, like `Int parse("123")`, that method is defined in the class's metaclass.
 

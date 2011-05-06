@@ -79,6 +79,7 @@ Is that a method that takes a dynamic argument and returns a value of type "b", 
 
 If there are keywords for the other types of members, we could infer no keyword at all to mean method (since methods are likely the most common member). That would make things more terse. The downside is that it looks less consistent. Consider:
 
+    :::magpie
     interface Type
         canAssignFrom(other Type -> Bool)
         getMemberType(name String -> Type | Nothing)
@@ -91,6 +92,7 @@ If there are keywords for the other types of members, we could infer no keyword 
 
 The getters look really out of place there. So, for now, we'll try keywords for everything and see how it goes. As a nice bonus, this means that we can support calling arbitrary methods inside a class body, since they are not ambiguous with method declaration. So we can make things like this work:
 
+    :::magpie
     class Foo
         mixin(Bar) // call a method on Foo
     end

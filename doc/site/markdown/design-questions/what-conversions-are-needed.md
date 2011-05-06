@@ -16,10 +16,12 @@ expressions that are evaluated at type-check time. That, unfortunately, means we
 *can't* make casts just be methods on types, because the type-checker would have
 a very hard time being smart enough to understand that. Consider:
 
+    :::magpie
     var a = Foo cast(bar)
 
 The intent here is that a will hold a value `bar`, statically typed to be `Foo`. We can do this by simply defining the return type of `Foo cast()` to be `Foo`. That's easy. Now what about this:
 
+    :::magpie
     var a = (Foo | Bar) cast(bar)
 
 The type-checker will look at `Foo`, and find its `|` method. From there it will get the return type of that and look up the `cast` method on that type. For this to work correctly then, the static type of `Foo |()` would need to evaluate the argument *value* passed to it. No dice.
@@ -38,17 +40,20 @@ type (which is necessary to address another issue), it may be important to have
 a variable's type be a supertype of what's directly inferred from its
 initializer. For example:
 
+    :::magpie
     var a = 123
     a = "hi" // error
 
 But if we could widen `a`'s type at the point of initialization to allow
 `String`s, that would be fine:
 
+    :::magpie
     var a = 123 upcast[Int | String]
     a = "hi" // ok now, no type change
 
 If widening variable types is the only use case for upcasts, we could consider rolling this into variable declaration syntax:
 
+    :::magpie
     var a Int | String = 123
 
 There is at least one other use case, though: field initializers. For now, let's leave off any special syntax since this should hopefully not be needed frequently anyway.
@@ -59,6 +64,7 @@ In the implementation of certain low-level type-related methods, or in other wei
 
 The syntax for this should highlight its unsafety. Something like:
 
+    :::magpie
     var a = foo unsafeCast![Bar]
 
 ### 3. An asserted downcast
@@ -67,6 +73,7 @@ This is the common case where you're downcasting an object and you're quite cert
 
 The desired behavior is "check the type and if it isn't what I expect, blow up". More specifically, it will likely throw an exception. This is what doing a cast in a C# or Java does. In Magpie:
 
+    :::magpie
     var a = someObj cast[Foo | Bar]
 
 ### 4. A potential downcast
@@ -77,6 +84,7 @@ specifically, it will return a value whose type is the desired type or
 `Nothing`. At runtime, it will do the type test and return the original value on
 success and nothing on failure. This plays nicely with `let`:
 
+    :::magpie
     let b = a as[Foo] then
         ...
     end
@@ -87,5 +95,6 @@ There's one other use case I've thought of. In situations like mocking or testin
 
 For mocking, it would be nice to have looser structural compatibility. This basically lets you duck type any type and takes advantage of Magpie's dynamic core. We'll call this "masquerading". An object of one concrete type can masquerade as another unrelated type as long as its methods are compatible. It looks like:
 
+    :::magpie
     var a = someObj masqueradeAs[Foo] // returns Foo | Nothing
     var b = someObj masqueradeCast[Foo] // returns Foo

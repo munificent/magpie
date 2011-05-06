@@ -23,7 +23,7 @@ Once a variable has been defined, it can be accessed by name as you would expect
 
 ## Patterns
 
-In our previous examples, the part between `var` and the `=` has always been a simple name, but what you're seeing there is actually a [pattern](../patterns.html). That means any pattern is allowed in a declaration. A simple case is what other languages call "multiple assignment":
+In our previous examples, the part between `var` and the `=` has always been a simple name, but what you're seeing there is actually a [pattern](patterns.html). That means any pattern is allowed in a declaration. A simple case is what other languages call "multiple assignment":
 
     :::magpie
     var x, y = 1, 2

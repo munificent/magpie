@@ -1,6 +1,6 @@
 ^title Calls
 
-Most of the expressions you'll write in Magpie will be *calls*. A call invokes a [multimethod](../multimethods.html) by name, passing in the provided argument. Method calls may have one of three different "fixities" in Magpie, which means the name of the method may appear before, after, or in the middle of the argument.
+Most of the expressions you'll write in Magpie will be *calls*. A call invokes a [multimethod](multimethods.html) by name, passing in the provided argument. Method calls may have one of three different "fixities" in Magpie, which means the name of the method may appear before, after, or in the middle of the argument.
 
 It's important to note that the fixity distinction is purely syntactic. Semantically, all method calls are just calls that take a single argument. Magpie is flexible here is so that you can define methods that read most clearly when called.
 
@@ -40,7 +40,7 @@ This invokes the `count` method with `"a string"` as the lone argument. Method c
 
 Note that in this case, the argument is just `"a string"` while a prefix call like `count("a string")` would have the argument `(nothing, "a string")`. Prepending `nothing` for postfix calls makes it possible for a multimethod to distinguish between a prefix and postfix method with the same name.
 
-A call expression may *not* omit *both* the left- and right-hand arguments. A name by itself is a [name expression](names.html). This lets Magpie statically (i.e. just from parsing) tell if a name is used to look up a variable or to call a method.
+A call expression may *not* omit *both* the left- and right-hand arguments. A name by itself is a [name expression](variables.html). This lets Magpie statically (i.e. just from parsing) tell if a name is used to look up a variable or to call a method.
 
 ## Implicit Receivers and `this`
 
@@ -67,3 +67,4 @@ This expression will be parsed like:
     :::magpie
     ((addressBook names) find("Waldo")) email()
 
+<p class="future">Need to document indexer calls here.</p>

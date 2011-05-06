@@ -14,6 +14,7 @@ method to a class. The conventional OOP style is:
 To add a method to an existing class, just replace `class` with `extend`. The
 other option is Go style, where methods are just declared freestanding, like:
 
+    :::magpie
     def SomeClass someMethod(arg Int ->)
         // ...
     end
@@ -36,6 +37,7 @@ other option is Go style, where methods are just declared freestanding, like:
 
 Answer: **There are advantages both ways.** If you're adding a lot of methods to one class, then being able to do that in one block saves a lot of redundant typing, especially with long class names or generic classes:
 
+    :::magpie
     def AbstractDictionary[Key, Value] blah...
     def AbstractDictionary[Key, Value] blah...
     def AbstractDictionary[Key, Value] blah...
@@ -43,6 +45,7 @@ Answer: **There are advantages both ways.** If you're adding a lot of methods to
 
 On the other hand, if you're adding a bunch of methods to different classes (i.e. avoiding the visitor pattern), the blocks are tedious:
 
+    :::magpie
     extend AddExpr
         evaluate(-> Int) left + right
     end
