@@ -2,7 +2,7 @@
 
 If you've seen a few lines of Magpie code, you've likely seen patterns already. They are used everywhere in the language: `match` expressions use them, but so do [variable declarations](variables.html), [method parameters](multimethods.html), and `catch` clauses for handling exceptions.
 
-Given an object, a pattern does two things: First, it *tests* if the object *matches* that pattern. Then, if and only if it does, it may *bind new variables* to parts of the object. By performing those operations together, patterns can pull data out of an object but only when the object correctly has the data you're asking for.
+Patterns are the foundation that control flow and variable binding are built on in Magpie. Given an object, a pattern does two things: First, it *tests* if the object *matches* that pattern. Then, if and only if it does, it may *bind new variables* to parts of the object. By performing those operations together, patterns can pull data out of an object but only when the object correctly has the data you're asking for.
 
 ## Kinds of Patterns
 
@@ -14,20 +14,20 @@ The simplest pattern is the wildcard, a single underscore (`_`). A wildcard alwa
 
 ### Literal Patterns
 
-A literal value like `123` or `true` where a pattern is expected defines a *literal* pattern. As you would expect, a literal pattern only matches an identical value. The pattern `"hi"` matches the string value `"hi"` and nothing else.
+A [literal value](primitives.html) like `123` or `true` where a pattern is expected defines a *literal* pattern. As you would expect, a literal pattern only matches an identical value. The pattern `"hi"` matches the string value `"hi"` and nothing else.
 
 ### Equality Patterns
 
-To check if a value is equal to the result of some expression, you can use an *equality pattern*. It starts with `==`, followed by the value to be compared with.
+To check if a value is equal to the result of some [expression](expressions.html), you can use an *equality pattern*. It starts with `==`, followed by the value to be compared with.
 
     :::magpie
     == math.Pi
 
-The above pattern will match the value &pi; and fail to match otherwise. The value can be any Magpie [expression](expressions.html).
+The above pattern will match the value &pi; and fail to match otherwise.
 
 ### Type Patterns
 
-Now we start to get to the interesting patterns. Often, you'll want to check to see if a value is of a certain class (or a subclass) in order to tell if an operation is valid. To do that, you can use a *type pattern*. A type pattern starts with the keyword `is` followed by an expression:
+Now we start to get to the interesting patterns. Often, you'll want to check to see if a value is of a certain [class](classes.html) (or a subclass) in order to tell if an operation is valid. To do that, you can use a *type pattern*. A type pattern starts with the keyword `is` followed by an expression:
 
     :::magpie
     is String
@@ -36,21 +36,21 @@ A type pattern matches if the value is of the given class or one of its subclass
 
 ### Variable Patterns
 
-To pull data out of an object, you use *variable patterns*. A variable pattern always successfully matches, and when it does, it creates a new variable with its name whose value is the object being matched. As you'd expect, a variable pattern is just an identifier. This pattern matches any value and creates a new variable named `name` when it does:
+To bind values to names, you use *variable patterns*. A variable pattern always successfully matches, and when it does, it creates a new named variable whose value is the matched object. As you'd expect, a variable pattern is just an identifier.
 
     :::magpie
     name
 
-A variable pattern may also have another pattern following it. If it does, the variable pattern will only match if that pattern matches too. For example:
+This pattern matches any value and creates a new variable named `name` when it does. A variable pattern may also have another pattern following it. If it does, the variable pattern will only match if that pattern matches too. For example:
 
     :::magpie
     name is String
 
-This pattern will match if the value is a string. If it is, then it will bind the variable `name` to the value.
+This is a variable pattern containing a type pattern. The entire pattern matches only if the value is a string. If it is, then it will bind the variable `name` to the value.
 
 ### Record Patterns
 
-As you can imagine, these are the dual to [record expressions](records.html). A record pattern contains a series of fields. Each field may have a name, and must have a pattern. When it is tested, it looks for fields in the given value to match all of the pattern's fields. The entire record pattern matches if all of its field patterns match.
+*Record patterns* are the dual to [record *expressions*](records.html). A record pattern contains a series of fields. Each field may have a name, and must have a pattern. When it is tested, it looks for fields in the given value to match all of the pattern's fields. The entire record pattern matches if all of its field patterns match.
 
     :::magpie
     x: _, y: _
@@ -67,9 +67,9 @@ This will match a record whose `x` field is `1` and whose `y` field contains a s
 
 This will match a record with `name` and `address` fields. If it matches, it will create new variables `n` and `a` and bind them to the values of those fields.
 
-Like record expressions, record patterns can omit the field names in which case they'll be inferred by position:
+Like record expressions, record patterns can omit the field names, in which case they'll be inferred by position:
 
     :::magpie
     x is Int, y is Int
 
-This matches a record with two positional fields that are integers and bind the fields. In other words, matching that pattern against `3, 4` will bind `x` to `3` and `y` is `4`.
+This matches a record with two positional fields that are integers and binds the fields. In other words, matching that pattern against `3, 4` will bind `x` to `3` and `y` is `4`.

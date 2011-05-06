@@ -1,3 +1,5 @@
+$body: #333;
+
 $primary: hsl(320, 100%, 40%);
 $primary-light: lighten($primary, 20%);
 
@@ -5,7 +7,7 @@ $sans: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 $serif: Georgia, serif;
 $monospace: Courier, monospace;
 
-$syntax-default: #666;
+$syntax-default: #555;
 
 @mixin round {
   -moz-border-radius: 5px;
@@ -19,7 +21,7 @@ body, h1, h2, h3, h4, li, ol, ul, tr, td, pre, code {
 
 body {
   background: #fff url('background.gif') repeat-y top left;
-  color: #333;
+  color: $body;
 }
 
 h1 {
@@ -105,6 +107,11 @@ a:hover {
   p {
     font: 15px/25px $serif;
     margin: 0 0 10px 0;
+
+    // De-emphasize links in body text to not distract the reader.
+    a {
+      color: $body;
+    }
   }
 
   p + p {
@@ -126,18 +133,19 @@ a:hover {
 
   pre, code, tt {
     color: $syntax-default;
+    background: #f4f4f4;
     font: 14px/20px $monospace;
   }
 
   code {
+    @include round;
     white-space: nowrap;
-    font-size: 16px;
+    font-size: 15px;
     padding: 0 2px;
   }
 
   pre {
     @include round;
-    background: #f4f4f4;
     margin: 0 0 10px 0;
     padding: 10px;
   }
@@ -146,6 +154,19 @@ a:hover {
     margin: 20px 0;
     border: none;
     border-bottom: solid 1px #4b81ab;
+  }
+}
+
+// Highlight links if the reader hovers over the content area.
+.content:hover {
+  p {
+    a {
+      color: $primary;
+    }
+
+    a:hover {
+      color: $primary-light;
+    }
   }
 }
 
@@ -172,7 +193,7 @@ p.future {
 $syntax-keyword:     $primary;
 $syntax-comment:     lighten($syntax-default, 20%);
 $syntax-literal:     hsl(200, 100%, 35%);
-$syntax-pseudo:      hsl(260, 100%, 40%);
+$syntax-pseudo:      hsl(190, 100%, 35%);
 $syntax-punctuation: lighten($syntax-default, 20%);
 
 pre {

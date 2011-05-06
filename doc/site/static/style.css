@@ -4,7 +4,7 @@ body, h1, h2, h3, h4, li, ol, ul, tr, td, pre, code {
 
 body {
   background: white url("background.gif") repeat-y top left;
-  color: #333; }
+  color: #333333; }
 
 h1 {
   font: normal 36px Georgia, serif;
@@ -57,7 +57,7 @@ a:hover {
     border-top: solid 1px #ddd;
     padding-top: 20px; }
     .content h2 code {
-      color: #666666;
+      color: #555555;
       font: 24px Courier, monospace; }
   .content h3 {
     font: italic 18px Georgia, serif;
@@ -65,6 +65,8 @@ a:hover {
   .content p {
     font: 15px/25px Georgia, serif;
     margin: 0 0 10px 0; }
+    .content p a {
+      color: #333333; }
   .content p + p {
     margin-top: 20px; }
   .content ul, .content ol {
@@ -75,22 +77,29 @@ a:hover {
   .content li + li {
     margin-top: 10px; }
   .content pre, .content code, .content tt {
-    color: #666666;
+    color: #555555;
+    background: #f4f4f4;
     font: 14px/20px Courier, monospace; }
   .content code {
+    -moz-border-radius: 5px;
+    border-radius: 5px;
     white-space: nowrap;
-    font-size: 16px;
+    font-size: 15px;
     padding: 0 2px; }
   .content pre {
     -moz-border-radius: 5px;
     border-radius: 5px;
-    background: #f4f4f4;
     margin: 0 0 10px 0;
     padding: 10px; }
   .content hr {
     margin: 20px 0;
     border: none;
     border-bottom: solid 1px #4b81ab; }
+
+.content:hover p a {
+  color: #cc0088; }
+.content:hover p a:hover {
+  color: #ff33bb; }
 
 .footer {
   font: italic 15px Georgia, serif;
@@ -118,14 +127,14 @@ pre .s {
 pre .se {
   color: #0077b3; }
 pre .c1 {
-  color: #999999; }
+  color: #888888; }
 pre .cm {
-  color: #999999; }
+  color: #888888; }
 pre .nb {
   color: #0077b3; }
 pre .mi {
   color: #0077b3; }
 pre .bp {
-  color: #4400cc; }
+  color: #0095b3; }
 pre .p {
-  color: #999999; }
+  color: #888888; }

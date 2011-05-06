@@ -42,6 +42,32 @@ Note that in this case, the argument is just `"a string"` while a prefix call li
 
 A call expression may *not* omit *both* the left- and right-hand arguments. A name by itself is a [name expression](variables.html). This lets Magpie statically (i.e. just from parsing) tell if a name is used to look up a variable or to call a method.
 
+## Indexers
+
+The named call syntax we've seen covers most code you'll read and write in Magpie, but it also offers a little special sugar for accessing collection-like objects. An *indexer* is a method call that uses square brackets.
+
+    :::magpie
+    collection[3]
+
+Here, we're calling an indexer method. The left-hand argument is `collection` and the right-hand is `3`. While they look different, indexers are just another notation for method calls. You can define your own indexers and they can be overloaded just like other multimethods. If `collection` here was an instance of an `Array` class, the indexer method called above could be defined like this:
+
+    :::magpie
+    def (this is Array)[index is Int]
+        // Get item at index...
+    end
+
+Indexers aren't limited to numeric arguments inside the square brackets.
+
+    :::magpie
+    def (this is Grid)[x is Int, y is Int]
+        // Get item at position...
+    end
+
+Here we've defined an indexer for a `Grid` class that accesses at point on a two-dimensional space. It can be called like this:
+
+    :::magpie
+    grid[2, 3]
+
 ## Implicit Receivers and `this`
 
 Many OOP languages like C++ and Java allow omitting the receiver in a method call. If omitted, it will be inferred to be `this`. In Magpie, there is no implicit receiver since methods aren't directly tied to classes. Instead, you have to manually specify the object you want to be the left-hand argument, even if it is the same object that was passed as the left-hand to the current method.
@@ -66,5 +92,3 @@ This expression will be parsed like:
 
     :::magpie
     ((addressBook names) find("Waldo")) email()
-
-<p class="future">Need to document indexer calls here.</p>
