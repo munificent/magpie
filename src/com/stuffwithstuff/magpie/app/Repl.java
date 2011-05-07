@@ -69,7 +69,7 @@ public class Repl implements InterpreterHost {
 
   @Override
   public ModuleInfo loadModule(String name) {
-    return Script.loadModule(name);
+    return MagpieApp.loadModule(name);
   }
 
   protected CharacterReader createReader() {

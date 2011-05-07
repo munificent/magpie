@@ -16,6 +16,6 @@ public class ScriptInterpreterHost implements InterpreterHost {
 
   @Override
   public ModuleInfo loadModule(String name) {
-    return Script.loadModule(name);
+    return MagpieApp.loadModule(name);
   }
 }
