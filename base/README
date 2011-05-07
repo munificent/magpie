@@ -1,3 +1,0 @@
-This is the old library directory. The files in here are for the syntax
-extension support which is currently broken. As that gets fixed, these files
-will move over to "lib/".
