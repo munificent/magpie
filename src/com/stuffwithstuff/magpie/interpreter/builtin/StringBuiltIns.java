@@ -55,4 +55,16 @@ public class StringBuiltIns {
           arg.getField(1).asString()));
     }
   }
+
+  // TODO(bob): Make an indexer that takes a range, so you can do:
+  // "some string"[2 to(4)]
+  @Signature("(is String) substring(start is Int, stop is Int)")
+  public static class Substring implements BuiltInCallable {
+    public Obj invoke(Context context, Obj arg) {
+      String string = arg.getField(0).asString();
+      int startIndex = arg.getField(1).getField(0).asInt();
+      int endIndex = arg.getField(1).getField(1).asInt();
+      return context.toObj(string.substring(startIndex, endIndex));
+    }
+  }
 }
