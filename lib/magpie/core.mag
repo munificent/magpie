@@ -264,7 +264,7 @@ def _makeOperator(name is String, stickiness is Int)
             parser matchToken(TokenType.LINE)
             var right = parser parseExpression(stickiness)
             CallExpression new(Expression: (position: token position),
-                receiver: left, name: name, argument: right)
+                name: name, argument: { `left, `right })
         end
     )
 end

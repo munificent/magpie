@@ -25,26 +25,26 @@ public class DefParser implements PrefixParser {
     // Indexer:            def (this String)[index Int]
     // Index setter:       def (this String)[index Int] = (c Char)
 
-    // Parse the receiver, if any.
-    Pattern receiver;
+    // Parse the left argument, if any.
+    Pattern leftArg;
     if (parser.lookAhead(TokenType.LEFT_PAREN)) {
-      receiver = parsePattern(parser);
+      leftArg = parsePattern(parser);
     } else {
-      receiver = Pattern.nothing();
+      leftArg = Pattern.nothing();
     }
     
     // Parse the message.
     String name;
-    Pattern arg;
+    Pattern rightArg;
     if (parser.match(TokenType.NAME)) {
       // Regular named message.
       name = parser.last(1).getString();
       
-      // Parse the argument, if any.
+      // Parse the right argument, if any.
       if (parser.lookAhead(TokenType.LEFT_PAREN)) {
-        arg = parsePattern(parser);
+        rightArg = parsePattern(parser);
       } else {
-        arg = null;
+        rightArg = null;
       }
     } else {
       // No name, so it must be an indexer.
@@ -52,10 +52,10 @@ public class DefParser implements PrefixParser {
       parser.consume(TokenType.LEFT_BRACKET);
       
       if (!parser.match(TokenType.RIGHT_BRACKET)) {
-        arg = PatternParser.parse(parser);
+        rightArg = PatternParser.parse(parser);
         parser.consume(TokenType.RIGHT_BRACKET);
       } else {
-        arg = Pattern.nothing();
+        rightArg = Pattern.nothing();
       }
     }
     
@@ -66,31 +66,23 @@ public class DefParser implements PrefixParser {
     }
 
     // Combine into a single multimethod pattern.
-    // def m(a)         -> m(nothing, a)
-    // def (r) m(a)     -> m(r, a)
-    // def (r) g        -> g(r)
-    // def (r) s = v    -> s=(r, v)
-    // def (r) s(a) = v -> s=(r, (a, v))
+    // def m(r)         -> m(nothing, r)
+    // def (l) g        -> g(l)
+    // def (l) m(r)     -> m(l, r)
+    // def s(r) = v     -> s_=((nothing, r), v)
+    // def (l) s = v    -> s_=(l, v)
+    // def (l) s(r) = v -> s_=((l, r), v)
     
     Pattern pattern;
-    if (arg == null) {
-      if (setValue == null) {
-        // Getter.
-        pattern = receiver;
-      } else {
-        // Setter.
-        pattern = Pattern.record(receiver, setValue);
-        name = Name.makeAssigner(name);
-      }
+    if (rightArg == null) {
+      pattern = leftArg;
     } else {
-      if (setValue == null) {
-        // Method.
-        pattern = Pattern.record(receiver, arg);
-      } else {
-        // Setter with argument.
-        pattern = Pattern.record(receiver, Pattern.record(arg, setValue));
-        name = Name.makeAssigner(name);
-      }
+      pattern = Pattern.record(leftArg, rightArg);
+    }
+    
+    if (setValue != null) {
+      name = Name.makeAssigner(name);
+      pattern = Pattern.record(pattern, setValue);
     }
     
     return new Pair<String, Pattern>(name, pattern);

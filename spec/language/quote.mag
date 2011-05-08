@@ -27,8 +27,8 @@ end
 
 specify("An unquote in a quote") with
     it should("insert the value of a named identifier into the quote") with
-        var foo = { a(b) }
-        var result = { c(`foo) }
+        var foo = { b a }
+        var result = { `foo c }
         result name shouldEqual("c")
         result argument name shouldEqual("a")
         result argument argument name shouldEqual("b")
@@ -38,8 +38,8 @@ specify("An unquote in a quote") with
         def make(value)
             IntExpression new(value: value)
         end
-        var result = { print(`(make(123))) }
-        result name shouldEqual("print")
+        var result = { `(make(123)) method }
+        result name shouldEqual("method")
         result argument value shouldEqual(123)
     end
 

@@ -34,7 +34,7 @@ public final class Name {
   }
   
   public static String makeAssigner(String name) {
-    return name + "_=";
+    return name + " =";
   }
   
   public static String makeClassPrivate(String className, String member) {

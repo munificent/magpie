@@ -33,23 +33,10 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
 
   @Override
   public Expr visit(CallExpr expr, Expr value) {
-    if (expr.getReceiver() == null) {
-      // message(arg) = value  -->  message_=(arg, value)
-      return Expr.call(expr.getPosition(),
-          null, Name.makeAssigner(expr.getName()),
-          Expr.record(expr.getArg(), value));
-    } else {
-      if (expr.getArg() == null) {
-        // receiver message = value  -->  receiver message_=(value)
-        return Expr.call(expr.getPosition(),
-            expr.getReceiver(), Name.makeAssigner(expr.getName()), value);
-      } else {
-        // receiver message(arg) = value  -->  receiver message_=(arg, value)
-        return Expr.call(expr.getPosition(),
-            expr.getReceiver(), Name.makeAssigner(expr.getName()),
-            Expr.record(expr.getArg(), value));
-      }
-    }
+    // call(arg) --> call_=(arg, value)
+    
+    return Expr.call(expr.getPosition(), expr.getArg(),
+        Name.makeAssigner(expr.getName()), value);
   }
   
   @Override

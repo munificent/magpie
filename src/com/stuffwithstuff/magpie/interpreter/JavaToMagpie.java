@@ -184,7 +184,6 @@ public class JavaToMagpie {
     public Obj visit(CallExpr expr, Void context) {
       return construct("CallExpression",
           "position", expr.getPosition(),
-          "receiver", expr.getReceiver(),
           "name",     expr.getName(),
           "argument", expr.getArg());
     }

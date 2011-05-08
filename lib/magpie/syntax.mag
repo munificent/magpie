@@ -53,6 +53,11 @@ end
 defclass BreakExpression is Expression
 end
 
+defclass CallExpression is Expression
+    val name     is String
+    val argument is Expression
+end
+
 defclass ClassExpression is Expression
     val doc     is String
     val name    is String
@@ -64,12 +69,6 @@ defclass Field
     val mutable?    is Bool
     val initializer // Expression | Nothing
     val pattern     // Pattern | Nothing
-end
-
-defclass CallExpression is Expression
-    val receiver is Expression
-    val name     is String
-    val argument is Expression
 end
 
 defclass FunctionExpression is Expression

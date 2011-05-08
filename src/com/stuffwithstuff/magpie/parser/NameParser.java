@@ -45,10 +45,18 @@ public class NameParser implements PrefixParser, InfixParser {
     }
     
     // See if this is a bare name, or a method call.
-    if ((left == null) && (arg == null)) {
-      return Expr.name(token.getPosition(), token.getString());
+    if (left == null) {
+      if (arg == null) {
+        return Expr.name(token.getPosition(), token.getString());
+      } else {
+        return Expr.call(token.getPosition(), Expr.nothing(), token.getString(), arg);
+      }
     } else {
-      return Expr.call(token.getPosition(), left, token.getString(), arg);
+      if (arg == null) {
+        return Expr.getter(token.getPosition(), left, token.getString());
+      } else {
+        return Expr.call(token.getPosition(), left, token.getString(), arg);
+      }
     }
   }
   

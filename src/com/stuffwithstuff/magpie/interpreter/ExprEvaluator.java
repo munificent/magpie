@@ -66,23 +66,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
           "Could not find a method named \"" + expr.getName() + "\".");
     }
 
-    // Figure out the receiver.
-    Obj receiver;
-    if (expr.getReceiver() == null) {
-      receiver = mContext.nothing();
-    } else {
-      receiver = evaluate(expr.getReceiver(), scope);
-    }
-    
-    // If we're given a right-hand argument, combine it with the receiver.
-    // If not, this is a getter-style multimethod.
-    Obj arg;
-    if (expr.getArg() != null) {
-      arg = mContext.toObj(receiver, evaluate(expr.getArg(), scope));
-    } else {
-      arg = receiver;
-    }
-
+    Obj arg = evaluate(expr.getArg(), scope);
     return multimethod.invoke(new Context(scope.getModule()), arg);
   }
   

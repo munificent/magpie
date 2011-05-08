@@ -34,7 +34,7 @@ public class PatternTyper implements PatternVisitor<Expr, Void> {
 
   @Override
   public Expr visit(ValuePattern pattern, Void dummy) {
-    return Expr.call(Position.none(), pattern.getValue(), "type");
+    return Expr.getter(Position.none(), pattern.getValue(), "class");
   }
 
   @Override

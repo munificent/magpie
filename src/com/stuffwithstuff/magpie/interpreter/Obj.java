@@ -41,13 +41,7 @@ public class Obj {
   }
   
   public Obj getField(int index) {
-    Obj field = getField(Name.getTupleField(index));
-
-    // TODO(bob): Hackish. If you treat a non-tuple like a tuple, it acts like
-    // a 1-uple: the first field is the object and others are missing.
-    if (field == null) return this;
-    
-    return field;
+    return getField(Name.getTupleField(index));
   }
 
   /**

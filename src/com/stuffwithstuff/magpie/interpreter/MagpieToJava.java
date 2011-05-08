@@ -63,6 +63,11 @@ public class MagpieToJava {
     } else if (exprClass == getClass("BreakExpression")) {
       return Expr.break_(
           getPosition(expr));
+    } else if (exprClass == getClass("CallExpression")) {
+      return Expr.call(
+          getPosition(expr),
+          getString(expr, "name"),
+          getExpr(expr, "argument"));
     } else if (exprClass == getClass("ClassExpression")) {
       List<String> parents = new ArrayList<String>();
       for (Obj parent : expr.getField("parents").asList()) {
@@ -85,12 +90,6 @@ public class MagpieToJava {
           getString(expr, "name"),
           parents,
           fields);
-    } else if (exprClass == getClass("CallExpression")) {
-      return Expr.call(
-          getPosition(expr),
-          getExpr(expr, "receiver"),
-          getString(expr, "name"),
-          getExpr(expr, "argument"));
     } else if (exprClass == getClass("FunctionExpression")) {
       return Expr.fn(
           getPosition(expr),

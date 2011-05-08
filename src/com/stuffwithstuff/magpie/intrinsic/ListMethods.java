@@ -22,12 +22,12 @@ public class ListMethods {
   @Def("(is List)[index is Int] = (item)")
   public static class IndexAssign implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
-      List<Obj> elements = arg.getField(0).asList();
+      List<Obj> elements = arg.getField(0).getField(0).asList();
       
       int index = validateIndex(context, elements,
-          arg.getField(1).getField(0).asInt());
+          arg.getField(0).getField(1).asInt());
       
-      Obj value = arg.getField(1).getField(1);
+      Obj value = arg.getField(1);
       
       elements.set(index, value);
       return value;
