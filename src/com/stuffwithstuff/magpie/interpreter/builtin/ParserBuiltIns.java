@@ -1,5 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter.builtin;
 
+import java.util.List;
+
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.Context;
@@ -11,6 +13,7 @@ import com.stuffwithstuff.magpie.parser.MagpieParser;
 import com.stuffwithstuff.magpie.parser.PrefixParser;
 import com.stuffwithstuff.magpie.parser.Token;
 import com.stuffwithstuff.magpie.parser.TokenType;
+import com.stuffwithstuff.magpie.util.Pair;
 
 public class ParserBuiltIns {
   @Signature("definePrefix(keyword is String, parser)")
@@ -42,9 +45,29 @@ public class ParserBuiltIns {
       return context.nothing();
     }
   }
-  
+
+  @Signature("(this is Parser) consume(keyword is String)")
+  public static class Consume_Keyword implements BuiltInCallable {
+    public Obj invoke(Context context, Obj arg) {
+      MagpieParser parser = (MagpieParser) arg.getField(0).getValue();
+      String keyword = arg.getField(1).asString();
+
+      return JavaToMagpie.convert(context, parser.consume(keyword));
+    }
+  }
+
+  @Signature("(this is Parser) matchToken(token is String)")
+  public static class MatchToken_String implements BuiltInCallable {
+    public Obj invoke(Context context, Obj arg) {
+      MagpieParser parser = (MagpieParser) arg.getField(0).getValue();
+      String keyword = arg.getField(1).asString();
+      
+      return context.toObj(parser.match(keyword));
+    }
+  }
+
   @Signature("(this is Parser) matchToken(token is TokenType)")
-  public static class MatchToken implements BuiltInCallable {
+  public static class MatchToken_TokenType implements BuiltInCallable {
     public Obj invoke(Context context, Obj arg) {
       MagpieParser parser = (MagpieParser) arg.getField(0).getValue();
       
@@ -66,6 +89,37 @@ public class ParserBuiltIns {
     }
   }
   
+  @Signature("(this is Parser) parseExpressionOrBlock(keywords is List)")
+  public static class ParseExpressionOrBlock_List implements BuiltInCallable {
+    @Override
+    public Obj invoke(Context context, Obj arg) {
+      MagpieParser parser = (MagpieParser) arg.getField(0).getValue();
+
+      List<Obj> keywordObjs = arg.getField(1).asList();
+      String[] keywords = new String[keywordObjs.size()];
+      for (int i = 0; i < keywords.length; i++) {
+        keywords[i] = keywordObjs.get(i).asString();
+      }
+      
+      Pair<Expr, Token> result = parser.parseExpressionOrBlock(keywords);
+      
+      Obj expr = JavaToMagpie.convert(context, result.getKey());
+      Obj token = JavaToMagpie.convert(context, result.getValue());
+      return context.toObj(expr, token);
+    }
+  }
+  
+  @Signature("(this is Parser) parseExpressionOrBlock()")
+  public static class ParseExpressionOrBlock_Nothing implements BuiltInCallable {
+    @Override
+    public Obj invoke(Context context, Obj arg) {
+      MagpieParser parser = (MagpieParser) arg.getField(0).getValue();
+
+      Expr expr = parser.parseExpressionOrBlock();
+      return JavaToMagpie.convert(context, expr);
+    }
+  }
+
   private static class MagpiePrefixParser implements PrefixParser {
     public MagpiePrefixParser(Context context, Obj parser) {
       mContext = context;

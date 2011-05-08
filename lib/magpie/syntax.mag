@@ -188,32 +188,3 @@ end
 
 defclass WildcardPattern is Pattern
 end
-
-
-// "definfix" Parser and core operators
-// ----------------------------------------------------------------------------
-
-definePrefix("definfix", fn(parser is Parser, token is Token)
-    // Keyword for parsing an infix operator with a given name and stickiness.
-    // Simply desugars to a call a function with the same name:
-    //
-    //     definfix + 5
-    //     // from:
-    //     a +% b
-    //     // to:
-    //     a +%(b)
-    var name = parser consume(TokenType.NAME) value
-    var stickiness = parser consume(TokenType.INT) value
-
-    {
-        defineInfix(`name, `stickiness,
-            fn(parser is Parser, left is Expression, token is Token)
-                // Ignore a newline after operator.
-                parser matchToken(TokenType.LINE)
-                var right = parser parseExpression(`stickiness)
-                CallExpression new(Expression: (position: token position),
-                    receiver: left, name: `name, argument: right)
-            end
-        )
-    }
-end)

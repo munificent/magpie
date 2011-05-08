@@ -15,7 +15,7 @@ public class Interpreter {
     mBaseModule = new Module(mHost.loadModule("magpie.core"), this);
     mLoadingModules.push(mBaseModule);
     
-    EnvironmentBuilder builder = new EnvironmentBuilder(this, mBaseModule);
+    EnvironmentBuilder builder = new EnvironmentBuilder(this);
     mClass = builder.createClassClass();
     builder.initialize();
     

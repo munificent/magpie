@@ -124,11 +124,21 @@ end
 
 def (this is Indexable) validateIndex(index is Int)
     // Negative indexes count from the back.
-    if index <(0) then index = this count +(index)
+    index = match index <(0)
+        case true then this count +(index)
+        else index
+    end
 
     // Check the bounds.
-    if index <(0) then throw OutOfBoundsError new()
-    if index >=(this count) then throw OutOfBoundsError new()
+    match index <(0)
+        case true then throw OutOfBoundsError new()
+        else nothing
+    end
+
+    match index >=(this count)
+        case true then throw OutOfBoundsError new()
+        else nothing
+    end
 
     // Return the updated index.
     index
@@ -174,7 +184,6 @@ end
 // "and" Parser
 // ----------------------------------------------------------------------------
 
-// TODO(bob): Move into its own module.
 defineInfix("and", 3, fn(parser is Parser, left is Expression, token is Token)
     // Ignore a newline after "and".
     parser matchToken(TokenType.LINE)
@@ -194,7 +203,6 @@ end)
 // "or" Parser
 // ----------------------------------------------------------------------------
 
-// TODO(bob): Move into its own module.
 defineInfix("or", 3, fn(parser is Parser, left is Expression, token is Token)
     // Ignore a newline after "or".
     parser matchToken(TokenType.LINE)
@@ -207,6 +215,50 @@ defineInfix("or", 3, fn(parser is Parser, left is Expression, token is Token)
                 case true then temp__
                 else `right
             end
+        end
+    }
+end)
+
+// If expression
+// ----------------------------------------------------------------------------
+
+definePrefix("if", fn(parser is Parser, token is Token)
+    // Parse the condition.
+    var condition, _ = parser parseExpressionOrBlock(["then"])
+
+    // Parse the then body.
+    parser consume("then")
+    var thenExpr, endToken = parser parseExpressionOrBlock(["else", "end"])
+
+    // Don't try to parse "else" if we got an explicit "end" for the "then"
+    // block.
+    var consumedEnd? = match endToken
+        case nothing then false
+        case token then
+            match token type name
+                case "NAME" then token value ==("end")
+                else false
+            end
+        end
+    end
+
+    // See if we have an "else" keyword.
+    var parsedElse? = match consumedEnd?
+        case true then false
+        case false then parser matchToken("else")
+    end
+
+    // Parse the "else" expression if there otherwise use nothing.
+    var elseExpr = match parsedElse?
+        case true then parser parseExpressionOrBlock()
+        else { nothing }
+    end
+
+    // Desugar to a match.
+    {
+        match `condition true?
+            case true then `thenExpr
+            else `elseExpr
         end
     }
 end)
@@ -237,3 +289,34 @@ _makeOperator("<=", 5)
 _makeOperator(">=", 5)
 _makeOperator("==", 4)
 _makeOperator("!=", 4)
+
+// "definfix" Parser and core operators
+// ----------------------------------------------------------------------------
+
+/*
+definePrefix("definfix", fn(parser is Parser, token is Token)
+    // Keyword for parsing an infix operator with a given name and stickiness.
+    // Simply desugars to a call a function with the same name:
+    //
+    //     definfix + 5
+    //     // from:
+    //     a +% b
+    //     // to:
+    //     a +%(b)
+    var name = parser consume(TokenType.NAME) value
+    var stickiness = parser consume(TokenType.INT) value
+
+    {
+        defineInfix(`name, `stickiness,
+            fn(parser is Parser, left is Expression, token is Token)
+                // Ignore a newline after operator.
+                parser matchToken(TokenType.LINE)
+                var right = parser parseExpression(`stickiness)
+                CallExpression new(Expression: (position: token position),
+                    receiver: left, name: `name, argument: right)
+            end
+        )
+    }
+end)
+
+*/

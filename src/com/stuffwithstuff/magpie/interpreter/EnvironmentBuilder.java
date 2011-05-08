@@ -8,9 +8,9 @@ import com.stuffwithstuff.magpie.ast.Field;
 import com.stuffwithstuff.magpie.interpreter.builtin.ClassNew;
 
 public class EnvironmentBuilder {
-  public EnvironmentBuilder(Interpreter interpreter, Module module) {
+  public EnvironmentBuilder(Interpreter interpreter) {
     mInterpreter = interpreter;
-    mModule = module;
+    mModule = mInterpreter.getBaseModule();
   }
 
   public ClassObj createClassClass() {

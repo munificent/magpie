@@ -22,7 +22,6 @@ public class Grammar {
     prefix("do",        new DoParser());
     prefix("fn",        new FnParser());
     prefix("for",       new LoopParser());
-    prefix("if",        new IfParser());
     prefix("import",    new ImportParser());
     prefix("match",     new MatchParser());
     prefix("return",    new ReturnParser());
@@ -36,7 +35,7 @@ public class Grammar {
     infix(TokenType.LEFT_BRACKET, new BracketInfixParser());
 
     reserve("-> case catch else end then");
-    reserve("break def defclass do fn for if import is match nothing return throw val var while");
+    reserve("break def defclass do fn for import is match nothing return throw val var while");
   }
   
   public PrefixParser getPrefixParser(Token token) {
