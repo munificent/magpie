@@ -62,4 +62,20 @@ public class BuiltInFunctions {
       return context.toObj(canParse);
     }
   }
+  
+  @Signature("(left) == (right)")
+  public static class Equals implements BuiltInCallable {
+    public Obj invoke(Context context, Obj arg) {
+      // By default, "==" does reference equality.
+      return context.toObj(arg.getField(0) == arg.getField(1));
+    }
+  }
+
+  // TODO(bob): Rename toString.
+  @Signature("(this) string")
+  public static class String_ implements BuiltInCallable {
+    public Obj invoke(Context context, Obj arg) {
+      return context.toObj("<" + arg.getClassObj().getName() + ">");
+    }
+  }
 }

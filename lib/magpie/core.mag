@@ -1,6 +1,5 @@
 // magpie.core is automatically loaded and imported into every module before it
 // is run.
-import magpie.reflect sameAs?
 import magpie.syntax
 
 // TODO(bob): This file is getting kind of massive. Need to figure out how to
@@ -12,7 +11,6 @@ import classfile:com.stuffwithstuff.magpie.interpreter.builtin.ClassBuiltIns
 import classfile:com.stuffwithstuff.magpie.interpreter.builtin.FunctionBuiltIns
 import classfile:com.stuffwithstuff.magpie.interpreter.builtin.IntBuiltIns
 import classfile:com.stuffwithstuff.magpie.interpreter.builtin.ListBuiltIns
-import classfile:com.stuffwithstuff.magpie.interpreter.builtin.ObjectBuiltIns
 import classfile:com.stuffwithstuff.magpie.interpreter.builtin.StringBuiltIns
 
 // Note: This file is parsed before any arithmetic operator syntax has been
@@ -64,11 +62,6 @@ end
 def not(false)
     /// Returns `true`.
     true
-end
-
-// By default, == just does identity comparison.
-def (this) == (that)
-    this sameAs?(that)
 end
 
 def (this) != (that)
