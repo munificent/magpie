@@ -4,29 +4,28 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.stuffwithstuff.magpie.parser.CharacterReader;
+import com.stuffwithstuff.magpie.SourceReader;
+import com.stuffwithstuff.magpie.SourceFile;
 import com.stuffwithstuff.magpie.parser.Grammar;
 import com.stuffwithstuff.magpie.parser.InfixParser;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
 import com.stuffwithstuff.magpie.parser.PrefixParser;
-import com.stuffwithstuff.magpie.parser.StringCharacterReader;
+import com.stuffwithstuff.magpie.parser.StringReader;
 
 public class Module {
-  public Module(ModuleInfo info, Interpreter interpreter) {
+  public Module(String name, SourceFile info, Interpreter interpreter) {
+    mName = name;
     mInfo = info;
     mInterpreter = interpreter;
     mScope = new Scope(this);
   }
   
-  public String getName() { return mInfo.getName(); }
-  public String getPath() { return mInfo.getPath(); }
-  public String getSource() { return mInfo.getSource(); }
+  public String getName() { return mName; }
   public Interpreter getInterpreter() { return mInterpreter; }
   public Scope getScope() { return mScope; }
   
-  private CharacterReader readSource() {
-    return new StringCharacterReader(mInfo.getPath(), mInfo.getSource());
-
+  private SourceReader readSource() {
+    return new StringReader(mInfo.getPath(), mInfo.getSource());
   }
   
   public Map<String, Obj> getExportedVariables() {
@@ -81,7 +80,8 @@ public class Module {
     return mInfo.toString();
   }
   
-  private final ModuleInfo mInfo;
+  private final String mName;
+  private final SourceFile mInfo;
   private final Interpreter mInterpreter;
   private final Scope mScope;
   private final Grammar mGrammar = new Grammar();

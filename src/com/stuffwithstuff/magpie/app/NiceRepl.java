@@ -1,6 +1,6 @@
 package com.stuffwithstuff.magpie.app;
 
-import com.stuffwithstuff.magpie.parser.CharacterReader;
+import com.stuffwithstuff.magpie.SourceReader;
 
 public class NiceRepl extends Repl {
   @Override
@@ -11,7 +11,7 @@ public class NiceRepl extends Repl {
   }
   
   @Override
-  protected CharacterReader createReader() {
+  protected SourceReader createReader() {
     return new NiceReplCharacterReader(getInterpreter());
   }
   

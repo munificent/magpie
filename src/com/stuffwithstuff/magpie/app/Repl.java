@@ -1,18 +1,18 @@
 package com.stuffwithstuff.magpie.app;
 
+import com.stuffwithstuff.magpie.SourceReader;
+import com.stuffwithstuff.magpie.MagpieHost;
+import com.stuffwithstuff.magpie.SourceFile;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.ErrorException;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
-import com.stuffwithstuff.magpie.interpreter.InterpreterHost;
-import com.stuffwithstuff.magpie.interpreter.ModuleInfo;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.QuitException;
-import com.stuffwithstuff.magpie.parser.CharacterReader;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
 import com.stuffwithstuff.magpie.parser.ParseException;
 import com.stuffwithstuff.magpie.parser.TokenType;
 
-public class Repl implements InterpreterHost {
+public class Repl implements MagpieHost {
   public Repl() {
     mInterpreter = new Interpreter(this);
   }
@@ -58,22 +58,17 @@ public class Repl implements InterpreterHost {
   }
 
   @Override
-  public boolean allowTopLevelRedefinition() {
-    return true;
-  }
-
-  @Override
   public void print(String text) {
     System.out.print(text);
   }
 
   @Override
-  public ModuleInfo loadModule(String name) {
+  public SourceFile loadModule(String name) {
     return MagpieApp.loadModule(name);
   }
 
-  protected CharacterReader createReader() {
-    return new ReplCharacterReader();
+  protected SourceReader createReader() {
+    return new ReplReader();
   }
   
   protected void printResult(String result) {

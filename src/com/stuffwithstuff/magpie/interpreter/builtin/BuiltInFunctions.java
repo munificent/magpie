@@ -7,7 +7,7 @@ import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.QuitException;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
 import com.stuffwithstuff.magpie.parser.ParseException;
-import com.stuffwithstuff.magpie.parser.StringCharacterReader;
+import com.stuffwithstuff.magpie.parser.StringReader;
 
 /**
  * Defines built-in methods that are available as top-level global functions.
@@ -48,7 +48,7 @@ public class BuiltInFunctions {
       try {
         Interpreter tempInterpreter = new Interpreter(context.getInterpreter().getHost());
         MagpieParser parser = MagpieParser.create(
-            new StringCharacterReader("", source),
+            new StringReader("", source),
             tempInterpreter.getBaseModule().getGrammar());
 
         while (true) {

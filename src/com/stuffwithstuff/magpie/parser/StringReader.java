@@ -1,17 +1,17 @@
 package com.stuffwithstuff.magpie.parser;
 
+import com.stuffwithstuff.magpie.SourceReader;
+
 
 /**
  * Reads a string, one character at a time.
  */
-public class StringCharacterReader implements CharacterReader {
-  public StringCharacterReader(String description, String text) {
+public class StringReader implements SourceReader {
+  public StringReader(String description, String text) {
     mDescription = description;
     mText = text;
     mPosition = 0;
   }
-  
-  public String getText() { return mText; }
   
   @Override
   public String getDescription() { return mDescription; }

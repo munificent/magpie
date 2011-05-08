@@ -3,6 +3,7 @@ package com.stuffwithstuff.magpie.parser;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.stuffwithstuff.magpie.SourceReader;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
@@ -11,14 +12,14 @@ import com.stuffwithstuff.magpie.util.Pair;
 
 public class MagpieParser extends Parser {
   public static MagpieParser create(String text) {
-    return create(new StringCharacterReader("", text));
+    return create(new StringReader("", text));
   }
   
-  public static MagpieParser create(CharacterReader reader) {
+  public static MagpieParser create(SourceReader reader) {
     return create(reader, new Grammar());
   }
   
-  public static MagpieParser create(CharacterReader reader, Grammar grammar) {
+  public static MagpieParser create(SourceReader reader, Grammar grammar) {
     TokenReader lexer = new Lexer(reader);
     TokenReader morpher = new Morpher(lexer);
     TokenReader annotator = new Annotator(morpher);

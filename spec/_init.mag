@@ -1,8 +1,8 @@
 // The test infrastructure.
-import .specify
+import spec.specify
 
 // The individual test cases.
-import .language
-import .core
+import spec.language
+import spec.core
 
 runTests()

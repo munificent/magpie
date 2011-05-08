@@ -1,22 +1,19 @@
-package com.stuffwithstuff.magpie.interpreter;
+package com.stuffwithstuff.magpie;
 
-public class ModuleInfo {
-  public ModuleInfo(String name, String path, String source) {
-    mName = name;
+public class SourceFile {
+  public SourceFile(String path, String source) {
     mPath = path;
     mSource = source;
   }
   
-  public String getName() { return mName; }
   public String getPath() { return mPath; }
   public String getSource() { return mSource; }
   
   @Override
   public String toString() {
-    return mName;
+    return mPath;
   }
   
-  private final String mName;
   private final String mPath;
   private final String mSource;
 }

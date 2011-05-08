@@ -3,16 +3,18 @@ package com.stuffwithstuff.magpie.interpreter;
 import java.util.*;
 import java.util.Map.Entry;
 
+import com.stuffwithstuff.magpie.MagpieHost;
+import com.stuffwithstuff.magpie.SourceFile;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.interpreter.builtin.*;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
 
 public class Interpreter {
-  public Interpreter(InterpreterHost host) {
+  public Interpreter(MagpieHost host) {
     mHost = host;
 
     // Bootstrap the base module with the core definitions.
-    mBaseModule = new Module(mHost.loadModule("magpie.core"), this);
+    mBaseModule = new Module("magpie.core", mHost.loadModule("magpie.core"), this);
     mLoadingModules.push(mBaseModule);
     
     EnvironmentBuilder builder = new EnvironmentBuilder(this);
@@ -38,8 +40,8 @@ public class Interpreter {
     mSyntaxModule = importModule("magpie.syntax");
   }
   
-  public void interpret(ModuleInfo info) {
-    evaluateModule(new Module(info, this));
+  public void interpret(SourceFile info) {
+    evaluateModule(new Module("", info, this));
   }
 
   public Obj interpret(Expr expression) {
@@ -98,8 +100,8 @@ public class Interpreter {
     
     // Only load it once.
     if (module == null) {
-      ModuleInfo info = mHost.loadModule(name);
-      module = new Module(info, this);
+      SourceFile info = mHost.loadModule(name);
+      module = new Module(name, info, this);
       mModules.put(name, module);
       
       evaluateModule(module);
@@ -233,7 +235,7 @@ public class Interpreter {
     return object;
   }
   
-  public InterpreterHost getHost() {
+  public MagpieHost getHost() {
     return mHost;
   }
   
@@ -282,7 +284,7 @@ public class Interpreter {
     }
   }
   
-  private final InterpreterHost mHost;
+  private final MagpieHost mHost;
   
   private final Map<String, Module> mModules = new HashMap<String, Module>();
   

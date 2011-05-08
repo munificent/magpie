@@ -4,14 +4,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import com.stuffwithstuff.magpie.parser.CharacterReader;
+import com.stuffwithstuff.magpie.SourceReader;
 
 /**
  * Provides a string of characters by reading them from the user a line at a
  * time, as requested.
  */
-public class ReplCharacterReader implements CharacterReader {
-  public ReplCharacterReader() {
+public class ReplReader implements SourceReader {
+  public ReplReader() {
     InputStreamReader converter = new InputStreamReader(System.in);
     mInput = new BufferedReader(converter);
   }

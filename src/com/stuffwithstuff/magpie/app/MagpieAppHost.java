@@ -1,17 +1,16 @@
-package com.stuffwithstuff.magpie.interpreter;
+package com.stuffwithstuff.magpie.app;
 
 import com.stuffwithstuff.magpie.MagpieHost;
 import com.stuffwithstuff.magpie.SourceFile;
 
-
-public class NullInterpreterHost implements MagpieHost {
+public class MagpieAppHost implements MagpieHost {
   @Override
   public void print(String text) {
-    // Do nothing.
+    System.out.print(text);
   }
 
   @Override
   public SourceFile loadModule(String name) {
-    throw new UnsupportedOperationException();
+    return MagpieApp.loadModule(name);
   }
 }

@@ -3,7 +3,7 @@ package com.stuffwithstuff.magpie.app;
 import com.stuffwithstuff.magpie.app.Term.ForeColor;
 import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.parser.ParseException;
-import com.stuffwithstuff.magpie.parser.StringCharacterReader;
+import com.stuffwithstuff.magpie.parser.StringReader;
 import com.stuffwithstuff.magpie.parser.Token;
 import com.stuffwithstuff.magpie.parser.TokenType;
 import com.stuffwithstuff.magpie.parser.Lexer;
@@ -12,7 +12,7 @@ import com.stuffwithstuff.magpie.parser.Lexer;
  * Provides a string of characters by reading them from the user a line at a
  * time, as requested.
  */
-public class NiceReplCharacterReader extends ReplCharacterReader {
+public class NiceReplCharacterReader extends ReplReader {
   public NiceReplCharacterReader(Interpreter interpreter) {
     mInterpreter = interpreter;
   }
@@ -27,7 +27,7 @@ public class NiceReplCharacterReader extends ReplCharacterReader {
   @Override
   protected void afterReadLine(String prompt, String line) {
     try {
-      Lexer lexer = new Lexer(new StringCharacterReader("", line));
+      Lexer lexer = new Lexer(new StringReader("", line));
   
       Term.moveUp();
   

@@ -4,9 +4,8 @@ import java.io.*;
 import java.net.URL;
 import java.nio.charset.Charset;
 
-import com.stuffwithstuff.magpie.interpreter.ErrorException;
-import com.stuffwithstuff.magpie.interpreter.Interpreter;
-import com.stuffwithstuff.magpie.interpreter.ModuleInfo;
+import com.stuffwithstuff.magpie.Magpie;
+import com.stuffwithstuff.magpie.SourceFile;
 import com.stuffwithstuff.magpie.interpreter.Profiler;
 import com.stuffwithstuff.magpie.interpreter.QuitException;
 
@@ -45,44 +44,34 @@ public class MagpieApp {
 
     Profiler.display();
   }
-  
-  public static File getAppDirectory() {
-    URL location = MagpieApp.class.getProtectionDomain().getCodeSource().getLocation();
-    // Back up one directory to get out of "bin/".
-    return new File(location.getFile()).getParentFile();
-  }
 
-  public static ModuleInfo loadModule(String name) {
+  public static SourceFile loadModule(String name) {
     try {
       String modulePath = name.replace('.', '/');
       
       // $CWD/foo/bar.mag
       File file = new File(modulePath + ".mag");
       if (file.exists()) {
-        return new ModuleInfo(name,
-            file.getPath(), readFile(file.getPath()));
+        return new SourceFile(file.getPath(), readFile(file.getPath()));
       }
       
       // $CWD/foo/bar/_init.mag
       file = new File(modulePath + "/_init.mag");
       if (file.exists()) {
-        return new ModuleInfo(name,
-            file.getPath(), readFile(file.getPath()));
+        return new SourceFile(file.getPath(), readFile(file.getPath()));
       }
       
       // $APPDIR/lib/foo/bar.mag
       File appDir = new File(getAppDirectory(), "lib");
       file = new File(appDir, modulePath + ".mag");
       if (file.exists()) {
-        return new ModuleInfo(name,
-            file.getPath(), readFile(file.getPath()));
+        return new SourceFile(file.getPath(), readFile(file.getPath()));
       }
       
       // $APPDIR/lib/foo/bar/_init.mag
       file = new File(appDir, modulePath + "/_init.mag");
       if (file.exists()) {
-        return new ModuleInfo(name,
-            file.getPath(), readFile(file.getPath()));
+        return new SourceFile(file.getPath(), readFile(file.getPath()));
       }
 
       throw new IOException("Couldn't find module " + name);
@@ -95,14 +84,15 @@ public class MagpieApp {
   
   public static void execute(String path) throws IOException {
     String script = readFile(path);
-    Interpreter interpreter = new Interpreter(new ScriptInterpreterHost());
+    Magpie magpie = new Magpie(new MagpieAppHost());
     
-    try {
-      interpreter.interpret(new ModuleInfo(path, path, script));
-    } catch(ErrorException ex) {
-      System.out.println(String.format("Uncaught %s: %s",
-          ex.getError().getClassObj().getName(), ex.getError().getValue()));
-    }
+    magpie.run(new SourceFile(path, script));
+  }
+  
+  private static File getAppDirectory() {
+    URL location = MagpieApp.class.getProtectionDomain().getCodeSource().getLocation();
+    // Back up one directory to get out of "bin/".
+    return new File(location.getFile()).getParentFile();
   }
 
   private static String readFile(String path) throws IOException {

@@ -1,11 +1,12 @@
 package com.stuffwithstuff.magpie.parser;
 
+import com.stuffwithstuff.magpie.SourceReader;
 import com.stuffwithstuff.magpie.parser.Token;
 import com.stuffwithstuff.magpie.parser.TokenType;
 
 public class Lexer implements TokenReader {
 
-  public Lexer(CharacterReader text) {
+  public Lexer(SourceReader text) {
     mText = text;
     mLine = 1;
     mCol = 1;
@@ -281,7 +282,7 @@ public class Lexer implements TokenReader {
         || ("~!$%^&*-=+|/?<>.".indexOf(c) != -1);
   }
   
-  private final CharacterReader mText;
+  private final SourceReader mText;
   private String mRead;
   private int mStartLine;
   private int mStartCol;
