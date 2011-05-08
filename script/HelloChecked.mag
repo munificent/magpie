@@ -1,7 +1,0 @@
-// The difference between this script and Hello.mag is that this one
-// type-checks before printing "Hello, world!". If a script contains a "main"
-// function, then Magpie executes the entire script, type-checks everything in
-// global scope, then calls main if there were no errors.
-def main(->)
-    print("Hello, world!")
-end
