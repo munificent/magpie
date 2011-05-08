@@ -1,1 +1,1 @@
-import classfile:com.stuffwithstuff.magpie.interpreter.builtin.ReflectBuiltIns
+import classfile:com.stuffwithstuff.magpie.intrinsic.ReflectMethods

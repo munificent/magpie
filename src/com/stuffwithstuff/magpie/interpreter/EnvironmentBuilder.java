@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.stuffwithstuff.magpie.ast.Field;
-import com.stuffwithstuff.magpie.interpreter.builtin.ClassNew;
+import com.stuffwithstuff.magpie.intrinsic.ClassNew;
 
 public class EnvironmentBuilder {
   public EnvironmentBuilder(Interpreter interpreter) {

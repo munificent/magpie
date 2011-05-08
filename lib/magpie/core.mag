@@ -6,12 +6,10 @@ import magpie.syntax
 // have multiple sources files define a single logical module. Maybe just an
 // easy way to re-export an imported name.
 
-import classfile:com.stuffwithstuff.magpie.interpreter.builtin.BuiltInFunctions
-import classfile:com.stuffwithstuff.magpie.interpreter.builtin.ClassBuiltIns
-import classfile:com.stuffwithstuff.magpie.interpreter.builtin.FunctionBuiltIns
-import classfile:com.stuffwithstuff.magpie.interpreter.builtin.IntBuiltIns
-import classfile:com.stuffwithstuff.magpie.interpreter.builtin.ListBuiltIns
-import classfile:com.stuffwithstuff.magpie.interpreter.builtin.StringBuiltIns
+import classfile:com.stuffwithstuff.magpie.intrinsic.IntrinsicMethods
+import classfile:com.stuffwithstuff.magpie.intrinsic.IntMethods
+import classfile:com.stuffwithstuff.magpie.intrinsic.ListMethods
+import classfile:com.stuffwithstuff.magpie.intrinsic.StringMethods
 
 // Note: This file is parsed before any arithmetic operator syntax has been
 // defined, which is why it calls them in regular message for like 1+(2).

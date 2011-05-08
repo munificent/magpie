@@ -1,8 +1,9 @@
-package com.stuffwithstuff.magpie.interpreter.builtin;
+package com.stuffwithstuff.magpie.intrinsic;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import com.stuffwithstuff.magpie.Def;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.Scope;
 import com.stuffwithstuff.magpie.parser.DefParser;
@@ -10,12 +11,32 @@ import com.stuffwithstuff.magpie.parser.MagpieParser;
 import com.stuffwithstuff.magpie.parser.ParseException;
 import com.stuffwithstuff.magpie.util.Pair;
 
-public abstract class BuiltIns {
+public abstract class IntrinsicLoader {
+  /**
+   * Given the name of a JVM classfile, loads it, finds all of the intrinsic
+   * methods it specifies, and defines them in the given scope.
+   * 
+   * @param className  Name of the classfile to load.
+   * @param scope      Scope to define the methods in.
+   * @return           True if successful.
+   */
+  public static boolean loadClass(String className, Scope scope) {
+    try {
+      ClassLoader classLoader = IntrinsicLoader.class.getClassLoader();
+      @SuppressWarnings("rawtypes")
+      Class javaClass = classLoader.loadClass(className);
+      IntrinsicLoader.register(javaClass, scope);
+      return true;
+    } catch (ClassNotFoundException e) {
+      return false;
+    }
+  }
+  
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public static void register(Class javaClass, Scope scope) {
+  private static void register(Class javaClass, Scope scope) {
 
     for (Class innerClass : javaClass.getDeclaredClasses()) {
-      Signature signature = (Signature) innerClass.getAnnotation(Signature.class);
+      Def signature = (Def) innerClass.getAnnotation(Def.class);
       if (signature != null) {
         registerMethod(scope, innerClass, signature.value());
       }
@@ -33,8 +54,8 @@ public abstract class BuiltIns {
       
       // Construct the method.
       Constructor ctor = innerClass.getConstructor();
-      BuiltInCallable callable = (BuiltInCallable) ctor.newInstance();
-      BuiltIn builtIn = new BuiltIn(pattern, callable, scope);
+      Intrinsic callable = (Intrinsic) ctor.newInstance();
+      IntrinsicCallable builtIn = new IntrinsicCallable(pattern, callable, scope);
       
       // Register it.
       scope.define(name, builtIn);

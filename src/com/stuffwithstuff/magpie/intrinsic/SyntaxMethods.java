@@ -1,7 +1,8 @@
-package com.stuffwithstuff.magpie.interpreter.builtin;
+package com.stuffwithstuff.magpie.intrinsic;
 
 import java.util.List;
 
+import com.stuffwithstuff.magpie.Def;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.Context;
@@ -15,9 +16,9 @@ import com.stuffwithstuff.magpie.parser.Token;
 import com.stuffwithstuff.magpie.parser.TokenType;
 import com.stuffwithstuff.magpie.util.Pair;
 
-public class ParserBuiltIns {
-  @Signature("definePrefix(keyword is String, parser)")
-  public static class DefinePrefix implements BuiltInCallable {
+public class SyntaxMethods {
+  @Def("definePrefix(keyword is String, parser)")
+  public static class DefinePrefix implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
       String keyword = arg.getField(1).getField(0).asString();
       Obj parser = arg.getField(1).getField(1);
@@ -29,8 +30,8 @@ public class ParserBuiltIns {
     }
   }
   
-  @Signature("defineInfix(keyword is String, stickiness is Int, parser)")
-  public static class DefineInfix implements BuiltInCallable {
+  @Def("defineInfix(keyword is String, stickiness is Int, parser)")
+  public static class DefineInfix implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
       String keyword = arg.getField(1).getField(0).asString();
       int stickiness = arg.getField(1).getField(1).asInt();
@@ -46,8 +47,8 @@ public class ParserBuiltIns {
     }
   }
 
-  @Signature("(this is Parser) consume(keyword is String)")
-  public static class Consume_Keyword implements BuiltInCallable {
+  @Def("(this is Parser) consume(keyword is String)")
+  public static class Consume_Keyword implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
       MagpieParser parser = (MagpieParser) arg.getField(0).getValue();
       String keyword = arg.getField(1).asString();
@@ -56,8 +57,8 @@ public class ParserBuiltIns {
     }
   }
 
-  @Signature("(this is Parser) matchToken(token is String)")
-  public static class MatchToken_String implements BuiltInCallable {
+  @Def("(this is Parser) matchToken(token is String)")
+  public static class MatchToken_String implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
       MagpieParser parser = (MagpieParser) arg.getField(0).getValue();
       String keyword = arg.getField(1).asString();
@@ -66,8 +67,8 @@ public class ParserBuiltIns {
     }
   }
 
-  @Signature("(this is Parser) matchToken(token is TokenType)")
-  public static class MatchToken_TokenType implements BuiltInCallable {
+  @Def("(this is Parser) matchToken(token is TokenType)")
+  public static class MatchToken_TokenType implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
       MagpieParser parser = (MagpieParser) arg.getField(0).getValue();
       
@@ -77,8 +78,8 @@ public class ParserBuiltIns {
     }
   }
   
-  @Signature("(this is Parser) parseExpression(stickiness is Int)")
-  public static class ParseExpression implements BuiltInCallable {
+  @Def("(this is Parser) parseExpression(stickiness is Int)")
+  public static class ParseExpression implements Intrinsic {
     @Override
     public Obj invoke(Context context, Obj arg) {
       MagpieParser parser = (MagpieParser) arg.getField(0).getValue();
@@ -89,8 +90,8 @@ public class ParserBuiltIns {
     }
   }
   
-  @Signature("(this is Parser) parseExpressionOrBlock(keywords is List)")
-  public static class ParseExpressionOrBlock_List implements BuiltInCallable {
+  @Def("(this is Parser) parseExpressionOrBlock(keywords is List)")
+  public static class ParseExpressionOrBlock_List implements Intrinsic {
     @Override
     public Obj invoke(Context context, Obj arg) {
       MagpieParser parser = (MagpieParser) arg.getField(0).getValue();
@@ -109,8 +110,8 @@ public class ParserBuiltIns {
     }
   }
   
-  @Signature("(this is Parser) parseExpressionOrBlock()")
-  public static class ParseExpressionOrBlock_Nothing implements BuiltInCallable {
+  @Def("(this is Parser) parseExpressionOrBlock()")
+  public static class ParseExpressionOrBlock_Nothing implements Intrinsic {
     @Override
     public Obj invoke(Context context, Obj arg) {
       MagpieParser parser = (MagpieParser) arg.getField(0).getValue();

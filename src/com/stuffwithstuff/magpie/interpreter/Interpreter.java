@@ -6,7 +6,9 @@ import java.util.Map.Entry;
 import com.stuffwithstuff.magpie.MagpieHost;
 import com.stuffwithstuff.magpie.SourceFile;
 import com.stuffwithstuff.magpie.ast.*;
-import com.stuffwithstuff.magpie.interpreter.builtin.*;
+import com.stuffwithstuff.magpie.intrinsic.ClassInit;
+import com.stuffwithstuff.magpie.intrinsic.FieldGetter;
+import com.stuffwithstuff.magpie.intrinsic.FieldSetter;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
 
 public class Interpreter {

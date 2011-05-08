@@ -1,14 +1,15 @@
-package com.stuffwithstuff.magpie.interpreter.builtin;
+package com.stuffwithstuff.magpie.intrinsic;
 
 import java.util.List;
 
+import com.stuffwithstuff.magpie.Def;
 import com.stuffwithstuff.magpie.interpreter.Context;
 import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
-public class ListBuiltIns {
-  @Signature("(is List)[index is Int]")
-  public static class Index implements BuiltInCallable {
+public class ListMethods {
+  @Def("(is List)[index is Int]")
+  public static class Index implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
       List<Obj> elements = arg.getField(0).asList();
       int index = validateIndex(context, elements,
@@ -18,8 +19,8 @@ public class ListBuiltIns {
     }
   }
 
-  @Signature("(is List)[index is Int] = (item)")
-  public static class IndexAssign implements BuiltInCallable {
+  @Def("(is List)[index is Int] = (item)")
+  public static class IndexAssign implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
       List<Obj> elements = arg.getField(0).asList();
       
@@ -33,8 +34,8 @@ public class ListBuiltIns {
     }
   }
   
-  @Signature("(is List) add(item)")
-  public static class Add implements BuiltInCallable {
+  @Def("(is List) add(item)")
+  public static class Add implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
       List<Obj> elements = arg.getField(0).asList();
       elements.add(arg.getField(1));
@@ -43,8 +44,8 @@ public class ListBuiltIns {
     }
   }
 
-  @Signature("(is List) clear()")
-  public static class Clear implements BuiltInCallable {
+  @Def("(is List) clear()")
+  public static class Clear implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
       List<Obj> elements = arg.getField(0).asList();
       elements.clear();
@@ -52,8 +53,8 @@ public class ListBuiltIns {
     }
   }
   
-  @Signature("(is List) count")
-  public static class Count implements BuiltInCallable {
+  @Def("(is List) count")
+  public static class Count implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
       List<Obj> elements = arg.asList();
       return context.toObj(elements.size());

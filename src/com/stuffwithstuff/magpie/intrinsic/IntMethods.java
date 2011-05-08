@@ -1,9 +1,10 @@
-package com.stuffwithstuff.magpie.interpreter.builtin;
+package com.stuffwithstuff.magpie.intrinsic;
 
+import com.stuffwithstuff.magpie.Def;
 import com.stuffwithstuff.magpie.interpreter.Context;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
-public class IntBuiltIns {
+public class IntMethods {
   /*
   @Shared
   @Signature("parse(text String -> Int)")
@@ -21,32 +22,32 @@ public class IntBuiltIns {
   }
   */
   
-  @Signature("(is Int) +(right is Int)")
+  @Def("(is Int) +(right is Int)")
   public static class Add extends ArithmeticOperator {
     protected int perform(int left, int right) { return left + right; }
   }
   
-  @Signature("(is Int) -(right is Int)")
+  @Def("(is Int) -(right is Int)")
   public static class Subtract extends ArithmeticOperator {
     protected int perform(int left, int right) { return left - right; }
   }
   
-  @Signature("(is Int) *(right is Int)")
+  @Def("(is Int) *(right is Int)")
   public static class Multiply extends ArithmeticOperator {
     protected int perform(int left, int right) { return left * right; }
   }
   
-  @Signature("(is Int) /(right is Int)")
+  @Def("(is Int) /(right is Int)")
   public static class Divide extends ArithmeticOperator {
     protected int perform(int left, int right) { return left / right; }
   }
   
-  @Signature("(is Int) %(right is Int)")
+  @Def("(is Int) %(right is Int)")
   public static class Modulo extends ArithmeticOperator {
     protected int perform(int left, int right) { return left % right; }
   }
 
-  private abstract static class ArithmeticOperator implements BuiltInCallable {
+  private abstract static class ArithmeticOperator implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
       int left = arg.getField(0).asInt();
       int right = arg.getField(1).asInt();
@@ -57,8 +58,8 @@ public class IntBuiltIns {
     protected abstract int perform(int left, int right);
   }
   
-  @Signature("(is Int) ==(right is Int)")
-  public static class Equals implements BuiltInCallable {
+  @Def("(is Int) ==(right is Int)")
+  public static class Equals implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
       int left = arg.getField(0).asInt();
       int right = arg.getField(1).asInt();
@@ -67,8 +68,8 @@ public class IntBuiltIns {
     }
   }
   
-  @Signature("(is Int) compareTo(other is Int)")
-  public static class Compare implements BuiltInCallable {
+  @Def("(is Int) compareTo(other is Int)")
+  public static class Compare implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
       int left = arg.getField(0).asInt();
       int right = arg.getField(1).asInt();
@@ -77,8 +78,8 @@ public class IntBuiltIns {
     }
   }
   
-  @Signature("(is Int) string")
-  public static class String_ implements BuiltInCallable {
+  @Def("(is Int) string")
+  public static class String_ implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
       return context.toObj(Integer.toString(arg.asInt()));
     }

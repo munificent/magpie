@@ -1,9 +1,9 @@
-package com.stuffwithstuff.magpie.interpreter.builtin;
+package com.stuffwithstuff.magpie;
 
 import java.lang.annotation.*;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface Signature {
+public @interface Def {
   String value();
 }

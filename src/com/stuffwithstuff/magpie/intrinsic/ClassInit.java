@@ -1,4 +1,4 @@
-package com.stuffwithstuff.magpie.interpreter.builtin;
+package com.stuffwithstuff.magpie.intrinsic;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -8,7 +8,7 @@ import java.util.Map;
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
-import com.stuffwithstuff.magpie.interpreter.builtin.BuiltIns;
+import com.stuffwithstuff.magpie.intrinsic.IntrinsicLoader;
 import com.stuffwithstuff.magpie.util.Pair;
 
 /**
@@ -148,12 +148,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
         scope.importName(mContext, expr.getName(), rename, module);
       }
     } else if (expr.getScheme().equals("classfile")) {
-      try {
-        ClassLoader classLoader = BuiltIns.class.getClassLoader();
-        @SuppressWarnings("rawtypes")
-        Class javaClass = classLoader.loadClass(expr.getModule());
-        BuiltIns.register(javaClass, scope);
-      } catch (ClassNotFoundException e) {
+      if (!IntrinsicLoader.loadClass(expr.getModule(), scope)) {
         // TODO(bob): Throw better error.
         throw mContext.error("Error", "Could not load classfile \"" +
             expr.getModule() + "\".");

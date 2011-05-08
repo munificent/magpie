@@ -1,8 +1,8 @@
-package com.stuffwithstuff.magpie.interpreter.builtin;
+package com.stuffwithstuff.magpie.intrinsic;
 
 import com.stuffwithstuff.magpie.interpreter.Context;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
-public interface BuiltInCallable {
+public interface Intrinsic {
   Obj invoke(Context context, Obj arg);
 }

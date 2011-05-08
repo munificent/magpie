@@ -1,4 +1,4 @@
-import classfile:com.stuffwithstuff.magpie.interpreter.builtin.ParserBuiltIns
+import classfile:com.stuffwithstuff.magpie.intrinsic.SyntaxMethods
 
 defclass Parser
     /// An instance of this class will be passed to a user-defined parse()

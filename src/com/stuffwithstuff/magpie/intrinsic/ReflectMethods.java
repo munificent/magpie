@@ -1,5 +1,6 @@
-package com.stuffwithstuff.magpie.interpreter.builtin;
+package com.stuffwithstuff.magpie.intrinsic;
 
+import com.stuffwithstuff.magpie.Def;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.RecordPattern;
 import com.stuffwithstuff.magpie.interpreter.Callable;
@@ -9,32 +10,32 @@ import com.stuffwithstuff.magpie.interpreter.Multimethod;
 import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
-public class ReflectBuiltIns {
-  @Signature("(_) class")
-  public static class Class_ implements BuiltInCallable {
+public class ReflectMethods {
+  @Def("(_) class")
+  public static class Class_ implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
       return arg.getClassObj();
     }
   }
 
-  @Signature("(_) is?(class is Class)")
-  public static class Is implements BuiltInCallable {
+  @Def("(_) is?(class is Class)")
+  public static class Is implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
       return context.toObj(arg.getField(0).getClassObj().isSubclassOf(
           arg.getField(1).asClass()));
     }
   }
   
-  @Signature("(_) sameAs?(other)")
-  public static class Same implements BuiltInCallable {
+  @Def("(_) sameAs?(other)")
+  public static class Same implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
       return context.toObj(
           arg.getField(0) == arg.getField(1));
     }
   }
   
-  @Signature("docMethod(methodName is String)")
-  public static class DocMethod implements BuiltInCallable {
+  @Def("docMethod(methodName is String)")
+  public static class DocMethod implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
       String name = arg.getField(1).asString();
       
@@ -69,8 +70,8 @@ public class ReflectBuiltIns {
     }
   }
   
-  @Signature("(is Class) doc")
-  public static class ClassDoc implements BuiltInCallable {
+  @Def("(is Class) doc")
+  public static class ClassDoc implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
       ClassObj classObj = arg.getField(1).asClass();
       
