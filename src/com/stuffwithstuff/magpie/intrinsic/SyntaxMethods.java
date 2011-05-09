@@ -19,9 +19,9 @@ import com.stuffwithstuff.magpie.util.Pair;
 public class SyntaxMethods {
   @Def("definePrefix(keyword is String, parser)")
   public static class DefinePrefix implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
-      String keyword = arg.getField(1).getField(0).asString();
-      Obj parser = arg.getField(1).getField(1);
+    public Obj invoke(Context context, Obj left, Obj right) {
+      String keyword = right.getField(0).asString();
+      Obj parser = right.getField(1);
       
       context.getModule().defineSyntax(keyword,
           new MagpiePrefixParser(context, parser));
@@ -32,10 +32,10 @@ public class SyntaxMethods {
   
   @Def("defineInfix(keyword is String, stickiness is Int, parser)")
   public static class DefineInfix implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
-      String keyword = arg.getField(1).getField(0).asString();
-      int stickiness = arg.getField(1).getField(1).asInt();
-      Obj parser = arg.getField(1).getField(2);
+    public Obj invoke(Context context, Obj left, Obj right) {
+      String keyword = right.getField(0).asString();
+      int stickiness = right.getField(1).asInt();
+      Obj parser = right.getField(2);
 
       // TODO(bob): Hack! Wrong. Needs to define it in the module that's
       // calling this. Once built-ins have access to the calling module, fix
@@ -49,9 +49,9 @@ public class SyntaxMethods {
 
   @Def("(this is Parser) consume(keyword is String)")
   public static class Consume_Keyword implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
-      MagpieParser parser = (MagpieParser) arg.getField(0).getValue();
-      String keyword = arg.getField(1).asString();
+    public Obj invoke(Context context, Obj left, Obj right) {
+      MagpieParser parser = (MagpieParser) left.getValue();
+      String keyword = right.asString();
 
       return JavaToMagpie.convert(context, parser.consume(keyword));
     }
@@ -59,9 +59,9 @@ public class SyntaxMethods {
 
   @Def("(this is Parser) matchToken(token is String)")
   public static class MatchToken_String implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
-      MagpieParser parser = (MagpieParser) arg.getField(0).getValue();
-      String keyword = arg.getField(1).asString();
+    public Obj invoke(Context context, Obj left, Obj right) {
+      MagpieParser parser = (MagpieParser) left.getValue();
+      String keyword = right.asString();
       
       return context.toObj(parser.match(keyword));
     }
@@ -69,11 +69,11 @@ public class SyntaxMethods {
 
   @Def("(this is Parser) matchToken(token is TokenType)")
   public static class MatchToken_TokenType implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
-      MagpieParser parser = (MagpieParser) arg.getField(0).getValue();
+    public Obj invoke(Context context, Obj left, Obj right) {
+      MagpieParser parser = (MagpieParser) left.getValue();
       
       TokenType tokenType = MagpieToJava.convertTokenType(
-          context, arg.getField(1));
+          context, right);
       return context.toObj(parser.match(tokenType));
     }
   }
@@ -81,10 +81,10 @@ public class SyntaxMethods {
   @Def("(this is Parser) parseExpression(stickiness is Int)")
   public static class ParseExpression implements Intrinsic {
     @Override
-    public Obj invoke(Context context, Obj arg) {
-      MagpieParser parser = (MagpieParser) arg.getField(0).getValue();
+    public Obj invoke(Context context, Obj left, Obj right) {
+      MagpieParser parser = (MagpieParser) left.getValue();
 
-      Expr expr = parser.parseExpression(arg.getField(1).asInt());
+      Expr expr = parser.parseExpression(right.asInt());
       
       return JavaToMagpie.convert(context, expr);
     }
@@ -93,10 +93,10 @@ public class SyntaxMethods {
   @Def("(this is Parser) parseExpressionOrBlock(keywords is List)")
   public static class ParseExpressionOrBlock_List implements Intrinsic {
     @Override
-    public Obj invoke(Context context, Obj arg) {
-      MagpieParser parser = (MagpieParser) arg.getField(0).getValue();
+    public Obj invoke(Context context, Obj left, Obj right) {
+      MagpieParser parser = (MagpieParser) left.getValue();
 
-      List<Obj> keywordObjs = arg.getField(1).asList();
+      List<Obj> keywordObjs = right.asList();
       String[] keywords = new String[keywordObjs.size()];
       for (int i = 0; i < keywords.length; i++) {
         keywords[i] = keywordObjs.get(i).asString();
@@ -113,8 +113,8 @@ public class SyntaxMethods {
   @Def("(this is Parser) parseExpressionOrBlock()")
   public static class ParseExpressionOrBlock_Nothing implements Intrinsic {
     @Override
-    public Obj invoke(Context context, Obj arg) {
-      MagpieParser parser = (MagpieParser) arg.getField(0).getValue();
+    public Obj invoke(Context context, Obj left, Obj right) {
+      MagpieParser parser = (MagpieParser) left.getValue();
 
       Expr expr = parser.parseExpressionOrBlock();
       return JavaToMagpie.convert(context, expr);

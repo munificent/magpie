@@ -13,31 +13,31 @@ import com.stuffwithstuff.magpie.interpreter.Obj;
 public class ReflectMethods {
   @Def("(_) class")
   public static class Class_ implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
-      return arg.getField(0).getClassObj();
+    public Obj invoke(Context context, Obj left, Obj right) {
+      return left.getClassObj();
     }
   }
 
   @Def("(_) is?(class is Class)")
   public static class Is implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
-      return context.toObj(arg.getField(0).getClassObj().isSubclassOf(
-          arg.getField(1).asClass()));
+    public Obj invoke(Context context, Obj left, Obj right) {
+      return context.toObj(left.getClassObj().isSubclassOf(
+          right.asClass()));
     }
   }
   
   @Def("(_) sameAs?(other)")
   public static class Same implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
+    public Obj invoke(Context context, Obj left, Obj right) {
       return context.toObj(
-          arg.getField(0) == arg.getField(1));
+          left == right);
     }
   }
   
   @Def("docMethod(methodName is String)")
   public static class DocMethod implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
-      String name = arg.getField(1).asString();
+    public Obj invoke(Context context, Obj left, Obj right) {
+      String name = right.asString();
       
       // TODO(bob): Hackish, but works.
       Multimethod multimethod = context.getModule().getScope()
@@ -72,8 +72,8 @@ public class ReflectMethods {
   
   @Def("(is Class) doc")
   public static class ClassDoc implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
-      ClassObj classObj = arg.getField(0).asClass();
+    public Obj invoke(Context context, Obj left, Obj right) {
+      ClassObj classObj = left.asClass();
       
       StringBuilder builder = new StringBuilder();
       builder.append(classObj.getName() + "\n");

@@ -10,10 +10,10 @@ import com.stuffwithstuff.magpie.interpreter.Obj;
 public class ListMethods {
   @Def("(is List)[index is Int]")
   public static class Index implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
-      List<Obj> elements = arg.getField(0).asList();
+    public Obj invoke(Context context, Obj left, Obj right) {
+      List<Obj> elements = left.asList();
       int index = validateIndex(context, elements,
-          arg.getField(1).asInt());
+          right.asInt());
       
       return elements.get(index);
     }
@@ -21,13 +21,13 @@ public class ListMethods {
 
   @Def("(is List)[index is Int] = (item)")
   public static class IndexAssign implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
-      List<Obj> elements = arg.getField(0).getField(0).asList();
+    public Obj invoke(Context context, Obj left, Obj right) {
+      List<Obj> elements = left.getField(0).asList();
       
       int index = validateIndex(context, elements,
-          arg.getField(0).getField(1).asInt());
+          left.getField(1).asInt());
       
-      Obj value = arg.getField(1);
+      Obj value = right;
       
       elements.set(index, value);
       return value;
@@ -36,18 +36,18 @@ public class ListMethods {
   
   @Def("(is List) add(item)")
   public static class Add implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
-      List<Obj> elements = arg.getField(0).asList();
-      elements.add(arg.getField(1));
+    public Obj invoke(Context context, Obj left, Obj right) {
+      List<Obj> elements = left.asList();
+      elements.add(right);
       
-      return arg.getField(1);
+      return right;
     }
   }
 
   @Def("(is List) clear()")
   public static class Clear implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
-      List<Obj> elements = arg.getField(0).asList();
+    public Obj invoke(Context context, Obj left, Obj right) {
+      List<Obj> elements = left.asList();
       elements.clear();
       return context.nothing();
     }
@@ -55,8 +55,8 @@ public class ListMethods {
   
   @Def("(is List) count")
   public static class Count implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
-      List<Obj> elements = arg.getField(0).asList();
+    public Obj invoke(Context context, Obj left, Obj right) {
+      List<Obj> elements = left.asList();
       return context.toObj(elements.size());
     }
   }

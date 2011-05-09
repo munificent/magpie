@@ -20,7 +20,7 @@ import com.stuffwithstuff.magpie.parser.StringReader;
 public class IntrinsicMethods {
   @Def("currentTime()")
   public static class CurrentTime implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
+    public Obj invoke(Context context, Obj left, Obj right) {
       // TODO(bob): Total hack to fit in an int.
       int time = (int) (System.currentTimeMillis() - 1289000000000L);
       return context.toObj(time);
@@ -29,24 +29,24 @@ public class IntrinsicMethods {
 
   @Def("prints(text is String)")
   public static class Print implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
-      context.getInterpreter().print(arg.getField(1).asString());
+    public Obj invoke(Context context, Obj left, Obj right) {
+      context.getInterpreter().print(right.asString());
       return context.nothing();
     }
   }
   
   @Def("quit()")
   public static class Quit implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
+    public Obj invoke(Context context, Obj left, Obj right) {
       throw new QuitException();
     }
   }
   
   @Def("(is Function) call(arg)")
   public static class Call implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
-      FnObj function = arg.getField(0).asFn();
-      Obj fnArg = arg.getField(1);
+    public Obj invoke(Context context, Obj left, Obj right) {
+      FnObj function = left.asFn();
+      Obj fnArg = right;
       
       // Make sure the argument matches the function's pattern.
       Callable callable = function.getCallable();
@@ -64,8 +64,8 @@ public class IntrinsicMethods {
   // TODO(bob): More or less temporary.
   @Def("canParse?(source is String)")
   public static class CheckSyntax implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
-      String source = arg.getField(1).asString();
+    public Obj invoke(Context context, Obj left, Obj right) {
+      String source = right.asString();
       
       boolean canParse = true;
       
@@ -89,24 +89,24 @@ public class IntrinsicMethods {
   
   @Def("(this is Class) name")
   public static class Class_Name implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
-      return context.toObj(arg.getField(0).asClass().getName());
+    public Obj invoke(Context context, Obj left, Obj right) {
+      return context.toObj(left.asClass().getName());
     }
   }
 
   @Def("(left) == (right)")
   public static class Equals implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
+    public Obj invoke(Context context, Obj left, Obj right) {
       // By default, "==" does reference equality.
-      return context.toObj(arg.getField(0) == arg.getField(1));
+      return context.toObj(left == right);
     }
   }
 
   // TODO(bob): Rename toString.
   @Def("(this) string")
   public static class String_ implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
-      return context.toObj("<" + arg.getClassObj().getName() + ">");
+    public Obj invoke(Context context, Obj left, Obj right) {
+      return context.toObj("<" + left.getClassObj().getName() + ">");
     }
   }
 }

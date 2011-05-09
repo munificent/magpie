@@ -17,13 +17,13 @@ public class Multimethod {
     mMethods.add(method);
   }
   
-  public Obj invoke(Context context, Obj receiver, Obj arg) {
-    return invoke(context, context.toObj(receiver, arg));
+  public Obj invoke(Context context, Obj left, Obj right) {
+    return invoke(context, context.toObj(left, right));
   }
   
   public Obj invoke(Context context, Obj arg) {
     Callable method = select(context, arg);
-        
+    
     if (method == null) {
       context.error(Name.NO_METHOD_ERROR, 
           "Could not find a method to match argument " + arg + ".");

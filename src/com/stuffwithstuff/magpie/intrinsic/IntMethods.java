@@ -48,11 +48,8 @@ public class IntMethods {
   }
 
   private abstract static class ArithmeticOperator implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
-      int left = arg.getField(0).asInt();
-      int right = arg.getField(1).asInt();
-      
-      return context.toObj(perform(left, right));
+    public Obj invoke(Context context, Obj left, Obj right) {
+      return context.toObj(perform(left.asInt(), right.asInt()));
     }
     
     protected abstract int perform(int left, int right);
@@ -60,28 +57,22 @@ public class IntMethods {
   
   @Def("(is Int) ==(right is Int)")
   public static class Equals implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
-      int left = arg.getField(0).asInt();
-      int right = arg.getField(1).asInt();
-      
-      return context.toObj(left == right);
+    public Obj invoke(Context context, Obj left, Obj right) {
+      return context.toObj(left.asInt() == right.asInt());
     }
   }
   
   @Def("(is Int) compareTo(other is Int)")
   public static class Compare implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
-      int left = arg.getField(0).asInt();
-      int right = arg.getField(1).asInt();
-      
-      return context.toObj(((Integer)left).compareTo(right));
+    public Obj invoke(Context context, Obj left, Obj right) {
+      return context.toObj(((Integer)left.asInt()).compareTo(right.asInt()));
     }
   }
   
   @Def("(is Int) string")
   public static class String_ implements Intrinsic {
-    public Obj invoke(Context context, Obj arg) {
-      return context.toObj(Integer.toString(arg.getField(0).asInt()));
+    public Obj invoke(Context context, Obj left, Obj right) {
+      return context.toObj(Integer.toString(left.asInt()));
     }
   }
 }

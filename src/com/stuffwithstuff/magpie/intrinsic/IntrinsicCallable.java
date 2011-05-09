@@ -15,7 +15,7 @@ public class IntrinsicCallable implements Callable {
 
   @Override
   public Obj invoke(Context context, Obj arg) {
-    return mCallable.invoke(context, arg);
+    return mCallable.invoke(context, arg.getField(0), arg.getField(1));
   }
   
   @Override
