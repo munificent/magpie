@@ -56,7 +56,7 @@ public class ListMethods {
   @Def("(is List) count")
   public static class Count implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
-      List<Obj> elements = arg.asList();
+      List<Obj> elements = arg.getField(0).asList();
       return context.toObj(elements.size());
     }
   }

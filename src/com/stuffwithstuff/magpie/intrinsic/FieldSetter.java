@@ -16,14 +16,14 @@ public class FieldSetter implements Callable {
   public FieldSetter(ClassObj classObj, String name, Field field, Scope closure) {
     mName = name;
     mPattern = Pattern.record(
-        Pattern.type(Expr.name(classObj.getName())),
+        Pattern.record(Pattern.type(Expr.name(classObj.getName())), Pattern.nothing()),
         field.getPattern());
     mClosure = closure;
   }
   
   @Override
   public Obj invoke(Context context, Obj arg) {
-    arg.getField(0).setField(mName, arg.getField(1));
+    arg.getField(0).getField(0).setField(mName, arg.getField(1));
     return arg.getField(1);
   }
 

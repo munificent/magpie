@@ -14,7 +14,7 @@ public class ReflectMethods {
   @Def("(_) class")
   public static class Class_ implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
-      return arg.getClassObj();
+      return arg.getField(0).getClassObj();
     }
   }
 
@@ -73,7 +73,7 @@ public class ReflectMethods {
   @Def("(is Class) doc")
   public static class ClassDoc implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
-      ClassObj classObj = arg.getField(1).asClass();
+      ClassObj classObj = arg.getField(0).asClass();
       
       StringBuilder builder = new StringBuilder();
       builder.append(classObj.getName() + "\n");

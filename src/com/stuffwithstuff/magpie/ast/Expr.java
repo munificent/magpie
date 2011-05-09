@@ -44,8 +44,8 @@ public abstract class Expr {
     return new CallExpr(position, name, arg);
   }
   
-  public static Expr getter(Position position, Expr leftArg, String name) {
-    return new CallExpr(position, name, leftArg);
+  public static Expr call(Position position, Expr leftArg, String name) {
+    return new CallExpr(position, name, Expr.record(leftArg, Expr.nothing()));
   }
 
   public static Expr class_(Position position, String doc,

@@ -27,20 +27,19 @@ end
 
 specify("An unquote in a quote") with
     it should("insert the value of a named identifier into the quote") with
-        var foo = { b a }
-        var result = { `foo c }
-        result name shouldEqual("c")
-        result argument name shouldEqual("a")
-        result argument argument name shouldEqual("b")
+        var foo = { 123 }
+        var result = { `foo }
+        result shouldBe(IntExpression)
+        result value shouldEqual(123)
     end
 
     it should("allow a parenthesized expression after the backtick") with
         def make(value)
             IntExpression new(value: value)
         end
-        var result = { `(make(123)) method }
-        result name shouldEqual("method")
-        result argument value shouldEqual(123)
+        var result = { `(make(123)) }
+        result shouldBe(IntExpression)
+        result value shouldEqual(123)
     end
 
     it should("wrap an unquoted nothing in a NothingExpression") with

@@ -44,7 +44,7 @@ public class DefParser implements PrefixParser {
       if (parser.lookAhead(TokenType.LEFT_PAREN)) {
         rightArg = parsePattern(parser);
       } else {
-        rightArg = null;
+        rightArg = Pattern.nothing();
       }
     } else {
       // No name, so it must be an indexer.
@@ -66,19 +66,7 @@ public class DefParser implements PrefixParser {
     }
 
     // Combine into a single multimethod pattern.
-    // def m(r)         -> m(nothing, r)
-    // def (l) g        -> g(l)
-    // def (l) m(r)     -> m(l, r)
-    // def s(r) = v     -> s_=((nothing, r), v)
-    // def (l) s = v    -> s_=(l, v)
-    // def (l) s(r) = v -> s_=((l, r), v)
-    
-    Pattern pattern;
-    if (rightArg == null) {
-      pattern = leftArg;
-    } else {
-      pattern = Pattern.record(leftArg, rightArg);
-    }
+    Pattern pattern = Pattern.record(leftArg, rightArg);
     
     if (setValue != null) {
       name = Name.makeAssigner(name);

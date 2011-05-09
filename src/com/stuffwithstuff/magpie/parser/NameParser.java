@@ -53,7 +53,7 @@ public class NameParser implements PrefixParser, InfixParser {
       }
     } else {
       if (arg == null) {
-        return Expr.getter(token.getPosition(), left, token.getString());
+        return Expr.call(token.getPosition(), left, token.getString());
       } else {
         return Expr.call(token.getPosition(), left, token.getString(), arg);
       }

@@ -14,13 +14,13 @@ import com.stuffwithstuff.magpie.interpreter.Scope;
 public class FieldGetter implements Callable {
   public FieldGetter(ClassObj classObj, String name, Scope closure) {
     mName = name;
-    mPattern = Pattern.type(Expr.name(classObj.getName()));
+    mPattern = Pattern.record(Pattern.type(Expr.name(classObj.getName())), Pattern.nothing());
     mClosure = closure;
   }
   
   @Override
   public Obj invoke(Context context, Obj arg) {
-    Obj value = arg.getField(mName);
+    Obj value = arg.getField(0).getField(mName);
     if (value == null) return context.nothing();
     return value;
   }

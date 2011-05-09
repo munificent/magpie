@@ -34,7 +34,6 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
   @Override
   public Expr visit(CallExpr expr, Expr value) {
     // call(arg) --> call_=(arg, value)
-    
     return Expr.call(expr.getPosition(), expr.getArg(),
         Name.makeAssigner(expr.getName()), value);
   }

@@ -27,7 +27,7 @@ public class StringMethods {
   @Def("(is String) count")
   public static class Count implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
-      return context.toObj(arg.asString().length());
+      return context.toObj(arg.getField(0).asString().length());
     }
   }
   

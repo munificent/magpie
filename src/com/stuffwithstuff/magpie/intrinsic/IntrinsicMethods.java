@@ -90,7 +90,7 @@ public class IntrinsicMethods {
   @Def("(this is Class) name")
   public static class Class_Name implements Intrinsic {
     public Obj invoke(Context context, Obj arg) {
-      return context.toObj(arg.asClass().getName());
+      return context.toObj(arg.getField(0).asClass().getName());
     }
   }
 
