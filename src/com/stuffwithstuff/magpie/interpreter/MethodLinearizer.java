@@ -90,7 +90,7 @@ public class MethodLinearizer implements Comparator<Callable> {
       switch (kind2) {
       case ANY:     return firstWins;
       case RECORD:  return compareRecords(pattern1, scope1, pattern2, scope2);
-      case TYPE:    return compareTypes(pattern1, scope1, pattern2, scope2);
+      case TYPE:    return firstWins;
       case VALUE:   return secondWins;
       default:
         throw new UnsupportedOperationException("Unknown pattern kind.");
@@ -98,7 +98,7 @@ public class MethodLinearizer implements Comparator<Callable> {
     case TYPE:
       switch (kind2) {
       case ANY:     return firstWins;
-      case RECORD:  return compareTypes(pattern1, scope1, pattern2, scope2);
+      case RECORD:  return secondWins;
       case TYPE:    return compareTypes(pattern1, scope1, pattern2, scope2);
       case VALUE:   return secondWins;
       default:
@@ -179,8 +179,8 @@ public class MethodLinearizer implements Comparator<Callable> {
   
   private int compareTypes(Pattern pattern1, Scope scope1,
       Pattern pattern2, Scope scope2) {
-    Obj type1 = mContext.evaluate(PatternTyper.evaluate(pattern1), scope1);
-    Obj type2 = mContext.evaluate(PatternTyper.evaluate(pattern2), scope2);
+    Obj type1 = mContext.evaluate(((TypePattern)pattern1).getType(), scope1);
+    Obj type2 = mContext.evaluate(((TypePattern)pattern2).getType(), scope2);
     
     // TODO(bob): WIP getting rid of types.
     if (type1 instanceof ClassObj && type2 instanceof ClassObj) {
