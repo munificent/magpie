@@ -52,7 +52,7 @@ Here is a "safe" division function that does not allow dividing by zero. Since a
 
 Unlike a returned error, a thrown error will not be given back to the calling code. Instead, Magpie will continue to unwind the callstack, causing each successive method to immediately return until the error is *caught*.
 
-Errors are caught using a catch clause, which is `catch` followed by a [pattern](patterns.html), followed by `then`, and finally the expression or block to execute when an error is caught.
+Errors are caught using a *catch clause*, which is `catch` followed by a [pattern](patterns.html), followed by `then`, and finally the expression or block to execute when an error is caught.
 
     :::magpie
     def canDivide?(numerator is Int, denominator is Int)
@@ -62,9 +62,7 @@ Errors are caught using a catch clause, which is `catch` followed by a [pattern]
         false // If we got here, an error occurred.
     end
 
-You can see here that unlike the exception-handling syntax in most languages, Magpie does not have an explicit `try` syntax. Instead, *any* [block](blocks.html) is implicitly a "try" block and may have catch clauses.
-
-In `canDivide`, the block is the method body itself, but any block may have catch clauses. For example:
+You can see here that unlike the exception-handling syntax in most languages, Magpie does not have an explicit `try` syntax. Instead, *any* [block](blocks.html) is implicitly a "try" block and may have catch clauses. In `canDivide`, the block is the method body itself, but other blocks may have catch clauses. For example:
 
     :::magpie
     if someCondition? then
