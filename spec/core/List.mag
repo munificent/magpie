@@ -103,3 +103,46 @@ specify("The 'count' method on Lists") with
         ["a", "b"] count shouldEqual(2)
     end
 end
+
+specify("The 'insert' method on Lists") with
+    it should("insert an item at the given index") with
+        var list = ["a", "b", "c"]
+        list insert("d", at: 0)
+        list insert("e", at: 2)
+        list insert("f", at: 5)
+
+        list[0] shouldEqual("d")
+        list[1] shouldEqual("a")
+        list[2] shouldEqual("e")
+        list[3] shouldEqual("b")
+        list[4] shouldEqual("c")
+        list[5] shouldEqual("f")
+    end
+
+    it should("count from the back (+1) if the index is negative") with
+        var list = ["a", "b", "c"]
+        list insert("d", at: -1)
+        list insert("e", at: -2)
+
+        list[0] shouldEqual("a")
+        list[1] shouldEqual("b")
+        list[2] shouldEqual("c")
+        list[3] shouldEqual("e")
+        list[4] shouldEqual("d")
+    end
+
+    it should("return the inserted item") with
+        ["a"] insert("b", at: 0) shouldEqual("b")
+    end
+
+    it should("throw an OutOfBoundsError on a bad index") with
+        var list = [1, 2, 3]
+        fn
+            list insert("dummy", at: 4)
+        end shouldThrow(OutOfBoundsError)
+
+        fn
+            list insert("dummy", at: -5)
+        end shouldThrow(OutOfBoundsError)
+    end
+end

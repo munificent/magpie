@@ -11,25 +11,23 @@ public class ListMethods {
   @Def("(is List)[index is Int]")
   public static class Index implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
-      List<Obj> elements = left.asList();
-      int index = validateIndex(context, elements,
-          right.asInt());
+      List<Obj> list = left.asList();
+      int index = validateIndex(context, list, right.asInt());
       
-      return elements.get(index);
+      return list.get(index);
     }
   }
 
   @Def("(is List)[index is Int] = (item)")
   public static class IndexAssign implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
-      List<Obj> elements = left.getField(0).asList();
+      List<Obj> list = left.getField(0).asList();
       
-      int index = validateIndex(context, elements,
-          left.getField(1).asInt());
+      int index = validateIndex(context, list, left.getField(1).asInt());
       
       Obj value = right;
       
-      elements.set(index, value);
+      list.set(index, value);
       return value;
     }
   }
@@ -61,53 +59,37 @@ public class ListMethods {
     }
   }
   
-  private static int validateIndex(Context context, List<Obj> list,
-      int index) {
+  @Def("(is List) insert(item, at: index is Int)")
+  public static class Insert implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      List<Obj> list = left.asList();
+      Obj value = right.getField(0);
+      
+      int index = validateIndex(context, list.size() + 1,
+          right.getField("at").asInt());
+
+      list.add(index, value);
+      
+      return value;
+    }
+  }
+
+  private static int validateIndex(Context context, List<Obj> list, int index) {
+    return validateIndex(context, list.size(), index);
+  }
+  
+  private static int validateIndex(Context context, int size, int index) {
     // Negative indices count backwards from the end.
     if (index < 0) {
-      index = list.size() + index;
+      index = size + index;
     }
     
     // Check the bounds.
-    if ((index < 0) || (index >= list.size())) {
+    if ((index < 0) || (index >= size)) {
       context.error(Name.OUT_OF_BOUNDS_ERROR, "Index " + index +
-          " is out of bounds [0, " + list.size() + "].");
+          " is out of bounds [0, " + size + "].");
     }
     
     return index;
   }
-
-  /*
-
-  
-  @Signature("insert(index Int, item ->)")
-  public static class Insert implements BuiltInCallable {
-    public Obj invoke(Context context, Obj thisObj, Obj arg) {
-      int index = arg.getTupleField(0).asInt();
-      Obj value = arg.getTupleField(1);
-  
-      List<Obj> elements = thisObj.asArray();
-      elements.add(index, value);
-      
-      return interpreter.nothing();
-    }
-  }
-  
-  @Signature("removeAt(index Int)")
-  public static class RemoveAt implements BuiltInCallable {
-    public Obj invoke(Context context, Obj thisObj, Obj arg) {
-      List<Obj> elements = thisObj.asArray();
-      
-      int index = arg.asInt();
-      
-      // Negative indices count backwards from the end.
-      if (index < 0) {
-        index = elements.size() + index;
-      }
-      
-      return elements.remove(index);
-    }
-  }
-  
-  */
 }

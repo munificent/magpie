@@ -26,7 +26,7 @@ def runTests()
         _totalTests + " tests in " + (endTimeMs - _startTimeMs) + "ms.")
 end
 
-def specify(spec (description is String, block is Function))
+def specify(spec (is String, is Function))
     _specs add(spec)
 end
 
