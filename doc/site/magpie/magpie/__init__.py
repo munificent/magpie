@@ -21,12 +21,8 @@ class MagpieLexer(RegexLexer):
             (r'(and|break|case|catch|def|defclass|definfix|do|else|end|fn|for|'
              r'if|import|is|match|or|return|then|throw|val|var|while)\b', Keyword),
 
-            (r'(true|false|nothing)\b', Name.Builtin),
-
-            (r'(this|it)\b', Name.Builtin.Pseudo),
-
             # keywords
-            (r'(\<\-|\-\>|\.)', Keyword),
+            # (r'(=)', Keyword),
 
             (r'[,()\\\[\]{}]', Punctuation),
 
@@ -35,8 +31,11 @@ class MagpieLexer(RegexLexer):
             (r'/\*.*?\*/', Comment.Multiline),
 
             # user-defined names
-            (r'[a-zA-Z_][a-zA-Z_0-9`~!$%^&*\-=+\\|/?<>]*', Name),
-            #(r'[`~!$%^&*\-=+\\|/?<>][a-zA-Z_0-9`~!$%^&*\-=+\\|/?<>]*', Operator),
+            (r'[a-zA-Z_~!$%^&*\-=+\\|/?<>\.][a-zA-Z_~!$%^&*\-=+\\|/?<>\.0-9]*', Name),
+
+            # built-in names
+            (r'(true|false|nothing)\b', Name.Builtin),
+            (r'(this|it)\b', Name.Builtin.Pseudo),
 
             # literals
 

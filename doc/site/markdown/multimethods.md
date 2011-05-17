@@ -65,6 +65,35 @@ And, finally, methods can have arguments on both sides:
 
 When defining a method, both the left and right argument patterns, if present, must be in parentheses. When *calling* a method, only the right one must.
 
+## Indexers
+
+Most methods will be named methods like we've seen, but Magpie also has a little syntactic sugar for working with collection-like objects: *indexer methods*. These are essentially methods whose name is `[]`.
+
+    :::magpie
+    list[2]
+
+Here, we're accessing an element from some `list` variable by calling an indexer method. The left argument is `list` and the right argument is `2`. Aside from their syntax, there is nothing special about indexers. They're just methods like any other and you're free to define your own indexers, like so:
+
+    :::magpie
+    def (this is String)[index is Int]
+        this substring(index, 1)
+    end
+
+Here, we've defined an indexer on strings that takes a number and returns the character at that index (as a string). As you'd expect, the right argument can also be a [record](records.html):
+
+    :::magpie
+    defclass Grid
+        val width is Int
+        val height is Int
+        val cells is List
+    end
+
+    def (this is Grid)[x is Int, y is Int]
+        cells[y * width + x]
+    end
+
+Here we've defined a `Grid` class that represents a 2D array of cells. You can get the cell at a given coordinate using an indexer that takes two ints, like `grid[2, 3]`.
+
 ## Method Scope
 
 In the above examples, it looks like we're adding methods to the `String` class. In other languages, this is called [monkey-patching](http://en.wikipedia.org/wiki/Monkey_patch) and it's frowned upon. If two unrelated parts of the codebase both declare methods on the same class with the same name, they will collide and do something... probably bad.
@@ -92,7 +121,7 @@ In Magpie (as in [CLOS](http://en.wikipedia.org/wiki/CLOS)) methods are not *own
 
 It is impossible to have a method collision in Magpie. If you try to define two methods with the same name and pattern in the same scope, it will [throw an error](error-handling.html). This way, you're free to define methods that are called in a way that appears natural without having to worry about shooting yourself in the foot.
 
-<p class="future">Eh, currently it doesn't check for pattern collisions. But it will.</p>
+<p class="future">Checking for pattern collisions hasn't been implemented yet.</p>
 
 ## Multimethods
 
@@ -124,7 +153,7 @@ Since all methods actually take a single argument, we're free to specialize a mu
         this + this
     end
 
-    def (this is Int)
+    def (this is Int) double
         this * 2
     end
 
@@ -173,9 +202,9 @@ First, different kinds of patterns are ordered. From best to worst:
 3.  Type patterns
 4.  Wildcard patterns
 
-For variable patterns, we look at its inner pattern. (If it doesn't have one, it implicitly has a wildcard one.) The above list resolves our `odd?` example: the first method will win since a value pattern (`0`) takes precedence over a type pattern (`is Int`).
+For variable patterns, we look at its inner pattern. (If it doesn't have one, it is implicitly `_`, the wildcard pattern.) The above list addresses our `odd?` example: the first method will win since a value pattern (`0`) takes precedence over a type pattern (`is Int`).
 
-To linearize two patterns of the same kind, we need more precise rules.
+To linearize two patterns of the *same* kind, we need more precise rules.
 
 ### Class Ordering
 
@@ -239,9 +268,22 @@ It's possible for two record patterns to match the same argument.
 
     printPoint(x: 1, y: 2, z: 3)
 
-A record pattern matches as long as the argument has the fields the record requires. *Extra* fields are allowed and ignored, so here both methods match.
+A record pattern matches as long as the argument has the fields the record requires. *Extra* fields are allowed and ignored, so here both methods match. It's also possible for records with the same fields but different field patterns to match:
 
-The rules for ordering records are a bit subtle. The first requirement is that the records must specify the same fields, or one must be a subset of the other. If not, they cannot be ordered and an `AmbiguousMethodError` is [thrown](error-handling.html).
+    :::magpie
+    def sameGeneration?(a: is Parent, b: is Parent)
+        true
+    end
+
+    def sameGeneration?(a: is Child, b: is Child)
+        true
+    end
+
+    def sameGeneration?(a: _, b: _)
+        false
+    end
+
+Ordering these can be complex, so the linearization rules for records a bit subtle. The first requirement is that the records must specify the same fields, or one must be a subset of the other. If not, they cannot be ordered and an `AmbiguousMethodError` is [thrown](error-handling.html).
 
     :::magpie
     def say(x: x)
@@ -254,19 +296,33 @@ The rules for ordering records are a bit subtle. The first requirement is that t
 
     say(x: 1, y: 2)
 
-It's unclear what the programmer was even trying to accomplish here, and Magpie can't read your mind. So in cases like this, it just raises an error to signal its confusion.
+It's unclear what the programmer was even trying to accomplish here, and Magpie can't read your mind. So in cases like this, it just raises an error to signal its confusion. Our first example doesn't have this problem, though. The first definition of `printPoint` is a subset of the former, so there's no ambiguity. In that case, it proceeds to the next step.
 
-Our first example doesn't have this problem, though. The first definition of `printPoint` is a subset of the former, so there's no ambiguity. In that case, it proceeds to the next step. We go through the fields that the two records have in common and linearize their patterns. If all of those fields order the same way, then the record whose fields wins is the winner. If they disagree, it's ambiguous.
+There are several signals we can rely on to tell us which record should come first. We'll call those *lean*. To order records in a predictable way, those signals need to agree with each other. The first signal is if one record has fields the other doesn't. In our first `printPoint` example, the second method has an extra `z:` field. That means we *lean* towards preferring that method since it "uses more" of the argument that gets passed in.
 
-**TODO still ambiguous as to which printPoint wins here.**
+Next, we go through the fields that the two records have in common and linearize *their* patterns. Whichever pattern wins is a lean towards that record. (If the patterns compare the same, like the `x` and `y` fields in the two `printPoint` methods, then there's no lean one way or the other.)
 
-<p class="future">There are still some details and corner cases that I'm working on here, so this may change a bit over time though the basics seem pretty solid.</p>
+If all of the leans are towards one record, it wins. If the leans are inconsistent then it's ambiguous. This is all a bit fishy, so some examples should clarify:
 
+    :::magpie
+    x: x, y: y
+    x: x, y: y, z: z
+    // Second wins: more fields
 
-**TODO**
+    x: x, y: y
+    y: y, z: z
+    // Ambiguous: neither is a subset of the other
 
-## Indexers
+    a: is Parent, b: is Parent
+    a: is Child, b: is Parent
+    // Second wins: Child is more specific
 
-**TODO**
+    a: is Parent, b: is Child
+    a: is Child, b: is Parent
+    // Ambiguous: fields disagree
 
-**TODO: Also need to document how they interact with modules.**
+The general theme here is that it tries to pick records that are "obviously" the more specific one where "more specific" means more fields or more precise fields. If it isn't crystal clear which one the programmer intended to win, Magpie just throws its hands up and pleads confusion.
+
+**TODO: Setters and indexer setters.**
+
+**TODO: Need to document how multimethods interact with modules.**

@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import glob
 import markdown
 import os
@@ -82,7 +84,7 @@ def format_file(path):
     template = template.replace('$(title)', title)
 #    template = template.replace('$(prev)', prev)
 #    template = template.replace('$(next)', next)
-    template = template.replace('$(breadcrumb)', breadcrumb(basename))
+#    template = template.replace('$(breadcrumb)', breadcrumb(basename))
     template = template.replace('$(root)', root)
     template = template.replace('$(content)', html)
 

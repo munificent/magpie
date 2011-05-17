@@ -84,8 +84,7 @@ a:hover {
 
 .content {
   max-width: 640px;
-  margin: 0 0 0 280px;
-  padding: 40px;
+  margin: 40px 40px 40px 320px;
 
   h2 {
     font: normal 24px $serif;
@@ -189,7 +188,7 @@ p.future {
   padding: 10px;
 }
 
-/* syntax highlighting */
+// Syntax highlighting.
 $syntax-keyword:     $primary;
 $syntax-comment:     lighten($syntax-default, 20%);
 $syntax-literal:     hsl(200, 100%, 35%);

@@ -1,6 +1,6 @@
 ^title Calls
 
-Most of the expressions you'll write in Magpie will be *calls*. A call invokes a [multimethod](multimethods.html) by name, passing in the provided argument. Method calls may have one of three different "fixities" in Magpie, which means the name of the method may appear before, after, or in the middle of the argument.
+Most of the [expressions](expressions.html) you'll write in Magpie will be *calls*. A call invokes a [multimethod](multimethods.html) by name, passing in the provided argument. Method calls may have one of three different "fixities" in Magpie, which means the name of the method may appear before, after, or in the middle of the argument.
 
 It's important to note that the fixity distinction is purely syntactic. Semantically, all method calls are just calls that take a single argument. Magpie is flexible here is so that you can define methods that read most clearly when called.
 
