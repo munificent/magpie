@@ -22,7 +22,7 @@ This declares a simple class `Point`, with two fields `x` and `y`.
 
 ## Constructing Instances
 
-Once you've defined a class, you can instantiate new instances of it by calling the constructor method `new`. The left-hand argument to `new` is the class being instantiated, and the right-hand argument is a [record](records.html). The record has a named field for each field that the class defines. The types of those fields must match the pattern defined for the field if any. Given our above `Point` class, we can create a new instance like this:
+Once you've defined a class, you instantiate new instances of it by calling the constructor method `new`. The left-hand argument to `new` is the class being instantiated, and the right-hand argument is a [record](records.html). The record has a named field for each field that the class defines. The types of those fields must match the pattern defined for the field if any. Given our above `Point` class, we can create a new instance like this:
 
     :::magpie
     var point = Point new(x: 2, y: 3)
@@ -45,7 +45,7 @@ Here we've defined a new `init()` method that takes a `x` and `y` coordinates us
 
 When you call `new()` it looks for an `init()` method that matches *whatever* you pass to it. In this case, `2, 3` matches our overloaded `init()` method. That method in turn calls the canonical or "real" initializer to ensure that all of the class's fields are initialized.
 
-This way, you are free to overload `init()` to make it easy to create instances of your classes. The only key requirement is that an `init()` method needs to eventually "bottom out" and call the canonical initializer before it returns. The canonical `init()` does the magic of actually initializing all of the fields. 
+This way, you are free to overload `init()` to make it easy to create instances of your classes. The only key requirement is that an `init()` method needs to eventually "bottom out" and call the canonical initializer before it returns. The canonical `init()` does the magic of actually initializing all of the fields.
 
 ### Overloading Construction
 
@@ -65,7 +65,7 @@ This also gives you the flexibility of creating an instance of a different class
 
 ## Fields
 
-Once you have an instance of a class, you can access a field by invoking a [getter](calls.html) on the object whose name is the name of the field.
+Once you have an instance of a class, you access a field by invoking a [getter](calls.html) on the object whose name is the name of the field.
 
     :::magpie
     var point = Point new(x: 2, y: 3)
@@ -86,7 +86,7 @@ Setting a field on an existing object looks like you'd expect:
 
 ### Field Patterns
 
-When defining a field, you may optionally give it a [pattern](patterns.html) after the field's name. If provided, then the you will only be able to initialize or assign to the field using values that match that pattern.
+When defining a field, you may optionally give it a [pattern](patterns.html) after the field's name. If provided, then you will only be able to initialize or assign to the field using values that match that pattern.
 
     :::magpie
     defclass Point
@@ -94,7 +94,7 @@ When defining a field, you may optionally give it a [pattern](patterns.html) aft
         var y is Int
     end
 
-Here `x` and `y` are now constrained to number values by using `is Int` patterns. If you try to construct a `Point` using another type, or set a field using something other than an `Int`, you'll get an error.
+Here `x` and `y` are now constrained to number values by using `is Int` patterns. If you try to construct a `Point` using another type, or set a field using something other than an `Int`, you'll get an [error](error-handling.html).
 
 ### Immutable Fields
 
@@ -124,6 +124,6 @@ Here `Point`s will default to be `0, 0`. You can create a new one simply by doin
     :::magpie
     var point = Point new()
 
-## Inheritance 
+## Inheritance
 
 **TODO**

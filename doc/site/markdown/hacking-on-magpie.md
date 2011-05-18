@@ -22,10 +22,11 @@ Magpie lives on [github](http://github.com). To work on the source, just clone [
 
 The code for the interpreter is split out into six namespaces:
 
-* `com.stuffwithstuff.magpie`: Top-level stuff for the application: `main()`, the REPL, file-loading, etc.
+* `com.stuffwithstuff.magpie`: Classes that define the visible programmatic interface to the language. If you host Magpie within your own app, you'll talk to Magpie through here.
+* `com.stuffwithstuff.magpie.app`: Stuff for the standalone application: `main()`, the REPL, file-loading, etc.
 * `com.stuffwithstuff.magpie.ast`: Classes for the parsed syntax tree. The code here defines the data structures that hold Magpie code.
 * `com.stuffwithstuff.magpie.interpreter`: The interpreter. The heart of Magpie is here.
-* `com.stuffwithstuff.magpie.interpreter.builtins`: Built-ins. Methods in Magpie that are implemented in Java live here.
+* `com.stuffwithstuff.magpie.intrinsics`: Built-in methods in Magpie that are implemented in Java live here.
 * `com.stuffwithstuff.parser`: The lexer and parser. This takes in a string of code and spits out AST.
 * `com.stuffwithstuff.util`: Other random utility stuff.
 
@@ -52,20 +53,11 @@ The simplest way to understand Magpie's code is to walk through it in the order 
     that its syntax can be extended by users.
 
     The end result of this is single expression or list of expressions.
-    The source code is now in a form that Magpie can understand. Each expression
-    will be a subclass of the base `Expr` class. There are subclasses for all
-    of the core expression types (i.e. the things that don't get desugared
-    away): literals (`IntExpr`, `StringExpr`, etc.), messages (`MessageExpr`),
-    flow control (`IfExpr`, `ReturnExpr`, etc.), etc.
+    The source code is now in a form that Magpie can understand. Each expression will be a subclass of the base `Expr` class. There are subclasses for all of the core expression types (i.e. the things that don't get desugared away): literals (`IntExpr`, `StringExpr`, etc.), calls (`CallExpr`), flow control (`MatchExpr`, `ReturnExpr`, etc.), etc.
 
     The actual set of `Expr` subclasses is in flux. It isn't well-defined what
     becomes a real AST node, and what gets desugared by the parser into
-    something simpler. Having fewer AST classes makes the interpreter simpler to
-    implement. Having more makes it easier to create good error messages. What
-    will likely happen over time is that this will be split into two levels: a
-    rich AST set that is very close to the text syntax. That will get translated
-    to a much simpler core syntax (basically just messages and literals) which
-    will be what the interpreter or compiler sees.
+    something simpler. Having fewer AST classes makes the interpreter simpler to implement. Having more makes it easier to create good error messages. What will likely happen over time is that this will be split into two levels: a rich AST set that is very close to the text syntax. That will get translated to a much simpler core syntax (basically just messages and literals) which will be what the interpreter or compiler sees.
 
 4.  Next, we create an `Interpreter` to actually interpret the `Expr`s. It
     creates a global `Scope`, and defines the built-in types in it: `Int`,
@@ -78,22 +70,14 @@ The simplest way to understand Magpie's code is to walk through it in the order 
     to Magpie. `BuiltIn` uses reflection to find all of those methods and make
     them available to be called from Magpie.
 
-6. Now we've got a live Magpie environment we can start running code in, but
-   it's still pretty empty. Things like interfaces aren't defined in Java,
-   they're in the base library. So before we can do useful stuff, we need to
-   load the base lib. This is done automatically by `Script` before it runs the
-   user-provided code.
+6.  Now we've got a live Magpie environment we can start running code in, but
+    it's still pretty empty. Things like interfaces aren't defined in Java, they're in the base library. So before we can do useful stuff, we need to load the base lib. This is done automatically by `Script` before it runs the user-provided code.
 
-7. Finally we can throw our code at the interpreter. We pass it our parsed
-   expressions. It creates an `EvalContext` which defines the context in which
-   code is executed: the local variable scope (and its parent scopes), as well
-   as what `this` refers to. Code is always evaluated with an `EvalContext`.
+7.  Finally we can throw our code at the interpreter. We pass it our parsed
+    expressions. It creates an `EvalContext` which defines the context in which code is executed: the local variable scope (and its parent scopes), as well as what `this` refers to. Code is always evaluated with an `EvalContext`.
 
-8.  It then creates an `ExprEvaluator`. `Expr` uses the Visitor Pattern to allow
-    operations on the different expression types without having to put that code
-    directly in the `Expr`-derived classes. `ExprEvaluator` is one of the two
-    visitors in Magpie. It, as you'd expect, evaluates `Expr`s. This is where
-    the actual Magpie code gets interpreted.
+8.  It then creates an `ExprEvaluator`. `Expr` uses the Visitor Pattern to
+    allow operations on the different expression types without having to put that code directly in the `Expr`-derived classes. `ExprEvaluator` is one of the two visitors in Magpie. It, as you'd expect, evaluates `Expr`s. This is where the actual Magpie code gets interpreted.
 
     Right now, Magpie is a tree-walk interpreter: it interprets code by
     recursively traversing an expression tree and evaluating the nodes. At some
@@ -102,51 +86,4 @@ The simplest way to understand Magpie's code is to walk through it in the order 
     generate bytecode.
 
 9.  We pass our expressions to evaluate to the evaluator which evaluates them.
-    Ta-da! We've run Magpie code. Now this is where things get interesting. At
-    this point, we've evaluated the script given to us. When that's done, it's
-    possible that that script defined a function and assigned it to the global
-    variable `main`. If that's happened, it's time to type-check...
-
-10. `Script` now creates a `Checker`. This class is the static sister to
-    `Interpreter`. Where the interpreter evaluates code dynamically, the checker
-    examines its statically. We pass the interpreter to checker (because it has
-    the global scope where everything we're checking is defined) and tell it to
-    check.
-
-11. `Checker` creates a new top-level `EvalContext`. `EvalContext`s in the
-    interpreter bind variable *values* to names. In the `Checker`, we'll use the
-    same `EvalContext` class, but we'll be binding *types* to names. (We can
-    re-use `EvalContext` here because all types are first-class in Magpie: a
-    type is just another Magpie object, so it *is* a value.
-
-    Then it walks through all of the classes and functions remaining in global
-    scope and checks them.
-
-12. To check a function, we create an `ExprChecker`. This is the other `Expr`
-    visitor class. It walks a tree of `Expr`s and type-checks them. The most
-    important part of type-checking is that when it encounters a `MessageExpr`,
-    it looks at the type of the receiver to see if it's a valid message for that
-    type. Then it looks at the arguments being passed to make sure they match
-    the type annotations provided for the parameters.
-
-13. Right here is where Magpie is very different from most languages. The core
-    of type-checking is looking at type compatibility: you have a method that's
-    declared to take a `Foo` and you're passing it a `Bar` is that OK?
-
-    In most languages, the rules for answer that question (the subtype relation)
-    are hard-coded in the interpreter or compiler. In Magpie, they're actually
-    implemented in Magpie (in the base lib). This means that in the middle of
-    *statically* checking Magpie code, we need to periodically switch to
-    *dynamically* evaluating some Magpie code.
-
-    When we check a function, it will periodically call over to the interpreter
-    to tell it to *evaluate* some expression: a type annotation or a
-    `canAssignFrom` message which is what Magpie calls the subtype test. This is
-    the most magical part of Magpie's code.
-
-14. If any of these type-checks fail, we generate a runtime error. Once
-    everything is checked, those errors are returned to `Script`. If there are
-    any, it prints them and stops. (Yay! Static type-safety in a dynamic
-    language!) Otherwise, it then invokes `main()`.
-
-15. We're done!
+    Ta-da! We've run Magpie code.
