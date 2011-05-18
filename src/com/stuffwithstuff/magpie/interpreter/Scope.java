@@ -4,10 +4,10 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.util.Expect;
+import com.stuffwithstuff.magpie.util.Pair;
 
 /**
- * A scope for named variables. This is used to define the name environment
- * both for local variables in a block, and for members in an object.
+ * A lexical scope for named variables and multimethods.
  */
 public class Scope {
   /**
@@ -110,8 +110,13 @@ public class Scope {
   public boolean assign(String name, Obj value) {
     Scope scope = this;
     while (scope != null) {
-      if (scope.mVariables.containsKey(name)) {
-        scope.mVariables.put(name, value);
+      Pair<Boolean, Obj> variable = scope.mVariables.get(name);
+      if (variable != null) {
+        // Only assign if the variable is mutable.
+        // TODO(bob): Should be a static error.
+        if (variable.getKey()) {
+          scope.mVariables.put(name, new Pair<Boolean, Obj>(true, value));
+        }
         return true;
       }
       scope = scope.getParent();
@@ -120,14 +125,14 @@ public class Scope {
     return false;
   }
 
-  public boolean define(String name, Obj value) {
+  public boolean define(boolean isMutable, String name, Obj value) {
     Expect.notEmpty(name);
     Expect.notNull(value);
 
     // Don't allow redefinition.
     if (!mAllowRedefinition && (get(name) != null)) return false;
 
-    mVariables.put(name, value);
+    mVariables.put(name, new Pair<Boolean, Obj>(isMutable, value));
     
     // If we're defining a top-level public variable, export it too.
     if ((mParent == null) && Name.isPublic(name)) {
@@ -140,7 +145,9 @@ public class Scope {
   public Obj get(String name) {
     Expect.notEmpty(name);
     
-    return mVariables.get(name);
+    Pair<Boolean, Obj> variable = mVariables.get(name);
+    if (variable == null) return null;
+    return variable.getValue();
   }
   
   public void define(String name, Callable method) {
@@ -178,7 +185,7 @@ public class Scope {
     return null;
   }
 
-  public Set<Entry<String, Obj>> entries() {
+  public Set<Entry<String, Pair<Boolean, Obj>>> entries() {
     return mVariables.entrySet();
   }
   
@@ -192,9 +199,14 @@ public class Scope {
     
     Scope scope = this;
     while (scope != null) {
-      for (Entry<String, Obj> entry : scope.entries()) {
-        builder.append("var ").append(entry.getKey())
-               .append(" = ").append(entry.getValue()).append("\n");
+      for (Entry<String, Pair<Boolean, Obj>> entry : scope.entries()) {
+        if (entry.getValue().getKey()) {
+          builder.append("var ");
+        } else {
+          builder.append("val ");
+        }
+        builder.append(entry.getKey())
+               .append(" = ").append(entry.getValue().getValue()).append("\n");
       }
       
       for (Entry<String, Multimethod> multimethod : scope.getMultimethods().entrySet()) {
@@ -220,7 +232,7 @@ public class Scope {
           "that name defined.");
     }
     
-    mVariables.put(name, value);
+    mVariables.put(name, new Pair<Boolean, Obj>(false, value));
   }
   
   private void importMultimethod(Context context, String name,
@@ -241,6 +253,6 @@ public class Scope {
   private final boolean mAllowRedefinition;
   private final Scope mParent;
   private final Module mModule;
-  private final Map<String, Obj> mVariables = new HashMap<String, Obj>();
+  private final Map<String, Pair<Boolean, Obj> > mVariables = new HashMap<String, Pair<Boolean, Obj>>();
   private final Map<String, Multimethod> mMultimethods = new HashMap<String, Multimethod>();
 }

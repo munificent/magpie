@@ -21,7 +21,7 @@ public class EnvironmentBuilder {
     ClassObj classObj = new ClassObj(null, Name.CLASS, null,
         new HashMap<String, Field>(), scope, "");
     classObj.bindClass(classObj);
-    scope.define(Name.CLASS, classObj);
+    scope.define(false, Name.CLASS, classObj);
     
     return classObj;
   }
@@ -72,7 +72,7 @@ public class EnvironmentBuilder {
       // TODO(bob): Doc.
       ClassObj classObj = mInterpreter.createClass(mName,
           Arrays.asList(mParents), mFields, mModule.getScope(), "");
-      mModule.getScope().define(mName, classObj);
+      mModule.getScope().define(false, mName, classObj);
       
       return classObj;
     }

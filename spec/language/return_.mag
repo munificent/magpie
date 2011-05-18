@@ -2,14 +2,14 @@ import spec.specify
 
 specify("A 'return' expression") with
     it should("return the returned value") with
-        var f = fn
+        val f = fn
             return "value"
         end
         f call() shouldEqual("value")
     end
 
     it should("return nothing if no value is provided") with
-        var f = fn
+        val f = fn
             return
         end
         f call() shouldEqual(nothing)
@@ -17,7 +17,7 @@ specify("A 'return' expression") with
 
     it should("exit the function immediately") with
         var reached = false
-        var f = fn
+        val f = fn
             return "value"
             reached = true
         end

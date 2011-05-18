@@ -176,6 +176,7 @@ public class MagpieToJava {
     } else if (exprClass == getClass("VarExpression")) {
       return Expr.var(
           getPosition(expr),
+          getBool(expr, "mutable?"),
           getPattern(expr, "pattern"),
           getExpr(expr, "value"));
     }

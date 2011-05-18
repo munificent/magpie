@@ -191,12 +191,12 @@ public abstract class Expr {
     return new UnquoteExpr(position, value);
   }
 
-  public static Expr var(Position position, String name, Expr value) {
-    return var(position, Pattern.variable(name), value);
+  public static Expr var(Position position, boolean isMutable, String name, Expr value) {
+    return var(position, isMutable, Pattern.variable(name), value);
   }
   
-  public static Expr var(Position position, Pattern pattern, Expr value) {
-    return new VarExpr(position, pattern, value);
+  public static Expr var(Position position, boolean isMutable, Pattern pattern, Expr value) {
+    return new VarExpr(position, isMutable, pattern, value);
   }
 
   public Expr(Position position, String doc) {

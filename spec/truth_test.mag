@@ -1,6 +1,7 @@
 defclass TruthTest
-    /// A simple class that implements truthiness and tracks when it was called.
-    var value  is Bool
+    /// A simple class that implements truthiness and tracks when it was
+    /// called.
+    val value  is Bool
     var called is Bool = false
 end
 

@@ -8,7 +8,7 @@ end
 
 specify("The indexer on Ranges") with
     it should("return the value at the zero-based index in the range") with
-        var range = Range new(first: 2, last: 5)
+        val range = Range new(first: 2, last: 5)
         range[0] shouldEqual(2)
         range[1] shouldEqual(3)
         range[2] shouldEqual(4)
@@ -16,7 +16,7 @@ specify("The indexer on Ranges") with
     end
 
     it should("count from the back if the index is negative") with
-        var range = Range new(first: 2, last: 5)
+        val range = Range new(first: 2, last: 5)
         range[-1] shouldEqual(5)
         range[-2] shouldEqual(4)
         range[-3] shouldEqual(3)
@@ -24,7 +24,7 @@ specify("The indexer on Ranges") with
     end
 
     it should("throw an OutOfBoundsError on a bad index") with
-    var range = Range new(first: 2, last: 5)
+        val range = Range new(first: 2, last: 5)
         fn
             range[4]
         end shouldThrow(OutOfBoundsError)

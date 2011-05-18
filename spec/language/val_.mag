@@ -1,0 +1,43 @@
+import spec.specify
+
+specify("A 'val' expression") with
+    it should("bind a value to a name") with
+        val i = "value"
+        i shouldEqual("value")
+    end
+
+    it should("shadow a variable in an outer scope") with
+        val i = "outer"
+        if true then
+            val i = "inner"
+            i shouldEqual("inner")
+        end
+        i shouldEqual("outer")
+    end
+
+    it should("not allow redefining in the same scope") with
+        fn
+            val i = "first"
+            val i = "second"
+        end shouldThrow(RedefinitionError)
+    end
+
+    it should("allow a block initializer") with
+        val i =
+            var temp = "a"
+            temp = temp + "b"
+            temp + "c"
+        end
+        i shouldEqual("abc")
+    end
+
+    it should("not allow assignment") with
+        val i = "before"
+        // TODO(bob): Eventually, should be a static error. For now, we'll just
+        // have the assignment do nothing.
+        i = "after"
+        i shouldEqual("before")
+    end
+
+    // TODO(bob): Spec pattern destructuring.
+end

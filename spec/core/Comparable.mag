@@ -1,7 +1,7 @@
 import spec.specify
 
 defclass TestComparable is Comparable
-    var result is Int
+    val result is Int
 end
 
 def (this is TestComparable) compareTo(is TestComparable)
@@ -15,17 +15,17 @@ end
 specify("The '<' method on Comparables") with
     it should("return true only if compareTo() returns -1") with
         do
-            var left, right = makeTestPair(-1)
+            val left, right = makeTestPair(-1)
             (left < right) shouldEqual(true)
         end
 
         do
-            var left, right = makeTestPair(0)
+            val left, right = makeTestPair(0)
             (left < right) shouldEqual(false)
         end
 
         do
-            var left, right = makeTestPair(1)
+            val left, right = makeTestPair(1)
             (left < right) shouldEqual(false)
         end
     end
@@ -34,17 +34,17 @@ end
 specify("The '>' method on Comparables") with
     it should("return true only if compareTo() returns 1") with
         do
-            var left, right = makeTestPair(-1)
+            val left, right = makeTestPair(-1)
             (left > right) shouldEqual(false)
         end
 
         do
-            var left, right = makeTestPair(0)
+            val left, right = makeTestPair(0)
             (left > right) shouldEqual(false)
         end
 
         do
-            var left, right = makeTestPair(1)
+            val left, right = makeTestPair(1)
             (left > right) shouldEqual(true)
         end
     end
@@ -53,17 +53,17 @@ end
 specify("The '<=' method on Comparables") with
     it should("return false only if compareTo() returns 1") with
         do
-            var left, right = makeTestPair(-1)
+            val left, right = makeTestPair(-1)
             (left <= right) shouldEqual(true)
         end
 
         do
-            var left, right = makeTestPair(0)
+            val left, right = makeTestPair(0)
             (left <= right) shouldEqual(true)
         end
 
         do
-            var left, right = makeTestPair(1)
+            val left, right = makeTestPair(1)
             (left <= right) shouldEqual(false)
         end
     end
@@ -72,17 +72,17 @@ end
 specify("The '>=' method on Comparables") with
     it should("return false only if compareTo() returns -1") with
         do
-            var left, right = makeTestPair(-1)
+            val left, right = makeTestPair(-1)
             (left >= right) shouldEqual(false)
         end
 
         do
-            var left, right = makeTestPair(0)
+            val left, right = makeTestPair(0)
             (left >= right) shouldEqual(true)
         end
 
         do
-            var left, right = makeTestPair(1)
+            val left, right = makeTestPair(1)
             (left >= right) shouldEqual(true)
         end
     end

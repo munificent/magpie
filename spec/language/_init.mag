@@ -19,5 +19,6 @@ import .quote
 import .record
 import .return_
 import .string
+import .val_
 import .var_
 import .with_

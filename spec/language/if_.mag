@@ -21,16 +21,16 @@ specify("An 'if then' expression") with
 
     it should("create a local scope for the 'if' expression that is visible " +
               "to the 'then' expression") with
-        var a = "outside"
+        val a = "outside"
         var b = "outside"
-        if var a = "inside" then b = a
+        if val a = "inside" then b = a
         a shouldEqual("outside")
         b shouldEqual("inside")
     end
 
     it should("create a local scope for the 'then' expression") with
-        var a = "outside"
-        if true then var a = "inside"
+        val a = "outside"
+        if true then val a = "inside"
         a shouldEqual("outside")
     end
 
@@ -87,16 +87,16 @@ specify("An 'if then else' expression") with
 
     it should("create a local scope for the 'if' expression that is visible " +
               "to the 'else' expression") with
-        var a = "outside"
+        val a = "outside"
         var b = "outside"
-        if var a = "" then "ignored" else b = a
+        if val a = "" then "ignored" else b = a
         a shouldEqual("outside")
         b shouldEqual("")
     end
 
     it should("create a local scope for the 'else' expression") with
-        var a = "outside"
-        if false then "ignored" else var a = "shadow"
+        val a = "outside"
+        if false then "ignored" else val a = "shadow"
         a shouldEqual("outside")
     end
 

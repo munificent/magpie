@@ -2,9 +2,7 @@ import spec.specify
 
 specify("A 'with' block argument") with
     it should("pass the body as a function to the method") with
-        var f = fn(block)
-            block call()
-        end
+        val f = fn(block) block call()
         var called = false
         f call with
             called = true
@@ -13,8 +11,7 @@ specify("A 'with' block argument") with
     end
 
     it should("allow a block body") with
-        var f = fn(block) block call()
-
+        val f = fn(block) block call()
         var result = ""
         f call with
             result = "a"
@@ -24,15 +21,14 @@ specify("A 'with' block argument") with
     end
 
     it should("allow a single expression body") with
-        var f = fn(block) block call()
-
+        val f = fn(block) block call()
         var result = ""
         f call with result = "ab"
         result shouldEqual("ab")
     end
 
     it should("concatenate the fn with other arguments") with
-        var f = fn(arg1, arg2, block)
+        val f = fn(arg1, arg2, block)
             arg1 shouldEqual("arg1")
             arg2 shouldEqual("arg2")
             block call()
@@ -46,12 +42,12 @@ specify("A 'with' block argument") with
     end
 
     it should("create an 'it' parameter if not is provided") with
-        var f = fn(block) block call("it")
+        val f = fn(block) block call("it")
         f call with it shouldEqual("it")
     end
 
     it should("allow a parameter list") with
-        var f = fn(block) block call("a", "b")
+        val f = fn(block) block call("a", "b")
         f call with(a, b)
             a shouldEqual("a")
             b shouldEqual("b")
@@ -59,10 +55,9 @@ specify("A 'with' block argument") with
     end
 
     it should("only do a local return") with
-        var f = fn(block) block call()
-
+        val f = fn(block) block call()
         var called = false
-        var result = f call with
+        val result = f call with
             called = true
             if true then return "returned"
             "no return"

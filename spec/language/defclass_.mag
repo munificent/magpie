@@ -135,7 +135,7 @@ specify("A class's default constructor") with
             var b
         end
 
-        var c = C new(a: "a", b: "b")
+        val c = C new(a: "a", b: "b")
         c a shouldEqual("a")
         c b shouldEqual("b")
     end
@@ -146,7 +146,7 @@ specify("A class's default constructor") with
             var b = "b"
         end
 
-        var c = C new()
+        val c = C new()
         c a shouldEqual("a")
         c b shouldEqual("b")
     end
@@ -165,7 +165,7 @@ specify("A class's default constructor") with
             var cc
         end
 
-        var c = C new(A: (aa: "a"), B: (bb: "b"), cc: "c")
+        val c = C new(A: (aa: "a"), B: (bb: "b"), cc: "c")
         c aa shouldEqual("a")
         c bb shouldEqual("b")
         c cc shouldEqual("c")
@@ -182,7 +182,7 @@ specify("A class's default constructor") with
             this init(a: string + "a", b: string + "b")
         end
 
-        var c = C new("string ")
+        val c = C new("string ")
         c a shouldEqual("string a")
         c b shouldEqual("string b")
     end
@@ -205,7 +205,7 @@ specify("A class's default constructor") with
             this init(A: string, bb: "b " + string)
         end
 
-        var b = B new("string")
+        val b = B new("string")
         b aa shouldEqual("a string")
         b bb shouldEqual("b string")
     end

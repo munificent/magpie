@@ -27,8 +27,8 @@ end
 
 specify("An unquote in a quote") with
     it should("insert the value of a named identifier into the quote") with
-        var foo = { 123 }
-        var result = { `foo }
+        val foo = { 123 }
+        val result = { `foo }
         result shouldBe(IntExpression)
         result value shouldEqual(123)
     end
@@ -37,7 +37,7 @@ specify("An unquote in a quote") with
         def make(value)
             IntExpression new(value: value)
         end
-        var result = { `(make(123)) }
+        val result = { `(make(123)) }
         result shouldBe(IntExpression)
         result value shouldEqual(123)
     end

@@ -9,7 +9,7 @@ end
 
 specify("The 'to' method on Ints") with
     it should("create a Range from the receiver to the given value") with
-        var range = 2 to(5)
+        val range = 2 to(5)
         range first shouldEqual(2)
         range last shouldEqual(5)
     end

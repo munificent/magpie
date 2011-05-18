@@ -15,9 +15,9 @@ specify("An 'or' expression") with
     end
 
     it should("short-circuit at the first true argument") with
-        var a = TruthTest new(false)
-        var b = TruthTest new(true)
-        var c = TruthTest new(true)
+        val a = TruthTest new(false)
+        val b = TruthTest new(true)
+        val c = TruthTest new(true)
         a or b or c
         a called shouldEqual(true)
         b called shouldEqual(true)
@@ -25,8 +25,8 @@ specify("An 'or' expression") with
     end
 
     it should("call 'true?' on the arguments to determine truth") with
-        var left = TruthTest new(false)
-        var right = TruthTest new(false)
+        val left = TruthTest new(false)
+        val right = TruthTest new(false)
         left or right
         left called shouldEqual(true)
         right called shouldEqual(false)

@@ -81,7 +81,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
     ClassObj classObj = mContext.getInterpreter().createClass(expr.getName(),
         parents, expr.getFields(), scope, expr.getDoc());
     
-    scope.define(expr.getName(), classObj);
+    scope.define(false, expr.getName(), classObj);
 
     return classObj;
   }
@@ -199,7 +199,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
     if (result != null) return result;
     
     // If we got here, no patterns matched.
-    throw mContext.error("NoMatchError", "Could not find a match for \"" +
+    throw mContext.error(Name.NO_MATCH_ERROR, "Could not find a match for \"" +
         mContext.getInterpreter().evaluateToString(value) + "\".");
   }
 
@@ -221,7 +221,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
     if (variable != null) return variable;
     
     // TODO(bob): Detect this statically.
-    throw mContext.error("NoVariableError",
+    throw mContext.error(Name.NO_VARIABLE_ERROR,
         "Could not find a variable named \"" + expr.getName() + "\".");
   }
 
@@ -300,7 +300,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
   public Obj visit(VarExpr expr, Scope scope) {
     Obj value = evaluate(expr.getValue(), scope);
 
-    PatternBinder.bind(mContext, expr.getPattern(), value, scope);
+    PatternBinder.bind(mContext, expr.isMutable(), expr.getPattern(), value,
+        scope);
     return value;
   }
 
@@ -312,9 +313,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
       if (PatternTester.test(mContext, pattern, value, scope)) {
         // Matched. Bind variables and evaluate the body.
         scope = scope.push();
-        PatternBinder.bind(mContext, pattern, value,
-            scope);
-        
+        PatternBinder.bind(mContext, false, pattern, value, scope);
         return evaluate(matchCase.getBody(), scope);
       }
     }

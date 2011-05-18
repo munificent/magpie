@@ -14,7 +14,7 @@ specify("The 'validateIndex' method on Indexables") with
     end
 
     it should("throw an OutOfBoundsError on a bad index") with
-        var list = [1, 2, 3]
+        val list = [1, 2, 3]
         fn
             list validateIndex(3)
         end shouldThrow(OutOfBoundsError)
@@ -27,7 +27,7 @@ end
 
 specify("The 'iterate' method on Indexables") with
     it should("create an IndexableIterator") with
-        var iterator = [1, 2, 3] iterate()
+        val iterator = [1, 2, 3] iterate()
         iterator shouldBe(IndexableIterator)
     end
 end

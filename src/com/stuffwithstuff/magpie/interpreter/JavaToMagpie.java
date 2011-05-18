@@ -374,6 +374,7 @@ public class JavaToMagpie {
     public Obj visit(VarExpr expr, Void context) {
       return construct("VarExpression",
           "position", expr.getPosition(),
+          "mutable?", expr.isMutable(),
           "pattern",  expr.getPattern(),
           "value",    expr.getValue());
     }

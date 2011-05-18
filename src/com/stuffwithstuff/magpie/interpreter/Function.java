@@ -23,7 +23,7 @@ public class Function implements Callable {
       
       // Bind the arguments to the pattern.
       Pattern pattern = mFunction.getPattern();
-      PatternBinder.bind(context, pattern, arg, scope);
+      PatternBinder.bind(context, false, pattern, arg, scope);
       
       try {
         return context.evaluate(mFunction.getBody(), scope);

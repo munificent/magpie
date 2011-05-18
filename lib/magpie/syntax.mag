@@ -149,8 +149,9 @@ defclass UnquoteExpression is Expression
 end
 
 defclass VarExpression is Expression
-    val pattern is Pattern
-    val value   is Expression
+    val mutable? is Bool
+    val pattern  is Pattern
+    val value    is Expression
 end
 
 // MatchCase

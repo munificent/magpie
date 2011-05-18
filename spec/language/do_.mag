@@ -25,9 +25,9 @@ specify("A 'do' expression") with
     end
 
     it should("define a local variable scope") with
-        var a = "outer"
+        val a = "outer"
         do
-            var a = "inner"
+            val a = "inner"
             a shouldEqual("inner")
         end
         a shouldEqual("outer")

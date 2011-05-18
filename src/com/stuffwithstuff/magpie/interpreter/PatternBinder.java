@@ -9,9 +9,9 @@ import com.stuffwithstuff.magpie.ast.pattern.*;
  * new variables in the context.
  */
 public class PatternBinder implements PatternVisitor<Void, Obj>  {
-  public static void bind(Context context, Pattern pattern,
+  public static void bind(Context context, boolean isMutable, Pattern pattern,
       Obj value, Scope scope) {
-    PatternBinder binder = new PatternBinder(context, scope);
+    PatternBinder binder = new PatternBinder(isMutable, context, scope);
     pattern.accept(binder, value);
   }
 
@@ -62,7 +62,8 @@ public class PatternBinder implements PatternVisitor<Void, Obj>  {
     return null;
   }
 
-  private PatternBinder(Context context, Scope scope) {
+  private PatternBinder(boolean isMutable, Context context, Scope scope) {
+    mIsMutable = isMutable;
     mContext = context;
     mScope = scope;
   }
@@ -72,9 +73,10 @@ public class PatternBinder implements PatternVisitor<Void, Obj>  {
     if (name.equals("_")) return true;
     
     // Bind the variable.
-    return mScope.define(name, value);
+    return mScope.define(mIsMutable, name, value);
   }
   
+  private final boolean mIsMutable;
   private final Context mContext;  
   private final Scope mScope;
 }

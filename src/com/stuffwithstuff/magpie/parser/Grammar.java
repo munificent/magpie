@@ -26,6 +26,7 @@ public class Grammar {
     prefix("match",     new MatchParser());
     prefix("return",    new ReturnParser());
     prefix("throw",     new ThrowParser());
+    prefix("val",       new VarParser());
     prefix("var",       new VarParser());
     prefix("while",     new LoopParser());
 

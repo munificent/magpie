@@ -2,7 +2,7 @@ import spec.specify
 
 specify("The 'next' method on ListIterators") with
     it should("advance the current value") with
-        var iterator = [1, 2, 3] iterate()
+        val iterator = [1, 2, 3] iterate()
 
         iterator next()
         iterator current shouldEqual(1)
@@ -14,7 +14,7 @@ specify("The 'next' method on ListIterators") with
     end
 
     it should("return false when the end of the list is reached") with
-        var iterator = [1, 2, 3] iterate()
+        val iterator = [1, 2, 3] iterate()
 
         iterator next() shouldEqual(true) // 1
         iterator next() shouldEqual(true) // 2

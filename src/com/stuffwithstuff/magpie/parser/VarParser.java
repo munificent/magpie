@@ -6,11 +6,13 @@ import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 public class VarParser implements PrefixParser {
   @Override
   public Expr parse(MagpieParser parser, Token token) {
+    boolean isMutable = token.getText().equals("var");
+    
     PositionSpan span = parser.startBefore();
     Pattern pattern = PatternParser.parse(parser);
     parser.consume(TokenType.EQUALS);
     Expr value = parser.parseExpressionOrBlock();
     
-    return Expr.var(span.end(), pattern, value);
+    return Expr.var(span.end(), isMutable, pattern, value);
   }
 }

@@ -3,7 +3,7 @@ import spec.specify
 specify("A 'fn' expression") with
     it should("bind the argument to the parameter") with
         var result = nothing
-        var f = fn(a) result = a
+        val f = fn(a) result = a
         f call("one")
         result shouldEqual("one")
 
@@ -11,8 +11,8 @@ specify("A 'fn' expression") with
         result shouldEqual("two")
     end
 
-    it should("bind a tuple argument to the parameter") with
-        var f = fn(arg)
+    it should("bind a record argument to the parameter") with
+        val f = fn(arg)
             var a, b = arg
             a + b
         end
@@ -24,7 +24,7 @@ specify("A 'fn' expression") with
     end
 
     it should("close over surrounding variables") with
-        var outer = "outer"
+        val outer = "outer"
         var assigned = ""
         (fn assigned = outer) call()
         assigned shouldEqual("outer")
@@ -32,7 +32,7 @@ specify("A 'fn' expression") with
 
     it should("throw a NoMethodError if the argument doesn't match the " +
               "pattern") with
-        var f = fn (n is Int) n
+        val f = fn (n is Int) n
         fn
             f call("not int")
         end shouldThrow(NoMethodError)

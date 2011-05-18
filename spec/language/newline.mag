@@ -5,7 +5,7 @@ import spec.specify
 
 specify("A newline") with
     it should("be ignored after a comma") with
-        var i = 1,
+        val i = 1,
             2
 
         var a, b = i
@@ -14,9 +14,9 @@ specify("A newline") with
     end
 
     it should("be ignored after a field") with
-        var a = x:
+        val a = x:
             1, y: 2
-        var x: x, y: y = a
+        val x: x, y: y = a
         x shouldEqual(1)
         y shouldEqual(2)
     end
@@ -30,7 +30,7 @@ end
 
 specify("A backslash") with
     it should("consume the following newline") with
-        var a = true \
+        val a = true \
             string
         a shouldEqual("true")
     end

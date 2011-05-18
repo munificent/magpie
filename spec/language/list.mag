@@ -2,7 +2,7 @@ import spec.specify
 
 specify("A list literal expression") with
     it should("create a list containing the elements") with
-        var list = [1, "two", true]
+        val list = [1, "two", true]
         list shouldBe(List)
         list[0] shouldEqual(1)
         list[1] shouldEqual("two")
@@ -10,14 +10,14 @@ specify("A list literal expression") with
     end
 
     it should("allow an empty list") with
-        var list = []
+        val list = []
         list shouldBe(List)
         list count shouldEqual(0)
     end
 
     it should("evaluate the elements left to right") with
         var e = ""
-        var list = [(e = e + "1"), (e = e + "2"), (e = e + "3")]
+        [(e = e + "1"), (e = e + "2"), (e = e + "3")]
         e shouldEqual("123")
     end
 end

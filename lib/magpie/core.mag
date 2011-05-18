@@ -115,30 +115,30 @@ end
 
 def (this is Indexable) validateIndex(index is Int)
     // Negative indexes count from the back.
-    index = match index <(0)
+    val wrappedIndex = match index <(0)
         case true then this count +(index)
         else index
     end
 
     // Check the bounds.
-    match index <(0)
+    match wrappedIndex <(0)
         case true then throw OutOfBoundsError new()
         else nothing
     end
 
-    match index >=(this count)
+    match wrappedIndex >=(this count)
         case true then throw OutOfBoundsError new()
         else nothing
     end
 
     // Return the updated index.
-    index
+    wrappedIndex
 end
 
 defclass IndexableIterator
     /// An iterator that can iterator over any class that inherits from
     /// Indexable and provides a "count" getter, and a numeric indexer.
-    var indexable is Indexable
+    val indexable is Indexable
     var index     = -1
 end
 
@@ -155,13 +155,12 @@ end
 defclass Range is Indexable
     /// An Indexable, iterable range of sequential integers from a given
     /// *first* to *last* (inclusive).
-    var first is Int
-    var last  is Int
+    val first is Int
+    val last  is Int
 end
 
 def (this is Range)[index is Int]
-    index = this validateIndex(index)
-    this first +(index)
+    this first +(this validateIndex(index))
 end
 
 def (this is Range) count
@@ -178,11 +177,11 @@ end
 defineInfix("and", 3, fn(parser is Parser, left is Expression, token is Token)
     // Ignore a newline after "and".
     parser matchToken(TokenType.LINE)
-    var right = parser parseExpression(3)
+    val right = parser parseExpression(3)
     {
         do
             // TODO(bob): Use generated symbol.
-            var temp__ = `left
+            val temp__ = `left
             match temp__ true?
                 case true then `right
                 else temp__
@@ -197,11 +196,11 @@ end)
 defineInfix("or", 3, fn(parser is Parser, left is Expression, token is Token)
     // Ignore a newline after "or".
     parser matchToken(TokenType.LINE)
-    var right = parser parseExpression(3)
+    val right = parser parseExpression(3)
     {
         do
             // TODO(bob): Use generated symbol.
-            var temp__ = `left
+            val temp__ = `left
             match temp__ true?
                 case true then temp__
                 else `right
@@ -215,15 +214,15 @@ end)
 
 definePrefix("if", fn(parser is Parser, token is Token)
     // Parse the condition.
-    var condition, _ = parser parseExpressionOrBlock(["then"])
+    val condition, _ = parser parseExpressionOrBlock(["then"])
 
     // Parse the then body.
     parser consume("then")
-    var thenExpr, endToken = parser parseExpressionOrBlock(["else", "end"])
+    val thenExpr, endToken = parser parseExpressionOrBlock(["else", "end"])
 
     // Don't try to parse "else" if we got an explicit "end" for the "then"
     // block.
-    var consumedEnd? = match endToken
+    val consumedEnd? = match endToken
         case nothing then false
         case token then
             match token type name
@@ -234,13 +233,13 @@ definePrefix("if", fn(parser is Parser, token is Token)
     end
 
     // See if we have an "else" keyword.
-    var parsedElse? = match consumedEnd?
+    val parsedElse? = match consumedEnd?
         case true then false
         case false then parser matchToken("else")
     end
 
     // Parse the "else" expression if there otherwise use nothing.
-    var elseExpr = match parsedElse?
+    val elseExpr = match parsedElse?
         case true then parser parseExpressionOrBlock()
         else { nothing }
     end
@@ -262,7 +261,7 @@ def _makeOperator(name is String, stickiness is Int)
         fn(parser is Parser, left is Expression, token is Token)
             // Ignore a newline after operator.
             parser matchToken(TokenType.LINE)
-            var right = parser parseExpression(stickiness)
+            val right = parser parseExpression(stickiness)
             CallExpression new(Expression: (position: token position),
                 name: name, argument: { `left, `right })
         end
