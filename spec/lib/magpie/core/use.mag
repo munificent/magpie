@@ -1,0 +1,33 @@
+import spec.specify
+
+defclass Resource
+    var open? = true
+end
+
+def (this is Resource) close()
+    this open? = false
+end
+
+specify("The 'use' method") with
+    it should("call the given block, passing in the resource") with
+        val resource = Resource new()
+        var called? = false
+        resource use with
+            it shouldEqual(resource)
+            called? = true
+        end
+
+        called? shouldEqual(true)
+    end
+
+    it should("call close() on the resource when done") with
+        val resource = Resource new()
+        resource use with
+            resource open? shouldEqual(true)
+        end
+
+        resource open? shouldEqual(false)
+    end
+
+    // TODO(bob): Test how it handles errors.
+end

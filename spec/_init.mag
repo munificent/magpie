@@ -3,6 +3,6 @@ import spec.specify
 
 // The individual test cases.
 import spec.language
-import spec.core
+import spec.lib
 
 runTests()

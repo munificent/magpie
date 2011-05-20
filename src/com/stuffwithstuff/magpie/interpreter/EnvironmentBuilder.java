@@ -48,6 +48,7 @@ public class EnvironmentBuilder {
     ClassObj error = class_("Error").end();
     
     class_(Name.AMBIGUOUS_METHOD_ERROR, error).end();
+    // TODO(bob): Move into io module.
     class_(Name.IO_ERROR, error).end();
     class_(Name.NO_MATCH_ERROR, error).end();
     class_(Name.NO_METHOD_ERROR, error).end();

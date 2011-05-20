@@ -171,6 +171,24 @@ def (this is Int) to(last is Int)
     Range new(first: this, last: last)
 end
 
+
+def (resource) use(block)
+    do
+        val result = block call(resource)
+        resource close()
+        result
+    catch error then
+        resource close()
+        throw error
+    end
+end
+
+// TODO(bob): Need way to create multimethod without defining any methods.
+def (_) close()
+    throw Error new("abstract")
+end
+
+
 // "and" Parser
 // ----------------------------------------------------------------------------
 

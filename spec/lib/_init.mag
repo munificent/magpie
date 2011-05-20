@@ -1,0 +1,11 @@
+import .io.File
+import .magpie.core.Bool
+import .magpie.core.Class
+import .magpie.core.Comparable
+import .magpie.core.Indexable
+import .magpie.core.IndexableIterator
+import .magpie.core.Int
+import .magpie.core.List
+import .magpie.core.ListIterator
+import .magpie.core.Range
+import .magpie.core.use

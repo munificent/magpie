@@ -1,0 +1,32 @@
+// A few examples of reading a file.
+
+import io
+
+// 1. The primitive way.
+do
+    val file = open("example/File.mag")
+    while true do
+        val line = file readLine()
+        if line == nothing then break
+        print(line)
+    end
+    file close()
+end
+
+// 2. Using "use" instead of explicit close().
+do
+    open("example/File.mag") use with
+        while true do
+            val line = it readLine()
+            if line == nothing then break
+            print(line)
+        end
+    end
+end
+
+// 3. Using the file as an iterator.
+do
+    open("example/File.mag") use with
+        for line = it do print(line)
+    end
+end

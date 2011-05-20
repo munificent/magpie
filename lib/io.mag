@@ -1,0 +1,27 @@
+import classfile:com.stuffwithstuff.magpie.intrinsic.FileMethods
+
+defclass File
+end
+
+def open(path is String)
+    File open(path)
+end
+
+// Iterator over files.
+defclass FileIterator
+    val file is File
+    var line = nothing
+end
+
+def (this is File) iterate()
+    FileIterator new(file: this)
+end
+
+def (this is FileIterator) next()
+    this line = this file readLine()
+    this line != nothing
+end
+
+def (this is FileIterator) current
+    this line
+end

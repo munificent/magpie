@@ -1,0 +1,54 @@
+import spec.specify
+
+import io
+
+val TEST_PATH = "spec/lib/io/test_file.txt"
+
+specify("The 'open' method") with
+    it should("return a File") with
+        val file = open(TEST_PATH)
+        file shouldBe(File)
+    end
+
+    it should("return an open File") with
+        val file = open(TEST_PATH)
+        open? shouldEqual(true)
+    end
+end
+
+specify("The 'close' method on File") with
+    it should("close the file") with
+        val file = open(TEST_PATH)
+        file close()
+        open? shouldEqual(false)
+    end
+
+    it should("return nothing") with
+        val file = open(TEST_PATH)
+        file close() shouldEqual(nothing)
+    end
+
+    it should("do nothing if the file is closed") with
+        val file = open(TEST_PATH)
+        file close()
+        file close() shouldEqual(nothing)
+    end
+end
+
+specify("The 'readLine' method on File") with
+    it should("return successive lines from the file") with
+        val file = open(TEST_PATH)
+        file readLine() shouldEqual("one")
+        file readLine() shouldEqual("two")
+        file readLine() shouldEqual("three")
+    end
+
+    it should("return nothing when the end is reached") with
+        val file = open(TEST_PATH)
+        file readLine() // one
+        file readLine() // two
+        file readLine() // three
+        file readLine() shouldEqual(nothing)
+        file readLine() shouldEqual(nothing)
+    end
+end
