@@ -21,15 +21,8 @@ public abstract class Parser {
   /**
    * Creates a new PositionSpan that starts before the last consumed Token.
    */
-  public PositionSpan startBefore() {
+  public PositionSpan span() {
     return new PositionSpan(this, last(1).getPosition());
-  }
-  
-  /**
-   * Creates a new PositionSpan that starts at the current Token.
-   */
-  public PositionSpan startAfter() {
-    return new PositionSpan(this, current().getPosition());
   }
 
   /**
@@ -43,7 +36,6 @@ public abstract class Parser {
    */
   public Token last(int offset) {
     Expect.positive(offset);
-
     return mConsumed.get(offset - 1);
   }
 
@@ -59,102 +51,48 @@ public abstract class Parser {
   
   /**
    * Looks ahead at the token stream to see if the next tokens match the
-   * expected types, in order. For example, if the next tokens are (123, true),
-   * then a call to lookAhead(TokenType.INT, TokenType.BOOL) will return true.
+   * expected ones, in order. For example, if the next tokens are (123, "do"),
+   * then a call to lookAhead(TokenType.INT, "do") will return true.
    * Does not consume any tokens.
    * 
-   * @param   types  The expected token types, in the order that they are
-   *                 expected to appear.
-   * @return         True if the next tokens are of the given types, false
-   *                 otherwise.
+   * @param   tokens  The expected tokens. Each element can either be a
+   *                  TokenType or a string denoting the name of a specific
+   *                  keyword.
+   * @return          True if the next tokens match.
    */
-  public boolean lookAhead(TokenType... types) {
-    // make sure all of the types match before we start consuming
-    for (int i = 0; i < types.length; i++) {
-      if (!lookAhead(i).getType().equals(types[i]))
-        return false;
-      
-      // TODO(bob): Kinda gross. If we're looking for a NAME, we need to make
-      // sure that it is *not* a claimed keyword.
-      if ((types[i] == TokenType.NAME) && isReserved(lookAhead(i).getString())) {
-        return false;
+  public boolean lookAhead(Object... tokens) {
+    for (int i = 0; i < tokens.length; i++) {
+      // See if we're matching by type or keyword.
+      if (tokens[i] instanceof TokenType) {
+        TokenType type = (TokenType)tokens[i];
+        if (!lookAhead(i).getType().equals(type)) return false;
+        
+        // If we're looking for a NAME, we need to make sure that name is not a
+        // reserved word.
+        if ((type == TokenType.NAME) && isReserved(lookAhead(i).getString())) {
+          return false;
+        }
+      } else {
+        // Must be a keyword.
+        String keyword = (String)tokens[i];
+        if (lookAhead(i).getType() != TokenType.NAME) return false;
+        if (!lookAhead(i).getString().equals(keyword)) return false;
       }
     }
 
     return true;
   }
-  
+
   /**
    * Gets whether or not the next Token is of any of the given types. Does not
    * consume the token.
    * 
-   * @param   types  The allowed types for the next Token.
-   * @return         True if the Token is one of the types, false otherwise.
+   * @param   tokens  The allowed tokens for the next Token.
+   * @return          True if the Token is one of the tokens.
    */
-  public boolean lookAheadAny(TokenType... types) {
-    for (TokenType type : types) {
-      if (lookAhead(type)) return true;
-    }
-    
-    return false;
-  }
-
-  // TODO(bob): Hack temp until all keyword parsing is moved into Magpie.
-  public Token consume(String keyword) {
-    if (!match(keyword)) {
-      String message = String.format("Expected keyword %s at %s, found %s.",
-          keyword, current().getPosition(), current());
-      throw new ParseException(message);
-    }
-
-    return last(1);
-  }
-  
-  // TODO(bob): Hack temp until all keyword parsing is moved into Magpie.
-  public boolean match(String... keywords) {
-    // See if they match.
-    if (!lookAhead(keywords)) return false;
-
-    // Consume the matched tokens.
-    for (int i = 0; i < keywords.length; i++) {
-      consume();
-    }
-    
-    return true;
-  }
-
-  // TODO(bob): Hack temp until all keyword parsing is moved into Magpie.
-  public boolean match(TokenType type, String keyword) {
-    if (!lookAhead(type, keyword)) return false;
-
-    consume();
-    consume();
-    
-    return true;
-  }
-
-  // TODO(bob): Hack temp until all keyword parsing is moved into Magpie.
-  public boolean lookAhead(TokenType type, String keyword) {
-    if (!lookAhead(type)) return false;
-    if (lookAhead(1).getType() != TokenType.NAME) return false;
-    if (!lookAhead(1).getString().equals(keyword)) return false;
-    
-    return true;
-  }
-  
-  public boolean lookAhead(String... keywords) {
-    // make sure all of the types match before we start consuming
-    for (int i = 0; i < keywords.length; i++) {
-      if (lookAhead(i).getType() != TokenType.NAME) return false;
-      if (!lookAhead(i).getString().equals(keywords[i])) return false;
-    }
-
-    return true;
-  }
-  
-  public boolean lookAheadAny(String... keywords) {
-    for (String keyword : keywords) {
-      if (lookAhead(keyword)) return true;
+  public boolean lookAheadAny(Object... tokens) {
+    for (Object token : tokens) {
+      if (lookAhead(token)) return true;
     }
     
     return false;
@@ -162,19 +100,18 @@ public abstract class Parser {
 
   /**
    * Looks ahead at the token stream to see if the next tokens match the
-   * expected types, in order. If so, they are all consumed.
+   * expected ones, in order. If so, they are all consumed.
    * 
-   * @param   types  The expected token types, in the order that they are
-   *                 expected to appear.
-   * @return         True if the tokens matched and were consumed, false
-   *                 otherwise.
+   * @param   tokens  The expected tokens, in the order that they are
+   *                  expected to appear.
+   * @return          True if the tokens matched and were consumed.
    */
-  public boolean match(TokenType... types) {
+  public boolean match(Object... tokens) {
     // See if they match.
-    if (!lookAhead(types)) return false;
+    if (!lookAhead(tokens)) return false;
 
     // Consume the matched tokens.
-    for (int i = 0; i < types.length; i++) {
+    for (int i = 0; i < tokens.length; i++) {
       consume();
     }
     
@@ -183,19 +120,19 @@ public abstract class Parser {
 
   /**
    * Looks ahead at the next token to see if it's any of the given allowed
-   * types. If so, consumes it.
+   * tokens. If so, consumes it.
    * 
-   * @param   types  The types the next token can be.
-   * @return         True if it matched and was consumed, false otherwise.
+   * @param   tokens  The tokens the next token can be.
+   * @return          True if it matched and was consumed.
    */
-  public boolean matchAny(TokenType... types) {
-    for (TokenType type : types) {
-      if (match(type)) return true;
+  public boolean matchAny(Object... tokens) {
+    for (Object token : tokens) {
+      if (match(token)) return true;
     }
     
     return false;
   }
-  
+
   /**
    * Consumes the current token and advances to the next one.
    *
@@ -229,37 +166,26 @@ public abstract class Parser {
 
   /**
    * Consumes the current token and advances to the next one. The token is
-   * required to be one of the given types. If not, a ParseException will be
-   * thrown.
+   * required to be the given keyword. If not, a ParseException will be thrown.
    * 
-   * @param   types  The types that are allowed for the current token.
-   * @return         The consumed token.
+   * @param   keyword  The keyword that the current token must be.
+   * @return           The consumed token.
    */
-  public Token consumeAny(TokenType... types) {
-    for (int i = 0; i < types.length; i++) {
-      if (match(types[i])) return last(1);
+  public Token consume(String keyword) {
+    if (match(keyword)) {
+      return last(1);
+    } else {
+      String message = String.format("Expected keyword %s at %s, found %s.",
+          keyword, current().getPosition(), current());
+      throw new ParseException(message);
     }
-    
-    StringBuilder builder = new StringBuilder();
-    builder.append("Expected ");
-    
-    for (int i = 0; i < types.length; i++) {
-      builder.append(types[i]);
-
-      if (i < types.length - 2) {
-        builder.append(", ");
-      } else if (i < types.length - 1) {
-        builder.append(" or ");
-      }
-    }
-    
-    builder.append(" at ")
-           .append(current().getPosition())
-           .append(" and found ")
-           .append(current());
-    throw new ParseException(builder.toString());
   }
 
+  /**
+   * Gets whether or not the name is reserved. Reserved words describe name
+   * tokens whose name is special and prohibit the token from being parsed as
+   * a regular identifier. For example, "then" is reserved.
+   */
   protected abstract boolean isReserved(String name);
   
   private Token lookAhead(int distance) {

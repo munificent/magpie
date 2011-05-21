@@ -10,7 +10,7 @@ public class BracePrefixParser implements PrefixParser {
   public Expr parse(MagpieParser parser, Token token) {
     parser.pushQuote();
     
-    PositionSpan span = parser.startBefore();
+    PositionSpan span = parser.span();
     
     // Ignore a line after {
     parser.match(TokenType.LINE);
@@ -30,8 +30,10 @@ public class BracePrefixParser implements PrefixParser {
     
     parser.popQuote();
     
-    if (exprs.size() == 1) return Expr.quote(span.end(), exprs.get(0));
-    
-    return Expr.quote(span.end(), Expr.sequence(exprs));
+    if (exprs.size() == 1) {
+      return Expr.quote(span.end(), exprs.get(0));
+    } else {
+      return Expr.quote(span.end(), Expr.sequence(exprs));
+    }
   }
 }

@@ -6,7 +6,7 @@ import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 public class FnParser implements PrefixParser {
   @Override
   public Expr parse(MagpieParser parser, Token token) {
-    PositionSpan span = parser.startBefore();
+    PositionSpan span = parser.span();
     
     // Parse the pattern if present.
     Pattern pattern = null;

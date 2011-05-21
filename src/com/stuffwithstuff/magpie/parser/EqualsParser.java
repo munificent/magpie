@@ -6,10 +6,10 @@ public class EqualsParser implements InfixParser {
   @Override
   public Expr parse(MagpieParser parser, Expr left, Token token) {
     // Parse the value being assigned.
-    Expr value = parser.parseExpression(getStickiness() - 1);
+    Expr value = parser.parseExpression(getPrecedence() - 1);
     return ConvertAssignmentExpr.convert(left, value);
   }
   
   @Override
-  public int getStickiness() { return Precedence.ASSIGNMENT; }
+  public int getPrecedence() { return Precedence.ASSIGNMENT; }
 }

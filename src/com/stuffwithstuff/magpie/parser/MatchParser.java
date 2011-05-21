@@ -28,7 +28,7 @@ public class MatchParser implements PrefixParser {
   
   @Override
   public Expr parse(MagpieParser parser, Token token) {
-    PositionSpan span = parser.startBefore();
+    PositionSpan span = parser.span();
     
     // Parse the value.
     Expr value = parser.parseExpression();

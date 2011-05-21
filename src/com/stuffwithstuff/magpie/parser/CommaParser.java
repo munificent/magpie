@@ -26,12 +26,12 @@ public class CommaParser implements InfixParser {
       }
       index++;
       
-      fields.add(new Pair<String, Expr>(name, parser.parseExpression(getStickiness())));
+      fields.add(new Pair<String, Expr>(name, parser.parseExpression(getPrecedence())));
     } while (parser.match(TokenType.COMMA));
     
     return Expr.record(left.getPosition().union(parser.last(1).getPosition()), fields);
   }
   
   @Override
-  public int getStickiness() { return Precedence.COMPOSITION; }
+  public int getPrecedence() { return Precedence.RECORD; }
 }

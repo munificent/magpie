@@ -35,8 +35,7 @@ public class Grammar {
     infix(TokenType.EQUALS,       new EqualsParser());
     infix(TokenType.LEFT_BRACKET, new BracketInfixParser());
 
-    reserve("-> case catch else end then");
-    reserve("break def defclass do fn for import is match nothing return throw val var while");
+    reserve("case catch else end is then");
   }
   
   public PrefixParser getPrefixParser(Token token) {
@@ -48,11 +47,11 @@ public class Grammar {
   }
   
   public void defineParser(String keyword, PrefixParser parser) {
-    prefix(keyword, parser);
+    mPrefixParsers.define(keyword, parser);
   }
   
   public void defineParser(String keyword, InfixParser parser) {
-    infix(keyword, parser);
+    mInfixParsers.define(keyword, parser);
   }
   
   /**
@@ -80,8 +79,8 @@ public class Grammar {
         isReserved(token.getString());
   }
   
-  public int getStickiness(Token token) {
-    int stickiness = 0;
+  public int getPrecedence(Token token) {
+    int precedence = 0;
     
     // A reserved word can't start an infix expression. Prevents us from
     // parsing a keyword as an identifier.
@@ -94,10 +93,10 @@ public class Grammar {
 
     InfixParser parser = mInfixParsers.get(token);
     if (parser != null) {
-      stickiness = parser.getStickiness();
+      precedence = parser.getPrecedence();
     }
     
-    return stickiness;
+    return precedence;
   }
   
   private void prefix(TokenType type, PrefixParser parser) {
@@ -105,15 +104,12 @@ public class Grammar {
   }
   
   private void prefix(String keyword, PrefixParser parser) {
+    mReservedWords.add(keyword);
     mPrefixParsers.define(keyword, parser);
   }
   
   private void infix(TokenType type, InfixParser parser) {
     mInfixParsers.define(type, parser);
-  }
-  
-  private void infix(String keyword, InfixParser parser) {
-    mInfixParsers.define(keyword, parser);
   }
   
   private void reserve(String wordString) {

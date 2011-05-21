@@ -12,7 +12,7 @@ import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 public class ClassParser implements PrefixParser {  
   @Override
   public Expr parse(MagpieParser parser, Token token) {
-    PositionSpan span = parser.startBefore();
+    PositionSpan span = parser.span();
     String name = parser.consume(TokenType.NAME).getString();
     
     // Parse the parents, if any.

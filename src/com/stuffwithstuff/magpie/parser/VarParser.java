@@ -8,7 +8,7 @@ public class VarParser implements PrefixParser {
   public Expr parse(MagpieParser parser, Token token) {
     boolean isMutable = token.getText().equals("var");
     
-    PositionSpan span = parser.startBefore();
+    PositionSpan span = parser.span();
     Pattern pattern = PatternParser.parse(parser);
     parser.consume(TokenType.EQUALS);
     Expr value = parser.parseExpressionOrBlock();

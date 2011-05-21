@@ -12,7 +12,7 @@ specify("The 'open' method") with
 
     it should("return an open File") with
         val file = open(TEST_PATH)
-        open? shouldEqual(true)
+        file open? shouldEqual(true)
     end
 end
 
@@ -20,7 +20,7 @@ specify("The 'close' method on File") with
     it should("close the file") with
         val file = open(TEST_PATH)
         file close()
-        open? shouldEqual(false)
+        file open? shouldEqual(false)
     end
 
     it should("return nothing") with

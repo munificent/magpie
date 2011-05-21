@@ -14,5 +14,5 @@ public class BracketInfixParser implements InfixParser {
   }
   
   @Override
-  public int getStickiness() { return Precedence.MESSAGE; }
+  public int getPrecedence() { return Precedence.MESSAGE; }
 }

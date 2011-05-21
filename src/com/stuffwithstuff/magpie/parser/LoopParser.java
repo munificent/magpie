@@ -11,7 +11,7 @@ public class LoopParser implements PrefixParser {
   @Override
   public Expr parse(MagpieParser parser, Token token) {
     // "while" and "for" loop.
-    PositionSpan span = parser.startBefore();
+    PositionSpan span = parser.span();
     
     // A loop is desugared from this:
     //
@@ -47,7 +47,7 @@ public class LoopParser implements PrefixParser {
             Expr.nothing(),
             Expr.break_(condition.getPosition())));
       } else {
-        PositionSpan iteratorSpan = parser.startBefore();
+        PositionSpan iteratorSpan = parser.span();
         Pattern pattern = PatternParser.parse(parser);
         parser.consume(TokenType.EQUALS);
         Expr generator = parser.parseExpression();

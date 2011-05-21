@@ -42,12 +42,12 @@ public class MagpieParser extends Parser {
   }
   
   public Expr parseTypeAnnotation() {
-    // Start at just above tuple precedence so that those don't get consumed
+    // Start at just above record precedence so that those don't get consumed
     // by the type.
-    return parseExpression(21);
+    return parseExpression(Precedence.RECORD + 1);
   }
   
-  public Expr parseExpression(int stickiness) {
+  public Expr parseExpression(int precedence) {
     // Top down operator precedence parser based on:
     // http://javascript.crockford.com/tdop/tdop.html
     Token token = consume();
@@ -61,7 +61,7 @@ public class MagpieParser extends Parser {
     Expect.notNull(prefix);
     Expr left = prefix.parse(this, token);
     
-    while (stickiness < mGrammar.getStickiness(current())) {
+    while (precedence < mGrammar.getPrecedence(current())) {
       token = consume();
       
       InfixParser infix = mGrammar.getInfixParser(token);
@@ -109,7 +109,7 @@ public class MagpieParser extends Parser {
   }
 
   public Expr groupExpression(TokenType right) {
-    PositionSpan span = startBefore();
+    PositionSpan span = span();
     if (match(right)) {
       return Expr.nothing(span.end());
     }
@@ -141,20 +141,15 @@ public class MagpieParser extends Parser {
     mQuoteDepth--;
   }
 
-  /**
-   * Gets whether or not the name is a "keyword". A keyword is any name that
-   * has special meaning to the parser: it's either a reserved word, or it has
-   * a prefix or infix parser registered to the name.
-   */
   @Override
   protected boolean isReserved(String name) {
     return mGrammar.isReserved(name);
   }
   
   private Pair<Expr, Token> parseExpressionOrBlock(boolean parseCatch,
-      String[] endKeywords) {
+      Object[] endTokens) {
     if (lookAhead(TokenType.LINE)){
-      return parseBlock(parseCatch, endKeywords);
+      return parseBlock(parseCatch, endTokens);
     } else {
       Expr body = parseExpression();
       return new Pair<Expr, Token>(body, null);
@@ -162,15 +157,13 @@ public class MagpieParser extends Parser {
   }
   
   private Pair<Expr, Token> parseBlock(boolean parseCatch,
-      String[] endKeywords) {
+      Object[] endTokens) {
     consume(TokenType.LINE);
     
     List<Expr> exprs = new ArrayList<Expr>();
     
     while (true) {
-      // TODO(bob): This keyword stuff is temporary until all keywords are
-      // moved into Magpie.
-      if ((endKeywords != null) && lookAheadAny(endKeywords)) break;
+      if ((endTokens != null) && lookAheadAny(endTokens)) break;
       if (lookAhead("catch")) break;
       
       exprs.add(parseExpression());
@@ -190,7 +183,7 @@ public class MagpieParser extends Parser {
     List<MatchCase> catches = new ArrayList<MatchCase>();
     if (parseCatch) {
       while (match("catch")) {
-        catches.add(parseCatch(endKeywords));
+        catches.add(parseCatch(endTokens));
       }
     }
 
@@ -202,12 +195,12 @@ public class MagpieParser extends Parser {
     return new Pair<Expr, Token>(expr, endToken);
   }
   
-  private MatchCase parseCatch(String[] endKeywords) {
+  private MatchCase parseCatch(Object[] endTokens) {
     Pattern pattern = PatternParser.parse(this);
 
     consume("then");
 
-    Pair<Expr, Token> body = parseExpressionOrBlock(false, endKeywords);
+    Pair<Expr, Token> body = parseExpressionOrBlock(false, endTokens);
 
     // Allow newlines to separate single-line catches.
     if ((body.getValue() == null) && lookAhead(TokenType.LINE, "catch")) {

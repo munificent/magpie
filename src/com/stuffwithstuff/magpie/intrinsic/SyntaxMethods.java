@@ -30,18 +30,15 @@ public class SyntaxMethods {
     }
   }
   
-  @Def("defineInfix(keyword is String, stickiness is Int, parser)")
+  @Def("defineInfix(keyword is String, precedence is Int, parser)")
   public static class DefineInfix implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       String keyword = right.getField(0).asString();
-      int stickiness = right.getField(1).asInt();
+      int precedence = right.getField(1).asInt();
       Obj parser = right.getField(2);
 
-      // TODO(bob): Hack! Wrong. Needs to define it in the module that's
-      // calling this. Once built-ins have access to the calling module, fix
-      // this.
       context.getModule().defineSyntax(keyword,
-          new MagpieInfixParser(context, stickiness, parser));
+          new MagpieInfixParser(context, precedence, parser));
       
       return context.nothing();
     }
@@ -78,7 +75,7 @@ public class SyntaxMethods {
     }
   }
   
-  @Def("(this is Parser) parseExpression(stickiness is Int)")
+  @Def("(this is Parser) parseExpression(precedence is Int)")
   public static class ParseExpression implements Intrinsic {
     @Override
     public Obj invoke(Context context, Obj left, Obj right) {
@@ -148,9 +145,9 @@ public class SyntaxMethods {
   }
   
   private static class MagpieInfixParser implements InfixParser {
-    public MagpieInfixParser(Context context, int stickiness, Obj parser) {
+    public MagpieInfixParser(Context context, int precedence, Obj parser) {
       mContext = context;
-      mStickiness = stickiness;
+      mPrecedence = precedence;
       mParser = parser;
     }
     
@@ -172,12 +169,12 @@ public class SyntaxMethods {
     }
     
     @Override
-    public int getStickiness() {
-      return mStickiness;
+    public int getPrecedence() {
+      return mPrecedence;
     }
     
     private final Context mContext;
-    private final int mStickiness;
+    private final int mPrecedence;
     private final Obj mParser;
   }
 }

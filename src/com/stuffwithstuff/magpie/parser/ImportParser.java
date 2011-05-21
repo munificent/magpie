@@ -5,7 +5,7 @@ import com.stuffwithstuff.magpie.ast.Expr;
 public class ImportParser implements PrefixParser {
   @Override
   public Expr parse(MagpieParser parser, Token token) {
-    PositionSpan span = parser.startBefore();
+    PositionSpan span = parser.span();
     
     String scheme = null;
     if (parser.match(TokenType.FIELD)) {

@@ -274,12 +274,12 @@ end)
 // Infix arithmetic operators
 // ----------------------------------------------------------------------------
 
-def _makeOperator(name is String, stickiness is Int)
-    defineInfix(name, stickiness,
+def _makeOperator(name is String, precedence is Int)
+    defineInfix(name, precedence,
         fn(parser is Parser, left is Expression, token is Token)
             // Ignore a newline after operator.
             parser matchToken(TokenType.LINE)
-            val right = parser parseExpression(stickiness)
+            val right = parser parseExpression(precedence)
             CallExpression new(Expression: (position: token position),
                 name: name, argument: { `left, `right })
         end
@@ -303,7 +303,7 @@ _makeOperator("!=", 4)
 
 /*
 definePrefix("definfix", fn(parser is Parser, token is Token)
-    // Keyword for parsing an infix operator with a given name and stickiness.
+    // Keyword for parsing an infix operator with a given name and precedence.
     // Simply desugars to a call a function with the same name:
     //
     //     definfix + 5
@@ -312,14 +312,14 @@ definePrefix("definfix", fn(parser is Parser, token is Token)
     //     // to:
     //     a +%(b)
     var name = parser consume(TokenType.NAME) value
-    var stickiness = parser consume(TokenType.INT) value
+    var precedence = parser consume(TokenType.INT) value
 
     {
-        defineInfix(`name, `stickiness,
+        defineInfix(`name, `precedence,
             fn(parser is Parser, left is Expression, token is Token)
                 // Ignore a newline after operator.
                 parser matchToken(TokenType.LINE)
-                var right = parser parseExpression(`stickiness)
+                var right = parser parseExpression(`precedence)
                 CallExpression new(Expression: (position: token position),
                     receiver: left, name: `name, argument: right)
             end

@@ -8,7 +8,7 @@ import com.stuffwithstuff.magpie.ast.Expr;
 public class BracketPrefixParser implements PrefixParser {
   @Override
   public Expr parse(MagpieParser parser, Token token) {
-    PositionSpan span = parser.startBefore();
+    PositionSpan span = parser.span();
     
     List<Expr> elements = new ArrayList<Expr>();
     

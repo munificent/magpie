@@ -61,7 +61,7 @@ public class NameParser implements PrefixParser, InfixParser {
   }
   
   @Override
-  public int getStickiness() { return Precedence.MESSAGE; }
+  public int getPrecedence() { return Precedence.MESSAGE; }
 
   private Expr appendField(Expr expr, Expr field) {
     if (expr == null) {

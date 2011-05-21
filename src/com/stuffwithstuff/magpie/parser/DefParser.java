@@ -78,7 +78,7 @@ public class DefParser implements PrefixParser {
   
   @Override
   public Expr parse(MagpieParser parser, Token token) {
-    PositionSpan span = parser.startBefore();
+    PositionSpan span = parser.span();
     
     Pair<String, Pattern> signature = parseSignature(parser);
     

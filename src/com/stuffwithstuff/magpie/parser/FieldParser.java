@@ -21,7 +21,7 @@ public class FieldParser implements PrefixParser {
     int index = 1;
     String name = token.getString();
     while (true) {
-      Expr value = parser.parseExpression(Precedence.COMPOSITION);
+      Expr value = parser.parseExpression(Precedence.RECORD);
       fields.add(new Pair<String, Expr>(name, value));
       
       if (usedNames.contains(name)) {
