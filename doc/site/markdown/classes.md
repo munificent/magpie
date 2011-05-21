@@ -122,8 +122,139 @@ Finally, when defining a field in a class, you can give it an initializer by hav
 Here `Point`s will default to be `0, 0`. You can create a new one simply by doing:
 
     :::magpie
-    var point = Point new()
+    val point = Point new()
 
 ## Inheritance
 
-**TODO**
+Like most class-based languages, Magpie supports *inheritance*. You can specify that one class is a *child* or *subclass* of another, like so:
+
+    :::magpie
+    defclass Widget
+        val label is String
+    end
+
+    defclass Button is Widget
+        var pressed? is Bool
+    end
+
+The part after `is` in the declaration of `Button` specifies its parent class. A child class inherits all of the state of its parent class. So here, `Button` will have fields for both `pressed?` and `label`.
+
+When constructing a new instance of a class, its parent classes also need their constructors to be called so that inherited fields can be correctly initialized. To do this, the canonical initializer is extended to include a field for the parent class.
+
+    :::magpie
+    Button new(Widget: (label: "Play"), pressed?: false)
+
+When the initializer for `Button` is called, it takes the value of the `Widget:` field and uses that as the argument to `Widget init(...)`. This way, child classes can invoke overridden parent class initializers, like so:
+
+    :::magpie
+    // Since there's just one field, don't require a record:
+    def (this == Widget) init(label is String)
+        this init(label: label)
+    end
+
+    // We can then call it through Button:
+    Button new(Widget: "Play", pressed?: false)
+
+If a parent class doesn't have any fields, or has initializers for all of them, you can omit it when constructing the child class. If the parent class has its own parent class, you may need to initialize it too:
+
+    :::magpie
+    defclass CheckBox is Button
+        var checked? is Bool
+    end
+
+    CheckBox new(Button: (Widget: "45 RPM", pressed?: false),
+            checked?: true)
+
+That's a bit tedious, so you're encouraged to override the initializers for your class to "flatten" that out and hide the parent class initialization.
+
+    :::magpie
+    def (this == Button) init(label is String, pressed? is Bool)
+        this init(Widget: label, pressed? pressed)
+    end
+
+    def (this == CheckBox) init(label is String, pressed? is Bool,
+            checked? is Bool)
+        // Use the init() for Button we just defined.
+        this init(Button: (label, pressed?), checked?: checked?)
+    end
+
+    // Use the init() for CheckBox.
+    CheckBox new("45 RPM", false, true)
+
+You can consider canonical initializers to be "raw" initializers that you'll likely hide behind a simpler overridden one.
+
+### Inherited Methods
+
+If you call a [multimethod](multimethods.html) and pass in an instance of a child class, it will look through all of its methods to find a [pattern](patterns.html) that matches. A type pattern will match against an object of the given class, but it will also match objects of *child classes* of that class. In that way, methods defined using `is` patterns are automatically inherited by child classes.
+
+    :::magpie
+    def (this is Widget) display()
+        print(this label)
+    end
+
+    val checkBox = CheckBox new("45 RPM", false, true)
+    checkBox display() // Prints "45 RPM".
+
+When multiple patterns match an object, type patterns on child classes take precedence over parent classes. This lets you *override* a method defined on a parent class.
+
+    :::magpie
+    def (this is CheckBox) display()
+        val check = if this checked? then "[X] " else "[ ] "
+        print(check + this label)
+    end
+
+    val checkBox = CheckBox new("45 RPM", false, true)
+    checkBox display() // Prints "[X] 45 RPM".
+
+Note that method inheritance like this only works for *type* patterns. Value patterns (i.e. `==` ones) do *not* match subclasses.
+
+    :::magpie
+    // Given a string like "Play|true", creates a new Button.
+    def (this == Button) fromString(descriptor is String)
+        val parts = descriptor split("|")
+        this new Button(parts[0], parts[1] true?)
+    end
+
+    CheckBox fromString("45 RPM|false") // ERROR: No method found.
+
+This follows more or less other languages where "static" or "class" methods are not inherited, just "instance" ones.
+
+### Multiple Inheritance
+
+Unlike many newer languages, Magpie embraces multiple inheritance. A class is free to have as many parent classes as it wishes:
+
+    :::magpie
+    defclass Container
+        val widgets is List
+    end
+
+    defclass GroupBox is Widget, Container
+        var selected is Int
+    end
+
+Here, `GroupBox` inherits from both `Widget` and `Container`. This means it gets all of the fields of both of those parents (and their parents). In addition, methods specialized to either of those are valid for `GroupBox` objects too. When constructing an object, all of its parent classes must be initialized.
+
+    :::magpie
+    GroupBox new(
+            Widget: "Group",
+            Container: (widgets: []),
+            selected: 0)
+
+Here, we're passing fields for both `Widget:` and `Container:`.
+
+Multiple inheritance can add considerable complexity to a language, which is why many shy away from it. Most of that complexity can be traced back to a single corner case: *inheriting from the same class twice*. For example:
+
+    :::magpie
+    defclass RadioButton is Button, Widget
+    end
+
+    val group = RadioButton new(
+            Button: ("From Button", false),
+            Widget: "From Widget")
+    print(group label) // ???
+
+Here, `RadioButton` inherits `Widget` along two paths: once from `Button`, and once from `Widget` directly. Both paths try to initialize the label, one using `"From Button"` and one using `"From Widget"`. Which one "wins"? Overriding methods have similar problems.
+
+To avoid these problems, Magpie has a simple rule: *a class may only inherit from some other class once, either directly or indirectly.* In other words, there may only be one path from a given child class to a given parent class. If you try to define a class like `RadioGroup` above, Magpie will [throw](error-handling.html) `ParentCollisionError` at you.
+
+A side-effect of this rule is that Magpie doesn't have a "root" class like `Object` or `Any` in other languages. It doesn't need one. Root classes usually don't have state, and you can define methods that work on objects of any class (think `toString()` or `getHashCode()`) simply by defining methods that aren't specialized to any type.

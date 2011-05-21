@@ -51,5 +51,3 @@ If you want to create a block in the middle of another block, you can create a `
     print("four")
 
 This can be useful if you want to limit the scope of a [variable](variables.html) since they have block scope.
-
-<p class="future">Need to explain catch here.</p>
