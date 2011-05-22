@@ -1,4 +1,4 @@
-package com.stuffwithstuff.magpie.interpreter;
+package com.stuffwithstuff.magpie.app;
 
 /**
  * This exception is thrown by the "quit" built-in function to unwind the

@@ -9,7 +9,6 @@ import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.PatternTester;
-import com.stuffwithstuff.magpie.interpreter.QuitException;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
 import com.stuffwithstuff.magpie.parser.ParseException;
 import com.stuffwithstuff.magpie.parser.StringReader;
@@ -24,21 +23,6 @@ public class IntrinsicMethods {
       // TODO(bob): Total hack to fit in an int.
       int time = (int) (System.currentTimeMillis() - 1289000000000L);
       return context.toObj(time);
-    }
-  }
-
-  @Def("prints(text is String)")
-  public static class Print implements Intrinsic {
-    public Obj invoke(Context context, Obj left, Obj right) {
-      context.getInterpreter().print(right.asString());
-      return context.nothing();
-    }
-  }
-  
-  @Def("quit()")
-  public static class Quit implements Intrinsic {
-    public Obj invoke(Context context, Obj left, Obj right) {
-      throw new QuitException();
     }
   }
   

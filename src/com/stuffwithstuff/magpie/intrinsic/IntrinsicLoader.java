@@ -4,7 +4,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import com.stuffwithstuff.magpie.Def;
+import com.stuffwithstuff.magpie.Method;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
+import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.Scope;
 import com.stuffwithstuff.magpie.parser.DefParser;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
@@ -33,7 +35,7 @@ public abstract class IntrinsicLoader {
   }
   
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  private static void register(Class javaClass, Scope scope) {
+  public static void register(Class javaClass, Scope scope) {
 
     for (Class innerClass : javaClass.getDeclaredClasses()) {
       Def signature = (Def) innerClass.getAnnotation(Def.class);
@@ -52,13 +54,19 @@ public abstract class IntrinsicLoader {
       String name = parsed.getKey();
       Pattern pattern = parsed.getValue();
       
-      // Construct the method.
       Constructor ctor = innerClass.getConstructor();
-      Intrinsic callable = (Intrinsic) ctor.newInstance();
-      IntrinsicCallable builtIn = new IntrinsicCallable(pattern, callable, scope);
+      Object instance = ctor.newInstance();
+      
+      // If an external method, wrap it.
+      if (instance instanceof Method) {
+        // Must be an external method.
+        instance = new MethodWrapper((Method) instance);
+      }
+      
+      Callable callable = new IntrinsicCallable(pattern, (Intrinsic) instance, scope);
       
       // Register it.
-      scope.define(name, builtIn);
+      scope.define(name, callable);
       
     } catch (SecurityException e) {
       // TODO Auto-generated catch block

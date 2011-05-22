@@ -5,9 +5,9 @@ import java.net.URL;
 import java.nio.charset.Charset;
 
 import com.stuffwithstuff.magpie.Magpie;
+import com.stuffwithstuff.magpie.Method;
 import com.stuffwithstuff.magpie.SourceFile;
 import com.stuffwithstuff.magpie.interpreter.Profiler;
-import com.stuffwithstuff.magpie.interpreter.QuitException;
 
 public class MagpieApp {
 
@@ -86,7 +86,17 @@ public class MagpieApp {
     String script = readFile(path);
     Magpie magpie = new Magpie(new MagpieAppHost());
     
-    magpie.run(new SourceFile(path, script));
+    magpie.defineMethod("printString(s is String)", new Method() {
+      public Object call(Object left, Object right) {
+        System.out.print(right);
+        return null;
+      }
+    });
+    
+    String result = magpie.run(new SourceFile(path, script));
+    if (result != null) {
+      System.out.println(result);
+    }
   }
   
   private static File getAppDirectory() {

@@ -112,10 +112,6 @@ public class Interpreter {
     return module;
   }
   
-  public void print(String text) {
-    mHost.print(text);
-  }
-  
   public ErrorException error(String errorClassName, String message) {
     // Look up the error class.
     ClassObj classObj = mBaseModule.getScope().get(errorClassName).asClass();

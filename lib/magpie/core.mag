@@ -39,12 +39,12 @@ end
 
 def print()
     /// Prints a newline to standard output.
-    prints("\n")
+    printString("\n")
 end
 
 def print(text is String)
     /// Prints *text* to standard output.
-    prints(text +("\n"))
+    printString(text +("\n"))
 end
 
 def print(any)
