@@ -1,7 +1,7 @@
 package com.stuffwithstuff.magpie.app;
 
+import com.stuffwithstuff.magpie.Repl;
 import com.stuffwithstuff.magpie.app.Term.ForeColor;
-import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.parser.ParseException;
 import com.stuffwithstuff.magpie.parser.StringReader;
 import com.stuffwithstuff.magpie.parser.Token;
@@ -13,10 +13,10 @@ import com.stuffwithstuff.magpie.parser.Lexer;
  * time, as requested.
  */
 public class NiceReplCharacterReader extends ReplReader {
-  public NiceReplCharacterReader(Interpreter interpreter) {
-    mInterpreter = interpreter;
+  public NiceReplCharacterReader(Repl repl) {
+    super(repl);
   }
-
+  
   @Override
   protected void showPrompt(String prompt) {
     Term.set(Term.ForeColor.GRAY);
@@ -25,7 +25,7 @@ public class NiceReplCharacterReader extends ReplReader {
   }
   
   @Override
-  protected void afterReadLine(String prompt, String line) {
+  protected void afterReadLine(Repl repl, String prompt, String line) {
     try {
       Lexer lexer = new Lexer(new StringReader("", line));
   
@@ -57,7 +57,7 @@ public class NiceReplCharacterReader extends ReplReader {
           if (token.isKeyword("this") || token.isKeyword("nothing")) {
             // special identifiers
             Term.set(ForeColor.LIGHT_BLUE);
-          } else if (mInterpreter.getBaseModule().getGrammar().isReserved(token.getString())) {
+          } else if (repl.isReservedWord(token.getString())) {
             Term.set(ForeColor.CYAN);
           } else {
             Term.set(ForeColor.WHITE);
@@ -98,6 +98,4 @@ public class NiceReplCharacterReader extends ReplReader {
     System.out.println();
     Term.restoreColor();
   }
-  
-  private final Interpreter mInterpreter;
 }

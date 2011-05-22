@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import com.stuffwithstuff.magpie.Repl;
 import com.stuffwithstuff.magpie.SourceReader;
 
 /**
@@ -11,7 +12,8 @@ import com.stuffwithstuff.magpie.SourceReader;
  * time, as requested.
  */
 public class ReplReader implements SourceReader {
-  public ReplReader() {
+  public ReplReader(Repl repl) {
+    mRepl = repl;
     InputStreamReader converter = new InputStreamReader(System.in);
     mInput = new BufferedReader(converter);
   }
@@ -43,7 +45,7 @@ public class ReplReader implements SourceReader {
     System.out.print(prompt);
   }
   
-  protected void afterReadLine(String prompt, String line) {
+  protected void afterReadLine(Repl repl, String prompt, String line) {
     // Do nothing.
   }
   
@@ -61,7 +63,7 @@ public class ReplReader implements SourceReader {
     try {
       mLine = mInput.readLine();
       
-      afterReadLine(prompt, mLine);
+      afterReadLine(mRepl, prompt, mLine);
       
       mLine = mLine + "\n";
     } catch (IOException e) {
@@ -71,6 +73,7 @@ public class ReplReader implements SourceReader {
     mPosition = 0;
   }
   
+  private final Repl mRepl;
   private final BufferedReader mInput;
   private boolean mFirstLine = true;
   private String mLine = "";

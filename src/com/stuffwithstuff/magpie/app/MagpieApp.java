@@ -36,7 +36,7 @@ public class MagpieApp {
     
     // If no script is given, just spin up the REPL.
     if (path == null) {
-      Repl repl = niceRepl ? new NiceRepl() : new Repl();
+      ConsoleRepl repl = niceRepl ? new ColorRepl() : new ConsoleRepl();
       repl.run();
     } else {
       runScript(path);

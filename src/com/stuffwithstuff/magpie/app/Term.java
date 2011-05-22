@@ -1,7 +1,10 @@
 package com.stuffwithstuff.magpie.app;
 
-// http://invisible-island.net/xterm/ctlseqs/ctlseqs.html
-
+/**
+ * Simple wrapper for outputing ANSI escape codes to control the terminal. See:
+ * http://en.wikipedia.org/wiki/ANSI_escape_code
+ * http://invisible-island.net/xterm/ctlseqs/ctlseqs.html
+ */
 public class Term {
   public enum ForeColor {
     BLACK       ("0;30"),
@@ -39,6 +42,11 @@ public class Term {
   }
   
   public static void moveUp() {
-    System.out.print("\033[F");
+    // Move up one line and to first column. Doesn't work in iTerm. :(
+    // System.out.print("\033[F");
+    // Move up one line.
+    System.out.print("\033[A");
+    // Move to column 1.
+    System.out.print("\033[1G");
   }
 }

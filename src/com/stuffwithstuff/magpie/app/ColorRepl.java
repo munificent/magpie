@@ -1,8 +1,8 @@
 package com.stuffwithstuff.magpie.app;
 
-import com.stuffwithstuff.magpie.SourceReader;
+import com.stuffwithstuff.magpie.Repl;
 
-public class NiceRepl extends Repl {
+public class ColorRepl extends ConsoleRepl {
   @Override
   public void print(String text) {
     Term.set(Term.ForeColor.WHITE);
@@ -11,8 +11,8 @@ public class NiceRepl extends Repl {
   }
   
   @Override
-  protected SourceReader createReader() {
-    return new NiceReplCharacterReader(getInterpreter());
+  protected ReplReader createReader(Repl repl) {
+    return new NiceReplCharacterReader(repl);
   }
   
   @Override

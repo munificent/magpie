@@ -138,11 +138,7 @@ public class Interpreter {
 
   public ClassObj getClassClass() { return mClass; }
   public ClassObj getBoolClass() { return mBoolClass; }
-  public ClassObj getFunctionClass() { return mFnClass; }
   public ClassObj getIntClass() { return mIntClass; }
-  public ClassObj getListClass() { return mListClass; }
-  public ClassObj getNothingClass() { return mNothingClass; }
-  public ClassObj getRecordClass() { return mRecordClass; }
   public ClassObj getStringClass() { return mStringClass; }
   
   public Module getBaseModule() { return mBaseModule; }

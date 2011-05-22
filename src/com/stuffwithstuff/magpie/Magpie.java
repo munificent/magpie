@@ -17,5 +17,12 @@ public class Magpie {
     }
   }
   
+  public Repl createRepl() {
+    return new Repl(mInterpreter);
+  }
+  
+  // TODO(bob): Don't expose this.
+  public Interpreter getInterpreter() { return mInterpreter; }
+  
   private final Interpreter mInterpreter;
 }
