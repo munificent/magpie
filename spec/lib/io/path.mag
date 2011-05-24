@@ -1,0 +1,26 @@
+import spec.specify
+
+import io.path
+
+specify("The 'base' method") with
+    it should("return the last component of the filename") with
+        "a" base shouldEqual("a")
+        "/a" base shouldEqual("a")
+        "/a/b" base shouldEqual("b")
+        "/ab/ba/bag" base shouldEqual("bag")
+        "/ab/ba/bag.txt" base shouldEqual("bag.txt")
+        "/foo/bar/baz.bang" base shouldEqual("baz.bang")
+        "/foo/bar.baz.bang" base shouldEqual("bar.baz.bang")
+    end
+
+    it should("ignore trailing directory separators") with
+        "foo/" base shouldEqual("foo")
+        "bar///" base shouldEqual("bar")
+    end
+
+    it should("handle edge cases") with
+        "" base shouldEqual("")
+        "." base shouldEqual(".")
+        ".." base shouldEqual("..")
+    end
+end

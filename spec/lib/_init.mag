@@ -1,4 +1,5 @@
 import .io.File
+import .io.path
 import .magpie.core.Bool
 import .magpie.core.Class
 import .magpie.core.Comparable

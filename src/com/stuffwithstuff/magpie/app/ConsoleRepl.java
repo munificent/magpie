@@ -4,11 +4,9 @@ import com.stuffwithstuff.magpie.Def;
 import com.stuffwithstuff.magpie.Magpie;
 import com.stuffwithstuff.magpie.Method;
 import com.stuffwithstuff.magpie.Repl;
-import com.stuffwithstuff.magpie.MagpieHost;
 import com.stuffwithstuff.magpie.ReplResult;
-import com.stuffwithstuff.magpie.SourceFile;
 
-public class ConsoleRepl implements MagpieHost {
+public class ConsoleRepl extends MagpieAppHost {
   public ConsoleRepl() {
     mMagpie = new Magpie(this);
     
@@ -46,11 +44,6 @@ public class ConsoleRepl implements MagpieHost {
 
   public void print(String text) {
     System.out.print(text);
-  }
-
-  @Override
-  public SourceFile loadModule(String name) {
-    return MagpieApp.loadModule(name);
   }
 
   protected ReplReader createReader(Repl repl) {
