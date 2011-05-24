@@ -167,9 +167,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
       // escape this loop.
       while (true) {
         // Evaluate the body in its own scope.
-        scope = scope.push();
-
-        evaluate(expr.getBody(), scope);
+        evaluate(expr.getBody(), scope.push());
       }
     } catch (BreakException ex) {
       // Nothing to do.
