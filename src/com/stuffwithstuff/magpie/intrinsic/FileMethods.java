@@ -1,15 +1,12 @@
 package com.stuffwithstuff.magpie.intrinsic;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 
 import com.stuffwithstuff.magpie.Def;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.Context;
 import com.stuffwithstuff.magpie.interpreter.Obj;
+import com.stuffwithstuff.magpie.util.FileReader;
 
 public class FileMethods {
   @Def("(is File) close()")
@@ -45,6 +42,20 @@ public class FileMethods {
     }
   }
   
+  @Def("(is File) read()")
+  public static class Read implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      FileReader reader = (FileReader)left.getValue();
+      try {
+        String contents = reader.readAll();
+        if (contents == null) return context.nothing();
+        return context.toObj(contents);
+      } catch (IOException e) {
+        throw context.error("IOError", "Could not read.");
+      }
+    }
+  }
+  
   @Def("(is File) readLine()")
   public static class ReadLine implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
@@ -58,39 +69,4 @@ public class FileMethods {
       }
     }
   }
-
-  private static class FileReader {
-    public FileReader(String path) throws IOException {
-      mStream = new FileInputStream(path);
-      InputStreamReader input = new InputStreamReader(mStream,
-          Charset.forName("UTF-8"));
-      mReader = new BufferedReader(input);
-    }
-    
-    public boolean isOpen() {
-      return mStream != null;
-    }
-    
-    public void close() {
-      // Do nothing if already closed.
-      if (mStream == null) return;
-      
-      try {
-        mStream.close();
-        mStream = null;
-        mReader = null;
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-    }
-    
-    public String readLine() throws IOException {
-      return mReader.readLine();
-    }
-    
-    private FileInputStream mStream;
-    private BufferedReader mReader;
-  }
-  
 }

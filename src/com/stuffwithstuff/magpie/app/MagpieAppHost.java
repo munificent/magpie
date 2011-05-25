@@ -1,16 +1,12 @@
 package com.stuffwithstuff.magpie.app;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.URL;
-import java.nio.charset.Charset;
 
 import com.stuffwithstuff.magpie.MagpieHost;
 import com.stuffwithstuff.magpie.SourceFile;
+import com.stuffwithstuff.magpie.util.FileReader;
 
 public class MagpieAppHost implements MagpieHost {
   @Override
@@ -64,23 +60,6 @@ public class MagpieAppHost implements MagpieHost {
       path = new File(filePath, "_init.mag").getPath();
     }
     
-    FileInputStream stream = new FileInputStream(path);
-
-    try {
-      InputStreamReader input = new InputStreamReader(
-          stream, Charset.forName("UTF-8"));
-      Reader reader = new BufferedReader(input);
-
-      StringBuilder builder = new StringBuilder();
-      char[] buffer = new char[8192];
-      int read;
-
-      while ((read = reader.read(buffer, 0, buffer.length)) > 0) {
-        builder.append(buffer, 0, read);
-      }
-
-      return builder.toString();
-    } finally {
-      stream.close();
-    }
-  }}
+    return FileReader.read(path);
+  }
+}

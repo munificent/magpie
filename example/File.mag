@@ -30,3 +30,10 @@ do
         for line = it do print(line)
     end
 end
+
+// 4. Reading it all at once.
+do
+    open("example/File.mag") use with
+        print(it read())
+    end
+end

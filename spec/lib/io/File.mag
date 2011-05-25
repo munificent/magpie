@@ -41,6 +41,7 @@ specify("The 'readLine' method on File") with
         file readLine() shouldEqual("one")
         file readLine() shouldEqual("two")
         file readLine() shouldEqual("three")
+        file close()
     end
 
     it should("return nothing when the end is reached") with
@@ -50,5 +51,14 @@ specify("The 'readLine' method on File") with
         file readLine() // three
         file readLine() shouldEqual(nothing)
         file readLine() shouldEqual(nothing)
+        file close()
+    end
+end
+
+specify("The 'read' method on File") with
+    it should("return the entire contents of the file") with
+        val file = open(TEST_PATH)
+        file read() shouldEqual("one\ntwo\nthree")
+        file close()
     end
 end
