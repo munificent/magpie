@@ -31,7 +31,7 @@ end
 specify("A backslash") with
     it should("consume the following newline") with
         val a = true \
-            string
+            toString
         a shouldEqual("true")
     end
 end

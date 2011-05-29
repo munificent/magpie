@@ -56,8 +56,10 @@ public class Interpreter {
   }
   
   public String evaluateToString(Obj value) {
-    Multimethod multimethod = mBaseModule.getScope().lookUpMultimethod(Name.STRING);
-    return multimethod.invoke(new Context(mBaseModule), value, mNothing).asString();
+    Multimethod multimethod = mBaseModule.getScope().lookUpMultimethod(
+        Name.TO_STRING);
+    return multimethod.invoke(
+        new Context(mBaseModule), value, mNothing).asString();
   }
   
   public Obj invoke(Obj leftArg, String method, Obj rightArg) {

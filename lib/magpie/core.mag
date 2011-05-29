@@ -17,23 +17,23 @@ import classfile:com.stuffwithstuff.magpie.intrinsic.StringMethods
 // String conversion for core classes
 // ----------------------------------------------------------------------------
 
-def (this is String) string
+def (this is String) toString
     this
 end
 
-def (nothing) string
+def (nothing) toString
     "nothing"
 end
 
-def (true) string
+def (true) toString
     "true"
 end
 
-def (false) string
+def (false) toString
     "false"
 end
 
-def (this is Class) string
+def (this is Class) toString
     this name
 end
 
@@ -43,13 +43,13 @@ def print()
 end
 
 def print(text is String)
-    /// Prints *text* to standard output.
+    /// Prints `text` to standard output.
     printString(text +("\n"))
 end
 
 def print(any)
-    /// Converts *any* to a string and prints it to standard output.
-    print(any string)
+    /// Converts `any` to a string and prints it to standard output.
+    print(any toString)
 end
 
 def not(true)
@@ -67,7 +67,7 @@ def (this) != (that)
 end
 
 def (this) + (that)
-    (this string) +(that string)
+    (this toString) +(that toString)
 end
 
 // Truthiness.

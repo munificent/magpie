@@ -1,9 +1,9 @@
 import spec.specify
 
-specify("The 'string' getter on Ints") with
+specify("The 'toString' getter on Ints") with
     it should("convert the value to a string") with
-        0 string shouldEqual("0")
-        123 string shouldEqual("123")
+        0 toString shouldEqual("0")
+        123 toString shouldEqual("123")
     end
 end
 

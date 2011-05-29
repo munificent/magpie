@@ -28,7 +28,7 @@ public final class Name {
   public static final String PARENT_COLLISION_ERROR = "ParentCollisionError";
   public static final String PARSE_ERROR = "ParseError";
   public static final String REDEFINITION_ERROR = "RedefinitionError";
-  public static final String STRING = "string";
+  public static final String TO_STRING = "toString";
 
   public static boolean isPublic(String name) {
     return !name.startsWith("_");

@@ -86,9 +86,8 @@ public class IntrinsicMethods {
     }
   }
 
-  // TODO(bob): Rename toString.
-  @Def("(this) string")
-  public static class String_ implements Intrinsic {
+  @Def("(this) toString")
+  public static class ToString implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       return context.toObj("<" + left.getClassObj().getName() + ">");
     }

@@ -69,8 +69,8 @@ public class IntMethods {
     }
   }
   
-  @Def("(is Int) string")
-  public static class String_ implements Intrinsic {
+  @Def("(is Int) toString")
+  public static class ToString implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       return context.toObj(Integer.toString(left.asInt()));
     }
