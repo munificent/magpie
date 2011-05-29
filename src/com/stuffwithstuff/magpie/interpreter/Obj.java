@@ -1,5 +1,7 @@
 package com.stuffwithstuff.magpie.interpreter;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -128,14 +130,17 @@ public class Obj {
       return mValue.toString();
     } else if (mClass.getName().equals("Record")) {
       StringBuilder builder = new StringBuilder();
-      builder.append("(");
       
-      for (Entry<String, Obj> field : mFields.entrySet()) {
-        if (builder.length() > 1) builder.append(", ");
-        builder.append(field.getKey()).append(": ").append(field.getValue());
+      // Show fields in sorted order.
+      List<String> fields = new ArrayList<String>(mFields.keySet());
+      Collections.sort(fields);
+      
+      for (int i = 0; i < fields.size(); i++) {
+        if (i > 0) builder.append(", ");
+        String field = fields.get(i);
+        builder.append(field).append(": ").append(mFields.get(field));
       }
       
-      builder.append(")");
       return builder.toString();
       
     } else if (mClass.getName().equals("Nothing")) {

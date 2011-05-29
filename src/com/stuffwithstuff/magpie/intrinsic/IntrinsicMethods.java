@@ -92,4 +92,11 @@ public class IntrinsicMethods {
       return context.toObj("<" + left.getClassObj().getName() + ">");
     }
   }
+
+  @Def("(is Record) toString")
+  public static class Record_ToString implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      return context.toObj(left.toString());
+    }
+  }
 }
