@@ -1,0 +1,14 @@
+// Share IO multimethods for reading/writing from sockets.
+import io
+
+import classfile:com.stuffwithstuff.magpie.intrinsic.NetMethods
+
+// TODO(bob): Need to make sure this cannot be constructed somehow.
+defclass ServerSocket
+end
+
+// TODO(bob): Need to make sure this cannot be constructed somehow.
+defclass Socket
+end
+
+_setClasses(ServerSocket, Socket)

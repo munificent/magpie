@@ -1,5 +1,8 @@
 package com.stuffwithstuff.magpie.intrinsic;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.stuffwithstuff.magpie.Def;
 import com.stuffwithstuff.magpie.interpreter.Context;
 import com.stuffwithstuff.magpie.interpreter.Name;
@@ -63,6 +66,18 @@ public class StringMethods {
       int startIndex = right.getField(0).asInt();
       int endIndex = right.getField(1).asInt();
       return context.toObj(string.substring(startIndex, endIndex));
+    }
+  }
+
+  @Def("(is String) split(separator is String)")
+  public static class Split implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      String[] parts = left.asString().split(right.asString());
+      List<Obj> elements = new ArrayList<Obj>();
+      for (String part : parts) {
+        elements.add(context.toObj(part));
+      }
+      return context.toList(elements);
     }
   }
 }

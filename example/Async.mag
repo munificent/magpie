@@ -1,0 +1,19 @@
+import system.routine
+
+def spawn(name)
+    async with
+        for i = 1 to(50) do
+            print(name + " " + i)
+            sleep(100)
+        end
+    end
+end
+
+print("Spawning routines")
+spawn("a")
+spawn("b")
+spawn("c")
+
+print("Sleeping main thread")
+sleep(6000)
+print("Done")

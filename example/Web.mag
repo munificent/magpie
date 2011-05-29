@@ -1,0 +1,28 @@
+// A very primitive web server.
+import io
+import net
+import async
+
+val server = ServerSocket new(8080)
+print("Waiting for connections...")
+while true do
+    val socket = server accept()
+    // Start a new thread to respond to the request.
+    run with
+        // Process the request.
+        val request = socket readLine()
+        val parts = request split(" ")
+
+        // Only GET is supported.
+        if parts[0] != "GET" then return
+
+        val path = parts[1]
+        print("Serving " + path)
+        // Open the file being served.
+        open("." + path) use with
+            // Read it and write it to the socket.
+            socket write(it read())
+        end
+        socket close()
+    end
+end

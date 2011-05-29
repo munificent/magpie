@@ -8,7 +8,16 @@ import com.stuffwithstuff.magpie.interpreter.Context;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.util.FileReader;
 
-public class FileMethods {
+public class IOMethods {
+  // TODO(bob): Hackish.
+  @Def("_setClasses(== File)")
+  public static class SetClasses implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      sFileClass = right.asClass();
+      return context.nothing();
+    }
+  }
+
   @Def("(is File) close()")
   public static class Close implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
@@ -18,16 +27,15 @@ public class FileMethods {
     }
   }
 
-  @Def("(== File) open(path is String)")
+  @Def("open(path is String)")
   public static class Open implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
-      ClassObj fileClass = left.asClass();
       String path = right.asString();
       
       FileReader reader;
       try {
         reader = new FileReader(path);
-        return context.instantiate(fileClass, reader);
+        return context.instantiate(sFileClass, reader);
       } catch (IOException e) {
         throw context.error("IOError", "Could not open file.");
       }
@@ -69,4 +77,6 @@ public class FileMethods {
       }
     }
   }
+  
+  private static ClassObj sFileClass;
 }

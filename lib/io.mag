@@ -1,10 +1,6 @@
-import classfile:com.stuffwithstuff.magpie.intrinsic.FileMethods
+import classfile:com.stuffwithstuff.magpie.intrinsic.IOMethods
 
 defclass File
-end
-
-def open(path is String)
-    File open(path)
 end
 
 // Iterator over files.
@@ -25,3 +21,5 @@ end
 def (this is FileIterator) current
     this line
 end
+
+_setClasses(File)
