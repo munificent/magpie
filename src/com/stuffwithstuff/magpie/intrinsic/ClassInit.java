@@ -50,6 +50,9 @@ public class ClassInit implements Callable {
       }
     }
     
+    // Note that we've successfully reached the canonical initializer.
+    context.getInterpreter().finishInitialization();
+    
     return obj;
   }
   

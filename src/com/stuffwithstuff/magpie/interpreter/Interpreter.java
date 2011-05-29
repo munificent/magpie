@@ -239,19 +239,38 @@ public class Interpreter {
     Obj newObj = instantiate(classObj, null);
     
     mConstructing.push(newObj);
+
     // Call the init() multimethod.
     initializeNewObject(context, classObj, initArg);
+
     mConstructing.pop();
     
     return newObj;
   }
   
   public void initializeNewObject(Context context, ClassObj classObj, Obj arg) {
+    // Keep track of how many times we reach the canonical initializer so that
+    // we can generate an error if an init() call fails to bottom out to it.
+    int expected = mInitializingCount++;
+    
     Multimethod init = classObj.getClosure().lookUpMultimethod(Name.INIT);
     // Note: the receiver for init() is the class itself, not the new instance
     // which is considered to be in a hidden state since it isn't initialized
     // yet.
     init.invoke(context, classObj, arg);
+
+    // Make sure the canonical initializer was called.
+    if (mInitializingCount > expected) {
+      // Just decrement it so the error doesn't cascade.
+      mInitializingCount--;
+
+      error(Name.INITIALIZATION_ERROR,
+          "Instance of class " + classObj.getName() + " was not initialized.");
+    }
+  }
+  
+  public void finishInitialization() {
+    mInitializingCount--;
   }
   
   private void evaluateModule(Module module) {
@@ -300,6 +319,7 @@ public class Interpreter {
   private final Module mSyntaxModule;
   
   private final Stack<Obj> mConstructing = new Stack<Obj>();
+  private int mInitializingCount = 0;
 
   private boolean mInObjectsEqual = false;
 }

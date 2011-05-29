@@ -57,6 +57,7 @@ public class EnvironmentBuilder {
     class_(Name.PARENT_COLLISION_ERROR, error).end();
     class_(Name.PARSE_ERROR, error).end();
     class_(Name.REDEFINITION_ERROR, error).end();
+    class_(Name.INITIALIZATION_ERROR, error).end();
   }
   
   private ClassBuilder class_(String name, ClassObj... parents) {

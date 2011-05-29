@@ -17,6 +17,7 @@ public final class Name {
   public static final String IS_TRUE = "true?";
   public static final String IT = "it";
   public static final String ITERATE = "iterate";
+  public static final String INITIALIZATION_ERROR = "InitializationError";
   public static final String NEW = "new";
   public static final String NEXT = "next";
   public static final String NO_MATCH_ERROR = "NoMatchError";

@@ -209,4 +209,36 @@ specify("A class's default constructor") with
         b aa shouldEqual("a string")
         b bb shouldEqual("b string")
     end
+
+    it should("require the canonical initializer to be called") with
+        defclass A
+            var aa
+        end
+
+        def (this == A) init()
+            "don't chain to canonical"
+        end
+
+        fn
+            A new()
+        end shouldThrow(InitializationError)
+    end
+
+    it should("require the parent's canonical initializer to be called") with
+        defclass A
+            var aa
+        end
+
+        defclass B is A
+            var bb
+        end
+
+        def (this == A) init(s is String)
+            "don't chain to canonical"
+        end
+
+        fn
+            B new(A: "s", bb: "dummy")
+        end shouldThrow(InitializationError)
+    end
 end
