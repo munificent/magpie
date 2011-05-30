@@ -57,7 +57,7 @@ nothing/) that `null` has in most other languages. It's rare that you'll
 actually need to write `nothing` in code since it can usually be inferred from
 context but it's there if you need it.
 
-Since `nothing` is in its own class, that means that methods that are specialized to other types are guaranteed to never receiving `nothing` instead. In Magpie, you never need to do this:
+Since `nothing` is in its own class, that means that a method that is [specialized](multimethods.html) to another class won't receive `nothing` instead. In Magpie, you never need to do this:
 
     :::magpie
     def length(string is String)
@@ -67,4 +67,4 @@ Since `nothing` is in its own class, that means that methods that are specialize
         string count
     end
 
-If your method is selected, you are assured that the argument matches the types you require.
+If your method expects a string, you'll get a string, not a string-or-maybe-nothing.

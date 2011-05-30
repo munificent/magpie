@@ -89,7 +89,7 @@ def (this) shouldEqual(expected)
 end
 
 def (this) shouldBe(expected is Class, message is String)
-    if this is?(expected) then
+    if this isa(expected) then
         _currentTestSuite _pass()
     else
         _currentTestSuite _fail(message)

@@ -71,23 +71,23 @@ def (this) + (that)
 end
 
 // Truthiness.
-def (this) true?
+def (this) isTrue
     true
 end
 
-def (this is Bool) true?
+def (this is Bool) isTrue
     this
 end
 
-def (this is Int) true?
+def (this is Int) isTrue
     this !=(0)
 end
 
-def (this is String) true?
+def (this is String) isTrue
     this count >(0)
 end
 
-def (nothing) true?
+def (nothing) isTrue
     false
 end
 
@@ -200,7 +200,7 @@ defineInfix("and", 3, fn(parser is Parser, left is Expression, token is Token)
         do
             // TODO(bob): Use generated symbol.
             val temp__ = `left
-            match temp__ true?
+            match temp__ isTrue
                 case true then `right
                 else temp__
             end
@@ -219,7 +219,7 @@ defineInfix("or", 3, fn(parser is Parser, left is Expression, token is Token)
         do
             // TODO(bob): Use generated symbol.
             val temp__ = `left
-            match temp__ true?
+            match temp__ isTrue
                 case true then temp__
                 else `right
             end
@@ -240,7 +240,7 @@ definePrefix("if", fn(parser is Parser, token is Token)
 
     // Don't try to parse "else" if we got an explicit "end" for the "then"
     // block.
-    val consumedEnd? = match endToken
+    val consumedEnd = match endToken
         case nothing then false
         case token then
             match token type name
@@ -251,20 +251,20 @@ definePrefix("if", fn(parser is Parser, token is Token)
     end
 
     // See if we have an "else" keyword.
-    val parsedElse? = match consumedEnd?
+    val parsedElse = match consumedEnd
         case true then false
         case false then parser matchToken("else")
     end
 
     // Parse the "else" expression if there otherwise use nothing.
-    val elseExpr = match parsedElse?
+    val elseExpr = match parsedElse
         case true then parser parseExpressionOrBlock()
         else { nothing }
     end
 
     // Desugar to a match.
     {
-        match `condition true?
+        match `condition isTrue
             case true then `thenExpr
             else `elseExpr
         end

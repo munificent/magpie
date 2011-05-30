@@ -46,7 +46,7 @@ public class IntrinsicMethods {
   }
 
   // TODO(bob): More or less temporary.
-  @Def("canParse?(source is String)")
+  @Def("canParse(source is String)")
   public static class CheckSyntax implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       String source = right.asString();

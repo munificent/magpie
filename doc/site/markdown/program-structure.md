@@ -17,36 +17,60 @@ Comments are as in C, C++, Java, etc.:
 
 ## Doc Comments
 
-**TODO**
+Magpie has a third kind of comment called *documentation comments* or simply *doc comments*. They start with three slashes and proceed to the end of the line.
+
+    :::magpie
+    def square(n is Int)
+        /// Returns `n` squared.
+        n * n
+    end
+
+Doc comments are used to document entire constructs: [classes](classes.html), [methods](multimethods.html), etc. Unlike other comments, doc comments are *not* ignored by the language. This means they are only allowed where they are expected: at the beginning of a method body or a class definition:
+
+    :::magpie
+    defclass Address
+        /// A postal address.
+        val street
+        val city
+        val state
+    end
+
+Doc comments are formatted using [Markdown](http://daringfireball.net/projects/markdown/) and are intended to be parsed to generate offline documentation files.
 
 ## Names
 
-Magpie is more open-ended when it comes to names than most other languages. Regular identifiers, used for things like [variables](variables.html) and [methods](multimethods.html) can consist of letters, numbers, underscores, and even many punctuation characters. These are all valid names:
+Identifiers come in two flavors in Magpie: regular names, and operators. A regular name is any sequence of letters, underscores (`_`), and periods (`.`). Digits may also be used after the first character. Case is sensitive.
 
     :::magpie
     hi
-    +
-    using-hyphens
-    numb3r5_r_0k_2
-    even_!$%_this_^&*_is_<>=_valid
-    $%^*
-    a.b.c
+    ._.
+    camelCase
+    PascalCase
+    abc123
+    d.o.t
     ...
+    ALL_CAPS
 
-## Whitespace
+Operators are any sequence of punctuation characters from the following set:
 
-This flexibility has a side effect that might trip you up at first (but I
-hope only at first): whitespace must be used to separate names, operators, and
-literals. These examples will not be parsed like they would be in other
-languages:
+    :::magpie
+    ~ ! $ % ^ & * - = + | / ? < >
+
+These are all valid operators:
+
+    :::magpie
+    +
+    -
+    *
+    ?!
+    <=>&^?!
+
+The *only* difference between regular names and operators is the tokenization process&mdash; how the parser splits a series of characters into "words".
 
     :::magpie
     a+b
-    true==false
-    count=3
 
-Each line here is actually a single identifier. The solution is to make sure to
-separate names with spaces, like `a + b`.
+This will get parsed into three separate tokens: `a`, `+`, `b`. Once that tokenization is done, though, regular names and operators are both just identifiers. You can use either to name [variables](variables.html) and [methods](multimethods.html), [classes](classes.html), etc.
 
 ## Newlines
 
@@ -62,7 +86,7 @@ doesn't make sense. Specifically, that means newlines following a comma (`,`), e
 
     :::magpie
     var a = 1,
-            2 // a will be the tuple (1, 2).
+            2 // a will be the record (1, 2).
 
     var b = 1 +
             2 // b will be 3.

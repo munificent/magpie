@@ -14,7 +14,7 @@ public final class Name {
   public static final String EQEQ = "==";
   public static final String INIT = "init";
   public static final String IO_ERROR = "IOError";
-  public static final String IS_TRUE = "true?";
+  public static final String IS_TRUE = "isTrue";
   public static final String IT = "it";
   public static final String ITERATE = "iterate";
   public static final String INITIALIZATION_ERROR = "InitializationError";

@@ -78,7 +78,7 @@ public class MagpieToJava {
       for (Obj entry : expr.getField("fields").asList()) {
         Obj fieldObj = entry.getField(1);
         Field field = new Field(
-            getBool(fieldObj, "mutable?"),
+            getBool(fieldObj, "isMutable"),
             getExpr(fieldObj, "initializer"),
             getPattern(fieldObj, "pattern"));
         fields.put(entry.getField(0).asString(), field);
@@ -176,7 +176,7 @@ public class MagpieToJava {
     } else if (exprClass == getClass("VarExpression")) {
       return Expr.var(
           getPosition(expr),
-          getBool(expr, "mutable?"),
+          getBool(expr, "isMutable"),
           getPattern(expr, "pattern"),
           getExpr(expr, "value"));
     }

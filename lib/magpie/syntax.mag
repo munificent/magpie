@@ -65,7 +65,7 @@ defclass ClassExpression is Expression
 end
 
 defclass Field
-    val mutable?    is Bool
+    val isMutable   is Bool
     val initializer // Expression | Nothing
     val pattern     // Pattern | Nothing
 end
@@ -148,9 +148,9 @@ defclass UnquoteExpression is Expression
 end
 
 defclass VarExpression is Expression
-    val mutable? is Bool
-    val pattern  is Pattern
-    val value    is Expression
+    val isMutable is Bool
+    val pattern   is Pattern
+    val value     is Expression
 end
 
 // MatchCase

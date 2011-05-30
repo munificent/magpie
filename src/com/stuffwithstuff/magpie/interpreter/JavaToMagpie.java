@@ -194,7 +194,7 @@ public class JavaToMagpie {
       
       for (Entry<String, Field> field : expr.getFields().entrySet()) {
         fields.add(construct("Field",
-            "mutable?",    field.getValue().isMutable(),
+            "isMutable",   field.getValue().isMutable(),
             "initializer", field.getValue().getInitializer(),
             "pattern",     field.getValue().getPattern()));
       }
@@ -373,10 +373,10 @@ public class JavaToMagpie {
     @Override
     public Obj visit(VarExpr expr, Void context) {
       return construct("VarExpression",
-          "position", expr.getPosition(),
-          "mutable?", expr.isMutable(),
-          "pattern",  expr.getPattern(),
-          "value",    expr.getValue());
+          "position",  expr.getPosition(),
+          "isMutable", expr.isMutable(),
+          "pattern",   expr.getPattern(),
+          "value",     expr.getValue());
     }
   }
   

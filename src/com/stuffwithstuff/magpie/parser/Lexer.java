@@ -57,8 +57,8 @@ public class Lexer implements TokenReader {
       if (isDigit(peek())) {
         // A negative number.
         return readNumber();
-      } else if (isName(peek())) {
-        // A name starting with "-".
+      } else if (isOperator(peek())) {
+        // An operator starting with "-".
         return readName();
       } else {
         // A "-" by itself.
@@ -75,6 +75,9 @@ public class Lexer implements TokenReader {
       if (isName(c)) {
         // Identifier.
         return readName();
+      } else if (isOperator(c)) {
+        // Operator.
+        return readOperator();
       } else if (isDigit(c)) {
         // Number.
         return readNumber();
@@ -167,6 +170,22 @@ public class Lexer implements TokenReader {
   private Token readName() {
     while (true) {
       if (isName(peek()) || isDigit(peek())) {
+        advance();
+      } else if (peek() == ':') {
+        advance();
+        
+        // Trim off the ":".
+        String value = mRead.substring(0, mRead.length() - 1);
+        return makeToken(TokenType.FIELD, value);
+      } else {
+        return makeToken(TokenType.NAME);
+      }
+    }
+  }
+
+  private Token readOperator() {
+    while (true) {
+      if (isName(peek()) || isOperator(peek())) {
         advance();
       } else if (peek() == ':') {
         advance();
@@ -278,8 +297,11 @@ public class Lexer implements TokenReader {
   private boolean isName(final char c) {
     return ((c >= 'a') && (c <= 'z'))
         || ((c >= 'A') && (c <= 'Z'))
-        || (c == '_')
-        || ("~!$%^&*-=+|/?<>.".indexOf(c) != -1);
+        || (c == '_') || (c == '.');
+  }
+  
+  private boolean isOperator(final char c) {
+    return ("~!$%^&*-=+|/?<>".indexOf(c) != -1);
   }
   
   private final SourceReader mText;

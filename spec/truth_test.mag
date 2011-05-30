@@ -9,7 +9,7 @@ def (this == TruthTest) init(value is Bool)
     this init(value: value)
 end
 
-def (this is TruthTest) true?
+def (this is TruthTest) isTrue
     this called = true
     this value
 end
@@ -18,6 +18,6 @@ end
 defclass NotTruable
 end
 
-def (this is NotTruable) true?
+def (this is NotTruable) isTrue
     nothing
 end

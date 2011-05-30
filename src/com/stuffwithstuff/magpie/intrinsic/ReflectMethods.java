@@ -18,7 +18,8 @@ public class ReflectMethods {
     }
   }
 
-  @Def("(_) is?(class is Class)")
+  // TODO(bob): Come up with better name.
+  @Def("(_) isa(class is Class)")
   public static class Is implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       return context.toObj(left.getClassObj().isSubclassOf(
@@ -26,7 +27,7 @@ public class ReflectMethods {
     }
   }
   
-  @Def("(_) sameAs?(other)")
+  @Def("(_) sameAs(other)")
   public static class Same implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       return context.toObj(

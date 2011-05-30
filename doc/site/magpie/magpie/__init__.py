@@ -30,8 +30,9 @@ class MagpieLexer(RegexLexer):
             (r'//[^\n]*?\n', Comment.Single),
             (r'/\*.*?\*/', Comment.Multiline),
 
-            # user-defined names
-            (r'[a-zA-Z_~!$%^&*\-=+\\|/?<>\.][a-zA-Z_~!$%^&*\-=+\\|/?<>\.0-9]*', Name),
+            # names and operators
+            (r'[~!$%^&*\-=+\\|/?<>\.]+', Name),
+            (r'[a-zA-Z_.][a-zA-Z_.0-9]+', Name),
 
             # built-in names
             (r'(true|false|nothing)\b', Name.Builtin),

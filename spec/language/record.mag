@@ -46,6 +46,6 @@ specify("A record expression") with
     end
 
     it should("fail to parse duplicate field names") with
-        canParse?("a: 1, a: 2") shouldEqual(false)
+        canParse("a: 1, a: 2") shouldEqual(false)
     end
 end
