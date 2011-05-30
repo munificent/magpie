@@ -105,6 +105,10 @@ public abstract class Expr {
     return new MatchExpr(position, value, cases);
   }
   
+  public static Expr method(Position position, String doc, String name) {
+    return method(position, doc, name, null, null);
+  }
+  
   public static Expr method(Position position, String doc, String name,
       Pattern pattern, Expr body) {
     return new MethodExpr(position, doc, name, pattern, body);

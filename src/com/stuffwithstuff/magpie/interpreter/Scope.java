@@ -151,6 +151,13 @@ public class Scope {
   }
   
   public void define(String name, Callable method) {
+    // Define it if not already present.
+    Multimethod multimethod = defineMultimethod(name);
+    
+    multimethod.addMethod(method);
+  }
+  
+  public Multimethod defineMultimethod(String name) {
     Multimethod multimethod = mMultimethods.get(name);
     
     // Only define it the first time if not found.
@@ -167,8 +174,8 @@ public class Scope {
     if ((mParent == null) && Name.isPublic(name)) {
       mModule.addExport(name, multimethod);
     }
-    
-    multimethod.addMethod(method);
+
+    return multimethod;
   }
 
   public Multimethod lookUpMultimethod(String name) {

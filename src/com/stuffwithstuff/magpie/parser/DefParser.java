@@ -80,6 +80,20 @@ public class DefParser implements PrefixParser {
   public Expr parse(MagpieParser parser, Token token) {
     PositionSpan span = parser.span();
     
+    // Handle a multimethod definition with no specializations.
+    if (parser.lookAhead(TokenType.NAME, TokenType.LINE)) {
+      String name = parser.consume().getString();
+      String doc = "";
+      // If there is a doc comment, the method has a block for it.
+      if (parser.match(TokenType.LINE, TokenType.DOC_COMMENT)) {
+        doc = parser.last(1).getString();
+        parser.consume(TokenType.LINE);
+        parser.consume("end");
+      }
+      
+      return Expr.method(span.end(), doc, name);
+    }
+    
     Pair<String, Pattern> signature = parseSignature(parser);
     
     // Parse the doc comment if given.

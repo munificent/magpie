@@ -203,12 +203,17 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
 
   @Override
   public Obj visit(MethodExpr expr, Scope scope) {
-    Function method = new Function(
-        Expr.fn(expr.getPosition(), expr.getDoc(),
-            expr.getPattern(), expr.getBody()),
-        scope);
-    
-    scope.define(expr.getName(), method);
+    if (expr.getBody() != null) {
+      Function method = new Function(
+          Expr.fn(expr.getPosition(), expr.getDoc(),
+              expr.getPattern(), expr.getBody()),
+          scope);
+      
+      scope.define(expr.getName(), method);
+    } else {
+      // Defining the multimethod here but not adding any methods.
+      scope.defineMultimethod(expr.getName());
+    }
     
     return mContext.nothing();
   }

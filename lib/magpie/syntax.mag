@@ -7,10 +7,8 @@ defclass Parser
     /// lookahead, etc.
 end
 
-// Define this here so that there is a single "parse" multimethod.
-// TODO(bob): Abstract methods.
-def (this) parse(parser is Parser, token is Token)
-    throw Error new("Must override.")
+def parse
+    /// TODO(bob): Document me!
 end
 
 defclass Position
