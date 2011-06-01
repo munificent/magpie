@@ -1,5 +1,6 @@
 import classfile:com.stuffwithstuff.magpie.intrinsic.IOMethods
 
+// TODO(bob): Need to make sure this cannot be constructed somehow.
 defclass File
 end
 

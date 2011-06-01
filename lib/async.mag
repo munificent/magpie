@@ -1,1 +1,7 @@
 import classfile:com.stuffwithstuff.magpie.intrinsic.AsyncMethods
+
+// TODO(bob): Need to make sure this cannot be constructed somehow.
+defclass Channel
+end
+
+_setClasses(Channel)

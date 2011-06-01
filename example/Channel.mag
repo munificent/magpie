@@ -1,0 +1,18 @@
+import async
+
+val channel = Channel new(1)
+
+print("Spawning routines")
+run with
+    while true do print("a read " + channel receive())
+end
+run with
+    while true do print("b read " + channel receive())
+end
+
+for i = 1 to(100) do
+    channel send(i)
+    sleep(100)
+end
+
+print("Done")

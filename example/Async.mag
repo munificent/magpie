@@ -1,7 +1,7 @@
-import system.routine
+import async
 
 def spawn(name)
-    async with
+    run with
         for i = 1 to(50) do
             print(name + " " + i)
             sleep(100)

@@ -43,7 +43,7 @@ public class IOMethods {
   }
   
   @Def("(is File) isOpen")
-  public static class OpenP implements Intrinsic {
+  public static class IsOpen implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       FileReader reader = (FileReader)left.getValue();
       return context.toObj(reader.isOpen());
