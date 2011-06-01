@@ -65,7 +65,7 @@ def format_file(path):
     if root == './':
         root = ''
 
-    html = markdown.markdown(contents, ['def_list', 'codehilite'])
+    html = markdown.markdown(contents, ['def_list', 'codehilite', 'headerid'])
 
     # determine the next and previous pages based on the ordering list
 #    if not basename in ordering:
