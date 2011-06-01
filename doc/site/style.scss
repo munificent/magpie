@@ -96,11 +96,21 @@ a:hover {
       color: $syntax-default;
       font: 24px $monospace;
     }
+
+    // Titles link to themselves, so don't color them.
+    a {
+      color: $body;
+    }
   }
 
   h3 {
     font: italic 18px $serif;
     margin: 30px 0 10px 0;
+
+    // Titles link to themselves, so don't color them.
+    a {
+      color: $body;
+    }
   }
 
   p {

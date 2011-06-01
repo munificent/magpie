@@ -58,9 +58,13 @@ a:hover {
     .content h2 code {
       color: #555555;
       font: 24px Courier, monospace; }
+    .content h2 a {
+      color: #333333; }
   .content h3 {
     font: italic 18px Georgia, serif;
     margin: 30px 0 10px 0; }
+    .content h3 a {
+      color: #333333; }
   .content p {
     font: 15px/25px Georgia, serif;
     margin: 0 0 10px 0; }

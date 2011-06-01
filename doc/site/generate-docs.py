@@ -50,7 +50,20 @@ def format_file(path):
             indentation = line[:len(line) - len(stripped)]
 
             # ignore commands
-            if not stripped.startswith('^'):
+            if stripped.startswith('^'):
+                pass
+            elif stripped.startswith('#'):
+                # build the page navigation from the headers
+                index = stripped.find(" ")
+                headertype = stripped[:index]
+                header = stripped[index:].strip()
+                anchor = header.lower().replace(' ', '-')
+                anchor = anchor.translate(None, '.?!:/')
+
+                # add an anchor to the header
+                contents += indentation + headertype
+                contents += '<a href="#{0}" name="{0}">{1}</a>\n'.format(anchor, header)
+            else:
                 contents = contents + line
 
     modified = datetime.fromtimestamp(os.path.getmtime(path))
