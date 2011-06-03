@@ -36,23 +36,23 @@ In this case, the pattern is a simple variable pattern, but more complex pattern
 
 Here we have a record pattern with two fields that must both be strings. We call it by passing it a record of two strings: `"Fred", "George"`. This may seem a bit strange, but it's important to note that we are *not* passing two arguments. In Magpie, all methods (and [functions](functions.html)) always take a *single* argument. It's just that the argument may be a record which the method destructures.
 
-The end result is that it does what you expect, but there's some conceptual unification going on under the hood. The destructuring initialization that you can do when declaring [variables](variables.html) is the exact same process use when splitting out argument to a method, or selecting a `catch` clause when an [error](error-handling.html) is thrown.
+The end result is that it does what you expect, but there's some conceptual unification going on under the hood. The destructuring initialization that you can do when declaring [variables](variables.html) is the exact same process used when splitting out arguments to a method, or selecting a `catch` clause when an [error](error-handling.html) is thrown.
 
 ## Left and Right Arguments
 
 Methods are *infix* expressions, which means that an argument may appear to the left of the name, to the right, or both. (More pedantically, *the record that forms the single argument* may have fields which appear to the left and right of the name.)
 
-The `greet` methods we've defined only have a right argument. Methods which only have a *left* argument are informally called *getters*.
+The `greet` methods we've defined so far only have a right argument. Methods which only have a *left* argument are informally called *getters*.
 
     :::magpie
-    def (this is String) empty?
+    def (this is String) isEmpty
         this count == 0
     end
 
-This defines a getter `empty?` (the `?` is just part of the name) whose left argument must be a string. It takes no right argument. It can be called like this:
+This defines a getter `isEmpty` whose left argument must be a string. It takes no right argument. It can be called like this:
 
     :::magpie
-    "not empty" empty? // false
+    "not empty" isEmpty // false
 
 And, finally, methods can have arguments on both sides:
 
@@ -67,7 +67,7 @@ When defining a method, both the left and right argument patterns, if present, m
 
 ## Indexers
 
-Most methods will be named methods like we've seen, but Magpie also has a little syntactic sugar for working with collection-like objects: *indexer methods*. These are essentially methods whose name is `[]`.
+Most methods will be named methods like we've seen, but Magpie also has a little syntactic sugar for working with collection-like objects: *indexer methods*. These are essentially methods whose name is `[]`. The left argument appears before the brackets, and the right argument is inside them.
 
     :::magpie
     list[2]

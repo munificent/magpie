@@ -1,8 +1,17 @@
 ^title Patterns
 
-If you've seen a few lines of Magpie code, you've likely seen patterns already. They are used everywhere in the language: `match` expressions use them, but so do [variable declarations](variables.html), [method parameters](multimethods.html), and `catch` clauses for handling exceptions.
+If you've seen a few lines of Magpie code, you've likely seen patterns already. They are used everywhere in the language: [`match` expressions](pattern-matching.html) obviously use them, but so do [variable declarations](variables.html), [method parameters](multimethods.html), and `catch` clauses for handling exceptions.
 
-Patterns are the foundation that control flow and variable binding are built on in Magpie. Given an object, a pattern does two things: First, it *tests* if the object *matches* that pattern. Then, if and only if it does, it may *bind new variables* to parts of the object. By performing those operations together, patterns can pull data out of an object but only when the object correctly has the data you're asking for.
+Patterns are the foundation that control flow and naming are built on in Magpie. Given an [object](objects.html), a pattern does two things: First, it *tests* if the object *matches* that pattern. Then, if and only if it does, it may *bind new variables* to parts of the object. By performing those operations together, patterns can pull data out of an object but only when the object correctly has the data you're asking for.
+
+A quick example in the context of a `match` expression should help clarify this:
+
+    :::magpie
+    match "s", 234, true
+        case "s", n is Int, _ then print(n + 2)
+    end
+
+Here, the value being matched is the record `"s", 234, true`. The pattern is `"s", n is Int, _`, a record pattern containing a value pattern, type pattern, and wildcard pattern, respectively. This pattern *does* match that value, which means it will bind `n` and then evaluate the body in that scope. In this case, the body is just `print(n + 2)`.
 
 ## Kinds of Patterns
 
@@ -72,4 +81,4 @@ Like record expressions, record patterns can omit the field names, in which case
     :::magpie
     x is Int, y is Int
 
-This matches a record with two positional fields that are integers and binds the fields. In other words, matching that pattern against `3, 4` will bind `x` to `3` and `y` is `4`.
+This matches a record with two positional fields whose values are integers and binds the fields. In other words, matching that pattern against `3, 4` will bind `x` to `3` and `y` to `4`.

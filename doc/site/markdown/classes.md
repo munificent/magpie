@@ -1,8 +1,7 @@
 ^title Classes
 
 Magpie is a class-based language. That means everything you can stick in a
-variable will be an *object* and every object is an instance of some *class*.
-Even [primitive types](primitives.html) like numbers and booleans are full-featured objects, as are [functions](functions.html).
+[variable](variables.html) will be an [*object*](objects.html) and every object is an instance of some *class*. Even [primitive types](primitives.html) like numbers and booleans are full-featured objects, as are [functions](functions.html).
 
 Objects exist to *store data*, package it together, and let you pass it around. Objects also know their class, which can be used to select one method in a [multimethod](multimethods.html).
 
@@ -22,10 +21,10 @@ This declares a simple class `Point`, with two fields `x` and `y`.
 
 ## Constructing Instances
 
-Once you've defined a class, you instantiate new instances of it by calling the constructor method `new`. The left-hand argument to `new` is the class being instantiated, and the right-hand argument is a [record](records.html). The record has a named field for each field that the class defines. The types of those fields must match the pattern defined for the field if any. Given our above `Point` class, we can create a new instance like this:
+Once you've defined a class, you instantiate new instances of it by calling the constructor method `new`. The left-hand argument to `new` is the class being instantiated, and the right-hand argument is a [record](records.html). The record has a named field for each field that the class defines. Given our above `Point` class, we can create a new instance like this:
 
     :::magpie
-    var point = Point new(x: 2, y: 3)
+    val point = Point new(x: 2, y: 3)
 
 ### Overloading Initialization
 
@@ -41,15 +40,15 @@ When you define a class, Magpie automatically creates a new specialization for `
 Here we've defined a new `init()` method that takes a `x` and `y` coordinates using a simple unnamed record. We can call it like this:
 
     :::magpie
-    var point = Point new(2, 3)
+    val point = Point new(2, 3)
 
 When you call `new()` it looks for an `init()` method that matches *whatever* you pass to it. In this case, `2, 3` matches our overloaded `init()` method. That method in turn calls the canonical or "real" initializer to ensure that all of the class's fields are initialized.
 
-This way, you are free to overload `init()` to make it easy to create instances of your classes. The only key requirement is that an `init()` method needs to eventually "bottom out" and call the canonical initializer before it returns. The canonical `init()` does the magic of actually initializing all of the fields.
+This way, you are free to overload `init()` to make it easy to create instances of your classes. The only key requirement is that an `init()` method needs to eventually "bottom out" and call the canonical initializer before it returns. If you fail to do that, Magpie will [throw](error-handling.html) an `InitializationError` when you try to construct the object.
 
 ### Overloading Construction
 
-In the above example, we provide an alternate path to creating a new object, but we're still creating a new object of the given class. Sometimes you may need to be more flexible than that. Perhaps you want to cache objects.
+In the above example, we provide an alternate path for *initializing* a new object, but we're still *creating* a new object normally. Sometimes you may need to be more flexible than that. Perhaps you want to cache objects so that calling `new()` with certain arguments always returns the *same* object.
 
     :::magpie
     def (this == Point) new(x is Int, y is Int)
@@ -68,7 +67,7 @@ This also gives you the flexibility of creating an instance of a different class
 Once you have an instance of a class, you access a field by invoking a [getter](calls.html) on the object whose name is the name of the field.
 
     :::magpie
-    var point = Point new(x: 2, y: 3)
+    val point = Point new(x: 2, y: 3)
     print(point x) // 2
 
 Here, `point x` is a call to a method `x` with argument `point`. As you would expect, it returns the field's value.
@@ -78,7 +77,7 @@ Here, `point x` is a call to a method `x` with argument `point`. As you would ex
 Setting a field on an existing object looks like you'd expect:
 
     :::magpie
-    var point = Point new(x: 2, y: 3)
+    val point = Point new(x: 2, y: 3)
     point x = 4
     print(point x)
 
@@ -215,9 +214,10 @@ Note that method inheritance like this only works for *type* patterns. Value pat
         this new Button(parts[0], parts[1] true?)
     end
 
+    Button fromString("45 RPM|false")   // OK.
     CheckBox fromString("45 RPM|false") // ERROR: No method found.
 
-This follows more or less other languages where "static" or "class" methods are not inherited, just "instance" ones.
+This more or less follows other languages where "static" or "class" methods are not inherited, just "instance" ones.
 
 ### Multiple Inheritance
 
@@ -253,7 +253,7 @@ Multiple inheritance can add considerable complexity to a language, which is why
             Widget: "From Widget")
     print(group label) // ???
 
-Here, `RadioButton` inherits `Widget` along two paths: once from `Button`, and once from `Widget` directly. Both paths try to initialize the label, one using `"From Button"` and one using `"From Widget"`. Which one "wins"? Overriding methods have similar problems.
+Here, `RadioButton` inherits `Widget` along two paths: once from `Button`, and once from `Widget` directly. Both paths try to initialize the label, one using `"From Button"` and one using `"From Widget"`. How do we decide which one "wins"? Overriding methods have similar ambiguity problems.
 
 To avoid these problems, Magpie has a simple rule: *a class may only inherit from some other class once, either directly or indirectly.* In other words, there may only be one path from a given child class to a given parent class. If you try to define a class like `RadioGroup` above, Magpie will [throw](error-handling.html) `ParentCollisionError` at you.
 

@@ -25,7 +25,7 @@ Magpie has a third kind of comment called *documentation comments* or simply *do
         n * n
     end
 
-Doc comments are used to document entire constructs: [classes](classes.html), [methods](multimethods.html), etc. Unlike other comments, doc comments are *not* ignored by the language. This means they are only allowed where they are expected: at the beginning of a method body or a class definition:
+Doc comments are used to document entire constructs: [modules](modules.html), [classes](classes.html), [methods](multimethods.html), etc. Unlike other comments, doc comments are *not* ignored by the language. This means they are only allowed where they are expected: at the beginning of a file, method body, or class definition:
 
     :::magpie
     defclass Address
@@ -85,23 +85,23 @@ To make things easier, Magpie will ignore a newline in any place where it
 doesn't make sense. Specifically, that means newlines following a comma (`,`), equals (`=`), backtick (<code>\`</code>), or infix operator (`+`, `-`, etc.) will be discarded:
 
     :::magpie
-    var a = 1,
+    val a = 1,
             2 // a will be the record (1, 2).
 
-    var b = 1 +
+    val b = 1 +
             2 // b will be 3.
 
-    var c = true and
+    val c = true and
             false // c will be false.
 
 If you specifically want to ignore a newline where it otherwise *would* separate two expressions, you can end the line with a backslash (`\`):
 
     :::magpie
-    var a = foo
+    val a = foo
     bar()
     // Sets a to foo then calls bar()
 
-    var a = foo \
+    val a = foo \
     bar()
     // Equivalent to:
     // var a = foo bar()

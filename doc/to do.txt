@@ -1,22 +1,22 @@
 Major features:
 + Modules.
-- Refine pattern syntax. The current way of specifying type and value patterns
++ Refine pattern syntax. The current way of specifying type and value patterns
   is gross. Need to investigate first-class or extensible patterns.
 - Annotations. In order to be able to bolt on a type system later, this will be
   necessary. Structured documentation (i.e. method comments) should in turn be
   implemented using this.
-- Get the extensible syntax stuff working again, including quotations.
-- Concurrency. To avoid shared state, I'll have to figure out how this interacts
++ Get the extensible syntax stuff working again, including quotations.
++ Concurrency. To avoid shared state, I'll have to figure out how this interacts
   with closures, so it will likely be necessary to do modules first.
 
 Minor features:
-- "val" local variables (especially for iterator variables).
-- Private names. Only private fields are really needed. (For private methods,
++ "val" local variables (especially for iterator variables).
++ Private names. Only private fields are really needed. (For private methods,
   just don't export them from the module.) But probably do both to be
   consistent.
 - String interpolation.
 - Cascade syntax?
-- "and" and "or".
++ "and" and "or".
 - Doubles and other atomic types.
 - Dictionaries.
 - Enums. Need to figure out the basic pattern for enum-like things. This is
@@ -25,6 +25,7 @@ Minor features:
 - List patterns.
 - String interpolation.
 - Destructuring assignment.
+- super().
 
 Implementation:
 - Compile to bytecode. This will make tail call elimination easier, help with
