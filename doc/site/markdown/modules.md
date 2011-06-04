@@ -43,7 +43,7 @@ To solve that, an `import` expression will also define names in the importing mo
     :::magpie
     // dessert.mag
     var pie = "apple"
-    det eatPie()
+    def eatPie()
         print("You eat a delicious " + pie + " pie")
     end
 
@@ -60,7 +60,7 @@ It's import to realize that when you import a variable, you get your *own* varia
     :::magpie
     // dessert.mag
     var pie = "apple"
-    det eatPie()
+    def eatPie()
         print("You eat a delicious " + pie + " pie")
     end
 
@@ -73,7 +73,7 @@ It's import to realize that when you import a variable, you get your *own* varia
 
     changePie()
     print(pie) // Still prints "apple"
-    eatPie(pie) // Prints "chocolate"
+    eatPie() // Prints "chocolate"
 
 Here, `dessert.mag` is changing the value of `pie` after `hungry.mag` imports it. We won't see that change reflected in the `pie` variable defined in `hungry.mag`, but we will see it when it calls `eatPie()` since that method looks it up in `dessert.mag` where its defined.
 

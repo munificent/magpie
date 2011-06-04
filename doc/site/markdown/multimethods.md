@@ -11,7 +11,7 @@ Methods are defined using the `def` keyword.
         print("Hi!")
     end
 
-Here we've defined a method named `greet` whose body is a [block](blocks.html) containing a single `print` call. You can call this method like so:
+Here we've defined a method named `greet` whose body is a [block](blocks.html) containing a single `print` call. You can [call](calls.html) this method like so:
 
     :::magpie
     greet()
@@ -25,7 +25,7 @@ We can define a method that takes an argument by using a pattern in its definiti
 
     greet("Fred") // Hi, Fred
 
-In this case, the pattern is a simple variable pattern, but more complex patterns can be used:
+In this case, the pattern `who` is a simple variable pattern, but more complex patterns can be used:
 
     :::magpie
     def greet(who is String, whoElse is String)
@@ -34,13 +34,13 @@ In this case, the pattern is a simple variable pattern, but more complex pattern
 
     greet("Fred", "George")
 
-Here we have a record pattern with two fields that must both be strings. We call it by passing it a record of two strings: `"Fred", "George"`. This may seem a bit strange, but it's important to note that we are *not* passing two arguments. In Magpie, all methods (and [functions](functions.html)) always take a *single* argument. It's just that the argument may be a record which the method destructures.
+Here we have a record pattern with two fields that must both be strings. We call it by passing it a record of two strings: `"Fred", "George"`. This may seem a bit strange, but it's important to note that we are *not* passing two arguments. In Magpie, methods (and [functions](functions.html)) always take a *single* argument. It's just that the argument may be a record which the method destructures.
 
-The end result is that it does what you expect, but there's some conceptual unification going on under the hood. The destructuring initialization that you can do when declaring [variables](variables.html) is the exact same process used when splitting out arguments to a method, or selecting a `catch` clause when an [error](error-handling.html) is thrown.
+The end result is that it works pretty much like other languages, but there's some conceptual unification going on under the hood. The destructuring initialization that you can do when declaring [variables](variables.html) is the exact same process used when splitting out arguments to a method, or selecting a `catch` clause when an [error](error-handling.html) is thrown.
 
 ## Left and Right Arguments
 
-Methods are *infix* expressions, which means that an argument may appear to the left of the name, to the right, or both. (More pedantically, *the record that forms the single argument* may have fields which appear to the left and right of the name.)
+Method calls are *infix* expressions, which means that an argument may appear to the left of the name, to the right, or both. (More pedantically, *the record that forms the single argument* may have fields which appear to the left and right of the name.)
 
 The `greet` methods we've defined so far only have a right argument. Methods which only have a *left* argument are informally called *getters*.
 
@@ -63,11 +63,44 @@ And, finally, methods can have arguments on both sides:
 
     "Fred" greet("George")
 
-When defining a method, both the left and right argument patterns, if present, must be in parentheses. When *calling* a method, only the right one must.
+When you define a method, the argument patterns always need to be in parentheses. When you *call* a method, only the right one must. If you chain several method calls, they associate to the left (like most languages). For example, this:
+
+    :::magpie
+    people find("Smith") firstName greet("George")
+
+is the same as:
+
+    :::magpie
+    ((people find("Fred")) firstName) greet("George")
+
+## Setters
+
+In addition to getters, you can also define *setter* methods. Like getters, setters are just regular methods, but they have special syntax to make them look like assignment. You define a setter like so:
+
+    :::magpie
+    def (this is Person) name = (name is String)
+        print("Set name to " + name + "...")
+    end
+
+The `=` followed by a pattern tells Magpie that you're defining a setter. We can call the above setter:
+
+    :::magpie
+    person name = "Fred"
+
+A setter may also have a right argument:
+
+    :::magpie
+    def (this is Contact) phoneNumber(type is String) = (number is String)
+        print("Set " + type + " number to " + number)
+    end
+
+    jenny phoneNumber("Home") = "867-5309"
+
+Magpie tries to roll as much behavior under method calls as possible and getters and setters are a good example of that. It's worth noting that *everything* that looks like a getter or setter is just a method call. When you're accessing fields in a [class](classes.html), you're just calling getter and setter methods that have automatically created implementations.
 
 ## Indexers
 
-Most methods will be named methods like we've seen, but Magpie also has a little syntactic sugar for working with collection-like objects: *indexer methods*. These are essentially methods whose name is `[]`. The left argument appears before the brackets, and the right argument is inside them.
+In addition to setters, Magpie has one more little bit of extra syntax for method calls. To make working with collection-like objects easier, it provides *indexer methods*. These are essentially methods whose name is `[]`. The left argument appears before the brackets, and the right argument is inside them.
 
     :::magpie
     list[2]
@@ -92,11 +125,23 @@ Here, we've defined an indexer on strings that takes a number and returns the ch
         cells[y * width + x]
     end
 
-Here we've defined a `Grid` class that represents a 2D array of cells. You can get the cell at a given coordinate using an indexer that takes two ints, like `grid[2, 3]`.
+Here we've defined a `Grid` class that represents a 2D array of cells. It includes an indexer for getting the cell at a given coordinate. You can call it like this:
+
+    :::magpie
+    val cell = grid[2, 3]
+
+You can also define *indexer setters* which combines the syntax of those:
+
+    :::magpie
+    def (this is Grid)[x is Int, y is Int] = (value)
+        cells[y * with + x] = value
+    end
+
+    grid[2, 3] = "some value"
 
 ## Method Scope
 
-In the above examples, it looks like we're adding methods to the `String` class. In other languages, this is called [monkey-patching](http://en.wikipedia.org/wiki/Monkey_patch) and it's frowned upon. If two unrelated parts of the codebase both declare methods on the same class with the same name, they will collide and do something... probably bad.
+Magpie's method call syntax looks similar to other OOP languages where a "receiver" argument precedes the method. We've seen some examples where we define methods whose left argument is a built-in type like `String`. In other languages, this is called [monkey-patching](http://en.wikipedia.org/wiki/Monkey_patch) and doing it is fraught with peril. The reason is that when you invoke a method in those languages, it looks up the method *on the class of the receiver*. If two unrelated parts of the program define a method with the same name on the same class, those two methods will collide. When we call it later we may find the wrong one.
 
 In Magpie (as in [CLOS](http://en.wikipedia.org/wiki/CLOS)) methods are not *owned* by classes. Instead, methods reside in lexical scope, just like variables. When you call a method, the method is found by looking for it in the scope *where the call appears*, and not on the class of any of the arguments. When a method goes out of scope, it disappears just like a variable.
 
@@ -119,7 +164,7 @@ In Magpie (as in [CLOS](http://en.wikipedia.org/wiki/CLOS)) methods are not *own
         "a" method() // a second
     end
 
-It is impossible to have a method collision in Magpie. If you try to define two methods with the same name and pattern in the same scope, it will [throw an error](error-handling.html). This way, you're free to define methods that are called in a way that appears natural without having to worry about shooting yourself in the foot.
+It is impossible to have a method collision in Magpie. If you try to define two methods with the same name and pattern in the same scope, it will [throw an error](error-handling.html). This way, you can define methods that have a nice readable calling syntax without having to worry about breaking code in some other part of the codebase.
 
 <p class="future">Checking for pattern collisions hasn't been implemented yet.</p>
 
@@ -322,7 +367,3 @@ If all of the leans are towards one record, it wins. If the leans are inconsiste
     // Ambiguous: fields disagree
 
 The general theme here is that it tries to pick records that are "obviously" the more specific one where "more specific" means more fields or more precise fields. If it isn't crystal clear which one the programmer intended to win, Magpie just throws its hands up and pleads confusion.
-
-**TODO: Setters and indexer setters.**
-
-**TODO: Need to document how multimethods interact with modules.**

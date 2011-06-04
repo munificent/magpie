@@ -14,7 +14,7 @@ This creates an anonymous function that prints `"I'm a fn!"` when called. If a f
     :::magpie
     fn(name, age) print("Hi, " + name + ". You are " + age + " years old.")
 
-The body of a function can be a single expression as we've seen, but can also be a block.
+The body of a function can be a single expression as we've seen, but can also be a [block](blocks.html).
 
     :::magpie
     fn(i)
