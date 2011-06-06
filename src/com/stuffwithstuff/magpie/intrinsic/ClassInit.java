@@ -40,13 +40,10 @@ public class ClassInit implements Callable {
     
     // Initialize the fields from the record.
     for (Entry<String, Field> field : mClass.getFieldDefinitions().entrySet()) {
-      // Only care about fields that don't have initializers.
-      if (field.getValue().getInitializer() == null) {
-        // Assign it from the record.
-        Obj value = arg.getField(field.getKey());
-        if (value != null) {
-          obj.setField(field.getKey(), arg.getField(field.getKey()));
-        }
+      // Assign it from the record.
+      Obj value = arg.getField(field.getKey());
+      if (value != null) {
+        obj.setField(field.getKey(), arg.getField(field.getKey()));
       }
     }
     

@@ -151,6 +151,15 @@ specify("A class's default constructor") with
         c b shouldEqual("b")
     end
 
+    it should("override an initialized field if given a value") with
+        defclass C
+            var a = "a"
+        end
+
+        val c = C new(a: "override")
+        c a shouldEqual("override")
+    end
+
     it should("initialize parent classes with record fields that match the " +
               "parent class name") with
         defclass A
