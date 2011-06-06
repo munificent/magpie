@@ -5,7 +5,11 @@ Almost every language has arrays and Magpie is no different. If you have a bunch
     :::magpie
     [1, "banana", true]
 
-Here, we've created an array of three elements. Notice that the elements don't have to be the same type. You can access an element from an array by calling the [indexer method](multimethods.html#indexers) on it with the index of the element you want. Like most languages, indexes start at zero:
+Here, we've created an array of three elements. Notice that the elements don't have to be the same type.
+
+## Accessing Elements
+
+You can access an element from an array by calling the [indexer method](multimethods.html#indexers) on it with the index of the element you want. Like most languages, indexes start at zero:
 
     :::magpie
     val hirsute = ["sideburns", "porkchops", "'stache"]

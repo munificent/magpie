@@ -77,6 +77,7 @@ The second line will [throw](error-handling.html) a `RedefinitionError` when eva
 
 After a variable has been declared, you can assign to it using `=`:
 
+    :::magpie
     var a = 123
     a = 234
 
@@ -84,6 +85,7 @@ An assignment will walk up the scope stack to find where the named variable is d
 
 Like variable definition, an assignment expression returns the assigned value:
 
+    :::magpie
     var a = "before"
     print(a = "after") // prints "after"
 
