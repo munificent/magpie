@@ -23,6 +23,6 @@ public class BracketPrefixParser implements PrefixParser {
     
     parser.consume(TokenType.RIGHT_BRACKET);
     
-    return Expr.list(span.end(), elements);
+    return Expr.array(span.end(), elements);
   }
 }

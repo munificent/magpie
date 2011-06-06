@@ -24,6 +24,7 @@ public class Interpreter {
     builder.initialize();
     
     Scope scope = mBaseModule.getScope();
+    mArrayClass = scope.get("Array").asClass();
     mBoolClass = scope.get("Bool").asClass();
     mFnClass = scope.get("Function").asClass();
     mIntClass = scope.get("Int").asClass();
@@ -177,6 +178,10 @@ public class Interpreter {
     return classObj;
   }
 
+  public Obj createArray(List<Obj> elements) {
+    return instantiate(mArrayClass, elements);
+  }
+
   public Obj createList(List<Obj> elements) {
     return instantiate(mListClass, elements);
   }
@@ -304,6 +309,7 @@ public class Interpreter {
   private final Map<String, Module> mModules = new HashMap<String, Module>();
   
   private final ClassObj mClass;
+  private final ClassObj mArrayClass;
   private final ClassObj mBoolClass;
   private final ClassObj mFnClass;
   private final ClassObj mIntClass;

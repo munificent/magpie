@@ -1,4 +1,5 @@
 import .and_
+import .array
 import .assign
 import .break_
 import .catch_
@@ -10,7 +11,6 @@ import .for_
 import .if_
 import .import_
 import .let_
-import .list
 import .match_
 import .newline
 import .or_

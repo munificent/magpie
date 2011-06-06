@@ -1,0 +1,21 @@
+import spec.specify
+
+specify("An array literal expression") with
+    it should("create an array containing the elements") with
+        val array = [1, "two", true]
+        array shouldBe(Array)
+        array[0] shouldEqual(1)
+        array[1] shouldEqual("two")
+        array[2] shouldEqual(true)
+    end
+
+    it should("allow an empty array") with
+        [] count shouldEqual(0)
+    end
+
+    it should("evaluate the elements left to right") with
+        var e = ""
+        [(e = e + "1"), (e = e + "2"), (e = e + "3")]
+        e shouldEqual("123")
+    end
+end

@@ -18,7 +18,7 @@ import com.stuffwithstuff.magpie.ast.Field;
 import com.stuffwithstuff.magpie.ast.FnExpr;
 import com.stuffwithstuff.magpie.ast.ImportExpr;
 import com.stuffwithstuff.magpie.ast.IntExpr;
-import com.stuffwithstuff.magpie.ast.ListExpr;
+import com.stuffwithstuff.magpie.ast.ArrayExpr;
 import com.stuffwithstuff.magpie.ast.LoopExpr;
 import com.stuffwithstuff.magpie.ast.MatchExpr;
 import com.stuffwithstuff.magpie.ast.MethodExpr;
@@ -81,12 +81,12 @@ public class JavaToMagpie {
     return expr.accept(converter, null);
   }
   
-  private Obj convertList(List<?> values) {
+  private Obj convertArray(List<?> values) {
     List<Obj> objs = new ArrayList<Obj>();
     for (Object value : values) {
       objs.add(convertObject(value));
     }
-    return mContext.toList(objs);
+    return mContext.toArray(objs);
   }
   
   private Obj convertMatchCase(MatchCase matchCase) {
@@ -160,6 +160,13 @@ public class JavaToMagpie {
 
   private class ExprConverter implements ExprVisitor<Obj, Void> {
     @Override
+    public Obj visit(ArrayExpr expr, Void context) {
+      return construct("ArrayExpression",
+          "position", expr.getPosition(),
+          "elements", convertArray(expr.getElements()));
+    }
+
+    @Override
     public Obj visit(AssignExpr expr, Void context) {
       return construct("AssignExpression",
           "position", expr.getPosition(),
@@ -203,8 +210,8 @@ public class JavaToMagpie {
           "position", expr.getPosition(),
           "doc",      expr.getDoc(),
           "name",     expr.getName(),
-          "parents",  convertList(expr.getParents()),
-          "fields",   convertList(fields));
+          "parents",  convertArray(expr.getParents()),
+          "fields",   convertArray(fields));
     }
 
     @Override
@@ -234,13 +241,6 @@ public class JavaToMagpie {
     }
 
     @Override
-    public Obj visit(ListExpr expr, Void context) {
-      return construct("ListExpression",
-          "position", expr.getPosition(),
-          "elements", convertList(expr.getElements()));
-    }
-
-    @Override
     public Obj visit(LoopExpr expr, Void context) {
       return construct("LoopExpression",
           "position", expr.getPosition(),
@@ -252,7 +252,7 @@ public class JavaToMagpie {
       return construct("MatchExpression",
           "position", expr.getPosition(),
           "value",    expr.getValue(),
-          "cases",    convertList(expr.getCases()));
+          "cases",    convertArray(expr.getCases()));
     }
 
     @Override
@@ -311,14 +311,14 @@ public class JavaToMagpie {
       return construct("ScopeExpression",
           "position", expr.getPosition(),
           "body",     expr.getBody(),
-          "catches",  convertList(expr.getCatches()));
+          "catches",  convertArray(expr.getCatches()));
     }
 
     @Override
     public Obj visit(SequenceExpr expr, Void context) {
       return construct("SequenceExpression",
           "position",    expr.getPosition(),
-          "expressions", convertList(expr.getExpressions()));
+          "expressions", convertArray(expr.getExpressions()));
     }
 
     @Override

@@ -33,6 +33,17 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
   }
 
   @Override
+  public Obj visit(ArrayExpr expr, Scope scope) {
+    // Evaluate the elements.
+    List<Obj> elements = new ArrayList<Obj>();
+    for (Expr element : expr.getElements()) {
+      elements.add(evaluate(element, scope));
+    }
+
+    return mContext.toArray(elements);
+  }
+
+  @Override
   public Obj visit(AssignExpr expr, Scope scope) {
     Obj value = evaluate(expr.getValue(), scope);
 
@@ -145,17 +156,6 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
   @Override
   public Obj visit(IntExpr expr, Scope scope) {
     return mContext.toObj(expr.getValue());
-  }
-
-  @Override
-  public Obj visit(ListExpr expr, Scope scope) {
-    // Evaluate the elements.
-    List<Obj> elements = new ArrayList<Obj>();
-    for (Expr element : expr.getElements()) {
-      elements.add(evaluate(element, scope));
-    }
-
-    return mContext.toList(elements);
   }
   
   @Override

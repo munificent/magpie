@@ -1,5 +1,7 @@
 import .io.File
 import .io.path
+import .magpie.core.Array
+import .magpie.core.ArrayIterator
 import .magpie.core.Bool
 import .magpie.core.Class
 import .magpie.core.Comparable

@@ -6,7 +6,8 @@ var _totalFailures = 0
 var _currentTestSuite = nothing
 var _startTimeMs = 0
 
-var _specs = []
+// TODO(bob): Better way to make an empty list.
+var _specs = [] toList
 
 def runTests()
     _totalTests = 0

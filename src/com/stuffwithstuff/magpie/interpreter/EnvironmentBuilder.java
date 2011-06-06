@@ -35,6 +35,7 @@ public class EnvironmentBuilder {
     ClassObj indexable = class_("Indexable").end();
     ClassObj comparable = class_("Comparable").end();
     
+    class_("Array", indexable).end();
     class_("Bool").end();
     class_("Int", comparable).end();
     class_("Function").end();

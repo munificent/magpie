@@ -15,7 +15,12 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
     ConvertAssignmentExpr converter = new ConvertAssignmentExpr();
     return target.accept(converter, value);
   }
-  
+
+  @Override
+  public Expr visit(ArrayExpr expr, Expr value) {
+    throw new NotImplementedException("Destructuring is only implemented on new vars for now.");
+  }
+
   @Override
   public Expr visit(AssignExpr expr, Expr value) {
     return invalidExpression(expr);
@@ -56,11 +61,6 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
   @Override
   public Expr visit(IntExpr expr, Expr value) {
     return invalidExpression(expr);
-  }
-
-  @Override
-  public Expr visit(ListExpr expr, Expr value) {
-    throw new NotImplementedException("Destructuring is only implemented on new vars for now.");
   }
 
   @Override

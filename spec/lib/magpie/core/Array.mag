@@ -1,0 +1,42 @@
+import spec.specify
+
+specify("The Array class") with
+    it should("inherit Indexable") with
+        [1] shouldBe(Indexable)
+    end
+end
+
+specify("The indexer on Arrays") with
+    it should("return the element at the zero-based index") with
+        val array = [1, "two", true]
+        array[0] shouldEqual(1)
+        array[1] shouldEqual("two")
+        array[2] shouldEqual(true)
+    end
+
+    it should("count from the back if the index is negative") with
+        val array = [1, "two", true]
+        array[-1] shouldEqual(true)
+        array[-2] shouldEqual("two")
+        array[-3] shouldEqual(1)
+    end
+
+    it should("throw an OutOfBoundsError on a bad index") with
+        val array = [1, 2, 3]
+        fn
+            array[3]
+        end shouldThrow(OutOfBoundsError)
+
+        fn
+            array[-4]
+        end shouldThrow(OutOfBoundsError)
+    end
+end
+
+specify("The 'count' method on Arrays") with
+    it should("return the number of elements in the list") with
+        [] count shouldEqual(0)
+        ["a"] count shouldEqual(1)
+        ["a", "b"] count shouldEqual(2)
+    end
+end

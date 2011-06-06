@@ -6,6 +6,7 @@ import magpie.syntax
 // have multiple sources files define a single logical module. Maybe just an
 // easy way to re-export an imported name.
 
+import classfile:com.stuffwithstuff.magpie.intrinsic.ArrayMethods
 import classfile:com.stuffwithstuff.magpie.intrinsic.IntrinsicMethods
 import classfile:com.stuffwithstuff.magpie.intrinsic.IntMethods
 import classfile:com.stuffwithstuff.magpie.intrinsic.ListMethods

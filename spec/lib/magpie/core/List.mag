@@ -2,27 +2,27 @@ import spec.specify
 
 specify("The List class") with
     it should("inherit Indexable") with
-        [1] shouldBe(Indexable)
+        [1] toList shouldBe(Indexable)
     end
 end
 
 specify("The indexer on Lists") with
     it should("return the element at the zero-based index") with
-        val list = [1, "two", true]
+        val list = [1, "two", true] toList
         list[0] shouldEqual(1)
         list[1] shouldEqual("two")
         list[2] shouldEqual(true)
     end
 
     it should("count from the back if the index is negative") with
-        val list = [1, "two", true]
+        val list = [1, "two", true] toList
         list[-1] shouldEqual(true)
         list[-2] shouldEqual("two")
         list[-3] shouldEqual(1)
     end
 
     it should("throw an OutOfBoundsError on a bad index") with
-        val list = [1, 2, 3]
+        val list = [1, 2, 3] toList
         fn
             list[3]
         end shouldThrow(OutOfBoundsError)
@@ -35,7 +35,7 @@ end
 
 specify("The indexed assigner on Lists") with
     it should("replace the item at the given index in the list") with
-        val list = [2, 3, 4]
+        val list = [2, 3, 4] toList
         list[0] = 5
         list[2] = 6
         list[0] shouldEqual(5)
@@ -44,7 +44,7 @@ specify("The indexed assigner on Lists") with
     end
 
     it should("count from the back if the index is negative") with
-        val list = [2, 3, 4]
+        val list = [2, 3, 4] toList
         list[-1] = 5
         list[-2] = 6
         list[0] shouldEqual(2)
@@ -53,7 +53,7 @@ specify("The indexed assigner on Lists") with
     end
 
     it should("throw an OutOfBoundsError on a bad index") with
-        val list = [1, 2, 3]
+        val list = [1, 2, 3] toList
         fn
             list[3] = "dummy"
         end shouldThrow(OutOfBoundsError)
@@ -64,13 +64,13 @@ specify("The indexed assigner on Lists") with
     end
 
     it should("return the assigned value") with
-        ([1][0] = 3) shouldEqual(3)
+        ([1] toList[0] = 3) shouldEqual(3)
     end
 end
 
 specify("The 'add' method on Lists") with
     it should("add an element to the end of the list") with
-        val list = ["a"]
+        val list = ["a"] toList
         list add("b")
         list add("c")
 
@@ -80,33 +80,33 @@ specify("The 'add' method on Lists") with
     end
 
     it should("return the added item") with
-        [1, 2] add(3) shouldEqual(3)
+        [1, 2] toList add(3) shouldEqual(3)
     end
 end
 
 specify("The 'clear' method on Lists") with
     it should("remove all elements from the list") with
-        val list = ["a", "b"]
+        val list = ["a", "b"] toList
         list clear()
         list count shouldEqual(0)
     end
 
     it should("return nothing") with
-        [1, 2] clear() shouldEqual(nothing)
+        [1, 2] toList clear() shouldEqual(nothing)
     end
 end
 
 specify("The 'count' method on Lists") with
     it should("return the number of elements in the list") with
-        [] count shouldEqual(0)
-        ["a"] count shouldEqual(1)
-        ["a", "b"] count shouldEqual(2)
+        [] toList count shouldEqual(0)
+        ["a"] toList count shouldEqual(1)
+        ["a", "b"] toList count shouldEqual(2)
     end
 end
 
 specify("The 'insert' method on Lists") with
     it should("insert an item at the given index") with
-        val list = ["a", "b", "c"]
+        val list = ["a", "b", "c"] toList
         list insert("d", at: 0)
         list insert("e", at: 2)
         list insert("f", at: 5)
@@ -120,7 +120,7 @@ specify("The 'insert' method on Lists") with
     end
 
     it should("count from the back (+1) if the index is negative") with
-        val list = ["a", "b", "c"]
+        val list = ["a", "b", "c"] toList
         list insert("d", at: -1)
         list insert("e", at: -2)
 
@@ -132,11 +132,11 @@ specify("The 'insert' method on Lists") with
     end
 
     it should("return the inserted item") with
-        ["a"] insert("b", at: 0) shouldEqual("b")
+        ["a"] toList insert("b", at: 0) shouldEqual("b")
     end
 
     it should("throw an OutOfBoundsError on a bad index") with
-        val list = [1, 2, 3]
+        val list = [1, 2, 3] toList
         fn
             list insert("dummy", at: 4)
         end shouldThrow(OutOfBoundsError)

@@ -10,7 +10,7 @@ public interface ExprVisitor<R, C> {
   R visit(FnExpr expr, C context);
   R visit(ImportExpr expr, C context);
   R visit(IntExpr expr, C context);
-  R visit(ListExpr expr, C context);
+  R visit(ArrayExpr expr, C context);
   R visit(LoopExpr expr, C context);
   R visit(MatchExpr expr, C context);
   R visit(MethodExpr expr, C context);

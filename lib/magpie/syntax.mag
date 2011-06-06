@@ -40,6 +40,10 @@ defclass Expression
     val position is Position
 end
 
+defclass ArrayExpression is Expression
+    val elements is Array // of Expression
+end
+
 defclass AssignExpression is Expression
     val name  is String
     val value is Expression
@@ -60,8 +64,8 @@ end
 defclass ClassExpression is Expression
     val doc     is String
     val name    is String
-    val parents is List // List of String
-    val fields  is List // List of (String, Field)
+    val parents is Array // of String
+    val fields  is Array // of (String, Field)
 end
 
 defclass Field
@@ -89,11 +93,7 @@ end
 
 defclass MatchExpression is Expression
     val value is Expression
-    val cases is List // List of MatchCases
-end
-
-defclass ListExpression is Expression
-    val elements is List // List of Expression
+    val cases is Array // of MatchCases
 end
 
 defclass LoopExpression is Expression
@@ -119,7 +119,7 @@ defclass QuoteExpression is Expression
 end
 
 defclass RecordExpression is Expression
-    val fields is List // List of (String, Expression)
+    val fields is Array // of (String, Expression)
 end
 
 defclass ReturnExpression is Expression
@@ -128,11 +128,11 @@ end
 
 defclass ScopeExpression is Expression
     val body    is Expression
-    val catches is List // List of MatchCases
+    val catches is Array // of MatchCases
 end
 
 defclass SequenceExpression is Expression
-    val expressions is List // List of Expression
+    val expressions is Array // of Expression
 end
 
 defclass StringExpression is Expression
@@ -168,8 +168,8 @@ defclass Pattern
 end
 
 defclass RecordPattern is Pattern
-    val fields is List // List of (String, Pattern) pairs.
-                       // Ideally, would be String -> Pattern map.
+    val fields is Array // of (String, Pattern) pairs.
+                        // Ideally, would be String -> Pattern map.
 end
 
 defclass TypePattern is Pattern

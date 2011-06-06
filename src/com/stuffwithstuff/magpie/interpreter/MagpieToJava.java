@@ -51,7 +51,11 @@ public class MagpieToJava {
     if (mContext.isNothing(expr)) return null;
     
     ClassObj exprClass = expr.getClassObj();
-    if (exprClass == getClass("AssignExpression")) {
+    if (exprClass == getClass("ArrayExpression")) {
+    return Expr.array(
+        getPosition(expr),
+        getExprList(expr, "elements"));
+    } else if (exprClass == getClass("AssignExpression")) {
       return Expr.assign(
           getPosition(expr),
           getString(expr, "name"),
@@ -107,10 +111,6 @@ public class MagpieToJava {
       return Expr.int_(
           getPosition(expr),
           getInt(expr, "value"));
-    } else if (exprClass == getClass("ListExpression")) {
-      return Expr.list(
-          getPosition(expr),
-          getExprList(expr, "elements"));
     } else if (exprClass == getClass("LoopExpression")) {
       return Expr.loop(
           getPosition(expr),

@@ -78,6 +78,10 @@ public class Context {
     return getInterpreter().createRecord(fields);
   }
 
+  public Obj toArray(List<Obj> elements) {
+    return getInterpreter().createArray(elements);
+  }
+
   public Obj toList(List<Obj> elements) {
     return getInterpreter().createList(elements);
   }

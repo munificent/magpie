@@ -26,6 +26,7 @@ Minor features:
 - String interpolation.
 - Destructuring assignment.
 - super().
++ Split List into Array (immutable) and List (mutable).
 
 Implementation:
 - Compile to bytecode. This will make tail call elimination easier, help with

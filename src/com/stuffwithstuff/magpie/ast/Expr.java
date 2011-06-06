@@ -19,7 +19,11 @@ import com.stuffwithstuff.magpie.util.Pair;
  * 
  * @author bob
  */
-public abstract class Expr {
+public abstract class Expr {  
+  public static Expr array(Position position, List<Expr> elements) {
+    return new ArrayExpr(position, elements);
+  }
+
   public static Expr assign(Position position, String name, Expr value) {
     return new AssignExpr(position, name, value);
   }
@@ -90,10 +94,6 @@ public abstract class Expr {
   
   public static Expr int_(Position position, int value) {
     return new IntExpr(position, value);
-  }
-  
-  public static Expr list(Position position, List<Expr> elements) {
-    return new ListExpr(position, elements);
   }
   
   public static Expr loop(Position position, Expr body) {

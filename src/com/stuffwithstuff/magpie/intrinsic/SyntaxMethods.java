@@ -87,7 +87,7 @@ public class SyntaxMethods {
     }
   }
   
-  @Def("(this is Parser) parseExpressionOrBlock(keywords is List)")
+  @Def("(this is Parser) parseExpressionOrBlock(keywords is Array)")
   public static class ParseExpressionOrBlock_List implements Intrinsic {
     @Override
     public Obj invoke(Context context, Obj left, Obj right) {
