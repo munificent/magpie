@@ -32,5 +32,6 @@ One point bears repeating because it's a bit unusual: arrays are *immutable* in 
 
 If you want a *mutable* indexed collection, you want a *list*. You can create a list from an array like so:
 
-    var beards = hirsute toList
+    :::magpie
+    val beards = hirsute toList
     beards[1] = "goatee" // OK!
