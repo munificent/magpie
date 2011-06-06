@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie.parser;
 
 import com.stuffwithstuff.magpie.SourceReader;
+import com.stuffwithstuff.magpie.util.Expect;
 
 
 /**
@@ -8,6 +9,9 @@ import com.stuffwithstuff.magpie.SourceReader;
  */
 public class StringReader implements SourceReader {
   public StringReader(String description, String text) {
+    Expect.notNull(description);
+    Expect.notNull(text);
+
     mDescription = description;
     mText = text;
     mPosition = 0;

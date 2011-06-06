@@ -21,7 +21,7 @@ public class NiceReplCharacterReader extends ReplReader {
   protected void showPrompt(String prompt) {
     Term.set(Term.ForeColor.GRAY);
     System.out.print(prompt);
-    Term.set(Term.ForeColor.WHITE);
+    Term.restoreColor();
   }
   
   @Override
@@ -34,7 +34,8 @@ public class NiceReplCharacterReader extends ReplReader {
       // Redraw the prompt.
       Term.set(Term.ForeColor.GRAY);
       System.out.print(prompt);
-      
+      Term.restoreColor();
+
       while (true) {
         Token token = lexer.readToken();
         if (token.getType() == TokenType.EOF) break;
