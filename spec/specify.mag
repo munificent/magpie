@@ -1,4 +1,4 @@
-import magpie.reflect
+import reflection
 
 var _totalTests = 0
 var _totalFailures = 0

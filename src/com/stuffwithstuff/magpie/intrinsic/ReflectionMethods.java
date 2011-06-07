@@ -10,7 +10,7 @@ import com.stuffwithstuff.magpie.interpreter.Multimethod;
 import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
-public class ReflectMethods {
+public class ReflectionMethods {
   @Def("(_) class")
   public static class Class_ implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
