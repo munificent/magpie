@@ -43,8 +43,7 @@ It should be pretty easy to get it up and running. You'll need to:
    you rock the command-line, you can just do:
 
         $ cd magpie
-        $ ant
-        $ ./jar_build.sh
+        $ ant jar
 
 3. **Run it.** Magpie is a command line app. After building the jar, you can
    run it by doing:

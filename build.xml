@@ -16,4 +16,15 @@
   <target name="clean" description="Remove generated artifacts.">
     <delete dir="bin" />
   </target>
+
+  <target name="jar" depends="build" description="Generate magpie.jar.">
+    <jar destfile="magpie.jar" basedir="bin" includes="**/*.class">
+      <manifest>
+        <attribute name="Created-By" value="Marcus Martin" />
+
+        <attribute name  = "Main-Class"
+                   value = "com.stuffwithstuff.magpie.app.MagpieApp" />
+      </manifest>
+    </jar>
+  </target>
 </project>
