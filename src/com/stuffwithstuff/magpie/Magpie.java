@@ -31,7 +31,7 @@ public class Magpie {
     return new Repl(mInterpreter);
   }
   
-  public void defineMethod(String signature, Method method) {
+  public void defineMethod(String signature, String doc, Method method) {
     MagpieParser parser = MagpieParser.create(signature);
     Pair<String, Pattern> parsed = DefParser.parseSignature(parser);
 
@@ -41,7 +41,7 @@ public class Magpie {
     Scope scope = mInterpreter.getBaseModule().getScope();
     
     // Construct the method.
-    Callable callable = new IntrinsicCallable(pattern, new MethodWrapper(method), scope);
+    Callable callable = new IntrinsicCallable(pattern, doc, new MethodWrapper(method), scope);
     
     // Register it.
     scope.define(name, callable);

@@ -17,7 +17,11 @@ public class ValuePattern extends Pattern {
 
   @Override
   public String toString() {
-    return mValue.toString();
+    if (mValue.isLiteral()) {
+      return mValue.toString();
+    } else {
+      return "== " + mValue.toString();
+    }
   }
 
   private final Expr mValue;

@@ -212,7 +212,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
       scope.define(expr.getName(), method);
     } else {
       // Defining the multimethod here but not adding any methods.
-      scope.defineMultimethod(expr.getName());
+      scope.defineMultimethod(expr.getName(), expr.getDoc());
     }
     
     return mContext.nothing();

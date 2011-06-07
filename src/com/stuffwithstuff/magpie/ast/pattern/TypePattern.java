@@ -17,7 +17,7 @@ public class TypePattern extends Pattern {
 
   @Override
   public String toString() {
-    return mType.toString();
+    return "is " + mType.toString();
   }
 
   private final Expr   mType;

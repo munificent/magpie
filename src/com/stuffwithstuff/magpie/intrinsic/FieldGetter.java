@@ -37,8 +37,7 @@ public class FieldGetter implements Callable {
   
   @Override
   public String getDoc() {
-    // TODO(bob): Actual docs.
-    return "<FieldGetter>";
+    return "Gets the value of the field.";
   }
 
   private final String mName;

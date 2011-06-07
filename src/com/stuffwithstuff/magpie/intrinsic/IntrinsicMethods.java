@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie.intrinsic;
 
 import com.stuffwithstuff.magpie.Def;
+import com.stuffwithstuff.magpie.Doc;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.Context;
@@ -27,6 +28,7 @@ public class IntrinsicMethods {
   }
   
   @Def("(is Function) call(arg)")
+  @Doc("Invokes the given function.")
   public static class Call implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       FnObj function = left.asFn();
@@ -72,6 +74,7 @@ public class IntrinsicMethods {
   }
   
   @Def("(this is Class) name")
+  @Doc("Gets the name of the class.")
   public static class Class_Name implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       return context.toObj(left.asClass().getName());
@@ -79,6 +82,7 @@ public class IntrinsicMethods {
   }
 
   @Def("(left) == (right)")
+  @Doc("Returns true if left and right are the same object.")
   public static class Equals implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       // By default, "==" does reference equality.
@@ -87,6 +91,7 @@ public class IntrinsicMethods {
   }
 
   @Def("(this) toString")
+  @Doc("Returns a generic string representation of the object.")
   public static class ToString implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       return context.toObj("<" + left.getClassObj().getName() + ">");
@@ -94,6 +99,7 @@ public class IntrinsicMethods {
   }
 
   @Def("(is Record) toString")
+  @Doc("Returns a string representation of the given record.")
   public static class Record_ToString implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       return context.toObj(left.toString());

@@ -216,6 +216,10 @@ public abstract class Expr {
   
   public String getDoc() { return mDoc; }
   
+  public boolean isLiteral() {
+    return false;
+  }
+  
   public abstract <TReturn, TContext> TReturn accept(
       ExprVisitor<TReturn, TContext> visitor, TContext context);
   

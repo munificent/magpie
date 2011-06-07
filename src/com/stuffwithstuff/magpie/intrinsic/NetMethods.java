@@ -8,6 +8,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import com.stuffwithstuff.magpie.Def;
+import com.stuffwithstuff.magpie.Doc;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.Context;
 import com.stuffwithstuff.magpie.interpreter.Name;
@@ -27,6 +28,7 @@ public class NetMethods {
   }
 
   @Def("(== ServerSocket) new(port is Int)")
+  @Doc("Creates a new ServerSocket listening on the given port.")
   public static class ServerSocket_New implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       try {
@@ -39,6 +41,8 @@ public class NetMethods {
   }
 
   @Def("(is ServerSocket) accept()")
+  @Doc("Waits until a connection is made to the ServerSocket and then\n" +
+       "returns a Socket to communicate.")
   public static class Accept implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       ServerSocket serverSocket = (ServerSocket) left.getValue();
@@ -53,6 +57,8 @@ public class NetMethods {
   }
 
   @Def("(is Socket) readLine()")
+  @Doc("Reads a line of text from the Socket. Returns nothing if the\n" +
+       "there is no more to read.")
   public static class ReadLine implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       SocketWrapper socket = (SocketWrapper) left.getValue();
@@ -69,6 +75,7 @@ public class NetMethods {
   }
 
   @Def("(is Socket) write(text as String)")
+  @Doc("Writes the given string to the Socket.")
   public static class Write implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       SocketWrapper socket = (SocketWrapper) left.getValue();
@@ -78,6 +85,7 @@ public class NetMethods {
   }
 
   @Def("(is Socket) close()")
+  @Doc("Closes the Socket.")
   public static class Close implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       SocketWrapper socket = (SocketWrapper) left.getValue();

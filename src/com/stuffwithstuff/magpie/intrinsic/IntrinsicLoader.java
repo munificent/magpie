@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import com.stuffwithstuff.magpie.Def;
+import com.stuffwithstuff.magpie.Doc;
 import com.stuffwithstuff.magpie.Method;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.Callable;
@@ -63,7 +64,14 @@ public abstract class IntrinsicLoader {
         instance = new MethodWrapper((Method) instance);
       }
       
-      Callable callable = new IntrinsicCallable(pattern, (Intrinsic) instance, scope);
+      // Look for documentation.
+      String doc = "";
+      Doc docAnnotation = (Doc) innerClass.getAnnotation(Doc.class);
+      if (docAnnotation != null) {
+        doc = docAnnotation.value();
+      }
+      
+      Callable callable = new IntrinsicCallable(pattern, doc, (Intrinsic) instance, scope);
       
       // Register it.
       scope.define(name, callable);

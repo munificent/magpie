@@ -152,17 +152,17 @@ public class Scope {
   
   public void define(String name, Callable method) {
     // Define it if not already present.
-    Multimethod multimethod = defineMultimethod(name);
+    Multimethod multimethod = defineMultimethod(name, "");
     
     multimethod.addMethod(method);
   }
   
-  public Multimethod defineMultimethod(String name) {
+  public Multimethod defineMultimethod(String name, String doc) {
     Multimethod multimethod = mMultimethods.get(name);
     
     // Only define it the first time if not found.
     if (multimethod == null) {
-      multimethod = new Multimethod();
+      multimethod = new Multimethod(doc);
       mMultimethods.put(name, multimethod);
     }
     

@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.Def;
+import com.stuffwithstuff.magpie.Doc;
 import com.stuffwithstuff.magpie.interpreter.Context;
 import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class ArrayMethods {
   @Def("(is Array)[index is Int]")
+  @Doc("Gets the array element at the given index.")
   public static class Index implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       List<Obj> list = left.asList();
@@ -20,6 +22,7 @@ public class ArrayMethods {
   }
 
   @Def("(is Array) count")
+  @Doc("Gets the number of elements in the array.")
   public static class Count implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       List<Obj> elements = left.asList();
@@ -28,6 +31,8 @@ public class ArrayMethods {
   }
 
   @Def("(is Array) toList")
+  @Doc("Creates a new List containing the elements of the array. Does not\n" +
+       "modify the original array.")
   public static class ToList implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       // Copy the array in case the list modifies it.

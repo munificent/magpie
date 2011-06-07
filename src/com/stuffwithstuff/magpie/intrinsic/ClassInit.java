@@ -80,8 +80,7 @@ public class ClassInit implements Callable {
   
   @Override
   public String getDoc() {
-    // TODO(bob): Actual docs.
-    return "<ClassInit>";
+    return "Canonical initializer for class " + mClass.getName() + ".";
   }
 
   @Override

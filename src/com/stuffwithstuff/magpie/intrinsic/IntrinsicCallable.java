@@ -7,8 +7,9 @@ import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.Scope;
 
 public class IntrinsicCallable implements Callable {
-  public IntrinsicCallable(Pattern pattern, Intrinsic callable, Scope closure) {
+  public IntrinsicCallable(Pattern pattern, String doc, Intrinsic callable, Scope closure) {
     mPattern = pattern;
+    mDoc = doc;
     mCallable = callable;
     mClosure = closure;
   }
@@ -28,11 +29,11 @@ public class IntrinsicCallable implements Callable {
   
   @Override
   public String getDoc() {
-    // TODO(bob): Define Java annotation to let built-ins provide this.
-    return "<built-in>";
+    return mDoc;
   }
   
   private final Pattern mPattern;
+  private final String mDoc;
   private final Intrinsic mCallable;
   private final Scope mClosure;
 }

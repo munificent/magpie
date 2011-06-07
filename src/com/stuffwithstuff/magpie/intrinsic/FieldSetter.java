@@ -39,8 +39,7 @@ public class FieldSetter implements Callable {
   
   @Override
   public String getDoc() {
-    // TODO(bob): Actual docs.
-    return "<FieldSetter>";
+    return "Sets the field to the given value.";
   }
 
   private final String mName;

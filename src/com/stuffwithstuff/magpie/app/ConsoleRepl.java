@@ -11,7 +11,8 @@ public class ConsoleRepl extends MagpieAppHost {
     mMagpie = new Magpie(this);
     
     mMagpie.defineMethods(ReplMethods.class);
-    mMagpie.defineMethod("printString(s is String)", new PrintString());
+    mMagpie.defineMethod("printString(s is String)",
+        "Prints the given string to stdout.", new PrintString());
     
     mRepl = mMagpie.createRepl();
   }
@@ -29,12 +30,14 @@ public class ConsoleRepl extends MagpieAppHost {
       while (true) {
         ReplResult result = mRepl.readAndEvaluate(createReader(mRepl));
         
-        // Indent the lines.
-        String text = result.getText().replace("\n", "\n  ");
-        if (result.isError()) {
-          printError(text);
-        } else {
-          printResult(text);
+        if (result.getText() != null) {
+          // Indent the lines.
+          String text = result.getText().replace("\n", "\n  ");
+          if (result.isError()) {
+            printError(text);
+          } else {
+            printResult(text);
+          }
         }
       }
     } catch (QuitException e) {

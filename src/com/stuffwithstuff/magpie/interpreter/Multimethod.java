@@ -7,6 +7,17 @@ import java.util.List;
 import com.stuffwithstuff.magpie.util.Expect;
 
 public class Multimethod {
+  public Multimethod(String doc) {
+    mDoc = doc;
+  }
+  
+  /**
+   * Gets the documentation for the multimethod. This should describe the
+   * multimethod in general, while each method's doc describes its behavior
+   * for those specific arguments.
+   */
+  public String getDoc() { return mDoc; }
+  
   public List<Callable> getMethods() { return mMethods; }
   
   public void addMethod(Callable method) {
@@ -57,5 +68,6 @@ public class Multimethod {
     Collections.sort(methods, new MethodLinearizer(context));
   }
   
+  private final String mDoc;
   private final List<Callable> mMethods = new ArrayList<Callable>();
 }

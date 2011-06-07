@@ -6,6 +6,12 @@ import magpie.syntax
 // have multiple sources files define a single logical module. Maybe just an
 // easy way to re-export an imported name.
 
+// Document the multimethods here before we import intrinsic methods for them.
+
+def toString
+    /// Returns a string representation of the left argument.
+end
+
 import classfile:com.stuffwithstuff.magpie.intrinsic.ArrayMethods
 import classfile:com.stuffwithstuff.magpie.intrinsic.IntrinsicMethods
 import classfile:com.stuffwithstuff.magpie.intrinsic.IntMethods
@@ -19,22 +25,27 @@ import classfile:com.stuffwithstuff.magpie.intrinsic.StringMethods
 // ----------------------------------------------------------------------------
 
 def (this is String) toString
+    /// Just returns the argument.
     this
 end
 
 def (nothing) toString
+    /// Returns "nothing".
     "nothing"
 end
 
 def (true) toString
+    /// Returns "true".
     "true"
 end
 
 def (false) toString
+    /// Returns "false".
     "false"
 end
 
 def (this is Class) toString
+    /// Returns the name of the class.
     this name
 end
 
@@ -65,10 +76,6 @@ end
 
 def (this) != (that)
     not(this ==(that))
-end
-
-def (this) + (that)
-    (this toString) +(that toString)
 end
 
 // Truthiness.

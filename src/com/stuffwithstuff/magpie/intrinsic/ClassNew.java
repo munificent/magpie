@@ -42,8 +42,7 @@ public class ClassNew implements Callable {
   
   @Override
   public String getDoc() {
-    // TODO(bob): Actual docs.
-    return "<ClassNew>";
+    return "Creates a new instance of a class.";
   }
 
   private final Scope mClosure;

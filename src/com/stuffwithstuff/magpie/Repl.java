@@ -22,7 +22,13 @@ public class Repl {
       parser.consume(TokenType.LINE);
       
       Obj result = mInterpreter.interpret(expr);
-      return new ReplResult(mInterpreter.evaluateToString(result), false);
+      String resultText;
+      if (result == mInterpreter.nothing()) {
+        resultText = null;
+      } else {
+        resultText = mInterpreter.evaluateToString(result);
+      }
+      return new ReplResult(resultText, false);
     } catch(ParseException ex) {
       return new ReplResult("Parse error: " + ex.getMessage(), true);
     } catch(ErrorException ex) {

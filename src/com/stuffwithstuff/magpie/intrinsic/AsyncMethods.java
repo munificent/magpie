@@ -1,6 +1,7 @@
 package com.stuffwithstuff.magpie.intrinsic;
 
 import com.stuffwithstuff.magpie.Def;
+import com.stuffwithstuff.magpie.Doc;
 import com.stuffwithstuff.magpie.interpreter.Channel;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.Context;
@@ -31,6 +32,8 @@ public class AsyncMethods {
   }
   
   @Def("(is Channel) send(value)")
+  @Doc("Sends the given value to the channel. The value must be\n" +
+       "thread-safe. If the channel's buffer is full, this blocks")
   public static class Send implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       Channel channel = (Channel) left.getValue();
@@ -46,6 +49,8 @@ public class AsyncMethods {
   }
   
   @Def("(is Channel) receive()")
+  @Doc("Reads a value from the channel. If the channe's buffer is empty,\n" +
+       "then this blocks until another thread sends a value to it.")
   public static class Receive implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       Channel channel = (Channel) left.getValue();
@@ -60,6 +65,7 @@ public class AsyncMethods {
   }
 
   @Def("run(body is Function)")
+  @Doc("Creates a new thread and runs the function concurrently on it.")
   public static class Run implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       FnObj function = right.asFn();
@@ -72,6 +78,7 @@ public class AsyncMethods {
   }
 
   @Def("sleep(milliseconds is Int)")
+  @Doc("Pauses the thread for a given number of milliseconds.")
   public static class Sleep implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       long milliseconds = right.asInt();

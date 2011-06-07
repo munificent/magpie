@@ -47,7 +47,8 @@ public class MagpieApp {
     String script = MagpieAppHost.readFile(path);
     Magpie magpie = new Magpie(new MagpieAppHost());
     
-    magpie.defineMethod("printString(s is String)", new Method() {
+    magpie.defineMethod("printString(s is String)",
+        "Prints the given string to stdout.", new Method() {
       public Object call(Object left, Object right) {
         System.out.print(right);
         return null;

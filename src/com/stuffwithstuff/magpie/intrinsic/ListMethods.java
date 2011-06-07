@@ -3,12 +3,14 @@ package com.stuffwithstuff.magpie.intrinsic;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.Def;
+import com.stuffwithstuff.magpie.Doc;
 import com.stuffwithstuff.magpie.interpreter.Context;
 import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class ListMethods {
   @Def("(is List)[index is Int]")
+  @Doc("Gets the element at the given index in the list.")
   public static class Index implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       List<Obj> list = left.asList();
@@ -19,6 +21,8 @@ public class ListMethods {
   }
 
   @Def("(is List)[index is Int] = (item)")
+  @Doc("Replaces the element at the given index in the list. Returns the\n" +
+       "assigned value.")
   public static class IndexAssign implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       List<Obj> list = left.getField(0).asList();
@@ -33,6 +37,7 @@ public class ListMethods {
   }
   
   @Def("(is List) add(item)")
+  @Doc("Appends the item to the end of the list.")
   public static class Add implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       List<Obj> elements = left.asList();
@@ -43,6 +48,7 @@ public class ListMethods {
   }
 
   @Def("(is List) clear()")
+  @Doc("Removes all items from the list.")
   public static class Clear implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       List<Obj> elements = left.asList();
@@ -52,6 +58,7 @@ public class ListMethods {
   }
   
   @Def("(is List) count")
+  @Doc("Returns the number of items in the list.")
   public static class Count implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       List<Obj> elements = left.asList();
@@ -60,6 +67,7 @@ public class ListMethods {
   }
   
   @Def("(is List) insert(item, at: index is Int)")
+  @Doc("Inserts the given item at the given index in the list.")
   public static class Insert implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       List<Obj> list = left.asList();
