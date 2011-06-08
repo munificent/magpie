@@ -2,25 +2,56 @@ import spec.specify
 
 import io.path
 
-specify("The 'base' method") with
+specify("The 'baseName' method") with
     it should("return the last component of the filename") with
-        "a" base shouldEqual("a")
-        "/a" base shouldEqual("a")
-        "/a/b" base shouldEqual("b")
-        "/ab/ba/bag" base shouldEqual("bag")
-        "/ab/ba/bag.txt" base shouldEqual("bag.txt")
-        "/foo/bar/baz.bang" base shouldEqual("baz.bang")
-        "/foo/bar.baz.bang" base shouldEqual("bar.baz.bang")
+        "a" baseName shouldEqual("a")
+        "/a" baseName shouldEqual("a")
+        "/a/b" baseName shouldEqual("b")
+        "/ab/ba/bag" baseName shouldEqual("bag")
+        "/ab/ba/bag.txt" baseName shouldEqual("bag.txt")
+        "/foo/bar/baz.bang" baseName shouldEqual("baz.bang")
+        "/foo/bar.baz.bang" baseName shouldEqual("bar.baz.bang")
     end
 
     it should("ignore trailing directory separators") with
-        "foo/" base shouldEqual("foo")
-        "bar///" base shouldEqual("bar")
+        "foo/" baseName shouldEqual("foo")
+        "bar///" baseName shouldEqual("bar")
     end
 
     it should("handle edge cases") with
-        "" base shouldEqual("")
-        "." base shouldEqual(".")
-        ".." base shouldEqual("..")
+        "" baseName shouldEqual("")
+        "." baseName shouldEqual(".")
+        ".." baseName shouldEqual("..")
+    end
+end
+
+specify("The 'extension' method") with
+    it should("return the extension of the filename") with
+        "a.txt" extension shouldEqual(".txt")
+        "a" extension shouldEqual("")
+        "some/path/a.txt" extension shouldEqual(".txt")
+        ".bashrc" extension shouldEqual("")
+        "path/.bashrc" extension shouldEqual("")
+    end
+
+    it should("ignore dots in directories") with
+        "dir.ext/path.txt" extension shouldEqual(".txt")
+        "foo.bar/path" extension shouldEqual("")
+    end
+
+    it should("return just the last part if there are multiple dots") with
+        "a.b.c" extension shouldEqual(".c")
+    end
+
+    it should("handle edge cases") with
+        "" extension shouldEqual("")
+        "." extension shouldEqual("")
+        "/" extension shouldEqual("")
+        "/." extension shouldEqual("")
+        ".." extension shouldEqual("")
+        "..." extension shouldEqual("")
+        "...." extension shouldEqual("")
+        ".foo." extension shouldEqual(".")
+        "foo." extension shouldEqual(".")
     end
 end

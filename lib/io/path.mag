@@ -1,1 +1,11 @@
 import classfile:com.stuffwithstuff.magpie.intrinsic.PathMethods
+
+def (path is String) extension
+    val baseName = path baseName
+    print(baseName)
+    match baseName lastIndexOf(".")
+        case 0 then "" // Can't start with extension.
+        case pos is Int then baseName substring(from: pos)
+        else "" // No extension.
+    end
+end
