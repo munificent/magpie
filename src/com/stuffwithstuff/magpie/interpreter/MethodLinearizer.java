@@ -47,17 +47,12 @@ import com.stuffwithstuff.magpie.ast.pattern.WildcardPattern;
  * With structural types, their fields are linearized. If all fields sort the
  * same way (or are the same) then the type with the winning fields wins. For
  * example, (Derived, Int) beats (Base, Int).
- * 
- * TODO(bob): Note that only a fraction of the above is currently implemented.
- * It's getting there...
- * TODO(bob): What about OrTypes, function types, generics, and user-defined
- * types?
  */
 public class MethodLinearizer implements Comparator<Callable> {
   public MethodLinearizer(Context context) {
     mContext = context;
   }
-
+  
   @Override
   public int compare(Callable method1, Callable method2) {
     return compare(method1.getPattern(), method1.getClosure(),
@@ -66,9 +61,6 @@ public class MethodLinearizer implements Comparator<Callable> {
 
   private int compare(Pattern pattern1, Scope scope1,
       Pattern pattern2, Scope scope2) {
-    final int firstWins = -1;
-    final int secondWins = 1;
-    
     pattern1 = pattern1.accept(new PatternSimplifier(), null);
     pattern2 = pattern2.accept(new PatternSimplifier(), null);
     
@@ -80,35 +72,35 @@ public class MethodLinearizer implements Comparator<Callable> {
     case ANY:
       switch (kind2) {
       case ANY:     return 0;
-      case RECORD:  return secondWins;
-      case TYPE:    return secondWins;
-      case VALUE:   return secondWins;
+      case RECORD:  return SECOND_WINS;
+      case TYPE:    return SECOND_WINS;
+      case VALUE:   return SECOND_WINS;
       default:
         throw new UnsupportedOperationException("Unknown pattern kind.");
       }
     case RECORD:
       switch (kind2) {
-      case ANY:     return firstWins;
+      case ANY:     return FIRST_WINS;
       case RECORD:  return compareRecords(pattern1, scope1, pattern2, scope2);
-      case TYPE:    return firstWins;
-      case VALUE:   return secondWins;
+      case TYPE:    return FIRST_WINS;
+      case VALUE:   return SECOND_WINS;
       default:
         throw new UnsupportedOperationException("Unknown pattern kind.");
       }
     case TYPE:
       switch (kind2) {
-      case ANY:     return firstWins;
-      case RECORD:  return secondWins;
+      case ANY:     return FIRST_WINS;
+      case RECORD:  return SECOND_WINS;
       case TYPE:    return compareTypes(pattern1, scope1, pattern2, scope2);
-      case VALUE:   return secondWins;
+      case VALUE:   return SECOND_WINS;
       default:
         throw new UnsupportedOperationException("Unknown pattern kind.");
       }
     case VALUE:
       switch (kind2) {
-      case ANY:     return firstWins;
-      case RECORD:  return firstWins;
-      case TYPE:    return firstWins;
+      case ANY:     return FIRST_WINS;
+      case RECORD:  return FIRST_WINS;
+      case TYPE:    return FIRST_WINS;
       case VALUE:   return compareValues(pattern1, scope1, pattern2, scope2);
       default:
         throw new UnsupportedOperationException("Unknown pattern kind.");
@@ -146,6 +138,9 @@ public class MethodLinearizer implements Comparator<Callable> {
     // Take the intersection of their fields.
     Set<String> intersect = intersect(record1.keySet(), record2.keySet());
     
+    // Which record are we leaning towards preferring?
+    int lean = 0;
+    
     // If the records don't have the same number of fields, one must be a
     // strict superset of the other.
     if ((record1.size() != intersect.size()) ||
@@ -153,28 +148,30 @@ public class MethodLinearizer implements Comparator<Callable> {
       if (containsOthers(record1.keySet(), record2.keySet()) &&
           containsOthers(record2.keySet(), record1.keySet())) {
         throw ambiguous(pattern1, pattern2);
+      } else {
+        // Lean towards the superset.
+        lean = (record1.size() > record2.size()) ? FIRST_WINS : SECOND_WINS;
       }
     }
 
     // Fields that are common to the two cannot disagree on sort order.
-    int currentComparison = 0;
     for (String name : intersect) {
       Pattern field1 = record1.get(name);
       Pattern field2 = record2.get(name);
       
       int compare = compare(field1, scope1, field2, scope2);
       
-      if (currentComparison == 0) {
-        currentComparison = compare;
+      if (lean == 0) {
+        lean = compare;
       } else if (compare == 0) {
         // Do nothing.
-      } else if (compare != currentComparison) {
+      } else if (compare != lean) {
         // If we get here, the fields don't agree.
         throw ambiguous(pattern1, pattern2);
       }
     }
     
-    return currentComparison;
+    return lean;
   }
   
   private int compareTypes(Pattern pattern1, Scope scope1,
@@ -294,5 +291,8 @@ public class MethodLinearizer implements Comparator<Callable> {
     }
   }
   
+  private static final int FIRST_WINS = -1;
+  private static final int SECOND_WINS = 1;
+
   private final Context mContext;
 }
