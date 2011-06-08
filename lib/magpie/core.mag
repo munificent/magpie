@@ -99,6 +99,13 @@ def (nothing) isTrue
     false
 end
 
+// TODO(bob): Probably want to get rid of this since its too open-ended, but
+// really need string interpolation first.
+def (left) +(right)
+    /// Converts the arguments to strings and concatenates them.
+    left toString +(right toString)
+end
+
 // Implement comparison in terms of a master compareTo() method.
 def (this is Comparable) < (that is Comparable)
     this compareTo(that) ==(-1)

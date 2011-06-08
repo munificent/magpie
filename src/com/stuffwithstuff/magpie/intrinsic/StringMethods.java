@@ -63,17 +63,50 @@ public class StringMethods {
           right.asString()));
     }
   }
+  
+  @Def("(haystack is String) indexOf(needle is String)")
+  @Doc("Returns the index in haystack of the first occurrence of needle or\n" +
+       "nothing if it is not found.")
+  public static class IndexOf implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      int index = left.asString().indexOf(right.asString());
+      if (index == -1) return context.nothing();
+      return context.toObj(index);
+    }
+  }
+  
+  @Def("(haystack is String) lastIndexOf(needle is String)")
+  @Doc("Returns the index in haystack of the last occurrence of needle or\n" +
+       "nothing if it is not found.")
+  public static class LastIndexOf implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      int index = left.asString().lastIndexOf(right.asString());
+      if (index == -1) return context.nothing();
+      return context.toObj(index);
+    }
+  }
 
   // TODO(bob): Make an indexer that takes a range, so you can do:
   // "some string"[2 to(4)]
-  @Def("(is String) substring(start is Int, stop is Int)")
+  @Def("(string is String) substring(from: from is Int, to: to is Int)")
   @Doc("Returns a substring of this string.")
-  public static class Substring implements Intrinsic {
+  public static class Substring_FromTo implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       String string = left.asString();
-      int startIndex = right.getField(0).asInt();
-      int endIndex = right.getField(1).asInt();
-      return context.toObj(string.substring(startIndex, endIndex));
+      int from = right.getField("from").asInt();
+      int to = right.getField("to").asInt();
+      return context.toObj(string.substring(from, to + 1));
+    }
+  }
+  
+  @Def("(string is String) substring(from: from is Int)")
+  @Doc("Returns the portion of the string starting at from, to the\n" +
+       "end of the string.")
+  public static class Substring_From implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      String string = left.asString();
+      int startIndex = right.getField("from").asInt();
+      return context.toObj(string.substring(startIndex));
     }
   }
 
