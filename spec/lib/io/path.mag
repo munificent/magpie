@@ -23,6 +23,12 @@ specify("The 'baseName' method") with
         "." baseName shouldEqual(".")
         ".." baseName shouldEqual("..")
     end
+
+    it should("optionally remove extensions") with
+      "quux/foo.mag" baseName(".mag") shouldEqual("foo")
+      "quux/foo.mag" baseName(".bar") shouldEqual("foo.mag")
+      "quux/.mag"    baseName(".mag") shouldEqual(".mag")
+    end
 end
 
 specify("The 'dirName' method") with

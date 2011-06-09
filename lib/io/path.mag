@@ -1,5 +1,19 @@
 import classfile:com.stuffwithstuff.magpie.intrinsic.PathMethods
 
+def (path is String) baseName(ext is String)
+  /// Gets the last component of the file path, removing ext from the end.
+  /// If path and ext are identical, path is returned unscathed.
+
+  val name = path baseName
+  if name == ext then return name
+
+  if ext == name substring(from: name count - ext count) then
+     return name substring(from: 0, to: name count - ext count - 1)
+  end
+
+  name
+end
+
 def (path is String) extension
     val baseName = path baseName
     match baseName lastIndexOf(".")
