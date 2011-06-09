@@ -25,6 +25,37 @@ specify("The 'baseName' method") with
     end
 end
 
+specify("The 'dirName' method") with
+    it should("return all the components of filename except the last one") with
+        "/dir/file" dirName shouldEqual("/dir")
+        "/path/to/file.txt" dirName shouldEqual("/path/to")
+        "file.txt" dirName shouldEqual("")
+        "" dirName shouldEqual("")
+        "/" dirName shouldEqual("")
+        "/foo/foo" dirName shouldEqual("/foo")
+    end
+
+    it should("ignore a trailing '/'") with
+        "/foo/bar/" dirName shouldEqual("/foo")
+    end
+
+    it should("handle edge cases") with
+        "" dirName shouldEqual("")
+        "." dirName shouldEqual("")
+        "./" dirName shouldEqual("")
+        "./b/./" dirName shouldEqual("./b")
+        ".." dirName shouldEqual("")
+        "../" dirName shouldEqual("")
+        "/" dirName shouldEqual("")
+        "/." dirName shouldEqual("/")
+        "/foo/" dirName shouldEqual("/")
+        "/foo/." dirName shouldEqual("/foo")
+        "/foo/./" dirName shouldEqual("/foo")
+        "/foo/../." dirName shouldEqual("/foo/..")
+        "foo/../" dirName shouldEqual("foo")
+    end
+end
+
 specify("The 'extension' method") with
     it should("return the extension of the filename") with
         "a.txt" extension shouldEqual(".txt")
@@ -48,9 +79,6 @@ specify("The 'extension' method") with
         "." extension shouldEqual("")
         "/" extension shouldEqual("")
         "/." extension shouldEqual("")
-        ".." extension shouldEqual("")
-        "..." extension shouldEqual("")
-        "...." extension shouldEqual("")
         ".foo." extension shouldEqual(".")
         "foo." extension shouldEqual(".")
     end
