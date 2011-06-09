@@ -7,8 +7,10 @@ def (path is String) baseName(ext is String)
   val name = path baseName
   if name == ext then return name
 
-  if ext == name substring(from: name count - ext count) then
-     return name substring(from: 0, to: name count - ext count - 1)
+  val offset = name count - ext count
+
+  if ext == name substring(from: offset) then
+     return name substring(from: 0, to: offset - 1)
   end
 
   name
