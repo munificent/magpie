@@ -29,7 +29,7 @@ public class Profiler {
 
     String format = "%-40s %6s %10s %10s %10s\n";
     System.out.format(format, "Location", "Calls", "Elapsed ms", "Exclus. ms",
-        "Average µs");
+        "Average Î¼s");
     System.out.format(format, "--------", "-----", "----------", "----------",
         "----------");
     for (Profile profile : profiles) {
