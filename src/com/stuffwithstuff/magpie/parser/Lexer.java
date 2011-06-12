@@ -203,6 +203,12 @@ public class Lexer implements TokenReader {
     while (true) {
       if (isDigit(peek())) {
         advance();
+      } else if (peek() == ':') {
+        advance();
+        
+        // Trim off the ":".
+        String value = mRead.substring(0, mRead.length() - 1);
+        return makeToken(TokenType.FIELD, value);
       } else {
         return makeToken(TokenType.INT, Integer.parseInt(mRead));
       }
