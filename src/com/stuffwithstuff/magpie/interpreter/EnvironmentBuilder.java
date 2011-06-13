@@ -42,7 +42,7 @@ public class EnvironmentBuilder {
     class_("List", indexable).end();
     class_("Nothing").end();
     class_("Record").end();
-    class_("String", comparable).end();
+    class_("String", comparable, indexable).end();
     class_("Tuple", indexable).end();
 
     // Define the core error classes.

@@ -1,0 +1,98 @@
+import spec.specify
+
+specify("The String class") with
+    it should("inherit Indexable") with
+        "s" shouldBe(Indexable)
+    end
+
+    it should("inherit Comparable") with
+        "s" shouldBe(Comparable)
+    end
+end
+
+specify("The indexer on Strings") with
+    it should("return the character at the zero-based index") with
+        val string = "abc"
+        string[0] shouldEqual("a")
+        string[1] shouldEqual("b")
+        string[2] shouldEqual("c")
+    end
+
+    it should("count from the back if the index is negative") with
+        val string = "abc"
+        string[-1] shouldEqual("c")
+        string[-2] shouldEqual("b")
+        string[-3] shouldEqual("a")
+    end
+
+    it should("throw an OutOfBoundsError on a bad index") with
+        val string = "abc"
+        fn
+            string[3]
+        end shouldThrow(OutOfBoundsError)
+
+        fn
+            string[-4]
+        end shouldThrow(OutOfBoundsError)
+    end
+end
+
+specify("The 'count' method on Strings") with
+    it should("return the number of characters in the string") with
+        "" count shouldEqual(0)
+        "a" count shouldEqual(1)
+        "ab" count shouldEqual(2)
+    end
+end
+
+specify("The indexOf() method on strings") with
+    it should("return the index of the string") with
+        "hayneedlestack" indexOf("needle") shouldEqual(3)
+        "needlehaystack" indexOf("needle") shouldEqual(0)
+        "haystackneedle" indexOf("needle") shouldEqual(8)
+        "needle" indexOf("needle") shouldEqual(0)
+    end
+
+    it should("return the index of the first occurrence") with
+        "0123needle456needle789" indexOf("needle") shouldEqual(4)
+    end
+
+    it should("return nothing if not found") with
+        "just haystack" indexOf("needle") shouldEqual(nothing)
+    end
+end
+
+specify("The lastIndexOf() method on strings") with
+    it should("return the index of the string") with
+        "hayneedlestack" lastIndexOf("needle") shouldEqual(3)
+        "needlehaystack" lastIndexOf("needle") shouldEqual(0)
+        "haystackneedle" lastIndexOf("needle") shouldEqual(8)
+        "needle" lastIndexOf("needle") shouldEqual(0)
+    end
+
+    it should("return the index of the last occurrence") with
+        "0123needle456needle789" lastIndexOf("needle") shouldEqual(13)
+    end
+
+    it should("return nothing if not found") with
+        "just haystack" lastIndexOf("needle") shouldEqual(nothing)
+    end
+end
+
+specify("The substring(from:, to:) method on strings") with
+    it should("return the substring between the given indices (inclusive)") with
+        "012345678" substring(from: 2, to: 5) shouldEqual("2345")
+        "012345678" substring(from: 3, to: 3) shouldEqual("3")
+        "012345678" substring(from: 0, to: 3) shouldEqual("0123")
+        "012345678" substring(from: 2, to: 8) shouldEqual("2345678")
+    end
+end
+
+specify("The substring(from:, to:) method on strings") with
+    it should("return the substring between the given indices (inclusive)") with
+        "012345678" substring(from: 2, to: 5) shouldEqual("2345")
+        "012345678" substring(from: 3, to: 3) shouldEqual("3")
+        "012345678" substring(from: 0, to: 3) shouldEqual("0123")
+        "012345678" substring(from: 2, to: 8) shouldEqual("2345678")
+    end
+end
