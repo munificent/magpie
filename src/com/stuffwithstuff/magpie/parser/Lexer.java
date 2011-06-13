@@ -102,31 +102,55 @@ public class Lexer implements TokenReader {
   }
   
   private Token readString() {
+    StringBuilder escaped = new StringBuilder();
+    
     while (true) {
-      switch (advance()) {
+      char c = advance();
+      switch (c) {
       case '\\':
         // String escape.
-        switch (advance()) {
-        case 'n':
-        case 't':
-        case '"':
-        case '\\':
-          // Do nothing, valid escape.
+        char e = advance();
+        switch (e) {
+        case 'b': escaped.append("\b"); break;
+        case 'f': escaped.append("\f"); break;
+        case 'n': escaped.append("\n"); break;
+        case 'r': escaped.append("\r"); break;
+        case 't': escaped.append("\t"); break;
+        case '"': escaped.append("\""); break;
+        case '\\': escaped.append("\\"); break;
+        
+        case 'x':
+          int a = readHexDigit();
+          int b = readHexDigit();
+          int code = (a << 4) | b;
+          // TODO(bob): 4-digit escape code too.
+          escaped.append(Character.toChars(code)[0]);
           break;
           
-        default: throw new ParseException("Unknown string escape.");
+        default:
+          throw new ParseException("Unknown string escape.");
         }
         break;
         
       case '"':
-        return makeToken(TokenType.STRING, convertStringLiteral(mRead));
+        return makeToken(TokenType.STRING, escaped.toString());
        
       case '\0': throw new ParseException("Unterminated string.");
       
       default:
-        // Do nothing, already advanced.
+        escaped.append(c);
       }
     }
+  }
+  
+  private int readHexDigit() {
+    char c = Character.toLowerCase(advance());
+    int digit = "0123456789abcdef".indexOf(c);
+    if (digit == -1) {
+      throw new ParseException("Expected hex digit.");
+    }
+    
+    return digit;
   }
   
   private Token readLineComment() {
@@ -221,32 +245,6 @@ public class Lexer implements TokenReader {
         return makeToken(TokenType.INT, Integer.parseInt(mRead));
       }
     }
-  }
-  
-  private String convertStringLiteral(String literal) {
-    // Trim the quotes and convert the escapes.
-    StringBuilder builder = new StringBuilder();
-    
-    boolean inEscape = false;
-    for (int i = 1; i < literal.length() - 1; i++) {
-      if (inEscape) {
-        switch (literal.charAt(i)) {
-        case 'n': builder.append("\n"); break;
-        case 't': builder.append("\t"); break;
-        case '\\': builder.append("\\"); break;
-        case '"': builder.append("\""); break;
-        }
-        inEscape = false;
-      } else {
-        if (literal.charAt(i) == '\\') {
-          inEscape = true;
-        } else {
-          builder.append(literal.charAt(i));
-        }
-      }
-    }
-
-    return builder.toString();
   }
   
   private char peek() {
