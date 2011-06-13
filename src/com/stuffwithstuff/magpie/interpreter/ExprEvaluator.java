@@ -78,7 +78,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
     }
 
     Obj arg = evaluate(expr.getArg(), scope);
-    return multimethod.invoke(new Context(scope.getModule()), arg);
+    return multimethod.invoke(expr.getName(),
+        new Context(scope.getModule()), arg);
   }
   
   @Override

@@ -59,13 +59,14 @@ public class Interpreter {
   public String evaluateToString(Obj value) {
     Multimethod multimethod = mBaseModule.getScope().lookUpMultimethod(
         Name.TO_STRING);
-    return multimethod.invoke(
+    return multimethod.invoke(Name.TO_STRING,
         new Context(mBaseModule), value, mNothing).asString();
   }
   
   public Obj invoke(Obj leftArg, String method, Obj rightArg) {
     Multimethod multimethod = mBaseModule.getScope().lookUpMultimethod(method);
-    return multimethod.invoke(new Context(mBaseModule), leftArg, rightArg);
+    return multimethod.invoke(method,
+        new Context(mBaseModule), leftArg, rightArg);
   }
   
   public boolean objectsEqual(Obj a, Obj b) {
@@ -87,7 +88,7 @@ public class Interpreter {
     if (equals == null) return a == b;
     
     mInObjectsEqual = true;
-    Obj result = equals.invoke(new Context(mBaseModule), a, b);
+    Obj result = equals.invoke(Name.EQEQ, new Context(mBaseModule), a, b);
     mInObjectsEqual = false;
     
     return result.asBool();
@@ -264,7 +265,7 @@ public class Interpreter {
     // Note: the receiver for init() is the class itself, not the new instance
     // which is considered to be in a hidden state since it isn't initialized
     // yet.
-    init.invoke(context, classObj, arg);
+    init.invoke(Name.INIT, context, classObj, arg);
 
     // Make sure the canonical initializer was called.
     if (mInitializingCount > expected) {

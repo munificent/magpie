@@ -28,16 +28,17 @@ public class Multimethod {
     mMethods.add(method);
   }
   
-  public Obj invoke(Context context, Obj left, Obj right) {
-    return invoke(context, context.toObj(left, right));
+  public Obj invoke(String name, Context context, Obj left, Obj right) {
+    return invoke(name, context, context.toObj(left, right));
   }
   
-  public Obj invoke(Context context, Obj arg) {
+  public Obj invoke(String name, Context context, Obj arg) {
     Callable method = select(context, arg);
     
     if (method == null) {
       context.error(Name.NO_METHOD_ERROR, 
-          "Could not find a method to match argument " + arg + ".");
+          "Could not find a method \"" + name + "\" that matches argument " +
+          arg + ".");
     }
 
     return method.invoke(context, arg);
