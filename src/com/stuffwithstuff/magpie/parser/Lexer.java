@@ -131,16 +131,24 @@ public class Lexer implements TokenReader {
   
   private Token readLineComment() {
     advance(); // Consume second "/".
+
+    int slashCount = 2;
+
+    // Consume any number of additional leading "/".
+    while (peek() == '/') {
+      ++slashCount;
+      advance();
+    }
     
     // See if it's a "///" doc comment.
-    boolean isDoc = (peek() == '/');
+    boolean isDoc = slashCount == 3;
       
     while (true) {
       switch (peek()) {
       case '\n':
       case '\r':
       case '\0':
-        String value = mRead.substring(isDoc ? 3 : 2).trim();
+        String value = mRead.substring(slashCount).trim();
         return makeToken(
             isDoc ? TokenType.DOC_COMMENT : TokenType.LINE_COMMENT, value);
         
