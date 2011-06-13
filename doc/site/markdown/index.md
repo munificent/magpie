@@ -2,7 +2,7 @@
 
 Thanks for coming!
 
-Magpie is a small dynamically-typed programming language built around [*patterns*](patterns.html), [*classes*](classes.html), and [*multimethods*](multimethods.html). From functional languages, it borrows first-class [functions](functions.html), closures, expressions-for-everything, and [quotations](quotations.html). It's most novel feature is probably an [extensible syntax](syntax-extensions.html). It runs on the [JVM](http://en.wikipedia.org/wiki/Java_Virtual_Machine).
+Magpie is a small dynamically-typed programming language built around [*patterns*](patterns.html), [*classes*](classes.html), and [*multimethods*](multimethods.html). From functional languages, it borrows first-class [functions](functions.html), closures, expressions-for-everything, and [quotations](quotations.html). Its most novel feature is probably an [extensible syntax](syntax-extensions.html). It runs on the [JVM](http://en.wikipedia.org/wiki/Java_Virtual_Machine).
 
 It looks a bit like this:
 
