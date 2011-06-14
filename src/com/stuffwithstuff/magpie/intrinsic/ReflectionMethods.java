@@ -1,5 +1,9 @@
 package com.stuffwithstuff.magpie.intrinsic;
 
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
+
 import com.stuffwithstuff.magpie.Def;
 import com.stuffwithstuff.magpie.Doc;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
@@ -10,6 +14,8 @@ import com.stuffwithstuff.magpie.interpreter.Context;
 import com.stuffwithstuff.magpie.interpreter.Multimethod;
 import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
+import com.stuffwithstuff.magpie.interpreter.PatternTester;
+import com.stuffwithstuff.magpie.interpreter.Scope;
 
 public class ReflectionMethods {
   @Def("(this) class")
@@ -128,4 +134,72 @@ public class ReflectionMethods {
       return context.nothing();
     }
   }
+
+  private static abstract class Methods implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      StringBuilder builder = new StringBuilder();
+      
+      Obj matchingValue = getMatchingValueFromArgs(context, left, right);
+
+      for(String method : findMultimethods(context, matchingValue)) {
+        builder.append(method).append("\n");
+      }
+      System.out.println(builder.toString());
+      
+      return context.nothing();
+    }
+
+    protected Set<String> findMultimethods(Context context, Obj matchingValue) {
+      Set<String> matching = new TreeSet<String>();
+
+      Scope scope = context.getModule().getScope();
+      while (scope != null) {
+        for(Entry<String, Multimethod> multimethod : scope.getMultimethods().entrySet()) {
+          for(Callable method : multimethod.getValue().getMethods()) {
+            if(isMatchingMethod(matchingValue, context, method)) {
+              matching.add(multimethod.getKey());
+              break;
+            }
+          }  
+        }
+        scope = scope.getParent();
+      }
+ 
+      return matching;
+    }
+  
+    protected abstract Obj getMatchingValueFromArgs(Context context, Obj left, Obj right);
+    protected abstract boolean isMatchingMethod(Obj value, Context context, Callable method);
+  }
+
+  @Def("(this) showMethods")
+  @Doc("Displays the multimethods that can be called with this object on the left.")
+  public static class MethodsFromLeft extends Methods {
+
+    @Override
+    protected Obj getMatchingValueFromArgs(Context context, Obj left, Obj right) {
+      return left;
+    }
+
+    @Override
+    public boolean isMatchingMethod(Obj value, Context context, Callable method) {
+      Pattern leftParam = ((RecordPattern)method.getPattern()).getFields().get(Name.getTupleField(0));
+      return PatternTester.test(context, leftParam, value, method.getClosure());
+    }
+  }  
+
+  @Def("(this) showMethods(_)")
+  @Doc("Displays the multimethods that can be called with the given arguments.")
+  public static class MethodsFromArgs extends Methods {
+
+    @Override
+    protected Obj getMatchingValueFromArgs(Context context, Obj left, Obj right) {
+      return context.toObj(left, right);
+    }
+
+    @Override
+    public boolean isMatchingMethod(Obj value, Context context, Callable method) {
+      return PatternTester.test(context, method.getPattern(), value, method.getClosure());
+    }
+  }  
 }
