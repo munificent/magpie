@@ -1,5 +1,9 @@
 package com.stuffwithstuff.magpie.intrinsic;
 
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
+
 import com.stuffwithstuff.magpie.Def;
 import com.stuffwithstuff.magpie.Doc;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
@@ -10,6 +14,8 @@ import com.stuffwithstuff.magpie.interpreter.Context;
 import com.stuffwithstuff.magpie.interpreter.Multimethod;
 import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
+import com.stuffwithstuff.magpie.interpreter.PatternTester;
+import com.stuffwithstuff.magpie.interpreter.Scope;
 
 public class ReflectionMethods {
   @Def("(this) class")
@@ -127,5 +133,40 @@ public class ReflectionMethods {
       
       return context.nothing();
     }
+  }
+
+  @Def("(this) showMethods")
+  @Doc("Displays the multimethods that can be called with this object on the left.")
+  public static class Methods implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      StringBuilder builder = new StringBuilder();
+      for(String method: findMultiMethods(context, left)) {
+        builder.append(method).append("\n");
+      }
+      System.out.println(builder.toString());
+      
+      return context.nothing();
+    }
+
+    public Set<String> findMultiMethods(Context context, Obj leftArgument) {
+      Set<String> matching = new TreeSet<String>();
+
+      Scope scope = context.getModule().getScope();
+      while (scope != null) {
+        for(Entry<String, Multimethod> multimethod: scope.getMultimethods().entrySet()) {
+          for(Callable method: multimethod.getValue().getMethods()) {
+            Pattern leftParam = ((RecordPattern) method.getPattern()).getFields().get(Name.getTupleField(0));
+            if(PatternTester.test(context, leftParam, leftArgument, method.getClosure())) {
+              matching.add(multimethod.getKey());
+              break;
+            }
+          }  
+        }
+        scope = scope.getParent();
+      }
+ 
+      return matching;
+    }
+  
   }
 }
