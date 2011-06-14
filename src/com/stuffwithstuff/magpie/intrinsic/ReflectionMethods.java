@@ -2,7 +2,8 @@ package com.stuffwithstuff.magpie.intrinsic;
 
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.Map;
+import java.util.TreeMap;
 
 import com.stuffwithstuff.magpie.Def;
 import com.stuffwithstuff.magpie.Doc;
@@ -16,6 +17,7 @@ import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.PatternTester;
 import com.stuffwithstuff.magpie.interpreter.Scope;
+import com.stuffwithstuff.magpie.util.MultimethodDocBuilder;
 
 public class ReflectionMethods {
   @Def("(this) class")
@@ -60,8 +62,6 @@ public class ReflectionMethods {
         System.out.println(
             "Couldn't find a method named \"" + name + "\".\n");
       } else {
-        StringBuilder builder = new StringBuilder();
-        
         // showDoc
         // Displays the documentation for the given argument.
         //
@@ -69,46 +69,7 @@ public class ReflectionMethods {
         //   Displays the documentation for the multimethod with the given name.
         // showDoc(class is Class)
         //   Displays the documentation for the given class.
-        
-        // Only show the overall documentation if it exists.
-        if (multimethod.getDoc().length() > 0) {
-          builder.append(name).append("\n");
-          builder.append(multimethod.getDoc()).append("\n");
-          builder.append("\n");
-        }
-        
-        for (Callable method : multimethod.getMethods()) {
-          RecordPattern pattern = (RecordPattern) method.getPattern();
-          Pattern leftParam = pattern.getFields().get(Name.getTupleField(0));
-          Pattern rightParam = pattern.getFields().get(Name.getTupleField(1));
-          
-          String leftText = leftParam.toString();
-          if (leftText.equals("nothing")) {
-            leftText = "";
-          } else {
-            leftText = "(" + leftText + ") ";
-          }
-          
-          String rightText = rightParam.toString();
-          if (rightText.equals("nothing")) {
-            if (leftText.equals("")) {
-              rightText = "()";
-            } else {
-              rightText = "";
-            }
-          } else {
-            rightText = "(" + rightText + ")";
-          }
-          
-          builder.append(leftText).append(name).append(rightText).append("\n");
-          if (method.getDoc().length() > 0) {
-            builder.append("  " + method.getDoc().replace("\n", "\n  ") + "\n");
-          } else {
-            builder.append("  No documentation.\n");
-          }
-        }
-        
-        System.out.print(builder);
+        System.out.println(new MultimethodDocBuilder().buildDoc(name, multimethod));
       }
       
       return context.nothing();
@@ -136,28 +97,37 @@ public class ReflectionMethods {
   }
 
   private static abstract class Methods implements Intrinsic {
-    public Obj invoke(Context context, Obj left, Obj right) {
+    public Obj invoke(final Context context, Obj left, Obj right) {
       StringBuilder builder = new StringBuilder();
       
-      Obj matchingValue = getMatchingValueFromArgs(context, left, right);
+      final Obj matchingValue = getMatchingValueFromArgs(context, left, right);
 
-      for(String method : findMultimethods(context, matchingValue)) {
-        builder.append(method).append("\n");
+      MultimethodDocBuilder docBuilder = new MultimethodDocBuilder() {
+
+        @Override
+        protected boolean shouldDisplayMethod(Callable callable) {
+          return isMatchingMethod(matchingValue, context, callable);
+        }
+      };
+
+      for(Entry<String, Multimethod> multimethod : findMultimethods(context, matchingValue)) {
+        docBuilder.appendDoc(multimethod.getKey(), multimethod.getValue(), builder);
+        builder.append("\n");
       }
       System.out.println(builder.toString());
       
       return context.nothing();
     }
 
-    protected Set<String> findMultimethods(Context context, Obj matchingValue) {
-      Set<String> matching = new TreeSet<String>();
+    protected Set<Entry<String, Multimethod>> findMultimethods(Context context, Obj matchingValue) {
+      Map<String, Multimethod> matching = new TreeMap<String, Multimethod>();
 
       Scope scope = context.getModule().getScope();
       while (scope != null) {
         for(Entry<String, Multimethod> multimethod : scope.getMultimethods().entrySet()) {
           for(Callable method : multimethod.getValue().getMethods()) {
             if(isMatchingMethod(matchingValue, context, method)) {
-              matching.add(multimethod.getKey());
+              matching.put(multimethod.getKey(), multimethod.getValue());
               break;
             }
           }  
@@ -165,7 +135,7 @@ public class ReflectionMethods {
         scope = scope.getParent();
       }
  
-      return matching;
+      return matching.entrySet();
     }
   
     protected abstract Obj getMatchingValueFromArgs(Context context, Obj left, Obj right);
