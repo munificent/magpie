@@ -1,3 +1,4 @@
 #!/bin/sh
-java -jar magpie.jar $@
+DIRECTORY=$(cd `dirname $0` && pwd)
+java -jar $DIRECTORY/magpie.jar $@
 
