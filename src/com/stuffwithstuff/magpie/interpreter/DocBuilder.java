@@ -1,18 +1,15 @@
-package com.stuffwithstuff.magpie.util;
+package com.stuffwithstuff.magpie.interpreter;
 
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.ast.pattern.RecordPattern;
-import com.stuffwithstuff.magpie.interpreter.Callable;
-import com.stuffwithstuff.magpie.interpreter.Multimethod;
-import com.stuffwithstuff.magpie.interpreter.Name;
 
-public class MultimethodDocBuilder {
+public class DocBuilder {
 
-  public String buildDoc(String name, Multimethod multimethod) {
-    return appendDoc(name, multimethod, new StringBuilder()).toString();
+  public DocBuilder() {
+    builder = new StringBuilder();
   }
-
-  public StringBuilder appendDoc(String name, Multimethod multimethod, StringBuilder builder) {
+  
+  public DocBuilder append(String name, Multimethod multimethod) {
     if (multimethod.getDoc().length() > 0) {
       builder.append(name).append("\n");
       builder.append(multimethod.getDoc()).append("\n");
@@ -52,11 +49,20 @@ public class MultimethodDocBuilder {
       }
     }
 
-    return builder;
+    return this;
+  }
+  
+  public DocBuilder append(String string) {
+    builder.append(string);
+    return this;
   }
 
+  /**
+   * Override this to filter out the set of method specializations that get shown.
+   */
   protected boolean shouldDisplayMethod(Callable callable) {
     return true;
   }
 
+  private StringBuilder builder;
 }
