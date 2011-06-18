@@ -30,6 +30,32 @@ public class ArrayMethods {
     }
   }
 
+  @Def("(== Array) new()")
+  @Doc("Creates a new empty array. Given that arrays are immutable, this\n" +
+       "is not that useful (you can just do `[]`) but is provided for\n" +
+       "consistency.")
+  public static class New implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      return context.toArray(new ArrayList<Obj>());
+    }
+  }
+
+  @Def("(== Array) new(fill: fill, size: size is Int)")
+  @Doc("Creates an array filled with the given value.")
+  public static class New_FillSize implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      Obj fill = right.getField("fill");
+      int size = right.getField("size").asInt();
+      
+      List<Obj> elements = new ArrayList<Obj>();
+      for (int i = 0; i < size; i++) {
+        elements.add(fill);
+      }
+      
+      return context.toArray(elements);
+    }
+  }
+  
   @Def("(is Array) toList")
   @Doc("Creates a new List containing the elements of the array. Does not\n" +
        "modify the original array.")
