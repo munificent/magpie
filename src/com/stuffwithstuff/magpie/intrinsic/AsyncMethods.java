@@ -21,8 +21,16 @@ public class AsyncMethods {
     }
   }
   
-  @Def("(== Channel) new(capacity is Int)")
+  @Def("(== Channel) new()")
   public static class NewChannel implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      Channel channel = new Channel();
+      return context.instantiate(sChannelClass, channel);
+    }
+  }
+  
+  @Def("(== Channel) new(capacity is Int)")
+  public static class NewChannel_Capacity implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       int capacity = right.asInt();
       

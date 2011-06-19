@@ -3,6 +3,10 @@ package com.stuffwithstuff.magpie.interpreter;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Channel {
+  public Channel() {
+    mQueue = new LinkedBlockingQueue<Obj>();
+  }
+  
   public Channel(int capacity) {
     mQueue = new LinkedBlockingQueue<Obj>(capacity);
   }
