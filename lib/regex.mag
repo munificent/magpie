@@ -1,0 +1,30 @@
+import classfile:com.stuffwithstuff.magpie.intrinsic.RegexMethods
+
+defclass Regex
+end
+
+defclass MatchResult
+  val start is Int
+  val finish is Int
+  val groups is Array
+end
+
+def (this is String) replace(regex is Regex, block is Function)
+  var lastIndex = 0
+  var finalString = ""
+  for result = this find(regex) do
+    print(result start)
+    if lastIndex < result start then finalString = finalString + this substring(from: lastIndex, to: result start - 1)
+    finalString = finalString + block call(result)
+    print(finalString)
+    lastIndex = result finish
+  end
+  if(lastIndex < this count) then
+    finalString + this substring(from: lastIndex)
+  else
+    finalString
+  end
+end
+
+_setClasses(Regex, MatchResult)
+
