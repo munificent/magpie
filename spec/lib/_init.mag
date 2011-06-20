@@ -13,3 +13,4 @@ import .magpie.core.ListIterator
 import .magpie.core.Range
 import .magpie.core.String
 import .magpie.core.use
+import .regex

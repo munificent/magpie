@@ -52,3 +52,19 @@ specify("The method 'matches' on String") with
   end
 
 end
+
+specify("The method 'replace' on String") with
+
+  it should("replace all occurrences with the value from the block.") with
+    ("ababab" replace("ab" asRegex) with "bc") shouldEqual("bcbcbc")
+  end
+
+  it should("pass each MatchResult into the block.") with
+    "ababab" replace("ab" asRegex) with it groups[0] shouldEqual("ab")
+  end
+
+  it should("not replace anything in a string that does not have matches.") with
+    ("ababab" replace("bc" asRegex) with "cd") shouldEqual("ababab")
+  end
+
+end

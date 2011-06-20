@@ -10,13 +10,12 @@ defclass MatchResult
 end
 
 def (this is String) replace(regex is Regex, block is Function)
+  /// Replaces all occurrences of regex in this with the results of executing block with the occurrence
   var lastIndex = 0
   var finalString = ""
   for result = this find(regex) do
-    print(result start)
     if lastIndex < result start then finalString = finalString + this substring(from: lastIndex, to: result start - 1)
     finalString = finalString + block call(result)
-    print(finalString)
     lastIndex = result finish
   end
   if(lastIndex < this count) then
