@@ -23,7 +23,8 @@ public class ClassNew implements Callable {
   public Obj invoke(Context context, Obj arg) {
     // Get the class being constructed.
     ClassObj classObj = arg.getField(0).asClass();
-    return context.getInterpreter().constructNewObject(context, classObj, arg.getField(1));
+    return context.getInterpreter().constructNewObject(
+        context, classObj, arg.getField(1));
   }
   
   @Override

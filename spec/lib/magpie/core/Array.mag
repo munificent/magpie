@@ -6,6 +6,23 @@ specify("The Array class") with
     end
 end
 
+specify("The '(this == Array) new()' method") with
+    it should("create a new empty array") with
+        val array = Array new()
+        array shouldBe(Array)
+        array count shouldEqual(0)
+    end
+end
+
+specify("The '(this == Array) new(fill: value, size: size is Int)' method") with
+    it should("create an array filled with the given value") with
+        val array = Array new(fill: "f", size: 5)
+        array shouldBe(Array)
+        array count shouldEqual(5)
+        for element = array do element shouldEqual("f")
+    end
+end
+
 specify("The indexer on Arrays") with
     it should("return the element at the zero-based index") with
         val array = [1, "two", true]

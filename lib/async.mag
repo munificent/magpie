@@ -1,4 +1,12 @@
+def isAsyncSafe
+    /// Gets whether or not the object is "async safe". An async safe object
+    /// can be sent through a Channel or accessed across threads.
+end
+
 import classfile:com.stuffwithstuff.magpie.intrinsic.AsyncMethods
+
+defclass UnsafeAsyncError is Error
+end
 
 // TODO(bob): Need to make sure this cannot be constructed somehow.
 defclass Channel

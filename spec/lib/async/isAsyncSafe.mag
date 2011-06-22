@@ -1,0 +1,37 @@
+import spec.specify
+
+import async
+
+// TODO(bob): Uncomment when this is implemented.
+/*
+specify("The '(this) isAsyncSafe' method") with
+    it should("return true on primitive types") with
+        nothing        isAsyncSafe shouldEqual(true)
+        true           isAsyncSafe shouldEqual(true)
+        123            isAsyncSafe shouldEqual(true)
+        "string"       isAsyncSafe shouldEqual(true)
+        ["arr", "ay"]  isAsyncSafe shouldEqual(true)
+        ("rec", "ord") isAsyncSafe shouldEqual(true)
+    end
+
+    it should("return false on Lists") with
+        List new() isAsyncSafe shouldEqual(false)
+    end
+
+    it should("return true on immutable classes") with
+        defclass Mutable
+            var a
+        end
+
+        defclass Immutable
+            val a
+        end
+
+        Mutable new(a: 123) isAsyncSafe shouldEqual(false)
+        Immutable new(a: 123) isAsyncSafe shouldEqual(true)
+        Immutable new(a: List new()) isAsyncSafe shouldEqual(false)
+
+        // TODO(bob): Inheritance.
+    end
+end
+*/

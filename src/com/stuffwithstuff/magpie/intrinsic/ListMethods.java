@@ -1,5 +1,6 @@
 package com.stuffwithstuff.magpie.intrinsic;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.stuffwithstuff.magpie.Def;
@@ -63,6 +64,30 @@ public class ListMethods {
     public Obj invoke(Context context, Obj left, Obj right) {
       List<Obj> elements = left.asList();
       return context.toObj(elements.size());
+    }
+  }
+
+  @Def("(== List) new()")
+  @Doc("Creates a new empty list.")
+  public static class New implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      return context.toList(new ArrayList<Obj>());
+    }
+  }
+
+  @Def("(== List) new(fill: fill, size: size is Int)")
+  @Doc("Creates a list filled with the given value.")
+  public static class New_FillSize implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      Obj fill = right.getField("fill");
+      int size = right.getField("size").asInt();
+      
+      List<Obj> elements = new ArrayList<Obj>();
+      for (int i = 0; i < size; i++) {
+        elements.add(fill);
+      }
+      
+      return context.toList(elements);
     }
   }
   
