@@ -19,7 +19,7 @@ specify("The '(this == Array) new(fill: value, size: size is Int)' method") with
         val array = Array new(fill: "f", size: 5)
         array shouldBe(Array)
         array count shouldEqual(5)
-        for element = array do element shouldEqual("f")
+        for element in array do element shouldEqual("f")
     end
 end
 

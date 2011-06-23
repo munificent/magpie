@@ -13,11 +13,11 @@ import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.Context;
 import com.stuffwithstuff.magpie.interpreter.Multimethod;
+import com.stuffwithstuff.magpie.interpreter.DocBuilder;
 import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.PatternTester;
 import com.stuffwithstuff.magpie.interpreter.Scope;
-import com.stuffwithstuff.magpie.util.MultimethodDocBuilder;
 
 public class ReflectionMethods {
   @Def("(this) class")
@@ -69,7 +69,7 @@ public class ReflectionMethods {
         //   Displays the documentation for the multimethod with the given name.
         // showDoc(class is Class)
         //   Displays the documentation for the given class.
-        System.out.println(new MultimethodDocBuilder().buildDoc(name, multimethod));
+        System.out.println(new DocBuilder().append(name, multimethod).toString());
       }
       
       return context.nothing();
@@ -98,11 +98,10 @@ public class ReflectionMethods {
 
   private static abstract class Methods implements Intrinsic {
     public Obj invoke(final Context context, Obj left, Obj right) {
-      StringBuilder builder = new StringBuilder();
-      
+     
       final Obj matchingValue = getMatchingValueFromArgs(context, left, right);
 
-      MultimethodDocBuilder docBuilder = new MultimethodDocBuilder() {
+      DocBuilder docBuilder = new DocBuilder() {
 
         @Override
         protected boolean shouldDisplayMethod(Callable callable) {
@@ -111,10 +110,10 @@ public class ReflectionMethods {
       };
 
       for(Entry<String, Multimethod> multimethod : findMultimethods(context, matchingValue)) {
-        docBuilder.appendDoc(multimethod.getKey(), multimethod.getValue(), builder);
-        builder.append("\n");
+        docBuilder.append(multimethod.getKey(), multimethod.getValue());
+        docBuilder.append("\n");
       }
-      System.out.println(builder.toString());
+      System.out.println(docBuilder.toString());
       
       return context.nothing();
     }

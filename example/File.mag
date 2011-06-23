@@ -27,7 +27,7 @@ end
 // 3. Using the file as an iterator.
 do
     open("example/File.mag") use with
-        for line = it do print(line)
+        for line in it do print(line)
     end
 end
 

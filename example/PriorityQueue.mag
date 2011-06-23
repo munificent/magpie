@@ -20,7 +20,7 @@ class PriorityQueue
     def add(item)
         // Add to the end of the heap.
         heap add(item)
-    
+
         // Re-heapify.
         var index = heap count - 1
         while index > 0 do
@@ -36,48 +36,48 @@ class PriorityQueue
         var top = heap(0)
         heap(0) = heap last
         heap removeAt(heap count - 1)
-    
+
         // Re-heapify.
         var index = 0
         while index < heap count do
             var min = index
             var left = leftChild(index)
             var right = rightChild(index)
-        
+
             if left < heap count and heap(left) < heap(min) then
                 min = left
             end
-        
+
             if right < heap count and heap(right) < heap(min) then
                 min = right
             end
-        
+
             if min != index then
                 heap swap(index, min)
                 index = min
             else break
         end
-    
+
         top
     end
 
     def addAll(items)
-        for item = items do add(item)
+        for item in items do add(item)
     end
-    
+
     var heap List(Dynamic) = Array new()
 end
 
 def expect(queue, items)
     var success = true
-    for item = items do
+    for item in items do
         var top = queue dequeue()
         if top != item then
             print("FAIL: Expected " ~ item ~ " and got " ~ top)
             success = false
         end
     end
-    
+
     if success then print("Got all expected: " ~ items);
 end
 

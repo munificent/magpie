@@ -3,7 +3,7 @@ import spec.specify
 specify("A 'break' expression") with
     it should("exit a loop") with
         var i = ""
-        for a = 1 to(5) do
+        for a in 1 to(5) do
             i = i + a
             if a == 2 then break
         end
@@ -12,8 +12,8 @@ specify("A 'break' expression") with
 
     it should("exit the nearest enclosing loop") with
         var i = ""
-        for a = 1 to(5) do
-            for b = 1 to(5) do
+        for a in 1 to(5) do
+            for b in 1 to(5) do
                 i = i + a
                 if b == 2 then break
             end
