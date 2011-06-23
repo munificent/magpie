@@ -16,7 +16,7 @@ public class LoopParser implements PrefixParser {
     // A loop is desugared from this:
     //
     //   while bar
-    //   for a = foo do
+    //   for a in foo do
     //       print(a)
     //   end
     //
@@ -49,7 +49,7 @@ public class LoopParser implements PrefixParser {
       } else {
         PositionSpan iteratorSpan = parser.span();
         Pattern pattern = PatternParser.parse(parser);
-        parser.consume(TokenType.EQUALS);
+        parser.consume("in");
         Expr generator = parser.parseExpression();
         Position position = iteratorSpan.end();
         

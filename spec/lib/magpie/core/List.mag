@@ -19,7 +19,7 @@ specify("The '(this == List) new(fill: value, size: size is Int)' method") with
         val list = List new(fill: "f", size: 5)
         list shouldBe(List)
         list count shouldEqual(5)
-        for element = list do element shouldEqual("f")
+        for element in list do element shouldEqual("f")
     end
 end
 

@@ -2,7 +2,7 @@ import async
 
 def spawn(name)
     run with
-        for i = 1 to(50) do
+        for i in 1 to(50) do
             print(name + " " + i)
             sleep(100)
         end

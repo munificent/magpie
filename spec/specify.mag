@@ -16,7 +16,7 @@ def runTests()
     print("Executing specification...")
     _startTimeMs = currentTime()
 
-    for description, block = _specs do
+    for description, block in _specs do
         _currentTestSuite = _TestSuite new(_name: description)
         block call(_currentTestSuite)
     end

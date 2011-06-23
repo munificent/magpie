@@ -89,7 +89,7 @@ end
 def calculate(text is String)
     var stack = Stack new()
 
-    for token = Tokenizer new(text: text) do
+    for token in Tokenizer new(text: text) do
         match token
             case "0" then literal(stack, 0)
             case "1" then literal(stack, 1)
@@ -112,7 +112,7 @@ def calculate(text is String)
             else print("unknown op " ~ token)
         end
     end
-    
+
     stack pop()
 end
 

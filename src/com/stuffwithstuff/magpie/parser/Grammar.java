@@ -35,7 +35,7 @@ public class Grammar {
     infix(TokenType.EQUALS,       new EqualsParser());
     infix(TokenType.LEFT_BRACKET, new BracketInfixParser());
 
-    reserve("case catch else end is then");
+    reserve("case catch else end in is then");
   }
   
   public PrefixParser getPrefixParser(Token token) {

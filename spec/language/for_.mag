@@ -3,7 +3,7 @@ import spec.specify
 specify("A 'for' expression") with
     it should("create a fresh variable each iteration") with
         val closures = [] toList
-        for a = 1 to(3) do closures add(fn a)
+        for a in 1 to(3) do closures add(fn a)
         closures[0] call() shouldEqual(1)
         closures[1] call() shouldEqual(2)
         closures[2] call() shouldEqual(3)
@@ -11,21 +11,21 @@ specify("A 'for' expression") with
 
     it should("create a local scope for the hidden iterator variable") with
         fn
-            for a = 1 to(3) do nothing
-            for a = 1 to(3) do nothing
+            for a in 1 to(3) do nothing
+            for a in 1 to(3) do nothing
         end shouldNotThrow()
     end
 
     it should("create a local scope for the 'do' expression") with
         val a = "outer"
-        for b = 1 to(3) do val a = "inner"
+        for b in 1 to(3) do val a = "inner"
         a shouldEqual("outer")
     end
 
     it should("match a pattern against the iterator") with
         val items = [(1, 2), (3, 4), (5, 6)]
         var result = ""
-        for x, y = items do result = result + x + y
+        for x, y in items do result = result + x + y
         result shouldEqual("123456")
     end
 end
