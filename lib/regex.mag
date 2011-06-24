@@ -4,25 +4,30 @@ defclass Regex
 end
 
 defclass MatchResult
-  val start is Int
-  val finish is Int
-  val groups is Array
+    val start is Int
+    val finish is Int
+    val groups is Array
 end
 
-def (this is String) replace(regex is Regex, block is Function)
-  /// Replaces all occurrences of regex in this with the results of executing block with the occurrence
-  var lastIndex = 0
-  var finalString = ""
-  for result = this find(regex) do
-    if lastIndex < result start then finalString = finalString + this substring(from: lastIndex, to: result start - 1)
-    finalString = finalString + block call(result)
-    lastIndex = result finish
-  end
-  if(lastIndex < this count) then
-    finalString + this substring(from: lastIndex)
-  else
-    finalString
-  end
+def regex(pattern is String)
+    regex(pattern, "")
+end
+
+def (this is String) replaceAll(regex is Regex, block is Function)
+    /// Replaces all occurrences of regex in this with the results of executing block with the occurrence
+    var lastIndex = 0
+    var finalString = ""
+    for result in this findAll(regex) do
+        if lastIndex < result start then finalString = finalString + 
+            this substring(from: lastIndex, to: result start - 1)
+        finalString = finalString + block call(result)
+        lastIndex = result finish
+    end
+    if(lastIndex < this count) then
+        finalString + this substring(from: lastIndex)
+    else
+        finalString
+    end
 end
 
 _setClasses(Regex, MatchResult)

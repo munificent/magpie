@@ -1,70 +1,59 @@
 import spec.specify
 import regex
 
-specify("The method 'contains' on String") with
+specify("The method 'findAll' on String") with
 
-  it should("be false when the regular expression can not be found.") with
-    "test ababab" contains("bc" asRegex) shouldEqual(false)
-  end
+    it should("return all occurrences of the regular expression in the String.") with
+        val matches = "ab abb" findAll(regex("a(b+)"))
+        matches shouldBe(Array)
 
-  it should("be true when the regular expression can be found.") with
-    "test ababab" contains("(ab)+" asRegex) shouldEqual(true)
-  end
+        matches[0] start shouldEqual(0)
+        matches[0] finish shouldEqual(2)
+        matches[0] groups[0] shouldEqual("ab")
+        matches[0] groups[1] shouldEqual("b")
+
+        matches[1] start shouldEqual(3)
+        matches[1] finish shouldEqual(6)
+        matches[1] groups[0] shouldEqual("abb")
+        matches[1] groups[1] shouldEqual("bb")
+    end
+
+    it should("return an empty Array when the regular expression is not in the String.") with
+        "ab abb" findAll(regex("bc")) count shouldEqual(0)
+    end
+
 end
 
 specify("The method 'find' on String") with
 
-  it should("return all occurrences of the regular expression in the String.") with
-    val matches = "ab abb" find("a(b+)" asRegex)
-    matches shouldBe(Array)
+    it should("return a MatchResult when the entire input matches.") with
+        val matchResult = "ababab" find(regex("^(ab)+$"))
+        matchResult shouldBe(MatchResult)
 
-    matches[0] start shouldEqual(0)
-    matches[0] finish shouldEqual(2)
-    matches[0] groups[0] shouldEqual("ab")
-    matches[0] groups[1] shouldEqual("b")
+        matchResult start shouldEqual(0)
+        matchResult finish shouldEqual("ababab" count)
+        matchResult groups[0] shouldEqual("ababab")
+        matchResult groups[1] shouldEqual("ab")
+    end
 
-    matches[1] start shouldEqual(3)
-    matches[1] finish shouldEqual(6)
-    matches[1] groups[0] shouldEqual("abb")
-    matches[1] groups[1] shouldEqual("bb")
-  end
-
-  it should("return nothing when the regular expression is not in the String.") with
-    "ab abb" find("bc" asRegex) count shouldEqual(0)
-  end
+    it should("return nothing when the string does not match.") with
+        "ababab" find(regex("bc")) shouldEqual(nothing)
+    end
 
 end
 
-specify("The method 'matches' on String") with
+specify("The method 'replaceAll' on String") with
 
-  it should("return a MatchResult when the entire input matches.") with
-    val matchResult = "ababab" matches("(ab)+" asRegex)
-    matchResult shouldBe(MatchResult)
+    it should("replace all occurrences with the value from the block.") with
+        ("ababab" replaceAll(regex("ab")) with "bc") shouldEqual("bcbcbc")
+    end
 
-    matchResult start shouldEqual(0)
-    matchResult finish shouldEqual("ababab" count)
-    matchResult groups[0] shouldEqual("ababab")
-    matchResult groups[1] shouldEqual("ab")
-  end
+    it should("pass each MatchResult into the block.") with
+        "ababab" replaceAll(regex("ab")) with it groups[0] shouldEqual("ab")
+    end
 
-  it should("return nothing when the string does not match.") with
-    "ababab" matches("bc" asRegex) shouldEqual(nothing)
-  end
-
-end
-
-specify("The method 'replace' on String") with
-
-  it should("replace all occurrences with the value from the block.") with
-    ("ababab" replace("ab" asRegex) with "bc") shouldEqual("bcbcbc")
-  end
-
-  it should("pass each MatchResult into the block.") with
-    "ababab" replace("ab" asRegex) with it groups[0] shouldEqual("ab")
-  end
-
-  it should("not replace anything in a string that does not have matches.") with
-    ("ababab" replace("bc" asRegex) with "cd") shouldEqual("ababab")
-  end
+    it should("not replace anything in a string that does not have matches.") with
+        ("ababab" replaceAll(regex("bc")) with "cd") shouldEqual("ababab")
+    end
 
 end

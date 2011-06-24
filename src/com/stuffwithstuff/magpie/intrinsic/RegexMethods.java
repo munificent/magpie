@@ -28,34 +28,53 @@ public class RegexMethods {
     
   }
 
-  @Def("(this is String) asRegex")
-  @Doc("Compiles this string into a regular expression.")
-  public static class AsRegex implements Intrinsic {
+  @Def("regex(pattern is String, modifiers is String)")
+  @Doc("Compiles the pattern into a regular expression using the provided " +
+  		"modifiers. The modifiers change the behavior of the regular " +
+  		"expression to allow case insensitive (i), multiline (m), " +
+  		"dot matches all (s), and whitespace ignoring (x) patterns.")
+  public static class Regex implements Intrinsic {
 
     @Override
     public Obj invoke(Context context, Obj left, Obj right) {
-      String stringPattern = left.asString();
-      Pattern pattern = Pattern.compile(stringPattern);
+      int modifiers = extractModifiers(right.getField(1).asString());
+      Pattern pattern = Pattern.compile(right.getField(0).asString(), modifiers);
       return context.instantiate(sRegexClass, pattern);
+    }
+
+    private int extractModifiers(String modifierString) {
+      int modifiers = 0;
+      for(int i = 0; i < modifierString.length(); i++) {
+        switch(modifierString.charAt(i)) {
+        case 'i': modifiers &= Pattern.CASE_INSENSITIVE; break;
+        case 'm': modifiers &= Pattern.MULTILINE; break;
+        case 's': modifiers &= Pattern.DOTALL; break;
+        case 'x': modifiers &= Pattern.COMMENTS; break;
+        }
+      }
+      return modifiers;
     }
     
   }
-  
-  @Def("(this is String) contains(regex is Regex)")
-  @Doc("Returns true if the String contains the regular expression.")
-  public static class Contains implements Intrinsic {
+
+  @Def("(this is String) find(regex is Regex)")
+  @Doc("Finds the first occurrence of the regular expression in the string.")
+  public static class Find implements Intrinsic {
 
     @Override
     public Obj invoke(Context context, Obj left, Obj right) {
       Pattern pattern = (Pattern)right.getValue();
-      return context.toObj(pattern.matcher(left.asString()).find());
+      Matcher matcher = pattern.matcher(left.asString());
+      if(matcher.find())
+        return newMatchResult(context, matcher);
+      return context.nothing();
     }
     
   }
   
-  @Def("(this is String) find(regex is Regex)")
+  @Def("(this is String) findAll(regex is Regex)")
   @Doc("Returns an iterable over all occurrences of the regex in the String.")
-  public static class Find implements Intrinsic {
+  public static class FindAll implements Intrinsic {
 
     @Override
     public Obj invoke(Context context, Obj left, Obj right) {
@@ -66,25 +85,6 @@ public class RegexMethods {
         finds.add(newMatchResult(context, matcher));
       }
       return context.toArray(finds);
-    }
-    
-  }
-  
-  @Def("(this is String) matches(regex is Regex)")
-  @Doc("Returns a MatchResult for regex against this if the regular expression matches.")
-  public static class Matches implements Intrinsic {
-
-    @Override
-    public Obj invoke(Context context, Obj left, Obj right) {
-      Pattern pattern = (Pattern)right.getValue();
-
-      Matcher matcher = pattern.matcher(left.asString());
-      
-      if(!matcher.matches()) {
-        return context.nothing();
-      }
-      
-      return newMatchResult(context, matcher);
     }
     
   }
@@ -100,8 +100,8 @@ public class RegexMethods {
     fields.put("finish", context.toObj(matcher.end()));
     fields.put("groups", context.toArray(groups));
     
-    return context.getInterpreter().constructNewObject(context, sMatchClass, context.toObj(fields));
-    
+    return context.getInterpreter().constructNewObject(context, sMatchClass, 
+        context.toObj(fields));
   }
   
   private static ClassObj sRegexClass;
