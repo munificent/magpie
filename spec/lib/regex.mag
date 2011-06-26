@@ -57,3 +57,48 @@ specify("The method 'replaceAll' on String") with
     end
 
 end
+
+specify("The method 'replace' on String") with
+
+    it should("replace the first occurrences with the value from the block.") with
+        ("ababab" replace(regex("ab")) with "bc") shouldEqual("bcabab")
+    end
+
+    it should("pass the MatchResult into the block.") with
+        "ababab" replace(regex("ab")) with it groups[0] shouldEqual("ab")
+    end
+
+    it should("not replace anything in a string that does not have matches.") with
+        ("ababab" replace(regex("bc")) with "cd") shouldEqual("ababab")
+    end
+
+end
+specify("The modifiers option on the 'regex' method") with
+
+    it should("create case insensitive regular expressions.") with
+        "ABAB" find(regex("ba", "i")) isTrue shouldEqual(true)
+    end
+    
+    it should("create multiline patterns.") with
+        "ab\na" find(regex("b$", "m")) isTrue shouldEqual(true)
+    end
+    
+    it should("create patterns in which dot matches newlines.") with
+        "ab\na" find(regex("b.a", "s")) isTrue shouldEqual(true)
+    end
+    
+    it should("allow multiple modifiers in the input string.") with
+        "AB\na" find(regex("b.a", "si")) isTrue shouldEqual(true)
+    end
+    
+    it should("throw an error when an unsupported modifier is used.") with
+        var errorThrown = false;
+        do
+            result = regex("ab", "t")
+        catch(e is UnsupportedModifierError) then
+            errorThrown = true
+        end
+        
+        errorThrown shouldEqual(true)
+    end
+end

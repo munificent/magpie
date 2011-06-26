@@ -9,12 +9,31 @@ defclass MatchResult
     val groups is Array
 end
 
+defclass UnsupportedModifierError is Error 
+end
+
 def regex(pattern is String)
+    /// Compiles the pattern into a regular expression.
     regex(pattern, "")
 end
 
+def (this is String) replace(regex is Regex, block is Function)
+    /// Replaces the first occurrence of regular expression in this String with
+    /// the results of executing the block on the matching region.
+    val result = this find(regex)
+    if result then
+      val preString = this substring(from: 0, to: result start - 1)
+      val postString = this substring(from: result finish)
+      preString + block call(result) + postString
+    else
+      this
+    end
+end
+
 def (this is String) replaceAll(regex is Regex, block is Function)
-    /// Replaces all occurrences of regex in this with the results of executing block with the occurrence
+    /// Replaces all occurrences of the regular expression in this String. Each
+    /// occurrence is replaced with the results of executing the block on the 
+    /// matching region.
     var lastIndex = 0
     var finalString = ""
     for result in this findAll(regex) do
@@ -30,5 +49,5 @@ def (this is String) replaceAll(regex is Regex, block is Function)
     end
 end
 
-_setClasses(Regex, MatchResult)
+_setClasses(Regex, MatchResult, UnsupportedModifierError)
 

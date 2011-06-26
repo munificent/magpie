@@ -12,17 +12,19 @@ import com.stuffwithstuff.magpie.Def;
 import com.stuffwithstuff.magpie.Doc;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.Context;
+import com.stuffwithstuff.magpie.interpreter.ErrorException;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class RegexMethods {
   
-  @Def("_setClasses(== Regex, == MatchResult)")
+  @Def("_setClasses(== Regex, == MatchResult, == UnsupportedModifierError)")
   public static class SetClasses implements Intrinsic {
 
     @Override
     public Obj invoke(Context context, Obj left, Obj right) {
       sRegexClass = right.getField(0).asClass();
       sMatchClass = right.getField(1).asClass();
+      sModifierErrorClass = right.getField(2).asClass();
       return context.nothing();
     }
     
@@ -30,35 +32,53 @@ public class RegexMethods {
 
   @Def("regex(pattern is String, modifiers is String)")
   @Doc("Compiles the pattern into a regular expression using the provided " +
-  		"modifiers. The modifiers change the behavior of the regular " +
-  		"expression to allow case insensitive (i), multiline (m), " +
-  		"dot matches all (s), and whitespace ignoring (x) patterns.")
+  		"modifiers.\n\nModifiers are supplied as a string of flags. The " +
+  		"following modifier flags are supported:\n" +
+  		"  * i - Makes the regular expression case insensitive.\n" +
+  		"  * m - Makes the regular expression support multiline patterns " +
+  		"allowing ^ and $ to match before and after line separators.\n" +
+  		"  * s - Makes the dot operator in the pattern match all characters " +
+  		"including line separators\n")
   public static class Regex implements Intrinsic {
 
     @Override
     public Obj invoke(Context context, Obj left, Obj right) {
-      int modifiers = extractModifiers(right.getField(1).asString());
+      int modifiers = extractModifiers(right.getField(1).asString(), context);
       Pattern pattern = Pattern.compile(right.getField(0).asString(), modifiers);
       return context.instantiate(sRegexClass, pattern);
     }
 
-    private int extractModifiers(String modifierString) {
+    private int extractModifiers(String modifierString, Context context) {
       int modifiers = 0;
       for(int i = 0; i < modifierString.length(); i++) {
         switch(modifierString.charAt(i)) {
-        case 'i': modifiers &= Pattern.CASE_INSENSITIVE; break;
-        case 'm': modifiers &= Pattern.MULTILINE; break;
-        case 's': modifiers &= Pattern.DOTALL; break;
-        case 'x': modifiers &= Pattern.COMMENTS; break;
+        case 'i': modifiers |= Pattern.CASE_INSENSITIVE; break;
+        case 'm': modifiers |= Pattern.MULTILINE; break;
+        case 's': modifiers |= Pattern.DOTALL; break;
+        default: 
+          throw createUnsupportedModifierError(context, modifierString.charAt(i));
         }
       }
       return modifiers;
+    }
+
+    private ErrorException createUnsupportedModifierError(Context context, 
+        char flag) {
+      String message = "'" + flag + "' is not a supported regular expression " +
+      		"modifier.";
+      Obj error = context.getInterpreter().instantiate(sModifierErrorClass, 
+          message);
+      
+      error.setValue(message);
+      
+      return new ErrorException(error);
     }
     
   }
 
   @Def("(this is String) find(regex is Regex)")
-  @Doc("Finds the first occurrence of the regular expression in the string.")
+  @Doc("Returns a MatchResult for the first occurrence of the regular " +
+  		"expression in this String or nothing if it is not found.")
   public static class Find implements Intrinsic {
 
     @Override
@@ -73,7 +93,8 @@ public class RegexMethods {
   }
   
   @Def("(this is String) findAll(regex is Regex)")
-  @Doc("Returns an iterable over all occurrences of the regex in the String.")
+  @Doc("Returns an array of all occurrences of the regular expression in this " +
+  		"String.")
   public static class FindAll implements Intrinsic {
 
     @Override
@@ -106,5 +127,6 @@ public class RegexMethods {
   
   private static ClassObj sRegexClass;
   private static ClassObj sMatchClass;
+  private static ClassObj sModifierErrorClass;
 
 }
