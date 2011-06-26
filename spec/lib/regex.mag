@@ -2,8 +2,8 @@ import spec.specify
 import regex
 
 specify("The method 'findAll' on String") with
-
-    it should("return all occurrences of the regular expression in the String.") with
+    it should("return all occurrences of the regular expression in the " +
+              "String.") with
         val matches = "ab abb" findAll(regex("a(b+)"))
         matches shouldBe(Array)
 
@@ -18,14 +18,14 @@ specify("The method 'findAll' on String") with
         matches[1] groups[1] shouldEqual("bb")
     end
 
-    it should("return an empty Array when the regular expression is not in the String.") with
+    it should("return an empty Array when the regular expression is not in " +
+              "the String.") with
         "ab abb" findAll(regex("bc")) count shouldEqual(0)
     end
 
 end
 
 specify("The method 'find' on String") with
-
     it should("return a MatchResult when the entire input matches.") with
         val matchResult = "ababab" find(regex("^(ab)+$"))
         matchResult shouldBe(MatchResult)
@@ -39,11 +39,9 @@ specify("The method 'find' on String") with
     it should("return nothing when the string does not match.") with
         "ababab" find(regex("bc")) shouldEqual(nothing)
     end
-
 end
 
 specify("The method 'replaceAll' on String") with
-
     it should("replace all occurrences with the value from the block.") with
         ("ababab" replaceAll(regex("ab")) with "bc") shouldEqual("bcbcbc")
     end
@@ -52,15 +50,15 @@ specify("The method 'replaceAll' on String") with
         "ababab" replaceAll(regex("ab")) with it groups[0] shouldEqual("ab")
     end
 
-    it should("not replace anything in a string that does not have matches.") with
+    it should("not replace anything in a string that does not have " +
+              "matches.") with
         ("ababab" replaceAll(regex("bc")) with "cd") shouldEqual("ababab")
     end
 
 end
 
 specify("The method 'replace' on String") with
-
-    it should("replace the first occurrences with the value from the block.") with
+    it should("replace the first occurrence with the result of the block.") with
         ("ababab" replace(regex("ab")) with "bc") shouldEqual("bcabab")
     end
 
@@ -68,29 +66,29 @@ specify("The method 'replace' on String") with
         "ababab" replace(regex("ab")) with it groups[0] shouldEqual("ab")
     end
 
-    it should("not replace anything in a string that does not have matches.") with
+    it should("not replace anything if there are no matches.") with
         ("ababab" replace(regex("bc")) with "cd") shouldEqual("ababab")
     end
 
 end
-specify("The modifiers option on the 'regex' method") with
 
+specify("The modifiers option on the 'regex' method") with
     it should("create case insensitive regular expressions.") with
         "ABAB" find(regex("ba", "i")) isTrue shouldEqual(true)
     end
-    
+
     it should("create multiline patterns.") with
         "ab\na" find(regex("b$", "m")) isTrue shouldEqual(true)
     end
-    
+
     it should("create patterns in which dot matches newlines.") with
         "ab\na" find(regex("b.a", "s")) isTrue shouldEqual(true)
     end
-    
+
     it should("allow multiple modifiers in the input string.") with
         "AB\na" find(regex("b.a", "si")) isTrue shouldEqual(true)
     end
-    
+
     it should("throw an error when an unsupported modifier is used.") with
         var errorThrown = false;
         do
@@ -98,7 +96,7 @@ specify("The modifiers option on the 'regex' method") with
         catch(e is UnsupportedModifierError) then
             errorThrown = true
         end
-        
+
         errorThrown shouldEqual(true)
     end
 end
