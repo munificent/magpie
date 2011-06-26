@@ -1,0 +1,53 @@
+import classfile:com.stuffwithstuff.magpie.intrinsic.RegexMethods
+
+defclass Regex
+end
+
+defclass MatchResult
+    val start is Int
+    val finish is Int
+    val groups is Array
+end
+
+defclass UnsupportedModifierError is Error 
+end
+
+def regex(pattern is String)
+    /// Compiles the pattern into a regular expression.
+    regex(pattern, "")
+end
+
+def (this is String) replace(regex is Regex, block is Function)
+    /// Replaces the first occurrence of regular expression in this String with
+    /// the results of executing the block on the matching region.
+    val result = this find(regex)
+    if result then
+      val preString = this substring(from: 0, to: result start - 1)
+      val postString = this substring(from: result finish)
+      preString + block call(result) + postString
+    else
+      this
+    end
+end
+
+def (this is String) replaceAll(regex is Regex, block is Function)
+    /// Replaces all occurrences of the regular expression in this String. Each
+    /// occurrence is replaced with the results of executing the block on the 
+    /// matching region.
+    var lastIndex = 0
+    var finalString = ""
+    for result in this findAll(regex) do
+        if lastIndex < result start then finalString = finalString + 
+            this substring(from: lastIndex, to: result start - 1)
+        finalString = finalString + block call(result)
+        lastIndex = result finish
+    end
+    if(lastIndex < this count) then
+        finalString + this substring(from: lastIndex)
+    else
+        finalString
+    end
+end
+
+_setClasses(Regex, MatchResult, UnsupportedModifierError)
+
