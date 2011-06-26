@@ -9,9 +9,6 @@ defclass MatchResult
     val groups is Array
 end
 
-defclass UnsupportedModifierError is Error 
-end
-
 def regex(pattern is String)
     /// Compiles the pattern into a regular expression.
     regex(pattern, "")
@@ -32,12 +29,12 @@ end
 
 def (this is String) replaceAll(regex is Regex, block is Function)
     /// Replaces all occurrences of the regular expression in this String. Each
-    /// occurrence is replaced with the results of executing the block on the 
+    /// occurrence is replaced with the results of executing the block on the
     /// matching region.
     var lastIndex = 0
     var finalString = ""
     for result in this findAll(regex) do
-        if lastIndex < result start then finalString = finalString + 
+        if lastIndex < result start then finalString = finalString +
             this substring(from: lastIndex, to: result start - 1)
         finalString = finalString + block call(result)
         lastIndex = result finish
@@ -49,5 +46,5 @@ def (this is String) replaceAll(regex is Regex, block is Function)
     end
 end
 
-_setClasses(Regex, MatchResult, UnsupportedModifierError)
+_setClasses(Regex, MatchResult)
 

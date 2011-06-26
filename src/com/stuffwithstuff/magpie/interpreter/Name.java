@@ -6,6 +6,7 @@ package com.stuffwithstuff.magpie.interpreter;
  */
 public final class Name {
   public static final String AMBIGUOUS_METHOD_ERROR = "AmbiguousMethodError";
+  public static final String ARGUMENT_ERROR = "ArgumentError";
   public static final String CALL = "call";
   public static final String CLASS = "Class";
   public static final String COUNT = "count";

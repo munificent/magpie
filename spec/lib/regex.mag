@@ -90,13 +90,8 @@ specify("The modifiers option on the 'regex' method") with
     end
 
     it should("throw an error when an unsupported modifier is used.") with
-        var errorThrown = false;
-        do
+        fn
             result = regex("ab", "t")
-        catch(e is UnsupportedModifierError) then
-            errorThrown = true
-        end
-
-        errorThrown shouldEqual(true)
+        end shouldThrow(ArgumentError)
     end
 end

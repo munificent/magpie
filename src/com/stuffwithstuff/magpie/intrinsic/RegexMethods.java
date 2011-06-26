@@ -11,19 +11,18 @@ import com.stuffwithstuff.magpie.Def;
 import com.stuffwithstuff.magpie.Doc;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.Context;
-import com.stuffwithstuff.magpie.interpreter.ErrorException;
+import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class RegexMethods {
   
-  @Def("_setClasses(== Regex, == MatchResult, == UnsupportedModifierError)")
+  @Def("_setClasses(== Regex, == MatchResult)")
   public static class SetClasses implements Intrinsic {
 
     @Override
     public Obj invoke(Context context, Obj left, Obj right) {
       sRegexClass = right.getField(0).asClass();
       sMatchClass = right.getField(1).asClass();
-      sModifierErrorClass = right.getField(2).asClass();
       return context.nothing();
     }
     
@@ -50,31 +49,19 @@ public class RegexMethods {
 
     private int extractModifiers(String modifierString, Context context) {
       int modifiers = 0;
-      for(int i = 0; i < modifierString.length(); i++) {
+      for (int i = 0; i < modifierString.length(); i++) {
         switch(modifierString.charAt(i)) {
         case 'i': modifiers |= Pattern.CASE_INSENSITIVE; break;
         case 'm': modifiers |= Pattern.MULTILINE; break;
         case 's': modifiers |= Pattern.DOTALL; break;
         default:
-          throw createUnsupportedModifierError(
-              context, modifierString.charAt(i));
+          throw context.error(Name.ARGUMENT_ERROR, "'" +
+              modifierString.charAt(i) + "' is not a supported regular " +
+              "expression modifier.");
         }
       }
       return modifiers;
     }
-
-    private ErrorException createUnsupportedModifierError(Context context, 
-        char flag) {
-      String message = "'" + flag + "' is not a supported regular " +
-          "expression modifier.";
-      Obj error = context.getInterpreter().instantiate(sModifierErrorClass, 
-          message);
-      
-      error.setValue(message);
-      
-      return new ErrorException(error);
-    }
-    
   }
 
   @Def("(this is String) find(regex is Regex)")
@@ -128,6 +115,5 @@ public class RegexMethods {
   
   private static ClassObj sRegexClass;
   private static ClassObj sMatchClass;
-  private static ClassObj sModifierErrorClass;
 
 }
