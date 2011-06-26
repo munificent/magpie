@@ -1,0 +1,56 @@
+/*
+For each name:
+
+Whether to export it
+What to rename it to
+Prefix
+
+Can both rename and export same name
+
+Also, exclude, or only include certain names. Three cases:
+1. Include everything, but maybe rename some specific stuff.
+2. Only include the specified names.
+3. Include everything but the excluded names.
+*/
+
+// Import everything, export some stuff.
+import text with
+    export contains  // import and re-export
+    indexOf as index  // rename
+    export lastIndexOf as last
+end
+
+// Import everything, prefixed.
+import text with
+    prefix text
+end
+
+/*
+(module <module name> <module declaration> ...)
+
+<module declaration>:
+- (export <exportspec> ...)
+- (import <importset> ...)
+- (begin <command or definition> ... )
+- (include <filename1> <filename2> ...)
+- (include-ci <filename1> <filename2> ...)
+- (cond-expand <cond-expandclause> ...)
+
+<export spec>:
+- <identifier>
+- (rename <identifier1> <identifier2>)
+
+<import set>:
+- <module name>
+- (only <import set> <identifier> ...)
+- (except <import set> <identifier> ...)
+- (prefix <import set> <identifier>)
+- (rename <import set> (<identifier1> <identifier2>) ...)
+
+In the first form, all of the identifiers in the named module’s export clauses are imported with the same names (or the exported names if exported with a rename form). The additional <import set> forms modify this set as follows:
+- An only form produces a subset of the given <import set>, including only the listed identifiers (af- ter any renaming). It is an error if any of the listed identifiers are not found in the original set.
+- An except form produces a subset of the given <import set>, excluding the listed identifiers (after any renaming). It is an error if any of the listed identifiers are not found in the original set.
+- A rename form modifies the given <import set>, replac- ing  each  instance  of  <identif ier1 > with  <identif ier2 >. It is an error if any of the listed <identifier1>s are not found in the original set.
+- A prefix form automatically renames all identifiers in the given <import set>, prefixing each with the speci- fied <identifier>.
+import declarations may also be made at the top-level of a program. In a module declaration, the same identifier may not be imported more than once.
+*/
