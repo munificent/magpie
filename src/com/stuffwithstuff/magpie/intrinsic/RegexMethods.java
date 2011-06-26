@@ -15,17 +15,14 @@ import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
 public class RegexMethods {
-  
   @Def("_setClasses(== Regex, == MatchResult)")
   public static class SetClasses implements Intrinsic {
-
     @Override
     public Obj invoke(Context context, Obj left, Obj right) {
       sRegexClass = right.getField(0).asClass();
       sMatchClass = right.getField(1).asClass();
       return context.nothing();
     }
-    
   }
 
   @Def("regex(pattern is String, modifiers is String)")
@@ -38,7 +35,6 @@ public class RegexMethods {
        "  * s - Makes the dot operator in the pattern match all characters " +
        "including line separators\n")
   public static class Regex implements Intrinsic {
-
     @Override
     public Obj invoke(Context context, Obj left, Obj right) {
       int modifiers = extractModifiers(right.getField(1).asString(), context);
@@ -68,7 +64,6 @@ public class RegexMethods {
   @Doc("Returns a MatchResult for the first occurrence of the regular " +
        "expression in this String or nothing if it is not found.")
   public static class Find implements Intrinsic {
-
     @Override
     public Obj invoke(Context context, Obj left, Obj right) {
       Pattern pattern = (Pattern)right.getValue();
@@ -77,14 +72,12 @@ public class RegexMethods {
         return newMatchResult(context, matcher);
       return context.nothing();
     }
-    
   }
   
   @Def("(this is String) findAll(regex is Regex)")
   @Doc("Returns an array of all occurrences of the regular expression in " +
        "this String.")
   public static class FindAll implements Intrinsic {
-
     @Override
     public Obj invoke(Context context, Obj left, Obj right) {
       Pattern pattern = (Pattern)right.getValue();
@@ -95,7 +88,6 @@ public class RegexMethods {
       }
       return context.toArray(finds);
     }
-    
   }
   
   private static Obj newMatchResult(Context context, Matcher matcher) {
@@ -115,5 +107,4 @@ public class RegexMethods {
   
   private static ClassObj sRegexClass;
   private static ClassObj sMatchClass;
-
 }
