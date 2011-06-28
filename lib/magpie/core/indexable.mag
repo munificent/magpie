@@ -1,0 +1,59 @@
+
+// Ranges and indexable iteration.
+def (this is Indexable) iterate()
+    IndexableIterator new(indexable: this)
+end
+
+def (this is Indexable) validateIndex(index is Int)
+    // Negative indexes count from the back.
+    val wrappedIndex = match index <(0)
+        case true then this count +(index)
+        else index
+    end
+
+    // Check the bounds.
+    match wrappedIndex <(0)
+        case true then throw OutOfBoundsError new()
+        else nothing
+    end
+
+    match wrappedIndex >=(this count)
+        case true then throw OutOfBoundsError new()
+        else nothing
+    end
+
+    // Return the updated index.
+    wrappedIndex
+end
+
+defclass Iterator
+    /// Interface for a class that implements the iterator protocal. Classes
+    /// that inherit this should specialize the next() and current methods.
+end
+
+def next
+    /// Given an iterator, advances to the next item if there is a next one.
+    /// Returns true if it advanced successfully or false if the iteration has
+    /// reached its end.
+end
+
+def current
+    /// Gets the current item the iterator is sitting on.
+end
+
+
+defclass IndexableIterator is Iterator
+    /// An iterator that can iterator over any class that inherits from
+    /// Indexable and provides a "count" getter, and a numeric indexer.
+    val indexable is Indexable
+    var index     = -1
+end
+
+def (this is IndexableIterator) next()
+    this index = this index +(1)
+    this index <(this indexable count)
+end
+
+def (this is IndexableIterator) current
+    this indexable[this index]
+end

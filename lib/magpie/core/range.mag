@@ -1,0 +1,23 @@
+
+defclass Range is Indexable
+    /// An Indexable, iterable range of sequential integers from a given
+    /// *first* to *last* (inclusive).
+    val first is Int
+    val last  is Int
+end
+
+def (this is Range)[index is Int]
+    this first +(this validateIndex(index))
+end
+
+def (this is Range) count
+    (this last -(this first)) +(1)
+end
+
+def (this is Int) to(last is Int)
+    Range new(first: this, last: last)
+end
+
+def (this is Int) until(after is Int)
+    Range new(first: this, last: after -(1))
+end

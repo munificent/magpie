@@ -1,0 +1,17 @@
+
+def (resource) use(block)
+    do
+        val result = block call(resource)
+        resource close()
+        result
+    catch error then
+        resource close()
+        throw error
+    end
+end
+
+// TODO(bob): Need way to create multimethod without defining any methods.
+def close
+    /// Closes the left argument. This will be called by use() when the scope
+    /// is exited. Any object passed to use() is expected to specialize this.
+end

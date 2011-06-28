@@ -1,10 +1,5 @@
 // magpie.core is automatically loaded and imported into every module before it
 // is run.
-import magpie.syntax
-
-// TODO(bob): This file is getting kind of massive. Need to figure out how to
-// have multiple sources files define a single logical module. Maybe just an
-// easy way to re-export an imported name.
 
 // Document the multimethods here before we import intrinsic methods for them.
 
@@ -113,121 +108,35 @@ def (left) +(right)
 end
 
 
-// Implement comparison in terms of a master compareTo() method.
-def (this is Comparable) < (that is Comparable)
-    this compareTo(that) ==(-1)
+import magpie.core.comparable with
+    export <
+    export >
+    export <=
+    export >=
 end
 
-def (this is Comparable) > (that is Comparable)
-    this compareTo(that) ==(1)
+import magpie.core.indexable with
+    export iterate
+    export validateIndex
+    export Iterator
+    export next
+    export current
+    export IndexableIterator
 end
 
-def (this is Comparable) <= (that is Comparable)
-    this compareTo(that) !=(1)
+import magpie.core.range with
+    export Range
+    export first
+    export last
+    export count
+    export to
+    export until
 end
 
-def (this is Comparable) >= (that is Comparable)
-    this compareTo(that) !=(-1)
-end
-
-// Ranges and indexable iteration.
-def (this is Indexable) iterate()
-    IndexableIterator new(indexable: this)
-end
-
-def (this is Indexable) validateIndex(index is Int)
-    // Negative indexes count from the back.
-    val wrappedIndex = match index <(0)
-        case true then this count +(index)
-        else index
-    end
-
-    // Check the bounds.
-    match wrappedIndex <(0)
-        case true then throw OutOfBoundsError new()
-        else nothing
-    end
-
-    match wrappedIndex >=(this count)
-        case true then throw OutOfBoundsError new()
-        else nothing
-    end
-
-    // Return the updated index.
-    wrappedIndex
-end
-
-defclass Iterator
-    /// Interface for a class that implements the iterator protocal. Classes
-    /// that inherit this should specialize the next() and current methods.
-end
-
-def next
-    /// Given an iterator, advances to the next item if there is a next one.
-    /// Returns true if it advanced successfully or false if the iteration has
-    /// reached its end.
-end
-
-def current
-    /// Gets the current item the iterator is sitting on.
-end
-
-
-defclass IndexableIterator is Iterator
-    /// An iterator that can iterator over any class that inherits from
-    /// Indexable and provides a "count" getter, and a numeric indexer.
-    val indexable is Indexable
-    var index     = -1
-end
-
-def (this is IndexableIterator) next()
-    this index = this index +(1)
-    this index <(this indexable count)
-end
-
-def (this is IndexableIterator) current
-    this indexable[this index]
-end
-
-
-defclass Range is Indexable
-    /// An Indexable, iterable range of sequential integers from a given
-    /// *first* to *last* (inclusive).
-    val first is Int
-    val last  is Int
-end
-
-def (this is Range)[index is Int]
-    this first +(this validateIndex(index))
-end
-
-def (this is Range) count
-    (this last -(this first)) +(1)
-end
-
-def (this is Int) to(last is Int)
-    Range new(first: this, last: last)
-end
-
-def (this is Int) until(after is Int)
-    Range new(first: this, last: after -(1))
-end
-
-
-def (resource) use(block)
-    do
-        val result = block call(resource)
-        resource close()
-        result
-    catch error then
-        resource close()
-        throw error
-    end
-end
-
-// TODO(bob): Need way to create multimethod without defining any methods.
-def (_) close()
-    throw Error new("abstract")
+// TODO(bob): Should this be in core?
+import magpie.core.usable with
+    export use
+    export close
 end
 
 import magpie.syntax.arithmetic with
@@ -272,5 +181,4 @@ definePrefix("definfix", fn(parser is Parser, token is Token)
         )
     }
 end)
-
 */
