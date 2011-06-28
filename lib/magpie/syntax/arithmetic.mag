@@ -1,0 +1,25 @@
+import magpie.syntax
+
+def _makeOperator(name is String, precedence is Int)
+    defineInfix(name, precedence,
+        fn(parser is Parser, left is Expression, token is Token)
+            // Ignore a newline after operator.
+            parser matchToken(TokenType.LINE)
+            val right = parser parseExpression(precedence)
+            CallExpression new(Expression: (position: token position),
+                name: name, argument: { `left, `right })
+        end
+    )
+end
+
+_makeOperator("*", 8)
+_makeOperator("/", 8)
+_makeOperator("%", 8)
+_makeOperator("+", 7)
+_makeOperator("-", 7)
+_makeOperator("<", 5)
+_makeOperator(">", 5)
+_makeOperator("<=", 5)
+_makeOperator(">=", 5)
+_makeOperator("==", 4)
+_makeOperator("!=", 4)

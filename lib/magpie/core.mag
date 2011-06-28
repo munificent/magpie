@@ -18,6 +18,12 @@ import classfile:com.stuffwithstuff.magpie.intrinsic.IntMethods
 import classfile:com.stuffwithstuff.magpie.intrinsic.ListMethods
 import classfile:com.stuffwithstuff.magpie.intrinsic.StringMethods
 
+import magpie.syntax.branching with
+    export and
+    export or
+    export if
+end
+
 // Note: This file is parsed before any arithmetic operator syntax has been
 // defined, which is why it calls them in regular message for like 1+(2).
 
@@ -106,6 +112,7 @@ def (left) +(right)
     left toString +(right toString)
 end
 
+
 // Implement comparison in terms of a master compareTo() method.
 def (this is Comparable) < (that is Comparable)
     this compareTo(that) ==(-1)
@@ -165,6 +172,7 @@ def current
     /// Gets the current item the iterator is sitting on.
 end
 
+
 defclass IndexableIterator is Iterator
     /// An iterator that can iterator over any class that inherits from
     /// Indexable and provides a "count" getter, and a numeric indexer.
@@ -222,115 +230,19 @@ def (_) close()
     throw Error new("abstract")
 end
 
-
-// "and" Parser
-// ----------------------------------------------------------------------------
-
-defineInfix("and", 3, fn(parser is Parser, left is Expression, token is Token)
-    // Ignore a newline after "and".
-    parser matchToken(TokenType.LINE)
-    val right = parser parseExpression(3)
-    {
-        do
-            // TODO(bob): Use generated symbol.
-            val temp__ = `left
-            match temp__ isTrue
-                case true then `right
-                else temp__
-            end
-        end
-    }
-end)
-
-// "or" Parser
-// ----------------------------------------------------------------------------
-
-defineInfix("or", 3, fn(parser is Parser, left is Expression, token is Token)
-    // Ignore a newline after "or".
-    parser matchToken(TokenType.LINE)
-    val right = parser parseExpression(3)
-    {
-        do
-            // TODO(bob): Use generated symbol.
-            val temp__ = `left
-            match temp__ isTrue
-                case true then temp__
-                else `right
-            end
-        end
-    }
-end)
-
-// If expression
-// ----------------------------------------------------------------------------
-
-definePrefix("if", fn(parser is Parser, token is Token)
-    // Parse the condition.
-    val condition, _ = parser parseExpressionOrBlock(["then"])
-
-    // Parse the then body.
-    parser consume("then")
-    val thenExpr, endToken = parser parseExpressionOrBlock(["else", "end"])
-
-    // Don't try to parse "else" if we got an explicit "end" for the "then"
-    // block.
-    val consumedEnd = match endToken
-        case nothing then false
-        case token then
-            match token type name
-                case "NAME" then token value ==("end")
-                else false
-            end
-        end
-    end
-
-    // See if we have an "else" keyword.
-    val parsedElse = match consumedEnd
-        case true then false
-        case false then parser matchToken("else")
-    end
-
-    // Parse the "else" expression if there otherwise use nothing.
-    val elseExpr = match parsedElse
-        case true then parser parseExpressionOrBlock()
-        else { nothing }
-    end
-
-    // Desugar to a match.
-    {
-        match `condition isTrue
-            case true then `thenExpr
-            else `elseExpr
-        end
-    }
-end)
-
-// Infix arithmetic operators
-// ----------------------------------------------------------------------------
-
-def _makeOperator(name is String, precedence is Int)
-    defineInfix(name, precedence,
-        fn(parser is Parser, left is Expression, token is Token)
-            // Ignore a newline after operator.
-            parser matchToken(TokenType.LINE)
-            val right = parser parseExpression(precedence)
-            CallExpression new(Expression: (position: token position),
-                name: name, argument: { `left, `right })
-        end
-    )
+import magpie.syntax.arithmetic with
+    export *
+    export /
+    export %
+    export +
+    export -
+    export <
+    export >
+    export <=
+    export >=
+    export ==
+    export !=
 end
-
-_makeOperator("*", 8)
-_makeOperator("/", 8)
-_makeOperator("%", 8)
-_makeOperator("+", 7)
-_makeOperator("-", 7)
-_makeOperator("<", 5)
-_makeOperator(">", 5)
-_makeOperator("<=", 5)
-_makeOperator(">=", 5)
-_makeOperator("==", 4)
-_makeOperator("!=", 4)
 
 // "definfix" Parser and core operators
 // ----------------------------------------------------------------------------

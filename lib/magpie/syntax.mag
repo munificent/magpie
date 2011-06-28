@@ -83,8 +83,15 @@ end
 defclass ImportExpression is Expression
     val scheme is String
     val module is String
-    val name   is String
-    val rename is String
+    val prefix is String
+    val isOnly is Bool
+    val declarations is Array // of ImportDeclarations
+end
+
+defclass ImportDeclaration
+    val isExported  is Bool
+    val name        is String
+    val rename      is String
 end
 
 defclass IntExpression is Expression
