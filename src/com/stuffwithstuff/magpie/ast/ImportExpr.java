@@ -1,5 +1,7 @@
 package com.stuffwithstuff.magpie.ast;
 
+import java.util.List;
+
 import com.stuffwithstuff.magpie.parser.Position;
 
 public class ImportExpr extends Expr {
@@ -8,25 +10,22 @@ public class ImportExpr extends Expr {
    * 
    * @param module  The name of the module to import. Will start with "." for
    *                a relative import.
-   * @param name    The name to import from the module, or null if all names
-   *                should be imported.
-   * @param rename  The name that the imported name should be imported as. If
-   *                name is null, than this is a prefix that will be applied to
-   *                all imported names (with a "." added). If "_", the module
-   *                will be used as a prefix.
    */
-  ImportExpr(Position position, String scheme, String module, String name, String rename) {
+  ImportExpr(Position position, String scheme, String module,
+      String prefix, boolean isOnly, List<ImportDeclaration> declarations) {
     super(position);
     mScheme = scheme;
     mModule = module;
-    mName   = name;
-    mRename = rename;
+    mPrefix = prefix;
+    mIsOnly = isOnly;
+    mDeclarations = declarations;
   }
   
   public String getScheme() { return mScheme; }
   public String getModule() { return mModule; }
-  public String getName() { return mName; }
-  public String getRename() { return mRename; }
+  public String getPrefix() { return mPrefix; }
+  public boolean isOnly() { return mIsOnly; }
+  public List<ImportDeclaration> getDeclarations() { return mDeclarations; }
   
   @Override
   public <R, C> R accept(ExprVisitor<R, C> visitor, C context) {
@@ -39,14 +38,15 @@ public class ImportExpr extends Expr {
     
     if (mScheme != null) builder.append(mScheme).append(":");
     builder.append(mModule);
-    if (mName != null) builder.append(" ").append(mName);
-    if (mRename != null) builder.append(" = ").append(mRename);
+    
+    // TODO(bob): Update.
     
     builder.append("\n");
   }
 
   private final String mScheme;
   private final String mModule;
-  private final String mName;
-  private final String mRename;
+  private final String mPrefix;
+  private final boolean mIsOnly;
+  private final List<ImportDeclaration> mDeclarations;
 }

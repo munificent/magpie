@@ -3,6 +3,8 @@ package com.stuffwithstuff.magpie.interpreter;
 import java.util.*;
 import java.util.Map.Entry;
 
+import com.stuffwithstuff.magpie.parser.InfixParser;
+import com.stuffwithstuff.magpie.parser.PrefixParser;
 import com.stuffwithstuff.magpie.util.Expect;
 import com.stuffwithstuff.magpie.util.Pair;
 
@@ -45,39 +47,38 @@ public class Scope {
   public Module getModule() {
     return mModule;
   }
-  
-  public void importAll(Context context, String prefix, Module module) {
-    // Copy the variables.
-    for (Entry<String, Obj> entry : module.getExportedVariables().entrySet()) {
-      importVariable(context, prefix + entry.getKey(), entry.getValue(),
-          module);
-    }
-    
-    // Import the multimethods.
-    for (Entry<String, Multimethod> entry : module.getExportedMultimethods().entrySet()) {
-      String name = prefix + entry.getKey();
-      importMultimethod(context, name, entry.getValue(), module);
-    }
-  }
 
   public void importName(Context context, String name, String rename,
-      Module module) {
+      Module module, boolean export) {
     
-    Obj variable = module.getExportedVariables().get(name);
+    // Import a variable.
+    Obj variable = module.getExportedVariable(name);
     if (variable != null) {
-      importVariable(context, rename, variable, module);
+      importVariable(context, rename, variable, module, export);
     }
     
-    Multimethod multimethod = module.getExportedMultimethods().get(name);
+    // Import a multimethod.
+    Multimethod multimethod = module.getExportedMultimethod(name);
     if (multimethod != null) {
-      importMultimethod(context, rename, multimethod, module);
+      importMultimethod(context, rename, multimethod, module, export);
+    }
+    
+    // Import syntax.
+    PrefixParser prefix = module.getExportedPrefixParser(name);
+    if (prefix != null) {
+      context.getModule().defineSyntax(rename, prefix, export);
+    }
+
+    InfixParser infix = module.getExportedInfixParser(name);
+    if (infix != null) {
+      context.getModule().defineSyntax(rename, infix, export);
     }
   }
   
   public Scope getParent() {
     return mParent;
   }
-  
+    
   /**
    * Looks up the given name in the context's lexical scope chain.
    * @param   name The name of the variable to look up.
@@ -231,7 +232,7 @@ public class Scope {
   }
   
   private void importVariable(Context context, String name, Obj value,
-      Module module) {
+      Module module, boolean export) {
     if (!mAllowRedefinition && (get(name) != null)) {
       context.error(Name.REDEFINITION_ERROR,
           "Can not import variable \"" + name + "\" from " +
@@ -240,10 +241,14 @@ public class Scope {
     }
     
     mVariables.put(name, new Pair<Boolean, Obj>(false, value));
+    
+    if (export && (mParent == null)) {
+      mModule.addExport(name, value);
+    }
   }
   
   private void importMultimethod(Context context, String name,
-      Multimethod multimethod, Module module) {
+      Multimethod multimethod, Module module, boolean export) {
     if (mAllowRedefinition) return;
 
     Multimethod existing = mMultimethods.get(name);
@@ -255,6 +260,10 @@ public class Scope {
     }
     
     mMultimethods.put(name, multimethod);
+    
+    if (export && (mParent == null)) {
+      mModule.addExport(name, multimethod);
+    }
   }
 
   private final boolean mAllowRedefinition;

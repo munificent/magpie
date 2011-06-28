@@ -1,3 +1,42 @@
+import spec.specify
+
+specify("An 'import' expression") with
+    it should("import unqualified names by default") with
+        import spec.language.import_test
+    end
+
+    it should("apply a prefix to all names if given") with
+        import spec.language.import_test with prefix foo
+    end
+
+    it should("use the module name as prefix if given \"_\"") with
+        import spec.language.import_test with prefix _
+    end
+
+    it should("import a named variable") with
+        import spec.language.import_test with a
+    end
+
+    it should("import a named method") with
+        import spec.language.import_test b
+
+        b() shouldEqual("b")
+        fn
+            a
+        end shouldThrow(NoVariableError)
+    end
+
+    it should("rename the imported name") with
+        import spec.language.import_test a = rename.a
+        import spec.language.import_test b = rename.b
+
+        rename.a shouldEqual("a")
+        rename.b() shouldEqual("b")
+    end
+
+    // TODO(bob): Relative imports.
+end
+
 /*
 For each name:
 
@@ -12,6 +51,13 @@ Also, exclude, or only include certain names. Three cases:
 2. Only include the specified names.
 3. Include everything but the excluded names.
 */
+
+// Import everything unqualified.
+import regex
+
+// Import everything prefixed.
+import regex as re
+
 
 // Import everything, export some stuff.
 import text with

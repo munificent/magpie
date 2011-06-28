@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.stuffwithstuff.magpie.ast.*;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
@@ -108,40 +109,44 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
     // TODO(bob): Eventually the schemes should be host-provided plug-ins.
     if (expr.getScheme() == null) {
       Module module = mContext.getInterpreter().importModule(expr.getModule());
-      
-      if (expr.getName() == null) {
-        // Not a specific name, so import all names.
-        String prefix;
-        if (expr.getRename() == null) {
-          // Just use the unqualified name.
-          prefix = "";
-        } else if (expr.getRename().equals("_")) {
-          // Use the module name as a prefix.
-          prefix = module.getName() + ".";
-        } else {
-          prefix = expr.getRename() + ".";
-        }
-        
-        scope.importAll(mContext, prefix, module);
-        
-        // TODO(bob): Need to import syntax extensions from imported module
-        // into this one once EvalContext knows module.
-        //module.importSyntax(mBaseModule);
 
+      // Map names to declarations.
+      Map<String, ImportDeclaration> declarations =
+          new HashMap<String, ImportDeclaration>();
+      for (ImportDeclaration declaration : expr.getDeclarations()) {
+        declarations.put(declaration.getName(), declaration);
+      }
+      
+      Set<String> importedNames;
+      
+      if (expr.isOnly()) {
+        importedNames = declarations.keySet();
       } else {
-        // Importing just one name.
-        String rename;
-        if (expr.getRename() == null) {
-          // Just use the unqualified name.
-          rename = expr.getName();
-        } else if (expr.getRename().equals("_")) {
-          // Use the module name as a prefix.
-          rename = module.getName() + "." + expr.getName();
-        } else {
-          rename = expr.getRename();
+        importedNames = module.getExportedNames();
+      }
+
+      // Import the names.
+      for (String name : importedNames) {
+        ImportDeclaration declaration = declarations.get(name);
+        
+        String rename = name;
+        
+        // Rename it, if given one.
+        if ((declaration != null) && (declaration.getRename() != null)) {
+          rename = declaration.getRename();
+        }
+
+        // Apply the prefix, if given.
+        if (expr.getPrefix() != null) {
+          rename = expr.getPrefix() + "." + rename;
+        }
+
+        boolean export = false;
+        if (declaration != null) {
+          export = declaration.isExported();
         }
         
-        scope.importName(mContext, expr.getName(), rename, module);
+        scope.importName(mContext, name, rename, module, export);
       }
     } else if (expr.getScheme().equals("classfile")) {
       if (!IntrinsicLoader.loadClass(expr.getModule(), scope)) {

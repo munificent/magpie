@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.Field;
+import com.stuffwithstuff.magpie.ast.ImportDeclaration;
 import com.stuffwithstuff.magpie.ast.pattern.MatchCase;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.parser.Position;
@@ -101,12 +102,21 @@ public class MagpieToJava {
           getPattern(expr, "pattern"),
           getExpr(expr, "body"));
     } else if (exprClass == getClass("ImportExpression")) {
+      List<ImportDeclaration> declarations = new ArrayList<ImportDeclaration>();
+      for (Obj declaration : expr.getField("declarations").asList()) {
+        declarations.add(new ImportDeclaration(
+            getBool(declaration, "isExport"),
+            getString(declaration, "name"),
+            getString(declaration, "rename")));
+      }
+
       return Expr.import_(
           getPosition(expr),
           getString(expr, "scheme"),
           getString(expr, "module"),
-          getString(expr, "name"),
-          getString(expr, "rename"));
+          getString(expr, "prefix"),
+          getBool(expr, "isOnly"),
+          declarations);
     } else if (exprClass == getClass("IntExpression")) {
       return Expr.int_(
           getPosition(expr),
@@ -289,8 +299,7 @@ public class MagpieToJava {
   }
   
   private ClassObj getClass(String name) {
-    return mContext.getInterpreter().getSyntaxModule().getExportedVariables()
-        .get(name).asClass();
+    return mContext.getInterpreter().getSyntaxModule().getExportedVariable(name).asClass();
   }
   
   private final Context mContext;

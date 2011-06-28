@@ -9,6 +9,7 @@ import com.stuffwithstuff.magpie.ast.BoolExpr;
 import com.stuffwithstuff.magpie.ast.BreakExpr;
 import com.stuffwithstuff.magpie.ast.CallExpr;
 import com.stuffwithstuff.magpie.ast.ClassExpr;
+import com.stuffwithstuff.magpie.ast.ImportDeclaration;
 import com.stuffwithstuff.magpie.ast.QuoteExpr;
 import com.stuffwithstuff.magpie.ast.UnquoteExpr;
 import com.stuffwithstuff.magpie.ast.VarExpr;
@@ -146,8 +147,7 @@ public class JavaToMagpie {
   }
 
   private Obj construct(String className, Object... args) {
-    ClassObj classObj = mContext.getInterpreter().getSyntaxModule().getExportedVariables()
-        .get(className).asClass();
+    ClassObj classObj = mContext.getInterpreter().getSyntaxModule().getExportedVariable(className).asClass();
     Obj object = mContext.instantiate(classObj, null);
 
     // TODO(bob): Hackish. Goes around normal object construction process.
@@ -225,12 +225,22 @@ public class JavaToMagpie {
 
     @Override
     public Obj visit(ImportExpr expr, Void context) {
+      List<Obj> declarations = new ArrayList<Obj>();
+      
+      for (ImportDeclaration declaration : expr.getDeclarations()) {
+        declarations.add(construct("ImportDeclaration",
+            "isExported", declaration.isExported(),
+            "name",       declaration.getName(),
+            "rename",     declaration.getRename()));
+      }
+      
       return construct("ImportExpression",
-          "position", expr.getPosition(),
-          "scheme",   expr.getScheme(),
-          "module",   expr.getModule(),
-          "name",     expr.getName(),
-          "rename",   expr.getRename());
+          "position",     expr.getPosition(),
+          "scheme",       expr.getScheme(),
+          "module",       expr.getModule(),
+          "prefix",       expr.getPrefix(),
+          "isOnly",       expr.isOnly(),
+          "declarations", convertArray(declarations));
     }
 
     @Override

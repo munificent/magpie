@@ -1,8 +1,10 @@
 package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.stuffwithstuff.magpie.SourceReader;
 import com.stuffwithstuff.magpie.SourceFile;
@@ -28,12 +30,24 @@ public class Module {
     return new StringReader(mInfo.getPath(), mInfo.getSource());
   }
   
-  public Map<String, Obj> getExportedVariables() {
-    return mExportedVariables;
+  public Set<String> getExportedNames() {
+    return mExportedNames;
   }
 
-  public Map<String, Multimethod> getExportedMultimethods() {
-    return mExportedMultimethods;
+  public Obj getExportedVariable(String name) {
+    return mExportedVariables.get(name);
+  }
+
+  public Multimethod getExportedMultimethod(String name) {
+    return mExportedMultimethods.get(name);
+  }
+  
+  public PrefixParser getExportedPrefixParser(String name) {
+    return mExportedPrefixParsers.get(name);
+  }
+  
+  public InfixParser getExportedInfixParser(String name) {
+    return mExportedInfixParsers.get(name);
   }
   
   public void importSyntax(Module other) {
@@ -50,10 +64,12 @@ public class Module {
   public void addExport(String name, Obj value) {
     if (mExportedVariables.containsKey(name)) throw new IllegalArgumentException();
     
+    mExportedNames.add(name);
     mExportedVariables.put(name, value);
   }
   
   public void addExport(String name, Multimethod multimethod) {
+    mExportedNames.add(name);
     mExportedMultimethods.put(name, multimethod);
   }
   
@@ -65,14 +81,22 @@ public class Module {
     return mGrammar;
   }
 
-  public void defineSyntax(String keyword, InfixParser parser) {
+  public void defineSyntax(String keyword, InfixParser parser, boolean export) {
     mGrammar.defineParser(keyword, parser);
-    mExportedInfixParsers.put(keyword, parser);
+    
+    if (export) {
+      mExportedNames.add(keyword);
+      mExportedInfixParsers.put(keyword, parser);
+    }
   }
   
-  public void defineSyntax(String keyword, PrefixParser parser) {
+  public void defineSyntax(String keyword, PrefixParser parser, boolean export) {
     mGrammar.defineParser(keyword, parser);
-    mExportedPrefixParsers.put(keyword, parser);
+    
+    if (export) {
+      mExportedNames.add(keyword);
+      mExportedPrefixParsers.put(keyword, parser);
+    }
   }
   
   @Override
@@ -85,6 +109,7 @@ public class Module {
   private final Interpreter mInterpreter;
   private final Scope mScope;
   private final Grammar mGrammar = new Grammar();
+  private final Set<String> mExportedNames = new HashSet<String>();
   private final Map<String, Obj> mExportedVariables =
       new HashMap<String, Obj>();
   private final Map<String, Multimethod> mExportedMultimethods =

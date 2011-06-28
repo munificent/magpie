@@ -9,21 +9,26 @@ specify("An 'import' expression") with
     end
 
     it should("apply a prefix to all names if given") with
-        import spec.language.import_test = prefix
+        import spec.language.import_test as prefix
 
         prefix.a shouldEqual("a")
         prefix.b() shouldEqual("b")
     end
 
-    it should("use the module name as prefix if given \"_\"") with
-        import spec.language.import_test = _
+    it should("rename a imported name") with
+        import spec.language.import_test with
+            a as rename.a
+            b as rename.b
+        end
 
-        spec.language.import_test.a shouldEqual("a")
-        spec.language.import_test.b() shouldEqual("b")
+        rename.a shouldEqual("a")
+        rename.b() shouldEqual("b")
     end
 
-    it should("import a named variable") with
-        import spec.language.import_test a
+    it should("just import the specified names") with
+        import spec.language.import_test with only
+            a
+        end
 
         a shouldEqual("a")
         fn
@@ -31,22 +36,5 @@ specify("An 'import' expression") with
         end shouldThrow(NoMethodError)
     end
 
-    it should("import a named method") with
-        import spec.language.import_test b
-
-        b() shouldEqual("b")
-        fn
-            a
-        end shouldThrow(NoVariableError)
-    end
-
-    it should("rename the imported name") with
-        import spec.language.import_test a = rename.a
-        import spec.language.import_test b = rename.b
-
-        rename.a shouldEqual("a")
-        rename.b() shouldEqual("b")
-    end
-
-    // TODO(bob): Relative imports.
+    // TODO(bob): Relative imports, exports.
 end

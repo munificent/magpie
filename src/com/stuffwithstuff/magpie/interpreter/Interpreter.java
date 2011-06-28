@@ -288,8 +288,11 @@ public class Interpreter {
     try {
       // Copy the base stuff in first.
       if (module != mBaseModule) {
-        module.getScope().importAll(new Context(module), "", mBaseModule);
-        module.importSyntax(mBaseModule);
+        Context context = new Context(module);
+        Scope scope = module.getScope();
+        for (String name : mBaseModule.getExportedNames()) {
+          scope.importName(context, name, name, mBaseModule, false);
+        }
       }
       
       // Evaluate every expression in the file. We do this incrementally so
