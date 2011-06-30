@@ -6,7 +6,7 @@ specify("The List class") with
     end
 end
 
-specify("The '(this == List) new()' method") with
+specifyMethod("(this == List) new()") with
     it should("create a new empty list") with
         val list = List new()
         list shouldBe(List)
@@ -14,7 +14,7 @@ specify("The '(this == List) new()' method") with
     end
 end
 
-specify("The '(this == List) new(fill: value, size: size is Int)' method") with
+specifyMethod("(this == List) new(fill: value, size: size is Int)") with
     it should("create a list filled with the given value") with
         val list = List new(fill: "f", size: 5)
         list shouldBe(List)
@@ -23,7 +23,7 @@ specify("The '(this == List) new(fill: value, size: size is Int)' method") with
     end
 end
 
-specify("The indexer on Lists") with
+specifyMethod("(this is List)[index is Int]") with
     it should("return the element at the zero-based index") with
         val list = [1, "two", true] toList
         list[0] shouldEqual(1)
@@ -50,7 +50,7 @@ specify("The indexer on Lists") with
     end
 end
 
-specify("The indexed assigner on Lists") with
+specifyMethod("(this is List)[index is Int] = (value)") with
     it should("replace the item at the given index in the list") with
         val list = [2, 3, 4] toList
         list[0] = 5
@@ -85,7 +85,7 @@ specify("The indexed assigner on Lists") with
     end
 end
 
-specify("The 'add' method on Lists") with
+specifyMethod("(this is List) add(item)") with
     it should("add an element to the end of the list") with
         val list = ["a"] toList
         list add("b")
@@ -101,7 +101,7 @@ specify("The 'add' method on Lists") with
     end
 end
 
-specify("The 'clear' method on Lists") with
+specifyMethod("(this is List) clear()") with
     it should("remove all elements from the list") with
         val list = ["a", "b"] toList
         list clear()
@@ -113,7 +113,7 @@ specify("The 'clear' method on Lists") with
     end
 end
 
-specify("The 'count' method on Lists") with
+specifyMethod("(this is List) count") with
     it should("return the number of elements in the list") with
         [] toList count shouldEqual(0)
         ["a"] toList count shouldEqual(1)
@@ -121,7 +121,7 @@ specify("The 'count' method on Lists") with
     end
 end
 
-specify("The 'insert' method on Lists") with
+specifyMethod("(this is List) insert(item, at: index is Int)") with
     it should("insert an item at the given index") with
         val list = ["a", "b", "c"] toList
         list insert("d", at: 0)

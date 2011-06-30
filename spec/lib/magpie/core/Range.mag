@@ -6,7 +6,7 @@ specify("The Range class") with
     end
 end
 
-specify("The indexer on Ranges") with
+specifyMethod("(this is Range)[index is Int]") with
     it should("return the value at the zero-based index in the range") with
         val range = Range new(first: 2, last: 5)
         range[0] shouldEqual(2)
@@ -35,7 +35,7 @@ specify("The indexer on Ranges") with
     end
 end
 
-specify("The 'count' method on Ranges") with
+specifyMethod("(this is Range) count") with
     it should("return the number of values in the range") with
         Range new(first: 2, last: 2) count shouldEqual(1)
         Range new(first: 2, last: 3) count shouldEqual(2)

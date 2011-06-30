@@ -6,7 +6,7 @@ specify("The Indexable class") with
     end
 end
 
-specify("The 'validateIndex' method on Indexables") with
+specifyMethod("(this is Indexable) validateIndex(index is Int)") with
     it should("return the original index if in bounds") with
         [1, 2, 3] validateIndex(0) shouldEqual(0)
         [1, 2, 3] validateIndex(1) shouldEqual(1)
@@ -31,7 +31,7 @@ specify("The 'validateIndex' method on Indexables") with
     end
 end
 
-specify("The 'iterate' method on Indexables") with
+specifyMethod("(this is Indexable) iterate()") with
     it should("create an IndexableIterator") with
         val iterator = [1, 2, 3] iterate()
         iterator shouldBe(IndexableIterator)

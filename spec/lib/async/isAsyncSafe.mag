@@ -4,7 +4,7 @@ import async
 
 // TODO(bob): Uncomment when this is implemented.
 /*
-specify("The '(this) isAsyncSafe' method") with
+specify("(this) isAsyncSafe") with
     it should("return true on primitive types") with
         nothing        isAsyncSafe shouldEqual(true)
         true           isAsyncSafe shouldEqual(true)

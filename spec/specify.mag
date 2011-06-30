@@ -27,7 +27,6 @@ def runTests()
         _totalTests + " tests in " + (endTimeMs - _startTimeMs) + "ms.")
 end
 
-// TODO(bob): Move calls to this over to specifyMethod where appropriate.
 def specify(spec (is String, is Function))
     _specs add(spec)
 end

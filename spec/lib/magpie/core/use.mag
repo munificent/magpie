@@ -8,7 +8,7 @@ def (this is Resource) close()
     this isOpen = false
 end
 
-specify("The 'use' method") with
+specifyMethod("(resource) use(block is Function)") with
     it should("call the given block, passing in the resource") with
         val resource = Resource new()
         var called = false

@@ -4,7 +4,7 @@ import async
 
 // TODO(bob): Uncomment when this is implemented.
 /*
-specify("The '(this is Channel) send(obj)' method") with
+specifyMethod("(this is Channel) send(obj)") with
     it should("throw an error if the object is not async-safe") with
         val channel = Channel new()
 

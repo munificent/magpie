@@ -1,6 +1,6 @@
 import spec.specify
 
-specify("The 'name' method on Classes") with
+specifyMethod("(this is Class) name") with
     it should("return the name of the class") with
         Int name shouldEqual("Int")
         String name shouldEqual("String")

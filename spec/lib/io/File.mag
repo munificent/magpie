@@ -4,7 +4,7 @@ import io
 
 val TEST_PATH = "spec/lib/io/test_file.txt"
 
-specify("The 'open' method") with
+specifyMethod("open(path is String)") with
     it should("return a File") with
         val file = open(TEST_PATH)
         file shouldBe(File)
@@ -16,7 +16,7 @@ specify("The 'open' method") with
     end
 end
 
-specify("The 'close' method on File") with
+specifyMethod("(file is File) close()") with
     it should("close the file") with
         val file = open(TEST_PATH)
         file close()
@@ -35,7 +35,7 @@ specify("The 'close' method on File") with
     end
 end
 
-specify("The 'readLine' method on File") with
+specifyMethod("(file is File) readLine()") with
     it should("return successive lines from the file") with
         val file = open(TEST_PATH)
         file readLine() shouldEqual("one")
@@ -55,7 +55,7 @@ specify("The 'readLine' method on File") with
     end
 end
 
-specify("The 'read' method on File") with
+specifyMethod("(file is File) read()") with
     it should("return the entire contents of the file") with
         val file = open(TEST_PATH)
         file read() shouldEqual("one\ntwo\nthree")

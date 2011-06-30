@@ -1,6 +1,6 @@
 import spec.specify
 
-specify("The 'not' method on Bools") with
+specifyMethod("(this is Bool) not") with
     it should("negate") with
         not(true) shouldEqual(false)
         not(false) shouldEqual(true)

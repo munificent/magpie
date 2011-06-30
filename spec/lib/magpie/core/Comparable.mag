@@ -12,7 +12,7 @@ def makeTestPair(result is Int)
     TestComparable new(result: result), TestComparable new(result: 0)
 end
 
-specify("The '<' method on Comparables") with
+specifyMethod("(left is Comparable) <(right is Comparable)") with
     it should("return true only if compareTo() returns -1") with
         do
             val left, right = makeTestPair(-1)
@@ -31,7 +31,7 @@ specify("The '<' method on Comparables") with
     end
 end
 
-specify("The '>' method on Comparables") with
+specifyMethod("(left is Comparable) >(right is Comparable)") with
     it should("return true only if compareTo() returns 1") with
         do
             val left, right = makeTestPair(-1)
@@ -50,7 +50,7 @@ specify("The '>' method on Comparables") with
     end
 end
 
-specify("The '<=' method on Comparables") with
+specifyMethod("(left is Comparable) <=(right is Comparable)") with
     it should("return false only if compareTo() returns 1") with
         do
             val left, right = makeTestPair(-1)
@@ -69,7 +69,7 @@ specify("The '<=' method on Comparables") with
     end
 end
 
-specify("The '>=' method on Comparables") with
+specifyMethod("(left is Comparable) >=(right is Comparable)") with
     it should("return false only if compareTo() returns -1") with
         do
             val left, right = makeTestPair(-1)

@@ -1,6 +1,6 @@
 import spec.specify
 
-specify("The 'to' method on Ints") with
+specifyMethod("(first is Int) to(last is Int)") with
     it should("create a Range from the receiver to the given value") with
         val range = 2 to(5)
         range first shouldEqual(2)
@@ -8,7 +8,7 @@ specify("The 'to' method on Ints") with
     end
 end
 
-specify("The 'compareTo' method on Ints") with
+specifyMethod("(left is Int) compareTo(right is Int)") with
     it should("return -1 if this is less than the argument") with
         -4 compareTo(-1) shouldEqual(-1)
         0 compareTo(1) shouldEqual(-1)

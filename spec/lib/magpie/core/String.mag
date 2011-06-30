@@ -10,7 +10,7 @@ specify("The String class") with
     end
 end
 
-specify("The indexer on Strings") with
+specifyMethod("(this is String)[index is Int]") with
     it should("return the character at the zero-based index") with
         val string = "abc"
         string[0] shouldEqual("a")
@@ -37,7 +37,7 @@ specify("The indexer on Strings") with
     end
 end
 
-specify("The 'count' method on Strings") with
+specifyMethod("(this is String) count") with
     it should("return the number of characters in the string") with
         "" count shouldEqual(0)
         "a" count shouldEqual(1)
@@ -45,7 +45,7 @@ specify("The 'count' method on Strings") with
     end
 end
 
-specify("The indexOf() method on strings") with
+specifyMethod("(haystack is String) indexOf(needle is String)") with
     it should("return the index of the string") with
         "hayneedlestack" indexOf("needle") shouldEqual(3)
         "needlehaystack" indexOf("needle") shouldEqual(0)
@@ -62,7 +62,7 @@ specify("The indexOf() method on strings") with
     end
 end
 
-specify("The lastIndexOf() method on strings") with
+specifyMethod("(haystack is String) lastIndexOf(needle is String)") with
     it should("return the index of the string") with
         "hayneedlestack" lastIndexOf("needle") shouldEqual(3)
         "needlehaystack" lastIndexOf("needle") shouldEqual(0)
@@ -79,7 +79,8 @@ specify("The lastIndexOf() method on strings") with
     end
 end
 
-specify("The substring(from:, to:) method on strings") with
+specifyMethod(
+        "(this is String) substring(from: from is Int, to: to is Int)") with
     it should("return the substring between the given indices (inclusive)") with
         "012345678" substring(from: 2, to: 5) shouldEqual("2345")
         "012345678" substring(from: 3, to: 3) shouldEqual("3")
@@ -88,7 +89,8 @@ specify("The substring(from:, to:) method on strings") with
     end
 end
 
-specify("The substring(from:, to:) method on strings") with
+specifyMethod(
+        "(this is String) substring(from: from is Int, to: to is Int)") with
     it should("return the substring between the given indices (inclusive)") with
         "012345678" substring(from: 2, to: 5) shouldEqual("2345")
         "012345678" substring(from: 3, to: 3) shouldEqual("3")

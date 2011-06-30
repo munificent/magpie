@@ -6,7 +6,7 @@ specify("The Array class") with
     end
 end
 
-specify("The '(this == Array) new()' method") with
+specifyMethod("(this == Array) new()") with
     it should("create a new empty array") with
         val array = Array new()
         array shouldBe(Array)
@@ -14,7 +14,7 @@ specify("The '(this == Array) new()' method") with
     end
 end
 
-specify("The '(this == Array) new(fill: value, size: size is Int)' method") with
+specifyMethod("(this == Array) new(fill: value, size: size is Int)") with
     it should("create an array filled with the given value") with
         val array = Array new(fill: "f", size: 5)
         array shouldBe(Array)
@@ -23,7 +23,7 @@ specify("The '(this == Array) new(fill: value, size: size is Int)' method") with
     end
 end
 
-specify("The indexer on Arrays") with
+specifyMethod("(this is Array)[index is Int]") with
     it should("return the element at the zero-based index") with
         val array = [1, "two", true]
         array[0] shouldEqual(1)
@@ -50,7 +50,7 @@ specify("The indexer on Arrays") with
     end
 end
 
-specify("The 'count' method on Arrays") with
+specifyMethod("(this is Array) count") with
     it should("return the number of elements in the list") with
         [] count shouldEqual(0)
         ["a"] count shouldEqual(1)

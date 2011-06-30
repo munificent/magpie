@@ -3,7 +3,6 @@ import .async.isAsyncSafe
 import .io.File
 import .io.path
 import .magpie.core.Array
-import .magpie.core.ArrayIterator
 import .magpie.core.Bool
 import .magpie.core.Class
 import .magpie.core.Comparable
@@ -12,7 +11,6 @@ import .magpie.core.IndexableIterator
 import .magpie.core.Int
 import .magpie.core.Iterable
 import .magpie.core.List
-import .magpie.core.ListIterator
 import .magpie.core.Range
 import .magpie.core.String
 import .magpie.core.toString

@@ -1,6 +1,6 @@
 import spec.specify
 
-specify("The 'next' method on IndexableIterators") with
+specifyMethod("(this is IndexableIterator) next()") with
     it should("advance the current value") with
         val iterator = [1, 2, 3] iterate()
         iterator next()

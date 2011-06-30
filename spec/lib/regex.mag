@@ -1,7 +1,9 @@
 import spec.specify
 import regex
 
-specify("The method 'findAll' on String") with
+// TODO(bob): Specify regex().
+
+specifyMethod("(this is String) findAll(regex is Regex)") with
     it should("return all occurrences of the regular expression in the " +
               "String.") with
         val matches = "ab abb" findAll(regex("a(b+)"))
@@ -25,7 +27,7 @@ specify("The method 'findAll' on String") with
 
 end
 
-specify("The method 'find' on String") with
+specifyMethod("(this is String) find(regex is Regex)") with
     it should("return a MatchResult when the entire input matches.") with
         val matchResult = "ababab" find(regex("^(ab)+$"))
         matchResult shouldBe(MatchResult)
@@ -41,7 +43,8 @@ specify("The method 'find' on String") with
     end
 end
 
-specify("The method 'replaceAll' on String") with
+specifyMethod(
+        "(this is String) replaceAll(regex is Regex, block is Function") with
     it should("replace all occurrences with the value from the block.") with
         ("ababab" replaceAll(regex("ab")) with "bc") shouldEqual("bcbcbc")
     end
@@ -57,7 +60,8 @@ specify("The method 'replaceAll' on String") with
 
 end
 
-specify("The method 'replace' on String") with
+specifyMethod(
+        "(this is String) replace(regex is Regex, block is Function)") with
     it should("replace the first occurrence with the result of the block.") with
         ("ababab" replace(regex("ab")) with "bc") shouldEqual("bcabab")
     end
@@ -72,7 +76,7 @@ specify("The method 'replace' on String") with
 
 end
 
-specify("The modifiers option on the 'regex' method") with
+specifyMethod("regex(this is String, options is String)") with
     it should("create case insensitive regular expressions.") with
         "ABAB" find(regex("ba", "i")) isTrue shouldEqual(true)
     end
