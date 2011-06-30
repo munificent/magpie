@@ -17,7 +17,6 @@ public class Interpreter {
 
     // Bootstrap the base module with the core definitions.
     mBaseModule = new Module("magpie.core", mHost.loadModule("magpie.core"), this);
-    mLoadingModules.push(mBaseModule);
     
     EnvironmentBuilder builder = new EnvironmentBuilder(this);
     mClass = builder.createClassClass();
