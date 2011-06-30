@@ -1,0 +1,15 @@
+import spec.specify
+
+specifyMethod("(this is Iterable) join(separator is String)") with
+    it should("convert the elements to strings and concatenate them") with
+        [1, true, "three"] join("") shouldEqual("1truethree")
+    end
+
+    it should("insert the separator between elements") with
+        [1, true, "three"] join("|") shouldEqual("1|true|three")
+    end
+
+    it should("return an empty string on an empty collection") with
+        [] join("sep") shouldEqual("")
+    end
+end

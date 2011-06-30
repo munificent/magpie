@@ -1,12 +1,5 @@
 import spec.specify
 
-specify("The 'toString' getter on Ints") with
-    it should("convert the value to a string") with
-        0 toString shouldEqual("0")
-        123 toString shouldEqual("123")
-    end
-end
-
 specify("The 'to' method on Ints") with
     it should("create a Range from the receiver to the given value") with
         val range = 2 to(5)

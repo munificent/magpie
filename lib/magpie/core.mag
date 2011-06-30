@@ -50,6 +50,14 @@ def (this is Class) toString
     this name
 end
 
+def (this is Array) toString
+    "[" +(this join(", ")) +("]")
+end
+
+def (this is List) toString
+    "list [" +(this join(", ")) +("]")
+end
+
 def print()
     /// Prints a newline to standard output.
     printString("\n")
@@ -98,6 +106,21 @@ end
 
 def (nothing) isTrue
     false
+end
+
+def (this is Iterable) join(separator is String)
+    /// Convert the elements of the collection to a string, and concatenate them
+    /// using the given separate between pairs of elements.
+    var result = ""
+    var first = true
+    for element in this do
+        match first
+            case true then first = false
+            else result = result +(separator)
+        end
+        result = result +(element toString)
+    end
+    result
 end
 
 // TODO(bob): Probably want to get rid of this since its too open-ended, but

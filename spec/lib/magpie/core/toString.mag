@@ -1,0 +1,51 @@
+import spec.specify
+
+specifyMethod("(this is Array) toString") with
+    it should("convert the array to a string") with
+        [] toString shouldEqual("[]")
+        [1] toString shouldEqual("[1]")
+        [1, true, "three"] toString shouldEqual("[1, true, three]")
+    end
+end
+
+specifyMethod("(this is Bool) toString") with
+    it should("convert the value to a string") with
+        true toString shouldEqual("true")
+        false toString shouldEqual("false")
+    end
+end
+
+specifyMethod("(this is Class) toString") with
+    it should("return the name of the class") with
+        Int toString shouldEqual("Int")
+        Bool toString shouldEqual("Bool")
+    end
+end
+
+specifyMethod("(this is Int) toString") with
+    it should("convert the value to a string") with
+        0 toString shouldEqual("0")
+        123 toString shouldEqual("123")
+    end
+end
+
+specifyMethod("(this is List) toString") with
+    it should("convert the list to a string") with
+        [] toList toString shouldEqual("list []")
+        [1] toList toString shouldEqual("list [1]")
+        [1, true, "three"] toList toString shouldEqual("list [1, true, three]")
+    end
+end
+
+specifyMethod("(this is Nothing) toString") with
+    it should("convert the value to a string") with
+        nothing toString shouldEqual("nothing")
+    end
+end
+
+specifyMethod("(this is String) toString") with
+    it should("return the string") with
+        "blah" toString shouldEqual("blah")
+        "argh" toString shouldEqual("argh")
+    end
+end

@@ -27,8 +27,13 @@ def runTests()
         _totalTests + " tests in " + (endTimeMs - _startTimeMs) + "ms.")
 end
 
+// TODO(bob): Move calls to this over to specifyMethod where appropriate.
 def specify(spec (is String, is Function))
     _specs add(spec)
+end
+
+def specifyMethod(method is String, body is Function)
+    specify("The method " + method, body)
 end
 
 defclass _TestSuite
@@ -98,12 +103,14 @@ def (this) shouldBe(expected is Class, message is String)
 end
 
 def (this) shouldBe(expected is Class)
-    this shouldBe(expected, "Expected class " + expected + " but was " + this class)
+    /// Verifies that the left argument is an instance of the given class.
+    this shouldBe(expected, "Expected class " + expected + " but was " +
+        this class)
 end
 
-// Verifies that a function throws an error of the given class. Will execute the
-// function.
 def (this is Function) shouldThrow(errorClass is Class)
+    /// Verifies that a function throws an error of the given class. Will
+    /// execute the function.
     var caught = false
     do
         this call()
@@ -116,8 +123,9 @@ def (this is Function) shouldThrow(errorClass is Class)
         errorClass + " but no error was thrown.")
 end
 
-// Verifies that a function does not throw an error. Will execute the function.
 def (this is Function) shouldNotThrow()
+    /// Verifies that a function does not throw an error. Will execute the
+    /// function.
     var caught = nothing
     do
         this call()

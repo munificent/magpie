@@ -32,7 +32,8 @@ public class EnvironmentBuilder {
     Callable newMethod = new ClassNew(scope);
     scope.define("new", newMethod);
     
-    ClassObj indexable = class_("Indexable").end();
+    ClassObj iterable = class_("Iterable").end();
+    ClassObj indexable = class_("Indexable", iterable).end();
     ClassObj comparable = class_("Comparable").end();
     
     class_("Array", indexable).end();

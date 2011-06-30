@@ -1,5 +1,11 @@
 import spec.specify
 
+specify("The Indexable class") with
+    it should("inherit Iterable") with
+        [1] shouldBe(Iterable)
+    end
+end
+
 specify("The 'validateIndex' method on Indexables") with
     it should("return the original index if in bounds") with
         [1, 2, 3] validateIndex(0) shouldEqual(0)

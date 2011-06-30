@@ -10,9 +10,11 @@ import .magpie.core.Comparable
 import .magpie.core.Indexable
 import .magpie.core.IndexableIterator
 import .magpie.core.Int
+import .magpie.core.Iterable
 import .magpie.core.List
 import .magpie.core.ListIterator
 import .magpie.core.Range
 import .magpie.core.String
+import .magpie.core.toString
 import .magpie.core.use
 import .regex
