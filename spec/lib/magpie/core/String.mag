@@ -90,11 +90,49 @@ specifyMethod(
 end
 
 specifyMethod(
-        "(this is String) substring(from: from is Int, to: to is Int)") with
-    it should("return the substring between the given indices (inclusive)") with
-        "012345678" substring(from: 2, to: 5) shouldEqual("2345")
-        "012345678" substring(from: 3, to: 3) shouldEqual("3")
-        "012345678" substring(from: 0, to: 3) shouldEqual("0123")
-        "012345678" substring(from: 2, to: 8) shouldEqual("2345678")
+        "(this is String) substring(from: from is Int)") with
+    it should("return the substring from from to the end") with
+        "012345" substring(from: 0) shouldEqual("012345")
+        "012345" substring(from: 1) shouldEqual("12345")
+        "012345" substring(from: 2) shouldEqual("2345")
     end
+
+    // TODO(bob): Test out of bounds. Test negative indices.
+end
+
+specifyMethod(
+        "(this is String) substring(from: from is Int, count: count is Int)") with
+    it should("return the substring starting at the given index and with the " +
+              "given length") with
+        "012345678" substring(from: 2, count: 1) shouldEqual("2")
+        "012345678" substring(from: 3, count: 3) shouldEqual("345")
+    end
+
+    it should("return an empty string if count is zero") with
+        "012345678" substring(from: 2, count: 0) shouldEqual("")
+    end
+
+    it should("throw an OutOfBoundsError if from is too high") with
+        fn
+            "0123" substring(from: 4, count: 1)
+        end shouldThrow(OutOfBoundsError)
+    end
+
+    it should("throw an OutOfBoundsError if from is too low") with
+        fn
+            "0123" substring(from: -5, count: 1)
+        end shouldThrow(OutOfBoundsError)
+    end
+
+    it should("throw an OutOfBoundsError if count is too high") with
+        fn
+            "0123" substring(from: 0, count: 5)
+        end shouldThrow(OutOfBoundsError)
+
+        fn
+            "0123" substring(from: 2, count: 3)
+        end shouldThrow(OutOfBoundsError)
+    end
+
+    // TODO(bob): Test negative from.
 end

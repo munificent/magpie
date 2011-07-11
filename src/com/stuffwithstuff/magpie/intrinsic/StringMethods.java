@@ -109,7 +109,27 @@ public class StringMethods {
       return context.toObj(string.substring(startIndex));
     }
   }
-
+  
+  @Def("(string is String) substring(from: from is Int, count: count is Int)")
+  @Doc("Returns the substring starting at the given index and with the " +
+       "given length.")
+  public static class Substring_FromCount implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      String string = left.asString();
+      int startIndex = Indexable.validateIndex(context, string,
+          right.getField("from").asInt());
+      int count = right.getField("count").asInt();
+      
+      int endIndex = startIndex + count;
+      if (endIndex > string.length()) {
+        context.error(Name.OUT_OF_BOUNDS_ERROR, "Index " + endIndex +
+          " is out of bounds [0, " + string.length() + "].");
+      }
+      
+      return context.toObj(string.substring(startIndex, startIndex + count));
+    }
+  }
+  
   @Def("(is String) split(separator is String)")
   @Doc("Splits the string at every occurrence of the given separator and\n" +
        "returns an array of the given substrings.")
