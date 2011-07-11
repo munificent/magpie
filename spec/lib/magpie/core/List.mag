@@ -163,3 +163,21 @@ specifyMethod("(this is List) insert(item, at: index is Int)") with
         end shouldThrow(OutOfBoundsError)
     end
 end
+
+specifyMethod("(this is List) toArray") with
+    it should("create an array with the same elements as the list") with
+        val list = [1, 2, 3] toList
+        val array = list toArray
+        array shouldBe(Array)
+        array[0] shouldEqual(1)
+        array[1] shouldEqual(2)
+        array[2] shouldEqual(3)
+    end
+
+    it should("make sure the array doesn't reference the mutable list") with
+        val list = ["ok"] toList
+        val array = list toArray
+        list[0] = "bad"
+        array[0] shouldEqual("ok")
+    end
+end

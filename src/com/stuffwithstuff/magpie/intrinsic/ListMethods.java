@@ -107,6 +107,20 @@ public class ListMethods {
     }
   }
 
+  @Def("(is List) toArray")
+  @Doc("Creates a new array containing the same elements as the list.")
+  public static class ToArray implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      List<Obj> list = left.asList();
+      List<Obj> array = new ArrayList<Obj>();
+      for (Obj element : list) {
+        array.add(element);
+      }
+      
+      return context.toArray(array);
+    }
+  }
+  
   private static int validateIndex(Context context, List<Obj> list, int index) {
     return validateIndex(context, list.size(), index);
   }
