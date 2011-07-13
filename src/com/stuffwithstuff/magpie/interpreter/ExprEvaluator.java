@@ -309,6 +309,12 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
   public Obj visit(VarExpr expr, Scope scope) {
     Obj value = evaluate(expr.getValue(), scope);
 
+    if (!PatternTester.test(mContext, expr.getPattern(), value, scope)) {
+      mContext.error(Name.NO_MATCH_ERROR, "The variable pattern \"" +
+          expr.getPattern() + "\" does not match the initialized value \"" +
+          mContext.getInterpreter().evaluateToString(value) + "\".");
+    }
+    
     PatternBinder.bind(mContext, expr.isMutable(), expr.getPattern(), value,
         scope);
     return value;

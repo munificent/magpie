@@ -31,5 +31,12 @@ specify("A 'var' expression") with
         i shouldEqual("abc")
     end
 
+    it should("throw a NoMatchError if the value doesn't match the " +
+              " pattern") with
+        fn
+            var a, b = "not record"
+        end shouldThrow(NoMatchError)
+    end
+
     // TODO(bob): Spec pattern destructuring.
 end

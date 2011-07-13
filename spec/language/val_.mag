@@ -39,5 +39,12 @@ specify("A 'val' expression") with
         i shouldEqual("before")
     end
 
+    it should("throw a NoMatchError if the value doesn't match the " +
+              " pattern") with
+        fn
+            val a, b = "not record"
+        end shouldThrow(NoMatchError)
+    end
+
     // TODO(bob): Spec pattern destructuring.
 end
