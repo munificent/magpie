@@ -1,5 +1,10 @@
 package com.stuffwithstuff.magpie.intrinsic;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
+
 import com.stuffwithstuff.magpie.Def;
 import com.stuffwithstuff.magpie.Doc;
 import com.stuffwithstuff.magpie.ast.Expr;
@@ -90,6 +95,33 @@ public class IntrinsicMethods {
     }
   }
 
+  @Def("(left is Record) ==(right is Record)")
+  @Doc("Returns true if the two records have the same fields.")
+  public static class Equals_Record implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      Map<String, Obj> fields = left.getFields();
+      Set<String> compared = new HashSet<String>();
+      
+      // Make sure the right record has all of the left record's fields.
+      for (Entry<String, Obj> entry : fields.entrySet()) {
+        Obj rightField = right.getField(entry.getKey());
+        if (rightField == null) return context.toObj(false);
+        if (!context.getInterpreter().objectsEqual(
+            entry.getValue(), rightField)) {
+          return context.toObj(false);
+        }
+        compared.add(entry.getKey());
+      }
+      
+      // Make sure the right record doesn't have any extra fields.
+      for (String field : right.getFields().keySet()) {
+        if (!compared.contains(field)) return context.toObj(false);
+      }
+      
+      return context.toObj(true);
+    }
+  }
+  
   @Def("(this) toString")
   @Doc("Returns a generic string representation of the object.")
   public static class ToString implements Intrinsic {

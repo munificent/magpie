@@ -45,6 +45,10 @@ public class Obj {
     return getField(Name.getTupleField(index));
   }
 
+  public Map<String, Obj> getFields() {
+    return mFields;
+  }
+  
   /**
    * Sets the given field to the given value.
    * @param name   The name of the field.

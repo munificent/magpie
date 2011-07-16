@@ -89,8 +89,15 @@ def (this) shouldEqual(expected, message is String)
     end
 end
 
+def escape(string is String)
+    string replace("\n", with: "\\n") \
+           replace("\r", with: "\\r") \
+           replace("\t", with: "\\t")
+end
+
 def (this) shouldEqual(expected)
-    this shouldEqual(expected, "Expected " + expected + " but was " + this)
+    this shouldEqual(expected, "Expected " + escape(expected toString) +
+        " but was " + escape(this toString))
 end
 
 def (this) shouldBe(expected is Class, message is String)

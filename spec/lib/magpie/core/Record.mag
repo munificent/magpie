@@ -1,0 +1,17 @@
+import spec.specify
+
+specifyMethod("(left is Record) ==(right is Record)") with
+    it should("return true if they have the same equal fields") with
+        (("a", b: true, c: 3) == ("a", b: true, c: 3)) shouldEqual(true)
+        (("a", b: true, c: 3) == ("a", b: true, c: 4)) shouldEqual(false)
+    end
+
+    it should("return false if either record has extra fields") with
+        ((1, 2, 3) == (1, 2)) shouldEqual(false)
+        ((1, 2) == (1, 2, 3)) shouldEqual(false)
+    end
+
+    it should("ignore the order of named fields") with
+        ((a: 1, b: 2) == (b: 2, a: 1)) shouldEqual(true)
+    end
+end
