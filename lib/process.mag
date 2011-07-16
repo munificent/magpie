@@ -1,0 +1,7 @@
+import classfile:com.stuffwithstuff.magpie.intrinsic.ProcessMethods
+
+def executeOutput(command is String)
+    /// Executes the given command in a new process and returns the output.
+    val out: output = execute(command)
+    output
+end

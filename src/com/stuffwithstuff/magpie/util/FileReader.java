@@ -47,15 +47,7 @@ public class FileReader {
   }
   
   public String readAll() throws IOException {
-    StringBuilder builder = new StringBuilder();
-    char[] buffer = new char[8192];
-    int read;
-
-    while ((read = mReader.read(buffer, 0, buffer.length)) > 0) {
-      builder.append(buffer, 0, read);
-    }
-
-    return builder.toString();
+    return IO.readAll(mReader);
   }
   
   private FileInputStream mStream;

@@ -2,6 +2,7 @@ package com.stuffwithstuff.magpie.intrinsic;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 
 import com.stuffwithstuff.magpie.Def;
 import com.stuffwithstuff.magpie.Doc;
@@ -85,7 +86,22 @@ public class StringMethods {
       return context.toObj(index);
     }
   }
-
+  
+  // TODO(bob): Need to make this line up with Regex replace/replaceAll.
+  @Def("(string is String) replace(before is String, with: after is String)")
+  @Doc("Replaces each instance of before with after.")
+  public static class Replace implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      String string = left.asString();
+      String before = right.getField(0).asString();
+      String after = right.getField("with").asString();
+      
+      // TODO(bob): Should just be replacing a string, not a pattern.
+      return context.toObj(
+          string.replaceAll(before, Matcher.quoteReplacement(after)));
+    }
+  }
+  
   // TODO(bob): Make an indexer that takes a range, so you can do:
   // "some string"[2 to(4)]
   @Def("(string is String) substring(from: from is Int, to: to is Int)")

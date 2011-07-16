@@ -1,0 +1,16 @@
+import spec.specify
+import process
+
+// Note: these tests expect to be execute various Unix commands.
+
+specifyMethod("execute(command is String)") with
+    it should("Return a record of the output and exit code") with
+        execute("echo hi") shouldEqual(out: "hi\n", exit: 0)
+    end
+end
+
+specifyMethod("executeOutput(command is String)") with
+    it should("Return the output") with
+        executeOutput("echo hi") shouldEqual("hi\n")
+    end
+end
