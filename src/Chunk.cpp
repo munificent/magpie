@@ -4,10 +4,10 @@ namespace magpie {
 
   Chunk::Chunk(int numRegisters)
   : numRegisters_(numRegisters) {
-    code_.add((123 << 16) | (0 << 8) | OP_LOAD_SHORT);
-    code_.add(  (0 << 16) | (1 << 8) | OP_MOVE);
-    code_.add(              (1 << 8) | OP_HACK_PRINT);
-    code_.add(                         OP_RETURN);
+    code_.add(MAKE_LOAD_SHORT(123, 0));
+    code_.add(MAKE_MOVE(0, 1));
+    code_.add(MAKE_HACK_PRINT(1));
+    code_.add(MAKE_RETURN(0));
   }
 
 }

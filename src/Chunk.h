@@ -2,13 +2,17 @@
 
 #include "Array.h"
 
-#define GET_OP(opcode) ((unsigned char)(opcode) & 0xff)
+#define OP_MOVE       (0x01) // A: from, B: to
+#define OP_LOAD_SHORT (0x02) // AB: value, C: register
+#define OP_CALL       (0x03) // A: arg, B: method, C: result
+#define OP_RETURN     (0x04) // A: result
+#define OP_HACK_PRINT (0x05) // A: register
 
-#define OP_MOVE       (0x01) //  unused(8) | from(8) | to(8) | opcode(8)
-#define OP_LOAD_SHORT (0x02) //  value(16) | register(8) | opcode(8)
-#define OP_CALL       (0x03) //  result register(8) | arg register(8) | method register(8) | opcode(8)
-#define OP_RETURN     (0x04) // unused(16) | register(8) | opcode(8)
-#define OP_HACK_PRINT (0x05) // unused(16) | register(8) | opcode(8)
+#define MAKE_MOVE(from, to)       ((from << 24) | (to << 16) | OP_MOVE)
+#define MAKE_LOAD_SHORT(value, r) ((value << 16) | (r << 8) | OP_LOAD_SHORT)
+#define MAKE_CALL(arg, method, result) ((arg << 24) | (method << 16) | (result << 8) | OP_CALL)
+#define MAKE_RETURN(result) ((result << 24) | OP_RETURN)
+#define MAKE_HACK_PRINT(r) ((r << 24) | OP_HACK_PRINT)
 
 namespace magpie {
 
