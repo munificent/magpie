@@ -12,9 +12,17 @@
 
 namespace magpie {
 
+  Fiber::Fiber() {
+  }
+  
   void Fiber::interpret(Ref<Chunk> chunk) {
     call(chunk, Ref<Object>());
     run();
+  }
+  
+  unsigned short Fiber::addLiteral(Ref<Object> value) {
+    literals_.add(value);
+    return literals_.count() - 1;
   }
 
   void Fiber::run() {
@@ -34,10 +42,10 @@ namespace magpie {
           break;
         }
           
-        case OP_LOAD_SHORT: {
-          unsigned short value = (instruction & 0xffff0000) >> 16;
+        case OP_LITERAL: {
+          unsigned short index = (instruction & 0xffff0000) >> 16;
           unsigned char reg = GET_A(instruction);
-          frame.setRegister(reg, Object::create((double)value));
+          frame.setRegister(reg, literals_[index]);
           break;
         }
           
@@ -85,6 +93,10 @@ namespace magpie {
           std::cout << "Register " << (int)reg << " = " << value << "\n";
           break;
         }
+          
+        default:
+          ASSERT(false, "Unknown opcode.");
+          break;
       }
     }
   }

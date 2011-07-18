@@ -10,9 +10,12 @@ namespace magpie {
 
   class Fiber {
   public:
-    Fiber() {}
+    Fiber();
     
     void interpret(Ref<Chunk> chunk);
+    
+    // TODO(bob): Temp?
+    unsigned short addLiteral(Ref<Object> value);
     
   private:
     void run();
@@ -20,6 +23,7 @@ namespace magpie {
     
     Array<Ref<CallFrame> > stack_;
     Ref<Object>            return_;
+    Array<Ref<Object> >    literals_;
     
     NO_COPY(Fiber);
   };
