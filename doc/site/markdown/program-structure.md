@@ -17,7 +17,7 @@ Comments are as in C, C++, Java, etc.:
 
 ## Doc Comments
 
-Magpie has a third kind of comment called *documentation comments* or simply *doc comments*. They start with three slashes and proceed to the end of the line.
+In addition to regular line and block comments, Magpie has a third kind of comment called *documentation comments* or simply *doc comments*. They start with three slashes and proceed to the end of the line.
 
     :::magpie
     def square(n is Int)

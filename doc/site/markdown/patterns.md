@@ -1,21 +1,21 @@
 ^title Patterns
 
-If you've seen a few lines of Magpie code, you've likely seen patterns already. They are used everywhere in the language: [`match` expressions](pattern-matching.html) obviously use them, but so do [variable declarations](variables.html), [method parameters](multimethods.html), and `catch` clauses for handling exceptions.
+If you've seen a few lines of Magpie code, you've likely seen patterns already. They are used everywhere in the language: [`match` expressions](pattern-matching.html) obviously use them, but so do [variable declarations](variables.html), [method parameters](multimethods.html), and `catch` clauses for [handling exceptions](error-handling.html).
 
 Patterns are the foundation that control flow and naming are built on in Magpie. Given an [object](objects.html), a pattern does two things: First, it *tests* if the object *matches* that pattern. Then, if and only if it does, it may *bind new variables* to parts of the object. By performing those operations together, patterns can pull data out of an object but only when the object correctly has the data you're asking for.
 
-A quick example in the context of a `match` expression should help clarify this:
+A quick example in the context of a `match` expression should clarify:
 
     :::magpie
     match "s", 234, true
         case "s", n is Int, _ then print(n + 2)
     end
 
-Here, the value being matched is the record `"s", 234, true`. The pattern is `"s", n is Int, _`, a record pattern containing a value pattern, type pattern, and wildcard pattern, respectively. This pattern *does* match that value, which means it will bind `n` and then evaluate the body in that scope. In this case, the body is just `print(n + 2)`.
+Here, the value being matched is the [record](records.html) `"s", 234, true`. The pattern is `"s", n is Int, _`, a record pattern containing a value pattern, type pattern, and wildcard pattern, respectively. This pattern *does* match that value, which means it will bind `n` and then evaluate the body in that scope. In this case, the body is just `print(n + 2)`.
 
 ## Kinds of Patterns
 
-There are a few different basic patterns built in:
+Syntactically, patterns are a bit like the twin of expressions. Like expressions, there are different atomic pattern syntaxes which can be composed to form larger patterns. There are six kinds of patterns:
 
 ### Wildcard Patterns
 
