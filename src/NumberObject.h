@@ -13,6 +13,10 @@ namespace magpie {
     
     virtual NumberObject* asNumber() { return this; }
     
+    virtual void debugTrace(std::ostream & stream) const {
+      stream << value_;
+    }
+    
     double getValue() const { return value_; }
     
   private:

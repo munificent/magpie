@@ -44,7 +44,7 @@ namespace magpie {
           
         case OP_LITERAL: {
           unsigned short index = (instruction & 0xffff0000) >> 16;
-          unsigned char reg = GET_A(instruction);
+          unsigned char reg = GET_C(instruction);
           frame.setRegister(reg, literals_[index]);
           break;
         }
@@ -52,7 +52,9 @@ namespace magpie {
         case OP_CALL: {
           unsigned char argReg = GET_A(instruction);
           unsigned char methodReg = GET_B(instruction);
+          
           Ref<Object> arg = frame.getRegister(argReg);
+          Ref<Object> methodObj = frame.getRegister(methodReg);
           Multimethod* multimethod = frame.getRegister(methodReg)->asMultimethod();
           
           Ref<Chunk> method = multimethod->select(arg);
@@ -61,6 +63,7 @@ namespace magpie {
           // Store the IP back into the callframe so we know where to resume
           // when we return to it.
           frame.setInstruction(ip - 1);
+          ip = 0;
           
           call(method, arg);
           break;
@@ -68,17 +71,21 @@ namespace magpie {
         
         case OP_RETURN: {
           unsigned char reg = GET_A(instruction);
-          return_ = frame.getRegister(reg);
+          
+          Ref<Object> result = frame.getRegister(reg);          
           stack_.remove(-1);
           
           if (stack_.count() > 0) {
             // Give the result back and resume the calling method.
             CallFrame& caller = *stack_[-1];
             ip = caller.getInstruction();
-            
-            unsigned int callInstruction = (*frame.getChunk())[ip];
+
+            unsigned int callInstruction = (*caller.getChunk())[ip];
             unsigned char reg = GET_C(callInstruction);
-            caller.setRegister(reg, return_);
+            caller.setRegister(reg, result);
+            
+            // Done with the CALL that we're returning from.
+            ip++;
           } else {
             // The last method has returned, so end the fiber.
             running = false;
@@ -88,9 +95,9 @@ namespace magpie {
           
         case OP_HACK_PRINT: {
           unsigned char reg = GET_A(instruction);
+
           Ref<Object> object = frame.getRegister(reg);
-          double value = object->asNumber()->getValue();
-          std::cout << "Register " << (int)reg << " = " << value << "\n";
+          std::cout << "Hack print: " << object << "\n";
           break;
         }
           

@@ -3,8 +3,8 @@
 namespace magpie {
   
   Ref<Chunk> Multimethod::select(Ref<Object> arg) {
-    // TODO(bob) Not implemented yet!
-    return Ref<Chunk>();
+    // TODO(bob) Temp!
+    return code_;
   }
   
 }

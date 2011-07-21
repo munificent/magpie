@@ -22,7 +22,6 @@ namespace magpie {
     void call(Ref<Chunk> chunk, Ref<Object> arg);
     
     Array<Ref<CallFrame> > stack_;
-    Ref<Object>            return_;
     Array<Ref<Object> >    literals_;
     
     NO_COPY(Fiber);
