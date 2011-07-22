@@ -3,13 +3,6 @@
 #include "Chunk.h"
 #include "NumberObject.h"
 
-// These macros are for destructuring an instruction.
-
-#define GET_OP(opcode) ((unsigned char)(opcode) & 0xff)
-#define GET_A(opcode) ((unsigned char)(((opcode) & 0xff000000) >> 24))
-#define GET_B(opcode) ((unsigned char)(((opcode) & 0x00ff0000) >> 16))
-#define GET_C(opcode) ((unsigned char)(((opcode) & 0x0000ff00) >>  8))
-
 namespace magpie {
 
   Fiber::Fiber() {
@@ -43,7 +36,7 @@ namespace magpie {
         }
           
         case OP_LITERAL: {
-          unsigned short index = (instruction & 0xffff0000) >> 16;
+          unsigned short index = GET_Ax(instruction);
           unsigned char reg = GET_C(instruction);
           frame.setRegister(reg, literals_[index]);
           break;
