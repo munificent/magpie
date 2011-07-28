@@ -129,8 +129,8 @@ But there's a problem. We're unquoting `name` and `age`, but those aren't expres
 
     :::magpie
     def makeExpression(name String, age Int -> Expression)
-        var nameExpr = StringExpression(name)
-        var ageExpr  = IntExpression(age)
+        var nameExpr = StringExpression new(name)
+        var ageExpr  = IntExpression new(age)
         { print(`nameExpr ~~ "is" ~~ `ageExpr ~~ "years old.")
     end
 
