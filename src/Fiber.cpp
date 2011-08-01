@@ -2,18 +2,20 @@
 
 #include "Chunk.h"
 #include "NumberObject.h"
+#include "VM.h"
 
 namespace magpie {
 
-  Fiber::Fiber() {
+  Fiber::Fiber(VM& vm)
+  : vm_(vm) {
   }
   
-  void Fiber::interpret(Ref<Chunk> chunk) {
-    call(chunk, Ref<Object>());
+  void Fiber::interpret(gc<Chunk> chunk) {
+    call(chunk, gc<Object>());
     run();
   }
   
-  unsigned short Fiber::addLiteral(Ref<Object> value) {
+  unsigned short Fiber::addLiteral(gc<Object> value) {
     literals_.add(value);
     return literals_.count() - 1;
   }
@@ -46,11 +48,11 @@ namespace magpie {
           unsigned char argReg = GET_A(instruction);
           unsigned char methodReg = GET_B(instruction);
           
-          Ref<Object> arg = frame.getRegister(argReg);
-          Ref<Object> methodObj = frame.getRegister(methodReg);
+          gc<Object> arg = frame.getRegister(argReg);
+          gc<Object> methodObj = frame.getRegister(methodReg);
           Multimethod* multimethod = frame.getRegister(methodReg)->asMultimethod();
           
-          Ref<Chunk> method = multimethod->select(arg);
+          gc<Chunk> method = multimethod->select(arg);
           // TODO(bob): Handle method not found.
           
           // Store the IP back into the callframe so we know where to resume
@@ -65,7 +67,7 @@ namespace magpie {
         case OP_RETURN: {
           unsigned char reg = GET_A(instruction);
           
-          Ref<Object> result = frame.getRegister(reg);          
+          gc<Object> result = frame.getRegister(reg);
           stack_.remove(-1);
           
           if (stack_.count() > 0) {
@@ -89,7 +91,7 @@ namespace magpie {
         case OP_HACK_PRINT: {
           unsigned char reg = GET_A(instruction);
 
-          Ref<Object> object = frame.getRegister(reg);
+          gc<Object> object = frame.getRegister(reg);
           std::cout << "Hack print: " << object << "\n";
           break;
         }
@@ -101,8 +103,8 @@ namespace magpie {
     }
   }
   
-  void Fiber::call(Ref<Chunk> chunk, Ref<Object> arg) {
-    stack_.add(Ref<CallFrame>(new CallFrame(chunk)));
+  void Fiber::call(gc<Chunk> chunk, gc<Object> arg) {
+    stack_.add(gc<CallFrame>(new (vm_) CallFrame(chunk)));
     
     // The argument always goes into the first register.
     stack_[-1]->setRegister(0, arg);

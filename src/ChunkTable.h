@@ -2,7 +2,7 @@
 
 #include "Array.h"
 #include "Chunk.h"
-#include "Ref.h"
+#include "GC.h"
 
 namespace magpie {
   //### bob: code is never removed from this, even if no longer needed.
@@ -13,13 +13,13 @@ namespace magpie {
   public:
     // Adds the given chunk to the table if not already present, and returns
     // its ID.
-    int add(Ref<Chunk> chunk);
+    int add(gc<Chunk> chunk);
     
     // Looks up the chunk with the given ID in the table.
-    Ref<Chunk> find(int id);
+    gc<Chunk> find(int id);
     
   private:
-    Array<Ref<Chunk> > chunks_;
+    Array<gc<Chunk> > chunks_;
   };
 }
 

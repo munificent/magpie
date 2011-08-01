@@ -2,18 +2,20 @@
 
 #include <iostream>
 
+#include "GC.h"
 #include "Macros.h"
-#include "Ref.h"
+#include "Managed.h"
 
 namespace magpie {
   class Multimethod;
   class NumberObject;
+  class VM;
   
-  class Object {
+  class Object : public Managed {
   public:
-    static Ref<Object> create(double value);
+    static gc<Object> create(VM& vm, double value);
     
-    Object() {}
+    Object() : Managed() {}
     
     virtual Multimethod*  asMultimethod() { return NULL; }
     virtual NumberObject* asNumber()      { return NULL; }

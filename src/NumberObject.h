@@ -11,6 +11,8 @@ namespace magpie {
     : Object(),
       value_(value) {}
     
+    virtual size_t getSize() const { return sizeof(NumberObject); }
+
     virtual NumberObject* asNumber() { return this; }
     
     virtual void debugTrace(std::ostream & stream) const {

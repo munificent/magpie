@@ -2,13 +2,16 @@
 
 #include "Array.h"
 #include "Bytecode.h"
+#include "Managed.h"
 
 namespace magpie {
 
-  class Chunk {
+  class Chunk : public Managed {
   public:
     Chunk(int numRegisters);
     
+    virtual size_t getSize() const { return sizeof(Chunk); }
+
     // Gets the instruction at the given index. Indexes are zero-based from the
     // beginning of the array. Negative indexes are from the end of the array
     // and go forward, so that -1 is the last item in the array.
