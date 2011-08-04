@@ -36,9 +36,6 @@ namespace magpie {
 
   void Heap::reset() {
     free_ = memory_;
-    
-    // TODO(bob): Just for debugging.
-    memset(memory_, 0xbb, (unsigned char*)end_ - (unsigned char*)memory_);
   }
   
   Managed* Heap::getFirst() {

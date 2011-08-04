@@ -12,7 +12,6 @@ struct Cons : public magpie::Managed {
   
   virtual size_t getSize() const { return sizeof(Cons); }
   virtual void reach(Memory& memory) {
-    std::cout << "reach " << id << "\n";
     memory.reach(next);
   }
   
@@ -30,7 +29,7 @@ struct TestRoots : public magpie::RootSource {
 
 void testCollector() {
   TestRoots roots;
-  Memory memory(roots, 1000);
+  Memory memory(roots, 10000000);
   
   gc<Cons> notRoot;
   
@@ -38,12 +37,10 @@ void testCollector() {
   gc<Cons>* a = &roots.root;
   gc<Cons>* b = &notRoot;
   int id = 0;
-  for (int i = 0; i < 600; i++) {
-    std::cout << "allocate " << id << "\n";
+  for (int i = 0; i < 600000; i++) {
     a->set(new (memory) Cons(id++));
     a = &((*a)->next);
 
-    std::cout << "allocate " << id << "\n";
     b->set(new (memory) Cons(id++));
     b = &((*b)->next);
   }

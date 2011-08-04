@@ -44,9 +44,6 @@ namespace magpie {
     // The actual heaps.
     Heap a_;
     Heap b_;
-    
-    int numAllocated_;
-    int numCopied_;
 
     NO_COPY(Memory);
   };

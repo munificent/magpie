@@ -11,19 +11,12 @@ namespace magpie {
   Memory::Memory(RootSource& roots, size_t heapSize)
   : roots_(roots),
     a_(heapSize),
-    b_(heapSize),
-    numAllocated_(0),
-    numCopied_(0) {
+    b_(heapSize) {
     to_ = &a_;
     from_ = &b_;
   }
   
   void Memory::collect() {
-    std::cout << "Collecting...\n";
-    std::cout << "allocated " << numAllocated_ << "\n";
-
-    numCopied_ = 0;
-    
     // Copy the roots to to-space.
     roots_.reachRoots(*this);
     
@@ -42,8 +35,6 @@ namespace magpie {
     Heap* temp = from_;
     from_ = to_;
     to_ = temp;
-    
-    std::cout << "copied    " << numCopied_ << "\n";
   }
   
   void* Memory::allocate(size_t size) {
@@ -51,8 +42,6 @@ namespace magpie {
       // Heap is full, so trigger a GC.
       collect();
     }
-    
-    numAllocated_++;
     
     // TODO(bob): Handle failure.
     return from_->allocate(size);
@@ -72,8 +61,6 @@ namespace magpie {
       
       // Replace the old object with a forwarding address.
       ::new (obj) ForwardingAddress(dest);
-      
-      numCopied_++;
       
       // Update the reference to point to the new location.
       return static_cast<Managed*> (dest);
