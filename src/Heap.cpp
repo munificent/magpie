@@ -5,7 +5,7 @@
 namespace magpie {
   
   Heap::Heap(size_t size) {
-    memory_ = reinterpret_cast<char*>(operator new(size));
+    memory_ = reinterpret_cast<char*>(::operator new(size));
     free_ = memory_;
     end_ = memory_ + size;
   }
