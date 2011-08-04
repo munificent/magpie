@@ -20,6 +20,11 @@ namespace magpie {
     // the heap doesn't have enough free space.
     void* allocate(size_t size);
     
+    // Resets the heap back to being completely unallocated. Note that this
+    // will not call destructors on any objects living on this heap. They just
+    // disappear in a puff of smoke.
+    void reset();
+    
     // Gets the first object contained in this heap.
     Managed* getFirst();
     
@@ -28,9 +33,9 @@ namespace magpie {
     Managed* getNext(Managed* current);
     
   private:
-    void* memory_;
-    void* free_;  // The first byte of available memory.
-    void* end_;   // The first byte past the end of the heap.
+    char* memory_;
+    char* free_;  // The first byte of available memory.
+    char* end_;   // The first byte past the end of the heap.
     
     NO_COPY(Heap);
   };

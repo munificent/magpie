@@ -7,13 +7,13 @@
 #include "Managed.h"
 
 namespace magpie {
+  class Memory;
   class Multimethod;
   class NumberObject;
-  class VM;
   
   class Object : public Managed {
   public:
-    static gc<Object> create(VM& vm, double value);
+    static gc<Object> create(Memory& memory, double value);
     
     Object() : Managed() {}
     

@@ -7,31 +7,35 @@
 #include "Macros.h"
 
 namespace magpie {
-  class Managed;
-  class VM;
+  class RootSource;
   
   // The dynamic memory manager. Uses Cheney-style semi-space copying for
   // garbage collection.
   class Memory {
   public:
-    typedef float(*reachCallback)(Memory*, Managed*);
-    
-    Memory(VM& vm, size_t heapSize);
+    Memory(RootSource& roots, size_t heapSize);
     
     void collect();
     
     void* allocate(size_t size);
-
-    // If the pointed-to object is in from-space, copies it to to-space and
-    // leaves a forwarding pointer. If it's a forwarding pointer already, just
-    // updates the reference. After calling, ref will point to the new object
-    // in to-space.
+    
+    // Indicates that the given object is reachable and should be preserved
+    // during garbage collection.
     template <class T>
-    void copy(gc<T>& ref);
+    void reach(gc<T>& ref) {
+      if (ref.isNull()) return;
+      Managed* newLocation = copy(&(*ref));
+      ref.set(static_cast<T*> (newLocation));
+    }
     
   private:
     
-    VM&  vm_;
+    // If the pointed-to object is in from-space, copies it to to-space and
+    // leaves a forwarding pointer. If it's a forwarding pointer already, just
+    // updates the reference. Returns the new address of the object.
+    Managed* copy(Managed* obj);
+
+    RootSource&  roots_;
     
     // Pointers to a and b. These will swap back and forth on each collection.
     Heap* from_;
@@ -40,6 +44,9 @@ namespace magpie {
     // The actual heaps.
     Heap a_;
     Heap b_;
+    
+    int numAllocated_;
+    int numCopied_;
 
     NO_COPY(Memory);
   };

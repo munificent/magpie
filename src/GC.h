@@ -25,9 +25,7 @@ namespace magpie {
     T& operator *() const { return *obj_; }
     T* operator ->() const { return obj_; }
     
-    void* getRawPointer() const {
-      return reinterpret_cast<void*>(obj_);
-    }
+    bool isNull() const { return obj_ == NULL; }
     
     void set(T* obj) {
       obj_ = obj;

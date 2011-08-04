@@ -4,37 +4,46 @@
 #include "ForwardingAddress.h"
 #include "GC.h"
 #include "Managed.h"
-#include "VM.h"
+#include "RootSource.h"
 
 namespace magpie {
   
-  Memory::Memory(VM& vm, size_t heapSize)
-  : vm_(vm),
+  Memory::Memory(RootSource& roots, size_t heapSize)
+  : roots_(roots),
     a_(heapSize),
-    b_(heapSize) {
+    b_(heapSize),
+    numAllocated_(0),
+    numCopied_(0) {
     to_ = &a_;
     from_ = &b_;
   }
   
   void Memory::collect() {
     std::cout << "Collecting...\n";
+    std::cout << "allocated " << numAllocated_ << "\n";
+
+    numCopied_ = 0;
     
-    // Copy the root to to-space.
-    gc<Fiber>& root = vm_.getFiber();
-    copy(root);
+    // Copy the roots to to-space.
+    roots_.reachRoots(*this);
     
     // Walk through to-space, copying over every object reachable from it.
     Managed* reached = to_->getFirst();
     while (reached != NULL) {
-      reached->reachRefs(*this);
+      reached->reach(*this);
       reached = to_->getNext(reached);
     }
 
+    // We've copied everything reachable from from_ so it can be cleared now.
+    from_->reset();
+    
     // Swap the semi-spaces. Everything is now in to_ which becomes the new
     // from_ for the next collection.
     Heap* temp = from_;
     from_ = to_;
     to_ = temp;
+    
+    std::cout << "copied    " << numCopied_ << "\n";
   }
   
   void* Memory::allocate(size_t size) {
@@ -43,28 +52,31 @@ namespace magpie {
       collect();
     }
     
+    numAllocated_++;
+    
     // TODO(bob): Handle failure.
     return from_->allocate(size);
   }
-  
-  template <class T>
-  void Memory::copy(gc<T>& ref) {
+    
+  Managed* Memory::copy(Managed* obj) {
     // See if what we're pointing to has already been moved.
-    T* forward = static_cast<T*>(ref->getForwardingAddress());
+    Managed* forward = obj->getForwardingAddress();
     if (forward) {
       // It has, so just update this reference.
-      ref.set(forward);
+      return forward;
     } else {
       // It hasn't, so copy it to to-space.
-      size_t size = ref->getSize();
-      T* dest = reinterpret_cast<T*>(to_->allocate(size));
-      memcpy(dest, &(*ref), size);
+      size_t size = obj->getSize();
+      Managed* dest = static_cast<Managed*> (to_->allocate(size));
+      memcpy(dest, obj, size);
       
       // Replace the old object with a forwarding address.
-      ::new (ref.getRawPointer()) ForwardingAddress(dest);
+      ::new (obj) ForwardingAddress(dest);
+      
+      numCopied_++;
       
       // Update the reference to point to the new location.
-      ref.set(dest);
+      return static_cast<Managed*> (dest);
     }
   }
 

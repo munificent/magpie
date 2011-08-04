@@ -4,8 +4,6 @@
 #include "Memory.h"
 
 namespace magpie {
-  class VM;
-  
   // Base class for any object that is memory managed by the garbage collector
   class Managed {
   public:
@@ -24,9 +22,9 @@ namespace magpie {
     // This will be called by the garbage collector when this object has been
     // reached. Subclasses should override this and call Memory::copy() on any
     // gc<T> references that the object contains.
-    virtual void reachRefs(Memory& memory) {}
+    virtual void reach(Memory& memory) {}
 
-    void* operator new(size_t s, VM& vm);
+    void* operator new(size_t s, Memory& memory);
     
   private:
     
