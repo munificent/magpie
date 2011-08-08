@@ -209,8 +209,8 @@ public class Interpreter {
     return record;
   }
   
-  public Obj createRecord(Map<String, Obj> fields) {
-    Obj record = instantiate(mRecordClass, null);
+  public Obj createRecord(List<String> keys, Map<String, Obj> fields) {
+    Obj record = instantiate(mRecordClass, keys);
     
     for (Entry<String, Obj> field : fields.entrySet()) {
       record.setField(field.getKey(), field.getValue());

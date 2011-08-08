@@ -246,14 +246,20 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
 
   @Override
   public Obj visit(RecordExpr expr, Scope scope) {
+    
+    // TODO(bob): Hack, keep track of order keys appear for better pretty-
+    // printing.
+    List<String> keys = new ArrayList<String>();
+    
     // Evaluate the fields.
     Map<String, Obj> fields = new HashMap<String, Obj>();
     for (Pair<String, Expr> entry : expr.getFields()) {
+      keys.add(entry.getKey());
       Obj value = evaluate(entry.getValue(), scope);
       fields.put(entry.getKey(), value);
     }
 
-    return mContext.toObj(fields);
+    return mContext.toObj(keys, fields);
   }
 
   @Override

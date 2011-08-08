@@ -109,8 +109,10 @@ public class StringMethods {
   public static class Substring_FromTo implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       String string = left.asString();
-      int from = right.getField("from").asInt();
-      int to = right.getField("to").asInt();
+      int from = Indexable.validateIndex(context, string,
+          right.getField("from").asInt());
+      int to = Indexable.validateIndex(context, string,
+          right.getField("to").asInt());
       return context.toObj(string.substring(from, to + 1));
     }
   }

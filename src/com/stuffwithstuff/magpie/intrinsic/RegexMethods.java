@@ -96,13 +96,17 @@ public class RegexMethods {
       groups.add(context.toObj(matcher.group(i)));
     }
     
+    List<String> keys = new ArrayList<String>();
+    keys.add("start");
+    keys.add("finish");
+    keys.add("groups");
     Map<String, Obj> fields = new HashMap<String, Obj>();
     fields.put("start", context.toObj(matcher.start()));
     fields.put("finish", context.toObj(matcher.end()));
     fields.put("groups", context.toArray(groups));
     
     return context.getInterpreter().constructNewObject(context, sMatchClass, 
-        context.toObj(fields));
+        context.toObj(keys, fields));
   }
   
   private static ClassObj sRegexClass;

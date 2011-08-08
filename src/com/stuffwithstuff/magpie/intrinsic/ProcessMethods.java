@@ -3,7 +3,9 @@ package com.stuffwithstuff.magpie.intrinsic;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.stuffwithstuff.magpie.Def;
@@ -27,11 +29,15 @@ public class ProcessMethods {
         String output = IO.readAll(new BufferedReader(
             new InputStreamReader(process.getInputStream())));
         
+        List<String> keys = new ArrayList<String>();
+        keys.add("out");
+        keys.add("exit");
+
         Map<String, Obj> record = new HashMap<String, Obj>();
         record.put("out", context.toObj(output));
         record.put("exit", context.toObj(exit));
         
-        return context.toObj(record);
+        return context.toObj(keys, record);
       } catch (IOException e) {
         e.printStackTrace();
       } catch (InterruptedException e) {

@@ -74,8 +74,8 @@ public class Context {
     return getInterpreter().createRecord(fields);
   }
   
-  public Obj toObj(Map<String, Obj> fields) {
-    return getInterpreter().createRecord(fields);
+  public Obj toObj(List<String> keys, Map<String, Obj> fields) {
+    return getInterpreter().createRecord(keys, fields);
   }
 
   public Obj toArray(List<Obj> elements) {

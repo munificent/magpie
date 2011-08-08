@@ -1,7 +1,6 @@
 package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -125,29 +124,43 @@ public class Obj {
         "The object \"%s\" is not a string.", this));
   }
   
+  @SuppressWarnings("unchecked")
   @Override
   public String toString() {
     if (mValue instanceof String) {
       return "\"" + mValue + "\"";
-    } else if (mValue != null) {
-      return mValue.toString();
     } else if (mClass.getName().equals("Record")) {
       StringBuilder builder = new StringBuilder();
       
-      // Show fields in sorted order.
-      List<String> fields = new ArrayList<String>(mFields.keySet());
-      Collections.sort(fields);
-      
-      for (int i = 0; i < fields.size(); i++) {
-        if (i > 0) builder.append(", ");
-        String field = fields.get(i);
-        builder.append(field).append(": ").append(mFields.get(field));
+      // Show fields in the order they appeared.
+      // TODO(bob): Hack. Assumes key list is in value. Lame.
+      List<String> keys;
+      if (mValue instanceof List<?>) {
+        keys = (List<String>) mValue;
+      } else {
+        // TODO(bob): Hack.
+        keys = new ArrayList<String>();
+        for (String key : mFields.keySet()) {
+          keys.add(key);
+        }
       }
       
+      for (int i = 0; i < keys.size(); i++) {
+        String key = keys.get(i);
+        if (i > 0) builder.append(", ");
+        // Omit the field if it's positional.
+        if (!key.equals(Integer.toString(i))) {
+          builder.append(key).append(": ");
+        }
+        builder.append(mFields.get(key));
+      }
+            
       return builder.toString();
       
     } else if (mClass.getName().equals("Nothing")) {
       return "nothing";
+    } else if (mValue != null) {
+      return mValue.toString();
     }
 
     return "Instance of " + mClass.getName();
