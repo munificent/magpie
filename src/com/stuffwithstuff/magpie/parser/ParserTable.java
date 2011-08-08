@@ -16,6 +16,10 @@ public class ParserTable<T> {
     mNameTable.put(name, parser);
   }
   
+  public boolean contains(String name) {
+    return mNameTable.containsKey(name);
+  }
+  
   public void define(TokenType type, T parser) {
     Expect.notNull(parser);
     

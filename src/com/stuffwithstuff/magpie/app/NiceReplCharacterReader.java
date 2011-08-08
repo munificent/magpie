@@ -55,10 +55,12 @@ public class NiceReplCharacterReader extends ReplReader {
         
         // Identifiers.
         case NAME:
-          if (token.isKeyword("this") || token.isKeyword("nothing")) {
+          if (token.isKeyword("this") ||
+              token.isKeyword("nothing") ||
+              token.isKeyword("it")) {
             // special identifiers
             Term.set(ForeColor.LIGHT_BLUE);
-          } else if (repl.isReservedWord(token.getString())) {
+          } else if (repl.isKeyword(token.getString())) {
             Term.set(ForeColor.CYAN);
           } else {
             Term.set(ForeColor.WHITE);

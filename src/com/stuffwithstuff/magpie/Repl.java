@@ -38,8 +38,8 @@ public class Repl {
     }
   }
   
-  public boolean isReservedWord(String name) {
-    return mInterpreter.getBaseModule().getGrammar().isReserved(name);
+  public boolean isKeyword(String name) {
+    return mInterpreter.getBaseModule().getGrammar().isKeyword(name);
   }
 
   private final Interpreter mInterpreter;
