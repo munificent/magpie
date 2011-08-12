@@ -55,7 +55,7 @@ Unlike a returned error, a thrown error will not be given back to the calling co
 Errors are caught using a *catch clause*, which is `catch` followed by a [pattern](patterns.html), followed by `then`, and finally the expression or block to execute when an error is caught.
 
     :::magpie
-    def canDivide?(numerator is Int, denominator is Int)
+    def canDivide(numerator is Int, denominator is Int)
         safeDivide(numerator, denominator)
         true // If we got here, no error was thrown.
     catch err is DivideByZeroError then
@@ -65,7 +65,7 @@ Errors are caught using a *catch clause*, which is `catch` followed by a [patter
 You can see here that unlike the exception-handling syntax in most languages, Magpie does not have an explicit `try` syntax. Instead, *any* [block](blocks.html) is implicitly a "try" block and may have catch clauses. In `canDivide`, the block is the method body itself, but other blocks may have catch clauses. For example:
 
     :::magpie
-    if someCondition? then
+    if someCondition then
         doSomethingUnsafe()
     catch err is Error then
         // Failed.

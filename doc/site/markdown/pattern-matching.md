@@ -43,7 +43,7 @@ A case body may also be a block, as you'd expect. If it's the last case in the m
             print("apple")
             print("pie crust")
             print("ice cream")
-        case "lemon tart" // "case" here ends "apple pie" block
+        case "lemon tart" then // "case" here ends "apple pie" block
             print("lemon")
             print("pastry shell")
         end // last case block must end with "end"
