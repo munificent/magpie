@@ -19,9 +19,9 @@ def (this is String) replace(regex is Regex, block is Function)
     /// the results of executing the block on the matching region.
     val result = this find(regex)
     if result then
-        val preString = this substring(from: 0, to: result start - 1)
-        val postString = this substring(from: result finish)
-        preString + block call(result) + postString
+        val before = this substring(from: 0, count: result start)
+        val after = this substring(from: result finish)
+        before + block call(result) + after
     else this
 end
 
