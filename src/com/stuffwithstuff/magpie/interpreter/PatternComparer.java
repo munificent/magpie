@@ -1,6 +1,5 @@
 package com.stuffwithstuff.magpie.interpreter;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -48,18 +47,32 @@ import com.stuffwithstuff.magpie.ast.pattern.WildcardPattern;
  * same way (or are the same) then the type with the winning fields wins. For
  * example, (Derived, Int) beats (Base, Int).
  */
-public class MethodLinearizer implements Comparator<Callable> {
-  public MethodLinearizer(Context context) {
+public class PatternComparer {
+  public static enum Result {
+    LESS,
+    GREATER,
+    SAME,
+    NONE;
+    
+    Result reverse() {
+      switch (this) {
+      case LESS: return GREATER;
+      case GREATER: return LESS;
+      default: return this;
+      }
+    }
+  }
+  
+  public PatternComparer(Context context) {
     mContext = context;
   }
   
-  @Override
-  public int compare(Callable method1, Callable method2) {
+  public Result compare(Callable method1, Callable method2) {
     return compare(method1.getPattern(), method1.getClosure(),
                    method2.getPattern(), method2.getClosure());
   }
 
-  private int compare(Pattern pattern1, Scope scope1,
+  private Result compare(Pattern pattern1, Scope scope1,
       Pattern pattern2, Scope scope2) {
     pattern1 = pattern1.accept(new PatternSimplifier(), null);
     pattern2 = pattern2.accept(new PatternSimplifier(), null);
@@ -71,36 +84,36 @@ public class MethodLinearizer implements Comparator<Callable> {
     switch (kind1) {
     case ANY:
       switch (kind2) {
-      case ANY:     return 0;
-      case RECORD:  return SECOND_WINS;
-      case TYPE:    return SECOND_WINS;
-      case VALUE:   return SECOND_WINS;
+      case ANY:     return Result.SAME;
+      case RECORD:  return Result.LESS;
+      case TYPE:    return Result.LESS;
+      case VALUE:   return Result.LESS;
       default:
         throw new UnsupportedOperationException("Unknown pattern kind.");
       }
     case RECORD:
       switch (kind2) {
-      case ANY:     return FIRST_WINS;
+      case ANY:     return Result.GREATER;
       case RECORD:  return compareRecords(pattern1, scope1, pattern2, scope2);
-      case TYPE:    return FIRST_WINS;
-      case VALUE:   return SECOND_WINS;
+      case TYPE:    return Result.GREATER;
+      case VALUE:   return Result.LESS;
       default:
         throw new UnsupportedOperationException("Unknown pattern kind.");
       }
     case TYPE:
       switch (kind2) {
-      case ANY:     return FIRST_WINS;
-      case RECORD:  return SECOND_WINS;
+      case ANY:     return Result.GREATER;
+      case RECORD:  return Result.LESS;
       case TYPE:    return compareTypes(pattern1, scope1, pattern2, scope2);
-      case VALUE:   return SECOND_WINS;
+      case VALUE:   return Result.LESS;
       default:
         throw new UnsupportedOperationException("Unknown pattern kind.");
       }
     case VALUE:
       switch (kind2) {
-      case ANY:     return FIRST_WINS;
-      case RECORD:  return FIRST_WINS;
-      case TYPE:    return FIRST_WINS;
+      case ANY:     return Result.GREATER;
+      case RECORD:  return Result.GREATER;
+      case TYPE:    return Result.GREATER;
       case VALUE:   return compareValues(pattern1, scope1, pattern2, scope2);
       default:
         throw new UnsupportedOperationException("Unknown pattern kind.");
@@ -130,7 +143,7 @@ public class MethodLinearizer implements Comparator<Callable> {
     return false;
   }
   
-  private int compareRecords(Pattern pattern1, Scope scope1,
+  private Result compareRecords(Pattern pattern1, Scope scope1,
       Pattern pattern2, Scope scope2) {
     Map<String, Pattern> record1 = ((RecordPattern)pattern1).getFields();
     Map<String, Pattern> record2 = ((RecordPattern)pattern2).getFields();
@@ -139,7 +152,7 @@ public class MethodLinearizer implements Comparator<Callable> {
     Set<String> intersect = intersect(record1.keySet(), record2.keySet());
     
     // Which record are we leaning towards preferring?
-    int lean = 0;
+    Result lean = Result.SAME;
     
     // If the records don't have the same number of fields, one must be a
     // strict superset of the other.
@@ -147,10 +160,10 @@ public class MethodLinearizer implements Comparator<Callable> {
         (record2.size() != intersect.size())) {
       if (containsOthers(record1.keySet(), record2.keySet()) &&
           containsOthers(record2.keySet(), record1.keySet())) {
-        throw ambiguous(pattern1, pattern2);
+        return Result.NONE;
       } else {
         // Lean towards the superset.
-        lean = (record1.size() > record2.size()) ? FIRST_WINS : SECOND_WINS;
+        lean = (record1.size() > record2.size()) ? Result.GREATER : Result.LESS;
       }
     }
 
@@ -159,22 +172,23 @@ public class MethodLinearizer implements Comparator<Callable> {
       Pattern field1 = record1.get(name);
       Pattern field2 = record2.get(name);
       
-      int compare = compare(field1, scope1, field2, scope2);
+      Result compare = compare(field1, scope1, field2, scope2);
+      if (compare == Result.NONE) return Result.NONE;
       
-      if (lean == 0) {
+      if (lean == Result.SAME) {
         lean = compare;
-      } else if (compare == 0) {
+      } else if (compare == Result.SAME) {
         // Do nothing.
       } else if (compare != lean) {
         // If we get here, the fields don't agree.
-        throw ambiguous(pattern1, pattern2);
+        return Result.NONE;
       }
     }
     
     return lean;
   }
   
-  private int compareTypes(Pattern pattern1, Scope scope1,
+  private Result compareTypes(Pattern pattern1, Scope scope1,
       Pattern pattern2, Scope scope2) {
     Obj type1 = mContext.evaluate(((TypePattern)pattern1).getType(), scope1);
     Obj type2 = mContext.evaluate(((TypePattern)pattern2).getType(), scope2);
@@ -185,24 +199,24 @@ public class MethodLinearizer implements Comparator<Callable> {
       ClassObj class2 = (ClassObj)type2;
       
       // Same class.
-      if (class1 == class2) return 0;
+      if (class1 == class2) return Result.SAME;
       
       if (class1.isSubclassOf(class2)) {
         // Class1 is a subclass, so it's more specific.
-        return -1;
+        return Result.GREATER;
       } else if (class2.isSubclassOf(class1)) {
         // Class2 is a subclass, so it's more specific.
-        return 1;
+        return Result.LESS;
       } else {
-        // No class relation between the two, so they can't be linearized.
-        throw ambiguous(pattern1, pattern2);
+        // No class relation between the two, so they can't be ordered.
+        return Result.NONE;
       }
     }
     
     throw new UnsupportedOperationException("Must be class now!");
   }
 
-  private int compareValues(Pattern pattern1, Scope scope1,
+  private Result compareValues(Pattern pattern1, Scope scope1,
       Pattern pattern2, Scope scope2) {
     Obj value1 = mContext.evaluate(((ValuePattern)pattern1).getValue(), scope1);
     Obj value2 = mContext.evaluate(((ValuePattern)pattern2).getValue(), scope2);
@@ -210,15 +224,10 @@ public class MethodLinearizer implements Comparator<Callable> {
     // Identical values are ordered the same. This lets us have tuples with
     // some identical value fields (like nothing) which are then sorted by
     // other fields.
-    if (mContext.objectsEqual(value1, value2)) return 0;
+    if (mContext.objectsEqual(value1, value2)) return Result.SAME;
     
     // Any other paid of values can't be sorted.
-    throw ambiguous(pattern1, pattern2);
-  }
-  
-  private ErrorException ambiguous(Pattern pattern1, Pattern pattern2) {
-    return mContext.error(Name.AMBIGUOUS_METHOD_ERROR, 
-        "Cannot choose a method between " + pattern1 + " and " + pattern2);
+    return Result.NONE;
   }
 
   private enum PatternKind {
@@ -291,8 +300,5 @@ public class MethodLinearizer implements Comparator<Callable> {
     }
   }
   
-  private static final int FIRST_WINS = -1;
-  private static final int SECOND_WINS = 1;
-
   private final Context mContext;
 }
