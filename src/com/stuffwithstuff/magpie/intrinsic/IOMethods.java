@@ -1,6 +1,8 @@
 package com.stuffwithstuff.magpie.intrinsic;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 import com.stuffwithstuff.magpie.Def;
 import com.stuffwithstuff.magpie.Doc;
@@ -84,6 +86,23 @@ public class IOMethods {
       }
     }
   }
-  
+
+  @Def("readLine()")
+  @Doc("Reads a line from standard input and returns it.")
+  public static class Nothing_ReadLine implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+      String string;
+      try {
+        string = in.readLine();
+        return context.toObj(string);
+      } catch (IOException e) {
+        // TODO(bob): Handle error.
+        e.printStackTrace();
+        throw context.error("IOError", "Could not read.");
+      }
+    }
+  }
+
   private static ClassObj sFileClass;
 }

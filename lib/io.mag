@@ -24,3 +24,13 @@ def (this is FileIterator) current
 end
 
 _setClasses(File)
+
+def write(s is String)
+    /// Writes the given string to standard out. No newline will be appended.
+    printString(s)
+end
+
+def writeLine(s is String)
+    /// Writes the given string to standard out appended by a newline.
+    print(s)
+end

@@ -58,6 +58,8 @@ def (this is List) toString
     "list [" +(this join(", ")) +("]")
 end
 
+// TODO(bob): Implement these using io.write.
+
 def print()
     /// Prints a newline to standard output.
     printString("\n")
