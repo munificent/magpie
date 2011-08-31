@@ -23,8 +23,39 @@ defclass TokenType
     val name String
 end
 
-// TODO(bob): Other TokenTypes.
-var TokenType.LINE = TokenType new(name: "LINE")
+// TODO(bob): A better enum type would be nice.
+// punctuation and grouping
+val TokenType.LEFT_PAREN = TokenType new(name: "LEFT_PAREN")
+val TokenType.RIGHT_PAREN = TokenType new(name: "RIGHT_PAREN")
+val TokenType.LEFT_BRACKET = TokenType new(name: "LEFT_BRACKET")
+val TokenType.RIGHT_BRACKET = TokenType new(name: "RIGHT_BRACKET")
+val TokenType.LEFT_BRACE = TokenType new(name: "LEFT_BRACE")
+val TokenType.RIGHT_BRACE = TokenType new(name: "RIGHT_BRACE")
+val TokenType.BACKTICK = TokenType new(name: "BACKTICK")
+val TokenType.COMMA = TokenType new(name: "COMMA")
+val TokenType.EQUALS = TokenType new(name: "EQUALS")
+
+// identifiers
+val TokenType.NAME = TokenType new(name: "NAME")
+val TokenType.FIELD = TokenType new(name: "FIELD") // a record field like "x:"
+
+// literals
+val TokenType.BOOL = TokenType new(name: "BOOL")
+val TokenType.DOUBLE = TokenType new(name: "DOUBLE")
+val TokenType.INT = TokenType new(name: "INT")
+val TokenType.NOTHING = TokenType new(name: "NOTHING")
+val TokenType.STRING = TokenType new(name: "STRING")
+
+// comments
+val TokenType.BLOCK_COMMENT = TokenType new(name: "BLOCK_COMMENT")
+val TokenType.DOC_COMMENT = TokenType new(name: "DOC_COMMENT")
+val TokenType.LINE_COMMENT = TokenType new(name: "LINE_COMMENT")
+
+// spacing
+val TokenType.LINE = TokenType new(name: "LINE")
+val TokenType.WHITESPACE = TokenType new(name: "WHITESPACE")
+val TokenType.LINE_CONTINUATION = TokenType new(name: "LINE_CONTINUATION")
+val TokenType.EOF = TokenType new(name: "EOF")
 
 defclass Token
     val position Position

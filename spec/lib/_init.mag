@@ -16,5 +16,6 @@ import .magpie.core.Record
 import .magpie.core.String
 import .magpie.core.toString
 import .magpie.core.use
+import .magpie.syntax.lexer
 import .process
 import .regex

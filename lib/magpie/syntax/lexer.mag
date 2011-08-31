@@ -1,0 +1,43 @@
+import magpie.syntax
+
+// TODO(bob): Move to core
+def (n is Int) counting
+    // TODO(bob): Use real max int!
+    n to(999999)
+end
+
+def _makeToken(type is TokenType, text is String, column is Int)
+    /// Makes a new Token from the given portion of a string.
+    Token new(
+        position: Position new(
+            file: "", startLine: 1, startCol: column,
+            endLine: 1, endCol: column + text count),
+        type: type, text: text, value: nothing)
+end
+
+def lex(source is String)
+    /// Lexes the given string and returns a collection of Tokens.
+
+    // TODO(bob): At least use a real column number.
+    val pos = Position new(file: "", startLine: 0, startCol: 0,
+        endLine: 0, endCol: 0)
+
+    val tokens = List new()
+
+    for c in source
+    for i in 0 counting do
+        match c
+            case "(" then tokens add(_makeToken(TokenType.LEFT_PAREN, c, i))
+            case ")" then tokens add(_makeToken(TokenType.RIGHT_PAREN, c, i))
+            case "[" then tokens add(_makeToken(TokenType.LEFT_BRACKET, c, i))
+            case "]" then tokens add(_makeToken(TokenType.RIGHT_BRACKET, c, i))
+            case "{" then tokens add(_makeToken(TokenType.LEFT_BRACE, c, i))
+            case "}" then tokens add(_makeToken(TokenType.RIGHT_BRACE, c, i))
+            case "`" then tokens add(_makeToken(TokenType.BACKTICK, c, i))
+            case "," then tokens add(_makeToken(TokenType.COMMA, c, i))
+            case "=" then tokens add(_makeToken(TokenType.EQUALS, c, i))
+        end
+    end
+
+    tokens
+end
