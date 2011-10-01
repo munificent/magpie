@@ -2,34 +2,4 @@ import spec.specify
 import magpie.syntax
 import magpie.syntax.lexer
 
-specifyMethod("lex()") with
-    def (result) checkTokens(expected)
-        result count shouldEqual(expected count)
-        for token in result
-        for type in expected do
-            token type shouldEqual(type)
-        end
-    end
-
-    it should("tokenize single-character tokens") with
-        lex("()[]{}`,=") checkTokens([
-            TokenType.LEFT_PAREN,
-            TokenType.RIGHT_PAREN,
-            TokenType.LEFT_BRACKET,
-            TokenType.RIGHT_BRACKET,
-            TokenType.LEFT_BRACE,
-            TokenType.RIGHT_BRACE,
-            TokenType.BACKTICK,
-            TokenType.COMMA,
-            TokenType.EQUALS])
-    end
-
-    it should("include the position") with
-        val comma = lex("==,=")[2]
-        comma position file shouldEqual("")
-        comma position startLine shouldEqual(1)
-        comma position startCol shouldEqual(2)
-        comma position endLine shouldEqual(1)
-        comma position endCol shouldEqual(3)
-    end
-end
+// TODO(bob): Spec!

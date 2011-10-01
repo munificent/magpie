@@ -1,43 +1,331 @@
 import magpie.syntax
 
-// TODO(bob): Move to core
-def (n is Int) counting
-    // TODO(bob): Use real max int!
-    n to(999999)
+// TODO(bob): Move to somewhere more appropriate:
+
+def (this is TokenType) toString
+    this name
 end
 
-def _makeToken(type is TokenType, text is String, column is Int)
-    /// Makes a new Token from the given portion of a string.
-    Token new(
-        position: Position new(
-            file: "", startLine: 1, startCol: column,
-            endLine: 1, endCol: column + text count),
-        type: type, text: text, value: nothing)
+def (this is Position) toString
+    "(" + this startCol + ", " + this startLine + " - " +
+        this endCol + ", " + this endLine + ")"
 end
 
-def lex(source is String)
-    /// Lexes the given string and returns a collection of Tokens.
+def (this is Token) toString
+    this position + " " + this type name + " \"" + this text + "\""
+end
 
-    // TODO(bob): At least use a real column number.
-    val pos = Position new(file: "", startLine: 0, startCol: 0,
-        endLine: 0, endCol: 0)
+def (haystack is String) contains(needle is String)
+    haystack indexOf(needle) != nothing
+end
 
-    val tokens = List new()
+// ---
 
-    for c in source
-    for i in 0 counting do
-        match c
-            case "(" then tokens add(_makeToken(TokenType.LEFT_PAREN, c, i))
-            case ")" then tokens add(_makeToken(TokenType.RIGHT_PAREN, c, i))
-            case "[" then tokens add(_makeToken(TokenType.LEFT_BRACKET, c, i))
-            case "]" then tokens add(_makeToken(TokenType.RIGHT_BRACKET, c, i))
-            case "{" then tokens add(_makeToken(TokenType.LEFT_BRACE, c, i))
-            case "}" then tokens add(_makeToken(TokenType.RIGHT_BRACE, c, i))
-            case "`" then tokens add(_makeToken(TokenType.BACKTICK, c, i))
-            case "," then tokens add(_makeToken(TokenType.COMMA, c, i))
-            case "=" then tokens add(_makeToken(TokenType.EQUALS, c, i))
+// TODO(bob): Should inherit and implement Iterable.
+defclass Lexer
+    // TODO(bob): Support an iterable stream of characters.
+    val _text is String
+    var _pos is Int
+    var _line is Int
+    var _col  is Int
+    var _startLine is Int
+    var _startCol is Int
+    var _read is String
+end
+
+def (this == Lexer) init(text /* is SourceReader */)
+    this init(_text: text, _pos: 0, _line: 1, _col: 1,
+        _startLine: 1, _startCol: 1, _read: "")
+end
+
+def (this is Lexer) readToken
+    match this _advance
+        // Whitespace.
+        case " " then this _readWhitespace
+        case "\t" then this _readWhitespace
+
+        // Line endings.
+        case ";" then this _makeToken(TokenType.LINE)
+        case "\n" then this _makeToken(TokenType.LINE)
+        case "\r" then this _makeToken(TokenType.LINE)
+
+        // Comments.
+        case "/" then
+            match this _peek
+                case "/" then this _readLineComment
+                case "*" then this _readBlockComment
+            end
+
+        // Punctuators.
+        case "(" then this _makeToken(TokenType.LEFT_PAREN)
+        case ")" then this _makeToken(TokenType.RIGHT_PAREN)
+        case "[" then this _makeToken(TokenType.LEFT_BRACKET)
+        case "]" then this _makeToken(TokenType.RIGHT_BRACKET)
+        case "{" then this _makeToken(TokenType.LEFT_BRACE)
+        case "}" then this _makeToken(TokenType.RIGHT_BRACE)
+        case "`" then this _makeToken(TokenType.BACKTICK)
+        case "," then this _makeToken(TokenType.COMMA)
+
+        // EOF.
+        case "\0" then this _makeToken(TokenType.EOF)
+
+        // TODO(bob): User-defined patterns would be nice here.
+        case c then
+            if c _isName then
+                this _readName
+            else if c _isOperator then
+                this _readOperator
+            else if c _isDigit then
+                this _readNumber
+            else this _makeToken(TokenType.ERROR)
+        end
+    end
+end
+
+def (this is Lexer) _readWhitespace
+    while true do
+        match this _peek
+            case " " then this _advance
+            case "\t" then this _advance
+            else return this _makeToken(TokenType.WHITESPACE)
+        end
+    end
+end
+
+def (this is Lexer) _readLineComment
+    var numSlashes = 1
+    while this _advance == "/" do numSlashes = numSlashes + 1
+
+    // See if it's a "///" doc comment.
+    val type = if numSlashes == 3 then
+            TokenType.DOC_COMMENT
+        else
+            TokenType.LINE_COMMENT
+        end
+
+    // Consume the rest of the line.
+    while not("\n\r" contains(this _peek)) do this _advance
+
+    val value = this _read substring(from: numSlashes) trim
+    this _makeToken(type, value)
+end
+
+def (this is Lexer) _readBlockComment
+    while true do
+        match this _advance
+            case "*" then
+                match this _advance
+                    case "/" then
+                        return this _makeToken(TokenType.BLOCK_COMMENT)
+                    case "\0" then
+                        return this _makeToken(TokenType.ERROR)
+                    else nothing // Keep advancing.
+                end
+            case "\0" then return this _makeToken(TokenType.ERROR)
+            else nothing // Keep advancing.
+        end
+    end
+end
+
+def (this is Lexer) _readName
+    while true do
+        if this _peek _isName or this _peek _isDigit then
+            this _advance
+        else if this _peek == ":" then
+            this _advance
+
+            // Trim of the ":".
+            val value = this _read substring(from: 0, to: this _read count - 1)
+            return this _makeToken(TokenType.FIELD, value)
+        else return this _makeToken(TokenType.NAME)
+    end
+end
+
+def (this is Lexer) _readOperator
+    while true do
+        if this _peek _isName or this _peek _isOperator then
+            this _advance
+        else if this _peek == ":" then
+            this _advance
+
+            // Trim of the ":".
+            val value = this _read substring(from: 0, to: this _read count - 1)
+            return this _makeToken(TokenType.FIELD, value)
+        else
+            return this _makeToken(TokenType.NAME)
+        end
+    end
+end
+
+def (this is Lexer) _readNumber
+    while true do
+        if this _peek _isDigit then
+            this _advance
+        else if this _peek == ":" then
+            this _advance
+
+            // Trim off the ":".
+            // TODO(bob): substring(to: -1)
+            val value = this _read substring(from: 0, to: this _read count - 1)
+            return this _makeToken(TokenType.FIELD, value)
+        else
+            // TODO(bob): Need to parse int.
+            return this _makeToken(TokenType.INT, this _read)
+        end
+    end
+end
+
+def (this is Lexer) _peek
+    if this _pos >= this _text count then
+        "\0"
+    else this _text[this _pos]
+end
+
+def (this is Lexer) _advance
+    val c = this _peek
+    this _pos = this _pos + 1
+    this _read = this _read + c
+
+    // Update the position.
+    match c
+        case "\n" then
+            this _line = this _line + 1
+            this _col = 1
+        else this _col = this _col + 1
+    end
+
+    c
+end
+
+def (this is Lexer) _makeToken(type is TokenType)
+    this _makeToken(type, this _read)
+end
+
+def (this is Lexer) _makeToken(type is TokenType, value)
+    // Handle reserved words.
+    // TODO(bob): Consider making argument writable?
+    var actualType = type
+    if type == TokenType.NAME then
+        actualType = match this _read
+            case "nothing" then TokenType.NOTHING
+            case "false"   then TokenType.FALSE
+            case "true"    then TokenType.TRUE
+            case "="       then TokenType.EQUALS
+            case otherwise then TokenType.NAME
         end
     end
 
-    tokens
+    val token = Token new(position: this _currentPosition,
+        type: actualType, text: this _read, value: value)
+
+    this _startLine = this _line
+    this _startCol  = this _col
+    this _read      = ""
+
+    token
+end
+
+def (this is Lexer) _currentPosition
+    Position new(file: "",
+        startLine: this _startLine, startCol: this _startCol,
+        endLine: this _line, endCol: this _col)
+end
+
+def (c is String) _isDigit
+    // TODO(bob): Need a better way of working with characters.
+    match c
+        case "0" then true
+        case "1" then true
+        case "2" then true
+        case "3" then true
+        case "4" then true
+        case "5" then true
+        case "6" then true
+        case "7" then true
+        case "8" then true
+        case "9" then true
+        else false
+    end
+end
+
+def (c is String) _isName
+    // TODO(bob): Need a better way of working with characters.
+    match c
+        case "a" then true
+        case "b" then true
+        case "c" then true
+        case "d" then true
+        case "e" then true
+        case "f" then true
+        case "g" then true
+        case "h" then true
+        case "i" then true
+        case "j" then true
+        case "k" then true
+        case "l" then true
+        case "m" then true
+        case "n" then true
+        case "o" then true
+        case "p" then true
+        case "q" then true
+        case "r" then true
+        case "s" then true
+        case "t" then true
+        case "u" then true
+        case "v" then true
+        case "w" then true
+        case "x" then true
+        case "y" then true
+        case "z" then true
+        case "A" then true
+        case "B" then true
+        case "C" then true
+        case "D" then true
+        case "E" then true
+        case "F" then true
+        case "G" then true
+        case "H" then true
+        case "I" then true
+        case "J" then true
+        case "K" then true
+        case "L" then true
+        case "M" then true
+        case "N" then true
+        case "O" then true
+        case "P" then true
+        case "Q" then true
+        case "R" then true
+        case "S" then true
+        case "T" then true
+        case "U" then true
+        case "V" then true
+        case "W" then true
+        case "X" then true
+        case "Y" then true
+        case "Z" then true
+        case "_" then true
+        case "." then true
+        else false
+    end
+end
+
+def (c is String) _isOperator
+    // TODO(bob): Need a better way of working with characters.
+    match c
+        case "~" then true
+        case "!" then true
+        case "$" then true
+        case "%" then true
+        case "^" then true
+        case "*" then true
+        case "-" then true
+        case "=" then true
+        case "+" then true
+        case "|" then true
+        case "/" then true
+        case "?" then true
+        case "<" then true
+        case ">" then true
+        else false
+    end
 end

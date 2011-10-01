@@ -55,6 +55,8 @@ val TokenType.LINE_COMMENT = TokenType new(name: "LINE_COMMENT")
 val TokenType.LINE = TokenType new(name: "LINE")
 val TokenType.WHITESPACE = TokenType new(name: "WHITESPACE")
 val TokenType.LINE_CONTINUATION = TokenType new(name: "LINE_CONTINUATION")
+
+val TokenType.ERROR = TokenType new(name: "ERROR")
 val TokenType.EOF = TokenType new(name: "EOF")
 
 defclass Token
