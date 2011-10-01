@@ -118,6 +118,7 @@ public class Lexer implements TokenReader {
         case 't': escaped.append("\t"); break;
         case '"': escaped.append("\""); break;
         case '\\': escaped.append("\\"); break;
+        case '0': escaped.append("\0"); break;
         
         case 'x':
           int a = readHexDigit();
