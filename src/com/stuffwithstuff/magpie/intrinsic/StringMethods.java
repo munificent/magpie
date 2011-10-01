@@ -64,7 +64,7 @@ public class StringMethods {
           right.asString()));
     }
   }
-  
+
   @Def("(haystack is String) indexOf(needle is String)")
   @Doc("Returns the index in haystack of the first occurrence of needle or\n" +
        "nothing if it is not found.")
@@ -159,6 +159,15 @@ public class StringMethods {
         elements.add(context.toObj(part));
       }
       return context.toArray(elements);
+    }
+  }
+  
+  @Def("(this is String) trim")
+  @Doc("Trims whitespace from both ends of the string.")
+  public static class Trim implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      String string = left.asString();
+      return context.toObj(string.trim());
     }
   }
 }
