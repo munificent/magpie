@@ -274,30 +274,6 @@ To order two type patterns, we look at the [classes](classes.html) being compare
 
 Here, both methods match because an instance of `Child` is also an instance of `Parent`. In this case, the second method specialized to `is Child` wins because `Child` is a subclass of `Parent`.
 
-There is a similar rule for sibling classes.
-
-    :::magpie
-    defclass ParentA
-    end
-
-    defclass ParentB
-    end
-
-    defclass Child is ParentA, ParentB
-    end
-
-    def sayParent(is ParentA)
-        print("ParentA")
-    end
-
-    def sayParent(is ParentA)
-        print("ParentA")
-    end
-
-    sayParent(Child new())
-
-Here, `ParentB` will win because comes *after* `ParentA` in `Child`'s list of parents. Because Magpie only allows a single inheritance path to any class, these two rules are enough to order any pair of classes that are related to each other.
-
 ### Record Ordering
 
 It's possible for two record patterns to match the same argument.
