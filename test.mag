@@ -1,0 +1,19 @@
+import magpie.syntax
+import magpie.syntax.lexer
+
+print("lex test")
+
+val lexer = Lexer new(
+    "\n" +
+    "// TODO(bob): Move to core\n" +
+    "def (n is Int) counting\n" +
+    "    /* TODO(bob): Use real max int!\n" +
+    "    next line!*/\n" +
+    "    n to(123 + 456)\n" +
+    "end")
+
+for i in 1 to(100) do
+    val token = lexer readToken
+    print(token)
+    if token type == TokenType.EOF then break
+end

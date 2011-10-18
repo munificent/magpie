@@ -1,8 +1,11 @@
 package com.stuffwithstuff.magpie.intrinsic;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.stuffwithstuff.magpie.Def;
 import com.stuffwithstuff.magpie.Doc;
@@ -103,6 +106,31 @@ public class IOMethods {
       }
     }
   }
-
+  
+  @Def("(is Directory) exists")
+  @Doc("Returns true if the directory exists.")
+  public static class Directory_Exists implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      String path = left.getField("path").asString();
+      return context.toObj(new File(path).isDirectory());
+    }
+  }
+  
+  @Def("(is Directory) _contents")
+  @Doc("Gets the contents of the directory.")
+  public static class Directory_Iterate implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      String path = left.getField("path").asString();
+      File[] files = new File(path).listFiles();
+      
+      List<Obj> paths = new ArrayList<Obj>();
+      for (File file : files) {
+        paths.add(context.toObj(file.getPath()));
+      }
+      
+      return context.toList(paths);
+    }
+  }
+  
   private static ClassObj sFileClass;
 }

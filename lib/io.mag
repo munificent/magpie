@@ -4,17 +4,30 @@ import classfile:com.stuffwithstuff.magpie.intrinsic.IOMethods
 defclass File
 end
 
-// Iterator over files.
+defclass Directory
+    val path is String
+end
+
+def dir(path is String)
+    Directory new(path: path)
+end
+
+def (this is Directory) iterate
+    /// Iterates over the contents of the Directory.
+    this _contents iterate
+end
+
 defclass FileIterator
+    /// Iterator over file contents.
     val file is File
     var line = nothing
 end
 
-def (this is File) iterate()
+def (this is File) iterate
     FileIterator new(file: this)
 end
 
-def (this is FileIterator) next()
+def (this is FileIterator) next
     this line = this file readLine()
     this line != nothing
 end
@@ -22,8 +35,6 @@ end
 def (this is FileIterator) current
     this line
 end
-
-_setClasses(File)
 
 def write(s is String)
     /// Writes the given string to standard out. No newline will be appended.
@@ -34,3 +45,5 @@ def writeLine(s is String)
     /// Writes the given string to standard out appended by a newline.
     print(s)
 end
+
+_setClasses(File)

@@ -1,5 +1,6 @@
 import .async.Channel
 import .async.isAsyncSafe
+import .io.Directory
 import .io.File
 import .io.path
 import .magpie.core.Array

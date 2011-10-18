@@ -2,34 +2,34 @@ import spec.specify
 
 import io
 
-val TEST_PATH = "spec/lib/io/test_file.txt"
+val testPath = "spec/lib/io/test_file.txt"
 
 specifyMethod("open(path is String)") with
     it should("return a File") with
-        val file = open(TEST_PATH)
+        val file = open(testPath)
         file shouldBe(File)
     end
 
     it should("return an open File") with
-        val file = open(TEST_PATH)
+        val file = open(testPath)
         file isOpen shouldEqual(true)
     end
 end
 
 specifyMethod("(file is File) close()") with
     it should("close the file") with
-        val file = open(TEST_PATH)
+        val file = open(testPath)
         file close()
         file isOpen shouldEqual(false)
     end
 
     it should("return nothing") with
-        val file = open(TEST_PATH)
+        val file = open(testPath)
         file close() shouldEqual(nothing)
     end
 
     it should("do nothing if the file is closed") with
-        val file = open(TEST_PATH)
+        val file = open(testPath)
         file close()
         file close() shouldEqual(nothing)
     end
@@ -37,7 +37,7 @@ end
 
 specifyMethod("(file is File) readLine()") with
     it should("return successive lines from the file") with
-        val file = open(TEST_PATH)
+        val file = open(testPath)
         file readLine() shouldEqual("one")
         file readLine() shouldEqual("two")
         file readLine() shouldEqual("three")
@@ -45,7 +45,7 @@ specifyMethod("(file is File) readLine()") with
     end
 
     it should("return nothing when the end is reached") with
-        val file = open(TEST_PATH)
+        val file = open(testPath)
         file readLine() // one
         file readLine() // two
         file readLine() // three
@@ -57,7 +57,7 @@ end
 
 specifyMethod("(file is File) read()") with
     it should("return the entire contents of the file") with
-        val file = open(TEST_PATH)
+        val file = open(testPath)
         file read() shouldEqual("one\ntwo\nthree")
         file close()
     end
