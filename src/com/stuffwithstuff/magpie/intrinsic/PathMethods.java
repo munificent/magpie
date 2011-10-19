@@ -25,4 +25,31 @@ public class PathMethods {
       return context.toObj(dirName);
     }
   }
+
+  @Def("(is String) exists")
+  @Doc("Returns true if the path exists.")
+  public static class String_Exists implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      String path = left.asString();
+      return context.toObj(new File(path).exists());
+    }
+  }
+
+  @Def("(is String) isDir")
+  @Doc("Returns true if the path points to a directory.")
+  public static class String_IsDir implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      String path = left.asString();
+      return context.toObj(new File(path).isDirectory());
+    }
+  }
+
+  @Def("(is String) isFile")
+  @Doc("Returns true if the path points to a file.")
+  public static class String_IsFile implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      String path = left.asString();
+      return context.toObj(new File(path).isFile());
+    }
+  }
 }

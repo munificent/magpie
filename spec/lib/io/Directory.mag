@@ -2,8 +2,8 @@ import spec.specify
 
 import io
 
-val testDir = "spec/lib/io/test_dir"
-val testFile = "spec/lib/io/test_file.txt"
+val _testDir = "spec/lib/io/test_dir"
+val _testFile = "spec/lib/io/test_file.txt"
 
 specifyMethod("dir(path is String)") with
     it should("return a Directory object for the given path") with
@@ -16,11 +16,11 @@ end
 specifyMethod("(is Directory) exists") with
     it should("return true if the path points to a valid directory") with
         dir("not/real/path") exists shouldEqual(false)
-        dir(testDir) exists shouldEqual(true)
+        dir(_testDir) exists shouldEqual(true)
     end
 
     it should("not return true if the path points to a file") with
-        dir(testFile) exists shouldEqual(false)
+        dir(_testFile) exists shouldEqual(false)
     end
 end
 
@@ -28,7 +28,7 @@ specifyMethod("(is Directory) iterate") with
     it should("iterate over the contents of the directory") with
         // TODO(bob): Should these be string paths, File and Directory objects,
         // or some sort of Path object?
-        val iterator = dir(testDir) iterate
+        val iterator = dir(_testDir) iterate
         iterator next
         iterator current shouldEqual("spec/lib/io/test_dir/a.txt")
         iterator next

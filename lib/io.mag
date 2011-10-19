@@ -1,5 +1,7 @@
 import classfile:com.stuffwithstuff.magpie.intrinsic.IOMethods
 
+import io.path
+
 // TODO(bob): Need to make sure this cannot be constructed somehow.
 defclass File
 end
@@ -10,6 +12,10 @@ end
 
 def dir(path is String)
     Directory new(path: path)
+end
+
+def (this is Directory) exists
+    this path isDir
 end
 
 def (this is Directory) iterate

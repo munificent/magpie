@@ -107,15 +107,6 @@ public class IOMethods {
     }
   }
   
-  @Def("(is Directory) exists")
-  @Doc("Returns true if the directory exists.")
-  public static class Directory_Exists implements Intrinsic {
-    public Obj invoke(Context context, Obj left, Obj right) {
-      String path = left.getField("path").asString();
-      return context.toObj(new File(path).isDirectory());
-    }
-  }
-  
   @Def("(is Directory) _contents")
   @Doc("Gets the contents of the directory.")
   public static class Directory_Iterate implements Intrinsic {

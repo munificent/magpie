@@ -2,6 +2,9 @@ import spec.specify
 
 import io.path
 
+val _testDir = "spec/lib/io/test_dir"
+val _testPath = "spec/lib/io/test_file.txt"
+
 specifyMethod("(path is String) baseName") with
     it should("return the last component of the filename") with
         "a" baseName shouldEqual("a")
@@ -87,5 +90,47 @@ specifyMethod("(path is String) extension") with
         "/." extension shouldEqual("")
         ".foo." extension shouldEqual(".")
         "foo." extension shouldEqual(".")
+    end
+end
+
+specifyMethod("(path is String) exists") with
+    it should("return true if the path points to a directory") with
+        _testDir exists shouldEqual(true)
+    end
+
+    it should("return true if the path points to a file") with
+        _testPath exists shouldEqual(true)
+    end
+
+    it should("return false if the path does not exist") with
+        "non/existent" exists shouldEqual(false)
+    end
+end
+
+specifyMethod("(path is String) isDir") with
+    it should("return true if the path points to a directory") with
+        _testDir isDir shouldEqual(true)
+    end
+
+    it should("return false if the path points to a file") with
+        _testPath isDir shouldEqual(false)
+    end
+
+    it should("return false if the path does not exist") with
+        "non/existent" isDir shouldEqual(false)
+    end
+end
+
+specifyMethod("(path is String) isFile") with
+    it should("return false if the path points to a directory") with
+        _testDir isFile shouldEqual(false)
+    end
+
+    it should("return true if the path points to a file") with
+        _testPath isFile shouldEqual(true)
+    end
+
+    it should("return false if the path does not exist") with
+        "non/existent" isFile shouldEqual(false)
     end
 end
