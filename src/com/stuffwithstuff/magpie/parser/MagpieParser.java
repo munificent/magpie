@@ -41,12 +41,6 @@ public class MagpieParser extends Parser {
     return expr;
   }
   
-  public Expr parseTypeAnnotation() {
-    // Start at just above record precedence so that those don't get consumed
-    // by the type.
-    return parseExpression(Precedence.RECORD + 1);
-  }
-  
   public Expr parseExpression(int precedence) {
     // Top down operator precedence parser based on:
     // http://javascript.crockford.com/tdop/tdop.html

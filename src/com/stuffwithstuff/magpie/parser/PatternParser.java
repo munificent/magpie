@@ -89,6 +89,11 @@ public class PatternParser {
     } else if (parser.match(TokenType.LEFT_PAREN)) {
       // Nested pattern.
       Pattern inner = record(parser);
+      
+      if (inner == null) {
+        throw new ParseException("Could not parse primary pattern.");
+      }
+
       parser.consume(TokenType.RIGHT_PAREN);
       return inner;
     } else if (parser.match(TokenType.NAME)) {
