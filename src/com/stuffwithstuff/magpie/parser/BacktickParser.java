@@ -6,7 +6,8 @@ public class BacktickParser implements PrefixParser {
   @Override
   public Expr parse(MagpieParser parser, Token token) {
     if (!parser.inQuote()) {
-      throw new ParseException("Cannot unquote outside of a quotation.");
+      throw new ParseException(token.getPosition(),
+          "Cannot unquote outside of a quotation.");
     }
     
     Position position = token.getPosition();

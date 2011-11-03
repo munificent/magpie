@@ -82,7 +82,8 @@ public class Lexer implements TokenReader {
         // Number.
         return readNumber();
       } else {
-        throw new ParseException("Unknown character.");
+        // TODO(bob): Emit error token instead of throwing.
+        throw new ParseException(Position.none(), "Unknown character.");
       }
     }
   }
@@ -129,14 +130,16 @@ public class Lexer implements TokenReader {
           break;
           
         default:
-          throw new ParseException("Unknown string escape.");
+          // TODO(bob): Emit error token instead of throwing.
+          throw new ParseException(Position.none(), "Unknown string escape.");
         }
         break;
         
       case '"':
         return makeToken(TokenType.STRING, escaped.toString());
        
-      case '\0': throw new ParseException("Unterminated string.");
+        // TODO(bob): Emit error token instead of throwing.
+      case '\0': throw new ParseException(Position.none(), "Unterminated string.");
       
       default:
         escaped.append(c);
@@ -148,7 +151,8 @@ public class Lexer implements TokenReader {
     char c = Character.toLowerCase(advance());
     int digit = "0123456789abcdef".indexOf(c);
     if (digit == -1) {
-      throw new ParseException("Expected hex digit.");
+      // TODO(bob): Emit error token instead of throwing.
+      throw new ParseException(Position.none(), "Expected hex digit.");
     }
     
     return digit;
@@ -189,12 +193,14 @@ public class Lexer implements TokenReader {
       case '*':
         switch (advance()) {
         case '/': return makeToken(TokenType.BLOCK_COMMENT);
-        case '\0': throw new ParseException("Unterminated block comment.");
+        // TODO(bob): Emit error token instead of throwing.
+        case '\0': throw new ParseException(Position.none(), "Unterminated block comment.");
         default: // Do nothing, keep advancing.
         }
         break;
         
-      case '\0': throw new ParseException("Unterminated block comment.");
+        // TODO(bob): Emit error token instead of throwing.
+      case '\0': throw new ParseException(Position.none(), "Unterminated block comment.");
       default: // Do nothing, keep advancing.
       }
     }

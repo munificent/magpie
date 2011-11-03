@@ -20,12 +20,14 @@ public class FieldParser implements PrefixParser {
     
     int index = 1;
     String name = token.getString();
+    Position namePosition = token.getPosition();
     while (true) {
       Expr value = parser.parseExpression(Precedence.RECORD);
       fields.add(new Pair<String, Expr>(name, value));
       
       if (usedNames.contains(name)) {
-        throw new ParseException("A record may only use a field name once.");
+        throw new ParseException(namePosition,
+            "A record may only use a field name once.");
       }
       usedNames.add(name);
       
@@ -33,8 +35,10 @@ public class FieldParser implements PrefixParser {
       
       if (parser.match(TokenType.FIELD)) {
         name = parser.last(1).getString();
+        namePosition = parser.last(1).getPosition();
       } else {
         name = Name.getTupleField(index);
+        namePosition = parser.current().getPosition();
       }
       index++;
     }

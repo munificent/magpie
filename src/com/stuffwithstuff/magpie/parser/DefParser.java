@@ -103,7 +103,8 @@ public class DefParser implements PrefixParser {
     }
 
     if (!parser.lookAhead(TokenType.LINE)) {
-      throw new ParseException("A method body must be a block.");
+      throw new ParseException(parser.current().getPosition(),
+          "A method body must be a block.");
     }
     
     Expr body = parser.parseBlock();

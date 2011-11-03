@@ -13,7 +13,7 @@ public class MagpieAppHost implements MagpieHost {
   public SourceFile loadModule(String name) {
     try {
       String modulePath = name.replace('.', '/');
-      
+
       // $CWD/foo/bar.mag
       File file = new File(modulePath + ".mag");
       if (file.exists()) {
@@ -46,7 +46,12 @@ public class MagpieAppHost implements MagpieHost {
       return null;
     }
   }
-  
+
+  @Override
+  public void showSyntaxError(String message) {
+    System.out.println(message);
+  }
+
   private static File getAppDirectory() {
     URL location = MagpieApp.class.getProtectionDomain().getCodeSource().getLocation();
     // Back up one directory to get out of "bin/".

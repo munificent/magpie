@@ -16,6 +16,6 @@ public class LiteralParser implements PrefixParser {
       return Expr.string(token.getPosition(), token.getString());
     }
     
-    throw new ParseException("Unexpected token type for literal.");
+    throw new RuntimeException("Unexpected token type for literal.");
   }
 }

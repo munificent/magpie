@@ -10,6 +10,7 @@ import com.stuffwithstuff.magpie.intrinsic.ClassInit;
 import com.stuffwithstuff.magpie.intrinsic.FieldGetter;
 import com.stuffwithstuff.magpie.intrinsic.FieldSetter;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
+import com.stuffwithstuff.magpie.parser.ParseException;
 
 public class Interpreter {
   public Interpreter(MagpieHost host) {
@@ -298,9 +299,16 @@ public class Interpreter {
       // that expressions that define parsers can be used to parse the rest of
       // the file.
       while (true) {
-        Expr expr = parser.parseTopLevelExpression();
-        if (expr == null) break;
-        evaluate(expr, module, module.getScope());
+        try {
+          Expr expr = parser.parseTopLevelExpression();
+          if (expr == null) break;
+          evaluate(expr, module, module.getScope());
+        } catch (ParseException e) {
+          String message = String.format("Syntax error at %s: %s",
+              e.getPosition(), e.getMessage());
+          mHost.showSyntaxError(message);
+          break;
+        }
       }
     } finally {
       mLoadingModules.pop();

@@ -158,9 +158,9 @@ public abstract class Parser {
       return last(1);
     } else {
       Token current = current();
-      String message = String.format("Expected token %s at %s, found %s.",
-          type, current.getPosition(), current);
-      throw new ParseException(message);
+      String message = String.format("Expected token %s, found %s.",
+          type, current);
+      throw new ParseException(current.getPosition(), message);
     }
   }
 
@@ -175,9 +175,10 @@ public abstract class Parser {
     if (match(keyword)) {
       return last(1);
     } else {
-      String message = String.format("Expected keyword %s at %s, found %s.",
-          keyword, current().getPosition(), current());
-      throw new ParseException(message);
+      Token current = current();
+      String message = String.format("Expected keyword %s, found %s.",
+          keyword, current);
+      throw new ParseException(current.getPosition(), message);
     }
   }
 

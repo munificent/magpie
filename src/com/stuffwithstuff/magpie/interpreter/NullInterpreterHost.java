@@ -9,4 +9,9 @@ public class NullInterpreterHost implements MagpieHost {
   public SourceFile loadModule(String name) {
     throw new UnsupportedOperationException();
   }
+
+  @Override
+  public void showSyntaxError(String message) {
+    throw new UnsupportedOperationException();
+  }
 }

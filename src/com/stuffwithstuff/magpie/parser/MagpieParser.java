@@ -48,7 +48,7 @@ public class MagpieParser extends Parser {
     PrefixParser prefix = mGrammar.getPrefixParser(token);
     
     if (prefix == null) {
-      throw new ParseException(String.format(
+      throw new ParseException(token.getPosition(), String.format(
           "Cannot parse an expression that starts with \"%s\".", token));
     }
     

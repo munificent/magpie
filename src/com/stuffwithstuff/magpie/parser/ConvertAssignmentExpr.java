@@ -144,7 +144,7 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
   }
 
   private Expr invalidExpression(Expr expr) {
-    throw new ParseException("Expression \"" + expr +
+    throw new ParseException(expr.getPosition(), "Expression \"" + expr +
         "\" is not a valid target for assignment.");
   }
 }

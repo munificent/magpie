@@ -91,7 +91,8 @@ public class PatternParser {
       Pattern inner = record(parser);
       
       if (inner == null) {
-        throw new ParseException("Could not parse primary pattern.");
+        throw new ParseException(parser.current().getPosition(),
+            "Could not parse primary pattern.");
       }
 
       parser.consume(TokenType.RIGHT_PAREN);
