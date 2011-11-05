@@ -13,29 +13,31 @@ The `while something` part is the *clause*, and the expression after `do` (here 
 
 The simplest is `while`. It evaluates a condition expression. If it evaluates to `false`, the loop ends, otherwise it continues. For example:
 
+    :::magpie
     while 1 < 2 do print("forever...")
 
 ## `for` Clauses
 
 The other loop clause is `for`. It looks like:
 
-    for item = collection do print(item)
+    :::magpie
+    for item in collection do print(item)
 
-The expression after `=` is evaluated *once* before the loop starts and is expected to return an *iterable* object, which it then passes to the `iterate` method. That should return an *iterator*.
+The expression after `in` is evaluated *once* before the loop starts and is expected to return an *iterable* object, which it then passes to the `iterate` method. That should return an *iterator*.
 
-An iterator generates a series of values. There are two methods it gets passed to. The `next()` is called before each loop iteration (including the first) and advances the iterator to its next position. If the iterator is out of values, it returns `false` and the clause fails, otherwise it returns `true`. The `current` getter returns the current value that the iterator is sitting on.
+An iterator generates a series of values. There are two methods it gets passed to. The `next()` method is called before each loop iteration (including the first) and advances the iterator to its next position. If the iterator is out of values, it returns `false` and the clause fails, otherwise it returns `true`. The `current` getter returns the current value that the iterator is sitting on.
 
 Each iteration of the loop, Magpie will advance the iterator and bind the current value to a variable. The variable is scoped within the body of the loop. What this means is that a loop like:
 
     :::magpie
-    for item = collection do print(item)
+    for item in collection do print(item)
 
 Is really just syntactic sugar for something like:
 
     :::magpie
-    var __iter = collection iterate()
+    val __iter = collection iterate()
     while __iter next do
-        var item = __iter current
+        val item = __iter current
         print(item)
     end
 
@@ -52,7 +54,7 @@ Here, `to` and `until` are just regular methods and not built-in keywords. They 
 
 ## Combining Clauses
 
-The reason Magpie has only a single loop expression is because clauses can be combined. A single loop can have as many clauses as you want, of either type, in any order. At the beginning of each iteration of a loop (including before the first one), *all* of the clauses are evaluated in the order they appear. If *any* clause fails, the loop body is skipped and the loop ends. For example:
+The reason Magpie has only a single loop expression is because clauses can be combined. A single loop can have as many clauses as you want, of either kind, in any order. At the beginning of each iteration of a loop (including before the first one), *all* of the clauses are evaluated in the order they appear. If *any* clause fails, the loop body is skipped and the loop ends. For example:
 
     :::magpie
     while happy

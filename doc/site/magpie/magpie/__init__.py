@@ -18,8 +18,8 @@ class MagpieLexer(RegexLexer):
             (r'\s+', Text),
 
             # keywords
-            (r'(and|break|case|catch|def|defclass|definfix|do|else|end|fn|for|'
-             r'if|import|is|match|or|return|then|throw|val|var|while)\b', Keyword),
+            (r'(and|as|break|case|catch|def|defclass|definfix|do|else|end|fn|for|'
+             r'if|import|in|is|match|or|return|then|throw|val|var|with|while)\b', Keyword),
 
             # keywords
             # (r'(=)', Keyword),

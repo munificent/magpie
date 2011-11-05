@@ -17,6 +17,46 @@ One module can import another using an `import` expression. Like any expression,
 
 Here, we're importing the `io.path` module. Importing a module does two things: it runs the module's code, then it binds name in the importing scope.
 
+## Qualified Imports
+
+By default, when you import a module you get everything it exports just as it appears in that module. That works most of the time, but sometimes you may want finer-grained control. Maybe you only want to import a few things, or you need to rename something to deal with a name collision.
+
+To handle those, Magpie has a few additional qualifiers you can provide when you import. The first is a prefix:
+
+    :::magpie
+    import io.path as path
+
+When you add `as` followed by a name after the module being imported, it prefixes every imported name with that name followed by a dot (`.`). So if `io.path` defines a `baseName` method, we will import it as `path.baseName`. This is useful if you want to bring in every name, but make it very clear where they are coming from.
+
+If you want more precise control over specific names, you can add a `with` block to the import:
+
+    :::magpie
+    import io.path with
+        ...
+    end
+
+Each line inside that block lets you do a few things with a name. First is renaming:
+
+    :::magpie
+    import io.path with
+        baseName as base
+    end
+
+Using `as` lets you provide a new name for a name that you're importing. With the above example, this module would be able able to invoke the `baseName` method defined in `io.path` by calling `base`.
+
+If a line starts with `export` it lets you re-export an imported name.
+
+    :::magpie
+    import io.path with
+        export baseName
+    end
+
+By default, imported names are not in turn exported for a module. The idea is that you import things to use yourself, but you only export the behavior you define in your module.
+
+If you do actually want to make something you import part of the exported set of names in your module you can add `export` as shown. Here, anyone importing your module will be able to call the `baseName` method that's defined in `io.path` as if it were defined in your module.
+
+<p class="future">It isn't implemented yet, but at some point you'll also be able to exclude imported names and indicate that you only want to import a select set of names.</p>
+
 ## Module Loading
 
 When a module is imported for the first time, Magpie needs to find the file that corresponds to that module's name. This is called the *lookup* process. It works like so:
@@ -55,7 +95,7 @@ To solve that, an `import` expression will also define names in the importing mo
 
 When `hungry.mag` imports `dessert.mag` it gets a variable named `pie` defined in *its* scope that references the same value that it has in `dessert.mag`. Likewise, it gets a top-level `eatPie()` defined in its scope that it can then call.
 
-It's import to realize that when you import a variable, you get your *own* variable declared in your module that points to the same value that the exported variable had *when you imported it*. If either module assigns a different value to it, the other won't see that change. Consider:
+It's important to realize that when you import a variable, you get your *own* variable declared in your module that points to the same value that the exported variable had *when you imported it*. If either module assigns a different value to it, the other won't see that change. Consider:
 
     :::magpie
     // dessert.mag
@@ -108,4 +148,4 @@ This applies to methods, variables, as well as [classes](classes.html) and their
     val lock = Lock new()
     lock _key // ERROR: _key getter isn't defined here
 
-**TODO: Renames, prefixes, circular dependencies, _init.mag, relative imports.**
+**TODO: circular dependencies, _init.mag, relative imports.**

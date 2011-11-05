@@ -75,6 +75,7 @@ What other languages call "logical operators", Magpie calls "conjunctions". They
 
 An `and` conjunction evaluates the left-hand argument. If it's not true, it returns that value. Otherwise it evaluates and returns the right-hand argument. An `or` conjunction is reversed. If the left-hand argument *is* true, it's returned, otherwise the right-hand argument is evaluated and returned:
 
+    :::magpie
     print(0 and 1) // prints 0
     print(1 and 2) // prints 2
     print(0 or 1)  // prints 1
@@ -82,6 +83,7 @@ An `and` conjunction evaluates the left-hand argument. If it's not true, it retu
 
 Note that logical negation is *not* a built-in flow control expression. Instead, `not` is simply a method on booleans:
 
+    :::magpie
     if happy not then print("sad")
 
 <p class="future">
