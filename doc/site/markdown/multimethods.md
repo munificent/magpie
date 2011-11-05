@@ -223,6 +223,8 @@ We didn't define a `double` method that accepts a boolean, so when we call it, i
 
 ## Linearization
 
+**TODO(bob): Methods are partial order now, not a strict linearization. Need to update this.**
+
 The previous section says that the "most appropriate" method is selected based on the argument. In the examples we've seen so far, only one method is a possible match, so most appropriate is pretty easy. If multiple methods match the argument, we need to determine the *best* one. Magpie (and other languages) call this *linearization*.
 
     :::magpie
@@ -236,7 +238,7 @@ The previous section says that the "most appropriate" method is selected based o
 
 Here we have an `odd?` multimethod with two specializations. If we call it and pass in `0`, then both specializations match. Which is best? To answer this, Magpie has a few relatively simple rules that it uses to order the patterns.
 
-Before we get to those rules, it's important to understand one thing that does *not* affect ordering: *the order that methods are defined in a program has no affect on linearization.*
+Before we get to those rules, it's important to understand one thing that does *not* affect ordering: *the order that methods are defined in a program has no effect on linearization.*
 
 ### Pattern Kind
 

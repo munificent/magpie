@@ -1,6 +1,6 @@
 ^title Functions
 
-When you want to bundle up a reusable chunk of code in Magpie, you'll usually use a [method](multimethods.html). But sometimes you want a chunk of code that you can pass around like a value. For that, you'll use a *functions*. Functions are first-class objects that encapsulate an executable expression.
+When you want to bundle up a reusable chunk of code in Magpie, you'll usually use a [method](multimethods.html). But sometimes you want a chunk of code that you can pass around like a value. For that, you'll use a *function*. Functions are first-class objects that encapsulate an executable expression.
 
 ## Creating Functions
 
@@ -89,6 +89,7 @@ can access variables defined outside of their scope. They will hold onto closed-
 
 Here, the `makeCounter` method returns the function created on its second line. That function references a variable `i` declared outside of the function. Even after the function is returned from `makeCounter`, it is still able to access `i`.
 
+    :::magpie
     var counter = makeCounter()
     print(counter call()) // Prints 1.
     print(counter call()) // Prints 2.
