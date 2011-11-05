@@ -5,11 +5,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.stuffwithstuff.magpie.ast.Expr;
-import com.stuffwithstuff.magpie.ast.Field;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.Context;
+import com.stuffwithstuff.magpie.interpreter.FieldObj;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.Scope;
 
@@ -39,7 +39,7 @@ public class ClassInit implements Callable {
     }
     
     // Initialize the fields from the record.
-    for (Entry<String, Field> field : mClass.getFieldDefinitions().entrySet()) {
+    for (Entry<String, FieldObj> field : mClass.getFieldDefinitions().entrySet()) {
       // Assign it from the record.
       Obj value = arg.getField(field.getKey());
       if (value != null) {
@@ -61,7 +61,7 @@ public class ClassInit implements Callable {
     // The argument should be a record with fields for each declared field
     // in the class.
     Map<String, Pattern> fields = new HashMap<String, Pattern>();
-    for (Entry<String, Field> field : mClass.getFieldDefinitions().entrySet()) {
+    for (Entry<String, FieldObj> field : mClass.getFieldDefinitions().entrySet()) {
       // Only care about fields that don't have initializers.
       if (field.getValue().getInitializer() == null) {
         fields.put(field.getKey(), field.getValue().getPattern());

@@ -19,7 +19,7 @@ public class EnvironmentBuilder {
     // The class of all classes. Its class is itself.
     // TODO(bob): Doc.
     ClassObj classObj = new ClassObj(null, Name.CLASS, null,
-        new HashMap<String, Field>(), scope, "");
+        new HashMap<String, FieldObj>(), "");
     classObj.bindClass(classObj);
     scope.define(false, Name.CLASS, classObj);
     

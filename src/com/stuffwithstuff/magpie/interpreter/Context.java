@@ -51,7 +51,7 @@ public class Context {
   }
   
   public Obj instantiate(ClassObj classObj, Object primitiveValue) {
-    return getInterpreter().instantiate(classObj, primitiveValue);
+    return getInterpreter().instantiate(this, classObj, primitiveValue);
   }
   
   public Obj nothing() {
@@ -63,27 +63,27 @@ public class Context {
   }
   
   public Obj toObj(int value) {
-    return getInterpreter().createInt(value);
+    return getInterpreter().createInt(this, value);
   }
   
   public Obj toObj(String value) {
-    return getInterpreter().createString(value);
+    return getInterpreter().createString(this, value);
   }
 
   public Obj toObj(Obj... fields) {
-    return getInterpreter().createRecord(fields);
+    return getInterpreter().createRecord(this, fields);
   }
   
   public Obj toObj(List<String> keys, Map<String, Obj> fields) {
-    return getInterpreter().createRecord(keys, fields);
+    return getInterpreter().createRecord(this, keys, fields);
   }
 
   public Obj toArray(List<Obj> elements) {
-    return getInterpreter().createArray(elements);
+    return getInterpreter().createArray(this, elements);
   }
 
   public Obj toList(List<Obj> elements) {
-    return getInterpreter().createList(elements);
+    return getInterpreter().createList(this, elements);
   }
 
   public Obj toFunction(FnExpr expr, Scope closure) {

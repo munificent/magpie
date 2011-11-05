@@ -33,9 +33,11 @@ public class Interpreter {
     mRecordClass = scope.get("Record").asClass();
     mStringClass = scope.get("String").asClass();
     
-    mTrue = instantiate(mBoolClass, true);
-    mFalse = instantiate(mBoolClass, false);
-    mNothing = instantiate(mNothingClass, null);
+    Context context = new Context(mBaseModule);
+    
+    mTrue = instantiate(context, mBoolClass, true);
+    mFalse = instantiate(context, mBoolClass, false);
+    mNothing = instantiate(context, mNothingClass, null);
     
     evaluateModule(mBaseModule);
     
@@ -120,10 +122,13 @@ public class Interpreter {
     // Look up the error class.
     ClassObj classObj = mBaseModule.getScope().get(errorClassName).asClass();
 
+    // TODO(bob): Hackish.
+    Context context = new Context(mBaseModule);
+    
     // TODO(bob): Putting the message in here as the value is kind of hackish,
     // but it ensures we can display an error message even if we aren't able
     // to evaluate any code (like calling "string" on the error).
-    Obj error = instantiate(classObj, message);
+    Obj error = instantiate(context, classObj, message);
     
     error.setValue(message);
     
@@ -150,8 +155,23 @@ public class Interpreter {
   
   public ClassObj createClass(String name, List<ClassObj> parents,
       Map<String, Field> fields, Scope scope, String doc) {
+    
+    // Translate the fields.
+    Map<String, FieldObj> fieldObjs = new HashMap<String, FieldObj>();
+    for (Entry<String, Field> field : fields.entrySet()) {
+      Callable initializer = null;
+      if (field.getValue().getInitializer() != null) {
+        FnExpr fn = Expr.fn(field.getValue().getInitializer(), "");
+        initializer = new Function(fn, scope);
+      }
+      
+      FieldObj fieldObj = new FieldObj(initializer,
+          field.getValue().getPattern());
+      fieldObjs.put(field.getKey(), fieldObj);
+    }
+    
     // Create the class.
-    ClassObj classObj = new ClassObj(mClass, name, parents, fields, scope, doc);
+    ClassObj classObj = new ClassObj(mClass, name, parents, fieldObjs, doc);
     
     ClassObj colliding = classObj.checkForCollisions();
     if (colliding != null) {
@@ -161,7 +181,8 @@ public class Interpreter {
     }
     
     // Add the constructor.
-    scope.define(Name.INIT, new ClassInit(classObj, scope));
+    Multimethod init = scope.define(Name.INIT, new ClassInit(classObj, scope));
+    classObj.bindInitMultimethod(init);
     
     // Add getters and setters for the fields.
     for (Entry<String, Field> entry : fields.entrySet()) {
@@ -179,28 +200,28 @@ public class Interpreter {
     return classObj;
   }
 
-  public Obj createArray(List<Obj> elements) {
-    return instantiate(mArrayClass, elements);
+  public Obj createArray(Context context, List<Obj> elements) {
+    return instantiate(context, mArrayClass, elements);
   }
 
-  public Obj createList(List<Obj> elements) {
-    return instantiate(mListClass, elements);
+  public Obj createList(Context context, List<Obj> elements) {
+    return instantiate(context, mListClass, elements);
   }
 
-  public Obj createInt(int value) {
-    return instantiate(mIntClass, value);
+  public Obj createInt(Context context, int value) {
+    return instantiate(context, mIntClass, value);
   }
 
-  public Obj createString(String value) {
-    return instantiate(mStringClass, value);
+  public Obj createString(Context context, String value) {
+    return instantiate(context, mStringClass, value);
   }
   
   public FnObj createFn(FnExpr expr, Scope scope) {
     return new FnObj(mFnClass, new Function(expr, scope));
   }
   
-  public Obj createRecord(Obj... fields) {
-    Obj record = instantiate(mRecordClass, null);
+  public Obj createRecord(Context context, Obj... fields) {
+    Obj record = instantiate(context, mRecordClass, null);
     
     int index = 0;
     for (Obj field : fields) {
@@ -210,8 +231,8 @@ public class Interpreter {
     return record;
   }
   
-  public Obj createRecord(List<String> keys, Map<String, Obj> fields) {
-    Obj record = instantiate(mRecordClass, keys);
+  public Obj createRecord(Context context, List<String> keys, Map<String, Obj> fields) {
+    Obj record = instantiate(context, mRecordClass, keys);
     
     for (Entry<String, Obj> field : fields.entrySet()) {
       record.setField(field.getKey(), field.getValue());
@@ -220,16 +241,15 @@ public class Interpreter {
     return record;
   }
   
-  public Obj instantiate(ClassObj classObj, Object primitiveValue) {
+  // TODO(bob): Move this into Module?
+  public Obj instantiate(Context context, ClassObj classObj, Object primitiveValue) {
     Obj object = new Obj(classObj, primitiveValue);
     
     // Initialize its fields.
-    for (Entry<String, Field> field : classObj.getFieldDefinitions().entrySet()) {
-      Expr initializer = field.getValue().getInitializer();
+    for (Entry<String, FieldObj> field : classObj.getFieldDefinitions().entrySet()) {
+      Callable initializer = field.getValue().getInitializer();
       if (initializer != null) {
-        // Getting the module from the class's closure is a bit hackish.
-        Obj value = evaluate(initializer, classObj.getClosure().getModule(),
-            classObj.getClosure());
+        Obj value = initializer.invoke(context, mNothing);
         object.setField(field.getKey(), value);
       }
     }
@@ -244,7 +264,7 @@ public class Interpreter {
   public Obj getConstructingObject() { return mConstructing.peek(); }
   
   public Obj constructNewObject(Context context, ClassObj classObj, Obj initArg) {
-    Obj newObj = instantiate(classObj, null);
+    Obj newObj = instantiate(context, classObj, null);
     
     mConstructing.push(newObj);
 
@@ -261,7 +281,8 @@ public class Interpreter {
     // we can generate an error if an init() call fails to bottom out to it.
     int expected = mInitializingCount++;
     
-    Multimethod init = classObj.getClosure().lookUpMultimethod(Name.INIT);
+    Multimethod init = classObj.getInitMethod();
+    
     // Note: the receiver for init() is the class itself, not the new instance
     // which is considered to be in a hidden state since it isn't initialized
     // yet.
@@ -288,10 +309,9 @@ public class Interpreter {
     try {
       // Copy the base stuff in first.
       if (module != mBaseModule) {
-        Context context = new Context(module);
         Scope scope = module.getScope();
         for (String name : mBaseModule.getExportedNames()) {
-          scope.importName(context, name, name, mBaseModule, false);
+          scope.importName(name, name, mBaseModule, false);
         }
       }
       

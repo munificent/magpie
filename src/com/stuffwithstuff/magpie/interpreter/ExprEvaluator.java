@@ -79,8 +79,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
     }
 
     Obj arg = evaluate(expr.getArg(), scope);
-    return multimethod.invoke(expr.getName(),
-        new Context(scope.getModule()), arg);
+    return multimethod.invoke(expr.getName(), mContext, arg);
   }
   
   @Override
@@ -146,7 +145,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
           export = declaration.isExported();
         }
         
-        scope.importName(mContext, name, rename, module, export);
+        scope.importName(name, rename, module, export);
       }
     } else if (expr.getScheme().equals("classfile")) {
       if (!IntrinsicLoader.loadClass(expr.getModule(), scope)) {

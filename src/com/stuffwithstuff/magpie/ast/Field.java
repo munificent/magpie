@@ -27,8 +27,7 @@ public class Field {
   public Expr getInitializer() { return mInitializer; }
   
   /**
-   * Gets the pattern for this field. Will be null if the field has an
-   * initializer.
+   * Gets the pattern for this field.
    */
   public Pattern getPattern() { return mPattern; }
   

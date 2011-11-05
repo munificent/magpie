@@ -16,8 +16,6 @@ public class Scope {
    * Creates a new top-level scope for the given module.
    * @param module
    */
-  // TODO(bob): Remove module from this. It's only needed to export stuff and
-  // the few places that do that should already have access to the module.
   public Scope(Module module) {
     mAllowRedefinition = false;
     mModule = module;
@@ -44,34 +42,30 @@ public class Scope {
     return new Scope(this);
   }
   
-  public Module getModule() {
-    return mModule;
-  }
-
-  public void importName(Context context, String name, String rename,
-      Module module, boolean export) {
+  public void importName(String name, String rename, Module module,
+      boolean export) {
     
     // Import a variable.
     Obj variable = module.getExportedVariable(name);
     if (variable != null) {
-      importVariable(context, rename, variable, module, export);
+      importVariable(rename, variable, module, export);
     }
     
     // Import a multimethod.
     Multimethod multimethod = module.getExportedMultimethod(name);
     if (multimethod != null) {
-      importMultimethod(context, rename, multimethod, module, export);
+      importMultimethod(rename, multimethod, module, export);
     }
     
     // Import syntax.
     PrefixParser prefix = module.getExportedPrefixParser(name);
     if (prefix != null) {
-      context.getModule().defineSyntax(rename, prefix, export);
+      mModule.defineSyntax(rename, prefix, export);
     }
 
     InfixParser infix = module.getExportedInfixParser(name);
     if (infix != null) {
-      context.getModule().defineSyntax(rename, infix, export);
+      mModule.defineSyntax(rename, infix, export);
     }
   }
   
@@ -151,11 +145,13 @@ public class Scope {
     return variable.getValue();
   }
   
-  public void define(String name, Callable method) {
+  public Multimethod define(String name, Callable method) {
     // Define it if not already present.
     Multimethod multimethod = defineMultimethod(name, "");
     
     multimethod.addMethod(method);
+    
+    return multimethod;
   }
   
   public Multimethod defineMultimethod(String name, String doc) {
@@ -231,10 +227,10 @@ public class Scope {
     return builder.toString();
   }
   
-  private void importVariable(Context context, String name, Obj value,
+  private void importVariable(String name, Obj value,
       Module module, boolean export) {
     if (!mAllowRedefinition && (get(name) != null)) {
-      context.error(Name.REDEFINITION_ERROR,
+      new Context(mModule).error(Name.REDEFINITION_ERROR,
           "Can not import variable \"" + name + "\" from " +
           module.getName() + " because there is already a variable with " +
           "that name defined.");
@@ -247,13 +243,13 @@ public class Scope {
     }
   }
   
-  private void importMultimethod(Context context, String name,
+  private void importMultimethod(String name,
       Multimethod multimethod, Module module, boolean export) {
     if (mAllowRedefinition) return;
 
     Multimethod existing = mMultimethods.get(name);
     if ((existing != null) && (existing != multimethod)) {
-      context.error(Name.REDEFINITION_ERROR,
+      new Context(mModule).error(Name.REDEFINITION_ERROR,
           "Can not import multimethod \"" + name + "\" from " +
           module.getName() + " because there is already a multimethod with " +
           "that name defined.");

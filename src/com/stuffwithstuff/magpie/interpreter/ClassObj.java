@@ -2,8 +2,6 @@ package com.stuffwithstuff.magpie.interpreter;
 
 import java.util.*;
 
-import com.stuffwithstuff.magpie.ast.Field;
-
 /**
  * A runtime object representing a class.
  */
@@ -15,7 +13,7 @@ public class ClassObj extends Obj {
    * @param name        The name of the class.
    */
   public ClassObj(ClassObj classClass, String name, List<ClassObj> parents,
-      Map<String, Field> fields, Scope closure, String doc) {
+      Map<String, FieldObj> fields, String doc) {
     super(classClass);
     mName = name;
 
@@ -26,15 +24,14 @@ public class ClassObj extends Obj {
     }
     
     mFields = fields;
-    mClosure = closure;
     mDoc = doc;
   }
   
   public String getName() { return mName; }
   public List<ClassObj> getParents() { return mParents; }
-  public Map<String, Field> getFieldDefinitions() { return mFields; }
-  public Scope getClosure() { return mClosure; }
+  public Map<String, FieldObj> getFieldDefinitions() { return mFields; }
   public String getDoc() { return mDoc; }
+  public Multimethod getInitMethod() { return mInit; }
   
   /**
    * Gets whether or not this class is a subclass (or same class) as the given
@@ -63,6 +60,17 @@ public class ClassObj extends Obj {
     return checkForCollisions(reachedClasses, this);
   }
   
+  /**
+   * Stores the "init" multimethod for this class. ClassObj needs to keep track
+   * of this so that when new() invokes it, it can find the one in the scope
+   * where the class is defined so that any other specializations to it can be
+   * found.
+   */
+  public void bindInitMultimethod(Multimethod init) {
+    if (mInit != null) throw new IllegalStateException("Can only bind once.");
+    mInit = init;
+  }
+  
   @Override
   public String toString() {
     return mName;
@@ -85,7 +93,7 @@ public class ClassObj extends Obj {
   private final String mName;
   
   private final List<ClassObj> mParents;
-  private final Map<String, Field> mFields;
-  private final Scope mClosure;
+  private final Map<String, FieldObj> mFields;
   private final String mDoc;
+  private Multimethod mInit;
 }

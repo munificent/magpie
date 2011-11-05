@@ -128,8 +128,8 @@ public class SyntaxMethods {
     public Expr parse(MagpieParser parser, Token token) {
       // Wrap the Java parser in a Magpie one.
       ClassObj parserClass = mContext.getInterpreter().getSyntaxModule().getExportedVariable("Parser").asClass();
-      Obj parserObj = mContext.getInterpreter().instantiate(parserClass, parser);
-      
+      Obj parserObj = mContext.instantiate(parserClass, parser);
+
       Obj tokenObj = JavaToMagpie.convert(mContext, token);
       Obj arg = mContext.toObj(parserObj, tokenObj);
       
