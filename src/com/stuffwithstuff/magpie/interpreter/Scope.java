@@ -45,16 +45,31 @@ public class Scope {
   public void importName(String name, String rename, Module module,
       boolean export) {
     
-    // Import a variable.
+    // Import variable.
     Obj variable = module.getScope().get(name);
     if (variable != null) {
-      importVariable(rename, variable, module, export);
+      if (!mAllowRedefinition && (get(rename) != null)) {
+        mModule.error(Name.REDEFINITION_ERROR,
+            "Can not import variable \"" + rename + "\" from " +
+            module.getName() + " because there is already a variable with " +
+            "that name defined.");
+      }
+      
+      mVariables.put(rename, new Pair<Boolean, Obj>(false, variable));
     }
     
-    // Import a multimethod.
+    // Import multimethod.
     Multimethod multimethod = module.getScope().getMultimethod(name);
-    if (multimethod != null) {
-      importMultimethod(rename, multimethod, module, export);
+    if (multimethod != null || mAllowRedefinition) {
+      Multimethod existing = mMultimethods.get(rename);
+      if ((existing != null) && (existing != multimethod)) {
+        mModule.error(Name.REDEFINITION_ERROR,
+            "Can not import multimethod \"" + rename + "\" from " +
+            module.getName() + " because there is already a multimethod with " +
+            "that name defined.");
+      }
+      
+      mMultimethods.put(rename, multimethod);
     }
     
     // Import syntax.
@@ -66,6 +81,11 @@ public class Scope {
     InfixParser infix = module.getGrammar().getInfixParser(name);
     if (infix != null) {
       mModule.defineSyntax(rename, infix, export);
+    }
+    
+    // Re-export.
+    if (export && (mParent == null)) {
+      mModule.export(name);
     }
   }
   
@@ -229,41 +249,6 @@ public class Scope {
     }
     
     return builder.toString();
-  }
-  
-  private void importVariable(String name, Obj value,
-      Module module, boolean export) {
-    if (!mAllowRedefinition && (get(name) != null)) {
-      mModule.error(Name.REDEFINITION_ERROR,
-          "Can not import variable \"" + name + "\" from " +
-          module.getName() + " because there is already a variable with " +
-          "that name defined.");
-    }
-    
-    mVariables.put(name, new Pair<Boolean, Obj>(false, value));
-    
-    if (export && (mParent == null)) {
-      mModule.export(name);
-    }
-  }
-  
-  private void importMultimethod(String name,
-      Multimethod multimethod, Module module, boolean export) {
-    if (mAllowRedefinition) return;
-
-    Multimethod existing = mMultimethods.get(name);
-    if ((existing != null) && (existing != multimethod)) {
-      mModule.error(Name.REDEFINITION_ERROR,
-          "Can not import multimethod \"" + name + "\" from " +
-          module.getName() + " because there is already a multimethod with " +
-          "that name defined.");
-    }
-    
-    mMultimethods.put(name, multimethod);
-    
-    if (export && (mParent == null)) {
-      mModule.export(name);
-    }
   }
 
   private final boolean mAllowRedefinition;
