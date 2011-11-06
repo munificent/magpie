@@ -1,0 +1,31 @@
+// This tests the Lexer class by reading and lexing Magpie's standard lib.
+// It expends to be invoked from the top magpie/ directory.
+
+import magpie.syntax
+import magpie.syntax.lexer
+import io with
+    file as io.file
+end
+import io.path
+
+def lexFile(path)
+    print(path)
+    open(path) use with
+        val lexer = Lexer new(it read)
+        for i in 1 to(100000) do // sanity
+            val token = lexer readToken
+            print(token)
+            if token type == TokenType.EOF then break
+        end
+    end
+end
+
+def walk(path)
+    if path isFile then
+        if (path extension == ".mag") then lexFile(path)
+    else
+        for file in dir(path) do walk(file)
+    end
+end
+
+walk("lib")

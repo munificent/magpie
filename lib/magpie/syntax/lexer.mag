@@ -54,6 +54,7 @@ def (this is Lexer) readToken
             match this _peek
                 case "/" then this _readLineComment
                 case "*" then this _readBlockComment
+                else this _readOperator
             end
 
         // Punctuators.
@@ -205,18 +206,24 @@ def (this is Lexer) _makeToken(type is TokenType, value)
     // Handle reserved words.
     // TODO(bob): Consider making argument writable?
     var actualType = type
+    var actualValue = value
+
     if type == TokenType.NAME then
         actualType = match this _read
             case "nothing" then TokenType.NOTHING
-            case "false"   then TokenType.FALSE
-            case "true"    then TokenType.TRUE
+            case "false"   then
+                actualValue = false
+                TokenType.BOOL
+            case "true"    then
+                actualValue = true
+                TokenType.BOOL
             case "="       then TokenType.EQUALS
             case otherwise then TokenType.NAME
         end
     end
 
     val token = Token new(position: this _currentPosition,
-        type: actualType, text: this _read, value: value)
+        type: actualType, text: this _read, value: actualValue)
 
     this _startLine = this _line
     this _startCol  = this _col
