@@ -147,7 +147,7 @@ public class JavaToMagpie {
   }
 
   private Obj construct(String className, Object... args) {
-    ClassObj classObj = mContext.getInterpreter().getSyntaxModule().getExportedVariable(className).asClass();
+    ClassObj classObj = mContext.getInterpreter().getSyntaxModule().getScope().get(className).asClass();
     Obj object = mContext.instantiate(classObj, null);
 
     // TODO(bob): Hackish. Goes around normal object construction process.

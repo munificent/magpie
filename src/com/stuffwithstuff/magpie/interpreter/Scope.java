@@ -46,24 +46,24 @@ public class Scope {
       boolean export) {
     
     // Import a variable.
-    Obj variable = module.getExportedVariable(name);
+    Obj variable = module.getScope().get(name);
     if (variable != null) {
       importVariable(rename, variable, module, export);
     }
     
     // Import a multimethod.
-    Multimethod multimethod = module.getExportedMultimethod(name);
+    Multimethod multimethod = module.getScope().getMultimethod(name);
     if (multimethod != null) {
       importMultimethod(rename, multimethod, module, export);
     }
     
     // Import syntax.
-    PrefixParser prefix = module.getExportedPrefixParser(name);
+    PrefixParser prefix = module.getGrammar().getPrefixParser(name);
     if (prefix != null) {
       mModule.defineSyntax(rename, prefix, export);
     }
 
-    InfixParser infix = module.getExportedInfixParser(name);
+    InfixParser infix = module.getGrammar().getInfixParser(name);
     if (infix != null) {
       mModule.defineSyntax(rename, infix, export);
     }
@@ -131,7 +131,7 @@ public class Scope {
     
     // If we're defining a top-level public variable, export it too.
     if ((mParent == null) && Name.isPublic(name)) {
-      mModule.addExport(name, value);
+      mModule.export(name);
     }
     
     return true;
@@ -143,6 +143,10 @@ public class Scope {
     Pair<Boolean, Obj> variable = mVariables.get(name);
     if (variable == null) return null;
     return variable.getValue();
+  }
+  
+  public Multimethod getMultimethod(String name) {
+    return mMultimethods.get(name);
   }
   
   public Multimethod define(String name, Callable method) {
@@ -169,7 +173,7 @@ public class Scope {
     // then that multimethod now becomes exported. That satisfies the user's
     // expectation that all top-level defs are exported.
     if ((mParent == null) && Name.isPublic(name)) {
-      mModule.addExport(name, multimethod);
+      mModule.export(name);
     }
 
     return multimethod;
@@ -239,7 +243,7 @@ public class Scope {
     mVariables.put(name, new Pair<Boolean, Obj>(false, value));
     
     if (export && (mParent == null)) {
-      mModule.addExport(name, value);
+      mModule.export(name);
     }
   }
   
@@ -258,7 +262,7 @@ public class Scope {
     mMultimethods.put(name, multimethod);
     
     if (export && (mParent == null)) {
-      mModule.addExport(name, multimethod);
+      mModule.export(name);
     }
   }
 

@@ -42,8 +42,16 @@ public class Grammar {
     return mPrefixParsers.get(token);
   }
 
+  public PrefixParser getPrefixParser(String keyword) {
+    return mPrefixParsers.get(keyword);
+  }
+
   public InfixParser getInfixParser(Token token) {
     return mInfixParsers.get(token);
+  }
+
+  public InfixParser getInfixParser(String keyword) {
+    return mInfixParsers.get(keyword);
   }
   
   public void defineParser(String keyword, PrefixParser parser) {

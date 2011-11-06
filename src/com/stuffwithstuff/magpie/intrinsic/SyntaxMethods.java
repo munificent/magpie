@@ -127,7 +127,7 @@ public class SyntaxMethods {
     @Override
     public Expr parse(MagpieParser parser, Token token) {
       // Wrap the Java parser in a Magpie one.
-      ClassObj parserClass = mContext.getInterpreter().getSyntaxModule().getExportedVariable("Parser").asClass();
+      ClassObj parserClass = mContext.getInterpreter().getSyntaxModule().getScope().get("Parser").asClass();
       Obj parserObj = mContext.instantiate(parserClass, parser);
 
       Obj tokenObj = JavaToMagpie.convert(mContext, token);
@@ -154,7 +154,7 @@ public class SyntaxMethods {
     @Override
     public Expr parse(MagpieParser parser, Expr left, Token token) {
       // Wrap the Java parser in a Magpie one.
-      ClassObj parserClass = mContext.getInterpreter().getSyntaxModule().getExportedVariable("Parser").asClass();
+      ClassObj parserClass = mContext.getInterpreter().getSyntaxModule().getScope().get("Parser").asClass();
       Obj parserObj = mContext.instantiate(parserClass, parser);
       
       Obj tokenObj = JavaToMagpie.convert(mContext, token);

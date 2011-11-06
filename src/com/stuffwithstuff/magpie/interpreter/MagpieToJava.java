@@ -299,7 +299,7 @@ public class MagpieToJava {
   }
   
   private ClassObj getClass(String name) {
-    return mContext.getInterpreter().getSyntaxModule().getExportedVariable(name).asClass();
+    return mContext.getInterpreter().getSyntaxModule().getScope().get(name).asClass();
   }
   
   private final Context mContext;

@@ -26,6 +26,10 @@ public class ParserTable<T> {
     mTypeTable.put(type, parser);
   }
   
+  public T get(String name) {
+    return mNameTable.get(name);
+  }
+  
   public T get(Token token) {
     // A parser bound to a specific name takes priority over one bound to an
     // entire token type.
