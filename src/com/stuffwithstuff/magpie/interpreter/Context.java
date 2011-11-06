@@ -9,86 +9,24 @@ import com.stuffwithstuff.magpie.ast.FnExpr;
 /**
  * The context a Callable has to operate within.
  */
-public class Context {
-  public Context(Module module) {
-    mModule = module;
-  }
-  
-  public Interpreter getInterpreter() {
-    return mModule.getInterpreter();
-  }
-  
-  public Module getModule() {
-    return mModule;
-  }
-  
-  public ErrorException error(String errorClassName, String message) {
-    return getInterpreter().error(errorClassName, message);
-  }
-  
-  public Obj evaluate(Expr expression, Scope scope) {
-    return mModule.getInterpreter().evaluate(expression, mModule, scope);
-  }
-  
-  public boolean isBool(Obj object) {
-    return getInterpreter().getBoolClass() == object.getClassObj();
-  }
-  
-  public boolean isInt(Obj object) {
-    return getInterpreter().getIntClass() == object.getClassObj();
-  }
-  
-  public boolean isNothing(Obj object) {
-    return getInterpreter().nothing() == object;
-  }
-  
-  public boolean isString(Obj object) {
-    return getInterpreter().getStringClass() == object.getClassObj();
-  }
-  
-  public boolean objectsEqual(Obj a, Obj b) {
-    return getInterpreter().objectsEqual(a, b);
-  }
-  
-  public Obj instantiate(ClassObj classObj, Object primitiveValue) {
-    return getInterpreter().instantiate(this, classObj, primitiveValue);
-  }
-  
-  public Obj nothing() {
-    return getInterpreter().nothing();
-  }
-  
-  public Obj toObj(boolean value) {
-    return getInterpreter().createBool(value);
-  }
-  
-  public Obj toObj(int value) {
-    return getInterpreter().createInt(this, value);
-  }
-  
-  public Obj toObj(String value) {
-    return getInterpreter().createString(this, value);
-  }
-
-  public Obj toObj(Obj... fields) {
-    return getInterpreter().createRecord(this, fields);
-  }
-  
-  public Obj toObj(List<String> keys, Map<String, Obj> fields) {
-    return getInterpreter().createRecord(this, keys, fields);
-  }
-
-  public Obj toArray(List<Obj> elements) {
-    return getInterpreter().createArray(this, elements);
-  }
-
-  public Obj toList(List<Obj> elements) {
-    return getInterpreter().createList(this, elements);
-  }
-
-  public Obj toFunction(FnExpr expr, Scope closure) {
-    return getInterpreter().createFn(expr, closure);
-  }
-
-  private final Module mModule;  
+public interface Context {
+  public Interpreter getInterpreter();
+  public Module getModule();
+  public ErrorException error(String errorClassName, String message);
+  public Obj evaluate(Expr expression, Scope scope);
+  public boolean isBool(Obj object);
+  public boolean isInt(Obj object);
+  public boolean isNothing(Obj object);
+  public boolean isString(Obj object);
+  public boolean objectsEqual(Obj a, Obj b);
+  public Obj instantiate(ClassObj classObj, Object primitiveValue);
+  public Obj nothing();
+  public Obj toObj(boolean value);
+  public Obj toObj(int value);
+  public Obj toObj(String value);
+  public Obj toObj(Obj... fields);
+  public Obj toObj(List<String> keys, Map<String, Obj> fields);
+  public Obj toArray(List<Obj> elements);
+  public Obj toList(List<Obj> elements);
+  public Obj toFunction(FnExpr expr, Scope closure);
 }

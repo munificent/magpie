@@ -33,11 +33,9 @@ public class Interpreter {
     mRecordClass = scope.get("Record").asClass();
     mStringClass = scope.get("String").asClass();
     
-    Context context = new Context(mBaseModule);
-    
-    mTrue = instantiate(context, mBoolClass, true);
-    mFalse = instantiate(context, mBoolClass, false);
-    mNothing = instantiate(context, mNothingClass, null);
+    mTrue = mBaseModule.instantiate(mBoolClass, true);
+    mFalse = mBaseModule.instantiate(mBoolClass, false);
+    mNothing = mBaseModule.instantiate(mNothingClass, null);
     
     evaluateModule(mBaseModule);
     
@@ -54,7 +52,7 @@ public class Interpreter {
   }
   
   public Obj evaluate(Expr expr, Module module, Scope scope) {
-    ExprEvaluator evaluator = new ExprEvaluator(new Context(module));
+    ExprEvaluator evaluator = new ExprEvaluator(module);
     return evaluator.evaluate(expr, scope);
   }
   
@@ -62,13 +60,13 @@ public class Interpreter {
     Multimethod multimethod = mBaseModule.getScope().lookUpMultimethod(
         Name.TO_STRING);
     return multimethod.invoke(Name.TO_STRING,
-        new Context(mBaseModule), value, mNothing).asString();
+        mBaseModule, value, mNothing).asString();
   }
   
   public Obj invoke(Obj leftArg, String method, Obj rightArg) {
     Multimethod multimethod = mBaseModule.getScope().lookUpMultimethod(method);
     return multimethod.invoke(method,
-        new Context(mBaseModule), leftArg, rightArg);
+        mBaseModule, leftArg, rightArg);
   }
   
   public boolean objectsEqual(Obj a, Obj b) {
@@ -90,7 +88,7 @@ public class Interpreter {
     if (equals == null) return a == b;
     
     mInObjectsEqual = true;
-    Obj result = equals.invoke(Name.EQEQ, new Context(mBaseModule), a, b);
+    Obj result = equals.invoke(Name.EQEQ, mBaseModule, a, b);
     mInObjectsEqual = false;
     
     return result.asBool();
@@ -123,12 +121,12 @@ public class Interpreter {
     ClassObj classObj = mBaseModule.getScope().get(errorClassName).asClass();
 
     // TODO(bob): Hackish.
-    Context context = new Context(mBaseModule);
+    Context context = mBaseModule;
     
     // TODO(bob): Putting the message in here as the value is kind of hackish,
     // but it ensures we can display an error message even if we aren't able
     // to evaluate any code (like calling "string" on the error).
-    Obj error = instantiate(context, classObj, message);
+    Obj error = context.instantiate(classObj, message);
     
     error.setValue(message);
     
@@ -141,15 +139,19 @@ public class Interpreter {
    */
   public Obj nothing() { return mNothing; }
 
-  public ClassObj getClassClass() { return mClass; }
+  public ClassObj getArrayClass() { return mArrayClass; }
   public ClassObj getBoolClass() { return mBoolClass; }
+  public ClassObj getClassClass() { return mClass; }
+  public ClassObj getFnClass() { return mFnClass; }
   public ClassObj getIntClass() { return mIntClass; }
+  public ClassObj getListClass() { return mListClass; }
+  public ClassObj getRecordClass() { return mRecordClass; }
   public ClassObj getStringClass() { return mStringClass; }
   
   public Module getBaseModule() { return mBaseModule; }
   public Module getSyntaxModule() { return mSyntaxModule; }
   
-  public Obj createBool(boolean value) {
+  public Obj getBool(boolean value) {
     return value ? mTrue : mFalse;
   }
   
@@ -199,64 +201,7 @@ public class Interpreter {
     
     return classObj;
   }
-
-  public Obj createArray(Context context, List<Obj> elements) {
-    return instantiate(context, mArrayClass, elements);
-  }
-
-  public Obj createList(Context context, List<Obj> elements) {
-    return instantiate(context, mListClass, elements);
-  }
-
-  public Obj createInt(Context context, int value) {
-    return instantiate(context, mIntClass, value);
-  }
-
-  public Obj createString(Context context, String value) {
-    return instantiate(context, mStringClass, value);
-  }
-  
-  public FnObj createFn(FnExpr expr, Scope scope) {
-    return new FnObj(mFnClass, new Function(expr, scope));
-  }
-  
-  public Obj createRecord(Context context, Obj... fields) {
-    Obj record = instantiate(context, mRecordClass, null);
     
-    int index = 0;
-    for (Obj field : fields) {
-      record.setField(Name.getTupleField(index++), field);
-    }
-    
-    return record;
-  }
-  
-  public Obj createRecord(Context context, List<String> keys, Map<String, Obj> fields) {
-    Obj record = instantiate(context, mRecordClass, keys);
-    
-    for (Entry<String, Obj> field : fields.entrySet()) {
-      record.setField(field.getKey(), field.getValue());
-    }
-    
-    return record;
-  }
-  
-  // TODO(bob): Move this into Module?
-  public Obj instantiate(Context context, ClassObj classObj, Object primitiveValue) {
-    Obj object = new Obj(classObj, primitiveValue);
-    
-    // Initialize its fields.
-    for (Entry<String, FieldObj> field : classObj.getFieldDefinitions().entrySet()) {
-      Callable initializer = field.getValue().getInitializer();
-      if (initializer != null) {
-        Obj value = initializer.invoke(context, mNothing);
-        object.setField(field.getKey(), value);
-      }
-    }
-    
-    return object;
-  }
-  
   public MagpieHost getHost() {
     return mHost;
   }
@@ -264,7 +209,7 @@ public class Interpreter {
   public Obj getConstructingObject() { return mConstructing.peek(); }
   
   public Obj constructNewObject(Context context, ClassObj classObj, Obj initArg) {
-    Obj newObj = instantiate(context, classObj, null);
+    Obj newObj = context.instantiate(classObj, null);
     
     mConstructing.push(newObj);
 

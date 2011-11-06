@@ -230,7 +230,7 @@ public class Scope {
   private void importVariable(String name, Obj value,
       Module module, boolean export) {
     if (!mAllowRedefinition && (get(name) != null)) {
-      new Context(mModule).error(Name.REDEFINITION_ERROR,
+      mModule.error(Name.REDEFINITION_ERROR,
           "Can not import variable \"" + name + "\" from " +
           module.getName() + " because there is already a variable with " +
           "that name defined.");
@@ -249,7 +249,7 @@ public class Scope {
 
     Multimethod existing = mMultimethods.get(name);
     if ((existing != null) && (existing != multimethod)) {
-      new Context(mModule).error(Name.REDEFINITION_ERROR,
+      mModule.error(Name.REDEFINITION_ERROR,
           "Can not import multimethod \"" + name + "\" from " +
           module.getName() + " because there is already a multimethod with " +
           "that name defined.");
