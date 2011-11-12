@@ -1,0 +1,3 @@
+def foo("b")
+    "in b"
+end

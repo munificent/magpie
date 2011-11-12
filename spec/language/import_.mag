@@ -36,5 +36,28 @@ specify("An 'import' expression") with
         end shouldThrow(NoMethodError)
     end
 
-    // TODO(bob): Relative imports, exports.
+    it should("merge multimethds with the same name") with
+        import spec.language.import_test_a
+        import spec.language.import_test_b
+
+        foo("a") shouldEqual("in a")
+        foo("b") shouldEqual("in b")
+    end
+
+    it should("export overrides to the imported module") with
+        // imports c
+        //   c defines foo
+        //   c defines bar which calls foo
+        // imports d
+        //   d imports c
+        //   d specializes foo
+        // calls bar
+        import spec.language.import_test_c
+        import spec.language.import_test_d
+
+        callsOverridable("c") shouldEqual("in c")
+        callsOverridable("d") shouldEqual("in d")
+    end
+
+    // TODO(bob): Relative imports, exports, collisions.
 end

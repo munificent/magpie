@@ -1,0 +1,7 @@
+def overridable("c")
+    "in c"
+end
+
+def callsOverridable(arg)
+    overridable(arg)
+end

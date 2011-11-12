@@ -3,20 +3,27 @@
 
 import magpie.syntax
 import magpie.syntax.lexer
-import io with
-    file as io.file
-end
+import io
 import io.path
 
 def lexFile(path)
-    print(path)
     open(path) use with
         val lexer = Lexer new(it read)
-        for i in 1 to(100000) do // sanity
+        var tokens = 0
+        var errors = 0
+        while true do
+            tokens = tokens + 1
             val token = lexer readToken
-            print(token)
-            if token type == TokenType.EOF then break
+            match token type
+                case == TokenType.ERROR then
+                    errors = errors + 1
+                    print("ERROR " + token)
+                case == TokenType.EOF then break
+                else nothing // Do nothing.
+            end
         end
+
+        print(tokens + " tokens, " + errors + " errors in " + path)
     end
 end
 

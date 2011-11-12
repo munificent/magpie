@@ -59,17 +59,23 @@ public class Scope {
     }
     
     // Import multimethod.
-    Multimethod multimethod = module.getScope().getMultimethod(name);
-    if (multimethod != null || mAllowRedefinition) {
-      Multimethod existing = mMultimethods.get(rename);
-      if ((existing != null) && (existing != multimethod)) {
-        mModule.error(Name.REDEFINITION_ERROR,
-            "Can not import multimethod \"" + rename + "\" from " +
-            module.getName() + " because there is already a multimethod with " +
-            "that name defined.");
+    Multimethod remoteMultimethod = module.getScope().getMultimethod(name);
+    if (remoteMultimethod != null) {
+      Multimethod localMultimethod = getOrCreateMultimethod(rename,
+          remoteMultimethod.getDoc());
+      
+      // Add a reference from the imported multimethod to this one. That way,
+      // if it later gets extended, we'll see those here too.
+      remoteMultimethod.addExport(localMultimethod);
+      
+      for (Callable method : remoteMultimethod.getMethods()) {
+        localMultimethod.addMethod(method);
       }
       
-      mMultimethods.put(rename, multimethod);
+      // Add a reference from our multimethod to the one we imported. That way,
+      // if we provide new specializations (i.e. overrides), that module will
+      // see them too.
+      localMultimethod.addExport(remoteMultimethod);
     }
     
     // Import syntax.
@@ -170,6 +176,10 @@ public class Scope {
   }
   
   public Multimethod define(String name, Callable method) {
+    if (name.equals("overridable")) {
+      System.out.println();
+    }
+    
     // Define it if not already present.
     Multimethod multimethod = defineMultimethod(name, "");
     
@@ -179,13 +189,7 @@ public class Scope {
   }
   
   public Multimethod defineMultimethod(String name, String doc) {
-    Multimethod multimethod = mMultimethods.get(name);
-    
-    // Only define it the first time if not found.
-    if (multimethod == null) {
-      multimethod = new Multimethod(doc);
-      mMultimethods.put(name, multimethod);
-    }
+    Multimethod multimethod = getOrCreateMultimethod(name, doc);
     
     // If this is a top-level public method, export it too. Note that we do
     // this outside of the above if() so that if you import a multimethod
@@ -251,6 +255,18 @@ public class Scope {
     return builder.toString();
   }
 
+  private Multimethod getOrCreateMultimethod(String name, String doc) {
+    Multimethod multimethod = mMultimethods.get(name);
+    
+    // Only define it the first time if not found.
+    if (multimethod == null) {
+      multimethod = new Multimethod(doc);
+      mMultimethods.put(name, multimethod);
+    }
+    
+    return multimethod;
+  }
+  
   private final boolean mAllowRedefinition;
   private final Scope mParent;
   private final Module mModule;
