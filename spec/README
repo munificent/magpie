@@ -1,7 +1,7 @@
-This directory contains Magpie's executable formal specification. The spec is a
-Magpie program that should be easily human readable, but also machine
-verifiable. If a Magpie interpreter can run the spec without errors, it is a
-conforming implementation.
+This directory contains Magpie's executable specification. The spec is a Magpie
+program that should be easily human readable, but also machine verifiable. If a
+Magpie interpreter can run the spec without errors, it is a conforming
+implementation.
 
 At least, that's the plan. The spec still needs a lot of filling in, but it's
 getting there.
