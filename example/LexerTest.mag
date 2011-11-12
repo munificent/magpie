@@ -36,3 +36,4 @@ def walk(path)
 end
 
 walk("lib")
+walk("spec")

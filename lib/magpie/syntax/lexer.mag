@@ -49,6 +49,11 @@ def (this is Lexer) readToken
         case "\n" then this _makeToken(TokenType.LINE)
         case "\r" then this _makeToken(TokenType.LINE)
 
+        case "\\" then this _makeToken(TokenType.LINE_CONTINUATION)
+
+        // Strings.
+        case "\"" then this _readString
+
         // Comments.
         case "/" then
             match this _peek
@@ -93,6 +98,40 @@ def (this is Lexer) _readWhitespace
     end
 end
 
+def (this is Lexer) _readString
+    var escaped = ""
+
+    while true do
+        match this _advance
+            case "\\" then
+                // String escape.
+                match this _advance
+                    case "b" then escaped = escaped + "\b"
+                    case "f" then escaped = escaped + "\f"
+                    case "n" then escaped = escaped + "\n"
+                    case "r" then escaped = escaped + "\r"
+                    case "t" then escaped = escaped + "\t"
+                    case "\"" then escaped = escaped + "\""
+                    case "\\" then escaped = escaped + "\\"
+                    case "0" then escaped = escaped + "\0"
+
+                    // TODO(bob): Handle unicode escapes.
+
+                    else return this _makeToken(TokenType.ERROR)
+                end
+
+            case "\"" then
+                return this _makeToken(TokenType.STRING, escaped)
+
+            case "\0" then
+                // Unterminated string.
+                return this _makeToken(TokenType.ERROR)
+
+            case c then escaped = escaped + c
+        end
+    end
+end
+
 def (this is Lexer) _readLineComment
     var numSlashes = 1
     while this _advance == "/" do numSlashes = numSlashes + 1
@@ -105,7 +144,14 @@ def (this is Lexer) _readLineComment
         end
 
     // Consume the rest of the line.
-    while not("\n\r" contains(this _peek)) do this _advance
+    while true do
+        match this _peek
+            case "\n" then break
+            case "\r" then break
+            case "\0" then break
+            else this _advance
+        end
+    end
 
     val value = this _read substring(from: numSlashes) trim
     this _makeToken(type, value)
