@@ -34,23 +34,22 @@ allow you to seamlessly extend the language and libraries as you see fit.
 
 You can learn more about the language at http://magpie-lang.org/.
 
-Getting Started
----------------
+## Getting Started
 
 It should be pretty easy to get it up and running. You'll need to:
 
-    Pull down the code. It lives here: https://github.com/munificent/magpie
+*   Pull down the code. It lives here: https://github.com/munificent/magpie
 
-    Build it. The repo includes an Eclipse project if that's your thing. If
+*   Build it. The repo includes an Eclipse project if that's your thing. If
     you rock the command-line, you can just do:
 
-    $ cd magpie
-    $ ant jar
+        $ cd magpie
+        $ ant jar
 
-    Run it. Magpie is a command line app. After building the jar, you can run
+*   Run it. Magpie is a command line app. After building the jar, you can run
     it by doing:
 
-    $ ./magpie
+        $ ./magpie
 
 If you run it with no arguments, it drops you into a simple REPL. Enter a
 Magpie expression and it will immediately evaluate it. Since everything is an
