@@ -11,9 +11,8 @@ def lexFile(path)
         val lexer = Lexer new(it read)
         var tokens = 0
         var errors = 0
-        while true do
+        for token in lexer do
             tokens = tokens + 1
-            val token = lexer readToken
             match token type
                 case == TokenType.ERROR then
                     errors = errors + 1

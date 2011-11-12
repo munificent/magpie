@@ -21,7 +21,6 @@ end
 
 // ---
 
-// TODO(bob): Should inherit and implement Iterable.
 defclass Lexer
     // TODO(bob): Support an iterable stream of characters.
     val _text is String
@@ -381,4 +380,22 @@ def (c is String) _isOperator
         case ">" then true
         else false
     end
+end
+
+defclass LexerIterator
+    val lexer is Lexer
+    var current = nothing
+end
+
+def (this is LexerIterator) next
+    if this current != nothing and this current type == TokenType.EOF then
+        return false
+    end
+
+    this current = this lexer readToken
+    true
+end
+
+def (this is Lexer) iterate
+    LexerIterator new(lexer: this)
 end
