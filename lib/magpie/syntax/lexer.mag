@@ -1,6 +1,6 @@
 import magpie.syntax
 
-// TODO(bob): Move to somewhere more appropriate:
+// TODO(bob): Move to somewhere more appropriate then here
 
 def (this is TokenType) toString
     this name
@@ -383,7 +383,7 @@ def (c is String) _isOperator
 end
 
 defclass LexerIterator
-    val lexer is Lexer
+    val lexer
     var current = nothing
 end
 
@@ -397,5 +397,56 @@ def (this is LexerIterator) next
 end
 
 def (this is Lexer) iterate
+    LexerIterator new(lexer: this)
+end
+
+// TODO(bob): Unify with Lexer and Annotator.
+defclass Morpher
+    val tokens
+    var eatLines is Bool = true
+end
+
+def (this is Morpher) readToken
+    while true do
+        val token = this tokens readToken
+        var done = true
+
+        match token type
+            // Ignore non-semantic tokens.
+            case == TokenType.WHITESPACE then done = false
+            case == TokenType.BLOCK_COMMENT then done = false
+            case == TokenType.LINE_COMMENT then done = false
+
+            // Ignore lines after tokens that can't end an expression.
+            case == TokenType.BACKTICK then this eatLines = true
+            case == TokenType.COMMA then this eatLines = true
+            case == TokenType.FIELD then this eatLines = true
+            case == TokenType.LEFT_PAREN then this eatLines = true
+            case == TokenType.LEFT_BRACKET then this eatLines = true
+            case == TokenType.LEFT_BRACE then this eatLines = true
+
+            case == TokenType.LINE_CONTINUATION then
+                this eatLines = true
+                done = false
+
+            case == TokenType.LINE then
+                if this eatLines then
+                    done = false
+                else
+                    // Collapse multiple lines into one.
+                    this eatLines = true
+                end
+
+            else
+                // A line after any other token is significant.
+                this eatLines = false
+            end
+        end
+
+        if done then return token
+    end
+end
+
+def (this is Morpher) iterate
     LexerIterator new(lexer: this)
 end

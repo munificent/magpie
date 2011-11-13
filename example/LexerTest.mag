@@ -9,9 +9,11 @@ import io.path
 def lexFile(path)
     open(path) use with
         val lexer = Lexer new(it read)
+        val morpher = Morpher new(tokens: lexer)
+
         var tokens = 0
         var errors = 0
-        for token in lexer do
+        for token in morpher do
             tokens = tokens + 1
             match token type
                 case == TokenType.ERROR then
