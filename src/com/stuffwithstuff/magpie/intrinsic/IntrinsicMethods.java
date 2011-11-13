@@ -137,4 +137,20 @@ public class IntrinsicMethods {
       return context.toObj(left.toString());
     }
   }
+
+  @Def("(is Error) toString")
+  @Doc("Returns a string representation of the error.")
+  public static class Error_ToString implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      // If we've crammed a message in it (which internal errors do), then
+      // show that.
+      if (left.getValue() instanceof String) {
+        String message = (String)left.getValue();
+        return context.toObj(message);
+      }
+      
+      // Just do the default.
+      return context.toObj("<" + left.getClassObj().getName() + ">");
+    }
+  }
 }
