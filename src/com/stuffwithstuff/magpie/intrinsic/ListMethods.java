@@ -106,7 +106,19 @@ public class ListMethods {
       return value;
     }
   }
+  
+  @Def("(is List) removeAt(index is Int)")
+  @Doc("Remove the item at the given index.")
+  public static class RemoveAt implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      List<Obj> list = left.asList();
+      
+      int index = Indexable.validateIndex(context, list.size(), right.asInt());
 
+      return list.remove(index);
+    }
+  }
+  
   @Def("(is List) toArray")
   @Doc("Creates a new array containing the same elements as the list.")
   public static class ToArray implements Intrinsic {

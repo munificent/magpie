@@ -164,6 +164,41 @@ specifyMethod("(this is List) insert(item, at: index is Int)") with
     end
 end
 
+specifyMethod("(this is List) removeAt(index is Int)") with
+    it should("remove the item at the given index") with
+        val list = ["a", "b", "c", "d"] toList
+        list removeAt(1)
+
+        list[0] shouldEqual("a")
+        list[1] shouldEqual("c")
+        list[2] shouldEqual("d")
+    end
+
+    it should("count from the back (+1) if the index is negative") with
+        val list = ["a", "b", "c", "d"] toList
+        list removeAt(-2)
+
+        list[0] shouldEqual("a")
+        list[1] shouldEqual("b")
+        list[2] shouldEqual("d")
+    end
+
+    it should("return the removed item") with
+        ["a"] toList removeAt(0) shouldEqual("a")
+    end
+
+    it should("throw an OutOfBoundsError on a bad index") with
+        val list = [1, 2, 3] toList
+        fn
+            list removeAt(4)
+        end shouldThrow(OutOfBoundsError)
+
+        fn
+            list removeAt(-4)
+        end shouldThrow(OutOfBoundsError)
+    end
+end
+
 specifyMethod("(this is List) toArray") with
     it should("create an array with the same elements as the list") with
         val list = [1, 2, 3] toList
