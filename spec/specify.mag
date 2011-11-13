@@ -51,7 +51,7 @@ def (this is _TestSuite) should(description is String, block)
     do
         block call()
     catch error then
-        fail("Unexpected error: " + error class)
+        fail("Unexpected error: " + error class + "\n" + error)
     end
 
     if _totalTests == testsBefore then

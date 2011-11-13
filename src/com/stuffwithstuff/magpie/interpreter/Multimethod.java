@@ -47,7 +47,7 @@ public class Multimethod {
     }
     
     // Select the best method.
-    Callable method = mGraph.select(context, arg);
+    Callable method = mGraph.select(name, context, arg);
     
     if (method == null) {
       context.error(Name.NO_METHOD_ERROR, 

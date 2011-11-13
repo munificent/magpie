@@ -64,7 +64,7 @@ public class MethodGraph {
     mCache = new HashMap<MethodPair, PatternComparer.Result>();
   }
   
-  public Callable select(Context context, Obj arg) {
+  public Callable select(String name, Context context, Obj arg) {
     Callable selected = null;
 
     Callable[] methods = mMethods; 
@@ -79,8 +79,8 @@ public class MethodGraph {
         if (selected != null) {
           // Multiple (uncovered) matches, so it's ambiguous.
           throw context.error(Name.AMBIGUOUS_METHOD_ERROR, 
-              "Cannot choose a method between " + selected.getPattern() +
-              " and " + method.getPattern());
+              "Cannot choose a method between " + name + selected.getPattern() +
+              " and " + name + method.getPattern());
         }
 
         selected = method;
