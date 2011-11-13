@@ -21,3 +21,8 @@ end
 def (this is Int) until(after is Int)
     Range new(first: this, last: after -(1))
 end
+
+def (this is Int) from(first is Int)
+    // TODO(bob): Hack. Assumes Java int.
+    Range new(first: first, last: 2147483647)
+end
