@@ -1,0 +1,179 @@
+import magpie.syntax with
+    // TODO(bob): Exclude in imports.
+    Parser as _exclude_Parser
+    consume as _exclude_consume
+    matchToken as _exclude_matchToken
+end
+
+
+defclass Parser
+    /// Base class for a generic recursive descent parser with arbitrary
+    /// lookahead. Provides basic methods to look into and consume the token
+    /// stream. Parsers for specific grammars can then be built on top of those
+    /// operations.
+    val tokens is Iterator
+    val read is List
+    val consumed is List
+end
+
+def (this == Parser) init(tokens is Iterable)
+    this init(tokens: tokens iterate, read: List new(), consumed: List new())
+end
+
+/*
+def (this is Parser) span {
+    /// Creates a new PositionSpan that starts before the last consumed Token.
+    PositionSpan new(this, last(1).getPosition());
+}
+*/
+
+def (this is Parser) last(offset is Int)
+    /// Gets a previously consumed Token.
+    /// offset  How far back in the token stream to read. One is the most
+    ///         recently parsed token (i.e. read last(1) as "last one"),
+    ///         two is the token before that, etc. The offset must be
+    ///         positive. To get an unconsumed token, use current or
+    ///         _lookAhead().
+    /// Returns the previously consumed token.
+    this consumed[offset - 1]
+end
+
+def (this is Parser) current
+    /// Gets the current token in the token stream. This is the next token that
+    /// will be consumed.
+    this _lookAhead(0)
+end
+
+def (this is Parser) lookAhead(type is TokenType)
+    this _lookAhead(0, type)
+end
+
+def (this is Parser) lookAhead(keyword is String)
+    this _lookAhead(0, keyword)
+end
+
+def (this is Parser) lookAhead(tokens is Iterable)
+    /// Looks ahead at the token stream to see if the next tokens match the
+    /// expected ones, in order. For example, if the next tokens are
+    /// (123, "do"), then a call to lookAhead([TokenType.INT, "do"]) will return
+    /// true. Does not consume any tokens. Each element can be either a
+    /// TokenType or a string denoting the name of a specific keyword.
+    for token in tokens
+    for i in from(0) do if not(this _lookAhead(i, token)) then return false
+
+    true
+end
+
+def (this is Parser) lookAheadAny(tokens is Iterable)
+    /// Gets whether or not the next Token is of any of the given types. Does
+    /// not consume the token.
+    for token in tokens do if this lookAhead(token) then return true
+
+    false
+end
+
+def (this is Parser) matches(type is TokenType)
+    this matches([type])
+end
+
+def (this is Parser) matches(keyword is String)
+    this matches([keyword])
+end
+
+def (this is Parser) matches(tokens is Iterable)
+    /// Looks ahead at the token stream to see if the next tokens match the
+    /// expected ones, in order. If so, they are all consumed. Returns true if
+    /// all tokens matched.
+
+    // See if they match.
+    if not(this lookAhead(tokens)) then return false
+
+    // Consume the matched tokens.
+    for token in tokens do this consume
+
+    true
+end
+
+def (this is Parser) matchAny(tokens is Iterable)
+    /// Looks ahead at the next token to see if it's any of the given allowed
+    /// tokens. If so, consumes it. Returns true if any token matched.
+    for token in tokens do
+        if this matches(token) then return true
+    end
+
+    false
+end
+
+def (this is Parser) consume
+    /// Consumes the current token and advances to the next one.
+    // Make sure we've read the token.
+    this _lookAhead(0)
+
+    this consumed insert(this read removeAt(0), at: 0)
+    this last(1)
+end
+
+def (this is Parser) consume(type is TokenType)
+    /// Consumes the current token and advances to the next one. The token is
+    /// required to be of the given type. If not, a ParseException will be
+    /// thrown. Returns the consumed token.
+    if this lookAhead(type) then
+        this consume
+    else
+        val current = this current
+        val message = "Expected token " + type + ", found " + current + "."
+        // TODO(bob): Info for ParseErrors.
+        throw ParseError new(/*current position, message*/)
+    end
+end
+
+def (this is Parser) consume(keyword is String)
+    /// Consumes the current token and advances to the next one. The token is
+    /// required to be the given keyword. If not, a ParseException will be
+    /// thrown. Returns the consumed token.
+    if this lookAhead(keyword) then
+        this consume
+    else
+        val current = this current
+        val message = "Expected keyword " + keyword + ", found " + current + "."
+        // TODO(bob): Info for ParseErrors.
+        throw ParseError new(/*current position, message*/)
+    end
+end
+
+def (this is Parser) isReserved(name is String)
+    /// Gets whether or not the name is reserved. Reserved words describe name
+    /// tokens whose name is special and prohibit the token from being parsed as
+    /// a regular identifier. For example, "then" is reserved.
+    false
+end
+
+def (this is Parser) _lookAhead(distance is Int)
+    // Read in as many as needed.
+    while distance >= this read count do
+        // TODO(bob): Handle this returning false.
+        this tokens next
+        this read add(this tokens current)
+    end
+
+    // Get the queued token.
+    this read[distance]
+end
+
+def (this is Parser) _lookAhead(distance is Int, type is TokenType)
+    val token = this _lookAhead(distance)
+    if token type != type then
+        false
+    else if type != TokenType.NAME then
+        true
+    else
+        // If we're looking for a NAME, we need to make sure that name is not a
+        // reserved word.
+        not(this isReserved(token text))
+    end
+end
+
+def (this is Parser) _lookAhead(distance is Int, keyword is String)
+    val token = this _lookAhead(distance)
+    token type == TokenType.NAME and token text == keyword
+end

@@ -1,0 +1,100 @@
+import spec.specify
+import magpie.syntax with
+    // TODO(bob): This is a hack. Right now we have two Parser classes: the
+    // old one that is mostly intrinsic and used to shuttle between Java and
+    // Magpie, and the new one that's pure Magpie. This keeps them separate.
+    // TODO(bob): Exclude in imports.
+    Parser as _exclude_Parser
+    consume as _exclude_consume
+    matchToken as _exclude_matchToken
+end
+import magpie.syntax.parser
+
+def _token(type is TokenType, text is String)
+    val position = Position new(file: "",
+        startLine: 1, startCol: 1, endLine: 1, endCol: 2)
+    Token new(position: position, type: type, text: text, value: text)
+end
+
+val _testTokens = [
+        _token(TokenType.NAME, "foo"),
+        _token(TokenType.STRING, "\"bar\""),
+        _token(TokenType.INT, "123")]
+
+def (this is Token) shouldEqual(type is TokenType, text is String)
+    this type shouldEqual(type)
+    this text shouldEqual(text)
+end
+
+specifyMethod("(== Parser) new(tokens is Iterable)") with
+    it should("return a Parser") with
+        Parser new(_testTokens) shouldBe(Parser)
+    end
+end
+
+specifyMethod("(is Parser) consume") with
+    it should("consume a token from the stream") with
+        val parser = Parser new(_testTokens)
+
+        parser current shouldEqual(TokenType.NAME, "foo")
+        parser consume
+        parser current shouldEqual(TokenType.STRING, "\"bar\"")
+    end
+
+    it should("return the consumed token") with
+        val parser = Parser new(_testTokens)
+
+        parser consume shouldEqual(TokenType.NAME, "foo")
+        parser consume shouldEqual(TokenType.STRING, "\"bar\"")
+    end
+end
+
+specifyMethod("(is Parser) consume(type is TokenType)") with
+    it should("consume a token from the stream if the type matches") with
+        val parser = Parser new(_testTokens)
+
+        parser consume(TokenType.NAME) shouldEqual(TokenType.NAME, "foo")
+    end
+
+    it should("throw a ParseError if the type does not match") with
+        val parser = Parser new(_testTokens)
+
+        fn
+            parser consume(TokenType.INT)
+        end shouldThrow(ParseError)
+    end
+end
+
+specifyMethod("(is Parser) consume(keyword is String)") with
+    it should("consume a NAME token from the stream if the text matches") with
+        val parser = Parser new(_testTokens)
+
+        parser consume("foo") shouldEqual(TokenType.NAME, "foo")
+    end
+
+    it should("throw a ParseError if the text does not match") with
+        val parser = Parser new(_testTokens)
+
+        fn
+            parser consume("not foo")
+        end shouldThrow(ParseError)
+    end
+
+    it should("throw a ParseError if the type is not NAME") with
+        val parser = Parser new([_token(TokenType.INT, "123")])
+
+        fn
+            parser consume("whatever")
+        end shouldThrow(ParseError)
+    end
+end
+
+specifyMethod("(is Parser) isReserved(name is String)") with
+    it should("returns false by default") with
+        val parser = Parser new(_testTokens)
+
+        parser isReserved("foo") shouldEqual(false)
+        parser isReserved("then") shouldEqual(false)
+        parser isReserved("else") shouldEqual(false)
+    end
+end

@@ -417,6 +417,10 @@ def (this is Morpher) readToken
             case == TokenType.BLOCK_COMMENT then done = false
             case == TokenType.LINE_COMMENT then done = false
 
+            // TODO(bob): Temp. Eventually should include these so parser
+            // can parse them and include them in metadata.
+            case == TokenType.DOC_COMMENT then done = false
+
             // Ignore lines after tokens that can't end an expression.
             case == TokenType.BACKTICK then this eatLines = true
             case == TokenType.COMMA then this eatLines = true

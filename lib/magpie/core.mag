@@ -154,6 +154,7 @@ import magpie.core.range with
     export first
     export last
     export count
+    export from
     export to
     export until
 end

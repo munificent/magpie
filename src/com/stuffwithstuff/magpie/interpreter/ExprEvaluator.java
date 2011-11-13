@@ -74,7 +74,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
   public Obj visit(CallExpr expr, Scope scope) {
     Multimethod multimethod = scope.lookUpMultimethod(expr.getName());
     if (multimethod == null) {
-      throw mContext.error("NoMethodError",
+      throw mContext.error(Name.NO_METHOD_ERROR,
           "Could not find a method named \"" + expr.getName() + "\".");
     }
 
