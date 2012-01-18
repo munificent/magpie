@@ -22,6 +22,12 @@ namespace magpie {
     gc(const gc<T>& obj)
     : obj_(obj.obj_) {}
     
+    gc<T>& operator =(const gc<T> & other)
+    {
+      if (&other != this) obj_ = other.obj_;
+      return *this;
+    }
+    
     T& operator *() const { return *obj_; }
     T* operator ->() const { return obj_; }
     

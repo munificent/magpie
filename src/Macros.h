@@ -35,3 +35,6 @@
   private:                                          \
     className(const className &);                   \
     className& operator=(const className &)
+
+// This is used to indicate that an array member in a class is flexibly-sized.
+#define FLEXIBLE_SIZE (1)

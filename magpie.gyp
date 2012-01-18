@@ -56,6 +56,7 @@
       'src/GC.h',
       'src/Heap.cpp',
       'src/Heap.h',
+      'src/Macros.h',
       'src/magpie.1',
       'src/MagpieString.cpp',
       'src/MagpieString.h',

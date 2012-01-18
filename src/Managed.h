@@ -17,6 +17,8 @@ namespace magpie {
     
     // Subclasses must override this to provide their size in bytes so that the
     // copying collector can copy them.
+    // TODO(bob): Rename -> allocSize(). Too easy to confuse this for a 
+    // meaningful method on the subclass.
     virtual size_t getSize() const = 0;
     
     // This will be called by the garbage collector when this object has been
