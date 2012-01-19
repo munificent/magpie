@@ -10,7 +10,7 @@ namespace magpie {
   public:
     Chunk(int numRegisters);
     
-    virtual size_t getSize() const { return sizeof(Chunk); }
+    virtual size_t allocSize() const { return sizeof(Chunk); }
 
     // Gets the instruction at the given index. Indexes are zero-based from the
     // beginning of the array. Negative indexes are from the end of the array

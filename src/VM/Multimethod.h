@@ -12,7 +12,7 @@ namespace magpie {
     Multimethod(gc<Chunk> code)
     : code_(code) {}
     
-    virtual size_t getSize() const { return sizeof(Multimethod); }
+    virtual size_t allocSize() const { return sizeof(Multimethod); }
 
     virtual Multimethod* asMultimethod() { return this; }
     
