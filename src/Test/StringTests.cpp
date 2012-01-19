@@ -14,6 +14,7 @@ namespace magpie {
     AllocScope scope(memory);
     
     temp<String> s = String::create(scope, "some text");
+    temp<String> s2 = String::create(scope, "more");
     
     EXPECT_EQUAL(9, s->length());
     EXPECT_EQUAL(0, strcmp("some text", s->cString()));

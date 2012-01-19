@@ -10,7 +10,10 @@ namespace magpie {
   
   temp<String> String::create(AllocScope& scope, const char* text) {
     int length = strlen(text);
-    return scope.makeTemp(new(scope) String(text, length));
+    // Allocate enough memory for the string and its character array.
+    void* mem = scope.memory().allocate(calcStringSize(length));
+    // Construct it by calling global placement new.
+    return scope.makeTemp(::new(mem) String(text, length));
   }
 
   size_t String::allocSize() const {
