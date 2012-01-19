@@ -40,7 +40,7 @@
 // dynamically allocated on the heap. Note that starts a private section, so
 // you should either use this at the end of the declaration or before a privacy
 // declaration.
-#define STACK_ONLY(className)                       \
+#define STACK_ONLY                                  \
   void* operator new(size_t size);                  \
   void operator delete(void*, size_t);              \
 

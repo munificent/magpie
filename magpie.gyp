@@ -65,6 +65,8 @@
       'src/Memory/Memory.cpp',
       'src/Memory/Memory.h',
       'src/Memory/RootSource.h',
+      'src/Syntax/Lexer.cpp',
+      'src/Syntax/Lexer.h',
       'src/Syntax/Token.cpp',
       'src/Syntax/Token.h',
       'src/VM/CallFrame.cpp',
@@ -98,6 +100,8 @@
         'src/Test',
       ],
       'sources': [
+      'src/Test/LexerTests.cpp',
+      'src/Test/LexerTests.h',
       'src/Test/StringTests.cpp',
       'src/Test/StringTests.h',
       'src/Test/Test.cpp',

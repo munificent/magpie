@@ -77,7 +77,8 @@ namespace magpie {
     Memory & memory_;
     int numTempsBefore_;
     
-    STACK_ONLY(AllocScope);
+    NO_COPY(AllocScope);
+    STACK_ONLY;
   };
 }
 

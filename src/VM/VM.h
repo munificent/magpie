@@ -2,6 +2,7 @@
 
 #include "Fiber.h"
 #include "GC.h"
+#include "Lexer.h"
 #include "Macros.h"
 #include "Memory.h"
 #include "RootSource.h"
@@ -14,8 +15,8 @@ namespace magpie {
     
     virtual void reachRoots(Memory& memory);
     
-    Memory&    getMemory() { return memory_; }
-    gc<Fiber>& getFiber() { return fiber_; }
+    Memory&    memory() { return memory_; }
+    gc<Fiber>& fiber() { return fiber_; }
     
   private:
     Memory    memory_;

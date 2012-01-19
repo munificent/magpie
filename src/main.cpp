@@ -1,9 +1,11 @@
+#include <fstream>
 #include <iostream>
 
 #include "Chunk.h"
 #include "Fiber.h"
 #include "GC.h"
 #include "VM.h"
+#include "MagpieString.h"
 
 using namespace magpie;
 
@@ -47,6 +49,30 @@ void testCollector() {
   }
 }
 
+// Reads a file from the given path into a String.
+temp<String> readFile(AllocScope& scope, const char* path) {
+  std::ifstream stream(path);
+  
+  if (stream.fail()) {
+    std::cout << "Could not open file '" << path << "'." << std::endl;
+    return temp<String>();
+  }
+  
+  // From: http://stackoverflow.com/questions/2602013/read-whole-ascii-file-into-c-stdstring.
+  std::string str;
+  
+  // Allocate a std::string big enough for the file.
+  stream.seekg(0, std::ios::end);
+  str.reserve(stream.tellg());
+  stream.seekg(0, std::ios::beg);
+  
+  // Read it in.
+  str.assign((std::istreambuf_iterator<char>(stream)),
+             std::istreambuf_iterator<char>());
+  
+  return String::create(scope, str.c_str());
+}
+
 int main(int argc, char * const argv[]) {
   std::cout << "Magpie!\n";
   
@@ -54,9 +80,13 @@ int main(int argc, char * const argv[]) {
   
   // TODO(bob): Hack temp!
   VM vm;
-  AllocScope scope(vm.getMemory());
-  gc<Fiber> fiber = vm.getFiber();
+  AllocScope scope(vm.memory());
+  gc<Fiber>& fiber = vm.fiber();
 
+  // Try reading a file.
+  temp<String> source = readFile(scope, "../../example/Calculator.mag");
+  std::cout << source->cString() << std::endl;
+  
   gc<Chunk> return3 = gc<Chunk>(new (scope) Chunk(1));
   unsigned short three = fiber->addLiteral(Object::create(scope, 3.0));
   return3->write(MAKE_LITERAL(three, 0));

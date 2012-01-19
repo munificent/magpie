@@ -42,10 +42,16 @@ namespace magpie {
   template <class T>
   class temp {
   public:
+    // Creates a null temp reference.
+    temp()
+    : object_(NULL) {}
+    
     // TODO(bob): Should have to go through AllocScope.
     temp(GcBase* object)
     : object_(object) {}
     
+    bool isNull() const { return object_ == NULL; }
+
     // Gets the underlying object being referred to.
     T& operator *() { return *static_cast<T*>(object_->object_); }
     T* operator ->() { return static_cast<T*>(object_->object_); }

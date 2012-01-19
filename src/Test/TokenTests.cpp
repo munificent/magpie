@@ -16,8 +16,6 @@ namespace magpie {
     temp<String> text = String::create(scope, "foo");
     temp<Token> token = Token::create(scope, TOKEN_NAME, text);
     
-    std::cout << token->text().cString() << std::endl;
-    
     EXPECT_EQUAL(TOKEN_NAME, token->type());
     EXPECT_EQUAL(0, strcmp("foo", token->text().cString()));
   }

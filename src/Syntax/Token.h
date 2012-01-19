@@ -17,6 +17,7 @@ namespace magpie {
     TOKEN_LEFT_BRACE,
     TOKEN_RIGHT_BRACE,
 
+    TOKEN_PLUS,
     TOKEN_RETURN,
     
     TOKEN_NAME,
