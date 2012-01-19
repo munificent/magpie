@@ -44,7 +44,7 @@ namespace magpie {
   }
   
   Managed* Heap::getNext(Managed* current) {
-    void* next = (void*)((unsigned char*)current + current->getSize());
+    void* next = (void*)((unsigned char*)current + current->allocSize());
     
     // Don't walk past the end.
     if (next >= free_) return NULL;

@@ -2,6 +2,10 @@
 
 #include <iostream>
 
+#include "GC.h"
+#include "Memory.h"
+#include "RootSource.h"
+
 #define EXPECT(condition) \
 _expect(__FILE__, __LINE__, #condition, condition)
 
@@ -60,5 +64,10 @@ namespace magpie {
     static int failed_;
   };
   
+  struct TestRoot : public RootSource {
+    virtual void reachRoots(Memory& memory) {
+      // No roots.
+    }
+  };
 }
 

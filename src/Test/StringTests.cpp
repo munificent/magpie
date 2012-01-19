@@ -4,26 +4,19 @@
 #include "RootSource.h"
 
 namespace magpie {
-  struct TestRootedString : public RootSource {
-    virtual void reachRoots(Memory& memory) {
-      memory.reach(string);
-    }
-    
-    gc<String> string;
-  };
-  
   void StringTests::run() {
     create();
   }
   
   void StringTests::create() {
-    TestRootedString roots;
-    Memory memory(roots, 1000);
+    TestRoot root;
+    Memory memory(root, 1000);
+    AllocScope scope(memory);
     
-    String::create(memory, "some text", roots.string);
+    temp<String> s = String::create(scope, "some text");
     
-    EXPECT_EQUAL(9, roots.string->length());
-    EXPECT_EQUAL(0, strcmp("some text", roots.string->cString()));
+    EXPECT_EQUAL(9, s->length());
+    EXPECT_EQUAL(0, strcmp("some text", s->cString()));
   }
 }
 

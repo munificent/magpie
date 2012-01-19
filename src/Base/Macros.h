@@ -29,12 +29,20 @@
 
 // Use this inside a class declaration to prevent the compiler from creating
 // the default copy constructor and assignment operators for the class. Note
-// that starts a private section, so you should either use this at the end of
-// the declaration or before a privacy declaration.
+// that this starts a private section, so you should either use this at the end
+// of the declaration or before a privacy declaration.
 #define NO_COPY(className)                          \
   private:                                          \
     className(const className &);                   \
     className& operator=(const className &)
+
+// Use this inside a class declaration to prevent the class from being
+// dynamically allocated on the heap. Note that starts a private section, so
+// you should either use this at the end of the declaration or before a privacy
+// declaration.
+#define STACK_ONLY(className)                       \
+  void* operator new(size_t size);                  \
+  void operator delete(void*, size_t);              \
 
 // This is used to indicate that an array member in a class is flexibly-sized.
 #define FLEXIBLE_SIZE (1)

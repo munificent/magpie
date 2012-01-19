@@ -103,6 +103,8 @@
       'src/Test/Test.cpp',
       'src/Test/Test.h',
       'src/Test/TestMain.cpp',
+      'src/Test/TokenTests.cpp',
+      'src/Test/TokenTests.h',
       ],
     },
   ],

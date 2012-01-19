@@ -55,7 +55,7 @@ namespace magpie {
       return forward;
     } else {
       // It hasn't, so copy it to to-space.
-      size_t size = obj->getSize();
+      size_t size = obj->allocSize();
       Managed* dest = static_cast<Managed*> (to_->allocate(size));
       memcpy(dest, obj, size);
       

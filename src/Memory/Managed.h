@@ -19,15 +19,15 @@ namespace magpie {
     // copying collector can copy them.
     // TODO(bob): Rename -> allocSize(). Too easy to confuse this for a 
     // meaningful method on the subclass.
-    virtual size_t getSize() const = 0;
+    virtual size_t allocSize() const = 0;
     
     // This will be called by the garbage collector when this object has been
     // reached. Subclasses should override this and call Memory::copy() on any
     // gc<T> references that the object contains.
     virtual void reach(Memory& memory) {}
 
-    void* operator new(size_t s, Memory& memory);
-    
+    void* operator new(size_t s, AllocScope& scope);
+
   private:
     
     NO_COPY(Managed);

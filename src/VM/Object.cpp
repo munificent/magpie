@@ -5,8 +5,8 @@
 namespace magpie {
   using std::ostream;
 
-  gc<Object> Object::create(Memory& memory, double value) {
-    return gc<Object>(new (memory) NumberObject(value));
+  gc<Object> Object::create(AllocScope& scope, double value) {
+    return gc<Object>(new (scope) NumberObject(value));
   }
   
   std::ostream & operator<<(std::ostream & out, const Object & object)

@@ -20,7 +20,7 @@ namespace magpie {
     virtual Managed* getForwardingAddress() const { return address_; }
     
     // Note: this isn't actually used since forwarding addresses aren't copied.
-    virtual size_t getSize() const { return sizeof(ForwardingAddress); }
+    virtual size_t allocSize() const { return sizeof(ForwardingAddress); }
     
   private:
     Managed* address_;

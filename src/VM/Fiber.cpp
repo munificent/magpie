@@ -104,7 +104,8 @@ namespace magpie {
   }
   
   void Fiber::call(gc<Chunk> chunk, gc<Object> arg) {
-    stack_.add(gc<CallFrame>(new (vm_.getMemory()) CallFrame(chunk)));
+    AllocScope scope(vm_.getMemory());
+    stack_.add(gc<CallFrame>(new (scope) CallFrame(chunk)));
     
     // The argument always goes into the first register.
     stack_[-1]->setRegister(0, arg);

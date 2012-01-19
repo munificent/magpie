@@ -5,8 +5,8 @@
 
 namespace magpie {
   
-  void* Managed::operator new(size_t s, Memory& memory) {
-    return memory.allocate(s);
+  void* Managed::operator new(size_t s, AllocScope& scope) {
+    return scope.memory().allocate(s);
   }
   
 }
