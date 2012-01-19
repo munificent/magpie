@@ -4,14 +4,22 @@
 
 namespace magpie {
   
-  Heap::Heap(size_t size) {
-    memory_ = reinterpret_cast<char*>(::operator new(size));
-    free_ = memory_;
-    end_ = memory_ + size;
+  Heap::Heap()
+  : memory_(NULL),
+    free_(NULL),
+    end_(NULL) {
   }
   
   Heap::~Heap() {
-    operator delete(memory_);
+    if (memory_ != NULL) operator delete(memory_);
+  }
+  
+  void Heap::initialize(size_t size) {
+    ASSERT(memory_ == NULL, "Cannot reinitialize.");
+    
+    memory_ = reinterpret_cast<char*>(::operator new(size));
+    free_ = memory_;
+    end_ = memory_ + size;
   }
   
   bool Heap::canAllocate(size_t size) const {

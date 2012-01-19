@@ -3,9 +3,8 @@
 
 namespace magpie {
   
-  temp<Token> Token::create(AllocScope& scope, TokenType type,
-                            const gc<String> text) {
-    return scope.makeTemp(new(scope) Token(type, text));
+  temp<Token> Token::create(TokenType type, const gc<String> text) {
+    return Memory::makeTemp(new Token(type, text));
   }
   
   Token::Token(TokenType type, const gc<String> text)

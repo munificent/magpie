@@ -8,7 +8,7 @@ namespace magpie {
   // Garbage-collected immutable string class.
   class String : public Managed {
   public:
-    static temp<String> create(AllocScope& scope, const char* text);
+    static temp<String> create(const char* text);
     
     virtual size_t allocSize() const;
     

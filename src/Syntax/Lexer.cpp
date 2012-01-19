@@ -6,9 +6,9 @@
 
 namespace magpie
 {
-  temp<Token> Lexer::readToken(AllocScope& scope) {
-    temp<String> text = String::create(scope, "1");
-    return Token::create(scope, TOKEN_NUMBER, text);
+  temp<Token> Lexer::readToken() {
+    temp<String> text = String::create("1");
+    return Token::create(TOKEN_NUMBER, text);
     /*
     while (true) {
       if (isDone()) return temp<Token>(new Token(TOKEN_EOF));

@@ -9,12 +9,14 @@
 
 using namespace magpie;
 
+/*
+
 struct Cons : public magpie::Managed {
   Cons(int id) : id(id) {}
   
   virtual size_t allocSize() const { return sizeof(Cons); }
-  virtual void reach(Memory& memory) {
-    memory.reach(next);
+  virtual void reach() {
+    Memory::reach(next);
   }
   
   int id;
@@ -22,17 +24,15 @@ struct Cons : public magpie::Managed {
 };
 
 struct TestRoots : public magpie::RootSource {
-  virtual void reachRoots(Memory& memory) {
-    memory.reach(root);
+  virtual void reachRoots() {
+    Memory::reach(root);
   }
   
   gc<Cons> root;
 };
 
 void testCollector() {
-  TestRoots roots;
-  Memory memory(roots, 10000000);
-  AllocScope scope(memory);
+  AllocScope scope();
   
   gc<Cons> notRoot;
   
@@ -41,16 +41,17 @@ void testCollector() {
   gc<Cons>* b = &notRoot;
   int id = 0;
   for (int i = 0; i < 600000; i++) {
-    a->set(new (scope) Cons(id++));
+    a->set(new Cons(id++));
     a = &((*a)->next);
 
-    b->set(new (scope) Cons(id++));
+    b->set(new Cons(id++));
     b = &((*b)->next);
   }
 }
+*/
 
 // Reads a file from the given path into a String.
-temp<String> readFile(AllocScope& scope, const char* path) {
+temp<String> readFile(const char* path) {
   std::ifstream stream(path);
   
   if (stream.fail()) {
@@ -70,33 +71,33 @@ temp<String> readFile(AllocScope& scope, const char* path) {
   str.assign((std::istreambuf_iterator<char>(stream)),
              std::istreambuf_iterator<char>());
   
-  return String::create(scope, str.c_str());
+  return String::create(str.c_str());
 }
 
 int main(int argc, char * const argv[]) {
   std::cout << "Magpie!\n";
   
-  testCollector();
+  //  testCollector();
   
   // TODO(bob): Hack temp!
   VM vm;
-  AllocScope scope(vm.memory());
+  AllocScope scope;
   gc<Fiber>& fiber = vm.fiber();
 
   // Try reading a file.
-  temp<String> source = readFile(scope, "../../example/Calculator.mag");
+  temp<String> source = readFile("../../example/Calculator.mag");
   std::cout << source->cString() << std::endl;
   
-  gc<Chunk> return3 = gc<Chunk>(new (scope) Chunk(1));
-  unsigned short three = fiber->addLiteral(Object::create(scope, 3.0));
+  gc<Chunk> return3 = gc<Chunk>(new Chunk(1));
+  unsigned short three = fiber->addLiteral(Object::create(3.0));
   return3->write(MAKE_LITERAL(three, 0));
   return3->write(MAKE_RETURN(0));
   
-  gc<Object> return3Method = gc<Object>(new (scope) Multimethod(return3));
+  gc<Object> return3Method = gc<Object>(new Multimethod(return3));
   unsigned short method = fiber->addLiteral(return3Method);
   
-  gc<Chunk> chunk = gc<Chunk>(new (scope) Chunk(3));
-  unsigned short zero = fiber->addLiteral(Object::create(scope, 0));
+  gc<Chunk> chunk = gc<Chunk>(new Chunk(3));
+  unsigned short zero = fiber->addLiteral(Object::create(0));
   chunk->write(MAKE_LITERAL(zero, 0));
   chunk->write(MAKE_LITERAL(method, 1));
   chunk->write(MAKE_CALL(0, 1, 2));

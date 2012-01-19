@@ -24,9 +24,9 @@ namespace magpie {
     // This will be called by the garbage collector when this object has been
     // reached. Subclasses should override this and call Memory::copy() on any
     // gc<T> references that the object contains.
-    virtual void reach(Memory& memory) {}
+    virtual void reach() {}
 
-    void* operator new(size_t s, AllocScope& scope);
+    void* operator new(size_t s);
 
   private:
     

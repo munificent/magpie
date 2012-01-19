@@ -7,6 +7,7 @@
 #include "Macros.h"
 
 namespace magpie {
+  class AllocScope;
   class RootSource;
   
   // The dynamic memory manager. Uses Cheney-style semi-space copying for
@@ -15,16 +16,24 @@ namespace magpie {
     friend class AllocScope;
     
   public:
-    Memory(RootSource& roots, size_t heapSize);
+    static void initialize(RootSource* roots, size_t heapSize);
     
-    void collect();
+    static void collect();
     
-    void* allocate(size_t size);
+    static void* allocate(size_t size);
+    
+    template <class T>
+    static temp<T> makeTemp(T* object) {
+      ASSERT(currentScope_ != NULL, "Not in a scope.");
+      temps_[numTemps_].set(object);
+      gc<Managed>* tempSlot = &temps_[numTemps_++];
+      return temp<T>(tempSlot);
+    }
     
     // Indicates that the given object is reachable and should be preserved
     // during garbage collection.
     template <class T>
-    void reach(gc<T>& ref) {
+    static void reach(gc<T>& ref) {
       if (ref.isNull()) return;
       Managed* newLocation = copy(&(*ref));
       ref.set(static_cast<T*> (newLocation));
@@ -36,46 +45,43 @@ namespace magpie {
     // If the pointed-to object is in from-space, copies it to to-space and
     // leaves a forwarding pointer. If it's a forwarding pointer already, just
     // updates the reference. Returns the new address of the object.
-    Managed* copy(Managed* obj);
+    static Managed* copy(Managed* obj);
 
-    RootSource&  roots_;
+    static void pushScope(AllocScope* scope);
+    static void popScope();
+
+    static RootSource*  roots_;
     
     // Pointers to a and b. These will swap back and forth on each collection.
-    Heap* from_;
-    Heap* to_;
+    static Heap* from_;
+    static Heap* to_;
 
     // The actual heaps.
-    Heap a_;
-    Heap b_;
+    static Heap a_;
+    static Heap b_;
 
-    gc<Managed> temps_[MAX_TEMPS];
-    int numTemps_;
-    
-    NO_COPY(Memory);
+    static AllocScope* currentScope_;
+    static gc<Managed> temps_[MAX_TEMPS];
+    static int numTemps_;
   };
   
   class AllocScope {
   public:
-    AllocScope(Memory & memory)
-    : memory_(memory),
-      numTempsBefore_(memory_.numTemps_) {}
-    
-    ~AllocScope() {
-      memory_.numTemps_ = numTempsBefore_;
+    AllocScope()
+    : previous_(NULL),
+      numTempsBefore_(Memory::numTemps_) {
+      Memory::pushScope(this);
     }
     
-    Memory & memory() { return memory_; }
-    
-    template <class T>
-    temp<T> makeTemp(T* object) {
-      memory_.temps_[memory_.numTemps_].set(object);
-      gc<Managed>* tempSlot = &memory_.temps_[memory_.numTemps_++];
-      return temp<T>(tempSlot);
-    }    
+    ~AllocScope() {
+      Memory::popScope();
+    }  
     
   private:
-    Memory & memory_;
+    AllocScope* previous_;
     int numTempsBefore_;
+    
+    friend class Memory;
     
     NO_COPY(AllocScope);
     STACK_ONLY;

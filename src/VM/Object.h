@@ -13,7 +13,7 @@ namespace magpie {
   
   class Object : public Managed {
   public:
-    static gc<Object> create(AllocScope& scope, double value);
+    static gc<Object> create(double value);
     
     Object() : Managed() {}
     

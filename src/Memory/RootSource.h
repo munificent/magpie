@@ -15,7 +15,7 @@ namespace magpie {
   public:
     virtual ~RootSource() {}
     
-    virtual void reachRoots(Memory& memory) = 0;
+    virtual void reachRoots() = 0;
   };
 }
 

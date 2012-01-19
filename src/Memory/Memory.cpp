@@ -8,22 +8,31 @@
 
 namespace magpie {
   
-  Memory::Memory(RootSource& roots, size_t heapSize)
-  : roots_(roots),
-    a_(heapSize),
-    b_(heapSize) {
+  RootSource* Memory::roots_ = NULL;
+  Heap Memory::a_;
+  Heap Memory::b_;
+  AllocScope* Memory::currentScope_ = NULL;
+  gc<Managed> Memory::temps_[MAX_TEMPS];
+  int Memory::numTemps_ = 0;
+  Heap* Memory::to_ = NULL;
+  Heap* Memory::from_ = NULL;
+  
+  void Memory::initialize(RootSource* roots, size_t heapSize) {
+    roots_ = roots;
+    a_.initialize(heapSize);
+    b_.initialize(heapSize);
     to_ = &a_;
     from_ = &b_;
   }
   
   void Memory::collect() {
     // Copy the roots to to-space.
-    roots_.reachRoots(*this);
+    roots_->reachRoots();
     
     // Walk through to-space, copying over every object reachable from it.
     Managed* reached = to_->getFirst();
     while (reached != NULL) {
-      reached->reach(*this);
+      reached->reach();
       reached = to_->getNext(reached);
     }
 
@@ -46,7 +55,7 @@ namespace magpie {
     // TODO(bob): Handle failure.
     return from_->allocate(size);
   }
-    
+  
   Managed* Memory::copy(Managed* obj) {
     // See if what we're pointing to has already been moved.
     Managed* forward = obj->getForwardingAddress();
@@ -67,4 +76,14 @@ namespace magpie {
     }
   }
 
+  void Memory::pushScope(AllocScope* scope) {
+    ASSERT_NOT_NULL(scope);
+    scope->previous_ = currentScope_;
+    currentScope_ = scope;
+  }
+  
+  void Memory::popScope() {
+    numTemps_ = currentScope_->numTempsBefore_;
+    currentScope_ = currentScope_->previous_;
+  }
 }

@@ -5,6 +5,8 @@
 
 namespace magpie
 {
+  class Memory;
+  
   class Lexer {
   public:
     Lexer(gc<String> source)
@@ -13,7 +15,7 @@ namespace magpie
       start_(0) {}
     
     // Lexes and returns the next full Token read from the source.
-    temp<Token> readToken(AllocScope& scope);
+    temp<Token> readToken();
     
   private:
     /*

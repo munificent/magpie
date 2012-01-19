@@ -9,12 +9,10 @@ namespace magpie {
   }
   
   void TokenTests::create() {
-    TestRoot roots;
-    Memory memory(roots, 1000);
-    AllocScope scope(memory);
+    AllocScope scope;
     
-    temp<String> text = String::create(scope, "foo");
-    temp<Token> token = Token::create(scope, TOKEN_NAME, text);
+    temp<String> text = String::create("foo");
+    temp<Token> token = Token::create(TOKEN_NAME, text);
     
     EXPECT_EQUAL(TOKEN_NAME, token->type());
     EXPECT_EQUAL(0, strcmp("foo", token->text().cString()));

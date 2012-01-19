@@ -9,8 +9,10 @@ namespace magpie {
   // A contiguous chunk of garbage collected memory.
   class Heap {
   public:
-    Heap(size_t size);
+    Heap();
     ~Heap();
+    
+    void initialize(size_t size);
     
     // Gets whether or not an object of the given size can be allocated in this
     // heap.

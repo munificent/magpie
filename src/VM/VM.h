@@ -13,13 +13,11 @@ namespace magpie {
   public:
     VM();
     
-    virtual void reachRoots(Memory& memory);
+    virtual void reachRoots();
     
-    Memory&    memory() { return memory_; }
     gc<Fiber>& fiber() { return fiber_; }
     
   private:
-    Memory    memory_;
     gc<Fiber> fiber_;
     
     NO_COPY(VM);

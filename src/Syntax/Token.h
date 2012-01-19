@@ -33,8 +33,7 @@ namespace magpie {
   // consumed by the Parser.
   class Token : public Managed {
   public:
-    static temp<Token> create(AllocScope& scope, TokenType type,
-                              gc<String> text);
+    static temp<Token> create(TokenType type, gc<String> text);
 
     virtual size_t allocSize() const { return sizeof(Token); }
 

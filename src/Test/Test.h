@@ -65,7 +65,7 @@ namespace magpie {
   };
   
   struct TestRoot : public RootSource {
-    virtual void reachRoots(Memory& memory) {
+    virtual void reachRoots() {
       // No roots.
     }
   };
