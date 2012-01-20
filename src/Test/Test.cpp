@@ -2,14 +2,16 @@
 
 #include "Test.h"
 
-namespace magpie {
+namespace magpie
+{
   using std::cout;
   using std::endl;
-  
+
   int Test::tests_ = 0;
   int Test::failed_ = 0;
-  
-  void Test::showResults() {
+
+  void Test::showResults()
+  {
     if (failed_ == 0)
     {
       cout << "SUCCESS: All " << tests_ << " tests passed." << endl;
@@ -18,7 +20,7 @@ namespace magpie {
     {
       cout << endl;
       cout << "FAILURE: " << (tests_ - failed_) <<
-      " tests passed out of " << tests_ << "." << endl;
+              " tests passed out of " << tests_ << "." << endl;
     }
   }
 }

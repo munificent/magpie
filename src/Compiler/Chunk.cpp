@@ -1,9 +1,9 @@
 #include "Chunk.h"
 
-namespace magpie {
+namespace magpie
+{
 
   Chunk::Chunk(int numRegisters)
-  : numRegisters_(numRegisters) {
-  }
+  : numRegisters_(numRegisters) {}
 
 }

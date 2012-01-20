@@ -4,7 +4,8 @@
 #include <cstdlib>
 
 #define ASSERT(condition, message)                  \
-  if (!(condition)) {                               \
+  if (!(condition))                                 \
+  {                                                 \
     std::cout << "ASSERTION FAILED " << __FILE__    \
               << ":" << __LINE__ << " - "           \
               << message << std::endl;              \
@@ -15,7 +16,8 @@
   ASSERT(value != NULL, "Expression " #value " cannot be null.")
 
 #define ASSERT_INDEX(index, max)                    \
-  if (((index) < 0) || ((index) >= max)) {          \
+  if (((index) < 0) || ((index) >= max))            \
+  {                                                 \
     std::cout << "ASSERTION FAILED " << __FILE__    \
               << ":" << __LINE__ << " - "           \
               << "Index " << index                  \

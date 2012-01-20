@@ -6,8 +6,8 @@
 #include "Managed.h"
 #include "RootSource.h"
 
-namespace magpie {
-  
+namespace magpie
+{  
   RootSource* Memory::roots_ = NULL;
   Heap Memory::a_;
   Heap Memory::b_;
@@ -17,7 +17,8 @@ namespace magpie {
   Heap* Memory::to_ = NULL;
   Heap* Memory::from_ = NULL;
   
-  void Memory::initialize(RootSource* roots, size_t heapSize) {
+  void Memory::initialize(RootSource* roots, size_t heapSize)
+  {
     roots_ = roots;
     a_.initialize(heapSize);
     b_.initialize(heapSize);
@@ -25,13 +26,15 @@ namespace magpie {
     from_ = &b_;
   }
   
-  void Memory::collect() {
+  void Memory::collect()
+  {
     // Copy the roots to to-space.
     roots_->reachRoots();
     
     // Walk through to-space, copying over every object reachable from it.
     Managed* reached = to_->getFirst();
-    while (reached != NULL) {
+    while (reached != NULL)
+    {
       reached->reach();
       reached = to_->getNext(reached);
     }
@@ -46,8 +49,10 @@ namespace magpie {
     to_ = temp;
   }
   
-  void* Memory::allocate(size_t size) {
-    if (!from_->canAllocate(size)) {
+  void* Memory::allocate(size_t size)
+  {
+    if (!from_->canAllocate(size))
+    {
       // Heap is full, so trigger a GC.
       collect();
     }
@@ -56,13 +61,17 @@ namespace magpie {
     return from_->allocate(size);
   }
   
-  Managed* Memory::copy(Managed* obj) {
+  Managed* Memory::copy(Managed* obj)
+  {
     // See if what we're pointing to has already been moved.
     Managed* forward = obj->getForwardingAddress();
-    if (forward) {
+    if (forward)
+    {
       // It has, so just update this reference.
       return forward;
-    } else {
+    }
+    else
+    {
       // It hasn't, so copy it to to-space.
       size_t size = obj->allocSize();
       Managed* dest = static_cast<Managed*> (to_->allocate(size));
@@ -76,13 +85,15 @@ namespace magpie {
     }
   }
 
-  void Memory::pushScope(AllocScope* scope) {
+  void Memory::pushScope(AllocScope* scope)
+  {
     ASSERT_NOT_NULL(scope);
     scope->previous_ = currentScope_;
     currentScope_ = scope;
   }
   
-  void Memory::popScope() {
+  void Memory::popScope()
+  {
     numTemps_ = currentScope_->numTempsBefore_;
     currentScope_ = currentScope_->previous_;
   }

@@ -6,21 +6,24 @@
 
 namespace magpie
 {
-  temp<Token> Lexer::readToken() {
-    while (true) {
+  temp<Token> Lexer::readToken()
+  {
+    while (true)
+    {
       if (isDone()) return Token::create(TOKEN_EOF, String::create(""));
-      
+
       start_ = pos_;
-      
+
       char c = advance();
-      switch (c) {
+      switch (c)
+      {
         case ' ':
         case '\t':
         case '\r':
           // Skip whitespace.
           while (isWhitespace(peek())) advance();
           break;
-          
+
         case '(': return makeToken(TOKEN_LEFT_PAREN);
         case ')': return makeToken(TOKEN_RIGHT_PAREN);
         case '[': return makeToken(TOKEN_LEFT_BRACKET);
@@ -30,19 +33,24 @@ namespace magpie
         case '+': return makeToken(TOKEN_PLUS);
         case '-': return makeToken(TOKEN_MINUS);
         case '*': return makeToken(TOKEN_STAR);
-          
+
         case '\n': return makeToken(TOKEN_LINE);
 
         case '/':
-          if (peek() == '/') {
+          if (peek() == '/')
+          {
             skipLineComment();
-          /*} else if (peek() == '*') {
+          /*}
+            else if (peek() == '*')
+          {
             skipBlockComment();*/
-          } else {
+          }
+          else
+          {
             return makeToken(TOKEN_SLASH);
           }
           break;
-          
+
           /*
         case ',': return singleToken(TOKEN_LINE);
         case '@': return singleToken(TOKEN_AT);
@@ -51,100 +59,116 @@ namespace magpie
         case ';': return singleToken(TOKEN_SEMICOLON);
         case '\\': return singleToken(TOKEN_IGNORE_LINE);
         case '|': return singleToken(TOKEN_PIPE);
-          
+
         case ':':
           advance();
-          if (peek() == ':') {
+          if (peek() == ':')
+          {
             // "::".
             advance();
             return Ref<Token>(new Token(TOKEN_BIND));
           }
-          
+
           // Just a ":" by itself.
           return Ref<Token>(new Token(TOKEN_KEYWORD, ":"));
-          
+
         case '-':
           advance();
           if (isDigit(peek())) return readNumber();
           return readOperator();
-          
+
         case '/':
           advance();
-          if (peek() == '/') {
+          if (peek() == '/')
+          {
             // Line comment, so ignore the rest of the line and
             // emit the line token.
             mNeedsLine = true;
             return Ref<Token>(new Token(TOKEN_LINE));
-          } else if (peek() == '*') {
+          }
+          else if (peek() == '*')
+          {
             skipBlockComment();
-          } else {
+          }
+          else
+          {
             return readOperator();
           }
           break;
-          
+
         case '"': return readString();
-          
+
         default:
           if (isDigit(c)) return readNumber();
           if (isOperator(c)) return readOperator();
            */
         default:
           if (isNameStart(c)) return readName();
-          
+
           // If we got here, we don't know what it is.
           return makeToken(TOKEN_ERROR);
       }
     }
   }
-  
-  bool Lexer::isDone() const {
+
+  bool Lexer::isDone() const
+  {
     return pos_ == source_->length();
   }
-  
-  bool Lexer::isWhitespace(char c) const {
+
+  bool Lexer::isWhitespace(char c) const
+  {
     return (c == ' ') || (c == '\t') || (c == '\r');
   }
-  
-  bool Lexer::isNameStart(char c) const {
+
+  bool Lexer::isNameStart(char c) const
+  {
     return (c == '_') ||
           ((c >= 'a') && (c <= 'z')) ||
           ((c >= 'A') && (c <= 'Z'));
   }
-  
-  bool Lexer::isName(char c) const {
+
+  bool Lexer::isName(char c) const
+  {
     return isNameStart(c) || isDigit(c);
   }
-  
-  bool Lexer::isDigit(char c) const {
+
+  bool Lexer::isDigit(char c) const
+  {
     return (c >= '0') && (c <= '9');
   }
-  
-  char Lexer::peek(int ahead) const {
+
+  char Lexer::peek(int ahead) const
+  {
     if (pos_ + ahead >= source_->length()) return '\0';
     return (*source_)[pos_ + ahead];
   }
-  
-  char Lexer::advance() {
+
+  char Lexer::advance()
+  {
     char c = peek();
     pos_++;
     return c;
   }
-  
-  temp<Token> Lexer::makeToken(TokenType type) {
+
+  temp<Token> Lexer::makeToken(TokenType type)
+  {
     return Token::create(type, source_->substring(start_, pos_));
   }
-  
-  void Lexer::skipLineComment() {
+
+  void Lexer::skipLineComment()
+  {
     // TODO(bob): Handle EOF.
     while (peek() != '\n') advance();
   }
-  
-  temp<Token> Lexer::readName() {
+
+  temp<Token> Lexer::readName()
+  {
     // TODO(bob): Handle EOF.
     while (isName(peek())) advance();
-    
+
     temp<String> text = source_->substring(start_, pos_);
-    
+
     // See if it's a reserved word.
     TokenType type = TOKEN_NAME;
     if      (*text == "case"  ) type = TOKEN_CASE;
@@ -158,68 +182,82 @@ namespace magpie
     else if (*text == "return") type = TOKEN_RETURN;
     else if (*text == "then"  ) type = TOKEN_THEN;
     else if (*text == "while" ) type = TOKEN_WHILE;
-    
+
     return Token::create(type, text);
   }
-  
-  temp<Token> Lexer::readNumber() {
+
+  temp<Token> Lexer::readNumber()
+  {
     // TODO(bob): Handle EOF.
     while (isDigit(peek())) advance();
-    
+
     // Read the fractional part, if any.
-    if (peek() == '.') {
+    if (peek() == '.')
+    {
       advance();
       while (isDigit(peek())) advance();
     }
-    
+
     return makeToken(TOKEN_NUMBER);
   }
-  
+
   /*
   void Lexer::skipBlockComment()
   {
     advance();
     advance();
-    
+
     int nesting = 1;
-    
-    while (nesting > 0) {
+
+    while (nesting > 0)
+    {
       // TODO(bob): Unterminated comment. Should return error.
       if (isDone()) return;
-      
-      if ((peek() == '/') && (peek(1) == '*')) {
+
+      if ((peek() == '/') && (peek(1) == '*'))
+      {
         advance();
         advance();
         nesting++;
-      } else if ((peek() == '*') && (peek(1) == '/')) {
+      }
+      else if ((peek() == '*') && (peek(1) == '/'))
+      {
         advance();
         advance();
         nesting--;
-      } else if (peek() == '\0') {
+      }
+      else if (peek() == '\0')
+      {
         advanceLine();
-      } else {
+      }
+      else
+      {
         advance();
       }
     }
   }
-  
-  Ref<Token> Lexer::readString() {
+
+  Ref<Token> Lexer::readString()
+  {
     advance();
-    
+
     String text;
-    while (true) {
+    while (true)
+    {
       if (isDone()) return Ref<Token>(new Token(TOKEN_ERROR, "Unterminated string."));
-      
+
       char c = advance();
       if (c == '"') return Ref<Token>(new Token(TOKEN_STRING, text));
-      
+
       // An escape sequence.
-      if (c == '\\') {
+      if (c == '\\')
+      {
         if (isDone()) return Ref<Token>(new Token(TOKEN_ERROR,
                                                   "Unterminated string escape."));
-        
+
         char e = advance();
-        switch (e) {
+        switch (e)
+        {
           case 'n': text += "\n"; break;
           case '"': text += "\""; break;
           case '\\': text += "\\"; break;
@@ -228,49 +266,56 @@ namespace magpie
             return Ref<Token>(new Token(TOKEN_ERROR, String::Format(
                                                                     "Unrecognized escape sequence \"%c\".", e)));
         }
-      } else {
+      }
+      else
+      {
         // Normal character.
         text += c;
       }
     }
   }
-  
-  Ref<Token> Lexer::readNumber() {
+
+  Ref<Token> Lexer::readNumber()
+  {
     advance();
     while (isDigit(peek())) advance();
-    
+
     // Read the fractional part, if any.
-    if (peek() == '.') {
+    if (peek() == '.')
+    {
       advance();
       while (isDigit(peek())) advance();
     }
-    
+
     String text = mLine.Substring(mStart, mPos - mStart);
     double number = atof(text.CString());
     return Ref<Token>(new Token(TOKEN_NUMBER, number));
   }
-  
-  Ref<Token> Lexer::readName() {
-    while (isOperator(peek()) || isAlpha(peek()) || isDigit(peek())) {
+
+  Ref<Token> Lexer::readName()
+  {
+    while (isOperator(peek()) || isAlpha(peek()) || isDigit(peek()))
+    {
       // Comments take priority over names.
       if ((peek() == '/') && (peek(1) == '/')) break;
       if ((peek() == '/') && (peek(1) == '*')) break;
       advance();
     }
-    
+
     // If it ends in ":", it's a keyword.
     TokenType type = TOKEN_NAME;
-    if (peek() == ':') {
+    if (peek() == ':')
+    {
       advance();
       type = TOKEN_KEYWORD;
     }
-    
+
     String name = mLine.Substring(mStart, mPos - mStart);
-    
+
     if (name == "return") return Ref<Token>(new Token(TOKEN_RETURN));
     if (name == "self") return Ref<Token>(new Token(TOKEN_SELF));
     if (name == "undefined") return Ref<Token>(new Token(TOKEN_UNDEFINED));
-    
+
     return Ref<Token>(new Token(type, name));
   }
   */

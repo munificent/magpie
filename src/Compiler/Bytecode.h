@@ -26,6 +26,7 @@
 
 #define GET_Ax(i) ((unsigned short)(((i) & 0xffff0000) >> 16))
 
-namespace magpie {
+namespace magpie
+{
   typedef unsigned int bytecode;
 }

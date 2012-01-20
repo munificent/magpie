@@ -7,19 +7,21 @@
 #include "Memory.h"
 #include "RootSource.h"
 
-namespace magpie {
+namespace magpie
+{
   // The main Virtual Machine class for a running Magpie interpreter.
-  class VM : public RootSource {
+  class VM : public RootSource
+  {
   public:
     VM();
-    
+
     virtual void reachRoots();
-    
+
     gc<Fiber>& fiber() { return fiber_; }
-    
+
   private:
     gc<Fiber> fiber_;
-    
+
     NO_COPY(VM);
   };
 }
