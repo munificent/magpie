@@ -11,6 +11,7 @@ namespace magpie
 
   private:
     static void create();
+    static void is();
   };
 }
 

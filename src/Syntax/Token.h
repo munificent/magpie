@@ -57,6 +57,10 @@ namespace magpie
 
     TokenType     type() const { return type_; }
     const String& text() const { return *text_; }
+    
+    // Gets whether this token is of the given type.
+    bool is(TokenType type) const { return type_ == type; }
+    
   private:
     Token(TokenType type, const gc<String> text);
 

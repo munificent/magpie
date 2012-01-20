@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "LexerTests.h"
+#include "QueueTests.h"
 #include "StringTests.h"
 #include "TokenTests.h"
 
@@ -12,6 +13,7 @@ int main (int argc, char * const argv[])
   Memory::initialize(&root, 1024 * 1024 * 10);
 
   LexerTests::run();
+  QueueTests::run();
   StringTests::run();
   TokenTests::run();
 

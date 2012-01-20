@@ -8,6 +8,7 @@ namespace magpie
   void TokenTests::run()
   {
     create();
+    is();
   }
 
   void TokenTests::create()
@@ -19,6 +20,16 @@ namespace magpie
 
     EXPECT_EQUAL(TOKEN_NAME, token->type());
     EXPECT_EQUAL("foo", token->text());
+  }
+  
+  void TokenTests::is()
+  {
+    AllocScope scope;
+    
+    temp<Token> token = Token::create(TOKEN_NAME, String::create("foo"));
+    
+    EXPECT(token->is(TOKEN_NAME));
+    EXPECT_FALSE(token->is(TOKEN_NUMBER));
   }
 }
 
