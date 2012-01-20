@@ -15,7 +15,7 @@ namespace magpie {
     temp<Token> token = Token::create(TOKEN_NAME, text);
     
     EXPECT_EQUAL(TOKEN_NAME, token->type());
-    EXPECT_EQUAL(0, strcmp("foo", token->text().cString()));
+    EXPECT_EQUAL("foo", token->text());
   }
 }
 

@@ -21,13 +21,13 @@ namespace magpie {
     virtual NumberObject* asNumber()      { return NULL; }
     
     // TODO(bob): Debug only.
-    virtual void debugTrace(std::ostream & stream) const = 0;
+    virtual void debugTrace(std::ostream& stream) const = 0;
 
   private:
     NO_COPY(Object);
   };
   
   // TODO(bob): Debug only.
-  std::ostream & operator<<(std::ostream & cout, const Object & object);
+  std::ostream& operator <<(std::ostream& out, const Object& object);
   
 }

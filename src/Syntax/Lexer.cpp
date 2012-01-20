@@ -7,15 +7,12 @@
 namespace magpie
 {
   temp<Token> Lexer::readToken() {
-    temp<String> text = String::create("1");
-    return Token::create(TOKEN_NUMBER, text);
-    /*
     while (true) {
-      if (isDone()) return temp<Token>(new Token(TOKEN_EOF));
+      if (isDone()) return Token::create(TOKEN_EOF, temp<String>());
       
       start_ = pos_;
       
-      char c = peek();
+      char c = advance();
       switch (c) {
         case ' ':
         case '\t':
@@ -23,17 +20,13 @@ namespace magpie
           while (isWhitespace(peek())) advance();
           break;
           
-        case '\0':
-          // End of the line.
-          mNeedsLine = true;
-          return Ref<Token>(new Token(TOKEN_LINE));
-          
-        case '(': return singleToken(TOKEN_LEFT_PAREN);
-        case ')': return singleToken(TOKEN_RIGHT_PAREN);
-        case '[': return singleToken(TOKEN_LEFT_BRACKET);
-        case ']': return singleToken(TOKEN_RIGHT_BRACKET);
-        case '{': return singleToken(TOKEN_LEFT_BRACE);
-        case '}': return singleToken(TOKEN_RIGHT_BRACE);
+        case '(': return makeToken(TOKEN_LEFT_PAREN);
+        case ')': return makeToken(TOKEN_RIGHT_PAREN);
+        case '[': return makeToken(TOKEN_LEFT_BRACKET);
+        case ']': return makeToken(TOKEN_RIGHT_BRACKET);
+        case '{': return makeToken(TOKEN_LEFT_BRACE);
+        case '}': return makeToken(TOKEN_RIGHT_BRACE);
+          /*
         case ',': return singleToken(TOKEN_LINE);
         case '@': return singleToken(TOKEN_AT);
         case '.': return singleToken(TOKEN_DOT);
@@ -84,33 +77,17 @@ namespace magpie
           advance();
           return Ref<Token>(new Token(TOKEN_ERROR, String::Format(
               "Unrecognized character \"%c\".", c)));
+           */
       }
     }
-    */
   }
-  /*
-
+  
   bool Lexer::isDone() const {
-    return mNeedsLine && mReader.EndOfLines();
+    return pos_ == source_->length();
   }
   
   bool Lexer::isWhitespace(char c) const {
     return (c == ' ') || (c == '\t');
-  }
-  
-  bool Lexer::isAlpha(char c) const {
-    return (c == '_') ||
-          ((c >= 'a') && (c <= 'z')) ||
-          ((c >= 'A') && (c <= 'Z'));
-  }
-  
-  bool Lexer::isDigit(char c) const {
-    return (c >= '0') && (c <= '9');
-  }
-  
-  bool Lexer::isOperator(char c) const {
-    return (c != '\0') &&
-    (strchr("-+=/<>?~!$%^&*", c) != NULL);
   }
   
   char Lexer::peek(int ahead) const
@@ -125,6 +102,27 @@ namespace magpie
     pos_++;
     return c;
   }
+  
+  temp<Token> Lexer::makeToken(TokenType type) {
+    return Token::create(type, source_->substring(start_, pos_));
+  }
+  
+  /*
+  bool Lexer::isAlpha(char c) const {
+    return (c == '_') ||
+          ((c >= 'a') && (c <= 'z')) ||
+          ((c >= 'A') && (c <= 'Z'));
+  }
+  
+  bool Lexer::isDigit(char c) const {
+    return (c >= '0') && (c <= '9');
+  }
+  
+  bool Lexer::isOperator(char c) const {
+    return (c != '\0') &&
+    (strchr("-+=/<>?~!$%^&*", c) != NULL);
+  }
+
   
   void Lexer::skipBlockComment()
   {
@@ -151,11 +149,6 @@ namespace magpie
         advance();
       }
     }
-  }
-  
-  Ref<Token> Lexer::singleToken(TokenType type) {
-    advance();
-    return Ref<Token>(new Token(type));
   }
   
   Ref<Token> Lexer::readString() {

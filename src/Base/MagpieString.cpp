@@ -6,28 +6,63 @@
 #include "MagpieString.h"
 
 namespace magpie {
-  const char* String::emptyString_ = "";
-  
-  temp<String> String::create(const char* text) {
-    int length = strlen(text);
+  temp<String> String::create(const char* text, int length) {
+    if (length == -1) length = strlen(text);
+    
     // Allocate enough memory for the string and its character array.
     void* mem = Memory::allocate(calcStringSize(length));
     // Construct it by calling global placement new.
     return Memory::makeTemp(::new(mem) String(text, length));
   }
-
-  size_t String::allocSize() const {
-    return calcStringSize(length_);
+  
+  const char String::operator [](int index) const {
+    ASSERT_INDEX(index, length() + 1); // Allow accessing the terminator.
+    
+    return chars_[index];
   }
   
-  int String::length() const
+  bool String::operator ==(const String& right) const {
+    // Check for identity.
+    if (this == &right) return true;
+
+    if (length_ != right.length_) return false;
+    
+    // TODO(bob): Compare hashcodes if we have them.
+    
+    return strncmp(chars_, right.chars_, length_) == 0;
+  }
+  
+  bool String::operator !=(const String& right) const {
+    return !(*this == right);
+  }
+  
+  bool String::operator ==(const char* right) const
   {
+    return strncmp(chars_, right, length_) == 0;
+  }
+  
+  bool String::operator !=(const char* right) const {
+    return !(*this == right);
+  }
+  
+  int String::length() const {
     return length_;
   }
   
-  const char* String::cString() const
-  {
+  const char* String::cString() const {
     return chars_;
+  }
+
+  temp<String> String::substring(int start, int end) const {
+    ASSERT_INDEX(start, length());
+    ASSERT_INDEX(end, length() + 1); // End is past the last character.
+    ASSERT(start <= end, "Start must come before end.");
+
+    return create(&chars_[start], end - start);
+  }
+
+  size_t String::allocSize() const {
+    return calcStringSize(length_);
   }
   
   size_t String::calcStringSize(int length) {
@@ -41,6 +76,10 @@ namespace magpie {
   : length_(length) {
     // Add one for the terminator.
     strncpy(chars_, text, length + 1);
+    
+    // Make sure its terminated. May not be, for example, when creating a
+    // string from a substring.
+    chars_[length] = '\0';
   }
 }
 

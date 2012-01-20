@@ -18,25 +18,27 @@ namespace magpie
     temp<Token> readToken();
     
   private:
-    /*
     bool isDone() const;
     
+    bool isWhitespace(char c) const;
+
     char peek(int ahead = 0) const;
     
     char advance();
     
+    temp<Token> makeToken(TokenType type);
+    
+    /*
+     bool isAlpha(char c) const;
+     bool isDigit(char c) const;
+     bool isOperator(char c) const;
+    
     void skipBlockComment();
-    temp<Token> singleToken(TokenType type);
     temp<Token> readString();
     temp<Token> readNumber();
     temp<Token> readName();
     
     void advanceLine();
-    
-    bool isWhitespace(char c) const;
-    bool isAlpha(char c) const;
-    bool isDigit(char c) const;
-    bool isOperator(char c) const;
      */
     
     gc<String> source_;

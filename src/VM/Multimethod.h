@@ -16,7 +16,7 @@ namespace magpie {
 
     virtual Multimethod* asMultimethod() { return this; }
     
-    virtual void debugTrace(std::ostream & stream) const {
+    virtual void debugTrace(std::ostream& stream) const {
       stream << "(multimethod)";
     }
     

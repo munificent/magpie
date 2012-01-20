@@ -9,7 +9,7 @@ namespace magpie {
     return gc<Object>(new NumberObject(value));
   }
   
-  std::ostream & operator<<(std::ostream & out, const Object & object)
+  std::ostream& operator <<(std::ostream& out, const Object& object)
   {
     object.debugTrace(out);
     return out;

@@ -15,7 +15,7 @@ namespace magpie {
 
     virtual NumberObject* asNumber() { return this; }
     
-    virtual void debugTrace(std::ostream & stream) const {
+    virtual void debugTrace(std::ostream& stream) const {
       stream << value_;
     }
     

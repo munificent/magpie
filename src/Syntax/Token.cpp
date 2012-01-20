@@ -11,4 +11,3 @@ namespace magpie {
   : type_(type),
     text_(text) {}
 }
-

@@ -50,16 +50,38 @@ namespace magpie {
     temp(GcBase* object)
     : object_(object) {}
     
-    bool isNull() const { return object_ == NULL; }
+    bool isNull() const {
+      return object_ == NULL || object_->object_ == NULL;
+    }
 
     // Gets the underlying object being referred to.
-    T& operator *() { return *static_cast<T*>(object_->object_); }
-    T* operator ->() { return static_cast<T*>(object_->object_); }
+    T& operator *() const { return *static_cast<T*>(object_->object_); }
+    T* operator ->() const { return static_cast<T*>(object_->object_); }
+    
+    // Compare two temps. If both are non-null then compares the objects.
+    template <class S>
+    bool operator ==(const temp<S>& other) const
+    {
+      // Have to either both be null or neither.
+      if (isNull() != other.isNull()) return false;
+      return *object_ == *other.object_;
+    }
+    
+    template <class S>
+    inline bool operator !=(const temp<S>& right) const {
+      return !(this == right);
+    }
     
   private:
     GcBase* object_;
 
     template<class> friend class gc;
+  };
+  
+  template <class T>
+  std::ostream& operator <<(std::ostream& out, const temp<T>& object) {
+    out << *object;
+    return out;
   };
   
   // A rooted reference to an object in the managed heap. Use this type to hold
@@ -84,20 +106,37 @@ namespace magpie {
     gc(const temp<T>& object)
     : GcBase(object.object_->object_) {}
     
-    gc<T>& operator =(const gc<T>& other)
+    gc<T>& operator =(const gc<T>& right)
     {
-      if (&other != this) object_ = other.object_;
+      if (&right != this) object_ = right.object_;
       return *this;
     }
     
-    gc<T>& operator =(const temp<T>& other)
+    gc<T>& operator =(const temp<T>& right)
     {
-      object_ = other.object_->object_;
+      object_ = right.object_->object_;
       return *this;
     }
     
     T& operator *() const { return *static_cast<T*>(object_); }
     T* operator ->() const { return static_cast<T*>(object_); }
+    
+    // Compare two gc pointers. If both are non-null then compares the objects.
+    template <class S>
+    bool operator ==(const gc<S>& other) const
+    {
+      // Have to either both be null or neither.
+      if (isNull() != other.isNull()) return false;
+      
+      return *object_ == *other.object_;
+    }
+    
+    // Compares two references. References are not equal if they refer to
+    // different objects.
+    template <class S>
+    inline bool operator !=(const gc<S>& other) const {
+      return !(this == other);
+    }
     
     void set(T* object) {
       object_ = object;
@@ -105,7 +144,7 @@ namespace magpie {
   };
   
   template <class T>
-  std::ostream& operator<<(std::ostream& out, const gc<T>& object) {
+  std::ostream& operator <<(std::ostream& out, const gc<T>& object) {
     out << *object;
     return out;
   };

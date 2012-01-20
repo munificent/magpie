@@ -9,6 +9,9 @@
 #define EXPECT(condition) \
 _expect(__FILE__, __LINE__, #condition, condition)
 
+#define EXPECT_FALSE(condition) \
+_expect(__FILE__, __LINE__, #condition, !(condition))
+
 #define EXPECT_MSG(condition, message) \
 _expectMsg(__FILE__, __LINE__, condition, message)
 
