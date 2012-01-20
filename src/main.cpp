@@ -84,9 +84,15 @@ int main(int argc, char * const argv[]) {
   AllocScope scope;
   gc<Fiber>& fiber = vm.fiber();
 
-  // Try reading a file.
-  temp<String> source = readFile("../../example/Calculator.mag");
-  std::cout << source->cString() << std::endl;
+  // Try lexing a file.
+  temp<String> source = readFile("../../example/Fibonacci.mag");
+  Lexer lexer(source);
+  while (true) {
+    AllocScope tokenScope;
+    temp<Token> token = lexer.readToken();
+    std::cout << token << std::endl;
+    if (token->type() == TOKEN_EOF) break;
+  }
   
   gc<Chunk> return3 = gc<Chunk>(new Chunk(1));
   unsigned short three = fiber->addLiteral(Object::create(3.0));

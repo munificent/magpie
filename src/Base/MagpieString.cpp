@@ -81,5 +81,10 @@ namespace magpie {
     // string from a substring.
     chars_[length] = '\0';
   }
+  
+  std::ostream& operator <<(std::ostream& out, const String& right) {
+    out << right.cString();
+    return out;
+  };
 }
 

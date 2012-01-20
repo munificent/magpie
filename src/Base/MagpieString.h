@@ -57,9 +57,6 @@ namespace magpie {
     return right != left;
   }
   
-  inline std::ostream& operator <<(std::ostream& out, const String& right) {
-    out << right.cString();
-    return out;
-  };
+  std::ostream& operator <<(std::ostream& out, const String& right);
 }
 

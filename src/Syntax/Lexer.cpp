@@ -8,7 +8,7 @@ namespace magpie
 {
   temp<Token> Lexer::readToken() {
     while (true) {
-      if (isDone()) return Token::create(TOKEN_EOF, temp<String>());
+      if (isDone()) return Token::create(TOKEN_EOF, String::create(""));
       
       start_ = pos_;
       
@@ -16,6 +16,7 @@ namespace magpie
       switch (c) {
         case ' ':
         case '\t':
+        case '\r':
           // Skip whitespace.
           while (isWhitespace(peek())) advance();
           break;
@@ -26,6 +27,22 @@ namespace magpie
         case ']': return makeToken(TOKEN_RIGHT_BRACKET);
         case '{': return makeToken(TOKEN_LEFT_BRACE);
         case '}': return makeToken(TOKEN_RIGHT_BRACE);
+        case '+': return makeToken(TOKEN_PLUS);
+        case '-': return makeToken(TOKEN_MINUS);
+        case '*': return makeToken(TOKEN_STAR);
+          
+        case '\n': return makeToken(TOKEN_LINE);
+
+        case '/':
+          if (peek() == '/') {
+            skipLineComment();
+          /*} else if (peek() == '*') {
+            skipBlockComment();*/
+          } else {
+            return makeToken(TOKEN_SLASH);
+          }
+          break;
+          
           /*
         case ',': return singleToken(TOKEN_LINE);
         case '@': return singleToken(TOKEN_AT);
@@ -69,15 +86,13 @@ namespace magpie
           
         default:
           if (isDigit(c)) return readNumber();
-          if (isAlpha(c)) return readName();
           if (isOperator(c)) return readOperator();
-          
-          // If we got here, we don't know what it is. Just eat it so
-          // we don't get stuck.
-          advance();
-          return Ref<Token>(new Token(TOKEN_ERROR, String::Format(
-              "Unrecognized character \"%c\".", c)));
            */
+        default:
+          if (isNameStart(c)) return readName();
+          
+          // If we got here, we don't know what it is.
+          return makeToken(TOKEN_ERROR);
       }
     }
   }
@@ -87,17 +102,29 @@ namespace magpie
   }
   
   bool Lexer::isWhitespace(char c) const {
-    return (c == ' ') || (c == '\t');
+    return (c == ' ') || (c == '\t') || (c == '\r');
   }
   
-  char Lexer::peek(int ahead) const
-  {
+  bool Lexer::isNameStart(char c) const {
+    return (c == '_') ||
+          ((c >= 'a') && (c <= 'z')) ||
+          ((c >= 'A') && (c <= 'Z'));
+  }
+  
+  bool Lexer::isName(char c) const {
+    return isNameStart(c) || isDigit(c);
+  }
+  
+  bool Lexer::isDigit(char c) const {
+    return (c >= '0') && (c <= '9');
+  }
+  
+  char Lexer::peek(int ahead) const {
     if (pos_ + ahead >= source_->length()) return '\0';
     return (*source_)[pos_ + ahead];
   }
   
-  char Lexer::advance()
-  {
+  char Lexer::advance() {
     char c = peek();
     pos_++;
     return c;
@@ -107,23 +134,48 @@ namespace magpie
     return Token::create(type, source_->substring(start_, pos_));
   }
   
+  void Lexer::skipLineComment() {
+    // TODO(bob): Handle EOF.
+    while (peek() != '\n') advance();
+  }
+  
+  temp<Token> Lexer::readName() {
+    // TODO(bob): Handle EOF.
+    while (isName(peek())) advance();
+    
+    temp<String> text = source_->substring(start_, pos_);
+    
+    // See if it's a reserved word.
+    TokenType type = TOKEN_NAME;
+    if      (*text == "case"  ) type = TOKEN_CASE;
+    else if (*text == "def"   ) type = TOKEN_DEF;
+    else if (*text == "do"    ) type = TOKEN_DO;
+    else if (*text == "else"  ) type = TOKEN_ELSE;
+    else if (*text == "for"   ) type = TOKEN_FOR;
+    else if (*text == "if"    ) type = TOKEN_IF;
+    else if (*text == "is"    ) type = TOKEN_IS;
+    else if (*text == "match" ) type = TOKEN_MATCH;
+    else if (*text == "return") type = TOKEN_RETURN;
+    else if (*text == "then"  ) type = TOKEN_THEN;
+    else if (*text == "while" ) type = TOKEN_WHILE;
+    
+    return Token::create(type, text);
+  }
+  
+  temp<Token> Lexer::readNumber() {
+    // TODO(bob): Handle EOF.
+    while (isDigit(peek())) advance();
+    
+    // Read the fractional part, if any.
+    if (peek() == '.') {
+      advance();
+      while (isDigit(peek())) advance();
+    }
+    
+    return makeToken(TOKEN_NUMBER);
+  }
+  
   /*
-  bool Lexer::isAlpha(char c) const {
-    return (c == '_') ||
-          ((c >= 'a') && (c <= 'z')) ||
-          ((c >= 'A') && (c <= 'Z'));
-  }
-  
-  bool Lexer::isDigit(char c) const {
-    return (c >= '0') && (c <= '9');
-  }
-  
-  bool Lexer::isOperator(char c) const {
-    return (c != '\0') &&
-    (strchr("-+=/<>?~!$%^&*", c) != NULL);
-  }
-
-  
   void Lexer::skipBlockComment()
   {
     advance();

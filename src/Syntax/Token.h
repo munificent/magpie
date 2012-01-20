@@ -10,21 +10,36 @@ namespace magpie {
   
   // The different types of Tokens that make up Magpie source code.
   enum TokenType {
+    // Punctuators.
     TOKEN_LEFT_PAREN,
     TOKEN_RIGHT_PAREN,
     TOKEN_LEFT_BRACKET,
     TOKEN_RIGHT_BRACKET,
     TOKEN_LEFT_BRACE,
     TOKEN_RIGHT_BRACE,
-
     TOKEN_PLUS,
+    TOKEN_MINUS,
+    TOKEN_STAR,
+    TOKEN_SLASH,
+    
+    // Keywords.
+    TOKEN_CASE,
+    TOKEN_DEF,
+    TOKEN_DO,
+    TOKEN_ELSE,
+    TOKEN_FOR,
+    TOKEN_IF,
+    TOKEN_IS,
+    TOKEN_MATCH,
     TOKEN_RETURN,
+    TOKEN_THEN,
+    TOKEN_WHILE,
     
     TOKEN_NAME,
-
     TOKEN_NUMBER,
     TOKEN_STRING,
 
+    TOKEN_LINE,
     TOKEN_ERROR,
     TOKEN_EOF
   };
@@ -45,5 +60,7 @@ namespace magpie {
     TokenType   type_;
     gc<String>  text_;
   };
+
+  std::ostream& operator <<(std::ostream& out, const Token& right);
 }
 

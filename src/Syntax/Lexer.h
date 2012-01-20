@@ -21,26 +21,21 @@ namespace magpie
     bool isDone() const;
     
     bool isWhitespace(char c) const;
+    bool isNameStart(char c) const;
+    bool isName(char c) const;
+    bool isDigit(char c) const;
 
     char peek(int ahead = 0) const;
     
     char advance();
     
     temp<Token> makeToken(TokenType type);
-    
-    /*
-     bool isAlpha(char c) const;
-     bool isDigit(char c) const;
-     bool isOperator(char c) const;
-    
-    void skipBlockComment();
-    temp<Token> readString();
-    temp<Token> readNumber();
+
+    void skipLineComment();
+
     temp<Token> readName();
-    
-    void advanceLine();
-     */
-    
+    temp<Token> readNumber();
+
     gc<String> source_;
     bool    needsLine_;
     int     pos_;

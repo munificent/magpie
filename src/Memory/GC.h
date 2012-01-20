@@ -80,7 +80,11 @@ namespace magpie {
   
   template <class T>
   std::ostream& operator <<(std::ostream& out, const temp<T>& object) {
-    out << *object;
+    if (object.isNull()) {
+      out << "null";
+    } else {
+      out << *object;
+    }
     return out;
   };
   
@@ -104,7 +108,7 @@ namespace magpie {
     
     // You can promote a temp to a gc.
     gc(const temp<T>& object)
-    : GcBase(object.object_->object_) {}
+    : GcBase(object.isNull() ? NULL : object.object_->object_) {}
     
     gc<T>& operator =(const gc<T>& right)
     {
@@ -145,7 +149,11 @@ namespace magpie {
   
   template <class T>
   std::ostream& operator <<(std::ostream& out, const gc<T>& object) {
-    out << *object;
+    if (object.isNull()) {
+      out << "null";
+    } else {
+      out << *object;
+    }
     return out;
   };
 }
