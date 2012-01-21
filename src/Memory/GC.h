@@ -7,7 +7,8 @@
 namespace magpie
 {
   class Managed;
-
+  class Memory;
+  
   // Base class for gc. Used to resolve a circular dependency between temp and
   // gc. Shouldn't be used directly.
   class GcBase
@@ -43,16 +44,19 @@ namespace magpie
   // GC.
   template <class T>
   class temp
-  {
+  {    
   public:
     // Creates a null temp reference.
     temp()
     : object_(NULL) {}
 
-    // TODO(bob): Should have to go through AllocScope.
-    temp(GcBase* object)
-    : object_(object) {}
-
+    template <class S>
+    temp(const temp<S>& right)
+    : object_(right.object_)
+    {
+      // TODO(bob): Should statically check that S is a subtype of T.
+    }
+    
     bool isNull() const
     {
       return object_ == NULL || object_->object_ == NULL;
@@ -61,14 +65,14 @@ namespace magpie
     // Gets the underlying object being referred to.
     T& operator *() const { return *static_cast<T*>(object_->object_); }
     T* operator ->() const { return static_cast<T*>(object_->object_); }
-
+    
     // Compare two temps. If both are non-null then compares the objects.
     template <class S>
-    bool operator ==(const temp<S>& other) const
+    bool operator ==(const temp<S>& right) const
     {
       // Have to either both be null or neither.
-      if (isNull() != other.isNull()) return false;
-      return *object_ == *other.object_;
+      if (isNull() != right.isNull()) return false;
+      return *object_ == *right.object_;
     }
 
     template <class S>
@@ -78,9 +82,16 @@ namespace magpie
     }
 
   private:
+    temp(GcBase* object)
+    : object_(object) {}
+    
     GcBase* object_;
 
+    friend class Memory;
     template<class> friend class gc;
+    // This is so that temps with different type arguments can access each
+    // other's privates.
+    template<class> friend class temp;
   };
 
   template <class T>

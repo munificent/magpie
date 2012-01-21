@@ -68,6 +68,8 @@
       'src/Memory/RootSource.h',
       'src/Syntax/Lexer.cpp',
       'src/Syntax/Lexer.h',
+      'src/Syntax/Node.cpp',
+      'src/Syntax/Node.h',
       'src/Syntax/Parser.cpp',
       'src/Syntax/Parser.h',
       'src/Syntax/Token.cpp',

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 #include "Macros.h"
 #include "Memory.h"
 
@@ -19,8 +21,6 @@ namespace magpie
 
     // Subclasses must override this to provide their size in bytes so that the
     // copying collector can copy them.
-    // TODO(bob): Rename -> allocSize(). Too easy to confuse this for a
-    // meaningful method on the subclass.
     virtual size_t allocSize() const = 0;
 
     // This will be called by the garbage collector when this object has been
@@ -28,10 +28,18 @@ namespace magpie
     // gc<T> references that the object contains.
     virtual void reach() {}
 
+    virtual void trace(std::ostream& out) const;
+    
     void* operator new(size_t s);
 
   private:
 
     NO_COPY(Managed);
+  };
+  
+  inline std::ostream& operator <<(std::ostream& out, const Managed& object)
+  {
+    object.trace(out);
+    return out;
   };
 }

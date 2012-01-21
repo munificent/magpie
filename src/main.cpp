@@ -6,6 +6,7 @@
 #include "GC.h"
 #include "VM.h"
 #include "MagpieString.h"
+#include "Node.h"
 
 using namespace magpie;
 
@@ -91,7 +92,6 @@ int main(int argc, char * const argv[])
   // TODO(bob): Hack temp!
   VM vm;
   AllocScope scope;
-  gc<Fiber>& fiber = vm.fiber();
 
   // Try lexing a file.
   temp<String> source = readFile("../../example/Fibonacci.mag");
@@ -103,7 +103,15 @@ int main(int argc, char * const argv[])
     std::cout << token << std::endl;
     if (token->type() == TOKEN_EOF) break;
   }
-
+  
+  // Try making some nodes.
+  temp<Node> one = NumberNode::create(1.0);
+  temp<Node> two = NumberNode::create(2.0);
+  temp<Node> plus = BinaryOpNode::create(one, TOKEN_PLUS, two);
+  
+  std::cout << plus << std::endl;
+  
+  gc<Fiber>& fiber = vm.fiber();
   gc<Chunk> return3 = gc<Chunk>(new Chunk(1));
   unsigned short three = fiber->addLiteral(Object::create(3.0));
   return3->write(MAKE_LITERAL(three, 0));

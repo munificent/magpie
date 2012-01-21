@@ -53,6 +53,8 @@ namespace magpie
   public:
     static temp<Token> create(TokenType type, gc<String> text);
 
+    static const char* typeString(TokenType type);
+    
     virtual size_t allocSize() const { return sizeof(Token); }
 
     TokenType     type() const { return type_; }
