@@ -5,7 +5,7 @@
 
 namespace magpie
 {
-  void TokenTests::run()
+  void TokenTests::runTests()
   {
     create();
     is();

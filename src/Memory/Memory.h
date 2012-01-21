@@ -19,11 +19,14 @@ namespace magpie
 
   public:
     static void initialize(RootSource* roots, size_t heapSize);
-
+    static void shutDown();
+    
     static void collect();
 
     static void* allocate(size_t size);
 
+    static int numCollections() { return numCollections_; }
+    
     template <class T>
     static temp<T> makeTemp(T* object)
     {
@@ -69,6 +72,7 @@ namespace magpie
     static AllocScope* currentScope_;
     static gc<Managed> temps_[MAX_TEMPS];
     static int numTemps_;
+    static int numCollections_;
   };
 
   class AllocScope

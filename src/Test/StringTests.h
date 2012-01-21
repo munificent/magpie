@@ -7,13 +7,13 @@ namespace magpie
   class StringTests : public Test
   {
   public:
-    static void run();
+    virtual void runTests();
 
   private:
-    static void create();
-    static void subscript();
-    static void equals();
-    static void substring();
+    void create();
+    void subscript();
+    void equals();
+    void substring();
   };
 }
 

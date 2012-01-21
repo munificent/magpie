@@ -7,11 +7,11 @@ namespace magpie
   class TokenTests : public Test
   {
   public:
-    static void run();
+    virtual void runTests();
 
   private:
-    static void create();
-    static void is();
+    void create();
+    void is();
   };
 }
 

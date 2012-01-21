@@ -4,13 +4,13 @@
 
 namespace magpie
 {
-  class LexerTests : public Test
+  class MemoryTests : public Test
   {
   public:
     virtual void runTests();
 
   private:
-    void create();
+    void collect();
   };
 }
 

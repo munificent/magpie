@@ -17,13 +17,23 @@ namespace magpie
 
   void Heap::initialize(size_t size)
   {
-    ASSERT(memory_ == NULL, "Cannot reinitialize.");
+    ASSERT(memory_ == NULL, "Already initialized.");
 
     memory_ = reinterpret_cast<char*>(::operator new(size));
     free_ = memory_;
     end_ = memory_ + size;
   }
 
+  void Heap::shutDown()
+  {
+    ASSERT(memory_ != NULL, "Not initialized.");
+    
+    ::operator delete(memory_);
+    memory_ = NULL;
+    free_ = NULL;
+    end_ = NULL;
+  }
+  
   bool Heap::canAllocate(size_t size) const
   {
     // Find the end of the allocated object.
@@ -36,7 +46,6 @@ namespace magpie
   void* Heap::allocate(size_t size)
   {
     void* allocated = free_;
-    // TODO(bob): Use C++ cast.
     char* next = free_ + size;
 
     // Make sure we don't go past the end of the heap.
@@ -49,6 +58,9 @@ namespace magpie
   void Heap::reset()
   {
     free_ = memory_;
+    
+    // TODO(bob): Should only do this in debug/diagnostic builds.
+    memset(memory_, 0xcc, free_ - memory_);
   }
 
   Managed* Heap::getFirst()

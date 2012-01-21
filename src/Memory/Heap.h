@@ -15,6 +15,7 @@ namespace magpie
     ~Heap();
 
     void initialize(size_t size);
+    void shutDown();
 
     // Gets whether or not an object of the given size can be allocated in this
     // heap.

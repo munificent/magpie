@@ -28,7 +28,12 @@ namespace magpie
   {
   public:
     static void showResults();
-
+    
+    virtual ~Test() {}
+    
+    void run();
+    virtual void runTests() = 0;
+    
   protected:
     static void _expect(const char * file, int line,
                         const char * expression,
@@ -73,14 +78,6 @@ namespace magpie
   private:
     static int tests_;
     static int failed_;
-  };
-
-  struct TestRoot : public RootSource
-  {
-    virtual void reachRoots()
-    {
-      // No roots.
-    }
   };
 }
 

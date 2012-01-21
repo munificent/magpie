@@ -14,18 +14,33 @@ namespace magpie
   AllocScope* Memory::currentScope_ = NULL;
   gc<Managed> Memory::temps_[MAX_TEMPS];
   int Memory::numTemps_ = 0;
+  int Memory::numCollections_ = 0;
   Heap* Memory::to_ = NULL;
   Heap* Memory::from_ = NULL;
   
   void Memory::initialize(RootSource* roots, size_t heapSize)
   {
+    ASSERT_NOT_NULL(roots);
+    ASSERT(roots_ == NULL, "Already initialized.");
+    
     roots_ = roots;
     a_.initialize(heapSize);
     b_.initialize(heapSize);
     to_ = &a_;
     from_ = &b_;
+    numTemps_ = 0;
+    numCollections_ = 0;
   }
   
+  void Memory::shutDown()
+  {
+    ASSERT(roots_ != NULL, "Not initialized.");
+    
+    roots_ = NULL;
+    a_.shutDown();
+    b_.shutDown();
+  }
+
   void Memory::collect()
   {
     // Copy the roots to to-space.
@@ -47,6 +62,8 @@ namespace magpie
     Heap* temp = from_;
     from_ = to_;
     to_ = temp;
+    
+    numCollections_++;
   }
   
   void* Memory::allocate(size_t size)

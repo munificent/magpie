@@ -7,14 +7,14 @@ namespace magpie
   class QueueTests : public Test
   {
   public:
-    static void run();
+    virtual void runTests();
     
   private:
-    static void enqueueDequeue();
-    static void serialEnqueue();
-    static void multipleEnqueue();
-    static void count();
-    static void subscript();
+    void enqueueDequeue();
+    void serialEnqueue();
+    void multipleEnqueue();
+    void count();
+    void subscript();
   };
 }
 

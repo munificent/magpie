@@ -3,7 +3,7 @@
 
 namespace magpie
 {
-  void QueueTests::run()
+  void QueueTests::runTests()
   {
     enqueueDequeue();
     serialEnqueue();

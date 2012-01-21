@@ -5,7 +5,7 @@
 
 namespace magpie
 {
-  void LexerTests::run()
+  void LexerTests::runTests()
   {
     create();
   }

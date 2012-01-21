@@ -10,53 +10,6 @@
 
 using namespace magpie;
 
-/*
-
-struct Cons : public magpie::Managed
-{
-  Cons(int id) : id(id) {}
-
-  virtual size_t allocSize() const { return sizeof(Cons); }
-  virtual void reach()
-  {
-    Memory::reach(next);
-  }
-
-  int id;
-  gc<Cons> next;
-};
-
-struct TestRoots : public magpie::RootSource
-{
-  virtual void reachRoots()
-  {
-    Memory::reach(root);
-  }
-
-  gc<Cons> root;
-};
-
-void testCollector()
-{
-  AllocScope scope();
-
-  gc<Cons> notRoot;
-
-  // Make two long cons chains, only one of which is rooted.
-  gc<Cons>* a = &roots.root;
-  gc<Cons>* b = &notRoot;
-  int id = 0;
-  for (int i = 0; i < 600000; i++)
-  {
-    a->set(new Cons(id++));
-    a = &((*a)->next);
-
-    b->set(new Cons(id++));
-    b = &((*b)->next);
-  }
-}
-*/
-
 // Reads a file from the given path into a String.
 temp<String> readFile(const char* path)
 {
@@ -86,8 +39,6 @@ temp<String> readFile(const char* path)
 int main(int argc, char * const argv[])
 {
   std::cout << "Magpie!\n";
-
-  //  testCollector();
 
   // TODO(bob): Hack temp!
   VM vm;

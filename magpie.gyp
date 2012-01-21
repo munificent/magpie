@@ -105,6 +105,8 @@
         'src/Test',
       ],
       'sources': [
+      'src/Test/MemoryTests.cpp',
+      'src/Test/MemoryTests.h',
       'src/Test/LexerTests.cpp',
       'src/Test/LexerTests.h',
       'src/Test/QueueTests.cpp',

@@ -5,7 +5,7 @@
 
 namespace magpie
 {
-  void StringTests::run()
+  void StringTests::runTests()
   {
     create();
     subscript();
