@@ -43,6 +43,12 @@ namespace magpie
 
   void Memory::collect()
   {
+    // Copy the active temps to to-space.
+    for (int i = 0; i < numTemps_; i++)
+    {
+      reach(temps_[i]);
+    }
+    
     // Copy the roots to to-space.
     roots_->reachRoots();
     

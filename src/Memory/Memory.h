@@ -87,10 +87,49 @@ namespace magpie
 
     ~AllocScope()
     {
-      Memory::popScope();
+      if (numTempsBefore_ != CLOSED) Memory::popScope();
     }
 
+    // Closes this scope. Any temps created after calling this will be created
+    // in the enclosing scope (in any).
+    //
+    // More importantly, this lifts a temp out of this scope and stores it in
+    // the enclosing one. This way, you can create an object and return it
+    // safely while escaping the local AllocScope. It enables this pattern:
+    //
+    //     temp<Foo> makeFoo()
+    //     {
+    //       AllocScope scope;
+    //
+    //       temp<Bar> bar = Bar::create();
+    //       temp<Baz> baz = Baz::create();
+    //       temp<Bang> bang = Bang::create();
+    //       temp<Foo> foo = Foo::create(bar, baz, bang);
+    //       return scope.close(foo);
+    //     }
+    //
+    // Here, the memory manager can now reuse the temporary slots that were
+    // used for `bar`, `baz` and `bang` by closing the scope while still
+    // ensuring `foo` is kept alive.
+    template <class T>
+    temp<T> close(temp<T> object)
+    {
+      ASSERT(numTempsBefore_ != CLOSED, "Cannot close a scope more than once.");
+      
+      // Snag the object.
+      T* rawObject = *object;
+      
+      // Close this scope.
+      Memory::popScope();
+      numTempsBefore_ = CLOSED;
+      
+      // Now place it in a temp in the enclosing scope.
+      return makeTemp(rawObject);
+    }
+    
   private:
+    static const int CLOSED = -1;
+    
     AllocScope* previous_;
     int numTempsBefore_;
 

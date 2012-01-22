@@ -31,6 +31,7 @@ namespace magpie
   void MemoryTests::runTests()
   {
     collect();
+    inScopeTempsArePreserved();
   }
 
   void MemoryTests::collect()
@@ -69,6 +70,22 @@ namespace magpie
 
     // Make sure it actually did a collection.
     EXPECT(Memory::numCollections() > 0);
+  }
+  
+  void MemoryTests::inScopeTempsArePreserved()
+  {
+    Memory::shutDown();
+    
+    ConsRoots roots;
+    Memory::initialize(&roots, 1024 * 1024);
+
+    AllocScope scope;
+    temp<Cons> a = Memory::makeTemp(new Cons(123));
+    
+    // Force a collection.
+    Memory::collect();
+    
+    EXPECT_EQUAL(123, a->id);
   }
 }
 

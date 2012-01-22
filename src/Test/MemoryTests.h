@@ -11,6 +11,7 @@ namespace magpie
 
   private:
     void collect();
+    void inScopeTempsArePreserved();
   };
 }
 
