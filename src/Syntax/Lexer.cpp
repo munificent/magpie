@@ -104,7 +104,8 @@ namespace magpie
            */
         default:
           if (isNameStart(c)) return readName();
-
+          if (isDigit(c)) return readNumber();
+          
           // If we got here, we don't know what it is.
           return makeToken(TOKEN_ERROR);
       }
@@ -273,50 +274,6 @@ namespace magpie
         text += c;
       }
     }
-  }
-
-  Ref<Token> Lexer::readNumber()
-  {
-    advance();
-    while (isDigit(peek())) advance();
-
-    // Read the fractional part, if any.
-    if (peek() == '.')
-    {
-      advance();
-      while (isDigit(peek())) advance();
-    }
-
-    String text = mLine.Substring(mStart, mPos - mStart);
-    double number = atof(text.CString());
-    return Ref<Token>(new Token(TOKEN_NUMBER, number));
-  }
-
-  Ref<Token> Lexer::readName()
-  {
-    while (isOperator(peek()) || isAlpha(peek()) || isDigit(peek()))
-    {
-      // Comments take priority over names.
-      if ((peek() == '/') && (peek(1) == '/')) break;
-      if ((peek() == '/') && (peek(1) == '*')) break;
-      advance();
-    }
-
-    // If it ends in ":", it's a keyword.
-    TokenType type = TOKEN_NAME;
-    if (peek() == ':')
-    {
-      advance();
-      type = TOKEN_KEYWORD;
-    }
-
-    String name = mLine.Substring(mStart, mPos - mStart);
-
-    if (name == "return") return Ref<Token>(new Token(TOKEN_RETURN));
-    if (name == "self") return Ref<Token>(new Token(TOKEN_SELF));
-    if (name == "undefined") return Ref<Token>(new Token(TOKEN_UNDEFINED));
-
-    return Ref<Token>(new Token(type, name));
   }
   */
 }

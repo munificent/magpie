@@ -7,6 +7,7 @@
 #include "VM.h"
 #include "MagpieString.h"
 #include "Node.h"
+#include "Parser.h"
 
 using namespace magpie;
 
@@ -45,6 +46,7 @@ int main(int argc, char * const argv[])
   AllocScope scope;
 
   // Try lexing a file.
+  /*
   temp<String> source = readFile("../../example/Fibonacci.mag");
   Lexer lexer(source);
   while (true)
@@ -54,13 +56,14 @@ int main(int argc, char * const argv[])
     std::cout << token << std::endl;
     if (token->type() == TOKEN_EOF) break;
   }
+  */
   
-  // Try making some nodes.
-  temp<Node> one = NumberNode::create(1.0);
-  temp<Node> two = NumberNode::create(2.0);
-  temp<Node> plus = BinaryOpNode::create(one, TOKEN_PLUS, two);
+  // Try parsing.
+  temp<String> source = String::create("12 + 34 + 56");
+  Parser parser(source);
+  temp<Node> node = parser.parseExpression();
   
-  std::cout << plus << std::endl;
+  std::cout << node << std::endl;
   
   gc<Fiber>& fiber = vm.fiber();
   gc<Chunk> return3 = gc<Chunk>(new Chunk(1));

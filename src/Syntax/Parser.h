@@ -7,18 +7,29 @@
 namespace magpie
 {
   class Lexer;
+  class Node;
   
   // Base class for a generic recursive descent parser.
   class Parser
   {
-  protected:
-    Parser(Lexer& lexer /*, ErrorReporter & errorReporter*/)
-    : lexer_(lexer),
+  public:
+    Parser(gc<String> source /*, ErrorReporter & errorReporter*/)
+    : lexer_(source),
       hadError_(false)
     {}
     
+    // Parses an expression with the given precedence or higher.
+    temp<Node> parseExpression(int precedence = 0);
+    
+  private:
+    // Prefix parsers.
+    temp<Node> number(temp<Token> token);
+
+    // Infix parsers.
+    temp<Node> binaryOp(temp<Node> left, temp<Token> token);
+
     // Gets the Token the parser is currently looking at.
-    const Token& current() { return *read_[0]; }
+    const Token& current();
     
     // Returns true if the current Token is the given type.
     bool lookAhead(TokenType type);
@@ -51,9 +62,16 @@ namespace magpie
     bool hadError() const { return hadError_; }
     
   private:
+    typedef temp<Node> (Parser::*PrefixParseFn)(temp<Token> token);
+    typedef temp<Node> (Parser::*InfixParseFn)(temp<Node> left, temp<Token> token);
+    
     void fillLookAhead(int count);
     
-    Lexer& lexer_;
+    static PrefixParseFn prefixParsers_[TOKEN_NUM_TYPES];
+    static InfixParseFn  infixParsers_[TOKEN_NUM_TYPES];
+    static int           infixPrecedences_[TOKEN_NUM_TYPES];
+    
+    Lexer lexer_;
     
     // The 2 here is the maximum number of lookahead tokens.
     Queue<temp<Token>, 2> read_;

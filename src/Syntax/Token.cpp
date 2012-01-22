@@ -55,7 +55,7 @@ namespace magpie
   
   std::ostream& operator <<(std::ostream& out, const Token& right)
   {
-    out << right.type() << " " << right.text();
+    out << Token::typeString(right.type()) << " " << right.text();
     return out;
   };
 }

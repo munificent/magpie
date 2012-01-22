@@ -16,7 +16,8 @@ namespace magpie
 
   void BinaryOpNode::trace(std::ostream& out) const
   {
-    out << left_ << " " << Token::typeString(type_) << " " << right_;
+    out << "(" << left_ << " " << Token::typeString(type_)
+        << " " << right_ << ")";
   }
   
   temp<NumberNode> NumberNode::create(double value)
