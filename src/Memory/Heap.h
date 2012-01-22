@@ -7,7 +7,10 @@ namespace magpie
   class Managed;
 
   // TODO(bob): rename semispace
-  // A contiguous chunk of garbage collected memory.
+  // A contiguous chunk of garbage collected memory. For each object, it stores
+  // its size followed by the object's memory. Objects are allocated
+  // sequentially, so allocation is little more than a pointer increment. It
+  // does not support deallocating individual objects.
   class Heap
   {
   public:

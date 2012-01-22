@@ -16,8 +16,6 @@ namespace magpie
   public:
     Fiber(VM& vm);
 
-    virtual size_t allocSize() const { return sizeof(Fiber); }
-
     void interpret(gc<Chunk> chunk);
 
     // TODO(bob): Temp?

@@ -70,11 +70,6 @@ namespace magpie
     return create(&chars_[start], end - start);
   }
 
-  size_t String::allocSize() const
-  {
-    return calcStringSize(length_);
-  }
-
   size_t String::calcStringSize(int length)
   {
     // Note that sizeof(String) includes one extra byte because the flex

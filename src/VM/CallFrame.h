@@ -15,7 +15,6 @@ namespace magpie
   public:
     CallFrame(gc<Chunk> chunk);
 
-    virtual size_t allocSize() const { return sizeof(CallFrame); }
     // TODO(bob): Implement reach.
 
     int  getInstruction()                { return instruction_; }

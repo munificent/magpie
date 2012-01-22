@@ -9,7 +9,6 @@ namespace magpie
   {
     Cons(int id) : id(id) {}
     
-    virtual size_t allocSize() const { return sizeof(Cons); }
     virtual void reach()
     {
       Memory::reach(next);

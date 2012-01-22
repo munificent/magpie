@@ -39,8 +39,6 @@ namespace magpie
     // the last character to include in the substring.
     temp<String> substring(int start, int end) const;
 
-    virtual size_t allocSize() const;
-
   private:
     static size_t calcStringSize(int length);
 

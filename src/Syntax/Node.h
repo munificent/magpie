@@ -40,7 +40,6 @@ namespace magpie
     TokenType type() const { return type_; }
     Node& right() const { return *right_; }
     
-    virtual size_t allocSize() const { return sizeof(BinaryOpNode); }
     virtual void trace(std::ostream& out) const;
 
   private:
@@ -59,7 +58,6 @@ namespace magpie
   
     double value() const { return value_; }
     
-    virtual size_t allocSize() const { return sizeof(NumberNode); }
     virtual void trace(std::ostream& out) const;
 
   private:

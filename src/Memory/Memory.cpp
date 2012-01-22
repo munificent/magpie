@@ -90,15 +90,19 @@ namespace magpie
     else
     {
       // It hasn't, so copy it to to-space.
-      size_t size = obj->allocSize();
-      Managed* dest = static_cast<Managed*> (to_->allocate(size));
+      
+      // The size is stored directly before the object.
+      size_t size = *reinterpret_cast<size_t*>(
+          reinterpret_cast<char*>(obj) - sizeof(size_t));
+      
+      Managed* dest = static_cast<Managed*>(to_->allocate(size));
       memcpy(dest, obj, size);
       
       // Replace the old object with a forwarding address.
       ::new (obj) ForwardingAddress(dest);
       
       // Update the reference to point to the new location.
-      return static_cast<Managed*> (dest);
+      return static_cast<Managed*>(dest);
     }
   }
 
