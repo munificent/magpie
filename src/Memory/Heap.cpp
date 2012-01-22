@@ -49,8 +49,9 @@ namespace magpie
 
   void* Heap::allocate(size_t size)
   {
-    char* allocated = free_;
-    char* next = free_ + size + sizeof(size_t);
+    // The allocated object will start just after its size.
+    char* allocated = free_ + sizeof(size_t);
+    char* next = allocated + size;
 
     // Make sure we don't go past the end of the heap.
     if (next >= end_) return NULL;
@@ -58,10 +59,9 @@ namespace magpie
     free_ = next;
     
     // Store the allocated size so we know where the next object starts.
-    *reinterpret_cast<size_t*>(allocated) = size;
+    *reinterpret_cast<size_t*>(allocated - sizeof(size_t)) = size;
     
-    // The object is right after the size.
-    return allocated + sizeof(size_t);
+    return allocated;
   }
 
   void Heap::reset()
