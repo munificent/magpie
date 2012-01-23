@@ -18,8 +18,10 @@ namespace magpie
     NULL,                 // TOKEN_MINUS
     NULL,                 // TOKEN_STAR
     NULL,                 // TOKEN_SLASH
+    NULL,                 // TOKEN_PERCENT
 
     // Keywords.
+    NULL,                 // TOKEN_AND
     NULL,                 // TOKEN_CASE
     NULL,                 // TOKEN_DEF
     NULL,                 // TOKEN_DO
@@ -28,9 +30,12 @@ namespace magpie
     NULL,                 // TOKEN_IF
     NULL,                 // TOKEN_IS
     NULL,                 // TOKEN_MATCH
+    NULL,                 // TOKEN_NOT
+    NULL,                 // TOKEN_OR
     NULL,                 // TOKEN_RETURN
     NULL,                 // TOKEN_THEN
     NULL,                 // TOKEN_WHILE
+    NULL,                 // TOKEN_XOR
 
     NULL,                 // TOKEN_NAME
     &Parser::number,      // TOKEN_NUMBER
@@ -41,75 +46,45 @@ namespace magpie
     NULL                  // TOKEN_EOF
   };
 
-  Parser::InfixParseFn Parser::infixParsers_[] = {
-    // Punctuators.
-    NULL,                 // TOKEN_LEFT_PAREN
-    NULL,                 // TOKEN_RIGHT_PAREN
-    NULL,                 // TOKEN_LEFT_BRACKET
-    NULL,                 // TOKEN_RIGHT_BRACKET
-    NULL,                 // TOKEN_LEFT_BRACE
-    NULL,                 // TOKEN_RIGHT_BRACE
-    &Parser::binaryOp,    // TOKEN_PLUS
-    NULL,                 // TOKEN_MINUS
-    NULL,                 // TOKEN_STAR
-    NULL,                 // TOKEN_SLASH
-
-    // Keywords.
-    NULL,                 // TOKEN_CASE
-    NULL,                 // TOKEN_DEF
-    NULL,                 // TOKEN_DO
-    NULL,                 // TOKEN_ELSE
-    NULL,                 // TOKEN_FOR
-    NULL,                 // TOKEN_IF
-    NULL,                 // TOKEN_IS
-    NULL,                 // TOKEN_MATCH
-    NULL,                 // TOKEN_RETURN
-    NULL,                 // TOKEN_THEN
-    NULL,                 // TOKEN_WHILE
-
-    NULL,                 // TOKEN_NAME
-    NULL,                 // TOKEN_NUMBER
-    NULL,                 // TOKEN_STRING
-
-    NULL,                 // TOKEN_LINE
-    NULL,                 // TOKEN_ERROR
-    NULL                  // TOKEN_EOF
-  };
-
   // TODO(bob): Figure out full precedence table.
-  int Parser::infixPrecedences_[] = {
+  Parser::InfixParser Parser::infixParsers_[] = {
     // Punctuators.
-    -1, // TOKEN_LEFT_PAREN
-    -1, // TOKEN_RIGHT_PAREN
-    -1, // TOKEN_LEFT_BRACKET
-    -1, // TOKEN_RIGHT_BRACKET
-    -1, // TOKEN_LEFT_BRACE
-    -1, // TOKEN_RIGHT_BRACE
-    4,  // TOKEN_PLUS
-    -1, // TOKEN_MINUS
-    -1, // TOKEN_STAR
-    -1, // TOKEN_SLASH
+    { NULL, -1 },                 // TOKEN_LEFT_PAREN
+    { NULL, -1 },                 // TOKEN_RIGHT_PAREN
+    { NULL, -1 },                 // TOKEN_LEFT_BRACKET
+    { NULL, -1 },                 // TOKEN_RIGHT_BRACKET
+    { NULL, -1 },                 // TOKEN_LEFT_BRACE
+    { NULL, -1 },                 // TOKEN_RIGHT_BRACE
+    { &Parser::binaryOp, 7 },     // TOKEN_PLUS
+    { &Parser::binaryOp, 7 },     // TOKEN_MINUS
+    { &Parser::binaryOp, 8 },     // TOKEN_STAR
+    { &Parser::binaryOp, 8 },     // TOKEN_SLASH
+    { &Parser::binaryOp, 8 },     // TOKEN_PERCENT
 
     // Keywords.
-    -1, // TOKEN_CASE
-    -1, // TOKEN_DEF
-    -1, // TOKEN_DO
-    -1, // TOKEN_ELSE
-    -1, // TOKEN_FOR
-    -1, // TOKEN_IF
-    -1, // TOKEN_IS
-    -1, // TOKEN_MATCH
-    -1, // TOKEN_RETURN
-    -1, // TOKEN_THEN
-    -1, // TOKEN_WHILE
+    { &Parser::binaryOp, 3 },     // TOKEN_AND
+    { NULL, -1 },                 // TOKEN_CASE
+    { NULL, -1 },                 // TOKEN_DEF
+    { NULL, -1 },                 // TOKEN_DO
+    { NULL, -1 },                 // TOKEN_ELSE
+    { NULL, -1 },                 // TOKEN_FOR
+    { NULL, -1 },                 // TOKEN_IF
+    { NULL, -1 },                 // TOKEN_IS
+    { NULL, -1 },                 // TOKEN_MATCH
+    { NULL, -1 },                 // TOKEN_NOT
+    { &Parser::binaryOp, 3 },     // TOKEN_OR
+    { NULL, -1 },                 // TOKEN_RETURN
+    { NULL, -1 },                 // TOKEN_THEN
+    { NULL, -1 },                 // TOKEN_WHILE
+    { NULL, -1 },                 // TOKEN_XOR
 
-    -1, // TOKEN_NAME
-    -1, // TOKEN_NUMBER
-    -1, // TOKEN_STRING
+    { NULL, -1 },                 // TOKEN_NAME
+    { NULL, -1 },                 // TOKEN_NUMBER
+    { NULL, -1 },                 // TOKEN_STRING
 
-    -1, // TOKEN_LINE
-    -1, // TOKEN_ERROR
-    -1  // TOKEN_EOF
+    { NULL, -1 },                 // TOKEN_LINE
+    { NULL, -1 },                 // TOKEN_ERROR
+    { NULL, -1 }                  // TOKEN_EOF
   };
 
   temp<Node> Parser::parseExpression(int precedence)
@@ -129,11 +104,11 @@ namespace magpie
 
     temp<Node> left = (this->*prefix)(token);
 
-    while (precedence < infixPrecedences_[current().type()])
+    while (precedence < infixParsers_[current().type()].precedence)
     {
       token = consume();
 
-      InfixParseFn infix = infixParsers_[token->type()];
+      InfixParseFn infix = infixParsers_[token->type()].fn;
       left = (this->*infix)(left, token);
     }
 
@@ -153,8 +128,8 @@ namespace magpie
   {
     // TODO(bob): Support right-associative infix. Needs to do precedence
     // - 1 here, to be right-assoc.
-    temp<Node> right = parseExpression(infixPrecedences_[token->type()]);
-    
+    temp<Node> right = parseExpression(infixParsers_[token->type()].precedence);
+
     return BinaryOpNode::create(left, token->type(), right);
   }
 

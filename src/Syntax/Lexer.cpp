@@ -33,6 +33,7 @@ namespace magpie
         case '+': return makeToken(TOKEN_PLUS);
         case '-': return makeToken(TOKEN_MINUS);
         case '*': return makeToken(TOKEN_STAR);
+        case '%': return makeToken(TOKEN_PERCENT);
 
         case '\n': return makeToken(TOKEN_LINE);
 
@@ -172,7 +173,8 @@ namespace magpie
 
     // See if it's a reserved word.
     TokenType type = TOKEN_NAME;
-    if      (*text == "case"  ) type = TOKEN_CASE;
+    if      (*text == "and"   ) type = TOKEN_AND;
+    else if (*text == "case"  ) type = TOKEN_CASE;
     else if (*text == "def"   ) type = TOKEN_DEF;
     else if (*text == "do"    ) type = TOKEN_DO;
     else if (*text == "else"  ) type = TOKEN_ELSE;
@@ -180,9 +182,12 @@ namespace magpie
     else if (*text == "if"    ) type = TOKEN_IF;
     else if (*text == "is"    ) type = TOKEN_IS;
     else if (*text == "match" ) type = TOKEN_MATCH;
+    else if (*text == "not"   ) type = TOKEN_NOT;
+    else if (*text == "or"    ) type = TOKEN_OR;
     else if (*text == "return") type = TOKEN_RETURN;
     else if (*text == "then"  ) type = TOKEN_THEN;
     else if (*text == "while" ) type = TOKEN_WHILE;
+    else if (*text == "xor"   ) type = TOKEN_XOR;
 
     return Token::create(type, text);
   }

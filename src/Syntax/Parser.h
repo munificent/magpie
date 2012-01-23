@@ -65,11 +65,16 @@ namespace magpie
     typedef temp<Node> (Parser::*PrefixParseFn)(temp<Token> token);
     typedef temp<Node> (Parser::*InfixParseFn)(temp<Node> left, temp<Token> token);
     
+    struct InfixParser
+    {
+      InfixParseFn fn;
+      int          precedence;
+    };
+    
     void fillLookAhead(int count);
     
     static PrefixParseFn prefixParsers_[TOKEN_NUM_TYPES];
-    static InfixParseFn  infixParsers_[TOKEN_NUM_TYPES];
-    static int           infixPrecedences_[TOKEN_NUM_TYPES];
+    static InfixParser   infixParsers_[TOKEN_NUM_TYPES];
     
     Lexer lexer_;
     

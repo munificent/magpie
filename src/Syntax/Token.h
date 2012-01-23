@@ -23,8 +23,10 @@ namespace magpie
     TOKEN_MINUS,
     TOKEN_STAR,
     TOKEN_SLASH,
+    TOKEN_PERCENT,
 
     // Keywords.
+    TOKEN_AND,
     TOKEN_CASE,
     TOKEN_DEF,
     TOKEN_DO,
@@ -33,9 +35,12 @@ namespace magpie
     TOKEN_IF,
     TOKEN_IS,
     TOKEN_MATCH,
+    TOKEN_NOT,
+    TOKEN_OR,
     TOKEN_RETURN,
     TOKEN_THEN,
     TOKEN_WHILE,
+    TOKEN_XOR,
 
     TOKEN_NAME,
     TOKEN_NUMBER,

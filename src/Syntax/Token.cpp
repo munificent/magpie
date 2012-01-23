@@ -23,8 +23,10 @@ namespace magpie
       case TOKEN_MINUS:         return "-";
       case TOKEN_STAR:          return "*";
       case TOKEN_SLASH:         return "/";
+      case TOKEN_PERCENT:       return "%";
         
         // Keywords.
+      case TOKEN_AND:           return "and";
       case TOKEN_CASE:          return "case";
       case TOKEN_DEF:           return "def";
       case TOKEN_DO:            return "do";
@@ -33,9 +35,12 @@ namespace magpie
       case TOKEN_IF:            return "if";
       case TOKEN_IS:            return "is";
       case TOKEN_MATCH:         return "match";
+      case TOKEN_NOT:           return "not";
+      case TOKEN_OR:            return "or";
       case TOKEN_RETURN:        return "return";
       case TOKEN_THEN:          return "then";
       case TOKEN_WHILE:         return "while";
+      case TOKEN_XOR:           return "xor";
         
       case TOKEN_NAME:          return "name";
       case TOKEN_NUMBER:        return "number";
