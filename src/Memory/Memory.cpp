@@ -12,7 +12,7 @@ namespace magpie
   Heap Memory::a_;
   Heap Memory::b_;
   AllocScope* Memory::currentScope_ = NULL;
-  gc<Managed> Memory::temps_[MAX_TEMPS];
+  gc<Managed> Memory::temps_[Memory::MAX_TEMPS];
   int Memory::numTemps_ = 0;
   int Memory::numCollections_ = 0;
   Heap* Memory::to_ = NULL;
@@ -104,6 +104,11 @@ namespace magpie
       Managed* dest = static_cast<Managed*>(to_->allocate(size));
       memcpy(dest, obj, size);
       
+      // Clear it out so we can track down GC bugs.
+      /*
+      memset(obj, 0xcc, size);
+      */
+      
       // Replace the old object with a forwarding address.
       ::new (obj) ForwardingAddress(dest);
       
@@ -121,6 +126,16 @@ namespace magpie
   
   void Memory::popScope()
   {
+    ASSERT_NOT_NULL(currentScope_);
+
+    // Clear out the popped temps to help track down GC bugs.
+    /*
+    for (int i = currentScope_->numTempsBefore_; i < numTemps_; i++)
+    {
+      temps_[i] = gc<Managed>();
+    }
+    */
+
     numTemps_ = currentScope_->numTempsBefore_;
     currentScope_ = currentScope_->previous_;
   }

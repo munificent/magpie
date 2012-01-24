@@ -48,3 +48,10 @@
 
 // This is used to indicate that an array member in a class is flexibly-sized.
 #define FLEXIBLE_SIZE (1)
+
+// Statically ensures that T is a supertype of S (i.e. S can be assigned to T).
+// Will generate a compile error if this isn't the case.
+#define CHECK_SUBTYPE(T, S)                                 \
+while (false) {                                             \
+  *(static_cast<T* volatile*>(0)) = static_cast<S*>(0);     \
+}

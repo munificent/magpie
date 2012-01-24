@@ -40,6 +40,7 @@ namespace magpie
     TokenType type() const { return type_; }
     Node& right() const { return *right_; }
     
+    virtual void reach();
     virtual void trace(std::ostream& out) const;
 
   private:

@@ -14,6 +14,12 @@ namespace magpie
     right_(right)
   {}
 
+  void BinaryOpNode::reach()
+  {
+    Memory::reach(left_);
+    Memory::reach(right_);
+  }
+
   void BinaryOpNode::trace(std::ostream& out) const
   {
     out << "(" << left_ << " " << Token::typeString(type_)
@@ -31,7 +37,7 @@ namespace magpie
   
   void NumberNode::trace(std::ostream& out) const
   {
-    out << value_;
+    out << "(" << value_ << ")";
   }
 }
 

@@ -68,13 +68,14 @@ namespace magpie
     // Gets whether this token is of the given type.
     bool is(TokenType type) const { return type_ == type; }
     
+    virtual void reach();
+    virtual void trace(std::ostream& out) const;
+    
   private:
     Token(TokenType type, const gc<String> text);
 
     TokenType   type_;
     gc<String>  text_;
   };
-
-  std::ostream& operator <<(std::ostream& out, const Token& right);
 }
 

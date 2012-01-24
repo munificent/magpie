@@ -67,6 +67,11 @@ namespace magpie
   void Heap::reset()
   {
     free_ = memory_;
+    
+    // Clear it out so we can track down GC bugs.
+    /*
+    memset(memory_, 0xff, end_ - memory_);
+    */
   }
 
   Managed* Heap::getFirst()

@@ -39,6 +39,8 @@ namespace magpie
     // the last character to include in the substring.
     temp<String> substring(int start, int end) const;
 
+    virtual void trace(std::ostream& out) const;
+
   private:
     static size_t calcStringSize(int length);
 
@@ -58,7 +60,5 @@ namespace magpie
   {
     return right != left;
   }
-
-  std::ostream& operator <<(std::ostream& out, const String& right);
 }
 

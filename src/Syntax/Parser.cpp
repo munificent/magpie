@@ -89,9 +89,10 @@ namespace magpie
 
   temp<Node> Parser::parseExpression(int precedence)
   {
+    AllocScope scope;
+    
     // Pratt operator precedence parser. See this for more:
     // http://journal.stuffwithstuff.com/2011/03/19/pratt-parsers-expression-parsing-made-easy/
-
     temp<Token> token = consume();
     PrefixParseFn prefix = prefixParsers_[token->type()];
 
@@ -99,7 +100,7 @@ namespace magpie
     {
       // TODO(bob): Report error better.
       std::cout << "No prefix parser for " << token << "." << std::endl;
-      return temp<Token>();
+      return temp<Node>();
     }
 
     temp<Node> left = (this->*prefix)(token);
@@ -112,10 +113,7 @@ namespace magpie
       left = (this->*infix)(left, token);
     }
 
-    return left;
-
-    // TODO(bob): Implement!
-    return temp<Node>();
+    return scope.close(left);
   }
 
   temp<Node> Parser::number(temp<Token> token)
@@ -129,7 +127,7 @@ namespace magpie
     // TODO(bob): Support right-associative infix. Needs to do precedence
     // - 1 here, to be right-assoc.
     temp<Node> right = parseExpression(infixParsers_[token->type()].precedence);
-
+    
     return BinaryOpNode::create(left, token->type(), right);
   }
 
@@ -172,7 +170,8 @@ namespace magpie
   temp<Token> Parser::consume()
   {
     fillLookAhead(1);
-    return read_.dequeue();
+    // TODO(bob): Is making a temp here right?
+    return Memory::makeTemp(&(*read_.dequeue()));
   }
 
   temp<Token> Parser::consume(TokenType expected, const char* errorMessage)

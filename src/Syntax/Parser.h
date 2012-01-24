@@ -79,7 +79,7 @@ namespace magpie
     Lexer lexer_;
     
     // The 2 here is the maximum number of lookahead tokens.
-    Queue<temp<Token>, 2> read_;
+    Queue<gc<Token>, 2> read_;
     
     bool hadError_;
     

@@ -56,11 +56,16 @@ namespace magpie
   
   Token::Token(TokenType type, const gc<String> text)
   : type_(type),
-  text_(text) {}
+    text_(text)
+  {}
   
-  std::ostream& operator <<(std::ostream& out, const Token& right)
+  void Token::reach()
   {
-    out << Token::typeString(right.type()) << " " << right.text();
-    return out;
-  };
+    Memory::reach(text_);
+  }
+  
+  void Token::trace(std::ostream& out) const
+  {
+    out << "token " << Token::typeString(type_) << " " << text_;
+  }
 }

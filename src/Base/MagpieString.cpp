@@ -69,6 +69,11 @@ namespace magpie
 
     return create(&chars_[start], end - start);
   }
+  
+  void String::trace(std::ostream& out) const
+  {
+    out << "\"" << chars_ << "\"";
+  }
 
   size_t String::calcStringSize(int length)
   {

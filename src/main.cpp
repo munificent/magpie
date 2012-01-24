@@ -59,6 +59,7 @@ int main(int argc, char * const argv[])
   */
   
   // Try parsing.
+  //  temp<String> source = String::create("1+2 and 444/5");
   temp<String> source = String::create("1+2*3 and 4/5+6%7");
   Parser parser(source);
   temp<Node> node = parser.parseExpression();

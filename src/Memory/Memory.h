@@ -47,7 +47,7 @@ namespace magpie
       Managed* newLocation = copy(&(*ref));
       ref.set(static_cast<T*> (newLocation));
     }
-
+    
   private:
     static const int MAX_TEMPS = 128; // TODO(bob): Pick less random number.
 
@@ -117,14 +117,14 @@ namespace magpie
       ASSERT(numTempsBefore_ != CLOSED, "Cannot close a scope more than once.");
       
       // Snag the object.
-      T* rawObject = *object;
+      T* rawObject = &(*object);
       
       // Close this scope.
       Memory::popScope();
       numTempsBefore_ = CLOSED;
       
       // Now place it in a temp in the enclosing scope.
-      return makeTemp(rawObject);
+      return Memory::makeTemp(rawObject);
     }
     
   private:

@@ -54,7 +54,7 @@ namespace magpie
     temp(const temp<S>& right)
     : object_(right.object_)
     {
-      // TODO(bob): Should statically check that S is a subtype of T.
+      CHECK_SUBTYPE(T, S);
     }
     
     bool isNull() const
@@ -70,6 +70,8 @@ namespace magpie
     template <class S>
     bool operator ==(const temp<S>& right) const
     {
+      CHECK_SUBTYPE(T, S);
+      
       // Have to either both be null or neither.
       if (isNull() != right.isNull()) return false;
       return *object_ == *right.object_;
@@ -83,7 +85,8 @@ namespace magpie
 
   private:
     temp(GcBase* object)
-    : object_(object) {}
+    : object_(object)
+    {}
     
     GcBase* object_;
 
@@ -118,18 +121,22 @@ namespace magpie
   public:
     // Constructs a new gc pointer.
     explicit gc(T* object)
-    : GcBase(object) {}
+    : GcBase(object)
+    {}
 
     gc()
-    : GcBase(NULL) {}
+    : GcBase(NULL)
+    {}
 
     // GC pointers can be freely copied.
     gc(const gc& object)
-    : GcBase(object.object_) {}
+    : GcBase(object.object_)
+    {}
 
     // You can promote a temp to a gc.
     gc(const temp<T>& object)
-    : GcBase(object.isNull() ? NULL : object.object_->object_) {}
+    : GcBase(object.isNull() ? NULL : object.object_->object_)
+    {}
 
     gc<T>& operator =(const gc<T>& right)
     {
@@ -150,6 +157,8 @@ namespace magpie
     template <class S>
     bool operator ==(const gc<S>& other) const
     {
+      CHECK_SUBTYPE(T, S);
+      
       // Have to either both be null or neither.
       if (isNull() != other.isNull()) return false;
 
