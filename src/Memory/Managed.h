@@ -7,6 +7,8 @@
 
 namespace magpie
 {
+  class String;
+  
   // Base class for any object that is memory managed by the garbage collector
   class Managed
   {
@@ -15,6 +17,8 @@ namespace magpie
 
     virtual ~Managed() {}
 
+    temp<String> toString() const;
+    
     // Gets the forwarding pointer that this object has been replaced with if
     // it has been. Otherwise returns NULL.
     virtual Managed* getForwardingAddress() const { return NULL; }

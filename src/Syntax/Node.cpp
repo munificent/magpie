@@ -37,7 +37,7 @@ namespace magpie
   
   void NumberNode::trace(std::ostream& out) const
   {
-    out << "(" << value_ << ")";
+    out << value_;
   }
 }
 
