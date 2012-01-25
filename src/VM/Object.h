@@ -15,7 +15,7 @@ namespace magpie
   class Object : public Managed
   {
   public:
-    static gc<Object> create(double value);
+    static temp<NumberObject> create(double value);
 
     Object() : Managed() {}
 

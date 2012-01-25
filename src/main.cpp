@@ -7,7 +7,8 @@
 #include "VM.h"
 #include "MagpieString.h"
 #include "Node.h"
-#include "Parser.h"
+#include "NumberObject.h"
+#include "Compiler.h"
 
 using namespace magpie;
 
@@ -58,18 +59,12 @@ int main(int argc, char * const argv[])
   }
   */
   
-  // Try parsing.
-  //  temp<String> source = String::create("1+2 and 444/5");
-  temp<String> source = String::create("1+2*3 and 4/5+6%7");
-  Parser parser(source);
-  temp<Node> node = parser.parseExpression();
-  
-  std::cout << node << std::endl;
-  
+  Compiler compiler;
+
   gc<Fiber>& fiber = vm.fiber();
   gc<Chunk> return3 = gc<Chunk>(new Chunk(1));
   unsigned short three = fiber->addLiteral(Object::create(3.0));
-  return3->write(MAKE_LITERAL(three, 0));
+  return3->write(MAKE_CONSTANT(three, 0));
   return3->write(MAKE_RETURN(0));
 
   gc<Object> return3Method = gc<Object>(new Multimethod(return3));
@@ -77,8 +72,8 @@ int main(int argc, char * const argv[])
 
   gc<Chunk> chunk = gc<Chunk>(new Chunk(3));
   unsigned short zero = fiber->addLiteral(Object::create(0));
-  chunk->write(MAKE_LITERAL(zero, 0));
-  chunk->write(MAKE_LITERAL(method, 1));
+  chunk->write(MAKE_CONSTANT(zero, 0));
+  chunk->write(MAKE_CONSTANT(method, 1));
   chunk->write(MAKE_CALL(0, 1, 2));
   chunk->write(MAKE_MOVE(2, 0));
   chunk->write(MAKE_HACK_PRINT(0));

@@ -1,0 +1,29 @@
+#pragma once
+
+#include "Macros.h"
+#include "Lexer.h"
+#include "Queue.h"
+
+namespace magpie
+{
+  class BinaryOpNode;
+  class Lexer;
+  class Node;
+  class NumberNode;
+  
+  // Visitor pattern for dispatching on AST nodes. Implemented by the compiler.
+  class NodeVisitor
+  {
+  public:
+    virtual ~NodeVisitor() {}
+    
+    virtual void visit(BinaryOpNode& node, int arg) = 0;
+    virtual void visit(NumberNode& node, int arg) = 0;
+    
+  protected:
+    NodeVisitor() {}
+    
+  private:
+    NO_COPY(NodeVisitor);
+  };
+}

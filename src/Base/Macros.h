@@ -50,7 +50,9 @@
 #define FLEXIBLE_SIZE (1)
 
 // Statically ensures that T is a supertype of S (i.e. S can be assigned to T).
-// Will generate a compile error if this isn't the case.
+// Will generate a compile error if this isn't the case. Note that both types
+// must be complete (i.e. fully declared) at the point that you use this macro.
+// It will barf if either type has just been forward-declared.
 #define CHECK_SUBTYPE(T, S)                                 \
 while (false) {                                             \
   *(static_cast<T* volatile*>(0)) = static_cast<S*>(0);     \

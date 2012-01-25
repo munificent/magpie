@@ -134,9 +134,12 @@ namespace magpie
     {}
 
     // You can promote a temp to a gc.
-    gc(const temp<T>& object)
+    template <class S>
+    gc(const temp<S>& object)
     : GcBase(object.isNull() ? NULL : object.object_->object_)
-    {}
+    {
+      CHECK_SUBTYPE(T, S);
+    }
 
     gc<T>& operator =(const gc<T>& right)
     {

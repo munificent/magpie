@@ -42,7 +42,7 @@ namespace magpie
           break;
         }
 
-        case OP_LITERAL:
+        case OP_CONSTANT:
         {
           unsigned short index = GET_Ax(instruction);
           unsigned char reg = GET_C(instruction);

@@ -6,9 +6,9 @@ namespace magpie
 {
   using std::ostream;
 
-  gc<Object> Object::create(double value)
+  temp<NumberObject> Object::create(double value)
   {
-    return gc<Object>(new NumberObject(value));
+    return Memory::makeTemp(new NumberObject(value));
   }
 
   std::ostream& operator <<(std::ostream& out, const Object& object)

@@ -9,11 +9,13 @@ namespace magpie
   class Lexer;
   class Node;
   
-  // Base class for a generic recursive descent parser.
+  // Parses Magpie source from a string into an abstract syntax tree. The
+  // implementation is basically a vanilla recursive descent parser wrapped
+  // around a Pratt operator precedence parser for handling expressions.
   class Parser
   {
   public:
-    Parser(gc<String> source /*, ErrorReporter & errorReporter*/)
+    Parser(gc<String> source)
     : lexer_(source),
       hadError_(false)
     {}
