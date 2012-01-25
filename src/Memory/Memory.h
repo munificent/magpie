@@ -3,8 +3,8 @@
 #include <iostream>
 
 #include "GC.h"
-#include "Heap.h"
 #include "Macros.h"
+#include "Semispace.h"
 
 namespace magpie
 {
@@ -62,12 +62,12 @@ namespace magpie
     static RootSource*  roots_;
 
     // Pointers to a and b. These will swap back and forth on each collection.
-    static Heap* from_;
-    static Heap* to_;
+    static Semispace* from_;
+    static Semispace* to_;
 
-    // The actual heaps.
-    static Heap a_;
-    static Heap b_;
+    // The actual semispaces.
+    static Semispace a_;
+    static Semispace b_;
 
     static AllocScope* currentScope_;
     static gc<Managed> temps_[MAX_TEMPS];

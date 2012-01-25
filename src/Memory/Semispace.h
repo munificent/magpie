@@ -6,16 +6,15 @@ namespace magpie
 {
   class Managed;
 
-  // TODO(bob): rename semispace
   // A contiguous chunk of garbage collected memory. For each object, it stores
   // its size followed by the object's memory. Objects are allocated
   // sequentially, so allocation is little more than a pointer increment. It
   // does not support deallocating individual objects.
-  class Heap
+  class Semispace
   {
   public:
-    Heap();
-    ~Heap();
+    Semispace();
+    ~Semispace();
 
     void initialize(size_t size);
     void shutDown();
@@ -45,7 +44,7 @@ namespace magpie
     char* free_;  // The first byte of available memory.
     char* end_;   // The first byte past the end of the heap.
 
-    NO_COPY(Heap);
+    NO_COPY(Semispace);
   };
 }
 

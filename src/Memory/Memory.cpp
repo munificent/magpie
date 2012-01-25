@@ -9,14 +9,14 @@
 namespace magpie
 {  
   RootSource* Memory::roots_ = NULL;
-  Heap Memory::a_;
-  Heap Memory::b_;
+  Semispace Memory::a_;
+  Semispace Memory::b_;
   AllocScope* Memory::currentScope_ = NULL;
   gc<Managed> Memory::temps_[Memory::MAX_TEMPS];
   int Memory::numTemps_ = 0;
   int Memory::numCollections_ = 0;
-  Heap* Memory::to_ = NULL;
-  Heap* Memory::from_ = NULL;
+  Semispace* Memory::to_ = NULL;
+  Semispace* Memory::from_ = NULL;
   
   void Memory::initialize(RootSource* roots, size_t heapSize)
   {
@@ -65,7 +65,7 @@ namespace magpie
     
     // Swap the semi-spaces. Everything is now in to_ which becomes the new
     // from_ for the next collection.
-    Heap* temp = from_;
+    Semispace* temp = from_;
     from_ = to_;
     to_ = temp;
     

@@ -1,21 +1,20 @@
-#include "Heap.h"
+#include "Semispace.h"
 
 #include "Managed.h"
 
 namespace magpie
 {
-
-  Heap::Heap()
+  Semispace::Semispace()
   : memory_(NULL),
     free_(NULL),
     end_(NULL) {}
 
-  Heap::~Heap()
+  Semispace::~Semispace()
   {
     if (memory_ != NULL) operator delete(memory_);
   }
 
-  void Heap::initialize(size_t size)
+  void Semispace::initialize(size_t size)
   {
     ASSERT(memory_ == NULL, "Already initialized.");
 
@@ -28,7 +27,7 @@ namespace magpie
     *reinterpret_cast<size_t*>(memory_) = 0;
   }
 
-  void Heap::shutDown()
+  void Semispace::shutDown()
   {
     ASSERT(memory_ != NULL, "Not initialized.");
     
@@ -38,7 +37,7 @@ namespace magpie
     end_ = NULL;
   }
   
-  bool Heap::canAllocate(size_t size) const
+  bool Semispace::canAllocate(size_t size) const
   {
     // Find the end of the allocated object.
     char* next = free_ + size + sizeof(size_t);
@@ -47,7 +46,7 @@ namespace magpie
     return next < end_;
   }
 
-  void* Heap::allocate(size_t size)
+  void* Semispace::allocate(size_t size)
   {
     // The allocated object will start just after its size.
     char* allocated = free_ + sizeof(size_t);
@@ -64,7 +63,7 @@ namespace magpie
     return allocated;
   }
 
-  void Heap::reset()
+  void Semispace::reset()
   {
     free_ = memory_;
     
@@ -74,7 +73,7 @@ namespace magpie
     */
   }
 
-  Managed* Heap::getFirst()
+  Managed* Semispace::getFirst()
   {
     // Bail if there are no objects in the heap.
     if (*reinterpret_cast<size_t*>(memory_) == 0) return NULL;
@@ -83,7 +82,7 @@ namespace magpie
     return reinterpret_cast<Managed*>(memory_ + sizeof(size_t));
   }
 
-  Managed* Heap::getNext(Managed* current)
+  Managed* Semispace::getNext(Managed* current)
   {
     // Get the size of the current object so we know how far to skip.
     char* pos = reinterpret_cast<char*>(current);
