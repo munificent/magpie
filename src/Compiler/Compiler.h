@@ -7,25 +7,27 @@
 
 namespace magpie
 {
+  class Method;
+  
   class Compiler : private NodeVisitor
   {
   public:
-    Compiler()
-    : NodeVisitor()
-    {}
+    static temp<Method> compileMethod(const Node& node);
     
     virtual ~Compiler() {}
     
-    virtual void visit(BinaryOpNode& node, int dest);
-    virtual void visit(NumberNode& node, int dest);
-
   private:
+    Compiler(temp<Method> method);
+    
+    virtual void visit(const BinaryOpNode& node, int dest);
+    virtual void visit(const NumberNode& node, int dest);
+    
     void compileConstant(temp<Managed> value, int dest);
     
     void write(OpCode op, int a = 0xff, int b = 0xff, int c = 0xff);
     
-    Array<gc<Managed> > constants_;
-    Array<instruction>  code_;
+    // The method being compiled.
+    gc<Method> method_;
     
     NO_COPY(Compiler);
   };

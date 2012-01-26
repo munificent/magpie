@@ -13,12 +13,12 @@
 
 // Macros for destructuring instructions.
 
-#define GET_OP(i) ((unsigned char)(i) & 0xff)
-#define GET_A(i)  ((unsigned char)(((i) & 0xff000000) >> 24))
-#define GET_B(i)  ((unsigned char)(((i) & 0x00ff0000) >> 16))
-#define GET_C(i)  ((unsigned char)(((i) & 0x0000ff00) >>  8))
+#define GET_OP(i) (static_cast<OpCode>((i) & 0xff))
+#define GET_A(i)  (static_cast<int>(((i) & 0xff000000) >> 24))
+#define GET_B(i)  (static_cast<int>(((i) & 0x00ff0000) >> 16))
+#define GET_C(i)  (static_cast<int>(((i) & 0x0000ff00) >>  8))
 
-#define GET_Ax(i) ((unsigned short)(((i) & 0xffff0000) >> 16))
+#define GET_Ax(i) (static_cast<int>(((i) & 0xffff0000) >> 16))
 
 namespace magpie
 {

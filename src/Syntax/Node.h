@@ -2,15 +2,14 @@
 
 #include "Macros.h"
 #include "Managed.h"
+#include "NodeVisitor.h"
 #include "Token.h"
 
-/*
-#define NODE_VISITOR                                             \
-virtual void accept(IExprCompiler & compiler, int dest) const   \
-{                                                               \
-compiler.Visit(*this, dest);                                \
-}
-*/
+#define DECLARE_NODE                                      \
+virtual void accept(NodeVisitor& visitor, int arg) const  \
+    {                                                     \
+      visitor.visit(*this, arg);                          \
+    }
 
 namespace magpie
 {
@@ -21,12 +20,9 @@ namespace magpie
   {
   public:
     virtual ~Node() {}
-    /*
+
     // The visitor pattern.
-    virtual void Accept(IExprCompiler & compiler, int dest) const = 0;
-    
-    virtual void Trace(std::ostream & stream) const = 0;
-    */
+    virtual void accept(NodeVisitor& visitor, int arg) const = 0;
   };
   
   // A binary operator.
@@ -35,6 +31,8 @@ namespace magpie
   public:
     static temp<BinaryOpNode> create(gc<Node> left, TokenType type,
                                      gc<Node> right);
+    
+    DECLARE_NODE;
     
     Node& left() const { return *left_; }
     TokenType type() const { return type_; }
@@ -57,6 +55,8 @@ namespace magpie
   public:
     static temp<NumberNode> create(double value);
   
+    DECLARE_NODE;
+    
     double value() const { return value_; }
     
     virtual void trace(std::ostream& out) const;

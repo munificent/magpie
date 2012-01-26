@@ -1,24 +1,21 @@
 #include "Fiber.h"
 
-#include "Chunk.h"
+#include "Method.h"
 #include "NumberObject.h"
 #include "VM.h"
 
 namespace magpie
 {
   Fiber::Fiber(VM& vm)
-  : vm_(vm) {}
+  : vm_(vm),
+    stack_(),
+    callFrames_()
+  {}
 
-  void Fiber::interpret(gc<Chunk> chunk)
+  void Fiber::interpret(gc<Method> method)
   {
-    call(chunk, gc<Object>());
+    call(method);
     run();
-  }
-
-  unsigned short Fiber::addLiteral(gc<Object> value)
-  {
-    literals_.add(value);
-    return literals_.count() - 1;
   }
 
   void Fiber::run()
@@ -27,21 +24,22 @@ namespace magpie
     bool running = true;
     while (running)
     {
-      CallFrame& frame = *stack_[-1];
-      unsigned int instruction = (*frame.getChunk())[ip];
-      unsigned char op = GET_OP(instruction);
+      CallFrame& frame = callFrames_[-1];
+      instruction ins = frame.method()->code()[ip];
+      OpCode op = GET_OP(ins);
       ip++;
 
       switch (op)
       {
         case OP_MOVE:
         {
-          unsigned char from = GET_A(instruction);
-          unsigned char to = GET_B(instruction);
-          frame.setRegister(to, frame.getRegister(from));
+          int from = GET_A(ins);
+          int to = GET_B(ins);
+          store(frame, to, load(frame, from));
           break;
         }
 
+          /*
         case OP_CONSTANT:
         {
           unsigned short index = GET_Ax(instruction);
@@ -76,12 +74,12 @@ namespace magpie
           unsigned char reg = GET_A(instruction);
 
           gc<Object> result = frame.getRegister(reg);
-          stack_.remove(-1);
+          callFrames_.remove(-1);
 
-          if (stack_.count() > 0)
+          if (callFrames_.count() > 0)
           {
             // Give the result back and resume the calling method.
-            CallFrame& caller = *stack_[-1];
+            CallFrame& caller = *callFrames_[-1];
             ip = caller.getInstruction();
 
             unsigned int callInstruction = (*caller.getChunk())[ip];
@@ -107,7 +105,7 @@ namespace magpie
           std::cout << "Hack print: " << object << "\n";
           break;
         }
-
+*/
         default:
           ASSERT(false, "Unknown opcode.");
           break;
@@ -115,11 +113,9 @@ namespace magpie
     }
   }
 
-  void Fiber::call(gc<Chunk> chunk, gc<Object> arg)
+  void Fiber::call(gc<Method> method)
   {
-    stack_.add(gc<CallFrame>(new CallFrame(chunk)));
-
-    // The argument always goes into the first register.
-    stack_[-1]->setRegister(0, arg);
+    // TODO(bob): TEMP! Should not always use zero for stack start.
+    callFrames_.add(CallFrame(method, 0));
   }
 }

@@ -1,7 +1,6 @@
 #include <fstream>
 #include <iostream>
 
-#include "Chunk.h"
 #include "Fiber.h"
 #include "GC.h"
 #include "VM.h"
@@ -9,6 +8,7 @@
 #include "Node.h"
 #include "NumberObject.h"
 #include "Compiler.h"
+#include "Parser.h"
 
 using namespace magpie;
 
@@ -59,27 +59,11 @@ int main(int argc, char * const argv[])
   }
   */
   
-  Compiler compiler;
-
-  gc<Fiber>& fiber = vm.fiber();
-  gc<Chunk> return3 = gc<Chunk>(new Chunk(1));
-  unsigned short three = fiber->addLiteral(Object::create(3.0));
-  return3->write(MAKE_CONSTANT(three, 0));
-  return3->write(MAKE_RETURN(0));
-
-  gc<Object> return3Method = gc<Object>(new Multimethod(return3));
-  unsigned short method = fiber->addLiteral(return3Method);
-
-  gc<Chunk> chunk = gc<Chunk>(new Chunk(3));
-  unsigned short zero = fiber->addLiteral(Object::create(0));
-  chunk->write(MAKE_CONSTANT(zero, 0));
-  chunk->write(MAKE_CONSTANT(method, 1));
-  chunk->write(MAKE_CALL(0, 1, 2));
-  chunk->write(MAKE_MOVE(2, 0));
-  chunk->write(MAKE_HACK_PRINT(0));
-  chunk->write(MAKE_RETURN(0));
-
-  fiber->interpret(chunk);
+  temp<String> source = String::create("123");
+  Parser parser(source);
+  temp<Node> node = parser.parseExpression();
+  
+  temp<Method> method = Compiler::compileMethod(*node);
 
   return 0;
 }

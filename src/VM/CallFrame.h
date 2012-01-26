@@ -1,36 +1,29 @@
 #pragma once
 
 #include "Array.h"
-#include "Chunk.h"
 #include "GC.h"
 #include "Macros.h"
 #include "Managed.h"
-#include "Multimethod.h"
-#include "Object.h"
 
 namespace magpie
 {
-  class CallFrame : public Managed
+  class Method;
+  
+  class CallFrame
   {
   public:
-    CallFrame(gc<Chunk> chunk);
+    // So that we can use CallFrames in an Array<T> by value.
+    CallFrame();
+    
+    CallFrame(gc<Method> method, int stackStart);
 
-    // TODO(bob): Implement reach.
-
-    int  getInstruction()                { return instruction_; }
-    void setInstruction(int instruction) { instruction_ = instruction; }
-
-    gc<Chunk>       getChunk()           { return chunk_; }
-    gc<Object>      getRegister(int index) { return registers_[index]; }
-
-    void setRegister(int index, gc<Object> value) { registers_[index] = value; }
-
+    inline gc<Method> method() const { return method_; }
+    inline int stackStart() const { return stackStart_; }
+    
   private:
-    gc<Chunk>               chunk_;
-    int                     instruction_;
-    Array<gc<Object> >      registers_;
-
-    NO_COPY(CallFrame);
+    gc<Method>  method_;
+    int         instruction_;
+    int         stackStart_;
   };
 }
 
