@@ -1,31 +1,36 @@
 #include "Fiber.h"
 
 #include "Method.h"
-#include "NumberObject.h"
+#include "Object.h"
 #include "VM.h"
 
 namespace magpie
 {
+  temp<Fiber> Fiber::create(VM& vm)
+  {
+    return Memory::makeTemp(new Fiber(vm));
+  }
+  
   Fiber::Fiber(VM& vm)
   : vm_(vm),
     stack_(),
     callFrames_()
   {}
 
-  void Fiber::interpret(gc<Method> method)
+  temp<Object> Fiber::interpret(gc<Method> method)
   {
-    call(method);
-    run();
+    call(method, 0);
+    return run();
   }
 
-  void Fiber::run()
+  temp<Object> Fiber::run()
   {
     int ip = 0;
     bool running = true;
     while (running)
     {
       CallFrame& frame = callFrames_[-1];
-      instruction ins = frame.method()->code()[ip];
+      instruction ins = frame.method->code()[ip];
       OpCode op = GET_OP(ins);
       ip++;
 
@@ -39,15 +44,15 @@ namespace magpie
           break;
         }
 
-          /*
         case OP_CONSTANT:
         {
-          unsigned short index = GET_Ax(instruction);
-          unsigned char reg = GET_C(instruction);
-          frame.setRegister(reg, literals_[index]);
+          int index = GET_A(ins);
+          int reg = GET_B(ins);
+          store(frame, reg, frame.method->getConstant(index));
           break;
         }
 
+          /*
         case OP_CALL:
         {
           unsigned char argReg = GET_A(instruction);
@@ -68,35 +73,37 @@ namespace magpie
           call(method, arg);
           break;
         }
-
-        case OP_RETURN:
+           */
+          
+        case OP_END:
         {
-          unsigned char reg = GET_A(instruction);
+          unsigned char reg = GET_A(ins);
 
-          gc<Object> result = frame.getRegister(reg);
+          gc<Object> result = load(frame, reg);
           callFrames_.remove(-1);
 
           if (callFrames_.count() > 0)
           {
             // Give the result back and resume the calling method.
-            CallFrame& caller = *callFrames_[-1];
-            ip = caller.getInstruction();
+            CallFrame& caller = callFrames_[-1];
+            ip = caller.ip;
 
-            unsigned int callInstruction = (*caller.getChunk())[ip];
-            unsigned char reg = GET_C(callInstruction);
-            caller.setRegister(reg, result);
-
-            // Done with the CALL that we're returning from.
-            ip++;
+            instruction callInstruction = caller.method->code()[ip - 1];
+            ASSERT(GET_OP(callInstruction) == OP_CALL,
+                   "Should be returning to a call.");
+            
+            int reg = GET_C(callInstruction);
+            store(caller, reg, result);
           }
           else
           {
             // The last method has returned, so end the fiber.
             running = false;
+            return result.toTemp();
           }
           break;
         }
-
+/*
         case OP_HACK_PRINT:
         {
           unsigned char reg = GET_A(instruction);
@@ -111,11 +118,20 @@ namespace magpie
           break;
       }
     }
+    
+    ASSERT(false, "Should not get here.");
+    return temp<Object>();
   }
 
-  void Fiber::call(gc<Method> method)
+  void Fiber::call(gc<Method> method, int stackStart)
   {
-    // TODO(bob): TEMP! Should not always use zero for stack start.
-    callFrames_.add(CallFrame(method, 0));
+    // Allocate registers for the method.
+    // TODO(bob): Make this a single operation on Array.
+    while (stack_.count() < stackStart + method->numRegisters())
+    {
+      stack_.add(gc<Object>());
+    }
+    
+    callFrames_.add(CallFrame(method, stackStart));
   }
 }

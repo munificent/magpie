@@ -1,14 +1,13 @@
 #include <fstream>
 #include <iostream>
 
+#include "Compiler.h"
 #include "Fiber.h"
-#include "GC.h"
-#include "VM.h"
 #include "MagpieString.h"
 #include "Node.h"
-#include "NumberObject.h"
-#include "Compiler.h"
+#include "Object.h"
 #include "Parser.h"
+#include "VM.h"
 
 using namespace magpie;
 
@@ -65,5 +64,8 @@ int main(int argc, char * const argv[])
   
   temp<Method> method = Compiler::compileMethod(*node);
 
+  temp<Object> result = vm.fiber().interpret(method);
+  std::cout << result << std::endl;
+  
   return 0;
 }

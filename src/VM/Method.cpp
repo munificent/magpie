@@ -7,10 +7,16 @@ namespace magpie
     return Memory::makeTemp(new Method());
   }
   
-  int Method::addConstant(gc<Managed> constant)
+  int Method::addConstant(gc<Object> constant)
   {
     constants_.add(constant);
     return constants_.count() - 1;
+  }
+
+  gc<Object> Method::getConstant(int index) const
+  {
+    ASSERT_INDEX(index, constants_.count());
+    return constants_[index];
   }
 
   void Method::write(instruction code)

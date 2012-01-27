@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Fiber.h"
-#include "GC.h"
 #include "Lexer.h"
 #include "Macros.h"
 #include "Memory.h"
@@ -17,7 +16,7 @@ namespace magpie
 
     virtual void reachRoots();
 
-    gc<Fiber>& fiber() { return fiber_; }
+    Fiber& fiber() { return *fiber_; }
 
   private:
     gc<Fiber> fiber_;

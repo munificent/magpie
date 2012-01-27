@@ -3,10 +3,12 @@
 namespace magpie
 {
   VM::VM()
-  : fiber_(NULL)
+  : fiber_()
   {
     Memory::initialize(this, 1024 * 1024 * 10); // TODO(bob): Use non-magic number.
-    fiber_ = gc<Fiber>(new Fiber(*this));
+    
+    AllocScope scope;
+    fiber_ = Fiber::create(*this);
   }
 
   void VM::reachRoots()

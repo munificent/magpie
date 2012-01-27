@@ -2,7 +2,6 @@
 
 #include "Fiber.h"
 #include "ForwardingAddress.h"
-#include "GC.h"
 #include "Managed.h"
 #include "RootSource.h"
 

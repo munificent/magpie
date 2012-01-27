@@ -3,14 +3,6 @@
 #define MAKE_ABC(a, b, c, op)          ((a << 24) | (b << 16) | (c << 8) | op)
 #define MAKE_AxC(a, c, op)             ((a << 16) | (c << 8) | op)
 
-// Macros for building instructions.
-
-#define MAKE_MOVE(from, to)            MAKE_ABC(from, to, 0, OP_MOVE)
-#define MAKE_CONSTANT(index, r)        MAKE_AxC(index, r, OP_CONSTANT)
-#define MAKE_CALL(arg, method, result) MAKE_ABC(arg, method, result, OP_CALL)
-#define MAKE_RETURN(result)            MAKE_ABC(result, 0, 0, OP_RETURN)
-#define MAKE_HACK_PRINT(r)             MAKE_ABC(r, 0, 0, OP_HACK_PRINT)
-
 // Macros for destructuring instructions.
 
 #define GET_OP(i) (static_cast<OpCode>((i) & 0xff))
@@ -25,9 +17,9 @@ namespace magpie
   enum OpCode
   {
     OP_MOVE       = 0x01, // A: from, B: to
-    OP_CONSTANT   = 0x02, // AB: index, C: dest register
+    OP_CONSTANT   = 0x02, // A: index, B: dest register
     OP_CALL       = 0x03, // A: arg, B: method, C: result
-    OP_RETURN     = 0x04, // A: result
+    OP_END        = 0x04, // A: result register
     OP_HACK_PRINT = 0x05, // A: register
   };
   
