@@ -17,8 +17,8 @@ namespace magpie
   public:
     virtual ~NodeVisitor() {}
     
-    virtual void visit(const BinaryOpNode& node, int arg) = 0;
-    virtual void visit(const NumberNode& node, int arg) = 0;
+    virtual void visit(const BinaryOpNode& node, int dest) = 0;
+    virtual void visit(const NumberNode& node, int dest) = 0;
     
   protected:
     NodeVisitor() {}

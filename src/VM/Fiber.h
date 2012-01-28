@@ -57,6 +57,8 @@ namespace magpie
       stack_[frame.stackStart + reg] = value;
     }
     
+    gc<Object> loadRegisterOrConstant(const CallFrame& frame, int index);
+    
     VM&                 vm_;
     Array<gc<Object> >  stack_;
     Array<CallFrame>    callFrames_;

@@ -5,11 +5,12 @@
 #include "NodeVisitor.h"
 #include "Token.h"
 
-#define DECLARE_NODE                                      \
-virtual void accept(NodeVisitor& visitor, int arg) const  \
-    {                                                     \
-      visitor.visit(*this, arg);                          \
-    }
+#define DECLARE_NODE(type)                                  \
+  virtual void accept(NodeVisitor& visitor, int arg) const  \
+  {                                                         \
+    visitor.visit(*this, arg);                              \
+  }                                                         \
+  virtual const type* as##type() const { return this; }
 
 namespace magpie
 {
@@ -23,6 +24,10 @@ namespace magpie
 
     // The visitor pattern.
     virtual void accept(NodeVisitor& visitor, int arg) const = 0;
+    
+    // Dynamic casts.
+    virtual const BinaryOpNode* asBinaryOpNode() const { return NULL; }
+    virtual const NumberNode*   asNumberNode()   const { return NULL; }
   };
   
   // A binary operator.
@@ -32,7 +37,7 @@ namespace magpie
     static temp<BinaryOpNode> create(gc<Node> left, TokenType type,
                                      gc<Node> right);
     
-    DECLARE_NODE;
+    DECLARE_NODE(BinaryOpNode);
     
     Node& left() const { return *left_; }
     TokenType type() const { return type_; }
@@ -55,7 +60,7 @@ namespace magpie
   public:
     static temp<NumberNode> create(double value);
   
-    DECLARE_NODE;
+    DECLARE_NODE(NumberNode);
     
     double value() const { return value_; }
     

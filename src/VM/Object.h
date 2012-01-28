@@ -18,7 +18,11 @@ namespace magpie
 
     Object() : Managed() {}
 
-    virtual NumberObject* asNumber()      { return NULL; }
+    virtual double toNumber()
+    {
+      ASSERT(false, "Not a number.");
+      return 0;
+    }
 
   private:
     NO_COPY(Object);
@@ -32,7 +36,7 @@ namespace magpie
       value_(value)
     {}
     
-    virtual NumberObject* asNumber() { return this; }
+    virtual double toNumber() { return value_; }
     
     virtual void trace(std::ostream& stream) const
     {

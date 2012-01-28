@@ -77,9 +77,7 @@ namespace magpie
           
         case OP_END:
         {
-          unsigned char reg = GET_A(ins);
-
-          gc<Object> result = load(frame, reg);
+          gc<Object> result = loadRegisterOrConstant(frame, GET_A(ins));
           callFrames_.remove(-1);
 
           if (callFrames_.count() > 0)
@@ -92,8 +90,7 @@ namespace magpie
             ASSERT(GET_OP(callInstruction) == OP_CALL,
                    "Should be returning to a call.");
             
-            int reg = GET_C(callInstruction);
-            store(caller, reg, result);
+            store(caller, GET_C(callInstruction), result);
           }
           else
           {
@@ -103,16 +100,55 @@ namespace magpie
           }
           break;
         }
-/*
-        case OP_HACK_PRINT:
+          
+        case OP_ADD:
         {
-          unsigned char reg = GET_A(instruction);
-
-          gc<Object> object = frame.getRegister(reg);
-          std::cout << "Hack print: " << object << "\n";
+          gc<Object> a = loadRegisterOrConstant(frame, GET_A(ins));
+          gc<Object> b = loadRegisterOrConstant(frame, GET_B(ins));
+          
+          // TODO(bob): Handle non-number types.
+          double c = a->toNumber() + b->toNumber();
+          temp<Object> num = Object::create(c);
+          store(frame, GET_C(ins), num);
           break;
         }
-*/
+          
+        case OP_SUBTRACT:
+        {
+          gc<Object> a = loadRegisterOrConstant(frame, GET_A(ins));
+          gc<Object> b = loadRegisterOrConstant(frame, GET_B(ins));
+          
+          // TODO(bob): Handle non-number types.
+          double c = a->toNumber() - b->toNumber();
+          temp<Object> num = Object::create(c);
+          store(frame, GET_C(ins), num);
+          break;
+        }
+          
+        case OP_MULTIPLY:
+        {
+          gc<Object> a = loadRegisterOrConstant(frame, GET_A(ins));
+          gc<Object> b = loadRegisterOrConstant(frame, GET_B(ins));
+          
+          // TODO(bob): Handle non-number types.
+          double c = a->toNumber() * b->toNumber();
+          temp<Object> num = Object::create(c);
+          store(frame, GET_C(ins), num);
+          break;
+        }
+          
+        case OP_DIVIDE:
+        {
+          gc<Object> a = loadRegisterOrConstant(frame, GET_A(ins));
+          gc<Object> b = loadRegisterOrConstant(frame, GET_B(ins));
+          
+          // TODO(bob): Handle non-number types.
+          double c = a->toNumber() / b->toNumber();
+          temp<Object> num = Object::create(c);
+          store(frame, GET_C(ins), num);
+          break;
+        }
+          
         default:
           ASSERT(false, "Unknown opcode.");
           break;
@@ -133,5 +169,18 @@ namespace magpie
     }
     
     callFrames_.add(CallFrame(method, stackStart));
+  }
+
+  
+  gc<Object> Fiber::loadRegisterOrConstant(const CallFrame& frame, int index)
+  {
+    if (IS_CONSTANT(index))
+    {
+      return frame.method->getConstant(GET_CONSTANT(index));
+    }
+    else
+    {
+      return load(frame, index);
+    }
   }
 }

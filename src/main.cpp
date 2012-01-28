@@ -58,10 +58,11 @@ int main(int argc, char * const argv[])
   }
   */
   
-  temp<String> source = String::create("123");
+  temp<String> source = String::create("2 * 3 + 4 - 10 / 2");
   Parser parser(source);
   temp<Node> node = parser.parseExpression();
   
+  std::cout << node << std::endl;
   temp<Method> method = Compiler::compileMethod(*node);
 
   temp<Object> result = vm.fiber().interpret(method);
