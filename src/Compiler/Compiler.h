@@ -18,11 +18,12 @@ namespace magpie
     virtual ~Compiler() {}
     
   private:
-    Compiler(temp<Method> method);
+    Compiler();
     
-    void compile(const Node& node);
+    temp<Method> compile(const Node& node);
     
     virtual void visit(const BinaryOpNode& node, int dest);
+    virtual void visit(const IfNode& node, int dest);
     virtual void visit(const NumberNode& node, int dest);
     
     void compileInfix(const BinaryOpNode& node, OpCode op, int dest);
@@ -40,13 +41,16 @@ namespace magpie
     int compileConstant(const NumberNode& node);
 
     void write(OpCode op, int a = 0xff, int b = 0xff, int c = 0xff);
+    int startJump();
+    void endJump(int from, OpCode op, int a = 0xff, int b = 0xff, int c = 0xff);
     
     int reserveRegister();
     void releaseRegister();
 
-    // The method being compiled.
-    gc<Method> method_;
-    int        numInUseRegisters_;
+    Array<instruction> code_;
+    Array<gc<Object> > constants_;
+    int                numInUseRegisters_;
+    int                maxRegisters_;
 
     NO_COPY(Compiler);
   };

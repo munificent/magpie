@@ -7,6 +7,7 @@
 namespace magpie
 {
   class BinaryOpNode;
+  class IfNode;
   class Lexer;
   class Node;
   class NumberNode;
@@ -18,6 +19,7 @@ namespace magpie
     virtual ~NodeVisitor() {}
     
     virtual void visit(const BinaryOpNode& node, int dest) = 0;
+    virtual void visit(const IfNode& node, int dest) = 0;
     virtual void visit(const NumberNode& node, int dest) = 0;
     
   protected:

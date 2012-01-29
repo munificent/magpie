@@ -26,6 +26,39 @@ namespace magpie
         << " " << right_ << ")";
   }
   
+  temp<IfNode> IfNode::create(gc<Node> condition, gc<Node> thenArm,
+                              gc<Node> elseArm)
+  {
+    return Memory::makeTemp(new IfNode(condition, thenArm, elseArm));
+  }
+  
+  IfNode::IfNode(gc<Node> condition, gc<Node> thenArm, gc<Node> elseArm)
+  : condition_(condition),
+    thenArm_(thenArm),
+    elseArm_(elseArm)
+  {}
+  
+  void IfNode::reach()
+  {
+    Memory::reach(condition_);
+    Memory::reach(thenArm_);
+    Memory::reach(elseArm_);
+  }
+  
+  void IfNode::trace(std::ostream& out) const
+  {
+    out << "(if " << condition_ << " then " << thenArm_;
+    
+    if (elseArm_.isNull())
+    {
+      out << ")";
+    }
+    else
+    {
+      out << " else " << elseArm_ << ")";
+    }
+  }
+  
   temp<NumberNode> NumberNode::create(double value)
   {
     return Memory::makeTemp(new NumberNode(value));

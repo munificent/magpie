@@ -26,14 +26,18 @@ namespace magpie
   //          register if not
   enum OpCode
   {
-    OP_MOVE       = 0x01, // A: from, B: to
-    OP_CONSTANT   = 0x02, // C(A) -> R(B)
-    OP_ADD        = 0x03, // R(C) = RC(A) + RC(B)
-    OP_SUBTRACT   = 0x04, // R(C) = RC(A) - RC(B)
-    OP_MULTIPLY   = 0x05, // R(C) = RC(A) * RC(B)
-    OP_DIVIDE     = 0x06, // R(C) = RC(A) / RC(B)
-    OP_CALL       = 0x07, // A: arg, B: method, C: result
-    OP_END        = 0x08  // RC(A): result
+    OP_MOVE         = 0x01, // A: from, B: to
+    OP_CONSTANT     = 0x02, // C(A) -> R(B)
+    OP_ADD          = 0x03, // R(C) = RC(A) + RC(B)
+    OP_SUBTRACT     = 0x04, // R(C) = RC(A) - RC(B)
+    OP_MULTIPLY     = 0x05, // R(C) = RC(A) * RC(B)
+    OP_DIVIDE       = 0x06, // R(C) = RC(A) / RC(B)
+    OP_JUMP         = 0x07, // A = offset
+    // TODO(bob): Testing for zero is a temp hack until other types and
+    // truthiness are implemented.
+    OP_JUMP_IF_ZERO = 0x08, // R(A) = test register, B = offset
+    OP_CALL         = 0x09, // A: arg, B: method, C: result
+    OP_END          = 0x10  // RC(A): result
   };
   
   typedef unsigned int instruction;

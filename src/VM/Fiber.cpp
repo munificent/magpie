@@ -149,6 +149,24 @@ namespace magpie
           break;
         }
           
+        case OP_JUMP:
+        {
+          int offset = GET_A(ins);
+          ip += offset;
+          break;
+        }
+          
+        case OP_JUMP_IF_ZERO:
+        {
+          gc<Object> a = load(frame, GET_A(ins));
+          if (a->toNumber() == 0)
+          {
+            int offset = GET_B(ins);
+            ip += offset;
+          }
+          break;
+        }
+          
         default:
           ASSERT(false, "Unknown opcode.");
           break;

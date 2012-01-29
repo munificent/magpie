@@ -27,7 +27,7 @@ namespace magpie
     NULL,                 // TOKEN_DO
     NULL,                 // TOKEN_ELSE
     NULL,                 // TOKEN_FOR
-    NULL,                 // TOKEN_IF
+    &Parser::ifThenElse,  // TOKEN_IF
     NULL,                 // TOKEN_IS
     NULL,                 // TOKEN_MATCH
     NULL,                 // TOKEN_NOT
@@ -115,7 +115,23 @@ namespace magpie
 
     return scope.close(left);
   }
+  
+  temp<Node> Parser::ifThenElse(temp<Token> token)
+  {
+    AllocScope scope;
+    
+    temp<Node> condition = parseExpression();
+    consume(TOKEN_THEN, "Expect 'then' after 'if' condition.");
 
+    // TODO(bob): Block bodies.
+    temp<Node> thenArm = parseExpression();
+    // TODO(bob): Allow omitting 'else'.
+    consume(TOKEN_ELSE, "Expect 'else' after 'then' arm.");
+    temp<Node> elseArm = parseExpression();
+    
+    return scope.close(IfNode::create(condition, thenArm, elseArm));
+  }
+  
   temp<Node> Parser::number(temp<Token> token)
   {
     double number = atof(token->text().cString());

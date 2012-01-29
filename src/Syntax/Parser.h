@@ -25,6 +25,7 @@ namespace magpie
     
   private:
     // Prefix parsers.
+    temp<Node> ifThenElse(temp<Token> token);
     temp<Node> number(temp<Token> token);
 
     // Infix parsers.

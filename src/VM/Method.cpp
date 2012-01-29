@@ -2,25 +2,16 @@
 
 namespace magpie
 {
-  temp<Method> Method::create()
+  temp<Method> Method::create(const Array<instruction>& code,
+                              const Array<gc<Object> >& constants,
+                              int numRegisters)
   {
-    return Memory::makeTemp(new Method());
+    return Memory::makeTemp(new Method(code, constants, numRegisters));
   }
   
-  int Method::addConstant(gc<Object> constant)
-  {
-    constants_.add(constant);
-    return constants_.count() - 1;
-  }
-
   gc<Object> Method::getConstant(int index) const
   {
     ASSERT_INDEX(index, constants_.count());
     return constants_[index];
-  }
-
-  void Method::write(instruction code)
-  {
-    code_.add(code);
   }
 }

@@ -54,6 +54,30 @@ namespace magpie
     gc<Node>  right_;
   };
   
+  // An if-then-else expression.
+  class IfNode : public Node
+  {
+  public:
+    static temp<IfNode> create(gc<Node> condition, gc<Node> thenArm,
+                               gc<Node> elseArm);
+    
+    DECLARE_NODE(IfNode);
+    
+    Node& condition() const { return *condition_; }
+    Node& thenArm() const { return *thenArm_; }
+    Node& elseArm() const { return *elseArm_; }
+    
+    virtual void reach();
+    virtual void trace(std::ostream& out) const;
+    
+  private:
+    IfNode(gc<Node> condition, gc<Node> thenArm, gc<Node> elseArm);
+    
+    gc<Node> condition_;
+    gc<Node> thenArm_;
+    gc<Node> elseArm_;
+  };
+  
   // A number literal.
   class NumberNode : public Node
   {

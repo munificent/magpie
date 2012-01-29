@@ -13,24 +13,24 @@ namespace magpie
   class Method : public Managed
   {
   public:
-    static temp<Method> create();
+    static temp<Method> create(const Array<instruction>& code,
+                               const Array<gc<Object> >& constants,
+                               int numRegisters);
     
     inline const Array<instruction>& code() const { return code_; }
     
-    int addConstant(gc<Object> constant);
     gc<Object> getConstant(int index) const;
     
-    void write(instruction code);
-    
     int numRegisters() const { return numRegisters_; }
-    void setNumRegisters(int numRegisters) { numRegisters_ = numRegisters; }
+
     // TODO(bob): Implement reach().
     
   private:
-    Method()
-    : code_(),
-      constants_(),
-      numRegisters_(0)
+    Method(const Array<instruction>& code, const Array<gc<Object> >& constants,
+           int numRegisters)
+    : code_(code),
+      constants_(constants),
+      numRegisters_(numRegisters)
     {}
     
     Array<instruction> code_;

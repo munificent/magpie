@@ -7,24 +7,17 @@ namespace magpie
 {
   temp<Method> Compiler::compileMethod(const Node& node)
   {
-    AllocScope scope;
-    
-    temp<Method> method = Method::create();
-    
-    Compiler compiler(method);
-    
-    compiler.compile(node);
-    
-    return scope.close(method);
+    Compiler compiler;
+    return compiler.compile(node);
   }
   
-  Compiler::Compiler(temp<Method> method)
+  Compiler::Compiler()
   : NodeVisitor(),
-    method_(method),
-    numInUseRegisters_(0)
+    numInUseRegisters_(0),
+    maxRegisters_(0)
   {}
 
-  void Compiler::compile(const Node& node)
+  temp<Method> Compiler::compile(const Node& node)
   {
     /*
     // Reserve registers for the params. These have to go first because the
@@ -38,6 +31,8 @@ namespace magpie
     
     int result = compileExpressionOrConstant(node);
     write(OP_END, result);
+    
+    return Method::create(code_, constants_, maxRegisters_);
   }
 
   void Compiler::visit(const BinaryOpNode& node, int dest)
@@ -52,6 +47,28 @@ namespace magpie
       default:
         ASSERT(false, "Unknown infix operator.");
     }
+  }
+  
+  void Compiler::visit(const IfNode& node, int dest)
+  {
+    // Compile the condition.
+    node.condition().accept(*this, dest);
+    
+    // Leave a space for the test and jump instruction.
+    int jumpToElse = startJump();
+    
+    // Compile the then arm.
+    node.thenArm().accept(*this, dest);
+    
+    // Leave a space for the then arm to jump over the else arm.
+    int jumpPastElse = startJump();
+    
+    // Compile the else arm.
+    endJump(jumpToElse, OP_JUMP_IF_ZERO, dest, code_.count() - jumpToElse - 1);
+      
+    node.elseArm().accept(*this, dest);
+      
+    endJump(jumpPastElse, OP_JUMP, code_.count() - jumpPastElse - 1);
   }
   
   void Compiler::visit(const NumberNode& node, int dest)
@@ -92,7 +109,8 @@ namespace magpie
     
     // TODO(bob): Should check for duplicates. Only need one copy of any
     // given constant.
-    return method_->addConstant(constant);
+    constants_.add(constant);
+    return constants_.count() - 1;
   }
   
   void Compiler::write(OpCode op, int a, int b, int c)
@@ -101,17 +119,28 @@ namespace magpie
     ASSERT_INDEX(b, 256);
     ASSERT_INDEX(c, 256);
     
-    method_->write(MAKE_ABC(a, b, c, op));
+    code_.add(MAKE_ABC(a, b, c, op));
   }
 
+  int Compiler::startJump()
+  {
+    // Just write a dummy op to leave a space for the jump instruction.
+    write(OP_MOVE);
+    return code_.count() - 1;
+  }
   
+  void Compiler::endJump(int from, OpCode op, int a, int b, int c)
+  {
+    code_[from] = MAKE_ABC(a, b, c, op);
+  }
+
   int Compiler::reserveRegister()
   {
     numInUseRegisters_++;
     
-    if (method_->numRegisters() < numInUseRegisters_)
+    if (maxRegisters_ < numInUseRegisters_)
     {
-      method_->setNumRegisters(numInUseRegisters_);
+      maxRegisters_ = numInUseRegisters_;
     }
     
     return numInUseRegisters_ - 1;
