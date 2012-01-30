@@ -41,6 +41,8 @@ namespace magpie
     TOKEN_RETURN,
     TOKEN_THEN,
     TOKEN_TRUE,
+    TOKEN_VAL,
+    TOKEN_VAR,
     TOKEN_WHILE,
     TOKEN_XOR,
 

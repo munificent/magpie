@@ -36,6 +36,8 @@ namespace magpie
     NULL,                 // TOKEN_RETURN
     NULL,                 // TOKEN_THEN
     &Parser::boolean,     // TOKEN_TRUE
+    NULL,                 // TOKEN_VAL
+    NULL,                 // TOKEN_VAR
     NULL,                 // TOKEN_WHILE
     NULL,                 // TOKEN_XOR
 
@@ -79,6 +81,8 @@ namespace magpie
     { NULL, -1 },                 // TOKEN_RETURN
     { NULL, -1 },                 // TOKEN_THEN
     { NULL, -1 },                 // TOKEN_TRUE
+    { NULL, -1 },                 // TOKEN_VAL
+    { NULL, -1 },                 // TOKEN_VAR
     { NULL, -1 },                 // TOKEN_WHILE
     { NULL, -1 },                 // TOKEN_XOR
 

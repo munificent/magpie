@@ -41,6 +41,8 @@ namespace magpie
       case TOKEN_RETURN:        return "return";
       case TOKEN_THEN:          return "then";
       case TOKEN_TRUE:          return "true";
+      case TOKEN_VAL:           return "val";
+      case TOKEN_VAR:           return "var";
       case TOKEN_WHILE:         return "while";
       case TOKEN_XOR:           return "xor";
         

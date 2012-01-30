@@ -188,6 +188,8 @@ namespace magpie
     else if (*text == "return") type = TOKEN_RETURN;
     else if (*text == "then"  ) type = TOKEN_THEN;
     else if (*text == "true"  ) type = TOKEN_TRUE;
+    else if (*text == "val"   ) type = TOKEN_VAL;
+    else if (*text == "var"   ) type = TOKEN_VAR;
     else if (*text == "while" ) type = TOKEN_WHILE;
     else if (*text == "xor"   ) type = TOKEN_XOR;
 
