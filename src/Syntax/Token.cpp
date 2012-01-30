@@ -31,6 +31,7 @@ namespace magpie
       case TOKEN_DEF:           return "def";
       case TOKEN_DO:            return "do";
       case TOKEN_ELSE:          return "else";
+      case TOKEN_FALSE:         return "false";
       case TOKEN_FOR:           return "for";
       case TOKEN_IF:            return "if";
       case TOKEN_IS:            return "is";
@@ -39,6 +40,7 @@ namespace magpie
       case TOKEN_OR:            return "or";
       case TOKEN_RETURN:        return "return";
       case TOKEN_THEN:          return "then";
+      case TOKEN_TRUE:          return "true";
       case TOKEN_WHILE:         return "while";
       case TOKEN_XOR:           return "xor";
         

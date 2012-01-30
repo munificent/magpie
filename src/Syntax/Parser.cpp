@@ -26,6 +26,7 @@ namespace magpie
     NULL,                 // TOKEN_DEF
     NULL,                 // TOKEN_DO
     NULL,                 // TOKEN_ELSE
+    &Parser::boolean,     // TOKEN_FALSE
     NULL,                 // TOKEN_FOR
     &Parser::ifThenElse,  // TOKEN_IF
     NULL,                 // TOKEN_IS
@@ -34,6 +35,7 @@ namespace magpie
     NULL,                 // TOKEN_OR
     NULL,                 // TOKEN_RETURN
     NULL,                 // TOKEN_THEN
+    &Parser::boolean,     // TOKEN_TRUE
     NULL,                 // TOKEN_WHILE
     NULL,                 // TOKEN_XOR
 
@@ -67,6 +69,7 @@ namespace magpie
     { NULL, -1 },                 // TOKEN_DEF
     { NULL, -1 },                 // TOKEN_DO
     { NULL, -1 },                 // TOKEN_ELSE
+    { NULL, -1 },                 // TOKEN_FALSE
     { NULL, -1 },                 // TOKEN_FOR
     { NULL, -1 },                 // TOKEN_IF
     { NULL, -1 },                 // TOKEN_IS
@@ -75,6 +78,7 @@ namespace magpie
     { &Parser::binaryOp, 3 },     // TOKEN_OR
     { NULL, -1 },                 // TOKEN_RETURN
     { NULL, -1 },                 // TOKEN_THEN
+    { NULL, -1 },                 // TOKEN_TRUE
     { NULL, -1 },                 // TOKEN_WHILE
     { NULL, -1 },                 // TOKEN_XOR
 
@@ -114,6 +118,11 @@ namespace magpie
     }
 
     return scope.close(left);
+  }
+  
+  temp<Node> Parser::boolean(temp<Token> token)
+  {
+    return BoolNode::create(token->type() == TOKEN_TRUE);
   }
   
   temp<Node> Parser::ifThenElse(temp<Token> token)

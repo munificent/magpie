@@ -178,6 +178,7 @@ namespace magpie
     else if (*text == "def"   ) type = TOKEN_DEF;
     else if (*text == "do"    ) type = TOKEN_DO;
     else if (*text == "else"  ) type = TOKEN_ELSE;
+    else if (*text == "false" ) type = TOKEN_FALSE;
     else if (*text == "for"   ) type = TOKEN_FOR;
     else if (*text == "if"    ) type = TOKEN_IF;
     else if (*text == "is"    ) type = TOKEN_IS;
@@ -186,6 +187,7 @@ namespace magpie
     else if (*text == "or"    ) type = TOKEN_OR;
     else if (*text == "return") type = TOKEN_RETURN;
     else if (*text == "then"  ) type = TOKEN_THEN;
+    else if (*text == "true"  ) type = TOKEN_TRUE;
     else if (*text == "while" ) type = TOKEN_WHILE;
     else if (*text == "xor"   ) type = TOKEN_XOR;
 

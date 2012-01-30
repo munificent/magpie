@@ -26,6 +26,20 @@ namespace magpie
         << " " << right_ << ")";
   }
   
+  temp<BoolNode> BoolNode::create(bool value)
+  {
+    return Memory::makeTemp(new BoolNode(value));
+  }
+  
+  BoolNode::BoolNode(bool value)
+  : value_(value)
+  {}
+  
+  void BoolNode::trace(std::ostream& out) const
+  {
+    out << (value_ ? "true" : "false");
+  }
+  
   temp<IfNode> IfNode::create(gc<Node> condition, gc<Node> thenArm,
                               gc<Node> elseArm)
   {

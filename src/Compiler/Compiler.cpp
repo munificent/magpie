@@ -34,7 +34,12 @@ namespace magpie
     
     return Method::create(code_, constants_, maxRegisters_);
   }
-
+  
+  void Compiler::visit(const BoolNode& node, int dest)
+  {
+    write(OP_BOOL, node.value() ? 1 : 0, dest);
+  }
+  
   void Compiler::visit(const BinaryOpNode& node, int dest)
   {
     switch (node.type())
@@ -64,7 +69,7 @@ namespace magpie
     int jumpPastElse = startJump();
     
     // Compile the else arm.
-    endJump(jumpToElse, OP_JUMP_IF_ZERO, dest, code_.count() - jumpToElse - 1);
+    endJump(jumpToElse, OP_JUMP_IF_FALSE, dest, code_.count() - jumpToElse - 1);
       
     node.elseArm().accept(*this, dest);
       

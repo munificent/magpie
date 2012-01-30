@@ -54,6 +54,24 @@ namespace magpie
     gc<Node>  right_;
   };
   
+  // A boolean literal.
+  class BoolNode : public Node
+  {
+  public:
+    static temp<BoolNode> create(bool value);
+    
+    DECLARE_NODE(BoolNode);
+    
+    bool value() const { return value_; }
+    
+    virtual void trace(std::ostream& out) const;
+    
+  private:
+    BoolNode(bool value);
+    
+    bool value_;
+  };
+  
   // An if-then-else expression.
   class IfNode : public Node
   {

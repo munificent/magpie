@@ -31,6 +31,7 @@ namespace magpie
     TOKEN_DEF,
     TOKEN_DO,
     TOKEN_ELSE,
+    TOKEN_FALSE,
     TOKEN_FOR,
     TOKEN_IF,
     TOKEN_IS,
@@ -39,6 +40,7 @@ namespace magpie
     TOKEN_OR,
     TOKEN_RETURN,
     TOKEN_THEN,
+    TOKEN_TRUE,
     TOKEN_WHILE,
     TOKEN_XOR,
 

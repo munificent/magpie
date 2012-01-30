@@ -51,7 +51,17 @@ namespace magpie
           store(frame, reg, frame.method->getConstant(index));
           break;
         }
-
+          
+        case OP_BOOL:
+        {
+          bool value = GET_A(ins) == 1;
+          int reg = GET_B(ins);
+          // TODO(bob): Should just create singleton instances of true and false
+          // and reuse them.
+          store(frame, reg, Object::create(value));
+          break;
+        }
+          
           /*
         case OP_CALL:
         {
@@ -156,10 +166,10 @@ namespace magpie
           break;
         }
           
-        case OP_JUMP_IF_ZERO:
+        case OP_JUMP_IF_FALSE:
         {
           gc<Object> a = load(frame, GET_A(ins));
-          if (a->toNumber() == 0)
+          if (!a->toBool())
           {
             int offset = GET_B(ins);
             ip += offset;

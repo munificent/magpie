@@ -22,6 +22,7 @@ namespace magpie
     
     temp<Method> compile(const Node& node);
     
+    virtual void visit(const BoolNode& node, int dest);
     virtual void visit(const BinaryOpNode& node, int dest);
     virtual void visit(const IfNode& node, int dest);
     virtual void visit(const NumberNode& node, int dest);

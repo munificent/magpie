@@ -24,7 +24,17 @@ namespace magpie
     temp<Node> parseExpression(int precedence = 0);
     
   private:
+    typedef temp<Node> (Parser::*PrefixParseFn)(temp<Token> token);
+    typedef temp<Node> (Parser::*InfixParseFn)(temp<Node> left, temp<Token> token);
+    
+    struct InfixParser
+    {
+      InfixParseFn fn;
+      int          precedence;
+    };
+    
     // Prefix parsers.
+    temp<Node> boolean(temp<Token> token);
     temp<Node> ifThenElse(temp<Token> token);
     temp<Node> number(temp<Token> token);
 
@@ -63,16 +73,6 @@ namespace magpie
     
     // Gets whether or not any errors have been reported.
     bool hadError() const { return hadError_; }
-    
-  private:
-    typedef temp<Node> (Parser::*PrefixParseFn)(temp<Token> token);
-    typedef temp<Node> (Parser::*InfixParseFn)(temp<Node> left, temp<Token> token);
-    
-    struct InfixParser
-    {
-      InfixParseFn fn;
-      int          precedence;
-    };
     
     void fillLookAhead(int count);
     
