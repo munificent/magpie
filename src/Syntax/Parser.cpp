@@ -6,103 +6,108 @@
 
 namespace magpie
 {
-  Parser::PrefixParseFn Parser::prefixParsers_[] = {
-    // Punctuators.
-    NULL,                 // TOKEN_LEFT_PAREN
-    NULL,                 // TOKEN_RIGHT_PAREN
-    NULL,                 // TOKEN_LEFT_BRACKET
-    NULL,                 // TOKEN_RIGHT_BRACKET
-    NULL,                 // TOKEN_LEFT_BRACE
-    NULL,                 // TOKEN_RIGHT_BRACE
-    NULL,                 // TOKEN_PLUS
-    NULL,                 // TOKEN_MINUS
-    NULL,                 // TOKEN_STAR
-    NULL,                 // TOKEN_SLASH
-    NULL,                 // TOKEN_PERCENT
-
-    // Keywords.
-    NULL,                 // TOKEN_AND
-    NULL,                 // TOKEN_CASE
-    NULL,                 // TOKEN_DEF
-    NULL,                 // TOKEN_DO
-    NULL,                 // TOKEN_ELSE
-    &Parser::boolean,     // TOKEN_FALSE
-    NULL,                 // TOKEN_FOR
-    &Parser::ifThenElse,  // TOKEN_IF
-    NULL,                 // TOKEN_IS
-    NULL,                 // TOKEN_MATCH
-    NULL,                 // TOKEN_NOT
-    NULL,                 // TOKEN_OR
-    NULL,                 // TOKEN_RETURN
-    NULL,                 // TOKEN_THEN
-    &Parser::boolean,     // TOKEN_TRUE
-    NULL,                 // TOKEN_VAL
-    NULL,                 // TOKEN_VAR
-    NULL,                 // TOKEN_WHILE
-    NULL,                 // TOKEN_XOR
-
-    NULL,                 // TOKEN_NAME
-    &Parser::number,      // TOKEN_NUMBER
-    NULL,                 // TOKEN_STRING
-
-    NULL,                 // TOKEN_LINE
-    NULL,                 // TOKEN_ERROR
-    NULL                  // TOKEN_EOF
-  };
-
   // TODO(bob): Figure out full precedence table.
-  Parser::InfixParser Parser::infixParsers_[] = {
+  Parser::Parselet Parser::expressions_[] = {
     // Punctuators.
-    { NULL, -1 },                 // TOKEN_LEFT_PAREN
-    { NULL, -1 },                 // TOKEN_RIGHT_PAREN
-    { NULL, -1 },                 // TOKEN_LEFT_BRACKET
-    { NULL, -1 },                 // TOKEN_RIGHT_BRACKET
-    { NULL, -1 },                 // TOKEN_LEFT_BRACE
-    { NULL, -1 },                 // TOKEN_RIGHT_BRACE
-    { &Parser::binaryOp, 7 },     // TOKEN_PLUS
-    { &Parser::binaryOp, 7 },     // TOKEN_MINUS
-    { &Parser::binaryOp, 8 },     // TOKEN_STAR
-    { &Parser::binaryOp, 8 },     // TOKEN_SLASH
-    { &Parser::binaryOp, 8 },     // TOKEN_PERCENT
+    { NULL,                 NULL, -1 },                 // TOKEN_LEFT_PAREN
+    { NULL,                 NULL, -1 },                 // TOKEN_RIGHT_PAREN
+    { NULL,                 NULL, -1 },                 // TOKEN_LEFT_BRACKET
+    { NULL,                 NULL, -1 },                 // TOKEN_RIGHT_BRACKET
+    { NULL,                 NULL, -1 },                 // TOKEN_LEFT_BRACE
+    { NULL,                 NULL, -1 },                 // TOKEN_RIGHT_BRACE
+    { NULL,                 &Parser::binaryOp, 7 },     // TOKEN_PLUS
+    { NULL,                 &Parser::binaryOp, 7 },     // TOKEN_MINUS
+    { NULL,                 &Parser::binaryOp, 8 },     // TOKEN_STAR
+    { NULL,                 &Parser::binaryOp, 8 },     // TOKEN_SLASH
+    { NULL,                 &Parser::binaryOp, 8 },     // TOKEN_PERCENT
 
     // Keywords.
-    { &Parser::binaryOp, 3 },     // TOKEN_AND
-    { NULL, -1 },                 // TOKEN_CASE
-    { NULL, -1 },                 // TOKEN_DEF
-    { NULL, -1 },                 // TOKEN_DO
-    { NULL, -1 },                 // TOKEN_ELSE
-    { NULL, -1 },                 // TOKEN_FALSE
-    { NULL, -1 },                 // TOKEN_FOR
-    { NULL, -1 },                 // TOKEN_IF
-    { NULL, -1 },                 // TOKEN_IS
-    { NULL, -1 },                 // TOKEN_MATCH
-    { NULL, -1 },                 // TOKEN_NOT
-    { &Parser::binaryOp, 3 },     // TOKEN_OR
-    { NULL, -1 },                 // TOKEN_RETURN
-    { NULL, -1 },                 // TOKEN_THEN
-    { NULL, -1 },                 // TOKEN_TRUE
-    { NULL, -1 },                 // TOKEN_VAL
-    { NULL, -1 },                 // TOKEN_VAR
-    { NULL, -1 },                 // TOKEN_WHILE
-    { NULL, -1 },                 // TOKEN_XOR
+    { NULL,                 &Parser::binaryOp, 3 },     // TOKEN_AND
+    { NULL,                 NULL, -1 },                 // TOKEN_CASE
+    { NULL,                 NULL, -1 },                 // TOKEN_DEF
+    { NULL,                 NULL, -1 },                 // TOKEN_DO
+    { NULL,                 NULL, -1 },                 // TOKEN_ELSE
+    { &Parser::boolean,     NULL, -1 },                 // TOKEN_FALSE
+    { NULL,                 NULL, -1 },                 // TOKEN_FOR
+    { &Parser::ifThenElse,  NULL, -1 },                 // TOKEN_IF
+    { NULL,                 NULL, -1 },                 // TOKEN_IS
+    { NULL,                 NULL, -1 },                 // TOKEN_MATCH
+    { NULL,                 NULL, -1 },                 // TOKEN_NOT
+    { NULL,                 &Parser::binaryOp, 3 },     // TOKEN_OR
+    { NULL,                 NULL, -1 },                 // TOKEN_RETURN
+    { NULL,                 NULL, -1 },                 // TOKEN_THEN
+    { &Parser::boolean,     NULL, -1 },                 // TOKEN_TRUE
+    { NULL,                 NULL, -1 },                 // TOKEN_VAL
+    { NULL,                 NULL, -1 },                 // TOKEN_VAR
+    { NULL,                 NULL, -1 },                 // TOKEN_WHILE
+    { NULL,                 NULL, -1 },                 // TOKEN_XOR
 
-    { NULL, -1 },                 // TOKEN_NAME
-    { NULL, -1 },                 // TOKEN_NUMBER
-    { NULL, -1 },                 // TOKEN_STRING
+    { NULL,                 NULL, -1 },                 // TOKEN_NAME
+    { &Parser::number,      NULL, -1 },                 // TOKEN_NUMBER
+    { NULL,                 NULL, -1 },                 // TOKEN_STRING
 
-    { NULL, -1 },                 // TOKEN_LINE
-    { NULL, -1 },                 // TOKEN_ERROR
-    { NULL, -1 }                  // TOKEN_EOF
+    { NULL,                 NULL, -1 },                 // TOKEN_LINE
+    { NULL,                 NULL, -1 },                 // TOKEN_ERROR
+    { NULL,                 NULL, -1 }                  // TOKEN_EOF
   };
-
+  
+  // TODO(bob): Figure out full precedence table.
+  Parser::Parselet Parser::patterns_[] = {
+    // Punctuators.
+    { NULL,                 NULL, -1 },                 // TOKEN_LEFT_PAREN
+    { NULL,                 NULL, -1 },                 // TOKEN_RIGHT_PAREN
+    { NULL,                 NULL, -1 },                 // TOKEN_LEFT_BRACKET
+    { NULL,                 NULL, -1 },                 // TOKEN_RIGHT_BRACKET
+    { NULL,                 NULL, -1 },                 // TOKEN_LEFT_BRACE
+    { NULL,                 NULL, -1 },                 // TOKEN_RIGHT_BRACE
+    { NULL,                 NULL, -1 },                 // TOKEN_PLUS
+    { NULL,                 NULL, -1 },                 // TOKEN_MINUS
+    { NULL,                 NULL, -1 },                 // TOKEN_STAR
+    { NULL,                 NULL, -1 },                 // TOKEN_SLASH
+    { NULL,                 NULL, -1 },                 // TOKEN_PERCENT
+    
+    // Keywords.
+    { NULL,                 NULL, -1 },                 // TOKEN_AND
+    { NULL,                 NULL, -1 },                 // TOKEN_CASE
+    { NULL,                 NULL, -1 },                 // TOKEN_DEF
+    { NULL,                 NULL, -1 },                 // TOKEN_DO
+    { NULL,                 NULL, -1 },                 // TOKEN_ELSE
+    { NULL,                 NULL, -1 },                 // TOKEN_FALSE
+    { NULL,                 NULL, -1 },                 // TOKEN_FOR
+    { NULL,                 NULL, -1 },                 // TOKEN_IF
+    { NULL,                 NULL, -1 },                 // TOKEN_IS
+    { NULL,                 NULL, -1 },                 // TOKEN_MATCH
+    { NULL,                 NULL, -1 },                 // TOKEN_NOT
+    { NULL,                 NULL, -1 },                 // TOKEN_OR
+    { NULL,                 NULL, -1 },                 // TOKEN_RETURN
+    { NULL,                 NULL, -1 },                 // TOKEN_THEN
+    { NULL,                 NULL, -1 },                 // TOKEN_TRUE
+    { NULL,                 NULL, -1 },                 // TOKEN_VAL
+    { NULL,                 NULL, -1 },                 // TOKEN_VAR
+    { NULL,                 NULL, -1 },                 // TOKEN_WHILE
+    { NULL,                 NULL, -1 },                 // TOKEN_XOR
+    
+    { NULL,                 NULL, -1 },                 // TOKEN_NAME
+    { NULL,                 NULL, -1 },                 // TOKEN_NUMBER
+    { NULL,                 NULL, -1 },                 // TOKEN_STRING
+    
+    { NULL,                 NULL, -1 },                 // TOKEN_LINE
+    { NULL,                 NULL, -1 },                 // TOKEN_ERROR
+    { NULL,                 NULL, -1 }                  // TOKEN_EOF
+  };
+  
   temp<Node> Parser::parseExpression(int precedence)
   {
-    AllocScope scope;
-    
+    return parsePrecedence(expressions_, precedence);
+  }
+  
+  temp<Node> Parser::parsePrecedence(Parselet parselets[], int precedence)
+  {
     // Pratt operator precedence parser. See this for more:
     // http://journal.stuffwithstuff.com/2011/03/19/pratt-parsers-expression-parsing-made-easy/
+    AllocScope scope;
     temp<Token> token = consume();
-    PrefixParseFn prefix = prefixParsers_[token->type()];
+    PrefixParseFn prefix = parselets[token->type()].prefix;
 
     if (prefix == NULL)
     {
@@ -113,11 +118,11 @@ namespace magpie
 
     temp<Node> left = (this->*prefix)(token);
 
-    while (precedence < infixParsers_[current().type()].precedence)
+    while (precedence < parselets[current().type()].precedence)
     {
       token = consume();
 
-      InfixParseFn infix = infixParsers_[token->type()].fn;
+      InfixParseFn infix = parselets[token->type()].infix;
       left = (this->*infix)(left, token);
     }
 
@@ -155,11 +160,16 @@ namespace magpie
   {
     // TODO(bob): Support right-associative infix. Needs to do precedence
     // - 1 here, to be right-assoc.
-    temp<Node> right = parseExpression(infixParsers_[token->type()].precedence);
+    temp<Node> right = parseExpression(expressions_[token->type()].precedence);
     
     return BinaryOpNode::create(left, token->type(), right);
   }
-
+  
+  temp<Node> Parser::parsePattern(int precedence)
+  {
+    return parsePrecedence(patterns_, precedence);
+  }
+  
   const Token& Parser::current()
   {
     fillLookAhead(1);

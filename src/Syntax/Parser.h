@@ -27,19 +27,25 @@ namespace magpie
     typedef temp<Node> (Parser::*PrefixParseFn)(temp<Token> token);
     typedef temp<Node> (Parser::*InfixParseFn)(temp<Node> left, temp<Token> token);
     
-    struct InfixParser
+    struct Parselet
     {
-      InfixParseFn fn;
-      int          precedence;
+      PrefixParseFn prefix;
+      InfixParseFn  infix;
+      int           precedence;
     };
     
-    // Prefix parsers.
+    // Entrypoint for the generic operator precedence parser.
+    temp<Node> parsePrecedence(Parselet parselets[], int precedence);
+    
+    // Prefix expression parsers.
     temp<Node> boolean(temp<Token> token);
     temp<Node> ifThenElse(temp<Token> token);
     temp<Node> number(temp<Token> token);
 
-    // Infix parsers.
+    // Infix expression parsers.
     temp<Node> binaryOp(temp<Node> left, temp<Token> token);
+
+    temp<Node> parsePattern(int precedence = 0);
 
     // Gets the Token the parser is currently looking at.
     const Token& current();
@@ -76,8 +82,8 @@ namespace magpie
     
     void fillLookAhead(int count);
     
-    static PrefixParseFn prefixParsers_[TOKEN_NUM_TYPES];
-    static InfixParser   infixParsers_[TOKEN_NUM_TYPES];
+    static Parselet expressions_[TOKEN_NUM_TYPES];
+    static Parselet patterns_[TOKEN_NUM_TYPES];
     
     Lexer lexer_;
     
