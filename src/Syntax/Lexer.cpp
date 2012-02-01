@@ -30,6 +30,7 @@ namespace magpie
         case ']': return makeToken(TOKEN_RIGHT_BRACKET);
         case '{': return makeToken(TOKEN_LEFT_BRACE);
         case '}': return makeToken(TOKEN_RIGHT_BRACE);
+        case '=': return makeToken(TOKEN_EQUALS);
         case '+': return makeToken(TOKEN_PLUS);
         case '-': return makeToken(TOKEN_MINUS);
         case '*': return makeToken(TOKEN_STAR);

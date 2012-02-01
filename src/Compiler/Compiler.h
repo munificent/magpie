@@ -10,7 +10,7 @@ namespace magpie
   class Method;
   class Object;
   
-  class Compiler : private NodeVisitor
+  class Compiler : private NodeVisitor, private PatternVisitor
   {
   public:
     static temp<Method> compileMethod(const Node& node);
@@ -26,7 +26,10 @@ namespace magpie
     virtual void visit(const BinaryOpNode& node, int dest);
     virtual void visit(const IfNode& node, int dest);
     virtual void visit(const NumberNode& node, int dest);
-    
+    virtual void visit(const VariableNode& node, int dest);
+
+    virtual void visit(const VariablePattern& pattern, int value);
+
     void compileInfix(const BinaryOpNode& node, OpCode op, int dest);
 
     // Compiles the given node. If it's a constant node, it adds the constant
@@ -45,12 +48,16 @@ namespace magpie
     int startJump();
     void endJump(int from, OpCode op, int a = 0xff, int b = 0xff, int c = 0xff);
     
-    int reserveRegister();
+    int allocateRegister();
     void releaseRegister();
+    void reserveVariables(int count);
+    int allocateVariable();
 
+    Array<gc<String> > locals_;
     Array<instruction> code_;
     Array<gc<Object> > constants_;
     int                numInUseRegisters_;
+    int                variableStart_;
     int                maxRegisters_;
 
     NO_COPY(Compiler);

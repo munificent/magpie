@@ -12,6 +12,8 @@ namespace magpie
   class Lexer;
   class Node;
   class NumberNode;
+  class VariableNode;
+  class VariablePattern;
   
   // Visitor pattern for dispatching on AST nodes. Implemented by the compiler.
   class NodeVisitor
@@ -23,11 +25,28 @@ namespace magpie
     virtual void visit(const BinaryOpNode& node, int dest) = 0;
     virtual void visit(const IfNode& node, int dest) = 0;
     virtual void visit(const NumberNode& node, int dest) = 0;
+    virtual void visit(const VariableNode& node, int dest) = 0;
     
   protected:
     NodeVisitor() {}
     
   private:
     NO_COPY(NodeVisitor);
+  };
+  
+  // Visitor pattern for dispatching on AST pattern nodes. Implemented by the
+  // compiler.
+  class PatternVisitor
+  {
+  public:
+    virtual ~PatternVisitor() {}
+    
+    virtual void visit(const VariablePattern& pattern, int dest) = 0;
+    
+  protected:
+    PatternVisitor() {}
+    
+  private:
+    NO_COPY(PatternVisitor);
   };
 }

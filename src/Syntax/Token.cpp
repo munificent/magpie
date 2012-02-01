@@ -19,6 +19,7 @@ namespace magpie
       case TOKEN_RIGHT_BRACKET: return "]";
       case TOKEN_LEFT_BRACE:    return "{";
       case TOKEN_RIGHT_BRACE:   return "}";
+      case TOKEN_EQUALS:        return "=";
       case TOKEN_PLUS:          return "+";
       case TOKEN_MINUS:         return "-";
       case TOKEN_STAR:          return "*";

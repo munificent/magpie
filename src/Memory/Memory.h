@@ -92,10 +92,10 @@ namespace magpie
     GcBase* object_;
     
     friend class Memory;
-    template<class> friend class gc;
+    template <class> friend class gc;
     // This is so that temps with different type arguments can access each
     // other's privates.
-    template<class> friend class temp;
+    template <class> friend class temp;
   };
   
   template <class T>

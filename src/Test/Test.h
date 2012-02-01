@@ -2,7 +2,6 @@
 
 #include <iostream>
 
-#include "GC.h"
 #include "Memory.h"
 #include "RootSource.h"
 

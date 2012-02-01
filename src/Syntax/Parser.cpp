@@ -15,6 +15,7 @@ namespace magpie
     { NULL,                 NULL, -1 },                 // TOKEN_RIGHT_BRACKET
     { NULL,                 NULL, -1 },                 // TOKEN_LEFT_BRACE
     { NULL,                 NULL, -1 },                 // TOKEN_RIGHT_BRACE
+    { NULL,                 NULL, -1 },                 // TOKEN_EQUALS
     { NULL,                 &Parser::binaryOp, 7 },     // TOKEN_PLUS
     { NULL,                 &Parser::binaryOp, 7 },     // TOKEN_MINUS
     { NULL,                 &Parser::binaryOp, 8 },     // TOKEN_STAR
@@ -37,8 +38,8 @@ namespace magpie
     { NULL,                 NULL, -1 },                 // TOKEN_RETURN
     { NULL,                 NULL, -1 },                 // TOKEN_THEN
     { &Parser::boolean,     NULL, -1 },                 // TOKEN_TRUE
-    { NULL,                 NULL, -1 },                 // TOKEN_VAL
-    { NULL,                 NULL, -1 },                 // TOKEN_VAR
+    { &Parser::variable,    NULL, -1 },                 // TOKEN_VAL
+    { &Parser::variable,    NULL, -1 },                 // TOKEN_VAR
     { NULL,                 NULL, -1 },                 // TOKEN_WHILE
     { NULL,                 NULL, -1 },                 // TOKEN_XOR
 
@@ -51,81 +52,29 @@ namespace magpie
     { NULL,                 NULL, -1 }                  // TOKEN_EOF
   };
   
-  // TODO(bob): Figure out full precedence table.
-  Parser::Parselet Parser::patterns_[] = {
-    // Punctuators.
-    { NULL,                 NULL, -1 },                 // TOKEN_LEFT_PAREN
-    { NULL,                 NULL, -1 },                 // TOKEN_RIGHT_PAREN
-    { NULL,                 NULL, -1 },                 // TOKEN_LEFT_BRACKET
-    { NULL,                 NULL, -1 },                 // TOKEN_RIGHT_BRACKET
-    { NULL,                 NULL, -1 },                 // TOKEN_LEFT_BRACE
-    { NULL,                 NULL, -1 },                 // TOKEN_RIGHT_BRACE
-    { NULL,                 NULL, -1 },                 // TOKEN_PLUS
-    { NULL,                 NULL, -1 },                 // TOKEN_MINUS
-    { NULL,                 NULL, -1 },                 // TOKEN_STAR
-    { NULL,                 NULL, -1 },                 // TOKEN_SLASH
-    { NULL,                 NULL, -1 },                 // TOKEN_PERCENT
-    
-    // Keywords.
-    { NULL,                 NULL, -1 },                 // TOKEN_AND
-    { NULL,                 NULL, -1 },                 // TOKEN_CASE
-    { NULL,                 NULL, -1 },                 // TOKEN_DEF
-    { NULL,                 NULL, -1 },                 // TOKEN_DO
-    { NULL,                 NULL, -1 },                 // TOKEN_ELSE
-    { NULL,                 NULL, -1 },                 // TOKEN_FALSE
-    { NULL,                 NULL, -1 },                 // TOKEN_FOR
-    { NULL,                 NULL, -1 },                 // TOKEN_IF
-    { NULL,                 NULL, -1 },                 // TOKEN_IS
-    { NULL,                 NULL, -1 },                 // TOKEN_MATCH
-    { NULL,                 NULL, -1 },                 // TOKEN_NOT
-    { NULL,                 NULL, -1 },                 // TOKEN_OR
-    { NULL,                 NULL, -1 },                 // TOKEN_RETURN
-    { NULL,                 NULL, -1 },                 // TOKEN_THEN
-    { NULL,                 NULL, -1 },                 // TOKEN_TRUE
-    { NULL,                 NULL, -1 },                 // TOKEN_VAL
-    { NULL,                 NULL, -1 },                 // TOKEN_VAR
-    { NULL,                 NULL, -1 },                 // TOKEN_WHILE
-    { NULL,                 NULL, -1 },                 // TOKEN_XOR
-    
-    { NULL,                 NULL, -1 },                 // TOKEN_NAME
-    { NULL,                 NULL, -1 },                 // TOKEN_NUMBER
-    { NULL,                 NULL, -1 },                 // TOKEN_STRING
-    
-    { NULL,                 NULL, -1 },                 // TOKEN_LINE
-    { NULL,                 NULL, -1 },                 // TOKEN_ERROR
-    { NULL,                 NULL, -1 }                  // TOKEN_EOF
-  };
-  
   temp<Node> Parser::parseExpression(int precedence)
   {
-    return parsePrecedence(expressions_, precedence);
-  }
-  
-  temp<Node> Parser::parsePrecedence(Parselet parselets[], int precedence)
-  {
-    // Pratt operator precedence parser. See this for more:
-    // http://journal.stuffwithstuff.com/2011/03/19/pratt-parsers-expression-parsing-made-easy/
     AllocScope scope;
     temp<Token> token = consume();
-    PrefixParseFn prefix = parselets[token->type()].prefix;
-
+    PrefixParseFn prefix = expressions_[token->type()].prefix;
+    
     if (prefix == NULL)
     {
       // TODO(bob): Report error better.
       std::cout << "No prefix parser for " << token << "." << std::endl;
       return temp<Node>();
     }
-
+    
     temp<Node> left = (this->*prefix)(token);
-
-    while (precedence < parselets[current().type()].precedence)
+    
+    while (precedence < expressions_[current().type()].precedence)
     {
       token = consume();
-
-      InfixParseFn infix = parselets[token->type()].infix;
+      
+      InfixParseFn infix = expressions_[token->type()].infix;
       left = (this->*infix)(left, token);
     }
-
+    
     return scope.close(left);
   }
   
@@ -152,10 +101,22 @@ namespace magpie
   
   temp<Node> Parser::number(temp<Token> token)
   {
-    double number = atof(token->text().cString());
+    double number = atof(token->text()->cString());
     return NumberNode::create(number);
   }
+  
+  temp<Node> Parser::variable(temp<Token> token)
+  {
+    bool isMutable = token->type() == TOKEN_VAR;
 
+    temp<Pattern> pattern = parsePattern();
+    consume(TOKEN_EQUALS, "Expect '=' after variable declaration.");
+    // TODO(bob): What precedence?
+    temp<Node> value = parseExpression();
+    
+    return VariableNode::create(isMutable, pattern, value);
+  }
+  
   temp<Node> Parser::binaryOp(temp<Node> left, temp<Token> token)
   {
     // TODO(bob): Support right-associative infix. Needs to do precedence
@@ -165,9 +126,22 @@ namespace magpie
     return BinaryOpNode::create(left, token->type(), right);
   }
   
-  temp<Node> Parser::parsePattern(int precedence)
+  temp<Pattern> Parser::parsePattern()
   {
-    return parsePrecedence(patterns_, precedence);
+    return variablePattern();
+  }
+  
+  temp<Pattern> Parser::variablePattern()
+  {
+    if (lookAhead(TOKEN_NAME))
+    {
+      return VariablePattern::create(consume()->text());
+    }
+    else
+    {
+      error("Expected pattern.");
+      return temp<Pattern>();
+    }
   }
   
   const Token& Parser::current()

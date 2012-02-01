@@ -13,7 +13,11 @@ namespace magpie
   
   Compiler::Compiler()
   : NodeVisitor(),
+    locals_(),
+    code_(),
+    constants_(),
     numInUseRegisters_(0),
+    variableStart_(0),
     maxRegisters_(0)
   {}
 
@@ -28,6 +32,9 @@ namespace magpie
       mLocals.Add(params[i]);
     }
     */
+    
+    // Add a fake local for it so that local slots line up with their registers.
+    locals_.add(String::create("(return)"));
     
     int result = compileExpressionOrConstant(node);
     write(OP_END, result);
@@ -82,6 +89,43 @@ namespace magpie
     write(OP_CONSTANT, index, dest);
   }
   
+  void Compiler::visit(const VariableNode& node, int dest)
+  {
+    // Reserve the registers up front. This way we'll compile the value to
+    // a slot *after* them. We want registers to come before temporaries
+    // because they don't have nice stack-like semantics like temporary
+    // registers do.
+    reserveVariables(node.pattern()->countVariables());
+    
+    // Compile the value.
+    int valueReg = allocateRegister();
+    node.value()->accept(*this, valueReg);
+    
+    // TODO(bob): Handle mutable variables.
+    
+    // Now pattern match on it.
+    node.pattern()->accept(*this, valueReg);
+    
+    // Copy the final result.
+    // TODO(bob): Omit this in cases where it won't be used. Most variable
+    // declarations are just in sequences.
+    write(OP_MOVE, valueReg, dest);
+    
+    releaseRegister(); // valueReg.
+  }
+  
+  void Compiler::visit(const VariablePattern& pattern, int value)
+  {
+    // Declare the variable.
+    locals_.add(pattern.name());
+    int variable = allocateVariable();
+    ASSERT(locals_.count() - 1 == variable,
+           "Locals array needs to be in sync with registers for locals.");
+    
+    // Copy the value into the new variable.
+    write(OP_MOVE, value, variable);
+  }
+
   void Compiler::compileInfix(const BinaryOpNode& node, OpCode op, int dest)
   {
     int a = compileExpressionOrConstant(node.left());
@@ -98,7 +142,8 @@ namespace magpie
     const NumberNode* number = node.asNumberNode();
     if (number == NULL)
     {
-      int dest = reserveRegister();
+      int dest = allocateRegister();
+      
       node.accept(*this, dest);
       return dest;
     }
@@ -139,7 +184,7 @@ namespace magpie
     code_[from] = MAKE_ABC(a, b, c, op);
   }
 
-  int Compiler::reserveRegister()
+  int Compiler::allocateRegister()
   {
     numInUseRegisters_++;
     
@@ -155,5 +200,25 @@ namespace magpie
   {
     ASSERT(numInUseRegisters_ > 0, "Released too many registers.");
     numInUseRegisters_--;
+  }
+  
+  void Compiler::reserveVariables(int count)
+  {
+    variableStart_ = numInUseRegisters_;
+    
+    // Reserve the registers for them.
+    numInUseRegisters_++;
+    if (maxRegisters_ < numInUseRegisters_)
+    {
+      maxRegisters_ = numInUseRegisters_;
+    }
+  }
+
+  int Compiler::allocateVariable()
+  {
+    ASSERT(variableStart_ < numInUseRegisters_,
+        "Cannot allocate an unreserved variable.");
+    
+    return variableStart_++;
   }
 }

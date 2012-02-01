@@ -34,18 +34,18 @@ namespace magpie
       int           precedence;
     };
     
-    // Entrypoint for the generic operator precedence parser.
-    temp<Node> parsePrecedence(Parselet parselets[], int precedence);
-    
     // Prefix expression parsers.
     temp<Node> boolean(temp<Token> token);
     temp<Node> ifThenElse(temp<Token> token);
     temp<Node> number(temp<Token> token);
+    temp<Node> variable(temp<Token> token);
 
     // Infix expression parsers.
     temp<Node> binaryOp(temp<Node> left, temp<Token> token);
 
-    temp<Node> parsePattern(int precedence = 0);
+    // Pattern parsing.
+    temp<Pattern> parsePattern();
+    temp<Pattern> variablePattern();
 
     // Gets the Token the parser is currently looking at.
     const Token& current();
@@ -83,7 +83,6 @@ namespace magpie
     void fillLookAhead(int count);
     
     static Parselet expressions_[TOKEN_NUM_TYPES];
-    static Parselet patterns_[TOKEN_NUM_TYPES];
     
     Lexer lexer_;
     

@@ -19,6 +19,7 @@ namespace magpie
     TOKEN_RIGHT_BRACKET,
     TOKEN_LEFT_BRACE,
     TOKEN_RIGHT_BRACE,
+    TOKEN_EQUALS,
     TOKEN_PLUS,
     TOKEN_MINUS,
     TOKEN_STAR,
@@ -66,8 +67,8 @@ namespace magpie
 
     static const char* typeString(TokenType type);
     
-    TokenType     type() const { return type_; }
-    const String& text() const { return *text_; }
+    TokenType        type() const { return type_; }
+    const gc<String> text() const { return text_; }
     
     // Gets whether this token is of the given type.
     bool is(TokenType type) const { return type_ == type; }

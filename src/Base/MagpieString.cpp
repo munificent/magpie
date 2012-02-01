@@ -43,7 +43,7 @@ namespace magpie
 
   bool String::operator ==(const char* right) const
   {
-    return strncmp(chars_, right, length_) == 0;
+    return strcmp(chars_, right) == 0;
   }
 
   bool String::operator !=(const char* right) const

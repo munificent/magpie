@@ -64,6 +64,14 @@ namespace magpie
     EXPECT_FALSE("something" != *s);
     EXPECT_FALSE("else" == *s);
     EXPECT("else" != *s);
+
+    // Make sure substrings don't appear equal.
+    temp<String> s2 = String::create("abc");
+
+    EXPECT_FALSE("abcd" == *s2);
+    EXPECT_FALSE(*s2 == "abcd");
+    EXPECT_FALSE("ab" == *s2);
+    EXPECT_FALSE(*s2 == "ab");
   }
 
   void StringTests::substring()

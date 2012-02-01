@@ -86,5 +86,38 @@ namespace magpie
   {
     out << value_;
   }
+  
+  temp<VariableNode> VariableNode::create(bool isMutable, gc<Pattern> pattern,
+                                          gc<Node> value)
+  {
+    return Memory::makeTemp(new VariableNode(isMutable, pattern, value));
+  }
+  
+  VariableNode::VariableNode(bool isMutable, gc<Pattern> pattern,
+                             gc<Node> value)
+  : isMutable_(isMutable),
+    pattern_(pattern),
+    value_(value)
+  {}
+  
+  void VariableNode::trace(std::ostream& out) const
+  {
+    out << (isMutable_ ? "var " : "val ");
+    out << pattern_ << " = " << value_;
+  }
+  
+  temp<VariablePattern> VariablePattern::create(gc<String> name)
+  {
+    return Memory::makeTemp(new VariablePattern(name));
+  }
+  
+  VariablePattern::VariablePattern(gc<String> name)
+  : name_(name)
+  {}
+  
+  void VariablePattern::trace(std::ostream& out) const
+  {
+    out << name_;
+  }
 }
 

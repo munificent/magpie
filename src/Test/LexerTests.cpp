@@ -19,27 +19,27 @@ namespace magpie
 
     temp<Token> token = lexer.readToken();
     EXPECT_EQUAL(TOKEN_LEFT_PAREN, token->type());
-    EXPECT_EQUAL("(", token->text());
+    EXPECT_EQUAL("(", *token->text());
 
     token = lexer.readToken();
     EXPECT_EQUAL(TOKEN_RIGHT_PAREN, token->type());
-    EXPECT_EQUAL(")", token->text());
+    EXPECT_EQUAL(")", *token->text());
 
     token = lexer.readToken();
     EXPECT_EQUAL(TOKEN_LEFT_BRACKET, token->type());
-    EXPECT_EQUAL("[", token->text());
+    EXPECT_EQUAL("[", *token->text());
 
     token = lexer.readToken();
     EXPECT_EQUAL(TOKEN_RIGHT_BRACKET, token->type());
-    EXPECT_EQUAL("]", token->text());
+    EXPECT_EQUAL("]", *token->text());
 
     token = lexer.readToken();
     EXPECT_EQUAL(TOKEN_LEFT_BRACE, token->type());
-    EXPECT_EQUAL("{", token->text());
+    EXPECT_EQUAL("{", *token->text());
 
     token = lexer.readToken();
     EXPECT_EQUAL(TOKEN_RIGHT_BRACE, token->type());
-    EXPECT_EQUAL("}", token->text());
+    EXPECT_EQUAL("}", *token->text());
   }
 }
 

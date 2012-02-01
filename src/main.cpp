@@ -58,7 +58,8 @@ int main(int argc, char * const argv[])
   }
   */
   
-  temp<String> source = String::create("if false then 2 + 3 else 4 * 5");
+  temp<String> source = String::create("var i = 3");
+  //  temp<String> source = String::create("if false then 2 + 3 else 4 * 5");
   Parser parser(source);
   temp<Node> node = parser.parseExpression();
   
