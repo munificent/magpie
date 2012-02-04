@@ -43,7 +43,7 @@ namespace magpie
     { NULL,                 NULL, -1 },                 // TOKEN_WHILE
     { NULL,                 NULL, -1 },                 // TOKEN_XOR
 
-    { NULL,                 NULL, -1 },                 // TOKEN_NAME
+    { &Parser::name,        NULL, -1 },                 // TOKEN_NAME
     { &Parser::number,      NULL, -1 },                 // TOKEN_NUMBER
     { NULL,                 NULL, -1 },                 // TOKEN_STRING
 
@@ -51,8 +51,28 @@ namespace magpie
     { NULL,                 NULL, -1 },                 // TOKEN_ERROR
     { NULL,                 NULL, -1 }                  // TOKEN_EOF
   };
+
+  temp<Node> Parser::parseExpression()
+  {
+    return sequence();
+  }
   
-  temp<Node> Parser::parseExpression(int precedence)
+  temp<Node> Parser::sequence()
+  {
+    Array<gc<Node> > exprs;
+    
+    do
+    {
+      exprs.add(parsePrecedence());
+    }
+    while (match(TOKEN_LINE));
+    
+    // TODO(bob): Don't wrap in a sequence if there's just one.
+    
+    return SequenceNode::create(exprs);
+  }
+  
+  temp<Node> Parser::parsePrecedence(int precedence)
   {
     AllocScope scope;
     temp<Token> token = consume();
@@ -87,16 +107,21 @@ namespace magpie
   {
     AllocScope scope;
     
-    temp<Node> condition = parseExpression();
+    temp<Node> condition = parsePrecedence();
     consume(TOKEN_THEN, "Expect 'then' after 'if' condition.");
 
     // TODO(bob): Block bodies.
-    temp<Node> thenArm = parseExpression();
+    temp<Node> thenArm = parsePrecedence();
     // TODO(bob): Allow omitting 'else'.
     consume(TOKEN_ELSE, "Expect 'else' after 'then' arm.");
-    temp<Node> elseArm = parseExpression();
+    temp<Node> elseArm = parsePrecedence();
     
     return scope.close(IfNode::create(condition, thenArm, elseArm));
+  }
+  
+  temp<Node> Parser::name(temp<Token> token)
+  {
+    return NameNode::create(token->text());
   }
   
   temp<Node> Parser::number(temp<Token> token)
@@ -112,7 +137,7 @@ namespace magpie
     temp<Pattern> pattern = parsePattern();
     consume(TOKEN_EQUALS, "Expect '=' after variable declaration.");
     // TODO(bob): What precedence?
-    temp<Node> value = parseExpression();
+    temp<Node> value = parsePrecedence();
     
     return VariableNode::create(isMutable, pattern, value);
   }
@@ -121,7 +146,7 @@ namespace magpie
   {
     // TODO(bob): Support right-associative infix. Needs to do precedence
     // - 1 here, to be right-assoc.
-    temp<Node> right = parseExpression(expressions_[token->type()].precedence);
+    temp<Node> right = parsePrecedence(expressions_[token->type()].precedence);
     
     return BinaryOpNode::create(left, token->type(), right);
   }

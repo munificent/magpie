@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Array.h"
 #include "Macros.h"
 #include "Managed.h"
 #include "NodeVisitor.h"
@@ -38,7 +39,9 @@ namespace magpie
     virtual const BoolNode*     asBoolNode()     const { return NULL; }
     virtual const BinaryOpNode* asBinaryOpNode() const { return NULL; }
     virtual const IfNode*       asIfNode()       const { return NULL; }
+    virtual const NameNode*     asNameNode()     const { return NULL; }
     virtual const NumberNode*   asNumberNode()   const { return NULL; }
+    virtual const SequenceNode* asSequenceNode() const { return NULL; }
     virtual const VariableNode* asVariableNode() const { return NULL; }
   };
   
@@ -108,6 +111,24 @@ namespace magpie
     gc<Node> elseArm_;
   };
   
+  // A named variable reference.
+  class NameNode : public Node
+  {
+  public:
+    static temp<NameNode> create(gc<String> name);
+    
+    DECLARE_NODE(NameNode);
+    
+    gc<String> name() const { return name_; }
+    
+    virtual void trace(std::ostream& out) const;
+    
+  private:
+    NameNode(gc<String> name);
+    
+    gc<String> name_;
+  };
+  
   // A number literal.
   class NumberNode : public Node
   {
@@ -124,6 +145,24 @@ namespace magpie
     NumberNode(double value);
     
     double value_;
+  };
+  
+  // A sequence of line- or semicolon-separated expressions.
+  class SequenceNode : public Node
+  {
+  public:
+    static temp<SequenceNode> create(const Array<gc<Node> >& expressions);
+    
+    DECLARE_NODE(SequenceNode);
+    
+    const Array<gc<Node> >& expressions() const { return expressions_; }
+    
+    virtual void trace(std::ostream& out) const;
+    
+  private:
+    SequenceNode(const Array<gc<Node> >& expressions);
+    
+    Array<gc<Node> > expressions_;
   };
   
   // A 'var' or 'val' variable declaration.

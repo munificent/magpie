@@ -83,10 +83,28 @@ namespace magpie
     endJump(jumpPastElse, OP_JUMP, code_.count() - jumpPastElse - 1);
   }
   
+  void Compiler::visit(const NameNode& node, int dest)
+  {
+    int local = locals_.indexOf(node.name());
+    // TODO(bob): Handle unknown variable error.
+    write(OP_MOVE, local, dest);
+  }
+  
   void Compiler::visit(const NumberNode& node, int dest)
   {
     int index = compileConstant(node);
     write(OP_CONSTANT, index, dest);
+  }
+  
+  void Compiler::visit(const SequenceNode& node, int dest)
+  {
+    for (int i = 0; i < node.expressions().count(); i++)
+    {
+      // TODO(bob): Could compile all but the last expression with a special
+      // sigil dest that means "won't use" and some nodes could check that to
+      // omit some unnecessary instructions.
+      node.expressions()[i]->accept(*this, dest);
+    }
   }
   
   void Compiler::visit(const VariableNode& node, int dest)

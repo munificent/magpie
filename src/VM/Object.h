@@ -48,7 +48,7 @@ namespace magpie
     
     virtual void trace(std::ostream& stream) const
     {
-      stream << value_;
+      stream << (value_ ? "true" : "false");
     }
     
   private:

@@ -166,7 +166,9 @@ namespace magpie
       // Have to either both be null or neither.
       if (isNull() != other.isNull()) return false;
       
-      return *object_ == *other.object_;
+      T* left = static_cast<T*>(object_);
+      S* right = static_cast<S*>(other.object_);
+      return *left == *right;
     }
     
     // Compares two references. References are not equal if they refer to

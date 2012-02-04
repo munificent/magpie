@@ -73,6 +73,20 @@ namespace magpie
     }
   }
   
+  temp<NameNode> NameNode::create(gc<String> name)
+  {
+    return Memory::makeTemp(new NameNode(name));
+  }
+  
+  NameNode::NameNode(gc<String> name)
+  : name_(name)
+  {}
+  
+  void NameNode::trace(std::ostream& out) const
+  {
+    out << name_;
+  }
+  
   temp<NumberNode> NumberNode::create(double value)
   {
     return Memory::makeTemp(new NumberNode(value));
@@ -85,6 +99,23 @@ namespace magpie
   void NumberNode::trace(std::ostream& out) const
   {
     out << value_;
+  }
+  
+  temp<SequenceNode> SequenceNode::create(const Array<gc<Node> >& expressions)
+  {
+    return Memory::makeTemp(new SequenceNode(expressions));
+  }
+  
+  SequenceNode::SequenceNode(const Array<gc<Node> >& expressions)
+  : expressions_(expressions)
+  {}
+  
+  void SequenceNode::trace(std::ostream& out) const
+  {
+    for (int i = 0; i < expressions_.count(); i++)
+    {
+      out << expressions_[i] << "\n";
+    }
   }
   
   temp<VariableNode> VariableNode::create(bool isMutable, gc<Pattern> pattern,

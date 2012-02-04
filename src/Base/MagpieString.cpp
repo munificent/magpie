@@ -72,7 +72,7 @@ namespace magpie
   
   void String::trace(std::ostream& out) const
   {
-    out << "\"" << chars_ << "\"";
+    out << chars_;
   }
 
   size_t String::calcStringSize(int length)

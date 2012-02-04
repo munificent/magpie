@@ -20,8 +20,7 @@ namespace magpie
       hadError_(false)
     {}
     
-    // Parses an expression with the given precedence or higher.
-    temp<Node> parseExpression(int precedence = 0);
+    temp<Node> parseExpression();
     
   private:
     typedef temp<Node> (Parser::*PrefixParseFn)(temp<Token> token);
@@ -34,9 +33,15 @@ namespace magpie
       int           precedence;
     };
     
+    temp<Node> sequence();
+
+    // Parses an expression with the given precedence or higher.
+    temp<Node> parsePrecedence(int precedence = 0);
+    
     // Prefix expression parsers.
     temp<Node> boolean(temp<Token> token);
     temp<Node> ifThenElse(temp<Token> token);
+    temp<Node> name(temp<Token> token);
     temp<Node> number(temp<Token> token);
     temp<Node> variable(temp<Token> token);
 

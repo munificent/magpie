@@ -99,7 +99,18 @@ namespace magpie
       items_[count_ - 1] = T();
       count_--;
     }
+    
+    // Finds the index of the given item in the array. Returns -1 if not found.
+    int indexOf(const T & value) const
+    {
+      for (int i = 0; i < count_; i++)
+      {
+        if (items_[i] == value) return i;
+      }
 
+      return -1;
+    }
+    
     // Assigns the contents of the given array to this one. Clears this array
     // and refills it with the contents of the other.
     Array & operator=(const Array & other)
