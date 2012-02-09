@@ -73,6 +73,27 @@ namespace magpie
     }
   }
   
+  temp<MethodNode> MethodNode::create(gc<String> name, gc<Node> body)
+  {
+    return Memory::makeTemp(new MethodNode(name, body));
+  }
+  
+  MethodNode::MethodNode(gc<String> name, gc<Node> body)
+  : name_(name),
+    body_(body)
+  {}
+  
+  void MethodNode::reach()
+  {
+    Memory::reach(name_);
+    Memory::reach(body_);
+  }
+  
+  void MethodNode::trace(std::ostream& out) const
+  {
+    out << "def " << name_ << "()" << body_;
+  }
+  
   temp<NameNode> NameNode::create(gc<String> name)
   {
     return Memory::makeTemp(new NameNode(name));
@@ -81,6 +102,11 @@ namespace magpie
   NameNode::NameNode(gc<String> name)
   : name_(name)
   {}
+  
+  void NameNode::reach()
+  {
+    Memory::reach(name_);
+  }
   
   void NameNode::trace(std::ostream& out) const
   {

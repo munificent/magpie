@@ -39,6 +39,7 @@ namespace magpie
     virtual const BoolNode*     asBoolNode()     const { return NULL; }
     virtual const BinaryOpNode* asBinaryOpNode() const { return NULL; }
     virtual const IfNode*       asIfNode()       const { return NULL; }
+    virtual const MethodNode*   asMethodNode()   const { return NULL; }
     virtual const NameNode*     asNameNode()     const { return NULL; }
     virtual const NumberNode*   asNumberNode()   const { return NULL; }
     virtual const SequenceNode* asSequenceNode() const { return NULL; }
@@ -86,7 +87,7 @@ namespace magpie
     
     bool value_;
   };
-  
+   
   // An if-then-else expression.
   class IfNode : public Node
   {
@@ -111,6 +112,27 @@ namespace magpie
     gc<Node> elseArm_;
   };
   
+  // A method definition.
+  class MethodNode : public Node
+  {
+  public:
+    static temp<MethodNode> create(gc<String> name, gc<Node> body);
+    
+    DECLARE_NODE(MethodNode);
+    
+    gc<String> name() const { return name_; }
+    Node& body() const { return *body_; }
+    
+    virtual void reach();
+    virtual void trace(std::ostream& out) const;
+    
+  private:
+    MethodNode(gc<String> name, gc<Node> body);
+    
+    gc<String> name_;
+    gc<Node> body_;
+  };
+  
   // A named variable reference.
   class NameNode : public Node
   {
@@ -121,6 +143,7 @@ namespace magpie
     
     gc<String> name() const { return name_; }
     
+    virtual void reach();
     virtual void trace(std::ostream& out) const;
     
   private:

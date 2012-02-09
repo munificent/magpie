@@ -2,9 +2,25 @@
 #include "Method.h"
 #include "Node.h"
 #include "Object.h"
+#include "VM.h"
 
 namespace magpie
 {
+  void Compiler::compileProgram(VM& vm, const Node& node)
+  {
+    const SequenceNode* sequence = node.asSequenceNode();
+    ASSERT(sequence != NULL, "Top level should be sequence right now.");
+    
+    for (int i = 0; i < sequence->expressions().count(); i++)
+    {
+      const MethodNode* methodNode = sequence->expressions()[i]->asMethodNode();
+      ASSERT(methodNode != NULL, "Top level can only contain methods right now.");
+      
+      temp<Method> method = compileMethod(methodNode->body());
+      vm.globals().add(methodNode->name(), method);
+    }
+  }
+  
   temp<Method> Compiler::compileMethod(const Node& node)
   {
     Compiler compiler;
@@ -81,6 +97,11 @@ namespace magpie
     node.elseArm().accept(*this, dest);
       
     endJump(jumpPastElse, OP_JUMP, code_.count() - jumpPastElse - 1);
+  }
+  
+  void Compiler::visit(const MethodNode& node, int dest)
+  {
+    ASSERT(false, "Not implemented.");
   }
   
   void Compiler::visit(const NameNode& node, int dest)

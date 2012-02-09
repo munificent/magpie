@@ -1,4 +1,5 @@
 #include "Method.h"
+#include "MagpieString.h"
 
 namespace magpie
 {
@@ -13,5 +14,21 @@ namespace magpie
   {
     ASSERT_INDEX(index, constants_.count());
     return constants_[index];
+  }
+  
+  void MethodScope::add(gc<String> name, gc<Method> method)
+  {
+    names_.add(name);
+    methods_.add(method);
+  }
+  
+  gc<Method> MethodScope::findMain() const
+  {
+    for (int i = 0; i < methods_.count(); i++)
+    {
+      if (*names_[i] == "main") return methods_[i];
+    }
+    
+    return gc<Method>();
   }
 }

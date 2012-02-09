@@ -45,26 +45,15 @@ int main(int argc, char * const argv[])
   VM vm;
   AllocScope scope;
 
-  // Try lexing a file.
-  /*
-  temp<String> source = readFile("../../example/Fibonacci.mag");
-  Lexer lexer(source);
-  while (true)
-  {
-    AllocScope tokenScope;
-    temp<Token> token = lexer.readToken();
-    std::cout << token << std::endl;
-    if (token->type() == TOKEN_EOF) break;
-  }
-  */
-  
-  temp<String> source = String::create("var i = 123\ni");
-  //  temp<String> source = String::create("if false then 2 + 3 else 4 * 5");
+  // Read a file.
+  temp<String> source = readFile("../../example/Main.mag");
   Parser parser(source);
-  temp<Node> node = parser.parseExpression();
-  
+
+  temp<Node> node = parser.parseProgram();
   std::cout << node << std::endl;
-  temp<Method> method = Compiler::compileMethod(*node);
+  
+  Compiler::compileProgram(vm, *node);
+  gc<Method> method = vm.globals().findMain();
 
   temp<Object> result = vm.fiber().interpret(method);
   std::cout << result << std::endl;

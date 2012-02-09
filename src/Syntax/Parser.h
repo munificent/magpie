@@ -20,7 +20,7 @@ namespace magpie
       hadError_(false)
     {}
     
-    temp<Node> parseExpression();
+    temp<Node> parseProgram();
     
   private:
     typedef temp<Node> (Parser::*PrefixParseFn)(temp<Token> token);
@@ -33,7 +33,8 @@ namespace magpie
       int           precedence;
     };
     
-    temp<Node> sequence();
+    temp<Node> parseBlock();
+    temp<Node> statementLike();
 
     // Parses an expression with the given precedence or higher.
     temp<Node> parsePrecedence(int precedence = 0);

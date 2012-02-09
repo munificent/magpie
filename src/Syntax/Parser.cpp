@@ -28,6 +28,7 @@ namespace magpie
     { NULL,                 NULL, -1 },                 // TOKEN_DEF
     { NULL,                 NULL, -1 },                 // TOKEN_DO
     { NULL,                 NULL, -1 },                 // TOKEN_ELSE
+    { NULL,                 NULL, -1 },                 // TOKEN_END
     { &Parser::boolean,     NULL, -1 },                 // TOKEN_FALSE
     { NULL,                 NULL, -1 },                 // TOKEN_FOR
     { &Parser::ifThenElse,  NULL, -1 },                 // TOKEN_IF
@@ -52,24 +53,67 @@ namespace magpie
     { NULL,                 NULL, -1 }                  // TOKEN_EOF
   };
 
-  temp<Node> Parser::parseExpression()
+  temp<Node> Parser::parseProgram()
   {
-    return sequence();
-  }
-  
-  temp<Node> Parser::sequence()
-  {
+    // TODO(bob): Right now this just returns a sequence. Should probably have
+    // a different node type for the top level.
     Array<gc<Node> > exprs;
     
     do
     {
-      exprs.add(parsePrecedence());
+      exprs.add(statementLike());
     }
     while (match(TOKEN_LINE));
     
-    // TODO(bob): Don't wrap in a sequence if there's just one.
-    
     return SequenceNode::create(exprs);
+  }
+  
+  temp<Node> Parser::parseBlock()
+  {
+    // If we have a newline, then it's an actual block, otherwise it's a
+    // single expression.
+    if (match(TOKEN_LINE))
+    {
+      Array<gc<Node> > exprs;
+      
+      do
+      {
+        if (match(TOKEN_END)) break;
+        exprs.add(statementLike());
+      }
+      while (match(TOKEN_LINE));
+      
+      // TODO(bob): Don't wrap in a sequence if there's just one.
+      return SequenceNode::create(exprs);
+    }
+    else
+    {
+      return statementLike();
+    }
+  }
+
+  temp<Node> Parser::statementLike()
+  {
+    // TODO(rnystrom): Move if, var and val here.
+    if (match(TOKEN_DEF))
+    {
+      // Method definition.
+      temp<Token> name = consume(TOKEN_NAME,
+          "Expect a method name after 'def'.");
+      
+      // TODO(bob): Parse parameter pattern(s).
+      consume(TOKEN_LEFT_PAREN, "Temp.");
+      consume(TOKEN_RIGHT_PAREN, "Temp.");
+      
+      temp<Node> body = parseBlock();
+      
+      return MethodNode::create(name->text(), body);
+    }
+    else
+    {
+      // Otherwise it must be a normal expression.
+      return parsePrecedence();
+    }
   }
   
   temp<Node> Parser::parsePrecedence(int precedence)

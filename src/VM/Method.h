@@ -40,4 +40,16 @@ namespace magpie
     NO_COPY(Method);
   };
 
+  // TODO(bob): Move to separate file.
+  class MethodScope
+  {
+  public:
+    void add(gc<String> name, gc<Method> method);
+    
+    gc<Method> findMain() const;
+    
+  private:
+    Array<gc<Method> > methods_;
+    Array<gc<String> > names_;
+  };
 }

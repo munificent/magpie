@@ -17,7 +17,7 @@ namespace magpie
 
     temp<String> source = String::create("1+2*3 and 4/5+6%7");
     Parser parser(source);
-    temp<Node> node = parser.parseExpression();
+    temp<Node> node = parser.parseProgram();
     
     temp<String> text = node->toString();
     

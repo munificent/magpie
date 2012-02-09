@@ -31,6 +31,7 @@ namespace magpie
     TOKEN_CASE,
     TOKEN_DEF,
     TOKEN_DO,
+    TOKEN_END,
     TOKEN_ELSE,
     TOKEN_FALSE,
     TOKEN_FOR,

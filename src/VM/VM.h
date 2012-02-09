@@ -4,6 +4,7 @@
 #include "Lexer.h"
 #include "Macros.h"
 #include "Memory.h"
+#include "Method.h"
 #include "RootSource.h"
 
 namespace magpie
@@ -18,7 +19,10 @@ namespace magpie
 
     Fiber& fiber() { return *fiber_; }
 
+    MethodScope& globals() { return globals_; }
+    
   private:
+    MethodScope globals_;
     gc<Fiber> fiber_;
 
     NO_COPY(VM);
