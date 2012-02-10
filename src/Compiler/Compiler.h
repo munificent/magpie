@@ -8,13 +8,14 @@
 namespace magpie
 {
   class Method;
+  class ModuleAst;
   class Object;
   class VM;
   
   class Compiler : private NodeVisitor, private PatternVisitor
   {
   public:
-    static void compileProgram(VM& vm, const Node& node);
+    static void compileModule(VM& vm, gc<ModuleAst> module);
     static temp<Method> compileMethod(const Node& node);
     
     virtual ~Compiler() {}
@@ -27,7 +28,6 @@ namespace magpie
     virtual void visit(const BoolNode& node, int dest);
     virtual void visit(const BinaryOpNode& node, int dest);
     virtual void visit(const IfNode& node, int dest);
-    virtual void visit(const MethodNode& node, int dest);
     virtual void visit(const NameNode& node, int dest);
     virtual void visit(const NumberNode& node, int dest);
     virtual void visit(const SequenceNode& node, int dest);

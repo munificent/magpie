@@ -49,10 +49,10 @@ int main(int argc, char * const argv[])
   temp<String> source = readFile("../../example/Main.mag");
   Parser parser(source);
 
-  temp<Node> node = parser.parseProgram();
-  std::cout << node << std::endl;
+  temp<ModuleAst> module = parser.parseModule();
+  std::cout << module << std::endl;
   
-  Compiler::compileProgram(vm, *node);
+  Compiler::compileModule(vm, module);
   gc<Method> method = vm.globals().findMain();
 
   temp<Object> result = vm.fiber().interpret(method);

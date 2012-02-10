@@ -20,7 +20,7 @@ namespace magpie
       hadError_(false)
     {}
     
-    temp<Node> parseProgram();
+    temp<ModuleAst> parseModule();
     
   private:
     typedef temp<Node> (Parser::*PrefixParseFn)(temp<Token> token);
@@ -41,10 +41,8 @@ namespace magpie
     
     // Prefix expression parsers.
     temp<Node> boolean(temp<Token> token);
-    temp<Node> ifThenElse(temp<Token> token);
     temp<Node> name(temp<Token> token);
     temp<Node> number(temp<Token> token);
-    temp<Node> variable(temp<Token> token);
 
     // Infix expression parsers.
     temp<Node> binaryOp(temp<Node> left, temp<Token> token);

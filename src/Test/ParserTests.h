@@ -10,7 +10,7 @@ namespace magpie
     virtual void runTests();
 
   private:
-    void parseExpression();
+    void parseModule();
   };
 }
 

@@ -31,7 +31,7 @@ namespace magpie
     { NULL,                 NULL, -1 },                 // TOKEN_END
     { &Parser::boolean,     NULL, -1 },                 // TOKEN_FALSE
     { NULL,                 NULL, -1 },                 // TOKEN_FOR
-    { &Parser::ifThenElse,  NULL, -1 },                 // TOKEN_IF
+    { NULL,                 NULL, -1 },                 // TOKEN_IF
     { NULL,                 NULL, -1 },                 // TOKEN_IS
     { NULL,                 NULL, -1 },                 // TOKEN_MATCH
     { NULL,                 NULL, -1 },                 // TOKEN_NOT
@@ -39,8 +39,8 @@ namespace magpie
     { NULL,                 NULL, -1 },                 // TOKEN_RETURN
     { NULL,                 NULL, -1 },                 // TOKEN_THEN
     { &Parser::boolean,     NULL, -1 },                 // TOKEN_TRUE
-    { &Parser::variable,    NULL, -1 },                 // TOKEN_VAL
-    { &Parser::variable,    NULL, -1 },                 // TOKEN_VAR
+    { NULL,                 NULL, -1 },                 // TOKEN_VAL
+    { NULL,                 NULL, -1 },                 // TOKEN_VAR
     { NULL,                 NULL, -1 },                 // TOKEN_WHILE
     { NULL,                 NULL, -1 },                 // TOKEN_XOR
 
@@ -53,19 +53,30 @@ namespace magpie
     { NULL,                 NULL, -1 }                  // TOKEN_EOF
   };
 
-  temp<Node> Parser::parseProgram()
+  temp<ModuleAst> Parser::parseModule()
   {
     // TODO(bob): Right now this just returns a sequence. Should probably have
     // a different node type for the top level.
-    Array<gc<Node> > exprs;
+    Array<gc<MethodAst> > methods;
     
     do
     {
-      exprs.add(statementLike());
+      // Method definition.
+      consume(TOKEN_DEF, "The top level of a module contains only method definitions.");
+      temp<Token> name = consume(TOKEN_NAME,
+                                 "Expect a method name after 'def'.");
+      
+      // TODO(bob): Parse parameter pattern(s).
+      consume(TOKEN_LEFT_PAREN, "Temp.");
+      consume(TOKEN_RIGHT_PAREN, "Temp.");
+      
+      temp<Node> body = parseBlock();
+      
+      methods.add(MethodAst::create(name->text(), body));
     }
     while (match(TOKEN_LINE));
     
-    return SequenceNode::create(exprs);
+    return ModuleAst::create(methods);
   }
   
   temp<Node> Parser::parseBlock()
@@ -94,26 +105,36 @@ namespace magpie
 
   temp<Node> Parser::statementLike()
   {
-    // TODO(rnystrom): Move if, var and val here.
-    if (match(TOKEN_DEF))
+    AllocScope scope;
+    
+    if (match(TOKEN_IF))
     {
-      // Method definition.
-      temp<Token> name = consume(TOKEN_NAME,
-          "Expect a method name after 'def'.");
+      temp<Node> condition = parsePrecedence();
+      consume(TOKEN_THEN, "Expect 'then' after 'if' condition.");
       
-      // TODO(bob): Parse parameter pattern(s).
-      consume(TOKEN_LEFT_PAREN, "Temp.");
-      consume(TOKEN_RIGHT_PAREN, "Temp.");
+      // TODO(bob): Block bodies.
+      temp<Node> thenArm = parsePrecedence();
+      // TODO(bob): Allow omitting 'else'.
+      consume(TOKEN_ELSE, "Expect 'else' after 'then' arm.");
+      temp<Node> elseArm = parsePrecedence();
       
-      temp<Node> body = parseBlock();
-      
-      return MethodNode::create(name->text(), body);
+      return scope.close(IfNode::create(condition, thenArm, elseArm));
     }
-    else
+    
+    if (match(TOKEN_VAR) || match(TOKEN_VAL))
     {
-      // Otherwise it must be a normal expression.
-      return parsePrecedence();
+      // TODO(bob): Distinguish between var and val.
+      bool isMutable = false;
+      
+      temp<Pattern> pattern = parsePattern();
+      consume(TOKEN_EQUALS, "Expect '=' after variable declaration.");
+      // TODO(bob): What precedence?
+      temp<Node> value = parsePrecedence();
+      
+      return scope.close(VariableNode::create(isMutable, pattern, value));
     }
+    
+    return parsePrecedence();
   }
   
   temp<Node> Parser::parsePrecedence(int precedence)
@@ -147,22 +168,6 @@ namespace magpie
     return BoolNode::create(token->type() == TOKEN_TRUE);
   }
   
-  temp<Node> Parser::ifThenElse(temp<Token> token)
-  {
-    AllocScope scope;
-    
-    temp<Node> condition = parsePrecedence();
-    consume(TOKEN_THEN, "Expect 'then' after 'if' condition.");
-
-    // TODO(bob): Block bodies.
-    temp<Node> thenArm = parsePrecedence();
-    // TODO(bob): Allow omitting 'else'.
-    consume(TOKEN_ELSE, "Expect 'else' after 'then' arm.");
-    temp<Node> elseArm = parsePrecedence();
-    
-    return scope.close(IfNode::create(condition, thenArm, elseArm));
-  }
-  
   temp<Node> Parser::name(temp<Token> token)
   {
     return NameNode::create(token->text());
@@ -173,19 +178,7 @@ namespace magpie
     double number = atof(token->text()->cString());
     return NumberNode::create(number);
   }
-  
-  temp<Node> Parser::variable(temp<Token> token)
-  {
-    bool isMutable = token->type() == TOKEN_VAR;
-
-    temp<Pattern> pattern = parsePattern();
-    consume(TOKEN_EQUALS, "Expect '=' after variable declaration.");
-    // TODO(bob): What precedence?
-    temp<Node> value = parsePrecedence();
     
-    return VariableNode::create(isMutable, pattern, value);
-  }
-  
   temp<Node> Parser::binaryOp(temp<Node> left, temp<Token> token)
   {
     // TODO(bob): Support right-associative infix. Needs to do precedence

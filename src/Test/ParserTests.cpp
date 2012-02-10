@@ -8,18 +8,18 @@ namespace magpie
 {
   void ParserTests::runTests()
   {
-    parseExpression();
+    parseModule();
   }
 
-  void ParserTests::parseExpression()
+  void ParserTests::parseModule()
   {
     AllocScope scope;
 
-    temp<String> source = String::create("1+2*3 and 4/5+6%7");
+    temp<String> source = String::create("def foo()\n1+2*3 and 4/5+6%7\nend");
     Parser parser(source);
-    temp<Node> node = parser.parseProgram();
+    temp<ModuleAst> module = parser.parseModule();
     
-    temp<String> text = node->toString();
+    temp<String> text = module->toString();
     
     EXPECT_EQUAL("((1 + (2 * 3)) and ((4 / 5) + (6 % 7)))", *text);
   }

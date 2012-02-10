@@ -2,6 +2,44 @@
 
 namespace magpie
 {
+  temp<ModuleAst> ModuleAst::create(Array<gc<MethodAst> >& methods)
+  {
+    return Memory::makeTemp(new ModuleAst(methods));
+  }
+  
+  ModuleAst::ModuleAst(Array<gc<MethodAst> >& methods)
+  : methods_(methods)
+  {}
+  
+  void ModuleAst::reach()
+  {
+    for (int i = 0; i < methods_.count(); i++)
+    {
+      Memory::reach(methods_[i]);
+    }
+  }
+  
+  temp<MethodAst> MethodAst::create(gc<String> name, gc<Node> body)
+  {
+    return Memory::makeTemp(new MethodAst(name, body));
+  }
+  
+  MethodAst::MethodAst(gc<String> name, gc<Node> body)
+  : name_(name),
+    body_(body)
+  {}
+  
+  void MethodAst::reach()
+  {
+    Memory::reach(name_);
+    Memory::reach(body_);
+  }
+  
+  void MethodAst::trace(std::ostream& out) const
+  {
+    out << "def " << name_ << "()" << body_;
+  }
+  
   temp<BinaryOpNode> BinaryOpNode::create(gc<Node> left, TokenType type,
                                           gc<Node> right)
   {
@@ -72,28 +110,7 @@ namespace magpie
       out << " else " << elseArm_ << ")";
     }
   }
-  
-  temp<MethodNode> MethodNode::create(gc<String> name, gc<Node> body)
-  {
-    return Memory::makeTemp(new MethodNode(name, body));
-  }
-  
-  MethodNode::MethodNode(gc<String> name, gc<Node> body)
-  : name_(name),
-    body_(body)
-  {}
-  
-  void MethodNode::reach()
-  {
-    Memory::reach(name_);
-    Memory::reach(body_);
-  }
-  
-  void MethodNode::trace(std::ostream& out) const
-  {
-    out << "def " << name_ << "()" << body_;
-  }
-  
+    
   temp<NameNode> NameNode::create(gc<String> name)
   {
     return Memory::makeTemp(new NameNode(name));

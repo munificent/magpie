@@ -24,7 +24,42 @@ namespace magpie
 {
   using std::ostream;
   
+  class MethodAst;
   class Pattern;
+  
+  class ModuleAst : public Managed
+  {
+  public:
+    temp<ModuleAst> static create(Array<gc<MethodAst> >& methods);
+    
+    const Array<gc<MethodAst> > methods() const { return methods_; }
+    
+    virtual void reach();
+
+  private:
+    ModuleAst(Array<gc<MethodAst> >& methods);
+    
+    Array<gc<MethodAst> > methods_;
+  };
+  
+  // A method definition.
+  class MethodAst : public Managed
+  {
+  public:
+    static temp<MethodAst> create(gc<String> name, gc<Node> body);
+    
+    gc<String> name() const { return name_; }
+    Node& body() const { return *body_; }
+    
+    virtual void reach();
+    virtual void trace(std::ostream& out) const;
+    
+  private:
+    MethodAst(gc<String> name, gc<Node> body);
+    
+    gc<String> name_;
+    gc<Node> body_;
+  };
   
   // Base class for all AST node classes.
   class Node : public Managed
@@ -39,7 +74,6 @@ namespace magpie
     virtual const BoolNode*     asBoolNode()     const { return NULL; }
     virtual const BinaryOpNode* asBinaryOpNode() const { return NULL; }
     virtual const IfNode*       asIfNode()       const { return NULL; }
-    virtual const MethodNode*   asMethodNode()   const { return NULL; }
     virtual const NameNode*     asNameNode()     const { return NULL; }
     virtual const NumberNode*   asNumberNode()   const { return NULL; }
     virtual const SequenceNode* asSequenceNode() const { return NULL; }
@@ -110,27 +144,6 @@ namespace magpie
     gc<Node> condition_;
     gc<Node> thenArm_;
     gc<Node> elseArm_;
-  };
-  
-  // A method definition.
-  class MethodNode : public Node
-  {
-  public:
-    static temp<MethodNode> create(gc<String> name, gc<Node> body);
-    
-    DECLARE_NODE(MethodNode);
-    
-    gc<String> name() const { return name_; }
-    Node& body() const { return *body_; }
-    
-    virtual void reach();
-    virtual void trace(std::ostream& out) const;
-    
-  private:
-    MethodNode(gc<String> name, gc<Node> body);
-    
-    gc<String> name_;
-    gc<Node> body_;
   };
   
   // A named variable reference.

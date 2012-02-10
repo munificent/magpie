@@ -10,7 +10,6 @@ namespace magpie
   class BoolNode;
   class IfNode;
   class Lexer;
-  class MethodNode;
   class Node;
   class NameNode;
   class NumberNode;
@@ -27,7 +26,6 @@ namespace magpie
     virtual void visit(const BoolNode& node, int dest) = 0;
     virtual void visit(const BinaryOpNode& node, int dest) = 0;
     virtual void visit(const IfNode& node, int dest) = 0;
-    virtual void visit(const MethodNode& node, int dest) = 0;
     virtual void visit(const NameNode& node, int dest) = 0;
     virtual void visit(const NumberNode& node, int dest) = 0;
     virtual void visit(const SequenceNode& node, int dest) = 0;
