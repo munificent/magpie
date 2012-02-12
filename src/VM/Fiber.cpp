@@ -62,29 +62,18 @@ namespace magpie
           break;
         }
           
-          /*
         case OP_CALL:
         {
-          unsigned char argReg = GET_A(instruction);
-          unsigned char methodReg = GET_B(instruction);
-
-          gc<Object> arg = frame.getRegister(argReg);
-          gc<Object> methodObj = frame.getRegister(methodReg);
-          Multimethod* multimethod = frame.getRegister(methodReg)->asMultimethod();
-
-          gc<Chunk> method = multimethod->select(arg);
-          // TODO(bob): Handle method not found.
-
           // Store the IP back into the callframe so we know where to resume
           // when we return to it.
-          frame.setInstruction(ip - 1);
+          frame.ip = ip;
           ip = 0;
-
-          call(method, arg);
+          
+          gc<Method> method = vm_.globals().get(GET_A(ins));
+          call(method, stack_.count() - 1);
           break;
         }
-           */
-          
+        
         case OP_END:
         {
           gc<Object> result = loadRegisterOrConstant(frame, GET_A(ins));
@@ -100,7 +89,7 @@ namespace magpie
             ASSERT(GET_OP(callInstruction) == OP_CALL,
                    "Should be returning to a call.");
             
-            store(caller, GET_C(callInstruction), result);
+            store(caller, GET_B(callInstruction), result);
           }
           else
           {
@@ -189,6 +178,8 @@ namespace magpie
 
   void Fiber::call(gc<Method> method, int stackStart)
   {
+    //std::cout << "call " << method->name() << std::endl;
+    
     // Allocate registers for the method.
     // TODO(bob): Make this a single operation on Array.
     while (stack_.count() < stackStart + method->numRegisters())

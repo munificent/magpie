@@ -170,7 +170,18 @@ namespace magpie
   
   temp<Node> Parser::name(temp<Token> token)
   {
-    return NameNode::create(token->text());
+    // See if it's a method call like foo(arg).
+    if (match(TOKEN_LEFT_PAREN))
+    {
+      temp<Node> arg = parsePrecedence();
+      consume(TOKEN_RIGHT_PAREN, "Expect ')' after call argument.");
+      return CallNode::create(token->text(), arg);
+    }
+    else
+    {
+      // Just a bare name.
+      return NameNode::create(token->text());
+    }
   }
   
   temp<Node> Parser::number(temp<Token> token)

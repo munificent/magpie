@@ -35,7 +35,7 @@ namespace magpie
     OP_DIVIDE        = 0x07, // R(C) = RC(A) / RC(B)
     OP_JUMP          = 0x08, // A = offset
     OP_JUMP_IF_FALSE = 0x09, // R(A) = test register, B = offset
-    OP_CALL          = 0x0a, // A: arg, B: method, C: result
+    OP_CALL          = 0x0a, // A: method, B: arg and result
     OP_END           = 0x0b  // RC(A): result
   };
   

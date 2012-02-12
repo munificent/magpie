@@ -73,6 +73,7 @@ namespace magpie
     // Dynamic casts.
     virtual const BoolNode*     asBoolNode()     const { return NULL; }
     virtual const BinaryOpNode* asBinaryOpNode() const { return NULL; }
+    virtual const CallNode*     asCallNode()     const { return NULL; }
     virtual const IfNode*       asIfNode()       const { return NULL; }
     virtual const NameNode*     asNameNode()     const { return NULL; }
     virtual const NumberNode*   asNumberNode()   const { return NULL; }
@@ -121,7 +122,28 @@ namespace magpie
     
     bool value_;
   };
-   
+  
+  // A method call.
+  class CallNode : public Node
+  {
+  public:
+    static temp<CallNode> create(gc<String> name, gc<Node> arg);
+    
+    DECLARE_NODE(CallNode);
+    
+    gc<String> name() const { return name_; }
+    Node& arg() const { return *arg_; }
+    
+    virtual void reach();
+    virtual void trace(std::ostream& out) const;
+    
+  private:
+    CallNode(gc<String> name, gc<Node> arg);
+    
+    gc<String> name_;
+    gc<Node> arg_;
+  };
+  
   // An if-then-else expression.
   class IfNode : public Node
   {

@@ -8,23 +8,30 @@ namespace magpie
 {
   void Compiler::compileModule(VM& vm, gc<ModuleAst> module)
   {
+    // Declare methods first so we can resolve mutually recursive calls.
     for (int i = 0; i < module->methods().count(); i++)
     {
       const MethodAst& methodDef = *module->methods()[i];
-      
-      temp<Method> method = compileMethod(methodDef.body());
-      vm.globals().add(methodDef.name(), method);
+      vm.globals().declare(methodDef.name());
+    }
+    
+    for (int i = 0; i < module->methods().count(); i++)
+    {
+      const MethodAst& methodDef = *module->methods()[i];
+      temp<Method> method = compileMethod(vm, methodDef);
+      vm.globals().define(methodDef.name(), method);
     }
   }
   
-  temp<Method> Compiler::compileMethod(const Node& node)
+  temp<Method> Compiler::compileMethod(VM& vm, const MethodAst& method)
   {
-    Compiler compiler;
-    return compiler.compile(node);
+    Compiler compiler(vm);
+    return compiler.compile(method);
   }
   
-  Compiler::Compiler()
+  Compiler::Compiler(VM& vm)
   : NodeVisitor(),
+    vm_(vm),
     locals_(),
     code_(),
     constants_(),
@@ -33,7 +40,7 @@ namespace magpie
     maxRegisters_(0)
   {}
 
-  temp<Method> Compiler::compile(const Node& node)
+  temp<Method> Compiler::compile(const MethodAst& method)
   {
     /*
     // Reserve registers for the params. These have to go first because the
@@ -48,15 +55,10 @@ namespace magpie
     // Add a fake local for it so that local slots line up with their registers.
     locals_.add(String::create("(return)"));
     
-    int result = compileExpressionOrConstant(node);
+    int result = compileExpressionOrConstant(method.body());
     write(OP_END, result);
     
-    return Method::create(code_, constants_, maxRegisters_);
-  }
-  
-  void Compiler::visit(const BoolNode& node, int dest)
-  {
-    write(OP_BOOL, node.value() ? 1 : 0, dest);
+    return Method::create(method.name(), code_, constants_, maxRegisters_);
   }
   
   void Compiler::visit(const BinaryOpNode& node, int dest)
@@ -71,6 +73,22 @@ namespace magpie
       default:
         ASSERT(false, "Unknown infix operator.");
     }
+  }
+  
+  void Compiler::visit(const BoolNode& node, int dest)
+  {
+    write(OP_BOOL, node.value() ? 1 : 0, dest);
+  }
+  
+  void Compiler::visit(const CallNode& node, int dest)
+  {
+    int method = vm_.globals().find(node.name());
+    // TODO(bob): Handle unknown method error.
+    
+    // Compile the argument.
+    node.arg().accept(*this, dest);
+    
+    write(OP_CALL, method, dest);
   }
   
   void Compiler::visit(const IfNode& node, int dest)

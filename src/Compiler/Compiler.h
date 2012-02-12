@@ -8,6 +8,7 @@
 namespace magpie
 {
   class Method;
+  class MethodAst;
   class ModuleAst;
   class Object;
   class VM;
@@ -16,17 +17,18 @@ namespace magpie
   {
   public:
     static void compileModule(VM& vm, gc<ModuleAst> module);
-    static temp<Method> compileMethod(const Node& node);
+    static temp<Method> compileMethod(VM& vm, const MethodAst& method);
     
     virtual ~Compiler() {}
     
   private:
-    Compiler();
+    Compiler(VM& vm);
     
-    temp<Method> compile(const Node& node);
+    temp<Method> compile(const MethodAst& method);
     
-    virtual void visit(const BoolNode& node, int dest);
     virtual void visit(const BinaryOpNode& node, int dest);
+    virtual void visit(const BoolNode& node, int dest);
+    virtual void visit(const CallNode& node, int dest);
     virtual void visit(const IfNode& node, int dest);
     virtual void visit(const NameNode& node, int dest);
     virtual void visit(const NumberNode& node, int dest);
@@ -58,6 +60,7 @@ namespace magpie
     void reserveVariables(int count);
     int allocateVariable();
 
+    VM&                vm_;
     Array<gc<String> > locals_;
     Array<instruction> code_;
     Array<gc<Object> > constants_;

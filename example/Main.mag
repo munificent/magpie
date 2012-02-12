@@ -1,4 +1,7 @@
+def foo()
+    1 + 2
+end
 def main()
-    var i = 1 + 2 + 3
+    var i = foo(3)
     i + 4
 end
