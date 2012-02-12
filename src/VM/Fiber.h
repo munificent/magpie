@@ -43,7 +43,7 @@ namespace magpie
     Fiber(VM& vm);
     
     temp<Object> run();
-    void call(gc<Method> method, int stackStart);
+    void call(gc<Method> method, int stackStart, gc<Object> arg);
     
     // Loads a register for the given callframe.
     inline gc<Object> load(const CallFrame& frame, int reg)

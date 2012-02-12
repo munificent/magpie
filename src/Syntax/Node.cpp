@@ -19,19 +19,22 @@ namespace magpie
     }
   }
   
-  temp<MethodAst> MethodAst::create(gc<String> name, gc<Node> body)
+  temp<MethodAst> MethodAst::create(gc<String> name, gc<Pattern> parameter,
+                                    gc<Node> body)
   {
-    return Memory::makeTemp(new MethodAst(name, body));
+    return Memory::makeTemp(new MethodAst(name, parameter, body));
   }
   
-  MethodAst::MethodAst(gc<String> name, gc<Node> body)
+  MethodAst::MethodAst(gc<String> name, gc<Pattern> parameter, gc<Node> body)
   : name_(name),
+    parameter_(parameter),
     body_(body)
   {}
   
   void MethodAst::reach()
   {
     Memory::reach(name_);
+    Memory::reach(parameter_);
     Memory::reach(body_);
   }
   

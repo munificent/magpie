@@ -1,5 +1,5 @@
-def foo()
-    1 + 2
+def foo(n)
+    n + 1
 end
 def main()
     var i = foo(3)

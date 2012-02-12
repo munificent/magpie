@@ -46,18 +46,21 @@ namespace magpie
   class MethodAst : public Managed
   {
   public:
-    static temp<MethodAst> create(gc<String> name, gc<Node> body);
+    static temp<MethodAst> create(gc<String> name, gc<Pattern> parameter,
+                                  gc<Node> body);
     
     gc<String> name() const { return name_; }
+    gc<Pattern> parameter() const { return parameter_; }
     Node& body() const { return *body_; }
     
     virtual void reach();
     virtual void trace(std::ostream& out) const;
     
   private:
-    MethodAst(gc<String> name, gc<Node> body);
+    MethodAst(gc<String> name, gc<Pattern> parameter, gc<Node> body);
     
     gc<String> name_;
+    gc<Pattern> parameter_;
     gc<Node> body_;
   };
   

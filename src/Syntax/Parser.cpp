@@ -66,13 +66,18 @@ namespace magpie
       temp<Token> name = consume(TOKEN_NAME,
                                  "Expect a method name after 'def'.");
       
-      // TODO(bob): Parse parameter pattern(s).
+      // TODO(bob): Parse real pattern(s).
+      temp<Pattern> pattern;
       consume(TOKEN_LEFT_PAREN, "Temp.");
+      if (lookAhead(TOKEN_NAME))
+      {
+        pattern = parsePattern();
+      }
       consume(TOKEN_RIGHT_PAREN, "Temp.");
       
       temp<Node> body = parseBlock();
       
-      methods.add(MethodAst::create(name->text(), body));
+      methods.add(MethodAst::create(name->text(), pattern, body));
     }
     while (match(TOKEN_LINE));
     

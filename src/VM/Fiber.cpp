@@ -19,7 +19,8 @@ namespace magpie
 
   temp<Object> Fiber::interpret(gc<Method> method)
   {
-    call(method, 0);
+    // TODO(bob): What should the arg object be here?
+    call(method, 0, gc<Object>());
     return run();
   }
 
@@ -70,7 +71,8 @@ namespace magpie
           ip = 0;
           
           gc<Method> method = vm_.globals().get(GET_A(ins));
-          call(method, stack_.count() - 1);
+          gc<Object> arg = load(frame, GET_B(ins));
+          call(method, stack_.count() - 1, arg);
           break;
         }
         
@@ -176,7 +178,7 @@ namespace magpie
     return temp<Object>();
   }
 
-  void Fiber::call(gc<Method> method, int stackStart)
+  void Fiber::call(gc<Method> method, int stackStart, gc<Object> arg)
   {
     //std::cout << "call " << method->name() << std::endl;
     
@@ -186,6 +188,9 @@ namespace magpie
     {
       stack_.add(gc<Object>());
     }
+    
+    // Bind the argument in the called method.
+    stack_[stackStart] = arg;
     
     callFrames_.add(CallFrame(method, stackStart));
   }

@@ -42,20 +42,21 @@ namespace magpie
 
   temp<Method> Compiler::compile(const MethodAst& method)
   {
-    /*
-    // Reserve registers for the params. These have to go first because the
-    // caller will place them here.
-    for (int i = 0; i < params.Count(); i++)
-    {
-      ReserveRegister();
-      mLocals.Add(params[i]);
-    }
-    */
-    
+    // Create a register for the argument and result value.
+    int result = allocateRegister();
+
     // Add a fake local for it so that local slots line up with their registers.
     locals_.add(String::create("(return)"));
     
-    int result = compileExpressionOrConstant(method.body());
+    // TODO(bob): Hackish and temporary.
+    if (!method.parameter().isNull())
+    {
+      // Evaluate the method's parameter pattern.
+      reserveVariables(method.parameter()->countVariables());
+      method.parameter()->accept(*this, result);
+    }
+    
+    method.body().accept(*this, result);
     write(OP_END, result);
     
     return Method::create(method.name(), code_, constants_, maxRegisters_);
