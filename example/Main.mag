@@ -1,7 +1,6 @@
-def foo(n)
-    n + 1
+def fib(n)
+    if n < 2 then n else fib(n - 2) + fib(n - 1)
 end
 def main()
-    var i = foo(3)
-    i + 4
+    fib(25) // 75025
 end

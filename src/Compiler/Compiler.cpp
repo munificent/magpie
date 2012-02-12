@@ -66,10 +66,11 @@ namespace magpie
   {
     switch (node.type())
     {
-      case TOKEN_PLUS:  compileInfix(node, OP_ADD, dest); break;
-      case TOKEN_MINUS: compileInfix(node, OP_SUBTRACT, dest); break;
-      case TOKEN_STAR:  compileInfix(node, OP_MULTIPLY, dest); break;
-      case TOKEN_SLASH: compileInfix(node, OP_DIVIDE, dest); break;
+      case TOKEN_PLUS:      compileInfix(node, OP_ADD, dest); break;
+      case TOKEN_MINUS:     compileInfix(node, OP_SUBTRACT, dest); break;
+      case TOKEN_STAR:      compileInfix(node, OP_MULTIPLY, dest); break;
+      case TOKEN_SLASH:     compileInfix(node, OP_DIVIDE, dest); break;
+      case TOKEN_LESS_THAN: compileInfix(node, OP_LESS_THAN, dest); break;
         
       default:
         ASSERT(false, "Unknown infix operator.");

@@ -1,4 +1,5 @@
 #include "VM.h"
+#include "Object.h"
 
 namespace magpie
 {
@@ -9,11 +10,19 @@ namespace magpie
     
     AllocScope scope;
     fiber_ = Fiber::create(*this);
+    
+    // TODO(bob): Get rid of this nasty conversion problem.
+    temp<Object> trueTemp = BoolObject::create(true);
+    temp<Object> falseTemp = BoolObject::create(false);
+    true_ = trueTemp;
+    false_ = falseTemp;
   }
 
   void VM::reachRoots()
   {
     Memory::reach(fiber_);
+    Memory::reach(true_);
+    Memory::reach(false_);
   }
 }
 

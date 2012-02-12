@@ -25,7 +25,8 @@ namespace magpie
     TOKEN_STAR,
     TOKEN_SLASH,
     TOKEN_PERCENT,
-
+    TOKEN_LESS_THAN,
+    
     // Keywords.
     TOKEN_AND,
     TOKEN_CASE,

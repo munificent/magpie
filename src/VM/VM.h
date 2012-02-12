@@ -21,9 +21,17 @@ namespace magpie
 
     MethodScope& globals() { return globals_; }
     
+    inline gc<Object> getBool(bool value) const
+    {
+      return value ? true_ : false_;
+    }
+    
   private:
     MethodScope globals_;
     gc<Fiber> fiber_;
+    
+    gc<Object> true_;
+    gc<Object> false_;
 
     NO_COPY(VM);
   };

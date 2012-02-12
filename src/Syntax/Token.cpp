@@ -25,6 +25,7 @@ namespace magpie
       case TOKEN_STAR:          return "*";
       case TOKEN_SLASH:         return "/";
       case TOKEN_PERCENT:       return "%";
+      case TOKEN_LESS_THAN:     return "<";
         
         // Keywords.
       case TOKEN_AND:           return "and";

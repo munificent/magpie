@@ -65,6 +65,10 @@ namespace magpie
         cout << "DIVIDE        " << GET_A(ins) << " - " << GET_B(ins) << " -> " << GET_C(ins);
         break;
         
+      case OP_LESS_THAN:
+        cout << "LESS_THAN     " << GET_A(ins) << " < " << GET_B(ins) << " -> " << GET_C(ins);
+        break;
+        
       case OP_JUMP:
         cout << "JUMP          " << GET_A(ins);
         break;

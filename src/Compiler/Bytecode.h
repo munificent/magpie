@@ -33,10 +33,11 @@ namespace magpie
     OP_SUBTRACT      = 0x05, // R(C) = RC(A) - RC(B)
     OP_MULTIPLY      = 0x06, // R(C) = RC(A) * RC(B)
     OP_DIVIDE        = 0x07, // R(C) = RC(A) / RC(B)
-    OP_JUMP          = 0x08, // A = offset
-    OP_JUMP_IF_FALSE = 0x09, // R(A) = test register, B = offset
-    OP_CALL          = 0x0a, // A: method, B: arg and result
-    OP_END           = 0x0b  // RC(A): result
+    OP_LESS_THAN     = 0x08, // R(C) = RC(A) < RC(B)
+    OP_JUMP          = 0x09, // A = offset
+    OP_JUMP_IF_FALSE = 0x0a, // R(A) = test register, B = offset
+    OP_CALL          = 0x0b, // A: method, B: arg and result
+    OP_END           = 0x0c  // RC(A): result
   };
   
   typedef unsigned int instruction;

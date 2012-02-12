@@ -21,6 +21,7 @@ namespace magpie
     { NULL,                 &Parser::binaryOp, 8 },     // TOKEN_STAR
     { NULL,                 &Parser::binaryOp, 8 },     // TOKEN_SLASH
     { NULL,                 &Parser::binaryOp, 8 },     // TOKEN_PERCENT
+    { NULL,                 &Parser::binaryOp, 4 },     // TOKEN_LESS_THAN
 
     // Keywords.
     { NULL,                 &Parser::binaryOp, 3 },     // TOKEN_AND

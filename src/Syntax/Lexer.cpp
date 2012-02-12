@@ -35,6 +35,7 @@ namespace magpie
         case '-': return makeToken(TOKEN_MINUS);
         case '*': return makeToken(TOKEN_STAR);
         case '%': return makeToken(TOKEN_PERCENT);
+        case '<': return makeToken(TOKEN_LESS_THAN);
 
         case '\n': return makeToken(TOKEN_LINE);
 

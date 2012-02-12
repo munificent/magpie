@@ -30,6 +30,7 @@ namespace magpie
     bool running = true;
     while (running)
     {
+      AllocScope scope;
       CallFrame& frame = callFrames_[-1];
       instruction ins = frame.method->code()[ip];
       OpCode op = GET_OP(ins);
@@ -59,7 +60,7 @@ namespace magpie
           int reg = GET_B(ins);
           // TODO(bob): Should just create singleton instances of true and false
           // and reuse them.
-          store(frame, reg, Object::create(value));
+          store(frame, reg, vm_.getBool(value));
           break;
         }
           
@@ -147,6 +148,17 @@ namespace magpie
           double c = a->toNumber() / b->toNumber();
           temp<Object> num = Object::create(c);
           store(frame, GET_C(ins), num);
+          break;
+        }
+          
+        case OP_LESS_THAN:
+        {
+          gc<Object> a = loadRegisterOrConstant(frame, GET_A(ins));
+          gc<Object> b = loadRegisterOrConstant(frame, GET_B(ins));
+          
+          // TODO(bob): Handle non-number types.
+          bool c = a->toNumber() < b->toNumber();
+          store(frame, GET_C(ins), vm_.getBool(c));
           break;
         }
           
