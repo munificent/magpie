@@ -1,0 +1,12 @@
+// A few examples of reading a file.
+
+import io
+
+create("example/out.magc") use with
+    it writeByte(0)
+    it writeByte(128)
+    it writeByte(255)
+    it writeInt(1234567)
+end
+
+print("Done")

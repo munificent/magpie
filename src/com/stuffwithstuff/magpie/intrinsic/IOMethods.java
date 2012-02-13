@@ -13,8 +13,14 @@ import com.stuffwithstuff.magpie.interpreter.ClassObj;
 import com.stuffwithstuff.magpie.interpreter.Context;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.util.FileReader;
+import com.stuffwithstuff.magpie.util.FileWriter;
 
 public class IOMethods {
+  // TODO(bob): There is a big hack here. We use the same "File" Magpie class
+  // to encapsulate both a FileReader and a FileWriter. But the read and
+  // write methods assume one or the other and will blow up if you use the
+  // wrong one.
+  
   // TODO(bob): Hackish.
   @Def("_setClasses(== File)")
   public static class SetClasses implements Intrinsic {
@@ -28,8 +34,13 @@ public class IOMethods {
   @Doc("Closes the file.")
   public static class Close implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
-      FileReader reader = (FileReader)left.getValue();
-      reader.close();
+      if (left.getValue() instanceof FileReader) {
+        FileReader reader = (FileReader)left.getValue();
+        reader.close();
+      } else {
+        FileWriter writer = (FileWriter)left.getValue();
+        writer.close();
+      }
       return context.nothing();
     }
   }
@@ -44,6 +55,22 @@ public class IOMethods {
       try {
         reader = new FileReader(path);
         return context.instantiate(sFileClass, reader);
+      } catch (IOException e) {
+        throw context.error("IOError", "Could not open file.");
+      }
+    }
+  }
+
+  @Def("create(path is String)")
+  @Doc("Creates a new file at the given path.")
+  public static class Create implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      String path = right.asString();
+      
+      FileWriter writer;
+      try {
+        writer = new FileWriter(path);
+        return context.instantiate(sFileClass, writer);
       } catch (IOException e) {
         throw context.error("IOError", "Could not open file.");
       }
@@ -103,6 +130,34 @@ public class IOMethods {
         // TODO(bob): Handle error.
         e.printStackTrace();
         throw context.error("IOError", "Could not read.");
+      }
+    }
+  }
+
+  @Def("(is File) writeByte(is Int)")
+  @Doc("Writes the given byte (value from 0 to 255 inclusive) to this File.")
+  public static class WriteByte implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      FileWriter writer = (FileWriter)left.getValue();
+      try {
+        writer.writeByte(right.asInt());
+        return right;
+      } catch (IOException e) {
+        throw context.error("IOError", "Could not write.");
+      }
+    }
+  }
+
+  @Def("(is File) writeInt(is Int)")
+  @Doc("Writes the given int to this File.")
+  public static class WriteInt implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      FileWriter writer = (FileWriter)left.getValue();
+      try {
+        writer.writeInt(right.asInt());
+        return right;
+      } catch (IOException e) {
+        throw context.error("IOError", "Could not write.");
       }
     }
   }
