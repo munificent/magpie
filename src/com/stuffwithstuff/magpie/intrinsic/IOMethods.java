@@ -148,13 +148,56 @@ public class IOMethods {
     }
   }
 
-  @Def("(is File) writeInt(is Int)")
+  @Def("(is File) writeInt32(is Int)")
   @Doc("Writes the given int to this File.")
   public static class WriteInt implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       FileWriter writer = (FileWriter)left.getValue();
       try {
-        writer.writeInt(right.asInt());
+        writer.writeInt32(right.asInt());
+        return right;
+      } catch (IOException e) {
+        throw context.error("IOError", "Could not write.");
+      }
+    }
+  }
+
+  // TODO(bob): Need to support non-ints!
+  @Def("(is File) writeDouble(is Int)")
+  @Doc("Writes the given number to this File.")
+  public static class WriteDouble implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      FileWriter writer = (FileWriter)left.getValue();
+      try {
+        writer.writeDouble(right.asInt());
+        return right;
+      } catch (IOException e) {
+        throw context.error("IOError", "Could not write.");
+      }
+    }
+  }
+
+  @Def("(is File) writeUInt16(is Int)")
+  @Doc("Writes the given int to this File.")
+  public static class WriteUInt16 implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      FileWriter writer = (FileWriter)left.getValue();
+      try {
+        writer.writeUInt16(right.asInt());
+        return right;
+      } catch (IOException e) {
+        throw context.error("IOError", "Could not write.");
+      }
+    }
+  }
+  
+  @Def("(is File) writeUInt32(is Int)")
+  @Doc("Writes the given int to this File.")
+  public static class WriteUInt32 implements Intrinsic {
+    public Obj invoke(Context context, Obj left, Obj right) {
+      FileWriter writer = (FileWriter)left.getValue();
+      try {
+        writer.writeUInt32(right.asInt());
         return right;
       } catch (IOException e) {
         throw context.error("IOError", "Could not write.");

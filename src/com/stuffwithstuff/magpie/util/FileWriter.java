@@ -30,9 +30,27 @@ public class FileWriter {
     mStream.writeByte(value);
   }
   
-  public void writeInt(int value) throws IOException {
+  public void writeInt32(int value) throws IOException {
     mStream.writeInt(value);
   }
   
+  public void writeUInt16(int value) throws IOException {
+    // Little endian.
+    mStream.writeByte(value & 0x00ff);
+    mStream.writeByte((value & 0xff00) >> 8);
+  }
+  
+  public void writeUInt32(int value) throws IOException {
+    // Little endian.
+    mStream.writeByte(value & 0x000000ff);
+    mStream.writeByte((value & 0x0000ff00) >>  8);
+    mStream.writeByte((value & 0x00ff0000) >> 16);
+    mStream.writeByte((value & 0xff000000) >> 24);
+  }
+  
+  public void writeDouble(double value) throws IOException {
+    mStream.writeDouble(value);
+  }
+
   private DataOutputStream mStream;
 }

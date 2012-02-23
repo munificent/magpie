@@ -2,11 +2,41 @@
 
 import io
 
+def (file is File) writeString(string is String)
+    file writeUInt16(string count)
+
+end
+
 create("example/out.magc") use with
-    it writeByte(0)
-    it writeByte(128)
-    it writeByte(255)
-    it writeInt(1234567)
+    // "magc" header.
+    it writeByte(109)
+    it writeByte( 97)
+    it writeByte(103)
+    it writeByte( 99)
+
+    // Number of methods.
+    it writeUInt16(1)
+
+    // Length of method name.
+    it writeUInt16(4)
+    it writeByte(109) // m
+    it writeByte( 97) // a
+    it writeByte(105) // i
+    it writeByte(110) // n
+
+    // Number of instructrions.
+    it writeUInt16(1)
+
+    it writeUInt32(65282)    // LOAD_CONSTANT 0 -> 0
+    it writeUInt32(16776972) // END 0
+
+    // Number of registers.
+    it writeByte(1)
+
+    // Number of constants.
+    it writeByte(1)
+
+    it writeDouble(123)
 end
 
 print("Done")
