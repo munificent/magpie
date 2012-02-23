@@ -206,6 +206,10 @@ public class Interpreter {
     return mHost;
   }
   
+  public Map<String, Multimethod> getMultimethods() {
+    return mMultimethods;
+  }
+  
   public Obj getConstructingObject() { return mConstructing.peek(); }
   
   public Obj constructNewObject(Context context, ClassObj classObj, Obj initArg) {
@@ -283,6 +287,7 @@ public class Interpreter {
   private final MagpieHost mHost;
   
   private final Map<String, Module> mModules = new HashMap<String, Module>();
+  private final Map<String, Multimethod> mMultimethods = new HashMap<String, Multimethod>();
   
   private final ClassObj mClass;
   private final ClassObj mArrayClass;

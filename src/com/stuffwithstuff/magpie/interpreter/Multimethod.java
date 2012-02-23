@@ -21,19 +21,7 @@ public class Multimethod {
     if (mMethods.contains(method)) return;
     
     mMethods.add(method);
-    
-    // Push to the other modules that imported this multimethod too.
-    for (Multimethod export : mExports) {
-      export.addMethod(method);
-    }
-    
     mSorted = false;
-  }
-  
-  public void addExport(Multimethod multimethod) {
-    if (multimethod == this) throw new IllegalArgumentException();
-    
-    mExports.add(multimethod);
   }
   
   public Obj invoke(String name, Context context, Obj left, Obj right) {
@@ -62,5 +50,4 @@ public class Multimethod {
   private boolean mSorted = false;
   private final MethodGraph mGraph = new MethodGraph();
   private List<Callable> mMethods = new ArrayList<Callable>();
-  private List<Multimethod> mExports = new ArrayList<Multimethod>();
 }

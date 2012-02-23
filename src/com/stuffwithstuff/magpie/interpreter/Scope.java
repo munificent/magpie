@@ -59,23 +59,23 @@ public class Scope {
     }
     
     // Import multimethod.
-    Multimethod remoteMultimethod = module.getScope().getMultimethod(name);
-    if (remoteMultimethod != null) {
-      Multimethod localMultimethod = getOrCreateMultimethod(rename,
-          remoteMultimethod.getDoc());
-      
-      // Add a reference from the imported multimethod to this one. That way,
-      // if it later gets extended, we'll see those here too.
-      remoteMultimethod.addExport(localMultimethod);
-      
-      for (Callable method : remoteMultimethod.getMethods()) {
-        localMultimethod.addMethod(method);
+    Multimethod multimethod = module.getScope().getMultimethod(name);
+    if (multimethod != null || mAllowRedefinition) {
+      Multimethod existing = mMultimethods.get(rename);
+      if ((existing != null) && (existing != multimethod)) {
+        mModule.error(Name.REDEFINITION_ERROR,
+            "Can not import multimethod \"" + rename + "\" from " +
+            module.getName() + " because there is already a multimethod with " +
+            "that name defined.");
       }
       
-      // Add a reference from our multimethod to the one we imported. That way,
-      // if we provide new specializations (i.e. overrides), that module will
-      // see them too.
-      localMultimethod.addExport(remoteMultimethod);
+      mMultimethods.put(rename, multimethod);
+      // TODO(bob): Right now, all top-level multimethods are defined in the
+      // global multimethod set, and not in the module itself, so we should
+      // never hit this case. Eventually, we do want to support this so that
+      // you can have importable non-global methods. (They will work
+      // essentially like extension methods in C#.)
+      throw new RuntimeException("Untested");
     }
     
     // Import syntax.
@@ -176,10 +176,6 @@ public class Scope {
   }
   
   public Multimethod define(String name, Callable method) {
-    if (name.equals("overridable")) {
-      System.out.println();
-    }
-    
     // Define it if not already present.
     Multimethod multimethod = defineMultimethod(name, "");
     
@@ -189,18 +185,21 @@ public class Scope {
   }
   
   public Multimethod defineMultimethod(String name, String doc) {
-    Multimethod multimethod = getOrCreateMultimethod(name, doc);
-    
-    // If this is a top-level public method, export it too. Note that we do
-    // this outside of the above if() so that if you import a multimethod
-    // (which does not add it to the exports) and then add a new method to it,
-    // then that multimethod now becomes exported. That satisfies the user's
-    // expectation that all top-level defs are exported.
     if ((mParent == null) && Name.isPublic(name)) {
-      mModule.export(name);
+      // Top-level public name, so define it globally.
+      Multimethod multimethod = mModule.getInterpreter().getMultimethods().get(name);
+      
+      // Only define it the first time if not found.
+      if (multimethod == null) {
+        multimethod = new Multimethod(doc);
+        mModule.getInterpreter().getMultimethods().put(name, multimethod);
+      }
+      
+      return multimethod;
     }
-
-    return multimethod;
+    
+    // Otherwise, it's a local multimethod.
+    return getOrCreateMultimethod(name, doc);
   }
 
   public Multimethod lookUpMultimethod(String name) {
@@ -213,8 +212,8 @@ public class Scope {
       scope = scope.mParent;
     }
     
-    // Not found.
-    return null;
+    // It's not a local one, so see if it's global.
+    return mModule.getInterpreter().getMultimethods().get(name);
   }
 
   public Set<Entry<String, Pair<Boolean, Obj>>> entries() {

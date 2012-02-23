@@ -1,5 +1,8 @@
 val a = "a"
 
+// TODO(bob): Module-local top-level multimethods aren't implemented yet.
+/*
 def b()
     "b"
 end
+*/
