@@ -18,7 +18,7 @@ public class BracePrefixParser implements PrefixParser {
     // Parse a sequence of expressions.
     List<Expr> exprs = new ArrayList<Expr>();
     while (true) {
-      exprs.add(parser.parseExpression());
+      exprs.add(parser.parseStatement());
       
       // Stop when we hit the closing }.
       if (parser.match(TokenType.RIGHT_BRACE)) break;

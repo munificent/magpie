@@ -81,7 +81,7 @@ public class SyntaxMethods {
     public Obj invoke(Context context, Obj left, Obj right) {
       MagpieParser parser = (MagpieParser) left.getValue();
 
-      Expr expr = parser.parseExpression(right.asInt());
+      Expr expr = parser.parsePrecedence(right.asInt());
       
       return JavaToMagpie.convert(context, expr);
     }

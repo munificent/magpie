@@ -73,10 +73,10 @@ public class PatternParser {
   
   private static Pattern primary(MagpieParser parser) {
     if (parser.match("is")) {
-      Expr type = parser.parseExpression(Precedence.COMPARISON);
+      Expr type = parser.parsePrecedence(Precedence.COMPARISON);
       return Pattern.type(type);
     } else if (parser.match("==")) {
-      Expr value = parser.parseExpression(Precedence.COMPARISON);
+      Expr value = parser.parsePrecedence(Precedence.COMPARISON);
       return Pattern.value(value);
     } if (parser.match(TokenType.BOOL)) {
       return Pattern.value(Expr.bool(parser.last(1).getBool()));

@@ -16,26 +16,18 @@ public class Grammar {
     prefix(TokenType.NAME,          new NameParser());
     prefix(TokenType.FIELD,         new FieldParser());
     
-    prefix("break",     new BreakParser());
     prefix("def",       new DefParser());
     prefix("defclass",  new ClassParser());
-    prefix("do",        new DoParser());
     prefix("fn",        new FnParser());
-    prefix("for",       new LoopParser());
-    prefix("import",    new ImportParser());
     prefix("match",     new MatchParser());
-    prefix("return",    new ReturnParser());
-    prefix("throw",     new ThrowParser());
-    prefix("val",       new VarParser());
-    prefix("var",       new VarParser());
-    prefix("while",     new LoopParser());
 
     infix(TokenType.NAME,         new NameParser());
     infix(TokenType.COMMA,        new CommaParser());
     infix(TokenType.EQUALS,       new EqualsParser());
     infix(TokenType.LEFT_BRACKET, new BracketInfixParser());
 
-    reserve("case catch else end export in is then");
+    reserve("break case catch do else end export for");
+    reserve("import in is return then throw val var while");
   }
   
   public PrefixParser getPrefixParser(Token token) {

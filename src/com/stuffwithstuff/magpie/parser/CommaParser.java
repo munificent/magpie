@@ -26,7 +26,7 @@ public class CommaParser implements InfixParser {
       }
       index++;
       
-      fields.add(new Pair<String, Expr>(name, parser.parseExpression(getPrecedence())));
+      fields.add(new Pair<String, Expr>(name, parser.parsePrecedence(getPrecedence())));
     } while (parser.match(TokenType.COMMA));
     
     return Expr.record(left.getPosition().union(parser.last(1).getPosition()), fields);

@@ -22,7 +22,7 @@ public class FieldParser implements PrefixParser {
     String name = token.getString();
     Position namePosition = token.getPosition();
     while (true) {
-      Expr value = parser.parseExpression(Precedence.RECORD);
+      Expr value = parser.parsePrecedence(Precedence.RECORD);
       fields.add(new Pair<String, Expr>(name, value));
       
       if (usedNames.contains(name)) {

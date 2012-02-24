@@ -17,7 +17,7 @@ public class BracketPrefixParser implements PrefixParser {
       do {
       // Higher precedence than COMPOSITION so that "," are parsed by the list
       // and not as tuples.
-      elements.add(parser.parseExpression(Precedence.LOGICAL));
+      elements.add(parser.parsePrecedence(Precedence.LOGICAL));
       } while (parser.match(TokenType.COMMA));
     }
     
