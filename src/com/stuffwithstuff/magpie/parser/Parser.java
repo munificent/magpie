@@ -61,7 +61,7 @@ public abstract class Parser {
    */
   public boolean lookAhead(TokenType... tokens) {
     for (int i = 0; i < tokens.length; i++) {
-      if (!lookAhead(i).getType().equals(tokens[i])) return false;
+      if (!lookAhead(i).is(tokens[i])) return false;
     }
 
     return true;

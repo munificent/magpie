@@ -254,7 +254,7 @@ public class MagpieParser extends Parser {
     // Need a more elegant way to handle this.
 
     // Only if we have a block body. Single-expression bodies shouldn't do this.
-    if (last(1).getType() != TokenType.END) return expr;
+    if (!last(1).is(TokenType.END)) return expr;
     
     return parseInfix(expr, 0);
   }
@@ -491,7 +491,7 @@ public class MagpieParser extends Parser {
     List<Expr> eachLoop = new ArrayList<Expr>();
     
     while (true) {
-      if (token.getType() == TokenType.WHILE) {
+      if (token.is(TokenType.WHILE)) {
         Expr condition = parseExpression();
         eachLoop.add(Expr.if_(condition,
             Expr.nothing(),
@@ -565,7 +565,7 @@ public class MagpieParser extends Parser {
     
     // Don't try to parse "else" if we got an explicit "end" for the "then"
     // block.
-    boolean consumedEnd = (endToken != null) && (endToken.getType() == TokenType.END);
+    boolean consumedEnd = (endToken != null) && endToken.is(TokenType.END);
 
     // See if we have an "else" keyword and parse the else arm.
     Expr elseExpr;
@@ -645,9 +645,7 @@ public class MagpieParser extends Parser {
     // If the block ends with 'end', then we want to consume that token,
     // otherwise we want to leave it unconsumed to be consistent with the
     // single-expression block case.
-    if (endToken.getType() == TokenType.END) {
-      consume();
-    }
+    if (endToken.is(TokenType.END)) consume();
     
     // Parse any catch clauses.
     List<MatchCase> catches = new ArrayList<MatchCase>();

@@ -19,6 +19,8 @@ public final class Token {
     mValue = value;
   }
 
+  public boolean is(TokenType type) { return mType == type; }
+  
   public Position getPosition() { return mPosition; }
   
   public TokenType getType() { return mType; }

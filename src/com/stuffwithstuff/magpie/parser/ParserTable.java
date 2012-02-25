@@ -33,7 +33,7 @@ public class ParserTable<T> {
   public T get(Token token) {
     // A parser bound to a specific name takes priority over one bound to an
     // entire token type.
-    if (token.getType() == TokenType.NAME) {
+    if (token.is(TokenType.NAME)) {
       T named = mNameTable.get(token.getString());
       if (named != null) return named;
     }

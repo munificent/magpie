@@ -18,7 +18,7 @@ public class Annotator extends Parser implements TokenReader {
     while (true) {
       Token token = consume();
       
-      if (token.getType() == TokenType.DOC_COMMENT) {
+      if (token.is(TokenType.DOC_COMMENT)) {
         // Collapse successive doc comments into a single token. Given:
         // 
         //  /// Line 1.
