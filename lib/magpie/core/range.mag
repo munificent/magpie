@@ -7,11 +7,11 @@ defclass Range is Indexable
 end
 
 def (this is Range)[index is Int]
-    this first +(this validateIndex(index))
+    this first + this validateIndex(index)
 end
 
 def (this is Range) count
-    (this last -(this first)) +(1)
+    this last - this first + 1
 end
 
 def (this is Int) to(last is Int)
@@ -19,7 +19,7 @@ def (this is Int) to(last is Int)
 end
 
 def (this is Int) until(after is Int)
-    Range new(first: this, last: after -(1))
+    Range new(first: this, last: after - 1)
 end
 
 def from(first is Int)

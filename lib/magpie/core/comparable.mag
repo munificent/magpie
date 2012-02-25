@@ -1,16 +1,16 @@
 // Implement comparison in terms of a master compareTo() method.
 def (this is Comparable) < (that is Comparable)
-    this compareTo(that) ==(-1)
+    this compareTo(that) == -1
 end
 
 def (this is Comparable) > (that is Comparable)
-    this compareTo(that) ==(1)
+    this compareTo(that) == 1
 end
 
 def (this is Comparable) <= (that is Comparable)
-    this compareTo(that) !=(1)
+    this compareTo(that) != 1
 end
 
 def (this is Comparable) >= (that is Comparable)
-    this compareTo(that) !=(-1)
+    this compareTo(that) != -1
 end

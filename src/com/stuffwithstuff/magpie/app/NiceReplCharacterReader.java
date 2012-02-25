@@ -31,6 +31,9 @@ public class NiceReplCharacterReader extends ReplReader {
   
       Term.moveUp();
   
+      // TODO(bob): Now that there are token types for reserved words and
+      // operators, should handle them here.
+      
       // Redraw the prompt.
       Term.set(Term.ForeColor.GRAY);
       System.out.print(prompt);
@@ -49,7 +52,7 @@ public class NiceReplCharacterReader extends ReplReader {
         case RIGHT_BRACE:
         case BACKTICK:
         case COMMA:
-        case EQUALS:
+        case EQ:
           Term.set(Term.ForeColor.GRAY);
           break;
         

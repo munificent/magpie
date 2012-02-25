@@ -75,7 +75,7 @@ public class PatternParser {
     if (parser.match("is")) {
       Expr type = parser.parsePrecedence(Precedence.COMPARISON);
       return Pattern.type(type);
-    } else if (parser.match("==")) {
+    } else if (parser.match(TokenType.EQEQ)) {
       Expr value = parser.parsePrecedence(Precedence.COMPARISON);
       return Pattern.value(value);
     } if (parser.match(TokenType.BOOL)) {

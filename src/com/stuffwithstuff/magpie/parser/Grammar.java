@@ -22,8 +22,20 @@ public class Grammar {
     infix(TokenType.OR,           new OrParser());
     infix(TokenType.NAME,         new NameParser());
     infix(TokenType.COMMA,        new CommaParser());
-    infix(TokenType.EQUALS,       new EqualsParser());
+    infix(TokenType.EQ,           new EqualsParser());
     infix(TokenType.LEFT_BRACKET, new BracketInfixParser());
+
+    infix(TokenType.ASTERISK,     new InfixOperatorParser(8));
+    infix(TokenType.SLASH,        new InfixOperatorParser(8));
+    infix(TokenType.PERCENT,      new InfixOperatorParser(8));
+    infix(TokenType.PLUS,         new InfixOperatorParser(7));
+    infix(TokenType.MINUS,        new InfixOperatorParser(7));
+    infix(TokenType.LT,           new InfixOperatorParser(5));
+    infix(TokenType.GT,           new InfixOperatorParser(5));
+    infix(TokenType.LTE,          new InfixOperatorParser(5));
+    infix(TokenType.GTE,          new InfixOperatorParser(5));
+    infix(TokenType.EQEQ,         new InfixOperatorParser(4));
+    infix(TokenType.NOTEQ,        new InfixOperatorParser(4));
 
     reserve("break case catch def defclass do else end export for");
     reserve("import if in is match return then throw val var while");

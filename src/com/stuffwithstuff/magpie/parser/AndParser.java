@@ -14,7 +14,6 @@ import com.stuffwithstuff.magpie.interpreter.Name;
 public class AndParser implements InfixParser {
   @Override
   public Expr parse(MagpieParser parser, Expr left, Token token) {
-    // Parse the argument, if any.
     Expr right = parser.parsePrecedence(Precedence.LOGICAL);
     
     // Desugar to a pattern match:

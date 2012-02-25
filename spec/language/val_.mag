@@ -22,15 +22,6 @@ specify("A 'val' expression") with
         end shouldThrow(RedefinitionError)
     end
 
-    it should("allow a block initializer") with
-        val i =
-            var temp = "a"
-            temp = temp + "b"
-            temp + "c"
-        end
-        i shouldEqual("abc")
-    end
-
     it should("not allow assignment") with
         val i = "before"
         // TODO(bob): Eventually, should be a static error. For now, we'll just

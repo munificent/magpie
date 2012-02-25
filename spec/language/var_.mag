@@ -22,15 +22,6 @@ specify("A 'var' expression") with
         end shouldThrow(RedefinitionError)
     end
 
-    it should("allow a block initializer") with
-        var i =
-            var temp = "a"
-            temp = temp + "b"
-            temp + "c"
-        end
-        i shouldEqual("abc")
-    end
-
     it should("throw a NoMatchError if the value doesn't match the " +
               " pattern") with
         fn

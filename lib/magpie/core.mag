@@ -13,8 +13,38 @@ import classfile:com.stuffwithstuff.magpie.intrinsic.IntMethods
 import classfile:com.stuffwithstuff.magpie.intrinsic.ListMethods
 import classfile:com.stuffwithstuff.magpie.intrinsic.StringMethods
 
-// Note: This file is parsed before any arithmetic operator syntax has been
-// defined, which is why it calls them in regular message for like 1+(2).
+import magpie.core.comparable
+
+// TODO(bob): The methods are commented out below because multimethods are
+// globally scoped now. That means they don't need to be exported. I'm leaving
+// them here for now because eventually Magpie will have non-global top-level
+// multimethods that will need to be exported and I want to think about which
+// of these should be in that category.
+
+import magpie.core.indexable with
+//    export iterate
+//    export validateIndex
+    export Iterator
+//    export next
+//    export current
+    export IndexableIterator
+end
+
+import magpie.core.range with
+    export Range
+//    export first
+//    export last
+//    export count
+//    export from
+//    export to
+//    export until
+end
+
+// TODO(bob): Should this be in core?
+import magpie.core.usable with
+//    export use
+//    export close
+end
 
 // String conversion for core classes
 // ----------------------------------------------------------------------------
@@ -45,11 +75,11 @@ def (this is Class) toString
 end
 
 def (this is Array) toString
-    "[" +(this join(", ")) +("]")
+    "[" + this join(", ") + "]"
 end
 
 def (this is List) toString
-    "list [" +(this join(", ")) +("]")
+    "list [" + this join(", ") + "]"
 end
 
 // TODO(bob): Implement these using io.write.
@@ -61,7 +91,7 @@ end
 
 def print(text is String)
     /// Prints `text` to standard output.
-    printString(text +("\n"))
+    printString(text + "\n")
 end
 
 def print(any)
@@ -80,7 +110,7 @@ def not(false)
 end
 
 def (this) != (that)
-    not(this ==(that))
+    not(this == that)
 end
 
 // Truthiness.
@@ -93,11 +123,11 @@ def (this is Bool) isTrue
 end
 
 def (this is Int) isTrue
-    this !=(0)
+    this != 0
 end
 
 def (this is String) isTrue
-    this count >(0)
+    this count > 0
 end
 
 def (nothing) isTrue
@@ -112,93 +142,16 @@ def (this is Iterable) join(separator is String)
     for element in this do
         match first
             case true then first = false
-            else result = result +(separator)
+            else result = result + separator
         end
-        result = result +(element toString)
+        result = result + element toString
     end
     result
 end
 
 // TODO(bob): Probably want to get rid of this since its too open-ended, but
 // really need string interpolation first.
-def (left) +(right)
+def (left) + (right)
     /// Converts the arguments to strings and concatenates them.
-    left toString +(right toString)
+    left toString + right toString
 end
-
-
-import magpie.core.comparable with
-    export <
-    export >
-    export <=
-    export >=
-end
-
-import magpie.core.indexable with
-    export iterate
-    export validateIndex
-    export Iterator
-    export next
-    export current
-    export IndexableIterator
-end
-
-import magpie.core.range with
-    export Range
-    export first
-    export last
-    export count
-    export from
-    export to
-    export until
-end
-
-// TODO(bob): Should this be in core?
-import magpie.core.usable with
-    export use
-    export close
-end
-
-import magpie.syntax.arithmetic with
-    export *
-    export /
-    export %
-    export +
-    export -
-    export <
-    export >
-    export <=
-    export >=
-    export ==
-    export !=
-end
-
-// "definfix" Parser and core operators
-// ----------------------------------------------------------------------------
-
-/*
-definePrefix("definfix", fn(parser is Parser, token is Token)
-    // Keyword for parsing an infix operator with a given name and precedence.
-    // Simply desugars to a call a function with the same name:
-    //
-    //     definfix + 5
-    //     // from:
-    //     a +% b
-    //     // to:
-    //     a +%(b)
-    var name = parser consume(TokenType.NAME) value
-    var precedence = parser consume(TokenType.INT) value
-
-    {
-        defineInfix(`name, `precedence,
-            fn(parser is Parser, left is Expression, token is Token)
-                // Ignore a newline after operator.
-                parser matchToken(TokenType.LINE)
-                var right = parser parseExpression(`precedence)
-                CallExpression new(Expression: (position: token position),
-                    receiver: left, name: `name, argument: right)
-            end
-        )
-    }
-end)
-*/

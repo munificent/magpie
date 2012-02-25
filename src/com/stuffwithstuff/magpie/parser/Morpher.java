@@ -38,6 +38,18 @@ public class Morpher implements TokenReader {
       case LEFT_PAREN:
       case LEFT_BRACKET:
       case LEFT_BRACE:
+      case ASTERISK:
+      case SLASH:
+      case PERCENT:
+      case PLUS:
+      case MINUS:
+      case LT:
+      case GT:
+      case LTE:
+      case GTE:
+      case EQ:
+      case EQEQ:
+      case NOTEQ:
       case AND:
       case OR:
         mEatLines = true;

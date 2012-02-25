@@ -160,7 +160,18 @@ public class MagpieParser extends Parser {
     // Parse the message.
     String name;
     Pattern rightArg;
-    if (match(TokenType.NAME)) {
+    if (matchAny(TokenType.NAME,
+                 TokenType.ASTERISK,
+                 TokenType.SLASH,
+                 TokenType.PERCENT,
+                 TokenType.PLUS,
+                 TokenType.MINUS,
+                 TokenType.LT,
+                 TokenType.GT,
+                 TokenType.LTE,
+                 TokenType.GTE,
+                 TokenType.EQEQ,
+                 TokenType.NOTEQ)) {
       // Regular named message.
       name = last(1).getString();
       
@@ -185,7 +196,7 @@ public class MagpieParser extends Parser {
     
     // Parse the setter's rvalue type, if any.
     Pattern setValue = null;
-    if (match(TokenType.EQUALS)) {
+    if (match(TokenType.EQ)) {
       setValue = parsePattern();
     }
 
@@ -341,7 +352,7 @@ public class MagpieParser extends Parser {
     
     // Parse the pattern if there is one.
     Pattern pattern;
-    if (lookAhead(TokenType.EQUALS) || lookAhead(TokenType.LINE)) {
+    if (lookAhead(TokenType.EQ) || lookAhead(TokenType.LINE)) {
       pattern = Pattern.wildcard();
     } else {
       pattern = PatternParser.parse(this);
@@ -349,7 +360,7 @@ public class MagpieParser extends Parser {
     
     // Parse the initializer if there is one.
     Expr initializer;
-    if (match(TokenType.EQUALS)) {
+    if (match(TokenType.EQ)) {
       initializer = parseExpressionOrBlock();
     } else {
       initializer = null;
@@ -608,7 +619,7 @@ public class MagpieParser extends Parser {
   private Expr parseVar(boolean isMutable) {
     PositionSpan span = span();
     Pattern pattern = PatternParser.parse(this);
-    consume(TokenType.EQUALS);
+    consume(TokenType.EQ);
     Expr value = parseExpressionOrBlock();
     
     return Expr.var(span.end(), isMutable, pattern, value);

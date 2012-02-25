@@ -10,7 +10,20 @@ public enum TokenType {
   RIGHT_BRACE,
   BACKTICK,
   COMMA,
-  EQUALS,
+  
+  // operators
+  ASTERISK,
+  SLASH,
+  PERCENT,
+  PLUS,
+  MINUS,
+  LT,
+  GT,
+  LTE,
+  GTE,
+  EQ,
+  EQEQ,
+  NOTEQ,
   
   // keywords
   AND,

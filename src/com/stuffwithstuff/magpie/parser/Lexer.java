@@ -294,8 +294,30 @@ public class Lexer implements TokenReader {
       } else if (mRead.equals("true")) {
         type = TokenType.BOOL;
         value = true;
+      } else if (mRead.equals("*")) {
+        type = TokenType.ASTERISK;
+      } else if (mRead.equals("/")) {
+        type = TokenType.SLASH;
+      } else if (mRead.equals("%")) {
+        type = TokenType.PERCENT;
+      } else if (mRead.equals("+")) {
+        type = TokenType.PLUS;
+      } else if (mRead.equals("-")) {
+        type = TokenType.MINUS;
+      } else if (mRead.equals("<")) {
+        type = TokenType.LT;
+      } else if (mRead.equals(">")) {
+        type = TokenType.GT;
+      } else if (mRead.equals("<=")) {
+        type = TokenType.LTE;
+      } else if (mRead.equals(">=")) {
+        type = TokenType.GTE;
       } else if (mRead.equals("=")) {
-        type = TokenType.EQUALS;
+        type = TokenType.EQ;
+      } else if (mRead.equals("==")) {
+        type = TokenType.EQEQ;
+      } else if (mRead.equals("!=")) {
+        type = TokenType.NOTEQ;
       }
     }
     
