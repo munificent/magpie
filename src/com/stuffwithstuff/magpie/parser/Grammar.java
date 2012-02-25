@@ -24,7 +24,7 @@ public class Grammar {
     infix(TokenType.LEFT_BRACKET, new BracketInfixParser());
 
     reserve("break case catch def defclass do else end export for");
-    reserve("import match in is return then throw val var while");
+    reserve("import if in is match return then throw val var while");
   }
   
   public PrefixParser getPrefixParser(Token token) {

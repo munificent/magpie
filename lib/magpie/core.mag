@@ -16,7 +16,6 @@ import classfile:com.stuffwithstuff.magpie.intrinsic.StringMethods
 import magpie.syntax.branching with
     export and
     export or
-    export if
 end
 
 // Note: This file is parsed before any arithmetic operator syntax has been

@@ -66,11 +66,11 @@ specifyMethod(
         ("ababab" replace(regex("ab")) with "bc") shouldEqual("bcabab")
     end
 
-    it should("pass the MatchResult into the block.") with
+    it should("pass the MatchResult into the block") with
         "ababab" replace(regex("ab")) with it groups[0] shouldEqual("ab")
     end
 
-    it should("not replace anything if there are no matches.") with
+    it should("not replace anything if there are no matches") with
         ("ababab" replace(regex("bc")) with "cd") shouldEqual("ababab")
     end
 

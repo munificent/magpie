@@ -57,6 +57,7 @@ public class MagpieParser extends Parser {
     if (match("defclass")) return parseDefclass();
     if (match("do")) return parseDo();
     if (match("for")) return parseLoop();
+    if (match("if")) return parseIf();
     if (match("import")) return parseImport();
     if (match("match")) return parseMatch();
     if (match("return")) return parseReturn();
@@ -546,6 +547,43 @@ public class MagpieParser extends Parser {
 
     // Wrap the iterators in their own scope.
     return Expr.scope(Expr.sequence(outerBlock));
+  }
+  
+  private Expr parseIf() {
+    PositionSpan span = span();
+    
+    // Parse the condition.
+    Expr condition = parseExpressionOrBlock(new String[] { "then" }).getKey();
+
+    // Parse the then body.
+    consume("then");
+    Pair<Expr, Token> thenResult = parseExpressionOrBlock(
+        new String[] { "else", "end" });
+    Expr thenExpr = thenResult.getKey();
+    Token endToken = thenResult.getValue();
+    
+    // Don't try to parse "else" if we got an explicit "end" for the "then"
+    // block.
+    boolean consumedEnd = (endToken != null) && endToken.isKeyword("end");
+
+    // See if we have an "else" keyword and parse the else arm.
+    Expr elseExpr;
+    if (!consumedEnd && match("else")) {
+      elseExpr = parseExpressionOrBlock();
+    } else {
+      elseExpr = Expr.nothing();
+    }
+
+    // Desugar to a match.
+    // TODO(bob): Should do this in a later pass.
+    Expr truthyCondition = Expr.call(condition.getPosition(), condition,
+        Name.IS_TRUE);
+    List<MatchCase> cases = new ArrayList<MatchCase>();
+    cases.add(new MatchCase(Pattern.value(Expr.bool(true)), thenExpr));
+    cases.add(new MatchCase(elseExpr));
+    
+    Expr matchExpr = Expr.match(span.end(), truthyCondition, cases);
+    return allowExpressionAfterBlock(matchExpr);
   }
   
   private Expr parseReturn() {
