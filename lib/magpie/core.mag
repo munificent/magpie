@@ -13,11 +13,6 @@ import classfile:com.stuffwithstuff.magpie.intrinsic.IntMethods
 import classfile:com.stuffwithstuff.magpie.intrinsic.ListMethods
 import classfile:com.stuffwithstuff.magpie.intrinsic.StringMethods
 
-import magpie.syntax.branching with
-    export and
-    export or
-end
-
 // Note: This file is parsed before any arithmetic operator syntax has been
 // defined, which is why it calls them in regular message for like 1+(2).
 

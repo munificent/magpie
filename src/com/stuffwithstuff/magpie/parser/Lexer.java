@@ -282,7 +282,11 @@ public class Lexer implements TokenReader {
   private Token makeToken(TokenType type, Object value) {
     // Handle reserved words.
     if (type == TokenType.NAME) {
-      if (mRead.equals("nothing")) {
+      if (mRead.equals("and")) {
+        type = TokenType.AND;
+      } else if (mRead.equals("or")) {
+        type = TokenType.OR;
+      } else if (mRead.equals("nothing")) {
         type = TokenType.NOTHING;
       } else if (mRead.equals("false")) {
         type = TokenType.BOOL;

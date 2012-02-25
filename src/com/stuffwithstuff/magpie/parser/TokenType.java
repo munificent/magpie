@@ -12,6 +12,10 @@ public enum TokenType {
   COMMA,
   EQUALS,
   
+  // keywords
+  AND,
+  OR,
+  
   // identifiers
   NAME,
   FIELD,      // a record field like "x:"

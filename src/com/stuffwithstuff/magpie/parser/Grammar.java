@@ -18,6 +18,8 @@ public class Grammar {
     
     prefix("fn",        new FnParser());
 
+    infix(TokenType.AND,          new AndParser());
+    infix(TokenType.OR,           new OrParser());
     infix(TokenType.NAME,         new NameParser());
     infix(TokenType.COMMA,        new CommaParser());
     infix(TokenType.EQUALS,       new EqualsParser());

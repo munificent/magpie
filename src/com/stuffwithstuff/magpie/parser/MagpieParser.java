@@ -93,7 +93,6 @@ public class MagpieParser extends Parser {
   private Expr parseInfix(Expr left, int precedence) {
     while (precedence < mGrammar.getPrecedence(current())) {
       Token token = consume();
-      
       InfixParser infix = mGrammar.getInfixParser(token);
       left = infix.parse(this, left, token);
     }
