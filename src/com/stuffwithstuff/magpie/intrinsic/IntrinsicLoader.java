@@ -100,7 +100,7 @@ public abstract class IntrinsicLoader {
     try {
       // Process the annotation to get the method's Magpie name and type
       // signature.
-      MagpieParser parser = MagpieParser.create(text);
+      MagpieParser parser = new MagpieParser(text);
       return parser.parseSignature();
     } catch (ParseException e) {
       // TODO(bob): Hack. Better error handling.

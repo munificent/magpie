@@ -14,11 +14,10 @@ public class Repl {
   }
   
   public ReplResult readAndEvaluate(SourceReader reader) {
-    MagpieParser parser = MagpieParser.create(reader,
-        mInterpreter.getBaseModule().getGrammar());
+    MagpieParser parser = new MagpieParser(reader);
 
     try {
-      Expr expr = parser.parseExpression();
+      Expr expr = parser.parseStatement();
       parser.consume(TokenType.LINE);
       
       Obj result = mInterpreter.interpret(expr);
@@ -38,9 +37,5 @@ public class Repl {
     }
   }
   
-  public boolean isKeyword(String name) {
-    return mInterpreter.getBaseModule().getGrammar().isKeyword(name);
-  }
-
   private final Interpreter mInterpreter;
 }

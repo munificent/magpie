@@ -252,7 +252,7 @@ public class Interpreter {
   }
   
   private void evaluateModule(Module module) {
-    MagpieParser parser = module.createParser();
+    MagpieParser parser = new MagpieParser(module.readSource());
     
     mLoadingModules.push(module);
     try {
@@ -264,20 +264,16 @@ public class Interpreter {
         }
       }
       
-      // Evaluate every expression in the file. We do this incrementally so
-      // that expressions that define parsers can be used to parse the rest of
-      // the file.
-      while (true) {
-        try {
-          Expr expr = parser.parseTopLevelExpression();
-          if (expr == null) break;
+      // Evaluate the module.
+      try {
+        List<Expr> exprs = parser.parseModule();
+        for (Expr expr : exprs) {
           evaluate(expr, module, module.getScope());
-        } catch (ParseException e) {
-          String message = String.format("Syntax error at %s: %s",
-              e.getPosition(), e.getMessage());
-          mHost.showSyntaxError(message);
-          break;
         }
+      } catch (ParseException e) {
+        String message = String.format("Syntax error at %s: %s",
+            e.getPosition(), e.getMessage());
+        mHost.showSyntaxError(message);
       }
     } finally {
       mLoadingModules.pop();

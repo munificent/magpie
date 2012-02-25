@@ -11,7 +11,6 @@ import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.Context;
 import com.stuffwithstuff.magpie.interpreter.FnObj;
-import com.stuffwithstuff.magpie.interpreter.Interpreter;
 import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 import com.stuffwithstuff.magpie.interpreter.PatternTester;
@@ -54,20 +53,17 @@ public class IntrinsicMethods {
 
   // TODO(bob): More or less temporary.
   @Def("canParse(source is String)")
-  public static class CheckSyntax implements Intrinsic {
+  public static class CanParse implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       String source = right.asString();
       
       boolean canParse = true;
       
       try {
-        Interpreter tempInterpreter = new Interpreter(context.getInterpreter().getHost());
-        MagpieParser parser = MagpieParser.create(
-            new StringReader("", source),
-            tempInterpreter.getBaseModule().getGrammar());
+        MagpieParser parser = new MagpieParser(new StringReader("", source));
 
         while (true) {
-          Expr expr = parser.parseTopLevelExpression();
+          Expr expr = parser.parseStatement();
           if (expr == null) break;
         }
       } catch (ParseException e) {

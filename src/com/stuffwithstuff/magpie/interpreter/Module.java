@@ -10,10 +10,6 @@ import com.stuffwithstuff.magpie.SourceReader;
 import com.stuffwithstuff.magpie.SourceFile;
 import com.stuffwithstuff.magpie.ast.Expr;
 import com.stuffwithstuff.magpie.ast.FnExpr;
-import com.stuffwithstuff.magpie.parser.Grammar;
-import com.stuffwithstuff.magpie.parser.InfixParser;
-import com.stuffwithstuff.magpie.parser.MagpieParser;
-import com.stuffwithstuff.magpie.parser.PrefixParser;
 import com.stuffwithstuff.magpie.parser.StringReader;
 
 public class Module implements Context {
@@ -28,30 +24,13 @@ public class Module implements Context {
   public Interpreter getInterpreter() { return mInterpreter; }
   public Scope getScope() { return mScope; }
   public Set<String> getExportedNames() { return mExportedNames; }
-  public Grammar getGrammar() { return mGrammar; }
    
-  private SourceReader readSource() {
+  public SourceReader readSource() {
     return new StringReader(mInfo.getPath(), mInfo.getSource());
   }
   
   public void export(String name) {
     mExportedNames.add(name);
-  }
-  
-  public MagpieParser createParser() {
-    return MagpieParser.create(readSource(), mGrammar);
-  }
-  
-  public void defineSyntax(String keyword, InfixParser parser, boolean export) {
-    mGrammar.defineParser(keyword, parser);
-    
-    if (export) mExportedNames.add(keyword);
-  }
-  
-  public void defineSyntax(String keyword, PrefixParser parser, boolean export) {
-    mGrammar.defineParser(keyword, parser);
-    
-    if (export) mExportedNames.add(keyword);
   }
   
   // Context inferface:
@@ -163,6 +142,5 @@ public class Module implements Context {
   private final SourceFile mInfo;
   private final Interpreter mInterpreter;
   private final Scope mScope;
-  private final Grammar mGrammar = new Grammar();
   private final Set<String> mExportedNames = new HashSet<String>();
 }

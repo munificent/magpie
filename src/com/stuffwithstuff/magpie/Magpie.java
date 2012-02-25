@@ -31,7 +31,7 @@ public class Magpie {
   }
   
   public void defineMethod(String signature, String doc, Method method) {
-    MagpieParser parser = MagpieParser.create(signature);
+    MagpieParser parser = new MagpieParser(signature);
     Pair<String, Pattern> parsed = parser.parseSignature();
 
     String name = parsed.getKey();

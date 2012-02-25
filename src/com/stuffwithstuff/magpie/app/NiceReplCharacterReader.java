@@ -63,8 +63,11 @@ public class NiceReplCharacterReader extends ReplReader {
               token.isKeyword("it")) {
             // special identifiers
             Term.set(ForeColor.LIGHT_BLUE);
+            // TODO(bob): Fix this once we have token types for the reserved words.
+            /*
           } else if (repl.isKeyword(token.getString())) {
             Term.set(ForeColor.CYAN);
+            */
           } else {
             Term.set(ForeColor.WHITE);
           }

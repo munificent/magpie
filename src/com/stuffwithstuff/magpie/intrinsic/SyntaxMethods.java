@@ -1,5 +1,6 @@
 package com.stuffwithstuff.magpie.intrinsic;
 
+/*
 import java.util.List;
 
 import com.stuffwithstuff.magpie.Def;
@@ -15,8 +16,15 @@ import com.stuffwithstuff.magpie.parser.PrefixParser;
 import com.stuffwithstuff.magpie.parser.Token;
 import com.stuffwithstuff.magpie.parser.TokenType;
 import com.stuffwithstuff.magpie.util.Pair;
+*/
+
+// TODO(bob): Now that Magpie's grammar isn't extensible, this stuff isn't
+// being used. Keeping it around though because it may still be useful as a
+// module for playing with Magpie code in Magpie. When Magpie is self-hosted,
+// this can go away entirely.
 
 public class SyntaxMethods {
+  /*
   @Def("definePrefix(keyword is String, parser)")
   public static class DefinePrefix implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
@@ -177,4 +185,5 @@ public class SyntaxMethods {
     private final int mPrecedence;
     private final Obj mParser;
   }
+  */
 }

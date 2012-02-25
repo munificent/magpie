@@ -14,34 +14,29 @@ import com.stuffwithstuff.magpie.util.Expect;
 import com.stuffwithstuff.magpie.util.Pair;
 
 public class MagpieParser extends Parser {
-  public static MagpieParser create(String text) {
-    return create(new StringReader("", text));
+  public MagpieParser(String text) {
+    this(new StringReader("", text));
   }
   
-  public static MagpieParser create(SourceReader reader) {
-    return create(reader, new Grammar());
+  public MagpieParser(SourceReader reader) {
+    this(new Annotator(new Morpher(new Lexer(reader))));
   }
   
-  public static MagpieParser create(SourceReader reader, Grammar grammar) {
-    TokenReader lexer = new Lexer(reader);
-    TokenReader morpher = new Morpher(lexer);
-    TokenReader annotator = new Annotator(morpher);
-    
-    return new MagpieParser(annotator, grammar);
-  }
-  
-  public MagpieParser(TokenReader tokens, Grammar grammar) {
+  public MagpieParser(TokenReader tokens) {
     super(tokens);
-    
-    mGrammar = grammar;
+    mGrammar = new Grammar();
   }
   
-  public Expr parseTopLevelExpression() {
-    if (lookAhead(TokenType.EOF)) return null;
+  public List<Expr> parseModule() {
+    List<Expr> exprs = new ArrayList<Expr>();
     
-    Expr expr = parseStatement();
-    if (!lookAhead(TokenType.EOF)) consume(TokenType.LINE);
-    return expr;
+    while (!lookAhead(TokenType.EOF)) {
+      Expr expr = parseStatement();
+      exprs.add(expr);
+      if (!lookAhead(TokenType.EOF)) consume(TokenType.LINE);
+    }
+    
+    return exprs;
   }
   
   /**
@@ -69,11 +64,11 @@ public class MagpieParser extends Parser {
     return parseExpression();
   }
   
-  public Expr parseExpression() {
+  Expr parseExpression() {
     return parsePrecedence(0);
   }
 
-  public Expr parsePrecedence(int precedence) {
+  Expr parsePrecedence(int precedence) {
     // Top down operator precedence parser based on:
     // http://javascript.crockford.com/tdop/tdop.html
     Token token = consume();
@@ -100,22 +95,22 @@ public class MagpieParser extends Parser {
     return left;
   }
   
-  public Expr parseBlock() {
+  Expr parseBlock() {
     return parseBlock(true, new String[] { "end" }).getKey();
   }
   
-  public Expr parseExpressionOrBlock() {
+  Expr parseExpressionOrBlock() {
     return parseExpressionOrBlock("end").getKey();
   }
 
-  public Pair<Expr, Token> parseExpressionOrBlock(String... endTokens) {
+  private Pair<Expr, Token> parseExpressionOrBlock(String... endTokens) {
     return parseExpressionOrBlock(true, endTokens);
   }
 
   /**
    * Parses a function type declaration.
    */
-  public Pattern parseFunctionType() {
+  Pattern parseFunctionType() {
     // Parse the prototype: (foo Foo, bar Bar)
     consume(TokenType.LEFT_PAREN);
     
@@ -211,7 +206,7 @@ public class MagpieParser extends Parser {
     return new Pair<String, Pattern>(name, pattern);
   }
   
-  public Expr groupExpression(TokenType right) {
+  Expr groupExpression(TokenType right) {
     PositionSpan span = span();
     if (match(right)) {
       return Expr.nothing(span.end());

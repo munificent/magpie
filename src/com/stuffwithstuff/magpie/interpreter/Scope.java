@@ -3,8 +3,6 @@ package com.stuffwithstuff.magpie.interpreter;
 import java.util.*;
 import java.util.Map.Entry;
 
-import com.stuffwithstuff.magpie.parser.InfixParser;
-import com.stuffwithstuff.magpie.parser.PrefixParser;
 import com.stuffwithstuff.magpie.util.Expect;
 import com.stuffwithstuff.magpie.util.Pair;
 
@@ -76,17 +74,6 @@ public class Scope {
       // you can have importable non-global methods. (They will work
       // essentially like extension methods in C#.)
       throw new RuntimeException("Untested");
-    }
-    
-    // Import syntax.
-    PrefixParser prefix = module.getGrammar().getPrefixParser(name);
-    if (prefix != null) {
-      mModule.defineSyntax(rename, prefix, export);
-    }
-
-    InfixParser infix = module.getGrammar().getInfixParser(name);
-    if (infix != null) {
-      mModule.defineSyntax(rename, infix, export);
     }
     
     // Re-export.
