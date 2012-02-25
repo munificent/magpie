@@ -9,7 +9,6 @@ import com.stuffwithstuff.magpie.Method;
 import com.stuffwithstuff.magpie.ast.pattern.Pattern;
 import com.stuffwithstuff.magpie.interpreter.Callable;
 import com.stuffwithstuff.magpie.interpreter.Scope;
-import com.stuffwithstuff.magpie.parser.DefParser;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
 import com.stuffwithstuff.magpie.parser.ParseException;
 import com.stuffwithstuff.magpie.util.Pair;
@@ -102,7 +101,7 @@ public abstract class IntrinsicLoader {
       // Process the annotation to get the method's Magpie name and type
       // signature.
       MagpieParser parser = MagpieParser.create(text);
-      return DefParser.parseSignature(parser);
+      return parser.parseSignature();
     } catch (ParseException e) {
       // TODO(bob): Hack. Better error handling.
       System.out.println("Could not parse built-in signature \"" +

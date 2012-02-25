@@ -16,18 +16,15 @@ public class Grammar {
     prefix(TokenType.NAME,          new NameParser());
     prefix(TokenType.FIELD,         new FieldParser());
     
-    prefix("def",       new DefParser());
-    prefix("defclass",  new ClassParser());
     prefix("fn",        new FnParser());
-    prefix("match",     new MatchParser());
 
     infix(TokenType.NAME,         new NameParser());
     infix(TokenType.COMMA,        new CommaParser());
     infix(TokenType.EQUALS,       new EqualsParser());
     infix(TokenType.LEFT_BRACKET, new BracketInfixParser());
 
-    reserve("break case catch do else end export for");
-    reserve("import in is return then throw val var while");
+    reserve("break case catch def defclass do else end export for");
+    reserve("import match in is return then throw val var while");
   }
   
   public PrefixParser getPrefixParser(Token token) {

@@ -8,7 +8,6 @@ import com.stuffwithstuff.magpie.interpreter.Scope;
 import com.stuffwithstuff.magpie.intrinsic.IntrinsicCallable;
 import com.stuffwithstuff.magpie.intrinsic.IntrinsicLoader;
 import com.stuffwithstuff.magpie.intrinsic.MethodWrapper;
-import com.stuffwithstuff.magpie.parser.DefParser;
 import com.stuffwithstuff.magpie.parser.MagpieParser;
 import com.stuffwithstuff.magpie.util.Pair;
 
@@ -33,7 +32,7 @@ public class Magpie {
   
   public void defineMethod(String signature, String doc, Method method) {
     MagpieParser parser = MagpieParser.create(signature);
-    Pair<String, Pattern> parsed = DefParser.parseSignature(parser);
+    Pair<String, Pattern> parsed = parser.parseSignature();
 
     String name = parsed.getKey();
     Pattern pattern = parsed.getValue();

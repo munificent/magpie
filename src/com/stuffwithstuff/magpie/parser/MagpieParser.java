@@ -1,7 +1,9 @@
 package com.stuffwithstuff.magpie.parser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.stuffwithstuff.magpie.SourceReader;
 import com.stuffwithstuff.magpie.ast.*;
@@ -51,9 +53,12 @@ public class MagpieParser extends Parser {
    */
   public Expr parseStatement() {
     if (match("break")) return parseBreak();
+    if (match("def")) return parseDef();
+    if (match("defclass")) return parseDefclass();
     if (match("do")) return parseDo();
     if (match("for")) return parseLoop();
     if (match("import")) return parseImport();
+    if (match("match")) return parseMatch();
     if (match("return")) return parseReturn();
     if (match("throw")) return parseThrow();
     if (match("var")) return parseVar(true);
@@ -128,6 +133,73 @@ public class MagpieParser extends Parser {
     return pattern;
   }
 
+  public Pair<String, Pattern> parseSignature() {
+    // No receiver:        def print(text String)
+    // No arg method:      def (this String) reverse()
+    // Shared method:      def (Int) parse(text String)
+    // Getter:             def (this String) count
+    // Method on anything: def (this) debugDump()
+    // Value receiver:     def (true) not()
+    // Value arg:          def fib(0)
+    // Constant receiver:  def (LEFT_PAREN) not()
+    // Constant arg:       def string(LEFT_PAREN)
+    // Setter:             def (this Person) name = (name String)
+    // Setter with arg:    def (this List) at(index Int) = (item)
+    // Complex receiver:   def (a Int, b Int) sum()
+    // Indexer:            def (this String)[index Int]
+    // Index setter:       def (this String)[index Int] = (c Char)
+
+    // Parse the left argument, if any.
+    Pattern leftArg;
+    if (lookAhead(TokenType.LEFT_PAREN)) {
+      leftArg = parsePattern();
+    } else {
+      leftArg = Pattern.nothing();
+    }
+    
+    // Parse the message.
+    String name;
+    Pattern rightArg;
+    if (match(TokenType.NAME)) {
+      // Regular named message.
+      name = last(1).getString();
+      
+      // Parse the right argument, if any.
+      if (lookAhead(TokenType.LEFT_PAREN)) {
+        rightArg = parsePattern();
+      } else {
+        rightArg = Pattern.nothing();
+      }
+    } else {
+      // No name, so it must be an indexer.
+      name = "[]";
+      consume(TokenType.LEFT_BRACKET);
+      
+      if (!match(TokenType.RIGHT_BRACKET)) {
+        rightArg = PatternParser.parse(this);
+        consume(TokenType.RIGHT_BRACKET);
+      } else {
+        rightArg = Pattern.nothing();
+      }
+    }
+    
+    // Parse the setter's rvalue type, if any.
+    Pattern setValue = null;
+    if (match(TokenType.EQUALS)) {
+      setValue = parsePattern();
+    }
+
+    // Combine into a single multimethod pattern.
+    Pattern pattern = Pattern.record(leftArg, rightArg);
+    
+    if (setValue != null) {
+      name = Name.makeAssigner(name);
+      pattern = Pattern.record(pattern, setValue);
+    }
+    
+    return new Pair<String, Pattern>(name, pattern);
+  }
+  
   public Expr groupExpression(TokenType right) {
     PositionSpan span = span();
     if (match(right)) {
@@ -170,19 +242,125 @@ public class MagpieParser extends Parser {
     return Expr.break_(last(1).getPosition());
   }
   
-  private Expr parseDo() {
-    Expr body = parseBlock();
-    Expr result = Expr.scope(body);
-    
+  private Expr allowExpressionAfterBlock(Expr expr) {
     // TODO(bob): Hackish. This is to allow infix expressions, particularly
-    // method calls, after a "do" block, like:
+    // method calls, after a the block bodies of some expressions, like:
     //
     // do
     //    123
     // end shouldEqual(123) // <--
     //
     // Need a more elegant way to handle this.
-    return parseInfix(result, 0);
+
+    // Only if we have a block body. Single-expression bodies shouldn't do this.
+    if (!last(1).isKeyword("end")) return expr;
+    
+    return parseInfix(expr, 0);
+  }
+  
+  private Expr parseDef() {
+    PositionSpan span = span();
+    
+    // Handle a multimethod definition with no specializations.
+    if (lookAhead(TokenType.NAME, TokenType.LINE)) {
+      String name = consume().getString();
+      String doc = "";
+      // If there is a doc comment, the method has a block for it.
+      if (match(TokenType.LINE, TokenType.DOC_COMMENT)) {
+        doc = last(1).getString();
+        consume(TokenType.LINE);
+        consume("end");
+      }
+      
+      return Expr.method(span.end(), doc, name);
+    }
+    
+    Pair<String, Pattern> signature = parseSignature();
+    
+    // Parse the doc comment if given.
+    String doc = "";
+    if (match(TokenType.LINE, TokenType.DOC_COMMENT)) {
+      doc = last(1).getString();
+    }
+
+    if (!lookAhead(TokenType.LINE)) {
+      throw new ParseException(current().getPosition(),
+          "A method body must be a block.");
+    }
+    
+    Expr body = parseBlock();
+    
+    return Expr.method(span.end(), doc, 
+        signature.getKey(), signature.getValue(), body);
+  }
+  
+  private Pattern parsePattern() {
+    consume(TokenType.LEFT_PAREN);
+    if (match(TokenType.RIGHT_PAREN)) return Pattern.nothing();
+    
+    Pattern pattern = PatternParser.parse(this);
+    consume(TokenType.RIGHT_PAREN);
+    return pattern;
+  }
+  
+  private Expr parseDefclass() {
+    PositionSpan span = span();
+    String name = consume(TokenType.NAME).getString();
+    
+    // Parse the parents, if any.
+    List<String> parents = new ArrayList<String>();
+    if (match("is")) {
+      do {
+        parents.add(consume(TokenType.NAME).getString());
+      } while (match(TokenType.COMMA));
+    }
+    
+    consume(TokenType.LINE);
+
+    // Parse the doc comment if given.
+    String doc = "";
+    if (match(TokenType.DOC_COMMENT, TokenType.LINE)) {
+      doc = last(2).getString();
+    }
+    
+    Map<String, Field> fields = new HashMap<String, Field>();
+    
+    // Parse the body.
+    while (!match("end")) {
+      if (match("var")) parseField(true, fields);
+      else if (match("val")) parseField(false, fields);
+
+      consume(TokenType.LINE);
+    }
+    
+    return Expr.class_(span.end(), doc, name, parents, fields);
+  }
+
+  private void parseField(boolean isMutable, Map<String, Field> fields) {
+    String name = consume(TokenType.NAME).getString();
+    
+    // Parse the pattern if there is one.
+    Pattern pattern;
+    if (lookAhead(TokenType.EQUALS) || lookAhead(TokenType.LINE)) {
+      pattern = Pattern.wildcard();
+    } else {
+      pattern = PatternParser.parse(this);
+    }
+    
+    // Parse the initializer if there is one.
+    Expr initializer;
+    if (match(TokenType.EQUALS)) {
+      initializer = parseExpressionOrBlock();
+    } else {
+      initializer = null;
+    }
+    
+    fields.put(name, new Field(isMutable, initializer, pattern));
+  }
+  
+  private Expr parseDo() {
+    Expr body = parseBlock();
+    return allowExpressionAfterBlock(Expr.scope(body));
   }
   
   private Expr parseImport() {
@@ -228,7 +406,51 @@ public class MagpieParser extends Parser {
     }
     return Expr.import_(span.end(), scheme, module, prefix, isOnly, declarations);
   }
+  
+  private Expr parseMatch() {
+    PositionSpan span = span();
     
+    // Parse the value.
+    Expr value = parseExpression();
+    
+    // Require a newline between the value and the first case.
+    consume(TokenType.LINE);
+        
+    // Parse the cases.
+    List<MatchCase> cases = new ArrayList<MatchCase>();
+    while (match("case")) {
+      cases.add(parseCase());
+    }
+    
+    // Parse the else case, if present.
+    if (match("else")) {
+      Expr elseCase = parseExpressionOrBlock();
+      cases.add(new MatchCase(elseCase));
+    }
+    
+    consume(TokenType.LINE);
+    consume("end");
+    
+    return allowExpressionAfterBlock(Expr.match(span.end(), value, cases));
+  }
+  
+  private MatchCase parseCase() {
+    Pattern pattern = PatternParser.parse(this);
+
+    consume("then");
+    
+    Pair<Expr, Token> bodyParse = parseExpressionOrBlock("else", "end", "case");
+    
+    // Allow newlines to separate single-line case and else cases.
+    if ((bodyParse.getValue() == null) &&
+        (lookAhead(TokenType.LINE, "case") ||
+         lookAhead(TokenType.LINE, "else"))) {
+      consume(TokenType.LINE);
+    }
+    
+    return new MatchCase(pattern, bodyParse.getKey());
+  }
+  
   /**
    * Parse a "while" or "for" loop.
    */
