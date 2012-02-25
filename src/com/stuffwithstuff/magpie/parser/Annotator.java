@@ -36,9 +36,4 @@ public class Annotator extends Parser implements TokenReader {
       return token;
     }
   }
-
-  @Override
-  protected boolean isReserved(String name) {
-    return false;
-  }
 }

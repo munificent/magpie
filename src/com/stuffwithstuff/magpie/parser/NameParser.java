@@ -25,7 +25,7 @@ public class NameParser implements PrefixParser, InfixParser {
     }
     
     // Pass the block, if any.
-    if (parser.match("with")) {
+    if (parser.match(TokenType.WITH)) {
       // Parse the parameter list if given.
       Pattern blockType;
       if (parser.lookAhead(TokenType.LEFT_PAREN)) {

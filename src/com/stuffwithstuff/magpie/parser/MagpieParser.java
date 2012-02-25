@@ -47,19 +47,19 @@ public class MagpieParser extends Parser {
    * the condition in an "if" expection.
    */
   public Expr parseStatement() {
-    if (match("break")) return parseBreak();
-    if (match("def")) return parseDef();
-    if (match("defclass")) return parseDefclass();
-    if (match("do")) return parseDo();
-    if (match("for")) return parseLoop();
-    if (match("if")) return parseIf();
-    if (match("import")) return parseImport();
-    if (match("match")) return parseMatch();
-    if (match("return")) return parseReturn();
-    if (match("throw")) return parseThrow();
-    if (match("var")) return parseVar(true);
-    if (match("val")) return parseVar(false);
-    if (match("while")) return parseLoop();
+    if (match(TokenType.BREAK)) return parseBreak();
+    if (match(TokenType.DEF)) return parseDef();
+    if (match(TokenType.DEFCLASS)) return parseDefclass();
+    if (match(TokenType.DO)) return parseDo();
+    if (match(TokenType.FOR)) return parseLoop();
+    if (match(TokenType.IF)) return parseIf();
+    if (match(TokenType.IMPORT)) return parseImport();
+    if (match(TokenType.MATCH)) return parseMatch();
+    if (match(TokenType.RETURN)) return parseReturn();
+    if (match(TokenType.THROW)) return parseThrow();
+    if (match(TokenType.VAR)) return parseVar(true);
+    if (match(TokenType.VAL)) return parseVar(false);
+    if (match(TokenType.WHILE)) return parseLoop();
     
     return parseExpression();
   }
@@ -96,14 +96,14 @@ public class MagpieParser extends Parser {
   }
   
   Expr parseBlock() {
-    return parseBlock(true, new String[] { "end" }).getKey();
+    return parseBlock(true, new TokenType[] { TokenType.END }).getKey();
   }
   
   Expr parseExpressionOrBlock() {
-    return parseExpressionOrBlock("end").getKey();
+    return parseExpressionOrBlock(TokenType.END).getKey();
   }
 
-  private Pair<Expr, Token> parseExpressionOrBlock(String... endTokens) {
+  private Pair<Expr, Token> parseExpressionOrBlock(TokenType... endTokens) {
     return parseExpressionOrBlock(true, endTokens);
   }
 
@@ -239,11 +239,6 @@ public class MagpieParser extends Parser {
     mQuoteDepth--;
   }
 
-  @Override
-  protected boolean isReserved(String name) {
-    return mGrammar.isReserved(name);
-  }
-  
   private Expr parseBreak() {
     return Expr.break_(last(1).getPosition());
   }
@@ -259,7 +254,7 @@ public class MagpieParser extends Parser {
     // Need a more elegant way to handle this.
 
     // Only if we have a block body. Single-expression bodies shouldn't do this.
-    if (!last(1).isKeyword("end")) return expr;
+    if (last(1).getType() != TokenType.END) return expr;
     
     return parseInfix(expr, 0);
   }
@@ -275,7 +270,7 @@ public class MagpieParser extends Parser {
       if (match(TokenType.LINE, TokenType.DOC_COMMENT)) {
         doc = last(1).getString();
         consume(TokenType.LINE);
-        consume("end");
+        consume(TokenType.END);
       }
       
       return Expr.method(span.end(), doc, name);
@@ -315,7 +310,7 @@ public class MagpieParser extends Parser {
     
     // Parse the parents, if any.
     List<String> parents = new ArrayList<String>();
-    if (match("is")) {
+    if (match(TokenType.IS)) {
       do {
         parents.add(consume(TokenType.NAME).getString());
       } while (match(TokenType.COMMA));
@@ -332,9 +327,9 @@ public class MagpieParser extends Parser {
     Map<String, Field> fields = new HashMap<String, Field>();
     
     // Parse the body.
-    while (!match("end")) {
-      if (match("var")) parseField(true, fields);
-      else if (match("val")) parseField(false, fields);
+    while (!match(TokenType.END)) {
+      if (match(TokenType.VAR)) parseField(true, fields);
+      else if (match(TokenType.VAL)) parseField(false, fields);
 
       consume(TokenType.LINE);
     }
@@ -382,7 +377,7 @@ public class MagpieParser extends Parser {
     
     // Parse the prefix, if any.
     String prefix = null;
-    if (match("as")) {
+    if (match(TokenType.AS)) {
       prefix = consume(TokenType.NAME).getString();
     }
     
@@ -390,19 +385,19 @@ public class MagpieParser extends Parser {
     List<ImportDeclaration> declarations = new ArrayList<ImportDeclaration>();
     boolean isOnly = false;
     
-    if (match("with")) {
-      if (match("only")) isOnly = true;
+    if (match(TokenType.WITH)) {
+      if (match(TokenType.ONLY)) isOnly = true;
       
       consume(TokenType.LINE);
       
-      while (!match("end")) {
+      while (!match(TokenType.END)) {
         // TODO(bob): "excluding".
         
-        boolean export = match("export");
+        boolean export = match(TokenType.EXPORT);
         
         String name = consume(TokenType.NAME).getString();
         String rename = null;
-        if (match("as")) {
+        if (match(TokenType.AS)) {
           rename = consume(TokenType.NAME).getString();
         }
         
@@ -424,18 +419,18 @@ public class MagpieParser extends Parser {
         
     // Parse the cases.
     List<MatchCase> cases = new ArrayList<MatchCase>();
-    while (match("case")) {
+    while (match(TokenType.CASE)) {
       cases.add(parseCase());
     }
     
     // Parse the else case, if present.
-    if (match("else")) {
+    if (match(TokenType.ELSE)) {
       Expr elseCase = parseExpressionOrBlock();
       cases.add(new MatchCase(elseCase));
     }
     
     consume(TokenType.LINE);
-    consume("end");
+    consume(TokenType.END);
     
     return allowExpressionAfterBlock(Expr.match(span.end(), value, cases));
   }
@@ -443,14 +438,15 @@ public class MagpieParser extends Parser {
   private MatchCase parseCase() {
     Pattern pattern = PatternParser.parse(this);
 
-    consume("then");
+    consume(TokenType.THEN);
     
-    Pair<Expr, Token> bodyParse = parseExpressionOrBlock("else", "end", "case");
+    Pair<Expr, Token> bodyParse = parseExpressionOrBlock(
+        TokenType.ELSE, TokenType.END, TokenType.CASE);
     
     // Allow newlines to separate single-line case and else cases.
     if ((bodyParse.getValue() == null) &&
-        (lookAhead(TokenType.LINE, "case") ||
-         lookAhead(TokenType.LINE, "else"))) {
+        (lookAhead(TokenType.LINE, TokenType.CASE) ||
+         lookAhead(TokenType.LINE, TokenType.ELSE))) {
       consume(TokenType.LINE);
     }
     
@@ -495,7 +491,7 @@ public class MagpieParser extends Parser {
     List<Expr> eachLoop = new ArrayList<Expr>();
     
     while (true) {
-      if (token.isKeyword("while")) {
+      if (token.getType() == TokenType.WHILE) {
         Expr condition = parseExpression();
         eachLoop.add(Expr.if_(condition,
             Expr.nothing(),
@@ -503,7 +499,7 @@ public class MagpieParser extends Parser {
       } else {
         PositionSpan iteratorSpan = span();
         Pattern pattern = PatternParser.parse(this);
-        consume("in");
+        consume(TokenType.IN);
         Expr generator = parseExpression();
         Position position = iteratorSpan.end();
         
@@ -525,14 +521,14 @@ public class MagpieParser extends Parser {
       }
       match(TokenType.LINE); // Optional line after a clause.
       
-      if (match("while") || match("for")) {
+      if (matchAny(TokenType.WHILE, TokenType.FOR)) {
         token = last(1);
       } else {
         break;
       }
     }
     
-    consume("do");
+    consume(TokenType.DO);
     Expr body = parseExpressionOrBlock();
 
     // Build the loop body.
@@ -558,22 +554,22 @@ public class MagpieParser extends Parser {
     PositionSpan span = span();
     
     // Parse the condition.
-    Expr condition = parseExpressionOrBlock(new String[] { "then" }).getKey();
+    Expr condition = parseExpressionOrBlock(TokenType.THEN).getKey();
 
     // Parse the then body.
-    consume("then");
+    consume(TokenType.THEN);
     Pair<Expr, Token> thenResult = parseExpressionOrBlock(
-        new String[] { "else", "end" });
+        TokenType.ELSE, TokenType.END);
     Expr thenExpr = thenResult.getKey();
     Token endToken = thenResult.getValue();
     
     // Don't try to parse "else" if we got an explicit "end" for the "then"
     // block.
-    boolean consumedEnd = (endToken != null) && endToken.isKeyword("end");
+    boolean consumedEnd = (endToken != null) && (endToken.getType() == TokenType.END);
 
     // See if we have an "else" keyword and parse the else arm.
     Expr elseExpr;
-    if (!consumedEnd && match("else")) {
+    if (!consumedEnd && match(TokenType.ELSE)) {
       elseExpr = parseExpressionOrBlock();
     } else {
       elseExpr = Expr.nothing();
@@ -621,7 +617,7 @@ public class MagpieParser extends Parser {
   }
   
   private Pair<Expr, Token> parseExpressionOrBlock(boolean parseCatch,
-      Object[] endTokens) {
+      TokenType[] endTokens) {
     if (lookAhead(TokenType.LINE)){
       return parseBlock(parseCatch, endTokens);
     } else {
@@ -631,14 +627,14 @@ public class MagpieParser extends Parser {
   }
   
   private Pair<Expr, Token> parseBlock(boolean parseCatch,
-      Object[] endTokens) {
+      TokenType[] endTokens) {
     consume(TokenType.LINE);
     
     List<Expr> exprs = new ArrayList<Expr>();
     
     while (true) {
       if ((endTokens != null) && lookAheadAny(endTokens)) break;
-      if (lookAhead("catch")) break;
+      if (lookAhead(TokenType.CATCH)) break;
       
       exprs.add(parseStatement());
       consume(TokenType.LINE);
@@ -649,14 +645,14 @@ public class MagpieParser extends Parser {
     // If the block ends with 'end', then we want to consume that token,
     // otherwise we want to leave it unconsumed to be consistent with the
     // single-expression block case.
-    if (endToken.isKeyword("end")) {
+    if (endToken.getType() == TokenType.END) {
       consume();
     }
     
     // Parse any catch clauses.
     List<MatchCase> catches = new ArrayList<MatchCase>();
     if (parseCatch) {
-      while (match("catch")) {
+      while (match(TokenType.CATCH)) {
         catches.add(parseCatch(endTokens));
       }
     }
@@ -669,15 +665,15 @@ public class MagpieParser extends Parser {
     return new Pair<Expr, Token>(expr, endToken);
   }
   
-  private MatchCase parseCatch(Object[] endTokens) {
+  private MatchCase parseCatch(TokenType[] endTokens) {
     Pattern pattern = PatternParser.parse(this);
 
-    consume("then");
+    consume(TokenType.THEN);
 
     Pair<Expr, Token> body = parseExpressionOrBlock(false, endTokens);
 
     // Allow newlines to separate single-line catches.
-    if ((body.getValue() == null) && lookAhead(TokenType.LINE, "catch")) {
+    if ((body.getValue() == null) && lookAhead(TokenType.LINE, TokenType.CATCH)) {
       consume();
     }
 

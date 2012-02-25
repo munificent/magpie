@@ -72,7 +72,7 @@ public class PatternParser {
   }
   
   private static Pattern primary(MagpieParser parser) {
-    if (parser.match("is")) {
+    if (parser.match(TokenType.IS)) {
       Expr type = parser.parsePrecedence(Precedence.COMPARISON);
       return Pattern.type(type);
     } else if (parser.match(TokenType.EQEQ)) {

@@ -30,11 +30,6 @@ public final class Token {
   public double  getDouble() { return ((Double)mValue).doubleValue(); }
   public String  getString() { return (String)mValue; }
   
-  public boolean isKeyword(String name) {
-    if (mType != TokenType.NAME) return false;
-    return name.equals(getString());
-  }
-  
   public String toString() {
     return mText;
   }

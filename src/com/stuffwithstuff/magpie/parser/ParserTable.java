@@ -41,10 +41,6 @@ public class ParserTable<T> {
     return mTypeTable.get(token.getType());
   }
   
-  public boolean isReserved(String name) {
-    return mNameTable.containsKey(name);
-  }
-  
   private final Map<String, T> mNameTable = new HashMap<String, T>();
   private final Map<TokenType, T> mTypeTable = new HashMap<TokenType, T>();
 }

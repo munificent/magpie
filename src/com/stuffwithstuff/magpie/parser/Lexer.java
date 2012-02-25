@@ -1,5 +1,8 @@
 package com.stuffwithstuff.magpie.parser;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.stuffwithstuff.magpie.SourceReader;
 import com.stuffwithstuff.magpie.parser.Token;
 import com.stuffwithstuff.magpie.parser.TokenType;
@@ -282,42 +285,14 @@ public class Lexer implements TokenReader {
   private Token makeToken(TokenType type, Object value) {
     // Handle reserved words.
     if (type == TokenType.NAME) {
-      if (mRead.equals("and")) {
-        type = TokenType.AND;
-      } else if (mRead.equals("or")) {
-        type = TokenType.OR;
-      } else if (mRead.equals("nothing")) {
-        type = TokenType.NOTHING;
+      if (sKeywords.containsKey(mRead)) {
+        type = sKeywords.get(mRead);
       } else if (mRead.equals("false")) {
         type = TokenType.BOOL;
         value = false;
       } else if (mRead.equals("true")) {
         type = TokenType.BOOL;
         value = true;
-      } else if (mRead.equals("*")) {
-        type = TokenType.ASTERISK;
-      } else if (mRead.equals("/")) {
-        type = TokenType.SLASH;
-      } else if (mRead.equals("%")) {
-        type = TokenType.PERCENT;
-      } else if (mRead.equals("+")) {
-        type = TokenType.PLUS;
-      } else if (mRead.equals("-")) {
-        type = TokenType.MINUS;
-      } else if (mRead.equals("<")) {
-        type = TokenType.LT;
-      } else if (mRead.equals(">")) {
-        type = TokenType.GT;
-      } else if (mRead.equals("<=")) {
-        type = TokenType.LTE;
-      } else if (mRead.equals(">=")) {
-        type = TokenType.GTE;
-      } else if (mRead.equals("=")) {
-        type = TokenType.EQ;
-      } else if (mRead.equals("==")) {
-        type = TokenType.EQEQ;
-      } else if (mRead.equals("!=")) {
-        type = TokenType.NOTEQ;
       }
     }
     
@@ -355,4 +330,51 @@ public class Lexer implements TokenReader {
   private int mStartCol;
   private int mLine;
   private int mCol;
+  
+  private static final Map<String, TokenType> sKeywords;
+  
+  static {
+    sKeywords = new HashMap<String, TokenType>();
+    sKeywords.put("and",      TokenType.AND);
+    sKeywords.put("as",       TokenType.AS);
+    sKeywords.put("break",    TokenType.BREAK);
+    sKeywords.put("case",     TokenType.CASE);
+    sKeywords.put("catch",    TokenType.CATCH);
+    sKeywords.put("def",      TokenType.DEF);
+    sKeywords.put("defclass", TokenType.DEFCLASS);
+    sKeywords.put("do",       TokenType.DO);
+    sKeywords.put("else",     TokenType.ELSE);
+    sKeywords.put("end",      TokenType.END);
+    sKeywords.put("export",   TokenType.EXPORT);
+    sKeywords.put("fn",       TokenType.FN);
+    sKeywords.put("for",      TokenType.FOR);
+    sKeywords.put("import",   TokenType.IMPORT);
+    sKeywords.put("if",       TokenType.IF);
+    sKeywords.put("in",       TokenType.IN);
+    sKeywords.put("is",       TokenType.IS);
+    sKeywords.put("match",    TokenType.MATCH);
+    sKeywords.put("nothing",  TokenType.NOTHING);
+    sKeywords.put("only",     TokenType.ONLY);
+    sKeywords.put("or",       TokenType.OR);
+    sKeywords.put("return",   TokenType.RETURN);
+    sKeywords.put("then",     TokenType.THEN);
+    sKeywords.put("throw",    TokenType.THROW);
+    sKeywords.put("val",      TokenType.VAL);
+    sKeywords.put("var",      TokenType.VAR);
+    sKeywords.put("while",    TokenType.WHILE);
+    sKeywords.put("with",     TokenType.WITH);
+    
+    sKeywords.put("*",    TokenType.ASTERISK);
+    sKeywords.put("/",    TokenType.SLASH);
+    sKeywords.put("%",    TokenType.PERCENT);
+    sKeywords.put("+",    TokenType.PLUS);
+    sKeywords.put("-",    TokenType.MINUS);
+    sKeywords.put("<",    TokenType.LT);
+    sKeywords.put(">",    TokenType.GT);
+    sKeywords.put("<=",   TokenType.LTE);
+    sKeywords.put(">=",   TokenType.GTE);
+    sKeywords.put("=",    TokenType.EQ);
+    sKeywords.put("==",   TokenType.EQEQ);
+    sKeywords.put("!=",   TokenType.NOTEQ);
+  }
 }

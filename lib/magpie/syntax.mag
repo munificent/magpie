@@ -1,5 +1,3 @@
-import classfile:com.stuffwithstuff.magpie.intrinsic.SyntaxMethods
-
 // TODO(bob): Need to make sure this cannot be constructed somehow.
 defclass Parser
     /// An instance of this class will be passed to a user-defined parse()
