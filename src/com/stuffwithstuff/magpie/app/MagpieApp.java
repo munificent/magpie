@@ -39,6 +39,8 @@ public class MagpieApp {
     if (path == null && version == null) {
       ConsoleRepl repl = niceRepl ? new ColorRepl() : new ConsoleRepl();
       repl.run();
+    } else if (version != null) {
+      System.out.println("Magpie version 1.0.0");
     } else {
       runScript(path);
     }
