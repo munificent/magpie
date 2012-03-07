@@ -14,7 +14,8 @@ public class MagpieApp {
    */
   public static void main(String[] args) {
     String path = null;
-    
+    String version = null;
+
     // Process the arguments.
     boolean niceRepl = true;
     for (int i = 0; i < args.length; i++) {
