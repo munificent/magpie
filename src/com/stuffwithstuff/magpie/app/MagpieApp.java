@@ -21,6 +21,8 @@ public class MagpieApp {
     for (int i = 0; i < args.length; i++) {
       if (args[i].equals("-p")) {
         Profiler.setEnabled(true);
+      } else if (args[i].equals("--version")) {
+        version = "1.0.0";
       } else if (args[i].equals("--dumbrepl")) {
         niceRepl = false;
       } else {
