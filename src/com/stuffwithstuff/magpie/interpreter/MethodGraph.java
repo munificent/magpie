@@ -15,7 +15,7 @@ import java.util.Map;
  * Given:
  * 
  * Any two patterns A and B can be compared. If A is a more specific pattern
- * than be (for example, it's a type pattern of a subclass and B is a type
+ * than B (for example, it's a type pattern of a subclass and B is a type
  * pattern for a superclass), then A is "less" than B, and B is "greater" than
  * A. We also say that A "covers" B, meaning that if an argument matches A then
  * there's no need to consider B since A would always be preferred.
