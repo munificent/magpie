@@ -23,6 +23,6 @@ def (this is Int) until(after is Int)
 end
 
 def from(first is Int)
-    // TODO(bob): Hack. Assumes Java int.
-    Range new(first: first, last: 2147483647)
+    // TODO(bob): Total hack.
+    Range new(first: first, last: 9999999)
 end

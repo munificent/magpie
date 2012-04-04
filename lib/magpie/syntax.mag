@@ -31,7 +31,47 @@ val TokenType.LEFT_BRACE = TokenType new(name: "LEFT_BRACE")
 val TokenType.RIGHT_BRACE = TokenType new(name: "RIGHT_BRACE")
 val TokenType.BACKTICK = TokenType new(name: "BACKTICK")
 val TokenType.COMMA = TokenType new(name: "COMMA")
-val TokenType.EQUALS = TokenType new(name: "EQUALS")
+
+val TokenType.ASTERISK = TokenType new(name: "ASTERISK")
+val TokenType.SLASH = TokenType new(name: "SLASH")
+val TokenType.PERCENT = TokenType new(name: "PERCENT")
+val TokenType.PLUS = TokenType new(name: "PLUS")
+val TokenType.MINUS = TokenType new(name: "MINUS")
+val TokenType.LT = TokenType new(name: "LT")
+val TokenType.GT = TokenType new(name: "GT")
+val TokenType.LTE = TokenType new(name: "LTE")
+val TokenType.GTE = TokenType new(name: "GTE")
+val TokenType.EQ = TokenType new(name: "EQ")
+val TokenType.EQEQ = TokenType new(name: "EQEQ")
+val TokenType.NOTEQ = TokenType new(name: "NOTEQ")
+
+val TokenType.AND        = TokenType new(name: "AND")
+val TokenType.AS         = TokenType new(name: "AS")
+val TokenType.BREAK      = TokenType new(name: "BREAK")
+val TokenType.CASE       = TokenType new(name: "CASE")
+val TokenType.CATCH      = TokenType new(name: "CATCH")
+val TokenType.DEF        = TokenType new(name: "DEF")
+val TokenType.DEFCLASS   = TokenType new(name: "DEFCLASS")
+val TokenType.DO         = TokenType new(name: "DO")
+val TokenType.ELSE       = TokenType new(name: "ELSE")
+val TokenType.END        = TokenType new(name: "END")
+val TokenType.EXPORT     = TokenType new(name: "EXPORT")
+val TokenType.FN         = TokenType new(name: "FN")
+val TokenType.FOR        = TokenType new(name: "FOR")
+val TokenType.IMPORT     = TokenType new(name: "IMPORT")
+val TokenType.IF         = TokenType new(name: "IF")
+val TokenType.IN         = TokenType new(name: "IN")
+val TokenType.IS         = TokenType new(name: "IS")
+val TokenType.MATCH      = TokenType new(name: "MATCH")
+val TokenType.ONLY       = TokenType new(name: "ONLY")
+val TokenType.OR         = TokenType new(name: "OR")
+val TokenType.RETURN     = TokenType new(name: "RETURN")
+val TokenType.THEN       = TokenType new(name: "THEN")
+val TokenType.THROW      = TokenType new(name: "THROW")
+val TokenType.VAL        = TokenType new(name: "VAL")
+val TokenType.VAR        = TokenType new(name: "VAR")
+val TokenType.WHILE      = TokenType new(name: "WHILE")
+val TokenType.WITH       = TokenType new(name: "WITH")
 
 // identifiers
 val TokenType.NAME = TokenType new(name: "NAME")
@@ -224,4 +264,22 @@ defclass VariablePattern is Pattern
 end
 
 defclass WildcardPattern is Pattern
+end
+
+// TODO(bob): Move these into separate file?
+def (expr is BoolExpression) toString
+    expr value toString
+end
+
+def (expr is CallExpression) toString
+    expr name + "(" + expr argument + ")"
+end
+
+def (expr is RecordExpression) toString
+    var result = ""
+    for field, value in expr fields do
+        if result != "" then result = result + ", "
+        result = result + field + ": " + value
+    end
+    result
 end

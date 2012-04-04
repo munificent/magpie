@@ -1,0 +1,40 @@
+// This tests the Lexer class by reading and lexing Magpie's standard lib.
+// It expends to be invoked from the top magpie/ directory.
+
+import magpie.syntax with
+    // TODO(bob): Exclude in imports.
+    Parser as _exclude_Parser
+end
+import magpie.syntax.lexer
+import magpie.syntax.parser
+import io
+import io.path
+
+def parse(source)
+    print("parsing " + source)
+    val lexer = Lexer new(source)
+    val morpher = Morpher new(tokens: lexer)
+    val parser = Parser new(morpher)
+
+    val expr = parser parseProgram
+    print(expr)
+end
+
+def lexFile(path)
+    open(path) use with
+        parse(it read)
+    end
+end
+
+def walk(path)
+    if path isFile then
+        if (path extension == ".mag") then lexFile(path)
+    else
+        for file in dir(path) do walk(file)
+    end
+end
+
+parse("true + false * true - false")
+
+//walk("lib")
+//walk("spec")

@@ -20,12 +20,229 @@ def (this == Parser) init(tokens is Iterable)
     this init(tokens: tokens iterate, read: List new(), consumed: List new())
 end
 
-/*
-def (this is Parser) span {
-    /// Creates a new PositionSpan that starts before the last consumed Token.
-    PositionSpan new(this, last(1).getPosition());
-}
-*/
+def (parser is Parser) parseProgram
+    parser _statement
+end
+
+def (parser is Parser) _statement
+    if parser matches(TokenType.DEF) then return parser _parseDef
+
+    parser _parseExpression
+end
+
+def (parser is Parser) _parseExpression
+    parser _parsePrecedence(0)
+end
+
+def (parser is Parser) _parseDef
+    val name, pattern = parser _parseSignature
+end
+
+def nothingPattern()
+    ValuePattern new(value: NothingExpression new())
+end
+
+def (parser is Parser) _parseSignature
+    // No receiver:        def print(text String)
+    // No arg method:      def (this String) reverse()
+    // Shared method:      def (Int) parse(text String)
+    // Getter:             def (this String) count
+    // Method on anything: def (this) debugDump()
+    // Value receiver:     def (true) not()
+    // Value arg:          def fib(0)
+    // Constant receiver:  def (LEFT_PAREN) not()
+    // Constant arg:       def string(LEFT_PAREN)
+    // Setter:             def (this Person) name = (name String)
+    // Setter with arg:    def (this List) at(index Int) = (item)
+    // Complex receiver:   def (a Int, b Int) sum()
+    // Indexer:            def (this String)[index Int]
+    // Index setter:       def (this String)[index Int] = (c Char)
+
+    // Parse the left argument, if any.
+    val leftArg = if parser lookAhead(TokenType.LEFT_PAREN) then
+        parser parsePattern
+    else nothingPattern()
+
+    // Parse the message.
+    var name = nothing
+    var rightArg = nothing
+    if parser matchesAny([TokenType.NAME,
+        TokenType.ASTERISK,
+        TokenType.SLASH,
+        TokenType.PERCENT,
+        TokenType.PLUS,
+        TokenType.MINUS,
+        TokenType.LT,
+        TokenType.GT,
+        TokenType.LTE,
+        TokenType.GTE,
+        TokenType.EQEQ,
+        TokenType.NOTEQ]) then
+
+        // Regular named message.
+        name = parser last(1) text
+
+        // Parse the right argument, if any.
+        if parser lookAhead(TokenType.LEFT_PAREN) then
+            rightArg = parser _parsePattern
+        end
+    else
+        // No name, so it must be an indexer.
+        name = "[]"
+        parser consume(TokenType.LEFT_BRACKET)
+
+        if not(parser matches(TokenType.RIGHT_BRACKET)) then
+            rightArg = parser _parserPattern
+            parser consume(TokenType.RIGHT_BRACKET)
+        end
+    end
+
+    if rightArg = nothing then rightArg = nothingPattern()
+
+    // Parse the setter's rvalue type, if any.
+    val setValue = if parser matches(TokenType.EQ) then
+        parser _parsePattern
+    end
+
+    // Combine into a single multimethod pattern.
+    var pattern = RecordPattern new(fields: [("0", leftArg), ("1", rightArg)])
+
+    if setValue == nothing then
+        name = name _toAssigner
+        pattern = RecordPattern new(fields: [("0", pattern), ("1", setValue)])
+    end
+
+    name, pattern
+end
+
+def (parser is Parser) _parsePattern
+    /// A pattern may have a name, no name, or a wildcard name.
+    /// It may also have a further pattern expression, or not.
+    /// Each of those combinations has a different interpretation:
+    ///
+    /// no name,  no pattern -> Oops, error!
+    /// no name,  pattern    -> Just use the pattern.
+    /// name,     no pattern -> Straight variable pattern.
+    /// name,     pattern    -> Variable pattern with embedded pattern.
+    /// wildcard, no pattern -> Wildcard pattern.
+    /// wildcard, pattern    -> Use the pattern.
+    ///
+    /// The last case is a bit special since the wildcard is there but doesn't
+    /// affect the pattern. It's used to distinguish matching on the value's
+    /// *type* versus matching the value as *equal to a type*. For example:
+    ///
+    /// match foo
+    ///     case Int   then print("foo is the Int class object")
+    ///     case _ Int then print("foo's type is Int")
+    /// end
+    parser _parseRecordPattern
+end
+
+def (parser is Parser) _parseRecordPattern
+    val fields = [] toList
+    var index = 0
+    var isRecord = false
+    var field = nothing
+
+    while true do
+        var name = nothing
+        if parser matches(TokenType.FIELD) then
+            name = parser last(1) text
+            isRecord = true
+        else
+            name = index toString
+        end
+        index = index + 1
+
+        field = parser _parsePrimaryPattern
+        if not(parser matches(TokenType.COMMA)) then break
+    end
+
+    // TODO(bob): This code is ugly.
+    // If it's just a single pattern with no field name, just return it.
+    if fields count == 1 and not(isRecord) then return field
+
+    RecordPattern new(fields: fields)
+end
+
+def (parser is Parser) _parsePrimaryPattern
+    // TODO(bob): Temp.
+    parser consume
+    WildcardPattern new()
+end
+
+def (name is String) _toAssigner
+    name + " ="
+end
+
+def (parser is Parser) _parsePrecedence(precedence is Int)
+    // Top down operator precedence parser based on:
+    // http://javascript.crockford.com/tdop/tdop.html
+    val token = parser consume
+    val left = parser _parsePrefix(token)
+    parser _parseInfix(left, precedence)
+end
+
+def (parser is Parser) _parseInfix(left is Expression, precedence is Int)
+    var expr = left
+    while precedence < parser current type _precedence do
+        val token = parser consume
+        val infix = _getInfixParser(token type)
+        expr = infix call(parser, expr, token)
+    end
+    expr
+end
+
+def (parser is Parser) _parsePrefix(token is Token)
+    match token type
+        case == TokenType.BOOL    then BoolExpression new(value: token value)
+        // TODO(bob): Need to parse string value to int.
+        case == TokenType.INT     then IntExpression new(value: token value)
+        case == TokenType.NOTHING then NothingExpression new()
+        case == TokenType.STRING  then StringExpression new(value: token value)
+    end
+end
+
+def _getInfixParser(type is TokenType)
+    val infixOperator = fn(parser, expr, token) parser _parseInfixOperator(expr, token)
+
+    match type
+        case == TokenType.ASTERISK then infixOperator
+        case == TokenType.SLASH then infixOperator
+        case == TokenType.PERCENT then infixOperator
+        case == TokenType.PLUS then infixOperator
+        case == TokenType.MINUS then infixOperator
+        case == TokenType.LT then infixOperator
+        case == TokenType.GT then infixOperator
+        case == TokenType.LTE then infixOperator
+        case == TokenType.GTE then infixOperator
+        case == TokenType.EQEQ then infixOperator
+        case == TokenType.NOTEQ then infixOperator
+    end
+end
+
+def (parser is Parser) _parseInfixOperator(left is Expression, token is Token)
+    val right = parser _parsePrecedence(token type _precedence)
+    CallExpression new(name: token text, argument:
+        RecordExpression new(fields: [("0", left), ("1", right)]))
+end
+
+def (type is TokenType) _precedence
+    match type
+    case == TokenType.ASTERISK then 8
+    case == TokenType.SLASH then 8
+    case == TokenType.PERCENT then 8
+    case == TokenType.PLUS then 7
+    case == TokenType.MINUS then 7
+    case == TokenType.LT then 5
+    case == TokenType.GT then 5
+    case == TokenType.LTE then 5
+    case == TokenType.GTE then 5
+    case == TokenType.EQEQ then 4
+    case == TokenType.NOTEQ then 4
+    else 0
+    end
+end
 
 def (this is Parser) last(offset is Int)
     /// Gets a previously consumed Token.
@@ -48,10 +265,6 @@ def (this is Parser) lookAhead(type is TokenType)
     this _lookAhead(0, type)
 end
 
-def (this is Parser) lookAhead(keyword is String)
-    this _lookAhead(0, keyword)
-end
-
 def (this is Parser) lookAhead(tokens is Iterable)
     /// Looks ahead at the token stream to see if the next tokens match the
     /// expected ones, in order. For example, if the next tokens are
@@ -59,7 +272,9 @@ def (this is Parser) lookAhead(tokens is Iterable)
     /// true. Does not consume any tokens. Each element can be either a
     /// TokenType or a string denoting the name of a specific keyword.
     for token in tokens
-    for i in from(0) do if not(this _lookAhead(i, token)) then return false
+    for i in from(0) do
+        if not(this _lookAhead(i, token)) then return false
+    end
 
     true
 end
@@ -76,10 +291,6 @@ def (this is Parser) matches(type is TokenType)
     this matches([type])
 end
 
-def (this is Parser) matches(keyword is String)
-    this matches([keyword])
-end
-
 def (this is Parser) matches(tokens is Iterable)
     /// Looks ahead at the token stream to see if the next tokens match the
     /// expected ones, in order. If so, they are all consumed. Returns true if
@@ -94,7 +305,7 @@ def (this is Parser) matches(tokens is Iterable)
     true
 end
 
-def (this is Parser) matchAny(tokens is Iterable)
+def (this is Parser) matchesAny(tokens is Iterable)
     /// Looks ahead at the next token to see if it's any of the given allowed
     /// tokens. If so, consumes it. Returns true if any token matched.
     for token in tokens do
@@ -113,67 +324,32 @@ def (this is Parser) consume
     this last(1)
 end
 
-def (this is Parser) consume(type is TokenType)
+def (parser is Parser) consume(type is TokenType)
     /// Consumes the current token and advances to the next one. The token is
     /// required to be of the given type. If not, a ParseException will be
     /// thrown. Returns the consumed token.
-    if this lookAhead(type) then
-        this consume
+    if parser lookAhead(type) then
+        parser consume
     else
-        val current = this current
+        val current = parser current
         val message = "Expected token " + type + ", found " + current + "."
         // TODO(bob): Info for ParseErrors.
         throw ParseError new(/*current position, message*/)
     end
 end
 
-def (this is Parser) consume(keyword is String)
-    /// Consumes the current token and advances to the next one. The token is
-    /// required to be the given keyword. If not, a ParseException will be
-    /// thrown. Returns the consumed token.
-    if this lookAhead(keyword) then
-        this consume
-    else
-        val current = this current
-        val message = "Expected keyword " + keyword + ", found " + current + "."
-        // TODO(bob): Info for ParseErrors.
-        throw ParseError new(/*current position, message*/)
-    end
-end
-
-def (this is Parser) isReserved(name is String)
-    /// Gets whether or not the name is reserved. Reserved words describe name
-    /// tokens whose name is special and prohibit the token from being parsed as
-    /// a regular identifier. For example, "then" is reserved.
-    false
-end
-
-def (this is Parser) _lookAhead(distance is Int)
+def (parser is Parser) _lookAhead(distance is Int)
     // Read in as many as needed.
-    while distance >= this read count do
+    while distance >= parser read count do
         // TODO(bob): Handle this returning false.
-        this tokens next
-        this read add(this tokens current)
+        parser tokens next
+        parser read add(parser tokens current)
     end
 
     // Get the queued token.
-    this read[distance]
+    parser read[distance]
 end
 
-def (this is Parser) _lookAhead(distance is Int, type is TokenType)
-    val token = this _lookAhead(distance)
-    if token type != type then
-        false
-    else if type != TokenType.NAME then
-        true
-    else
-        // If we're looking for a NAME, we need to make sure that name is not a
-        // reserved word.
-        not(this isReserved(token text))
-    end
-end
-
-def (this is Parser) _lookAhead(distance is Int, keyword is String)
-    val token = this _lookAhead(distance)
-    token type == TokenType.NAME and token text == keyword
+def (parser is Parser) _lookAhead(distance is Int, type is TokenType)
+    parser _lookAhead(distance) type == type
 end

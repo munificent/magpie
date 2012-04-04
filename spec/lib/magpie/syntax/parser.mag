@@ -64,37 +64,3 @@ specifyMethod("(is Parser) consume(type is TokenType)") with
         end shouldThrow(ParseError)
     end
 end
-
-specifyMethod("(is Parser) consume(keyword is String)") with
-    it should("consume a NAME token from the stream if the text matches") with
-        val parser = Parser new(_testTokens)
-
-        parser consume("foo") shouldEqual(TokenType.NAME, "foo")
-    end
-
-    it should("throw a ParseError if the text does not match") with
-        val parser = Parser new(_testTokens)
-
-        fn
-            parser consume("not foo")
-        end shouldThrow(ParseError)
-    end
-
-    it should("throw a ParseError if the type is not NAME") with
-        val parser = Parser new([_token(TokenType.INT, "123")])
-
-        fn
-            parser consume("whatever")
-        end shouldThrow(ParseError)
-    end
-end
-
-specifyMethod("(is Parser) isReserved(name is String)") with
-    it should("returns false by default") with
-        val parser = Parser new(_testTokens)
-
-        parser isReserved("foo") shouldEqual(false)
-        parser isReserved("then") shouldEqual(false)
-        parser isReserved("else") shouldEqual(false)
-    end
-end

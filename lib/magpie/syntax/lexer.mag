@@ -21,7 +21,7 @@ end
 
 // ---
 
-defclass Lexer
+defclass Lexer is Iterable
     // TODO(bob): Support an iterable stream of characters.
     val _text is String
     var _pos is Int
@@ -255,14 +255,53 @@ def (this is Lexer) _makeToken(type is TokenType, value)
 
     if type == TokenType.NAME then
         actualType = match this _read
-            case "nothing" then TokenType.NOTHING
+            case "*"          then TokenType.ASTERISK
+            case "/"          then TokenType.SLASH
+            case "%"          then TokenType.PERCENT
+            case "+"          then TokenType.PLUS
+            case "-"          then TokenType.MINUS
+            case "<"          then TokenType.LT
+            case ">"          then TokenType.GT
+            case "<="         then TokenType.LTE
+            case ">="         then TokenType.GTE
+            case "="          then TokenType.EQ
+            case "=="         then TokenType.EQEQ
+            case "!="         then TokenType.NOTEQ
+            case "and"        then TokenType.AND
+            case "as"         then TokenType.AS
+            case "break"      then TokenType.BREAK
+            case "case"       then TokenType.CASE
+            case "catch"      then TokenType.CATCH
+            case "def"        then TokenType.DEF
+            case "defclass"   then TokenType.DEFCLASS
+            case "do"         then TokenType.DO
+            case "else"       then TokenType.ELSE
+            case "end"        then TokenType.END
+            case "export"     then TokenType.EXPORT
+            case "fn"         then TokenType.FN
+            case "for"        then TokenType.FOR
+            case "import"     then TokenType.IMPORT
+            case "if"         then TokenType.IF
+            case "in"         then TokenType.IN
+            case "is"         then TokenType.IS
+            case "match"      then TokenType.MATCH
+            case "nothing"    then TokenType.NOTHING
+            case "only"       then TokenType.ONLY
+            case "or"         then TokenType.OR
+            case "return"     then TokenType.RETURN
+            case "then"       then TokenType.THEN
+            case "throw"      then TokenType.THROW
+            case "val"        then TokenType.VAL
+            case "var"        then TokenType.VAR
+            case "while"      then TokenType.WHILE
+            case "with"       then TokenType.WITH
+
             case "false"   then
                 actualValue = false
                 TokenType.BOOL
             case "true"    then
                 actualValue = true
                 TokenType.BOOL
-            case "="       then TokenType.EQUALS
             case otherwise then TokenType.NAME
         end
     end
@@ -382,7 +421,7 @@ def (c is String) _isOperator
     end
 end
 
-defclass LexerIterator
+defclass LexerIterator is Iterator
     val lexer
     var current = nothing
 end
@@ -401,7 +440,7 @@ def (this is Lexer) iterate
 end
 
 // TODO(bob): Unify with Lexer and Annotator.
-defclass Morpher
+defclass Morpher is Iterable
     val tokens
     var eatLines is Bool = true
 end
