@@ -75,7 +75,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
     Multimethod multimethod = scope.lookUpMultimethod(expr.getName());
     if (multimethod == null) {
       throw mContext.error(Name.NO_METHOD_ERROR,
-          "Could not find a method named \"" + expr.getName() + "\".");
+          "Could not find a method named \"" + expr.getName() + "\". (" +
+          expr.getPosition() + ")");
     }
 
     Obj arg = evaluate(expr.getArg(), scope);
@@ -203,7 +204,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
     
     // If we got here, no patterns matched.
     throw mContext.error(Name.NO_MATCH_ERROR, "Could not find a match for \"" +
-        mContext.getInterpreter().evaluateToString(value) + "\".");
+        mContext.getInterpreter().evaluateToString(value) + "\" (" +
+        expr.getPosition() + ").");
   }
 
   @Override
@@ -230,7 +232,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
     
     // TODO(bob): Detect this statically.
     throw mContext.error(Name.NO_VARIABLE_ERROR,
-        "Could not find a variable named \"" + expr.getName() + "\".");
+        "Could not find a variable named \"" + expr.getName() + "\" (" +
+        expr.getPosition() + ").");
   }
 
   @Override
@@ -317,7 +320,8 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
     if (!PatternTester.test(mContext, expr.getPattern(), value, scope)) {
       mContext.error(Name.NO_MATCH_ERROR, "The variable pattern \"" +
           expr.getPattern() + "\" does not match the initialized value \"" +
-          mContext.getInterpreter().evaluateToString(value) + "\".");
+          mContext.getInterpreter().evaluateToString(value) + "\" (" +
+          expr.getPosition() + ").");
     }
     
     PatternBinder.bind(mContext, expr.isMutable(), expr.getPattern(), value,
