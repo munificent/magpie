@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>name</key>
+	<string>Magpie</string>
+	<key>ordering</key>
+	<array>
+		<string>4B269243-36A6-4AF9-8CD8-72B7560D1344</string>
+	</array>
+	<key>uuid</key>
+	<string>650C1AD1-24B4-4FDD-B1C0-ACB5E348FAAA</string>
+</dict>
+</plist>
