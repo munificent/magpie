@@ -1,5 +1,8 @@
 package com.stuffwithstuff.magpie.parser;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Grammar {
   public Grammar() {
     prefix(TokenType.BOOL,          new LiteralParser());
@@ -36,25 +39,17 @@ public class Grammar {
   }
   
   public PrefixParser getPrefixParser(Token token) {
-    return mPrefixParsers.get(token);
-  }
-
-  public PrefixParser getPrefixParser(String keyword) {
-    return mPrefixParsers.get(keyword);
+    return mPrefixParsers.get(token.getType());
   }
 
   public InfixParser getInfixParser(Token token) {
-    return mInfixParsers.get(token);
+    return mInfixParsers.get(token.getType());
   }
 
-  public InfixParser getInfixParser(String keyword) {
-    return mInfixParsers.get(keyword);
-  }
-  
   public int getPrecedence(Token token) {
     int precedence = 0;
 
-    InfixParser parser = mInfixParsers.get(token);
+    InfixParser parser = mInfixParsers.get(token.getType());
     if (parser != null) {
       precedence = parser.getPrecedence();
     }
@@ -63,15 +58,15 @@ public class Grammar {
   }
   
   private void prefix(TokenType type, PrefixParser parser) {
-    mPrefixParsers.define(type, parser);
+    mPrefixParsers.put(type, parser);
   }
   
   private void infix(TokenType type, InfixParser parser) {
-    mInfixParsers.define(type, parser);
+    mInfixParsers.put(type, parser);
   }
   
-  private final ParserTable<PrefixParser> mPrefixParsers =
-      new ParserTable<PrefixParser>();
-  private final ParserTable<InfixParser> mInfixParsers =
-      new ParserTable<InfixParser>();
+  private final Map<TokenType, PrefixParser> mPrefixParsers =
+      new HashMap<TokenType, PrefixParser>();
+  private final Map<TokenType, InfixParser> mInfixParsers =
+      new HashMap<TokenType, InfixParser>();
 }
