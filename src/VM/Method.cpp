@@ -10,6 +10,12 @@ namespace magpie
   {
     return Memory::makeTemp(new Method(name, code, constants, numRegisters));
   }
+
+  temp<Method> Method::create(gc<String> name,
+                              Primitive primitive)
+  {
+    return Memory::makeTemp(new Method(name, primitive));
+  }
   
   gc<Object> Method::getConstant(int index) const
   {
@@ -89,6 +95,11 @@ namespace magpie
     cout << endl;
   }
 
+  void Method::reach()
+  {
+    ASSERT(false, "Not implemented.");
+  }
+  
   void MethodScope::declare(gc<String> name)
   {
     names_.add(name);
@@ -99,6 +110,12 @@ namespace magpie
   {
     int index = find(name);
     methods_[index] = method;
+  }
+  
+  void MethodScope::define(gc<String> name, Primitive primitive)
+  {
+    names_.add(name);
+    methods_.add(Method::create(name, primitive));
   }
   
   int MethodScope::find(gc<String> name) const

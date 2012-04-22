@@ -66,14 +66,22 @@ namespace magpie
           
         case OP_CALL:
         {
-          // Store the IP back into the callframe so we know where to resume
-          // when we return to it.
-          frame.ip = ip;
-          ip = 0;
-          
           gc<Method> method = vm_.globals().get(GET_A(ins));
           gc<Object> arg = load(frame, GET_B(ins));
-          call(method, stack_.count() - 1, arg);
+          
+          Primitive primitive = method->primitive();
+          if (primitive != NULL) {
+            // TODO(bob): Pass arg and get return.
+            gc<Object> result = primitive(arg);
+            store(frame, GET_B(ins), result);
+          } else {
+            // Store the IP back into the callframe so we know where to resume
+            // when we return to it.
+            frame.ip = ip;
+            ip = 0;
+            
+            call(method, stack_.count() - 1, arg);
+          }
           break;
         }
         

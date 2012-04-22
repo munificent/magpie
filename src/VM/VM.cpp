@@ -1,5 +1,12 @@
 #include "VM.h"
 #include "Object.h"
+#include "Primitives.h"
+
+#define DEF_PRIMITIVE(name) \
+        { \
+          temp<String> primName = String::create(#name); \
+          globals_.define(primName, name##Primitive); \
+        }
 
 namespace magpie
 {
@@ -10,6 +17,8 @@ namespace magpie
     
     AllocScope scope;
     fiber_ = Fiber::create(*this);
+    
+    DEF_PRIMITIVE(print);
     
     // TODO(bob): Get rid of this nasty conversion problem.
     temp<Object> trueTemp = BoolObject::create(true);

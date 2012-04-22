@@ -10,6 +10,9 @@ namespace magpie
 {
   class Object;
   
+  // TODO(bob): Have actual return.
+  typedef gc<Object> (*Primitive)(gc<Object> arg);
+  
   class Method : public Managed
   {
   public:
@@ -17,9 +20,13 @@ namespace magpie
                                const Array<instruction>& code,
                                const Array<gc<Object> >& constants,
                                int numRegisters);
+
+    static temp<Method> create(gc<String> name,
+                               Primitive primitive);
     
     gc<String> name() const { return name_; }
     inline const Array<instruction>& code() const { return code_; }
+    inline Primitive primitive() const { return primitive_; }
     
     gc<Object> getConstant(int index) const;
     
@@ -28,7 +35,7 @@ namespace magpie
     void debugTrace() const;
     void debugTrace(instruction ins) const;
 
-    // TODO(bob): Implement reach().
+    virtual void reach();
     
   private:
     Method(gc<String> name, const Array<instruction>& code,
@@ -36,13 +43,26 @@ namespace magpie
     : name_(name),
       code_(code),
       constants_(constants),
-      numRegisters_(numRegisters)
+      numRegisters_(numRegisters),
+      primitive_(NULL)
+    {}
+
+    Method(gc<String> name, Primitive primitive)
+    : name_(name),
+      code_(),
+      constants_(),
+      numRegisters_(0),
+      primitive_(primitive)
     {}
     
     gc<String>         name_;
     Array<instruction> code_;
     Array<gc<Object> > constants_;
     int numRegisters_;
+    
+    // The primitive function for this method. Will be NULL for non-primitive
+    // methods.
+    Primitive primitive_;
     
     NO_COPY(Method);
   };
@@ -53,6 +73,7 @@ namespace magpie
   public:
     void declare(gc<String> name);
     void define(gc<String> name, gc<Method> method);
+    void define(gc<String> name, Primitive primitive);
     
     int find(gc<String> name) const;
     gc<Method> get(int index) const { return methods_[index]; }

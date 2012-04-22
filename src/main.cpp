@@ -188,15 +188,15 @@ int main(int argc, char * const argv[])
   //  ModuleLoader::load(vm, "../../example/out.magc");
   
   // Read a file.
-  temp<String> source = readFile("../../example/Main.mag");
+  temp<String> source = readFile("../../example/Fibonacci2.mag");
   Parser parser(source);
-
   temp<ModuleAst> module = parser.parseModule();
-  cout << module << endl;
   
+  // Compile it.
   Compiler::compileModule(vm, module);
+  
+  // Invoke main().
   gc<Method> method = vm.globals().findMain();
-
   temp<Object> result = vm.fiber().interpret(method);
   cout << result << endl;
   
