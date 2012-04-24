@@ -13,12 +13,18 @@ namespace magpie
     Lexer(gc<String> source)
     : source_(source),
       pos_(0),
-      start_(0) {}
+      start_(0),
+      skipNewline_(true)
+    {}
 
-    // Lexes and returns the next full Token read from the source.
+    // Lexes and returns the next full Token read from the source. Handles
+    // eliding newlines that should ignored.
     temp<Token> readToken();
 
   private:
+    // Reads a single token without and newline processing.
+    temp<Token> readRawToken();
+    
     bool isDone() const;
 
     bool isWhitespace(char c) const;
@@ -38,9 +44,9 @@ namespace magpie
     temp<Token> readNumber();
 
     gc<String> source_;
-    bool    needsLine_;
     int     pos_;
     int     start_;
+    bool    skipNewline_;
 
     NO_COPY(Lexer);
   };

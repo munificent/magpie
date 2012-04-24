@@ -10,6 +10,72 @@ namespace magpie
   {
     while (true)
     {
+      AllocScope scope;
+      temp<Token> token = readRawToken();
+      
+      switch (token->type())
+      {
+        // Ignore newlines after tokens that can't end an expression.
+        case TOKEN_LEFT_PAREN:
+        case TOKEN_LEFT_BRACKET:
+        case TOKEN_LEFT_BRACE:
+        case TOKEN_EQUALS:
+        case TOKEN_PLUS:
+        case TOKEN_MINUS:
+        case TOKEN_STAR:
+        case TOKEN_SLASH:
+        case TOKEN_PERCENT:
+        case TOKEN_LESS_THAN:
+        case TOKEN_AND:
+        case TOKEN_IS:
+        case TOKEN_NOT:
+        case TOKEN_OR:
+        case TOKEN_XOR:
+          skipNewline_ = true;
+          break;
+          
+        // TODO(bob): Need to decide how we want to handle keywords. Some of
+        // them specifically should *not* elide newlines because they can have
+        // a block after them.
+        /*
+        case TOKEN_CASE:
+        case TOKEN_DEF:
+        case TOKEN_DO:
+        case TOKEN_END:
+        case TOKEN_ELSE:
+        case TOKEN_FALSE:
+        case TOKEN_FOR:
+        case TOKEN_IF:
+        case TOKEN_MATCH:
+        case TOKEN_RETURN:
+        case TOKEN_THEN:
+        case TOKEN_TRUE:
+        case TOKEN_VAL:
+        case TOKEN_VAR:
+        case TOKEN_WHILE:
+        */
+          
+        case TOKEN_LINE:
+          if (skipNewline_) continue;
+          
+          // Collapse multiple newlines into one.
+          skipNewline_ = true;
+          break;
+
+        default:
+          // A line after any other token is significant.
+          skipNewline_ = false;
+          break;
+      }
+      
+      return scope.close(token);
+    }
+  }
+  
+  temp<Token> Lexer::readRawToken()
+  {
+    while (true)
+    {
       if (isDone()) return Token::create(TOKEN_EOF, String::create(""));
 
       start_ = pos_;
@@ -108,7 +174,7 @@ namespace magpie
         default:
           if (isNameStart(c)) return readName();
           if (isDigit(c)) return readNumber();
-          
+
           // If we got here, we don't know what it is.
           return makeToken(TOKEN_ERROR);
       }
