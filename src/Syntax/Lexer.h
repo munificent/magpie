@@ -39,6 +39,7 @@ namespace magpie
     temp<Token> makeToken(TokenType type);
 
     void skipLineComment();
+    void skipBlockComment();
 
     temp<Token> readName();
     temp<Token> readNumber();

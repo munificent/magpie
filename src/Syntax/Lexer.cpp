@@ -109,10 +109,10 @@ namespace magpie
           if (peek() == '/')
           {
             skipLineComment();
-          /*}
-            else if (peek() == '*')
+          }
+          else if (peek() == '*')
           {
-            skipBlockComment();*/
+            skipBlockComment();
           }
           else
           {
@@ -231,7 +231,38 @@ namespace magpie
     // TODO(bob): Handle EOF.
     while (peek() != '\n') advance();
   }
-
+  
+  void Lexer::skipBlockComment()
+  {
+    advance();
+    advance();
+    
+    int nesting = 1;
+    
+    while (nesting > 0)
+    {
+      // TODO(bob): Unterminated comment. Should return error.
+      if (isDone()) return;
+      
+      if ((peek() == '/') && (peek(1) == '*'))
+      {
+        advance();
+        advance();
+        nesting++;
+      }
+      else if ((peek() == '*') && (peek(1) == '/'))
+      {
+        advance();
+        advance();
+        nesting--;
+      }
+      else
+      {
+        advance();
+      }
+    }
+  }
+  
   temp<Token> Lexer::readName()
   {
     // TODO(bob): Handle EOF.
@@ -281,41 +312,6 @@ namespace magpie
   }
 
   /*
-  void Lexer::skipBlockComment()
-  {
-    advance();
-    advance();
-
-    int nesting = 1;
-
-    while (nesting > 0)
-    {
-      // TODO(bob): Unterminated comment. Should return error.
-      if (isDone()) return;
-
-      if ((peek() == '/') && (peek(1) == '*'))
-      {
-        advance();
-        advance();
-        nesting++;
-      }
-      else if ((peek() == '*') && (peek(1) == '/'))
-      {
-        advance();
-        advance();
-        nesting--;
-      }
-      else if (peek() == '\0')
-      {
-        advanceLine();
-      }
-      else
-      {
-        advance();
-      }
-    }
-  }
-
   Ref<Token> Lexer::readString()
   {
     advance();
