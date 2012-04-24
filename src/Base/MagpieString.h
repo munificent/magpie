@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "Array.h"
+#include "Macros.h"
 #include "Managed.h"
 
 namespace magpie
@@ -11,10 +13,18 @@ namespace magpie
   {
   public:
     // Creates a new heap-allocated string containing the given characters.
-    // If the length is known (or you want to truncate `text`, it can be passed
+    // If the length is known (or you want to truncate `text`), it can be passed
     // in. Otherwise omit it and it will be calculated from `text`.
     static temp<String> create(const char* text, int length = -1);
 
+    // Creates a new heap-allocated string containing the given array of
+    // characters.
+    static temp<String> create(const Array<char>& text);
+    
+    // Creates a new string using the given C-style format string and a
+    // number of arguments to be formatted.
+    static temp<String> format(const char* format, ...);
+    
     // Gets the character at the given index.
     const char operator [](int index) const;
 
@@ -42,12 +52,16 @@ namespace magpie
     virtual void trace(std::ostream& out) const;
 
   private:
+    static const int FORMATTED_STRING_MAX = 512;
+    
     static size_t calcStringSize(int length);
 
-    String(const char* text, int length);
+    String(int length);
 
     int length_;
     char chars_[FLEXIBLE_SIZE];
+    
+    NO_COPY(String);
   };
 
   // Compare to raw C strings.

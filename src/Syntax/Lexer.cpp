@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "Array.h"
 #include "Lexer.h"
 
 namespace magpie
@@ -120,27 +121,9 @@ namespace magpie
           }
           break;
 
+        case '"': return readString();
+
           /*
-        case ',': return singleToken(TOKEN_LINE);
-        case '@': return singleToken(TOKEN_AT);
-        case '.': return singleToken(TOKEN_DOT);
-        case '#': return singleToken(TOKEN_HASH);
-        case ';': return singleToken(TOKEN_SEMICOLON);
-        case '\\': return singleToken(TOKEN_IGNORE_LINE);
-        case '|': return singleToken(TOKEN_PIPE);
-
-        case ':':
-          advance();
-          if (peek() == ':')
-          {
-            // "::".
-            advance();
-            return Ref<Token>(new Token(TOKEN_BIND));
-          }
-
-          // Just a ":" by itself.
-          return Ref<Token>(new Token(TOKEN_KEYWORD, ":"));
-
         case '-':
           advance();
           if (isDigit(peek())) return readNumber();
@@ -164,19 +147,13 @@ namespace magpie
             return readOperator();
           }
           break;
-
-        case '"': return readString();
-
-        default:
-          if (isDigit(c)) return readNumber();
-          if (isOperator(c)) return readOperator();
            */
         default:
           if (isNameStart(c)) return readName();
           if (isDigit(c)) return readNumber();
 
           // If we got here, we don't know what it is.
-          return makeToken(TOKEN_ERROR);
+          return error(String::format("Unknown character '%c'.", c));
       }
     }
   }
@@ -223,9 +200,19 @@ namespace magpie
 
   temp<Token> Lexer::makeToken(TokenType type)
   {
-    return Token::create(type, source_->substring(start_, pos_));
+    return makeToken(type, source_->substring(start_, pos_));
   }
-
+  
+  temp<Token> Lexer::makeToken(TokenType type, gc<String> text)
+  {
+    return Token::create(type, text);
+  }
+  
+  temp<Token> Lexer::error(gc<String> message)
+  {
+    return Token::create(TOKEN_ERROR, message);
+  }
+  
   void Lexer::skipLineComment()
   {
     // TODO(bob): Handle EOF.
@@ -311,43 +298,49 @@ namespace magpie
     return makeToken(TOKEN_NUMBER);
   }
 
-  /*
-  Ref<Token> Lexer::readString()
+  temp<Token> Lexer::readString()
   {
     advance();
 
-    String text;
+    Array<char> chars;
     while (true)
     {
-      if (isDone()) return Ref<Token>(new Token(TOKEN_ERROR, "Unterminated string."));
-
+      if (isDone())
+      {
+        return error(String::create("Unterminated string."));
+      }
+      
       char c = advance();
-      if (c == '"') return Ref<Token>(new Token(TOKEN_STRING, text));
-
+      if (c == '"')
+      {
+        temp<String> text = String::create(chars);
+        return makeToken(TOKEN_STRING, text);
+      }
+      
       // An escape sequence.
       if (c == '\\')
       {
-        if (isDone()) return Ref<Token>(new Token(TOKEN_ERROR,
-                                                  "Unterminated string escape."));
-
+        if (isDone())
+        {
+          return error(String::create("Unterminated string escape."));
+        }
+        
         char e = advance();
         switch (e)
         {
-          case 'n': text += "\n"; break;
-          case '"': text += "\""; break;
-          case '\\': text += "\\"; break;
-          case 't': text += "\t"; break;
+          case 'n':  chars.add('\n'); break;
+          case '"':  chars.add('"'); break;
+          case '\\': chars.add('\\'); break;
+          case 't':  chars.add('\t'); break;
           default:
-            return Ref<Token>(new Token(TOKEN_ERROR, String::Format(
-                                                                    "Unrecognized escape sequence \"%c\".", e)));
+            return error(String::format("Uknown escape sequence '%c'.", e));
         }
       }
       else
       {
         // Normal character.
-        text += c;
+        chars.add(c);
       }
     }
   }
-  */
 }

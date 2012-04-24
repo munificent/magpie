@@ -37,12 +37,15 @@ namespace magpie
     char advance();
 
     temp<Token> makeToken(TokenType type);
-
+    temp<Token> makeToken(TokenType type, gc<String> text);
+    temp<Token> error(gc<String> message);
+    
     void skipLineComment();
     void skipBlockComment();
 
     temp<Token> readName();
     temp<Token> readNumber();
+    temp<Token> readString();
 
     gc<String> source_;
     int     pos_;

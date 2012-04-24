@@ -13,10 +13,51 @@ namespace magpie
 
     // Allocate enough memory for the string and its character array.
     void* mem = Memory::allocate(calcStringSize(length));
+    
     // Construct it by calling global placement new.
-    return Memory::makeTemp(::new(mem) String(text, length));
-  }
+    temp<String> string = Memory::makeTemp(::new(mem) String(length));
+    
+    strncpy(string->chars_, text, length);
 
+    // Make sure its terminated. May not be, for example, when creating a
+    // string from a substring.
+    string->chars_[length] = '\0';
+    
+    return string;
+  }
+  
+  temp<String> String::create(const Array<char>& text)
+  {
+    // Allocate enough memory for the string and its character array.
+    void* mem = Memory::allocate(calcStringSize(text.count()));
+    
+    // Construct it by calling global placement new.
+    temp<String> string = Memory::makeTemp(::new(mem) String(text.count()));
+    
+    for (int i = 0; i < text.count(); i++) {
+      string->chars_[i] = text[i];
+    }
+    
+    // Make sure its terminated.
+    string->chars_[text.count()] = '\0';
+    
+    return string;
+  }
+  
+  temp<String> String::format(const char* format, ...)
+  {
+    char result[FORMATTED_STRING_MAX];
+    
+    va_list args;
+    va_start (args, format);
+    
+    vsprintf(result, format, args);
+    
+    va_end (args);
+    
+    return String::create(result);
+  }
+  
   const char String::operator [](int index) const
   {
     ASSERT_INDEX(index, length() + 1); // Allow accessing the terminator.
@@ -83,15 +124,9 @@ namespace magpie
     return sizeof(String) + (sizeof(char) * length);
   }
 
-  String::String(const char * text, int length)
+  String::String(int length)
   : length_(length)
   {
-    // Add one for the terminator.
-    strncpy(chars_, text, length + 1);
-
-    // Make sure its terminated. May not be, for example, when creating a
-    // string from a substring.
-    chars_[length] = '\0';
   }
 
   std::ostream& operator <<(std::ostream& out, const String& right)
