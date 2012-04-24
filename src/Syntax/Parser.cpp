@@ -181,7 +181,7 @@ namespace magpie
     {
       temp<Node> arg = parsePrecedence();
       consume(TOKEN_RIGHT_PAREN, "Expect ')' after call argument.");
-      return CallNode::create(token->text(), arg);
+      return CallNode::create(gc<Node>(), token->text(), arg);
     }
     else
     {

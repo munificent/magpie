@@ -87,8 +87,10 @@ namespace magpie
     int method = vm_.globals().find(node.name());
     // TODO(bob): Handle unknown method error.
     
+    ASSERT(node.leftArg().isNull(), "Left-hand arguments aren't supported yet.");
+    
     // Compile the argument.
-    node.arg().accept(*this, dest);
+    node.rightArg()->accept(*this, dest);
     
     write(OP_CALL, method, dest);
   }

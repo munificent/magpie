@@ -81,25 +81,28 @@ namespace magpie
     out << (value_ ? "true" : "false");
   }
   
-  temp<CallNode> CallNode::create(gc<String> name, gc<Node> arg)
+  temp<CallNode> CallNode::create(
+      gc<Node> leftArg, gc<String> name, gc<Node> rightArg)
   {
-    return Memory::makeTemp(new CallNode(name, arg));
+    return Memory::makeTemp(new CallNode(leftArg, name, rightArg));
   }
   
-  CallNode::CallNode(gc<String> name, gc<Node> arg)
-  : name_(name),
-    arg_(arg)
+  CallNode::CallNode(gc<Node> leftArg, gc<String> name, gc<Node> rightArg)
+  : leftArg_(leftArg),
+    name_(name),
+    rightArg_(rightArg)
   {}
   
   void CallNode::reach()
   {
+    Memory::reach(leftArg_);
     Memory::reach(name_);
-    Memory::reach(arg_);
+    Memory::reach(rightArg_);
   }
   
   void CallNode::trace(std::ostream& out) const
   {
-    out << name_ << "(" << arg_ << ")";
+    out << leftArg_ << " " << name_ << "(" << rightArg_ << ")";
   }
   
   temp<IfNode> IfNode::create(gc<Node> condition, gc<Node> thenArm,

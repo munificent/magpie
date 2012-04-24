@@ -130,21 +130,24 @@ namespace magpie
   class CallNode : public Node
   {
   public:
-    static temp<CallNode> create(gc<String> name, gc<Node> arg);
+    static temp<CallNode> create(
+        gc<Node> leftArg, gc<String> name, gc<Node> rightArg);
     
     DECLARE_NODE(CallNode);
     
-    gc<String> name() const { return name_; }
-    Node& arg() const { return *arg_; }
+    gc<String> name()     const { return name_; }
+    gc<Node>   rightArg() const { return rightArg_; }
+    gc<Node>   leftArg()  const { return leftArg_; }
     
     virtual void reach();
     virtual void trace(std::ostream& out) const;
     
   private:
-    CallNode(gc<String> name, gc<Node> arg);
+    CallNode(gc<Node> leftArg, gc<String> name, gc<Node> rightArg);
     
+    gc<Node> leftArg_;
     gc<String> name_;
-    gc<Node> arg_;
+    gc<Node> rightArg_;
   };
   
   // An if-then-else expression.
