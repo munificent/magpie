@@ -13,7 +13,7 @@ namespace magpie
     {
       AllocScope scope;
       temp<Token> token = readRawToken();
-      
+
       switch (token->type())
       {
         // Ignore newlines after tokens that can't end an expression.
@@ -300,8 +300,6 @@ namespace magpie
 
   temp<Token> Lexer::readString()
   {
-    advance();
-
     Array<char> chars;
     while (true)
     {

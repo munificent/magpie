@@ -3,6 +3,6 @@ def fib(n)
 end
 
 def main()
-    print(123)
+    print("blah")
     fib(25) // 75025
 end

@@ -188,6 +188,20 @@ namespace magpie
     }
   }
   
+  temp<StringNode> StringNode::create(gc<String> value)
+  {
+    return Memory::makeTemp(new StringNode(value));
+  }
+  
+  StringNode::StringNode(gc<String> value)
+  : value_(value)
+  {}
+  
+  void StringNode::trace(std::ostream& out) const
+  {
+    out << value_;
+  }
+  
   temp<VariableNode> VariableNode::create(bool isMutable, gc<Pattern> pattern,
                                           gc<Node> value)
   {

@@ -13,4 +13,9 @@ namespace magpie
   {
     return Memory::makeTemp(new NumberObject(value));
   }
+  
+  temp<StringObject> Object::create(gc<String> value)
+  {
+    return Memory::makeTemp(new StringObject(value));
+  }
 }

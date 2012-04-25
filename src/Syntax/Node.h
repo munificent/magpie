@@ -81,6 +81,7 @@ namespace magpie
     virtual const NameNode*     asNameNode()     const { return NULL; }
     virtual const NumberNode*   asNumberNode()   const { return NULL; }
     virtual const SequenceNode* asSequenceNode() const { return NULL; }
+    virtual const StringNode*   asStringNode()   const { return NULL; }
     virtual const VariableNode* asVariableNode() const { return NULL; }
   };
   
@@ -227,6 +228,24 @@ namespace magpie
     SequenceNode(const Array<gc<Node> >& expressions);
     
     Array<gc<Node> > expressions_;
+  };
+  
+  // A string literal.
+  class StringNode : public Node
+  {
+  public:
+    static temp<StringNode> create(gc<String> value);
+    
+    DECLARE_NODE(StringNode);
+    
+    gc<String> value() const { return value_; }
+    
+    virtual void trace(std::ostream& out) const;
+    
+  private:
+    StringNode(gc<String> value);
+    
+    gc<String> value_;
   };
   
   // A 'var' or 'val' variable declaration.

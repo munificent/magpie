@@ -33,6 +33,7 @@ namespace magpie
     virtual void visit(const NameNode& node, int dest);
     virtual void visit(const NumberNode& node, int dest);
     virtual void visit(const SequenceNode& node, int dest);
+    virtual void visit(const StringNode& node, int dest);
     virtual void visit(const VariableNode& node, int dest);
 
     virtual void visit(const VariablePattern& pattern, int value);
@@ -50,6 +51,7 @@ namespace magpie
     int compileExpressionOrConstant(const Node& node);
     
     int compileConstant(const NumberNode& node);
+    int compileConstant(const StringNode& node);
 
     void write(OpCode op, int a = 0xff, int b = 0xff, int c = 0xff);
     int startJump();

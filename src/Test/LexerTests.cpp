@@ -8,6 +8,7 @@ namespace magpie
   void LexerTests::runTests()
   {
     create();
+    stringLiteral();
   }
 
   void LexerTests::create()

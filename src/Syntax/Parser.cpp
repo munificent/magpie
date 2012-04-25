@@ -47,7 +47,7 @@ namespace magpie
 
     { &Parser::name,        NULL, -1 },                 // TOKEN_NAME
     { &Parser::number,      NULL, -1 },                 // TOKEN_NUMBER
-    { NULL,                 NULL, -1 },                 // TOKEN_STRING
+    { &Parser::string,      NULL, -1 },                 // TOKEN_STRING
 
     { NULL,                 NULL, -1 },                 // TOKEN_LINE
     { NULL,                 NULL, -1 },                 // TOKEN_ERROR
@@ -195,7 +195,12 @@ namespace magpie
     double number = atof(token->text()->cString());
     return NumberNode::create(number);
   }
-    
+
+  temp<Node> Parser::string(temp<Token> token)
+  {
+    return StringNode::create(token->text());
+  }
+  
   temp<Node> Parser::binaryOp(temp<Node> left, temp<Token> token)
   {
     // TODO(bob): Support right-associative infix. Needs to do precedence

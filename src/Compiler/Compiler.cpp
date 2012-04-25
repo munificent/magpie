@@ -141,6 +141,12 @@ namespace magpie
     }
   }
   
+  void Compiler::visit(const StringNode& node, int dest)
+  {
+    int index = compileConstant(node);
+    write(OP_CONSTANT, index, dest);
+  }
+  
   void Compiler::visit(const VariableNode& node, int dest)
   {
     // Reserve the registers up front. This way we'll compile the value to
@@ -192,22 +198,36 @@ namespace magpie
   int Compiler::compileExpressionOrConstant(const Node& node)
   {
     const NumberNode* number = node.asNumberNode();
-    if (number == NULL)
-    {
-      int dest = allocateRegister();
-      
-      node.accept(*this, dest);
-      return dest;
-    }
-    else
+    if (number != NULL)
     {
       return MAKE_CONSTANT(compileConstant(*number));
     }
+    
+    const StringNode* string = node.asStringNode();
+    if (string != NULL)
+    {
+      return MAKE_CONSTANT(compileConstant(*string));
+    }
+    
+    int dest = allocateRegister();
+      
+    node.accept(*this, dest);
+    return dest;
   }
   
   int Compiler::compileConstant(const NumberNode& node)
   {
     temp<NumberObject> constant = Object::create(node.value());
+    
+    // TODO(bob): Should check for duplicates. Only need one copy of any
+    // given constant.
+    constants_.add(constant);
+    return constants_.count() - 1;
+  }
+  
+  int Compiler::compileConstant(const StringNode& node)
+  {
+    temp<StringObject> constant = Object::create(node.value());
     
     // TODO(bob): Should check for duplicates. Only need one copy of any
     // given constant.

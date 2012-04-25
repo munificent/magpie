@@ -43,6 +43,7 @@ namespace magpie
     temp<Node> boolean(temp<Token> token);
     temp<Node> name(temp<Token> token);
     temp<Node> number(temp<Token> token);
+    temp<Node> string(temp<Token> token);
 
     // Infix expression parsers.
     temp<Node> binaryOp(temp<Node> left, temp<Token> token);

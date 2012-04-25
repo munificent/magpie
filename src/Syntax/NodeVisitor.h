@@ -15,6 +15,7 @@ namespace magpie
   class NameNode;
   class NumberNode;
   class SequenceNode;
+  class StringNode;
   class VariableNode;
   class VariablePattern;
   
@@ -31,6 +32,7 @@ namespace magpie
     virtual void visit(const NameNode& node, int dest) = 0;
     virtual void visit(const NumberNode& node, int dest) = 0;
     virtual void visit(const SequenceNode& node, int dest) = 0;
+    virtual void visit(const StringNode& node, int dest) = 0;
     virtual void visit(const VariableNode& node, int dest) = 0;
     
   protected:
