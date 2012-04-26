@@ -9,6 +9,11 @@ namespace magpie
     return Memory::makeTemp(new BoolObject(value));
   }
   
+  temp<ClassObject> Object::createClass(gc<String> name)
+  {
+    return Memory::makeTemp(new ClassObject(name));
+  }
+  
   temp<NumberObject> Object::create(double value)
   {
     return Memory::makeTemp(new NumberObject(value));

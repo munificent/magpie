@@ -19,7 +19,8 @@ namespace magpie
 
     Fiber& fiber() { return *fiber_; }
 
-    MethodScope& globals() { return globals_; }
+    // The globally available top-level methods.
+    MethodScope& methods() { return methods_; }
     
     inline gc<Object> getBool(bool value) const
     {
@@ -27,7 +28,7 @@ namespace magpie
     }
     
   private:
-    MethodScope globals_;
+    MethodScope methods_;
     gc<Fiber> fiber_;
     
     gc<Object> true_;

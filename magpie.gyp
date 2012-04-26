@@ -77,6 +77,8 @@
       'src/VM/Fiber.h',
       'src/VM/Method.cpp',
       'src/VM/Method.h',
+      'src/VM/Module.cpp',
+      'src/VM/Module.h',
       'src/VM/Object.cpp',
       'src/VM/Object.h',
       'src/VM/Primitives.cpp',

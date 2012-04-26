@@ -9,6 +9,7 @@
 namespace magpie
 {
   class BoolObject;
+  class ClassObject;
   class Memory;
   class Multimethod;
   class NumberObject;
@@ -18,6 +19,7 @@ namespace magpie
   {
   public:
     static temp<BoolObject> create(bool value);
+    static temp<ClassObject> createClass(gc<String> value);
     static temp<NumberObject> create(double value);
     static temp<StringObject> create(gc<String> value);
 
@@ -64,6 +66,23 @@ namespace magpie
     bool value_;
     
     NO_COPY(BoolObject);
+  };
+  
+  class ClassObject : public Object
+  {
+  public:
+    ClassObject(gc<String> name)
+    : Object(),
+      name_(name)
+    {}
+    
+    virtual void trace(std::ostream& stream) const
+    {
+      stream << name_;
+    }
+    
+  private:
+    gc<String> name_;
   };
   
   class NumberObject : public Object

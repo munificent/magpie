@@ -5,7 +5,7 @@
 #define DEF_PRIMITIVE(name) \
         { \
           temp<String> primName = String::create(#name); \
-          globals_.define(primName, name##Primitive); \
+          methods_.define(primName, name##Primitive); \
         }
 
 namespace magpie

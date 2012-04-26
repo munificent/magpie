@@ -66,7 +66,7 @@ namespace magpie
           
         case OP_CALL:
         {
-          gc<Method> method = vm_.globals().get(GET_A(ins));
+          gc<Method> method = vm_.methods().get(GET_A(ins));
           gc<Object> arg = load(frame, GET_B(ins));
           
           Primitive primitive = method->primitive();

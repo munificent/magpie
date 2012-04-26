@@ -6,27 +6,36 @@
 
 namespace magpie
 {
-  void Compiler::compileModule(VM& vm, gc<ModuleAst> module)
+  bool Compiler::compileModule(VM& vm, gc<ModuleAst> module)
   {
     // Declare methods first so we can resolve mutually recursive calls.
     for (int i = 0; i < module->methods().count(); i++)
     {
-      const MethodAst& methodDef = *module->methods()[i];
-      vm.globals().declare(methodDef.name());
+      const MethodAst& methodAst = *module->methods()[i];
+      vm.methods().declare(methodAst.name());
     }
     
+    // Try to compile all of the methods.
     for (int i = 0; i < module->methods().count(); i++)
     {
-      const MethodAst& methodDef = *module->methods()[i];
-      temp<Method> method = compileMethod(vm, methodDef);
-      vm.globals().define(methodDef.name(), method);
+      const MethodAst& methodAst = *module->methods()[i];
+      temp<Method> method = compileMethod(vm, methodAst);
+
+      // Bail if there was a compile error.
+      if (method.isNull()) return false;
+      
+      vm.methods().define(methodAst.name(), method);
     }
+    
+    return true;
   }
   
-  temp<Method> Compiler::compileMethod(VM& vm, const MethodAst& method)
+  temp<Method> Compiler::compileMethod(VM& vm, const MethodAst& methodAst)
   {
     Compiler compiler(vm);
-    return compiler.compile(method);
+    temp<Method> method = compiler.compile(methodAst);
+    if (compiler.hasError_) return temp<Method>();
+    return method;
   }
   
   Compiler::Compiler(VM& vm)
@@ -37,7 +46,8 @@ namespace magpie
     constants_(),
     numInUseRegisters_(0),
     variableStart_(0),
-    maxRegisters_(0)
+    maxRegisters_(0),
+    hasError_(false)
   {}
 
   temp<Method> Compiler::compile(const MethodAst& method)
@@ -84,8 +94,13 @@ namespace magpie
   
   void Compiler::visit(const CallNode& node, int dest)
   {
-    int method = vm_.globals().find(node.name());
-    // TODO(bob): Handle unknown method error.
+    int method = vm_.methods().find(node.name());
+    
+    if (method == -1)
+    {
+      error("Method '%s' is not defined.", node.name()->cString());
+      return;
+    }
     
     ASSERT(node.leftArg().isNull(), "Left-hand arguments aren't supported yet.");
     
@@ -120,7 +135,13 @@ namespace magpie
   void Compiler::visit(const NameNode& node, int dest)
   {
     int local = locals_.indexOf(node.name());
-    // TODO(bob): Handle unknown variable error.
+    
+    if (local == -1)
+    {
+      error("Variable '%s' is not defined.", node.name()->cString());
+      return;
+    }
+    
     write(OP_MOVE, local, dest);
   }
   
@@ -292,5 +313,22 @@ namespace magpie
         "Cannot allocate an unreserved variable.");
     
     return variableStart_++;
+  }
+  
+  void Compiler::error(const char* format, ...)
+  {
+    hasError_ = true;
+    // TODO(bob): Hackish. Need to figure out if we want C-style, C++-style or
+    // Magpie GC strings for compiler error messages.
+    char result[512];
+    
+    va_list args;
+    va_start (args, format);
+    
+    vsprintf(result, format, args);
+    
+    va_end (args);
+    
+    std::cout << "Error: " << result << std::endl;
   }
 }

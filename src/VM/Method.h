@@ -67,7 +67,6 @@ namespace magpie
     NO_COPY(Method);
   };
 
-  // TODO(bob): Move to separate file.
   class MethodScope
   {
   public:

@@ -16,7 +16,7 @@ namespace magpie
   class Compiler : private NodeVisitor, private PatternVisitor
   {
   public:
-    static void compileModule(VM& vm, gc<ModuleAst> module);
+    static bool compileModule(VM& vm, gc<ModuleAst> module);
     static temp<Method> compileMethod(VM& vm, const MethodAst& method);
     
     virtual ~Compiler() {}
@@ -62,6 +62,12 @@ namespace magpie
     void reserveVariables(int count);
     int allocateVariable();
 
+    // Reports a compile error. When the compiler encounters an error, it will
+    // try to keep going to find as many errors as possible. However, after
+    // it's done, it will not actually produce any resulting code since it's
+    // obviously wrong.
+    void error(const char* format, ...);
+    
     VM&                vm_;
     Array<gc<String> > locals_;
     Array<instruction> code_;
@@ -69,7 +75,8 @@ namespace magpie
     int                numInUseRegisters_;
     int                variableStart_;
     int                maxRegisters_;
-
+    bool               hasError_;
+    
     NO_COPY(Compiler);
   };
 
