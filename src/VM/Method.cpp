@@ -1,5 +1,6 @@
 #include "Method.h"
 #include "MagpieString.h"
+#include "Object.h"
 
 namespace magpie
 {
@@ -97,7 +98,8 @@ namespace magpie
 
   void Method::reach()
   {
-    ASSERT(false, "Not implemented.");
+    Memory::reach(name_);
+    Memory::reach(constants_);
   }
   
   void MethodScope::declare(gc<String> name)

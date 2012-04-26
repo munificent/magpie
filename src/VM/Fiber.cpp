@@ -23,6 +23,15 @@ namespace magpie
     call(method, 0, gc<Object>());
     return run();
   }
+  
+  void Fiber::reach()
+  {
+    Memory::reach(stack_);
+    for (int i = 0; i < callFrames_.count(); i++)
+    {
+      Memory::reach(callFrames_[i].method);
+    }
+  }
 
   temp<Object> Fiber::run()
   {

@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "Array.h"
 #include "Macros.h"
 #include "Semispace.h"
 
@@ -239,6 +240,17 @@ namespace magpie
       if (ref.isNull()) return;
       Managed* newLocation = copy(&(*ref));
       ref.set(static_cast<T*> (newLocation));
+    }
+    
+    // Indicates that the given array of objects is reachable and should be
+    // preserved during garbage collection.
+    template <class T>
+    static void reach(Array<gc<T> >& array)
+    {
+      for (int i = 0; i < array.count(); i++)
+      {
+        reach(array[i]);
+      }
     }
     
   private:

@@ -23,4 +23,9 @@ namespace magpie
   {
     return Memory::makeTemp(new StringObject(value));
   }
+  
+  void StringObject::reach()
+  {
+    Memory::reach(value_);
+  }
 }

@@ -118,6 +118,8 @@ namespace magpie
     
     virtual gc<String> toString() const { return value_; }
     
+    virtual void reach();
+    
     virtual void trace(std::ostream& stream) const
     {
       stream << value_;

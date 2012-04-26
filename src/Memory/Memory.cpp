@@ -42,6 +42,25 @@ namespace magpie
 
   void Memory::collect()
   {
+    // TODO(bob): There is a significant bug here. When objects are moved,
+    // every temp<T> on the stack is fixed. Every gc<T> stored in an object is
+    // fixed. However, there's (at least) one big missing piece: this. The
+    // callframes on the C stack are typically methods. Those methods have an
+    // implicit "this" pointer. That isn't being updated. So if you do:
+    //
+    // struct Foo
+    // {
+    //   int field;
+    //   void method()
+    //   {
+    //     Object::create(); // allocate and cause a GC
+    //     cout << field; // access a field on this
+    //   }
+    // };
+    //
+    // Then bad things happen because you're accessing memory in the dead
+    // semispace, not the current one.
+    
     // Copy the active temps to to-space.
     for (int i = 0; i < numTemps_; i++)
     {

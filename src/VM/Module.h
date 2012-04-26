@@ -9,8 +9,6 @@ namespace magpie
   class Module : public Managed
   {
   public:
-    virtual ~Module() {}
-    
     virtual void reachRoots();
 
   private:

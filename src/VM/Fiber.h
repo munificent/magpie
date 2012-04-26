@@ -15,9 +15,9 @@ namespace magpie
   public:
     static temp<Fiber> create(VM& vm);
     
-    // TODO(bob): Implement reach().
-
     temp<Object> interpret(gc<Method> method);
+    
+    virtual void reach();
     
   private:
     struct CallFrame
