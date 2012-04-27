@@ -4,5 +4,7 @@ end
 
 def main()
     print("blah")
+    blor()
+    print(ook)
     fib(25) // 75025
 end

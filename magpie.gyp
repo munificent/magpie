@@ -64,6 +64,8 @@
       'src/Memory/RootSource.h',
       'src/Memory/Semispace.cpp',
       'src/Memory/Semispace.h',
+      'src/Syntax/ErrorReporter.cpp',
+      'src/Syntax/ErrorReporter.h',
       'src/Syntax/Lexer.cpp',
       'src/Syntax/Lexer.h',
       'src/Syntax/Node.cpp',

@@ -16,7 +16,7 @@ namespace magpie
     AllocScope scope;
 
     temp<String> source = String::create("()[]{}");
-    Lexer lexer(source);
+    Lexer lexer(temp<String>(), source);
 
     temp<Token> token = lexer.readToken();
     EXPECT_EQUAL(TOKEN_LEFT_PAREN, token->type());
@@ -48,7 +48,7 @@ namespace magpie
     AllocScope scope;
 
     temp<String> source = String::create("\"st\\nr\"");
-    Lexer lexer(source);
+    Lexer lexer(temp<String>(), source);
     
     temp<Token> token = lexer.readToken();
     EXPECT_EQUAL(TOKEN_STRING, token->type());

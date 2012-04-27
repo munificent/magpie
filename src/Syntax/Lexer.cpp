@@ -77,10 +77,12 @@ namespace magpie
   {
     while (true)
     {
-      if (isDone()) return Token::create(TOKEN_EOF, String::create(""));
+      if (isDone()) return makeToken(TOKEN_EOF, String::create(""));
 
       start_ = pos_;
-
+      startRow_ = currentRow_;
+      startCol_ = currentCol_;
+      
       char c = advance();
       switch (c)
       {
@@ -123,31 +125,6 @@ namespace magpie
 
         case '"': return readString();
 
-          /*
-        case '-':
-          advance();
-          if (isDigit(peek())) return readNumber();
-          return readOperator();
-
-        case '/':
-          advance();
-          if (peek() == '/')
-          {
-            // Line comment, so ignore the rest of the line and
-            // emit the line token.
-            mNeedsLine = true;
-            return Ref<Token>(new Token(TOKEN_LINE));
-          }
-          else if (peek() == '*')
-          {
-            skipBlockComment();
-          }
-          else
-          {
-            return readOperator();
-          }
-          break;
-           */
         default:
           if (isNameStart(c)) return readName();
           if (isDigit(c)) return readNumber();
@@ -194,7 +171,22 @@ namespace magpie
   char Lexer::advance()
   {
     char c = peek();
-    pos_++;
+    
+    if (!isDone())
+    {
+      pos_++;
+      
+      if (c == '\n')
+      {
+        currentRow_++;
+        currentCol_ = 1;
+      }
+      else
+      {
+        currentCol_++;
+      }
+    }
+    
     return c;
   }
 
@@ -205,12 +197,15 @@ namespace magpie
   
   temp<Token> Lexer::makeToken(TokenType type, gc<String> text)
   {
-    return Token::create(type, text);
+    // TODO(bob): Include file name.
+    temp<SourcePos> pos = SourcePos::create(fileName_,
+        startRow_, startCol_, currentRow_, currentCol_);
+    return Token::create(type, text, pos);
   }
   
   temp<Token> Lexer::error(gc<String> message)
   {
-    return Token::create(TOKEN_ERROR, message);
+    return makeToken(TOKEN_ERROR, message);
   }
   
   void Lexer::skipLineComment()
@@ -280,7 +275,7 @@ namespace magpie
     else if (*text == "while" ) type = TOKEN_WHILE;
     else if (*text == "xor"   ) type = TOKEN_XOR;
 
-    return Token::create(type, text);
+    return makeToken(type, text);
   }
 
   temp<Token> Lexer::readNumber()

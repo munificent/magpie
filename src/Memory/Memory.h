@@ -231,7 +231,18 @@ namespace magpie
       gc<Managed>* tempSlot = &temps_[numTemps_++];
       return temp<T>(tempSlot);
     }
-
+    
+    template <class T>
+    static temp<T> makeTemp(gc<T> object)
+    {
+      ASSERT(currentScope_ != NULL, "Not in a scope.");
+      ASSERT(numTemps_ < MAX_TEMPS, "Too many temps.");
+      
+      temps_[numTemps_].set(&(*object));
+      gc<Managed>* tempSlot = &temps_[numTemps_++];
+      return temp<T>(tempSlot);
+    }
+    
     // Indicates that the given object is reachable and should be preserved
     // during garbage collection.
     template <class T>

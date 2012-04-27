@@ -46,15 +46,16 @@ int main(int argc, char * const argv[])
   AllocScope scope;
   
   // Read a file.
+  ErrorReporter reporter;
   temp<String> source = readFile("../../example/Fibonacci2.mag");
-  Parser parser(source);
+  Parser parser(String::create("Fibonacci2.mag"), source, reporter);
   temp<ModuleAst> module = parser.parseModule();
   
   // Compile it.
-  bool success = Compiler::compileModule(vm, module);
+  Compiler::compileModule(vm, module, reporter);
   
   // Invoke main().
-  if (success)
+  if (reporter.numErrors() == 0)
   {
     gc<Method> method = vm.methods().findMain();
     temp<Object> result = vm.fiber().interpret(method);

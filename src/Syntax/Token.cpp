@@ -3,9 +3,41 @@
 
 namespace magpie
 {
-  temp<Token> Token::create(TokenType type, const gc<String> text)
+  temp<SourcePos> SourcePos::create(gc<String> file,
+      int startLine, int startCol, int endLine, int endCol)
   {
-    return Memory::makeTemp(new Token(type, text));
+    return Memory::makeTemp(
+        new SourcePos(file, startLine, startCol, endLine, endCol));
+  }
+  
+  temp<SourcePos> SourcePos::spanTo(gc<SourcePos> end)
+  {
+    return SourcePos::create(file_, startLine_, startCol_,
+                             end->endLine_, end->endCol_);
+  }
+
+  void SourcePos::reach()
+  {
+    Memory::reach(file_);
+  }
+  
+  void SourcePos::trace(std::ostream& out) const
+  {
+    out << file_ << " line " << startLine_ << " col " << startCol_;
+  }
+
+  SourcePos::SourcePos(gc<String> file, int startLine, int startCol,
+                       int endLine, int endCol)
+  : file_(file),
+    startLine_(startLine),
+    startCol_(startCol),
+    endLine_(endLine),
+    endCol_(endCol)
+  {}
+  
+  temp<Token> Token::create(TokenType type, gc<String> text, gc<SourcePos> pos)
+  {
+    return Memory::makeTemp(new Token(type, text, pos));
   }
   
   const char* Token::typeString(TokenType type)
@@ -61,18 +93,33 @@ namespace magpie
     }
   }
   
-  Token::Token(TokenType type, const gc<String> text)
+  Token::Token(TokenType type, gc<String> text, gc<SourcePos> pos)
   : type_(type),
-    text_(text)
+    text_(text),
+    pos_(pos)
   {}
   
   void Token::reach()
   {
     Memory::reach(text_);
+    Memory::reach(pos_);
   }
   
   void Token::trace(std::ostream& out) const
   {
-    out << "token " << Token::typeString(type_) << " " << text_;
+    switch (type_)
+    {
+      case TOKEN_NAME:
+      case TOKEN_NUMBER:
+      case TOKEN_STRING:
+      case TOKEN_ERROR:
+        // Show the text.
+        out << text_;
+        break;
+      
+      default:
+        // It's a token type with a fixed text, so just use that.
+        out << typeString(type_);
+    }
   }
 }

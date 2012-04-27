@@ -16,7 +16,8 @@ namespace magpie
     AllocScope scope;
 
     temp<String> source = String::create("def foo()\n1+2*3 and 4/5+6%7\nend");
-    Parser parser(source);
+    ErrorReporter reporter;
+    Parser parser(gc<String>(), source, reporter);
     temp<ModuleAst> module = parser.parseModule();
     
     temp<String> text = module->toString();

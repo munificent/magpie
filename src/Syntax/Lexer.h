@@ -10,11 +10,16 @@ namespace magpie
   class Lexer
   {
   public:
-    Lexer(gc<String> source)
-    : source_(source),
+    Lexer(gc<String> fileName, gc<String> source)
+    : fileName_(fileName),
+      source_(source),
       pos_(0),
       start_(0),
-      skipNewline_(true)
+      skipNewline_(true),
+      startRow_(1),
+      startCol_(1),
+      currentRow_(1),
+      currentCol_(1)
     {}
 
     // Lexes and returns the next full Token read from the source. Handles
@@ -47,11 +52,16 @@ namespace magpie
     temp<Token> readNumber();
     temp<Token> readString();
 
+    gc<String> fileName_;
     gc<String> source_;
     int     pos_;
     int     start_;
     bool    skipNewline_;
-
+    int     startRow_;
+    int     startCol_;
+    int     currentRow_;
+    int     currentCol_;
+    
     NO_COPY(Lexer);
   };
 }

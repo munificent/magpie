@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Macros.h"
+#include "ErrorReporter.h"
 #include "Lexer.h"
 #include "Queue.h"
 
@@ -8,6 +9,7 @@ namespace magpie
 {
   class Lexer;
   class Node;
+  class ErrorReporter;
   
   // Parses Magpie source from a string into an abstract syntax tree. The
   // implementation is basically a vanilla recursive descent parser wrapped
@@ -15,9 +17,9 @@ namespace magpie
   class Parser
   {
   public:
-    Parser(gc<String> source)
-    : lexer_(source),
-      hadError_(false)
+    Parser(gc<String> fileName, gc<String> source, ErrorReporter& reporter)
+    : lexer_(fileName, source),
+      reporter_(reporter)
     {}
     
     temp<ModuleAst> parseModule();
@@ -79,11 +81,8 @@ namespace magpie
     // Otherwise reports the given error message and returns a null temp.
     temp<Token> consume(TokenType expected, const char* errorMessage);
     
-    // Reports the given error message relevant to the current token.
-    void error(const char* message);
-    
     // Gets whether or not any errors have been reported.
-    bool hadError() const { return hadError_; }
+    bool hadError() const { return reporter_.numErrors() > 0; }
     
     void fillLookAhead(int count);
     
@@ -94,7 +93,7 @@ namespace magpie
     // The 2 here is the maximum number of lookahead tokens.
     Queue<gc<Token>, 2> read_;
     
-    bool hadError_;
+    ErrorReporter& reporter_;
     
     NO_COPY(Parser);
   };

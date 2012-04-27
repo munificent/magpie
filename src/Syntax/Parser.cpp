@@ -100,8 +100,10 @@ namespace magpie
       }
       while (match(TOKEN_LINE));
       
+      temp<SourcePos> span = exprs[0]->pos()->spanTo(current().pos());
+      
       // TODO(bob): Don't wrap in a sequence if there's just one.
-      return SequenceNode::create(exprs);
+      return SequenceNode::create(span, exprs);
     }
     else
     {
@@ -113,8 +115,10 @@ namespace magpie
   {
     AllocScope scope;
     
-    if (match(TOKEN_IF))
+    if (lookAhead(TOKEN_IF))
     {
+      temp<SourcePos> start = Memory::makeTemp(consume()->pos());
+      
       temp<Node> condition = parsePrecedence();
       consume(TOKEN_THEN, "Expect 'then' after 'if' condition.");
       
@@ -124,11 +128,14 @@ namespace magpie
       consume(TOKEN_ELSE, "Expect 'else' after 'then' arm.");
       temp<Node> elseArm = parsePrecedence();
       
-      return scope.close(IfNode::create(condition, thenArm, elseArm));
+      temp<SourcePos> span = start->spanTo(current().pos());
+      return scope.close(IfNode::create(span, condition, thenArm, elseArm));
     }
     
-    if (match(TOKEN_VAR) || match(TOKEN_VAL))
+    if (lookAhead(TOKEN_VAR) || lookAhead(TOKEN_VAL))
     {
+      temp<SourcePos> start = Memory::makeTemp(consume()->pos());
+      
       // TODO(bob): Distinguish between var and val.
       bool isMutable = false;
       
@@ -137,7 +144,8 @@ namespace magpie
       // TODO(bob): What precedence?
       temp<Node> value = parsePrecedence();
       
-      return scope.close(VariableNode::create(isMutable, pattern, value));
+      temp<SourcePos> span = start->spanTo(current().pos());
+      return scope.close(VariableNode::create(span, isMutable, pattern, value));
     }
     
     return parsePrecedence();
@@ -151,8 +159,8 @@ namespace magpie
     
     if (prefix == NULL)
     {
-      // TODO(bob): Report error better.
-      std::cout << "No prefix parser for " << token << "." << std::endl;
+      reporter_.error(token->pos(), "Unexpected token '%s'.",
+                      token->toString()->cString());
       return temp<Node>();
     }
     
@@ -171,7 +179,7 @@ namespace magpie
   
   temp<Node> Parser::boolean(temp<Token> token)
   {
-    return BoolNode::create(token->type() == TOKEN_TRUE);
+    return BoolNode::create(token->pos(), token->type() == TOKEN_TRUE);
   }
   
   temp<Node> Parser::name(temp<Token> token)
@@ -181,24 +189,26 @@ namespace magpie
     {
       temp<Node> arg = parsePrecedence();
       consume(TOKEN_RIGHT_PAREN, "Expect ')' after call argument.");
-      return CallNode::create(gc<Node>(), token->text(), arg);
+
+      temp<SourcePos> span = token->pos()->spanTo(current().pos());
+      return CallNode::create(span, gc<Node>(), token->text(), arg);
     }
     else
     {
       // Just a bare name.
-      return NameNode::create(token->text());
+      return NameNode::create(token->pos(), token->text());
     }
   }
   
   temp<Node> Parser::number(temp<Token> token)
   {
     double number = atof(token->text()->cString());
-    return NumberNode::create(number);
+    return NumberNode::create(token->pos(), number);
   }
 
   temp<Node> Parser::string(temp<Token> token)
   {
-    return StringNode::create(token->text());
+    return StringNode::create(token->pos(), token->text());
   }
   
   temp<Node> Parser::binaryOp(temp<Node> left, temp<Token> token)
@@ -207,7 +217,7 @@ namespace magpie
     // - 1 here, to be right-assoc.
     temp<Node> right = parsePrecedence(expressions_[token->type()].precedence);
     
-    return BinaryOpNode::create(left, token->type(), right);
+    return BinaryOpNode::create(token->pos(), left, token->type(), right);
   }
   
   temp<Pattern> Parser::parsePattern()
@@ -223,7 +233,7 @@ namespace magpie
     }
     else
     {
-      error("Expected pattern.");
+      reporter_.error(current().pos(), "Expected pattern.");
       return temp<Pattern>();
     }
   }
@@ -261,7 +271,7 @@ namespace magpie
 
   void Parser::expect(TokenType expected, const char* errorMessage)
   {
-    if (!lookAhead(expected)) error(errorMessage);
+    if (!lookAhead(expected)) reporter_.error(current().pos(), errorMessage);
   }
 
   temp<Token> Parser::consume()
@@ -275,16 +285,8 @@ namespace magpie
   {
     if (lookAhead(expected)) return consume();
 
-    error(errorMessage);
+    reporter_.error(current().pos(), errorMessage);
     return temp<Token>();
-  }
-
-  void Parser::error(const char* message)
-  {
-    hadError_ = true;
-    // TODO(bob): Report error instead of printing it directly.
-    std::stringstream error;
-    std::cout << "Parse error on '" << current() << "': " << message;
   }
 
   void Parser::fillLookAhead(int count)

@@ -1,4 +1,5 @@
 #include "Compiler.h"
+#include "ErrorReporter.h"
 #include "Method.h"
 #include "Node.h"
 #include "Object.h"
@@ -6,7 +7,8 @@
 
 namespace magpie
 {
-  bool Compiler::compileModule(VM& vm, gc<ModuleAst> module)
+  void Compiler::compileModule(VM& vm, gc<ModuleAst> module,
+                               ErrorReporter& reporter)
   {
     // Declare methods first so we can resolve mutually recursive calls.
     for (int i = 0; i < module->methods().count(); i++)
@@ -19,35 +21,32 @@ namespace magpie
     for (int i = 0; i < module->methods().count(); i++)
     {
       const MethodAst& methodAst = *module->methods()[i];
-      temp<Method> method = compileMethod(vm, methodAst);
+      temp<Method> method = compileMethod(vm, methodAst, reporter);
 
       // Bail if there was a compile error.
-      if (method.isNull()) return false;
+      if (method.isNull()) return;
       
       vm.methods().define(methodAst.name(), method);
     }
-    
-    return true;
   }
   
-  temp<Method> Compiler::compileMethod(VM& vm, const MethodAst& methodAst)
+  temp<Method> Compiler::compileMethod(VM& vm, const MethodAst& methodAst,
+                                       ErrorReporter& reporter)
   {
-    Compiler compiler(vm);
-    temp<Method> method = compiler.compile(methodAst);
-    if (compiler.hasError_) return temp<Method>();
-    return method;
+    Compiler compiler(vm, reporter);
+    return compiler.compile(methodAst);
   }
   
-  Compiler::Compiler(VM& vm)
+  Compiler::Compiler(VM& vm, ErrorReporter& reporter)
   : NodeVisitor(),
     vm_(vm),
+    reporter_(reporter),
     locals_(),
     code_(),
     constants_(),
     numInUseRegisters_(0),
     variableStart_(0),
-    maxRegisters_(0),
-    hasError_(false)
+    maxRegisters_(0)
   {}
 
   temp<Method> Compiler::compile(const MethodAst& method)
@@ -98,7 +97,8 @@ namespace magpie
     
     if (method == -1)
     {
-      error("Method '%s' is not defined.", node.name()->cString());
+      reporter_.error(node.pos(), "Method '%s' is not defined.",
+                      node.name()->cString());
       return;
     }
     
@@ -138,7 +138,8 @@ namespace magpie
     
     if (local == -1)
     {
-      error("Variable '%s' is not defined.", node.name()->cString());
+      reporter_.error(node.pos(),
+                      "Variable '%s' is not defined.", node.name()->cString());
       return;
     }
     
@@ -313,22 +314,5 @@ namespace magpie
         "Cannot allocate an unreserved variable.");
     
     return variableStart_++;
-  }
-  
-  void Compiler::error(const char* format, ...)
-  {
-    hasError_ = true;
-    // TODO(bob): Hackish. Need to figure out if we want C-style, C++-style or
-    // Magpie GC strings for compiler error messages.
-    char result[512];
-    
-    va_list args;
-    va_start (args, format);
-    
-    vsprintf(result, format, args);
-    
-    va_end (args);
-    
-    std::cout << "Error: " << result << std::endl;
   }
 }
