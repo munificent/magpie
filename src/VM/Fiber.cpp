@@ -32,7 +32,7 @@ namespace magpie
       Memory::reach(callFrames_[i].method);
     }
   }
-
+    
   temp<Object> Fiber::run()
   {
     int ip = 0;
@@ -206,7 +206,7 @@ namespace magpie
     ASSERT(false, "Should not get here.");
     return temp<Object>();
   }
-
+  
   void Fiber::call(gc<Method> method, int stackStart, gc<Object> arg)
   {
     //std::cout << "call " << method->name() << std::endl;

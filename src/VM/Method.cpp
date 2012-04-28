@@ -139,4 +139,13 @@ namespace magpie
     
     return gc<Method>();
   }
+  
+  void MethodScope::reach()
+  {
+    for (int i = 0; i < methods_.count(); i++)
+    {
+      Memory::reach(methods_[i]);
+      Memory::reach(names_[i]);
+    }
+  }
 }

@@ -39,6 +39,10 @@ namespace magpie
     // given object is the last one in the heap.
     Managed* getNext(Managed* current);
 
+    inline size_t size() const { return end_ - memory_; }
+    inline size_t amountAllocated() const { return free_ - memory_; }
+    inline size_t amountFree() const { return end_ - free_; }
+    
   private:
     char* memory_;
     char* free_;  // The first byte of available memory.

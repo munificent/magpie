@@ -14,6 +14,11 @@ namespace magpie
     return Memory::makeTemp(new ClassObject(name));
   }
   
+  void ClassObject::reach()
+  {
+    Memory::reach(name_);
+  }
+  
   temp<NumberObject> Object::create(double value)
   {
     return Memory::makeTemp(new NumberObject(value));

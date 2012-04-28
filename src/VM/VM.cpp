@@ -29,6 +29,7 @@ namespace magpie
 
   void VM::reachRoots()
   {
+    methods_.reach();
     Memory::reach(fiber_);
     Memory::reach(true_);
     Memory::reach(false_);

@@ -79,6 +79,8 @@ namespace magpie
     
     gc<Method> findMain() const;
     
+    void reach();
+    
   private:
     Array<gc<Method> > methods_;
     Array<gc<String> > names_;

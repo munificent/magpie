@@ -76,6 +76,8 @@ namespace magpie
       name_(name)
     {}
     
+    virtual void reach();
+    
     virtual void trace(std::ostream& stream) const
     {
       stream << name_;
