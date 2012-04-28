@@ -10,7 +10,7 @@ namespace magpie
   class Lexer
   {
   public:
-    Lexer(gc<String> fileName, gc<String> source)
+    Lexer(const char* fileName, gc<String> source)
     : fileName_(fileName),
       source_(source),
       pos_(0),
@@ -52,7 +52,7 @@ namespace magpie
     temp<Token> readNumber();
     temp<Token> readString();
 
-    gc<String> fileName_;
+    const char* fileName_;
     gc<String> source_;
     int     pos_;
     int     start_;

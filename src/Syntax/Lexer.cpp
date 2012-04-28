@@ -198,7 +198,7 @@ namespace magpie
   temp<Token> Lexer::makeToken(TokenType type, gc<String> text)
   {
     // TODO(bob): Include file name.
-    temp<SourcePos> pos = SourcePos::create(fileName_,
+    SourcePos pos = SourcePos(fileName_,
         startRow_, startCol_, currentRow_, currentCol_);
     return Token::create(type, text, pos);
   }

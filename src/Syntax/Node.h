@@ -68,7 +68,7 @@ namespace magpie
   class Node : public Managed
   {
   public:
-    Node(gc<SourcePos> pos)
+    Node(const SourcePos& pos)
     : pos_(pos)
     {}
     
@@ -88,17 +88,17 @@ namespace magpie
     virtual const StringNode*   asStringNode()   const { return NULL; }
     virtual const VariableNode* asVariableNode() const { return NULL; }
     
-    gc<SourcePos> pos() const { return pos_; }
+    const SourcePos& pos() const { return pos_; }
   
   private:
-    gc<SourcePos> pos_;
+    SourcePos pos_;
   };
   
   // A binary operator.
   class BinaryOpNode : public Node
   {
   public:
-    static temp<BinaryOpNode> create(gc<SourcePos> pos, gc<Node> left,
+    static temp<BinaryOpNode> create(const SourcePos& pos, gc<Node> left,
                                      TokenType type, gc<Node> right);
     
     DECLARE_NODE(BinaryOpNode);
@@ -111,7 +111,7 @@ namespace magpie
     virtual void trace(std::ostream& out) const;
 
   private:
-    BinaryOpNode(gc<SourcePos> pos,
+    BinaryOpNode(const SourcePos& pos,
                  gc<Node> left, TokenType type, gc<Node> right);
     
     gc<Node>  left_;
@@ -123,7 +123,7 @@ namespace magpie
   class BoolNode : public Node
   {
   public:
-    static temp<BoolNode> create(gc<SourcePos> pos, bool value);
+    static temp<BoolNode> create(const SourcePos& pos, bool value);
     
     DECLARE_NODE(BoolNode);
     
@@ -132,7 +132,7 @@ namespace magpie
     virtual void trace(std::ostream& out) const;
     
   private:
-    BoolNode(gc<SourcePos> pos, bool value);
+    BoolNode(const SourcePos& pos, bool value);
     
     bool value_;
   };
@@ -141,7 +141,7 @@ namespace magpie
   class CallNode : public Node
   {
   public:
-    static temp<CallNode> create(gc<SourcePos> pos,
+    static temp<CallNode> create(const SourcePos& pos,
         gc<Node> leftArg, gc<String> name, gc<Node> rightArg);
     
     DECLARE_NODE(CallNode);
@@ -154,7 +154,7 @@ namespace magpie
     virtual void trace(std::ostream& out) const;
     
   private:
-    CallNode(gc<SourcePos> pos,
+    CallNode(const SourcePos& pos,
              gc<Node> leftArg, gc<String> name, gc<Node> rightArg);
     
     gc<Node> leftArg_;
@@ -166,7 +166,7 @@ namespace magpie
   class IfNode : public Node
   {
   public:
-    static temp<IfNode> create(gc<SourcePos> pos, gc<Node> condition,
+    static temp<IfNode> create(const SourcePos& pos, gc<Node> condition,
                                gc<Node> thenArm, gc<Node> elseArm);
     
     DECLARE_NODE(IfNode);
@@ -179,7 +179,7 @@ namespace magpie
     virtual void trace(std::ostream& out) const;
     
   private:
-    IfNode(gc<SourcePos> pos, gc<Node> condition,
+    IfNode(const SourcePos& pos, gc<Node> condition,
            gc<Node> thenArm, gc<Node> elseArm);
     
     gc<Node> condition_;
@@ -191,7 +191,7 @@ namespace magpie
   class NameNode : public Node
   {
   public:
-    static temp<NameNode> create(gc<SourcePos> pos, gc<String> name);
+    static temp<NameNode> create(const SourcePos& pos, gc<String> name);
     
     DECLARE_NODE(NameNode);
     
@@ -201,7 +201,7 @@ namespace magpie
     virtual void trace(std::ostream& out) const;
     
   private:
-    NameNode(gc<SourcePos> pos, gc<String> name);
+    NameNode(const SourcePos& pos, gc<String> name);
     
     gc<String> name_;
   };
@@ -210,7 +210,7 @@ namespace magpie
   class NumberNode : public Node
   {
   public:
-    static temp<NumberNode> create(gc<SourcePos> pos, double value);
+    static temp<NumberNode> create(const SourcePos& pos, double value);
   
     DECLARE_NODE(NumberNode);
     
@@ -219,7 +219,7 @@ namespace magpie
     virtual void trace(std::ostream& out) const;
 
   private:
-    NumberNode(gc<SourcePos> pos, double value);
+    NumberNode(const SourcePos& pos, double value);
     
     double value_;
   };
@@ -228,7 +228,7 @@ namespace magpie
   class SequenceNode : public Node
   {
   public:
-    static temp<SequenceNode> create(gc<SourcePos> pos,
+    static temp<SequenceNode> create(const SourcePos& pos,
                                      const Array<gc<Node> >& expressions);
     
     DECLARE_NODE(SequenceNode);
@@ -238,7 +238,7 @@ namespace magpie
     virtual void trace(std::ostream& out) const;
     
   private:
-    SequenceNode(gc<SourcePos> pos, const Array<gc<Node> >& expressions);
+    SequenceNode(const SourcePos& pos, const Array<gc<Node> >& expressions);
     
     Array<gc<Node> > expressions_;
   };
@@ -247,7 +247,7 @@ namespace magpie
   class StringNode : public Node
   {
   public:
-    static temp<StringNode> create(gc<SourcePos> pos, gc<String> value);
+    static temp<StringNode> create(const SourcePos& pos, gc<String> value);
     
     DECLARE_NODE(StringNode);
     
@@ -256,7 +256,7 @@ namespace magpie
     virtual void trace(std::ostream& out) const;
     
   private:
-    StringNode(gc<SourcePos> pos, gc<String> value);
+    StringNode(const SourcePos& pos, gc<String> value);
     
     gc<String> value_;
   };
@@ -265,7 +265,7 @@ namespace magpie
   class VariableNode : public Node
   {
   public:
-    static temp<VariableNode> create(gc<SourcePos> pos, bool isMutable,
+    static temp<VariableNode> create(const SourcePos& pos, bool isMutable,
                                      gc<Pattern> pattern, gc<Node> value);
     
     DECLARE_NODE(VariableNode);
@@ -277,7 +277,7 @@ namespace magpie
     virtual void trace(std::ostream& out) const;
     
   private:
-    VariableNode(gc<SourcePos> pos, bool isMutable,
+    VariableNode(const SourcePos& pos, bool isMutable,
                  gc<Pattern> pattern, gc<Node> value);
     
     bool isMutable_;

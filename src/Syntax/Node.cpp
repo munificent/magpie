@@ -43,14 +43,14 @@ namespace magpie
     out << "def " << name_ << "()" << body_;
   }
   
-  temp<BinaryOpNode> BinaryOpNode::create(gc<SourcePos> pos,
+  temp<BinaryOpNode> BinaryOpNode::create(const SourcePos& pos,
                                           gc<Node> left, TokenType type,
                                           gc<Node> right)
   {
     return Memory::makeTemp(new BinaryOpNode(pos, left, type, right));
   }
   
-  BinaryOpNode::BinaryOpNode(gc<SourcePos> pos,
+  BinaryOpNode::BinaryOpNode(const SourcePos& pos,
                              gc<Node> left, TokenType type, gc<Node> right)
   : Node(pos),
     left_(left),
@@ -70,12 +70,12 @@ namespace magpie
         << " " << right_ << ")";
   }
   
-  temp<BoolNode> BoolNode::create(gc<SourcePos> pos, bool value)
+  temp<BoolNode> BoolNode::create(const SourcePos& pos, bool value)
   {
     return Memory::makeTemp(new BoolNode(pos, value));
   }
   
-  BoolNode::BoolNode(gc<SourcePos> pos, bool value)
+  BoolNode::BoolNode(const SourcePos& pos, bool value)
   : Node(pos),
     value_(value)
   {}
@@ -85,13 +85,13 @@ namespace magpie
     out << (value_ ? "true" : "false");
   }
   
-  temp<CallNode> CallNode::create(gc<SourcePos> pos,
+  temp<CallNode> CallNode::create(const SourcePos& pos,
       gc<Node> leftArg, gc<String> name, gc<Node> rightArg)
   {
     return Memory::makeTemp(new CallNode(pos, leftArg, name, rightArg));
   }
   
-  CallNode::CallNode(gc<SourcePos> pos,
+  CallNode::CallNode(const SourcePos& pos,
                      gc<Node> leftArg, gc<String> name, gc<Node> rightArg)
   : Node(pos),
     leftArg_(leftArg),
@@ -111,13 +111,13 @@ namespace magpie
     out << leftArg_ << " " << name_ << "(" << rightArg_ << ")";
   }
   
-  temp<IfNode> IfNode::create(gc<SourcePos> pos, gc<Node> condition,
+  temp<IfNode> IfNode::create(const SourcePos& pos, gc<Node> condition,
                               gc<Node> thenArm, gc<Node> elseArm)
   {
     return Memory::makeTemp(new IfNode(pos, condition, thenArm, elseArm));
   }
   
-  IfNode::IfNode(gc<SourcePos> pos, gc<Node> condition,
+  IfNode::IfNode(const SourcePos& pos, gc<Node> condition,
                  gc<Node> thenArm, gc<Node> elseArm)
   : Node(pos),
     condition_(condition),
@@ -146,12 +146,12 @@ namespace magpie
     }
   }
     
-  temp<NameNode> NameNode::create(gc<SourcePos> pos, gc<String> name)
+  temp<NameNode> NameNode::create(const SourcePos& pos, gc<String> name)
   {
     return Memory::makeTemp(new NameNode(pos, name));
   }
   
-  NameNode::NameNode(gc<SourcePos> pos, gc<String> name)
+  NameNode::NameNode(const SourcePos& pos, gc<String> name)
   : Node(pos),
     name_(name)
   {}
@@ -166,12 +166,12 @@ namespace magpie
     out << name_;
   }
   
-  temp<NumberNode> NumberNode::create(gc<SourcePos> pos, double value)
+  temp<NumberNode> NumberNode::create(const SourcePos& pos, double value)
   {
     return Memory::makeTemp(new NumberNode(pos, value));
   }
   
-  NumberNode::NumberNode(gc<SourcePos> pos, double value)
+  NumberNode::NumberNode(const SourcePos& pos, double value)
   : Node(pos),
     value_(value)
   {}
@@ -181,13 +181,13 @@ namespace magpie
     out << value_;
   }
   
-  temp<SequenceNode> SequenceNode::create(gc<SourcePos> pos,
+  temp<SequenceNode> SequenceNode::create(const SourcePos& pos,
                                           const Array<gc<Node> >& expressions)
   {
     return Memory::makeTemp(new SequenceNode(pos, expressions));
   }
   
-  SequenceNode::SequenceNode(gc<SourcePos> pos,
+  SequenceNode::SequenceNode(const SourcePos& pos,
                              const Array<gc<Node> >& expressions)
   : Node(pos),
     expressions_(expressions)
@@ -201,12 +201,12 @@ namespace magpie
     }
   }
   
-  temp<StringNode> StringNode::create(gc<SourcePos> pos, gc<String> value)
+  temp<StringNode> StringNode::create(const SourcePos& pos, gc<String> value)
   {
     return Memory::makeTemp(new StringNode(pos, value));
   }
   
-  StringNode::StringNode(gc<SourcePos> pos, gc<String> value)
+  StringNode::StringNode(const SourcePos& pos, gc<String> value)
   : Node(pos),
     value_(value)
   {}
@@ -216,13 +216,13 @@ namespace magpie
     out << value_;
   }
   
-  temp<VariableNode> VariableNode::create(gc<SourcePos> pos, bool isMutable,
+  temp<VariableNode> VariableNode::create(const SourcePos& pos, bool isMutable,
                                           gc<Pattern> pattern, gc<Node> value)
   {
     return Memory::makeTemp(new VariableNode(pos, isMutable, pattern, value));
   }
   
-  VariableNode::VariableNode(gc<SourcePos> pos, bool isMutable,
+  VariableNode::VariableNode(const SourcePos& pos, bool isMutable,
                              gc<Pattern> pattern, gc<Node> value)
   : Node(pos),
     isMutable_(isMutable),

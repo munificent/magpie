@@ -100,7 +100,7 @@ namespace magpie
       }
       while (match(TOKEN_LINE));
       
-      temp<SourcePos> span = exprs[0]->pos()->spanTo(current().pos());
+      SourcePos span = exprs[0]->pos().spanTo(current().pos());
       
       // TODO(bob): Don't wrap in a sequence if there's just one.
       return SequenceNode::create(span, exprs);
@@ -117,7 +117,7 @@ namespace magpie
     
     if (lookAhead(TOKEN_IF))
     {
-      temp<SourcePos> start = Memory::makeTemp(consume()->pos());
+      SourcePos start = consume()->pos();
       
       temp<Node> condition = parsePrecedence();
       consume(TOKEN_THEN, "Expect 'then' after 'if' condition.");
@@ -128,13 +128,13 @@ namespace magpie
       consume(TOKEN_ELSE, "Expect 'else' after 'then' arm.");
       temp<Node> elseArm = parsePrecedence();
       
-      temp<SourcePos> span = start->spanTo(current().pos());
+      SourcePos span = start.spanTo(current().pos());
       return scope.close(IfNode::create(span, condition, thenArm, elseArm));
     }
     
     if (lookAhead(TOKEN_VAR) || lookAhead(TOKEN_VAL))
     {
-      temp<SourcePos> start = Memory::makeTemp(consume()->pos());
+      SourcePos start = consume()->pos();
       
       // TODO(bob): Distinguish between var and val.
       bool isMutable = false;
@@ -144,7 +144,7 @@ namespace magpie
       // TODO(bob): What precedence?
       temp<Node> value = parsePrecedence();
       
-      temp<SourcePos> span = start->spanTo(current().pos());
+      SourcePos span = start.spanTo(current().pos());
       return scope.close(VariableNode::create(span, isMutable, pattern, value));
     }
     
@@ -190,7 +190,7 @@ namespace magpie
       temp<Node> arg = parsePrecedence();
       consume(TOKEN_RIGHT_PAREN, "Expect ')' after call argument.");
 
-      temp<SourcePos> span = token->pos()->spanTo(current().pos());
+      SourcePos span = token->pos().spanTo(current().pos());
       return CallNode::create(span, gc<Node>(), token->text(), arg);
     }
     else

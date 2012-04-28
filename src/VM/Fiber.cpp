@@ -32,7 +32,7 @@ namespace magpie
       Memory::reach(callFrames_[i].method);
     }
   }
-    
+
   temp<Object> Fiber::run()
   {
     int ip = 0;

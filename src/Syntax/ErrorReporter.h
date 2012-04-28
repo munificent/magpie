@@ -12,7 +12,7 @@ namespace magpie
     : numErrors_(0)
     {}
     
-    void error(gc<SourcePos> pos, const char* format, ...);
+    void error(const SourcePos& pos, const char* format, ...);
     
     int numErrors() const { return numErrors_; }
     

@@ -17,7 +17,7 @@ namespace magpie
   class Parser
   {
   public:
-    Parser(gc<String> fileName, gc<String> source, ErrorReporter& reporter)
+    Parser(const char* fileName, gc<String> source, ErrorReporter& reporter)
     : lexer_(fileName, source),
       reporter_(reporter)
     {}

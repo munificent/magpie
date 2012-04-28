@@ -60,29 +60,23 @@ namespace magpie
   };
 
   // A span of source code associated with some Token or AST.
-  class SourcePos : public Managed
+  class SourcePos
   {
   public:
-    static temp<SourcePos> create(gc<String> file, int startLine, int startCol,
-                                  int endLine, int endCol);
+    SourcePos(const char* file, int startLine, int startCol,
+              int endLine, int endCol);
     
-    gc<String> file() const { return file_; }
+    const char* file() const { return file_; }
     int startLine() const { return startLine_; }
     int startCol() const { return startCol_; }
     int endLine() const { return endLine_; }
     int endCol() const { return endCol_; }
     
-    temp<SourcePos> spanTo(gc<SourcePos> end);
-    
-    virtual void reach();
-    virtual void trace(std::ostream& out) const;
+    SourcePos spanTo(const SourcePos& end) const;
 
   private:
-    SourcePos(gc<String> file, int startLine, int startCol,
-              int endLine, int endCol);
-    
     // The name of the source file containing this position.
-    gc<String> file_;
+    const char* file_;
     
     int startLine_;
     int startCol_;
@@ -95,13 +89,14 @@ namespace magpie
   class Token : public Managed
   {
   public:
-    static temp<Token> create(TokenType type, gc<String> text, gc<SourcePos> pos);
+    static temp<Token> create(TokenType type, gc<String> text,
+                              const SourcePos& pos);
 
     static const char* typeString(TokenType type);
     
-    TokenType     type() const { return type_; }
-    gc<String>    text() const { return text_; }
-    gc<SourcePos> pos()  const { return pos_; }
+    TokenType         type() const { return type_; }
+    gc<String>        text() const { return text_; }
+    const SourcePos&  pos()  const { return pos_; }
     
     // Gets whether this token is of the given type.
     bool is(TokenType type) const { return type_ == type; }
@@ -110,11 +105,11 @@ namespace magpie
     virtual void trace(std::ostream& out) const;
     
   private:
-    Token(TokenType type, gc<String> text, gc<SourcePos> pos);
+    Token(TokenType type, gc<String> text, const SourcePos& pos);
 
-    TokenType     type_;
-    gc<String>    text_;
-    gc<SourcePos> pos_;
+    TokenType   type_;
+    gc<String>  text_;
+    SourcePos   pos_;
   };
 }
 

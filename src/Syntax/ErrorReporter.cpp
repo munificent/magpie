@@ -4,7 +4,7 @@
 
 namespace magpie
 {
-  void ErrorReporter::error(gc<SourcePos> pos, const char* format, ...)
+  void ErrorReporter::error(const SourcePos& pos, const char* format, ...)
   {
     // TODO(bob): Hackish. Need to figure out if we want C-style, C++-style or
     // Magpie GC strings.
@@ -15,9 +15,9 @@ namespace magpie
     vsprintf(message, format, args);
     va_end(args);
 
-    std::cout << "[" << pos->file() << " line "
-        << pos->startLine() << " col "
-        << pos->startCol() << "] Error: " << message << std::endl;
+    std::cout << "[" << pos.file() << " line "
+        << pos.startLine() << " col "
+        << pos.startCol() << "] Error: " << message << std::endl;
 
     numErrors_++;
   }

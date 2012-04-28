@@ -46,9 +46,10 @@ int main(int argc, char * const argv[])
   AllocScope scope;
   
   // Read a file.
+  const char* fileName = "../../example/Fibonacci2.mag";
   ErrorReporter reporter;
-  temp<String> source = readFile("../../example/Fibonacci2.mag");
-  Parser parser(String::create("Fibonacci2.mag"), source, reporter);
+  temp<String> source = readFile(fileName);
+  Parser parser(fileName, source, reporter);
   temp<ModuleAst> module = parser.parseModule();
   
   // Compile it.

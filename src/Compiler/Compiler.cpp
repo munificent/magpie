@@ -94,18 +94,19 @@ namespace magpie
   void Compiler::visit(const CallNode& node, int dest)
   {
     int method = vm_.methods().find(node.name());
-    
     if (method == -1)
     {
       reporter_.error(node.pos(), "Method '%s' is not defined.",
                       node.name()->cString());
-      return;
     }
     
     ASSERT(node.leftArg().isNull(), "Left-hand arguments aren't supported yet.");
     
-    // Compile the argument.
+    // Compile the argument. Do this even if the method wasn't found so we can
+    // report errors in the arg expression too.
     node.rightArg()->accept(*this, dest);
+    
+    if (method == -1) return;
     
     write(OP_CALL, method, dest);
   }
