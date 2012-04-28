@@ -31,13 +31,10 @@ namespace magpie
   void MemoryTests::runTests()
   {
     collect();
-    inScopeTempsArePreserved();
   }
 
   void MemoryTests::collect()
   {
-    // TODO(bob): Get working with latest GC changes.
-    /*
     Memory::shutDown();
     
     ConsRoots roots;
@@ -53,6 +50,8 @@ namespace magpie
     int id = 0;
     for (int i = 0; i <= 600; i++)
     {
+      Memory::checkCollect();
+      
       a->set(new Cons(id));
       a = &((*a)->next);
       
@@ -72,25 +71,6 @@ namespace magpie
 
     // Make sure it actually did a collection.
     EXPECT(Memory::numCollections() > 0);
-     */
-  }
-  
-  void MemoryTests::inScopeTempsArePreserved()
-  {
-    // TODO(bob): No temp support right now.
-    /*
-    Memory::shutDown();
-    
-    ConsRoots roots;
-    Memory::initialize(&roots, 1024 * 1024);
-
-    gc<Cons> a = new Cons(123);
-    
-    // Force a collection.
-    Memory::collect();
-    
-    EXPECT_EQUAL(123, a->id);
-    */
   }
 }
 
