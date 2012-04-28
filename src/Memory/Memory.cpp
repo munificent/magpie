@@ -10,11 +10,6 @@ namespace magpie
   RootSource* Memory::roots_ = NULL;
   Semispace Memory::a_;
   Semispace Memory::b_;
-  /*
-  AllocScope* Memory::currentScope_ = NULL;
-  gc<Managed> Memory::temps_[Memory::MAX_TEMPS];
-  int Memory::numTemps_ = 0;
-   */
   int Memory::numCollections_ = 0;
   Semispace* Memory::to_ = NULL;
   Semispace* Memory::from_ = NULL;
@@ -29,9 +24,6 @@ namespace magpie
     b_.initialize(heapSize);
     to_ = &a_;
     from_ = &b_;
-    /*
-    numTemps_ = 0;
-     */
     numCollections_ = 0;
   }
   
@@ -51,40 +43,7 @@ namespace magpie
     // memory we could want to allocate between calls to checkCollect().
     if (from_->amountFree() > 1024) return false;
     
-    collect();
-    return true;
-  }
-  
-  void Memory::collect()
-  {
     size_t freeBefore = from_->amountFree();
-    
-    // TODO(bob): There is a significant bug here. When objects are moved,
-    // every temp<T> on the stack is fixed. Every gc<T> stored in an object is
-    // fixed. However, there's (at least) one big missing piece: this. The
-    // callframes on the C stack are typically methods. Those methods have an
-    // implicit "this" pointer. That isn't being updated. So if you do:
-    //
-    // struct Foo
-    // {
-    //   int field;
-    //   void method()
-    //   {
-    //     Object::create(); // allocate and cause a GC
-    //     cout << field; // access a field on this
-    //   }
-    // };
-    //
-    // Then bad things happen because you're accessing memory in the dead
-    // semispace, not the current one.
-    
-    /*
-    // Copy the active temps to to-space.
-    for (int i = 0; i < numTemps_; i++)
-    {
-      reach(temps_[i]);
-    }
-    */
     
     // Copy the roots to to-space.
     roots_->reachRoots();
@@ -123,6 +82,7 @@ namespace magpie
               << ", reclaimed " << (from_->amountFree() - freeBefore)
               << "." << std::endl;
     */
+    return true;
   }
   
   void* Memory::allocate(size_t size)
