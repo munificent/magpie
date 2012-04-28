@@ -17,18 +17,16 @@ namespace magpie
   class Parser
   {
   public:
-    // TODO(bob): Need to do something better for the strings here. Since the
-    // Parser class isn't GC'd, it can't point to stuff that is.
     Parser(const char* fileName, gc<String> source, ErrorReporter& reporter)
     : lexer_(fileName, source),
       reporter_(reporter)
     {}
     
-    ModuleAst* parseModule();
+    gc<ModuleAst> parseModule();
     
   private:
-    typedef Node* (Parser::*PrefixParseFn)(Token* token);
-    typedef Node* (Parser::*InfixParseFn)(Node* left, Token* token);
+    typedef gc<Node> (Parser::*PrefixParseFn)(gc<Token> token);
+    typedef gc<Node> (Parser::*InfixParseFn)(gc<Node> left, gc<Token> token);
     
     struct Parselet
     {
@@ -37,24 +35,24 @@ namespace magpie
       int           precedence;
     };
     
-    Node* parseBlock();
-    Node* statementLike();
+    gc<Node> parseBlock();
+    gc<Node> statementLike();
 
     // Parses an expression with the given precedence or higher.
-    Node* parsePrecedence(int precedence = 0);
+    gc<Node> parsePrecedence(int precedence = 0);
     
     // Prefix expression parsers.
-    Node* boolean(Token* token);
-    Node* name(Token* token);
-    Node* number(Token* token);
-    Node* string(Token* token);
+    gc<Node> boolean(gc<Token> token);
+    gc<Node> name(gc<Token> token);
+    gc<Node> number(gc<Token> token);
+    gc<Node> string(gc<Token> token);
 
     // Infix expression parsers.
-    Node* binaryOp(Node* left, Token* token);
+    gc<Node> binaryOp(gc<Node> left, gc<Token> token);
 
     // Pattern parsing.
-    Pattern* parsePattern();
-    Pattern* variablePattern();
+    gc<Pattern> parsePattern();
+    gc<Pattern> variablePattern();
 
     // Gets the Token the parser is currently looking at.
     const Token& current();
@@ -77,11 +75,11 @@ namespace magpie
     
     // TODO(bob): Return temp or gc?
     // Consumes the current Token and advances the Parser.
-    Token* consume();
+    gc<Token> consume();
     
     // Consumes the current Token if it matches the expected type.
     // Otherwise reports the given error message and returns a null temp.
-    Token* consume(TokenType expected, const char* errorMessage);
+    gc<Token> consume(TokenType expected, const char* errorMessage);
     
     // Gets whether or not any errors have been reported.
     bool hadError() const { return reporter_.numErrors() > 0; }
@@ -93,7 +91,7 @@ namespace magpie
     Lexer lexer_;
     
     // The 2 here is the maximum number of lookahead tokens.
-    Queue<Token*, 2> read_;
+    Queue<gc<Token>, 2> read_;
     
     ErrorReporter& reporter_;
     

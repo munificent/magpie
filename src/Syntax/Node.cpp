@@ -2,46 +2,40 @@
 
 namespace magpie
 {
-  ModuleAst::ModuleAst(Array<MethodAst*>& methods)
+  ModuleAst::ModuleAst(Array<gc<MethodAst> >& methods)
   : methods_(methods)
   {}
   
-  ModuleAst::~ModuleAst()
+  void ModuleAst::reach()
   {
-    for (int i = 0; i < methods_.count(); i++)
-    {
-      delete methods_[i];
-    }
+    Memory::reach(methods_);
   }
   
-  MethodAst::MethodAst(gc<String> name, Pattern* parameter, Node* body)
+  MethodAst::MethodAst(gc<String> name, gc<Pattern> parameter, gc<Node> body)
   : name_(name),
     parameter_(parameter),
     body_(body)
   {}
   
-  MethodAst::~MethodAst()
+  void MethodAst::reach()
   {
-    delete parameter_;
-    delete body_;
-    // TODO
-    /*
+    Memory::reach(parameter_);
     Memory::reach(name_);
-     */
+    Memory::reach(body_);
   }
   
   BinaryOpNode::BinaryOpNode(const SourcePos& pos,
-                             Node* left, TokenType type, Node* right)
+                             gc<Node> left, TokenType type, gc<Node> right)
   : Node(pos),
     left_(left),
     type_(type),
     right_(right)
   {}
 
-  BinaryOpNode::~BinaryOpNode()
+  void BinaryOpNode::reach()
   {
-    delete left_;
-    delete right_;
+    Memory::reach(left_);
+    Memory::reach(right_);
   }
 
   void BinaryOpNode::trace(std::ostream& out) const
@@ -61,18 +55,18 @@ namespace magpie
   }
   
   CallNode::CallNode(const SourcePos& pos,
-                     Node* leftArg, gc<String> name, Node* rightArg)
+                     gc<Node> leftArg, gc<String> name, gc<Node> rightArg)
   : Node(pos),
     leftArg_(leftArg),
     name_(name),
     rightArg_(rightArg)
   {}
   
-  CallNode::~CallNode()
+  void CallNode::reach()
   {
-    delete leftArg_;
-    //    Memory::reach(name_);
-    delete rightArg_;
+    Memory::reach(leftArg_);
+    Memory::reach(name_);
+    Memory::reach(rightArg_);
   }
   
   void CallNode::trace(std::ostream& out) const
@@ -80,26 +74,26 @@ namespace magpie
     out << leftArg_ << " " << name_ << "(" << rightArg_ << ")";
   }
   
-  IfNode::IfNode(const SourcePos& pos, Node* condition,
-                 Node* thenArm, Node* elseArm)
+  IfNode::IfNode(const SourcePos& pos, gc<Node> condition,
+                 gc<Node> thenArm, gc<Node> elseArm)
   : Node(pos),
     condition_(condition),
     thenArm_(thenArm),
     elseArm_(elseArm)
   {}
   
-  IfNode::~IfNode()
+  void IfNode::reach()
   {
-    delete condition_;
-    delete thenArm_;
-    delete elseArm_;
+    Memory::reach(condition_);
+    Memory::reach(thenArm_);
+    Memory::reach(elseArm_);
   }
   
   void IfNode::trace(std::ostream& out) const
   {
     out << "(if " << condition_ << " then " << thenArm_;
     
-    if (elseArm_ == NULL)
+    if (elseArm_.isNull())
     {
       out << ")";
     }
@@ -114,9 +108,9 @@ namespace magpie
     name_(name)
   {}
   
-  NameNode::~NameNode()
+  void NameNode::reach()
   {
-    //    Memory::reach(name_);
+    Memory::reach(name_);
   }
   
   void NameNode::trace(std::ostream& out) const
@@ -135,19 +129,16 @@ namespace magpie
   }
   
   SequenceNode::SequenceNode(const SourcePos& pos,
-                             const Array<Node*>& expressions)
+                             const Array<gc<Node> >& expressions)
   : Node(pos),
     expressions_(expressions)
   {}
   
-  SequenceNode::~SequenceNode()
+  void SequenceNode::reach()
   {
-    for (int i = 0; i < expressions_.count(); i++)
-    {
-      delete expressions_[i];
-    }
+    Memory::reach(expressions_);
   }
-  
+
   void SequenceNode::trace(std::ostream& out) const
   {
     for (int i = 0; i < expressions_.count(); i++)
@@ -161,23 +152,28 @@ namespace magpie
     value_(value)
   {}
   
+  void StringNode::reach()
+  {
+    Memory::reach(value_);
+  }
+  
   void StringNode::trace(std::ostream& out) const
   {
     out << value_;
   }
   
   VariableNode::VariableNode(const SourcePos& pos, bool isMutable,
-                             Pattern* pattern, Node* value)
+                             gc<Pattern> pattern, gc<Node> value)
   : Node(pos),
     isMutable_(isMutable),
     pattern_(pattern),
     value_(value)
   {}
   
-  VariableNode::~VariableNode()
+  void VariableNode::reach()
   {
-    delete pattern_;
-    delete value_;
+    Memory::reach(pattern_);
+    Memory::reach(value_);
   }
   
   void VariableNode::trace(std::ostream& out) const
@@ -189,6 +185,11 @@ namespace magpie
   VariablePattern::VariablePattern(gc<String> name)
   : name_(name)
   {}
+  
+  void VariablePattern::reach()
+  {
+    Memory::reach(name_);
+  }
   
   void VariablePattern::trace(std::ostream& out) const
   {

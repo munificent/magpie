@@ -16,7 +16,7 @@ namespace magpie
     gc<String> source = String::create("()[]{}");
     Lexer lexer("", source);
 
-    Token* token = lexer.readToken();
+    gc<Token> token = lexer.readToken();
     EXPECT_EQUAL(TOKEN_LEFT_PAREN, token->type());
     EXPECT_EQUAL("(", *token->text());
 
@@ -46,7 +46,7 @@ namespace magpie
     gc<String> source = String::create("\"st\\nr\"");
     Lexer lexer("", source);
     
-    Token* token = lexer.readToken();
+    gc<Token> token = lexer.readToken();
     EXPECT_EQUAL(TOKEN_STRING, token->type());
     EXPECT_EQUAL("st\nr", *token->text());
   }

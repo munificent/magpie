@@ -7,7 +7,7 @@
 
 namespace magpie
 {
-  void Compiler::compileModule(VM& vm, const ModuleAst* module,
+  void Compiler::compileModule(VM& vm, gc<ModuleAst> module,
                                ErrorReporter& reporter)
   {
     // Declare methods first so we can resolve mutually recursive calls.
@@ -20,17 +20,17 @@ namespace magpie
     // Try to compile all of the methods.
     for (int i = 0; i < module->methods().count(); i++)
     {
-      const MethodAst& methodAst = *module->methods()[i];
+      gc<MethodAst> methodAst = module->methods()[i];
       gc<Method> method = compileMethod(vm, methodAst, reporter);
 
       // Bail if there was a compile error.
       if (method.isNull()) return;
       
-      vm.methods().define(methodAst.name(), method);
+      vm.methods().define(methodAst->name(), method);
     }
   }
   
-  gc<Method> Compiler::compileMethod(VM& vm, const MethodAst& methodAst,
+  gc<Method> Compiler::compileMethod(VM& vm, gc<MethodAst> methodAst,
                                        ErrorReporter& reporter)
   {
     Compiler compiler(vm, reporter);
@@ -49,7 +49,7 @@ namespace magpie
     maxRegisters_(0)
   {}
 
-  gc<Method> Compiler::compile(const MethodAst& method)
+  gc<Method> Compiler::compile(gc<MethodAst> method)
   {
     // Create a register for the argument and result value.
     int result = allocateRegister();
@@ -58,17 +58,17 @@ namespace magpie
     locals_.add(String::create("(return)"));
     
     // TODO(bob): Hackish and temporary.
-    if (method.parameter() != NULL)
+    if (!method->parameter().isNull())
     {
       // Evaluate the method's parameter pattern.
-      reserveVariables(method.parameter()->countVariables());
-      method.parameter()->accept(*this, result);
+      reserveVariables(method->parameter()->countVariables());
+      method->parameter()->accept(*this, result);
     }
     
-    method.body().accept(*this, result);
+    method->body().accept(*this, result);
     write(OP_END, result);
     
-    return new Method(method.name(), code_, constants_, maxRegisters_);
+    return new Method(method->name(), code_, constants_, maxRegisters_);
   }
   
   void Compiler::visit(const BinaryOpNode& node, int dest)
@@ -100,7 +100,7 @@ namespace magpie
                       node.name()->cString());
     }
     
-    ASSERT(node.leftArg() == NULL, "Left-hand arguments aren't supported yet.");
+    ASSERT(node.leftArg().isNull(), "Left-hand arguments aren't supported yet.");
     
     // Compile the argument. Do this even if the method wasn't found so we can
     // report errors in the arg expression too.
@@ -114,13 +114,13 @@ namespace magpie
   void Compiler::visit(const IfNode& node, int dest)
   {
     // Compile the condition.
-    node.condition().accept(*this, dest);
+    node.condition()->accept(*this, dest);
     
     // Leave a space for the test and jump instruction.
     int jumpToElse = startJump();
     
     // Compile the then arm.
-    node.thenArm().accept(*this, dest);
+    node.thenArm()->accept(*this, dest);
     
     // Leave a space for the then arm to jump over the else arm.
     int jumpPastElse = startJump();
@@ -128,7 +128,7 @@ namespace magpie
     // Compile the else arm.
     endJump(jumpToElse, OP_JUMP_IF_FALSE, dest, code_.count() - jumpToElse - 1);
       
-    node.elseArm().accept(*this, dest);
+    node.elseArm()->accept(*this, dest);
       
     endJump(jumpPastElse, OP_JUMP, code_.count() - jumpPastElse - 1);
   }
@@ -209,8 +209,8 @@ namespace magpie
 
   void Compiler::compileInfix(const BinaryOpNode& node, OpCode op, int dest)
   {
-    int a = compileExpressionOrConstant(node.left());
-    int b = compileExpressionOrConstant(node.right());
+    int a = compileExpressionOrConstant(*node.left());
+    int b = compileExpressionOrConstant(*node.right());
     
     write(op, a, b, dest);
     

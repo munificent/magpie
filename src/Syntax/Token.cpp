@@ -76,23 +76,26 @@ namespace magpie
     }
   }
   
-  std::ostream& operator <<(std::ostream& out, const Token& token)
+  void Token::reach()
   {
-    switch (token.type())
+    Memory::reach(text_);
+  }
+  
+  void Token::trace(std::ostream& out)
+  {
+    switch (type_)
     {
       case TOKEN_NAME:
       case TOKEN_NUMBER:
       case TOKEN_STRING:
       case TOKEN_ERROR:
         // Show the text.
-        out << token.text();
+        out << text_;
         break;
       
       default:
         // It's a token type with a fixed text, so just use that.
-        out << Token::typeString(token.type());
+        out << typeString(type_);
     }
-    
-    return out;
   }
 }

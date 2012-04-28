@@ -24,7 +24,9 @@ namespace magpie
     
     Managed* object_;
     
+    /*
     template<class> friend class temp;
+    */
     template<class> friend class gc;
   };
   

@@ -49,12 +49,10 @@ int main(int argc, char * const argv[])
   ErrorReporter reporter;
   gc<String> source = readFile(fileName);
   Parser parser(fileName, source, reporter);
-  ModuleAst* module = parser.parseModule();
+  gc<ModuleAst> module = parser.parseModule();
   
   // Compile it.
   Compiler::compileModule(vm, module, reporter);
-  
-  delete module;
   
   // Invoke main().
   if (reporter.numErrors() == 0)

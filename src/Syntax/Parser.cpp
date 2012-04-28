@@ -54,21 +54,21 @@ namespace magpie
     { NULL,                 NULL, -1 }                  // TOKEN_EOF
   };
 
-  ModuleAst* Parser::parseModule()
+  gc<ModuleAst> Parser::parseModule()
   {
     // TODO(bob): Right now this just returns a sequence. Should probably have
     // a different node type for the top level.
-    Array<MethodAst*> methods;
+    Array<gc<MethodAst> > methods;
     
     do
     {
       // Method definition.
       consume(TOKEN_DEF, "The top level of a module contains only method definitions.");
-      Token* name = consume(TOKEN_NAME,
+      gc<Token> name = consume(TOKEN_NAME,
                             "Expect a method name after 'def'.");
       
       // TODO(bob): Parse real pattern(s).
-      Pattern* pattern = NULL;
+      gc<Pattern> pattern = NULL;
       consume(TOKEN_LEFT_PAREN, "Temp.");
       if (lookAhead(TOKEN_NAME))
       {
@@ -76,7 +76,7 @@ namespace magpie
       }
       consume(TOKEN_RIGHT_PAREN, "Temp.");
       
-      Node* body = parseBlock();
+      gc<Node> body = parseBlock();
       
       methods.add(new MethodAst(name->text(), pattern, body));
     }
@@ -85,13 +85,13 @@ namespace magpie
     return new ModuleAst(methods);
   }
   
-  Node* Parser::parseBlock()
+  gc<Node> Parser::parseBlock()
   {
     // If we have a newline, then it's an actual block, otherwise it's a
     // single expression.
     if (match(TOKEN_LINE))
     {
-      Array<Node*> exprs;
+      Array<gc<Node> > exprs;
       
       do
       {
@@ -112,20 +112,20 @@ namespace magpie
     }
   }
 
-  Node* Parser::statementLike()
+  gc<Node> Parser::statementLike()
   {
     if (lookAhead(TOKEN_IF))
     {
       SourcePos start = consume()->pos();
       
-      Node* condition = parsePrecedence();
+      gc<Node> condition = parsePrecedence();
       consume(TOKEN_THEN, "Expect 'then' after 'if' condition.");
       
       // TODO(bob): Block bodies.
-      Node* thenArm = parsePrecedence();
+      gc<Node> thenArm = parsePrecedence();
       // TODO(bob): Allow omitting 'else'.
       consume(TOKEN_ELSE, "Expect 'else' after 'then' arm.");
-      Node* elseArm = parsePrecedence();
+      gc<Node> elseArm = parsePrecedence();
       
       SourcePos span = start.spanTo(current().pos());
       return new IfNode(span, condition, thenArm, elseArm);
@@ -138,10 +138,10 @@ namespace magpie
       // TODO(bob): Distinguish between var and val.
       bool isMutable = false;
       
-      Pattern* pattern = parsePattern();
+      gc<Pattern> pattern = parsePattern();
       consume(TOKEN_EQUALS, "Expect '=' after variable declaration.");
       // TODO(bob): What precedence?
-      Node* value = parsePrecedence();
+      gc<Node> value = parsePrecedence();
       
       SourcePos span = start.spanTo(current().pos());
       return new VariableNode(span, isMutable, pattern, value);
@@ -150,9 +150,9 @@ namespace magpie
     return parsePrecedence();
   }
   
-  Node* Parser::parsePrecedence(int precedence)
+  gc<Node> Parser::parsePrecedence(int precedence)
   {
-    Token* token = consume();
+    gc<Token> token = consume();
     PrefixParseFn prefix = expressions_[token->type()].prefix;
     
     if (prefix == NULL)
@@ -162,7 +162,7 @@ namespace magpie
       return NULL;
     }
     
-    Node* left = (this->*prefix)(token);
+    gc<Node> left = (this->*prefix)(token);
     
     while (precedence < expressions_[current().type()].precedence)
     {
@@ -175,17 +175,17 @@ namespace magpie
     return left;
   }
   
-  Node* Parser::boolean(Token* token)
+  gc<Node> Parser::boolean(gc<Token> token)
   {
     return new BoolNode(token->pos(), token->type() == TOKEN_TRUE);
   }
   
-  Node* Parser::name(Token* token)
+  gc<Node> Parser::name(gc<Token> token)
   {
     // See if it's a method call like foo(arg).
     if (match(TOKEN_LEFT_PAREN))
     {
-      Node* arg = parsePrecedence();
+      gc<Node> arg = parsePrecedence();
       consume(TOKEN_RIGHT_PAREN, "Expect ')' after call argument.");
 
       SourcePos span = token->pos().spanTo(current().pos());
@@ -198,32 +198,32 @@ namespace magpie
     }
   }
   
-  Node* Parser::number(Token* token)
+  gc<Node> Parser::number(gc<Token> token)
   {
     double number = atof(token->text()->cString());
     return new NumberNode(token->pos(), number);
   }
 
-  Node* Parser::string(Token* token)
+  gc<Node> Parser::string(gc<Token> token)
   {
     return new StringNode(token->pos(), token->text());
   }
   
-  Node* Parser::binaryOp(Node* left, Token* token)
+  gc<Node> Parser::binaryOp(gc<Node> left, gc<Token> token)
   {
     // TODO(bob): Support right-associative infix. Needs to do precedence
     // - 1 here, to be right-assoc.
-    Node* right = parsePrecedence(expressions_[token->type()].precedence);
+    gc<Node> right = parsePrecedence(expressions_[token->type()].precedence);
     
     return new BinaryOpNode(token->pos(), left, token->type(), right);
   }
   
-  Pattern* Parser::parsePattern()
+  gc<Pattern> Parser::parsePattern()
   {
     return variablePattern();
   }
   
-  Pattern* Parser::variablePattern()
+  gc<Pattern> Parser::variablePattern()
   {
     if (lookAhead(TOKEN_NAME))
     {
@@ -232,7 +232,7 @@ namespace magpie
     else
     {
       reporter_.error(current().pos(), "Expected pattern.");
-      return NULL;
+      return gc<Pattern>();
     }
   }
   
@@ -272,7 +272,7 @@ namespace magpie
     if (!lookAhead(expected)) reporter_.error(current().pos(), errorMessage);
   }
 
-  Token* Parser::consume()
+  gc<Token> Parser::consume()
   {
     fillLookAhead(1);
     // TODO(bob): Memory leak! Tokens aren't being deleted after being consumed.
@@ -280,7 +280,7 @@ namespace magpie
     return read_.dequeue();
   }
 
-  Token* Parser::consume(TokenType expected, const char* errorMessage)
+  gc<Token> Parser::consume(TokenType expected, const char* errorMessage)
   {
     if (lookAhead(expected)) return consume();
 

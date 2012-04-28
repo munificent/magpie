@@ -10,8 +10,8 @@ namespace magpie
   class Lexer
   {
   public:
-    // TODO(bob): Need to do something better for the strings here. Since the
-    // Lexer class isn't GC'd, it can't point to stuff that is.
+    // TODO(bob): Need to do something better for the strings here. Right now,
+    // the lexer isn't a root.
     Lexer(const char* fileName, gc<String> source)
     : fileName_(fileName),
       source_(source),
@@ -26,11 +26,11 @@ namespace magpie
 
     // Lexes and returns the next full Token read from the source. Handles
     // eliding newlines that should ignored.
-    Token* readToken();
+    gc<Token> readToken();
 
   private:
     // Reads a single token without and newline processing.
-    Token* readRawToken();
+    gc<Token> readRawToken();
     
     bool isDone() const;
 
@@ -43,16 +43,16 @@ namespace magpie
 
     char advance();
 
-    Token* makeToken(TokenType type);
-    Token* makeToken(TokenType type, gc<String> text);
-    Token* error(gc<String> message);
+    gc<Token> makeToken(TokenType type);
+    gc<Token> makeToken(TokenType type, gc<String> text);
+    gc<Token> error(gc<String> message);
     
     void skipLineComment();
     void skipBlockComment();
 
-    Token* readName();
-    Token* readNumber();
-    Token* readString();
+    gc<Token> readName();
+    gc<Token> readNumber();
+    gc<Token> readString();
 
     const char* fileName_;
     gc<String> source_;
