@@ -1,8 +1,7 @@
 def fib(n)
-    if n < 2 /* comment /* nested */ outer */ then n else fib(n - 2) + fib(n - 1)
+    if n < 2 then n else fib(n - 2) + fib(n - 1)
 end
 
 def main()
-    print("blah")
-    fib(25) // 75025
+    fib(30)
 end
