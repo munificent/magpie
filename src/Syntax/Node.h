@@ -27,45 +27,37 @@ namespace magpie
   class MethodAst;
   class Pattern;
   
-  class ModuleAst : public Managed
+  class ModuleAst
   {
   public:
-    temp<ModuleAst> static create(Array<gc<MethodAst> >& methods);
+    ModuleAst(Array<MethodAst*>& methods);
+    ~ModuleAst();
     
-    const Array<gc<MethodAst> > methods() const { return methods_; }
-    
-    virtual void reach();
+    const Array<MethodAst*> methods() const { return methods_; }
 
   private:
-    ModuleAst(Array<gc<MethodAst> >& methods);
-    
-    Array<gc<MethodAst> > methods_;
+    Array<MethodAst*> methods_;
   };
   
   // A method definition.
-  class MethodAst : public Managed
+  class MethodAst
   {
   public:
-    static temp<MethodAst> create(gc<String> name, gc<Pattern> parameter,
-                                  gc<Node> body);
+    MethodAst(gc<String> name, Pattern* parameter, Node* body);
+    ~MethodAst();
     
     gc<String> name() const { return name_; }
-    gc<Pattern> parameter() const { return parameter_; }
+    const Pattern* parameter() const { return parameter_; }
     Node& body() const { return *body_; }
     
-    virtual void reach();
-    virtual void trace(std::ostream& out) const;
-    
   private:
-    MethodAst(gc<String> name, gc<Pattern> parameter, gc<Node> body);
-    
     gc<String> name_;
-    gc<Pattern> parameter_;
-    gc<Node> body_;
+    Pattern* parameter_;
+    Node* body_;
   };
   
   // Base class for all AST node classes.
-  class Node : public Managed
+  class Node
   {
   public:
     Node(const SourcePos& pos)
@@ -98,8 +90,9 @@ namespace magpie
   class BinaryOpNode : public Node
   {
   public:
-    static temp<BinaryOpNode> create(const SourcePos& pos, gc<Node> left,
-                                     TokenType type, gc<Node> right);
+    BinaryOpNode(const SourcePos& pos,
+                 Node* left, TokenType type, Node* right);
+    ~BinaryOpNode();
     
     DECLARE_NODE(BinaryOpNode);
     
@@ -107,23 +100,19 @@ namespace magpie
     TokenType type() const { return type_; }
     Node& right() const { return *right_; }
     
-    virtual void reach();
     virtual void trace(std::ostream& out) const;
 
   private:
-    BinaryOpNode(const SourcePos& pos,
-                 gc<Node> left, TokenType type, gc<Node> right);
-    
-    gc<Node>  left_;
+    Node*  left_;
     TokenType type_;
-    gc<Node>  right_;
+    Node*  right_;
   };
   
   // A boolean literal.
   class BoolNode : public Node
   {
   public:
-    static temp<BoolNode> create(const SourcePos& pos, bool value);
+    BoolNode(const SourcePos& pos, bool value);
     
     DECLARE_NODE(BoolNode);
     
@@ -132,8 +121,6 @@ namespace magpie
     virtual void trace(std::ostream& out) const;
     
   private:
-    BoolNode(const SourcePos& pos, bool value);
-    
     bool value_;
   };
   
@@ -141,33 +128,31 @@ namespace magpie
   class CallNode : public Node
   {
   public:
-    static temp<CallNode> create(const SourcePos& pos,
-        gc<Node> leftArg, gc<String> name, gc<Node> rightArg);
+    CallNode(const SourcePos& pos,
+             Node* leftArg, gc<String> name, Node* rightArg);
+    ~CallNode();
     
     DECLARE_NODE(CallNode);
     
     gc<String> name()     const { return name_; }
-    gc<Node>   rightArg() const { return rightArg_; }
-    gc<Node>   leftArg()  const { return leftArg_; }
+    Node*   rightArg() const { return rightArg_; }
+    Node*   leftArg()  const { return leftArg_; }
     
-    virtual void reach();
     virtual void trace(std::ostream& out) const;
     
   private:
-    CallNode(const SourcePos& pos,
-             gc<Node> leftArg, gc<String> name, gc<Node> rightArg);
-    
-    gc<Node> leftArg_;
+    Node* leftArg_;
     gc<String> name_;
-    gc<Node> rightArg_;
+    Node* rightArg_;
   };
   
   // An if-then-else expression.
   class IfNode : public Node
   {
   public:
-    static temp<IfNode> create(const SourcePos& pos, gc<Node> condition,
-                               gc<Node> thenArm, gc<Node> elseArm);
+    IfNode(const SourcePos& pos, Node* condition,
+           Node* thenArm, Node* elseArm);
+    ~IfNode();
     
     DECLARE_NODE(IfNode);
     
@@ -175,34 +160,28 @@ namespace magpie
     Node& thenArm() const { return *thenArm_; }
     Node& elseArm() const { return *elseArm_; }
     
-    virtual void reach();
     virtual void trace(std::ostream& out) const;
     
-  private:
-    IfNode(const SourcePos& pos, gc<Node> condition,
-           gc<Node> thenArm, gc<Node> elseArm);
-    
-    gc<Node> condition_;
-    gc<Node> thenArm_;
-    gc<Node> elseArm_;
+  private:    
+    Node* condition_;
+    Node* thenArm_;
+    Node* elseArm_;
   };
   
   // A named variable reference.
   class NameNode : public Node
   {
   public:
-    static temp<NameNode> create(const SourcePos& pos, gc<String> name);
+    NameNode(const SourcePos& pos, gc<String> name);
+    ~NameNode();
     
     DECLARE_NODE(NameNode);
     
     gc<String> name() const { return name_; }
     
-    virtual void reach();
     virtual void trace(std::ostream& out) const;
     
-  private:
-    NameNode(const SourcePos& pos, gc<String> name);
-    
+  private:    
     gc<String> name_;
   };
   
@@ -210,8 +189,8 @@ namespace magpie
   class NumberNode : public Node
   {
   public:
-    static temp<NumberNode> create(const SourcePos& pos, double value);
-  
+    NumberNode(const SourcePos& pos, double value);
+    
     DECLARE_NODE(NumberNode);
     
     double value() const { return value_; }
@@ -219,8 +198,6 @@ namespace magpie
     virtual void trace(std::ostream& out) const;
 
   private:
-    NumberNode(const SourcePos& pos, double value);
-    
     double value_;
   };
   
@@ -228,26 +205,24 @@ namespace magpie
   class SequenceNode : public Node
   {
   public:
-    static temp<SequenceNode> create(const SourcePos& pos,
-                                     const Array<gc<Node> >& expressions);
+    SequenceNode(const SourcePos& pos, const Array<Node*>& expressions);
+    ~SequenceNode();
     
     DECLARE_NODE(SequenceNode);
     
-    const Array<gc<Node> >& expressions() const { return expressions_; }
+    const Array<Node*>& expressions() const { return expressions_; }
     
     virtual void trace(std::ostream& out) const;
     
-  private:
-    SequenceNode(const SourcePos& pos, const Array<gc<Node> >& expressions);
-    
-    Array<gc<Node> > expressions_;
+  private:    
+    Array<Node*> expressions_;
   };
   
   // A string literal.
   class StringNode : public Node
   {
   public:
-    static temp<StringNode> create(const SourcePos& pos, gc<String> value);
+    StringNode(const SourcePos& pos, gc<String> value);
     
     DECLARE_NODE(StringNode);
     
@@ -255,9 +230,7 @@ namespace magpie
     
     virtual void trace(std::ostream& out) const;
     
-  private:
-    StringNode(const SourcePos& pos, gc<String> value);
-    
+  private:    
     gc<String> value_;
   };
   
@@ -265,28 +238,26 @@ namespace magpie
   class VariableNode : public Node
   {
   public:
-    static temp<VariableNode> create(const SourcePos& pos, bool isMutable,
-                                     gc<Pattern> pattern, gc<Node> value);
+    VariableNode(const SourcePos& pos, bool isMutable,
+                 Pattern* pattern, Node* value);
+    ~VariableNode();
     
     DECLARE_NODE(VariableNode);
     
     bool isMutable() const { return isMutable_; }
-    gc<Pattern> pattern() const { return pattern_; }
-    gc<Node> value() const { return value_; }
+    const Pattern* pattern() const { return pattern_; }
+    Node* value() const { return value_; }
     
     virtual void trace(std::ostream& out) const;
     
-  private:
-    VariableNode(const SourcePos& pos, bool isMutable,
-                 gc<Pattern> pattern, gc<Node> value);
-    
+  private:    
     bool isMutable_;
-    gc<Pattern> pattern_;
-    gc<Node> value_;
+    Pattern* pattern_;
+    Node* value_;
   };
   
   // Base class for all AST pattern node classes.
-  class Pattern : public Managed
+  class Pattern
   {
   public:
     virtual ~Pattern() {}
@@ -305,7 +276,7 @@ namespace magpie
   class VariablePattern : public Pattern
   {
   public:
-    static temp<VariablePattern> create(gc<String> name);
+    VariablePattern(gc<String> name);
     
     DECLARE_PATTERN(VariablePattern);
     
@@ -315,9 +286,7 @@ namespace magpie
     
     virtual void trace(std::ostream& out) const;
     
-  private:
-    VariablePattern(gc<String> name);
-    
+  private:    
     gc<String> name_;
   };
 }

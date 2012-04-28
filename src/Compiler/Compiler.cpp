@@ -7,7 +7,7 @@
 
 namespace magpie
 {
-  void Compiler::compileModule(VM& vm, gc<ModuleAst> module,
+  void Compiler::compileModule(VM& vm, const ModuleAst* module,
                                ErrorReporter& reporter)
   {
     // Declare methods first so we can resolve mutually recursive calls.
@@ -20,6 +20,8 @@ namespace magpie
     // Try to compile all of the methods.
     for (int i = 0; i < module->methods().count(); i++)
     {
+      AllocScope scope;
+      
       const MethodAst& methodAst = *module->methods()[i];
       temp<Method> method = compileMethod(vm, methodAst, reporter);
 
@@ -58,7 +60,7 @@ namespace magpie
     locals_.add(String::create("(return)"));
     
     // TODO(bob): Hackish and temporary.
-    if (!method.parameter().isNull())
+    if (method.parameter() != NULL)
     {
       // Evaluate the method's parameter pattern.
       reserveVariables(method.parameter()->countVariables());
@@ -100,7 +102,7 @@ namespace magpie
                       node.name()->cString());
     }
     
-    ASSERT(node.leftArg().isNull(), "Left-hand arguments aren't supported yet.");
+    ASSERT(node.leftArg() == NULL, "Left-hand arguments aren't supported yet.");
     
     // Compile the argument. Do this even if the method wasn't found so we can
     // report errors in the arg expression too.

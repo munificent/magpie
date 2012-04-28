@@ -17,7 +17,7 @@ namespace magpie
   class Compiler : private NodeVisitor, private PatternVisitor
   {
   public:
-    static void compileModule(VM& vm, gc<ModuleAst> module,
+    static void compileModule(VM& vm, const ModuleAst* module,
                               ErrorReporter& reporter);
     static temp<Method> compileMethod(VM& vm, const MethodAst& method,
                                       ErrorReporter& reporter);

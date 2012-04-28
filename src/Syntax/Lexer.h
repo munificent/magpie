@@ -24,11 +24,11 @@ namespace magpie
 
     // Lexes and returns the next full Token read from the source. Handles
     // eliding newlines that should ignored.
-    temp<Token> readToken();
+    Token* readToken();
 
   private:
     // Reads a single token without and newline processing.
-    temp<Token> readRawToken();
+    Token* readRawToken();
     
     bool isDone() const;
 
@@ -41,16 +41,16 @@ namespace magpie
 
     char advance();
 
-    temp<Token> makeToken(TokenType type);
-    temp<Token> makeToken(TokenType type, gc<String> text);
-    temp<Token> error(gc<String> message);
+    Token* makeToken(TokenType type);
+    Token* makeToken(TokenType type, gc<String> text);
+    Token* error(gc<String> message);
     
     void skipLineComment();
     void skipBlockComment();
 
-    temp<Token> readName();
-    temp<Token> readNumber();
-    temp<Token> readString();
+    Token* readName();
+    Token* readNumber();
+    Token* readString();
 
     const char* fileName_;
     gc<String> source_;

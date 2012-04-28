@@ -22,11 +22,11 @@ namespace magpie
       reporter_(reporter)
     {}
     
-    temp<ModuleAst> parseModule();
+    ModuleAst* parseModule();
     
   private:
-    typedef temp<Node> (Parser::*PrefixParseFn)(temp<Token> token);
-    typedef temp<Node> (Parser::*InfixParseFn)(temp<Node> left, temp<Token> token);
+    typedef Node* (Parser::*PrefixParseFn)(Token* token);
+    typedef Node* (Parser::*InfixParseFn)(Node* left, Token* token);
     
     struct Parselet
     {
@@ -35,24 +35,24 @@ namespace magpie
       int           precedence;
     };
     
-    temp<Node> parseBlock();
-    temp<Node> statementLike();
+    Node* parseBlock();
+    Node* statementLike();
 
     // Parses an expression with the given precedence or higher.
-    temp<Node> parsePrecedence(int precedence = 0);
+    Node* parsePrecedence(int precedence = 0);
     
     // Prefix expression parsers.
-    temp<Node> boolean(temp<Token> token);
-    temp<Node> name(temp<Token> token);
-    temp<Node> number(temp<Token> token);
-    temp<Node> string(temp<Token> token);
+    Node* boolean(Token* token);
+    Node* name(Token* token);
+    Node* number(Token* token);
+    Node* string(Token* token);
 
     // Infix expression parsers.
-    temp<Node> binaryOp(temp<Node> left, temp<Token> token);
+    Node* binaryOp(Node* left, Token* token);
 
     // Pattern parsing.
-    temp<Pattern> parsePattern();
-    temp<Pattern> variablePattern();
+    Pattern* parsePattern();
+    Pattern* variablePattern();
 
     // Gets the Token the parser is currently looking at.
     const Token& current();
@@ -75,11 +75,11 @@ namespace magpie
     
     // TODO(bob): Return temp or gc?
     // Consumes the current Token and advances the Parser.
-    temp<Token> consume();
+    Token* consume();
     
     // Consumes the current Token if it matches the expected type.
     // Otherwise reports the given error message and returns a null temp.
-    temp<Token> consume(TokenType expected, const char* errorMessage);
+    Token* consume(TokenType expected, const char* errorMessage);
     
     // Gets whether or not any errors have been reported.
     bool hadError() const { return reporter_.numErrors() > 0; }
@@ -91,7 +91,7 @@ namespace magpie
     Lexer lexer_;
     
     // The 2 here is the maximum number of lookahead tokens.
-    Queue<gc<Token>, 2> read_;
+    Queue<Token*, 2> read_;
     
     ErrorReporter& reporter_;
     

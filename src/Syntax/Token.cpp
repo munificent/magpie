@@ -17,11 +17,11 @@ namespace magpie
     return SourcePos(file_, startLine_, startCol_, end.endLine_, end.endCol_);
   }
 
-  temp<Token> Token::create(TokenType type, gc<String> text,
-                            const SourcePos& pos)
-  {
-    return Memory::makeTemp(new Token(type, text, pos));
-  }
+  Token::Token(TokenType type, gc<String> text, const SourcePos& pos)
+  : type_(type),
+    text_(text),
+    pos_(pos)
+  {}
   
   const char* Token::typeString(TokenType type)
   {
@@ -76,32 +76,23 @@ namespace magpie
     }
   }
   
-  Token::Token(TokenType type, gc<String> text, const SourcePos& pos)
-  : type_(type),
-    text_(text),
-    pos_(pos)
-  {}
-  
-  void Token::reach()
+  std::ostream& operator <<(std::ostream& out, const Token& token)
   {
-    Memory::reach(text_);
-  }
-  
-  void Token::trace(std::ostream& out) const
-  {
-    switch (type_)
+    switch (token.type())
     {
       case TOKEN_NAME:
       case TOKEN_NUMBER:
       case TOKEN_STRING:
       case TOKEN_ERROR:
         // Show the text.
-        out << text_;
+        out << token.text();
         break;
       
       default:
         // It's a token type with a fixed text, so just use that.
-        out << typeString(type_);
+        out << Token::typeString(token.type());
     }
+    
+    return out;
   }
 }

@@ -7,12 +7,12 @@
 
 namespace magpie
 {
-  temp<Token> Lexer::readToken()
+  Token* Lexer::readToken()
   {
     while (true)
     {
       AllocScope scope;
-      temp<Token> token = readRawToken();
+      Token* token = readRawToken();
 
       switch (token->type())
       {
@@ -69,11 +69,11 @@ namespace magpie
           break;
       }
       
-      return scope.close(token);
+      return token;
     }
   }
   
-  temp<Token> Lexer::readRawToken()
+  Token* Lexer::readRawToken()
   {
     while (true)
     {
@@ -190,20 +190,20 @@ namespace magpie
     return c;
   }
 
-  temp<Token> Lexer::makeToken(TokenType type)
+  Token* Lexer::makeToken(TokenType type)
   {
     return makeToken(type, source_->substring(start_, pos_));
   }
   
-  temp<Token> Lexer::makeToken(TokenType type, gc<String> text)
+  Token* Lexer::makeToken(TokenType type, gc<String> text)
   {
     // TODO(bob): Include file name.
     SourcePos pos = SourcePos(fileName_,
         startRow_, startCol_, currentRow_, currentCol_);
-    return Token::create(type, text, pos);
+    return new Token(type, text, pos);
   }
   
-  temp<Token> Lexer::error(gc<String> message)
+  Token* Lexer::error(gc<String> message)
   {
     return makeToken(TOKEN_ERROR, message);
   }
@@ -245,7 +245,7 @@ namespace magpie
     }
   }
   
-  temp<Token> Lexer::readName()
+  Token* Lexer::readName()
   {
     // TODO(bob): Handle EOF.
     while (isName(peek())) advance();
@@ -278,7 +278,7 @@ namespace magpie
     return makeToken(type, text);
   }
 
-  temp<Token> Lexer::readNumber()
+  Token* Lexer::readNumber()
   {
     // TODO(bob): Handle EOF.
     while (isDigit(peek())) advance();
@@ -293,7 +293,7 @@ namespace magpie
     return makeToken(TOKEN_NUMBER);
   }
 
-  temp<Token> Lexer::readString()
+  Token* Lexer::readString()
   {
     Array<char> chars;
     while (true)

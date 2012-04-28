@@ -54,23 +54,21 @@ namespace magpie
     { NULL,                 NULL, -1 }                  // TOKEN_EOF
   };
 
-  temp<ModuleAst> Parser::parseModule()
+  ModuleAst* Parser::parseModule()
   {
     // TODO(bob): Right now this just returns a sequence. Should probably have
     // a different node type for the top level.
-    Array<gc<MethodAst> > methods;
+    Array<MethodAst*> methods;
     
     do
     {
-      AllocScope scope;
-      
       // Method definition.
       consume(TOKEN_DEF, "The top level of a module contains only method definitions.");
-      temp<Token> name = consume(TOKEN_NAME,
-                                 "Expect a method name after 'def'.");
+      Token* name = consume(TOKEN_NAME,
+                            "Expect a method name after 'def'.");
       
       // TODO(bob): Parse real pattern(s).
-      temp<Pattern> pattern;
+      Pattern* pattern = NULL;
       consume(TOKEN_LEFT_PAREN, "Temp.");
       if (lookAhead(TOKEN_NAME))
       {
@@ -78,22 +76,22 @@ namespace magpie
       }
       consume(TOKEN_RIGHT_PAREN, "Temp.");
       
-      temp<Node> body = parseBlock();
+      Node* body = parseBlock();
       
-      methods.add(scope.close(MethodAst::create(name->text(), pattern, body)));
+      methods.add(new MethodAst(name->text(), pattern, body));
     }
     while (match(TOKEN_LINE));
     
-    return ModuleAst::create(methods);
+    return new ModuleAst(methods);
   }
   
-  temp<Node> Parser::parseBlock()
+  Node* Parser::parseBlock()
   {
     // If we have a newline, then it's an actual block, otherwise it's a
     // single expression.
     if (match(TOKEN_LINE))
     {
-      Array<gc<Node> > exprs;
+      Array<Node*> exprs;
       
       do
       {
@@ -102,10 +100,11 @@ namespace magpie
       }
       while (match(TOKEN_LINE));
       
-      SourcePos span = exprs[0]->pos().spanTo(current().pos());
+      // If there is just one expression in the sequence, don't wrap it.
+      if (exprs.count() == 1) return exprs[0];
       
-      // TODO(bob): Don't wrap in a sequence if there's just one.
-      return SequenceNode::create(span, exprs);
+      SourcePos span = exprs[0]->pos().spanTo(current().pos());
+      return new SequenceNode(span, exprs);
     }
     else
     {
@@ -113,25 +112,23 @@ namespace magpie
     }
   }
 
-  temp<Node> Parser::statementLike()
+  Node* Parser::statementLike()
   {
-    AllocScope scope;
-    
     if (lookAhead(TOKEN_IF))
     {
       SourcePos start = consume()->pos();
       
-      temp<Node> condition = parsePrecedence();
+      Node* condition = parsePrecedence();
       consume(TOKEN_THEN, "Expect 'then' after 'if' condition.");
       
       // TODO(bob): Block bodies.
-      temp<Node> thenArm = parsePrecedence();
+      Node* thenArm = parsePrecedence();
       // TODO(bob): Allow omitting 'else'.
       consume(TOKEN_ELSE, "Expect 'else' after 'then' arm.");
-      temp<Node> elseArm = parsePrecedence();
+      Node* elseArm = parsePrecedence();
       
       SourcePos span = start.spanTo(current().pos());
-      return scope.close(IfNode::create(span, condition, thenArm, elseArm));
+      return new IfNode(span, condition, thenArm, elseArm);
     }
     
     if (lookAhead(TOKEN_VAR) || lookAhead(TOKEN_VAL))
@@ -141,32 +138,31 @@ namespace magpie
       // TODO(bob): Distinguish between var and val.
       bool isMutable = false;
       
-      temp<Pattern> pattern = parsePattern();
+      Pattern* pattern = parsePattern();
       consume(TOKEN_EQUALS, "Expect '=' after variable declaration.");
       // TODO(bob): What precedence?
-      temp<Node> value = parsePrecedence();
+      Node* value = parsePrecedence();
       
       SourcePos span = start.spanTo(current().pos());
-      return scope.close(VariableNode::create(span, isMutable, pattern, value));
+      return new VariableNode(span, isMutable, pattern, value);
     }
     
-    return scope.close(parsePrecedence());
+    return parsePrecedence();
   }
   
-  temp<Node> Parser::parsePrecedence(int precedence)
+  Node* Parser::parsePrecedence(int precedence)
   {
-    AllocScope scope;
-    temp<Token> token = consume();
+    Token* token = consume();
     PrefixParseFn prefix = expressions_[token->type()].prefix;
     
     if (prefix == NULL)
     {
       reporter_.error(token->pos(), "Unexpected token '%s'.",
-                      token->toString()->cString());
-      return temp<Node>();
+                      token->text()->cString());
+      return NULL;
     }
     
-    temp<Node> left = (this->*prefix)(token);
+    Node* left = (this->*prefix)(token);
     
     while (precedence < expressions_[current().type()].precedence)
     {
@@ -176,69 +172,67 @@ namespace magpie
       left = (this->*infix)(left, token);
     }
     
-    return scope.close(left);
+    return left;
   }
   
-  temp<Node> Parser::boolean(temp<Token> token)
+  Node* Parser::boolean(Token* token)
   {
-    return BoolNode::create(token->pos(), token->type() == TOKEN_TRUE);
+    return new BoolNode(token->pos(), token->type() == TOKEN_TRUE);
   }
   
-  temp<Node> Parser::name(temp<Token> token)
+  Node* Parser::name(Token* token)
   {
-    AllocScope scope;
-    
     // See if it's a method call like foo(arg).
     if (match(TOKEN_LEFT_PAREN))
     {
-      temp<Node> arg = parsePrecedence();
+      Node* arg = parsePrecedence();
       consume(TOKEN_RIGHT_PAREN, "Expect ')' after call argument.");
 
       SourcePos span = token->pos().spanTo(current().pos());
-      return scope.close(CallNode::create(span, gc<Node>(), token->text(), arg));
+      return new CallNode(span, NULL, token->text(), arg);
     }
     else
     {
       // Just a bare name.
-      return scope.close(NameNode::create(token->pos(), token->text()));
+      return new NameNode(token->pos(), token->text());
     }
   }
   
-  temp<Node> Parser::number(temp<Token> token)
+  Node* Parser::number(Token* token)
   {
     double number = atof(token->text()->cString());
-    return NumberNode::create(token->pos(), number);
+    return new NumberNode(token->pos(), number);
   }
 
-  temp<Node> Parser::string(temp<Token> token)
+  Node* Parser::string(Token* token)
   {
-    return StringNode::create(token->pos(), token->text());
+    return new StringNode(token->pos(), token->text());
   }
   
-  temp<Node> Parser::binaryOp(temp<Node> left, temp<Token> token)
+  Node* Parser::binaryOp(Node* left, Token* token)
   {
     // TODO(bob): Support right-associative infix. Needs to do precedence
     // - 1 here, to be right-assoc.
-    temp<Node> right = parsePrecedence(expressions_[token->type()].precedence);
+    Node* right = parsePrecedence(expressions_[token->type()].precedence);
     
-    return BinaryOpNode::create(token->pos(), left, token->type(), right);
+    return new BinaryOpNode(token->pos(), left, token->type(), right);
   }
   
-  temp<Pattern> Parser::parsePattern()
+  Pattern* Parser::parsePattern()
   {
     return variablePattern();
   }
   
-  temp<Pattern> Parser::variablePattern()
+  Pattern* Parser::variablePattern()
   {
     if (lookAhead(TOKEN_NAME))
     {
-      return VariablePattern::create(consume()->text());
+      return new VariablePattern(consume()->text());
     }
     else
     {
       reporter_.error(current().pos(), "Expected pattern.");
-      return temp<Pattern>();
+      return NULL;
     }
   }
   
@@ -278,19 +272,21 @@ namespace magpie
     if (!lookAhead(expected)) reporter_.error(current().pos(), errorMessage);
   }
 
-  temp<Token> Parser::consume()
+  Token* Parser::consume()
   {
     fillLookAhead(1);
-    // TODO(bob): Is making a temp here right?
-    return Memory::makeTemp(&(*read_.dequeue()));
+    // TODO(bob): Memory leak! Tokens aren't being deleted after being consumed.
+    // Either make sure they get deleted, or switch to a zone allocator.
+    return read_.dequeue();
   }
 
-  temp<Token> Parser::consume(TokenType expected, const char* errorMessage)
+  Token* Parser::consume(TokenType expected, const char* errorMessage)
   {
     if (lookAhead(expected)) return consume();
 
+    std::cout << current() << std::endl;
     reporter_.error(current().pos(), errorMessage);
-    return temp<Token>();
+    return NULL;
   }
 
   void Parser::fillLookAhead(int count)
