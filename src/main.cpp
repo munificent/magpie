@@ -59,8 +59,7 @@ int main(int argc, char * const argv[])
   // Invoke main().
   if (reporter.numErrors() == 0)
   {
-    gc<Method> method = vm.methods().findMain();
-    gc<Object> result = vm.fiber().interpret(method);
+    gc<Object> result = vm.run();
     cout << result << endl;
   }
   

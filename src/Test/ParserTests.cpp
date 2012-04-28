@@ -13,16 +13,19 @@ namespace magpie
 
   void ParserTests::parseModule()
   {
-    AllocScope scope;
-
-    temp<String> source = String::create("def foo()\n1+2*3 and 4/5+6%7\nend");
+    gc<String> source = String::create("def foo()\n1+2*3 and 4/5+6%7\nend");
     ErrorReporter reporter;
-    Parser parser(gc<String>(), source, reporter);
-    temp<ModuleAst> module = parser.parseModule();
+    Parser parser("", source, reporter);
+    ModuleAst* module = parser.parseModule();
     
-    temp<String> text = module->toString();
+    // TODO(bob): Re-enable once AST supports pretty-printing again.
+    /*
+    gc<String> text = module->toString();
     
     EXPECT_EQUAL("((1 + (2 * 3)) and ((4 / 5) + (6 % 7)))", *text);
+    */
+    
+    delete module;
   }
 }
 

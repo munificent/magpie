@@ -15,10 +15,8 @@ namespace magpie
 
   void StringTests::create()
   {
-    AllocScope scope;
-
-    temp<String> s1 = String::create("some text");
-    temp<String> s2 = String::create("more");
+    gc<String> s1 = String::create("some text");
+    gc<String> s2 = String::create("more");
 
     EXPECT_EQUAL(9, s1->length());
     EXPECT_EQUAL("some text", *s1);
@@ -29,9 +27,7 @@ namespace magpie
 
   void StringTests::subscript()
   {
-    AllocScope scope;
-
-    temp<String> s = String::create("abcd");
+    gc<String> s = String::create("abcd");
 
     EXPECT_EQUAL('a', (*s)[0]);
     EXPECT_EQUAL('b', (*s)[1]);
@@ -41,11 +37,9 @@ namespace magpie
 
   void StringTests::equals()
   {
-    AllocScope scope;
-
-    temp<String> s = String::create("something");
-    temp<String> same = String::create("something");
-    temp<String> different = String::create("different");
+    gc<String> s = String::create("something");
+    gc<String> same = String::create("something");
+    gc<String> different = String::create("different");
 
     // String to C-string.
     EXPECT(*s == "something");
@@ -66,7 +60,7 @@ namespace magpie
     EXPECT("else" != *s);
 
     // Make sure substrings don't appear equal.
-    temp<String> s2 = String::create("abc");
+    gc<String> s2 = String::create("abc");
 
     EXPECT_FALSE("abcd" == *s2);
     EXPECT_FALSE(*s2 == "abcd");
@@ -76,12 +70,10 @@ namespace magpie
 
   void StringTests::substring()
   {
-    AllocScope scope;
-
-    temp<String> s = String::create("abcdef");
+    gc<String> s = String::create("abcdef");
 
     // Zero-length.
-    temp<String> sub = s->substring(3, 3);
+    gc<String> sub = s->substring(3, 3);
     EXPECT_EQUAL("", *sub);
 
     // From beginning.

@@ -13,25 +13,24 @@ namespace magpie
 
   void TokenTests::create()
   {
-    AllocScope scope;
-
-    temp<String> file = String::create("filename");
-    temp<String> text = String::create("foo");
-    temp<Token> token = Token::create(TOKEN_NAME, text, gc<SourcePos>());
+    gc<String> text = String::create("foo");
+    Token* token = new Token(TOKEN_NAME, text, SourcePos("", -1, -1, -1, -1));
 
     EXPECT_EQUAL(TOKEN_NAME, token->type());
     EXPECT_EQUAL("foo", *token->text());
+    
+    delete token;
   }
   
   void TokenTests::is()
   {
-    AllocScope scope;
-    
-    temp<String> text = String::create("foo");
-    temp<Token> token = Token::create(TOKEN_NAME, text, gc<SourcePos>());
+    gc<String> text = String::create("foo");
+    Token* token = new Token(TOKEN_NAME, text, SourcePos("", -1, -1, -1, -1));
     
     EXPECT(token->is(TOKEN_NAME));
     EXPECT_FALSE(token->is(TOKEN_NUMBER));
+    
+    delete token;
   }
 }
 

@@ -15,8 +15,9 @@ namespace magpie
   public:
     Fiber(VM& vm);
     
-    gc<Object> interpret(gc<Method> method);
-    
+    void init(gc<Method> method);
+    gc<Object> run();
+
     virtual void reach();
     
   private:
@@ -40,7 +41,6 @@ namespace magpie
       int         stackStart;
     };
     
-    gc<Object> run();
     void call(gc<Method> method, int stackStart, gc<Object> arg);
     
     // Loads a register for the given callframe.

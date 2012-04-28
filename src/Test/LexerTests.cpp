@@ -13,12 +13,10 @@ namespace magpie
 
   void LexerTests::create()
   {
-    AllocScope scope;
+    gc<String> source = String::create("()[]{}");
+    Lexer lexer("", source);
 
-    temp<String> source = String::create("()[]{}");
-    Lexer lexer(temp<String>(), source);
-
-    temp<Token> token = lexer.readToken();
+    Token* token = lexer.readToken();
     EXPECT_EQUAL(TOKEN_LEFT_PAREN, token->type());
     EXPECT_EQUAL("(", *token->text());
 
@@ -45,12 +43,10 @@ namespace magpie
   
   void LexerTests::stringLiteral()
   {
-    AllocScope scope;
-
-    temp<String> source = String::create("\"st\\nr\"");
-    Lexer lexer(temp<String>(), source);
+    gc<String> source = String::create("\"st\\nr\"");
+    Lexer lexer("", source);
     
-    temp<Token> token = lexer.readToken();
+    Token* token = lexer.readToken();
     EXPECT_EQUAL(TOKEN_STRING, token->type());
     EXPECT_EQUAL("st\nr", *token->text());
   }

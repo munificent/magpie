@@ -89,6 +89,8 @@ namespace magpie
   class Token
   {
   public:
+    // TODO(bob): Need to do something better for the strings here. Since the
+    // Token class isn't GC'd, it can't point to stuff that is.
     Token(TokenType type, gc<String> text, const SourcePos& pos);
     
     static const char* typeString(TokenType type);

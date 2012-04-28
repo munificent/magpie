@@ -232,6 +232,7 @@ namespace magpie
     static void initialize(RootSource* roots, size_t heapSize);
     static void shutDown();
     
+    static bool checkCollect();
     static void collect();
 
     static void* allocate(size_t size);

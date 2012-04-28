@@ -17,6 +17,8 @@ namespace magpie
   class Parser
   {
   public:
+    // TODO(bob): Need to do something better for the strings here. Since the
+    // Parser class isn't GC'd, it can't point to stuff that is.
     Parser(const char* fileName, gc<String> source, ErrorReporter& reporter)
     : lexer_(fileName, source),
       reporter_(reporter)

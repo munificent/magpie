@@ -15,6 +15,8 @@ namespace magpie
   public:
     VM();
 
+    gc<Object> run();
+    
     virtual void reachRoots();
 
     Fiber& fiber() { return *fiber_; }

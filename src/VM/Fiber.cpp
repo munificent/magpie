@@ -12,32 +12,24 @@ namespace magpie
     callFrames_()
   {}
 
-  gc<Object> Fiber::interpret(gc<Method> method)
+  void Fiber::init(gc<Method> method)
   {
+    ASSERT(stack_.count() == 0, "Cannot re-initialize Fiber.");
+    ASSERT(callFrames_.count() == 0, "Cannot re-initialize Fiber.");
+
     // TODO(bob): What should the arg object be here?
     call(method, 0, gc<Object>());
-    return run();
-  }
-  
-  void Fiber::reach()
-  {
-    Memory::reach(stack_);
-    for (int i = 0; i < callFrames_.count(); i++)
-    {
-      Memory::reach(callFrames_[i].method);
-    }
   }
 
   gc<Object> Fiber::run()
   {
-    int ip = 0;
-    bool running = true;
-    while (running)
+    while (true)
     {
+      if (Memory::checkCollect()) return gc<Object>();
+      
       CallFrame& frame = callFrames_[-1];
-      instruction ins = frame.method->code()[ip];
+      instruction ins = frame.method->code()[frame.ip++];
       OpCode op = GET_OP(ins);
-      ip++;
 
       switch (op)
       {
@@ -61,8 +53,6 @@ namespace magpie
         {
           bool value = GET_A(ins) == 1;
           int reg = GET_B(ins);
-          // TODO(bob): Should just create singleton instances of true and false
-          // and reuse them.
           store(frame, reg, vm_.getBool(value));
           break;
         }
@@ -78,12 +68,8 @@ namespace magpie
             gc<Object> result = primitive(arg);
             store(frame, GET_B(ins), result);
           } else {
-            // Store the IP back into the callframe so we know where to resume
-            // when we return to it.
-            frame.ip = ip;
-            ip = 0;
-            
-            call(method, stack_.count() - 1, arg);
+            int stackStart = frame.stackStart + frame.method->numRegisters();
+            call(method, stackStart, arg);
           }
           break;
         }
@@ -97,9 +83,7 @@ namespace magpie
           {
             // Give the result back and resume the calling method.
             CallFrame& caller = callFrames_[-1];
-            ip = caller.ip;
-
-            instruction callInstruction = caller.method->code()[ip - 1];
+            instruction callInstruction = caller.method->code()[caller.ip - 1];
             ASSERT(GET_OP(callInstruction) == OP_CALL,
                    "Should be returning to a call.");
             
@@ -108,7 +92,6 @@ namespace magpie
           else
           {
             // The last method has returned, so end the fiber.
-            running = false;
             return result;
           }
           break;
@@ -176,7 +159,7 @@ namespace magpie
         case OP_JUMP:
         {
           int offset = GET_A(ins);
-          ip += offset;
+          frame.ip += offset;
           break;
         }
           
@@ -186,7 +169,7 @@ namespace magpie
           if (!a->toBool())
           {
             int offset = GET_B(ins);
-            ip += offset;
+            frame.ip += offset;
           }
           break;
         }
@@ -201,10 +184,25 @@ namespace magpie
     return gc<Object>();
   }
   
+  void Fiber::reach()
+  {
+    // Only reach registers that are still in use. We don't shrink the stack,
+    // so it may have dead registers at the end that are safe to collect.
+    CallFrame& frame = callFrames_[-1];
+    int numRegisters = frame.stackStart + frame.method->numRegisters();
+    for (int i = 0; i < numRegisters; i++)
+    {
+      Memory::reach(stack_[i]);
+    }
+    
+    for (int i = 0; i < callFrames_.count(); i++)
+    {
+      Memory::reach(callFrames_[i].method);
+    }
+  }
+  
   void Fiber::call(gc<Method> method, int stackStart, gc<Object> arg)
   {
-    //std::cout << "call " << method->name() << std::endl;
-    
     // Allocate registers for the method.
     // TODO(bob): Make this a single operation on Array.
     while (stack_.count() < stackStart + method->numRegisters())

@@ -44,8 +44,21 @@ namespace magpie
     b_.shutDown();
   }
 
+  bool Memory::checkCollect()
+  {
+    // Don't collect if we've got room.
+    // TODO(bob): Tune this. It basically needs to be the maximum amount of
+    // memory we could want to allocate between calls to checkCollect().
+    if (from_->amountFree() > 1024) return false;
+    
+    collect();
+    return true;
+  }
+  
   void Memory::collect()
   {
+    size_t freeBefore = from_->amountFree();
+    
     // TODO(bob): There is a significant bug here. When objects are moved,
     // every temp<T> on the stack is fixed. Every gc<T> stored in an object is
     // fixed. However, there's (at least) one big missing piece: this. The
@@ -94,21 +107,39 @@ namespace magpie
     to_ = temp;
     
     numCollections_++;
+    
+    if (freeBefore >= from_->amountFree())
+    {
+      // TODO(bob): Do something more graceful here.
+      std::cout << "Out of memory. Only " << from_->amountFree()
+                << " bytes available after garbage collection." << std::endl;
+      exit(-1);
+    }
+    
+    /*
+    std::cout << "GC collect " << numCollections_
+              << ", free before " << freeBefore
+              << ", after " << from_->amountFree()
+              << ", reclaimed " << (from_->amountFree() - freeBefore)
+              << "." << std::endl;
+    */
   }
   
   void* Memory::allocate(size_t size)
   {
     if (!from_->canAllocate(size))
     {
-      std::cout << "Oh, dear. Out of memory." << std::endl;
+      // TODO(bob): Do something better here. We don't trigger a GC here right
+      // now because we want to ensure that GC (which involves moving objects)
+      // only happens at well-defined points where we know there aren't any
+      // references to GC objects on the stack. Right now, we don't support
+      // tracking temporaries like that, so instead we just call checkCollect()
+      // at a point in time when we know there aren't any to worry about.
+      std::cout << "Out of memory. Need " << size << " and only "
+                << from_->amountFree() << " available." << std::endl;
       exit(-1);
-      /*
-      // Heap is full, so trigger a GC.
-      collect();
-     */
     }
     
-    // TODO(bob): Handle failure.
     return from_->allocate(size);
   }
   

@@ -10,6 +10,8 @@ namespace magpie
   class Lexer
   {
   public:
+    // TODO(bob): Need to do something better for the strings here. Since the
+    // Lexer class isn't GC'd, it can't point to stuff that is.
     Lexer(const char* fileName, gc<String> source)
     : fileName_(fileName),
       source_(source),
