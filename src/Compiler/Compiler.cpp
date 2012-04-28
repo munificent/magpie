@@ -20,10 +20,8 @@ namespace magpie
     // Try to compile all of the methods.
     for (int i = 0; i < module->methods().count(); i++)
     {
-      AllocScope scope;
-      
       const MethodAst& methodAst = *module->methods()[i];
-      temp<Method> method = compileMethod(vm, methodAst, reporter);
+      gc<Method> method = compileMethod(vm, methodAst, reporter);
 
       // Bail if there was a compile error.
       if (method.isNull()) return;
@@ -32,7 +30,7 @@ namespace magpie
     }
   }
   
-  temp<Method> Compiler::compileMethod(VM& vm, const MethodAst& methodAst,
+  gc<Method> Compiler::compileMethod(VM& vm, const MethodAst& methodAst,
                                        ErrorReporter& reporter)
   {
     Compiler compiler(vm, reporter);
@@ -51,7 +49,7 @@ namespace magpie
     maxRegisters_(0)
   {}
 
-  temp<Method> Compiler::compile(const MethodAst& method)
+  gc<Method> Compiler::compile(const MethodAst& method)
   {
     // Create a register for the argument and result value.
     int result = allocateRegister();
@@ -70,7 +68,7 @@ namespace magpie
     method.body().accept(*this, result);
     write(OP_END, result);
     
-    return Method::create(method.name(), code_, constants_, maxRegisters_);
+    return new Method(method.name(), code_, constants_, maxRegisters_);
   }
   
   void Compiler::visit(const BinaryOpNode& node, int dest)
@@ -242,7 +240,7 @@ namespace magpie
   
   int Compiler::compileConstant(const NumberNode& node)
   {
-    temp<NumberObject> constant = Object::create(node.value());
+    gc<Object> constant = new NumberObject(node.value());
     
     // TODO(bob): Should check for duplicates. Only need one copy of any
     // given constant.
@@ -252,7 +250,7 @@ namespace magpie
   
   int Compiler::compileConstant(const StringNode& node)
   {
-    temp<StringObject> constant = Object::create(node.value());
+    gc<Object> constant = new StringObject(node.value());
     
     // TODO(bob): Should check for duplicates. Only need one copy of any
     // given constant.

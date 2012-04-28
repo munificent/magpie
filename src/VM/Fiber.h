@@ -13,9 +13,9 @@ namespace magpie
   class Fiber : public Managed
   {
   public:
-    static temp<Fiber> create(VM& vm);
+    Fiber(VM& vm);
     
-    temp<Object> interpret(gc<Method> method);
+    gc<Object> interpret(gc<Method> method);
     
     virtual void reach();
     
@@ -40,9 +40,7 @@ namespace magpie
       int         stackStart;
     };
     
-    Fiber(VM& vm);
-    
-    temp<Object> run();
+    gc<Object> run();
     void call(gc<Method> method, int stackStart, gc<Object> arg);
     
     // Loads a register for the given callframe.

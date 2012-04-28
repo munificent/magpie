@@ -6,7 +6,7 @@
 
 namespace magpie
 {
-  temp<String> Managed::toString() const
+  gc<String> Managed::toString() const
   {
     // TODO(bob): Hackish, but handy for debugging.
     std::stringstream result;

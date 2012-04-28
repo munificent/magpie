@@ -4,20 +4,6 @@
 
 namespace magpie
 {
-  temp<Method> Method::create(gc<String> name,
-                              const Array<instruction>& code,
-                              const Array<gc<Object> >& constants,
-                              int numRegisters)
-  {
-    return Memory::makeTemp(new Method(name, code, constants, numRegisters));
-  }
-
-  temp<Method> Method::create(gc<String> name,
-                              Primitive primitive)
-  {
-    return Memory::makeTemp(new Method(name, primitive));
-  }
-  
   gc<Object> Method::getConstant(int index) const
   {
     ASSERT_INDEX(index, constants_.count());
@@ -117,7 +103,7 @@ namespace magpie
   void MethodScope::define(gc<String> name, Primitive primitive)
   {
     names_.add(name);
-    methods_.add(Method::create(name, primitive));
+    methods_.add(new Method(name, primitive));
   }
   
   int MethodScope::find(gc<String> name) const

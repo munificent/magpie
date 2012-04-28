@@ -11,7 +11,6 @@ namespace magpie
   {
     while (true)
     {
-      AllocScope scope;
       Token* token = readRawToken();
 
       switch (token->type())
@@ -250,7 +249,7 @@ namespace magpie
     // TODO(bob): Handle EOF.
     while (isName(peek())) advance();
 
-    temp<String> text = source_->substring(start_, pos_);
+    gc<String> text = source_->substring(start_, pos_);
 
     // See if it's a reserved word.
     TokenType type = TOKEN_NAME;
@@ -306,7 +305,7 @@ namespace magpie
       char c = advance();
       if (c == '"')
       {
-        temp<String> text = String::create(chars);
+        gc<String> text = String::create(chars);
         return makeToken(TOKEN_STRING, text);
       }
       

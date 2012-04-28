@@ -16,13 +16,22 @@ namespace magpie
   class Method : public Managed
   {
   public:
-    static temp<Method> create(gc<String> name,
-                               const Array<instruction>& code,
-                               const Array<gc<Object> >& constants,
-                               int numRegisters);
-
-    static temp<Method> create(gc<String> name,
-                               Primitive primitive);
+    Method(gc<String> name, const Array<instruction>& code,
+           const Array<gc<Object> >& constants, int numRegisters)
+    : name_(name),
+      code_(code),
+      constants_(constants),
+      numRegisters_(numRegisters),
+      primitive_(NULL)
+    {}
+    
+    Method(gc<String> name, Primitive primitive)
+    : name_(name),
+      code_(),
+      constants_(),
+      numRegisters_(0),
+      primitive_(primitive)
+    {}
     
     gc<String> name() const { return name_; }
     inline const Array<instruction>& code() const { return code_; }
@@ -38,23 +47,6 @@ namespace magpie
     virtual void reach();
     
   private:
-    Method(gc<String> name, const Array<instruction>& code,
-           const Array<gc<Object> >& constants, int numRegisters)
-    : name_(name),
-      code_(code),
-      constants_(constants),
-      numRegisters_(numRegisters),
-      primitive_(NULL)
-    {}
-
-    Method(gc<String> name, Primitive primitive)
-    : name_(name),
-      code_(),
-      constants_(),
-      numRegisters_(0),
-      primitive_(primitive)
-    {}
-    
     gc<String>         name_;
     Array<instruction> code_;
     Array<gc<Object> > constants_;

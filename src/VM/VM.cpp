@@ -3,10 +3,7 @@
 #include "Primitives.h"
 
 #define DEF_PRIMITIVE(name) \
-        { \
-          temp<String> primName = String::create(#name); \
-          methods_.define(primName, name##Primitive); \
-        }
+        methods_.define(String::create(#name), name##Primitive); \
 
 namespace magpie
 {
@@ -15,16 +12,12 @@ namespace magpie
   {
     Memory::initialize(this, 1024 * 1024 * 10); // TODO(bob): Use non-magic number.
     
-    AllocScope scope;
-    fiber_ = Fiber::create(*this);
+    fiber_ = new Fiber(*this);
     
     DEF_PRIMITIVE(print);
     
-    // TODO(bob): Get rid of this nasty conversion problem.
-    temp<Object> trueTemp = BoolObject::create(true);
-    temp<Object> falseTemp = BoolObject::create(false);
-    true_ = trueTemp;
-    false_ = falseTemp;
+    true_ = new BoolObject(true);
+    false_ = new BoolObject(false);
   }
 
   void VM::reachRoots()

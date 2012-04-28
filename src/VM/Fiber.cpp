@@ -6,18 +6,13 @@
 
 namespace magpie
 {
-  temp<Fiber> Fiber::create(VM& vm)
-  {
-    return Memory::makeTemp(new Fiber(vm));
-  }
-  
   Fiber::Fiber(VM& vm)
   : vm_(vm),
     stack_(),
     callFrames_()
   {}
 
-  temp<Object> Fiber::interpret(gc<Method> method)
+  gc<Object> Fiber::interpret(gc<Method> method)
   {
     // TODO(bob): What should the arg object be here?
     call(method, 0, gc<Object>());
@@ -33,13 +28,12 @@ namespace magpie
     }
   }
 
-  temp<Object> Fiber::run()
+  gc<Object> Fiber::run()
   {
     int ip = 0;
     bool running = true;
     while (running)
     {
-      AllocScope scope;
       CallFrame& frame = callFrames_[-1];
       instruction ins = frame.method->code()[ip];
       OpCode op = GET_OP(ins);
@@ -115,7 +109,7 @@ namespace magpie
           {
             // The last method has returned, so end the fiber.
             running = false;
-            return result.toTemp();
+            return result;
           }
           break;
         }
@@ -127,7 +121,7 @@ namespace magpie
           
           // TODO(bob): Handle non-number types.
           double c = a->toNumber() + b->toNumber();
-          temp<Object> num = Object::create(c);
+          gc<Object> num = new NumberObject(c);
           store(frame, GET_C(ins), num);
           break;
         }
@@ -139,7 +133,7 @@ namespace magpie
           
           // TODO(bob): Handle non-number types.
           double c = a->toNumber() - b->toNumber();
-          temp<Object> num = Object::create(c);
+          gc<Object> num = new NumberObject(c);
           store(frame, GET_C(ins), num);
           break;
         }
@@ -151,7 +145,7 @@ namespace magpie
           
           // TODO(bob): Handle non-number types.
           double c = a->toNumber() * b->toNumber();
-          temp<Object> num = Object::create(c);
+          gc<Object> num = new NumberObject(c);
           store(frame, GET_C(ins), num);
           break;
         }
@@ -163,7 +157,7 @@ namespace magpie
           
           // TODO(bob): Handle non-number types.
           double c = a->toNumber() / b->toNumber();
-          temp<Object> num = Object::create(c);
+          gc<Object> num = new NumberObject(c);
           store(frame, GET_C(ins), num);
           break;
         }
@@ -204,7 +198,7 @@ namespace magpie
     }
     
     ASSERT(false, "Should not get here.");
-    return temp<Object>();
+    return gc<Object>();
   }
   
   void Fiber::call(gc<Method> method, int stackStart, gc<Object> arg)

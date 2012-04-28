@@ -15,15 +15,15 @@ namespace magpie
     // Creates a new heap-allocated string containing the given characters.
     // If the length is known (or you want to truncate `text`), it can be passed
     // in. Otherwise omit it and it will be calculated from `text`.
-    static temp<String> create(const char* text, int length = -1);
+    static gc<String> create(const char* text, int length = -1);
 
     // Creates a new heap-allocated string containing the given array of
     // characters.
-    static temp<String> create(const Array<char>& text);
+    static gc<String> create(const Array<char>& text);
     
     // Creates a new string using the given C-style format string and a
     // number of arguments to be formatted.
-    static temp<String> format(const char* format, ...);
+    static gc<String> format(const char* format, ...);
     
     // Gets the character at the given index.
     const char operator [](int index) const;
@@ -47,7 +47,7 @@ namespace magpie
     // Creates a new string containing a substring of this one. `start` is the
     // index of the first character and `end` is the index of just past the
     // the last character to include in the substring.
-    temp<String> substring(int start, int end) const;
+    gc<String> substring(int start, int end) const;
 
     virtual void trace(std::ostream& out) const;
 

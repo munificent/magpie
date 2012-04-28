@@ -17,7 +17,7 @@ namespace magpie
 
     virtual ~Managed() {}
 
-    temp<String> toString() const;
+    gc<String> toString() const;
     
     // Gets the forwarding pointer that this object has been replaced with if
     // it has been. Otherwise returns NULL.

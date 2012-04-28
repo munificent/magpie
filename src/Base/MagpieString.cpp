@@ -7,7 +7,7 @@
 
 namespace magpie
 {
-  temp<String> String::create(const char* text, int length)
+  gc<String> String::create(const char* text, int length)
   {
     if (length == -1) length = strlen(text);
 
@@ -15,7 +15,7 @@ namespace magpie
     void* mem = Memory::allocate(calcStringSize(length));
     
     // Construct it by calling global placement new.
-    temp<String> string = Memory::makeTemp(::new(mem) String(length));
+    gc<String> string = ::new(mem) String(length);
     
     strncpy(string->chars_, text, length);
 
@@ -26,13 +26,13 @@ namespace magpie
     return string;
   }
   
-  temp<String> String::create(const Array<char>& text)
+  gc<String> String::create(const Array<char>& text)
   {
     // Allocate enough memory for the string and its character array.
     void* mem = Memory::allocate(calcStringSize(text.count()));
     
     // Construct it by calling global placement new.
-    temp<String> string = Memory::makeTemp(::new(mem) String(text.count()));
+    gc<String> string = ::new(mem) String(text.count());
     
     for (int i = 0; i < text.count(); i++) {
       string->chars_[i] = text[i];
@@ -44,7 +44,7 @@ namespace magpie
     return string;
   }
   
-  temp<String> String::format(const char* format, ...)
+  gc<String> String::format(const char* format, ...)
   {
     char result[FORMATTED_STRING_MAX];
     
@@ -102,7 +102,7 @@ namespace magpie
     return chars_;
   }
 
-  temp<String> String::substring(int start, int end) const
+  gc<String> String::substring(int start, int end) const
   {
     ASSERT_INDEX(start, length());
     ASSERT_INDEX(end, length() + 1); // End is past the last character.

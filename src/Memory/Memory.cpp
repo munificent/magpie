@@ -10,9 +10,11 @@ namespace magpie
   RootSource* Memory::roots_ = NULL;
   Semispace Memory::a_;
   Semispace Memory::b_;
+  /*
   AllocScope* Memory::currentScope_ = NULL;
   gc<Managed> Memory::temps_[Memory::MAX_TEMPS];
   int Memory::numTemps_ = 0;
+   */
   int Memory::numCollections_ = 0;
   Semispace* Memory::to_ = NULL;
   Semispace* Memory::from_ = NULL;
@@ -27,7 +29,9 @@ namespace magpie
     b_.initialize(heapSize);
     to_ = &a_;
     from_ = &b_;
+    /*
     numTemps_ = 0;
+     */
     numCollections_ = 0;
   }
   
@@ -61,11 +65,13 @@ namespace magpie
     // Then bad things happen because you're accessing memory in the dead
     // semispace, not the current one.
     
+    /*
     // Copy the active temps to to-space.
     for (int i = 0; i < numTemps_; i++)
     {
       reach(temps_[i]);
     }
+    */
     
     // Copy the roots to to-space.
     roots_->reachRoots();
@@ -94,8 +100,12 @@ namespace magpie
   {
     if (!from_->canAllocate(size))
     {
+      std::cout << "Oh, dear. Out of memory." << std::endl;
+      exit(-1);
+      /*
       // Heap is full, so trigger a GC.
       collect();
+     */
     }
     
     // TODO(bob): Handle failure.
@@ -135,6 +145,7 @@ namespace magpie
     }
   }
 
+  /*
   void Memory::pushScope(AllocScope* scope)
   {
     ASSERT_NOT_NULL(scope);
@@ -147,14 +158,13 @@ namespace magpie
     ASSERT_NOT_NULL(currentScope_);
 
     // Clear out the popped temps to help track down GC bugs.
-    /*
     for (int i = currentScope_->numTempsBefore_; i < numTemps_; i++)
     {
       temps_[i] = gc<Managed>();
     }
-    */
 
     numTemps_ = currentScope_->numTempsBefore_;
     currentScope_ = currentScope_->previous_;
   }
+   */
 }

@@ -44,6 +44,7 @@ namespace magpie
   // wrapped object (i.e. it's a pointer to a pointer). This ensures that it
   // can maintain a reference even if the underlying object is moved by the
   // GC.
+  /*
   template <class T>
   class temp
   {    
@@ -112,6 +113,7 @@ namespace magpie
     }
     return out;
   };
+  */
   
   // A rooted reference to an object in the managed heap. Use this type to hold
   // reachable references to GC objects. Mainly, this means that fields of
@@ -122,7 +124,7 @@ namespace magpie
   {
   public:
     // Constructs a new gc pointer.
-    explicit gc(T* object)
+    gc(T* object)
     : GcBase(object)
     {}
     
@@ -135,12 +137,20 @@ namespace magpie
     : GcBase(object.object_)
     {}
     
+    /*
     // You can promote a temp to a gc.
     template <class S>
     gc(const temp<S>& object)
     : GcBase(object.isNull() ? NULL : object.object_->object_)
     {
       CHECK_SUBTYPE(T, S);
+    }
+    */
+    
+    gc<T>& operator =(T* right)
+    {
+      object_ = right;
+      return *this;
     }
     
     gc<T>& operator =(const gc<T>& right)
@@ -149,11 +159,13 @@ namespace magpie
       return *this;
     }
     
+    /*
     gc<T>& operator =(const temp<T>& right)
     {
       object_ = right.object_->object_;
       return *this;
     }
+    */
     
     T& operator *() const { return *static_cast<T*>(object_); }
     T* operator ->() const { return static_cast<T*>(object_); }
@@ -180,7 +192,9 @@ namespace magpie
       return !(this == other);
     }
     
+    /*
     temp<T> toTemp() const;
+    */
     
     void set(T* object)
     {
@@ -202,15 +216,18 @@ namespace magpie
     return out;
   };
 
+  /*
   class AllocScope;
+   */
   class RootSource;
 
   // The dynamic memory manager. Uses Cheney-style semi-space copying for
   // garbage collection.
   class Memory
   {
+    /*
     friend class AllocScope;
-
+    */
   public:
     static void initialize(RootSource* roots, size_t heapSize);
     static void shutDown();
@@ -221,6 +238,7 @@ namespace magpie
 
     static int numCollections() { return numCollections_; }
     
+    /*
     template <class T>
     static temp<T> makeTemp(T* object)
     {
@@ -242,6 +260,7 @@ namespace magpie
       gc<Managed>* tempSlot = &temps_[numTemps_++];
       return temp<T>(tempSlot);
     }
+    */
     
     // Indicates that the given object is reachable and should be preserved
     // during garbage collection.
@@ -265,16 +284,19 @@ namespace magpie
     }
     
   private:
+    /*
     static const int MAX_TEMPS = 128; // TODO(bob): Pick less random number.
-
+    */
     // If the pointed-to object is in from-space, copies it to to-space and
     // leaves a forwarding pointer. If it's a forwarding pointer already, just
     // updates the reference. Returns the new address of the object.
     static Managed* copy(Managed* obj);
 
+    /*
     static void pushScope(AllocScope* scope);
     static void popScope();
-
+     */
+    
     static RootSource*  roots_;
 
     // Pointers to a and b. These will swap back and forth on each collection.
@@ -285,12 +307,15 @@ namespace magpie
     static Semispace a_;
     static Semispace b_;
 
+    /*
     static AllocScope* currentScope_;
     static gc<Managed> temps_[MAX_TEMPS];
     static int numTemps_;
+     */
     static int numCollections_;
   };
 
+  /*
   class AllocScope
   {
   public:
@@ -360,5 +385,6 @@ namespace magpie
   {
     return Memory::makeTemp(static_cast<T*>(object_));
   }
+   */
 }
 

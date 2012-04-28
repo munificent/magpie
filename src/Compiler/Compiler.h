@@ -19,15 +19,15 @@ namespace magpie
   public:
     static void compileModule(VM& vm, const ModuleAst* module,
                               ErrorReporter& reporter);
-    static temp<Method> compileMethod(VM& vm, const MethodAst& method,
-                                      ErrorReporter& reporter);
+    static gc<Method> compileMethod(VM& vm, const MethodAst& method,
+                                    ErrorReporter& reporter);
     
     virtual ~Compiler() {}
     
   private:
     Compiler(VM& vm, ErrorReporter& reporter);
     
-    temp<Method> compile(const MethodAst& method);
+    gc<Method> compile(const MethodAst& method);
     
     virtual void visit(const BinaryOpNode& node, int dest);
     virtual void visit(const BoolNode& node, int dest);

@@ -18,11 +18,6 @@ namespace magpie
   class Object : public Managed
   {
   public:
-    static temp<BoolObject> create(bool value);
-    static temp<ClassObject> createClass(gc<String> value);
-    static temp<NumberObject> create(double value);
-    static temp<StringObject> create(gc<String> value);
-
     Object() : Managed() {}
     
     virtual bool toBool() const
