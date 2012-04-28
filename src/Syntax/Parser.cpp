@@ -62,6 +62,8 @@ namespace magpie
     
     do
     {
+      AllocScope scope;
+      
       // Method definition.
       consume(TOKEN_DEF, "The top level of a module contains only method definitions.");
       temp<Token> name = consume(TOKEN_NAME,
@@ -78,7 +80,7 @@ namespace magpie
       
       temp<Node> body = parseBlock();
       
-      methods.add(MethodAst::create(name->text(), pattern, body));
+      methods.add(scope.close(MethodAst::create(name->text(), pattern, body)));
     }
     while (match(TOKEN_LINE));
     
@@ -148,7 +150,7 @@ namespace magpie
       return scope.close(VariableNode::create(span, isMutable, pattern, value));
     }
     
-    return parsePrecedence();
+    return scope.close(parsePrecedence());
   }
   
   temp<Node> Parser::parsePrecedence(int precedence)
@@ -184,6 +186,8 @@ namespace magpie
   
   temp<Node> Parser::name(temp<Token> token)
   {
+    AllocScope scope;
+    
     // See if it's a method call like foo(arg).
     if (match(TOKEN_LEFT_PAREN))
     {
@@ -191,12 +195,12 @@ namespace magpie
       consume(TOKEN_RIGHT_PAREN, "Expect ')' after call argument.");
 
       SourcePos span = token->pos().spanTo(current().pos());
-      return CallNode::create(span, gc<Node>(), token->text(), arg);
+      return scope.close(CallNode::create(span, gc<Node>(), token->text(), arg));
     }
     else
     {
       // Just a bare name.
-      return NameNode::create(token->pos(), token->text());
+      return scope.close(NameNode::create(token->pos(), token->text()));
     }
   }
   
