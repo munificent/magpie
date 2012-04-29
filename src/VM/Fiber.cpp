@@ -77,7 +77,7 @@ namespace magpie
         case OP_END:
         {
           gc<Object> result = loadRegisterOrConstant(frame, GET_A(ins));
-          callFrames_.remove(-1);
+          callFrames_.removeAt(-1);
 
           if (callFrames_.count() > 0)
           {

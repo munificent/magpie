@@ -116,8 +116,20 @@ namespace magpie
     ASSERT(false, "Not implemented.");
   }
   
+  void Compiler::visit(const DoNode& node, int dest)
+  {
+    // Keep track of locals that are declared in this scope.
+    int numLocals = startScope();
+    
+    node.body()->accept(*this, dest);
+    
+    endScope(numLocals);
+  }
+  
   void Compiler::visit(const IfNode& node, int dest)
   {
+    // TODO(bob): Should create scopes for the arms.
+    
     // Compile the condition.
     node.condition()->accept(*this, dest);
     
@@ -140,7 +152,7 @@ namespace magpie
   
   void Compiler::visit(const NameNode& node, int dest)
   {
-    int local = locals_.indexOf(node.name());
+    int local = locals_.lastIndexOf(node.name());
     
     if (local == -1)
     {
@@ -284,6 +296,17 @@ namespace magpie
     code_[from] = MAKE_ABC(a, b, c, op);
   }
 
+  int Compiler::startScope()
+  {
+    return locals_.count();
+  }
+  
+  void Compiler::endScope(int numLocals)
+  {
+    // TODO(bob): Should free up the corresponding register too.
+    locals_.truncate(numLocals);
+  }
+
   int Compiler::allocateRegister()
   {
     numInUseRegisters_++;
@@ -307,7 +330,7 @@ namespace magpie
     variableStart_ = numInUseRegisters_;
     
     // Reserve the registers for them.
-    numInUseRegisters_++;
+    numInUseRegisters_ += count;
     if (maxRegisters_ < numInUseRegisters_)
     {
       maxRegisters_ = numInUseRegisters_;

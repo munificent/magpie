@@ -24,6 +24,8 @@ nodes = sorted({
     ('name',        'gc<String>'),
     ('parameter',   'gc<Pattern>'),
     ('body',        'gc<Node>')],
+  'Do': [
+    ('body',        'gc<Node>')],
   'If': [
     ('condition',   'gc<Node>'),
     ('thenArm',     'gc<Node>'),

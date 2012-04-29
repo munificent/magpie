@@ -33,6 +33,7 @@ namespace magpie
     virtual void visit(const BoolNode& node, int dest);
     virtual void visit(const CallNode& node, int dest);
     virtual void visit(const DefMethodNode& node, int dest);
+    virtual void visit(const DoNode& node, int dest);
     virtual void visit(const IfNode& node, int dest);
     virtual void visit(const NameNode& node, int dest);
     virtual void visit(const NumberNode& node, int dest);
@@ -60,6 +61,9 @@ namespace magpie
     void write(OpCode op, int a = 0xff, int b = 0xff, int c = 0xff);
     int startJump();
     void endJump(int from, OpCode op, int a = 0xff, int b = 0xff, int c = 0xff);
+    
+    int startScope();
+    void endScope(int numLocals);
     
     int allocateRegister();
     void releaseRegister();

@@ -34,7 +34,7 @@ namespace magpie
   {
     out << (value_ ? "true" : "false");
   }
-
+  
   void CallNode::trace(std::ostream& out) const
   {
     out << leftArg_ << " " << name_ << "(" << rightArg_ << ")";
@@ -45,7 +45,12 @@ namespace magpie
     // TODO(bob): Implement.
     out << "(def)";
   }
-
+  
+  void DoNode::trace(std::ostream& out) const
+  {
+    out << "(do " << body_ << ")";
+  }
+  
   void IfNode::trace(std::ostream& out) const
   {
     out << "(if " << condition_ << " then " << thenArm_;

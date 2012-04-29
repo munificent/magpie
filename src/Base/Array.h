@@ -26,7 +26,7 @@ namespace magpie
       ensureCapacity_(capacity);
     }
 
-    Array(int size, const T & fillWith)
+    Array(int size, const T& fillWith)
     : count_(0),
       capacity_(0),
       items_(NULL)
@@ -37,7 +37,7 @@ namespace magpie
       count_ = size;
     }
 
-    Array(const Array<T> & array)
+    Array(const Array<T>& array)
     : count_(0),
       capacity_(0),
       items_(NULL)
@@ -62,14 +62,14 @@ namespace magpie
 
     // Adds the given item to the end of the array, increasing its size
     // automatically.
-    void add(const T & value)
+    void add(const T& value)
     {
       ensureCapacity_(count_ + 1);
       items_[count_++] = value;
     }
 
     // Adds all of the items from the given array to this one.
-    void add(const Array<T> & array)
+    void add(const Array<T>& array)
     {
       ensureCapacity_(count_ + array.count_);
 
@@ -87,7 +87,7 @@ namespace magpie
     // Removes the item at the given index. Indexes are zero-based from the
     // beginning of the array. Negative indexes are from the end of the array
     // and go forward, so that -1 is the last item in the array.
-    void remove(int index)
+    void removeAt(int index)
     {
       if (index < 0) index = count_ + index;
       ASSERT_INDEX(index, count_);
@@ -101,7 +101,7 @@ namespace magpie
     }
     
     // Finds the index of the given item in the array. Returns -1 if not found.
-    int indexOf(const T & value) const
+    int indexOf(const T& value) const
     {
       for (int i = 0; i < count_; i++)
       {
@@ -111,9 +111,39 @@ namespace magpie
       return -1;
     }
     
+    int lastIndexOf(const T& value) const
+    {
+      for (int i = count_ - 1; i >= 0; i--)
+      {
+        if (items_[i] == value) return i;
+      }
+      
+      return -1;
+    }
+    
+    void truncate(int count)
+    {
+      ASSERT(count >= 0, "Cannot truncate to a negative count.");
+      
+      // Early out if there's nothing to remove.
+      if (count >= count_) return;
+      
+      // Clear the items.
+      for (int i = count; i < count_; i++)
+      {
+        items_[i] = T();
+      }
+      
+      // TODO(bob): This never actually reallocates a smaller array.
+      // Should it?
+      
+      // Truncate.
+      count_ = count;
+    }
+    
     // Assigns the contents of the given array to this one. Clears this array
     // and refills it with the contents of the other.
-    Array & operator=(const Array & other)
+    Array& operator=(const Array& other)
     {
       // Early out of self-assignment.
       if (&other == this) return *this;
@@ -127,7 +157,7 @@ namespace magpie
     // Gets the item at the given index. Indexes are zero-based from the
     // beginning of the array. Negative indexes are from the end of the array
     // and go forward, so that -1 is the last item in the array.
-    T & operator[] (int index)
+    T& operator[] (int index)
     {
       if (index < 0) index = count_ + index;
       ASSERT_INDEX(index, count_);
@@ -138,7 +168,7 @@ namespace magpie
     // Gets the item at the given index. Indexes are zero-based from the
     // beginning of the array. Negative indexes are from the end of the array
     // and go forward, so that -1 is the last item in the array.
-    const T & operator[] (int index) const
+    const T& operator[] (int index) const
     {
       if (index < 0) index = count_ + index;
       ASSERT_INDEX(index, count_);

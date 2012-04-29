@@ -5,6 +5,7 @@ class BinaryOpNode;
 class BoolNode;
 class CallNode;
 class DefMethodNode;
+class DoNode;
 class IfNode;
 class NameNode;
 class NumberNode;
@@ -22,6 +23,7 @@ public:
   virtual void visit(const BoolNode& node, int dest) = 0;
   virtual void visit(const CallNode& node, int dest) = 0;
   virtual void visit(const DefMethodNode& node, int dest) = 0;
+  virtual void visit(const DoNode& node, int dest) = 0;
   virtual void visit(const IfNode& node, int dest) = 0;
   virtual void visit(const NameNode& node, int dest) = 0;
   virtual void visit(const NumberNode& node, int dest) = 0;
@@ -52,6 +54,7 @@ public:
   virtual const BoolNode* asBoolNode() const { return NULL; }
   virtual const CallNode* asCallNode() const { return NULL; }
   virtual const DefMethodNode* asDefMethodNode() const { return NULL; }
+  virtual const DoNode* asDoNode() const { return NULL; }
   virtual const IfNode* asIfNode() const { return NULL; }
   virtual const NameNode* asNameNode() const { return NULL; }
   virtual const NumberNode* asNumberNode() const { return NULL; }
@@ -192,6 +195,34 @@ public:
 private:
   gc<String> name_;
   gc<Pattern> parameter_;
+  gc<Node> body_;
+};
+
+class DoNode : public Node
+{
+public:
+  DoNode(const SourcePos& pos, gc<Node> body)
+  : Node(pos),
+    body_(body)
+  {}
+
+  virtual void accept(NodeVisitor& visitor, int arg) const
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual const DoNode* asDoNode() const { return this; }
+
+  gc<Node> body() const { return body_; }
+
+  virtual void reach()
+  {
+    Memory::reach(body_);
+  }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
   gc<Node> body_;
 };
 

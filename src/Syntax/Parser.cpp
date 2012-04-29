@@ -135,6 +135,14 @@ namespace magpie
       return new DefMethodNode(span, name->text(), pattern, body);
     }
     
+    if (lookAhead(TOKEN_DO))
+    {
+      SourcePos start = consume()->pos();
+      gc<Node> body = parseBlock();
+      SourcePos span = start.spanTo(current().pos());
+      return new DoNode(span, body);
+    }
+    
     if (lookAhead(TOKEN_IF))
     {
       SourcePos start = consume()->pos();
