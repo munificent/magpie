@@ -1,0 +1,101 @@
+// Trying to work through how scope and name binding should work for variables
+// and methods. The goal here is to have a semantic that works for top-level
+// definitions (where mututal recursion definitely needs to work) that we can
+// also use for nested scopes. That lets the top level of a module just be a
+// regular expression.
+
+// ok
+def foo() print("foo")
+foo()
+
+// no method error
+foo()
+def foo() print("foo")
+
+// ---
+
+// needs to be ok for mutually recursive methods
+def foo(n) if n > 0 then bar(n - 1)
+def bar(n) if n > 0 then foo(n - 1)
+foo(3)
+
+// ---
+
+// ok
+var a = 1
+def foo() print(a)
+foo()
+
+// no method error
+var a = 1
+foo()
+def foo() print(a)
+
+// ok
+def foo() print(a)
+var a = 1
+foo()
+
+// error (compile-time? runtime?)
+def foo() print(a)
+foo()
+var a = 1
+
+// no method error
+foo()
+var a = 1
+def foo() print(a)
+
+// ?
+foo()
+def foo() print(a)
+var a = 1
+
+// ---
+
+// no method error
+def foo(is Bool) "bool"
+def bar() foo(3)
+bar()
+def foo(is Int) "int"
+
+// ok
+def foo(is Bool) "bool"
+def bar() foo(3)
+def foo(is Int) "int"
+bar()
+
+// ---
+
+// ok
+var a = 1
+def foo() bar()
+def bar() print(a)
+foo()
+
+// ---
+
+// prints "inner"
+var a = "outer"
+do
+    var a = "inner"
+    def foo() print(a)
+    foo()
+end
+
+// option 1: prints "outer" twice
+//   This is simple to implement and makes sense. Basically each "var" creates
+//   a new scope block that extends after itself. Like "let" in Scheme.
+// option 2: compile time error "a" has two meanings in same scope
+//   This is I think what C# does. It is an error for one name (here 'a') to
+//   be resolved to two different variables within the same scope. Here the
+//   scope is the entire do block.
+// option 3: prints "outer" then "inner"
+//   No. That's dynamic scope. Hell no.
+var a = "outer"
+do
+    def foo() print(a)
+    foo()
+    var a = "inner"
+    foo()
+end

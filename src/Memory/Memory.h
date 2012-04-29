@@ -76,7 +76,7 @@ namespace magpie
   private:
     Managed* object_;
   };
-  
+
   template <class T>
   std::ostream& operator <<(std::ostream& out, const gc<T>& object)
   {

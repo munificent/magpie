@@ -65,7 +65,7 @@ namespace magpie
       method->parameter()->accept(*this, result);
     }
     
-    method->body().accept(*this, result);
+    method->body()->accept(*this, result);
     write(OP_END, result);
     
     return new Method(method->name(), code_, constants_, maxRegisters_);
@@ -109,6 +109,11 @@ namespace magpie
     if (method == -1) return;
     
     write(OP_CALL, method, dest);
+  }
+  
+  void Compiler::visit(const DefMethodNode& node, int dest)
+  {
+    ASSERT(false, "Not implemented.");
   }
   
   void Compiler::visit(const IfNode& node, int dest)

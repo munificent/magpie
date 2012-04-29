@@ -40,21 +40,22 @@ namespace magpie
   };
   
   // A method definition.
+  // TODO(bob): Get rid of and unify with DefMethodNode.
   class MethodAst : public Managed
   {
   public:
     MethodAst(gc<String> name, gc<Pattern> parameter, gc<Node> body);
     
-    gc<String> name() const { return name_; }
+    gc<String>  name()      const { return name_; }
     gc<Pattern> parameter() const { return parameter_; }
-    Node& body() const { return *body_; }
+    gc<Node>    body()      const { return body_; }
     
     virtual void reach();
     
   private:
-    gc<String> name_;
+    gc<String>  name_;
     gc<Pattern> parameter_;
-    gc<Node> body_;
+    gc<Node>    body_;
   };
   
   // Base class for all AST node classes.
@@ -69,15 +70,16 @@ namespace magpie
     virtual void accept(NodeVisitor& visitor, int arg) const = 0;
     
     // Dynamic casts.
-    virtual const BoolNode*     asBoolNode()     const { return NULL; }
-    virtual const BinaryOpNode* asBinaryOpNode() const { return NULL; }
-    virtual const CallNode*     asCallNode()     const { return NULL; }
-    virtual const IfNode*       asIfNode()       const { return NULL; }
-    virtual const NameNode*     asNameNode()     const { return NULL; }
-    virtual const NumberNode*   asNumberNode()   const { return NULL; }
-    virtual const SequenceNode* asSequenceNode() const { return NULL; }
-    virtual const StringNode*   asStringNode()   const { return NULL; }
-    virtual const VariableNode* asVariableNode() const { return NULL; }
+    virtual const BoolNode*       asBoolNode()       const { return NULL; }
+    virtual const BinaryOpNode*   asBinaryOpNode()   const { return NULL; }
+    virtual const DefMethodNode*  asDefMethodNode()  const { return NULL; }
+    virtual const CallNode*       asCallNode()       const { return NULL; }
+    virtual const IfNode*         asIfNode()         const { return NULL; }
+    virtual const NameNode*       asNameNode()       const { return NULL; }
+    virtual const NumberNode*     asNumberNode()     const { return NULL; }
+    virtual const SequenceNode*   asSequenceNode()   const { return NULL; }
+    virtual const StringNode*     asStringNode()     const { return NULL; }
+    virtual const VariableNode*   asVariableNode()   const { return NULL; }
     
     const SourcePos& pos() const { return pos_; }
   
@@ -94,9 +96,9 @@ namespace magpie
     
     DECLARE_NODE(BinaryOpNode);
     
-    gc<Node> left() const { return left_; }
-    TokenType type() const { return type_; }
-    gc<Node> right() const { return right_; }
+    gc<Node>  left()  const { return left_; }
+    TokenType type()  const { return type_; }
+    gc<Node>  right() const { return right_; }
     
     virtual void reach();
     virtual void trace(std::ostream& out) const;
@@ -140,9 +142,30 @@ namespace magpie
     virtual void trace(std::ostream& out) const;
     
   private:
-    gc<Node> leftArg_;
+    gc<Node>   leftArg_;
     gc<String> name_;
-    gc<Node> rightArg_;
+    gc<Node>   rightArg_;
+  };
+  
+  // A method definition.
+  class DefMethodNode : public Node
+  {
+  public:
+    DefMethodNode(const SourcePos& pos, gc<String> name,
+                  gc<Pattern> parameter, gc<Node> body);
+    
+    DECLARE_NODE(DefMethodNode);
+
+    gc<String>  name()      const { return name_; }
+    gc<Pattern> parameter() const { return parameter_; }
+    gc<Node>    body()      const { return body_; }
+    
+    virtual void reach();
+    
+  private:
+    gc<String>  name_;
+    gc<Pattern> parameter_;
+    gc<Node>    body_;
   };
   
   // An if-then-else expression.
@@ -155,8 +178,8 @@ namespace magpie
     DECLARE_NODE(IfNode);
     
     gc<Node> condition() const { return condition_; }
-    gc<Node> thenArm() const { return thenArm_; }
-    gc<Node> elseArm() const { return elseArm_; }
+    gc<Node> thenArm()   const { return thenArm_; }
+    gc<Node> elseArm()   const { return elseArm_; }
     
     virtual void reach();
     virtual void trace(std::ostream& out) const;
@@ -243,17 +266,17 @@ namespace magpie
     
     DECLARE_NODE(VariableNode);
     
-    bool isMutable() const { return isMutable_; }
-    gc<Pattern> pattern() const { return pattern_; }
-    gc<Node> value() const { return value_; }
+    bool        isMutable() const { return isMutable_; }
+    gc<Pattern> pattern()   const { return pattern_; }
+    gc<Node>    value()     const { return value_; }
     
     virtual void reach();
     virtual void trace(std::ostream& out) const;
     
   private:    
-    bool isMutable_;
+    bool        isMutable_;
     gc<Pattern> pattern_;
-    gc<Node> value_;
+    gc<Node>    value_;
   };
   
   // Base class for all AST pattern node classes.

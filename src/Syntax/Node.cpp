@@ -19,8 +19,8 @@ namespace magpie
   
   void MethodAst::reach()
   {
-    Memory::reach(parameter_);
     Memory::reach(name_);
+    Memory::reach(parameter_);
     Memory::reach(body_);
   }
   
@@ -72,6 +72,21 @@ namespace magpie
   void CallNode::trace(std::ostream& out) const
   {
     out << leftArg_ << " " << name_ << "(" << rightArg_ << ")";
+  }
+  
+  DefMethodNode::DefMethodNode(const SourcePos& pos, gc<String> name,
+                               gc<Pattern> parameter, gc<Node> body)
+  : Node(pos),
+    name_(name),
+    parameter_(parameter),
+    body_(body)
+  {}
+  
+  void DefMethodNode::reach()
+  {
+    Memory::reach(name_);
+    Memory::reach(parameter_);
+    Memory::reach(body_);
   }
   
   IfNode::IfNode(const SourcePos& pos, gc<Node> condition,

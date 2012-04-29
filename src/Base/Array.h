@@ -173,6 +173,7 @@ namespace magpie
       while (capacity < desiredCapacity) capacity *= GROW_FACTOR;
 
       // Create the new array.
+      // TODO(bob): Should use the GC heap here, at least for some arrays.
       T* newItems = new T[capacity];
 
       // Copy the items over.

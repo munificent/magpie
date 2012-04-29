@@ -114,6 +114,27 @@ namespace magpie
 
   gc<Node> Parser::statementLike()
   {
+    if (lookAhead(TOKEN_DEF))
+    {
+      SourcePos start = consume()->pos();
+      gc<Token> name = consume(TOKEN_NAME,
+                               "Expect a method name after 'def'.");
+
+      // TODO(bob): Parse real pattern(s). Handle prefix, infix, postfix
+      // methods.
+      gc<Pattern> pattern = NULL;
+      consume(TOKEN_LEFT_PAREN, "Temp.");
+      if (lookAhead(TOKEN_NAME))
+      {
+        pattern = parsePattern();
+      }
+      consume(TOKEN_RIGHT_PAREN, "Temp.");
+      
+      gc<Node> body = parseBlock();
+      SourcePos span = start.spanTo(current().pos());
+      return new DefMethodNode(span, name->text(), pattern, body);
+    }
+    
     if (lookAhead(TOKEN_IF))
     {
       SourcePos start = consume()->pos();

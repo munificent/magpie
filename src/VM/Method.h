@@ -10,7 +10,6 @@ namespace magpie
 {
   class Object;
   
-  // TODO(bob): Have actual return.
   typedef gc<Object> (*Primitive)(gc<Object> arg);
   
   class Method : public Managed
