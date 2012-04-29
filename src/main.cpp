@@ -41,11 +41,18 @@ gc<String> readFile(const char* path)
 
 int main(int argc, char * const argv[])
 {
+  if (argc < 2)
+  {
+    // TODO(bob): Show usage, etc.
+    std::cout << "magpie <script>" << std::endl;
+    return 1;
+  }
+  
   // TODO(bob): Hack temp!
   VM vm;
   
-  // Read a file.
-  const char* fileName = "../../example/Fibonacci2.mag"; // "../../script/big.mag";
+  // Read the file.
+  const char* fileName = argv[1];
   ErrorReporter reporter;
   gc<String> source = readFile(fileName);
   Parser parser(fileName, source, reporter);
@@ -54,11 +61,10 @@ int main(int argc, char * const argv[])
   // Compile it.
   Compiler::compileModule(vm, module, reporter);
   
-  // Invoke main().
   if (reporter.numErrors() == 0)
   {
-    gc<Object> result = vm.run();
-    cout << result << endl;
+    // Invoke main().
+    vm.run();
   }
   
   return 0;
