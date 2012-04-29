@@ -15,7 +15,7 @@ namespace magpie
     vsprintf(message, format, args);
     va_end(args);
 
-    std::cout << "[" << pos.file() << " line "
+    std::cerr << "[" << pos.file() << " line "
         << pos.startLine() << " col "
         << pos.startCol() << "] Error: " << message << std::endl;
 

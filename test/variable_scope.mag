@@ -1,0 +1,16 @@
+def main()
+    // Shadowing and unshadowing.
+    val a = "outer"
+    print(a) // expect: outer
+    do
+        val a = "inner"
+        print(a) // expect: inner
+
+        do
+            val a = "innerinner"
+            print(a) // expect: innerinner
+        end
+        print(a) // expect: inner
+    end
+    print(a) // expect: outer
+end
