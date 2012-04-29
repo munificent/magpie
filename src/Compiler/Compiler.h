@@ -3,7 +3,7 @@
 #include "Array.h"
 #include "Bytecode.h"
 #include "Memory.h"
-#include "NodeVisitor.h"
+#include "Node.h"
 
 namespace magpie
 {
