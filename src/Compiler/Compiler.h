@@ -58,25 +58,28 @@ namespace magpie
     int compileConstant(const NumberNode& node);
     int compileConstant(const StringNode& node);
 
+    // Walks the pattern and allocates locals for any variable patterns
+    // encountered. We do this in a separate step so we can tell how many locals
+    // we need for the pattern since the value temporary will come after that.
+    void declarePattern(const Pattern& pattern);
+
     void write(OpCode op, int a = 0xff, int b = 0xff, int c = 0xff);
     int startJump();
     void endJump(int from, OpCode op, int a = 0xff, int b = 0xff, int c = 0xff);
     
     int startScope();
     void endScope(int numLocals);
+    int makeLocal(gc<String> name);
+    int makeTemp();
+    void releaseTemp();
+    void updateMaxRegisters();
     
-    int allocateRegister();
-    void releaseRegister();
-    void reserveVariables(int count);
-    int allocateVariable();
-
     VM&                vm_;
     ErrorReporter&     reporter_;
     Array<gc<String> > locals_;
     Array<instruction> code_;
     Array<gc<Object> > constants_;
-    int                numInUseRegisters_;
-    int                variableStart_;
+    int                numTemps_;
     int                maxRegisters_;
     
     NO_COPY(Compiler);

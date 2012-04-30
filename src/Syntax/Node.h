@@ -81,10 +81,7 @@ namespace magpie
     virtual void accept(PatternVisitor& visitor, int arg) const = 0;
 
     // Dynamic casts.
-    virtual const VariablePattern* asVariable() const { return NULL; }
-
-    // Get the number of variables a pattern declares.
-    virtual int countVariables() const = 0;
+    virtual const VariablePattern* asVariablePattern() const { return NULL; }
   };
 
   // A variable pattern.
@@ -94,8 +91,6 @@ namespace magpie
     VariablePattern(gc<String> name);
 
     DECLARE_PATTERN(VariablePattern);
-
-    virtual int countVariables() const { return 1; }
 
     gc<String> name() const { return name_; }
 

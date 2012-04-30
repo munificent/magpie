@@ -44,24 +44,20 @@ namespace magpie
     locals_(),
     code_(),
     constants_(),
-    numInUseRegisters_(0),
-    variableStart_(0),
+    numTemps_(0),
     maxRegisters_(0)
   {}
 
   gc<Method> Compiler::compile(gc<MethodAst> method)
   {
-    // Create a register for the argument and result value.
-    int result = allocateRegister();
-
-    // Add a fake local for it so that local slots line up with their registers.
-    locals_.add(String::create("(return)"));
+    // Create a fake local for the argument and result value.
+    int result = makeLocal(String::create("(return)"));
     
     // TODO(bob): Hackish and temporary.
     if (!method->parameter().isNull())
     {
       // Evaluate the method's parameter pattern.
-      reserveVariables(method->parameter()->countVariables());
+      declarePattern(*method->parameter());
       method->parameter()->accept(*this, result);
     }
     
@@ -189,14 +185,12 @@ namespace magpie
   
   void Compiler::visit(const VariableNode& node, int dest)
   {
-    // Reserve the registers up front. This way we'll compile the value to
-    // a slot *after* them. We want registers to come before temporaries
-    // because they don't have nice stack-like semantics like temporary
-    // registers do.
-    reserveVariables(node.pattern()->countVariables());
+    // Reserve the locals up front. This way we'll compile the value to a slot
+    // *after* them. This ensures locals always come before temporaries.
+    declarePattern(*node.pattern());
     
     // Compile the value.
-    int valueReg = allocateRegister();
+    int valueReg = makeTemp();
     node.value()->accept(*this, valueReg);
     
     // TODO(bob): Handle mutable variables.
@@ -209,16 +203,13 @@ namespace magpie
     // declarations are just in sequences.
     write(OP_MOVE, valueReg, dest);
     
-    releaseRegister(); // valueReg.
+    releaseTemp(); // valueReg.
   }
   
   void Compiler::visit(const VariablePattern& pattern, int value)
   {
-    // Declare the variable.
-    locals_.add(pattern.name());
-    int variable = allocateVariable();
-    ASSERT(locals_.count() - 1 == variable,
-           "Locals array needs to be in sync with registers for locals.");
+    int variable = locals_.lastIndexOf(pattern.name());
+    ASSERT(variable != -1, "Should have called declareVariables() already.")
     
     // Copy the value into the new variable.
     write(OP_MOVE, value, variable);
@@ -231,8 +222,8 @@ namespace magpie
     
     write(op, a, b, dest);
     
-    if (IS_REGISTER(a)) releaseRegister();
-    if (IS_REGISTER(b)) releaseRegister();
+    if (IS_REGISTER(a)) releaseTemp();
+    if (IS_REGISTER(b)) releaseTemp();
   }
   
   int Compiler::compileExpressionOrConstant(const Node& node)
@@ -249,7 +240,7 @@ namespace magpie
       return MAKE_CONSTANT(compileConstant(*string));
     }
     
-    int dest = allocateRegister();
+    int dest = makeTemp();
       
     node.accept(*this, dest);
     return dest;
@@ -275,6 +266,15 @@ namespace magpie
     return constants_.count() - 1;
   }
   
+  void Compiler::declarePattern(const Pattern& pattern)
+  {
+    const VariablePattern* variablePattern = pattern.asVariablePattern();
+    if (variablePattern != NULL)
+    {
+      makeLocal(variablePattern->name());
+    }
+  }
+  
   void Compiler::write(OpCode op, int a, int b, int c)
   {
     ASSERT_INDEX(a, 256);
@@ -283,7 +283,7 @@ namespace magpie
     
     code_.add(MAKE_ABC(a, b, c, op));
   }
-
+  
   int Compiler::startJump()
   {
     // Just write a dummy op to leave a space for the jump instruction.
@@ -303,45 +303,40 @@ namespace magpie
   
   void Compiler::endScope(int numLocals)
   {
-    // TODO(bob): Should free up the corresponding register too.
+    ASSERT(numTemps_ == 0, "Cannot end a scope when there are temporaries in "
+           "use.");
+    
     locals_.truncate(numLocals);
   }
-
-  int Compiler::allocateRegister()
+  
+  int Compiler::makeLocal(gc<String> name)
   {
-    numInUseRegisters_++;
+    ASSERT(numTemps_ == 0, "Cannot declare a local variable when there are "
+           "temporaries in use.");
     
-    if (maxRegisters_ < numInUseRegisters_)
-    {
-      maxRegisters_ = numInUseRegisters_;
-    }
-    
-    return numInUseRegisters_ - 1;
+    locals_.add(name);
+    updateMaxRegisters();
+    return locals_.count() - 1;
   }
   
-  void Compiler::releaseRegister()
+  int Compiler::makeTemp()
   {
-    ASSERT(numInUseRegisters_ > 0, "Released too many registers.");
-    numInUseRegisters_--;
+    numTemps_++;
+    updateMaxRegisters();    
+    return locals_.count() + numTemps_ - 1;
   }
   
-  void Compiler::reserveVariables(int count)
+  void Compiler::releaseTemp()
   {
-    variableStart_ = numInUseRegisters_;
-    
-    // Reserve the registers for them.
-    numInUseRegisters_ += count;
-    if (maxRegisters_ < numInUseRegisters_)
-    {
-      maxRegisters_ = numInUseRegisters_;
-    }
+    ASSERT(numTemps_ > 0, "No temp to release.");
+    numTemps_--;
   }
 
-  int Compiler::allocateVariable()
+  void Compiler::updateMaxRegisters()
   {
-    ASSERT(variableStart_ < numInUseRegisters_,
-        "Cannot allocate an unreserved variable.");
-    
-    return variableStart_++;
+    if (maxRegisters_ < locals_.count() + numTemps_)
+    {
+      maxRegisters_ = locals_.count() + numTemps_;
+    }
   }
 }
