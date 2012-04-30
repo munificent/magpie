@@ -133,7 +133,9 @@ namespace magpie
     int jumpToElse = startJump();
     
     // Compile the then arm.
+    int numLocals = startScope();
     node.thenArm()->accept(*this, dest);
+    endScope(numLocals);
     
     // Leave a space for the then arm to jump over the else arm.
     int jumpPastElse = startJump();
@@ -141,8 +143,19 @@ namespace magpie
     // Compile the else arm.
     endJump(jumpToElse, OP_JUMP_IF_FALSE, dest, code_.count() - jumpToElse - 1);
       
-    node.elseArm()->accept(*this, dest);
-      
+    if (!node.elseArm().isNull())
+    {
+      int numLocals = startScope();
+      node.elseArm()->accept(*this, dest);
+      endScope(numLocals);
+    }
+    else
+    {
+      // TODO(bob): Should compile to `nothing` when that is implemented.
+      // For now, just emit a false.
+      write(OP_BOOL, 0, dest);
+    }
+    
     endJump(jumpPastElse, OP_JUMP, code_.count() - jumpPastElse - 1);
   }
   

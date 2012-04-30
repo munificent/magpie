@@ -2,7 +2,7 @@
 
 # Runs the language tests.
 from os import listdir
-from os.path import abspath, dirname, isdir, join, realpath, relpath
+from os.path import abspath, dirname, isdir, join, realpath, relpath, splitext
 import re
 from subprocess import Popen, PIPE
 
@@ -23,22 +23,28 @@ def walk(dir, callback):
     dir = abspath(dir)
     for file in [file for file in listdir(dir) if not file in [".",".."]]:
         nfile = join(dir, file)
-        callback(nfile)
         if isdir(nfile):
             walk(nfile, callback)
+        else:
+            callback(nfile)
 
 
 def run_test(path):
+    if (splitext(path)[1] != '.mag'):
+        return
+
     # Make a nice short path relative to the working directory.
     path = relpath(path)
 
     # Read the test and parse out the expectations.
     expect_output = []
+    i = 1
     with open(path, 'r') as file:
         for line in file:
             match = EXPECT_PATTERN.search(line)
             if match:
-                expect_output.append(match.group(1))
+                expect_output.append((match.group(1), i))
+            i += 1
 
     # Invoke magpie and run the test.
     proc = Popen([MAGPIE_APP, path], stdout=PIPE, stderr=PIPE)
@@ -52,14 +58,16 @@ def run_test(path):
         if expect_index >= len(expect_output):
             fails.append('Got output "{0}" when none was expected.'.
                 format(line))
-        elif expect_output[expect_index] != line:
-            fails.append('Expected output "{0}" and got "{1}".'.
-                format(expect_output[expect_index], line))
+        elif expect_output[expect_index][0] != line:
+            fails.append('Expected output "{0}" on line {1} and got "{2}".'.
+                format(expect_output[expect_index][0],
+                       expect_output[expect_index][1], line))
         expect_index += 1
 
     while expect_index < len(expect_output):
-        fails.append('Missing expected output "{0}".'.
-            format(expect_output[expect_index]))
+        fails.append('Missing expected output "{0}" on line {1}.'.
+            format(expect_output[expect_index][0],
+                   expect_output[expect_index][1]))
         expect_index += 1
 
     # Validate the error output.

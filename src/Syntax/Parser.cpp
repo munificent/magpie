@@ -62,6 +62,8 @@ namespace magpie
     
     do
     {
+      if (lookAhead(TOKEN_EOF)) break;
+      
       // Method definition.
       consume(TOKEN_DEF, "The top level of a module contains only method definitions.");
       gc<Token> name = consume(TOKEN_NAME,
@@ -81,6 +83,8 @@ namespace magpie
       methods.add(new MethodAst(name->text(), pattern, body));
     }
     while (match(TOKEN_LINE));
+    
+    // TODO(bob): Should validate that we are at EOF here.
     
     return new ModuleAst(methods);
   }
@@ -151,10 +155,13 @@ namespace magpie
       consume(TOKEN_THEN, "Expect 'then' after 'if' condition.");
       
       // TODO(bob): Block bodies.
-      gc<Node> thenArm = parsePrecedence();
-      // TODO(bob): Allow omitting 'else'.
-      consume(TOKEN_ELSE, "Expect 'else' after 'then' arm.");
-      gc<Node> elseArm = parsePrecedence();
+      gc<Node> thenArm = statementLike();      
+      gc<Node> elseArm;
+      
+      if (match(TOKEN_ELSE))
+      {
+        elseArm = statementLike();
+      }
       
       SourcePos span = start.spanTo(current().pos());
       return new IfNode(span, condition, thenArm, elseArm);
@@ -214,7 +221,9 @@ namespace magpie
     // See if it's a method call like foo(arg).
     if (match(TOKEN_LEFT_PAREN))
     {
-      gc<Node> arg = parsePrecedence();
+      // TODO(bob): Is this right? Do we want to allow variable declarations
+      // here?
+      gc<Node> arg = statementLike();
       consume(TOKEN_RIGHT_PAREN, "Expect ')' after call argument.");
 
       SourcePos span = token->pos().spanTo(current().pos());

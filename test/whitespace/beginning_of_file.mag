@@ -1,0 +1,6 @@
+
+
+
+def main()
+    print("ok") // expect: ok
+end

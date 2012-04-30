@@ -1,0 +1,87 @@
+def main()
+    // if then
+
+    // Evaluate the 'then' expression if the condition is true.
+    if true then print("good") // expect: good
+    if false then print("bad")
+
+    // Return the 'then' expression if the condition is true.
+    print(if true then "good") // expect: good
+
+    // Return nothing if the condition is false.
+    print(if false then "bad") // expect: nothing
+
+    // if then else
+
+    // Evaluate the 'then' expression if the condition is true.
+    if true then print("good") else print("bad") // expect: good
+    if false then print("bad") else print("good") // expect: good
+
+    // Return the 'then' expression if the condition is true.
+    print(if true then "good" else "bad") // expect: good
+
+    // Return the 'else' expression if the condition is false.
+    print(if false then "bad" else "good") // expect: good
+
+    // Create a local scope for the 'then' expression.
+    val a = "out"
+    if true then val a = "in"
+    print(a) // expect: out
+
+    // Create a local scope for the 'else' expression.
+    val b = "out"
+    if false then "dummy" else val b = "in"
+    print(b) // expect: out
+
+end/*
+specify("An 'if then' expression") with
+    it should("create a local scope for the 'if' expression that is visible " +
+              "to the 'then' expression") with
+        val a = "outside"
+        var b = "outside"
+        if val a = "inside" then b = a
+        a shouldEqual("outside")
+        b shouldEqual("inside")
+    end
+
+    it should("allow a block for the 'if' expression") with
+        var a = 0
+        if
+            a = a + 1
+            a = a + 2
+            true
+        then
+            true
+        end
+        a shouldEqual(3)
+    end
+
+    it should("allow a block for the 'then' expression") with
+        var a = 0
+        if true then
+            a = a + 1
+            a = a + 2
+        end
+        a shouldEqual(3)
+    end
+end
+
+specify("An 'if then else' expression") with
+    it should("allow a block for the 'else' expression") with
+        var a = 0
+        if false then "ignored" else
+            a = a + 1
+            a = a + 2
+        end
+        a shouldEqual(3)
+    end
+
+    it should("not associate an 'else' on the next line with a previous " +
+              "single-line 'then'") with
+        (if true then
+            if false then "then"
+        else
+            "else"
+        end) shouldEqual(nothing)
+    end
+end*/

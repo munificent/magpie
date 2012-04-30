@@ -45,8 +45,17 @@ namespace magpie
       return *this;
     }
     
-    T& operator *() const { return *static_cast<T*>(object_); }
-    T* operator ->() const { return static_cast<T*>(object_); }
+    T& operator *() const
+    {
+      ASSERT(object_ != NULL, "Cannot dereference NULL pointer.");
+      return *static_cast<T*>(object_);
+    }
+    
+    T* operator ->() const
+    {
+      ASSERT(object_ != NULL, "Cannot dereference NULL pointer.");
+      return static_cast<T*>(object_);
+    }
     
     // Compare two references. If both are non-null then compares the objects.
     template <class S>
