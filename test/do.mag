@@ -1,0 +1,22 @@
+def main()
+    // Evaluate the expressions in order.
+    do
+        print("1") // expect: 1
+        print("2") // expect: 2
+        print("3") // expect: 3
+    end
+
+    // Return the value of the last expression.
+    print(do
+        1
+        2
+    end) // expect: 2
+
+    // Create a local scope.
+    val a = "outer"
+    do
+        val a = "inner"
+        print(a) // expect: inner
+    end
+    print(a) // expect: outer
+end
