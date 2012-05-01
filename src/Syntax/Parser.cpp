@@ -24,7 +24,7 @@ namespace magpie
     { NULL,                 &Parser::binaryOp, 4 },     // TOKEN_LESS_THAN
 
     // Keywords.
-    { NULL,                 &Parser::binaryOp, 3 },     // TOKEN_AND
+    { NULL,                 &Parser::and_, 3 },         // TOKEN_AND
     { NULL,                 NULL, -1 },                 // TOKEN_CASE
     { NULL,                 NULL, -1 },                 // TOKEN_DEF
     { NULL,                 NULL, -1 },                 // TOKEN_DO
@@ -37,7 +37,7 @@ namespace magpie
     { NULL,                 NULL, -1 },                 // TOKEN_MATCH
     { NULL,                 NULL, -1 },                 // TOKEN_NOT
     { &Parser::nothing,     NULL, -1 },                 // TOKEN_NOTHING
-    { NULL,                 &Parser::binaryOp, 3 },     // TOKEN_OR
+    { NULL,                 &Parser::or_, 3 },          // TOKEN_OR
     { NULL,                 NULL, -1 },                 // TOKEN_RETURN
     { NULL,                 NULL, -1 },                 // TOKEN_THEN
     { &Parser::boolean,     NULL, -1 },                 // TOKEN_TRUE
@@ -234,6 +234,8 @@ namespace magpie
     return left;
   }
   
+  // Prefix parsers -----------------------------------------------------------
+
   gc<Node> Parser::boolean(gc<Token> token)
   {
     return new BoolNode(token->pos(), token->type() == TOKEN_TRUE);
@@ -275,6 +277,14 @@ namespace magpie
     return new StringNode(token->pos(), token->text());
   }
   
+  // Infix parsers ------------------------------------------------------------
+  
+  gc<Node> Parser::and_(gc<Node> left, gc<Token> token)
+  {
+    gc<Node> right = parsePrecedence(expressions_[token->type()].precedence);
+    return new AndNode(token->pos(), left, right);
+  }
+  
   gc<Node> Parser::binaryOp(gc<Node> left, gc<Token> token)
   {
     // TODO(bob): Support right-associative infix. Needs to do precedence
@@ -282,6 +292,12 @@ namespace magpie
     gc<Node> right = parsePrecedence(expressions_[token->type()].precedence);
     
     return new BinaryOpNode(token->pos(), left, token->type(), right);
+  }
+  
+  gc<Node> Parser::or_(gc<Node> left, gc<Token> token)
+  {
+    gc<Node> right = parsePrecedence(expressions_[token->type()].precedence);
+    return new OrNode(token->pos(), left, right);
   }
   
   gc<Pattern> Parser::parsePattern()

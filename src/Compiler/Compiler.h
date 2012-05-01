@@ -29,6 +29,7 @@ namespace magpie
     
     gc<Method> compile(gc<MethodAst> method);
     
+    virtual void visit(const AndNode& node, int dest);
     virtual void visit(const BinaryOpNode& node, int dest);
     virtual void visit(const BoolNode& node, int dest);
     virtual void visit(const CallNode& node, int dest);
@@ -38,13 +39,12 @@ namespace magpie
     virtual void visit(const NameNode& node, int dest);
     virtual void visit(const NothingNode& node, int dest);
     virtual void visit(const NumberNode& node, int dest);
+    virtual void visit(const OrNode& node, int dest);
     virtual void visit(const SequenceNode& node, int dest);
     virtual void visit(const StringNode& node, int dest);
     virtual void visit(const VariableNode& node, int dest);
 
     virtual void visit(const VariablePattern& pattern, int value);
-
-    void compileInfix(const BinaryOpNode& node, OpCode op, int dest);
 
     // Compiles the given node. If it's a constant node, it adds the constant
     // to the method table and returns the constant id (with the mask bit set).

@@ -23,7 +23,12 @@ namespace magpie
     Memory::reach(parameter_);
     Memory::reach(body_);
   }
-
+  
+  void AndNode::trace(std::ostream& out) const
+  {
+    out << "(and " << left_ << " " << right_ << ")";
+  }
+  
   void BinaryOpNode::trace(std::ostream& out) const
   {
     out << "(" << left_ << " " << Token::typeString(type_)
@@ -78,6 +83,11 @@ namespace magpie
   void NumberNode::trace(std::ostream& out) const
   {
     out << value_;
+  }
+  
+  void OrNode::trace(std::ostream& out) const
+  {
+    out << "(or " << left_ << " " << right_ << ")";
   }
   
   void SequenceNode::trace(std::ostream& out) const

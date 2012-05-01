@@ -1,0 +1,38 @@
+def main()
+    // Note: These tests implicitly depend on non-zero ints being truthy.
+    //       Also rely on print() returning its argument.
+
+    // Return the first non-true argument.
+    print(0 and false) // expect: 0
+    print(1 and 0) // expect: 0
+    print(1 and 2 and 0) // expect: 0
+
+    // Return the last argument if all are true.
+    print(1 and true) // expect: true
+    print(1 and 2 and 3) // expect: 3
+
+    // Short-circuit at the first false argument.
+    print(true) and // expect: true
+        print(false) and // expect: false
+        print(false) // should not print
+
+    // Call 'true?' on the arguments to determine truthiness.
+    // TODO(bob): Support this.
+    /*
+        it should("call 'true?' on the arguments to determine truth") with
+            val left = TruthTest new(false)
+            val right = TruthTest new(false)
+            left and right
+            left called shouldEqual(true)
+            right called shouldEqual(false)
+        end
+    */
+
+    print(true and true) // expect: true
+    print(true and 1) // expect: 1
+    print(1 and true) // expect: true
+
+    // Swallow a trailing newline.
+    print(true and
+        true) // expect: true
+end

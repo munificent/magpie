@@ -17,6 +17,7 @@ class color:
     GREEN = '\033[32m'
     RED = '\033[31m'
     DEFAULT = '\033[0m'
+    PINK = '\033[91m'
 
 def walk(dir, callback):
     """ Walks [dir], and executes [callback] on each file. """
@@ -57,7 +58,14 @@ def run_test(path):
         fails.append('Unexpected output on stderr:')
         for line in err.split('\n'):
             if line != '':
-                fails.append(line)
+                fails.append(color.PINK + line + color.DEFAULT)
+
+    # Validate the return code.
+    # TODO(bob): Allow tests to specify expected return code.
+    expect_return = 0
+    if proc.returncode != expect_return:
+        fails.append('{2}Expected return code {0} and got {1}{3}.'.
+            format(expect_return, proc.returncode, color.PINK, color.DEFAULT))
 
     # Validate the output.
     expect_index = 0
@@ -77,23 +85,13 @@ def run_test(path):
                    expect_output[expect_index][1]))
         expect_index += 1
 
-    # Validate the error output.
-    # TODO(bob): Implement. Allow tests to specify which lines compile errors
-    # should occur on a parse those out of the stderr.
-
-    # Validate the return code.
-    # TODO(bob): Allow tests to specify expected return code.
-    expect_return = 0
-    if proc.returncode != expect_return:
-        fails.append('Expected return code {0} and got {1}.'.
-            format(expect_return, proc.returncode))
-
     # Display the results.
     if len(fails) == 0:
         print color.GREEN + 'PASS' + color.DEFAULT + ': ' + path
     else:
         print color.RED + 'FAIL' + color.DEFAULT + ': ' + path
         for fail in fails:
-            print '     ', fail
+            print fail
+        print
 
 walk(TEST_DIR, run_test)

@@ -10,6 +10,9 @@ header_path = join(magpie_dir, 'src', 'Syntax', 'Node.generated.h')
 
 # Define the AST node classes.
 nodes = sorted({
+  'And': [
+    ('left',      'gc<Node>'),
+    ('right',     'gc<Node>')],
   'BinaryOp': [
     ('left',      'gc<Node>'),
     ('type',      'TokenType'),
@@ -35,6 +38,9 @@ nodes = sorted({
   'Nothing': [],
   'Number': [
     ('value',       'double')],
+  'Or': [
+    ('left',      'gc<Node>'),
+    ('right',     'gc<Node>')],
   'Sequence': [
     ('expressions', 'Array<gc<Node> >')],
   'String': [

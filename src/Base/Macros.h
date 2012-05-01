@@ -6,7 +6,7 @@
 #define ASSERT(condition, message)                  \
   if (!(condition))                                 \
   {                                                 \
-    std::cout << "ASSERTION FAILED " << __FILE__    \
+    std::cerr << "ASSERTION FAILED " << __FILE__    \
               << ":" << __LINE__ << " - "           \
               << message << std::endl;              \
     abort();                                        \
@@ -18,7 +18,7 @@
 #define ASSERT_INDEX(index, max)                    \
   if (((index) < 0) || ((index) >= max))            \
   {                                                 \
-    std::cout << "ASSERTION FAILED " << __FILE__    \
+    std::cerr << "ASSERTION FAILED " << __FILE__    \
               << ":" << __LINE__ << " - "           \
               << "Index " << index                  \
               << " was out of range [0, " << max    \

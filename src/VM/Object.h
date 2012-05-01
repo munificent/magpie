@@ -107,6 +107,8 @@ namespace magpie
       value_(value)
     {}
     
+    // TODO(bob): Do we want to do this here, or rely on a "true?" method?
+    virtual bool toBool() const { return value_ != 0; }
     virtual double toNumber() const { return value_; }
     
     virtual void trace(std::ostream& stream) const
