@@ -52,6 +52,13 @@ def run_test(path):
 
     fails = []
 
+    # Validate that no errors occurred.
+    if err != '':
+        fails.append('Unexpected output on stderr:')
+        for line in err.split('\n'):
+            if line != '':
+                fails.append(line)
+
     # Validate the output.
     expect_index = 0
     for line in out.split():

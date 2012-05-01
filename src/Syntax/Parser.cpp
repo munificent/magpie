@@ -88,8 +88,15 @@ namespace magpie
     
     return new ModuleAst(methods);
   }
-  
-  gc<Node> Parser::parseBlock()
+
+  gc<Node> Parser::parseBlock(TokenType endToken)
+  {
+    TokenType dummy;
+    return parseBlock(endToken, endToken, &dummy);
+  }
+
+  gc<Node> Parser::parseBlock(TokenType end1, TokenType end2,
+                              TokenType* outEndToken)
   {
     // If we have a newline, then it's an actual block, otherwise it's a
     // single expression.
@@ -99,10 +106,20 @@ namespace magpie
       
       do
       {
-        if (match(TOKEN_END)) break;
+        if (lookAhead(end1)) break;
+        if (lookAhead(end2)) break;
         exprs.add(statementLike());
       }
       while (match(TOKEN_LINE));
+
+      // Return which kind of token we ended the block with, for callers that
+      // care.
+      *outEndToken = current().type();
+
+      // If the block ends with 'end', then we want to consume that token,
+      // otherwise we want to leave it unconsumed to be consistent with the
+      // single-expression block case.
+      if (current().is(TOKEN_END)) consume();
       
       // If there is just one expression in the sequence, don't wrap it.
       if (exprs.count() == 1) return exprs[0];
@@ -112,6 +129,8 @@ namespace magpie
     }
     else
     {
+      // Not a block, so no block end token.
+      *outEndToken = TOKEN_EOF;
       return statementLike();
     }
   }
@@ -151,16 +170,18 @@ namespace magpie
     {
       SourcePos start = consume()->pos();
       
-      gc<Node> condition = parsePrecedence();
+      gc<Node> condition = parseBlock(TOKEN_THEN);
       consume(TOKEN_THEN, "Expect 'then' after 'if' condition.");
       
-      // TODO(bob): Block bodies.
-      gc<Node> thenArm = statementLike();      
+      TokenType endToken;
+      gc<Node> thenArm = parseBlock(TOKEN_ELSE, TOKEN_END, &endToken);
       gc<Node> elseArm;
       
-      if (match(TOKEN_ELSE))
+      // Don't look for an else arm if the then arm was a block that
+      // specifically ended with 'end'.
+      if ((endToken != TOKEN_END) && match(TOKEN_ELSE))
       {
-        elseArm = statementLike();
+        elseArm = parseBlock();
       }
       
       SourcePos span = start.spanTo(current().pos());
@@ -193,8 +214,9 @@ namespace magpie
     
     if (prefix == NULL)
     {
+      gc<String> tokenText = token->toString();
       reporter_.error(token->pos(), "Unexpected token '%s'.",
-                      token->text()->cString());
+                      tokenText->cString());
       return NULL;
     }
     
@@ -321,8 +343,6 @@ namespace magpie
   gc<Token> Parser::consume(TokenType expected, const char* errorMessage)
   {
     if (lookAhead(expected)) return consume();
-
-    std::cout << current() << std::endl;
     reporter_.error(current().pos(), errorMessage);
     return NULL;
   }

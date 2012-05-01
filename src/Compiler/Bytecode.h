@@ -28,7 +28,7 @@ namespace magpie
   {
     OP_MOVE          = 0x01, // A: from, B: to
     OP_CONSTANT      = 0x02, // C(A) -> R(B)
-    OP_BOOL          = 0x03, // A -> R(B)
+    OP_BUILT_IN      = 0x03, // A -> R(B)
     OP_ADD           = 0x04, // R(C) = RC(A) + RC(B)
     OP_SUBTRACT      = 0x05, // R(C) = RC(A) - RC(B)
     OP_MULTIPLY      = 0x06, // R(C) = RC(A) * RC(B)
@@ -38,6 +38,13 @@ namespace magpie
     OP_JUMP_IF_FALSE = 0x0a, // R(A) = test register, B = offset
     OP_CALL          = 0x0b, // A: method, B: arg and result
     OP_END           = 0x0c  // RC(A): result
+  };
+  
+  enum BuiltIn
+  {
+    BUILT_IN_FALSE   = 0,
+    BUILT_IN_TRUE    = 1,
+    BUILT_IN_NOTHING = 2
   };
   
   typedef unsigned int instruction;

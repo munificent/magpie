@@ -38,8 +38,8 @@ namespace magpie
         cout << "CONSTANT      " << GET_A(ins) << " -> " << GET_B(ins);
         break;
         
-      case OP_BOOL:
-        cout << "BOOL          " << GET_A(ins) << " -> " << GET_B(ins);
+      case OP_BUILT_IN:
+        cout << "BUILT_IN      " << GET_A(ins) << " -> " << GET_B(ins);
         break;
         
       case OP_ADD:

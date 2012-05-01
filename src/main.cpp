@@ -58,14 +58,15 @@ int main(int argc, char * const argv[])
   Parser parser(fileName, source, reporter);
   gc<ModuleAst> module = parser.parseModule();
   
+  if (reporter.numErrors() > 0) return 1;
+  
   // Compile it.
   Compiler::compileModule(vm, module, reporter);
   
-  if (reporter.numErrors() == 0)
-  {
-    // Invoke main().
-    vm.run();
-  }
+  if (reporter.numErrors() > 0) return 1;
+
+  // Invoke main().
+  vm.run();
   
   return 0;
 }

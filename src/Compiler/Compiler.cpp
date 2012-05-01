@@ -84,7 +84,7 @@ namespace magpie
   
   void Compiler::visit(const BoolNode& node, int dest)
   {
-    write(OP_BOOL, node.value() ? 1 : 0, dest);
+    write(OP_BUILT_IN, node.value() ? BUILT_IN_TRUE : BUILT_IN_FALSE, dest);
   }
   
   void Compiler::visit(const CallNode& node, int dest)
@@ -114,17 +114,15 @@ namespace magpie
   
   void Compiler::visit(const DoNode& node, int dest)
   {
-    // Keep track of locals that are declared in this scope.
-    int numLocals = startScope();
-    
+    int doScope = startScope();
     node.body()->accept(*this, dest);
-    
-    endScope(numLocals);
+    endScope(doScope);
   }
   
   void Compiler::visit(const IfNode& node, int dest)
   {
     // TODO(bob): Should create scopes for the arms.
+    int ifScope = startScope();
     
     // Compile the condition.
     node.condition()->accept(*this, dest);
@@ -133,9 +131,9 @@ namespace magpie
     int jumpToElse = startJump();
     
     // Compile the then arm.
-    int numLocals = startScope();
+    int thenScope = startScope();
     node.thenArm()->accept(*this, dest);
-    endScope(numLocals);
+    endScope(thenScope);
     
     // Leave a space for the then arm to jump over the else arm.
     int jumpPastElse = startJump();
@@ -145,18 +143,18 @@ namespace magpie
       
     if (!node.elseArm().isNull())
     {
-      int numLocals = startScope();
+      int elseScope = startScope();
       node.elseArm()->accept(*this, dest);
-      endScope(numLocals);
+      endScope(elseScope);
     }
     else
     {
-      // TODO(bob): Should compile to `nothing` when that is implemented.
-      // For now, just emit a false.
-      write(OP_BOOL, 0, dest);
+      // A missing 'else' arm is implicitly 'nothing'.
+      write(OP_BUILT_IN, BUILT_IN_NOTHING, dest);
     }
     
     endJump(jumpPastElse, OP_JUMP, code_.count() - jumpPastElse - 1);
+    endScope(ifScope);
   }
   
   void Compiler::visit(const NameNode& node, int dest)

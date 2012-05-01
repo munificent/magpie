@@ -18,6 +18,7 @@ namespace magpie
     
     true_ = new BoolObject(true);
     false_ = new BoolObject(false);
+    nothing_ = new NothingObject();
   }
 
   gc<Object> VM::run()
@@ -41,6 +42,7 @@ namespace magpie
     Memory::reach(fiber_);
     Memory::reach(true_);
     Memory::reach(false_);
+    Memory::reach(nothing_);
   }
 }
 

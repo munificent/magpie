@@ -29,13 +29,25 @@ namespace magpie
       return value ? true_ : false_;
     }
     
+    inline gc<Object> getBuiltIn(int value) const
+    {
+      switch (value) {
+        case 0: return false_;
+        case 1: return true_;
+        case 2: return nothing_;
+      }
+      
+      ASSERT(false, "Unknown built-in ID.");
+    }
+    
   private:
     MethodScope methods_;
     gc<Fiber> fiber_;
     
     gc<Object> true_;
     gc<Object> false_;
-
+    gc<Object> nothing_;
+    
     NO_COPY(VM);
   };
 }

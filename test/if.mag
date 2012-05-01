@@ -1,6 +1,4 @@
 def main()
-    // if then
-
     // Evaluate the 'then' expression if the condition is true.
     if true then print("good") // expect: good
     if false then print("bad")
@@ -10,8 +8,6 @@ def main()
 
     // Return nothing if the condition is false.
     print(if false then "bad") // expect: nothing
-
-    // if then else
 
     // Evaluate the 'then' expression if the condition is true.
     if true then print("good") else print("bad") // expect: good
@@ -23,6 +19,25 @@ def main()
     // Return the 'else' expression if the condition is false.
     print(if false then "bad" else "good") // expect: good
 
+    // Create a scope for the 'if' expression that is visible to the arms.
+    do
+        var a = "out"
+        if
+            var a = "in"
+            true
+        then print(a) // expect: in
+        print(a) // expect: out
+    end
+
+    do
+        var a = "out"
+        if
+            var a = "in"
+            false
+        then print("bad") else print(a) // expect: in
+        print(a) // expect: out
+    end
+
     // Create a local scope for the 'then' expression.
     val a = "out"
     if true then val a = "in"
@@ -33,55 +48,32 @@ def main()
     if false then "dummy" else val b = "in"
     print(b) // expect: out
 
-end/*
-specify("An 'if then' expression") with
-    it should("create a local scope for the 'if' expression that is visible " +
-              "to the 'then' expression") with
-        val a = "outside"
-        var b = "outside"
-        if val a = "inside" then b = a
-        a shouldEqual("outside")
-        b shouldEqual("inside")
+    // Allow a block for the 'if' expression.
+    if
+        print("if") // expect: if
+        true
+    then print("good") // expect: good
+
+    // Allow a block for the 'then' expression, terminated by 'end'.
+    if true then
+        print("a") // expect: a
+        print("b") // expect: b
     end
 
-    it should("allow a block for the 'if' expression") with
-        var a = 0
-        if
-            a = a + 1
-            a = a + 2
-            true
-        then
-            true
-        end
-        a shouldEqual(3)
+    // Allow a block for the 'then' expression, terminated by 'else'.
+    if true then
+        print("a") // expect: a
+        print("b") // expect: b
+    else print("bad")
+
+    // Allow a block for the 'else' expression.
+    if false then "bad" else
+        print("a") // expect: a
+        print("b") // expect: b
     end
 
-    it should("allow a block for the 'then' expression") with
-        var a = 0
-        if true then
-            a = a + 1
-            a = a + 2
-        end
-        a shouldEqual(3)
-    end
+    // An 'else' on its own line cannot follow a single-expression 'then'.
+    if true then
+        if false then print("bad")
+    else print("also bad")
 end
-
-specify("An 'if then else' expression") with
-    it should("allow a block for the 'else' expression") with
-        var a = 0
-        if false then "ignored" else
-            a = a + 1
-            a = a + 2
-        end
-        a shouldEqual(3)
-    end
-
-    it should("not associate an 'else' on the next line with a previous " +
-              "single-line 'then'") with
-        (if true then
-            if false then "then"
-        else
-            "else"
-        end) shouldEqual(nothing)
-    end
-end*/

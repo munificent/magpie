@@ -101,7 +101,7 @@ namespace magpie
     bool is(TokenType type) const { return type_ == type; }
     
     virtual void reach();
-    virtual void trace(std::ostream& out);
+    virtual void trace(std::ostream& out) const;
     
   private:
     TokenType   type_;

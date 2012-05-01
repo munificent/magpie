@@ -13,6 +13,7 @@ namespace magpie
   class Memory;
   class Multimethod;
   class NumberObject;
+  class NothingObject;
   class StringObject;
   
   class Object : public Managed
@@ -80,6 +81,22 @@ namespace magpie
     
   private:
     gc<String> name_;
+  };
+  
+  class NothingObject : public Object
+  {
+  public:
+    NothingObject()
+    : Object()
+    {}
+    
+    virtual void trace(std::ostream& stream) const
+    {
+      stream << "nothing";
+    }
+    
+  private:
+    NO_COPY(NothingObject);
   };
   
   class NumberObject : public Object

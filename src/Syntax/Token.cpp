@@ -81,7 +81,7 @@ namespace magpie
     Memory::reach(text_);
   }
   
-  void Token::trace(std::ostream& out)
+  void Token::trace(std::ostream& out) const
   {
     switch (type_)
     {

@@ -49,11 +49,11 @@ namespace magpie
           break;
         }
           
-        case OP_BOOL:
+        case OP_BUILT_IN:
         {
-          bool value = GET_A(ins) == 1;
+          int value = GET_A(ins);
           int reg = GET_B(ins);
-          store(frame, reg, vm_.getBool(value));
+          store(frame, reg, vm_.getBuiltIn(value));
           break;
         }
           

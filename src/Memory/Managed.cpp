@@ -10,7 +10,7 @@ namespace magpie
   {
     // TODO(bob): Hackish, but handy for debugging.
     std::stringstream result;
-    result << *this;
+    trace(result);
     return String::create(result.str().c_str());
   }
 
