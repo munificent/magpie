@@ -5,4 +5,7 @@ def main()
     // Can be stored in a variable.
     val a = nothing
     print(a) // expect: nothing
+
+    // Is falsy.
+    if nothing then print("bad") else print("good") // expect: good
 end

@@ -90,6 +90,9 @@ namespace magpie
     : Object()
     {}
     
+    // TODO(bob): Do we want to do this here, or rely on a "true?" method?
+    virtual bool toBool() const { return false; }
+    
     virtual void trace(std::ostream& stream) const
     {
       stream << "nothing";
