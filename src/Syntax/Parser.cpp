@@ -36,6 +36,7 @@ namespace magpie
     { NULL,                 NULL, -1 },                 // TOKEN_IS
     { NULL,                 NULL, -1 },                 // TOKEN_MATCH
     { NULL,                 NULL, -1 },                 // TOKEN_NOT
+    { &Parser::nothing,     NULL, -1 },                 // TOKEN_NOTHING
     { NULL,                 &Parser::binaryOp, 3 },     // TOKEN_OR
     { NULL,                 NULL, -1 },                 // TOKEN_RETURN
     { NULL,                 NULL, -1 },                 // TOKEN_THEN
@@ -256,6 +257,11 @@ namespace magpie
       // Just a bare name.
       return new NameNode(token->pos(), token->text());
     }
+  }
+  
+  gc<Node> Parser::nothing(gc<Token> token)
+  {
+    return new NothingNode(token->pos());
   }
   
   gc<Node> Parser::number(gc<Token> token)

@@ -33,7 +33,7 @@ namespace magpie
         case TOKEN_XOR:
           skipNewline_ = true;
           break;
-          
+
         // TODO(bob): Need to decide how we want to handle keywords. Some of
         // them specifically should *not* elide newlines because they can have
         // a block after them.
@@ -54,10 +54,10 @@ namespace magpie
         case TOKEN_VAR:
         case TOKEN_WHILE:
         */
-          
+
         case TOKEN_LINE:
           if (skipNewline_) continue;
-          
+
           // Collapse multiple newlines into one.
           skipNewline_ = true;
           break;
@@ -67,11 +67,11 @@ namespace magpie
           skipNewline_ = false;
           break;
       }
-      
+
       return token;
     }
   }
-  
+
   gc<Token> Lexer::readRawToken()
   {
     while (true)
@@ -81,7 +81,7 @@ namespace magpie
       start_ = pos_;
       startRow_ = currentRow_;
       startCol_ = currentCol_;
-      
+
       char c = advance();
       switch (c)
       {
@@ -170,11 +170,11 @@ namespace magpie
   char Lexer::advance()
   {
     char c = peek();
-    
+
     if (!isDone())
     {
       pos_++;
-      
+
       if (c == '\n')
       {
         currentRow_++;
@@ -185,7 +185,7 @@ namespace magpie
         currentCol_++;
       }
     }
-    
+
     return c;
   }
 
@@ -193,7 +193,7 @@ namespace magpie
   {
     return makeToken(type, source_->substring(start_, pos_));
   }
-  
+
   gc<Token> Lexer::makeToken(TokenType type, gc<String> text)
   {
     // TODO(bob): Include file name.
@@ -201,30 +201,30 @@ namespace magpie
         startRow_, startCol_, currentRow_, currentCol_);
     return new Token(type, text, pos);
   }
-  
+
   gc<Token> Lexer::error(gc<String> message)
   {
     return makeToken(TOKEN_ERROR, message);
   }
-  
+
   void Lexer::skipLineComment()
   {
     // TODO(bob): Handle EOF.
     while (peek() != '\n') advance();
   }
-  
+
   void Lexer::skipBlockComment()
   {
     advance();
     advance();
-    
+
     int nesting = 1;
-    
+
     while (nesting > 0)
     {
       // TODO(bob): Unterminated comment. Should return error.
       if (isDone()) return;
-      
+
       if ((peek() == '/') && (peek(1) == '*'))
       {
         advance();
@@ -243,7 +243,7 @@ namespace magpie
       }
     }
   }
-  
+
   gc<Token> Lexer::readName()
   {
     // TODO(bob): Handle EOF.
@@ -253,26 +253,27 @@ namespace magpie
 
     // See if it's a reserved word.
     TokenType type = TOKEN_NAME;
-    if      (*text == "and"   ) type = TOKEN_AND;
-    else if (*text == "case"  ) type = TOKEN_CASE;
-    else if (*text == "def"   ) type = TOKEN_DEF;
-    else if (*text == "do"    ) type = TOKEN_DO;
-    else if (*text == "else"  ) type = TOKEN_ELSE;
-    else if (*text == "end"   ) type = TOKEN_END;
-    else if (*text == "false" ) type = TOKEN_FALSE;
-    else if (*text == "for"   ) type = TOKEN_FOR;
-    else if (*text == "if"    ) type = TOKEN_IF;
-    else if (*text == "is"    ) type = TOKEN_IS;
-    else if (*text == "match" ) type = TOKEN_MATCH;
-    else if (*text == "not"   ) type = TOKEN_NOT;
-    else if (*text == "or"    ) type = TOKEN_OR;
-    else if (*text == "return") type = TOKEN_RETURN;
-    else if (*text == "then"  ) type = TOKEN_THEN;
-    else if (*text == "true"  ) type = TOKEN_TRUE;
-    else if (*text == "val"   ) type = TOKEN_VAL;
-    else if (*text == "var"   ) type = TOKEN_VAR;
-    else if (*text == "while" ) type = TOKEN_WHILE;
-    else if (*text == "xor"   ) type = TOKEN_XOR;
+    if      (*text == "and"    ) type = TOKEN_AND;
+    else if (*text == "case"   ) type = TOKEN_CASE;
+    else if (*text == "def"    ) type = TOKEN_DEF;
+    else if (*text == "do"     ) type = TOKEN_DO;
+    else if (*text == "else"   ) type = TOKEN_ELSE;
+    else if (*text == "end"    ) type = TOKEN_END;
+    else if (*text == "false"  ) type = TOKEN_FALSE;
+    else if (*text == "for"    ) type = TOKEN_FOR;
+    else if (*text == "if"     ) type = TOKEN_IF;
+    else if (*text == "is"     ) type = TOKEN_IS;
+    else if (*text == "match"  ) type = TOKEN_MATCH;
+    else if (*text == "not"    ) type = TOKEN_NOT;
+    else if (*text == "nothing") type = TOKEN_NOTHING;
+    else if (*text == "or"     ) type = TOKEN_OR;
+    else if (*text == "return" ) type = TOKEN_RETURN;
+    else if (*text == "then"   ) type = TOKEN_THEN;
+    else if (*text == "true"   ) type = TOKEN_TRUE;
+    else if (*text == "val"    ) type = TOKEN_VAL;
+    else if (*text == "var"    ) type = TOKEN_VAR;
+    else if (*text == "while"  ) type = TOKEN_WHILE;
+    else if (*text == "xor"    ) type = TOKEN_XOR;
 
     return makeToken(type, text);
   }
@@ -301,14 +302,14 @@ namespace magpie
       {
         return error(String::create("Unterminated string."));
       }
-      
+
       char c = advance();
       if (c == '"')
       {
         gc<String> text = String::create(chars);
         return makeToken(TOKEN_STRING, text);
       }
-      
+
       // An escape sequence.
       if (c == '\\')
       {
@@ -316,7 +317,7 @@ namespace magpie
         {
           return error(String::create("Unterminated string escape."));
         }
-        
+
         char e = advance();
         switch (e)
         {

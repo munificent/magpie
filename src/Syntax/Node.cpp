@@ -69,7 +69,12 @@ namespace magpie
   {
     out << name_;
   }
-
+  
+  void NothingNode::trace(std::ostream& out) const
+  {
+    out << "nothing";
+  }
+  
   void NumberNode::trace(std::ostream& out) const
   {
     out << value_;

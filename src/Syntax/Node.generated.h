@@ -8,6 +8,7 @@ class DefMethodNode;
 class DoNode;
 class IfNode;
 class NameNode;
+class NothingNode;
 class NumberNode;
 class SequenceNode;
 class StringNode;
@@ -26,6 +27,7 @@ public:
   virtual void visit(const DoNode& node, int dest) = 0;
   virtual void visit(const IfNode& node, int dest) = 0;
   virtual void visit(const NameNode& node, int dest) = 0;
+  virtual void visit(const NothingNode& node, int dest) = 0;
   virtual void visit(const NumberNode& node, int dest) = 0;
   virtual void visit(const SequenceNode& node, int dest) = 0;
   virtual void visit(const StringNode& node, int dest) = 0;
@@ -57,6 +59,7 @@ public:
   virtual const DoNode* asDoNode() const { return NULL; }
   virtual const IfNode* asIfNode() const { return NULL; }
   virtual const NameNode* asNameNode() const { return NULL; }
+  virtual const NothingNode* asNothingNode() const { return NULL; }
   virtual const NumberNode* asNumberNode() const { return NULL; }
   virtual const SequenceNode* asSequenceNode() const { return NULL; }
   virtual const StringNode* asStringNode() const { return NULL; }
@@ -288,6 +291,26 @@ public:
 
 private:
   gc<String> name_;
+};
+
+class NothingNode : public Node
+{
+public:
+  NothingNode(const SourcePos& pos)
+  : Node(pos)
+  {}
+
+  virtual void accept(NodeVisitor& visitor, int arg) const
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual const NothingNode* asNothingNode() const { return this; }
+
+
+  virtual void trace(std::ostream& out) const;
+
+private:
 };
 
 class NumberNode : public Node

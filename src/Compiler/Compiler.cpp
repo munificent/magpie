@@ -171,6 +171,11 @@ namespace magpie
     write(OP_MOVE, local, dest);
   }
   
+  void Compiler::visit(const NothingNode& node, int dest)
+  {
+    write(OP_BUILT_IN, BUILT_IN_NOTHING, dest);
+  }
+  
   void Compiler::visit(const NumberNode& node, int dest)
   {
     int index = compileConstant(node);

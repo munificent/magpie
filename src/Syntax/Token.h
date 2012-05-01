@@ -39,6 +39,7 @@ namespace magpie
     TOKEN_IS,
     TOKEN_MATCH,
     TOKEN_NOT,
+    TOKEN_NOTHING,
     TOKEN_OR,
     TOKEN_RETURN,
     TOKEN_THEN,

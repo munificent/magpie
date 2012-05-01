@@ -1,0 +1,8 @@
+def main()
+    // Knows its name.
+    print(nothing) // expect: nothing
+
+    // Can be stored in a variable.
+    val a = nothing
+    print(a) // expect: nothing
+end

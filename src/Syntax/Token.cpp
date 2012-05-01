@@ -55,6 +55,7 @@ namespace magpie
       case TOKEN_IS:            return "is";
       case TOKEN_MATCH:         return "match";
       case TOKEN_NOT:           return "not";
+      case TOKEN_NOTHING:       return "nothing";
       case TOKEN_OR:            return "or";
       case TOKEN_RETURN:        return "return";
       case TOKEN_THEN:          return "then";

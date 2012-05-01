@@ -32,6 +32,7 @@ nodes = sorted({
     ('elseArm',     'gc<Node>')],
   'Name': [
     ('name',        'gc<String>')],
+  'Nothing': [],
   'Number': [
     ('value',       'double')],
   'Sequence': [
@@ -120,8 +121,7 @@ private:
       if type.find('gc<') != -1:
         reachFields += '    Memory::reach(' + name + '_);\n'
 
-      if ctorParams != '':
-        ctorParams += ', '
+      ctorParams += ', '
       if type.startswith('Array'):
         # Array fields are passed to the constructor by reference.
         ctorParams += 'const ' + type + '&'
@@ -145,7 +145,7 @@ private:
 class {0}Node : public Node
 {{
 public:
-  {0}Node(const SourcePos& pos, {1})
+  {0}Node(const SourcePos& pos{1})
   : Node(pos){2}
   {{}}
 
