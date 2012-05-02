@@ -76,7 +76,6 @@ namespace magpie
     
     node.right()->accept(*this, dest);
     
-    // Compile the else arm.
     endJump(jumpToEnd, OP_JUMP_IF_FALSE, dest, code_.count() - jumpToEnd - 1);
   }
   
@@ -206,7 +205,14 @@ namespace magpie
   
   void Compiler::visit(const OrNode& node, int dest)
   {
-    ASSERT(false, "Not implemented.");
+    node.left()->accept(*this, dest);
+    
+    // Leave a space for the test and jump instruction.
+    int jumpToEnd = startJump();
+    
+    node.right()->accept(*this, dest);
+    
+    endJump(jumpToEnd, OP_JUMP_IF_TRUE, dest, code_.count() - jumpToEnd - 1);
   }
   
   void Compiler::visit(const SequenceNode& node, int dest)

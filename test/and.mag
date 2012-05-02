@@ -28,10 +28,6 @@ def main()
         end
     */
 
-    print(true and true) // expect: true
-    print(true and 1) // expect: 1
-    print(1 and true) // expect: true
-
     // Swallow a trailing newline.
     print(true and
         true) // expect: true

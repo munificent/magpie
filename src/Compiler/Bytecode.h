@@ -36,8 +36,9 @@ namespace magpie
     OP_LESS_THAN     = 0x08, // R(C) = RC(A) < RC(B)
     OP_JUMP          = 0x09, // A = offset
     OP_JUMP_IF_FALSE = 0x0a, // R(A) = test register, B = offset
-    OP_CALL          = 0x0b, // A: method, B: arg and result
-    OP_END           = 0x0c  // RC(A): result
+    OP_JUMP_IF_TRUE  = 0x0b, // R(A) = test register, B = offset
+    OP_CALL          = 0x0c, // A: method, B: arg and result
+    OP_END           = 0x0d  // RC(A): result
   };
   
   enum BuiltIn

@@ -70,6 +70,10 @@ namespace magpie
         cout << "JUMP_IF_FALSE " << GET_A(ins) << "? " << GET_B(ins);
         break;
         
+      case OP_JUMP_IF_TRUE:
+        cout << "JUMP_IF_TRUE " << GET_A(ins) << "? " << GET_B(ins);
+        break;
+        
       case OP_CALL:
         cout << "CALL          " << GET_A(ins) << " -> " << GET_B(ins);
         break;
