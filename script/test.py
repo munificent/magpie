@@ -5,6 +5,7 @@ from os import listdir
 from os.path import abspath, dirname, isdir, join, realpath, relpath, splitext
 import re
 from subprocess import Popen, PIPE
+import sys
 
 MAGPIE_DIR = dirname(dirname(realpath(__file__)))
 TEST_DIR = join(MAGPIE_DIR, 'test')
@@ -33,6 +34,12 @@ def walk(dir, callback):
 def run_test(path):
     if (splitext(path)[1] != '.mag'):
         return
+
+    # Check if we are just running a subset of the tests.
+    if len(sys.argv) == 2:
+        this_test = relpath(path, join(MAGPIE_DIR, 'test'))
+        if not this_test.startswith(sys.argv[1]):
+            return
 
     # Make a nice short path relative to the working directory.
     path = relpath(path)
@@ -69,7 +76,13 @@ def run_test(path):
 
     # Validate the output.
     expect_index = 0
-    for line in out.split():
+
+    # Remove the trailing last empty line.
+    out_lines = out.split('\n')
+    if out_lines[-1] == '':
+        del out_lines[-1]
+
+    for line in out_lines:
         if expect_index >= len(expect_output):
             fails.append('Got output "{0}" when none was expected.'.
                 format(line))
