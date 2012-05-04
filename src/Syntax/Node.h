@@ -16,7 +16,6 @@ namespace magpie
 {
   using std::ostream;
 
-  class MethodAst;
   class Node;
   class NodeVisitor;
   class Pattern;
@@ -41,34 +40,15 @@ namespace magpie
   class ModuleAst : public Managed
   {
   public:
-    ModuleAst(Array<gc<MethodAst> >& methods);
+    ModuleAst(Array<gc<Node> >& methods);
 
-    const Array<gc<MethodAst> > methods() const { return methods_; }
+    const Array<gc<Node> > methods() const { return methods_; }
 
     virtual void reach();
   private:
-    Array<gc<MethodAst> > methods_;
+    Array<gc<Node> > methods_;
   };
 
-  // A method definition.
-  // TODO(bob): Get rid of and unify with DefMethodNode.
-  class MethodAst : public Managed
-  {
-  public:
-    MethodAst(gc<String> name, gc<Pattern> parameter, gc<Node> body);
-
-    gc<String>  name()      const { return name_; }
-    gc<Pattern> parameter() const { return parameter_; }
-    gc<Node>    body()      const { return body_; }
-
-    virtual void reach();
-
-  private:
-    gc<String>  name_;
-    gc<Pattern> parameter_;
-    gc<Node>    body_;
-  };
-  
 #include "Node.generated.h"
 
   // Base class for all AST pattern node classes.

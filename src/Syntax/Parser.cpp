@@ -57,15 +57,14 @@ namespace magpie
 
   gc<ModuleAst> Parser::parseModule()
   {
-    // TODO(bob): Right now this just returns a sequence. Should probably have
-    // a different node type for the top level.
-    Array<gc<MethodAst> > methods;
+    Array<gc<Node> > methods;
     
     do
     {
       if (lookAhead(TOKEN_EOF)) break;
       
       // Method definition.
+      SourcePos start = current().pos();
       consume(TOKEN_DEF, "The top level of a module contains only method definitions.");
       gc<Token> name = consume(TOKEN_NAME,
                             "Expect a method name after 'def'.");
@@ -81,7 +80,8 @@ namespace magpie
       
       gc<Node> body = parseBlock();
       
-      methods.add(new MethodAst(name->text(), pattern, body));
+      SourcePos span = start.spanTo(current().pos());
+      methods.add(new DefMethodNode(span, name->text(), pattern, body));
     }
     while (match(TOKEN_LINE));
     
@@ -156,8 +156,7 @@ namespace magpie
       
       gc<Node> body = parseBlock();
       SourcePos span = start.spanTo(current().pos());
-      gc<MethodAst> method = new MethodAst(name->text(), pattern, body);
-      return new DefMethodNode(span, method);
+      return new DefMethodNode(span, name->text(), pattern, body);
     }
     
     if (lookAhead(TOKEN_DO))

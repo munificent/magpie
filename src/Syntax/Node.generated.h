@@ -206,9 +206,11 @@ private:
 class DefMethodNode : public Node
 {
 public:
-  DefMethodNode(const SourcePos& pos, gc<MethodAst> method)
+  DefMethodNode(const SourcePos& pos, gc<String> name, gc<Pattern> parameter, gc<Node> body)
   : Node(pos),
-    method_(method)
+    name_(name),
+    parameter_(parameter),
+    body_(body)
   {}
 
   virtual void accept(NodeVisitor& visitor, int arg) const
@@ -218,17 +220,23 @@ public:
 
   virtual const DefMethodNode* asDefMethodNode() const { return this; }
 
-  gc<MethodAst> method() const { return method_; }
+  gc<String> name() const { return name_; }
+  gc<Pattern> parameter() const { return parameter_; }
+  gc<Node> body() const { return body_; }
 
   virtual void reach()
   {
-    Memory::reach(method_);
+    Memory::reach(name_);
+    Memory::reach(parameter_);
+    Memory::reach(body_);
   }
 
   virtual void trace(std::ostream& out) const;
 
 private:
-  gc<MethodAst> method_;
+  gc<String> name_;
+  gc<Pattern> parameter_;
+  gc<Node> body_;
 };
 
 class DoNode : public Node

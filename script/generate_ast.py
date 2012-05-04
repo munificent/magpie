@@ -24,7 +24,9 @@ nodes = sorted({
     ('name',        'gc<String>'),
     ('rightArg',    'gc<Node>')],
   'DefMethod': [
-    ('method',      'gc<MethodAst>')], # TODO(bob): Get rid of MethodAst.
+    ('name',        'gc<String>'),
+    ('parameter',   'gc<Pattern>'),
+    ('body',        'gc<Node>')],
   'Do': [
     ('body',        'gc<Node>')],
   'If': [

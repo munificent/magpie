@@ -13,24 +13,24 @@ namespace magpie
     // Declare methods first so we can resolve mutually recursive calls.
     for (int i = 0; i < module->methods().count(); i++)
     {
-      const MethodAst& methodAst = *module->methods()[i];
+      const DefMethodNode& methodAst = *module->methods()[i]->asDefMethodNode();
       vm.methods().declare(methodAst.name());
     }
 
     // Try to compile all of the methods.
     for (int i = 0; i < module->methods().count(); i++)
     {
-      gc<MethodAst> methodAst = module->methods()[i];
+      const DefMethodNode& methodAst = *module->methods()[i]->asDefMethodNode();
       gc<Method> method = compileMethod(vm, methodAst, reporter);
 
       // Bail if there was a compile error.
       if (method.isNull()) return;
 
-      vm.methods().define(methodAst->name(), method);
+      vm.methods().define(methodAst.name(), method);
     }
   }
 
-  gc<Method> Compiler::compileMethod(VM& vm, gc<MethodAst> methodAst,
+  gc<Method> Compiler::compileMethod(VM& vm, const DefMethodNode& methodAst,
                                      ErrorReporter& reporter)
   {
     Compiler compiler(vm, reporter);
@@ -48,20 +48,20 @@ namespace magpie
     maxRegisters_(0)
   {}
 
-  gc<Method> Compiler::compile(gc<MethodAst> method)
+  gc<Method> Compiler::compile(const DefMethodNode& method)
   {
     // Create a fake local for the argument and result value.
     int result = makeLocal(String::create("(return)"));
 
     // TODO(bob): Hackish and temporary.
-    if (!method->parameter().isNull())
+    if (!method.parameter().isNull())
     {
       // Evaluate the method's parameter pattern.
-      declarePattern(*method->parameter());
-      method->parameter()->accept(*this, result);
+      declarePattern(*method.parameter());
+      method.parameter()->accept(*this, result);
     }
 
-    method->body()->accept(*this, result);
+    method.body()->accept(*this, result);
     write(OP_END, result);
 
     method_->setCode(code_, maxRegisters_);
@@ -133,10 +133,9 @@ namespace magpie
   void Compiler::visit(const DefMethodNode& node, int dest)
   {
     // TODO(bob): Handle nested non-top-level methods.
-    gc<Method> compiled = compileMethod(vm_, node.method(), reporter_);
+    gc<Method> compiled = compileMethod(vm_, node, reporter_);
     int methodIndex = method_->addMethod(compiled);
-    
-    int globalIndex = vm_.methods().declare(node.method()->name());
+    int globalIndex = vm_.methods().declare(node.name());
     
     write(OP_DEF_METHOD, methodIndex, globalIndex);
     

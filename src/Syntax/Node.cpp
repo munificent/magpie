@@ -2,7 +2,7 @@
 
 namespace magpie
 {
-  ModuleAst::ModuleAst(Array<gc<MethodAst> >& methods)
+  ModuleAst::ModuleAst(Array<gc<Node> >& methods)
   : methods_(methods)
   {}
   
@@ -10,20 +10,7 @@ namespace magpie
   {
     Memory::reach(methods_);
   }
-  
-  MethodAst::MethodAst(gc<String> name, gc<Pattern> parameter, gc<Node> body)
-  : name_(name),
-    parameter_(parameter),
-    body_(body)
-  {}
-  
-  void MethodAst::reach()
-  {
-    Memory::reach(name_);
-    Memory::reach(parameter_);
-    Memory::reach(body_);
-  }
-  
+    
   void AndNode::trace(std::ostream& out) const
   {
     out << "(and " << left_ << " " << right_ << ")";
