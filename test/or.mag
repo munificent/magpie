@@ -1,34 +1,32 @@
-def main()
-    // Note: These tests implicitly depend on zero and nothing being falsey.
-    //       Also rely on print() returning its argument.
+// Note: These tests implicitly depend on zero and nothing being falsey.
+//       Also rely on print() returning its argument.
 
-    // Return the first true argument.
-    print(1 or true) // expect: 1
-    print(0 or 1) // expect: 1
-    print(false or 0 or true) // expect: true
+// Return the first true argument.
+print(1 or true) // expect: 1
+print(0 or 1) // expect: 1
+print(false or 0 or true) // expect: true
 
-    // Return the last argument if all are false.
-    print(0 or false) // expect: false
-    print(0 or false or nothing) // expect: nothing
+// Return the last argument if all are false.
+print(0 or false) // expect: false
+print(0 or false or nothing) // expect: nothing
 
-    // Short-circuit at the first true argument.
-    print(false) or // expect: false
-        print(true) or // expect: true
-        print(true) // should not print
+// Short-circuit at the first true argument.
+print(false) or // expect: false
+    print(true) or // expect: true
+    print(true) // should not print
 
-    // Call 'true?' on the arguments to determine truthiness.
-    // TODO(bob): Support this.
-    /*
-        it should("call 'true?' on the arguments to determine truth") with
-            val left = TruthTest new(true)
-            val right = TruthTest new(false)
-            left or right
-            left called shouldEqual(true)
-            right called shouldEqual(false)
-        end
-    */
+// Call 'true?' on the arguments to determine truthiness.
+// TODO(bob): Support this.
+/*
+    it should("call 'true?' on the arguments to determine truth") with
+        val left = TruthTest new(true)
+        val right = TruthTest new(false)
+        left or right
+        left called shouldEqual(true)
+        right called shouldEqual(false)
+    end
+*/
 
-    // Swallow a trailing newline.
-    print(true or
-        true) // expect: true
-end
+// Swallow a trailing newline.
+print(true or
+    true) // expect: true

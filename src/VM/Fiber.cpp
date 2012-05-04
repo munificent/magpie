@@ -18,7 +18,7 @@ namespace magpie
     ASSERT(callFrames_.count() == 0, "Cannot re-initialize Fiber.");
 
     // TODO(bob): What should the arg object be here?
-    call(method, 0, gc<Object>());
+    call(method, 0, vm_.nothing());
   }
 
   gc<Object> Fiber::run()

@@ -1,79 +1,77 @@
-def main()
-    // Evaluate the 'then' expression if the condition is true.
-    if true then print("good") // expect: good
-    if false then print("bad")
+// Evaluate the 'then' expression if the condition is true.
+if true then print("good") // expect: good
+if false then print("bad")
 
-    // Return the 'then' expression if the condition is true.
-    print(if true then "good") // expect: good
+// Return the 'then' expression if the condition is true.
+print(if true then "good") // expect: good
 
-    // Return nothing if the condition is false.
-    print(if false then "bad") // expect: nothing
+// Return nothing if the condition is false.
+print(if false then "bad") // expect: nothing
 
-    // Evaluate the 'then' expression if the condition is true.
-    if true then print("good") else print("bad") // expect: good
-    if false then print("bad") else print("good") // expect: good
+// Evaluate the 'then' expression if the condition is true.
+if true then print("good") else print("bad") // expect: good
+if false then print("bad") else print("good") // expect: good
 
-    // Return the 'then' expression if the condition is true.
-    print(if true then "good" else "bad") // expect: good
+// Return the 'then' expression if the condition is true.
+print(if true then "good" else "bad") // expect: good
 
-    // Return the 'else' expression if the condition is false.
-    print(if false then "bad" else "good") // expect: good
+// Return the 'else' expression if the condition is false.
+print(if false then "bad" else "good") // expect: good
 
-    // Create a scope for the 'if' expression that is visible to the arms.
-    do
-        var a = "out"
-        if
-            var a = "in"
-            true
-        then print(a) // expect: in
-        print(a) // expect: out
-    end
-
-    do
-        var a = "out"
-        if
-            var a = "in"
-            false
-        then print("bad") else print(a) // expect: in
-        print(a) // expect: out
-    end
-
-    // Create a local scope for the 'then' expression.
-    val a = "out"
-    if true then val a = "in"
-    print(a) // expect: out
-
-    // Create a local scope for the 'else' expression.
-    val b = "out"
-    if false then "dummy" else val b = "in"
-    print(b) // expect: out
-
-    // Allow a block for the 'if' expression.
+// Create a scope for the 'if' expression that is visible to the arms.
+do
+    var a = "out"
     if
-        print("if") // expect: if
+        var a = "in"
         true
-    then print("good") // expect: good
-
-    // Allow a block for the 'then' expression, terminated by 'end'.
-    if true then
-        print("a") // expect: a
-        print("b") // expect: b
-    end
-
-    // Allow a block for the 'then' expression, terminated by 'else'.
-    if true then
-        print("a") // expect: a
-        print("b") // expect: b
-    else print("bad")
-
-    // Allow a block for the 'else' expression.
-    if false then "bad" else
-        print("a") // expect: a
-        print("b") // expect: b
-    end
-
-    // An 'else' on its own line cannot follow a single-expression 'then'.
-    if true then
-        if false then print("bad")
-    else print("also bad")
+    then print(a) // expect: in
+    print(a) // expect: out
 end
+
+do
+    var a = "out"
+    if
+        var a = "in"
+        false
+    then print("bad") else print(a) // expect: in
+    print(a) // expect: out
+end
+
+// Create a local scope for the 'then' expression.
+val a = "out"
+if true then val a = "in"
+print(a) // expect: out
+
+// Create a local scope for the 'else' expression.
+val b = "out"
+if false then "dummy" else val b = "in"
+print(b) // expect: out
+
+// Allow a block for the 'if' expression.
+if
+    print("if") // expect: if
+    true
+then print("good") // expect: good
+
+// Allow a block for the 'then' expression, terminated by 'end'.
+if true then
+    print("a") // expect: a
+    print("b") // expect: b
+end
+
+// Allow a block for the 'then' expression, terminated by 'else'.
+if true then
+    print("a") // expect: a
+    print("b") // expect: b
+else print("bad")
+
+// Allow a block for the 'else' expression.
+if false then "bad" else
+    print("a") // expect: a
+    print("b") // expect: b
+end
+
+// An 'else' on its own line cannot follow a single-expression 'then'.
+if true then
+    if false then print("bad")
+else print("also bad")

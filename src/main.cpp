@@ -56,17 +56,16 @@ int main(int argc, char * const argv[])
   ErrorReporter reporter;
   gc<String> source = readFile(fileName);
   Parser parser(fileName, source, reporter);
-  gc<ModuleAst> module = parser.parseModule();
+  gc<Node> moduleAst = parser.parseModule();
   
   if (reporter.numErrors() > 0) return 1;
   
   // Compile it.
-  Compiler::compileModule(vm, module, reporter);
+  Module* module = Compiler::compileModule(vm, moduleAst, reporter);
   
   if (reporter.numErrors() > 0) return 1;
 
-  // Invoke main().
-  vm.run();
+  vm.loadModule(module);
   
   return 0;
 }

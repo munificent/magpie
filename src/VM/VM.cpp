@@ -23,9 +23,10 @@ namespace magpie
     nothing_ = new NothingObject();
   }
 
-  gc<Object> VM::run()
+  void VM::loadModule(Module* module)
   {
-    fiber_->init(methods_.findMain());
+    modules_.add(module);
+    fiber_->init(module->body());
     
     while (true)
     {
@@ -34,10 +35,10 @@ namespace magpie
       // If the fiber returns null, it's still running but it did a GC run.
       // Since that moves the fiber, we return back to here so we can invoke
       // run() again at its new location in memory.
-      if (!result.isNull()) return result;
+      if (!result.isNull()) return;
     }
   }
-  
+
   void VM::reachRoots()
   {
     methods_.reach();

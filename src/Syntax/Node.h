@@ -37,18 +37,6 @@ namespace magpie
     NO_COPY(PatternVisitor);
   };
   
-  class ModuleAst : public Managed
-  {
-  public:
-    ModuleAst(Array<gc<Node> >& methods);
-
-    const Array<gc<Node> > methods() const { return methods_; }
-
-    virtual void reach();
-  private:
-    Array<gc<Node> > methods_;
-  };
-
 #include "Node.generated.h"
 
   // Base class for all AST pattern node classes.

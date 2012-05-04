@@ -22,7 +22,7 @@ namespace magpie
       reporter_(reporter)
     {}
     
-    gc<ModuleAst> parseModule();
+    gc<Node> parseModule();
     
   private:
     typedef gc<Node> (Parser::*PrefixParseFn)(gc<Token> token);
@@ -58,6 +58,8 @@ namespace magpie
     gc<Pattern> parsePattern();
     gc<Pattern> variablePattern();
 
+    gc<Node> createSequence(const Array<gc<Node> >& exprs);
+    
     // Gets the Token the parser is currently looking at.
     const Token& current();
     

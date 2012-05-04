@@ -1,40 +1,30 @@
 #include "Compiler.h"
 #include "ErrorReporter.h"
 #include "Method.h"
+#include "Module.h"
 #include "Node.h"
 #include "Object.h"
 #include "VM.h"
 
 namespace magpie
 {
-  void Compiler::compileModule(VM& vm, gc<ModuleAst> module,
-                               ErrorReporter& reporter)
+  Module* Compiler::compileModule(VM& vm, gc<Node> module,
+                                     ErrorReporter& reporter)
   {
-    // Declare methods first so we can resolve mutually recursive calls.
-    for (int i = 0; i < module->methods().count(); i++)
-    {
-      const DefMethodNode& methodAst = *module->methods()[i]->asDefMethodNode();
-      vm.methods().declare(methodAst.name());
-    }
+    // TODO(bob): Temp hackish. Wrap the module body in a fake method.
+    DefMethodNode* method = new DefMethodNode(module->pos(),
+        String::create("<module>"),
+        new VariablePattern(String::create("<unused>")), module);
 
-    // Try to compile all of the methods.
-    for (int i = 0; i < module->methods().count(); i++)
-    {
-      const DefMethodNode& methodAst = *module->methods()[i]->asDefMethodNode();
-      gc<Method> method = compileMethod(vm, methodAst, reporter);
-
-      // Bail if there was a compile error.
-      if (method.isNull()) return;
-
-      vm.methods().define(methodAst.name(), method);
-    }
+    gc<Method> body = compileMethod(vm, *method, reporter);
+    return new Module(body);
   }
 
-  gc<Method> Compiler::compileMethod(VM& vm, const DefMethodNode& methodAst,
+  gc<Method> Compiler::compileMethod(VM& vm, const DefMethodNode& method,
                                      ErrorReporter& reporter)
   {
     Compiler compiler(vm, reporter);
-    return compiler.compile(methodAst);
+    return compiler.compile(method);
   }
 
   Compiler::Compiler(VM& vm, ErrorReporter& reporter)

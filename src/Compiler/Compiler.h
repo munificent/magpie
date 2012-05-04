@@ -9,17 +9,17 @@ namespace magpie
 {
   class ErrorReporter;
   class Method;
-  class MethodAst;
-  class ModuleAst;
+  class Module;
+  class Node;
   class Object;
   class VM;
   
   class Compiler : private NodeVisitor, private PatternVisitor
   {
   public:
-    static void compileModule(VM& vm, gc<ModuleAst> module,
-                              ErrorReporter& reporter);
-    static gc<Method> compileMethod(VM& vm, const DefMethodNode& methodAst,
+    static Module* compileModule(VM& vm, gc<Node> module,
+                                 ErrorReporter& reporter);
+    static gc<Method> compileMethod(VM& vm, const DefMethodNode& method,
                                     ErrorReporter& reporter);
     
     virtual ~Compiler() {}

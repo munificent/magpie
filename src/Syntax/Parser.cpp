@@ -55,41 +55,21 @@ namespace magpie
     { NULL,                 NULL, -1 }                  // TOKEN_EOF
   };
 
-  gc<ModuleAst> Parser::parseModule()
+  gc<Node> Parser::parseModule()
   {
-    Array<gc<Node> > methods;
+    Array<gc<Node> > exprs;
     
     do
     {
       if (lookAhead(TOKEN_EOF)) break;
-      
-      // Method definition.
-      SourcePos start = current().pos();
-      consume(TOKEN_DEF, "The top level of a module contains only method definitions.");
-      gc<Token> name = consume(TOKEN_NAME,
-                            "Expect a method name after 'def'.");
-      
-      // TODO(bob): Parse real pattern(s).
-      gc<Pattern> pattern = NULL;
-      consume(TOKEN_LEFT_PAREN, "Temp.");
-      if (lookAhead(TOKEN_NAME))
-      {
-        pattern = parsePattern();
-      }
-      consume(TOKEN_RIGHT_PAREN, "Temp.");
-      
-      gc<Node> body = parseBlock();
-      
-      SourcePos span = start.spanTo(current().pos());
-      methods.add(new DefMethodNode(span, name->text(), pattern, body));
+      exprs.add(statementLike());
     }
     while (match(TOKEN_LINE));
     
     // TODO(bob): Should validate that we are at EOF here.
-    
-    return new ModuleAst(methods);
+    return createSequence(exprs);
   }
-
+  
   gc<Node> Parser::parseBlock(TokenType endToken)
   {
     TokenType dummy;
@@ -122,11 +102,7 @@ namespace magpie
       // single-expression block case.
       if (current().is(TOKEN_END)) consume();
       
-      // If there is just one expression in the sequence, don't wrap it.
-      if (exprs.count() == 1) return exprs[0];
-      
-      SourcePos span = exprs[0]->pos().spanTo(current().pos());
-      return new SequenceNode(span, exprs);
+      return createSequence(exprs);
     }
     else
     {
@@ -226,7 +202,6 @@ namespace magpie
     while (precedence < expressions_[current().type()].precedence)
     {
       token = consume();
-      
       InfixParseFn infix = expressions_[token->type()].infix;
       left = (this->*infix)(left, token);
     }
@@ -316,6 +291,17 @@ namespace magpie
       reporter_.error(current().pos(), "Expected pattern.");
       return gc<Pattern>();
     }
+  }
+  
+  gc<Node> Parser::createSequence(const Array<gc<Node> >& exprs)
+  {
+    // If there is just one expression in the sequence, don't wrap it.
+    if (exprs.count() == 1) return exprs[0];
+    
+    // TODO(bob): Using current() here and elsewhere is wrong. That's one
+    // token past the span.
+    SourcePos span = exprs[0]->pos().spanTo(exprs[-1]->pos());
+    return new SequenceNode(span, exprs);
   }
   
   const Token& Parser::current()

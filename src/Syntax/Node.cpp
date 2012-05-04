@@ -2,15 +2,6 @@
 
 namespace magpie
 {
-  ModuleAst::ModuleAst(Array<gc<Node> >& methods)
-  : methods_(methods)
-  {}
-  
-  void ModuleAst::reach()
-  {
-    Memory::reach(methods_);
-  }
-    
   void AndNode::trace(std::ostream& out) const
   {
     out << "(and " << left_ << " " << right_ << ")";

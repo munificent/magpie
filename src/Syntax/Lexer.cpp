@@ -209,8 +209,7 @@ namespace magpie
 
   void Lexer::skipLineComment()
   {
-    // TODO(bob): Handle EOF.
-    while (peek() != '\n') advance();
+    while (!isDone() && peek() != '\n') advance();
   }
 
   void Lexer::skipBlockComment()

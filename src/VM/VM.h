@@ -17,7 +17,7 @@ namespace magpie
   public:
     VM();
 
-    gc<Object> run();
+    void loadModule(Module* module);
     
     virtual void reachRoots();
 
@@ -25,6 +25,8 @@ namespace magpie
 
     // The globally available top-level methods.
     MethodScope& methods() { return methods_; }
+    
+    inline gc<Object> nothing() const { return nothing_; }
     
     inline gc<Object> getBool(bool value) const
     {
