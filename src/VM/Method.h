@@ -15,28 +15,42 @@ namespace magpie
   class Method : public Managed
   {
   public:
-    Method(gc<String> name, const Array<instruction>& code,
+    Method()
+    : code_(),
+      constants_(),
+      numRegisters_(0),
+      primitive_(NULL)
+    {}
+    
+    // TODO(bob): Get rid of this.
+    Method(const Array<instruction>& code,
            const Array<gc<Object> >& constants, int numRegisters)
-    : name_(name),
-      code_(code),
+    : code_(code),
       constants_(constants),
       numRegisters_(numRegisters),
       primitive_(NULL)
     {}
     
-    Method(gc<String> name, Primitive primitive)
-    : name_(name),
-      code_(),
+    Method(Primitive primitive)
+    : code_(),
       constants_(),
       numRegisters_(0),
       primitive_(primitive)
     {}
     
-    gc<String> name() const { return name_; }
+    void setCode(const Array<instruction>& code,
+                 int maxRegisters);
+    
     inline const Array<instruction>& code() const { return code_; }
     inline Primitive primitive() const { return primitive_; }
     
+    int addConstant(gc<Object> constant);
     gc<Object> getConstant(int index) const;
+    
+    // Adds the given method to this method's list of contained methods. Returns
+    // the index of the added method.
+    int addMethod(gc<Method> method);
+    gc<Method> getMethod(int index) const;
     
     int numRegisters() const { return numRegisters_; }
 
@@ -46,9 +60,12 @@ namespace magpie
     virtual void reach();
     
   private:
-    gc<String>         name_;
     Array<instruction> code_;
     Array<gc<Object> > constants_;
+    
+    // Methods declared within this method.
+    Array<gc<Method> > methods_;
+    
     int numRegisters_;
     
     // The primitive function for this method. Will be NULL for non-primitive
@@ -61,7 +78,8 @@ namespace magpie
   class MethodScope
   {
   public:
-    void declare(gc<String> name);
+    int declare(gc<String> name);
+    void define(int index, gc<Method> method);
     void define(gc<String> name, gc<Method> method);
     void define(gc<String> name, Primitive primitive);
     

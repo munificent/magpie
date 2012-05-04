@@ -31,7 +31,7 @@ namespace magpie
   }
 
   gc<Method> Compiler::compileMethod(VM& vm, gc<MethodAst> methodAst,
-                                       ErrorReporter& reporter)
+                                     ErrorReporter& reporter)
   {
     Compiler compiler(vm, reporter);
     return compiler.compile(methodAst);
@@ -41,9 +41,9 @@ namespace magpie
   : NodeVisitor(),
     vm_(vm),
     reporter_(reporter),
+    method_(new Method()),
     locals_(),
     code_(),
-    constants_(),
     numTemps_(0),
     maxRegisters_(0)
   {}
@@ -64,7 +64,9 @@ namespace magpie
     method->body()->accept(*this, result);
     write(OP_END, result);
 
-    return new Method(method->name(), code_, constants_, maxRegisters_);
+    method_->setCode(code_, maxRegisters_);
+    
+    return method_;
   }
   
   void Compiler::visit(const AndNode& node, int dest)
@@ -130,7 +132,15 @@ namespace magpie
 
   void Compiler::visit(const DefMethodNode& node, int dest)
   {
-    ASSERT(false, "Not implemented.");
+    // TODO(bob): Handle nested non-top-level methods.
+    gc<Method> compiled = compileMethod(vm_, node.method(), reporter_);
+    int methodIndex = method_->addMethod(compiled);
+    
+    int globalIndex = vm_.methods().declare(node.method()->name());
+    
+    write(OP_DEF_METHOD, methodIndex, globalIndex);
+    
+    // TODO(bob): Emit code to capture upvals and upvars.
   }
 
   void Compiler::visit(const DoNode& node, int dest)
@@ -286,22 +296,12 @@ namespace magpie
 
   int Compiler::compileConstant(const NumberNode& node)
   {
-    gc<Object> constant = new NumberObject(node.value());
-
-    // TODO(bob): Should check for duplicates. Only need one copy of any
-    // given constant.
-    constants_.add(constant);
-    return constants_.count() - 1;
+    return method_->addConstant(new NumberObject(node.value()));
   }
 
   int Compiler::compileConstant(const StringNode& node)
   {
-    gc<Object> constant = new StringObject(node.value());
-
-    // TODO(bob): Should check for duplicates. Only need one copy of any
-    // given constant.
-    constants_.add(constant);
-    return constants_.count() - 1;
+    return method_->addConstant(new StringObject(node.value()));
   }
 
   void Compiler::declarePattern(const Pattern& pattern)

@@ -1,4 +1,5 @@
 #include "VM.h"
+#include "Module.h"
 #include "Object.h"
 #include "Primitives.h"
 
@@ -8,7 +9,8 @@
 namespace magpie
 {
   VM::VM()
-  : fiber_()
+  : modules_(),
+    fiber_()
   {
     Memory::initialize(this, 1024 * 1024 * 2); // TODO(bob): Use non-magic number.
     
@@ -43,6 +45,11 @@ namespace magpie
     Memory::reach(true_);
     Memory::reach(false_);
     Memory::reach(nothing_);
+    
+    for (int i = 0; i < modules_.count(); i++)
+    {
+      modules_[i]->reach();
+    }
   }
 }
 

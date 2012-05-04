@@ -29,16 +29,17 @@ namespace magpie
     OP_MOVE          = 0x01, // A: from, B: to
     OP_CONSTANT      = 0x02, // C(A) -> R(B)
     OP_BUILT_IN      = 0x03, // A -> R(B)
-    OP_ADD           = 0x04, // R(C) = RC(A) + RC(B)
-    OP_SUBTRACT      = 0x05, // R(C) = RC(A) - RC(B)
-    OP_MULTIPLY      = 0x06, // R(C) = RC(A) * RC(B)
-    OP_DIVIDE        = 0x07, // R(C) = RC(A) / RC(B)
-    OP_LESS_THAN     = 0x08, // R(C) = RC(A) < RC(B)
-    OP_JUMP          = 0x09, // A = offset
-    OP_JUMP_IF_FALSE = 0x0a, // R(A) = test register, B = offset
-    OP_JUMP_IF_TRUE  = 0x0b, // R(A) = test register, B = offset
-    OP_CALL          = 0x0c, // A: method, B: arg and result
-    OP_END           = 0x0d  // RC(A): result
+    OP_DEF_METHOD    = 0x04, // A = index of method, B = index to define in globals
+    OP_ADD           = 0x05, // R(C) = RC(A) + RC(B)
+    OP_SUBTRACT      = 0x06, // R(C) = RC(A) - RC(B)
+    OP_MULTIPLY      = 0x07, // R(C) = RC(A) * RC(B)
+    OP_DIVIDE        = 0x08, // R(C) = RC(A) / RC(B)
+    OP_LESS_THAN     = 0x09, // R(C) = RC(A) < RC(B)
+    OP_JUMP          = 0x0a, // A = offset
+    OP_JUMP_IF_FALSE = 0x0b, // R(A) = test register, B = offset
+    OP_JUMP_IF_TRUE  = 0x0c, // R(A) = test register, B = offset
+    OP_CALL          = 0x0d, // A: method, B: arg and result
+    OP_END           = 0x0e  // RC(A): result
   };
   
   enum BuiltIn

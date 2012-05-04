@@ -77,9 +77,10 @@ namespace magpie
     
     VM&                vm_;
     ErrorReporter&     reporter_;
+    // The method being compiled.
+    gc<Method> method_;
     Array<gc<String> > locals_;
     Array<instruction> code_;
-    Array<gc<Object> > constants_;
     int                numTemps_;
     int                maxRegisters_;
     

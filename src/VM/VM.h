@@ -9,6 +9,8 @@
 
 namespace magpie
 {
+  class Module;
+  
   // The main Virtual Machine class for a running Magpie interpreter.
   class VM : public RootSource
   {
@@ -41,6 +43,7 @@ namespace magpie
     }
     
   private:
+    Array<Module*> modules_;
     MethodScope methods_;
     gc<Fiber> fiber_;
     

@@ -11,12 +11,12 @@ header_path = join(magpie_dir, 'src', 'Syntax', 'Node.generated.h')
 # Define the AST node classes.
 nodes = sorted({
   'And': [
-    ('left',      'gc<Node>'),
-    ('right',     'gc<Node>')],
+    ('left',        'gc<Node>'),
+    ('right',       'gc<Node>')],
   'BinaryOp': [
-    ('left',      'gc<Node>'),
-    ('type',      'TokenType'),
-    ('right',     'gc<Node>')],
+    ('left',        'gc<Node>'),
+    ('type',        'TokenType'),
+    ('right',       'gc<Node>')],
   'Bool': [
     ('value',       'bool')],
   'Call': [
@@ -24,9 +24,7 @@ nodes = sorted({
     ('name',        'gc<String>'),
     ('rightArg',    'gc<Node>')],
   'DefMethod': [
-    ('name',        'gc<String>'),
-    ('parameter',   'gc<Pattern>'),
-    ('body',        'gc<Node>')],
+    ('method',      'gc<MethodAst>')], # TODO(bob): Get rid of MethodAst.
   'Do': [
     ('body',        'gc<Node>')],
   'If': [
@@ -39,8 +37,8 @@ nodes = sorted({
   'Number': [
     ('value',       'double')],
   'Or': [
-    ('left',      'gc<Node>'),
-    ('right',     'gc<Node>')],
+    ('left',        'gc<Node>'),
+    ('right',       'gc<Node>')],
   'Sequence': [
     ('expressions', 'Array<gc<Node> >')],
   'String': [

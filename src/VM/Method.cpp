@@ -4,17 +4,42 @@
 
 namespace magpie
 {
+  void Method::setCode(const Array<instruction>& code, int maxRegisters)
+  {
+    // TODO(bob): Copying here is lame!
+    code_ = code;
+    numRegisters_ = maxRegisters;
+  }
+
+  int Method::addConstant(gc<Object> constant)
+  {
+    // TODO(bob): Should check for duplicates. Only need one copy of any
+    // given constant.
+    constants_.add(constant);
+    return constants_.count() - 1;
+  }
+  
   gc<Object> Method::getConstant(int index) const
   {
     ASSERT_INDEX(index, constants_.count());
     return constants_[index];
   }
   
+  int Method::addMethod(gc<Method> method)
+  {
+    methods_.add(method);
+    return methods_.count() - 1;
+  }
+
+  gc<Method> Method::getMethod(int index) const
+  {
+    ASSERT_INDEX(index, methods_.count());
+    return methods_[index];
+  }
+
   void Method::debugTrace() const
   {
     using namespace std;
-    
-    cout << name_ << endl;
     
     // TODO(bob): Constants.
     
@@ -40,6 +65,10 @@ namespace magpie
         
       case OP_BUILT_IN:
         cout << "BUILT_IN      " << GET_A(ins) << " -> " << GET_B(ins);
+        break;
+        
+      case OP_DEF_METHOD:
+        cout << "DEF_METHOD    " << GET_A(ins) << " " << GET_B(ins);
         break;
         
       case OP_ADD:
@@ -88,16 +117,23 @@ namespace magpie
 
   void Method::reach()
   {
-    Memory::reach(name_);
     Memory::reach(constants_);
+    Memory::reach(methods_);
   }
   
-  void MethodScope::declare(gc<String> name)
+  int MethodScope::declare(gc<String> name)
   {
+    // TODO(bob): Handle the name already existing.
     names_.add(name);
     methods_.add(gc<Method>());
+    return names_.count() - 1;
   }
   
+  void MethodScope::define(int index, gc<Method> method)
+  {
+    methods_[index] = method;
+  }
+
   void MethodScope::define(gc<String> name, gc<Method> method)
   {
     int index = find(name);
@@ -107,7 +143,7 @@ namespace magpie
   void MethodScope::define(gc<String> name, Primitive primitive)
   {
     names_.add(name);
-    methods_.add(new Method(name, primitive));
+    methods_.add(new Method(primitive));
   }
   
   int MethodScope::find(gc<String> name) const

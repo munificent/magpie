@@ -5,15 +5,15 @@
 
 namespace magpie
 {
+  class Method;
+  
   // A single Magpie module.
-  class Module : public Managed
+  class Module
   {
   public:
-    virtual void reachRoots();
-
-  private:
-
+    void reach();
+    
+  private:    
     NO_COPY(Module);
   };
 }
-

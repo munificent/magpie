@@ -156,7 +156,8 @@ namespace magpie
       
       gc<Node> body = parseBlock();
       SourcePos span = start.spanTo(current().pos());
-      return new DefMethodNode(span, name->text(), pattern, body);
+      gc<MethodAst> method = new MethodAst(name->text(), pattern, body);
+      return new DefMethodNode(span, method);
     }
     
     if (lookAhead(TOKEN_DO))
