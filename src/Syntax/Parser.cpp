@@ -221,10 +221,19 @@ namespace magpie
     // See if it's a method call like foo(arg).
     if (match(TOKEN_LEFT_PAREN))
     {
-      // TODO(bob): Is this right? Do we want to allow variable declarations
-      // here?
-      gc<Node> arg = statementLike();
-      consume(TOKEN_RIGHT_PAREN, "Expect ')' after call argument.");
+      gc<Node> arg;
+      if (match(TOKEN_RIGHT_PAREN))
+      {
+        // Implicit "nothing" argument.
+        arg = new NothingNode(current().pos());
+      }
+      else
+      {
+        // TODO(bob): Is this right? Do we want to allow variable declarations
+        // here?
+        arg = statementLike();
+        consume(TOKEN_RIGHT_PAREN, "Expect ')' after call argument.");
+      }
 
       SourcePos span = token->pos().spanTo(current().pos());
       return new CallNode(span, NULL, token->text(), arg);
