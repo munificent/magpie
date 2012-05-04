@@ -1,0 +1,5 @@
+// In middle of line.
+print/* ... */(/* */"ok"/* */) // expect: ok
+
+// Nested.
+print(/* in /* nest */ out */"ok") // expect: ok

@@ -1,0 +1,8 @@
+// Delimited using double quotes.
+print("some string") // expect: some string
+
+// Escape characters.
+print("\"")     // expect: "
+print("\\")     // expect: \
+print("(\n)")   // expect: (
+                // expect: )

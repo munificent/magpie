@@ -1,0 +1,14 @@
+// Call with no argument.
+def foo()
+    print("foo")
+end
+foo() // expect: foo
+
+// Call with explicit nothing argument.
+foo(nothing) // expect: foo
+
+// Call with variable parameter pattern.
+def bar(n)
+    print(n)
+end
+bar("arg") // expect: arg
