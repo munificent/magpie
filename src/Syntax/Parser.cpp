@@ -293,7 +293,8 @@ namespace magpie
   {
     if (lookAhead(TOKEN_NAME))
     {
-      return new VariablePattern(consume()->text());
+      gc<Token> token = consume();
+      return new VariablePattern(token->pos(), token->text());
     }
     else
     {

@@ -14,7 +14,7 @@ namespace magpie
     // TODO(bob): Temp hackish. Wrap the module body in a fake method.
     DefMethodNode* method = new DefMethodNode(module->pos(),
         String::create("<module>"),
-        new VariablePattern(String::create("<unused>")), module);
+        new VariablePattern(module->pos(), String::create("<unused>")), module);
 
     gc<Method> body = compileMethod(vm, *method, reporter);
     return new Module(body);
@@ -26,7 +26,55 @@ namespace magpie
     Compiler compiler(vm, reporter);
     return compiler.compile(method);
   }
+  
+  Compiler::Scope::Scope(Compiler* compiler)
+  : compiler_(*compiler),
+    parent_(compiler_.scope_),
+    start_(compiler_.locals_.count())
+  {
+    compiler_.scope_ = this;
+  }
+  
+  Compiler::Scope::~Scope()
+  {
+    ASSERT(start_ == -1, "Forgot to end scope.");
+  }
+  
+  int Compiler::Scope::makeLocal(const SourcePos& pos, gc<String> name)
+  {
+    ASSERT(compiler_.numTemps_ == 0,
+           "Cannot make a local variable when there are temporaries in use.");
+    
+    Array<gc<String> >& locals = compiler_.locals_;
 
+    // Make sure there isn't already a local variable with this name in this
+    // scope.
+    for (int i = start_; i < locals.count(); i++)
+    {
+      if (locals[i] == name)
+      {
+        compiler_.reporter_.error(pos,
+            "There is already a variable '%s' defined in this scope.",
+            name->cString());
+      }
+    }
+    
+    compiler_.locals_.add(name);
+    compiler_.updateMaxRegisters();
+    return compiler_.locals_.count() - 1;
+  }
+  
+  void Compiler::Scope::end()
+  {
+    ASSERT(start_ != -1, "Already ended this scope.");
+    ASSERT(compiler_.numTemps_ == 0,
+           "Cannot end a scope when there are temporaries in use.");
+    
+    compiler_.locals_.truncate(start_);
+    compiler_.scope_ = parent_;
+    start_ = -1;
+  }
+  
   Compiler::Compiler(VM& vm, ErrorReporter& reporter)
   : NodeVisitor(),
     vm_(vm),
@@ -35,13 +83,18 @@ namespace magpie
     locals_(),
     code_(),
     numTemps_(0),
-    maxRegisters_(0)
+    maxRegisters_(0),
+    scope_(NULL)
   {}
 
   gc<Method> Compiler::compile(const DefMethodNode& method)
   {
+    // Create a top-level scope.
+    Scope scope(this);
+    scope_ = &scope;
+    
     // Create a fake local for the argument and result value.
-    int result = makeLocal(String::create("(return)"));
+    int result = scope.makeLocal(method.pos(), String::create("(return)"));
 
     // TODO(bob): Hackish and temporary.
     if (!method.parameter().isNull())
@@ -56,6 +109,7 @@ namespace magpie
 
     method_->setCode(code_, maxRegisters_);
     
+    scope.end();
     return method_;
   }
   
@@ -134,15 +188,14 @@ namespace magpie
 
   void Compiler::visit(const DoNode& node, int dest)
   {
-    int doScope = startScope();
+    Scope doScope(this);
     node.body()->accept(*this, dest);
-    endScope(doScope);
+    doScope.end();
   }
 
   void Compiler::visit(const IfNode& node, int dest)
   {
-    // TODO(bob): Should create scopes for the arms.
-    int ifScope = startScope();
+    Scope ifScope(this);
 
     // Compile the condition.
     node.condition()->accept(*this, dest);
@@ -151,10 +204,10 @@ namespace magpie
     int jumpToElse = startJump();
 
     // Compile the then arm.
-    int thenScope = startScope();
+    Scope thenScope(this);
     node.thenArm()->accept(*this, dest);
-    endScope(thenScope);
-
+    thenScope.end();
+    
     // Leave a space for the then arm to jump over the else arm.
     int jumpPastElse = startJump();
 
@@ -163,9 +216,9 @@ namespace magpie
 
     if (!node.elseArm().isNull())
     {
-      int elseScope = startScope();
+      Scope elseScope = Scope(this);
       node.elseArm()->accept(*this, dest);
-      endScope(elseScope);
+      elseScope.end();
     }
     else
     {
@@ -174,7 +227,7 @@ namespace magpie
     }
 
     endJump(jumpPastElse, OP_JUMP, code_.count() - jumpPastElse - 1);
-    endScope(ifScope);
+    ifScope.end();
   }
 
   void Compiler::visit(const NameNode& node, int dest)
@@ -298,7 +351,7 @@ namespace magpie
     const VariablePattern* variablePattern = pattern.asVariablePattern();
     if (variablePattern != NULL)
     {
-      makeLocal(variablePattern->name());
+      scope_->makeLocal(pattern.pos(), variablePattern->name());
     }
   }
 
@@ -321,29 +374,6 @@ namespace magpie
   void Compiler::endJump(int from, OpCode op, int a, int b, int c)
   {
     code_[from] = MAKE_ABC(a, b, c, op);
-  }
-
-  int Compiler::startScope()
-  {
-    return locals_.count();
-  }
-
-  void Compiler::endScope(int numLocals)
-  {
-    ASSERT(numTemps_ == 0, "Cannot end a scope when there are temporaries in "
-           "use.");
-
-    locals_.truncate(numLocals);
-  }
-
-  int Compiler::makeLocal(gc<String> name)
-  {
-    ASSERT(numTemps_ == 0, "Cannot declare a local variable when there are "
-           "temporaries in use.");
-
-    locals_.add(name);
-    updateMaxRegisters();
-    return locals_.count() - 1;
   }
 
   int Compiler::makeTemp()

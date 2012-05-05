@@ -87,8 +87,9 @@ namespace magpie
     out << pattern_ << " = " << value_;
   }
   
-  VariablePattern::VariablePattern(gc<String> name)
-  : name_(name)
+  VariablePattern::VariablePattern(const SourcePos& pos, gc<String> name)
+  : Pattern(pos),
+    name_(name)
   {}
   
   void VariablePattern::reach()

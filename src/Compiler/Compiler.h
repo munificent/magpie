@@ -25,6 +25,21 @@ namespace magpie
     virtual ~Compiler() {}
     
   private:
+    class Scope
+    {
+    public:
+      Scope(Compiler* compiler);      
+      ~Scope();
+      
+      int makeLocal(const SourcePos& pos, gc<String> name);
+      void end();
+      
+    private:
+      Compiler& compiler_;
+      Scope* parent_;
+      int start_;
+    };
+    
     Compiler(VM& vm, ErrorReporter& reporter);
     
     gc<Method> compile(const DefMethodNode& methodAst);
@@ -68,23 +83,30 @@ namespace magpie
     int startJump();
     void endJump(int from, OpCode op, int a = 0xff, int b = 0xff, int c = 0xff);
     
-    int startScope();
-    void endScope(int numLocals);
-    int makeLocal(gc<String> name);
     int makeTemp();
     void releaseTemp();
     void updateMaxRegisters();
     
-    VM&                vm_;
-    ErrorReporter&     reporter_;
+    VM& vm_;
+    ErrorReporter& reporter_;
+    
     // The method being compiled.
     gc<Method> method_;
+    
+    // The names of the current in-scope local variables (including all outer
+    // scopes). The indices in this array correspond to the registers where
+    // those locals are stored.
     Array<gc<String> > locals_;
+    
     Array<instruction> code_;
-    int                numTemps_;
-    int                maxRegisters_;
+    
+    // The number of temporary registers currently in use.
+    int numTemps_;
+    int maxRegisters_;
+    
+    // The current inner-most local variable scope.
+    Scope* scope_;
     
     NO_COPY(Compiler);
   };
-
 }

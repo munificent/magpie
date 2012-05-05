@@ -43,20 +43,29 @@ namespace magpie
   class Pattern : public Managed
   {
   public:
+    Pattern(const SourcePos& pos)
+    : pos_(pos)
+    {}
+    
     virtual ~Pattern() {}
 
+    const SourcePos& pos() const { return pos_; }
+    
     // The visitor pattern.
     virtual void accept(PatternVisitor& visitor, int arg) const = 0;
 
     // Dynamic casts.
     virtual const VariablePattern* asVariablePattern() const { return NULL; }
+  
+  private:
+    SourcePos pos_;
   };
 
   // A variable pattern.
   class VariablePattern : public Pattern
   {
   public:
-    VariablePattern(gc<String> name);
+    VariablePattern(const SourcePos& pos, gc<String> name);
 
     DECLARE_PATTERN(VariablePattern);
 
