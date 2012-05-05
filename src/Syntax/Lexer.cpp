@@ -196,7 +196,6 @@ namespace magpie
 
   gc<Token> Lexer::makeToken(TokenType type, gc<String> text)
   {
-    // TODO(bob): Include file name.
     SourcePos pos = SourcePos(fileName_,
         startRow_, startCol_, currentRow_, currentCol_);
     return new Token(type, text, pos);
@@ -245,7 +244,6 @@ namespace magpie
 
   gc<Token> Lexer::readName()
   {
-    // TODO(bob): Handle EOF.
     while (isName(peek())) advance();
 
     gc<String> text = source_->substring(start_, pos_);
@@ -279,7 +277,6 @@ namespace magpie
 
   gc<Token> Lexer::readNumber()
   {
-    // TODO(bob): Handle EOF.
     while (isDigit(peek())) advance();
 
     // Read the fractional part, if any.

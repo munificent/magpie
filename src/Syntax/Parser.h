@@ -79,7 +79,6 @@ namespace magpie
     // way.
     void expect(TokenType expected, const char* errorMessage);
     
-    // TODO(bob): Return temp or gc?
     // Consumes the current Token and advances the Parser.
     gc<Token> consume();
     

@@ -22,15 +22,6 @@ namespace magpie
       primitive_(NULL)
     {}
     
-    // TODO(bob): Get rid of this.
-    Method(const Array<instruction>& code,
-           const Array<gc<Object> >& constants, int numRegisters)
-    : code_(code),
-      constants_(constants),
-      numRegisters_(numRegisters),
-      primitive_(NULL)
-    {}
-    
     Method(Primitive primitive)
     : code_(),
       constants_(),

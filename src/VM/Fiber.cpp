@@ -71,7 +71,6 @@ namespace magpie
           
           Primitive primitive = method->primitive();
           if (primitive != NULL) {
-            // TODO(bob): Pass arg and get return.
             gc<Object> result = primitive(arg);
             store(frame, GET_B(ins), result);
           } else {
