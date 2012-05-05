@@ -352,8 +352,6 @@ namespace magpie
   gc<Token> Parser::consume()
   {
     fillLookAhead(1);
-    // TODO(bob): Memory leak! Tokens aren't being deleted after being consumed.
-    // Either make sure they get deleted, or switch to a zone allocator.
     return read_.dequeue();
   }
 

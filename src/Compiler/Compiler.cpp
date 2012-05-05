@@ -105,8 +105,10 @@ namespace magpie
     int method = vm_.methods().find(node.name());
     if (method == -1)
     {
-      reporter_.error(node.pos(), "Method '%s' is not defined.",
-                      node.name()->cString());
+      // If we didn't find it, create an implicit forward declaration.
+      // TODO(bob): After the module is compiled, should go back and ensure that
+      // all forward declarations have been filled in.
+      method = vm_.methods().declare(node.name());
     }
 
     ASSERT(node.leftArg().isNull(), "Left-hand arguments aren't supported yet.");
@@ -114,8 +116,6 @@ namespace magpie
     // Compile the argument. Do this even if the method wasn't found so we can
     // report errors in the arg expression too.
     node.rightArg()->accept(*this, dest);
-
-    if (method == -1) return;
 
     write(OP_CALL, method, dest);
   }

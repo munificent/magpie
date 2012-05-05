@@ -123,7 +123,11 @@ namespace magpie
   
   int MethodScope::declare(gc<String> name)
   {
-    // TODO(bob): Handle the name already existing.
+    // If a method is already declared with that name (either as a forward
+    // declaration, or as an actual previous method) then reuse that index.
+    int existing = find(name);
+    if (existing != -1) return existing;
+    
     names_.add(name);
     methods_.add(gc<Method>());
     return names_.count() - 1;
