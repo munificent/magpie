@@ -13,6 +13,8 @@ TEST_DIR = join(MAGPIE_DIR, 'test')
 MAGPIE_APP = join(MAGPIE_DIR, 'build', 'Debug', 'magpie')
 
 EXPECT_PATTERN = re.compile(r'// expect: (.*)')
+EXPECT_ERROR_PATTERN = re.compile(r'// expect error')
+ERROR_PATTERN = re.compile(r'line (\d+) col \d+\] Error: ')
 
 class color:
     GREEN = '\033[32m'
@@ -46,12 +48,16 @@ def run_test(path):
 
     # Read the test and parse out the expectations.
     expect_output = []
+    expect_error = []
     i = 1
     with open(path, 'r') as file:
         for line in file:
             match = EXPECT_PATTERN.search(line)
             if match:
                 expect_output.append((match.group(1), i))
+            match = EXPECT_ERROR_PATTERN.search(line)
+            if match:
+                expect_error.append(i)
             i += 1
 
     # Invoke magpie and run the test.
@@ -60,19 +66,32 @@ def run_test(path):
 
     fails = []
 
-    # Validate that no errors occurred.
+    # Validate that no unexpected errors occurred.
     if err != '':
-        fails.append('Unexpected output on stderr:')
         for line in err.split('\n'):
-            if line != '':
-                fails.append(color.PINK + line + color.DEFAULT)
+            match = ERROR_PATTERN.search(line)
+            if match:
+                if not float(match.group(1)) in expect_error:
+                    fails.append('Unexpected error:')
+                    fails.append(line)
+            elif line != '':
+                fails.append('Unexpected output on stderr:')
+                fails.append(line)
+    else:
+        for line in expect_error:
+            fails.append('Expected error on line ' + str(line) + ' and got none.')
 
     # Validate the return code.
     # TODO(bob): Allow tests to specify expected return code.
     expect_return = 0
+
+    # If we expect compile errors in the test, it should return 1.
+    if len(expect_error) > 0:
+        expect_return = 1
+
     if proc.returncode != expect_return:
-        fails.append('{2}Expected return code {0} and got {1}{3}.'.
-            format(expect_return, proc.returncode, color.PINK, color.DEFAULT))
+        fails.append('Expected return code {0} and got {1}.'.
+            format(expect_return, proc.returncode))
 
     # Validate the output.
     expect_index = 0
@@ -104,7 +123,7 @@ def run_test(path):
     else:
         print color.RED + 'FAIL' + color.DEFAULT + ': ' + path
         for fail in fails:
-            print fail
+            print '     ', color.PINK + fail + color.DEFAULT
         print
 
 walk(TEST_DIR, run_test)
