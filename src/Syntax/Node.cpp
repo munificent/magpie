@@ -87,16 +87,6 @@ namespace magpie
     out << pattern_ << " = " << value_;
   }
   
-  VariablePattern::VariablePattern(const SourcePos& pos, gc<String> name)
-  : Pattern(pos),
-    name_(name)
-  {}
-  
-  void VariablePattern::reach()
-  {
-    Memory::reach(name_);
-  }
-  
   void VariablePattern::trace(std::ostream& out) const
   {
     out << name_;

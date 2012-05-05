@@ -15,8 +15,8 @@ class OrNode;
 class SequenceNode;
 class StringNode;
 class VariableNode;
+class VariablePattern;
 
-// Visitor pattern for dispatching on AST nodes. Implemented by the compiler.
 class NodeVisitor
 {
 public:
@@ -52,11 +52,13 @@ public:
   : pos_(pos)
   {}
 
+  virtual ~Node() {}
+
   // The visitor pattern.
   virtual void accept(NodeVisitor& visitor, int arg) const = 0;
 
   // Dynamic casts.
-  virtual const AndNode* asAndNode() const { return NULL; }
+    virtual const AndNode* asAndNode() const { return NULL; }
   virtual const BinaryOpNode* asBinaryOpNode() const { return NULL; }
   virtual const BoolNode* asBoolNode() const { return NULL; }
   virtual const CallNode* asCallNode() const { return NULL; }
@@ -495,4 +497,68 @@ private:
   bool isMutable_;
   gc<Pattern> pattern_;
   gc<Node> value_;
+};
+
+class PatternVisitor
+{
+public:
+  virtual ~PatternVisitor() {}
+
+  virtual void visit(const VariablePattern& node, int dest) = 0;
+
+protected:
+  PatternVisitor() {}
+
+private:
+  NO_COPY(PatternVisitor);
+};
+
+// Base class for all AST node classes.
+class Pattern : public Managed
+{
+public:
+  Pattern(const SourcePos& pos)
+  : pos_(pos)
+  {}
+
+  virtual ~Pattern() {}
+
+  // The visitor pattern.
+  virtual void accept(PatternVisitor& visitor, int arg) const = 0;
+
+  // Dynamic casts.
+    virtual const VariablePattern* asVariablePattern() const { return NULL; }
+
+  const SourcePos& pos() const { return pos_; }
+
+private:
+  SourcePos pos_;
+};
+
+class VariablePattern : public Pattern
+{
+public:
+  VariablePattern(const SourcePos& pos, gc<String> name)
+  : Pattern(pos),
+    name_(name)
+  {}
+
+  virtual void accept(PatternVisitor& visitor, int arg) const
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual const VariablePattern* asVariablePattern() const { return this; }
+
+  gc<String> name() const { return name_; }
+
+  virtual void reach()
+  {
+    Memory::reach(name_);
+  }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  gc<String> name_;
 };
