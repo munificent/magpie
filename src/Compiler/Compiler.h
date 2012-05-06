@@ -25,7 +25,10 @@ namespace magpie
     virtual ~Compiler() {}
     
   private:
-    class Scope
+    // Keeps track of local variable scopes to handle nesting and shadowing.
+    // This class can also visit patterns in order to create registers for the
+    // variables declared in a pattern.
+    class Scope : public PatternVisitor
     {
     public:
       Scope(Compiler* compiler);      
@@ -34,10 +37,15 @@ namespace magpie
       int makeLocal(const SourcePos& pos, gc<String> name);
       void end();
       
+      virtual void visit(const NothingPattern& pattern, int value);
+      virtual void visit(const VariablePattern& pattern, int value);
+
     private:
       Compiler& compiler_;
       Scope* parent_;
       int start_;
+      
+      NO_COPY(Scope);
     };
     
     Compiler(VM& vm, ErrorReporter& reporter);
@@ -59,6 +67,7 @@ namespace magpie
     virtual void visit(const StringNode& node, int dest);
     virtual void visit(const VariableNode& node, int dest);
 
+    virtual void visit(const NothingPattern& pattern, int value);
     virtual void visit(const VariablePattern& pattern, int value);
 
     // Compiles the given node. If it's a constant node, it adds the constant
@@ -77,8 +86,8 @@ namespace magpie
     // Walks the pattern and allocates locals for any variable patterns
     // encountered. We do this in a separate step so we can tell how many locals
     // we need for the pattern since the value temporary will come after that.
-    void declarePattern(const Pattern& pattern);
-
+    void reserveVariables(const Pattern& pattern);
+    
     void write(OpCode op, int a = 0xff, int b = 0xff, int c = 0xff);
     int startJump();
     void endJump(int from, OpCode op, int a = 0xff, int b = 0xff, int c = 0xff);

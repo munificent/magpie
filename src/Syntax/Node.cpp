@@ -87,6 +87,11 @@ namespace magpie
     out << pattern_ << " = " << value_;
   }
   
+  void NothingPattern::trace(std::ostream& out) const
+  {
+    out << "nothing";
+  }
+  
   void VariablePattern::trace(std::ostream& out) const
   {
     out << name_;

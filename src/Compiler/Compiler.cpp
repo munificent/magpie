@@ -75,6 +75,16 @@ namespace magpie
     start_ = -1;
   }
   
+  void Compiler::Scope::visit(const NothingPattern& pattern, int unused)
+  {
+    // Nothing to do.
+  }
+  
+  void Compiler::Scope::visit(const VariablePattern& pattern, int unused)
+  {
+    makeLocal(pattern.pos(), pattern.name());
+  }
+  
   Compiler::Compiler(VM& vm, ErrorReporter& reporter)
   : NodeVisitor(),
     vm_(vm),
@@ -96,13 +106,9 @@ namespace magpie
     // Create a fake local for the argument and result value.
     int result = scope.makeLocal(method.pos(), String::create("(return)"));
 
-    // TODO(bob): Hackish and temporary.
-    if (!method.parameter().isNull())
-    {
-      // Evaluate the method's parameter pattern.
-      declarePattern(*method.parameter());
-      method.parameter()->accept(*this, result);
-    }
+    // Evaluate the method's parameter pattern.
+    reserveVariables(*method.parameter());
+    method.parameter()->accept(*this, result);
 
     method.body()->accept(*this, result);
     write(OP_END, result);
@@ -216,7 +222,7 @@ namespace magpie
 
     if (!node.elseArm().isNull())
     {
-      Scope elseScope = Scope(this);
+      Scope elseScope(this);
       node.elseArm()->accept(*this, dest);
       elseScope.end();
     }
@@ -288,7 +294,7 @@ namespace magpie
   {
     // Reserve the locals up front. This way we'll compile the value to a slot
     // *after* them. This ensures locals always come before temporaries.
-    declarePattern(*node.pattern());
+    reserveVariables(*node.pattern());
 
     // Compile the value.
     int valueReg = makeTemp();
@@ -306,7 +312,12 @@ namespace magpie
 
     releaseTemp(); // valueReg.
   }
-
+  
+  void Compiler::visit(const NothingPattern& pattern, int value)
+  {
+    // TODO(bob): Eventually this should generate code to test the pattern.
+  }
+  
   void Compiler::visit(const VariablePattern& pattern, int value)
   {
     int variable = locals_.lastIndexOf(pattern.name());
@@ -346,13 +357,10 @@ namespace magpie
     return method_->addConstant(new StringObject(node.value()));
   }
 
-  void Compiler::declarePattern(const Pattern& pattern)
+  void Compiler::reserveVariables(const Pattern& pattern)
   {
-    const VariablePattern* variablePattern = pattern.asVariablePattern();
-    if (variablePattern != NULL)
-    {
-      scope_->makeLocal(pattern.pos(), variablePattern->name());
-    }
+    // Int is unused.
+    pattern.accept(*scope_, -1);
   }
 
   void Compiler::write(OpCode op, int a, int b, int c)

@@ -15,6 +15,7 @@ class OrNode;
 class SequenceNode;
 class StringNode;
 class VariableNode;
+class NothingPattern;
 class VariablePattern;
 
 class NodeVisitor
@@ -504,6 +505,7 @@ class PatternVisitor
 public:
   virtual ~PatternVisitor() {}
 
+  virtual void visit(const NothingPattern& node, int dest) = 0;
   virtual void visit(const VariablePattern& node, int dest) = 0;
 
 protected:
@@ -527,12 +529,33 @@ public:
   virtual void accept(PatternVisitor& visitor, int arg) const = 0;
 
   // Dynamic casts.
-    virtual const VariablePattern* asVariablePattern() const { return NULL; }
+    virtual const NothingPattern* asNothingPattern() const { return NULL; }
+  virtual const VariablePattern* asVariablePattern() const { return NULL; }
 
   const SourcePos& pos() const { return pos_; }
 
 private:
   SourcePos pos_;
+};
+
+class NothingPattern : public Pattern
+{
+public:
+  NothingPattern(const SourcePos& pos)
+  : Pattern(pos)
+  {}
+
+  virtual void accept(PatternVisitor& visitor, int arg) const
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual const NothingPattern* asNothingPattern() const { return this; }
+
+
+  virtual void trace(std::ostream& out) const;
+
+private:
 };
 
 class VariablePattern : public Pattern

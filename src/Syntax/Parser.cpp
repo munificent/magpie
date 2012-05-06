@@ -116,19 +116,25 @@ namespace magpie
   {
     if (lookAhead(TOKEN_DEF))
     {
+      // TODO(bob): Handle infix and postfix methods.
       SourcePos start = consume()->pos();
       gc<Token> name = consume(TOKEN_NAME,
                                "Expect a method name after 'def'.");
 
-      // TODO(bob): Parse real pattern(s). Handle prefix, infix, postfix
-      // methods.
       gc<Pattern> pattern = NULL;
-      consume(TOKEN_LEFT_PAREN, "Temp.");
-      if (lookAhead(TOKEN_NAME))
+      consume(TOKEN_LEFT_PAREN, "Expect '(' after method name.");
+      if (lookAhead(TOKEN_RIGHT_PAREN))
+      {
+        // Handle () empty pattern.
+        // TODO(bob): Better position.
+        gc<Token> token = consume();
+        pattern = new NothingPattern(token->pos());
+      }
+      else
       {
         pattern = parsePattern();
+        consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
       }
-      consume(TOKEN_RIGHT_PAREN, "Temp.");
       
       gc<Node> body = parseBlock();
       SourcePos span = start.spanTo(current().pos());
@@ -286,15 +292,15 @@ namespace magpie
   
   gc<Pattern> Parser::parsePattern()
   {
-    return variablePattern();
-  }
-  
-  gc<Pattern> Parser::variablePattern()
-  {
     if (lookAhead(TOKEN_NAME))
     {
       gc<Token> token = consume();
       return new VariablePattern(token->pos(), token->text());
+    }
+    else if (lookAhead(TOKEN_NOTHING))
+    {
+      gc<Token> token = consume();
+      return new NothingPattern(token->pos());
     }
     else
     {

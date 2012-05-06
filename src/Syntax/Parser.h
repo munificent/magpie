@@ -56,7 +56,6 @@ namespace magpie
 
     // Pattern parsing.
     gc<Pattern> parsePattern();
-    gc<Pattern> variablePattern();
 
     gc<Node> createSequence(const Array<gc<Node> >& exprs);
     
