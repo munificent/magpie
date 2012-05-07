@@ -107,8 +107,8 @@ namespace magpie
         cout << "CALL          " << GET_A(ins) << " -> " << GET_B(ins);
         break;
         
-      case OP_END:
-        cout << "END           " << GET_A(ins);
+      case OP_RETURN:
+        cout << "RETURN        " << GET_A(ins);
         break;
     }
     

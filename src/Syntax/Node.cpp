@@ -68,6 +68,18 @@ namespace magpie
     out << "(or " << left_ << " " << right_ << ")";
   }
   
+  void ReturnNode::trace(std::ostream& out) const
+  {
+    if (value_.isNull())
+    {
+      out << "(return)";
+    }
+    else
+    {
+      out << "(return " << value_ << ")";
+    }
+  }
+  
   void SequenceNode::trace(std::ostream& out) const
   {
     for (int i = 0; i < expressions_.count(); i++)

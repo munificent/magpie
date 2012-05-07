@@ -80,7 +80,7 @@ namespace magpie
           break;
         }
         
-        case OP_END:
+        case OP_RETURN:
         {
           gc<Object> result = loadRegisterOrConstant(frame, GET_A(ins));
           callFrames_.removeAt(-1);

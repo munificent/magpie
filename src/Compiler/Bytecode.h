@@ -39,7 +39,7 @@ namespace magpie
     OP_JUMP_IF_FALSE = 0x0b, // R(A) = test register, B = offset
     OP_JUMP_IF_TRUE  = 0x0c, // R(A) = test register, B = offset
     OP_CALL          = 0x0d, // A: method, B: arg and result
-    OP_END           = 0x0e  // RC(A): result
+    OP_RETURN        = 0x0e  // RC(A): result
   };
   
   enum BuiltIn

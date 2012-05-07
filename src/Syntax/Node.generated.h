@@ -12,6 +12,7 @@ class NameNode;
 class NothingNode;
 class NumberNode;
 class OrNode;
+class ReturnNode;
 class SequenceNode;
 class StringNode;
 class VariableNode;
@@ -34,6 +35,7 @@ public:
   virtual void visit(const NothingNode& node, int dest) = 0;
   virtual void visit(const NumberNode& node, int dest) = 0;
   virtual void visit(const OrNode& node, int dest) = 0;
+  virtual void visit(const ReturnNode& node, int dest) = 0;
   virtual void visit(const SequenceNode& node, int dest) = 0;
   virtual void visit(const StringNode& node, int dest) = 0;
   virtual void visit(const VariableNode& node, int dest) = 0;
@@ -70,6 +72,7 @@ public:
   virtual const NothingNode* asNothingNode() const { return NULL; }
   virtual const NumberNode* asNumberNode() const { return NULL; }
   virtual const OrNode* asOrNode() const { return NULL; }
+  virtual const ReturnNode* asReturnNode() const { return NULL; }
   virtual const SequenceNode* asSequenceNode() const { return NULL; }
   virtual const StringNode* asStringNode() const { return NULL; }
   virtual const VariableNode* asVariableNode() const { return NULL; }
@@ -407,6 +410,34 @@ public:
 private:
   gc<Node> left_;
   gc<Node> right_;
+};
+
+class ReturnNode : public Node
+{
+public:
+  ReturnNode(const SourcePos& pos, gc<Node> value)
+  : Node(pos),
+    value_(value)
+  {}
+
+  virtual void accept(NodeVisitor& visitor, int arg) const
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual const ReturnNode* asReturnNode() const { return this; }
+
+  gc<Node> value() const { return value_; }
+
+  virtual void reach()
+  {
+    Memory::reach(value_);
+  }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  gc<Node> value_;
 };
 
 class SequenceNode : public Node

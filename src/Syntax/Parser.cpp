@@ -169,6 +169,25 @@ namespace magpie
       return new IfNode(span, condition, thenArm, elseArm);
     }
     
+    if (match(TOKEN_RETURN))
+    {
+      SourcePos start = last().pos();
+      
+      // Parse the value if there is one.
+      gc<Node> value;
+      if (!lookAhead(TOKEN_LINE))
+      {
+        // TODO(bob): Using statementLike() here is weird. Some stuff makes
+        // sense like "return if ...". But "return var..." and
+        // "return return..." are pretty crazy. Should probably refine the
+        // grammar here.
+        value = statementLike();
+      }
+      
+      SourcePos span = start.spanTo(last().pos());
+      return new ReturnNode(span, value);
+    }
+    
     if (match(TOKEN_VAR) || match(TOKEN_VAL))
     {
       SourcePos start = last().pos();
@@ -178,7 +197,7 @@ namespace magpie
       
       gc<Pattern> pattern = parsePattern();
       consume(TOKEN_EQUALS, "Expect '=' after variable declaration.");
-      // TODO(bob): What precedence?
+      // TODO(bob): What precedence? Should also allow "if" here.
       gc<Node> value = parsePrecedence();
       
       SourcePos span = start.spanTo(last().pos());

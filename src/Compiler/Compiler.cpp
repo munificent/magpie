@@ -111,7 +111,7 @@ namespace magpie
     method.parameter()->accept(*this, result);
 
     method.body()->accept(*this, result);
-    write(OP_END, result);
+    write(OP_RETURN, result);
 
     method_->setCode(code_, maxRegisters_);
     
@@ -271,6 +271,22 @@ namespace magpie
     node.right()->accept(*this, dest);
     
     endJump(jumpToEnd, OP_JUMP_IF_TRUE, dest, code_.count() - jumpToEnd - 1);
+  }
+  
+  void Compiler::visit(const ReturnNode& node, int dest)
+  {
+    // Compile the return value.
+    if (node.value().isNull())
+    {
+      // No value, so implicitly "nothing".
+      write(OP_BUILT_IN, BUILT_IN_NOTHING, dest);
+    }
+    else
+    {
+      node.value()->accept(*this, dest);
+    }
+
+    write(OP_RETURN, dest);
   }
   
   void Compiler::visit(const SequenceNode& node, int dest)

@@ -41,6 +41,8 @@ nodes = sorted({
     'Or': [
         ('left',        'gc<Node>'),
         ('right',       'gc<Node>')],
+    'Return': [
+        ('value',       'gc<Node>')],
     'Sequence': [
         ('expressions', 'Array<gc<Node> >')],
     'String': [

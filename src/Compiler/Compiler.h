@@ -63,6 +63,7 @@ namespace magpie
     virtual void visit(const NothingNode& node, int dest);
     virtual void visit(const NumberNode& node, int dest);
     virtual void visit(const OrNode& node, int dest);
+    virtual void visit(const ReturnNode& node, int dest);
     virtual void visit(const SequenceNode& node, int dest);
     virtual void visit(const StringNode& node, int dest);
     virtual void visit(const VariableNode& node, int dest);
