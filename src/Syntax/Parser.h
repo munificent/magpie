@@ -54,6 +54,7 @@ namespace magpie
     // Infix expression parsers.
     gc<Node> and_(gc<Node> left, gc<Token> token);
     gc<Node> binaryOp(gc<Node> left, gc<Token> token);
+    gc<Node> call(gc<Node> left, gc<Token> token);
     gc<Node> or_(gc<Node> left, gc<Token> token);
 
     // Pattern parsing.

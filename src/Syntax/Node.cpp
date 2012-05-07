@@ -20,13 +20,39 @@ namespace magpie
   
   void CallNode::trace(std::ostream& out) const
   {
-    out << leftArg_ << " " << name_ << "(" << rightArg_ << ")";
+    out << "(";
+    if (!leftArg_.isNull())
+    {
+      out << leftArg_ << " ";
+    }
+    
+    out << name_;
+    
+    if (!rightArg_.isNull())
+    {
+      out << " " << rightArg_;
+    }
+    
+    out << ")";
   }
   
   void DefMethodNode::trace(std::ostream& out) const
   {
     // TODO(bob): Implement.
-    out << "(def)";
+    out << "(def ";
+    if (!leftParam_.isNull())
+    {
+      out << "(" << leftParam_ << ") ";
+    }
+
+    out << name_;
+    
+    if (!rightParam_.isNull())
+    {
+      out << " (" << rightParam_ << ")";
+    }
+    
+    out << " -> " << body_ << ")";
   }
   
   void DoNode::trace(std::ostream& out) const
@@ -82,15 +108,19 @@ namespace magpie
   
   void SequenceNode::trace(std::ostream& out) const
   {
+    out << "(\n";
+    
     for (int i = 0; i < expressions_.count(); i++)
     {
       out << expressions_[i] << "\n";
     }
+    
+    out << ")";
   }
   
   void StringNode::trace(std::ostream& out) const
   {
-    out << value_;
+    out << "\"" << value_ << "\"";
   }
   
   void VariableNode::trace(std::ostream& out) const

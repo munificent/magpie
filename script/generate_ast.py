@@ -24,8 +24,9 @@ nodes = sorted({
         ('name',        'gc<String>'),
         ('rightArg',    'gc<Node>')],
     'DefMethod': [
+        ('leftParam',   'gc<Pattern>'),
         ('name',        'gc<String>'),
-        ('parameter',   'gc<Pattern>'),
+        ('rightParam',  'gc<Pattern>'),
         ('body',        'gc<Node>')],
     'Do': [
         ('body',        'gc<Node>')],

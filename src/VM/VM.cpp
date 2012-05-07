@@ -3,8 +3,8 @@
 #include "Object.h"
 #include "Primitives.h"
 
-#define DEF_PRIMITIVE(name) \
-        methods_.define(String::create(#name), name##Primitive); \
+#define DEF_PRIMITIVE(name, signature) \
+        methods_.define(String::create(signature), name##Primitive); \
 
 namespace magpie
 {
@@ -16,7 +16,7 @@ namespace magpie
     
     fiber_ = new Fiber(*this);
     
-    DEF_PRIMITIVE(print);
+    DEF_PRIMITIVE(print, "print()");
     
     true_ = new BoolObject(true);
     false_ = new BoolObject(false);

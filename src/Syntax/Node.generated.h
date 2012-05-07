@@ -212,10 +212,11 @@ private:
 class DefMethodNode : public Node
 {
 public:
-  DefMethodNode(const SourcePos& pos, gc<String> name, gc<Pattern> parameter, gc<Node> body)
+  DefMethodNode(const SourcePos& pos, gc<Pattern> leftParam, gc<String> name, gc<Pattern> rightParam, gc<Node> body)
   : Node(pos),
+    leftParam_(leftParam),
     name_(name),
-    parameter_(parameter),
+    rightParam_(rightParam),
     body_(body)
   {}
 
@@ -226,22 +227,25 @@ public:
 
   virtual const DefMethodNode* asDefMethodNode() const { return this; }
 
+  gc<Pattern> leftParam() const { return leftParam_; }
   gc<String> name() const { return name_; }
-  gc<Pattern> parameter() const { return parameter_; }
+  gc<Pattern> rightParam() const { return rightParam_; }
   gc<Node> body() const { return body_; }
 
   virtual void reach()
   {
+    Memory::reach(leftParam_);
     Memory::reach(name_);
-    Memory::reach(parameter_);
+    Memory::reach(rightParam_);
     Memory::reach(body_);
   }
 
   virtual void trace(std::ostream& out) const;
 
 private:
+  gc<Pattern> leftParam_;
   gc<String> name_;
-  gc<Pattern> parameter_;
+  gc<Pattern> rightParam_;
   gc<Node> body_;
 };
 

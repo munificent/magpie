@@ -135,13 +135,16 @@ namespace magpie
   
   void MethodScope::define(int index, gc<Method> method)
   {
+    ASSERT(methods_[index].isNull(),
+           "Multimethods are't implemented yet, so cannot redefine an "
+           "already defined method.");
+    
     methods_[index] = method;
   }
 
   void MethodScope::define(gc<String> name, gc<Method> method)
   {
-    int index = find(name);
-    methods_[index] = method;
+    define(find(name), method);
   }
   
   void MethodScope::define(gc<String> name, Primitive primitive)
@@ -158,16 +161,6 @@ namespace magpie
     }
     
     return -1;
-  }
-  
-  gc<Method> MethodScope::findMain() const
-  {
-    for (int i = 0; i < methods_.count(); i++)
-    {
-      if (*names_[i] == "main") return methods_[i];
-    }
-    
-    return gc<Method>();
   }
   
   void MethodScope::reach()

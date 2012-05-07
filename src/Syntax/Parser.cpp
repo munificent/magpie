@@ -6,7 +6,16 @@
 
 namespace magpie
 {
-  // TODO(bob): Figure out full precedence table.
+  // Precedence table:
+  // 1 assignment  
+  // 2 record (,)
+  // 3 logical (and or)
+  // 4 equality (== !=)
+  // 5 comparison (< > <= >=)
+  // 6 term (+ -)
+  // 7 product (* / %)
+  // 8 unary (not -)
+  // 9 call
   Parser::Parselet Parser::expressions_[] = {
     // Punctuators.
     { NULL,                 NULL, -1 },                 // TOKEN_LEFT_PAREN
@@ -16,12 +25,12 @@ namespace magpie
     { NULL,                 NULL, -1 },                 // TOKEN_LEFT_BRACE
     { NULL,                 NULL, -1 },                 // TOKEN_RIGHT_BRACE
     { NULL,                 NULL, -1 },                 // TOKEN_EQUALS
-    { NULL,                 &Parser::binaryOp, 7 },     // TOKEN_PLUS
-    { NULL,                 &Parser::binaryOp, 7 },     // TOKEN_MINUS
-    { NULL,                 &Parser::binaryOp, 8 },     // TOKEN_STAR
-    { NULL,                 &Parser::binaryOp, 8 },     // TOKEN_SLASH
-    { NULL,                 &Parser::binaryOp, 8 },     // TOKEN_PERCENT
-    { NULL,                 &Parser::binaryOp, 4 },     // TOKEN_LESS_THAN
+    { NULL,                 &Parser::binaryOp, 6 },     // TOKEN_PLUS
+    { NULL,                 &Parser::binaryOp, 6 },     // TOKEN_MINUS
+    { NULL,                 &Parser::binaryOp, 7 },     // TOKEN_STAR
+    { NULL,                 &Parser::binaryOp, 7 },     // TOKEN_SLASH
+    { NULL,                 &Parser::binaryOp, 7 },     // TOKEN_PERCENT
+    { NULL,                 &Parser::binaryOp, 5 },     // TOKEN_LESS_THAN
 
     // Keywords.
     { NULL,                 &Parser::and_, 3 },         // TOKEN_AND
@@ -46,7 +55,7 @@ namespace magpie
     { NULL,                 NULL, -1 },                 // TOKEN_WHILE
     { NULL,                 NULL, -1 },                 // TOKEN_XOR
 
-    { &Parser::name,        NULL, -1 },                 // TOKEN_NAME
+    { &Parser::name,        &Parser::call, 9 },         // TOKEN_NAME
     { &Parser::number,      NULL, -1 },                 // TOKEN_NUMBER
     { &Parser::string,      NULL, -1 },                 // TOKEN_STRING
 
@@ -116,27 +125,35 @@ namespace magpie
   {
     if (match(TOKEN_DEF))
     {
-      // TODO(bob): Handle infix and postfix methods.
       SourcePos start = last().pos();
+      
+      gc<Pattern> leftParam;
+      if (match(TOKEN_LEFT_PAREN))
+      {
+        leftParam = parsePattern();
+        consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
+      }
+      
       gc<Token> name = consume(TOKEN_NAME,
                                "Expect a method name after 'def'.");
 
-      gc<Pattern> pattern = NULL;
-      consume(TOKEN_LEFT_PAREN, "Expect '(' after method name.");
-      if (match(TOKEN_RIGHT_PAREN))
+      gc<Pattern> rightParam;
+      if (match(TOKEN_LEFT_PAREN))
       {
-        // Handle () empty pattern.
-        pattern = new NothingPattern(last().pos());
-      }
-      else
-      {
-        pattern = parsePattern();
-        consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
+        if (match(TOKEN_RIGHT_PAREN))
+        {
+          // Allow () empty pattern to just mean "no parameter".
+        }
+        else
+        {
+          rightParam = parsePattern();
+          consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
+        }
       }
       
       gc<Node> body = parseBlock();
       SourcePos span = start.spanTo(last().pos());
-      return new DefMethodNode(span, name->text(), pattern, body);
+      return new DefMethodNode(span, leftParam, name->text(), rightParam, body);
     }
     
     if (match(TOKEN_DO))
@@ -241,31 +258,7 @@ namespace magpie
   
   gc<Node> Parser::name(gc<Token> token)
   {
-    // See if it's a method call like foo(arg).
-    if (match(TOKEN_LEFT_PAREN))
-    {
-      gc<Node> arg;
-      if (match(TOKEN_RIGHT_PAREN))
-      {
-        // Implicit "nothing" argument.
-        arg = new NothingNode(last().pos());
-      }
-      else
-      {
-        // TODO(bob): Is this right? Do we want to allow variable declarations
-        // here?
-        arg = statementLike();
-        consume(TOKEN_RIGHT_PAREN, "Expect ')' after call argument.");
-      }
-
-      SourcePos span = token->pos().spanTo(last().pos());
-      return new CallNode(span, NULL, token->text(), arg);
-    }
-    else
-    {
-      // Just a bare name.
-      return new NameNode(token->pos(), token->text());
-    }
+    return call(gc<Node>(), token);
   }
   
   gc<Node> Parser::nothing(gc<Token> token)
@@ -299,6 +292,38 @@ namespace magpie
     gc<Node> right = parsePrecedence(expressions_[token->type()].precedence);
     
     return new BinaryOpNode(token->pos(), left, token->type(), right);
+  }
+  
+  gc<Node> Parser::call(gc<Node> left, gc<Token> token)
+  {
+    // See if we have an argument on the right.
+    bool hasRightArg = false;
+    gc<Node> right;
+    if (match(TOKEN_LEFT_PAREN))
+    {
+      hasRightArg = true;
+      if (match(TOKEN_RIGHT_PAREN))
+      {
+        // Allow () to distinguish a call from a name, but don't provide an
+        // argument.
+      }
+      else
+      {
+        // TODO(bob): Is this right? Do we want to allow variable declarations
+        // here?
+        right = statementLike();
+        consume(TOKEN_RIGHT_PAREN, "Expect ')' after call argument.");
+      }
+    }
+    
+    if (left.isNull() && !hasRightArg)
+    {
+      // Just a bare name.
+      return new NameNode(token->pos(), token->text());
+    }
+
+    // TODO(bob): Better position.
+    return new CallNode(token->pos(), left, token->text(), right);
   }
   
   gc<Node> Parser::or_(gc<Node> left, gc<Token> token)

@@ -119,4 +119,37 @@ namespace magpie
     
     NO_COPY(Compiler);
   };
+  
+  // Method definitions and calls are statically distinguished by the records
+  // used for the left and right arguments (or parameters). For example, a
+  // call to "foo(1, b: 2)" is statically known to be different from a call to
+  // "foo(1)" or "1 foo".
+  //
+  // This class supports that by generating a "signature" string for a method
+  // definition or call that contains both the method's name, and the structure
+  // of its arguments. The above examples would have signatures "foo(,b)",
+  // "foo()", and "()foo" respectively.
+  class SignatureBuilder
+  {
+  public:
+    // Builds a signature for the method being called by the given node.
+    static gc<String> build(const CallNode& node);
+    
+    // Builds a signature for the given method definition.
+    static gc<String> build(const DefMethodNode& node);
+    
+  private:
+    SignatureBuilder()
+    : length_(0)
+    {}
+    
+    static const int MAX_LENGTH = 256; // TODO(bob): Use something dynamic.
+    
+    void writeArg(gc<Node> node);
+    void writeParam(gc<Pattern> pattern);
+    void add(const char* text);
+    
+    int length_;
+    char signature_[MAX_LENGTH];
+  };
 }

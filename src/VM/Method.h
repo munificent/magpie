@@ -77,8 +77,6 @@ namespace magpie
     int find(gc<String> name) const;
     gc<Method> get(int index) const { return methods_[index]; }
     
-    gc<Method> findMain() const;
-    
     void reach();
     
   private:

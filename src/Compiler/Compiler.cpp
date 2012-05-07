@@ -13,8 +13,10 @@ namespace magpie
   {
     // TODO(bob): Temp hackish. Wrap the module body in a fake method.
     DefMethodNode* method = new DefMethodNode(module->pos(),
+        new NothingPattern(module->pos()),
         String::create("<module>"),
-        new VariablePattern(module->pos(), String::create("<unused>")), module);
+        new NothingPattern(module->pos()),
+        module);
 
     gc<Method> body = compileMethod(vm, *method, reporter);
     return new Module(body);
@@ -106,9 +108,11 @@ namespace magpie
     // Create a fake local for the argument and result value.
     int result = scope.makeLocal(method.pos(), String::create("(return)"));
 
-    // Evaluate the method's parameter pattern.
-    reserveVariables(*method.parameter());
-    method.parameter()->accept(*this, result);
+    // Evaluate the method's parameter patterns.
+    if (!method.leftParam().isNull()) reserveVariables(*method.leftParam());
+    if (!method.rightParam().isNull()) reserveVariables(*method.rightParam());
+    if (!method.leftParam().isNull()) method.leftParam()->accept(*this, result);
+    if (!method.rightParam().isNull()) method.rightParam()->accept(*this, result);
 
     method.body()->accept(*this, result);
     write(OP_RETURN, result);
@@ -162,21 +166,39 @@ namespace magpie
 
   void Compiler::visit(const CallNode& node, int dest)
   {
-    int method = vm_.methods().find(node.name());
+    gc<String> signature = SignatureBuilder::build(node);
+    int method = vm_.methods().find(signature);
     if (method == -1)
     {
       // If we didn't find it, create an implicit forward declaration.
       // TODO(bob): After the module is compiled, should go back and ensure that
       // all forward declarations have been filled in.
-      method = vm_.methods().declare(node.name());
+      method = vm_.methods().declare(signature);
     }
 
-    ASSERT(node.leftArg().isNull(), "Left-hand arguments aren't supported yet.");
+    ASSERT(node.leftArg().isNull() || node.rightArg().isNull(),
+           "Calls with left and right args aren't implemented yet.");
 
-    // Compile the argument. Do this even if the method wasn't found so we can
-    // report errors in the arg expression too.
-    node.rightArg()->accept(*this, dest);
+    // Compile the argument(s).
+    // TODO(bob): This is going to need work. Basically, it needs to destructure
+    // the left and right arguments to figure out how many actual arguments
+    // there are, allocate the right amount of temporaries, compile the args
+    // to those, and then call. (For cases where there is just a total of one
+    // argument, we can just use the one existing dest register, though.
+    // Likewise, the method prelude code needs to handle multiple arguments.
+    // For now, since we don't have records, we only support postfix or prefix
+    // calls, but not infix. That ensures we only ever need one register.
 
+    if (!node.leftArg().isNull())
+    {
+      node.leftArg()->accept(*this, dest);
+    }
+    
+    if (!node.rightArg().isNull())
+    {
+      node.rightArg()->accept(*this, dest);
+    }
+    
     write(OP_CALL, method, dest);
   }
 
@@ -185,7 +207,9 @@ namespace magpie
     // TODO(bob): Handle nested non-top-level methods.
     gc<Method> compiled = compileMethod(vm_, node, reporter_);
     int methodIndex = method_->addMethod(compiled);
-    int globalIndex = vm_.methods().declare(node.name());
+    
+    gc<String> signature = SignatureBuilder::build(node);
+    int globalIndex = vm_.methods().declare(signature);
     
     write(OP_DEF_METHOD, methodIndex, globalIndex);
     
@@ -419,5 +443,70 @@ namespace magpie
     {
       maxRegisters_ = locals_.count() + numTemps_;
     }
+  }
+  
+  gc<String> SignatureBuilder::build(const CallNode& node)
+  {
+    // 1 foo                 -> ()foo
+    // 1 foo()               -> ()foo
+    // 1 foo(2)              -> ()foo()
+    // foo(1)                -> foo()
+    // (1, 2) foo            -> (,)foo
+    // foo(1, b: 2, 3, e: 4) -> foo(,b,,e)
+    
+    SignatureBuilder builder;
+    
+    builder.writeArg(node.leftArg());
+    builder.add(node.name()->cString());
+    builder.writeArg(node.rightArg());
+    
+    return String::create(builder.signature_, builder.length_);
+  }
+  
+  gc<String> SignatureBuilder::build(const DefMethodNode& node)
+  {
+    // def (a) foo               -> ()foo
+    // def (a) foo()             -> ()foo
+    // def (a) foo(b)            -> ()foo()
+    // def foo(b)                -> foo()
+    // def (a, b) foo            -> (,)foo
+    // def foo(a, b: c, d, e: f) -> foo(,b,,e)
+    
+    SignatureBuilder builder;
+    
+    builder.writeParam(node.leftParam());
+    builder.add(node.name()->cString());
+    builder.writeParam(node.rightParam());
+    
+    return String::create(builder.signature_, builder.length_);
+  }
+  
+  void SignatureBuilder::writeArg(gc<Node> node)
+  {
+    // Do nothing if there is no arg.
+    if (node.isNull()) return;
+    
+    // TODO(bob): Support record expressions.
+    // Right now, all other nodes mean "some arg goes here".
+    add("()");
+  }
+
+  void SignatureBuilder::writeParam(gc<Pattern> pattern)
+  {
+    // Do nothing if there is no pattern.
+    if (pattern.isNull()) return;
+    
+    // TODO(bob): Support record patterns.
+    // Right now, all other patterns mean "some arg goes here".
+    add("()");
+  }
+
+  void SignatureBuilder::add(const char* text)
+  {
+    int length = strlen(text);
+    ASSERT(length_ + length < MAX_LENGTH, "Signature too long.");
+    
+    strcpy(signature_ + length_, text);
+    length_ += strlen(text);
   }
 }

@@ -1,14 +1,32 @@
-// Call with no argument.
+// Method with no parameter on either side.
 def foo()
-    print("foo")
+    print("no params")
 end
-foo() // expect: foo
 
-// Call with explicit nothing argument.
-foo(nothing) // expect: foo
-
-// Call with variable parameter pattern.
-def bar(n)
+// Method with right parameter.
+def foo(n)
+    print("right")
     print(n)
 end
-bar("arg") // expect: arg
+
+// Method with left parameter.
+def (n) foo
+    print("left")
+    print(n)
+end
+
+
+// Call with no argument.
+foo() // expect: no params
+
+// Call with explicit nothing argument.
+foo(nothing) // expect: right
+             // expect: nothing
+
+// Call with right argument.
+foo("arg") // expect: right
+           // expect: arg
+
+// Call with left argument.
+"arg" foo // expect: left
+          // expect: arg
