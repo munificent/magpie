@@ -114,21 +114,19 @@ namespace magpie
 
   gc<Node> Parser::statementLike()
   {
-    if (lookAhead(TOKEN_DEF))
+    if (match(TOKEN_DEF))
     {
       // TODO(bob): Handle infix and postfix methods.
-      SourcePos start = consume()->pos();
+      SourcePos start = last().pos();
       gc<Token> name = consume(TOKEN_NAME,
                                "Expect a method name after 'def'.");
 
       gc<Pattern> pattern = NULL;
       consume(TOKEN_LEFT_PAREN, "Expect '(' after method name.");
-      if (lookAhead(TOKEN_RIGHT_PAREN))
+      if (match(TOKEN_RIGHT_PAREN))
       {
         // Handle () empty pattern.
-        // TODO(bob): Better position.
-        gc<Token> token = consume();
-        pattern = new NothingPattern(token->pos());
+        pattern = new NothingPattern(last().pos());
       }
       else
       {
@@ -137,21 +135,21 @@ namespace magpie
       }
       
       gc<Node> body = parseBlock();
-      SourcePos span = start.spanTo(current().pos());
+      SourcePos span = start.spanTo(last().pos());
       return new DefMethodNode(span, name->text(), pattern, body);
     }
     
-    if (lookAhead(TOKEN_DO))
+    if (match(TOKEN_DO))
     {
-      SourcePos start = consume()->pos();
+      SourcePos start = last().pos();
       gc<Node> body = parseBlock();
-      SourcePos span = start.spanTo(current().pos());
+      SourcePos span = start.spanTo(last().pos());
       return new DoNode(span, body);
     }
     
-    if (lookAhead(TOKEN_IF))
+    if (match(TOKEN_IF))
     {
-      SourcePos start = consume()->pos();
+      SourcePos start = last().pos();
       
       gc<Node> condition = parseBlock(TOKEN_THEN);
       consume(TOKEN_THEN, "Expect 'then' after 'if' condition.");
@@ -167,13 +165,13 @@ namespace magpie
         elseArm = parseBlock();
       }
       
-      SourcePos span = start.spanTo(current().pos());
+      SourcePos span = start.spanTo(last().pos());
       return new IfNode(span, condition, thenArm, elseArm);
     }
     
-    if (lookAhead(TOKEN_VAR) || lookAhead(TOKEN_VAL))
+    if (match(TOKEN_VAR) || match(TOKEN_VAL))
     {
-      SourcePos start = consume()->pos();
+      SourcePos start = last().pos();
       
       // TODO(bob): Distinguish between var and val.
       bool isMutable = false;
@@ -183,7 +181,7 @@ namespace magpie
       // TODO(bob): What precedence?
       gc<Node> value = parsePrecedence();
       
-      SourcePos span = start.spanTo(current().pos());
+      SourcePos span = start.spanTo(last().pos());
       return new VariableNode(span, isMutable, pattern, value);
     }
     
@@ -231,7 +229,7 @@ namespace magpie
       if (match(TOKEN_RIGHT_PAREN))
       {
         // Implicit "nothing" argument.
-        arg = new NothingNode(current().pos());
+        arg = new NothingNode(last().pos());
       }
       else
       {
@@ -241,7 +239,7 @@ namespace magpie
         consume(TOKEN_RIGHT_PAREN, "Expect ')' after call argument.");
       }
 
-      SourcePos span = token->pos().spanTo(current().pos());
+      SourcePos span = token->pos().spanTo(last().pos());
       return new CallNode(span, NULL, token->text(), arg);
     }
     else
@@ -292,15 +290,13 @@ namespace magpie
   
   gc<Pattern> Parser::parsePattern()
   {
-    if (lookAhead(TOKEN_NAME))
+    if (match(TOKEN_NAME))
     {
-      gc<Token> token = consume();
-      return new VariablePattern(token->pos(), token->text());
+      return new VariablePattern(last().pos(), last().text());
     }
-    else if (lookAhead(TOKEN_NOTHING))
+    else if (match(TOKEN_NOTHING))
     {
-      gc<Token> token = consume();
-      return new NothingPattern(token->pos());
+      return new NothingPattern(last().pos());
     }
     else
     {
@@ -314,8 +310,6 @@ namespace magpie
     // If there is just one expression in the sequence, don't wrap it.
     if (exprs.count() == 1) return exprs[0];
     
-    // TODO(bob): Using current() here and elsewhere is wrong. That's one
-    // token past the span.
     SourcePos span = exprs[0]->pos().spanTo(exprs[-1]->pos());
     return new SequenceNode(span, exprs);
   }
@@ -359,7 +353,8 @@ namespace magpie
   gc<Token> Parser::consume()
   {
     fillLookAhead(1);
-    return read_.dequeue();
+    last_ = read_.dequeue();
+    return last_;
   }
 
   gc<Token> Parser::consume(TokenType expected, const char* errorMessage)

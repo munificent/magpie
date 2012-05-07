@@ -19,7 +19,9 @@ namespace magpie
   public:
     Parser(const char* fileName, gc<String> source, ErrorReporter& reporter)
     : lexer_(fileName, source),
-      reporter_(reporter)
+      reporter_(reporter),
+      read_(),
+      last_()
     {}
     
     gc<Node> parseModule();
@@ -59,29 +61,32 @@ namespace magpie
 
     gc<Node> createSequence(const Array<gc<Node> >& exprs);
     
-    // Gets the Token the parser is currently looking at.
+    // Gets the token the parser is currently looking at.
     const Token& current();
     
-    // Returns true if the current Token is the given type.
+    // Gets the most recently consumed token.
+    const Token& last() const { return *last_; }
+    
+    // Returns true if the current token is the given type.
     bool lookAhead(TokenType type);
     
-    // Returns true if the current and next Tokens is the given types (in
+    // Returns true if the current and next tokens is the given types (in
     // order).
     bool lookAhead(TokenType current, TokenType next);
     
-    // Consumes the current Token and returns true if it is the given type,
+    // Consumes the current token and returns true if it is the given type,
     // otherwise returns false.
     bool match(TokenType type);
     
-    // Verifies the current Token if it matches the expected type, and
+    // Verifies the current token if it matches the expected type, and
     // reports an error if it doesn't. Does not consume the token either
     // way.
     void expect(TokenType expected, const char* errorMessage);
     
-    // Consumes the current Token and advances the Parser.
+    // Consumes the current token and advances the parser.
     gc<Token> consume();
     
-    // Consumes the current Token if it matches the expected type.
+    // Consumes the current token if it matches the expected type.
     // Otherwise reports the given error message and returns a null temp.
     gc<Token> consume(TokenType expected, const char* errorMessage);
     
@@ -94,10 +99,13 @@ namespace magpie
     
     Lexer lexer_;
     
+    ErrorReporter& reporter_;
+    
     // The 2 here is the maximum number of lookahead tokens.
     Queue<gc<Token>, 2> read_;
     
-    ErrorReporter& reporter_;
+    // The most recently consumed token.
+    gc<Token> last_;
     
     NO_COPY(Parser);
   };
