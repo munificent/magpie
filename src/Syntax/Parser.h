@@ -47,6 +47,7 @@ namespace magpie
     // Prefix expression parsers.
     gc<Node> boolean(gc<Token> token);
     gc<Node> name(gc<Token> token);
+    gc<Node> not_(gc<Token> token);
     gc<Node> nothing(gc<Token> token);
     gc<Node> number(gc<Token> token);
     gc<Node> string(gc<Token> token);

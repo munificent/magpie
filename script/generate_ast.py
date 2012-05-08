@@ -36,6 +36,8 @@ nodes = sorted({
         ('elseArm',     'gc<Node>')],
     'Name': [
         ('name',        'gc<String>')],
+    'Not': [
+        ('value',       'gc<Node>')],
     'Nothing': [],
     'Number': [
         ('value',       'double')],

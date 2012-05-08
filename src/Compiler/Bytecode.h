@@ -35,11 +35,12 @@ namespace magpie
     OP_MULTIPLY      = 0x07, // R(C) = RC(A) * RC(B)
     OP_DIVIDE        = 0x08, // R(C) = RC(A) / RC(B)
     OP_LESS_THAN     = 0x09, // R(C) = RC(A) < RC(B)
-    OP_JUMP          = 0x0a, // A = offset
-    OP_JUMP_IF_FALSE = 0x0b, // R(A) = test register, B = offset
-    OP_JUMP_IF_TRUE  = 0x0c, // R(A) = test register, B = offset
-    OP_CALL          = 0x0d, // A: method, B: arg and result
-    OP_RETURN        = 0x0e  // RC(A): result
+    OP_NOT           = 0x0a, // R(C) = RC(A) + RC(B)
+    OP_JUMP          = 0x0b, // A = offset
+    OP_JUMP_IF_FALSE = 0x0c, // R(A) = test register, B = offset
+    OP_JUMP_IF_TRUE  = 0x0d, // R(A) = test register, B = offset
+    OP_CALL          = 0x0e, // A: method, B: arg and result
+    OP_RETURN        = 0x0f  // RC(A): result
   };
   
   enum BuiltIn

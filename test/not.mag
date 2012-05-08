@@ -1,0 +1,19 @@
+// Note: These tests implicitly depend on non-zero ints being truthy.
+
+// Negates a boolean.
+print(not true) // expect: false
+print(not false) // expect: true
+
+// Is true if the argument is falsy.
+print(not 0) // expect: true
+
+// Is false if the argument is truthy.
+print(not 1) // expect: false
+
+// Is higher precedence than "and" and "or".
+print(not false and false) // expect: false
+print(not true or true) // expect: true
+
+// TODO(bob):
+// - Should call "true?" on its argument.
+// - Precedence.

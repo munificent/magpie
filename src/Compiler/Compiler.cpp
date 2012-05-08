@@ -273,7 +273,13 @@ namespace magpie
 
     write(OP_MOVE, local, dest);
   }
-
+  
+  void Compiler::visit(const NotNode& node, int dest)
+  {
+    node.value()->accept(*this, dest);
+    write(OP_NOT, dest);
+  }
+  
   void Compiler::visit(const NothingNode& node, int dest)
   {
     write(OP_BUILT_IN, BUILT_IN_NOTHING, dest);

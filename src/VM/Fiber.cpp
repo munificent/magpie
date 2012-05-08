@@ -162,6 +162,16 @@ namespace magpie
           break;
         }
           
+        case OP_NOT:
+        {
+          gc<Object> value = loadRegisterOrConstant(frame, GET_A(ins));
+          
+          // TODO(bob): Handle user-defined types.
+          bool result = !value->toBool();
+          store(frame, GET_A(ins), vm_.getBool(result));
+          break;
+        }
+          
         case OP_JUMP:
         {
           int offset = GET_A(ins);

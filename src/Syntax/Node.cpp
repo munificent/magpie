@@ -79,6 +79,11 @@ namespace magpie
     out << name_;
   }
   
+  void NotNode::trace(std::ostream& out) const
+  {
+    out << "(not " << value_ << ")";
+  }
+  
   void NothingNode::trace(std::ostream& out) const
   {
     out << "nothing";
