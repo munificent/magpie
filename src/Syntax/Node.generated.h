@@ -19,6 +19,7 @@ class SequenceNode;
 class StringNode;
 class VariableNode;
 class NothingPattern;
+class RecordPattern;
 class VariablePattern;
 
 class NodeVisitor
@@ -608,6 +609,7 @@ public:
   virtual ~PatternVisitor() {}
 
   virtual void visit(const NothingPattern& node, int dest) = 0;
+  virtual void visit(const RecordPattern& node, int dest) = 0;
   virtual void visit(const VariablePattern& node, int dest) = 0;
 
 protected:
@@ -632,6 +634,7 @@ public:
 
   // Dynamic casts.
     virtual const NothingPattern* asNothingPattern() const { return NULL; }
+  virtual const RecordPattern* asRecordPattern() const { return NULL; }
   virtual const VariablePattern* asVariablePattern() const { return NULL; }
 
   const SourcePos& pos() const { return pos_; }
@@ -658,6 +661,39 @@ public:
   virtual void trace(std::ostream& out) const;
 
 private:
+};
+
+class RecordPattern : public Pattern
+{
+public:
+  RecordPattern(const SourcePos& pos, const Array<PatternField>& fields)
+  : Pattern(pos),
+    fields_(fields)
+  {}
+
+  virtual void accept(PatternVisitor& visitor, int arg) const
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual const RecordPattern* asRecordPattern() const { return this; }
+
+  Array<PatternField> fields() const { return fields_; }
+
+  virtual void reach()
+  {
+
+    for (int i = 0; i < fields_.count(); i++)
+    {
+        Memory::reach(fields_[i].name);
+        Memory::reach(fields_[i].value);
+    }
+  }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  Array<PatternField> fields_;
 };
 
 class VariablePattern : public Pattern

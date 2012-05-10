@@ -82,6 +82,15 @@ namespace magpie
     // Nothing to do.
   }
   
+  void Compiler::Scope::visit(const RecordPattern& pattern, int unused)
+  {
+    // Recurse into the fields.
+    for (int i = 0; i < pattern.fields().count(); i++)
+    {
+      pattern.fields()[i].value->accept(*this, unused);
+    }
+  }
+ 
   void Compiler::Scope::visit(const VariablePattern& pattern, int unused)
   {
     makeLocal(pattern.pos(), pattern.name());
@@ -167,6 +176,7 @@ namespace magpie
   void Compiler::visit(const CallNode& node, int dest)
   {
     gc<String> signature = SignatureBuilder::build(node);
+    
     int method = vm_.methods().find(signature);
     if (method == -1)
     {
@@ -394,6 +404,21 @@ namespace magpie
     // TODO(bob): Eventually this should generate code to test the pattern.
   }
   
+  void Compiler::visit(const RecordPattern& pattern, int value)
+  {
+    // TODO(bob): Needs to also generate code to test that the value matches
+    // this record.
+    
+    // Recurse into the fields.
+    for (int i = 0; i < pattern.fields().count(); i++)
+    {
+      // TODO(bob): This isn't right. It's just binding the entire record value
+      // to the field. It needs to actually emit code to destructure (to pull
+      // this field out of the record stored in `value`).
+      pattern.fields()[i].value->accept(*this, value);
+    }
+  }
+  
   void Compiler::visit(const VariablePattern& pattern, int value)
   {
     int variable = locals_.lastIndexOf(pattern.name());
@@ -491,9 +516,19 @@ namespace magpie
     // foo(1, b: 2, 3, e: 4) -> foo(,b,,e)
     SignatureBuilder builder;
     
-    builder.writeArg(node.leftArg());
+    if (!node.leftArg().isNull())
+    {
+      builder.writeArg(node.leftArg());
+      builder.add(" ");
+    }
+    
     builder.add(node.name()->cString());
-    builder.writeArg(node.rightArg());
+
+    if (!node.rightArg().isNull())
+    {
+      builder.add(" ");
+      builder.writeArg(node.rightArg());
+    }
     
     return String::create(builder.signature_, builder.length_);
   }
@@ -508,9 +543,19 @@ namespace magpie
     // def foo(a, b: c, d, e: f) -> foo(,b,,e)
     SignatureBuilder builder;
     
-    builder.writeParam(node.leftParam());
+    if (!node.leftParam().isNull())
+    {
+      builder.writeParam(node.leftParam());
+      builder.add(" ");
+    }
+    
     builder.add(node.name()->cString());
-    builder.writeParam(node.rightParam());
+    
+    if (!node.rightParam().isNull())
+    {
+      builder.add(" ");
+      builder.writeParam(node.rightParam());
+    }
     
     return String::create(builder.signature_, builder.length_);
   }
@@ -534,22 +579,41 @@ namespace magpie
   
   void SignatureBuilder::writeArg(gc<Node> node)
   {
-    // Do nothing if there is no arg.
-    if (node.isNull()) return;
+    // TODO(bob): Clean up. Redundant with build().
+    // If it's a record, destructure it into the signature.
+    const RecordNode* record = node->asRecordNode();
+    if (record != NULL)
+    {
+      for (int i = 0; i < record->fields().count(); i++)
+      {
+        add(record->fields()[i].name);
+        add(":");
+      }
+      
+      return;
+    }
     
-    // TODO(bob): Support record expressions.
     // Right now, all other nodes mean "some arg goes here".
-    add("()");
+    add("0:");
   }
 
   void SignatureBuilder::writeParam(gc<Pattern> pattern)
   {
-    // Do nothing if there is no pattern.
-    if (pattern.isNull()) return;
+    // If it's a record, destructure it into the signature.
+    const RecordPattern* record = pattern->asRecordPattern();
+    if (record != NULL)
+    {
+      for (int i = 0; i < record->fields().count(); i++)
+      {
+        add(record->fields()[i].name);
+        add(":");
+      }
+      
+      return;
+    }
     
-    // TODO(bob): Support record patterns.
-    // Right now, all other patterns mean "some arg goes here".
-    add("()");
+    // Any other pattern is implicitly a single-field record.
+    add("0:");
   }
   
   void SignatureBuilder::add(gc<String> text)

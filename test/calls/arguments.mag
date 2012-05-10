@@ -29,3 +29,20 @@ foo("arg") // expect: right
 // Call with left argument.
 "arg" foo // expect: left
           // expect: arg
+
+// Record patterns.
+def foo(a, b)
+    print("2-uple")
+end
+
+def foo(a, b, c)
+    print("3-uple")
+end
+
+def foo(x: x, y: y)
+    print("x y")
+end
+
+foo(1, 2)       // expect: 2-uple
+foo(1, 2, 3)    // expect: 3-uple
+foo(x: 1, y: 2) // expect: x y

@@ -62,7 +62,9 @@ namespace magpie
 
     // Pattern parsing.
     gc<Pattern> parsePattern();
-
+    gc<Pattern> recordPattern();
+    gc<Pattern> primaryPattern();
+    
     gc<Node> createSequence(const Array<gc<Node> >& exprs);
 
     // Gets the token the parser is currently looking at.

@@ -60,6 +60,8 @@ nodes = sorted({
 
 patterns = sorted({
     'Nothing': [],
+    'Record': [
+        ('fields',      'Array<PatternField>')],
     'Variable': [
         ('name', 'gc<String>')]
 }.items())
@@ -197,7 +199,7 @@ def makeClass(baseClass, className, fields):
     for name, type in fields:
         if type.find('gc<') != -1:
             reachFields += '    Memory::reach(' + name + '_);\n'
-        if type == 'Array<Field>':
+        if type == 'Array<Field>' or type == 'Array<PatternField>':
             reachFields += REACH_FIELD_ARRAY.format(name)
 
         ctorParams += ', '

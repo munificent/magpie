@@ -152,6 +152,19 @@ namespace magpie
     out << "nothing";
   }
   
+  void RecordPattern::trace(std::ostream& out) const
+  {
+    out << "(";
+    
+    for (int i = 0; i < fields_.count(); i++)
+    {
+      if (i > 0) out << ", ";
+      out << fields_[i].name << ": " << fields_[i].value;
+    }
+    
+    out << ")";
+  }
+  
   void VariablePattern::trace(std::ostream& out) const
   {
     out << name_;

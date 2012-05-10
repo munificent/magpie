@@ -17,7 +17,7 @@ namespace magpie
     
     fiber_ = new Fiber(*this);
     
-    DEF_PRIMITIVE(print, "print()");
+    DEF_PRIMITIVE(print, "print 0:");
     
     true_ = new BoolObject(true);
     false_ = new BoolObject(false);

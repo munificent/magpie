@@ -409,7 +409,51 @@ namespace magpie
     return new OrNode(token->pos(), left, right);
   }
 
+  // Pattern parsers ----------------------------------------------------------
+  
   gc<Pattern> Parser::parsePattern()
+  {
+    return recordPattern();
+  }
+
+  gc<Pattern> Parser::recordPattern()
+  {
+    SourcePos pos = current().pos();
+    Array<PatternField> fields;
+    
+    do
+    {
+      gc<String> name;
+      if (match(TOKEN_FIELD))
+      {
+        name = last().text();
+      }
+      
+      gc<Pattern> value = primaryPattern();
+      fields.add(PatternField(name, value));
+    }
+    while (match(TOKEN_COMMA));
+    
+    // If we just have a single unnamed field, it's not a record, it's just
+    // that pattern.
+    if (fields.count() == 1 && fields[0].name.isNull())
+    {
+      return fields[0].value;
+    }
+    
+    // Fill in the positional names.
+    for (int i = 0; i < fields.count(); i++)
+    {
+      if (fields[i].name.isNull())
+      {
+        fields[i].name = String::format("%d", i);
+      }
+    }
+    
+    return new RecordPattern(pos.spanTo(last().pos()), fields);
+  }
+  
+  gc<Pattern> Parser::primaryPattern()
   {
     if (match(TOKEN_NAME))
     {
@@ -425,6 +469,8 @@ namespace magpie
       return gc<Pattern>();
     }
   }
+  
+  // Helpers and base methods -------------------------------------------------
 
   gc<Node> Parser::createSequence(const Array<gc<Node> >& exprs)
   {

@@ -38,6 +38,7 @@ namespace magpie
       void end();
       
       virtual void visit(const NothingPattern& pattern, int value);
+      virtual void visit(const RecordPattern& pattern, int value);
       virtual void visit(const VariablePattern& pattern, int value);
 
     private:
@@ -71,6 +72,7 @@ namespace magpie
     virtual void visit(const VariableNode& node, int dest);
 
     virtual void visit(const NothingPattern& pattern, int value);
+    virtual void visit(const RecordPattern& pattern, int value);
     virtual void visit(const VariablePattern& pattern, int value);
 
     // Compiles the given node. If it's a constant node, it adds the constant
