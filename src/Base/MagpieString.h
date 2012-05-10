@@ -8,6 +8,9 @@
 
 namespace magpie
 {
+  // TODO(bob): Is this the best place for this?
+  typedef int symbolId;
+  
   // Garbage-collected immutable string class.
   class String : public Managed
   {

@@ -320,6 +320,8 @@ namespace magpie
     // them so that it understands (x: 1, y: 2) and (y: 2, x: 1) are the same
     // shape. When that happens, this will need to take that into account.
     
+    Array<int> names;
+    
     // Compile the fields.
     int firstField;
     for (int i = 0; i < node.fields().count(); i++)
@@ -328,11 +330,13 @@ namespace magpie
       if (i == 0) firstField = fieldReg;
       
       node.fields()[i].value->accept(*this, fieldReg);
+      names.add(vm_.addSymbol(node.fields()[i].name));
     }
     
+    // TODO(bob): Need to sort field names.
+    
     // Create the record type.
-    gc<String> signature = SignatureBuilder::build(node);
-    int type = vm_.addRecordType(signature);
+    int type = vm_.addRecordType(names);
     
     // Create the record.
     write(OP_RECORD, firstField, type, dest);
@@ -412,10 +416,15 @@ namespace magpie
     // Recurse into the fields.
     for (int i = 0; i < pattern.fields().count(); i++)
     {
-      // TODO(bob): This isn't right. It's just binding the entire record value
-      // to the field. It needs to actually emit code to destructure (to pull
-      // this field out of the record stored in `value`).
-      pattern.fields()[i].value->accept(*this, value);
+      // Destructure the field.
+      int field = makeTemp();
+      int symbol = vm_.addSymbol(pattern.fields()[i].name);
+      write(OP_GET_FIELD, value, symbol, field);
+      
+      // Recurse into the pattern, using that field.
+      pattern.fields()[i].value->accept(*this, field);
+      
+      releaseTemp();
     }
   }
   
@@ -555,23 +564,6 @@ namespace magpie
     {
       builder.add(" ");
       builder.writeParam(node.rightParam());
-    }
-    
-    return String::create(builder.signature_, builder.length_);
-  }
-  
-  gc<String> SignatureBuilder::build(const RecordNode& node)
-  {
-    // 1, 2, 3       -> 0:1:2:
-    // a: 1, 2, b: 3 -> 1:a:b:
-    // b: 1, a: 2    -> a:b:
-    SignatureBuilder builder;
-    
-    // TODO(bob): Sort fields.
-    for (int i = 0; i < node.fields().count(); i++)
-    {
-      builder.add(node.fields()[i].name);
-      builder.add(":");
     }
     
     return String::create(builder.signature_, builder.length_);

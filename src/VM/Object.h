@@ -14,6 +14,7 @@ namespace magpie
   class Multimethod;
   class NumberObject;
   class NothingObject;
+  class RecordObject;
   class StringObject;
   
   class Object : public Managed
@@ -32,6 +33,8 @@ namespace magpie
       ASSERT(false, "Not a number.");
       return 0;
     }
+    
+    virtual RecordObject* toRecord() { return NULL; }
     
     virtual gc<String> toString() const
     {
@@ -127,20 +130,28 @@ namespace magpie
   
   // A record's "type" is an implicit class that describes the set of fields
   // that a record has.
-  // TODO(bob): Hackish. Right now this just supports tuples.
   class RecordType : public Managed
   {
   public:
-    RecordType(gc<String> signature);
+    static gc<RecordType> create(const Array<int>& fields);
     
-    gc<String> signature() const { return signature_; }
     int numFields() const { return numFields_; }
     
-    virtual void reach();
-
+    // Returns the index for the given field, or -1 if this record doesn't have
+    // a field with that name. Given a RecordObject whose RecordType is this,
+    // the index of a field here will be the index in that object's fields for
+    // the field with the given name.
+    int getField(symbolId symbol) const;
+    
+    // Given the index of a field in this type, returns the symbol ID of that
+    // field.
+    symbolId getSymbol(int index) const;
+    
   private:
-    gc<String> signature_;
+    RecordType(const Array<int>& fields);
+    
     int numFields_;
+    int names_[FLEXIBLE_SIZE];
   };
   
   // A record or tuple object.
@@ -150,7 +161,10 @@ namespace magpie
     static gc<Object> create(gc<RecordType> type,
                              const Array<gc<Object> >& stack, int startIndex);
     
+    gc<Object> getField(int symbol);
+    
     virtual bool toBool() const { return true; }
+    virtual RecordObject* toRecord() { return this; }
     
     virtual void reach();
     virtual void trace(std::ostream& stream) const;

@@ -45,12 +45,16 @@ namespace magpie
       ASSERT(false, "Unknown built-in ID.");
     }
     
-    int addRecordType(gc<String> signature);
+    int addRecordType(const Array<int>& fields);
     gc<RecordType> getRecordType(int id);
+    
+    symbolId addSymbol(gc<String> name);
     
   private:
     Array<Module*> modules_;
     Array<gc<RecordType> > recordTypes_;
+    // TODO(bob): Something more optimal than an O(n) array.
+    Array<gc<String> > symbols_;
     MethodScope methods_;
     gc<Fiber> fiber_;
     

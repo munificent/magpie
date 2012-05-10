@@ -21,7 +21,7 @@ namespace magpie
 
   Parser::Parselet Parser::expressions_[] = {
     // Punctuators.
-    { NULL,             NULL, -1 },                                 // TOKEN_LEFT_PAREN
+    { &Parser::group,   NULL, -1 },                                 // TOKEN_LEFT_PAREN
     { NULL,             NULL, -1 },                                 // TOKEN_RIGHT_PAREN
     { NULL,             NULL, -1 },                                 // TOKEN_LEFT_BRACKET
     { NULL,             NULL, -1 },                                 // TOKEN_RIGHT_BRACKET
@@ -262,7 +262,15 @@ namespace magpie
   {
     return new BoolNode(token->pos(), token->type() == TOKEN_TRUE);
   }
-
+  
+  gc<Node> Parser::group(gc<Token> token)
+  {
+    // TODO(bob): Should this be statementLike, so you can do "(if ...)"?
+    gc<Node> node = parsePrecedence();
+    consume(TOKEN_RIGHT_PAREN, "Expect ')'.");
+    return node;
+  }
+  
   gc<Node> Parser::name(gc<Token> token)
   {
     return call(gc<Node>(), token);
@@ -463,9 +471,15 @@ namespace magpie
     {
       return new NothingPattern(last().pos());
     }
+    else if (match(TOKEN_LEFT_PAREN))
+    {
+      gc<Pattern> pattern = parsePattern();
+      consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
+      return pattern;
+    }
     else
     {
-      reporter_.error(current().pos(), "Expected pattern.");
+      reporter_.error(current().pos(), "Expect pattern.");
       return gc<Pattern>();
     }
   }

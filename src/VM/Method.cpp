@@ -74,6 +74,10 @@ namespace magpie
         cout << "DEF_METHOD    " << GET_A(ins) << " " << GET_B(ins);
         break;
         
+      case OP_GET_FIELD:
+        cout << "GET_FIELD     " << GET_A(ins) << "[" << GET_B(ins) << "] -> " << GET_C(ins);
+        break;
+        
       case OP_ADD:
         cout << "ADD           " << GET_A(ins) << " + " << GET_B(ins) << " -> " << GET_C(ins);
         break;

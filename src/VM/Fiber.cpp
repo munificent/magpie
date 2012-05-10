@@ -73,6 +73,16 @@ namespace magpie
           break;
         }
           
+        case OP_GET_FIELD:
+        {
+          RecordObject* record = load(frame, GET_A(ins))->toRecord();
+          ASSERT(record != NULL, "Need to implement trying to get a field from a non-record.");
+          
+          int symbol = GET_B(ins);
+          store(frame, GET_C(ins), record->getField(symbol));
+          break;
+        }
+          
         case OP_CALL:
         {
           gc<Method> method = vm_.methods().get(GET_A(ins));

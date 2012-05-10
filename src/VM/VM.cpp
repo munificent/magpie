@@ -55,17 +55,33 @@ namespace magpie
     }
   }
   
-  int VM::addRecordType(gc<String> signature)
+  int VM::addRecordType(const Array<int>& fields)
   {
     // TODO(bob): Should use a hash table or something more optimal.
     // See if we already have a type for this signature.
     for (int i = 0; i < recordTypes_.count(); i++)
     {
-      if (recordTypes_[i]->signature() == signature) return i;
+      RecordType& type = *recordTypes_[i];
+      
+      // See if this record type matches what we're looking for.
+      if (fields.count() != type.numFields()) continue;
+      
+      bool found = true;
+      for (int j = 0; j < fields.count(); j++)
+      {
+        // Compare the symbol IDs of the records.
+        // TODO(bob): Note, assumes symbols are sorted in both records.
+        if (type.getSymbol(j) != fields[j]) {
+          found = false;
+          break;
+        }
+      }
+      
+      if (found) return i;
     }
     
     // It's a new type, so add it.
-    gc<RecordType> type = new RecordType(signature);
+    gc<RecordType> type = RecordType::create(fields);
     recordTypes_.add(type);
     return recordTypes_.count() - 1;
   }
@@ -73,6 +89,19 @@ namespace magpie
   gc<RecordType> VM::getRecordType(int id)
   {
     return recordTypes_[id];
+  }
+  
+  symbolId VM::addSymbol(gc<String> name)
+  {
+    // See if it's already in the table.
+    for (int i = 0; i < symbols_.count(); i++)
+    {
+      if (*name == *symbols_[i]) return i;
+    }
+    
+    // It's a new symbol.
+    symbols_.add(name);
+    return symbols_.count() - 1;
   }
 }
 

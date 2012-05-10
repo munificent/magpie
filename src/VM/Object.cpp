@@ -9,22 +9,45 @@ namespace magpie
     Memory::reach(name_);
   }
   
-  RecordType::RecordType(gc<String> signature)
-  : signature_(signature)
+  gc<RecordType> RecordType::create(const Array<int>& fields)
   {
-    // Count the fields.
-    numFields_ = 0;
-    for (int i = 0; i < signature->length(); i++)
+    // Allocate enough memory for the record and its fields.
+    void* mem = Memory::allocate(sizeof(RecordType) + 
+                                 sizeof(int) * (fields.count() - 1));
+    
+    // Construct it by calling global placement new.
+    return ::new(mem) RecordType(fields);
+  }
+
+  RecordType::RecordType(const Array<int>& fields)
+  : numFields_(fields.count())
+  {    
+    // Initialize the fields.
+    for (int i = 0; i < fields.count(); i++)
     {
-      if ((*signature)[i] == ':') numFields_++;
+      names_[i] = fields[i];
     }
   }
-  
-  void RecordType::reach()
+
+  int RecordType::getField(symbolId symbol) const
   {
-    Memory::reach(signature_);
+    // TODO(bob): This loop is less than ideal since it is hit every time we
+    // pull a field out of a record. It will be complex, but consider a more
+    // advanced solution to this.
+    for (int i = 0; i < numFields_; i++)
+    {
+      if (names_[i] == symbol) return i;
+    }
+    
+    return -1;
   }
   
+  symbolId RecordType::getSymbol(int index) const
+  {
+    ASSERT_INDEX(index, numFields_);
+    return names_[index];
+  }
+
   gc<Object> RecordObject::create(gc<RecordType> type,
       const Array<gc<Object> >& stack, int startIndex)
   {
@@ -42,6 +65,14 @@ namespace magpie
     }
     
     return record;
+  }
+
+  gc<Object> RecordObject::getField(int symbol)
+  {
+    int index = type_->getField(symbol);
+    ASSERT(index != -1, "Need to implement handling unknown fields.");
+    
+    return fields_[index];
   }
 
   void RecordObject::reach()

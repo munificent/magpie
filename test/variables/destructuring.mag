@@ -1,0 +1,49 @@
+// Destructure tuples.
+val tuple3 = 3, 4, 5
+val a, b, c = tuple3
+print(a) // expect: 3
+print(b) // expect: 4
+print(c) // expect: 5
+
+// Partial destructure.
+val d, e = tuple3
+print(d) // expect: 3
+print(e) // expect: 4
+
+// Destructure named record.
+val record = a: 1, b: 2, c: 3
+val a: f, b: g, c: h = record
+print(f) // expect: 1
+print(g) // expect: 2
+print(h) // expect: 3
+
+// Partial destructure.
+val a: i, c: j = record
+print(i) // expect: 1
+print(j) // expect: 3
+
+// Destructure in different order.
+val c: k, a: l, b: m = record
+print(l) // expect: 1
+print(m) // expect: 2
+print(k) // expect: 3
+
+// Mixed tuple/record.
+val mixed = 1, a: 2, 3, b: 4
+val n, a: o, p, b: q = mixed
+print(n) // expect: 1
+print(o) // expect: 2
+print(p) // expect: 3
+print(q) // expect: 4
+
+// Nested patterns.
+val nested = 1, (a: 2, b: (3, 4), c: 5), 6
+val r, (a: s, b: (t, u), c: v), w = nested
+print(r) // expect: 1
+print(s) // expect: 2
+print(t) // expect: 3
+print(u) // expect: 4
+print(v) // expect: 5
+print(w) // expect: 6
+
+// TODO(bob): Pattern mismatch.

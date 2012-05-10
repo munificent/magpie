@@ -142,9 +142,6 @@ namespace magpie
     // Builds a signature for the given method definition.
     static gc<String> build(const DefMethodNode& node);
     
-    // Builds a signature for the given record.
-    static gc<String> build(const RecordNode& node);
-    
   private:
     SignatureBuilder()
     : length_(0)
