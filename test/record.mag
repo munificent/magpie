@@ -1,0 +1,63 @@
+// Evaluate the fields left to right.
+val record = z: print(1), x: print(2), y: print(3)
+// expect: 1
+// expect: 2
+// expect: 3
+
+// Infer a positional name if omitted.
+val semituple = a: "a", "2", c: "3"
+// TODO(bob): Destructure and test.
+
+val tuple = 1, 2, 3
+// TODO(bob): Destructure and test.
+
+/*
+specify("A record expression") with
+    it should("evaluate the fields left to right") with
+        var e = ""
+        val rec = z: (e = e + "1"), x: (e = e + "2"), y: (e = e + "3")
+        e shouldEqual("123")
+    end
+
+    it should("define fields on the object") with
+        val rec = x: 1, y: 2
+        val x: x, y: y = rec
+        x shouldEqual(1)
+        y shouldEqual(2)
+    end
+
+    it should("ignore the order of fields when matching") with
+        val rec = x: 1, y: 2
+        val y: y, x: x = rec
+        x shouldEqual(1)
+        y shouldEqual(2)
+    end
+
+    it should("allow reserved words as field names") with
+        val rec = var: "var", with: "with", end: "end"
+        val var: a, with: b, end: c = rec
+        a shouldEqual("var")
+        b shouldEqual("with")
+        c shouldEqual("end")
+    end
+
+    it should("infer a positional name if omitted") with
+        val rec = a: "1", "2", c: "3"
+        val a: a, b, c: c = rec
+        a shouldEqual("1")
+        b shouldEqual("2")
+        c shouldEqual("3")
+    end
+
+    it should("allow omitting all names") with
+        val rec = "1", "2", "3"
+        val a, b, c = rec
+        a shouldEqual("1")
+        b shouldEqual("2")
+        c shouldEqual("3")
+    end
+
+    it should("fail to parse duplicate field names") with
+        canParse("a: 1, a: 2") shouldEqual(false)
+    end
+end*/

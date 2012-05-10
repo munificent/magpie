@@ -125,6 +125,48 @@ namespace magpie
     NO_COPY(NumberObject);
   };
   
+  // A record's "type" is an implicit class that describes the set of fields
+  // that a record has.
+  // TODO(bob): Hackish. Right now this just supports tuples.
+  class RecordType : public Managed
+  {
+  public:
+    RecordType(gc<String> signature);
+    
+    gc<String> signature() const { return signature_; }
+    int numFields() const { return numFields_; }
+    
+    virtual void reach();
+
+  private:
+    gc<String> signature_;
+    int numFields_;
+  };
+  
+  // A record or tuple object.
+  class RecordObject : public Object
+  {
+  public:
+    static gc<Object> create(gc<RecordType> type,
+                             const Array<gc<Object> >& stack, int startIndex);
+    
+    virtual bool toBool() const { return true; }
+    
+    virtual void reach();
+    virtual void trace(std::ostream& stream) const;
+    
+  private:
+    RecordObject(gc<RecordType> type)
+    : Object(),
+      type_(type)
+    {}
+    
+    gc<RecordType> type_;
+    gc<Object>     fields_[FLEXIBLE_SIZE];
+    
+    NO_COPY(RecordObject);
+  };
+  
   // TODO(bob): The double boxing here where this has a pointer to a String is
   // lame. Consider unifying this with the real string class.
   class StringObject : public Object

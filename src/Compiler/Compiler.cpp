@@ -303,6 +303,36 @@ namespace magpie
     endJump(jumpToEnd, OP_JUMP_IF_TRUE, dest, code_.count() - jumpToEnd - 1);
   }
   
+  void Compiler::visit(const RecordNode& node, int dest)
+  {
+    // TODO(bob): Hack. This assumes that the fields in the expression are in
+    // the same order that the type expects. Eventually, the type needs to sort
+    // them so that it understands (x: 1, y: 2) and (y: 2, x: 1) are the same
+    // shape. When that happens, this will need to take that into account.
+    
+    // Compile the fields.
+    int firstField;
+    for (int i = 0; i < node.fields().count(); i++)
+    {
+      int fieldReg = makeTemp();
+      if (i == 0) firstField = fieldReg;
+      
+      node.fields()[i].value->accept(*this, fieldReg);
+    }
+    
+    // Create the record type.
+    gc<String> signature = SignatureBuilder::build(node);
+    int type = vm_.addRecordType(signature);
+    
+    // Create the record.
+    write(OP_RECORD, firstField, type, dest);
+
+    for (int i = 0; i < node.fields().count(); i++)
+    {
+      releaseTemp();
+    }
+  }
+  
   void Compiler::visit(const ReturnNode& node, int dest)
   {
     // Compile the return value.
@@ -459,7 +489,6 @@ namespace magpie
     // foo(1)                -> foo()
     // (1, 2) foo            -> (,)foo
     // foo(1, b: 2, 3, e: 4) -> foo(,b,,e)
-    
     SignatureBuilder builder;
     
     builder.writeArg(node.leftArg());
@@ -477,12 +506,28 @@ namespace magpie
     // def foo(b)                -> foo()
     // def (a, b) foo            -> (,)foo
     // def foo(a, b: c, d, e: f) -> foo(,b,,e)
-    
     SignatureBuilder builder;
     
     builder.writeParam(node.leftParam());
     builder.add(node.name()->cString());
     builder.writeParam(node.rightParam());
+    
+    return String::create(builder.signature_, builder.length_);
+  }
+  
+  gc<String> SignatureBuilder::build(const RecordNode& node)
+  {
+    // 1, 2, 3       -> 0:1:2:
+    // a: 1, 2, b: 3 -> 1:a:b:
+    // b: 1, a: 2    -> a:b:
+    SignatureBuilder builder;
+    
+    // TODO(bob): Sort fields.
+    for (int i = 0; i < node.fields().count(); i++)
+    {
+      builder.add(node.fields()[i].name);
+      builder.add(":");
+    }
     
     return String::create(builder.signature_, builder.length_);
   }
@@ -506,7 +551,12 @@ namespace magpie
     // Right now, all other patterns mean "some arg goes here".
     add("()");
   }
-
+  
+  void SignatureBuilder::add(gc<String> text)
+  {
+    add(text->cString());
+  }
+  
   void SignatureBuilder::add(const char* text)
   {
     int length = strlen(text);

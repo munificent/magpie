@@ -18,6 +18,7 @@ namespace magpie
     TOKEN_RIGHT_BRACKET,
     TOKEN_LEFT_BRACE,
     TOKEN_RIGHT_BRACE,
+    TOKEN_COMMA,
     TOKEN_EQUALS,
     TOKEN_PLUS,
     TOKEN_MINUS,
@@ -49,6 +50,7 @@ namespace magpie
     TOKEN_WHILE,
     TOKEN_XOR,
 
+    TOKEN_FIELD,
     TOKEN_NAME,
     TOKEN_NUMBER,
     TOKEN_STRING,

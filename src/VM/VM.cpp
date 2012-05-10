@@ -10,6 +10,7 @@ namespace magpie
 {
   VM::VM()
   : modules_(),
+    recordTypes_(),
     fiber_()
   {
     Memory::initialize(this, 1024 * 1024 * 2); // TODO(bob): Use non-magic number.
@@ -42,6 +43,7 @@ namespace magpie
   void VM::reachRoots()
   {
     methods_.reach();
+    Memory::reach(recordTypes_);
     Memory::reach(fiber_);
     Memory::reach(true_);
     Memory::reach(false_);
@@ -51,6 +53,26 @@ namespace magpie
     {
       modules_[i]->reach();
     }
+  }
+  
+  int VM::addRecordType(gc<String> signature)
+  {
+    // TODO(bob): Should use a hash table or something more optimal.
+    // See if we already have a type for this signature.
+    for (int i = 0; i < recordTypes_.count(); i++)
+    {
+      if (recordTypes_[i]->signature() == signature) return i;
+    }
+    
+    // It's a new type, so add it.
+    gc<RecordType> type = new RecordType(signature);
+    recordTypes_.add(type);
+    return recordTypes_.count() - 1;
+  }
+
+  gc<RecordType> VM::getRecordType(int id)
+  {
+    return recordTypes_[id];
   }
 }
 

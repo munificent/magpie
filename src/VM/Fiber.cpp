@@ -57,6 +57,15 @@ namespace magpie
           break;
         }
           
+        case OP_RECORD:
+        {
+          int firstReg = GET_A(ins);
+          gc<RecordType> type = vm_.getRecordType(GET_B(ins));
+          gc<Object> record = RecordObject::create(type, stack_, firstReg);
+          store(frame, GET_C(ins), record);
+          break;
+        }
+          
         case OP_DEF_METHOD:
         {
           gc<Method> method = frame.method->getMethod(GET_A(ins));

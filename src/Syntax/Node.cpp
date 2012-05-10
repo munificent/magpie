@@ -99,6 +99,19 @@ namespace magpie
     out << "(or " << left_ << " " << right_ << ")";
   }
   
+  void RecordNode::trace(std::ostream& out) const
+  {
+    out << "(";
+    
+    for (int i = 0; i < fields_.count(); i++)
+    {
+      if (i > 0) out << ", ";
+      out << fields_[i].name << ": " << fields_[i].value;
+    }
+    
+    out << ")";
+  }
+  
   void ReturnNode::trace(std::ostream& out) const
   {
     if (value_.isNull())

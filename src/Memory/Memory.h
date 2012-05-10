@@ -33,6 +33,13 @@ namespace magpie
     : object_(object.object_)
     {}
     
+    template <class S>
+    gc(const gc<S>& object)
+    : object_(object.object_)
+    {
+      CHECK_SUBTYPE(T, S);
+    }
+    
     gc<T>& operator =(T* right)
     {
       object_ = right;
@@ -84,6 +91,10 @@ namespace magpie
     
   private:
     Managed* object_;
+
+    // This is so that gcs with different type arguments can access each other's
+    // privates. In particular, the casting copy constructor relies on this.
+    template <class> friend class gc;
   };
 
   template <class T>

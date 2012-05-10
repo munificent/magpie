@@ -34,6 +34,7 @@ namespace magpie
       case TOKEN_RIGHT_BRACKET: return "]";
       case TOKEN_LEFT_BRACE:    return "{";
       case TOKEN_RIGHT_BRACE:   return "}";
+      case TOKEN_COMMA:         return ",";
       case TOKEN_EQUALS:        return "=";
       case TOKEN_PLUS:          return "+";
       case TOKEN_MINUS:         return "-";
@@ -65,6 +66,7 @@ namespace magpie
       case TOKEN_WHILE:         return "while";
       case TOKEN_XOR:           return "xor";
         
+      case TOKEN_FIELD:         return "field";
       case TOKEN_NAME:          return "name";
       case TOKEN_NUMBER:        return "number";
       case TOKEN_STRING:        return "string";
@@ -92,6 +94,10 @@ namespace magpie
       case TOKEN_ERROR:
         // Show the text.
         out << text_;
+        break;
+        
+      case TOKEN_FIELD:
+        out << text_ << ":";
         break;
       
       default:

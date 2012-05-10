@@ -10,6 +10,7 @@
 namespace magpie
 {
   class Module;
+  class RecordType;
   
   // The main Virtual Machine class for a running Magpie interpreter.
   class VM : public RootSource
@@ -44,8 +45,12 @@ namespace magpie
       ASSERT(false, "Unknown built-in ID.");
     }
     
+    int addRecordType(gc<String> signature);
+    gc<RecordType> getRecordType(int id);
+    
   private:
     Array<Module*> modules_;
+    Array<gc<RecordType> > recordTypes_;
     MethodScope methods_;
     gc<Fiber> fiber_;
     

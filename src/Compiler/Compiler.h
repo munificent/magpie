@@ -64,6 +64,7 @@ namespace magpie
     virtual void visit(const NothingNode& node, int dest);
     virtual void visit(const NumberNode& node, int dest);
     virtual void visit(const OrNode& node, int dest);
+    virtual void visit(const RecordNode& node, int dest);
     virtual void visit(const ReturnNode& node, int dest);
     virtual void visit(const SequenceNode& node, int dest);
     virtual void visit(const StringNode& node, int dest);
@@ -139,6 +140,9 @@ namespace magpie
     // Builds a signature for the given method definition.
     static gc<String> build(const DefMethodNode& node);
     
+    // Builds a signature for the given record.
+    static gc<String> build(const RecordNode& node);
+    
   private:
     SignatureBuilder()
     : length_(0)
@@ -148,6 +152,7 @@ namespace magpie
     
     void writeArg(gc<Node> node);
     void writeParam(gc<Pattern> pattern);
+    void add(gc<String> text);
     void add(const char* text);
     
     int length_;

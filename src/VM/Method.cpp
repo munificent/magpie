@@ -67,6 +67,9 @@ namespace magpie
         cout << "BUILT_IN      " << GET_A(ins) << " -> " << GET_B(ins);
         break;
         
+      case OP_RECORD:
+        cout << "RECORD        " << GET_A(ins) << "[" << GET_B(ins) << "] -> " << GET_C(ins);
+        
       case OP_DEF_METHOD:
         cout << "DEF_METHOD    " << GET_A(ins) << " " << GET_B(ins);
         break;

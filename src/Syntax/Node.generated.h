@@ -13,6 +13,7 @@ class NotNode;
 class NothingNode;
 class NumberNode;
 class OrNode;
+class RecordNode;
 class ReturnNode;
 class SequenceNode;
 class StringNode;
@@ -37,6 +38,7 @@ public:
   virtual void visit(const NothingNode& node, int dest) = 0;
   virtual void visit(const NumberNode& node, int dest) = 0;
   virtual void visit(const OrNode& node, int dest) = 0;
+  virtual void visit(const RecordNode& node, int dest) = 0;
   virtual void visit(const ReturnNode& node, int dest) = 0;
   virtual void visit(const SequenceNode& node, int dest) = 0;
   virtual void visit(const StringNode& node, int dest) = 0;
@@ -75,6 +77,7 @@ public:
   virtual const NothingNode* asNothingNode() const { return NULL; }
   virtual const NumberNode* asNumberNode() const { return NULL; }
   virtual const OrNode* asOrNode() const { return NULL; }
+  virtual const RecordNode* asRecordNode() const { return NULL; }
   virtual const ReturnNode* asReturnNode() const { return NULL; }
   virtual const SequenceNode* asSequenceNode() const { return NULL; }
   virtual const StringNode* asStringNode() const { return NULL; }
@@ -445,6 +448,39 @@ public:
 private:
   gc<Node> left_;
   gc<Node> right_;
+};
+
+class RecordNode : public Node
+{
+public:
+  RecordNode(const SourcePos& pos, const Array<Field>& fields)
+  : Node(pos),
+    fields_(fields)
+  {}
+
+  virtual void accept(NodeVisitor& visitor, int arg) const
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual const RecordNode* asRecordNode() const { return this; }
+
+  Array<Field> fields() const { return fields_; }
+
+  virtual void reach()
+  {
+
+    for (int i = 0; i < fields_.count(); i++)
+    {
+        Memory::reach(fields_[i].name);
+        Memory::reach(fields_[i].value);
+    }
+  }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  Array<Field> fields_;
 };
 
 class ReturnNode : public Node

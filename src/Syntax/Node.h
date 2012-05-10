@@ -12,6 +12,23 @@ namespace magpie
   class Node;
   class Pattern;
   
+  // A record field.
+  struct Field
+  {
+    Field()
+    : name(),
+      value()
+    {}
+    
+    Field(gc<String> name, gc<Node> value)
+    : name(name),
+      value(value)
+    {}
+
+    gc<String> name;
+    gc<Node> value;
+  };
+  
 #include "Node.generated.h"
 }
 

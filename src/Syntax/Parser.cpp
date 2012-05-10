@@ -27,6 +27,7 @@ namespace magpie
     { NULL,             NULL, -1 },                                 // TOKEN_RIGHT_BRACKET
     { NULL,             NULL, -1 },                                 // TOKEN_LEFT_BRACE
     { NULL,             NULL, -1 },                                 // TOKEN_RIGHT_BRACE
+    { NULL,             &Parser::infixRecord, PRECEDENCE_RECORD },  // TOKEN_COMMA
     { NULL,             NULL, -1 },                                 // TOKEN_EQUALS
     { NULL,             &Parser::binaryOp, PRECEDENCE_TERM },       // TOKEN_PLUS
     { NULL,             &Parser::binaryOp, PRECEDENCE_TERM },       // TOKEN_MINUS
@@ -58,6 +59,7 @@ namespace magpie
     { NULL,             NULL, -1 },                                  // TOKEN_WHILE
     { NULL,             NULL, -1 },                                  // TOKEN_XOR
 
+    { &Parser::record,  NULL, -1 },                                  // TOKEN_FIELD
     { &Parser::name,    &Parser::call, PRECEDENCE_CALL },            // TOKEN_NAME
     { &Parser::number,  NULL, -1 },                                  // TOKEN_NUMBER
     { &Parser::string,  NULL, -1 },                                  // TOKEN_STRING
@@ -78,6 +80,8 @@ namespace magpie
     }
     while (match(TOKEN_LINE));
 
+    consume(TOKEN_EOF, "Expected end of file.");
+    
     // TODO(bob): Should validate that we are at EOF here.
     return createSequence(exprs);
   }
@@ -280,7 +284,38 @@ namespace magpie
     double number = atof(token->text()->cString());
     return new NumberNode(token->pos(), number);
   }
-
+  
+  gc<Node> Parser::record(gc<Token> token)
+  {
+    Array<Field> fields;
+    
+    gc<Node> value = parsePrecedence(PRECEDENCE_LOGICAL);
+    fields.add(Field(token->text(), value));
+    
+    int i = 1;
+    while (match(TOKEN_COMMA))
+    {
+      gc<String> name;
+      if (match(TOKEN_FIELD))
+      {
+        // A named field.
+        name = last().text();
+      }
+      else
+      {
+        // Infer the name from its position.
+        name = String::format("%d", i);
+      }
+      
+      value = parsePrecedence(PRECEDENCE_LOGICAL);
+      fields.add(Field(name, value));
+      
+      i++;
+    }
+    
+    return new RecordNode(token->pos().spanTo(last().pos()), fields);
+  }
+  
   gc<Node> Parser::string(gc<Token> token)
   {
     return new StringNode(token->pos(), token->text());
@@ -335,6 +370,39 @@ namespace magpie
     return new CallNode(token->pos(), left, token->text(), right);
   }
 
+  gc<Node> Parser::infixRecord(gc<Node> left, gc<Token> token)
+  {
+    Array<Field> fields;
+
+    // First field is positional.
+    gc<String> name = String::create("0");
+    fields.add(Field(name, left));
+    
+    int i = 1;
+    do
+    {
+      gc<String> name;
+      if (match(TOKEN_FIELD))
+      {
+        // A named field.
+        name = last().text();
+      }
+      else
+      {
+        // Infer the name from its position.
+        name = String::format("%d", i);
+      }
+      
+      gc<Node> value = parsePrecedence(PRECEDENCE_LOGICAL);
+      fields.add(Field(name, value));
+      
+      i++;
+    }
+    while (match(TOKEN_COMMA));
+    
+    return new RecordNode(left->pos().spanTo(last().pos()), fields);
+  }
+
   gc<Node> Parser::or_(gc<Node> left, gc<Token> token)
   {
     gc<Node> right = parsePrecedence(expressions_[token->type()].precedence);
@@ -366,7 +434,7 @@ namespace magpie
     SourcePos span = exprs[0]->pos().spanTo(exprs[-1]->pos());
     return new SequenceNode(span, exprs);
   }
-
+  
   const Token& Parser::current()
   {
     fillLookAhead(1);
@@ -414,7 +482,10 @@ namespace magpie
   {
     if (lookAhead(expected)) return consume();
     reporter_.error(current().pos(), errorMessage);
-    return NULL;
+    
+    // Just so that we can keep going and try to find other errors, consume the
+    // failed token and proceed.
+    return consume();
   }
 
   void Parser::fillLookAhead(int count)

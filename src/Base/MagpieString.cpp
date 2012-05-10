@@ -120,7 +120,7 @@ namespace magpie
   {
     // Note that sizeof(String) includes one extra byte because the flex
     // array is declared with that size. We need that extra byte for the
-    // terminator. Otherwise, we'd want to do "* (length + 1)".
+    // terminator. Otherwise, we'd want to do "* (length - 1)".
     return sizeof(String) + (sizeof(char) * length);
   }
 

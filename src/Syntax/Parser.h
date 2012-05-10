@@ -50,19 +50,21 @@ namespace magpie
     gc<Node> not_(gc<Token> token);
     gc<Node> nothing(gc<Token> token);
     gc<Node> number(gc<Token> token);
+    gc<Node> record(gc<Token> token);
     gc<Node> string(gc<Token> token);
 
     // Infix expression parsers.
     gc<Node> and_(gc<Node> left, gc<Token> token);
     gc<Node> binaryOp(gc<Node> left, gc<Token> token);
     gc<Node> call(gc<Node> left, gc<Token> token);
+    gc<Node> infixRecord(gc<Node> left, gc<Token> token);
     gc<Node> or_(gc<Node> left, gc<Token> token);
 
     // Pattern parsing.
     gc<Pattern> parsePattern();
 
     gc<Node> createSequence(const Array<gc<Node> >& exprs);
-    
+
     // Gets the token the parser is currently looking at.
     const Token& current();
     

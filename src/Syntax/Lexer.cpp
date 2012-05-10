@@ -19,6 +19,7 @@ namespace magpie
         case TOKEN_LEFT_PAREN:
         case TOKEN_LEFT_BRACKET:
         case TOKEN_LEFT_BRACE:
+        case TOKEN_COMMA:
         case TOKEN_EQUALS:
         case TOKEN_PLUS:
         case TOKEN_MINUS:
@@ -98,6 +99,7 @@ namespace magpie
         case ']': return makeToken(TOKEN_RIGHT_BRACKET);
         case '{': return makeToken(TOKEN_LEFT_BRACE);
         case '}': return makeToken(TOKEN_RIGHT_BRACE);
+        case ',': return makeToken(TOKEN_COMMA);
         case '=': return makeToken(TOKEN_EQUALS);
         case '+': return makeToken(TOKEN_PLUS);
         case '-': return makeToken(TOKEN_MINUS);
@@ -247,7 +249,14 @@ namespace magpie
     while (isName(peek())) advance();
 
     gc<String> text = source_->substring(start_, pos_);
-
+    
+    // See if it's a field.
+    if (peek() == ':')
+    {
+      advance();
+      return makeToken(TOKEN_FIELD, text);
+    }
+    
     // See if it's a reserved word.
     TokenType type = TOKEN_NAME;
     if      (*text == "and"    ) type = TOKEN_AND;

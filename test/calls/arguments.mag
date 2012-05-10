@@ -15,7 +15,6 @@ def (n) foo
     print(n)
 end
 
-
 // Call with no argument.
 foo() // expect: no params
 

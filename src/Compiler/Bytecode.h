@@ -29,18 +29,19 @@ namespace magpie
     OP_MOVE          = 0x01, // A: from, B: to
     OP_CONSTANT      = 0x02, // C(A) -> R(B)
     OP_BUILT_IN      = 0x03, // A -> R(B)
-    OP_DEF_METHOD    = 0x04, // A = index of method, B = index to define in globals
-    OP_ADD           = 0x05, // R(C) = RC(A) + RC(B)
-    OP_SUBTRACT      = 0x06, // R(C) = RC(A) - RC(B)
-    OP_MULTIPLY      = 0x07, // R(C) = RC(A) * RC(B)
-    OP_DIVIDE        = 0x08, // R(C) = RC(A) / RC(B)
-    OP_LESS_THAN     = 0x09, // R(C) = RC(A) < RC(B)
-    OP_NOT           = 0x0a, // R(C) = RC(A) + RC(B)
-    OP_JUMP          = 0x0b, // A = offset
-    OP_JUMP_IF_FALSE = 0x0c, // R(A) = test register, B = offset
-    OP_JUMP_IF_TRUE  = 0x0d, // R(A) = test register, B = offset
-    OP_CALL          = 0x0e, // A: method, B: arg and result
-    OP_RETURN        = 0x0f  // RC(A): result
+    OP_RECORD        = 0x04, // R(A) first field, B num fields -> R(C)
+    OP_DEF_METHOD    = 0x05, // A = index of method, B = index to define in globals
+    OP_ADD           = 0x06, // R(C) = RC(A) + RC(B)
+    OP_SUBTRACT      = 0x07, // R(C) = RC(A) - RC(B)
+    OP_MULTIPLY      = 0x08, // R(C) = RC(A) * RC(B)
+    OP_DIVIDE        = 0x09, // R(C) = RC(A) / RC(B)
+    OP_LESS_THAN     = 0x0a, // R(C) = RC(A) < RC(B)
+    OP_NOT           = 0x0b, // R(C) = RC(A) + RC(B)
+    OP_JUMP          = 0x0c, // A = offset
+    OP_JUMP_IF_FALSE = 0x0d, // R(A) = test register, B = offset
+    OP_JUMP_IF_TRUE  = 0x0e, // R(A) = test register, B = offset
+    OP_CALL          = 0x0f, // A: method, B: arg and result
+    OP_RETURN        = 0x10  // RC(A): result
   };
   
   enum BuiltIn

@@ -44,6 +44,8 @@ nodes = sorted({
     'Or': [
         ('left',        'gc<Node>'),
         ('right',       'gc<Node>')],
+    'Record': [
+        ('fields',      'Array<Field>')],
     'Return': [
         ('value',       'gc<Node>')],
     'Sequence': [
@@ -71,6 +73,14 @@ REACH_METHOD = '''
   virtual void reach()
   {{
 {0}  }}
+'''
+
+REACH_FIELD_ARRAY = '''
+    for (int i = 0; i < {0}_.count(); i++)
+    {{
+        Memory::reach({0}_[i].name);
+        Memory::reach({0}_[i].value);
+    }}
 '''
 
 BASE_CLASS = '''
@@ -185,9 +195,10 @@ def makeClass(baseClass, className, fields):
     memberVars = ''
     reachFields = ''
     for name, type in fields:
-        # Only generate a reach() method if the class contains a GC-ed field.
         if type.find('gc<') != -1:
             reachFields += '    Memory::reach(' + name + '_);\n'
+        if type == 'Array<Field>':
+            reachFields += REACH_FIELD_ARRAY.format(name)
 
         ctorParams += ', '
         if type.startswith('Array'):
@@ -202,6 +213,7 @@ def makeClass(baseClass, className, fields):
         memberVars += '\n  {1} {0}_;'.format(name, type)
 
     reach = ''
+    # Only generate a reach() method if the class contains a GC-ed field.
     if reachFields != '':
         reach = REACH_METHOD.format(reachFields)
 
