@@ -19,7 +19,8 @@ namespace magpie
   public:
     static Module* compileModule(VM& vm, gc<Node> module,
                                  ErrorReporter& reporter);
-    static gc<Method> compileMethod(VM& vm, const DefMethodNode& method,
+    static gc<Method> compileMethod(VM& vm, Module* module,
+                                    const DefMethodNode& method,
                                     ErrorReporter& reporter);
     
     virtual ~Compiler() {}
@@ -49,7 +50,7 @@ namespace magpie
       NO_COPY(Scope);
     };
     
-    Compiler(VM& vm, ErrorReporter& reporter);
+    Compiler(VM& vm, ErrorReporter& reporter, Module* module);
     
     gc<Method> compile(const DefMethodNode& methodAst);
     

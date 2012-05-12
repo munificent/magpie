@@ -26,23 +26,49 @@ namespace magpie
   //          register if not
   enum OpCode
   {
-    OP_MOVE          = 0x01, // A: from, B: to
-    OP_CONSTANT      = 0x02, // C(A) -> R(B)
-    OP_BUILT_IN      = 0x03, // A -> R(B)
-    OP_RECORD        = 0x04, // R(A) first field, B num fields -> R(C)
-    OP_DEF_METHOD    = 0x05, // A = index of method, B = index to define in globals
-    OP_GET_FIELD     = 0x06, // R(A) record, B symbol -> R(C)
-    OP_ADD           = 0x07, // R(C) = RC(A) + RC(B)
-    OP_SUBTRACT      = 0x08, // R(C) = RC(A) - RC(B)
-    OP_MULTIPLY      = 0x09, // R(C) = RC(A) * RC(B)
-    OP_DIVIDE        = 0x0a, // R(C) = RC(A) / RC(B)
-    OP_LESS_THAN     = 0x0b, // R(C) = RC(A) < RC(B)
-    OP_NOT           = 0x0c, // R(C) = RC(A) + RC(B)
-    OP_JUMP          = 0x0d, // A = offset
-    OP_JUMP_IF_FALSE = 0x0e, // R(A) = test register, B = offset
-    OP_JUMP_IF_TRUE  = 0x0f, // R(A) = test register, B = offset
-    OP_CALL          = 0x10, // A: method, B: arg and result
-    OP_RETURN        = 0x11  // RC(A): result
+    // Moves the value in register A to register B.
+    OP_MOVE = 0x01,
+    
+    // Loads the constant with index A into register B.
+    OP_CONSTANT = 0x02,
+    
+    // Loads the built-in value with index A (see VM::getBuiltIn()) into
+    // register B.
+    OP_BUILT_IN = 0x03,
+    
+    // Creates a record from fields on the stack. A is the register of the
+    // first field, with subsequent fields following on the stack. B is the
+    // index of the record type (see VM::getRecordType()). Stores the record in
+    // register C.
+    OP_RECORD = 0x04,
+    
+    // Defines a new top-level global method. A is the index of the new method
+    // in the containing method's list of methods. B is the index of the method
+    // in the VM's method table.
+    OP_DEF_METHOD = 0x05,
+    
+    // Destructures a record field. Register A holds the record to destructure.
+    // B is the symbol for the field (see VM::addSymbol()). Stores the field
+    // value in register C.
+    OP_GET_FIELD = 0x06,
+    
+    // Loads a top-level variable exported from a module. A is the index of
+    // the imported module in the containing module's import list. B is the
+    // index of the exported variable in that module to load. Stores the value
+    // in register C.
+    OP_GET_MODULE = 0x07,
+    
+    OP_ADD           = 0x08, // R(C) = RC(A) + RC(B)
+    OP_SUBTRACT      = 0x09, // R(C) = RC(A) - RC(B)
+    OP_MULTIPLY      = 0x0a, // R(C) = RC(A) * RC(B)
+    OP_DIVIDE        = 0x0b, // R(C) = RC(A) / RC(B)
+    OP_LESS_THAN     = 0x0c, // R(C) = RC(A) < RC(B)
+    OP_NOT           = 0x0d, // R(C) = RC(A) + RC(B)
+    OP_JUMP          = 0x0e, // A = offset
+    OP_JUMP_IF_FALSE = 0x0f, // R(A) = test register, B = offset
+    OP_JUMP_IF_TRUE  = 0x10, // R(A) = test register, B = offset
+    OP_CALL          = 0x11, // A: method, B: arg and result
+    OP_RETURN        = 0x12  // RC(A): result
   };
   
   enum BuiltIn

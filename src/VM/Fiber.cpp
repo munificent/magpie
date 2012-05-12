@@ -1,6 +1,7 @@
 #include "Fiber.h"
 
 #include "Method.h"
+#include "Module.h"
 #include "Object.h"
 #include "VM.h"
 
@@ -80,6 +81,16 @@ namespace magpie
           
           int symbol = GET_B(ins);
           store(frame, GET_C(ins), record->getField(symbol));
+          break;
+        }
+          
+        case OP_GET_MODULE:
+        {
+          int importIndex = GET_A(ins);
+          int exportIndex = GET_B(ins);
+          gc<Object> object = frame.method->module()->getImport(importIndex,
+                                                                exportIndex);
+          store(frame, GET_C(ins), object);
           break;
         }
           

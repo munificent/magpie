@@ -8,24 +8,33 @@
 
 namespace magpie
 {
-  Module* Compiler::compileModule(VM& vm, gc<Node> module,
+  Module* Compiler::compileModule(VM& vm, gc<Node> moduleNode,
                                      ErrorReporter& reporter)
   {
     // TODO(bob): Temp hackish. Wrap the module body in a fake method.
-    DefMethodNode* method = new DefMethodNode(module->pos(),
-        new NothingPattern(module->pos()),
+    DefMethodNode* method = new DefMethodNode(moduleNode->pos(),
+        new NothingPattern(moduleNode->pos()),
         String::create("<module>"),
-        new NothingPattern(module->pos()),
-        module);
+        new NothingPattern(moduleNode->pos()),
+        moduleNode);
 
-    gc<Method> body = compileMethod(vm, *method, reporter);
-    return new Module(body);
+    Module* module = new Module();
+    
+    // TODO(bob): Doing this here is hackish. Need to figure out when a module's
+    // imports are resolved.
+    module->imports().add(vm.coreModule());
+    
+    gc<Method> body = compileMethod(vm, module, *method, reporter);
+    module->bindBody(body);
+    
+    return module;
   }
 
-  gc<Method> Compiler::compileMethod(VM& vm, const DefMethodNode& method,
+  gc<Method> Compiler::compileMethod(VM& vm, Module* module,
+                                     const DefMethodNode& method,
                                      ErrorReporter& reporter)
   {
-    Compiler compiler(vm, reporter);
+    Compiler compiler(vm, reporter, module);
     return compiler.compile(method);
   }
   
@@ -96,11 +105,11 @@ namespace magpie
     makeLocal(pattern.pos(), pattern.name());
   }
   
-  Compiler::Compiler(VM& vm, ErrorReporter& reporter)
+  Compiler::Compiler(VM& vm, ErrorReporter& reporter, Module* module)
   : NodeVisitor(),
     vm_(vm),
     reporter_(reporter),
-    method_(new Method()),
+    method_(new Method(module)),
     locals_(),
     code_(),
     numTemps_(0),
@@ -215,7 +224,8 @@ namespace magpie
   void Compiler::visit(const DefMethodNode& node, int dest)
   {
     // TODO(bob): Handle nested non-top-level methods.
-    gc<Method> compiled = compileMethod(vm_, node, reporter_);
+    gc<Method> compiled = compileMethod(vm_, method_->module(), node,
+                                        reporter_);
     int methodIndex = method_->addMethod(compiled);
     
     gc<String> signature = SignatureBuilder::build(node);
@@ -272,16 +282,35 @@ namespace magpie
 
   void Compiler::visit(const NameNode& node, int dest)
   {
+    // See if it's a local variable.
     int local = locals_.lastIndexOf(node.name());
-
-    if (local == -1)
+    if (local != -1)
     {
-      reporter_.error(node.pos(),
-                      "Variable '%s' is not defined.", node.name()->cString());
+      write(OP_MOVE, local, dest);
       return;
     }
-
-    write(OP_MOVE, local, dest);
+    
+    // See if it's an imported name. Walk through the modules this one imports.
+    // TODO(bob): Need to handle name collisions.
+    Module* module = method_->module();
+    for (int i = 0; i < module->imports().count(); i++)
+    {
+      Module* import = module->imports()[i];
+      
+      // Walk through the names it exports.
+      for (int j = 0; j < import->numExports(); j++)
+      {
+        if (*import->getExportName(j) == *node.name())
+        {
+          // Found it.
+          write(OP_GET_MODULE, i, j, dest);
+          return;
+        }
+      }
+    }
+    
+    reporter_.error(node.pos(),
+                    "Variable '%s' is not defined.", node.name()->cString());
   }
   
   void Compiler::visit(const NotNode& node, int dest)

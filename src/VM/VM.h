@@ -18,10 +18,13 @@ namespace magpie
   public:
     VM();
 
+    virtual void reachRoots();
+    
+    bool loadModule(const char* fileName, gc<String> source);
     void loadModule(Module* module);
     
-    virtual void reachRoots();
-
+    Module* coreModule() { return coreModule_; }
+    
     Fiber& fiber() { return *fiber_; }
 
     // The globally available top-level methods.
@@ -52,6 +55,7 @@ namespace magpie
     
   private:
     Array<Module*> modules_;
+    Module* coreModule_;
     Array<gc<RecordType> > recordTypes_;
     // TODO(bob): Something more optimal than an O(n) array.
     Array<gc<String> > symbols_;

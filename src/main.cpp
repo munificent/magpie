@@ -53,19 +53,8 @@ int main(int argc, char * const argv[])
   
   // Read the file.
   const char* fileName = argv[1];
-  ErrorReporter reporter;
   gc<String> source = readFile(fileName);
-  Parser parser(fileName, source, reporter);
-  gc<Node> moduleAst = parser.parseModule();
+  bool success = vm.loadModule(fileName, source);
   
-  if (reporter.numErrors() > 0) return 1;
-  
-  // Compile it.
-  Module* module = Compiler::compileModule(vm, moduleAst, reporter);
-  
-  if (reporter.numErrors() > 0) return 1;
-
-  vm.loadModule(module);
-  
-  return 0;
+  return success ? 0 : 1;
 }

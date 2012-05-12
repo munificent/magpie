@@ -8,22 +8,39 @@ namespace magpie
   class Method;
   class Object;
   
-  // A single Magpie module.
+  // A module is a single file of compiled Magpie code.
   class Module
   {
   public:
-    Module(gc<Method> body)
-    : body_(body)
+    Module()
+    : body_(),
+      imports_()
     {}
     
     void reach();
     
+    void bindBody(gc<Method> body);
     gc<Method> body() const { return body_; }
     
+    Array<Module*>& imports() { return imports_; }
+    
+    void addExport(gc<String> name, gc<Object> value);
+    int numExports() const { return exports_.count(); }
+    gc<Object> getExport(int index) const { return exports_[index]; }
+    gc<String> getExportName(int index) const { return exportNames_[index]; }
+    
+    // Gets an imported top-level value. `importIndex` is the index of the
+    // imported module to get the value from. `exportIndex` is the index of the
+    // value to get in that module's list of exports.
+    gc<Object> getImport(int importIndex, int exportIndex);
+    
   private:
-    // The code comprosing a module is compiled to a fake method, so that
+    // The code compromising a module is compiled to a fake method so that
     // loading a module is basically just executing a function call.
     gc<Method> body_;
+    
+    // The modules imported by this one.
+    Array<Module*> imports_;
     
     // The top-level variables exported by this module.
     Array<gc<Object> > exports_;

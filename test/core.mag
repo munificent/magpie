@@ -1,0 +1,4 @@
+// Tests stuff automatically imported from the "core" module.
+
+print(Bool) // expect: Bool
+print(String) // expect: String

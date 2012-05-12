@@ -1,6 +1,9 @@
 #include "VM.h"
+#include "Compiler.h"
+#include "ErrorReporter.h"
 #include "Module.h"
 #include "Object.h"
+#include "Parser.h"
 #include "Primitives.h"
 
 #define DEF_PRIMITIVE(name, signature) \
@@ -22,6 +25,29 @@ namespace magpie
     true_ = new BoolObject(true);
     false_ = new BoolObject(false);
     nothing_ = new NothingObject();
+
+    coreModule_ = new Module();
+    gc<String> boolName = String::create("Bool");
+    coreModule_->addExport(boolName, new ClassObject(boolName));
+    gc<String> stringName = String::create("String");
+    coreModule_->addExport(stringName, new ClassObject(stringName));
+  }
+
+  bool VM::loadModule(const char* fileName, gc<String> source)
+  {
+    ErrorReporter reporter;
+    Parser parser(fileName, source, reporter);
+    gc<Node> moduleAst = parser.parseModule();
+    
+    if (reporter.numErrors() > 0) return false;
+    
+    // Compile it.
+    Module* module = Compiler::compileModule(*this, moduleAst, reporter);
+    
+    if (reporter.numErrors() > 0) return false;
+    
+    loadModule(module);
+    return true;
   }
 
   void VM::loadModule(Module* module)
