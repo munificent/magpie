@@ -1,5 +1,6 @@
 #include "Semispace.h"
 
+#include "ForwardingAddress.h"
 #include "Managed.h"
 
 namespace magpie
@@ -48,6 +49,13 @@ namespace magpie
 
   void* Semispace::allocate(size_t size)
   {
+    // When this object is copied, it will be replaced with a forwarding
+    // address. We need to ensure we always have enough room for that too.
+    if (size < sizeof(ForwardingAddress))
+    {
+      size = sizeof(ForwardingAddress);
+    }
+    
     // The allocated object will start just after its size.
     char* allocated = free_ + sizeof(size_t);
     char* next = allocated + size;
