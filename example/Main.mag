@@ -1,3 +1,5 @@
-def main()
-    123
+def fib(n)
+    if n < 2 then n else fib(n - 2) + fib(n - 1)
 end
+
+print(fib(10))

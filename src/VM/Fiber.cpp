@@ -243,13 +243,30 @@ namespace magpie
   
   void Fiber::reach()
   {
-    // Only reach registers that are still in use. We don't shrink the stack,
-    // so it may have dead registers at the end that are safe to collect.
+    // Walk the stack.
     CallFrame& frame = callFrames_[-1];
     int numRegisters = frame.stackStart + frame.method->numRegisters();
-    for (int i = 0; i < numRegisters; i++)
+    
+    // Only reach registers that are still in use. We don't shrink the stack,
+    // so it may have dead registers at the end that are safe to collect.
+    int i;
+    for (i = 0; i < numRegisters; i++)
     {
       Memory::reach(stack_[i]);
+    }
+
+    // For the remaining registers, clear them out now. When a new call is
+    // pushed onto the stack, we allocate registers for it, but we don't clear
+    // them out. This means that when a collection occurs, there may be a few
+    // registers on the end of the stack that are stale: they are set to
+    // whatever they were on some previous call. Since a collection may have
+    // occurred between now and then, and dead registers aren't reached (see
+    // above), we may have bad pointers. This clears those out so we don't get
+    // into that situation. We do it here instead of in call() because call()
+    // needs to be as fast as possible.
+    for (; i < stack_.count(); i++)
+    {
+      stack_[i] = gc<Object>();
     }
     
     for (int i = 0; i < callFrames_.count(); i++)

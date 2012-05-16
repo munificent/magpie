@@ -135,27 +135,4 @@ namespace magpie
       return static_cast<Managed*>(dest);
     }
   }
-
-  /*
-  void Memory::pushScope(AllocScope* scope)
-  {
-    ASSERT_NOT_NULL(scope);
-    scope->previous_ = currentScope_;
-    currentScope_ = scope;
-  }
-  
-  void Memory::popScope()
-  {
-    ASSERT_NOT_NULL(currentScope_);
-
-    // Clear out the popped temps to help track down GC bugs.
-    for (int i = currentScope_->numTempsBefore_; i < numTemps_; i++)
-    {
-      temps_[i] = gc<Managed>();
-    }
-
-    numTemps_ = currentScope_->numTempsBefore_;
-    currentScope_ = currentScope_->previous_;
-  }
-   */
 }

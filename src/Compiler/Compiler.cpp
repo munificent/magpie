@@ -352,7 +352,7 @@ namespace magpie
     Array<int> names;
     
     // Compile the fields.
-    int firstField;
+    int firstField = -1;
     for (int i = 0; i < node.fields().count(); i++)
     {
       int fieldReg = makeTemp();
