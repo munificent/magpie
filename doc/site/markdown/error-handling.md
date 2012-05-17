@@ -38,7 +38,7 @@ This pushes the problem onto the caller. They can no longer assume `parseYesNo` 
 
 Some errors occur very rarely, such as a stack overflow or out of memory. Other errors indicate bugs in the code that should be fixed instead of handling the error at runtime. For those cases, it's a chore to make the user check and manually handle an error return that they never expect to see.
 
-For those cases, Magpie also supports *throwing* errors. A `throw` expression will cause the currently executing code to immediately stop and being unwinding the callstack. A `throw` includes an error object that describes the problem. By convention, these should be subclasses of `Error`.
+For those cases, Magpie also supports *throwing* errors. A `throw` expression will cause the currently executing code to immediately stop and begin unwinding the callstack. When you throw, you include an error object that describes the problem. By convention, these are subclasses of `Error`.
 
 Here is a "safe" division function that does not allow dividing by zero. Since attempting to divide by zero indicates a programmer error, it throws instead of returning the error.
 
@@ -79,13 +79,13 @@ You can see here that unlike the exception-handling syntax in most languages, Ma
 
 A single block may have more than one catch clause. When an error is thrown from the block, each catch clause's pattern is matched against the error in the order that they appear. The first catch clause whose pattern matches catches the error. The body of the catch clause is evaluated and that becomes the value returned by the block.
 
-If no catch clause matches the error, the error continues to propogate.
+If no catch clause matches the error, the error continues to propagate.
 
 ## Errors and "Exceptions"
 
-Magpie's error-handling system is very similar to exceptions in most languages. It uses the term "error" for them because its valid to use errors outside of `throw` and `catch`: you can return error objects and pass them around, which is considered poor form in languages that refer to them as exceptions.
+Magpie's error objects very similar to exceptions in most languages. It uses the term "error" for them because its valid to use errors outside of `throw` and `catch`: you can return error objects and pass them around. That's considered poor form in languages that call them "exceptions".
 
-The caller and callee may also disagree on whether or not an error is important enough to be returned or should be thrown. In those cases, a caller may catch a thrown error and return it, or throw a returned one. Using the same `Error`-derived classes for both affords that flexibility.
+This is handy because the caller and callee may disagree on whether or not an error is important enough to be returned or should be thrown. A caller may catch a thrown error and then return it, or it may throw one that was returned to it. Using the same `Error`-derived classes for both affords that flexibility.
 
     :::magpie
     def returnError()
@@ -101,4 +101,4 @@ The caller and callee may also disagree on whether or not an error is important 
         end
     end
 
-In other words, an `Error` object tells you *what* the error is, but now how it gets passed from the code that generates the error to the code that handles it.
+In other words, an `Error` object tells you *what* the error is, but not *how it gets passed* from the code that generates the error to the code that handles it.
