@@ -23,7 +23,7 @@ In Java, it's standard practice to wrap all of your fields in getters and setter
 
 Magpie tries to prevent you from needing to do speculative work like that. You
 should be able to write code simple today that solves today's problems. Later,
-when the problems change, the decisions you made today shouldn't come back to
+when the problems change, the decisions you made then shouldn't come back to
 haunt you.
 
 This means following [uniform
@@ -32,7 +32,7 @@ default behavior today (such as accessing a field or assigning to a collection)
 can be upgraded to a user-defined abstraction later without affecting every
 callsite.
 
-It also means allowing existing constructs to be extended and modified. You should be able add new methods or even fields to existing classes, even classes you didn't define. Classes should be able to implement interfaces that were created after the class was defined. Even the type system and syntax itself should be open to extension and modification.
+It also means allowing existing constructs to be extended and modified. You should be able add new methods that work naturally with existing classes and feel as built-in as ones that were created when that class was.
 
 ## Give users power and trust them to use it well.
 
@@ -42,7 +42,7 @@ language must be able to solve more than just the problems we know of today.
 That means we have to be open to the language surprising us (but hopefully
 mostly in pleasant ways).
 
-"It's too powerful" should not be sufficient reason to deny users a feature. It's the scared, incompetent or cynical that are drawn to harmless things, and are those the people we want to surround ourselves with? We shouldn't minimize danger by removing powerful tools altogether, instead we should design them well such that they're easy and safe to use.
+"It's too powerful" should not be sufficient reason to deny users a feature. It's the scared, incompetent and cynical that are drawn to harmless things, and are those the people we want to surround ourselves with? We shouldn't minimize danger by removing powerful tools altogether, instead we should design them well such that they're easy and safe to use.
 
 ## Prefer defining things in the library over in the language.
 
