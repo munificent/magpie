@@ -91,10 +91,16 @@ namespace magpie
   gc<Node> Parser::parseBlock(TokenType endToken)
   {
     TokenType dummy;
-    return parseBlock(endToken, endToken, &dummy);
+    return parseBlock(true, endToken, endToken, &dummy);
   }
-
+  
   gc<Node> Parser::parseBlock(TokenType end1, TokenType end2,
+                              TokenType* outEndToken)
+  {
+    return parseBlock(true, end1, end2, outEndToken);
+  }
+  
+  gc<Node> Parser::parseBlock(bool allowCatch, TokenType end1, TokenType end2,
                               TokenType* outEndToken)
   {
     // If we have a newline, then it's an actual block, otherwise it's a
@@ -107,6 +113,7 @@ namespace magpie
       {
         if (lookAhead(end1)) break;
         if (lookAhead(end2)) break;
+        if (lookAhead(TOKEN_CATCH)) break;
         exprs.add(statementLike());
       }
       while (match(TOKEN_LINE));
@@ -120,7 +127,28 @@ namespace magpie
       // single-expression block case.
       if (current().is(TOKEN_END)) consume();
 
-      return createSequence(exprs);
+      gc<Node> block = createSequence(exprs);
+      
+      // Parse any catch clauses.
+      if (allowCatch)
+      {
+        Array<CatchClause> catches;
+        while (match(TOKEN_CATCH))
+        {
+          gc<Pattern> pattern = parsePattern();
+          consume(TOKEN_THEN, "Expect 'then' after catch pattern.");
+          gc<Node> body = parseBlock(false, end1, end2, outEndToken);
+          catches.add(CatchClause(pattern, body));
+        }
+        
+        if (catches.count() > 0)
+        {
+          block = new CatchNode(block->pos().spanTo(last().pos()),
+                                block, catches);
+        }
+      }
+      
+      return block;
     }
     else
     {

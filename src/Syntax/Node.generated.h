@@ -5,6 +5,7 @@ class AndNode;
 class BinaryOpNode;
 class BoolNode;
 class CallNode;
+class CatchNode;
 class DefMethodNode;
 class DoNode;
 class IfNode;
@@ -32,6 +33,7 @@ public:
   virtual void visit(const BinaryOpNode& node, int dest) = 0;
   virtual void visit(const BoolNode& node, int dest) = 0;
   virtual void visit(const CallNode& node, int dest) = 0;
+  virtual void visit(const CatchNode& node, int dest) = 0;
   virtual void visit(const DefMethodNode& node, int dest) = 0;
   virtual void visit(const DoNode& node, int dest) = 0;
   virtual void visit(const IfNode& node, int dest) = 0;
@@ -72,6 +74,7 @@ public:
   virtual const BinaryOpNode* asBinaryOpNode() const { return NULL; }
   virtual const BoolNode* asBoolNode() const { return NULL; }
   virtual const CallNode* asCallNode() const { return NULL; }
+  virtual const CatchNode* asCatchNode() const { return NULL; }
   virtual const DefMethodNode* asDefMethodNode() const { return NULL; }
   virtual const DoNode* asDoNode() const { return NULL; }
   virtual const IfNode* asIfNode() const { return NULL; }
@@ -217,6 +220,37 @@ private:
   gc<Node> leftArg_;
   gc<String> name_;
   gc<Node> rightArg_;
+};
+
+class CatchNode : public Node
+{
+public:
+  CatchNode(const SourcePos& pos, gc<Node> body, const Array<CatchClause>& catches)
+  : Node(pos),
+    body_(body),
+    catches_(catches)
+  {}
+
+  virtual void accept(NodeVisitor& visitor, int arg) const
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual const CatchNode* asCatchNode() const { return this; }
+
+  gc<Node> body() const { return body_; }
+  Array<CatchClause> catches() const { return catches_; }
+
+  virtual void reach()
+  {
+    Memory::reach(body_);
+  }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  gc<Node> body_;
+  Array<CatchClause> catches_;
 };
 
 class DefMethodNode : public Node

@@ -58,6 +58,7 @@ namespace magpie
     virtual void visit(const BinaryOpNode& node, int dest);
     virtual void visit(const BoolNode& node, int dest);
     virtual void visit(const CallNode& node, int dest);
+    virtual void visit(const CatchNode& node, int dest);
     virtual void visit(const DefMethodNode& node, int dest);
     virtual void visit(const DoNode& node, int dest);
     virtual void visit(const IfNode& node, int dest);

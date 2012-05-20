@@ -67,13 +67,27 @@ namespace magpie
     OP_JUMP          = 0x0e, // A = offset
     OP_JUMP_IF_FALSE = 0x0f, // R(A) = test register, B = offset
     OP_JUMP_IF_TRUE  = 0x10, // R(A) = test register, B = offset
-    OP_CALL          = 0x11, // A: method, B: arg and result
+    
+    // Invokes a top-level method. The index of the method in the global table
+    // is A. It passes in the argument in register B and stores the result in
+    // register C.
+    // TODO(bob): Tweak operands so that we can support more than 256 methods.
+    OP_CALL = 0x11,
     
     // Exits the current method, returning register A.
     OP_RETURN = 0x12,
     
     // Throws the error object in register A.
-    OP_THROW = 0x13
+    OP_THROW = 0x13,
+    
+    // Registers a new catch handler. If an error is thrown before the
+    // subsequent OP_EXIT_TRY, then execution will jump to the associate catch
+    // block. Its code location is the location of the OP_ENTER_TRY + A.
+    OP_ENTER_TRY = 0x14,
+    
+    // Discards the previous OP_ENTER_TRY handler. This occurs when execution
+    // has proceeded past the block containing a catch clause.
+    OP_EXIT_TRY = 0x15,
   };
   
   enum BuiltIn

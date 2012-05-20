@@ -1,0 +1,31 @@
+// No error thrown.
+do
+    print("no error") // expect: no error
+catch err then
+    print("bad")
+end
+print("after") // expect: after
+
+// Catch.
+do
+    throw "blah"
+catch err then
+    print("caught") // expect: caught
+end
+
+// Unwind to enclosing method.
+def a()
+    throw "blah"
+end
+
+def b()
+    a()
+end
+
+def c()
+    b()
+catch err then
+    print("caught") // expect: caught
+end
+
+c()

@@ -86,12 +86,17 @@ namespace magpie
   class CatchFrame : public Managed
   {
   public:
-    CatchFrame(gc<CatchFrame> parent, int callFrame)
+    CatchFrame(gc<CatchFrame> parent, int callFrame, int offset)
     : parent_(parent),
-      callFrame_(callFrame)
+      callFrame_(callFrame),
+      offset_(offset)
     {}
     
     void reach();
+    
+    gc<CatchFrame> parent() const { return parent_; }
+    int callFrame() const { return callFrame_; }
+    int offset() const { return offset_; }
     
   private:
     // The next enclosing catch. If this catch doesn't handle the error, it
@@ -101,5 +106,9 @@ namespace magpie
     
     // Index of the CallFrame for the method containing this catch.
     int callFrame_;
+    
+    // The offset of the instruction to jump to in the containing method to
+    // start executing the catch handler.
+    int offset_;
   };
 }

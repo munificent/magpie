@@ -214,6 +214,13 @@ namespace magpie
           gc<Object> result = loadRegisterOrConstant(frame, GET_A(ins));
           callFrames_.removeAt(-1);
           
+          // Discard any try blocks enclosed in the current method.
+          while (!nearestCatch_.isNull() &&
+                 (nearestCatch_->callFrame() >= callFrames_.count()))
+          {
+            nearestCatch_ = nearestCatch_->parent();
+          }
+          
           if (callFrames_.count() > 0)
           {
             // Give the result back and resume the calling method.
@@ -235,11 +242,35 @@ namespace magpie
           
         case OP_THROW:
         {
-          // TODO(bob): Errors can't be caught yet, so just bail.
-          return FIBER_UNCAUGHT_ERROR;
+          // If there is nothing to catch it, end the fiber.
+          if (nearestCatch_.isNull()) return FIBER_UNCAUGHT_ERROR;
+          
+          // Unwind any nested callframes above the one containing the catch
+          // clause.
+          callFrames_.truncate(nearestCatch_->callFrame() + 1);
+          
+          // Jump to the catch handler.
+          callFrames_[-1].ip = nearestCatch_->offset();
+          
+          // Discard the try block now that we are outside of it.
+          nearestCatch_ = nearestCatch_->parent();
           break;
         }
           
+        case OP_ENTER_TRY:
+        {
+          int offset = frame.ip + GET_A(ins);
+          nearestCatch_ = new CatchFrame(nearestCatch_, callFrames_.count() - 1,
+                                          offset);
+          break;
+        }
+          
+        case OP_EXIT_TRY:
+        {
+          nearestCatch_ = nearestCatch_->parent();
+          break;
+        }
+      
         default:
           ASSERT(false, "Unknown opcode.");
           break;

@@ -38,7 +38,10 @@ namespace magpie
     };
     
     gc<Node> parseBlock(TokenType endToken = TOKEN_END);
-    gc<Node> parseBlock(TokenType end1, TokenType end2, TokenType* outEndToken);
+    gc<Node> parseBlock(TokenType end1, TokenType end2,
+                        TokenType* outEndToken);
+    gc<Node> parseBlock(bool allowCatch, TokenType end1, TokenType end2,
+                        TokenType* outEndToken);
     gc<Node> statementLike();
 
     // Parses an expression with the given precedence or higher.

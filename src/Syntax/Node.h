@@ -46,6 +46,28 @@ namespace magpie
     gc<Pattern> value;
   };
   
+  // A single "catch" pattern in a CatchNode.
+  class CatchClause
+  {
+  public:
+    CatchClause()
+    : pattern_(),
+      body_()
+    {}
+    
+    CatchClause(gc<Pattern> pattern, gc<Node> body)
+    : pattern_(pattern),
+      body_(body)
+    {}
+    
+    gc<Pattern> pattern() const { return pattern_; }
+    gc<Node> body() const { return body_; }
+    
+  private:
+    gc<Pattern> pattern_;
+    gc<Node> body_;
+  };
+  
 #include "Node.generated.h"
 }
 

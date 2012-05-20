@@ -36,9 +36,21 @@ namespace magpie
     out << ")";
   }
   
+  void CatchNode::trace(std::ostream& out) const
+  {
+    out << "(try " << body_;
+    
+    for (int i = 0; i < catches_.count(); i++)
+    {
+      out << " (catch " << catches_[i].pattern() << " then ";
+      out << catches_[i].body() << ")";
+    }
+    
+    out << ")";
+  }
+  
   void DefMethodNode::trace(std::ostream& out) const
   {
-    // TODO(bob): Implement.
     out << "(def ";
     if (!leftParam_.isNull())
     {

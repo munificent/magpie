@@ -23,6 +23,9 @@ nodes = sorted({
         ('leftArg',     'gc<Node>'),
         ('name',        'gc<String>'),
         ('rightArg',    'gc<Node>')],
+    'Catch': [
+        ('body',        'gc<Node>'),
+        ('catches',     'Array<CatchClause>')],
     'DefMethod': [
         ('leftParam',   'gc<Pattern>'),
         ('name',        'gc<String>'),

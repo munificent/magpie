@@ -220,7 +220,35 @@ namespace magpie
     
     write(OP_CALL, method, dest);
   }
-
+  
+  void Compiler::visit(const CatchNode& node, int dest)
+  {
+    // Register the catch handler.
+    int enter = startJump();
+    
+    // Compile the block body.
+    Scope tryScope(this);
+    node.body()->accept(*this, dest);
+    tryScope.end();
+    
+    // Complete the catch handler.
+    write(OP_EXIT_TRY);
+    
+    // Jump past it if an exception is not thrown.
+    int jumpPastCatch = startJump();
+    endJump(enter, OP_ENTER_TRY, code_.count() - enter - 1);
+    
+    // Compile the catch handlers.
+    Scope catchScope(this);
+    // TODO(bob): Handle multiple catches, compile their patterns, pattern
+    // match, etc. For now, just compile the body.
+    ASSERT(node.catches().count() == 1, "Multiple catch clauses not impl.");
+    node.catches()[0].body()->accept(*this, dest);
+    catchScope.end();
+    
+    endJump(jumpPastCatch, OP_JUMP, code_.count() - jumpPastCatch - 1);
+  }
+  
   void Compiler::visit(const DefMethodNode& node, int dest)
   {
     // TODO(bob): Handle nested non-top-level methods.
