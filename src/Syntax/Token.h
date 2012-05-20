@@ -30,6 +30,7 @@ namespace magpie
     // Keywords.
     TOKEN_AND,
     TOKEN_CASE,
+    TOKEN_CATCH,
     TOKEN_DEF,
     TOKEN_DO,
     TOKEN_END,
@@ -44,6 +45,7 @@ namespace magpie
     TOKEN_OR,
     TOKEN_RETURN,
     TOKEN_THEN,
+    TOKEN_THROW,
     TOKEN_TRUE,
     TOKEN_VAL,
     TOKEN_VAR,

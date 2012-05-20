@@ -53,6 +53,7 @@ namespace magpie
     gc<Node> number(gc<Token> token);
     gc<Node> record(gc<Token> token);
     gc<Node> string(gc<Token> token);
+    gc<Node> throw_(gc<Token> token);
 
     // Infix expression parsers.
     gc<Node> and_(gc<Node> left, gc<Token> token);

@@ -7,16 +7,31 @@
 
 namespace magpie
 {
+  class CatchFrame;
   class Object;
   class VM;
 
+  // The reason Fiber::run() returned.
+  enum FiberResult
+  {
+    // The fiber's entry method has completed and the fiber is complete.
+    FIBER_DONE = 0,
+    
+    // A garbage collection is happened, so the fiber has moved in memory.
+    FIBER_DID_GC,
+    
+    // An error was thrown and not caught by anything, so the fiber has
+    // completely unwound.
+    FIBER_UNCAUGHT_ERROR
+  };
+  
   class Fiber : public Managed
   {
   public:
     Fiber(VM& vm);
     
     void init(gc<Method> method);
-    gc<Object> run();
+    FiberResult run();
 
     virtual void reach();
     
@@ -60,7 +75,31 @@ namespace magpie
     VM&                 vm_;
     Array<gc<Object> >  stack_;
     Array<CallFrame>    callFrames_;
-
+    gc<CatchFrame>      nearestCatch_;
+    
     NO_COPY(Fiber);
+  };
+  
+  // Describes a block containing a "catch" clause that is currently on the
+  // stack. When an error is thrown, this is used to jump to the appropriate
+  // catch handler(s).
+  class CatchFrame : public Managed
+  {
+  public:
+    CatchFrame(gc<CatchFrame> parent, int callFrame)
+    : parent_(parent),
+      callFrame_(callFrame)
+    {}
+    
+    void reach();
+    
+  private:
+    // The next enclosing catch. If this catch doesn't handle the error, it
+    // will be rethrown to its parent. If the parent is null, then the error
+    // is unhandled and the fiber will abort.
+    gc<CatchFrame> parent_;
+    
+    // Index of the CallFrame for the method containing this catch.
+    int callFrame_;
   };
 }

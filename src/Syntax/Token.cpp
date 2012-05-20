@@ -46,6 +46,7 @@ namespace magpie
         // Keywords.
       case TOKEN_AND:           return "and";
       case TOKEN_CASE:          return "case";
+      case TOKEN_CATCH:         return "catch";
       case TOKEN_DEF:           return "def";
       case TOKEN_DO:            return "do";
       case TOKEN_END:           return "end";
@@ -60,6 +61,7 @@ namespace magpie
       case TOKEN_OR:            return "or";
       case TOKEN_RETURN:        return "return";
       case TOKEN_THEN:          return "then";
+      case TOKEN_THROW:         return "throw";
       case TOKEN_TRUE:          return "true";
       case TOKEN_VAL:           return "val";
       case TOKEN_VAR:           return "var";

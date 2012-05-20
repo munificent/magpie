@@ -125,6 +125,10 @@ namespace magpie
       case OP_RETURN:
         cout << "RETURN        " << GET_A(ins);
         break;
+        
+      case OP_THROW:
+        cout << "THROW         " << GET_A(ins);
+        break;
     }
     
     cout << endl;

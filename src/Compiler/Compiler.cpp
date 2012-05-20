@@ -408,7 +408,16 @@ namespace magpie
     int index = compileConstant(node);
     write(OP_CONSTANT, index, dest);
   }
-
+  
+  void Compiler::visit(const ThrowNode& node, int dest)
+  {
+    // Compile the error object.
+    node.value()->accept(*this, dest);
+    
+    // Throw it.
+    write(OP_THROW, dest);
+  }
+  
   void Compiler::visit(const VariableNode& node, int dest)
   {
     // Reserve the locals up front. This way we'll compile the value to a slot

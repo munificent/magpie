@@ -261,6 +261,7 @@ namespace magpie
     TokenType type = TOKEN_NAME;
     if      (*text == "and"    ) type = TOKEN_AND;
     else if (*text == "case"   ) type = TOKEN_CASE;
+    else if (*text == "catch"  ) type = TOKEN_CATCH;
     else if (*text == "def"    ) type = TOKEN_DEF;
     else if (*text == "do"     ) type = TOKEN_DO;
     else if (*text == "else"   ) type = TOKEN_ELSE;
@@ -275,6 +276,7 @@ namespace magpie
     else if (*text == "or"     ) type = TOKEN_OR;
     else if (*text == "return" ) type = TOKEN_RETURN;
     else if (*text == "then"   ) type = TOKEN_THEN;
+    else if (*text == "throw"  ) type = TOKEN_THROW;
     else if (*text == "true"   ) type = TOKEN_TRUE;
     else if (*text == "val"    ) type = TOKEN_VAL;
     else if (*text == "var"    ) type = TOKEN_VAR;

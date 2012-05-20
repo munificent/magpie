@@ -39,6 +39,7 @@ namespace magpie
     // Keywords.
     { NULL,             &Parser::and_, PRECEDENCE_LOGICAL },         // TOKEN_AND
     { NULL,             NULL, -1 },                                  // TOKEN_CASE
+    { NULL,             NULL, -1 },                                  // TOKEN_CATCH
     { NULL,             NULL, -1 },                                  // TOKEN_DEF
     { NULL,             NULL, -1 },                                  // TOKEN_DO
     { NULL,             NULL, -1 },                                  // TOKEN_ELSE
@@ -53,6 +54,7 @@ namespace magpie
     { NULL,             &Parser::or_, PRECEDENCE_LOGICAL },          // TOKEN_OR
     { NULL,             NULL, -1 },                                  // TOKEN_RETURN
     { NULL,             NULL, -1 },                                  // TOKEN_THEN
+    { &Parser::throw_,  NULL, -1 },                                  // TOKEN_THROW
     { &Parser::boolean, NULL, -1 },                                  // TOKEN_TRUE
     { NULL,             NULL, -1 },                                  // TOKEN_VAL
     { NULL,             NULL, -1 },                                  // TOKEN_VAR
@@ -328,7 +330,13 @@ namespace magpie
   {
     return new StringNode(token->pos(), token->text());
   }
-
+  
+  gc<Node> Parser::throw_(gc<Token> token)
+  {
+    gc<Node> value = parsePrecedence(PRECEDENCE_LOGICAL);
+    return new ThrowNode(token->pos().spanTo(last().pos()), value);
+  }
+  
   // Infix parsers ------------------------------------------------------------
 
   gc<Node> Parser::and_(gc<Node> left, gc<Token> token)

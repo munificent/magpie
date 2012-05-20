@@ -55,14 +55,19 @@ namespace magpie
     modules_.add(module);
     fiber_->init(module->body());
     
-    while (true)
+    FiberResult result;
+    while ((result = fiber_->run()) == FIBER_DID_GC)
     {
-      gc<Object> result = fiber_->run();
-      
-      // If the fiber returns null, it's still running but it did a GC run.
+      // If the fiber returns FIBER_DID_GC, it's still running but it did a GC.
       // Since that moves the fiber, we return back to here so we can invoke
       // run() again at its new location in memory.
-      if (!result.isNull()) return;
+    }
+    
+    // TODO(bob): Kind of hackish.
+    // If we got an uncaught error while loading the module, exit with an error.
+    if (result == FIBER_UNCAUGHT_ERROR)
+    {
+      exit(3);
     }
   }
 

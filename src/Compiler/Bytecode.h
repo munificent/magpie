@@ -68,7 +68,12 @@ namespace magpie
     OP_JUMP_IF_FALSE = 0x0f, // R(A) = test register, B = offset
     OP_JUMP_IF_TRUE  = 0x10, // R(A) = test register, B = offset
     OP_CALL          = 0x11, // A: method, B: arg and result
-    OP_RETURN        = 0x12  // RC(A): result
+    
+    // Exits the current method, returning register A.
+    OP_RETURN = 0x12,
+    
+    // Throws the error object in register A.
+    OP_THROW = 0x13
   };
   
   enum BuiltIn

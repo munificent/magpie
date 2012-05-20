@@ -10,7 +10,8 @@ namespace magpie
   Fiber::Fiber(VM& vm)
   : vm_(vm),
     stack_(),
-    callFrames_()
+    callFrames_(),
+    nearestCatch_()
   {}
 
   void Fiber::init(gc<Method> method)
@@ -22,11 +23,11 @@ namespace magpie
     call(method, 0, vm_.nothing());
   }
 
-  gc<Object> Fiber::run()
+  FiberResult Fiber::run()
   {
     while (true)
     {
-      if (Memory::checkCollect()) return gc<Object>();
+      if (Memory::checkCollect()) return FIBER_DID_GC;
       
       CallFrame& frame = callFrames_[-1];
       instruction ins = frame.method->code()[frame.ip++];
@@ -91,45 +92,6 @@ namespace magpie
           gc<Object> object = frame.method->module()->getImport(importIndex,
                                                                 exportIndex);
           store(frame, GET_C(ins), object);
-          break;
-        }
-          
-        case OP_CALL:
-        {
-          gc<Method> method = vm_.methods().get(GET_A(ins));
-          gc<Object> arg = load(frame, GET_B(ins));
-          
-          Primitive primitive = method->primitive();
-          if (primitive != NULL) {
-            gc<Object> result = primitive(arg);
-            store(frame, GET_B(ins), result);
-          } else {
-            int stackStart = frame.stackStart + frame.method->numRegisters();
-            call(method, stackStart, arg);
-          }
-          break;
-        }
-        
-        case OP_RETURN:
-        {
-          gc<Object> result = loadRegisterOrConstant(frame, GET_A(ins));
-          callFrames_.removeAt(-1);
-
-          if (callFrames_.count() > 0)
-          {
-            // Give the result back and resume the calling method.
-            CallFrame& caller = callFrames_[-1];
-            instruction callInstruction = caller.method->code()[caller.ip - 1];
-            ASSERT(GET_OP(callInstruction) == OP_CALL,
-                   "Should be returning to a call.");
-            
-            store(caller, GET_B(callInstruction), result);
-          }
-          else
-          {
-            // The last method has returned, so end the fiber.
-            return result;
-          }
           break;
         }
           
@@ -231,6 +193,53 @@ namespace magpie
           break;
         }
           
+        case OP_CALL:
+        {
+          gc<Method> method = vm_.methods().get(GET_A(ins));
+          gc<Object> arg = load(frame, GET_B(ins));
+          
+          Primitive primitive = method->primitive();
+          if (primitive != NULL) {
+            gc<Object> result = primitive(arg);
+            store(frame, GET_B(ins), result);
+          } else {
+            int stackStart = frame.stackStart + frame.method->numRegisters();
+            call(method, stackStart, arg);
+          }
+          break;
+        }
+          
+        case OP_RETURN:
+        {
+          gc<Object> result = loadRegisterOrConstant(frame, GET_A(ins));
+          callFrames_.removeAt(-1);
+          
+          if (callFrames_.count() > 0)
+          {
+            // Give the result back and resume the calling method.
+            CallFrame& caller = callFrames_[-1];
+            instruction callInstruction = caller.method->code()[caller.ip - 1];
+            ASSERT(GET_OP(callInstruction) == OP_CALL,
+                   "Should be returning to a call.");
+            
+            store(caller, GET_B(callInstruction), result);
+          }
+          else
+          {
+            // The last method has returned, so end the fiber.
+            // TODO(bob): Do we care about the result value?
+            return FIBER_DONE;
+          }
+          break;
+        }
+          
+        case OP_THROW:
+        {
+          // TODO(bob): Errors can't be caught yet, so just bail.
+          return FIBER_UNCAUGHT_ERROR;
+          break;
+        }
+          
         default:
           ASSERT(false, "Unknown opcode.");
           break;
@@ -238,7 +247,7 @@ namespace magpie
     }
     
     ASSERT(false, "Should not get here.");
-    return gc<Object>();
+    return FIBER_DONE;
   }
   
   void Fiber::reach()
@@ -301,5 +310,10 @@ namespace magpie
     {
       return load(frame, index);
     }
+  }
+  
+  void CatchFrame::reach()
+  {
+    Memory::reach(parent_);
   }
 }

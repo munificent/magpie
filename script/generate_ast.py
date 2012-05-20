@@ -52,6 +52,8 @@ nodes = sorted({
         ('expressions', 'Array<gc<Node> >')],
     'String': [
         ('value',       'gc<String>')],
+    'Throw': [
+        ('value',       'gc<Node>')],
     'Variable': [
         ('isMutable',   'bool'),
         ('pattern',     'gc<Pattern>'),

@@ -17,6 +17,7 @@ class RecordNode;
 class ReturnNode;
 class SequenceNode;
 class StringNode;
+class ThrowNode;
 class VariableNode;
 class NothingPattern;
 class RecordPattern;
@@ -43,6 +44,7 @@ public:
   virtual void visit(const ReturnNode& node, int dest) = 0;
   virtual void visit(const SequenceNode& node, int dest) = 0;
   virtual void visit(const StringNode& node, int dest) = 0;
+  virtual void visit(const ThrowNode& node, int dest) = 0;
   virtual void visit(const VariableNode& node, int dest) = 0;
 
 protected:
@@ -82,6 +84,7 @@ public:
   virtual const ReturnNode* asReturnNode() const { return NULL; }
   virtual const SequenceNode* asSequenceNode() const { return NULL; }
   virtual const StringNode* asStringNode() const { return NULL; }
+  virtual const ThrowNode* asThrowNode() const { return NULL; }
   virtual const VariableNode* asVariableNode() const { return NULL; }
 
   const SourcePos& pos() const { return pos_; }
@@ -566,6 +569,34 @@ public:
 
 private:
   gc<String> value_;
+};
+
+class ThrowNode : public Node
+{
+public:
+  ThrowNode(const SourcePos& pos, gc<Node> value)
+  : Node(pos),
+    value_(value)
+  {}
+
+  virtual void accept(NodeVisitor& visitor, int arg) const
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual const ThrowNode* asThrowNode() const { return this; }
+
+  gc<Node> value() const { return value_; }
+
+  virtual void reach()
+  {
+    Memory::reach(value_);
+  }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  gc<Node> value_;
 };
 
 class VariableNode : public Node

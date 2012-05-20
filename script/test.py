@@ -15,6 +15,7 @@ MAGPIE_APP = join(MAGPIE_DIR, 'build', 'Debug', 'magpie')
 EXPECT_PATTERN = re.compile(r'// expect: (.*)')
 EXPECT_ERROR_PATTERN = re.compile(r'// expect error')
 ERROR_PATTERN = re.compile(r'line (\d+) col \d+\] Error: ')
+EXPECT_EXIT_PATTERN = re.compile(r'// expect exit (\d+)')
 
 class color:
     GREEN = '\033[32m'
@@ -49,15 +50,26 @@ def run_test(path):
     # Read the test and parse out the expectations.
     expect_output = []
     expect_error = []
+    expect_return = 0
+
     i = 1
     with open(path, 'r') as file:
         for line in file:
             match = EXPECT_PATTERN.search(line)
             if match:
                 expect_output.append((match.group(1), i))
+
             match = EXPECT_ERROR_PATTERN.search(line)
             if match:
                 expect_error.append(i)
+                # If we expect compile errors in the test, it should return
+                # exit code 1.
+                expect_return = 1
+
+            match = EXPECT_EXIT_PATTERN.search(line)
+            if match:
+                expect_return = int(match.group(1))
+
             i += 1
 
     # Invoke magpie and run the test.
@@ -81,14 +93,7 @@ def run_test(path):
         for line in expect_error:
             fails.append('Expected error on line ' + str(line) + ' and got none.')
 
-    # Validate the return code.
-    # TODO(bob): Allow tests to specify expected return code.
-    expect_return = 0
-
-    # If we expect compile errors in the test, it should return 1.
-    if len(expect_error) > 0:
-        expect_return = 1
-
+    # Validate the exit code.
     if proc.returncode != expect_return:
         fails.append('Expected return code {0} and got {1}.'.
             format(expect_return, proc.returncode))

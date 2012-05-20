@@ -1,0 +1,1 @@
+throw "uncaught" // expect exit 3

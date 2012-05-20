@@ -141,10 +141,15 @@ namespace magpie
     out << "\"" << value_ << "\"";
   }
   
+  void ThrowNode::trace(std::ostream& out) const
+  {
+    out << "(throw " << value_ << ")";
+  }
+  
   void VariableNode::trace(std::ostream& out) const
   {
-    out << (isMutable_ ? "var " : "val ");
-    out << pattern_ << " = " << value_;
+    out << "(" << (isMutable_ ? "var " : "val ");
+    out << pattern_ << " = " << value_ << ")";
   }
   
   void NothingPattern::trace(std::ostream& out) const
