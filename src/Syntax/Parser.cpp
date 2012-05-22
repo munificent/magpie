@@ -524,6 +524,9 @@ namespace magpie
 
   gc<Node> Parser::createSequence(const Array<gc<Node> >& exprs)
   {
+    // If the sequence is empty, just default it to nothing.
+    if (exprs.count() == 0) return new NothingNode(last().pos());
+    
     // If there is just one expression in the sequence, don't wrap it.
     if (exprs.count() == 1) return exprs[0];
 
@@ -586,7 +589,18 @@ namespace magpie
 
   void Parser::fillLookAhead(int count)
   {
-    while (read_.count() < count) read_.enqueue(lexer_.readToken());
+    while (read_.count() < count)
+    {
+      gc<Token> token = lexer_.readToken();
+      if (token->is(TOKEN_ERROR))
+      {
+        reporter_.error(token->pos(), token->text()->cString());
+      }
+      else
+      {
+        read_.enqueue(token);
+      }
+    }
   }
 }
 

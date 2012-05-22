@@ -1,0 +1,5 @@
+// TODO(bob): Decide if this is the behavior we actually want.
+print("a string with
+a newline in it")
+// expect: a string with
+// expect: a newline in it

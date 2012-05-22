@@ -333,7 +333,7 @@ namespace magpie
           case '\\': chars.add('\\'); break;
           case 't':  chars.add('\t'); break;
           default:
-            return error(String::format("Uknown escape sequence '%c'.", e));
+            return error(String::format("Unknown escape sequence '%c'.", e));
         }
       }
       else

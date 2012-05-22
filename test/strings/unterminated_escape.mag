@@ -1,0 +1,2 @@
+// expect error line 2
+"a string that isn't terminated\

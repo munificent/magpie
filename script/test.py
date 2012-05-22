@@ -14,6 +14,7 @@ MAGPIE_APP = join(MAGPIE_DIR, 'build', 'Debug', 'magpie')
 
 EXPECT_PATTERN = re.compile(r'// expect: (.*)')
 EXPECT_ERROR_PATTERN = re.compile(r'// expect error')
+EXPECT_ERROR_LINE_PATTERN = re.compile(r'// expect error line (\d+)')
 ERROR_PATTERN = re.compile(r'line (\d+) col \d+\] Error: ')
 EXPECT_EXIT_PATTERN = re.compile(r'// expect exit (\d+)')
 
@@ -62,6 +63,13 @@ def run_test(path):
             match = EXPECT_ERROR_PATTERN.search(line)
             if match:
                 expect_error.append(i)
+                # If we expect compile errors in the test, it should return
+                # exit code 1.
+                expect_return = 1
+
+            match = EXPECT_ERROR_LINE_PATTERN.search(line)
+            if match:
+                expect_error.append(int(match.group(1)))
                 # If we expect compile errors in the test, it should return
                 # exit code 1.
                 expect_return = 1
