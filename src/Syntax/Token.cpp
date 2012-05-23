@@ -11,7 +11,7 @@ namespace magpie
     endLine_(endLine),
     endCol_(endCol)
     {}
-  
+
   SourcePos SourcePos::spanTo(const SourcePos& end) const
   {
     return SourcePos(file_, startLine_, startCol_, end.endLine_, end.endCol_);
@@ -22,7 +22,7 @@ namespace magpie
     text_(text),
     pos_(pos)
   {}
-  
+
   const char* Token::typeString(TokenType type)
   {
     switch (type)
@@ -35,14 +35,19 @@ namespace magpie
       case TOKEN_LEFT_BRACE:    return "{";
       case TOKEN_RIGHT_BRACE:   return "}";
       case TOKEN_COMMA:         return ",";
-      case TOKEN_EQUALS:        return "=";
+      case TOKEN_EQ:            return "=";
+      case TOKEN_EQEQ:          return "==";
+      case TOKEN_NEQ:           return "!=";
+      case TOKEN_LT:            return "<";
+      case TOKEN_GT:            return ">";
+      case TOKEN_LTE:           return "<=";
+      case TOKEN_GTE:           return ">=";
       case TOKEN_PLUS:          return "+";
       case TOKEN_MINUS:         return "-";
       case TOKEN_STAR:          return "*";
       case TOKEN_SLASH:         return "/";
       case TOKEN_PERCENT:       return "%";
-      case TOKEN_LESS_THAN:     return "<";
-        
+
         // Keywords.
       case TOKEN_AND:           return "and";
       case TOKEN_CASE:          return "case";
@@ -67,12 +72,12 @@ namespace magpie
       case TOKEN_VAR:           return "var";
       case TOKEN_WHILE:         return "while";
       case TOKEN_XOR:           return "xor";
-        
+
       case TOKEN_FIELD:         return "field";
       case TOKEN_NAME:          return "name";
       case TOKEN_NUMBER:        return "number";
       case TOKEN_STRING:        return "string";
-        
+
       case TOKEN_LINE:          return "line";
       case TOKEN_ERROR:         return "error";
       case TOKEN_EOF:           return "eof";
@@ -80,12 +85,12 @@ namespace magpie
         ASSERT(false, "Unknown TokenType.");
     }
   }
-  
+
   void Token::reach()
   {
     Memory::reach(text_);
   }
-  
+
   void Token::trace(std::ostream& out) const
   {
     switch (type_)
@@ -97,11 +102,11 @@ namespace magpie
         // Show the text.
         out << text_;
         break;
-        
+
       case TOKEN_FIELD:
         out << text_ << ":";
         break;
-      
+
       default:
         // It's a token type with a fixed text, so just use that.
         out << typeString(type_);

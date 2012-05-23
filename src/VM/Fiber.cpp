@@ -143,6 +143,17 @@ namespace magpie
           break;
         }
           
+        case OP_EQUAL:
+        {
+          gc<Object> a = loadRegisterOrConstant(frame, GET_A(ins));
+          gc<Object> b = loadRegisterOrConstant(frame, GET_B(ins));
+          
+          // TODO(bob): Handle non-number types.
+          bool c = a->toNumber() == b->toNumber();
+          store(frame, GET_C(ins), vm_.getBool(c));
+          break;
+        }
+          
         case OP_LESS_THAN:
         {
           gc<Object> a = loadRegisterOrConstant(frame, GET_A(ins));
@@ -150,6 +161,17 @@ namespace magpie
           
           // TODO(bob): Handle non-number types.
           bool c = a->toNumber() < b->toNumber();
+          store(frame, GET_C(ins), vm_.getBool(c));
+          break;
+        }
+          
+        case OP_GREATER_THAN:
+        {
+          gc<Object> a = loadRegisterOrConstant(frame, GET_A(ins));
+          gc<Object> b = loadRegisterOrConstant(frame, GET_B(ins));
+          
+          // TODO(bob): Handle non-number types.
+          bool c = a->toNumber() > b->toNumber();
           store(frame, GET_C(ins), vm_.getBool(c));
           break;
         }

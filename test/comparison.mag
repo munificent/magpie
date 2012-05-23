@@ -1,0 +1,23 @@
+print(1 == 2) // expect: false
+print(1 == 1) // expect: true
+print(2 == 1) // expect: false
+
+print(1 != 2) // expect: true
+print(1 != 1) // expect: false
+print(2 != 1) // expect: true
+
+print(1 < 2) // expect: true
+print(1 < 1) // expect: false
+print(2 < 1) // expect: false
+
+print(1 > 2) // expect: false
+print(1 > 1) // expect: false
+print(2 > 1) // expect: true
+
+print(1 <= 2) // expect: true
+print(1 <= 1) // expect: true
+print(2 <= 1) // expect: false
+
+print(1 >= 2) // expect: false
+print(1 >= 1) // expect: true
+print(2 >= 1) // expect: true

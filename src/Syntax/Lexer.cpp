@@ -20,13 +20,18 @@ namespace magpie
         case TOKEN_LEFT_BRACKET:
         case TOKEN_LEFT_BRACE:
         case TOKEN_COMMA:
-        case TOKEN_EQUALS:
+        case TOKEN_EQ:
+        case TOKEN_EQEQ:
+        case TOKEN_NEQ:
+        case TOKEN_LT:
+        case TOKEN_GT:
+        case TOKEN_LTE:
+        case TOKEN_GTE:
         case TOKEN_PLUS:
         case TOKEN_MINUS:
         case TOKEN_STAR:
         case TOKEN_SLASH:
         case TOKEN_PERCENT:
-        case TOKEN_LESS_THAN:
         case TOKEN_AND:
         case TOKEN_IS:
         case TOKEN_NOT:
@@ -100,13 +105,42 @@ namespace magpie
         case '{': return makeToken(TOKEN_LEFT_BRACE);
         case '}': return makeToken(TOKEN_RIGHT_BRACE);
         case ',': return makeToken(TOKEN_COMMA);
-        case '=': return makeToken(TOKEN_EQUALS);
+        case '=':
+          if (peek() == '=')
+          {
+            advance();
+            return makeToken(TOKEN_EQEQ);
+          }
+          return makeToken(TOKEN_EQ);
+          
+        case '!':
+          if (peek() == '=')
+          {
+            advance();
+            return makeToken(TOKEN_NEQ);
+          }
+          return error(String::create("Expect '=' after '!'."));
+          
+        case '<':
+          if (peek() == '=')
+          {
+            advance();
+            return makeToken(TOKEN_LTE);
+          }
+          return makeToken(TOKEN_LT);
+          
+        case '>':
+          if (peek() == '=')
+          {
+            advance();
+            return makeToken(TOKEN_GTE);
+          }
+          return makeToken(TOKEN_GT);
+          
         case '+': return makeToken(TOKEN_PLUS);
         case '-': return makeToken(TOKEN_MINUS);
         case '*': return makeToken(TOKEN_STAR);
         case '%': return makeToken(TOKEN_PERCENT);
-        case '<': return makeToken(TOKEN_LESS_THAN);
-
         case '\n': return makeToken(TOKEN_LINE);
 
         case '/':

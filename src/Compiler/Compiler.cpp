@@ -159,19 +159,27 @@ namespace magpie
     int b = compileExpressionOrConstant(*node.right());
 
     OpCode op;
+    bool negate = false;
     switch (node.type())
     {
-      case TOKEN_PLUS:      op = OP_ADD; break;
-      case TOKEN_MINUS:     op = OP_SUBTRACT; break;
-      case TOKEN_STAR:      op = OP_MULTIPLY; break;
-      case TOKEN_SLASH:     op = OP_DIVIDE; break;
-      case TOKEN_LESS_THAN: op = OP_LESS_THAN; break;
+      case TOKEN_PLUS:   op = OP_ADD; break;
+      case TOKEN_MINUS:  op = OP_SUBTRACT; break;
+      case TOKEN_STAR:   op = OP_MULTIPLY; break;
+      case TOKEN_SLASH:  op = OP_DIVIDE; break;
+      case TOKEN_EQEQ:   op = OP_EQUAL; break;
+      case TOKEN_NEQ:    op = OP_EQUAL; negate = true; break;
+      case TOKEN_LT:     op = OP_LESS_THAN; break;
+      case TOKEN_LTE:    op = OP_GREATER_THAN; negate = true; break;
+      case TOKEN_GT:     op = OP_GREATER_THAN; break;
+      case TOKEN_GTE:    op = OP_LESS_THAN; negate = true; break;
 
       default:
         ASSERT(false, "Unknown infix operator.");
     }
     
     write(op, a, b, dest);
+    
+    if (negate) write(OP_NOT, dest);
     
     if (IS_REGISTER(a)) releaseTemp();
     if (IS_REGISTER(b)) releaseTemp();
