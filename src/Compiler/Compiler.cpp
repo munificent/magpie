@@ -100,9 +100,18 @@ namespace magpie
     }
   }
  
+  void Compiler::Scope::visit(const ValuePattern& pattern, int unused)
+  {
+    // Nothing to do.
+  }
+  
   void Compiler::Scope::visit(const VariablePattern& pattern, int unused)
   {
     makeLocal(pattern.pos(), pattern.name());
+    if (!pattern.pattern().isNull())
+    {
+      pattern.pattern()->accept(*this, unused);
+    }
   }
   
   Compiler::Compiler(VM& vm, ErrorReporter& reporter, Module* module)
@@ -502,6 +511,12 @@ namespace magpie
     }
   }
   
+  void Compiler::visit(const ValuePattern& pattern, int value)
+  {
+    // TODO(bob): Eventually this should generate code to test the pattern.
+    ASSERT(false, "Not implemented.");
+  }
+  
   void Compiler::visit(const VariablePattern& pattern, int value)
   {
     int variable = locals_.lastIndexOf(pattern.name());
@@ -509,6 +524,8 @@ namespace magpie
 
     // Copy the value into the new variable.
     write(OP_MOVE, value, variable);
+    
+    ASSERT(pattern.pattern().isNull(), "Inner patterns aren't implemented yet.");
   }
 
   int Compiler::compileExpressionOrConstant(const Node& node)

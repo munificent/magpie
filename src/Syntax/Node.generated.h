@@ -22,6 +22,7 @@ class ThrowNode;
 class VariableNode;
 class NothingPattern;
 class RecordPattern;
+class ValuePattern;
 class VariablePattern;
 
 class NodeVisitor
@@ -675,6 +676,7 @@ public:
 
   virtual void visit(const NothingPattern& node, int dest) = 0;
   virtual void visit(const RecordPattern& node, int dest) = 0;
+  virtual void visit(const ValuePattern& node, int dest) = 0;
   virtual void visit(const VariablePattern& node, int dest) = 0;
 
 protected:
@@ -700,6 +702,7 @@ public:
   // Dynamic casts.
     virtual const NothingPattern* asNothingPattern() const { return NULL; }
   virtual const RecordPattern* asRecordPattern() const { return NULL; }
+  virtual const ValuePattern* asValuePattern() const { return NULL; }
   virtual const VariablePattern* asVariablePattern() const { return NULL; }
 
   const SourcePos& pos() const { return pos_; }
@@ -761,12 +764,41 @@ private:
   Array<PatternField> fields_;
 };
 
+class ValuePattern : public Pattern
+{
+public:
+  ValuePattern(const SourcePos& pos, gc<Node> value)
+  : Pattern(pos),
+    value_(value)
+  {}
+
+  virtual void accept(PatternVisitor& visitor, int arg) const
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual const ValuePattern* asValuePattern() const { return this; }
+
+  gc<Node> value() const { return value_; }
+
+  virtual void reach()
+  {
+    Memory::reach(value_);
+  }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  gc<Node> value_;
+};
+
 class VariablePattern : public Pattern
 {
 public:
-  VariablePattern(const SourcePos& pos, gc<String> name)
+  VariablePattern(const SourcePos& pos, gc<String> name, gc<Pattern> pattern)
   : Pattern(pos),
-    name_(name)
+    name_(name),
+    pattern_(pattern)
   {}
 
   virtual void accept(PatternVisitor& visitor, int arg) const
@@ -777,14 +809,17 @@ public:
   virtual const VariablePattern* asVariablePattern() const { return this; }
 
   gc<String> name() const { return name_; }
+  gc<Pattern> pattern() const { return pattern_; }
 
   virtual void reach()
   {
     Memory::reach(name_);
+    Memory::reach(pattern_);
   }
 
   virtual void trace(std::ostream& out) const;
 
 private:
   gc<String> name_;
+  gc<Pattern> pattern_;
 };

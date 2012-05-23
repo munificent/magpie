@@ -478,7 +478,13 @@ namespace magpie
         name = last().text();
       }
 
-      gc<Pattern> value = primaryPattern();
+      gc<Pattern> value = variablePattern();
+      
+      if (value.isNull())
+      {
+        reporter_.error(current().pos(), "Expect pattern.");
+      }
+      
       fields.add(PatternField(name, value));
     }
     while (match(TOKEN_COMMA));
@@ -502,11 +508,26 @@ namespace magpie
     return new RecordPattern(pos.spanTo(last().pos()), fields);
   }
 
-  gc<Pattern> Parser::primaryPattern()
+  gc<Pattern> Parser::variablePattern()
   {
     if (match(TOKEN_NAME))
     {
-      return new VariablePattern(last().pos(), last().text());
+      gc<Pattern> inner = primaryPattern();
+      return new VariablePattern(last().pos(), last().text(), inner);
+    }
+    else
+    {
+      return primaryPattern();
+    }
+  }
+  
+  gc<Pattern> Parser::primaryPattern()
+  {
+    if (match(TOKEN_EQEQ))
+    {
+      SourcePos start = last().pos();
+      gc<Node> value = parsePrecedence(PRECEDENCE_COMPARISON);
+      return new ValuePattern(start.spanTo(last().pos()), value);
     }
     else if (match(TOKEN_NOTHING))
     {
@@ -520,7 +541,6 @@ namespace magpie
     }
     else
     {
-      reporter_.error(current().pos(), "Expect pattern.");
       return gc<Pattern>();
     }
   }
