@@ -159,7 +159,7 @@ namespace magpie
     
     node.right()->accept(*this, dest);
     
-    endJump(jumpToEnd, OP_JUMP_IF_FALSE, dest, code_.count() - jumpToEnd - 1);
+    endJump(jumpToEnd, OP_JUMP_IF_FALSE, dest);
   }
   
   void Compiler::visit(const BinaryOpNode& node, int dest)
@@ -253,7 +253,7 @@ namespace magpie
     
     // Jump past it if an exception is not thrown.
     int jumpPastCatch = startJump();
-    endJump(enter, OP_ENTER_TRY, code_.count() - enter - 1);
+    endJump(enter, OP_ENTER_TRY);
     
     // Compile the catch handlers.
     Scope catchScope(this);
@@ -263,7 +263,7 @@ namespace magpie
     node.catches()[0].body()->accept(*this, dest);
     catchScope.end();
     
-    endJump(jumpPastCatch, OP_JUMP, code_.count() - jumpPastCatch - 1);
+    endJump(jumpPastCatch, OP_JUMP);
   }
   
   void Compiler::visit(const DefMethodNode& node, int dest)
@@ -307,7 +307,7 @@ namespace magpie
     int jumpPastElse = startJump();
 
     // Compile the else arm.
-    endJump(jumpToElse, OP_JUMP_IF_FALSE, dest, code_.count() - jumpToElse - 1);
+    endJump(jumpToElse, OP_JUMP_IF_FALSE, dest);
 
     if (!node.elseArm().isNull())
     {
@@ -321,7 +321,7 @@ namespace magpie
       write(OP_BUILT_IN, BUILT_IN_NOTHING, dest);
     }
 
-    endJump(jumpPastElse, OP_JUMP, code_.count() - jumpPastElse - 1);
+    endJump(jumpPastElse, OP_JUMP);
     ifScope.end();
   }
 
@@ -384,7 +384,7 @@ namespace magpie
     
     node.right()->accept(*this, dest);
     
-    endJump(jumpToEnd, OP_JUMP_IF_TRUE, dest, code_.count() - jumpToEnd - 1);
+    endJump(jumpToEnd, OP_JUMP_IF_TRUE, dest);
   }
   
   void Compiler::visit(const RecordNode& node, int dest)
@@ -513,8 +513,20 @@ namespace magpie
   
   void Compiler::visit(const ValuePattern& pattern, int value)
   {
-    // TODO(bob): Eventually this should generate code to test the pattern.
-    ASSERT(false, "Not implemented.");
+    // Evaluate the expected value.
+    int expected = makeTemp();
+    pattern.value()->accept(*this, expected);
+    
+    // Throw if the value doesn't match the expected one.
+    write(OP_EQUAL, value, expected, expected);
+    
+    int jumpOverThrow = startJump();
+    // TODO(bob): Should throw a NoMatchError and not "false" which is the
+    // temporary hack here.
+    write(OP_THROW, expected);
+    endJump(jumpOverThrow, OP_JUMP_IF_TRUE, expected);
+    
+    releaseTemp();
   }
   
   void Compiler::visit(const VariablePattern& pattern, int value)
@@ -525,7 +537,11 @@ namespace magpie
     // Copy the value into the new variable.
     write(OP_MOVE, value, variable);
     
-    ASSERT(pattern.pattern().isNull(), "Inner patterns aren't implemented yet.");
+    // Compile the inner pattern.
+    if (!pattern.pattern().isNull())
+    {
+      pattern.pattern()->accept(*this, value);
+    }
   }
 
   int Compiler::compileExpressionOrConstant(const Node& node)
@@ -580,8 +596,28 @@ namespace magpie
     return code_.count() - 1;
   }
 
-  void Compiler::endJump(int from, OpCode op, int a, int b, int c)
+  void Compiler::endJump(int from, OpCode op, int a, int b)
   {
+    int c;
+    int offset = code_.count() - from - 1;
+    
+    // Add the offset as the last operand.
+    if (a == -1)
+    {
+      a = offset;
+      b = 0xff;
+      c = 0xff;
+    }
+    else if (b == -1)
+    {
+      b = offset;
+      c = 0xff;
+    }
+    else
+    {
+      c = offset;
+    }
+    
     code_[from] = MAKE_ABC(a, b, c, op);
   }
 

@@ -100,7 +100,11 @@ namespace magpie
     
     void write(OpCode op, int a = 0xff, int b = 0xff, int c = 0xff);
     int startJump();
-    void endJump(int from, OpCode op, int a = 0xff, int b = 0xff, int c = 0xff);
+    
+    // Backpatches the bytecode at `from` with the given instruction and the
+    // given operands with an additional operand that is the offset from `from`
+    // to the current instruction position.
+    void endJump(int from, OpCode op, int a = -1, int b = -1);
     
     int makeTemp();
     void releaseTemp();
