@@ -512,8 +512,9 @@ namespace magpie
   {
     if (match(TOKEN_NAME))
     {
+      gc<String> name = last().text();
       gc<Pattern> inner = primaryPattern();
-      return new VariablePattern(last().pos(), last().text(), inner);
+      return new VariablePattern(last().pos(), name, inner);
     }
     else
     {

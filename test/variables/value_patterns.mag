@@ -1,0 +1,16 @@
+val a == 1 = 1
+print(a) // expect: 1
+
+// Can use an expression for the value.
+val d == 1 + 2 + 3 = 6
+print(d) // expect: 6
+
+// Don't actually need to name a variable.
+print(val == 1 = 1) // expect: 1
+
+// Failed value pattern match.
+do
+    val e == 1 = 2
+catch err then
+    print("caught") // expect: caught
+end

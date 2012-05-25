@@ -46,12 +46,4 @@ print(u) // expect: 4
 print(v) // expect: 5
 print(w) // expect: 6
 
-// Failed value pattern match.
-do
-    val a == 1 = 2
-catch err then
-    print("caught") // expect: caught
-end
-print("after") // expect: after
-
-// TODO(bob): Pattern mismatch.
+// TODO(bob): Shape mismatch.
