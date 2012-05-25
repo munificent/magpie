@@ -182,6 +182,11 @@ namespace magpie
     out << ")";
   }
   
+  void TypePattern::trace(std::ostream& out) const
+  {
+    out << "(is " << type_ << ")";
+  }
+  
   void ValuePattern::trace(std::ostream& out) const
   {
     out << "(== " << value_ << ")";

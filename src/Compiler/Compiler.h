@@ -40,6 +40,7 @@ namespace magpie
       
       virtual void visit(const NothingPattern& pattern, int value);
       virtual void visit(const RecordPattern& pattern, int value);
+      virtual void visit(const TypePattern& pattern, int value);
       virtual void visit(const ValuePattern& pattern, int value);
       virtual void visit(const VariablePattern& pattern, int value);
 
@@ -77,6 +78,7 @@ namespace magpie
 
     virtual void visit(const NothingPattern& pattern, int value);
     virtual void visit(const RecordPattern& pattern, int value);
+    virtual void visit(const TypePattern& pattern, int value);
     virtual void visit(const ValuePattern& pattern, int value);
     virtual void visit(const VariablePattern& pattern, int value);
 

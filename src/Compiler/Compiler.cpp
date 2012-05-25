@@ -100,6 +100,11 @@ namespace magpie
     }
   }
  
+  void Compiler::Scope::visit(const TypePattern& pattern, int value)
+  {
+    // Nothing to do.
+  }
+  
   void Compiler::Scope::visit(const ValuePattern& pattern, int unused)
   {
     // Nothing to do.
@@ -509,6 +514,11 @@ namespace magpie
       
       releaseTemp();
     }
+  }
+  
+  void Compiler::visit(const TypePattern& pattern, int value)
+  {
+    ASSERT(false, "Not implemented.");
   }
   
   void Compiler::visit(const ValuePattern& pattern, int value)

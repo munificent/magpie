@@ -67,6 +67,8 @@ patterns = sorted({
     'Nothing': [],
     'Record': [
         ('fields',      'Array<PatternField>')],
+    'Type': [
+        ('type',        'gc<Node>')],
     'Value': [
         ('value',       'gc<Node>')],
     'Variable': [

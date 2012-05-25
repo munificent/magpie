@@ -22,6 +22,7 @@ class ThrowNode;
 class VariableNode;
 class NothingPattern;
 class RecordPattern;
+class TypePattern;
 class ValuePattern;
 class VariablePattern;
 
@@ -676,6 +677,7 @@ public:
 
   virtual void visit(const NothingPattern& node, int dest) = 0;
   virtual void visit(const RecordPattern& node, int dest) = 0;
+  virtual void visit(const TypePattern& node, int dest) = 0;
   virtual void visit(const ValuePattern& node, int dest) = 0;
   virtual void visit(const VariablePattern& node, int dest) = 0;
 
@@ -702,6 +704,7 @@ public:
   // Dynamic casts.
     virtual const NothingPattern* asNothingPattern() const { return NULL; }
   virtual const RecordPattern* asRecordPattern() const { return NULL; }
+  virtual const TypePattern* asTypePattern() const { return NULL; }
   virtual const ValuePattern* asValuePattern() const { return NULL; }
   virtual const VariablePattern* asVariablePattern() const { return NULL; }
 
@@ -762,6 +765,34 @@ public:
 
 private:
   Array<PatternField> fields_;
+};
+
+class TypePattern : public Pattern
+{
+public:
+  TypePattern(const SourcePos& pos, gc<Node> type)
+  : Pattern(pos),
+    type_(type)
+  {}
+
+  virtual void accept(PatternVisitor& visitor, int arg) const
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual const TypePattern* asTypePattern() const { return this; }
+
+  gc<Node> type() const { return type_; }
+
+  virtual void reach()
+  {
+    Memory::reach(type_);
+  }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  gc<Node> type_;
 };
 
 class ValuePattern : public Pattern

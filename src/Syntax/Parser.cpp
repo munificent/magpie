@@ -529,6 +529,12 @@ namespace magpie
       gc<Node> value = parsePrecedence(PRECEDENCE_COMPARISON);
       return new ValuePattern(start.spanTo(last().pos()), value);
     }
+    else if (match(TOKEN_IS))
+    {
+      SourcePos start = last().pos();
+      gc<Node> type = parsePrecedence(PRECEDENCE_COMPARISON);
+      return new TypePattern(start.spanTo(last().pos()), type);
+    }
     else if (match(TOKEN_NOTHING))
     {
       return new NothingPattern(last().pos());
