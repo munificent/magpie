@@ -32,6 +32,13 @@ namespace magpie
     
     inline gc<Object> nothing() const { return nothing_; }
     
+    inline gc<Object> boolClass() const { return boolClass_; }
+    inline gc<Object> classClass() const { return classClass_; }
+    inline gc<Object> nothingClass() const { return nothingClass_; }
+    inline gc<Object> numberClass() const { return numberClass_; }
+    inline gc<Object> recordClass() const { return recordClass_; }
+    inline gc<Object> stringClass() const { return stringClass_; }
+    
     inline gc<Object> getBool(bool value) const
     {
       return value ? true_ : false_;
@@ -54,6 +61,8 @@ namespace magpie
     symbolId addSymbol(gc<String> name);
     
   private:
+    void makeClass(gc<Object>& classObj, const char* name);
+    
     Array<Module*> modules_;
     Module* coreModule_;
     Array<gc<RecordType> > recordTypes_;
@@ -65,6 +74,12 @@ namespace magpie
     gc<Object> true_;
     gc<Object> false_;
     gc<Object> nothing_;
+    gc<Object> boolClass_;
+    gc<Object> classClass_;
+    gc<Object> nothingClass_;
+    gc<Object> numberClass_;
+    gc<Object> recordClass_;
+    gc<Object> stringClass_;
     
     NO_COPY(VM);
   };

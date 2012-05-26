@@ -9,14 +9,15 @@ namespace magpie
   enum Precedence {
     PRECEDENCE_ASSIGNMENT = 1, // =
     PRECEDENCE_RECORD     = 2, // ,
-    PRECEDENCE_LOGICAL    = 3, // and or
-    PRECEDENCE_NOT        = 4, // not
-    PRECEDENCE_EQUALITY   = 5, // == !=
-    PRECEDENCE_COMPARISON = 6, // < > <= >=
-    PRECEDENCE_TERM       = 7, // + -
-    PRECEDENCE_PRODUCT    = 8, // * / %
-    PRECEDENCE_NEGATE     = 9, // -
-    PRECEDENCE_CALL       = 10
+    PRECEDENCE_IS         = 3, // is
+    PRECEDENCE_LOGICAL    = 4, // and or
+    PRECEDENCE_NOT        = 5, // not
+    PRECEDENCE_EQUALITY   = 6, // == !=
+    PRECEDENCE_COMPARISON = 7, // < > <= >=
+    PRECEDENCE_TERM       = 8, // + -
+    PRECEDENCE_PRODUCT    = 9, // * / %
+    PRECEDENCE_NEGATE     = 10, // -
+    PRECEDENCE_CALL       = 11
   };
 
   Parser::Parselet Parser::expressions_[] = {
@@ -52,7 +53,7 @@ namespace magpie
     { &Parser::boolean, NULL, -1 },                                  // TOKEN_FALSE
     { NULL,             NULL, -1 },                                  // TOKEN_FOR
     { NULL,             NULL, -1 },                                  // TOKEN_IF
-    { NULL,             NULL, -1 },                                  // TOKEN_IS
+    { NULL,             &Parser::is, PRECEDENCE_IS },                // TOKEN_IS
     { NULL,             NULL, -1 },                                  // TOKEN_MATCH
     { &Parser::not_,    NULL, -1 },                                  // TOKEN_NOT
     { &Parser::nothing, NULL, -1 },                                  // TOKEN_NOTHING
@@ -451,7 +452,13 @@ namespace magpie
 
     return new RecordNode(left->pos().spanTo(last().pos()), fields);
   }
-
+  
+  gc<Node> Parser::is(gc<Node> left, gc<Token> token)
+  {
+    gc<Node> type = parsePrecedence(PRECEDENCE_IS + 1);
+    return new IsNode(token->pos(), left, type);
+  }
+  
   gc<Node> Parser::or_(gc<Node> left, gc<Token> token)
   {
     gc<Node> right = parsePrecedence(expressions_[token->type()].precedence);

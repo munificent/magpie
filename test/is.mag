@@ -1,0 +1,31 @@
+print(false is Bool) // expect: true
+print(Num is Bool) // expect: false
+print(nothing is Bool) // expect: false
+print(123 is Bool) // expect: false
+print("s" is Bool) // expect: false
+
+print(false is Class) // expect: false
+print(Num is Class) // expect: true
+print(nothing is Class) // expect: false
+print(123 is Class) // expect: false
+print("s" is Class) // expect: false
+
+print(false is Nothing) // expect: false
+print(Num is Nothing) // expect: false
+print(nothing is Nothing) // expect: true
+print(123 is Nothing) // expect: false
+print("s" is Nothing) // expect: false
+
+print(false is Num) // expect: false
+print(Num is Num) // expect: false
+print(nothing is Num) // expect: false
+print(123 is Num) // expect: true
+print("s" is Num) // expect: false
+
+print(false is String) // expect: false
+print(Num is String) // expect: false
+print(nothing is String) // expect: false
+print(123 is String) // expect: false
+print("s" is String) // expect: true
+
+// TODO(bob): Subtyping, user-defined classes, expressions for type.

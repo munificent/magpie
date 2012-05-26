@@ -37,6 +37,9 @@ nodes = sorted({
         ('condition',   'gc<Node>'),
         ('thenArm',     'gc<Node>'),
         ('elseArm',     'gc<Node>')],
+    'Is': [
+        ('value',       'gc<Node>'),
+        ('type',        'gc<Node>')],
     'Name': [
         ('name',        'gc<String>')],
     'Not': [

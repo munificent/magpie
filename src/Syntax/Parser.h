@@ -63,6 +63,7 @@ namespace magpie
     gc<Node> binaryOp(gc<Node> left, gc<Token> token);
     gc<Node> call(gc<Node> left, gc<Token> token);
     gc<Node> infixRecord(gc<Node> left, gc<Token> token);
+    gc<Node> is(gc<Node> left, gc<Token> token);
     gc<Node> or_(gc<Node> left, gc<Token> token);
 
     // Pattern parsing.

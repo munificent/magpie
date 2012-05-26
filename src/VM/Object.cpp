@@ -9,6 +9,12 @@ namespace magpie
     Memory::reach(name_);
   }
   
+  bool ClassObject::is(const ClassObject& other) const
+  {
+    // TODO(bob): Subtyping.
+    return this == &other;
+  }
+
   gc<RecordType> RecordType::create(const Array<int>& fields)
   {
     // Allocate enough memory for the record and its fields.

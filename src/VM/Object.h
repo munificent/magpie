@@ -17,15 +17,32 @@ namespace magpie
   class RecordObject;
   class StringObject;
   
+  enum ObjectType {
+    OBJECT_BOOL,
+    OBJECT_CLASS,
+    OBJECT_NOTHING,
+    OBJECT_NUMBER,
+    OBJECT_RECORD,
+    OBJECT_STRING
+  };
+  
   class Object : public Managed
   {
   public:
     Object() : Managed() {}
     
+    virtual ObjectType type() const = 0;
+    
     virtual bool toBool() const
     {
       ASSERT(false, "Not a bool.");
       return false;
+    }
+    
+    virtual const ClassObject* toClass() const
+    {
+      ASSERT(false, "Not a class.");
+      return NULL;
     }
     
     virtual double toNumber() const
@@ -54,6 +71,8 @@ namespace magpie
       value_(value)
     {}
     
+    virtual ObjectType type() const { return OBJECT_BOOL; }
+    
     virtual bool toBool() const { return value_; }
     
     virtual void trace(std::ostream& stream) const
@@ -75,6 +94,14 @@ namespace magpie
       name_(name)
     {}
     
+    gc<String> name() const { return name_; }
+    
+    bool is(const ClassObject& other) const;
+    
+    virtual ObjectType type() const { return OBJECT_CLASS; }
+    
+    virtual const ClassObject* toClass() const { return this; }
+    
     virtual void reach();
     
     virtual void trace(std::ostream& stream) const
@@ -92,6 +119,8 @@ namespace magpie
     NothingObject()
     : Object()
     {}
+    
+    virtual ObjectType type() const { return OBJECT_NOTHING; }
     
     // TODO(bob): Do we want to do this here, or rely on a "true?" method?
     virtual bool toBool() const { return false; }
@@ -112,6 +141,8 @@ namespace magpie
     : Object(),
       value_(value)
     {}
+    
+    virtual ObjectType type() const { return OBJECT_NUMBER; }
     
     // TODO(bob): Do we want to do this here, or rely on a "true?" method?
     virtual bool toBool() const { return value_ != 0; }
@@ -163,6 +194,8 @@ namespace magpie
     
     gc<Object> getField(int symbol);
     
+    virtual ObjectType type() const { return OBJECT_RECORD; }
+
     virtual bool toBool() const { return true; }
     virtual RecordObject* toRecord() { return this; }
     
@@ -190,6 +223,8 @@ namespace magpie
     : Object(),
       value_(value)
     {}
+    
+    virtual ObjectType type() const { return OBJECT_STRING; }
     
     virtual gc<String> toString() const { return value_; }
     

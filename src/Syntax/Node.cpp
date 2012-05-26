@@ -85,7 +85,11 @@ namespace magpie
       out << " else " << elseArm_ << ")";
     }
   }
-
+  
+  void IsNode::trace(std::ostream& out) const
+  {
+    out << "(" << value_ << " is " << type_ << ")";
+  }
   void NameNode::trace(std::ostream& out) const
   {
     out << name_;

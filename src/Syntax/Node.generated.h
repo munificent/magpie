@@ -9,6 +9,7 @@ class CatchNode;
 class DefMethodNode;
 class DoNode;
 class IfNode;
+class IsNode;
 class NameNode;
 class NotNode;
 class NothingNode;
@@ -39,6 +40,7 @@ public:
   virtual void visit(const DefMethodNode& node, int dest) = 0;
   virtual void visit(const DoNode& node, int dest) = 0;
   virtual void visit(const IfNode& node, int dest) = 0;
+  virtual void visit(const IsNode& node, int dest) = 0;
   virtual void visit(const NameNode& node, int dest) = 0;
   virtual void visit(const NotNode& node, int dest) = 0;
   virtual void visit(const NothingNode& node, int dest) = 0;
@@ -80,6 +82,7 @@ public:
   virtual const DefMethodNode* asDefMethodNode() const { return NULL; }
   virtual const DoNode* asDoNode() const { return NULL; }
   virtual const IfNode* asIfNode() const { return NULL; }
+  virtual const IsNode* asIsNode() const { return NULL; }
   virtual const NameNode* asNameNode() const { return NULL; }
   virtual const NotNode* asNotNode() const { return NULL; }
   virtual const NothingNode* asNothingNode() const { return NULL; }
@@ -357,6 +360,38 @@ private:
   gc<Node> condition_;
   gc<Node> thenArm_;
   gc<Node> elseArm_;
+};
+
+class IsNode : public Node
+{
+public:
+  IsNode(const SourcePos& pos, gc<Node> value, gc<Node> type)
+  : Node(pos),
+    value_(value),
+    type_(type)
+  {}
+
+  virtual void accept(NodeVisitor& visitor, int arg) const
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual const IsNode* asIsNode() const { return this; }
+
+  gc<Node> value() const { return value_; }
+  gc<Node> type() const { return type_; }
+
+  virtual void reach()
+  {
+    Memory::reach(value_);
+    Memory::reach(type_);
+  }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  gc<Node> value_;
+  gc<Node> type_;
 };
 
 class NameNode : public Node

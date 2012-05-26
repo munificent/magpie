@@ -114,6 +114,10 @@ namespace magpie
         cout << "NOT           " << GET_A(ins);
         break;
         
+      case OP_IS:
+        cout << "IS            " << GET_A(ins) << " is " << GET_B(ins);
+        break;
+        
       case OP_JUMP:
         cout << "JUMP          " << GET_A(ins);
         break;

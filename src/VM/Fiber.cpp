@@ -186,6 +186,30 @@ namespace magpie
           break;
         }
           
+        case OP_IS:
+        {
+          gc<Object> value = load(frame, GET_A(ins));
+          
+          // TODO(bob): Handle it not being a class.
+          const ClassObject* expected = load(frame, GET_B(ins))->toClass();
+          
+          gc<Object> type;
+          switch (value->type())
+          {
+            case OBJECT_BOOL:    type = vm_.boolClass(); break;
+            case OBJECT_CLASS:   type = vm_.classClass(); break;
+            case OBJECT_NOTHING: type = vm_.nothingClass(); break;
+            case OBJECT_NUMBER:  type = vm_.numberClass(); break;
+            case OBJECT_RECORD:  type = vm_.recordClass(); break;
+            case OBJECT_STRING:  type = vm_.stringClass(); break;
+            default:
+              ASSERT(false, "Unknown object type.");
+          }
+          
+          store(frame, GET_A(ins), vm_.getBool(type->toClass()->is(*expected)));
+          break;
+        }
+          
         case OP_JUMP:
         {
           int offset = GET_A(ins);

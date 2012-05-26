@@ -22,15 +22,18 @@ namespace magpie
     
     DEF_PRIMITIVE(print, "print 0:");
     
+    coreModule_ = new Module();
+    
+    makeClass(boolClass_, "Bool");
+    makeClass(classClass_, "Class");
+    makeClass(nothingClass_, "Nothing");
+    makeClass(numberClass_, "Num");
+    makeClass(recordClass_, "Record");
+    makeClass(stringClass_, "String");
+    
     true_ = new BoolObject(true);
     false_ = new BoolObject(false);
     nothing_ = new NothingObject();
-
-    coreModule_ = new Module();
-    gc<String> boolName = String::create("Bool");
-    coreModule_->addExport(boolName, new ClassObject(boolName));
-    gc<String> stringName = String::create("String");
-    coreModule_->addExport(stringName, new ClassObject(stringName));
   }
 
   bool VM::loadModule(const char* fileName, gc<String> source)
@@ -133,6 +136,13 @@ namespace magpie
     // It's a new symbol.
     symbols_.add(name);
     return symbols_.count() - 1;
+  }
+
+  void VM::makeClass(gc<Object>& classObj, const char* name)
+  {
+    gc<String> nameString = String::create(name);
+    classObj = new ClassObject(nameString);
+    coreModule_->addExport(nameString, classObj);
   }
 }
 

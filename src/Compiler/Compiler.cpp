@@ -329,7 +329,19 @@ namespace magpie
     endJump(jumpPastElse, OP_JUMP);
     ifScope.end();
   }
+  
+  void Compiler::visit(const IsNode& node, int dest)
+  {
+    node.value()->accept(*this, dest);
+    
+    int type = makeTemp();
+    node.type()->accept(*this, type);
 
+    write(OP_IS, dest, type);
+
+    releaseTemp(); // type
+  }
+  
   void Compiler::visit(const NameNode& node, int dest)
   {
     // See if it's a local variable.
