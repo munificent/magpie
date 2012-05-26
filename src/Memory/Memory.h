@@ -87,6 +87,13 @@ namespace magpie
     
     bool isNull() const { return object_ == NULL; }
     
+    // Unlike operator ==, this only checks that the two gc<T> objects are
+    // referring to the exact same object in memory.
+    inline bool sameAs(gc<T> other)
+    {
+      return object_ == other.object_;
+    }
+    
     void set(T* object) { object_ = object; }
     
   private:

@@ -68,7 +68,7 @@ namespace magpie
     OP_NOT           = 0x0f, // R(C) = RC(A) + RC(B)
     
     // Tests if the value in register A is an instance of the type in register
-    // B. Stores the result back in register A.
+    // B. Stores the result in register C.
     OP_IS = 0x10,
     
     OP_JUMP          = 0x11, // A = offset

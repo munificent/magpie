@@ -148,9 +148,16 @@ namespace magpie
           gc<Object> a = loadRegisterOrConstant(frame, GET_A(ins));
           gc<Object> b = loadRegisterOrConstant(frame, GET_B(ins));
           
-          // TODO(bob): Handle non-number types.
-          bool c = a->toNumber() == b->toNumber();
-          store(frame, GET_C(ins), vm_.getBool(c));
+          // See if the objects are equal. If they have the same identity, they
+          // must be.
+          bool equal = true;
+          if (!a.sameAs(b))
+          {
+            // TODO(bob): Handle non-number types.
+            equal = a->toNumber() == b->toNumber();
+          }
+          
+          store(frame, GET_C(ins), vm_.getBool(equal));
           break;
         }
           
@@ -206,7 +213,7 @@ namespace magpie
               ASSERT(false, "Unknown object type.");
           }
           
-          store(frame, GET_A(ins), vm_.getBool(type->toClass()->is(*expected)));
+          store(frame, GET_C(ins), vm_.getBool(type->toClass()->is(*expected)));
           break;
         }
           

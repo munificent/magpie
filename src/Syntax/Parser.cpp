@@ -545,7 +545,7 @@ namespace magpie
     }
     else if (match(TOKEN_NOTHING))
     {
-      return new NothingPattern(last().pos());
+      return new ValuePattern(last().pos(), new NothingNode(last().pos()));
     }
     else if (match(TOKEN_LEFT_PAREN))
     {

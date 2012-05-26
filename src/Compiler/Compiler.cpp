@@ -12,11 +12,10 @@ namespace magpie
                                      ErrorReporter& reporter)
   {
     // TODO(bob): Temp hackish. Wrap the module body in a fake method.
+    gc<Pattern> nothing = new ValuePattern(moduleNode->pos(),
+                                           new NothingNode(moduleNode->pos()));
     DefMethodNode* method = new DefMethodNode(moduleNode->pos(),
-        new NothingPattern(moduleNode->pos()),
-        String::create("<module>"),
-        new NothingPattern(moduleNode->pos()),
-        moduleNode);
+        nothing, String::create("<module>"), nothing, moduleNode);
 
     Module* module = new Module();
     
@@ -86,11 +85,6 @@ namespace magpie
     start_ = -1;
   }
   
-  void Compiler::Scope::visit(const NothingPattern& pattern, int unused)
-  {
-    // Nothing to do.
-  }
-  
   void Compiler::Scope::visit(const RecordPattern& pattern, int unused)
   {
     // Recurse into the fields.
@@ -143,8 +137,8 @@ namespace magpie
     // Evaluate the method's parameter patterns.
     if (!method.leftParam().isNull()) reserveVariables(*method.leftParam());
     if (!method.rightParam().isNull()) reserveVariables(*method.rightParam());
-    if (!method.leftParam().isNull()) method.leftParam()->accept(*this, result);
-    if (!method.rightParam().isNull()) method.rightParam()->accept(*this, result);
+    compilePattern(method.leftParam(), result);
+    compilePattern(method.rightParam(), result);
 
     method.body()->accept(*this, result);
     write(OP_RETURN, result);
@@ -337,7 +331,7 @@ namespace magpie
     int type = makeTemp();
     node.type()->accept(*this, type);
 
-    write(OP_IS, dest, type);
+    write(OP_IS, dest, type, dest);
 
     releaseTemp(); // type
   }
@@ -493,7 +487,7 @@ namespace magpie
     // TODO(bob): Handle mutable variables.
 
     // Now pattern match on it.
-    node.pattern()->accept(*this, valueReg);
+    compilePattern(node.pattern(), valueReg);
 
     // Copy the final result.
     // TODO(bob): Omit this in cases where it won't be used. Most variable
@@ -503,67 +497,12 @@ namespace magpie
     releaseTemp(); // valueReg.
   }
   
-  void Compiler::visit(const NothingPattern& pattern, int value)
+  void Compiler::compilePattern(gc<Pattern> pattern, int dest)
   {
-    // TODO(bob): Eventually this should generate code to test the pattern.
-  }
-  
-  void Compiler::visit(const RecordPattern& pattern, int value)
-  {
-    // TODO(bob): Needs to also generate code to test that the value matches
-    // this record.
+    if (pattern.isNull()) return;
     
-    // Recurse into the fields.
-    for (int i = 0; i < pattern.fields().count(); i++)
-    {
-      // Destructure the field.
-      int field = makeTemp();
-      int symbol = vm_.addSymbol(pattern.fields()[i].name);
-      write(OP_GET_FIELD, value, symbol, field);
-      
-      // Recurse into the pattern, using that field.
-      pattern.fields()[i].value->accept(*this, field);
-      
-      releaseTemp();
-    }
-  }
-  
-  void Compiler::visit(const TypePattern& pattern, int value)
-  {
-    ASSERT(false, "Not implemented.");
-  }
-  
-  void Compiler::visit(const ValuePattern& pattern, int value)
-  {
-    // Evaluate the expected value.
-    int expected = makeTemp();
-    pattern.value()->accept(*this, expected);
-    
-    // Throw if the value doesn't match the expected one.
-    write(OP_EQUAL, value, expected, expected);
-    
-    int jumpOverThrow = startJump();
-    // TODO(bob): Should throw a NoMatchError and not "false" which is the
-    // temporary hack here.
-    write(OP_THROW, expected);
-    endJump(jumpOverThrow, OP_JUMP_IF_TRUE, expected);
-    
-    releaseTemp();
-  }
-  
-  void Compiler::visit(const VariablePattern& pattern, int value)
-  {
-    int variable = locals_.lastIndexOf(pattern.name());
-    ASSERT(variable != -1, "Should have called declareVariables() already.")
-
-    // Copy the value into the new variable.
-    write(OP_MOVE, value, variable);
-    
-    // Compile the inner pattern.
-    if (!pattern.pattern().isNull())
-    {
-      pattern.pattern()->accept(*this, value);
-    }
+    PatternCompiler compiler(*this);
+    pattern->accept(compiler, dest);
   }
 
   int Compiler::compileExpressionOrConstant(const Node& node)
@@ -661,6 +600,77 @@ namespace magpie
     if (maxRegisters_ < locals_.count() + numTemps_)
     {
       maxRegisters_ = locals_.count() + numTemps_;
+    }
+  }
+  
+  void PatternCompiler::visit(const RecordPattern& pattern, int value)
+  {
+    // TODO(bob): Needs to also generate code to test that the value matches
+    // this record.
+    
+    // Recurse into the fields.
+    for (int i = 0; i < pattern.fields().count(); i++)
+    {
+      // Destructure the field.
+      int field = compiler_.makeTemp();
+      int symbol = compiler_.vm_.addSymbol(pattern.fields()[i].name);
+      compiler_.write(OP_GET_FIELD, value, symbol, field);
+      
+      // Recurse into the pattern, using that field.
+      pattern.fields()[i].value->accept(*this, field);
+      
+      compiler_.releaseTemp();
+    }
+  }
+  
+  void PatternCompiler::visit(const TypePattern& pattern, int value)
+  {
+    // Evaluate the expected type.
+    int expected = compiler_.makeTemp();
+    pattern.type()->accept(compiler_, expected);
+    
+    // Throw if the value doesn't match the expected type.
+    compiler_.write(OP_IS, value, expected, expected);
+    
+    int jumpOverThrow = compiler_.startJump();
+    // TODO(bob): Should throw a NoMatchError and not "false" which is the
+    // temporary hack here.
+    compiler_.write(OP_THROW, expected);
+    compiler_.endJump(jumpOverThrow, OP_JUMP_IF_TRUE, expected);
+    
+    compiler_.releaseTemp();
+  }
+  
+  void PatternCompiler::visit(const ValuePattern& pattern, int value)
+  {
+    // Evaluate the expected value.
+    int expected = compiler_.makeTemp();
+    pattern.value()->accept(compiler_, expected);
+    
+    // Throw if the value doesn't match the expected one.
+    compiler_.write(OP_EQUAL, value, expected, expected);
+    
+    int jumpOverThrow = compiler_.startJump();
+    // TODO(bob): Should throw a NoMatchError and not "false" which is the
+    // temporary hack here.
+    compiler_.write(OP_THROW, expected);
+    compiler_.endJump(jumpOverThrow, OP_JUMP_IF_TRUE, expected);
+    
+    compiler_.releaseTemp();
+  }
+  
+  void PatternCompiler::visit(const VariablePattern& pattern, int value)
+  {
+    int variable = compiler_.locals_.lastIndexOf(pattern.name());
+    ASSERT(variable != -1, "Should have called declareVariables() already.")
+    
+    // Copy the value into the new variable.
+    compiler_.write(OP_MOVE, value, variable);
+    
+    // Compile the inner pattern.
+    if (!pattern.pattern().isNull())
+    {
+      pattern.pattern()->accept(*this, value);
     }
   }
   

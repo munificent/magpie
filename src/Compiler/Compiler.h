@@ -12,10 +12,13 @@ namespace magpie
   class Module;
   class Node;
   class Object;
+  class PatternCompiler;
   class VM;
   
-  class Compiler : private NodeVisitor, private PatternVisitor
+  class Compiler : private NodeVisitor
   {
+    friend class PatternCompiler;
+    
   public:
     static Module* compileModule(VM& vm, gc<Node> module,
                                  ErrorReporter& reporter);
@@ -38,7 +41,6 @@ namespace magpie
       int makeLocal(const SourcePos& pos, gc<String> name);
       void end();
       
-      virtual void visit(const NothingPattern& pattern, int value);
       virtual void visit(const RecordPattern& pattern, int value);
       virtual void visit(const TypePattern& pattern, int value);
       virtual void visit(const ValuePattern& pattern, int value);
@@ -77,12 +79,8 @@ namespace magpie
     virtual void visit(const ThrowNode& node, int dest);
     virtual void visit(const VariableNode& node, int dest);
 
-    virtual void visit(const NothingPattern& pattern, int value);
-    virtual void visit(const RecordPattern& pattern, int value);
-    virtual void visit(const TypePattern& pattern, int value);
-    virtual void visit(const ValuePattern& pattern, int value);
-    virtual void visit(const VariablePattern& pattern, int value);
-
+    void compilePattern(gc<Pattern> pattern, int dest);
+    
     // Compiles the given node. If it's a constant node, it adds the constant
     // to the method table and returns the constant id (with the mask bit set).
     // Otherwise, creates a temporary register and compiles the node to evaluate
@@ -134,6 +132,22 @@ namespace magpie
     Scope* scope_;
     
     NO_COPY(Compiler);
+  };
+  
+  class PatternCompiler : public PatternVisitor
+  {
+  public:
+    PatternCompiler(Compiler& compiler)
+    : compiler_(compiler)
+    {}
+    
+    virtual void visit(const RecordPattern& pattern, int value);
+    virtual void visit(const TypePattern& pattern, int value);
+    virtual void visit(const ValuePattern& pattern, int value);
+    virtual void visit(const VariablePattern& pattern, int value);
+  
+  private:
+    Compiler& compiler_;
   };
   
   // Method definitions and calls are statically distinguished by the records

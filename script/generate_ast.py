@@ -67,7 +67,6 @@ nodes = sorted({
 }.items())
 
 patterns = sorted({
-    'Nothing': [],
     'Record': [
         ('fields',      'Array<PatternField>')],
     'Type': [
