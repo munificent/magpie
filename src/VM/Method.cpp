@@ -143,11 +143,15 @@ namespace magpie
         break;
         
       case OP_ENTER_TRY:
-        cout << "ENTER_TRY     +" << GET_A(ins);
+        cout << "ENTER_TRY     " << GET_A(ins);
         break;
         
       case OP_EXIT_TRY:
         cout << "EXIT_TRY      ";
+        break;
+        
+      case OP_TEST_MATCH:
+        cout << "TEST_MATCH    " << GET_A(ins);
         break;
     }
     

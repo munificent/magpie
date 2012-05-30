@@ -25,7 +25,7 @@ nodes = sorted({
         ('rightArg',    'gc<Node>')],
     'Catch': [
         ('body',        'gc<Node>'),
-        ('catches',     'Array<CatchClause>')],
+        ('catches',     'Array<MatchClause>')],
     'DefMethod': [
         ('leftParam',   'gc<Pattern>'),
         ('name',        'gc<String>'),
@@ -40,6 +40,9 @@ nodes = sorted({
     'Is': [
         ('value',       'gc<Node>'),
         ('type',        'gc<Node>')],
+    'Match': [
+        ('value',       'gc<Node>'),
+        ('cases',       'Array<MatchClause>')],
     'Name': [
         ('name',        'gc<String>')],
     'Not': [
@@ -159,6 +162,8 @@ private:
 }};
 '''
 
+num_types = 0
+
 def main():
     # Create the Node AST header.
     with open(header_path, 'w') as file:
@@ -190,6 +195,8 @@ def main():
         for pattern, fields in patterns:
             file.write(makeClass('Pattern', pattern, fields))
 
+    print 'Created', num_types, 'types.'
+
 
 def makeVisitor(name, types):
     result = VISITOR_HEADER.format(name)
@@ -202,7 +209,8 @@ def makeVisitor(name, types):
 
 
 def makeClass(baseClass, className, fields):
-    print className
+    global num_types
+    num_types += 1
     ctorParams = ''
     ctorArgs = ''
     accessors = ''
@@ -223,7 +231,15 @@ def makeClass(baseClass, className, fields):
         ctorParams += ' ' + name
 
         ctorArgs += ',\n    {0}_({0})'.format(name)
-        accessors += '  {1} {0}() const {{ return {0}_; }}\n'.format(name, type)
+
+        if type.startswith('Array'):
+            # Accessors for arrays do not copy.
+            accessors += '  const {1}& {0}() const {{ return {0}_; }}\n'.format(
+                name, type)
+        else:
+            accessors += '  {1} {0}() const {{ return {0}_; }}\n'.format(
+                name, type)
+
         memberVars += '\n  {1} {0}_;'.format(name, type)
 
     reach = ''

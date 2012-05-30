@@ -43,6 +43,7 @@ namespace magpie
     gc<Node> parseBlock(bool allowCatch, TokenType end1, TokenType end2,
                         TokenType* outEndToken);
     gc<Node> statementLike();
+    gc<Node> flowControl();
 
     // Parses an expression with the given precedence or higher.
     gc<Node> parsePrecedence(int precedence = 0);
@@ -78,7 +79,7 @@ namespace magpie
     const Token& current();
     
     // Gets the most recently consumed token.
-    const Token& last() const { return *last_; }
+    const gc<Token> last() const { return last_; }
     
     // Returns true if the current token is the given type.
     bool lookAhead(TokenType type);

@@ -46,16 +46,17 @@ namespace magpie
     gc<Pattern> value;
   };
   
-  // A single "catch" pattern in a CatchNode.
-  class CatchClause
+  // A pattern paired with the expression to execute when the pattern matches.
+  // Used for match expressions and catch clauses.
+  class MatchClause
   {
   public:
-    CatchClause()
+    MatchClause()
     : pattern_(),
       body_()
     {}
     
-    CatchClause(gc<Pattern> pattern, gc<Node> body)
+    MatchClause(gc<Pattern> pattern, gc<Node> body)
     : pattern_(pattern),
       body_(body)
     {}

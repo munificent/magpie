@@ -150,13 +150,47 @@ namespace magpie
           
           // See if the objects are equal. If they have the same identity, they
           // must be.
-          bool equal = true;
-          if (!a.sameAs(b))
+          bool equal;
+          if (a.sameAs(b))
           {
-            // TODO(bob): Handle non-number types.
-            equal = a->toNumber() == b->toNumber();
+            equal = true;
           }
-          
+          else if (a->type() != b->type())
+          {
+            // Different types, so not equal.
+            equal = false;
+          }
+          else
+          {
+            // Same type, so compare values.
+            switch (a->type())
+            {
+              case OBJECT_BOOL:
+                equal = a->toBool() == b->toBool();
+                break;
+                
+              case OBJECT_CLASS:
+                equal = false;
+                break;
+                
+              case OBJECT_NOTHING:
+                ASSERT(false, "Should only be one instance of nothing.");
+                break;
+                
+              case OBJECT_NUMBER:
+                equal = a->toNumber() == b->toNumber();
+                break;
+                
+              case OBJECT_RECORD:
+                ASSERT(false, "Equality on records not implemented.");
+                break;
+                
+              case OBJECT_STRING:
+                equal = a->toString() == b->toString();
+                break;
+            }
+          }
+
           store(frame, GET_C(ins), vm_.getBool(equal));
           break;
         }
@@ -295,18 +329,11 @@ namespace magpie
           
         case OP_THROW:
         {
-          // If there is nothing to catch it, end the fiber.
-          if (nearestCatch_.isNull()) return FIBER_UNCAUGHT_ERROR;
-          
-          // Unwind any nested callframes above the one containing the catch
-          // clause.
-          callFrames_.truncate(nearestCatch_->callFrame() + 1);
-          
-          // Jump to the catch handler.
-          callFrames_[-1].ip = nearestCatch_->offset();
-          
-          // Discard the try block now that we are outside of it.
-          nearestCatch_ = nearestCatch_->parent();
+          // TODO(bob): Throw an actual value.
+          if (!throwError(vm_.getBool(false)))
+          {
+            return FIBER_UNCAUGHT_ERROR;
+          }
           break;
         }
           
@@ -321,6 +348,17 @@ namespace magpie
         case OP_EXIT_TRY:
         {
           nearestCatch_ = nearestCatch_->parent();
+          break;
+        }
+          
+        case OP_TEST_MATCH:
+        {
+          gc<Object> pass = load(frame, GET_A(ins));
+          // TODO(bob): Throw NoMatchError.
+          if (!pass->toBool() && !throwError(vm_.getBool(false)))
+          {
+            return FIBER_UNCAUGHT_ERROR;
+          }
           break;
         }
       
@@ -383,6 +421,24 @@ namespace magpie
     callFrames_.add(CallFrame(method, stackStart));
   }
 
+  bool Fiber::throwError(gc<Object> error)
+  {
+    // If there is nothing to catch it, end the fiber.
+    if (nearestCatch_.isNull()) return false;
+    
+    // Unwind any nested callframes above the one containing the catch
+    // clause.
+    callFrames_.truncate(nearestCatch_->callFrame() + 1);
+    
+    // Jump to the catch handler.
+    // TODO(bob): Insert thrown value into appropriate register.
+    callFrames_[-1].ip = nearestCatch_->offset();
+    
+    // Discard the try block now that we are outside of it.
+    nearestCatch_ = nearestCatch_->parent();
+    
+    return true;
+  }
   
   gc<Object> Fiber::loadRegisterOrConstant(const CallFrame& frame, int index)
   {

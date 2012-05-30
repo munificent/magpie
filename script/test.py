@@ -18,6 +18,9 @@ EXPECT_ERROR_LINE_PATTERN = re.compile(r'// expect error line (\d+)')
 ERROR_PATTERN = re.compile(r'line (\d+) col \d+\] Error: ')
 EXPECT_EXIT_PATTERN = re.compile(r'// expect exit (\d+)')
 
+passed = 0
+failed = 0
+
 class color:
     GREEN = '\033[32m'
     RED = '\033[31m'
@@ -36,6 +39,9 @@ def walk(dir, callback):
 
 
 def run_test(path):
+    global passed
+    global failed
+
     if (splitext(path)[1] != '.mag'):
         return
 
@@ -132,11 +138,20 @@ def run_test(path):
 
     # Display the results.
     if len(fails) == 0:
-        print color.GREEN + 'PASS' + color.DEFAULT + ': ' + path
+        passed += 1
+        #print color.GREEN + 'PASS' + color.DEFAULT + ': ' + path
     else:
+        failed += 1
         print color.RED + 'FAIL' + color.DEFAULT + ': ' + path
         for fail in fails:
             print '     ', color.PINK + fail + color.DEFAULT
         print
 
 walk(TEST_DIR, run_test)
+
+if failed == 0:
+    print 'All ' + color.GREEN + str(passed) + color.DEFAULT + ' tests passed.'
+else:
+    print (color.GREEN + str(passed) + color.DEFAULT + ' tests passed. ' +
+           color.RED + str(failed) + color.DEFAULT + ' tests failed.')
+

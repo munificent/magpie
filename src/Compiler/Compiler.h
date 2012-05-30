@@ -67,6 +67,7 @@ namespace magpie
     virtual void visit(const DoNode& node, int dest);
     virtual void visit(const IfNode& node, int dest);
     virtual void visit(const IsNode& node, int dest);
+    virtual void visit(const MatchNode& node, int dest);
     virtual void visit(const NameNode& node, int dest);
     virtual void visit(const NotNode& node, int dest);
     virtual void visit(const NothingNode& node, int dest);
@@ -134,12 +135,40 @@ namespace magpie
     NO_COPY(Compiler);
   };
   
+  // Locates a code offset and a register where a pattern-match test operation
+  // occurs. By default, the test instruction will be OP_TEST_MATCH, which
+  // throws on failure. But for cases in a match expression, it should jump to
+  // the next case if a match fails. This tracks these locations so we can
+  // replace them with appropriate jumps.
+  struct matchTest
+  {
+    // Default constructor so we can use this in Array.
+    matchTest()
+    : position(-1),
+      value(-1)
+    {}
+    
+    matchTest(int position, int value)
+    : position(position),
+      value(value)
+    {}
+    
+    // Location in the bytecode where the test instruction appears.
+    int position;
+    
+    // Register where the value of the test is stored.
+    int value;
+  };
+  
   class PatternCompiler : public PatternVisitor
   {
   public:
-    PatternCompiler(Compiler& compiler)
-    : compiler_(compiler)
+    PatternCompiler(Compiler& compiler, bool recordTests = false)
+    : compiler_(compiler),
+      recordTests_(recordTests_)
     {}
+    
+    const Array<matchTest> tests() const { return tests_; }
     
     virtual void visit(const RecordPattern& pattern, int value);
     virtual void visit(const TypePattern& pattern, int value);
@@ -147,7 +176,11 @@ namespace magpie
     virtual void visit(const VariablePattern& pattern, int value);
   
   private:
+    void writeTest(int reg);
+    
     Compiler& compiler_;
+    bool recordTests_;
+    Array<matchTest> tests_;
   };
   
   // Method definitions and calls are statically distinguished by the records

@@ -70,6 +70,10 @@ namespace magpie
       stack_[frame.stackStart + reg] = value;
     }
     
+    // Throws the given error object. Returns true if a catch handler was found
+    // or false if the error unwound the entire callstack.
+    bool throwError(gc<Object> error);
+    
     gc<Object> loadRegisterOrConstant(const CallFrame& frame, int index);
     
     VM&                 vm_;

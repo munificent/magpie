@@ -336,6 +336,55 @@ namespace magpie
     releaseTemp(); // type
   }
   
+  void Compiler::visit(const MatchNode& node, int dest)
+  {
+    // Compile the value.
+    node.value()->accept(*this, dest);
+    
+    Array<int> endJumps;
+    
+    // Compile each case.
+    for (int i = 0; i < node.cases().count(); i++)
+    {
+      const MatchClause& clause = node.cases()[i];
+      
+      Scope caseScope(this);
+      
+      // Reserve the locals up front. This way we'll compile the value to a slot
+      // *after* them. This ensures locals always come before temporaries.
+      reserveVariables(*clause.pattern());
+      
+      // Compile the pattern.
+      PatternCompiler compiler(*this, i < node.cases().count() - 1);
+      clause.pattern()->accept(compiler, dest);
+      
+      // Compile the body if the match succeeds.
+      clause.body()->accept(*this, dest);
+      
+      // Then jump past the other cases.
+      if (i < node.cases().count() - 1)
+      {
+        endJumps.add(startJump());
+
+        // Since this isn't the last case, then every match failure should just
+        // jump to the next case.
+        for (int j = 0; j < compiler.tests().count(); j++)
+        {
+          const matchTest& test = compiler.tests()[j];
+          endJump(test.position, OP_JUMP_IF_FALSE, test.value); 
+        }
+      }
+      
+      caseScope.end();
+    }
+    
+    // Patch all the jumps now that we know where the end is.
+    for (int i = 0; i < endJumps.count(); i++)
+    {
+      endJump(endJumps[i], OP_JUMP);
+    }
+  }
+  
   void Compiler::visit(const NameNode& node, int dest)
   {
     // See if it's a local variable.
@@ -481,6 +530,7 @@ namespace magpie
     reserveVariables(*node.pattern());
 
     // Compile the value.
+    // TODO(bob): Why is there a temp for this?
     int valueReg = makeTemp();
     node.value()->accept(*this, valueReg);
 
@@ -629,14 +679,9 @@ namespace magpie
     int expected = compiler_.makeTemp();
     pattern.type()->accept(compiler_, expected);
     
-    // Throw if the value doesn't match the expected type.
+    // Test if the value matches the expected type.
     compiler_.write(OP_IS, value, expected, expected);
-    
-    int jumpOverThrow = compiler_.startJump();
-    // TODO(bob): Should throw a NoMatchError and not "false" which is the
-    // temporary hack here.
-    compiler_.write(OP_THROW, expected);
-    compiler_.endJump(jumpOverThrow, OP_JUMP_IF_TRUE, expected);
+    writeTest(expected);
     
     compiler_.releaseTemp();
   }
@@ -647,14 +692,9 @@ namespace magpie
     int expected = compiler_.makeTemp();
     pattern.value()->accept(compiler_, expected);
     
-    // Throw if the value doesn't match the expected one.
+    // Test if the value matches the expected one.
     compiler_.write(OP_EQUAL, value, expected, expected);
-    
-    int jumpOverThrow = compiler_.startJump();
-    // TODO(bob): Should throw a NoMatchError and not "false" which is the
-    // temporary hack here.
-    compiler_.write(OP_THROW, expected);
-    compiler_.endJump(jumpOverThrow, OP_JUMP_IF_TRUE, expected);
+    writeTest(expected);
     
     compiler_.releaseTemp();
   }
@@ -674,6 +714,12 @@ namespace magpie
     }
   }
   
+  void PatternCompiler::writeTest(int expected)
+  {
+    if (recordTests_) tests_.add(matchTest(compiler_.code_.count(), expected));
+    compiler_.write(OP_TEST_MATCH, expected);
+  }
+
   gc<String> SignatureBuilder::build(const CallNode& node)
   {
     // 1 foo                 -> ()foo

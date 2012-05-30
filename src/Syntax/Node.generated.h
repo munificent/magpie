@@ -10,6 +10,7 @@ class DefMethodNode;
 class DoNode;
 class IfNode;
 class IsNode;
+class MatchNode;
 class NameNode;
 class NotNode;
 class NothingNode;
@@ -40,6 +41,7 @@ public:
   virtual void visit(const DoNode& node, int dest) = 0;
   virtual void visit(const IfNode& node, int dest) = 0;
   virtual void visit(const IsNode& node, int dest) = 0;
+  virtual void visit(const MatchNode& node, int dest) = 0;
   virtual void visit(const NameNode& node, int dest) = 0;
   virtual void visit(const NotNode& node, int dest) = 0;
   virtual void visit(const NothingNode& node, int dest) = 0;
@@ -82,6 +84,7 @@ public:
   virtual const DoNode* asDoNode() const { return NULL; }
   virtual const IfNode* asIfNode() const { return NULL; }
   virtual const IsNode* asIsNode() const { return NULL; }
+  virtual const MatchNode* asMatchNode() const { return NULL; }
   virtual const NameNode* asNameNode() const { return NULL; }
   virtual const NotNode* asNotNode() const { return NULL; }
   virtual const NothingNode* asNothingNode() const { return NULL; }
@@ -229,7 +232,7 @@ private:
 class CatchNode : public Node
 {
 public:
-  CatchNode(const SourcePos& pos, gc<Node> body, const Array<CatchClause>& catches)
+  CatchNode(const SourcePos& pos, gc<Node> body, const Array<MatchClause>& catches)
   : Node(pos),
     body_(body),
     catches_(catches)
@@ -243,7 +246,7 @@ public:
   virtual const CatchNode* asCatchNode() const { return this; }
 
   gc<Node> body() const { return body_; }
-  Array<CatchClause> catches() const { return catches_; }
+  const Array<MatchClause>& catches() const { return catches_; }
 
   virtual void reach()
   {
@@ -254,7 +257,7 @@ public:
 
 private:
   gc<Node> body_;
-  Array<CatchClause> catches_;
+  Array<MatchClause> catches_;
 };
 
 class DefMethodNode : public Node
@@ -391,6 +394,37 @@ public:
 private:
   gc<Node> value_;
   gc<Node> type_;
+};
+
+class MatchNode : public Node
+{
+public:
+  MatchNode(const SourcePos& pos, gc<Node> value, const Array<MatchClause>& cases)
+  : Node(pos),
+    value_(value),
+    cases_(cases)
+  {}
+
+  virtual void accept(NodeVisitor& visitor, int arg) const
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual const MatchNode* asMatchNode() const { return this; }
+
+  gc<Node> value() const { return value_; }
+  const Array<MatchClause>& cases() const { return cases_; }
+
+  virtual void reach()
+  {
+    Memory::reach(value_);
+  }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  gc<Node> value_;
+  Array<MatchClause> cases_;
 };
 
 class NameNode : public Node
@@ -539,7 +573,7 @@ public:
 
   virtual const RecordNode* asRecordNode() const { return this; }
 
-  Array<Field> fields() const { return fields_; }
+  const Array<Field>& fields() const { return fields_; }
 
   virtual void reach()
   {
@@ -600,7 +634,7 @@ public:
 
   virtual const SequenceNode* asSequenceNode() const { return this; }
 
-  Array<gc<Node> > expressions() const { return expressions_; }
+  const Array<gc<Node> >& expressions() const { return expressions_; }
 
   virtual void reach()
   {
@@ -761,7 +795,7 @@ public:
 
   virtual const RecordPattern* asRecordPattern() const { return this; }
 
-  Array<PatternField> fields() const { return fields_; }
+  const Array<PatternField>& fields() const { return fields_; }
 
   virtual void reach()
   {

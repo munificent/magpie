@@ -95,6 +95,9 @@ namespace magpie
     // Discards the previous OP_ENTER_TRY handler. This occurs when execution
     // has proceeded past the block containing a catch clause.
     OP_EXIT_TRY = 0x18,
+    
+    // If register A is false, then throws a NoMatchError.
+    OP_TEST_MATCH = 0x19
   };
   
   enum BuiltIn

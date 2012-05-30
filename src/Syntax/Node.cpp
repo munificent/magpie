@@ -90,6 +90,20 @@ namespace magpie
   {
     out << "(" << value_ << " is " << type_ << ")";
   }
+  
+  void MatchNode::trace(std::ostream& out) const
+  {
+    out << "(match " << value_;
+    
+    for (int i = 0; i < cases_.count(); i++)
+    {
+      out << " (case " << cases_[i].pattern() << " then ";
+      out << cases_[i].body() << ")";
+    }
+    
+    out << ")";
+  }
+  
   void NameNode::trace(std::ostream& out) const
   {
     out << name_;
