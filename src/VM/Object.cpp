@@ -76,7 +76,7 @@ namespace magpie
   gc<Object> RecordObject::getField(int symbol)
   {
     int index = type_->getField(symbol);
-    ASSERT(index != -1, "Need to implement handling unknown fields.");
+    if (index == -1) return gc<Object>();
     
     return fields_[index];
   }

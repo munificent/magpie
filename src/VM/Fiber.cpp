@@ -78,10 +78,32 @@ namespace magpie
         case OP_GET_FIELD:
         {
           RecordObject* record = load(frame, GET_A(ins))->toRecord();
-          ASSERT(record != NULL, "Need to implement trying to get a field from a non-record.");
           
-          int symbol = GET_B(ins);
-          store(frame, GET_C(ins), record->getField(symbol));
+          // We can't pull record fields out of something that isn't a record.
+          // TODO(bob): Should you be able to destructure arbitrary objects by
+          // invoking getters with the right name?
+          if (record != NULL)
+          {
+            int symbol = GET_B(ins);
+            gc<Object> field = record->getField(symbol);
+
+            // If the record doesn't have the field, fail the match.
+            // TODO(bob): Throw NoMatchError.
+            if (!field.isNull())
+            {
+              store(frame, GET_C(ins), field);
+            }
+            else
+            {
+              // TODO(bob): Throw NoMatchError.
+              if (!throwError(vm_.getBool(false))) return FIBER_UNCAUGHT_ERROR;
+            }
+          }
+          else
+          {
+            // TODO(bob): Throw NoMatchError.
+            if (!throwError(vm_.getBool(false))) return FIBER_UNCAUGHT_ERROR;
+          }
           break;
         }
           
