@@ -78,6 +78,10 @@ namespace magpie
         cout << "GET_FIELD     " << GET_A(ins) << "[" << GET_B(ins) << "] -> " << GET_C(ins);
         break;
         
+      case OP_TEST_FIELD:
+        cout << "TEST_FIELD    " << GET_A(ins) << "[" << GET_B(ins) << "] -> " << GET_C(ins);
+        break;
+        
       case OP_GET_MODULE:
         cout << "GET_MODULE    import " << GET_A(ins) << ", var " << GET_B(ins) << " -> " << GET_C(ins);
         break;

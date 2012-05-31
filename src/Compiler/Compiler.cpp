@@ -347,6 +347,7 @@ namespace magpie
     for (int i = 0; i < node.cases().count(); i++)
     {
       const MatchClause& clause = node.cases()[i];
+      bool lastPattern = i == node.cases().count() - 1;
       
       Scope caseScope(this);
       
@@ -355,24 +356,19 @@ namespace magpie
       reserveVariables(*clause.pattern());
       
       // Compile the pattern.
-      PatternCompiler compiler(*this, i < node.cases().count() - 1);
+      PatternCompiler compiler(*this, !lastPattern);
       clause.pattern()->accept(compiler, dest);
       
       // Compile the body if the match succeeds.
       clause.body()->accept(*this, dest);
       
       // Then jump past the other cases.
-      if (i < node.cases().count() - 1)
+      if (!lastPattern)
       {
         endJumps.add(startJump());
-
-        // Since this isn't the last case, then every match failure should just
-        // jump to the next case.
-        for (int j = 0; j < compiler.tests().count(); j++)
-        {
-          const matchTest& test = compiler.tests()[j];
-          endJump(test.position, OP_JUMP_IF_FALSE, test.value); 
-        }
+        
+        // If this pattern fails, make it jump to the next case.
+        compiler.endJumps();
       }
       
       caseScope.end();
@@ -653,18 +649,47 @@ namespace magpie
     }
   }
   
+  void PatternCompiler::endJumps()
+  {
+    // Since this isn't the last case, then every match failure should just
+    // jump to the next case.
+    for (int j = 0; j < tests_.count(); j++)
+    {
+      const matchTest& test = tests_[j];
+      
+      if (test.value == -1)
+      {
+        // This test is a field destructure, so just set the offset.
+        compiler_.endJump(test.position, OP_JUMP); 
+      }
+      else
+      {
+        // A normal test.
+        compiler_.endJump(test.position, OP_JUMP_IF_FALSE, test.value); 
+      }
+    }
+  }
+  
   void PatternCompiler::visit(const RecordPattern& pattern, int value)
   {
-    // TODO(bob): Needs to also generate code to test that the value matches
-    // this record.
-    
     // Recurse into the fields.
     for (int i = 0; i < pattern.fields().count(); i++)
     {
-      // Destructure the field.
+      // Test and destructure the field. This takes two instructions to encode
+      // all of the operands.
       int field = compiler_.makeTemp();
       int symbol = compiler_.vm_.addSymbol(pattern.fields()[i].name);
-      compiler_.write(OP_GET_FIELD, value, symbol, field);
+      
+      if (jumpOnFailure_)
+      {
+        compiler_.write(OP_TEST_FIELD, value, symbol, field);
+        tests_.add(matchTest(compiler_.code_.count(), -1));
+        compiler_.startJump();
+      }
+      else
+      {
+        compiler_.write(OP_GET_FIELD, value, symbol, field);
+      }
       
       // Recurse into the pattern, using that field.
       pattern.fields()[i].value->accept(*this, field);
@@ -716,7 +741,10 @@ namespace magpie
   
   void PatternCompiler::writeTest(int expected)
   {
-    if (recordTests_) tests_.add(matchTest(compiler_.code_.count(), expected));
+    if (jumpOnFailure_)
+    {
+      tests_.add(matchTest(compiler_.code_.count(), expected));
+    }
     compiler_.write(OP_TEST_MATCH, expected);
   }
 

@@ -49,55 +49,61 @@ namespace magpie
     
     // Destructures a record field. Register A holds the record to destructure.
     // B is the symbol for the field (see VM::addSymbol()). Stores the field
-    // value in register C.
+    // value in register C. If register A does not have a record, or the record
+    // does not have the expected field, throws a NoMatchError.
     OP_GET_FIELD = 0x06,
+    
+    // Similar to OP_GET_FIELD. However, if the match fails, it does not throw.
+    // Instead, the instruction following this one is required to be an OP_JUMP
+    // containing the offset to jump to.
+    OP_TEST_FIELD = 0x07,
     
     // Loads a top-level variable exported from a module. A is the index of
     // the imported module in the containing module's import list. B is the
     // index of the exported variable in that module to load. Stores the value
     // in register C.
-    OP_GET_MODULE = 0x07,
+    OP_GET_MODULE = 0x08,
     
-    OP_ADD           = 0x08, // R(C) = RC(A) + RC(B)
-    OP_SUBTRACT      = 0x09, // R(C) = RC(A) - RC(B)
-    OP_MULTIPLY      = 0x0a, // R(C) = RC(A) * RC(B)
-    OP_DIVIDE        = 0x0b, // R(C) = RC(A) / RC(B)
-    OP_EQUAL         = 0x0c, // R(C) = RC(A) == RC(B)
-    OP_LESS_THAN     = 0x0d, // R(C) = RC(A) < RC(B)
-    OP_GREATER_THAN  = 0x0e, // R(C) = RC(A) > RC(B)
-    OP_NOT           = 0x0f, // R(C) = RC(A) + RC(B)
+    OP_ADD           = 0x09, // R(C) = RC(A) + RC(B)
+    OP_SUBTRACT      = 0x0a, // R(C) = RC(A) - RC(B)
+    OP_MULTIPLY      = 0x0b, // R(C) = RC(A) * RC(B)
+    OP_DIVIDE        = 0x0c, // R(C) = RC(A) / RC(B)
+    OP_EQUAL         = 0x0d, // R(C) = RC(A) == RC(B)
+    OP_LESS_THAN     = 0x0e, // R(C) = RC(A) < RC(B)
+    OP_GREATER_THAN  = 0x0f, // R(C) = RC(A) > RC(B)
+    OP_NOT           = 0x10, // R(C) = RC(A) + RC(B)
     
     // Tests if the value in register A is an instance of the type in register
     // B. Stores the result in register C.
-    OP_IS = 0x10,
+    OP_IS = 0x11,
     
-    OP_JUMP          = 0x11, // A = offset
-    OP_JUMP_IF_FALSE = 0x12, // R(A) = test register, B = offset
-    OP_JUMP_IF_TRUE  = 0x13, // R(A) = test register, B = offset
+    OP_JUMP          = 0x12, // A = offset
+    OP_JUMP_IF_FALSE = 0x13, // R(A) = test register, B = offset
+    OP_JUMP_IF_TRUE  = 0x14, // R(A) = test register, B = offset
     
     // Invokes a top-level method. The index of the method in the global table
     // is A. It passes in the argument in register B and stores the result in
     // register C.
     // TODO(bob): Tweak operands so that we can support more than 256 methods.
-    OP_CALL = 0x14,
+    OP_CALL = 0x15,
     
     // Exits the current method, returning register A.
-    OP_RETURN = 0x15,
+    OP_RETURN = 0x16,
     
     // Throws the error object in register A.
-    OP_THROW = 0x16,
+    OP_THROW = 0x17,
     
     // Registers a new catch handler. If an error is thrown before the
     // subsequent OP_EXIT_TRY, then execution will jump to the associate catch
     // block. Its code location is the location of the OP_ENTER_TRY + A.
-    OP_ENTER_TRY = 0x17,
+    OP_ENTER_TRY = 0x18,
     
     // Discards the previous OP_ENTER_TRY handler. This occurs when execution
     // has proceeded past the block containing a catch clause.
-    OP_EXIT_TRY = 0x18,
+    OP_EXIT_TRY = 0x19,
     
     // If register A is false, then throws a NoMatchError.
-    OP_TEST_MATCH = 0x19
+    OP_TEST_MATCH = 0x1a
   };
   
   enum BuiltIn

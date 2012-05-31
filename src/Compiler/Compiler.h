@@ -163,12 +163,12 @@ namespace magpie
   class PatternCompiler : public PatternVisitor
   {
   public:
-    PatternCompiler(Compiler& compiler, bool recordTests = false)
+    PatternCompiler(Compiler& compiler, bool jumpOnFailure = false)
     : compiler_(compiler),
-      recordTests_(recordTests_)
+      jumpOnFailure_(jumpOnFailure)
     {}
     
-    const Array<matchTest> tests() const { return tests_; }
+    void endJumps();
     
     virtual void visit(const RecordPattern& pattern, int value);
     virtual void visit(const TypePattern& pattern, int value);
@@ -179,7 +179,7 @@ namespace magpie
     void writeTest(int reg);
     
     Compiler& compiler_;
-    bool recordTests_;
+    bool jumpOnFailure_;
     Array<matchTest> tests_;
   };
   

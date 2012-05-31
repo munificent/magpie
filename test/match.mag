@@ -50,3 +50,12 @@ match "first"
         print("bad")
     end
 end
+
+// Record pattern.
+match x: 1, y: 2
+    case x: 1, y: 3 then print("bad")
+    case x: 2, y: 1 then print("bad")
+    case x: 1, z: 2 then print("bad")
+    case x: 1 then print("x") // expect: x
+    case y: 2 then print("bad")
+end

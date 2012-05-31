@@ -77,6 +77,7 @@ namespace magpie
           
         case OP_GET_FIELD:
         {
+          bool success = false;
           RecordObject* record = load(frame, GET_A(ins))->toRecord();
           
           // We can't pull record fields out of something that isn't a record.
@@ -92,17 +93,51 @@ namespace magpie
             if (!field.isNull())
             {
               store(frame, GET_C(ins), field);
-            }
-            else
-            {
-              // TODO(bob): Throw NoMatchError.
-              if (!throwError(vm_.getBool(false))) return FIBER_UNCAUGHT_ERROR;
+              success = true;
             }
           }
-          else
+          
+          // TODO(bob): Throw NoMatchError.
+          if (!success && !throwError(vm_.getBool(false)))
           {
+            return FIBER_UNCAUGHT_ERROR;
+          }
+          break;
+        }
+          
+        case OP_TEST_FIELD:
+        {
+          bool success = false;
+          RecordObject* record = load(frame, GET_A(ins))->toRecord();
+          
+          // The next instruction is a pseudo-instruction containing the offset
+          // to jump to.
+          instruction jump = frame.method->code()[frame.ip++];
+          ASSERT(GET_OP(jump) == OP_JUMP,
+                 "Pseudo-instruction after OP_TEST_FIELD must be OP_JUMP.");
+          
+          // We can't pull record fields out of something that isn't a record.
+          // TODO(bob): Should you be able to destructure arbitrary objects by
+          // invoking getters with the right name?
+          if (record != NULL)
+          {
+            int symbol = GET_B(ins);
+            gc<Object> field = record->getField(symbol);
+            
+            // If the record doesn't have the field, fail the match.
             // TODO(bob): Throw NoMatchError.
-            if (!throwError(vm_.getBool(false))) return FIBER_UNCAUGHT_ERROR;
+            if (!field.isNull())
+            {
+              store(frame, GET_C(ins), field);
+              success = true;
+            }
+          }
+          
+          // Jump if the match failed.
+          if (!success)
+          {
+            int offset = GET_A(jump);
+            frame.ip += offset;
           }
           break;
         }
