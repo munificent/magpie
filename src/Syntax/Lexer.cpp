@@ -323,7 +323,16 @@ namespace magpie
   gc<Token> Lexer::readNumber()
   {
     while (isDigit(peek())) advance();
-
+    
+    // See if it's a field.
+    if (peek() == ':')
+    {
+      gc<String> text = source_->substring(start_, pos_);
+      
+      advance();
+      return makeToken(TOKEN_FIELD, text);
+    }
+    
     // Read the fractional part, if any.
     if (peek() == '.')
     {

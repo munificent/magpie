@@ -216,5 +216,10 @@ namespace magpie
       out << name_;
     }
   }
+  
+  void WildcardPattern::trace(std::ostream& out) const
+  {
+    out << "_";
+  }
 }
 

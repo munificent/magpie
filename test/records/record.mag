@@ -1,0 +1,50 @@
+// Evaluate the fields left to right.
+do
+    val record = z: print(1), x: print(2), y: print(3)
+    // expect: 1
+    // expect: 2
+    // expect: 3
+end
+
+// Define fields on the object.
+do
+    val record = x: 1, y: 2
+    val x: x, y: y = record
+    print(x) // expect: 1
+    print(y) // expect: 2
+end
+
+// Infer a positional name if omitted.
+do
+    val semituple = a: "1", "2", c: "3"
+    val a: a, b, c: c = semituple
+    print(a) // expect: 1
+    print(b) // expect: 2
+    print(c) // expect: 3
+end
+
+// Allow omitting all names.
+do
+    val tuple = 1, 2, 3
+    val a, b, c = tuple
+    print(a) // expect: 1
+    print(b) // expect: 2
+    print(c) // expect: 3
+end
+
+// Ignore the order of fields when matching.
+do
+    val record = x: 1, y: 2
+    val y: y, x: x = record
+    print(x) // expect: 1
+    print(y) // expect: 2
+end
+
+// Allow reserved words as field names.
+do
+    val record = var: "var", with: "with", end: "end"
+    val var: a, with: b, end: c = record
+    print(a) // expect: var
+    print(b) // expect: with
+    print(c) // expect: end
+end

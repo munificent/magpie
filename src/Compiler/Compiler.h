@@ -45,6 +45,7 @@ namespace magpie
       virtual void visit(const TypePattern& pattern, int value);
       virtual void visit(const ValuePattern& pattern, int value);
       virtual void visit(const VariablePattern& pattern, int value);
+      virtual void visit(const WildcardPattern& pattern, int value);
 
     private:
       Compiler& compiler_;
@@ -174,6 +175,7 @@ namespace magpie
     virtual void visit(const TypePattern& pattern, int value);
     virtual void visit(const ValuePattern& pattern, int value);
     virtual void visit(const VariablePattern& pattern, int value);
+    virtual void visit(const WildcardPattern& pattern, int value);
   
   private:
     void writeTest(int reg);

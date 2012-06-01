@@ -1,0 +1,5 @@
+// Should not bind a variable with a wildcard pattern.
+match "whatever"
+    case _      then print(_) // expect error
+    case "else" then print("no")
+end

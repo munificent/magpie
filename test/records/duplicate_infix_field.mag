@@ -1,0 +1,2 @@
+// Fail to parse duplicate field names.
+print(1, a: 2, a: 3) // expect error

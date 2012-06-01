@@ -1,0 +1,2 @@
+// Fail to parse duplicate field names.
+a: 1, a: 2 // expect error

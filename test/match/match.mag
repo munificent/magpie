@@ -1,0 +1,124 @@
+// Evaluate the value expression once.
+match print("a") // expect: a
+    case "a" then print("one") // expect: one
+    case "b" then print("two")
+end
+
+// Return the value of the matched case.
+print(match 2
+    case 1 then "one"
+    case 2 then "two"
+    case 3 then "three"
+end) // expect: two
+
+// Only evaluate the first matched case.
+match true
+    case true then print("1") // expect: 1
+    case true then print("2")
+end
+
+// Throw an error if no case matches.
+do
+    match "not found"
+        case "a" then "bad"
+        case "b" then "bad"
+    end
+catch err then
+    print("caught") // expect: caught
+end
+
+// Bind a variable pattern.
+match 1
+    case a then print(a) // expect: 1
+end
+
+// Scope a binding to just the matched case.
+do
+    val a = "outer"
+    match "match"
+        case a then print(a) // expect: match
+    end
+    print(a) // expect: outer
+end
+
+// Allow a block for a case body.
+match "first"
+    case "first" then
+        print("a") // expect: a
+        print("b") // expect: b
+    case "second" then
+        print("bad")
+    end
+end
+
+// Match a bool literal.
+match true
+    case true then print("yes") // expect: yes
+    case false then print("no")
+end
+
+// Match an int literal.
+match 2
+    case 1 then print("no")
+    case 2 then print("yes") // expect: yes
+end
+
+// Match a string literal.
+match "b"
+    case "a" then print("no")
+    case "b" then print("yes") // expect: yes
+end
+
+// Record pattern.
+match x: 1, y: 2
+    case x: 1, y: 3 then print("bad")
+    case x: 2, y: 1 then print("bad")
+    case x: 1, z: 2 then print("bad")
+    case x: 1 then print("x") // expect: x
+    case y: 2 then print("bad")
+end
+
+// Bind a variable to an entire record.
+match 1, 2
+    case a then print(a) // expect: (1, 2)
+end
+
+// Bind a variable to a record field.
+match a: 1, b: (c: 2, d: 3)
+    case a: a, b: (c: b, d: c) then print(a + b + c) // expect: 6
+end
+
+// Match positional record fields.
+match 1, 2
+    case 1, 3 then print("no")
+    case 3, 2 then print("no")
+    case 1, 2 then print("yes") // expect: yes
+end
+
+// Bind a variable to a positional field.
+match 1, (2, 3)
+    case a, (b, c) then print(a + b + c) // expect: 6
+end
+
+// Match a variable pattern with an inner pattern.
+match 123
+    case a is Bool then print("no")
+    case a is Num then print("yes") // expect: yes
+end
+
+// Use a numeric field name.
+match 1, 2
+    case 0: a, 1: b then print(a + b) // expect: 3
+end
+
+/*
+specify("A value pattern") with
+    it should("match a class object as a value") with
+        match Int
+            case == Bool then "no"
+            case == Int then "yes"
+        end shouldEqual("yes")
+    end
+end
+
+*/

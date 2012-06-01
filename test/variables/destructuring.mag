@@ -62,6 +62,15 @@ do
     print(w) // expect: 6
 end
 
+// Numeric field names.
+do
+    val tuple = 0: 5, 1: 6, 2: 7
+    var a, b, c = tuple
+    print(a) // expect: 5
+    print(b) // expect: 6
+    print(c) // expect: 7
+end
+
 // Not a record value.
 do
     val x: a = "not record"

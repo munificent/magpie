@@ -1,0 +1,4 @@
+// Should not allow a duplicate field name in a record pattern.
+match "whatever"
+    case a: 1, a: 2 then print("no") // expect error
+end

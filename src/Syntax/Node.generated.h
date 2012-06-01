@@ -26,6 +26,7 @@ class RecordPattern;
 class TypePattern;
 class ValuePattern;
 class VariablePattern;
+class WildcardPattern;
 
 class NodeVisitor
 {
@@ -747,6 +748,7 @@ public:
   virtual void visit(const TypePattern& node, int dest) = 0;
   virtual void visit(const ValuePattern& node, int dest) = 0;
   virtual void visit(const VariablePattern& node, int dest) = 0;
+  virtual void visit(const WildcardPattern& node, int dest) = 0;
 
 protected:
   PatternVisitor() {}
@@ -773,6 +775,7 @@ public:
   virtual const TypePattern* asTypePattern() const { return NULL; }
   virtual const ValuePattern* asValuePattern() const { return NULL; }
   virtual const VariablePattern* asVariablePattern() const { return NULL; }
+  virtual const WildcardPattern* asWildcardPattern() const { return NULL; }
 
   const SourcePos& pos() const { return pos_; }
 
@@ -899,4 +902,24 @@ public:
 private:
   gc<String> name_;
   gc<Pattern> pattern_;
+};
+
+class WildcardPattern : public Pattern
+{
+public:
+  WildcardPattern(const SourcePos& pos)
+  : Pattern(pos)
+  {}
+
+  virtual void accept(PatternVisitor& visitor, int arg) const
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual const WildcardPattern* asWildcardPattern() const { return this; }
+
+
+  virtual void trace(std::ostream& out) const;
+
+private:
 };

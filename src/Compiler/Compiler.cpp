@@ -113,6 +113,11 @@ namespace magpie
     }
   }
   
+  void Compiler::Scope::visit(const WildcardPattern& pattern, int value)
+  {
+    // Nothing to do.
+  }
+  
   Compiler::Compiler(VM& vm, ErrorReporter& reporter, Module* module)
   : NodeVisitor(),
     vm_(vm),
@@ -737,6 +742,11 @@ namespace magpie
     {
       pattern.pattern()->accept(*this, value);
     }
+  }
+  
+  void PatternCompiler::visit(const WildcardPattern& pattern, int value)
+  {
+    // Nothing to do.
   }
   
   void PatternCompiler::writeTest(int expected)

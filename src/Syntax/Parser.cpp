@@ -390,7 +390,18 @@ namespace magpie
         // Infer the name from its position.
         name = String::format("%d", i);
       }
-
+      
+      // Make sure there are no duplicate fields.
+      for (int j = 0; j < fields.count(); j++)
+      {
+        if (*name == *fields[j].name)
+        {
+          reporter_.error(current().pos(),
+                          "Cannot use field '%s' twice in a record.",
+                          name->cString());
+        }
+      }
+      
       value = parsePrecedence(PRECEDENCE_LOGICAL);
       fields.add(Field(name, value));
 
@@ -483,6 +494,17 @@ namespace magpie
         name = String::format("%d", i);
       }
 
+      // Make sure there are no duplicate fields.
+      for (int j = 0; j < fields.count(); j++)
+      {
+        if (*name == *fields[j].name)
+        {
+          reporter_.error(current().pos(),
+                          "Cannot use field '%s' twice in a record.",
+                          name->cString());
+        }
+      }
+      
       gc<Node> value = parsePrecedence(PRECEDENCE_LOGICAL);
       fields.add(Field(name, value));
 
@@ -514,6 +536,7 @@ namespace magpie
 
   gc<Pattern> Parser::recordPattern()
   {
+    bool hasField = false;
     SourcePos pos = current().pos();
     Array<PatternField> fields;
 
@@ -523,8 +546,24 @@ namespace magpie
       if (match(TOKEN_FIELD))
       {
         name = last()->text();
+        hasField = true;
+      }
+      else
+      {
+        name = String::format("%d", fields.count());
       }
 
+      // Make sure the field isn't already in use.
+      for (int j = 0; j < fields.count(); j++)
+      {
+        if (*name == *fields[j].name)
+        {
+          reporter_.error(current().pos(),
+              "Cannot use field '%s' twice in a record pattern.",
+              name->cString());
+        }
+      }
+      
       gc<Pattern> value = variablePattern();
       
       if (value.isNull())
@@ -538,18 +577,9 @@ namespace magpie
 
     // If we just have a single unnamed field, it's not a record, it's just
     // that pattern.
-    if (fields.count() == 1 && fields[0].name.isNull())
+    if (fields.count() == 1 && !hasField)
     {
       return fields[0].value;
-    }
-
-    // Fill in the positional names.
-    for (int i = 0; i < fields.count(); i++)
-    {
-      if (fields[i].name.isNull())
-      {
-        fields[i].name = String::format("%d", i);
-      }
     }
 
     return new RecordPattern(pos.spanTo(last()->pos()), fields);
@@ -560,8 +590,15 @@ namespace magpie
     if (match(TOKEN_NAME))
     {
       gc<String> name = last()->text();
-      gc<Pattern> inner = primaryPattern();
-      return new VariablePattern(last()->pos(), name, inner);
+      if (*name == "_")
+      {
+        return new WildcardPattern(last()->pos());
+      }
+      else
+      {
+        gc<Pattern> inner = primaryPattern();
+        return new VariablePattern(last()->pos(), name, inner);
+      }
     }
     else
     {
