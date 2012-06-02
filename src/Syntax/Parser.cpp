@@ -1,7 +1,7 @@
 #include <sstream>
 
+#include "Ast.h"
 #include "Lexer.h"
-#include "Node.h"
 #include "Parser.h"
 
 namespace magpie
@@ -77,9 +77,9 @@ namespace magpie
     { NULL,             NULL, -1 }                                   // TOKEN_EOF
   };
 
-  gc<Node> Parser::parseModule()
+  gc<Expr> Parser::parseModule()
   {
-    Array<gc<Node> > exprs;
+    Array<gc<Expr> > exprs;
 
     do
     {
@@ -94,26 +94,26 @@ namespace magpie
     return createSequence(exprs);
   }
 
-  gc<Node> Parser::parseBlock(TokenType endToken)
+  gc<Expr> Parser::parseBlock(TokenType endToken)
   {
     TokenType dummy;
     return parseBlock(true, endToken, endToken, &dummy);
   }
 
-  gc<Node> Parser::parseBlock(TokenType end1, TokenType end2,
+  gc<Expr> Parser::parseBlock(TokenType end1, TokenType end2,
                               TokenType* outEndToken)
   {
     return parseBlock(true, end1, end2, outEndToken);
   }
 
-  gc<Node> Parser::parseBlock(bool allowCatch, TokenType end1, TokenType end2,
+  gc<Expr> Parser::parseBlock(bool allowCatch, TokenType end1, TokenType end2,
                               TokenType* outEndToken)
   {
     // If we have a newline, then it's an actual block, otherwise it's a
     // single expression.
     if (match(TOKEN_LINE))
     {
-      Array<gc<Node> > exprs;
+      Array<gc<Expr> > exprs;
 
       do
       {
@@ -133,7 +133,7 @@ namespace magpie
       // single-expression block case.
       if (current().is(TOKEN_END)) consume();
 
-      gc<Node> block = createSequence(exprs);
+      gc<Expr> block = createSequence(exprs);
 
       // Parse any catch clauses.
       if (allowCatch)
@@ -143,13 +143,13 @@ namespace magpie
         {
           gc<Pattern> pattern = parsePattern();
           consume(TOKEN_THEN, "Expect 'then' after catch pattern.");
-          gc<Node> body = parseBlock(false, end1, end2, outEndToken);
+          gc<Expr> body = parseBlock(false, end1, end2, outEndToken);
           catches.add(MatchClause(pattern, body));
         }
 
         if (catches.count() > 0)
         {
-          block = new CatchNode(block->pos().spanTo(last()->pos()),
+          block = new CatchExpr(block->pos().spanTo(last()->pos()),
                                 block, catches);
         }
       }
@@ -164,7 +164,7 @@ namespace magpie
     }
   }
   
-  gc<Node> Parser::statementLike()
+  gc<Expr> Parser::statementLike()
   {
     if (match(TOKEN_DEF))
     {
@@ -194,9 +194,9 @@ namespace magpie
         }
       }
       
-      gc<Node> body = parseBlock();
+      gc<Expr> body = parseBlock();
       SourcePos span = start.spanTo(last()->pos());
-      return new DefMethodNode(span, leftParam, name->text(), rightParam, body);
+      return new DefMethodExpr(span, leftParam, name->text(), rightParam, body);
     }
     
     if (match(TOKEN_RETURN))
@@ -204,14 +204,14 @@ namespace magpie
       SourcePos start = last()->pos();
       
       // Parse the value if there is one.
-      gc<Node> value;
+      gc<Expr> value;
       if (!lookAhead(TOKEN_LINE))
       {
         value = flowControl();
       }
       
       SourcePos span = start.spanTo(last()->pos());
-      return new ReturnNode(span, value);
+      return new ReturnExpr(span, value);
     }
     
     if (match(TOKEN_VAR) || match(TOKEN_VAL))
@@ -223,35 +223,35 @@ namespace magpie
       
       gc<Pattern> pattern = parsePattern();
       consume(TOKEN_EQ, "Expect '=' after variable declaration.");
-      gc<Node> value = flowControl();
+      gc<Expr> value = flowControl();
       
       SourcePos span = start.spanTo(last()->pos());
-      return new VariableNode(span, isMutable, pattern, value);
+      return new VariableExpr(span, isMutable, pattern, value);
     }
     
     return flowControl();
   }
   
-  gc<Node> Parser::flowControl()
+  gc<Expr> Parser::flowControl()
   {
     if (match(TOKEN_DO))
     {
       SourcePos start = last()->pos();
-      gc<Node> body = parseBlock();
+      gc<Expr> body = parseBlock();
       SourcePos span = start.spanTo(last()->pos());
-      return new DoNode(span, body);
+      return new DoExpr(span, body);
     }
 
     if (match(TOKEN_IF))
     {
       SourcePos start = last()->pos();
 
-      gc<Node> condition = parseBlock(TOKEN_THEN);
+      gc<Expr> condition = parseBlock(TOKEN_THEN);
       consume(TOKEN_THEN, "Expect 'then' after 'if' condition.");
 
       TokenType endToken;
-      gc<Node> thenArm = parseBlock(TOKEN_ELSE, TOKEN_END, &endToken);
-      gc<Node> elseArm;
+      gc<Expr> thenArm = parseBlock(TOKEN_ELSE, TOKEN_END, &endToken);
+      gc<Expr> elseArm;
 
       // Don't look for an else arm if the then arm was a block that
       // specifically ended with 'end'.
@@ -261,7 +261,7 @@ namespace magpie
       }
 
       SourcePos span = start.spanTo(last()->pos());
-      return new IfNode(span, condition, thenArm, elseArm);
+      return new IfExpr(span, condition, thenArm, elseArm);
     }
 
     if (match(TOKEN_MATCH))
@@ -269,7 +269,7 @@ namespace magpie
       SourcePos start = last()->pos();
 
       // Parse the value.
-      gc<Node> value = parsePrecedence(PRECEDENCE_ASSIGNMENT);
+      gc<Expr> value = parsePrecedence(PRECEDENCE_ASSIGNMENT);
       
       // Require a newline between the value and the first case.
       consume(TOKEN_LINE, "Expect a newline after a match's value expression.");
@@ -283,7 +283,7 @@ namespace magpie
         consume(TOKEN_THEN, "Expect 'then' after a case pattern.");
         
         TokenType endToken;
-        gc<Node> body = parseBlock(TOKEN_ELSE, TOKEN_END, TOKEN_CASE,
+        gc<Expr> body = parseBlock(TOKEN_ELSE, TOKEN_END, TOKEN_CASE,
                                    &endToken);
         
         // Allow newlines to separate single-line case and else cases.
@@ -302,13 +302,13 @@ namespace magpie
       consume(TOKEN_END, "Expect 'end' after match expression.");
       
       SourcePos span = start.spanTo(last()->pos());
-      return new MatchNode(span, value, cases);
+      return new MatchExpr(span, value, cases);
     }
     
     return parsePrecedence();
   }
 
-  gc<Node> Parser::parsePrecedence(int precedence)
+  gc<Expr> Parser::parsePrecedence(int precedence)
   {
     gc<Token> token = consume();
     PrefixParseFn prefix = expressions_[token->type()].prefix;
@@ -321,7 +321,7 @@ namespace magpie
       return NULL;
     }
 
-    gc<Node> left = (this->*prefix)(token);
+    gc<Expr> left = (this->*prefix)(token);
 
     while (precedence < expressions_[current().type()].precedence)
     {
@@ -335,45 +335,45 @@ namespace magpie
 
   // Prefix parsers -----------------------------------------------------------
 
-  gc<Node> Parser::boolean(gc<Token> token)
+  gc<Expr> Parser::boolean(gc<Token> token)
   {
-    return new BoolNode(token->pos(), token->type() == TOKEN_TRUE);
+    return new BoolExpr(token->pos(), token->type() == TOKEN_TRUE);
   }
 
-  gc<Node> Parser::group(gc<Token> token)
+  gc<Expr> Parser::group(gc<Token> token)
   {
-    gc<Node> node = flowControl();
+    gc<Expr> expr = flowControl();
     consume(TOKEN_RIGHT_PAREN, "Expect ')'.");
-    return node;
+    return expr;
   }
 
-  gc<Node> Parser::name(gc<Token> token)
+  gc<Expr> Parser::name(gc<Token> token)
   {
-    return call(gc<Node>(), token);
+    return call(gc<Expr>(), token);
   }
 
-  gc<Node> Parser::not_(gc<Token> token)
+  gc<Expr> Parser::not_(gc<Token> token)
   {
-    gc<Node> value = parsePrecedence(PRECEDENCE_CALL);
-    return new NotNode(token->pos().spanTo(value->pos()), value);
+    gc<Expr> value = parsePrecedence(PRECEDENCE_CALL);
+    return new NotExpr(token->pos().spanTo(value->pos()), value);
   }
 
-  gc<Node> Parser::nothing(gc<Token> token)
+  gc<Expr> Parser::nothing(gc<Token> token)
   {
-    return new NothingNode(token->pos());
+    return new NothingExpr(token->pos());
   }
 
-  gc<Node> Parser::number(gc<Token> token)
+  gc<Expr> Parser::number(gc<Token> token)
   {
     double number = atof(token->text()->cString());
-    return new NumberNode(token->pos(), number);
+    return new NumberExpr(token->pos(), number);
   }
 
-  gc<Node> Parser::record(gc<Token> token)
+  gc<Expr> Parser::record(gc<Token> token)
   {
     Array<Field> fields;
 
-    gc<Node> value = parsePrecedence(PRECEDENCE_LOGICAL);
+    gc<Expr> value = parsePrecedence(PRECEDENCE_LOGICAL);
     fields.add(Field(token->text(), value));
 
     int i = 1;
@@ -408,42 +408,42 @@ namespace magpie
       i++;
     }
 
-    return new RecordNode(token->pos().spanTo(last()->pos()), fields);
+    return new RecordExpr(token->pos().spanTo(last()->pos()), fields);
   }
 
-  gc<Node> Parser::string(gc<Token> token)
+  gc<Expr> Parser::string(gc<Token> token)
   {
-    return new StringNode(token->pos(), token->text());
+    return new StringExpr(token->pos(), token->text());
   }
 
-  gc<Node> Parser::throw_(gc<Token> token)
+  gc<Expr> Parser::throw_(gc<Token> token)
   {
-    gc<Node> value = parsePrecedence(PRECEDENCE_LOGICAL);
-    return new ThrowNode(token->pos().spanTo(last()->pos()), value);
+    gc<Expr> value = parsePrecedence(PRECEDENCE_LOGICAL);
+    return new ThrowExpr(token->pos().spanTo(last()->pos()), value);
   }
 
   // Infix parsers ------------------------------------------------------------
 
-  gc<Node> Parser::and_(gc<Node> left, gc<Token> token)
+  gc<Expr> Parser::and_(gc<Expr> left, gc<Token> token)
   {
-    gc<Node> right = parsePrecedence(expressions_[token->type()].precedence);
-    return new AndNode(token->pos(), left, right);
+    gc<Expr> right = parsePrecedence(expressions_[token->type()].precedence);
+    return new AndExpr(token->pos(), left, right);
   }
 
-  gc<Node> Parser::binaryOp(gc<Node> left, gc<Token> token)
+  gc<Expr> Parser::binaryOp(gc<Expr> left, gc<Token> token)
   {
     // TODO(bob): Support right-associative infix. Needs to do precedence
     // - 1 here, to be right-assoc.
-    gc<Node> right = parsePrecedence(expressions_[token->type()].precedence);
+    gc<Expr> right = parsePrecedence(expressions_[token->type()].precedence);
 
-    return new BinaryOpNode(token->pos(), left, token->type(), right);
+    return new BinaryOpExpr(token->pos(), left, token->type(), right);
   }
 
-  gc<Node> Parser::call(gc<Node> left, gc<Token> token)
+  gc<Expr> Parser::call(gc<Expr> left, gc<Token> token)
   {
     // See if we have an argument on the right.
     bool hasRightArg = false;
-    gc<Node> right;
+    gc<Expr> right;
     if (match(TOKEN_LEFT_PAREN))
     {
       hasRightArg = true;
@@ -464,14 +464,14 @@ namespace magpie
     if (left.isNull() && !hasRightArg)
     {
       // Just a bare name.
-      return new NameNode(token->pos(), token->text());
+      return new NameExpr(token->pos(), token->text());
     }
 
     // TODO(bob): Better position.
-    return new CallNode(token->pos(), left, token->text(), right);
+    return new CallExpr(token->pos(), left, token->text(), right);
   }
 
-  gc<Node> Parser::infixRecord(gc<Node> left, gc<Token> token)
+  gc<Expr> Parser::infixRecord(gc<Expr> left, gc<Token> token)
   {
     Array<Field> fields;
 
@@ -505,26 +505,26 @@ namespace magpie
         }
       }
       
-      gc<Node> value = parsePrecedence(PRECEDENCE_LOGICAL);
+      gc<Expr> value = parsePrecedence(PRECEDENCE_LOGICAL);
       fields.add(Field(name, value));
 
       i++;
     }
     while (match(TOKEN_COMMA));
 
-    return new RecordNode(left->pos().spanTo(last()->pos()), fields);
+    return new RecordExpr(left->pos().spanTo(last()->pos()), fields);
   }
   
-  gc<Node> Parser::is(gc<Node> left, gc<Token> token)
+  gc<Expr> Parser::is(gc<Expr> left, gc<Token> token)
   {
-    gc<Node> type = parsePrecedence(PRECEDENCE_IS + 1);
-    return new IsNode(token->pos(), left, type);
+    gc<Expr> type = parsePrecedence(PRECEDENCE_IS + 1);
+    return new IsExpr(token->pos(), left, type);
   }
   
-  gc<Node> Parser::or_(gc<Node> left, gc<Token> token)
+  gc<Expr> Parser::or_(gc<Expr> left, gc<Token> token)
   {
-    gc<Node> right = parsePrecedence(expressions_[token->type()].precedence);
-    return new OrNode(token->pos(), left, right);
+    gc<Expr> right = parsePrecedence(expressions_[token->type()].precedence);
+    return new OrExpr(token->pos(), left, right);
   }
 
   // Pattern parsers ----------------------------------------------------------
@@ -610,39 +610,39 @@ namespace magpie
   {
     if (match(TOKEN_TRUE) || match(TOKEN_FALSE))
     {
-      gc<Node> value = boolean(last());
+      gc<Expr> value = boolean(last());
       return new ValuePattern(last()->pos(), value);
     }
     
     if (match(TOKEN_EQEQ))
     {
       SourcePos start = last()->pos();
-      gc<Node> value = parsePrecedence(PRECEDENCE_COMPARISON);
+      gc<Expr> value = parsePrecedence(PRECEDENCE_COMPARISON);
       return new ValuePattern(start.spanTo(last()->pos()), value);
     }
     
     if (match(TOKEN_IS))
     {
       SourcePos start = last()->pos();
-      gc<Node> type = parsePrecedence(PRECEDENCE_COMPARISON);
+      gc<Expr> type = parsePrecedence(PRECEDENCE_COMPARISON);
       return new TypePattern(start.spanTo(last()->pos()), type);
     }
     
     if (match(TOKEN_NOTHING))
     {
-      gc<Node> value = nothing(last());
+      gc<Expr> value = nothing(last());
       return new ValuePattern(last()->pos(), value);
     }
     
     if (match(TOKEN_NUMBER))
     {
-      gc<Node> value = number(last());
+      gc<Expr> value = number(last());
       return new ValuePattern(last()->pos(), value);
     }
     
     if (match(TOKEN_STRING))
     {
-      gc<Node> value = string(last());
+      gc<Expr> value = string(last());
       return new ValuePattern(last()->pos(), value);
     }
     
@@ -658,16 +658,16 @@ namespace magpie
 
   // Helpers and base methods -------------------------------------------------
 
-  gc<Node> Parser::createSequence(const Array<gc<Node> >& exprs)
+  gc<Expr> Parser::createSequence(const Array<gc<Expr> >& exprs)
   {
     // If the sequence is empty, just default it to nothing.
-    if (exprs.count() == 0) return new NothingNode(last()->pos());
+    if (exprs.count() == 0) return new NothingExpr(last()->pos());
 
     // If there is just one expression in the sequence, don't wrap it.
     if (exprs.count() == 1) return exprs[0];
 
     SourcePos span = exprs[0]->pos().spanTo(exprs[-1]->pos());
-    return new SequenceNode(span, exprs);
+    return new SequenceExpr(span, exprs);
   }
 
   const Token& Parser::current()

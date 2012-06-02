@@ -1,10 +1,10 @@
 #include <fstream>
 #include <iostream>
 
+#include "Ast.h"
 #include "Compiler.h"
 #include "Fiber.h"
 #include "MagpieString.h"
-#include "Node.h"
 #include "Object.h"
 #include "Parser.h"
 #include "VM.h"

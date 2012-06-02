@@ -6,76 +6,76 @@
 from os.path import dirname, join, realpath
 
 magpie_dir = dirname(dirname(realpath(__file__)))
-header_path = join(magpie_dir, 'src', 'Syntax', 'Node.generated.h')
+header_path = join(magpie_dir, 'src', 'Syntax', 'Ast.generated.h')
 
-# Define the AST node classes.
-nodes = sorted({
+# Define the AST expr classes.
+exprs = sorted({
     'And': [
-        ('left',        'gc<Node>'),
-        ('right',       'gc<Node>')],
+        ('left',        'gc<Expr>'),
+        ('right',       'gc<Expr>')],
     'BinaryOp': [
-        ('left',        'gc<Node>'),
+        ('left',        'gc<Expr>'),
         ('type',        'TokenType'),
-        ('right',       'gc<Node>')],
+        ('right',       'gc<Expr>')],
     'Bool': [
         ('value',       'bool')],
     'Call': [
-        ('leftArg',     'gc<Node>'),
+        ('leftArg',     'gc<Expr>'),
         ('name',        'gc<String>'),
-        ('rightArg',    'gc<Node>')],
+        ('rightArg',    'gc<Expr>')],
     'Catch': [
-        ('body',        'gc<Node>'),
+        ('body',        'gc<Expr>'),
         ('catches',     'Array<MatchClause>')],
     'DefMethod': [
         ('leftParam',   'gc<Pattern>'),
         ('name',        'gc<String>'),
         ('rightParam',  'gc<Pattern>'),
-        ('body',        'gc<Node>')],
+        ('body',        'gc<Expr>')],
     'Do': [
-        ('body',        'gc<Node>')],
+        ('body',        'gc<Expr>')],
     'If': [
-        ('condition',   'gc<Node>'),
-        ('thenArm',     'gc<Node>'),
-        ('elseArm',     'gc<Node>')],
+        ('condition',   'gc<Expr>'),
+        ('thenArm',     'gc<Expr>'),
+        ('elseArm',     'gc<Expr>')],
     'Is': [
-        ('value',       'gc<Node>'),
-        ('type',        'gc<Node>')],
+        ('value',       'gc<Expr>'),
+        ('type',        'gc<Expr>')],
     'Match': [
-        ('value',       'gc<Node>'),
+        ('value',       'gc<Expr>'),
         ('cases',       'Array<MatchClause>')],
     'Name': [
         ('name',        'gc<String>')],
     'Not': [
-        ('value',       'gc<Node>')],
+        ('value',       'gc<Expr>')],
     'Nothing': [],
     'Number': [
         ('value',       'double')],
     'Or': [
-        ('left',        'gc<Node>'),
-        ('right',       'gc<Node>')],
+        ('left',        'gc<Expr>'),
+        ('right',       'gc<Expr>')],
     'Record': [
         ('fields',      'Array<Field>')],
     'Return': [
-        ('value',       'gc<Node>')],
+        ('value',       'gc<Expr>')],
     'Sequence': [
-        ('expressions', 'Array<gc<Node> >')],
+        ('expressions', 'Array<gc<Expr> >')],
     'String': [
         ('value',       'gc<String>')],
     'Throw': [
-        ('value',       'gc<Node>')],
+        ('value',       'gc<Expr>')],
     'Variable': [
         ('isMutable',   'bool'),
         ('pattern',     'gc<Pattern>'),
-        ('value',       'gc<Node>')]
+        ('value',       'gc<Expr>')]
 }.items())
 
 patterns = sorted({
     'Record': [
         ('fields',      'Array<PatternField>')],
     'Type': [
-        ('type',        'gc<Node>')],
+        ('type',        'gc<Expr>')],
     'Value': [
-        ('value',       'gc<Node>')],
+        ('value',       'gc<Expr>')],
     'Variable': [
         ('name',        'gc<String>'),
         ('pattern',     'gc<Pattern>')],
@@ -166,25 +166,25 @@ private:
 num_types = 0
 
 def main():
-    # Create the Node AST header.
+    # Create the AST header.
     with open(header_path, 'w') as file:
         file.write(HEADER)
 
         # Write the forward declarations for the visitor.
-        for className, fields in nodes:
-            file.write('class {0}Node;\n'.format(className))
+        for className, fields in exprs:
+            file.write('class {0}Expr;\n'.format(className))
         for pattern, fields in patterns:
             file.write('class {0}Pattern;\n'.format(pattern))
 
-        # Write the node visitor class.
-        file.write(makeVisitor('Node', nodes))
+        # Write the expression visitor class.
+        file.write(makeVisitor('Expr', exprs))
 
-        # Create the base Node class.
-        file.write(makeBaseClass('Node', nodes))
+        # Create the base Expr class.
+        file.write(makeBaseClass('Expr', exprs))
 
-        # Create the node subclasses.
-        for node, fields in nodes:
-            file.write(makeClass('Node', node, fields))
+        # Create the expression subclasses.
+        for expr, fields in exprs:
+            file.write(makeClass('Expr', expr, fields))
 
         # Write the pattern visitor class.
         file.write(makeVisitor('Pattern', patterns))

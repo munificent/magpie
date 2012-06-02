@@ -1,21 +1,21 @@
+#include "Ast.h"
 #include "Compiler.h"
 #include "ErrorReporter.h"
 #include "Method.h"
 #include "Module.h"
-#include "Node.h"
 #include "Object.h"
 #include "VM.h"
 
 namespace magpie
 {
-  Module* Compiler::compileModule(VM& vm, gc<Node> moduleNode,
+  Module* Compiler::compileModule(VM& vm, gc<Expr> moduleExpr,
                                      ErrorReporter& reporter)
   {
     // TODO(bob): Temp hackish. Wrap the module body in a fake method.
-    gc<Pattern> nothing = new ValuePattern(moduleNode->pos(),
-                                           new NothingNode(moduleNode->pos()));
-    DefMethodNode* method = new DefMethodNode(moduleNode->pos(),
-        nothing, String::create("<module>"), nothing, moduleNode);
+    gc<Pattern> nothing = new ValuePattern(moduleExpr->pos(),
+                                           new NothingExpr(moduleExpr->pos()));
+    DefMethodExpr* method = new DefMethodExpr(moduleExpr->pos(),
+        nothing, String::create("<module>"), nothing, moduleExpr);
 
     Module* module = new Module();
     
@@ -30,7 +30,7 @@ namespace magpie
   }
 
   gc<Method> Compiler::compileMethod(VM& vm, Module* module,
-                                     const DefMethodNode& method,
+                                     const DefMethodExpr& method,
                                      ErrorReporter& reporter)
   {
     Compiler compiler(vm, reporter, module);
@@ -119,7 +119,7 @@ namespace magpie
   }
   
   Compiler::Compiler(VM& vm, ErrorReporter& reporter, Module* module)
-  : NodeVisitor(),
+  : ExprVisitor(),
     vm_(vm),
     reporter_(reporter),
     method_(new Method(module)),
@@ -130,7 +130,7 @@ namespace magpie
     scope_(NULL)
   {}
 
-  gc<Method> Compiler::compile(const DefMethodNode& method)
+  gc<Method> Compiler::compile(const DefMethodExpr& method)
   {
     // Create a top-level scope.
     Scope scope(this);
@@ -154,26 +154,26 @@ namespace magpie
     return method_;
   }
   
-  void Compiler::visit(const AndNode& node, int dest)
+  void Compiler::visit(const AndExpr& expr, int dest)
   {
-    node.left()->accept(*this, dest);
+    expr.left()->accept(*this, dest);
     
     // Leave a space for the test and jump instruction.
     int jumpToEnd = startJump();
     
-    node.right()->accept(*this, dest);
+    expr.right()->accept(*this, dest);
     
     endJump(jumpToEnd, OP_JUMP_IF_FALSE, dest);
   }
   
-  void Compiler::visit(const BinaryOpNode& node, int dest)
+  void Compiler::visit(const BinaryOpExpr& expr, int dest)
   {
-    int a = compileExpressionOrConstant(*node.left());
-    int b = compileExpressionOrConstant(*node.right());
+    int a = compileExpressionOrConstant(*expr.left());
+    int b = compileExpressionOrConstant(*expr.right());
 
     OpCode op;
     bool negate = false;
-    switch (node.type())
+    switch (expr.type())
     {
       case TOKEN_PLUS:   op = OP_ADD; break;
       case TOKEN_MINUS:  op = OP_SUBTRACT; break;
@@ -198,14 +198,14 @@ namespace magpie
     if (IS_REGISTER(b)) releaseTemp();
   }
 
-  void Compiler::visit(const BoolNode& node, int dest)
+  void Compiler::visit(const BoolExpr& expr, int dest)
   {
-    write(OP_BUILT_IN, node.value() ? BUILT_IN_TRUE : BUILT_IN_FALSE, dest);
+    write(OP_BUILT_IN, expr.value() ? BUILT_IN_TRUE : BUILT_IN_FALSE, dest);
   }
 
-  void Compiler::visit(const CallNode& node, int dest)
+  void Compiler::visit(const CallExpr& expr, int dest)
   {
-    gc<String> signature = SignatureBuilder::build(node);
+    gc<String> signature = SignatureBuilder::build(expr);
     
     int method = vm_.methods().find(signature);
     if (method == -1)
@@ -216,7 +216,7 @@ namespace magpie
       method = vm_.methods().declare(signature);
     }
 
-    ASSERT(node.leftArg().isNull() || node.rightArg().isNull(),
+    ASSERT(expr.leftArg().isNull() || expr.rightArg().isNull(),
            "Calls with left and right args aren't implemented yet.");
 
     // Compile the argument(s).
@@ -229,27 +229,27 @@ namespace magpie
     // For now, since we don't have records, we only support postfix or prefix
     // calls, but not infix. That ensures we only ever need one register.
 
-    if (!node.leftArg().isNull())
+    if (!expr.leftArg().isNull())
     {
-      node.leftArg()->accept(*this, dest);
+      expr.leftArg()->accept(*this, dest);
     }
     
-    if (!node.rightArg().isNull())
+    if (!expr.rightArg().isNull())
     {
-      node.rightArg()->accept(*this, dest);
+      expr.rightArg()->accept(*this, dest);
     }
     
     write(OP_CALL, method, dest);
   }
   
-  void Compiler::visit(const CatchNode& node, int dest)
+  void Compiler::visit(const CatchExpr& expr, int dest)
   {
     // Register the catch handler.
     int enter = startJump();
     
     // Compile the block body.
     Scope tryScope(this);
-    node.body()->accept(*this, dest);
+    expr.body()->accept(*this, dest);
     tryScope.end();
     
     // Complete the catch handler.
@@ -263,21 +263,21 @@ namespace magpie
     Scope catchScope(this);
     // TODO(bob): Handle multiple catches, compile their patterns, pattern
     // match, etc. For now, just compile the body.
-    ASSERT(node.catches().count() == 1, "Multiple catch clauses not impl.");
-    node.catches()[0].body()->accept(*this, dest);
+    ASSERT(expr.catches().count() == 1, "Multiple catch clauses not impl.");
+    expr.catches()[0].body()->accept(*this, dest);
     catchScope.end();
     
     endJump(jumpPastCatch, OP_JUMP);
   }
   
-  void Compiler::visit(const DefMethodNode& node, int dest)
+  void Compiler::visit(const DefMethodExpr& expr, int dest)
   {
     // TODO(bob): Handle nested non-top-level methods.
-    gc<Method> compiled = compileMethod(vm_, method_->module(), node,
+    gc<Method> compiled = compileMethod(vm_, method_->module(), expr,
                                         reporter_);
     int methodIndex = method_->addMethod(compiled);
     
-    gc<String> signature = SignatureBuilder::build(node);
+    gc<String> signature = SignatureBuilder::build(expr);
     int globalIndex = vm_.methods().declare(signature);
     
     write(OP_DEF_METHOD, methodIndex, globalIndex);
@@ -285,26 +285,26 @@ namespace magpie
     // TODO(bob): Emit code to capture upvals and upvars.
   }
 
-  void Compiler::visit(const DoNode& node, int dest)
+  void Compiler::visit(const DoExpr& expr, int dest)
   {
     Scope doScope(this);
-    node.body()->accept(*this, dest);
+    expr.body()->accept(*this, dest);
     doScope.end();
   }
 
-  void Compiler::visit(const IfNode& node, int dest)
+  void Compiler::visit(const IfExpr& expr, int dest)
   {
     Scope ifScope(this);
 
     // Compile the condition.
-    node.condition()->accept(*this, dest);
+    expr.condition()->accept(*this, dest);
 
     // Leave a space for the test and jump instruction.
     int jumpToElse = startJump();
 
     // Compile the then arm.
     Scope thenScope(this);
-    node.thenArm()->accept(*this, dest);
+    expr.thenArm()->accept(*this, dest);
     thenScope.end();
     
     // Leave a space for the then arm to jump over the else arm.
@@ -313,10 +313,10 @@ namespace magpie
     // Compile the else arm.
     endJump(jumpToElse, OP_JUMP_IF_FALSE, dest);
 
-    if (!node.elseArm().isNull())
+    if (!expr.elseArm().isNull())
     {
       Scope elseScope(this);
-      node.elseArm()->accept(*this, dest);
+      expr.elseArm()->accept(*this, dest);
       elseScope.end();
     }
     else
@@ -329,30 +329,30 @@ namespace magpie
     ifScope.end();
   }
   
-  void Compiler::visit(const IsNode& node, int dest)
+  void Compiler::visit(const IsExpr& expr, int dest)
   {
-    node.value()->accept(*this, dest);
+    expr.value()->accept(*this, dest);
     
     int type = makeTemp();
-    node.type()->accept(*this, type);
+    expr.type()->accept(*this, type);
 
     write(OP_IS, dest, type, dest);
 
     releaseTemp(); // type
   }
   
-  void Compiler::visit(const MatchNode& node, int dest)
+  void Compiler::visit(const MatchExpr& expr, int dest)
   {
     // Compile the value.
-    node.value()->accept(*this, dest);
+    expr.value()->accept(*this, dest);
     
     Array<int> endJumps;
     
     // Compile each case.
-    for (int i = 0; i < node.cases().count(); i++)
+    for (int i = 0; i < expr.cases().count(); i++)
     {
-      const MatchClause& clause = node.cases()[i];
-      bool lastPattern = i == node.cases().count() - 1;
+      const MatchClause& clause = expr.cases()[i];
+      bool lastPattern = i == expr.cases().count() - 1;
       
       Scope caseScope(this);
       
@@ -386,10 +386,10 @@ namespace magpie
     }
   }
   
-  void Compiler::visit(const NameNode& node, int dest)
+  void Compiler::visit(const NameExpr& expr, int dest)
   {
     // See if it's a local variable.
-    int local = locals_.lastIndexOf(node.name());
+    int local = locals_.lastIndexOf(expr.name());
     if (local != -1)
     {
       write(OP_MOVE, local, dest);
@@ -406,7 +406,7 @@ namespace magpie
       // Walk through the names it exports.
       for (int j = 0; j < import->numExports(); j++)
       {
-        if (*import->getExportName(j) == *node.name())
+        if (*import->getExportName(j) == *expr.name())
         {
           // Found it.
           write(OP_GET_MODULE, i, j, dest);
@@ -415,40 +415,40 @@ namespace magpie
       }
     }
     
-    reporter_.error(node.pos(),
-                    "Variable '%s' is not defined.", node.name()->cString());
+    reporter_.error(expr.pos(),
+                    "Variable '%s' is not defined.", expr.name()->cString());
   }
   
-  void Compiler::visit(const NotNode& node, int dest)
+  void Compiler::visit(const NotExpr& expr, int dest)
   {
-    node.value()->accept(*this, dest);
+    expr.value()->accept(*this, dest);
     write(OP_NOT, dest);
   }
   
-  void Compiler::visit(const NothingNode& node, int dest)
+  void Compiler::visit(const NothingExpr& expr, int dest)
   {
     write(OP_BUILT_IN, BUILT_IN_NOTHING, dest);
   }
 
-  void Compiler::visit(const NumberNode& node, int dest)
+  void Compiler::visit(const NumberExpr& expr, int dest)
   {
-    int index = compileConstant(node);
+    int index = compileConstant(expr);
     write(OP_CONSTANT, index, dest);
   }
   
-  void Compiler::visit(const OrNode& node, int dest)
+  void Compiler::visit(const OrExpr& expr, int dest)
   {
-    node.left()->accept(*this, dest);
+    expr.left()->accept(*this, dest);
     
     // Leave a space for the test and jump instruction.
     int jumpToEnd = startJump();
     
-    node.right()->accept(*this, dest);
+    expr.right()->accept(*this, dest);
     
     endJump(jumpToEnd, OP_JUMP_IF_TRUE, dest);
   }
   
-  void Compiler::visit(const RecordNode& node, int dest)
+  void Compiler::visit(const RecordExpr& expr, int dest)
   {
     // TODO(bob): Hack. This assumes that the fields in the expression are in
     // the same order that the type expects. Eventually, the type needs to sort
@@ -459,13 +459,13 @@ namespace magpie
     
     // Compile the fields.
     int firstField = -1;
-    for (int i = 0; i < node.fields().count(); i++)
+    for (int i = 0; i < expr.fields().count(); i++)
     {
       int fieldReg = makeTemp();
       if (i == 0) firstField = fieldReg;
       
-      node.fields()[i].value->accept(*this, fieldReg);
-      names.add(vm_.addSymbol(node.fields()[i].name));
+      expr.fields()[i].value->accept(*this, fieldReg);
+      names.add(vm_.addSymbol(expr.fields()[i].name));
     }
     
     // TODO(bob): Need to sort field names.
@@ -476,69 +476,69 @@ namespace magpie
     // Create the record.
     write(OP_RECORD, firstField, type, dest);
 
-    for (int i = 0; i < node.fields().count(); i++)
+    for (int i = 0; i < expr.fields().count(); i++)
     {
       releaseTemp();
     }
   }
   
-  void Compiler::visit(const ReturnNode& node, int dest)
+  void Compiler::visit(const ReturnExpr& expr, int dest)
   {
     // Compile the return value.
-    if (node.value().isNull())
+    if (expr.value().isNull())
     {
       // No value, so implicitly "nothing".
       write(OP_BUILT_IN, BUILT_IN_NOTHING, dest);
     }
     else
     {
-      node.value()->accept(*this, dest);
+      expr.value()->accept(*this, dest);
     }
 
     write(OP_RETURN, dest);
   }
   
-  void Compiler::visit(const SequenceNode& node, int dest)
+  void Compiler::visit(const SequenceExpr& expr, int dest)
   {
-    for (int i = 0; i < node.expressions().count(); i++)
+    for (int i = 0; i < expr.expressions().count(); i++)
     {
       // TODO(bob): Could compile all but the last expression with a special
-      // sigil dest that means "won't use" and some nodes could check that to
+      // sigil dest that means "won't use" and some exprs could check that to
       // omit some unnecessary instructions.
-      node.expressions()[i]->accept(*this, dest);
+      expr.expressions()[i]->accept(*this, dest);
     }
   }
 
-  void Compiler::visit(const StringNode& node, int dest)
+  void Compiler::visit(const StringExpr& expr, int dest)
   {
-    int index = compileConstant(node);
+    int index = compileConstant(expr);
     write(OP_CONSTANT, index, dest);
   }
   
-  void Compiler::visit(const ThrowNode& node, int dest)
+  void Compiler::visit(const ThrowExpr& expr, int dest)
   {
     // Compile the error object.
-    node.value()->accept(*this, dest);
+    expr.value()->accept(*this, dest);
     
     // Throw it.
     write(OP_THROW, dest);
   }
   
-  void Compiler::visit(const VariableNode& node, int dest)
+  void Compiler::visit(const VariableExpr& expr, int dest)
   {
     // Reserve the locals up front. This way we'll compile the value to a slot
     // *after* them. This ensures locals always come before temporaries.
-    reserveVariables(*node.pattern());
+    reserveVariables(*expr.pattern());
 
     // Compile the value.
     // TODO(bob): Why is there a temp for this?
     int valueReg = makeTemp();
-    node.value()->accept(*this, valueReg);
+    expr.value()->accept(*this, valueReg);
 
     // TODO(bob): Handle mutable variables.
 
     // Now pattern match on it.
-    compilePattern(node.pattern(), valueReg);
+    compilePattern(expr.pattern(), valueReg);
 
     // Copy the final result.
     // TODO(bob): Omit this in cases where it won't be used. Most variable
@@ -556,15 +556,15 @@ namespace magpie
     pattern->accept(compiler, dest);
   }
 
-  int Compiler::compileExpressionOrConstant(const Node& node)
+  int Compiler::compileExpressionOrConstant(const Expr& expr)
   {
-    const NumberNode* number = node.asNumberNode();
+    const NumberExpr* number = expr.asNumberExpr();
     if (number != NULL)
     {
       return MAKE_CONSTANT(compileConstant(*number));
     }
 
-    const StringNode* string = node.asStringNode();
+    const StringExpr* string = expr.asStringExpr();
     if (string != NULL)
     {
       return MAKE_CONSTANT(compileConstant(*string));
@@ -572,18 +572,18 @@ namespace magpie
 
     int dest = makeTemp();
 
-    node.accept(*this, dest);
+    expr.accept(*this, dest);
     return dest;
   }
 
-  int Compiler::compileConstant(const NumberNode& node)
+  int Compiler::compileConstant(const NumberExpr& expr)
   {
-    return method_->addConstant(new NumberObject(node.value()));
+    return method_->addConstant(new NumberObject(expr.value()));
   }
 
-  int Compiler::compileConstant(const StringNode& node)
+  int Compiler::compileConstant(const StringExpr& expr)
   {
-    return method_->addConstant(new StringObject(node.value()));
+    return method_->addConstant(new StringObject(expr.value()));
   }
 
   void Compiler::reserveVariables(const Pattern& pattern)
@@ -758,7 +758,7 @@ namespace magpie
     compiler_.write(OP_TEST_MATCH, expected);
   }
 
-  gc<String> SignatureBuilder::build(const CallNode& node)
+  gc<String> SignatureBuilder::build(const CallExpr& expr)
   {
     // 1 foo                 -> ()foo
     // 1 foo()               -> ()foo
@@ -768,24 +768,24 @@ namespace magpie
     // foo(1, b: 2, 3, e: 4) -> foo(,b,,e)
     SignatureBuilder builder;
     
-    if (!node.leftArg().isNull())
+    if (!expr.leftArg().isNull())
     {
-      builder.writeArg(node.leftArg());
+      builder.writeArg(expr.leftArg());
       builder.add(" ");
     }
     
-    builder.add(node.name()->cString());
+    builder.add(expr.name()->cString());
 
-    if (!node.rightArg().isNull())
+    if (!expr.rightArg().isNull())
     {
       builder.add(" ");
-      builder.writeArg(node.rightArg());
+      builder.writeArg(expr.rightArg());
     }
     
     return String::create(builder.signature_, builder.length_);
   }
   
-  gc<String> SignatureBuilder::build(const DefMethodNode& node)
+  gc<String> SignatureBuilder::build(const DefMethodExpr& expr)
   {
     // def (a) foo               -> ()foo
     // def (a) foo()             -> ()foo
@@ -795,28 +795,28 @@ namespace magpie
     // def foo(a, b: c, d, e: f) -> foo(,b,,e)
     SignatureBuilder builder;
     
-    if (!node.leftParam().isNull())
+    if (!expr.leftParam().isNull())
     {
-      builder.writeParam(node.leftParam());
+      builder.writeParam(expr.leftParam());
       builder.add(" ");
     }
     
-    builder.add(node.name()->cString());
+    builder.add(expr.name()->cString());
     
-    if (!node.rightParam().isNull())
+    if (!expr.rightParam().isNull())
     {
       builder.add(" ");
-      builder.writeParam(node.rightParam());
+      builder.writeParam(expr.rightParam());
     }
     
     return String::create(builder.signature_, builder.length_);
   }
   
-  void SignatureBuilder::writeArg(gc<Node> node)
+  void SignatureBuilder::writeArg(gc<Expr> expr)
   {
     // TODO(bob): Clean up. Redundant with build().
     // If it's a record, destructure it into the signature.
-    const RecordNode* record = node->asRecordNode();
+    const RecordExpr* record = expr->asRecordExpr();
     if (record != NULL)
     {
       for (int i = 0; i < record->fields().count(); i++)
@@ -828,7 +828,7 @@ namespace magpie
       return;
     }
     
-    // Right now, all other nodes mean "some arg goes here".
+    // Right now, all other exprs mean "some arg goes here".
     add("0:");
   }
 

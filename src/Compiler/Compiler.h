@@ -3,27 +3,27 @@
 #include "Array.h"
 #include "Bytecode.h"
 #include "Memory.h"
-#include "Node.h"
+#include "Ast.h"
 
 namespace magpie
 {
   class ErrorReporter;
   class Method;
   class Module;
-  class Node;
+  class Expr;
   class Object;
   class PatternCompiler;
   class VM;
   
-  class Compiler : private NodeVisitor
+  class Compiler : private ExprVisitor
   {
     friend class PatternCompiler;
     
   public:
-    static Module* compileModule(VM& vm, gc<Node> module,
+    static Module* compileModule(VM& vm, gc<Expr> module,
                                  ErrorReporter& reporter);
     static gc<Method> compileMethod(VM& vm, Module* module,
-                                    const DefMethodNode& method,
+                                    const DefMethodExpr& method,
                                     ErrorReporter& reporter);
     
     virtual ~Compiler() {}
@@ -57,44 +57,44 @@ namespace magpie
     
     Compiler(VM& vm, ErrorReporter& reporter, Module* module);
     
-    gc<Method> compile(const DefMethodNode& methodAst);
+    gc<Method> compile(const DefMethodExpr& methodAst);
     
-    virtual void visit(const AndNode& node, int dest);
-    virtual void visit(const BinaryOpNode& node, int dest);
-    virtual void visit(const BoolNode& node, int dest);
-    virtual void visit(const CallNode& node, int dest);
-    virtual void visit(const CatchNode& node, int dest);
-    virtual void visit(const DefMethodNode& node, int dest);
-    virtual void visit(const DoNode& node, int dest);
-    virtual void visit(const IfNode& node, int dest);
-    virtual void visit(const IsNode& node, int dest);
-    virtual void visit(const MatchNode& node, int dest);
-    virtual void visit(const NameNode& node, int dest);
-    virtual void visit(const NotNode& node, int dest);
-    virtual void visit(const NothingNode& node, int dest);
-    virtual void visit(const NumberNode& node, int dest);
-    virtual void visit(const OrNode& node, int dest);
-    virtual void visit(const RecordNode& node, int dest);
-    virtual void visit(const ReturnNode& node, int dest);
-    virtual void visit(const SequenceNode& node, int dest);
-    virtual void visit(const StringNode& node, int dest);
-    virtual void visit(const ThrowNode& node, int dest);
-    virtual void visit(const VariableNode& node, int dest);
+    virtual void visit(const AndExpr& expr, int dest);
+    virtual void visit(const BinaryOpExpr& expr, int dest);
+    virtual void visit(const BoolExpr& expr, int dest);
+    virtual void visit(const CallExpr& expr, int dest);
+    virtual void visit(const CatchExpr& expr, int dest);
+    virtual void visit(const DefMethodExpr& expr, int dest);
+    virtual void visit(const DoExpr& expr, int dest);
+    virtual void visit(const IfExpr& expr, int dest);
+    virtual void visit(const IsExpr& expr, int dest);
+    virtual void visit(const MatchExpr& expr, int dest);
+    virtual void visit(const NameExpr& expr, int dest);
+    virtual void visit(const NotExpr& expr, int dest);
+    virtual void visit(const NothingExpr& expr, int dest);
+    virtual void visit(const NumberExpr& expr, int dest);
+    virtual void visit(const OrExpr& expr, int dest);
+    virtual void visit(const RecordExpr& expr, int dest);
+    virtual void visit(const ReturnExpr& expr, int dest);
+    virtual void visit(const SequenceExpr& expr, int dest);
+    virtual void visit(const StringExpr& expr, int dest);
+    virtual void visit(const ThrowExpr& expr, int dest);
+    virtual void visit(const VariableExpr& expr, int dest);
 
     void compilePattern(gc<Pattern> pattern, int dest);
     
-    // Compiles the given node. If it's a constant node, it adds the constant
+    // Compiles the given expr. If it's a constant expr, it adds the constant
     // to the method table and returns the constant id (with the mask bit set).
-    // Otherwise, creates a temporary register and compiles the node to evaluate
+    // Otherwise, creates a temporary register and compiles the expr to evaluate
     // into that. It then returns the register. The caller is required to
     // release that register when done with it.
     //
     // Some instructions like OP_END and OP_ADD can read an operatand from a
     // register or a constant. This is used to compile the operands for those.
-    int compileExpressionOrConstant(const Node& node);
+    int compileExpressionOrConstant(const Expr& expr);
     
-    int compileConstant(const NumberNode& node);
-    int compileConstant(const StringNode& node);
+    int compileConstant(const NumberExpr& expr);
+    int compileConstant(const StringExpr& expr);
 
     // Walks the pattern and allocates locals for any variable patterns
     // encountered. We do this in a separate step so we can tell how many locals
@@ -197,11 +197,11 @@ namespace magpie
   class SignatureBuilder
   {
   public:
-    // Builds a signature for the method being called by the given node.
-    static gc<String> build(const CallNode& node);
+    // Builds a signature for the method being called by the given expr.
+    static gc<String> build(const CallExpr& expr);
     
     // Builds a signature for the given method definition.
-    static gc<String> build(const DefMethodNode& node);
+    static gc<String> build(const DefMethodExpr& expr);
     
   private:
     SignatureBuilder()
@@ -210,7 +210,7 @@ namespace magpie
     
     static const int MAX_LENGTH = 256; // TODO(bob): Use something dynamic.
     
-    void writeArg(gc<Node> node);
+    void writeArg(gc<Expr> expr);
     void writeParam(gc<Pattern> pattern);
     void add(gc<String> text);
     void add(const char* text);

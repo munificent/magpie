@@ -1,24 +1,24 @@
-#include "Node.h"
+#include "Ast.h"
 
 namespace magpie
 {
-  void AndNode::trace(std::ostream& out) const
+  void AndExpr::trace(std::ostream& out) const
   {
     out << "(and " << left_ << " " << right_ << ")";
   }
   
-  void BinaryOpNode::trace(std::ostream& out) const
+  void BinaryOpExpr::trace(std::ostream& out) const
   {
     out << "(" << left_ << " " << Token::typeString(type_)
         << " " << right_ << ")";
   }
 
-  void BoolNode::trace(std::ostream& out) const
+  void BoolExpr::trace(std::ostream& out) const
   {
     out << (value_ ? "true" : "false");
   }
   
-  void CallNode::trace(std::ostream& out) const
+  void CallExpr::trace(std::ostream& out) const
   {
     out << "(";
     if (!leftArg_.isNull())
@@ -36,7 +36,7 @@ namespace magpie
     out << ")";
   }
   
-  void CatchNode::trace(std::ostream& out) const
+  void CatchExpr::trace(std::ostream& out) const
   {
     out << "(try " << body_;
     
@@ -49,7 +49,7 @@ namespace magpie
     out << ")";
   }
   
-  void DefMethodNode::trace(std::ostream& out) const
+  void DefMethodExpr::trace(std::ostream& out) const
   {
     out << "(def ";
     if (!leftParam_.isNull())
@@ -67,12 +67,12 @@ namespace magpie
     out << " -> " << body_ << ")";
   }
   
-  void DoNode::trace(std::ostream& out) const
+  void DoExpr::trace(std::ostream& out) const
   {
     out << "(do " << body_ << ")";
   }
   
-  void IfNode::trace(std::ostream& out) const
+  void IfExpr::trace(std::ostream& out) const
   {
     out << "(if " << condition_ << " then " << thenArm_;
     
@@ -86,12 +86,12 @@ namespace magpie
     }
   }
   
-  void IsNode::trace(std::ostream& out) const
+  void IsExpr::trace(std::ostream& out) const
   {
     out << "(" << value_ << " is " << type_ << ")";
   }
   
-  void MatchNode::trace(std::ostream& out) const
+  void MatchExpr::trace(std::ostream& out) const
   {
     out << "(match " << value_;
     
@@ -104,32 +104,32 @@ namespace magpie
     out << ")";
   }
   
-  void NameNode::trace(std::ostream& out) const
+  void NameExpr::trace(std::ostream& out) const
   {
     out << name_;
   }
   
-  void NotNode::trace(std::ostream& out) const
+  void NotExpr::trace(std::ostream& out) const
   {
     out << "(not " << value_ << ")";
   }
   
-  void NothingNode::trace(std::ostream& out) const
+  void NothingExpr::trace(std::ostream& out) const
   {
     out << "nothing";
   }
   
-  void NumberNode::trace(std::ostream& out) const
+  void NumberExpr::trace(std::ostream& out) const
   {
     out << value_;
   }
   
-  void OrNode::trace(std::ostream& out) const
+  void OrExpr::trace(std::ostream& out) const
   {
     out << "(or " << left_ << " " << right_ << ")";
   }
   
-  void RecordNode::trace(std::ostream& out) const
+  void RecordExpr::trace(std::ostream& out) const
   {
     out << "(";
     
@@ -142,7 +142,7 @@ namespace magpie
     out << ")";
   }
   
-  void ReturnNode::trace(std::ostream& out) const
+  void ReturnExpr::trace(std::ostream& out) const
   {
     if (value_.isNull())
     {
@@ -154,7 +154,7 @@ namespace magpie
     }
   }
   
-  void SequenceNode::trace(std::ostream& out) const
+  void SequenceExpr::trace(std::ostream& out) const
   {
     out << "(\n";
     
@@ -166,17 +166,17 @@ namespace magpie
     out << ")";
   }
   
-  void StringNode::trace(std::ostream& out) const
+  void StringExpr::trace(std::ostream& out) const
   {
     out << "\"" << value_ << "\"";
   }
   
-  void ThrowNode::trace(std::ostream& out) const
+  void ThrowExpr::trace(std::ostream& out) const
   {
     out << "(throw " << value_ << ")";
   }
   
-  void VariableNode::trace(std::ostream& out) const
+  void VariableExpr::trace(std::ostream& out) const
   {
     out << "(" << (isMutable_ ? "var " : "val ");
     out << pattern_ << " = " << value_ << ")";

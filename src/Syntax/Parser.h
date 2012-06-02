@@ -8,8 +8,8 @@
 namespace magpie
 {
   class Lexer;
-  class Node;
   class ErrorReporter;
+  class Expr;
   
   // Parses Magpie source from a string into an abstract syntax tree. The
   // implementation is basically a vanilla recursive descent parser wrapped
@@ -24,11 +24,11 @@ namespace magpie
       last_()
     {}
     
-    gc<Node> parseModule();
+    gc<Expr> parseModule();
     
   private:
-    typedef gc<Node> (Parser::*PrefixParseFn)(gc<Token> token);
-    typedef gc<Node> (Parser::*InfixParseFn)(gc<Node> left, gc<Token> token);
+    typedef gc<Expr> (Parser::*PrefixParseFn)(gc<Token> token);
+    typedef gc<Expr> (Parser::*InfixParseFn)(gc<Expr> left, gc<Token> token);
     
     struct Parselet
     {
@@ -37,35 +37,35 @@ namespace magpie
       int           precedence;
     };
     
-    gc<Node> parseBlock(TokenType endToken = TOKEN_END);
-    gc<Node> parseBlock(TokenType end1, TokenType end2,
+    gc<Expr> parseBlock(TokenType endToken = TOKEN_END);
+    gc<Expr> parseBlock(TokenType end1, TokenType end2,
                         TokenType* outEndToken);
-    gc<Node> parseBlock(bool allowCatch, TokenType end1, TokenType end2,
+    gc<Expr> parseBlock(bool allowCatch, TokenType end1, TokenType end2,
                         TokenType* outEndToken);
-    gc<Node> statementLike();
-    gc<Node> flowControl();
+    gc<Expr> statementLike();
+    gc<Expr> flowControl();
 
     // Parses an expression with the given precedence or higher.
-    gc<Node> parsePrecedence(int precedence = 0);
+    gc<Expr> parsePrecedence(int precedence = 0);
     
     // Prefix expression parsers.
-    gc<Node> boolean(gc<Token> token);
-    gc<Node> group(gc<Token> token);
-    gc<Node> name(gc<Token> token);
-    gc<Node> not_(gc<Token> token);
-    gc<Node> nothing(gc<Token> token);
-    gc<Node> number(gc<Token> token);
-    gc<Node> record(gc<Token> token);
-    gc<Node> string(gc<Token> token);
-    gc<Node> throw_(gc<Token> token);
+    gc<Expr> boolean(gc<Token> token);
+    gc<Expr> group(gc<Token> token);
+    gc<Expr> name(gc<Token> token);
+    gc<Expr> not_(gc<Token> token);
+    gc<Expr> nothing(gc<Token> token);
+    gc<Expr> number(gc<Token> token);
+    gc<Expr> record(gc<Token> token);
+    gc<Expr> string(gc<Token> token);
+    gc<Expr> throw_(gc<Token> token);
 
     // Infix expression parsers.
-    gc<Node> and_(gc<Node> left, gc<Token> token);
-    gc<Node> binaryOp(gc<Node> left, gc<Token> token);
-    gc<Node> call(gc<Node> left, gc<Token> token);
-    gc<Node> infixRecord(gc<Node> left, gc<Token> token);
-    gc<Node> is(gc<Node> left, gc<Token> token);
-    gc<Node> or_(gc<Node> left, gc<Token> token);
+    gc<Expr> and_(gc<Expr> left, gc<Token> token);
+    gc<Expr> binaryOp(gc<Expr> left, gc<Token> token);
+    gc<Expr> call(gc<Expr> left, gc<Token> token);
+    gc<Expr> infixRecord(gc<Expr> left, gc<Token> token);
+    gc<Expr> is(gc<Expr> left, gc<Token> token);
+    gc<Expr> or_(gc<Expr> left, gc<Token> token);
 
     // Pattern parsing.
     gc<Pattern> parsePattern();
@@ -73,7 +73,7 @@ namespace magpie
     gc<Pattern> variablePattern();
     gc<Pattern> primaryPattern();
     
-    gc<Node> createSequence(const Array<gc<Node> >& exprs);
+    gc<Expr> createSequence(const Array<gc<Expr> >& exprs);
 
     // Gets the token the parser is currently looking at.
     const Token& current();

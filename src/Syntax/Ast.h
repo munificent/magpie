@@ -9,7 +9,7 @@ namespace magpie
 {
   using std::ostream;
 
-  class Node;
+  class Expr;
   class Pattern;
   
   // A record field.
@@ -20,13 +20,13 @@ namespace magpie
       value()
     {}
     
-    Field(gc<String> name, gc<Node> value)
+    Field(gc<String> name, gc<Expr> value)
     : name(name),
       value(value)
     {}
 
     gc<String> name;
-    gc<Node> value;
+    gc<Expr> value;
   };
   
   // A record pattern field.
@@ -56,19 +56,19 @@ namespace magpie
       body_()
     {}
     
-    MatchClause(gc<Pattern> pattern, gc<Node> body)
+    MatchClause(gc<Pattern> pattern, gc<Expr> body)
     : pattern_(pattern),
       body_(body)
     {}
     
     gc<Pattern> pattern() const { return pattern_; }
-    gc<Node> body() const { return body_; }
+    gc<Expr> body() const { return body_; }
     
   private:
     gc<Pattern> pattern_;
-    gc<Node> body_;
+    gc<Expr> body_;
   };
   
-#include "Node.generated.h"
+#include "Ast.generated.h"
 }
 
