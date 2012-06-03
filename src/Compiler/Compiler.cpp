@@ -59,87 +59,6 @@ namespace magpie
     return compiler.compile(method);
   }
   
-  Compiler::Scope::Scope(Compiler* compiler)
-  : compiler_(*compiler),
-    parent_(compiler_.scope_),
-    start_(compiler_.locals_.count())
-  {
-    compiler_.scope_ = this;
-  }
-  
-  Compiler::Scope::~Scope()
-  {
-    ASSERT(start_ == -1, "Forgot to end scope.");
-  }
-  
-  int Compiler::Scope::makeLocal(const SourcePos& pos, gc<String> name)
-  {
-    ASSERT(compiler_.numTemps_ == 0,
-           "Cannot make a local variable when there are temporaries in use.");
-    
-    Array<gc<String> >& locals = compiler_.locals_;
-
-    // Make sure there isn't already a local variable with this name in this
-    // scope.
-    for (int i = start_; i < locals.count(); i++)
-    {
-      if (locals[i] == name)
-      {
-        compiler_.reporter_.error(pos,
-            "There is already a variable '%s' defined in this scope.",
-            name->cString());
-      }
-    }
-    
-    compiler_.locals_.add(name);
-    compiler_.updateMaxRegisters();
-    return compiler_.locals_.count() - 1;
-  }
-  
-  void Compiler::Scope::end()
-  {
-    ASSERT(start_ != -1, "Already ended this scope.");
-    ASSERT(compiler_.numTemps_ == 0,
-           "Cannot end a scope when there are temporaries in use.");
-    
-    compiler_.locals_.truncate(start_);
-    compiler_.scope_ = parent_;
-    start_ = -1;
-  }
-  
-  void Compiler::Scope::visit(const RecordPattern& pattern, int unused)
-  {
-    // Recurse into the fields.
-    for (int i = 0; i < pattern.fields().count(); i++)
-    {
-      pattern.fields()[i].value->accept(*this, unused);
-    }
-  }
- 
-  void Compiler::Scope::visit(const TypePattern& pattern, int value)
-  {
-    // Nothing to do.
-  }
-  
-  void Compiler::Scope::visit(const ValuePattern& pattern, int unused)
-  {
-    // Nothing to do.
-  }
-  
-  void Compiler::Scope::visit(const VariablePattern& pattern, int unused)
-  {
-    makeLocal(pattern.pos(), pattern.name());
-    if (!pattern.pattern().isNull())
-    {
-      pattern.pattern()->accept(*this, unused);
-    }
-  }
-  
-  void Compiler::Scope::visit(const WildcardPattern& pattern, int value)
-  {
-    // Nothing to do.
-  }
-  
   Compiler::Compiler(VM& vm, ErrorReporter& reporter, Module* module)
   : ExprVisitor(),
     vm_(vm),
@@ -598,8 +517,7 @@ namespace magpie
 
   void Compiler::reserveVariables(const Pattern& pattern)
   {
-    // Int is unused.
-    pattern.accept(*scope_, -1);
+    scope_->reserveVariables(pattern);
   }
 
   void Compiler::write(OpCode op, int a, int b, int c)
@@ -662,6 +580,94 @@ namespace magpie
     {
       maxRegisters_ = locals_.count() + numTemps_;
     }
+  }
+  
+  
+  Scope::Scope(Compiler* compiler)
+  : compiler_(*compiler),
+  parent_(compiler_.scope_),
+  start_(compiler_.locals_.count())
+  {
+    compiler_.scope_ = this;
+  }
+  
+  Scope::~Scope()
+  {
+    ASSERT(start_ == -1, "Forgot to end scope.");
+  }
+  
+  void Scope::reserveVariables(const Pattern& pattern)
+  {
+    // Arg is not used.
+    pattern.accept(*this, -1);
+  }
+
+  int Scope::makeLocal(const SourcePos& pos, gc<String> name)
+  {
+    ASSERT(compiler_.numTemps_ == 0,
+           "Cannot make a local variable when there are temporaries in use.");
+    
+    Array<gc<String> >& locals = compiler_.locals_;
+    
+    // Make sure there isn't already a local variable with this name in this
+    // scope.
+    for (int i = start_; i < locals.count(); i++)
+    {
+      if (locals[i] == name)
+      {
+        compiler_.reporter_.error(pos,
+                                  "There is already a variable '%s' defined in this scope.",
+                                  name->cString());
+      }
+    }
+    
+    compiler_.locals_.add(name);
+    compiler_.updateMaxRegisters();
+    return compiler_.locals_.count() - 1;
+  }
+  
+  void Scope::end()
+  {
+    ASSERT(start_ != -1, "Already ended this scope.");
+    ASSERT(compiler_.numTemps_ == 0,
+           "Cannot end a scope when there are temporaries in use.");
+    
+    compiler_.locals_.truncate(start_);
+    compiler_.scope_ = parent_;
+    start_ = -1;
+  }
+  
+  void Scope::visit(const RecordPattern& pattern, int unused)
+  {
+    // Recurse into the fields.
+    for (int i = 0; i < pattern.fields().count(); i++)
+    {
+      pattern.fields()[i].value->accept(*this, unused);
+    }
+  }
+  
+  void Scope::visit(const TypePattern& pattern, int value)
+  {
+    // Nothing to do.
+  }
+  
+  void Scope::visit(const ValuePattern& pattern, int unused)
+  {
+    // Nothing to do.
+  }
+  
+  void Scope::visit(const VariablePattern& pattern, int unused)
+  {
+    makeLocal(pattern.pos(), pattern.name());
+    if (!pattern.pattern().isNull())
+    {
+      pattern.pattern()->accept(*this, unused);
+    }
+  }
+  
+  void Scope::visit(const WildcardPattern& pattern, int value)
+  {
+    // Nothing to do.
   }
   
   void PatternCompiler::endJumps()

@@ -13,11 +13,13 @@ namespace magpie
   class Expr;
   class Object;
   class PatternCompiler;
+  class Scope;
   class VM;
   
   class Compiler : private ExprVisitor
   {
     friend class PatternCompiler;
+    friend class Scope;
     
   public:
     static Module* compileModule(VM& vm, gc<ModuleAst> module,
@@ -28,33 +30,7 @@ namespace magpie
     
     virtual ~Compiler() {}
     
-  private:
-    // Keeps track of local variable scopes to handle nesting and shadowing.
-    // This class can also visit patterns in order to create registers for the
-    // variables declared in a pattern.
-    class Scope : public PatternVisitor
-    {
-    public:
-      Scope(Compiler* compiler);      
-      ~Scope();
-      
-      int makeLocal(const SourcePos& pos, gc<String> name);
-      void end();
-      
-      virtual void visit(const RecordPattern& pattern, int value);
-      virtual void visit(const TypePattern& pattern, int value);
-      virtual void visit(const ValuePattern& pattern, int value);
-      virtual void visit(const VariablePattern& pattern, int value);
-      virtual void visit(const WildcardPattern& pattern, int value);
-
-    private:
-      Compiler& compiler_;
-      Scope* parent_;
-      int start_;
-      
-      NO_COPY(Scope);
-    };
-    
+  private:    
     Compiler(VM& vm, ErrorReporter& reporter, Module* module);
     
     gc<Method> compile(const MethodDef& method);
@@ -133,6 +109,41 @@ namespace magpie
     Scope* scope_;
     
     NO_COPY(Compiler);
+  };
+
+  // Keeps track of local variable scopes to handle nesting and shadowing.
+  // This class can also visit patterns in order to create registers for the
+  // variables declared in a pattern.
+  class Scope : private PatternVisitor
+  {
+  public:
+    Scope(Compiler* compiler);      
+    ~Scope();
+    
+    // Allocates registers for all of the variables defined in pattern. Must be
+    // called before the pattern is compiled to ensure that locals come before
+    // temporary registers.
+    void reserveVariables(const Pattern& pattern);
+    
+    // Creates a new local variable with the given name.
+    int makeLocal(const SourcePos& pos, gc<String> name);
+    
+    // Closes this scope. This must be called before the Scope object goes out
+    // of (C++) scope.
+    void end();
+    
+    virtual void visit(const RecordPattern& pattern, int value);
+    virtual void visit(const TypePattern& pattern, int value);
+    virtual void visit(const ValuePattern& pattern, int value);
+    virtual void visit(const VariablePattern& pattern, int value);
+    virtual void visit(const WildcardPattern& pattern, int value);
+    
+  private:
+    Compiler& compiler_;
+    Scope* parent_;
+    int start_;
+    
+    NO_COPY(Scope);
   };
   
   // Locates a code offset and a register where a pattern-match test operation
