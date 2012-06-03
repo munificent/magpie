@@ -9,6 +9,7 @@ namespace magpie
 {
   using std::ostream;
 
+  class Def;
   class Expr;
   class Pattern;
   
@@ -67,6 +68,28 @@ namespace magpie
   private:
     gc<Pattern> pattern_;
     gc<Expr> body_;
+  };
+  
+  class ModuleAst : public Managed
+  {
+  public:
+    ModuleAst(const Array<gc<Def> >& defs, gc<Expr> body)
+    : defs_(defs),
+      body_(body)
+    {}
+    
+    const Array<gc<Def> >& defs() const { return defs_; }
+    gc<Expr> body() const { return body_; }
+    
+    virtual void reach()
+    {
+      Memory::reach(defs_);
+      Memory::reach(body_);
+    }
+    
+  private:
+    Array<gc<Def> > defs_;
+    gc<Expr>        body_;
   };
   
 #include "Ast.generated.h"

@@ -77,9 +77,20 @@ namespace magpie
     { NULL,             NULL, -1 }                                   // TOKEN_EOF
   };
 
-  gc<Expr> Parser::parseModule()
+  gc<ModuleAst> Parser::parseModule()
   {
+    Array<gc<Def> > defs;
     Array<gc<Expr> > exprs;
+
+    // TODO(bob): Parse definitions.
+    do
+    {
+      if (lookAhead(TOKEN_EOF)) break;
+      gc<Def> def = parseDefinition();
+      if (def.isNull()) break;
+      defs.add(def);
+    }
+    while (match(TOKEN_LINE));
 
     do
     {
@@ -90,8 +101,47 @@ namespace magpie
 
     consume(TOKEN_EOF, "Expected end of file.");
 
-    // TODO(bob): Should validate that we are at EOF here.
-    return createSequence(exprs);
+    gc<Expr> body = createSequence(exprs);
+    return new ModuleAst(defs, body);
+  }
+
+  gc<Def> Parser::parseDefinition()
+  {
+    if (match(TOKEN_DEF))
+    {
+      SourcePos start = last()->pos();
+      
+      gc<Pattern> leftParam;
+      if (match(TOKEN_LEFT_PAREN))
+      {
+        leftParam = parsePattern();
+        consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
+      }
+      
+      gc<Token> name = consume(TOKEN_NAME,
+                               "Expect a method name after 'def'.");
+      
+      gc<Pattern> rightParam;
+      if (match(TOKEN_LEFT_PAREN))
+      {
+        if (match(TOKEN_RIGHT_PAREN))
+        {
+          // Allow () empty pattern to just mean "no parameter".
+        }
+        else
+        {
+          rightParam = parsePattern();
+          consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
+        }
+      }
+      
+      gc<Expr> body = parseBlock();
+      SourcePos span = start.spanTo(last()->pos());
+      return new MethodDef(span, leftParam, name->text(), rightParam, body);
+    }
+    
+    // Not a definition.
+    return gc<Def>();
   }
 
   gc<Expr> Parser::parseBlock(TokenType endToken)
@@ -165,40 +215,7 @@ namespace magpie
   }
   
   gc<Expr> Parser::statementLike()
-  {
-    if (match(TOKEN_DEF))
-    {
-      SourcePos start = last()->pos();
-      
-      gc<Pattern> leftParam;
-      if (match(TOKEN_LEFT_PAREN))
-      {
-        leftParam = parsePattern();
-        consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
-      }
-      
-      gc<Token> name = consume(TOKEN_NAME,
-                               "Expect a method name after 'def'.");
-      
-      gc<Pattern> rightParam;
-      if (match(TOKEN_LEFT_PAREN))
-      {
-        if (match(TOKEN_RIGHT_PAREN))
-        {
-          // Allow () empty pattern to just mean "no parameter".
-        }
-        else
-        {
-          rightParam = parsePattern();
-          consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
-        }
-      }
-      
-      gc<Expr> body = parseBlock();
-      SourcePos span = start.spanTo(last()->pos());
-      return new DefMethodExpr(span, leftParam, name->text(), rightParam, body);
-    }
-    
+  {    
     if (match(TOKEN_RETURN))
     {
       SourcePos start = last()->pos();

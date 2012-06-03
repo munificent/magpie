@@ -8,7 +8,15 @@ from os.path import dirname, join, realpath
 magpie_dir = dirname(dirname(realpath(__file__)))
 header_path = join(magpie_dir, 'src', 'Syntax', 'Ast.generated.h')
 
-# Define the AST expr classes.
+# Define the AST classes.
+defs = sorted({
+    'Method': [
+        ('leftParam',   'gc<Pattern>'),
+        ('name',        'gc<String>'),
+        ('rightParam',  'gc<Pattern>'),
+        ('body',        'gc<Expr>')],
+}.items())
+
 exprs = sorted({
     'And': [
         ('left',        'gc<Expr>'),
@@ -26,11 +34,6 @@ exprs = sorted({
     'Catch': [
         ('body',        'gc<Expr>'),
         ('catches',     'Array<MatchClause>')],
-    'DefMethod': [
-        ('leftParam',   'gc<Pattern>'),
-        ('name',        'gc<String>'),
-        ('rightParam',  'gc<Pattern>'),
-        ('body',        'gc<Expr>')],
     'Do': [
         ('body',        'gc<Expr>')],
     'If': [
@@ -101,8 +104,8 @@ REACH_FIELD_ARRAY = '''
     }}
 '''
 
+# TODO(bob): The "int arg" param is useless for the Def visitor. Should omit it.
 BASE_CLASS = '''
-// Base class for all AST node classes.
 class {0} : public Managed
 {{
 public:
@@ -116,7 +119,7 @@ public:
   virtual void accept({0}Visitor& visitor, int arg) const = 0;
 
   // Dynamic casts.
-  {1}
+{1}
   const SourcePos& pos() const {{ return pos_; }}
 
 private:
@@ -124,6 +127,7 @@ private:
 }};
 '''
 
+# TODO(bob): The "int arg" param is useless for the Def visitor. Should omit it.
 SUBCLASS = '''
 class {0}{6} : public {6}
 {{
@@ -170,46 +174,41 @@ def main():
     with open(header_path, 'w') as file:
         file.write(HEADER)
 
-        # Write the forward declarations for the visitor.
-        for className, fields in exprs:
-            file.write('class {0}Expr;\n'.format(className))
-        for pattern, fields in patterns:
-            file.write('class {0}Pattern;\n'.format(pattern))
+        # Write the forward declarations.
+        forwardDeclare(file, defs, 'Def')
+        forwardDeclare(file, exprs, 'Expr')
+        forwardDeclare(file, patterns, 'Pattern')
 
-        # Write the expression visitor class.
-        file.write(makeVisitor('Expr', exprs))
-
-        # Create the base Expr class.
-        file.write(makeBaseClass('Expr', exprs))
-
-        # Create the expression subclasses.
-        for expr, fields in exprs:
-            file.write(makeClass('Expr', expr, fields))
-
-        # Write the pattern visitor class.
-        file.write(makeVisitor('Pattern', patterns))
-
-        # Create the base Pattern class.
-        file.write(makeBaseClass('Pattern', patterns))
-
-        # Create the pattern subclasses.
-        for pattern, fields in patterns:
-            file.write(makeClass('Pattern', pattern, fields))
+        makeAst(file, 'Def', defs)
+        makeAst(file, 'Expr', exprs)
+        makeAst(file, 'Pattern', patterns)
 
     print 'Created', num_types, 'types.'
 
 
-def makeVisitor(name, types):
+def forwardDeclare(file, nodes, name):
+    for className, fields in nodes:
+        file.write('class {0}{1};\n'.format(className, name))
+
+
+def makeAst(file, name, types):
+    makeVisitor(file, name, types)
+    makeBaseClass(file, name, types)
+    for type, fields in types:
+        makeClass(file, name, type, fields)
+
+
+def makeVisitor(file, name, types):
     result = VISITOR_HEADER.format(name)
 
     for className, fields in types:
         result += ('  virtual void visit(const {1}{0}& node, int dest) = 0;\n'
             .format(name, className))
 
-    return result + VISITOR_FOOTER.format(name)
+    file.write(result + VISITOR_FOOTER.format(name))
 
 
-def makeClass(baseClass, className, fields):
+def makeClass(file, baseClass, className, fields):
     global num_types
     num_types += 1
     ctorParams = ''
@@ -248,15 +247,15 @@ def makeClass(baseClass, className, fields):
     if reachFields != '':
         reach = REACH_METHOD.format(reachFields)
 
-    return SUBCLASS.format(className, ctorParams, ctorArgs, accessors, reach,
-                           memberVars, baseClass)
+    file.write(SUBCLASS.format(className, ctorParams, ctorArgs, accessors,
+                               reach, memberVars, baseClass))
 
-def makeBaseClass(name, types):
+def makeBaseClass(file, name, types):
     casts = ''
     for subclass, fields in types:
         casts += '  virtual const {1}{0}* as{1}{0}()'.format(name, subclass)
         casts += ' const { return NULL; }\n'
 
-    return BASE_CLASS.format(name, casts)
+    file.write(BASE_CLASS.format(name, casts))
 
 main()

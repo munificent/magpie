@@ -2,6 +2,24 @@
 
 namespace magpie
 {
+  void MethodDef::trace(std::ostream& out) const
+  {
+    out << "(def ";
+    if (!leftParam_.isNull())
+    {
+      out << "(" << leftParam_ << ") ";
+    }
+    
+    out << name_;
+    
+    if (!rightParam_.isNull())
+    {
+      out << " (" << rightParam_ << ")";
+    }
+    
+    out << " -> " << body_ << ")";
+  }
+  
   void AndExpr::trace(std::ostream& out) const
   {
     out << "(and " << left_ << " " << right_ << ")";
@@ -48,25 +66,7 @@ namespace magpie
     
     out << ")";
   }
-  
-  void DefMethodExpr::trace(std::ostream& out) const
-  {
-    out << "(def ";
-    if (!leftParam_.isNull())
-    {
-      out << "(" << leftParam_ << ") ";
-    }
-
-    out << name_;
     
-    if (!rightParam_.isNull())
-    {
-      out << " (" << rightParam_ << ")";
-    }
-    
-    out << " -> " << body_ << ")";
-  }
-  
   void DoExpr::trace(std::ostream& out) const
   {
     out << "(do " << body_ << ")";

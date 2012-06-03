@@ -12,20 +12,3 @@ do
 catch err then
     print("caught") // expect: caught
 end
-
-// Unwind to enclosing method.
-def a()
-    throw "blah"
-end
-
-def b()
-    a()
-end
-
-def c()
-    b()
-catch err then
-    print("caught") // expect: caught
-end
-
-c()

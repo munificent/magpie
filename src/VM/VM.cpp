@@ -40,7 +40,7 @@ namespace magpie
   {
     ErrorReporter reporter;
     Parser parser(fileName, source, reporter);
-    gc<Expr> moduleAst = parser.parseModule();
+    gc<ModuleAst> moduleAst = parser.parseModule();
     
     if (reporter.numErrors() > 0) return false;
     

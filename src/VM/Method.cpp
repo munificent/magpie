@@ -24,18 +24,6 @@ namespace magpie
     ASSERT_INDEX(index, constants_.count());
     return constants_[index];
   }
-  
-  int Method::addMethod(gc<Method> method)
-  {
-    methods_.add(method);
-    return methods_.count() - 1;
-  }
-
-  gc<Method> Method::getMethod(int index) const
-  {
-    ASSERT_INDEX(index, methods_.count());
-    return methods_[index];
-  }
 
   void Method::debugTrace() const
   {
@@ -69,11 +57,7 @@ namespace magpie
         
       case OP_RECORD:
         cout << "RECORD        " << GET_A(ins) << "[" << GET_B(ins) << "] -> " << GET_C(ins);
-        
-      case OP_DEF_METHOD:
-        cout << "DEF_METHOD    " << GET_A(ins) << " " << GET_B(ins);
-        break;
-        
+
       case OP_GET_FIELD:
         cout << "GET_FIELD     " << GET_A(ins) << "[" << GET_B(ins) << "] -> " << GET_C(ins);
         break;
@@ -165,7 +149,6 @@ namespace magpie
   void Method::reach()
   {
     Memory::reach(constants_);
-    Memory::reach(methods_);
   }
   
   int MethodScope::declare(gc<String> name)

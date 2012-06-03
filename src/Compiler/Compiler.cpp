@@ -8,29 +8,51 @@
 
 namespace magpie
 {
-  Module* Compiler::compileModule(VM& vm, gc<Expr> moduleExpr,
-                                     ErrorReporter& reporter)
+  Module* Compiler::compileModule(VM& vm, gc<ModuleAst> moduleAst,
+                                  ErrorReporter& reporter)
   {
-    // TODO(bob): Temp hackish. Wrap the module body in a fake method.
-    gc<Pattern> nothing = new ValuePattern(moduleExpr->pos(),
-                                           new NothingExpr(moduleExpr->pos()));
-    DefMethodExpr* method = new DefMethodExpr(moduleExpr->pos(),
-        nothing, String::create("<module>"), nothing, moduleExpr);
-
     Module* module = new Module();
     
     // TODO(bob): Doing this here is hackish. Need to figure out when a module's
     // imports are resolved.
     module->imports().add(vm.coreModule());
     
-    gc<Method> body = compileMethod(vm, module, *method, reporter);
-    module->bindBody(body);
+    // Declare the definitions.
+    for (int i = 0; i < moduleAst->defs().count(); i++)
+    {
+      // TODO(bob): Handle non-method defs when they exist.
+      const MethodDef* method = moduleAst->defs()[i]->asMethodDef();
+      gc<String> signature = SignatureBuilder::build(*method);
+      vm.methods().declare(signature);
+    }
+    
+    // TODO(bob): This will need some work when modules and imports are
+    // supported. We will need to forward declare all of the modules, handle
+    // imported/exported names, and *then* go back and define all of them.
+    // Now define them to allow mutual recursion.
+    for (int i = 0; i < moduleAst->defs().count(); i++)
+    {
+      // TODO(bob): Handle non-method defs when they exist.
+      const MethodDef* method = moduleAst->defs()[i]->asMethodDef();
+      gc<String> signature = SignatureBuilder::build(*method);
+      gc<Method> compiled = compileMethod(vm, module, *method, reporter);
+      vm.methods().define(signature, compiled);
+    }
+    
+    // Wrap the body in a shell method and compile it.
+    gc<Expr> body = moduleAst->body();
+    gc<Pattern> nothing = new ValuePattern(body->pos(),
+        new NothingExpr(body->pos()));
+    MethodDef* method = new MethodDef(body->pos(),
+        nothing, String::create("<module>"), nothing, body);
+    
+    module->bindBody(compileMethod(vm, module, *method, reporter));
     
     return module;
   }
 
   gc<Method> Compiler::compileMethod(VM& vm, Module* module,
-                                     const DefMethodExpr& method,
+                                     const MethodDef& method,
                                      ErrorReporter& reporter)
   {
     Compiler compiler(vm, reporter, module);
@@ -130,7 +152,7 @@ namespace magpie
     scope_(NULL)
   {}
 
-  gc<Method> Compiler::compile(const DefMethodExpr& method)
+  gc<Method> Compiler::compile(const MethodDef& method)
   {
     // Create a top-level scope.
     Scope scope(this);
@@ -206,16 +228,19 @@ namespace magpie
   void Compiler::visit(const CallExpr& expr, int dest)
   {
     gc<String> signature = SignatureBuilder::build(expr);
-    
+
     int method = vm_.methods().find(signature);
+    
     if (method == -1)
     {
-      // If we didn't find it, create an implicit forward declaration.
-      // TODO(bob): After the module is compiled, should go back and ensure that
-      // all forward declarations have been filled in.
-      method = vm_.methods().declare(signature);
+      reporter_.error(expr.pos(),
+                      "Could not find a method with signature '%s'.",
+                      signature->cString());
+    
+      // Just pick a method so we can keep compiling to report later errors.
+      method = 0;
     }
-
+    
     ASSERT(expr.leftArg().isNull() || expr.rightArg().isNull(),
            "Calls with left and right args aren't implemented yet.");
 
@@ -269,22 +294,7 @@ namespace magpie
     
     endJump(jumpPastCatch, OP_JUMP);
   }
-  
-  void Compiler::visit(const DefMethodExpr& expr, int dest)
-  {
-    // TODO(bob): Handle nested non-top-level methods.
-    gc<Method> compiled = compileMethod(vm_, method_->module(), expr,
-                                        reporter_);
-    int methodIndex = method_->addMethod(compiled);
     
-    gc<String> signature = SignatureBuilder::build(expr);
-    int globalIndex = vm_.methods().declare(signature);
-    
-    write(OP_DEF_METHOD, methodIndex, globalIndex);
-    
-    // TODO(bob): Emit code to capture upvals and upvars.
-  }
-
   void Compiler::visit(const DoExpr& expr, int dest)
   {
     Scope doScope(this);
@@ -785,7 +795,7 @@ namespace magpie
     return String::create(builder.signature_, builder.length_);
   }
   
-  gc<String> SignatureBuilder::build(const DefMethodExpr& expr)
+  gc<String> SignatureBuilder::build(const MethodDef& method)
   {
     // def (a) foo               -> ()foo
     // def (a) foo()             -> ()foo
@@ -795,18 +805,18 @@ namespace magpie
     // def foo(a, b: c, d, e: f) -> foo(,b,,e)
     SignatureBuilder builder;
     
-    if (!expr.leftParam().isNull())
+    if (!method.leftParam().isNull())
     {
-      builder.writeParam(expr.leftParam());
+      builder.writeParam(method.leftParam());
       builder.add(" ");
     }
     
-    builder.add(expr.name()->cString());
+    builder.add(method.name()->cString());
     
-    if (!expr.rightParam().isNull())
+    if (!method.rightParam().isNull())
     {
       builder.add(" ");
-      builder.writeParam(expr.rightParam());
+      builder.writeParam(method.rightParam());
     }
     
     return String::create(builder.signature_, builder.length_);

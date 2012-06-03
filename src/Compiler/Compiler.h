@@ -20,10 +20,10 @@ namespace magpie
     friend class PatternCompiler;
     
   public:
-    static Module* compileModule(VM& vm, gc<Expr> module,
+    static Module* compileModule(VM& vm, gc<ModuleAst> module,
                                  ErrorReporter& reporter);
     static gc<Method> compileMethod(VM& vm, Module* module,
-                                    const DefMethodExpr& method,
+                                    const MethodDef& method,
                                     ErrorReporter& reporter);
     
     virtual ~Compiler() {}
@@ -57,14 +57,13 @@ namespace magpie
     
     Compiler(VM& vm, ErrorReporter& reporter, Module* module);
     
-    gc<Method> compile(const DefMethodExpr& methodAst);
-    
+    gc<Method> compile(const MethodDef& method);
+
     virtual void visit(const AndExpr& expr, int dest);
     virtual void visit(const BinaryOpExpr& expr, int dest);
     virtual void visit(const BoolExpr& expr, int dest);
     virtual void visit(const CallExpr& expr, int dest);
     virtual void visit(const CatchExpr& expr, int dest);
-    virtual void visit(const DefMethodExpr& expr, int dest);
     virtual void visit(const DoExpr& expr, int dest);
     virtual void visit(const IfExpr& expr, int dest);
     virtual void visit(const IsExpr& expr, int dest);
@@ -201,7 +200,7 @@ namespace magpie
     static gc<String> build(const CallExpr& expr);
     
     // Builds a signature for the given method definition.
-    static gc<String> build(const DefMethodExpr& expr);
+    static gc<String> build(const MethodDef& expr);
     
   private:
     SignatureBuilder()

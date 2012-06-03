@@ -1,0 +1,6 @@
+def (a) foo(b)
+    print("bad")
+end
+
+// Right method name, but wrong signature. Missing left arg.
+foo("arg") // expect error

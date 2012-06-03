@@ -68,13 +68,6 @@ namespace magpie
           break;
         }
           
-        case OP_DEF_METHOD:
-        {
-          gc<Method> method = frame.method->getMethod(GET_A(ins));
-          vm_.methods().define(GET_B(ins), method);
-          break;
-        }
-          
         case OP_GET_FIELD:
         {
           bool success = false;

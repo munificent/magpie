@@ -43,11 +43,6 @@ namespace magpie
     int addConstant(gc<Object> constant);
     gc<Object> getConstant(int index) const;
     
-    // Adds the given method to this method's list of contained methods. Returns
-    // the index of the added method.
-    int addMethod(gc<Method> method);
-    gc<Method> getMethod(int index) const;
-    
     int numRegisters() const { return numRegisters_; }
 
     void debugTrace() const;
@@ -63,9 +58,6 @@ namespace magpie
     
     Array<instruction> code_;
     Array<gc<Object> > constants_;
-    
-    // Methods declared within this method.
-    Array<gc<Method> > methods_;
     
     int numRegisters_;
     

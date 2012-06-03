@@ -1,0 +1,10 @@
+// Top-level methods can be mutually recursive.
+def foo(n)
+    if n < 1 then "done" else bar(n - 1)
+end
+
+def bar(n)
+    foo(n - 1)
+end
+
+print(bar(5)) // expect: done
