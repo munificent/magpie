@@ -47,7 +47,8 @@ exprs = sorted({
         ('value',       'gc<Expr>'),
         ('cases',       'Array<MatchClause>')],
     'Name': [
-        ('name',        'gc<String>')],
+        ('name',        'gc<String>'),
+        ('resolved*',   'ResolvedName')],
     'Not': [
         ('value',       'gc<Expr>')],
     'Nothing': [],
@@ -110,7 +111,7 @@ class {0} : public Managed
 {{
 public:
   {0}(const SourcePos& pos)
-  : pos_(pos)
+  : pos_(pos){2}
   {{}}
 
   virtual ~{0}() {{}}
@@ -121,9 +122,9 @@ public:
   // Dynamic casts.
 {1}
   const SourcePos& pos() const {{ return pos_; }}
-
+{4}
 private:
-  SourcePos pos_;
+  SourcePos pos_;{3}
 }};
 '''
 
@@ -165,6 +166,25 @@ protected:
 private:
   NO_COPY({0}Visitor);
 }};
+'''
+
+EXPR_INITIALIZERS = ''',
+    numLocals_(-1)'''
+
+EXPR_FIELDS = '''
+  int numLocals_;
+'''
+
+EXPR_METHODS = '''
+  int numLocals() const {
+    ASSERT(numLocals_ != -1, "Expression has not been resolved yet.");
+    return numLocals_;
+  }
+
+  void setNumLocals(int numLocals) {
+    ASSERT(numLocals_ == -1, "Expression is already resolved.");
+    numLocals_ = numLocals;
+  }
 '''
 
 num_types = 0
@@ -217,20 +237,27 @@ def makeClass(file, baseClass, className, fields):
     memberVars = ''
     reachFields = ''
     for name, type in fields:
+        mutable = False
+        if name.endswith('*'):
+            mutable = True
+            name = name[:-1]
+
         if type.find('gc<') != -1:
             reachFields += '    Memory::reach(' + name + '_);\n'
         if type == 'Array<Field>' or type == 'Array<PatternField>':
             reachFields += REACH_FIELD_ARRAY.format(name)
 
-        ctorParams += ', '
-        if type.startswith('Array'):
-            # Array fields are passed to the constructor by reference.
-            ctorParams += 'const ' + type + '&'
+        if not mutable:
+            ctorParams += ', '
+            if type.startswith('Array'):
+                # Array fields are passed to the constructor by reference.
+                ctorParams += 'const ' + type + '&'
+            else:
+                ctorParams += type
+            ctorParams += ' ' + name
+            ctorArgs += ',\n    {0}_({0})'.format(name)
         else:
-            ctorParams += type
-        ctorParams += ' ' + name
-
-        ctorArgs += ',\n    {0}_({0})'.format(name)
+            ctorArgs += ',\n    {0}_()'.format(name)
 
         if type.startswith('Array'):
             # Accessors for arrays do not copy.
@@ -239,6 +266,11 @@ def makeClass(file, baseClass, className, fields):
         else:
             accessors += '  {1} {0}() const {{ return {0}_; }}\n'.format(
                 name, type)
+
+        # Include a setter too if it's mutable.
+        if mutable:
+            accessors += '  void set{2}({1} {0}) {{ {0}_ = {0}; }}\n'.format(
+                name, type, name.title())
 
         memberVars += '\n  {1} {0}_;'.format(name, type)
 
@@ -256,6 +288,15 @@ def makeBaseClass(file, name, types):
         casts += '  virtual const {1}{0}* as{1}{0}()'.format(name, subclass)
         casts += ' const { return NULL; }\n'
 
-    file.write(BASE_CLASS.format(name, casts))
+    initializers = ''
+    fields = ''
+    methods = ''
+
+    if name == 'Expr':
+        initializers = EXPR_INITIALIZERS
+        fields = EXPR_FIELDS
+        methods = EXPR_METHODS
+
+    file.write(BASE_CLASS.format(name, casts, initializers, fields, methods))
 
 main()

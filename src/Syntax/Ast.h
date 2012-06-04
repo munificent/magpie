@@ -70,6 +70,14 @@ namespace magpie
     gc<Expr> body_;
   };
   
+  class ResolvedName
+  {
+  private:
+    bool isLocal_;
+    int import_;
+    int index_;
+  };
+  
   class ModuleAst : public Managed
   {
   public:

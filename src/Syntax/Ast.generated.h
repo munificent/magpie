@@ -140,7 +140,8 @@ class Expr : public Managed
 {
 public:
   Expr(const SourcePos& pos)
-  : pos_(pos)
+  : pos_(pos),
+    numLocals_(-1)
   {}
 
   virtual ~Expr() {}
@@ -172,8 +173,20 @@ public:
 
   const SourcePos& pos() const { return pos_; }
 
+  int numLocals() const {
+    ASSERT(numLocals_ != -1, "Expression has not been resolved yet.");
+    return numLocals_;
+  }
+
+  void setNumLocals(int numLocals) {
+    ASSERT(numLocals_ == -1, "Expression is already resolved.");
+    numLocals_ = numLocals;
+  }
+
 private:
   SourcePos pos_;
+  int numLocals_;
+
 };
 
 class AndExpr : public Expr
@@ -465,7 +478,8 @@ class NameExpr : public Expr
 public:
   NameExpr(const SourcePos& pos, gc<String> name)
   : Expr(pos),
-    name_(name)
+    name_(name),
+    resolved_()
   {}
 
   virtual void accept(ExprVisitor& visitor, int arg) const
@@ -476,6 +490,8 @@ public:
   virtual const NameExpr* asNameExpr() const { return this; }
 
   gc<String> name() const { return name_; }
+  ResolvedName resolved() const { return resolved_; }
+  void setResolved(ResolvedName resolved) { resolved_ = resolved; }
 
   virtual void reach()
   {
@@ -486,6 +502,7 @@ public:
 
 private:
   gc<String> name_;
+  ResolvedName resolved_;
 };
 
 class NotExpr : public Expr
