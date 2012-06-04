@@ -1,0 +1,52 @@
+def (a) foo(b)
+    print("1 infix 1")
+    print(a)
+    print(b)
+end
+
+def (a, b) foo(c)
+    print("2 infix 1")
+    print(a)
+    print(b)
+    print(c)
+end
+
+def (a) foo(b, c)
+    print("1 infix 2")
+    print(a)
+    print(b)
+    print(c)
+end
+
+def (a, b) foo(c, d)
+    print("2 infix 2")
+    print(a)
+    print(b)
+    print(c)
+    print(d)
+end
+
+1 foo(2)
+// expect: 1 infix 1
+// expect: 1
+// expect: 2
+
+(1, 2) foo(3)
+// expect: 2 infix 1
+// expect: 1
+// expect: 2
+// expect: 3
+
+1 foo(2, 3)
+// expect: 1 infix 2
+// expect: 1
+// expect: 2
+// expect: 3
+
+(1, 2) foo(3, 4)
+// expect: 2 infix 2
+// expect: 1
+// expect: 2
+// expect: 3
+// expect: 4
+

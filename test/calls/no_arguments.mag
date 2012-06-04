@@ -1,0 +1,7 @@
+// Method with no parameter on either side.
+def foo()
+    print("no params")
+end
+
+// Call with no argument.
+foo() // expect: no params

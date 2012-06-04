@@ -1,0 +1,13 @@
+// Method with right parameter.
+def foo(n)
+    print("right")
+    print(n)
+end
+
+// Call with explicit nothing argument.
+foo(nothing) // expect: right
+             // expect: nothing
+
+// Call with right argument.
+foo("arg") // expect: right
+           // expect: arg

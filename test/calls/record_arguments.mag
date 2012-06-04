@@ -1,0 +1,30 @@
+// Record patterns.
+def foo(a, b)
+    print("2-uple")
+    print(a)
+    print(b)
+end
+
+def foo(a, b, c)
+    print("3-uple")
+    print(a)
+    print(b)
+    print(c)
+end
+
+def foo(x: x, y: y)
+    print("record")
+    print(x)
+    print(y)
+end
+
+foo(1, 2)       // expect: 2-uple
+                // expect: 1
+                // expect: 2
+foo(1, 2, 3)    // expect: 3-uple
+                // expect: 1
+                // expect: 2
+                // expect: 3
+foo(x: 1, y: 2) // expect: record
+                // expect: 1
+                // expect: 2
