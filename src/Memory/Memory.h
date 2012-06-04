@@ -73,8 +73,8 @@ namespace magpie
       // Have to either both be null or neither.
       if (isNull() != other.isNull()) return false;
       
-      T* left = static_cast<T*>(object_);
-      S* right = static_cast<S*>(other.object_);
+      const T* left = static_cast<const T*>(object_);
+      const S* right = static_cast<const S*>(other.object_);
       return *left == *right;
     }
     
