@@ -34,6 +34,9 @@ namespace magpie
     
     gc<Method> compile(MethodDef& method);
 
+    void compile(gc<Expr> expr, int dest);
+    void compile(gc<Pattern> pattern, int dest);
+    
     virtual void visit(AndExpr& expr, int dest);
     virtual void visit(BinaryOpExpr& expr, int dest);
     virtual void visit(BoolExpr& expr, int dest);
@@ -55,8 +58,6 @@ namespace magpie
     virtual void visit(ThrowExpr& expr, int dest);
     virtual void visit(VariableExpr& expr, int dest);
 
-    void compilePattern(gc<Pattern> pattern, int dest);
-    
     // Compiles the given expr. If it's a constant expr, it adds the constant
     // to the method table and returns the constant id (with the mask bit set).
     // Otherwise, creates a temporary register and compiles the expr to evaluate
@@ -65,7 +66,7 @@ namespace magpie
     //
     // Some instructions like OP_END and OP_ADD can read an operatand from a
     // register or a constant. This is used to compile the operands for those.
-    int compileExpressionOrConstant(Expr& expr);
+    int compileExpressionOrConstant(gc<Expr> expr);
     
     int compileConstant(const NumberExpr& expr);
     int compileConstant(const StringExpr& expr);

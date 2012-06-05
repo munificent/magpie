@@ -75,6 +75,12 @@ namespace magpie
   {
     Resolver::resolve(reporter_, *method_->module(), method);
     
+    // Reserve slots up front for all of the locals. This ensures that temps
+    // will always be after locals.
+    // TODO(bob): Using max here isn't optimal. Ideally a given temp only needs
+    // to be after the locals that are in scope during the duration of that
+    // temp. But calculating that is a bit hairy. For now, until we have a more
+    // advanced compiler, this is a simple solution.
     numLocals_ = method.maxLocals();
     maxSlots_ = numLocals_;
     
@@ -82,10 +88,10 @@ namespace magpie
     int result = 0;
 
     // Evaluate the method's parameter patterns.
-    compilePattern(method.leftParam(), result);
-    compilePattern(method.rightParam(), result);
+    compile(method.leftParam(), result);
+    compile(method.rightParam(), result);
 
-    method.body()->accept(*this, result);
+    compile(method.body(), result);
     write(OP_RETURN, result);
 
     method_->setCode(code_, maxSlots_);
@@ -93,22 +99,35 @@ namespace magpie
     return method_;
   }
   
+  void Compiler::compile(gc<Expr> expr, int dest)
+  {
+    expr->accept(*this, dest);
+  }
+  
+  void Compiler::compile(gc<Pattern> pattern, int dest)
+  {
+    if (pattern.isNull()) return;
+    
+    PatternCompiler compiler(*this);
+    pattern->accept(compiler, dest);
+  }
+  
   void Compiler::visit(AndExpr& expr, int dest)
   {
-    expr.left()->accept(*this, dest);
+    compile(expr.left(), dest);
     
     // Leave a space for the test and jump instruction.
     int jumpToEnd = startJump();
     
-    expr.right()->accept(*this, dest);
+    compile(expr.right(), dest);
     
     endJump(jumpToEnd, OP_JUMP_IF_FALSE, dest);
   }
   
   void Compiler::visit(BinaryOpExpr& expr, int dest)
   {
-    int a = compileExpressionOrConstant(*expr.left());
-    int b = compileExpressionOrConstant(*expr.right());
+    int a = compileExpressionOrConstant(expr.left());
+    int b = compileExpressionOrConstant(expr.right());
 
     OpCode op;
     bool negate = false;
@@ -173,12 +192,12 @@ namespace magpie
 
     if (!expr.leftArg().isNull())
     {
-      expr.leftArg()->accept(*this, dest);
+      compile(expr.leftArg(), dest);
     }
     
     if (!expr.rightArg().isNull())
     {
-      expr.rightArg()->accept(*this, dest);
+      compile(expr.rightArg(), dest);
     }
     
     write(OP_CALL, method, dest);
@@ -190,7 +209,7 @@ namespace magpie
     int enter = startJump();
     
     // Compile the block body.
-    expr.body()->accept(*this, dest);
+    compile(expr.body(), dest);
     
     // Complete the catch handler.
     write(OP_EXIT_TRY);
@@ -203,26 +222,26 @@ namespace magpie
     // TODO(bob): Handle multiple catches, compile their patterns, pattern
     // match, etc. For now, just compile the body.
     ASSERT(expr.catches().count() == 1, "Multiple catch clauses not impl.");
-    expr.catches()[0].body()->accept(*this, dest);
+    compile(expr.catches()[0].body(), dest);
     
     endJump(jumpPastCatch, OP_JUMP);
   }
     
   void Compiler::visit(DoExpr& expr, int dest)
   {
-    expr.body()->accept(*this, dest);
+    compile(expr.body(), dest);
   }
 
   void Compiler::visit(IfExpr& expr, int dest)
   {
     // Compile the condition.
-    expr.condition()->accept(*this, dest);
+    compile(expr.condition(), dest);
 
     // Leave a space for the test and jump instruction.
     int jumpToElse = startJump();
 
     // Compile the then arm.
-    expr.thenArm()->accept(*this, dest);
+    compile(expr.thenArm(), dest);
     
     // Leave a space for the then arm to jump over the else arm.
     int jumpPastElse = startJump();
@@ -232,7 +251,7 @@ namespace magpie
 
     if (!expr.elseArm().isNull())
     {
-      expr.elseArm()->accept(*this, dest);
+      compile(expr.elseArm(), dest);
     }
     else
     {
@@ -245,10 +264,10 @@ namespace magpie
   
   void Compiler::visit(IsExpr& expr, int dest)
   {
-    expr.value()->accept(*this, dest);
+    compile(expr.value(), dest);
     
     int type = makeTemp();
-    expr.type()->accept(*this, type);
+    compile(expr.type(), type);
 
     write(OP_IS, dest, type, dest);
 
@@ -258,7 +277,7 @@ namespace magpie
   void Compiler::visit(MatchExpr& expr, int dest)
   {
     // Compile the value.
-    expr.value()->accept(*this, dest);
+    compile(expr.value(), dest);
     
     Array<int> endJumps;
     
@@ -273,7 +292,7 @@ namespace magpie
       clause.pattern()->accept(compiler, dest);
       
       // Compile the body if the match succeeds.
-      clause.body()->accept(*this, dest);
+      compile(clause.body(), dest);
       
       // Then jump past the other cases.
       if (!lastPattern)
@@ -310,7 +329,7 @@ namespace magpie
   
   void Compiler::visit(NotExpr& expr, int dest)
   {
-    expr.value()->accept(*this, dest);
+    compile(expr.value(), dest);
     write(OP_NOT, dest);
   }
   
@@ -327,12 +346,12 @@ namespace magpie
   
   void Compiler::visit(OrExpr& expr, int dest)
   {
-    expr.left()->accept(*this, dest);
+    compile(expr.left(), dest);
     
     // Leave a space for the test and jump instruction.
     int jumpToEnd = startJump();
     
-    expr.right()->accept(*this, dest);
+    compile(expr.right(), dest);
     
     endJump(jumpToEnd, OP_JUMP_IF_TRUE, dest);
   }
@@ -353,7 +372,7 @@ namespace magpie
       int fieldSlot = makeTemp();
       if (i == 0) firstField = fieldSlot;
       
-      expr.fields()[i].value->accept(*this, fieldSlot);
+      compile(expr.fields()[i].value, fieldSlot);
       names.add(vm_.addSymbol(expr.fields()[i].name));
     }
     
@@ -381,7 +400,7 @@ namespace magpie
     }
     else
     {
-      expr.value()->accept(*this, dest);
+      compile(expr.value(), dest);
     }
 
     write(OP_RETURN, dest);
@@ -394,7 +413,7 @@ namespace magpie
       // TODO(bob): Could compile all but the last expression with a special
       // sigil dest that means "won't use" and some exprs could check that to
       // omit some unnecessary instructions.
-      expr.expressions()[i]->accept(*this, dest);
+      compile(expr.expressions()[i], dest);
     }
   }
 
@@ -407,7 +426,7 @@ namespace magpie
   void Compiler::visit(ThrowExpr& expr, int dest)
   {
     // Compile the error object.
-    expr.value()->accept(*this, dest);
+    compile(expr.value(), dest);
     
     // Throw it.
     write(OP_THROW, dest);
@@ -416,31 +435,23 @@ namespace magpie
   void Compiler::visit(VariableExpr& expr, int dest)
   {
     // Compile the value.
-    expr.value()->accept(*this, dest);
+    compile(expr.value(), dest);
 
     // TODO(bob): Handle mutable variables.
 
     // Now pattern match on it.
-    compilePattern(expr.pattern(), dest);
+    compile(expr.pattern(), dest);
   }
   
-  void Compiler::compilePattern(gc<Pattern> pattern, int dest)
+  int Compiler::compileExpressionOrConstant(gc<Expr> expr)
   {
-    if (pattern.isNull()) return;
-    
-    PatternCompiler compiler(*this);
-    pattern->accept(compiler, dest);
-  }
-
-  int Compiler::compileExpressionOrConstant(Expr& expr)
-  {
-    const NumberExpr* number = expr.asNumberExpr();
+    const NumberExpr* number = expr->asNumberExpr();
     if (number != NULL)
     {
       return MAKE_CONSTANT(compileConstant(*number));
     }
 
-    const StringExpr* string = expr.asStringExpr();
+    const StringExpr* string = expr->asStringExpr();
     if (string != NULL)
     {
       return MAKE_CONSTANT(compileConstant(*string));
@@ -448,7 +459,7 @@ namespace magpie
 
     int dest = makeTemp();
 
-    expr.accept(*this, dest);
+    compile(expr, dest);
     return dest;
   }
 
@@ -573,7 +584,7 @@ namespace magpie
   {
     // Evaluate the expected type.
     int expected = compiler_.makeTemp();
-    pattern.type()->accept(compiler_, expected);
+    compiler_.compile(pattern.type(), expected);
     
     // Test if the value matches the expected type.
     compiler_.write(OP_IS, value, expected, expected);
@@ -586,7 +597,7 @@ namespace magpie
   {
     // Evaluate the expected value.
     int expected = compiler_.makeTemp();
-    pattern.value()->accept(compiler_, expected);
+    compiler_.compile(pattern.value(), expected);
     
     // Test if the value matches the expected one.
     compiler_.write(OP_EQUAL, value, expected, expected);
