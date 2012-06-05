@@ -65,36 +65,31 @@ namespace magpie
     vm_(vm),
     reporter_(reporter),
     method_(new Method(module)),
-    locals_(),
     code_(),
+    numLocals_(0),
     numTemps_(0),
-    maxRegisters_(0),
-    scope_(NULL)
+    maxSlots_(0)
   {}
 
   gc<Method> Compiler::compile(MethodDef& method)
   {
     Resolver::resolve(reporter_, *method_->module(), method);
     
-    // Create a top-level scope.
-    Scope scope(this);
-    scope_ = &scope;
+    numLocals_ = method.maxLocals();
+    maxSlots_ = numLocals_;
     
     // Create a fake local for the argument and result value.
-    int result = scope.makeLocal(method.pos(), String::create("(return)"));
+    int result = 0;
 
     // Evaluate the method's parameter patterns.
-    if (!method.leftParam().isNull()) reserveVariables(*method.leftParam());
-    if (!method.rightParam().isNull()) reserveVariables(*method.rightParam());
     compilePattern(method.leftParam(), result);
     compilePattern(method.rightParam(), result);
 
     method.body()->accept(*this, result);
     write(OP_RETURN, result);
 
-    method_->setCode(code_, maxRegisters_);
+    method_->setCode(code_, maxSlots_);
     
-    scope.end();
     return method_;
   }
   
@@ -195,9 +190,7 @@ namespace magpie
     int enter = startJump();
     
     // Compile the block body.
-    Scope tryScope(this);
     expr.body()->accept(*this, dest);
-    tryScope.end();
     
     // Complete the catch handler.
     write(OP_EXIT_TRY);
@@ -207,27 +200,21 @@ namespace magpie
     endJump(enter, OP_ENTER_TRY);
     
     // Compile the catch handlers.
-    Scope catchScope(this);
     // TODO(bob): Handle multiple catches, compile their patterns, pattern
     // match, etc. For now, just compile the body.
     ASSERT(expr.catches().count() == 1, "Multiple catch clauses not impl.");
     expr.catches()[0].body()->accept(*this, dest);
-    catchScope.end();
     
     endJump(jumpPastCatch, OP_JUMP);
   }
     
   void Compiler::visit(DoExpr& expr, int dest)
   {
-    Scope doScope(this);
     expr.body()->accept(*this, dest);
-    doScope.end();
   }
 
   void Compiler::visit(IfExpr& expr, int dest)
   {
-    Scope ifScope(this);
-
     // Compile the condition.
     expr.condition()->accept(*this, dest);
 
@@ -235,9 +222,7 @@ namespace magpie
     int jumpToElse = startJump();
 
     // Compile the then arm.
-    Scope thenScope(this);
     expr.thenArm()->accept(*this, dest);
-    thenScope.end();
     
     // Leave a space for the then arm to jump over the else arm.
     int jumpPastElse = startJump();
@@ -247,9 +232,7 @@ namespace magpie
 
     if (!expr.elseArm().isNull())
     {
-      Scope elseScope(this);
       expr.elseArm()->accept(*this, dest);
-      elseScope.end();
     }
     else
     {
@@ -258,7 +241,6 @@ namespace magpie
     }
 
     endJump(jumpPastElse, OP_JUMP);
-    ifScope.end();
   }
   
   void Compiler::visit(IsExpr& expr, int dest)
@@ -286,12 +268,6 @@ namespace magpie
       const MatchClause& clause = expr.cases()[i];
       bool lastPattern = i == expr.cases().count() - 1;
       
-      Scope caseScope(this);
-      
-      // Reserve the locals up front. This way we'll compile the value to a slot
-      // *after* them. This ensures locals always come before temporaries.
-      reserveVariables(*clause.pattern());
-      
       // Compile the pattern.
       PatternCompiler compiler(*this, !lastPattern);
       clause.pattern()->accept(compiler, dest);
@@ -307,8 +283,6 @@ namespace magpie
         // If this pattern fails, make it jump to the next case.
         compiler.endJumps();
       }
-      
-      caseScope.end();
     }
     
     // Patch all the jumps now that we know where the end is.
@@ -376,10 +350,10 @@ namespace magpie
     int firstField = -1;
     for (int i = 0; i < expr.fields().count(); i++)
     {
-      int fieldReg = makeTemp();
-      if (i == 0) firstField = fieldReg;
+      int fieldSlot = makeTemp();
+      if (i == 0) firstField = fieldSlot;
       
-      expr.fields()[i].value->accept(*this, fieldReg);
+      expr.fields()[i].value->accept(*this, fieldSlot);
       names.add(vm_.addSymbol(expr.fields()[i].name));
     }
     
@@ -441,26 +415,13 @@ namespace magpie
   
   void Compiler::visit(VariableExpr& expr, int dest)
   {
-    // Reserve the locals up front. This way we'll compile the value to a slot
-    // *after* them. This ensures locals always come before temporaries.
-    reserveVariables(*expr.pattern());
-
     // Compile the value.
-    // TODO(bob): Why is there a temp for this?
-    int valueReg = makeTemp();
-    expr.value()->accept(*this, valueReg);
+    expr.value()->accept(*this, dest);
 
     // TODO(bob): Handle mutable variables.
 
     // Now pattern match on it.
-    compilePattern(expr.pattern(), valueReg);
-
-    // Copy the final result.
-    // TODO(bob): Omit this in cases where it won't be used. Most variable
-    // declarations are just in sequences.
-    write(OP_MOVE, valueReg, dest);
-
-    releaseTemp(); // valueReg.
+    compilePattern(expr.pattern(), dest);
   }
   
   void Compiler::compilePattern(gc<Pattern> pattern, int dest)
@@ -499,11 +460,6 @@ namespace magpie
   int Compiler::compileConstant(const StringExpr& expr)
   {
     return method_->addConstant(new StringObject(expr.value()));
-  }
-
-  void Compiler::reserveVariables(Pattern& pattern)
-  {
-    scope_->reserveVariables(pattern);
   }
 
   void Compiler::write(OpCode op, int a, int b, int c)
@@ -550,109 +506,18 @@ namespace magpie
   int Compiler::makeTemp()
   {
     numTemps_++;
-    updateMaxRegisters();
-    return locals_.count() + numTemps_ - 1;
+    if (maxSlots_ < numLocals_ + numTemps_)
+    {
+      maxSlots_ = numLocals_ + numTemps_;
+    }
+    
+    return numLocals_ + numTemps_ - 1;
   }
 
   void Compiler::releaseTemp()
   {
     ASSERT(numTemps_ > 0, "No temp to release.");
     numTemps_--;
-  }
-
-  void Compiler::updateMaxRegisters()
-  {
-    if (maxRegisters_ < locals_.count() + numTemps_)
-    {
-      maxRegisters_ = locals_.count() + numTemps_;
-    }
-  }
-  
-  Scope::Scope(Compiler* compiler)
-  : compiler_(*compiler),
-  parent_(compiler_.scope_),
-  start_(compiler_.locals_.count())
-  {
-    compiler_.scope_ = this;
-  }
-  
-  Scope::~Scope()
-  {
-    ASSERT(start_ == -1, "Forgot to end scope.");
-  }
-  
-  void Scope::reserveVariables(Pattern& pattern)
-  {
-    // Arg is not used.
-    pattern.accept(*this, -1);
-  }
-
-  int Scope::makeLocal(const SourcePos& pos, gc<String> name)
-  {
-    ASSERT(compiler_.numTemps_ == 0,
-           "Cannot make a local variable when there are temporaries in use.");
-    
-    Array<gc<String> >& locals = compiler_.locals_;
-    
-    // Make sure there isn't already a local variable with this name in this
-    // scope.
-    for (int i = start_; i < locals.count(); i++)
-    {
-      if (locals[i] == name)
-      {
-        compiler_.reporter_.error(pos,
-                                  "There is already a variable '%s' defined in this scope.",
-                                  name->cString());
-      }
-    }
-    
-    compiler_.locals_.add(name);
-    compiler_.updateMaxRegisters();
-    return compiler_.locals_.count() - 1;
-  }
-  
-  void Scope::end()
-  {
-    ASSERT(start_ != -1, "Already ended this scope.");
-    ASSERT(compiler_.numTemps_ == 0,
-           "Cannot end a scope when there are temporaries in use.");
-    
-    compiler_.locals_.truncate(start_);
-    compiler_.scope_ = parent_;
-    start_ = -1;
-  }
-  
-  void Scope::visit(RecordPattern& pattern, int unused)
-  {
-    // Recurse into the fields.
-    for (int i = 0; i < pattern.fields().count(); i++)
-    {
-      pattern.fields()[i].value->accept(*this, unused);
-    }
-  }
-  
-  void Scope::visit(TypePattern& pattern, int value)
-  {
-    // Nothing to do.
-  }
-  
-  void Scope::visit(ValuePattern& pattern, int unused)
-  {
-    // Nothing to do.
-  }
-  
-  void Scope::visit(VariablePattern& pattern, int unused)
-  {
-    makeLocal(pattern.pos(), pattern.name());
-    if (!pattern.pattern().isNull())
-    {
-      pattern.pattern()->accept(*this, unused);
-    }
-  }
-  
-  void Scope::visit(WildcardPattern& pattern, int value)
-  {
-    // Nothing to do.
   }
   
   void PatternCompiler::endJumps()
@@ -661,9 +526,9 @@ namespace magpie
     // jump to the next case.
     for (int j = 0; j < tests_.count(); j++)
     {
-      const matchTest& test = tests_[j];
+      const MatchTest& test = tests_[j];
       
-      if (test.value == -1)
+      if (test.slot == -1)
       {
         // This test is a field destructure, so just set the offset.
         compiler_.endJump(test.position, OP_JUMP); 
@@ -671,7 +536,7 @@ namespace magpie
       else
       {
         // A normal test.
-        compiler_.endJump(test.position, OP_JUMP_IF_FALSE, test.value); 
+        compiler_.endJump(test.position, OP_JUMP_IF_FALSE, test.slot); 
       }
     }
   }
@@ -689,7 +554,7 @@ namespace magpie
       if (jumpOnFailure_)
       {
         compiler_.write(OP_TEST_FIELD, value, symbol, field);
-        tests_.add(matchTest(compiler_.code_.count(), -1));
+        tests_.add(MatchTest(compiler_.code_.count(), -1));
         compiler_.startJump();
       }
       else
@@ -732,11 +597,11 @@ namespace magpie
   
   void PatternCompiler::visit(VariablePattern& pattern, int value)
   {
-    int variable = compiler_.locals_.lastIndexOf(pattern.name());
-    ASSERT(variable != -1, "Should have called declareVariables() already.")
+    ASSERT(pattern.resolved().isResolved(),
+           "Must resolve before compiling.");
     
     // Copy the value into the new variable.
-    compiler_.write(OP_MOVE, value, variable);
+    compiler_.write(OP_MOVE, value, pattern.resolved().index());
     
     // Compile the inner pattern.
     if (!pattern.pattern().isNull())
@@ -754,7 +619,7 @@ namespace magpie
   {
     if (jumpOnFailure_)
     {
-      tests_.add(matchTest(compiler_.code_.count(), expected));
+      tests_.add(MatchTest(compiler_.code_.count(), expected));
     }
     compiler_.write(OP_TEST_MATCH, expected);
   }

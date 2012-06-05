@@ -11,12 +11,12 @@ namespace magpie
     Resolver resolver(reporter, module);
 
     // Create a top-level scope.
-    Scope2 scope(&resolver);
+    Scope scope(&resolver);
     resolver.scope_ = &scope;
     
     // TODO(bob): This should go away when we're handling the args correctly.
     // Create a fake local for the argument and result value.
-    scope.makeLocal(method.pos(), String::create("(return)"));
+    resolver.makeLocal(method.pos(), String::create("(return)"), 0);
     
     // Create variables for the parameters.
     if (!method.leftParam().isNull())
@@ -32,23 +32,47 @@ namespace magpie
     resolver.resolve(method.body());
     
     scope.end();
+    
+    method.setMaxLocals(resolver.maxLocals_);
   }
   
   void Resolver::resolve(gc<Expr> expr)
   {
     expr->accept(*this, -1);
   }
-
+  
+  int Resolver::makeLocal(const SourcePos& pos, gc<String> name, int startSlot)
+  {
+    // Make sure there isn't already a local variable with this name in this
+    // scope.
+    for (int i = startSlot; i < locals_.count(); i++)
+    {
+      if (locals_[i] == name)
+      {
+        reporter_.error(pos,
+            "There is already a variable '%s' defined in this scope.",
+            name->cString());
+      }
+    }
+    
+    locals_.add(name);
+    if (locals_.count() > maxLocals_) {
+      maxLocals_ = locals_.count();
+    }
+    
+    return locals_.count() - 1;
+  }
+  
   void Resolver::visit(AndExpr& expr, int dummy)
   {
-    expr.left()->accept(*this, dummy);
-    expr.right()->accept(*this, dummy);
+    resolve(expr.left());
+    resolve(expr.right());
   }
   
   void Resolver::visit(BinaryOpExpr& expr, int dummy)
   {
-    expr.left()->accept(*this, dummy);
-    expr.right()->accept(*this, dummy);
+    resolve(expr.left());
+    resolve(expr.right());
   }
   
   void Resolver::visit(BoolExpr& expr, int dummy)
@@ -60,62 +84,62 @@ namespace magpie
   {
     if (!expr.leftArg().isNull())
     {
-      expr.leftArg()->accept(*this, dummy);
+      resolve(expr.leftArg());
     }
 
     // TODO(bob): Resolve method here too?
     
     if (!expr.rightArg().isNull())
     {
-      expr.rightArg()->accept(*this, dummy);
+      resolve(expr.rightArg());
     }
   }
   
   void Resolver::visit(CatchExpr& expr, int dummy)
   {
     // Resolve the block body.
-    Scope2 tryScope(this);
-    expr.body()->accept(*this, dummy);
+    Scope tryScope(this);
+    resolve(expr.body());
     tryScope.end();
 
     // Resolve the catch handlers.
     for (int i = 0; i < expr.catches().count(); i++)
     {
-      Scope2 caseScope(this);
+      Scope caseScope(this);
       const MatchClause& clause = expr.catches()[i];
       
       // Resolve the pattern.
       scope_->resolve(*clause.pattern());
       
       // Resolve the body.
-      clause.body()->accept(*this, dummy);
+      resolve(clause.body());
       caseScope.end();
     }
   }
   
   void Resolver::visit(DoExpr& expr, int dummy)
   {
-    Scope2 doScope(this);
-    expr.body()->accept(*this, dummy);
+    Scope doScope(this);
+    resolve(expr.body());
     doScope.end();
   }
   
   void Resolver::visit(IfExpr& expr, int dummy)
   {
-    Scope2 ifScope(this);
+    Scope ifScope(this);
 
     // Resolve the condition.
-    expr.condition()->accept(*this, dummy);
+    resolve(expr.condition());
 
     // Resolve the then arm.
-    Scope2 thenScope(this);
-    expr.thenArm()->accept(*this, dummy);
+    Scope thenScope(this);
+    resolve(expr.thenArm());
     thenScope.end();
 
     if (!expr.elseArm().isNull())
     {
-      Scope2 elseScope(this);
-      expr.elseArm()->accept(*this, dummy);
+      Scope elseScope(this);
+      resolve(expr.elseArm());
       elseScope.end();
     }
 
@@ -124,26 +148,26 @@ namespace magpie
   
   void Resolver::visit(IsExpr& expr, int dummy)
   {
-    expr.value()->accept(*this, dummy);
-    expr.type()->accept(*this, dummy);
+    resolve(expr.value());
+    resolve(expr.type());
   }
   
   void Resolver::visit(MatchExpr& expr, int dummy)
   {
     // Resolve the value.
-    expr.value()->accept(*this, dummy);
+    resolve(expr.value());
 
     // Resolve each case.
     for (int i = 0; i < expr.cases().count(); i++)
     {
-      Scope2 caseScope(this);
+      Scope caseScope(this);
       const MatchClause& clause = expr.cases()[i];
       
       // Resolve the pattern.
       scope_->resolve(*clause.pattern());
 
       // Resolve the body.
-      clause.body()->accept(*this, dummy);
+      resolve(clause.body());
       caseScope.end();
     }
   }
@@ -186,7 +210,7 @@ namespace magpie
   
   void Resolver::visit(NotExpr& expr, int dummy)
   {
-    expr.value()->accept(*this, dummy);
+    resolve(expr.value());
   }
   
   void Resolver::visit(NothingExpr& expr, int dummy)
@@ -201,8 +225,8 @@ namespace magpie
   
   void Resolver::visit(OrExpr& expr, int dummy)
   {
-    expr.left()->accept(*this, dummy);
-    expr.right()->accept(*this, dummy);
+    resolve(expr.left());
+    resolve(expr.right());
   }
   
   void Resolver::visit(RecordExpr& expr, int dummy)
@@ -210,7 +234,7 @@ namespace magpie
     // Resolve the fields.
     for (int i = 0; i < expr.fields().count(); i++)
     {
-      expr.fields()[i].value->accept(*this, dummy);
+      resolve(expr.fields()[i].value);
     }
   }
   
@@ -219,7 +243,7 @@ namespace magpie
     // Resolve the return value.
     if (!expr.value().isNull())
     {
-      expr.value()->accept(*this, dummy);
+      resolve(expr.value());
     }
   }
   
@@ -227,7 +251,7 @@ namespace magpie
   {
     for (int i = 0; i < expr.expressions().count(); i++)
     {
-      expr.expressions()[i]->accept(*this, dummy);
+      resolve(expr.expressions()[i]);
     }
   }
   
@@ -239,19 +263,19 @@ namespace magpie
   void Resolver::visit(ThrowExpr& expr, int dummy)
   {
     // Resolve the error object.
-    expr.value()->accept(*this, dummy);
+    resolve(expr.value());
   }
   
   void Resolver::visit(VariableExpr& expr, int dummy)
   {
     // Resolve the value.
-    expr.value()->accept(*this, dummy);
+    resolve(expr.value());
     
     // Now declare any locals on the left-hand side.
     scope_->resolve(*expr.pattern());
   }
   
-  Scope2::Scope2(Resolver* resolver)
+  Scope::Scope(Resolver* resolver)
   : resolver_(*resolver),
     parent_(resolver_.scope_),
     start_(resolver_.locals_.count())
@@ -259,40 +283,17 @@ namespace magpie
     resolver_.scope_ = this;
   }
   
-  Scope2::~Scope2()
+  Scope::~Scope()
   {
     ASSERT(start_ == -1, "Forgot to end scope.");
   }
   
-  void Scope2::resolve(Pattern& pattern)
+  void Scope::resolve(Pattern& pattern)
   {
     pattern.accept(*this, -1);
   }
-
-  int Scope2::makeLocal(const SourcePos& pos, gc<String> name)
-  {
-    Array<gc<String> >& locals = resolver_.locals_;
-    
-    // Make sure there isn't already a local variable with this name in this
-    // scope.
-    for (int i = start_; i < locals.count(); i++)
-    {
-      if (locals[i] == name)
-      {
-        resolver_.reporter_.error(pos,
-            "There is already a variable '%s' defined in this scope.",
-            name->cString());
-      }
-    }
-    
-    resolver_.locals_.add(name);
-    /*
-    resolver_.updateMaxRegisters();
-    */
-    return resolver_.locals_.count() - 1;
-  }
   
-  void Scope2::end()
+  void Scope::end()
   {
     ASSERT(start_ != -1, "Already ended this scope.");
 
@@ -301,7 +302,7 @@ namespace magpie
     start_ = -1;
   }
   
-  void Scope2::visit(RecordPattern& pattern, int dummy)
+  void Scope::visit(RecordPattern& pattern, int dummy)
   {
     // Recurse into the fields.
     for (int i = 0; i < pattern.fields().count(); i++)
@@ -310,28 +311,31 @@ namespace magpie
     }
   }
   
-  void Scope2::visit(TypePattern& pattern, int value)
+  void Scope::visit(TypePattern& pattern, int value)
   {
     // Resolve the type expression.
     resolver_.resolve(pattern.type());
   }
   
-  void Scope2::visit(ValuePattern& pattern, int dummy)
+  void Scope::visit(ValuePattern& pattern, int dummy)
   {
     // Resolve the value expression.
     resolver_.resolve(pattern.value());
   }
   
-  void Scope2::visit(VariablePattern& pattern, int dummy)
+  void Scope::visit(VariablePattern& pattern, int dummy)
   {
-    makeLocal(pattern.pos(), pattern.name());
+    // Create a slot for the variable.
+    int slot = resolver_.makeLocal(pattern.pos(), pattern.name(), start_);
+    pattern.setResolved(ResolvedName(slot));
+    
     if (!pattern.pattern().isNull())
     {
       pattern.pattern()->accept(*this, dummy);
     }
   }
   
-  void Scope2::visit(WildcardPattern& pattern, int dummy)
+  void Scope::visit(WildcardPattern& pattern, int dummy)
   {
     // Nothing to do.
   }

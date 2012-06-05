@@ -19,7 +19,6 @@ namespace magpie
   class Compiler : private ExprVisitor
   {
     friend class PatternCompiler;
-    friend class Scope;
     
   public:
     static Module* compileModule(VM& vm, gc<ModuleAst> module,
@@ -71,11 +70,6 @@ namespace magpie
     int compileConstant(const NumberExpr& expr);
     int compileConstant(const StringExpr& expr);
 
-    // Walks the pattern and allocates locals for any variable patterns
-    // encountered. We do this in a separate step so we can tell how many locals
-    // we need for the pattern since the value temporary will come after that.
-    void reserveVariables(Pattern& pattern);
-    
     void write(OpCode op, int a = 0xff, int b = 0xff, int c = 0xff);
     int startJump();
     
@@ -86,7 +80,6 @@ namespace magpie
     
     int makeTemp();
     void releaseTemp();
-    void updateMaxRegisters();
     
     VM& vm_;
     ErrorReporter& reporter_;
@@ -94,56 +87,14 @@ namespace magpie
     // The method being compiled.
     gc<Method> method_;
     
-    // The names of the current in-scope local variables (including all outer
-    // scopes). The indices in this array correspond to the registers where
-    // those locals are stored.
-    Array<gc<String> > locals_;
-    
     Array<instruction> code_;
     
-    // The number of temporary registers currently in use.
+    // The number of slots currently in use.
+    int numLocals_;
     int numTemps_;
-    int maxRegisters_;
-    
-    // The current inner-most local variable scope.
-    Scope* scope_;
+    int maxSlots_;
     
     NO_COPY(Compiler);
-  };
-
-  // Keeps track of local variable scopes to handle nesting and shadowing.
-  // This class can also visit patterns in order to create registers for the
-  // variables declared in a pattern.
-  class Scope : private PatternVisitor
-  {
-  public:
-    Scope(Compiler* compiler);      
-    ~Scope();
-    
-    // Allocates registers for all of the variables defined in pattern. Must be
-    // called before the pattern is compiled to ensure that locals come before
-    // temporary registers.
-    void reserveVariables(Pattern& pattern);
-    
-    // Creates a new local variable with the given name.
-    int makeLocal(const SourcePos& pos, gc<String> name);
-    
-    // Closes this scope. This must be called before the Scope object goes out
-    // of (C++) scope.
-    void end();
-    
-    virtual void visit(RecordPattern& pattern, int value);
-    virtual void visit(TypePattern& pattern, int value);
-    virtual void visit(ValuePattern& pattern, int value);
-    virtual void visit(VariablePattern& pattern, int value);
-    virtual void visit(WildcardPattern& pattern, int value);
-    
-  private:
-    Compiler& compiler_;
-    Scope* parent_;
-    int start_;
-    
-    NO_COPY(Scope);
   };
   
   // Locates a code offset and a register where a pattern-match test operation
@@ -151,24 +102,24 @@ namespace magpie
   // throws on failure. But for cases in a match expression, it should jump to
   // the next case if a match fails. This tracks these locations so we can
   // replace them with appropriate jumps.
-  struct matchTest
+  struct MatchTest
   {
     // Default constructor so we can use this in Array.
-    matchTest()
+    MatchTest()
     : position(-1),
-      value(-1)
+      slot(-1)
     {}
     
-    matchTest(int position, int value)
+    MatchTest(int position, int slot)
     : position(position),
-      value(value)
+      slot(slot)
     {}
     
     // Location in the bytecode where the test instruction appears.
     int position;
     
-    // Register where the value of the test is stored.
-    int value;
+    // Slot where the value of the test is stored.
+    int slot;
   };
   
   class PatternCompiler : public PatternVisitor
@@ -192,7 +143,7 @@ namespace magpie
     
     Compiler& compiler_;
     bool jumpOnFailure_;
-    Array<matchTest> tests_;
+    Array<MatchTest> tests_;
   };
   
   // Method definitions and calls are statically distinguished by the records

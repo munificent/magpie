@@ -6,11 +6,11 @@
 
 namespace magpie
 {
-  class Scope2;
+  class Scope;
   
   class Resolver : public ExprVisitor
   {
-    friend class Scope2;
+    friend class Scope;
     
   public:
     static void resolve(ErrorReporter& reporter, const Module& module,
@@ -20,11 +20,15 @@ namespace magpie
     Resolver(ErrorReporter& reporter, const Module& module)
     : reporter_(reporter),
       module_(module),
-      locals_()
+      locals_(),
+      maxLocals_(0)
     {}
     
     void resolve(gc<Expr> expr);
     
+    // Creates a new local variable with the given name.
+    int makeLocal(const SourcePos& pos, gc<String> name, int startSlot);
+        
     virtual void visit(AndExpr& expr, int dummy);
     virtual void visit(BinaryOpExpr& expr, int dummy);
     virtual void visit(BoolExpr& expr, int dummy);
@@ -54,26 +58,26 @@ namespace magpie
     // scopes). The indices in this array correspond to the slots where those
     // locals are stored.
     Array<gc<String> > locals_;
+    
+    // The maximum number of locals that are in scope at the same time.
+    int maxLocals_;
 
     // The current inner-most local variable scope.
-    Scope2* scope_;
+    Scope* scope_;
     
     NO_COPY(Resolver);
   };
   
   // Keeps track of local variable scopes to handle nesting and shadowing.
-  // This class can also visit patterns in order to create registers for the
+  // This class can also visit patterns in order to create slots for the
   // variables declared in a pattern.
-  class Scope2 : private PatternVisitor
+  class Scope : private PatternVisitor
   {
   public:
-    Scope2(Resolver* resolver);      
-    ~Scope2();
+    Scope(Resolver* resolver);      
+    ~Scope();
     
     void resolve(Pattern& pattern);
-    
-    // Creates a new local variable with the given name.
-    int makeLocal(const SourcePos& pos, gc<String> name);
     
     // Closes this scope. This must be called before the Scope object goes out
     // of (C++) scope.
@@ -87,9 +91,9 @@ namespace magpie
     
   private:
     Resolver& resolver_;
-    Scope2* parent_;
+    Scope* parent_;
     int start_;
     
-    NO_COPY(Scope2);
+    NO_COPY(Scope);
   };
 }

@@ -14,7 +14,8 @@ defs = sorted({
         ('leftParam',   'gc<Pattern>'),
         ('name',        'gc<String>'),
         ('rightParam',  'gc<Pattern>'),
-        ('body',        'gc<Expr>')],
+        ('body',        'gc<Expr>'),
+        ('maxLocals*',  'int')],
 }.items())
 
 exprs = sorted({
@@ -82,7 +83,8 @@ patterns = sorted({
         ('value',       'gc<Expr>')],
     'Variable': [
         ('name',        'gc<String>'),
-        ('pattern',     'gc<Pattern>')],
+        ('pattern',     'gc<Pattern>'),
+        ('resolved*',   'ResolvedName')],
     'Wildcard': []
 }.items())
 
@@ -169,21 +171,21 @@ private:
 '''
 
 EXPR_INITIALIZERS = ''',
-    numLocals_(-1)'''
+    maxLocals_(-1)'''
 
 EXPR_FIELDS = '''
-  int numLocals_;
+  int maxLocals_;
 '''
 
 EXPR_METHODS = '''
-  int numLocals() const {
-    ASSERT(numLocals_ != -1, "Expression has not been resolved yet.");
-    return numLocals_;
+  int maxLocals() const {
+    ASSERT(maxLocals_ != -1, "Expression has not been resolved yet.");
+    return maxLocals_;
   }
 
-  void setNumLocals(int numLocals) {
-    ASSERT(numLocals_ == -1, "Expression is already resolved.");
-    numLocals_ = numLocals;
+  void setMaxLocals(int maxLocals) {
+    ASSERT(maxLocals_ == -1, "Expression is already resolved.");
+    maxLocals_ = maxLocals;
   }
 '''
 
@@ -257,7 +259,10 @@ def makeClass(file, baseClass, className, fields):
             ctorParams += ' ' + name
             ctorArgs += ',\n    {0}_({0})'.format(name)
         else:
-            ctorArgs += ',\n    {0}_()'.format(name)
+            if type == 'int':
+                ctorArgs += ',\n    {0}_(-1)'.format(name)
+            else:
+                ctorArgs += ',\n    {0}_()'.format(name)
 
         if type.startswith('Array'):
             # Accessors for arrays do not copy.
@@ -270,7 +275,7 @@ def makeClass(file, baseClass, className, fields):
         # Include a setter too if it's mutable.
         if mutable:
             accessors += '  void set{2}({1} {0}) {{ {0}_ = {0}; }}\n'.format(
-                name, type, name.title())
+                name, type, name[0].upper() + name[1:])
 
         memberVars += '\n  {1} {0}_;'.format(name, type)
 

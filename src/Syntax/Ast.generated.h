@@ -71,7 +71,8 @@ public:
     leftParam_(leftParam),
     name_(name),
     rightParam_(rightParam),
-    body_(body)
+    body_(body),
+    maxLocals_(-1)
   {}
 
   virtual void accept(DefVisitor& visitor, int arg)
@@ -85,6 +86,8 @@ public:
   gc<String> name() const { return name_; }
   gc<Pattern> rightParam() const { return rightParam_; }
   gc<Expr> body() const { return body_; }
+  int maxLocals() const { return maxLocals_; }
+  void setMaxLocals(int maxLocals) { maxLocals_ = maxLocals; }
 
   virtual void reach()
   {
@@ -101,6 +104,7 @@ private:
   gc<String> name_;
   gc<Pattern> rightParam_;
   gc<Expr> body_;
+  int maxLocals_;
 };
 
 class ExprVisitor
@@ -141,7 +145,7 @@ class Expr : public Managed
 public:
   Expr(const SourcePos& pos)
   : pos_(pos),
-    numLocals_(-1)
+    maxLocals_(-1)
   {}
 
   virtual ~Expr() {}
@@ -173,19 +177,19 @@ public:
 
   const SourcePos& pos() const { return pos_; }
 
-  int numLocals() const {
-    ASSERT(numLocals_ != -1, "Expression has not been resolved yet.");
-    return numLocals_;
+  int maxLocals() const {
+    ASSERT(maxLocals_ != -1, "Expression has not been resolved yet.");
+    return maxLocals_;
   }
 
-  void setNumLocals(int numLocals) {
-    ASSERT(numLocals_ == -1, "Expression is already resolved.");
-    numLocals_ = numLocals;
+  void setMaxLocals(int maxLocals) {
+    ASSERT(maxLocals_ == -1, "Expression is already resolved.");
+    maxLocals_ = maxLocals;
   }
 
 private:
   SourcePos pos_;
-  int numLocals_;
+  int maxLocals_;
 
 };
 
@@ -926,7 +930,8 @@ public:
   VariablePattern(const SourcePos& pos, gc<String> name, gc<Pattern> pattern)
   : Pattern(pos),
     name_(name),
-    pattern_(pattern)
+    pattern_(pattern),
+    resolved_()
   {}
 
   virtual void accept(PatternVisitor& visitor, int arg)
@@ -938,6 +943,8 @@ public:
 
   gc<String> name() const { return name_; }
   gc<Pattern> pattern() const { return pattern_; }
+  ResolvedName resolved() const { return resolved_; }
+  void setResolved(ResolvedName resolved) { resolved_ = resolved; }
 
   virtual void reach()
   {
@@ -950,6 +957,7 @@ public:
 private:
   gc<String> name_;
   gc<Pattern> pattern_;
+  ResolvedName resolved_;
 };
 
 class WildcardPattern : public Pattern
