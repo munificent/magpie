@@ -144,8 +144,7 @@ class Expr : public Managed
 {
 public:
   Expr(const SourcePos& pos)
-  : pos_(pos),
-    maxLocals_(-1)
+  : pos_(pos)
   {}
 
   virtual ~Expr() {}
@@ -177,20 +176,8 @@ public:
 
   const SourcePos& pos() const { return pos_; }
 
-  int maxLocals() const {
-    ASSERT(maxLocals_ != -1, "Expression has not been resolved yet.");
-    return maxLocals_;
-  }
-
-  void setMaxLocals(int maxLocals) {
-    ASSERT(maxLocals_ == -1, "Expression is already resolved.");
-    maxLocals_ = maxLocals;
-  }
-
 private:
   SourcePos pos_;
-  int maxLocals_;
-
 };
 
 class AndExpr : public Expr

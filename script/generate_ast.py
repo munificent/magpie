@@ -113,7 +113,7 @@ class {0} : public Managed
 {{
 public:
   {0}(const SourcePos& pos)
-  : pos_(pos){2}
+  : pos_(pos)
   {{}}
 
   virtual ~{0}() {{}}
@@ -124,9 +124,9 @@ public:
   // Dynamic casts.
 {1}
   const SourcePos& pos() const {{ return pos_; }}
-{4}
+
 private:
-  SourcePos pos_;{3}
+  SourcePos pos_;
 }};
 '''
 
@@ -168,25 +168,6 @@ protected:
 private:
   NO_COPY({0}Visitor);
 }};
-'''
-
-EXPR_INITIALIZERS = ''',
-    maxLocals_(-1)'''
-
-EXPR_FIELDS = '''
-  int maxLocals_;
-'''
-
-EXPR_METHODS = '''
-  int maxLocals() const {
-    ASSERT(maxLocals_ != -1, "Expression has not been resolved yet.");
-    return maxLocals_;
-  }
-
-  void setMaxLocals(int maxLocals) {
-    ASSERT(maxLocals_ == -1, "Expression is already resolved.");
-    maxLocals_ = maxLocals;
-  }
 '''
 
 num_types = 0
@@ -293,15 +274,6 @@ def makeBaseClass(file, name, types):
         casts += '  virtual {1}{0}* as{1}{0}()'.format(name, subclass)
         casts += ' { return NULL; }\n'
 
-    initializers = ''
-    fields = ''
-    methods = ''
-
-    if name == 'Expr':
-        initializers = EXPR_INITIALIZERS
-        fields = EXPR_FIELDS
-        methods = EXPR_METHODS
-
-    file.write(BASE_CLASS.format(name, casts, initializers, fields, methods))
+    file.write(BASE_CLASS.format(name, casts))
 
 main()
