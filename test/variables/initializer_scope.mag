@@ -1,0 +1,7 @@
+// Make sure the RHS of a variable is executed in a scope *before* its variables
+// are declared.
+var a = "outer"
+do
+    var a = a
+    print(a) // expect: outer
+end
