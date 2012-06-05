@@ -25,7 +25,7 @@ namespace magpie
     static Module* compileModule(VM& vm, gc<ModuleAst> module,
                                  ErrorReporter& reporter);
     static gc<Method> compileMethod(VM& vm, Module* module,
-                                    const MethodDef& method,
+                                    MethodDef& method,
                                     ErrorReporter& reporter);
     
     virtual ~Compiler() {}
@@ -33,28 +33,28 @@ namespace magpie
   private:    
     Compiler(VM& vm, ErrorReporter& reporter, Module* module);
     
-    gc<Method> compile(const MethodDef& method);
+    gc<Method> compile(MethodDef& method);
 
-    virtual void visit(const AndExpr& expr, int dest);
-    virtual void visit(const BinaryOpExpr& expr, int dest);
-    virtual void visit(const BoolExpr& expr, int dest);
-    virtual void visit(const CallExpr& expr, int dest);
-    virtual void visit(const CatchExpr& expr, int dest);
-    virtual void visit(const DoExpr& expr, int dest);
-    virtual void visit(const IfExpr& expr, int dest);
-    virtual void visit(const IsExpr& expr, int dest);
-    virtual void visit(const MatchExpr& expr, int dest);
-    virtual void visit(const NameExpr& expr, int dest);
-    virtual void visit(const NotExpr& expr, int dest);
-    virtual void visit(const NothingExpr& expr, int dest);
-    virtual void visit(const NumberExpr& expr, int dest);
-    virtual void visit(const OrExpr& expr, int dest);
-    virtual void visit(const RecordExpr& expr, int dest);
-    virtual void visit(const ReturnExpr& expr, int dest);
-    virtual void visit(const SequenceExpr& expr, int dest);
-    virtual void visit(const StringExpr& expr, int dest);
-    virtual void visit(const ThrowExpr& expr, int dest);
-    virtual void visit(const VariableExpr& expr, int dest);
+    virtual void visit(AndExpr& expr, int dest);
+    virtual void visit(BinaryOpExpr& expr, int dest);
+    virtual void visit(BoolExpr& expr, int dest);
+    virtual void visit(CallExpr& expr, int dest);
+    virtual void visit(CatchExpr& expr, int dest);
+    virtual void visit(DoExpr& expr, int dest);
+    virtual void visit(IfExpr& expr, int dest);
+    virtual void visit(IsExpr& expr, int dest);
+    virtual void visit(MatchExpr& expr, int dest);
+    virtual void visit(NameExpr& expr, int dest);
+    virtual void visit(NotExpr& expr, int dest);
+    virtual void visit(NothingExpr& expr, int dest);
+    virtual void visit(NumberExpr& expr, int dest);
+    virtual void visit(OrExpr& expr, int dest);
+    virtual void visit(RecordExpr& expr, int dest);
+    virtual void visit(ReturnExpr& expr, int dest);
+    virtual void visit(SequenceExpr& expr, int dest);
+    virtual void visit(StringExpr& expr, int dest);
+    virtual void visit(ThrowExpr& expr, int dest);
+    virtual void visit(VariableExpr& expr, int dest);
 
     void compilePattern(gc<Pattern> pattern, int dest);
     
@@ -66,7 +66,7 @@ namespace magpie
     //
     // Some instructions like OP_END and OP_ADD can read an operatand from a
     // register or a constant. This is used to compile the operands for those.
-    int compileExpressionOrConstant(const Expr& expr);
+    int compileExpressionOrConstant(Expr& expr);
     
     int compileConstant(const NumberExpr& expr);
     int compileConstant(const StringExpr& expr);
@@ -74,7 +74,7 @@ namespace magpie
     // Walks the pattern and allocates locals for any variable patterns
     // encountered. We do this in a separate step so we can tell how many locals
     // we need for the pattern since the value temporary will come after that.
-    void reserveVariables(const Pattern& pattern);
+    void reserveVariables(Pattern& pattern);
     
     void write(OpCode op, int a = 0xff, int b = 0xff, int c = 0xff);
     int startJump();
@@ -123,7 +123,7 @@ namespace magpie
     // Allocates registers for all of the variables defined in pattern. Must be
     // called before the pattern is compiled to ensure that locals come before
     // temporary registers.
-    void reserveVariables(const Pattern& pattern);
+    void reserveVariables(Pattern& pattern);
     
     // Creates a new local variable with the given name.
     int makeLocal(const SourcePos& pos, gc<String> name);
@@ -132,11 +132,11 @@ namespace magpie
     // of (C++) scope.
     void end();
     
-    virtual void visit(const RecordPattern& pattern, int value);
-    virtual void visit(const TypePattern& pattern, int value);
-    virtual void visit(const ValuePattern& pattern, int value);
-    virtual void visit(const VariablePattern& pattern, int value);
-    virtual void visit(const WildcardPattern& pattern, int value);
+    virtual void visit(RecordPattern& pattern, int value);
+    virtual void visit(TypePattern& pattern, int value);
+    virtual void visit(ValuePattern& pattern, int value);
+    virtual void visit(VariablePattern& pattern, int value);
+    virtual void visit(WildcardPattern& pattern, int value);
     
   private:
     Compiler& compiler_;
@@ -181,11 +181,11 @@ namespace magpie
     
     void endJumps();
     
-    virtual void visit(const RecordPattern& pattern, int value);
-    virtual void visit(const TypePattern& pattern, int value);
-    virtual void visit(const ValuePattern& pattern, int value);
-    virtual void visit(const VariablePattern& pattern, int value);
-    virtual void visit(const WildcardPattern& pattern, int value);
+    virtual void visit(RecordPattern& pattern, int value);
+    virtual void visit(TypePattern& pattern, int value);
+    virtual void visit(ValuePattern& pattern, int value);
+    virtual void visit(VariablePattern& pattern, int value);
+    virtual void visit(WildcardPattern& pattern, int value);
   
   private:
     void writeTest(int reg);

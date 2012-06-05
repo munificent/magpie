@@ -117,7 +117,7 @@ public:
   virtual ~{0}() {{}}
 
   // The visitor pattern.
-  virtual void accept({0}Visitor& visitor, int arg) const = 0;
+  virtual void accept({0}Visitor& visitor, int arg) = 0;
 
   // Dynamic casts.
 {1}
@@ -137,12 +137,12 @@ public:
   : {6}(pos){2}
   {{}}
 
-  virtual void accept({6}Visitor& visitor, int arg) const
+  virtual void accept({6}Visitor& visitor, int arg)
   {{
     visitor.visit(*this, arg);
   }}
 
-  virtual const {0}{6}* as{0}{6}() const {{ return this; }}
+  virtual {0}{6}* as{0}{6}() {{ return this; }}
 
 {3}{4}
   virtual void trace(std::ostream& out) const;
@@ -222,7 +222,7 @@ def makeVisitor(file, name, types):
     result = VISITOR_HEADER.format(name)
 
     for className, fields in types:
-        result += ('  virtual void visit(const {1}{0}& node, int dest) = 0;\n'
+        result += ('  virtual void visit({1}{0}& node, int dest) = 0;\n'
             .format(name, className))
 
     file.write(result + VISITOR_FOOTER.format(name))
@@ -261,7 +261,7 @@ def makeClass(file, baseClass, className, fields):
 
         if type.startswith('Array'):
             # Accessors for arrays do not copy.
-            accessors += '  const {1}& {0}() const {{ return {0}_; }}\n'.format(
+            accessors += '  const {1}& {0}() {{ return {0}_; }}\n'.format(
                 name, type)
         else:
             accessors += '  {1} {0}() const {{ return {0}_; }}\n'.format(
@@ -285,8 +285,8 @@ def makeClass(file, baseClass, className, fields):
 def makeBaseClass(file, name, types):
     casts = ''
     for subclass, fields in types:
-        casts += '  virtual const {1}{0}* as{1}{0}()'.format(name, subclass)
-        casts += ' const { return NULL; }\n'
+        casts += '  virtual {1}{0}* as{1}{0}()'.format(name, subclass)
+        casts += ' { return NULL; }\n'
 
     initializers = ''
     fields = ''

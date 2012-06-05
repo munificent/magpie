@@ -4,6 +4,7 @@
 #include "Method.h"
 #include "Module.h"
 #include "Object.h"
+#include "Resolver.h"
 #include "VM.h"
 
 namespace magpie
@@ -21,7 +22,7 @@ namespace magpie
     for (int i = 0; i < moduleAst->defs().count(); i++)
     {
       // TODO(bob): Handle non-method defs when they exist.
-      const MethodDef* method = moduleAst->defs()[i]->asMethodDef();
+      MethodDef* method = moduleAst->defs()[i]->asMethodDef();
       gc<String> signature = SignatureBuilder::build(*method);
       vm.methods().declare(signature);
     }
@@ -33,7 +34,7 @@ namespace magpie
     for (int i = 0; i < moduleAst->defs().count(); i++)
     {
       // TODO(bob): Handle non-method defs when they exist.
-      const MethodDef* method = moduleAst->defs()[i]->asMethodDef();
+      MethodDef* method = moduleAst->defs()[i]->asMethodDef();
       gc<String> signature = SignatureBuilder::build(*method);
       gc<Method> compiled = compileMethod(vm, module, *method, reporter);
       vm.methods().define(signature, compiled);
@@ -52,7 +53,7 @@ namespace magpie
   }
 
   gc<Method> Compiler::compileMethod(VM& vm, Module* module,
-                                     const MethodDef& method,
+                                     MethodDef& method,
                                      ErrorReporter& reporter)
   {
     Compiler compiler(vm, reporter, module);
@@ -71,8 +72,10 @@ namespace magpie
     scope_(NULL)
   {}
 
-  gc<Method> Compiler::compile(const MethodDef& method)
+  gc<Method> Compiler::compile(MethodDef& method)
   {
+    Resolver::resolve(reporter_, *method_->module(), method);
+    
     // Create a top-level scope.
     Scope scope(this);
     scope_ = &scope;
@@ -95,7 +98,7 @@ namespace magpie
     return method_;
   }
   
-  void Compiler::visit(const AndExpr& expr, int dest)
+  void Compiler::visit(AndExpr& expr, int dest)
   {
     expr.left()->accept(*this, dest);
     
@@ -107,7 +110,7 @@ namespace magpie
     endJump(jumpToEnd, OP_JUMP_IF_FALSE, dest);
   }
   
-  void Compiler::visit(const BinaryOpExpr& expr, int dest)
+  void Compiler::visit(BinaryOpExpr& expr, int dest)
   {
     int a = compileExpressionOrConstant(*expr.left());
     int b = compileExpressionOrConstant(*expr.right());
@@ -139,12 +142,12 @@ namespace magpie
     if (IS_REGISTER(b)) releaseTemp();
   }
 
-  void Compiler::visit(const BoolExpr& expr, int dest)
+  void Compiler::visit(BoolExpr& expr, int dest)
   {
     write(OP_BUILT_IN, expr.value() ? BUILT_IN_TRUE : BUILT_IN_FALSE, dest);
   }
 
-  void Compiler::visit(const CallExpr& expr, int dest)
+  void Compiler::visit(CallExpr& expr, int dest)
   {
     gc<String> signature = SignatureBuilder::build(expr);
 
@@ -186,7 +189,7 @@ namespace magpie
     write(OP_CALL, method, dest);
   }
   
-  void Compiler::visit(const CatchExpr& expr, int dest)
+  void Compiler::visit(CatchExpr& expr, int dest)
   {
     // Register the catch handler.
     int enter = startJump();
@@ -214,14 +217,14 @@ namespace magpie
     endJump(jumpPastCatch, OP_JUMP);
   }
     
-  void Compiler::visit(const DoExpr& expr, int dest)
+  void Compiler::visit(DoExpr& expr, int dest)
   {
     Scope doScope(this);
     expr.body()->accept(*this, dest);
     doScope.end();
   }
 
-  void Compiler::visit(const IfExpr& expr, int dest)
+  void Compiler::visit(IfExpr& expr, int dest)
   {
     Scope ifScope(this);
 
@@ -258,7 +261,7 @@ namespace magpie
     ifScope.end();
   }
   
-  void Compiler::visit(const IsExpr& expr, int dest)
+  void Compiler::visit(IsExpr& expr, int dest)
   {
     expr.value()->accept(*this, dest);
     
@@ -270,7 +273,7 @@ namespace magpie
     releaseTemp(); // type
   }
   
-  void Compiler::visit(const MatchExpr& expr, int dest)
+  void Compiler::visit(MatchExpr& expr, int dest)
   {
     // Compile the value.
     expr.value()->accept(*this, dest);
@@ -315,57 +318,40 @@ namespace magpie
     }
   }
   
-  void Compiler::visit(const NameExpr& expr, int dest)
+  void Compiler::visit(NameExpr& expr, int dest)
   {
-    // See if it's a local variable.
-    int local = locals_.lastIndexOf(expr.name());
-    if (local != -1)
-    {
-      write(OP_MOVE, local, dest);
-      return;
-    }
+    ASSERT(expr.resolved().isResolved(),
+           "Names should be resolved before compiling.");
     
-    // See if it's an imported name. Walk through the modules this one imports.
-    // TODO(bob): Need to handle name collisions.
-    Module* module = method_->module();
-    for (int i = 0; i < module->imports().count(); i++)
+    if (expr.resolved().isLocal())
     {
-      Module* import = module->imports()[i];
-      
-      // Walk through the names it exports.
-      for (int j = 0; j < import->numExports(); j++)
-      {
-        if (*import->getExportName(j) == *expr.name())
-        {
-          // Found it.
-          write(OP_GET_MODULE, i, j, dest);
-          return;
-        }
-      }
+      write(OP_MOVE, expr.resolved().index(), dest);
     }
-    
-    reporter_.error(expr.pos(),
-                    "Variable '%s' is not defined.", expr.name()->cString());
+    else
+    {
+      write(OP_GET_MODULE, expr.resolved().import(), expr.resolved().index(),
+            dest);
+    }
   }
   
-  void Compiler::visit(const NotExpr& expr, int dest)
+  void Compiler::visit(NotExpr& expr, int dest)
   {
     expr.value()->accept(*this, dest);
     write(OP_NOT, dest);
   }
   
-  void Compiler::visit(const NothingExpr& expr, int dest)
+  void Compiler::visit(NothingExpr& expr, int dest)
   {
     write(OP_BUILT_IN, BUILT_IN_NOTHING, dest);
   }
 
-  void Compiler::visit(const NumberExpr& expr, int dest)
+  void Compiler::visit(NumberExpr& expr, int dest)
   {
     int index = compileConstant(expr);
     write(OP_CONSTANT, index, dest);
   }
   
-  void Compiler::visit(const OrExpr& expr, int dest)
+  void Compiler::visit(OrExpr& expr, int dest)
   {
     expr.left()->accept(*this, dest);
     
@@ -377,7 +363,7 @@ namespace magpie
     endJump(jumpToEnd, OP_JUMP_IF_TRUE, dest);
   }
   
-  void Compiler::visit(const RecordExpr& expr, int dest)
+  void Compiler::visit(RecordExpr& expr, int dest)
   {
     // TODO(bob): Hack. This assumes that the fields in the expression are in
     // the same order that the type expects. Eventually, the type needs to sort
@@ -411,7 +397,7 @@ namespace magpie
     }
   }
   
-  void Compiler::visit(const ReturnExpr& expr, int dest)
+  void Compiler::visit(ReturnExpr& expr, int dest)
   {
     // Compile the return value.
     if (expr.value().isNull())
@@ -427,7 +413,7 @@ namespace magpie
     write(OP_RETURN, dest);
   }
   
-  void Compiler::visit(const SequenceExpr& expr, int dest)
+  void Compiler::visit(SequenceExpr& expr, int dest)
   {
     for (int i = 0; i < expr.expressions().count(); i++)
     {
@@ -438,13 +424,13 @@ namespace magpie
     }
   }
 
-  void Compiler::visit(const StringExpr& expr, int dest)
+  void Compiler::visit(StringExpr& expr, int dest)
   {
     int index = compileConstant(expr);
     write(OP_CONSTANT, index, dest);
   }
   
-  void Compiler::visit(const ThrowExpr& expr, int dest)
+  void Compiler::visit(ThrowExpr& expr, int dest)
   {
     // Compile the error object.
     expr.value()->accept(*this, dest);
@@ -453,7 +439,7 @@ namespace magpie
     write(OP_THROW, dest);
   }
   
-  void Compiler::visit(const VariableExpr& expr, int dest)
+  void Compiler::visit(VariableExpr& expr, int dest)
   {
     // Reserve the locals up front. This way we'll compile the value to a slot
     // *after* them. This ensures locals always come before temporaries.
@@ -485,7 +471,7 @@ namespace magpie
     pattern->accept(compiler, dest);
   }
 
-  int Compiler::compileExpressionOrConstant(const Expr& expr)
+  int Compiler::compileExpressionOrConstant(Expr& expr)
   {
     const NumberExpr* number = expr.asNumberExpr();
     if (number != NULL)
@@ -515,7 +501,7 @@ namespace magpie
     return method_->addConstant(new StringObject(expr.value()));
   }
 
-  void Compiler::reserveVariables(const Pattern& pattern)
+  void Compiler::reserveVariables(Pattern& pattern)
   {
     scope_->reserveVariables(pattern);
   }
@@ -582,7 +568,6 @@ namespace magpie
     }
   }
   
-  
   Scope::Scope(Compiler* compiler)
   : compiler_(*compiler),
   parent_(compiler_.scope_),
@@ -596,7 +581,7 @@ namespace magpie
     ASSERT(start_ == -1, "Forgot to end scope.");
   }
   
-  void Scope::reserveVariables(const Pattern& pattern)
+  void Scope::reserveVariables(Pattern& pattern)
   {
     // Arg is not used.
     pattern.accept(*this, -1);
@@ -637,7 +622,7 @@ namespace magpie
     start_ = -1;
   }
   
-  void Scope::visit(const RecordPattern& pattern, int unused)
+  void Scope::visit(RecordPattern& pattern, int unused)
   {
     // Recurse into the fields.
     for (int i = 0; i < pattern.fields().count(); i++)
@@ -646,17 +631,17 @@ namespace magpie
     }
   }
   
-  void Scope::visit(const TypePattern& pattern, int value)
+  void Scope::visit(TypePattern& pattern, int value)
   {
     // Nothing to do.
   }
   
-  void Scope::visit(const ValuePattern& pattern, int unused)
+  void Scope::visit(ValuePattern& pattern, int unused)
   {
     // Nothing to do.
   }
   
-  void Scope::visit(const VariablePattern& pattern, int unused)
+  void Scope::visit(VariablePattern& pattern, int unused)
   {
     makeLocal(pattern.pos(), pattern.name());
     if (!pattern.pattern().isNull())
@@ -665,7 +650,7 @@ namespace magpie
     }
   }
   
-  void Scope::visit(const WildcardPattern& pattern, int value)
+  void Scope::visit(WildcardPattern& pattern, int value)
   {
     // Nothing to do.
   }
@@ -691,7 +676,7 @@ namespace magpie
     }
   }
   
-  void PatternCompiler::visit(const RecordPattern& pattern, int value)
+  void PatternCompiler::visit(RecordPattern& pattern, int value)
   {
     // Recurse into the fields.
     for (int i = 0; i < pattern.fields().count(); i++)
@@ -719,7 +704,7 @@ namespace magpie
     }
   }
   
-  void PatternCompiler::visit(const TypePattern& pattern, int value)
+  void PatternCompiler::visit(TypePattern& pattern, int value)
   {
     // Evaluate the expected type.
     int expected = compiler_.makeTemp();
@@ -732,7 +717,7 @@ namespace magpie
     compiler_.releaseTemp();
   }
   
-  void PatternCompiler::visit(const ValuePattern& pattern, int value)
+  void PatternCompiler::visit(ValuePattern& pattern, int value)
   {
     // Evaluate the expected value.
     int expected = compiler_.makeTemp();
@@ -745,7 +730,7 @@ namespace magpie
     compiler_.releaseTemp();
   }
   
-  void PatternCompiler::visit(const VariablePattern& pattern, int value)
+  void PatternCompiler::visit(VariablePattern& pattern, int value)
   {
     int variable = compiler_.locals_.lastIndexOf(pattern.name());
     ASSERT(variable != -1, "Should have called declareVariables() already.")
@@ -760,7 +745,7 @@ namespace magpie
     }
   }
   
-  void PatternCompiler::visit(const WildcardPattern& pattern, int value)
+  void PatternCompiler::visit(WildcardPattern& pattern, int value)
   {
     // Nothing to do.
   }
@@ -832,7 +817,7 @@ namespace magpie
   {
     // TODO(bob): Clean up. Redundant with build().
     // If it's a record, destructure it into the signature.
-    const RecordExpr* record = expr->asRecordExpr();
+    RecordExpr* record = expr->asRecordExpr();
     if (record != NULL)
     {
       for (int i = 0; i < record->fields().count(); i++)
@@ -851,7 +836,7 @@ namespace magpie
   void SignatureBuilder::writeParam(gc<Pattern> pattern)
   {
     // If it's a record, destructure it into the signature.
-    const RecordPattern* record = pattern->asRecordPattern();
+    RecordPattern* record = pattern->asRecordPattern();
     if (record != NULL)
     {
       for (int i = 0; i < record->fields().count(); i++)

@@ -56,6 +56,8 @@
       'src/Compiler/Bytecode.h',
       'src/Compiler/Compiler.cpp',
       'src/Compiler/Compiler.h',
+      'src/Compiler/Resolver.cpp',
+      'src/Compiler/Resolver.h',
       'src/Memory/ForwardingAddress.h',
       'src/Memory/Managed.cpp',
       'src/Memory/Managed.h',

@@ -33,7 +33,7 @@ class DefVisitor
 public:
   virtual ~DefVisitor() {}
 
-  virtual void visit(const MethodDef& node, int dest) = 0;
+  virtual void visit(MethodDef& node, int dest) = 0;
 
 protected:
   DefVisitor() {}
@@ -52,10 +52,10 @@ public:
   virtual ~Def() {}
 
   // The visitor pattern.
-  virtual void accept(DefVisitor& visitor, int arg) const = 0;
+  virtual void accept(DefVisitor& visitor, int arg) = 0;
 
   // Dynamic casts.
-  virtual const MethodDef* asMethodDef() const { return NULL; }
+  virtual MethodDef* asMethodDef() { return NULL; }
 
   const SourcePos& pos() const { return pos_; }
 
@@ -74,12 +74,12 @@ public:
     body_(body)
   {}
 
-  virtual void accept(DefVisitor& visitor, int arg) const
+  virtual void accept(DefVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const MethodDef* asMethodDef() const { return this; }
+  virtual MethodDef* asMethodDef() { return this; }
 
   gc<Pattern> leftParam() const { return leftParam_; }
   gc<String> name() const { return name_; }
@@ -108,26 +108,26 @@ class ExprVisitor
 public:
   virtual ~ExprVisitor() {}
 
-  virtual void visit(const AndExpr& node, int dest) = 0;
-  virtual void visit(const BinaryOpExpr& node, int dest) = 0;
-  virtual void visit(const BoolExpr& node, int dest) = 0;
-  virtual void visit(const CallExpr& node, int dest) = 0;
-  virtual void visit(const CatchExpr& node, int dest) = 0;
-  virtual void visit(const DoExpr& node, int dest) = 0;
-  virtual void visit(const IfExpr& node, int dest) = 0;
-  virtual void visit(const IsExpr& node, int dest) = 0;
-  virtual void visit(const MatchExpr& node, int dest) = 0;
-  virtual void visit(const NameExpr& node, int dest) = 0;
-  virtual void visit(const NotExpr& node, int dest) = 0;
-  virtual void visit(const NothingExpr& node, int dest) = 0;
-  virtual void visit(const NumberExpr& node, int dest) = 0;
-  virtual void visit(const OrExpr& node, int dest) = 0;
-  virtual void visit(const RecordExpr& node, int dest) = 0;
-  virtual void visit(const ReturnExpr& node, int dest) = 0;
-  virtual void visit(const SequenceExpr& node, int dest) = 0;
-  virtual void visit(const StringExpr& node, int dest) = 0;
-  virtual void visit(const ThrowExpr& node, int dest) = 0;
-  virtual void visit(const VariableExpr& node, int dest) = 0;
+  virtual void visit(AndExpr& node, int dest) = 0;
+  virtual void visit(BinaryOpExpr& node, int dest) = 0;
+  virtual void visit(BoolExpr& node, int dest) = 0;
+  virtual void visit(CallExpr& node, int dest) = 0;
+  virtual void visit(CatchExpr& node, int dest) = 0;
+  virtual void visit(DoExpr& node, int dest) = 0;
+  virtual void visit(IfExpr& node, int dest) = 0;
+  virtual void visit(IsExpr& node, int dest) = 0;
+  virtual void visit(MatchExpr& node, int dest) = 0;
+  virtual void visit(NameExpr& node, int dest) = 0;
+  virtual void visit(NotExpr& node, int dest) = 0;
+  virtual void visit(NothingExpr& node, int dest) = 0;
+  virtual void visit(NumberExpr& node, int dest) = 0;
+  virtual void visit(OrExpr& node, int dest) = 0;
+  virtual void visit(RecordExpr& node, int dest) = 0;
+  virtual void visit(ReturnExpr& node, int dest) = 0;
+  virtual void visit(SequenceExpr& node, int dest) = 0;
+  virtual void visit(StringExpr& node, int dest) = 0;
+  virtual void visit(ThrowExpr& node, int dest) = 0;
+  virtual void visit(VariableExpr& node, int dest) = 0;
 
 protected:
   ExprVisitor() {}
@@ -147,29 +147,29 @@ public:
   virtual ~Expr() {}
 
   // The visitor pattern.
-  virtual void accept(ExprVisitor& visitor, int arg) const = 0;
+  virtual void accept(ExprVisitor& visitor, int arg) = 0;
 
   // Dynamic casts.
-  virtual const AndExpr* asAndExpr() const { return NULL; }
-  virtual const BinaryOpExpr* asBinaryOpExpr() const { return NULL; }
-  virtual const BoolExpr* asBoolExpr() const { return NULL; }
-  virtual const CallExpr* asCallExpr() const { return NULL; }
-  virtual const CatchExpr* asCatchExpr() const { return NULL; }
-  virtual const DoExpr* asDoExpr() const { return NULL; }
-  virtual const IfExpr* asIfExpr() const { return NULL; }
-  virtual const IsExpr* asIsExpr() const { return NULL; }
-  virtual const MatchExpr* asMatchExpr() const { return NULL; }
-  virtual const NameExpr* asNameExpr() const { return NULL; }
-  virtual const NotExpr* asNotExpr() const { return NULL; }
-  virtual const NothingExpr* asNothingExpr() const { return NULL; }
-  virtual const NumberExpr* asNumberExpr() const { return NULL; }
-  virtual const OrExpr* asOrExpr() const { return NULL; }
-  virtual const RecordExpr* asRecordExpr() const { return NULL; }
-  virtual const ReturnExpr* asReturnExpr() const { return NULL; }
-  virtual const SequenceExpr* asSequenceExpr() const { return NULL; }
-  virtual const StringExpr* asStringExpr() const { return NULL; }
-  virtual const ThrowExpr* asThrowExpr() const { return NULL; }
-  virtual const VariableExpr* asVariableExpr() const { return NULL; }
+  virtual AndExpr* asAndExpr() { return NULL; }
+  virtual BinaryOpExpr* asBinaryOpExpr() { return NULL; }
+  virtual BoolExpr* asBoolExpr() { return NULL; }
+  virtual CallExpr* asCallExpr() { return NULL; }
+  virtual CatchExpr* asCatchExpr() { return NULL; }
+  virtual DoExpr* asDoExpr() { return NULL; }
+  virtual IfExpr* asIfExpr() { return NULL; }
+  virtual IsExpr* asIsExpr() { return NULL; }
+  virtual MatchExpr* asMatchExpr() { return NULL; }
+  virtual NameExpr* asNameExpr() { return NULL; }
+  virtual NotExpr* asNotExpr() { return NULL; }
+  virtual NothingExpr* asNothingExpr() { return NULL; }
+  virtual NumberExpr* asNumberExpr() { return NULL; }
+  virtual OrExpr* asOrExpr() { return NULL; }
+  virtual RecordExpr* asRecordExpr() { return NULL; }
+  virtual ReturnExpr* asReturnExpr() { return NULL; }
+  virtual SequenceExpr* asSequenceExpr() { return NULL; }
+  virtual StringExpr* asStringExpr() { return NULL; }
+  virtual ThrowExpr* asThrowExpr() { return NULL; }
+  virtual VariableExpr* asVariableExpr() { return NULL; }
 
   const SourcePos& pos() const { return pos_; }
 
@@ -198,12 +198,12 @@ public:
     right_(right)
   {}
 
-  virtual void accept(ExprVisitor& visitor, int arg) const
+  virtual void accept(ExprVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const AndExpr* asAndExpr() const { return this; }
+  virtual AndExpr* asAndExpr() { return this; }
 
   gc<Expr> left() const { return left_; }
   gc<Expr> right() const { return right_; }
@@ -231,12 +231,12 @@ public:
     right_(right)
   {}
 
-  virtual void accept(ExprVisitor& visitor, int arg) const
+  virtual void accept(ExprVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const BinaryOpExpr* asBinaryOpExpr() const { return this; }
+  virtual BinaryOpExpr* asBinaryOpExpr() { return this; }
 
   gc<Expr> left() const { return left_; }
   TokenType type() const { return type_; }
@@ -264,12 +264,12 @@ public:
     value_(value)
   {}
 
-  virtual void accept(ExprVisitor& visitor, int arg) const
+  virtual void accept(ExprVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const BoolExpr* asBoolExpr() const { return this; }
+  virtual BoolExpr* asBoolExpr() { return this; }
 
   bool value() const { return value_; }
 
@@ -289,12 +289,12 @@ public:
     rightArg_(rightArg)
   {}
 
-  virtual void accept(ExprVisitor& visitor, int arg) const
+  virtual void accept(ExprVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const CallExpr* asCallExpr() const { return this; }
+  virtual CallExpr* asCallExpr() { return this; }
 
   gc<Expr> leftArg() const { return leftArg_; }
   gc<String> name() const { return name_; }
@@ -324,15 +324,15 @@ public:
     catches_(catches)
   {}
 
-  virtual void accept(ExprVisitor& visitor, int arg) const
+  virtual void accept(ExprVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const CatchExpr* asCatchExpr() const { return this; }
+  virtual CatchExpr* asCatchExpr() { return this; }
 
   gc<Expr> body() const { return body_; }
-  const Array<MatchClause>& catches() const { return catches_; }
+  const Array<MatchClause>& catches() { return catches_; }
 
   virtual void reach()
   {
@@ -354,12 +354,12 @@ public:
     body_(body)
   {}
 
-  virtual void accept(ExprVisitor& visitor, int arg) const
+  virtual void accept(ExprVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const DoExpr* asDoExpr() const { return this; }
+  virtual DoExpr* asDoExpr() { return this; }
 
   gc<Expr> body() const { return body_; }
 
@@ -384,12 +384,12 @@ public:
     elseArm_(elseArm)
   {}
 
-  virtual void accept(ExprVisitor& visitor, int arg) const
+  virtual void accept(ExprVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const IfExpr* asIfExpr() const { return this; }
+  virtual IfExpr* asIfExpr() { return this; }
 
   gc<Expr> condition() const { return condition_; }
   gc<Expr> thenArm() const { return thenArm_; }
@@ -419,12 +419,12 @@ public:
     type_(type)
   {}
 
-  virtual void accept(ExprVisitor& visitor, int arg) const
+  virtual void accept(ExprVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const IsExpr* asIsExpr() const { return this; }
+  virtual IsExpr* asIsExpr() { return this; }
 
   gc<Expr> value() const { return value_; }
   gc<Expr> type() const { return type_; }
@@ -451,15 +451,15 @@ public:
     cases_(cases)
   {}
 
-  virtual void accept(ExprVisitor& visitor, int arg) const
+  virtual void accept(ExprVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const MatchExpr* asMatchExpr() const { return this; }
+  virtual MatchExpr* asMatchExpr() { return this; }
 
   gc<Expr> value() const { return value_; }
-  const Array<MatchClause>& cases() const { return cases_; }
+  const Array<MatchClause>& cases() { return cases_; }
 
   virtual void reach()
   {
@@ -482,12 +482,12 @@ public:
     resolved_()
   {}
 
-  virtual void accept(ExprVisitor& visitor, int arg) const
+  virtual void accept(ExprVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const NameExpr* asNameExpr() const { return this; }
+  virtual NameExpr* asNameExpr() { return this; }
 
   gc<String> name() const { return name_; }
   ResolvedName resolved() const { return resolved_; }
@@ -513,12 +513,12 @@ public:
     value_(value)
   {}
 
-  virtual void accept(ExprVisitor& visitor, int arg) const
+  virtual void accept(ExprVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const NotExpr* asNotExpr() const { return this; }
+  virtual NotExpr* asNotExpr() { return this; }
 
   gc<Expr> value() const { return value_; }
 
@@ -540,12 +540,12 @@ public:
   : Expr(pos)
   {}
 
-  virtual void accept(ExprVisitor& visitor, int arg) const
+  virtual void accept(ExprVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const NothingExpr* asNothingExpr() const { return this; }
+  virtual NothingExpr* asNothingExpr() { return this; }
 
 
   virtual void trace(std::ostream& out) const;
@@ -561,12 +561,12 @@ public:
     value_(value)
   {}
 
-  virtual void accept(ExprVisitor& visitor, int arg) const
+  virtual void accept(ExprVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const NumberExpr* asNumberExpr() const { return this; }
+  virtual NumberExpr* asNumberExpr() { return this; }
 
   double value() const { return value_; }
 
@@ -585,12 +585,12 @@ public:
     right_(right)
   {}
 
-  virtual void accept(ExprVisitor& visitor, int arg) const
+  virtual void accept(ExprVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const OrExpr* asOrExpr() const { return this; }
+  virtual OrExpr* asOrExpr() { return this; }
 
   gc<Expr> left() const { return left_; }
   gc<Expr> right() const { return right_; }
@@ -616,14 +616,14 @@ public:
     fields_(fields)
   {}
 
-  virtual void accept(ExprVisitor& visitor, int arg) const
+  virtual void accept(ExprVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const RecordExpr* asRecordExpr() const { return this; }
+  virtual RecordExpr* asRecordExpr() { return this; }
 
-  const Array<Field>& fields() const { return fields_; }
+  const Array<Field>& fields() { return fields_; }
 
   virtual void reach()
   {
@@ -649,12 +649,12 @@ public:
     value_(value)
   {}
 
-  virtual void accept(ExprVisitor& visitor, int arg) const
+  virtual void accept(ExprVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const ReturnExpr* asReturnExpr() const { return this; }
+  virtual ReturnExpr* asReturnExpr() { return this; }
 
   gc<Expr> value() const { return value_; }
 
@@ -677,14 +677,14 @@ public:
     expressions_(expressions)
   {}
 
-  virtual void accept(ExprVisitor& visitor, int arg) const
+  virtual void accept(ExprVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const SequenceExpr* asSequenceExpr() const { return this; }
+  virtual SequenceExpr* asSequenceExpr() { return this; }
 
-  const Array<gc<Expr> >& expressions() const { return expressions_; }
+  const Array<gc<Expr> >& expressions() { return expressions_; }
 
   virtual void reach()
   {
@@ -705,12 +705,12 @@ public:
     value_(value)
   {}
 
-  virtual void accept(ExprVisitor& visitor, int arg) const
+  virtual void accept(ExprVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const StringExpr* asStringExpr() const { return this; }
+  virtual StringExpr* asStringExpr() { return this; }
 
   gc<String> value() const { return value_; }
 
@@ -733,12 +733,12 @@ public:
     value_(value)
   {}
 
-  virtual void accept(ExprVisitor& visitor, int arg) const
+  virtual void accept(ExprVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const ThrowExpr* asThrowExpr() const { return this; }
+  virtual ThrowExpr* asThrowExpr() { return this; }
 
   gc<Expr> value() const { return value_; }
 
@@ -763,12 +763,12 @@ public:
     value_(value)
   {}
 
-  virtual void accept(ExprVisitor& visitor, int arg) const
+  virtual void accept(ExprVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const VariableExpr* asVariableExpr() const { return this; }
+  virtual VariableExpr* asVariableExpr() { return this; }
 
   bool isMutable() const { return isMutable_; }
   gc<Pattern> pattern() const { return pattern_; }
@@ -793,11 +793,11 @@ class PatternVisitor
 public:
   virtual ~PatternVisitor() {}
 
-  virtual void visit(const RecordPattern& node, int dest) = 0;
-  virtual void visit(const TypePattern& node, int dest) = 0;
-  virtual void visit(const ValuePattern& node, int dest) = 0;
-  virtual void visit(const VariablePattern& node, int dest) = 0;
-  virtual void visit(const WildcardPattern& node, int dest) = 0;
+  virtual void visit(RecordPattern& node, int dest) = 0;
+  virtual void visit(TypePattern& node, int dest) = 0;
+  virtual void visit(ValuePattern& node, int dest) = 0;
+  virtual void visit(VariablePattern& node, int dest) = 0;
+  virtual void visit(WildcardPattern& node, int dest) = 0;
 
 protected:
   PatternVisitor() {}
@@ -816,14 +816,14 @@ public:
   virtual ~Pattern() {}
 
   // The visitor pattern.
-  virtual void accept(PatternVisitor& visitor, int arg) const = 0;
+  virtual void accept(PatternVisitor& visitor, int arg) = 0;
 
   // Dynamic casts.
-  virtual const RecordPattern* asRecordPattern() const { return NULL; }
-  virtual const TypePattern* asTypePattern() const { return NULL; }
-  virtual const ValuePattern* asValuePattern() const { return NULL; }
-  virtual const VariablePattern* asVariablePattern() const { return NULL; }
-  virtual const WildcardPattern* asWildcardPattern() const { return NULL; }
+  virtual RecordPattern* asRecordPattern() { return NULL; }
+  virtual TypePattern* asTypePattern() { return NULL; }
+  virtual ValuePattern* asValuePattern() { return NULL; }
+  virtual VariablePattern* asVariablePattern() { return NULL; }
+  virtual WildcardPattern* asWildcardPattern() { return NULL; }
 
   const SourcePos& pos() const { return pos_; }
 
@@ -839,14 +839,14 @@ public:
     fields_(fields)
   {}
 
-  virtual void accept(PatternVisitor& visitor, int arg) const
+  virtual void accept(PatternVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const RecordPattern* asRecordPattern() const { return this; }
+  virtual RecordPattern* asRecordPattern() { return this; }
 
-  const Array<PatternField>& fields() const { return fields_; }
+  const Array<PatternField>& fields() { return fields_; }
 
   virtual void reach()
   {
@@ -872,12 +872,12 @@ public:
     type_(type)
   {}
 
-  virtual void accept(PatternVisitor& visitor, int arg) const
+  virtual void accept(PatternVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const TypePattern* asTypePattern() const { return this; }
+  virtual TypePattern* asTypePattern() { return this; }
 
   gc<Expr> type() const { return type_; }
 
@@ -900,12 +900,12 @@ public:
     value_(value)
   {}
 
-  virtual void accept(PatternVisitor& visitor, int arg) const
+  virtual void accept(PatternVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const ValuePattern* asValuePattern() const { return this; }
+  virtual ValuePattern* asValuePattern() { return this; }
 
   gc<Expr> value() const { return value_; }
 
@@ -929,12 +929,12 @@ public:
     pattern_(pattern)
   {}
 
-  virtual void accept(PatternVisitor& visitor, int arg) const
+  virtual void accept(PatternVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const VariablePattern* asVariablePattern() const { return this; }
+  virtual VariablePattern* asVariablePattern() { return this; }
 
   gc<String> name() const { return name_; }
   gc<Pattern> pattern() const { return pattern_; }
@@ -959,12 +959,12 @@ public:
   : Pattern(pos)
   {}
 
-  virtual void accept(PatternVisitor& visitor, int arg) const
+  virtual void accept(PatternVisitor& visitor, int arg)
   {
     visitor.visit(*this, arg);
   }
 
-  virtual const WildcardPattern* asWildcardPattern() const { return this; }
+  virtual WildcardPattern* asWildcardPattern() { return this; }
 
 
   virtual void trace(std::ostream& out) const;

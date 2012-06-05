@@ -23,6 +23,7 @@ namespace magpie
     gc<Method> body() const { return body_; }
     
     Array<Module*>& imports() { return imports_; }
+    const Array<Module*>& imports() const { return imports_; }
     
     void addExport(gc<String> name, gc<Object> value);
     int numExports() const { return exports_.count(); }

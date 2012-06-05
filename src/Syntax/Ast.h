@@ -72,6 +72,34 @@ namespace magpie
   
   class ResolvedName
   {
+  public:
+    // Creates a new unresolved name.
+    ResolvedName()
+    : isLocal_(false),
+      import_(-1),
+      index_(-1)
+    {}
+    
+    // Resolves the name to a local variable with the given slot index.
+    ResolvedName(int index)
+    : isLocal_(true),
+      import_(-1),
+      index_(index)
+    {}
+    
+    // Resolves the name to a variable that is the given export from the given
+    // import.
+    ResolvedName(int importIndex, int exportIndex)
+    : isLocal_(false),
+      import_(importIndex),
+      index_(exportIndex)
+    {}
+    
+    bool isResolved() const { return index_ != -1; }
+    bool isLocal() const { return isLocal_; }
+    int import() const { return import_; }
+    int index() const { return index_; }
+    
   private:
     bool isLocal_;
     int import_;
