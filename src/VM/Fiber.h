@@ -58,23 +58,23 @@ namespace magpie
     
     void call(gc<Method> method, int stackStart);
     
-    // Loads a register for the given callframe.
-    inline gc<Object> load(const CallFrame& frame, int reg)
+    // Loads a slot for the given callframe.
+    inline gc<Object> load(const CallFrame& frame, int slot)
     {
-      return stack_[frame.stackStart + reg];
+      return stack_[frame.stackStart + slot];
     }
     
-    // Stores a register for the given callframe.
-    inline void store(const CallFrame& frame, int reg, gc<Object> value)
+    // Stores a slot for the given callframe.
+    inline void store(const CallFrame& frame, int slot, gc<Object> value)
     {
-      stack_[frame.stackStart + reg] = value;
+      stack_[frame.stackStart + slot] = value;
     }
     
     // Throws the given error object. Returns true if a catch handler was found
     // or false if the error unwound the entire callstack.
     bool throwError(gc<Object> error);
     
-    gc<Object> loadRegisterOrConstant(const CallFrame& frame, int index);
+    gc<Object> loadSlotOrConstant(const CallFrame& frame, int index);
     
     VM&                 vm_;
     Array<gc<Object> >  stack_;

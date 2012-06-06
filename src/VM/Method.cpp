@@ -4,11 +4,11 @@
 
 namespace magpie
 {
-  void Method::setCode(const Array<instruction>& code, int maxRegisters)
+  void Method::setCode(const Array<instruction>& code, int numSlots)
   {
     // TODO(bob): Copying here is lame!
     code_ = code;
-    numRegisters_ = maxRegisters;
+    numSlots_ = numSlots;
   }
 
   int Method::addConstant(gc<Object> constant)

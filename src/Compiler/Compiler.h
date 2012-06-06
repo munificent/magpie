@@ -64,12 +64,12 @@ namespace magpie
 
     // Compiles the given expr. If it's a constant expr, it adds the constant
     // to the method table and returns the constant id (with the mask bit set).
-    // Otherwise, creates a temporary register and compiles the expr to evaluate
-    // into that. It then returns the register. The caller is required to
-    // release that register when done with it.
+    // Otherwise, creates a temporary slot and compiles the expr to evaluate
+    // into that. It then returns the shot. The caller is required to release
+    // release that slot when done with it.
     //
-    // Some instructions like OP_END and OP_ADD can read an operatand from a
-    // register or a constant. This is used to compile the operands for those.
+    // Some instructions like OP_END and OP_ADD can read an operand from a
+    // slot or a constant. This is used to compile the operands for those.
     int compileExpressionOrConstant(gc<Expr> expr);
     
     int compileConstant(const NumberExpr& expr);
@@ -104,7 +104,7 @@ namespace magpie
     NO_COPY(Compiler);
   };
   
-  // Locates a code offset and a register where a pattern-match test operation
+  // Locates a code offset and a slot where a pattern-match test operation
   // occurs. By default, the test instruction will be OP_TEST_MATCH, which
   // throws on failure. But for cases in a match expression, it should jump to
   // the next case if a match fails. This tracks these locations so we can
@@ -146,7 +146,7 @@ namespace magpie
     virtual void visit(WildcardPattern& pattern, int value);
   
   private:
-    void writeTest(int reg);
+    void writeTest(int slot);
     
     Compiler& compiler_;
     bool jumpOnFailure_;

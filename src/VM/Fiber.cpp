@@ -45,24 +45,24 @@ namespace magpie
         case OP_CONSTANT:
         {
           int index = GET_A(ins);
-          int reg = GET_B(ins);
-          store(frame, reg, frame.method->getConstant(index));
+          int slot = GET_B(ins);
+          store(frame, slot, frame.method->getConstant(index));
           break;
         }
           
         case OP_BUILT_IN:
         {
           int value = GET_A(ins);
-          int reg = GET_B(ins);
-          store(frame, reg, vm_.getBuiltIn(value));
+          int slot = GET_B(ins);
+          store(frame, slot, vm_.getBuiltIn(value));
           break;
         }
           
         case OP_RECORD:
         {
-          int firstReg = GET_A(ins);
+          int firstSlot = GET_A(ins);
           gc<RecordType> type = vm_.getRecordType(GET_B(ins));
-          gc<Object> record = RecordObject::create(type, stack_, firstReg);
+          gc<Object> record = RecordObject::create(type, stack_, firstSlot);
           store(frame, GET_C(ins), record);
           break;
         }
@@ -146,8 +146,8 @@ namespace magpie
           
         case OP_ADD:
         {
-          gc<Object> a = loadRegisterOrConstant(frame, GET_A(ins));
-          gc<Object> b = loadRegisterOrConstant(frame, GET_B(ins));
+          gc<Object> a = loadSlotOrConstant(frame, GET_A(ins));
+          gc<Object> b = loadSlotOrConstant(frame, GET_B(ins));
           
           // TODO(bob): Handle non-number types.
           double c = a->toNumber() + b->toNumber();
@@ -158,8 +158,8 @@ namespace magpie
           
         case OP_SUBTRACT:
         {
-          gc<Object> a = loadRegisterOrConstant(frame, GET_A(ins));
-          gc<Object> b = loadRegisterOrConstant(frame, GET_B(ins));
+          gc<Object> a = loadSlotOrConstant(frame, GET_A(ins));
+          gc<Object> b = loadSlotOrConstant(frame, GET_B(ins));
           
           // TODO(bob): Handle non-number types.
           double c = a->toNumber() - b->toNumber();
@@ -170,8 +170,8 @@ namespace magpie
           
         case OP_MULTIPLY:
         {
-          gc<Object> a = loadRegisterOrConstant(frame, GET_A(ins));
-          gc<Object> b = loadRegisterOrConstant(frame, GET_B(ins));
+          gc<Object> a = loadSlotOrConstant(frame, GET_A(ins));
+          gc<Object> b = loadSlotOrConstant(frame, GET_B(ins));
           
           // TODO(bob): Handle non-number types.
           double c = a->toNumber() * b->toNumber();
@@ -182,8 +182,8 @@ namespace magpie
           
         case OP_DIVIDE:
         {
-          gc<Object> a = loadRegisterOrConstant(frame, GET_A(ins));
-          gc<Object> b = loadRegisterOrConstant(frame, GET_B(ins));
+          gc<Object> a = loadSlotOrConstant(frame, GET_A(ins));
+          gc<Object> b = loadSlotOrConstant(frame, GET_B(ins));
           
           // TODO(bob): Handle non-number types.
           double c = a->toNumber() / b->toNumber();
@@ -194,8 +194,8 @@ namespace magpie
           
         case OP_EQUAL:
         {
-          gc<Object> a = loadRegisterOrConstant(frame, GET_A(ins));
-          gc<Object> b = loadRegisterOrConstant(frame, GET_B(ins));
+          gc<Object> a = loadSlotOrConstant(frame, GET_A(ins));
+          gc<Object> b = loadSlotOrConstant(frame, GET_B(ins));
           
           // See if the objects are equal. If they have the same identity, they
           // must be.
@@ -246,8 +246,8 @@ namespace magpie
           
         case OP_LESS_THAN:
         {
-          gc<Object> a = loadRegisterOrConstant(frame, GET_A(ins));
-          gc<Object> b = loadRegisterOrConstant(frame, GET_B(ins));
+          gc<Object> a = loadSlotOrConstant(frame, GET_A(ins));
+          gc<Object> b = loadSlotOrConstant(frame, GET_B(ins));
           
           // TODO(bob): Handle non-number types.
           bool c = a->toNumber() < b->toNumber();
@@ -257,8 +257,8 @@ namespace magpie
           
         case OP_GREATER_THAN:
         {
-          gc<Object> a = loadRegisterOrConstant(frame, GET_A(ins));
-          gc<Object> b = loadRegisterOrConstant(frame, GET_B(ins));
+          gc<Object> a = loadSlotOrConstant(frame, GET_A(ins));
+          gc<Object> b = loadSlotOrConstant(frame, GET_B(ins));
           
           // TODO(bob): Handle non-number types.
           bool c = a->toNumber() > b->toNumber();
@@ -268,7 +268,7 @@ namespace magpie
           
         case OP_NOT:
         {
-          gc<Object> value = loadRegisterOrConstant(frame, GET_A(ins));
+          gc<Object> value = loadSlotOrConstant(frame, GET_A(ins));
           
           // TODO(bob): Handle user-defined types.
           bool result = !value->toBool();
@@ -349,7 +349,7 @@ namespace magpie
           
         case OP_RETURN:
         {
-          gc<Object> result = loadRegisterOrConstant(frame, GET_A(ins));
+          gc<Object> result = loadSlotOrConstant(frame, GET_A(ins));
           callFrames_.removeAt(-1);
           
           // Discard any try blocks enclosed in the current method.
@@ -427,25 +427,25 @@ namespace magpie
   {
     // Walk the stack.
     CallFrame& frame = callFrames_[-1];
-    int numRegisters = frame.stackStart + frame.method->numRegisters();
+    int numSlots = frame.stackStart + frame.method->numSlots();
     
-    // Only reach registers that are still in use. We don't shrink the stack,
-    // so it may have dead registers at the end that are safe to collect.
+    // Only reach slots that are still in use. We don't shrink the stack, so it
+    // may have dead slots at the end that are safe to collect.
     int i;
-    for (i = 0; i < numRegisters; i++)
+    for (i = 0; i < numSlots; i++)
     {
       Memory::reach(stack_[i]);
     }
 
-    // For the remaining registers, clear them out now. When a new call is
-    // pushed onto the stack, we allocate registers for it, but we don't clear
-    // them out. This means that when a collection occurs, there may be a few
-    // registers on the end of the stack that are stale: they are set to
-    // whatever they were on some previous call. Since a collection may have
-    // occurred between now and then, and dead registers aren't reached (see
-    // above), we may have bad pointers. This clears those out so we don't get
-    // into that situation. We do it here instead of in call() because call()
-    // needs to be as fast as possible.
+    // For the remaining slot, clear them out now. When a new call is pushed
+    // onto the stack, we allocate slots for it, but we don't clear them out.
+    // This means that when a collection occurs, there may be a few slots on
+    // the end of the stack that are stale: they are set to whatever they were
+    // on some previous call. Since a collection may have occurred between now
+    // and then, and dead slots aren't reached (see above), we may have bad
+    // pointers. This clears those out so we don't get into that situation. We
+    // do it here instead of in call() because call() needs to be as fast as
+    // possible.
     for (; i < stack_.count(); i++)
     {
       stack_[i] = gc<Object>();
@@ -459,9 +459,9 @@ namespace magpie
   
   void Fiber::call(gc<Method> method, int stackStart)
   {
-    // Allocate registers for the method.
+    // Allocate slots for the method.
     // TODO(bob): Make this a single operation on Array.
-    while (stack_.count() < stackStart + method->numRegisters())
+    while (stack_.count() < stackStart + method->numSlots())
     {
       stack_.add(gc<Object>());
     }
@@ -479,7 +479,7 @@ namespace magpie
     callFrames_.truncate(nearestCatch_->callFrame() + 1);
     
     // Jump to the catch handler.
-    // TODO(bob): Insert thrown value into appropriate register.
+    // TODO(bob): Insert thrown value into appropriate slot.
     callFrames_[-1].ip = nearestCatch_->offset();
     
     // Discard the try block now that we are outside of it.
@@ -488,7 +488,7 @@ namespace magpie
     return true;
   }
   
-  gc<Object> Fiber::loadRegisterOrConstant(const CallFrame& frame, int index)
+  gc<Object> Fiber::loadSlotOrConstant(const CallFrame& frame, int index)
   {
     if (IS_CONSTANT(index))
     {

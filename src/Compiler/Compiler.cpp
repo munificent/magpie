@@ -212,8 +212,8 @@ namespace magpie
     
     if (negate) write(OP_NOT, dest);
     
-    if (IS_REGISTER(a)) releaseTemp();
-    if (IS_REGISTER(b)) releaseTemp();
+    if (IS_SLOT(a)) releaseTemp();
+    if (IS_SLOT(b)) releaseTemp();
   }
 
   void Compiler::visit(BoolExpr& expr, int dest)
@@ -677,13 +677,13 @@ namespace magpie
     // Nothing to do.
   }
   
-  void PatternCompiler::writeTest(int expected)
+  void PatternCompiler::writeTest(int slot)
   {
     if (jumpOnFailure_)
     {
-      tests_.add(MatchTest(compiler_.code_.count(), expected));
+      tests_.add(MatchTest(compiler_.code_.count(), slot));
     }
-    compiler_.write(OP_TEST_MATCH, expected);
+    compiler_.write(OP_TEST_MATCH, slot);
   }
 
   gc<String> SignatureBuilder::build(const CallExpr& expr)

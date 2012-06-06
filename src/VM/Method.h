@@ -20,7 +20,7 @@ namespace magpie
     : module_(module),
       code_(),
       constants_(),
-      numRegisters_(0),
+      numSlots_(0),
       primitive_(NULL)
     {}
     
@@ -28,12 +28,12 @@ namespace magpie
     : module_(NULL),
       code_(),
       constants_(),
-      numRegisters_(0),
+      numSlots_(0),
       primitive_(primitive)
     {}
     
     void setCode(const Array<instruction>& code,
-                 int maxRegisters);
+                 int maxSlots);
     
     Module* module() { return module_; }
     
@@ -43,7 +43,7 @@ namespace magpie
     int addConstant(gc<Object> constant);
     gc<Object> getConstant(int index) const;
     
-    int numRegisters() const { return numRegisters_; }
+    int numSlots() const { return numSlots_; }
 
     void debugTrace() const;
     void debugTrace(instruction ins) const;
@@ -59,7 +59,7 @@ namespace magpie
     Array<instruction> code_;
     Array<gc<Object> > constants_;
     
-    int numRegisters_;
+    int numSlots_;
     
     // The primitive function for this method. Will be NULL for non-primitive
     // methods.

@@ -13,39 +13,34 @@
 #define GET_Ax(i) (static_cast<int>(((i) & 0xffff0000) >> 16))
 
 #define IS_CONSTANT(i) (((i) & 0x80) == 0x80)
-#define IS_REGISTER(i) (((i) & 0x80) == 0x00)
+#define IS_SLOT(i) (((i) & 0x80) == 0x00)
 
 #define GET_CONSTANT(i) ((i) & 0x7f)
 #define MAKE_CONSTANT(i) ((i) | 0x80)
 
 namespace magpie
 {
-  // C(A) -> operand A is an index into the constant table
-  // R(A) -> operand A will be a register
-  // RC(A) -> operator A will be a constant if the high bit is set or a
-  //          register if not
   enum OpCode
   {
-    // Moves the value in register A to register B.
+    // Moves the value in slot A to slot B.
     OP_MOVE = 0x01,
     
-    // Loads the constant with index A into register B.
+    // Loads the constant with index A into slot B.
     OP_CONSTANT = 0x02,
     
     // Loads the built-in value with index A (see VM::getBuiltIn()) into
-    // register B.
+    // slot B.
     OP_BUILT_IN = 0x03,
     
-    // Creates a record from fields on the stack. A is the register of the
-    // first field, with subsequent fields following on the stack. B is the
-    // index of the record type (see VM::getRecordType()). Stores the record in
-    // register C.
+    // Creates a record from fields on the stack. A is the slot of the first
+    // field, with subsequent fields following on the stack. B is the index of
+    // the record type (see VM::getRecordType()). Stores the record in slot C.
     OP_RECORD = 0x04,
         
-    // Destructures a record field. Register A holds the record to destructure.
-    // B is the symbol for the field (see VM::addSymbol()). Stores the field
-    // value in register C. If register A does not have a record, or the record
-    // does not have the expected field, throws a NoMatchError.
+    // Destructures a record field. Slot A holds the record to destructure. B
+    // is the symbol for the field (see VM::addSymbol()). Stores the field
+    // value in slot C. If slot A does not have a record, or the record does
+    // not have the expected field, throws a NoMatchError.
     OP_GET_FIELD = 0x05,
     
     // Similar to OP_GET_FIELD. However, if the match fails, it does not throw.
@@ -56,7 +51,7 @@ namespace magpie
     // Loads a top-level variable exported from a module. A is the index of
     // the imported module in the containing module's import list. B is the
     // index of the exported variable in that module to load. Stores the value
-    // in register C.
+    // in slot C.
     OP_GET_MODULE = 0x07,
     
     OP_ADD           = 0x08, // R(C) = RC(A) + RC(B)
@@ -68,30 +63,30 @@ namespace magpie
     OP_GREATER_THAN  = 0x0e, // R(C) = RC(A) > RC(B)
     OP_NOT           = 0x0f, // R(C) = RC(A) + RC(B)
     
-    // Tests if the value in register A is an instance of the type in register
-    // B. Stores the result in register C.
+    // Tests if the value in slot A is an instance of the type in slot B.
+    // Stores the result in slot C.
     OP_IS = 0x10,
     
     OP_JUMP          = 0x11, // A = offset
-    OP_JUMP_IF_FALSE = 0x12, // R(A) = test register, B = offset
-    OP_JUMP_IF_TRUE  = 0x13, // R(A) = test register, B = offset
+    OP_JUMP_IF_FALSE = 0x12, // R(A) = test slot, B = offset
+    OP_JUMP_IF_TRUE  = 0x13, // R(A) = test slot, B = offset
     
     // Invokes a top-level method. The index of the method in the global table
-    // is A. The arguments to the method are laid out in sequential registers
-    // starting at B. The number of registers needed is determined by the
-    // signature, so is not explicitly pass. The result will be stored in
-    // register C when the method returns.
+    // is A. The arguments to the method are laid out in sequential slots
+    // starting at B. The number of slots needed is determined by the
+    // signature, so is not explicitly passed. The result will be stored in
+    // slot C when the method returns.
     // TODO(bob): Tweak operands so that we can support more than 256 methods.
     OP_CALL = 0x14,
     
-    // Exits the current method, returning register A.
+    // Exits the current method, returning slot A.
     OP_RETURN = 0x15,
     
-    // Throws the error object in register A.
+    // Throws the error object in slot A.
     OP_THROW = 0x16,
     
     // Registers a new catch handler. If an error is thrown before the
-    // subsequent OP_EXIT_TRY, then execution will jump to the associate catch
+    // subsequent OP_EXIT_TRY, then execution will jump to the associated catch
     // block. Its code location is the location of the OP_ENTER_TRY + A.
     OP_ENTER_TRY = 0x17,
     
@@ -99,7 +94,7 @@ namespace magpie
     // has proceeded past the block containing a catch clause.
     OP_EXIT_TRY = 0x18,
     
-    // If register A is false, then throws a NoMatchError.
+    // Throws a NoMatchError if slot A is false.
     OP_TEST_MATCH = 0x19
   };
   

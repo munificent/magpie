@@ -16,8 +16,8 @@ namespace magpie
     
     // First, we allocate slots for the destructured parameters. We do this
     // first so that all parameter slots for the method are contiguous at the
-    // beginning of the method's register window. The caller will assume this
-    // when it sets up the arguments before the call.
+    // beginning of the method's slot window. The caller will assume this when
+    // it sets up the arguments before the call.
     resolver.allocateSlotsForParam(method.leftParam());
     resolver.allocateSlotsForParam(method.rightParam());
     
