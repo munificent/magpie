@@ -26,6 +26,10 @@ namespace magpie
       scope_(NULL)
     {}
     
+    // The AST for a method parameter is a single pattern on each side, but the
+    // compile implicitly destructures it when the pattern is a record so that
+    // we don't allocate a record only to immediately destructure it. These
+    // methods methods handle that one-level-deep destructuring.
     void allocateSlotsForParam(gc<Pattern> pattern);
     void makeParamSlot(gc<Pattern> param);
     void destructureParam(gc<Pattern> pattern);

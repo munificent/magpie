@@ -21,14 +21,13 @@ namespace magpie
     resolver.allocateSlotsForParam(method.leftParam());
     resolver.allocateSlotsForParam(method.rightParam());
     
+    // Create a slot for the result value.
+    resolver.makeLocal(method.pos(), String::create("(result)"));
+    
     // Now that we've got our slots set up, we can actually resolve the nested
     // patterns for the param (if there are any).
     resolver.destructureParam(method.leftParam());
     resolver.destructureParam(method.rightParam());
-
-    // Create a slot for the result value.
-    // TODO(bob): Make sure compiler is doing same thing here.
-    resolver.makeLocal(method.pos(), String::create("(result)"));
     
     resolver.resolve(method.body());
     
