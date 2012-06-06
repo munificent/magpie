@@ -207,7 +207,7 @@ namespace magpie
   
   void VariablePattern::trace(std::ostream& out) const
   {
-    if (pattern_.isNull())
+    if (!pattern_.isNull())
     {
       out << "(" << name_ << " " << pattern_ << ")";
     }

@@ -14,20 +14,21 @@ namespace magpie
     Scope scope(&resolver);
     resolver.scope_ = &scope;
     
-    // TODO(bob): This should go away when we're handling the args correctly.
-    // Create a fake local for the argument and result value.
-    resolver.makeLocal(method.pos(), String::create("(return)"), 0);
+    // First, we allocate slots for the destructured parameters. We do this
+    // first so that all parameter slots for the method are contiguous at the
+    // beginning of the method's register window. The caller will assume this
+    // when it sets up the arguments before the call.
+    resolver.allocateSlotsForParam(method.leftParam());
+    resolver.allocateSlotsForParam(method.rightParam());
     
-    // Create variables for the parameters.
-    if (!method.leftParam().isNull())
-    {
-      scope.resolve(*method.leftParam());
-    }
+    // Now that we've got our slots set up, we can actually resolve the nested
+    // patterns for the param (if there are any).
+    resolver.destructureParam(method.leftParam());
+    resolver.destructureParam(method.rightParam());
 
-    if (!method.rightParam().isNull())
-    {
-      scope.resolve(*method.rightParam());
-    }
+    // Create a slot for the result value.
+    // TODO(bob): Make sure compiler is doing same thing here.
+    resolver.makeLocal(method.pos(), String::create("(result)"));
     
     resolver.resolve(method.body());
     
@@ -36,16 +37,98 @@ namespace magpie
     method.setMaxLocals(resolver.maxLocals_);
   }
   
+  void Resolver::allocateSlotsForParam(gc<Pattern> pattern)
+  {
+    // No parameter so do nothing.
+    if (pattern.isNull()) return;
+    
+    RecordPattern* record = pattern->asRecordPattern();
+    if (record != NULL)
+    {
+      // Allocate each field.
+      for (int i = 0; i < record->fields().count(); i++)
+      {
+        makeParamSlot(record->fields()[i].value);
+      }
+    }
+    else
+    {
+      // If we got here, the pattern isn't a record, so it's a single slot.
+      makeParamSlot(pattern);
+    }
+  }
+  
+  void Resolver::makeParamSlot(gc<Pattern> param)
+  {
+    VariablePattern* variable = param->asVariablePattern();
+    if (variable != NULL)
+    {
+      // It's a variable, so create a named local for it and resolve the
+      // variable.
+      int slot = makeLocal(param->pos(), variable->name());
+      variable->setResolved(ResolvedName(slot));
+      
+      // Note that we do *not* resolve the variable's inner pattern here. We
+      // do that after all param slots are resolved so that we can ensure the
+      // param slots are contiguous.
+    }
+    else
+    {
+      // We don't have a variable for this parameter, but the argument
+      // will still be on the stack, so make an unnamed slot for it.
+      makeLocal(param->pos(), String::format("(%d)", unnamedSlotId_++));
+    }
+  }
+  
+  void Resolver::destructureParam(gc<Pattern> pattern)
+  {
+    // No parameter so do nothing.
+    if (pattern.isNull()) return;
+    
+    RecordPattern* record = pattern->asRecordPattern();
+    if (record != NULL)
+    {
+      // Resolve each field.
+      for (int i = 0; i < record->fields().count(); i++)
+      {
+        resolveParam(record->fields()[i].value);
+      }
+    }
+    else
+    {
+      // If we got here, the pattern isn't a record, so its a single slot.
+      resolveParam(pattern);
+    }
+  }
+  
+  void Resolver::resolveParam(gc<Pattern> param)
+  {
+    VariablePattern* variable = param->asVariablePattern();
+    if (variable != NULL)
+    {
+      // It's a variable, so resolve its inner pattern.
+      if (!variable->pattern().isNull())
+      {
+        scope_->resolve(*variable->pattern());
+      }
+    }
+    else
+    {
+      // Not a variable, so just resolve it normally.
+      scope_->resolve(*param);
+    }
+  }
+  
   void Resolver::resolve(gc<Expr> expr)
   {
     expr->accept(*this, -1);
   }
   
-  int Resolver::makeLocal(const SourcePos& pos, gc<String> name, int startSlot)
+  int Resolver::makeLocal(const SourcePos& pos, gc<String> name)
   {
-    // Make sure there isn't already a local variable with this name in this
-    // scope.
-    for (int i = startSlot; i < locals_.count(); i++)
+    // Make sure there isn't already a local variable with this name in the
+    // current scope.
+    for (int i = scope_->startSlot(); i < locals_.count(); i++)
     {
       if (locals_[i] == name)
       {
@@ -59,7 +142,7 @@ namespace magpie
     if (locals_.count() > maxLocals_) {
       maxLocals_ = locals_.count();
     }
-    
+            
     return locals_.count() - 1;
   }
   
@@ -296,7 +379,7 @@ namespace magpie
   void Scope::end()
   {
     ASSERT(start_ != -1, "Already ended this scope.");
-
+    
     resolver_.locals_.truncate(start_);
     resolver_.scope_ = parent_;
     start_ = -1;
@@ -326,7 +409,7 @@ namespace magpie
   void Scope::visit(VariablePattern& pattern, int dummy)
   {
     // Create a slot for the variable.
-    int slot = resolver_.makeLocal(pattern.pos(), pattern.name(), start_);
+    int slot = resolver_.makeLocal(pattern.pos(), pattern.name());
     pattern.setResolved(ResolvedName(slot));
     
     if (!pattern.pattern().isNull())

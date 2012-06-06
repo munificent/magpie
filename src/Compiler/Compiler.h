@@ -34,9 +34,13 @@ namespace magpie
     
     gc<Method> compile(MethodDef& method);
 
-    void compile(gc<Expr> expr, int dest);
-    void compile(gc<Pattern> pattern, int dest);
+    void compileParam(gc<Pattern> param, int& slot);
+    void compileParamField(gc<Pattern> param, int slot);
+    int compileArg(gc<Expr> arg);
     
+    void compile(gc<Expr> expr, int dest);
+    void compile(gc<Pattern> pattern, int slot);
+
     virtual void visit(AndExpr& expr, int dest);
     virtual void visit(BinaryOpExpr& expr, int dest);
     virtual void visit(BoolExpr& expr, int dest);
@@ -79,8 +83,10 @@ namespace magpie
     // to the current instruction position.
     void endJump(int from, OpCode op, int a = -1, int b = -1);
     
+    int getNextTemp() const;
     int makeTemp();
     void releaseTemp();
+    void releaseTemps(int count);
     
     VM& vm_;
     ErrorReporter& reporter_;

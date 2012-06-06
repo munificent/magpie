@@ -19,8 +19,7 @@ namespace magpie
     ASSERT(stack_.count() == 0, "Cannot re-initialize Fiber.");
     ASSERT(callFrames_.count() == 0, "Cannot re-initialize Fiber.");
 
-    // TODO(bob): What should the arg object be here?
-    call(method, 0, vm_.nothing());
+    call(method, 0);
   }
 
   FiberResult Fiber::run()
@@ -333,15 +332,17 @@ namespace magpie
         case OP_CALL:
         {
           gc<Method> method = vm_.methods().get(GET_A(ins));
-          gc<Object> arg = load(frame, GET_B(ins));
+          int firstArg = GET_B(ins);
           
           Primitive primitive = method->primitive();
           if (primitive != NULL) {
+            // TODO(bob): Hack. Support multi-arg primitives.
+            gc<Object> arg = load(frame, firstArg);
             gc<Object> result = primitive(arg);
-            store(frame, GET_B(ins), result);
+            store(frame, GET_C(ins), result);
           } else {
-            int stackStart = frame.stackStart + frame.method->numRegisters();
-            call(method, stackStart, arg);
+            int stackStart = frame.stackStart + firstArg;
+            call(method, stackStart);
           }
           break;
         }
@@ -366,7 +367,7 @@ namespace magpie
             ASSERT(GET_OP(callInstruction) == OP_CALL,
                    "Should be returning to a call.");
             
-            store(caller, GET_B(callInstruction), result);
+            store(caller, GET_C(callInstruction), result);
           }
           else
           {
@@ -456,7 +457,7 @@ namespace magpie
     }
   }
   
-  void Fiber::call(gc<Method> method, int stackStart, gc<Object> arg)
+  void Fiber::call(gc<Method> method, int stackStart)
   {
     // Allocate registers for the method.
     // TODO(bob): Make this a single operation on Array.
@@ -464,9 +465,6 @@ namespace magpie
     {
       stack_.add(gc<Object>());
     }
-    
-    // Bind the argument in the called method.
-    stack_[stackStart] = arg;
     
     callFrames_.add(CallFrame(method, stackStart));
   }

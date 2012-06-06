@@ -42,10 +42,8 @@ namespace magpie
     
     // Wrap the body in a shell method and compile it.
     gc<Expr> body = moduleAst->body();
-    gc<Pattern> nothing = new ValuePattern(body->pos(),
-        new NothingExpr(body->pos()));
-    MethodDef* method = new MethodDef(body->pos(),
-        nothing, String::create("<module>"), nothing, body);
+    MethodDef* method = new MethodDef(body->pos(), gc<Pattern>(),
+        String::create("<module>"), gc<Pattern>(), body);
     
     module->bindBody(compileMethod(vm, module, *method, reporter));
     
@@ -84,32 +82,94 @@ namespace magpie
     numLocals_ = method.maxLocals();
     maxSlots_ = numLocals_;
     
-    // Create a fake local for the argument and result value.
-    int result = 0;
+    // Track the slots used for the arguments and result. This code here must
+    // be kept carefully in sync with the similar prelude code in Resolver.
+    int numParamSlots = 0;
 
     // Evaluate the method's parameter patterns.
-    compile(method.leftParam(), result);
-    compile(method.rightParam(), result);
+    compileParam(method.leftParam(), numParamSlots);
+    compileParam(method.rightParam(), numParamSlots);
 
-    compile(method.body(), result);
-    write(OP_RETURN, result);
+    // The result slot is just after the param slots.
+    compile(method.body(), numParamSlots);
+    write(OP_RETURN, numParamSlots);
 
     method_->setCode(code_, maxSlots_);
     
     return method_;
   }
   
+  void Compiler::compileParam(gc<Pattern> param, int& slot)
+  {
+    // No parameter so do nothing.
+    if (param.isNull()) return;
+    
+    RecordPattern* record = param->asRecordPattern();
+    if (record != NULL)
+    {
+      // Compile each field.
+      for (int i = 0; i < record->fields().count(); i++)
+      {
+        compileParamField(record->fields()[i].value, slot++);
+      }
+    }
+    else
+    {
+      // If we got here, the pattern isn't a record, so it's a single slot.
+      compileParamField(param, slot++);
+    }
+  }
+
+  void Compiler::compileParamField(gc<Pattern> param, int slot)
+  {
+    VariablePattern* variable = param->asVariablePattern();
+    if (variable != NULL)
+    {
+      // It's a variable, so compile its inner pattern. We don't worry about
+      // the variable itself because the calling convention ensures its value
+      // is already in the right slot.
+      compile(variable->pattern(), slot);
+    }
+    else
+    {
+      // Not a variable, so just compile it normally.
+      compile(param, slot);
+    }
+  }
+  
+  int Compiler::compileArg(gc<Expr> arg)
+  {
+    // No arg so do nothing.
+    if (arg.isNull()) return 0;
+    
+    RecordExpr* record = arg->asRecordExpr();
+    if (record != NULL)
+    {
+      // Compile each field.
+      for (int i = 0; i < record->fields().count(); i++)
+      {
+        compile(record->fields()[i].value, makeTemp());
+      }
+      
+      return record->fields().count();
+    }
+
+    // If we got here, the arg isn't a record, so its a single value.
+    compile(arg, makeTemp());
+    return 1;
+  }
+    
   void Compiler::compile(gc<Expr> expr, int dest)
   {
     expr->accept(*this, dest);
   }
   
-  void Compiler::compile(gc<Pattern> pattern, int dest)
+  void Compiler::compile(gc<Pattern> pattern, int slot)
   {
     if (pattern.isNull()) return;
     
     PatternCompiler compiler(*this);
-    pattern->accept(compiler, dest);
+    pattern->accept(compiler, slot);
   }
   
   void Compiler::visit(AndExpr& expr, int dest)
@@ -176,31 +236,15 @@ namespace magpie
       // Just pick a method so we can keep compiling to report later errors.
       method = 0;
     }
-    
-    ASSERT(expr.leftArg().isNull() || expr.rightArg().isNull(),
-           "Calls with left and right args aren't implemented yet.");
 
-    // Compile the argument(s).
-    // TODO(bob): This is going to need work. Basically, it needs to destructure
-    // the left and right arguments to figure out how many actual arguments
-    // there are, allocate the right amount of temporaries, compile the args
-    // to those, and then call. (For cases where there is just a total of one
-    // argument, we can just use the one existing dest register, though.
-    // Likewise, the method prelude code needs to handle multiple arguments.
-    // For now, since we don't have records, we only support postfix or prefix
-    // calls, but not infix. That ensures we only ever need one register.
-
-    if (!expr.leftArg().isNull())
-    {
-      compile(expr.leftArg(), dest);
-    }
+    int firstArg = getNextTemp();
+    int numTemps = 0;
+    numTemps += compileArg(expr.leftArg());
+    numTemps += compileArg(expr.rightArg());
     
-    if (!expr.rightArg().isNull())
-    {
-      compile(expr.rightArg(), dest);
-    }
+    write(OP_CALL, method, firstArg, dest);
     
-    write(OP_CALL, method, dest);
+    releaseTemps(numTemps);
   }
   
   void Compiler::visit(CatchExpr& expr, int dest)
@@ -384,10 +428,7 @@ namespace magpie
     // Create the record.
     write(OP_RECORD, firstField, type, dest);
 
-    for (int i = 0; i < expr.fields().count(); i++)
-    {
-      releaseTemp();
-    }
+    releaseTemps(expr.fields().count());
   }
   
   void Compiler::visit(ReturnExpr& expr, int dest)
@@ -514,6 +555,11 @@ namespace magpie
     code_[from] = MAKE_ABC(a, b, c, op);
   }
 
+  int Compiler::getNextTemp() const
+  {
+    return numLocals_ + numTemps_;
+  }
+  
   int Compiler::makeTemp()
   {
     numTemps_++;
@@ -527,8 +573,13 @@ namespace magpie
 
   void Compiler::releaseTemp()
   {
-    ASSERT(numTemps_ > 0, "No temp to release.");
-    numTemps_--;
+    releaseTemps(1);
+  }
+  
+  void Compiler::releaseTemps(int count)
+  {
+    ASSERT(numTemps_ >= count, "Cannot release more temps than were created.");
+    numTemps_ -= count;
   }
   
   void PatternCompiler::endJumps()

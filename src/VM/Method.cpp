@@ -119,7 +119,7 @@ namespace magpie
         break;
         
       case OP_CALL:
-        cout << "CALL          " << GET_A(ins) << " -> " << GET_B(ins);
+        cout << "CALL          " << GET_A(ins) << "(" << GET_B(ins) << ") -> " << GET_C(ins);
         break;
         
       case OP_RETURN:

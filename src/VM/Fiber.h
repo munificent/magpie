@@ -56,7 +56,7 @@ namespace magpie
       int         stackStart;
     };
     
-    void call(gc<Method> method, int stackStart, gc<Object> arg);
+    void call(gc<Method> method, int stackStart);
     
     // Loads a register for the given callframe.
     inline gc<Object> load(const CallFrame& frame, int reg)

@@ -21,13 +21,19 @@ namespace magpie
     : reporter_(reporter),
       module_(module),
       locals_(),
-      maxLocals_(0)
+      maxLocals_(0),
+      unnamedSlotId_(0),
+      scope_(NULL)
     {}
     
+    void allocateSlotsForParam(gc<Pattern> pattern);
+    void makeParamSlot(gc<Pattern> param);
+    void destructureParam(gc<Pattern> pattern);
+    void resolveParam(gc<Pattern> pattern);
     void resolve(gc<Expr> expr);
     
     // Creates a new local variable with the given name.
-    int makeLocal(const SourcePos& pos, gc<String> name, int startSlot);
+    int makeLocal(const SourcePos& pos, gc<String> name);
         
     virtual void visit(AndExpr& expr, int dummy);
     virtual void visit(BinaryOpExpr& expr, int dummy);
@@ -62,6 +68,10 @@ namespace magpie
     // The maximum number of locals that are in scope at the same time.
     int maxLocals_;
 
+    // We sometimes need to create placeholder locals to make sure the indices
+    // in locals_ line up with slots. This is used to name them.
+    int unnamedSlotId_;
+    
     // The current inner-most local variable scope.
     Scope* scope_;
     
@@ -78,6 +88,8 @@ namespace magpie
     ~Scope();
     
     void resolve(Pattern& pattern);
+    
+    int startSlot() const { return start_; }
     
     // Closes this scope. This must be called before the Scope object goes out
     // of (C++) scope.

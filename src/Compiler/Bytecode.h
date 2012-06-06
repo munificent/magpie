@@ -77,8 +77,10 @@ namespace magpie
     OP_JUMP_IF_TRUE  = 0x13, // R(A) = test register, B = offset
     
     // Invokes a top-level method. The index of the method in the global table
-    // is A. It passes in the argument in register B and stores the result in
-    // register C.
+    // is A. The arguments to the method are laid out in sequential registers
+    // starting at B. The number of registers needed is determined by the
+    // signature, so is not explicitly pass. The result will be stored in
+    // register C when the method returns.
     // TODO(bob): Tweak operands so that we can support more than 256 methods.
     OP_CALL = 0x14,
     
