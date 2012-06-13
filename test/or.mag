@@ -15,6 +15,10 @@ print(false) or // expect: false
     print(true) or // expect: true
     print(true) // should not print
 
+// Swallow a trailing newline.
+print(true or
+    true) // expect: true
+
 // Call 'true?' on the arguments to determine truthiness.
 // TODO(bob): Support this.
 /*
@@ -26,7 +30,3 @@ print(false) or // expect: false
         right called shouldEqual(false)
     end
 */
-
-// Swallow a trailing newline.
-print(true or
-    true) // expect: true

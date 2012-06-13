@@ -256,17 +256,18 @@ namespace magpie
     compile(expr.body(), dest);
     
     // Complete the catch handler.
-    write(OP_EXIT_TRY);
+    write(OP_EXIT_TRY); // slot for caught value here?
     
     // Jump past it if an exception is not thrown.
     int jumpPastCatch = startJump();
+    
     endJump(enter, OP_ENTER_TRY);
     
-    // Compile the catch handlers.
-    // TODO(bob): Handle multiple catches, compile their patterns, pattern
-    // match, etc. For now, just compile the body.
-    ASSERT(expr.catches().count() == 1, "Multiple catch clauses not impl.");
-    compile(expr.catches()[0].body(), dest);
+    // TODO(bob): Can we use "dest" here or does it need to be a temp?
+    // Write a pseudo-opcode so we know what slot to put the error in.
+    write(OP_MOVE, dest);
+    
+    compileMatch(expr.catches(), dest);
     
     endJump(jumpPastCatch, OP_JUMP);
   }
@@ -320,39 +321,8 @@ namespace magpie
   
   void Compiler::visit(MatchExpr& expr, int dest)
   {
-    // Compile the value.
     compile(expr.value(), dest);
-    
-    Array<int> endJumps;
-    
-    // Compile each case.
-    for (int i = 0; i < expr.cases().count(); i++)
-    {
-      const MatchClause& clause = expr.cases()[i];
-      bool lastPattern = i == expr.cases().count() - 1;
-      
-      // Compile the pattern.
-      PatternCompiler compiler(*this, !lastPattern);
-      clause.pattern()->accept(compiler, dest);
-      
-      // Compile the body if the match succeeds.
-      compile(clause.body(), dest);
-      
-      // Then jump past the other cases.
-      if (!lastPattern)
-      {
-        endJumps.add(startJump());
-        
-        // If this pattern fails, make it jump to the next case.
-        compiler.endJumps();
-      }
-    }
-    
-    // Patch all the jumps now that we know where the end is.
-    for (int i = 0; i < endJumps.count(); i++)
-    {
-      endJump(endJumps[i], OP_JUMP);
-    }
+    compileMatch(expr.cases(), dest);
   }
   
   void Compiler::visit(NameExpr& expr, int dest)
@@ -482,6 +452,40 @@ namespace magpie
 
     // Now pattern match on it.
     compile(expr.pattern(), dest);
+  }
+  
+  void Compiler::compileMatch(const Array<MatchClause>& clauses, int dest)
+  {
+    Array<int> endJumps;
+    
+    // Compile each case.
+    for (int i = 0; i < clauses.count(); i++)
+    {
+      const MatchClause& clause = clauses[i];
+      bool lastPattern = i == clauses.count() - 1;
+      
+      // Compile the pattern.
+      PatternCompiler compiler(*this, !lastPattern);
+      clause.pattern()->accept(compiler, dest);
+      
+      // Compile the body if the match succeeds.
+      compile(clause.body(), dest);
+      
+      // Then jump past the other cases.
+      if (!lastPattern)
+      {
+        endJumps.add(startJump());
+        
+        // If this pattern fails, make it jump to the next case.
+        compiler.endJumps();
+      }
+    }
+    
+    // Patch all the jumps now that we know where the end is.
+    for (int i = 0; i < endJumps.count(); i++)
+    {
+      endJump(endJumps[i], OP_JUMP);
+    }
   }
   
   int Compiler::compileExpressionOrConstant(gc<Expr> expr)

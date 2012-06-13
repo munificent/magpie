@@ -381,10 +381,9 @@ namespace magpie
         case OP_THROW:
         {
           // TODO(bob): Throw an actual value.
-          if (!throwError(vm_.getBool(false)))
-          {
-            return FIBER_UNCAUGHT_ERROR;
-          }
+          gc<Object> error = load(frame, GET_A(ins));
+          //std::cout << "throwing " << error << std::endl;
+          if (!throwError(error)) return FIBER_UNCAUGHT_ERROR;
           break;
         }
           
@@ -479,8 +478,16 @@ namespace magpie
     callFrames_.truncate(nearestCatch_->callFrame() + 1);
     
     // Jump to the catch handler.
-    // TODO(bob): Insert thrown value into appropriate slot.
-    callFrames_[-1].ip = nearestCatch_->offset();
+    CallFrame& frame = callFrames_[-1];
+    frame.ip = nearestCatch_->offset();
+    
+    // The next instruction is a pseudo-op identifying where the error is.
+    instruction errorIns = frame.method->code()[frame.ip];
+    ASSERT(GET_OP(errorIns) == OP_MOVE,
+        "Expect pseudo-instruction at beginning of catch code.");
+    int errorSlot = GET_A(errorIns);
+    store(frame, errorSlot, error);
+    frame.ip++;
     
     // Discard the try block now that we are outside of it.
     nearestCatch_ = nearestCatch_->parent();

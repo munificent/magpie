@@ -62,6 +62,8 @@ namespace magpie
     virtual void visit(ThrowExpr& expr, int dest);
     virtual void visit(VariableExpr& expr, int dest);
 
+    void compileMatch(const Array<MatchClause>& clauses, int dest);
+    
     // Compiles the given expr. If it's a constant expr, it adds the constant
     // to the method table and returns the constant id (with the mask bit set).
     // Otherwise, creates a temporary slot and compiles the expr to evaluate

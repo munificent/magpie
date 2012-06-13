@@ -1,0 +1,11 @@
+// A method body can have a catch clause.
+def method(shouldThrow)
+    print("method")
+    if shouldThrow then throw "err"
+catch err then
+    print("caught")
+end
+
+method(false) // expect: method
+method(true)  // expect: method
+              // expect: caught
