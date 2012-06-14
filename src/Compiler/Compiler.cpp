@@ -319,6 +319,11 @@ namespace magpie
     releaseTemp(); // type
   }
   
+  void Compiler::visit(LoopExpr& expr, int dest)
+  {
+    ASSERT(false, "Not impl.");
+  }
+
   void Compiler::visit(MatchExpr& expr, int dest)
   {
     compile(expr.value(), dest);

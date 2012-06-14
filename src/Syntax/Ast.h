@@ -47,6 +47,38 @@ namespace magpie
     gc<Pattern> value;
   };
   
+  // A clause that gets executed every iteration in a loop: either a "while",
+  // or a "for".
+  class LoopClause
+  {
+  public:
+    LoopClause()
+    : pattern_(),
+      expression_()
+    {}
+    
+    LoopClause(gc<Expr> condition)
+    : isFor_(false),
+      pattern_(),
+      expression_(condition)
+    {}
+    
+    LoopClause(gc<Pattern> pattern, gc<Expr> expression)
+    : isFor_(true),
+      pattern_(pattern),
+      expression_(expression)
+    {}
+    
+    bool isFor() const { return isFor_; }
+    gc<Pattern> pattern() const { return pattern_; }
+    gc<Expr> expression() const { return expression_; }    
+  
+  private:
+    bool isFor_;
+    gc<Pattern> pattern_;
+    gc<Expr> expression_;
+  };
+  
   // A pattern paired with the expression to execute when the pattern matches.
   // Used for match expressions and catch clauses.
   class MatchClause

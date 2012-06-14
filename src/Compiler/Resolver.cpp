@@ -234,6 +234,11 @@ namespace magpie
     resolve(expr.type());
   }
   
+  void Resolver::visit(LoopExpr& expr, int dest)
+  {
+    ASSERT(false, "Not impl.");
+  }
+  
   void Resolver::visit(MatchExpr& expr, int dummy)
   {
     // Resolve the value.

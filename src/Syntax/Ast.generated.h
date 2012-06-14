@@ -10,6 +10,7 @@ class CatchExpr;
 class DoExpr;
 class IfExpr;
 class IsExpr;
+class LoopExpr;
 class MatchExpr;
 class NameExpr;
 class NotExpr;
@@ -120,6 +121,7 @@ public:
   virtual void visit(DoExpr& node, int dest) = 0;
   virtual void visit(IfExpr& node, int dest) = 0;
   virtual void visit(IsExpr& node, int dest) = 0;
+  virtual void visit(LoopExpr& node, int dest) = 0;
   virtual void visit(MatchExpr& node, int dest) = 0;
   virtual void visit(NameExpr& node, int dest) = 0;
   virtual void visit(NotExpr& node, int dest) = 0;
@@ -161,6 +163,7 @@ public:
   virtual DoExpr* asDoExpr() { return NULL; }
   virtual IfExpr* asIfExpr() { return NULL; }
   virtual IsExpr* asIsExpr() { return NULL; }
+  virtual LoopExpr* asLoopExpr() { return NULL; }
   virtual MatchExpr* asMatchExpr() { return NULL; }
   virtual NameExpr* asNameExpr() { return NULL; }
   virtual NotExpr* asNotExpr() { return NULL; }
@@ -431,6 +434,37 @@ public:
 private:
   gc<Expr> value_;
   gc<Expr> type_;
+};
+
+class LoopExpr : public Expr
+{
+public:
+  LoopExpr(const SourcePos& pos, const Array<LoopClause>& clauses, gc<Expr> body)
+  : Expr(pos),
+    clauses_(clauses),
+    body_(body)
+  {}
+
+  virtual void accept(ExprVisitor& visitor, int arg)
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual LoopExpr* asLoopExpr() { return this; }
+
+  const Array<LoopClause>& clauses() { return clauses_; }
+  gc<Expr> body() const { return body_; }
+
+  virtual void reach()
+  {
+    Memory::reach(body_);
+  }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  Array<LoopClause> clauses_;
+  gc<Expr> body_;
 };
 
 class MatchExpr : public Expr

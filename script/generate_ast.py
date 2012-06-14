@@ -44,6 +44,9 @@ exprs = sorted({
     'Is': [
         ('value',       'gc<Expr>'),
         ('type',        'gc<Expr>')],
+    'Loop': [
+        ('clauses',     'Array<LoopClause>'),
+        ('body',        'gc<Expr>')],
     'Match': [
         ('value',       'gc<Expr>'),
         ('cases',       'Array<MatchClause>')],
