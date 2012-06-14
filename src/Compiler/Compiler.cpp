@@ -184,6 +184,15 @@ namespace magpie
     endJump(jumpToEnd, OP_JUMP_IF_FALSE, dest);
   }
   
+  void Compiler::visit(AssignExpr& expr, int dest)
+  {
+    // Compile the value and also make it the result of the expression.
+    compile(expr.value(), dest);
+    
+    // Now pattern match on the value.
+    compile(expr.pattern(), dest);
+  }
+  
   void Compiler::visit(BinaryOpExpr& expr, int dest)
   {
     int a = compileExpressionOrConstant(expr.left());
@@ -452,8 +461,6 @@ namespace magpie
   {
     // Compile the value.
     compile(expr.value(), dest);
-
-    // TODO(bob): Handle mutable variables.
 
     // Now pattern match on it.
     compile(expr.pattern(), dest);

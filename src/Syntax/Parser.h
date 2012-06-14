@@ -62,6 +62,7 @@ namespace magpie
 
     // Infix expression parsers.
     gc<Expr> and_(gc<Expr> left, gc<Token> token);
+    gc<Expr> assignment(gc<Expr> left, gc<Token> token);
     gc<Expr> binaryOp(gc<Expr> left, gc<Token> token);
     gc<Expr> call(gc<Expr> left, gc<Token> token);
     gc<Expr> infixRecord(gc<Expr> left, gc<Token> token);
@@ -73,6 +74,20 @@ namespace magpie
     gc<Pattern> recordPattern();
     gc<Pattern> variablePattern();
     gc<Pattern> primaryPattern();
+
+    // The left-hand side of an assignment expression is a pattern, but it will
+    // initially be parsed as an expression. Correctly determining whether a
+    // series of tokens is the LHS of an assignment before parsing them 
+    // requires arbitrary lookahead.
+    //
+    // Instead, the parser assumes it's parsing an expression until it hits an
+    // '='. Then it takes the LHS expression and converts it to a pattern. This
+    // means that only the subset of patterns that are syntactically valid as
+    // expressions can be used as the target of an assignment. Fortunately,
+    // most patterns fall under that. (The exceptions are type and value
+    // patterns that are not nested inside a variable pattern, like "== 4" or
+    // "is Num".)
+    gc<Pattern> convertToPattern(gc<Expr> expr);
     
     gc<Expr> createSequence(const Array<gc<Expr> >& exprs);
 
@@ -123,5 +138,41 @@ namespace magpie
     gc<Token> last_;
     
     NO_COPY(Parser);
+  };
+
+  class ExprToPatternConverter : public ExprVisitor
+  {
+  public:
+    // Converts the given expression to a pattern, if possible. Returns null
+    // if not.
+    gc<Pattern> convert(gc<Expr> expr);
+    
+  private:
+    ExprToPatternConverter() {}
+    
+    virtual void visit(AndExpr& expr, int dummy);
+    virtual void visit(AssignExpr& expr, int dest);
+    virtual void visit(BinaryOpExpr& expr, int dummy);
+    virtual void visit(BoolExpr& expr, int dummy);
+    virtual void visit(CallExpr& expr, int dummy);
+    virtual void visit(CatchExpr& expr, int dummy);
+    virtual void visit(DoExpr& expr, int dummy);
+    virtual void visit(IfExpr& expr, int dummy);
+    virtual void visit(IsExpr& expr, int dummy);
+    virtual void visit(LoopExpr& expr, int dummy);
+    virtual void visit(MatchExpr& expr, int dummy);
+    virtual void visit(NameExpr& expr, int dummy);
+    virtual void visit(NotExpr& expr, int dummy);
+    virtual void visit(NothingExpr& expr, int dummy);
+    virtual void visit(NumberExpr& expr, int dummy);
+    virtual void visit(OrExpr& expr, int dummy);
+    virtual void visit(RecordExpr& expr, int dummy);
+    virtual void visit(ReturnExpr& expr, int dummy);
+    virtual void visit(SequenceExpr& expr, int dummy);
+    virtual void visit(StringExpr& expr, int dummy);
+    virtual void visit(ThrowExpr& expr, int dummy);
+    virtual void visit(VariableExpr& expr, int dummy);
+    
+    NO_COPY(ExprToPatternConverter);
   };
 }

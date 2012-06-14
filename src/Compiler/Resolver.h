@@ -40,6 +40,7 @@ namespace magpie
     int makeLocal(const SourcePos& pos, gc<String> name);
         
     virtual void visit(AndExpr& expr, int dummy);
+    virtual void visit(AssignExpr& expr, int dest);
     virtual void visit(BinaryOpExpr& expr, int dummy);
     virtual void visit(BoolExpr& expr, int dummy);
     virtual void visit(CallExpr& expr, int dummy);
@@ -93,6 +94,7 @@ namespace magpie
     ~Scope();
     
     void resolve(Pattern& pattern);
+    void resolveAssignment(Pattern& pattern);
     
     int startSlot() const { return start_; }
     
@@ -100,11 +102,11 @@ namespace magpie
     // of (C++) scope.
     void end();
     
-    virtual void visit(RecordPattern& pattern, int dummy);
-    virtual void visit(TypePattern& pattern, int dummy);
-    virtual void visit(ValuePattern& pattern, int dummy);
-    virtual void visit(VariablePattern& pattern, int dummy);
-    virtual void visit(WildcardPattern& pattern, int dummy);
+    virtual void visit(RecordPattern& pattern, int isAssignment);
+    virtual void visit(TypePattern& pattern, int isAssignment);
+    virtual void visit(ValuePattern& pattern, int isAssignment);
+    virtual void visit(VariablePattern& pattern, int isAssignment);
+    virtual void visit(WildcardPattern& pattern, int isAssignment);
     
   private:
     Resolver& resolver_;

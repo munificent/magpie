@@ -25,6 +25,11 @@ namespace magpie
     out << "(and " << left_ << " " << right_ << ")";
   }
   
+  void AssignExpr::trace(std::ostream& out) const
+  {
+    out << "(" << pattern_ << " = " << value_ << ")";
+  }
+  
   void BinaryOpExpr::trace(std::ostream& out) const
   {
     out << "(" << left_ << " " << Token::typeString(type_)

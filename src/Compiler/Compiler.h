@@ -42,6 +42,7 @@ namespace magpie
     void compile(gc<Pattern> pattern, int slot);
 
     virtual void visit(AndExpr& expr, int dest);
+    virtual void visit(AssignExpr& expr, int dest);
     virtual void visit(BinaryOpExpr& expr, int dest);
     virtual void visit(BoolExpr& expr, int dest);
     virtual void visit(CallExpr& expr, int dest);

@@ -151,6 +151,12 @@ namespace magpie
     resolve(expr.right());
   }
   
+  void Resolver::visit(AssignExpr& expr, int dest)
+  {
+    scope_->resolveAssignment(*expr.pattern());
+    resolve(expr.value());
+  }
+  
   void Resolver::visit(BinaryOpExpr& expr, int dummy)
   {
     resolve(expr.left());
@@ -377,7 +383,12 @@ namespace magpie
   
   void Scope::resolve(Pattern& pattern)
   {
-    pattern.accept(*this, -1);
+    pattern.accept(*this, 0);
+  }
+  
+  void Scope::resolveAssignment(Pattern& pattern)
+  {
+    pattern.accept(*this, 1);
   }
   
   void Scope::end()
@@ -389,40 +400,61 @@ namespace magpie
     start_ = -1;
   }
   
-  void Scope::visit(RecordPattern& pattern, int dummy)
+  void Scope::visit(RecordPattern& pattern, int isAssignment)
   {
     // Recurse into the fields.
     for (int i = 0; i < pattern.fields().count(); i++)
     {
-      pattern.fields()[i].value->accept(*this, dummy);
+      pattern.fields()[i].value->accept(*this, isAssignment);
     }
   }
   
-  void Scope::visit(TypePattern& pattern, int value)
+  void Scope::visit(TypePattern& pattern, int isAssignment)
   {
     // Resolve the type expression.
     resolver_.resolve(pattern.type());
   }
   
-  void Scope::visit(ValuePattern& pattern, int dummy)
+  void Scope::visit(ValuePattern& pattern, int isAssignment)
   {
     // Resolve the value expression.
     resolver_.resolve(pattern.value());
   }
   
-  void Scope::visit(VariablePattern& pattern, int dummy)
+  void Scope::visit(VariablePattern& pattern, int isAssignment)
   {
-    // Create a slot for the variable.
-    int slot = resolver_.makeLocal(pattern.pos(), pattern.name());
+    int slot;
+    if (isAssignment == 1)
+    {
+      // Assigning to an existing variable, so look it up.
+      slot = resolver_.locals_.lastIndexOf(pattern.name());
+      
+      // TODO(bob): Report error if variable is immutable.
+      
+      if (slot == -1)
+      {
+        resolver_.reporter_.error(pattern.pos(),
+            "Variable '%s' is not defined.", pattern.name()->cString());
+        
+        // Put a fake slot in so we can continue and report more errors.
+        slot = 0;
+      }
+    }
+    else
+    {
+      // Declaring a variable, so create a slot for it.
+      slot = resolver_.makeLocal(pattern.pos(), pattern.name());
+    }
+
     pattern.setResolved(ResolvedName(slot));
     
     if (!pattern.pattern().isNull())
     {
-      pattern.pattern()->accept(*this, dummy);
+      pattern.pattern()->accept(*this, isAssignment);
     }
   }
   
-  void Scope::visit(WildcardPattern& pattern, int dummy)
+  void Scope::visit(WildcardPattern& pattern, int isAssignment)
   {
     // Nothing to do.
   }

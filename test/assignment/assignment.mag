@@ -1,0 +1,48 @@
+// Simple assignment.
+do
+    var a = 1
+    print(a) // expect: 1
+    a = 2
+    print(a) // expect: 2
+end
+
+// Parallel assignment.
+do
+    var a, b = 1, 2
+    a, b = b, a
+    print(a) // expect: 2
+    print(b) // expect: 1
+end
+
+// Destructuring.
+do
+    var record = 1, (x: 2, y: 3), 4
+    var a, b, c, d = 0, 0, 0, 0
+    a, (x: b, y: c), d = record
+    print(a) // expect: 1
+    print(b) // expect: 2
+    print(c) // expect: 3
+    print(d) // expect: 4
+end
+
+// Result of assignment expression is the value.
+do
+    var a, b = 0, 0
+    var c = a, b = 1, 2
+    print(a) // expect: 1
+    print(b) // expect: 2
+    print(c) // expect: (1, 2)
+end
+
+// Assign to variable declared in outer scope.
+do
+    var a = 0
+    do
+        a = 1
+    end
+    print(a) // expect: 1
+end
+
+// TODO(bob):
+// - Refutable pattern.
+// - Compile error if variable isn't mutable.

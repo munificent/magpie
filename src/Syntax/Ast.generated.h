@@ -3,6 +3,7 @@
 
 class MethodDef;
 class AndExpr;
+class AssignExpr;
 class BinaryOpExpr;
 class BoolExpr;
 class CallExpr;
@@ -114,6 +115,7 @@ public:
   virtual ~ExprVisitor() {}
 
   virtual void visit(AndExpr& node, int dest) = 0;
+  virtual void visit(AssignExpr& node, int dest) = 0;
   virtual void visit(BinaryOpExpr& node, int dest) = 0;
   virtual void visit(BoolExpr& node, int dest) = 0;
   virtual void visit(CallExpr& node, int dest) = 0;
@@ -156,6 +158,7 @@ public:
 
   // Dynamic casts.
   virtual AndExpr* asAndExpr() { return NULL; }
+  virtual AssignExpr* asAssignExpr() { return NULL; }
   virtual BinaryOpExpr* asBinaryOpExpr() { return NULL; }
   virtual BoolExpr* asBoolExpr() { return NULL; }
   virtual CallExpr* asCallExpr() { return NULL; }
@@ -213,6 +216,38 @@ public:
 private:
   gc<Expr> left_;
   gc<Expr> right_;
+};
+
+class AssignExpr : public Expr
+{
+public:
+  AssignExpr(const SourcePos& pos, gc<Pattern> pattern, gc<Expr> value)
+  : Expr(pos),
+    pattern_(pattern),
+    value_(value)
+  {}
+
+  virtual void accept(ExprVisitor& visitor, int arg)
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual AssignExpr* asAssignExpr() { return this; }
+
+  gc<Pattern> pattern() const { return pattern_; }
+  gc<Expr> value() const { return value_; }
+
+  virtual void reach()
+  {
+    Memory::reach(pattern_);
+    Memory::reach(value_);
+  }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  gc<Pattern> pattern_;
+  gc<Expr> value_;
 };
 
 class BinaryOpExpr : public Expr

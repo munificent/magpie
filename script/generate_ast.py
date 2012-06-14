@@ -22,6 +22,9 @@ exprs = sorted({
     'And': [
         ('left',        'gc<Expr>'),
         ('right',       'gc<Expr>')],
+    'Assign': [
+        ('pattern',     'gc<Pattern>'),
+        ('value',       'gc<Expr>')],
     'BinaryOp': [
         ('left',        'gc<Expr>'),
         ('type',        'TokenType'),
