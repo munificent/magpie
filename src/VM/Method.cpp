@@ -108,7 +108,7 @@ namespace magpie
         break;
         
       case OP_JUMP:
-        cout << "JUMP          " << GET_A(ins);
+        cout << "JUMP          " << GET_A(ins) << " " << GET_B(ins);
         break;
         
       case OP_JUMP_IF_FALSE:

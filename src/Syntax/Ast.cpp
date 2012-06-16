@@ -95,29 +95,7 @@ namespace magpie
   {
     out << "(" << value_ << " is " << type_ << ")";
   }
-  
-  void LoopExpr::trace(std::ostream& out) const
-  {
-    out << "(loop ";
     
-    for (int i = 0; i < clauses_.count(); i++)
-    {
-      const LoopClause& clause = clauses_[i];
-      if (clause.isFor())
-      {
-        out << "(for " << clause.pattern() << " ";
-      }
-      else
-      {
-        out << "(while ";
-      }
-      
-      out << clause.expression() << ") ";
-    }
-    
-    out << body_ << ")";
-  }
-  
   void MatchExpr::trace(std::ostream& out) const
   {
     out << "(match " << value_;
@@ -207,6 +185,11 @@ namespace magpie
   {
     out << "(" << (isMutable_ ? "var " : "val ");
     out << pattern_ << " = " << value_ << ")";
+  }
+  
+  void WhileExpr::trace(std::ostream& out) const
+  {
+    out << "(while " << condition_ << " " << body_ << ")";
   }
   
   void RecordPattern::trace(std::ostream& out) const

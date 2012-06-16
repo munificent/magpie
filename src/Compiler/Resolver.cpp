@@ -239,12 +239,7 @@ namespace magpie
     resolve(expr.value());
     resolve(expr.type());
   }
-  
-  void Resolver::visit(LoopExpr& expr, int dest)
-  {
-    ASSERT(false, "Not impl.");
-  }
-  
+    
   void Resolver::visit(MatchExpr& expr, int dummy)
   {
     // Resolve the value.
@@ -366,6 +361,18 @@ namespace magpie
     
     // Now declare any locals on the left-hand side.
     scope_->resolve(*expr.pattern());
+  }
+  
+  void Resolver::visit(WhileExpr& expr, int dest)
+  {
+    Scope loopScope(this);
+    
+    resolve(expr.condition());
+    
+    // TODO(bob): Should the body get its own scope?
+    resolve(expr.body());
+    
+    loopScope.end();
   }
   
   Scope::Scope(Resolver* resolver)

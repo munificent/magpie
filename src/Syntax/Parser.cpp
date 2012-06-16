@@ -249,9 +249,10 @@ namespace magpie
 
   gc<Expr> Parser::flowControl()
   {
+    SourcePos start = current().pos();
+    
     if (match(TOKEN_DO))
     {
-      SourcePos start = last()->pos();
       gc<Expr> body = parseBlock();
       SourcePos span = start.spanTo(last()->pos());
       return new DoExpr(span, body);
@@ -259,8 +260,6 @@ namespace magpie
 
     if (match(TOKEN_IF))
     {
-      SourcePos start = last()->pos();
-
       gc<Expr> condition = parseBlock(TOKEN_THEN);
       consume(TOKEN_THEN, "Expect 'then' after 'if' condition.");
 
@@ -281,8 +280,6 @@ namespace magpie
 
     if (match(TOKEN_MATCH))
     {
-      SourcePos start = last()->pos();
-
       // Parse the value.
       gc<Expr> value = parsePrecedence(PRECEDENCE_ASSIGNMENT);
 
@@ -320,6 +317,15 @@ namespace magpie
       return new MatchExpr(span, value, cases);
     }
 
+    if (match(TOKEN_WHILE))
+    {
+      gc<Expr> condition = parseBlock(TOKEN_DO);
+      consume(TOKEN_DO, "Expect 'do' after 'while' condition.");
+      gc<Expr> body = parseBlock();
+      
+      return new WhileExpr(start.spanTo(last()->pos()), condition, body);
+    }
+    
     return parsePrecedence();
   }
 

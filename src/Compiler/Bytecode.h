@@ -67,7 +67,10 @@ namespace magpie
     // Stores the result in slot C.
     OP_IS = 0x10,
     
-    OP_JUMP          = 0x11, // A = offset
+    // Performs an unconditional jump. If A is 1, then the instruction pointer
+    // is moved forward by B. Otherwise, it is moved back by that amount.
+    OP_JUMP = 0x11,
+    
     OP_JUMP_IF_FALSE = 0x12, // R(A) = test slot, B = offset
     OP_JUMP_IF_TRUE  = 0x13, // R(A) = test slot, B = offset
     

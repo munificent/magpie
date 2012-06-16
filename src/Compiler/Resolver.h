@@ -48,7 +48,6 @@ namespace magpie
     virtual void visit(DoExpr& expr, int dummy);
     virtual void visit(IfExpr& expr, int dummy);
     virtual void visit(IsExpr& expr, int dummy);
-    virtual void visit(LoopExpr& expr, int dummy);
     virtual void visit(MatchExpr& expr, int dummy);
     virtual void visit(NameExpr& expr, int dummy);
     virtual void visit(NotExpr& expr, int dummy);
@@ -61,7 +60,8 @@ namespace magpie
     virtual void visit(StringExpr& expr, int dummy);
     virtual void visit(ThrowExpr& expr, int dummy);
     virtual void visit(VariableExpr& expr, int dummy);
-        
+    virtual void visit(WhileExpr& expr, int dummy);
+
     ErrorReporter& reporter_;
 
     const Module& module_;

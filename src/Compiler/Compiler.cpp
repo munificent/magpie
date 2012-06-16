@@ -278,7 +278,7 @@ namespace magpie
     
     compileMatch(expr.catches(), dest);
     
-    endJump(jumpPastCatch, OP_JUMP);
+    endJump(jumpPastCatch, OP_JUMP, 1);
   }
     
   void Compiler::visit(DoExpr& expr, int dest)
@@ -313,7 +313,7 @@ namespace magpie
       write(OP_BUILT_IN, BUILT_IN_NOTHING, dest);
     }
 
-    endJump(jumpPastElse, OP_JUMP);
+    endJump(jumpPastElse, OP_JUMP, 1);
   }
   
   void Compiler::visit(IsExpr& expr, int dest)
@@ -326,11 +326,6 @@ namespace magpie
     write(OP_IS, dest, type, dest);
 
     releaseTemp(); // type
-  }
-  
-  void Compiler::visit(LoopExpr& expr, int dest)
-  {
-    ASSERT(false, "Not impl.");
   }
 
   void Compiler::visit(MatchExpr& expr, int dest)
@@ -466,6 +461,21 @@ namespace magpie
     compile(expr.pattern(), dest);
   }
   
+  void Compiler::visit(WhileExpr& expr, int dest)
+  {
+    int loopStart = startJumpBack();
+    
+    // Compile the condition.
+    int condition = makeTemp();
+    compile(expr.condition(), condition);
+    int loopExit = startJump();
+    releaseTemp(); // condition
+    
+    compile(expr.body(), dest);
+    endJumpBack(loopStart);
+    endJump(loopExit, OP_JUMP_IF_FALSE, condition);
+  }
+  
   void Compiler::compileMatch(const Array<MatchClause>& clauses, int dest)
   {
     Array<int> endJumps;
@@ -496,7 +506,7 @@ namespace magpie
     // Patch all the jumps now that we know where the end is.
     for (int i = 0; i < endJumps.count(); i++)
     {
-      endJump(endJumps[i], OP_JUMP);
+      endJump(endJumps[i], OP_JUMP, 1);
     }
   }
   
@@ -546,6 +556,12 @@ namespace magpie
     return code_.count() - 1;
   }
 
+  int Compiler::startJumpBack()
+  {
+    // Remember the current instruction so we can calculate the offset.
+    return code_.count() - 1;
+  }
+
   void Compiler::endJump(int from, OpCode op, int a, int b)
   {
     int c;
@@ -569,6 +585,12 @@ namespace magpie
     }
     
     code_[from] = MAKE_ABC(a, b, c, op);
+  }
+
+  void Compiler::endJumpBack(int to)
+  {
+    int offset = code_.count() - to;
+    write(OP_JUMP, 0, offset);
   }
 
   int Compiler::getNextTemp() const
@@ -609,7 +631,7 @@ namespace magpie
       if (test.slot == -1)
       {
         // This test is a field destructure, so just set the offset.
-        compiler_.endJump(test.position, OP_JUMP); 
+        compiler_.endJump(test.position, OP_JUMP, 1); 
       }
       else
       {

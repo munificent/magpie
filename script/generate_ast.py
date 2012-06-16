@@ -47,9 +47,6 @@ exprs = sorted({
     'Is': [
         ('value',       'gc<Expr>'),
         ('type',        'gc<Expr>')],
-    'Loop': [
-        ('clauses',     'Array<LoopClause>'),
-        ('body',        'gc<Expr>')],
     'Match': [
         ('value',       'gc<Expr>'),
         ('cases',       'Array<MatchClause>')],
@@ -77,7 +74,10 @@ exprs = sorted({
     'Variable': [
         ('isMutable',   'bool'),
         ('pattern',     'gc<Pattern>'),
-        ('value',       'gc<Expr>')]
+        ('value',       'gc<Expr>')],
+    'While': [
+        ('condition',   'gc<Expr>'),
+        ('body',        'gc<Expr>')]
 }.items())
 
 patterns = sorted({

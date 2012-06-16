@@ -50,7 +50,6 @@ namespace magpie
     virtual void visit(DoExpr& expr, int dest);
     virtual void visit(IfExpr& expr, int dest);
     virtual void visit(IsExpr& expr, int dest);
-    virtual void visit(LoopExpr& expr, int dest);
     virtual void visit(MatchExpr& expr, int dest);
     virtual void visit(NameExpr& expr, int dest);
     virtual void visit(NotExpr& expr, int dest);
@@ -63,6 +62,7 @@ namespace magpie
     virtual void visit(StringExpr& expr, int dest);
     virtual void visit(ThrowExpr& expr, int dest);
     virtual void visit(VariableExpr& expr, int dest);
+    virtual void visit(WhileExpr& expr, int dest);
 
     void compileMatch(const Array<MatchClause>& clauses, int dest);
     
@@ -81,11 +81,15 @@ namespace magpie
 
     void write(OpCode op, int a = 0xff, int b = 0xff, int c = 0xff);
     int startJump();
+    int startJumpBack();
     
     // Backpatches the bytecode at `from` with the given instruction and the
     // given operands with an additional operand that is the offset from `from`
     // to the current instruction position.
     void endJump(int from, OpCode op, int a = -1, int b = -1);
+    
+    // Inserts a backwards jump to the given instruction.
+    void endJumpBack(int to);
     
     int getNextTemp() const;
     int makeTemp();

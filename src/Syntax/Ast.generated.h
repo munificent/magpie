@@ -11,7 +11,6 @@ class CatchExpr;
 class DoExpr;
 class IfExpr;
 class IsExpr;
-class LoopExpr;
 class MatchExpr;
 class NameExpr;
 class NotExpr;
@@ -24,6 +23,7 @@ class SequenceExpr;
 class StringExpr;
 class ThrowExpr;
 class VariableExpr;
+class WhileExpr;
 class RecordPattern;
 class TypePattern;
 class ValuePattern;
@@ -123,7 +123,6 @@ public:
   virtual void visit(DoExpr& node, int dest) = 0;
   virtual void visit(IfExpr& node, int dest) = 0;
   virtual void visit(IsExpr& node, int dest) = 0;
-  virtual void visit(LoopExpr& node, int dest) = 0;
   virtual void visit(MatchExpr& node, int dest) = 0;
   virtual void visit(NameExpr& node, int dest) = 0;
   virtual void visit(NotExpr& node, int dest) = 0;
@@ -136,6 +135,7 @@ public:
   virtual void visit(StringExpr& node, int dest) = 0;
   virtual void visit(ThrowExpr& node, int dest) = 0;
   virtual void visit(VariableExpr& node, int dest) = 0;
+  virtual void visit(WhileExpr& node, int dest) = 0;
 
 protected:
   ExprVisitor() {}
@@ -166,7 +166,6 @@ public:
   virtual DoExpr* asDoExpr() { return NULL; }
   virtual IfExpr* asIfExpr() { return NULL; }
   virtual IsExpr* asIsExpr() { return NULL; }
-  virtual LoopExpr* asLoopExpr() { return NULL; }
   virtual MatchExpr* asMatchExpr() { return NULL; }
   virtual NameExpr* asNameExpr() { return NULL; }
   virtual NotExpr* asNotExpr() { return NULL; }
@@ -179,6 +178,7 @@ public:
   virtual StringExpr* asStringExpr() { return NULL; }
   virtual ThrowExpr* asThrowExpr() { return NULL; }
   virtual VariableExpr* asVariableExpr() { return NULL; }
+  virtual WhileExpr* asWhileExpr() { return NULL; }
 
   const SourcePos& pos() const { return pos_; }
 
@@ -469,37 +469,6 @@ public:
 private:
   gc<Expr> value_;
   gc<Expr> type_;
-};
-
-class LoopExpr : public Expr
-{
-public:
-  LoopExpr(const SourcePos& pos, const Array<LoopClause>& clauses, gc<Expr> body)
-  : Expr(pos),
-    clauses_(clauses),
-    body_(body)
-  {}
-
-  virtual void accept(ExprVisitor& visitor, int arg)
-  {
-    visitor.visit(*this, arg);
-  }
-
-  virtual LoopExpr* asLoopExpr() { return this; }
-
-  const Array<LoopClause>& clauses() { return clauses_; }
-  gc<Expr> body() const { return body_; }
-
-  virtual void reach()
-  {
-    Memory::reach(body_);
-  }
-
-  virtual void trace(std::ostream& out) const;
-
-private:
-  Array<LoopClause> clauses_;
-  gc<Expr> body_;
 };
 
 class MatchExpr : public Expr
@@ -846,6 +815,38 @@ private:
   bool isMutable_;
   gc<Pattern> pattern_;
   gc<Expr> value_;
+};
+
+class WhileExpr : public Expr
+{
+public:
+  WhileExpr(const SourcePos& pos, gc<Expr> condition, gc<Expr> body)
+  : Expr(pos),
+    condition_(condition),
+    body_(body)
+  {}
+
+  virtual void accept(ExprVisitor& visitor, int arg)
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual WhileExpr* asWhileExpr() { return this; }
+
+  gc<Expr> condition() const { return condition_; }
+  gc<Expr> body() const { return body_; }
+
+  virtual void reach()
+  {
+    Memory::reach(condition_);
+    Memory::reach(body_);
+  }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  gc<Expr> condition_;
+  gc<Expr> body_;
 };
 
 class PatternVisitor

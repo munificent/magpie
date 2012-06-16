@@ -139,40 +139,4 @@ namespace magpie
     
     NO_COPY(Parser);
   };
-
-  class ExprToPatternConverter : public ExprVisitor
-  {
-  public:
-    // Converts the given expression to a pattern, if possible. Returns null
-    // if not.
-    gc<Pattern> convert(gc<Expr> expr);
-    
-  private:
-    ExprToPatternConverter() {}
-    
-    virtual void visit(AndExpr& expr, int dummy);
-    virtual void visit(AssignExpr& expr, int dest);
-    virtual void visit(BinaryOpExpr& expr, int dummy);
-    virtual void visit(BoolExpr& expr, int dummy);
-    virtual void visit(CallExpr& expr, int dummy);
-    virtual void visit(CatchExpr& expr, int dummy);
-    virtual void visit(DoExpr& expr, int dummy);
-    virtual void visit(IfExpr& expr, int dummy);
-    virtual void visit(IsExpr& expr, int dummy);
-    virtual void visit(LoopExpr& expr, int dummy);
-    virtual void visit(MatchExpr& expr, int dummy);
-    virtual void visit(NameExpr& expr, int dummy);
-    virtual void visit(NotExpr& expr, int dummy);
-    virtual void visit(NothingExpr& expr, int dummy);
-    virtual void visit(NumberExpr& expr, int dummy);
-    virtual void visit(OrExpr& expr, int dummy);
-    virtual void visit(RecordExpr& expr, int dummy);
-    virtual void visit(ReturnExpr& expr, int dummy);
-    virtual void visit(SequenceExpr& expr, int dummy);
-    virtual void visit(StringExpr& expr, int dummy);
-    virtual void visit(ThrowExpr& expr, int dummy);
-    virtual void visit(VariableExpr& expr, int dummy);
-    
-    NO_COPY(ExprToPatternConverter);
-  };
 }

@@ -302,8 +302,9 @@ namespace magpie
           
         case OP_JUMP:
         {
-          int offset = GET_A(ins);
-          frame.ip += offset;
+          int forward = GET_A(ins);
+          int offset = GET_B(ins);
+          frame.ip += (forward == 1) ? offset : -offset;
           break;
         }
           

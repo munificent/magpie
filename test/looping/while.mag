@@ -1,0 +1,63 @@
+// Simple while loop.
+do
+    var i = 0
+    while i < 3 do
+        print(i)
+        i = i + 1
+    end
+    // expect: 0
+    // expect: 1
+    // expect: 2
+end
+
+// Block for condition.
+do
+    var i = 0
+    while
+        print(i)
+        i < 3
+    do
+        i = i + 1
+    end
+    // expect: 0
+    // expect: 1
+    // expect: 2
+    // expect: 3
+end
+
+// Single-expression body.
+do
+    var i = 0
+    while i < 3 do print(i = i + 1)
+    // expect: 1
+    // expect: 2
+    // expect: 3
+end
+
+// Body has its own scope.
+do
+    val a = "outer"
+    var i = 0
+    while i < 1 do
+        val a = "inner"
+        print(a) // expect: inner
+        i = i + 1
+    end
+    print(a) // expect: outer
+end
+
+// Condition has its own scope that it shares with the body.
+do
+    val a = "outer"
+    var i = 0
+    while
+        val a = "inner"
+        i < 2
+    do
+        i = i + 1
+        print(a)
+    end
+    // expect: inner
+    // expect: inner
+    print(a) // expect: outer
+end
