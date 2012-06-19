@@ -202,10 +202,6 @@ namespace magpie
     bool negate = false;
     switch (expr.type())
     {
-      case TOKEN_PLUS:   op = OP_ADD; break;
-      case TOKEN_MINUS:  op = OP_SUBTRACT; break;
-      case TOKEN_STAR:   op = OP_MULTIPLY; break;
-      case TOKEN_SLASH:  op = OP_DIVIDE; break;
       case TOKEN_EQEQ:   op = OP_EQUAL; break;
       case TOKEN_NEQ:    op = OP_EQUAL; negate = true; break;
       case TOKEN_LT:     op = OP_LESS_THAN; break;

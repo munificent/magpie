@@ -224,4 +224,23 @@ namespace magpie
     T*  items_;
   };
 
+  template <class T>
+  class ArrayView
+  {
+  public:
+    ArrayView(Array<T>& array, int start)
+    : array_(array),
+      start_(start)
+    {}
+    
+    // Gets the item at the given index.
+    inline T& operator[] (int index)
+    {
+      return array_[start_ + index];
+    }
+    
+  private:
+    Array<T>& array_;
+    int start_;
+  };
 }

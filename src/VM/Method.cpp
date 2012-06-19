@@ -70,23 +70,7 @@ namespace magpie
       case OP_GET_MODULE:
         cout << "GET_MODULE    import " << GET_A(ins) << ", var " << GET_B(ins) << " -> " << GET_C(ins);
         break;
-        
-      case OP_ADD:
-        cout << "ADD           " << GET_A(ins) << " + " << GET_B(ins) << " -> " << GET_C(ins);
-        break;
-        
-      case OP_SUBTRACT:
-        cout << "SUBTRACT      " << GET_A(ins) << " - " << GET_B(ins) << " -> " << GET_C(ins);
-        break;
-        
-      case OP_MULTIPLY:
-        cout << "MULTIPLY      " << GET_A(ins) << " - " << GET_B(ins) << " -> " << GET_C(ins);
-        break;
-        
-      case OP_DIVIDE:
-        cout << "DIVIDE        " << GET_A(ins) << " - " << GET_B(ins) << " -> " << GET_C(ins);
-        break;
-        
+
       case OP_EQUAL:
         cout << "EQUAL         " << GET_A(ins) << " == " << GET_B(ins) << " -> " << GET_C(ins);
         break;

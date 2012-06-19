@@ -53,26 +53,22 @@ namespace magpie
     // index of the exported variable in that module to load. Stores the value
     // in slot C.
     OP_GET_MODULE = 0x07,
-    
-    OP_ADD           = 0x08, // R(C) = RC(A) + RC(B)
-    OP_SUBTRACT      = 0x09, // R(C) = RC(A) - RC(B)
-    OP_MULTIPLY      = 0x0a, // R(C) = RC(A) * RC(B)
-    OP_DIVIDE        = 0x0b, // R(C) = RC(A) / RC(B)
-    OP_EQUAL         = 0x0c, // R(C) = RC(A) == RC(B)
-    OP_LESS_THAN     = 0x0d, // R(C) = RC(A) < RC(B)
-    OP_GREATER_THAN  = 0x0e, // R(C) = RC(A) > RC(B)
-    OP_NOT           = 0x0f, // R(C) = RC(A) + RC(B)
+
+    OP_EQUAL         = 0x08, // R(C) = RC(A) == RC(B)
+    OP_LESS_THAN     = 0x09, // R(C) = RC(A) < RC(B)
+    OP_GREATER_THAN  = 0x0a, // R(C) = RC(A) > RC(B)
+    OP_NOT           = 0x0b, // R(C) = RC(A) + RC(B)
     
     // Tests if the value in slot A is an instance of the type in slot B.
     // Stores the result in slot C.
-    OP_IS = 0x10,
+    OP_IS = 0x0c,
     
     // Performs an unconditional jump. If A is 1, then the instruction pointer
     // is moved forward by B. Otherwise, it is moved back by that amount.
-    OP_JUMP = 0x11,
+    OP_JUMP = 0x0d,
     
-    OP_JUMP_IF_FALSE = 0x12, // R(A) = test slot, B = offset
-    OP_JUMP_IF_TRUE  = 0x13, // R(A) = test slot, B = offset
+    OP_JUMP_IF_FALSE = 0x0e, // R(A) = test slot, B = offset
+    OP_JUMP_IF_TRUE  = 0x0f, // R(A) = test slot, B = offset
     
     // Invokes a top-level method. The index of the method in the global table
     // is A. The arguments to the method are laid out in sequential slots
@@ -80,25 +76,25 @@ namespace magpie
     // signature, so is not explicitly passed. The result will be stored in
     // slot C when the method returns.
     // TODO(bob): Tweak operands so that we can support more than 256 methods.
-    OP_CALL = 0x14,
+    OP_CALL = 0x10,
     
     // Exits the current method, returning slot A.
-    OP_RETURN = 0x15,
+    OP_RETURN = 0x11,
     
     // Throws the error object in slot A.
-    OP_THROW = 0x16,
+    OP_THROW = 0x12,
     
     // Registers a new catch handler. If an error is thrown before the
     // subsequent OP_EXIT_TRY, then execution will jump to the associated catch
     // block. Its code location is the location of the OP_ENTER_TRY + A.
-    OP_ENTER_TRY = 0x17,
+    OP_ENTER_TRY = 0x13,
     
     // Discards the previous OP_ENTER_TRY handler. This occurs when execution
     // has proceeded past the block containing a catch clause.
-    OP_EXIT_TRY = 0x18,
+    OP_EXIT_TRY = 0x14,
     
     // Throws a NoMatchError if slot A is false.
-    OP_TEST_MATCH = 0x19
+    OP_TEST_MATCH = 0x15
   };
   
   enum BuiltIn

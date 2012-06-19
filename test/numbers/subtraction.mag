@@ -1,0 +1,5 @@
+print(0 - 0) // expect: 0
+print(4 - 3) // expect: 1
+print(3 - 4) // expect: -1
+
+// TODO(bob): How should it handle "3-4"?

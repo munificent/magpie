@@ -144,54 +144,6 @@ namespace magpie
           break;
         }
           
-        case OP_ADD:
-        {
-          gc<Object> a = loadSlotOrConstant(frame, GET_A(ins));
-          gc<Object> b = loadSlotOrConstant(frame, GET_B(ins));
-          
-          // TODO(bob): Handle non-number types.
-          double c = a->toNumber() + b->toNumber();
-          gc<Object> num = new NumberObject(c);
-          store(frame, GET_C(ins), num);
-          break;
-        }
-          
-        case OP_SUBTRACT:
-        {
-          gc<Object> a = loadSlotOrConstant(frame, GET_A(ins));
-          gc<Object> b = loadSlotOrConstant(frame, GET_B(ins));
-          
-          // TODO(bob): Handle non-number types.
-          double c = a->toNumber() - b->toNumber();
-          gc<Object> num = new NumberObject(c);
-          store(frame, GET_C(ins), num);
-          break;
-        }
-          
-        case OP_MULTIPLY:
-        {
-          gc<Object> a = loadSlotOrConstant(frame, GET_A(ins));
-          gc<Object> b = loadSlotOrConstant(frame, GET_B(ins));
-          
-          // TODO(bob): Handle non-number types.
-          double c = a->toNumber() * b->toNumber();
-          gc<Object> num = new NumberObject(c);
-          store(frame, GET_C(ins), num);
-          break;
-        }
-          
-        case OP_DIVIDE:
-        {
-          gc<Object> a = loadSlotOrConstant(frame, GET_A(ins));
-          gc<Object> b = loadSlotOrConstant(frame, GET_B(ins));
-          
-          // TODO(bob): Handle non-number types.
-          double c = a->toNumber() / b->toNumber();
-          gc<Object> num = new NumberObject(c);
-          store(frame, GET_C(ins), num);
-          break;
-        }
-          
         case OP_EQUAL:
         {
           gc<Object> a = loadSlotOrConstant(frame, GET_A(ins));
@@ -337,9 +289,8 @@ namespace magpie
           
           Primitive primitive = method->primitive();
           if (primitive != NULL) {
-            // TODO(bob): Hack. Support multi-arg primitives.
-            gc<Object> arg = load(frame, firstArg);
-            gc<Object> result = primitive(arg);
+            ArrayView<gc<Object> > args(stack_, frame.stackStart + firstArg);
+            gc<Object> result = primitive(args);
             store(frame, GET_C(ins), result);
           } else {
             int stackStart = frame.stackStart + firstArg;

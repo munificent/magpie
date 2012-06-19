@@ -11,7 +11,7 @@ namespace magpie
   class Module;
   class Object;
   
-  typedef gc<Object> (*Primitive)(gc<Object> arg);
+  typedef gc<Object> (*Primitive)(ArrayView<gc<Object> >& args);
   
   class Method : public Managed
   {

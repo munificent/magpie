@@ -1,0 +1,3 @@
+print(0 * 0) // expect: 0
+print(0 * 123) // expect: 0
+print(3 * 4) // expect: 12

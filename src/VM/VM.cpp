@@ -21,6 +21,10 @@ namespace magpie
     fiber_ = new Fiber(*this);
     
     DEF_PRIMITIVE(print, "print 0:");
+    DEF_PRIMITIVE(add, "0: + 0:");
+    DEF_PRIMITIVE(subtract, "0: - 0:");
+    DEF_PRIMITIVE(multiply, "0: * 0:");
+    DEF_PRIMITIVE(divide, "0: / 0:");
     
     coreModule_ = new Module();
     

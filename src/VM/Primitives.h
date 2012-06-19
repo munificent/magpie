@@ -7,10 +7,14 @@
 #include "Method.h"
 #include "RootSource.h"
 
-#define PRIMITIVE(name) gc<Object> name##Primitive(gc<Object> arg)
+#define PRIMITIVE(name) gc<Object> name##Primitive(ArrayView<gc<Object> >& args)
 
 namespace magpie
 {
   PRIMITIVE(print);
+  PRIMITIVE(add);
+  PRIMITIVE(subtract);
+  PRIMITIVE(multiply);
+  PRIMITIVE(divide);
 }
 

@@ -36,11 +36,11 @@ namespace magpie
     { NULL,             &Parser::binaryOp, PRECEDENCE_COMPARISON },   // TOKEN_GT
     { NULL,             &Parser::binaryOp, PRECEDENCE_COMPARISON },   // TOKEN_LTE
     { NULL,             &Parser::binaryOp, PRECEDENCE_COMPARISON },   // TOKEN_GTE
-    { NULL,             &Parser::binaryOp, PRECEDENCE_TERM },         // TOKEN_PLUS
-    { NULL,             &Parser::binaryOp, PRECEDENCE_TERM },         // TOKEN_MINUS
-    { NULL,             &Parser::binaryOp, PRECEDENCE_PRODUCT },      // TOKEN_STAR
-    { NULL,             &Parser::binaryOp, PRECEDENCE_PRODUCT },      // TOKEN_SLASH
-    { NULL,             &Parser::binaryOp, PRECEDENCE_PRODUCT },      // TOKEN_PERCENT
+    { NULL,             &Parser::infixCall, PRECEDENCE_TERM },        // TOKEN_PLUS
+    { NULL,             &Parser::infixCall, PRECEDENCE_TERM },        // TOKEN_MINUS
+    { NULL,             &Parser::infixCall, PRECEDENCE_PRODUCT },     // TOKEN_STAR
+    { NULL,             &Parser::infixCall, PRECEDENCE_PRODUCT },     // TOKEN_SLASH
+    { NULL,             &Parser::infixCall, PRECEDENCE_PRODUCT },     // TOKEN_PERCENT
 
     // Keywords.
     { NULL,             &Parser::and_, PRECEDENCE_LOGICAL },           // TOKEN_AND
@@ -498,7 +498,16 @@ namespace magpie
     // TODO(bob): Better position.
     return new CallExpr(token->pos(), left, token->text(), right);
   }
-
+  
+  gc<Expr> Parser::infixCall(gc<Expr> left, gc<Token> token)
+  {
+    // TODO(bob): Support right-associative infix. Needs to do precedence
+    // - 1 here, to be right-assoc.
+    gc<Expr> right = parsePrecedence(expressions_[token->type()].precedence);
+    
+    return new CallExpr(token->pos(), left, token->text(), right);
+  }
+  
   gc<Expr> Parser::infixRecord(gc<Expr> left, gc<Token> token)
   {
     Array<Field> fields;

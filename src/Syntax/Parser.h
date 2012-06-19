@@ -65,6 +65,7 @@ namespace magpie
     gc<Expr> assignment(gc<Expr> left, gc<Token> token);
     gc<Expr> binaryOp(gc<Expr> left, gc<Token> token);
     gc<Expr> call(gc<Expr> left, gc<Token> token);
+    gc<Expr> infixCall(gc<Expr> left, gc<Token> token);
     gc<Expr> infixRecord(gc<Expr> left, gc<Token> token);
     gc<Expr> is(gc<Expr> left, gc<Token> token);
     gc<Expr> or_(gc<Expr> left, gc<Token> token);
