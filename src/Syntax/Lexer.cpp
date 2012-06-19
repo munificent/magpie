@@ -138,7 +138,17 @@ namespace magpie
           return makeToken(TOKEN_GT);
           
         case '+': return makeToken(TOKEN_PLUS);
-        case '-': return makeToken(TOKEN_MINUS);
+        case '-':
+          if (isDigit(peek()))
+          {
+            return readNumber();
+          }
+          else
+          {
+            return makeToken(TOKEN_MINUS);
+          }
+          break;
+          
         case '*': return makeToken(TOKEN_STAR);
         case '%': return makeToken(TOKEN_PERCENT);
         case '\n': return makeToken(TOKEN_LINE);

@@ -1,0 +1,9 @@
+print(0) // expect: 0
+print(1) // expect: 1
+print(123456) // expect: 123456
+print(-123456) // expect: -123456
+print(-0) // expect: -0
+
+print(12.34) // expect: 12.34
+
+// TODO(bob): Scientific notation, hex, etc.

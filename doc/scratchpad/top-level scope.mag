@@ -1,0 +1,94 @@
+// top level variables need to be able to construct instances of classes
+var tokenWhile = Token new("while")
+
+// top level variables need to be able to call methods
+val someConstant = makeNextConstant()
+
+// to order methods, need to be able to evaluate value and type patterns
+def method(== Tokens stringLiteral)
+def method(is SomeClass)
+
+// to define classes, need to be able to evaluate base class expression
+defclass Base is Super
+end
+
+// to instantiate classes, need to be able to evaluate field patterns and
+// initializers
+var _count = 0
+defclass Counter
+    val i is num = _count = _count + 1
+end
+
+
+/*
+
+Goal: compile a multimethod to a single function body. The top of the body will
+more or less be a big match expression. Each case is a method. The main
+difference is that cases won't be strictly linearly tested. Instead a failed
+case will jump to the next appropriate method to try (basically it walks the
+graph).
+
+To be able compile this übermethod, we need to be able to compile all of the
+individual methods (i.e. we need things like their module context). We also
+need to be able to order them based on their patterns.
+
+However, to do that, we have to have *evaluated* their patterns already.
+Consider:
+*/
+
+defclass Foo
+
+// What if we limit top-level method type patterns to simple top-level names
+// that we can resolve without needing to execute code? Value patterns don't
+// need to be ordered, record patterns can be ordered purely by looking at the
+// AST. The only pattern that needs some interesting ordering logic is type
+// patterns, and those should almost always just be names like "foo is Foo".
+// If we require that those names be top-level classes, we can probably order
+// methods without needing to execute code. The tricky bit is:
+
+defclass Foo
+end
+
+val AlsoFoo = Foo
+
+def method(x is AlsoFoo)
+    ...
+end
+
+// We'd like to be able to make this work too.
+
+
+
+
+/*
+
+Strawman 1:
+
+Top-level vars are evaluated lazily. The first time it is accessed, its
+initializer will be run. If another access is detected while that initializer
+is being executed, then we have a circular reference, and it's an error.
+
+Pros:
+- Allows for references between modules like:
+  // a.mag
+  var a = bOther
+  var aOther = 123
+
+  // b.mag
+  var b = aOther
+  var bOther = 123
+- Order of var definitions isn't important
+- Don't waste time on startup initializing unused vars
+
+Cons:
+- Complex
+- Initializers with side-effects run at unknown time
+
+Top-level method bodies can access all top-level variables, regardless of
+declaration order.
+
+A class definition works like a top-level variable definition: it's evaluated
+lazily on use. "Evaluated" here mainly means evaluating the superclass
+expression and field patterns.
+
+*/

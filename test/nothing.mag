@@ -7,3 +7,10 @@ print(a) // expect: nothing
 
 // Is falsy.
 if nothing then print("bad") else print("good") // expect: good
+
+// Is equal to itself, but not other things.
+print(nothing == nothing) // expect: true
+print(nothing == 0) // expect: false
+print(nothing == false) // expect: false
+print(nothing == "nothing") // expect: false
+print(nothing == "") // expect: false
