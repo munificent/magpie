@@ -136,10 +136,10 @@ namespace magpie
           
         case OP_GET_MODULE:
         {
-          int importIndex = GET_A(ins);
+          int moduleIndex = GET_A(ins);
           int exportIndex = GET_B(ins);
-          gc<Object> object = frame.method->module()->getImport(importIndex,
-                                                                exportIndex);
+          Module* module = vm_.getModule(moduleIndex);
+          gc<Object> object = module->getExport(exportIndex);
           store(frame, GET_C(ins), object);
           break;
         }

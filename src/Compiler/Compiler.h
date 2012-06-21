@@ -98,6 +98,9 @@ namespace magpie
     
     VM& vm_;
     ErrorReporter& reporter_;
+
+    // The module containing the method being compiled.
+    Module* module_;
     
     // The method being compiled.
     gc<Method> method_;

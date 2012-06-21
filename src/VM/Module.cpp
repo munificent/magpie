@@ -23,10 +23,5 @@ namespace magpie
     exportNames_.add(name);
     exports_.add(value);
   }
-  
-  gc<Object> Module::getImport(int importIndex, int exportIndex)
-  {
-    return imports_[importIndex]->getExport(exportIndex);
-  }
 }
 

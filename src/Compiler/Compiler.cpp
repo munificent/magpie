@@ -12,7 +12,7 @@ namespace magpie
   Module* Compiler::compileModule(VM& vm, gc<ModuleAst> moduleAst,
                                   ErrorReporter& reporter)
   {
-    Module* module = new Module();
+    Module* module = vm.createModule();
     
     // TODO(bob): Doing this here is hackish. Need to figure out when a module's
     // imports are resolved.
@@ -62,7 +62,8 @@ namespace magpie
   : ExprVisitor(),
     vm_(vm),
     reporter_(reporter),
-    method_(new Method(module)),
+    module_(module),
+    method_(new Method()),
     code_(),
     numLocals_(0),
     numTemps_(0),
@@ -71,7 +72,7 @@ namespace magpie
 
   gc<Method> Compiler::compile(MethodDef& method)
   {
-    Resolver::resolve(reporter_, *method_->module(), method);
+    Resolver::resolve(vm_, reporter_, *module_, method);
     
     // Reserve slots up front for all of the locals. This ensures that temps
     // will always be after locals.

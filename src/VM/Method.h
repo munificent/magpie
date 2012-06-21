@@ -16,17 +16,15 @@ namespace magpie
   class Method : public Managed
   {
   public:
-    Method(Module* module)
-    : module_(module),
-      code_(),
+    Method()
+    : code_(),
       constants_(),
       numSlots_(0),
       primitive_(NULL)
     {}
     
     Method(Primitive primitive)
-    : module_(NULL),
-      code_(),
+    : code_(),
       constants_(),
       numSlots_(0),
       primitive_(primitive)
@@ -34,8 +32,6 @@ namespace magpie
     
     void setCode(const Array<instruction>& code,
                  int maxSlots);
-    
-    Module* module() { return module_; }
     
     inline const Array<instruction>& code() const { return code_; }
     inline Primitive primitive() const { return primitive_; }
@@ -51,11 +47,6 @@ namespace magpie
     virtual void reach();
     
   private:
-    // The module where this method is defined. Not gc because modules live
-    // outside of the managed heap and aren't collected. Will be NULL for
-    // primitives.
-    Module* module_;
-    
     Array<instruction> code_;
     Array<gc<Object> > constants_;
     

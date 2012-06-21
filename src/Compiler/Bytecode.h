@@ -49,9 +49,8 @@ namespace magpie
     OP_TEST_FIELD = 0x06,
     
     // Loads a top-level variable exported from a module. A is the index of
-    // the imported module in the containing module's import list. B is the
-    // index of the exported variable in that module to load. Stores the value
-    // in slot C.
+    // the module in the VM's global module list. B is the index of the
+    // exported variable in that module to load. Stores the value in slot C.
     OP_GET_MODULE = 0x07,
 
     OP_EQUAL         = 0x08, // R(C) = RC(A) == RC(B)

@@ -26,7 +26,7 @@ namespace magpie
     DEF_PRIMITIVE(multiply, "0: * 0:");
     DEF_PRIMITIVE(divide, "0: / 0:");
     
-    coreModule_ = new Module();
+    coreModule_ = createModule();
     
     makeClass(boolClass_, "Bool");
     makeClass(classClass_, "Class");
@@ -50,7 +50,7 @@ namespace magpie
     
     // Compile it.
     Module* module = Compiler::compileModule(*this, moduleAst, reporter);
-    
+
     if (reporter.numErrors() > 0) return false;
     
     loadModule(module);
@@ -59,7 +59,6 @@ namespace magpie
 
   void VM::loadModule(Module* module)
   {
-    modules_.add(module);
     fiber_->init(module->body());
     
     FiberResult result;
@@ -76,6 +75,20 @@ namespace magpie
     {
       exit(3);
     }
+  }
+
+  Module* VM::createModule()
+  {
+    Module* module = new Module();
+    modules_.add(module);
+    return module;
+  }
+  
+  int VM::getModuleIndex(Module* module) const
+  {
+    int index = modules_.indexOf(module);
+    ASSERT(index != -1, "Cannot get index of unknown module.");
+    return index;
   }
 
   void VM::reachRoots()

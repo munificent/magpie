@@ -2,13 +2,14 @@
 #include "ErrorReporter.h"
 #include "Module.h"
 #include "Resolver.h"
+#include "VM.h"
 
 namespace magpie
 {
-  void Resolver::resolve(ErrorReporter& reporter, const Module& module,
+  void Resolver::resolve(VM& vm, ErrorReporter& reporter, const Module& module,
                          MethodDef& method)
   {
-    Resolver resolver(reporter, module);
+    Resolver resolver(vm, reporter, module);
 
     // Create a top-level scope.
     Scope scope(&resolver);
@@ -282,7 +283,10 @@ namespace magpie
         if (*import->getExportName(j) == *expr.name())
         {
           // Found it.
-          expr.setResolved(ResolvedName(i, j));
+          
+          // Get the module's real index.
+          int module = vm_.getModuleIndex(import);
+          expr.setResolved(ResolvedName(module, j));
           return;
         }
       }

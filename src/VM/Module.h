@@ -30,11 +30,6 @@ namespace magpie
     gc<Object> getExport(int index) const { return exports_[index]; }
     gc<String> getExportName(int index) const { return exportNames_[index]; }
     
-    // Gets an imported top-level value. `importIndex` is the index of the
-    // imported module to get the value from. `exportIndex` is the index of the
-    // value to get in that module's list of exports.
-    gc<Object> getImport(int importIndex, int exportIndex);
-    
   private:
     // The code compromising a module is compiled to a fake method so that
     // loading a module is basically just executing a function call.

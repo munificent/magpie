@@ -23,7 +23,11 @@ namespace magpie
     bool loadModule(const char* fileName, gc<String> source);
     void loadModule(Module* module);
     
+    Module* createModule();
+    
     Module* coreModule() { return coreModule_; }
+    Module* getModule(int index) { return modules_[index]; }
+    int getModuleIndex(Module* module) const;
     
     Fiber& fiber() { return *fiber_; }
 
