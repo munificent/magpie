@@ -136,30 +136,10 @@ namespace magpie
     Memory::reach(constants_);
   }
   
-  int MethodScope::declare(gc<String> name)
-  {
-    // If a method is already declared with that name (either as a forward
-    // declaration, or as an actual previous method) then reuse that index.
-    int existing = find(name);
-    if (existing != -1) return existing;
-    
-    names_.add(name);
-    methods_.add(gc<Method>());
-    return names_.count() - 1;
-  }
-  
-  void MethodScope::define(int index, gc<Method> method)
-  {
-    ASSERT(methods_[index].isNull(),
-           "Multimethods are't implemented yet, so cannot redefine an "
-           "already defined method.");
-    
-    methods_[index] = method;
-  }
-
   void MethodScope::define(gc<String> name, gc<Method> method)
   {
-    define(find(name), method);
+    names_.add(name);
+    methods_.add(method);
   }
   
   void MethodScope::define(gc<String> name, Primitive primitive)

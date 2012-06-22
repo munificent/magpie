@@ -40,7 +40,7 @@ namespace magpie
     nothing_ = new NothingObject();
   }
 
-  bool VM::loadModule(const char* fileName, gc<String> source)
+  bool VM::loadProgram(const char* fileName, gc<String> source)
   {
     ErrorReporter reporter;
     Parser parser(fileName, source, reporter);
@@ -49,7 +49,7 @@ namespace magpie
     if (reporter.numErrors() > 0) return false;
     
     // Compile it.
-    Module* module = Compiler::compileModule(*this, moduleAst, reporter);
+    Module* module = Compiler::compileProgram(*this, moduleAst, reporter);
 
     if (reporter.numErrors() > 0) return false;
     

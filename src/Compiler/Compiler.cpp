@@ -9,59 +9,146 @@
 
 namespace magpie
 {
-  Module* Compiler::compileModule(VM& vm, gc<ModuleAst> moduleAst,
+  Module* Compiler::compileProgram(VM& vm, gc<ModuleAst> moduleAst,
                                   ErrorReporter& reporter)
   {
+    Compiler compiler(vm, reporter);
+    
     Module* module = vm.createModule();
     
     // TODO(bob): Doing this here is hackish. Need to figure out when a module's
     // imports are resolved.
     module->imports().add(vm.coreModule());
     
-    // Declare the definitions.
+    // TODO(bob): Hack temp. Cram the core primitives in the multimethod array
+    // so that things have the right indexes. This should go away. Instead, we
+    // should walk all modules and add their methods, including core.
+    compiler.addMethod(String::create("print 0:"), gc<MethodDef>(), vm.coreModule());
+    compiler.addMethod(String::create("0: + 0:"), gc<MethodDef>(), vm.coreModule());
+    compiler.addMethod(String::create("0: - 0:"), gc<MethodDef>(), vm.coreModule());
+    compiler.addMethod(String::create("0: * 0:"), gc<MethodDef>(), vm.coreModule());
+    compiler.addMethod(String::create("0: / 0:"), gc<MethodDef>(), vm.coreModule());
+    
+    // Group all of the methods together into multimethods. This also
+    // effectively forward-declares them, so we know their index.
     for (int i = 0; i < moduleAst->defs().count(); i++)
     {
       // TODO(bob): Handle non-method defs when they exist.
       MethodDef* method = moduleAst->defs()[i]->asMethodDef();
       gc<String> signature = SignatureBuilder::build(*method);
-      vm.methods().declare(signature);
+      compiler.addMethod(signature, method, module);
     }
     
-    // TODO(bob): This will need some work when modules and imports are
-    // supported. We will need to forward declare all of the modules, handle
-    // imported/exported names, and *then* go back and define all of them.
-    // Now define them to allow mutual recursion.
-    for (int i = 0; i < moduleAst->defs().count(); i++)
+    // Compile all of the multimethods.
+    for (int i = 0; i < compiler.multimethods_.count(); i++)
     {
-      // TODO(bob): Handle non-method defs when they exist.
-      MethodDef* method = moduleAst->defs()[i]->asMethodDef();
-      gc<String> signature = SignatureBuilder::build(*method);
-      gc<Method> compiled = compileMethod(vm, module, *method, reporter);
-      vm.methods().define(signature, compiled);
+      gc<Multimethod> multimethod = compiler.multimethods_[i];
+      
+      // TODO(bob): Hack temp. Skip primitive multimethods.
+      if (multimethod->methods()[0]->def().isNull()) continue;
+      
+      gc<Method> compiled = compileMultimethod(compiler, *multimethod, reporter);
+      vm.methods().define(multimethod->signature(), compiled);
     }
     
-    // Wrap the body in a shell method and compile it.
+    // Wrap the module's imperative code in a shell method and compile it.
     gc<Expr> body = moduleAst->body();
     MethodDef* method = new MethodDef(body->pos(), gc<Pattern>(),
         String::create("<module>"), gc<Pattern>(), body);
     
-    module->bindBody(compileMethod(vm, module, *method, reporter));
+    module->bindBody(compileMethod(compiler, module, *method, reporter));
+    
+    // TODO:
+    // - Make bytecode for calling a primitive.
+    // - Make a multimethod containing a primitive compile to a method that
+    //   just does a primitive call instruction.
+    // - Patterns for primitives.
+    // - Make MethodCompiler take a Multimethod.
     
     return module;
   }
 
-  gc<Method> Compiler::compileMethod(VM& vm, Module* module,
+  void Compiler::addMethod(gc<String> signature, gc<MethodDef> method,
+                           Module* module)
+  {
+    // See if we already have a multimethod with that signature.
+    int index;
+    for (index = 0; index < multimethods_.count(); index++)
+    {
+      if (multimethods_[index]->signature() == signature) break;
+    }
+    
+    if (index == multimethods_.count())
+    {
+      // A new multimethod, so add it.
+      multimethods_.add(new Multimethod(signature));
+    }
+    
+    multimethods_[index]->addMethod(method, module);
+  }
+  
+  int Compiler::findMethod(gc<String> signature)
+  {
+    for (int i = 0; i < multimethods_.count(); i++)
+    {
+      if (multimethods_[i]->signature() == signature) return i;
+    }
+    
+    return -1;
+  }
+
+  int Compiler::addSymbol(gc<String> name)
+  {
+    return vm_.addSymbol(name);
+  }
+
+  int Compiler::addRecordType(Array<int>& nameSymbols)
+  {
+    return vm_.addRecordType(nameSymbols);
+  }
+
+  int Compiler::getModuleIndex(Module* module)
+  {
+    return vm_.getModuleIndex(module);
+  }
+  
+  gc<Method> Compiler::compileMultimethod(Compiler& compiler,
+                                          Multimethod& multimethod,
+                                          ErrorReporter& reporter)
+  {
+    ASSERT(multimethod.methods().count() == 1, "Multimethods aren't implemented yet.");
+    
+    gc<MethodInstance> method = multimethod.methods()[0];
+    return MethodCompiler(compiler, method->module()).compile(*method->def());
+  }
+  
+  gc<Method> Compiler::compileMethod(Compiler& compiler, Module* module,
                                      MethodDef& method,
                                      ErrorReporter& reporter)
   {
-    Compiler compiler(vm, reporter, module);
-    return compiler.compile(method);
+    return MethodCompiler(compiler, module).compile(method);
   }
   
-  Compiler::Compiler(VM& vm, ErrorReporter& reporter, Module* module)
+  void MethodInstance::reach()
+  {
+    Memory::reach(def_);
+  }
+  
+  void Multimethod::addMethod(gc<MethodDef> method, Module* module)
+  {
+    methods_.add(new MethodInstance(method, module));
+  }
+  
+  void Multimethod::reach()
+  {
+    Memory::reach(signature_);
+    Memory::reach(methods_);
+  }
+  
+  MethodCompiler::MethodCompiler(Compiler& compiler,
+                                 Module* module)
   : ExprVisitor(),
-    vm_(vm),
-    reporter_(reporter),
+    compiler_(compiler),
     module_(module),
     method_(new Method()),
     code_(),
@@ -70,9 +157,9 @@ namespace magpie
     maxSlots_(0)
   {}
 
-  gc<Method> Compiler::compile(MethodDef& method)
+  gc<Method> MethodCompiler::compile(MethodDef& method)
   {
-    Resolver::resolve(vm_, reporter_, *module_, method);
+    Resolver::resolve(compiler_, *module_, method);
     
     // Reserve slots up front for all of the locals. This ensures that temps
     // will always be after locals.
@@ -100,7 +187,7 @@ namespace magpie
     return method_;
   }
   
-  void Compiler::compileParam(gc<Pattern> param, int& slot)
+  void MethodCompiler::compileParam(gc<Pattern> param, int& slot)
   {
     // No parameter so do nothing.
     if (param.isNull()) return;
@@ -121,7 +208,7 @@ namespace magpie
     }
   }
 
-  void Compiler::compileParamField(gc<Pattern> param, int slot)
+  void MethodCompiler::compileParamField(gc<Pattern> param, int slot)
   {
     VariablePattern* variable = param->asVariablePattern();
     if (variable != NULL)
@@ -138,7 +225,7 @@ namespace magpie
     }
   }
   
-  int Compiler::compileArg(gc<Expr> arg)
+  int MethodCompiler::compileArg(gc<Expr> arg)
   {
     // No arg so do nothing.
     if (arg.isNull()) return 0;
@@ -160,12 +247,12 @@ namespace magpie
     return 1;
   }
     
-  void Compiler::compile(gc<Expr> expr, int dest)
+  void MethodCompiler::compile(gc<Expr> expr, int dest)
   {
     expr->accept(*this, dest);
   }
   
-  void Compiler::compile(gc<Pattern> pattern, int slot)
+  void MethodCompiler::compile(gc<Pattern> pattern, int slot)
   {
     if (pattern.isNull()) return;
     
@@ -173,7 +260,7 @@ namespace magpie
     pattern->accept(compiler, slot);
   }
   
-  void Compiler::visit(AndExpr& expr, int dest)
+  void MethodCompiler::visit(AndExpr& expr, int dest)
   {
     compile(expr.left(), dest);
     
@@ -185,7 +272,7 @@ namespace magpie
     endJump(jumpToEnd, OP_JUMP_IF_FALSE, dest);
   }
   
-  void Compiler::visit(AssignExpr& expr, int dest)
+  void MethodCompiler::visit(AssignExpr& expr, int dest)
   {
     // Compile the value and also make it the result of the expression.
     compile(expr.value(), dest);
@@ -194,7 +281,7 @@ namespace magpie
     compile(expr.pattern(), dest);
   }
   
-  void Compiler::visit(BinaryOpExpr& expr, int dest)
+  void MethodCompiler::visit(BinaryOpExpr& expr, int dest)
   {
     int a = compileExpressionOrConstant(expr.left());
     int b = compileExpressionOrConstant(expr.right());
@@ -222,20 +309,20 @@ namespace magpie
     if (IS_SLOT(b)) releaseTemp();
   }
 
-  void Compiler::visit(BoolExpr& expr, int dest)
+  void MethodCompiler::visit(BoolExpr& expr, int dest)
   {
     write(OP_BUILT_IN, expr.value() ? BUILT_IN_TRUE : BUILT_IN_FALSE, dest);
   }
 
-  void Compiler::visit(CallExpr& expr, int dest)
+  void MethodCompiler::visit(CallExpr& expr, int dest)
   {
     gc<String> signature = SignatureBuilder::build(expr);
 
-    int method = vm_.methods().find(signature);
+    int method = compiler_.findMethod(signature);
     
     if (method == -1)
     {
-      reporter_.error(expr.pos(),
+      compiler_.reporter().error(expr.pos(),
                       "Could not find a method with signature '%s'.",
                       signature->cString());
     
@@ -253,7 +340,7 @@ namespace magpie
     releaseTemps(numTemps);
   }
   
-  void Compiler::visit(CatchExpr& expr, int dest)
+  void MethodCompiler::visit(CatchExpr& expr, int dest)
   {
     // Register the catch handler.
     int enter = startJump();
@@ -278,12 +365,12 @@ namespace magpie
     endJump(jumpPastCatch, OP_JUMP, 1);
   }
     
-  void Compiler::visit(DoExpr& expr, int dest)
+  void MethodCompiler::visit(DoExpr& expr, int dest)
   {
     compile(expr.body(), dest);
   }
 
-  void Compiler::visit(IfExpr& expr, int dest)
+  void MethodCompiler::visit(IfExpr& expr, int dest)
   {
     // Compile the condition.
     compile(expr.condition(), dest);
@@ -313,7 +400,7 @@ namespace magpie
     endJump(jumpPastElse, OP_JUMP, 1);
   }
   
-  void Compiler::visit(IsExpr& expr, int dest)
+  void MethodCompiler::visit(IsExpr& expr, int dest)
   {
     compile(expr.value(), dest);
     
@@ -325,13 +412,13 @@ namespace magpie
     releaseTemp(); // type
   }
 
-  void Compiler::visit(MatchExpr& expr, int dest)
+  void MethodCompiler::visit(MatchExpr& expr, int dest)
   {
     compile(expr.value(), dest);
     compileMatch(expr.cases(), dest);
   }
   
-  void Compiler::visit(NameExpr& expr, int dest)
+  void MethodCompiler::visit(NameExpr& expr, int dest)
   {
     ASSERT(expr.resolved().isResolved(),
            "Names should be resolved before compiling.");
@@ -347,24 +434,24 @@ namespace magpie
     }
   }
   
-  void Compiler::visit(NotExpr& expr, int dest)
+  void MethodCompiler::visit(NotExpr& expr, int dest)
   {
     compile(expr.value(), dest);
     write(OP_NOT, dest);
   }
   
-  void Compiler::visit(NothingExpr& expr, int dest)
+  void MethodCompiler::visit(NothingExpr& expr, int dest)
   {
     write(OP_BUILT_IN, BUILT_IN_NOTHING, dest);
   }
 
-  void Compiler::visit(NumberExpr& expr, int dest)
+  void MethodCompiler::visit(NumberExpr& expr, int dest)
   {
     int index = compileConstant(expr);
     write(OP_CONSTANT, index, dest);
   }
   
-  void Compiler::visit(OrExpr& expr, int dest)
+  void MethodCompiler::visit(OrExpr& expr, int dest)
   {
     compile(expr.left(), dest);
     
@@ -376,7 +463,7 @@ namespace magpie
     endJump(jumpToEnd, OP_JUMP_IF_TRUE, dest);
   }
   
-  void Compiler::visit(RecordExpr& expr, int dest)
+  void MethodCompiler::visit(RecordExpr& expr, int dest)
   {
     // TODO(bob): Hack. This assumes that the fields in the expression are in
     // the same order that the type expects. Eventually, the type needs to sort
@@ -393,13 +480,13 @@ namespace magpie
       if (i == 0) firstField = fieldSlot;
       
       compile(expr.fields()[i].value, fieldSlot);
-      names.add(vm_.addSymbol(expr.fields()[i].name));
+      names.add(compiler_.addSymbol(expr.fields()[i].name));
     }
     
     // TODO(bob): Need to sort field names.
     
     // Create the record type.
-    int type = vm_.addRecordType(names);
+    int type = compiler_.addRecordType(names);
     
     // Create the record.
     write(OP_RECORD, firstField, type, dest);
@@ -407,7 +494,7 @@ namespace magpie
     releaseTemps(expr.fields().count());
   }
   
-  void Compiler::visit(ReturnExpr& expr, int dest)
+  void MethodCompiler::visit(ReturnExpr& expr, int dest)
   {
     // Compile the return value.
     if (expr.value().isNull())
@@ -423,7 +510,7 @@ namespace magpie
     write(OP_RETURN, dest);
   }
   
-  void Compiler::visit(SequenceExpr& expr, int dest)
+  void MethodCompiler::visit(SequenceExpr& expr, int dest)
   {
     for (int i = 0; i < expr.expressions().count(); i++)
     {
@@ -434,13 +521,13 @@ namespace magpie
     }
   }
 
-  void Compiler::visit(StringExpr& expr, int dest)
+  void MethodCompiler::visit(StringExpr& expr, int dest)
   {
     int index = compileConstant(expr);
     write(OP_CONSTANT, index, dest);
   }
   
-  void Compiler::visit(ThrowExpr& expr, int dest)
+  void MethodCompiler::visit(ThrowExpr& expr, int dest)
   {
     // Compile the error object.
     compile(expr.value(), dest);
@@ -449,7 +536,7 @@ namespace magpie
     write(OP_THROW, dest);
   }
   
-  void Compiler::visit(VariableExpr& expr, int dest)
+  void MethodCompiler::visit(VariableExpr& expr, int dest)
   {
     // Compile the value.
     compile(expr.value(), dest);
@@ -458,7 +545,7 @@ namespace magpie
     compile(expr.pattern(), dest);
   }
   
-  void Compiler::visit(WhileExpr& expr, int dest)
+  void MethodCompiler::visit(WhileExpr& expr, int dest)
   {
     int loopStart = startJumpBack();
     
@@ -473,7 +560,7 @@ namespace magpie
     endJump(loopExit, OP_JUMP_IF_FALSE, condition);
   }
   
-  void Compiler::compileMatch(const Array<MatchClause>& clauses, int dest)
+  void MethodCompiler::compileMatch(const Array<MatchClause>& clauses, int dest)
   {
     Array<int> endJumps;
     
@@ -507,7 +594,7 @@ namespace magpie
     }
   }
   
-  int Compiler::compileExpressionOrConstant(gc<Expr> expr)
+  int MethodCompiler::compileExpressionOrConstant(gc<Expr> expr)
   {
     const NumberExpr* number = expr->asNumberExpr();
     if (number != NULL)
@@ -527,17 +614,17 @@ namespace magpie
     return dest;
   }
 
-  int Compiler::compileConstant(const NumberExpr& expr)
+  int MethodCompiler::compileConstant(const NumberExpr& expr)
   {
     return method_->addConstant(new NumberObject(expr.value()));
   }
 
-  int Compiler::compileConstant(const StringExpr& expr)
+  int MethodCompiler::compileConstant(const StringExpr& expr)
   {
     return method_->addConstant(new StringObject(expr.value()));
   }
 
-  void Compiler::write(OpCode op, int a, int b, int c)
+  void MethodCompiler::write(OpCode op, int a, int b, int c)
   {
     ASSERT_INDEX(a, 256);
     ASSERT_INDEX(b, 256);
@@ -546,20 +633,20 @@ namespace magpie
     code_.add(MAKE_ABC(a, b, c, op));
   }
 
-  int Compiler::startJump()
+  int MethodCompiler::startJump()
   {
     // Just write a dummy op to leave a space for the jump instruction.
     write(OP_MOVE);
     return code_.count() - 1;
   }
 
-  int Compiler::startJumpBack()
+  int MethodCompiler::startJumpBack()
   {
     // Remember the current instruction so we can calculate the offset.
     return code_.count() - 1;
   }
 
-  void Compiler::endJump(int from, OpCode op, int a, int b)
+  void MethodCompiler::endJump(int from, OpCode op, int a, int b)
   {
     int c;
     int offset = code_.count() - from - 1;
@@ -584,18 +671,18 @@ namespace magpie
     code_[from] = MAKE_ABC(a, b, c, op);
   }
 
-  void Compiler::endJumpBack(int to)
+  void MethodCompiler::endJumpBack(int to)
   {
     int offset = code_.count() - to;
     write(OP_JUMP, 0, offset);
   }
 
-  int Compiler::getNextTemp() const
+  int MethodCompiler::getNextTemp() const
   {
     return numLocals_ + numTemps_;
   }
   
-  int Compiler::makeTemp()
+  int MethodCompiler::makeTemp()
   {
     numTemps_++;
     if (maxSlots_ < numLocals_ + numTemps_)
@@ -606,12 +693,12 @@ namespace magpie
     return numLocals_ + numTemps_ - 1;
   }
 
-  void Compiler::releaseTemp()
+  void MethodCompiler::releaseTemp()
   {
     releaseTemps(1);
   }
   
-  void Compiler::releaseTemps(int count)
+  void MethodCompiler::releaseTemps(int count)
   {
     ASSERT(numTemps_ >= count, "Cannot release more temps than were created.");
     numTemps_ -= count;
@@ -646,7 +733,7 @@ namespace magpie
       // Test and destructure the field. This takes two instructions to encode
       // all of the operands.
       int field = compiler_.makeTemp();
-      int symbol = compiler_.vm_.addSymbol(pattern.fields()[i].name);
+      int symbol = compiler_.compiler_.addSymbol(pattern.fields()[i].name);
       
       if (jumpOnFailure_)
       {

@@ -1,4 +1,5 @@
 #include "Ast.h"
+#include "Compiler.h"
 #include "ErrorReporter.h"
 #include "Module.h"
 #include "Resolver.h"
@@ -6,10 +7,10 @@
 
 namespace magpie
 {
-  void Resolver::resolve(VM& vm, ErrorReporter& reporter, const Module& module,
+  void Resolver::resolve(Compiler& compiler, const Module& module,
                          MethodDef& method)
   {
-    Resolver resolver(vm, reporter, module);
+    Resolver resolver(compiler, module);
 
     // Create a top-level scope.
     Scope scope(&resolver);
@@ -132,7 +133,7 @@ namespace magpie
     {
       if (locals_[i] == name)
       {
-        reporter_.error(pos,
+        compiler_.reporter().error(pos,
             "There is already a variable '%s' defined in this scope.",
             name->cString());
       }
@@ -285,14 +286,14 @@ namespace magpie
           // Found it.
           
           // Get the module's real index.
-          int module = vm_.getModuleIndex(import);
+          int module = compiler_.getModuleIndex(import);
           expr.setResolved(ResolvedName(module, j));
           return;
         }
       }
     }
 
-    reporter_.error(expr.pos(),
+    compiler_.reporter().error(expr.pos(),
         "Variable '%s' is not defined.", expr.name()->cString());
     
     // Resolve it to some fake local so compilation can continue and report
@@ -444,7 +445,7 @@ namespace magpie
       
       if (slot == -1)
       {
-        resolver_.reporter_.error(pattern.pos(),
+        resolver_.compiler_.reporter().error(pattern.pos(),
             "Variable '%s' is not defined.", pattern.name()->cString());
         
         // Put a fake slot in so we can continue and report more errors.

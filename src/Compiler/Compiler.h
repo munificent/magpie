@@ -8,29 +8,103 @@
 namespace magpie
 {
   class ErrorReporter;
+  class Expr;
   class Method;
   class Module;
-  class Expr;
+  class Multimethod;
   class Object;
   class PatternCompiler;
   class Scope;
   class VM;
   
-  class Compiler : private ExprVisitor
+  class Compiler
   {
-    friend class PatternCompiler;
-    
   public:
-    static Module* compileModule(VM& vm, gc<ModuleAst> module,
+    static Module* compileProgram(VM& vm, gc<ModuleAst> module,
                                  ErrorReporter& reporter);
-    static gc<Method> compileMethod(VM& vm, Module* module,
+
+    ErrorReporter& reporter() { return reporter_; }
+    
+    void addMethod(gc<String> signature, gc<MethodDef> method, Module* module);
+    int findMethod(gc<String> signature);
+    
+    int addSymbol(gc<String> name);
+    int addRecordType(Array<int>& nameSymbols);
+    int getModuleIndex(Module* module);
+    
+  private:
+    static gc<Method> compileMultimethod(Compiler& compiler,
+                                    Multimethod& multimethod,
+                                    ErrorReporter& reporter);
+    
+    static gc<Method> compileMethod(Compiler& compiler, Module* module,
                                     MethodDef& method,
                                     ErrorReporter& reporter);
     
-    virtual ~Compiler() {}
+    Compiler(VM& vm, ErrorReporter& reporter)
+    : vm_(vm),
+      reporter_(reporter),
+      multimethods_()
+    {}
+    
+    VM& vm_;
+    ErrorReporter& reporter_;
+    
+    // TODO(bob): Make this a map.
+    Array<gc<Multimethod> > multimethods_;
+  };
+  
+  // A single method definition in a multimethod, and the context where it was
+  // defined so that it can be compiled correctly.
+  // TODO(bob): Should this be gc, or just a value type?
+  class MethodInstance : public Managed
+  {
+  public:
+    MethodInstance(gc<MethodDef> def, Module* module)
+    : def_(def),
+      module_(module)
+    {}
+    
+    gc<MethodDef> def() { return def_; }
+    Module* module() { return module_; }
+    
+    virtual void reach();
+
+  private:
+    gc<MethodDef> def_;
+    Module* module_;
+  };
+  
+  // Collects all of the method definitions for a given signature so that they
+  // can be compiled to a single bytecode method all at once.
+  class Multimethod : public Managed
+  {
+  public:
+    Multimethod(gc<String> signature)
+    : signature_(signature)
+    {}
+    
+    gc<String> signature() { return signature_; }
+    void addMethod(gc<MethodDef> method, Module* module);
+    Array<gc<MethodInstance> > methods() { return methods_; }
+    
+    virtual void reach();
+
+  private:
+    gc<String> signature_;
+    Array<gc<MethodInstance> > methods_;
+  };
+    
+  class MethodCompiler : private ExprVisitor
+  {
+    friend class Compiler;
+    friend class PatternCompiler;
+    
+  public:
+    virtual ~MethodCompiler() {}
     
   private:    
-    Compiler(VM& vm, ErrorReporter& reporter, Module* module);
+    MethodCompiler(Compiler& compiler, Module* module);
     
     gc<Method> compile(MethodDef& method);
 
@@ -96,8 +170,7 @@ namespace magpie
     void releaseTemp();
     void releaseTemps(int count);
     
-    VM& vm_;
-    ErrorReporter& reporter_;
+    Compiler& compiler_;
 
     // The module containing the method being compiled.
     Module* module_;
@@ -112,7 +185,7 @@ namespace magpie
     int numTemps_;
     int maxSlots_;
     
-    NO_COPY(Compiler);
+    NO_COPY(MethodCompiler);
   };
   
   // Locates a code offset and a slot where a pattern-match test operation
@@ -143,7 +216,7 @@ namespace magpie
   class PatternCompiler : public PatternVisitor
   {
   public:
-    PatternCompiler(Compiler& compiler, bool jumpOnFailure = false)
+    PatternCompiler(MethodCompiler& compiler, bool jumpOnFailure = false)
     : compiler_(compiler),
       jumpOnFailure_(jumpOnFailure)
     {}
@@ -159,7 +232,7 @@ namespace magpie
   private:
     void writeTest(int slot);
     
-    Compiler& compiler_;
+    MethodCompiler& compiler_;
     bool jumpOnFailure_;
     Array<MatchTest> tests_;
   };

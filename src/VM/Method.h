@@ -62,8 +62,6 @@ namespace magpie
   class MethodScope
   {
   public:
-    int declare(gc<String> name);
-    void define(int index, gc<Method> method);
     void define(gc<String> name, gc<Method> method);
     void define(gc<String> name, Primitive primitive);
     

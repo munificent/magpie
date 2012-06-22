@@ -20,7 +20,7 @@ namespace magpie
 
     virtual void reachRoots();
     
-    bool loadModule(const char* fileName, gc<String> source);
+    bool loadProgram(const char* fileName, gc<String> source);
     void loadModule(Module* module);
     
     Module* createModule();

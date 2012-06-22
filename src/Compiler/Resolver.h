@@ -6,6 +6,7 @@
 
 namespace magpie
 {
+  class Compiler;
   class Scope;
   class VM;
   
@@ -14,13 +15,12 @@ namespace magpie
     friend class Scope;
     
   public:
-    static void resolve(VM& vm, ErrorReporter& reporter, const Module& module,
+    static void resolve(Compiler& compiler, const Module& module,
                         MethodDef& method);
     
   private:
-    Resolver(VM& vm, ErrorReporter& reporter, const Module& module)
-    : vm_(vm),
-      reporter_(reporter),
+    Resolver(Compiler& compiler, const Module& module)
+    : compiler_(compiler),
       module_(module),
       locals_(),
       maxLocals_(0),
@@ -64,8 +64,7 @@ namespace magpie
     virtual void visit(VariableExpr& expr, int dummy);
     virtual void visit(WhileExpr& expr, int dummy);
 
-    VM& vm_;
-    ErrorReporter& reporter_;
+    Compiler& compiler_;
 
     const Module& module_;
     
