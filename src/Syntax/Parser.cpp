@@ -118,8 +118,34 @@ namespace magpie
         consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
       }
 
-      gc<Token> name = consume(TOKEN_NAME,
-                               "Expect a method name after 'def'.");
+      gc<Token> name;
+      if (lookAhead(TOKEN_NAME) ||
+          lookAhead(TOKEN_EQEQ) ||
+          lookAhead(TOKEN_NEQ) ||
+          lookAhead(TOKEN_LT) ||
+          lookAhead(TOKEN_GT) ||
+          lookAhead(TOKEN_LTE) ||
+          lookAhead(TOKEN_GTE) ||
+          lookAhead(TOKEN_PLUS) ||
+          lookAhead(TOKEN_MINUS) ||
+          lookAhead(TOKEN_STAR) ||
+          lookAhead(TOKEN_SLASH) ||
+          lookAhead(TOKEN_PERCENT))
+      {
+        name = consume();
+      }
+      else if (leftParam.isNull())
+      {
+        reporter_.error(current().pos(),
+            "Expect a method name after 'def' but got '%s'.",
+            current().text()->cString());
+      }
+      else
+      {
+        reporter_.error(current().pos(),
+            "Expect a method name after left parameter in 'def' but got '%s'.",
+            current().text()->cString());
+      }
 
       gc<Pattern> rightParam;
       if (match(TOKEN_LEFT_PAREN))
@@ -134,8 +160,21 @@ namespace magpie
           consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
         }
       }
-
-      gc<Expr> body = parseBlock();
+      
+      // See if this is a native method.
+      gc<Expr> body;
+      if (lookAhead(TOKEN_NAME) && (*current().text() == "native"))
+      {
+        consume();
+        gc<Token> text = consume(TOKEN_STRING,
+            "Expect string after 'native'.");
+        body = new NativeExpr(text->pos(), text->text());
+      }
+      else
+      {
+        body = parseBlock();
+      }
+      
       SourcePos span = start.spanTo(last()->pos());
       return new MethodDef(span, leftParam, name->text(), rightParam, body);
     }

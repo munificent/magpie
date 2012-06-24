@@ -114,6 +114,11 @@ namespace magpie
     out << name_;
   }
   
+  void NativeExpr::trace(std::ostream& out) const
+  {
+    out << "(native " << name_ << ")";
+  }
+  
   void NotExpr::trace(std::ostream& out) const
   {
     out << "(not " << value_ << ")";

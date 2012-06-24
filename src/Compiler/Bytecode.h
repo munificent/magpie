@@ -77,23 +77,28 @@ namespace magpie
     // TODO(bob): Tweak operands so that we can support more than 256 methods.
     OP_CALL = 0x10,
     
+    // Invokes a primitive method. The index of the primitive is A. The result
+    // of the call will be placed into register B. Assumes the arguments to the
+    // primitive are the top of the current call frame's stack.
+    OP_PRIMITIVE = 0x11,
+    
     // Exits the current method, returning slot A.
-    OP_RETURN = 0x11,
+    OP_RETURN = 0x12,
     
     // Throws the error object in slot A.
-    OP_THROW = 0x12,
+    OP_THROW = 0x13,
     
     // Registers a new catch handler. If an error is thrown before the
     // subsequent OP_EXIT_TRY, then execution will jump to the associated catch
     // block. Its code location is the location of the OP_ENTER_TRY + A.
-    OP_ENTER_TRY = 0x13,
+    OP_ENTER_TRY = 0x14,
     
     // Discards the previous OP_ENTER_TRY handler. This occurs when execution
     // has proceeded past the block containing a catch clause.
-    OP_EXIT_TRY = 0x14,
+    OP_EXIT_TRY = 0x15,
     
     // Throws a NoMatchError if slot A is false.
-    OP_TEST_MATCH = 0x15
+    OP_TEST_MATCH = 0x16
   };
   
   enum BuiltIn

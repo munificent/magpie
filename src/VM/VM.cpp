@@ -6,13 +6,11 @@
 #include "Parser.h"
 #include "Primitives.h"
 
-#define DEF_PRIMITIVE(name, signature) \
-        methods_.define(String::create(signature), name##Primitive); \
-
 namespace magpie
 {
   VM::VM()
   : modules_(),
+    primitives_(),
     recordTypes_(),
     fiber_()
   {
@@ -20,11 +18,11 @@ namespace magpie
     
     fiber_ = new Fiber(*this);
     
-    DEF_PRIMITIVE(print, "print 0:");
-    DEF_PRIMITIVE(add, "0: + 0:");
-    DEF_PRIMITIVE(subtract, "0: - 0:");
-    DEF_PRIMITIVE(multiply, "0: * 0:");
-    DEF_PRIMITIVE(divide, "0: / 0:");
+    primitives_.add(printPrimitive);
+    primitives_.add(addPrimitive);
+    primitives_.add(subtractPrimitive);
+    primitives_.add(multiplyPrimitive);
+    primitives_.add(dividePrimitive);
     
     coreModule_ = createModule();
     
@@ -42,14 +40,32 @@ namespace magpie
 
   bool VM::loadProgram(const char* fileName, gc<String> source)
   {
-    ErrorReporter reporter;
-    Parser parser(fileName, source, reporter);
-    gc<ModuleAst> moduleAst = parser.parseModule();
+    // TODO(bob): Put this in an actual file somewhere.
+    /*
+    const char* coreSource =
+        "def (is Num) + (is Num) native \"num +\"\n"
+        "def (is Num) - (is Num) native \"num -\"\n"
+        "def (is Num) * (is Num) native \"num *\"\n"
+        "def (is Num) / (is Num) native \"num /\"\n"
+        "def print(arg) native \"print\"\n";
+     */
+    // TODO(bob): Type annotate args when core module can figure out what "Num"
+    // is bound to.
+    const char* coreSource =
+        "def (_) + (_) native \"num +\"\n"
+        "def (_) - (_) native \"num -\"\n"
+        "def (_) * (_) native \"num *\"\n"
+        "def (_) / (_) native \"num /\"\n"
+        "def print(arg) native \"print\"\n";
+    gc<ModuleAst> coreAst = parseModule("<core>", String::create(coreSource));
     
-    if (reporter.numErrors() > 0) return false;
+    gc<ModuleAst> moduleAst = parseModule(fileName, source);
+    
+    if (moduleAst.isNull()) return false;
     
     // Compile it.
-    Module* module = Compiler::compileProgram(*this, moduleAst, reporter);
+    ErrorReporter reporter;
+    Module* module = Compiler::compileProgram(*this, coreAst, moduleAst, reporter);
 
     if (reporter.numErrors() > 0) return false;
     
@@ -153,6 +169,17 @@ namespace magpie
     // It's a new symbol.
     symbols_.add(name);
     return symbols_.count() - 1;
+  }
+
+  gc<ModuleAst> VM::parseModule(const char* fileName, gc<String> source)
+  {
+    ErrorReporter reporter;
+    Parser parser(fileName, source, reporter);
+    gc<ModuleAst> moduleAst = parser.parseModule();
+    
+    if (reporter.numErrors() > 0) return gc<ModuleAst>();
+    
+    return moduleAst;
   }
 
   void VM::makeClass(gc<Object>& classObj, const char* name)

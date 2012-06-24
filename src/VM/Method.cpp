@@ -107,6 +107,10 @@ namespace magpie
         cout << "CALL          " << GET_A(ins) << "(" << GET_B(ins) << ") -> " << GET_C(ins);
         break;
         
+      case OP_PRIMITIVE:
+        cout << "PRIMITIVE     " << GET_A(ins) << "(" << GET_B(ins) << ") -> " << GET_C(ins);
+        break;
+        
       case OP_RETURN:
         cout << "RETURN        " << GET_A(ins);
         break;
@@ -141,13 +145,7 @@ namespace magpie
     names_.add(name);
     methods_.add(method);
   }
-  
-  void MethodScope::define(gc<String> name, Primitive primitive)
-  {
-    names_.add(name);
-    methods_.add(new Method(primitive));
-  }
-  
+    
   int MethodScope::find(gc<String> name) const
   {
     for (int i = 0; i < methods_.count(); i++)

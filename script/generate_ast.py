@@ -15,7 +15,7 @@ defs = sorted({
         ('name',        'gc<String>'),
         ('rightParam',  'gc<Pattern>'),
         ('body',        'gc<Expr>'),
-        ('maxLocals*',  'int')],
+        ('maxLocals*',  'int')]
 }.items())
 
 exprs = sorted({
@@ -53,6 +53,9 @@ exprs = sorted({
     'Name': [
         ('name',        'gc<String>'),
         ('resolved*',   'ResolvedName')],
+    'Native': [
+        ('name',        'gc<String>'),
+        ('index*',      'int')],
     'Not': [
         ('value',       'gc<Expr>')],
     'Nothing': [],
@@ -125,7 +128,7 @@ public:
   virtual ~{0}() {{}}
 
   // The visitor pattern.
-  virtual void accept({0}Visitor& visitor, int arg) = 0;
+  virtual void accept({0}Visitor& visitor, {2} arg) = 0;
 
   // Dynamic casts.
 {1}
@@ -145,7 +148,7 @@ public:
   : {6}(pos){2}
   {{}}
 
-  virtual void accept({6}Visitor& visitor, int arg)
+  virtual void accept({6}Visitor& visitor, {7} arg)
   {{
     visitor.visit(*this, arg);
   }}
@@ -188,9 +191,9 @@ def main():
         forwardDeclare(file, exprs, 'Expr')
         forwardDeclare(file, patterns, 'Pattern')
 
-        makeAst(file, 'Def', defs)
-        makeAst(file, 'Expr', exprs)
-        makeAst(file, 'Pattern', patterns)
+        makeAst(file, 'Def', 'Module*', defs)
+        makeAst(file, 'Expr', 'int', exprs)
+        makeAst(file, 'Pattern', 'int', patterns)
 
     print 'Created', num_types, 'types.'
 
@@ -200,24 +203,24 @@ def forwardDeclare(file, nodes, name):
         file.write('class {0}{1};\n'.format(className, name))
 
 
-def makeAst(file, name, types):
-    makeVisitor(file, name, types)
-    makeBaseClass(file, name, types)
+def makeAst(file, name, visitorParam, types):
+    makeVisitor(file, name, visitorParam, types)
+    makeBaseClass(file, name, visitorParam, types)
     for type, fields in types:
-        makeClass(file, name, type, fields)
+        makeClass(file, name, type, visitorParam, fields)
 
 
-def makeVisitor(file, name, types):
+def makeVisitor(file, name, param, types):
     result = VISITOR_HEADER.format(name)
 
     for className, fields in types:
-        result += ('  virtual void visit({1}{0}& node, int dest) = 0;\n'
-            .format(name, className))
+        result += ('  virtual void visit({1}{0}& node, {2} arg) = 0;\n'
+            .format(name, className, param))
 
     file.write(result + VISITOR_FOOTER.format(name))
 
 
-def makeClass(file, baseClass, className, fields):
+def makeClass(file, baseClass, className, visitorParam, fields):
     global num_types
     num_types += 1
     ctorParams = ''
@@ -272,14 +275,14 @@ def makeClass(file, baseClass, className, fields):
         reach = REACH_METHOD.format(reachFields)
 
     file.write(SUBCLASS.format(className, ctorParams, ctorArgs, accessors,
-                               reach, memberVars, baseClass))
+                               reach, memberVars, baseClass, visitorParam))
 
-def makeBaseClass(file, name, types):
+def makeBaseClass(file, name, visitorParam, types):
     casts = ''
     for subclass, fields in types:
         casts += '  virtual {1}{0}* as{1}{0}()'.format(name, subclass)
         casts += ' { return NULL; }\n'
 
-    file.write(BASE_CLASS.format(name, casts))
+    file.write(BASE_CLASS.format(name, casts, visitorParam))
 
 main()

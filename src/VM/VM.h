@@ -10,7 +10,10 @@
 namespace magpie
 {
   class Module;
+  class ModuleAst;
   class RecordType;
+  
+  typedef gc<Object> (*Primitive)(ArrayView<gc<Object> >& args);
   
   // The main Virtual Machine class for a running Magpie interpreter.
   class VM : public RootSource
@@ -59,16 +62,23 @@ namespace magpie
       ASSERT(false, "Unknown built-in ID.");
     }
     
+    Primitive getPrimitive(int index) const { return primitives_[index]; }
+    
     int addRecordType(const Array<int>& fields);
     gc<RecordType> getRecordType(int id);
     
     symbolId addSymbol(gc<String> name);
     
   private:
+    // Parses the given module source file. Returns null if there was a syntax
+    // error.
+    gc<ModuleAst> parseModule(const char* fileName, gc<String> source);
+    
     void makeClass(gc<Object>& classObj, const char* name);
     
     Array<Module*> modules_;
     Module* coreModule_;
+    Array<Primitive> primitives_;
     Array<gc<RecordType> > recordTypes_;
     // TODO(bob): Something more optimal than an O(n) array.
     Array<gc<String> > symbols_;

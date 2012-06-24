@@ -11,6 +11,7 @@ namespace magpie
 
   class Def;
   class Expr;
+  class Module;
   class Pattern;
   
   // A record field.

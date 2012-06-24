@@ -11,17 +11,19 @@ namespace magpie
   class Expr;
   class Method;
   class Module;
+  class ModuleCompilation;
   class Multimethod;
   class Object;
   class PatternCompiler;
   class Scope;
   class VM;
   
-  class Compiler
+  class Compiler : private DefVisitor
   {
   public:
-    static Module* compileProgram(VM& vm, gc<ModuleAst> module,
-                                 ErrorReporter& reporter);
+    static Module* compileProgram(VM& vm, gc<ModuleAst> coreAst,
+                                  gc<ModuleAst> module,
+                                  ErrorReporter& reporter);
 
     ErrorReporter& reporter() { return reporter_; }
     
@@ -33,10 +35,6 @@ namespace magpie
     int getModuleIndex(Module* module);
     
   private:
-    static gc<Method> compileMultimethod(Compiler& compiler,
-                                    Multimethod& multimethod,
-                                    ErrorReporter& reporter);
-    
     static gc<Method> compileMethod(Compiler& compiler, Module* module,
                                     MethodDef& method,
                                     ErrorReporter& reporter);
@@ -47,11 +45,37 @@ namespace magpie
       multimethods_()
     {}
     
+    void visit(MethodDef& def, Module* module);
+    
+    void declareModule(gc<ModuleAst> moduleAst, Module* module);
+    void compileMultimethods();
+    
     VM& vm_;
     ErrorReporter& reporter_;
     
+    Array<gc<ModuleCompilation> > modules_;
     // TODO(bob): Make this a map.
     Array<gc<Multimethod> > multimethods_;
+  };
+  
+  // A module being compiled.
+  // TODO(bob): Should this be gc, or just a value type?
+  class ModuleCompilation : public Managed
+  {
+  public:
+    ModuleCompilation(gc<ModuleAst> ast, Module* module)
+    : ast_(ast),
+      module_(module)
+    {}
+    
+    gc<ModuleAst> ast() { return ast_; }
+    Module* module() { return module_; }
+    
+    virtual void reach();
+
+  private:
+    gc<ModuleAst> ast_;
+    Module* module_;
   };
   
   // A single method definition in a multimethod, and the context where it was
@@ -126,6 +150,7 @@ namespace magpie
     virtual void visit(IsExpr& expr, int dest);
     virtual void visit(MatchExpr& expr, int dest);
     virtual void visit(NameExpr& expr, int dest);
+    virtual void visit(NativeExpr& expr, int dest);
     virtual void visit(NotExpr& expr, int dest);
     virtual void visit(NothingExpr& expr, int dest);
     virtual void visit(NumberExpr& expr, int dest);

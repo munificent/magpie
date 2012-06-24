@@ -286,16 +286,17 @@ namespace magpie
         {
           gc<Method> method = vm_.methods().get(GET_A(ins));
           int firstArg = GET_B(ins);
+          int stackStart = frame.stackStart + firstArg;
+          call(method, stackStart);
+          break;
+        }
           
-          Primitive primitive = method->primitive();
-          if (primitive != NULL) {
-            ArrayView<gc<Object> > args(stack_, frame.stackStart + firstArg);
-            gc<Object> result = primitive(args);
-            store(frame, GET_C(ins), result);
-          } else {
-            int stackStart = frame.stackStart + firstArg;
-            call(method, stackStart);
-          }
+        case OP_PRIMITIVE:
+        {
+          Primitive primitive = vm_.getPrimitive(GET_A(ins));
+          ArrayView<gc<Object> > args(stack_, frame.stackStart);
+          gc<Object> result = primitive(args);
+          store(frame, GET_B(ins), result);
           break;
         }
           

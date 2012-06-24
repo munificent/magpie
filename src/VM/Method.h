@@ -11,30 +11,19 @@ namespace magpie
   class Module;
   class Object;
   
-  typedef gc<Object> (*Primitive)(ArrayView<gc<Object> >& args);
-  
   class Method : public Managed
   {
   public:
     Method()
     : code_(),
       constants_(),
-      numSlots_(0),
-      primitive_(NULL)
+      numSlots_(0)
     {}
-    
-    Method(Primitive primitive)
-    : code_(),
-      constants_(),
-      numSlots_(0),
-      primitive_(primitive)
-    {}
-    
+        
     void setCode(const Array<instruction>& code,
                  int maxSlots);
     
     inline const Array<instruction>& code() const { return code_; }
-    inline Primitive primitive() const { return primitive_; }
     
     int addConstant(gc<Object> constant);
     gc<Object> getConstant(int index) const;
@@ -52,10 +41,6 @@ namespace magpie
     
     int numSlots_;
     
-    // The primitive function for this method. Will be NULL for non-primitive
-    // methods.
-    Primitive primitive_;
-    
     NO_COPY(Method);
   };
 
@@ -63,7 +48,6 @@ namespace magpie
   {
   public:
     void define(gc<String> name, gc<Method> method);
-    void define(gc<String> name, Primitive primitive);
     
     int find(gc<String> name) const;
     gc<Method> get(int index) const { return methods_[index]; }

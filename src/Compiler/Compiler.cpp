@@ -9,8 +9,9 @@
 
 namespace magpie
 {
-  Module* Compiler::compileProgram(VM& vm, gc<ModuleAst> moduleAst,
-                                  ErrorReporter& reporter)
+  Module* Compiler::compileProgram(VM& vm, gc<ModuleAst> coreAst,
+                                   gc<ModuleAst> moduleAst,
+                                   ErrorReporter& reporter)
   {
     Compiler compiler(vm, reporter);
     
@@ -20,36 +21,10 @@ namespace magpie
     // imports are resolved.
     module->imports().add(vm.coreModule());
     
-    // TODO(bob): Hack temp. Cram the core primitives in the multimethod array
-    // so that things have the right indexes. This should go away. Instead, we
-    // should walk all modules and add their methods, including core.
-    compiler.addMethod(String::create("print 0:"), gc<MethodDef>(), vm.coreModule());
-    compiler.addMethod(String::create("0: + 0:"), gc<MethodDef>(), vm.coreModule());
-    compiler.addMethod(String::create("0: - 0:"), gc<MethodDef>(), vm.coreModule());
-    compiler.addMethod(String::create("0: * 0:"), gc<MethodDef>(), vm.coreModule());
-    compiler.addMethod(String::create("0: / 0:"), gc<MethodDef>(), vm.coreModule());
-    
-    // Group all of the methods together into multimethods. This also
-    // effectively forward-declares them, so we know their index.
-    for (int i = 0; i < moduleAst->defs().count(); i++)
-    {
-      // TODO(bob): Handle non-method defs when they exist.
-      MethodDef* method = moduleAst->defs()[i]->asMethodDef();
-      gc<String> signature = SignatureBuilder::build(*method);
-      compiler.addMethod(signature, method, module);
-    }
-    
-    // Compile all of the multimethods.
-    for (int i = 0; i < compiler.multimethods_.count(); i++)
-    {
-      gc<Multimethod> multimethod = compiler.multimethods_[i];
-      
-      // TODO(bob): Hack temp. Skip primitive multimethods.
-      if (multimethod->methods()[0]->def().isNull()) continue;
-      
-      gc<Method> compiled = compileMultimethod(compiler, *multimethod, reporter);
-      vm.methods().define(multimethod->signature(), compiled);
-    }
+    // TODO(bob): Need to do this on all modules in the import graph.
+    compiler.declareModule(coreAst, vm.coreModule());
+    compiler.declareModule(moduleAst, module);
+    compiler.compileMultimethods();
     
     // Wrap the module's imperative code in a shell method and compile it.
     gc<Expr> body = moduleAst->body();
@@ -57,17 +32,9 @@ namespace magpie
         String::create("<module>"), gc<Pattern>(), body);
     
     module->bindBody(compileMethod(compiler, module, *method, reporter));
-    
-    // TODO:
-    // - Make bytecode for calling a primitive.
-    // - Make a multimethod containing a primitive compile to a method that
-    //   just does a primitive call instruction.
-    // - Patterns for primitives.
-    // - Make MethodCompiler take a Multimethod.
-    
     return module;
   }
-
+  
   void Compiler::addMethod(gc<String> signature, gc<MethodDef> method,
                            Module* module)
   {
@@ -111,17 +78,7 @@ namespace magpie
   {
     return vm_.getModuleIndex(module);
   }
-  
-  gc<Method> Compiler::compileMultimethod(Compiler& compiler,
-                                          Multimethod& multimethod,
-                                          ErrorReporter& reporter)
-  {
-    ASSERT(multimethod.methods().count() == 1, "Multimethods aren't implemented yet.");
     
-    gc<MethodInstance> method = multimethod.methods()[0];
-    return MethodCompiler(compiler, method->module()).compile(*method->def());
-  }
-  
   gc<Method> Compiler::compileMethod(Compiler& compiler, Module* module,
                                      MethodDef& method,
                                      ErrorReporter& reporter)
@@ -129,6 +86,46 @@ namespace magpie
     return MethodCompiler(compiler, module).compile(method);
   }
   
+  void Compiler::visit(MethodDef& def, Module* module)
+  {
+    gc<String> signature = SignatureBuilder::build(def);
+    addMethod(signature, &def, module);
+  }
+  
+  void Compiler::declareModule(gc<ModuleAst> moduleAst, Module* module)
+  {
+    modules_.add(new ModuleCompilation(moduleAst, module));
+    
+    // Group all of the methods together into multimethods. This also
+    // effectively forward-declares them, so we know their index.
+    for (int i = 0; i < moduleAst->defs().count(); i++)
+    {
+      moduleAst->defs()[i]->accept(*this, module);
+    }
+  }
+  
+  void Compiler::compileMultimethods()
+  {
+    // Compile all of the multimethods.
+    for (int i = 0; i < multimethods_.count(); i++)
+    {
+      gc<Multimethod> multimethod = multimethods_[i];
+      
+      ASSERT(multimethod->methods().count() == 1,
+             "Multimethods aren't implemented yet.");
+      
+      gc<MethodInstance> method = multimethod->methods()[0];
+      gc<Method> compiled = MethodCompiler(*this, method->module()).compile(*method->def());
+      
+      vm_.methods().define(multimethod->signature(), compiled);
+    }
+  }
+  
+  void ModuleCompilation::reach()
+  {
+    Memory::reach(ast_);
+  }
+
   void MethodInstance::reach()
   {
     Memory::reach(def_);
@@ -432,6 +429,11 @@ namespace magpie
       write(OP_GET_MODULE, expr.resolved().import(), expr.resolved().index(),
             dest);
     }
+  }
+  
+  void MethodCompiler::visit(NativeExpr& expr, int dest)
+  {
+    write(OP_PRIMITIVE, expr.index(), dest);
   }
   
   void MethodCompiler::visit(NotExpr& expr, int dest)

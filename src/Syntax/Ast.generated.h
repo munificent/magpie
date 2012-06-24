@@ -13,6 +13,7 @@ class IfExpr;
 class IsExpr;
 class MatchExpr;
 class NameExpr;
+class NativeExpr;
 class NotExpr;
 class NothingExpr;
 class NumberExpr;
@@ -35,7 +36,7 @@ class DefVisitor
 public:
   virtual ~DefVisitor() {}
 
-  virtual void visit(MethodDef& node, int dest) = 0;
+  virtual void visit(MethodDef& node, Module* arg) = 0;
 
 protected:
   DefVisitor() {}
@@ -54,7 +55,7 @@ public:
   virtual ~Def() {}
 
   // The visitor pattern.
-  virtual void accept(DefVisitor& visitor, int arg) = 0;
+  virtual void accept(DefVisitor& visitor, Module* arg) = 0;
 
   // Dynamic casts.
   virtual MethodDef* asMethodDef() { return NULL; }
@@ -77,7 +78,7 @@ public:
     maxLocals_(-1)
   {}
 
-  virtual void accept(DefVisitor& visitor, int arg)
+  virtual void accept(DefVisitor& visitor, Module* arg)
   {
     visitor.visit(*this, arg);
   }
@@ -114,28 +115,29 @@ class ExprVisitor
 public:
   virtual ~ExprVisitor() {}
 
-  virtual void visit(AndExpr& node, int dest) = 0;
-  virtual void visit(AssignExpr& node, int dest) = 0;
-  virtual void visit(BinaryOpExpr& node, int dest) = 0;
-  virtual void visit(BoolExpr& node, int dest) = 0;
-  virtual void visit(CallExpr& node, int dest) = 0;
-  virtual void visit(CatchExpr& node, int dest) = 0;
-  virtual void visit(DoExpr& node, int dest) = 0;
-  virtual void visit(IfExpr& node, int dest) = 0;
-  virtual void visit(IsExpr& node, int dest) = 0;
-  virtual void visit(MatchExpr& node, int dest) = 0;
-  virtual void visit(NameExpr& node, int dest) = 0;
-  virtual void visit(NotExpr& node, int dest) = 0;
-  virtual void visit(NothingExpr& node, int dest) = 0;
-  virtual void visit(NumberExpr& node, int dest) = 0;
-  virtual void visit(OrExpr& node, int dest) = 0;
-  virtual void visit(RecordExpr& node, int dest) = 0;
-  virtual void visit(ReturnExpr& node, int dest) = 0;
-  virtual void visit(SequenceExpr& node, int dest) = 0;
-  virtual void visit(StringExpr& node, int dest) = 0;
-  virtual void visit(ThrowExpr& node, int dest) = 0;
-  virtual void visit(VariableExpr& node, int dest) = 0;
-  virtual void visit(WhileExpr& node, int dest) = 0;
+  virtual void visit(AndExpr& node, int arg) = 0;
+  virtual void visit(AssignExpr& node, int arg) = 0;
+  virtual void visit(BinaryOpExpr& node, int arg) = 0;
+  virtual void visit(BoolExpr& node, int arg) = 0;
+  virtual void visit(CallExpr& node, int arg) = 0;
+  virtual void visit(CatchExpr& node, int arg) = 0;
+  virtual void visit(DoExpr& node, int arg) = 0;
+  virtual void visit(IfExpr& node, int arg) = 0;
+  virtual void visit(IsExpr& node, int arg) = 0;
+  virtual void visit(MatchExpr& node, int arg) = 0;
+  virtual void visit(NameExpr& node, int arg) = 0;
+  virtual void visit(NativeExpr& node, int arg) = 0;
+  virtual void visit(NotExpr& node, int arg) = 0;
+  virtual void visit(NothingExpr& node, int arg) = 0;
+  virtual void visit(NumberExpr& node, int arg) = 0;
+  virtual void visit(OrExpr& node, int arg) = 0;
+  virtual void visit(RecordExpr& node, int arg) = 0;
+  virtual void visit(ReturnExpr& node, int arg) = 0;
+  virtual void visit(SequenceExpr& node, int arg) = 0;
+  virtual void visit(StringExpr& node, int arg) = 0;
+  virtual void visit(ThrowExpr& node, int arg) = 0;
+  virtual void visit(VariableExpr& node, int arg) = 0;
+  virtual void visit(WhileExpr& node, int arg) = 0;
 
 protected:
   ExprVisitor() {}
@@ -168,6 +170,7 @@ public:
   virtual IsExpr* asIsExpr() { return NULL; }
   virtual MatchExpr* asMatchExpr() { return NULL; }
   virtual NameExpr* asNameExpr() { return NULL; }
+  virtual NativeExpr* asNativeExpr() { return NULL; }
   virtual NotExpr* asNotExpr() { return NULL; }
   virtual NothingExpr* asNothingExpr() { return NULL; }
   virtual NumberExpr* asNumberExpr() { return NULL; }
@@ -534,6 +537,38 @@ private:
   ResolvedName resolved_;
 };
 
+class NativeExpr : public Expr
+{
+public:
+  NativeExpr(const SourcePos& pos, gc<String> name)
+  : Expr(pos),
+    name_(name),
+    index_(-1)
+  {}
+
+  virtual void accept(ExprVisitor& visitor, int arg)
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual NativeExpr* asNativeExpr() { return this; }
+
+  gc<String> name() const { return name_; }
+  int index() const { return index_; }
+  void setIndex(int index) { index_ = index; }
+
+  virtual void reach()
+  {
+    Memory::reach(name_);
+  }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  gc<String> name_;
+  int index_;
+};
+
 class NotExpr : public Expr
 {
 public:
@@ -854,11 +889,11 @@ class PatternVisitor
 public:
   virtual ~PatternVisitor() {}
 
-  virtual void visit(RecordPattern& node, int dest) = 0;
-  virtual void visit(TypePattern& node, int dest) = 0;
-  virtual void visit(ValuePattern& node, int dest) = 0;
-  virtual void visit(VariablePattern& node, int dest) = 0;
-  virtual void visit(WildcardPattern& node, int dest) = 0;
+  virtual void visit(RecordPattern& node, int arg) = 0;
+  virtual void visit(TypePattern& node, int arg) = 0;
+  virtual void visit(ValuePattern& node, int arg) = 0;
+  virtual void visit(VariablePattern& node, int arg) = 0;
+  virtual void visit(WildcardPattern& node, int arg) = 0;
 
 protected:
   PatternVisitor() {}
