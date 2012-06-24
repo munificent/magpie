@@ -77,10 +77,10 @@ namespace magpie
     // TODO(bob): Tweak operands so that we can support more than 256 methods.
     OP_CALL = 0x10,
     
-    // Invokes a primitive method. The index of the primitive is A. The result
-    // of the call will be placed into register B. Assumes the arguments to the
-    // primitive are the top of the current call frame's stack.
-    OP_PRIMITIVE = 0x11,
+    // Invokes a native method. The index of the native is A. The result of the
+    // call will be placed into register B. Assumes the arguments to the
+    // native are the top of the current call frame's stack.
+    OP_NATIVE = 0x11,
     
     // Exits the current method, returning slot A.
     OP_RETURN = 0x12,

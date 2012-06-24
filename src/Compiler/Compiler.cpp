@@ -433,7 +433,7 @@ namespace magpie
   
   void MethodCompiler::visit(NativeExpr& expr, int dest)
   {
-    write(OP_PRIMITIVE, expr.index(), dest);
+    write(OP_NATIVE, expr.index(), dest);
   }
   
   void MethodCompiler::visit(NotExpr& expr, int dest)

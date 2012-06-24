@@ -10,7 +10,7 @@ namespace magpie
 {
   VM::VM()
   : modules_(),
-    primitives_(),
+    natives_(),
     recordTypes_(),
     fiber_()
   {
@@ -18,11 +18,11 @@ namespace magpie
     
     fiber_ = new Fiber(*this);
     
-    primitives_.add(printPrimitive);
-    primitives_.add(addPrimitive);
-    primitives_.add(subtractPrimitive);
-    primitives_.add(multiplyPrimitive);
-    primitives_.add(dividePrimitive);
+    natives_.add(printPrimitive);
+    natives_.add(addPrimitive);
+    natives_.add(subtractPrimitive);
+    natives_.add(multiplyPrimitive);
+    natives_.add(dividePrimitive);
     
     coreModule_ = createModule();
     

@@ -291,11 +291,11 @@ namespace magpie
           break;
         }
           
-        case OP_PRIMITIVE:
+        case OP_NATIVE:
         {
-          Primitive primitive = vm_.getPrimitive(GET_A(ins));
+          Native native = vm_.getNative(GET_A(ins));
           ArrayView<gc<Object> > args(stack_, frame.stackStart);
-          gc<Object> result = primitive(args);
+          gc<Object> result = native(args);
           store(frame, GET_B(ins), result);
           break;
         }
