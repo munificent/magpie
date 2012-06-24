@@ -2,14 +2,19 @@
 #include "Compiler.h"
 #include "ErrorReporter.h"
 #include "Module.h"
+#include "Natives.h"
 #include "Object.h"
 #include "Parser.h"
-#include "Primitives.h"
+
+#define DEF_NATIVE(name, desc) \
+    nativeNames_.add(String::create(desc)); \
+    natives_.add(name##Native);
 
 namespace magpie
 {
   VM::VM()
   : modules_(),
+    nativeNames_(),
     natives_(),
     recordTypes_(),
     fiber_()
@@ -18,11 +23,11 @@ namespace magpie
     
     fiber_ = new Fiber(*this);
     
-    natives_.add(printPrimitive);
-    natives_.add(addPrimitive);
-    natives_.add(subtractPrimitive);
-    natives_.add(multiplyPrimitive);
-    natives_.add(dividePrimitive);
+    DEF_NATIVE(print, "print");
+    DEF_NATIVE(add, "num +");
+    DEF_NATIVE(subtract, "num -");
+    DEF_NATIVE(multiply, "num *");
+    DEF_NATIVE(divide, "num /");
     
     coreModule_ = createModule();
     
@@ -122,6 +127,16 @@ namespace magpie
     }
   }
   
+  int VM::findNative(gc<String> name)
+  {
+    for (int i = 0; i < nativeNames_.count(); i++)
+    {
+      if (nativeNames_[i] == name) return i;
+    }
+
+    return -1;
+  }
+
   int VM::addRecordType(const Array<int>& fields)
   {
     // TODO(bob): Should use a hash table or something more optimal.

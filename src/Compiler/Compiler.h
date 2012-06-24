@@ -33,6 +33,7 @@ namespace magpie
     int addSymbol(gc<String> name);
     int addRecordType(Array<int>& nameSymbols);
     int getModuleIndex(Module* module);
+    int findNative(gc<String> name);
     
   private:
     static gc<Method> compileMethod(Compiler& compiler, Module* module,

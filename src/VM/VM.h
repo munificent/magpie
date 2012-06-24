@@ -62,6 +62,7 @@ namespace magpie
       ASSERT(false, "Unknown built-in ID.");
     }
     
+    int findNative(gc<String> name);
     Native getNative(int index) const { return natives_[index]; }
     
     int addRecordType(const Array<int>& fields);
@@ -78,7 +79,10 @@ namespace magpie
     
     Array<Module*> modules_;
     Module* coreModule_;
+    
+    Array<gc<String> > nativeNames_;
     Array<Native> natives_;
+    
     Array<gc<RecordType> > recordTypes_;
     // TODO(bob): Something more optimal than an O(n) array.
     Array<gc<String> > symbols_;

@@ -79,6 +79,11 @@ namespace magpie
     return vm_.getModuleIndex(module);
   }
     
+  int Compiler::findNative(gc<String> name)
+  {
+    return vm_.findNative(name);
+  }
+
   gc<Method> Compiler::compileMethod(Compiler& compiler, Module* module,
                                      MethodDef& method,
                                      ErrorReporter& reporter)

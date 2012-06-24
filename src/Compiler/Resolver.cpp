@@ -303,18 +303,15 @@ namespace magpie
   
   void Resolver::visit(NativeExpr& expr, int dummy)
   {
-    // TODO(bob): Hack temp. Put this somewhere central.
-    if (*expr.name() == "print") expr.setIndex(0);
-    else if (*expr.name() == "num +") expr.setIndex(1);
-    else if (*expr.name() == "num -") expr.setIndex(2);
-    else if (*expr.name() == "num *") expr.setIndex(3);
-    else if (*expr.name() == "num /") expr.setIndex(4);
-    else
+    int index = compiler_.findNative(expr.name());
+    
+    if (index == -1)
     {
       compiler_.reporter().error(expr.pos(),
           "Unknown native '%s'.", expr.name()->cString());
-      expr.setIndex(0);
     }
+
+    expr.setIndex(index);
   }
   
   void Resolver::visit(NotExpr& expr, int dummy)
