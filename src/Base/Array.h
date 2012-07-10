@@ -42,7 +42,7 @@ namespace magpie
       capacity_(0),
       items_(NULL)
     {
-      add(array);
+      addAll(array);
     }
 
     ~Array()
@@ -69,7 +69,7 @@ namespace magpie
     }
 
     // Adds all of the items from the given array to this one.
-    void add(const Array<T>& array)
+    void addAll(const Array<T>& array)
     {
       ensureCapacity_(count_ + array.count_);
 
@@ -141,6 +141,15 @@ namespace magpie
       count_ = count;
     }
     
+    // If the array is smaller than size, than grows it to that size. New
+    // elements are filled by calling the default constructor on T.
+    void grow(int size)
+    {
+      if (count_ >= size) return;
+      ensureCapacity_(size);
+      count_ = size;
+    }
+    
     // Assigns the contents of the given array to this one. Clears this array
     // and refills it with the contents of the other.
     Array& operator=(const Array& other)
@@ -149,7 +158,7 @@ namespace magpie
       if (&other == this) return *this;
 
       clear();
-      add(other);
+      addAll(other);
 
       return *this;
     }

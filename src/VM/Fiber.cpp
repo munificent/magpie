@@ -80,8 +80,7 @@ namespace magpie
             int symbol = GET_B(ins);
             gc<Object> field = record->getField(symbol);
 
-            // If the record doesn't have the field, fail the match.
-            // TODO(bob): Throw NoMatchError.
+            // If the record has the field, store it.
             if (!field.isNull())
             {
               store(frame, GET_C(ins), field);
@@ -116,8 +115,7 @@ namespace magpie
             int symbol = GET_B(ins);
             gc<Object> field = record->getField(symbol);
             
-            // If the record doesn't have the field, fail the match.
-            // TODO(bob): Throw NoMatchError.
+            // If the record has the field, store it.
             if (!field.isNull())
             {
               store(frame, GET_C(ins), field);
@@ -332,9 +330,7 @@ namespace magpie
           
         case OP_THROW:
         {
-          // TODO(bob): Throw an actual value.
           gc<Object> error = load(frame, GET_A(ins));
-          //std::cout << "throwing " << error << std::endl;
           if (!throwError(error)) return FIBER_UNCAUGHT_ERROR;
           break;
         }
@@ -411,12 +407,7 @@ namespace magpie
   void Fiber::call(gc<Method> method, int stackStart)
   {
     // Allocate slots for the method.
-    // TODO(bob): Make this a single operation on Array.
-    while (stack_.count() < stackStart + method->numSlots())
-    {
-      stack_.add(gc<Object>());
-    }
-    
+    stack_.grow(stackStart + method->numSlots());    
     callFrames_.add(CallFrame(method, stackStart));
   }
 

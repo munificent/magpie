@@ -14,6 +14,7 @@ namespace magpie
     void subscript();
     void lastIndexOf();
     void removeAt();
+    void grow();
     void truncate();
   };
 }

@@ -3,12 +3,38 @@
 
 namespace magpie
 {
+  // Number-like value class that has a meaningful default constructor.
+  struct Int
+  {
+    Int()
+    : value(-1)
+    {}
+    
+    Int(int value)
+    : value(value)
+    {}
+  
+    int value;
+  };
+  
+  bool operator !=(int left, const Int& right)
+  {
+    return left != right.value;
+  }
+  
+  std::ostream& operator <<(std::ostream& out, const Int& i)
+  {
+    out << i.value;
+    return out;
+  };
+  
   void ArrayTests::runTests()
   {
     create();
     subscript();
     lastIndexOf();
     removeAt();
+    grow();
     truncate();
   }
   
@@ -81,6 +107,33 @@ namespace magpie
     array.removeAt(0);
     
     EXPECT_EQUAL(0, array.count());
+  }
+  
+  void ArrayTests::grow()
+  {
+    Array<Int> array;
+    array.add(1);
+    array.add(2);
+    
+    // Grow to a smaller size does nothing.
+    array.grow(1);    
+    EXPECT_EQUAL(2, array.count());
+    EXPECT_EQUAL(1, array[0]);
+    EXPECT_EQUAL(2, array[1]);
+    
+    // Grow to same size does nothing.
+    array.grow(2);
+    EXPECT_EQUAL(2, array.count());
+    EXPECT_EQUAL(1, array[0]);
+    EXPECT_EQUAL(2, array[1]);
+    
+    // Grow.
+    array.grow(4);
+    EXPECT_EQUAL(4, array.count());
+    EXPECT_EQUAL(1, array[0]);
+    EXPECT_EQUAL(2, array[1]);
+    EXPECT_EQUAL(-1, array[2]);
+    EXPECT_EQUAL(-1, array[3]);
   }
   
   void ArrayTests::truncate()
