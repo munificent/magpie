@@ -57,6 +57,19 @@ end
 
 // We'd like to be able to make this work too.
 
+/*
+
+There's another problem too. We need to detect pattern collisions with value
+patterns, like:
+*/
+
+def foo(== 2) ...
+def foo(== 1 + 1) ...
+
+/*
+Ideally, we would do that statically when the method is being "compiled", but
+that means evaluating expressions during compilation.
+*/
 
 
 
@@ -92,3 +105,67 @@ lazily on use. "Evaluated" here mainly means evaluating the superclass
 expression and field patterns.
 
 */
+
+
+// -----------------------------------------------------------------------------
+// Strawman 2: FAIL
+//
+// Top-level variable initializers, expressions in method patterns, and
+// superclass expressions are evaluated eagerly, top-down. So this is OK:
+
+defclass Foo
+end
+
+def method(is Foo) ...
+
+// But these are errors:
+
+def method(== bar) // error: bar not defined yet
+var bar = 1
+
+def method(is Bar) // error: Bar not defined yet
+
+defclass Bar is Foo // error: Foo not defined yet
+end
+defclass Foo
+end
+
+// However, method bodies and field initializers are "lazy": they can safely
+// refer to things defined later in the file at the top level.
+
+// Crap: no that won't work. Field *patterns* would want to be eager here like
+// method patterns (because the point for this is so that those methods can be
+// sorted at compile time) but we definitely need mutual recursion in field
+// patterns.
+
+
+/*
+
+Strawman 3: Embrace interpretation
+
+Top-level variable initializers and superclass expressions are evaluated lazily
+on first use. They are *resolved* eagerly, which should catch most compile
+errors. We can maybe detect cycles eagerly too.
+
+Multimethods are sorted on first use and method pattern expressions are
+evaluated at that time. This should mean that a method pattern expression can
+call a method, it just can't have a circular method call dependency.
+
+Pros:
+- I think it may actually work?
+
+Cons:
+- Need to be able to execute Magpie code before methods can be sorted. So
+- compiling a multimethod to pure bytecode can't be done "statically" before
+  any Magpie code is run.
+
+*/
+
+def foo(== 0) 0
+
+var bar = foo(0)
+
+def foo(== bar) 1
+
+print(foo(1))
+
