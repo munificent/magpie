@@ -1,0 +1,9 @@
+// skip
+defclass Foo
+    var bar = baz()
+end
+
+def baz() "baz"
+
+var foo = Foo new
+print(foo bar) // expect: baz

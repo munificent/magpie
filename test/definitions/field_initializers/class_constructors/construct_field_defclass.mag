@@ -1,0 +1,9 @@
+// skip
+var foo = Foo new // expect exit 3
+
+defclass Foo
+    var bar = Bar new
+end
+
+defclass Bar
+end

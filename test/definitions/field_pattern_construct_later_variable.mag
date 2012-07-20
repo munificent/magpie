@@ -1,0 +1,12 @@
+// skip
+defclass Foo
+    var field is bar
+end
+
+do
+    var foo = Foo new(field: 123)
+catch is NoMethodError then
+    print("caught") // expect: caught
+end
+
+var bar = Num

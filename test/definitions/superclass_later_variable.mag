@@ -1,0 +1,10 @@
+// skip
+defclass Foo
+end
+
+defclass Bar is fooVar // expect error
+end
+
+var fooVar = Foo
+
+print(Bar new is Foo)

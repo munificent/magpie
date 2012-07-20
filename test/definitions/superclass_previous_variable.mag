@@ -1,0 +1,10 @@
+// skip
+defclass Foo
+end
+
+var fooVar = Foo
+
+defclass Bar is fooVar
+end
+
+print(Bar new is Foo) // expect: true

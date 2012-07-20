@@ -1,0 +1,4 @@
+// skip
+def foo() "ok"
+var a = foo()
+print(a) // expect: ok

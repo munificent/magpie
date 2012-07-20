@@ -1,0 +1,11 @@
+// skip
+defclass Foo
+end
+
+// TODO(bob): Compile error or NoMethodError?
+defclass Bar is foo() // expect error
+end
+
+def foo() Foo
+
+print(Bar new is Foo)
