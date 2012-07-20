@@ -20,7 +20,7 @@ namespace magpie
   private:    
     MethodCompiler(Compiler& compiler, Module* module);
     
-    gc<Method> compile(MethodDef& method);
+    gc<Chunk> compile(MethodDef& method);
 
     void compileParam(gc<Pattern> param, int& slot);
     void compileParamField(gc<Pattern> param, int slot);
@@ -90,8 +90,8 @@ namespace magpie
     // The module containing the method being compiled.
     Module* module_;
     
-    // The method being compiled.
-    gc<Method> method_;
+    // The chunk being compiled.
+    gc<Chunk> chunk_;
     
     Array<instruction> code_;
     

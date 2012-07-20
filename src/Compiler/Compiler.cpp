@@ -85,7 +85,7 @@ namespace magpie
     return vm_.findNative(name);
   }
 
-  gc<Method> Compiler::compileMethod(Compiler& compiler, Module* module,
+  gc<Chunk> Compiler::compileMethod(Compiler& compiler, Module* module,
                                      MethodDef& method,
                                      ErrorReporter& reporter)
   {
@@ -121,7 +121,7 @@ namespace magpie
              "Multimethods aren't implemented yet.");
       
       gc<MethodInstance> method = multimethod->methods()[0];
-      gc<Method> compiled = MethodCompiler(*this, method->module()).compile(*method->def());
+      gc<Chunk> compiled = MethodCompiler(*this, method->module()).compile(*method->def());
       
       vm_.methods().define(multimethod->signature(), compiled);
     }

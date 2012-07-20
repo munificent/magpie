@@ -11,10 +11,11 @@ namespace magpie
   class Module;
   class Object;
   
-  class Method : public Managed
+  // A compiled chunk of bytecode that can be executed by a Fiber.
+  class Chunk : public Managed
   {
   public:
-    Method()
+    Chunk()
     : code_(),
       constants_(),
       numSlots_(0)
@@ -41,21 +42,21 @@ namespace magpie
     
     int numSlots_;
     
-    NO_COPY(Method);
+    NO_COPY(Chunk);
   };
 
   class MethodScope
   {
   public:
-    void define(gc<String> name, gc<Method> method);
+    void define(gc<String> name, gc<Chunk> method);
     
     int find(gc<String> name) const;
-    gc<Method> get(int index) const { return methods_[index]; }
+    gc<Chunk> get(int index) const { return methods_[index]; }
     
     void reach();
     
   private:
-    Array<gc<Method> > methods_;
+    Array<gc<Chunk> > methods_;
     Array<gc<String> > names_;
   };
 }

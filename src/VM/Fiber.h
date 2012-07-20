@@ -14,7 +14,7 @@ namespace magpie
   // The reason Fiber::run() returned.
   enum FiberResult
   {
-    // The fiber's entry method has completed and the fiber is complete.
+    // The fiber's entry chunk has completed and the fiber is complete.
     FIBER_DONE = 0,
     
     // A garbage collection is happened, so the fiber has moved in memory.
@@ -30,7 +30,7 @@ namespace magpie
   public:
     Fiber(VM& vm);
     
-    void init(gc<Method> method);
+    void init(gc<Chunk> chunk);
     FiberResult run();
 
     virtual void reach();
@@ -40,23 +40,23 @@ namespace magpie
     {
       // So that we can use CallFrames in an Array<T> by value.
       CallFrame()
-      : method(),
+      : chunk(),
         ip(0),
         stackStart(0)
       {}
       
-      CallFrame(gc<Method> method, int stackStart)
-      : method(method),
+      CallFrame(gc<Chunk> chunk, int stackStart)
+      : chunk(chunk),
         ip(0),
         stackStart(stackStart)
       {}
       
-      gc<Method>  method;
+      gc<Chunk>   chunk;
       int         ip;
       int         stackStart;
     };
     
-    void call(gc<Method> method, int stackStart);
+    void call(gc<Chunk> chunk, int stackStart);
     
     // Loads a slot for the given callframe.
     inline gc<Object> load(const CallFrame& frame, int slot)
@@ -108,10 +108,10 @@ namespace magpie
     // is unhandled and the fiber will abort.
     gc<CatchFrame> parent_;
     
-    // Index of the CallFrame for the method containing this catch.
+    // Index of the CallFrame for the chunk containing this catch.
     int callFrame_;
     
-    // The offset of the instruction to jump to in the containing method to
+    // The offset of the instruction to jump to in the containing chunk to
     // start executing the catch handler.
     int offset_;
   };

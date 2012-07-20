@@ -6,8 +6,8 @@
 
 namespace magpie
 {
+  class Chunk;
   class ErrorReporter;
-  class Method;
   class Module;
   class ModuleCompilation;
   class Multimethod;
@@ -31,9 +31,9 @@ namespace magpie
     int findNative(gc<String> name);
     
   private:
-    static gc<Method> compileMethod(Compiler& compiler, Module* module,
-                                    MethodDef& method,
-                                    ErrorReporter& reporter);
+    static gc<Chunk> compileMethod(Compiler& compiler, Module* module,
+                                   MethodDef& method,
+                                   ErrorReporter& reporter);
     
     Compiler(VM& vm, ErrorReporter& reporter)
     : vm_(vm),

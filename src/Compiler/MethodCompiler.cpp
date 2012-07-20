@@ -11,14 +11,14 @@ namespace magpie
   : ExprVisitor(),
     compiler_(compiler),
     module_(module),
-    method_(new Method()),
+    chunk_(new Chunk()),
     code_(),
     numLocals_(0),
     numTemps_(0),
     maxSlots_(0)
   {}
 
-  gc<Method> MethodCompiler::compile(MethodDef& method)
+  gc<Chunk> MethodCompiler::compile(MethodDef& method)
   {
     Resolver::resolve(compiler_, *module_, method);
     
@@ -43,9 +43,9 @@ namespace magpie
     compile(method.body(), numParamSlots);
     write(OP_RETURN, numParamSlots);
 
-    method_->setCode(code_, maxSlots_);
+    chunk_->setCode(code_, maxSlots_);
     
-    return method_;
+    return chunk_;
   }
   
   void MethodCompiler::compileParam(gc<Pattern> param, int& slot)
@@ -482,12 +482,12 @@ namespace magpie
 
   int MethodCompiler::compileConstant(const NumberExpr& expr)
   {
-    return method_->addConstant(new NumberObject(expr.value()));
+    return chunk_->addConstant(new NumberObject(expr.value()));
   }
 
   int MethodCompiler::compileConstant(const StringExpr& expr)
   {
-    return method_->addConstant(new StringObject(expr.value()));
+    return chunk_->addConstant(new StringObject(expr.value()));
   }
 
   void MethodCompiler::write(OpCode op, int a, int b, int c)

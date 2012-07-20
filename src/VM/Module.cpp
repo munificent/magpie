@@ -12,7 +12,7 @@ namespace magpie
     Memory::reach(exportNames_);
   }
   
-  void Module::bindBody(gc<Method> body)
+  void Module::bindBody(gc<Chunk> body)
   {
     ASSERT(body_.isNull(), "Can only bind a module once.");
     body_ = body;

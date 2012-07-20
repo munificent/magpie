@@ -1,0 +1,5 @@
+// skip
+// expect exit 3
+foo()
+def foo() bar
+var bar = "123"

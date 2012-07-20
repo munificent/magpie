@@ -14,12 +14,12 @@ namespace magpie
     nearestCatch_()
   {}
 
-  void Fiber::init(gc<Method> method)
+  void Fiber::init(gc<Chunk> chunk)
   {
     ASSERT(stack_.count() == 0, "Cannot re-initialize Fiber.");
     ASSERT(callFrames_.count() == 0, "Cannot re-initialize Fiber.");
 
-    call(method, 0);
+    call(chunk, 0);
   }
 
   FiberResult Fiber::run()
@@ -29,7 +29,7 @@ namespace magpie
       if (Memory::checkCollect()) return FIBER_DID_GC;
       
       CallFrame& frame = callFrames_[-1];
-      instruction ins = frame.method->code()[frame.ip++];
+      instruction ins = frame.chunk->code()[frame.ip++];
       OpCode op = GET_OP(ins);
 
       switch (op)
@@ -46,7 +46,7 @@ namespace magpie
         {
           int index = GET_A(ins);
           int slot = GET_B(ins);
-          store(frame, slot, frame.method->getConstant(index));
+          store(frame, slot, frame.chunk->getConstant(index));
           break;
         }
           
@@ -104,7 +104,7 @@ namespace magpie
           
           // The next instruction is a pseudo-instruction containing the offset
           // to jump to.
-          instruction jump = frame.method->code()[frame.ip++];
+          instruction jump = frame.chunk->code()[frame.ip++];
           ASSERT(GET_OP(jump) == OP_JUMP,
                  "Pseudo-instruction after OP_TEST_FIELD must be OP_JUMP.");
           
@@ -284,7 +284,7 @@ namespace magpie
           
         case OP_CALL:
         {
-          gc<Method> method = vm_.methods().get(GET_A(ins));
+          gc<Chunk> method = vm_.methods().get(GET_A(ins));
           int firstArg = GET_B(ins);
           int stackStart = frame.stackStart + firstArg;
           call(method, stackStart);
@@ -305,7 +305,7 @@ namespace magpie
           gc<Object> result = loadSlotOrConstant(frame, GET_A(ins));
           callFrames_.removeAt(-1);
           
-          // Discard any try blocks enclosed in the current method.
+          // Discard any try blocks enclosed in the current chunk.
           while (!nearestCatch_.isNull() &&
                  (nearestCatch_->callFrame() >= callFrames_.count()))
           {
@@ -314,9 +314,9 @@ namespace magpie
           
           if (callFrames_.count() > 0)
           {
-            // Give the result back and resume the calling method.
+            // Give the result back and resume the calling chunk.
             CallFrame& caller = callFrames_[-1];
-            instruction callInstruction = caller.method->code()[caller.ip - 1];
+            instruction callInstruction = caller.chunk->code()[caller.ip - 1];
             ASSERT(GET_OP(callInstruction) == OP_CALL,
                    "Should be returning to a call.");
             
@@ -324,7 +324,7 @@ namespace magpie
           }
           else
           {
-            // The last method has returned, so end the fiber.
+            // The last chunk has returned, so end the fiber.
             // TODO(bob): Do we care about the result value?
             return FIBER_DONE;
           }
@@ -379,7 +379,7 @@ namespace magpie
   {
     // Walk the stack.
     CallFrame& frame = callFrames_[-1];
-    int numSlots = frame.stackStart + frame.method->numSlots();
+    int numSlots = frame.stackStart + frame.chunk->numSlots();
     
     // Only reach slots that are still in use. We don't shrink the stack, so it
     // may have dead slots at the end that are safe to collect.
@@ -405,20 +405,20 @@ namespace magpie
     
     for (int i = 0; i < callFrames_.count(); i++)
     {
-      Memory::reach(callFrames_[i].method);
+      Memory::reach(callFrames_[i].chunk);
     }
   }
   
-  void Fiber::call(gc<Method> method, int stackStart)
+  void Fiber::call(gc<Chunk> chunk, int stackStart)
   {
     // Allocate slots for the method.
     // TODO(bob): Make this a single operation on Array.
-    while (stack_.count() < stackStart + method->numSlots())
+    while (stack_.count() < stackStart + chunk->numSlots())
     {
       stack_.add(gc<Object>());
     }
     
-    callFrames_.add(CallFrame(method, stackStart));
+    callFrames_.add(CallFrame(chunk, stackStart));
   }
 
   bool Fiber::throwError(gc<Object> error)
@@ -435,7 +435,7 @@ namespace magpie
     frame.ip = nearestCatch_->offset();
     
     // The next instruction is a pseudo-op identifying where the error is.
-    instruction errorIns = frame.method->code()[frame.ip];
+    instruction errorIns = frame.chunk->code()[frame.ip];
     ASSERT(GET_OP(errorIns) == OP_MOVE,
         "Expect pseudo-instruction at beginning of catch code.");
     int errorSlot = GET_A(errorIns);
@@ -452,7 +452,7 @@ namespace magpie
   {
     if (IS_CONSTANT(index))
     {
-      return frame.method->getConstant(GET_CONSTANT(index));
+      return frame.chunk->getConstant(GET_CONSTANT(index));
     }
     else
     {

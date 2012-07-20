@@ -5,7 +5,7 @@
 
 namespace magpie
 {
-  class Method;
+  class Chunk;
   class Object;
   
   // A module is a single file of compiled Magpie code.
@@ -19,8 +19,8 @@ namespace magpie
     
     void reach();
     
-    void bindBody(gc<Method> body);
-    gc<Method> body() const { return body_; }
+    void bindBody(gc<Chunk> body);
+    gc<Chunk> body() const { return body_; }
     
     Array<Module*>& imports() { return imports_; }
     const Array<Module*>& imports() const { return imports_; }
@@ -33,7 +33,7 @@ namespace magpie
   private:
     // The code compromising a module is compiled to a fake method so that
     // loading a module is basically just executing a function call.
-    gc<Method> body_;
+    gc<Chunk> body_;
     
     // The modules imported by this one.
     Array<Module*> imports_;

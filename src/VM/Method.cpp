@@ -4,14 +4,14 @@
 
 namespace magpie
 {
-  void Method::setCode(const Array<instruction>& code, int numSlots)
+  void Chunk::setCode(const Array<instruction>& code, int numSlots)
   {
     // TODO(bob): Copying here is lame!
     code_ = code;
     numSlots_ = numSlots;
   }
 
-  int Method::addConstant(gc<Object> constant)
+  int Chunk::addConstant(gc<Object> constant)
   {
     // TODO(bob): Should check for duplicates. Only need one copy of any
     // given constant.
@@ -19,13 +19,13 @@ namespace magpie
     return constants_.count() - 1;
   }
   
-  gc<Object> Method::getConstant(int index) const
+  gc<Object> Chunk::getConstant(int index) const
   {
     ASSERT_INDEX(index, constants_.count());
     return constants_[index];
   }
 
-  void Method::debugTrace() const
+  void Chunk::debugTrace() const
   {
     using namespace std;
     
@@ -37,7 +37,7 @@ namespace magpie
     }
   }
   
-  void Method::debugTrace(instruction ins) const
+  void Chunk::debugTrace(instruction ins) const
   {
     using namespace std;
     
@@ -135,12 +135,12 @@ namespace magpie
     cout << endl;
   }
 
-  void Method::reach()
+  void Chunk::reach()
   {
     Memory::reach(constants_);
   }
   
-  void MethodScope::define(gc<String> name, gc<Method> method)
+  void MethodScope::define(gc<String> name, gc<Chunk> method)
   {
     names_.add(name);
     methods_.add(method);
