@@ -14,7 +14,7 @@ namespace magpie
   class RecordType;
   
   typedef gc<Object> (*Native)(ArrayView<gc<Object> >& args);
-  
+
   // The main Virtual Machine class for a running Magpie interpreter.
   class VM : public RootSource
   {
@@ -34,9 +34,6 @@ namespace magpie
     
     Fiber& fiber() { return *fiber_; }
 
-    // The globally available top-level methods.
-    MethodScope& methods() { return methods_; }
-    
     inline gc<Object> nothing() const { return nothing_; }
     
     inline gc<Object> boolClass() const { return boolClass_; }
@@ -70,6 +67,15 @@ namespace magpie
     
     symbolId addSymbol(gc<String> name);
     
+    // Adds a method to the list of methods that have been compiled, but whose
+    // definitions have not yet been executed.
+    methodId addMethod(gc<Method> method);
+    
+    int declareMultimethod(gc<String> signature);
+    int findMultimethod(gc<String> signature);
+    void defineMethod(int multimethod, methodId method);
+    gc<Chunk> getMultimethod(int multimethod);
+    
   private:
     // Parses the given module source file. Returns null if there was a syntax
     // error.
@@ -86,7 +92,10 @@ namespace magpie
     Array<gc<RecordType> > recordTypes_;
     // TODO(bob): Something more optimal than an O(n) array.
     Array<gc<String> > symbols_;
-    MethodScope methods_;
+    
+    Array<gc<Method> > methods_;
+    Array<gc<Multimethod> > multimethods_;
+    
     gc<Fiber> fiber_;
     
     gc<Object> true_;

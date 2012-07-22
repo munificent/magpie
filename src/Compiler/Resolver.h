@@ -15,8 +15,11 @@ namespace magpie
     friend class Scope;
     
   public:
+    static int resolveBody(Compiler& compiler, const Module& module,
+                            gc<Expr> body);
+    
     static void resolve(Compiler& compiler, const Module& module,
-                        MethodDef& method);
+                        DefExpr& method);
     
   private:
     Resolver(Compiler& compiler, const Module& module)
@@ -47,6 +50,7 @@ namespace magpie
     virtual void visit(BoolExpr& expr, int dummy);
     virtual void visit(CallExpr& expr, int dummy);
     virtual void visit(CatchExpr& expr, int dummy);
+    virtual void visit(DefExpr& expr, int dummy);
     virtual void visit(DoExpr& expr, int dummy);
     virtual void visit(IfExpr& expr, int dummy);
     virtual void visit(IsExpr& expr, int dummy);

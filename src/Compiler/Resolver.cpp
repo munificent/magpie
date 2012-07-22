@@ -7,8 +7,26 @@
 
 namespace magpie
 {
+  int Resolver::resolveBody(Compiler& compiler, const Module& module,
+                            gc<Expr> body)
+  {
+    Resolver resolver(compiler, module);
+    
+    // Create a top-level scope.
+    Scope scope(&resolver);
+    resolver.scope_ = &scope;
+    
+    // Create a slot for the result value.
+    resolver.makeLocal(SourcePos(NULL, 0, 0, 0, 0), String::create("(result)"));
+    resolver.resolve(body);
+    
+    scope.end();
+    
+    return resolver.maxLocals_;
+  }
+  
   void Resolver::resolve(Compiler& compiler, const Module& module,
-                         MethodDef& method)
+                         DefExpr& method)
   {
     Resolver resolver(compiler, module);
 
@@ -24,7 +42,7 @@ namespace magpie
     resolver.allocateSlotsForParam(method.rightParam());
     
     // Create a slot for the result value.
-    resolver.makeLocal(method.pos(), String::create("(result)"));
+    resolver.makeLocal(SourcePos(NULL, 0, 0, 0, 0), String::create("(result)"));
     
     // Now that we've got our slots set up, we can actually resolve the nested
     // patterns for the param (if there are any).
@@ -205,6 +223,12 @@ namespace magpie
       resolve(clause.body());
       caseScope.end();
     }
+  }
+  
+  void Resolver::visit(DefExpr& expr, int dummy)
+  {
+    // Resolve the method itself.
+    Resolver::resolve(compiler_, module_, expr);
   }
   
   void Resolver::visit(DoExpr& expr, int dummy)

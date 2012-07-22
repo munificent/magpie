@@ -1,3 +1,5 @@
+#include "Compiler.h"
+#include "ErrorReporter.h"
 #include "Method.h"
 #include "MagpieString.h"
 #include "Object.h"
@@ -53,6 +55,10 @@ namespace magpie
         
       case OP_BUILT_IN:
         cout << "BUILT_IN      " << GET_A(ins) << " -> " << GET_B(ins);
+        break;
+        
+      case OP_METHOD:
+        cout << "METHOD        " << GET_A(ins) << " <- " << GET_B(ins);
         break;
         
       case OP_RECORD:
@@ -140,28 +146,36 @@ namespace magpie
     Memory::reach(constants_);
   }
   
-  void MethodScope::define(gc<String> name, gc<Chunk> method)
+  Multimethod::Multimethod(gc<String> signature)
+  : signature_(signature),
+    chunk_(),
+    methods_()
+  {}
+  
+  void Multimethod::addMethod(gc<Method> method)
   {
-    names_.add(name);
     methods_.add(method);
-  }
     
-  int MethodScope::find(gc<String> name) const
-  {
-    for (int i = 0; i < methods_.count(); i++)
-    {
-      if (names_[i] == name) return i;
-    }
-    
-    return -1;
+    // Clear out the code since it needs to be recompiled.
+    chunk_ = NULL;
   }
   
-  void MethodScope::reach()
+  gc<Chunk> Multimethod::getChunk(VM& vm)
   {
-    for (int i = 0; i < methods_.count(); i++)
+    // Re-compile if methods have been defined since the last time this was
+    // called.
+    if (chunk_.isNull())
     {
-      Memory::reach(methods_[i]);
-      Memory::reach(names_[i]);
+      ErrorReporter reporter;
+      chunk_ = Compiler::compileMultimethod(vm, reporter, *this);
     }
+    
+    return chunk_;
+  }
+  
+  gc<Method> Multimethod::hackGetMethod()
+  {
+    ASSERT(methods_.count() == 1, "Multimethods are not implemented yet.");
+    return methods_[0];
   }
 }

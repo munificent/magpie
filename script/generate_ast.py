@@ -9,15 +9,6 @@ magpie_dir = dirname(dirname(realpath(__file__)))
 header_path = join(magpie_dir, 'src', 'Syntax', 'Ast.generated.h')
 
 # Define the AST classes.
-defs = sorted({
-    'Method': [
-        ('leftParam',   'gc<Pattern>'),
-        ('name',        'gc<String>'),
-        ('rightParam',  'gc<Pattern>'),
-        ('body',        'gc<Expr>'),
-        ('maxLocals*',  'int')]
-}.items())
-
 exprs = sorted({
     'And': [
         ('left',        'gc<Expr>'),
@@ -38,6 +29,12 @@ exprs = sorted({
     'Catch': [
         ('body',        'gc<Expr>'),
         ('catches',     'Array<MatchClause>')],
+    'Def': [
+        ('leftParam',   'gc<Pattern>'),
+        ('name',        'gc<String>'),
+        ('rightParam',  'gc<Pattern>'),
+        ('body',        'gc<Expr>'),
+        ('maxLocals*',  'int')],
     'Do': [
         ('body',        'gc<Expr>')],
     'If': [
@@ -159,6 +156,7 @@ public:
   virtual void trace(std::ostream& out) const;
 
 private:{5}
+  NO_COPY({0}{6});
 }};
 '''
 
@@ -187,11 +185,9 @@ def main():
         file.write(HEADER)
 
         # Write the forward declarations.
-        forwardDeclare(file, defs, 'Def')
         forwardDeclare(file, exprs, 'Expr')
         forwardDeclare(file, patterns, 'Pattern')
 
-        makeAst(file, 'Def', 'Module*', defs)
         makeAst(file, 'Expr', 'int', exprs)
         makeAst(file, 'Pattern', 'int', patterns)
 

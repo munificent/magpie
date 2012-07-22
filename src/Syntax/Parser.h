@@ -37,7 +37,6 @@ namespace magpie
       int           precedence;
     };
     
-    gc<Def>  parseDefinition();
     gc<Expr> parseBlock(TokenType endToken = TOKEN_END);
     gc<Expr> parseBlock(TokenType end1, TokenType end2,
                         TokenType* outEndToken);

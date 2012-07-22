@@ -8,113 +8,44 @@ namespace magpie
 {
   class Chunk;
   class ErrorReporter;
+  class Method;
   class Module;
   class ModuleCompilation;
   class Multimethod;
   class VM;
   
-  class Compiler : private DefVisitor
+  class Compiler
   {
   public:
-    static Module* compileProgram(VM& vm, gc<ModuleAst> coreAst,
-                                  gc<ModuleAst> module,
-                                  ErrorReporter& reporter);
-
+    static Module* compileModule(VM& vm, ErrorReporter& reporter,
+                                 gc<ModuleAst> module, bool importCore);
+    
+    static gc<Chunk> compileMultimethod(VM& vm, ErrorReporter& reporter,
+                                        Multimethod& multimethod);
+    
     ErrorReporter& reporter() { return reporter_; }
     
-    void addMethod(gc<String> signature, gc<MethodDef> method, Module* module);
     int findMethod(gc<String> signature);
     
-    int addSymbol(gc<String> name);
+    int declareMultimethod(gc<String> signature);
+    methodId addMethod(gc<Method> method);
+    symbolId addSymbol(gc<String> name);
     int addRecordType(Array<int>& nameSymbols);
     int getModuleIndex(Module* module);
     int findNative(gc<String> name);
     
   private:
-    static gc<Chunk> compileMethod(Compiler& compiler, Module* module,
-                                   MethodDef& method,
-                                   ErrorReporter& reporter);
-    
     Compiler(VM& vm, ErrorReporter& reporter)
     : vm_(vm),
-      reporter_(reporter),
-      multimethods_()
+      reporter_(reporter)
     {}
     
-    void visit(MethodDef& def, Module* module);
-    
     void declareModule(gc<ModuleAst> moduleAst, Module* module);
-    void compileMultimethods();
     
     VM& vm_;
     ErrorReporter& reporter_;
-    
-    Array<gc<ModuleCompilation> > modules_;
-    // TODO(bob): Make this a map.
-    Array<gc<Multimethod> > multimethods_;
   };
-  
-  // A module being compiled.
-  // TODO(bob): Should this be gc, or just a value type?
-  class ModuleCompilation : public Managed
-  {
-  public:
-    ModuleCompilation(gc<ModuleAst> ast, Module* module)
-    : ast_(ast),
-      module_(module)
-    {}
     
-    gc<ModuleAst> ast() { return ast_; }
-    Module* module() { return module_; }
-    
-    virtual void reach();
-
-  private:
-    gc<ModuleAst> ast_;
-    Module* module_;
-  };
-  
-  // A single method definition in a multimethod, and the context where it was
-  // defined so that it can be compiled correctly.
-  // TODO(bob): Should this be gc, or just a value type?
-  class MethodInstance : public Managed
-  {
-  public:
-    MethodInstance(gc<MethodDef> def, Module* module)
-    : def_(def),
-      module_(module)
-    {}
-    
-    gc<MethodDef> def() { return def_; }
-    Module* module() { return module_; }
-    
-    virtual void reach();
-
-  private:
-    gc<MethodDef> def_;
-    Module* module_;
-  };
-  
-  // Collects all of the method definitions for a given signature so that they
-  // can be compiled to a single bytecode method all at once.
-  class Multimethod : public Managed
-  {
-  public:
-    Multimethod(gc<String> signature)
-    : signature_(signature)
-    {}
-    
-    gc<String> signature() { return signature_; }
-    void addMethod(gc<MethodDef> method, Module* module);
-    Array<gc<MethodInstance> > methods() { return methods_; }
-    
-    virtual void reach();
-
-  private:
-    gc<String> signature_;
-    Array<gc<MethodInstance> > methods_;
-  };
-
   // Method definitions and calls are statically distinguished by the records
   // used for the left and right arguments (or parameters). For example, a
   // call to "foo(1, b: 2)" is statically known to be different from a call to
@@ -131,7 +62,7 @@ namespace magpie
     static gc<String> build(const CallExpr& expr);
     
     // Builds a signature for the given method definition.
-    static gc<String> build(const MethodDef& expr);
+    static gc<String> build(const DefExpr& expr);
     
   private:
     SignatureBuilder()

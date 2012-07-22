@@ -16,7 +16,6 @@ namespace magpie
 
   void Fiber::init(gc<Chunk> chunk)
   {
-    ASSERT(stack_.count() == 0, "Cannot re-initialize Fiber.");
     ASSERT(callFrames_.count() == 0, "Cannot re-initialize Fiber.");
 
     call(chunk, 0);
@@ -55,6 +54,16 @@ namespace magpie
           int value = GET_A(ins);
           int slot = GET_B(ins);
           store(frame, slot, vm_.getBuiltIn(value));
+          break;
+        }
+          
+        case OP_METHOD:
+        {
+          // Adds a method to a multimethod. A is the index of the multimethod to
+          // specialize. B is the index of the method to add.
+          int multimethod = GET_A(ins);
+          int method = GET_B(ins);
+          vm_.defineMethod(multimethod, method);
           break;
         }
           
@@ -284,7 +293,7 @@ namespace magpie
           
         case OP_CALL:
         {
-          gc<Chunk> method = vm_.methods().get(GET_A(ins));
+          gc<Chunk> method = vm_.getMultimethod(GET_A(ins));
           int firstArg = GET_B(ins);
           int stackStart = frame.stackStart + firstArg;
           call(method, stackStart);

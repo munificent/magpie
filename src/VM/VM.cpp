@@ -17,27 +17,20 @@ namespace magpie
     nativeNames_(),
     natives_(),
     recordTypes_(),
+    methods_(),
+    multimethods_(),
     fiber_()
   {
     Memory::initialize(this, 1024 * 1024 * 2); // TODO(bob): Use non-magic number.
     
     fiber_ = new Fiber(*this);
-    
+        
     DEF_NATIVE(print, "print");
     DEF_NATIVE(add, "num +");
     DEF_NATIVE(subtract, "num -");
     DEF_NATIVE(multiply, "num *");
     DEF_NATIVE(divide, "num /");
-    
-    coreModule_ = createModule();
-    
-    makeClass(boolClass_, "Bool");
-    makeClass(classClass_, "Class");
-    makeClass(nothingClass_, "Nothing");
-    makeClass(numberClass_, "Num");
-    makeClass(recordClass_, "Record");
-    makeClass(stringClass_, "String");
-    
+        
     true_ = new BoolObject(true);
     false_ = new BoolObject(false);
     nothing_ = new NothingObject();
@@ -45,6 +38,9 @@ namespace magpie
 
   bool VM::loadProgram(const char* fileName, gc<String> source)
   {
+    ErrorReporter reporter;
+    
+    // Load the core module.
     // TODO(bob): Put this in an actual file somewhere.
     /*
     const char* coreSource =
@@ -63,14 +59,21 @@ namespace magpie
         "def (_) / (_) native \"num /\"\n"
         "def print(arg) native \"print\"\n";
     gc<ModuleAst> coreAst = parseModule("<core>", String::create(coreSource));
+    coreModule_ = Compiler::compileModule(*this, reporter, coreAst, false); 
+    loadModule(coreModule_);
+    
+    makeClass(boolClass_, "Bool");
+    makeClass(classClass_, "Class");
+    makeClass(nothingClass_, "Nothing");
+    makeClass(numberClass_, "Num");
+    makeClass(recordClass_, "Record");
+    makeClass(stringClass_, "String");
     
     gc<ModuleAst> moduleAst = parseModule(fileName, source);
-    
     if (moduleAst.isNull()) return false;
     
     // Compile it.
-    ErrorReporter reporter;
-    Module* module = Compiler::compileProgram(*this, coreAst, moduleAst, reporter);
+    Module* module = Compiler::compileModule(*this, reporter, moduleAst, true);
 
     if (reporter.numErrors() > 0) return false;
     
@@ -114,12 +117,13 @@ namespace magpie
 
   void VM::reachRoots()
   {
-    methods_.reach();
     Memory::reach(recordTypes_);
     Memory::reach(fiber_);
     Memory::reach(true_);
     Memory::reach(false_);
     Memory::reach(nothing_);
+    Memory::reach(symbols_);
+    Memory::reach(methods_);
     
     for (int i = 0; i < modules_.count(); i++)
     {
@@ -184,6 +188,45 @@ namespace magpie
     // It's a new symbol.
     symbols_.add(name);
     return symbols_.count() - 1;
+  }
+
+  methodId VM::addMethod(gc<Method> method)
+  {
+    methods_.add(method);
+    return methods_.count() - 1;
+  }
+  
+  int VM::declareMultimethod(gc<String> signature)
+  {
+    // See if it's already declared.
+    int index = findMultimethod(signature);
+    if (index != -1) return index;
+    
+    // It's a new multimethod.
+    multimethods_.add(new Multimethod(signature));
+    return multimethods_.count() - 1;
+  }
+  
+  int VM::findMultimethod(gc<String> signature)
+  {
+    for (int i = 0; i < multimethods_.count(); i++)
+    {
+      if (signature == multimethods_[i]->signature()) return i;
+    }
+    
+    // Not found.
+    return -1;
+  }
+
+  void VM::defineMethod(int multimethod, methodId method)
+  {
+    multimethods_[multimethod]->addMethod(methods_[method]);
+  }
+
+  gc<Chunk> VM::getMultimethod(int multimethodId)
+  {
+    gc<Multimethod> multimethod = multimethods_[multimethodId];
+    return multimethod->getChunk(*this);
   }
 
   gc<ModuleAst> VM::parseModule(const char* fileName, gc<String> source)

@@ -17,11 +17,28 @@ namespace magpie
     numTemps_(0),
     maxSlots_(0)
   {}
-
-  gc<Chunk> MethodCompiler::compile(MethodDef& method)
+  
+  gc<Chunk> MethodCompiler::compileBody(gc<Expr> body)
   {
-    Resolver::resolve(compiler_, *module_, method);
+    // Reserve slots up front for all of the locals. This ensures that temps
+    // will always be after locals.
+    // TODO(bob): Using max here isn't optimal. Ideally a given temp only needs
+    // to be after the locals that are in scope during the duration of that
+    // temp. But calculating that is a bit hairy. For now, until we have a more
+    // advanced compiler, this is a simple solution.
+    numLocals_ = Resolver::resolveBody(compiler_, *module_, body);
+    maxSlots_ = numLocals_;
     
+    // The result slot is the first slot. See Resolver::resolveBody().
+    compile(body, 0);
+    write(OP_RETURN, 0);
+    
+    chunk_->setCode(code_, maxSlots_);
+    return chunk_;
+  }
+  
+  gc<Chunk> MethodCompiler::compileTemp(DefExpr& method)
+  {
     // Reserve slots up front for all of the locals. This ensures that temps
     // will always be after locals.
     // TODO(bob): Using max here isn't optimal. Ideally a given temp only needs
@@ -44,10 +61,9 @@ namespace magpie
     write(OP_RETURN, numParamSlots);
 
     chunk_->setCode(code_, maxSlots_);
-    
     return chunk_;
   }
-  
+    
   void MethodCompiler::compileParam(gc<Pattern> param, int& slot)
   {
     // No parameter so do nothing.
@@ -225,7 +241,16 @@ namespace magpie
     
     endJump(jumpPastCatch, OP_JUMP, 1);
   }
+  
+  void MethodCompiler::visit(DefExpr& expr, int dummy)
+  {
+    gc<String> signature = SignatureBuilder::build(expr);
+    int multimethod = compiler_.declareMultimethod(signature);
+    methodId method = compiler_.addMethod(new Method(module_, &expr));
     
+    write(OP_METHOD, multimethod, method);
+  }
+  
   void MethodCompiler::visit(DoExpr& expr, int dest)
   {
     compile(expr.body(), dest);

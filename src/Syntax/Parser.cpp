@@ -79,18 +79,7 @@ namespace magpie
 
   gc<ModuleAst> Parser::parseModule()
   {
-    Array<gc<Def> > defs;
     Array<gc<Expr> > exprs;
-
-    // TODO(bob): Parse definitions.
-    do
-    {
-      if (lookAhead(TOKEN_EOF)) break;
-      gc<Def> def = parseDefinition();
-      if (def.isNull()) break;
-      defs.add(def);
-    }
-    while (match(TOKEN_LINE));
 
     do
     {
@@ -101,86 +90,7 @@ namespace magpie
 
     consume(TOKEN_EOF, "Expected end of file.");
 
-    gc<Expr> body = createSequence(exprs);
-    return new ModuleAst(defs, body);
-  }
-
-  gc<Def> Parser::parseDefinition()
-  {
-    if (match(TOKEN_DEF))
-    {
-      SourcePos start = last()->pos();
-
-      gc<Pattern> leftParam;
-      if (match(TOKEN_LEFT_PAREN))
-      {
-        leftParam = parsePattern();
-        consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
-      }
-
-      gc<Token> name;
-      if (lookAhead(TOKEN_NAME) ||
-          lookAhead(TOKEN_EQEQ) ||
-          lookAhead(TOKEN_NEQ) ||
-          lookAhead(TOKEN_LT) ||
-          lookAhead(TOKEN_GT) ||
-          lookAhead(TOKEN_LTE) ||
-          lookAhead(TOKEN_GTE) ||
-          lookAhead(TOKEN_PLUS) ||
-          lookAhead(TOKEN_MINUS) ||
-          lookAhead(TOKEN_STAR) ||
-          lookAhead(TOKEN_SLASH) ||
-          lookAhead(TOKEN_PERCENT))
-      {
-        name = consume();
-      }
-      else if (leftParam.isNull())
-      {
-        reporter_.error(current().pos(),
-            "Expect a method name after 'def' but got '%s'.",
-            current().text()->cString());
-      }
-      else
-      {
-        reporter_.error(current().pos(),
-            "Expect a method name after left parameter in 'def' but got '%s'.",
-            current().text()->cString());
-      }
-
-      gc<Pattern> rightParam;
-      if (match(TOKEN_LEFT_PAREN))
-      {
-        if (match(TOKEN_RIGHT_PAREN))
-        {
-          // Allow () empty pattern to just mean "no parameter".
-        }
-        else
-        {
-          rightParam = parsePattern();
-          consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
-        }
-      }
-      
-      // See if this is a native method.
-      gc<Expr> body;
-      if (lookAhead(TOKEN_NAME) && (*current().text() == "native"))
-      {
-        consume();
-        gc<Token> text = consume(TOKEN_STRING,
-            "Expect string after 'native'.");
-        body = new NativeExpr(text->pos(), text->text());
-      }
-      else
-      {
-        body = parseBlock();
-      }
-      
-      SourcePos span = start.spanTo(last()->pos());
-      return new MethodDef(span, leftParam, name->text(), rightParam, body);
-    }
-
-    // Not a definition.
-    return gc<Def>();
+    return new ModuleAst(exprs);
   }
 
   gc<Expr> Parser::parseBlock(TokenType endToken)
@@ -255,6 +165,80 @@ namespace magpie
 
   gc<Expr> Parser::statementLike()
   {
+    // TODO(bob): Split this out so that defs can only appear at the top-level
+    // and the beginning of blocks, like (define) in Scheme.
+    if (match(TOKEN_DEF))
+    {
+      SourcePos start = last()->pos();
+      
+      gc<Pattern> leftParam;
+      if (match(TOKEN_LEFT_PAREN))
+      {
+        leftParam = parsePattern();
+        consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
+      }
+      
+      gc<Token> name;
+      if (lookAhead(TOKEN_NAME) ||
+          lookAhead(TOKEN_EQEQ) ||
+          lookAhead(TOKEN_NEQ) ||
+          lookAhead(TOKEN_LT) ||
+          lookAhead(TOKEN_GT) ||
+          lookAhead(TOKEN_LTE) ||
+          lookAhead(TOKEN_GTE) ||
+          lookAhead(TOKEN_PLUS) ||
+          lookAhead(TOKEN_MINUS) ||
+          lookAhead(TOKEN_STAR) ||
+          lookAhead(TOKEN_SLASH) ||
+          lookAhead(TOKEN_PERCENT))
+      {
+        name = consume();
+      }
+      else if (leftParam.isNull())
+      {
+        reporter_.error(current().pos(),
+            "Expect a method name after 'def' but got '%s'.",
+            current().text()->cString());
+      }
+      else
+      {
+        reporter_.error(current().pos(),
+            "Expect a method name after left parameter in 'def' but got '%s'.",
+            current().text()->cString());
+      }
+      
+      gc<Pattern> rightParam;
+      if (match(TOKEN_LEFT_PAREN))
+      {
+        if (match(TOKEN_RIGHT_PAREN))
+        {
+          // Allow () empty pattern to just mean "no parameter".
+        }
+        else
+        {
+          rightParam = parsePattern();
+          consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
+        }
+      }
+      
+      // See if this is a native method.
+      gc<Expr> body;
+      if (lookAhead(TOKEN_NAME) && (*current().text() == "native"))
+      {
+        consume();
+        gc<Token> text = consume(TOKEN_STRING,
+                                 "Expect string after 'native'.");
+        body = new NativeExpr(text->pos(), text->text());
+      }
+      else
+      {
+        body = parseBlock();
+      }
+      
+      SourcePos span = start.spanTo(last()->pos());
+      return new DefExpr(span, leftParam, name->text(), rightParam, body);
+    }
+
     if (match(TOKEN_RETURN))
     {
       SourcePos start = last()->pos();

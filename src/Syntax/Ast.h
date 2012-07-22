@@ -110,23 +110,19 @@ namespace magpie
   class ModuleAst : public Managed
   {
   public:
-    ModuleAst(const Array<gc<Def> >& defs, gc<Expr> body)
-    : defs_(defs),
-      body_(body)
+    ModuleAst(const Array<gc<Expr> >& exprs)
+    : exprs_(exprs)
     {}
     
-    const Array<gc<Def> >& defs() const { return defs_; }
-    gc<Expr> body() const { return body_; }
+    const Array<gc<Expr> >& exprs() const { return exprs_; }
     
     virtual void reach()
     {
-      Memory::reach(defs_);
-      Memory::reach(body_);
+      Memory::reach(exprs_);
     }
     
   private:
-    Array<gc<Def> > defs_;
-    gc<Expr>        body_;
+    Array<gc<Expr> > exprs_;
   };
   
 #include "Ast.generated.h"

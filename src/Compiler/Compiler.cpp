@@ -10,62 +10,48 @@
 
 namespace magpie
 {
-  Module* Compiler::compileProgram(VM& vm, gc<ModuleAst> coreAst,
-                                   gc<ModuleAst> moduleAst,
-                                   ErrorReporter& reporter)
+  Module* Compiler::compileModule(VM& vm, ErrorReporter& reporter,
+                                  gc<ModuleAst> ast, bool importCore)
   {
     Compiler compiler(vm, reporter);
     
     Module* module = vm.createModule();
+
+    if (importCore) module->imports().add(vm.coreModule());
     
-    // TODO(bob): Doing this here is hackish. Need to figure out when a module's
-    // imports are resolved.
-    module->imports().add(vm.coreModule());
+    compiler.declareModule(ast, module);
     
-    // TODO(bob): Need to do this on all modules in the import graph.
-    compiler.declareModule(coreAst, vm.coreModule());
-    compiler.declareModule(moduleAst, module);
-    compiler.compileMultimethods();
-    
-    // Wrap the module's imperative code in a shell method and compile it.
-    gc<Expr> body = moduleAst->body();
-    MethodDef* method = new MethodDef(body->pos(), gc<Pattern>(),
-        String::create("<module>"), gc<Pattern>(), body);
-    
-    module->bindBody(compileMethod(compiler, module, *method, reporter));
+    // TODO(bob): Move this new Seq into parser.
+    gc<Expr> body = new SequenceExpr(SourcePos(NULL, 0, 0, 0, 0), ast->exprs());
+    gc<Chunk> code = MethodCompiler(compiler, module).compileBody(body);
+    module->bindBody(code);
     return module;
   }
   
-  void Compiler::addMethod(gc<String> signature, gc<MethodDef> method,
-                           Module* module)
+  gc<Chunk> Compiler::compileMultimethod(VM& vm, ErrorReporter& reporter,
+                                         Multimethod& multimethod)
   {
-    // See if we already have a multimethod with that signature.
-    int index;
-    for (index = 0; index < multimethods_.count(); index++)
-    {
-      if (multimethods_[index]->signature() == signature) break;
-    }
-    
-    if (index == multimethods_.count())
-    {
-      // A new multimethod, so add it.
-      multimethods_.add(new Multimethod(signature));
-    }
-    
-    multimethods_[index]->addMethod(method, module);
+    Compiler compiler(vm, reporter);
+    gc<Method> method = multimethod.hackGetMethod();
+    return MethodCompiler(compiler, method->module()).compileTemp(*method->def());
   }
   
   int Compiler::findMethod(gc<String> signature)
   {
-    for (int i = 0; i < multimethods_.count(); i++)
-    {
-      if (multimethods_[i]->signature() == signature) return i;
-    }
-    
-    return -1;
+    return vm_.findMultimethod(signature);
+  }
+  
+  int Compiler::declareMultimethod(gc<String> signature)
+  {
+    return vm_.declareMultimethod(signature);
   }
 
-  int Compiler::addSymbol(gc<String> name)
+  methodId Compiler::addMethod(gc<Method> method)
+  {
+    return vm_.addMethod(method);
+  }
+  
+  symbolId Compiler::addSymbol(gc<String> name)
   {
     return vm_.addSymbol(name);
   }
@@ -85,67 +71,20 @@ namespace magpie
     return vm_.findNative(name);
   }
 
-  gc<Chunk> Compiler::compileMethod(Compiler& compiler, Module* module,
-                                     MethodDef& method,
-                                     ErrorReporter& reporter)
-  {
-    return MethodCompiler(compiler, module).compile(method);
-  }
-  
-  void Compiler::visit(MethodDef& def, Module* module)
-  {
-    gc<String> signature = SignatureBuilder::build(def);
-    addMethod(signature, &def, module);
-  }
-  
   void Compiler::declareModule(gc<ModuleAst> moduleAst, Module* module)
   {
-    modules_.add(new ModuleCompilation(moduleAst, module));
-    
-    // Group all of the methods together into multimethods. This also
-    // effectively forward-declares them, so we know their index.
-    for (int i = 0; i < moduleAst->defs().count(); i++)
+    for (int i = 0; i < moduleAst->exprs().count(); i++)
     {
-      moduleAst->defs()[i]->accept(*this, module);
+      DefExpr* def = moduleAst->exprs()[i]->asDefExpr();
+      if (def != NULL)
+      {
+        gc<String> signature = SignatureBuilder::build(*def);
+        
+        declareMultimethod(signature);
+      }
+      
+      // TODO(bob): Handle 'var' and 'defclass' here too.
     }
-  }
-  
-  void Compiler::compileMultimethods()
-  {
-    // Compile all of the multimethods.
-    for (int i = 0; i < multimethods_.count(); i++)
-    {
-      gc<Multimethod> multimethod = multimethods_[i];
-      
-      ASSERT(multimethod->methods().count() == 1,
-             "Multimethods aren't implemented yet.");
-      
-      gc<MethodInstance> method = multimethod->methods()[0];
-      gc<Chunk> compiled = MethodCompiler(*this, method->module()).compile(*method->def());
-      
-      vm_.methods().define(multimethod->signature(), compiled);
-    }
-  }
-  
-  void ModuleCompilation::reach()
-  {
-    Memory::reach(ast_);
-  }
-
-  void MethodInstance::reach()
-  {
-    Memory::reach(def_);
-  }
-  
-  void Multimethod::addMethod(gc<MethodDef> method, Module* module)
-  {
-    methods_.add(new MethodInstance(method, module));
-  }
-  
-  void Multimethod::reach()
-  {
-    Memory::reach(signature_);
-    Memory::reach(methods_);
   }
   
   gc<String> SignatureBuilder::build(const CallExpr& expr)
@@ -175,7 +114,7 @@ namespace magpie
     return String::create(builder.signature_, builder.length_);
   }
   
-  gc<String> SignatureBuilder::build(const MethodDef& method)
+  gc<String> SignatureBuilder::build(const DefExpr& method)
   {
     // def (a) foo               -> ()foo
     // def (a) foo()             -> ()foo
