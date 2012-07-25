@@ -90,7 +90,14 @@ namespace magpie
 
     consume(TOKEN_EOF, "Expected end of file.");
 
-    return new ModuleAst(exprs);
+    // An empty module is equivalent to `nothing`.
+    if (exprs.count() == 0)
+    {
+      exprs.add(new NothingExpr(last()->pos()));
+    }
+    
+    SourcePos span = exprs[0]->pos().spanTo(exprs[-1]->pos());
+    return new ModuleAst(new SequenceExpr(span, exprs));
   }
 
   gc<Expr> Parser::parseBlock(TokenType endToken)

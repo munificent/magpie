@@ -19,11 +19,9 @@ namespace magpie
 
     if (importCore) module->imports().add(vm.coreModule());
     
-    compiler.declareModule(ast, module);
+    compiler.declareTopLevel(ast, module);
     
-    // TODO(bob): Move this new Seq into parser.
-    gc<Expr> body = new SequenceExpr(SourcePos(NULL, 0, 0, 0, 0), ast->exprs());
-    gc<Chunk> code = MethodCompiler(compiler, module).compileBody(body);
+    gc<Chunk> code = MethodCompiler(compiler, module).compileBody(ast->body());
     module->bindBody(code);
     return module;
   }
@@ -61,7 +59,7 @@ namespace magpie
     return vm_.addRecordType(nameSymbols);
   }
 
-  int Compiler::getModuleIndex(Module* module)
+  int Compiler::getModuleIndex(Module& module)
   {
     return vm_.getModuleIndex(module);
   }
@@ -71,22 +69,62 @@ namespace magpie
     return vm_.findNative(name);
   }
 
-  void Compiler::declareModule(gc<ModuleAst> moduleAst, Module* module)
+  void Compiler::declareTopLevel(gc<ModuleAst> moduleAst, Module* module)
   {
-    for (int i = 0; i < moduleAst->exprs().count(); i++)
+    for (int i = 0; i < moduleAst->body()->expressions().count(); i++)
     {
-      DefExpr* def = moduleAst->exprs()[i]->asDefExpr();
+      gc<Expr> expr = moduleAst->body()->expressions()[i];
+      
+      DefExpr* def = expr->asDefExpr();
       if (def != NULL)
       {
-        gc<String> signature = SignatureBuilder::build(*def);
-        
-        declareMultimethod(signature);
+        declareMultimethod(SignatureBuilder::build(*def));
       }
       
-      // TODO(bob): Handle 'var' and 'defclass' here too.
+      VariableExpr* var = expr->asVariableExpr();
+      if (var != NULL)
+      {
+        declareVariables(var->pattern(), module);
+      }
+      
+      // TODO(bob): Handle 'defclass' here too.
     }
   }
   
+  void Compiler::declareVariables(gc<Pattern> pattern, Module* module)
+  {
+    RecordPattern* record = pattern->asRecordPattern();
+    if (record != NULL)
+    {
+      for (int i = 0; i < record->fields().count(); i++)
+      {
+        declareVariables(record->fields()[i].value, module);
+      }
+      
+      return;
+    }
+    
+    VariablePattern* variable = pattern->asVariablePattern();
+    if (variable != NULL)
+    {
+      // Make sure there isn't already a top-level variable with that name.
+      int existing = module->findVariable(variable->name());
+      if (existing != -1)
+      {
+        reporter_.error(pattern->pos(),
+            "There is already a variable '%s' defined in this module.",
+            variable->name()->cString());
+      }
+      
+      module->addVariable(variable->name(), gc<Object>());
+      
+      if (!variable->pattern().isNull())
+      {
+        declareVariables(variable->pattern(), module);
+      }
+    }
+  }
+
   gc<String> SignatureBuilder::build(const CallExpr& expr)
   {
     // 1 foo                 -> ()foo

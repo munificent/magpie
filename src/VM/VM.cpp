@@ -108,9 +108,9 @@ namespace magpie
     return module;
   }
   
-  int VM::getModuleIndex(Module* module) const
+  int VM::getModuleIndex(Module& module) const
   {
-    int index = modules_.indexOf(module);
+    int index = modules_.indexOf(&module);
     ASSERT(index != -1, "Cannot get index of unknown module.");
     return index;
   }
@@ -244,7 +244,7 @@ namespace magpie
   {
     gc<String> nameString = String::create(name);
     classObj = new ClassObject(nameString);
-    coreModule_->addExport(nameString, classObj);
+    coreModule_->addVariable(nameString, classObj);
   }
 }
 

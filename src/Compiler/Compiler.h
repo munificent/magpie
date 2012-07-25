@@ -31,7 +31,7 @@ namespace magpie
     methodId addMethod(gc<Method> method);
     symbolId addSymbol(gc<String> name);
     int addRecordType(Array<int>& nameSymbols);
-    int getModuleIndex(Module* module);
+    int getModuleIndex(Module& module);
     int findNative(gc<String> name);
     
   private:
@@ -40,7 +40,12 @@ namespace magpie
       reporter_(reporter)
     {}
     
-    void declareModule(gc<ModuleAst> moduleAst, Module* module);
+    // Walk through the module's top-level declarations and create any names
+    // up front. This allows mututal recursion of top level elements.
+    void declareTopLevel(gc<ModuleAst> moduleAst, Module* module);
+    
+    // Forward-declare any variables in the given pattern.
+    void declareVariables(gc<Pattern> pattern, Module* module);
     
     VM& vm_;
     ErrorReporter& reporter_;

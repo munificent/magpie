@@ -1,0 +1,2 @@
+// expect exit 3
+val x: a, y: b = x: 1

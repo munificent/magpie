@@ -15,16 +15,14 @@ namespace magpie
     friend class Scope;
     
   public:
-    static int resolveBody(Compiler& compiler, const Module& module,
-                            gc<Expr> body);
-    
-    static void resolve(Compiler& compiler, const Module& module,
-                        DefExpr& method);
+    static int resolveBody(Compiler& compiler, Module& module, gc<Expr> body);
+    static void resolve(Compiler& compiler, Module& module, DefExpr& method);
     
   private:
-    Resolver(Compiler& compiler, const Module& module)
+    Resolver(Compiler& compiler, Module& module, bool isModuleBody)
     : compiler_(compiler),
       module_(module),
+      isModuleBody_(isModuleBody),
       locals_(),
       maxLocals_(0),
       unnamedSlotId_(0),
@@ -71,7 +69,11 @@ namespace magpie
 
     Compiler& compiler_;
 
-    const Module& module_;
+    Module& module_;
+    
+    // True if this resolver is resolving top-level expressions in a module
+    // body. False if it's resolving a method body.
+    bool isModuleBody_;
     
     // The names of the current in-scope local variables (including all outer
     // scopes). The indices in this array correspond to the slots where those
@@ -99,6 +101,8 @@ namespace magpie
   public:
     Scope(Resolver* resolver);      
     ~Scope();
+    
+    bool isTopLevel() const;
     
     void resolve(Pattern& pattern);
     void resolveAssignment(Pattern& pattern);

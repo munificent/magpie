@@ -143,13 +143,23 @@ namespace magpie
           break;
         }
           
-        case OP_GET_MODULE:
+        case OP_GET_VAR:
         {
           int moduleIndex = GET_A(ins);
-          int exportIndex = GET_B(ins);
+          int variableIndex = GET_B(ins);
           Module* module = vm_.getModule(moduleIndex);
-          gc<Object> object = module->getExport(exportIndex);
+          gc<Object> object = module->getVariable(variableIndex);
           store(frame, GET_C(ins), object);
+          break;
+        }
+          
+        case OP_SET_VAR:
+        {
+          int moduleIndex = GET_A(ins);
+          int variableIndex = GET_B(ins);
+          Module* module = vm_.getModule(moduleIndex);
+          gc<Object> value = load(frame, GET_C(ins));
+          module->setVariable(variableIndex, value);
           break;
         }
           

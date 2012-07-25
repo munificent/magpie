@@ -7,10 +7,9 @@
 
 namespace magpie
 {
-  int Resolver::resolveBody(Compiler& compiler, const Module& module,
-                            gc<Expr> body)
+  int Resolver::resolveBody(Compiler& compiler, Module& module, gc<Expr> body)
   {
-    Resolver resolver(compiler, module);
+    Resolver resolver(compiler, module, true);
     
     // Create a top-level scope.
     Scope scope(&resolver);
@@ -25,12 +24,11 @@ namespace magpie
     return resolver.maxLocals_;
   }
   
-  void Resolver::resolve(Compiler& compiler, const Module& module,
-                         DefExpr& method)
+  void Resolver::resolve(Compiler& compiler, Module& module, DefExpr& method)
   {
-    Resolver resolver(compiler, module);
+    Resolver resolver(compiler, module, false);
 
-    // Create a top-level scope.
+    // Create a scope for the method body.
     Scope scope(&resolver);
     resolver.scope_ = &scope;
     
@@ -296,21 +294,37 @@ namespace magpie
       return;
     }
 
+    // See if it's a top-level name.
+    // TODO(bob): This is copied from below. Pull out into separate fn.
+    for (int j = 0; j < module_.numVariables(); j++)
+    {
+      if (*module_.getVariableName(j) == *expr.name())
+      {
+        // Found it.
+        
+        // Get the module's real index.
+        int module = compiler_.getModuleIndex(module_);
+        expr.setResolved(ResolvedName(module, j));
+        return;
+      }
+    }
+    
     // See if it's an imported name. Walk through the modules this one imports.
     // TODO(bob): Need to handle name collisions.
     for (int i = 0; i < module_.imports().count(); i++)
     {
       Module* import = module_.imports()[i];
 
+      // TODO(bob): Handle private names.
       // Walk through the names it exports.
-      for (int j = 0; j < import->numExports(); j++)
+      for (int j = 0; j < import->numVariables(); j++)
       {
-        if (*import->getExportName(j) == *expr.name())
+        if (*import->getVariableName(j) == *expr.name())
         {
           // Found it.
           
           // Get the module's real index.
-          int module = compiler_.getModuleIndex(import);
+          int module = compiler_.getModuleIndex(*import);
           expr.setResolved(ResolvedName(module, j));
           return;
         }
@@ -430,6 +444,11 @@ namespace magpie
     ASSERT(start_ == -1, "Forgot to end scope.");
   }
   
+  bool Scope::isTopLevel() const
+  {
+    return resolver_.isModuleBody_ && (parent_ == NULL);
+  }
+
   void Scope::resolve(Pattern& pattern)
   {
     pattern.accept(*this, 0);
@@ -472,31 +491,53 @@ namespace magpie
   
   void Scope::visit(VariablePattern& pattern, int isAssignment)
   {
-    int slot;
-    if (isAssignment == 1)
+    if (isTopLevel())
     {
-      // Assigning to an existing variable, so look it up.
-      slot = resolver_.locals_.lastIndexOf(pattern.name());
+      // It's a top-level module variable.
+      int module = resolver_.compiler_.getModuleIndex(resolver_.module_);
+      int index = resolver_.module_.findVariable(pattern.name());
+      // TODO(bob): Handle index == -1.
       
-      // TODO(bob): Report error if variable is immutable.
-      
-      if (slot == -1)
+      if (index == -1)
       {
         resolver_.compiler_.reporter().error(pattern.pos(),
             "Variable '%s' is not defined.", pattern.name()->cString());
         
-        // Put a fake slot in so we can continue and report more errors.
-        slot = 0;
+        // Put a fake index in so we can continue and report more errors.
+        index = 0;
       }
+      
+      pattern.setResolved(ResolvedName(module, index));
     }
     else
     {
-      // Declaring a variable, so create a slot for it.
-      slot = resolver_.makeLocal(pattern.pos(), pattern.name());
+      // It's a local variable.
+      int slot;
+      if (isAssignment == 1)
+      {
+        // Assigning to an existing variable, so look it up.
+        slot = resolver_.locals_.lastIndexOf(pattern.name());
+        
+        // TODO(bob): Report error if variable is immutable.
+        
+        if (slot == -1)
+        {
+          resolver_.compiler_.reporter().error(pattern.pos(),
+              "Variable '%s' is not defined.", pattern.name()->cString());
+          
+          // Put a fake slot in so we can continue and report more errors.
+          slot = 0;
+        }
+      }
+      else
+      {
+        // Declaring a variable, so create a slot for it.
+        slot = resolver_.makeLocal(pattern.pos(), pattern.name());
+      }
+      
+      pattern.setResolved(ResolvedName(slot));
     }
-
-    pattern.setResolved(ResolvedName(slot));
-    
+        
     if (!pattern.pattern().isNull())
     {
       pattern.pattern()->accept(*this, isAssignment);

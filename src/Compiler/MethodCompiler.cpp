@@ -315,7 +315,7 @@ namespace magpie
     }
     else
     {
-      write(OP_GET_MODULE, expr.resolved().import(), expr.resolved().index(),
+      write(OP_GET_VAR, expr.resolved().module(), expr.resolved().index(),
             dest);
     }
   }
@@ -675,8 +675,17 @@ namespace magpie
     ASSERT(pattern.resolved().isResolved(),
            "Must resolve before compiling.");
     
-    // Copy the value into the new variable.
-    compiler_.write(OP_MOVE, value, pattern.resolved().index());
+    if (pattern.resolved().isLocal())
+    {
+      // Copy the value into the new variable.
+      compiler_.write(OP_MOVE, value, pattern.resolved().index());
+    }
+    else
+    {
+      // Assign to the top-level variable.
+      compiler_.write(OP_SET_VAR, pattern.resolved().module(),
+                      pattern.resolved().index(), value);
+    }
     
     // Compile the inner pattern.
     if (!pattern.pattern().isNull())

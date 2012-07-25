@@ -30,7 +30,7 @@ namespace magpie
     
     Module* coreModule() { return coreModule_; }
     Module* getModule(int index) { return modules_[index]; }
-    int getModuleIndex(Module* module) const;
+    int getModuleIndex(Module& module) const;
     
     Fiber& fiber() { return *fiber_; }
 
