@@ -1,0 +1,6 @@
+do
+    print(a)
+catch err then // TODO(bob): Test that this is UndefinedVariableError
+    print("ok") // expect: ok
+end
+var a = "value"

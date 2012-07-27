@@ -1,4 +1,0 @@
-// skip
-var a = b // expect error
-var b = "ok"
-print(a)

@@ -1,5 +1,0 @@
-// skip
-// TODO(bob): Compile error, or NoMethodError?
-var a = foo() // expect error
-def foo() "ok"
-print(a)

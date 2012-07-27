@@ -1,0 +1,4 @@
+// skip
+// expect exit 3
+var a = foo()
+def foo() "ok"

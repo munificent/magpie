@@ -149,6 +149,13 @@ namespace magpie
           int variableIndex = GET_B(ins);
           Module* module = vm_.getModule(moduleIndex);
           gc<Object> object = module->getVariable(variableIndex);
+          
+          // TODO(bob): Throw UndefinedVariableError.
+          if (object.isNull() && !throwError(vm_.getBool(false)))
+          {
+            return FIBER_UNCAUGHT_ERROR;
+          }
+          
           store(frame, GET_C(ins), object);
           break;
         }
