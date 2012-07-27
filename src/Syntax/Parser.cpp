@@ -147,7 +147,7 @@ namespace magpie
         Array<MatchClause> catches;
         while (match(TOKEN_CATCH))
         {
-          gc<Pattern> pattern = parsePattern();
+          gc<Pattern> pattern = parsePattern(false);
           consume(TOKEN_THEN, "Expect 'then' after catch pattern.");
           gc<Expr> body = parseBlock(false, end1, end2, outEndToken);
           catches.add(MatchClause(pattern, body));
@@ -181,7 +181,7 @@ namespace magpie
       gc<Pattern> leftParam;
       if (match(TOKEN_LEFT_PAREN))
       {
-        leftParam = parsePattern();
+        leftParam = parsePattern(true);
         consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
       }
       
@@ -223,7 +223,7 @@ namespace magpie
         }
         else
         {
-          rightParam = parsePattern();
+          rightParam = parsePattern(true);
           consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
         }
       }
@@ -266,7 +266,7 @@ namespace magpie
       bool isMutable = last()->is(TOKEN_VAR);
 
       SourcePos start = last()->pos();
-      gc<Pattern> pattern = parsePattern();
+      gc<Pattern> pattern = parsePattern(false);
       consume(TOKEN_EQ, "Expect '=' after variable declaration.");
       gc<Expr> value = flowControl();
 
@@ -320,7 +320,7 @@ namespace magpie
       Array<MatchClause> cases;
       while (match(TOKEN_CASE))
       {
-        gc<Pattern> pattern = parsePattern();
+        gc<Pattern> pattern = parsePattern(false);
 
         consume(TOKEN_THEN, "Expect 'then' after a case pattern.");
 
@@ -596,12 +596,12 @@ namespace magpie
 
   // Pattern parsers ----------------------------------------------------------
 
-  gc<Pattern> Parser::parsePattern()
+  gc<Pattern> Parser::parsePattern(bool isMethod)
   {
-    return recordPattern();
+    return recordPattern(isMethod);
   }
 
-  gc<Pattern> Parser::recordPattern()
+  gc<Pattern> Parser::recordPattern(bool isMethod)
   {
     bool hasField = false;
     SourcePos pos = current().pos();
@@ -631,7 +631,7 @@ namespace magpie
         }
       }
 
-      gc<Pattern> value = variablePattern();
+      gc<Pattern> value = variablePattern(isMethod);
 
       if (value.isNull())
       {
@@ -652,7 +652,7 @@ namespace magpie
     return new RecordPattern(pos.spanTo(last()->pos()), fields);
   }
 
-  gc<Pattern> Parser::variablePattern()
+  gc<Pattern> Parser::variablePattern(bool isMethod)
   {
     if (match(TOKEN_NAME))
     {
@@ -663,17 +663,17 @@ namespace magpie
       }
       else
       {
-        gc<Pattern> inner = primaryPattern();
+        gc<Pattern> inner = primaryPattern(isMethod);
         return new VariablePattern(last()->pos(), name, inner);
       }
     }
     else
     {
-      return primaryPattern();
+      return primaryPattern(isMethod);
     }
   }
 
-  gc<Pattern> Parser::primaryPattern()
+  gc<Pattern> Parser::primaryPattern(bool isMethod)
   {
     if (match(TOKEN_TRUE) || match(TOKEN_FALSE))
     {
@@ -684,14 +684,14 @@ namespace magpie
     if (match(TOKEN_EQEQ))
     {
       SourcePos start = last()->pos();
-      gc<Expr> value = parsePrecedence(PRECEDENCE_COMPARISON);
+      gc<Expr> value = parseExpressionInPattern(isMethod);
       return new ValuePattern(start.spanTo(last()->pos()), value);
     }
 
     if (match(TOKEN_IS))
     {
       SourcePos start = last()->pos();
-      gc<Expr> type = parsePrecedence(PRECEDENCE_COMPARISON);
+      gc<Expr> type = parseExpressionInPattern(isMethod);
       return new TypePattern(start.spanTo(last()->pos()), type);
     }
 
@@ -715,12 +715,25 @@ namespace magpie
 
     if (match(TOKEN_LEFT_PAREN))
     {
-      gc<Pattern> pattern = parsePattern();
+      gc<Pattern> pattern = parsePattern(isMethod);
       consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
       return pattern;
     }
 
     return gc<Pattern>();
+  }
+
+  gc<Expr> Parser::parseExpressionInPattern(bool isMethod)
+  {
+    // Can only use names in method patterns.
+    if (isMethod)
+    {
+      gc<Token> name = consume(TOKEN_NAME,
+          "An expression in a method pattern can only be a simple name.");
+      return new NameExpr(name->pos(), name->text());
+    }
+
+    return parsePrecedence(PRECEDENCE_COMPARISON);
   }
 
   // Helpers and base methods -------------------------------------------------
