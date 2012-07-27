@@ -1,0 +1,82 @@
+// These are the different kinds of expressions that occur at the top level.
+// - Top-level variable initializer
+// - Superclass expressions
+// - Field patterns
+// - Field initializers
+// - Method patterns
+// - Method bodies
+
+// These are the kinds of top-level things an expression may want to use:
+// - Top level variable
+// - Method call
+// - Class name
+
+// For each pair of these, we need to figure out what is allowed and what isn't.
+// In particular, where forward references are allowed and where they aren't.
+
+//                    var  method  class
+// Variable            P     P
+// Superclass          P     P
+// Field pattern       ?     ?
+// Field initializer   P
+// Method pattern      P
+// Method body         P
+
+// P - Can refer to previously declared ones.
+// R - Can refer to previously and later declared ones.
+
+// Variable initializer -> top-level variable.
+// A variable can refer to a previously declared one.
+
+// Variable initializer -> method.
+// Variable initializers can call methods.
+// Q: Can they call methods whose body is declared after the variable?
+
+// Superclass expression -> top-level variable.
+// Superclass expressions can refer to previously declared variables.
+
+// Superclass expression -> method.
+// Superclass expressions can call methods.
+// Q: Can they call methods whose body is declared after the class?
+
+// Field pattern -> top-level variable.
+// Field patterns can refer to top-level variables.
+// Q: Can they refer to ones declared after the class?
+
+
+// Variable initializers need to be able to refer to others, but not
+// recursively. Circular dependencies are bad here. Can either topologically
+// sort variables based on what they refer to (like Dart does), or just require
+// them to be declared in order (like they are in inner scopes).
+var a = 1
+var b = a + 1 // OK
+
+// Not OK.
+var c = d + 1
+var d = c + 1
+
+// A superclass expression should be able to refer to a top-level variable.
+// Can probably require the variable to already be declared, though.
+var someClass = SomeClass
+defclass Derived is someClass
+end
+
+// Field patterns should be able to
+
+// A method body needs to be able to refer to a later method. This is to allow
+// mutually recursive methods. This might be easy since methods are globally
+// scoped anyway.
+def foo(n) if n > 0 then bar(n - 1)
+def bar(n) if n > 0 then foo(n - 1)
+foo(3)
+
+// A field pattern needs to be able to refer to a later class. This is to allow
+// mutually recursive classes.
+defclass Branch
+    var leaf is Leaf
+end
+
+defclass Leaf
+    var branch is Branch
+end
+

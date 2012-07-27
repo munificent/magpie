@@ -1,0 +1,2 @@
+// expect exit 3
+val e is Bool = 2

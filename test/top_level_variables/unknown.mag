@@ -1,0 +1,8 @@
+// Accessing an unknown name.
+print(unknown) // expect error
+
+// Accessing a name that has gone out of scope.
+do
+    val gone = "here"
+end
+print(gone) // expect error

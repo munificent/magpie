@@ -1,0 +1,9 @@
+// skip
+defclass Foo
+    var field is Bar
+end
+
+defclass Bar
+end
+
+print(Foo new(field: Bar new) field is Bar) // expect: true

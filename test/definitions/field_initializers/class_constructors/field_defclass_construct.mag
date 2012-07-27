@@ -1,0 +1,10 @@
+// skip
+defclass Foo
+    var bar = Bar new
+end
+
+defclass Bar
+end
+
+var foo = Foo new
+print(foo bar is Bar) // expect: true

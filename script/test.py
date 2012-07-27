@@ -12,6 +12,7 @@ TEST_DIR = join(MAGPIE_DIR, 'test')
 # TODO(bob): Support other platforms and configurations.
 MAGPIE_APP = join(MAGPIE_DIR, 'build', 'Debug', 'magpie')
 
+SKIP_PATTERN = re.compile(r'// skip')
 EXPECT_PATTERN = re.compile(r'// expect: (.*)')
 EXPECT_ERROR_PATTERN = re.compile(r'// expect error')
 EXPECT_ERROR_LINE_PATTERN = re.compile(r'// expect error line (\d+)')
@@ -20,12 +21,14 @@ EXPECT_EXIT_PATTERN = re.compile(r'// expect exit (\d+)')
 
 passed = 0
 failed = 0
+skipped = 0
 
 class color:
     GREEN = '\033[32m'
     RED = '\033[31m'
     DEFAULT = '\033[0m'
     PINK = '\033[91m'
+    YELLOW = '\033[33m'
 
 def walk(dir, callback):
     """ Walks [dir], and executes [callback] on each file. """
@@ -41,6 +44,7 @@ def walk(dir, callback):
 def run_test(path):
     global passed
     global failed
+    global skipped
 
     if (splitext(path)[1] != '.mag'):
         return
@@ -62,6 +66,11 @@ def run_test(path):
     i = 1
     with open(path, 'r') as file:
         for line in file:
+            match = SKIP_PATTERN.search(line)
+            if match:
+                skipped += 1
+                return
+
             match = EXPECT_PATTERN.search(line)
             if match:
                 expect_output.append((match.group(1), i))
@@ -155,3 +164,5 @@ else:
     print (color.GREEN + str(passed) + color.DEFAULT + ' tests passed. ' +
            color.RED + str(failed) + color.DEFAULT + ' tests failed.')
 
+if skipped > 0:
+    print 'Skipped ' + color.YELLOW + str(skipped) + color.DEFAULT + ' tests.'

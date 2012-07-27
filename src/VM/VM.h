@@ -10,8 +10,11 @@
 namespace magpie
 {
   class Module;
+  class ModuleAst;
   class RecordType;
   
+  typedef gc<Object> (*Native)(ArrayView<gc<Object> >& args);
+
   // The main Virtual Machine class for a running Magpie interpreter.
   class VM : public RootSource
   {
@@ -20,16 +23,17 @@ namespace magpie
 
     virtual void reachRoots();
     
-    bool loadModule(const char* fileName, gc<String> source);
+    bool loadProgram(const char* fileName, gc<String> source);
     void loadModule(Module* module);
     
+    Module* createModule();
+    
     Module* coreModule() { return coreModule_; }
+    Module* getModule(int index) { return modules_[index]; }
+    int getModuleIndex(Module& module) const;
     
     Fiber& fiber() { return *fiber_; }
 
-    // The globally available top-level methods.
-    MethodScope& methods() { return methods_; }
-    
     inline gc<Object> nothing() const { return nothing_; }
     
     inline gc<Object> boolClass() const { return boolClass_; }
@@ -55,20 +59,43 @@ namespace magpie
       ASSERT(false, "Unknown built-in ID.");
     }
     
+    int findNative(gc<String> name);
+    Native getNative(int index) const { return natives_[index]; }
+    
     int addRecordType(const Array<int>& fields);
     gc<RecordType> getRecordType(int id);
     
     symbolId addSymbol(gc<String> name);
     
+    // Adds a method to the list of methods that have been compiled, but whose
+    // definitions have not yet been executed.
+    methodId addMethod(gc<Method> method);
+    
+    int declareMultimethod(gc<String> signature);
+    int findMultimethod(gc<String> signature);
+    void defineMethod(int multimethod, methodId method);
+    gc<Chunk> getMultimethod(int multimethod);
+    
   private:
+    // Parses the given module source file. Returns null if there was a syntax
+    // error.
+    gc<ModuleAst> parseModule(const char* fileName, gc<String> source);
+    
     void makeClass(gc<Object>& classObj, const char* name);
     
     Array<Module*> modules_;
     Module* coreModule_;
+    
+    Array<gc<String> > nativeNames_;
+    Array<Native> natives_;
+    
     Array<gc<RecordType> > recordTypes_;
     // TODO(bob): Something more optimal than an O(n) array.
     Array<gc<String> > symbols_;
-    MethodScope methods_;
+    
+    Array<gc<Method> > methods_;
+    Array<gc<Multimethod> > multimethods_;
+    
     gc<Fiber> fiber_;
     
     gc<Object> true_;

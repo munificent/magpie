@@ -1,0 +1,2 @@
+// Should not allow a duplicate field name in a record pattern.
+val a, b: b, b: c = 1 // expect error

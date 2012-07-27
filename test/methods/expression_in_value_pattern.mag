@@ -1,0 +1,4 @@
+// Can only have simple name expressions in value patterns.
+def foo(== 1 + 2) "three" // expect error
+
+foo(3)

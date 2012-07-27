@@ -1,17 +1,19 @@
+#include "Compiler.h"
+#include "ErrorReporter.h"
 #include "Method.h"
 #include "MagpieString.h"
 #include "Object.h"
 
 namespace magpie
 {
-  void Method::setCode(const Array<instruction>& code, int numSlots)
+  void Chunk::setCode(const Array<instruction>& code, int numSlots)
   {
     // TODO(bob): Copying here is lame!
     code_ = code;
     numSlots_ = numSlots;
   }
 
-  int Method::addConstant(gc<Object> constant)
+  int Chunk::addConstant(gc<Object> constant)
   {
     // TODO(bob): Should check for duplicates. Only need one copy of any
     // given constant.
@@ -19,13 +21,13 @@ namespace magpie
     return constants_.count() - 1;
   }
   
-  gc<Object> Method::getConstant(int index) const
+  gc<Object> Chunk::getConstant(int index) const
   {
     ASSERT_INDEX(index, constants_.count());
     return constants_[index];
   }
 
-  void Method::debugTrace() const
+  void Chunk::debugTrace() const
   {
     using namespace std;
     
@@ -37,7 +39,7 @@ namespace magpie
     }
   }
   
-  void Method::debugTrace(instruction ins) const
+  void Chunk::debugTrace(instruction ins) const
   {
     using namespace std;
     
@@ -55,6 +57,10 @@ namespace magpie
         cout << "BUILT_IN      " << GET_A(ins) << " -> " << GET_B(ins);
         break;
         
+      case OP_METHOD:
+        cout << "METHOD        " << GET_A(ins) << " <- " << GET_B(ins);
+        break;
+        
       case OP_RECORD:
         cout << "RECORD        " << GET_A(ins) << "[" << GET_B(ins) << "] -> " << GET_C(ins);
         break;
@@ -67,10 +73,14 @@ namespace magpie
         cout << "TEST_FIELD    " << GET_A(ins) << "[" << GET_B(ins) << "] -> " << GET_C(ins);
         break;
         
-      case OP_GET_MODULE:
-        cout << "GET_MODULE    import " << GET_A(ins) << ", var " << GET_B(ins) << " -> " << GET_C(ins);
+      case OP_GET_VAR:
+        cout << "OP_GET_VAR    module " << GET_A(ins) << ", var " << GET_B(ins) << " -> " << GET_C(ins);
         break;
-
+        
+      case OP_SET_VAR:
+        cout << "OP_SET_VAR    module " << GET_A(ins) << ", var " << GET_B(ins) << " <- " << GET_C(ins);
+        break;
+        
       case OP_EQUAL:
         cout << "EQUAL         " << GET_A(ins) << " == " << GET_B(ins) << " -> " << GET_C(ins);
         break;
@@ -107,6 +117,10 @@ namespace magpie
         cout << "CALL          " << GET_A(ins) << "(" << GET_B(ins) << ") -> " << GET_C(ins);
         break;
         
+      case OP_NATIVE:
+        cout << "NATIVE        " << GET_A(ins) << "(" << GET_B(ins) << ") -> " << GET_C(ins);
+        break;
+        
       case OP_RETURN:
         cout << "RETURN        " << GET_A(ins);
         break;
@@ -131,59 +145,41 @@ namespace magpie
     cout << endl;
   }
 
-  void Method::reach()
+  void Chunk::reach()
   {
     Memory::reach(constants_);
   }
   
-  int MethodScope::declare(gc<String> name)
+  Multimethod::Multimethod(gc<String> signature)
+  : signature_(signature),
+    chunk_(),
+    methods_()
+  {}
+  
+  void Multimethod::addMethod(gc<Method> method)
   {
-    // If a method is already declared with that name (either as a forward
-    // declaration, or as an actual previous method) then reuse that index.
-    int existing = find(name);
-    if (existing != -1) return existing;
+    methods_.add(method);
     
-    names_.add(name);
-    methods_.add(gc<Method>());
-    return names_.count() - 1;
+    // Clear out the code since it needs to be recompiled.
+    chunk_ = NULL;
   }
   
-  void MethodScope::define(int index, gc<Method> method)
+  gc<Chunk> Multimethod::getChunk(VM& vm)
   {
-    ASSERT(methods_[index].isNull(),
-           "Multimethods are't implemented yet, so cannot redefine an "
-           "already defined method.");
-    
-    methods_[index] = method;
-  }
-
-  void MethodScope::define(gc<String> name, gc<Method> method)
-  {
-    define(find(name), method);
-  }
-  
-  void MethodScope::define(gc<String> name, Primitive primitive)
-  {
-    names_.add(name);
-    methods_.add(new Method(primitive));
-  }
-  
-  int MethodScope::find(gc<String> name) const
-  {
-    for (int i = 0; i < methods_.count(); i++)
+    // Re-compile if methods have been defined since the last time this was
+    // called.
+    if (chunk_.isNull())
     {
-      if (names_[i] == name) return i;
+      ErrorReporter reporter;
+      chunk_ = Compiler::compileMultimethod(vm, reporter, *this);
     }
     
-    return -1;
+    return chunk_;
   }
   
-  void MethodScope::reach()
+  gc<Method> Multimethod::hackGetMethod()
   {
-    for (int i = 0; i < methods_.count(); i++)
-    {
-      Memory::reach(methods_[i]);
-      Memory::reach(names_[i]);
-    }
+    ASSERT(methods_.count() == 1, "Multimethods are not implemented yet.");
+    return methods_[0];
   }
 }

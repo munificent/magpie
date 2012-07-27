@@ -1,0 +1,67 @@
+Type and value patterns can only have simple name expressions. That means they always resolve to a top-level variable (which may be a class). They can't call methods.
+
+First, forward-declare all variables and methods. (This includes class names, which are just sugar for variables, and field getters and setters, which are sugar for methods.)
+
+Then, go through the definitions in order:
+
+*   If it's a variable, evaluate its expression eagerly and assign it. If the
+    initializer refers to an undefined variable (i.e. a later declared one that
+    hasn't been initialized yet), raise some kind of error.
+
+*   If it's a method, take its pattern and AST and add them to the appropriate
+    multimethod, but don't actually compile it yet. Resolve any names in the
+    argument pattern to make sure they are declared, but don't look up their
+    values yet, since they may be defined later†.
+
+*   If it's a class, evaluate its superclass expression eagerly. If it refers
+    to an undefined variable, raise some kind of error. Define the class itself
+    and create a variable for its name bound to the class object.
+
+    For all of the fields, create methods like the above bullet point.
+
+Now, go through all of the multimethods and compile them. In order to sort the
+methods, we just need to be able to look up top-level variable names, which
+should all be defined now, and which we can do without executing any real
+Magpie code.
+
+Problems with this approach:
+
+*   Variables must be ordered explicitly to handle their circular references.
+    That's OK within a module because you have to do the same thing with locals
+    anyway. It does mean that you can't have non-circular
+
+*   Method patterns are limited. No arbitrary expressions. In practice, that's
+    probably not much of a limitation. And, now that I think about it, you can
+    always work around it by just making a variable that has whatever expression
+    you want in the pattern. Instead of:
+
+        def foo(== some expression + 3) ...
+
+    Just do:
+
+        var _fooPattern = some expression + 3
+        def foo(== _fooPattern)
+
+    At some point, if we want to allow expressions in method patterns, we could
+    possibly make it essentially desugar to that anyway. The important parts
+    are that:
+
+     1. During method sorting, a pattern's value can just be looked up and we
+        don't have to run any Magpie code.
+     2. The expression for a method pattern is evaluated "lazily" so that
+        circular references work.
+
+*   What order are modules processed in? The above just describes compiling a
+    single module. For methods, the order doesn't matter much, but variables
+    do.
+
+† This is needed because field getter methods need to be able to reference
+  later classes so that mututally recursive classes work:
+
+    defclass Foo
+        bar is Bar // Pattern has forward ref.
+    end
+
+    defclass Bar
+        foo is Foo
+    end

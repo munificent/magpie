@@ -79,18 +79,7 @@ namespace magpie
 
   gc<ModuleAst> Parser::parseModule()
   {
-    Array<gc<Def> > defs;
     Array<gc<Expr> > exprs;
-
-    // TODO(bob): Parse definitions.
-    do
-    {
-      if (lookAhead(TOKEN_EOF)) break;
-      gc<Def> def = parseDefinition();
-      if (def.isNull()) break;
-      defs.add(def);
-    }
-    while (match(TOKEN_LINE));
 
     do
     {
@@ -101,47 +90,14 @@ namespace magpie
 
     consume(TOKEN_EOF, "Expected end of file.");
 
-    gc<Expr> body = createSequence(exprs);
-    return new ModuleAst(defs, body);
-  }
-
-  gc<Def> Parser::parseDefinition()
-  {
-    if (match(TOKEN_DEF))
+    // An empty module is equivalent to `nothing`.
+    if (exprs.count() == 0)
     {
-      SourcePos start = last()->pos();
-
-      gc<Pattern> leftParam;
-      if (match(TOKEN_LEFT_PAREN))
-      {
-        leftParam = parsePattern();
-        consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
-      }
-
-      gc<Token> name = consume(TOKEN_NAME,
-                               "Expect a method name after 'def'.");
-
-      gc<Pattern> rightParam;
-      if (match(TOKEN_LEFT_PAREN))
-      {
-        if (match(TOKEN_RIGHT_PAREN))
-        {
-          // Allow () empty pattern to just mean "no parameter".
-        }
-        else
-        {
-          rightParam = parsePattern();
-          consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
-        }
-      }
-
-      gc<Expr> body = parseBlock();
-      SourcePos span = start.spanTo(last()->pos());
-      return new MethodDef(span, leftParam, name->text(), rightParam, body);
+      exprs.add(new NothingExpr(last()->pos()));
     }
-
-    // Not a definition.
-    return gc<Def>();
+    
+    SourcePos span = exprs[0]->pos().spanTo(exprs[-1]->pos());
+    return new ModuleAst(new SequenceExpr(span, exprs));
   }
 
   gc<Expr> Parser::parseBlock(TokenType endToken)
@@ -191,7 +147,7 @@ namespace magpie
         Array<MatchClause> catches;
         while (match(TOKEN_CATCH))
         {
-          gc<Pattern> pattern = parsePattern();
+          gc<Pattern> pattern = parsePattern(false);
           consume(TOKEN_THEN, "Expect 'then' after catch pattern.");
           gc<Expr> body = parseBlock(false, end1, end2, outEndToken);
           catches.add(MatchClause(pattern, body));
@@ -216,6 +172,80 @@ namespace magpie
 
   gc<Expr> Parser::statementLike()
   {
+    // TODO(bob): Split this out so that defs can only appear at the top-level
+    // and the beginning of blocks, like (define) in Scheme.
+    if (match(TOKEN_DEF))
+    {
+      SourcePos start = last()->pos();
+      
+      gc<Pattern> leftParam;
+      if (match(TOKEN_LEFT_PAREN))
+      {
+        leftParam = parsePattern(true);
+        consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
+      }
+      
+      gc<Token> name;
+      if (lookAhead(TOKEN_NAME) ||
+          lookAhead(TOKEN_EQEQ) ||
+          lookAhead(TOKEN_NEQ) ||
+          lookAhead(TOKEN_LT) ||
+          lookAhead(TOKEN_GT) ||
+          lookAhead(TOKEN_LTE) ||
+          lookAhead(TOKEN_GTE) ||
+          lookAhead(TOKEN_PLUS) ||
+          lookAhead(TOKEN_MINUS) ||
+          lookAhead(TOKEN_STAR) ||
+          lookAhead(TOKEN_SLASH) ||
+          lookAhead(TOKEN_PERCENT))
+      {
+        name = consume();
+      }
+      else if (leftParam.isNull())
+      {
+        reporter_.error(current().pos(),
+            "Expect a method name after 'def' but got '%s'.",
+            current().text()->cString());
+      }
+      else
+      {
+        reporter_.error(current().pos(),
+            "Expect a method name after left parameter in 'def' but got '%s'.",
+            current().text()->cString());
+      }
+      
+      gc<Pattern> rightParam;
+      if (match(TOKEN_LEFT_PAREN))
+      {
+        if (match(TOKEN_RIGHT_PAREN))
+        {
+          // Allow () empty pattern to just mean "no parameter".
+        }
+        else
+        {
+          rightParam = parsePattern(true);
+          consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
+        }
+      }
+      
+      // See if this is a native method.
+      gc<Expr> body;
+      if (lookAhead(TOKEN_NAME) && (*current().text() == "native"))
+      {
+        consume();
+        gc<Token> text = consume(TOKEN_STRING,
+                                 "Expect string after 'native'.");
+        body = new NativeExpr(text->pos(), text->text());
+      }
+      else
+      {
+        body = parseBlock();
+      }
+      
+      SourcePos span = start.spanTo(last()->pos());
+      return new DefExpr(span, leftParam, name->text(), rightParam, body);
+    }
+
     if (match(TOKEN_RETURN))
     {
       SourcePos start = last()->pos();
@@ -236,7 +266,7 @@ namespace magpie
       bool isMutable = last()->is(TOKEN_VAR);
 
       SourcePos start = last()->pos();
-      gc<Pattern> pattern = parsePattern();
+      gc<Pattern> pattern = parsePattern(false);
       consume(TOKEN_EQ, "Expect '=' after variable declaration.");
       gc<Expr> value = flowControl();
 
@@ -290,7 +320,7 @@ namespace magpie
       Array<MatchClause> cases;
       while (match(TOKEN_CASE))
       {
-        gc<Pattern> pattern = parsePattern();
+        gc<Pattern> pattern = parsePattern(false);
 
         consume(TOKEN_THEN, "Expect 'then' after a case pattern.");
 
@@ -566,12 +596,12 @@ namespace magpie
 
   // Pattern parsers ----------------------------------------------------------
 
-  gc<Pattern> Parser::parsePattern()
+  gc<Pattern> Parser::parsePattern(bool isMethod)
   {
-    return recordPattern();
+    return recordPattern(isMethod);
   }
 
-  gc<Pattern> Parser::recordPattern()
+  gc<Pattern> Parser::recordPattern(bool isMethod)
   {
     bool hasField = false;
     SourcePos pos = current().pos();
@@ -601,7 +631,7 @@ namespace magpie
         }
       }
 
-      gc<Pattern> value = variablePattern();
+      gc<Pattern> value = variablePattern(isMethod);
 
       if (value.isNull())
       {
@@ -622,7 +652,7 @@ namespace magpie
     return new RecordPattern(pos.spanTo(last()->pos()), fields);
   }
 
-  gc<Pattern> Parser::variablePattern()
+  gc<Pattern> Parser::variablePattern(bool isMethod)
   {
     if (match(TOKEN_NAME))
     {
@@ -633,17 +663,17 @@ namespace magpie
       }
       else
       {
-        gc<Pattern> inner = primaryPattern();
+        gc<Pattern> inner = primaryPattern(isMethod);
         return new VariablePattern(last()->pos(), name, inner);
       }
     }
     else
     {
-      return primaryPattern();
+      return primaryPattern(isMethod);
     }
   }
 
-  gc<Pattern> Parser::primaryPattern()
+  gc<Pattern> Parser::primaryPattern(bool isMethod)
   {
     if (match(TOKEN_TRUE) || match(TOKEN_FALSE))
     {
@@ -654,14 +684,14 @@ namespace magpie
     if (match(TOKEN_EQEQ))
     {
       SourcePos start = last()->pos();
-      gc<Expr> value = parsePrecedence(PRECEDENCE_COMPARISON);
+      gc<Expr> value = parseExpressionInPattern(isMethod);
       return new ValuePattern(start.spanTo(last()->pos()), value);
     }
 
     if (match(TOKEN_IS))
     {
       SourcePos start = last()->pos();
-      gc<Expr> type = parsePrecedence(PRECEDENCE_COMPARISON);
+      gc<Expr> type = parseExpressionInPattern(isMethod);
       return new TypePattern(start.spanTo(last()->pos()), type);
     }
 
@@ -685,12 +715,25 @@ namespace magpie
 
     if (match(TOKEN_LEFT_PAREN))
     {
-      gc<Pattern> pattern = parsePattern();
+      gc<Pattern> pattern = parsePattern(isMethod);
       consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
       return pattern;
     }
 
     return gc<Pattern>();
+  }
+
+  gc<Expr> Parser::parseExpressionInPattern(bool isMethod)
+  {
+    // Can only use names in method patterns.
+    if (isMethod)
+    {
+      gc<Token> name = consume(TOKEN_NAME,
+          "An expression in a method pattern can only be a simple name.");
+      return new NameExpr(name->pos(), name->text());
+    }
+
+    return parsePrecedence(PRECEDENCE_COMPARISON);
   }
 
   // Helpers and base methods -------------------------------------------------

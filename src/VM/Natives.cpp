@@ -1,36 +1,36 @@
 #include "Object.h"
-#include "Primitives.h"
+#include "Natives.h"
 
 namespace magpie
 {
-  PRIMITIVE(print)
+  NATIVE(print)
   {
     std::cout << args[0] << std::endl;
     return args[0];
   }
 
-  PRIMITIVE(add)
+  NATIVE(add)
   {
     // TODO(bob): Handle non-number types.
     double c = args[0]->toNumber() + args[1]->toNumber();
     return new NumberObject(c);
   }
   
-  PRIMITIVE(subtract)
+  NATIVE(subtract)
   {
     // TODO(bob): Handle non-number types.
     double c = args[0]->toNumber() - args[1]->toNumber();
     return new NumberObject(c);
   }
   
-  PRIMITIVE(multiply)
+  NATIVE(multiply)
   {
     // TODO(bob): Handle non-number types.
     double c = args[0]->toNumber() * args[1]->toNumber();
     return new NumberObject(c);
   }
   
-  PRIMITIVE(divide)
+  NATIVE(divide)
   {
     // TODO(bob): Handle non-number types.
     double c = args[0]->toNumber() / args[1]->toNumber();

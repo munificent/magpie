@@ -1,0 +1,2 @@
+// expect exit 3
+val x: a is Num = x: true

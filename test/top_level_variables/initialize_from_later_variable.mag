@@ -1,0 +1,4 @@
+// expect exit 3
+var a = b
+var b = "ok"
+print(a)

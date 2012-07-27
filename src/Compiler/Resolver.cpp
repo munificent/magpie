@@ -1,16 +1,34 @@
 #include "Ast.h"
+#include "Compiler.h"
 #include "ErrorReporter.h"
 #include "Module.h"
 #include "Resolver.h"
+#include "VM.h"
 
 namespace magpie
 {
-  void Resolver::resolve(ErrorReporter& reporter, const Module& module,
-                         MethodDef& method)
+  int Resolver::resolveBody(Compiler& compiler, Module& module, gc<Expr> body)
   {
-    Resolver resolver(reporter, module);
-
+    Resolver resolver(compiler, module, true);
+    
     // Create a top-level scope.
+    Scope scope(&resolver);
+    resolver.scope_ = &scope;
+    
+    // Create a slot for the result value.
+    resolver.makeLocal(SourcePos(NULL, 0, 0, 0, 0), String::create("(result)"));
+    resolver.resolve(body);
+    
+    scope.end();
+    
+    return resolver.maxLocals_;
+  }
+  
+  void Resolver::resolve(Compiler& compiler, Module& module, DefExpr& method)
+  {
+    Resolver resolver(compiler, module, false);
+
+    // Create a scope for the method body.
     Scope scope(&resolver);
     resolver.scope_ = &scope;
     
@@ -22,7 +40,7 @@ namespace magpie
     resolver.allocateSlotsForParam(method.rightParam());
     
     // Create a slot for the result value.
-    resolver.makeLocal(method.pos(), String::create("(result)"));
+    resolver.makeLocal(SourcePos(NULL, 0, 0, 0, 0), String::create("(result)"));
     
     // Now that we've got our slots set up, we can actually resolve the nested
     // patterns for the param (if there are any).
@@ -131,7 +149,7 @@ namespace magpie
     {
       if (locals_[i] == name)
       {
-        reporter_.error(pos,
+        compiler_.reporter().error(pos,
             "There is already a variable '%s' defined in this scope.",
             name->cString());
       }
@@ -205,6 +223,12 @@ namespace magpie
     }
   }
   
+  void Resolver::visit(DefExpr& expr, int dummy)
+  {
+    // Resolve the method itself.
+    Resolver::resolve(compiler_, module_, expr);
+  }
+  
   void Resolver::visit(DoExpr& expr, int dummy)
   {
     Scope doScope(this);
@@ -270,30 +294,62 @@ namespace magpie
       return;
     }
 
+    // See if it's a top-level name.
+    // TODO(bob): This is copied from below. Pull out into separate fn.
+    for (int j = 0; j < module_.numVariables(); j++)
+    {
+      if (*module_.getVariableName(j) == *expr.name())
+      {
+        // Found it.
+        
+        // Get the module's real index.
+        int module = compiler_.getModuleIndex(module_);
+        expr.setResolved(ResolvedName(module, j));
+        return;
+      }
+    }
+    
     // See if it's an imported name. Walk through the modules this one imports.
     // TODO(bob): Need to handle name collisions.
     for (int i = 0; i < module_.imports().count(); i++)
     {
       Module* import = module_.imports()[i];
 
+      // TODO(bob): Handle private names.
       // Walk through the names it exports.
-      for (int j = 0; j < import->numExports(); j++)
+      for (int j = 0; j < import->numVariables(); j++)
       {
-        if (*import->getExportName(j) == *expr.name())
+        if (*import->getVariableName(j) == *expr.name())
         {
           // Found it.
-          expr.setResolved(ResolvedName(i, j));
+          
+          // Get the module's real index.
+          int module = compiler_.getModuleIndex(*import);
+          expr.setResolved(ResolvedName(module, j));
           return;
         }
       }
     }
 
-    reporter_.error(expr.pos(),
+    compiler_.reporter().error(expr.pos(),
         "Variable '%s' is not defined.", expr.name()->cString());
     
     // Resolve it to some fake local so compilation can continue and report
     // more errors.
     expr.setResolved(ResolvedName(0));
+  }
+  
+  void Resolver::visit(NativeExpr& expr, int dummy)
+  {
+    int index = compiler_.findNative(expr.name());
+    
+    if (index == -1)
+    {
+      compiler_.reporter().error(expr.pos(),
+          "Unknown native '%s'.", expr.name()->cString());
+    }
+
+    expr.setIndex(index);
   }
   
   void Resolver::visit(NotExpr& expr, int dummy)
@@ -388,6 +444,11 @@ namespace magpie
     ASSERT(start_ == -1, "Forgot to end scope.");
   }
   
+  bool Scope::isTopLevel() const
+  {
+    return resolver_.isModuleBody_ && (parent_ == NULL);
+  }
+
   void Scope::resolve(Pattern& pattern)
   {
     pattern.accept(*this, 0);
@@ -430,31 +491,53 @@ namespace magpie
   
   void Scope::visit(VariablePattern& pattern, int isAssignment)
   {
-    int slot;
-    if (isAssignment == 1)
+    if (isTopLevel())
     {
-      // Assigning to an existing variable, so look it up.
-      slot = resolver_.locals_.lastIndexOf(pattern.name());
+      // It's a top-level module variable.
+      int module = resolver_.compiler_.getModuleIndex(resolver_.module_);
+      int index = resolver_.module_.findVariable(pattern.name());
+      // TODO(bob): Handle index == -1.
       
-      // TODO(bob): Report error if variable is immutable.
-      
-      if (slot == -1)
+      if (index == -1)
       {
-        resolver_.reporter_.error(pattern.pos(),
+        resolver_.compiler_.reporter().error(pattern.pos(),
             "Variable '%s' is not defined.", pattern.name()->cString());
         
-        // Put a fake slot in so we can continue and report more errors.
-        slot = 0;
+        // Put a fake index in so we can continue and report more errors.
+        index = 0;
       }
+      
+      pattern.setResolved(ResolvedName(module, index));
     }
     else
     {
-      // Declaring a variable, so create a slot for it.
-      slot = resolver_.makeLocal(pattern.pos(), pattern.name());
+      // It's a local variable.
+      int slot;
+      if (isAssignment == 1)
+      {
+        // Assigning to an existing variable, so look it up.
+        slot = resolver_.locals_.lastIndexOf(pattern.name());
+        
+        // TODO(bob): Report error if variable is immutable.
+        
+        if (slot == -1)
+        {
+          resolver_.compiler_.reporter().error(pattern.pos(),
+              "Variable '%s' is not defined.", pattern.name()->cString());
+          
+          // Put a fake slot in so we can continue and report more errors.
+          slot = 0;
+        }
+      }
+      else
+      {
+        // Declaring a variable, so create a slot for it.
+        slot = resolver_.makeLocal(pattern.pos(), pattern.name());
+      }
+      
+      pattern.setResolved(ResolvedName(slot));
     }
-
-    pattern.setResolved(ResolvedName(slot));
-    
+        
     if (!pattern.pattern().isNull())
     {
       pattern.pattern()->accept(*this, isAssignment);

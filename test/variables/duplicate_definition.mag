@@ -1,3 +1,5 @@
 // Two variables in the same scope.
-val a = "first"
-val a = "second" // expect error
+do
+    val a = "first"
+    val a = "second" // expect error
+end

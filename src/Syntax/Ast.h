@@ -9,9 +9,10 @@ namespace magpie
 {
   using std::ostream;
 
-  class Def;
   class Expr;
+  class Module;
   class Pattern;
+  class SequenceExpr;
   
   // A record field.
   struct Field
@@ -76,56 +77,52 @@ namespace magpie
     // Creates a new unresolved name.
     ResolvedName()
     : isLocal_(false),
-      import_(-1),
+      module_(-1),
       index_(-1)
     {}
     
     // Resolves the name to a local variable with the given slot index.
     ResolvedName(int index)
     : isLocal_(true),
-      import_(-1),
+      module_(-1),
       index_(index)
     {}
     
     // Resolves the name to a variable that is the given export from the given
     // import.
-    ResolvedName(int importIndex, int exportIndex)
+    ResolvedName(int module, int variable)
     : isLocal_(false),
-      import_(importIndex),
-      index_(exportIndex)
+      module_(module),
+      index_(variable)
     {}
     
     bool isResolved() const { return index_ != -1; }
     bool isLocal() const { return isLocal_; }
-    int import() const { return import_; }
+    int module() const { return module_; }
     int index() const { return index_; }
     
   private:
     bool isLocal_;
-    int import_;
+    int module_;
     int index_;
   };
   
   class ModuleAst : public Managed
   {
   public:
-    ModuleAst(const Array<gc<Def> >& defs, gc<Expr> body)
-    : defs_(defs),
-      body_(body)
+    ModuleAst(gc<SequenceExpr> body)
+    : body_(body)
     {}
     
-    const Array<gc<Def> >& defs() const { return defs_; }
-    gc<Expr> body() const { return body_; }
+    gc<SequenceExpr> body() const { return body_; }
     
     virtual void reach()
     {
-      Memory::reach(defs_);
       Memory::reach(body_);
     }
     
   private:
-    Array<gc<Def> > defs_;
-    gc<Expr>        body_;
+    gc<SequenceExpr> body_;
   };
   
 #include "Ast.generated.h"

@@ -1,0 +1,3 @@
+var bar = "123"
+def foo() bar
+print(foo()) // expect: 123

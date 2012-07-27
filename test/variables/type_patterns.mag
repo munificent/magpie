@@ -1,12 +1,18 @@
-val a is Num = 1
-print(a) // expect: 1
+do
+    val a is Num = 1
+    print(a) // expect: 1
+end
 
 // Can use an expression for the value.
-val d is String = "str"
-print(d) // expect: str
+do
+    val d is String = "str"
+    print(d) // expect: str
+end
 
 // Don't actually need to name a variable.
-print(val is Num = 1) // expect: 1
+do
+    print(val is Num = 1) // expect: 1
+end
 
 // Failed value pattern match.
 do

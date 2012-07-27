@@ -1,0 +1,6 @@
+def bar(arg) Num
+
+// Can only have simple name expressions in type patterns.
+def foo(is bar("whatever")) "number" // expect error
+
+foo(3)

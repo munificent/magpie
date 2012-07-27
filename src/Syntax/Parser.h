@@ -37,7 +37,6 @@ namespace magpie
       int           precedence;
     };
     
-    gc<Def>  parseDefinition();
     gc<Expr> parseBlock(TokenType endToken = TOKEN_END);
     gc<Expr> parseBlock(TokenType end1, TokenType end2,
                         TokenType* outEndToken);
@@ -71,10 +70,11 @@ namespace magpie
     gc<Expr> or_(gc<Expr> left, gc<Token> token);
 
     // Pattern parsing.
-    gc<Pattern> parsePattern();
-    gc<Pattern> recordPattern();
-    gc<Pattern> variablePattern();
-    gc<Pattern> primaryPattern();
+    gc<Pattern> parsePattern(bool isMethod);
+    gc<Pattern> recordPattern(bool isMethod);
+    gc<Pattern> variablePattern(bool isMethod);
+    gc<Pattern> primaryPattern(bool isMethod);
+    gc<Expr> parseExpressionInPattern(bool isMethod);
 
     // The left-hand side of an assignment expression is a pattern, but it will
     // initially be parsed as an expression. Correctly determining whether a

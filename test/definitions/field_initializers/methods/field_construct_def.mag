@@ -1,0 +1,8 @@
+// skip
+defclass Foo
+    var bar = baz()
+end
+
+var foo = Foo new // expect exit 3
+
+def baz() "baz"

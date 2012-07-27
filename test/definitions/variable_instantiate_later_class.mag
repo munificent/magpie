@@ -1,0 +1,7 @@
+// skip
+var a = Foo new // expect error
+
+defclass Foo
+end
+
+print(a is Foo)

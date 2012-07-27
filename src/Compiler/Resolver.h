@@ -6,20 +6,23 @@
 
 namespace magpie
 {
+  class Compiler;
   class Scope;
+  class VM;
   
   class Resolver : public ExprVisitor
   {
     friend class Scope;
     
   public:
-    static void resolve(ErrorReporter& reporter, const Module& module,
-                        MethodDef& method);
+    static int resolveBody(Compiler& compiler, Module& module, gc<Expr> body);
+    static void resolve(Compiler& compiler, Module& module, DefExpr& method);
     
   private:
-    Resolver(ErrorReporter& reporter, const Module& module)
-    : reporter_(reporter),
+    Resolver(Compiler& compiler, Module& module, bool isModuleBody)
+    : compiler_(compiler),
       module_(module),
+      isModuleBody_(isModuleBody),
       locals_(),
       maxLocals_(0),
       unnamedSlotId_(0),
@@ -45,11 +48,13 @@ namespace magpie
     virtual void visit(BoolExpr& expr, int dummy);
     virtual void visit(CallExpr& expr, int dummy);
     virtual void visit(CatchExpr& expr, int dummy);
+    virtual void visit(DefExpr& expr, int dummy);
     virtual void visit(DoExpr& expr, int dummy);
     virtual void visit(IfExpr& expr, int dummy);
     virtual void visit(IsExpr& expr, int dummy);
     virtual void visit(MatchExpr& expr, int dummy);
     virtual void visit(NameExpr& expr, int dummy);
+    virtual void visit(NativeExpr& expr, int dest);
     virtual void visit(NotExpr& expr, int dummy);
     virtual void visit(NothingExpr& expr, int dummy);
     virtual void visit(NumberExpr& expr, int dummy);
@@ -62,9 +67,13 @@ namespace magpie
     virtual void visit(VariableExpr& expr, int dummy);
     virtual void visit(WhileExpr& expr, int dummy);
 
-    ErrorReporter& reporter_;
+    Compiler& compiler_;
 
-    const Module& module_;
+    Module& module_;
+    
+    // True if this resolver is resolving top-level expressions in a module
+    // body. False if it's resolving a method body.
+    bool isModuleBody_;
     
     // The names of the current in-scope local variables (including all outer
     // scopes). The indices in this array correspond to the slots where those
@@ -92,6 +101,8 @@ namespace magpie
   public:
     Scope(Resolver* resolver);      
     ~Scope();
+    
+    bool isTopLevel() const;
     
     void resolve(Pattern& pattern);
     void resolveAssignment(Pattern& pattern);

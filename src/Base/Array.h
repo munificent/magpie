@@ -6,7 +6,6 @@
 
 namespace magpie
 {
-
   // A resizable dynamic array class. Array items must support copying and a
   // default constructor.
   template <class T>
@@ -99,7 +98,7 @@ namespace magpie
       items_[count_ - 1] = T();
       count_--;
     }
-    
+
     // Finds the index of the given item in the array. Returns -1 if not found.
     int indexOf(const T& value) const
     {

@@ -8,37 +8,26 @@
 
 namespace magpie
 {
+  class DefExpr;
   class Module;
   class Object;
+  class Pattern;
+  class VM;
   
-  typedef gc<Object> (*Primitive)(ArrayView<gc<Object> >& args);
-  
-  class Method : public Managed
+  // A compiled chunk of bytecode that can be executed by a Fiber.
+  class Chunk : public Managed
   {
   public:
-    Method(Module* module)
-    : module_(module),
-      code_(),
+    Chunk()
+    : code_(),
       constants_(),
-      numSlots_(0),
-      primitive_(NULL)
-    {}
-    
-    Method(Primitive primitive)
-    : module_(NULL),
-      code_(),
-      constants_(),
-      numSlots_(0),
-      primitive_(primitive)
+      numSlots_(0)
     {}
     
     void setCode(const Array<instruction>& code,
                  int maxSlots);
     
-    Module* module() { return module_; }
-    
     inline const Array<instruction>& code() const { return code_; }
-    inline Primitive primitive() const { return primitive_; }
     
     int addConstant(gc<Object> constant);
     gc<Object> getConstant(int index) const;
@@ -51,38 +40,57 @@ namespace magpie
     virtual void reach();
     
   private:
-    // The module where this method is defined. Not gc because modules live
-    // outside of the managed heap and aren't collected. Will be NULL for
-    // primitives.
-    Module* module_;
-    
     Array<instruction> code_;
     Array<gc<Object> > constants_;
     
     int numSlots_;
     
-    // The primitive function for this method. Will be NULL for non-primitive
-    // methods.
-    Primitive primitive_;
-    
-    NO_COPY(Method);
+    NO_COPY(Chunk);
   };
-
-  class MethodScope
+  
+  // Intermediate representation of a single method in a multimethod. This is
+  // produced during module compilation and "halfway" compiles the method to
+  // bytecode. The final compilation to bytecode occurs once all methods for a
+  // multimethod are known. The Expr for the body here should already be
+  // resolved.
+  class Method : public Managed
   {
   public:
-    int declare(gc<String> name);
-    void define(int index, gc<Method> method);
-    void define(gc<String> name, gc<Method> method);
-    void define(gc<String> name, Primitive primitive);
+    Method(Module* module, gc<DefExpr> def)
+    : module_(module),
+      def_(def)
+    {}
     
-    int find(gc<String> name) const;
-    gc<Method> get(int index) const { return methods_[index]; }
+    Module* module() { return module_; }
+    gc<DefExpr> def() { return def_; }
     
-    void reach();
+    // TODO(bob): reach().
     
   private:
+    Module* module_;
+    gc<DefExpr> def_;
+  };
+  
+  class Multimethod : public Managed
+  {
+  public:
+    Multimethod(gc<String> signature);
+    
+    gc<String> signature() { return signature_; }
+    gc<Chunk> getChunk(VM& vm);
+    
+    void addMethod(gc<Method> method);
+    
+    // TODO(bob): For now, we can just compile a single method to bytecode.
+    // This is just until we get everything working with the new interpreter-
+    // style method definitions (where "def" expressions are expressions).
+    gc<Method> hackGetMethod();
+    
+  private:
+    // TODO(bob): reach().
+    
+    gc<String> signature_;
+    gc<Chunk> chunk_;
     Array<gc<Method> > methods_;
-    Array<gc<String> > names_;
   };
 }
