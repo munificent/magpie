@@ -111,14 +111,8 @@ match 1, 2
     case 0: a, 1: b then print(a + b) // expect: 3
 end
 
-/*
-specify("A value pattern") with
-    it should("match a class object as a value") with
-        match Int
-            case == Bool then "no"
-            case == Int then "yes"
-        end shouldEqual("yes")
-    end
+// Match a class object as a value.
+match Num
+    case == Bool then print("no")
+    case == Num then print("yes") // expect: yes
 end
-
-*/

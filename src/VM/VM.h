@@ -9,6 +9,7 @@
 
 namespace magpie
 {
+  class ClassObject;
   class Module;
   class ModuleAst;
   class RecordType;
@@ -36,12 +37,13 @@ namespace magpie
 
     inline gc<Object> nothing() const { return nothing_; }
     
-    inline gc<Object> boolClass() const { return boolClass_; }
-    inline gc<Object> classClass() const { return classClass_; }
-    inline gc<Object> nothingClass() const { return nothingClass_; }
-    inline gc<Object> numberClass() const { return numberClass_; }
-    inline gc<Object> recordClass() const { return recordClass_; }
-    inline gc<Object> stringClass() const { return stringClass_; }
+    inline gc<ClassObject> boolClass() const { return boolClass_; }
+    inline gc<ClassObject> classClass() const { return classClass_; }
+    inline gc<ClassObject> nothingClass() const { return nothingClass_; }
+    inline gc<ClassObject> numberClass() const { return numberClass_; }
+    inline gc<ClassObject> recordClass() const { return recordClass_; }
+    inline gc<ClassObject> stringClass() const { return stringClass_; }
+    inline gc<ClassObject> noMatchErrorClass() const { return noMatchErrorClass_; }
     
     inline gc<Object> getBool(bool value) const
     {
@@ -81,7 +83,7 @@ namespace magpie
     // error.
     gc<ModuleAst> parseModule(const char* fileName, gc<String> source);
     
-    void makeClass(gc<Object>& classObj, const char* name);
+    void makeClass(gc<ClassObject>& classObj, const char* name);
     
     Array<Module*> modules_;
     Module* coreModule_;
@@ -101,12 +103,13 @@ namespace magpie
     gc<Object> true_;
     gc<Object> false_;
     gc<Object> nothing_;
-    gc<Object> boolClass_;
-    gc<Object> classClass_;
-    gc<Object> nothingClass_;
-    gc<Object> numberClass_;
-    gc<Object> recordClass_;
-    gc<Object> stringClass_;
+    gc<ClassObject> boolClass_;
+    gc<ClassObject> classClass_;
+    gc<ClassObject> nothingClass_;
+    gc<ClassObject> numberClass_;
+    gc<ClassObject> recordClass_;
+    gc<ClassObject> stringClass_;
+    gc<ClassObject> noMatchErrorClass_;
     
     NO_COPY(VM);
   };

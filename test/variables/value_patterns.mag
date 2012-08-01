@@ -17,6 +17,6 @@ end
 // Failed value pattern match.
 do
     val e == 1 = 2
-catch err then
+catch err is NoMatchError then
     print("caught") // expect: caught
 end

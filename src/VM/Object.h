@@ -10,6 +10,7 @@ namespace magpie
 {
   class BoolObject;
   class ClassObject;
+  class DynamicObject;
   class Memory;
   class Multimethod;
   class NumberObject;
@@ -20,6 +21,7 @@ namespace magpie
   enum ObjectType {
     OBJECT_BOOL,
     OBJECT_CLASS,
+    OBJECT_DYNAMIC,
     OBJECT_NOTHING,
     OBJECT_NUMBER,
     OBJECT_RECORD,
@@ -42,6 +44,12 @@ namespace magpie
     virtual const ClassObject* toClass() const
     {
       ASSERT(false, "Not a class.");
+      return NULL;
+    }
+    
+    virtual DynamicObject* toDynamic()
+    {
+      ASSERT(false, "Not a dynamic object.");
       return NULL;
     }
     
@@ -111,6 +119,32 @@ namespace magpie
     
   private:
     gc<String> name_;
+  };
+  
+  // A regular instance of some class.
+  class DynamicObject : public Object
+  {
+  public:
+    DynamicObject(gc<ClassObject> classObj)
+    : Object(),
+      class_(classObj)
+    {}
+    
+    virtual ObjectType type() const { return OBJECT_DYNAMIC; }
+
+    virtual DynamicObject* toDynamic() { return this; }
+
+    virtual void trace(std::ostream& stream) const
+    {
+      stream << "[instance of " << class_->name() << "]";
+    }
+    
+    gc<ClassObject> classObj() { return class_; }
+    
+  private:
+    gc<ClassObject> class_;
+    
+    NO_COPY(DynamicObject);
   };
   
   class NothingObject : public Object

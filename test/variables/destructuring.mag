@@ -74,21 +74,21 @@ end
 // Not a record value.
 do
     val x: a = "not record"
-catch err then
+catch err is NoMatchError then
     print("caught") // expect: caught
 end
 
 // Missing field.
 do
     val x: a, y: b = x: 1
-catch err then
+catch err is NoMatchError then
     print("caught") // expect: caught
 end
 
 // Field pattern fails.
 do
     val x: a is Num = x: true
-catch err then
+catch err is NoMatchError then
     print("caught") // expect: caught
 end
 

@@ -97,10 +97,10 @@ namespace magpie
             }
           }
           
-          // TODO(bob): Throw NoMatchError.
-          if (!success && !throwError(vm_.getBool(false)))
+          if (!success)
           {
-            return FIBER_UNCAUGHT_ERROR;
+            gc<Object> error = new DynamicObject(vm_.noMatchErrorClass());
+            if (!throwError(error)) return FIBER_UNCAUGHT_ERROR;
           }
           break;
         }
@@ -198,6 +198,10 @@ namespace magpie
                 equal = false;
                 break;
                 
+              case OBJECT_DYNAMIC:
+                ASSERT(false, "Equality on arbitrary objects not implemented.");
+                break;
+                
               case OBJECT_NOTHING:
                 ASSERT(false, "Should only be one instance of nothing.");
                 break;
@@ -264,12 +268,16 @@ namespace magpie
           {
             case OBJECT_BOOL:    type = vm_.boolClass(); break;
             case OBJECT_CLASS:   type = vm_.classClass(); break;
+            case OBJECT_DYNAMIC:
+            {
+              DynamicObject* object = value->toDynamic();
+              type = object->classObj();
+              break;
+            }
             case OBJECT_NOTHING: type = vm_.nothingClass(); break;
             case OBJECT_NUMBER:  type = vm_.numberClass(); break;
             case OBJECT_RECORD:  type = vm_.recordClass(); break;
             case OBJECT_STRING:  type = vm_.stringClass(); break;
-            default:
-              ASSERT(false, "Unknown object type.");
           }
           
           store(frame, GET_C(ins), vm_.getBool(type->toClass()->is(*expected)));
@@ -379,10 +387,10 @@ namespace magpie
         case OP_TEST_MATCH:
         {
           gc<Object> pass = load(frame, GET_A(ins));
-          // TODO(bob): Throw NoMatchError.
-          if (!pass->toBool() && !throwError(vm_.getBool(false)))
+          if (!pass->toBool())
           {
-            return FIBER_UNCAUGHT_ERROR;
+            gc<Object> error = new DynamicObject(vm_.noMatchErrorClass());
+            if (!throwError(error)) return FIBER_UNCAUGHT_ERROR;
           }
           break;
         }

@@ -68,6 +68,7 @@ namespace magpie
     makeClass(numberClass_, "Num");
     makeClass(recordClass_, "Record");
     makeClass(stringClass_, "String");
+    makeClass(noMatchErrorClass_, "NoMatchError");
     
     gc<ModuleAst> moduleAst = parseModule(fileName, source);
     if (moduleAst.isNull()) return false;
@@ -240,7 +241,7 @@ namespace magpie
     return moduleAst;
   }
 
-  void VM::makeClass(gc<Object>& classObj, const char* name)
+  void VM::makeClass(gc<ClassObject>& classObj, const char* name)
   {
     gc<String> nameString = String::create(name);
     classObj = new ClassObject(nameString);
