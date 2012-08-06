@@ -18,13 +18,10 @@ namespace magpie
     virtual ~MethodCompiler() {}
     
   private:    
-    MethodCompiler(Compiler& compiler, Module* module);
+    MethodCompiler(Compiler& compiler);
     
-    gc<Chunk> compileBody(gc<Expr> body);
-
-    // TODO(bob): Hack temp. This is just to get single non-multimethods working
-    // with the new deferred compilation model.
-    gc<Chunk> compileTemp(DefExpr& method);
+    gc<Chunk> compileBody(Module* module, gc<Expr> body);
+    gc<Chunk> compile(Multimethod& multimethod);
     
     void compileParam(gc<Pattern> param, int& slot);
     void compileParamField(gc<Pattern> param, int slot);

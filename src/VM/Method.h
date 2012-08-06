@@ -79,13 +79,10 @@ namespace magpie
     gc<String> signature() { return signature_; }
     gc<Chunk> getChunk(VM& vm);
     
+    Array<gc<Method> >& methods() { return methods_; }
+    
     void addMethod(gc<Method> method);
-    
-    // TODO(bob): For now, we can just compile a single method to bytecode.
-    // This is just until we get everything working with the new interpreter-
-    // style method definitions (where "def" expressions are expressions).
-    gc<Method> hackGetMethod();
-    
+
   private:
     // TODO(bob): reach().
     

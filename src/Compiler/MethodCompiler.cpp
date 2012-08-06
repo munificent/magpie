@@ -6,11 +6,10 @@
 
 namespace magpie
 {
-  MethodCompiler::MethodCompiler(Compiler& compiler,
-                                 Module* module)
+  MethodCompiler::MethodCompiler(Compiler& compiler)
   : ExprVisitor(),
     compiler_(compiler),
-    module_(module),
+    module_(NULL),
     chunk_(new Chunk()),
     code_(),
     numLocals_(0),
@@ -18,8 +17,10 @@ namespace magpie
     maxSlots_(0)
   {}
   
-  gc<Chunk> MethodCompiler::compileBody(gc<Expr> body)
+  gc<Chunk> MethodCompiler::compileBody(Module* module, gc<Expr> body)
   {
+    module_ = module;
+    
     // Reserve slots up front for all of the locals. This ensures that temps
     // will always be after locals.
     // TODO(bob): Using max here isn't optimal. Ideally a given temp only needs
@@ -37,29 +38,53 @@ namespace magpie
     return chunk_;
   }
   
-  gc<Chunk> MethodCompiler::compileTemp(DefExpr& method)
+  gc<Chunk> MethodCompiler::compile(Multimethod& multimethod)
   {
-    // Reserve slots up front for all of the locals. This ensures that temps
-    // will always be after locals.
-    // TODO(bob): Using max here isn't optimal. Ideally a given temp only needs
-    // to be after the locals that are in scope during the duration of that
-    // temp. But calculating that is a bit hairy. For now, until we have a more
-    // advanced compiler, this is a simple solution.
-    numLocals_ = method.maxLocals();
-    maxSlots_ = numLocals_;
+    Array<gc<Method> >& methods = multimethod.methods();
     
-    // Track the slots used for the arguments and result. This code here must
-    // be kept carefully in sync with the similar prelude code in Resolver.
-    int numParamSlots = 0;
-
-    // Evaluate the method's parameter patterns.
-    compileParam(method.leftParam(), numParamSlots);
-    compileParam(method.rightParam(), numParamSlots);
-
-    // The result slot is just after the param slots.
-    compile(method.body(), numParamSlots);
-    write(OP_RETURN, numParamSlots);
-
+    if (methods.count() == 0)
+    {
+      // TODO(bob): Should be a NoMethodError, not NoMatchError.
+      // If there are no methods, the body just immediately throws a match
+      // failure. This happens when you call a method before it has been
+      // defined. Since methods are forward-declared (to support recursion),
+      // the multimethod exists, but it has no methods in it.
+      maxSlots_ = 1;
+      write(OP_BUILT_IN, 0, 0);
+      write(OP_TEST_MATCH, 0);
+    }
+    else if (methods.count() == 1)
+    {
+      gc<DefExpr> method = multimethod.methods()[0]->def();
+      
+      module_ = multimethod.methods()[0]->module();
+      
+      // Reserve slots up front for all of the locals. This ensures that temps
+      // will always be after locals.
+      // TODO(bob): Using max here isn't optimal. Ideally a given temp only needs
+      // to be after the locals that are in scope during the duration of that
+      // temp. But calculating that is a bit hairy. For now, until we have a more
+      // advanced compiler, this is a simple solution.
+      numLocals_ = method->maxLocals();
+      maxSlots_ = numLocals_;
+      
+      // Track the slots used for the arguments and result. This code here must
+      // be kept carefully in sync with the similar prelude code in Resolver.
+      int numParamSlots = 0;
+      
+      // Evaluate the method's parameter patterns.
+      compileParam(method->leftParam(), numParamSlots);
+      compileParam(method->rightParam(), numParamSlots);
+      
+      // The result slot is just after the param slots.
+      compile(method->body(), numParamSlots);
+      write(OP_RETURN, numParamSlots);
+    }
+    else if (methods.count() > 1)
+    {
+      ASSERT(false, "Multimethods aren't implemented yet.");
+    }
+    
     chunk_->setCode(code_, maxSlots_);
     return chunk_;
   }

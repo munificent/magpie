@@ -176,10 +176,4 @@ namespace magpie
     
     return chunk_;
   }
-  
-  gc<Method> Multimethod::hackGetMethod()
-  {
-    ASSERT(methods_.count() == 1, "Multimethods are not implemented yet.");
-    return methods_[0];
-  }
 }

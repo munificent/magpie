@@ -21,7 +21,7 @@ namespace magpie
     
     compiler.declareTopLevel(ast, module);
     
-    gc<Chunk> code = MethodCompiler(compiler, module).compileBody(ast->body());
+    gc<Chunk> code = MethodCompiler(compiler).compileBody(module, ast->body());
     module->bindBody(code);
     return module;
   }
@@ -30,8 +30,7 @@ namespace magpie
                                          Multimethod& multimethod)
   {
     Compiler compiler(vm, reporter);
-    gc<Method> method = multimethod.hackGetMethod();
-    return MethodCompiler(compiler, method->module()).compileTemp(*method->def());
+    return MethodCompiler(compiler).compile(multimethod);
   }
   
   int Compiler::findMethod(gc<String> signature)

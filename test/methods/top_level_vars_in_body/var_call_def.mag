@@ -1,4 +1,3 @@
-// skip
 // expect exit 3
 var bar = "123"
 foo()
