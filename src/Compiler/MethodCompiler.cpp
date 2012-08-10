@@ -53,43 +53,60 @@ namespace magpie
       write(OP_BUILT_IN, 0, 0);
       write(OP_TEST_MATCH, 0);
     }
-    else if (methods.count() == 1)
+    else
     {
-      gc<DefExpr> method = multimethod.methods()[0]->def();
-      
-      module_ = multimethod.methods()[0]->module();
-      
-      // Reserve slots up front for all of the locals. This ensures that temps
-      // will always be after locals.
-      // TODO(bob): Using max here isn't optimal. Ideally a given temp only needs
-      // to be after the locals that are in scope during the duration of that
-      // temp. But calculating that is a bit hairy. For now, until we have a more
-      // advanced compiler, this is a simple solution.
-      numLocals_ = method->maxLocals();
-      maxSlots_ = numLocals_;
-      
-      // Track the slots used for the arguments and result. This code here must
-      // be kept carefully in sync with the similar prelude code in Resolver.
-      int numParamSlots = 0;
-      
-      // Evaluate the method's parameter patterns.
-      compileParam(method->leftParam(), numParamSlots);
-      compileParam(method->rightParam(), numParamSlots);
-      
-      // The result slot is just after the param slots.
-      compile(method->body(), numParamSlots);
-      write(OP_RETURN, numParamSlots);
-    }
-    else if (methods.count() > 1)
-    {
-      ASSERT(false, "Multimethods aren't implemented yet.");
+      // TODO(bob): Lots of work needed here:
+      // - Sort methods by specificity.
+      // - Support call-next-method.
+      // - Detect pattern collisions.
+      // - Throw AmbiguousMethodError when appropriate.
+      for (int i = 0; i < multimethod.methods().count(); i++)
+      {
+        PatternCompiler compiler(*this, true);
+        
+        gc<DefExpr> method = multimethod.methods()[i]->def();
+        module_ = multimethod.methods()[i]->module();
+        
+        // Reserve slots up front for all of the locals. This ensures that
+        // temps will always be after locals.
+        // TODO(bob): Using max here isn't optimal. Ideally a given temp only
+        // needs to be after the locals that are in scope during the duration
+        // of that temp. But calculating that is a bit hairy. For now, until we
+        // have a more advanced compiler, this is a simple solution.
+        numLocals_ = method->maxLocals();
+        maxSlots_ = MAX(maxSlots_, numLocals_);
+        
+        // Track the slots used for the arguments and result. This code here
+        // must be kept carefully in sync with the similar prelude code in
+        // Resolver.
+        int numParamSlots = 0;
+        
+        // Evaluate the method's parameter patterns.
+        compileParam(compiler, method->leftParam(), numParamSlots);
+        compileParam(compiler, method->rightParam(), numParamSlots);
+        
+        // The result slot is just after the param slots.
+        compile(method->body(), numParamSlots);
+        write(OP_RETURN, numParamSlots);
+        
+        compiler.endJumps();
+        
+        ASSERT(numTemps_ == 0, "Should not have any temps left after a method "
+                               "is compiled.");
+      }
+
+      // If we get here, all methods failed to match, so throw a NoMethodError.
+      // TODO(bob): Should throw NoMethodError instead of false.
+      write(OP_BUILT_IN, 0, 0);
+      write(OP_THROW, 0);
     }
     
     chunk_->setCode(code_, maxSlots_);
     return chunk_;
   }
     
-  void MethodCompiler::compileParam(gc<Pattern> param, int& slot)
+  void MethodCompiler::compileParam(PatternCompiler& compiler,
+                                    gc<Pattern> param, int& slot)
   {
     // No parameter so do nothing.
     if (param.isNull()) return;
@@ -100,17 +117,18 @@ namespace magpie
       // Compile each field.
       for (int i = 0; i < record->fields().count(); i++)
       {
-        compileParamField(record->fields()[i].value, slot++);
+        compileParamField(compiler, record->fields()[i].value, slot++);
       }
     }
     else
     {
       // If we got here, the pattern isn't a record, so it's a single slot.
-      compileParamField(param, slot++);
+      compileParamField(compiler, param, slot++);
     }
   }
 
-  void MethodCompiler::compileParamField(gc<Pattern> param, int slot)
+  void MethodCompiler::compileParamField(PatternCompiler& compiler,
+                                         gc<Pattern> param, int slot)
   {
     VariablePattern* variable = param->asVariablePattern();
     if (variable != NULL)
@@ -118,12 +136,12 @@ namespace magpie
       // It's a variable, so compile its inner pattern. We don't worry about
       // the variable itself because the calling convention ensures its value
       // is already in the right slot.
-      compile(variable->pattern(), slot);
+      compiler.compile(variable->pattern(), slot);
     }
     else
     {
       // Not a variable, so just compile it normally.
-      compile(param, slot);
+      compiler.compile(param, slot);
     }
   }
   
@@ -156,10 +174,8 @@ namespace magpie
   
   void MethodCompiler::compile(gc<Pattern> pattern, int slot)
   {
-    if (pattern.isNull()) return;
-    
     PatternCompiler compiler(*this);
-    pattern->accept(compiler, slot);
+    compiler.compile(pattern, slot);
   }
   
   void MethodCompiler::visit(AndExpr& expr, int dest)
@@ -620,6 +636,13 @@ namespace magpie
     numTemps_ -= count;
   }
   
+  void PatternCompiler::compile(gc<Pattern> pattern, int slot)
+  {
+    if (pattern.isNull()) return;
+    
+    pattern->accept(*this, slot);
+  }
+
   void PatternCompiler::endJumps()
   {
     // Since this isn't the last case, then every match failure should just

@@ -8,6 +8,7 @@
 namespace magpie
 {
   class Module;
+  class PatternCompiler;
   
   class MethodCompiler : private ExprVisitor
   {
@@ -23,8 +24,9 @@ namespace magpie
     gc<Chunk> compileBody(Module* module, gc<Expr> body);
     gc<Chunk> compile(Multimethod& multimethod);
     
-    void compileParam(gc<Pattern> param, int& slot);
-    void compileParamField(gc<Pattern> param, int slot);
+    void compileParam(PatternCompiler& compiler, gc<Pattern> param, int& slot);
+    void compileParamField(PatternCompiler& compiler, gc<Pattern> param,
+                           int slot);
     int compileArg(gc<Expr> arg);
     
     void compile(gc<Expr> expr, int dest);
@@ -138,13 +140,15 @@ namespace magpie
       jumpOnFailure_(jumpOnFailure)
     {}
     
+    void compile(gc<Pattern> pattern, int slot);
+    
     void endJumps();
     
-    virtual void visit(RecordPattern& pattern, int value);
-    virtual void visit(TypePattern& pattern, int value);
-    virtual void visit(ValuePattern& pattern, int value);
-    virtual void visit(VariablePattern& pattern, int value);
-    virtual void visit(WildcardPattern& pattern, int value);
+    virtual void visit(RecordPattern& pattern, int slot);
+    virtual void visit(TypePattern& pattern, int slot);
+    virtual void visit(ValuePattern& pattern, int slot);
+    virtual void visit(VariablePattern& pattern, int slot);
+    virtual void visit(WildcardPattern& pattern, int slot);
   
   private:
     void writeTest(int slot);

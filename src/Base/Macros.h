@@ -57,3 +57,5 @@
 while (false) {                                             \
   *(static_cast<T* volatile*>(0)) = static_cast<S*>(0);     \
 }
+
+#define MAX(a, b) ((a > b) ? a : b)

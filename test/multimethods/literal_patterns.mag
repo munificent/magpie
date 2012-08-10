@@ -1,6 +1,7 @@
-// skip
 def foo(0) print("zero")
+def foo(2) print("two")
 def foo(1) print("one")
 
 foo(0) // expect: zero
 foo(1) // expect: one
+foo(2) // expect: two
