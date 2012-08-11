@@ -1,0 +1,5 @@
+// TODO(bob): Just a quick temp test.
+defclass Foo
+end
+
+print(Foo) // expect: Foo

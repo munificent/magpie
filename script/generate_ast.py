@@ -29,6 +29,9 @@ exprs = sorted({
     'Catch': [
         ('body',        'gc<Expr>'),
         ('catches',     'Array<MatchClause>')],
+    'DefClass': [
+        ('name',        'gc<String>'),
+        ('resolved*',   'ResolvedName')],
     'Def': [
         ('leftParam',   'gc<Pattern>'),
         ('name',        'gc<String>'),

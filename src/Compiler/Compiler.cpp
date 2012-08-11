@@ -78,15 +78,22 @@ namespace magpie
       if (def != NULL)
       {
         declareMultimethod(SignatureBuilder::build(*def));
+        continue;
+      }
+      
+      DefClassExpr* defClass = expr->asDefClassExpr();
+      if (defClass != NULL)
+      {
+        declareVariable(defClass->pos(), defClass->name(), module);
+        continue;
       }
       
       VariableExpr* var = expr->asVariableExpr();
       if (var != NULL)
       {
         declareVariables(var->pattern(), module);
+        continue;
       }
-      
-      // TODO(bob): Handle 'defclass' here too.
     }
   }
   
@@ -106,16 +113,7 @@ namespace magpie
     VariablePattern* variable = pattern->asVariablePattern();
     if (variable != NULL)
     {
-      // Make sure there isn't already a top-level variable with that name.
-      int existing = module->findVariable(variable->name());
-      if (existing != -1)
-      {
-        reporter_.error(pattern->pos(),
-            "There is already a variable '%s' defined in this module.",
-            variable->name()->cString());
-      }
-      
-      module->addVariable(variable->name(), gc<Object>());
+      declareVariable(variable->pos(), variable->name(), module);
       
       if (!variable->pattern().isNull())
       {
@@ -124,6 +122,20 @@ namespace magpie
     }
   }
 
+  void Compiler::declareVariable(SourcePos pos, gc<String> name, Module* module)
+  {
+    // Make sure there isn't already a top-level variable with that name.
+    int existing = module->findVariable(name);
+    if (existing != -1)
+    {
+      reporter_.error(pos,
+          "There is already a variable '%s' defined in this module.",
+          name->cString());
+    }
+    
+    module->addVariable(name, gc<Object>());
+  }
+  
   gc<String> SignatureBuilder::build(const CallExpr& expr)
   {
     // 1 foo                 -> ()foo

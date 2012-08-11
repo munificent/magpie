@@ -245,6 +245,19 @@ namespace magpie
       return new DefExpr(span, leftParam, name->text(), rightParam, body);
     }
     
+    if (match(TOKEN_DEFCLASS))
+    {
+      SourcePos start = last()->pos();
+      gc<Token> name = consume(TOKEN_NAME,
+                               "Expect name after 'defclass'.");
+      
+      consume(TOKEN_LINE, "Expect newline after class name.");
+      consume(TOKEN_END, "Expect 'end' class body.");
+      
+      SourcePos span = start.spanTo(last()->pos());
+      return new DefClassExpr(span, name->text());
+    }
+    
     return statementLike();
   }
     

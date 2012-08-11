@@ -72,6 +72,11 @@ namespace magpie
     out << " -> " << body_ << ")";
   }
   
+  void DefClassExpr::trace(std::ostream& out) const
+  {
+    out << "(defclass " << name_ << ")";
+  }
+  
   void DoExpr::trace(std::ostream& out) const
   {
     out << "(do " << body_ << ")";

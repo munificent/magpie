@@ -39,6 +39,7 @@ namespace magpie
     virtual void visit(CallExpr& expr, int dest);
     virtual void visit(CatchExpr& expr, int dest);
     virtual void visit(DefExpr& expr, int dest);
+    virtual void visit(DefClassExpr& expr, int dest);
     virtual void visit(DoExpr& expr, int dest);
     virtual void visit(IfExpr& expr, int dest);
     virtual void visit(IsExpr& expr, int dest);
@@ -69,9 +70,12 @@ namespace magpie
     // slot or a constant. This is used to compile the operands for those.
     int compileExpressionOrConstant(gc<Expr> expr);
     
+    int compileConstant(const DefClassExpr& expr);
     int compileConstant(const NumberExpr& expr);
     int compileConstant(const StringExpr& expr);
 
+    void compileAssignment(const ResolvedName& resolved, int value);
+    
     void write(OpCode op, int a = 0xff, int b = 0xff, int c = 0xff);
     int startJump();
     int startJumpBack();

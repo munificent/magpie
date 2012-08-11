@@ -292,6 +292,16 @@ namespace magpie
     write(OP_METHOD, multimethod, method);
   }
   
+  void MethodCompiler::visit(DefClassExpr& expr, int dest)
+  {
+    // Create and load the class.
+    int index = compileConstant(expr);
+    write(OP_CONSTANT, index, dest);
+    
+    // Also store it in its named variable.
+    compileAssignment(expr.resolved(), dest);
+  }
+  
   void MethodCompiler::visit(DoExpr& expr, int dest)
   {
     compile(expr.body(), dest);
@@ -528,6 +538,12 @@ namespace magpie
   
   int MethodCompiler::compileExpressionOrConstant(gc<Expr> expr)
   {
+    const DefClassExpr* defClass = expr->asDefClassExpr();
+    if (defClass != NULL)
+    {
+      return MAKE_CONSTANT(compileConstant(*defClass));
+    }
+    
     const NumberExpr* number = expr->asNumberExpr();
     if (number != NULL)
     {
@@ -545,7 +561,12 @@ namespace magpie
     compile(expr, dest);
     return dest;
   }
-
+  
+  int MethodCompiler::compileConstant(const DefClassExpr& expr)
+  {
+    return chunk_->addConstant(new ClassObject(expr.name()));
+  }
+  
   int MethodCompiler::compileConstant(const NumberExpr& expr)
   {
     return chunk_->addConstant(new NumberObject(expr.value()));
@@ -556,6 +577,23 @@ namespace magpie
     return chunk_->addConstant(new StringObject(expr.value()));
   }
 
+  void MethodCompiler::compileAssignment(const ResolvedName& resolved,
+                                         int value)
+  {
+    ASSERT(resolved.isResolved(), "Must resolve before compiling.");
+    
+    if (resolved.isLocal())
+    {
+      // Copy the value into the new variable.
+      write(OP_MOVE, value, resolved.index());
+    }
+    else
+    {
+      // Assign to the top-level variable.
+      write(OP_SET_VAR, resolved.module(), resolved.index(), value);
+    }
+  }
+  
   void MethodCompiler::write(OpCode op, int a, int b, int c)
   {
     ASSERT_INDEX(a, 256);
@@ -720,20 +758,7 @@ namespace magpie
   
   void PatternCompiler::visit(VariablePattern& pattern, int value)
   {
-    ASSERT(pattern.resolved().isResolved(),
-           "Must resolve before compiling.");
-    
-    if (pattern.resolved().isLocal())
-    {
-      // Copy the value into the new variable.
-      compiler_.write(OP_MOVE, value, pattern.resolved().index());
-    }
-    else
-    {
-      // Assign to the top-level variable.
-      compiler_.write(OP_SET_VAR, pattern.resolved().module(),
-                      pattern.resolved().index(), value);
-    }
+    compiler_.compileAssignment(pattern.resolved(), value);
     
     // Compile the inner pattern.
     if (!pattern.pattern().isNull())

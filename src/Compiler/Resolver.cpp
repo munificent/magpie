@@ -229,6 +229,19 @@ namespace magpie
     Resolver::resolve(compiler_, module_, expr);
   }
   
+  void Resolver::visit(DefClassExpr& expr, int dummy)
+  {
+    // Resolve the class name's variable.
+    int module = compiler_.getModuleIndex(module_);
+    int index = module_.findVariable(expr.name());
+    
+    ASSERT(index != -1, "Should have already forward-declared the class.");
+    
+    expr.setResolved(ResolvedName(module, index));
+    
+    // TODO(bob): Resolve field patterns and initializers.
+  }
+  
   void Resolver::visit(DoExpr& expr, int dummy)
   {
     Scope doScope(this);
@@ -497,7 +510,6 @@ namespace magpie
       // they should already exist. Just look up the existing one.
       int module = resolver_.compiler_.getModuleIndex(resolver_.module_);
       int index = resolver_.module_.findVariable(pattern.name());
-      // TODO(bob): Handle index == -1.
       
       if (index == -1)
       {

@@ -8,6 +8,7 @@ class BoolExpr;
 class CallExpr;
 class CatchExpr;
 class DefExpr;
+class DefClassExpr;
 class DoExpr;
 class IfExpr;
 class IsExpr;
@@ -43,6 +44,7 @@ public:
   virtual void visit(CallExpr& node, int arg) = 0;
   virtual void visit(CatchExpr& node, int arg) = 0;
   virtual void visit(DefExpr& node, int arg) = 0;
+  virtual void visit(DefClassExpr& node, int arg) = 0;
   virtual void visit(DoExpr& node, int arg) = 0;
   virtual void visit(IfExpr& node, int arg) = 0;
   virtual void visit(IsExpr& node, int arg) = 0;
@@ -88,6 +90,7 @@ public:
   virtual CallExpr* asCallExpr() { return NULL; }
   virtual CatchExpr* asCatchExpr() { return NULL; }
   virtual DefExpr* asDefExpr() { return NULL; }
+  virtual DefClassExpr* asDefClassExpr() { return NULL; }
   virtual DoExpr* asDoExpr() { return NULL; }
   virtual IfExpr* asIfExpr() { return NULL; }
   virtual IsExpr* asIsExpr() { return NULL; }
@@ -350,6 +353,39 @@ private:
   gc<Expr> body_;
   int maxLocals_;
   NO_COPY(DefExpr);
+};
+
+class DefClassExpr : public Expr
+{
+public:
+  DefClassExpr(const SourcePos& pos, gc<String> name)
+  : Expr(pos),
+    name_(name),
+    resolved_()
+  {}
+
+  virtual void accept(ExprVisitor& visitor, int arg)
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual DefClassExpr* asDefClassExpr() { return this; }
+
+  gc<String> name() const { return name_; }
+  ResolvedName resolved() const { return resolved_; }
+  void setResolved(ResolvedName resolved) { resolved_ = resolved; }
+
+  virtual void reach()
+  {
+    Memory::reach(name_);
+  }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  gc<String> name_;
+  ResolvedName resolved_;
+  NO_COPY(DefClassExpr);
 };
 
 class DoExpr : public Expr
