@@ -493,7 +493,8 @@ namespace magpie
   {
     if (isTopLevel())
     {
-      // It's a top-level module variable.
+      // It's a top-level module variable. Since these are forward declared,
+      // they should already exist. Just look up the existing one.
       int module = resolver_.compiler_.getModuleIndex(resolver_.module_);
       int index = resolver_.module_.findVariable(pattern.name());
       // TODO(bob): Handle index == -1.
@@ -511,31 +512,47 @@ namespace magpie
     }
     else
     {
-      // It's a local variable.
-      int slot;
+      // It's in a local scope.
+      ResolvedName resolved;
       if (isAssignment == 1)
       {
         // Assigning to an existing variable, so look it up.
-        slot = resolver_.locals_.lastIndexOf(pattern.name());
+        int slot = resolver_.locals_.lastIndexOf(pattern.name());
         
         // TODO(bob): Report error if variable is immutable.
         
-        if (slot == -1)
+        if (slot != -1)
         {
-          resolver_.compiler_.reporter().error(pattern.pos(),
-              "Variable '%s' is not defined.", pattern.name()->cString());
+          resolved = ResolvedName(slot);
+        }
+        else
+        {
+          // Not a local variable. See if it's a top-level one.
+          int module = resolver_.compiler_.getModuleIndex(resolver_.module_);
+          int index = resolver_.module_.findVariable(pattern.name());
           
-          // Put a fake slot in so we can continue and report more errors.
-          slot = 0;
+          if (index != -1)
+          {
+            resolved = ResolvedName(module, index);
+          }
+          else
+          {
+            resolver_.compiler_.reporter().error(pattern.pos(),
+                "Variable '%s' is not defined.", pattern.name()->cString());
+
+            // Put a fake slot in so we can continue and report more errors.
+            resolved = ResolvedName(0);
+          }
         }
       }
       else
       {
         // Declaring a variable, so create a slot for it.
-        slot = resolver_.makeLocal(pattern.pos(), pattern.name());
+        int slot = resolver_.makeLocal(pattern.pos(), pattern.name());
+        resolved = ResolvedName(slot);
       }
       
-      pattern.setResolved(ResolvedName(slot));
+      pattern.setResolved(resolved);
     }
         
     if (!pattern.pattern().isNull())

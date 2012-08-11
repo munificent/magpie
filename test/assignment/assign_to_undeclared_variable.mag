@@ -1,2 +1,0 @@
-// Assign to a variable that isn't declared.
-unknown = 123 // expect error

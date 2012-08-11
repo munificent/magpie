@@ -47,6 +47,7 @@ namespace magpie
     { NULL,             NULL, -1 },                                    // TOKEN_CASE
     { NULL,             NULL, -1 },                                    // TOKEN_CATCH
     { NULL,             NULL, -1 },                                    // TOKEN_DEF
+    { NULL,             NULL, -1 },                                    // TOKEN_DEFCLASS
     { NULL,             NULL, -1 },                                    // TOKEN_DO
     { NULL,             NULL, -1 },                                    // TOKEN_ELSE
     { NULL,             NULL, -1 },                                    // TOKEN_END

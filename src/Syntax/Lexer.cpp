@@ -303,29 +303,30 @@ namespace magpie
     
     // See if it's a reserved word.
     TokenType type = TOKEN_NAME;
-    if      (*text == "and"    ) type = TOKEN_AND;
-    else if (*text == "case"   ) type = TOKEN_CASE;
-    else if (*text == "catch"  ) type = TOKEN_CATCH;
-    else if (*text == "def"    ) type = TOKEN_DEF;
-    else if (*text == "do"     ) type = TOKEN_DO;
-    else if (*text == "else"   ) type = TOKEN_ELSE;
-    else if (*text == "end"    ) type = TOKEN_END;
-    else if (*text == "false"  ) type = TOKEN_FALSE;
-    else if (*text == "for"    ) type = TOKEN_FOR;
-    else if (*text == "if"     ) type = TOKEN_IF;
-    else if (*text == "is"     ) type = TOKEN_IS;
-    else if (*text == "match"  ) type = TOKEN_MATCH;
-    else if (*text == "not"    ) type = TOKEN_NOT;
-    else if (*text == "nothing") type = TOKEN_NOTHING;
-    else if (*text == "or"     ) type = TOKEN_OR;
-    else if (*text == "return" ) type = TOKEN_RETURN;
-    else if (*text == "then"   ) type = TOKEN_THEN;
-    else if (*text == "throw"  ) type = TOKEN_THROW;
-    else if (*text == "true"   ) type = TOKEN_TRUE;
-    else if (*text == "val"    ) type = TOKEN_VAL;
-    else if (*text == "var"    ) type = TOKEN_VAR;
-    else if (*text == "while"  ) type = TOKEN_WHILE;
-    else if (*text == "xor"    ) type = TOKEN_XOR;
+    if      (*text == "and"     ) type = TOKEN_AND;
+    else if (*text == "case"    ) type = TOKEN_CASE;
+    else if (*text == "catch"   ) type = TOKEN_CATCH;
+    else if (*text == "def"     ) type = TOKEN_DEF;
+    else if (*text == "defclass") type = TOKEN_DEFCLASS;
+    else if (*text == "do"      ) type = TOKEN_DO;
+    else if (*text == "else"    ) type = TOKEN_ELSE;
+    else if (*text == "end"     ) type = TOKEN_END;
+    else if (*text == "false"   ) type = TOKEN_FALSE;
+    else if (*text == "for"     ) type = TOKEN_FOR;
+    else if (*text == "if"      ) type = TOKEN_IF;
+    else if (*text == "is"      ) type = TOKEN_IS;
+    else if (*text == "match"   ) type = TOKEN_MATCH;
+    else if (*text == "not"     ) type = TOKEN_NOT;
+    else if (*text == "nothing" ) type = TOKEN_NOTHING;
+    else if (*text == "or"      ) type = TOKEN_OR;
+    else if (*text == "return"  ) type = TOKEN_RETURN;
+    else if (*text == "then"    ) type = TOKEN_THEN;
+    else if (*text == "throw"   ) type = TOKEN_THROW;
+    else if (*text == "true"    ) type = TOKEN_TRUE;
+    else if (*text == "val"     ) type = TOKEN_VAL;
+    else if (*text == "var"     ) type = TOKEN_VAR;
+    else if (*text == "while"   ) type = TOKEN_WHILE;
+    else if (*text == "xor"     ) type = TOKEN_XOR;
 
     return makeToken(type, text);
   }

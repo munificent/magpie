@@ -53,6 +53,7 @@ namespace magpie
       case TOKEN_CASE:          return "case";
       case TOKEN_CATCH:         return "catch";
       case TOKEN_DEF:           return "def";
+      case TOKEN_DEFCLASS:      return "defclass";
       case TOKEN_DO:            return "do";
       case TOKEN_END:           return "end";
       case TOKEN_ELSE:          return "else";
