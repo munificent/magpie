@@ -8,6 +8,7 @@ namespace magpie
   void StringTests::runTests()
   {
     create();
+    concat();
     subscript();
     equals();
     substring();
@@ -24,7 +25,16 @@ namespace magpie
     EXPECT_EQUAL(4, s2->length());
     EXPECT_EQUAL("more", *s2);
   }
-
+  
+  void StringTests::concat()
+  {
+    gc<String> s1 = String::create("first");
+    gc<String> s2 = String::create("second");
+    gc<String> result = String::concat(s1, s2);
+    
+    EXPECT_EQUAL("firstsecond", *result);
+  }
+  
   void StringTests::subscript()
   {
     gc<String> s = String::create("abcd");

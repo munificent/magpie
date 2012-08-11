@@ -12,7 +12,8 @@
 namespace magpie
 {
   NATIVE(print);
-  NATIVE(add);
+  NATIVE(addNum);
+  NATIVE(addString);
   NATIVE(subtract);
   NATIVE(multiply);
   NATIVE(divide);

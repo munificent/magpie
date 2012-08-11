@@ -1,0 +1,4 @@
+print("a" + "b") // expect: ab
+print("first" + "second") // expect: firstsecond
+print("blah" + "") // expect: blah
+print("" + "blah") // expect: blah

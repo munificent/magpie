@@ -29,6 +29,9 @@ namespace magpie
     // number of arguments to be formatted.
     static gc<String> format(const char* format, ...);
     
+    // Creates a new string that is the concatenation of [a] and [b].
+    static gc<String> concat(gc<String> a, gc<String> b);
+    
     // Gets the character at the given index.
     const char operator [](int index) const;
 

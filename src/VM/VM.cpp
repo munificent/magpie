@@ -26,7 +26,8 @@ namespace magpie
     fiber_ = new Fiber(*this);
         
     DEF_NATIVE(print, "print");
-    DEF_NATIVE(add, "num +");
+    DEF_NATIVE(addNum, "num +");
+    DEF_NATIVE(addString, "string +");
     DEF_NATIVE(subtract, "num -");
     DEF_NATIVE(multiply, "num *");
     DEF_NATIVE(divide, "num /");
@@ -58,6 +59,7 @@ namespace magpie
         "defclass NoMatchError\n"
         "end\n"
         "def (is Num) + (is Num) native \"num +\"\n"
+        "def (is String) + (is String) native \"string +\"\n"
         "def (is Num) - (is Num) native \"num -\"\n"
         "def (is Num) * (is Num) native \"num *\"\n"
         "def (is Num) / (is Num) native \"num /\"\n"

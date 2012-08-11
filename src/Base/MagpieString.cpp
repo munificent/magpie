@@ -34,6 +34,7 @@ namespace magpie
     // Construct it by calling global placement new.
     gc<String> string = ::new(mem) String(text.count());
     
+    // TODO(bob): memmove?
     for (int i = 0; i < text.count(); i++) {
       string->chars_[i] = text[i];
     }
@@ -56,6 +57,24 @@ namespace magpie
     va_end (args);
     
     return String::create(result);
+  }
+  
+  gc<String> String::concat(gc<String> a, gc<String> b)
+  {
+    int length = a->length() + b->length();
+    // Allocate enough memory for the string and its character array.
+    void* mem = Memory::allocate(calcStringSize(length));
+    
+    // Construct it by calling global placement new.
+    gc<String> string = ::new(mem) String(length);
+    
+    strncpy(string->chars_, a->chars_, a->length());
+    strncpy(string->chars_ + a->length(), b->chars_, b->length());
+    
+    // Make sure its terminated.
+    string->chars_[length] = '\0';
+    
+    return string;
   }
   
   const char String::operator [](int index) const

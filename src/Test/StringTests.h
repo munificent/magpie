@@ -11,6 +11,7 @@ namespace magpie
 
   private:
     void create();
+    void concat();
     void subscript();
     void equals();
     void substring();

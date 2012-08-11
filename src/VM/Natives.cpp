@@ -9,30 +9,32 @@ namespace magpie
     return args[0];
   }
 
-  NATIVE(add)
+  NATIVE(addNum)
   {
-    // TODO(bob): Handle non-number types.
     double c = args[0]->toNumber() + args[1]->toNumber();
     return new NumberObject(c);
   }
   
+  NATIVE(addString)
+  {
+    return new StringObject(
+        String::concat(args[0]->toString(), args[1]->toString()));
+  }
+  
   NATIVE(subtract)
   {
-    // TODO(bob): Handle non-number types.
     double c = args[0]->toNumber() - args[1]->toNumber();
     return new NumberObject(c);
   }
   
   NATIVE(multiply)
   {
-    // TODO(bob): Handle non-number types.
     double c = args[0]->toNumber() * args[1]->toNumber();
     return new NumberObject(c);
   }
   
   NATIVE(divide)
   {
-    // TODO(bob): Handle non-number types.
     double c = args[0]->toNumber() / args[1]->toNumber();
     return new NumberObject(c);
   }
