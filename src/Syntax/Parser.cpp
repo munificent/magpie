@@ -85,7 +85,7 @@ namespace magpie
     do
     {
       if (lookAhead(TOKEN_EOF)) break;
-      exprs.add(statementLike());
+      exprs.add(topLevelExpression());
     }
     while (match(TOKEN_LINE));
 
@@ -170,11 +170,9 @@ namespace magpie
       return statementLike();
     }
   }
-
-  gc<Expr> Parser::statementLike()
+  
+  gc<Expr> Parser::topLevelExpression()
   {
-    // TODO(bob): Split this out so that defs can only appear at the top-level
-    // and the beginning of blocks, like (define) in Scheme.
     if (match(TOKEN_DEF))
     {
       SourcePos start = last()->pos();
@@ -205,14 +203,14 @@ namespace magpie
       else if (leftParam.isNull())
       {
         reporter_.error(current().pos(),
-            "Expect a method name after 'def' but got '%s'.",
-            current().text()->cString());
+                        "Expect a method name after 'def' but got '%s'.",
+                        current().text()->cString());
       }
       else
       {
         reporter_.error(current().pos(),
-            "Expect a method name after left parameter in 'def' but got '%s'.",
-            current().text()->cString());
+                        "Expect a method name after left parameter in 'def' but got '%s'.",
+                        current().text()->cString());
       }
       
       gc<Pattern> rightParam;
@@ -246,7 +244,19 @@ namespace magpie
       SourcePos span = start.spanTo(last()->pos());
       return new DefExpr(span, leftParam, name->text(), rightParam, body);
     }
-
+    
+    return statementLike();
+  }
+    
+  gc<Expr> Parser::statementLike()
+  {
+    if (match(TOKEN_DEF))
+    {
+      // Methods can only be declared at the top level. Show a friendly error.
+      reporter_.error(current().pos(),
+          "Methods can only be declared at the top level of a module.");
+    }
+    
     if (match(TOKEN_RETURN))
     {
       SourcePos start = last()->pos();

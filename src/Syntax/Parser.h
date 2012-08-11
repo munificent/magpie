@@ -42,6 +42,7 @@ namespace magpie
                         TokenType* outEndToken);
     gc<Expr> parseBlock(bool allowCatch, TokenType end1, TokenType end2,
                         TokenType* outEndToken);
+    gc<Expr> topLevelExpression();
     gc<Expr> statementLike();
     gc<Expr> flowControl();
 

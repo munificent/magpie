@@ -1,0 +1,4 @@
+// At least right now, methods can only be declared at the top level.
+do
+    def foo() "no" // expect error
+end
