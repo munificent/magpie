@@ -42,33 +42,37 @@ namespace magpie
     
     // Load the core module.
     // TODO(bob): Put this in an actual file somewhere.
-    /*
     const char* coreSource =
+        "defclass Bool\n"
+        "end\n"
+        "defclass Class\n"
+        "end\n"
+        "defclass Nothing\n"
+        "end\n"
+        "defclass Num\n"
+        "end\n"
+        "defclass Record\n"
+        "end\n"
+        "defclass String\n"
+        "end\n"
+        "defclass NoMatchError\n"
+        "end\n"
         "def (is Num) + (is Num) native \"num +\"\n"
         "def (is Num) - (is Num) native \"num -\"\n"
         "def (is Num) * (is Num) native \"num *\"\n"
         "def (is Num) / (is Num) native \"num /\"\n"
         "def print(arg) native \"print\"\n";
-     */
-    // TODO(bob): Type annotate args when core module can figure out what "Num"
-    // is bound to.
-    const char* coreSource =
-        "def (_) + (_) native \"num +\"\n"
-        "def (_) - (_) native \"num -\"\n"
-        "def (_) * (_) native \"num *\"\n"
-        "def (_) / (_) native \"num /\"\n"
-        "def print(arg) native \"print\"\n";
     gc<ModuleAst> coreAst = parseModule("<core>", String::create(coreSource));
     coreModule_ = Compiler::compileModule(*this, reporter, coreAst, false); 
     loadModule(coreModule_);
-    
-    makeClass(boolClass_, "Bool");
-    makeClass(classClass_, "Class");
-    makeClass(nothingClass_, "Nothing");
-    makeClass(numberClass_, "Num");
-    makeClass(recordClass_, "Record");
-    makeClass(stringClass_, "String");
-    makeClass(noMatchErrorClass_, "NoMatchError");
+        
+    registerClass(boolClass_, "Bool");
+    registerClass(classClass_, "Class");
+    registerClass(nothingClass_, "Nothing");
+    registerClass(numberClass_, "Num");
+    registerClass(recordClass_, "Record");
+    registerClass(stringClass_, "String");
+    registerClass(noMatchErrorClass_, "NoMatchError");
     
     gc<ModuleAst> moduleAst = parseModule(fileName, source);
     if (moduleAst.isNull()) return false;
@@ -241,11 +245,10 @@ namespace magpie
     return moduleAst;
   }
 
-  void VM::makeClass(gc<ClassObject>& classObj, const char* name)
+  void VM::registerClass(gc<ClassObject>& classObj, const char* name)
   {
-    gc<String> nameString = String::create(name);
-    classObj = new ClassObject(nameString);
-    coreModule_->addVariable(nameString, classObj);
+    int index = coreModule_->findVariable(String::create(name));
+    classObj = coreModule_->getVariable(index)->toClass();
   }
 }
 

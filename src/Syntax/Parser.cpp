@@ -203,14 +203,14 @@ namespace magpie
       else if (leftParam.isNull())
       {
         reporter_.error(current().pos(),
-                        "Expect a method name after 'def' but got '%s'.",
-                        current().text()->cString());
+            "Expect a method name after 'def' but got '%s'.",
+            current().text()->cString());
       }
       else
       {
         reporter_.error(current().pos(),
-                        "Expect a method name after left parameter in 'def' but got '%s'.",
-                        current().text()->cString());
+            "Expect a method name after left parameter in 'def' but got '%s'.",
+            current().text()->cString());
       }
       
       gc<Pattern> rightParam;

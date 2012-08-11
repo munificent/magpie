@@ -83,7 +83,7 @@ namespace magpie
     // error.
     gc<ModuleAst> parseModule(const char* fileName, gc<String> source);
     
-    void makeClass(gc<ClassObject>& classObj, const char* name);
+    void registerClass(gc<ClassObject>& classObj, const char* name);
     
     Array<Module*> modules_;
     Module* coreModule_;

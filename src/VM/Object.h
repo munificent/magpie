@@ -41,7 +41,7 @@ namespace magpie
       return false;
     }
     
-    virtual const ClassObject* toClass() const
+    virtual ClassObject* toClass()
     {
       ASSERT(false, "Not a class.");
       return NULL;
@@ -108,7 +108,7 @@ namespace magpie
     
     virtual ObjectType type() const { return OBJECT_CLASS; }
     
-    virtual const ClassObject* toClass() const { return this; }
+    virtual ClassObject* toClass() { return this; }
     
     virtual void reach();
     
