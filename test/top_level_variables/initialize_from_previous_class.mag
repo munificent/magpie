@@ -1,0 +1,5 @@
+defclass Foo
+end
+
+var a = Foo
+print(a) // expect: Foo
