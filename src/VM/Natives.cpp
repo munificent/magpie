@@ -38,5 +38,11 @@ namespace magpie
     double c = args[0]->toNumber() / args[1]->toNumber();
     return new NumberObject(c);
   }
+  
+  NATIVE(stringCount)
+  {
+    double c = args[0]->toString()->length();
+    return new NumberObject(c);
+  }
 }
 

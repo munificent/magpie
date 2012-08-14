@@ -31,6 +31,7 @@ namespace magpie
     DEF_NATIVE(subtract, "num -");
     DEF_NATIVE(multiply, "num *");
     DEF_NATIVE(divide, "num /");
+    DEF_NATIVE(stringCount, "string count");
         
     true_ = new BoolObject(true);
     false_ = new BoolObject(false);
@@ -63,7 +64,8 @@ namespace magpie
         "def (is Num) - (is Num) native \"num -\"\n"
         "def (is Num) * (is Num) native \"num *\"\n"
         "def (is Num) / (is Num) native \"num /\"\n"
-        "def print(arg) native \"print\"\n";
+        "def print(arg) native \"print\"\n"
+        "def (is String) count native \"string count\"\n";
     gc<ModuleAst> coreAst = parseModule("<core>", String::create(coreSource));
     coreModule_ = Compiler::compileModule(*this, reporter, coreAst, false); 
     loadModule(coreModule_);

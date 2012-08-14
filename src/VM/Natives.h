@@ -17,5 +17,6 @@ namespace magpie
   NATIVE(subtract);
   NATIVE(multiply);
   NATIVE(divide);
+  NATIVE(stringCount);
 }
 
