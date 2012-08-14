@@ -24,10 +24,8 @@ namespace magpie
 
     virtual void reachRoots();
     
-    bool loadProgram(const char* fileName, gc<String> source);
-    void loadModule(Module* module);
-    
-    Module* createModule();
+    void init();
+    bool loadModule(const char* fileName, gc<String> source);
     
     Module* coreModule() { return coreModule_; }
     Module* getModule(int index) { return modules_[index]; }
@@ -84,6 +82,10 @@ namespace magpie
     gc<ModuleAst> parseModule(const char* fileName, gc<String> source);
     
     void registerClass(gc<ClassObject>& classObj, const char* name);
+    
+    Module* compileModule(const char* fileName, gc<String> source);    
+    
+    void runModule(Module* module);
     
     Array<Module*> modules_;
     Module* coreModule_;

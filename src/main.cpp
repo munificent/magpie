@@ -51,10 +51,12 @@ int main(int argc, char * const argv[])
   // TODO(bob): Hack temp!
   VM vm;
   
+  vm.init();
+  
   // Read the file.
   const char* fileName = argv[1];
   gc<String> source = readFile(fileName);
-  bool success = vm.loadProgram(fileName, source);
+  bool success = vm.loadModule(fileName, source);
   
   return success ? 0 : 1;
 }

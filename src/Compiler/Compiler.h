@@ -17,8 +17,8 @@ namespace magpie
   class Compiler
   {
   public:
-    static Module* compileModule(VM& vm, ErrorReporter& reporter,
-                                 gc<ModuleAst> module, bool importCore);
+    static void compileModule(VM& vm, ErrorReporter& reporter,
+                              gc<ModuleAst> ast, Module* module);
     
     static gc<Chunk> compileMultimethod(VM& vm, ErrorReporter& reporter,
                                         Multimethod& multimethod);

@@ -10,20 +10,22 @@
 
 namespace magpie
 {
-  Module* Compiler::compileModule(VM& vm, ErrorReporter& reporter,
-                                  gc<ModuleAst> ast, bool importCore)
+  void Compiler::compileModule(VM& vm, ErrorReporter& reporter,
+                                  gc<ModuleAst> ast, Module* module)
   {
     Compiler compiler(vm, reporter);
     
-    Module* module = vm.createModule();
-
-    if (importCore) module->imports().add(vm.coreModule());
+    // Every module implicitly imports core (except core itself, which is
+    // assumed to be the first module loaded).
+    if (vm.coreModule() != NULL)
+    {
+      module->imports().add(vm.coreModule());
+    }
     
     compiler.declareTopLevel(ast, module);
     
     gc<Chunk> code = MethodCompiler(compiler).compileBody(module, ast->body());
     module->bindBody(code);
-    return module;
   }
   
   gc<Chunk> Compiler::compileMultimethod(VM& vm, ErrorReporter& reporter,

@@ -14,6 +14,7 @@ namespace magpie
 {
   VM::VM()
   : modules_(),
+    coreModule_(NULL),
     nativeNames_(),
     natives_(),
     recordTypes_(),
@@ -38,13 +39,11 @@ namespace magpie
     nothing_ = new NothingObject();
   }
 
-  bool VM::loadProgram(const char* fileName, gc<String> source)
+  void VM::init()
   {
-    ErrorReporter reporter;
-    
     // Load the core module.
     // TODO(bob): Put this in an actual file somewhere.
-    const char* coreSource =
+    gc<String> coreSource = String::create(
         "defclass Bool\n"
         "end\n"
         "defclass Class\n"
@@ -65,11 +64,10 @@ namespace magpie
         "def (is Num) * (is Num) native \"num *\"\n"
         "def (is Num) / (is Num) native \"num /\"\n"
         "def print(arg) native \"print\"\n"
-        "def (is String) count native \"string count\"\n";
-    gc<ModuleAst> coreAst = parseModule("<core>", String::create(coreSource));
-    coreModule_ = Compiler::compileModule(*this, reporter, coreAst, false); 
-    loadModule(coreModule_);
-        
+        "def (is String) count native \"string count\"\n");
+    coreModule_ = compileModule("<core>", coreSource);
+    runModule(coreModule_);
+    
     registerClass(boolClass_, "Bool");
     registerClass(classClass_, "Class");
     registerClass(nothingClass_, "Nothing");
@@ -77,44 +75,15 @@ namespace magpie
     registerClass(recordClass_, "Record");
     registerClass(stringClass_, "String");
     registerClass(noMatchErrorClass_, "NoMatchError");
-    
-    gc<ModuleAst> moduleAst = parseModule(fileName, source);
-    if (moduleAst.isNull()) return false;
-    
-    // Compile it.
-    Module* module = Compiler::compileModule(*this, reporter, moduleAst, true);
+  }
 
-    if (reporter.numErrors() > 0) return false;
+  bool VM::loadModule(const char* fileName, gc<String> source)
+  {
+    Module* module = compileModule(fileName, source);
+    if (module == NULL) return false;
     
-    loadModule(module);
+    runModule(module);
     return true;
-  }
-
-  void VM::loadModule(Module* module)
-  {
-    fiber_->init(module->body());
-    
-    FiberResult result;
-    while ((result = fiber_->run()) == FIBER_DID_GC)
-    {
-      // If the fiber returns FIBER_DID_GC, it's still running but it did a GC.
-      // Since that moves the fiber, we return back to here so we can invoke
-      // run() again at its new location in memory.
-    }
-    
-    // TODO(bob): Kind of hackish.
-    // If we got an uncaught error while loading the module, exit with an error.
-    if (result == FIBER_UNCAUGHT_ERROR)
-    {
-      exit(3);
-    }
-  }
-
-  Module* VM::createModule()
-  {
-    Module* module = new Module();
-    modules_.add(module);
-    return module;
   }
   
   int VM::getModuleIndex(Module& module) const
@@ -253,6 +222,43 @@ namespace magpie
   {
     int index = coreModule_->findVariable(String::create(name));
     classObj = coreModule_->getVariable(index)->toClass();
+  }
+  
+  Module* VM::compileModule(const char* fileName, gc<String> source)
+  {
+    // Parse it.
+    gc<ModuleAst> ast = parseModule(fileName, source);
+    if (ast.isNull()) return NULL;
+    
+    Module* module = new Module();
+    modules_.add(module);
+    
+    // Compile it.
+    ErrorReporter reporter;
+    Compiler::compileModule(*this, reporter, ast, module);
+    if (reporter.numErrors() > 0) return NULL;
+    
+    return module;
+  }
+  
+  void VM::runModule(Module* module)
+  {
+    fiber_->init(module->body());
+    
+    FiberResult result;
+    while ((result = fiber_->run()) == FIBER_DID_GC)
+    {
+      // If the fiber returns FIBER_DID_GC, it's still running but it did a GC.
+      // Since that moves the fiber, we return back to here so we can invoke
+      // run() again at its new location in memory.
+    }
+    
+    // TODO(bob): Kind of hackish.
+    // If we got an uncaught error while loading the module, exit with an error.
+    if (result == FIBER_UNCAUGHT_ERROR)
+    {
+      exit(3);
+    }
   }
 }
 
