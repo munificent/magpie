@@ -28,4 +28,8 @@ print(nothing is String) // expect: false
 print(123 is String) // expect: false
 print("s" is String) // expect: true
 
+// Swallow trailing newline.
+print(false is
+    Bool) // expect: true
+
 // TODO(bob): Subtyping, user-defined classes, expressions for type.

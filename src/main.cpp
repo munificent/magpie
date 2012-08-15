@@ -39,24 +39,69 @@ gc<String> readFile(const char* path)
   return String::create(str.c_str());
 }
 
-int main(int argc, char * const argv[])
+gc<String> readLine(bool isContinued)
 {
-  if (argc < 2)
+  std::string line;
+  while (line.size() == 0)
   {
-    // TODO(bob): Show usage, etc.
-    std::cout << "magpie <script>" << std::endl;
-    return 1;
+    std::cout << (isContinued ? "| " : "> ");
+    std::getline(std::cin, line);
   }
   
-  // TODO(bob): Hack temp!
+  return String::create(line.c_str());
+}
+
+int repl()
+{
   VM vm;
-  
   vm.init();
   
-  // Read the file.
-  const char* fileName = argv[1];
+  while (true)
+  {
+    gc<String> source;
+    gc<Expr> ast;
+    
+    while (true)
+    {
+      gc<String> line = readLine(!source.isNull());
+      if (source.isNull())
+      {
+        source = line;
+      }
+      else
+      {
+        source = String::format("%s\n%s", source->cString(), line->cString());
+      }
+      
+      ErrorReporter reporter(true);
+      Parser parser("<repl>", source, reporter);
+      ast = parser.parseExpression();
+      
+      if (reporter.needMoreLines()) continue;
+      if (reporter.numErrors() == 0) break;
+      return 3;
+    }
+    
+    std::cout << ": " << ast << std::endl;
+  }
+}
+
+int runFile(const char* fileName)
+{
+  VM vm;
+  vm.init();
+  
   gc<String> source = readFile(fileName);
   bool success = vm.loadModule(fileName, source);
-  
   return success ? 0 : 1;
+}
+
+int main(int argc, const char* argv[])
+{
+  if (argc == 1) return repl();
+  if (argc == 2) return runFile(argv[1]);
+
+  // TODO(bob): Show usage, etc.
+  std::cout << "magpie <script>" << std::endl;
+  return 1;
 }

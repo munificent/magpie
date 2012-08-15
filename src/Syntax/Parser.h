@@ -24,7 +24,11 @@ namespace magpie
       last_()
     {}
     
+    // Parses an entire module.
     gc<ModuleAst> parseModule();
+    
+    // Parses a single expression in a REPL session.
+    gc<Expr> parseExpression();
     
   private:
     typedef gc<Expr> (Parser::*PrefixParseFn)(gc<Token> token);
@@ -122,8 +126,9 @@ namespace magpie
     // Otherwise reports the given error message and returns a null temp.
     gc<Token> consume(TokenType expected, const char* errorMessage);
     
-    // Gets whether or not any errors have been reported.
-    bool hadError() const { return reporter_.numErrors() > 0; }
+    // Detects if the lexer ran out of input when another line is expected.
+    // This lets the REPL know it needs to read another line.
+    void checkForMissingLine();
     
     void fillLookAhead(int count);
     

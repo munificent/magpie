@@ -101,6 +101,11 @@ namespace magpie
     return new ModuleAst(new SequenceExpr(span, exprs));
   }
 
+  gc<Expr> Parser::parseExpression()
+  {
+    return topLevelExpression();
+  }
+
   gc<Expr> Parser::parseBlock(TokenType endToken)
   {
     TokenType dummy;
@@ -127,10 +132,19 @@ namespace magpie
         if (lookAhead(end1)) break;
         if (lookAhead(end2)) break;
         if (lookAhead(TOKEN_CATCH)) break;
-        exprs.add(statementLike());
+
+        gc<Expr> expr = statementLike();
+        if (expr.isNull()) break;
+        exprs.add(expr);
       }
       while (match(TOKEN_LINE));
-
+      
+      if (lookAhead(TOKEN_EOF))
+      {
+        checkForMissingLine();
+        reporter_.error(current().pos(), "Unterminated block.");
+      }
+      
       // Return which kind of token we ended the block with, for callers that
       // care.
       *outEndToken = current().type();
@@ -138,7 +152,7 @@ namespace magpie
       // If the block ends with 'end', then we want to consume that token,
       // otherwise we want to leave it unconsumed to be consistent with the
       // single-expression block case.
-      if (current().is(TOKEN_END)) consume();
+      match(TOKEN_END);
 
       gc<Expr> block = createSequence(exprs);
 
@@ -162,6 +176,15 @@ namespace magpie
       }
 
       return block;
+    }
+    else if (lookAhead(TOKEN_EOF))
+    {
+      checkForMissingLine();
+      reporter_.error(current().pos(),
+          "Expected block or expression but reached end of file.");
+      
+      // Return a fake node so we can continue and report errors.
+      return new NothingExpr(current().pos());
     }
     else
     {
@@ -393,7 +416,9 @@ namespace magpie
       gc<String> tokenText = token->toString();
       reporter_.error(token->pos(), "Unexpected token '%s'.",
                       tokenText->cString());
-      return NULL;
+      
+      // Return a fake expression so we can keep parsing to find more errors.
+      return new NothingExpr(token->pos());
     }
 
     gc<Expr> left = (this->*prefix)(token);
@@ -852,11 +877,21 @@ namespace magpie
   gc<Token> Parser::consume(TokenType expected, const char* errorMessage)
   {
     if (lookAhead(expected)) return consume();
+    
+    if (expected == TOKEN_LINE) checkForMissingLine();
     reporter_.error(current().pos(), errorMessage);
 
     // Just so that we can keep going and try to find other errors, consume the
     // failed token and proceed.
     return consume();
+  }
+
+  void Parser::checkForMissingLine()
+  {
+    if (lookAhead(TOKEN_EOF) && reporter_.numErrors() == 0)
+    {
+      reporter_.setNeedMoreLines();
+    }
   }
 
   void Parser::fillLookAhead(int count)
