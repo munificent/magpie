@@ -15,6 +15,7 @@ namespace magpie
   VM::VM()
   : modules_(),
     coreModule_(NULL),
+    replModule_(NULL),
     nativeNames_(),
     natives_(),
     recordTypes_(),
@@ -86,6 +87,25 @@ namespace magpie
     return true;
   }
   
+  gc<Object> VM::evaluateReplExpression(gc<Expr> expr)
+  {
+    if (replModule_ == NULL)
+    {
+      replModule_ = new Module();
+      modules_.add(replModule_);
+      
+      // Implicitly import core.
+      replModule_->imports().add(coreModule_);
+    }
+    
+    // Compile it.
+    ErrorReporter reporter;
+    Compiler::compileExpression(*this, reporter, expr, replModule_);
+    if (reporter.numErrors() > 0) return gc<Object>();
+
+    return runModule(replModule_);
+  }
+
   int VM::getModuleIndex(Module& module) const
   {
     int index = modules_.indexOf(&module);
@@ -241,17 +261,21 @@ namespace magpie
     return module;
   }
   
-  void VM::runModule(Module* module)
+  gc<Object> VM::runModule(Module* module)
   {
     fiber_->init(module->body());
     
     FiberResult result;
-    while ((result = fiber_->run()) == FIBER_DID_GC)
+    gc<Object> value;
+    
+    // If the fiber returns FIBER_DID_GC, it's still running but it did a GC.
+    // Since that moves the fiber, we return back to here so we can invoke
+    // run() again at its new location in memory.
+    do
     {
-      // If the fiber returns FIBER_DID_GC, it's still running but it did a GC.
-      // Since that moves the fiber, we return back to here so we can invoke
-      // run() again at its new location in memory.
+      result = fiber_->run(value);
     }
+    while (result == FIBER_DID_GC);
     
     // TODO(bob): Kind of hackish.
     // If we got an uncaught error while loading the module, exit with an error.
@@ -259,6 +283,8 @@ namespace magpie
     {
       exit(3);
     }
+    
+    return value;
   }
 }
 

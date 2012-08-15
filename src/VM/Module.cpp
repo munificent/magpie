@@ -12,9 +12,8 @@ namespace magpie
     Memory::reach(variableNames_);
   }
   
-  void Module::bindBody(gc<Chunk> body)
+  void Module::setBody(gc<Chunk> body)
   {
-    ASSERT(body_.isNull(), "Can only bind a module once.");
     body_ = body;
   }
   

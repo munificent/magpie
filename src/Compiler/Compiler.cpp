@@ -22,10 +22,13 @@ namespace magpie
       module->imports().add(vm.coreModule());
     }
     
-    compiler.declareTopLevel(ast, module);
+    for (int i = 0; i < ast->body()->expressions().count(); i++)
+    {
+      compiler.declareTopLevel(ast->body()->expressions()[i], module);
+    }
     
     gc<Chunk> code = MethodCompiler(compiler).compileBody(module, ast->body());
-    module->bindBody(code);
+    module->setBody(code);
   }
   
   gc<Chunk> Compiler::compileMultimethod(VM& vm, ErrorReporter& reporter,
@@ -35,6 +38,17 @@ namespace magpie
     return MethodCompiler(compiler).compile(multimethod);
   }
   
+  void Compiler::compileExpression(VM& vm, ErrorReporter& reporter,
+                                   gc<Expr> expr, Module* module)
+  {
+    Compiler compiler(vm, reporter);
+    
+    compiler.declareTopLevel(expr, module);
+    
+    gc<Chunk> code = MethodCompiler(compiler).compileBody(module, expr);
+    module->setBody(code);
+  }
+
   int Compiler::findMethod(gc<String> signature)
   {
     return vm_.findMultimethod(signature);
@@ -70,32 +84,27 @@ namespace magpie
     return vm_.findNative(name);
   }
 
-  void Compiler::declareTopLevel(gc<ModuleAst> moduleAst, Module* module)
+  void Compiler::declareTopLevel(gc<Expr> expr, Module* module)
   {
-    for (int i = 0; i < moduleAst->body()->expressions().count(); i++)
+    DefExpr* def = expr->asDefExpr();
+    if (def != NULL)
     {
-      gc<Expr> expr = moduleAst->body()->expressions()[i];
-      
-      DefExpr* def = expr->asDefExpr();
-      if (def != NULL)
-      {
-        declareMultimethod(SignatureBuilder::build(*def));
-        continue;
-      }
-      
-      DefClassExpr* defClass = expr->asDefClassExpr();
-      if (defClass != NULL)
-      {
-        declareVariable(defClass->pos(), defClass->name(), module);
-        continue;
-      }
-      
-      VariableExpr* var = expr->asVariableExpr();
-      if (var != NULL)
-      {
-        declareVariables(var->pattern(), module);
-        continue;
-      }
+      declareMultimethod(SignatureBuilder::build(*def));
+      return;
+    }
+    
+    DefClassExpr* defClass = expr->asDefClassExpr();
+    if (defClass != NULL)
+    {
+      declareVariable(defClass->pos(), defClass->name(), module);
+      return;
+    }
+    
+    VariableExpr* var = expr->asVariableExpr();
+    if (var != NULL)
+    {
+      declareVariables(var->pattern(), module);
+      return;
     }
   }
   

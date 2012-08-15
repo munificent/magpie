@@ -21,7 +21,7 @@ namespace magpie
     call(chunk, 0);
   }
 
-  FiberResult Fiber::run()
+  FiberResult Fiber::run(gc<Object>& result)
   {
     while (true)
     {
@@ -334,7 +334,7 @@ namespace magpie
           
         case OP_RETURN:
         {
-          gc<Object> result = loadSlotOrConstant(frame, GET_A(ins));
+          gc<Object> value = loadSlotOrConstant(frame, GET_A(ins));
           callFrames_.removeAt(-1);
           
           // Discard any try blocks enclosed in the current chunk.
@@ -352,12 +352,12 @@ namespace magpie
             ASSERT(GET_OP(callInstruction) == OP_CALL,
                    "Should be returning to a call.");
             
-            store(caller, GET_C(callInstruction), result);
+            store(caller, GET_C(callInstruction), value);
           }
           else
           {
             // The last chunk has returned, so end the fiber.
-            // TODO(bob): Do we care about the result value?
+            result = value;
             return FIBER_DONE;
           }
           break;

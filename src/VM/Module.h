@@ -21,7 +21,7 @@ namespace magpie
     
     void reach();
     
-    void bindBody(gc<Chunk> body);
+    void setBody(gc<Chunk> body);
     gc<Chunk> body() const { return body_; }
     
     Array<Module*>& imports() { return imports_; }

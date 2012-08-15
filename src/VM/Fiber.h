@@ -31,7 +31,7 @@ namespace magpie
     Fiber(VM& vm);
     
     void init(gc<Chunk> chunk);
-    FiberResult run();
+    FiberResult run(gc<Object>& result);
 
     virtual void reach();
     

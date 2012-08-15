@@ -59,7 +59,7 @@ int repl()
   while (true)
   {
     gc<String> source;
-    gc<Expr> ast;
+    gc<Expr> expr;
     
     while (true)
     {
@@ -75,14 +75,17 @@ int repl()
       
       ErrorReporter reporter(true);
       Parser parser("<repl>", source, reporter);
-      ast = parser.parseExpression();
+      expr = parser.parseExpression();
       
       if (reporter.needMoreLines()) continue;
       if (reporter.numErrors() == 0) break;
       return 3;
     }
     
-    std::cout << ": " << ast << std::endl;
+    // Evaluate the expression.
+    gc<Object> result = vm.evaluateReplExpression(expr);
+    
+    std::cout << ": " << result << std::endl;
   }
 }
 

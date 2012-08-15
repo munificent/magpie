@@ -22,7 +22,10 @@ namespace magpie
     
     static gc<Chunk> compileMultimethod(VM& vm, ErrorReporter& reporter,
                                         Multimethod& multimethod);
-    
+
+    static void compileExpression(VM& vm, ErrorReporter& reporter,
+                                  gc<Expr> expr, Module* module);
+
     ErrorReporter& reporter() { return reporter_; }
     
     int findMethod(gc<String> signature);
@@ -40,9 +43,9 @@ namespace magpie
       reporter_(reporter)
     {}
     
-    // Walk through the module's top-level declarations and create any names
-    // up front. This allows mututal recursion of top level elements.
-    void declareTopLevel(gc<ModuleAst> moduleAst, Module* module);
+    // Creates any names declared by top-level [expr]. Allows mututal recursion
+    // of top level elements.
+    void declareTopLevel(gc<Expr> expr, Module* module);
     
     // Forward-declare any variables in the given pattern.
     void declareVariables(gc<Pattern> pattern, Module* module);

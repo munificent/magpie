@@ -10,6 +10,7 @@
 namespace magpie
 {
   class ClassObject;
+  class Expr;
   class Module;
   class ModuleAst;
   class RecordType;
@@ -26,6 +27,8 @@ namespace magpie
     
     void init();
     bool loadModule(const char* fileName, gc<String> source);
+    
+    gc<Object> evaluateReplExpression(gc<Expr> expr);
     
     Module* coreModule() { return coreModule_; }
     Module* getModule(int index) { return modules_[index]; }
@@ -85,10 +88,11 @@ namespace magpie
     
     Module* compileModule(const char* fileName, gc<String> source);    
     
-    void runModule(Module* module);
+    gc<Object> runModule(Module* module);
     
     Array<Module*> modules_;
     Module* coreModule_;
+    Module* replModule_;
     
     Array<gc<String> > nativeNames_;
     Array<Native> natives_;
