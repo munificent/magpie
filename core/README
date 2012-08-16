@@ -1,0 +1,2 @@
+This directory contains the Magpie "standard library" for the C++ Magpie VM.
+Once the VM is more mature, this will be merged with lib/.

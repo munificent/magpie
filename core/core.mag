@@ -1,0 +1,21 @@
+defclass Bool
+end
+defclass Class
+end
+defclass Nothing
+end
+defclass Num
+end
+defclass Record
+end
+defclass String
+end
+defclass NoMatchError
+end
+def (is Num) + (is Num) native "num +"
+def (is String) + (is String) native "string +"
+def (is Num) - (is Num) native "num -"
+def (is Num) * (is Num) native "num *"
+def (is Num) / (is Num) native "num /"
+def print(arg) native "print"
+def (is String) count native "string count"

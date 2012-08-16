@@ -40,32 +40,9 @@ namespace magpie
     nothing_ = new NothingObject();
   }
 
-  void VM::init()
+  void VM::init(gc<String> coreSource)
   {
     // Load the core module.
-    // TODO(bob): Put this in an actual file somewhere.
-    gc<String> coreSource = String::create(
-        "defclass Bool\n"
-        "end\n"
-        "defclass Class\n"
-        "end\n"
-        "defclass Nothing\n"
-        "end\n"
-        "defclass Num\n"
-        "end\n"
-        "defclass Record\n"
-        "end\n"
-        "defclass String\n"
-        "end\n"
-        "defclass NoMatchError\n"
-        "end\n"
-        "def (is Num) + (is Num) native \"num +\"\n"
-        "def (is String) + (is String) native \"string +\"\n"
-        "def (is Num) - (is Num) native \"num -\"\n"
-        "def (is Num) * (is Num) native \"num *\"\n"
-        "def (is Num) / (is Num) native \"num /\"\n"
-        "def print(arg) native \"print\"\n"
-        "def (is String) count native \"string count\"\n");
     coreModule_ = compileModule("<core>", coreSource);
     runModule(coreModule_);
     

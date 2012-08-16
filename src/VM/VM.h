@@ -25,7 +25,7 @@ namespace magpie
 
     virtual void reachRoots();
     
-    void init();
+    void init(gc<String> coreSource);
     bool loadModule(const char* fileName, gc<String> source);
     
     gc<Object> evaluateReplExpression(gc<Expr> expr);
