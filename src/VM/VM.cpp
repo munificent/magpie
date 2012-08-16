@@ -28,12 +28,13 @@ namespace magpie
     fiber_ = new Fiber(*this);
         
     DEF_NATIVE(print, "print");
-    DEF_NATIVE(addNum, "num +");
-    DEF_NATIVE(addString, "string +");
-    DEF_NATIVE(subtract, "num -");
-    DEF_NATIVE(multiply, "num *");
-    DEF_NATIVE(divide, "num /");
-    DEF_NATIVE(stringCount, "string count");
+    DEF_NATIVE(numPlusNum, "Num + Num");
+    DEF_NATIVE(stringPlusString, "String + String");
+    DEF_NATIVE(numMinusNum, "Num - Num");
+    DEF_NATIVE(numTimesNum, "Num * Num");
+    DEF_NATIVE(numDivNum, "Num / Num");
+    DEF_NATIVE(stringCount, "String count");
+    DEF_NATIVE(numToString, "Num toString");
         
     true_ = new BoolObject(true);
     false_ = new BoolObject(false);

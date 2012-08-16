@@ -12,10 +12,19 @@ defclass String
 end
 defclass NoMatchError
 end
-def (is Num) + (is Num) native "num +"
-def (is String) + (is String) native "string +"
-def (is Num) - (is Num) native "num -"
-def (is Num) * (is Num) native "num *"
-def (is Num) / (is Num) native "num /"
+
+def (is Num) + (is Num) native "Num + Num"
+def (is String) + (is String) native "String + String"
+def (is Num) - (is Num) native "Num - Num"
+def (is Num) * (is Num) native "Num * Num"
+def (is Num) / (is Num) native "Num / Num"
+
 def print(arg) native "print"
-def (is String) count native "string count"
+
+def (is String) count native "String count"
+
+def (true) toString "true"
+def (false) toString "false"
+
+def (is Num) toString native "Num toString"
+def (s is String) toString s

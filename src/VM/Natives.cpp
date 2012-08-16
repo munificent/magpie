@@ -9,31 +9,31 @@ namespace magpie
     return args[0];
   }
 
-  NATIVE(addNum)
+  NATIVE(numPlusNum)
   {
     double c = args[0]->toNumber() + args[1]->toNumber();
     return new NumberObject(c);
   }
   
-  NATIVE(addString)
+  NATIVE(stringPlusString)
   {
     return new StringObject(
         String::concat(args[0]->toString(), args[1]->toString()));
   }
   
-  NATIVE(subtract)
+  NATIVE(numMinusNum)
   {
     double c = args[0]->toNumber() - args[1]->toNumber();
     return new NumberObject(c);
   }
   
-  NATIVE(multiply)
+  NATIVE(numTimesNum)
   {
     double c = args[0]->toNumber() * args[1]->toNumber();
     return new NumberObject(c);
   }
   
-  NATIVE(divide)
+  NATIVE(numDivNum)
   {
     double c = args[0]->toNumber() / args[1]->toNumber();
     return new NumberObject(c);
@@ -43,6 +43,12 @@ namespace magpie
   {
     double c = args[0]->toString()->length();
     return new NumberObject(c);
+  }
+  
+  NATIVE(numToString)
+  {
+    double n = args[0]->toNumber();
+    return new StringObject(String::format("%g", n));
   }
 }
 

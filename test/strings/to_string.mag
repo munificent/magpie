@@ -1,0 +1,4 @@
+print("" toString == "") // expect: true
+print("abc" toString == "abc") // expect: true
+
+// TODO(bob): Floating point, negative zero.

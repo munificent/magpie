@@ -1,0 +1,2 @@
+print(true toString == "true") // expect: true
+print(false toString == "false") // expect: true

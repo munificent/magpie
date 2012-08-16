@@ -12,11 +12,12 @@
 namespace magpie
 {
   NATIVE(print);
-  NATIVE(addNum);
-  NATIVE(addString);
-  NATIVE(subtract);
-  NATIVE(multiply);
-  NATIVE(divide);
+  NATIVE(numPlusNum);
+  NATIVE(stringPlusString);
+  NATIVE(numMinusNum);
+  NATIVE(numTimesNum);
+  NATIVE(numDivNum);
   NATIVE(stringCount);
+  NATIVE(numToString);
 }
 
