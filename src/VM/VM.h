@@ -15,7 +15,7 @@ namespace magpie
   class ModuleAst;
   class RecordType;
   
-  typedef gc<Object> (*Native)(ArrayView<gc<Object> >& args);
+  typedef gc<Object> (*Native)(VM& vm, ArrayView<gc<Object> >& args);
 
   // The main Virtual Machine class for a running Magpie interpreter.
   class VM : public RootSource

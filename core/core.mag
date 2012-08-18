@@ -1,15 +1,21 @@
 defclass Bool
 end
+
 defclass Class
 end
+
 defclass Nothing
 end
+
 defclass Num
 end
+
 defclass Record
 end
+
 defclass String
 end
+
 defclass NoMatchError
 end
 
@@ -18,6 +24,11 @@ def (is String) + (is String) native "String + String"
 def (is Num) - (is Num) native "Num - Num"
 def (is Num) * (is Num) native "Num * Num"
 def (is Num) / (is Num) native "Num / Num"
+
+def (is Num) < (is Num) native "Num < Num"
+def (is Num) <= (is Num) native "Num <= Num"
+def (is Num) > (is Num) native "Num > Num"
+def (is Num) >= (is Num) native "Num >= Num"
 
 def print(arg) native "print"
 

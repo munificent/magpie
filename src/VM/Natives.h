@@ -7,7 +7,7 @@
 #include "Method.h"
 #include "RootSource.h"
 
-#define NATIVE(name) gc<Object> name##Native(ArrayView<gc<Object> >& args)
+#define NATIVE(name) gc<Object> name##Native(VM& vm, ArrayView<gc<Object> >& args)
 
 namespace magpie
 {
@@ -17,6 +17,10 @@ namespace magpie
   NATIVE(numMinusNum);
   NATIVE(numTimesNum);
   NATIVE(numDivNum);
+  NATIVE(numLessThanNum);
+  NATIVE(numLessThanEqualToNum);
+  NATIVE(numGreaterThanNum);
+  NATIVE(numGreaterThanEqualToNum);
   NATIVE(stringCount);
   NATIVE(numToString);
 }

@@ -224,28 +224,6 @@ namespace magpie
           break;
         }
           
-        case OP_LESS_THAN:
-        {
-          gc<Object> a = loadSlotOrConstant(frame, GET_A(ins));
-          gc<Object> b = loadSlotOrConstant(frame, GET_B(ins));
-          
-          // TODO(bob): Handle non-number types.
-          bool c = a->toNumber() < b->toNumber();
-          store(frame, GET_C(ins), vm_.getBool(c));
-          break;
-        }
-          
-        case OP_GREATER_THAN:
-        {
-          gc<Object> a = loadSlotOrConstant(frame, GET_A(ins));
-          gc<Object> b = loadSlotOrConstant(frame, GET_B(ins));
-          
-          // TODO(bob): Handle non-number types.
-          bool c = a->toNumber() > b->toNumber();
-          store(frame, GET_C(ins), vm_.getBool(c));
-          break;
-        }
-          
         case OP_NOT:
         {
           gc<Object> value = loadSlotOrConstant(frame, GET_A(ins));
@@ -327,7 +305,7 @@ namespace magpie
         {
           Native native = vm_.getNative(GET_A(ins));
           ArrayView<gc<Object> > args(stack_, frame.stackStart);
-          gc<Object> result = native(args);
+          gc<Object> result = native(vm_, args);
           store(frame, GET_B(ins), result);
           break;
         }

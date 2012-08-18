@@ -32,10 +32,10 @@ namespace magpie
     { NULL,             &Parser::assignment, PRECEDENCE_ASSIGNMENT }, // TOKEN_EQ
     { NULL,             &Parser::binaryOp, PRECEDENCE_EQUALITY },     // TOKEN_EQEQ
     { NULL,             &Parser::binaryOp, PRECEDENCE_EQUALITY },     // TOKEN_NEQ
-    { NULL,             &Parser::binaryOp, PRECEDENCE_COMPARISON },   // TOKEN_LT
-    { NULL,             &Parser::binaryOp, PRECEDENCE_COMPARISON },   // TOKEN_GT
-    { NULL,             &Parser::binaryOp, PRECEDENCE_COMPARISON },   // TOKEN_LTE
-    { NULL,             &Parser::binaryOp, PRECEDENCE_COMPARISON },   // TOKEN_GTE
+    { NULL,             &Parser::infixCall, PRECEDENCE_COMPARISON },  // TOKEN_LT
+    { NULL,             &Parser::infixCall, PRECEDENCE_COMPARISON },  // TOKEN_GT
+    { NULL,             &Parser::infixCall, PRECEDENCE_COMPARISON },  // TOKEN_LTE
+    { NULL,             &Parser::infixCall, PRECEDENCE_COMPARISON },  // TOKEN_GTE
     { NULL,             &Parser::infixCall, PRECEDENCE_TERM },        // TOKEN_PLUS
     { NULL,             &Parser::infixCall, PRECEDENCE_TERM },        // TOKEN_MINUS
     { NULL,             &Parser::infixCall, PRECEDENCE_PRODUCT },     // TOKEN_STAR

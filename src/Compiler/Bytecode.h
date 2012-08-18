@@ -63,20 +63,18 @@ namespace magpie
     OP_SET_VAR = 0x09,
 
     OP_EQUAL         = 0x0a, // R(C) = RC(A) == RC(B)
-    OP_LESS_THAN     = 0x0b, // R(C) = RC(A) < RC(B)
-    OP_GREATER_THAN  = 0x0c, // R(C) = RC(A) > RC(B)
-    OP_NOT           = 0x0d, // R(C) = RC(A) + RC(B)
+    OP_NOT           = 0x0b, // R(C) = RC(A) + RC(B)
     
     // Tests if the value in slot A is an instance of the type in slot B.
     // Stores the result in slot C.
-    OP_IS = 0x0e,
+    OP_IS = 0x0c,
     
     // Performs an unconditional jump. If A is 1, then the instruction pointer
     // is moved forward by B. Otherwise, it is moved back by that amount.
-    OP_JUMP = 0x0f,
+    OP_JUMP = 0x0d,
     
-    OP_JUMP_IF_FALSE = 0x10, // R(A) = test slot, B = offset
-    OP_JUMP_IF_TRUE  = 0x11, // R(A) = test slot, B = offset
+    OP_JUMP_IF_FALSE = 0x0e, // R(A) = test slot, B = offset
+    OP_JUMP_IF_TRUE  = 0x0f, // R(A) = test slot, B = offset
     
     // Invokes a top-level method. The index of the method in the global table
     // is A. The arguments to the method are laid out in sequential slots
@@ -84,30 +82,30 @@ namespace magpie
     // signature, so is not explicitly passed. The result will be stored in
     // slot C when the method returns.
     // TODO(bob): Tweak operands so that we can support more than 256 methods.
-    OP_CALL = 0x12,
+    OP_CALL = 0x10,
     
     // Invokes a native method. The index of the native is A. The result of the
     // call will be placed into register B. Assumes the arguments to the
     // native are the top of the current call frame's stack.
-    OP_NATIVE = 0x13,
+    OP_NATIVE = 0x11,
     
     // Exits the current method, returning slot A.
-    OP_RETURN = 0x14,
+    OP_RETURN = 0x12,
     
     // Throws the error object in slot A.
-    OP_THROW = 0x15,
+    OP_THROW = 0x13,
     
     // Registers a new catch handler. If an error is thrown before the
     // subsequent OP_EXIT_TRY, then execution will jump to the associated catch
     // block. Its code location is the location of the OP_ENTER_TRY + A.
-    OP_ENTER_TRY = 0x16,
+    OP_ENTER_TRY = 0x14,
     
     // Discards the previous OP_ENTER_TRY handler. This occurs when execution
     // has proceeded past the block containing a catch clause.
-    OP_EXIT_TRY = 0x17,
+    OP_EXIT_TRY = 0x15,
     
     // Throws a NoMatchError if slot A is false.
-    OP_TEST_MATCH = 0x18
+    OP_TEST_MATCH = 0x16
   };
   
   enum BuiltIn

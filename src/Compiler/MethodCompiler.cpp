@@ -210,10 +210,6 @@ namespace magpie
     {
       case TOKEN_EQEQ:   op = OP_EQUAL; break;
       case TOKEN_NEQ:    op = OP_EQUAL; negate = true; break;
-      case TOKEN_LT:     op = OP_LESS_THAN; break;
-      case TOKEN_LTE:    op = OP_GREATER_THAN; negate = true; break;
-      case TOKEN_GT:     op = OP_GREATER_THAN; break;
-      case TOKEN_GTE:    op = OP_LESS_THAN; negate = true; break;
 
       default:
         ASSERT(false, "Unknown infix operator.");

@@ -33,6 +33,10 @@ namespace magpie
     DEF_NATIVE(numMinusNum, "Num - Num");
     DEF_NATIVE(numTimesNum, "Num * Num");
     DEF_NATIVE(numDivNum, "Num / Num");
+    DEF_NATIVE(numLessThanNum, "Num < Num");
+    DEF_NATIVE(numLessThanEqualToNum, "Num <= Num");
+    DEF_NATIVE(numGreaterThanNum, "Num > Num");
+    DEF_NATIVE(numGreaterThanEqualToNum, "Num >= Num");
     DEF_NATIVE(stringCount, "String count");
     DEF_NATIVE(numToString, "Num toString");
         

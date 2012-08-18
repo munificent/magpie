@@ -1,5 +1,6 @@
 #include "Object.h"
 #include "Natives.h"
+#include "VM.h"
 
 namespace magpie
 {
@@ -37,6 +38,26 @@ namespace magpie
   {
     double c = args[0]->toNumber() / args[1]->toNumber();
     return new NumberObject(c);
+  }
+  
+  NATIVE(numLessThanNum)
+  {
+    return vm.getBool(args[0]->toNumber() < args[1]->toNumber());
+  }
+  
+  NATIVE(numLessThanEqualToNum)
+  {
+    return vm.getBool(args[0]->toNumber() <= args[1]->toNumber());
+  }
+  
+  NATIVE(numGreaterThanNum)
+  {
+    return vm.getBool(args[0]->toNumber() > args[1]->toNumber());
+  }
+  
+  NATIVE(numGreaterThanEqualToNum)
+  {
+    return vm.getBool(args[0]->toNumber() >= args[1]->toNumber());
   }
   
   NATIVE(stringCount)
