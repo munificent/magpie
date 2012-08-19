@@ -56,6 +56,7 @@ namespace magpie
     // Prefix expression parsers.
     gc<Expr> boolean(gc<Token> token);
     gc<Expr> group(gc<Token> token);
+    gc<Expr> list(gc<Token> token);
     gc<Expr> name(gc<Token> token);
     gc<Expr> not_(gc<Token> token);
     gc<Expr> nothing(gc<Token> token);

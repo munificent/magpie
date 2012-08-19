@@ -12,6 +12,7 @@ class DefClassExpr;
 class DoExpr;
 class IfExpr;
 class IsExpr;
+class ListExpr;
 class MatchExpr;
 class NameExpr;
 class NativeExpr;
@@ -48,6 +49,7 @@ public:
   virtual void visit(DoExpr& node, int arg) = 0;
   virtual void visit(IfExpr& node, int arg) = 0;
   virtual void visit(IsExpr& node, int arg) = 0;
+  virtual void visit(ListExpr& node, int arg) = 0;
   virtual void visit(MatchExpr& node, int arg) = 0;
   virtual void visit(NameExpr& node, int arg) = 0;
   virtual void visit(NativeExpr& node, int arg) = 0;
@@ -94,6 +96,7 @@ public:
   virtual DoExpr* asDoExpr() { return NULL; }
   virtual IfExpr* asIfExpr() { return NULL; }
   virtual IsExpr* asIsExpr() { return NULL; }
+  virtual ListExpr* asListExpr() { return NULL; }
   virtual MatchExpr* asMatchExpr() { return NULL; }
   virtual NameExpr* asNameExpr() { return NULL; }
   virtual NativeExpr* asNativeExpr() { return NULL; }
@@ -485,6 +488,35 @@ private:
   gc<Expr> value_;
   gc<Expr> type_;
   NO_COPY(IsExpr);
+};
+
+class ListExpr : public Expr
+{
+public:
+  ListExpr(const SourcePos& pos, const Array<gc<Expr> >& elements)
+  : Expr(pos),
+    elements_(elements)
+  {}
+
+  virtual void accept(ExprVisitor& visitor, int arg)
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual ListExpr* asListExpr() { return this; }
+
+  const Array<gc<Expr> >& elements() { return elements_; }
+
+  virtual void reach()
+  {
+    Memory::reach(elements_);
+  }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  Array<gc<Expr> > elements_;
+  NO_COPY(ListExpr);
 };
 
 class MatchExpr : public Expr

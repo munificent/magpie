@@ -40,6 +40,7 @@ namespace magpie
     
     inline gc<ClassObject> boolClass() const { return boolClass_; }
     inline gc<ClassObject> classClass() const { return classClass_; }
+    inline gc<ClassObject> listClass() const { return listClass_; }
     inline gc<ClassObject> nothingClass() const { return nothingClass_; }
     inline gc<ClassObject> numberClass() const { return numberClass_; }
     inline gc<ClassObject> recordClass() const { return recordClass_; }
@@ -111,6 +112,7 @@ namespace magpie
     gc<Object> nothing_;
     gc<ClassObject> boolClass_;
     gc<ClassObject> classClass_;
+    gc<ClassObject> listClass_;
     gc<ClassObject> nothingClass_;
     gc<ClassObject> numberClass_;
     gc<ClassObject> recordClass_;

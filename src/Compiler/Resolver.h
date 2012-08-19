@@ -53,6 +53,7 @@ namespace magpie
     virtual void visit(DoExpr& expr, int dummy);
     virtual void visit(IfExpr& expr, int dummy);
     virtual void visit(IsExpr& expr, int dummy);
+    virtual void visit(ListExpr& expr, int dummy);
     virtual void visit(MatchExpr& expr, int dummy);
     virtual void visit(NameExpr& expr, int dummy);
     virtual void visit(NativeExpr& expr, int dest);

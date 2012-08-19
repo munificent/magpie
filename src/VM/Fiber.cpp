@@ -76,6 +76,21 @@ namespace magpie
           break;
         }
           
+        case OP_LIST:
+        {
+          int firstSlot = GET_A(ins);
+          int numElements = GET_B(ins);
+          
+          gc<ListObject> list = new ListObject(numElements);
+          for (int i = 0; i < numElements; i++)
+          {
+            gc<Object> element = load(frame, firstSlot + i);
+            list->elements().add(element);
+          }
+          store(frame, GET_C(ins), list);
+          break;
+        }
+          
         case OP_GET_FIELD:
         {
           bool success = false;
@@ -202,6 +217,10 @@ namespace magpie
                 ASSERT(false, "Equality on arbitrary objects not implemented.");
                 break;
                 
+              case OBJECT_LIST:
+                ASSERT(false, "Equality on lists not implemented.");
+                break;
+                
               case OBJECT_NOTHING:
                 ASSERT(false, "Should only be one instance of nothing.");
                 break;
@@ -252,6 +271,7 @@ namespace magpie
               type = object->classObj();
               break;
             }
+            case OBJECT_LIST:    type = vm_.listClass(); break;
             case OBJECT_NOTHING: type = vm_.nothingClass(); break;
             case OBJECT_NUMBER:  type = vm_.numberClass(); break;
             case OBJECT_RECORD:  type = vm_.recordClass(); break;

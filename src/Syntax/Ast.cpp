@@ -100,7 +100,21 @@ namespace magpie
   {
     out << "(" << value_ << " is " << type_ << ")";
   }
+  
+  void ListExpr::trace(std::ostream& out) const
+  {
+    out << "[\n";
     
+    for (int i = 0; i < elements_.count(); i++)
+    {
+      out << elements_[i];
+      if (i < elements_.count() - 1) out << ",";
+      out << "\n";
+    }
+    
+    out << "]";
+  }
+  
   void MatchExpr::trace(std::ostream& out) const
   {
     out << "(match " << value_;

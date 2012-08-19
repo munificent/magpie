@@ -11,6 +11,7 @@ namespace magpie
   class BoolObject;
   class ClassObject;
   class DynamicObject;
+  class ListObject;
   class Memory;
   class Multimethod;
   class NumberObject;
@@ -22,6 +23,7 @@ namespace magpie
     OBJECT_BOOL,
     OBJECT_CLASS,
     OBJECT_DYNAMIC,
+    OBJECT_LIST,
     OBJECT_NOTHING,
     OBJECT_NUMBER,
     OBJECT_RECORD,
@@ -53,6 +55,12 @@ namespace magpie
       return NULL;
     }
     
+    virtual ListObject* toList()
+    {
+      ASSERT(false, "Not a list.");
+      return NULL;
+    }
+
     virtual double toNumber() const
     {
       ASSERT(false, "Not a number.");
@@ -145,6 +153,28 @@ namespace magpie
     gc<ClassObject> class_;
     
     NO_COPY(DynamicObject);
+  };
+  
+  class ListObject : public Object
+  {
+  public:
+    ListObject(int capacity)
+    : Object(),
+      elements_(capacity)
+    {}
+    
+    virtual ObjectType type() const { return OBJECT_LIST; }
+    
+    virtual ListObject* toList() { return this; }
+    
+    virtual void trace(std::ostream& stream) const;
+    
+    Array<gc<Object> >& elements() { return elements_; }
+    
+  private:
+    Array<gc<Object> > elements_;
+    
+    NO_COPY(ListObject);
   };
   
   class NothingObject : public Object

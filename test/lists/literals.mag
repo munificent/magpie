@@ -1,0 +1,6 @@
+print([]) // expect: []
+print([1]) // expect: [1]
+print([1, 2, 3, 4, 5]) // expect: [1, 2, 3, 4, 5]
+
+// "," is lower precedence than "is".
+print([true is Bool, 1 is String]) // expect: [true, false]

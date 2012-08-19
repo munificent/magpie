@@ -344,7 +344,25 @@ namespace magpie
 
     releaseTemp(); // type
   }
-
+  
+  void MethodCompiler::visit(ListExpr& expr, int dest)
+  {
+    // TODO(bob): Putting these all in registers and then copying them to the
+    // list after creation may be slow. Another option to consider is to write
+    // a start list bytecode first, and then have each element get pushed
+    // directly to the new list.
+    int firstElement = getNextTemp();
+    for (int i = 0; i < expr.elements().count(); i++)
+    {
+      int element = makeTemp();
+      compile(expr.elements()[i], element);
+    }
+    
+    write(OP_LIST, firstElement, expr.elements().count(), dest);
+    
+    releaseTemps(expr.elements().count());
+  }
+  
   void MethodCompiler::visit(MatchExpr& expr, int dest)
   {
     compile(expr.value(), dest);

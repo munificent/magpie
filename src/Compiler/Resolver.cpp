@@ -276,7 +276,15 @@ namespace magpie
     resolve(expr.value());
     resolve(expr.type());
   }
-    
+  
+  void Resolver::visit(ListExpr& expr, int dummy)
+  {
+    for (int i = 0; i < expr.elements().count(); i++)
+    {
+      resolve(expr.elements()[i]);
+    }
+  }
+  
   void Resolver::visit(MatchExpr& expr, int dummy)
   {
     // Resolve the value.

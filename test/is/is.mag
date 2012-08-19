@@ -32,4 +32,19 @@ print("s" is String) // expect: true
 print(false is
     Bool) // expect: true
 
-// TODO(bob): Subtyping, user-defined classes, expressions for type.
+// Higher precedence than logical operators.
+print(0 and "s" is Num) // expect: 0
+print(1 or "s" is String) // expect: 1
+print(1 is Num and 123) // expect: 123
+print(1 is Bool or 123) // expect: 123
+
+// Higher precedence than record.
+var a = 1 is Num, 1 is Bool
+print(a) // expect: (true, false)
+
+// TODO(bob):
+// - Subtyping
+// - User-defined classes
+// - Expressions for type
+// - Precedence related to == on left and right
+// - Precedence related to not on left and right

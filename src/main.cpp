@@ -109,7 +109,7 @@ int repl(VM& vm)
     // Evaluate the expression.
     gc<Object> result = vm.evaluateReplExpression(expr);
     
-    std::cout << ": " << result << std::endl;
+    std::cout << "= " << result << std::endl;
   }
 }
 

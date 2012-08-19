@@ -14,6 +14,17 @@ namespace magpie
     // TODO(bob): Subtyping.
     return this == &other;
   }
+  
+  void ListObject::trace(std::ostream& stream) const
+  {
+    stream << "[";
+    for (int i = 0; i < elements_.count(); i++)
+    {
+      stream << elements_[i];
+      if (i < elements_.count() - 1) stream << ", ";
+    }
+    stream << "]";
+  }
 
   gc<RecordType> RecordType::create(const Array<int>& fields)
   {

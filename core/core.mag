@@ -4,6 +4,9 @@ end
 defclass Class
 end
 
+defclass List
+end
+
 defclass Nothing
 end
 

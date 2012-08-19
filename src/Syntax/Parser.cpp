@@ -9,9 +9,9 @@ namespace magpie
   enum Precedence {
     PRECEDENCE_ASSIGNMENT = 1, // =
     PRECEDENCE_RECORD     = 2, // ,
-    PRECEDENCE_IS         = 3, // is
-    PRECEDENCE_LOGICAL    = 4, // and or
-    PRECEDENCE_NOT        = 5, // not
+    PRECEDENCE_LOGICAL    = 3, // and or
+    PRECEDENCE_NOT        = 4, // not
+    PRECEDENCE_IS         = 5, // is
     PRECEDENCE_EQUALITY   = 6, // == !=
     PRECEDENCE_COMPARISON = 7, // < > <= >=
     PRECEDENCE_TERM       = 8, // + -
@@ -24,7 +24,7 @@ namespace magpie
     // Punctuators.
     { &Parser::group,   NULL, -1 },                                   // TOKEN_LEFT_PAREN
     { NULL,             NULL, -1 },                                   // TOKEN_RIGHT_PAREN
-    { NULL,             NULL, -1 },                                   // TOKEN_LEFT_BRACKET
+    { &Parser::list,    NULL, -1 },                                   // TOKEN_LEFT_BRACKET
     { NULL,             NULL, -1 },                                   // TOKEN_RIGHT_BRACKET
     { NULL,             NULL, -1 },                                   // TOKEN_LEFT_BRACE
     { NULL,             NULL, -1 },                                   // TOKEN_RIGHT_BRACE
@@ -423,7 +423,7 @@ namespace magpie
 
     gc<Expr> left = (this->*prefix)(token);
 
-    while (precedence < expressions_[current().type()].precedence)
+    while (precedence <= expressions_[current().type()].precedence)
     {
       token = consume();
       InfixParseFn infix = expressions_[token->type()].infix;
@@ -446,7 +446,28 @@ namespace magpie
     consume(TOKEN_RIGHT_PAREN, "Expect ')'.");
     return expr;
   }
-
+  
+  gc<Expr> Parser::list(gc<Token> token)
+  {
+    SourcePos start = token->pos();
+    Array<gc<Expr> > elements;
+    
+    // Handle empty lists.
+    if (!lookAhead(TOKEN_RIGHT_BRACKET))
+    {
+      while (true)
+      {
+        // TODO(bob): What about parse errors or EOF?
+        elements.add(parsePrecedence(PRECEDENCE_LOGICAL));
+        if (!match(TOKEN_COMMA)) break;
+      }
+    }
+    
+    consume(TOKEN_RIGHT_BRACKET, "Except ']' to close list.");
+    
+    return new ListExpr(start.spanTo(last()->pos()), elements);
+  }
+  
   gc<Expr> Parser::name(gc<Token> token)
   {
     return call(gc<Expr>(), token);
@@ -473,7 +494,7 @@ namespace magpie
   {
     Array<Field> fields;
 
-    gc<Expr> value = parsePrecedence(PRECEDENCE_LOGICAL);
+    gc<Expr> value = parsePrecedence(PRECEDENCE_RECORD + 1);
     fields.add(Field(token->text(), value));
 
     int i = 1;
@@ -502,7 +523,7 @@ namespace magpie
         }
       }
 
-      value = parsePrecedence(PRECEDENCE_LOGICAL);
+      value = parsePrecedence(PRECEDENCE_RECORD + 1);
       fields.add(Field(name, value));
 
       i++;
@@ -621,7 +642,7 @@ namespace magpie
         }
       }
 
-      gc<Expr> value = parsePrecedence(PRECEDENCE_LOGICAL);
+      gc<Expr> value = parsePrecedence(PRECEDENCE_RECORD + 1);
       fields.add(Field(name, value));
 
       i++;
@@ -633,7 +654,7 @@ namespace magpie
 
   gc<Expr> Parser::is(gc<Expr> left, gc<Token> token)
   {
-    gc<Expr> type = parsePrecedence(PRECEDENCE_IS + 1);
+    gc<Expr> type = parsePrecedence(PRECEDENCE_CALL);
     return new IsExpr(token->pos(), left, type);
   }
 

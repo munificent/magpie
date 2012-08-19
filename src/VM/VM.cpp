@@ -53,6 +53,7 @@ namespace magpie
     
     registerClass(boolClass_, "Bool");
     registerClass(classClass_, "Class");
+    registerClass(listClass_, "List");
     registerClass(nothingClass_, "Nothing");
     registerClass(numberClass_, "Num");
     registerClass(recordClass_, "Record");
