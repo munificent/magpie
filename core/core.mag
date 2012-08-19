@@ -42,3 +42,5 @@ def (false) toString "false"
 
 def (is Num) toString native "Num toString"
 def (s is String) toString s
+
+def (is List) count native "List count"

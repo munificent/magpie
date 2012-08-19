@@ -23,5 +23,6 @@ namespace magpie
   NATIVE(numGreaterThanEqualToNum);
   NATIVE(stringCount);
   NATIVE(numToString);
+  NATIVE(listCount);
 }
 

@@ -71,5 +71,11 @@ namespace magpie
     double n = args[0]->toNumber();
     return new StringObject(String::format("%g", n));
   }
+  
+  NATIVE(listCount)
+  {
+    ListObject* list = args[0]->toList();
+    return new NumberObject(list->elements().count());
+  }
 }
 

@@ -1,0 +1,3 @@
+print([] count) // expect: 0
+print(["a"] count) // expect: 1
+print(["a", "b", "c"] count) // expect: 3

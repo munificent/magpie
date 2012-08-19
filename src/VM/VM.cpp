@@ -39,6 +39,7 @@ namespace magpie
     DEF_NATIVE(numGreaterThanEqualToNum, "Num >= Num");
     DEF_NATIVE(stringCount, "String count");
     DEF_NATIVE(numToString, "Num toString");
+    DEF_NATIVE(listCount, "List count");
         
     true_ = new BoolObject(true);
     false_ = new BoolObject(false);
