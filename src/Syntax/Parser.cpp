@@ -32,15 +32,9 @@ namespace magpie
     { NULL,             &Parser::assignment, PRECEDENCE_ASSIGNMENT }, // TOKEN_EQ
     { NULL,             &Parser::binaryOp, PRECEDENCE_EQUALITY },     // TOKEN_EQEQ
     { NULL,             &Parser::binaryOp, PRECEDENCE_EQUALITY },     // TOKEN_NEQ
-    { NULL,             &Parser::infixCall, PRECEDENCE_COMPARISON },  // TOKEN_LT
-    { NULL,             &Parser::infixCall, PRECEDENCE_COMPARISON },  // TOKEN_GT
-    { NULL,             &Parser::infixCall, PRECEDENCE_COMPARISON },  // TOKEN_LTE
-    { NULL,             &Parser::infixCall, PRECEDENCE_COMPARISON },  // TOKEN_GTE
-    { NULL,             &Parser::infixCall, PRECEDENCE_TERM },        // TOKEN_PLUS
-    { NULL,             &Parser::infixCall, PRECEDENCE_TERM },        // TOKEN_MINUS
-    { NULL,             &Parser::infixCall, PRECEDENCE_PRODUCT },     // TOKEN_STAR
-    { NULL,             &Parser::infixCall, PRECEDENCE_PRODUCT },     // TOKEN_SLASH
-    { NULL,             &Parser::infixCall, PRECEDENCE_PRODUCT },     // TOKEN_PERCENT
+    { NULL,             &Parser::infixCall, PRECEDENCE_COMPARISON },  // TOKEN_COMPARISON
+    { NULL,             &Parser::infixCall, PRECEDENCE_TERM },        // TOKEN_TERM_OP
+    { NULL,             &Parser::infixCall, PRECEDENCE_PRODUCT },     // TOKEN_PRODUCT_OP
 
     // Keywords.
     { NULL,             &Parser::and_, PRECEDENCE_LOGICAL },           // TOKEN_AND
@@ -211,15 +205,9 @@ namespace magpie
       if (lookAhead(TOKEN_NAME) ||
           lookAhead(TOKEN_EQEQ) ||
           lookAhead(TOKEN_NEQ) ||
-          lookAhead(TOKEN_LT) ||
-          lookAhead(TOKEN_GT) ||
-          lookAhead(TOKEN_LTE) ||
-          lookAhead(TOKEN_GTE) ||
-          lookAhead(TOKEN_PLUS) ||
-          lookAhead(TOKEN_MINUS) ||
-          lookAhead(TOKEN_STAR) ||
-          lookAhead(TOKEN_SLASH) ||
-          lookAhead(TOKEN_PERCENT))
+          lookAhead(TOKEN_COMPARE_OP) ||
+          lookAhead(TOKEN_TERM_OP) ||
+          lookAhead(TOKEN_PRODUCT_OP))
       {
         name = consume();
       }

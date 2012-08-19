@@ -38,15 +38,9 @@ namespace magpie
       case TOKEN_EQ:            return "=";
       case TOKEN_EQEQ:          return "==";
       case TOKEN_NEQ:           return "!=";
-      case TOKEN_LT:            return "<";
-      case TOKEN_GT:            return ">";
-      case TOKEN_LTE:           return "<=";
-      case TOKEN_GTE:           return ">=";
-      case TOKEN_PLUS:          return "+";
-      case TOKEN_MINUS:         return "-";
-      case TOKEN_STAR:          return "*";
-      case TOKEN_SLASH:         return "/";
-      case TOKEN_PERCENT:       return "%";
+      case TOKEN_COMPARE_OP:    return "compare op";
+      case TOKEN_TERM_OP:       return "term op";
+      case TOKEN_PRODUCT_OP:    return "product op";
 
         // Keywords.
       case TOKEN_AND:           return "and";

@@ -23,15 +23,9 @@ namespace magpie
         case TOKEN_EQ:
         case TOKEN_EQEQ:
         case TOKEN_NEQ:
-        case TOKEN_LT:
-        case TOKEN_GT:
-        case TOKEN_LTE:
-        case TOKEN_GTE:
-        case TOKEN_PLUS:
-        case TOKEN_MINUS:
-        case TOKEN_STAR:
-        case TOKEN_SLASH:
-        case TOKEN_PERCENT:
+        case TOKEN_COMPARE_OP:
+        case TOKEN_TERM_OP:
+        case TOKEN_PRODUCT_OP:
         case TOKEN_AND:
         case TOKEN_IS:
         case TOKEN_NOT:
@@ -125,19 +119,19 @@ namespace magpie
           if (peek() == '=')
           {
             advance();
-            return makeToken(TOKEN_LTE);
+            return makeToken(TOKEN_COMPARE_OP);
           }
-          return makeToken(TOKEN_LT);
+          return makeToken(TOKEN_COMPARE_OP);
           
         case '>':
           if (peek() == '=')
           {
             advance();
-            return makeToken(TOKEN_GTE);
+            return makeToken(TOKEN_COMPARE_OP);
           }
-          return makeToken(TOKEN_GT);
+          return makeToken(TOKEN_COMPARE_OP);
           
-        case '+': return makeToken(TOKEN_PLUS);
+        case '+': return makeToken(TOKEN_TERM_OP);
         case '-':
           if (isDigit(peek()))
           {
@@ -145,12 +139,12 @@ namespace magpie
           }
           else
           {
-            return makeToken(TOKEN_MINUS);
+            return makeToken(TOKEN_TERM_OP);
           }
           break;
           
-        case '*': return makeToken(TOKEN_STAR);
-        case '%': return makeToken(TOKEN_PERCENT);
+        case '*': return makeToken(TOKEN_PRODUCT_OP);
+        case '%': return makeToken(TOKEN_PRODUCT_OP);
         case '\n': return makeToken(TOKEN_LINE);
 
         case '/':
@@ -164,7 +158,7 @@ namespace magpie
           }
           else
           {
-            return makeToken(TOKEN_SLASH);
+            return makeToken(TOKEN_PRODUCT_OP);
           }
           break;
 

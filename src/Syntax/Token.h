@@ -22,15 +22,12 @@ namespace magpie
     TOKEN_EQ,
     TOKEN_EQEQ,
     TOKEN_NEQ,
-    TOKEN_LT,
-    TOKEN_GT,
-    TOKEN_LTE,
-    TOKEN_GTE,
-    TOKEN_PLUS,
-    TOKEN_MINUS,
-    TOKEN_STAR,
-    TOKEN_SLASH,
-    TOKEN_PERCENT,
+    
+    // Infix operators. There is a different token type for each precedence.
+    // The starting character determines the token type.
+    TOKEN_COMPARE_OP, // < >
+    TOKEN_TERM_OP,    // + -
+    TOKEN_PRODUCT_OP, // * / %
     
     // Keywords.
     TOKEN_AND,
