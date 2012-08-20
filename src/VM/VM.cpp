@@ -6,8 +6,8 @@
 #include "Object.h"
 #include "Parser.h"
 
-#define DEF_NATIVE(name, desc) \
-    nativeNames_.add(String::create(desc)); \
+#define DEF_NATIVE(name) \
+    nativeNames_.add(String::create(#name)); \
     natives_.add(name##Native);
 
 namespace magpie
@@ -27,19 +27,20 @@ namespace magpie
     
     fiber_ = new Fiber(*this);
         
-    DEF_NATIVE(print, "print");
-    DEF_NATIVE(numPlusNum, "Num + Num");
-    DEF_NATIVE(stringPlusString, "String + String");
-    DEF_NATIVE(numMinusNum, "Num - Num");
-    DEF_NATIVE(numTimesNum, "Num * Num");
-    DEF_NATIVE(numDivNum, "Num / Num");
-    DEF_NATIVE(numLessThanNum, "Num < Num");
-    DEF_NATIVE(numLessThanEqualToNum, "Num <= Num");
-    DEF_NATIVE(numGreaterThanNum, "Num > Num");
-    DEF_NATIVE(numGreaterThanEqualToNum, "Num >= Num");
-    DEF_NATIVE(stringCount, "String count");
-    DEF_NATIVE(numToString, "Num toString");
-    DEF_NATIVE(listCount, "List count");
+    DEF_NATIVE(print);
+    DEF_NATIVE(numPlusNum);
+    DEF_NATIVE(stringPlusString);
+    DEF_NATIVE(numMinusNum);
+    DEF_NATIVE(numTimesNum);
+    DEF_NATIVE(numDivNum);
+    DEF_NATIVE(numLessThanNum);
+    DEF_NATIVE(numLessThanEqualToNum);
+    DEF_NATIVE(numGreaterThanNum);
+    DEF_NATIVE(numGreaterThanEqualToNum);
+    DEF_NATIVE(stringCount);
+    DEF_NATIVE(numToString);
+    DEF_NATIVE(listCount);
+    DEF_NATIVE(listIndex);
         
     true_ = new BoolObject(true);
     false_ = new BoolObject(false);

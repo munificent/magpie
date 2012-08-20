@@ -22,25 +22,27 @@ end
 defclass NoMatchError
 end
 
-def (is Num) + (is Num) native "Num + Num"
-def (is String) + (is String) native "String + String"
-def (is Num) - (is Num) native "Num - Num"
-def (is Num) * (is Num) native "Num * Num"
-def (is Num) / (is Num) native "Num / Num"
+def (is Num) + (is Num) native "numPlusNum"
+def (is String) + (is String) native "stringPlusString"
+def (is Num) - (is Num) native "numMinusNum"
+def (is Num) * (is Num) native "numTimesNum"
+def (is Num) / (is Num) native "numDivNum"
 
-def (is Num) < (is Num) native "Num < Num"
-def (is Num) <= (is Num) native "Num <= Num"
-def (is Num) > (is Num) native "Num > Num"
-def (is Num) >= (is Num) native "Num >= Num"
+def (is Num) < (is Num) native "numLessThanNum"
+def (is Num) <= (is Num) native "numLessThanEqualToNum"
+def (is Num) > (is Num) native "numGreaterThanNum"
+def (is Num) >= (is Num) native "numGreaterThanEqualToNum"
 
 def print(arg) native "print"
 
-def (is String) count native "String count"
+def (is String) count native "stringCount"
 
 def (true) toString "true"
 def (false) toString "false"
 
-def (is Num) toString native "Num toString"
+def (is Num) toString native "numToString"
 def (s is String) toString s
 
-def (is List) count native "List count"
+def (is List) count native "listCount"
+
+def (is List)[is Num] native "listIndex"
