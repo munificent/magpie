@@ -24,7 +24,7 @@ namespace magpie
     // Punctuators.
     { &Parser::group,   NULL, -1 },                                   // TOKEN_LEFT_PAREN
     { NULL,             NULL, -1 },                                   // TOKEN_RIGHT_PAREN
-    { &Parser::list,    NULL, -1 },                                   // TOKEN_LEFT_BRACKET
+    { &Parser::list,    &Parser::index, PRECEDENCE_CALL },            // TOKEN_LEFT_BRACKET
     { NULL,             NULL, -1 },                                   // TOKEN_RIGHT_BRACKET
     { NULL,             NULL, -1 },                                   // TOKEN_LEFT_BRACE
     { NULL,             NULL, -1 },                                   // TOKEN_RIGHT_BRACE
@@ -192,16 +192,27 @@ namespace magpie
   {
     if (match(TOKEN_DEF))
     {
+      // Examples:
+      // Infix:              def (haystack) contains(needle)
+      // No left arg:        def print(text)
+      // No right arg:       def (text) reverse
+      // Setter:             def (person) name = (name)
+      // Setter with arg:    def (list) at(index) = (item)
+      // Indexer:            def (string)[index]
+      // Index setter:       def (string)[index] = (char)
+
       SourcePos start = last()->pos();
       
       gc<Pattern> leftParam;
+      gc<String> name;
+      gc<Pattern> rightParam;
+      
       if (match(TOKEN_LEFT_PAREN))
       {
         leftParam = parsePattern(true);
         consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
       }
       
-      gc<Token> name;
       if (lookAhead(TOKEN_NAME) ||
           lookAhead(TOKEN_EQEQ) ||
           lookAhead(TOKEN_NEQ) ||
@@ -209,33 +220,36 @@ namespace magpie
           lookAhead(TOKEN_TERM_OP) ||
           lookAhead(TOKEN_PRODUCT_OP))
       {
-        name = consume();
+        name = consume()->text();
+        
+        if (match(TOKEN_LEFT_PAREN))
+        {
+          if (match(TOKEN_RIGHT_PAREN))
+          {
+            // Allow () empty pattern to just mean "no parameter".
+            // TODO(bob): Do we want to keep this? Seems unsymmetric and
+            // pointless.
+          }
+          else
+          {
+            rightParam = parsePattern(true);
+            consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
+          }
+        }
       }
-      else if (leftParam.isNull())
+      else if (match(TOKEN_LEFT_BRACKET))
       {
-        reporter_.error(current().pos(),
-            "Expect a method name after 'def' but got '%s'.",
-            current().text()->cString());
+        // It's an indexer.
+        name = String::create("[]");
+        
+        rightParam = parsePattern(true);
+        consume(TOKEN_RIGHT_BRACKET, "Except ']' after indexer pattern.");
       }
       else
       {
         reporter_.error(current().pos(),
-            "Expect a method name after left parameter in 'def' but got '%s'.",
+            "Expect a method name or pattern after 'def' but got '%s'.",
             current().text()->cString());
-      }
-      
-      gc<Pattern> rightParam;
-      if (match(TOKEN_LEFT_PAREN))
-      {
-        if (match(TOKEN_RIGHT_PAREN))
-        {
-          // Allow () empty pattern to just mean "no parameter".
-        }
-        else
-        {
-          rightParam = parsePattern(true);
-          consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
-        }
       }
       
       // See if this is a native method.
@@ -253,7 +267,7 @@ namespace magpie
       }
       
       SourcePos span = start.spanTo(last()->pos());
-      return new DefExpr(span, leftParam, name->text(), rightParam, body);
+      return new DefExpr(span, leftParam, name, rightParam, body);
     }
     
     if (match(TOKEN_DEFCLASS))
@@ -585,6 +599,18 @@ namespace magpie
 
     // TODO(bob): Better position.
     return new CallExpr(token->pos(), left, token->text(), right);
+  }
+  
+  gc<Expr> Parser::index(gc<Expr> left, gc<Token> token)
+  {
+    // Parse the index.
+    // TODO(bob): Is this right? Do we want to allow variable declarations
+    // here?
+    gc<Expr> index = statementLike();
+    consume(TOKEN_RIGHT_BRACKET, "Expect ']' after index argument.");
+    
+    // TODO(bob): Better position.
+    return new CallExpr(token->pos(), left, String::create("[]"), index);
   }
   
   gc<Expr> Parser::infixCall(gc<Expr> left, gc<Token> token)

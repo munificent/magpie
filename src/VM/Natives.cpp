@@ -77,5 +77,12 @@ namespace magpie
     ListObject* list = args[0]->toList();
     return new NumberObject(list->elements().count());
   }
+  
+  NATIVE(listIndex)
+  {
+    ListObject* list = args[0]->toList();
+    // TODO(bob): What if the index isn't an int?
+    return list->elements()[static_cast<int>(args[1]->toNumber())];
+  }
 }
 
