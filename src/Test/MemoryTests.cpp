@@ -11,7 +11,7 @@ namespace magpie
     
     virtual void reach()
     {
-      Memory::reach(next);
+      next.reach();
     }
     
     int id;
@@ -22,7 +22,7 @@ namespace magpie
   {
     virtual void reachRoots()
     {
-      Memory::reach(root);
+      root.reach();
     }
     
     gc<Cons> root;

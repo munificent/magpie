@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "Macros.h"
+#include "Memory.h"
 
 namespace magpie
 {
@@ -78,7 +79,7 @@ namespace magpie
     // Removes all items from the array.
     void clear()
     {
-      if (items_ != NULL) delete [] items_;
+      items_ = NULL;
       count_ = 0;
       capacity_ = 0;
     }
@@ -146,6 +147,13 @@ namespace magpie
     {
       if (count_ >= size) return;
       ensureCapacity_(size);
+      
+      // Default construct any new ones.
+      for (int i = count_; i < size; i++)
+      {
+        new (static_cast<void*>(&items_[i])) T();
+      }
+       
       count_ = size;
     }
 
@@ -221,16 +229,13 @@ namespace magpie
       while (capacity < desiredCapacity) capacity *= GROW_FACTOR;
 
       // Create the new array.
-      // TODO(bob): Should use the GC heap here, at least for some arrays.
-      T* newItems = new T[capacity];
+      void* mem = Memory::allocate(sizeof(T) * capacity);
 
-      // Copy the items over.
-      for (int i = 0; i < count_; i++) newItems[i] = items_[i];
-
-      // Delete the old one.
-      delete [] items_;
-      items_ = newItems;
-
+      // Copy the existing items over. Note that this does *not* call any
+      // user-defined assignment operators. It just moves the memory straight
+      // over.
+      memcpy(mem, items_, sizeof(T) * count_);
+      items_ = static_cast<T*>(mem);
       capacity_ = capacity;
     }
 

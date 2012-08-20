@@ -119,12 +119,6 @@ namespace magpie
   // replace them with appropriate jumps.
   struct MatchTest
   {
-    // Default constructor so we can use this in Array.
-    MatchTest()
-    : position(-1),
-      slot(-1)
-    {}
-    
     MatchTest(int position, int slot)
     : position(position),
       slot(slot)
