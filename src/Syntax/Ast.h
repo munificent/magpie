@@ -118,7 +118,7 @@ namespace magpie
     
     virtual void reach()
     {
-      Memory::reach(body_);
+      body_.reach();
     }
     
   private:

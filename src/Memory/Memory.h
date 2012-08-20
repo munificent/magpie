@@ -2,14 +2,71 @@
 
 #include <iostream>
 
-#include "Array.h"
 #include "Macros.h"
 #include "Semispace.h"
 
 namespace magpie
 {
   class Managed;
-  class Memory;
+  class RootSource;
+  
+  // The dynamic memory manager. Uses a basic Cheney-style semi-space copying
+  // collector. To keep things extremely simple, this GC has a couple of
+  // restrictions.
+  //
+  //   * It will not force a garbage collection during an allocation. Instead,
+  //     it relies checkCollect() being called at some convenient time before
+  //     memory is needed. checkCollect() will do a collection if the amount of
+  //     free space is below some threshold. As long as you never need to
+  //     allocate more than that threshold between calls to checkCollect(),
+  //     everything works fine.
+  //
+  //   * It does not trace temporaries that are on the stack. The only roots it
+  //     knows about are the ones in the provided RootSource. This means that
+  //     you should not call checkCollect() while there are references to GC
+  //     objects on the C stack.
+  //
+  //   * You must be very careful about `this`. This is a copying collector, so
+  //     every live object will move when a collection occurs. If you call
+  //     checkCollect() while you are inside an instance method of some GC class
+  //     then that object itself will be moved, invalidating the this pointer.
+  //     Trying to access any instance after that will do Bad Things. To avoid
+  //     this, checkCollect() should only be called when no GC object methods
+  //     are on the stack.
+  //
+  // What can I say, it's my first GC.
+  class Memory
+  {
+    template <class> friend class gc;
+    
+  public:
+    static void initialize(RootSource* roots, size_t heapSize);
+    static void shutDown();
+    
+    static bool checkCollect();
+    
+    static void* allocate(size_t size);
+    
+    static int numCollections() { return numCollections_; }
+    
+  private:
+    // If the pointed-to object is in from-space, copies it to to-space and
+    // leaves a forwarding pointer. If it's a forwarding pointer already, just
+    // updates the reference. Returns the new address of the object.
+    static Managed* copy(Managed* obj);
+    
+    static RootSource*  roots_;
+    
+    // Pointers to a and b. These will swap back and forth on each collection.
+    static Semispace* from_;
+    static Semispace* to_;
+    
+    // The actual semispaces.
+    static Semispace a_;
+    static Semispace b_;
+    
+    static int numCollections_;
+  };
   
   // A reference to an object on the garbage-collected heap. It's basically a
   // wrapper around a pointer, but it clarifies in code which pointers are to
@@ -85,6 +142,14 @@ namespace magpie
       return !(this == other);
     }
     
+    // Indicates that the referenced object is reachable and should be
+    // preserved during garbage collection.
+    void reach()
+    {
+      if (object_ == NULL) return;
+      object_ = static_cast<T*>(Memory::copy(object_));
+    }
+    
     bool isNull() const { return object_ == NULL; }
     
     // Unlike operator ==, this only checks that the two gc<T> objects are
@@ -116,85 +181,6 @@ namespace magpie
       out << *object;
     }
     return out;
-  };
-
-  class RootSource;
-
-  // The dynamic memory manager. Uses a basic Cheney-style semi-space copying
-  // collector. To keep things extremely simple, this GC has a couple of
-  // restrictions.
-  //
-  //   * It will not force a garbage collection during an allocation. Instead,
-  //     it relies checkCollect() being called at some convenient time before
-  //     memory is needed. checkCollect() will do a collection if the amount of
-  //     free space is below some threshold. As long as you never need to
-  //     allocate more than that threshold between calls to checkCollect(),
-  //     everything works fine.
-  //
-  //   * It does not trace temporaries that are on the stack. The only roots it
-  //     knows about are the ones in the provided RootSource. This means that
-  //     you should not call checkCollect() while there are references to GC
-  //     objects on the C stack.
-  //
-  //   * You must be very careful about `this`. This is a copying collector, so
-  //     every live object will move when a collection occurs. If you call
-  //     checkCollect() while you are inside an instance method of some GC class
-  //     then that object itself will be moved, invalidating the this pointer.
-  //     Trying to access any instance after that will do Bad Things. To avoid
-  //     this, checkCollect() should only be called when no GC object methods
-  //     are on the stack.
-  //
-  // What can I say, it's my first GC.
-  class Memory
-  {
-  public:
-    static void initialize(RootSource* roots, size_t heapSize);
-    static void shutDown();
-    
-    static bool checkCollect();
-
-    static void* allocate(size_t size);
-
-    static int numCollections() { return numCollections_; }
-    
-    // Indicates that the given object is reachable and should be preserved
-    // during garbage collection.
-    template <class T>
-    static void reach(gc<T>& ref)
-    {
-      if (ref.isNull()) return;
-      Managed* newLocation = copy(&(*ref));
-      ref.set(static_cast<T*> (newLocation));
-    }
-    
-    // Indicates that the given array of objects is reachable and should be
-    // preserved during garbage collection.
-    template <class T>
-    static void reach(Array<gc<T> >& array)
-    {
-      for (int i = 0; i < array.count(); i++)
-      {
-        reach(array[i]);
-      }
-    }
-    
-  private:
-    // If the pointed-to object is in from-space, copies it to to-space and
-    // leaves a forwarding pointer. If it's a forwarding pointer already, just
-    // updates the reference. Returns the new address of the object.
-    static Managed* copy(Managed* obj);
-    
-    static RootSource*  roots_;
-
-    // Pointers to a and b. These will swap back and forth on each collection.
-    static Semispace* from_;
-    static Semispace* to_;
-
-    // The actual semispaces.
-    static Semispace a_;
-    static Semispace b_;
-
-    static int numCollections_;
   };
 }
 

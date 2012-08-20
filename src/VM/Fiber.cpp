@@ -414,7 +414,7 @@ namespace magpie
     int i;
     for (i = 0; i < numSlots; i++)
     {
-      Memory::reach(stack_[i]);
+      stack_[i].reach();
     }
 
     // For the remaining slot, clear them out now. When a new call is pushed
@@ -433,7 +433,7 @@ namespace magpie
     
     for (int i = 0; i < callFrames_.count(); i++)
     {
-      Memory::reach(callFrames_[i].chunk);
+      callFrames_[i].chunk.reach();
     }
   }
   
@@ -485,6 +485,6 @@ namespace magpie
   
   void CatchFrame::reach()
   {
-    Memory::reach(parent_);
+    parent_.reach();
   }
 }

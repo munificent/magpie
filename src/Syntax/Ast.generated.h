@@ -139,8 +139,8 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(left_);
-    Memory::reach(right_);
+    left_.reach();
+    right_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -172,8 +172,8 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(pattern_);
-    Memory::reach(value_);
+    pattern_.reach();
+    value_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -207,8 +207,8 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(left_);
-    Memory::reach(right_);
+    left_.reach();
+    right_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -267,9 +267,9 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(leftArg_);
-    Memory::reach(name_);
-    Memory::reach(rightArg_);
+    leftArg_.reach();
+    name_.reach();
+    rightArg_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -302,7 +302,7 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(body_);
+    body_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -341,10 +341,10 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(leftParam_);
-    Memory::reach(name_);
-    Memory::reach(rightParam_);
-    Memory::reach(body_);
+    leftParam_.reach();
+    name_.reach();
+    rightParam_.reach();
+    body_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -380,7 +380,7 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(name_);
+    name_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -410,7 +410,7 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(body_);
+    body_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -443,9 +443,9 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(condition_);
-    Memory::reach(thenArm_);
-    Memory::reach(elseArm_);
+    condition_.reach();
+    thenArm_.reach();
+    elseArm_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -478,8 +478,8 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(value_);
-    Memory::reach(type_);
+    value_.reach();
+    type_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -509,7 +509,7 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(elements_);
+    elements_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -540,7 +540,7 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(value_);
+    value_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -573,7 +573,7 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(name_);
+    name_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -606,7 +606,7 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(name_);
+    name_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -636,7 +636,7 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(value_);
+    value_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -712,8 +712,8 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(left_);
-    Memory::reach(right_);
+    left_.reach();
+    right_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -746,8 +746,8 @@ public:
 
     for (int i = 0; i < fields_.count(); i++)
     {
-        Memory::reach(fields_[i].name);
-        Memory::reach(fields_[i].value);
+        fields_[i].name.reach();
+        fields_[i].value.reach();
     }
   }
 
@@ -777,7 +777,7 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(value_);
+    value_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -806,7 +806,7 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(expressions_);
+    expressions_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -835,7 +835,7 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(value_);
+    value_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -864,7 +864,7 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(value_);
+    value_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -897,8 +897,8 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(pattern_);
-    Memory::reach(value_);
+    pattern_.reach();
+    value_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -931,8 +931,8 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(condition_);
-    Memory::reach(body_);
+    condition_.reach();
+    body_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -1008,8 +1008,8 @@ public:
 
     for (int i = 0; i < fields_.count(); i++)
     {
-        Memory::reach(fields_[i].name);
-        Memory::reach(fields_[i].value);
+        fields_[i].name.reach();
+        fields_[i].value.reach();
     }
   }
 
@@ -1039,7 +1039,7 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(type_);
+    type_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -1068,7 +1068,7 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(value_);
+    value_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -1102,8 +1102,8 @@ public:
 
   virtual void reach()
   {
-    Memory::reach(name_);
-    Memory::reach(pattern_);
+    name_.reach();
+    pattern_.reach();
   }
 
   virtual void trace(std::ostream& out) const;

@@ -83,7 +83,7 @@ namespace magpie
 
   void Token::reach()
   {
-    Memory::reach(text_);
+    text_.reach();
   }
 
   void Token::trace(std::ostream& out) const

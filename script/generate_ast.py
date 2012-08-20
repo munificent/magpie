@@ -113,8 +113,8 @@ REACH_METHOD = '''
 REACH_FIELD_ARRAY = '''
     for (int i = 0; i < {0}_.count(); i++)
     {{
-        Memory::reach({0}_[i].name);
-        Memory::reach({0}_[i].value);
+        {0}_[i].name.reach();
+        {0}_[i].value.reach();
     }}
 '''
 
@@ -236,7 +236,7 @@ def makeClass(file, baseClass, className, visitorParam, fields):
             name = name[:-1]
 
         if type.find('gc<') != -1:
-            reachFields += '    Memory::reach(' + name + '_);\n'
+            reachFields += '    ' + name + '_.reach();\n'
         if type == 'Array<Field>' or type == 'Array<PatternField>':
             reachFields += REACH_FIELD_ARRAY.format(name)
 

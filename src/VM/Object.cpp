@@ -6,7 +6,7 @@ namespace magpie
 
   void ClassObject::reach()
   {
-    Memory::reach(name_);
+    name_.reach();
   }
   
   bool ClassObject::is(const ClassObject& other) const
@@ -94,11 +94,11 @@ namespace magpie
 
   void RecordObject::reach()
   {
-    Memory::reach(type_);
+    type_.reach();
     
     for (int i = 0; i < type_->numFields(); i++)
     {
-      Memory::reach(fields_[i]);
+      fields_[i].reach();
     }
   }
   
@@ -116,6 +116,6 @@ namespace magpie
   
   void StringObject::reach()
   {
-    Memory::reach(value_);
+    value_.reach();
   }
 }

@@ -148,6 +148,16 @@ namespace magpie
       ensureCapacity_(size);
       count_ = size;
     }
+
+    // Indicates that the given array of objects is reachable and should be
+    // preserved during garbage collection. T should be a gc type.
+    void reach()
+    {
+      for (int i = 0; i < count_; i++)
+      {
+        items_[i].reach();
+      }
+    }
     
     // Assigns the contents of the given array to this one. Clears this array
     // and refills it with the contents of the other.

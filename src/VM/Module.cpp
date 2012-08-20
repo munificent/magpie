@@ -7,9 +7,9 @@ namespace magpie
 {
   void Module::reach()
   {
-    Memory::reach(body_);
-    Memory::reach(variables_);
-    Memory::reach(variableNames_);
+    body_.reach();
+    variables_.reach();
+    variableNames_.reach();
   }
   
   void Module::setBody(gc<Chunk> body)

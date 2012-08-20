@@ -143,7 +143,7 @@ namespace magpie
 
   void Chunk::reach()
   {
-    Memory::reach(constants_);
+    constants_.reach();
   }
   
   Multimethod::Multimethod(gc<String> signature)

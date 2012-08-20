@@ -100,13 +100,13 @@ namespace magpie
 
   void VM::reachRoots()
   {
-    Memory::reach(recordTypes_);
-    Memory::reach(fiber_);
-    Memory::reach(true_);
-    Memory::reach(false_);
-    Memory::reach(nothing_);
-    Memory::reach(symbols_);
-    Memory::reach(methods_);
+    recordTypes_.reach();
+    fiber_.reach();
+    true_.reach();
+    false_.reach();
+    nothing_.reach();
+    symbols_.reach();
+    methods_.reach();
     
     for (int i = 0; i < modules_.count(); i++)
     {

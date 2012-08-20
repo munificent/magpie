@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Array.h"
 #include "Macros.h"
 #include "Managed.h"
 
