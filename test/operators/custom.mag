@@ -1,0 +1,38 @@
+def (a) *** (b)
+    "(" + a + " *** " + b + ")"
+end
+
+def (a) +++ (b)
+    "(" + a + " +++ " + b + ")"
+end
+
+def (a) -+*/% (b)
+    "(" + a + " -+*/% " + b + ")"
+end
+
+def (a) <<+- (b)
+    "(" + a + " <<+- " + b + ")"
+end
+
+def (a) >% (b)
+    "(" + a + " >% " + b + ")"
+end
+
+def (a) /-- (b)
+    "(" + a + " /-- " + b + ")"
+end
+
+print("a" +++ "b") // expect: (a +++ b)
+print("a" -+*/% "b") // expect: (a -+*/% b)
+print("a" <<+- "b") // expect: (a <<+- b)
+print("a" >% "b") // expect: (a >% b)
+print("a" /-- "b") // expect: (a /-- b)
+
+// Precedence is determined by first character.
+print("a" +++ "b" *** "c") // expect: (a +++ (b *** c))
+print("a" *** "b" +++ "c") // expect: ((a *** b) +++ c)
+print("a" +++ "b" <<+- "c") // expect: ((a +++ b) <<+- c)
+print("a" -+*/% "b" >% "c") // expect: ((a -+*/% b) >% c)
+print("a" +++ "b" /-- "c") // expect: (a +++ (b /-- c))
+
+// TODO(bob): What about ! | & @ # $ ^?

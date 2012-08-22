@@ -114,38 +114,20 @@ namespace magpie
             return makeToken(TOKEN_NEQ);
           }
           return error(String::create("Expect '=' after '!'."));
-          
+
+        case '+':
+        case '*':
+        case '%':
         case '<':
-          if (peek() == '=')
-          {
-            advance();
-            return makeToken(TOKEN_COMPARE_OP);
-          }
-          return makeToken(TOKEN_COMPARE_OP);
-          
         case '>':
-          if (peek() == '=')
-          {
-            advance();
-            return makeToken(TOKEN_COMPARE_OP);
-          }
-          return makeToken(TOKEN_COMPARE_OP);
+          return readOperator();
           
-        case '+': return makeToken(TOKEN_TERM_OP);
         case '-':
           if (isDigit(peek()))
           {
             return readNumber();
           }
-          else
-          {
-            return makeToken(TOKEN_TERM_OP);
-          }
-          break;
-          
-        case '*': return makeToken(TOKEN_PRODUCT_OP);
-        case '%': return makeToken(TOKEN_PRODUCT_OP);
-        case '\n': return makeToken(TOKEN_LINE);
+          return readOperator();
 
         case '/':
           if (peek() == '/')
@@ -158,11 +140,15 @@ namespace magpie
           }
           else
           {
-            return makeToken(TOKEN_PRODUCT_OP);
+            return readOperator();
           }
           break;
 
-        case '"': return readString();
+        case '\n':
+          return makeToken(TOKEN_LINE);
+          
+        case '"':
+          return readString();
 
         default:
           if (isNameStart(c)) return readName();
@@ -195,7 +181,14 @@ namespace magpie
   {
     return isNameStart(c) || isDigit(c);
   }
-
+  
+  bool Lexer::isOperator(char c) const
+  {
+    return (c == '+') || (c == '-') ||
+           (c == '*') || (c == '/') || (c == '%') ||
+           (c == '<') || (c == '>') || (c == '=');
+  }
+  
   bool Lexer::isDigit(char c) const
   {
     return (c >= '0') && (c <= '9');
@@ -347,7 +340,33 @@ namespace magpie
 
     return makeToken(TOKEN_NUMBER);
   }
-
+  
+  gc<Token> Lexer::readOperator()
+  {
+    while (isOperator(peek())) advance();
+    
+    gc<String> text = source_->substring(start_, pos_);
+    
+    TokenType type;
+    switch ((*text)[0])
+    {
+      case '+':
+      case '-':
+        type = TOKEN_TERM_OP; break;
+      case '*':
+      case '/':
+      case '%':
+        type = TOKEN_PRODUCT_OP; break;
+      case '<':
+      case '>':
+        type = TOKEN_COMPARE_OP; break;
+      default:
+        ASSERT(false, "Unexpected operator character.");
+    }
+    
+    return makeToken(type, text);
+  }
+  
   gc<Token> Lexer::readString()
   {
     Array<char> chars;

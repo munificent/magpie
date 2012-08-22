@@ -37,6 +37,7 @@ namespace magpie
     bool isWhitespace(char c) const;
     bool isNameStart(char c) const;
     bool isName(char c) const;
+    bool isOperator(char c) const;
     bool isDigit(char c) const;
 
     char peek(int ahead = 0) const;
@@ -52,6 +53,7 @@ namespace magpie
 
     gc<Token> readName();
     gc<Token> readNumber();
+    gc<Token> readOperator();
     gc<Token> readString();
 
     const char* fileName_;
