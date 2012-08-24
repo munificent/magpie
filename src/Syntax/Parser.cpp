@@ -207,6 +207,7 @@ namespace magpie
       gc<Pattern> leftParam;
       gc<String> name;
       gc<Pattern> rightParam;
+      gc<Pattern> value;
       
       if (match(TOKEN_LEFT_PAREN))
       {
@@ -253,6 +254,14 @@ namespace magpie
             current().text()->cString());
       }
       
+      // See if it's a setter.
+      if (match(TOKEN_EQ))
+      {
+        consume(TOKEN_LEFT_PAREN, "Expect '(' after '=' to define setter.");
+        value = parsePattern(true);
+        consume(TOKEN_RIGHT_PAREN, "Expect ')' after value pattern.");
+      }
+      
       // See if this is a native method.
       gc<Expr> body;
       if (lookAhead(TOKEN_NAME) && (*current().text() == "native"))
@@ -268,7 +277,7 @@ namespace magpie
       }
       
       SourcePos span = start.spanTo(last()->pos());
-      return new DefExpr(span, leftParam, name, rightParam, body);
+      return new DefExpr(span, leftParam, name, rightParam, value, body);
     }
     
     if (match(TOKEN_DEFCLASS))
@@ -568,9 +577,9 @@ namespace magpie
   
   gc<Expr> Parser::assignment(gc<Expr> left, gc<Token> token)
   {
-    gc<Pattern> pattern = convertToPattern(left);
+    gc<LValue> lvalue = convertToLValue(left);
     gc<Expr> value = parsePrecedence(PRECEDENCE_ASSIGNMENT);
-    return new AssignExpr(left->pos().spanTo(value->pos()), pattern, value);
+    return new AssignExpr(left->pos().spanTo(value->pos()), lvalue, value);
   }
   
   gc<Expr> Parser::binaryOp(gc<Expr> left, gc<Token> token)
@@ -835,36 +844,43 @@ namespace magpie
 
   // Helpers and base methods -------------------------------------------------
 
-  gc<Pattern> Parser::convertToPattern(gc<Expr> expr)
+  gc<LValue> Parser::convertToLValue(gc<Expr> expr)
   {
     NameExpr* name = expr->asNameExpr();
     if (name != NULL)
     {
-      return new VariablePattern(name->pos(), name->name(), gc<Pattern>());
+      if (*name->name() == "_")
+      {
+        return new WildcardLValue(name->pos());
+      }
+      
+      return new NameLValue(name->pos(), name->name());
     }
     
     RecordExpr* record = expr->asRecordExpr();
     if (record != NULL)
     {
-      Array<PatternField> fields;
+      Array<LValueField> fields;
       for (int i = 0; i < record->fields().count(); i++)
       {
         const Field& field = record->fields()[i];
-        fields.add(PatternField(field.name, convertToPattern(field.value)));
+        fields.add(LValueField(field.name, convertToLValue(field.value)));
       }
       
-      return new RecordPattern(expr->pos(), fields);
+      return new RecordLValue(expr->pos(), fields);
     }
     
-    // TODO(bob): Convert other valid expressions to patterns:
-    // - Literals?
-    // - "==" expressions?
-    // - "is" expressions?
+    CallExpr* call = expr->asCallExpr();
+    if (call != NULL)
+    {
+      return new CallLValue(expr->pos(),
+          call->leftArg(), call->name(), call->rightArg());
+    }
     
-    // If we got here, the expression is not a valid pattern.
+    // If we got here, the expression is not a valid LValue.
     // TODO(bob): Better error message here.
     reporter_.error(expr->pos(), "Invalid left-hand side of assignment.");
-    return gc<Pattern>();
+    return gc<LValue>();
   }
 
   gc<Expr> Parser::createSequence(const Array<gc<Expr> >& exprs)

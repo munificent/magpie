@@ -10,7 +10,7 @@ namespace magpie
   class Module;
   class PatternCompiler;
   
-  class MethodCompiler : private ExprVisitor
+  class MethodCompiler : private ExprVisitor, private LValueVisitor
   {
     friend class Compiler;
     friend class PatternCompiler;
@@ -59,7 +59,12 @@ namespace magpie
     virtual void visit(ThrowExpr& expr, int dest);
     virtual void visit(VariableExpr& expr, int dest);
     virtual void visit(WhileExpr& expr, int dest);
-
+    
+    virtual void visit(CallLValue& lvalue, int value);
+    virtual void visit(NameLValue& lvalue, int value);
+    virtual void visit(RecordLValue& lvalue, int value);
+    virtual void visit(WildcardLValue& lvalue, int value);
+    
     void compileMatch(const Array<MatchClause>& clauses, int dest);
     
     // Compiles the given expr. If it's a constant expr, it adds the constant

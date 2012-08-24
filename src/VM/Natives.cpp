@@ -84,5 +84,13 @@ namespace magpie
     // TODO(bob): What if the index isn't an int?
     return list->elements()[static_cast<int>(args[1]->toNumber())];
   }
+  
+  NATIVE(listIndexSet)
+  {
+    ListObject* list = args[0]->toList();
+    // TODO(bob): What if the index isn't an int?
+    list->elements()[static_cast<int>(args[1]->toNumber())] = args[2];
+    return args[2];
+  }
 }
 

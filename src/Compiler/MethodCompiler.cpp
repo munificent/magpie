@@ -84,6 +84,7 @@ namespace magpie
         // Evaluate the method's parameter patterns.
         compileParam(compiler, method->leftParam(), numParamSlots);
         compileParam(compiler, method->rightParam(), numParamSlots);
+        compileParam(compiler, method->value(), numParamSlots);
         
         // The result slot is just after the param slots.
         compile(method->body(), numParamSlots);
@@ -195,8 +196,8 @@ namespace magpie
     // Compile the value and also make it the result of the expression.
     compile(expr.value(), dest);
     
-    // Now pattern match on the value.
-    compile(expr.pattern(), dest);
+    // Now assign it to the left-hand side.
+    expr.lvalue()->accept(*this, dest);
   }
   
   void MethodCompiler::visit(BinaryOpExpr& expr, int dest)
@@ -561,6 +562,71 @@ namespace magpie
     compile(expr.body(), dest);
     endJumpBack(loopStart);
     endJump(loopExit, OP_JUMP_IF_FALSE, condition);
+  }
+  
+  void MethodCompiler::visit(CallLValue& lvalue, int value)
+  {
+    gc<String> signature = SignatureBuilder::build(lvalue);
+    
+    int method = compiler_.findMethod(signature);
+    
+    if (method == -1)
+    {
+      compiler_.reporter().error(lvalue.pos(),
+          "Could not find a method with signature '%s'.",
+          signature->cString());
+      
+      // Just pick a method so we can keep compiling to report later errors.
+      method = 0;
+    }
+    
+    // Compile the method arguments.
+    int firstArg = getNextTemp();
+    int numTemps = 0;
+    numTemps += compileArg(lvalue.leftArg());
+    numTemps += compileArg(lvalue.rightArg());
+    
+    // Then add the value as the last argument.
+    int valueSlot = makeTemp();
+    write(OP_MOVE, value, valueSlot);
+    
+    // TODO(bob): Is overwriting the value slot correct here?
+    write(OP_CALL, method, firstArg, value);
+    
+    releaseTemp(); // valueSlot.
+    releaseTemps(numTemps);
+  }
+  
+  void MethodCompiler::visit(NameLValue& lvalue, int value)
+  {
+    compileAssignment(lvalue.resolved(), value);
+  }
+  
+  void MethodCompiler::visit(RecordLValue& lvalue, int value)
+  {
+    // TODO(bob): Lot of copy/paste between this and RecordPattern.
+    // Recurse into the fields.
+    for (int i = 0; i < lvalue.fields().count(); i++)
+    {
+      // TODO(bob): Could be faster and skip this if the field is a wildcard.
+      
+      // Test and destructure the field. This takes two instructions to encode
+      // all of the operands.
+      int field = makeTemp();
+      int symbol = compiler_.addSymbol(lvalue.fields()[i].name);
+      
+      write(OP_GET_FIELD, value, symbol, field);
+      
+      // Recurse into the record, using that field.
+      lvalue.fields()[i].value->accept(*this, field);
+      
+      releaseTemp(); // field.
+    }
+  }
+  
+  void MethodCompiler::visit(WildcardLValue& lvalue, int value)
+  {
+    // Nothing to do.
   }
   
   void MethodCompiler::compileMatch(const Array<MatchClause>& clauses, int dest)

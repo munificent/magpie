@@ -38,6 +38,7 @@ namespace magpie
     // it sets up the arguments before the call.
     resolver.allocateSlotsForParam(method.leftParam());
     resolver.allocateSlotsForParam(method.rightParam());
+    resolver.allocateSlotsForParam(method.value());
     
     // Create a slot for the result value.
     resolver.makeLocal(SourcePos(NULL, 0, 0, 0, 0), String::create("(result)"));
@@ -46,6 +47,7 @@ namespace magpie
     // patterns for the param (if there are any).
     resolver.destructureParam(method.leftParam());
     resolver.destructureParam(method.rightParam());
+    resolver.destructureParam(method.value());
     
     resolver.resolve(method.body());
     
@@ -169,9 +171,9 @@ namespace magpie
     resolve(expr.right());
   }
   
-  void Resolver::visit(AssignExpr& expr, int dest)
+  void Resolver::visit(AssignExpr& expr, int dummy)
   {
-    scope_->resolveAssignment(*expr.pattern());
+    expr.lvalue()->accept(*this, dummy);
     resolve(expr.value());
   }
   
@@ -466,6 +468,65 @@ namespace magpie
     loopScope.end();
   }
   
+  void Resolver::visit(CallLValue& lvalue, int dummy)
+  {
+    if (!lvalue.leftArg().isNull())
+    {
+      resolve(lvalue.leftArg());
+    }
+    
+    // TODO(bob): Resolve method here too?
+    
+    if (!lvalue.rightArg().isNull())
+    {
+      resolve(lvalue.rightArg());
+    }
+  }
+  
+  void Resolver::visit(NameLValue& lvalue, int dummy)
+  {
+    // Look up the variable.
+    int slot = locals_.lastIndexOf(lvalue.name());
+    
+    // TODO(bob): Report error if variable is immutable.
+    
+    if (slot != -1)
+    {
+      lvalue.setResolved(ResolvedName(slot));
+      return;
+    }
+
+    // Not a local variable. See if it's a top-level one.
+    int module = compiler_.getModuleIndex(module_);
+    int index = module_.findVariable(lvalue.name());
+    
+    if (index != -1)
+    {
+      lvalue.setResolved(ResolvedName(module, index));
+      return;
+    }
+
+    compiler_.reporter().error(lvalue.pos(),
+        "Variable '%s' is not defined.", lvalue.name()->cString());
+      
+    // Put a fake slot in so we can continue and report more errors.
+    lvalue.setResolved(ResolvedName(0));
+  }
+  
+  void Resolver::visit(RecordLValue& lvalue, int dummy)
+  {
+    // Recurse into the fields.
+    for (int i = 0; i < lvalue.fields().count(); i++)
+    {
+      lvalue.fields()[i].value->accept(*this, dummy);
+    }
+  }
+  
+  void Resolver::visit(WildcardLValue& lvalue, int dummy)
+  {
+    // Nothing to do.
+  }
+    
   Scope::Scope(Resolver* resolver)
   : resolver_(*resolver),
     parent_(resolver_.scope_),
@@ -486,12 +547,7 @@ namespace magpie
 
   void Scope::resolve(Pattern& pattern)
   {
-    pattern.accept(*this, 0);
-  }
-  
-  void Scope::resolveAssignment(Pattern& pattern)
-  {
-    pattern.accept(*this, 1);
+    pattern.accept(*this, -1);
   }
   
   void Scope::end()
@@ -503,28 +559,28 @@ namespace magpie
     start_ = -1;
   }
   
-  void Scope::visit(RecordPattern& pattern, int isAssignment)
+  void Scope::visit(RecordPattern& pattern, int dummy)
   {
     // Recurse into the fields.
     for (int i = 0; i < pattern.fields().count(); i++)
     {
-      pattern.fields()[i].value->accept(*this, isAssignment);
+      pattern.fields()[i].value->accept(*this, dummy);
     }
   }
   
-  void Scope::visit(TypePattern& pattern, int isAssignment)
+  void Scope::visit(TypePattern& pattern, int dummy)
   {
     // Resolve the type expression.
     resolver_.resolve(pattern.type());
   }
   
-  void Scope::visit(ValuePattern& pattern, int isAssignment)
+  void Scope::visit(ValuePattern& pattern, int dummy)
   {
     // Resolve the value expression.
     resolver_.resolve(pattern.value());
   }
   
-  void Scope::visit(VariablePattern& pattern, int isAssignment)
+  void Scope::visit(VariablePattern& pattern, int dummy)
   {
     if (isTopLevel())
     {
@@ -546,56 +602,18 @@ namespace magpie
     }
     else
     {
-      // It's in a local scope.
-      ResolvedName resolved;
-      if (isAssignment == 1)
-      {
-        // Assigning to an existing variable, so look it up.
-        int slot = resolver_.locals_.lastIndexOf(pattern.name());
-        
-        // TODO(bob): Report error if variable is immutable.
-        
-        if (slot != -1)
-        {
-          resolved = ResolvedName(slot);
-        }
-        else
-        {
-          // Not a local variable. See if it's a top-level one.
-          int module = resolver_.compiler_.getModuleIndex(resolver_.module_);
-          int index = resolver_.module_.findVariable(pattern.name());
-          
-          if (index != -1)
-          {
-            resolved = ResolvedName(module, index);
-          }
-          else
-          {
-            resolver_.compiler_.reporter().error(pattern.pos(),
-                "Variable '%s' is not defined.", pattern.name()->cString());
-
-            // Put a fake slot in so we can continue and report more errors.
-            resolved = ResolvedName(0);
-          }
-        }
-      }
-      else
-      {
-        // Declaring a variable, so create a slot for it.
-        int slot = resolver_.makeLocal(pattern.pos(), pattern.name());
-        resolved = ResolvedName(slot);
-      }
-      
-      pattern.setResolved(resolved);
+      // Declaring a local variable, so create a slot for it.
+      int slot = resolver_.makeLocal(pattern.pos(), pattern.name());
+      pattern.setResolved(ResolvedName(slot));
     }
         
     if (!pattern.pattern().isNull())
     {
-      pattern.pattern()->accept(*this, isAssignment);
+      pattern.pattern()->accept(*this, dummy);
     }
   }
   
-  void Scope::visit(WildcardPattern& pattern, int isAssignment)
+  void Scope::visit(WildcardPattern& pattern, int dummy)
   {
     // Nothing to do.
   }

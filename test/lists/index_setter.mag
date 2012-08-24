@@ -1,0 +1,29 @@
+// Basic assignment.
+do
+    val list = [1, 2, 3]
+    list[1] = 5
+    print(list) // expect: [1, 5, 3]
+end
+
+// Returns right-hand side.
+do
+    val list = [1, 2, 3]
+    print(list[1] = 5) // expect: 5
+end
+
+// Negative indices.
+do
+    val list = [1, 2, 3]
+    list[-1] = 5
+    list[-2] = 6
+    list[-3] = 7
+    print(list) // expect: [7, 6, 5]
+end
+
+// Multiple assignment.
+do
+    val list = [1, 2, 3]
+    list[0], (list[1], list[2]) = 4, (5, 6)
+end
+
+// TODO(bob): Out of bounds.

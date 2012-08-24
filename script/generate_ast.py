@@ -14,7 +14,7 @@ exprs = sorted({
         ('left',        'gc<Expr>'),
         ('right',       'gc<Expr>')],
     'Assign': [
-        ('pattern',     'gc<Pattern>'),
+        ('lvalue',      'gc<LValue>'),
         ('value',       'gc<Expr>')],
     'BinaryOp': [
         ('left',        'gc<Expr>'),
@@ -36,6 +36,7 @@ exprs = sorted({
         ('leftParam',   'gc<Pattern>'),
         ('name',        'gc<String>'),
         ('rightParam',  'gc<Pattern>'),
+        ('value',       'gc<Pattern>'),
         ('body',        'gc<Expr>'),
         ('maxLocals*',  'int')],
     'Do': [
@@ -100,6 +101,19 @@ patterns = sorted({
         ('name',        'gc<String>'),
         ('pattern',     'gc<Pattern>'),
         ('resolved*',   'ResolvedName')],
+    'Wildcard': []
+}.items())
+
+lvalues = sorted({
+    'Call': [
+        ('leftArg',     'gc<Expr>'),
+        ('name',        'gc<String>'),
+        ('rightArg',    'gc<Expr>')],
+    'Name': [
+        ('name',        'gc<String>'),
+        ('resolved*',   'ResolvedName')],
+    'Record': [
+        ('fields',      'Array<LValueField>')],
     'Wildcard': []
 }.items())
 
@@ -195,9 +209,11 @@ def main():
 
         # Write the forward declarations.
         forwardDeclare(file, exprs, 'Expr')
+        forwardDeclare(file, lvalues, 'LValue')
         forwardDeclare(file, patterns, 'Pattern')
 
         makeAst(file, 'Expr', 'int', exprs)
+        makeAst(file, 'LValue', 'int', lvalues)
         makeAst(file, 'Pattern', 'int', patterns)
 
     print 'Created', num_types, 'types.'
@@ -241,7 +257,7 @@ def makeClass(file, baseClass, className, visitorParam, fields):
 
         if type.find('gc<') != -1:
             reachFields += '    ' + name + '_.reach();\n'
-        if type == 'Array<Field>' or type == 'Array<PatternField>':
+        if type.endswith('Field>'):
             reachFields += REACH_FIELD_ARRAY.format(name)
 
         if not mutable:

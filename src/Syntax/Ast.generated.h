@@ -28,6 +28,10 @@ class StringExpr;
 class ThrowExpr;
 class VariableExpr;
 class WhileExpr;
+class CallLValue;
+class NameLValue;
+class RecordLValue;
+class WildcardLValue;
 class RecordPattern;
 class TypePattern;
 class ValuePattern;
@@ -157,9 +161,9 @@ private:
 class AssignExpr : public Expr
 {
 public:
-  AssignExpr(const SourcePos& pos, gc<Pattern> pattern, gc<Expr> value)
+  AssignExpr(const SourcePos& pos, gc<LValue> lvalue, gc<Expr> value)
   : Expr(pos),
-    pattern_(pattern),
+    lvalue_(lvalue),
     value_(value)
   {}
 
@@ -170,19 +174,19 @@ public:
 
   virtual AssignExpr* asAssignExpr() { return this; }
 
-  gc<Pattern> pattern() const { return pattern_; }
+  gc<LValue> lvalue() const { return lvalue_; }
   gc<Expr> value() const { return value_; }
 
   virtual void reach()
   {
-    pattern_.reach();
+    lvalue_.reach();
     value_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
 
 private:
-  gc<Pattern> pattern_;
+  gc<LValue> lvalue_;
   gc<Expr> value_;
   NO_COPY(AssignExpr);
 };
@@ -319,11 +323,12 @@ private:
 class DefExpr : public Expr
 {
 public:
-  DefExpr(const SourcePos& pos, gc<Pattern> leftParam, gc<String> name, gc<Pattern> rightParam, gc<Expr> body)
+  DefExpr(const SourcePos& pos, gc<Pattern> leftParam, gc<String> name, gc<Pattern> rightParam, gc<Pattern> value, gc<Expr> body)
   : Expr(pos),
     leftParam_(leftParam),
     name_(name),
     rightParam_(rightParam),
+    value_(value),
     body_(body),
     maxLocals_(-1)
   {}
@@ -338,6 +343,7 @@ public:
   gc<Pattern> leftParam() const { return leftParam_; }
   gc<String> name() const { return name_; }
   gc<Pattern> rightParam() const { return rightParam_; }
+  gc<Pattern> value() const { return value_; }
   gc<Expr> body() const { return body_; }
   int maxLocals() const { return maxLocals_; }
   void setMaxLocals(int maxLocals) { maxLocals_ = maxLocals; }
@@ -347,6 +353,7 @@ public:
     leftParam_.reach();
     name_.reach();
     rightParam_.reach();
+    value_.reach();
     body_.reach();
   }
 
@@ -356,6 +363,7 @@ private:
   gc<Pattern> leftParam_;
   gc<String> name_;
   gc<Pattern> rightParam_;
+  gc<Pattern> value_;
   gc<Expr> body_;
   int maxLocals_;
   NO_COPY(DefExpr);
@@ -981,6 +989,172 @@ private:
   gc<Expr> condition_;
   gc<Expr> body_;
   NO_COPY(WhileExpr);
+};
+
+class LValueVisitor
+{
+public:
+  virtual ~LValueVisitor() {}
+
+  virtual void visit(CallLValue& node, int arg) = 0;
+  virtual void visit(NameLValue& node, int arg) = 0;
+  virtual void visit(RecordLValue& node, int arg) = 0;
+  virtual void visit(WildcardLValue& node, int arg) = 0;
+
+protected:
+  LValueVisitor() {}
+
+private:
+  NO_COPY(LValueVisitor);
+};
+
+class LValue : public Managed
+{
+public:
+  LValue(const SourcePos& pos)
+  : pos_(pos)
+  {}
+
+  virtual ~LValue() {}
+
+  // The visitor pattern.
+  virtual void accept(LValueVisitor& visitor, int arg) = 0;
+
+  // Dynamic casts.
+  virtual CallLValue* asCallLValue() { return NULL; }
+  virtual NameLValue* asNameLValue() { return NULL; }
+  virtual RecordLValue* asRecordLValue() { return NULL; }
+  virtual WildcardLValue* asWildcardLValue() { return NULL; }
+
+  const SourcePos& pos() const { return pos_; }
+
+private:
+  SourcePos pos_;
+};
+
+class CallLValue : public LValue
+{
+public:
+  CallLValue(const SourcePos& pos, gc<Expr> leftArg, gc<String> name, gc<Expr> rightArg)
+  : LValue(pos),
+    leftArg_(leftArg),
+    name_(name),
+    rightArg_(rightArg)
+  {}
+
+  virtual void accept(LValueVisitor& visitor, int arg)
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual CallLValue* asCallLValue() { return this; }
+
+  gc<Expr> leftArg() const { return leftArg_; }
+  gc<String> name() const { return name_; }
+  gc<Expr> rightArg() const { return rightArg_; }
+
+  virtual void reach()
+  {
+    leftArg_.reach();
+    name_.reach();
+    rightArg_.reach();
+  }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  gc<Expr> leftArg_;
+  gc<String> name_;
+  gc<Expr> rightArg_;
+  NO_COPY(CallLValue);
+};
+
+class NameLValue : public LValue
+{
+public:
+  NameLValue(const SourcePos& pos, gc<String> name)
+  : LValue(pos),
+    name_(name),
+    resolved_()
+  {}
+
+  virtual void accept(LValueVisitor& visitor, int arg)
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual NameLValue* asNameLValue() { return this; }
+
+  gc<String> name() const { return name_; }
+  ResolvedName resolved() const { return resolved_; }
+  void setResolved(ResolvedName resolved) { resolved_ = resolved; }
+
+  virtual void reach()
+  {
+    name_.reach();
+  }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  gc<String> name_;
+  ResolvedName resolved_;
+  NO_COPY(NameLValue);
+};
+
+class RecordLValue : public LValue
+{
+public:
+  RecordLValue(const SourcePos& pos, const Array<LValueField>& fields)
+  : LValue(pos),
+    fields_(fields)
+  {}
+
+  virtual void accept(LValueVisitor& visitor, int arg)
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual RecordLValue* asRecordLValue() { return this; }
+
+  const Array<LValueField>& fields() { return fields_; }
+
+  virtual void reach()
+  {
+
+    for (int i = 0; i < fields_.count(); i++)
+    {
+        fields_[i].name.reach();
+        fields_[i].value.reach();
+    }
+  }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  Array<LValueField> fields_;
+  NO_COPY(RecordLValue);
+};
+
+class WildcardLValue : public LValue
+{
+public:
+  WildcardLValue(const SourcePos& pos)
+  : LValue(pos)
+  {}
+
+  virtual void accept(LValueVisitor& visitor, int arg)
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual WildcardLValue* asWildcardLValue() { return this; }
+
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  NO_COPY(WildcardLValue);
 };
 
 class PatternVisitor

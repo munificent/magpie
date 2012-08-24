@@ -149,18 +149,11 @@ namespace magpie
   
   gc<String> SignatureBuilder::build(const CallExpr& expr)
   {
-    // 1 foo                 -> ()foo
-    // 1 foo()               -> ()foo
-    // 1 foo(2)              -> ()foo()
-    // foo(1)                -> foo()
-    // (1, 2) foo            -> (,)foo
-    // foo(1, b: 2, 3, e: 4) -> foo(,b,,e)
     SignatureBuilder builder;
     
     if (!expr.leftArg().isNull())
     {
       builder.writeArg(expr.leftArg());
-      builder.add(" ");
     }
     
     builder.add(expr.name()->cString());
@@ -176,21 +169,20 @@ namespace magpie
   
   gc<String> SignatureBuilder::build(const DefExpr& method)
   {
-    // def (a) foo               -> ()foo
-    // def (a) foo()             -> ()foo
-    // def (a) foo(b)            -> ()foo()
-    // def foo(b)                -> foo()
-    // def (a, b) foo            -> (,)foo
-    // def foo(a, b: c, d, e: f) -> foo(,b,,e)
     SignatureBuilder builder;
     
     if (!method.leftParam().isNull())
     {
       builder.writeParam(method.leftParam());
-      builder.add(" ");
     }
     
-    builder.add(method.name()->cString());
+    gc<String> name = method.name();
+    if (!method.value().isNull())
+    {
+      name = String::format("%s=", name->cString());
+    }
+    
+    builder.add(name);
     
     if (!method.rightParam().isNull())
     {
@@ -198,9 +190,40 @@ namespace magpie
       builder.writeParam(method.rightParam());
     }
     
+    if (!method.value().isNull())
+    {
+      builder.add("=");
+      builder.writeParam(method.value());
+    }
+    
     return String::create(builder.signature_, builder.length_);
   }
   
+  gc<String> SignatureBuilder::build(const CallLValue& lvalue)
+  {
+    SignatureBuilder builder;
+    
+    if (!lvalue.leftArg().isNull())
+    {
+      builder.writeArg(lvalue.leftArg());
+    }
+    
+    gc<String> name = String::format("%s=", lvalue.name()->cString());
+    builder.add(name);
+    
+    if (!lvalue.rightArg().isNull())
+    {
+      builder.add(" ");
+      builder.writeArg(lvalue.rightArg());
+    }
+    
+    // Add the value.
+    // TODO(bob): Can you do destructuring here?
+    builder.add("=0:");
+    
+    return String::create(builder.signature_, builder.length_);
+  }
+
   void SignatureBuilder::writeArg(gc<Expr> expr)
   {
     // TODO(bob): Clean up. Redundant with build().

@@ -10,7 +10,7 @@ namespace magpie
   class Scope;
   class VM;
   
-  class Resolver : public ExprVisitor
+  class Resolver : public ExprVisitor, private LValueVisitor
   {
     friend class Scope;
     
@@ -70,6 +70,11 @@ namespace magpie
     virtual void visit(VariableExpr& expr, int dummy);
     virtual void visit(WhileExpr& expr, int dummy);
 
+    virtual void visit(CallLValue& lvalue, int dummy);
+    virtual void visit(NameLValue& lvalue, int dummy);
+    virtual void visit(RecordLValue& lvalue, int dummy);
+    virtual void visit(WildcardLValue& lvalue, int dummy);
+
     Compiler& compiler_;
 
     Module& module_;
@@ -108,7 +113,6 @@ namespace magpie
     bool isTopLevel() const;
     
     void resolve(Pattern& pattern);
-    void resolveAssignment(Pattern& pattern);
     
     int startSlot() const { return start_; }
     
@@ -116,11 +120,11 @@ namespace magpie
     // of (C++) scope.
     void end();
     
-    virtual void visit(RecordPattern& pattern, int isAssignment);
-    virtual void visit(TypePattern& pattern, int isAssignment);
-    virtual void visit(ValuePattern& pattern, int isAssignment);
-    virtual void visit(VariablePattern& pattern, int isAssignment);
-    virtual void visit(WildcardPattern& pattern, int isAssignment);
+    virtual void visit(RecordPattern& pattern, int dummy);
+    virtual void visit(TypePattern& pattern, int dummy);
+    virtual void visit(ValuePattern& pattern, int dummy);
+    virtual void visit(VariablePattern& pattern, int dummy);
+    virtual void visit(WildcardPattern& pattern, int dummy);
     
   private:
     Resolver& resolver_;

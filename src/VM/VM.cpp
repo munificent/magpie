@@ -41,6 +41,7 @@ namespace magpie
     DEF_NATIVE(numToString);
     DEF_NATIVE(listCount);
     DEF_NATIVE(listIndex);
+    DEF_NATIVE(listIndexSet);
         
     true_ = new BoolObject(true);
     false_ = new BoolObject(false);

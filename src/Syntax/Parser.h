@@ -83,19 +83,14 @@ namespace magpie
     gc<Pattern> primaryPattern(bool isMethod);
     gc<Expr> parseExpressionInPattern(bool isMethod);
 
-    // The left-hand side of an assignment expression is a pattern, but it will
+    // The left-hand side of an assignment expression is an lvalue, but it will
     // initially be parsed as an expression. Correctly determining whether a
     // series of tokens is the LHS of an assignment before parsing them 
     // requires arbitrary lookahead.
     //
     // Instead, the parser assumes it's parsing an expression until it hits an
-    // '='. Then it takes the LHS expression and converts it to a pattern. This
-    // means that only the subset of patterns that are syntactically valid as
-    // expressions can be used as the target of an assignment. Fortunately,
-    // most patterns fall under that. (The exceptions are type and value
-    // patterns that are not nested inside a variable pattern, like "== 4" or
-    // "is Num".)
-    gc<Pattern> convertToPattern(gc<Expr> expr);
+    // '='. Then it takes the LHS expression and converts it to an lvalue.
+    gc<LValue> convertToLValue(gc<Expr> expr);
     
     gc<Expr> createSequence(const Array<gc<Expr> >& exprs);
 

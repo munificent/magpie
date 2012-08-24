@@ -46,3 +46,4 @@ def (s is String) toString s
 def (is List) count native "listCount"
 
 def (is List)[is Num] native "listIndex"
+def (is List)[index is Num]=(value) native "listIndexSet"

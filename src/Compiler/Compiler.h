@@ -74,6 +74,9 @@ namespace magpie
     // Builds a signature for the given method definition.
     static gc<String> build(const DefExpr& expr);
     
+    // Builds a signature for the method being called by the given lvalue.
+    static gc<String> build(const CallLValue& lvalue);
+    
   private:
     SignatureBuilder()
     : length_(0)

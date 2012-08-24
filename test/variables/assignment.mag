@@ -43,6 +43,14 @@ do
     print(a) // expect: 1
 end
 
+// Assign to wildcard.
+do
+    var a = 0
+    _ = print("ok") // expect: ok
+    _, a, _ = 1, 2, 3
+    print(a) // expect: 2
+end
+
 // TODO(bob):
 // - Refutable pattern.
 // - Compile error if variable isn't mutable.

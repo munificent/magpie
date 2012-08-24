@@ -10,6 +10,7 @@ namespace magpie
   using std::ostream;
 
   class Expr;
+  class LValue;
   class Module;
   class Pattern;
   class SequenceExpr;
@@ -47,7 +48,24 @@ namespace magpie
     gc<String> name;
     gc<Pattern> value;
   };
+  
+  // A record lvalue field.
+  struct LValueField
+  {
+    LValueField()
+    : name(),
+      value()
+    {}
     
+    LValueField(gc<String> name, gc<LValue> value)
+    : name(name),
+      value(value)
+    {}
+    
+    gc<String> name;
+    gc<LValue> value;
+  };
+  
   // A pattern paired with the expression to execute when the pattern matches.
   // Used for match expressions and catch clauses.
   class MatchClause

@@ -9,7 +9,7 @@ namespace magpie
   
   void AssignExpr::trace(std::ostream& out) const
   {
-    out << "(" << pattern_ << " = " << value_ << ")";
+    out << "(" << lvalue_ << " = " << value_ << ")";
   }
   
   void BinaryOpExpr::trace(std::ostream& out) const
@@ -67,6 +67,11 @@ namespace magpie
     if (!rightParam_.isNull())
     {
       out << " (" << rightParam_ << ")";
+    }
+    
+    if (!value_.isNull())
+    {
+      out << "=(" << value_ << ")";
     }
     
     out << " -> " << body_ << ")";
@@ -220,6 +225,47 @@ namespace magpie
   void WhileExpr::trace(std::ostream& out) const
   {
     out << "(while " << condition_ << " " << body_ << ")";
+  }
+  
+  void CallLValue::trace(std::ostream& out) const
+  {
+    out << "(";
+    if (!leftArg_.isNull())
+    {
+      out << leftArg_ << " ";
+    }
+    
+    out << name_;
+    
+    if (!rightArg_.isNull())
+    {
+      out << " " << rightArg_;
+    }
+    
+    out << ")";
+  }
+  
+  void NameLValue::trace(std::ostream& out) const
+  {
+    out << name_;
+  }
+  
+  void RecordLValue::trace(std::ostream& out) const
+  {
+    out << "(";
+    
+    for (int i = 0; i < fields_.count(); i++)
+    {
+      if (i > 0) out << ", ";
+      out << fields_[i].name << ": " << fields_[i].value;
+    }
+    
+    out << ")";
+  }
+  
+  void WildcardLValue::trace(std::ostream& out) const
+  {
+    out << "_";
   }
   
   void RecordPattern::trace(std::ostream& out) const
