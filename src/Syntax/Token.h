@@ -41,6 +41,7 @@ namespace magpie
     TOKEN_FALSE,
     TOKEN_FOR,
     TOKEN_IF,
+    TOKEN_IN,
     TOKEN_IS,
     TOKEN_MATCH,
     TOKEN_NOT,

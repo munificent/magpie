@@ -10,6 +10,7 @@ class CatchExpr;
 class DefExpr;
 class DefClassExpr;
 class DoExpr;
+class ForExpr;
 class IfExpr;
 class IsExpr;
 class ListExpr;
@@ -47,6 +48,7 @@ public:
   virtual void visit(DefExpr& node, int arg) = 0;
   virtual void visit(DefClassExpr& node, int arg) = 0;
   virtual void visit(DoExpr& node, int arg) = 0;
+  virtual void visit(ForExpr& node, int arg) = 0;
   virtual void visit(IfExpr& node, int arg) = 0;
   virtual void visit(IsExpr& node, int arg) = 0;
   virtual void visit(ListExpr& node, int arg) = 0;
@@ -94,6 +96,7 @@ public:
   virtual DefExpr* asDefExpr() { return NULL; }
   virtual DefClassExpr* asDefClassExpr() { return NULL; }
   virtual DoExpr* asDoExpr() { return NULL; }
+  virtual ForExpr* asForExpr() { return NULL; }
   virtual IfExpr* asIfExpr() { return NULL; }
   virtual IsExpr* asIsExpr() { return NULL; }
   virtual ListExpr* asListExpr() { return NULL; }
@@ -418,6 +421,43 @@ public:
 private:
   gc<Expr> body_;
   NO_COPY(DoExpr);
+};
+
+class ForExpr : public Expr
+{
+public:
+  ForExpr(const SourcePos& pos, gc<Pattern> pattern, gc<Expr> iterator, gc<Expr> body)
+  : Expr(pos),
+    pattern_(pattern),
+    iterator_(iterator),
+    body_(body)
+  {}
+
+  virtual void accept(ExprVisitor& visitor, int arg)
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual ForExpr* asForExpr() { return this; }
+
+  gc<Pattern> pattern() const { return pattern_; }
+  gc<Expr> iterator() const { return iterator_; }
+  gc<Expr> body() const { return body_; }
+
+  virtual void reach()
+  {
+    pattern_.reach();
+    iterator_.reach();
+    body_.reach();
+  }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  gc<Pattern> pattern_;
+  gc<Expr> iterator_;
+  gc<Expr> body_;
+  NO_COPY(ForExpr);
 };
 
 class IfExpr : public Expr

@@ -48,6 +48,7 @@ namespace magpie
     { &Parser::boolean, NULL, -1 },                                    // TOKEN_FALSE
     { NULL,             NULL, -1 },                                    // TOKEN_FOR
     { NULL,             NULL, -1 },                                    // TOKEN_IF
+    { NULL,             NULL, -1 },                                    // TOKEN_IN
     { NULL,             &Parser::is, PRECEDENCE_IS },                  // TOKEN_IS
     { NULL,             NULL, -1 },                                    // TOKEN_MATCH
     { &Parser::not_,    NULL, -1 },                                    // TOKEN_NOT
@@ -335,6 +336,18 @@ namespace magpie
       gc<Expr> body = parseBlock();
       SourcePos span = start.spanTo(last()->pos());
       return new DoExpr(span, body);
+    }
+    
+    if (match(TOKEN_FOR))
+    {
+      gc<Pattern> pattern = parsePattern(false);
+      consume(TOKEN_IN, "Expect 'in' after for loop pattern.");
+      gc<Expr> iterator = parsePrecedence();
+      consume(TOKEN_DO, "Expect 'do' after for loop iterator.");
+      gc<Expr> body = parseBlock();
+      
+      SourcePos span = start.spanTo(last()->pos());
+      return new ForExpr(span, pattern, iterator, body);
     }
 
     if (match(TOKEN_IF))

@@ -302,7 +302,54 @@ namespace magpie
   {
     compile(expr.body(), dest);
   }
+  
+  void MethodCompiler::visit(ForExpr& expr, int dest)
+  {
+    // TODO(bob): Hackish. An actual intermediate representation would help
+    // here.
+    int iterateMethod = compiler_.findMethod(String::create("0: iterate"));
+    ASSERT(iterateMethod != -1, "Should have 'iterate' method in core.");
 
+    int nextMethod = compiler_.findMethod(String::create("0: next"));
+    ASSERT(nextMethod != -1, "Should have 'next' method in core.");
+    
+    int currentMethod = compiler_.findMethod(String::create("0: current"));
+    ASSERT(currentMethod != -1, "Should have 'current' method in core.");
+    
+    // Evaluate the iteratable expression.
+    int iterator = makeTemp();
+    compile(expr.iterator(), iterator);
+    
+    // Then call "iterate" on it to get an iterator.
+    // TODO(bob): Hackish. An actual intermediate representation would help
+    // here.
+    write(OP_CALL, iterateMethod, iterator, iterator);
+    
+    int loopStart = startJumpBack();
+    
+    // Call "next" on the iterator.
+    write(OP_CALL, nextMethod, iterator, dest);
+    
+    // If false, jump to exit.
+    int loopExit = startJump();
+    
+    // Call "current" on the iterator.
+    write(OP_CALL, currentMethod, iterator, dest);
+    
+    // Match on the loop pattern.
+    compile(expr.pattern(), dest);
+    
+    // Compile the body.
+    compile(expr.body(), dest);
+    
+    endJumpBack(loopStart);
+    endJump(loopExit, OP_JUMP_IF_FALSE, dest);
+    
+    releaseTemp(); // iterator.
+    
+    // TODO(bob): Need to figure out what the result value should be.
+  }
+  
   void MethodCompiler::visit(IfExpr& expr, int dest)
   {
     // Compile the condition.

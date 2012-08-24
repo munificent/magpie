@@ -82,6 +82,12 @@ namespace magpie
     out << "(do " << body_ << ")";
   }
   
+  void ForExpr::trace(std::ostream& out) const
+  {
+    out << "(for " << pattern_ << " in " << iterator_
+        << " do " << body_ << ")";
+  }
+  
   void IfExpr::trace(std::ostream& out) const
   {
     out << "(if " << condition_ << " then " << thenArm_;

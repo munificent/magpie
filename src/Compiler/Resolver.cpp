@@ -249,6 +249,20 @@ namespace magpie
     doScope.end();
   }
   
+  void Resolver::visit(ForExpr& expr, int dummy)
+  {
+    // Resolve the iterator in the current scope.
+    resolve(expr.iterator());
+    
+    // Resolve the body (including the loop pattern) in its own scope.
+    Scope loopScope(this);
+    
+    scope_->resolve(*expr.pattern());
+    resolve(expr.body());
+    
+    loopScope.end();
+  }
+  
   void Resolver::visit(IfExpr& expr, int dummy)
   {
     Scope ifScope(this);

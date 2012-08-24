@@ -46,6 +46,7 @@ namespace magpie
         case TOKEN_FALSE:
         case TOKEN_FOR:
         case TOKEN_IF:
+        case TOKEN_IN:
         case TOKEN_MATCH:
         case TOKEN_RETURN:
         case TOKEN_THEN:
@@ -301,6 +302,7 @@ namespace magpie
     else if (*text == "false"   ) type = TOKEN_FALSE;
     else if (*text == "for"     ) type = TOKEN_FOR;
     else if (*text == "if"      ) type = TOKEN_IF;
+    else if (*text == "in"      ) type = TOKEN_IN;
     else if (*text == "is"      ) type = TOKEN_IS;
     else if (*text == "match"   ) type = TOKEN_MATCH;
     else if (*text == "not"     ) type = TOKEN_NOT;
