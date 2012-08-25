@@ -308,13 +308,13 @@ namespace magpie
   {
     // TODO(bob): Hackish. An actual intermediate representation would help
     // here.
-    int iterateMethod = compiler_.findMethod(String::create("0: iterate"));
+    int iterateMethod = compiler_.findMethod(String::create("0:iterate"));
     ASSERT(iterateMethod != -1, "Should have 'iterate' method in core.");
 
-    int nextMethod = compiler_.findMethod(String::create("0: next"));
+    int nextMethod = compiler_.findMethod(String::create("0:next"));
     ASSERT(nextMethod != -1, "Should have 'next' method in core.");
     
-    int currentMethod = compiler_.findMethod(String::create("0: current"));
+    int currentMethod = compiler_.findMethod(String::create("0:current"));
     ASSERT(currentMethod != -1, "Should have 'current' method in core.");
     
     // Evaluate the iteratable expression.
