@@ -143,6 +143,29 @@ namespace magpie
     expr->accept(*this, -1);
   }
   
+  void Resolver::resolveCall(CallExpr& expr, bool isLValue)
+  {
+    // Resolve the arguments.
+    if (!expr.leftArg().isNull()) resolve(expr.leftArg());
+    if (!expr.rightArg().isNull()) resolve(expr.rightArg());
+    
+    // Resolve the method.
+    gc<String> signature = SignatureBuilder::build(expr, isLValue);
+    int method = compiler_.findMethod(signature);
+    
+    if (method == -1)
+    {
+      compiler_.reporter().error(expr.pos(),
+          "Could not find a method with signature '%s'.",
+          signature->cString());
+      
+      // Just pick a method so we can keep compiling to report later errors.
+      method = 0;
+    }
+    
+    expr.setResolved(method);
+  }
+
   int Resolver::makeLocal(const SourcePos& pos, gc<String> name)
   {
     // Make sure there isn't already a local variable with this name in the
@@ -173,8 +196,8 @@ namespace magpie
   
   void Resolver::visit(AssignExpr& expr, int dummy)
   {
-    expr.lvalue()->accept(*this, dummy);
     resolve(expr.value());
+    expr.lvalue()->accept(*this, dummy);
   }
   
   void Resolver::visit(BinaryOpExpr& expr, int dummy)
@@ -190,17 +213,7 @@ namespace magpie
   
   void Resolver::visit(CallExpr& expr, int dummy)
   {
-    if (!expr.leftArg().isNull())
-    {
-      resolve(expr.leftArg());
-    }
-
-    // TODO(bob): Resolve method here too?
-    
-    if (!expr.rightArg().isNull())
-    {
-      resolve(expr.rightArg());
-    }
+    resolveCall(expr, false);
   }
   
   void Resolver::visit(CatchExpr& expr, int dummy)
@@ -470,17 +483,7 @@ namespace magpie
   
   void Resolver::visit(CallLValue& lvalue, int dummy)
   {
-    if (!lvalue.leftArg().isNull())
-    {
-      resolve(lvalue.leftArg());
-    }
-    
-    // TODO(bob): Resolve method here too?
-    
-    if (!lvalue.rightArg().isNull())
-    {
-      resolve(lvalue.rightArg());
-    }
+    resolveCall(*lvalue.call(), true);
   }
   
   void Resolver::visit(NameLValue& lvalue, int dummy)

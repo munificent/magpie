@@ -38,6 +38,7 @@ namespace magpie
     void destructureParam(gc<Pattern> pattern);
     void resolveParam(gc<Pattern> pattern);
     void resolve(gc<Expr> expr);
+    void resolveCall(CallExpr& expr, bool isLValue);
     
     // Creates a new local variable with the given name.
     int makeLocal(const SourcePos& pos, gc<String> name);

@@ -1,0 +1,11 @@
+// skip
+// TODO(bob): This should work, but destructuring of the value pattern isn't
+// supported yet.
+def foo() = (a, b)
+    print(a)
+    print(b)
+end
+
+foo() = 1, 2
+// expect: 1
+// expect: 2

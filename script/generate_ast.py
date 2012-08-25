@@ -25,7 +25,8 @@ exprs = sorted({
     'Call': [
         ('leftArg',     'gc<Expr>'),
         ('name',        'gc<String>'),
-        ('rightArg',    'gc<Expr>')],
+        ('rightArg',    'gc<Expr>'),
+        ('resolved*',   'int')],
     'Catch': [
         ('body',        'gc<Expr>'),
         ('catches',     'Array<MatchClause>')],
@@ -106,9 +107,7 @@ patterns = sorted({
 
 lvalues = sorted({
     'Call': [
-        ('leftArg',     'gc<Expr>'),
-        ('name',        'gc<String>'),
-        ('rightArg',    'gc<Expr>')],
+        ('call',        'gc<CallExpr>')],
     'Name': [
         ('name',        'gc<String>'),
         ('resolved*',   'ResolvedName')],

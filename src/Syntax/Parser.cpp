@@ -873,8 +873,7 @@ namespace magpie
     CallExpr* call = expr->asCallExpr();
     if (call != NULL)
     {
-      return new CallLValue(expr->pos(),
-          call->leftArg(), call->name(), call->rightArg());
+      return new CallLValue(expr->pos(), call);
     }
     
     // If we got here, the expression is not a valid LValue.

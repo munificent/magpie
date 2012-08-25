@@ -231,28 +231,7 @@ namespace magpie
 
   void MethodCompiler::visit(CallExpr& expr, int dest)
   {
-    gc<String> signature = SignatureBuilder::build(expr);
-
-    int method = compiler_.findMethod(signature);
-    
-    if (method == -1)
-    {
-      compiler_.reporter().error(expr.pos(),
-                      "Could not find a method with signature '%s'.",
-                      signature->cString());
-    
-      // Just pick a method so we can keep compiling to report later errors.
-      method = 0;
-    }
-
-    int firstArg = getNextTemp();
-    int numTemps = 0;
-    numTemps += compileArg(expr.leftArg());
-    numTemps += compileArg(expr.rightArg());
-    
-    write(OP_CALL, method, firstArg, dest);
-    
-    releaseTemps(numTemps);
+    compileCall(expr, dest, -1);
   }
   
   void MethodCompiler::visit(CatchExpr& expr, int dest)
@@ -566,35 +545,8 @@ namespace magpie
   
   void MethodCompiler::visit(CallLValue& lvalue, int value)
   {
-    gc<String> signature = SignatureBuilder::build(lvalue);
-    
-    int method = compiler_.findMethod(signature);
-    
-    if (method == -1)
-    {
-      compiler_.reporter().error(lvalue.pos(),
-          "Could not find a method with signature '%s'.",
-          signature->cString());
-      
-      // Just pick a method so we can keep compiling to report later errors.
-      method = 0;
-    }
-    
-    // Compile the method arguments.
-    int firstArg = getNextTemp();
-    int numTemps = 0;
-    numTemps += compileArg(lvalue.leftArg());
-    numTemps += compileArg(lvalue.rightArg());
-    
-    // Then add the value as the last argument.
-    int valueSlot = makeTemp();
-    write(OP_MOVE, value, valueSlot);
-    
     // TODO(bob): Is overwriting the value slot correct here?
-    write(OP_CALL, method, firstArg, value);
-    
-    releaseTemp(); // valueSlot.
-    releaseTemps(numTemps);
+    compileCall(*lvalue.call(), value, value);
   }
   
   void MethodCompiler::visit(NameLValue& lvalue, int value)
@@ -704,6 +656,31 @@ namespace magpie
     return chunk_->addConstant(new StringObject(expr.value()));
   }
 
+  void MethodCompiler::compileCall(const CallExpr& call, int dest,
+                                   int valueSlot)
+  {
+    ASSERT(call.resolved() != -1,
+           "Method should be resolved before compiling.");
+    
+    // Compile the method arguments.
+    int firstArg = getNextTemp();
+    int numTemps = 0;
+    numTemps += compileArg(call.leftArg());
+    numTemps += compileArg(call.rightArg());
+    
+    // Then add the value as the last argument.
+    if (valueSlot != -1)
+    {
+      int valueArg = makeTemp();
+      write(OP_MOVE, valueSlot, valueArg);
+    }
+    
+    write(OP_CALL, call.resolved(), firstArg, dest);
+    
+    if (valueSlot != -1) releaseTemp(); // valueArg.
+    releaseTemps(numTemps);
+  }
+    
   void MethodCompiler::compileAssignment(const ResolvedName& resolved,
                                          int value)
   {

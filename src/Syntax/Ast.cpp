@@ -229,20 +229,7 @@ namespace magpie
   
   void CallLValue::trace(std::ostream& out) const
   {
-    out << "(";
-    if (!leftArg_.isNull())
-    {
-      out << leftArg_ << " ";
-    }
-    
-    out << name_;
-    
-    if (!rightArg_.isNull())
-    {
-      out << " " << rightArg_;
-    }
-    
-    out << ")";
+    out << call_;
   }
   
   void NameLValue::trace(std::ostream& out) const

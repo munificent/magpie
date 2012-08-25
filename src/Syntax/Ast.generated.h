@@ -258,7 +258,8 @@ public:
   : Expr(pos),
     leftArg_(leftArg),
     name_(name),
-    rightArg_(rightArg)
+    rightArg_(rightArg),
+    resolved_(-1)
   {}
 
   virtual void accept(ExprVisitor& visitor, int arg)
@@ -271,6 +272,8 @@ public:
   gc<Expr> leftArg() const { return leftArg_; }
   gc<String> name() const { return name_; }
   gc<Expr> rightArg() const { return rightArg_; }
+  int resolved() const { return resolved_; }
+  void setResolved(int resolved) { resolved_ = resolved; }
 
   virtual void reach()
   {
@@ -285,6 +288,7 @@ private:
   gc<Expr> leftArg_;
   gc<String> name_;
   gc<Expr> rightArg_;
+  int resolved_;
   NO_COPY(CallExpr);
 };
 
@@ -1035,11 +1039,9 @@ private:
 class CallLValue : public LValue
 {
 public:
-  CallLValue(const SourcePos& pos, gc<Expr> leftArg, gc<String> name, gc<Expr> rightArg)
+  CallLValue(const SourcePos& pos, gc<CallExpr> call)
   : LValue(pos),
-    leftArg_(leftArg),
-    name_(name),
-    rightArg_(rightArg)
+    call_(call)
   {}
 
   virtual void accept(LValueVisitor& visitor, int arg)
@@ -1049,23 +1051,17 @@ public:
 
   virtual CallLValue* asCallLValue() { return this; }
 
-  gc<Expr> leftArg() const { return leftArg_; }
-  gc<String> name() const { return name_; }
-  gc<Expr> rightArg() const { return rightArg_; }
+  gc<CallExpr> call() const { return call_; }
 
   virtual void reach()
   {
-    leftArg_.reach();
-    name_.reach();
-    rightArg_.reach();
+    call_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
 
 private:
-  gc<Expr> leftArg_;
-  gc<String> name_;
-  gc<Expr> rightArg_;
+  gc<CallExpr> call_;
   NO_COPY(CallLValue);
 };
 

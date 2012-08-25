@@ -81,6 +81,10 @@ namespace magpie
     int compileConstant(const NumberExpr& expr);
     int compileConstant(const StringExpr& expr);
 
+    // Compiles a method call. If `valueSlot` is -1, then it's a regular call.
+    // Otherwise, it's a call to a setter, and `valueSlot` is the slot holding
+    // the right-hand side value.
+    void compileCall(const CallExpr& expr, int dest, int valueSlot);
     void compileAssignment(const ResolvedName& resolved, int value);
     
     void write(OpCode op, int a = 0xff, int b = 0xff, int c = 0xff);

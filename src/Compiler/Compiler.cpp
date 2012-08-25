@@ -147,7 +147,7 @@ namespace magpie
     module->addVariable(name, gc<Object>());
   }
   
-  gc<String> SignatureBuilder::build(const CallExpr& expr)
+  gc<String> SignatureBuilder::build(const CallExpr& expr, bool isLValue)
   {
     SignatureBuilder builder;
     
@@ -157,12 +157,16 @@ namespace magpie
     }
     
     builder.add(expr.name()->cString());
+    if (isLValue) builder.add("=");
 
     if (!expr.rightArg().isNull())
     {
       builder.add(" ");
       builder.writeArg(expr.rightArg());
     }
+    
+    // TODO(bob): Can you do destructuring here?
+    if (isLValue) builder.add("=0:");
     
     return String::create(builder.signature_, builder.length_);
   }
@@ -176,13 +180,8 @@ namespace magpie
       builder.writeParam(method.leftParam());
     }
     
-    gc<String> name = method.name();
-    if (!method.value().isNull())
-    {
-      name = String::format("%s=", name->cString());
-    }
-    
-    builder.add(name);
+    builder.add(method.name()->cString());
+    if (!method.value().isNull()) builder.add("=");
     
     if (!method.rightParam().isNull())
     {
@@ -199,31 +198,6 @@ namespace magpie
     return String::create(builder.signature_, builder.length_);
   }
   
-  gc<String> SignatureBuilder::build(const CallLValue& lvalue)
-  {
-    SignatureBuilder builder;
-    
-    if (!lvalue.leftArg().isNull())
-    {
-      builder.writeArg(lvalue.leftArg());
-    }
-    
-    gc<String> name = String::format("%s=", lvalue.name()->cString());
-    builder.add(name);
-    
-    if (!lvalue.rightArg().isNull())
-    {
-      builder.add(" ");
-      builder.writeArg(lvalue.rightArg());
-    }
-    
-    // Add the value.
-    // TODO(bob): Can you do destructuring here?
-    builder.add("=0:");
-    
-    return String::create(builder.signature_, builder.length_);
-  }
-
   void SignatureBuilder::writeArg(gc<Expr> expr)
   {
     // TODO(bob): Clean up. Redundant with build().
