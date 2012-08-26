@@ -109,6 +109,10 @@ int repl(VM& vm)
     // Evaluate the expression.
     gc<Object> result = vm.evaluateReplExpression(expr);
     
+    // Don't show the result if it's a definition.
+    if (expr->asDefExpr() != NULL) continue;
+    if (expr->asDefClassExpr() != NULL) continue;
+      
     std::cout << "= " << result << std::endl;
   }
 }
