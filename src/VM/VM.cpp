@@ -27,6 +27,7 @@ namespace magpie
     
     fiber_ = new Fiber(*this);
         
+    DEF_NATIVE(objectNew);
     DEF_NATIVE(print);
     DEF_NATIVE(numPlusNum);
     DEF_NATIVE(stringPlusString);
@@ -267,6 +268,7 @@ namespace magpie
     // If we got an uncaught error while loading the module, exit with an error.
     if (result == FIBER_UNCAUGHT_ERROR)
     {
+      std::cerr << "Uncaught error." << std::endl;
       exit(3);
     }
     

@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <sysexits.h>
 
 #include <mach-o/dyld.h>
 
@@ -47,7 +48,7 @@ gc<String> readFile(const char* path)
 
   if (stream.fail())
   {
-    cout << "Could not open file '" << path << "'." << endl;
+    cerr << "Could not open file '" << path << "'." << endl;
     return gc<String>();
   }
 
@@ -120,6 +121,8 @@ int repl(VM& vm)
 int runFile(VM& vm, const char* fileName)
 {
   gc<String> source = readFile(fileName);
+  if (source.isNull()) return EX_NOINPUT;
+  
   bool success = vm.loadModule(fileName, source);
   return success ? 0 : 1;
 }
@@ -138,8 +141,7 @@ int main(int argc, const char* argv[])
 
   VM vm;
 
-  gc<String> coreSource = readFile(path);
-  
+  gc<String> coreSource = readFile(path);  
   vm.init(coreSource);
   
   if (argc == 1) return repl(vm);

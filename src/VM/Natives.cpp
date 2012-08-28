@@ -4,6 +4,12 @@
 
 namespace magpie
 {
+  NATIVE(objectNew)
+  {
+    // TODO(bob): Handle constructor arguments.
+    return new DynamicObject(args[0]->toClass());
+  }
+  
   NATIVE(print)
   {
     std::cout << args[0] << std::endl;

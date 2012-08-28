@@ -53,11 +53,6 @@ namespace magpie
   {
     return vm_.findMultimethod(signature);
   }
-  
-  int Compiler::declareMultimethod(gc<String> signature)
-  {
-    return vm_.declareMultimethod(signature);
-  }
 
   methodId Compiler::addMethod(gc<Method> method)
   {
@@ -96,7 +91,7 @@ namespace magpie
     DefClassExpr* defClass = expr->asDefClassExpr();
     if (defClass != NULL)
     {
-      declareVariable(defClass->pos(), defClass->name(), module);
+      declareClass(*defClass, module);
       return;
     }
     
@@ -106,6 +101,23 @@ namespace magpie
       declareVariables(var->pattern(), module);
       return;
     }
+  }
+  
+  void Compiler::declareClass(DefClassExpr& defClass, Module* module)
+  {
+    declareVariable(defClass.pos(), defClass.name(), module);
+    
+    // Declare the constructor.
+    // TODO(bob): Include fields in the signature.
+    declareMultimethod(String::create("0:new"));
+    
+    // TODO(bob): Create constructor method.
+    // TODO(bob): Create getters and setters for fields.
+  }
+  
+  int Compiler::declareMultimethod(gc<String> signature)
+  {
+    return vm_.declareMultimethod(signature);
   }
   
   void Compiler::declareVariables(gc<Pattern> pattern, Module* module)

@@ -1,5 +1,8 @@
-def fib(n)
-    if n < 2 then n else fib(n - 2) + fib(n - 1)
+defclass Foo
 end
 
-print(fib(10))
+defclass Bar
+end
+
+print(Foo new is Foo)
+print(Bar new is Bar)

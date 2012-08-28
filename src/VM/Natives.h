@@ -11,6 +11,7 @@
 
 namespace magpie
 {
+  NATIVE(objectNew);
   NATIVE(print);
   NATIVE(numPlusNum);
   NATIVE(stringPlusString);

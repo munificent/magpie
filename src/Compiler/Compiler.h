@@ -30,7 +30,6 @@ namespace magpie
     
     int findMethod(gc<String> signature);
     
-    int declareMultimethod(gc<String> signature);
     methodId addMethod(gc<Method> method);
     symbolId addSymbol(gc<String> name);
     int addRecordType(Array<int>& nameSymbols);
@@ -46,6 +45,10 @@ namespace magpie
     // Creates any names declared by top-level [expr]. Allows mututal recursion
     // of top level elements.
     void declareTopLevel(gc<Expr> expr, Module* module);
+    
+    void declareClass(DefClassExpr& classExpr, Module* module);
+    
+    int declareMultimethod(gc<String> signature);
     
     // Forward-declare any variables in the given pattern.
     void declareVariables(gc<Pattern> pattern, Module* module);

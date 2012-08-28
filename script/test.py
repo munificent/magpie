@@ -102,7 +102,7 @@ def run_test(path):
     fails = []
 
     # Validate that no unexpected errors occurred.
-    if err != '':
+    if expect_return == 1 and err != '':
         for line in err.split('\n'):
             match = ERROR_PATTERN.search(line)
             if match:

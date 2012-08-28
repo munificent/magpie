@@ -259,10 +259,10 @@ namespace magpie
     endJump(jumpPastCatch, OP_JUMP, 1);
   }
   
-  void MethodCompiler::visit(DefExpr& expr, int dummy)
+  void MethodCompiler::visit(DefExpr& expr, int dest)
   {
     gc<String> signature = SignatureBuilder::build(expr);
-    int multimethod = compiler_.declareMultimethod(signature);
+    int multimethod = compiler_.findMethod(signature);
     methodId method = compiler_.addMethod(new Method(module_, &expr));
     
     write(OP_METHOD, multimethod, method);
@@ -276,6 +276,16 @@ namespace magpie
     
     // Also store it in its named variable.
     compileAssignment(expr.resolved(), dest);
+    
+    // Synthesize a constructor.
+    // TODO(bob): Hackish. Also, what about init()?
+    // TODO(bob): Handle field arguments.
+    // TODO(bob): Make left argument pattern a class pattern.
+    DefExpr* ctor = new DefExpr(expr.pos(), new WildcardPattern(expr.pos()),
+        String::create("new"), gc<Pattern>(), gc<Pattern>(),
+        new NativeExpr(expr.pos(), String::create("objectNew")));
+    Resolver::resolve(compiler_, *module_, *ctor);
+    ctor->accept(*this, dest);
   }
   
   void MethodCompiler::visit(DoExpr& expr, int dest)
