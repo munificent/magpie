@@ -285,12 +285,41 @@ namespace magpie
       SourcePos start = last()->pos();
       gc<Token> name = consume(TOKEN_NAME,
                                "Expect name after 'defclass'.");
-      
       consume(TOKEN_LINE, "Expect newline after class name.");
-      consume(TOKEN_END, "Expect 'end' class body.");
+      
+      Array<gc<ClassField> > fields;
+      
+      while (true)
+      {
+        if (match(TOKEN_VAR) || match(TOKEN_VAL))
+        {
+          bool isMutable = last()->is(TOKEN_VAR);
+          gc<String> name = consume(TOKEN_NAME, "Expect field name.")->text();
+          gc<Pattern> pattern;
+          gc<Expr> initializer;
+          if (!lookAhead(TOKEN_LINE) && !lookAhead(TOKEN_EQ))
+          {
+            pattern = primaryPattern(true);
+          }
+          
+          if (match(TOKEN_EQ))
+          {
+            initializer = flowControl();
+          }
+          
+          consume(TOKEN_LINE, "Expect newline after class field.");
+          
+          fields.add(new ClassField(isMutable, name, pattern, initializer));
+        }
+        else
+        {
+          consume(TOKEN_END, "Expect 'end' after class fields.");
+          break;
+        }
+      }
       
       SourcePos span = start.spanTo(last()->pos());
-      return new DefClassExpr(span, name->text());
+      return new DefClassExpr(span, name->text(), fields);
     }
     
     return statementLike();

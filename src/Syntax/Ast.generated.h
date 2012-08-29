@@ -376,9 +376,10 @@ private:
 class DefClassExpr : public Expr
 {
 public:
-  DefClassExpr(const SourcePos& pos, gc<String> name)
+  DefClassExpr(const SourcePos& pos, gc<String> name, const Array<gc<ClassField> >& fields)
   : Expr(pos),
     name_(name),
+    fields_(fields),
     resolved_()
   {}
 
@@ -390,18 +391,21 @@ public:
   virtual DefClassExpr* asDefClassExpr() { return this; }
 
   gc<String> name() const { return name_; }
+  const Array<gc<ClassField> >& fields() { return fields_; }
   ResolvedName resolved() const { return resolved_; }
   void setResolved(ResolvedName resolved) { resolved_ = resolved; }
 
   virtual void reach()
   {
     name_.reach();
+    fields_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
 
 private:
   gc<String> name_;
+  Array<gc<ClassField> > fields_;
   ResolvedName resolved_;
   NO_COPY(DefClassExpr);
 };

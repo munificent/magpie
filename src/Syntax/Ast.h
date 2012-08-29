@@ -48,7 +48,7 @@ namespace magpie
     gc<String> name;
     gc<Pattern> value;
   };
-  
+
   // A record lvalue field.
   struct LValueField
   {
@@ -64,6 +64,32 @@ namespace magpie
     
     gc<String> name;
     gc<LValue> value;
+  };
+  
+  // A class field.
+  class ClassField : public Managed
+  {
+  public:
+    ClassField(bool isMutable, gc<String> name, gc<Pattern> pattern,
+               gc<Expr> initializer)
+    : isMutable_(isMutable),
+      name_(name),
+      pattern_(pattern),
+      initializer_(initializer)
+    {}
+    
+    bool isMutable() const { return isMutable_; }
+    gc<String> name() const { return name_; }
+    gc<Pattern> pattern() const { return pattern_; }
+    gc<Expr> initializer() const { return initializer_; }
+    
+    void reach();
+    
+  private:
+    bool isMutable_;
+    gc<String> name_;
+    gc<Pattern> pattern_;
+    gc<Expr> initializer_;
   };
   
   // A pattern paired with the expression to execute when the pattern matches.

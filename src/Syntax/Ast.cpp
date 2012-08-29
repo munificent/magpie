@@ -1,7 +1,14 @@
 #include "Ast.h"
 
 namespace magpie
-{  
+{
+  void ClassField::reach()
+  {
+    name_.reach();
+    pattern_.reach();
+    initializer_.reach();
+  }
+
   void AndExpr::trace(std::ostream& out) const
   {
     out << "(and " << left_ << " " << right_ << ")";
@@ -79,7 +86,27 @@ namespace magpie
   
   void DefClassExpr::trace(std::ostream& out) const
   {
-    out << "(defclass " << name_ << ")";
+    out << "(defclass " << name_ << "\n";
+    
+    for (int i = 0; i < fields_.count(); i++)
+    {
+      ClassField& field = *fields_[i];
+      out << "  ";
+      out << (field.isMutable() ? "var " : "val ") << " " << field.name();
+
+      if (!field.pattern().isNull())
+      {
+        out << " " << field.pattern();
+      }
+
+      if (!field.initializer().isNull())
+      {
+        out << " = " << field.initializer();
+      }
+      out << "\n";
+    }
+    
+    out << ")";
   }
   
   void DoExpr::trace(std::ostream& out) const

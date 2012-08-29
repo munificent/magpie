@@ -32,6 +32,7 @@ exprs = sorted({
         ('catches',     'Array<MatchClause>')],
     'DefClass': [
         ('name',        'gc<String>'),
+        ('fields',      'Array<gc<ClassField> >'),
         ('resolved*',   'ResolvedName')],
     'Def': [
         ('leftParam',   'gc<Pattern>'),
