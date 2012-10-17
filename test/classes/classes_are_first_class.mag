@@ -1,0 +1,5 @@
+defclass Foo
+end
+
+var foo = Foo
+print(foo new is Foo) // expect: true

@@ -8,7 +8,15 @@ def foo(s is String)
     print(s)
 end
 
-foo(123) // expect: num
-         // expect: 123
-foo("s") // expect: string
-         // expect: s
+defclass Bar
+end
+
+def foo(b is Bar)
+    print("bar")
+end
+
+foo(123)     // expect: num
+             // expect: 123
+foo("s")     // expect: string
+             // expect: s
+foo(Bar new) // expect: bar
