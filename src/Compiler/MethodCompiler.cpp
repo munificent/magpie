@@ -40,67 +40,56 @@ namespace magpie
   
   gc<Chunk> MethodCompiler::compile(Multimethod& multimethod)
   {
-    Array<gc<Method> >& methods = multimethod.methods();
-    
-    if (methods.count() == 0)
-    {
-      // TODO(bob): Should be a NoMethodError, not NoMatchError.
-      // If there are no methods, the body just immediately throws a match
-      // failure. This happens when you call a method before it has been
-      // defined. Since methods are forward-declared (to support recursion),
-      // the multimethod exists, but it has no methods in it.
-      maxSlots_ = 1;
-      write(OP_BUILT_IN, 0, 0);
-      write(OP_TEST_MATCH, 0);
-    }
-    else
-    {
-      // TODO(bob): Lots of work needed here:
-      // - Sort methods by specificity.
-      // - Support call-next-method.
-      // - Detect pattern collisions.
-      // - Throw AmbiguousMethodError when appropriate.
-      for (int i = 0; i < multimethod.methods().count(); i++)
-      {
-        PatternCompiler compiler(*this, true);
-        
-        gc<DefExpr> method = multimethod.methods()[i]->def();
-        module_ = multimethod.methods()[i]->module();
-        
-        // Reserve slots up front for all of the locals. This ensures that
-        // temps will always be after locals.
-        // TODO(bob): Using max here isn't optimal. Ideally a given temp only
-        // needs to be after the locals that are in scope during the duration
-        // of that temp. But calculating that is a bit hairy. For now, until we
-        // have a more advanced compiler, this is a simple solution.
-        numLocals_ = method->maxLocals();
-        maxSlots_ = MAX(maxSlots_, numLocals_);
-        
-        // Track the slots used for the arguments and result. This code here
-        // must be kept carefully in sync with the similar prelude code in
-        // Resolver.
-        int numParamSlots = 0;
-        
-        // Evaluate the method's parameter patterns.
-        compileParam(compiler, method->leftParam(), numParamSlots);
-        compileParam(compiler, method->rightParam(), numParamSlots);
-        compileParam(compiler, method->value(), numParamSlots);
-        
-        // The result slot is just after the param slots.
-        compile(method->body(), numParamSlots);
-        write(OP_RETURN, numParamSlots);
-        
-        compiler.endJumps();
-        
-        ASSERT(numTemps_ == 0, "Should not have any temps left after a method "
-                               "is compiled.");
-      }
+    // Need at least one slot. If there are no methods (which can happen since
+    // methods are forward-declared and can be called before any definition has
+    // executed) we need one slot to load and throw the NoMethodError.
+    maxSlots_ = 1;
 
-      // If we get here, all methods failed to match, so throw a NoMethodError.
-      // TODO(bob): Should throw NoMethodError instead of false.
-      write(OP_BUILT_IN, 0, 0);
-      write(OP_THROW, 0);
+    // TODO(bob): Lots of work needed here:
+    // - Sort methods by specificity.
+    // - Support call-next-method.
+    // - Detect pattern collisions.
+    // - Throw AmbiguousMethodError when appropriate.
+    for (int i = 0; i < multimethod.methods().count(); i++)
+    {
+      PatternCompiler compiler(*this, true);
+      
+      gc<DefExpr> method = multimethod.methods()[i]->def();
+      module_ = multimethod.methods()[i]->module();
+      
+      // Reserve slots up front for all of the locals. This ensures that
+      // temps will always be after locals.
+      // TODO(bob): Using max here isn't optimal. Ideally a given temp only
+      // needs to be after the locals that are in scope during the duration
+      // of that temp. But calculating that is a bit hairy. For now, until we
+      // have a more advanced compiler, this is a simple solution.
+      numLocals_ = method->maxLocals();
+      maxSlots_ = MAX(maxSlots_, numLocals_);
+      
+      // Track the slots used for the arguments and result. This code here
+      // must be kept carefully in sync with the similar prelude code in
+      // Resolver.
+      int numParamSlots = 0;
+      
+      // Evaluate the method's parameter patterns.
+      compileParam(compiler, method->leftParam(), numParamSlots);
+      compileParam(compiler, method->rightParam(), numParamSlots);
+      compileParam(compiler, method->value(), numParamSlots);
+      
+      // The result slot is just after the param slots.
+      compile(method->body(), numParamSlots);
+      write(OP_RETURN, numParamSlots);
+      
+      compiler.endJumps();
+      
+      ASSERT(numTemps_ == 0, "Should not have any temps left after a method "
+                             "is compiled.");
     }
+
+    // If we get here, all methods failed to match, so throw a NoMethodError.
+    // TODO(bob): Should throw NoMethodError instead of false.
+    write(OP_BUILT_IN, 0, 0);
+    write(OP_THROW, 0);
     
     chunk_->setCode(code_, maxSlots_);
     return chunk_;
