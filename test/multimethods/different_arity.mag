@@ -1,0 +1,16 @@
+def foo() print("zero")
+def foo(a, b) print("two")
+def foo(a) print("one")
+def foo(a, b, c) print("three")
+
+def foo(x: a) print("x")
+def foo(y: a) print("y")
+def foo(x: a, y: b) print("xy")
+
+foo() // expect: zero
+foo(1) // expect: one
+foo(1, 1) // expect: two
+foo(1, 1, 1) // expect: three
+foo(x: 1) // expect: x
+foo(y: 1) // expect: y
+foo(x: 1, y: 1) // expect: xy
