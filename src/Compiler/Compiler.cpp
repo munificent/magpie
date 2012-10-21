@@ -103,19 +103,24 @@ namespace magpie
     }
   }
   
-  void Compiler::declareClass(DefClassExpr& defClass, Module* module)
+  void Compiler::declareClass(DefClassExpr& classExpr, Module* module)
   {
-    declareVariable(defClass.pos(), defClass.name(), module);
+    declareVariable(classExpr.pos(), classExpr.name(), module);
 
     // Synthesize the constructor and field accessors.
     Array<gc<DefExpr> > synthesizedMethods;
-    synthesizedMethods.add(synthesizeConstructor(defClass));
+    synthesizedMethods.add(synthesizeConstructor(classExpr));
 
-    // TODO(bob): Create getters and setters for fields.
+    // Create getters for fields.
+    // TODO(bob): Create setters for fields.
+    for (int i = 0; i < classExpr.fields().count(); i++)
+    {
+      synthesizedMethods.add(synthesizeGetter(classExpr, i));
+    }
 
     // TODO(bob): Stuffing this back in the AST is a bit gross. An intermediate
     // representation would help here.
-    defClass.setSynthesizedMethods(synthesizedMethods);
+    classExpr.setSynthesizedMethods(synthesizedMethods);
 
     // Declare the automatically-generated methods.
     for (int i = 0; i < synthesizedMethods.count(); i++)
@@ -127,6 +132,13 @@ namespace magpie
   gc<DefExpr> Compiler::synthesizeConstructor(DefClassExpr& classExpr)
   {
     const SourcePos& pos = classExpr.pos();
+
+    // Match the class object itself on the left.
+    gc<Pattern> leftPattern = new ValuePattern(pos,
+        new NameExpr(pos, classExpr.name()));
+
+    // Match the fields on the right.
+    // TODO(bob): Skip fields that have initializers.
     gc<Pattern> rightPattern;
     if (classExpr.fields().count() > 0)
     {
@@ -140,11 +152,25 @@ namespace magpie
 
       rightPattern = new RecordPattern(pos, fields);
     }
-
-    // TODO(bob): Make left argument pattern a class pattern.
-    return new DefExpr(pos, new WildcardPattern(pos),
-                       String::create("new"), rightPattern, gc<Pattern>(),
+    
+    return new DefExpr(pos, leftPattern, String::create("new"), rightPattern,
+                       gc<Pattern>(),
                        new NativeExpr(pos, String::create("objectNew")));
+  }
+
+  gc<DefExpr> Compiler::synthesizeGetter(DefClassExpr& classExpr,
+                                         int fieldIndex)
+  {
+    // Match the class on the left.
+    const SourcePos& pos = classExpr.pos();
+    gc<Pattern> leftPattern = new TypePattern(pos,
+        new NameExpr(pos, classExpr.name()));
+
+    // TODO(bob): Give this a real body that returns the field!
+    return new DefExpr(pos, leftPattern,
+                       classExpr.fields()[fieldIndex]->name(), gc<Pattern>(),
+                       gc<Pattern>(),
+                       new GetFieldExpr(pos, fieldIndex));
   }
 
   int Compiler::declareMultimethod(gc<String> signature)
@@ -288,7 +314,7 @@ namespace magpie
   
   void SignatureBuilder::add(const char* text)
   {
-    int length = strlen(text);
+    int length = static_cast<int>(strlen(text));
     ASSERT(length_ + length < MAX_LENGTH, "Signature too long.");
     
     strcpy(signature_ + length_, text);

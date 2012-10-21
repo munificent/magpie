@@ -56,7 +56,7 @@ namespace magpie
           store(frame, slot, vm_.getBuiltIn(value));
           break;
         }
-          
+
         case OP_METHOD:
         {
           // Adds a method to a multimethod. A is the index of the multimethod to
@@ -114,7 +114,7 @@ namespace magpie
           
           if (!success)
           {
-            gc<Object> error = new DynamicObject(vm_.noMatchErrorClass());
+            gc<Object> error = DynamicObject::create(vm_.noMatchErrorClass());
             if (!throwError(error)) return FIBER_UNCAUGHT_ERROR;
           }
           break;
@@ -155,7 +155,17 @@ namespace magpie
           }
           break;
         }
-          
+
+        case OP_GET_CLASS_FIELD:
+        {
+          int objectIndex = GET_A(ins);
+          int fieldIndex = GET_B(ins);
+
+          gc<DynamicObject> object = load(frame, objectIndex)->toDynamic();
+          store(frame, GET_C(ins), object->getField(fieldIndex));
+          break;
+        }
+
         case OP_GET_VAR:
         {
           int moduleIndex = GET_A(ins);
@@ -277,7 +287,7 @@ namespace magpie
             case OBJECT_RECORD:  type = vm_.recordClass(); break;
             case OBJECT_STRING:  type = vm_.stringClass(); break;
           }
-          
+
           store(frame, GET_C(ins), vm_.getBool(type->toClass()->is(*expected)));
           break;
         }
@@ -387,7 +397,7 @@ namespace magpie
           gc<Object> pass = load(frame, GET_A(ins));
           if (!pass->toBool())
           {
-            gc<Object> error = new DynamicObject(vm_.noMatchErrorClass());
+            gc<Object> error = DynamicObject::create(vm_.noMatchErrorClass());
             if (!throwError(error)) return FIBER_UNCAUGHT_ERROR;
           }
           break;
@@ -417,7 +427,7 @@ namespace magpie
       stack_[i].reach();
     }
 
-    // For the remaining slot, clear them out now. When a new call is pushed
+    // For the remaining slots, clear them out now. When a new call is pushed
     // onto the stack, we allocate slots for it, but we don't clear them out.
     // This means that when a collection occurs, there may be a few slots on
     // the end of the stack that are stale: they are set to whatever they were
@@ -449,8 +459,7 @@ namespace magpie
     // If there is nothing to catch it, end the fiber.
     if (nearestCatch_.isNull()) return false;
     
-    // Unwind any nested callframes above the one containing the catch
-    // clause.
+    // Unwind any nested callframes above the one containing the catch clause.
     callFrames_.truncate(nearestCatch_->callFrame() + 1);
     
     // Jump to the catch handler.

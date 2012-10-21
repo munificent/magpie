@@ -324,6 +324,13 @@ namespace magpie
     
     // TODO(bob): Need to figure out what the result value should be.
   }
+
+  void MethodCompiler::visit(GetFieldExpr& expr, int dest)
+  {
+    // TODO(bob): Hack. Assumes the object is in slot zero. This should be the
+    // case since this expr is always synthesized but it's still brittle.
+    write(OP_GET_CLASS_FIELD, 0, expr.index(), dest);
+  }
   
   void MethodCompiler::visit(IfExpr& expr, int dest)
   {
@@ -638,7 +645,8 @@ namespace magpie
   
   int MethodCompiler::compileConstant(const DefClassExpr& expr)
   {
-    return chunk_->addConstant(new ClassObject(expr.name()));
+    return chunk_->addConstant(
+        new ClassObject(expr.name(), expr.fields().count()));
   }
   
   int MethodCompiler::compileConstant(const NumberExpr& expr)

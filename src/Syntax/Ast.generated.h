@@ -11,6 +11,7 @@ class DefExpr;
 class DefClassExpr;
 class DoExpr;
 class ForExpr;
+class GetFieldExpr;
 class IfExpr;
 class IsExpr;
 class ListExpr;
@@ -53,6 +54,7 @@ public:
   virtual void visit(DefClassExpr& node, int arg) = 0;
   virtual void visit(DoExpr& node, int arg) = 0;
   virtual void visit(ForExpr& node, int arg) = 0;
+  virtual void visit(GetFieldExpr& node, int arg) = 0;
   virtual void visit(IfExpr& node, int arg) = 0;
   virtual void visit(IsExpr& node, int arg) = 0;
   virtual void visit(ListExpr& node, int arg) = 0;
@@ -101,6 +103,7 @@ public:
   virtual DefClassExpr* asDefClassExpr() { return NULL; }
   virtual DoExpr* asDoExpr() { return NULL; }
   virtual ForExpr* asForExpr() { return NULL; }
+  virtual GetFieldExpr* asGetFieldExpr() { return NULL; }
   virtual IfExpr* asIfExpr() { return NULL; }
   virtual IsExpr* asIsExpr() { return NULL; }
   virtual ListExpr* asListExpr() { return NULL; }
@@ -309,7 +312,7 @@ public:
   virtual CatchExpr* asCatchExpr() { return this; }
 
   gc<Expr> body() const { return body_; }
-  const Array<MatchClause>& catches() { return catches_; }
+  const Array<MatchClause>& catches() const { return catches_; }
 
   virtual void reach()
   {
@@ -392,10 +395,10 @@ public:
   virtual DefClassExpr* asDefClassExpr() { return this; }
 
   gc<String> name() const { return name_; }
-  const Array<gc<ClassField> >& fields() { return fields_; }
+  const Array<gc<ClassField> >& fields() const { return fields_; }
   ResolvedName resolved() const { return resolved_; }
   void setResolved(ResolvedName resolved) { resolved_ = resolved; }
-  const Array<gc<DefExpr> >& synthesizedMethods() { return synthesizedMethods_; }
+  const Array<gc<DefExpr> >& synthesizedMethods() const { return synthesizedMethods_; }
   void setSynthesizedMethods(Array<gc<DefExpr> > synthesizedMethods) { synthesizedMethods_ = synthesizedMethods; }
 
   virtual void reach()
@@ -479,6 +482,30 @@ private:
   gc<Expr> iterator_;
   gc<Expr> body_;
   NO_COPY(ForExpr);
+};
+
+class GetFieldExpr : public Expr
+{
+public:
+  GetFieldExpr(const SourcePos& pos, int index)
+  : Expr(pos),
+    index_(index)
+  {}
+
+  virtual void accept(ExprVisitor& visitor, int arg)
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual GetFieldExpr* asGetFieldExpr() { return this; }
+
+  int index() const { return index_; }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  int index_;
+  NO_COPY(GetFieldExpr);
 };
 
 class IfExpr : public Expr
@@ -566,7 +593,7 @@ public:
 
   virtual ListExpr* asListExpr() { return this; }
 
-  const Array<gc<Expr> >& elements() { return elements_; }
+  const Array<gc<Expr> >& elements() const { return elements_; }
 
   virtual void reach()
   {
@@ -597,7 +624,7 @@ public:
   virtual MatchExpr* asMatchExpr() { return this; }
 
   gc<Expr> value() const { return value_; }
-  const Array<MatchClause>& cases() { return cases_; }
+  const Array<MatchClause>& cases() const { return cases_; }
 
   virtual void reach()
   {
@@ -800,7 +827,7 @@ public:
 
   virtual RecordExpr* asRecordExpr() { return this; }
 
-  const Array<Field>& fields() { return fields_; }
+  const Array<Field>& fields() const { return fields_; }
 
   virtual void reach()
   {
@@ -863,7 +890,7 @@ public:
 
   virtual SequenceExpr* asSequenceExpr() { return this; }
 
-  const Array<gc<Expr> >& expressions() { return expressions_; }
+  const Array<gc<Expr> >& expressions() const { return expressions_; }
 
   virtual void reach()
   {
@@ -1122,7 +1149,7 @@ public:
 
   virtual RecordLValue* asRecordLValue() { return this; }
 
-  const Array<LValueField>& fields() { return fields_; }
+  const Array<LValueField>& fields() const { return fields_; }
 
   virtual void reach()
   {
@@ -1220,7 +1247,7 @@ public:
 
   virtual RecordPattern* asRecordPattern() { return this; }
 
-  const Array<PatternField>& fields() { return fields_; }
+  const Array<PatternField>& fields() const { return fields_; }
 
   virtual void reach()
   {

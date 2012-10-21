@@ -46,95 +46,99 @@ namespace magpie
     switch (GET_OP(ins))
     {
       case OP_MOVE:
-        cout << "MOVE          " << GET_A(ins) << " -> " << GET_B(ins);
+        cout << "MOVE            " << GET_A(ins) << " -> " << GET_B(ins);
         break;
         
       case OP_CONSTANT:
-        cout << "CONSTANT      " << GET_A(ins) << " -> " << GET_B(ins);
+        cout << "CONSTANT        " << GET_A(ins) << " -> " << GET_B(ins);
         break;
         
       case OP_BUILT_IN:
-        cout << "BUILT_IN      " << GET_A(ins) << " -> " << GET_B(ins);
+        cout << "BUILT_IN        " << GET_A(ins) << " -> " << GET_B(ins);
         break;
         
       case OP_METHOD:
-        cout << "METHOD        " << GET_A(ins) << " <- " << GET_B(ins);
+        cout << "METHOD          " << GET_A(ins) << " <- " << GET_B(ins);
         break;
         
       case OP_RECORD:
-        cout << "RECORD        " << GET_A(ins) << "[" << GET_B(ins) << "] -> " << GET_C(ins);
+        cout << "RECORD          " << GET_A(ins) << "[" << GET_B(ins) << "] -> " << GET_C(ins);
         break;
         
       case OP_LIST:
-        cout << "LIST          [" << GET_A(ins) << "..." << GET_B(ins) << "] -> " << GET_C(ins);
+        cout << "LIST            [" << GET_A(ins) << "..." << GET_B(ins) << "] -> " << GET_C(ins);
         break;
         
       case OP_GET_FIELD:
-        cout << "GET_FIELD     " << GET_A(ins) << "[" << GET_B(ins) << "] -> " << GET_C(ins);
+        cout << "GET_FIELD       " << GET_A(ins) << "[" << GET_B(ins) << "] -> " << GET_C(ins);
         break;
         
       case OP_TEST_FIELD:
-        cout << "TEST_FIELD    " << GET_A(ins) << "[" << GET_B(ins) << "] -> " << GET_C(ins);
+        cout << "TEST_FIELD      " << GET_A(ins) << "[" << GET_B(ins) << "] -> " << GET_C(ins);
         break;
-        
+
+      case OP_GET_CLASS_FIELD:
+        cout << "GET_CLASS_FIELD " << GET_A(ins) << "[" << GET_B(ins) << "] -> " << GET_C(ins);
+        break;
+
       case OP_GET_VAR:
-        cout << "OP_GET_VAR    module " << GET_A(ins) << ", var " << GET_B(ins) << " -> " << GET_C(ins);
+        cout << "OP_GET_VAR      module " << GET_A(ins) << ", var " << GET_B(ins) << " -> " << GET_C(ins);
         break;
         
       case OP_SET_VAR:
-        cout << "OP_SET_VAR    module " << GET_A(ins) << ", var " << GET_B(ins) << " <- " << GET_C(ins);
+        cout << "OP_SET_VAR      module " << GET_A(ins) << ", var " << GET_B(ins) << " <- " << GET_C(ins);
         break;
         
       case OP_EQUAL:
-        cout << "EQUAL         " << GET_A(ins) << " == " << GET_B(ins) << " -> " << GET_C(ins);
+        cout << "EQUAL           " << GET_A(ins) << " == " << GET_B(ins) << " -> " << GET_C(ins);
         break;
         
       case OP_NOT:
-        cout << "NOT           " << GET_A(ins);
+        cout << "NOT             " << GET_A(ins);
         break;
         
       case OP_IS:
-        cout << "IS            " << GET_A(ins) << " is " << GET_B(ins);
+        cout << "IS              " << GET_A(ins) << " is " << GET_B(ins);
         break;
         
       case OP_JUMP:
-        cout << "JUMP          " << GET_A(ins) << " " << GET_B(ins);
+        cout << "JUMP            " << GET_A(ins) << " " << GET_B(ins);
         break;
         
       case OP_JUMP_IF_FALSE:
-        cout << "JUMP_IF_FALSE " << GET_A(ins) << "? " << GET_B(ins);
+        cout << "JUMP_IF_FALSE   " << GET_A(ins) << "? " << GET_B(ins);
         break;
         
       case OP_JUMP_IF_TRUE:
-        cout << "JUMP_IF_TRUE " << GET_A(ins) << "? " << GET_B(ins);
+        cout << "JUMP_IF_TRUE    " << GET_A(ins) << "? " << GET_B(ins);
         break;
         
       case OP_CALL:
-        cout << "CALL          " << GET_A(ins) << "(" << GET_B(ins) << ") -> " << GET_C(ins);
+        cout << "CALL            " << GET_A(ins) << "(" << GET_B(ins) << ") -> " << GET_C(ins);
         break;
         
       case OP_NATIVE:
-        cout << "NATIVE        " << GET_A(ins) << "(" << GET_B(ins) << ") -> " << GET_C(ins);
+        cout << "NATIVE          " << GET_A(ins) << "(" << GET_B(ins) << ") -> " << GET_C(ins);
         break;
         
       case OP_RETURN:
-        cout << "RETURN        " << GET_A(ins);
+        cout << "RETURN          " << GET_A(ins);
         break;
         
       case OP_THROW:
-        cout << "THROW         " << GET_A(ins);
+        cout << "THROW           " << GET_A(ins);
         break;
         
       case OP_ENTER_TRY:
-        cout << "ENTER_TRY     " << GET_A(ins);
+        cout << "ENTER_TRY       " << GET_A(ins);
         break;
         
       case OP_EXIT_TRY:
-        cout << "EXIT_TRY      ";
+        cout << "EXIT_TRY        ";
         break;
         
       case OP_TEST_MATCH:
-        cout << "TEST_MATCH    " << GET_A(ins);
+        cout << "TEST_MATCH      " << GET_A(ins);
         break;
     }
     

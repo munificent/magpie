@@ -1,0 +1,9 @@
+defclass Foo
+    var a
+    var b
+end
+
+var foo = Foo new(a: 1, b: 2)
+print(foo is Foo) // expect: true
+print(foo a) // expect: 1
+print(foo b) // expect: 2

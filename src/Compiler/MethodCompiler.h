@@ -42,6 +42,7 @@ namespace magpie
     virtual void visit(DefClassExpr& expr, int dest);
     virtual void visit(DoExpr& expr, int dest);
     virtual void visit(ForExpr& expr, int dest);
+    virtual void visit(GetFieldExpr& expr, int dest);
     virtual void visit(IfExpr& expr, int dest);
     virtual void visit(IsExpr& expr, int dest);
     virtual void visit(ListExpr& expr, int dest);

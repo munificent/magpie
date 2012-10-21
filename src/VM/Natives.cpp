@@ -6,8 +6,9 @@ namespace magpie
 {
   NATIVE(objectNew)
   {
-    // TODO(bob): Handle constructor arguments.
-    return new DynamicObject(args[0]->toClass());
+    // This assumes the args list has, in order, the class object and then all
+    // of the field values for that class.
+    return DynamicObject::create(args);
   }
   
   NATIVE(print)

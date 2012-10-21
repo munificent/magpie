@@ -14,7 +14,45 @@ namespace magpie
     // TODO(bob): Subtyping.
     return this == &other;
   }
-  
+
+  gc<Object> DynamicObject::create(gc<ClassObject> classObj)
+  {
+    ASSERT(classObj->numFields() == 0, "Class cannot have fields.");
+    
+    // Allocate enough memory for the object.
+    void* mem = Memory::allocate(sizeof(DynamicObject));
+
+    // Construct it by calling global placement new.
+    return ::new(mem) DynamicObject(classObj);
+  }
+
+  gc<Object> DynamicObject::create(ArrayView<gc<Object> >& args)
+  {
+    gc<ClassObject> classObj = args[0]->toClass();
+    
+    // Allocate enough memory for the object and its fields.
+    void* mem = Memory::allocate(sizeof(DynamicObject) +
+        sizeof(gc<Object>) * (classObj->numFields() - 1));
+
+    // Construct it by calling global placement new.
+    gc<DynamicObject> object = ::new(mem) DynamicObject(classObj);
+
+    // Initialize the fields.
+    for (int i = 0; i < classObj->numFields(); i++)
+    {
+      // +1 because the first arg is the class.
+      object->fields_[i] = args[i + 1];
+    }
+
+    return object;
+  }
+
+  gc<Object> DynamicObject::getField(int index)
+  {
+    ASSERT_INDEX(index, class_->numFields());
+    return fields_[index];
+  }
+
   void ListObject::trace(std::ostream& stream) const
   {
     stream << "[";

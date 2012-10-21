@@ -9,7 +9,7 @@ namespace magpie
 {
   gc<String> String::create(const char* text, int length)
   {
-    if (length == -1) length = strlen(text);
+    if (length == -1) length = static_cast<int>(strlen(text));
 
     // Allocate enough memory for the string and its character array.
     void* mem = Memory::allocate(calcStringSize(length));

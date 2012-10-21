@@ -64,23 +64,11 @@ namespace magpie
   void DefExpr::trace(std::ostream& out) const
   {
     out << "(def ";
-    if (!leftParam_.isNull())
-    {
-      out << "(" << leftParam_ << ") ";
-    }
-    
+    if (!leftParam_.isNull()) out << leftParam_ << " ";
     out << name_;
-    
-    if (!rightParam_.isNull())
-    {
-      out << " (" << rightParam_ << ")";
-    }
-    
-    if (!value_.isNull())
-    {
-      out << "=(" << value_ << ")";
-    }
-    
+    if (!rightParam_.isNull()) out << " " << rightParam_;
+    if (!value_.isNull()) out << "=" << value_;
+
     out << " -> " << body_ << ")";
   }
   
@@ -118,6 +106,11 @@ namespace magpie
   {
     out << "(for " << pattern_ << " in " << iterator_
         << " do " << body_ << ")";
+  }
+
+  void GetFieldExpr::trace(std::ostream& out) const
+  {
+    out << "(get-field " << index_ << ")";
   }
   
   void IfExpr::trace(std::ostream& out) const

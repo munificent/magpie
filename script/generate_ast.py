@@ -48,6 +48,8 @@ exprs = sorted({
         ('pattern',     'gc<Pattern>'),
         ('iterator',    'gc<Expr>'),
         ('body',        'gc<Expr>')],
+    'GetField': [
+        ('index',       'int')],
     'If': [
         ('condition',   'gc<Expr>'),
         ('thenArm',     'gc<Expr>'),
@@ -278,7 +280,7 @@ def makeClass(file, baseClass, className, visitorParam, fields):
 
         if type.startswith('Array'):
             # Accessors for arrays do not copy.
-            accessors += '  const {1}& {0}() {{ return {0}_; }}\n'.format(
+            accessors += '  const {1}& {0}() const {{ return {0}_; }}\n'.format(
                 name, type)
         else:
             accessors += '  {1} {0}() const {{ return {0}_; }}\n'.format(

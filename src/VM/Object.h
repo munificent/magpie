@@ -105,12 +105,14 @@ namespace magpie
   class ClassObject : public Object
   {
   public:
-    ClassObject(gc<String> name)
+    ClassObject(gc<String> name, int numFields)
     : Object(),
-      name_(name)
+      name_(name),
+      numFields_(numFields)
     {}
     
     gc<String> name() const { return name_; }
+    int numFields() const { return numFields_; }
     
     bool is(const ClassObject& other) const;
     
@@ -127,16 +129,20 @@ namespace magpie
     
   private:
     gc<String> name_;
+    int numFields_;
   };
   
   // A regular instance of some class.
   class DynamicObject : public Object
   {
   public:
-    DynamicObject(gc<ClassObject> classObj)
-    : Object(),
-      class_(classObj)
-    {}
+    // Creates a new instance of [classObj]. This should only be used for
+    // built-in classes which do not have any fields.
+    static gc<Object> create(gc<ClassObject> classObj);
+
+    // Creates a new instance of [classObj] using [args] to initialize its
+    // fields.
+    static gc<Object> create(ArrayView<gc<Object> >& args);
     
     virtual ObjectType type() const { return OBJECT_DYNAMIC; }
 
@@ -148,10 +154,18 @@ namespace magpie
     }
     
     gc<ClassObject> classObj() { return class_; }
-    
+
+    gc<Object> getField(int index);
+
   private:
+    DynamicObject(gc<ClassObject> classObj)
+    : Object(),
+      class_(classObj)
+    {}
+
     gc<ClassObject> class_;
-    
+    gc<Object>      fields_[FLEXIBLE_SIZE];
+
     NO_COPY(DynamicObject);
   };
   
@@ -247,6 +261,8 @@ namespace magpie
     
     int numFields_;
     int names_[FLEXIBLE_SIZE];
+
+    NO_COPY(RecordType);
   };
   
   // A record or tuple object.

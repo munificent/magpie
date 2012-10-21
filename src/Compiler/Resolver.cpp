@@ -283,6 +283,13 @@ namespace magpie
     
     loopScope.end();
   }
+
+  void Resolver::visit(GetFieldExpr& expr, int dummy)
+  {
+    // TODO(bob): This really shouldn't be an AST node. It should just be part
+    // of some IR.
+    // Do nothing.
+  }
   
   void Resolver::visit(IfExpr& expr, int dummy)
   {
