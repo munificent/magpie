@@ -253,7 +253,13 @@ namespace magpie
     ASSERT(index != -1, "Should have already forward-declared the class.");
     
     expr.setResolved(ResolvedName(module, index));
-    
+
+    // Resolve the synthesized stuff.
+    for (int i = 0; i < expr.synthesizedMethods().count(); i++)
+    {
+      Resolver::resolve(compiler_, module_, *expr.synthesizedMethods()[i]);
+    }
+
     // TODO(bob): Resolve field patterns and initializers.
   }
   

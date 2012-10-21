@@ -265,16 +265,12 @@ namespace magpie
     
     // Also store it in its named variable.
     compileAssignment(expr.resolved(), dest);
-    
-    // Synthesize a constructor.
-    // TODO(bob): Hackish. Also, what about init()?
-    // TODO(bob): Handle field arguments.
-    // TODO(bob): Make left argument pattern a class pattern.
-    DefExpr* ctor = new DefExpr(expr.pos(), new WildcardPattern(expr.pos()),
-        String::create("new"), gc<Pattern>(), gc<Pattern>(),
-        new NativeExpr(expr.pos(), String::create("objectNew")));
-    Resolver::resolve(compiler_, *module_, *ctor);
-    ctor->accept(*this, dest);
+
+    // Compile the synthesized stuff.
+    for (int i = 0; i < expr.synthesizedMethods().count(); i++)
+    {
+      expr.synthesizedMethods()[i]->accept(*this, dest);
+    }
   }
   
   void MethodCompiler::visit(DoExpr& expr, int dest)

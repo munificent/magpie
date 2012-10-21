@@ -47,7 +47,8 @@ namespace magpie
     void declareTopLevel(gc<Expr> expr, Module* module);
     
     void declareClass(DefClassExpr& classExpr, Module* module);
-    
+    gc<DefExpr> synthesizeConstructor(DefClassExpr& classExpr);
+
     int declareMultimethod(gc<String> signature);
     
     // Forward-declare any variables in the given pattern.

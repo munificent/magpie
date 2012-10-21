@@ -106,15 +106,47 @@ namespace magpie
   void Compiler::declareClass(DefClassExpr& defClass, Module* module)
   {
     declareVariable(defClass.pos(), defClass.name(), module);
-    
-    // Declare the constructor.
-    // TODO(bob): Include fields in the signature.
-    declareMultimethod(String::create("0:new"));
-    
-    // TODO(bob): Create constructor method.
+
+    // Synthesize the constructor and field accessors.
+    Array<gc<DefExpr> > synthesizedMethods;
+    synthesizedMethods.add(synthesizeConstructor(defClass));
+
     // TODO(bob): Create getters and setters for fields.
+
+    // TODO(bob): Stuffing this back in the AST is a bit gross. An intermediate
+    // representation would help here.
+    defClass.setSynthesizedMethods(synthesizedMethods);
+
+    // Declare the automatically-generated methods.
+    for (int i = 0; i < synthesizedMethods.count(); i++)
+    {
+      declareMultimethod(SignatureBuilder::build(*synthesizedMethods[i]));
+    }
   }
-  
+
+  gc<DefExpr> Compiler::synthesizeConstructor(DefClassExpr& classExpr)
+  {
+    const SourcePos& pos = classExpr.pos();
+    gc<Pattern> rightPattern;
+    if (classExpr.fields().count() > 0)
+    {
+      Array<PatternField> fields;
+      for (int i = 0; i < classExpr.fields().count(); i++)
+      {
+        gc<ClassField> field = classExpr.fields()[i];
+        // TODO(bob): Handle field pattern.
+        fields.add(PatternField(field->name(), new WildcardPattern(pos)));
+      }
+
+      rightPattern = new RecordPattern(pos, fields);
+    }
+
+    // TODO(bob): Make left argument pattern a class pattern.
+    return new DefExpr(pos, new WildcardPattern(pos),
+                       String::create("new"), rightPattern, gc<Pattern>(),
+                       new NativeExpr(pos, String::create("objectNew")));
+  }
+
   int Compiler::declareMultimethod(gc<String> signature)
   {
     return vm_.declareMultimethod(signature);

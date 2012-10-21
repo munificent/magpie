@@ -380,7 +380,8 @@ public:
   : Expr(pos),
     name_(name),
     fields_(fields),
-    resolved_()
+    resolved_(),
+    synthesizedMethods_()
   {}
 
   virtual void accept(ExprVisitor& visitor, int arg)
@@ -394,11 +395,14 @@ public:
   const Array<gc<ClassField> >& fields() { return fields_; }
   ResolvedName resolved() const { return resolved_; }
   void setResolved(ResolvedName resolved) { resolved_ = resolved; }
+  const Array<gc<DefExpr> >& synthesizedMethods() { return synthesizedMethods_; }
+  void setSynthesizedMethods(Array<gc<DefExpr> > synthesizedMethods) { synthesizedMethods_ = synthesizedMethods; }
 
   virtual void reach()
   {
     name_.reach();
     fields_.reach();
+    synthesizedMethods_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -407,6 +411,7 @@ private:
   gc<String> name_;
   Array<gc<ClassField> > fields_;
   ResolvedName resolved_;
+  Array<gc<DefExpr> > synthesizedMethods_;
   NO_COPY(DefClassExpr);
 };
 

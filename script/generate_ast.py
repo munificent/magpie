@@ -33,7 +33,8 @@ exprs = sorted({
     'DefClass': [
         ('name',        'gc<String>'),
         ('fields',      'Array<gc<ClassField> >'),
-        ('resolved*',   'ResolvedName')],
+        ('resolved*',   'ResolvedName'),
+        ('synthesizedMethods*', 'Array<gc<DefExpr> >')],
     'Def': [
         ('leftParam',   'gc<Pattern>'),
         ('name',        'gc<String>'),
