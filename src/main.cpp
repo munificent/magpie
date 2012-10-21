@@ -24,7 +24,7 @@ void getCoreLibPath(char* path)
   uint32_t size = PATH_MAX;
   int result = _NSGetExecutablePath(relativePath, &size);
   ASSERT(result == 0, "Executable path too long.");
-  
+
   // Find the core lib relative to the executable.
   // TODO(bob): Hack. Try to work from the build directory too.
   if (strstr(relativePath, "build/Debug/magpie") != 0 ||
@@ -141,7 +141,12 @@ int main(int argc, const char* argv[])
 
   VM vm;
 
-  gc<String> coreSource = readFile(path);  
+  gc<String> coreSource = readFile(path);
+  if (coreSource.isNull())
+  {
+    return 1;
+  }
+  
   vm.init(coreSource);
   
   if (argc == 1) return repl(vm);
