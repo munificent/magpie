@@ -81,6 +81,14 @@ gc<String> readLine(bool isContinued)
 
 int repl(VM& vm)
 {
+  std::cout << std::endl;
+  std::cout << "      _/Oo>" << std::endl;
+  std::cout << "     /__/     magpie v0.0.0" << std::endl;
+  std::cout << "____//hh___________________" << std::endl;
+  std::cout << "   //" << std::endl;
+  std::cout << std::endl;
+  std::cout << "Type 'Ctrl+C' to exit." << std::endl;
+
   while (true)
   {
     gc<String> source;
