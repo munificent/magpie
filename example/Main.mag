@@ -1,8 +1,2 @@
-defclass Foo
-end
 
-defclass Bar
-end
-
-print(Foo new is Foo)
-print(Bar new is Bar)
+for i in [2, 3, 4, 5] do print(i)

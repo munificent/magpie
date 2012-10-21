@@ -1,0 +1,10 @@
+for i in [] do print(i) // prints nothing
+
+for i in ["value"] do print(i)
+// expect: value
+
+for i in [1, 2, 3, 4] do print(i)
+// expect: 1
+// expect: 2
+// expect: 3
+// expect: 4

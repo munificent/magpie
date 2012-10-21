@@ -47,3 +47,22 @@ def (is List) count native "listCount"
 
 def (is List)[is Num] native "listIndex"
 def (is List)[index is Num]=(value) native "listIndexSet"
+
+// Makes lists iterable.
+defclass ListIterator
+    val list is List
+    var index
+end
+
+def (list is List) iterate
+    ListIterator new(list: list, index: -1)
+end
+
+def (iterator is ListIterator) current
+    iterator list[iterator index]
+end
+
+def (iterator is ListIterator) next
+    iterator index = iterator index + 1
+    iterator index < iterator list count
+end
