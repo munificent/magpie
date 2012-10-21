@@ -1,38 +1,3 @@
-/*
-import spec.specify
-
-specify("A 'catch' clause in a block") with
-
-    it should("unwind past uncaught error types") with
-        var caught = false
-        do
-            do
-                throw "unwind error"
-            catch is Int then
-                fail("Should not be caught here.")
-            end
-        catch is String then
-            caught = true
-        end
-        caught shouldEqual(true)
-    end
-
-    it should("allow catch clauses in an if/then block") with
-        if true then
-            throw "error"
-        catch err is String then err shouldEqual("error")
-    end
-
-    it should("allow catch clauses in an else block") with
-        if false then
-            nothing
-        else
-            throw "error"
-        catch err is String then err shouldEqual("error")
-    end
-end
-*/
-
 // Do not execute the catch block if no error thrown.
 do
     print("no error") // expect: no error
@@ -77,18 +42,6 @@ do
     throw "err"
 catch err then print("caught") // expect: caught
 
-// Allow catch clauses in an if/then block.
-if true then
-    throw "err"
-catch err then print("ok") // expect: ok
-
-// Allow catch clauses in an else block.
-if false then
-    nothing
-else
-    throw "err"
-catch err then print("ok") // expect: ok
-
 // Select the first matching catch clause.
 do
     throw "err"
@@ -97,11 +50,10 @@ catch "wrong" then
 catch "also wrong" then
     print("bad")
 catch "err" then
-    print("good")   // expect: good
+    print("good") // expect: good
 catch "err" then
     print("bad")
 end
-
 
 // TODO(bob):
 // - catch patterns, destructuring, value patterns, etc.

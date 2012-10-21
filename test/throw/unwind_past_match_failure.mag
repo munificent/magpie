@@ -1,0 +1,11 @@
+// skip
+// Unwind past uncaught error types.
+do
+    do
+        throw "unwind error"
+    catch is Num then
+        print("Should not be caught here.")
+    end
+catch is String then
+    print("caught") // expect: caught
+end

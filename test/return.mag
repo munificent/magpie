@@ -2,18 +2,26 @@
 def a()
     return "result"
 end
+print(a()) // expect: result
 
 // Returns nothing if not value is provided.
 def b()
     return
 end
+print(b()) // expect: nothing
 
-// Exists the method immediately.
+// Exits the method immediately.
 def c()
     return "done"
     print("bad")
 end
-
-print(a()) // expect: result
-print(b()) // expect: nothing
 print(c()) // expect: done
+
+// Exits from a nested scope.
+def d()
+    if true then
+        return "if"
+    end
+    print("bad")
+end
+print(d()) // expect: if

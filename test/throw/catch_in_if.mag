@@ -1,0 +1,15 @@
+// Allow catch in if clauses.
+if true then
+    throw "error"
+catch err is String then
+    print(err) // expect: error
+end
+
+// Allow catch in else clauses.
+if false then
+    nothing
+else
+    throw "error"
+catch err is String then
+    print(err) // expect: error
+end
