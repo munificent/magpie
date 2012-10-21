@@ -1,0 +1,6 @@
+defclass Foo
+    var a
+    var b
+end
+
+var foo = Foo new(b: 1, a: 2) // expect error

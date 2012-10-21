@@ -1,0 +1,8 @@
+defclass Foo
+    var a
+    var b
+end
+
+Foo new // expect error
+Foo new(a: 1) // expect error
+Foo new(b: 1) // expect error

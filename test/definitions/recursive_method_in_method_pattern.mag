@@ -1,8 +1,0 @@
-// skip
-def foo(arg) arg
-var a = foo(1)
-def foo(arg == foo(1)) 2
-var b = foo(1)
-
-print(a) // expect: 1
-print(b) // expect: 2
