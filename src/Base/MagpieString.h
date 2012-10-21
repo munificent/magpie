@@ -33,7 +33,7 @@ namespace magpie
     static gc<String> concat(gc<String> a, gc<String> b);
     
     // Gets the character at the given index.
-    const char operator [](int index) const;
+    char operator [](int index) const;
 
     // Compare strings.
     bool operator ==(const String& right) const;

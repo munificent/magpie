@@ -77,7 +77,7 @@ namespace magpie
     return string;
   }
   
-  const char String::operator [](int index) const
+  char String::operator [](int index) const
   {
     ASSERT_INDEX(index, length() + 1); // Allow accessing the terminator.
 

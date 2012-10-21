@@ -119,10 +119,12 @@ namespace magpie
       // The size is stored directly before the object.
       size_t size = *reinterpret_cast<size_t*>(
           reinterpret_cast<char*>(obj) - sizeof(size_t));
-      
-      Managed* dest = static_cast<Managed*>(to_->allocate(size));
-      memcpy(dest, obj, size);
-      
+
+      void* mem = to_->allocate(size);
+      memcpy(mem, static_cast<void*>(obj), size);
+
+      Managed* dest = static_cast<Managed*>(mem);
+
       // Clear it out so we can track down GC bugs.
       /*
       memset(obj, 0xcc, size);
