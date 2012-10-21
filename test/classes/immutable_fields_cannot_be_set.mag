@@ -1,0 +1,9 @@
+defclass Foo
+    val a
+    var b
+end
+
+var foo = Foo new(a: 1, b: 2)
+// TODO(bob): Should this assume a compile error or a runtime one? It will turn
+// into a runtime error if any other type anywhere defines a setter named "a".
+foo a = 2 // expect error

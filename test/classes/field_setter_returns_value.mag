@@ -4,4 +4,4 @@ defclass Foo
 end
 
 var foo = Foo new(a: 1, b: 2)
-print(foo is Foo) // expect: true
+print(foo a = 3) // expect: 3

@@ -49,6 +49,7 @@ namespace magpie
     void declareClass(DefClassExpr& classExpr, Module* module);
     gc<DefExpr> synthesizeConstructor(DefClassExpr& classExpr);
     gc<DefExpr> synthesizeGetter(DefClassExpr& classExpr, int fieldIndex);
+    gc<DefExpr> synthesizeSetter(DefClassExpr& classExpr, int fieldIndex);
 
     int declareMultimethod(gc<String> signature);
     

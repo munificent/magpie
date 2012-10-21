@@ -166,6 +166,21 @@ namespace magpie
           break;
         }
 
+        case OP_SET_CLASS_FIELD:
+        {
+          int objectIndex = GET_A(ins);
+          int fieldIndex = GET_B(ins);
+
+          gc<DynamicObject> object = load(frame, objectIndex)->toDynamic();
+          object->setField(fieldIndex, load(frame, GET_C(ins)));
+
+          // TODO(bob): Assuming the slot here is a nasty hack. This assumes
+          // that this opcode only appears inside a setter method that has a
+          // certain slot layout.
+          store(frame, 2, load(frame, GET_C(ins)));
+          break;
+        }
+          
         case OP_GET_VAR:
         {
           int moduleIndex = GET_A(ins);

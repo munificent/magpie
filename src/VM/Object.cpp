@@ -53,6 +53,12 @@ namespace magpie
     return fields_[index];
   }
 
+  void DynamicObject::setField(int index, gc<Object> value)
+  {
+    ASSERT_INDEX(index, class_->numFields());
+    fields_[index] = value;
+  }
+
   void ListObject::trace(std::ostream& stream) const
   {
     stream << "[";

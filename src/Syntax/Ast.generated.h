@@ -25,6 +25,7 @@ class OrExpr;
 class RecordExpr;
 class ReturnExpr;
 class SequenceExpr;
+class SetFieldExpr;
 class StringExpr;
 class ThrowExpr;
 class VariableExpr;
@@ -68,6 +69,7 @@ public:
   virtual void visit(RecordExpr& node, int arg) = 0;
   virtual void visit(ReturnExpr& node, int arg) = 0;
   virtual void visit(SequenceExpr& node, int arg) = 0;
+  virtual void visit(SetFieldExpr& node, int arg) = 0;
   virtual void visit(StringExpr& node, int arg) = 0;
   virtual void visit(ThrowExpr& node, int arg) = 0;
   virtual void visit(VariableExpr& node, int arg) = 0;
@@ -117,6 +119,7 @@ public:
   virtual RecordExpr* asRecordExpr() { return NULL; }
   virtual ReturnExpr* asReturnExpr() { return NULL; }
   virtual SequenceExpr* asSequenceExpr() { return NULL; }
+  virtual SetFieldExpr* asSetFieldExpr() { return NULL; }
   virtual StringExpr* asStringExpr() { return NULL; }
   virtual ThrowExpr* asThrowExpr() { return NULL; }
   virtual VariableExpr* asVariableExpr() { return NULL; }
@@ -902,6 +905,30 @@ public:
 private:
   Array<gc<Expr> > expressions_;
   NO_COPY(SequenceExpr);
+};
+
+class SetFieldExpr : public Expr
+{
+public:
+  SetFieldExpr(const SourcePos& pos, int index)
+  : Expr(pos),
+    index_(index)
+  {}
+
+  virtual void accept(ExprVisitor& visitor, int arg)
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual SetFieldExpr* asSetFieldExpr() { return this; }
+
+  int index() const { return index_; }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  int index_;
+  NO_COPY(SetFieldExpr);
 };
 
 class StringExpr : public Expr

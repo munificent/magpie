@@ -225,6 +225,11 @@ namespace magpie
     
     out << ")";
   }
+
+  void SetFieldExpr::trace(std::ostream& out) const
+  {
+    out << "(set-field " << index_ << ")";
+  }
   
   void StringExpr::trace(std::ostream& out) const
   {

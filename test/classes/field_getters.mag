@@ -1,0 +1,12 @@
+defclass Foo
+    var a
+    var b
+end
+
+var foo = Foo new(a: 1, b: 2)
+print(foo a) // expect: 1
+print(foo b) // expect: 2
+
+foo = Foo new(a: 3, b: 4)
+print(foo a) // expect: 3
+print(foo b) // expect: 4

@@ -461,6 +461,13 @@ namespace magpie
       resolve(expr.expressions()[i]);
     }
   }
+
+  void Resolver::visit(SetFieldExpr& expr, int dummy)
+  {
+    // TODO(bob): This really shouldn't be an AST node. It should just be part
+    // of some IR.
+    // Do nothing.
+  }
   
   void Resolver::visit(StringExpr& expr, int dummy)
   {

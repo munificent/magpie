@@ -156,6 +156,7 @@ namespace magpie
     gc<ClassObject> classObj() { return class_; }
 
     gc<Object> getField(int index);
+    void setField(int index, gc<Object> value);
 
   private:
     DynamicObject(gc<ClassObject> classObj)

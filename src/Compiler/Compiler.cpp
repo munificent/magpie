@@ -116,6 +116,10 @@ namespace magpie
     for (int i = 0; i < classExpr.fields().count(); i++)
     {
       synthesizedMethods.add(synthesizeGetter(classExpr, i));
+      if (classExpr.fields()[i]->isMutable())
+      {
+        synthesizedMethods.add(synthesizeSetter(classExpr, i));
+      }
     }
 
     // TODO(bob): Stuffing this back in the AST is a bit gross. An intermediate
@@ -166,11 +170,25 @@ namespace magpie
     gc<Pattern> leftPattern = new TypePattern(pos,
         new NameExpr(pos, classExpr.name()));
 
-    // TODO(bob): Give this a real body that returns the field!
     return new DefExpr(pos, leftPattern,
                        classExpr.fields()[fieldIndex]->name(), gc<Pattern>(),
                        gc<Pattern>(),
                        new GetFieldExpr(pos, fieldIndex));
+  }
+
+  gc<DefExpr> Compiler::synthesizeSetter(DefClassExpr& classExpr,
+                                         int fieldIndex)
+  {
+    // Match the class on the left.
+    const SourcePos& pos = classExpr.pos();
+    gc<Pattern> leftPattern = new TypePattern(pos,
+        new NameExpr(pos, classExpr.name()));
+
+    // TODO(bob): Use the field pattern instead of Wildcard.
+    return new DefExpr(pos, leftPattern,
+                       classExpr.fields()[fieldIndex]->name(), gc<Pattern>(),
+                       new WildcardPattern(pos),
+                       new SetFieldExpr(pos, fieldIndex));
   }
 
   int Compiler::declareMultimethod(gc<String> signature)

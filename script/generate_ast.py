@@ -82,6 +82,8 @@ exprs = sorted({
         ('value',       'gc<Expr>')],
     'Sequence': [
         ('expressions', 'Array<gc<Expr> >')],
+    'SetField': [
+        ('index',       'int')],
     'String': [
         ('value',       'gc<String>')],
     'Throw': [

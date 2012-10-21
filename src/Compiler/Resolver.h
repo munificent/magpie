@@ -67,6 +67,7 @@ namespace magpie
     virtual void visit(RecordExpr& expr, int dummy);
     virtual void visit(ReturnExpr& expr, int dummy);
     virtual void visit(SequenceExpr& expr, int dummy);
+    virtual void visit(SetFieldExpr& expr, int dummy);
     virtual void visit(StringExpr& expr, int dummy);
     virtual void visit(ThrowExpr& expr, int dummy);
     virtual void visit(VariableExpr& expr, int dummy);
