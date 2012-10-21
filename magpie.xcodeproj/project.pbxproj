@@ -1,0 +1,434 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		29DAD4DF1633CBC500017F86 /* MagpieString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 29DAD4051633CBC500017F86 /* MagpieString.cpp */; };
+		29DAD56E1633CBC500017F86 /* Compiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 29DAD4A31633CBC500017F86 /* Compiler.cpp */; };
+		29DAD56F1633CBC500017F86 /* MethodCompiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 29DAD4A51633CBC500017F86 /* MethodCompiler.cpp */; };
+		29DAD5701633CBC500017F86 /* Resolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 29DAD4A71633CBC500017F86 /* Resolver.cpp */; };
+		29DAD5711633CBC500017F86 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 29DAD4AA1633CBC500017F86 /* main.cpp */; };
+		29DAD5721633CBC500017F86 /* Managed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 29DAD4AD1633CBC500017F86 /* Managed.cpp */; };
+		29DAD5731633CBC500017F86 /* Memory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 29DAD4AF1633CBC500017F86 /* Memory.cpp */; };
+		29DAD5741633CBC500017F86 /* Semispace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 29DAD4B21633CBC500017F86 /* Semispace.cpp */; };
+		29DAD5751633CBC500017F86 /* Ast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 29DAD4B51633CBC500017F86 /* Ast.cpp */; };
+		29DAD5761633CBC500017F86 /* ErrorReporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 29DAD4B81633CBC500017F86 /* ErrorReporter.cpp */; };
+		29DAD5771633CBC500017F86 /* Lexer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 29DAD4BA1633CBC500017F86 /* Lexer.cpp */; };
+		29DAD5781633CBC500017F86 /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 29DAD4BC1633CBC500017F86 /* Parser.cpp */; };
+		29DAD5791633CBC500017F86 /* Token.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 29DAD4BE1633CBC500017F86 /* Token.cpp */; };
+		29DAD5831633CBC500017F86 /* Fiber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 29DAD4D31633CBC500017F86 /* Fiber.cpp */; };
+		29DAD5841633CBC500017F86 /* Method.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 29DAD4D51633CBC500017F86 /* Method.cpp */; };
+		29DAD5851633CBC500017F86 /* Module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 29DAD4D71633CBC500017F86 /* Module.cpp */; };
+		29DAD5861633CBC500017F86 /* Natives.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 29DAD4D91633CBC500017F86 /* Natives.cpp */; };
+		29DAD5871633CBC500017F86 /* Object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 29DAD4DB1633CBC500017F86 /* Object.cpp */; };
+		29DAD5881633CBC500017F86 /* VM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 29DAD4DD1633CBC500017F86 /* VM.cpp */; };
+		29DAD5B81633D23700017F86 /* magpie.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 29DAD4A91633CBC500017F86 /* magpie.1 */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		29DAD3EC1633CB5D00017F86 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+				29DAD5B81633D23700017F86 /* magpie.1 in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		29DAD3EE1633CB5D00017F86 /* magpie */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = magpie; sourceTree = BUILT_PRODUCTS_DIR; };
+		29DAD4031633CBC500017F86 /* Array.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Array.h; sourceTree = "<group>"; };
+		29DAD4041633CBC500017F86 /* Macros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Macros.h; sourceTree = "<group>"; };
+		29DAD4051633CBC500017F86 /* MagpieString.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MagpieString.cpp; sourceTree = "<group>"; };
+		29DAD4061633CBC500017F86 /* MagpieString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MagpieString.h; sourceTree = "<group>"; };
+		29DAD4071633CBC500017F86 /* Queue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Queue.h; sourceTree = "<group>"; };
+		29DAD4081633CBC500017F86 /* Stack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Stack.h; sourceTree = "<group>"; };
+		29DAD4A21633CBC500017F86 /* Bytecode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Bytecode.h; sourceTree = "<group>"; };
+		29DAD4A31633CBC500017F86 /* Compiler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Compiler.cpp; sourceTree = "<group>"; };
+		29DAD4A41633CBC500017F86 /* Compiler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Compiler.h; sourceTree = "<group>"; };
+		29DAD4A51633CBC500017F86 /* MethodCompiler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MethodCompiler.cpp; sourceTree = "<group>"; };
+		29DAD4A61633CBC500017F86 /* MethodCompiler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MethodCompiler.h; sourceTree = "<group>"; };
+		29DAD4A71633CBC500017F86 /* Resolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Resolver.cpp; sourceTree = "<group>"; };
+		29DAD4A81633CBC500017F86 /* Resolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Resolver.h; sourceTree = "<group>"; };
+		29DAD4A91633CBC500017F86 /* magpie.1 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.man; path = magpie.1; sourceTree = "<group>"; };
+		29DAD4AA1633CBC500017F86 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		29DAD4AC1633CBC500017F86 /* ForwardingAddress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ForwardingAddress.h; sourceTree = "<group>"; };
+		29DAD4AD1633CBC500017F86 /* Managed.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Managed.cpp; sourceTree = "<group>"; };
+		29DAD4AE1633CBC500017F86 /* Managed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Managed.h; sourceTree = "<group>"; };
+		29DAD4AF1633CBC500017F86 /* Memory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Memory.cpp; sourceTree = "<group>"; };
+		29DAD4B01633CBC500017F86 /* Memory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Memory.h; sourceTree = "<group>"; };
+		29DAD4B11633CBC500017F86 /* RootSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RootSource.h; sourceTree = "<group>"; };
+		29DAD4B21633CBC500017F86 /* Semispace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Semispace.cpp; sourceTree = "<group>"; };
+		29DAD4B31633CBC500017F86 /* Semispace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Semispace.h; sourceTree = "<group>"; };
+		29DAD4B51633CBC500017F86 /* Ast.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Ast.cpp; sourceTree = "<group>"; };
+		29DAD4B61633CBC500017F86 /* Ast.generated.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Ast.generated.h; sourceTree = "<group>"; };
+		29DAD4B71633CBC500017F86 /* Ast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Ast.h; sourceTree = "<group>"; };
+		29DAD4B81633CBC500017F86 /* ErrorReporter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ErrorReporter.cpp; sourceTree = "<group>"; };
+		29DAD4B91633CBC500017F86 /* ErrorReporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ErrorReporter.h; sourceTree = "<group>"; };
+		29DAD4BA1633CBC500017F86 /* Lexer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Lexer.cpp; sourceTree = "<group>"; };
+		29DAD4BB1633CBC500017F86 /* Lexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Lexer.h; sourceTree = "<group>"; };
+		29DAD4BC1633CBC500017F86 /* Parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Parser.cpp; sourceTree = "<group>"; };
+		29DAD4BD1633CBC500017F86 /* Parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Parser.h; sourceTree = "<group>"; };
+		29DAD4BE1633CBC500017F86 /* Token.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Token.cpp; sourceTree = "<group>"; };
+		29DAD4BF1633CBC500017F86 /* Token.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Token.h; sourceTree = "<group>"; };
+		29DAD4C11633CBC500017F86 /* ArrayTests.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ArrayTests.cpp; sourceTree = "<group>"; };
+		29DAD4C21633CBC500017F86 /* ArrayTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ArrayTests.h; sourceTree = "<group>"; };
+		29DAD4C31633CBC500017F86 /* LexerTests.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LexerTests.cpp; sourceTree = "<group>"; };
+		29DAD4C41633CBC500017F86 /* LexerTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LexerTests.h; sourceTree = "<group>"; };
+		29DAD4C51633CBC500017F86 /* MemoryTests.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MemoryTests.cpp; sourceTree = "<group>"; };
+		29DAD4C61633CBC500017F86 /* MemoryTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MemoryTests.h; sourceTree = "<group>"; };
+		29DAD4C71633CBC500017F86 /* ParserTests.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParserTests.cpp; sourceTree = "<group>"; };
+		29DAD4C81633CBC500017F86 /* ParserTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParserTests.h; sourceTree = "<group>"; };
+		29DAD4C91633CBC500017F86 /* QueueTests.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = QueueTests.cpp; sourceTree = "<group>"; };
+		29DAD4CA1633CBC500017F86 /* QueueTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QueueTests.h; sourceTree = "<group>"; };
+		29DAD4CB1633CBC500017F86 /* StringTests.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StringTests.cpp; sourceTree = "<group>"; };
+		29DAD4CC1633CBC500017F86 /* StringTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StringTests.h; sourceTree = "<group>"; };
+		29DAD4CD1633CBC500017F86 /* Test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Test.cpp; sourceTree = "<group>"; };
+		29DAD4CE1633CBC500017F86 /* Test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Test.h; sourceTree = "<group>"; };
+		29DAD4CF1633CBC500017F86 /* TestMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestMain.cpp; sourceTree = "<group>"; };
+		29DAD4D01633CBC500017F86 /* TokenTests.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TokenTests.cpp; sourceTree = "<group>"; };
+		29DAD4D11633CBC500017F86 /* TokenTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TokenTests.h; sourceTree = "<group>"; };
+		29DAD4D31633CBC500017F86 /* Fiber.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Fiber.cpp; sourceTree = "<group>"; };
+		29DAD4D41633CBC500017F86 /* Fiber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Fiber.h; sourceTree = "<group>"; };
+		29DAD4D51633CBC500017F86 /* Method.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Method.cpp; sourceTree = "<group>"; };
+		29DAD4D61633CBC500017F86 /* Method.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Method.h; sourceTree = "<group>"; };
+		29DAD4D71633CBC500017F86 /* Module.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Module.cpp; sourceTree = "<group>"; };
+		29DAD4D81633CBC500017F86 /* Module.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Module.h; sourceTree = "<group>"; };
+		29DAD4D91633CBC500017F86 /* Natives.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Natives.cpp; sourceTree = "<group>"; };
+		29DAD4DA1633CBC500017F86 /* Natives.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Natives.h; sourceTree = "<group>"; };
+		29DAD4DB1633CBC500017F86 /* Object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Object.cpp; sourceTree = "<group>"; };
+		29DAD4DC1633CBC500017F86 /* Object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Object.h; sourceTree = "<group>"; };
+		29DAD4DD1633CBC500017F86 /* VM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VM.cpp; sourceTree = "<group>"; };
+		29DAD4DE1633CBC500017F86 /* VM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VM.h; sourceTree = "<group>"; };
+		29DAD5B61633D22200017F86 /* core.mag */ = {isa = PBXFileReference; lastKnownFileType = text; path = core.mag; sourceTree = "<group>"; };
+		29DAD5B71633D22200017F86 /* README */ = {isa = PBXFileReference; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		29DAD3EB1633CB5D00017F86 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		29DAD3E31633CB5D00017F86 = {
+			isa = PBXGroup;
+			children = (
+				29DAD5B51633D22200017F86 /* core */,
+				29DAD3FF1633CBC500017F86 /* src */,
+				29DAD3EF1633CB5D00017F86 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		29DAD3EF1633CB5D00017F86 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				29DAD3EE1633CB5D00017F86 /* magpie */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		29DAD3FF1633CBC500017F86 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				29DAD4021633CBC500017F86 /* Base */,
+				29DAD4A11633CBC500017F86 /* Compiler */,
+				29DAD4A91633CBC500017F86 /* magpie.1 */,
+				29DAD4AA1633CBC500017F86 /* main.cpp */,
+				29DAD4AB1633CBC500017F86 /* Memory */,
+				29DAD4B41633CBC500017F86 /* Syntax */,
+				29DAD4C01633CBC500017F86 /* Test */,
+				29DAD4D21633CBC500017F86 /* VM */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		29DAD4021633CBC500017F86 /* Base */ = {
+			isa = PBXGroup;
+			children = (
+				29DAD4031633CBC500017F86 /* Array.h */,
+				29DAD4041633CBC500017F86 /* Macros.h */,
+				29DAD4051633CBC500017F86 /* MagpieString.cpp */,
+				29DAD4061633CBC500017F86 /* MagpieString.h */,
+				29DAD4071633CBC500017F86 /* Queue.h */,
+				29DAD4081633CBC500017F86 /* Stack.h */,
+			);
+			path = Base;
+			sourceTree = "<group>";
+		};
+		29DAD4A11633CBC500017F86 /* Compiler */ = {
+			isa = PBXGroup;
+			children = (
+				29DAD4A21633CBC500017F86 /* Bytecode.h */,
+				29DAD4A31633CBC500017F86 /* Compiler.cpp */,
+				29DAD4A41633CBC500017F86 /* Compiler.h */,
+				29DAD4A51633CBC500017F86 /* MethodCompiler.cpp */,
+				29DAD4A61633CBC500017F86 /* MethodCompiler.h */,
+				29DAD4A71633CBC500017F86 /* Resolver.cpp */,
+				29DAD4A81633CBC500017F86 /* Resolver.h */,
+			);
+			path = Compiler;
+			sourceTree = "<group>";
+		};
+		29DAD4AB1633CBC500017F86 /* Memory */ = {
+			isa = PBXGroup;
+			children = (
+				29DAD4AC1633CBC500017F86 /* ForwardingAddress.h */,
+				29DAD4AD1633CBC500017F86 /* Managed.cpp */,
+				29DAD4AE1633CBC500017F86 /* Managed.h */,
+				29DAD4AF1633CBC500017F86 /* Memory.cpp */,
+				29DAD4B01633CBC500017F86 /* Memory.h */,
+				29DAD4B11633CBC500017F86 /* RootSource.h */,
+				29DAD4B21633CBC500017F86 /* Semispace.cpp */,
+				29DAD4B31633CBC500017F86 /* Semispace.h */,
+			);
+			path = Memory;
+			sourceTree = "<group>";
+		};
+		29DAD4B41633CBC500017F86 /* Syntax */ = {
+			isa = PBXGroup;
+			children = (
+				29DAD4B51633CBC500017F86 /* Ast.cpp */,
+				29DAD4B61633CBC500017F86 /* Ast.generated.h */,
+				29DAD4B71633CBC500017F86 /* Ast.h */,
+				29DAD4B81633CBC500017F86 /* ErrorReporter.cpp */,
+				29DAD4B91633CBC500017F86 /* ErrorReporter.h */,
+				29DAD4BA1633CBC500017F86 /* Lexer.cpp */,
+				29DAD4BB1633CBC500017F86 /* Lexer.h */,
+				29DAD4BC1633CBC500017F86 /* Parser.cpp */,
+				29DAD4BD1633CBC500017F86 /* Parser.h */,
+				29DAD4BE1633CBC500017F86 /* Token.cpp */,
+				29DAD4BF1633CBC500017F86 /* Token.h */,
+			);
+			path = Syntax;
+			sourceTree = "<group>";
+		};
+		29DAD4C01633CBC500017F86 /* Test */ = {
+			isa = PBXGroup;
+			children = (
+				29DAD4C11633CBC500017F86 /* ArrayTests.cpp */,
+				29DAD4C21633CBC500017F86 /* ArrayTests.h */,
+				29DAD4C31633CBC500017F86 /* LexerTests.cpp */,
+				29DAD4C41633CBC500017F86 /* LexerTests.h */,
+				29DAD4C51633CBC500017F86 /* MemoryTests.cpp */,
+				29DAD4C61633CBC500017F86 /* MemoryTests.h */,
+				29DAD4C71633CBC500017F86 /* ParserTests.cpp */,
+				29DAD4C81633CBC500017F86 /* ParserTests.h */,
+				29DAD4C91633CBC500017F86 /* QueueTests.cpp */,
+				29DAD4CA1633CBC500017F86 /* QueueTests.h */,
+				29DAD4CB1633CBC500017F86 /* StringTests.cpp */,
+				29DAD4CC1633CBC500017F86 /* StringTests.h */,
+				29DAD4CD1633CBC500017F86 /* Test.cpp */,
+				29DAD4CE1633CBC500017F86 /* Test.h */,
+				29DAD4CF1633CBC500017F86 /* TestMain.cpp */,
+				29DAD4D01633CBC500017F86 /* TokenTests.cpp */,
+				29DAD4D11633CBC500017F86 /* TokenTests.h */,
+			);
+			path = Test;
+			sourceTree = "<group>";
+		};
+		29DAD4D21633CBC500017F86 /* VM */ = {
+			isa = PBXGroup;
+			children = (
+				29DAD4D31633CBC500017F86 /* Fiber.cpp */,
+				29DAD4D41633CBC500017F86 /* Fiber.h */,
+				29DAD4D51633CBC500017F86 /* Method.cpp */,
+				29DAD4D61633CBC500017F86 /* Method.h */,
+				29DAD4D71633CBC500017F86 /* Module.cpp */,
+				29DAD4D81633CBC500017F86 /* Module.h */,
+				29DAD4D91633CBC500017F86 /* Natives.cpp */,
+				29DAD4DA1633CBC500017F86 /* Natives.h */,
+				29DAD4DB1633CBC500017F86 /* Object.cpp */,
+				29DAD4DC1633CBC500017F86 /* Object.h */,
+				29DAD4DD1633CBC500017F86 /* VM.cpp */,
+				29DAD4DE1633CBC500017F86 /* VM.h */,
+			);
+			path = VM;
+			sourceTree = "<group>";
+		};
+		29DAD5B51633D22200017F86 /* core */ = {
+			isa = PBXGroup;
+			children = (
+				29DAD5B61633D22200017F86 /* core.mag */,
+				29DAD5B71633D22200017F86 /* README */,
+			);
+			path = core;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		29DAD3ED1633CB5D00017F86 /* magpie */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 29DAD3F81633CB5D00017F86 /* Build configuration list for PBXNativeTarget "magpie" */;
+			buildPhases = (
+				29DAD3EA1633CB5D00017F86 /* Sources */,
+				29DAD3EB1633CB5D00017F86 /* Frameworks */,
+				29DAD3EC1633CB5D00017F86 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = magpie;
+			productName = magpie;
+			productReference = 29DAD3EE1633CB5D00017F86 /* magpie */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		29DAD3E51633CB5D00017F86 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0450;
+				ORGANIZATIONNAME = "Bob Nystrom";
+			};
+			buildConfigurationList = 29DAD3E81633CB5D00017F86 /* Build configuration list for PBXProject "magpie" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 29DAD3E31633CB5D00017F86;
+			productRefGroup = 29DAD3EF1633CB5D00017F86 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				29DAD3ED1633CB5D00017F86 /* magpie */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		29DAD3EA1633CB5D00017F86 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				29DAD4DF1633CBC500017F86 /* MagpieString.cpp in Sources */,
+				29DAD56E1633CBC500017F86 /* Compiler.cpp in Sources */,
+				29DAD56F1633CBC500017F86 /* MethodCompiler.cpp in Sources */,
+				29DAD5701633CBC500017F86 /* Resolver.cpp in Sources */,
+				29DAD5711633CBC500017F86 /* main.cpp in Sources */,
+				29DAD5721633CBC500017F86 /* Managed.cpp in Sources */,
+				29DAD5731633CBC500017F86 /* Memory.cpp in Sources */,
+				29DAD5741633CBC500017F86 /* Semispace.cpp in Sources */,
+				29DAD5751633CBC500017F86 /* Ast.cpp in Sources */,
+				29DAD5761633CBC500017F86 /* ErrorReporter.cpp in Sources */,
+				29DAD5771633CBC500017F86 /* Lexer.cpp in Sources */,
+				29DAD5781633CBC500017F86 /* Parser.cpp in Sources */,
+				29DAD5791633CBC500017F86 /* Token.cpp in Sources */,
+				29DAD5831633CBC500017F86 /* Fiber.cpp in Sources */,
+				29DAD5841633CBC500017F86 /* Method.cpp in Sources */,
+				29DAD5851633CBC500017F86 /* Module.cpp in Sources */,
+				29DAD5861633CBC500017F86 /* Natives.cpp in Sources */,
+				29DAD5871633CBC500017F86 /* Object.cpp in Sources */,
+				29DAD5881633CBC500017F86 /* VM.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		29DAD3F61633CB5D00017F86 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		29DAD3F71633CB5D00017F86 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		29DAD3F91633CB5D00017F86 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		29DAD3FA1633CB5D00017F86 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		29DAD3E81633CB5D00017F86 /* Build configuration list for PBXProject "magpie" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				29DAD3F61633CB5D00017F86 /* Debug */,
+				29DAD3F71633CB5D00017F86 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		29DAD3F81633CB5D00017F86 /* Build configuration list for PBXNativeTarget "magpie" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				29DAD3F91633CB5D00017F86 /* Debug */,
+				29DAD3FA1633CB5D00017F86 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 29DAD3E51633CB5D00017F86 /* Project object */;
+}
