@@ -81,6 +81,10 @@ namespace magpie
         cout << "GET_CLASS_FIELD " << GET_A(ins) << "[" << GET_B(ins) << "] -> " << GET_C(ins);
         break;
 
+      case OP_SET_CLASS_FIELD:
+        cout << "SET_CLASS_FIELD " << GET_A(ins) << "[" << GET_B(ins) << "] = " << GET_C(ins);
+        break;
+
       case OP_GET_VAR:
         cout << "OP_GET_VAR      module " << GET_A(ins) << ", var " << GET_B(ins) << " -> " << GET_C(ins);
         break;
@@ -149,7 +153,12 @@ namespace magpie
   {
     constants_.reach();
   }
-  
+
+  void Method::reach()
+  {
+    def_.reach();
+  }
+
   Multimethod::Multimethod(gc<String> signature)
   : signature_(signature),
     chunk_(),
@@ -175,5 +184,12 @@ namespace magpie
     }
     
     return chunk_;
+  }
+
+  void Multimethod::reach()
+  {
+    signature_.reach();
+    chunk_.reach();
+    methods_.reach();
   }
 }

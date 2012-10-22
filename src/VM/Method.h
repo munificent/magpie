@@ -63,8 +63,8 @@ namespace magpie
     
     Module* module() { return module_; }
     gc<DefExpr> def() { return def_; }
-    
-    // TODO(bob): reach().
+
+    virtual void reach();
     
   private:
     Module* module_;
@@ -83,9 +83,9 @@ namespace magpie
     
     void addMethod(gc<Method> method);
 
+    virtual void reach();
+
   private:
-    // TODO(bob): reach().
-    
     gc<String> signature_;
     gc<Chunk> chunk_;
     Array<gc<Method> > methods_;
