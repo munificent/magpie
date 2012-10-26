@@ -22,6 +22,9 @@ namespace magpie
     MethodCompiler(Compiler& compiler);
     
     gc<Chunk> compileBody(Module* module, gc<Expr> body);
+
+    // Compiles [multimethod] to bytecode. Assumes the methods have already
+    // been sorted.
     gc<Chunk> compile(Multimethod& multimethod);
     
     void compileParam(PatternCompiler& compiler, gc<Pattern> param, int& slot);

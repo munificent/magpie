@@ -179,7 +179,10 @@ namespace magpie
     // called.
     if (chunk_.isNull())
     {
+      // Determine their specialization order.
+      sort(vm);
       ErrorReporter reporter;
+      
       chunk_ = Compiler::compileMultimethod(vm, reporter, *this);
     }
     
@@ -191,5 +194,219 @@ namespace magpie
     signature_.reach();
     chunk_.reach();
     methods_.reach();
+  }
+
+  void Multimethod::sort(VM& vm)
+  {
+    Array<gc<Method> > sorted;
+
+    // TODO(bob): This is a really primitive topological sort. We end up
+    // comparing the same set of methods multiple times. Could do lots better.
+    while (sorted.count() < methods_.count())
+    {
+      for (int i = 0; i < methods_.count(); i++)
+      {
+        if (methods_[i].isNull()) continue;
+
+        // See if any other method is more specialized than this one.
+        bool covered = false;
+        for (int j = 0; j < methods_.count(); j++)
+        {
+          if (i == j) continue;
+          if (methods_[j].isNull()) continue;
+          
+          MethodOrder order = compare(methods_[i], methods_[j]);
+          if (order == ORDER_AFTER)
+          {
+            covered = true;
+            break;
+          }
+        }
+
+        if (!covered)
+        {
+          sorted.add(methods_[i]);
+          methods_[i] = NULL;
+        }
+      }
+    }
+
+    methods_.clear();
+    methods_.addAll(sorted);
+  }
+
+  MethodOrder Multimethod::compare(gc<Method> a, gc<Method> b)
+  {
+    Array<MethodOrder> orders;
+    if (!a->def()->leftParam().isNull())
+    {
+      orders.add(PatternComparer::compare(
+          a->def()->leftParam(), b->def()->leftParam()));
+    }
+
+    if (!a->def()->rightParam().isNull())
+    {
+      orders.add(PatternComparer::compare(
+          a->def()->rightParam(), b->def()->rightParam()));
+    }
+
+    if (!a->def()->value().isNull())
+    {
+      orders.add(PatternComparer::compare(
+          a->def()->value(), b->def()->value()));
+    }
+
+    // Orderings have to agree or there isn't a well-defined order.
+    MethodOrder order = unifyOrders(orders);
+
+    /*
+    std::cout << a->def() << std::endl;
+    std::cout << b->def() << std::endl;
+    std::cout << "order ";
+
+    switch (order)
+    {
+      case ORDER_BEFORE: std::cout << "before"; break;
+      case ORDER_AFTER: std::cout << "after"; break;
+      case ORDER_NONE: std::cout << "none"; break;
+      case ORDER_EQUAL: std::cout << "equal"; break;
+    }
+    
+    std::cout << std::endl;
+    */
+    
+    return order;
+  }
+
+  MethodOrder Multimethod::unifyOrders(const Array<MethodOrder>& orders)
+  {
+    MethodOrder order = ORDER_NONE;
+
+    for (int i = 0; i < orders.count(); i++)
+    {
+      switch (orders[i])
+      {
+        case ORDER_BEFORE:
+          // If orders disagree, then there is no ordering.
+          if (order == ORDER_AFTER) return ORDER_NONE;
+          order = ORDER_BEFORE;
+          break;
+
+        case ORDER_AFTER:
+          // If orders disagree, then there is no ordering.
+          if (order == ORDER_BEFORE) return ORDER_NONE;
+          order = ORDER_AFTER;
+          break;
+
+        case ORDER_NONE:
+          // Do nothing.
+          break;
+
+        case ORDER_EQUAL:
+          if (order == ORDER_NONE) order = ORDER_EQUAL;
+          break;
+      }
+    }
+
+    return order;
+  }
+
+  MethodOrder PatternComparer::compare(gc<Pattern> a, gc<Pattern> b)
+  {
+    VariablePattern* variable = b->asVariablePattern();
+    if (variable != NULL)
+    {
+      b = variable->pattern();
+      // TODO(bob): Hackish. Treat variables without inner patterns as wildcards
+      // by manually creating a WildcardPattern. Lame.
+      if (b.isNull())
+      {
+        b = new WildcardPattern(variable->pos());
+      }
+    }
+
+    MethodOrder result = ORDER_NONE;
+    PatternComparer comparer(*b, &result);
+    a->accept(comparer, -1);
+    
+    return result;
+  }
+
+  void PatternComparer::visit(RecordPattern& node, int dummy)
+  {
+    if (other_.asRecordPattern() != NULL) {
+      ASSERT(false, "Not implemented.");
+    } else if (other_.asTypePattern() != NULL) {
+      // TODO(bob): Is this right?
+      *result_ = ORDER_NONE;
+    } else if (other_.asValuePattern() != NULL) {
+      *result_ = ORDER_AFTER;
+    } else if (other_.asWildcardPattern() != NULL) {
+      *result_ = ORDER_BEFORE;
+    } else {
+      ASSERT(false, "Unknown pattern type.");
+    }
+  }
+
+  void PatternComparer::visit(TypePattern& node, int dummy)
+  {
+    if (other_.asRecordPattern() != NULL) {
+      // TODO(bob): Is this right?
+      *result_ = ORDER_NONE;
+    } else if (other_.asTypePattern() != NULL) {
+      // TODO(bob): Should compare type relations in hierarchy.
+      *result_ = ORDER_EQUAL;
+    } else if (other_.asValuePattern() != NULL) {
+      *result_ = ORDER_AFTER;
+    } else if (other_.asWildcardPattern() != NULL) {
+      *result_ = ORDER_BEFORE;
+    } else {
+      ASSERT(false, "Unknown pattern type.");
+    }
+  }
+
+  void PatternComparer::visit(ValuePattern& node, int dummy)
+  {
+    if (other_.asRecordPattern() != NULL) {
+      *result_ = ORDER_NONE;
+    } else if (other_.asTypePattern() != NULL) {
+      *result_ = ORDER_BEFORE;
+    } else if (other_.asValuePattern() != NULL) {
+      // TODO(bob): Check for value collisions.
+      *result_ = ORDER_EQUAL;
+    } else if (other_.asWildcardPattern() != NULL) {
+      *result_ = ORDER_BEFORE;
+    } else {
+      ASSERT(false, "Unknown pattern type.");
+    }
+  }
+
+  void PatternComparer::visit(VariablePattern& node, int dummy)
+  {
+    // TODO(bob): Hackish. Treat variables without inner patterns as wildcards
+    // by manually creating a WildcardPattern. Lame.
+    if (node.pattern().isNull())
+    {
+      (new WildcardPattern(node.pos()))->accept(*this, dummy);
+      return;
+    }
+
+    // Just ignore the variable and compare the inner pattern.
+    node.pattern()->accept(*this, dummy);
+  }
+  
+  void PatternComparer::visit(WildcardPattern& node, int dummy)
+  {
+    if (other_.asRecordPattern() != NULL) {
+      *result_ = ORDER_AFTER;
+    } else if (other_.asTypePattern() != NULL) {
+      *result_ = ORDER_AFTER;
+    } else if (other_.asValuePattern() != NULL) {
+      *result_ = ORDER_AFTER;
+    } else if (other_.asWildcardPattern() != NULL) {
+      *result_ = ORDER_EQUAL;
+    } else {
+      ASSERT(false, "Unknown pattern type.");
+    }
   }
 }

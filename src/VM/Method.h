@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Array.h"
+#include "Ast.h"
 #include "Bytecode.h"
 #include "Macros.h"
 #include "Managed.h"
@@ -70,6 +71,24 @@ namespace magpie
     Module* module_;
     gc<DefExpr> def_;
   };
+
+  // The relative ordering of two methods. When a method comes "before" another,
+  // that means it is more specialized and would be preferred over the other
+  // when given an argument that matches both.
+  enum MethodOrder
+  {
+    // The first method is more specialized than the second.
+    ORDER_BEFORE,
+
+    // The second method is more specialized than the first.
+    ORDER_AFTER,
+
+    // The two methods are equivalent. This means the patterns have collided.
+    ORDER_EQUAL,
+
+    // The two methods don't have an ordering relative to each other.
+    ORDER_NONE
+  };
   
   class Multimethod : public Managed
   {
@@ -86,8 +105,37 @@ namespace magpie
     virtual void reach();
 
   private:
+    void sort(VM& vm);
+    MethodOrder compare(gc<Method> a, gc<Method> b);
+
+    // Given an array of orders, determines the overall ordering. This is used
+    // to determine how a pair of records are ordered given the ordering of all
+    // of their elements.
+    MethodOrder unifyOrders(const Array<MethodOrder>& orders);
+
     gc<String> signature_;
     gc<Chunk> chunk_;
     Array<gc<Method> > methods_;
+  };
+
+  class PatternComparer : public PatternVisitor
+  {
+  public:
+    static MethodOrder compare(gc<Pattern> a, gc<Pattern> b);
+    
+    PatternComparer(Pattern& other, MethodOrder* result)
+    : other_(other),
+      result_(result)
+    {}
+    
+    virtual void visit(RecordPattern& node, int dummy);
+    virtual void visit(TypePattern& node, int dummy);
+    virtual void visit(ValuePattern& node, int dummy);
+    virtual void visit(VariablePattern& node, int dummy);
+    virtual void visit(WildcardPattern& node, int dummy);
+
+  private:
+    Pattern& other_;
+    MethodOrder* result_;
   };
 }

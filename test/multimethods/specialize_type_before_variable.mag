@@ -1,0 +1,15 @@
+def foo(n is Num)
+    print("num")
+end
+
+def foo(a)
+    print("other")
+end
+
+def foo(s is String)
+    print("string")
+end
+
+foo(123)  // expect: num
+foo("s")  // expect: string
+foo(true) // expect: other

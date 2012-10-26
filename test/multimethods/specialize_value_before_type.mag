@@ -1,0 +1,15 @@
+def foo(1)
+    print("1")
+end
+
+def foo(is Num)
+    print("num")
+end
+
+def foo(2)
+    print("2")
+end
+
+foo(1) // expect: 1
+foo(2) // expect: 2
+foo(3) // expect: num

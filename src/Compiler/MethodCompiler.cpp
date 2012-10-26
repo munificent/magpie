@@ -37,7 +37,7 @@ namespace magpie
     chunk_->setCode(code_, maxSlots_);
     return chunk_;
   }
-  
+
   gc<Chunk> MethodCompiler::compile(Multimethod& multimethod)
   {
     // Need at least one slot. If there are no methods (which can happen since
@@ -46,7 +46,6 @@ namespace magpie
     maxSlots_ = 1;
 
     // TODO(bob): Lots of work needed here:
-    // - Sort methods by specificity.
     // - Support call-next-method.
     // - Detect pattern collisions.
     // - Throw AmbiguousMethodError when appropriate.
@@ -79,7 +78,7 @@ namespace magpie
       // The result slot is just after the param slots.
       compile(method->body(), numParamSlots);
       write(OP_RETURN, numParamSlots);
-      
+
       compiler.endJumps();
       
       ASSERT(numTemps_ == 0, "Should not have any temps left after a method "
@@ -94,7 +93,7 @@ namespace magpie
     chunk_->setCode(code_, maxSlots_);
     return chunk_;
   }
-    
+
   void MethodCompiler::compileParam(PatternCompiler& compiler,
                                     gc<Pattern> param, int& slot)
   {
