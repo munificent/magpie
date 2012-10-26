@@ -57,13 +57,14 @@ namespace magpie
     // containing the offset to jump to.
     OP_TEST_FIELD = 0x08,
 
-    // Accesses a class field. Slot A holds the instance to get the field for. B
-    // is the index of the field. Stores the field value in slot C.
-    // TODO(bob): Can this be unified with OP_GET_FIELD?
+    // Accesses a class field. A is the index of the field. This opcode should
+    // only appear inside auto-generated methods because it assumes a certain
+    // slot layout.
     OP_GET_CLASS_FIELD = 0x09,
 
-    // Assigns a class field. Slot A holds the instance to get the field for. B
-    // is the index of the field. Slot C is the value to assign.
+    // Assigns a class field. A is the index of the field. This opcode should
+    // only appear inside auto-generated methods because it assumes a certain
+    // slot layout.
     OP_SET_CLASS_FIELD = 0x0a,
     
     // Loads a top-level variable from a module. A is the index of the module

@@ -326,9 +326,7 @@ namespace magpie
 
   void MethodCompiler::visit(GetFieldExpr& expr, int dest)
   {
-    // TODO(bob): Hack. Assumes the object is in slot zero. This should be the
-    // case since this expr is always synthesized but it's still brittle.
-    write(OP_GET_CLASS_FIELD, 0, expr.index(), dest);
+    write(OP_GET_CLASS_FIELD, expr.index());
   }
   
   void MethodCompiler::visit(IfExpr& expr, int dest)
@@ -507,9 +505,7 @@ namespace magpie
 
   void MethodCompiler::visit(SetFieldExpr& expr, int dest)
   {
-    // TODO(bob): Hack. Assumes the object is in slot zero. This should be the
-    // case since this expr is always synthesized but it's still brittle.
-    write(OP_SET_CLASS_FIELD, 0, expr.index(), 1);
+    write(OP_SET_CLASS_FIELD, expr.index());
   }
   
   void MethodCompiler::visit(StringExpr& expr, int dest)

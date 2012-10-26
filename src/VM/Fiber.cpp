@@ -158,26 +158,24 @@ namespace magpie
 
         case OP_GET_CLASS_FIELD:
         {
-          int objectIndex = GET_A(ins);
-          int fieldIndex = GET_B(ins);
+          // This assumes a certain slot layout because this opcode only
+          // appears in auto-generated getter methods.
+          int fieldIndex = GET_A(ins);
 
-          gc<DynamicObject> object = load(frame, objectIndex)->toDynamic();
-          store(frame, GET_C(ins), object->getField(fieldIndex));
+          gc<DynamicObject> object = load(frame, 0)->toDynamic();
+          store(frame, 1, object->getField(fieldIndex));
           break;
         }
 
         case OP_SET_CLASS_FIELD:
         {
-          int objectIndex = GET_A(ins);
-          int fieldIndex = GET_B(ins);
+          // This assumes a certain slot layout because this opcode only
+          // appears in auto-generated getter methods.
+          int fieldIndex = GET_A(ins);
 
-          gc<DynamicObject> object = load(frame, objectIndex)->toDynamic();
-          object->setField(fieldIndex, load(frame, GET_C(ins)));
-
-          // TODO(bob): Assuming the slot here is a nasty hack. This assumes
-          // that this opcode only appears inside a setter method that has a
-          // certain slot layout.
-          store(frame, 2, load(frame, GET_C(ins)));
+          gc<DynamicObject> object = load(frame, 0)->toDynamic();
+          object->setField(fieldIndex, load(frame, 1));
+          store(frame, 2, load(frame, 1));
           break;
         }
           
