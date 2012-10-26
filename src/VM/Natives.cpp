@@ -11,9 +11,9 @@ namespace magpie
     return DynamicObject::create(args);
   }
   
-  NATIVE(print)
+  NATIVE(printString)
   {
-    std::cout << args[0] << std::endl;
+    std::cout << args[0]->toString() << std::endl;
     return args[0];
   }
 

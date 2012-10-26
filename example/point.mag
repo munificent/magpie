@@ -1,0 +1,20 @@
+defclass Point
+    var x
+    var y
+end
+
+def (p is Point) toString
+    "(" + p x + ", " + p y + ")"
+end
+
+def (== Point) new(x is Num, y is Num)
+    Point new(x: x, y: y)
+end
+
+def (left is Point) + (right is Point)
+    Point new(left x + right x, left y + right y)
+end
+
+var p = Point new(1, 2)
+var q = Point new(4, 5)
+print(p + q)

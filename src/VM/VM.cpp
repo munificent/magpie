@@ -28,7 +28,7 @@ namespace magpie
     fiber_ = new Fiber(*this);
         
     DEF_NATIVE(objectNew);
-    DEF_NATIVE(print);
+    DEF_NATIVE(printString);
     DEF_NATIVE(numPlusNum);
     DEF_NATIVE(stringPlusString);
     DEF_NATIVE(numMinusNum);

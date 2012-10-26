@@ -23,7 +23,6 @@ defclass NoMatchError
 end
 
 def (is Num) + (is Num) native "numPlusNum"
-def (is String) + (is String) native "stringPlusString"
 def (is Num) - (is Num) native "numMinusNum"
 def (is Num) * (is Num) native "numTimesNum"
 def (is Num) / (is Num) native "numDivNum"
@@ -33,9 +32,24 @@ def (is Num) <= (is Num) native "numLessThanEqualToNum"
 def (is Num) > (is Num) native "numGreaterThanNum"
 def (is Num) >= (is Num) native "numGreaterThanEqualToNum"
 
-def print(arg) native "print"
+def (is String) + (is String) native "stringPlusString"
+def (left) + (right is String)
+    left toString + right
+end
+def (left is String) + (right)
+    left + right toString
+end
+
+def print(arg)
+    print(arg toString)
+end
+
+def print(arg is String) native "printString"
 
 def (is String) count native "stringCount"
+
+// TODO(bob): Do something better here?
+def (arg) toString "[Object]"
 
 def (true) toString "true"
 def (false) toString "false"
