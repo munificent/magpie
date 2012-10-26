@@ -1,3 +1,5 @@
+#include <sstream>
+
 #include "Object.h"
 #include "Natives.h"
 #include "VM.h"
@@ -10,7 +12,15 @@ namespace magpie
     // of the field values for that class.
     return DynamicObject::create(args);
   }
-  
+
+  NATIVE(objectToString)
+  {
+    // TODO(bob): Can definitely do something more efficient here!
+    std::stringstream stream;
+    stream << args[0];
+    return new StringObject(String::create(stream.str().c_str()));
+  }
+
   NATIVE(printString)
   {
     std::cout << args[0]->toString() << std::endl;

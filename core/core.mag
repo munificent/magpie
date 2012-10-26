@@ -42,14 +42,14 @@ end
 
 def print(arg)
     print(arg toString)
+    arg
 end
 
 def print(arg is String) native "printString"
 
 def (is String) count native "stringCount"
 
-// TODO(bob): Do something better here?
-def (arg) toString "[Object]"
+def (_) toString native "objectToString"
 
 def (true) toString "true"
 def (false) toString "false"
