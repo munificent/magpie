@@ -282,26 +282,8 @@ namespace magpie
           
           // TODO(bob): Handle it not being a class.
           const ClassObject* expected = load(frame, GET_B(ins))->toClass();
-          
-          gc<Object> type;
-          switch (value->type())
-          {
-            case OBJECT_BOOL:    type = vm_.boolClass(); break;
-            case OBJECT_CLASS:   type = vm_.classClass(); break;
-            case OBJECT_DYNAMIC:
-            {
-              DynamicObject* object = value->toDynamic();
-              type = object->classObj();
-              break;
-            }
-            case OBJECT_LIST:    type = vm_.listClass(); break;
-            case OBJECT_NOTHING: type = vm_.nothingClass(); break;
-            case OBJECT_NUMBER:  type = vm_.numberClass(); break;
-            case OBJECT_RECORD:  type = vm_.recordClass(); break;
-            case OBJECT_STRING:  type = vm_.stringClass(); break;
-          }
-
-          store(frame, GET_C(ins), vm_.getBool(type->toClass()->is(*expected)));
+          gc<ClassObject> classObject = value->getClass(vm_);
+          store(frame, GET_C(ins), vm_.getBool(classObject->is(*expected)));
           break;
         }
           

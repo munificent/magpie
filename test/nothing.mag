@@ -14,3 +14,7 @@ print(nothing == 0) // expect: false
 print(nothing == false) // expect: false
 print(nothing == "nothing") // expect: false
 print(nothing == "") // expect: false
+
+// Has class "Nothing".
+print(nothing is Nothing) // expect: true
+print(nothing class == Nothing) // expect: true

@@ -5,5 +5,6 @@ defclass Bar
 end
 
 print(Foo new is Foo) // expect: true
+print(Foo new class == Foo) // expect: true
 print(Bar new is Bar) // expect: true
-
+print(Bar new class == Bar) // expect: true

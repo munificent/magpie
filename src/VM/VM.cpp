@@ -26,7 +26,8 @@ namespace magpie
     Memory::initialize(this, 1024 * 1024 * 2); // TODO(bob): Use non-magic number.
     
     fiber_ = new Fiber(*this);
-        
+
+    DEF_NATIVE(objectClass);
     DEF_NATIVE(objectNew);
     DEF_NATIVE(objectToString);
     DEF_NATIVE(printString);

@@ -1,14 +1,25 @@
 #include "Object.h"
+#include "VM.h"
 
 namespace magpie
 {
   using std::ostream;
 
+  gc<ClassObject> BoolObject::getClass(VM& vm) const
+  {
+    return vm.boolClass();
+  }
+  
+  gc<ClassObject> ClassObject::getClass(VM& vm) const
+  {
+    return vm.classClass();
+  }
+  
   void ClassObject::reach()
   {
     name_.reach();
   }
-  
+
   bool ClassObject::is(const ClassObject& other) const
   {
     // TODO(bob): Subtyping.
@@ -47,6 +58,11 @@ namespace magpie
     return object;
   }
 
+  gc<ClassObject> DynamicObject::getClass(VM& vm) const
+  {
+    return class_;
+  }
+  
   gc<Object> DynamicObject::getField(int index)
   {
     ASSERT_INDEX(index, class_->numFields());
@@ -59,6 +75,11 @@ namespace magpie
     fields_[index] = value;
   }
 
+  gc<ClassObject> ListObject::getClass(VM& vm) const
+  {
+    return vm.listClass();
+  }
+  
   void ListObject::trace(std::ostream& stream) const
   {
     stream << "[";
@@ -70,6 +91,16 @@ namespace magpie
     stream << "]";
   }
 
+  gc<ClassObject> NothingObject::getClass(VM& vm) const
+  {
+    return vm.nothingClass();
+  }
+
+  gc<ClassObject> NumberObject::getClass(VM& vm) const
+  {
+    return vm.numberClass();
+  }
+  
   gc<RecordType> RecordType::create(const Array<int>& fields)
   {
     // Allocate enough memory for the record and its fields.
@@ -136,6 +167,11 @@ namespace magpie
     return fields_[index];
   }
 
+  gc<ClassObject> RecordObject::getClass(VM& vm) const
+  {
+    return vm.recordClass();
+  }
+  
   void RecordObject::reach()
   {
     type_.reach();
@@ -156,6 +192,11 @@ namespace magpie
       stream << fields_[i];
     }
     stream << ")";
+  }
+
+  gc<ClassObject> StringObject::getClass(VM& vm) const
+  {
+    return vm.stringClass();
   }
   
   void StringObject::reach()

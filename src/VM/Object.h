@@ -18,6 +18,7 @@ namespace magpie
   class NothingObject;
   class RecordObject;
   class StringObject;
+  class VM;
   
   enum ObjectType {
     OBJECT_BOOL,
@@ -36,7 +37,10 @@ namespace magpie
     Object() : Managed() {}
     
     virtual ObjectType type() const = 0;
-    
+
+    // Gets the ClassObject for this object's class.
+    virtual gc<ClassObject> getClass(VM& vm) const = 0;
+
     virtual bool toBool() const
     {
       ASSERT(false, "Not a bool.");
@@ -88,7 +92,9 @@ namespace magpie
     {}
     
     virtual ObjectType type() const { return OBJECT_BOOL; }
-    
+
+    virtual gc<ClassObject> getClass(VM& vm) const;
+
     virtual bool toBool() const { return value_; }
     
     virtual void trace(std::ostream& stream) const
@@ -117,7 +123,9 @@ namespace magpie
     bool is(const ClassObject& other) const;
     
     virtual ObjectType type() const { return OBJECT_CLASS; }
-    
+
+    virtual gc<ClassObject> getClass(VM& vm) const;
+
     virtual ClassObject* toClass() { return this; }
     
     virtual void reach();
@@ -145,6 +153,8 @@ namespace magpie
     static gc<Object> create(ArrayView<gc<Object> >& args);
     
     virtual ObjectType type() const { return OBJECT_DYNAMIC; }
+
+    virtual gc<ClassObject> getClass(VM& vm) const;
 
     virtual DynamicObject* toDynamic() { return this; }
 
@@ -179,7 +189,9 @@ namespace magpie
     {}
     
     virtual ObjectType type() const { return OBJECT_LIST; }
-    
+
+    virtual gc<ClassObject> getClass(VM& vm) const;
+
     virtual ListObject* toList() { return this; }
     
     virtual void trace(std::ostream& stream) const;
@@ -200,7 +212,9 @@ namespace magpie
     {}
     
     virtual ObjectType type() const { return OBJECT_NOTHING; }
-    
+
+    virtual gc<ClassObject> getClass(VM& vm) const;
+
     // TODO(bob): Do we want to do this here, or rely on a "true?" method?
     virtual bool toBool() const { return false; }
     
@@ -222,7 +236,9 @@ namespace magpie
     {}
     
     virtual ObjectType type() const { return OBJECT_NUMBER; }
-    
+
+    virtual gc<ClassObject> getClass(VM& vm) const;
+
     // TODO(bob): Do we want to do this here, or rely on a "true?" method?
     virtual bool toBool() const { return value_ != 0; }
     virtual double toNumber() const { return value_; }
@@ -256,7 +272,7 @@ namespace magpie
     // Given the index of a field in this type, returns the symbol ID of that
     // field.
     symbolId getSymbol(int index) const;
-    
+
   private:
     RecordType(const Array<int>& fields);
     
@@ -276,6 +292,8 @@ namespace magpie
     gc<Object> getField(int symbol);
     
     virtual ObjectType type() const { return OBJECT_RECORD; }
+
+    virtual gc<ClassObject> getClass(VM& vm) const;
 
     virtual bool toBool() const { return true; }
     virtual RecordObject* toRecord() { return this; }
@@ -306,7 +324,9 @@ namespace magpie
     {}
     
     virtual ObjectType type() const { return OBJECT_STRING; }
-    
+
+    virtual gc<ClassObject> getClass(VM& vm) const;
+
     virtual gc<String> toString() const { return value_; }
     
     virtual void reach();

@@ -47,6 +47,8 @@ end
 
 def print(arg is String) native "printString"
 
+def (_) class native "objectClass"
+
 def (is String) count native "stringCount"
 
 def (_) toString native "objectToString"
