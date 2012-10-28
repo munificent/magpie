@@ -2,3 +2,7 @@ print("a" + "b") // expect: ab
 print("first" + "second") // expect: firstsecond
 print("blah" + "") // expect: blah
 print("" + "blah") // expect: blah
+
+// Convert other operand to string if one operand is.
+print("s" + 123) // expect: s123
+print(123 + "s") // expect: 123s
