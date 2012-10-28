@@ -1,3 +1,6 @@
+// TODO(bob): What happens if the index isn't an integer?
+// TODO(bob): Out of bounds.
+
 val list = [1, 2, 3, 4]
 print(list[0]) // expect: 1
 print(list[1]) // expect: 2
@@ -8,4 +11,3 @@ print(list[-2]) // expect: 3
 print(list[-3]) // expect: 2
 print(list[-4]) // expect: 1
 
-// TODO(bob): Out of bounds.

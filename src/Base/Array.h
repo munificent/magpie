@@ -76,6 +76,22 @@ namespace magpie
       for (int i = 0; i < array.count_; i++) items_[count_++] = array[i];
     }
 
+    // Inserts the given item at the given index, growing the array and pushing
+    // following items down.
+    void insert(const T& value, int index)
+    {
+      if (index < 0) index = count_ + 1 + index;
+      ASSERT_INDEX(index, count_ + 1);
+
+      ensureCapacity_(count_ + 1);
+
+      // Shift items down.
+      for (int i = count_; i > index; i--) items_[i] = items_[i - 1];
+
+      items_[index] = value;
+      count_++;
+    }
+
     // Removes all items from the array.
     void clear()
     {

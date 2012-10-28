@@ -57,10 +57,11 @@ def (false) toString "false"
 def (is Num) toString native "numToString"
 def (s is String) toString s
 
+def (is List) add(item) native "listAdd"
 def (is List) count native "listCount"
-
 def (is List)[is Num] native "listIndex"
 def (is List)[index is Num]=(value) native "listIndexSet"
+def (is List) insert(item, at: index is Num) native "listInsert"
 
 // Makes lists iterable.
 defclass ListIterator

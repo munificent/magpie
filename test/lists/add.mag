@@ -1,0 +1,10 @@
+var a = []
+a add(1)
+print(a) // expect: [1]
+a add(2)
+print(a) // expect: [1, 2]
+a add(3)
+print(a) // expect: [1, 2, 3]
+
+// Returns added element.
+print(a add(4)) // expect: 4

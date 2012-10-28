@@ -1,0 +1,62 @@
+// TODO(bob): What happens if the index isn't an integer?
+// TODO(bob): Out of bounds.
+
+// Add to empty list.
+do
+    var a = []
+    a insert(1, at: 0)
+    print(a) // expect: [1]
+end
+
+// Normal indices.
+do
+    var a = [1, 2, 3]
+    a insert(4, at: 0)
+    print(a) // expect: [4, 1, 2, 3]
+end
+
+do
+    var a = [1, 2, 3]
+    a insert(4, at: 1)
+    print(a) // expect: [1, 4, 2, 3]
+end
+
+do
+    var a = [1, 2, 3]
+    a insert(4, at: 2)
+    print(a) // expect: [1, 2, 4, 3]
+end
+
+do
+    var a = [1, 2, 3]
+    a insert(4, at: 3)
+    print(a) // expect: [1, 2, 3, 4]
+end
+
+// Negative indices.
+do
+    var a = [1, 2, 3]
+    a insert(4, at: -4)
+    print(a) // expect: [4, 1, 2, 3]
+end
+
+do
+    var a = [1, 2, 3]
+    a insert(4, at: -3)
+    print(a) // expect: [1, 4, 2, 3]
+end
+
+do
+    var a = [1, 2, 3]
+    a insert(4, at: -2)
+    print(a) // expect: [1, 2, 4, 3]
+end
+
+do
+    var a = [1, 2, 3]
+    a insert(4, at: -1)
+    print(a) // expect: [1, 2, 3, 4]
+end
+
+// Returns inserted value.
+print([1, 2] insert(3, at: 0)) // expect: 3

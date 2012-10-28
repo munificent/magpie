@@ -88,6 +88,13 @@ namespace magpie
     double n = args[0]->toNumber();
     return new StringObject(String::format("%g", n));
   }
+
+  NATIVE(listAdd)
+  {
+    ListObject* list = args[0]->toList();
+    list->elements().add(args[1]);
+    return args[1];
+  }
   
   NATIVE(listCount)
   {
@@ -108,6 +115,16 @@ namespace magpie
     // TODO(bob): What if the index isn't an int?
     list->elements()[static_cast<int>(args[1]->toNumber())] = args[2];
     return args[2];
+  }
+
+  NATIVE(listInsert)
+  {
+    ListObject* list = args[0]->toList();
+    gc<Object> value = args[1];
+    // TODO(bob): How do we want to handle non-integer indices?
+    int index = static_cast<int>(args[2]->toNumber());
+    list->elements().insert(value, index);
+    return args[1];
   }
 }
 

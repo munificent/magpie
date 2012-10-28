@@ -41,10 +41,12 @@ namespace magpie
     DEF_NATIVE(numGreaterThanEqualToNum);
     DEF_NATIVE(stringCount);
     DEF_NATIVE(numToString);
+    DEF_NATIVE(listAdd);
     DEF_NATIVE(listCount);
     DEF_NATIVE(listIndex);
     DEF_NATIVE(listIndexSet);
-        
+    DEF_NATIVE(listInsert);
+
     true_ = new BoolObject(true);
     false_ = new BoolObject(false);
     nothing_ = new NothingObject();
