@@ -150,8 +150,14 @@ namespace magpie
       for (int i = 0; i < classExpr.fields().count(); i++)
       {
         gc<ClassField> field = classExpr.fields()[i];
-        // TODO(bob): Handle field pattern.
-        fields.add(PatternField(field->name(), new WildcardPattern(pos)));
+        gc<Pattern> pattern = field->pattern();
+
+        if (pattern.isNull())
+        {
+          pattern = new WildcardPattern(classExpr.pos());
+        }
+
+        fields.add(PatternField(field->name(), pattern));
       }
 
       rightPattern = new RecordPattern(pos, fields);
@@ -179,16 +185,22 @@ namespace magpie
   gc<DefExpr> Compiler::synthesizeSetter(DefClassExpr& classExpr,
                                          int fieldIndex)
   {
+    gc<ClassField> field = classExpr.fields()[fieldIndex];
+
     // Match the class on the left.
     const SourcePos& pos = classExpr.pos();
     gc<Pattern> leftPattern = new TypePattern(pos,
         new NameExpr(pos, classExpr.name()));
 
-    // TODO(bob): Use the field pattern instead of Wildcard.
-    return new DefExpr(pos, leftPattern,
-                       classExpr.fields()[fieldIndex]->name(), gc<Pattern>(),
-                       new WildcardPattern(pos),
-                       new SetFieldExpr(pos, fieldIndex));
+    gc<Pattern> pattern = field->pattern();
+
+    if (pattern.isNull())
+    {
+      pattern = new WildcardPattern(classExpr.pos());
+    }
+    
+    return new DefExpr(pos, leftPattern, field->name(), gc<Pattern>(),
+                       pattern, new SetFieldExpr(pos, fieldIndex));
   }
 
   int Compiler::declareMultimethod(gc<String> signature)

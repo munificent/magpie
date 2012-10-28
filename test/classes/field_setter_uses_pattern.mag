@@ -1,0 +1,18 @@
+defclass Foo
+    var a is Num
+    var b is String
+end
+
+var foo = Foo new(a: 1, b: "s")
+foo a = 1
+foo b = "t"
+
+do
+    foo a = "not num"
+catch err then print("caught") // expect: caught
+// TODO(bob): Validate error type.
+
+do
+    foo b = 123
+catch err then print("caught") // expect: caught
+// TODO(bob): Validate error type.
