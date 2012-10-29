@@ -2,15 +2,27 @@
 
 # Runs the language tests.
 from os import listdir
-from os.path import abspath, dirname, isdir, join, realpath, relpath, splitext
+from os.path import abspath, dirname, isdir, isfile, join, realpath, relpath, splitext
 import re
 from subprocess import Popen, PIPE
 import sys
+from string import strip
 
 MAGPIE_DIR = dirname(dirname(realpath(__file__)))
 TEST_DIR = join(MAGPIE_DIR, 'test')
 # TODO(bob): Support other platforms and configurations.
-MAGPIE_APP = join(MAGPIE_DIR, 'build', 'Debug', 'magpie')
+if sys.platform == 'win32':
+    MAGPIE_APP = join(MAGPIE_DIR, 'Debug', 'magpie.exe')
+    if not isfile(MAGPIE_APP):
+        MAGPIE_APP = join(MAGPIE_DIR, 'Release', 'magpie.exe')
+    if not isfile(MAGPIE_APP):
+        sys.exit("Cannot find magpie.exe!")
+else:
+    MAGPIE_APP = join(MAGPIE_DIR, 'build', 'Debug', 'magpie')
+    if not isfile(MAGPIE_APP):
+        MAGPIE_APP = join(MAGPIE_DIR, 'build', 'Release', 'magpie')
+    if not isfile(MAGPIE_APP):
+        sys.exit("Cannot find magpie!")
 
 SKIP_PATTERN = re.compile(r'// skip')
 EXPECT_PATTERN = re.compile(r'// expect: (.*)')
@@ -23,12 +35,20 @@ passed = 0
 failed = 0
 skipped = 0
 
-class color:
-    GREEN = '\033[32m'
-    RED = '\033[31m'
-    DEFAULT = '\033[0m'
-    PINK = '\033[91m'
-    YELLOW = '\033[33m'
+if sys.platform == 'win32':
+    class color:
+        GREEN = ''
+        RED = ''
+        DEFAULT = ''
+        PINK = ''
+        YELLOW = ''
+else:
+    class color:
+        GREEN = '\033[32m'
+        RED = '\033[31m'
+        DEFAULT = '\033[0m'
+        PINK = '\033[91m'
+        YELLOW = '\033[33m'
 
 def walk(dir, callback):
     """ Walks [dir], and executes [callback] on each file. """
@@ -98,6 +118,7 @@ def run_test(path):
     # Invoke magpie and run the test.
     proc = Popen([MAGPIE_APP, path], stdout=PIPE, stderr=PIPE)
     (out, err) = proc.communicate()
+    (out, err) = out.replace('\r\n', '\n'),  err.replace('\r\n', '\n')
 
     fails = []
 
