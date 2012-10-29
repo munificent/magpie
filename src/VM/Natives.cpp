@@ -8,8 +8,6 @@ namespace magpie
 {
   NATIVE(objectClass)
   {
-    // This assumes the args list has, in order, the class object and then all
-    // of the field values for that class.
     return args[0]->getClass(vm);
   }
   
