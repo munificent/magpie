@@ -81,6 +81,12 @@ namespace magpie
 
     // Returns the object as a RecordObject if it is one, otherwise `NULL`.
     virtual RecordObject* toRecord() { return NULL; }
+
+    // Converts the object to a string. Unlike [asString], the object can be
+    // any type.
+    virtual gc<String> toString() const = 0;
+
+    virtual void trace(std::ostream& stream) const;
     
   private:
     NO_COPY(Object);
@@ -99,11 +105,8 @@ namespace magpie
     virtual gc<ClassObject> getClass(VM& vm) const;
 
     virtual bool toBool() const { return value_; }
-    
-    virtual void trace(std::ostream& stream) const
-    {
-      stream << (value_ ? "true" : "false");
-    }
+
+    virtual gc<String> toString() const;
     
   private:
     bool value_;
@@ -130,13 +133,10 @@ namespace magpie
     virtual gc<ClassObject> getClass(VM& vm) const;
 
     virtual ClassObject* asClass() { return this; }
-    
+
+    virtual gc<String> toString() const;
+
     virtual void reach();
-    
-    virtual void trace(std::ostream& stream) const
-    {
-      stream << name_;
-    }
     
   private:
     gc<String> name_;
@@ -161,10 +161,7 @@ namespace magpie
 
     virtual DynamicObject* asDynamic() { return this; }
 
-    virtual void trace(std::ostream& stream) const
-    {
-      stream << "[instance of " << class_->name() << "]";
-    }
+    virtual gc<String> toString() const;
     
     gc<ClassObject> classObj() { return class_; }
 
@@ -196,8 +193,8 @@ namespace magpie
     virtual gc<ClassObject> getClass(VM& vm) const;
 
     virtual ListObject* asList() { return this; }
-    
-    virtual void trace(std::ostream& stream) const;
+
+    virtual gc<String> toString() const;
     
     Array<gc<Object> >& elements() { return elements_; }
     
@@ -220,11 +217,8 @@ namespace magpie
 
     // TODO(bob): Do we want to do this here, or rely on a "true?" method?
     virtual bool toBool() const { return false; }
-    
-    virtual void trace(std::ostream& stream) const
-    {
-      stream << "nothing";
-    }
+
+    virtual gc<String> toString() const;
     
   private:
     NO_COPY(NothingObject);
@@ -241,15 +235,11 @@ namespace magpie
     virtual ObjectType type() const { return OBJECT_NUMBER; }
 
     virtual gc<ClassObject> getClass(VM& vm) const;
+    virtual double asNumber() const { return value_; }
 
     // TODO(bob): Do we want to do this here, or rely on a "true?" method?
     virtual bool toBool() const { return value_ != 0; }
-    virtual double asNumber() const { return value_; }
-    
-    virtual void trace(std::ostream& stream) const
-    {
-      stream << value_;
-    }
+    virtual gc<String> toString() const;
     
   private:
     double value_;
@@ -299,9 +289,9 @@ namespace magpie
     virtual gc<ClassObject> getClass(VM& vm) const;
 
     virtual RecordObject* toRecord() { return this; }
-    
+    virtual gc<String> toString() const;
+
     virtual void reach();
-    virtual void trace(std::ostream& stream) const;
     
   private:
     RecordObject(gc<RecordType> type)
@@ -330,14 +320,10 @@ namespace magpie
     virtual gc<ClassObject> getClass(VM& vm) const;
 
     virtual gc<String> asString() const { return value_; }
-    
+    virtual gc<String> toString() const { return value_; }
+
     virtual void reach();
-    
-    virtual void trace(std::ostream& stream) const
-    {
-      stream << value_;
-    }
-    
+
   private:
     gc<String> value_;
     

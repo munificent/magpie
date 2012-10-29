@@ -1,3 +1,5 @@
+#include <sstream>
+
 #include "Object.h"
 #include "VM.h"
 
@@ -5,16 +7,32 @@ namespace magpie
 {
   using std::ostream;
 
+  void Object::trace(std::ostream& stream) const
+  {
+    stream << toString();
+  }
+  
   gc<ClassObject> BoolObject::getClass(VM& vm) const
   {
     return vm.boolClass();
+  }
+
+  gc<String> BoolObject::toString() const
+  {
+    // TODO(bob): Store these as constants.
+    return String::create(value_ ? "true" : "false");
   }
   
   gc<ClassObject> ClassObject::getClass(VM& vm) const
   {
     return vm.classClass();
   }
-  
+
+  gc<String> ClassObject::toString() const
+  {
+    return name_;
+  }
+
   void ClassObject::reach()
   {
     name_.reach();
@@ -62,6 +80,11 @@ namespace magpie
   {
     return class_;
   }
+
+  gc<String> DynamicObject::toString() const
+  {
+    return String::format("[instance of %s]", class_->name()->cString());
+  }
   
   gc<Object> DynamicObject::getField(int index)
   {
@@ -79,9 +102,11 @@ namespace magpie
   {
     return vm.listClass();
   }
-  
-  void ListObject::trace(std::ostream& stream) const
+
+  gc<String> ListObject::toString() const
   {
+    std::stringstream stream;
+
     stream << "[";
     for (int i = 0; i < elements_.count(); i++)
     {
@@ -89,18 +114,31 @@ namespace magpie
       if (i < elements_.count() - 1) stream << ", ";
     }
     stream << "]";
-  }
 
+    return String::create(stream.str().c_str());
+  }
+  
   gc<ClassObject> NothingObject::getClass(VM& vm) const
   {
     return vm.nothingClass();
   }
 
+  gc<String> NothingObject::toString() const
+  {
+    // TODO(bob): Store in constant.
+    return String::create("nothing");
+  }
+  
   gc<ClassObject> NumberObject::getClass(VM& vm) const
   {
     return vm.numberClass();
   }
-  
+
+  gc<String> NumberObject::toString() const
+  {
+    return String::format("%g", value_);
+  }
+
   gc<RecordType> RecordType::create(const Array<int>& fields)
   {
     // Allocate enough memory for the record and its fields.
@@ -171,6 +209,22 @@ namespace magpie
   {
     return vm.recordClass();
   }
+
+  gc<String> RecordObject::toString() const
+  {
+    std::stringstream stream;
+
+    // TODO(bob): Handle named fields.
+    stream << "(";
+    for (int i = 0; i < type_->numFields(); i++)
+    {
+      if (i > 0) stream << ", ";
+      stream << fields_[i];
+    }
+    stream << ")";
+
+    return String::create(stream.str().c_str());
+  }
   
   void RecordObject::reach()
   {
@@ -182,18 +236,6 @@ namespace magpie
     }
   }
   
-  void RecordObject::trace(std::ostream& stream) const
-  {
-    // TODO(bob): Handle named fields.
-    stream << "(";
-    for (int i = 0; i < type_->numFields(); i++)
-    {
-      if (i > 0) stream << ", ";
-      stream << fields_[i];
-    }
-    stream << ")";
-  }
-
   gc<ClassObject> StringObject::getClass(VM& vm) const
   {
     return vm.stringClass();

@@ -20,10 +20,7 @@ namespace magpie
 
   NATIVE(objectToString)
   {
-    // TODO(bob): Can definitely do something more efficient here!
-    std::stringstream stream;
-    stream << args[0];
-    return new StringObject(String::create(stream.str().c_str()));
+    return new StringObject(args[0]->toString());
   }
 
   NATIVE(printString)
