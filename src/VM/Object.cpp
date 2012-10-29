@@ -39,7 +39,7 @@ namespace magpie
 
   gc<Object> DynamicObject::create(ArrayView<gc<Object> >& args)
   {
-    gc<ClassObject> classObj = args[0]->toClass();
+    gc<ClassObject> classObj = args[0]->asClass();
     
     // Allocate enough memory for the object and its fields.
     void* mem = Memory::allocate(sizeof(DynamicObject) +

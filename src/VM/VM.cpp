@@ -232,7 +232,7 @@ namespace magpie
   void VM::registerClass(gc<ClassObject>& classObj, const char* name)
   {
     int index = coreModule_->findVariable(String::create(name));
-    classObj = coreModule_->getVariable(index)->toClass();
+    classObj = coreModule_->getVariable(index)->asClass();
   }
   
   Module* VM::compileModule(const char* fileName, gc<String> source)

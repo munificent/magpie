@@ -40,45 +40,48 @@ namespace magpie
 
     // Gets the ClassObject for this object's class.
     virtual gc<ClassObject> getClass(VM& vm) const = 0;
-
-    virtual bool toBool() const
-    {
-      ASSERT(false, "Not a bool.");
-      return false;
-    }
     
-    virtual ClassObject* toClass()
+    // Returns the object as a class. Object *must* be a ClassObject.
+    virtual ClassObject* asClass()
     {
       ASSERT(false, "Not a class.");
       return NULL;
     }
     
-    virtual DynamicObject* toDynamic()
+    // Returns the object as a dynamic object. Object *must* be a DynamicObject.
+    virtual DynamicObject* asDynamic()
     {
       ASSERT(false, "Not a dynamic object.");
       return NULL;
     }
     
-    virtual ListObject* toList()
+    // Returns the object as a list. Object *must* be a ListObject.
+    virtual ListObject* asList()
     {
       ASSERT(false, "Not a list.");
       return NULL;
     }
 
-    virtual double toNumber() const
+    // Returns the object as a number. Object *must* be a NumberObject.
+    virtual double asNumber() const
     {
       ASSERT(false, "Not a number.");
       return 0;
     }
     
-    virtual RecordObject* toRecord() { return NULL; }
-    
-    virtual gc<String> toString() const
+    // Returns the object as a string. Object *must* be a StringObject.
+    virtual gc<String> asString() const
     {
       ASSERT(false, "Not a string.");
       return gc<String>();
     }
 
+    // Returns the boolean value of the object.
+    virtual bool toBool() const { return true; }
+
+    // Returns the object as a RecordObject if it is one, otherwise `NULL`.
+    virtual RecordObject* toRecord() { return NULL; }
+    
   private:
     NO_COPY(Object);
   };
@@ -126,7 +129,7 @@ namespace magpie
 
     virtual gc<ClassObject> getClass(VM& vm) const;
 
-    virtual ClassObject* toClass() { return this; }
+    virtual ClassObject* asClass() { return this; }
     
     virtual void reach();
     
@@ -156,7 +159,7 @@ namespace magpie
 
     virtual gc<ClassObject> getClass(VM& vm) const;
 
-    virtual DynamicObject* toDynamic() { return this; }
+    virtual DynamicObject* asDynamic() { return this; }
 
     virtual void trace(std::ostream& stream) const
     {
@@ -192,7 +195,7 @@ namespace magpie
 
     virtual gc<ClassObject> getClass(VM& vm) const;
 
-    virtual ListObject* toList() { return this; }
+    virtual ListObject* asList() { return this; }
     
     virtual void trace(std::ostream& stream) const;
     
@@ -241,7 +244,7 @@ namespace magpie
 
     // TODO(bob): Do we want to do this here, or rely on a "true?" method?
     virtual bool toBool() const { return value_ != 0; }
-    virtual double toNumber() const { return value_; }
+    virtual double asNumber() const { return value_; }
     
     virtual void trace(std::ostream& stream) const
     {
@@ -295,7 +298,6 @@ namespace magpie
 
     virtual gc<ClassObject> getClass(VM& vm) const;
 
-    virtual bool toBool() const { return true; }
     virtual RecordObject* toRecord() { return this; }
     
     virtual void reach();
@@ -327,7 +329,7 @@ namespace magpie
 
     virtual gc<ClassObject> getClass(VM& vm) const;
 
-    virtual gc<String> toString() const { return value_; }
+    virtual gc<String> asString() const { return value_; }
     
     virtual void reach();
     

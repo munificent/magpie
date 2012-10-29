@@ -162,7 +162,7 @@ namespace magpie
           // appears in auto-generated getter methods.
           int fieldIndex = GET_A(ins);
 
-          gc<DynamicObject> object = load(frame, 0)->toDynamic();
+          gc<DynamicObject> object = load(frame, 0)->asDynamic();
           store(frame, 1, object->getField(fieldIndex));
           break;
         }
@@ -173,7 +173,7 @@ namespace magpie
           // appears in auto-generated getter methods.
           int fieldIndex = GET_A(ins);
 
-          gc<DynamicObject> object = load(frame, 0)->toDynamic();
+          gc<DynamicObject> object = load(frame, 0)->asDynamic();
           object->setField(fieldIndex, load(frame, 1));
           store(frame, 2, load(frame, 1));
           break;
@@ -249,7 +249,7 @@ namespace magpie
                 break;
                 
               case OBJECT_NUMBER:
-                equal = a->toNumber() == b->toNumber();
+                equal = a->asNumber() == b->asNumber();
                 break;
                 
               case OBJECT_RECORD:
@@ -257,7 +257,7 @@ namespace magpie
                 break;
                 
               case OBJECT_STRING:
-                equal = a->toString() == b->toString();
+                equal = a->asString() == b->asString();
                 break;
             }
           }
@@ -281,7 +281,7 @@ namespace magpie
           gc<Object> value = load(frame, GET_A(ins));
           
           // TODO(bob): Handle it not being a class.
-          const ClassObject* expected = load(frame, GET_B(ins))->toClass();
+          const ClassObject* expected = load(frame, GET_B(ins))->asClass();
           gc<ClassObject> classObject = value->getClass(vm_);
           store(frame, GET_C(ins), vm_.getBool(classObject->is(*expected)));
           break;
