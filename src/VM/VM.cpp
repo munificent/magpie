@@ -67,6 +67,8 @@ namespace magpie
     registerClass(recordClass_, "Record");
     registerClass(stringClass_, "String");
     registerClass(noMatchErrorClass_, "NoMatchError");
+    registerClass(noMethodErrorClass_, "NoMethodError");
+    registerClass(undefinedVarErrorClass_, "UndefinedVarError");
   }
 
   bool VM::loadModule(const char* fileName, gc<String> source)
@@ -118,6 +120,18 @@ namespace magpie
     {
       modules_[i]->reach();
     }
+  }
+
+  gc<Object> VM::getBuiltIn(int value) const
+  {
+    switch (value) {
+      case 0: return false_;
+      case 1: return true_;
+      case 2: return nothing_;
+      case 3: return DynamicObject::create(noMethodErrorClass_);
+    }
+
+    ASSERT(false, "Unknown built-in ID.");
   }
   
   int VM::findNative(gc<String> name)

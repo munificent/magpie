@@ -22,6 +22,12 @@ end
 defclass NoMatchError
 end
 
+defclass NoMethodError
+end
+
+defclass UndefinedVarError
+end
+
 def (is Num) + (is Num) native "numPlusNum"
 def (is Num) - (is Num) native "numMinusNum"
 def (is Num) * (is Num) native "numTimesNum"

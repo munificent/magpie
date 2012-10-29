@@ -46,23 +46,16 @@ namespace magpie
     inline gc<ClassObject> recordClass() const { return recordClass_; }
     inline gc<ClassObject> stringClass() const { return stringClass_; }
     inline gc<ClassObject> noMatchErrorClass() const { return noMatchErrorClass_; }
-    
+    inline gc<ClassObject> noMethodErrorClass() const { return noMethodErrorClass_; }
+    inline gc<ClassObject> undefinedVarErrorClass() const { return undefinedVarErrorClass_; }
+
     inline gc<Object> getBool(bool value) const
     {
       return value ? true_ : false_;
     }
     
-    inline gc<Object> getBuiltIn(int value) const
-    {
-      switch (value) {
-        case 0: return false_;
-        case 1: return true_;
-        case 2: return nothing_;
-      }
-      
-      ASSERT(false, "Unknown built-in ID.");
-    }
-    
+    gc<Object> getBuiltIn(int value) const;
+
     int findNative(gc<String> name);
     Native getNative(int index) const { return natives_[index]; }
     
@@ -118,7 +111,9 @@ namespace magpie
     gc<ClassObject> recordClass_;
     gc<ClassObject> stringClass_;
     gc<ClassObject> noMatchErrorClass_;
-    
+    gc<ClassObject> noMethodErrorClass_;
+    gc<ClassObject> undefinedVarErrorClass_;
+
     NO_COPY(VM);
   };
 }

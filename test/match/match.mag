@@ -23,7 +23,7 @@ do
         case "a" then "bad"
         case "b" then "bad"
     end
-catch err then
+catch is NoMatchError then
     print("caught") // expect: caught
 end
 

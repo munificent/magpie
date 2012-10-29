@@ -186,10 +186,12 @@ namespace magpie
           Module* module = vm_.getModule(moduleIndex);
           gc<Object> object = module->getVariable(variableIndex);
           
-          // TODO(bob): Throw UndefinedVariableError.
-          if (object.isNull() && !throwError(vm_.getBool(false)))
+          if (object.isNull())
           {
-            return FIBER_UNCAUGHT_ERROR;
+            gc<Object> error = DynamicObject::create(
+                vm_.undefinedVarErrorClass());
+
+            if (!throwError(error)) return FIBER_UNCAUGHT_ERROR;
           }
           
           store(frame, GET_C(ins), object);

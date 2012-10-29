@@ -86,8 +86,7 @@ namespace magpie
     }
 
     // If we get here, all methods failed to match, so throw a NoMethodError.
-    // TODO(bob): Should throw NoMethodError instead of false.
-    write(OP_BUILT_IN, 0, 0);
+    write(OP_BUILT_IN, 3, 0);
     write(OP_THROW, 0);
     
     chunk_->setCode(code_, maxSlots_);

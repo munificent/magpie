@@ -9,10 +9,8 @@ print(foo b) // expect: s
 
 do
     Foo new(a: true, b: "s")
-catch err then print("caught") // expect: caught
-// TODO(bob): Check error type.
+catch is NoMethodError then print("caught") // expect: caught
 
 do
     Foo new(a: 1, b: 2)
-catch err then print("caught") // expect: caught
-// TODO(bob): Check error type.
+catch is NoMethodError then print("caught") // expect: caught
