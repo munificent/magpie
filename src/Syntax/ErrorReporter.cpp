@@ -1,4 +1,5 @@
 #include <sstream>
+#include <stdarg.h>
 
 #include "ErrorReporter.h"
 
@@ -8,11 +9,11 @@ namespace magpie
   {
     // If we're just waiting for more input, don't show any errors.
     if (needMoreLines_) return;
-    
+
     // TODO(bob): Hackish. Need to figure out if we want C-style, C++-style or
     // Magpie GC strings.
     char message[512];
-    
+
     va_list args;
     va_start(args, format);
     vsprintf(message, format, args);
@@ -24,7 +25,7 @@ namespace magpie
 
     numErrors_++;
   }
-  
+
   void ErrorReporter::setNeedMoreLines()
   {
     if (isRepl_) needMoreLines_ = true;
