@@ -116,3 +116,34 @@ match Num
     case == Bool then print("no")
     case == Num then print("yes") // expect: yes
 end
+
+// Allow a single-line else.
+match "second"
+    case "first" then print("no")
+    else print("else") // expect: else
+end
+
+// Return the value of the else clause.
+print(match "second"
+    case "first" then print("no")
+    else "else"
+end) // expect: else
+
+// Allow a block for the else body.
+var result = ""
+match "second"
+    case "first" then print("no")
+    else
+        print("a") // expect: a
+        print("b") // expect: b
+    end
+end
+
+// Return the value of the else block.
+print(match "second"
+    case "first" then print("no")
+    else
+        "dummy"
+        "else"
+    end
+end) // expect: else

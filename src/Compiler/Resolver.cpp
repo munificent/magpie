@@ -338,8 +338,11 @@ namespace magpie
       Scope caseScope(this);
       const MatchClause& clause = expr.cases()[i];
       
-      // Resolve the pattern.
-      scope_->resolve(*clause.pattern());
+      // Resolve the pattern (will be null for the else case).
+      if (!clause.pattern().isNull())
+      {
+        scope_->resolve(*clause.pattern());
+      }
 
       // Resolve the body.
       resolve(clause.body());

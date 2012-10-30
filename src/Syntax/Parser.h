@@ -42,10 +42,12 @@ namespace magpie
     };
     
     gc<Expr> parseBlock(TokenType endToken = TOKEN_END);
+    gc<Expr> parseBlock(TokenType end1, TokenType end2, TokenType end3,
+                        TokenType* outEndToken);
     gc<Expr> parseBlock(TokenType end1, TokenType end2,
                         TokenType* outEndToken);
     gc<Expr> parseBlock(bool allowCatch, TokenType end1, TokenType end2,
-                        TokenType* outEndToken);
+                        TokenType end3, TokenType* outEndToken);
     gc<Expr> topLevelExpression();
     gc<Expr> statementLike();
     gc<Expr> flowControl();

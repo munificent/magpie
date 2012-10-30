@@ -104,17 +104,23 @@ namespace magpie
   gc<Expr> Parser::parseBlock(TokenType endToken)
   {
     TokenType dummy;
-    return parseBlock(true, endToken, endToken, &dummy);
+    return parseBlock(true, endToken, endToken, endToken, &dummy);
   }
 
   gc<Expr> Parser::parseBlock(TokenType end1, TokenType end2,
                               TokenType* outEndToken)
   {
-    return parseBlock(true, end1, end2, outEndToken);
+    return parseBlock(true, end1, end2, end2, outEndToken);
   }
 
-  gc<Expr> Parser::parseBlock(bool allowCatch, TokenType end1, TokenType end2,
+  gc<Expr> Parser::parseBlock(TokenType end1, TokenType end2, TokenType end3,
                               TokenType* outEndToken)
+  {
+    return parseBlock(true, end1, end2, end3, outEndToken);
+  }
+  
+  gc<Expr> Parser::parseBlock(bool allowCatch, TokenType end1, TokenType end2,
+                              TokenType end3, TokenType* outEndToken)
   {
     // If we have a newline, then it's an actual block, otherwise it's a
     // single expression.
@@ -126,6 +132,7 @@ namespace magpie
       {
         if (lookAhead(end1)) break;
         if (lookAhead(end2)) break;
+        if (lookAhead(end3)) break;
         if (lookAhead(TOKEN_CATCH)) break;
 
         gc<Expr> expr = statementLike();
@@ -159,7 +166,7 @@ namespace magpie
         {
           gc<Pattern> pattern = parsePattern(false);
           consume(TOKEN_THEN, "Expect 'then' after catch pattern.");
-          gc<Expr> body = parseBlock(false, end1, end2, outEndToken);
+          gc<Expr> body = parseBlock(false, end1, end2, end3, outEndToken);
           catches.add(MatchClause(pattern, body));
         }
 
@@ -437,6 +444,13 @@ namespace magpie
         }
 
         cases.add(MatchClause(pattern, body));
+      }
+
+      // Parse the else.
+      if (match(TOKEN_ELSE))
+      {
+        gc<Expr> body = parseBlock();
+        cases.add(MatchClause(gc<Pattern>(), body));
       }
 
       consume(TOKEN_LINE,

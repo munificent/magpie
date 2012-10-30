@@ -1,0 +1,6 @@
+// Should not allow a case after the else.
+match "whatever"
+    case "a" then "a"
+    else "b"
+    case "c" then "c" // expect error
+end

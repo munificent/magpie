@@ -594,10 +594,13 @@ namespace magpie
       const MatchClause& clause = clauses[i];
       bool lastPattern = i == clauses.count() - 1;
       
-      // Compile the pattern.
+      // Compile the pattern (if there is one and it isn't the "else" case).
       PatternCompiler compiler(*this, !lastPattern);
-      clause.pattern()->accept(compiler, dest);
-      
+      if (!clause.pattern().isNull())
+      {
+        clause.pattern()->accept(compiler, dest);
+      }
+
       // Compile the body if the match succeeds.
       compile(clause.body(), dest);
       
