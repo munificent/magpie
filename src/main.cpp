@@ -8,7 +8,7 @@
 #include <windows.h>
 #define PATH_MAX MAX_PATH
 #define EX_NOINPUT 1
-#elif
+#else
 #include <sysexits.h>
 #endif
 

@@ -10,7 +10,7 @@ from string import strip
 
 MAGPIE_DIR = dirname(dirname(realpath(__file__)))
 TEST_DIR = join(MAGPIE_DIR, 'test')
-# TODO(bob): Support other platforms and configurations.
+
 if sys.platform == 'win32':
     MAGPIE_APP = join(MAGPIE_DIR, 'Debug', 'magpie.exe')
     if not isfile(MAGPIE_APP):
