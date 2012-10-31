@@ -1,0 +1,21 @@
+// skip
+// TODO(bob): Implement record multimethod ordering.
+def foo(is Num, is Num)
+    print("num num")
+end
+
+def foo(is Num, is String)
+    print("num string")
+end
+
+def foo(is String, is String)
+    print("string string")
+end
+def foo(is String, is Num)
+    print("string num")
+end
+
+foo(123, 123) // expect: num num
+foo(123, "s") // expect: num string
+foo("s", "s") // expect: string string
+foo("s", 123) // expect: string num

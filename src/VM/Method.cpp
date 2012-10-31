@@ -335,7 +335,7 @@ namespace magpie
   void PatternComparer::visit(RecordPattern& node, int dummy)
   {
     if (other_.asRecordPattern() != NULL) {
-      ASSERT(false, "Not implemented.");
+      *result_ = compareRecords(node, *other_.asRecordPattern());
     } else if (other_.asTypePattern() != NULL) {
       // TODO(bob): Is this right?
       *result_ = ORDER_NONE;
@@ -408,5 +408,11 @@ namespace magpie
     } else {
       ASSERT(false, "Unknown pattern type.");
     }
+  }
+
+  MethodOrder PatternComparer::compareRecords(RecordPattern& a,
+                                              RecordPattern& b) {
+    ASSERT(false, "Not implemented.");
+    return ORDER_NONE;
   }
 }
