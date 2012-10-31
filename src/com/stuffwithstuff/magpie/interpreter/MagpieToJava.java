@@ -24,17 +24,17 @@ public class MagpieToJava {
     MagpieToJava converter = new MagpieToJava(context);
     return converter.convertExpr(expr);
   }
-  
+
   public static Pattern convertPattern(Context context, Obj pattern) {
     MagpieToJava converter = new MagpieToJava(context);
     return converter.convertPattern(pattern);
   }
-  
+
   public static Token convertToken(Context context, Obj token) {
     MagpieToJava converter = new MagpieToJava(context);
     return converter.convertToken(token);
   }
-  
+
   public static TokenType convertTokenType(Context context, Obj token) {
     MagpieToJava converter = new MagpieToJava(context);
     return converter.convertTokenType(token);
@@ -48,9 +48,9 @@ public class MagpieToJava {
    */
   private Expr convertExpr(Obj expr) {
     Expect.notNull(expr);
-    
+
     if (mContext.isNothing(expr)) return null;
-    
+
     ClassObj exprClass = expr.getClassObj();
     if (exprClass == getClass("ArrayExpression")) {
     return Expr.array(
@@ -78,7 +78,7 @@ public class MagpieToJava {
       for (Obj parent : expr.getField("parents").asList()) {
         parents.add(parent.asString());
       }
-      
+
       Map<String, Field> fields = new HashMap<String, Field>();
       for (Obj entry : expr.getField("fields").asList()) {
         Obj fieldObj = entry.getField(1);
@@ -190,10 +190,10 @@ public class MagpieToJava {
           getPattern(expr, "pattern"),
           getExpr(expr, "value"));
     }
-    
+
     throw new IllegalArgumentException("Not a valid expression object.");
   }
-  
+
   private MatchCase convertMatchCase(Obj matchCase) {
     return new MatchCase(
         getPattern(matchCase, "pattern"),
@@ -202,7 +202,7 @@ public class MagpieToJava {
 
   private Pattern convertPattern(Obj pattern) {
     if (mContext.isNothing(pattern)) return null;
-    
+
     ClassObj patternClass = pattern.getClassObj();
 
     if (patternClass == getClass("RecordPattern")) {
@@ -226,10 +226,10 @@ public class MagpieToJava {
     } else if (patternClass == getClass("WildcardPattern")) {
       return Pattern.wildcard();
     }
-    
+
     throw new IllegalArgumentException("Not a valid pattern object.");
   }
-  
+
   private Position convertPosition(Obj position) {
     return new Position(
         getString(position, "file"),
@@ -238,26 +238,26 @@ public class MagpieToJava {
         getInt(position, "endLine"),
         getInt(position, "endCol"));
   }
-  
+
   private Token convertToken(Obj token) {
     Position position = getPosition(token);
     TokenType type = convertTokenType(token.getField("tokenType"));
     String text = getString(token, "text");
     Object value = token.getField("value").getValue();
-    
+
     return new Token(position, type, text, value);
   }
 
   private TokenType convertTokenType(Obj tokenType) {
     String name = getString(tokenType, "name");
-    
+
     return TokenType.valueOf(name);
   }
 
   private boolean getBool(Obj obj, String name) {
     return obj.getField(name).asBool();
   }
-  
+
   private Expr getExpr(Obj obj, String name) {
     return convertExpr(obj.getField(name));
   }
@@ -273,11 +273,11 @@ public class MagpieToJava {
   private int getInt(Obj obj, String name) {
     return obj.getField(name).asInt();
   }
-  
+
   private List<Obj> getList(Obj obj, String name) {
     return obj.getField(name).asList();
   }
-  
+
   private List<MatchCase> getMatchCaseList(Obj obj, String name) {
     List<MatchCase> cases = new ArrayList<MatchCase>();
     for (Obj matchCase : obj.getField(name).asList()) {
@@ -285,11 +285,11 @@ public class MagpieToJava {
     }
     return cases;
   }
-  
+
   private Pattern getPattern(Obj obj, String name) {
     return convertPattern(obj.getField(name));
   }
-  
+
   private Position getPosition(Obj obj) {
     return convertPosition(obj.getField("position"));
   }
@@ -297,10 +297,10 @@ public class MagpieToJava {
   private String getString(Obj obj, String name) {
     return obj.getField(name).asString();
   }
-  
+
   private ClassObj getClass(String name) {
     return mContext.getInterpreter().getSyntaxModule().getScope().get(name).asClass();
   }
-  
+
   private final Context mContext;
 }

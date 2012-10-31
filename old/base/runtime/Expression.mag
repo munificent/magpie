@@ -7,19 +7,19 @@ union Expression
     BoolExpr    Bool
     IntExpr     Int
     StringExpr  String
-    
+
     NameExpr    String
-    
+
     TupleExpr   Array[Expression]
     ArrayExpr   Array[Expression]
 
     BlockExpr   Array[Expression]
-    
+
     CallExpr    (Expression, Expression)
     DefineExpr  (Bool, String, Expression) // mutable?, name, value
     AssignExpr  (Expression, Expression) // target, value
     ReturnExpr  Expression
-    
+
     IfExpr      (Expression, Expression, Expression) // condition, then, else
 end
 
@@ -30,7 +30,7 @@ String (expr Expression -> String)
     else if expr.StringExpr?    then "\"" + expr.StringExprValue.String + "\""
 
     else if expr.NameExpr?      then expr.NameExprValue.String
-                                     
+
     else if expr.TupleExpr?     then Join ("(", ", ", ")", expr.TupleExprValue)
     else if expr.ArrayExpr?     then Join ("[", ", ", "]", expr.ArrayExprValue)
 
@@ -52,7 +52,7 @@ String (expr Expression -> String)
     else if expr.IfExpr?        then "if " + expr.IfExprValue.0.String + " then " +
                                      expr.IfExprValue.1.String + " else " +
                                      expr.IfExprValue.2.String
-        
+
     else "???"
 end
 

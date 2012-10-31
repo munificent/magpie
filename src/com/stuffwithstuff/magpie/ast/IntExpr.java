@@ -7,9 +7,9 @@ public class IntExpr extends Expr {
     super(position);
     mValue = value;
   }
-  
+
   public int getValue() { return mValue; }
-  
+
   @Override
   public boolean isLiteral() {
     return true;

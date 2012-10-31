@@ -17,14 +17,14 @@ public class FieldGetter implements Callable {
     mPattern = Pattern.record(Pattern.type(Expr.name(classObj.getName())), Pattern.nothing());
     mClosure = closure;
   }
-  
+
   @Override
   public Obj invoke(Context context, Obj arg) {
     Obj value = arg.getField(0).getField(mName);
     if (value == null) return context.nothing();
     return value;
   }
-  
+
   @Override
   public Pattern getPattern() {
     return mPattern;
@@ -34,7 +34,7 @@ public class FieldGetter implements Callable {
   public Scope getClosure() {
     return mClosure;
   }
-  
+
   @Override
   public String getDoc() {
     return "Gets the value of the field.";

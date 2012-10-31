@@ -49,13 +49,13 @@ public class JavaToMagpie {
     JavaToMagpie javaToMagpie = new JavaToMagpie(context, null);
     return javaToMagpie.convertExpr(expr);
   }
-  
+
   public static Obj convertAndUnquote(Context context, Expr expr,
       Scope scope) {
     JavaToMagpie javaToMagpie = new JavaToMagpie(context, scope);
     return javaToMagpie.convertExpr(expr);
   }
-  
+
   public static Obj convert(Context context, Pattern pattern) {
     JavaToMagpie javaToMagpie = new JavaToMagpie(context, null);
     return javaToMagpie.convertPattern(pattern);
@@ -65,12 +65,12 @@ public class JavaToMagpie {
     JavaToMagpie javaToMagpie = new JavaToMagpie(context, null);
     return javaToMagpie.convertTokenType(type);
   }
-  
+
   public static Obj convert(Context context, Token token) {
     JavaToMagpie javaToMagpie = new JavaToMagpie(context, null);
     return javaToMagpie.convertToken(token);
   }
-  
+
   private JavaToMagpie(Context context, Scope scope) {
     mContext = context;
     mScope = scope;
@@ -81,7 +81,7 @@ public class JavaToMagpie {
     ExprConverter converter = new ExprConverter();
     return expr.accept(converter, null);
   }
-  
+
   private Obj convertArray(List<?> values) {
     List<Obj> objs = new ArrayList<Obj>();
     for (Object value : values) {
@@ -89,10 +89,10 @@ public class JavaToMagpie {
     }
     return mContext.toArray(objs);
   }
-  
+
   private Obj convertMatchCase(MatchCase matchCase) {
     if (matchCase == null) return mContext.nothing();
-    
+
     return construct("MatchCase",
         "pattern", matchCase.getPattern(),
         "body",    matchCase.getBody());
@@ -100,11 +100,11 @@ public class JavaToMagpie {
 
   private Obj convertPattern(Pattern pattern) {
     if (pattern == null) return mContext.nothing();
-    
+
     PatternConverter converter = new PatternConverter();
     return pattern.accept(converter, null);
   }
-  
+
   private Obj convertPosition(Position position) {
     return construct("Position",
         "file",      position.getSourceFile(),
@@ -113,22 +113,22 @@ public class JavaToMagpie {
         "endLine",   position.getEndLine(),
         "endCol",    position.getEndCol());
   }
-  
+
   private Obj convertToken(Token token) {
     if (token == null) return mContext.nothing();
-    
+
     return construct("Token",
         "position",  token.getPosition(),
         "type",      token.getType(),
         "text",      token.getText(),
         "value",     token.getValue());
   }
-  
+
   private Obj convertTokenType(TokenType type) {
     return construct("TokenType",
-        "name", type.toString());    
+        "name", type.toString());
   }
-  
+
   private Obj convertObject(Object object) {
     if (object == null) return mContext.nothing();
     if (object instanceof Obj) return (Obj) object;
@@ -141,7 +141,7 @@ public class JavaToMagpie {
     if (object instanceof Position) return convertPosition((Position) object);
     if (object instanceof Token) return convertToken((Token) object);
     if (object instanceof TokenType) return convertTokenType((TokenType) object);
-    
+
     throw new UnsupportedOperationException("Don't know how to convert an " +
         "object of type " + object.getClass().getSimpleName() + ".");
   }
@@ -154,7 +154,7 @@ public class JavaToMagpie {
     for (int i = 0; i < args.length; i += 2) {
       object.setField((String) args[i], convertObject(args[i + 1]));
     }
-    
+
     return object;
   }
 
@@ -198,14 +198,14 @@ public class JavaToMagpie {
     @Override
     public Obj visit(ClassExpr expr, Void context) {
       List<Obj> fields = new ArrayList<Obj>();
-      
+
       for (Entry<String, Field> field : expr.getFields().entrySet()) {
         fields.add(construct("Field",
             "isMutable",   field.getValue().isMutable(),
             "initializer", field.getValue().getInitializer(),
             "pattern",     field.getValue().getPattern()));
       }
-      
+
       return construct("ClassExpression",
           "position", expr.getPosition(),
           "doc",      expr.getDoc(),
@@ -226,14 +226,14 @@ public class JavaToMagpie {
     @Override
     public Obj visit(ImportExpr expr, Void context) {
       List<Obj> declarations = new ArrayList<Obj>();
-      
+
       for (ImportDeclaration declaration : expr.getDeclarations()) {
         declarations.add(construct("ImportDeclaration",
             "isExported", declaration.isExported(),
             "name",       declaration.getName(),
             "rename",     declaration.getRename()));
       }
-      
+
       return construct("ImportExpression",
           "position",     expr.getPosition(),
           "scheme",       expr.getScheme(),
@@ -352,7 +352,7 @@ public class JavaToMagpie {
       if (mScope != null) {
         // TODO(bob): Check that it evaluates to an expression?
         Obj value = mContext.evaluate(expr.getBody(), mScope);
-        
+
         // If the unquoted value is a primitive object, automatically promote
         // it to a corresponding literal.
         if (mContext.isBool(value)) {
@@ -389,7 +389,7 @@ public class JavaToMagpie {
           "value",     expr.getValue());
     }
   }
-  
+
   public class PatternConverter implements PatternVisitor<Obj, Void> {
 
     @Override
@@ -429,7 +429,7 @@ public class JavaToMagpie {
       return construct("WildcardPattern");
     }
   }
-  
+
   private final Context mContext;
   private final Scope mScope;
 }

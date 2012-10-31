@@ -14,7 +14,7 @@ namespace magpie
   class Object;
   class Pattern;
   class VM;
-  
+
   // A compiled chunk of bytecode that can be executed by a Fiber.
   class Chunk : public Managed
   {
@@ -24,31 +24,31 @@ namespace magpie
       constants_(),
       numSlots_(0)
     {}
-    
+
     void setCode(const Array<instruction>& code,
                  int maxSlots);
-    
+
     inline const Array<instruction>& code() const { return code_; }
-    
+
     int addConstant(gc<Object> constant);
     gc<Object> getConstant(int index) const;
-    
+
     int numSlots() const { return numSlots_; }
 
     void debugTrace() const;
     void debugTrace(instruction ins) const;
 
     virtual void reach();
-    
+
   private:
     Array<instruction> code_;
     Array<gc<Object> > constants_;
-    
+
     int numSlots_;
-    
+
     NO_COPY(Chunk);
   };
-  
+
   // Intermediate representation of a single method in a multimethod. This is
   // produced during module compilation and "halfway" compiles the method to
   // bytecode. The final compilation to bytecode occurs once all methods for a
@@ -61,12 +61,12 @@ namespace magpie
     : module_(module),
       def_(def)
     {}
-    
+
     Module* module() { return module_; }
     gc<DefExpr> def() { return def_; }
 
     virtual void reach();
-    
+
   private:
     Module* module_;
     gc<DefExpr> def_;
@@ -89,17 +89,17 @@ namespace magpie
     // The two methods don't have an ordering relative to each other.
     ORDER_NONE
   };
-  
+
   class Multimethod : public Managed
   {
   public:
     Multimethod(gc<String> signature);
-    
+
     gc<String> signature() { return signature_; }
     gc<Chunk> getChunk(VM& vm);
-    
+
     Array<gc<Method> >& methods() { return methods_; }
-    
+
     void addMethod(gc<Method> method);
 
     virtual void reach();
@@ -122,12 +122,12 @@ namespace magpie
   {
   public:
     static MethodOrder compare(gc<Pattern> a, gc<Pattern> b);
-    
+
     PatternComparer(Pattern& other, MethodOrder* result)
     : other_(other),
       result_(result)
     {}
-    
+
     virtual void visit(RecordPattern& node, int dummy);
     virtual void visit(TypePattern& node, int dummy);
     virtual void visit(ValuePattern& node, int dummy);

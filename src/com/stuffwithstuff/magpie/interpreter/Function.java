@@ -17,14 +17,14 @@ public class Function implements Callable {
   public Obj invoke(Context context, Obj arg) {
     try {
       Profiler.push(mFunction.getPosition());
-      
+
       // Create a local scope for the function.
       Scope scope = mScope.push();
-      
+
       // Bind the arguments to the pattern.
       Pattern pattern = mFunction.getPattern();
       PatternBinder.bind(context, false, pattern, arg, scope);
-      
+
       try {
         return context.evaluate(mFunction.getBody(), scope);
       } catch (ReturnException ex) {
@@ -35,7 +35,7 @@ public class Function implements Callable {
       Profiler.pop();
     }
   }
-  
+
   @Override
   public Pattern getPattern() { return mFunction.getPattern(); }
 
@@ -44,7 +44,7 @@ public class Function implements Callable {
 
   @Override
   public String getDoc() { return mFunction.getDoc(); }
-  
+
   private final FnExpr mFunction;
   private final Scope mScope;
 }

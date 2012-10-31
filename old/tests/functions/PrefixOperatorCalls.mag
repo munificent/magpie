@@ -5,7 +5,7 @@ Main (->)
     // call it in prefix form
     def a <- (++) (1, 2)
     Print a.String
-    
+
     // reverse apply
     def b <- (3, 4).(++)
     Print b.String

@@ -18,7 +18,7 @@ public class IntrinsicCallable implements Callable {
   public Obj invoke(Context context, Obj arg) {
     return mCallable.invoke(context, arg.getField(0), arg.getField(1));
   }
-  
+
   @Override
   public Pattern getPattern() { return mPattern; }
 
@@ -26,12 +26,12 @@ public class IntrinsicCallable implements Callable {
   public Scope getClosure() {
     return mClosure;
   }
-  
+
   @Override
   public String getDoc() {
     return mDoc;
   }
-  
+
   private final Pattern mPattern;
   private final String mDoc;
   private final Intrinsic mCallable;

@@ -12,12 +12,12 @@ Main (->)
     // single line define
     def a <- 123
     Print a.String
-    
+
     // single line variable
     var b <- "foo"
     b <- "bar"
     Print b
-    
+
     // multi-line define
     def
         c <- "c"
@@ -26,22 +26,22 @@ Main (->)
                 "d"
             end
     end
-    
+
     Print c
     Print d
-    
+
     // multi-line variable
     var
         e <- "c"
         f <- "d"
     end
-    
+
     e <- "e"
     f <- "f"
-    
+
     Print e
     Print f
-    
+
     // tuple splitting
     def g, h <- ("g", "h")
     Print g

@@ -23,24 +23,24 @@ public class Term {
     LAVENDER    ("1;35"),
     CYAN        ("0;36"),
     LIGHT_CYAN  ("1;36");
-    
+
     ForeColor(String escape) {
       mEscape = escape;
     }
-    
+
     public String escape() { return mEscape; }
-    
+
     private final String mEscape;
   }
-  
+
   public static void restoreColor() {
     System.out.print("\033[0m");
   }
-  
+
   public static void set(ForeColor color) {
     System.out.print("\033[" + color.escape() + "m");
   }
-  
+
   public static void moveUp() {
     // Move up one line and to first column. Doesn't work in iTerm. :(
     // System.out.print("\033[F");

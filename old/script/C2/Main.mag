@@ -8,21 +8,21 @@ Main (arg String ->)
         TestList
         TestString
         TestDict
-        
+
         // lexing
         TestToken
         TestLexer
-        
+
         // bytecode generation
         TestOffsetTable
-        
-    else     
+
+    else
         Print arg
 
         def text <- ReadFile arg
         Print text
         Print "writing bytecode"
-        
+
         WriteDumbBytecode
     end
 end
@@ -30,28 +30,28 @@ end
 //### bob: temp for testing
 WriteDumbBytecode (->)
     def stream <- Stream
-    
+
     // magic number
     WriteByte (stream, 112) // p
     WriteByte (stream, 105) // i
     WriteByte (stream, 101) // e
     WriteByte (stream, 33)  // !
-    
+
     // version
     WriteByte (stream, 0)
     WriteByte (stream, 0)
     WriteByte (stream, 0)
     WriteByte (stream, 0)
-    
+
     // number of exported functions
     Write (stream, 1)
-    
+
     // offset to exported function name
     Write (stream, 32)
-    
+
     // exported function offset
     Write (stream, 20)
-    
+
     // bytecode
     Write (stream, 0)      // num locals
     WriteByte (stream, 2)  // push int
@@ -59,9 +59,9 @@ WriteDumbBytecode (->)
     WriteByte (stream, 24) // int to string
     WriteByte (stream, 40) // print
     WriteByte (stream, 20) // return
-    
+
     // strings
     Write (stream, "Main ()")
-    
+
     Close stream
 end

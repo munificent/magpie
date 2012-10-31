@@ -15,7 +15,7 @@ public class CallExpr extends Expr {
 
   public String getName()      { return mName; }
   public Expr   getArg()       { return mArg; }
-  
+
   @Override
   public <R, C> R accept(ExprVisitor<R, C> visitor, C context) {
     return visitor.visit(this, context);
@@ -24,7 +24,7 @@ public class CallExpr extends Expr {
   @Override
   public void toString(StringBuilder builder, String indent) {
     builder.append(mName);
-    
+
     if (mArg instanceof NothingExpr) {
       builder.append("()");
     } else {

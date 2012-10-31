@@ -11,14 +11,14 @@ public class FnExpr extends Expr {
   FnExpr(Position position, String doc, Expr body) {
     this(position, doc, Pattern.nothing(), body);
   }
-  
+
   FnExpr(Position position, String doc, Pattern pattern, Expr body) {
     super(position, doc);
     Expect.notNull(pattern);
     mPattern = pattern;
     mBody = body;
   }
-  
+
   public Pattern getPattern() { return mPattern; }
   public Expr    getBody()    { return mBody; }
 
@@ -26,7 +26,7 @@ public class FnExpr extends Expr {
   public <R, C> R accept(ExprVisitor<R, C> visitor, C context) {
     return visitor.visit(this, context);
   }
-  
+
   @Override
   public void toString(StringBuilder builder, String indent) {
     builder.append("fn(").append(mPattern).append(") ");

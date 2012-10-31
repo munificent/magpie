@@ -13,12 +13,12 @@ import com.stuffwithstuff.magpie.util.Expect;
 public abstract class Parser {
   public Parser(TokenReader tokens) {
     Expect.notNull(tokens);
-    
+
     mTokens = tokens;
     mRead = new LinkedList<Token>();
     mConsumed = new LinkedList<Token>();
   }
-  
+
   /**
    * Creates a new PositionSpan that starts before the last consumed Token.
    */
@@ -43,19 +43,19 @@ public abstract class Parser {
   /**
    * Gets the current token in the token stream. This is the next token that
    * will be consumed.
-   * 
+   *
    * @return The current token.
    */
   public Token current() {
     return lookAhead(0);
   }
-  
+
   /**
    * Looks ahead at the token stream to see if the next tokens match the
    * expected types, in order. For example, if the next tokens are (123, "do"),
    * then a call to lookAhead(TokenType.INT, TokenType.DO) will return true.
    * Does not consume any tokens.
-   * 
+   *
    * @param   tokens  The expected types.
    * @return          True if the next tokens match.
    */
@@ -70,7 +70,7 @@ public abstract class Parser {
   /**
    * Gets whether or not the next Token is of any of the given types. Does not
    * consume the token.
-   * 
+   *
    * @param   tokens  The allowed types for the next Token.
    * @return          True if the Token is one of the types.
    */
@@ -78,14 +78,14 @@ public abstract class Parser {
     for (TokenType token : tokens) {
       if (lookAhead(token)) return true;
     }
-    
+
     return false;
   }
 
   /**
    * Looks ahead at the token stream to see if the next tokens match the
    * expected types, in order. If so, they are all consumed.
-   * 
+   *
    * @param   tokens  The expected types, in the order that they are
    *                  expected to appear.
    * @return          True if the tokens matched and were consumed.
@@ -98,14 +98,14 @@ public abstract class Parser {
     for (int i = 0; i < tokens.length; i++) {
       consume();
     }
-    
+
     return true;
   }
 
   /**
    * Looks ahead at the next token to see if it's any of the given allowed
    * types. If so, consumes it.
-   * 
+   *
    * @param   tokens  The types the next token can be.
    * @return          True if it matched and was consumed.
    */
@@ -113,7 +113,7 @@ public abstract class Parser {
     for (TokenType token : tokens) {
       if (match(token)) return true;
     }
-    
+
     return false;
   }
 
@@ -125,7 +125,7 @@ public abstract class Parser {
   public Token consume() {
     // Make sure we've read the token.
     lookAhead(0);
-    
+
     mConsumed.add(0, mRead.remove(0));
     return last(1);
   }
@@ -133,7 +133,7 @@ public abstract class Parser {
   /**
    * Consumes the current token and advances to the next one. The token is
    * required to be of the given type. If not, a ParseException will be thrown.
-   * 
+   *
    * @param   type  The type that the current token must be.
    * @return        The consumed token.
    */

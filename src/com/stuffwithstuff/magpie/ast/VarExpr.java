@@ -13,11 +13,11 @@ public class VarExpr extends Expr {
     mPattern = pattern;
     mValue = value;
   }
-  
+
   public boolean isMutable() { return mIsMutable; }
   public Pattern getPattern() { return mPattern; }
   public Expr getValue() { return mValue; }
-  
+
   @Override
   public <R, C> R accept(ExprVisitor<R, C> visitor, C context) {
     return visitor.visit(this, context);
@@ -30,7 +30,7 @@ public class VarExpr extends Expr {
     } else {
       builder.append("val ");
     }
-    
+
     builder.append(mPattern).append(" = ");
     mValue.toString(builder, indent);
   }

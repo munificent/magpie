@@ -10,17 +10,17 @@ Main (->)
 
     def a <- x: 3 y: "four"
     Foo a
-    
+
     Foo (x: 5 y: 6)
 
     // field order doesn't matter
     Foo (y: 8 x: 7)
-    
+
     // can contain tuples
     def b <- foo: 1, 2 bar: 3, 4
     Print b.foo.0.String
     Print b.bar.1.String
-    
+
     //Bar (x: 1 z: true y: "nine")
 end
 

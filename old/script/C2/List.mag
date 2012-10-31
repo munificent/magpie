@@ -28,9 +28,9 @@ Rest[T] (list List[T] -> List[T]) list.ConsValue.1
 
 Count[T] (list List[T] -> Int)
     var count <- 0
-    
+
     for item <- list do count <- + 1
-    
+
     count
 end
 
@@ -54,7 +54,7 @@ MoveNext[T] (iterator ListIterator[T] -> Bool)
     else
         iterator.Started? <- true
     end
-    
+
     Not iterator.List.Empty?
 end
 

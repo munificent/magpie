@@ -6,7 +6,7 @@ public class NothingExpr extends Expr {
   NothingExpr(Position position) {
     super(position);
   }
-  
+
   @Override
   public boolean isLiteral() {
     return true;

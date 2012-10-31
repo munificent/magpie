@@ -25,21 +25,21 @@ List.Clear (->) // ...
 // method calls use a familiar syntax
 Test1 (->)
     def list <- List
-    
+
     list.Add "foo"
     list.Clear // implicit () arg
-    
+
     // order of precedence (lowest to highest)
     // 1. flow control
     // 2. operators
     // 3. function calls
     // 4. method selection
-    
+
     list.Add 1 + 2             // (list.Add 1) + 2
     list.Add SomeFunc arg      // list.Add (SomeFunc arg)
     list.Add list.Count        // list.Add (list.Count)
     list.Add list.Add SomeFunc // list.Add (list.Add SomeFunc)
-    
+
     // but it's really just syntactic sugar (of course)
     def callback <- fn .Add (List, String)
     callback (list, "foo")
@@ -96,7 +96,7 @@ end
 
 Test4 (->)
     def list <- List // add stuff to list ...
-    
+
     def item <- list.2 // get third item from list
 end
 

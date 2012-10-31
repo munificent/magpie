@@ -10,7 +10,7 @@ Main (->)
     def a <- Bar ("whoop", 3, true)
     Print a.Bar?.String
     Print a.BarValue
-    
+
     def b <- Frob (123, false)
     Print b.Bar?.String
     Print b.FrobValue

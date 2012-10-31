@@ -10,14 +10,14 @@ Main (->)
     def a <- Bar 1
     Print a.Bar?.String
     Print a.BarValue.String
-    
+
     def b <- Bar "2"
     Print a.Bang?.String
     Print b.BarValue
-    
+
     def c <- Bar[Bool] true
     Print c.BarValue.String
-    
+
     //### bob: you should also be able to do Bar (3, 4) here, but
     // the automatic tuple unwrapping when matching function args
     // break this (it looks for Bar (a, b) and doesn't match Bar (a).

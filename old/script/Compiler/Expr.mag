@@ -8,7 +8,7 @@ namespace Magpie:Compiler
     //### bob: temp hack because you can't get a reference to an
     // auto function (yet)
     Call* (a Expr, b Expr -> Expr) Call (a, b)
-    
+
     union Expr
         // literals
         UnitLiteral
@@ -16,11 +16,11 @@ namespace Magpie:Compiler
         IntLiteral      Int
         StringLiteral   Int                 // index into string table
         FunctionLiteral Function
-        
+
         // compounds
         Tuple           List'Expr
         Block           List'Expr
-        
+
         // variables
         Locals
         Load            (Expr, Int)         // structure, field
@@ -30,13 +30,13 @@ namespace Magpie:Compiler
         IfDo            (Expr, Expr)        // condition, body
         IfThenElse      (Expr, Expr, Expr)  // condition, then, else
         While           (Expr, Expr)        // condition, body
-        
+
         // other
         Call            (Expr, Expr)        // function, arg
-        
+
         // bound only
         Intrinsic       (IntrinsicExpr, Expr)
-        
+
         // unbound only
         Name            (String, List'Decl) // name, type args
         UnboundString   String
@@ -44,16 +44,16 @@ namespace Magpie:Compiler
         Assign          (Expr, Expr)         // target, value
         FunctionRef     (String, List'Decl, List'Decl) // name, type args, param types
     end
-    
+
     union IntrinsicExpr
         BoolToString
         IntToString
-        
+
         Print
         AddInt
         AddString
     end
-    
+
     String (expr Expr -> String)
         // literals
         if expr.UnitLiteral?            then "()"
@@ -61,11 +61,11 @@ namespace Magpie:Compiler
         else if expr.IntLiteral?        then "int " + expr.IntLiteralValue.String
         else if expr.StringLiteral?     then "string at " + expr.StringLiteralValue.String
         else if expr.FunctionLiteral?   then expr.FunctionLiteralValue.Name
-        
+
         // compounds
         else if expr.Tuple?             then "(" + Join (expr.TupleValue, ", ") + ")"
         else if expr.Block?             then "{" + Join (expr.TupleValue, "; ") + "}"
-        
+
         // variables
         else if expr.Locals?            then "_locals"
         else if expr.Load?              then expr.LoadValue.First.String + "'" + expr.LoadValue.Second.String + ""
@@ -77,7 +77,7 @@ namespace Magpie:Compiler
         else if expr.IfThenElse?        then "if " + expr.IfThenElseValue.First.String +
                                              " then " + expr.IfThenElseValue.Second.String +
                                              " else " + expr.IfThenElseValue.Third.String
-        
+
         // other
         else if expr.Intrinsic? then
             def intrinsic <- expr.IntrinsicValue.First
@@ -89,9 +89,9 @@ namespace Magpie:Compiler
                         else if intrinsic.AddString?    then "+"
                         else "???"
             text + " " + expr.IntrinsicValue.Second.String
-            
+
         else if expr.Call?              then expr.CallValue.First.String + " " + expr.CallValue.Second.String
-        
+
         // unbound
         else if expr.Name?              then expr.NameValue.First // ### bob: need to include type args
         else if expr.UnboundString?     then "\"" + expr.UnboundStringValue + "\""
@@ -100,7 +100,7 @@ namespace Magpie:Compiler
             type + expr.DefineValue.First + " <- " + expr.DefineValue.Second.String
         else if expr.Assign?            then expr.AssignValue.First.String + " <- " + expr.AssignValue.Second.String
         else if expr.FunctionRef?       then "fn " + expr.FunctionRefValue.First
-        
+
         else "???"
     end
 end

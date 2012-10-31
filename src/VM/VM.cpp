@@ -24,7 +24,7 @@ namespace magpie
     fiber_()
   {
     Memory::initialize(this, 1024 * 1024 * 2); // TODO(bob): Use non-magic number.
-    
+
     fiber_ = new Fiber(*this);
 
     DEF_NATIVE(objectClass);
@@ -58,7 +58,7 @@ namespace magpie
     // Load the core module.
     coreModule_ = compileModule("<core>", coreSource);
     runModule(coreModule_);
-    
+
     registerClass(boolClass_, "Bool");
     registerClass(classClass_, "Class");
     registerClass(listClass_, "List");
@@ -75,22 +75,22 @@ namespace magpie
   {
     Module* module = compileModule(fileName, source);
     if (module == NULL) return false;
-    
+
     runModule(module);
     return true;
   }
-  
+
   gc<Object> VM::evaluateReplExpression(gc<Expr> expr)
   {
     if (replModule_ == NULL)
     {
       replModule_ = new Module();
       modules_.add(replModule_);
-      
+
       // Implicitly import core.
       replModule_->imports().add(coreModule_);
     }
-    
+
     // Compile it.
     ErrorReporter reporter;
     Compiler::compileExpression(*this, reporter, expr, replModule_);
@@ -115,7 +115,7 @@ namespace magpie
     nothing_.reach();
     symbols_.reach();
     methods_.reach();
-    
+
     for (int i = 0; i < modules_.count(); i++)
     {
       modules_[i]->reach();
@@ -133,7 +133,7 @@ namespace magpie
 
     ASSERT(false, "Unknown built-in ID.");
   }
-  
+
   int VM::findNative(gc<String> name)
   {
     for (int i = 0; i < nativeNames_.count(); i++)
@@ -151,10 +151,10 @@ namespace magpie
     for (int i = 0; i < recordTypes_.count(); i++)
     {
       RecordType& type = *recordTypes_[i];
-      
+
       // See if this record type matches what we're looking for.
       if (fields.count() != type.numFields()) continue;
-      
+
       bool found = true;
       for (int j = 0; j < fields.count(); j++)
       {
@@ -165,10 +165,10 @@ namespace magpie
           break;
         }
       }
-      
+
       if (found) return i;
     }
-    
+
     // It's a new type, so add it.
     gc<RecordType> type = RecordType::create(fields);
     recordTypes_.add(type);
@@ -179,7 +179,7 @@ namespace magpie
   {
     return recordTypes_[id];
   }
-  
+
   symbolId VM::addSymbol(gc<String> name)
   {
     // See if it's already in the table.
@@ -187,7 +187,7 @@ namespace magpie
     {
       if (*name == *symbols_[i]) return i;
     }
-    
+
     // It's a new symbol.
     symbols_.add(name);
     return symbols_.count() - 1;
@@ -198,25 +198,25 @@ namespace magpie
     methods_.add(method);
     return methods_.count() - 1;
   }
-  
+
   int VM::declareMultimethod(gc<String> signature)
   {
     // See if it's already declared.
     int index = findMultimethod(signature);
     if (index != -1) return index;
-    
+
     // It's a new multimethod.
     multimethods_.add(new Multimethod(signature));
     return multimethods_.count() - 1;
   }
-  
+
   int VM::findMultimethod(gc<String> signature)
   {
     for (int i = 0; i < multimethods_.count(); i++)
     {
       if (signature == multimethods_[i]->signature()) return i;
     }
-    
+
     // Not found.
     return -1;
   }
@@ -237,9 +237,9 @@ namespace magpie
     ErrorReporter reporter;
     Parser parser(fileName, source, reporter);
     gc<ModuleAst> moduleAst = parser.parseModule();
-    
+
     if (reporter.numErrors() > 0) return gc<ModuleAst>();
-    
+
     return moduleAst;
   }
 
@@ -248,31 +248,31 @@ namespace magpie
     int index = coreModule_->findVariable(String::create(name));
     classObj = coreModule_->getVariable(index)->asClass();
   }
-  
+
   Module* VM::compileModule(const char* fileName, gc<String> source)
   {
     // Parse it.
     gc<ModuleAst> ast = parseModule(fileName, source);
     if (ast.isNull()) return NULL;
-    
+
     Module* module = new Module();
     modules_.add(module);
-    
+
     // Compile it.
     ErrorReporter reporter;
     Compiler::compileModule(*this, reporter, ast, module);
     if (reporter.numErrors() > 0) return NULL;
-    
+
     return module;
   }
-  
+
   gc<Object> VM::runModule(Module* module)
   {
     fiber_->init(module->body());
-    
+
     FiberResult result;
     gc<Object> value;
-    
+
     // If the fiber returns FIBER_DID_GC, it's still running but it did a GC.
     // Since that moves the fiber, we return back to here so we can invoke
     // run() again at its new location in memory.
@@ -281,7 +281,7 @@ namespace magpie
       result = fiber_->run(value);
     }
     while (result == FIBER_DID_GC);
-    
+
     // TODO(bob): Kind of hackish.
     // If we got an uncaught error while loading the module, exit with an error.
     if (result == FIBER_UNCAUGHT_ERROR)
@@ -289,7 +289,7 @@ namespace magpie
       std::cerr << "Uncaught error." << std::endl;
       exit(3);
     }
-    
+
     return value;
   }
 }

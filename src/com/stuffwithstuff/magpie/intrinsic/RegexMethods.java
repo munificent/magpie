@@ -73,7 +73,7 @@ public class RegexMethods {
       return context.nothing();
     }
   }
-  
+
   @Def("(this is String) findAll(regex is Regex)")
   @Doc("Returns an array of all occurrences of the regular expression in " +
        "this String.")
@@ -89,13 +89,13 @@ public class RegexMethods {
       return context.toArray(finds);
     }
   }
-  
+
   private static Obj newMatchResult(Context context, Matcher matcher) {
     List<Obj> groups = new ArrayList<Obj>();
     for(int i = 0; i <= matcher.groupCount(); i++) {
       groups.add(context.toObj(matcher.group(i)));
     }
-    
+
     List<String> keys = new ArrayList<String>();
     keys.add("start");
     keys.add("finish");
@@ -104,11 +104,11 @@ public class RegexMethods {
     fields.put("start", context.toObj(matcher.start()));
     fields.put("finish", context.toObj(matcher.end()));
     fields.put("groups", context.toArray(groups));
-    
-    return context.getInterpreter().constructNewObject(context, sMatchClass, 
+
+    return context.getInterpreter().constructNewObject(context, sMatchClass,
         context.toObj(keys, fields));
   }
-  
+
   private static ClassObj sRegexClass;
   private static ClassObj sMatchClass;
 }

@@ -17,34 +17,34 @@ class Example
 
     // define instance method
     def foo(arg Int -> Bool) body
-    
+
     // define instance getter
     get foo Int = 123
-    
+
     // define instance setter
     set foo Int = print(it)
-    
+
     // declare instance field
     var foo Int
-    
+
     // declare instance method
     def foo(arg Int -> Bool) // ??? do what here ???
-    
+
     // declare instance getter
     get foo Int
-    
+
     // declare instance setter
     set foo Int
 
     // define shared field
     shared var foo Int = 123
-    
+
     // define shared method
     shared def foo(arg Int -> Bool) body
-    
+
     // define shared getter
     shared get foo Int = 123
-    
+
     // define shared setter
     shared set foo Int = print(it)
 end
@@ -71,17 +71,17 @@ end
 class Foo
     def method(x Int, y Int -> Int) = i
     var function (Int, Int) -> Int = fn(i Int -> Int) i
-    
+
     def method(i Int, b Bool) = "whatever"
     var tupleField (Int, Bool) = (1, true)
 end
 
 class MethodSet
     def add(name String, method Callable ->) _methods(name) = method
-  
+
     def find(name String -> Callable) _methods(name)
-  
+
     get methods Map[String, Callable] = _methods
-  
+
     var _methods = HashMap[String, Callable] new()
 end

@@ -10,9 +10,9 @@ public class Ref<V> {
   public Ref() {
     mValue = null;
   }
-  
+
   public V get() { return mValue; }
   public void set(V value) { mValue = value; }
-  
+
   private V mValue;
 }

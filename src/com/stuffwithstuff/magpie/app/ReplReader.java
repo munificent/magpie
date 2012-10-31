@@ -17,7 +17,7 @@ public class ReplReader implements SourceReader {
     InputStreamReader converter = new InputStreamReader(System.in);
     mInput = new BufferedReader(converter);
   }
-  
+
   @Override
   public String getDescription() {
     return "<repl>";
@@ -31,7 +31,7 @@ public class ReplReader implements SourceReader {
 
     return mLine.charAt(mPosition);
   }
-  
+
   @Override
   public void advance() {
     if (mPosition < mLine.length()) {
@@ -44,11 +44,11 @@ public class ReplReader implements SourceReader {
   protected void showPrompt(String prompt) {
     System.out.print(prompt);
   }
-  
+
   protected void afterReadLine(Repl repl, String prompt, String line) {
     // Do nothing.
   }
-  
+
   private void readLine() {
     String prompt;
     if (mFirstLine) {
@@ -57,14 +57,14 @@ public class ReplReader implements SourceReader {
     } else {
       prompt = "| ";
     }
-    
+
     showPrompt(prompt);
-    
+
     try {
       mLine = mInput.readLine();
-      
+
       afterReadLine(mRepl, prompt, mLine);
-      
+
       mLine = mLine + "\n";
     } catch (IOException e) {
       // TODO Auto-generated catch block
@@ -72,7 +72,7 @@ public class ReplReader implements SourceReader {
     }
     mPosition = 0;
   }
-  
+
   private final Repl mRepl;
   private final BufferedReader mInput;
   private boolean mFirstLine = true;

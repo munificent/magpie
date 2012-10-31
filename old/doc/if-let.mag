@@ -50,5 +50,5 @@ end
 switch m
     if (1, 2) then Print "1 2"
     if (2, 3) then Print "2 3"
-    let a <- 
+    let a <-
 end

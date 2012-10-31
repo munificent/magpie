@@ -4,7 +4,7 @@
 Main (->)
     def a <- { if foo then bar else bang }
     Print a.String
-    
+
     def b <- { if foo then bar }
     Print b.String
 end

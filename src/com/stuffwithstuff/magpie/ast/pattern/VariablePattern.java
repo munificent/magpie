@@ -6,7 +6,7 @@ public class VariablePattern extends Pattern {
   /**
    * A pattern that binds a variable. It may optionally require a pattern
    * to also match, for example "a Int" where "Int" is the pattern.
-   * 
+   *
    * @param name
    * @param pattern
    */
@@ -14,10 +14,10 @@ public class VariablePattern extends Pattern {
     mName = name;
     mPattern = pattern;
   }
-  
+
   public String  getName() { return mName; }
   public Pattern getPattern() { return mPattern; }
-  
+
   @Override
   public <R, C> R accept(PatternVisitor<R, C> visitor, C context) {
     return visitor.visit(this, context);

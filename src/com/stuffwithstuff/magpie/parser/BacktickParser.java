@@ -9,7 +9,7 @@ public class BacktickParser implements PrefixParser {
       throw new ParseException(token.getPosition(),
           "Cannot unquote outside of a quotation.");
     }
-    
+
     Position position = token.getPosition();
     Expr body;
     if (parser.match(TokenType.NAME)) {
@@ -19,7 +19,7 @@ public class BacktickParser implements PrefixParser {
       parser.consume(TokenType.LEFT_PAREN);
       body = parser.groupExpression(TokenType.RIGHT_PAREN);
     }
-    
+
     return Expr.unquote(position, body);
   }
 }

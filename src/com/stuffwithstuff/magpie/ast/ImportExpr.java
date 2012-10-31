@@ -7,7 +7,7 @@ import com.stuffwithstuff.magpie.parser.Position;
 public class ImportExpr extends Expr {
   /**
    * Creates a new ImportExpr.
-   * 
+   *
    * @param module  The name of the module to import. Will start with "." for
    *                a relative import.
    */
@@ -20,13 +20,13 @@ public class ImportExpr extends Expr {
     mIsOnly = isOnly;
     mDeclarations = declarations;
   }
-  
+
   public String getScheme() { return mScheme; }
   public String getModule() { return mModule; }
   public String getPrefix() { return mPrefix; }
   public boolean isOnly() { return mIsOnly; }
   public List<ImportDeclaration> getDeclarations() { return mDeclarations; }
-  
+
   @Override
   public <R, C> R accept(ExprVisitor<R, C> visitor, C context) {
     return visitor.visit(this, context);
@@ -35,12 +35,12 @@ public class ImportExpr extends Expr {
   @Override
   public void toString(StringBuilder builder, String indent) {
     builder.append("import ");
-    
+
     if (mScheme != null) builder.append(mScheme).append(":");
     builder.append(mModule);
-    
+
     // TODO(bob): Update.
-    
+
     builder.append("\n");
   }
 

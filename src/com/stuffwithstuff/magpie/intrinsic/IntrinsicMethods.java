@@ -30,14 +30,14 @@ public class IntrinsicMethods {
       return context.toObj(time);
     }
   }
-  
+
   @Def("(is Function) call(arg)")
   @Doc("Invokes the given function.")
   public static class Call implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       FnObj function = left.asFn();
       Obj fnArg = right;
-      
+
       // Make sure the argument matches the function's pattern.
       Callable callable = function.getCallable();
       if (!PatternTester.test(context, callable.getPattern(), fnArg,
@@ -56,9 +56,9 @@ public class IntrinsicMethods {
   public static class CanParse implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       String source = right.asString();
-      
+
       boolean canParse = true;
-      
+
       try {
         MagpieParser parser = new MagpieParser(new StringReader("", source));
 
@@ -69,11 +69,11 @@ public class IntrinsicMethods {
       } catch (ParseException e) {
         canParse = false;
       }
-      
+
       return context.toObj(canParse);
     }
   }
-  
+
   @Def("(this is Class) name")
   @Doc("Gets the name of the class.")
   public static class Class_Name implements Intrinsic {
@@ -97,7 +97,7 @@ public class IntrinsicMethods {
     public Obj invoke(Context context, Obj left, Obj right) {
       Map<String, Obj> fields = left.getFields();
       Set<String> compared = new HashSet<String>();
-      
+
       // Make sure the right record has all of the left record's fields.
       for (Entry<String, Obj> entry : fields.entrySet()) {
         Obj rightField = right.getField(entry.getKey());
@@ -108,16 +108,16 @@ public class IntrinsicMethods {
         }
         compared.add(entry.getKey());
       }
-      
+
       // Make sure the right record doesn't have any extra fields.
       for (String field : right.getFields().keySet()) {
         if (!compared.contains(field)) return context.toObj(false);
       }
-      
+
       return context.toObj(true);
     }
   }
-  
+
   @Def("(this) toString")
   @Doc("Returns a generic string representation of the object.")
   public static class ToString implements Intrinsic {
@@ -144,7 +144,7 @@ public class IntrinsicMethods {
         String message = (String)left.getValue();
         return context.toObj(message);
       }
-      
+
       // Just do the default.
       return context.toObj("<" + left.getClassObj().getName() + ">");
     }

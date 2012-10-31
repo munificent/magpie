@@ -19,12 +19,12 @@ public class FieldObj {
    * declared.
    */
   public Callable getInitializer() { return mInitializer; }
-  
+
   /**
    * Gets the pattern for this field.
    */
   public Pattern getPattern() { return mPattern; }
-  
+
   private final Callable mInitializer;
   private final Pattern  mPattern;
 }

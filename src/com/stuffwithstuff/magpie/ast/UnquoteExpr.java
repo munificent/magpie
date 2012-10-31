@@ -7,9 +7,9 @@ public class UnquoteExpr extends Expr {
     super(position);
     mBody = body;
   }
-  
+
   public Expr getBody() { return mBody; }
-  
+
   @Override
   public <R, C> R accept(ExprVisitor<R, C> visitor, C context) {
     return visitor.visit(this, context);
@@ -21,6 +21,6 @@ public class UnquoteExpr extends Expr {
     mBody.toString(builder, indent);
     builder.append(")");
   }
-  
+
   private final Expr mBody;
 }

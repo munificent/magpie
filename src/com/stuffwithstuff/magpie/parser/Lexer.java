@@ -13,7 +13,7 @@ public class Lexer implements TokenReader {
     mText = text;
     mLine = 1;
     mCol = 1;
-    
+
     mStartLine = 1;
     mStartCol = 1;
     mRead = "";
@@ -46,7 +46,7 @@ public class Lexer implements TokenReader {
       // Strings.
     case '"':
       return readString();
-      
+
       // Comments.
     case '/':
       switch (peek()) {
@@ -54,7 +54,7 @@ public class Lexer implements TokenReader {
       case '*': return readBlockComment();
       default:  return readName();
       }
-      
+
       // Need to handle numeric literals.
     case '-':
       if (isDigit(peek())) {
@@ -67,13 +67,13 @@ public class Lexer implements TokenReader {
         // A "-" by itself.
         return makeToken(TokenType.NAME);
       }
-      
+
     case '\\':
       return makeToken(TokenType.LINE_CONTINUATION);
-      
+
       // EOF.
     case '\0': return makeToken(TokenType.EOF);
-    
+
     default:
       if (isName(c)) {
         // Identifier.
@@ -90,7 +90,7 @@ public class Lexer implements TokenReader {
       }
     }
   }
-  
+
   private Token readWhitespace() {
     while (true) {
       switch (peek()) {
@@ -98,16 +98,16 @@ public class Lexer implements TokenReader {
       case '\t':
         advance();
         break;
-        
+
       default:
         return makeToken(TokenType.WHITESPACE);
       }
     }
   }
-  
+
   private Token readString() {
     StringBuilder escaped = new StringBuilder();
-    
+
     while (true) {
       char c = advance();
       switch (c) {
@@ -123,7 +123,7 @@ public class Lexer implements TokenReader {
         case '"': escaped.append("\""); break;
         case '\\': escaped.append("\\"); break;
         case '0': escaped.append("\0"); break;
-        
+
         case 'x':
           int a = readHexDigit();
           int b = readHexDigit();
@@ -131,25 +131,25 @@ public class Lexer implements TokenReader {
           // TODO(bob): 4-digit escape code too.
           escaped.append(Character.toChars(code)[0]);
           break;
-          
+
         default:
           // TODO(bob): Emit error token instead of throwing.
           throw new ParseException(Position.none(), "Unknown string escape.");
         }
         break;
-        
+
       case '"':
         return makeToken(TokenType.STRING, escaped.toString());
-       
+
         // TODO(bob): Emit error token instead of throwing.
       case '\0': throw new ParseException(Position.none(), "Unterminated string.");
-      
+
       default:
         escaped.append(c);
       }
     }
   }
-  
+
   private int readHexDigit() {
     char c = Character.toLowerCase(advance());
     int digit = "0123456789abcdef".indexOf(c);
@@ -157,10 +157,10 @@ public class Lexer implements TokenReader {
       // TODO(bob): Emit error token instead of throwing.
       throw new ParseException(Position.none(), "Expected hex digit.");
     }
-    
+
     return digit;
   }
-  
+
   private Token readLineComment() {
     advance(); // Consume second "/".
 
@@ -171,10 +171,10 @@ public class Lexer implements TokenReader {
       ++slashCount;
       advance();
     }
-    
+
     // See if it's a "///" doc comment.
     boolean isDoc = slashCount == 3;
-      
+
     while (true) {
       switch (peek()) {
       case '\n':
@@ -183,7 +183,7 @@ public class Lexer implements TokenReader {
         String value = mRead.substring(slashCount).trim();
         return makeToken(
             isDoc ? TokenType.DOC_COMMENT : TokenType.LINE_COMMENT, value);
-        
+
       default:
         advance();
       }
@@ -201,7 +201,7 @@ public class Lexer implements TokenReader {
         default: // Do nothing, keep advancing.
         }
         break;
-        
+
         // TODO(bob): Emit error token instead of throwing.
       case '\0': throw new ParseException(Position.none(), "Unterminated block comment.");
       default: // Do nothing, keep advancing.
@@ -215,7 +215,7 @@ public class Lexer implements TokenReader {
         advance();
       } else if (peek() == ':') {
         advance();
-        
+
         // Trim off the ":".
         String value = mRead.substring(0, mRead.length() - 1);
         return makeToken(TokenType.FIELD, value);
@@ -231,7 +231,7 @@ public class Lexer implements TokenReader {
         advance();
       } else if (peek() == ':') {
         advance();
-        
+
         // Trim off the ":".
         String value = mRead.substring(0, mRead.length() - 1);
         return makeToken(TokenType.FIELD, value);
@@ -240,14 +240,14 @@ public class Lexer implements TokenReader {
       }
     }
   }
-  
+
   private Token readNumber() {
     while (true) {
       if (isDigit(peek())) {
         advance();
       } else if (peek() == ':') {
         advance();
-        
+
         // Trim off the ":".
         String value = mRead.substring(0, mRead.length() - 1);
         return makeToken(TokenType.FIELD, value);
@@ -256,11 +256,11 @@ public class Lexer implements TokenReader {
       }
     }
   }
-  
+
   private char peek() {
     return mText.current();
   }
-  
+
   private char advance() {
     char c = mText.current();
     mText.advance();
@@ -281,7 +281,7 @@ public class Lexer implements TokenReader {
   private Token makeToken(TokenType type) {
     return makeToken(type, mRead);
   }
-  
+
   private Token makeToken(TokenType type, Object value) {
     // Handle reserved words.
     if (type == TokenType.NAME) {
@@ -295,44 +295,44 @@ public class Lexer implements TokenReader {
         value = true;
       }
     }
-    
+
     Token token = new Token(currentPosition(), type, mRead, value);
-    
+
     mStartLine = mLine;
     mStartCol = mCol;
     mRead = "";
-    
+
     return token;
   }
-  
+
   private Position currentPosition() {
     return new Position(mText.getDescription(),
         mStartLine, mStartCol, mLine, mCol);
   }
-  
+
   private boolean isDigit(final char c) {
     return (c >= '0') && (c <= '9');
   }
-  
+
   private boolean isName(final char c) {
     return ((c >= 'a') && (c <= 'z'))
         || ((c >= 'A') && (c <= 'Z'))
         || (c == '_') || (c == '.');
   }
-  
+
   private boolean isOperator(final char c) {
     return ("~!$%^&*-=+|/?<>".indexOf(c) != -1);
   }
-  
+
   private final SourceReader mText;
   private String mRead;
   private int mStartLine;
   private int mStartCol;
   private int mLine;
   private int mCol;
-  
+
   private static final Map<String, TokenType> sKeywords;
-  
+
   static {
     sKeywords = new HashMap<String, TokenType>();
     sKeywords.put("and",      TokenType.AND);
@@ -363,7 +363,7 @@ public class Lexer implements TokenReader {
     sKeywords.put("var",      TokenType.VAR);
     sKeywords.put("while",    TokenType.WHILE);
     sKeywords.put("with",     TokenType.WITH);
-    
+
     sKeywords.put("*",    TokenType.ASTERISK);
     sKeywords.put("/",    TokenType.SLASH);
     sKeywords.put("%",    TokenType.PERCENT);

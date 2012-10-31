@@ -10,7 +10,7 @@ Main (->)
 
     Print ((1, "first"), ("second", 2)).0.1
     Print ((1, "first"), ("second", 2)).1.0
-    
+
     def a <- (1, 2, 3, 4, "five")
     Print 4 a
 end

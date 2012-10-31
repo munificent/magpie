@@ -9,12 +9,12 @@ public class ColorRepl extends ConsoleRepl {
     System.out.print(text);
     Term.restoreColor();
   }
-  
+
   @Override
   protected ReplReader createReader(Repl repl) {
     return new NiceReplCharacterReader(repl);
   }
-  
+
   @Override
   protected void printResult(String result) {
     Term.set(Term.ForeColor.GRAY);
@@ -23,7 +23,7 @@ public class ColorRepl extends ConsoleRepl {
     System.out.println(result);
     Term.restoreColor();
   }
-  
+
   @Override
   protected void printError(String message) {
     Term.set(Term.ForeColor.RED);

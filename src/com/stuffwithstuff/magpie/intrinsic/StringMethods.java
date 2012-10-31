@@ -10,22 +10,22 @@ import com.stuffwithstuff.magpie.interpreter.Context;
 import com.stuffwithstuff.magpie.interpreter.Name;
 import com.stuffwithstuff.magpie.interpreter.Obj;
 
-public class StringMethods {  
+public class StringMethods {
   @Def("(is String)[index is Int]")
   @Doc("Gets the character at the given index in the string (as a string).")
   public static class Index implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       String string = left.asString();
       int index = right.asInt();
-      
+
       // Negative indices count backwards from the end.
       if (index < 0) index = string.length() + index;
-      
+
       if ((index < 0) || (index >= string.length())) {
         context.error(Name.OUT_OF_BOUNDS_ERROR, "Index " + index +
             " is out of bounds [0, " + string.length() + "].");
       }
-      
+
       return context.toObj(string.substring(index, index + 1));
     }
   }
@@ -37,7 +37,7 @@ public class StringMethods {
       return context.toObj(left.asString().length());
     }
   }
-  
+
   @Def("(is String) +(right is String)")
   @Doc("Concatenates the two strings.")
   public static class Add implements Intrinsic {
@@ -45,7 +45,7 @@ public class StringMethods {
       return context.toObj(left.asString() + right.asString());
     }
   }
-  
+
   @Def("(is String) ==(other is String)")
   @Doc("Returns true if the two strings are equivalent.")
   public static class Equals implements Intrinsic {
@@ -54,7 +54,7 @@ public class StringMethods {
           right.asString()));
     }
   }
-  
+
   @Def("(left is String) compareTo(right is String)")
   @Doc("Returns -1 if left comes lexicographically before right, 1 if it\n" +
        "comes after, and 0 if the two are equal.")
@@ -75,7 +75,7 @@ public class StringMethods {
       return context.toObj(index);
     }
   }
-  
+
   @Def("(haystack is String) lastIndexOf(needle is String)")
   @Doc("Returns the index in haystack of the last occurrence of needle or\n" +
        "nothing if it is not found.")
@@ -86,7 +86,7 @@ public class StringMethods {
       return context.toObj(index);
     }
   }
-  
+
   // TODO(bob): Need to make this line up with Regex replace/replaceAll.
   @Def("(string is String) replace(before is String, with: after is String)")
   @Doc("Replaces each instance of before with after.")
@@ -95,13 +95,13 @@ public class StringMethods {
       String string = left.asString();
       String before = right.getField(0).asString();
       String after = right.getField("with").asString();
-      
+
       // TODO(bob): Should just be replacing a string, not a pattern.
       return context.toObj(
           string.replaceAll(before, Matcher.quoteReplacement(after)));
     }
   }
-  
+
   // TODO(bob): Make an indexer that takes a range, so you can do:
   // "some string"[2 to(4)]
   @Def("(string is String) substring(from: from is Int, to: to is Int)")
@@ -116,7 +116,7 @@ public class StringMethods {
       return context.toObj(string.substring(from, to + 1));
     }
   }
-  
+
   @Def("(string is String) substring(from: from is Int)")
   @Doc("Returns the portion of the string starting at from, to the\n" +
        "end of the string.")
@@ -127,7 +127,7 @@ public class StringMethods {
       return context.toObj(string.substring(startIndex));
     }
   }
-  
+
   @Def("(string is String) substring(from: from is Int, count: count is Int)")
   @Doc("Returns the substring starting at the given index and with the " +
        "given length.")
@@ -137,17 +137,17 @@ public class StringMethods {
       int startIndex = Indexable.validateIndex(context, string,
           right.getField("from").asInt());
       int count = right.getField("count").asInt();
-      
+
       int endIndex = startIndex + count;
       if (endIndex > string.length()) {
         context.error(Name.OUT_OF_BOUNDS_ERROR, "Index " + endIndex +
           " is out of bounds [0, " + string.length() + "].");
       }
-      
+
       return context.toObj(string.substring(startIndex, startIndex + count));
     }
   }
-  
+
   @Def("(is String) split(separator is String)")
   @Doc("Splits the string at every occurrence of the given separator and\n" +
        "returns an array of the given substrings.")
@@ -161,7 +161,7 @@ public class StringMethods {
       return context.toArray(elements);
     }
   }
-  
+
   @Def("(this is String) trim")
   @Doc("Trims whitespace from both ends of the string.")
   public static class Trim implements Intrinsic {

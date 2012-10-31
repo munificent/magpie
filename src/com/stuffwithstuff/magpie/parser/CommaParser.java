@@ -15,7 +15,7 @@ public class CommaParser implements InfixParser {
     int index = 0;
     List<Pair<String, Expr>> fields = new ArrayList<Pair<String, Expr>>();
     fields.add(new Pair<String, Expr>(Name.getTupleField(index++), left));
-    
+
     // Parse the rest of the fields.
     do {
       String name;
@@ -25,13 +25,13 @@ public class CommaParser implements InfixParser {
         name = Name.getTupleField(index);
       }
       index++;
-      
+
       fields.add(new Pair<String, Expr>(name, parser.parsePrecedence(getPrecedence())));
     } while (parser.match(TokenType.COMMA));
-    
+
     return Expr.record(left.getPosition().union(parser.last(1).getPosition()), fields);
   }
-  
+
   @Override
   public int getPrecedence() { return Precedence.RECORD; }
 }

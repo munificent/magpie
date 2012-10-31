@@ -9,14 +9,14 @@ import com.stuffwithstuff.magpie.ReplResult;
 public class ConsoleRepl extends MagpieAppHost {
   public ConsoleRepl() {
     mMagpie = new Magpie(this);
-    
+
     mMagpie.defineMethods(ReplMethods.class);
     mMagpie.defineMethod("printString(s is String)",
         "Prints the given string to stdout.", new PrintString());
-    
+
     mRepl = mMagpie.createRepl();
   }
-  
+
   public void run() {
     System.out.println();
     System.out.println("      _/Oo>");
@@ -25,11 +25,11 @@ public class ConsoleRepl extends MagpieAppHost {
     System.out.println("   //");
     System.out.println();
     System.out.println("Type 'quit()' and press <Enter> to exit.");
-    
+
     try {
       while (true) {
         ReplResult result = mRepl.readAndEvaluate(createReader(mRepl));
-        
+
         if (result.getText() != null) {
           // Indent the lines.
           String text = result.getText().replace("\n", "\n  ");
@@ -52,20 +52,20 @@ public class ConsoleRepl extends MagpieAppHost {
   protected ReplReader createReader(Repl repl) {
     return new ReplReader(repl);
   }
-  
+
   protected void printResult(String result) {
     System.out.print("= ");
     System.out.println(result);
   }
-  
+
   protected void printError(String message) {
     System.out.println("! " + message);
   }
-  
+
   protected Repl getRepl() {
     return mRepl;
   }
-  
+
   @Def("prints(text is String)")
   private class PrintString implements Method {
     public Object call(Object left, Object right) {
@@ -73,7 +73,7 @@ public class ConsoleRepl extends MagpieAppHost {
       return null;
     }
   }
-  
+
   private final Magpie mMagpie;
   private final Repl mRepl;
 }

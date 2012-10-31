@@ -47,7 +47,7 @@ end
 Main fn (->)
     def a 123
     def b 345345
-    
+
     Print (a + b).String
 end
 

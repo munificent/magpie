@@ -10,11 +10,11 @@ import com.stuffwithstuff.magpie.ast.pattern.*;
 public class PatternTester implements PatternVisitor<Boolean, Obj> {
   public static boolean test(Context context, Pattern pattern,
       Obj value, Scope scope) {
-    
+
     PatternTester binder = new PatternTester(context, scope);
     return pattern.accept(binder, value);
   }
-  
+
   @Override
   public Boolean visit(RecordPattern pattern, Obj value) {
     // Test each field.
@@ -23,17 +23,17 @@ public class PatternTester implements PatternVisitor<Boolean, Obj> {
       if (fieldValue == null) return false;
       if (!field.getValue().accept(this, fieldValue)) return false;
     }
-    
+
     // If we got here, the fields all passed.
     return true;
   }
-  
+
   @Override
   public Boolean visit(TypePattern pattern, Obj value) {
     Obj expected = mContext.evaluate(pattern.getType(), mScope);
     return value.getClassObj().isSubclassOf((ClassObj)expected);
   }
-  
+
   @Override
   public Boolean visit(ValuePattern pattern, Obj value) {
     Obj expected = mContext.evaluate(pattern.getValue(), mScope);
@@ -54,7 +54,7 @@ public class PatternTester implements PatternVisitor<Boolean, Obj> {
     mContext = context;
     mScope = scope;
   }
-  
+
   private final Context mContext;
   private final Scope mScope;
 }

@@ -13,7 +13,7 @@ Main (->)
     def a <- 123
     def b <- 345
     def c <- "hi"
-    
+
     def d <- "a = {a}, b = {b}, a + b = {a + b} {c}"
 end
 
@@ -22,7 +22,7 @@ Main (->)
     def a <- 123
     def b <- 345
     def c <- "hi"
-    
+
     def d <- ("a = " + a.String +
               ", b = " + b.String +
               ", a + b = " + (a + b).String +

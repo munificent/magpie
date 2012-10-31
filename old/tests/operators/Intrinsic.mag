@@ -25,7 +25,7 @@ Main (->)
     Print (3 - 2 - 1).String
     Print (1 * 2 * 3).String
     Print (8 / 2 / 2).String
-    
+
     // flat precedence
     Print (1 + 2 * 3).String
 
@@ -34,7 +34,7 @@ Main (->)
     Print (1 > 2).String
     Print (1 <= 2).String
     Print (1 >= 2).String
-    
+
     // equality
     Print (true = true).String
     Print (true != true).String
@@ -48,7 +48,7 @@ Main (->)
     Print (true & true).String
     Print (true | false).String
     Print (false | false).String
-    
+
     // strings
     Print ("a" + "b")
 end

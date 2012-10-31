@@ -7,7 +7,7 @@ public class FnParser implements PrefixParser {
   @Override
   public Expr parse(MagpieParser parser, Token token) {
     PositionSpan span = parser.span();
-    
+
     // Parse the pattern if present.
     Pattern pattern = null;
     if (parser.lookAheadAny(TokenType.LEFT_PAREN)) {
@@ -15,12 +15,12 @@ public class FnParser implements PrefixParser {
     } else {
       pattern = Pattern.wildcard();
     }
-    
+
     // TODO(bob): Parse doc.
-    
+
     // Parse the body.
     Expr expr = parser.parseExpressionOrBlock();
-    
+
     return Expr.fn(span.end(), "", pattern, expr);
   }
 }

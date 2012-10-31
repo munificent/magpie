@@ -6,7 +6,7 @@ public class Routine extends Thread {
     mContext = context;
     mFunction = function;
   }
-  
+
   public void run() {
     try {
     mFunction.invoke(mContext, mContext.nothing());
@@ -16,7 +16,7 @@ public class Routine extends Thread {
           ex.getError().getClassObj().getName(), ex.getError().getValue()));
     }
   }
-  
+
   private final Context mContext;
   private final FnObj mFunction;
 }

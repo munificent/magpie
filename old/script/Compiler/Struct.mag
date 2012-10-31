@@ -6,13 +6,13 @@ using Magpie:Syntax
 namespace Magpie:Compiler
 
     Struct (name String -> Struct) Struct (name, List'Decl, List'StructField)
-    
+
     struct Struct
         Name        String
         TypeParams  List'Decl //### bob: why not List'string?
         Fields      List'StructField
     end
-    
+
     struct StructField
         Name        String
         Mutable?    Bool

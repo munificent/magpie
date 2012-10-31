@@ -16,9 +16,9 @@ namespace Magpie:Compiler
     Mark (file File ->) ()
     GetOffset (file File -> Int) 0
     Close (file File ->) ()
-    
+
     ReadFile (path String -> String) ""
-    
+
     struct File
     end
 end

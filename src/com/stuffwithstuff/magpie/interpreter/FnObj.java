@@ -6,7 +6,7 @@ package com.stuffwithstuff.magpie.interpreter;
 public class FnObj extends Obj {
   /**
    * Creates a new FnObj.
-   * 
+   *
    * @param classObj     The class of the function object itself: Function.
    * @param thisObj      The object that "this" is bound to in the body of the
    *                     function. For functions that are created by looking up
@@ -15,15 +15,15 @@ public class FnObj extends Obj {
    */
   public FnObj(ClassObj classObj, Callable callable) {
     super(classObj);
-    
+
     mCallable = callable;
   }
 
   public Callable getCallable() { return mCallable; }
-  
+
   public Obj invoke(Context context, Obj arg) {
     return mCallable.invoke(context, arg);
   }
-  
+
   private final Callable mCallable;
 }

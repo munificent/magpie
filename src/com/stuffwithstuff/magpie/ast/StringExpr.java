@@ -7,9 +7,9 @@ public class StringExpr extends Expr {
     super(position);
     mValue = text;
   }
-  
+
   public String getValue() { return mValue; }
-  
+
   @Override
   public boolean isLiteral() {
     return true;

@@ -5,20 +5,20 @@ using Magpie:Syntax
 
 // General-purpose LL parser functions
 namespace Magpie:Compiler
-    
+
     Parser (text String -> Parser) Parser (Scanner text, List'Token)
-    
+
     OneOrMoreLeft (parser Parser, separatorType Token,
             parseFunc fn (Parser -> Option'Expr),
             combineFunc fn (Expr, Token, Expr -> Expr) -> Option'Expr)
-        
+
         mutable left <- parseFunc parser
-        
+
         if left.Some? then
             while CurrentIs (parser, separatorType) do
                 def separator <- Consume (parser, separatorType)
                 def right     <- parseFunc parser
-                
+
                 if right.Some? then
                     left <- Some combineFunc (left.SomeValue, separator, right.SomeValue)
                 else
@@ -26,18 +26,18 @@ namespace Magpie:Compiler
                 end
             end
         end
-        
+
         left
     end
-    
+
     OneOrMoreRight (parser Parser,
             parseFunc fn (Parser -> Option'Expr),
             combineFunc fn (Expr, Expr -> Expr) -> Expr)
-            
+
         def exprs <- List'Expr
 
         mutable expr <- parseFunc parser
-        
+
         if expr.None? then
             Print ("Parse error finding first token in a right-associative sequence. Found " + parser.Current.String + " instead.")
             UnitLiteral
@@ -61,27 +61,27 @@ namespace Magpie:Compiler
 
     Current (parser Parser -> Token)
         def r <- parser.Read
-        
+
         if parser.Read.Size = 0 then
             parser.Read << parser.Scanner.Scan
         end
-        
+
         parser.Read.Peek.SomeValue
     end
-    
+
     ConsumeIf (parser Parser, token Token -> Bool)
         if CurrentIs (parser, token) then
             Ignore Consume parser
             true
         else false
     end
-    
+
     Consume (parser Parser -> Token)
         def token <- parser.Read.Dequeue.SomeValue
         Print ("<< " + token.String)
         token
     end
-    
+
     Consume (parser Parser, token Token -> Token)
         if SameType (parser.Current, token) then
             Consume parser
@@ -90,16 +90,16 @@ namespace Magpie:Compiler
             EofToken
         end
     end
-    
+
     Expect (parser Parser, token Token ->) Ignore Consume (parser, token)
 
     CurrentIs (parser Parser, token Token -> Bool)
         SameType (parser.Current, token)
     end
-    
+
     // ### bob: put somewhere global or bake into language?
     Ignore'T (arg T ->) ()
-    
+
     // ### bob: would be awesome if this was auto-generated
     SameType (a Token, b Token -> Bool)
         if a.LeftParenToken? then b.LeftParenToken?
@@ -135,7 +135,7 @@ namespace Magpie:Compiler
         else if a.EofToken? then b.EofToken?
         else false // error
     end
-    
+
     struct Parser
         Scanner Scanner
         Read    List'Token

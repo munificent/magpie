@@ -7,7 +7,7 @@ public class ParenthesisPrefixParser implements PrefixParser {
   public Expr parse(MagpieParser parser, Token token) {
     Expr expr = parser.parseStatement();
     parser.consume(TokenType.RIGHT_PAREN);
-    
+
     return expr;
   }
 }

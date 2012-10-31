@@ -9,7 +9,7 @@ public class EqualsParser implements InfixParser {
     Expr value = parser.parseStatement();
     return ConvertAssignmentExpr.convert(left, value);
   }
-  
+
   @Override
   public int getPrecedence() { return Precedence.ASSIGNMENT; }
 }

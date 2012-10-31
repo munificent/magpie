@@ -22,10 +22,10 @@ public class PatternBinder implements PatternVisitor<Void, Obj>  {
       Obj fieldValue = value.getField(field.getKey());
       field.getValue().accept(this, fieldValue);
     }
-    
+
     return null;
   }
-    
+
   @Override
   public Void visit(TypePattern pattern, Obj value) {
     // Do nothing.
@@ -44,10 +44,10 @@ public class PatternBinder implements PatternVisitor<Void, Obj>  {
     if (!bindNewVariable(pattern.getName(), value)) {
       // Cannot redefine a variable in the same scope.
       mContext.error(Name.REDEFINITION_ERROR, String.format(
-          "There is already a variable named \"%s\" in this scope.", 
+          "There is already a variable named \"%s\" in this scope.",
           pattern.getName()));
     }
-    
+
     // Recurse into the inner pattern if there is one.
     if (pattern.getPattern() != null) {
       pattern.getPattern().accept(this, value);
@@ -67,16 +67,16 @@ public class PatternBinder implements PatternVisitor<Void, Obj>  {
     mContext = context;
     mScope = scope;
   }
-  
+
   private boolean bindNewVariable(String name, Obj value) {
     // Ignore the wildcard name.
     if (name.equals("_")) return true;
-    
+
     // Bind the variable.
     return mScope.define(mIsMutable, name, value);
   }
-  
+
   private final boolean mIsMutable;
-  private final Context mContext;  
+  private final Context mContext;
   private final Scope mScope;
 }

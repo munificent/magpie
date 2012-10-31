@@ -12,7 +12,7 @@ union Token
     ColonToken
     DotToken
     PrimeToken
-    
+
     // keywords
     LeftArrowToken
     RightArrowToken
@@ -29,20 +29,20 @@ union Token
     UsingToken
     VarToken
     WhileToken
-    
+
     // literals
     UnitToken
     BoolToken   Bool
     IntToken    Int
     StringToken String
-    
+
     // identifiers
     NameToken      String
     OperatorToken  String
-    
+
     // whitespace
     LineToken
-    
+
     // the end of the source has been reached
     EofToken
 end
@@ -78,7 +78,7 @@ String (token Token -> String)
         case BoolToken value   then ("bool " + value.String)
         case IntToken value    then ("int " + value.String)
         case StringToken value then ("\"" + value + "\"")
-        
+
         case NameToken name    then ("name " + name)
         case OperatorToken op  then ("op " + op)
 
@@ -102,13 +102,13 @@ LookUpKeyword (token Token -> Token)
         case NameToken "union"      then UnionToken
         case NameToken "using"      then UsingToken
         case NameToken "while"      then WhileToken
-        
+
         case NameToken "true"       then BoolToken true
         case NameToken "false"      then BoolToken false
-        
+
         case OperatorToken "<-"     then LeftArrowToken
         case OperatorToken "->"     then RightArrowToken
-        
+
         case _ then token
     end
 end

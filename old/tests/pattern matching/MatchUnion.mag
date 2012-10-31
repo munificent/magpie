@@ -18,7 +18,7 @@ Main (->)
         case Banana then Print "banana"
         case _      then Print "else"
     end
-    
+
     match Cherry 3
         case Apple    then Print "one"
         case Cherry 2 then Print "two"
@@ -26,7 +26,7 @@ Main (->)
         case Cherry _ then Print "else"
         case _      then Print "else"
     end
-    
+
     match Date Date Date Apple
         case Date Apple then Print "one"
         case Date Date Apple then Print "two"
@@ -34,14 +34,14 @@ Main (->)
         case Date Date Date Date Apple then Print "four"
         case _ then Print "else"
     end
-    
+
     // bind variable to union
     match Cherry 123
         case Apple then Print "no"
         case Banana then Print "no"
         case b then Print "cherry"
     end
-    
+
     // bind variable to value
     match Cherry 123
         case Apple then Print "no"

@@ -15,7 +15,7 @@ public class ArrayMethods {
     public Obj invoke(Context context, Obj left, Obj right) {
       List<Obj> list = left.asList();
       int index = Indexable.validateIndex(context, list, right.asInt());
-      
+
       return list.get(index);
     }
   }
@@ -45,16 +45,16 @@ public class ArrayMethods {
     public Obj invoke(Context context, Obj left, Obj right) {
       Obj fill = right.getField("fill");
       int size = right.getField("size").asInt();
-      
+
       List<Obj> elements = new ArrayList<Obj>();
       for (int i = 0; i < size; i++) {
         elements.add(fill);
       }
-      
+
       return context.toArray(elements);
     }
   }
-  
+
   @Def("(is Array) toList")
   @Doc("Creates a new List containing the elements of the array. Does not\n" +
        "modify the original array.")

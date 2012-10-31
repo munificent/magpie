@@ -10,7 +10,7 @@ import com.stuffwithstuff.magpie.interpreter.Name;
 /**
  * Parses patterns. Patterns are used for match cases, function parameter
  * declarations, and catch clauses.
- * 
+ *
  * @author bob
  */
 public class PatternParser {
@@ -34,17 +34,17 @@ public class PatternParser {
    *     case Int   then print("foo is the Int class object")
    *     case _ Int then print("foo's type is Int")
    * end
-   * 
+   *
    * @param parser
    * @return
    */
   public static Pattern parse(MagpieParser parser) {
     return record(parser);
   }
-  
+
   private static Pattern record(MagpieParser parser) {
     Map<String, Pattern> fields = new HashMap<String, Pattern>();
-    
+
     int index = 0;
     boolean isRecord = false;
     Pattern field = null;
@@ -57,20 +57,20 @@ public class PatternParser {
         name = Name.getTupleField(index);
       }
       index++;
-      
+
       field = primary(parser);
       fields.put(name, field);
     } while (parser.match(TokenType.COMMA));
-    
+
     // TODO(bob): This code is ugly.
     // If it's just a single pattern with no field name, just return it.
     if (fields.size() == 1 && !isRecord) {
       return field;
     }
-    
+
     return Pattern.record(fields);
   }
-  
+
   private static Pattern primary(MagpieParser parser) {
     if (parser.match(TokenType.IS)) {
       Expr type = parser.parsePrecedence(Precedence.COMPARISON);
@@ -89,7 +89,7 @@ public class PatternParser {
     } else if (parser.match(TokenType.LEFT_PAREN)) {
       // Nested pattern.
       Pattern inner = record(parser);
-      
+
       if (inner == null) {
         throw new ParseException(parser.current().getPosition(),
             "Could not parse primary pattern.");
@@ -110,9 +110,9 @@ public class PatternParser {
         return Pattern.variable(name, pattern);
       }
     }
-    
+
     return null;
   }
-  
+
   private PatternParser() {}
 }

@@ -2,7 +2,7 @@
 
 Main (->)
     def a <- Foo ArrayOf (2, 3, 4)
-    
+
     Print a.Items.2.String
 end
 

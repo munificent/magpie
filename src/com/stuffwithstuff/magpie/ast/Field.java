@@ -19,18 +19,18 @@ public class Field {
    * Gets whether or not the field is mutable.
    */
   public boolean isMutable() { return mIsMutable; }
-  
+
   /**
    * Gets the initializer for this field. Returns null if the field is just
    * declared.
    */
   public Expr getInitializer() { return mInitializer; }
-  
+
   /**
    * Gets the pattern for this field.
    */
   public Pattern getPattern() { return mPattern; }
-  
+
   private final boolean  mIsMutable;
   private final Expr     mInitializer;
   private final Pattern  mPattern;

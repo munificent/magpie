@@ -51,7 +51,7 @@ namespace Magpie:Syntax
         else if op.Op-FileWriteString?  then 44
         else 9999
     end
-    
+
     union OpCode
         Op-PushNull
         Op-PushBool

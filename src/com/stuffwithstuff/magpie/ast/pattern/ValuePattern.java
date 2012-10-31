@@ -7,9 +7,9 @@ public class ValuePattern extends Pattern {
   ValuePattern(Expr value) {
     mValue = value;
   }
-  
+
   public Expr getValue() { return mValue; }
-  
+
   @Override
   public <R, C> R accept(PatternVisitor<R, C> visitor, C context) {
     return visitor.visit(this, context);

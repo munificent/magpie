@@ -14,10 +14,10 @@ public class Profiler {
   public static void setEnabled(boolean enable) {
     sEnabled = enable;
   }
-  
+
   public static void display() {
     if (!sEnabled) return;
-    
+
     List<Profile> profiles = new ArrayList<Profile>(sTimes.values());
     Collections.sort(profiles, new Comparator<Profile>() {
       public int compare(Profile e1, Profile e2) {
@@ -39,26 +39,26 @@ public class Profiler {
           exclusive, String.format("%.2f", average));
     }
   }
-  
+
   public static void push(Position position) {
     if (!sEnabled) return;
-    
+
     FunctionCall call = new FunctionCall();
     call.label = position.getSourceFile() + ":" + position.getStartLine();
     call.start = System.currentTimeMillis();
     sOngoing.push(call);
-    
+
     if (sOngoing.size() > 100) {
       System.out.println();
     }
   }
-  
+
   public static void pop() {
     if (!sEnabled) return;
-    
+
     FunctionCall call = sOngoing.pop();
     long elapsed = System.currentTimeMillis() - call.start;
-    
+
     // Update the profile for this function.
     Profile profile = sTimes.get(call.label);
     if (profile == null) {
@@ -70,31 +70,31 @@ public class Profiler {
     profile.elapsed += elapsed;
     profile.excluded += call.excluded;
     profile.calls++;
-    
+
     // Exclude its time from the caller.
     if (sOngoing.size() > 0) {
       sOngoing.peek().excluded += elapsed;
     }
   }
-  
+
   private static class FunctionCall {
     public String label;
     public long   start;
     public long   excluded;
-    
+
     @Override
     public String toString() {
       return label;
     }
   }
-  
+
   private static class Profile {
     public String label;
     public long   elapsed;
     public long   excluded;
     public int    calls;
   }
-  
+
   private static boolean sEnabled = false;
   private static final Stack<FunctionCall> sOngoing = new Stack<FunctionCall>();
   private static final Map<String, Profile> sTimes = new HashMap<String, Profile>();

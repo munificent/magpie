@@ -7,34 +7,34 @@ namespace Magpie:Compiler
 
     Parse (sourceFile String -> SourceFile)
         def parser <- Parser ReadFile sourceFile
-         
+
         SourceFile parser
     end
-    
+
     // <-- Usings NamespaceContents
     SourceFile (parser Parser -> SourceFile)
         Print "source file"
         def usings   <- Usings parser
         def contents <- NamespaceContents parser
-        
+
         SourceFile (usings, contents)
     end
-    
+
     // <-- (USING Name LINE)*
     Usings (parser Parser -> List'String)
         Print "usings"
         def usings <- List'String
-        
+
         while ConsumeIf (parser, UsingToken) do
             def name <- Name parser
             Expect (parser, LineToken)
-            
+
             usings << name
         end
-        
+
         usings
     end
-    
+
     // <-- ((Namespace | Function | Struct | Union) LINE)*
     NamespaceContents (parser Parser -> NamespaceContent)
         Print "contents"
@@ -48,7 +48,7 @@ namespace Magpie:Compiler
             else if parser.Current.StructToken?    then contents.Structs    << Struct parser
             else if parser.Current.UnionToken?     then contents.Unions     << Union parser
             else looping <- false
-            
+
             if Not ConsumeIf (parser, LineToken) then looping <- false
         end
 
@@ -58,10 +58,10 @@ namespace Magpie:Compiler
     // <-- NAMESPACE Name LINE NamespaceBody END
     Namespace (parser Parser -> Namespace)
         Expect (parser, NamespaceToken)
-        
+
         def name <- Name parser
         Expect (parser, LineToken)
-        
+
         def contents <- NamespaceContents parser
         Expect (parser, EndToken)
 
@@ -79,13 +79,13 @@ namespace Magpie:Compiler
         def name <- OperatorTokenValue Consume (parser, OperatorToken "")
         FunctionDefinition (parser, name)
     end
-    
+
     // <-- GenericDecl FnArgsDecl Block
     FunctionDefinition (parser Parser, name String -> Function)
         def typeParams <- TypeArgs parser
         def funcType   <- FnArgsDecl (parser, true)
         def body       <- Block parser
-        
+
         Function (name, typeParams, funcType, body)
     end
 
@@ -104,11 +104,11 @@ namespace Magpie:Compiler
                 // no grouping, so just a single type declaration
                 decls << TypeDecl parser
             end
-        end        
-        
+        end
+
         decls
     end
-    
+
     // <-- LPAREN ArgsDecl? ARROW TypeDecl? RPAREN
     FnArgsDecl (parser Parser, includeNames Bool -> FunctionDecl)
         Expect (parser, LeftParenToken)
@@ -123,11 +123,11 @@ namespace Magpie:Compiler
 
         FunctionDecl (params, returnType)
     end
-    
+
     // <-- NAME TypeDecl (COMMA NAME TypeDecl)*
     ParamsDecl (parser Parser, includeNames Bool -> List'ParamDecl)
         def params <- List'ParamDecl
-        
+
         mutable looping <- true
         while looping do
             def name <- if includeNames then
@@ -171,7 +171,7 @@ namespace Magpie:Compiler
 
         decls
     end
-    
+
     // <-- STRUCT NAME GenericDecl LINE StructBody END
     Struct (parser Parser -> Struct)
         Expect (parser, StructToken)
@@ -235,18 +235,18 @@ namespace Magpie:Compiler
     Name (parser Parser -> String)
         // ### bob: having to provide a name "" is lame
         mutable name <- NameTokenValue Consume (parser, NameToken "")
-        
+
         while ConsumeIf (parser, ColonToken) do
             name <- + ":" + NameTokenValue Consume (parser, NameToken "")
         end
-        
+
         name
     end
-    
+
     Block (parser Parser -> Expr)
         Block (parser, EndToken)
     end
-    
+
     // <-- Expression LINE? | LINE (Expression LINE)+ <terminator>
     Block (parser Parser, terminator Token -> Expr)
         if ConsumeIf (parser, LineToken) then
@@ -257,7 +257,7 @@ namespace Magpie:Compiler
             while looping do
                 expressions << Expression parser
                 Expect (parser, LineToken)
-                
+
                 if ConsumeIf (parser, terminator) then looping <- false
             end
 
@@ -279,11 +279,11 @@ namespace Magpie:Compiler
             expr
         end
     end
-    
+
     Expression (parser Parser -> Expr)
         DefineExpr parser
     end
-    
+
     // <-- (DEF | MUTABLE) NAME ASSIGN Block
     DefineExpr (parser Parser -> Expr)
         def mutable? <- if ConsumeIf (parser, DefToken) then Some false
@@ -298,7 +298,7 @@ namespace Magpie:Compiler
             Define (name, body, mutable?.SomeValue)
         else FlowExpr parser
     end
-    
+
     // <-- WHILE AssignExpr DO Block
     //   | IF AssignExpr ((THEN InnerBlock ELSE Block) | (DO Block))
     //   | AssignExpr
@@ -323,7 +323,7 @@ namespace Magpie:Compiler
             end
         else AssignExpr parser
     end
-    
+
     // <-- TupleExpr (ASSIGN (DOT | OPERATOR | e) Block)?
     AssignExpr (parser Parser -> Expr)
         mutable expr <- TupleExpr parser
@@ -336,7 +336,7 @@ namespace Magpie:Compiler
             else if CurrentIs (parser, OperatorToken "") then
                 opName <- OperatorTokenValue Consume (parser, OperatorToken "")
             end
-            
+
             def value <- Block parser
 
             if dot? then expr <- Assign (expr, Call (value, expr))
@@ -347,7 +347,7 @@ namespace Magpie:Compiler
 
         expr
     end
-    
+
     // <-- OperatorExpr (COMMA OperatorExpr)*
     TupleExpr (parser Parser -> Expr)
         def fields <- List'Expr
@@ -359,7 +359,7 @@ namespace Magpie:Compiler
         if fields.Size = 1 then fields.Peek.SomeValue
         else Tuple fields
     end
-    
+
     // <-- ApplyExpr (OPERATOR ApplyExpr)*
     OperatorExpr (parser Parser -> Expr)
         def expr <- OneOrMoreLeft (parser, OperatorToken "",
@@ -369,13 +369,13 @@ namespace Magpie:Compiler
         // ### bob: is this correct? can it ever be none?
         expr.SomeValue
     end
-    
+
     _OptionalApplyExpr (parser Parser -> Option'Expr) Some ApplyExpr parser
-    
+
     _OperatorCall (left Expr, separator Token, right Expr -> Expr)
         Call (Name (separator.OperatorTokenValue, List'Decl), Tuple ListOf (left, right))
     end
-    
+
     // <-- PrimaryExpr+
     ApplyExpr (parser Parser -> Expr)
         OneOrMoreRight(parser, fn ReverseApplyExpr (Parser), fn Call* (Expr, Expr))
@@ -387,9 +387,9 @@ namespace Magpie:Compiler
             fn PrimaryExpr (Parser),
             fn _ReverseApplyCall (Expr, Token, Expr))
     end
-    
+
     _ReverseApplyCall (left Expr, separator Token, right Expr -> Expr) Call (right, left)
-    
+
     // <-- Name
     //   | FN Name TupleType
     //   | BOOL_LITERAL
@@ -414,7 +414,7 @@ namespace Magpie:Compiler
                         else Expression parser
 
             Expect (parser, RightParenToken)
-            
+
             Some expr
         else None'Expr
     end

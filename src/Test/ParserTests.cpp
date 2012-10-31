@@ -17,7 +17,7 @@ namespace magpie
     ErrorReporter reporter;
     Parser parser("", source, reporter);
     gc<ModuleAst> module = parser.parseModule();
-    
+
     gc<String> text = module->toString();
     EXPECT_EQUAL("((1 + (2 * 3)) and ((4 / 5) + (6 % 7)))", *text);
   }

@@ -15,7 +15,7 @@ public class NameParser implements PrefixParser, InfixParser {
   public Expr parse(MagpieParser parser, Token token) {
     return parse(parser, null, token);
   }
-  
+
   @Override
   public Expr parse(MagpieParser parser, Expr left, Token token) {
     // Parse the argument, if any.
@@ -23,7 +23,7 @@ public class NameParser implements PrefixParser, InfixParser {
     if (parser.match(TokenType.LEFT_PAREN)) {
       arg = parser.groupExpression(TokenType.RIGHT_PAREN);
     }
-    
+
     // Pass the block, if any.
     if (parser.match(TokenType.WITH)) {
       // Parse the parameter list if given.
@@ -39,11 +39,11 @@ public class NameParser implements PrefixParser, InfixParser {
       Expr block = parser.parseExpressionOrBlock();
       // TODO(bob): Parse doc comment.
       block = Expr.fn(block.getPosition(), "", blockType, block);
-      
+
       // Add it to the argument list.
       arg = appendField(arg, block);
     }
-    
+
     // See if this is a bare name, or a method call.
     if (left == null) {
       if (arg == null) {
@@ -59,7 +59,7 @@ public class NameParser implements PrefixParser, InfixParser {
       }
     }
   }
-  
+
   @Override
   public int getPrecedence() { return Precedence.MESSAGE; }
 

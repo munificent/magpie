@@ -16,23 +16,23 @@ Main (->)
     Foo 1
     (fn Foo (Int)) 1
     a 1
-    
+
     def b <- fn Bar[Int] (Int)
     b 2
-    
+
     // return a function reference from a function
     def c <- GetFoo
     c 3
-    
+
     // call the returned function inline
     (GetFoo ()) 4
     ().GetFoo 4
     GetFoo <* 4
-    
+
     // handle overloads
     def d <- fn Foo ()
     d () // must be explicitly called
-    
+
     def e <- fn Foo (String)
     e "bar"
 end

@@ -50,7 +50,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
 
     // Try to assign to a local variable.
     if (scope.assign(expr.getName(), value)) return value;
-    
+
     // TODO(bob): Detect this statically.
     throw mContext.error("NoVariableError",
         "Could not find a variable named \"" + expr.getName() + "\".");
@@ -69,7 +69,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
     }
     return mContext.nothing();
   }
-  
+
   @Override
   public Obj visit(CallExpr expr, Scope scope) {
     Multimethod multimethod = scope.lookUpMultimethod(expr.getName());
@@ -82,7 +82,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
     Obj arg = evaluate(expr.getArg(), scope);
     return multimethod.invoke(expr.getName(), mContext, arg);
   }
-  
+
   @Override
   public Obj visit(ClassExpr expr, Scope scope) {
     // Look up the parents.
@@ -90,10 +90,10 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
     for (String parentName : expr.getParents()) {
       parents.add(scope.lookUp(parentName).asClass());
     }
-    
+
     ClassObj classObj = mContext.getInterpreter().createClass(expr.getName(),
         parents, expr.getFields(), scope, expr.getDoc());
-    
+
     scope.define(false, expr.getName(), classObj);
 
     return classObj;
@@ -116,9 +116,9 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
       for (ImportDeclaration declaration : expr.getDeclarations()) {
         declarations.put(declaration.getName(), declaration);
       }
-      
+
       Set<String> importedNames;
-      
+
       if (expr.isOnly()) {
         importedNames = declarations.keySet();
       } else {
@@ -128,9 +128,9 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
       // Import the names.
       for (String name : importedNames) {
         ImportDeclaration declaration = declarations.get(name);
-        
+
         String rename = name;
-        
+
         // Rename it, if given one.
         if ((declaration != null) && (declaration.getRename() != null)) {
           rename = declaration.getRename();
@@ -145,7 +145,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
         if (declaration != null) {
           export = declaration.isExported();
         }
-        
+
         scope.importName(name, rename, module, export);
       }
     } else if (expr.getScheme().equals("classfile")) {
@@ -155,7 +155,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
             expr.getModule() + "\".");
       }
     }
-    
+
     return mContext.nothing();
   }
 
@@ -163,7 +163,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
   public Obj visit(IntExpr expr, Scope scope) {
     return mContext.toObj(expr.getValue());
   }
-  
+
   @Override
   public Obj visit(LoopExpr expr, Scope scope) {
     try {
@@ -195,13 +195,13 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
     // end
     // i should be gone here
     scope = scope.push();
-    
+
     Obj value = evaluate(expr.getValue(), scope);
-    
+
     // Try each pattern until we get a match.
     Obj result = evaluateCases(value, expr.getCases(), scope);
     if (result != null) return result;
-    
+
     // If we got here, no patterns matched.
     throw mContext.error(Name.NO_MATCH_ERROR, "Could not find a match for \"" +
         mContext.getInterpreter().evaluateToString(value) + "\" (" +
@@ -215,13 +215,13 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
           Expr.fn(expr.getPosition(), expr.getDoc(),
               expr.getPattern(), expr.getBody()),
           scope);
-      
+
       scope.define(expr.getName(), method);
     } else {
       // Defining the multimethod here but not adding any methods.
       scope.defineMultimethod(expr.getName(), expr.getDoc());
     }
-    
+
     return mContext.nothing();
   }
 
@@ -229,7 +229,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
   public Obj visit(NameExpr expr, Scope scope) {
     Obj variable = scope.lookUp(expr.getName());
     if (variable != null) return variable;
-    
+
     // TODO(bob): Detect this statically.
     throw mContext.error(Name.NO_VARIABLE_ERROR,
         "Could not find a variable named \"" + expr.getName() + "\" (" +
@@ -248,11 +248,11 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
 
   @Override
   public Obj visit(RecordExpr expr, Scope scope) {
-    
+
     // TODO(bob): Hack, keep track of order keys appear for better pretty-
     // printing.
     List<String> keys = new ArrayList<String>();
-    
+
     // Evaluate the fields.
     Map<String, Obj> fields = new HashMap<String, Obj>();
     for (Pair<String, Expr> entry : expr.getFields()) {
@@ -323,7 +323,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
           mContext.getInterpreter().evaluateToString(value) + "\" (" +
           expr.getPosition() + ").");
     }
-    
+
     PatternBinder.bind(mContext, expr.isMutable(), expr.getPattern(), value,
         scope);
     return value;
@@ -331,7 +331,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
 
   private Obj evaluateCases(Obj value, List<MatchCase> cases, Scope scope) {
     if (cases == null) return null;
-    
+
     for (MatchCase matchCase : cases) {
       Pattern pattern = matchCase.getPattern();
       if (PatternTester.test(mContext, pattern, value, scope)) {
@@ -341,7 +341,7 @@ public class ExprEvaluator implements ExprVisitor<Obj, Scope> {
         return evaluate(matchCase.getBody(), scope);
       }
     }
-    
+
     return null;
   }
 

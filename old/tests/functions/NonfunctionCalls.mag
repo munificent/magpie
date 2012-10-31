@@ -3,7 +3,7 @@
 
 Main (->)
     true 1
-    
+
     // here's something odd
     Print (1 2 3 4).String
 end

@@ -7,12 +7,12 @@ import com.stuffwithstuff.magpie.parser.Position;
 public class ArrayExpr extends Expr {
   ArrayExpr(Position position, List<Expr> elements) {
     super(position);
-    
+
     mElements = elements;
   }
-  
+
   public List<Expr> getElements() { return mElements; }
-  
+
   @Override
   public <R, C> R accept(ExprVisitor<R, C> visitor, C context) {
     return visitor.visit(this, context);

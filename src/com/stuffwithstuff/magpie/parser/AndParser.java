@@ -15,7 +15,7 @@ public class AndParser implements InfixParser {
   @Override
   public Expr parse(MagpieParser parser, Expr left, Token token) {
     Expr right = parser.parsePrecedence(Precedence.LOGICAL);
-    
+
     // Desugar to a pattern match:
     //
     // match (val temp__ = `left) isTrue
@@ -26,15 +26,15 @@ public class AndParser implements InfixParser {
     String temp = parser.generateName();
     Expr value = Expr.var(left.getPosition(), false, temp, left);
     Expr truthCheck = Expr.call(left.getPosition(), value, Name.IS_TRUE);
-    
+
     List<MatchCase> cases = new ArrayList<MatchCase>();
     cases.add(new MatchCase(Pattern.value(Expr.bool(true)), right));
     cases.add(new MatchCase(Expr.name(temp)));
-    
+
     return Expr.match(left.getPosition().union(right.getPosition()),
         truthCheck, cases);
   }
-  
+
   @Override
   public int getPrecedence() { return Precedence.LOGICAL; }
 }

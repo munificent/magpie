@@ -42,7 +42,7 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
     return Expr.call(expr.getPosition(), expr.getArg(),
         Name.makeAssigner(expr.getName()), value);
   }
-  
+
   @Override
   public Expr visit(ClassExpr expr, Expr value) {
     return invalidExpression(expr);
@@ -52,7 +52,7 @@ public class ConvertAssignmentExpr implements ExprVisitor<Expr, Expr> {
   public Expr visit(FnExpr expr, Expr value) {
     return invalidExpression(expr);
   }
-  
+
   @Override
   public Expr visit(ImportExpr expr, Expr value) {
     return invalidExpression(expr);

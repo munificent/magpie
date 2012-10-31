@@ -26,7 +26,7 @@ public class ClassNew implements Callable {
     return context.getInterpreter().constructNewObject(
         context, classObj, arg.getField(1));
   }
-  
+
   @Override
   public Pattern getPattern() {
     // The receiver is any instance of Class, and it takes any argument, since
@@ -40,7 +40,7 @@ public class ClassNew implements Callable {
   public Scope getClosure() {
     return mClosure;
   }
-  
+
   @Override
   public String getDoc() {
     return "Creates a new instance of a class.";
