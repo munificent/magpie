@@ -7,7 +7,7 @@ end
 
 Current[T] (iter ArrayIterator[T] -> T)
     def index <- iter.Index
-    iter.Array.index 
+    iter.Array.index
 end
 
 struct ArrayIterator[T]

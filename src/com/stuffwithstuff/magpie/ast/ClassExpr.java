@@ -13,11 +13,11 @@ public class ClassExpr extends Expr {
     mParents = parents;
     mFields = fields;
   }
-  
+
   public String getName() { return mName; }
   public List<String> getParents() { return mParents; }
   public Map<String, Field> getFields() { return mFields; }
-  
+
   @Override
   public <R, C> R accept(ExprVisitor<R, C> visitor, C context) {
     return visitor.visit(this, context);

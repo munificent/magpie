@@ -11,11 +11,11 @@ public class MethodExpr extends Expr {
     mPattern = pattern;
     mBody = body;
   }
-  
+
   public String getName() { return mName; }
   public Pattern getPattern() { return mPattern; }
   public Expr getBody() { return mBody; }
-  
+
   @Override
   public <R, C> R accept(ExprVisitor<R, C> visitor, C context) {
     return visitor.visit(this, context);

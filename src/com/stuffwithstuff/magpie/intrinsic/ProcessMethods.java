@@ -28,7 +28,7 @@ public class ProcessMethods {
         int exit = process.waitFor();
         String output = IO.readAll(new BufferedReader(
             new InputStreamReader(process.getInputStream())));
-        
+
         List<String> keys = new ArrayList<String>();
         keys.add("out");
         keys.add("exit");
@@ -36,14 +36,14 @@ public class ProcessMethods {
         Map<String, Obj> record = new HashMap<String, Obj>();
         record.put("out", context.toObj(output));
         record.put("exit", context.toObj(exit));
-        
+
         return context.toObj(keys, record);
       } catch (IOException e) {
         e.printStackTrace();
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
-      
+
       return context.nothing();
     }
   }

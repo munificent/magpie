@@ -90,12 +90,12 @@ end
 MakeVector (numCoords Int, type Type -> Definition)
     def name <- "Vector" + numCoords.String
     def fieldNames <- "XYZWABCDEF";
-    
+
     def fields <- List'Field
     for i <- 1 -to- numCoords do
         Add (fields, Field (fieldNames.i, type))
     end
-    
+
     Struct (name, fields)
 end
 

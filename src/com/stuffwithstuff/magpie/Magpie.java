@@ -15,7 +15,7 @@ public class Magpie {
   public Magpie(MagpieHost host) {
     mInterpreter = new Interpreter(host);
   }
-  
+
   public String run(SourceFile source) {
     try {
       mInterpreter.interpret(source);
@@ -25,32 +25,32 @@ public class Magpie {
           ex.getError().getClassObj().getName(), ex.getError().getValue());
     }
   }
-  
+
   public Repl createRepl() {
     return new Repl(mInterpreter);
   }
-  
+
   public void defineMethod(String signature, String doc, Method method) {
     MagpieParser parser = new MagpieParser(signature);
     Pair<String, Pattern> parsed = parser.parseSignature();
 
     String name = parsed.getKey();
     Pattern pattern = parsed.getValue();
-    
+
     Scope scope = mInterpreter.getBaseModule().getScope();
-    
+
     // Construct the method.
     Callable callable = new IntrinsicCallable(pattern, doc, new MethodWrapper(method), scope);
-    
+
     // Register it.
     scope.define(name, callable);
   }
-  
+
   @SuppressWarnings("rawtypes")
   public void defineMethods(Class javaClass) {
     IntrinsicLoader.register(javaClass,
         mInterpreter.getBaseModule().getScope());
   }
-  
+
   private final Interpreter mInterpreter;
 }

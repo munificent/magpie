@@ -16,24 +16,24 @@ public class NiceReplCharacterReader extends ReplReader {
   public NiceReplCharacterReader(Repl repl) {
     super(repl);
   }
-  
+
   @Override
   protected void showPrompt(String prompt) {
     Term.set(Term.ForeColor.GRAY);
     System.out.print(prompt);
     Term.restoreColor();
   }
-  
+
   @Override
   protected void afterReadLine(Repl repl, String prompt, String line) {
     try {
       Lexer lexer = new Lexer(new StringReader("", line));
-  
+
       Term.moveUp();
-  
+
       // TODO(bob): Now that there are token types for reserved words and
       // operators, should handle them here.
-      
+
       // Redraw the prompt.
       Term.set(Term.ForeColor.GRAY);
       System.out.print(prompt);
@@ -55,7 +55,7 @@ public class NiceReplCharacterReader extends ReplReader {
         case EQ:
           Term.set(Term.ForeColor.GRAY);
           break;
-        
+
         // Identifiers.
         case NAME:
           /*
@@ -74,38 +74,38 @@ public class NiceReplCharacterReader extends ReplReader {
           }
           */
           break;
-          
+
         case FIELD:
           Term.set(Term.ForeColor.GRAY);
           break;
-  
+
         // literals
         case BOOL:
         case INT:
           Term.set(Term.ForeColor.LIGHT_BLUE);
           break;
-          
+
         case DOUBLE:
         case STRING:
           Term.set(Term.ForeColor.YELLOW);
           break;
-         
+
         case BLOCK_COMMENT:
         case DOC_COMMENT:
         case LINE_COMMENT:
           Term.set(Term.ForeColor.GRAY);
           break;
-          
+
         default:
           Term.restoreColor();
         }
-        
+
         System.out.print(token.getText());
       }
     } catch(ParseException ex) {
       // Do nothing, just eat it.
     }
-    
+
     System.out.println();
     Term.restoreColor();
   }

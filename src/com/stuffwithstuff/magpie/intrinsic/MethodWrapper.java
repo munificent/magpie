@@ -9,11 +9,11 @@ public class MethodWrapper implements Intrinsic {
   public MethodWrapper(Method method) {
     mMethod = method;
   }
-  
+
   @Override
   public Obj invoke(Context context, Obj left, Obj right) {
     Object result = mMethod.call(left.getValue(), right.getValue());
-    
+
     if (result == null) {
       return context.nothing();
     } else if (result instanceof Boolean) {
@@ -27,6 +27,6 @@ public class MethodWrapper implements Intrinsic {
       throw new InterpreterException("???");
     }
   }
-  
+
   private final Method mMethod;
 }

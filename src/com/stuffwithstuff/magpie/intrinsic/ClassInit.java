@@ -27,7 +27,7 @@ public class ClassInit implements Callable {
   public Obj invoke(Context context, Obj arg) {
     // We don't care about the receiver.
     arg = arg.getField(1);
-    
+
     Obj obj = context.getInterpreter().getConstructingObject();
 
     // Initialize the parent classes from the record.
@@ -37,7 +37,7 @@ public class ClassInit implements Callable {
         context.getInterpreter().initializeNewObject(context, parent, value);
       }
     }
-    
+
     // Initialize the fields from the record.
     for (Entry<String, FieldObj> field : mClass.getFieldDefinitions().entrySet()) {
       // Assign it from the record.
@@ -46,18 +46,18 @@ public class ClassInit implements Callable {
         obj.setField(field.getKey(), arg.getField(field.getKey()));
       }
     }
-    
+
     // Note that we've successfully reached the canonical initializer.
     context.getInterpreter().finishInitialization();
-    
+
     return obj;
   }
-  
+
   @Override
   public Pattern getPattern() {
     // The receiver should be the class object itself.
     Pattern receiver = Pattern.value(Expr.name(mClass.getName()));
-    
+
     // The argument should be a record with fields for each declared field
     // in the class.
     Map<String, Pattern> fields = new HashMap<String, Pattern>();
@@ -69,7 +69,7 @@ public class ClassInit implements Callable {
     }
 
     Pattern argument = Pattern.record(fields);
-    
+
     return Pattern.record(receiver, argument);
   }
 
@@ -77,7 +77,7 @@ public class ClassInit implements Callable {
   public Scope getClosure() {
     return mClosure;
   }
-  
+
   @Override
   public String getDoc() {
     return "Canonical initializer for class " + mClass.getName() + ".";
@@ -87,7 +87,7 @@ public class ClassInit implements Callable {
   public String toString() {
     return mClass.getName() + " init(" + getPattern() + ")";
   }
-  
+
   private final ClassObj mClass;
   private final Scope mClosure;
 }

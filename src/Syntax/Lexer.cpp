@@ -107,7 +107,7 @@ namespace magpie
             return makeToken(TOKEN_EQEQ);
           }
           return makeToken(TOKEN_EQ);
-          
+
         case '!':
           if (peek() == '=')
           {
@@ -122,7 +122,7 @@ namespace magpie
         case '<':
         case '>':
           return readOperator();
-          
+
         case '-':
           if (isDigit(peek()))
           {
@@ -147,7 +147,7 @@ namespace magpie
 
         case '\n':
           return makeToken(TOKEN_LINE);
-          
+
         case '"':
           return readString();
 
@@ -182,14 +182,14 @@ namespace magpie
   {
     return isNameStart(c) || isDigit(c);
   }
-  
+
   bool Lexer::isOperator(char c) const
   {
     return (c == '+') || (c == '-') ||
            (c == '*') || (c == '/') || (c == '%') ||
            (c == '<') || (c == '>') || (c == '=');
   }
-  
+
   bool Lexer::isDigit(char c) const
   {
     return (c >= '0') && (c <= '9');
@@ -281,14 +281,14 @@ namespace magpie
     while (isName(peek())) advance();
 
     gc<String> text = source_->substring(start_, pos_);
-    
+
     // See if it's a field.
     if (peek() == ':')
     {
       advance();
       return makeToken(TOKEN_FIELD, text);
     }
-    
+
     // See if it's a reserved word.
     TokenType type = TOKEN_NAME;
     if      (*text == "and"     ) type = TOKEN_AND;
@@ -323,16 +323,16 @@ namespace magpie
   gc<Token> Lexer::readNumber()
   {
     while (isDigit(peek())) advance();
-    
+
     // See if it's a field.
     if (peek() == ':')
     {
       gc<String> text = source_->substring(start_, pos_);
-      
+
       advance();
       return makeToken(TOKEN_FIELD, text);
     }
-    
+
     // Read the fractional part, if any.
     if (peek() == '.')
     {
@@ -342,13 +342,13 @@ namespace magpie
 
     return makeToken(TOKEN_NUMBER);
   }
-  
+
   gc<Token> Lexer::readOperator()
   {
     while (isOperator(peek())) advance();
-    
+
     gc<String> text = source_->substring(start_, pos_);
-    
+
     TokenType type;
     switch ((*text)[0])
     {
@@ -365,10 +365,10 @@ namespace magpie
       default:
         ASSERT(false, "Unexpected operator character.");
     }
-    
+
     return makeToken(type, text);
   }
-  
+
   gc<Token> Lexer::readString()
   {
     Array<char> chars;

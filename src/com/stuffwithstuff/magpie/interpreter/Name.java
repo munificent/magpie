@@ -34,19 +34,19 @@ public final class Name {
   public static boolean isPublic(String name) {
     return !name.startsWith("_");
   }
-  
+
   public static String makeAssigner(String name) {
     return name + " =";
   }
-  
+
   public static String makeClassPrivate(String className, String member) {
     return className + ".private." + member;
   }
-  
+
   public static String getTupleField(int index) {
     return Integer.toString(index);
   }
-  
+
   private Name() {
   }
 }

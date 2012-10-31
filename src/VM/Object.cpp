@@ -11,7 +11,7 @@ namespace magpie
   {
     stream << toString();
   }
-  
+
   gc<ClassObject> BoolObject::getClass(VM& vm) const
   {
     return vm.boolClass();
@@ -22,7 +22,7 @@ namespace magpie
     // TODO(bob): Store these as constants.
     return String::create(value_ ? "true" : "false");
   }
-  
+
   gc<ClassObject> ClassObject::getClass(VM& vm) const
   {
     return vm.classClass();
@@ -47,7 +47,7 @@ namespace magpie
   gc<Object> DynamicObject::create(gc<ClassObject> classObj)
   {
     ASSERT(classObj->numFields() == 0, "Class cannot have fields.");
-    
+
     // Allocate enough memory for the object.
     void* mem = Memory::allocate(sizeof(DynamicObject));
 
@@ -58,7 +58,7 @@ namespace magpie
   gc<Object> DynamicObject::create(ArrayView<gc<Object> >& args)
   {
     gc<ClassObject> classObj = args[0]->asClass();
-    
+
     // Allocate enough memory for the object and its fields.
     void* mem = Memory::allocate(sizeof(DynamicObject) +
         sizeof(gc<Object>) * (classObj->numFields() - 1));
@@ -85,7 +85,7 @@ namespace magpie
   {
     return String::format("[instance of %s]", class_->name()->cString());
   }
-  
+
   gc<Object> DynamicObject::getField(int index)
   {
     ASSERT_INDEX(index, class_->numFields());
@@ -117,7 +117,7 @@ namespace magpie
 
     return String::create(stream.str().c_str());
   }
-  
+
   gc<ClassObject> NothingObject::getClass(VM& vm) const
   {
     return vm.nothingClass();
@@ -128,7 +128,7 @@ namespace magpie
     // TODO(bob): Store in constant.
     return String::create("nothing");
   }
-  
+
   gc<ClassObject> NumberObject::getClass(VM& vm) const
   {
     return vm.numberClass();
@@ -142,16 +142,16 @@ namespace magpie
   gc<RecordType> RecordType::create(const Array<int>& fields)
   {
     // Allocate enough memory for the record and its fields.
-    void* mem = Memory::allocate(sizeof(RecordType) + 
+    void* mem = Memory::allocate(sizeof(RecordType) +
                                  sizeof(int) * (fields.count() - 1));
-    
+
     // Construct it by calling global placement new.
     return ::new(mem) RecordType(fields);
   }
 
   RecordType::RecordType(const Array<int>& fields)
   : numFields_(fields.count())
-  {    
+  {
     // Initialize the fields.
     for (int i = 0; i < fields.count(); i++)
     {
@@ -168,10 +168,10 @@ namespace magpie
     {
       if (names_[i] == symbol) return i;
     }
-    
+
     return -1;
   }
-  
+
   symbolId RecordType::getSymbol(int index) const
   {
     ASSERT_INDEX(index, numFields_);
@@ -182,18 +182,18 @@ namespace magpie
       const Array<gc<Object> >& stack, int startIndex)
   {
     // Allocate enough memory for the record and its fields.
-    void* mem = Memory::allocate(sizeof(RecordObject) + 
+    void* mem = Memory::allocate(sizeof(RecordObject) +
                                  sizeof(gc<Object>) * (type->numFields() - 1));
-    
+
     // Construct it by calling global placement new.
     gc<RecordObject> record = ::new(mem) RecordObject(type);
-    
+
     // Initialize the fields.
     for (int i = 0; i < type->numFields(); i++)
     {
       record->fields_[i] = stack[startIndex + i];
     }
-    
+
     return record;
   }
 
@@ -201,7 +201,7 @@ namespace magpie
   {
     int index = type_->getField(symbol);
     if (index == -1) return gc<Object>();
-    
+
     return fields_[index];
   }
 
@@ -225,22 +225,22 @@ namespace magpie
 
     return String::create(stream.str().c_str());
   }
-  
+
   void RecordObject::reach()
   {
     type_.reach();
-    
+
     for (int i = 0; i < type_->numFields(); i++)
     {
       fields_[i].reach();
     }
   }
-  
+
   gc<ClassObject> StringObject::getClass(VM& vm) const
   {
     return vm.stringClass();
   }
-  
+
   void StringObject::reach()
   {
     value_.reach();

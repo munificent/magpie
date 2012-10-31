@@ -10,7 +10,7 @@ namespace magpie
   {
     return args[0]->getClass(vm);
   }
-  
+
   NATIVE(objectNew)
   {
     // This assumes the args list has, in order, the class object and then all
@@ -34,57 +34,57 @@ namespace magpie
     double c = args[0]->asNumber() + args[1]->asNumber();
     return new NumberObject(c);
   }
-  
+
   NATIVE(stringPlusString)
   {
     return new StringObject(
         String::concat(args[0]->asString(), args[1]->asString()));
   }
-  
+
   NATIVE(numMinusNum)
   {
     double c = args[0]->asNumber() - args[1]->asNumber();
     return new NumberObject(c);
   }
-  
+
   NATIVE(numTimesNum)
   {
     double c = args[0]->asNumber() * args[1]->asNumber();
     return new NumberObject(c);
   }
-  
+
   NATIVE(numDivNum)
   {
     double c = args[0]->asNumber() / args[1]->asNumber();
     return new NumberObject(c);
   }
-  
+
   NATIVE(numLessThanNum)
   {
     return vm.getBool(args[0]->asNumber() < args[1]->asNumber());
   }
-  
+
   NATIVE(numLessThanEqualToNum)
   {
     return vm.getBool(args[0]->asNumber() <= args[1]->asNumber());
   }
-  
+
   NATIVE(numGreaterThanNum)
   {
     return vm.getBool(args[0]->asNumber() > args[1]->asNumber());
   }
-  
+
   NATIVE(numGreaterThanEqualToNum)
   {
     return vm.getBool(args[0]->asNumber() >= args[1]->asNumber());
   }
-  
+
   NATIVE(stringCount)
   {
     double c = args[0]->asString()->length();
     return new NumberObject(c);
   }
-  
+
   NATIVE(numToString)
   {
     double n = args[0]->asNumber();
@@ -97,20 +97,20 @@ namespace magpie
     list->elements().add(args[1]);
     return args[1];
   }
-  
+
   NATIVE(listCount)
   {
     ListObject* list = args[0]->asList();
     return new NumberObject(list->elements().count());
   }
-  
+
   NATIVE(listIndex)
   {
     ListObject* list = args[0]->asList();
     // TODO(bob): What if the index isn't an int?
     return list->elements()[static_cast<int>(args[1]->asNumber())];
   }
-  
+
   NATIVE(listIndexSet)
   {
     ListObject* list = args[0]->asList();

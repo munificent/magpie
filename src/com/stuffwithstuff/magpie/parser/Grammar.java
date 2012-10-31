@@ -15,7 +15,7 @@ public class Grammar {
     prefix(TokenType.BACKTICK,      new BacktickParser());
     prefix(TokenType.NAME,          new NameParser());
     prefix(TokenType.FIELD,         new FieldParser());
-    
+
     prefix(TokenType.FN,            new FnParser());
 
     infix(TokenType.AND,          new AndParser());
@@ -37,7 +37,7 @@ public class Grammar {
     infix(TokenType.EQEQ,         new InfixOperatorParser(4));
     infix(TokenType.NOTEQ,        new InfixOperatorParser(4));
   }
-  
+
   public PrefixParser getPrefixParser(Token token) {
     return mPrefixParsers.get(token.getType());
   }
@@ -53,18 +53,18 @@ public class Grammar {
     if (parser != null) {
       precedence = parser.getPrecedence();
     }
-    
+
     return precedence;
   }
-  
+
   private void prefix(TokenType type, PrefixParser parser) {
     mPrefixParsers.put(type, parser);
   }
-  
+
   private void infix(TokenType type, InfixParser parser) {
     mInfixParsers.put(type, parser);
   }
-  
+
   private final Map<TokenType, PrefixParser> mPrefixParsers =
       new HashMap<TokenType, PrefixParser>();
   private final Map<TokenType, InfixParser> mInfixParsers =

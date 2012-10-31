@@ -9,8 +9,8 @@ public class ErrorException extends RuntimeException {
   public ErrorException(Obj error) {
     mError = error;
   }
-  
+
   public Obj getError() { return mError; }
-  
+
   private final Obj mError;
 }

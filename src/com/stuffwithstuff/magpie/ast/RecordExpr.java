@@ -8,17 +8,17 @@ import com.stuffwithstuff.magpie.util.Pair;
 public class RecordExpr extends Expr {
   RecordExpr(Position position, List<Pair<String, Expr>> fields) {
     super(position);
-    
+
     mFields = fields;
   }
-  
+
   /**
    * Gets the fields for the record. We're using a list of entries instead of a
    * map because we need to ensure that fields are evaluated in the order that
    * they appear in the source.
    */
   public List<Pair<String, Expr>> getFields() { return mFields; }
-  
+
   @Override
   public <R, C> R accept(ExprVisitor<R, C> visitor, C context) {
     return visitor.visit(this, context);

@@ -14,7 +14,7 @@ namespace magpie
   class Module;
   class Pattern;
   class SequenceExpr;
-  
+
   // A record field.
   struct Field
   {
@@ -22,7 +22,7 @@ namespace magpie
     : name(),
       value()
     {}
-    
+
     Field(gc<String> name, gc<Expr> value)
     : name(name),
       value(value)
@@ -31,7 +31,7 @@ namespace magpie
     gc<String> name;
     gc<Expr> value;
   };
-  
+
   // A record pattern field.
   struct PatternField
   {
@@ -39,12 +39,12 @@ namespace magpie
     : name(),
       value()
     {}
-    
+
     PatternField(gc<String> name, gc<Pattern> value)
     : name(name),
       value(value)
     {}
-    
+
     gc<String> name;
     gc<Pattern> value;
   };
@@ -56,16 +56,16 @@ namespace magpie
     : name(),
       value()
     {}
-    
+
     LValueField(gc<String> name, gc<LValue> value)
     : name(name),
       value(value)
     {}
-    
+
     gc<String> name;
     gc<LValue> value;
   };
-  
+
   // A class field.
   class ClassField : public Managed
   {
@@ -77,21 +77,21 @@ namespace magpie
       pattern_(pattern),
       initializer_(initializer)
     {}
-    
+
     bool isMutable() const { return isMutable_; }
     gc<String> name() const { return name_; }
     gc<Pattern> pattern() const { return pattern_; }
     gc<Expr> initializer() const { return initializer_; }
-    
+
     void reach();
-    
+
   private:
     bool isMutable_;
     gc<String> name_;
     gc<Pattern> pattern_;
     gc<Expr> initializer_;
   };
-  
+
   // A pattern paired with the expression to execute when the pattern matches.
   // Used for match expressions and catch clauses.
   class MatchClause
@@ -101,20 +101,20 @@ namespace magpie
     : pattern_(),
       body_()
     {}
-    
+
     MatchClause(gc<Pattern> pattern, gc<Expr> body)
     : pattern_(pattern),
       body_(body)
     {}
-    
+
     gc<Pattern> pattern() const { return pattern_; }
     gc<Expr> body() const { return body_; }
-    
+
   private:
     gc<Pattern> pattern_;
     gc<Expr> body_;
   };
-  
+
   class ResolvedName
   {
   public:
@@ -124,14 +124,14 @@ namespace magpie
       module_(-1),
       index_(-1)
     {}
-    
+
     // Resolves the name to a local variable with the given slot index.
     ResolvedName(int index)
     : isLocal_(true),
       module_(-1),
       index_(index)
     {}
-    
+
     // Resolves the name to a variable that is the given export from the given
     // import.
     ResolvedName(int module, int variable)
@@ -139,36 +139,36 @@ namespace magpie
       module_(module),
       index_(variable)
     {}
-    
+
     bool isResolved() const { return index_ != -1; }
     bool isLocal() const { return isLocal_; }
     int module() const { return module_; }
     int index() const { return index_; }
-    
+
   private:
     bool isLocal_;
     int module_;
     int index_;
   };
-  
+
   class ModuleAst : public Managed
   {
   public:
     ModuleAst(gc<SequenceExpr> body)
     : body_(body)
     {}
-    
+
     gc<SequenceExpr> body() const { return body_; }
-    
+
     virtual void reach()
     {
       body_.reach();
     }
-    
+
   private:
     gc<SequenceExpr> body_;
   };
-  
+
 #include "Ast.generated.h"
 }
 

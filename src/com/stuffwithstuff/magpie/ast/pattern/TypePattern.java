@@ -7,9 +7,9 @@ public class TypePattern extends Pattern {
   TypePattern(Expr type) {
     mType = type;
   }
-  
+
   public Expr   getType() { return mType; }
-  
+
   @Override
   public <R, C> R accept(PatternVisitor<R, C> visitor, C context) {
     return visitor.visit(this, context);

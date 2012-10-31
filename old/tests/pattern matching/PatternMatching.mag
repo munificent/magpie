@@ -7,14 +7,14 @@ Main (->)
         case 2 then Print "2"
         case _ then Print "any"
     end
-    
+
     def c <- "foo"
     match c
         case "bar" then Print "bar"
         case "foo" then Print "foo"
         case _     then Print "any"
     end
-    
+
     // unions
     def d <- Banana
     match d
@@ -22,7 +22,7 @@ Main (->)
         case Banana then Print "banana"
         case Cherry then Print "cherry"
     end
-    
+
     // union values
     def e <- Inches 23
     match e
@@ -31,7 +31,7 @@ Main (->)
         case Inches a  then Print a.String
         case Feet _    then Print "feet"
     end
-    
+
     // structs
     def f <- Point (2, 3)
     match f
@@ -39,7 +39,7 @@ Main (->)
         case Point (1, 0) then Print "x unit"
         case Point (a, b) then Print "other"
     end
-    
+
     // tuples
     def g <- (1, true)
     match g
@@ -48,7 +48,7 @@ Main (->)
         case (a, true)  then Print "something true"
         case b          then Print "is this even valid?"
     end
-    
+
     // combined
     def h <- Add (Literal 1, Add (Literal 2, Literal 3))
     match h
@@ -57,7 +57,7 @@ Main (->)
         case Add (left, right)  then Print "add"
         case Add (Literal a, _) then Print "add literal"
     end
-    
+
     // nested matching
     def i <- 1
     def j <- 2

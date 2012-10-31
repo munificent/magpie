@@ -10,20 +10,20 @@ namespace magpie
   int Resolver::resolveBody(Compiler& compiler, Module& module, gc<Expr> body)
   {
     Resolver resolver(compiler, module, true);
-    
+
     // Create a top-level scope.
     Scope scope(&resolver);
     resolver.scope_ = &scope;
-    
+
     // Create a slot for the result value.
     resolver.makeLocal(SourcePos(NULL, 0, 0, 0, 0), String::create("(result)"));
     resolver.resolve(body);
-    
+
     scope.end();
-    
+
     return resolver.maxLocals_;
   }
-  
+
   void Resolver::resolve(Compiler& compiler, Module& module, DefExpr& method)
   {
     Resolver resolver(compiler, module, false);
@@ -31,7 +31,7 @@ namespace magpie
     // Create a scope for the method body.
     Scope scope(&resolver);
     resolver.scope_ = &scope;
-    
+
     // First, we allocate slots for the destructured parameters. We do this
     // first so that all parameter slots for the method are contiguous at the
     // beginning of the method's slot window. The caller will assume this when
@@ -39,28 +39,28 @@ namespace magpie
     resolver.allocateSlotsForParam(method.leftParam());
     resolver.allocateSlotsForParam(method.rightParam());
     resolver.allocateSlotsForParam(method.value());
-    
+
     // Create a slot for the result value.
     resolver.makeLocal(SourcePos(NULL, 0, 0, 0, 0), String::create("(result)"));
-    
+
     // Now that we've got our slots set up, we can actually resolve the nested
     // patterns for the param (if there are any).
     resolver.destructureParam(method.leftParam());
     resolver.destructureParam(method.rightParam());
     resolver.destructureParam(method.value());
-    
+
     resolver.resolve(method.body());
-    
+
     scope.end();
-    
+
     method.setMaxLocals(resolver.maxLocals_);
   }
-  
+
   void Resolver::allocateSlotsForParam(gc<Pattern> pattern)
   {
     // No parameter so do nothing.
     if (pattern.isNull()) return;
-    
+
     RecordPattern* record = pattern->asRecordPattern();
     if (record != NULL)
     {
@@ -76,7 +76,7 @@ namespace magpie
       makeParamSlot(pattern);
     }
   }
-  
+
   void Resolver::makeParamSlot(gc<Pattern> param)
   {
     VariablePattern* variable = param->asVariablePattern();
@@ -86,7 +86,7 @@ namespace magpie
       // variable.
       int slot = makeLocal(param->pos(), variable->name());
       variable->setResolved(ResolvedName(slot));
-      
+
       // Note that we do *not* resolve the variable's inner pattern here. We
       // do that after all param slots are resolved so that we can ensure the
       // param slots are contiguous.
@@ -98,12 +98,12 @@ namespace magpie
       makeLocal(param->pos(), String::format("(%d)", unnamedSlotId_++));
     }
   }
-  
+
   void Resolver::destructureParam(gc<Pattern> pattern)
   {
     // No parameter so do nothing.
     if (pattern.isNull()) return;
-    
+
     RecordPattern* record = pattern->asRecordPattern();
     if (record != NULL)
     {
@@ -119,7 +119,7 @@ namespace magpie
       resolveParam(pattern);
     }
   }
-  
+
   void Resolver::resolveParam(gc<Pattern> param)
   {
     VariablePattern* variable = param->asVariablePattern();
@@ -137,32 +137,32 @@ namespace magpie
       scope_->resolve(*param);
     }
   }
-  
+
   void Resolver::resolve(gc<Expr> expr)
   {
     expr->accept(*this, -1);
   }
-  
+
   void Resolver::resolveCall(CallExpr& expr, bool isLValue)
   {
     // Resolve the arguments.
     if (!expr.leftArg().isNull()) resolve(expr.leftArg());
     if (!expr.rightArg().isNull()) resolve(expr.rightArg());
-    
+
     // Resolve the method.
     gc<String> signature = SignatureBuilder::build(expr, isLValue);
     int method = compiler_.findMethod(signature);
-    
+
     if (method == -1)
     {
       compiler_.reporter().error(expr.pos(),
           "Could not find a method with signature '%s'.",
           signature->cString());
-      
+
       // Just pick a method so we can keep compiling to report later errors.
       method = 0;
     }
-    
+
     expr.setResolved(method);
   }
 
@@ -179,43 +179,43 @@ namespace magpie
             name->cString());
       }
     }
-    
+
     locals_.add(name);
     if (locals_.count() > maxLocals_) {
       maxLocals_ = locals_.count();
     }
-            
+
     return locals_.count() - 1;
   }
-  
+
   void Resolver::visit(AndExpr& expr, int dummy)
   {
     resolve(expr.left());
     resolve(expr.right());
   }
-  
+
   void Resolver::visit(AssignExpr& expr, int dummy)
   {
     resolve(expr.value());
     expr.lvalue()->accept(*this, dummy);
   }
-  
+
   void Resolver::visit(BinaryOpExpr& expr, int dummy)
   {
     resolve(expr.left());
     resolve(expr.right());
   }
-  
+
   void Resolver::visit(BoolExpr& expr, int dummy)
   {
     // Do nothing.
   }
-  
+
   void Resolver::visit(CallExpr& expr, int dummy)
   {
     resolveCall(expr, false);
   }
-  
+
   void Resolver::visit(CatchExpr& expr, int dummy)
   {
     // Resolve the block body.
@@ -228,30 +228,30 @@ namespace magpie
     {
       Scope caseScope(this);
       const MatchClause& clause = expr.catches()[i];
-      
+
       // Resolve the pattern.
       scope_->resolve(*clause.pattern());
-      
+
       // Resolve the body.
       resolve(clause.body());
       caseScope.end();
     }
   }
-  
+
   void Resolver::visit(DefExpr& expr, int dummy)
   {
     // Resolve the method itself.
     Resolver::resolve(compiler_, module_, expr);
   }
-  
+
   void Resolver::visit(DefClassExpr& expr, int dummy)
   {
     // Resolve the class name's variable.
     int module = compiler_.getModuleIndex(module_);
     int index = module_.findVariable(expr.name());
-    
+
     ASSERT(index != -1, "Should have already forward-declared the class.");
-    
+
     expr.setResolved(ResolvedName(module, index));
 
     // Resolve the synthesized stuff.
@@ -262,25 +262,25 @@ namespace magpie
 
     // TODO(bob): Resolve field patterns and initializers.
   }
-  
+
   void Resolver::visit(DoExpr& expr, int dummy)
   {
     Scope doScope(this);
     resolve(expr.body());
     doScope.end();
   }
-  
+
   void Resolver::visit(ForExpr& expr, int dummy)
   {
     // Resolve the iterator in the current scope.
     resolve(expr.iterator());
-    
+
     // Resolve the body (including the loop pattern) in its own scope.
     Scope loopScope(this);
-    
+
     scope_->resolve(*expr.pattern());
     resolve(expr.body());
-    
+
     loopScope.end();
   }
 
@@ -290,7 +290,7 @@ namespace magpie
     // of some IR.
     // Do nothing.
   }
-  
+
   void Resolver::visit(IfExpr& expr, int dummy)
   {
     Scope ifScope(this);
@@ -312,13 +312,13 @@ namespace magpie
 
     ifScope.end();
   }
-  
+
   void Resolver::visit(IsExpr& expr, int dummy)
   {
     resolve(expr.value());
     resolve(expr.type());
   }
-  
+
   void Resolver::visit(ListExpr& expr, int dummy)
   {
     for (int i = 0; i < expr.elements().count(); i++)
@@ -326,7 +326,7 @@ namespace magpie
       resolve(expr.elements()[i]);
     }
   }
-  
+
   void Resolver::visit(MatchExpr& expr, int dummy)
   {
     // Resolve the value.
@@ -337,7 +337,7 @@ namespace magpie
     {
       Scope caseScope(this);
       const MatchClause& clause = expr.cases()[i];
-      
+
       // Resolve the pattern (will be null for the else case).
       if (!clause.pattern().isNull())
       {
@@ -349,7 +349,7 @@ namespace magpie
       caseScope.end();
     }
   }
-  
+
   void Resolver::visit(NameExpr& expr, int dummy)
   {
     // See if it's a local variable.
@@ -367,14 +367,14 @@ namespace magpie
       if (*module_.getVariableName(j) == *expr.name())
       {
         // Found it.
-        
+
         // Get the module's real index.
         int module = compiler_.getModuleIndex(module_);
         expr.setResolved(ResolvedName(module, j));
         return;
       }
     }
-    
+
     // See if it's an imported name. Walk through the modules this one imports.
     // TODO(bob): Need to handle name collisions.
     for (int i = 0; i < module_.imports().count(); i++)
@@ -388,7 +388,7 @@ namespace magpie
         if (*import->getVariableName(j) == *expr.name())
         {
           // Found it.
-          
+
           // Get the module's real index.
           int module = compiler_.getModuleIndex(*import);
           expr.setResolved(ResolvedName(module, j));
@@ -399,16 +399,16 @@ namespace magpie
 
     compiler_.reporter().error(expr.pos(),
         "Variable '%s' is not defined.", expr.name()->cString());
-    
+
     // Resolve it to some fake local so compilation can continue and report
     // more errors.
     expr.setResolved(ResolvedName(0));
   }
-  
+
   void Resolver::visit(NativeExpr& expr, int dummy)
   {
     int index = compiler_.findNative(expr.name());
-    
+
     if (index == -1)
     {
       compiler_.reporter().error(expr.pos(),
@@ -417,28 +417,28 @@ namespace magpie
 
     expr.setIndex(index);
   }
-  
+
   void Resolver::visit(NotExpr& expr, int dummy)
   {
     resolve(expr.value());
   }
-  
+
   void Resolver::visit(NothingExpr& expr, int dummy)
   {
     // Do nothing.
   }
-  
+
   void Resolver::visit(NumberExpr& expr, int dummy)
   {
     // Do nothing.
   }
-  
+
   void Resolver::visit(OrExpr& expr, int dummy)
   {
     resolve(expr.left());
     resolve(expr.right());
   }
-  
+
   void Resolver::visit(RecordExpr& expr, int dummy)
   {
     // Resolve the fields.
@@ -447,7 +447,7 @@ namespace magpie
       resolve(expr.fields()[i].value);
     }
   }
-  
+
   void Resolver::visit(ReturnExpr& expr, int dummy)
   {
     // Resolve the return value.
@@ -456,7 +456,7 @@ namespace magpie
       resolve(expr.value());
     }
   }
-  
+
   void Resolver::visit(SequenceExpr& expr, int dummy)
   {
     for (int i = 0; i < expr.expressions().count(); i++)
@@ -471,51 +471,51 @@ namespace magpie
     // of some IR.
     // Do nothing.
   }
-  
+
   void Resolver::visit(StringExpr& expr, int dummy)
   {
     // Do nothing.
   }
-  
+
   void Resolver::visit(ThrowExpr& expr, int dummy)
   {
     // Resolve the error object.
     resolve(expr.value());
   }
-  
+
   void Resolver::visit(VariableExpr& expr, int dummy)
   {
     // Resolve the value.
     resolve(expr.value());
-    
+
     // Now declare any locals on the left-hand side.
     scope_->resolve(*expr.pattern());
   }
-  
+
   void Resolver::visit(WhileExpr& expr, int dest)
   {
     Scope loopScope(this);
-    
+
     resolve(expr.condition());
-    
+
     // TODO(bob): Should the body get its own scope?
     resolve(expr.body());
-    
+
     loopScope.end();
   }
-  
+
   void Resolver::visit(CallLValue& lvalue, int dummy)
   {
     resolveCall(*lvalue.call(), true);
   }
-  
+
   void Resolver::visit(NameLValue& lvalue, int dummy)
   {
     // Look up the variable.
     int slot = locals_.lastIndexOf(lvalue.name());
-    
+
     // TODO(bob): Report error if variable is immutable.
-    
+
     if (slot != -1)
     {
       lvalue.setResolved(ResolvedName(slot));
@@ -525,7 +525,7 @@ namespace magpie
     // Not a local variable. See if it's a top-level one.
     int module = compiler_.getModuleIndex(module_);
     int index = module_.findVariable(lvalue.name());
-    
+
     if (index != -1)
     {
       lvalue.setResolved(ResolvedName(module, index));
@@ -534,11 +534,11 @@ namespace magpie
 
     compiler_.reporter().error(lvalue.pos(),
         "Variable '%s' is not defined.", lvalue.name()->cString());
-      
+
     // Put a fake slot in so we can continue and report more errors.
     lvalue.setResolved(ResolvedName(0));
   }
-  
+
   void Resolver::visit(RecordLValue& lvalue, int dummy)
   {
     // Recurse into the fields.
@@ -547,12 +547,12 @@ namespace magpie
       lvalue.fields()[i].value->accept(*this, dummy);
     }
   }
-  
+
   void Resolver::visit(WildcardLValue& lvalue, int dummy)
   {
     // Nothing to do.
   }
-    
+
   Scope::Scope(Resolver* resolver)
   : resolver_(*resolver),
     parent_(resolver_.scope_),
@@ -560,12 +560,12 @@ namespace magpie
   {
     resolver_.scope_ = this;
   }
-  
+
   Scope::~Scope()
   {
     ASSERT(start_ == -1, "Forgot to end scope.");
   }
-  
+
   bool Scope::isTopLevel() const
   {
     return resolver_.isModuleBody_ && (parent_ == NULL);
@@ -575,16 +575,16 @@ namespace magpie
   {
     pattern.accept(*this, -1);
   }
-  
+
   void Scope::end()
   {
     ASSERT(start_ != -1, "Already ended this scope.");
-    
+
     resolver_.locals_.truncate(start_);
     resolver_.scope_ = parent_;
     start_ = -1;
   }
-  
+
   void Scope::visit(RecordPattern& pattern, int dummy)
   {
     // Recurse into the fields.
@@ -593,19 +593,19 @@ namespace magpie
       pattern.fields()[i].value->accept(*this, dummy);
     }
   }
-  
+
   void Scope::visit(TypePattern& pattern, int dummy)
   {
     // Resolve the type expression.
     resolver_.resolve(pattern.type());
   }
-  
+
   void Scope::visit(ValuePattern& pattern, int dummy)
   {
     // Resolve the value expression.
     resolver_.resolve(pattern.value());
   }
-  
+
   void Scope::visit(VariablePattern& pattern, int dummy)
   {
     if (isTopLevel())
@@ -614,16 +614,16 @@ namespace magpie
       // they should already exist. Just look up the existing one.
       int module = resolver_.compiler_.getModuleIndex(resolver_.module_);
       int index = resolver_.module_.findVariable(pattern.name());
-      
+
       if (index == -1)
       {
         resolver_.compiler_.reporter().error(pattern.pos(),
             "Variable '%s' is not defined.", pattern.name()->cString());
-        
+
         // Put a fake index in so we can continue and report more errors.
         index = 0;
       }
-      
+
       pattern.setResolved(ResolvedName(module, index));
     }
     else
@@ -632,13 +632,13 @@ namespace magpie
       int slot = resolver_.makeLocal(pattern.pos(), pattern.name());
       pattern.setResolved(ResolvedName(slot));
     }
-        
+
     if (!pattern.pattern().isNull())
     {
       pattern.pattern()->accept(*this, dummy);
     }
   }
-  
+
   void Scope::visit(WildcardPattern& pattern, int dummy)
   {
     // Nothing to do.

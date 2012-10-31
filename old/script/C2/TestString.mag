@@ -6,17 +6,17 @@ end
 
 TestString/Index (->)
     Print "TestString/Index"
-    
+
     AssertEqual ("c", "abcd".2)
 end
 
 TestString/Iterator (->)
     Print "TestString/Iterator"
-    
+
     for item <- "" do
         AssertFail "should not get item for string"
     end
-    
+
     for item <- "ab"
     for index <- FromZero do
         if index = 0 then AssertEqual ("a", item, "first char should be 'a'")
@@ -27,7 +27,7 @@ end
 
 TestString/Contains (->)
     Print "TestString/Contains"
-    
+
     AssertEqual (true, Contains ("abcde", "abc"))
     AssertEqual (true, Contains ("abcde", "de"))
     AssertEqual (false, Contains ("abcde", "abb"))

@@ -11,7 +11,7 @@ end
 type Expr
     Line    Int
     Column  Int
-    
+
 case Add
     Left    Expr
     Right   Expr
@@ -24,13 +24,13 @@ end
 
 Main (->)
     // constructors:
-    
+
     // current syntax
     def a <- Expr|Add (1, 2, Expr|Int (1, 2, 3),
                              Expr|Int (1, 2, 3))
-    
+
     // value access
     let left, right <- a.AsAdd then
     end
-    
+
 end

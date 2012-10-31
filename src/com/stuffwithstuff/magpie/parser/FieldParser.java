@@ -14,25 +14,25 @@ public class FieldParser implements PrefixParser {
   @Override
   public Expr parse(MagpieParser parser, Token token) {
     Position position = token.getPosition();
-    
+
     List<Pair<String, Expr>> fields = new ArrayList<Pair<String, Expr>>();
     Set<String> usedNames = new HashSet<String>();
-    
+
     int index = 1;
     String name = token.getString();
     Position namePosition = token.getPosition();
     while (true) {
       Expr value = parser.parsePrecedence(Precedence.RECORD);
       fields.add(new Pair<String, Expr>(name, value));
-      
+
       if (usedNames.contains(name)) {
         throw new ParseException(namePosition,
             "A record may only use a field name once.");
       }
       usedNames.add(name);
-      
+
       if (!parser.match(TokenType.COMMA)) break;
-      
+
       if (parser.match(TokenType.FIELD)) {
         name = parser.last(1).getString();
         namePosition = parser.last(1).getPosition();
@@ -42,7 +42,7 @@ public class FieldParser implements PrefixParser {
       }
       index++;
     }
-    
+
     return Expr.record(position, fields);
   }
 }

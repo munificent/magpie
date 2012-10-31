@@ -17,7 +17,7 @@ __Call[TKey, TValue] (key TKey, dict Dict[TKey, TValue] -> Option[TValue])
     for entry <- dict.Entries do
         if entry.Key = key then return Some entry.Value
     end
-    
+
     None[TValue]
 end
 
@@ -30,7 +30,7 @@ __Call<-[TKey, TValue] (key TKey, dict Dict[TKey, TValue], value TValue ->)
             return
         end
     end
-    
+
     // if we got here, the key wasn't found, so add it
     dict.Entries <- DictEntry (key, value) ++ dict.Entries
 end

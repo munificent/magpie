@@ -38,7 +38,7 @@ public class ReflectionMethods {
           right.asClass()));
     }
   }
-  
+
   @Def("(this) sameAs(that)")
   @Doc("Returns true if this and that are the same object.")
   public static class Same implements Intrinsic {
@@ -47,17 +47,17 @@ public class ReflectionMethods {
           left == right);
     }
   }
-  
+
   @Def("showDoc(method is String)")
   @Doc("Displays the documentation for the multimethod with the given name.")
   public static class DocMethod implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       String name = right.asString();
-      
+
       // TODO(bob): Hackish, but works.
       Multimethod multimethod = context.getModule().getScope()
           .lookUpMultimethod(name);
-            
+
       if (multimethod == null) {
         System.out.println(
             "Couldn't find a method named \"" + name + "\".\n");
@@ -71,17 +71,17 @@ public class ReflectionMethods {
         //   Displays the documentation for the given class.
         System.out.println(new DocBuilder().append(name, multimethod).toString());
       }
-      
+
       return context.nothing();
     }
   }
-  
+
   @Def("showDoc(class is Class)")
   @Doc("Displays the documentation for the given class.")
   public static class ClassDoc implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       ClassObj classObj = right.asClass();
-      
+
       StringBuilder builder = new StringBuilder();
       builder.append(classObj.getName() + "\n");
       if (classObj.getDoc().length() > 0) {
@@ -89,16 +89,16 @@ public class ReflectionMethods {
       } else {
         builder.append("| <no doc>\n");
       }
-      
+
       System.out.println(builder.toString());
-      
+
       return context.nothing();
     }
   }
 
   private static abstract class Methods implements Intrinsic {
     public Obj invoke(final Context context, Obj left, Obj right) {
-     
+
       final Obj matchingValue = getMatchingValueFromArgs(context, left, right);
 
       DocBuilder docBuilder = new DocBuilder() {
@@ -114,7 +114,7 @@ public class ReflectionMethods {
         docBuilder.append("\n");
       }
       System.out.println(docBuilder.toString());
-      
+
       return context.nothing();
     }
 
@@ -129,14 +129,14 @@ public class ReflectionMethods {
               matching.put(multimethod.getKey(), multimethod.getValue());
               break;
             }
-          }  
+          }
         }
         scope = scope.getParent();
       }
- 
+
       return matching.entrySet();
     }
-  
+
     protected abstract Obj getMatchingValueFromArgs(Context context, Obj left, Obj right);
     protected abstract boolean isMatchingMethod(Obj value, Context context, Callable method);
   }
@@ -155,7 +155,7 @@ public class ReflectionMethods {
       Pattern leftParam = ((RecordPattern)method.getPattern()).getFields().get(Name.getTupleField(0));
       return PatternTester.test(context, leftParam, value, method.getClosure());
     }
-  }  
+  }
 
   @Def("(this) showMethods(_)")
   @Doc("Displays the multimethods that can be called with the given arguments.")
@@ -170,5 +170,5 @@ public class ReflectionMethods {
     public boolean isMatchingMethod(Obj value, Context context, Callable method) {
       return PatternTester.test(context, method.getPattern(), value, method.getClosure());
     }
-  }  
+  }
 }

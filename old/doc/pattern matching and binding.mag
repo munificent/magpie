@@ -10,7 +10,7 @@
 // so". that's awesome.
 // so, an ideal conditional construct would support:
 // - simple "if this do this" cases
-// - multiple branches, of which only the first success is entered 
+// - multiple branches, of which only the first success is entered
 // - a final else branch if nothing else matches
 // - binding a variable on a successful match
 // - ideally, no duplication between branch conditions (so, if they
@@ -98,7 +98,7 @@ fn String (expr IExpr -> String)
     else
         "other"
     end
-    
+
     if expr is NumExpr then
         def num <- expr.NumExpr
         num.Value.String

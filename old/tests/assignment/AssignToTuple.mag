@@ -8,12 +8,12 @@ Main (->)
     var a <- 0
     var b <- "b"
     var c <- true
-    
+
     a, b, c <- 1, "B", false
     Print a.String
     Print b.String
     Print c.String
-    
+
     // fields should be assigned "simultaneously"
     var left <- "left"
     var right <- "right"

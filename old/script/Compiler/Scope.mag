@@ -10,21 +10,21 @@ namespace Magpie:Compiler
 
     // Creates a new child scope.
     Scope (parent Scope -> Scope) Scope (Some parent, Struct "_scope")
-    
+
     // Defines a local variable in the scope.
     Define (scope Scope, name String, type Decl, mutable? Bool ->)
         scope.Struct.Fields << StructField (name, mutable?, type)
     end
-    
+
     // Looks for a variable with the given name in this scope.
     LookUp (scope Scope, name String -> Option'Int)
         def index <- First# (scope.Struct.Fields, name, fn _NameMatches (String, StructField))
-        
+
         if index = -1 then None'Int else Some index
     end
-    
+
     _NameMatches (name String, field StructField -> Bool) name = field.Name
-    
+
     // Represents a lexical scope and the local variables it contains.
     struct Scope
         Parent  Option'Scope

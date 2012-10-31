@@ -20,7 +20,7 @@ namespace Iterative
         for n <- i.Times do
             pair <- (pair.Second, pair.First + pair.Second)
         end
-        
+
         pair.First
     end
 end
@@ -28,12 +28,12 @@ end
 namespace Generative
     Fib (i Int -> Int)
         mutable last <- 0
-        
+
         for f <- FibSequence
         for n <- i.Times do
             last <- f
         end
-        
+
         last
     end
 
@@ -45,10 +45,10 @@ namespace Generative
         iter.Next    <- next
         true
     end
-    
+
     struct FibSequence
     end
-    
+
     struct FibSequence^
         mutable Current Int
         mutable Next    Int

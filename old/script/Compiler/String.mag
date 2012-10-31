@@ -8,23 +8,23 @@ namespace Magpie:Compiler
     ParseInt (text String -> Int)
         mutable value <- 0
         mutable index <- 0
-        
+
         // handle a minus sign
         mutable sign <- if (text @ 0) = "-" then
             index <- + 1
             0 - 1 // ### bob: c# lexer barfs on negative literals
             else 1
-        
+
         while index < text.Size do
             def c <- text @ index
-            
+
             value <- (value * 10) + c.DigitValue
             index <- + 1
         end
-        
+
         value * sign
     end
-    
+
     DigitValue (digit String -> Int)
         if      digit = "0" then 0
         else if digit = "1" then 1
@@ -38,14 +38,14 @@ namespace Magpie:Compiler
         else if digit = "9" then 9
         else -1 // ### bob: error
     end
-    
+
     @ (text String, position Int -> String) Substring (text, position, 1)
-    
+
     Quote? (character String -> Bool) character = "\""
     Newline? (character String -> Bool) character = "\n"
     Backslash? (character String -> Bool) character = "\\"
     Minus? (character String -> Bool) character = "-"
-    
+
     Alpha? (character String -> Bool)
         if      character = "a" then true
         else if character = "b" then true
@@ -101,7 +101,7 @@ namespace Magpie:Compiler
         else if character = "Z" then true
         else false
     end
-    
+
     // _ ! & | - + = < > ? * / ~ @ # $ % ^ `
     Punctuation? (character String -> Bool)
         if      character = "_" then true
@@ -125,7 +125,7 @@ namespace Magpie:Compiler
         else if character = "backslash" then true // ### bob: current parser can't parse backslash in string literal
         else false
     end
-    
+
     Digit? (character String -> Bool)
         if      character = "0" then true
         else if character = "1" then true

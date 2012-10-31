@@ -3,7 +3,7 @@ All'T (sequence ISequence'T, predicate fn (T -> Bool) -> Bool)
     for item <- sequence do // calls sequence.Iterate
         if Not predicate item then return false
     end
-    
+
     return true
 end
 
@@ -27,7 +27,7 @@ namespace Collections'T
     MoveNext (iterator ListIterator -> Bool)
         // advance
         if iterator.List.List? then iterator.List <- .ListValue
-    
+
         iterator.List.Empty?
     end
 

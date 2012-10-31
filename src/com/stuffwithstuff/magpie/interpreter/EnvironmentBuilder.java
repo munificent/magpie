@@ -15,27 +15,27 @@ public class EnvironmentBuilder {
 
   public ClassObj createClassClass() {
     Scope scope = mModule.getScope();
-    
+
     // The class of all classes. Its class is itself.
     // TODO(bob): Doc.
     ClassObj classObj = new ClassObj(null, Name.CLASS, null,
         new HashMap<String, FieldObj>(), "");
     classObj.bindClass(classObj);
     scope.define(false, Name.CLASS, classObj);
-    
+
     return classObj;
   }
-  
+
   public void initialize() {
     // Create the default new() method for creating objects.
     Scope scope = mModule.getScope();
     Callable newMethod = new ClassNew(scope);
     scope.define("new", newMethod);
-    
+
     ClassObj iterable = class_("Iterable").end();
     ClassObj indexable = class_("Indexable", iterable).end();
     ClassObj comparable = class_("Comparable").end();
-    
+
     class_("Array", indexable).end();
     class_("Bool").end();
     class_("Int", comparable).end();
@@ -48,7 +48,7 @@ public class EnvironmentBuilder {
 
     // Define the core error classes.
     ClassObj error = class_("Error").end();
-    
+
     class_(Name.AMBIGUOUS_METHOD_ERROR, error).end();
     class_(Name.ARGUMENT_ERROR, error).end();
     // TODO(bob): Move into io module.
@@ -62,31 +62,31 @@ public class EnvironmentBuilder {
     class_(Name.REDEFINITION_ERROR, error).end();
     class_(Name.INITIALIZATION_ERROR, error).end();
   }
-  
+
   private ClassBuilder class_(String name, ClassObj... parents) {
     return new ClassBuilder(name, parents);
   }
-  
+
   private class ClassBuilder {
     public ClassBuilder(String name, ClassObj... parents) {
       mName = name;
       mParents = parents;
     }
-    
+
     public ClassObj end() {
       // TODO(bob): Doc.
       ClassObj classObj = mInterpreter.createClass(mName,
           Arrays.asList(mParents), mFields, mModule.getScope(), "");
       mModule.getScope().define(false, mName, classObj);
-      
+
       return classObj;
     }
-    
+
     private final String mName;
     private final ClassObj[] mParents;
     private final Map<String, Field> mFields = new HashMap<String, Field>();
   }
-  
+
   private final Interpreter mInterpreter;
   private final Module mModule;
 }

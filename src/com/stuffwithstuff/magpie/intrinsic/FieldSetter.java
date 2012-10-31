@@ -20,7 +20,7 @@ public class FieldSetter implements Callable {
         field.getPattern());
     mClosure = closure;
   }
-  
+
   @Override
   public Obj invoke(Context context, Obj arg) {
     arg.getField(0).getField(0).setField(mName, arg.getField(1));
@@ -36,7 +36,7 @@ public class FieldSetter implements Callable {
   public Scope getClosure() {
     return mClosure;
   }
-  
+
   @Override
   public String getDoc() {
     return "Sets the field to the given value.";

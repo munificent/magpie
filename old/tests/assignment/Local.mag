@@ -11,7 +11,7 @@ Main (->)
     // local variable
     var x <- 0
     Print x.String
-    
+
     x <- 10
     Print x.String
 

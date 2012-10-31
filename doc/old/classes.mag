@@ -10,29 +10,29 @@
 // Classes are a good example. At its code, Magpie supports (or will support) a
 // simple API for *building* a class, like:
 //
-// var Foo = class.new "Foo" 
+// var Foo = class.new "Foo"
 // Foo.addMethod("doSomething", fn () ...)
 //
 // Magpie's class syntax then desugars to that form. The syntax is like this:
 
 class Vector
     // Define a constructor.
-    this (a Int) 
+    this (a Int)
         x = a
         y = a
     end
-    
+
     // Declare a field declaration. This can be used at load time for type
     // checking, but does nothing at runtime.
     x Int
-    
+
     // Define a field. All field definitions will be evaluated when an object
     // is instantiated, right before its constructor runs.
     y = 3
-    
+
     // Define a method.
     mag (-> Int) sqrt (x.squared + y.squared)
-    
+
     // Define a "shared" or class method.
     shared zero (-> Vector) this.new (0, 0)
 end

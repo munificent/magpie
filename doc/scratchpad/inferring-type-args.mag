@@ -7,7 +7,7 @@ max(2, 3)
 // At type check time, the checker sees:
 // 1. Expected type: ('T, 'T)
 // 2. Actual type:   (Int, Int)
-// 
+//
 // It needs to calculate the value of 'T in order to evaluate the return type. It
 // calls "inferTypes" on the expected type:
 

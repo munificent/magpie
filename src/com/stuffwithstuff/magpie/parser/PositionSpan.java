@@ -8,11 +8,11 @@ public class PositionSpan {
     mParser = parser;
     mStart  = start;
   }
-  
+
   public Position end() {
     return mStart.union(mParser.last(1).getPosition());
   }
-  
+
   private final Parser mParser;
   private final Position     mStart;
 }

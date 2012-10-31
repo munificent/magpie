@@ -10,7 +10,7 @@ public class ScopeExpr extends Expr {
     mBody = body;
     mCatches = catches;
   }
-  
+
   public Expr getBody() { return mBody; }
   public List<MatchCase> getCatches() { return mCatches; }
 

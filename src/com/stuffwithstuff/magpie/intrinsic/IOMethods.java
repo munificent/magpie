@@ -20,7 +20,7 @@ public class IOMethods {
   // to encapsulate both a FileReader and a FileWriter. But the read and
   // write methods assume one or the other and will blow up if you use the
   // wrong one.
-  
+
   // TODO(bob): Hackish.
   @Def("_setClasses(== File)")
   public static class SetClasses implements Intrinsic {
@@ -50,7 +50,7 @@ public class IOMethods {
   public static class Open implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       String path = right.asString();
-      
+
       FileReader reader;
       try {
         reader = new FileReader(path);
@@ -66,7 +66,7 @@ public class IOMethods {
   public static class Create implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       String path = right.asString();
-      
+
       FileWriter writer;
       try {
         writer = new FileWriter(path);
@@ -76,7 +76,7 @@ public class IOMethods {
       }
     }
   }
-  
+
   @Def("(is File) isOpen")
   @Doc("Returns true if the file is open.")
   public static class IsOpen implements Intrinsic {
@@ -85,7 +85,7 @@ public class IOMethods {
       return context.toObj(reader.isOpen());
     }
   }
-  
+
   @Def("(is File) read()")
   @Doc("Reads the contents of the file as a string.")
   public static class Read implements Intrinsic {
@@ -100,7 +100,7 @@ public class IOMethods {
       }
     }
   }
-  
+
   @Def("(is File) readLine()")
   @Doc("Reads a single line of text from the file. Returns nothing if at\n" +
        "the end of the file.")
@@ -190,7 +190,7 @@ public class IOMethods {
       }
     }
   }
-  
+
   @Def("(is File) writeUInt32(is Int)")
   @Doc("Writes the given int to this File.")
   public static class WriteUInt32 implements Intrinsic {
@@ -204,22 +204,22 @@ public class IOMethods {
       }
     }
   }
-  
+
   @Def("(is Directory) _contents")
   @Doc("Gets the contents of the directory.")
   public static class Directory_Iterate implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       String path = left.getField("path").asString();
       File[] files = new File(path).listFiles();
-      
+
       List<Obj> paths = new ArrayList<Obj>();
       for (File file : files) {
         paths.add(context.toObj(file.getPath()));
       }
-      
+
       return context.toList(paths);
     }
   }
-  
+
   private static ClassObj sFileClass;
 }

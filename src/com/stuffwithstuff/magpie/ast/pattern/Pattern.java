@@ -10,18 +10,18 @@ public abstract class Pattern {
   public static Pattern nothing() {
     return new ValuePattern(Expr.nothing());
   }
-  
+
   public static Pattern record(Map<String, Pattern> fields) {
     return new RecordPattern(fields);
   }
 
   public static Pattern record(Pattern... fields) {
     Map<String, Pattern> recordFields = new HashMap<String, Pattern>();
-    
+
     for (int i = 0; i < fields.length; i++) {
       recordFields.put(Name.getTupleField(i), fields[i]);
     }
-    
+
     return record(recordFields);
   }
 
@@ -44,7 +44,7 @@ public abstract class Pattern {
   public static Pattern wildcard() {
     return new WildcardPattern();
   }
-  
+
 
   public abstract <R, C> R accept(PatternVisitor<R, C> visitor, C context);
 }

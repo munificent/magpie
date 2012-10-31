@@ -17,7 +17,7 @@ public abstract class IntrinsicLoader {
   /**
    * Given the name of a JVM classfile, loads it, finds all of the intrinsic
    * methods it specifies, and defines them in the given scope.
-   * 
+   *
    * @param className  Name of the classfile to load.
    * @param scope      Scope to define the methods in.
    * @return           True if successful.
@@ -33,7 +33,7 @@ public abstract class IntrinsicLoader {
       return false;
     }
   }
-  
+
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public static void register(Class javaClass, Scope scope) {
 
@@ -44,7 +44,7 @@ public abstract class IntrinsicLoader {
       }
     }
   }
-  
+
   @SuppressWarnings({ "unchecked", "rawtypes" })
   private static void registerMethod(Scope scope,
       Class innerClass, String signature) {
@@ -53,28 +53,28 @@ public abstract class IntrinsicLoader {
 
       String name = parsed.getKey();
       Pattern pattern = parsed.getValue();
-      
+
       Constructor ctor = innerClass.getConstructor();
       Object instance = ctor.newInstance();
-      
+
       // If an external method, wrap it.
       if (instance instanceof Method) {
         // Must be an external method.
         instance = new MethodWrapper((Method) instance);
       }
-      
+
       // Look for documentation.
       String doc = "";
       Doc docAnnotation = (Doc) innerClass.getAnnotation(Doc.class);
       if (docAnnotation != null) {
         doc = docAnnotation.value();
       }
-      
+
       Callable callable = new IntrinsicCallable(pattern, doc, (Intrinsic) instance, scope);
-      
+
       // Register it.
       scope.define(name, callable);
-      
+
     } catch (SecurityException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -95,7 +95,7 @@ public abstract class IntrinsicLoader {
       e.printStackTrace();
     }
   }
-  
+
   private static Pair<String, Pattern> parseSignature(String text) {
     try {
       // Process the annotation to get the method's Magpie name and type
@@ -107,7 +107,7 @@ public abstract class IntrinsicLoader {
       System.out.println("Could not parse built-in signature \"" +
           text + "\".");
     }
-    
+
     return null;
   }
 }

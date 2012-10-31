@@ -9,8 +9,8 @@ end
 CountA (n Int ->)
     if n > 0 then CountB (n - 1)
 end
-    
+
 CountB (n Int ->)
     if n > 0 then CountA (n - 1)
 end
-    
+

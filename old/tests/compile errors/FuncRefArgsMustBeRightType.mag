@@ -2,7 +2,7 @@
 
 Main (->)
     def fooRef <- fn Foo (Int, Bool)
-    
+
     fooRef ("1", true)
 end
 

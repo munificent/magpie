@@ -6,7 +6,7 @@ public class ImportDeclaration {
     mName = name;
     mRename = rename;
   }
-  
+
   public boolean isExported() { return mIsExported; }
   public String getName() { return mName; }
   public String getRename() { return mRename; }

@@ -9,6 +9,6 @@ end
 
 Foo[T] (value T, count Int ->)
     if count > 1 then Foo (value, count - 1)
-    
+
     Print (value.String + " " + count.String)
 end

@@ -16,16 +16,16 @@ public class StringReader implements SourceReader {
     mText = text;
     mPosition = 0;
   }
-  
+
   @Override
   public String getDescription() { return mDescription; }
-  
+
   @Override
   public char current() {
     if (mPosition >= mText.length()) return '\0';
     return mText.charAt(mPosition);
   }
-  
+
   @Override
   public void advance() {
     if (mPosition < mText.length()) mPosition++;

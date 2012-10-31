@@ -10,13 +10,13 @@ Main (->)
         case 3 then Print "three"
         case _ then Print "else"
     end
-    
+
     match 1
         case 4 then Print "four"
         case 1 then Print "one"
         case _ then Print "else"
     end
-    
+
     match 3
         case 1 then Print "no"
         case 2 then Print "no"

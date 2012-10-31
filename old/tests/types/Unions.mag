@@ -5,16 +5,16 @@
 
 Main (->)
     def a <- Bar "whoop"
-    
+
     Print a.Frob?.String
     Print a.BarValue
-    
+
     def b <- Frob
     Print b.Frob?.String
-    
+
     let c <- a.AsBar then Print c
     let c <- b.AsBar then Print "no"
-    
+
 end
 
 union Foo

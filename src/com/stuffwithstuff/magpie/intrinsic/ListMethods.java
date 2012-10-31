@@ -15,7 +15,7 @@ public class ListMethods {
     public Obj invoke(Context context, Obj left, Obj right) {
       List<Obj> list = left.asList();
       int index = Indexable.validateIndex(context, list, right.asInt());
-      
+
       return list.get(index);
     }
   }
@@ -26,24 +26,24 @@ public class ListMethods {
   public static class IndexAssign implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       List<Obj> list = left.getField(0).asList();
-      
+
       int index = Indexable.validateIndex(context, list,
           left.getField(1).asInt());
-      
+
       Obj value = right;
-      
+
       list.set(index, value);
       return value;
     }
   }
-  
+
   @Def("(is List) add(item)")
   @Doc("Appends the item to the end of the list.")
   public static class Add implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       List<Obj> elements = left.asList();
       elements.add(right);
-      
+
       return right;
     }
   }
@@ -57,7 +57,7 @@ public class ListMethods {
       return context.nothing();
     }
   }
-  
+
   @Def("(is List) count")
   @Doc("Returns the number of items in the list.")
   public static class Count implements Intrinsic {
@@ -81,44 +81,44 @@ public class ListMethods {
     public Obj invoke(Context context, Obj left, Obj right) {
       Obj fill = right.getField("fill");
       int size = right.getField("size").asInt();
-      
+
       List<Obj> elements = new ArrayList<Obj>();
       for (int i = 0; i < size; i++) {
         elements.add(fill);
       }
-      
+
       return context.toList(elements);
     }
   }
-  
+
   @Def("(is List) insert(item, at: index is Int)")
   @Doc("Inserts the given item at the given index in the list.")
   public static class Insert implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       List<Obj> list = left.asList();
       Obj value = right.getField(0);
-      
+
       int index = Indexable.validateIndex(context, list.size() + 1,
           right.getField("at").asInt());
 
       list.add(index, value);
-      
+
       return value;
     }
   }
-  
+
   @Def("(is List) removeAt(index is Int)")
   @Doc("Remove the item at the given index.")
   public static class RemoveAt implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       List<Obj> list = left.asList();
-      
+
       int index = Indexable.validateIndex(context, list.size(), right.asInt());
 
       return list.remove(index);
     }
   }
-  
+
   @Def("(is List) toArray")
   @Doc("Creates a new array containing the same elements as the list.")
   public static class ToArray implements Intrinsic {
@@ -128,7 +128,7 @@ public class ListMethods {
       for (Obj element : list) {
         array.add(element);
       }
-      
+
       return context.toArray(array);
     }
   }

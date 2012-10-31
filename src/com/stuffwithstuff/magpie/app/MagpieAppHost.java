@@ -19,20 +19,20 @@ public class MagpieAppHost implements MagpieHost {
       if (file.exists()) {
         return new SourceFile(file.getPath(), readFile(file.getPath()));
       }
-      
+
       // $CWD/foo/bar/_init.mag
       file = new File(modulePath + "/_init.mag");
       if (file.exists()) {
         return new SourceFile(file.getPath(), readFile(file.getPath()));
       }
-      
+
       // $APPDIR/lib/foo/bar.mag
       File appDir = new File(getAppDirectory(), "lib");
       file = new File(appDir, modulePath + ".mag");
       if (file.exists()) {
         return new SourceFile(file.getPath(), readFile(file.getPath()));
       }
-      
+
       // $APPDIR/lib/foo/bar/_init.mag
       file = new File(appDir, modulePath + "/_init.mag");
       if (file.exists()) {
@@ -64,7 +64,7 @@ public class MagpieAppHost implements MagpieHost {
     if (filePath.isDirectory()) {
       path = new File(filePath, "_init.mag").getPath();
     }
-    
+
     return FileReader.read(path);
   }
 }

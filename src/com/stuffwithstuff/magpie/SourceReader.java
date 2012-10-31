@@ -6,7 +6,7 @@ package com.stuffwithstuff.magpie;
  */
 public interface SourceReader {
   String getDescription();
-  
+
   char current();
   void advance();
 }

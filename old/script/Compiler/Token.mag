@@ -9,7 +9,7 @@ namespace Magpie:Compiler
     // auto function (yet)
     OperatorToken* (name String -> Token) OperatorToken name
     NameToken* (name String -> Token) NameToken name
-    
+
     union Token
         LeftParenToken
         RightParenToken
@@ -22,7 +22,7 @@ namespace Magpie:Compiler
         DotToken
         LineToken
         PrimeToken
-        
+
         // keywords
         DefToken
         DoToken
@@ -37,23 +37,23 @@ namespace Magpie:Compiler
         UnionToken
         UsingToken
         WhileToken
-        
+
         // literals
         UnitToken
         BoolToken   Bool
         IntToken    Int
         StringToken String
-        
+
         // identifiers
         NameToken      String
         OperatorToken  String
-        
+
         // the end of the source has been reached
         EofToken
     end
-    
+
     IntToken (text String -> Token) IntToken ParseInt text
-    
+
     String (token Token -> String)
         if      token.LeftParenToken?    then "("
         else if token.RightParenToken?   then ")"
@@ -66,7 +66,7 @@ namespace Magpie:Compiler
         else if token.DotToken?          then "."
         else if token.LineToken?         then "newline"
         else if token.PrimeToken?        then "'"
-        
+
         else if token.NameToken?         then ("name " + token.NameTokenValue)
         else if token.OperatorToken?     then ("operator " + token.OperatorTokenValue)
 
@@ -92,5 +92,5 @@ namespace Magpie:Compiler
         else if token.EofToken?        then "[eof]"
         else "???"
     end
-    
+
 end

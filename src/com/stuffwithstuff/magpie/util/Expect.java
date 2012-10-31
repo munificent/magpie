@@ -9,24 +9,24 @@ public final class Expect {
       throw new IllegalArgumentException("String cannot be empty.");
     }
   }
-  
+
   public static void notNull(Object arg) {
     if (arg == null) {
       throw new NullPointerException("Argument cannot be null.");
     }
   }
-  
+
   public static void isNull(Object arg) {
     if (arg != null) {
       throw new IllegalStateException("Value must be null.");
     }
   }
-  
+
   public static void positive(int arg) {
     if (arg <= 0) {
       throw new IllegalArgumentException("Argument must be positive.");
     }
   }
-  
+
   private Expect() {}
 }

@@ -26,7 +26,7 @@ namespace magpie
     while (true)
     {
       if (Memory::checkCollect()) return FIBER_DID_GC;
-      
+
       CallFrame& frame = callFrames_[-1];
       instruction ins = frame.chunk->code()[frame.ip++];
       OpCode op = GET_OP(ins);
@@ -48,7 +48,7 @@ namespace magpie
           store(frame, slot, frame.chunk->getConstant(index));
           break;
         }
-          
+
         case OP_BUILT_IN:
         {
           int value = GET_A(ins);
@@ -66,7 +66,7 @@ namespace magpie
           vm_.defineMethod(multimethod, method);
           break;
         }
-          
+
         case OP_RECORD:
         {
           int firstSlot = GET_A(ins);
@@ -75,12 +75,12 @@ namespace magpie
           store(frame, GET_C(ins), record);
           break;
         }
-          
+
         case OP_LIST:
         {
           int firstSlot = GET_A(ins);
           int numElements = GET_B(ins);
-          
+
           gc<ListObject> list = new ListObject(numElements);
           for (int i = 0; i < numElements; i++)
           {
@@ -90,12 +90,12 @@ namespace magpie
           store(frame, GET_C(ins), list);
           break;
         }
-          
+
         case OP_GET_FIELD:
         {
           bool success = false;
           RecordObject* record = load(frame, GET_A(ins))->toRecord();
-          
+
           // We can't pull record fields out of something that isn't a record.
           // TODO(bob): Should you be able to destructure arbitrary objects by
           // invoking getters with the right name?
@@ -111,7 +111,7 @@ namespace magpie
               success = true;
             }
           }
-          
+
           if (!success)
           {
             gc<Object> error = DynamicObject::create(vm_.noMatchErrorClass());
@@ -119,18 +119,18 @@ namespace magpie
           }
           break;
         }
-          
+
         case OP_TEST_FIELD:
         {
           bool success = false;
           RecordObject* record = load(frame, GET_A(ins))->toRecord();
-          
+
           // The next instruction is a pseudo-instruction containing the offset
           // to jump to.
           instruction jump = frame.chunk->code()[frame.ip++];
           ASSERT(GET_OP(jump) == OP_JUMP,
                  "Pseudo-instruction after OP_TEST_FIELD must be OP_JUMP.");
-          
+
           // We can't pull record fields out of something that isn't a record.
           // TODO(bob): Should you be able to destructure arbitrary objects by
           // invoking getters with the right name?
@@ -138,7 +138,7 @@ namespace magpie
           {
             int symbol = GET_B(ins);
             gc<Object> field = record->getField(symbol);
-            
+
             // If the record has the field, store it.
             if (!field.isNull())
             {
@@ -146,7 +146,7 @@ namespace magpie
               success = true;
             }
           }
-          
+
           // Jump if the match failed.
           if (!success)
           {
@@ -178,14 +178,14 @@ namespace magpie
           store(frame, 2, load(frame, 1));
           break;
         }
-          
+
         case OP_GET_VAR:
         {
           int moduleIndex = GET_A(ins);
           int variableIndex = GET_B(ins);
           Module* module = vm_.getModule(moduleIndex);
           gc<Object> object = module->getVariable(variableIndex);
-          
+
           if (object.isNull())
           {
             gc<Object> error = DynamicObject::create(
@@ -193,11 +193,11 @@ namespace magpie
 
             if (!throwError(error)) return FIBER_UNCAUGHT_ERROR;
           }
-          
+
           store(frame, GET_C(ins), object);
           break;
         }
-          
+
         case OP_SET_VAR:
         {
           int moduleIndex = GET_A(ins);
@@ -207,12 +207,12 @@ namespace magpie
           module->setVariable(variableIndex, value);
           break;
         }
-          
+
         case OP_EQUAL:
         {
           gc<Object> a = loadSlotOrConstant(frame, GET_A(ins));
           gc<Object> b = loadSlotOrConstant(frame, GET_B(ins));
-          
+
           // See if the objects are equal. If they have the same identity, they
           // must be.
           bool equal;
@@ -233,31 +233,31 @@ namespace magpie
               case OBJECT_BOOL:
                 equal = a->toBool() == b->toBool();
                 break;
-                
+
               case OBJECT_CLASS:
                 equal = false;
                 break;
-                
+
               case OBJECT_DYNAMIC:
                 ASSERT(false, "Equality on arbitrary objects not implemented.");
                 break;
-                
+
               case OBJECT_LIST:
                 ASSERT(false, "Equality on lists not implemented.");
                 break;
-                
+
               case OBJECT_NOTHING:
                 ASSERT(false, "Should only be one instance of nothing.");
                 break;
-                
+
               case OBJECT_NUMBER:
                 equal = a->asNumber() == b->asNumber();
                 break;
-                
+
               case OBJECT_RECORD:
                 ASSERT(false, "Equality on records not implemented.");
                 break;
-                
+
               case OBJECT_STRING:
                 equal = a->asString() == b->asString();
                 break;
@@ -267,28 +267,28 @@ namespace magpie
           store(frame, GET_C(ins), vm_.getBool(equal));
           break;
         }
-          
+
         case OP_NOT:
         {
           gc<Object> value = loadSlotOrConstant(frame, GET_A(ins));
-          
+
           // TODO(bob): Handle user-defined types.
           bool result = !value->toBool();
           store(frame, GET_A(ins), vm_.getBool(result));
           break;
         }
-          
+
         case OP_IS:
         {
           gc<Object> value = load(frame, GET_A(ins));
-          
+
           // TODO(bob): Handle it not being a class.
           const ClassObject* expected = load(frame, GET_B(ins))->asClass();
           gc<ClassObject> classObject = value->getClass(vm_);
           store(frame, GET_C(ins), vm_.getBool(classObject->is(*expected)));
           break;
         }
-          
+
         case OP_JUMP:
         {
           int forward = GET_A(ins);
@@ -296,7 +296,7 @@ namespace magpie
           frame.ip += (forward == 1) ? offset : -offset;
           break;
         }
-          
+
         case OP_JUMP_IF_FALSE:
         {
           gc<Object> a = load(frame, GET_A(ins));
@@ -307,7 +307,7 @@ namespace magpie
           }
           break;
         }
-          
+
         case OP_JUMP_IF_TRUE:
         {
           gc<Object> a = load(frame, GET_A(ins));
@@ -318,7 +318,7 @@ namespace magpie
           }
           break;
         }
-          
+
         case OP_CALL:
         {
           gc<Chunk> method = vm_.getMultimethod(GET_A(ins));
@@ -327,7 +327,7 @@ namespace magpie
           call(method, stackStart);
           break;
         }
-          
+
         case OP_NATIVE:
         {
           Native native = vm_.getNative(GET_A(ins));
@@ -336,19 +336,19 @@ namespace magpie
           store(frame, GET_B(ins), result);
           break;
         }
-          
+
         case OP_RETURN:
         {
           gc<Object> value = loadSlotOrConstant(frame, GET_A(ins));
           callFrames_.removeAt(-1);
-          
+
           // Discard any try blocks enclosed in the current chunk.
           while (!nearestCatch_.isNull() &&
                  (nearestCatch_->callFrame() >= callFrames_.count()))
           {
             nearestCatch_ = nearestCatch_->parent();
           }
-          
+
           if (callFrames_.count() > 0)
           {
             // Give the result back and resume the calling chunk.
@@ -356,7 +356,7 @@ namespace magpie
             instruction callInstruction = caller.chunk->code()[caller.ip - 1];
             ASSERT(GET_OP(callInstruction) == OP_CALL,
                    "Should be returning to a call.");
-            
+
             store(caller, GET_C(callInstruction), value);
           }
           else
@@ -367,14 +367,14 @@ namespace magpie
           }
           break;
         }
-          
+
         case OP_THROW:
         {
           gc<Object> error = load(frame, GET_A(ins));
           if (!throwError(error)) return FIBER_UNCAUGHT_ERROR;
           break;
         }
-          
+
         case OP_ENTER_TRY:
         {
           int offset = frame.ip + GET_A(ins);
@@ -382,13 +382,13 @@ namespace magpie
                                           offset);
           break;
         }
-          
+
         case OP_EXIT_TRY:
         {
           nearestCatch_ = nearestCatch_->parent();
           break;
         }
-          
+
         case OP_TEST_MATCH:
         {
           gc<Object> pass = load(frame, GET_A(ins));
@@ -399,23 +399,23 @@ namespace magpie
           }
           break;
         }
-      
+
         default:
           ASSERT(false, "Unknown opcode.");
           break;
       }
     }
-    
+
     ASSERT(false, "Should not get here.");
     return FIBER_DONE;
   }
-  
+
   void Fiber::reach()
   {
     // Walk the stack.
     CallFrame& frame = callFrames_[-1];
     int numSlots = frame.stackStart + frame.chunk->numSlots();
-    
+
     // Only reach slots that are still in use. We don't shrink the stack, so it
     // may have dead slots at the end that are safe to collect.
     int i;
@@ -437,17 +437,17 @@ namespace magpie
     {
       stack_[i] = gc<Object>();
     }
-    
+
     for (int i = 0; i < callFrames_.count(); i++)
     {
       callFrames_[i].chunk.reach();
     }
   }
-  
+
   void Fiber::call(gc<Chunk> chunk, int stackStart)
   {
     // Allocate slots for the method.
-    stack_.grow(stackStart + chunk->numSlots());    
+    stack_.grow(stackStart + chunk->numSlots());
     callFrames_.add(CallFrame(chunk, stackStart));
   }
 
@@ -455,14 +455,14 @@ namespace magpie
   {
     // If there is nothing to catch it, end the fiber.
     if (nearestCatch_.isNull()) return false;
-    
+
     // Unwind any nested callframes above the one containing the catch clause.
     callFrames_.truncate(nearestCatch_->callFrame() + 1);
-    
+
     // Jump to the catch handler.
     CallFrame& frame = callFrames_[-1];
     frame.ip = nearestCatch_->offset();
-    
+
     // The next instruction is a pseudo-op identifying where the error is.
     instruction errorIns = frame.chunk->code()[frame.ip];
     ASSERT(GET_OP(errorIns) == OP_MOVE,
@@ -470,13 +470,13 @@ namespace magpie
     int errorSlot = GET_A(errorIns);
     store(frame, errorSlot, error);
     frame.ip++;
-    
+
     // Discard the try block now that we are outside of it.
     nearestCatch_ = nearestCatch_->parent();
-    
+
     return true;
   }
-  
+
   gc<Object> Fiber::loadSlotOrConstant(const CallFrame& frame, int index)
   {
     if (IS_CONSTANT(index))
@@ -488,7 +488,7 @@ namespace magpie
       return load(frame, index);
     }
   }
-  
+
   void CatchFrame::reach()
   {
     parent_.reach();

@@ -17,10 +17,10 @@ public class Annotator extends Parser implements TokenReader {
   public Token readToken() {
     while (true) {
       Token token = consume();
-      
+
       if (token.is(TokenType.DOC_COMMENT)) {
         // Collapse successive doc comments into a single token. Given:
-        // 
+        //
         //  /// Line 1.
         //  /// Line 2.
         //
@@ -32,7 +32,7 @@ public class Annotator extends Parser implements TokenReader {
               token.getString() + "\n" + last(1).getString());
         }
       }
-      
+
       return token;
     }
   }

@@ -6,8 +6,8 @@ public class ParseException extends RuntimeException {
     super(message);
     mPosition = position;
   }
-  
+
   public Position getPosition() { return mPosition; }
-  
+
   private final Position mPosition;
 }

@@ -9,9 +9,9 @@ public class BracketPrefixParser implements PrefixParser {
   @Override
   public Expr parse(MagpieParser parser, Token token) {
     PositionSpan span = parser.span();
-    
+
     List<Expr> elements = new ArrayList<Expr>();
-    
+
     // Check for the empty list.
     if (!parser.lookAhead(TokenType.RIGHT_BRACKET)) {
       do {
@@ -20,9 +20,9 @@ public class BracketPrefixParser implements PrefixParser {
       elements.add(parser.parsePrecedence(Precedence.LOGICAL));
       } while (parser.match(TokenType.COMMA));
     }
-    
+
     parser.consume(TokenType.RIGHT_BRACKET);
-    
+
     return Expr.array(span.end(), elements);
   }
 }

@@ -8,7 +8,7 @@ namespace magpie
   {
   public:
     virtual void runTests();
-    
+
   private:
     void enqueueDequeue();
     void serialEnqueue();

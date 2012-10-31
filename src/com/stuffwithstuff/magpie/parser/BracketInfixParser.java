@@ -12,7 +12,7 @@ public class BracketInfixParser implements InfixParser {
     Expr arg = parser.groupExpression(TokenType.RIGHT_BRACKET);
     return Expr.call(token.getPosition(), left, "[]", arg);
   }
-  
+
   @Override
   public int getPrecedence() { return Precedence.MESSAGE; }
 }

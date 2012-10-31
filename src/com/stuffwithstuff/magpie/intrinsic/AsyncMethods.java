@@ -16,11 +16,11 @@ public class AsyncMethods {
   public static class SetClasses implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       sChannelClass = right.asClass();
-      
+
       return context.nothing();
     }
   }
-  
+
   @Def("(== Channel) new()")
   public static class NewChannel implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
@@ -28,24 +28,24 @@ public class AsyncMethods {
       return context.instantiate(sChannelClass, channel);
     }
   }
-  
+
   @Def("(== Channel) new(capacity is Int)")
   public static class NewChannel_Capacity implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       int capacity = right.asInt();
-      
+
       Channel channel = new Channel(capacity);
       return context.instantiate(sChannelClass, channel);
     }
   }
-  
+
   @Def("(is Channel) send(value)")
   @Doc("Sends the given value to the channel. The value must be\n" +
        "thread-safe. If the channel's buffer is full, this blocks")
   public static class Send implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       Channel channel = (Channel) left.getValue();
-      
+
       try {
         channel.send(right);
         return context.nothing();
@@ -55,14 +55,14 @@ public class AsyncMethods {
       }
     }
   }
-  
+
   @Def("(is Channel) receive()")
   @Doc("Reads a value from the channel. If the channe's buffer is empty,\n" +
        "then this blocks until another thread sends a value to it.")
   public static class Receive implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       Channel channel = (Channel) left.getValue();
-      
+
       try {
         return channel.receive();
       } catch (InterruptedException e) {
@@ -77,10 +77,10 @@ public class AsyncMethods {
   public static class Run implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       FnObj function = right.asFn();
-      
+
       Routine routine = new Routine(context, function);
       routine.start();
-      
+
       return context.nothing();
     }
   }
@@ -96,10 +96,10 @@ public class AsyncMethods {
         // TODO(bob): Handle error.
         e.printStackTrace();
       }
-      
+
       return context.nothing();
     }
   }
-  
+
   private static ClassObj sChannelClass;
 }

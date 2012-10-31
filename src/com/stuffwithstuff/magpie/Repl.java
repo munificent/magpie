@@ -12,14 +12,14 @@ public class Repl {
   Repl(Interpreter interpreter) {
     mInterpreter = interpreter;
   }
-  
+
   public ReplResult readAndEvaluate(SourceReader reader) {
     MagpieParser parser = new MagpieParser(reader);
 
     try {
       Expr expr = parser.parseStatement();
       parser.consume(TokenType.LINE);
-      
+
       Obj result = mInterpreter.interpret(expr);
       String resultText;
       if (result == mInterpreter.nothing()) {
@@ -36,6 +36,6 @@ public class Repl {
           true);
     }
   }
-  
+
   private final Interpreter mInterpreter;
 }

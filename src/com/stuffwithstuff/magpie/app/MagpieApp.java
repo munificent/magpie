@@ -14,7 +14,7 @@ public class MagpieApp {
    */
   public static void main(String[] args) {
     String path = null;
-    
+
     // Process the arguments.
     boolean niceRepl = true;
     for (int i = 0; i < args.length; i++) {
@@ -31,7 +31,7 @@ public class MagpieApp {
         }
       }
     }
-    
+
     // If no script is given, just spin up the REPL.
     if (path == null) {
       ConsoleRepl repl = niceRepl ? new ColorRepl() : new ConsoleRepl();
@@ -42,11 +42,11 @@ public class MagpieApp {
 
     Profiler.display();
   }
-  
+
   public static void execute(String path) throws IOException {
     String script = MagpieAppHost.readFile(path);
     Magpie magpie = new Magpie(new MagpieAppHost());
-    
+
     magpie.defineMethod("printString(s is String)",
         "Prints the given string to stdout.", new Method() {
       public Object call(Object left, Object right) {
@@ -54,13 +54,13 @@ public class MagpieApp {
         return null;
       }
     });
-    
+
     String result = magpie.run(new SourceFile(path, script));
     if (result != null) {
       System.out.println(result);
     }
   }
-  
+
   private static void runScript(String path) {
     try {
       execute(path);

@@ -5,7 +5,7 @@
 Main (->)
     def a <- ArrayOf[Bool]
     Print a.Size.String
-    
+
     def b <- ArrayOf true
     Print b.Size.String
 

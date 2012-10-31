@@ -7,7 +7,7 @@ import java.util.Map;
 
 import com.stuffwithstuff.magpie.util.Expect;
 
-public class Obj {  
+public class Obj {
   public Obj(ClassObj classObj, Object value) {
     if (classObj == null) {
       // If we are a class, we're our own class.
@@ -15,22 +15,22 @@ public class Obj {
     } else {
       mClass = classObj;
     }
-    
+
     mValue = value;
   }
-  
+
   public Obj(ClassObj classObj) {
     this(classObj, null);
   }
-  
+
   public ClassObj getClassObj() { return mClass; }
-  
+
   public void bindClass(ClassObj classObj) {
     Expect.notNull(classObj);
-    
+
     mClass = classObj;
   }
-  
+
   /**
    * Gets the value of a given field.
    * @param name   The name of the field.
@@ -39,7 +39,7 @@ public class Obj {
   public Obj getField(String name) {
     return mFields.get(name);
   }
-  
+
   public Obj getField(int index) {
     return getField(Name.getTupleField(index));
   }
@@ -47,7 +47,7 @@ public class Obj {
   public Map<String, Obj> getFields() {
     return mFields;
   }
-  
+
   /**
    * Sets the given field to the given value.
    * @param name   The name of the field.
@@ -56,11 +56,11 @@ public class Obj {
   public void setField(String name, Obj field) {
     mFields.put(name, field);
   }
-  
+
   public Object getValue() {
     return mValue;
   }
-  
+
   public void setValue(Object value) {
     mValue = value;
   }
@@ -73,7 +73,7 @@ public class Obj {
     if (mValue instanceof Boolean) {
       return ((Boolean)mValue).booleanValue();
     }
-    
+
     throw new InterpreterException(String.format(
         "The object \"%s\" is not a boolean.", this));
   }
@@ -82,16 +82,16 @@ public class Obj {
     if (this instanceof ClassObj) {
       return (ClassObj)this;
     }
-    
+
     throw new InterpreterException(String.format(
         "The object \"%s\" is not a class.", this));
   }
-  
+
   public FnObj asFn() {
     if (this instanceof FnObj) {
       return (FnObj)this;
     }
-    
+
     throw new InterpreterException(String.format(
         "The object \"%s\" is not a function.", this));
   }
@@ -101,29 +101,29 @@ public class Obj {
     if (mValue instanceof List<?>) {
       return (List<Obj>)mValue;
     }
-    
+
     throw new InterpreterException(String.format(
         "The object \"%s\" is not a List.", this));
   }
-  
+
   public int asInt() {
     if (mValue instanceof Integer) {
       return ((Integer)mValue).intValue();
     }
-    
+
     throw new InterpreterException(String.format(
         "The object \"%s\" is not an int.", this));
   }
-  
+
   public String asString() {
     if (mValue instanceof String) {
       return (String)mValue;
     }
-    
+
     throw new InterpreterException(String.format(
         "The object \"%s\" is not a string.", this));
   }
-  
+
   @SuppressWarnings("unchecked")
   @Override
   public String toString() {
@@ -131,7 +131,7 @@ public class Obj {
       return "\"" + mValue + "\"";
     } else if (mClass.getName().equals("Record")) {
       StringBuilder builder = new StringBuilder();
-      
+
       // Show fields in the order they appeared.
       // TODO(bob): Hack. Assumes key list is in value. Lame.
       List<String> keys;
@@ -144,7 +144,7 @@ public class Obj {
           keys.add(key);
         }
       }
-      
+
       for (int i = 0; i < keys.size(); i++) {
         String key = keys.get(i);
         if (i > 0) builder.append(", ");
@@ -154,9 +154,9 @@ public class Obj {
         }
         builder.append(mFields.get(key));
       }
-            
+
       return builder.toString();
-      
+
     } else if (mClass.getName().equals("Nothing")) {
       return "nothing";
     } else if (mValue != null) {
@@ -165,7 +165,7 @@ public class Obj {
 
     return "Instance of " + mClass.getName();
   }
-  
+
   private ClassObj mClass;
   private Object mValue;
   private final Map<String, Obj> mFields = new HashMap<String, Obj>();

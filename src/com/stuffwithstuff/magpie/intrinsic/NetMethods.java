@@ -22,7 +22,7 @@ public class NetMethods {
     public Obj invoke(Context context, Obj left, Obj right) {
       sServerSocketClass = right.getField(0).asClass();
       sSocketClass = right.getField(1).asClass();
-      
+
       return context.nothing();
     }
   }
@@ -46,7 +46,7 @@ public class NetMethods {
   public static class Accept implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       ServerSocket serverSocket = (ServerSocket) left.getValue();
-      
+
       try {
         SocketWrapper socket = new SocketWrapper(serverSocket.accept());
         return context.instantiate(sSocketClass, socket);
@@ -62,7 +62,7 @@ public class NetMethods {
   public static class ReadLine implements Intrinsic {
     public Obj invoke(Context context, Obj left, Obj right) {
       SocketWrapper socket = (SocketWrapper) left.getValue();
-      
+
       String line;
       try {
         line = socket.readLine();
@@ -97,31 +97,31 @@ public class NetMethods {
       }
     }
   }
-  
+
   private static class SocketWrapper {
     public SocketWrapper(Socket socket) throws IOException {
       mSocket = socket;
       mIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
       mOut = new PrintStream(mSocket.getOutputStream());
     }
-    
+
     public void close() throws IOException {
       mSocket.close();
     }
-    
+
     public String readLine() throws IOException {
       return mIn.readLine();
     }
-    
+
     public void write(String text) {
       mOut.print(text);
     }
-    
+
     private final Socket mSocket;
     private final BufferedReader mIn;
     private final PrintStream mOut;
   }
-  
+
   private static ClassObj sServerSocketClass;
   private static ClassObj sSocketClass;
 }

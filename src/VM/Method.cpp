@@ -20,7 +20,7 @@ namespace magpie
     constants_.add(constant);
     return constants_.count() - 1;
   }
-  
+
   gc<Object> Chunk::getConstant(int index) const
   {
     ASSERT_INDEX(index, constants_.count());
@@ -30,49 +30,49 @@ namespace magpie
   void Chunk::debugTrace() const
   {
     using namespace std;
-    
+
     // TODO(bob): Constants.
-    
+
     for (int i = 0; i < code_.count(); i++)
     {
       debugTrace(code_[i]);
     }
   }
-  
+
   void Chunk::debugTrace(instruction ins) const
   {
     using namespace std;
-    
+
     switch (GET_OP(ins))
     {
       case OP_MOVE:
         cout << "MOVE            " << GET_A(ins) << " -> " << GET_B(ins);
         break;
-        
+
       case OP_CONSTANT:
         cout << "CONSTANT        " << GET_A(ins) << " -> " << GET_B(ins);
         break;
-        
+
       case OP_BUILT_IN:
         cout << "BUILT_IN        " << GET_A(ins) << " -> " << GET_B(ins);
         break;
-        
+
       case OP_METHOD:
         cout << "METHOD          " << GET_A(ins) << " <- " << GET_B(ins);
         break;
-        
+
       case OP_RECORD:
         cout << "RECORD          " << GET_A(ins) << "[" << GET_B(ins) << "] -> " << GET_C(ins);
         break;
-        
+
       case OP_LIST:
         cout << "LIST            [" << GET_A(ins) << "..." << GET_B(ins) << "] -> " << GET_C(ins);
         break;
-        
+
       case OP_GET_FIELD:
         cout << "GET_FIELD       " << GET_A(ins) << "[" << GET_B(ins) << "] -> " << GET_C(ins);
         break;
-        
+
       case OP_TEST_FIELD:
         cout << "TEST_FIELD      " << GET_A(ins) << "[" << GET_B(ins) << "] -> " << GET_C(ins);
         break;
@@ -88,64 +88,64 @@ namespace magpie
       case OP_GET_VAR:
         cout << "OP_GET_VAR      module " << GET_A(ins) << ", var " << GET_B(ins) << " -> " << GET_C(ins);
         break;
-        
+
       case OP_SET_VAR:
         cout << "OP_SET_VAR      module " << GET_A(ins) << ", var " << GET_B(ins) << " <- " << GET_C(ins);
         break;
-        
+
       case OP_EQUAL:
         cout << "EQUAL           " << GET_A(ins) << " == " << GET_B(ins) << " -> " << GET_C(ins);
         break;
-        
+
       case OP_NOT:
         cout << "NOT             " << GET_A(ins);
         break;
-        
+
       case OP_IS:
         cout << "IS              " << GET_A(ins) << " is " << GET_B(ins);
         break;
-        
+
       case OP_JUMP:
         cout << "JUMP            " << GET_A(ins) << " " << GET_B(ins);
         break;
-        
+
       case OP_JUMP_IF_FALSE:
         cout << "JUMP_IF_FALSE   " << GET_A(ins) << "? " << GET_B(ins);
         break;
-        
+
       case OP_JUMP_IF_TRUE:
         cout << "JUMP_IF_TRUE    " << GET_A(ins) << "? " << GET_B(ins);
         break;
-        
+
       case OP_CALL:
         cout << "CALL            " << GET_A(ins) << "(" << GET_B(ins) << ") -> " << GET_C(ins);
         break;
-        
+
       case OP_NATIVE:
         cout << "NATIVE          " << GET_A(ins) << "(" << GET_B(ins) << ") -> " << GET_C(ins);
         break;
-        
+
       case OP_RETURN:
         cout << "RETURN          " << GET_A(ins);
         break;
-        
+
       case OP_THROW:
         cout << "THROW           " << GET_A(ins);
         break;
-        
+
       case OP_ENTER_TRY:
         cout << "ENTER_TRY       " << GET_A(ins);
         break;
-        
+
       case OP_EXIT_TRY:
         cout << "EXIT_TRY        ";
         break;
-        
+
       case OP_TEST_MATCH:
         cout << "TEST_MATCH      " << GET_A(ins);
         break;
     }
-    
+
     cout << endl;
   }
 
@@ -164,15 +164,15 @@ namespace magpie
     chunk_(),
     methods_()
   {}
-  
+
   void Multimethod::addMethod(gc<Method> method)
   {
     methods_.add(method);
-    
+
     // Clear out the code since it needs to be recompiled.
     chunk_ = NULL;
   }
-  
+
   gc<Chunk> Multimethod::getChunk(VM& vm)
   {
     // Re-compile if methods have been defined since the last time this was
@@ -182,10 +182,10 @@ namespace magpie
       // Determine their specialization order.
       sort(vm);
       ErrorReporter reporter;
-      
+
       chunk_ = Compiler::compileMultimethod(vm, reporter, *this);
     }
-    
+
     return chunk_;
   }
 
@@ -214,7 +214,7 @@ namespace magpie
         {
           if (i == j) continue;
           if (methods_[j].isNull()) continue;
-          
+
           MethodOrder order = compare(methods_[i], methods_[j]);
           if (order == ORDER_AFTER)
           {
@@ -271,10 +271,10 @@ namespace magpie
       case ORDER_NONE: std::cout << "none"; break;
       case ORDER_EQUAL: std::cout << "equal"; break;
     }
-    
+
     std::cout << std::endl;
     */
-    
+
     return order;
   }
 
@@ -328,7 +328,7 @@ namespace magpie
     MethodOrder result = ORDER_NONE;
     PatternComparer comparer(*b, &result);
     a->accept(comparer, -1);
-    
+
     return result;
   }
 
@@ -394,7 +394,7 @@ namespace magpie
     // Just ignore the variable and compare the inner pattern.
     node.pattern()->accept(*this, dummy);
   }
-  
+
   void PatternComparer::visit(WildcardPattern& node, int dummy)
   {
     if (other_.asRecordPattern() != NULL) {

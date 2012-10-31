@@ -40,12 +40,12 @@ namespace magpie
     EXPECT_EQUAL(TOKEN_RIGHT_BRACE, token->type());
     EXPECT_EQUAL("}", *token->text());
   }
-  
+
   void LexerTests::stringLiteral()
   {
     gc<String> source = String::create("\"st\\nr\"");
     Lexer lexer("", source);
-    
+
     gc<Token> token = lexer.readToken();
     EXPECT_EQUAL(TOKEN_STRING, token->type());
     EXPECT_EQUAL("st\nr", *token->text());

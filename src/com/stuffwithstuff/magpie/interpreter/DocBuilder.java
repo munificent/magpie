@@ -8,7 +8,7 @@ public class DocBuilder {
   public DocBuilder() {
     builder = new StringBuilder();
   }
-  
+
   public DocBuilder append(String name, Multimethod multimethod) {
     if (multimethod.getDoc().length() > 0) {
       builder.append(name).append("\n");
@@ -21,14 +21,14 @@ public class DocBuilder {
         RecordPattern pattern = (RecordPattern) method.getPattern();
         Pattern leftParam = pattern.getFields().get(Name.getTupleField(0));
         Pattern rightParam = pattern.getFields().get(Name.getTupleField(1));
-  
+
         String leftText = leftParam.toString();
         if (leftText.equals("nothing")) {
           leftText = "";
         } else {
           leftText = "(" + leftText + ") ";
         }
-  
+
         String rightText = rightParam.toString();
         if (rightText.equals("nothing")) {
           if (leftText.equals("")) {
@@ -39,7 +39,7 @@ public class DocBuilder {
         } else {
           rightText = "(" + rightText + ")";
         }
-  
+
         builder.append(leftText).append(name).append(rightText).append("\n");
         if (method.getDoc().length() > 0) {
           builder.append("  " + method.getDoc().replace("\n", "\n  ") + "\n");
@@ -51,7 +51,7 @@ public class DocBuilder {
 
     return this;
   }
-  
+
   public DocBuilder append(String string) {
     builder.append(string);
     return this;
@@ -61,7 +61,7 @@ public class DocBuilder {
   public String toString() {
     return builder.toString();
   }
-  
+
   /**
    * Override this to filter out the set of method specializations that get shown.
    */

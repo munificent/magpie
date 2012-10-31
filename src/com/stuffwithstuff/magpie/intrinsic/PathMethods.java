@@ -15,7 +15,7 @@ public class PathMethods {
       return context.toObj(new File(left.asString()).getName());
     }
   }
-  
+
   @Def("(this is String) dirName")
   @Doc("Gets all of the components of the path except the last one.")
   public static class DirName implements Intrinsic {

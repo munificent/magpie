@@ -27,12 +27,12 @@ namespace magpie
   {
   public:
     static void showResults();
-    
+
     virtual ~Test() {}
-    
+
     void run();
     virtual void runTests() = 0;
-    
+
   protected:
     static void _expect(const char * file, int line,
                         const char * expression,

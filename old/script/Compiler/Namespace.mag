@@ -9,27 +9,27 @@ namespace Magpie:Compiler
         Name        String
         Contents    NamespaceContent
     end
-    
+
     NamespaceContent (-> NamespaceContent)
         NamespaceContent (List'Namespace,
                           List'Function,
                           List'Struct,
                           List'Union)
     end
-    
+
     struct NamespaceContent
         Namespaces  List'Namespace
         Functions   List'Function
         Structs     List'Struct
         Unions      List'Union
     end
-    
+
     struct Union
         Name        String
         TypeParams  List'Decl //### bob: why not List'string?
         Cases       List'UnionCase
     end
-    
+
     struct UnionCase
         Name        String
         Type        Decl

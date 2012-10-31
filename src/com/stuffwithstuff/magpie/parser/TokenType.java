@@ -10,7 +10,7 @@ public enum TokenType {
   RIGHT_BRACE,
   BACKTICK,
   COMMA,
-  
+
   // operators
   ASTERISK,
   SLASH,
@@ -24,7 +24,7 @@ public enum TokenType {
   EQ,
   EQEQ,
   NOTEQ,
-  
+
   // keywords
   AND,
   AS,
@@ -53,7 +53,7 @@ public enum TokenType {
   VAR,
   WHILE,
   WITH,
-  
+
   // identifiers
   NAME,
   FIELD,      // a record field like "x:"
@@ -64,12 +64,12 @@ public enum TokenType {
   INT,
   NOTHING,
   STRING,
-  
+
   // comments
   BLOCK_COMMENT,
   DOC_COMMENT,
   LINE_COMMENT,
-  
+
   // spacing
   LINE,
   WHITESPACE,
