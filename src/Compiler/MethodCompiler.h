@@ -9,7 +9,8 @@ namespace magpie
 {
   class Module;
   class PatternCompiler;
-  
+
+  // TODO(bob): Rename "ExprCompiler" since we use it for functions too.
   class MethodCompiler : private ExprVisitor, private LValueVisitor
   {
     friend class Compiler;
@@ -26,7 +27,10 @@ namespace magpie
     // Compiles [multimethod] to bytecode. Assumes the methods have already
     // been sorted.
     gc<Chunk> compile(Multimethod& multimethod);
-    
+
+    // Compiles [function] to bytecode.
+    gc<Chunk> compile(Module* module, FnExpr& function);
+
     void compileParam(PatternCompiler& compiler, gc<Pattern> param, int& slot);
     void compileParamField(PatternCompiler& compiler, gc<Pattern> param,
                            int slot);
@@ -44,6 +48,7 @@ namespace magpie
     virtual void visit(DefExpr& expr, int dest);
     virtual void visit(DefClassExpr& expr, int dest);
     virtual void visit(DoExpr& expr, int dest);
+    virtual void visit(FnExpr& expr, int dest);
     virtual void visit(ForExpr& expr, int dest);
     virtual void visit(GetFieldExpr& expr, int dest);
     virtual void visit(IfExpr& expr, int dest);
@@ -111,7 +116,7 @@ namespace magpie
     
     Compiler& compiler_;
 
-    // The module containing the method being compiled.
+    // The module containing the code being compiled.
     Module* module_;
     
     // The chunk being compiled.

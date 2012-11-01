@@ -93,6 +93,42 @@ namespace magpie
     return chunk_;
   }
 
+  gc<Chunk> MethodCompiler::compile(Module* module, FnExpr& function)
+  {
+    module_ = module;
+    
+    PatternCompiler compiler(*this, true);
+
+    // Reserve slots up front for all of the locals. This ensures that
+    // temps will always be after locals.
+    // TODO(bob): Using max here isn't optimal. Ideally a given temp only
+    // needs to be after the locals that are in scope during the duration
+    // of that temp. But calculating that is a bit hairy. For now, until we
+    // have a more advanced compiler, this is a simple solution.
+    numLocals_ = function.maxLocals();
+    maxSlots_ = numLocals_;
+
+    // Track the slots used for the arguments and result. This code here
+    // must be kept carefully in sync with the similar prelude code in
+    // Resolver.
+    int numParamSlots = 0;
+
+    // Evaluate the method's parameter patterns.
+    compileParam(compiler, function.pattern(), numParamSlots);
+
+    // The result slot is just after the param slots.
+    compile(function.body(), numParamSlots);
+    write(OP_RETURN, numParamSlots);
+
+    compiler.endJumps();
+
+    ASSERT(numTemps_ == 0, "Should not have any temps left after a method "
+           "is compiled.");
+
+    chunk_->setCode(code_, maxSlots_);
+    return chunk_;
+  }
+
   void MethodCompiler::compileParam(PatternCompiler& compiler,
                                     gc<Pattern> param, int& slot)
   {
@@ -275,6 +311,18 @@ namespace magpie
   {
     compile(expr.body(), dest);
   }
+
+  void MethodCompiler::visit(FnExpr& expr, int dest)
+  {
+    // TODO(bob): Handle closures.
+    MethodCompiler compiler(compiler_);
+    gc<Chunk> chunk = compiler.compile(module_, expr);
+
+    int index = chunk_->addConstant(new FunctionObject(chunk));
+
+    write(OP_CONSTANT, index, dest);
+    // TODO(bob): Write bytecode to load upvars.
+  }
   
   void MethodCompiler::visit(ForExpr& expr, int dest)
   {
@@ -412,7 +460,7 @@ namespace magpie
   
   void MethodCompiler::visit(NativeExpr& expr, int dest)
   {
-    write(OP_NATIVE, expr.index(), dest);
+    write(OP_NATIVE, expr.index(), 0, dest);
   }
   
   void MethodCompiler::visit(NotExpr& expr, int dest)

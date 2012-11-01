@@ -24,7 +24,22 @@ namespace magpie
     // completely unwound.
     FIBER_UNCAUGHT_ERROR
   };
-  
+
+  // When a native function returns, this describes how the return value should
+  // be used.
+  enum NativeResult
+  {
+    // A normal return value. It will be the result of the native expression.
+    NATIVE_RESULT_RETURN,
+
+    // An error that should be thrown.
+    NATIVE_RESULT_THROW,
+
+    // The native has pushed a call frame on the stack, so it doesn't have a
+    // return value (yet).
+    NATIVE_RESULT_CALL
+  };
+
   class Fiber : public Managed
   {
   public:

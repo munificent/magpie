@@ -300,6 +300,7 @@ namespace magpie
     else if (*text == "else"    ) type = TOKEN_ELSE;
     else if (*text == "end"     ) type = TOKEN_END;
     else if (*text == "false"   ) type = TOKEN_FALSE;
+    else if (*text == "fn"      ) type = TOKEN_FN;
     else if (*text == "for"     ) type = TOKEN_FOR;
     else if (*text == "if"      ) type = TOKEN_IF;
     else if (*text == "in"      ) type = TOKEN_IN;

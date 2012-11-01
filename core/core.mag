@@ -4,6 +4,9 @@ end
 defclass Class
 end
 
+defclass Function
+end
+
 defclass List
 end
 
@@ -64,6 +67,9 @@ def (false) toString "false"
 
 def (is Num) toString native "numToString"
 def (s is String) toString s
+
+// TODO(bob): How should different argument patterns be handled?
+def (is Function) call native "functionCall"
 
 def (is List) add(item) native "listAdd"
 def (is List) count native "listCount"

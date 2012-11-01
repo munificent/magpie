@@ -241,6 +241,10 @@ namespace magpie
               case OBJECT_DYNAMIC:
                 ASSERT(false, "Equality on arbitrary objects not implemented.");
                 break;
+
+              case OBJECT_FUNCTION:
+                ASSERT(false, "Equality on functions not implemented.");
+                break;
                 
               case OBJECT_LIST:
                 ASSERT(false, "Equality on lists not implemented.");
@@ -332,8 +336,28 @@ namespace magpie
         {
           Native native = vm_.getNative(GET_A(ins));
           ArrayView<gc<Object> > args(stack_, frame.stackStart);
-          gc<Object> result = native(vm_, args);
-          store(frame, GET_B(ins), result);
+          NativeResult result = NATIVE_RESULT_RETURN;
+          gc<Object> value = native(vm_, *this, args, result);
+
+          switch (result)
+          {
+            case NATIVE_RESULT_RETURN:
+              store(frame, GET_C(ins), value);
+              break;
+              
+            case NATIVE_RESULT_THROW:
+              // TODO(bob): Implement this so natives can throw.
+              ASSERT(false, "Not impl.");
+              break;
+
+            case NATIVE_RESULT_CALL:
+              FunctionObject* function = args[0]->asFunction();
+
+              // Call the function, passing in this method's arguments except
+              // the first one, which is the function itself.
+              call(function->chunk(), frame.stackStart + 1);
+              break;
+          }
           break;
         }
           
@@ -354,8 +378,9 @@ namespace magpie
             // Give the result back and resume the calling chunk.
             CallFrame& caller = callFrames_[-1];
             instruction callInstruction = caller.chunk->code()[caller.ip - 1];
-            ASSERT(GET_OP(callInstruction) == OP_CALL,
-                   "Should be returning to a call.");
+            ASSERT((GET_OP(callInstruction) == OP_CALL ||
+                    GET_OP(callInstruction) == OP_NATIVE),
+                   "Should be returning to a call or native.");
             
             store(caller, GET_C(callInstruction), value);
           }
@@ -409,7 +434,7 @@ namespace magpie
     ASSERT(false, "Should not get here.");
     return FIBER_DONE;
   }
-  
+
   void Fiber::reach()
   {
     // Walk the stack.
@@ -443,14 +468,14 @@ namespace magpie
       callFrames_[i].chunk.reach();
     }
   }
-  
+
   void Fiber::call(gc<Chunk> chunk, int stackStart)
   {
     // Allocate slots for the method.
-    stack_.grow(stackStart + chunk->numSlots());    
+    stack_.grow(stackStart + chunk->numSlots());
     callFrames_.add(CallFrame(chunk, stackStart));
   }
-
+  
   bool Fiber::throwError(gc<Object> error)
   {
     // If there is nothing to catch it, end the fiber.

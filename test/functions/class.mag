@@ -1,0 +1,2 @@
+print((fn() "ok") is Function) // expect: true
+print((fn() "ok") class == Function) // expect: true

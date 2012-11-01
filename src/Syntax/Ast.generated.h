@@ -10,6 +10,7 @@ class CatchExpr;
 class DefExpr;
 class DefClassExpr;
 class DoExpr;
+class FnExpr;
 class ForExpr;
 class GetFieldExpr;
 class IfExpr;
@@ -54,6 +55,7 @@ public:
   virtual void visit(DefExpr& node, int arg) = 0;
   virtual void visit(DefClassExpr& node, int arg) = 0;
   virtual void visit(DoExpr& node, int arg) = 0;
+  virtual void visit(FnExpr& node, int arg) = 0;
   virtual void visit(ForExpr& node, int arg) = 0;
   virtual void visit(GetFieldExpr& node, int arg) = 0;
   virtual void visit(IfExpr& node, int arg) = 0;
@@ -104,6 +106,7 @@ public:
   virtual DefExpr* asDefExpr() { return NULL; }
   virtual DefClassExpr* asDefClassExpr() { return NULL; }
   virtual DoExpr* asDoExpr() { return NULL; }
+  virtual FnExpr* asFnExpr() { return NULL; }
   virtual ForExpr* asForExpr() { return NULL; }
   virtual GetFieldExpr* asGetFieldExpr() { return NULL; }
   virtual IfExpr* asIfExpr() { return NULL; }
@@ -448,6 +451,43 @@ public:
 private:
   gc<Expr> body_;
   NO_COPY(DoExpr);
+};
+
+class FnExpr : public Expr
+{
+public:
+  FnExpr(const SourcePos& pos, gc<Pattern> pattern, gc<Expr> body)
+  : Expr(pos),
+    pattern_(pattern),
+    body_(body),
+    maxLocals_(-1)
+  {}
+
+  virtual void accept(ExprVisitor& visitor, int arg)
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual FnExpr* asFnExpr() { return this; }
+
+  gc<Pattern> pattern() const { return pattern_; }
+  gc<Expr> body() const { return body_; }
+  int maxLocals() const { return maxLocals_; }
+  void setMaxLocals(int maxLocals) { maxLocals_ = maxLocals; }
+
+  virtual void reach()
+  {
+    pattern_.reach();
+    body_.reach();
+  }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  gc<Pattern> pattern_;
+  gc<Expr> body_;
+  int maxLocals_;
+  NO_COPY(FnExpr);
 };
 
 class ForExpr : public Expr
