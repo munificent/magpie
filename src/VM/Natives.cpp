@@ -91,6 +91,12 @@ namespace magpie
     return new StringObject(String::format("%g", n));
   }
 
+  NATIVE(functionCall)
+  {
+    result = NATIVE_RESULT_CALL;
+    return args[0];
+  }
+  
   NATIVE(listAdd)
   {
     ListObject* list = args[0]->asList();

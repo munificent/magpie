@@ -52,6 +52,7 @@ namespace magpie
       case TOKEN_END:           return "end";
       case TOKEN_ELSE:          return "else";
       case TOKEN_FALSE:         return "false";
+      case TOKEN_FN:            return "fn";
       case TOKEN_FOR:           return "for";
       case TOKEN_IF:            return "if";
       case TOKEN_IN:            return "in";

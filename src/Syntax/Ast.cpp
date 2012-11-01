@@ -101,6 +101,11 @@ namespace magpie
   {
     out << "(do " << body_ << ")";
   }
+
+  void FnExpr::trace(std::ostream& out) const
+  {
+    out << "(fn " << pattern_ << " -> " << body_ << ")";
+  }
   
   void ForExpr::trace(std::ostream& out) const
   {

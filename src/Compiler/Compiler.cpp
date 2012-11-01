@@ -37,7 +37,7 @@ namespace magpie
     Compiler compiler(vm, reporter);
     return MethodCompiler(compiler).compile(multimethod);
   }
-  
+
   void Compiler::compileExpression(VM& vm, ErrorReporter& reporter,
                                    gc<Expr> expr, Module* module)
   {

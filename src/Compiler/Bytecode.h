@@ -100,7 +100,7 @@ namespace magpie
     OP_CALL = 0x13,
     
     // Invokes a native method. The index of the native is A. The result of the
-    // call will be placed into register B. Assumes the arguments to the
+    // call will be placed into register C. Assumes the arguments to the
     // native are the top of the current call frame's stack.
     OP_NATIVE = 0x14,
     

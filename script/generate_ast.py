@@ -44,6 +44,10 @@ exprs = sorted({
         ('maxLocals*',  'int')],
     'Do': [
         ('body',        'gc<Expr>')],
+    'Fn': [
+        ('pattern',     'gc<Pattern>'),
+        ('body',        'gc<Expr>'),
+        ('maxLocals*',  'int')],
     'For': [
         ('pattern',     'gc<Pattern>'),
         ('iterator',    'gc<Expr>'),

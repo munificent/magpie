@@ -17,7 +17,8 @@ namespace magpie
   public:
     static int resolveBody(Compiler& compiler, Module& module, gc<Expr> body);
     static void resolve(Compiler& compiler, Module& module, DefExpr& method);
-    
+    static void resolve(Compiler& compiler, Module& module, FnExpr& function);
+
   private:
     Resolver(Compiler& compiler, Module& module, bool isModuleBody)
     : compiler_(compiler),
@@ -52,6 +53,7 @@ namespace magpie
     virtual void visit(DefExpr& expr, int dummy);
     virtual void visit(DefClassExpr& expr, int dummy);
     virtual void visit(DoExpr& expr, int dummy);
+    virtual void visit(FnExpr& expr, int dummy);
     virtual void visit(ForExpr& expr, int dummy);
     virtual void visit(GetFieldExpr& expr, int dummy);
     virtual void visit(IfExpr& expr, int dummy);

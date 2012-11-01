@@ -42,6 +42,7 @@ namespace magpie
     DEF_NATIVE(numGreaterThanEqualToNum);
     DEF_NATIVE(stringCount);
     DEF_NATIVE(numToString);
+    DEF_NATIVE(functionCall);
     DEF_NATIVE(listAdd);
     DEF_NATIVE(listCount);
     DEF_NATIVE(listIndex);
@@ -61,6 +62,7 @@ namespace magpie
     
     registerClass(boolClass_, "Bool");
     registerClass(classClass_, "Class");
+    registerClass(functionClass_, "Function");
     registerClass(listClass_, "List");
     registerClass(nothingClass_, "Nothing");
     registerClass(numberClass_, "Num");

@@ -98,6 +98,32 @@ namespace magpie
     fields_[index] = value;
   }
 
+  void DynamicObject::reach()
+  {
+    class_.reach();
+
+    for (int i = 0; i < class_->numFields(); i++)
+    {
+      fields_[i].reach();
+    }
+  }
+  
+  gc<ClassObject> FunctionObject::getClass(VM& vm) const
+  {
+    return vm.functionClass();
+  }
+
+  gc<String> FunctionObject::toString() const
+  {
+    // TODO(bob): Do something better here.
+    return String::create("[fn]");
+  }
+  
+  void FunctionObject::reach()
+  {
+    chunk_.reach();
+  }
+
   gc<ClassObject> ListObject::getClass(VM& vm) const
   {
     return vm.listClass();
@@ -116,6 +142,11 @@ namespace magpie
     stream << "]";
 
     return String::create(stream.str().c_str());
+  }
+
+  void ListObject::reach()
+  {
+    elements_.reach();
   }
   
   gc<ClassObject> NothingObject::getClass(VM& vm) const

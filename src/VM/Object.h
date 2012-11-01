@@ -9,8 +9,10 @@
 namespace magpie
 {
   class BoolObject;
+  class Chunk;
   class ClassObject;
   class DynamicObject;
+  class FunctionObject;
   class ListObject;
   class Memory;
   class Multimethod;
@@ -24,6 +26,7 @@ namespace magpie
     OBJECT_BOOL,
     OBJECT_CLASS,
     OBJECT_DYNAMIC,
+    OBJECT_FUNCTION,
     OBJECT_LIST,
     OBJECT_NOTHING,
     OBJECT_NUMBER,
@@ -50,6 +53,13 @@ namespace magpie
     
     // Returns the object as a dynamic object. Object *must* be a DynamicObject.
     virtual DynamicObject* asDynamic()
+    {
+      ASSERT(false, "Not a dynamic object.");
+      return NULL;
+    }
+
+    // Returns the object as a function. Object *must* be a FunctionObject.
+    virtual FunctionObject* asFunction()
     {
       ASSERT(false, "Not a dynamic object.");
       return NULL;
@@ -168,6 +178,8 @@ namespace magpie
     gc<Object> getField(int index);
     void setField(int index, gc<Object> value);
 
+    virtual void reach();
+
   private:
     DynamicObject(gc<ClassObject> classObj)
     : Object(),
@@ -178,6 +190,32 @@ namespace magpie
     gc<Object>      fields_[FLEXIBLE_SIZE];
 
     NO_COPY(DynamicObject);
+  };
+
+  class FunctionObject : public Object
+  {
+  public:
+    FunctionObject(gc<Chunk> chunk)
+    : Object(),
+      chunk_(chunk)
+    {}
+
+    virtual ObjectType type() const { return OBJECT_FUNCTION; }
+
+    virtual gc<ClassObject> getClass(VM& vm) const;
+
+    virtual FunctionObject* asFunction() { return this; }
+
+    virtual gc<String> toString() const;
+
+    gc<Chunk> chunk() { return chunk_; }
+    
+    virtual void reach();
+
+  private:
+    gc<Chunk> chunk_;
+    
+    NO_COPY(FunctionObject);
   };
   
   class ListObject : public Object
@@ -197,7 +235,9 @@ namespace magpie
     virtual gc<String> toString() const;
     
     Array<gc<Object> >& elements() { return elements_; }
-    
+
+    virtual void reach();
+
   private:
     Array<gc<Object> > elements_;
     

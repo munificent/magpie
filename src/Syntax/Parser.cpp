@@ -46,6 +46,7 @@ namespace magpie
     { NULL,             NULL, -1 },                                    // TOKEN_ELSE
     { NULL,             NULL, -1 },                                    // TOKEN_END
     { &Parser::boolean, NULL, -1 },                                    // TOKEN_FALSE
+    { &Parser::function,NULL, -1 },                                    // TOKEN_FN
     { NULL,             NULL, -1 },                                    // TOKEN_FOR
     { NULL,             NULL, -1 },                                    // TOKEN_IF
     { NULL,             NULL, -1 },                                    // TOKEN_IN
@@ -507,6 +508,25 @@ namespace magpie
     return new BoolExpr(token->pos(), token->type() == TOKEN_TRUE);
   }
 
+  gc<Expr> Parser::function(gc<Token> token)
+  {
+    consume(TOKEN_LEFT_PAREN, "Expect '(' after 'fn'.");
+
+    // Allow an empty pattern.
+    gc<Pattern> pattern;
+    if (!match(TOKEN_RIGHT_PAREN))
+    {
+      pattern = parsePattern(false);
+      consume(TOKEN_RIGHT_PAREN, "Expect ')' after function pattern.");
+    }
+
+    ASSERT(pattern.isNull(), "Functions with parameters aren't implemented yet.");
+
+    gc<Expr> body = parseBlock();
+    
+    return new FnExpr(token->pos().spanTo(last()->pos()), pattern, body);
+  }
+
   gc<Expr> Parser::group(gc<Token> token)
   {
     gc<Expr> expr = flowControl();
@@ -516,7 +536,6 @@ namespace magpie
   
   gc<Expr> Parser::list(gc<Token> token)
   {
-    SourcePos start = token->pos();
     Array<gc<Expr> > elements;
     
     // Handle empty lists.
@@ -532,7 +551,7 @@ namespace magpie
     
     consume(TOKEN_RIGHT_BRACKET, "Except ']' to close list.");
     
-    return new ListExpr(start.spanTo(last()->pos()), elements);
+    return new ListExpr(token->pos().spanTo(last()->pos()), elements);
   }
   
   gc<Expr> Parser::name(gc<Token> token)

@@ -55,7 +55,35 @@ namespace magpie
     
     method.setMaxLocals(resolver.maxLocals_);
   }
-  
+
+  void Resolver::resolve(Compiler& compiler, Module& module, FnExpr& function)
+  {
+    Resolver resolver(compiler, module, false);
+
+    // Create a scope for the function body.
+    Scope scope(&resolver);
+    resolver.scope_ = &scope;
+
+    // First, we allocate slots for the destructured parameters. We do this
+    // first so that all parameter slots for the function are contiguous at the
+    // beginning of the method's slot window. The caller will assume this when
+    // it sets up the arguments before the call.
+    resolver.allocateSlotsForParam(function.pattern());
+
+    // Create a slot for the result value.
+    resolver.makeLocal(SourcePos(NULL, 0, 0, 0, 0), String::create("(result)"));
+
+    // Now that we've got our slots set up, we can actually resolve the nested
+    // patterns for the param (if there are any).
+    resolver.destructureParam(function.pattern());
+
+    resolver.resolve(function.body());
+
+    scope.end();
+
+    function.setMaxLocals(resolver.maxLocals_);
+  }
+
   void Resolver::allocateSlotsForParam(gc<Pattern> pattern)
   {
     // No parameter so do nothing.
@@ -268,6 +296,13 @@ namespace magpie
     Scope doScope(this);
     resolve(expr.body());
     doScope.end();
+  }
+
+  void Resolver::visit(FnExpr& expr, int dummy)
+  {
+    // Resolve the function itself.
+    // TODO(bob): Handle upvars (closures).
+    Resolver::resolve(compiler_, module_, expr);
   }
   
   void Resolver::visit(ForExpr& expr, int dummy)
