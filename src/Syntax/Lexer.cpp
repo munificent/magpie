@@ -101,28 +101,16 @@ namespace magpie
         case '}': return makeToken(TOKEN_RIGHT_BRACE);
         case ',': return makeToken(TOKEN_COMMA);
         case '.':
-          if (peek() == '.')
-          {
-            advance();
-            if (peek() == '.') return makeToken(TOKEN_DOTDOTDOT);
-            return makeToken(TOKEN_DOTDOT);
-          }
-          return makeToken(TOKEN_DOT);
+          if (!match('.')) makeToken(TOKEN_DOT);
+          if (!match('.')) return makeToken(TOKEN_DOTDOT);
+          return makeToken(TOKEN_DOTDOTDOT);
 
         case '=':
-          if (peek() == '=')
-          {
-            advance();
-            return makeToken(TOKEN_EQEQ);
-          }
+          if (match('=')) return makeToken(TOKEN_EQEQ);
           return makeToken(TOKEN_EQ);
           
         case '!':
-          if (peek() == '=')
-          {
-            advance();
-            return makeToken(TOKEN_NEQ);
-          }
+          if (match('=')) return makeToken(TOKEN_NEQ);
           return error(String::create("Expect '=' after '!'."));
 
         case '+':
@@ -208,6 +196,13 @@ namespace magpie
   {
     if (pos_ + ahead >= source_->length()) return '\0';
     return (*source_)[pos_ + ahead];
+  }
+
+  bool Lexer::match(char c)
+  {
+    if (peek() != c) return false;
+    advance();
+    return true;
   }
 
   char Lexer::advance()
