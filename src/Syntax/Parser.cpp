@@ -14,10 +14,11 @@ namespace magpie
     PRECEDENCE_IS         = 5, // is
     PRECEDENCE_EQUALITY   = 6, // == !=
     PRECEDENCE_COMPARISON = 7, // < > <= >=
-    PRECEDENCE_TERM       = 8, // + -
-    PRECEDENCE_PRODUCT    = 9, // * / %
-    PRECEDENCE_NEGATE     = 10, // -
-    PRECEDENCE_CALL       = 11
+    PRECEDENCE_RANGE      = 8, // .. ...
+    PRECEDENCE_TERM       = 9, // + -
+    PRECEDENCE_PRODUCT    = 10, // * / %
+    PRECEDENCE_NEGATE     = 11, // -
+    PRECEDENCE_CALL       = 12
   };
 
   Parser::Parselet Parser::expressions_[] = {
@@ -30,8 +31,8 @@ namespace magpie
     { NULL,             NULL, -1 },                                   // TOKEN_RIGHT_BRACE
     { NULL,             &Parser::infixRecord, PRECEDENCE_RECORD },    // TOKEN_COMMA
     { NULL,             NULL, -1 },                                   // TOKEN_DOT
-    { NULL,             NULL, -1 },                                   // TOKEN_DOTDOT
-    { NULL,             NULL, -1 },                                   // TOKEN_DOTDOTDOT
+    { NULL,             &Parser::infixCall, PRECEDENCE_RANGE },       // TOKEN_DOTDOT
+    { NULL,             &Parser::infixCall, PRECEDENCE_RANGE },       // TOKEN_DOTDOTDOT
     { NULL,             &Parser::assignment, PRECEDENCE_ASSIGNMENT }, // TOKEN_EQ
     { NULL,             &Parser::binaryOp, PRECEDENCE_EQUALITY },     // TOKEN_EQEQ
     { NULL,             &Parser::binaryOp, PRECEDENCE_EQUALITY },     // TOKEN_NEQ
@@ -227,6 +228,8 @@ namespace magpie
       }
       
       if (lookAhead(TOKEN_NAME) ||
+          lookAhead(TOKEN_DOTDOT) ||
+          lookAhead(TOKEN_DOTDOTDOT) ||
           lookAhead(TOKEN_EQEQ) ||
           lookAhead(TOKEN_NEQ) ||
           lookAhead(TOKEN_COMPARE_OP) ||
@@ -704,7 +707,8 @@ namespace magpie
   {
     // TODO(bob): Support right-associative infix. Needs to do precedence
     // - 1 here, to be right-assoc.
-    gc<Expr> right = parsePrecedence(expressions_[token->type()].precedence);
+    gc<Expr> right = parsePrecedence(
+        expressions_[token->type()].precedence + 1);
     
     return new CallExpr(token->pos(), left, token->text(), right);
   }

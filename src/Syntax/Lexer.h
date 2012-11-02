@@ -41,7 +41,7 @@ namespace magpie
     bool isDigit(char c) const;
 
     char peek(int ahead = 0) const;
-
+    bool match(char c);
     char advance();
 
     gc<Token> makeToken(TokenType type);

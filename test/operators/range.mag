@@ -1,0 +1,16 @@
+def (a is String) .. (b is String)
+    "(" + a + " .. " + b + ")"
+end
+
+def (a is String) ... (b is String)
+    "(" + a + " ... " + b + ")"
+end
+
+
+print("a" .. "b") // expect: (a .. b)
+print("a" ... "b") // expect: (a ... b)
+
+print("a".."b".."c") // expect: ((a .. b) .. c)
+print("a"..."b"..."c") // expect: ((a ... b) ... c)
+print("a".."b"..."c") // expect: ((a .. b) ... c)
+print("a"..."b".."c") // expect: ((a ... b) .. c)
