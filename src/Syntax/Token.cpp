@@ -35,6 +35,9 @@ namespace magpie
       case TOKEN_LEFT_BRACE:    return "{";
       case TOKEN_RIGHT_BRACE:   return "}";
       case TOKEN_COMMA:         return ",";
+      case TOKEN_DOT:           return ".";
+      case TOKEN_DOTDOT:        return "..";
+      case TOKEN_DOTDOTDOT:     return "...";
       case TOKEN_EQ:            return "=";
       case TOKEN_EQEQ:          return "==";
       case TOKEN_NEQ:           return "!=";

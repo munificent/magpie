@@ -100,6 +100,15 @@ namespace magpie
         case '{': return makeToken(TOKEN_LEFT_BRACE);
         case '}': return makeToken(TOKEN_RIGHT_BRACE);
         case ',': return makeToken(TOKEN_COMMA);
+        case '.':
+          if (peek() == '.')
+          {
+            advance();
+            if (peek() == '.') return makeToken(TOKEN_DOTDOTDOT);
+            return makeToken(TOKEN_DOTDOT);
+          }
+          return makeToken(TOKEN_DOT);
+
         case '=':
           if (peek() == '=')
           {

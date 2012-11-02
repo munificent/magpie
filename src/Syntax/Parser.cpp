@@ -29,6 +29,9 @@ namespace magpie
     { NULL,             NULL, -1 },                                   // TOKEN_LEFT_BRACE
     { NULL,             NULL, -1 },                                   // TOKEN_RIGHT_BRACE
     { NULL,             &Parser::infixRecord, PRECEDENCE_RECORD },    // TOKEN_COMMA
+    { NULL,             NULL, -1 },                                   // TOKEN_DOT
+    { NULL,             NULL, -1 },                                   // TOKEN_DOTDOT
+    { NULL,             NULL, -1 },                                   // TOKEN_DOTDOTDOT
     { NULL,             &Parser::assignment, PRECEDENCE_ASSIGNMENT }, // TOKEN_EQ
     { NULL,             &Parser::binaryOp, PRECEDENCE_EQUALITY },     // TOKEN_EQEQ
     { NULL,             &Parser::binaryOp, PRECEDENCE_EQUALITY },     // TOKEN_NEQ
