@@ -1,0 +1,54 @@
+// TODO(bob): What about ! | & @ # $ ^ = ?
+
+defclass Tag
+    val text
+end
+
+def (tag is Tag) toString
+    tag text
+end
+
+val a = Tag new(text: "a")
+val b = Tag new(text: "b")
+val c = Tag new(text: "c")
+
+// Compare operators.
+def (a is Tag) < (b is Tag)
+    Tag new(text: "(" + a + " < " + b + ")")
+end
+
+def (a is Tag) > (b is Tag)
+    Tag new(text: "(" + a + " > " + b + ")")
+end
+
+// Term operators.
+def (a is Tag) + (b is Tag)
+    Tag new(text: "(" + a + " + " + b + ")")
+end
+
+def (a is Tag) - (b is Tag)
+    Tag new(text: "(" + a + " - " + b + ")")
+end
+
+// Product operators.
+def (a is Tag) * (b is Tag)
+    Tag new(text: "(" + a + " * " + b + ")")
+end
+
+def (a is Tag) / (b is Tag)
+    Tag new(text: "(" + a + " / " + b + ")")
+end
+
+def (a is Tag) % (b is Tag)
+    Tag new(text: "(" + a + " % " + b + ")")
+end
+
+print(a > b > c) // expect: ((a > b) > c)
+print(a < b < c) // expect: ((a < b) < c)
+
+print(a + b + c) // expect: ((a + b) + c)
+print(a - b - c) // expect: ((a - b) - c)
+
+print(a * b * c) // expect: ((a * b) * c)
+print(a / b / c) // expect: ((a / b) / c)
+print(a % b % c) // expect: ((a % b) % c)

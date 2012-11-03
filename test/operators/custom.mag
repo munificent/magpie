@@ -1,5 +1,5 @@
 // TODO(bob): What about ! | & @ # $ ^?
-// TODO(bob): Need to test precedence and associativity of all operators.
+// TODO(bob): Need to test precedence of all operators.
 
 def (a) *** (b)
     "(" + a + " *** " + b + ")"
