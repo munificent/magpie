@@ -96,9 +96,8 @@ namespace magpie
     {
       exprs.add(new NothingExpr(last()->pos()));
     }
-    
-    SourcePos span = exprs[0]->pos().spanTo(exprs[-1]->pos());
-    return new ModuleAst(new SequenceExpr(span, exprs));
+
+    return new ModuleAst(new SequenceExpr(spanFrom(exprs[0]), exprs));
   }
 
   gc<Expr> Parser::parseExpression()
@@ -149,12 +148,12 @@ namespace magpie
       if (lookAhead(TOKEN_EOF))
       {
         checkForMissingLine();
-        reporter_.error(current().pos(), "Unterminated block.");
+        reporter_.error(current()->pos(), "Unterminated block.");
       }
       
       // Return which kind of token we ended the block with, for callers that
       // care.
-      *outEndToken = current().type();
+      *outEndToken = current()->type();
 
       // If the block ends with 'end', then we want to consume that token,
       // otherwise we want to leave it unconsumed to be consistent with the
@@ -177,8 +176,7 @@ namespace magpie
 
         if (catches.count() > 0)
         {
-          block = new CatchExpr(block->pos().spanTo(last()->pos()),
-                                block, catches);
+          block = new CatchExpr(spanFrom(block), block, catches);
         }
       }
 
@@ -187,11 +185,11 @@ namespace magpie
     else if (lookAhead(TOKEN_EOF))
     {
       checkForMissingLine();
-      reporter_.error(current().pos(),
+      reporter_.error(current()->pos(),
           "Expected block or expression but reached end of file.");
       
       // Return a fake node so we can continue and report errors.
-      return new NothingExpr(current().pos());
+      return new NothingExpr(current()->pos());
     }
     else
     {
@@ -203,6 +201,8 @@ namespace magpie
   
   gc<Expr> Parser::topLevelExpression()
   {
+    gc<Token> start = current();
+    
     if (match(TOKEN_DEF))
     {
       // Examples:
@@ -214,8 +214,6 @@ namespace magpie
       // Indexer:            def (string)[index]
       // Index setter:       def (string)[index] = (char)
 
-      SourcePos start = last()->pos();
-      
       gc<Pattern> leftParam;
       gc<String> name;
       gc<Pattern> rightParam;
@@ -263,9 +261,9 @@ namespace magpie
       }
       else
       {
-        reporter_.error(current().pos(),
+        reporter_.error(current()->pos(),
             "Expect a method name or pattern after 'def' but got '%s'.",
-            current().text()->cString());
+            current()->text()->cString());
       }
       
       // See if it's a setter.
@@ -278,7 +276,7 @@ namespace magpie
       
       // See if this is a native method.
       gc<Expr> body;
-      if (lookAhead(TOKEN_NAME) && (*current().text() == "native"))
+      if (lookAhead(TOKEN_NAME) && (*current()->text() == "native"))
       {
         consume();
         gc<Token> text = consume(TOKEN_STRING,
@@ -290,13 +288,12 @@ namespace magpie
         body = parseBlock();
       }
       
-      SourcePos span = start.spanTo(last()->pos());
-      return new DefExpr(span, leftParam, name, rightParam, value, body);
+      return new DefExpr(spanFrom(start), leftParam, name, rightParam, value,
+                         body);
     }
     
     if (match(TOKEN_DEFCLASS))
     {
-      SourcePos start = last()->pos();
       gc<Token> name = consume(TOKEN_NAME,
                                "Expect name after 'defclass'.");
       consume(TOKEN_LINE, "Expect newline after class name.");
@@ -332,8 +329,7 @@ namespace magpie
         }
       }
       
-      SourcePos span = start.spanTo(last()->pos());
-      return new DefClassExpr(span, name->text(), fields);
+      return new DefClassExpr(spanFrom(start), name->text(), fields);
     }
     
     return statementLike();
@@ -341,17 +337,17 @@ namespace magpie
     
   gc<Expr> Parser::statementLike()
   {
+    gc<Token> start = current();
+
     if (match(TOKEN_DEF))
     {
       // Methods can only be declared at the top level. Show a friendly error.
-      reporter_.error(current().pos(),
+      reporter_.error(current()->pos(),
           "Methods can only be declared at the top level of a module.");
     }
     
     if (match(TOKEN_RETURN))
     {
-      SourcePos start = last()->pos();
-
       // Parse the value if there is one.
       gc<Expr> value;
       if (!lookAhead(TOKEN_LINE))
@@ -359,21 +355,18 @@ namespace magpie
         value = flowControl();
       }
 
-      SourcePos span = start.spanTo(last()->pos());
-      return new ReturnExpr(span, value);
+      return new ReturnExpr(spanFrom(start), value);
     }
 
     if (match(TOKEN_VAR) || match(TOKEN_VAL))
     {
       bool isMutable = last()->is(TOKEN_VAR);
 
-      SourcePos start = last()->pos();
       gc<Pattern> pattern = parsePattern(false);
       consume(TOKEN_EQ, "Expect '=' after variable declaration.");
       gc<Expr> value = flowControl();
 
-      SourcePos span = start.spanTo(last()->pos());
-      return new VariableExpr(span, isMutable, pattern, value);
+      return new VariableExpr(spanFrom(start), isMutable, pattern, value);
     }
 
     return flowControl();
@@ -381,13 +374,12 @@ namespace magpie
 
   gc<Expr> Parser::flowControl()
   {
-    SourcePos start = current().pos();
+    gc<Token> start = current();
     
     if (match(TOKEN_DO))
     {
       gc<Expr> body = parseBlock();
-      SourcePos span = start.spanTo(last()->pos());
-      return new DoExpr(span, body);
+      return new DoExpr(spanFrom(start), body);
     }
     
     if (match(TOKEN_FOR))
@@ -398,8 +390,7 @@ namespace magpie
       consume(TOKEN_DO, "Expect 'do' after for loop iterator.");
       gc<Expr> body = parseBlock();
       
-      SourcePos span = start.spanTo(last()->pos());
-      return new ForExpr(span, pattern, iterator, body);
+      return new ForExpr(spanFrom(start), pattern, iterator, body);
     }
 
     if (match(TOKEN_IF))
@@ -418,8 +409,7 @@ namespace magpie
         elseArm = parseBlock();
       }
 
-      SourcePos span = start.spanTo(last()->pos());
-      return new IfExpr(span, condition, thenArm, elseArm);
+      return new IfExpr(spanFrom(start), condition, thenArm, elseArm);
     }
 
     if (match(TOKEN_MATCH))
@@ -464,8 +454,7 @@ namespace magpie
               "Expect newline after last case in a match expression.");
       consume(TOKEN_END, "Expect 'end' after match expression.");
 
-      SourcePos span = start.spanTo(last()->pos());
-      return new MatchExpr(span, value, cases);
+      return new MatchExpr(spanFrom(start), value, cases);
     }
 
     if (match(TOKEN_WHILE))
@@ -474,7 +463,7 @@ namespace magpie
       consume(TOKEN_DO, "Expect 'do' after 'while' condition.");
       gc<Expr> body = parseBlock();
       
-      return new WhileExpr(start.spanTo(last()->pos()), condition, body);
+      return new WhileExpr(spanFrom(start), condition, body);
     }
     
     return parsePrecedence();
@@ -497,7 +486,7 @@ namespace magpie
 
     gc<Expr> left = (this->*prefix)(token);
 
-    while (precedence <= expressions_[current().type()].precedence)
+    while (precedence <= expressions_[current()->type()].precedence)
     {
       token = consume();
       InfixParseFn infix = expressions_[token->type()].infix;
@@ -529,8 +518,7 @@ namespace magpie
     ASSERT(pattern.isNull(), "Functions with parameters aren't implemented yet.");
 
     gc<Expr> body = parseBlock();
-    
-    return new FnExpr(token->pos().spanTo(last()->pos()), pattern, body);
+    return new FnExpr(spanFrom(token), pattern, body);
   }
 
   gc<Expr> Parser::group(gc<Token> token)
@@ -556,8 +544,7 @@ namespace magpie
     }
     
     consume(TOKEN_RIGHT_BRACKET, "Except ']' to close list.");
-    
-    return new ListExpr(token->pos().spanTo(last()->pos()), elements);
+    return new ListExpr(spanFrom(token), elements);
   }
   
   gc<Expr> Parser::name(gc<Token> token)
@@ -568,7 +555,7 @@ namespace magpie
   gc<Expr> Parser::not_(gc<Token> token)
   {
     gc<Expr> value = parsePrecedence(PRECEDENCE_CALL);
-    return new NotExpr(token->pos().spanTo(value->pos()), value);
+    return new NotExpr(spanFrom(token), value);
   }
 
   gc<Expr> Parser::nothing(gc<Token> token)
@@ -609,7 +596,7 @@ namespace magpie
       {
         if (*name == *fields[j].name)
         {
-          reporter_.error(current().pos(),
+          reporter_.error(current()->pos(),
                           "Cannot use field '%s' twice in a record.",
                           name->cString());
         }
@@ -621,7 +608,7 @@ namespace magpie
       i++;
     }
 
-    return new RecordExpr(token->pos().spanTo(last()->pos()), fields);
+    return new RecordExpr(spanFrom(token), fields);
   }
 
   gc<Expr> Parser::string(gc<Token> token)
@@ -632,7 +619,7 @@ namespace magpie
   gc<Expr> Parser::throw_(gc<Token> token)
   {
     gc<Expr> value = parsePrecedence(PRECEDENCE_LOGICAL);
-    return new ThrowExpr(token->pos().spanTo(last()->pos()), value);
+    return new ThrowExpr(spanFrom(token), value);
   }
 
   // Infix parsers ------------------------------------------------------------
@@ -647,7 +634,7 @@ namespace magpie
   {
     gc<LValue> lvalue = convertToLValue(left);
     gc<Expr> value = parsePrecedence(PRECEDENCE_ASSIGNMENT);
-    return new AssignExpr(left->pos().spanTo(value->pos()), lvalue, value);
+    return new AssignExpr(spanFrom(left), lvalue, value);
   }
   
   gc<Expr> Parser::binaryOp(gc<Expr> left, gc<Token> token)
@@ -684,11 +671,10 @@ namespace magpie
     if (left.isNull() && !hasRightArg)
     {
       // Just a bare name.
-      return new NameExpr(token->pos(), token->text());
+      return new NameExpr(spanFrom(token), token->text());
     }
 
-    // TODO(bob): Better position.
-    return new CallExpr(token->pos(), left, token->text(), right);
+    return new CallExpr(spanFrom(token), left, token->text(), right);
   }
   
   gc<Expr> Parser::index(gc<Expr> left, gc<Token> token)
@@ -699,8 +685,7 @@ namespace magpie
     gc<Expr> index = statementLike();
     consume(TOKEN_RIGHT_BRACKET, "Expect ']' after index argument.");
     
-    // TODO(bob): Better position.
-    return new CallExpr(token->pos(), left, String::create("[]"), index);
+    return new CallExpr(spanFrom(left), left, String::create("[]"), index);
   }
   
   gc<Expr> Parser::infixCall(gc<Expr> left, gc<Token> token)
@@ -710,7 +695,7 @@ namespace magpie
     gc<Expr> right = parsePrecedence(
         expressions_[token->type()].precedence + 1);
     
-    return new CallExpr(token->pos(), left, token->text(), right);
+    return new CallExpr(spanFrom(left), left, token->text(), right);
   }
   
   gc<Expr> Parser::infixRecord(gc<Expr> left, gc<Token> token)
@@ -741,7 +726,7 @@ namespace magpie
       {
         if (*name == *fields[j].name)
         {
-          reporter_.error(current().pos(),
+          reporter_.error(current()->pos(),
                           "Cannot use field '%s' twice in a record.",
                           name->cString());
         }
@@ -754,19 +739,19 @@ namespace magpie
     }
     while (match(TOKEN_COMMA));
 
-    return new RecordExpr(left->pos().spanTo(last()->pos()), fields);
+    return new RecordExpr(spanFrom(left), fields);
   }
 
   gc<Expr> Parser::is(gc<Expr> left, gc<Token> token)
   {
     gc<Expr> type = parsePrecedence(PRECEDENCE_CALL);
-    return new IsExpr(token->pos(), left, type);
+    return new IsExpr(spanFrom(left), left, type);
   }
 
   gc<Expr> Parser::or_(gc<Expr> left, gc<Token> token)
   {
     gc<Expr> right = parsePrecedence(expressions_[token->type()].precedence);
-    return new OrExpr(token->pos(), left, right);
+    return new OrExpr(spanFrom(left), left, right);
   }
 
   // Pattern parsers ----------------------------------------------------------
@@ -779,7 +764,7 @@ namespace magpie
   gc<Pattern> Parser::recordPattern(bool isMethod)
   {
     bool hasField = false;
-    SourcePos pos = current().pos();
+    gc<Token> start = current();
     Array<PatternField> fields;
 
     do
@@ -800,7 +785,7 @@ namespace magpie
       {
         if (*name == *fields[j].name)
         {
-          reporter_.error(current().pos(),
+          reporter_.error(current()->pos(),
               "Cannot use field '%s' twice in a record pattern.",
               name->cString());
         }
@@ -810,7 +795,7 @@ namespace magpie
 
       if (value.isNull())
       {
-        reporter_.error(current().pos(), "Expect pattern.");
+        reporter_.error(current()->pos(), "Expect pattern.");
       }
 
       fields.add(PatternField(name, value));
@@ -824,22 +809,22 @@ namespace magpie
       return fields[0].value;
     }
 
-    return new RecordPattern(pos.spanTo(last()->pos()), fields);
+    return new RecordPattern(spanFrom(start), fields);
   }
 
   gc<Pattern> Parser::variablePattern(bool isMethod)
   {
     if (match(TOKEN_NAME))
     {
-      gc<String> name = last()->text();
-      if (*name == "_")
+      gc<Token> name = last();
+      if (*name->text() == "_")
       {
-        return new WildcardPattern(last()->pos());
+        return new WildcardPattern(name->pos());
       }
       else
       {
         gc<Pattern> inner = primaryPattern(isMethod);
-        return new VariablePattern(last()->pos(), name, inner);
+        return new VariablePattern(spanFrom(name), name->text(), inner);
       }
     }
     else
@@ -850,42 +835,42 @@ namespace magpie
 
   gc<Pattern> Parser::primaryPattern(bool isMethod)
   {
+    gc<Token> start = last();
+
     if (match(TOKEN_TRUE) || match(TOKEN_FALSE))
     {
       gc<Expr> value = boolean(last());
-      return new ValuePattern(last()->pos(), value);
+      return new ValuePattern(spanFrom(start), value);
     }
 
     if (match(TOKEN_EQEQ))
     {
-      SourcePos start = last()->pos();
       gc<Expr> value = parseExpressionInPattern(isMethod);
-      return new ValuePattern(start.spanTo(last()->pos()), value);
+      return new ValuePattern(spanFrom(start), value);
     }
 
     if (match(TOKEN_IS))
     {
-      SourcePos start = last()->pos();
       gc<Expr> type = parseExpressionInPattern(isMethod);
-      return new TypePattern(start.spanTo(last()->pos()), type);
+      return new TypePattern(spanFrom(start), type);
     }
 
     if (match(TOKEN_NOTHING))
     {
       gc<Expr> value = nothing(last());
-      return new ValuePattern(last()->pos(), value);
+      return new ValuePattern(spanFrom(start), value);
     }
 
     if (match(TOKEN_NUMBER))
     {
       gc<Expr> value = number(last());
-      return new ValuePattern(last()->pos(), value);
+      return new ValuePattern(spanFrom(start), value);
     }
 
     if (match(TOKEN_STRING))
     {
       gc<Expr> value = string(last());
-      return new ValuePattern(last()->pos(), value);
+      return new ValuePattern(spanFrom(start), value);
     }
 
     if (match(TOKEN_LEFT_PAREN))
@@ -959,14 +944,13 @@ namespace magpie
     // If there is just one expression in the sequence, don't wrap it.
     if (exprs.count() == 1) return exprs[0];
 
-    SourcePos span = exprs[0]->pos().spanTo(exprs[-1]->pos());
-    return new SequenceExpr(span, exprs);
+    return new SequenceExpr(spanFrom(exprs[0]), exprs);
   }
 
-  const Token& Parser::current()
+  const gc<Token> Parser::current()
   {
     fillLookAhead(1);
-    return *read_[0];
+    return read_[0];
   }
 
   bool Parser::lookAhead(TokenType type)
@@ -996,7 +980,7 @@ namespace magpie
 
   void Parser::expect(TokenType expected, const char* errorMessage)
   {
-    if (!lookAhead(expected)) reporter_.error(current().pos(), errorMessage);
+    if (!lookAhead(expected)) reporter_.error(current()->pos(), errorMessage);
   }
 
   gc<Token> Parser::consume()
@@ -1011,7 +995,7 @@ namespace magpie
     if (lookAhead(expected)) return consume();
     
     if (expected == TOKEN_LINE) checkForMissingLine();
-    reporter_.error(current().pos(), errorMessage);
+    reporter_.error(current()->pos(), errorMessage);
 
     // Just so that we can keep going and try to find other errors, consume the
     // failed token and proceed.
@@ -1024,6 +1008,16 @@ namespace magpie
     {
       reporter_.setNeedMoreLines();
     }
+  }
+
+  SourcePos Parser::spanFrom(gc<Token> from)
+  {
+    return from->pos().spanTo(last()->pos());
+  }
+  
+  SourcePos Parser::spanFrom(gc<Expr> from)
+  {
+    return from->pos().spanTo(last()->pos());
   }
 
   void Parser::fillLookAhead(int count)

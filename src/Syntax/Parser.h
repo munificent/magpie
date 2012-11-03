@@ -98,7 +98,7 @@ namespace magpie
     gc<Expr> createSequence(const Array<gc<Expr> >& exprs);
 
     // Gets the token the parser is currently looking at.
-    const Token& current();
+    const gc<Token> current();
     
     // Gets the most recently consumed token.
     const gc<Token> last() const { return last_; }
@@ -131,7 +131,12 @@ namespace magpie
     void checkForMissingLine();
     
     void fillLookAhead(int count);
-    
+
+    // Creates a [SourcePos] that spans the code starting at [from] up to the
+    // last consumed [Token].
+    SourcePos spanFrom(gc<Token> from);
+    SourcePos spanFrom(gc<Expr> from);
+
     static Parselet expressions_[TOKEN_NUM_TYPES];
     
     Lexer lexer_;
