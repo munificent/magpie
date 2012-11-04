@@ -122,7 +122,6 @@ namespace magpie
           
         case OP_TEST_FIELD:
         {
-          bool success = false;
           RecordObject* record = load(frame, GET_A(ins))->toRecord();
           
           // The next instruction is a pseudo-instruction containing the offset
@@ -134,6 +133,7 @@ namespace magpie
           // We can't pull record fields out of something that isn't a record.
           // TODO(bob): Should you be able to destructure arbitrary objects by
           // invoking getters with the right name?
+          bool success = false;
           if (record != NULL)
           {
             int symbol = GET_B(ins);
@@ -150,7 +150,7 @@ namespace magpie
           // Jump if the match failed.
           if (!success)
           {
-            int offset = GET_A(jump);
+            int offset = GET_B(jump);
             frame.ip += offset;
           }
           break;
@@ -360,7 +360,7 @@ namespace magpie
           }
           break;
         }
-          
+
         case OP_RETURN:
         {
           gc<Object> value = loadSlotOrConstant(frame, GET_A(ins));
