@@ -1,0 +1,18 @@
+def foo(a (x: x))
+    print(x)
+end
+
+def foo(a (x: x, y: y, z: z))
+    print(x + " " + y + " " + z)
+end
+
+def foo(a (x: x, y: y))
+    print(x + " " + y)
+end
+
+var x = x: 1
+var xy = x: 1, y: 2
+var xyz = x: 1, y: 2, z: 3
+foo(x) // expect: 1
+foo(xy) // expect: 1 2
+foo(xyz) // expect: 1 2 3

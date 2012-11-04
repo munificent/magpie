@@ -1,0 +1,18 @@
+def foo(a (x: x is Num))
+    print("type")
+end
+
+def foo(a (x: x))
+    print("variable")
+end
+
+def foo(a (x: 1))
+    print("value")
+end
+
+var variable = x: "not num"
+var type = x: 123
+var value = x: 1
+foo(variable) // expect: variable
+foo(type) // expect: type
+foo(value) // expect: value
