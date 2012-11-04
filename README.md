@@ -56,23 +56,6 @@ is mainly a reference.
         $ cd magpie
         $ ant jar
 
-3.  **Run it.** Magpie is a command line app. After building the jar, you can
-    run it by doing:
-
-        $ ./magpie
-
-If you run it with no arguments, it drops you into a simple REPL. Enter a
-Magpie expression and it will immediately evaluate it. Since everything is an
-expression, even things like class definitions, you can build entire programs
-incrementally this way. Here's one to get you started:
-
-    for i in 1 to(20) do print("<your name> is awesome!")
-
-If you pass an argument to the app, it will assume it's a path to a script
-file and it will load and execute it:
-
-    $ ./magpie script/Hello.mag
-
 ### Building the Bytecode VM
 
 1.  **Pull down the code.** It lives here: https://github.com/munificent/magpie
@@ -107,7 +90,24 @@ file and it will load and execute it:
 
 5.  **Build the project.** Do what you usually do on your OS to build the thing.
 
-6.  **Run it.**
-
 [gyp]: http://code.google.com/p/gyp/
 
+### Running Magpie
+
+Magpie is a command line app. After building the jar, you can run it by doing:
+
+        $ ./magpie
+
+This will run the Java interpreter or the bytecode VM, whichever is more recent.
+
+If you run it with no arguments, it drops you into a simple REPL. Enter a
+Magpie expression and it will immediately evaluate it. Since everything is an
+expression, even things like class definitions, you can build entire programs
+incrementally this way. Here's one to get you started:
+
+    for i in 1 to(20) do print("<your name> is awesome!")
+
+If you pass an argument to the app, it will assume it's a path to a script
+file and it will load and execute it:
+
+    $ ./magpie example/hello.mag

@@ -6,5 +6,8 @@ doc/site/html/
 doc/site/magpie/magpie/__init__.pyc
 doc/site/.sass-cache/
 
+# Ignore gyp generated projects
+magpie.xcodeproj/project.pbxproj
+
 # Ignore user-specific config files.
 xcuserdata
