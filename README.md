@@ -36,18 +36,28 @@ You can learn more about the language at http://magpie-lang.org/.
 
 ## Getting Started
 
-It should be pretty easy to get it up and running. You'll need to:
+Magpie has two implementations right now. There is a prototype interpreter
+written in Java. This supports more of the language, but is (of course) tied to
+the JVM and is *much* slower. It's main job was to let me iterate on the
+language semantics quickly.
 
-*   Pull down the code. It lives here: https://github.com/munificent/magpie
+Now that the language has (mostly) settled down, I've started writing a
+bytecode VM in C++. This is the "real" Magpie implementation, but it's still a
+work in progress. All current development is going on here. The Java interpreter
+is mainly a reference.
 
-*   Build it. The repo includes an Eclipse project if that's your thing. If
+### Building the Java Interpreter
+
+1.  **Pull down the code.** It lives here: https://github.com/munificent/magpie
+
+2.  **Build it.** The repo includes an Eclipse project if that's your thing. If
     you rock the command-line, you can just do:
 
         $ cd magpie
         $ ant jar
 
-*   Run it. Magpie is a command line app. After building the jar, you can run
-    it by doing:
+3.  **Run it.** Magpie is a command line app. After building the jar, you can
+    run it by doing:
 
         $ ./magpie
 
@@ -62,3 +72,42 @@ If you pass an argument to the app, it will assume it's a path to a script
 file and it will load and execute it:
 
     $ ./magpie script/Hello.mag
+
+### Building the Bytecode VM
+
+1.  **Pull down the code.** It lives here: https://github.com/munificent/magpie
+
+2.  **Install [gyp][].** This is used to generate a makefile, Visual Studio
+    solution or XCode project as appropriate for your OS. You can pull it down
+    from the repo using:
+
+        $ svn checkout http://gyp.googlecode.com/svn/trunk/ gyp-read-only
+
+3.  **Generate a project.** Open
+
+        $ cd <path to magpie repo>
+        $ <path to gyp repo>/gyp --depth=1
+
+4.  **Set the output directory (XCode 4 only).** Recent versions of XCode build
+    into some shared directory not related to where the project is. This borks
+    Magpie since it's a command-line executable that loads the core library
+    from a path relative to that executable.
+
+    Unfortunately, this setting isn't in the project itself, so gyp can't help.
+    After you generate the project, open it in XCode, then:
+
+    1. Choose "File > Project Settings...".
+    2. On the "Build" tab, click "Advanced...".
+    3. Set "Build Location" to "Custom > Relative to Workspace".
+    4. Set "Products" to `build`.
+    5. Set "Intermediates" to `build/Intermediates`.
+    6. Click "Done".
+
+    This should ensure that Magpie gets built into `build/<config>/magpie`.
+
+5.  **Build the project.** Do what you usually do on your OS to build the thing.
+
+6.  **Run it.**
+
+[gyp]: http://code.google.com/p/gyp/
+
