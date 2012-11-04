@@ -1,0 +1,6 @@
+def foo(a (x: x, y: (y, z)))
+    print("x: " + x + " y: " + y + " " + z)
+end
+
+val a = x: 1, y: (2, 3)
+foo(a) // expect: x: 1 y: 2 3

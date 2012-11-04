@@ -1,5 +1,3 @@
-// skip
-// TODO(bob): Implement record multimethod ordering.
 def foo(is Num, is Num)
     print("num num")
 end

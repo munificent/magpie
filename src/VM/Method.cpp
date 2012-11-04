@@ -411,8 +411,106 @@ namespace magpie
   }
 
   MethodOrder PatternComparer::compareRecords(RecordPattern& a,
-                                              RecordPattern& b) {
-    ASSERT(false, "Not implemented.");
-    return ORDER_NONE;
+                                              RecordPattern& b)
+  {
+    // Take the intersection of their fields.
+    Array<gc<String> > intersect;
+    int onlyInA = 0;
+    int onlyInB = 0;
+    for (int i = 0; i < a.fields().count(); i++)
+    {
+      bool inBoth = false;
+      for (int j = 0; j < b.fields().count(); j++)
+      {
+        if (*a.fields()[i].name == *b.fields()[j].name)
+        {
+          inBoth = true;
+          break;
+        }
+      }
+
+      if (inBoth)
+      {
+        intersect.add(a.fields()[i].name);
+      }
+      else
+      {
+        onlyInA++;
+      }
+    }
+
+    for (int j = 0; j < b.fields().count(); j++)
+    {
+      bool inBoth = false;
+      for (int i = 0; i < a.fields().count(); i++)
+      {
+        if (*a.fields()[i].name == *b.fields()[j].name)
+        {
+          inBoth = true;
+          break;
+        }
+      }
+
+      if (!inBoth) onlyInB++;
+    }
+
+    // If the records don't have the same number of fields, one must be a
+    // strict superset of the other.
+    if ((onlyInA > 0) && (onlyInB > 0))
+    {
+      return ORDER_NONE;
+    }
+
+    // Which record are we leaning towards preferring? By default, we lean
+    // towards the one with more fields.
+    MethodOrder order = ORDER_EQUAL;
+    if (onlyInA > 0) order = ORDER_BEFORE;
+    else if (onlyInB > 0) order = ORDER_AFTER;
+
+    // Fields that are common to the two cannot disagree on sort order.
+    for (int i = 0; i < intersect.count(); i++)
+    {
+      gc<String> name = intersect[i];
+
+      gc<Pattern> aField;
+      for (int j = 0; j < a.fields().count(); j++)
+      {
+        if (*a.fields()[j].name == *name)
+        {
+          aField = a.fields()[j].value;
+          break;
+        }
+      }
+
+      gc<Pattern> bField;
+      for (int j = 0; j < b.fields().count(); j++)
+      {
+        if (*b.fields()[j].name == *name)
+        {
+          bField = b.fields()[j].value;
+          break;
+        }
+      }
+
+      MethodOrder fieldOrder = compare(aField, bField);
+      if (fieldOrder == ORDER_NONE) return ORDER_NONE;
+
+      if (order == ORDER_EQUAL)
+      {
+        // We don't have an ordering yet, so take it from this field.
+        order = fieldOrder;
+      }
+      else if (fieldOrder == ORDER_EQUAL)
+      {
+        // Do nothing.
+      }
+      else if (fieldOrder != order)
+      {
+        // The fields don't agree.
+        return ORDER_NONE;
+      }
+    }
+
+    return order;
   }
 }
