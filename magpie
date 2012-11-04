@@ -1,4 +1,20 @@
 #!/bin/sh
-DIRECTORY=$(cd `dirname $0` && pwd)
-java -jar $DIRECTORY/magpie.jar $@
 
+# Find the magpie configuration and type (JVM or bytecode) that was most
+# recently built and invoke it.
+MAGPIE="magpie.jar"
+for file in build/{Debug,Release}/magpie
+do
+  if test $file -nt $MAGPIE; then
+    MAGPIE=$file
+  fi
+done
+
+if [ $MAGPIE == "magpie.jar" ]; then
+  # Run the JVM interpreter.
+  DIRECTORY=$(cd `dirname $0` && pwd)
+  java -jar $DIRECTORY/magpie.jar $@
+else
+  # Run the bytecode VM.
+  ./$MAGPIE $@
+fi
