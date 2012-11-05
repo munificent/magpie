@@ -16,13 +16,21 @@ if sys.platform == 'win32':
     if not isfile(MAGPIE_APP):
         MAGPIE_APP = join(MAGPIE_DIR, 'Release', 'magpie.exe')
     if not isfile(MAGPIE_APP):
-        sys.exit("Cannot find magpie.exe!")
-else:
+        sys.exit('Cannot find magpie.exe!')
+elif sys.platform.startswith('linux'):
+    MAGPIE_APP = join(MAGPIE_DIR, '1', 'out', 'Debug', 'magpie')
+    if not isfile(MAGPIE_APP):
+        MAGPIE_APP = join(MAGPIE_DIR, '1', 'out', 'Release', 'magpie')
+    if not isfile(MAGPIE_APP):
+        sys.exit('Cannot find magpie!')
+elif sys.platform.startswith('darwin'):
     MAGPIE_APP = join(MAGPIE_DIR, 'build', 'Debug', 'magpie')
     if not isfile(MAGPIE_APP):
         MAGPIE_APP = join(MAGPIE_DIR, 'build', 'Release', 'magpie')
     if not isfile(MAGPIE_APP):
-        sys.exit("Cannot find magpie!")
+        sys.exit('Cannot find magpie!')
+else:
+    sys.exit('System not supported!')
 
 SKIP_PATTERN = re.compile(r'// skip')
 EXPECT_PATTERN = re.compile(r'// expect: (.*)')

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <cstring>
 
 #include "Macros.h"
 #include "Memory.h"
@@ -126,50 +127,50 @@ namespace magpie
 
       return -1;
     }
-    
+
     int lastIndexOf(const T& value) const
     {
       for (int i = count_ - 1; i >= 0; i--)
       {
         if (items_[i] == value) return i;
       }
-      
+
       return -1;
     }
-    
+
     void truncate(int count)
     {
       ASSERT(count >= 0, "Cannot truncate to a negative count.");
-      
+
       // Early out if there's nothing to remove.
       if (count >= count_) return;
-      
+
       // Clear the items.
       for (int i = count; i < count_; i++)
       {
         items_[i] = T();
       }
-      
+
       // TODO(bob): This never actually reallocates a smaller array.
       // Should it?
-      
+
       // Truncate.
       count_ = count;
     }
-    
+
     // If the array is smaller than size, than grows it to that size. New
     // elements are filled by calling the default constructor on T.
     void grow(int size)
     {
       if (count_ >= size) return;
       ensureCapacity_(size);
-      
+
       // Default construct any new ones.
       for (int i = count_; i < size; i++)
       {
         new (static_cast<void*>(&items_[i])) T();
       }
-       
+
       count_ = size;
     }
 
@@ -182,7 +183,7 @@ namespace magpie
         items_[i].reach();
       }
     }
-    
+
     // Assigns the contents of the given array to this one. Clears this array
     // and refills it with the contents of the other.
     Array& operator=(const Array& other)
@@ -271,13 +272,13 @@ namespace magpie
     : array_(array),
       start_(start)
     {}
-    
+
     // Gets the item at the given index.
     inline T& operator[] (int index)
     {
       return array_[start_ + index];
     }
-    
+
   private:
     Array<T>& array_;
     int start_;

@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <stdint.h>
 
 #ifdef _WIN32
@@ -12,8 +13,11 @@
 #include <sysexits.h>
 #endif
 
-#ifdef __APPLE__
+#if defined(__APPLE__)
 #include <mach-o/dyld.h>
+#elif defined(__linux__)
+#include <unistd.h>
+#include <linux/limits.h>
 #endif
 
 #include "Ast.h"
@@ -33,30 +37,63 @@ void getCoreLibPath(char* path)
   char relativePath[PATH_MAX];
 
   // TODO(bob): Move platform-specific stuff out to another file.
-  uint32_t size = PATH_MAX;
 #if defined(__APPLE__)
+  uint32_t size = PATH_MAX;
   int result = _NSGetExecutablePath(relativePath, &size);
   ASSERT(result == 0, "Executable path too long.");
 #elif defined(_WIN32)
-  char dirPath[PATH_MAX];
-  GetModuleFileName(NULL, dirPath, size);
+  GetModuleFileName(NULL, relativePath, PATH_MAX);
   ASSERT(GetLastError() != ERROR_INSUFFICIENT_BUFFER, "Executable path too long.")
-  _splitpath(dirPath, relativePath, relativePath+2, NULL, NULL);
+#elif defined(__linux__)
+  int len = readlink("/proc/self/exe", relativePath, PATH_MAX-1);
+  ASSERT(len != -1, "Executable path too long.");
+  relativePath[len] = '\0';
 #else
 #error Platform not yet supported!
 #endif
 
-  // Find the core lib relative to the executable.
+  // Cut off file name from path
+  char* lastSep = NULL;
+  for (char* c = relativePath; *c != '\0'; c++)
+  {
+#if defined(_WIN32)
+    if (*c == '/' || *c == '\\')
+#else
+    if (*c == '/')
+#endif
+    {
+      lastSep = c;
+    }
+  }
+
+  if (lastSep != NULL)
+  {
+    *lastSep = '\0';
+  }
+
+  // Find the magpie main directory relative to the executable.
   // TODO(bob): Hack. Try to work from the build directory too.
-  if (strstr(relativePath, "build/Debug/magpie") != 0 ||
-      strstr(relativePath, "build/Release/magpie") != 0)
+#if defined(__APPLE__)
+  if (strstr(relativePath, "build/Debug") != 0 ||
+      strstr(relativePath, "build/Release") != 0)
   {
-    strncat(relativePath, "/../../../core/core.mag", PATH_MAX);
+    strncat(relativePath, "/../..", PATH_MAX);
   }
-  else
+#elif defined(__linux__)
+  if (strstr(relativePath, "1/out") != 0)
   {
-    strncat(relativePath, "/../core/core.mag", PATH_MAX);
+    strncat(relativePath, "/../../..", PATH_MAX);
   }
+#elif defined(_WIN32)
+  if (strstr(relativePath, "Debug") != 0 ||
+      strstr(relativePath, "Release") != 0)
+  {
+    strncat(relativePath, "/..", PATH_MAX);
+  }
+#endif
+
+  // Add library path.
+  strncat(relativePath, "/core/core.mag", PATH_MAX);
 
   // Canonicalize the path.
 #ifdef _WIN32
