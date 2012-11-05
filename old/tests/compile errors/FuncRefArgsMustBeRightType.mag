@@ -1,9 +1,0 @@
-// error line: 6
-
-Main (->)
-    def fooRef <- fn Foo (Int, Bool)
-    
-    fooRef ("1", true)
-end
-
-Foo (a Int, b Bool ->) ()

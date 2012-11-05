@@ -1,5 +1,0 @@
-// error line: 4
-
-Main (->)
-    let a <- None[Int] then 1 else false
-end

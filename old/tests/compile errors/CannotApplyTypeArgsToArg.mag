@@ -1,9 +1,0 @@
-// error line: 8
-
-Main (->)
-    Foo 1
-end
-
-Foo (a Int ->)
-    def b <- a[Int]
-end

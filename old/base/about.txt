@@ -1,5 +1,0 @@
-This directory contains the base scripts. These scripts will be
-implicitly included when compiling any Magpie script. They include
-functionality that is essentially "core" to Magpie (such as functions
-for iterating through arrays) but which can actually be implemented
-using Magpie itself.

@@ -1,6 +1,0 @@
-// error line: 5
-
-Main (->)
-    def a <- 3
-    a true
-end
