@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdio>
+
 #include "Macros.h"
 #include "Token.h"
 
@@ -13,13 +15,13 @@ namespace magpie
       numErrors_(0),
       needMoreLines_(false)
     {}
-    
+
     void error(const SourcePos& pos, const char* format, ...);
     void setNeedMoreLines();
-    
+
     int numErrors() const { return numErrors_; }
     bool needMoreLines() const { return needMoreLines_; }
-    
+
   private:
     bool isRepl_;
     int numErrors_;
