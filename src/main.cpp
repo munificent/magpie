@@ -31,17 +31,6 @@
 using namespace magpie;
 using namespace std;
 
-// Gets the directory part of a path.
-void getDir(char * path)
-{
-  char * c1 = strrchr(path, '/');
-  char * c2 = strrchr(path, '\\');
-  c1 = c1 > c2 ? c1 : c2;
-  if (c1) {
-    *c1 = '\0';
-  }
-}
-
 // Finds the path to the core lib.
 void getCoreLibPath(char* path)
 {
@@ -57,20 +46,32 @@ void getCoreLibPath(char* path)
   ASSERT(GetLastError() != ERROR_INSUFFICIENT_BUFFER, "Executable path too long.")
 #elif defined(__linux__)
   int len = readlink("/proc/self/exe", relativePath, PATH_MAX-1);
-  if (len != -1)
-  {
-    relativePath[len] = '\0';
-  }
-  else
-  {
-    ASSERT(false, "Executable path too long.")
-  }
+  ASSERT(len != -1, "Executable path too long.");
+  relativePath[len] = '\0';
 #else
 #error Platform not yet supported!
 #endif
 
+  // Cut off file name from path
+  char* lastSep = NULL;
+  for (char* c = relativePath; *c != '\0'; c++)
+  {
+#if defined(_WIN32)
+    if (*c == '/' || *c == '\\')
+#else
+    if (*c == '/')
+#endif
+    {
+      lastSep = c;
+    }
+  }
+
+  if (lastSep != NULL)
+  {
+    *lastSep = '\0';
+  }
+
   // Find the magpie main directory relative to the executable.
-  getDir(relativePath);
   // TODO(bob): Hack. Try to work from the build directory too.
 #if defined(__APPLE__)
   if (strstr(relativePath, "build/Debug") != 0 ||
