@@ -1,5 +1,5 @@
 #include <sstream>
-#include <stdarg.h>
+#include <cstdarg>
 
 #include "ErrorReporter.h"
 
