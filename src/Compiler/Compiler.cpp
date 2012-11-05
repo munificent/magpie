@@ -1,8 +1,8 @@
 #include "Ast.h"
 #include "Compiler.h"
 #include "ErrorReporter.h"
+#include "ExprCompiler.h"
 #include "Method.h"
-#include "MethodCompiler.h"
 #include "Module.h"
 #include "Object.h"
 #include "Resolver.h"
@@ -14,38 +14,38 @@ namespace magpie
                                   gc<ModuleAst> ast, Module* module)
   {
     Compiler compiler(vm, reporter);
-    
+
     // Every module implicitly imports core (except core itself, which is
     // assumed to be the first module loaded).
     if (vm.coreModule() != NULL)
     {
       module->imports().add(vm.coreModule());
     }
-    
+
     for (int i = 0; i < ast->body()->expressions().count(); i++)
     {
       compiler.declareTopLevel(ast->body()->expressions()[i], module);
     }
-    
-    gc<Chunk> code = MethodCompiler(compiler).compileBody(module, ast->body());
+
+    gc<Chunk> code = ExprCompiler(compiler).compileBody(module, ast->body());
     module->setBody(code);
   }
-  
+
   gc<Chunk> Compiler::compileMultimethod(VM& vm, ErrorReporter& reporter,
                                          Multimethod& multimethod)
   {
     Compiler compiler(vm, reporter);
-    return MethodCompiler(compiler).compile(multimethod);
+    return ExprCompiler(compiler).compile(multimethod);
   }
 
   void Compiler::compileExpression(VM& vm, ErrorReporter& reporter,
                                    gc<Expr> expr, Module* module)
   {
     Compiler compiler(vm, reporter);
-    
+
     compiler.declareTopLevel(expr, module);
-    
-    gc<Chunk> code = MethodCompiler(compiler).compileBody(module, expr);
+
+    gc<Chunk> code = ExprCompiler(compiler).compileBody(module, expr);
     module->setBody(code);
   }
 
@@ -58,7 +58,7 @@ namespace magpie
   {
     return vm_.addMethod(method);
   }
-  
+
   symbolId Compiler::addSymbol(gc<String> name)
   {
     return vm_.addSymbol(name);
@@ -73,7 +73,7 @@ namespace magpie
   {
     return vm_.getModuleIndex(module);
   }
-    
+
   int Compiler::findNative(gc<String> name)
   {
     return vm_.findNative(name);
@@ -87,14 +87,14 @@ namespace magpie
       declareMultimethod(SignatureBuilder::build(*def));
       return;
     }
-    
+
     DefClassExpr* defClass = expr->asDefClassExpr();
     if (defClass != NULL)
     {
       declareClass(*defClass, module);
       return;
     }
-    
+
     VariableExpr* var = expr->asVariableExpr();
     if (var != NULL)
     {
@@ -102,7 +102,7 @@ namespace magpie
       return;
     }
   }
-  
+
   void Compiler::declareClass(DefClassExpr& classExpr, Module* module)
   {
     declareVariable(classExpr.pos(), classExpr.name(), module);
@@ -162,7 +162,7 @@ namespace magpie
 
       rightPattern = new RecordPattern(pos, fields);
     }
-    
+
     return new DefExpr(pos, leftPattern, String::create("new"), rightPattern,
                        gc<Pattern>(),
                        new NativeExpr(pos, String::create("objectNew")));
@@ -198,7 +198,7 @@ namespace magpie
     {
       pattern = new WildcardPattern(classExpr.pos());
     }
-    
+
     return new DefExpr(pos, leftPattern, field->name(), gc<Pattern>(),
                        pattern, new SetFieldExpr(pos, fieldIndex));
   }
@@ -207,7 +207,7 @@ namespace magpie
   {
     return vm_.declareMultimethod(signature);
   }
-  
+
   void Compiler::declareVariables(gc<Pattern> pattern, Module* module)
   {
     RecordPattern* record = pattern->asRecordPattern();
@@ -217,15 +217,15 @@ namespace magpie
       {
         declareVariables(record->fields()[i].value, module);
       }
-      
+
       return;
     }
-    
+
     VariablePattern* variable = pattern->asVariablePattern();
     if (variable != NULL)
     {
       declareVariable(variable->pos(), variable->name(), module);
-      
+
       if (!variable->pattern().isNull())
       {
         declareVariables(variable->pattern(), module);
@@ -243,19 +243,19 @@ namespace magpie
           "There is already a variable '%s' defined in this module.",
           name->cString());
     }
-    
+
     module->addVariable(name, gc<Object>());
   }
-  
+
   gc<String> SignatureBuilder::build(const CallExpr& expr, bool isLValue)
   {
     SignatureBuilder builder;
-    
+
     if (!expr.leftArg().isNull())
     {
       builder.writeArg(expr.leftArg());
     }
-    
+
     builder.add(expr.name()->cString());
     if (isLValue) builder.add("=");
 
@@ -264,40 +264,40 @@ namespace magpie
       builder.add(" ");
       builder.writeArg(expr.rightArg());
     }
-    
+
     // TODO(bob): Can you do destructuring here?
     if (isLValue) builder.add("=0:");
-    
+
     return String::create(builder.signature_, builder.length_);
   }
-  
+
   gc<String> SignatureBuilder::build(const DefExpr& method)
   {
     SignatureBuilder builder;
-    
+
     if (!method.leftParam().isNull())
     {
       builder.writeParam(method.leftParam());
     }
-    
+
     builder.add(method.name()->cString());
     if (!method.value().isNull()) builder.add("=");
-    
+
     if (!method.rightParam().isNull())
     {
       builder.add(" ");
       builder.writeParam(method.rightParam());
     }
-    
+
     if (!method.value().isNull())
     {
       builder.add("=");
       builder.writeParam(method.value());
     }
-    
+
     return String::create(builder.signature_, builder.length_);
   }
-  
+
   void SignatureBuilder::writeArg(gc<Expr> expr)
   {
     // TODO(bob): Clean up. Redundant with build().
@@ -310,10 +310,10 @@ namespace magpie
         add(record->fields()[i].name);
         add(":");
       }
-      
+
       return;
     }
-    
+
     // Right now, all other exprs mean "some arg goes here".
     add("0:");
   }
@@ -329,24 +329,24 @@ namespace magpie
         add(record->fields()[i].name);
         add(":");
       }
-      
+
       return;
     }
-    
+
     // Any other pattern is implicitly a single-field record.
     add("0:");
   }
-  
+
   void SignatureBuilder::add(gc<String> text)
   {
     add(text->cString());
   }
-  
+
   void SignatureBuilder::add(const char* text)
   {
     int length = static_cast<int>(strlen(text));
     ASSERT(length_ + length < MAX_LENGTH, "Signature too long.");
-    
+
     strcpy(signature_ + length_, text);
     length_ += strlen(text);
   }
