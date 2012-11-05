@@ -1,7 +1,0 @@
-// error line: 6
-
-Main (->)
-    // eventually, we would like this to work with any const expression
-    // but that will require constant folding in the compiler
-    def a <- (1, 2).(1 + 1)
-end

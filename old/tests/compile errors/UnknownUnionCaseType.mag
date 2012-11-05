@@ -1,9 +1,0 @@
-// error line: 8
-
-Main (->)
-    Print "hi"
-end
-
-union Foo
-    A Undefined
-end

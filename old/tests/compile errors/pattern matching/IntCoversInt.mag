@@ -1,8 +1,0 @@
-// error line: 6
-
-Main (->)
-    match 1
-        case 1 then Print "first"
-        case 1 then Print "second"
-    end
-end

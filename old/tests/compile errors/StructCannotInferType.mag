@@ -1,9 +1,0 @@
-// error line: 4
-
-Main (->)
-    Foo 123
-end
-
-struct Foo[T]
-    Bar Int
-end

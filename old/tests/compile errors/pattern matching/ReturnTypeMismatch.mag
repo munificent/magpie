@@ -1,8 +1,0 @@
-// error line: 5
-
-Main (->)
-    match true
-        case true  then 1
-        case false then true
-    end
-end

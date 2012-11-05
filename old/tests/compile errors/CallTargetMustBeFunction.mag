@@ -1,5 +1,0 @@
-// error line: 4
-
-Main (->)
-    true 1
-end
