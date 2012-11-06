@@ -2,6 +2,7 @@
 
 #include "Array.h"
 #include "Ast.h"
+#include "Bytecode.h"
 #include "Compiler.h"
 #include "Memory.h"
 
