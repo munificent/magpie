@@ -64,7 +64,7 @@ is mainly a reference.
     solution or XCode project as appropriate for your OS. You can pull it down
     from the repo using:
 
-        $ svn checkout http://gyp.googlecode.com/svn/trunk/ gyp-read-only
+        $ git clone http://git.chromium.org/external/gyp.git
 
 3.  **Generate a project.** Open
 
