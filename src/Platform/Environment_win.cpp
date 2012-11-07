@@ -1,4 +1,6 @@
-#include <mach-o/dyld.h>
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <cstring>
 
 #include "Macros.h"
 #include "Environment.h"
@@ -7,10 +9,9 @@ namespace magpie
 {
   void getCoreLibPath(char* path, uint32_t length)
   {
-    char relativePath[PATH_MAX];
+    char* relativePath = new char[length];
 
-    // TODO(bob): Move platform-specific stuff out to another file.
-    GetModuleFileName(NULL, relativePath, PATH_MAX);
+    GetModuleFileName(NULL, relativePath, length);
     ASSERT(GetLastError() != ERROR_INSUFFICIENT_BUFFER, "Executable path too long.")
 
     // Cut off file name from path
@@ -33,7 +34,7 @@ namespace magpie
     if (strstr(relativePath, "Debug") != 0 ||
         strstr(relativePath, "Release") != 0)
     {
-      strncat(relativePath, "/..", PATH_MAX);
+      strncat(relativePath, "/..", length);
     }
 
     // Add library path.
@@ -41,5 +42,6 @@ namespace magpie
 
     // Canonicalize the path.
     _fullpath(path, relativePath, length);
+    delete[] relativePath;
   }
 }
