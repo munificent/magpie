@@ -13,15 +13,9 @@
 #include <sysexits.h>
 #endif
 
-#if defined(__APPLE__)
-#include <mach-o/dyld.h>
-#elif defined(__linux__)
-#include <unistd.h>
-#include <linux/limits.h>
-#endif
-
 #include "Ast.h"
 #include "Compiler.h"
+#include "Environment.h"
 #include "Fiber.h"
 #include "MagpieString.h"
 #include "Object.h"
@@ -30,78 +24,6 @@
 
 using namespace magpie;
 using namespace std;
-
-// Finds the path to the core lib.
-void getCoreLibPath(char* path)
-{
-  char relativePath[PATH_MAX];
-
-  // TODO(bob): Move platform-specific stuff out to another file.
-#if defined(__APPLE__)
-  uint32_t size = PATH_MAX;
-  int result = _NSGetExecutablePath(relativePath, &size);
-  ASSERT(result == 0, "Executable path too long.");
-#elif defined(_WIN32)
-  GetModuleFileName(NULL, relativePath, PATH_MAX);
-  ASSERT(GetLastError() != ERROR_INSUFFICIENT_BUFFER, "Executable path too long.")
-#elif defined(__linux__)
-  int len = readlink("/proc/self/exe", relativePath, PATH_MAX-1);
-  ASSERT(len != -1, "Executable path too long.");
-  relativePath[len] = '\0';
-#else
-#error Platform not yet supported!
-#endif
-
-  // Cut off file name from path
-  char* lastSep = NULL;
-  for (char* c = relativePath; *c != '\0'; c++)
-  {
-#if defined(_WIN32)
-    if (*c == '/' || *c == '\\')
-#else
-    if (*c == '/')
-#endif
-    {
-      lastSep = c;
-    }
-  }
-
-  if (lastSep != NULL)
-  {
-    *lastSep = '\0';
-  }
-
-  // Find the magpie main directory relative to the executable.
-  // TODO(bob): Hack. Try to work from the build directory too.
-#if defined(__APPLE__)
-  if (strstr(relativePath, "build/Debug") != 0 ||
-      strstr(relativePath, "build/Release") != 0)
-  {
-    strncat(relativePath, "/../..", PATH_MAX);
-  }
-#elif defined(__linux__)
-  if (strstr(relativePath, "1/out") != 0)
-  {
-    strncat(relativePath, "/../../..", PATH_MAX);
-  }
-#elif defined(_WIN32)
-  if (strstr(relativePath, "Debug") != 0 ||
-      strstr(relativePath, "Release") != 0)
-  {
-    strncat(relativePath, "/..", PATH_MAX);
-  }
-#endif
-
-  // Add library path.
-  strncat(relativePath, "/core/core.mag", PATH_MAX);
-
-  // Canonicalize the path.
-#ifdef _WIN32
-  _fullpath(path, relativePath, PATH_MAX);
-#else
-  realpath(relativePath, path);
-#endif
-}
 
 // Reads a file from the given path into a String.
 gc<String> readFile(const char* path)
@@ -207,7 +129,7 @@ int main(int argc, const char* argv[])
   }
 
   char path[PATH_MAX];
-  getCoreLibPath(path);
+  getCoreLibPath(path, PATH_MAX);
 
   VM vm;
 
