@@ -7,17 +7,12 @@
 
 namespace magpie
 {
-  Fiber::Fiber(VM& vm)
+  Fiber::Fiber(VM& vm, gc<Chunk> chunk)
   : vm_(vm),
     stack_(),
     callFrames_(),
     nearestCatch_()
-  {}
-
-  void Fiber::init(gc<Chunk> chunk)
   {
-    ASSERT(callFrames_.count() == 0, "Cannot re-initialize Fiber.");
-
     call(chunk, 0);
   }
 

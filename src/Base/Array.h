@@ -104,17 +104,21 @@ namespace magpie
     // Removes the item at the given index. Indexes are zero-based from the
     // beginning of the array. Negative indexes are from the end of the array
     // and go forward, so that -1 is the last item in the array.
-    void removeAt(int index)
+    T removeAt(int index)
     {
       if (index < 0) index = count_ + index;
       ASSERT_INDEX(index, count_);
 
+      T item = items_[index];
+      
       // Shift items up.
       for (int i = index; i < count_ - 1; i++) items_[i] = items_[i + 1];
 
       // Clear the copy of the last item.
       items_[count_ - 1] = T();
       count_--;
+
+      return item;
     }
 
     // Finds the index of the given item in the array. Returns -1 if not found.

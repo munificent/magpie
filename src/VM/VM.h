@@ -6,6 +6,7 @@
 #include "Memory.h"
 #include "Method.h"
 #include "RootSource.h"
+#include "Scheduler.h"
 
 namespace magpie
 {
@@ -36,7 +37,7 @@ namespace magpie
     Module* getModule(int index) { return modules_[index]; }
     int getModuleIndex(Module& module) const;
     
-    Fiber& fiber() { return *fiber_; }
+    //    Fiber& fiber() { return *fiber_; }
 
     inline gc<Object> nothing() const { return nothing_; }
     
@@ -75,7 +76,10 @@ namespace magpie
     int findMultimethod(gc<String> signature);
     void defineMethod(int multimethod, methodId method);
     gc<Chunk> getMultimethod(int multimethod);
-    
+
+    // Adds a new fiber to the scheduler.
+    void addFiber(gc<Fiber> fiber);
+
   private:
     // Parses the given module source file. Returns null if there was a syntax
     // error.
@@ -100,8 +104,8 @@ namespace magpie
     
     Array<gc<Method> > methods_;
     Array<gc<Multimethod> > multimethods_;
-    
-    gc<Fiber> fiber_;
+
+    Scheduler scheduler_;
     
     gc<Object> true_;
     gc<Object> false_;

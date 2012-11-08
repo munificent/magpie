@@ -94,6 +94,8 @@
       'src/VM/Natives.h',
       'src/VM/Object.cpp',
       'src/VM/Object.h',
+      'src/VM/Scheduler.cpp',
+      'src/VM/Scheduler.h',
       'src/VM/VM.cpp',
       'src/VM/VM.h',
     ],

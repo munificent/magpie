@@ -96,6 +96,17 @@ namespace magpie
     result = NATIVE_RESULT_CALL;
     return args[0];
   }
+
+  NATIVE(functionRun)
+  {
+    FunctionObject* function = args[0]->asFunction();
+
+    gc<Fiber> functionFiber = new Fiber(vm, function->chunk());
+    vm.addFiber(functionFiber);
+
+    // TODO(bob): What should this return?
+    return args[0];
+  }
   
   NATIVE(listAdd)
   {

@@ -21,12 +21,10 @@ namespace magpie
     recordTypes_(),
     methods_(),
     multimethods_(),
-    fiber_()
+    scheduler_()
   {
     Memory::initialize(this, 1024 * 1024 * 2); // TODO(bob): Use non-magic number.
     
-    fiber_ = new Fiber(*this);
-
     DEF_NATIVE(objectClass);
     DEF_NATIVE(objectNew);
     DEF_NATIVE(objectToString);
@@ -43,6 +41,7 @@ namespace magpie
     DEF_NATIVE(stringCount);
     DEF_NATIVE(numToString);
     DEF_NATIVE(functionCall);
+    DEF_NATIVE(functionRun);
     DEF_NATIVE(listAdd);
     DEF_NATIVE(listCount);
     DEF_NATIVE(listIndex);
@@ -111,7 +110,7 @@ namespace magpie
   void VM::reachRoots()
   {
     recordTypes_.reach();
-    fiber_.reach();
+    scheduler_.reach();
     true_.reach();
     false_.reach();
     nothing_.reach();
@@ -234,6 +233,11 @@ namespace magpie
     return multimethod->getChunk(*this);
   }
 
+  void VM::addFiber(gc<Fiber> fiber)
+  {
+    scheduler_.add(fiber);
+  }
+
   gc<ModuleAst> VM::parseModule(const char* fileName, gc<String> source)
   {
     ErrorReporter reporter;
@@ -270,29 +274,41 @@ namespace magpie
   
   gc<Object> VM::runModule(Module* module)
   {
-    fiber_->init(module->body());
-    
-    FiberResult result;
+    // Pretend we just finished a fiber so we can kick off the "next" one.
+    scheduler_.add(new Fiber(*this, module->body()));
+    FiberResult result = FIBER_DONE;
+
     gc<Object> value;
-    
-    // If the fiber returns FIBER_DID_GC, it's still running but it did a GC.
-    // Since that moves the fiber, we return back to here so we can invoke
-    // run() again at its new location in memory.
-    do
+
+    while (true)
     {
-      result = fiber_->run(value);
+      gc<Fiber> fiber;
+      
+      switch (result)
+      {
+        case FIBER_DONE:
+          // Keep running fibers until we run out.
+          fiber = scheduler_.getNext();
+          if (fiber.isNull()) return value;
+          break;
+
+        case FIBER_DID_GC:
+          // If the fiber returns FIBER_DID_GC, it's still running but it did
+          // a GC. Since that moves the fiber, we return back to here so we
+          // can invoke run() again at its new location in memory.
+          break;
+
+        case FIBER_UNCAUGHT_ERROR:
+          // TODO(bob): Kind of hackish.
+          // TODO(bob): Give other fibers a chance to handle this.
+          // If we got an uncaught error, exit with an error.
+          std::cerr << "Uncaught error." << std::endl;
+          exit(3);
+          break;
+      }
+
+      result = fiber->run(value);
     }
-    while (result == FIBER_DID_GC);
-    
-    // TODO(bob): Kind of hackish.
-    // If we got an uncaught error while loading the module, exit with an error.
-    if (result == FIBER_UNCAUGHT_ERROR)
-    {
-      std::cerr << "Uncaught error." << std::endl;
-      exit(3);
-    }
-    
-    return value;
   }
 }
 

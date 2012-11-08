@@ -43,9 +43,8 @@ namespace magpie
   class Fiber : public Managed
   {
   public:
-    Fiber(VM& vm);
+    Fiber(VM& vm, gc<Chunk> chunk);
     
-    void init(gc<Chunk> chunk);
     FiberResult run(gc<Object>& result);
 
     virtual void reach();

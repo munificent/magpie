@@ -27,6 +27,7 @@ namespace magpie
   NATIVE(stringCount);
   NATIVE(numToString);
   NATIVE(functionCall);
+  NATIVE(functionRun);
   NATIVE(listAdd);
   NATIVE(listCount);
   NATIVE(listIndex);

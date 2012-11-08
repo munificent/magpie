@@ -1,0 +1,9 @@
+print("Top")
+
+for i in [1, 2, 3, 4] do
+    fn()
+        print("In function")
+    end run
+end
+
+print("Bottom")
