@@ -36,12 +36,11 @@ namespace magpie
     Module* coreModule() { return coreModule_; }
     Module* getModule(int index) { return modules_[index]; }
     int getModuleIndex(Module& module) const;
-    
-    //    Fiber& fiber() { return *fiber_; }
 
     inline gc<Object> nothing() const { return nothing_; }
     
     inline gc<ClassObject> boolClass() const { return boolClass_; }
+    inline gc<ClassObject> channelClass() const { return channelClass_; }
     inline gc<ClassObject> classClass() const { return classClass_; }
     inline gc<ClassObject> functionClass() const { return functionClass_; }
     inline gc<ClassObject> listClass() const { return listClass_; }
@@ -111,6 +110,7 @@ namespace magpie
     gc<Object> false_;
     gc<Object> nothing_;
     gc<ClassObject> boolClass_;
+    gc<ClassObject> channelClass_;
     gc<ClassObject> classClass_;
     gc<ClassObject> functionClass_;
     gc<ClassObject> listClass_;

@@ -7,8 +7,11 @@
 
 namespace magpie
 {
+  int Fiber::nextId_ = 0;
+
   Fiber::Fiber(VM& vm, gc<Chunk> chunk)
   : vm_(vm),
+    id_(nextId_++),
     stack_(),
     callFrames_(),
     nearestCatch_()
@@ -228,7 +231,11 @@ namespace magpie
               case OBJECT_BOOL:
                 equal = a->toBool() == b->toBool();
                 break;
-                
+
+              case OBJECT_CHANNEL:
+                ASSERT(false, "Equality on channels not implemented.");
+                break;
+
               case OBJECT_CLASS:
                 equal = false;
                 break;
@@ -346,12 +353,17 @@ namespace magpie
               break;
 
             case NATIVE_RESULT_CALL:
+            {
               FunctionObject* function = args[0]->asFunction();
 
               // Call the function, passing in this method's arguments except
               // the first one, which is the function itself.
               call(function->chunk(), frame.stackStart + 1);
               break;
+            }
+
+            case NATIVE_RESULT_SUSPEND:
+              return FIBER_SUSPEND;
           }
           break;
         }
@@ -371,13 +383,7 @@ namespace magpie
           if (callFrames_.count() > 0)
           {
             // Give the result back and resume the calling chunk.
-            CallFrame& caller = callFrames_[-1];
-            instruction callInstruction = caller.chunk->code()[caller.ip - 1];
-            ASSERT((GET_OP(callInstruction) == OP_CALL ||
-                    GET_OP(callInstruction) == OP_NATIVE),
-                   "Should be returning to a call or native.");
-            
-            store(caller, GET_C(callInstruction), value);
+            storeReturn(value);
           }
           else
           {
@@ -430,6 +436,17 @@ namespace magpie
     return FIBER_DONE;
   }
 
+  void Fiber::storeReturn(gc<Object> value)
+  {
+    CallFrame& frame = callFrames_[-1];
+    instruction instruction = frame.chunk->code()[frame.ip - 1];
+    ASSERT((GET_OP(instruction) == OP_CALL ||
+            GET_OP(instruction) == OP_NATIVE),
+           "Should be returning to a call or native.");
+
+    store(frame, GET_C(instruction), value);
+  }
+
   void Fiber::reach()
   {
     // Walk the stack.
@@ -462,6 +479,11 @@ namespace magpie
     {
       callFrames_[i].chunk.reach();
     }
+  }
+
+  void Fiber::trace(std::ostream& out) const
+  {
+    out << "[fiber " << id_ << "]";
   }
 
   void Fiber::call(gc<Chunk> chunk, int stackStart)

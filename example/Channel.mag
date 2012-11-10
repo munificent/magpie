@@ -1,18 +1,14 @@
-import async
+var channel = Channel make
 
-val channel = Channel new(1)
+fn()
+    print("Started fiber")
+    print(channel)
+    channel send("value!")
+    print("Ending fiber")
+end run
 
-print("Spawning routines")
-run with
-    while true do print("a read " + channel receive())
-end
-run with
-    while true do print("b read " + channel receive())
-end
+print("Created fiber")
+print(channel)
 
-for i in 1 to(100) do
-    channel send(i)
-    sleep(100)
-end
-
-print("Done")
+var value = channel receive
+print("Received " + value)

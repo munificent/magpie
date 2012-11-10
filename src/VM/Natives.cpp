@@ -91,6 +91,38 @@ namespace magpie
     return new StringObject(String::format("%g", n));
   }
 
+  NATIVE(channelNew)
+  {
+    return new ChannelObject();
+  }
+  
+  NATIVE(channelReceive)
+  {
+    // Hang this fiber off the channel we're waiting for a value from.
+    ChannelObject* channel = args[0]->asChannel();
+    gc<Object> value = channel->receive(vm, &fiber);
+
+    // If we don't have an immediate value, suspend this fiber.
+    if (value.isNull())
+    {
+      result = NATIVE_RESULT_SUSPEND;
+    }
+
+    return value;
+  }
+
+  NATIVE(channelSend)
+  {
+    ChannelObject* channel = args[0]->asChannel();
+
+    // Send the value and suspend this fiber until it's been received.
+    channel->send(vm, &fiber, args[1]);
+
+    // TODO(bob): If the channel is buffered, sending won't always suspend.
+    result = NATIVE_RESULT_SUSPEND;
+    return NULL;
+  }
+
   NATIVE(functionCall)
   {
     result = NATIVE_RESULT_CALL;

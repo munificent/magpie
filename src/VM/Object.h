@@ -10,8 +10,10 @@ namespace magpie
 {
   class BoolObject;
   class Chunk;
+  class ChannelObject;
   class ClassObject;
   class DynamicObject;
+  class Fiber;
   class FunctionObject;
   class ListObject;
   class Memory;
@@ -24,6 +26,7 @@ namespace magpie
   
   enum ObjectType {
     OBJECT_BOOL,
+    OBJECT_CHANNEL,
     OBJECT_CLASS,
     OBJECT_DYNAMIC,
     OBJECT_FUNCTION,
@@ -43,6 +46,13 @@ namespace magpie
 
     // Gets the ClassObject for this object's class.
     virtual gc<ClassObject> getClass(VM& vm) const = 0;
+
+    // Returns the object as a channel. Object *must* be a ChannelObject.
+    virtual ChannelObject* asChannel()
+    {
+      ASSERT(false, "Not a channel.");
+      return NULL;
+    }
     
     // Returns the object as a class. Object *must* be a ClassObject.
     virtual ClassObject* asClass()
@@ -122,6 +132,47 @@ namespace magpie
     bool value_;
     
     NO_COPY(BoolObject);
+  };
+
+  class ChannelObject : public Object
+  {
+  public:
+    ChannelObject()
+    : Object()
+    {}
+
+    // Takes a previously sent value and returns it to [receiver]. If no value
+    // has been sent yet, returns NULL.
+    gc<Object> receive(VM& vm, gc<Fiber> receiver);
+
+    // Sends a value along this channel. Returns true if a receiver was
+    // available to receive it.
+    bool send(VM& vm, gc<Fiber> sender, gc<Object> value);
+
+    virtual ObjectType type() const { return OBJECT_CHANNEL; }
+
+    virtual gc<ClassObject> getClass(VM& vm) const;
+
+    // Returns the object as a channel. Object *must* be a ChannelObject.
+    virtual ChannelObject* asChannel() { return this; }
+    
+    virtual gc<String> toString() const;
+
+    virtual void reach();
+
+  private:
+    // If a value is sent before a receiver is blocking, this in-flight value.
+    gc<Object> sentValue_;
+
+    // If a value is sent before a receiver is blocking, this refers to that
+    // blocked sender.
+    gc<Fiber> sender_;
+
+    // Fibers that are currently blocked waiting to receive a value on this
+    // channel.
+    Array<gc<Fiber> > receivers_;
+
+    NO_COPY(ChannelObject);
   };
   
   class ClassObject : public Object

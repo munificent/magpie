@@ -1,6 +1,9 @@
 defclass Bool
 end
 
+defclass Channel
+end
+
 defclass Class
 end
 
@@ -67,6 +70,11 @@ def (false) toString "false"
 
 def (is Num) toString native "numToString"
 def (s is String) toString s
+
+// TODO(bob): "make" -> "new"
+def (== Channel) make native "channelNew"
+def (is Channel) send(value) native "channelSend"
+def (is Channel) receive native "channelReceive"
 
 // TODO(bob): How should different argument patterns be handled?
 def (is Function) call native "functionCall"

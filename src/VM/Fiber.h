@@ -15,7 +15,10 @@ namespace magpie
   enum FiberResult
   {
     // The fiber's entry chunk has completed and the fiber is complete.
-    FIBER_DONE = 0,
+    FIBER_DONE,
+
+    // The fiber has been suspended to pass execution to another fiber.
+    FIBER_SUSPEND,
     
     // A garbage collection is happened, so the fiber has moved in memory.
     FIBER_DID_GC,
@@ -37,7 +40,10 @@ namespace magpie
 
     // The native has pushed a call frame on the stack, so it doesn't have a
     // return value (yet).
-    NATIVE_RESULT_CALL
+    NATIVE_RESULT_CALL,
+
+    // The native is suspending this fiber. It will be resumed later.
+    NATIVE_RESULT_SUSPEND
   };
 
   class Fiber : public Managed
@@ -46,9 +52,11 @@ namespace magpie
     Fiber(VM& vm, gc<Chunk> chunk);
     
     FiberResult run(gc<Object>& result);
+    void storeReturn(gc<Object> value);
 
     virtual void reach();
-    
+    virtual void trace(std::ostream& out) const;
+
   private:
     struct CallFrame
     {
@@ -89,8 +97,11 @@ namespace magpie
     bool throwError(gc<Object> error);
     
     gc<Object> loadSlotOrConstant(const CallFrame& frame, int index);
+
+    static int          nextId_;
     
     VM&                 vm_;
+    int                 id_;
     Array<gc<Object> >  stack_;
     Array<CallFrame>    callFrames_;
     gc<CatchFrame>      nearestCatch_;

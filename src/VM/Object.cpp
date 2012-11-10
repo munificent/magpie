@@ -22,6 +22,65 @@ namespace magpie
     // TODO(bob): Store these as constants.
     return String::create(value_ ? "true" : "false");
   }
+
+  gc<Object> ChannelObject::receive(VM& vm, gc<Fiber> receiver)
+  {
+    if (sentValue_.isNull())
+    {
+      // There isn't a value already available, so suspend the receiver.
+      receivers_.add(receiver);
+      return NULL;
+    }
+
+    // A value is already available, so receive it immediately.
+    gc<Object> value = sentValue_;
+    sentValue_ = NULL;
+
+    // Now the sender can stop blocking.
+    vm.addFiber(sender_);
+    sender_ = NULL;
+
+    return value;
+  }
+
+  bool ChannelObject::send(VM& vm, gc<Fiber> sender, gc<Object> value)
+  {
+    // If there are no blocking receivers, just wait.
+    if (receivers_.count() == 0)
+    {
+      // TODO(bob): Can this occur?
+      ASSERT(sentValue_.isNull(), "Can't back up sends.");
+      
+      sentValue_ = value;
+      sender_ = sender;
+      return false;
+    }
+
+    // Pick a receiver to wake up and receive the value.
+    gc<Fiber> fiber = receivers_.removeAt(0);
+    fiber->storeReturn(value);
+    vm.addFiber(fiber);
+    
+    return true;
+  }
+
+  gc<ClassObject> ChannelObject::getClass(VM& vm) const
+  {
+    return vm.channelClass();
+  }
+
+  gc<String> ChannelObject::toString() const
+  {
+    // TODO(bob): Do something more useful here?
+    return String::create("[channel]");
+  }
+
+  void ChannelObject::reach()
+  {
+    receivers_.reach();
+    sentValue_.reach();
+    sender_.reach();
+  }
   
   gc<ClassObject> ClassObject::getClass(VM& vm) const
   {

@@ -40,6 +40,9 @@ namespace magpie
     DEF_NATIVE(numGreaterThanEqualToNum);
     DEF_NATIVE(stringCount);
     DEF_NATIVE(numToString);
+    DEF_NATIVE(channelNew);
+    DEF_NATIVE(channelReceive);
+    DEF_NATIVE(channelSend);
     DEF_NATIVE(functionCall);
     DEF_NATIVE(functionRun);
     DEF_NATIVE(listAdd);
@@ -60,6 +63,7 @@ namespace magpie
     runModule(coreModule_);
     
     registerClass(boolClass_, "Bool");
+    registerClass(channelClass_, "Channel");
     registerClass(classClass_, "Class");
     registerClass(functionClass_, "Function");
     registerClass(listClass_, "List");
@@ -287,6 +291,7 @@ namespace magpie
       switch (result)
       {
         case FIBER_DONE:
+        case FIBER_SUSPEND:
           // Keep running fibers until we run out.
           fiber = scheduler_.getNext();
           if (fiber.isNull()) return value;

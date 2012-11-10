@@ -1,0 +1,17 @@
+// TODO(bob): Should be 'new'.
+var channel = Channel make
+fn() // TODO(bob): Use "async" syntax.
+    print("before receive")
+    print(channel receive)
+    print("after receive")
+end run
+
+print("before send")
+channel send("sent value")
+print("after send")
+
+// expect: before send
+// expect: before receive
+// expect: sent value
+// expect: after receive
+// expect: after send
