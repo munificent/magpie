@@ -1,4 +1,5 @@
 #include <mach-o/dyld.h>
+#include <cstring>
 
 #include "Macros.h"
 #include "Environment.h"
@@ -7,9 +8,9 @@ namespace magpie
 {
   void getCoreLibPath(char* path, uint32_t length)
   {
-    char relativePath[PATH_MAX];
-    
-    uint32_t size = PATH_MAX;
+    char* relativePath = new char[length];
+
+    uint32_t size = length;
     int result = _NSGetExecutablePath(relativePath, &size);
     ASSERT(result == 0, "Executable path too long.");
 
@@ -33,13 +34,14 @@ namespace magpie
     if (strstr(relativePath, "build/Debug") != 0 ||
         strstr(relativePath, "build/Release") != 0)
     {
-      strncat(relativePath, "/../..", PATH_MAX);
+      strncat(relativePath, "/../..", length);
     }
 
     // Add library path.
-    strncat(relativePath, "/core/core.mag", PATH_MAX);
+    strncat(relativePath, "/core/core.mag", length);
 
     // Canonicalize the path.
     realpath(relativePath, path);
+    delete[] relativePath;
   }
 }
