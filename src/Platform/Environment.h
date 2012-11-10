@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 namespace magpie
 {
   // Fills in [path] with the full path to the root directory containing the

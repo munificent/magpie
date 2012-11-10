@@ -1,8 +1,6 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <cstring>
-#include <stdint.h>
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -10,6 +8,11 @@
 #define PATH_MAX MAX_PATH
 #define EX_NOINPUT 1
 #else
+#ifdef __linux__
+#include <linux/limits.h>
+#else
+#include <limits.h>
+#endif
 #include <sysexits.h>
 #endif
 

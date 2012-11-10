@@ -1,5 +1,5 @@
 #include <unistd.h>
-#include <linux/limits.h>
+#include <cstring>
 
 #include "Macros.h"
 #include "Environment.h"
@@ -8,9 +8,9 @@ namespace magpie
 {
   void getCoreLibPath(char* path, uint32_t length)
   {
-    char relativePath[PATH_MAX];
+    char* relativePath = new char[length];
 
-    int len = readlink("/proc/self/exe", relativePath, PATH_MAX-1);
+    int len = readlink("/proc/self/exe", relativePath, length-1);
     ASSERT(len != -1, "Executable path too long.");
     relativePath[len] = '\0';
 
@@ -33,13 +33,14 @@ namespace magpie
     // TODO(bob): Hack. Try to work from the build directory too.
     if (strstr(relativePath, "1/out") != 0)
     {
-      strncat(relativePath, "/../../..", PATH_MAX);
+      strncat(relativePath, "/../../..", length);
     }
 
     // Add library path.
-    strncat(relativePath, "/core/core.mag", PATH_MAX);
+    strncat(relativePath, "/core/core.mag", length);
 
     // Canonicalize the path.
     realpath(relativePath, path);
+    delete[] relativePath;
   }
 }
