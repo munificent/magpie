@@ -11,97 +11,48 @@ namespace magpie
   
   int Resolver::resolveBody(Compiler& compiler, Module& module, gc<Expr> body)
   {
-    Resolver resolver(compiler, module, true);
-    
-    // Create a top-level scope.
-    Scope scope(&resolver);
-    resolver.scope_ = &scope;
-    
-    // Create a slot for the result value.
-    resolver.makeLocal(SourcePos(NULL, 0, 0, 0, 0), String::create("(result)"));
-    resolver.resolve(body);
-    
-    scope.end();
-    
-    return resolver.maxLocals_;
+    return resolve(compiler, module, true, NULL, NULL, NULL, body);
   }
   
   void Resolver::resolve(Compiler& compiler, Module& module, DefExpr& method)
   {
-    Resolver resolver(compiler, module, false);
-
-    // Create a scope for the method body.
-    Scope scope(&resolver);
-    resolver.scope_ = &scope;
-    
-    // First, we allocate slots for the destructured parameters. We do this
-    // first so that all parameter slots for the method are contiguous at the
-    // beginning of the method's slot window. The caller will assume this when
-    // it sets up the arguments before the call.
-    resolver.allocateSlotsForParam(method.leftParam());
-    resolver.allocateSlotsForParam(method.rightParam());
-    resolver.allocateSlotsForParam(method.value());
-    
-    // Create a slot for the result value.
-    resolver.makeLocal(SourcePos(NULL, 0, 0, 0, 0), String::create("(result)"));
-    
-    // Now that we've got our slots set up, we can actually resolve the nested
-    // patterns for the param (if there are any).
-    resolver.destructureParam(method.leftParam());
-    resolver.destructureParam(method.rightParam());
-    resolver.destructureParam(method.value());
-    
-    resolver.resolve(method.body());
-    
-    scope.end();
-    
-    method.setMaxLocals(resolver.maxLocals_);
+    int slots = resolve(compiler, module, false, method.leftParam(),
+                         method.rightParam(), method.value(), method.body());
+    method.setMaxLocals(slots);
   }
 
-  void Resolver::resolve(Compiler& compiler, Module& module, FnExpr& function)
+  int Resolver::resolve(Compiler& compiler, Module& module, bool isBody,
+                        gc<Pattern> leftParam, gc<Pattern> rightParam,
+                        gc<Pattern> valueParam, gc<Expr> body)
   {
-    Resolver resolver(compiler, module, false);
-
-    // Create a scope for the function body.
-    Scope scope(&resolver);
-    resolver.scope_ = &scope;
-
-    // First, we allocate slots for the destructured parameters. We do this
-    // first so that all parameter slots for the function are contiguous at the
-    // beginning of the method's slot window. The caller will assume this when
-    // it sets up the arguments before the call.
-    resolver.allocateSlotsForParam(function.pattern());
-
-    // Create a slot for the result value.
-    resolver.makeLocal(SourcePos(NULL, 0, 0, 0, 0), String::create("(result)"));
-
-    // Now that we've got our slots set up, we can actually resolve the nested
-    // patterns for the param (if there are any).
-    resolver.destructureParam(function.pattern());
-
-    resolver.resolve(function.body());
-
-    scope.end();
-
-    function.setMaxLocals(resolver.maxLocals_);
-  }
-
-  void Resolver::resolve(Compiler& compiler, Module& module, AsyncExpr& expr)
-  {
-    Resolver resolver(compiler, module, false);
+    Resolver resolver(compiler, module, isBody);
 
     // Create a scope for the body.
     Scope scope(&resolver);
     resolver.scope_ = &scope;
 
+    // First, we allocate slots for the destructured parameters. We do this
+    // first so that all parameter slots for the method are contiguous at the
+    // beginning of the method's slot window. The caller will assume this when
+    // it sets up the arguments before the call.
+    resolver.allocateSlotsForParam(leftParam);
+    resolver.allocateSlotsForParam(rightParam);
+    resolver.allocateSlotsForParam(valueParam);
+
     // Create a slot for the result value.
     resolver.makeLocal(SourcePos(NULL, 0, 0, 0, 0), String::create("(result)"));
 
-    resolver.resolve(expr.body());
+    // Now that we've got our slots set up, we can actually resolve the nested
+    // patterns for the param (if there are any).
+    resolver.destructureParam(leftParam);
+    resolver.destructureParam(rightParam);
+    resolver.destructureParam(valueParam);
+
+    resolver.resolve(body);
 
     scope.end();
 
-    expr.setMaxLocals(resolver.maxLocals_);
+    return resolver.maxLocals_;
   }
   
   void Resolver::allocateSlotsForParam(gc<Pattern> pattern)
@@ -250,8 +201,10 @@ namespace magpie
 
   void Resolver::visit(AsyncExpr& expr, int dummy)
   {
+    int slots = resolve(compiler_, module_, false, NULL, NULL, NULL,
+                        expr.body());
+    expr.setMaxLocals(slots);
     // TODO(bob): Handle upvars (closures).
-    Resolver::resolve(compiler_, module_, expr);
   }
 
   void Resolver::visit(BinaryOpExpr& expr, int dummy)
@@ -327,8 +280,10 @@ namespace magpie
   void Resolver::visit(FnExpr& expr, int dummy)
   {
     // Resolve the function itself.
+    int slots = resolve(compiler_, module_, false, NULL, expr.pattern(), NULL,
+                        expr.body());
+    expr.setMaxLocals(slots);
     // TODO(bob): Handle upvars (closures).
-    Resolver::resolve(compiler_, module_, expr);
   }
   
   void Resolver::visit(ForExpr& expr, int dummy)

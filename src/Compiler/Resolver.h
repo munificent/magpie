@@ -16,11 +16,13 @@ namespace magpie
     
   public:
     static int resolveBody(Compiler& compiler, Module& module, gc<Expr> body);
-    static void resolve(Compiler& compiler, Module& module, DefExpr& method);
-    static void resolve(Compiler& compiler, Module& module, FnExpr& function);
-    static void resolve(Compiler& compiler, Module& module, AsyncExpr& expr);
 
   private:
+    static void resolve(Compiler& compiler, Module& module, DefExpr& method);
+    static int resolve(Compiler& compiler, Module& module, bool isBody,
+                        gc<Pattern> leftParam, gc<Pattern> rightParam,
+                        gc<Pattern> valueParam, gc<Expr> body);
+
     Resolver(Compiler& compiler, Module& module, bool isModuleBody)
     : compiler_(compiler),
       module_(module),
