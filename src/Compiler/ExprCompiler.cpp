@@ -253,10 +253,7 @@ namespace magpie
     // TODO(bob): Handle closures.
     ExprCompiler compiler(compiler_);
     gc<Chunk> chunk = compiler.compile(module_, expr);
-
-    // TODO(bob): Instead of creating a function object here, chunks should
-    // have a separate array of sub-chunks.
-    int index = chunk_->addConstant(new FunctionObject(chunk));
+    int index = chunk_->addChunk(chunk);
 
     write(OP_ASYNC, index);
     // TODO(bob): What about dest?
@@ -357,10 +354,9 @@ namespace magpie
     // TODO(bob): Handle closures.
     ExprCompiler compiler(compiler_);
     gc<Chunk> chunk = compiler.compile(module_, expr);
+    int index = chunk_->addChunk(chunk);
 
-    int index = chunk_->addConstant(new FunctionObject(chunk));
-
-    write(OP_CONSTANT, index, dest);
+    write(OP_FUNCTION, index, dest);
     // TODO(bob): Write bytecode to load upvars.
   }
 

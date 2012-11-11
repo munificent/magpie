@@ -27,6 +27,18 @@ namespace magpie
     return constants_[index];
   }
 
+  int Chunk::addChunk(gc<Chunk> chunk)
+  {
+    chunks_.add(chunk);
+    return chunks_.count() - 1;
+  }
+
+  gc<Chunk> Chunk::getChunk(int index) const
+  {
+    ASSERT_INDEX(index, chunks_.count());
+    return chunks_[index];
+  }
+  
   void Chunk::debugTrace() const
   {
     using namespace std;
@@ -69,6 +81,10 @@ namespace magpie
         cout << "LIST            [" << GET_A(ins) << "..." << GET_B(ins) << "] -> " << GET_C(ins);
         break;
 
+      case OP_FUNCTION:
+        cout << "FUNCTION        " << GET_A(ins) << " -> " << GET_B(ins);
+        break;
+        
       case OP_ASYNC:
         cout << "ASYNC           " << GET_A(ins);
         break;

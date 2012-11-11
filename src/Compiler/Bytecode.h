@@ -46,8 +46,11 @@ namespace magpie
     // slot C.
     OP_LIST,
 
-    // Creates an async fiber. A is constant index of the function object for
-    // the fiber.
+    // Creates a function. A is constant index of the chunk for the body. Stores
+    // the result in slot B.
+    OP_FUNCTION,
+    
+    // Creates an async fiber. A is constant index of the chunk for the fiber.
     OP_ASYNC,
 
     // Destructures a record field. Slot A holds the record to destructure. B

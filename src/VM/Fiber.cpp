@@ -89,13 +89,16 @@ namespace magpie
           break;
         }
 
+        case OP_FUNCTION:
+        {
+          gc<Chunk> chunk = frame.chunk->getChunk(GET_A(ins));
+          store(frame, GET_B(ins), new FunctionObject(chunk));
+          break;
+        }
+          
         case OP_ASYNC:
         {
-          int index = GET_A(ins);
-          gc<Object> function = frame.chunk->getConstant(index);
-
-          gc<Fiber> fiber = new Fiber(vm_, function->asFunction()->chunk());
-          vm_.addFiber(fiber);
+          vm_.addFiber(new Fiber(vm_, frame.chunk->getChunk(GET_A(ins))));
           break;
         }
           

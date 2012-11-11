@@ -22,6 +22,7 @@ namespace magpie
     Chunk()
     : code_(),
       constants_(),
+      chunks_(),
       numSlots_(0)
     {}
 
@@ -33,6 +34,9 @@ namespace magpie
     int addConstant(gc<Object> constant);
     gc<Object> getConstant(int index) const;
 
+    int addChunk(gc<Chunk> chunk);
+    gc<Chunk> getChunk(int index) const;
+
     int numSlots() const { return numSlots_; }
 
     void debugTrace() const;
@@ -42,7 +46,13 @@ namespace magpie
 
   private:
     Array<instruction> code_;
+
+    // Constants that are defined and used within this chunk.
     Array<gc<Object> > constants_;
+
+    // Chunks of bytecode for nested functions and async blocks within this
+    // chunk.
+    Array<gc<Chunk> > chunks_;
 
     int numSlots_;
 
