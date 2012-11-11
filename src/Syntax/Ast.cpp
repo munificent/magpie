@@ -74,7 +74,15 @@ namespace magpie
   
   void DefClassExpr::trace(std::ostream& out) const
   {
-    out << "(defclass " << name_ << "\n";
+    out << "(defclass " << name_;
+
+    if (isNative_)
+    {
+      out << " native)";
+      return;
+    }
+
+    out << "\n";
     
     for (int i = 0; i < fields_.count(); i++)
     {

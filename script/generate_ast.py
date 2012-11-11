@@ -32,6 +32,7 @@ exprs = sorted({
         ('catches',     'Array<MatchClause>')],
     'DefClass': [
         ('name',        'gc<String>'),
+        ('isNative',    'bool'),
         ('fields',      'Array<gc<ClassField> >'),
         ('resolved*',   'ResolvedName'),
         ('synthesizedMethods*', 'Array<gc<DefExpr> >')],

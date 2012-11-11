@@ -107,6 +107,9 @@ namespace magpie
   {
     declareVariable(classExpr.pos(), classExpr.name(), module);
 
+    // Native classes have no fields or synthesized members.
+    if (classExpr.isNative()) return;
+
     // Synthesize the constructor and field accessors.
     Array<gc<DefExpr> > synthesizedMethods;
     synthesizedMethods.add(synthesizeConstructor(classExpr));

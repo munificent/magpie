@@ -385,9 +385,10 @@ private:
 class DefClassExpr : public Expr
 {
 public:
-  DefClassExpr(const SourcePos& pos, gc<String> name, const Array<gc<ClassField> >& fields)
+  DefClassExpr(const SourcePos& pos, gc<String> name, bool isNative, const Array<gc<ClassField> >& fields)
   : Expr(pos),
     name_(name),
+    isNative_(isNative),
     fields_(fields),
     resolved_(),
     synthesizedMethods_()
@@ -401,6 +402,7 @@ public:
   virtual DefClassExpr* asDefClassExpr() { return this; }
 
   gc<String> name() const { return name_; }
+  bool isNative() const { return isNative_; }
   const Array<gc<ClassField> >& fields() const { return fields_; }
   ResolvedName resolved() const { return resolved_; }
   void setResolved(ResolvedName resolved) { resolved_ = resolved; }
@@ -418,6 +420,7 @@ public:
 
 private:
   gc<String> name_;
+  bool isNative_;
   Array<gc<ClassField> > fields_;
   ResolvedName resolved_;
   Array<gc<DefExpr> > synthesizedMethods_;
