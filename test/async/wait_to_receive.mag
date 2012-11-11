@@ -1,5 +1,4 @@
-// TODO(bob): Should be 'new'.
-var channel = Channel make
+var channel = Channel new
 fn() // TODO(bob): Use "async" syntax.
     print("before send")
     channel send("sent value")

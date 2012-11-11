@@ -1,8 +1,7 @@
 defclass Bool
 end
 
-defclass Channel
-end
+defclass Channel native
 
 defclass Class
 end
@@ -71,8 +70,7 @@ def (false) toString "false"
 def (is Num) toString native "numToString"
 def (s is String) toString s
 
-// TODO(bob): "make" -> "new"
-def (== Channel) make native "channelNew"
+def (== Channel) new native "channelNew"
 def (is Channel) send(value) native "channelSend"
 def (is Channel) receive native "channelReceive"
 
