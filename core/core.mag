@@ -1,28 +1,12 @@
-defclass Bool
-end
-
+defclass Bool native
 defclass Channel native
-
-defclass Class
-end
-
-defclass Function
-end
-
-defclass List
-end
-
-defclass Nothing
-end
-
-defclass Num
-end
-
-defclass Record
-end
-
-defclass String
-end
+defclass Class native
+defclass Function native
+defclass List native
+defclass Nothing native
+defclass Num native
+defclass Record native
+defclass String native
 
 defclass NoMatchError
 end
