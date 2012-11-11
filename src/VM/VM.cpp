@@ -44,7 +44,6 @@ namespace magpie
     DEF_NATIVE(channelReceive);
     DEF_NATIVE(channelSend);
     DEF_NATIVE(functionCall);
-    DEF_NATIVE(functionRun);
     DEF_NATIVE(listAdd);
     DEF_NATIVE(listCount);
     DEF_NATIVE(listIndex);

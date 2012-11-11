@@ -61,9 +61,6 @@ def (is Channel) receive native "channelReceive"
 // TODO(bob): How should different argument patterns be handled?
 def (is Function) call native "functionCall"
 
-// TODO(bob): Temp!
-def (is Function) run native "functionRun"
-
 def (is List) add(item) native "listAdd"
 def (is List) count native "listCount"
 def (is List)[is Num] native "listIndex"

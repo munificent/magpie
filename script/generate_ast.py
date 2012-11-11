@@ -16,6 +16,9 @@ exprs = sorted({
     'Assign': [
         ('lvalue',      'gc<LValue>'),
         ('value',       'gc<Expr>')],
+    'Async': [
+        ('body',        'gc<Expr>'),
+        ('maxLocals*',  'int')],
     'BinaryOp': [
         ('left',        'gc<Expr>'),
         ('type',        'TokenType'),

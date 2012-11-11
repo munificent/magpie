@@ -1,9 +1,9 @@
 var channel = Channel new
-fn() // TODO(bob): Use "async" syntax.
+async
     print("before send")
     channel send("sent value")
     print("should not get here")
-end run
+end
 
 print("before receive")
 print(channel receive)

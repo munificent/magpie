@@ -18,6 +18,11 @@ namespace magpie
   {
     out << "(" << lvalue_ << " = " << value_ << ")";
   }
+
+  void AsyncExpr::trace(std::ostream& out) const
+  {
+    out << "(async " << body_ << ")";
+  }
   
   void BinaryOpExpr::trace(std::ostream& out) const
   {

@@ -30,7 +30,6 @@ namespace magpie
   NATIVE(channelReceive);
   NATIVE(channelSend);
   NATIVE(functionCall);
-  NATIVE(functionRun);
   NATIVE(listAdd);
   NATIVE(listCount);
   NATIVE(listIndex);

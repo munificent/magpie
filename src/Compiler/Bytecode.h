@@ -26,70 +26,74 @@ namespace magpie
     OP_MOVE = 0x01,
     
     // Loads the constant with index A into slot B.
-    OP_CONSTANT = 0x02,
+    OP_CONSTANT,
     
     // Loads the built-in value with index A (see VM::getBuiltIn()) into
     // slot B.
-    OP_BUILT_IN = 0x03,
+    OP_BUILT_IN,
     
     // Adds a method to a multimethod. A is the index of the multimethod to
     // specialize. B is the index of the method to add.
-    OP_METHOD = 0x04,
+    OP_METHOD,
     
     // Creates a record from fields on the stack. A is the slot of the first
     // field, with subsequent fields following on the stack. B is the index of
     // the record type (see VM::getRecordType()). Stores the record in slot C.
-    OP_RECORD = 0x05,
+    OP_RECORD,
     
     // Creates a list from elements on the stack. A is the slot of the first
     // element, B is the number of elements. The resulting list is placed in
     // slot C.
-    OP_LIST = 0x06,
-    
+    OP_LIST,
+
+    // Creates an async fiber. A is constant index of the function object for
+    // the fiber.
+    OP_ASYNC,
+
     // Destructures a record field. Slot A holds the record to destructure. B
     // is the symbol for the field (see VM::addSymbol()). Stores the field
     // value in slot C. If slot A does not have a record, or the record does
     // not have the expected field, throws a NoMatchError.
-    OP_GET_FIELD = 0x07,
+    OP_GET_FIELD,
     
     // Similar to OP_GET_FIELD. However, if the match fails, it does not throw.
     // Instead, the instruction following this one is required to be an OP_JUMP
     // containing the offset to jump to.
-    OP_TEST_FIELD = 0x08,
+    OP_TEST_FIELD,
 
     // Accesses a class field. A is the index of the field. This opcode should
     // only appear inside auto-generated methods because it assumes a certain
     // slot layout.
-    OP_GET_CLASS_FIELD = 0x09,
+    OP_GET_CLASS_FIELD,
 
     // Assigns a class field. A is the index of the field. This opcode should
     // only appear inside auto-generated methods because it assumes a certain
     // slot layout.
-    OP_SET_CLASS_FIELD = 0x0a,
+    OP_SET_CLASS_FIELD,
     
     // Loads a top-level variable from a module. A is the index of the module
     // in the VM's global module list. B is the index of the variable in that
     // module to load. Stores the value in slot C.
-    OP_GET_VAR = 0x0b,
+    OP_GET_VAR,
     
     // Sets a top-level variable. A is the index of the module in the VM's
     // global module list. B is the index of the variable in that module to set.
     // Slot C is the value to store.
-    OP_SET_VAR = 0x0c,
+    OP_SET_VAR,
 
-    OP_EQUAL         = 0x0d, // R(C) = RC(A) == RC(B)
-    OP_NOT           = 0x0e, // R(C) = RC(A) + RC(B)
+    OP_EQUAL, // R(C) = RC(A) == RC(B)
+    OP_NOT, // R(C) = RC(A) + RC(B)
     
     // Tests if the value in slot A is an instance of the type in slot B.
     // Stores the result in slot C.
-    OP_IS = 0x0f,
+    OP_IS,
     
     // Performs an unconditional jump. If A is 1, then the instruction pointer
     // is moved forward by B. Otherwise, it is moved back by that amount.
-    OP_JUMP = 0x10,
+    OP_JUMP,
     
-    OP_JUMP_IF_FALSE = 0x11, // R(A) = test slot, B = offset
-    OP_JUMP_IF_TRUE  = 0x12, // R(A) = test slot, B = offset
+    OP_JUMP_IF_FALSE, // R(A) = test slot, B = offset
+    OP_JUMP_IF_TRUE, // R(A) = test slot, B = offset
     
     // Invokes a top-level method. The index of the method in the global table
     // is A. The arguments to the method are laid out in sequential slots
@@ -97,30 +101,30 @@ namespace magpie
     // signature, so is not explicitly passed. The result will be stored in
     // slot C when the method returns.
     // TODO(bob): Tweak operands so that we can support more than 256 methods.
-    OP_CALL = 0x13,
+    OP_CALL,
     
     // Invokes a native method. The index of the native is A. The result of the
     // call will be placed into register C. Assumes the arguments to the
     // native are the top of the current call frame's stack.
-    OP_NATIVE = 0x14,
+    OP_NATIVE,
     
     // Exits the current method, returning slot A.
-    OP_RETURN = 0x15,
+    OP_RETURN,
     
     // Throws the error object in slot A.
-    OP_THROW = 0x16,
+    OP_THROW,
     
     // Registers a new catch handler. If an error is thrown before the
     // subsequent OP_EXIT_TRY, then execution will jump to the associated catch
     // block. Its code location is the location of the OP_ENTER_TRY + A.
-    OP_ENTER_TRY = 0x17,
+    OP_ENTER_TRY,
     
     // Discards the previous OP_ENTER_TRY handler. This occurs when execution
     // has proceeded past the block containing a catch clause.
-    OP_EXIT_TRY = 0x18,
+    OP_EXIT_TRY,
     
     // Throws a NoMatchError if slot A is false.
-    OP_TEST_MATCH = 0x19
+    OP_TEST_MATCH
   };
   
   enum BuiltIn

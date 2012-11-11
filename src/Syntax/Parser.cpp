@@ -42,6 +42,7 @@ namespace magpie
 
     // Keywords.
     { NULL,             &Parser::and_, PRECEDENCE_LOGICAL },           // TOKEN_AND
+    { NULL,             NULL, -1 },                                    // TOKEN_ASYNC
     { NULL,             NULL, -1 },                                    // TOKEN_CASE
     { NULL,             NULL, -1 },                                    // TOKEN_CATCH
     { NULL,             NULL, -1 },                                    // TOKEN_DEF
@@ -348,6 +349,12 @@ namespace magpie
   gc<Expr> Parser::statementLike()
   {
     gc<Token> start = current();
+
+    if (match(TOKEN_ASYNC))
+    {
+      gc<Expr> body = parseBlock();
+      return new AsyncExpr(spanFrom(start), body);
+    }
 
     if (match(TOKEN_DEF))
     {

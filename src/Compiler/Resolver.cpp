@@ -7,6 +7,8 @@
 
 namespace magpie
 {
+  // TODO(bob): There is a lot of copy/paste in these methods. Should unify.
+  
   int Resolver::resolveBody(Compiler& compiler, Module& module, gc<Expr> body)
   {
     Resolver resolver(compiler, module, true);
@@ -84,6 +86,24 @@ namespace magpie
     function.setMaxLocals(resolver.maxLocals_);
   }
 
+  void Resolver::resolve(Compiler& compiler, Module& module, AsyncExpr& expr)
+  {
+    Resolver resolver(compiler, module, false);
+
+    // Create a scope for the body.
+    Scope scope(&resolver);
+    resolver.scope_ = &scope;
+
+    // Create a slot for the result value.
+    resolver.makeLocal(SourcePos(NULL, 0, 0, 0, 0), String::create("(result)"));
+
+    resolver.resolve(expr.body());
+
+    scope.end();
+
+    expr.setMaxLocals(resolver.maxLocals_);
+  }
+  
   void Resolver::allocateSlotsForParam(gc<Pattern> pattern)
   {
     // No parameter so do nothing.
@@ -221,13 +241,19 @@ namespace magpie
     resolve(expr.left());
     resolve(expr.right());
   }
-  
+
   void Resolver::visit(AssignExpr& expr, int dummy)
   {
     resolve(expr.value());
     expr.lvalue()->accept(*this, dummy);
   }
-  
+
+  void Resolver::visit(AsyncExpr& expr, int dummy)
+  {
+    // TODO(bob): Handle upvars (closures).
+    Resolver::resolve(compiler_, module_, expr);
+  }
+
   void Resolver::visit(BinaryOpExpr& expr, int dummy)
   {
     resolve(expr.left());

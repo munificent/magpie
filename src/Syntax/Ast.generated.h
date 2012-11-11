@@ -3,6 +3,7 @@
 
 class AndExpr;
 class AssignExpr;
+class AsyncExpr;
 class BinaryOpExpr;
 class BoolExpr;
 class CallExpr;
@@ -48,6 +49,7 @@ public:
 
   virtual void visit(AndExpr& node, int arg) = 0;
   virtual void visit(AssignExpr& node, int arg) = 0;
+  virtual void visit(AsyncExpr& node, int arg) = 0;
   virtual void visit(BinaryOpExpr& node, int arg) = 0;
   virtual void visit(BoolExpr& node, int arg) = 0;
   virtual void visit(CallExpr& node, int arg) = 0;
@@ -99,6 +101,7 @@ public:
   // Dynamic casts.
   virtual AndExpr* asAndExpr() { return NULL; }
   virtual AssignExpr* asAssignExpr() { return NULL; }
+  virtual AsyncExpr* asAsyncExpr() { return NULL; }
   virtual BinaryOpExpr* asBinaryOpExpr() { return NULL; }
   virtual BoolExpr* asBoolExpr() { return NULL; }
   virtual CallExpr* asCallExpr() { return NULL; }
@@ -198,6 +201,39 @@ private:
   gc<LValue> lvalue_;
   gc<Expr> value_;
   NO_COPY(AssignExpr);
+};
+
+class AsyncExpr : public Expr
+{
+public:
+  AsyncExpr(const SourcePos& pos, gc<Expr> body)
+  : Expr(pos),
+    body_(body),
+    maxLocals_(-1)
+  {}
+
+  virtual void accept(ExprVisitor& visitor, int arg)
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual AsyncExpr* asAsyncExpr() { return this; }
+
+  gc<Expr> body() const { return body_; }
+  int maxLocals() const { return maxLocals_; }
+  void setMaxLocals(int maxLocals) { maxLocals_ = maxLocals; }
+
+  virtual void reach()
+  {
+    body_.reach();
+  }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  gc<Expr> body_;
+  int maxLocals_;
+  NO_COPY(AsyncExpr);
 };
 
 class BinaryOpExpr : public Expr

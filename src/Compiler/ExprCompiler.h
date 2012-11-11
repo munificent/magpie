@@ -31,6 +31,9 @@ namespace magpie
     // Compiles [function] to bytecode.
     gc<Chunk> compile(Module* module, FnExpr& function);
 
+    // Compiles [expr] to bytecode.
+    gc<Chunk> compile(Module* module, AsyncExpr& expr);
+
     void compileParam(PatternCompiler& compiler, gc<Pattern> param, int& slot);
     void compileParamField(PatternCompiler& compiler, gc<Pattern> param,
                            int slot);
@@ -41,6 +44,7 @@ namespace magpie
 
     virtual void visit(AndExpr& expr, int dest);
     virtual void visit(AssignExpr& expr, int dest);
+    virtual void visit(AsyncExpr& expr, int dest);
     virtual void visit(BinaryOpExpr& expr, int dest);
     virtual void visit(BoolExpr& expr, int dest);
     virtual void visit(CallExpr& expr, int dest);

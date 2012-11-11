@@ -296,6 +296,7 @@ namespace magpie
     // See if it's a reserved word.
     TokenType type = TOKEN_NAME;
     if      (*text == "and"     ) type = TOKEN_AND;
+    else if (*text == "async"   ) type = TOKEN_ASYNC;
     else if (*text == "case"    ) type = TOKEN_CASE;
     else if (*text == "catch"   ) type = TOKEN_CATCH;
     else if (*text == "def"     ) type = TOKEN_DEF;

@@ -17,6 +17,8 @@ namespace magpie
     maxSlots_(0)
   {}
 
+  // TODO(bob): There's a lot of overlap between these methods. Unify.
+
   gc<Chunk> ExprCompiler::compileBody(Module* module, gc<Expr> body)
   {
     module_ = module;
@@ -120,8 +122,6 @@ namespace magpie
     compile(function.body(), numParamSlots);
     write(OP_RETURN, numParamSlots);
 
-    compiler.endJumps();
-
     ASSERT(numTemps_ == 0, "Should not have any temps left after a method "
            "is compiled.");
 
@@ -129,6 +129,31 @@ namespace magpie
     return chunk_;
   }
 
+  gc<Chunk> ExprCompiler::compile(Module* module, AsyncExpr& expr)
+  {
+    module_ = module;
+
+    // Reserve slots up front for all of the locals. This ensures that
+    // temps will always be after locals.
+    // TODO(bob): Using max here isn't optimal. Ideally a given temp only
+    // needs to be after the locals that are in scope during the duration
+    // of that temp. But calculating that is a bit hairy. For now, until we
+    // have a more advanced compiler, this is a simple solution.
+    numLocals_ = expr.maxLocals();
+    maxSlots_ = numLocals_;
+
+    // TODO(bob): Don't actually need a result slot for this.
+    // The result slot is the first slot. See Resolver::resolveBody().
+    compile(expr.body(), 0);
+    write(OP_RETURN, 0);
+
+    ASSERT(numTemps_ == 0, "Should not have any temps left after a method "
+           "is compiled.");
+
+    chunk_->setCode(code_, maxSlots_);
+    return chunk_;
+  }
+  
   void ExprCompiler::compileParam(PatternCompiler& compiler,
                                     gc<Pattern> param, int& slot)
   {
@@ -221,6 +246,21 @@ namespace magpie
 
     // Now assign it to the left-hand side.
     expr.lvalue()->accept(*this, dest);
+  }
+
+  void ExprCompiler::visit(AsyncExpr& expr, int dest)
+  {
+    // TODO(bob): Handle closures.
+    ExprCompiler compiler(compiler_);
+    gc<Chunk> chunk = compiler.compile(module_, expr);
+
+    // TODO(bob): Instead of creating a function object here, chunks should
+    // have a separate array of sub-chunks.
+    int index = chunk_->addConstant(new FunctionObject(chunk));
+
+    write(OP_ASYNC, index);
+    // TODO(bob): What about dest?
+    // TODO(bob): Write bytecode to load upvars.
   }
 
   void ExprCompiler::visit(BinaryOpExpr& expr, int dest)

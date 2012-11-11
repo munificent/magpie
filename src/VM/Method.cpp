@@ -68,7 +68,11 @@ namespace magpie
       case OP_LIST:
         cout << "LIST            [" << GET_A(ins) << "..." << GET_B(ins) << "] -> " << GET_C(ins);
         break;
-        
+
+      case OP_ASYNC:
+        cout << "ASYNC           " << GET_A(ins);
+        break;
+
       case OP_GET_FIELD:
         cout << "GET_FIELD       " << GET_A(ins) << "[" << GET_B(ins) << "] -> " << GET_C(ins);
         break;

@@ -47,6 +47,7 @@ namespace magpie
 
         // Keywords.
       case TOKEN_AND:           return "and";
+      case TOKEN_ASYNC:         return "async";
       case TOKEN_CASE:          return "case";
       case TOKEN_CATCH:         return "catch";
       case TOKEN_DEF:           return "def";
