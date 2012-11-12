@@ -21,7 +21,7 @@ namespace magpie
 
   private:
     ExprCompiler(Compiler& compiler);
-
+    
     gc<Chunk> compileBody(Module* module, gc<Expr> body);
 
     // Compiles [multimethod] to bytecode. Assumes the methods have already
@@ -33,6 +33,9 @@ namespace magpie
 
     // Compiles [expr] to bytecode.
     gc<Chunk> compile(Module* module, AsyncExpr& expr);
+
+    void compile(Module* module, int maxLocals, gc<Pattern> leftParam,
+                 gc<Pattern> rightParam, gc<Pattern> valueParam, gc<Expr> body);
 
     void compileParam(PatternCompiler& compiler, gc<Pattern> param, int& slot);
     void compileParamField(PatternCompiler& compiler, gc<Pattern> param,

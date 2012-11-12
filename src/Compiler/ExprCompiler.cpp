@@ -17,24 +17,10 @@ namespace magpie
     maxSlots_(0)
   {}
 
-  // TODO(bob): There's a lot of overlap between these methods. Unify.
-
   gc<Chunk> ExprCompiler::compileBody(Module* module, gc<Expr> body)
   {
-    module_ = module;
-
-    // Reserve slots up front for all of the locals. This ensures that temps
-    // will always be after locals.
-    // TODO(bob): Using max here isn't optimal. Ideally a given temp only needs
-    // to be after the locals that are in scope during the duration of that
-    // temp. But calculating that is a bit hairy. For now, until we have a more
-    // advanced compiler, this is a simple solution.
-    numLocals_ = Resolver::resolveBody(compiler_, *module_, body);
-    maxSlots_ = numLocals_;
-
-    // The result slot is the first slot. See Resolver::resolveBody().
-    compile(body, 0);
-    write(OP_RETURN, 0);
+    int maxLocals = Resolver::resolveBody(compiler_, *module, body);
+    compile(module, maxLocals, NULL, NULL, NULL, body);
 
     chunk_->setCode(code_, maxSlots_);
     return chunk_;
@@ -53,38 +39,10 @@ namespace magpie
     // - Throw AmbiguousMethodError when appropriate.
     for (int i = 0; i < multimethod.methods().count(); i++)
     {
-      PatternCompiler compiler(*this, true);
-
       gc<DefExpr> method = multimethod.methods()[i]->def();
-      module_ = multimethod.methods()[i]->module();
-
-      // Reserve slots up front for all of the locals. This ensures that
-      // temps will always be after locals.
-      // TODO(bob): Using max here isn't optimal. Ideally a given temp only
-      // needs to be after the locals that are in scope during the duration
-      // of that temp. But calculating that is a bit hairy. For now, until we
-      // have a more advanced compiler, this is a simple solution.
-      numLocals_ = method->maxLocals();
-      maxSlots_ = MAX(maxSlots_, numLocals_);
-
-      // Track the slots used for the arguments and result. This code here
-      // must be kept carefully in sync with the similar prelude code in
-      // Resolver.
-      int numParamSlots = 0;
-
-      // Evaluate the method's parameter patterns.
-      compileParam(compiler, method->leftParam(), numParamSlots);
-      compileParam(compiler, method->rightParam(), numParamSlots);
-      compileParam(compiler, method->value(), numParamSlots);
-
-      // The result slot is just after the param slots.
-      compile(method->body(), numParamSlots);
-      write(OP_RETURN, numParamSlots);
-
-      compiler.endJumps();
-
-      ASSERT(numTemps_ == 0, "Should not have any temps left after a method "
-                             "is compiled.");
+      compile(multimethod.methods()[i]->module(), method->maxLocals(),
+              method->leftParam(), method->rightParam(), method->value(),
+              method->body());
     }
 
     // If we get here, all methods failed to match, so throw a NoMethodError.
@@ -97,39 +55,24 @@ namespace magpie
 
   gc<Chunk> ExprCompiler::compile(Module* module, FnExpr& function)
   {
-    module_ = module;
-
-    PatternCompiler compiler(*this, true);
-
-    // Reserve slots up front for all of the locals. This ensures that
-    // temps will always be after locals.
-    // TODO(bob): Using max here isn't optimal. Ideally a given temp only
-    // needs to be after the locals that are in scope during the duration
-    // of that temp. But calculating that is a bit hairy. For now, until we
-    // have a more advanced compiler, this is a simple solution.
-    numLocals_ = function.maxLocals();
-    maxSlots_ = numLocals_;
-
-    // Track the slots used for the arguments and result. This code here
-    // must be kept carefully in sync with the similar prelude code in
-    // Resolver.
-    int numParamSlots = 0;
-
-    // Evaluate the method's parameter patterns.
-    compileParam(compiler, function.pattern(), numParamSlots);
-
-    // The result slot is just after the param slots.
-    compile(function.body(), numParamSlots);
-    write(OP_RETURN, numParamSlots);
-
-    ASSERT(numTemps_ == 0, "Should not have any temps left after a method "
-           "is compiled.");
+    compile(module, function.maxLocals(), NULL, function.pattern(), NULL,
+            function.body());
 
     chunk_->setCode(code_, maxSlots_);
     return chunk_;
   }
 
   gc<Chunk> ExprCompiler::compile(Module* module, AsyncExpr& expr)
+  {
+    compile(module, expr.maxLocals(), NULL, NULL, NULL, expr.body());
+
+    chunk_->setCode(code_, maxSlots_);
+    return chunk_;
+  }
+
+  void ExprCompiler::compile(Module* module, int maxLocals,
+                             gc<Pattern> leftParam, gc<Pattern> rightParam,
+                             gc<Pattern> valueParam, gc<Expr> body)
   {
     module_ = module;
 
@@ -139,19 +82,29 @@ namespace magpie
     // needs to be after the locals that are in scope during the duration
     // of that temp. But calculating that is a bit hairy. For now, until we
     // have a more advanced compiler, this is a simple solution.
-    numLocals_ = expr.maxLocals();
-    maxSlots_ = numLocals_;
+    numLocals_ = maxLocals;
+    maxSlots_ = MAX(maxSlots_, numLocals_);
 
-    // TODO(bob): Don't actually need a result slot for this.
-    // The result slot is the first slot. See Resolver::resolveBody().
-    compile(expr.body(), 0);
-    write(OP_RETURN, 0);
+    PatternCompiler compiler(*this, true);
 
-    ASSERT(numTemps_ == 0, "Should not have any temps left after a method "
-           "is compiled.");
+    // Track the slots used for the arguments and result. This code here
+    // must be kept carefully in sync with the similar prelude code in
+    // Resolver.
+    int numParamSlots = 0;
 
-    chunk_->setCode(code_, maxSlots_);
-    return chunk_;
+    // Evaluate the method's parameter patterns.
+    compileParam(compiler, leftParam, numParamSlots);
+    compileParam(compiler, rightParam, numParamSlots);
+    compileParam(compiler, valueParam, numParamSlots);
+
+    // The result slot is just after the param slots.
+    compile(body, numParamSlots);
+
+    write(OP_RETURN, numParamSlots);
+
+    ASSERT(numTemps_ == 0, "Should not have any temps left.");
+
+    compiler.endJumps();
   }
   
   void ExprCompiler::compileParam(PatternCompiler& compiler,
