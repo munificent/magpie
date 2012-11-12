@@ -365,7 +365,26 @@ namespace magpie
       caseScope.end();
     }
   }
-  
+
+  bool Resolver::resolveTopLevelName(Module& module, NameExpr& expr)
+  {
+    for (int i = 0; i < module.numVariables(); i++)
+    {
+      // TODO(bob): Handle private names.
+      if (*module.getVariableName(i) == *expr.name())
+      {
+        // Found it.
+
+        // Get the module's real index.
+        int moduleIndex = compiler_.getModuleIndex(module);
+        expr.setResolved(ResolvedName(moduleIndex, i));
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   void Resolver::visit(NameExpr& expr, int dummy)
   {
     // See if it's a local variable.
@@ -376,41 +395,15 @@ namespace magpie
       return;
     }
 
-    // See if it's a top-level name.
-    // TODO(bob): This is copied from below. Pull out into separate fn.
-    for (int j = 0; j < module_.numVariables(); j++)
-    {
-      if (*module_.getVariableName(j) == *expr.name())
-      {
-        // Found it.
-        
-        // Get the module's real index.
-        int module = compiler_.getModuleIndex(module_);
-        expr.setResolved(ResolvedName(module, j));
-        return;
-      }
-    }
-    
+    // See if it's a top-level name in this module.
+    if (resolveTopLevelName(module_, expr)) return;
+
     // See if it's an imported name. Walk through the modules this one imports.
     // TODO(bob): Need to handle name collisions.
     for (int i = 0; i < module_.imports().count(); i++)
     {
       Module* import = module_.imports()[i];
-
-      // TODO(bob): Handle private names.
-      // Walk through the names it exports.
-      for (int j = 0; j < import->numVariables(); j++)
-      {
-        if (*import->getVariableName(j) == *expr.name())
-        {
-          // Found it.
-          
-          // Get the module's real index.
-          int module = compiler_.getModuleIndex(*import);
-          expr.setResolved(ResolvedName(module, j));
-          return;
-        }
-      }
+      if (resolveTopLevelName(*import, expr)) return;
     }
 
     compiler_.reporter().error(expr.pos(),

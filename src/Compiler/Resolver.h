@@ -43,7 +43,9 @@ namespace magpie
     void resolveParam(gc<Pattern> pattern);
     void resolve(gc<Expr> expr);
     void resolveCall(CallExpr& expr, bool isLValue);
-    
+
+    bool resolveTopLevelName(Module& module, NameExpr& expr);
+
     // Creates a new local variable with the given name.
     int makeLocal(const SourcePos& pos, gc<String> name);
         
