@@ -8,7 +8,9 @@
 namespace magpie
 {
   class CatchFrame;
+  class FunctionObject;
   class Object;
+  class Upvar;
   class VM;
 
   // The reason Fiber::run() returned.
@@ -49,7 +51,7 @@ namespace magpie
   class Fiber : public Managed
   {
   public:
-    Fiber(VM& vm, gc<Chunk> chunk);
+    Fiber(VM& vm, gc<FunctionObject> function);
     
     FiberResult run(gc<Object>& result);
     void storeReturn(gc<Object> value);
@@ -62,23 +64,23 @@ namespace magpie
     {
       // So that we can use CallFrames in an Array<T> by value.
       CallFrame()
-      : chunk(),
+      : function(),
         ip(0),
         stackStart(0)
       {}
       
-      CallFrame(gc<Chunk> chunk, int stackStart)
-      : chunk(chunk),
+      CallFrame(gc<FunctionObject> function, int stackStart)
+      : function(function),
         ip(0),
         stackStart(stackStart)
       {}
       
-      gc<Chunk>   chunk;
-      int         ip;
-      int         stackStart;
+      gc<FunctionObject> function;
+      int                ip;
+      int                stackStart;
     };
     
-    void call(gc<Chunk> chunk, int stackStart);
+    void call(gc<FunctionObject> function, int stackStart);
     
     // Loads a slot for the given callframe.
     inline gc<Object> load(const CallFrame& frame, int slot)
@@ -95,8 +97,18 @@ namespace magpie
     // Throws the given error object. Returns true if a catch handler was found
     // or false if the error unwound the entire callstack.
     bool throwError(gc<Object> error);
-    
+
     gc<Object> loadSlotOrConstant(const CallFrame& frame, int index);
+
+    gc<FunctionObject> loadFunction(CallFrame& frame, int chunkSlot);
+
+    // Gets the number of slots that are currently active on the stack.
+    int numActiveSlots() const;
+
+    // Closes any open upvars that are now past the end of the stack.
+    void closeUpvars();
+
+    gc<Upvar> captureUpvar(int slot);
 
     static int          nextId_;
     
@@ -105,10 +117,52 @@ namespace magpie
     Array<gc<Object> >  stack_;
     Array<CallFrame>    callFrames_;
     gc<CatchFrame>      nearestCatch_;
-    
+    gc<Upvar>           openUpvars_;
+
     NO_COPY(Fiber);
   };
-  
+
+  // A closure: a reference to a variable declared in an outer scope.
+  class Upvar : public Managed
+  {
+  public:
+    Upvar(int slot)
+    : slot_(slot)
+    {}
+
+    int slot() const
+    {
+      ASSERT(value_.isNull(), "Cannot get the slot for a closed upvar.");
+      return slot_;
+    }
+
+    gc<Upvar> next() { return next_; }
+    void setNext(gc<Upvar> next) { next_ = next; }
+
+    // Gets the value of the variable that the upvar is currently referencing.
+    gc<Object> getValue(Array<gc<Object> >& stack);
+
+    // Sets the value of the variable the upvar is referencing.
+    void setValue(Array<gc<Object> >& stack, gc<Object> value);
+
+    // Captures the variable from the stack and closese over it.
+    gc<Upvar> close(Array<gc<Object> >& stack);
+    
+  private:
+    // The index of the slot holding the variable. Will only be valid if the
+    // upvar hasn't been closed yet.
+    int slot_;
+
+    // If the upvar is closed, this will be the closed over variable's value.
+    // Otherwise, it will be null.
+    gc<Object> value_;
+
+    // Closed upvars are stored in a linked list accessible by the fiber. This
+    // ensures that multiple references to the same closed-over variable can
+    // correctly reuse the same upvar.
+    gc<Upvar> next_;
+  };
+
   // Describes a block containing a "catch" clause that is currently on the
   // stack. When an error is thrown, this is used to jump to the appropriate
   // catch handler(s).

@@ -9,23 +9,26 @@ namespace magpie
   class Compiler;
   class Scope;
   class VM;
-  
+
   class Resolver : public ExprVisitor, private LValueVisitor
   {
     friend class Scope;
-    
+
   public:
     static int resolveBody(Compiler& compiler, Module& module, gc<Expr> body);
 
   private:
     static void resolve(Compiler& compiler, Module& module, DefExpr& method);
-    static int resolve(Compiler& compiler, Module& module, bool isBody,
-                        gc<Pattern> leftParam, gc<Pattern> rightParam,
-                        gc<Pattern> valueParam, gc<Expr> body);
+    static int resolve(Compiler& compiler, Module& module, Resolver* parent,
+                       ResolvedProcedure* procedure, gc<Pattern> leftParam,
+                       gc<Pattern> rightParam, gc<Pattern> valueParam,
+                       gc<Expr> body);
 
-    Resolver(Compiler& compiler, Module& module, bool isModuleBody)
+    Resolver(Compiler& compiler, Module& module, Resolver* parent,
+             bool isModuleBody)
     : compiler_(compiler),
       module_(module),
+      parent_(parent),
       isModuleBody_(isModuleBody),
       locals_(),
       maxLocals_(0),
@@ -44,6 +47,11 @@ namespace magpie
     void resolve(gc<Expr> expr);
     void resolveCall(CallExpr& expr, bool isLValue);
 
+    // Attempts to resolve a name defined in a local variable scope. Returns
+    // the index of the upvar in the parent scope if found, or -1 if the name
+    // could not be resolved.
+    int resolveClosure(Resolver* resolver, NameExpr& expr);
+    
     bool resolveTopLevelName(Module& module, NameExpr& expr);
 
     // Creates a new local variable with the given name.
@@ -87,8 +95,11 @@ namespace magpie
     virtual void visit(WildcardLValue& lvalue, int dummy);
 
     Compiler& compiler_;
-
     Module& module_;
+
+    // If this resolver is resolving a function or async block, this will point
+    // to the resolver for the containing expression. Used to resolve closures.
+    Resolver* parent_;
     
     // True if this resolver is resolving top-level expressions in a module
     // body. False if it's resolving a method body.
@@ -108,6 +119,8 @@ namespace magpie
     
     // The current inner-most local variable scope.
     Scope* scope_;
+
+    Array<Closure> closures_;
     
     NO_COPY(Resolver);
   };

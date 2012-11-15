@@ -11,21 +11,21 @@ namespace magpie
   
   int Resolver::resolveBody(Compiler& compiler, Module& module, gc<Expr> body)
   {
-    return resolve(compiler, module, true, NULL, NULL, NULL, body);
+    return resolve(compiler, module, NULL, NULL, NULL, NULL, NULL, body);
   }
   
   void Resolver::resolve(Compiler& compiler, Module& module, DefExpr& method)
   {
-    int slots = resolve(compiler, module, false, method.leftParam(),
-                         method.rightParam(), method.value(), method.body());
-    method.setMaxLocals(slots);
+    resolve(compiler, module, NULL, &method.resolved(), method.leftParam(),
+            method.rightParam(), method.value(), method.body());
   }
 
-  int Resolver::resolve(Compiler& compiler, Module& module, bool isBody,
+  int Resolver::resolve(Compiler& compiler, Module& module, Resolver* parent,
+                        ResolvedProcedure* procedure,
                         gc<Pattern> leftParam, gc<Pattern> rightParam,
                         gc<Pattern> valueParam, gc<Expr> body)
   {
-    Resolver resolver(compiler, module, isBody);
+    Resolver resolver(compiler, module, parent, procedure == NULL);
 
     // Create a scope for the body.
     Scope scope(&resolver);
@@ -51,6 +51,13 @@ namespace magpie
     resolver.resolve(body);
 
     scope.end();
+
+    if (procedure != NULL)
+    {
+      // TODO(bob): Copying this stuff here is lame.
+      procedure->setMaxLocals(resolver.maxLocals_);
+      procedure->closures().addAll(resolver.closures_);
+    }
 
     return resolver.maxLocals_;
   }
@@ -165,6 +172,48 @@ namespace magpie
     expr.setResolved(method);
   }
 
+  int Resolver::resolveClosure(Resolver* resolver, NameExpr& expr)
+  {
+    Resolver* parent = resolver->parent_;
+    
+    // If we walked all the way up the enclosing definitions and didn't find it,
+    // then fail.
+    if (parent == NULL) return -1;
+
+    // See if it's defined in the immediately enclosing scope.
+    bool isLocal = true;
+    int slot = parent->locals_.lastIndexOf(expr.name());
+    if (slot == -1)
+    {
+      // Not found in the parent, so recurse to the enclosing scope.
+      slot = resolveClosure(resolver->parent_, expr);
+      if (slot == -1) return -1;
+    }
+
+    // Capture the parent's upvar. (In other words, flatten the closure.)
+    resolver->closures_.add(Closure(isLocal, slot));
+    return resolver->closures_.count() - 1;
+  }
+
+  bool Resolver::resolveTopLevelName(Module& module, NameExpr& expr)
+  {
+    for (int i = 0; i < module.numVariables(); i++)
+    {
+      // TODO(bob): Handle private names.
+      if (*module.getVariableName(i) == *expr.name())
+      {
+        // Found it.
+
+        // Get the module's real index.
+        int moduleIndex = compiler_.getModuleIndex(module);
+        expr.setResolved(ResolvedName(moduleIndex, i));
+        return true;
+      }
+    }
+
+    return false;
+  }
+  
   int Resolver::makeLocal(const SourcePos& pos, gc<String> name)
   {
     // Make sure there isn't already a local variable with this name in the
@@ -201,10 +250,7 @@ namespace magpie
 
   void Resolver::visit(AsyncExpr& expr, int dummy)
   {
-    int slots = resolve(compiler_, module_, false, NULL, NULL, NULL,
-                        expr.body());
-    expr.setMaxLocals(slots);
-    // TODO(bob): Handle upvars (closures).
+    resolve(compiler_, module_, this, false, NULL, NULL, NULL, expr.body());
   }
 
   void Resolver::visit(BinaryOpExpr& expr, int dummy)
@@ -248,7 +294,7 @@ namespace magpie
   void Resolver::visit(DefExpr& expr, int dummy)
   {
     // Resolve the method itself.
-    Resolver::resolve(compiler_, module_, expr);
+    resolve(compiler_, module_, expr);
   }
   
   void Resolver::visit(DefClassExpr& expr, int dummy)
@@ -280,10 +326,8 @@ namespace magpie
   void Resolver::visit(FnExpr& expr, int dummy)
   {
     // Resolve the function itself.
-    int slots = resolve(compiler_, module_, false, NULL, expr.pattern(), NULL,
-                        expr.body());
-    expr.setMaxLocals(slots);
-    // TODO(bob): Handle upvars (closures).
+    resolve(compiler_, module_, this, &expr.resolved(),
+            NULL, expr.pattern(), NULL, expr.body());
   }
   
   void Resolver::visit(ForExpr& expr, int dummy)
@@ -366,32 +410,21 @@ namespace magpie
     }
   }
 
-  bool Resolver::resolveTopLevelName(Module& module, NameExpr& expr)
-  {
-    for (int i = 0; i < module.numVariables(); i++)
-    {
-      // TODO(bob): Handle private names.
-      if (*module.getVariableName(i) == *expr.name())
-      {
-        // Found it.
-
-        // Get the module's real index.
-        int moduleIndex = compiler_.getModuleIndex(module);
-        expr.setResolved(ResolvedName(moduleIndex, i));
-        return true;
-      }
-    }
-
-    return false;
-  }
-
   void Resolver::visit(NameExpr& expr, int dummy)
   {
-    // See if it's a local variable.
+    // See if it's defined in this scope.
     int local = locals_.lastIndexOf(expr.name());
     if (local != -1)
     {
       expr.setResolved(ResolvedName(local));
+      return;
+    }
+
+    // See if it's a closure.
+    int upvar = resolveClosure(this, expr);
+    if (upvar != -1)
+    {
+      expr.setResolved(ResolvedName(NAME_CLOSURE, upvar));
       return;
     }
 
@@ -524,13 +557,15 @@ namespace magpie
     int slot = locals_.lastIndexOf(lvalue.name());
     
     // TODO(bob): Report error if variable is immutable.
-    
+
     if (slot != -1)
     {
       lvalue.setResolved(ResolvedName(slot));
       return;
     }
 
+    // TODO(bob): Handle closures.
+    
     // Not a local variable. See if it's a top-level one.
     int module = compiler_.getModuleIndex(module_);
     int index = module_.findVariable(lvalue.name());

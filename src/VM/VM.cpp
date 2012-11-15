@@ -277,8 +277,12 @@ namespace magpie
   
   gc<Object> VM::runModule(Module* module)
   {
+    // TODO(bob): Wrapping the chunk in a function is lame here since it doesn't
+    // havy any upvars anyway.
+    gc<FunctionObject> function = new FunctionObject(module->body());
+    
     // Pretend we just finished a fiber so we can kick off the "next" one.
-    scheduler_.add(new Fiber(*this, module->body()));
+    scheduler_.add(new Fiber(*this, function));
     FiberResult result = FIBER_DONE;
 
     gc<Object> value;

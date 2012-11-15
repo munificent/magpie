@@ -209,7 +209,7 @@ public:
   AsyncExpr(const SourcePos& pos, gc<Expr> body)
   : Expr(pos),
     body_(body),
-    maxLocals_(-1)
+    resolved_()
   {}
 
   virtual void accept(ExprVisitor& visitor, int arg)
@@ -220,8 +220,7 @@ public:
   virtual AsyncExpr* asAsyncExpr() { return this; }
 
   gc<Expr> body() const { return body_; }
-  int maxLocals() const { return maxLocals_; }
-  void setMaxLocals(int maxLocals) { maxLocals_ = maxLocals; }
+  ResolvedProcedure& resolved() { return resolved_; }
 
   virtual void reach()
   {
@@ -232,7 +231,7 @@ public:
 
 private:
   gc<Expr> body_;
-  int maxLocals_;
+  ResolvedProcedure resolved_;
   NO_COPY(AsyncExpr);
 };
 
@@ -379,7 +378,7 @@ public:
     rightParam_(rightParam),
     value_(value),
     body_(body),
-    maxLocals_(-1)
+    resolved_()
   {}
 
   virtual void accept(ExprVisitor& visitor, int arg)
@@ -394,8 +393,7 @@ public:
   gc<Pattern> rightParam() const { return rightParam_; }
   gc<Pattern> value() const { return value_; }
   gc<Expr> body() const { return body_; }
-  int maxLocals() const { return maxLocals_; }
-  void setMaxLocals(int maxLocals) { maxLocals_ = maxLocals; }
+  ResolvedProcedure& resolved() { return resolved_; }
 
   virtual void reach()
   {
@@ -414,7 +412,7 @@ private:
   gc<Pattern> rightParam_;
   gc<Pattern> value_;
   gc<Expr> body_;
-  int maxLocals_;
+  ResolvedProcedure resolved_;
   NO_COPY(DefExpr);
 };
 
@@ -499,7 +497,7 @@ public:
   : Expr(pos),
     pattern_(pattern),
     body_(body),
-    maxLocals_(-1)
+    resolved_()
   {}
 
   virtual void accept(ExprVisitor& visitor, int arg)
@@ -511,8 +509,7 @@ public:
 
   gc<Pattern> pattern() const { return pattern_; }
   gc<Expr> body() const { return body_; }
-  int maxLocals() const { return maxLocals_; }
-  void setMaxLocals(int maxLocals) { maxLocals_ = maxLocals; }
+  ResolvedProcedure& resolved() { return resolved_; }
 
   virtual void reach()
   {
@@ -525,7 +522,7 @@ public:
 private:
   gc<Pattern> pattern_;
   gc<Expr> body_;
-  int maxLocals_;
+  ResolvedProcedure resolved_;
   NO_COPY(FnExpr);
 };
 

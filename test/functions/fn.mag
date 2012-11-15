@@ -41,13 +41,6 @@ specify("A 'fn' expression") with
         (fn "return") call() shouldEqual("return")
     end
 
-    it should("close over surrounding variables") with
-        val outer = "outer"
-        var assigned = ""
-        (fn assigned = outer) call()
-        assigned shouldEqual("outer")
-    end
-
     it should("throw a NoMethodError if the argument doesn't match the " +
               "pattern") with
         val f = fn (n is Int) n

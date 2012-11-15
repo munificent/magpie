@@ -1,0 +1,51 @@
+// Access variable in an outer scope.
+do
+    val outer = "outer"
+    (fn() print(outer)) call // expect: outer
+end
+
+// Access closed over variable after it goes out of scope.
+do
+    var func = do
+        var outer = "outer"
+        fn() print(outer)
+    end
+
+    func call // expect: outer
+end
+
+// Access variable from distant outer scope.
+do
+    var fn3 = nothing
+    val fn1 = fn()
+        val outer1 = "outer1"
+        val fn2 = fn()
+            val outer2 = "outer2"
+            fn3 = fn()
+                print(outer1)
+                print(outer2)
+            end
+        end
+    end
+    fn3 call
+    // expect: outer1
+    // expect: outer2
+end
+
+// Assign to a closed over variable.
+do
+    val append, display = do
+        var value = "value"
+        val fn1 = fn()
+            value = value + "!"
+        end
+        val fn2 = fn()
+            print(value)
+        end
+        fn1, fn2
+    end
+
+    display call // expect: value
+    append call
+    display call // expect: value!
+end

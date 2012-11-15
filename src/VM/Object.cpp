@@ -103,7 +103,7 @@ namespace magpie
     return this == &other;
   }
 
-  gc<Object> DynamicObject::create(gc<ClassObject> classObj)
+  gc<DynamicObject> DynamicObject::create(gc<ClassObject> classObj)
   {
     ASSERT(classObj->numFields() == 0, "Class cannot have fields.");
     
@@ -114,7 +114,7 @@ namespace magpie
     return ::new(mem) DynamicObject(classObj);
   }
 
-  gc<Object> DynamicObject::create(ArrayView<gc<Object> >& args)
+  gc<DynamicObject> DynamicObject::create(ArrayView<gc<Object> >& args)
   {
     gc<ClassObject> classObj = args[0]->asClass();
     
@@ -166,6 +166,16 @@ namespace magpie
       fields_[i].reach();
     }
   }
+
+  gc<FunctionObject> FunctionObject::create(gc<Chunk> chunk)
+  {
+    // Allocate enough memory for the object and its upvars.
+    void* mem = Memory::allocate(sizeof(FunctionObject) +
+                                 sizeof(gc<Upvar>) * (chunk->numUpvars() - 1));
+
+    // Construct it by calling global placement new.
+    return ::new(mem) FunctionObject(chunk);
+  }
   
   gc<ClassObject> FunctionObject::getClass(VM& vm) const
   {
@@ -177,10 +187,27 @@ namespace magpie
     // TODO(bob): Do something better here.
     return String::create("[fn]");
   }
-  
+
+  gc<Upvar> FunctionObject::getUpvar(int index)
+  {
+    ASSERT_INDEX(index, chunk_->numUpvars());
+    return upvars_[index];
+  }
+
+  void FunctionObject::setUpvar(int index, gc<Upvar> upvar)
+  {
+    ASSERT_INDEX(index, chunk_->numUpvars());
+    upvars_[index] = upvar;
+  }
+
   void FunctionObject::reach()
   {
     chunk_.reach();
+
+    for (int i = 0; i < chunk_->numUpvars(); i++)
+    {
+      upvars_[i].reach();
+    }
   }
 
   gc<ClassObject> ListObject::getClass(VM& vm) const

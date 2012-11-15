@@ -9,14 +9,14 @@ namespace magpie
 {
   int Fiber::nextId_ = 0;
 
-  Fiber::Fiber(VM& vm, gc<Chunk> chunk)
+  Fiber::Fiber(VM& vm, gc<FunctionObject> function)
   : vm_(vm),
     id_(nextId_++),
     stack_(),
     callFrames_(),
     nearestCatch_()
   {
-    call(chunk, 0);
+    call(function, 0);
   }
 
   FiberResult Fiber::run(gc<Object>& result)
@@ -26,7 +26,8 @@ namespace magpie
       if (Memory::checkCollect()) return FIBER_DID_GC;
       
       CallFrame& frame = callFrames_[-1];
-      instruction ins = frame.chunk->code()[frame.ip++];
+      Chunk& chunk = *frame.function->chunk();
+      instruction ins = chunk.code()[frame.ip++];
       OpCode op = GET_OP(ins);
 
       switch (op)
@@ -43,7 +44,7 @@ namespace magpie
         {
           int index = GET_A(ins);
           int slot = GET_B(ins);
-          store(frame, slot, frame.chunk->getConstant(index));
+          store(frame, slot, chunk.getConstant(index));
           break;
         }
           
@@ -91,14 +92,16 @@ namespace magpie
 
         case OP_FUNCTION:
         {
-          gc<Chunk> chunk = frame.chunk->getChunk(GET_A(ins));
-          store(frame, GET_B(ins), new FunctionObject(chunk));
+          gc<FunctionObject> function = loadFunction(frame, GET_A(ins));
+          store(frame, GET_B(ins), function);
           break;
         }
           
         case OP_ASYNC:
         {
-          vm_.addFiber(new Fiber(vm_, frame.chunk->getChunk(GET_A(ins))));
+          // Create a function to store the chunk and upvars.
+          gc<FunctionObject> function = loadFunction(frame, GET_A(ins));
+          vm_.addFiber(new Fiber(vm_, function));
           break;
         }
           
@@ -137,7 +140,7 @@ namespace magpie
           
           // The next instruction is a pseudo-instruction containing the offset
           // to jump to.
-          instruction jump = frame.chunk->code()[frame.ip++];
+          instruction jump = chunk.code()[frame.ip++];
           ASSERT(GET_OP(jump) == OP_JUMP,
                  "Pseudo-instruction after OP_TEST_FIELD must be OP_JUMP.");
           
@@ -216,6 +219,23 @@ namespace magpie
           Module* module = vm_.getModule(moduleIndex);
           gc<Object> value = load(frame, GET_C(ins));
           module->setVariable(variableIndex, value);
+          break;
+        }
+
+        case OP_GET_UPVAR:
+        {
+          gc<Upvar> upvar = frame.function->getUpvar(GET_A(ins));
+          gc<Object> object = upvar->getValue(stack_);
+          store(frame, GET_B(ins), object);
+          std::cout << "GET_UPVAR " << object << " -> " << GET_B(ins) << std::endl;
+          break;
+        }
+
+        case OP_SET_UPVAR:
+        {
+          gc<Upvar> upvar = frame.function->getUpvar(GET_A(ins));
+          gc<Object> object = load(frame, GET_B(ins));
+          upvar->setValue(stack_, object);
           break;
         }
           
@@ -341,9 +361,13 @@ namespace magpie
         case OP_CALL:
         {
           gc<Chunk> method = vm_.getMultimethod(GET_A(ins));
+          // TODO(bob): Wrapping this in a function here is lame, especially
+          // since methods don't need any upvars.
+          gc<FunctionObject> function = new FunctionObject(method);
+
           int firstArg = GET_B(ins);
           int stackStart = frame.stackStart + firstArg;
-          call(method, stackStart);
+          call(function, stackStart);
           break;
         }
           
@@ -371,7 +395,7 @@ namespace magpie
 
               // Call the function, passing in this method's arguments except
               // the first one, which is the function itself.
-              call(function->chunk(), frame.stackStart + 1);
+              call(function, frame.stackStart + 1);
               break;
             }
 
@@ -392,6 +416,8 @@ namespace magpie
           {
             nearestCatch_ = nearestCatch_->parent();
           }
+
+          closeUpvars();
           
           if (callFrames_.count() > 0)
           {
@@ -438,10 +464,6 @@ namespace magpie
           }
           break;
         }
-      
-        default:
-          ASSERT(false, "Unknown opcode.");
-          break;
       }
     }
     
@@ -452,7 +474,7 @@ namespace magpie
   void Fiber::storeReturn(gc<Object> value)
   {
     CallFrame& frame = callFrames_[-1];
-    instruction instruction = frame.chunk->code()[frame.ip - 1];
+    instruction instruction = frame.function->chunk()->code()[frame.ip - 1];
     ASSERT((GET_OP(instruction) == OP_CALL ||
             GET_OP(instruction) == OP_NATIVE),
            "Should be returning to a call or native.");
@@ -463,8 +485,7 @@ namespace magpie
   void Fiber::reach()
   {
     // Walk the stack.
-    CallFrame& frame = callFrames_[-1];
-    int numSlots = frame.stackStart + frame.chunk->numSlots();
+    int numSlots = numActiveSlots();
     
     // Only reach slots that are still in use. We don't shrink the stack, so it
     // may have dead slots at the end that are safe to collect.
@@ -490,7 +511,7 @@ namespace magpie
     
     for (int i = 0; i < callFrames_.count(); i++)
     {
-      callFrames_[i].chunk.reach();
+      callFrames_[i].function->reach();
     }
   }
 
@@ -499,11 +520,11 @@ namespace magpie
     out << "[fiber " << id_ << "]";
   }
 
-  void Fiber::call(gc<Chunk> chunk, int stackStart)
+  void Fiber::call(gc<FunctionObject> function, int stackStart)
   {
     // Allocate slots for the method.
-    stack_.grow(stackStart + chunk->numSlots());
-    callFrames_.add(CallFrame(chunk, stackStart));
+    stack_.grow(stackStart + function->chunk()->numSlots());
+    callFrames_.add(CallFrame(function, stackStart));
   }
   
   bool Fiber::throwError(gc<Object> error)
@@ -513,13 +534,15 @@ namespace magpie
     
     // Unwind any nested callframes above the one containing the catch clause.
     callFrames_.truncate(nearestCatch_->callFrame() + 1);
+
+    closeUpvars();
     
     // Jump to the catch handler.
     CallFrame& frame = callFrames_[-1];
     frame.ip = nearestCatch_->offset();
     
     // The next instruction is a pseudo-op identifying where the error is.
-    instruction errorIns = frame.chunk->code()[frame.ip];
+    instruction errorIns = frame.function->chunk()->code()[frame.ip];
     ASSERT(GET_OP(errorIns) == OP_MOVE,
         "Expect pseudo-instruction at beginning of catch code.");
     int errorSlot = GET_A(errorIns);
@@ -536,14 +559,142 @@ namespace magpie
   {
     if (IS_CONSTANT(index))
     {
-      return frame.chunk->getConstant(GET_CONSTANT(index));
+      return frame.function->chunk()->getConstant(GET_CONSTANT(index));
     }
     else
     {
       return load(frame, index);
     }
   }
-  
+
+  gc<FunctionObject> Fiber::loadFunction(CallFrame& frame, int chunkSlot)
+  {
+    Chunk& chunk = *frame.function->chunk();
+    gc<Chunk> functionChunk = chunk.getChunk(chunkSlot);
+    gc<FunctionObject> function = FunctionObject::create(functionChunk);
+
+    // Capture the upvars.
+    for (int i = 0; i < functionChunk->numUpvars(); i++)
+    {
+      instruction upvarIns = chunk.code()[frame.ip++];
+      OpCode upvarOp = GET_OP(upvarIns);
+      int slot = GET_A(upvarIns);
+
+      ASSERT(upvarOp == OP_MOVE || upvarOp == OP_GET_UPVAR,
+             "Bad closure pseudo-instruction.");
+
+      gc<Upvar> upvar;
+      if (upvarOp == OP_MOVE)
+      {
+        upvar = captureUpvar(slot);
+        std::cout << "capture local upvar " << slot << " " << upvar->getValue(stack_) << std::endl;
+      }
+      else
+      {
+        upvar = frame.function->getUpvar(slot);
+        std::cout << "capture outer upvar " << slot << " " << upvar->getValue(stack_) << std::endl;
+      }
+
+      function->setUpvar(i, upvar);
+    }
+
+    return function;
+  }
+
+  int Fiber::numActiveSlots() const
+  {
+    if (callFrames_.count() == 0) return 0;
+
+    const CallFrame& frame = callFrames_[-1];
+    return frame.stackStart + frame.function->chunk()->numSlots();
+  }
+
+  void Fiber::closeUpvars()
+  {
+    int numSlots = numActiveSlots();
+    while (!openUpvars_.isNull())
+    {
+      if (openUpvars_->slot() < numSlots) break;
+      openUpvars_ = openUpvars_->close(stack_);
+    }
+  }
+
+  gc<Upvar> Fiber::captureUpvar(int slot)
+  {
+    // If there are no open upvars at all, we must need a new one.
+    if (openUpvars_.isNull())
+    {
+      openUpvars_ = new Upvar(slot);
+      return openUpvars_;
+    }
+
+    gc<Upvar> prevUpvar;
+    gc<Upvar> upvar = openUpvars_;
+    while (true)
+    {
+      if (upvar.isNull() || (upvar->slot() < slot))
+      {
+        // We've gone past this variable on the stack, so there must not be an
+        // open upvar for it. Make a new one and link it in in the right place
+        // to keep the list sorted.
+        gc<Upvar> newUpvar = new Upvar(slot);
+
+        if (newUpvar.isNull())
+        {
+          // Our new one is the first one in the list.
+          openUpvars_ = newUpvar;
+        }
+        else
+        {
+          prevUpvar->setNext(newUpvar);
+        }
+        newUpvar->setNext(upvar);
+
+        return newUpvar;
+      }
+      else if (upvar->slot() == slot)
+      {
+        // Already have an open upvalue, so reuse it.
+        return upvar;
+      }
+
+      // Walk towards the bottom of the stack.
+      prevUpvar = upvar;
+      upvar = upvar->next();
+    }
+  }
+
+  gc<Object> Upvar::getValue(Array<gc<Object> >& stack)
+  {
+    // If it's closed, return that value.
+    if (!value_.isNull()) return value_;
+
+    // It's still on the stack.
+    return stack[slot_];
+  }
+
+  void Upvar::setValue(Array<gc<Object> >& stack, gc<Object> value)
+  {
+    // If it's closed, store it here.
+    if (!value_.isNull())
+    {
+      value_ = value;
+      return;
+    }
+
+    // It's still on the stack, so store it there.
+    stack[slot_] = value;
+  }
+
+  gc<Upvar> Upvar::close(Array<gc<Object> >& stack)
+  {
+    ASSERT(value_.isNull(), "Cannot close an upvar more than once.");
+
+    value_ = stack[slot_];
+    next_ = NULL;
+    return next_;
+  }
+
   void CatchFrame::reach()
   {
     parent_.reach();

@@ -23,11 +23,11 @@ namespace magpie
     : code_(),
       constants_(),
       chunks_(),
-      numSlots_(0)
+      numSlots_(0),
+      numUpvars_(0)
     {}
 
-    void setCode(const Array<instruction>& code,
-                 int maxSlots);
+    void setCode(const Array<instruction>& code, int maxSlots, int numUpvars);
 
     inline const Array<instruction>& code() const { return code_; }
 
@@ -38,7 +38,8 @@ namespace magpie
     gc<Chunk> getChunk(int index) const;
 
     int numSlots() const { return numSlots_; }
-
+    int numUpvars() const { return numUpvars_; }
+    
     void debugTrace() const;
     void debugTrace(instruction ins) const;
 
@@ -55,6 +56,7 @@ namespace magpie
     Array<gc<Chunk> > chunks_;
 
     int numSlots_;
+    int numUpvars_;
 
     NO_COPY(Chunk);
   };

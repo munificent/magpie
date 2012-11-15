@@ -84,6 +84,13 @@ namespace magpie
     // Slot C is the value to store.
     OP_SET_VAR,
 
+    // Loads the value of an upvar. A is the index of the upvar. Stores the
+    // value in slot B.
+    OP_GET_UPVAR,
+
+    // Sets an upvar. A is the index of the upvar. Gets the value from slot B.
+    OP_SET_UPVAR,
+    
     OP_EQUAL, // R(C) = RC(A) == RC(B)
     OP_NOT, // R(C) = RC(A) + RC(B)
     

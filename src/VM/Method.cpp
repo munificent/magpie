@@ -6,11 +6,13 @@
 
 namespace magpie
 {
-  void Chunk::setCode(const Array<instruction>& code, int numSlots)
+  void Chunk::setCode(const Array<instruction>& code, int numSlots,
+                      int numUpvars)
   {
     // TODO(bob): Copying here is lame!
     code_ = code;
     numSlots_ = numSlots;
+    numUpvars_ = numUpvars;
   }
 
   int Chunk::addConstant(gc<Object> constant)
@@ -111,6 +113,14 @@ namespace magpie
         
       case OP_SET_VAR:
         cout << "OP_SET_VAR      module " << GET_A(ins) << ", var " << GET_B(ins) << " <- " << GET_C(ins);
+        break;
+
+      case OP_GET_UPVAR:
+        cout << "OP_GET_UPVAR    " << GET_A(ins) << " -> " << GET_B(ins);
+        break;
+
+      case OP_SET_UPVAR:
+        cout << "OP_SET_UPVAR    " << GET_A(ins) << " <- " << GET_B(ins);
         break;
         
       case OP_EQUAL:

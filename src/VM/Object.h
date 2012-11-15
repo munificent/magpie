@@ -22,6 +22,7 @@ namespace magpie
   class NothingObject;
   class RecordObject;
   class StringObject;
+  class Upvar;
   class VM;
   
   enum ObjectType {
@@ -210,11 +211,11 @@ namespace magpie
   public:
     // Creates a new instance of [classObj]. This should only be used for
     // built-in classes which do not have any fields.
-    static gc<Object> create(gc<ClassObject> classObj);
+    static gc<DynamicObject> create(gc<ClassObject> classObj);
 
     // Creates a new instance of [classObj] using [args] to initialize its
     // fields.
-    static gc<Object> create(ArrayView<gc<Object> >& args);
+    static gc<DynamicObject> create(ArrayView<gc<Object> >& args);
     
     virtual ObjectType type() const { return OBJECT_DYNAMIC; }
 
@@ -246,6 +247,12 @@ namespace magpie
   class FunctionObject : public Object
   {
   public:
+    // Creates a new function with the given chunk. If there are any upvars,
+    // they should be initialized after this by calling setUpvar().
+    static gc<FunctionObject> create(gc<Chunk> chunk);
+
+    // This is public so it can be called explicitly to create functions where
+    // we know there are no upvars.
     FunctionObject(gc<Chunk> chunk)
     : Object(),
       chunk_(chunk)
@@ -260,12 +267,16 @@ namespace magpie
     virtual gc<String> toString() const;
 
     gc<Chunk> chunk() { return chunk_; }
-    
+
+    gc<Upvar> getUpvar(int index);
+    void setUpvar(int index, gc<Upvar> upvar);
+
     virtual void reach();
 
   private:
     gc<Chunk> chunk_;
-    
+    gc<Upvar> upvars_[FLEXIBLE_SIZE];
+
     NO_COPY(FunctionObject);
   };
   

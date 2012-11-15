@@ -22,7 +22,11 @@ namespace magpie
     int maxLocals = Resolver::resolveBody(compiler_, *module, body);
     compile(module, maxLocals, NULL, NULL, NULL, body);
 
-    chunk_->setCode(code_, maxSlots_);
+    chunk_->setCode(code_, maxSlots_, 0);
+
+    std::cout << "module" << std::endl;
+    chunk_->debugTrace();
+
     return chunk_;
   }
 
@@ -40,7 +44,8 @@ namespace magpie
     for (int i = 0; i < multimethod.methods().count(); i++)
     {
       gc<DefExpr> method = multimethod.methods()[i]->def();
-      compile(multimethod.methods()[i]->module(), method->maxLocals(),
+      compile(multimethod.methods()[i]->module(),
+              method->resolved().maxLocals(),
               method->leftParam(), method->rightParam(), method->value(),
               method->body());
     }
@@ -49,24 +54,30 @@ namespace magpie
     write(OP_BUILT_IN, 3, 0);
     write(OP_THROW, 0);
 
-    chunk_->setCode(code_, maxSlots_);
+    // TODO(bob): If we ever allow nested methods, will need to handle upvars
+    // here.
+    chunk_->setCode(code_, maxSlots_, 0);
     return chunk_;
   }
 
   gc<Chunk> ExprCompiler::compile(Module* module, FnExpr& function)
   {
-    compile(module, function.maxLocals(), NULL, function.pattern(), NULL,
-            function.body());
+    compile(module, function.resolved().maxLocals(), NULL, function.pattern(),
+            NULL, function.body());
 
-    chunk_->setCode(code_, maxSlots_);
+    chunk_->setCode(code_, maxSlots_, function.resolved().closures().count());
+
+    std::cout << function << std::endl;
+    chunk_->debugTrace();
+
     return chunk_;
   }
 
   gc<Chunk> ExprCompiler::compile(Module* module, AsyncExpr& expr)
   {
-    compile(module, expr.maxLocals(), NULL, NULL, NULL, expr.body());
+    compile(module, expr.resolved().maxLocals(), NULL, NULL, NULL, expr.body());
 
-    chunk_->setCode(code_, maxSlots_);
+    chunk_->setCode(code_, maxSlots_, expr.resolved().closures().count());
     return chunk_;
   }
 
@@ -310,7 +321,16 @@ namespace magpie
     int index = chunk_->addChunk(chunk);
 
     write(OP_FUNCTION, index, dest);
-    // TODO(bob): Write bytecode to load upvars.
+
+    // Capture the closures.
+    for (int i = 0; i < expr.resolved().closures().count(); i++)
+    {
+      // Use different pseudo-opcodes to distinguish between closing over a
+      // local variable declared in the parent scope, or a closure.
+      const Closure& closure = expr.resolved().closures()[i];
+      OpCode op = closure.isLocal() ? OP_MOVE : OP_GET_UPVAR;
+      write(op, closure.slot());
+    }
   }
 
   void ExprCompiler::visit(ForExpr& expr, int dest)
@@ -436,14 +456,20 @@ namespace magpie
     ASSERT(expr.resolved().isResolved(),
            "Names should be resolved before compiling.");
 
-    if (expr.resolved().isLocal())
+    switch (expr.resolved().scope())
     {
-      write(OP_MOVE, expr.resolved().index(), dest);
-    }
-    else
-    {
-      write(OP_GET_VAR, expr.resolved().module(), expr.resolved().index(),
-            dest);
+      case NAME_LOCAL:
+        write(OP_MOVE, expr.resolved().index(), dest);
+        break;
+
+      case NAME_CLOSURE:
+        write(OP_GET_UPVAR, expr.resolved().index(), dest);
+        break;
+
+      case NAME_MODULE:
+        write(OP_GET_VAR, expr.resolved().module(), expr.resolved().index(),
+              dest);
+        break;
     }
   }
 
@@ -730,15 +756,21 @@ namespace magpie
   {
     ASSERT(resolved.isResolved(), "Must resolve before compiling.");
 
-    if (resolved.isLocal())
+    switch (resolved.scope())
     {
-      // Copy the value into the new variable.
-      write(OP_MOVE, value, resolved.index());
-    }
-    else
-    {
-      // Assign to the top-level variable.
-      write(OP_SET_VAR, resolved.module(), resolved.index(), value);
+      case NAME_LOCAL:
+        // Copy the value into the new variable.
+        write(OP_MOVE, value, resolved.index());
+        break;
+
+      case NAME_CLOSURE:
+        ASSERT(false, "Compiling closures not impl.");
+        break;
+
+      case NAME_MODULE:
+        // Assign to the top-level variable.
+        write(OP_SET_VAR, resolved.module(), resolved.index(), value);
+        break;
     }
   }
 

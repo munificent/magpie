@@ -18,7 +18,7 @@ exprs = sorted({
         ('value',       'gc<Expr>')],
     'Async': [
         ('body',        'gc<Expr>'),
-        ('maxLocals*',  'int')],
+        ('resolved',    'ResolvedProcedure*')],
     'BinaryOp': [
         ('left',        'gc<Expr>'),
         ('type',        'TokenType'),
@@ -45,13 +45,13 @@ exprs = sorted({
         ('rightParam',  'gc<Pattern>'),
         ('value',       'gc<Pattern>'),
         ('body',        'gc<Expr>'),
-        ('maxLocals*',  'int')],
+        ('resolved',    'ResolvedProcedure*')],
     'Do': [
         ('body',        'gc<Expr>')],
     'Fn': [
         ('pattern',     'gc<Pattern>'),
         ('body',        'gc<Expr>'),
-        ('maxLocals*',  'int')],
+        ('resolved',    'ResolvedProcedure*')],
     'For': [
         ('pattern',     'gc<Pattern>'),
         ('iterator',    'gc<Expr>'),
@@ -263,17 +263,24 @@ def makeClass(file, baseClass, className, visitorParam, fields):
     memberVars = ''
     reachFields = ''
     for name, type in fields:
-        mutable = False
+        # Whether or not the field has a setter.
+        settable = False
         if name.endswith('*'):
-            mutable = True
+            settable = True
             name = name[:-1]
+
+        # Whether or not the field is a mutable value accessed by reference.
+        mutable = False
+        if type.endswith('*'):
+            mutable = True
+            type = type[:-1]
 
         if type.find('gc<') != -1:
             reachFields += '    ' + name + '_.reach();\n'
         if type.endswith('Field>'):
             reachFields += REACH_FIELD_ARRAY.format(name)
 
-        if not mutable:
+        if not settable and not mutable:
             ctorParams += ', '
             if type.startswith('Array'):
                 # Array fields are passed to the constructor by reference.
@@ -288,7 +295,10 @@ def makeClass(file, baseClass, className, visitorParam, fields):
             else:
                 ctorArgs += ',\n    {0}_()'.format(name)
 
-        if type.startswith('Array'):
+        if mutable:
+            # Mutable fields are returned by reference.
+            accessors += '  {1}& {0}() {{ return {0}_; }}\n'.format(name, type)
+        elif type.startswith('Array'):
             # Accessors for arrays do not copy.
             accessors += '  const {1}& {0}() const {{ return {0}_; }}\n'.format(
                 name, type)
@@ -296,8 +306,8 @@ def makeClass(file, baseClass, className, visitorParam, fields):
             accessors += '  {1} {0}() const {{ return {0}_; }}\n'.format(
                 name, type)
 
-        # Include a setter too if it's mutable.
-        if mutable:
+        # Include a setter too if it's settable.
+        if settable:
             accessors += '  void set{2}({1} {0}) {{ {0}_ = {0}; }}\n'.format(
                 name, type, name[0].upper() + name[1:])
 
