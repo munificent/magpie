@@ -220,7 +220,8 @@ namespace magpie
 
     write(OP_ASYNC, index);
     // TODO(bob): What about dest?
-    // TODO(bob): Write bytecode to load upvars.
+
+    compileClosures(expr.resolved());
   }
 
   void ExprCompiler::visit(BinaryOpExpr& expr, int dest)
@@ -321,24 +322,9 @@ namespace magpie
 
     write(OP_FUNCTION, index, dest);
 
-    // Capture variables from outer scopes.
-    for (int i = 0; i < expr.resolved().closures().count(); i++)
-    {
-      int index = expr.resolved().closures()[i];
-      if (index == -1)
-      {
-        // This closure is a new one in this function so there's nothing to
-        // Capture. We just need to create a fresh upvar.
-        write(OP_MOVE, i);
-      }
-      else
-      {
-        // Capture the upvar from the outer scope.
-        write(OP_GET_UPVAR, i, index);
-      }
-    }
+    compileClosures(expr.resolved());
   }
-
+  
   void ExprCompiler::visit(ForExpr& expr, int dest)
   {
     // TODO(bob): Hackish. An actual intermediate representation would help
@@ -779,6 +765,26 @@ namespace magpie
     }
   }
 
+  void ExprCompiler::compileClosures(ResolvedProcedure& procedure)
+  {
+    // Capture variables from outer scopes.
+    for (int i = 0; i < procedure.closures().count(); i++)
+    {
+      int index = procedure.closures()[i];
+      if (index == -1)
+      {
+        // This closure is a new one in this function so there's nothing to
+        // Capture. We just need to create a fresh upvar.
+        write(OP_MOVE, i);
+      }
+      else
+      {
+        // Capture the upvar from the outer scope.
+        write(OP_GET_UPVAR, i, index);
+      }
+    }
+  }
+  
   void ExprCompiler::write(OpCode op, int a, int b, int c)
   {
     ASSERT_INDEX(a, 256);

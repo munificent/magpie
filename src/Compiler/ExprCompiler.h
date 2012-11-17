@@ -103,6 +103,7 @@ namespace magpie
     // the right-hand side value.
     void compileCall(const CallExpr& expr, int dest, int valueSlot);
     void compileAssignment(gc<ResolvedName> resolved, int value);
+    void compileClosures(ResolvedProcedure& procedure);
 
     void write(OpCode op, int a = 0xff, int b = 0xff, int c = 0xff);
     int startJump();

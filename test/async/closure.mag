@@ -1,0 +1,18 @@
+// TODO(bob):
+// - Close over variable in non-immediate enclosing scope.
+// - Assign to closure.
+// - Share closure between async blocks.
+// - Share closure between functions and async.
+
+var channel = Channel new
+
+// Access variable in an outer scope.
+do
+    val outer = "outer"
+    async
+        print(outer) // expect: outer
+        channel send("one")
+    end
+
+    print(channel receive) // expect: one
+end
