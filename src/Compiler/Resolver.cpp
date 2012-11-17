@@ -7,25 +7,29 @@
 
 namespace magpie
 {
-  // TODO(bob): There is a lot of copy/paste in these methods. Should unify.
-  
-  int Resolver::resolveBody(Compiler& compiler, Module& module, gc<Expr> body)
+  void Resolver::resolveBody(Compiler& compiler, Module& module, gc<Expr> body,
+                             int& maxLocals, int& numClosures)
   {
-    return resolve(compiler, module, NULL, NULL, NULL, NULL, NULL, body);
+    // Make a fake procedure so we can track closures.
+    ResolvedProcedure procedure;
+    maxLocals = resolve(compiler, module, NULL, &procedure, true, NULL, NULL,
+                        NULL, body);
+    numClosures = procedure.closures().count();
   }
   
   void Resolver::resolve(Compiler& compiler, Module& module, DefExpr& method)
   {
-    resolve(compiler, module, NULL, &method.resolved(), method.leftParam(),
-            method.rightParam(), method.value(), method.body());
+    resolve(compiler, module, NULL, &method.resolved(), false,
+            method.leftParam(), method.rightParam(), method.value(),
+            method.body());
   }
 
   int Resolver::resolve(Compiler& compiler, Module& module, Resolver* parent,
-                        ResolvedProcedure* procedure,
+                        ResolvedProcedure* procedure, bool isModuleBody,
                         gc<Pattern> leftParam, gc<Pattern> rightParam,
                         gc<Pattern> valueParam, gc<Expr> body)
   {
-    Resolver resolver(compiler, module, parent, procedure == NULL);
+    Resolver resolver(compiler, module, parent, isModuleBody);
 
     // Create a scope for the body.
     Scope scope(&resolver);
@@ -53,7 +57,7 @@ namespace magpie
     scope.end();
 
     // TODO(bob): Copying this stuff here is lame.
-    procedure->resolve(resolver.maxLocals_, resolver.numClosures_);
+    procedure->resolve(resolver.maxLocals_, resolver.closures_);
 
     return resolver.maxLocals_;
   }
@@ -175,36 +179,28 @@ namespace magpie
     // then give up.
     if (parent == NULL) return NULL;
 
-    gc<ResolvedName> local = parent->findLocal(expr.name());
-    if (!local.isNull())
+    gc<ResolvedName> outer = parent->findLocal(expr.name());
+    if (!outer.isNull())
     {
-      if (local->scope() == NAME_LOCAL)
+      if (outer->scope() == NAME_LOCAL)
       {
-        // It's not a closure yet, so make it one.
-        local->makeClosure(parent->numClosures_++);
-        std::cout << "found closure " << expr.name() << " " << local->index() << std::endl;
+        // TODO(bob): When we transform this local into a closure, we don't
+        // eliminate its slot on the stack, even though this means it doesn't
+        // get used. Ideally, we should.
+        // It's not a closure in the parent yet, so make it one.
+        outer->makeClosure(parent->closures_.count());
+        parent->closures_.add(-1);
       }
 
+      // Capture it in this procedure.
+      gc<ResolvedName> local = new ResolvedName(-1);
+      local->makeClosure(closures_.count());
+      closures_.add(outer->index());
       return local;
     }
 
     // TODO(bob): Recurse upwards.
     return NULL;
-    /*
-    // See if it's defined in the immediately enclosing scope.
-    bool isLocal = true;
-    int slot = parent->findLocal(expr.name());
-    if (slot == -1)
-    {
-      // Not found in the parent, so recurse to the enclosing scope.
-      slot = resolveClosure(resolver->parent_, expr);
-      if (slot == -1) return -1;
-    }
-
-    // Capture the parent's upvar. (In other words, flatten the closure.)
-    resolver->closures_.add(Closure(isLocal, slot));
-    return resolver->closures_.count() - 1;
-    */
   }
 
   bool Resolver::resolveTopLevelName(Module& module, NameExpr& expr)
@@ -273,7 +269,8 @@ namespace magpie
 
   void Resolver::visit(AsyncExpr& expr, int dummy)
   {
-    resolve(compiler_, module_, this, false, NULL, NULL, NULL, expr.body());
+    resolve(compiler_, module_, this, &expr.resolved(), false, NULL, NULL,
+            NULL, expr.body());
   }
 
   void Resolver::visit(BinaryOpExpr& expr, int dummy)
@@ -347,7 +344,7 @@ namespace magpie
   void Resolver::visit(FnExpr& expr, int dummy)
   {
     // Resolve the function itself.
-    resolve(compiler_, module_, this, &expr.resolved(),
+    resolve(compiler_, module_, this, &expr.resolved(), false,
             NULL, expr.pattern(), NULL, expr.body());
   }
   

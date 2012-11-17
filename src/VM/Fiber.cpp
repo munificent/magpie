@@ -227,7 +227,6 @@ namespace magpie
           gc<Upvar> upvar = frame.function->getUpvar(GET_A(ins));
           gc<Object> object = upvar->value();
           store(frame, GET_B(ins), object);
-          std::cout << "GET_UPVAR " << object << " -> " << GET_B(ins) << std::endl;
           break;
         }
 
@@ -417,10 +416,6 @@ namespace magpie
             nearestCatch_ = nearestCatch_->parent();
           }
 
-          /*
-          closeUpvars();
-          */
-
           if (callFrames_.count() > 0)
           {
             // Give the result back and resume the calling chunk.
@@ -536,10 +531,6 @@ namespace magpie
     
     // Unwind any nested callframes above the one containing the catch clause.
     callFrames_.truncate(nearestCatch_->callFrame() + 1);
-
-    /*
-    closeUpvars();
-    */
     
     // Jump to the catch handler.
     CallFrame& frame = callFrames_[-1];
@@ -590,44 +581,15 @@ namespace magpie
       if (upvarOp == OP_MOVE)
       {
         upvar = new Upvar();
-        std::cout << "create local upvar " << i << std::endl;
       }
       else
       {
         upvar = frame.function->getUpvar(GET_A(ins));
-        std::cout << "capture outer upvar " << GET_A(ins) << " " << upvar->value() << std::endl;
       }
 
       function->setUpvar(i, upvar);
     }
-    
-    /*
-    // Capture the upvars.
-    for (int i = 0; i < functionChunk->numUpvars(); i++)
-    {
-      instruction upvarIns = chunk.code()[frame.ip++];
-      OpCode upvarOp = GET_OP(upvarIns);
-      int slot = GET_A(upvarIns);
 
-      ASSERT(upvarOp == OP_MOVE || upvarOp == OP_GET_UPVAR,
-             "Bad closure pseudo-instruction.");
-
-      gc<Upvar> upvar;
-      if (upvarOp == OP_MOVE)
-      {
-        upvar = captureUpvar(slot);
-        std::cout << "capture local upvar " << slot << " " << upvar->getValue(stack_) << std::endl;
-      }
-      else
-      {
-        upvar = frame.function->getUpvar(slot);
-        std::cout << "capture outer upvar " << slot << " " << upvar->getValue(stack_) << std::endl;
-      }
-
-      function->setUpvar(i, upvar);
-    }
-    */
-    
     return function;
   }
 
@@ -638,94 +600,6 @@ namespace magpie
     const CallFrame& frame = callFrames_[-1];
     return frame.stackStart + frame.function->chunk()->numSlots();
   }
-
-  /*
-  void Fiber::closeUpvars()
-  {
-    int numSlots = numActiveSlots();
-    while (!openUpvars_.isNull())
-    {
-      if (openUpvars_->slot() < numSlots) break;
-      openUpvars_ = openUpvars_->close(stack_);
-    }
-  }
-
-  gc<Upvar> Fiber::captureUpvar(int slot)
-  {
-    // If there are no open upvars at all, we must need a new one.
-    if (openUpvars_.isNull())
-    {
-      openUpvars_ = new Upvar(slot);
-      return openUpvars_;
-    }
-
-    gc<Upvar> prevUpvar;
-    gc<Upvar> upvar = openUpvars_;
-    while (true)
-    {
-      if (upvar.isNull() || (upvar->slot() < slot))
-      {
-        // We've gone past this variable on the stack, so there must not be an
-        // open upvar for it. Make a new one and link it in in the right place
-        // to keep the list sorted.
-        gc<Upvar> newUpvar = new Upvar(slot);
-
-        if (newUpvar.isNull())
-        {
-          // Our new one is the first one in the list.
-          openUpvars_ = newUpvar;
-        }
-        else
-        {
-          prevUpvar->setNext(newUpvar);
-        }
-        newUpvar->setNext(upvar);
-
-        return newUpvar;
-      }
-      else if (upvar->slot() == slot)
-      {
-        // Already have an open upvalue, so reuse it.
-        return upvar;
-      }
-
-      // Walk towards the bottom of the stack.
-      prevUpvar = upvar;
-      upvar = upvar->next();
-    }
-  }
-
-  gc<Object> Upvar::getValue(Array<gc<Object> >& stack)
-  {
-    // If it's closed, return that value.
-    if (!value_.isNull()) return value_;
-
-    // It's still on the stack.
-    return stack[slot_];
-  }
-
-  void Upvar::setValue(Array<gc<Object> >& stack, gc<Object> value)
-  {
-    // If it's closed, store it here.
-    if (!value_.isNull())
-    {
-      value_ = value;
-      return;
-    }
-
-    // It's still on the stack, so store it there.
-    stack[slot_] = value;
-  }
-
-  gc<Upvar> Upvar::close(Array<gc<Object> >& stack)
-  {
-    ASSERT(value_.isNull(), "Cannot close an upvar more than once.");
-
-    value_ = stack[slot_];
-    next_ = NULL;
-    return next_;
-  }
-   */
 
   void CatchFrame::reach()
   {

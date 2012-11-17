@@ -179,16 +179,13 @@ namespace magpie
 
     // Every function has a list of "closures". These are variables that have
     // non-local extent, either because they are accessed from an enclosing
-    // procedure or by an enclosed one. This keeps track of them. Each number
+    // procedure or by an enclosed one. This keeps track of them. Each element
     // here is a closure in this procedure's scope.
     //
-    // If the number is -1, that means this closure exists purely so that an
-    // inner procedure can access it. From the perspective of this procedure,
-    // it is created from scratch.
-    //
-    // If the number is not -1, that means this closure is accessing a variable
-    // from an outer procedure. In that case, the number will be the index in
-    // that procedure's list of closures.
+    // The value is the index of a closure in the outer scope that this one is
+    // capturing. If the number is -1, that means this closure exists purely so
+    // that an inner procedure can access it. From the perspective of this
+    // procedure, it is created from scratch.
     const Array<int>& closures() const { return closures_; }
 
     void resolve(int maxLocals, const Array<int>& closures)

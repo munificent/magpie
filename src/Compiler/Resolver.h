@@ -36,14 +36,15 @@ namespace magpie
     friend class Scope;
 
   public:
-    static int resolveBody(Compiler& compiler, Module& module, gc<Expr> body);
+    static void resolveBody(Compiler& compiler, Module& module, gc<Expr> body,
+                            int& maxLocals, int& numClosures);
 
   private:
     static void resolve(Compiler& compiler, Module& module, DefExpr& method);
     static int resolve(Compiler& compiler, Module& module, Resolver* parent,
-                       ResolvedProcedure* procedure, gc<Pattern> leftParam,
-                       gc<Pattern> rightParam, gc<Pattern> valueParam,
-                       gc<Expr> body);
+                       ResolvedProcedure* procedure, bool isModuleBody,
+                       gc<Pattern> leftParam, gc<Pattern> rightParam,
+                       gc<Pattern> valueParam, gc<Expr> body);
 
     Resolver(Compiler& compiler, Module& module, Resolver* parent,
              bool isModuleBody)
@@ -53,7 +54,7 @@ namespace magpie
       isModuleBody_(isModuleBody),
       locals_(),
       maxLocals_(0),
-      numClosures_(0),
+      closures_(),
       unnamedSlotId_(0),
       scope_(NULL)
     {}
@@ -138,7 +139,7 @@ namespace magpie
     // The maximum number of locals that are in scope at the same time.
     int maxLocals_;
 
-    int numClosures_;
+    Array<int> closures_;
 
     // We sometimes need to create placeholder locals to make sure the indices
     // in locals_ line up with slots. This is used to name them.

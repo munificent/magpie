@@ -19,13 +19,12 @@ namespace magpie
 
   gc<Chunk> ExprCompiler::compileBody(Module* module, gc<Expr> body)
   {
-    int maxLocals = Resolver::resolveBody(compiler_, *module, body);
+    int maxLocals;
+    int numClosures;
+    Resolver::resolveBody(compiler_, *module, body, maxLocals, numClosures);
     compile(module, maxLocals, NULL, NULL, NULL, body);
 
-    chunk_->setCode(code_, maxSlots_, 0);
-
-    //std::cout << "module" << std::endl;
-    //chunk_->debugTrace();
+    chunk_->setCode(code_, maxSlots_, numClosures);
 
     return chunk_;
   }
