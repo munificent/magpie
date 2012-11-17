@@ -438,8 +438,8 @@ public:
   gc<String> name() const { return name_; }
   bool isNative() const { return isNative_; }
   const Array<gc<ClassField> >& fields() const { return fields_; }
-  ResolvedName resolved() const { return resolved_; }
-  void setResolved(ResolvedName resolved) { resolved_ = resolved; }
+  gc<ResolvedName> resolved() const { return resolved_; }
+  void setResolved(gc<ResolvedName> resolved) { resolved_ = resolved; }
   const Array<gc<DefExpr> >& synthesizedMethods() const { return synthesizedMethods_; }
   void setSynthesizedMethods(Array<gc<DefExpr> > synthesizedMethods) { synthesizedMethods_ = synthesizedMethods; }
 
@@ -447,6 +447,7 @@ public:
   {
     name_.reach();
     fields_.reach();
+    resolved_.reach();
     synthesizedMethods_.reach();
   }
 
@@ -456,7 +457,7 @@ private:
   gc<String> name_;
   bool isNative_;
   Array<gc<ClassField> > fields_;
-  ResolvedName resolved_;
+  gc<ResolvedName> resolved_;
   Array<gc<DefExpr> > synthesizedMethods_;
   NO_COPY(DefClassExpr);
 };
@@ -735,19 +736,20 @@ public:
   virtual NameExpr* asNameExpr() { return this; }
 
   gc<String> name() const { return name_; }
-  ResolvedName resolved() const { return resolved_; }
-  void setResolved(ResolvedName resolved) { resolved_ = resolved; }
+  gc<ResolvedName> resolved() const { return resolved_; }
+  void setResolved(gc<ResolvedName> resolved) { resolved_ = resolved; }
 
   virtual void reach()
   {
     name_.reach();
+    resolved_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
 
 private:
   gc<String> name_;
-  ResolvedName resolved_;
+  gc<ResolvedName> resolved_;
   NO_COPY(NameExpr);
 };
 
@@ -1221,19 +1223,20 @@ public:
   virtual NameLValue* asNameLValue() { return this; }
 
   gc<String> name() const { return name_; }
-  ResolvedName resolved() const { return resolved_; }
-  void setResolved(ResolvedName resolved) { resolved_ = resolved; }
+  gc<ResolvedName> resolved() const { return resolved_; }
+  void setResolved(gc<ResolvedName> resolved) { resolved_ = resolved; }
 
   virtual void reach()
   {
     name_.reach();
+    resolved_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
 
 private:
   gc<String> name_;
-  ResolvedName resolved_;
+  gc<ResolvedName> resolved_;
   NO_COPY(NameLValue);
 };
 
@@ -1446,13 +1449,14 @@ public:
 
   gc<String> name() const { return name_; }
   gc<Pattern> pattern() const { return pattern_; }
-  ResolvedName resolved() const { return resolved_; }
-  void setResolved(ResolvedName resolved) { resolved_ = resolved; }
+  gc<ResolvedName> resolved() const { return resolved_; }
+  void setResolved(gc<ResolvedName> resolved) { resolved_ = resolved; }
 
   virtual void reach()
   {
     name_.reach();
     pattern_.reach();
+    resolved_.reach();
   }
 
   virtual void trace(std::ostream& out) const;
@@ -1460,7 +1464,7 @@ public:
 private:
   gc<String> name_;
   gc<Pattern> pattern_;
-  ResolvedName resolved_;
+  gc<ResolvedName> resolved_;
   NO_COPY(VariablePattern);
 };
 

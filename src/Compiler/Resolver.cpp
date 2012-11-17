@@ -52,12 +52,8 @@ namespace magpie
 
     scope.end();
 
-    if (procedure != NULL)
-    {
-      // TODO(bob): Copying this stuff here is lame.
-      procedure->setMaxLocals(resolver.maxLocals_);
-      procedure->closures().addAll(resolver.closures_);
-    }
+    // TODO(bob): Copying this stuff here is lame.
+    procedure->resolve(resolver.maxLocals_, resolver.numClosures_);
 
     return resolver.maxLocals_;
   }
@@ -90,8 +86,7 @@ namespace magpie
     {
       // It's a variable, so create a named local for it and resolve the
       // variable.
-      int slot = makeLocal(param->pos(), variable->name());
-      variable->setResolved(ResolvedName(slot));
+      variable->setResolved(makeLocal(param->pos(), variable->name()));
       
       // Note that we do *not* resolve the variable's inner pattern here. We
       // do that after all param slots are resolved so that we can ensure the
@@ -172,17 +167,33 @@ namespace magpie
     expr.setResolved(method);
   }
 
-  int Resolver::resolveClosure(Resolver* resolver, NameExpr& expr)
+  gc<ResolvedName> Resolver::resolveClosure(Resolver* resolver, NameExpr& expr)
   {
     Resolver* parent = resolver->parent_;
-    
-    // If we walked all the way up the enclosing definitions and didn't find it,
-    // then fail.
-    if (parent == NULL) return -1;
 
+    // If we walked all the way up the enclosing definitions and didn't find it,
+    // then give up.
+    if (parent == NULL) return NULL;
+
+    gc<ResolvedName> local = parent->findLocal(expr.name());
+    if (!local.isNull())
+    {
+      if (local->scope() == NAME_LOCAL)
+      {
+        // It's not a closure yet, so make it one.
+        local->makeClosure(parent->numClosures_++);
+        std::cout << "found closure " << expr.name() << " " << local->index() << std::endl;
+      }
+
+      return local;
+    }
+
+    // TODO(bob): Recurse upwards.
+    return NULL;
+    /*
     // See if it's defined in the immediately enclosing scope.
     bool isLocal = true;
-    int slot = parent->locals_.lastIndexOf(expr.name());
+    int slot = parent->findLocal(expr.name());
     if (slot == -1)
     {
       // Not found in the parent, so recurse to the enclosing scope.
@@ -193,6 +204,7 @@ namespace magpie
     // Capture the parent's upvar. (In other words, flatten the closure.)
     resolver->closures_.add(Closure(isLocal, slot));
     return resolver->closures_.count() - 1;
+    */
   }
 
   bool Resolver::resolveTopLevelName(Module& module, NameExpr& expr)
@@ -206,34 +218,45 @@ namespace magpie
 
         // Get the module's real index.
         int moduleIndex = compiler_.getModuleIndex(module);
-        expr.setResolved(ResolvedName(moduleIndex, i));
+        expr.setResolved(new ResolvedName(moduleIndex, i));
         return true;
       }
     }
 
     return false;
   }
-  
-  int Resolver::makeLocal(const SourcePos& pos, gc<String> name)
+
+  gc<ResolvedName> Resolver::findLocal(gc<String> name)
+  {
+    for (int i = locals_.count() - 1; i >= 0; i--)
+    {
+      if (locals_[i].name() == name) return locals_[i].resolved();
+    }
+
+    return NULL;
+  }
+
+  gc<ResolvedName> Resolver::makeLocal(const SourcePos& pos, gc<String> name)
   {
     // Make sure there isn't already a local variable with this name in the
     // current scope.
     for (int i = scope_->startSlot(); i < locals_.count(); i++)
     {
-      if (locals_[i] == name)
+      if (locals_[i].name() == name)
       {
         compiler_.reporter().error(pos,
             "There is already a variable '%s' defined in this scope.",
             name->cString());
       }
     }
-    
-    locals_.add(name);
+
+    gc<ResolvedName> resolved = new ResolvedName(locals_.count());
+    locals_.add(Local(name, resolved));
     if (locals_.count() > maxLocals_) {
       maxLocals_ = locals_.count();
     }
             
-    return locals_.count() - 1;
+    return resolved;
   }
   
   void Resolver::visit(AndExpr& expr, int dummy)
@@ -305,15 +328,13 @@ namespace magpie
     
     ASSERT(index != -1, "Should have already forward-declared the class.");
     
-    expr.setResolved(ResolvedName(module, index));
+    expr.setResolved(new ResolvedName(module, index));
 
     // Resolve the synthesized stuff.
     for (int i = 0; i < expr.synthesizedMethods().count(); i++)
     {
       Resolver::resolve(compiler_, module_, *expr.synthesizedMethods()[i]);
     }
-
-    // TODO(bob): Resolve field patterns and initializers.
   }
   
   void Resolver::visit(DoExpr& expr, int dummy)
@@ -413,18 +434,18 @@ namespace magpie
   void Resolver::visit(NameExpr& expr, int dummy)
   {
     // See if it's defined in this scope.
-    int local = locals_.lastIndexOf(expr.name());
-    if (local != -1)
+    gc<ResolvedName> local = findLocal(expr.name());
+    if (!local.isNull())
     {
-      expr.setResolved(ResolvedName(local));
+      expr.setResolved(local);
       return;
     }
 
     // See if it's a closure.
-    int upvar = resolveClosure(this, expr);
-    if (upvar != -1)
+    gc<ResolvedName> upvar = resolveClosure(this, expr);
+    if (!upvar.isNull())
     {
-      expr.setResolved(ResolvedName(NAME_CLOSURE, upvar));
+      expr.setResolved(upvar);
       return;
     }
 
@@ -444,7 +465,7 @@ namespace magpie
     
     // Resolve it to some fake local so compilation can continue and report
     // more errors.
-    expr.setResolved(ResolvedName(0));
+    expr.setResolved(new ResolvedName(0));
   }
   
   void Resolver::visit(NativeExpr& expr, int dummy)
@@ -554,13 +575,13 @@ namespace magpie
   void Resolver::visit(NameLValue& lvalue, int dummy)
   {
     // Look up the variable.
-    int slot = locals_.lastIndexOf(lvalue.name());
+    gc<ResolvedName> resolved = findLocal(lvalue.name());
     
     // TODO(bob): Report error if variable is immutable.
 
-    if (slot != -1)
+    if (!resolved.isNull())
     {
-      lvalue.setResolved(ResolvedName(slot));
+      lvalue.setResolved(resolved);
       return;
     }
 
@@ -572,7 +593,7 @@ namespace magpie
     
     if (index != -1)
     {
-      lvalue.setResolved(ResolvedName(module, index));
+      lvalue.setResolved(new ResolvedName(module, index));
       return;
     }
 
@@ -580,7 +601,7 @@ namespace magpie
         "Variable '%s' is not defined.", lvalue.name()->cString());
       
     // Put a fake slot in so we can continue and report more errors.
-    lvalue.setResolved(ResolvedName(0));
+    lvalue.setResolved(new ResolvedName(0));
   }
   
   void Resolver::visit(RecordLValue& lvalue, int dummy)
@@ -668,13 +689,14 @@ namespace magpie
         index = 0;
       }
       
-      pattern.setResolved(ResolvedName(module, index));
+      pattern.setResolved(new ResolvedName(module, index));
     }
     else
     {
       // Declaring a local variable, so create a slot for it.
-      int slot = resolver_.makeLocal(pattern.pos(), pattern.name());
-      pattern.setResolved(ResolvedName(slot));
+      gc<ResolvedName> resolved = resolver_.makeLocal(pattern.pos(),
+                                                      pattern.name());
+      pattern.setResolved(resolved);
     }
         
     if (!pattern.pattern().isNull())

@@ -1,0 +1,10 @@
+do
+    print("before")
+    var func = do
+        var outer = "outer"
+        fn() print(outer)
+    end
+
+    print(func)
+    func call // expect: outer
+end

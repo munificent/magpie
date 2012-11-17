@@ -10,6 +10,27 @@ namespace magpie
   class Scope;
   class VM;
 
+  // Tracks information about a local variable.
+  class Local
+  {
+  public:
+    Local(gc<String> name, gc<ResolvedName> resolved)
+    : name_(name),
+      resolved_(resolved)
+    {}
+
+    // Default constructor so it can be used in Arrays.
+    Local()
+    {}
+
+    gc<String> name() { return name_; }
+    gc<ResolvedName> resolved() { return resolved_; }
+
+  private:
+    gc<String> name_;
+    gc<ResolvedName> resolved_;
+  };
+  
   class Resolver : public ExprVisitor, private LValueVisitor
   {
     friend class Scope;
@@ -32,6 +53,7 @@ namespace magpie
       isModuleBody_(isModuleBody),
       locals_(),
       maxLocals_(0),
+      numClosures_(0),
       unnamedSlotId_(0),
       scope_(NULL)
     {}
@@ -50,12 +72,15 @@ namespace magpie
     // Attempts to resolve a name defined in a local variable scope. Returns
     // the index of the upvar in the parent scope if found, or -1 if the name
     // could not be resolved.
-    int resolveClosure(Resolver* resolver, NameExpr& expr);
+    gc<ResolvedName> resolveClosure(Resolver* resolver, NameExpr& expr);
     
     bool resolveTopLevelName(Module& module, NameExpr& expr);
 
+    // Returns the resolved local variable with [name] or NULL if not found.
+    gc<ResolvedName> findLocal(gc<String> name);
+
     // Creates a new local variable with the given name.
-    int makeLocal(const SourcePos& pos, gc<String> name);
+    gc<ResolvedName> makeLocal(const SourcePos& pos, gc<String> name);
         
     virtual void visit(AndExpr& expr, int dummy);
     virtual void visit(AssignExpr& expr, int dest);
@@ -108,10 +133,12 @@ namespace magpie
     // The names of the current in-scope local variables (including all outer
     // scopes). The indices in this array correspond to the slots where those
     // locals are stored.
-    Array<gc<String> > locals_;
+    Array<Local> locals_;
     
     // The maximum number of locals that are in scope at the same time.
     int maxLocals_;
+
+    int numClosures_;
 
     // We sometimes need to create placeholder locals to make sure the indices
     // in locals_ line up with slots. This is used to name them.
@@ -120,8 +147,6 @@ namespace magpie
     // The current inner-most local variable scope.
     Scope* scope_;
 
-    Array<Closure> closures_;
-    
     NO_COPY(Resolver);
   };
   

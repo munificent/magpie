@@ -225,7 +225,7 @@ namespace magpie
         case OP_GET_UPVAR:
         {
           gc<Upvar> upvar = frame.function->getUpvar(GET_A(ins));
-          gc<Object> object = upvar->getValue(stack_);
+          gc<Object> object = upvar->value();
           store(frame, GET_B(ins), object);
           std::cout << "GET_UPVAR " << object << " -> " << GET_B(ins) << std::endl;
           break;
@@ -235,7 +235,7 @@ namespace magpie
         {
           gc<Upvar> upvar = frame.function->getUpvar(GET_A(ins));
           gc<Object> object = load(frame, GET_B(ins));
-          upvar->setValue(stack_, object);
+          upvar->setValue(object);
           break;
         }
           
@@ -417,8 +417,10 @@ namespace magpie
             nearestCatch_ = nearestCatch_->parent();
           }
 
+          /*
           closeUpvars();
-          
+          */
+
           if (callFrames_.count() > 0)
           {
             // Give the result back and resume the calling chunk.
@@ -535,7 +537,9 @@ namespace magpie
     // Unwind any nested callframes above the one containing the catch clause.
     callFrames_.truncate(nearestCatch_->callFrame() + 1);
 
+    /*
     closeUpvars();
+    */
     
     // Jump to the catch handler.
     CallFrame& frame = callFrames_[-1];
@@ -573,6 +577,31 @@ namespace magpie
     gc<Chunk> functionChunk = chunk.getChunk(chunkSlot);
     gc<FunctionObject> function = FunctionObject::create(functionChunk);
 
+    // Capture/create the upvars.
+    for (int i = 0; i < functionChunk->numUpvars(); i++)
+    {
+      instruction ins = chunk.code()[frame.ip++];
+      OpCode upvarOp = GET_OP(ins);
+
+      ASSERT(upvarOp == OP_MOVE || upvarOp == OP_GET_UPVAR,
+             "Bad closure pseudo-instruction.");
+
+      gc<Upvar> upvar;
+      if (upvarOp == OP_MOVE)
+      {
+        upvar = new Upvar();
+        std::cout << "create local upvar " << i << std::endl;
+      }
+      else
+      {
+        upvar = frame.function->getUpvar(GET_A(ins));
+        std::cout << "capture outer upvar " << GET_A(ins) << " " << upvar->value() << std::endl;
+      }
+
+      function->setUpvar(i, upvar);
+    }
+    
+    /*
     // Capture the upvars.
     for (int i = 0; i < functionChunk->numUpvars(); i++)
     {
@@ -597,7 +626,8 @@ namespace magpie
 
       function->setUpvar(i, upvar);
     }
-
+    */
+    
     return function;
   }
 
@@ -609,6 +639,7 @@ namespace magpie
     return frame.stackStart + frame.function->chunk()->numSlots();
   }
 
+  /*
   void Fiber::closeUpvars()
   {
     int numSlots = numActiveSlots();
@@ -694,6 +725,7 @@ namespace magpie
     next_ = NULL;
     return next_;
   }
+   */
 
   void CatchFrame::reach()
   {

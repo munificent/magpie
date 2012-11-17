@@ -24,8 +24,8 @@ namespace magpie
 
     chunk_->setCode(code_, maxSlots_, 0);
 
-    std::cout << "module" << std::endl;
-    chunk_->debugTrace();
+    //std::cout << "module" << std::endl;
+    //chunk_->debugTrace();
 
     return chunk_;
   }
@@ -67,8 +67,8 @@ namespace magpie
 
     chunk_->setCode(code_, maxSlots_, function.resolved().closures().count());
 
-    std::cout << function << std::endl;
-    chunk_->debugTrace();
+    //std::cout << function << std::endl;
+    //chunk_->debugTrace();
 
     return chunk_;
   }
@@ -322,14 +322,21 @@ namespace magpie
 
     write(OP_FUNCTION, index, dest);
 
-    // Capture the closures.
+    // Capture variables from outer scopes.
     for (int i = 0; i < expr.resolved().closures().count(); i++)
     {
-      // Use different pseudo-opcodes to distinguish between closing over a
-      // local variable declared in the parent scope, or a closure.
-      const Closure& closure = expr.resolved().closures()[i];
-      OpCode op = closure.isLocal() ? OP_MOVE : OP_GET_UPVAR;
-      write(op, closure.slot());
+      int index = expr.resolved().closures()[i];
+      if (index == -1)
+      {
+        // This closure is a new one in this function so there's nothing to
+        // Capture. We just need to create a fresh upvar.
+        write(OP_MOVE, i);
+      }
+      else
+      {
+        // Capture the upvar from the outer scope.
+        write(OP_GET_UPVAR, i, index);
+      }
     }
   }
 
@@ -453,21 +460,21 @@ namespace magpie
 
   void ExprCompiler::visit(NameExpr& expr, int dest)
   {
-    ASSERT(expr.resolved().isResolved(),
+    ASSERT(expr.resolved()->isResolved(),
            "Names should be resolved before compiling.");
 
-    switch (expr.resolved().scope())
+    switch (expr.resolved()->scope())
     {
       case NAME_LOCAL:
-        write(OP_MOVE, expr.resolved().index(), dest);
+        write(OP_MOVE, expr.resolved()->index(), dest);
         break;
 
       case NAME_CLOSURE:
-        write(OP_GET_UPVAR, expr.resolved().index(), dest);
+        write(OP_GET_UPVAR, expr.resolved()->index(), dest);
         break;
 
       case NAME_MODULE:
-        write(OP_GET_VAR, expr.resolved().module(), expr.resolved().index(),
+        write(OP_GET_VAR, expr.resolved()->module(), expr.resolved()->index(),
               dest);
         break;
     }
@@ -751,25 +758,24 @@ namespace magpie
     releaseTemps(numTemps);
   }
 
-  void ExprCompiler::compileAssignment(const ResolvedName& resolved,
-                                         int value)
+  void ExprCompiler::compileAssignment(gc<ResolvedName> resolved, int value)
   {
-    ASSERT(resolved.isResolved(), "Must resolve before compiling.");
+    ASSERT(resolved->isResolved(), "Must resolve before compiling.");
 
-    switch (resolved.scope())
+    switch (resolved->scope())
     {
       case NAME_LOCAL:
         // Copy the value into the new variable.
-        write(OP_MOVE, value, resolved.index());
+        write(OP_MOVE, value, resolved->index());
         break;
 
       case NAME_CLOSURE:
-        ASSERT(false, "Compiling closures not impl.");
+        write(OP_SET_UPVAR, resolved->index(), value);
         break;
 
       case NAME_MODULE:
         // Assign to the top-level variable.
-        write(OP_SET_VAR, resolved.module(), resolved.index(), value);
+        write(OP_SET_VAR, resolved->module(), resolved->index(), value);
         break;
     }
   }

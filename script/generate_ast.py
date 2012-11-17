@@ -37,7 +37,7 @@ exprs = sorted({
         ('name',        'gc<String>'),
         ('isNative',    'bool'),
         ('fields',      'Array<gc<ClassField> >'),
-        ('resolved*',   'ResolvedName'),
+        ('resolved*',   'gc<ResolvedName>'),
         ('synthesizedMethods*', 'Array<gc<DefExpr> >')],
     'Def': [
         ('leftParam',   'gc<Pattern>'),
@@ -72,7 +72,7 @@ exprs = sorted({
         ('cases',       'Array<MatchClause>')],
     'Name': [
         ('name',        'gc<String>'),
-        ('resolved*',   'ResolvedName')],
+        ('resolved*',   'gc<ResolvedName>')],
     'Native': [
         ('name',        'gc<String>'),
         ('index*',      'int')],
@@ -115,7 +115,7 @@ patterns = sorted({
     'Variable': [
         ('name',        'gc<String>'),
         ('pattern',     'gc<Pattern>'),
-        ('resolved*',   'ResolvedName')],
+        ('resolved*',   'gc<ResolvedName>')],
     'Wildcard': []
 }.items())
 
@@ -124,7 +124,7 @@ lvalues = sorted({
         ('call',        'gc<CallExpr>')],
     'Name': [
         ('name',        'gc<String>'),
-        ('resolved*',   'ResolvedName')],
+        ('resolved*',   'gc<ResolvedName>')],
     'Record': [
         ('fields',      'Array<LValueField>')],
     'Wildcard': []

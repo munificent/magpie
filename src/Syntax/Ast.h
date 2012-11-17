@@ -127,16 +127,9 @@ namespace magpie
     NAME_MODULE
   };
 
-  class ResolvedName
+  class ResolvedName : public Managed
   {
   public:
-    // Creates a new unresolved name.
-    ResolvedName()
-    : scope_(NAME_LOCAL),
-      module_(-1),
-      index_(-1)
-    {}
-    
     // Resolves the name to a local variable with the given slot index.
     ResolvedName(int index)
     : scope_(NAME_LOCAL),
@@ -144,13 +137,6 @@ namespace magpie
       index_(index)
     {}
 
-    // Resolves the name to a variable with the given scope and slot index.
-    ResolvedName(NameScope scope, int index)
-    : scope_(scope),
-      module_(-1),
-      index_(index)
-    {}
-    
     // Resolves the name to a variable that is the given export from the given
     // import.
     ResolvedName(int module, int variable)
@@ -163,36 +149,18 @@ namespace magpie
     NameScope scope() const { return scope_; }
     int module() const { return module_; }
     int index() const { return index_; }
-    
+
+    // Marks this name as being a local variable that is accessed by an inner
+    // definition.
+    void makeClosure(int index) {
+      scope_ = NAME_CLOSURE;
+      index_ = index;
+    }
+
   private:
     NameScope scope_;
     int module_;
     int index_;
-  };
-
-  // A reference to a variable declared outside of the scope where it's used.
-  class Closure
-  {
-  public:
-    // Default constructor so we can use this in Arrays.
-    Closure()
-    : isLocal_(false),
-    slot_(-1)
-    {}
-
-    Closure(bool isLocal, int slot)
-    : isLocal_(isLocal),
-    slot_(slot)
-    {}
-
-    // True if this is capturing a local variable from the enclosing scope.
-    // False if it's capturing an upvar from the enclosing scope.
-    bool isLocal() const { return isLocal_; }
-    int slot() const { return slot_; }
-
-  private:
-    bool isLocal_;
-    int  slot_;
   };
 
   // Contains the information generated during resolution for something containg
@@ -201,23 +169,38 @@ namespace magpie
   {
   public:
     ResolvedProcedure()
-    : closures_(),
-      maxLocals_(-1)
+    : maxLocals_(-1),
+      closures_()
     {}
 
     bool isResolved() const { return maxLocals_ != -1; }
 
-    // The variables that this procedure accesses that are defined in outer
-    // scopes. These will become [Upvar]s at runtime.
-    Array<Closure>& closures() { return closures_; }
-    
     int maxLocals() const { return maxLocals_; }
-    void setMaxLocals(int maxLocals) { maxLocals_ = maxLocals; }
 
-  private:
-    Array<Closure> closures_;
+    // Every function has a list of "closures". These are variables that have
+    // non-local extent, either because they are accessed from an enclosing
+    // procedure or by an enclosed one. This keeps track of them. Each number
+    // here is a closure in this procedure's scope.
+    //
+    // If the number is -1, that means this closure exists purely so that an
+    // inner procedure can access it. From the perspective of this procedure,
+    // it is created from scratch.
+    //
+    // If the number is not -1, that means this closure is accessing a variable
+    // from an outer procedure. In that case, the number will be the index in
+    // that procedure's list of closures.
+    const Array<int>& closures() const { return closures_; }
+
+    void resolve(int maxLocals, const Array<int>& closures)
+    {
+      maxLocals_ = maxLocals;
+      closures_.addAll(closures);
+    }
     
+  private:
     int maxLocals_;
+
+    Array<int> closures_;
 
     NO_COPY(ResolvedProcedure);
   };

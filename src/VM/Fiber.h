@@ -126,6 +126,24 @@ namespace magpie
   class Upvar : public Managed
   {
   public:
+    Upvar()
+    {}
+
+    // Gets the value of the variable that the upvar is currently referencing.
+    gc<Object> value() { return value_; }
+
+    // Sets the value of the variable the upvar is referencing.
+    void setValue(gc<Object> value) { value_ = value; }
+
+  private:
+    gc<Object> value_;
+  };
+  
+  /*
+  // A closure: a reference to a variable declared in an outer scope.
+  class Upvar : public Managed
+  {
+  public:
     Upvar(int slot)
     : slot_(slot)
     {}
@@ -162,7 +180,8 @@ namespace magpie
     // correctly reuse the same upvar.
     gc<Upvar> next_;
   };
-
+  */
+  
   // Describes a block containing a "catch" clause that is currently on the
   // stack. When an error is thrown, this is used to jump to the appropriate
   // catch handler(s).
