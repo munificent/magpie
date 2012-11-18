@@ -73,7 +73,7 @@ namespace magpie
     // Attempts to resolve a name defined in a local variable scope. Returns
     // the index of the closure in this procedure if found, or -1 if the name
     // could not be resolved.
-    int resolveClosure(Resolver* resolver, gc<String> name);
+    int resolveClosure(gc<String> name);
     
     bool resolveTopLevelName(Module& module, NameExpr& expr);
 

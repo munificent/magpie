@@ -1,10 +1,14 @@
+var g = nothing
+
 do
-    print("before")
-    var func = do
-        var outer = "outer"
-        fn() print(outer)
+    var a = "outer"
+    var f = fn()
+        g = fn()
+            print(a)
+        end
     end
 
-    print(func)
-    func call // expect: outer
+    f call
 end
+
+g call

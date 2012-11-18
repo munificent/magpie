@@ -171,28 +171,22 @@ namespace magpie
     expr.setResolved(method);
   }
 
-  int Resolver::resolveClosure(Resolver* resolver, gc<String> name)
+  int Resolver::resolveClosure(gc<String> name)
   {
-    // find the resolver whose locals_ contains the name. that's where the name
-    // is defined. then we need to make that name available in this procedure.
-    //
-    // the resolver where the name is defined will need to turn that name into
-    // a closure (if it isn't already).
-    //
-    // in every child resolver (including this one), add a closure pointing to
-    // the parent closure. (unless there already is a closure that's pointing
-    // to that one.
-    //
-    // resolve the name to point to the closure in this resolver.
-
-    Resolver* parent = resolver->parent_;
-
     // If we walked all the way up the enclosing definitions and didn't find it,
     // then give up.
-    if (parent == NULL) return -1;
+    if (parent_ == NULL) return -1;
 
-    gc<ResolvedName> local = parent->findLocal(name);
-    if (!local.isNull())
+    int parentClosure;
+    
+    gc<ResolvedName> local = parent_->findLocal(name);
+    if (local.isNull())
+    {
+      // Couldn't find it in the parent procedure, so recurse upwards.
+      parentClosure = parent_->resolveClosure(name);
+      if (parentClosure == -1) return -1;
+    }
+    else
     {
       // Since we're closing over this, make sure the procedure where it's
       // defined knows it's a closure.
@@ -202,26 +196,33 @@ namespace magpie
         // eliminate its slot on the stack, even though this means it doesn't
         // get used. Ideally, we should.
         // It's not a closure in the parent yet, so make it one.
-        local->makeClosure(parent->closures_.count());
-        parent->closures_.add(-1);
+        parentClosure = parent_->closures_.count();
+        local->makeClosure(parentClosure);
+        parent_->closures_.add(-1);
       }
-
-      // Find an existing closure in this procedure that capture's the outer
-      // one.
-      int closure = resolver->closures_.indexOf(local->index());
-
-      // If we don't already have a closure, create one.
-      if (closure == -1)
+      else
       {
-        closure = resolver->closures_.count();
-        resolver->closures_.add(local->index());
+        ASSERT(local->scope() == NAME_CLOSURE,
+               "Local variable should be a closure.");
+        parentClosure = local->index();
       }
-
-      return closure;
     }
 
-    // TODO(bob): Recurse upwards.
-    return -1;
+    // If we got here, we've found the variable, and the parent procedure has
+    // captured it in a closure. Now we can just capture that closure in our
+    // scope.
+
+    // See if we've got it already.
+    int closure = closures_.indexOf(parentClosure);
+
+    // If we don't already have a closure, create one.
+    if (closure == -1)
+    {
+      closure = closures_.count();
+      closures_.add(parentClosure);
+    }
+
+    return closure;
   }
 
   bool Resolver::resolveTopLevelName(Module& module, NameExpr& expr)
@@ -460,7 +461,7 @@ namespace magpie
     }
 
     // See if it's a closure.
-    int closure = resolveClosure(this, expr.name());
+    int closure = resolveClosure(expr.name());
     if (closure != -1)
     {
       gc<ResolvedName> resolved = new ResolvedName(-1);
