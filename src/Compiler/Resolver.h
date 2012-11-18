@@ -30,7 +30,7 @@ namespace magpie
     gc<String> name_;
     gc<ResolvedName> resolved_;
   };
-  
+
   class Resolver : public ExprVisitor, private LValueVisitor
   {
     friend class Scope;
@@ -71,9 +71,9 @@ namespace magpie
     void resolveCall(CallExpr& expr, bool isLValue);
 
     // Attempts to resolve a name defined in a local variable scope. Returns
-    // the index of the upvar in the parent scope if found, or -1 if the name
+    // the index of the closure in this procedure if found, or -1 if the name
     // could not be resolved.
-    gc<ResolvedName> resolveClosure(Resolver* resolver, NameExpr& expr);
+    int resolveClosure(Resolver* resolver, gc<String> name);
     
     bool resolveTopLevelName(Module& module, NameExpr& expr);
 
