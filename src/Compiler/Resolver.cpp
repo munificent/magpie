@@ -179,8 +179,8 @@ namespace magpie
 
     int parentClosure;
     
-    gc<ResolvedName> local = parent_->findLocal(name);
-    if (local.isNull())
+    gc<ResolvedName> outer = parent_->findLocal(name);
+    if (outer.isNull())
     {
       // Couldn't find it in the parent procedure, so recurse upwards.
       parentClosure = parent_->resolveClosure(name);
@@ -190,21 +190,21 @@ namespace magpie
     {
       // Since we're closing over this, make sure the procedure where it's
       // defined knows it's a closure.
-      if (local->scope() == NAME_LOCAL)
+      if (outer->scope() == NAME_LOCAL)
       {
         // TODO(bob): When we transform this local into a closure, we don't
         // eliminate its slot on the stack, even though this means it doesn't
         // get used. Ideally, we should.
         // It's not a closure in the parent yet, so make it one.
         parentClosure = parent_->closures_.count();
-        local->makeClosure(parentClosure);
+        outer->makeClosure(parentClosure);
         parent_->closures_.add(-1);
       }
       else
       {
-        ASSERT(local->scope() == NAME_CLOSURE,
+        ASSERT(outer->scope() == NAME_CLOSURE,
                "Local variable should be a closure.");
-        parentClosure = local->index();
+        parentClosure = outer->index();
       }
     }
 
@@ -595,9 +595,9 @@ namespace magpie
   
   void Resolver::visit(NameLValue& lvalue, int dummy)
   {
-    // Look up the variable.
+    // Look up the variable in this procedure.
     gc<ResolvedName> resolved = findLocal(lvalue.name());
-    
+
     // TODO(bob): Report error if variable is immutable.
 
     if (!resolved.isNull())
@@ -606,8 +606,17 @@ namespace magpie
       return;
     }
 
-    // TODO(bob): Handle closures.
-    
+    // See if it's a closure.
+    int closure = resolveClosure(lvalue.name());
+    if (closure != -1)
+    {
+      // TODO(bob): Report error if variable is immutable.
+      gc<ResolvedName> resolved = new ResolvedName(-1);
+      resolved->makeClosure(closure);
+      lvalue.setResolved(resolved);
+      return;
+    }
+
     // Not a local variable. See if it's a top-level one.
     int module = compiler_.getModuleIndex(module_);
     int index = module_.findVariable(lvalue.name());

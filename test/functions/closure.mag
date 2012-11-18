@@ -1,7 +1,18 @@
 // Access variable in an outer scope.
 do
-    val outer = "outer"
-    (fn() print(outer)) call // expect: outer
+    val a = "access"
+    (fn() print(a)) call // expect: access
+end
+
+// Assign a variable in an outer scope.
+do
+    var a = "before"
+    fn()
+        print(a) // expect: before
+        a = "after"
+        print(a) // expect: after
+    end call
+    print(a) // expect: after
 end
 
 // Access closed over variable after it goes out of scope.
@@ -16,23 +27,23 @@ end
 
 // Access variable from distant outer scope.
 do
-    var fn3 = nothing
-    val fn1 = fn()
+    var f = nothing
+    fn()
         val outer1 = "outer1"
-        val fn2 = fn()
+        fn()
             val outer2 = "outer2"
-            fn3 = fn()
+            f = fn()
                 print(outer1)
                 print(outer2)
             end
-        end
-    end
-    fn3 call
+        end call
+    end call
+    f call
     // expect: outer1
     // expect: outer2
 end
 
-// Assign to a closed over variable.
+// Share variable across multiple closures.
 do
     val append, display = do
         var value = "value"

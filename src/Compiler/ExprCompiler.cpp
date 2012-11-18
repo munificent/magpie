@@ -25,7 +25,6 @@ namespace magpie
     compile(module, maxLocals, NULL, NULL, NULL, body);
 
     chunk_->setCode(code_, maxSlots_, numClosures);
-
     return chunk_;
   }
 
@@ -65,10 +64,6 @@ namespace magpie
             NULL, function.body());
 
     chunk_->setCode(code_, maxSlots_, function.resolved().closures().count());
-
-    //std::cout << function << std::endl;
-    //chunk_->debugTrace();
-
     return chunk_;
   }
 
@@ -775,12 +770,12 @@ namespace magpie
       {
         // This closure is a new one in this function so there's nothing to
         // Capture. We just need to create a fresh upvar.
-        write(OP_MOVE, i);
+        write(OP_MOVE);
       }
       else
       {
         // Capture the upvar from the outer scope.
-        write(OP_GET_UPVAR, i, index);
+        write(OP_GET_UPVAR, index);
       }
     }
   }
