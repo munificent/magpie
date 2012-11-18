@@ -1,0 +1,12 @@
+// TODO(bob): Descending ranges?
+
+for i in 2..5 do print(i)
+// expect: 2
+// expect: 3
+// expect: 4
+// expect: 5
+
+for i in 2...5 do print(i)
+// expect: 2
+// expect: 3
+// expect: 4

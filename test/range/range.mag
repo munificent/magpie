@@ -1,0 +1,31 @@
+do
+    var range = Range new(first: 2, last: 5)
+    print(range class) // expect: Range
+    print(range first) // expect: 2
+    print(range last) // expect: 5
+    print(range inclusive) // expect: true
+end
+
+do
+    var range = Range new(first: -2, last: -5, inclusive: false)
+    print(range class) // expect: Range
+    print(range first) // expect: -2
+    print(range last) // expect: -5
+    print(range inclusive) // expect: false
+end
+
+do
+    var range = 2..5
+    print(range class) // expect: Range
+    print(range first) // expect: 2
+    print(range last) // expect: 5
+    print(range inclusive) // expect: true
+end
+
+do
+    var range = 2...5
+    print(range class) // expect: Range
+    print(range first) // expect: 2
+    print(range last) // expect: 5
+    print(range inclusive) // expect: false
+end

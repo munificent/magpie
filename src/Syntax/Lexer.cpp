@@ -340,7 +340,7 @@ namespace magpie
     }
     
     // Read the fractional part, if any.
-    if (peek() == '.')
+    if ((peek() == '.') && (isDigit(peek(1))))
     {
       advance();
       while (isDigit(peek())) advance();

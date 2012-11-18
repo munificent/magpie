@@ -85,3 +85,37 @@ def (iterator is ListIterator) next
     iterator index = iterator index + 1
     iterator index < iterator list count
 end
+
+defclass Range
+    val first is Num
+    val last is Num
+    val inclusive is Bool
+end
+
+def (== Range) new(first: first is Num, last: last is Num)
+    Range new(first: first, last: last, inclusive: true)
+end
+
+def (first is Num) .. (last is Num)
+    Range new(first: first, last: last)
+end
+
+def (first is Num) ... (last is Num)
+    Range new(first: first, last: last, inclusive: false)
+end
+
+def (range is Range) iterate
+    var last = range last
+    if not range inclusive  then last = last - 1
+    RangeIterator new(current: range first - 1, last: last)
+end
+
+defclass RangeIterator
+    var current is Num
+    val last is Num
+end
+
+def (iterator is RangeIterator) next
+    iterator current = iterator current + 1
+    iterator current <= iterator last
+end
