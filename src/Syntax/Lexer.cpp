@@ -308,6 +308,7 @@ namespace magpie
     else if (*text == "fn"      ) type = TOKEN_FN;
     else if (*text == "for"     ) type = TOKEN_FOR;
     else if (*text == "if"      ) type = TOKEN_IF;
+    else if (*text == "import"  ) type = TOKEN_IMPORT;
     else if (*text == "in"      ) type = TOKEN_IN;
     else if (*text == "is"      ) type = TOKEN_IS;
     else if (*text == "match"   ) type = TOKEN_MATCH;

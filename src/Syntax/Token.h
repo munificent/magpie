@@ -46,6 +46,7 @@ namespace magpie
     TOKEN_FN,
     TOKEN_FOR,
     TOKEN_IF,
+    TOKEN_IMPORT,
     TOKEN_IN,
     TOKEN_IS,
     TOKEN_MATCH,

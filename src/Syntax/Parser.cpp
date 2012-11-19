@@ -54,6 +54,7 @@ namespace magpie
     { &Parser::function,NULL, -1 },                                    // TOKEN_FN
     { NULL,             NULL, -1 },                                    // TOKEN_FOR
     { NULL,             NULL, -1 },                                    // TOKEN_IF
+    { NULL,             NULL, -1 },                                    // TOKEN_IMPORT
     { NULL,             NULL, -1 },                                    // TOKEN_IN
     { NULL,             &Parser::is, PRECEDENCE_IS },                  // TOKEN_IS
     { NULL,             NULL, -1 },                                    // TOKEN_MATCH
