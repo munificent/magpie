@@ -1,0 +1,40 @@
+do
+    val fns = []
+    for i in 1..4 do fns add(fn() print(i))
+    for func in fns do func call
+    // expect: 1
+    // expect: 2
+    // expect: 3
+    // expect: 4
+end
+
+// Access variable declared outside of loop.
+do
+    val fns = []
+    var i = 1
+    while i < 5 do
+        fns add(fn() print(i))
+        i = i + 1
+    end
+    for func in fns do func call
+    // expect: 5
+    // expect: 5
+    // expect: 5
+    // expect: 5
+end
+
+// Access variable declared inside loop.
+do
+    val fns = []
+    var i = 1
+    while i < 5 do
+        var j = i
+        fns add(fn() print(j))
+        i = i + 1
+    end
+    for func in fns do func call
+    // expect: 1
+    // expect: 2
+    // expect: 3
+    // expect: 4
+end

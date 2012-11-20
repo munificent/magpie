@@ -277,12 +277,7 @@ namespace magpie
   
   gc<Object> VM::runModule(Module* module)
   {
-    // TODO(bob): Hackish. Find a cleaner place/way to do this.
-    gc<FunctionObject> function = new FunctionObject(module->body());
-    for (int i = 0; i < module->body()->numUpvars(); i++)
-    {
-      function->setUpvar(i, new Upvar());
-    }
+    gc<FunctionObject> function = FunctionObject::create(module->body());
 
     // Pretend we just finished a fiber so we can kick off the "next" one.
     scheduler_.add(new Fiber(*this, function));

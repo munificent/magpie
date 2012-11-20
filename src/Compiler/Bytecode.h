@@ -89,6 +89,8 @@ namespace magpie
     OP_GET_UPVAR,
 
     // Sets an upvar. A is the index of the upvar. Gets the value from slot B.
+    // If C is 1 then a new upvar is created, otherwise, the existing one is
+    // assigned.
     OP_SET_UPVAR,
     
     OP_EQUAL, // R(C) = RC(A) == RC(B)

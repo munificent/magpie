@@ -294,7 +294,7 @@ namespace magpie
     write(OP_CONSTANT, index, dest);
 
     // Also store it in its named variable.
-    compileAssignment(expr.resolved(), dest);
+    compileAssignment(expr.resolved(), dest, true);
 
     // Compile the synthesized stuff.
     for (int i = 0; i < expr.synthesizedMethods().count(); i++)
@@ -609,7 +609,7 @@ namespace magpie
 
   void ExprCompiler::visit(NameLValue& lvalue, int value)
   {
-    compileAssignment(lvalue.resolved(), value);
+    compileAssignment(lvalue.resolved(), value, false);
   }
 
   void ExprCompiler::visit(RecordLValue& lvalue, int value)
@@ -743,7 +743,8 @@ namespace magpie
     releaseTemps(numTemps);
   }
 
-  void ExprCompiler::compileAssignment(gc<ResolvedName> resolved, int value)
+  void ExprCompiler::compileAssignment(gc<ResolvedName> resolved, int value,
+                                       bool isCreate)
   {
     ASSERT(resolved->isResolved(), "Must resolve before compiling.");
 
@@ -755,7 +756,7 @@ namespace magpie
         break;
 
       case NAME_CLOSURE:
-        write(OP_SET_UPVAR, resolved->index(), value);
+        write(OP_SET_UPVAR, resolved->index(), value, isCreate ? 1 : 0);
         break;
 
       case NAME_MODULE:
@@ -767,20 +768,24 @@ namespace magpie
 
   void ExprCompiler::compileClosures(ResolvedProcedure& procedure)
   {
-    // Capture variables from outer scopes.
+    // When a procedure is created, it needs to capture references to any
+    // variables declared outside of itself that it (or one of its nested
+    // procedures) accesses. We do this by compiling a series of
+    // pseudo-instructions. Each one describes which upvar from the outer
+    // procedure should be captured.
     for (int i = 0; i < procedure.closures().count(); i++)
     {
       int index = procedure.closures()[i];
       if (index == -1)
       {
         // This closure is a new one in this function so there's nothing to
-        // Capture. We just need to create a fresh upvar.
-        write(OP_MOVE);
+        // Capture. So just add a "do nothing" pseudo-op.
+        write(OP_GET_UPVAR, 0, 0, 0);
       }
       else
       {
         // Capture the upvar from the outer scope.
-        write(OP_GET_UPVAR, index);
+        write(OP_GET_UPVAR, index, 0, 1);
       }
     }
   }
@@ -949,7 +954,7 @@ namespace magpie
 
   void PatternCompiler::visit(VariablePattern& pattern, int value)
   {
-    compiler_.compileAssignment(pattern.resolved(), value);
+    compiler_.compileAssignment(pattern.resolved(), value, true);
 
     // Compile the inner pattern.
     if (!pattern.pattern().isNull())

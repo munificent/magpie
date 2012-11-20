@@ -251,13 +251,6 @@ namespace magpie
     // they should be initialized after this by calling setUpvar().
     static gc<FunctionObject> create(gc<Chunk> chunk);
 
-    // This is public so it can be called explicitly to create functions where
-    // we know there are no upvars.
-    FunctionObject(gc<Chunk> chunk)
-    : Object(),
-      chunk_(chunk)
-    {}
-
     virtual ObjectType type() const { return OBJECT_FUNCTION; }
 
     virtual gc<ClassObject> getClass(VM& vm) const;
@@ -274,6 +267,11 @@ namespace magpie
     virtual void reach();
 
   private:
+    FunctionObject(gc<Chunk> chunk)
+    : Object(),
+      chunk_(chunk)
+    {}
+
     gc<Chunk> chunk_;
     gc<Upvar> upvars_[FLEXIBLE_SIZE];
 

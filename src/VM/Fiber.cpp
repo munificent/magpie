@@ -232,7 +232,16 @@ namespace magpie
 
         case OP_SET_UPVAR:
         {
-          gc<Upvar> upvar = frame.function->getUpvar(GET_A(ins));
+          gc<Upvar> upvar;
+          if (GET_C(ins) == 1)
+          {
+            upvar = new Upvar();
+            frame.function->setUpvar(GET_A(ins), upvar);
+          }
+          else
+          {
+            upvar = frame.function->getUpvar(GET_A(ins));
+          }
           gc<Object> object = load(frame, GET_B(ins));
           upvar->setValue(object);
           break;
@@ -362,7 +371,7 @@ namespace magpie
           gc<Chunk> method = vm_.getMultimethod(GET_A(ins));
           // TODO(bob): Wrapping this in a function here is lame, especially
           // since methods don't need any upvars.
-          gc<FunctionObject> function = new FunctionObject(method);
+          gc<FunctionObject> function = FunctionObject::create(method);
 
           int firstArg = GET_B(ins);
           int stackStart = frame.stackStart + firstArg;
@@ -568,26 +577,20 @@ namespace magpie
     gc<Chunk> functionChunk = chunk.getChunk(chunkSlot);
     gc<FunctionObject> function = FunctionObject::create(functionChunk);
 
-    // Capture/create the upvars.
+    // Capture any needed upvars from the enclosing procedure.
+    // TODO(bob): If most of the upvars are not captured, we could do something
+    // more efficient here than a series of essentially no-op
+    // pseudo-instructions.
     for (int i = 0; i < functionChunk->numUpvars(); i++)
     {
       instruction ins = chunk.code()[frame.ip++];
-      OpCode upvarOp = GET_OP(ins);
+      ASSERT(GET_OP(ins) == OP_GET_UPVAR, "Bad closure pseudo-instruction.");
 
-      ASSERT(upvarOp == OP_MOVE || upvarOp == OP_GET_UPVAR,
-             "Bad closure pseudo-instruction.");
-
-      gc<Upvar> upvar;
-      if (upvarOp == OP_MOVE)
+      if (GET_C(ins) == 1)
       {
-        upvar = new Upvar();
+        gc<Upvar> upvar = frame.function->getUpvar(GET_A(ins));
+        function->setUpvar(i, upvar);
       }
-      else
-      {
-        upvar = frame.function->getUpvar(GET_A(ins));
-      }
-
-      function->setUpvar(i, upvar);
     }
 
     return function;
