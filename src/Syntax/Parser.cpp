@@ -343,6 +343,21 @@ namespace magpie
       
       return new DefClassExpr(spanFrom(start), name->text(), isNative, fields);
     }
+
+    if (match(TOKEN_IMPORT))
+    {
+      Array<gc<String> > name;
+      do
+      {
+        const char* firstError = "Expect name after 'import'.";
+        const char* restError = "Expect name after '.' in import.";
+        gc<Token> namePart = consume(TOKEN_NAME,
+            name.count() == 0 ? firstError : restError);
+        name.add(namePart->text());
+      } while (match(TOKEN_DOT));
+
+      return new ImportExpr(spanFrom(start), name);
+    }
     
     return statementLike();
   }

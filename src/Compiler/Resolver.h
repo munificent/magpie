@@ -97,6 +97,7 @@ namespace magpie
     virtual void visit(ForExpr& expr, int dummy);
     virtual void visit(GetFieldExpr& expr, int dummy);
     virtual void visit(IfExpr& expr, int dummy);
+    virtual void visit(ImportExpr& expr, int dummy);
     virtual void visit(IsExpr& expr, int dummy);
     virtual void visit(ListExpr& expr, int dummy);
     virtual void visit(MatchExpr& expr, int dummy);

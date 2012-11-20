@@ -15,6 +15,7 @@ class FnExpr;
 class ForExpr;
 class GetFieldExpr;
 class IfExpr;
+class ImportExpr;
 class IsExpr;
 class ListExpr;
 class MatchExpr;
@@ -61,6 +62,7 @@ public:
   virtual void visit(ForExpr& node, int arg) = 0;
   virtual void visit(GetFieldExpr& node, int arg) = 0;
   virtual void visit(IfExpr& node, int arg) = 0;
+  virtual void visit(ImportExpr& node, int arg) = 0;
   virtual void visit(IsExpr& node, int arg) = 0;
   virtual void visit(ListExpr& node, int arg) = 0;
   virtual void visit(MatchExpr& node, int arg) = 0;
@@ -113,6 +115,7 @@ public:
   virtual ForExpr* asForExpr() { return NULL; }
   virtual GetFieldExpr* asGetFieldExpr() { return NULL; }
   virtual IfExpr* asIfExpr() { return NULL; }
+  virtual ImportExpr* asImportExpr() { return NULL; }
   virtual IsExpr* asIsExpr() { return NULL; }
   virtual ListExpr* asListExpr() { return NULL; }
   virtual MatchExpr* asMatchExpr() { return NULL; }
@@ -623,6 +626,35 @@ private:
   gc<Expr> thenArm_;
   gc<Expr> elseArm_;
   NO_COPY(IfExpr);
+};
+
+class ImportExpr : public Expr
+{
+public:
+  ImportExpr(const SourcePos& pos, const Array<gc<String> >& name)
+  : Expr(pos),
+    name_(name)
+  {}
+
+  virtual void accept(ExprVisitor& visitor, int arg)
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual ImportExpr* asImportExpr() { return this; }
+
+  const Array<gc<String> >& name() const { return name_; }
+
+  virtual void reach()
+  {
+    name_.reach();
+  }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  Array<gc<String> > name_;
+  NO_COPY(ImportExpr);
 };
 
 class IsExpr : public Expr

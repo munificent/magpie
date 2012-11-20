@@ -412,6 +412,11 @@ namespace magpie
 
     ifScope.end();
   }
+
+  void Resolver::visit(ImportExpr& expr, int dummy)
+  {
+    ASSERT(false, "Not implemented.");
+  }
   
   void Resolver::visit(IsExpr& expr, int dummy)
   {

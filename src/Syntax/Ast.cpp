@@ -144,6 +144,19 @@ namespace magpie
       out << " else " << elseArm_ << ")";
     }
   }
+
+  void ImportExpr::trace(std::ostream& out) const
+  {
+    out << "(import ";
+
+    for (int i = 0; i < name_.count(); i++)
+    {
+      if (i > 0) out << ".";
+      out << name_[i];
+    }
+
+    out << ")";
+  }
   
   void IsExpr::trace(std::ostream& out) const
   {

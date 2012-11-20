@@ -402,6 +402,11 @@ namespace magpie
     endJump(jumpPastElse, OP_JUMP, 1);
   }
 
+  void ExprCompiler::visit(ImportExpr& expr, int dest)
+  {
+    ASSERT(false, "Not implemented.");
+  }
+
   void ExprCompiler::visit(IsExpr& expr, int dest)
   {
     compile(expr.value(), dest);
