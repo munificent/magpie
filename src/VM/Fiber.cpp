@@ -70,7 +70,8 @@ namespace magpie
         {
           int firstSlot = GET_A(ins);
           gc<RecordType> type = vm_.getRecordType(GET_B(ins));
-          gc<Object> record = RecordObject::create(type, stack_, firstSlot);
+          gc<Object> record = RecordObject::create(type, stack_,
+              frame.stackStart + firstSlot);
           store(frame, GET_C(ins), record);
           break;
         }

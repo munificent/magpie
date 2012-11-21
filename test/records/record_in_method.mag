@@ -1,0 +1,8 @@
+// Regression test. Records were being constructed from the stack
+// without taking into account the current frame's stack start.
+def foo(arg)
+    var i = 3, 4
+    print(i) // expect: (3, 4)
+end
+
+foo("arg")
