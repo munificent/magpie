@@ -2,7 +2,7 @@ var channel = Channel new
 async
     print("before send")
     channel send("sent value")
-    print("should not get here")
+    print("after send")
 end
 
 print("before receive")
@@ -13,3 +13,6 @@ print("after receive")
 // expect: before send
 // expect: sent value
 // expect: after receive
+// expect: after send
+// TODO(bob): Is "after send" what we want here? Should it stop after
+// the main fiber completes?
