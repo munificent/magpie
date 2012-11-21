@@ -1,0 +1,85 @@
+defclass Tree
+    val left
+    var right
+end
+
+def (tree is Tree) toString
+    "(" + tree left toString + " " + tree right toString + ")"
+end
+
+def tree(left, right)
+    Tree new(left: left, right: right)
+end
+
+def (tree is Tree) iterate
+    var channel = Channel new
+    async
+        tree walk(channel)
+        channel send("DONE")
+    end
+    ChannelIterator new(current: nothing, channel: channel)
+end
+
+def (obj) walk(channel is Channel)
+    channel send(obj)
+end
+
+def (tree is Tree) walk(channel is Channel)
+    tree left walk(channel)
+    tree right walk(channel)
+end
+
+defclass ChannelIterator
+    var current
+    val channel
+end
+
+def (iterator is ChannelIterator) next
+    iterator current = iterator channel receive
+    iterator current != "DONE" // HACK: Using sentinel value.
+end
+
+def (zip is ZipIterator) next
+    // TODO(bob): There's some kind of bug in the compiler where it's doing
+    // something wrong with the slots. If you get rid of some of these locals,
+    // it starts putting values in the wrong slots.
+    var a = zip iterator1 next
+    var b = zip iterator2 next
+    match a and b
+        case true then
+            var c = zip iterator1 current
+            var d = zip iterator2 current
+            var e = c, d
+            zip current = e
+            true
+        else false
+    end
+end
+
+defclass ZipIterable
+    val iterable1
+    val iterable2
+end
+
+def (zip is ZipIterable) iterate
+    ZipIterator new(current: nothing,
+                    iterator1: zip iterable1 iterate,
+                    iterator2: zip iterable2 iterate)
+end
+
+defclass ZipIterator
+    var current
+    val iterator1
+    val iterator2
+end
+
+def zip(a, b)
+    ZipIterable new(iterable1: a, iterable2: b)
+end
+
+var a = tree(tree(1, 2), tree(3, tree(4, 5)))
+var b = tree(tree(1, tree(2, 3)), tree(4, 5))
+print(a)
+print(b)
+
+for i, j in zip(a, b) do print(i + " " + j)

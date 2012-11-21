@@ -60,7 +60,10 @@ namespace magpie
     gc<Fiber> fiber = receivers_.removeAt(0);
     fiber->storeReturn(value);
     vm.addFiber(fiber);
-    
+
+    // Add the sender back to the scheduler too since it isn't blocked.
+    vm.addFiber(sender);
+
     return true;
   }
 

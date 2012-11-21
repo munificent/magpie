@@ -1,14 +1,12 @@
-var g = nothing
-
-do
-    var a = "outer"
-    var f = fn()
-        g = fn()
-            print(a)
-        end
+def (n) foo
+    var channel = Channel new
+    async
+        print("before")
+        channel send(n)
+        print("after")
     end
-
-    f call
+    channel
 end
 
-g call
+var ch = 123 foo
+print(ch receive)
