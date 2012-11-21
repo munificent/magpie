@@ -1,0 +1,20 @@
+// Close over a local in a method.
+def makeFn()
+    val a = "value"
+    fn() print(a)
+end
+
+do
+    val f = makeFn()
+    f call // expect: value
+end
+
+// Close over method parameters.
+def closeOverParams(a, b)
+    fn() print(a + b)
+end
+
+do
+    val f = closeOverParams("first", "second")
+    f call // expect: firstsecond
+end

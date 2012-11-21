@@ -10,6 +10,7 @@
 namespace magpie
 {
   class DefExpr;
+  class FunctionObject;
   class Module;
   class Object;
   class Pattern;
@@ -40,8 +41,8 @@ namespace magpie
     int numSlots() const { return numSlots_; }
     int numUpvars() const { return numUpvars_; }
     
-    void debugTrace() const;
-    void debugTrace(instruction ins) const;
+    void debugTrace(VM& vm) const;
+    void debugTrace(VM& vm, instruction ins) const;
 
     virtual void reach();
 
@@ -108,7 +109,7 @@ namespace magpie
     Multimethod(gc<String> signature);
 
     gc<String> signature() { return signature_; }
-    gc<Chunk> getChunk(VM& vm);
+    gc<FunctionObject> getFunction(VM& vm);
 
     Array<gc<Method> >& methods() { return methods_; }
 
@@ -126,7 +127,7 @@ namespace magpie
     MethodOrder unifyOrders(const Array<MethodOrder>& orders);
 
     gc<String> signature_;
-    gc<Chunk> chunk_;
+    gc<FunctionObject> function_;
     Array<gc<Method> > methods_;
   };
 

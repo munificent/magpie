@@ -138,50 +138,7 @@ namespace magpie
   private:
     gc<Object> value_;
   };
-  
-  /*
-  // A closure: a reference to a variable declared in an outer scope.
-  class Upvar : public Managed
-  {
-  public:
-    Upvar(int slot)
-    : slot_(slot)
-    {}
-
-    int slot() const
-    {
-      ASSERT(value_.isNull(), "Cannot get the slot for a closed upvar.");
-      return slot_;
-    }
-
-    gc<Upvar> next() { return next_; }
-    void setNext(gc<Upvar> next) { next_ = next; }
-
-    // Gets the value of the variable that the upvar is currently referencing.
-    gc<Object> getValue(Array<gc<Object> >& stack);
-
-    // Sets the value of the variable the upvar is referencing.
-    void setValue(Array<gc<Object> >& stack, gc<Object> value);
-
-    // Captures the variable from the stack and closese over it.
-    gc<Upvar> close(Array<gc<Object> >& stack);
     
-  private:
-    // The index of the slot holding the variable. Will only be valid if the
-    // upvar hasn't been closed yet.
-    int slot_;
-
-    // If the upvar is closed, this will be the closed over variable's value.
-    // Otherwise, it will be null.
-    gc<Object> value_;
-
-    // Closed upvars are stored in a linked list accessible by the fiber. This
-    // ensures that multiple references to the same closed-over variable can
-    // correctly reuse the same upvar.
-    gc<Upvar> next_;
-  };
-  */
-  
   // Describes a block containing a "catch" clause that is currently on the
   // stack. When an error is thrown, this is used to jump to the appropriate
   // catch handler(s).

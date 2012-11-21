@@ -11,6 +11,7 @@
 namespace magpie
 {
   class ClassObject;
+  class FunctionObject;
   class Expr;
   class Module;
   class ModuleAst;
@@ -74,7 +75,7 @@ namespace magpie
     int declareMultimethod(gc<String> signature);
     int findMultimethod(gc<String> signature);
     void defineMethod(int multimethod, methodId method);
-    gc<Chunk> getMultimethod(int multimethod);
+    gc<Multimethod> getMultimethod(int multimethod);
 
     // Adds a new fiber to the scheduler.
     void addFiber(gc<Fiber> fiber);

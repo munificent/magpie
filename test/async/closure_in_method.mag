@@ -1,0 +1,26 @@
+val channel = Channel new
+
+// Close over a local in a method.
+def makeAsync()
+    val a = "value"
+    async
+        channel send(a)
+    end
+end
+
+do
+    makeAsync()
+    print(channel receive) // expect: value
+end
+
+// Close over method parameters.
+def closeOverParams(a, b)
+    async
+        channel send(a + b)
+    end
+end
+
+do
+    closeOverParams("first", "second")
+    print(channel receive) // expect: firstsecond
+end

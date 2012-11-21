@@ -230,10 +230,9 @@ namespace magpie
     multimethods_[multimethod]->addMethod(methods_[method]);
   }
 
-  gc<Chunk> VM::getMultimethod(int multimethodId)
+  gc<Multimethod> VM::getMultimethod(int multimethodId)
   {
-    gc<Multimethod> multimethod = multimethods_[multimethodId];
-    return multimethod->getChunk(*this);
+    return multimethods_[multimethodId];
   }
 
   void VM::addFiber(gc<Fiber> fiber)

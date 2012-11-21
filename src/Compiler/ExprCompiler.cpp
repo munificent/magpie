@@ -35,6 +35,8 @@ namespace magpie
     // executed) we need one slot to load and throw the NoMethodError.
     maxSlots_ = 1;
 
+    int numClosures = 0;
+
     // TODO(bob): Lots of work needed here:
     // - Support call-next-method.
     // - Detect pattern collisions.
@@ -46,15 +48,16 @@ namespace magpie
               method->resolved().maxLocals(),
               method->leftParam(), method->rightParam(), method->value(),
               method->body());
+
+      // Keep track of the total number of closures we need.
+      numClosures = MAX(numClosures, method->resolved().closures().count());
     }
 
     // If we get here, all methods failed to match, so throw a NoMethodError.
     write(OP_BUILT_IN, 3, 0);
     write(OP_THROW, 0);
 
-    // TODO(bob): If we ever allow nested methods, will need to handle upvars
-    // here.
-    chunk_->setCode(code_, maxSlots_, 0);
+    chunk_->setCode(code_, maxSlots_, numClosures);
     return chunk_;
   }
 
@@ -144,6 +147,13 @@ namespace magpie
       // the variable itself because the calling convention ensures its value
       // is already in the right slot.
       compiler.compile(variable->pattern(), slot);
+
+      // If we closed over the parameter, then we don't want in a local slot,
+      // we want it in the upvar, so create it and copy the value up.
+      if (variable->resolved()->scope() == NAME_CLOSURE)
+      {
+        write(OP_SET_UPVAR, variable->resolved()->index(), slot, 1);
+      }
     }
     else
     {

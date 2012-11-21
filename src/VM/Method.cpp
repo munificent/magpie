@@ -3,6 +3,7 @@
 #include "Method.h"
 #include "MagpieString.h"
 #include "Object.h"
+#include "VM.h"
 
 namespace magpie
 {
@@ -41,7 +42,7 @@ namespace magpie
     return chunks_[index];
   }
   
-  void Chunk::debugTrace() const
+  void Chunk::debugTrace(VM& vm) const
   {
     using namespace std;
     
@@ -49,11 +50,11 @@ namespace magpie
     
     for (int i = 0; i < code_.count(); i++)
     {
-      debugTrace(code_[i]);
+      debugTrace(vm, code_[i]);
     }
   }
   
-  void Chunk::debugTrace(instruction ins) const
+  void Chunk::debugTrace(VM& vm, instruction ins) const
   {
     using namespace std;
     
@@ -64,7 +65,9 @@ namespace magpie
         break;
         
       case OP_CONSTANT:
-        cout << "CONSTANT        " << GET_A(ins) << " -> " << GET_B(ins);
+        cout << "CONSTANT        "
+             << GET_A(ins) << " -> " << GET_B(ins)
+             << " \"" << constants_[GET_A(ins)] << "\"";
         break;
         
       case OP_BUILT_IN:
@@ -72,7 +75,9 @@ namespace magpie
         break;
         
       case OP_METHOD:
-        cout << "METHOD          " << GET_A(ins) << " <- " << GET_B(ins);
+        cout << "METHOD          "
+             << GET_A(ins) << " <- " << GET_B(ins)
+             << " \"" << vm.getMultimethod(GET_A(ins))->signature() << "\"";
         break;
         
       case OP_RECORD:
@@ -148,8 +153,13 @@ namespace magpie
         break;
         
       case OP_CALL:
-        cout << "CALL            " << GET_A(ins) << "(" << GET_B(ins) << ") -> " << GET_C(ins);
+      {
+        gc<Multimethod> method = vm.getMultimethod(GET_A(ins));
+        cout << "CALL            "
+             << GET_A(ins) << "(" << GET_B(ins) << ") -> "
+             << GET_C(ins) << " \"" << method->signature() << "\"";
         break;
+      }
         
       case OP_NATIVE:
         cout << "NATIVE          " << GET_A(ins) << "(" << GET_B(ins) << ") -> " << GET_C(ins);
@@ -191,7 +201,7 @@ namespace magpie
 
   Multimethod::Multimethod(gc<String> signature)
   : signature_(signature),
-    chunk_(),
+    function_(),
     methods_()
   {}
   
@@ -200,29 +210,30 @@ namespace magpie
     methods_.add(method);
     
     // Clear out the code since it needs to be recompiled.
-    chunk_ = NULL;
+    function_ = NULL;
   }
   
-  gc<Chunk> Multimethod::getChunk(VM& vm)
+  gc<FunctionObject> Multimethod::getFunction(VM& vm)
   {
     // Re-compile if methods have been defined since the last time this was
     // called.
-    if (chunk_.isNull())
+    if (function_.isNull())
     {
       // Determine their specialization order.
       sort(vm);
       ErrorReporter reporter;
       
-      chunk_ = Compiler::compileMultimethod(vm, reporter, *this);
+      gc<Chunk> chunk = Compiler::compileMultimethod(vm, reporter, *this);
+      function_ = FunctionObject::create(chunk);
     }
     
-    return chunk_;
+    return function_;
   }
 
   void Multimethod::reach()
   {
     signature_.reach();
-    chunk_.reach();
+    function_.reach();
     methods_.reach();
   }
 

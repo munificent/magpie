@@ -207,7 +207,7 @@ namespace magpie
 
             if (!throwError(error)) return FIBER_UNCAUGHT_ERROR;
           }
-          
+
           store(frame, GET_C(ins), object);
           break;
         }
@@ -368,11 +368,9 @@ namespace magpie
           
         case OP_CALL:
         {
-          gc<Chunk> method = vm_.getMultimethod(GET_A(ins));
-          // TODO(bob): Wrapping this in a function here is lame, especially
-          // since methods don't need any upvars.
-          gc<FunctionObject> function = FunctionObject::create(method);
-
+          gc<Multimethod> multimethod = vm_.getMultimethod(GET_A(ins));
+          gc<FunctionObject> function = multimethod->getFunction(vm_);
+          
           int firstArg = GET_B(ins);
           int stackStart = frame.stackStart + firstArg;
           call(function, stackStart);
