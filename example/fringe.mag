@@ -1,37 +1,12 @@
-defclass Tree
-    val left
-    var right
-end
-
-def (tree is Tree) toString
-    "(" + tree left toString + " " + tree right toString + ")"
-end
-
-def tree(left, right)
-    Tree new(left: left, right: right)
-end
-
-def (tree is Tree) iterate
-    var channel = Channel new
-    async
-        tree walk(channel)
-        channel send("DONE")
-    end
-    ChannelIterator new(current: nothing, channel: channel)
-end
-
-def (obj) walk(channel is Channel)
-    channel send(obj)
-end
-
-def (tree is Tree) walk(channel is Channel)
-    tree left walk(channel)
-    tree right walk(channel)
-end
-
+// A generic iterator that reads from a channel until a "DONE" sentinel
+// value is sent.
 defclass ChannelIterator
     var current
     val channel
+end
+
+def (== ChannelIterator) new(channel is Channel)
+    ChannelIterator new(current: nothing, channel: channel)
 end
 
 def (iterator is ChannelIterator) next
@@ -39,21 +14,12 @@ def (iterator is ChannelIterator) next
     iterator current != "DONE" // HACK: Using sentinel value.
 end
 
+// A generic iterator for iterating over a pair of iterables together.
 def (zip is ZipIterator) next
-    // TODO(bob): There's some kind of bug in the compiler where it's doing
-    // something wrong with the slots. If you get rid of some of these locals,
-    // it starts putting values in the wrong slots.
-    var a = zip iterator1 next
-    var b = zip iterator2 next
-    match a and b
-        case true then
-            var c = zip iterator1 current
-            var d = zip iterator2 current
-            var e = c, d
-            zip current = e
-            true
-        else false
-    end
+    if zip iterator1 next and zip iterator2 next then
+        zip current = zip iterator1 current, zip iterator2 current
+        true
+    else false
 end
 
 defclass ZipIterable
@@ -77,9 +43,43 @@ def zip(a, b)
     ZipIterable new(iterable1: a, iterable2: b)
 end
 
+// A basic binary tree class.
+defclass Tree
+    val left
+    var right
+end
+
+def (tree is Tree) toString
+    "(" + tree left toString + " " + tree right toString + ")"
+end
+
+def tree(left, right)
+    Tree new(left: left, right: right)
+end
+
+def (tree is Tree) iterate
+    var channel = Channel new
+    async
+        tree walk(channel)
+        channel send("DONE")
+    end
+    ChannelIterator new(channel)
+end
+
+def (obj) walk(channel is Channel)
+    channel send(obj)
+end
+
+def (tree is Tree) walk(channel is Channel)
+    tree left walk(channel)
+    tree right walk(channel)
+end
+
+// Create two tree with different shapes.
 var a = tree(tree(1, 2), tree(3, tree(4, 5)))
 var b = tree(tree(1, tree(2, 3)), tree(4, 5))
 print(a)
 print(b)
 
+// Traverse their fringe in parallel.
 for i, j in zip(a, b) do print(i + " " + j)
