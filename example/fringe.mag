@@ -1,17 +1,3 @@
-// A generic iterator that reads from a channel until a "DONE" sentinel
-// value is sent.
-defclass ChannelIterator
-    val channel
-end
-
-def (== ChannelIterator) new(channel is Channel)
-    ChannelIterator new(channel: channel)
-end
-
-def (iterator is ChannelIterator) advance
-    iterator channel receive
-end
-
 // A generic iterator for iterating over a pair of iterables together.
 def (zip is ZipIterator) advance
     val value1 = zip iterator1 advance
@@ -58,9 +44,9 @@ def (tree is Tree) iterate
     var channel = Channel new
     async
         tree walk(channel)
-        channel send(done)
+        channel close
     end
-    ChannelIterator new(channel)
+    channel
 end
 
 def (obj) walk(channel is Channel)

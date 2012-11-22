@@ -1,0 +1,42 @@
+// TODO(bob):
+// - Sending to a closed channel.
+
+// Closing a channel is immediate if there are no blocked receivers.
+do
+    val channel = Channel new
+    print(channel isOpen) // expect: true
+    channel close
+    print(channel isOpen) // expect: false
+end
+
+// Returns nothing.
+do
+    val channel = Channel new
+    print(channel close) // expect: nothing
+end
+
+// Do nothing if already closed.
+do
+    val channel = Channel new
+    channel close
+    channel close
+    channel close
+    print(channel isOpen) // expect: false
+end
+
+// Receive "done" from a closed channel.
+do
+    val channel = Channel new
+    async
+        channel send("one")
+        channel send("two")
+        channel send("three")
+        channel close
+    end
+    print(channel receive) // expect: one
+    print(channel receive) // expect: two
+    print(channel receive) // expect: three
+    print(channel receive) // expect: done
+    print(channel receive) // expect: done
+    print(channel receive) // expect: done
+end

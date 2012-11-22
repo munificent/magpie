@@ -139,8 +139,15 @@ namespace magpie
   {
   public:
     ChannelObject()
-    : Object()
+    : Object(),
+      isOpen_(true)
     {}
+
+    bool isOpen() const { return isOpen_; }
+
+    // Sends the 'done' sentinel and closes the channel. Returns true if the
+    // sending fiber should be suspended.
+    bool close(VM& vm, gc<Fiber> sender);
 
     // Takes a previously sent value and returns it to [receiver]. If no value
     // has been sent yet, returns NULL.
@@ -162,6 +169,8 @@ namespace magpie
     virtual void reach();
 
   private:
+    bool isOpen_;
+    
     // If a value is sent before a receiver is blocking, this in-flight value.
     gc<Object> sentValue_;
 

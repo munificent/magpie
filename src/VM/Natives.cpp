@@ -91,6 +91,27 @@ namespace magpie
     return new StringObject(String::format("%g", n));
   }
 
+  NATIVE(channelClose)
+  {
+    ChannelObject* channel = args[0]->asChannel();
+
+    if (channel->close(vm, &fiber))
+    {
+      result = NATIVE_RESULT_SUSPEND;
+      return NULL;
+    }
+    else
+    {
+      return vm.nothing();
+    }
+  }
+  
+  NATIVE(channelIsOpen)
+  {
+    ChannelObject* channel = args[0]->asChannel();
+    return vm.getBool(channel->isOpen());
+  }
+
   NATIVE(channelNew)
   {
     return new ChannelObject();
@@ -122,7 +143,7 @@ namespace magpie
     result = NATIVE_RESULT_SUSPEND;
     return NULL;
   }
-
+  
   NATIVE(functionCall)
   {
     result = NATIVE_RESULT_CALL;

@@ -1,0 +1,4 @@
+val channel = Channel new
+print(channel class) // expect: Channel
+print(channel is Channel) // expect: true
+print(channel isOpen) // expect: true

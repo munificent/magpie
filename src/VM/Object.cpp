@@ -23,8 +23,28 @@ namespace magpie
     return String::create(value_ ? "true" : "false");
   }
 
+  bool ChannelObject::close(VM& vm, gc<Fiber> sender)
+  {
+    if (!isOpen_) return false;
+    isOpen_ = false;
+
+    // If no one is listening, close immediately.
+    if (receivers_.count() == 0) return false;
+
+    // Otherwise send 'done' to the receiver.
+    // TODO(bob): What if there are multiple receivers?
+    send(vm, sender, vm.getBuiltIn(BUILT_IN_DONE));
+    return true;
+  }
+
   gc<Object> ChannelObject::receive(VM& vm, gc<Fiber> receiver)
   {
+    // If the channel is closed, immediately receive 'done'.
+    if (!isOpen_)
+    {
+      return vm.getBuiltIn(BUILT_IN_DONE);
+    }
+
     if (sentValue_.isNull())
     {
       // There isn't a value already available, so suspend the receiver.

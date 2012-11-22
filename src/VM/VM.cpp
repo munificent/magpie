@@ -40,6 +40,8 @@ namespace magpie
     DEF_NATIVE(numGreaterThanEqualToNum);
     DEF_NATIVE(stringCount);
     DEF_NATIVE(numToString);
+    DEF_NATIVE(channelClose);
+    DEF_NATIVE(channelIsOpen);
     DEF_NATIVE(channelNew);
     DEF_NATIVE(channelReceive);
     DEF_NATIVE(channelSend);

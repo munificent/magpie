@@ -26,6 +26,8 @@ namespace magpie
   NATIVE(numGreaterThanEqualToNum);
   NATIVE(stringCount);
   NATIVE(numToString);
+  NATIVE(channelClose);
+  NATIVE(channelIsOpen);
   NATIVE(channelNew);
   NATIVE(channelReceive);
   NATIVE(channelSend);

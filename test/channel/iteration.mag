@@ -1,0 +1,12 @@
+val channel = Channel new
+
+async
+    for i in 1..4 do channel send(i)
+    channel send(done) // TODO(bob): close
+end
+
+for i in channel do print(i)
+// expect: 1
+// expect: 2
+// expect: 3
+// expect: 4

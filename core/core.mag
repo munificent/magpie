@@ -23,6 +23,10 @@ end
 
 val done = Done new
 
+def (is Done) toString
+    "done"
+end
+
 def (is Num) + (is Num) native "numPlusNum"
 def (is Num) - (is Num) native "numMinusNum"
 def (is Num) * (is Num) native "numTimesNum"
@@ -60,9 +64,20 @@ def (false) toString "false"
 def (is Num) toString native "numToString"
 def (s is String) toString s
 
+def (is Channel) close native "channelClose"
+def (is Channel) isOpen native "channelIsOpen"
 def (== Channel) new native "channelNew"
-def (is Channel) send(value) native "channelSend"
 def (is Channel) receive native "channelReceive"
+def (is Channel) send(value) native "channelSend"
+
+// Channels are themselves iterators, so iterating it returns itself.
+def (channel is Channel) iterate
+    channel
+end
+
+def (channel is Channel) advance
+    channel receive
+end
 
 // TODO(bob): How should different argument patterns be handled?
 def (is Function) call native "functionCall"
