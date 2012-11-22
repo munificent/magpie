@@ -50,7 +50,7 @@ namespace magpie
           
         case OP_BUILT_IN:
         {
-          int value = GET_A(ins);
+          BuiltIn value = static_cast<BuiltIn>(GET_A(ins));
           int slot = GET_B(ins);
           store(frame, slot, vm_.getBuiltIn(value));
           break;

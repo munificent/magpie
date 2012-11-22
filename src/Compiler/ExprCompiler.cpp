@@ -337,11 +337,8 @@ namespace magpie
     int iterateMethod = compiler_.findMethod(String::create("0:iterate"));
     ASSERT(iterateMethod != -1, "Should have 'iterate' method in core.");
 
-    int nextMethod = compiler_.findMethod(String::create("0:next"));
-    ASSERT(nextMethod != -1, "Should have 'next' method in core.");
-
-    int currentMethod = compiler_.findMethod(String::create("0:current"));
-    ASSERT(currentMethod != -1, "Should have 'current' method in core.");
+    int advanceMethod = compiler_.findMethod(String::create("0:advance"));
+    ASSERT(advanceMethod != -1, "Should have 'advance' method in core.");
 
     // Evaluate the iteratable expression.
     int iterator = makeTemp();
@@ -354,14 +351,16 @@ namespace magpie
 
     int loopStart = startJumpBack();
 
-    // Call "next" on the iterator.
-    write(OP_CALL, nextMethod, iterator, dest);
+    // Call "advance" on the iterator.
+    write(OP_CALL, advanceMethod, iterator, dest);
 
-    // If false, jump to exit.
+    // If done, jump to exit.
+    int doneSlot = makeTemp();
+    write(OP_BUILT_IN, BUILT_IN_DONE, doneSlot);
+    write(OP_EQUAL, dest, doneSlot, doneSlot);
+
     int loopExit = startJump();
-
-    // Call "current" on the iterator.
-    write(OP_CALL, currentMethod, iterator, dest);
+    releaseTemp(); // doneSlot.
 
     // Match on the loop pattern.
     compile(expr.pattern(), dest);
@@ -370,7 +369,7 @@ namespace magpie
     compile(expr.body(), dest);
 
     endJumpBack(loopStart);
-    endJump(loopExit, OP_JUMP_IF_FALSE, dest);
+    endJump(loopExit, OP_JUMP_IF_TRUE, doneSlot);
 
     releaseTemp(); // iterator.
 

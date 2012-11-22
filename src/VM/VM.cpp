@@ -73,6 +73,9 @@ namespace magpie
     registerClass(noMatchErrorClass_, "NoMatchError");
     registerClass(noMethodErrorClass_, "NoMethodError");
     registerClass(undefinedVarErrorClass_, "UndefinedVarError");
+
+    int index = coreModule_->findVariable(String::create("done"));
+    done_ = coreModule_->getVariable(index);
   }
 
   bool VM::loadModule(const char* fileName, gc<String> source)
@@ -117,6 +120,7 @@ namespace magpie
     true_.reach();
     false_.reach();
     nothing_.reach();
+    done_.reach();
     symbols_.reach();
     methods_.reach();
     
@@ -126,13 +130,15 @@ namespace magpie
     }
   }
 
-  gc<Object> VM::getBuiltIn(int value) const
+  gc<Object> VM::getBuiltIn(BuiltIn value) const
   {
     switch (value) {
-      case 0: return false_;
-      case 1: return true_;
-      case 2: return nothing_;
-      case 3: return DynamicObject::create(noMethodErrorClass_);
+      case BUILT_IN_FALSE: return false_;
+      case BUILT_IN_TRUE: return true_;
+      case BUILT_IN_NOTHING: return nothing_;
+      case BUILT_IN_NO_METHOD:
+        return DynamicObject::create(noMethodErrorClass_);
+      case BUILT_IN_DONE: return done_;
     }
 
     ASSERT(false, "Unknown built-in ID.");

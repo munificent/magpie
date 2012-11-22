@@ -58,7 +58,7 @@ namespace magpie
       return value ? true_ : false_;
     }
     
-    gc<Object> getBuiltIn(int value) const;
+    gc<Object> getBuiltIn(BuiltIn value) const;
 
     int findNative(gc<String> name);
     Native getNative(int index) const { return natives_[index]; }
@@ -106,10 +106,11 @@ namespace magpie
     Array<gc<Multimethod> > multimethods_;
 
     Scheduler scheduler_;
-    
+
     gc<Object> true_;
     gc<Object> false_;
     gc<Object> nothing_;
+    gc<Object> done_;
     gc<ClassObject> boolClass_;
     gc<ClassObject> channelClass_;
     gc<ClassObject> classClass_;

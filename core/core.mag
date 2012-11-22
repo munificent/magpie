@@ -17,6 +17,12 @@ end
 defclass UndefinedVarError
 end
 
+// TODO(bob): Make native so users can't construct their own instances.
+defclass Done
+end
+
+val done = Done new
+
 def (is Num) + (is Num) native "numPlusNum"
 def (is Num) - (is Num) native "numMinusNum"
 def (is Num) * (is Num) native "numTimesNum"
@@ -77,13 +83,13 @@ def (list is List) iterate
     ListIterator new(list: list, index: -1)
 end
 
-def (iterator is ListIterator) current
-    iterator list[iterator index]
-end
-
-def (iterator is ListIterator) next
+def (iterator is ListIterator) advance
     iterator index = iterator index + 1
-    iterator index < iterator list count
+    if iterator index >= iterator list count then
+        done
+    else
+        iterator list[iterator index]
+    end
 end
 
 defclass Range
@@ -115,7 +121,10 @@ defclass RangeIterator
     val last is Num
 end
 
-def (iterator is RangeIterator) next
-    iterator current = iterator current + 1
-    iterator current <= iterator last
+def (iterator is RangeIterator) advance
+    if iterator current + 1 > iterator last then
+        done
+    else
+        iterator current = iterator current + 1
+    end
 end

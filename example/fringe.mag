@@ -1,25 +1,24 @@
 // A generic iterator that reads from a channel until a "DONE" sentinel
 // value is sent.
 defclass ChannelIterator
-    var current
     val channel
 end
 
 def (== ChannelIterator) new(channel is Channel)
-    ChannelIterator new(current: nothing, channel: channel)
+    ChannelIterator new(channel: channel)
 end
 
-def (iterator is ChannelIterator) next
-    iterator current = iterator channel receive
-    iterator current != "DONE" // HACK: Using sentinel value.
+def (iterator is ChannelIterator) advance
+    iterator channel receive
 end
 
 // A generic iterator for iterating over a pair of iterables together.
-def (zip is ZipIterator) next
-    if zip iterator1 next and zip iterator2 next then
-        zip current = zip iterator1 current, zip iterator2 current
-        true
-    else false
+def (zip is ZipIterator) advance
+    val value1 = zip iterator1 advance
+    if value1 == done then return done
+    val value2 = zip iterator2 advance
+    if value2 == done then return done
+    value1, value2
 end
 
 defclass ZipIterable
@@ -28,13 +27,11 @@ defclass ZipIterable
 end
 
 def (zip is ZipIterable) iterate
-    ZipIterator new(current: nothing,
-                    iterator1: zip iterable1 iterate,
+    ZipIterator new(iterator1: zip iterable1 iterate,
                     iterator2: zip iterable2 iterate)
 end
 
 defclass ZipIterator
-    var current
     val iterator1
     val iterator2
 end
@@ -61,7 +58,7 @@ def (tree is Tree) iterate
     var channel = Channel new
     async
         tree walk(channel)
-        channel send("DONE")
+        channel send(done)
     end
     ChannelIterator new(channel)
 end

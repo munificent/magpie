@@ -141,9 +141,11 @@ namespace magpie
   
   enum BuiltIn
   {
-    BUILT_IN_FALSE   = 0,
-    BUILT_IN_TRUE    = 1,
-    BUILT_IN_NOTHING = 2
+    BUILT_IN_FALSE     = 0,
+    BUILT_IN_TRUE      = 1,
+    BUILT_IN_NOTHING   = 2,
+    BUILT_IN_NO_METHOD = 3,
+    BUILT_IN_DONE      = 4
   };
   
   typedef unsigned int instruction;
