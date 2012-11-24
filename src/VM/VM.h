@@ -29,8 +29,8 @@ namespace magpie
 
     virtual void reachRoots();
     
-    void init(gc<String> coreSource);
-    bool loadModule(const char* fileName, gc<String> source);
+    bool init();
+    bool runProgram(gc<String> path);
     
     gc<Object> evaluateReplExpression(gc<Expr> expr);
     
@@ -83,11 +83,11 @@ namespace magpie
   private:
     // Parses the given module source file. Returns null if there was a syntax
     // error.
-    gc<ModuleAst> parseModule(const char* fileName, gc<String> source);
+    gc<ModuleAst> parseModule(gc<String> path, gc<String> source);
     
     void registerClass(gc<ClassObject>& classObj, const char* name);
     
-    Module* compileModule(const char* fileName, gc<String> source);    
+    Module* compileModule(gc<String> path, gc<String> source);    
     
     gc<Object> runModule(Module* module);
     

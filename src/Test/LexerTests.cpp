@@ -14,7 +14,8 @@ namespace magpie
   void LexerTests::create()
   {
     gc<String> source = String::create("()[]{}");
-    Lexer lexer("", source);
+    gc<String> file = String::create("<file>");
+    Lexer lexer(file, source);
 
     gc<Token> token = lexer.readToken();
     EXPECT_EQUAL(TOKEN_LEFT_PAREN, token->type());
@@ -44,7 +45,8 @@ namespace magpie
   void LexerTests::stringLiteral()
   {
     gc<String> source = String::create("\"st\\nr\"");
-    Lexer lexer("", source);
+    gc<String> file = String::create("<file>");
+    Lexer lexer(file, source);
     
     gc<Token> token = lexer.readToken();
     EXPECT_EQUAL(TOKEN_STRING, token->type());

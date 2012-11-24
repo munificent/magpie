@@ -1,17 +1,18 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <cstring>
+#include <fstream>
 
 #include "Macros.h"
 #include "Environment.h"
 
 namespace magpie
 {
-  void getCoreLibPath(char* path, uint32_t length)
+  gc<String> getCoreLibPath()
   {
-    char* relativePath = new char[length];
+    char* relativePath[MAX_PATH];
 
-    GetModuleFileName(NULL, relativePath, length);
+    GetModuleFileName(NULL, relativePath, MAX_PATH);
     ASSERT(GetLastError() != ERROR_INSUFFICIENT_BUFFER, "Executable path too long.")
 
     // Cut off file name from path
@@ -34,14 +35,44 @@ namespace magpie
     if (strstr(relativePath, "Debug") != 0 ||
         strstr(relativePath, "Release") != 0)
     {
-      strncat(relativePath, "/..", length);
+      strncat(relativePath, "/..", MAX_PATH);
     }
 
     // Add library path.
-    strncat(relativePath, "/core/core.mag", length);
+    strncat(relativePath, "/core/core.mag", MAX_PATH);
 
     // Canonicalize the path.
-    _fullpath(path, relativePath, length);
-    delete[] relativePath;
+    char* path[MAX_PATH];
+    _fullpath(path, relativePath, MAX_PATH);
+    return String::create(path);
+  }
+
+  // Reads a file from the given path into a String.
+  gc<String> readFile(gc<String> path)
+  {
+    // TODO(bob): Use platform-native API for this.
+    using namespace std;
+
+    ifstream stream(path->cString());
+
+    if (stream.fail())
+    {
+      cerr << "Could not open file '" << path << "'." << endl;
+      return gc<String>();
+    }
+
+    // From: http://stackoverflow.com/questions/2602013/read-whole-ascii-file-into-c-stdstring.
+    string str;
+
+    // Allocate a std::string big enough for the file.
+    stream.seekg(0, ios::end);
+    str.reserve(stream.tellg());
+    stream.seekg(0, ios::beg);
+
+    // Read it in.
+    str.assign((istreambuf_iterator<char>(stream)),
+               istreambuf_iterator<char>());
+
+    return String::create(str.c_str());
   }
 }

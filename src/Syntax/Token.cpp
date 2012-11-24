@@ -3,7 +3,7 @@
 
 namespace magpie
 {
-  SourcePos::SourcePos(const char* file, int startLine, int startCol,
+  SourcePos::SourcePos(gc<String> file, int startLine, int startCol,
                        int endLine, int endCol)
   : file_(file),
     startLine_(startLine),

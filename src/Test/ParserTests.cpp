@@ -15,7 +15,7 @@ namespace magpie
   {
     gc<String> source = String::create("def foo()\n1+2*3 and 4/5+6%7\nend");
     ErrorReporter reporter;
-    Parser parser("", source, reporter);
+    Parser parser(String::create("<file>"), source, reporter);
     gc<ModuleAst> module = parser.parseModule();
     
     gc<String> text = module->toString();

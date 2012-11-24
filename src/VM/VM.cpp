@@ -1,6 +1,7 @@
 #include "VM.h"
 #include "Compiler.h"
 #include "ErrorReporter.h"
+#include "Environment.h"
 #include "Module.h"
 #include "Natives.h"
 #include "Object.h"
@@ -57,10 +58,14 @@ namespace magpie
     nothing_ = new NothingObject();
   }
 
-  void VM::init(gc<String> coreSource)
+  bool VM::init()
   {
+    gc<String> corePath = getCoreLibPath();
+    gc<String> coreSource = readFile(corePath);
+    if (coreSource.isNull()) return false;
+
     // Load the core module.
-    coreModule_ = compileModule("<core>", coreSource);
+    coreModule_ = compileModule(corePath, coreSource);
     runModule(coreModule_);
     
     registerClass(boolClass_, "Bool");
@@ -78,13 +83,16 @@ namespace magpie
 
     int index = coreModule_->findVariable(String::create("done"));
     done_ = coreModule_->getVariable(index);
+
+    return true;
   }
 
-  bool VM::loadModule(const char* fileName, gc<String> source)
+  bool VM::runProgram(gc<String> path)
   {
-    Module* module = compileModule(fileName, source);
+    gc<String> source = readFile(path);
+    Module* module = compileModule(path, source);
     if (module == NULL) return false;
-    
+
     runModule(module);
     return true;
   }
@@ -93,7 +101,7 @@ namespace magpie
   {
     if (replModule_ == NULL)
     {
-      replModule_ = new Module();
+      replModule_ = new Module(String::create("<repl>"));
       modules_.add(replModule_);
       
       // Implicitly import core.
@@ -248,10 +256,10 @@ namespace magpie
     scheduler_.add(fiber);
   }
 
-  gc<ModuleAst> VM::parseModule(const char* fileName, gc<String> source)
+  gc<ModuleAst> VM::parseModule(gc<String> path, gc<String> source)
   {
     ErrorReporter reporter;
-    Parser parser(fileName, source, reporter);
+    Parser parser(path, source, reporter);
     gc<ModuleAst> moduleAst = parser.parseModule();
     
     if (reporter.numErrors() > 0) return gc<ModuleAst>();
@@ -265,13 +273,13 @@ namespace magpie
     classObj = coreModule_->getVariable(index)->asClass();
   }
   
-  Module* VM::compileModule(const char* fileName, gc<String> source)
+  Module* VM::compileModule(gc<String> path, gc<String> source)
   {
     // Parse it.
-    gc<ModuleAst> ast = parseModule(fileName, source);
+    gc<ModuleAst> ast = parseModule(path, source);
     if (ast.isNull()) return NULL;
     
-    Module* module = new Module();
+    Module* module = new Module(path);
     modules_.add(module);
     
     // Compile it.

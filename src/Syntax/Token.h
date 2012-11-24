@@ -78,10 +78,11 @@ namespace magpie
   class SourcePos
   {
   public:
-    SourcePos(const char* file, int startLine, int startCol,
+    // TODO(bob): How should we manage memory for the file here?
+    SourcePos(gc<String> file, int startLine, int startCol,
               int endLine, int endCol);
     
-    const char* file() const { return file_; }
+    gc<String> file() const { return file_; }
     int startLine() const { return startLine_; }
     int startCol() const { return startCol_; }
     int endLine() const { return endLine_; }
@@ -91,7 +92,7 @@ namespace magpie
 
   private:
     // The name of the source file containing this position.
-    const char* file_;
+    gc<String> file_;
     
     int startLine_;
     int startCol_;

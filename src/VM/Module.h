@@ -13,8 +13,9 @@ namespace magpie
   class Module
   {
   public:
-    Module()
-    : body_(),
+    Module(gc<String> path)
+    : path_(path),
+      body_(),
       imports_(),
       variables_(),
       variableNames_()
@@ -41,6 +42,9 @@ namespace magpie
     void setVariable(int index, gc<Object> value);
     
   private:
+    // The path to the file the module was loaded from.
+    gc<String> path_;
+
     // The code compromising a module is compiled to a fake method so that
     // loading a module is basically just executing a function call.
     gc<Chunk> body_;

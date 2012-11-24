@@ -12,7 +12,7 @@ namespace magpie
   public:
     // TODO(bob): Need to do something better for the strings here. Right now,
     // the lexer isn't a root.
-    Lexer(const char* fileName, gc<String> source)
+    Lexer(gc<String> fileName, gc<String> source)
     : fileName_(fileName),
       source_(source),
       pos_(0),
@@ -56,7 +56,7 @@ namespace magpie
     gc<Token> readOperator();
     gc<Token> readString();
 
-    const char* fileName_;
+    gc<String> fileName_;
     gc<String> source_;
     int     pos_;
     int     start_;
