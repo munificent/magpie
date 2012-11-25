@@ -13,9 +13,30 @@
 
 namespace magpie
 {
+  // TODO(bob): Move somewhere else?
+  struct ImportGraph
+  {
+    // Default constructor so we can use it in Array.
+    ImportGraph()
+    : module(NULL)
+    {}
+
+    ImportGraph(Module* module)
+    : module(module),
+    imports()
+    {
+      for (int i = 0; i < module->imports().count(); i++)
+      {
+        imports.add(module->imports()[i]);
+      }
+    }
+
+    Module* module;
+    Array<Module*> imports;
+  };
+  
   VM::VM()
   : modules_(),
-    coreModule_(NULL),
     replModule_(NULL),
     nativeNames_(),
     natives_(),
@@ -26,6 +47,7 @@ namespace magpie
   {
     Memory::initialize(this, 1024 * 1024 * 2); // TODO(bob): Use non-magic number.
     
+    DEF_NATIVE(bindCore);
     DEF_NATIVE(objectClass);
     DEF_NATIVE(objectNew);
     DEF_NATIVE(objectToString);
@@ -58,16 +80,8 @@ namespace magpie
     nothing_ = new NothingObject();
   }
 
-  bool VM::init()
+  void VM::bindCore()
   {
-    gc<String> corePath = getCoreLibPath();
-    gc<String> coreSource = readFile(corePath);
-    if (coreSource.isNull()) return false;
-
-    // Load the core module.
-    coreModule_ = compileModule(corePath, coreSource);
-    runModule(coreModule_);
-    
     registerClass(boolClass_, "Bool");
     registerClass(channelClass_, "Channel");
     registerClass(classClass_, "Class");
@@ -81,33 +95,116 @@ namespace magpie
     registerClass(noMethodErrorClass_, "NoMethodError");
     registerClass(undefinedVarErrorClass_, "UndefinedVarError");
 
-    int index = coreModule_->findVariable(String::create("done"));
-    done_ = coreModule_->getVariable(index);
-
-    return true;
+    Module* core = coreModule();
+    int index = core->findVariable(String::create("done"));
+    done_ = core->getVariable(index);
   }
 
   bool VM::runProgram(gc<String> path)
   {
-    gc<String> source = readFile(path);
-    Module* module = compileModule(path, source);
-    if (module == NULL) return false;
+    // TODO(bob): What should the logical name of the entrypoint module be?
+    // If we're going to allow circular imports, it should be something
+    // canonical like "foo.bar" so that we can tell when we've circled back to
+    // it.
+    Module* entrypoint = addModule(path, path);
+    if (entrypoint == NULL) return false;
 
-    runModule(module);
+    // Sort the modules by their imports so that dependencies are run before
+    // modules that depend on them.
+    // See: http://en.wikipedia.org/wiki/Topological_sorting
+    // Clone the import graph so we can destructively modify it.
+    // TODO(bob): This does lots of array copies since ImportGraph stores an
+    // array directly. Do something smarter here.
+    Array<ImportGraph> graph;
+    for (int i = 0; i < modules_.count(); i++)
+    {
+      graph.add(ImportGraph(modules_[i]));
+    }
+
+    Array<Module*> modules;
+    while (graph.count() > 0)
+    {
+      bool madeProgress = false;
+      for (int i = 0; i < graph.count(); i++)
+      {
+        // See if all of this module's imports are accounted for.
+        if (graph[i].imports.count() == 0)
+        {
+          // They are, so it's ready to process.
+          modules.add(graph[i].module);
+
+          // And now everything that imports it doesn't have to worry about it
+          // anymore.
+          for (int j = 0; j < graph.count(); j++)
+          {
+            for (int k = 0; k < graph[j].imports.count(); k++)
+            {
+              if (graph[j].imports[k] == graph[i].module)
+              {
+                graph[j].imports.removeAt(k);
+                k--;
+              }
+            }
+          }
+
+          graph.removeAt(i);
+          i--;
+          madeProgress = true;
+        }
+      }
+
+      // Bail if there is an import cycle.
+      // TODO(bob): Better error-handling.
+      if (!madeProgress) return false;
+    }
+    
+    // Run each loaded module.
+    for (int i = 0; i < modules.count(); i++)
+    {
+      Module* module = modules[i];
+
+      // Compile it.
+      if (!module->compile(*this)) return false;
+
+      runModule(module);
+    }
+
     return true;
   }
-  
+
+  void VM::importModule(Module* from, gc<String> name)
+  {
+    // Locate the path to the module.
+    // TODO(bob): Do something real here!
+    // TODO(bob): Should check to see if the module is already loaded before
+    // looking up the path to it here.
+    gc<String> path;
+    if (*name == "core")
+    {
+      path = getCoreLibPath();
+    }
+    else
+    {
+      path = String::create("core/foo.mag");
+    }
+
+    Module* module = addModule(name, path);
+    if (module == NULL) return;
+
+    from->imports().add(module);
+  }
+
   gc<Object> VM::evaluateReplExpression(gc<Expr> expr)
   {
     if (replModule_ == NULL)
     {
-      replModule_ = new Module(String::create("<repl>"));
+      replModule_ = new Module(String::create("<repl>"), String::create(""));
       modules_.add(replModule_);
       
       // Implicitly import core.
-      replModule_->imports().add(coreModule_);
+      importModule(replModule_, String::create("core"));
     }
-    
+
     // Compile it.
     ErrorReporter reporter;
     Compiler::compileExpression(*this, reporter, expr, replModule_);
@@ -256,37 +353,25 @@ namespace magpie
     scheduler_.add(fiber);
   }
 
-  gc<ModuleAst> VM::parseModule(gc<String> path, gc<String> source)
+  Module* VM::addModule(gc<String> name, gc<String> path)
   {
-    ErrorReporter reporter;
-    Parser parser(path, source, reporter);
-    gc<ModuleAst> moduleAst = parser.parseModule();
-    
-    if (reporter.numErrors() > 0) return gc<ModuleAst>();
-    
-    return moduleAst;
-  }
+    // Make sure it hasn't already been added.
+    // TODO(bob): Could make modules_ a hash table for performance.
+    for (int i = 0; i < modules_.count(); i++)
+    {
+      if (modules_[i]->name() == name)
+      {
+        return modules_[i];
+      }
+    }
 
-  void VM::registerClass(gc<ClassObject>& classObj, const char* name)
-  {
-    int index = coreModule_->findVariable(String::create(name));
-    classObj = coreModule_->getVariable(index)->asClass();
-  }
-  
-  Module* VM::compileModule(gc<String> path, gc<String> source)
-  {
-    // Parse it.
-    gc<ModuleAst> ast = parseModule(path, source);
-    if (ast.isNull()) return NULL;
-    
-    Module* module = new Module(path);
+    Module* module = new Module(name, path);
     modules_.add(module);
     
-    // Compile it.
-    ErrorReporter reporter;
-    Compiler::compileModule(*this, reporter, ast, module);
-    if (reporter.numErrors() > 0) return NULL;
-    
+    if (!module->parse()) return NULL;
+
+    module->addImports(*this);
+
     return module;
   }
   
@@ -330,6 +415,24 @@ namespace magpie
 
       result = fiber->run(value);
     }
+  }
+
+  void VM::registerClass(gc<ClassObject>& classObj, const char* name)
+  {
+    Module* core = coreModule();
+    int index = core->findVariable(String::create(name));
+    classObj = core->getVariable(index)->asClass();
+  }
+
+  Module* VM::coreModule()
+  {
+    for (int i = 0; i < modules_.count(); i++)
+    {
+      if (*modules_[i]->name() == "core") return modules_[i];
+    }
+
+    ASSERT(false, "Could not find core module.");
+    return NULL;
   }
 }
 

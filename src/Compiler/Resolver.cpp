@@ -415,7 +415,7 @@ namespace magpie
 
   void Resolver::visit(ImportExpr& expr, int dummy)
   {
-    ASSERT(false, "Not implemented.");
+    // Nothing to do.
   }
   
   void Resolver::visit(IsExpr& expr, int dummy)

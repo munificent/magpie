@@ -11,6 +11,7 @@
 
 namespace magpie
 {
+  NATIVE(bindCore);
   NATIVE(objectClass);
   NATIVE(objectNew);
   NATIVE(objectToString);

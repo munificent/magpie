@@ -143,3 +143,7 @@ def (iterator is RangeIterator) advance
         iterator current = iterator current + 1
     end
 end
+
+// Now that everything is defined, wire it up to the VM.
+def _bindCore() native "bindCore"
+_bindCore()

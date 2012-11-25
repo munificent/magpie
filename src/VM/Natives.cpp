@@ -6,6 +6,12 @@
 
 namespace magpie
 {
+  NATIVE(bindCore)
+  {
+    vm.bindCore();
+    return vm.nothing();
+  }
+
   NATIVE(objectClass)
   {
     return args[0]->getClass(vm);

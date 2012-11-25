@@ -15,13 +15,6 @@ namespace magpie
   {
     Compiler compiler(vm, reporter);
 
-    // Every module implicitly imports core (except core itself, which is
-    // assumed to be the first module loaded).
-    if (vm.coreModule() != NULL)
-    {
-      module->imports().add(vm.coreModule());
-    }
-
     for (int i = 0; i < ast->body()->expressions().count(); i++)
     {
       compiler.declareTopLevel(ast->body()->expressions()[i], module);

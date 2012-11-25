@@ -413,7 +413,10 @@ namespace magpie
 
   void ExprCompiler::visit(ImportExpr& expr, int dest)
   {
-    ASSERT(false, "Not implemented.");
+    // Nothing to do.
+    // TODO(bob): Right now, we treat all imports as happening before any code
+    // in the module. In other words, you can refer to an imported name before
+    // the actual import expression has been "executed". Should we allow that?
   }
 
   void ExprCompiler::visit(IsExpr& expr, int dest)

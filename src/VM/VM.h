@@ -29,12 +29,16 @@ namespace magpie
 
     virtual void reachRoots();
     
-    bool init();
+    // This is called by a native method at the end of the core library so the
+    // VM can register the types defined there that it cares about.
+    void bindCore();
+
     bool runProgram(gc<String> path);
-    
+
+    void importModule(Module* from, gc<String> name);
+
     gc<Object> evaluateReplExpression(gc<Expr> expr);
-    
-    Module* coreModule() { return coreModule_; }
+
     Module* getModule(int index) { return modules_[index]; }
     int getModuleIndex(Module& module) const;
 
@@ -81,18 +85,17 @@ namespace magpie
     void addFiber(gc<Fiber> fiber);
 
   private:
-    // Parses the given module source file. Returns null if there was a syntax
-    // error.
-    gc<ModuleAst> parseModule(gc<String> path, gc<String> source);
-    
-    void registerClass(gc<ClassObject>& classObj, const char* name);
-    
-    Module* compileModule(gc<String> path, gc<String> source);    
-    
+    // Loads module [name] from [path] and the recursively loads its imports.
+    // [from] is the module that's depending on the added one.
+    Module* addModule(gc<String> name, gc<String> path);
+
     gc<Object> runModule(Module* module);
-    
+
+    void registerClass(gc<ClassObject>& classObj, const char* name);
+
+    Module* coreModule();
+
     Array<Module*> modules_;
-    Module* coreModule_;
     Module* replModule_;
     
     Array<gc<String> > nativeNames_;

@@ -78,7 +78,6 @@ int main(int argc, const char* argv[])
   }
 
   VM vm;
-  if (!vm.init()) return 1;
 
   if (argc == 1) return repl(vm);
 

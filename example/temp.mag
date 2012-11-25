@@ -1,12 +1,3 @@
-def (n) foo
-    var channel = Channel new
-    async
-        print("before")
-        channel send(n)
-        print("after")
-    end
-    channel
-end
+import foo
 
-var ch = 123 foo
-print(ch receive)
+foo()

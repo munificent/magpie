@@ -7,21 +7,29 @@
 namespace magpie
 {
   class Chunk;
+  class ModuleAst;
   class Object;
-  
+
   // A module is a single file of compiled Magpie code.
   class Module
   {
   public:
-    Module(gc<String> path)
-    : path_(path),
+    Module(gc<String> name, gc<String> path)
+    : name_(name),
+      path_(path),
+      ast_(),
       body_(),
       imports_(),
       variables_(),
       variableNames_()
     {}
-    
-    void reach();
+
+    // Gets the name of the module.
+    gc<String> name() const { return name_; }
+
+    bool parse();
+    void addImports(VM& vm);
+    bool compile(VM& vm);
     
     void setBody(gc<Chunk> body);
     gc<Chunk> body() const { return body_; }
@@ -40,10 +48,19 @@ namespace magpie
     gc<String> getVariableName(int index) const { return variableNames_[index]; }
 
     void setVariable(int index, gc<Object> value);
-    
+
+    void reach();
+
   private:
+    // The name of the module. This is how it will be referenced in imports.
+    gc<String> name_;
+    
     // The path to the file the module was loaded from.
     gc<String> path_;
+
+    // The parsed AST for the module. This will only be non-null after [load()]
+    // has been called and before [compile()].
+    gc<ModuleAst> ast_;
 
     // The code compromising a module is compiled to a fake method so that
     // loading a module is basically just executing a function call.
