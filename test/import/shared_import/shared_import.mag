@@ -1,0 +1,12 @@
+import a
+import b
+
+// c.mag should be run before both a and b because they both import it.
+// expect: c
+
+// b.mag should be run before a because a imports it.
+// expect: b
+
+// a.mag should be run since this script imports it.
+// expect: a
+print("main") // expect: main

@@ -1,0 +1,4 @@
+// nontest
+import c
+
+print("b")
