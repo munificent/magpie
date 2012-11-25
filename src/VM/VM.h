@@ -35,6 +35,9 @@ namespace magpie
 
     bool runProgram(gc<String> path);
 
+    // Gets the directory containing the main program file being executed.
+    gc<String> programDir() const { return programDir_; }
+
     void importModule(Module* from, gc<String> name);
 
     gc<Object> evaluateReplExpression(gc<Expr> expr);
@@ -86,7 +89,9 @@ namespace magpie
 
   private:
     // Loads module [name] from [path] and the recursively loads its imports.
-    // [from] is the module that's depending on the added one.
+    // [from] is the module that's depending on the added one. If [path] is
+    // NULL, then it will try to determine it from the name by searching the
+    // file system. If [name] is NULL, it will infer it from the path.
     Module* addModule(gc<String> name, gc<String> path);
 
     gc<Object> runModule(Module* module);
@@ -94,6 +99,8 @@ namespace magpie
     void registerClass(gc<ClassObject>& classObj, const char* name);
 
     Module* coreModule();
+
+    gc<String> programDir_;
 
     Array<Module*> modules_;
     Module* replModule_;

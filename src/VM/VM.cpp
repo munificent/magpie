@@ -6,6 +6,7 @@
 #include "Natives.h"
 #include "Object.h"
 #include "Parser.h"
+#include "Path.h"
 
 #define DEF_NATIVE(name) \
     nativeNames_.add(String::create(#name)); \
@@ -102,11 +103,10 @@ namespace magpie
 
   bool VM::runProgram(gc<String> path)
   {
-    // TODO(bob): What should the logical name of the entrypoint module be?
-    // If we're going to allow circular imports, it should be something
-    // canonical like "foo.bar" so that we can tell when we've circled back to
-    // it.
-    Module* entrypoint = addModule(path, path);
+    // Remember where the program is so we can import modules from there.
+    programDir_ = path::dir(path::real(path));
+
+    Module* entrypoint = addModule(NULL, path);
     if (entrypoint == NULL) return false;
 
     // Sort the modules by their imports so that dependencies are run before
@@ -174,21 +174,7 @@ namespace magpie
 
   void VM::importModule(Module* from, gc<String> name)
   {
-    // Locate the path to the module.
-    // TODO(bob): Do something real here!
-    // TODO(bob): Should check to see if the module is already loaded before
-    // looking up the path to it here.
-    gc<String> path;
-    if (*name == "core")
-    {
-      path = getCoreLibPath();
-    }
-    else
-    {
-      path = String::create("core/foo.mag");
-    }
-
-    Module* module = addModule(name, path);
+    Module* module = addModule(name, NULL);
     if (module == NULL) return;
 
     from->imports().add(module);
@@ -222,6 +208,7 @@ namespace magpie
 
   void VM::reachRoots()
   {
+    programDir_.reach();
     recordTypes_.reach();
     scheduler_.reach();
     true_.reach();
@@ -355,6 +342,15 @@ namespace magpie
 
   Module* VM::addModule(gc<String> name, gc<String> path)
   {
+    if (name.isNull())
+    {
+      ASSERT(!path.isNull(), "Must be given a path or a name.");
+
+      // Infer the name from the script file name.
+      // TODO(bob): Should take the file name without an extension.
+      name = path;
+    }
+    
     // Make sure it hasn't already been added.
     // TODO(bob): Could make modules_ a hash table for performance.
     for (int i = 0; i < modules_.count(); i++)
@@ -363,6 +359,16 @@ namespace magpie
       {
         return modules_[i];
       }
+    }
+
+    // Locate the path to the module if we aren't given it.
+    if (path.isNull())
+    {
+      ASSERT(!name.isNull(), "Must be given a path or a name.");
+      path = locateModule(programDir_, name);
+
+      // TODO(bob): Report error better.
+      if (path.isNull()) return NULL;
     }
 
     Module* module = new Module(name, path);

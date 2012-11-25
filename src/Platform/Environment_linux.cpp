@@ -8,7 +8,7 @@
 
 namespace magpie
 {
-  gc<String> getCoreLibPath()
+  gc<String> getCoreLibDir()
   {
     char* relativePath[PATH_MAX];
 
@@ -38,8 +38,8 @@ namespace magpie
       strncat(relativePath, "/../../..", PATH_MAX);
     }
 
-    // Add library path.
-    strncat(relativePath, "/core/core.mag", PATH_MAX);
+    // Add core library directory.
+    strncat(relativePath, "/core", PATH_MAX);
 
     // Canonicalize the path.
     char path[PATH_MAX];
