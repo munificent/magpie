@@ -1,0 +1,5 @@
+// nontest
+
+def fooMethod()
+    "found"
+end

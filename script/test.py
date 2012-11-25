@@ -33,6 +33,7 @@ else:
     sys.exit('System not supported!')
 
 SKIP_PATTERN = re.compile(r'// skip')
+NONTEST_PATTERN = re.compile(r'// nontest')
 EXPECT_PATTERN = re.compile(r'// expect: (.*)')
 EXPECT_ERROR_PATTERN = re.compile(r'// expect error')
 EXPECT_ERROR_LINE_PATTERN = re.compile(r'// expect error line (\d+)')
@@ -97,6 +98,11 @@ def run_test(path):
             match = SKIP_PATTERN.search(line)
             if match:
                 skipped += 1
+                return
+
+            match = NONTEST_PATTERN.search(line)
+            if match:
+                # Not a test file at all, so ignore it.
                 return
 
             match = EXPECT_PATTERN.search(line)
