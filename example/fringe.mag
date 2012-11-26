@@ -1,10 +1,10 @@
 // A generic iterator for iterating over a pair of iterables together.
 def (zip is ZipIterator) advance
-    val value1 = zip iterator1 advance
-    if value1 == done then return done
-    val value2 = zip iterator2 advance
-    if value2 == done then return done
-    value1, value2
+    match zip iterator1 advance, zip iterator2 advance
+        case == done, _ then done
+        case _, == done then done
+        case pair then pair
+    end
 end
 
 defclass ZipIterable
@@ -26,8 +26,8 @@ def zip(a, b)
     ZipIterable new(iterable1: a, iterable2: b)
 end
 
-// A basic binary tree class.
 defclass Tree
+    /// A basic binary tree class.
     val left
     var right
 end
@@ -37,10 +37,12 @@ def (tree is Tree) toString
 end
 
 def tree(left, right)
+    /// Convenience method for creating a Tree.
     Tree new(left: left, right: right)
 end
 
 def (tree is Tree) iterate
+    /// Iterates over the fringe, the leaves, of the tree.
     var channel = Channel new
     async
         tree walk(channel)
