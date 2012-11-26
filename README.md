@@ -10,10 +10,9 @@
                         AV
 
 
-Magpie is a small dynamically-typed programming language built around
-patterns, classes, and multimethods. From functional languages, it borrows
-first-class functions, closures, expressions-for-everything, and quotations.
-Its most novel feature is probably an extensible syntax. It runs on the JVM.
+Magpie is a small dynamically-typed programming language built around patterns,
+classes, and multimethods. It has a prototype interpreter that runs on the JVM
+and an in-progress bytecode VM written in C++.
 
 It looks a bit like this:
 
@@ -23,7 +22,7 @@ It looks a bit like this:
         ""
     end
 
-    def dragon(n is Int, turn)
+    def dragon(n is Num, turn)
         dragon(n - 1, "R") + turn + dragon(n - 1, "L")
     end
 
@@ -66,7 +65,7 @@ is mainly a reference.
 
         $ git clone http://git.chromium.org/external/gyp.git
 
-3.  **Generate a project.** Open
+3.  **Generate a project.** Run gyp from the root directory of the magpie repo:
 
         $ cd <path to magpie repo>
         $ <path to gyp repo>/gyp --depth=1
@@ -89,12 +88,15 @@ is mainly a reference.
     This should ensure that Magpie gets built into `build/<config>/magpie`.
 
 5.  **Build the project.** Do what you usually do on your OS to build the thing.
+    On Mac, that means open the XCode project and build from there. In Windows,
+    there is a Visual Studio solution you can build. On Linux, you can just run
+    `make`.
 
 [gyp]: http://code.google.com/p/gyp/
 
 ### Running Magpie
 
-Magpie is a command line app. After building the jar, you can run it by doing:
+Magpie is a command line app. After building it, you can run it by doing:
 
         $ ./magpie
 
@@ -105,7 +107,7 @@ Magpie expression and it will immediately evaluate it. Since everything is an
 expression, even things like class definitions, you can build entire programs
 incrementally this way. Here's one to get you started:
 
-    for i in 1 to(20) do print("<your name> is awesome!")
+    for i in 1..20 do print("<your name> is awesome!")
 
 If you pass an argument to the app, it will assume it's a path to a script
 file and it will load and execute it:
