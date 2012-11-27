@@ -74,7 +74,7 @@ int main(int argc, const char* argv[])
   {
     // TODO(bob): Show usage, etc.
     std::cout << "magpie [script]" << std::endl;
-    return 0;
+    return 1;
   }
 
   VM vm;
