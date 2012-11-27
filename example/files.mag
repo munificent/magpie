@@ -1,0 +1,4 @@
+import io
+
+val file = File open("example/files.mag")
+print(file read)

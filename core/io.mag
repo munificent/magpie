@@ -1,0 +1,8 @@
+defclass File native
+
+def (== File) open(path is String) native "fileOpen"
+def (is File) read native "fileRead"
+
+// Now that everything is defined, wire it up to the VM.
+def _bindIO() native "bindIO"
+_bindIO()

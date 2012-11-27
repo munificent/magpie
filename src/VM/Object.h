@@ -13,7 +13,9 @@ namespace magpie
   class ChannelObject;
   class ClassObject;
   class DynamicObject;
+  class FileObject;
   class Fiber;
+  class File;
   class FunctionObject;
   class ListObject;
   class Memory;
@@ -30,6 +32,7 @@ namespace magpie
     OBJECT_CHANNEL,
     OBJECT_CLASS,
     OBJECT_DYNAMIC,
+    OBJECT_FILE,
     OBJECT_FUNCTION,
     OBJECT_LIST,
     OBJECT_NOTHING,
@@ -69,6 +72,13 @@ namespace magpie
       return NULL;
     }
 
+    // Returns the object as a file. Object *must* be a FileObject.
+    virtual FileObject* asFile()
+    {
+      ASSERT(false, "Not a file.");
+      return NULL;
+    }
+    
     // Returns the object as a function. Object *must* be a FunctionObject.
     virtual FunctionObject* asFunction()
     {
@@ -251,6 +261,31 @@ namespace magpie
     gc<Object>      fields_[FLEXIBLE_SIZE];
 
     NO_COPY(DynamicObject);
+  };
+
+  class FileObject : public Object
+  {
+  public:
+    FileObject(File* file)
+    : Object(),
+      file_(file)
+    {}
+
+    File& file() { return *file_; }
+    
+    virtual ObjectType type() const { return OBJECT_FILE; }
+
+    virtual gc<ClassObject> getClass(VM& vm) const;
+    virtual FileObject* asFile() { return this; }
+    virtual gc<String> toString() const;
+    virtual void reach();
+
+  private:
+    // TODO(bob): Need some kind of finalization system so that files that get
+    // GC'd get closed.
+    File* file_;
+
+    NO_COPY(FileObject);
   };
 
   class FunctionObject : public Object

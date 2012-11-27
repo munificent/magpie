@@ -1,0 +1,4 @@
+import io
+
+val file = File open("class.mag")
+// TODO(bob): Test stuff.

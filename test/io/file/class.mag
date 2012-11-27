@@ -1,0 +1,5 @@
+import io
+
+val file = File open("class.mag")
+print(file is File) // expect: true
+print(file class == File) // expect: true

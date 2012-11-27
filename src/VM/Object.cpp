@@ -190,6 +190,23 @@ namespace magpie
     }
   }
 
+
+  gc<ClassObject> FileObject::getClass(VM& vm) const
+  {
+    return vm.fileClass();
+  }
+
+  gc<String> FileObject::toString() const
+  {
+    // TODO(bob): Include some kind of ID or something here.
+    return String::create("[file]");
+  }
+
+  void FileObject::reach()
+  {
+    // TODO(bob): How should we handle file_ here?
+  }
+
   gc<FunctionObject> FunctionObject::create(gc<Chunk> chunk)
   {
     // Allocate enough memory for the object and its upvars.

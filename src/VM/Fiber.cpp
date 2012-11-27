@@ -277,17 +277,9 @@ namespace magpie
               case OBJECT_CHANNEL:
                 ASSERT(false, "Equality on channels not implemented.");
                 break;
-
-              case OBJECT_CLASS:
-                equal = false;
-                break;
                 
               case OBJECT_DYNAMIC:
                 ASSERT(false, "Equality on arbitrary objects not implemented.");
-                break;
-
-              case OBJECT_FUNCTION:
-                ASSERT(false, "Equality on functions not implemented.");
                 break;
                 
               case OBJECT_LIST:
@@ -309,6 +301,14 @@ namespace magpie
               case OBJECT_STRING:
                 equal = a->asString() == b->asString();
                 break;
+
+              case OBJECT_CLASS:
+              case OBJECT_FILE:
+              case OBJECT_FUNCTION:
+                // Equality is based on identity, so if we get here, they
+                // aren't equal.
+                equal = false;
+              break;
             }
           }
 

@@ -1,5 +1,6 @@
 #include <sstream>
 
+#include "File.h"
 #include "Object.h"
 #include "Natives.h"
 #include "VM.h"
@@ -12,6 +13,12 @@ namespace magpie
     return vm.nothing();
   }
 
+  NATIVE(bindIO)
+  {
+    vm.bindIO();
+    return vm.nothing();
+  }
+  
   NATIVE(objectClass)
   {
     return args[0]->getClass(vm);
@@ -148,6 +155,20 @@ namespace magpie
     // TODO(bob): If the channel is buffered, sending won't always suspend.
     result = NATIVE_RESULT_SUSPEND;
     return NULL;
+  }
+
+  NATIVE(fileOpen)
+  {
+    // TODO(bob): Pass path to File.
+    File* file = new File();
+    return new FileObject(file);
+  }
+
+  NATIVE(fileRead)
+  {
+    // TODO(bob): Implement me.
+    std::cout << "read from " << args[0] << std::endl;
+    return vm.nothing();
   }
   
   NATIVE(functionCall)

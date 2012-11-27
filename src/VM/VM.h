@@ -33,6 +33,10 @@ namespace magpie
     // VM can register the types defined there that it cares about.
     void bindCore();
 
+    // This is called by a native method at the end of the io library so the
+    // VM can register the types defined there that it cares about.
+    void bindIO();
+
     bool runProgram(gc<String> path);
 
     // Gets the directory containing the main program file being executed.
@@ -50,6 +54,7 @@ namespace magpie
     inline gc<ClassObject> boolClass() const { return boolClass_; }
     inline gc<ClassObject> channelClass() const { return channelClass_; }
     inline gc<ClassObject> classClass() const { return classClass_; }
+    inline gc<ClassObject> fileClass() const { return fileClass_; }
     inline gc<ClassObject> functionClass() const { return functionClass_; }
     inline gc<ClassObject> listClass() const { return listClass_; }
     inline gc<ClassObject> nothingClass() const { return nothingClass_; }
@@ -96,9 +101,10 @@ namespace magpie
 
     gc<Object> runModule(Module* module);
 
-    void registerClass(gc<ClassObject>& classObj, const char* name);
+    void registerClass(Module* module, gc<ClassObject>& classObj,
+                       const char* name);
 
-    Module* coreModule();
+    Module* findModule(const char* name);
 
     gc<String> programDir_;
 
@@ -124,6 +130,7 @@ namespace magpie
     gc<ClassObject> boolClass_;
     gc<ClassObject> channelClass_;
     gc<ClassObject> classClass_;
+    gc<ClassObject> fileClass_;
     gc<ClassObject> functionClass_;
     gc<ClassObject> listClass_;
     gc<ClassObject> nothingClass_;

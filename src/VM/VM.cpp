@@ -49,6 +49,7 @@ namespace magpie
     Memory::initialize(this, 1024 * 1024 * 2); // TODO(bob): Use non-magic number.
     
     DEF_NATIVE(bindCore);
+    DEF_NATIVE(bindIO);
     DEF_NATIVE(objectClass);
     DEF_NATIVE(objectNew);
     DEF_NATIVE(objectToString);
@@ -69,6 +70,8 @@ namespace magpie
     DEF_NATIVE(channelNew);
     DEF_NATIVE(channelReceive);
     DEF_NATIVE(channelSend);
+    DEF_NATIVE(fileOpen);
+    DEF_NATIVE(fileRead);
     DEF_NATIVE(functionCall);
     DEF_NATIVE(listAdd);
     DEF_NATIVE(listCount);
@@ -83,22 +86,32 @@ namespace magpie
 
   void VM::bindCore()
   {
-    registerClass(boolClass_, "Bool");
-    registerClass(channelClass_, "Channel");
-    registerClass(classClass_, "Class");
-    registerClass(functionClass_, "Function");
-    registerClass(listClass_, "List");
-    registerClass(nothingClass_, "Nothing");
-    registerClass(numberClass_, "Num");
-    registerClass(recordClass_, "Record");
-    registerClass(stringClass_, "String");
-    registerClass(noMatchErrorClass_, "NoMatchError");
-    registerClass(noMethodErrorClass_, "NoMethodError");
-    registerClass(undefinedVarErrorClass_, "UndefinedVarError");
+    Module* core = findModule("core");
+    ASSERT_NOT_NULL(core);
+    
+    registerClass(core, boolClass_, "Bool");
+    registerClass(core, channelClass_, "Channel");
+    registerClass(core, classClass_, "Class");
+    registerClass(core, functionClass_, "Function");
+    registerClass(core, listClass_, "List");
+    registerClass(core, nothingClass_, "Nothing");
+    registerClass(core, numberClass_, "Num");
+    registerClass(core, recordClass_, "Record");
+    registerClass(core, stringClass_, "String");
+    registerClass(core, noMatchErrorClass_, "NoMatchError");
+    registerClass(core, noMethodErrorClass_, "NoMethodError");
+    registerClass(core, undefinedVarErrorClass_, "UndefinedVarError");
 
-    Module* core = coreModule();
     int index = core->findVariable(String::create("done"));
     done_ = core->getVariable(index);
+  }
+
+  void VM::bindIO()
+  {
+    Module* io = findModule("io");
+    ASSERT_NOT_NULL(io);
+
+    registerClass(io, fileClass_, "File");
   }
 
   bool VM::runProgram(gc<String> path)
@@ -423,18 +436,18 @@ namespace magpie
     }
   }
 
-  void VM::registerClass(gc<ClassObject>& classObj, const char* name)
+  void VM::registerClass(Module* module, gc<ClassObject>& classObj,
+                         const char* name)
   {
-    Module* core = coreModule();
-    int index = core->findVariable(String::create(name));
-    classObj = core->getVariable(index)->asClass();
+    int index = module->findVariable(String::create(name));
+    classObj = module->getVariable(index)->asClass();
   }
 
-  Module* VM::coreModule()
+  Module* VM::findModule(const char* name)
   {
     for (int i = 0; i < modules_.count(); i++)
     {
-      if (*modules_[i]->name() == "core") return modules_[i];
+      if (*modules_[i]->name() == name) return modules_[i];
     }
 
     ASSERT(false, "Could not find core module.");
