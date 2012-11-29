@@ -89,17 +89,12 @@ namespace magpie
     void defineMethod(int multimethod, methodId method);
     gc<Multimethod> getMultimethod(int multimethod);
 
-    // Adds a new fiber to the scheduler.
-    void addFiber(gc<Fiber> fiber);
-
   private:
     // Loads module [name] from [path] and the recursively loads its imports.
     // [from] is the module that's depending on the added one. If [path] is
     // NULL, then it will try to determine it from the name by searching the
     // file system. If [name] is NULL, it will infer it from the path.
     Module* addModule(gc<String> name, gc<String> path);
-
-    gc<Object> runModule(Module* module);
 
     void registerClass(Module* module, gc<ClassObject>& classObj,
                        const char* name);

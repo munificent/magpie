@@ -10,6 +10,7 @@ namespace magpie
   class CatchFrame;
   class FunctionObject;
   class Object;
+  class Scheduler;
   class Upvar;
   class VM;
 
@@ -51,10 +52,16 @@ namespace magpie
   class Fiber : public Managed
   {
   public:
-    Fiber(VM& vm, gc<FunctionObject> function);
+    Fiber(VM& vm, Scheduler& scheduler, gc<FunctionObject> function);
     
     FiberResult run(gc<Object>& result);
     void storeReturn(gc<Object> value);
+
+    // Mark this fiber as being no longer suspended and able to run.
+    void ready();
+
+    gc<Object> takeSentValue();
+    void setSending(gc<Object> value) { sendingValue_ = value; }
 
     virtual void reach();
     virtual void trace(std::ostream& out) const;
@@ -111,13 +118,18 @@ namespace magpie
     gc<Upvar> captureUpvar(int slot);
 
     static int          nextId_;
-    
+
     VM&                 vm_;
+    Scheduler&          scheduler_;
+
     int                 id_;
     Array<gc<Object> >  stack_;
     Array<CallFrame>    callFrames_;
     gc<CatchFrame>      nearestCatch_;
     gc<Upvar>           openUpvars_;
+
+    // If a fiber is suspended waiting to send a value, this is the value.
+    gc<Object> sendingValue_;
 
     NO_COPY(Fiber);
   };

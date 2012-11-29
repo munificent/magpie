@@ -163,9 +163,8 @@ namespace magpie
     // has been sent yet, returns NULL.
     gc<Object> receive(VM& vm, gc<Fiber> receiver);
 
-    // Sends a value along this channel. Returns true if a receiver was
-    // available to receive it.
-    bool send(VM& vm, gc<Fiber> sender, gc<Object> value);
+    // Sends a value along this channel.
+    void send(VM& vm, gc<Fiber> sender, gc<Object> value);
 
     virtual ObjectType type() const { return OBJECT_CHANNEL; }
 
@@ -180,16 +179,12 @@ namespace magpie
 
   private:
     bool isOpen_;
-    
-    // If a value is sent before a receiver is blocking, this in-flight value.
-    gc<Object> sentValue_;
 
-    // If a value is sent before a receiver is blocking, this refers to that
-    // blocked sender.
-    gc<Fiber> sender_;
+    // TODO(bob): Make these a linked-list queue.
+    // The fibers that are suspended waiting to send a value on this channel.
+    Array<gc<Fiber> > senders_;
 
-    // Fibers that are currently blocked waiting to receive a value on this
-    // channel.
+    // The fibers that are suspended waiting to receive a value on this channel.
     Array<gc<Fiber> > receivers_;
 
     NO_COPY(ChannelObject);

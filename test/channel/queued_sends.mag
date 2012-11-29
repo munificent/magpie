@@ -1,0 +1,25 @@
+val channel = Channel new
+
+async channel send("a")
+async channel send("b")
+async channel send("c")
+async channel send("d")
+
+async
+    print("receiving")
+    print(channel receive)
+    print(channel receive)
+    print(channel receive)
+    print(channel receive)
+    print(channel receive)
+end
+
+channel send("main")
+print("done")
+// expect: receiving
+// expect: main
+// expect: a
+// expect: b
+// expect: c
+// expect: d
+// expect: done

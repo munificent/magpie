@@ -9,8 +9,9 @@ namespace magpie
 {
   int Fiber::nextId_ = 0;
 
-  Fiber::Fiber(VM& vm, gc<FunctionObject> function)
+  Fiber::Fiber(VM& vm, Scheduler& scheduler, gc<FunctionObject> function)
   : vm_(vm),
+    scheduler_(scheduler),
     id_(nextId_++),
     stack_(),
     callFrames_(),
@@ -102,7 +103,7 @@ namespace magpie
         {
           // Create a function to store the chunk and upvars.
           gc<FunctionObject> function = loadFunction(frame, GET_A(ins));
-          vm_.addFiber(new Fiber(vm_, function));
+          scheduler_.spawn(function);
           break;
         }
           
@@ -485,6 +486,18 @@ namespace magpie
            "Should be returning to a call or native.");
 
     store(frame, GET_C(instruction), value);
+  }
+
+  void Fiber::ready()
+  {
+    scheduler_.add(this);
+  }
+
+  gc<Object> Fiber::takeSentValue()
+  {
+    gc<Object> value = sendingValue_;
+    sendingValue_ = NULL;
+    return value;
   }
 
   void Fiber::reach()

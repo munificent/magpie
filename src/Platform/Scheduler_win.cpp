@@ -9,8 +9,9 @@ namespace magpie
   {
   };
 
-  Scheduler::Scheduler()
-  : os_(new OSScheduler())
+  Scheduler::Scheduler(VM& vm)
+  : vm_(vm),
+    os_(new OSScheduler())
   {
   }
 

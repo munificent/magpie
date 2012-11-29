@@ -15,8 +15,9 @@ namespace magpie
     int queue;
   };
 
-  Scheduler::Scheduler()
-  : os_(new OSScheduler())
+  Scheduler::Scheduler(VM& vm)
+  : vm_(vm),
+    os_(new OSScheduler())
   {
     os_->queue = kqueue();
     if (os_->queue == -1)

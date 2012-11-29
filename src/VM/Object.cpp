@@ -28,12 +28,23 @@ namespace magpie
     if (!isOpen_) return false;
     isOpen_ = false;
 
-    // If no one is listening, close immediately.
+    // If nothing is going to receive the "done". Just ignore it and close
+    // immediately.
     if (receivers_.count() == 0) return false;
+    
+    // Send "done" to all of the receivers.
+    for (int i = 0; i < receivers_.count(); i++)
+    {
+      receivers_[i]->storeReturn(vm.getBuiltIn(BUILT_IN_DONE));
+      receivers_[i]->ready();
+    }
 
-    // Otherwise send 'done' to the receiver.
-    // TODO(bob): What if there are multiple receivers?
-    send(vm, sender, vm.getBuiltIn(BUILT_IN_DONE));
+    receivers_.clear();
+
+    // Add the sender back to the scheduler after the receivers so it can
+    // continue.
+    sender->ready();
+    
     return true;
   }
 
@@ -45,46 +56,39 @@ namespace magpie
       return vm.getBuiltIn(BUILT_IN_DONE);
     }
 
-    if (sentValue_.isNull())
+    // If we have a sender, take its value.
+    if (senders_.count() > 0)
     {
-      // There isn't a value already available, so suspend the receiver.
-      receivers_.add(receiver);
-      return NULL;
+      gc<Fiber> sender = senders_.removeAt(0);
+      sender->ready();
+      return sender->takeSentValue();
     }
 
-    // A value is already available, so receive it immediately.
-    gc<Object> value = sentValue_;
-    sentValue_ = NULL;
-
-    // Now the sender can stop blocking.
-    vm.addFiber(sender_);
-    sender_ = NULL;
-
-    return value;
+    // Otherwise, suspend.
+    receivers_.add(receiver);
+    return NULL;
   }
 
-  bool ChannelObject::send(VM& vm, gc<Fiber> sender, gc<Object> value)
+  void ChannelObject::send(VM& vm, gc<Fiber> sender, gc<Object> value)
   {
-    // If there are no blocking receivers, just wait.
-    if (receivers_.count() == 0)
+    // TODO(bob): What if the channel is closed?
+
+    // If we have a receiver, give it the value.
+    if (receivers_.count() > 0)
     {
-      // TODO(bob): Can this occur?
-      ASSERT(sentValue_.isNull(), "Can't back up sends.");
-      
-      sentValue_ = value;
-      sender_ = sender;
-      return false;
+      gc<Fiber> receiver = receivers_.removeAt(0);
+      receiver->storeReturn(value);
+      receiver->ready();
+
+      // Add the sender back to the scheduler too since it isn't blocked.
+      sender->ready();
+      return;
     }
 
-    // Pick a receiver to wake up and receive the value.
-    gc<Fiber> fiber = receivers_.removeAt(0);
-    fiber->storeReturn(value);
-    vm.addFiber(fiber);
-
-    // Add the sender back to the scheduler too since it isn't blocked.
-    vm.addFiber(sender);
-
-    return true;
+    // Otherwise, stuff the value and suspend.
+    sender->setSending(value);
+    senders_.add(sender);
+    return;
   }
 
   gc<ClassObject> ChannelObject::getClass(VM& vm) const
@@ -100,9 +104,8 @@ namespace magpie
 
   void ChannelObject::reach()
   {
+    senders_.reach();
     receivers_.reach();
-    sentValue_.reach();
-    sender_.reach();
   }
   
   gc<ClassObject> ClassObject::getClass(VM& vm) const

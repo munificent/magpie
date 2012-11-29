@@ -6,7 +6,10 @@
 namespace magpie
 {
   class Fiber;
-
+  class FunctionObject;
+  class Module;
+  class Object;
+  
   // Forward-declaration of the platform-specific scheduler data.
   class OSScheduler;
 
@@ -14,17 +17,25 @@ namespace magpie
   class Scheduler
   {
   public:
-    Scheduler();
+    Scheduler(VM& vm);
     ~Scheduler();
 
+    gc<Object> runModule(Module* module);
+
+    // Spawns a new Fiber running the given procedure.
+    void spawn(gc<FunctionObject> function);
     void add(gc<Fiber> fiber);
-    void remove(gc<Fiber> fiber);
-    gc<Fiber> getNext();
 
     void reach();
 
   private:
+    gc<Fiber> getNext();
+
+    VM& vm_;
     OSScheduler* os_;
+
+    // Fibers that are not blocked and can run now.
+    Array<gc<Fiber> > ready_;
 
     Array<gc<Fiber> > fibers_;
 

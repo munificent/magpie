@@ -1,0 +1,8 @@
+val channel = Channel new
+
+async channel send("a")
+async channel send("b")
+
+print(channel receive) // expect: a
+print(channel receive) // expect: b
+print("done")          // expect: done

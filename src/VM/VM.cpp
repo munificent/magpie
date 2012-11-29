@@ -44,7 +44,7 @@ namespace magpie
     recordTypes_(),
     methods_(),
     multimethods_(),
-    scheduler_()
+    scheduler_(*this)
   {
     Memory::initialize(this, 1024 * 1024 * 2); // TODO(bob): Use non-magic number.
     
@@ -179,7 +179,7 @@ namespace magpie
       // Compile it.
       if (!module->compile(*this)) return false;
 
-      runModule(module);
+      scheduler_.runModule(module);
     }
 
     return true;
@@ -209,7 +209,7 @@ namespace magpie
     Compiler::compileExpression(*this, reporter, expr, replModule_);
     if (reporter.numErrors() > 0) return gc<Object>();
 
-    return runModule(replModule_);
+    return scheduler_.runModule(replModule_);
   }
 
   int VM::getModuleIndex(Module& module) const
@@ -348,11 +348,6 @@ namespace magpie
     return multimethods_[multimethodId];
   }
 
-  void VM::addFiber(gc<Fiber> fiber)
-  {
-    scheduler_.add(fiber);
-  }
-
   Module* VM::addModule(gc<String> name, gc<String> path)
   {
     if (name.isNull())
@@ -392,48 +387,6 @@ namespace magpie
     module->addImports(*this);
 
     return module;
-  }
-  
-  gc<Object> VM::runModule(Module* module)
-  {
-    gc<FunctionObject> function = FunctionObject::create(module->body());
-
-    // Pretend we just finished a fiber so we can kick off the "next" one.
-    scheduler_.add(new Fiber(*this, function));
-    FiberResult result = FIBER_DONE;
-
-    gc<Object> value;
-
-    while (true)
-    {
-      gc<Fiber> fiber;
-      
-      switch (result)
-      {
-        case FIBER_DONE:
-        case FIBER_SUSPEND:
-          // Keep running fibers until we run out.
-          fiber = scheduler_.getNext();
-          if (fiber.isNull()) return value;
-          break;
-
-        case FIBER_DID_GC:
-          // If the fiber returns FIBER_DID_GC, it's still running but it did
-          // a GC. Since that moves the fiber, we return back to here so we
-          // can invoke run() again at its new location in memory.
-          break;
-
-        case FIBER_UNCAUGHT_ERROR:
-          // TODO(bob): Kind of hackish.
-          // TODO(bob): Give other fibers a chance to handle this.
-          // If we got an uncaught error, exit with an error.
-          std::cerr << "Uncaught error." << std::endl;
-          exit(3);
-          break;
-      }
-
-      result = fiber->run(value);
-    }
   }
 
   void VM::registerClass(Module* module, gc<ClassObject>& classObj,
