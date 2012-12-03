@@ -164,7 +164,7 @@ namespace magpie
     gc<Object> receive(VM& vm, gc<Fiber> receiver);
 
     // Sends a value along this channel.
-    void send(VM& vm, gc<Fiber> sender, gc<Object> value);
+    void send(gc<Fiber> sender, gc<Object> value);
 
     virtual ObjectType type() const { return OBJECT_CHANNEL; }
 

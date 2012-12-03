@@ -33,65 +33,76 @@ namespace magpie
      */
     gc<FunctionObject> function = FunctionObject::create(module->body());
 
-    // Pretend we just finished a fiber so we can kick off the "next" one.
-    add(new Fiber(vm_, *this, function));
-    FiberResult result = FIBER_DONE;
-
-    gc<Object> value;
+    gc<Fiber> mainFiber = new Fiber(vm_, *this, function);
+    add(mainFiber);
 
     while (true)
     {
+      // Keep running fibers as long as there are ones that are ready.
+      gc<Object> value;
       gc<Fiber> fiber;
-
-      switch (result)
+      while (true)
       {
-        case FIBER_DONE:
-        case FIBER_SUSPEND:
-          // Keep running fibers until we run out.
-          fiber = getNext();
-          if (fiber.isNull()) return value;
-          break;
+        if (fiber.isNull()) fiber = getNext();
+        if (fiber.isNull()) break;
 
-        case FIBER_DID_GC:
-          // If the fiber returns FIBER_DID_GC, it's still running but it did
-          // a GC. Since that moves the fiber, we return back to here so we
-          // can invoke run() again at its new location in memory.
-          break;
+        FiberResult result = fiber->run(value);
+        
+        switch (result)
+        {
+          case FIBER_DONE:
+          case FIBER_SUSPEND:
+            // Move to the next fiber.
+            fiber = NULL;
+            break;
 
-        case FIBER_UNCAUGHT_ERROR:
-          // TODO(bob): Kind of hackish.
-          // TODO(bob): Give other fibers a chance to handle this.
-          // If we got an uncaught error, exit with an error.
-          std::cerr << "Uncaught error." << std::endl;
-          exit(3);
-          break;
+          case FIBER_DID_GC:
+            // If the fiber returns FIBER_DID_GC, it's still running but it did
+            // a GC. Since that moves the fiber, we return back to here so we
+            // can invoke run() again at its new location in memory.
+            break;
+
+          case FIBER_UNCAUGHT_ERROR:
+            // TODO(bob): Kind of hackish.
+            // TODO(bob): Give other fibers a chance to handle this.
+            // If we got an uncaught error, exit with an error.
+            std::cerr << "Uncaught error." << std::endl;
+            exit(3);
+            break;
+        }
       }
 
-      result = fiber->run(value);
+      // TODO(bob): Should return value from mainFiber, not whatever fiber was
+      // last completed.
+      if (mainFiber->isDone()) return value;
+
+      // TODO(bob): Need to handle deadlock case where everything is waiting
+      // on channels.
+      
+      // We aren't done, but everything is suspended, so wait on the OS.
+      waitForOSEvents();
     }
   }
 
   void Scheduler::spawn(gc<FunctionObject> function)
   {
-    fibers_.add(new Fiber(vm_, *this, function));
+    ready_.add(new Fiber(vm_, *this, function));
   }
 
   void Scheduler::add(gc<Fiber> fiber)
   {
-    fibers_.add(fiber);
+    ready_.add(fiber);
   }
-
+  
   void Scheduler::reach()
   {
-    fibers_.reach();
+    ready_.reach();
   }
 
   gc<Fiber> Scheduler::getNext()
   {
-    if (fibers_.count() == 0) return NULL;
-
-    // TODO(bob): Hack temp!
-    return fibers_.removeAt(0);
+    if (ready_.count() == 0) return NULL;
+    return ready_.removeAt(0);
   }
 }
 

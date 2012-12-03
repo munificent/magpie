@@ -1,4 +1,5 @@
 import io
 
-val file = File open("class.mag")
+// TODO(bob): Path should be relative to this script.
+val file = File open("test/io/file/class.mag")
 // TODO(bob): Test stuff.

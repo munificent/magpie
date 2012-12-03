@@ -8,6 +8,7 @@
 namespace magpie
 {
   class CatchFrame;
+  class FileObject; // Temp.
   class FunctionObject;
   class Object;
   class Scheduler;
@@ -49,19 +50,69 @@ namespace magpie
     NATIVE_RESULT_SUSPEND
   };
 
+  // TODO(bob): Better name.
+  class Suspension : public Managed
+  {
+
+  };
+
+  // A suspend because the fiber is trying to send a value on a channel and no
+  // receivers are pending yet.
+  class ChannelSendSuspension : public Suspension
+  {
+  public:
+    ChannelSendSuspension(gc<Object> value)
+    : value_(value)
+    {}
+    
+    // Gets the value waiting to be sent.
+    gc<Object> value() { return value_; }
+
+    virtual void reach();
+    
+  private:
+    gc<Object> value_;
+  };
+
+  // A suspend because the fiber is reading from a file and it's waiting for
+  // the OS to say data is available.
+  class FileReadSuspension : public Suspension
+  {
+  public:
+    FileReadSuspension(gc<FileObject> file)
+    : file_(file)
+    {}
+
+    gc<FileObject> file() { return file_; }
+
+    virtual void reach();
+    
+  private:
+    // TODO(bob): Should this be a File, or a FileObject?
+    gc<FileObject> file_;
+  };
+
   class Fiber : public Managed
   {
   public:
     Fiber(VM& vm, Scheduler& scheduler, gc<FunctionObject> function);
-    
+
+    // Returns true if this fiber has finished executing all of its code.
+    bool isDone();
+
     FiberResult run(gc<Object>& result);
     void storeReturn(gc<Object> value);
 
     // Mark this fiber as being no longer suspended and able to run.
-    void ready();
+    gc<Suspension> ready();
 
-    gc<Object> takeSentValue();
-    void setSending(gc<Object> value) { sendingValue_ = value; }
+    // Mark this fiber as being suspended for the given reason.
+    void suspend(gc<Suspension> suspension);
+
+    gc<Suspension> suspension() { return suspension_; }
+
+    // TODO(bob): Hackish. Temp!
+    void readFile(gc<FileObject> file);
 
     virtual void reach();
     virtual void trace(std::ostream& out) const;
@@ -128,8 +179,7 @@ namespace magpie
     gc<CatchFrame>      nearestCatch_;
     gc<Upvar>           openUpvars_;
 
-    // If a fiber is suspended waiting to send a value, this is the value.
-    gc<Object> sendingValue_;
+    gc<Suspension>      suspension_;
 
     NO_COPY(Fiber);
   };

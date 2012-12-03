@@ -5,7 +5,11 @@
 
 namespace magpie
 {
+  // suspend stuff:
+  class ChannelObject;
+  
   class Fiber;
+  class FileObject;
   class FunctionObject;
   class Module;
   class Object;
@@ -26,9 +30,13 @@ namespace magpie
     void spawn(gc<FunctionObject> function);
     void add(gc<Fiber> fiber);
 
+    // TODO(bob): Temp?
+    void scheduleRead(gc<Fiber> fiber, gc<FileObject> file);
+    
     void reach();
 
   private:
+    void waitForOSEvents();
     gc<Fiber> getNext();
 
     VM& vm_;
@@ -36,8 +44,6 @@ namespace magpie
 
     // Fibers that are not blocked and can run now.
     Array<gc<Fiber> > ready_;
-
-    Array<gc<Fiber> > fibers_;
 
     NO_COPY(Scheduler);
   };

@@ -1,4 +1,8 @@
 import io
 
-val file = File open("example/files.mag")
+print("main")
+
+// TODO(bob): Path should be relative to script.
+val file = File open("../../example/files.mag")
 print(file read)
+print("after read")

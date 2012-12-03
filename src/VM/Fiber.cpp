@@ -9,6 +9,16 @@ namespace magpie
 {
   int Fiber::nextId_ = 0;
 
+  void ChannelSendSuspension::reach()
+  {
+    value_.reach();
+  }
+
+  void FileReadSuspension::reach()
+  {
+    file_.reach();
+  }
+  
   Fiber::Fiber(VM& vm, Scheduler& scheduler, gc<FunctionObject> function)
   : vm_(vm),
     scheduler_(scheduler),
@@ -18,6 +28,11 @@ namespace magpie
     nearestCatch_()
   {
     call(function, 0);
+  }
+
+  bool Fiber::isDone()
+  {
+    return callFrames_.count() == 0;
   }
 
   FiberResult Fiber::run(gc<Object>& result)
@@ -488,16 +503,28 @@ namespace magpie
     store(frame, GET_C(instruction), value);
   }
 
-  void Fiber::ready()
+  gc<Suspension> Fiber::ready()
   {
+    // Remove the suspension.
+    gc<Suspension> suspension = suspension_;
+    suspension_ = NULL;
+
     scheduler_.add(this);
+
+    return suspension;
   }
 
-  gc<Object> Fiber::takeSentValue()
+  // Mark this fiber as being suspended for the given reason.
+  void Fiber::suspend(gc<Suspension> suspension)
   {
-    gc<Object> value = sendingValue_;
-    sendingValue_ = NULL;
-    return value;
+    ASSERT(suspension_.isNull(), "Already suspended.");
+    
+    suspension_ = suspension;
+  }
+
+  void Fiber::readFile(gc<FileObject> fileObj)
+  {
+    scheduler_.scheduleRead(this, fileObj);
   }
 
   void Fiber::reach()

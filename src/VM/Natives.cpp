@@ -150,7 +150,7 @@ namespace magpie
     ChannelObject* channel = args[0]->asChannel();
 
     // Send the value and suspend this fiber until it's been received.
-    channel->send(vm, &fiber, args[1]);
+    channel->send(&fiber, args[1]);
 
     // TODO(bob): If the channel is buffered, sending won't always suspend.
     result = NATIVE_RESULT_SUSPEND;
@@ -159,16 +159,17 @@ namespace magpie
 
   NATIVE(fileOpen)
   {
-    // TODO(bob): Pass path to File.
-    File* file = new File();
+    File* file = new File(args[1]->asString());
     return new FileObject(file);
   }
 
   NATIVE(fileRead)
   {
-    // TODO(bob): Implement me.
-    std::cout << "read from " << args[0] << std::endl;
-    return vm.nothing();
+    gc<FileObject> fileObj = args[0]->asFile();
+    fiber.readFile(fileObj);
+    
+    result = NATIVE_RESULT_SUSPEND;
+    return NULL;
   }
   
   NATIVE(functionCall)

@@ -60,8 +60,11 @@ namespace magpie
     if (senders_.count() > 0)
     {
       gc<Fiber> sender = senders_.removeAt(0);
-      sender->ready();
-      return sender->takeSentValue();
+
+      // TODO(bob): Nasty. Do something cleaner to downcast here.
+      gc<ChannelSendSuspension> suspension = static_cast<ChannelSendSuspension*>(
+          &(*sender->ready()));
+      return suspension->value();
     }
 
     // Otherwise, suspend.
@@ -69,7 +72,7 @@ namespace magpie
     return NULL;
   }
 
-  void ChannelObject::send(VM& vm, gc<Fiber> sender, gc<Object> value)
+  void ChannelObject::send(gc<Fiber> sender, gc<Object> value)
   {
     // TODO(bob): What if the channel is closed?
 
@@ -86,7 +89,7 @@ namespace magpie
     }
 
     // Otherwise, stuff the value and suspend.
-    sender->setSending(value);
+    sender->suspend(new ChannelSendSuspension(value));
     senders_.add(sender);
     return;
   }
