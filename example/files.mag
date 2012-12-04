@@ -1,8 +1,24 @@
 import io
 
-print("main")
+val channel = Channel new
 
-// TODO(bob): Path should be relative to script.
-val file = File open("../../example/files.mag")
-print(file read)
-print("after read")
+async
+    print("reading 'files.mag'")
+    // TODO(bob): Path should be relative to script.
+    val file1 = File open("../../example/files.mag")
+    print(file1 read)
+    print("---")
+    channel send("done 1")
+end
+
+async
+    print("reading 'hello.mag'")
+    // TODO(bob): Path should be relative to script.
+    val file2 = File open("../../example/hello.mag")
+    print(file2 read)
+    print("---")
+    channel send("done 2")
+end
+
+print(channel receive)
+print(channel receive)

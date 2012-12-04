@@ -70,6 +70,8 @@ namespace magpie
     DEF_NATIVE(channelNew);
     DEF_NATIVE(channelReceive);
     DEF_NATIVE(channelSend);
+    DEF_NATIVE(fileClose);
+    DEF_NATIVE(fileIsOpen);
     DEF_NATIVE(fileOpen);
     DEF_NATIVE(fileRead);
     DEF_NATIVE(functionCall);

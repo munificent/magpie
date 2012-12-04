@@ -1,0 +1,11 @@
+import io
+
+// TODO(bob): Path should be relative to this script.
+val file = File open("test/io/file/class.mag")
+print(file close) // expect: nothing
+print(file isOpen) // expect: false
+
+// Throws ArgError if the file is already closed.
+do
+    file close
+catch e is ArgError then print("caught") // expect: caught

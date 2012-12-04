@@ -1,5 +1,6 @@
+// TODO(bob): Test invalid path.
 import io
 
 // TODO(bob): Path should be relative to this script.
 val file = File open("test/io/file/class.mag")
-// TODO(bob): Test stuff.
+print(file isOpen) // expect: true

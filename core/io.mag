@@ -1,5 +1,12 @@
 defclass File native
 
+def (is File) _close native "fileClose"
+def (file is File) close
+    if not file isOpen then throw ArgError new
+    file _close
+end
+
+def (is File) isOpen native "fileIsOpen"
 def (== File) open(path is String) native "fileOpen"
 def (is File) read native "fileRead"
 

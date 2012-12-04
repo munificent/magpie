@@ -33,6 +33,8 @@ namespace magpie
   NATIVE(channelNew);
   NATIVE(channelReceive);
   NATIVE(channelSend);
+  NATIVE(fileClose);
+  NATIVE(fileIsOpen);
   NATIVE(fileOpen);
   NATIVE(fileRead);
   NATIVE(functionCall);

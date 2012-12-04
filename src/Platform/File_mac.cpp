@@ -27,5 +27,18 @@ namespace magpie
   {
     delete os_;
   }
+
+  bool File::isOpen() const
+  {
+    return os_->descriptor != -1;
+  }
+
+  void File::close()
+  {
+    ASSERT(os_->descriptor != -1, "Cannot close a closed file.");
+    ::close(os_->descriptor);
+    // TODO(bob): Handle error.
+    os_->descriptor = -1;
+  }
 }
 

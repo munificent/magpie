@@ -14,6 +14,12 @@ end
 defclass NoMethodError
 end
 
+defclass ArgError
+    /// Error thrown when an invalid argument is passed to a method. This can
+    /// be because the argument is never valid for a method, or because the
+    /// argument's current state is invalid.
+end
+
 defclass UndefinedVarError
 end
 

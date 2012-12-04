@@ -157,6 +157,19 @@ namespace magpie
     return NULL;
   }
 
+  NATIVE(fileClose)
+  {
+    gc<FileObject> fileObj = args[0]->asFile();
+    fileObj->file().close();
+    return vm.nothing();
+  }
+  
+  NATIVE(fileIsOpen)
+  {
+    gc<FileObject> fileObj = args[0]->asFile();
+    return vm.getBool(fileObj->file().isOpen());
+  }
+  
   NATIVE(fileOpen)
   {
     File* file = new File(args[1]->asString());

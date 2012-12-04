@@ -19,7 +19,11 @@ namespace magpie
     // Gets the platform-specific file data.
     OSFile* os() { return os_; }
 
-    void read();
+    // Gets whether or not the file is open.
+    bool isOpen() const;
+
+    // Closes the file. Should only be called on open files.
+    void close();
     
   private:
     // TODO(bob): Using a gc pointer inside a non-GC type is a bit weird.
