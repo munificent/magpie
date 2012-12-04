@@ -65,16 +65,24 @@ namespace magpie
 
     if (numEvents == 1)
     {
+      // TODO(bob): Assumes it's a read event. Handle other event types.
       gc<Fiber> fiber = static_cast<Fiber*>(event.udata);
-      std::cout << "wake up " << fiber << std::endl;
 
       // TODO(bob): Nasty. Do something cleaner to downcast here.
       gc<FileReadSuspension> suspension = static_cast<FileReadSuspension*>(
           &(*fiber->ready()));
 
-      char* buffer = new char[event.data];
-      int bytesRead = read(suspension->file()->file().os()->descriptor, buffer, event.data);
-      std::cout << "read " << bytesRead << " bytes" << std::endl;
+      char* buffer = new char[event.data + 1];
+      int bytesRead = read(suspension->file()->file().os()->descriptor, buffer,
+                           event.data);
+      // TODO(bob): Handle error.
+      buffer[bytesRead] = '\0';
+
+      // TODO(bob): Hack! Assumes file is a text file. Need to handle encodings
+      // and binary data.
+      gc<String> text = String::create(buffer);
+      fiber->storeReturn(new StringObject(text));
+
       delete [] buffer;
     }
     else if (numEvents == 0)
