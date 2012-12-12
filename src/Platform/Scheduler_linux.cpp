@@ -19,5 +19,15 @@ namespace magpie
   {
     delete os_;
   }
+
+  void Scheduler::scheduleRead(gc<Fiber> fiber, gc<FileObject> fileObj)
+  {
+    ASSERT(false, "Not implemented yet.");
+  }
+  
+  void Scheduler::waitForOSEvents()
+  {
+    ASSERT(false, "Not implemented yet.");
+  }
 }
 
