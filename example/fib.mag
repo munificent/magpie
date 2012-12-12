@@ -1,0 +1,38 @@
+// Here's a couple of different ways to define the Fibonacci sequence in Magpie.
+
+// Basic recursive solution.
+def fibr(n is Num)
+    if n < 2 then n else fibr(n - 2) + fibr(n - 1)
+end
+
+print("If-then")
+for i in 0..10 do print(fibr(i))
+
+// Using pattern-matching.
+def fibp(n is Num) match n
+    case 0 then 0
+    case 1 then 1
+    else fibp(n - 2) + fibp(n - 1)
+end
+
+print("Pattern matching")
+for i in 0..10 do print(fibp(i))
+
+// An iterative solution.
+def fibi(n is Num)
+    if n <= 1 then return n
+    var a, b = 0, 1
+    for i in 2..n do a, b = b, a + b
+    b
+end
+
+print("Iterative")
+for i in 0..10 do print(fibi(i))
+
+// Using multimethods to specialize on the degenerate cases.
+def fibm(n is Num) fibm(n - 2) + fibm(n - 1)
+def fibm(0) 0
+def fibm(1) 1
+
+print("Multimethod")
+for i in 0..10 do print(fibm(i))
