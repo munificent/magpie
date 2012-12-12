@@ -37,6 +37,7 @@ def (is Num) + (is Num) native "numPlusNum"
 def (is Num) - (is Num) native "numMinusNum"
 def (is Num) * (is Num) native "numTimesNum"
 def (is Num) / (is Num) native "numDivNum"
+def (is Num) % (is Num) native "numModNum"
 
 def (is Num) < (is Num) native "numLessThanNum"
 def (is Num) <= (is Num) native "numLessThanEqualToNum"

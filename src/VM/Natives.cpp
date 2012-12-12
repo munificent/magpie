@@ -71,6 +71,14 @@ namespace magpie
     double c = args[0]->asNumber() / args[1]->asNumber();
     return new NumberObject(c);
   }
+
+  NATIVE(numModNum)
+  {
+    // TODO(bob): Handle floats!
+    int a = static_cast<int>(args[0]->asNumber());
+    int b = static_cast<int>(args[1]->asNumber());
+    return new NumberObject(a % b);
+  }
   
   NATIVE(numLessThanNum)
   {

@@ -22,6 +22,7 @@ namespace magpie
   NATIVE(numMinusNum);
   NATIVE(numTimesNum);
   NATIVE(numDivNum);
+  NATIVE(numModNum);
   NATIVE(numLessThanNum);
   NATIVE(numLessThanEqualToNum);
   NATIVE(numGreaterThanNum);

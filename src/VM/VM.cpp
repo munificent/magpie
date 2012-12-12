@@ -59,6 +59,7 @@ namespace magpie
     DEF_NATIVE(numMinusNum);
     DEF_NATIVE(numTimesNum);
     DEF_NATIVE(numDivNum);
+    DEF_NATIVE(numModNum);
     DEF_NATIVE(numLessThanNum);
     DEF_NATIVE(numLessThanEqualToNum);
     DEF_NATIVE(numGreaterThanNum);
