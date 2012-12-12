@@ -1,0 +1,8 @@
+// Stops when the main fiber is done, even if there are other fibers that can
+// run.
+
+async
+    print("in spawned")
+end
+
+print("in main") // expect: in main

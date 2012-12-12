@@ -70,11 +70,11 @@ namespace magpie
             exit(3);
             break;
         }
-      }
 
-      // TODO(bob): Should return value from mainFiber, not whatever fiber was
-      // last completed.
-      if (mainFiber->isDone()) return value;
+        // TODO(bob): Should return value from mainFiber, not whatever fiber
+        // was last completed.
+        if (mainFiber->isDone()) return value;
+      }
 
       // TODO(bob): Need to handle deadlock case where everything is waiting
       // on channels.
