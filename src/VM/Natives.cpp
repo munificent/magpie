@@ -214,6 +214,7 @@ namespace magpie
   
   NATIVE(listIndex)
   {
+    // Note: bounds checking is handled by core before calling this.
     ListObject* list = args[0]->asList();
     // TODO(bob): What if the index isn't an int?
     return list->elements()[static_cast<int>(args[1]->asNumber())];

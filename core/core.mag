@@ -91,8 +91,30 @@ def (is Function) call native "functionCall"
 
 def (is List) add(item) native "listAdd"
 def (is List) count native "listCount"
-def (is List)[is Num] native "listIndex"
-def (is List)[index is Num]=(value) native "listIndexSet"
+
+def (list is List) _boundsCheck(index is Num)
+    // Negative indices index backwards from the end.
+    if index < 0 then index = list count + index
+
+    // Check bounds.
+    if index < 0 then throw ArgError new
+    if index >= list count then throw ArgError new
+
+    index
+end
+
+def (list is List)[index is Num]
+    list _index(list _boundsCheck(index))
+end
+
+def (is List) _index(is Num) native "listIndex"
+
+def (list is List)[index is Num]=(value)
+    list _indexSet(list _boundsCheck(index), value)
+end
+
+def (is List) _indexSet(index is Num, value) native "listIndexSet"
+
 def (is List) insert(item, at: index is Num) native "listInsert"
 
 // Makes lists iterable.
