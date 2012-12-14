@@ -1,0 +1,36 @@
+// TODO(bob):
+// - Scope of pattern variables.
+
+// Body has its own scope.
+do
+    val a = "outer"
+    for i in 1..1 do
+        val a = "inner"
+        print(a) // expect: inner
+    end
+    print(a) // expect: outer
+end
+
+// Condition scope is not shared with body.
+do
+    val a = "outer"
+    for i in
+        val a = "iterator"
+        1..1
+    do
+        val a = "body"
+        print(a)
+    end
+    // expect: body
+    print(a) // expect: outer
+end
+
+// Loop variables are in different scope from surrounding expression.
+do
+    val a = "outer"
+    for a in ["inner"] do
+        print(a)
+    end
+    // expect: inner
+    print(a) // expect: outer
+end

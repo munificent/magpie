@@ -419,7 +419,7 @@ namespace magpie
     {
       gc<Pattern> pattern = parsePattern(false);
       consume(TOKEN_IN, "Expect 'in' after for loop pattern.");
-      gc<Expr> iterator = parsePrecedence();
+      gc<Expr> iterator = parseBlock(TOKEN_DO);
       consume(TOKEN_DO, "Expect 'do' after for loop iterator.");
       gc<Expr> body = parseBlock();
       
