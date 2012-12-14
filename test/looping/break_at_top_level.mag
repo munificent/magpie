@@ -1,0 +1,3 @@
+print("before")
+break // expect error
+print("after")

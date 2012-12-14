@@ -25,6 +25,7 @@ exprs = sorted({
         ('right',       'gc<Expr>')],
     'Bool': [
         ('value',       'bool')],
+    'Break': [],
     'Call': [
         ('leftArg',     'gc<Expr>'),
         ('name',        'gc<String>'),

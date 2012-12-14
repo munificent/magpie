@@ -61,7 +61,21 @@ namespace magpie
 
     return resolver.maxLocals_;
   }
-  
+
+  Resolver::Resolver(Compiler& compiler, Module& module, Resolver* parent,
+                     bool isModuleBody)
+  : compiler_(compiler),
+    module_(module),
+    parent_(parent),
+    isModuleBody_(isModuleBody),
+    locals_(),
+    maxLocals_(0),
+    closures_(),
+    unnamedSlotId_(0),
+    scope_(NULL),
+    numLoops_(0)
+  {}
+
   void Resolver::allocateSlotsForParam(gc<Pattern> pattern)
   {
     // No parameter so do nothing.
@@ -305,7 +319,16 @@ namespace magpie
   {
     // Do nothing.
   }
-  
+
+  void Resolver::visit(BreakExpr& expr, int dummy)
+  {
+    if (numLoops_ == 0)
+    {
+      compiler_.reporter().error(expr.pos(),
+          "A 'break' can only appear within the body of a loop.");
+    }
+  }
+
   void Resolver::visit(CallExpr& expr, int dummy)
   {
     resolveCall(expr, false);
@@ -381,7 +404,10 @@ namespace magpie
     Scope loopScope(this);
     
     scope_->resolve(*expr.pattern());
+    
+    numLoops_++;
     resolve(expr.body());
+    numLoops_--;
 
     loopScope.end();
   }
@@ -590,7 +616,9 @@ namespace magpie
     resolve(expr.condition());
     
     // TODO(bob): Should the body get its own scope?
+    numLoops_++;
     resolve(expr.body());
+    numLoops_--;
     
     loopScope.end();
   }

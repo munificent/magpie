@@ -1,0 +1,18 @@
+// TODO(bob):
+// - Value after break becomes result of loop expression?
+// - Break from nested loop
+
+do
+    for i in 0..5 do
+        print(i)
+        if i == 2 then break
+        print(i)
+        i = i + 1
+    end
+    // expect: 0
+    // expect: 0
+    // expect: 1
+    // expect: 1
+    // expect: 2
+    print("after") // expect: after
+end

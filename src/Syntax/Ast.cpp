@@ -34,7 +34,12 @@ namespace magpie
   {
     out << (value_ ? "true" : "false");
   }
-  
+
+  void BreakExpr::trace(std::ostream& out) const
+  {
+    out << "(break)";
+  }
+
   void CallExpr::trace(std::ostream& out) const
   {
     out << "(";

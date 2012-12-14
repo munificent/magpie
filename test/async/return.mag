@@ -1,0 +1,11 @@
+var channel = Channel new
+
+async
+    print("before") // expect: before
+    return
+    print("after")
+end
+
+async channel send("done")
+
+print(channel receive) // expect: done

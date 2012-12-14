@@ -8,12 +8,14 @@
 
 namespace magpie
 {
+  class Loop;
   class Module;
   class PatternCompiler;
 
   class ExprCompiler : private ExprVisitor, private LValueVisitor
   {
     friend class Compiler;
+    friend class Loop;
     friend class PatternCompiler;
 
   public:
@@ -50,6 +52,7 @@ namespace magpie
     virtual void visit(AsyncExpr& expr, int dest);
     virtual void visit(BinaryOpExpr& expr, int dest);
     virtual void visit(BoolExpr& expr, int dest);
+    virtual void visit(BreakExpr& expr, int dest);
     virtual void visit(CallExpr& expr, int dest);
     virtual void visit(CatchExpr& expr, int dest);
     virtual void visit(DefExpr& expr, int dest);
@@ -138,6 +141,9 @@ namespace magpie
     int numTemps_;
     int maxSlots_;
 
+    // The innermost loop currently being compiled.
+    Loop* currentLoop_;
+
     NO_COPY(ExprCompiler);
   };
 
@@ -158,6 +164,30 @@ namespace magpie
 
     // Slot where the value of the test is stored.
     int slot;
+  };
+
+  // Keeps track of the break expressions that have appeared in the current
+  // loop. When the loop body ends, these will be compiled to appropriate jumps.
+  class Loop
+  {
+  public:
+    Loop(ExprCompiler* compiler);
+    ~Loop();
+
+    void addBreak();
+    void end();
+    
+  private:
+    ExprCompiler* compiler_;
+    
+    // The enclosing loop, or NULL if this is the outermost loop.
+    Loop* parent_;
+
+    // The offsets of each break's jump.
+    Array<int> breaks_;
+
+    // TODO(bob): Make a macro that ensures that this can only be allocated on
+    // the stack.
   };
 
   class PatternCompiler : public PatternVisitor

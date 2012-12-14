@@ -47,17 +47,7 @@ namespace magpie
                        gc<Pattern> valueParam, gc<Expr> body);
 
     Resolver(Compiler& compiler, Module& module, Resolver* parent,
-             bool isModuleBody)
-    : compiler_(compiler),
-      module_(module),
-      parent_(parent),
-      isModuleBody_(isModuleBody),
-      locals_(),
-      maxLocals_(0),
-      closures_(),
-      unnamedSlotId_(0),
-      scope_(NULL)
-    {}
+             bool isModuleBody);
     
     // The AST for a method parameter is a single pattern on each side, but the
     // compile implicitly destructures it when the pattern is a record so that
@@ -88,6 +78,7 @@ namespace magpie
     virtual void visit(AsyncExpr& expr, int dummy);
     virtual void visit(BinaryOpExpr& expr, int dummy);
     virtual void visit(BoolExpr& expr, int dummy);
+    virtual void visit(BreakExpr& expr, int dummy);
     virtual void visit(CallExpr& expr, int dummy);
     virtual void visit(CatchExpr& expr, int dummy);
     virtual void visit(DefExpr& expr, int dummy);
@@ -148,6 +139,9 @@ namespace magpie
     
     // The current inner-most local variable scope.
     Scope* scope_;
+
+    // The number of nested loops the code currently being resolved is in.
+    int numLoops_;
 
     NO_COPY(Resolver);
   };

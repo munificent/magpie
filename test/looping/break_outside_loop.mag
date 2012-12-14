@@ -1,0 +1,15 @@
+do
+    for i in 1..1 do
+        break
+        while 1 > 2 do
+            break
+            for i in 1..1 do
+                break
+                print(i)
+            end
+        end
+    end
+    print("before")
+    break // expect error
+    print("after")
+end

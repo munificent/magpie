@@ -6,6 +6,7 @@ class AssignExpr;
 class AsyncExpr;
 class BinaryOpExpr;
 class BoolExpr;
+class BreakExpr;
 class CallExpr;
 class CatchExpr;
 class DefExpr;
@@ -53,6 +54,7 @@ public:
   virtual void visit(AsyncExpr& node, int arg) = 0;
   virtual void visit(BinaryOpExpr& node, int arg) = 0;
   virtual void visit(BoolExpr& node, int arg) = 0;
+  virtual void visit(BreakExpr& node, int arg) = 0;
   virtual void visit(CallExpr& node, int arg) = 0;
   virtual void visit(CatchExpr& node, int arg) = 0;
   virtual void visit(DefExpr& node, int arg) = 0;
@@ -106,6 +108,7 @@ public:
   virtual AsyncExpr* asAsyncExpr() { return NULL; }
   virtual BinaryOpExpr* asBinaryOpExpr() { return NULL; }
   virtual BoolExpr* asBoolExpr() { return NULL; }
+  virtual BreakExpr* asBreakExpr() { return NULL; }
   virtual CallExpr* asCallExpr() { return NULL; }
   virtual CatchExpr* asCatchExpr() { return NULL; }
   virtual DefExpr* asDefExpr() { return NULL; }
@@ -296,6 +299,27 @@ public:
 private:
   bool value_;
   NO_COPY(BoolExpr);
+};
+
+class BreakExpr : public Expr
+{
+public:
+  BreakExpr(const SourcePos& pos)
+  : Expr(pos)
+  {}
+
+  virtual void accept(ExprVisitor& visitor, int arg)
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual BreakExpr* asBreakExpr() { return this; }
+
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  NO_COPY(BreakExpr);
 };
 
 class CallExpr : public Expr

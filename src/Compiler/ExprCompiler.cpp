@@ -14,7 +14,8 @@ namespace magpie
     code_(),
     numLocals_(0),
     numTemps_(0),
-    maxSlots_(0)
+    maxSlots_(0),
+    currentLoop_(NULL)
   {}
 
   gc<Chunk> ExprCompiler::compileBody(Module* module, gc<Expr> body)
@@ -22,7 +23,11 @@ namespace magpie
     int maxLocals;
     int numClosures;
     Resolver::resolveBody(compiler_, *module, body, maxLocals, numClosures);
-    compile(module, maxLocals, NULL, NULL, NULL, body);
+
+    if (compiler_.reporter().numErrors() == 0)
+    {
+      compile(module, maxLocals, NULL, NULL, NULL, body);
+    }
 
     chunk_->setCode(code_, maxSlots_, numClosures);
     return chunk_;
@@ -258,6 +263,11 @@ namespace magpie
     write(OP_BUILT_IN, expr.value() ? BUILT_IN_TRUE : BUILT_IN_FALSE, dest);
   }
 
+  void ExprCompiler::visit(BreakExpr& expr, int dummy)
+  {
+    currentLoop_->addBreak();
+  }
+
   void ExprCompiler::visit(CallExpr& expr, int dest)
   {
     compileCall(expr, dest, -1);
@@ -366,11 +376,13 @@ namespace magpie
     compile(expr.pattern(), dest);
 
     // Compile the body.
+    Loop loop(this);
     compile(expr.body(), dest);
 
     endJumpBack(loopStart);
     endJump(loopExit, OP_JUMP_IF_TRUE, doneSlot);
-
+    loop.end();
+    
     releaseTemp(); // iterator.
 
     // TODO(bob): Need to figure out what the result value should be.
@@ -608,9 +620,12 @@ namespace magpie
     int loopExit = startJump();
     releaseTemp(); // condition
 
+    Loop loop(this);
     compile(expr.body(), dest);
+
     endJumpBack(loopStart);
     endJump(loopExit, OP_JUMP_IF_FALSE, condition);
+    loop.end();
   }
 
   void ExprCompiler::visit(CallLValue& lvalue, int value)
@@ -880,6 +895,34 @@ namespace magpie
   {
     ASSERT(numTemps_ >= count, "Cannot release more temps than were created.");
     numTemps_ -= count;
+  }
+
+  Loop::Loop(ExprCompiler* compiler)
+  : compiler_(compiler)
+  {
+    parent_ = compiler_->currentLoop_;
+    compiler_->currentLoop_ = this;
+  }
+  
+  Loop::~Loop()
+  {
+    ASSERT(compiler_ == NULL, "Forgot to end() loop.");
+  }
+
+  void Loop::addBreak()
+  {
+    breaks_.add(compiler_->startJump());
+  }
+
+  void Loop::end()
+  {
+    for (int i = 0; i < breaks_.count(); i++)
+    {
+      compiler_->endJump(breaks_[i], OP_JUMP, 1);
+    }
+
+    compiler_->currentLoop_ = parent_;
+    compiler_ = NULL;
   }
 
   void PatternCompiler::compile(gc<Pattern> pattern, int slot)

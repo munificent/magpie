@@ -43,6 +43,7 @@ namespace magpie
     // Keywords.
     { NULL,             &Parser::and_, PRECEDENCE_LOGICAL },           // TOKEN_AND
     { NULL,             NULL, -1 },                                    // TOKEN_ASYNC
+    { NULL,             NULL, -1 },                                    // TOKEN_BREAK
     { NULL,             NULL, -1 },                                    // TOKEN_CASE
     { NULL,             NULL, -1 },                                    // TOKEN_CATCH
     { NULL,             NULL, -1 },                                    // TOKEN_DEF
@@ -372,6 +373,13 @@ namespace magpie
       return new AsyncExpr(spanFrom(start), body);
     }
 
+    if (match(TOKEN_BREAK))
+    {
+      // TODO(bob): Allow multiple sequential breaks ("break break ...") to
+      // exit multiple nexted loops?
+      return new BreakExpr(spanFrom(start));
+    }
+    
     if (match(TOKEN_DEF))
     {
       // Methods can only be declared at the top level. Show a friendly error.
