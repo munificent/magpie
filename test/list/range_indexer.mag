@@ -1,0 +1,35 @@
+// TODO(bob):
+// - Backwards ranges?
+// - Negative range coordinates.
+// - Range setter.
+
+val list = [1, 2, 3, 4]
+
+// Normal ranges.
+print(list[0..3]) // expect: [1, 2, 3, 4]
+print(list[1..3]) // expect: [2, 3, 4]
+print(list[2..3]) // expect: [3, 4]
+print(list[2..2]) // expect: [3]
+print(list[3..2]) // expect: []
+
+// Inclusive ranges.
+print(list[0...4]) // expect: [1, 2, 3, 4]
+print(list[1...3]) // expect: [2, 3]
+print(list[3...3]) // expect: []
+
+// Out of bounds.
+do
+    list[-1..2]
+catch is ArgError then print("caught") // expect: caught
+
+do
+    list[1..4]
+catch is ArgError then print("caught") // expect: caught
+
+do
+    list[1...5]
+catch is ArgError then print("caught") // expect: caught
+
+do
+    list[7..8]
+catch is ArgError then print("caught") // expect: caught

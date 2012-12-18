@@ -115,6 +115,18 @@ end
 
 def (is List) _indexSet(index is Num, value) native "listIndexSet"
 
+def (list is List)[range is Range]
+    val first = range first
+    val last = range last + (if range inclusive then 1 else 0)
+
+    if first < 0 or first > list count or
+        last < 0 or last > list count then throw ArgError new
+
+    list _indexRange(first, last)
+end
+
+def (is List) _indexRange(first is Num, last is Num) native "listIndexRange"
+
 def (is List) insert(item, at: index is Num) native "listInsert"
 
 // Makes lists iterable.

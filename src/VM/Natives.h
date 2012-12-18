@@ -42,6 +42,7 @@ namespace magpie
   NATIVE(listAdd);
   NATIVE(listCount);
   NATIVE(listIndex);
+  NATIVE(listIndexRange);
   NATIVE(listIndexSet);
   NATIVE(listInsert);
 }

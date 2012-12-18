@@ -79,6 +79,7 @@ namespace magpie
     DEF_NATIVE(listAdd);
     DEF_NATIVE(listCount);
     DEF_NATIVE(listIndex);
+    DEF_NATIVE(listIndexRange);
     DEF_NATIVE(listIndexSet);
     DEF_NATIVE(listInsert);
 

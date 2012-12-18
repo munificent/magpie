@@ -219,6 +219,24 @@ namespace magpie
     // TODO(bob): What if the index isn't an int?
     return list->elements()[static_cast<int>(args[1]->asNumber())];
   }
+
+  NATIVE(listIndexRange)
+  {
+    // Note: bounds checking is handled by core before calling this.
+    ListObject* source = args[0]->asList();
+    // TODO(bob): What if first or last isn't an int?
+    int first = static_cast<int>(args[1]->asNumber());
+    int last = static_cast<int>(args[2]->asNumber());
+
+    int size = last - first;
+    gc<ListObject> list = new ListObject(size);
+    for (int i = 0; i < size; i++)
+    {
+      list->elements().add(source->elements()[i + first]);
+    }
+
+    return list;
+  }
   
   NATIVE(listIndexSet)
   {
