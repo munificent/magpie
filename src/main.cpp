@@ -31,6 +31,12 @@ int repl(VM& vm)
   std::cout << std::endl;
   std::cout << "Type 'Ctrl+C' to exit." << std::endl;
 
+  if (!vm.initRepl())
+  {
+    std::cerr << "Could not initialize REPL." << std::endl;
+    return 1;
+  }
+
   while (true)
   {
     gc<String> source;

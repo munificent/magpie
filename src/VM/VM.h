@@ -44,6 +44,7 @@ namespace magpie
 
     void importModule(Module* from, gc<String> name);
 
+    bool initRepl();
     gc<Object> evaluateReplExpression(gc<Expr> expr);
 
     Module* getModule(int index) { return modules_[index]; }

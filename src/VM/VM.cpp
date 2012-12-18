@@ -197,6 +197,15 @@ namespace magpie
     from->imports().add(module);
   }
 
+  bool VM::initRepl()
+  {
+    Module* core = addModule(String::create("core"), NULL);
+    if (!core->compile(*this)) return false;
+    scheduler_.runModule(core);
+
+    return true;
+  }
+
   gc<Object> VM::evaluateReplExpression(gc<Expr> expr)
   {
     if (replModule_ == NULL)
