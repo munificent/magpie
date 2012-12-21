@@ -1,0 +1,8 @@
+import io
+
+// TODO(bob): Path should be relative to this script.
+val file = File open("test/io/file/data.txt")
+print(file read)
+// expect: This is the first line.
+// expect: This is the second line.
+file close
