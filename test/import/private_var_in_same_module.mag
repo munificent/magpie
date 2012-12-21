@@ -1,0 +1,2 @@
+val _hidden = "can see me"
+print(_hidden) // expect: can see me

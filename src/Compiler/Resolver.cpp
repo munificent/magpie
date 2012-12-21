@@ -241,9 +241,11 @@ namespace magpie
 
   bool Resolver::resolveTopLevelName(Module& module, NameExpr& expr)
   {
+    // Do not look up private names in other modules.
+    if ((*expr.name())[0] == '_' && &module != &module_) return false;
+
     for (int i = 0; i < module.numVariables(); i++)
     {
-      // TODO(bob): Handle private names.
       if (*module.getVariableName(i) == *expr.name())
       {
         // Found it.
