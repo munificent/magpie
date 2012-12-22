@@ -28,7 +28,8 @@ namespace magpie
 
     if (compiler_.reporter().numErrors() == 0)
     {
-      compile(module, maxLocals, NULL, NULL, NULL, body);
+      gc<String> label = String::format("%s body", module->path()->cString());
+      compile(label, module, maxLocals, NULL, NULL, NULL, body);
     }
 
     chunk_->bind(maxSlots_, numClosures);
@@ -44,29 +45,32 @@ namespace magpie
 
     int numClosures = 0;
 
-    // TODO(bob): Is this the position we want if there are no methods?
-    SourcePos lastPos(gc<String>(), -1, -1, -1, -1);
-
     // TODO(bob): Lots of work needed here:
     // - Support call-next-method.
     // - Detect pattern collisions.
     // - Throw AmbiguousMethodError when appropriate.
     for (int i = 0; i < multimethod.methods().count(); i++)
     {
-      gc<DefExpr> method = multimethod.methods()[i]->def();
-      lastPos = method->pos();
-      compile(multimethod.methods()[i]->module(),
-              method->resolved().maxLocals(),
-              method->leftParam(), method->rightParam(), method->value(),
-              method->body());
+      gc<Method> method = multimethod.methods()[i];
+      gc<DefExpr> def = method->def();
+
+      gc<String> label = String::format("%s %s",
+                                        method->module()->path()->cString(),
+                                        def->name()->cString());
+
+      compile(label, method->module(),
+              def->resolved().maxLocals(),
+              def->leftParam(), def->rightParam(), def->value(),
+              def->body());
 
       // Keep track of the total number of closures we need.
-      numClosures = MAX(numClosures, method->resolved().closures().count());
+      numClosures = MAX(numClosures, def->resolved().closures().count());
     }
 
     // If we get here, all methods failed to match, so throw a NoMethodError.
-    write(lastPos, OP_BUILT_IN, 3, 0);
-    write(lastPos, OP_THROW, 0);
+    // TODO(bob): Is this the line we want if there are no methods?
+    write(-1, OP_BUILT_IN, 3, 0);
+    write(-1, OP_THROW, 0);
 
     chunk_->bind(maxSlots_, numClosures);
     return chunk_;
@@ -74,8 +78,11 @@ namespace magpie
 
   gc<Chunk> ExprCompiler::compile(Module* module, FnExpr& function)
   {
-    compile(module, function.resolved().maxLocals(), NULL, function.pattern(),
-            NULL, function.body());
+    gc<String> label = String::format("%s function %d",
+        module->path()->cString(), function.pos().startLine());
+    
+    compile(label, module, function.resolved().maxLocals(),
+            NULL, function.pattern(), NULL, function.body());
 
     chunk_->bind(maxSlots_, function.resolved().closures().count());
     return chunk_;
@@ -83,19 +90,23 @@ namespace magpie
 
   gc<Chunk> ExprCompiler::compile(Module* module, AsyncExpr& expr)
   {
-    compile(module, expr.resolved().maxLocals(), NULL, NULL, NULL, expr.body());
+    gc<String> label = String::format("%s async %d",
+        module->path()->cString(), expr.pos().startLine());
+
+    compile(label, module, expr.resolved().maxLocals(),
+            NULL, NULL, NULL, expr.body());
 
     chunk_->bind(maxSlots_, expr.resolved().closures().count());
     return chunk_;
   }
 
-  void ExprCompiler::compile(Module* module, int maxLocals,
+  void ExprCompiler::compile(gc<String> label, Module* module, int maxLocals,
                              gc<Pattern> leftParam, gc<Pattern> rightParam,
                              gc<Pattern> valueParam, gc<Expr> body)
   {
+    currentLabel_ = chunk_->addLabel(label);
+    
     module_ = module;
-    currentLabel_ = chunk_->addLabel(module->path());
-
     // Reserve slots up front for all of the locals. This ensures that
     // temps will always be after locals.
     // TODO(bob): Using max here isn't optimal. Ideally a given temp only
@@ -831,16 +842,16 @@ namespace magpie
 
   void ExprCompiler::write(const Expr& expr, OpCode op, int a, int b, int c)
   {
-    write(expr.pos(), op, a, b, c);
+    write(expr.pos().startLine(), op, a, b, c);
   }
 
-  void ExprCompiler::write(const SourcePos& pos, OpCode op, int a, int b, int c)
+  void ExprCompiler::write(int line, OpCode op, int a, int b, int c)
   {
     ASSERT_INDEX(a, 256);
     ASSERT_INDEX(b, 256);
     ASSERT_INDEX(c, 256);
 
-    chunk_->write(currentLabel_, pos.startLine(), MAKE_ABC(a, b, c, op));
+    chunk_->write(currentLabel_, line, MAKE_ABC(a, b, c, op));
   }
   
   int ExprCompiler::startJump(const Expr& expr)

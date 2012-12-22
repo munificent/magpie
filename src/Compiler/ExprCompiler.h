@@ -36,8 +36,9 @@ namespace magpie
     // Compiles [expr] to bytecode.
     gc<Chunk> compile(Module* module, AsyncExpr& expr);
 
-    void compile(Module* module, int maxLocals, gc<Pattern> leftParam,
-                 gc<Pattern> rightParam, gc<Pattern> valueParam, gc<Expr> body);
+    void compile(gc<String> label, Module* module, int maxLocals,
+                 gc<Pattern> leftParam, gc<Pattern> rightParam,
+                 gc<Pattern> valueParam, gc<Expr> body);
 
     void compileParam(PatternCompiler& compiler, gc<Pattern> param, int& slot);
     void compileParamField(PatternCompiler& compiler, gc<Pattern> param,
@@ -113,8 +114,7 @@ namespace magpie
 
     void write(const Expr& expr, OpCode op,
                int a = 0xff, int b = 0xff, int c = 0xff);
-    void write(const SourcePos& pos, OpCode op,
-               int a = 0xff, int b = 0xff, int c = 0xff);
+    void write(int line, OpCode op, int a = 0xff, int b = 0xff, int c = 0xff);
     int startJump(const Expr& expr);
     int startJump(const SourcePos& pos);
     int startJumpBack();
