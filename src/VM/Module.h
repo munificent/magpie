@@ -27,6 +27,9 @@ namespace magpie
     // Gets the name of the module.
     gc<String> name() const { return name_; }
 
+    // Gets the file path of the module.
+    gc<String> path() const { return path_; }
+
     bool parse();
     void addImports(VM& vm);
     bool compile(VM& vm);

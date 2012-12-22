@@ -575,8 +575,17 @@ namespace magpie
   bool Fiber::throwError(gc<Object> error)
   {
     // If there is nothing to catch it, end the fiber.
-    if (nearestCatch_.isNull()) return false;
-    
+    if (nearestCatch_.isNull())
+    {
+      // TODO(bob): Temp. Print a stack trace.
+      for (int i = 0; i < callFrames_.count(); i++)
+      {
+        CallFrame& frame = callFrames_[i];
+        frame.function->chunk()->printLoc(frame.ip);
+      }
+      return false;
+    }
+
     // Unwind any nested callframes above the one containing the catch clause.
     callFrames_.truncate(nearestCatch_->callFrame() + 1);
     

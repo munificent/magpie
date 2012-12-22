@@ -106,11 +106,17 @@ namespace magpie
     // Otherwise, it's a call to a setter, and `valueSlot` is the slot holding
     // the right-hand side value.
     void compileCall(const CallExpr& expr, int dest, int valueSlot);
-    void compileAssignment(gc<ResolvedName> resolved, int value, bool isCreate);
-    void compileClosures(ResolvedProcedure& procedure);
+    void compileAssignment(const SourcePos& pos, gc<ResolvedName> resolved,
+                           int value, bool isCreate);
+    void compileClosures(const SourcePos& pos,
+                         ResolvedProcedure& procedure);
 
-    void write(OpCode op, int a = 0xff, int b = 0xff, int c = 0xff);
-    int startJump();
+    void write(const Expr& expr, OpCode op,
+               int a = 0xff, int b = 0xff, int c = 0xff);
+    void write(const SourcePos& pos, OpCode op,
+               int a = 0xff, int b = 0xff, int c = 0xff);
+    int startJump(const Expr& expr);
+    int startJump(const SourcePos& pos);
     int startJumpBack();
 
     // Backpatches the bytecode at `from` with the given instruction and the
@@ -119,7 +125,7 @@ namespace magpie
     void endJump(int from, OpCode op, int a = -1, int b = -1);
 
     // Inserts a backwards jump to the given instruction.
-    void endJumpBack(int to);
+    void endJumpBack(const Expr& expr, int to);
 
     int getNextTemp() const;
     int makeTemp();
@@ -134,8 +140,6 @@ namespace magpie
     // The chunk being compiled.
     gc<Chunk> chunk_;
 
-    Array<instruction> code_;
-
     // The number of slots currently in use.
     int numLocals_;
     int numTemps_;
@@ -143,6 +147,10 @@ namespace magpie
 
     // The innermost loop currently being compiled.
     Loop* currentLoop_;
+
+    // A textual label for the code currently being compiled. Indexes into the
+    // chunk's list of labels.
+    int currentLabel_;
 
     NO_COPY(ExprCompiler);
   };
@@ -174,7 +182,7 @@ namespace magpie
     Loop(ExprCompiler* compiler);
     ~Loop();
 
-    void addBreak();
+    void addBreak(const Expr& expr);
     void end();
     
   private:
@@ -209,7 +217,7 @@ namespace magpie
     virtual void visit(WildcardPattern& pattern, int slot);
 
   private:
-    void writeTest(int slot);
+    void writeTest(const Pattern& pattern, int slot);
 
     ExprCompiler& compiler_;
     bool jumpOnFailure_;

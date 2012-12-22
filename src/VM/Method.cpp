@@ -7,13 +7,39 @@
 
 namespace magpie
 {
-  void Chunk::setCode(const Array<instruction>& code, int numSlots,
-                      int numUpvars)
+  void Chunk::printLoc(int ip)
   {
-    // TODO(bob): Copying here is lame!
-    code_ = code;
+    gc<String> label = labels_[codePos_[ip].label];
+    std::cout << label << " line " << codePos_[ip].line << std::endl;
+  }
+
+  void Chunk::bind(int numSlots, int numUpvars)
+  {
     numSlots_ = numSlots;
     numUpvars_ = numUpvars;
+  }
+
+  void Chunk::write(int file, int line, instruction ins)
+  {
+    code_.add(ins);
+    codePos_.add(CodePos(file, line));
+  }
+
+  void Chunk::rewrite(int pos, instruction ins)
+  {
+    code_[pos] = ins;
+  }
+
+  int Chunk::addLabel(gc<String> label)
+  {
+    // See if it's already in the list.
+    for (int i = 0; i < labels_.count(); i++)
+    {
+      if (labels_[i] == label) return i;
+    }
+
+    labels_.add(label);
+    return labels_.count() - 1;
   }
 
   int Chunk::addConstant(gc<Object> constant)
@@ -192,6 +218,8 @@ namespace magpie
   void Chunk::reach()
   {
     constants_.reach();
+    chunks_.reach();
+    labels_.reach();
   }
 
   void Method::reach()

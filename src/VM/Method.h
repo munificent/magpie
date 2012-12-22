@@ -16,6 +16,25 @@ namespace magpie
   class Pattern;
   class VM;
 
+  // Tracks source code position information in a compiled Chunk. For each
+  // instruction, there is a CodePos that tells which file and line that code
+  // corresponds to.
+  struct CodePos
+  {
+    CodePos(int label, int line)
+    : label(label),
+      line(line)
+    {}
+
+    // TODO(bob): Use unsigned shorts here?
+    // Index in the chunk's label list for the location that this code came
+    // from.
+    int label;
+
+    // The source line in the file that this code corresponds to.
+    int line;
+  };
+
   // A compiled chunk of bytecode that can be executed by a Fiber.
   class Chunk : public Managed
   {
@@ -24,13 +43,28 @@ namespace magpie
     : code_(),
       constants_(),
       chunks_(),
+      labels_(),
+      codePos_(),
       numSlots_(0),
       numUpvars_(0)
     {}
 
-    void setCode(const Array<instruction>& code, int maxSlots, int numUpvars);
+    // TODO(bob): Temp.
+    void printLoc(int ip);
+
+    void bind(int maxSlots, int numUpvars);
+
+    void write(int file, int line, instruction ins);
+    void rewrite(int pos, instruction ins);
+
+    // Gets the number of instructions in this chunk.
+    int count() const { return code_.count(); }
 
     inline const Array<instruction>& code() const { return code_; }
+
+    // Adds [label] to the list of labels displayed in stack traces. Returns
+    // the index of the file in the list.
+    int addLabel(gc<String> file);
 
     int addConstant(gc<Object> constant);
     gc<Object> getConstant(int index) const;
@@ -55,6 +89,13 @@ namespace magpie
     // Chunks of bytecode for nested functions and async blocks within this
     // chunk.
     Array<gc<Chunk> > chunks_;
+
+    // The text labels shown in stack traces. These are usually module file
+    // paths and method names.
+    Array<gc<String> > labels_;
+
+    // The source locations that correspond to each instruction in code_.
+    Array<CodePos> codePos_;
 
     int numSlots_;
     int numUpvars_;

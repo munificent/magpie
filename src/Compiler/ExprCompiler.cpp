@@ -1,8 +1,10 @@
 #include "ErrorReporter.h"
 #include "Method.h"
+#include "Module.h"
 #include "ExprCompiler.h"
 #include "Object.h"
 #include "Resolver.h"
+#include "Token.h"
 
 namespace magpie
 {
@@ -11,11 +13,11 @@ namespace magpie
     compiler_(compiler),
     module_(NULL),
     chunk_(new Chunk()),
-    code_(),
     numLocals_(0),
     numTemps_(0),
     maxSlots_(0),
-    currentLoop_(NULL)
+    currentLoop_(NULL),
+    currentLabel_(-1)
   {}
 
   gc<Chunk> ExprCompiler::compileBody(Module* module, gc<Expr> body)
@@ -29,7 +31,7 @@ namespace magpie
       compile(module, maxLocals, NULL, NULL, NULL, body);
     }
 
-    chunk_->setCode(code_, maxSlots_, numClosures);
+    chunk_->bind(maxSlots_, numClosures);
     return chunk_;
   }
 
@@ -42,6 +44,9 @@ namespace magpie
 
     int numClosures = 0;
 
+    // TODO(bob): Is this the position we want if there are no methods?
+    SourcePos lastPos(gc<String>(), -1, -1, -1, -1);
+
     // TODO(bob): Lots of work needed here:
     // - Support call-next-method.
     // - Detect pattern collisions.
@@ -49,6 +54,7 @@ namespace magpie
     for (int i = 0; i < multimethod.methods().count(); i++)
     {
       gc<DefExpr> method = multimethod.methods()[i]->def();
+      lastPos = method->pos();
       compile(multimethod.methods()[i]->module(),
               method->resolved().maxLocals(),
               method->leftParam(), method->rightParam(), method->value(),
@@ -59,10 +65,10 @@ namespace magpie
     }
 
     // If we get here, all methods failed to match, so throw a NoMethodError.
-    write(OP_BUILT_IN, 3, 0);
-    write(OP_THROW, 0);
+    write(lastPos, OP_BUILT_IN, 3, 0);
+    write(lastPos, OP_THROW, 0);
 
-    chunk_->setCode(code_, maxSlots_, numClosures);
+    chunk_->bind(maxSlots_, numClosures);
     return chunk_;
   }
 
@@ -71,7 +77,7 @@ namespace magpie
     compile(module, function.resolved().maxLocals(), NULL, function.pattern(),
             NULL, function.body());
 
-    chunk_->setCode(code_, maxSlots_, function.resolved().closures().count());
+    chunk_->bind(maxSlots_, function.resolved().closures().count());
     return chunk_;
   }
 
@@ -79,7 +85,7 @@ namespace magpie
   {
     compile(module, expr.resolved().maxLocals(), NULL, NULL, NULL, expr.body());
 
-    chunk_->setCode(code_, maxSlots_, expr.resolved().closures().count());
+    chunk_->bind(maxSlots_, expr.resolved().closures().count());
     return chunk_;
   }
 
@@ -88,6 +94,7 @@ namespace magpie
                              gc<Pattern> valueParam, gc<Expr> body)
   {
     module_ = module;
+    currentLabel_ = chunk_->addLabel(module->path());
 
     // Reserve slots up front for all of the locals. This ensures that
     // temps will always be after locals.
@@ -113,7 +120,7 @@ namespace magpie
     // The result slot is just after the param slots.
     compile(body, numParamSlots);
 
-    write(OP_RETURN, numParamSlots);
+    write(body->pos(), OP_RETURN, numParamSlots);
 
     ASSERT(numTemps_ == 0, "Should not have any temps left.");
 
@@ -157,7 +164,8 @@ namespace magpie
       // we want it in the upvar, so create it and copy the value up.
       if (variable->resolved()->scope() == NAME_CLOSURE)
       {
-        write(OP_SET_UPVAR, variable->resolved()->index(), slot, 1);
+        write(variable->pos(),
+              OP_SET_UPVAR, variable->resolved()->index(), slot, 1);
       }
     }
     else
@@ -205,7 +213,7 @@ namespace magpie
     compile(expr.left(), dest);
 
     // Leave a space for the test and jump instruction.
-    int jumpToEnd = startJump();
+    int jumpToEnd = startJump(expr);
 
     compile(expr.right(), dest);
 
@@ -228,10 +236,10 @@ namespace magpie
     gc<Chunk> chunk = compiler.compile(module_, expr);
     int index = chunk_->addChunk(chunk);
 
-    write(OP_ASYNC, index);
+    write(expr.pos(), OP_ASYNC, index);
     // TODO(bob): What about dest?
 
-    compileClosures(expr.resolved());
+    compileClosures(expr.pos(), expr.resolved());
   }
 
   void ExprCompiler::visit(BinaryOpExpr& expr, int dest)
@@ -250,9 +258,9 @@ namespace magpie
         ASSERT(false, "Unknown infix operator.");
     }
 
-    write(op, a, b, dest);
+    write(expr, op, a, b, dest);
 
-    if (negate) write(OP_NOT, dest);
+    if (negate) write(expr, OP_NOT, dest);
 
     if (IS_SLOT(a)) releaseTemp();
     if (IS_SLOT(b)) releaseTemp();
@@ -260,12 +268,13 @@ namespace magpie
 
   void ExprCompiler::visit(BoolExpr& expr, int dest)
   {
-    write(OP_BUILT_IN, expr.value() ? BUILT_IN_TRUE : BUILT_IN_FALSE, dest);
+    write(expr, OP_BUILT_IN, expr.value() ? BUILT_IN_TRUE : BUILT_IN_FALSE,
+          dest);
   }
 
   void ExprCompiler::visit(BreakExpr& expr, int dummy)
   {
-    currentLoop_->addBreak();
+    currentLoop_->addBreak(expr);
   }
 
   void ExprCompiler::visit(CallExpr& expr, int dest)
@@ -276,22 +285,22 @@ namespace magpie
   void ExprCompiler::visit(CatchExpr& expr, int dest)
   {
     // Register the catch handler.
-    int enter = startJump();
+    int enter = startJump(expr);
 
     // Compile the block body.
     compile(expr.body(), dest);
 
     // Complete the catch handler.
-    write(OP_EXIT_TRY); // slot for caught value here?
+    write(expr, OP_EXIT_TRY);
 
     // Jump past it if an exception is not thrown.
-    int jumpPastCatch = startJump();
+    int jumpPastCatch = startJump(expr);
 
     endJump(enter, OP_ENTER_TRY);
 
     // TODO(bob): Can we use "dest" here or does it need to be a temp?
     // Write a pseudo-opcode so we know what slot to put the error in.
-    write(OP_MOVE, dest);
+    write(expr, OP_MOVE, dest);
 
     compileMatch(expr.catches(), dest);
 
@@ -304,17 +313,17 @@ namespace magpie
     int multimethod = compiler_.findMethod(signature);
     methodId method = compiler_.addMethod(new Method(module_, &expr));
 
-    write(OP_METHOD, multimethod, method);
+    write(expr, OP_METHOD, multimethod, method);
   }
 
   void ExprCompiler::visit(DefClassExpr& expr, int dest)
   {
     // Create and load the class.
     int index = compileConstant(expr);
-    write(OP_CONSTANT, index, dest);
+    write(expr, OP_CONSTANT, index, dest);
 
     // Also store it in its named variable.
-    compileAssignment(expr.resolved(), dest, true);
+    compileAssignment(expr.pos(), expr.resolved(), dest, true);
 
     // Compile the synthesized stuff.
     for (int i = 0; i < expr.synthesizedMethods().count(); i++)
@@ -335,9 +344,9 @@ namespace magpie
     gc<Chunk> chunk = compiler.compile(module_, expr);
     int index = chunk_->addChunk(chunk);
 
-    write(OP_FUNCTION, index, dest);
+    write(expr, OP_FUNCTION, index, dest);
 
-    compileClosures(expr.resolved());
+    compileClosures(expr.pos(), expr.resolved());
   }
   
   void ExprCompiler::visit(ForExpr& expr, int dest)
@@ -357,19 +366,19 @@ namespace magpie
     // Then call "iterate" on it to get an iterator.
     // TODO(bob): Hackish. An actual intermediate representation would help
     // here.
-    write(OP_CALL, iterateMethod, iterator, iterator);
+    write(expr, OP_CALL, iterateMethod, iterator, iterator);
 
     int loopStart = startJumpBack();
 
     // Call "advance" on the iterator.
-    write(OP_CALL, advanceMethod, iterator, dest);
+    write(expr, OP_CALL, advanceMethod, iterator, dest);
 
     // If done, jump to exit.
     int doneSlot = makeTemp();
-    write(OP_BUILT_IN, BUILT_IN_DONE, doneSlot);
-    write(OP_EQUAL, dest, doneSlot, doneSlot);
+    write(expr, OP_BUILT_IN, BUILT_IN_DONE, doneSlot);
+    write(expr, OP_EQUAL, dest, doneSlot, doneSlot);
 
-    int loopExit = startJump();
+    int loopExit = startJump(expr);
     releaseTemp(); // doneSlot.
 
     // Match on the loop pattern.
@@ -379,7 +388,7 @@ namespace magpie
     Loop loop(this);
     compile(expr.body(), dest);
 
-    endJumpBack(loopStart);
+    endJumpBack(expr, loopStart);
     endJump(loopExit, OP_JUMP_IF_TRUE, doneSlot);
     loop.end();
     
@@ -390,7 +399,7 @@ namespace magpie
 
   void ExprCompiler::visit(GetFieldExpr& expr, int dest)
   {
-    write(OP_GET_CLASS_FIELD, expr.index());
+    write(expr, OP_GET_CLASS_FIELD, expr.index());
   }
 
   void ExprCompiler::visit(IfExpr& expr, int dest)
@@ -399,13 +408,13 @@ namespace magpie
     compile(expr.condition(), dest);
 
     // Leave a space for the test and jump instruction.
-    int jumpToElse = startJump();
+    int jumpToElse = startJump(expr);
 
     // Compile the then arm.
     compile(expr.thenArm(), dest);
 
     // Leave a space for the then arm to jump over the else arm.
-    int jumpPastElse = startJump();
+    int jumpPastElse = startJump(expr);
 
     // Compile the else arm.
     endJump(jumpToElse, OP_JUMP_IF_FALSE, dest);
@@ -417,7 +426,7 @@ namespace magpie
     else
     {
       // A missing 'else' arm is implicitly 'nothing'.
-      write(OP_BUILT_IN, BUILT_IN_NOTHING, dest);
+      write(expr, OP_BUILT_IN, BUILT_IN_NOTHING, dest);
     }
 
     endJump(jumpPastElse, OP_JUMP, 1);
@@ -438,7 +447,7 @@ namespace magpie
     int type = makeTemp();
     compile(expr.type(), type);
 
-    write(OP_IS, dest, type, dest);
+    write(expr, OP_IS, dest, type, dest);
 
     releaseTemp(); // type
   }
@@ -456,7 +465,7 @@ namespace magpie
       compile(expr.elements()[i], element);
     }
 
-    write(OP_LIST, firstElement, expr.elements().count(), dest);
+    write(expr, OP_LIST, firstElement, expr.elements().count(), dest);
 
     releaseTemps(expr.elements().count());
   }
@@ -475,40 +484,40 @@ namespace magpie
     switch (expr.resolved()->scope())
     {
       case NAME_LOCAL:
-        write(OP_MOVE, expr.resolved()->index(), dest);
+        write(expr, OP_MOVE, expr.resolved()->index(), dest);
         break;
 
       case NAME_CLOSURE:
-        write(OP_GET_UPVAR, expr.resolved()->index(), dest);
+        write(expr, OP_GET_UPVAR, expr.resolved()->index(), dest);
         break;
 
       case NAME_MODULE:
-        write(OP_GET_VAR, expr.resolved()->module(), expr.resolved()->index(),
-              dest);
+        write(expr, OP_GET_VAR, expr.resolved()->module(),
+              expr.resolved()->index(), dest);
         break;
     }
   }
 
   void ExprCompiler::visit(NativeExpr& expr, int dest)
   {
-    write(OP_NATIVE, expr.index(), 0, dest);
+    write(expr, OP_NATIVE, expr.index(), 0, dest);
   }
 
   void ExprCompiler::visit(NotExpr& expr, int dest)
   {
     compile(expr.value(), dest);
-    write(OP_NOT, dest);
+    write(expr, OP_NOT, dest);
   }
 
   void ExprCompiler::visit(NothingExpr& expr, int dest)
   {
-    write(OP_BUILT_IN, BUILT_IN_NOTHING, dest);
+    write(expr, OP_BUILT_IN, BUILT_IN_NOTHING, dest);
   }
 
   void ExprCompiler::visit(NumberExpr& expr, int dest)
   {
     int index = compileConstant(expr);
-    write(OP_CONSTANT, index, dest);
+    write(expr, OP_CONSTANT, index, dest);
   }
 
   void ExprCompiler::visit(OrExpr& expr, int dest)
@@ -516,7 +525,7 @@ namespace magpie
     compile(expr.left(), dest);
 
     // Leave a space for the test and jump instruction.
-    int jumpToEnd = startJump();
+    int jumpToEnd = startJump(expr);
 
     compile(expr.right(), dest);
 
@@ -549,7 +558,7 @@ namespace magpie
     int type = compiler_.addRecordType(names);
 
     // Create the record.
-    write(OP_RECORD, firstField, type, dest);
+    write(expr, OP_RECORD, firstField, type, dest);
 
     releaseTemps(expr.fields().count());
   }
@@ -560,14 +569,14 @@ namespace magpie
     if (expr.value().isNull())
     {
       // No value, so implicitly "nothing".
-      write(OP_BUILT_IN, BUILT_IN_NOTHING, dest);
+      write(expr, OP_BUILT_IN, BUILT_IN_NOTHING, dest);
     }
     else
     {
       compile(expr.value(), dest);
     }
 
-    write(OP_RETURN, dest);
+    write(expr, OP_RETURN, dest);
   }
 
   void ExprCompiler::visit(SequenceExpr& expr, int dest)
@@ -583,13 +592,13 @@ namespace magpie
 
   void ExprCompiler::visit(SetFieldExpr& expr, int dest)
   {
-    write(OP_SET_CLASS_FIELD, expr.index());
+    write(expr, OP_SET_CLASS_FIELD, expr.index());
   }
 
   void ExprCompiler::visit(StringExpr& expr, int dest)
   {
     int index = compileConstant(expr);
-    write(OP_CONSTANT, index, dest);
+    write(expr, OP_CONSTANT, index, dest);
   }
 
   void ExprCompiler::visit(ThrowExpr& expr, int dest)
@@ -598,7 +607,7 @@ namespace magpie
     compile(expr.value(), dest);
 
     // Throw it.
-    write(OP_THROW, dest);
+    write(expr, OP_THROW, dest);
   }
 
   void ExprCompiler::visit(VariableExpr& expr, int dest)
@@ -617,13 +626,13 @@ namespace magpie
     // Compile the condition.
     int condition = makeTemp();
     compile(expr.condition(), condition);
-    int loopExit = startJump();
+    int loopExit = startJump(expr);
     releaseTemp(); // condition
 
     Loop loop(this);
     compile(expr.body(), dest);
 
-    endJumpBack(loopStart);
+    endJumpBack(expr, loopStart);
     endJump(loopExit, OP_JUMP_IF_FALSE, condition);
     loop.end();
   }
@@ -636,7 +645,7 @@ namespace magpie
 
   void ExprCompiler::visit(NameLValue& lvalue, int value)
   {
-    compileAssignment(lvalue.resolved(), value, false);
+    compileAssignment(lvalue.pos(), lvalue.resolved(), value, false);
   }
 
   void ExprCompiler::visit(RecordLValue& lvalue, int value)
@@ -652,7 +661,8 @@ namespace magpie
       int field = makeTemp();
       int symbol = compiler_.addSymbol(lvalue.fields()[i].name);
 
-      write(OP_GET_FIELD, value, symbol, field);
+      write(lvalue.fields()[i].value->pos(), OP_GET_FIELD,
+            value, symbol, field);
 
       // Recurse into the record, using that field.
       lvalue.fields()[i].value->accept(*this, field);
@@ -689,7 +699,7 @@ namespace magpie
       // Then jump past the other cases.
       if (!lastPattern)
       {
-        endJumps.add(startJump());
+        endJumps.add(startJump(*clause.body()));
 
         // If this pattern fails, make it jump to the next case.
         compiler.endJumps();
@@ -761,16 +771,17 @@ namespace magpie
     if (valueSlot != -1)
     {
       int valueArg = makeTemp();
-      write(OP_MOVE, valueSlot, valueArg);
+      write(call, OP_MOVE, valueSlot, valueArg);
     }
 
-    write(OP_CALL, call.resolved(), firstArg, dest);
+    write(call, OP_CALL, call.resolved(), firstArg, dest);
 
     if (valueSlot != -1) releaseTemp(); // valueArg.
     releaseTemps(numTemps);
   }
 
-  void ExprCompiler::compileAssignment(gc<ResolvedName> resolved, int value,
+  void ExprCompiler::compileAssignment(const SourcePos& pos,
+                                       gc<ResolvedName> resolved, int value,
                                        bool isCreate)
   {
     ASSERT(resolved->isResolved(), "Must resolve before compiling.");
@@ -779,21 +790,22 @@ namespace magpie
     {
       case NAME_LOCAL:
         // Copy the value into the new variable.
-        write(OP_MOVE, value, resolved->index());
+        write(pos, OP_MOVE, value, resolved->index());
         break;
 
       case NAME_CLOSURE:
-        write(OP_SET_UPVAR, resolved->index(), value, isCreate ? 1 : 0);
+        write(pos, OP_SET_UPVAR, resolved->index(), value, isCreate ? 1 : 0);
         break;
 
       case NAME_MODULE:
         // Assign to the top-level variable.
-        write(OP_SET_VAR, resolved->module(), resolved->index(), value);
+        write(pos, OP_SET_VAR, resolved->module(), resolved->index(), value);
         break;
     }
   }
 
-  void ExprCompiler::compileClosures(ResolvedProcedure& procedure)
+  void ExprCompiler::compileClosures(const SourcePos& pos,
+                                     ResolvedProcedure& procedure)
   {
     // When a procedure is created, it needs to capture references to any
     // variables declared outside of itself that it (or one of its nested
@@ -807,42 +819,52 @@ namespace magpie
       {
         // This closure is a new one in this function so there's nothing to
         // Capture. So just add a "do nothing" pseudo-op.
-        write(OP_GET_UPVAR, 0, 0, 0);
+        write(pos, OP_GET_UPVAR, 0, 0, 0);
       }
       else
       {
         // Capture the upvar from the outer scope.
-        write(OP_GET_UPVAR, index, 0, 1);
+        write(pos, OP_GET_UPVAR, index, 0, 1);
       }
     }
   }
-  
-  void ExprCompiler::write(OpCode op, int a, int b, int c)
+
+  void ExprCompiler::write(const Expr& expr, OpCode op, int a, int b, int c)
+  {
+    write(expr.pos(), op, a, b, c);
+  }
+
+  void ExprCompiler::write(const SourcePos& pos, OpCode op, int a, int b, int c)
   {
     ASSERT_INDEX(a, 256);
     ASSERT_INDEX(b, 256);
     ASSERT_INDEX(c, 256);
 
-    code_.add(MAKE_ABC(a, b, c, op));
+    chunk_->write(currentLabel_, pos.startLine(), MAKE_ABC(a, b, c, op));
+  }
+  
+  int ExprCompiler::startJump(const Expr& expr)
+  {
+    return startJump(expr.pos());
   }
 
-  int ExprCompiler::startJump()
+  int ExprCompiler::startJump(const SourcePos& pos)
   {
     // Just write a dummy op to leave a space for the jump instruction.
-    write(OP_MOVE);
-    return code_.count() - 1;
+    write(pos, OP_MOVE);
+    return chunk_->count() - 1;
   }
 
   int ExprCompiler::startJumpBack()
   {
     // Remember the current instruction so we can calculate the offset.
-    return code_.count() - 1;
+    return chunk_->count() - 1;
   }
 
   void ExprCompiler::endJump(int from, OpCode op, int a, int b)
   {
     int c;
-    int offset = code_.count() - from - 1;
+    int offset = chunk_->count() - from - 1;
 
     // Add the offset as the last operand.
     if (a == -1)
@@ -861,13 +883,13 @@ namespace magpie
       c = offset;
     }
 
-    code_[from] = MAKE_ABC(a, b, c, op);
+    chunk_->rewrite(from, MAKE_ABC(a, b, c, op));
   }
 
-  void ExprCompiler::endJumpBack(int to)
+  void ExprCompiler::endJumpBack(const Expr& expr, int to)
   {
-    int offset = code_.count() - to;
-    write(OP_JUMP, 0, offset);
+    int offset = chunk_->count() - to;
+    write(expr, OP_JUMP, 0, offset);
   }
 
   int ExprCompiler::getNextTemp() const
@@ -909,9 +931,9 @@ namespace magpie
     ASSERT(compiler_ == NULL, "Forgot to end() loop.");
   }
 
-  void Loop::addBreak()
+  void Loop::addBreak(const Expr& expr)
   {
-    breaks_.add(compiler_->startJump());
+    breaks_.add(compiler_->startJump(expr));
   }
 
   void Loop::end()
@@ -958,24 +980,26 @@ namespace magpie
     // Recurse into the fields.
     for (int i = 0; i < pattern.fields().count(); i++)
     {
+      const PatternField& field = pattern.fields()[i];
+      
       // Test and destructure the field. This takes two instructions to encode
       // all of the operands.
-      int field = compiler_.makeTemp();
-      int symbol = compiler_.compiler_.addSymbol(pattern.fields()[i].name);
+      int fieldSlot = compiler_.makeTemp();
+      int symbol = compiler_.compiler_.addSymbol(field.name);
 
       if (jumpOnFailure_)
       {
-        compiler_.write(OP_TEST_FIELD, value, symbol, field);
-        tests_.add(MatchTest(compiler_.code_.count(), -1));
-        compiler_.startJump();
+        compiler_.write(pattern.pos(), OP_TEST_FIELD, value, symbol, fieldSlot);
+        tests_.add(MatchTest(compiler_.chunk_->count(), -1));
+        compiler_.startJump(pattern.pos());
       }
       else
       {
-        compiler_.write(OP_GET_FIELD, value, symbol, field);
+        compiler_.write(pattern.pos(), OP_GET_FIELD, value, symbol, fieldSlot);
       }
 
       // Recurse into the pattern, using that field.
-      pattern.fields()[i].value->accept(*this, field);
+      field.value->accept(*this, fieldSlot);
 
       compiler_.releaseTemp();
     }
@@ -988,8 +1012,8 @@ namespace magpie
     compiler_.compile(pattern.type(), expected);
 
     // Test if the value matches the expected type.
-    compiler_.write(OP_IS, value, expected, expected);
-    writeTest(expected);
+    compiler_.write(pattern.pos(), OP_IS, value, expected, expected);
+    writeTest(pattern, expected);
 
     compiler_.releaseTemp();
   }
@@ -1001,15 +1025,15 @@ namespace magpie
     compiler_.compile(pattern.value(), expected);
 
     // Test if the value matches the expected one.
-    compiler_.write(OP_EQUAL, value, expected, expected);
-    writeTest(expected);
+    compiler_.write(pattern.pos(), OP_EQUAL, value, expected, expected);
+    writeTest(pattern, expected);
 
     compiler_.releaseTemp();
   }
 
   void PatternCompiler::visit(VariablePattern& pattern, int value)
   {
-    compiler_.compileAssignment(pattern.resolved(), value, true);
+    compiler_.compileAssignment(pattern.pos(), pattern.resolved(), value, true);
 
     // Compile the inner pattern.
     if (!pattern.pattern().isNull())
@@ -1023,12 +1047,12 @@ namespace magpie
     // Nothing to do.
   }
 
-  void PatternCompiler::writeTest(int slot)
+  void PatternCompiler::writeTest(const Pattern& pattern, int slot)
   {
     if (jumpOnFailure_)
     {
-      tests_.add(MatchTest(compiler_.code_.count(), slot));
+      tests_.add(MatchTest(compiler_.chunk_->code().count(), slot));
     }
-    compiler_.write(OP_TEST_MATCH, slot);
+    compiler_.write(pattern.pos(), OP_TEST_MATCH, slot);
   }
 }
