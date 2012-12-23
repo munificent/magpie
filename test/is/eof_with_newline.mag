@@ -1,1 +1,2 @@
-false is // expect error
+false is
+// expect error

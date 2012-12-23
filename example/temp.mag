@@ -2,8 +2,19 @@ def foo()
     bar()
 end
 
+
+
+
+
+
+
+
+
+
+
+
 def bar()
-    baz()
+    baz() + +---* 2
 end
 
 def baz()

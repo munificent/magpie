@@ -32,6 +32,10 @@ namespace magpie
       }
     }
 
+    // If we're getting the very last line and it's empty (i.e. the source file
+    // ends with a newline), then return an empty string.
+    if (start >= source_->length()) return String::create("");
+
     return source_->substring(start, end);
   }
 

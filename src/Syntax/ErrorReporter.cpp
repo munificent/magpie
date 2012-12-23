@@ -19,9 +19,39 @@ namespace magpie
     vsprintf(message, format, args);
     va_end(args);
 
-    std::cerr << "[" << pos->file() << " line "
-        << pos->startLine() << " col "
-        << pos->startCol() << "] Error: " << message << std::endl;
+    std::cerr << "[" << pos->file()->path() << "] Error: " << message << std::endl;
+
+    if (pos->startLine() == pos->endLine())
+    {
+      // Show the line and highlight the error.
+      std::cerr << pos->startLine() << ": "
+                << pos->file()->getLine(pos->startLine()) << std::endl;
+
+      // TODO(bob): Lame hack!
+      int line = pos->startLine();
+      while (line > 0)
+      {
+        std::cerr << " ";
+        line /= 10;
+      }
+
+      std::cerr << "  ";
+      for (int i = 1; i < pos->endCol(); i++)
+      {
+        std::cerr << (i < pos->startCol() ? " " : "^");
+      }
+
+      std::cerr << std::endl;
+    }
+    else
+    {
+      // Show all of the lines.
+      for (int i = pos->startLine(); i <= pos->endLine(); i++)
+      {
+        // TODO(bob): Should pad line number so they all line up.
+        std::cerr << i << ": " << pos->file()->getLine(i) << std::endl;
+      }
+    }
 
     numErrors_++;
   }

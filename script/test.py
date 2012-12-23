@@ -37,7 +37,8 @@ NONTEST_PATTERN = re.compile(r'// nontest')
 EXPECT_PATTERN = re.compile(r'// expect: (.*)')
 EXPECT_ERROR_PATTERN = re.compile(r'// expect error')
 EXPECT_ERROR_LINE_PATTERN = re.compile(r'// expect error line (\d+)')
-ERROR_PATTERN = re.compile(r'line (\d+) col \d+\] Error: ')
+ERROR_PATTERN = re.compile(r'\] Error: ')
+ERROR_LINE_PATTERN = re.compile(r'(\d+): ')
 EXPECT_EXIT_PATTERN = re.compile(r'// expect exit (\d+)')
 
 passed = 0
@@ -138,12 +139,19 @@ def run_test(path):
 
     # Validate that no unexpected errors occurred.
     if expect_return == 1 and err != '':
-        for line in err.split('\n'):
+        lines = err.split('\n')
+        while len(lines) > 0:
+            line = lines.pop(0)
             match = ERROR_PATTERN.search(line)
             if match:
-                if not float(match.group(1)) in expect_error:
+                next_line = lines.pop(0)
+                match = ERROR_LINE_PATTERN.search(next_line)
+                if match and float(match.group(1)) in expect_error:
+                    # Discard the error highlighting line.
+                    lines.pop(0)
+                else:
                     fails.append('Unexpected error:')
-                    fails.append(line)
+                    fails.append(next_line)
             elif line != '':
                 fails.append('Unexpected output on stderr:')
                 fails.append(line)

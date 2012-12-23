@@ -1,3 +1,4 @@
 do
     print("1")
-    print("2") // expect error
+    print("2")
+// expect error

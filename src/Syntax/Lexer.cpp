@@ -77,11 +77,11 @@ namespace magpie
   {
     while (true)
     {
-      if (isDone()) return makeToken(TOKEN_EOF, String::create(""));
-
       start_ = pos_;
       startRow_ = currentRow_;
       startCol_ = currentCol_;
+
+      if (isDone()) return makeToken(TOKEN_EOF, String::create(""));
 
       char c = advance();
       switch (c)
