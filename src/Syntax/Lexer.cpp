@@ -101,7 +101,7 @@ namespace magpie
         case '}': return makeToken(TOKEN_RIGHT_BRACE);
         case ',': return makeToken(TOKEN_COMMA);
         case '.':
-          if (!match('.')) makeToken(TOKEN_DOT);
+          if (!match('.')) return makeToken(TOKEN_DOT);
           if (!match('.')) return makeToken(TOKEN_DOTDOT);
           return makeToken(TOKEN_DOTDOTDOT);
 

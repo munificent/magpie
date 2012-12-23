@@ -7,6 +7,7 @@
 namespace magpie
 {
   class Chunk;
+  class ErrorReporter;
   class ModuleAst;
   class Object;
 
@@ -33,8 +34,8 @@ namespace magpie
     // Gets the source file for the module.
     gc<SourceFile> source() const { return source_; }
 
-    bool parse();
-    void addImports(VM& vm);
+    bool parse(ErrorReporter& reporter);
+    void addImports(VM& vm, ErrorReporter& reporter);
     bool compile(VM& vm);
     
     void setBody(gc<Chunk> body);

@@ -55,11 +55,7 @@ namespace magpie
 
     ifstream stream(path->cString());
 
-    if (stream.fail())
-    {
-      cerr << "Could not open file '" << path << "'." << endl;
-      return gc<String>();
-    }
+    if (stream.fail()) return gc<String>();
 
     // From: http://stackoverflow.com/questions/2602013/read-whole-ascii-file-into-c-stdstring.
     string str;

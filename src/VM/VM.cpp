@@ -123,8 +123,10 @@ namespace magpie
     // Remember where the program is so we can import modules from there.
     programDir_ = path::dir(path::real(path));
 
-    Module* entrypoint = addModule(NULL, path);
-    if (entrypoint == NULL) return false;
+    // Traverse the import graph.
+    ErrorReporter reporter;
+    addModule(reporter, NULL, path);
+    if (reporter.numErrors() > 0) return false;
 
     // Sort the modules by their imports so that dependencies are run before
     // modules that depend on them.
@@ -189,17 +191,24 @@ namespace magpie
     return true;
   }
 
-  void VM::importModule(Module* from, gc<String> name)
+  void VM::importModule(ErrorReporter& reporter, Module* from,
+                        gc<SourcePos> pos, gc<String> name)
   {
-    Module* module = addModule(name, NULL);
-    if (module == NULL) return;
+    Module* module = addModule(reporter, name, NULL);
+    if (module == NULL)
+    {
+      reporter.error(pos, "Could not find module \"%s\".", name->cString());
+      return;
+    }
 
     from->imports().add(module);
   }
 
   bool VM::initRepl()
   {
-    Module* core = addModule(String::create("core"), NULL);
+    ErrorReporter reporter;
+    Module* core = addModule(reporter, String::create("core"), NULL);
+    if (reporter.numErrors() > 0) return false;
     if (!core->compile(*this)) return false;
     scheduler_.runModule(core);
 
@@ -208,17 +217,18 @@ namespace magpie
 
   gc<Object> VM::evaluateReplExpression(gc<Expr> expr)
   {
+    ErrorReporter reporter;
+    
     if (replModule_ == NULL)
     {
       replModule_ = new Module(String::create("<repl>"), String::create(""));
       modules_.add(replModule_);
       
       // Implicitly import core.
-      importModule(replModule_, String::create("core"));
+      importModule(reporter, replModule_, NULL, String::create("core"));
     }
 
     // Compile it.
-    ErrorReporter reporter;
     Compiler::compileExpression(*this, reporter, expr, replModule_);
     if (reporter.numErrors() > 0) return gc<Object>();
 
@@ -361,7 +371,8 @@ namespace magpie
     return multimethods_[multimethodId];
   }
 
-  Module* VM::addModule(gc<String> name, gc<String> path)
+  Module* VM::addModule(ErrorReporter& reporter, gc<String> name,
+                        gc<String> path)
   {
     if (name.isNull())
     {
@@ -388,16 +399,15 @@ namespace magpie
       ASSERT(!name.isNull(), "Must be given a path or a name.");
       path = locateModule(programDir_, name);
 
-      // TODO(bob): Report error better.
       if (path.isNull()) return NULL;
     }
 
     Module* module = new Module(name, path);
     modules_.add(module);
     
-    if (!module->parse()) return NULL;
+    if (!module->parse(reporter)) return NULL;
 
-    module->addImports(*this);
+    module->addImports(*this, reporter);
 
     return module;
   }

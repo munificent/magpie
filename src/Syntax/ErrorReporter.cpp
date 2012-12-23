@@ -9,6 +9,8 @@ namespace magpie
   {
     // If we're just waiting for more input, don't show any errors.
     if (needMoreLines_) return;
+    
+    numErrors_++;
 
     // TODO(bob): Hackish. Need to figure out if we want C-style, C++-style or
     // Magpie GC strings.
@@ -19,6 +21,13 @@ namespace magpie
     vsprintf(message, format, args);
     va_end(args);
 
+    // If we don't have any position information, just show the message.
+    if (pos.isNull())
+    {
+      std::cerr << "Error: " << message << std::endl;
+      return;
+    }
+    
     std::cerr << "[" << pos->file()->path() << "] Error: " << message << std::endl;
 
     if (pos->startLine() == pos->endLine())
@@ -52,8 +61,6 @@ namespace magpie
         std::cerr << i << ": " << pos->file()->getLine(i) << std::endl;
       }
     }
-
-    numErrors_++;
   }
 
   void ErrorReporter::setNeedMoreLines()

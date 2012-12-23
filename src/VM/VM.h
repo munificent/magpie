@@ -11,6 +11,7 @@
 namespace magpie
 {
   class ClassObject;
+  class ErrorReporter;
   class FunctionObject;
   class Expr;
   class Module;
@@ -42,7 +43,8 @@ namespace magpie
     // Gets the directory containing the main program file being executed.
     gc<String> programDir() const { return programDir_; }
 
-    void importModule(Module* from, gc<String> name);
+    void importModule(ErrorReporter& reporter, Module* from, gc<SourcePos> pos,
+                      gc<String> name);
 
     bool initRepl();
     gc<Object> evaluateReplExpression(gc<Expr> expr);
@@ -95,7 +97,8 @@ namespace magpie
     // [from] is the module that's depending on the added one. If [path] is
     // NULL, then it will try to determine it from the name by searching the
     // file system. If [name] is NULL, it will infer it from the path.
-    Module* addModule(gc<String> name, gc<String> path);
+    Module* addModule(ErrorReporter& reporter, gc<String> name,
+                      gc<String> path);
 
     void registerClass(Module* module, gc<ClassObject>& classObj,
                        const char* name);

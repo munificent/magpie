@@ -9,28 +9,35 @@
 
 namespace magpie
 {
-  bool Module::parse()
+  bool Module::parse(ErrorReporter& reporter)
   {
     ASSERT(ast_.isNull(), "Module is already parsed.");
 
-    // TODO(bob): Better error handling.
     gc<String> code = readFile(path_);
+    if (code.isNull())
+    {
+      reporter.error(NULL, "Could not read \"%s\".", path_->cString());
+      return false;
+    }
+
     source_ = new SourceFile(path_, code);
 
-    ErrorReporter reporter;
-    Parser parser(source_, reporter);
+    // Use a separate report for this module so we can tell if it parsed
+    // successfully on its own.
+    ErrorReporter innerReporter;
+    Parser parser(source_, innerReporter);
     ast_ = parser.parseModule();
 
-    if (reporter.numErrors() > 0) ast_ = NULL;
+    if (innerReporter.numErrors() > 0) ast_ = NULL;
     return !ast_.isNull();
   }
 
-  void Module::addImports(VM& vm)
+  void Module::addImports(VM& vm, ErrorReporter& reporter)
   {
     // Implicitly import core (unless we are core).
     if (*name_ != "core")
     {
-      vm.importModule(this, String::create("core"));
+      vm.importModule(reporter, this, NULL, String::create("core"));
     }
 
     // Load all of the imports.
@@ -46,7 +53,7 @@ namespace magpie
         name = String::format("%s.%s", name->cString(), import->name()[j]->cString());
       }
 
-      vm.importModule(this, name);
+      vm.importModule(reporter, this, import->pos(), name);
     }
   }
 
