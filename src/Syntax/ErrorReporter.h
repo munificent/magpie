@@ -16,7 +16,7 @@ namespace magpie
       needMoreLines_(false)
     {}
 
-    void error(const SourcePos& pos, const char* format, ...);
+    void error(gc<SourcePos> pos, const char* format, ...);
     void setNeedMoreLines();
 
     int numErrors() const { return numErrors_; }

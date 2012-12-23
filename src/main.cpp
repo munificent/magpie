@@ -39,23 +39,25 @@ int repl(VM& vm)
 
   while (true)
   {
-    gc<String> source;
+    gc<String> code;
     gc<Expr> expr;
 
     while (true)
     {
-      gc<String> line = readLine(!source.isNull());
-      if (source.isNull())
+      gc<String> line = readLine(!code.isNull());
+      if (code.isNull())
       {
-        source = line;
+        code = line;
       }
       else
       {
-        source = String::format("%s\n%s", source->cString(), line->cString());
+        code = String::format("%s\n%s", code->cString(), line->cString());
       }
 
+      gc<SourceFile> source = new SourceFile(String::create("<repl>"), code);
+      
       ErrorReporter reporter(true);
-      Parser parser(String::create("<repl>"), source, reporter);
+      Parser parser(source, reporter);
       expr = parser.parseExpression();
 
       if (reporter.needMoreLines()) continue;

@@ -17,7 +17,7 @@ namespace magpie
     numTemps_(0),
     maxSlots_(0),
     currentLoop_(NULL),
-    currentLabel_(-1)
+    currentFile_(-1)
   {}
 
   gc<Chunk> ExprCompiler::compileBody(Module* module, gc<Expr> body)
@@ -28,8 +28,7 @@ namespace magpie
 
     if (compiler_.reporter().numErrors() == 0)
     {
-      gc<String> label = String::format("%s body", module->path()->cString());
-      compile(label, module, maxLocals, NULL, NULL, NULL, body);
+      compile(module, maxLocals, NULL, NULL, NULL, body);
     }
 
     chunk_->bind(maxSlots_, numClosures);
@@ -53,12 +52,7 @@ namespace magpie
     {
       gc<Method> method = multimethod.methods()[i];
       gc<DefExpr> def = method->def();
-
-      gc<String> label = String::format("%s %s",
-                                        method->module()->path()->cString(),
-                                        def->name()->cString());
-
-      compile(label, method->module(),
+      compile(method->module(),
               def->resolved().maxLocals(),
               def->leftParam(), def->rightParam(), def->value(),
               def->body());
@@ -68,7 +62,6 @@ namespace magpie
     }
 
     // If we get here, all methods failed to match, so throw a NoMethodError.
-    // TODO(bob): Is this the line we want if there are no methods?
     write(-1, OP_BUILT_IN, 3, 0);
     write(-1, OP_THROW, 0);
 
@@ -78,10 +71,7 @@ namespace magpie
 
   gc<Chunk> ExprCompiler::compile(Module* module, FnExpr& function)
   {
-    gc<String> label = String::format("%s function %d",
-        module->path()->cString(), function.pos().startLine());
-    
-    compile(label, module, function.resolved().maxLocals(),
+    compile(module, function.resolved().maxLocals(),
             NULL, function.pattern(), NULL, function.body());
 
     chunk_->bind(maxSlots_, function.resolved().closures().count());
@@ -90,21 +80,18 @@ namespace magpie
 
   gc<Chunk> ExprCompiler::compile(Module* module, AsyncExpr& expr)
   {
-    gc<String> label = String::format("%s async %d",
-        module->path()->cString(), expr.pos().startLine());
-
-    compile(label, module, expr.resolved().maxLocals(),
+    compile(module, expr.resolved().maxLocals(),
             NULL, NULL, NULL, expr.body());
 
     chunk_->bind(maxSlots_, expr.resolved().closures().count());
     return chunk_;
   }
 
-  void ExprCompiler::compile(gc<String> label, Module* module, int maxLocals,
+  void ExprCompiler::compile(Module* module, int maxLocals,
                              gc<Pattern> leftParam, gc<Pattern> rightParam,
                              gc<Pattern> valueParam, gc<Expr> body)
   {
-    currentLabel_ = chunk_->addLabel(label);
+    currentFile_ = chunk_->addFile(module->source());
     
     module_ = module;
     // Reserve slots up front for all of the locals. This ensures that
@@ -791,7 +778,7 @@ namespace magpie
     releaseTemps(numTemps);
   }
 
-  void ExprCompiler::compileAssignment(const SourcePos& pos,
+  void ExprCompiler::compileAssignment(gc<SourcePos> pos,
                                        gc<ResolvedName> resolved, int value,
                                        bool isCreate)
   {
@@ -815,7 +802,7 @@ namespace magpie
     }
   }
 
-  void ExprCompiler::compileClosures(const SourcePos& pos,
+  void ExprCompiler::compileClosures(gc<SourcePos> pos,
                                      ResolvedProcedure& procedure)
   {
     // When a procedure is created, it needs to capture references to any
@@ -842,7 +829,7 @@ namespace magpie
 
   void ExprCompiler::write(const Expr& expr, OpCode op, int a, int b, int c)
   {
-    write(expr.pos().startLine(), op, a, b, c);
+    write(expr.pos()->startLine(), op, a, b, c);
   }
 
   void ExprCompiler::write(int line, OpCode op, int a, int b, int c)
@@ -851,7 +838,7 @@ namespace magpie
     ASSERT_INDEX(b, 256);
     ASSERT_INDEX(c, 256);
 
-    chunk_->write(currentLabel_, line, MAKE_ABC(a, b, c, op));
+    chunk_->write(currentFile_, line, MAKE_ABC(a, b, c, op));
   }
   
   int ExprCompiler::startJump(const Expr& expr)
@@ -859,10 +846,10 @@ namespace magpie
     return startJump(expr.pos());
   }
 
-  int ExprCompiler::startJump(const SourcePos& pos)
+  int ExprCompiler::startJump(gc<SourcePos> pos)
   {
     // Just write a dummy op to leave a space for the jump instruction.
-    write(pos, OP_MOVE);
+    write(pos->startLine(), OP_MOVE);
     return chunk_->count() - 1;
   }
 

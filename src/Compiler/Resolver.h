@@ -71,7 +71,7 @@ namespace magpie
     gc<ResolvedName> findLocal(gc<String> name);
 
     // Creates a new local variable with the given name.
-    gc<ResolvedName> makeLocal(const SourcePos& pos, gc<String> name);
+    gc<ResolvedName> makeLocal(gc<SourcePos> pos, gc<String> name);
         
     virtual void visit(AndExpr& expr, int dummy);
     virtual void visit(AssignExpr& expr, int dest);

@@ -1051,14 +1051,14 @@ namespace magpie
     }
   }
 
-  SourcePos Parser::spanFrom(gc<Token> from)
+  gc<SourcePos> Parser::spanFrom(gc<Token> from)
   {
-    return from->pos().spanTo(last()->pos());
+    return from->pos()->spanTo(last()->pos());
   }
   
-  SourcePos Parser::spanFrom(gc<Expr> from)
+  gc<SourcePos> Parser::spanFrom(gc<Expr> from)
   {
-    return from->pos().spanTo(last()->pos());
+    return from->pos()->spanTo(last()->pos());
   }
 
   void Parser::fillLookAhead(int count)

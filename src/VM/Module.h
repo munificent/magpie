@@ -30,6 +30,9 @@ namespace magpie
     // Gets the file path of the module.
     gc<String> path() const { return path_; }
 
+    // Gets the source file for the module.
+    gc<SourceFile> source() const { return source_; }
+
     bool parse();
     void addImports(VM& vm);
     bool compile(VM& vm);
@@ -61,7 +64,11 @@ namespace magpie
     // The path to the file the module was loaded from.
     gc<String> path_;
 
-    // The parsed AST for the module. This will only be non-null after [load()]
+    // The source file for this module. This will only be non-null after
+    // [parse()] has been called.
+    gc<SourceFile> source_;
+
+    // The parsed AST for the module. This will only be non-null after [parse()]
     // has been called and before [compile()].
     gc<ModuleAst> ast_;
 

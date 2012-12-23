@@ -5,7 +5,7 @@
 
 namespace magpie
 {
-  void ErrorReporter::error(const SourcePos& pos, const char* format, ...)
+  void ErrorReporter::error(gc<SourcePos> pos, const char* format, ...)
   {
     // If we're just waiting for more input, don't show any errors.
     if (needMoreLines_) return;
@@ -19,9 +19,9 @@ namespace magpie
     vsprintf(message, format, args);
     va_end(args);
 
-    std::cerr << "[" << pos.file() << " line "
-        << pos.startLine() << " col "
-        << pos.startCol() << "] Error: " << message << std::endl;
+    std::cerr << "[" << pos->file() << " line "
+        << pos->startLine() << " col "
+        << pos->startCol() << "] Error: " << message << std::endl;
 
     numErrors_++;
   }

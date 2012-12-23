@@ -1,3 +1,13 @@
-import foo
+def foo()
+    bar()
+end
+
+def bar()
+    baz()
+end
+
+def baz()
+    throw "oops!"
+end
 
 foo()

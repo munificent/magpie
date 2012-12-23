@@ -21,15 +21,15 @@ namespace magpie
   // corresponds to.
   struct CodePos
   {
-    CodePos(int label, int line)
-    : label(label),
+    CodePos(int file, int line)
+    : file(file),
       line(line)
     {}
 
     // TODO(bob): Use unsigned shorts here?
-    // Index in the chunk's label list for the location that this code came
+    // Index in the chunk's file list for the source file that this code came
     // from.
-    int label;
+    int file;
 
     // The source line in the file that this code corresponds to.
     int line;
@@ -43,14 +43,11 @@ namespace magpie
     : code_(),
       constants_(),
       chunks_(),
-      labels_(),
+      files_(),
       codePos_(),
       numSlots_(0),
       numUpvars_(0)
     {}
-
-    // TODO(bob): Temp.
-    void printLoc(int ip);
 
     void bind(int maxSlots, int numUpvars);
 
@@ -62,9 +59,9 @@ namespace magpie
 
     inline const Array<instruction>& code() const { return code_; }
 
-    // Adds [label] to the list of labels displayed in stack traces. Returns
-    // the index of the file in the list.
-    int addLabel(gc<String> file);
+    // Adds [file] to the list of files that contain code in this chunk. Used
+    // for displaying stack traces.
+    int addFile(gc<SourceFile> file);
 
     int addConstant(gc<Object> constant);
     gc<Object> getConstant(int index) const;
@@ -74,7 +71,13 @@ namespace magpie
 
     int numSlots() const { return numSlots_; }
     int numUpvars() const { return numUpvars_; }
-    
+
+    // Attempts to locate the source code used to generate the instruction at
+    // [ip]. If source code can't be associated with the given instruction,
+    // returns null. Otherwise, returns the source file, and sets [line] to the
+    // appropriate line.
+    gc<SourceFile> locateInstruction(int ip, int& line);
+
     void debugTrace(VM& vm) const;
     void debugTrace(VM& vm, instruction ins) const;
 
@@ -90,9 +93,7 @@ namespace magpie
     // chunk.
     Array<gc<Chunk> > chunks_;
 
-    // The text labels shown in stack traces. These are usually module file
-    // paths and method names.
-    Array<gc<String> > labels_;
+    Array<gc<SourceFile> > files_;
 
     // The source locations that correspond to each instruction in code_.
     Array<CodePos> codePos_;

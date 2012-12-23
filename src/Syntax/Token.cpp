@@ -3,7 +3,45 @@
 
 namespace magpie
 {
-  SourcePos::SourcePos(gc<String> file, int startLine, int startCol,
+  SourceFile::SourceFile(gc<String> path, gc<String> source)
+  : path_(path),
+    source_(source)
+  {}
+
+  gc<String> SourceFile::getLine(int line)
+  {
+    // TODO(bob): Cache this for perf?
+    int currentLine = 1;
+    int start = 0;
+    int end = source_->length();
+    for (int i = 0; i < source_->length(); i++)
+    {
+      if ((*source_)[i] == '\n')
+      {
+        currentLine++;
+
+        if (currentLine == line)
+        {
+          start = i + 1;
+        }
+        else if (currentLine == line + 1)
+        {
+          end = i;
+          break;
+        }
+      }
+    }
+
+    return source_->substring(start, end);
+  }
+
+  void SourceFile::reach()
+  {
+    path_.reach();
+    source_.reach();
+  }
+
+  SourcePos::SourcePos(gc<SourceFile> file, int startLine, int startCol,
                        int endLine, int endCol)
   : file_(file),
     startLine_(startLine),
@@ -12,12 +50,18 @@ namespace magpie
     endCol_(endCol)
     {}
 
-  SourcePos SourcePos::spanTo(const SourcePos& end) const
+  gc<SourcePos> SourcePos::spanTo(gc<SourcePos> end) const
   {
-    return SourcePos(file_, startLine_, startCol_, end.endLine_, end.endCol_);
+    return new SourcePos(file_, startLine_, startCol_,
+                         end->endLine_, end->endCol_);
   }
 
-  Token::Token(TokenType type, gc<String> text, const SourcePos& pos)
+  void SourcePos::reach()
+  {
+    file_.reach();
+  }
+
+  Token::Token(TokenType type, gc<String> text, gc<SourcePos> pos)
   : type_(type),
     text_(text),
     pos_(pos)

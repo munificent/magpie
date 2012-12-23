@@ -131,7 +131,7 @@ namespace magpie
 
   gc<DefExpr> Compiler::synthesizeConstructor(DefClassExpr& classExpr)
   {
-    const SourcePos& pos = classExpr.pos();
+    gc<SourcePos> pos = classExpr.pos();
 
     // Match the class object itself on the left.
     gc<Pattern> leftPattern = new ValuePattern(pos,
@@ -168,7 +168,7 @@ namespace magpie
                                          int fieldIndex)
   {
     // Match the class on the left.
-    const SourcePos& pos = classExpr.pos();
+    gc<SourcePos> pos = classExpr.pos();
     gc<Pattern> leftPattern = new TypePattern(pos,
         new NameExpr(pos, classExpr.name()));
 
@@ -184,7 +184,7 @@ namespace magpie
     gc<ClassField> field = classExpr.fields()[fieldIndex];
 
     // Match the class on the left.
-    const SourcePos& pos = classExpr.pos();
+    gc<SourcePos> pos = classExpr.pos();
     gc<Pattern> leftPattern = new TypePattern(pos,
         new NameExpr(pos, classExpr.name()));
 
@@ -229,7 +229,8 @@ namespace magpie
     }
   }
 
-  void Compiler::declareVariable(SourcePos pos, gc<String> name, Module* module)
+  void Compiler::declareVariable(gc<SourcePos> pos, gc<String> name,
+                                 Module* module)
   {
     // Make sure there isn't already a top-level variable with that name.
     int existing = module->findVariable(name);

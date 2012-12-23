@@ -234,7 +234,7 @@ namespace magpie
 
   gc<Token> Lexer::makeToken(TokenType type, gc<String> text)
   {
-    SourcePos pos = SourcePos(fileName_,
+    gc<SourcePos> pos = new SourcePos(source_,
         startRow_, startCol_, currentRow_, currentCol_);
     return new Token(type, text, pos);
   }

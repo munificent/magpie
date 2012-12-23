@@ -36,7 +36,7 @@ namespace magpie
     // Compiles [expr] to bytecode.
     gc<Chunk> compile(Module* module, AsyncExpr& expr);
 
-    void compile(gc<String> label, Module* module, int maxLocals,
+    void compile(Module* module, int maxLocals,
                  gc<Pattern> leftParam, gc<Pattern> rightParam,
                  gc<Pattern> valueParam, gc<Expr> body);
 
@@ -107,16 +107,16 @@ namespace magpie
     // Otherwise, it's a call to a setter, and `valueSlot` is the slot holding
     // the right-hand side value.
     void compileCall(const CallExpr& expr, int dest, int valueSlot);
-    void compileAssignment(const SourcePos& pos, gc<ResolvedName> resolved,
+    void compileAssignment(gc<SourcePos> pos, gc<ResolvedName> resolved,
                            int value, bool isCreate);
-    void compileClosures(const SourcePos& pos,
+    void compileClosures(gc<SourcePos> pos,
                          ResolvedProcedure& procedure);
 
     void write(const Expr& expr, OpCode op,
                int a = 0xff, int b = 0xff, int c = 0xff);
     void write(int line, OpCode op, int a = 0xff, int b = 0xff, int c = 0xff);
     int startJump(const Expr& expr);
-    int startJump(const SourcePos& pos);
+    int startJump(gc<SourcePos> pos);
     int startJumpBack();
 
     // Backpatches the bytecode at `from` with the given instruction and the
@@ -148,9 +148,9 @@ namespace magpie
     // The innermost loop currently being compiled.
     Loop* currentLoop_;
 
-    // A textual label for the code currently being compiled. Indexes into the
-    // chunk's list of labels.
-    int currentLabel_;
+    // The index in the chunk's file list of the file containing the source
+    // code currently being compiled.
+    int currentFile_;
 
     NO_COPY(ExprCompiler);
   };

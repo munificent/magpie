@@ -14,10 +14,11 @@ namespace magpie
     ASSERT(ast_.isNull(), "Module is already parsed.");
 
     // TODO(bob): Better error handling.
-    gc<String> source = readFile(path_);
+    gc<String> code = readFile(path_);
+    source_ = new SourceFile(path_, code);
 
     ErrorReporter reporter;
-    Parser parser(path_, source, reporter);
+    Parser parser(source_, reporter);
     ast_ = parser.parseModule();
 
     if (reporter.numErrors() > 0) ast_ = NULL;

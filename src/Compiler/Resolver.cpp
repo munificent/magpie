@@ -44,7 +44,8 @@ namespace magpie
     resolver.allocateSlotsForParam(valueParam);
 
     // Create a slot for the result value.
-    resolver.makeLocal(SourcePos(NULL, 0, 0, 0, 0), String::create("(result)"));
+    resolver.makeLocal(new SourcePos(NULL, 0, 0, 0, 0),
+                       String::create("(result)"));
 
     // Now that we've got our slots set up, we can actually resolve the nested
     // patterns for the param (if there are any).
@@ -270,7 +271,7 @@ namespace magpie
     return NULL;
   }
 
-  gc<ResolvedName> Resolver::makeLocal(const SourcePos& pos, gc<String> name)
+  gc<ResolvedName> Resolver::makeLocal(gc<SourcePos> pos, gc<String> name)
   {
     // Make sure there isn't already a local variable with this name in the
     // current scope.

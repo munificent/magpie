@@ -17,8 +17,8 @@ namespace magpie
   class Parser
   {
   public:
-    Parser(gc<String> fileName, gc<String> source, ErrorReporter& reporter)
-    : lexer_(fileName, source),
+    Parser(gc<SourceFile> source, ErrorReporter& reporter)
+    : lexer_(source),
       reporter_(reporter),
       read_(),
       last_()
@@ -134,8 +134,8 @@ namespace magpie
 
     // Creates a [SourcePos] that spans the code starting at [from] up to the
     // last consumed [Token].
-    SourcePos spanFrom(gc<Token> from);
-    SourcePos spanFrom(gc<Expr> from);
+    gc<SourcePos> spanFrom(gc<Token> from);
+    gc<SourcePos> spanFrom(gc<Expr> from);
 
     static Parselet expressions_[TOKEN_NUM_TYPES];
     

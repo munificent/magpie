@@ -157,7 +157,7 @@ BASE_CLASS = '''
 class {0} : public Managed
 {{
 public:
-  {0}(const SourcePos& pos)
+  {0}(gc<SourcePos> pos)
   : pos_(pos)
   {{}}
 
@@ -168,10 +168,10 @@ public:
 
   // Dynamic casts.
 {1}
-  const SourcePos& pos() const {{ return pos_; }}
+  gc<SourcePos> pos() const {{ return pos_; }}
 
 private:
-  SourcePos pos_;
+  gc<SourcePos> pos_;
 }};
 '''
 
@@ -180,7 +180,7 @@ SUBCLASS = '''
 class {0}{6} : public {6}
 {{
 public:
-  {0}{6}(const SourcePos& pos{1})
+  {0}{6}(gc<SourcePos> pos{1})
   : {6}(pos){2}
   {{}}
 

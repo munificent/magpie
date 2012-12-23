@@ -578,10 +578,22 @@ namespace magpie
     if (nearestCatch_.isNull())
     {
       // TODO(bob): Temp. Print a stack trace.
-      for (int i = 0; i < callFrames_.count(); i++)
+      for (int i = callFrames_.count() - 1; i >= 0; i--)
       {
         CallFrame& frame = callFrames_[i];
-        frame.function->chunk()->printLoc(frame.ip);
+        // -1 because ip has already advanced to the next instruction.
+        int line = -1;
+        gc<SourceFile> source = frame.function->chunk()->locateInstruction(
+            frame.ip - 1, line);
+
+        if (!source.isNull())
+        {
+          // TODO(bob): Can do better here. Would be nice to show enclosing
+          // method/function/async block.
+          std::cerr << "[" << source->path() << " line " << line
+                    << "]" << std::endl;
+          std::cerr << source->getLine(line) << std::endl;
+        }
       }
       return false;
     }

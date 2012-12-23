@@ -12,9 +12,8 @@ namespace magpie
   public:
     // TODO(bob): Need to do something better for the strings here. Right now,
     // the lexer isn't a root.
-    Lexer(gc<String> fileName, gc<String> source)
-    : fileName_(fileName),
-      source_(source),
+    Lexer(gc<SourceFile> source)
+    : source_(source),
       pos_(0),
       start_(0),
       skipNewline_(true),
@@ -56,8 +55,7 @@ namespace magpie
     gc<Token> readOperator();
     gc<Token> readString();
 
-    gc<String> fileName_;
-    gc<String> source_;
+    gc<SourceFile> source_;
     int     pos_;
     int     start_;
     bool    skipNewline_;

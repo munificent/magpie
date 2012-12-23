@@ -75,25 +75,54 @@ namespace magpie
     TOKEN_NUM_TYPES
   };
 
-  // A span of source code associated with some Token or AST.
-  class SourcePos
+  // A file containing Magpie source code.
+  class SourceFile : public Managed
   {
   public:
-    // TODO(bob): How should we manage memory for the file here?
-    SourcePos(gc<String> file, int startLine, int startCol,
+    SourceFile(gc<String> path, gc<String> source);
+
+    gc<String> path() { return path_; }
+    gc<String> source() { return source_; }
+
+    int length() const { return source_->length(); }
+
+    gc<String> substring(int start, int end) const
+    {
+      return source_->substring(start, end);
+    }
+    
+    char operator[](int pos) const { return (*source_)[pos]; }
+
+    // Gets the line of code at the given 1-based line index.
+    gc<String> getLine(int line);
+
+    virtual void reach();
+
+  private:
+    gc<String> path_;
+    gc<String> source_;
+  };
+
+  // A span of source code associated with some Token or AST.
+  class SourcePos : public Managed
+  {
+  public:
+    SourcePos(gc<SourceFile> file, int startLine, int startCol,
               int endLine, int endCol);
     
-    gc<String> file() const { return file_; }
+    gc<SourceFile> file() const { return file_; }
     int startLine() const { return startLine_; }
     int startCol() const { return startCol_; }
     int endLine() const { return endLine_; }
     int endCol() const { return endCol_; }
     
-    SourcePos spanTo(const SourcePos& end) const;
+    gc<SourcePos> spanTo(gc<SourcePos> end) const;
+
+    virtual void reach();
 
   private:
-    // The name of the source file containing this position.
-    gc<String> file_;
+    // The source file containing this position.
+    gc<SourceFile> file_;
     
     int startLine_;
     int startCol_;
@@ -106,13 +135,13 @@ namespace magpie
   class Token : public Managed
   {
   public:
-    Token(TokenType type, gc<String> text, const SourcePos& pos);
+    Token(TokenType type, gc<String> text, gc<SourcePos> pos);
     
     static const char* typeString(TokenType type);
     
-    TokenType         type() const { return type_; }
-    gc<String>        text() const { return text_; }
-    const SourcePos&  pos()  const { return pos_; }
+    TokenType      type() const { return type_; }
+    gc<String>     text() const { return text_; }
+    gc<SourcePos>  pos()  const { return pos_; }
     
     // Gets whether this token is of the given type.
     bool is(TokenType type) const { return type_ == type; }
@@ -121,9 +150,9 @@ namespace magpie
     virtual void trace(std::ostream& out) const;
     
   private:
-    TokenType   type_;
-    gc<String>  text_;
-    SourcePos   pos_;
+    TokenType     type_;
+    gc<String>    text_;
+    gc<SourcePos> pos_;
   };
 }
 

@@ -13,9 +13,10 @@ namespace magpie
 
   void ParserTests::parseModule()
   {
-    gc<String> source = String::create("def foo()\n1+2*3 and 4/5+6%7\nend");
+    gc<String> code = String::create("def foo()\n1+2*3 and 4/5+6%7\nend");
     ErrorReporter reporter;
-    Parser parser(String::create("<file>"), source, reporter);
+    gc<SourceFile> source = new SourceFile(String::create("<file>"), code);
+    Parser parser(source, reporter);
     gc<ModuleAst> module = parser.parseModule();
     
     gc<String> text = module->toString();

@@ -56,7 +56,7 @@ namespace magpie
     // Forward-declare any variables in the given pattern.
     void declareVariables(gc<Pattern> pattern, Module* module);
     
-    void declareVariable(SourcePos pos, gc<String> name, Module* module);
+    void declareVariable(gc<SourcePos> pos, gc<String> name, Module* module);
     
     VM& vm_;
     ErrorReporter& reporter_;
