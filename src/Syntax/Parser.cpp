@@ -25,7 +25,7 @@ namespace magpie
     // Punctuators.
     { &Parser::group,   NULL, -1 },                                   // TOKEN_LEFT_PAREN
     { NULL,             NULL, -1 },                                   // TOKEN_RIGHT_PAREN
-    { &Parser::list,    &Parser::index, PRECEDENCE_CALL },            // TOKEN_LEFT_BRACKET
+    { &Parser::list,    &Parser::subscript, PRECEDENCE_CALL },        // TOKEN_LEFT_BRACKET
     { NULL,             NULL, -1 },                                   // TOKEN_RIGHT_BRACKET
     { NULL,             NULL, -1 },                                   // TOKEN_LEFT_BRACE
     { NULL,             NULL, -1 },                                   // TOKEN_RIGHT_BRACE
@@ -731,18 +731,7 @@ namespace magpie
 
     return new CallExpr(spanFrom(token), left, token->text(), right);
   }
-  
-  gc<Expr> Parser::index(gc<Expr> left, gc<Token> token)
-  {
-    // Parse the index.
-    // TODO(bob): Is this right? Do we want to allow variable declarations
-    // here?
-    gc<Expr> index = statementLike();
-    consume(TOKEN_RIGHT_BRACKET, "Expect ']' after index argument.");
     
-    return new CallExpr(spanFrom(left), left, String::create("[]"), index);
-  }
-  
   gc<Expr> Parser::infixCall(gc<Expr> left, gc<Token> token)
   {
     // TODO(bob): Support right-associative infix. Needs to do precedence
@@ -807,6 +796,17 @@ namespace magpie
   {
     gc<Expr> right = parsePrecedence(expressions_[token->type()].precedence);
     return new OrExpr(spanFrom(left), left, right);
+  }
+
+  gc<Expr> Parser::subscript(gc<Expr> left, gc<Token> token)
+  {
+    // Parse the subscript.
+    // TODO(bob): Is this right? Do we want to allow variable declarations
+    // here?
+    gc<Expr> subscript = statementLike();
+    consume(TOKEN_RIGHT_BRACKET, "Expect ']' after subscript argument.");
+
+    return new CallExpr(spanFrom(left), left, String::create("[]"), subscript);
   }
 
   // Pattern parsers ----------------------------------------------------------
