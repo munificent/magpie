@@ -586,7 +586,7 @@ namespace magpie
         gc<SourceFile> source = frame.function->chunk()->locateInstruction(
             frame.ip - 1, line);
 
-        if (!source.isNull())
+        if (!source.isNull() && line != -1)
         {
           // TODO(bob): Can do better here. Would be nice to show enclosing
           // method/function/async block.

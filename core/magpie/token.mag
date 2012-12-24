@@ -1,0 +1,74 @@
+defclass TokenType
+    val name is String
+end
+
+def (this is TokenType) toString
+    this name
+end
+
+// TODO(bob): Figure out naming convention for enum-like constants.
+// Punctuators.
+val TokenLeftParen    = TokenType new(name: "LEFT_PAREN")
+val TokenRightParen   = TokenType new(name: "RIGHT_PAREN")
+val TokenLeftBracket  = TokenType new(name: "LEFT_BRACKET")
+val TokenRightBracket = TokenType new(name: "RIGHT_BRACKET")
+val TokenLeftBrace    = TokenType new(name: "LEFT_BRACE")
+val TokenRightBrace   = TokenType new(name: "RIGHT_BRACE")
+val TokenComma        = TokenType new(name: "COMMA")
+val TokenDot          = TokenType new(name: "DOT")
+val TokenDotDot       = TokenType new(name: "DOTDOT")
+val TokenDotDotDot    = TokenType new(name: "DOTDOTDOT")
+val TokenEq           = TokenType new(name: "EQ")
+val TokenEqEq         = TokenType new(name: "EQEQ")
+val TokenNEq          = TokenType new(name: "NEQ")
+
+// Infix operators. There is a different token type for each precedence.
+// The starting character determines the token type.
+val TokenCompareOp    = TokenType new(name: "COMPARE_OP") // < >
+val TokenTermOp       = TokenType new(name: "TERM_OP") // + -
+val TokenProductOp    = TokenType new(name: "PRODUCT_OP") // * / %
+
+// Keywords.
+val TokenAnd          = TokenType new(name: "AND")
+val TokenAsync        = TokenType new(name: "ASYNC")
+val TokenBreak        = TokenType new(name: "BREAK")
+val TokenCase         = TokenType new(name: "CASE")
+val TokenCatch        = TokenType new(name: "CATCH")
+val TokenDef          = TokenType new(name: "DEF")
+val TokenDefClass     = TokenType new(name: "DEFCLASS")
+val TokenDo           = TokenType new(name: "DO")
+val TokenElse         = TokenType new(name: "ELSE")
+val TokenEnd          = TokenType new(name: "END")
+val TokenFalse        = TokenType new(name: "FALSE")
+val TokenFn           = TokenType new(name: "FN")
+val TokenFor          = TokenType new(name: "FOR")
+val TokenImport       = TokenType new(name: "IMPORT")
+val TokenIf           = TokenType new(name: "IF")
+val TokenIn           = TokenType new(name: "IN")
+val TokenIs           = TokenType new(name: "IS")
+val TokenMatch        = TokenType new(name: "MATCH")
+val TokenNot          = TokenType new(name: "NOT")
+val TokenNothing      = TokenType new(name: "NOTHING")
+val TokenOr           = TokenType new(name: "OR")
+val TokenReturn       = TokenType new(name: "RETURN")
+val TokenThen         = TokenType new(name: "THEN")
+val TokenThrow        = TokenType new(name: "THROW")
+val TokenVal          = TokenType new(name: "VAL")
+val TokenVar          = TokenType new(name: "VAR")
+val TokenWhile        = TokenType new(name: "WHILE")
+val TokenXor          = TokenType new(name: "XOR")
+
+val TokenField        = TokenType new(name: "FIELD") // a record field like "x:"
+val TokenName         = TokenType new(name: "NAME")
+val TokenNumber       = TokenType new(name: "NUMBER")
+val TokenString       = TokenType new(name: "STRING")
+
+val TokenLine         = TokenType new(name: "LINE")
+val TokenError        = TokenType new(name: "ERROR")
+val TokenEof          = TokenType new(name: "EOF")
+val TokenWhitespace   = TokenType new(name: "WHITESPACE")
+
+// Comments.
+val TokenBlockComment = TokenType new(name: "BLOCK_COMMENT")
+val TokenDocComment   = TokenType new(name: "DOC_COMMENT")
+val TokenLineComment  = TokenType new(name: "LINE_COMMENT")

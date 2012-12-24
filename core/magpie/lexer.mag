@@ -1,0 +1,18 @@
+import magpie.token
+
+defclass Lexer
+    // TODO(bob): Support an iterable stream of characters.
+    val _text is String
+    var _pos is Num
+    var _line is Num
+    var _col  is Num
+    var _startLine is Num
+    var _startCol is Num
+    var _read is String
+end
+
+def (== Lexer) new(text is String)
+    // TODO(bob): Support default field values and get rid of these.
+    Lexer new(_text: text, _pos: 0, _line: 1, _col: 1,
+        _startLine: 1, _startCol: 1, _read: "")
+end

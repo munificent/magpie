@@ -1,24 +1,5 @@
-def foo()
-    bar()
-end
+import magpie.lexer
 
+var lexer = Lexer new("()()[]][")
 
-
-
-
-
-
-
-
-
-
-
-def bar()
-    baz() + +---* 2
-end
-
-def baz()
-    throw "oops!"
-end
-
-foo()
+for i in 1..5 do print(lexer readToken)
