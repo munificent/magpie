@@ -22,13 +22,9 @@ namespace magpie
 
     source_ = new SourceFile(path_, code);
 
-    // Use a separate report for this module so we can tell if it parsed
-    // successfully on its own.
-    ErrorReporter innerReporter;
-    Parser parser(source_, innerReporter);
+    Parser parser(source_, reporter);
     ast_ = parser.parseModule();
 
-    if (innerReporter.numErrors() > 0) ast_ = NULL;
     return !ast_.isNull();
   }
 
