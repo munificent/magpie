@@ -347,15 +347,22 @@ namespace magpie
 
     if (match(TOKEN_IMPORT))
     {
-      Array<gc<String> > name;
+      Array<gc<String> > names;
       do
       {
         const char* firstError = "Expect name after 'import'.";
         const char* restError = "Expect name after '.' in import.";
         gc<Token> namePart = consume(TOKEN_NAME,
-            name.count() == 0 ? firstError : restError);
-        name.add(namePart->text());
+            names.count() == 0 ? firstError : restError);
+        names.add(namePart->text());
       } while (match(TOKEN_DOT));
+
+      // TODO(bob): Create String::join() to optimize this?
+      gc<String> name = names[0];
+      for (int i = 1; i < names.count(); i++)
+      {
+        name = String::format("%s.%s", name->cString(), names[i]->cString());
+      }
 
       return new ImportExpr(spanFrom(start), name);
     }

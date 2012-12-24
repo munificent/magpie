@@ -655,7 +655,7 @@ private:
 class ImportExpr : public Expr
 {
 public:
-  ImportExpr(gc<SourcePos> pos, const Array<gc<String> >& name)
+  ImportExpr(gc<SourcePos> pos, gc<String> name)
   : Expr(pos),
     name_(name)
   {}
@@ -667,7 +667,7 @@ public:
 
   virtual ImportExpr* asImportExpr() { return this; }
 
-  const Array<gc<String> >& name() const { return name_; }
+  gc<String> name() const { return name_; }
 
   virtual void reach()
   {
@@ -677,7 +677,7 @@ public:
   virtual void trace(std::ostream& out) const;
 
 private:
-  Array<gc<String> > name_;
+  gc<String> name_;
   NO_COPY(ImportExpr);
 };
 

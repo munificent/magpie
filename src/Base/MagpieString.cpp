@@ -130,6 +130,18 @@ namespace magpie
     return create(&chars_[start], end - start);
   }
 
+  gc<String> String::replace(char from, char to) const
+  {
+    gc<String> result = String::create(chars_, length_);
+
+    for (int i = 0; i < length_; i++)
+    {
+      if (result->chars_[i] == from) result->chars_[i] = to;
+    }
+
+    return result;
+  }
+
   void String::trace(std::ostream& out) const
   {
     out << chars_;

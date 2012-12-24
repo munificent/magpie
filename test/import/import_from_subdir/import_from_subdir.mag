@@ -1,0 +1,3 @@
+import foo.bar.baz
+
+print(bazMethod()) // expect: found

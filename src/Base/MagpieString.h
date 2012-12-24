@@ -56,6 +56,10 @@ namespace magpie
     // the last character to include in the substring.
     gc<String> substring(int start, int end) const;
 
+    // Creates a new string where every instance of [from] in this string has
+    // been replaced with [to].
+    gc<String> replace(char from, char to) const;
+
     virtual void trace(std::ostream& out) const;
 
   private:

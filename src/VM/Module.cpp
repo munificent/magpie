@@ -42,14 +42,7 @@ namespace magpie
       ImportExpr* import = ast_->body()->expressions()[i]->asImportExpr();
       if (import == NULL) continue;
 
-      // TODO(bob): Should the parser do this?
-      gc<String> name = import->name()[0];
-      for (int j = 1; j < import->name().count(); j++)
-      {
-        name = String::format("%s.%s", name->cString(), import->name()[j]->cString());
-      }
-
-      vm.importModule(reporter, this, import->pos(), name);
+      vm.importModule(reporter, this, import->pos(), import->name());
     }
   }
 

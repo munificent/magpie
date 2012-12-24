@@ -64,7 +64,7 @@ exprs = sorted({
         ('thenArm',     'gc<Expr>'),
         ('elseArm',     'gc<Expr>')],
     'Import': [
-        ('name',        'Array<gc<String> >')],
+        ('name',        'gc<String>')],
     'Is': [
         ('value',       'gc<Expr>'),
         ('type',        'gc<Expr>')],

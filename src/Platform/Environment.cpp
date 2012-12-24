@@ -8,7 +8,8 @@ namespace magpie
   {
     // TODO(bob): Split module name on ".".
     // Build a relative path from the module name.
-    gc<String> relative = String::format("%s.mag", name->cString());
+    gc<String> relative = name->replace('.', path::separator());
+    relative = String::format("%s.mag", relative->cString());
 
     // Try to find it relative to the program first. (This will be null if
     // we're running in the REPL.)
