@@ -60,6 +60,15 @@ else:
         PINK = '\033[91m'
         YELLOW = '\033[33m'
 
+def print_line(line=None):
+    # Erase the line.
+    print '\033[2K',
+    # Move the cursor to the beginning.
+    print '\r',
+    if line:
+        print line,
+        sys.stdout.flush()
+
 def walk(dir, callback):
     """ Walks [dir], and executes [callback] on each file. """
     dir = abspath(dir)
@@ -92,6 +101,10 @@ def run_test(path):
     expect_output = []
     expect_error = []
     expect_return = 0
+
+    print_line('Passed: ' + color.GREEN + str(passed) + color.DEFAULT +
+               ' Failed: ' + color.RED + str(failed) + color.DEFAULT +
+               ' Skipped: ' + color.YELLOW + str(skipped) + color.DEFAULT)
 
     i = 1
     with open(path, 'r') as file:
@@ -201,6 +214,7 @@ def run_test(path):
 
 walk(TEST_DIR, run_test)
 
+print_line()
 if failed == 0:
     print 'All ' + color.GREEN + str(passed) + color.DEFAULT + ' tests passed.'
 else:
