@@ -105,7 +105,19 @@ namespace magpie
     double c = args[0]->asString()->length();
     return new NumberObject(c);
   }
-  
+
+  NATIVE(stringSubscriptNum)
+  {
+    // Note: bounds checking is handled by core before calling this.
+    gc<String> string = args[0]->asString();
+
+    // TODO(bob): Handle non-ASCII.
+    // TODO(bob): What if the index isn't an int?
+    char c = (*string)[args[1]->asNumber()];
+
+    return new CharacterObject(c);
+  }
+
   NATIVE(numToString)
   {
     double n = args[0]->asNumber();
@@ -212,7 +224,7 @@ namespace magpie
     return new NumberObject(list->elements().count());
   }
   
-  NATIVE(listIndex)
+  NATIVE(listSubscriptNum)
   {
     // Note: bounds checking is handled by core before calling this.
     ListObject* list = args[0]->asList();
@@ -220,7 +232,7 @@ namespace magpie
     return list->elements()[static_cast<int>(args[1]->asNumber())];
   }
 
-  NATIVE(listIndexRange)
+  NATIVE(listSubscriptRange)
   {
     // Note: bounds checking is handled by core before calling this.
     ListObject* source = args[0]->asList();
@@ -238,7 +250,7 @@ namespace magpie
     return list;
   }
   
-  NATIVE(listIndexSet)
+  NATIVE(listSubscriptSetNum)
   {
     ListObject* list = args[0]->asList();
     // TODO(bob): What if the index isn't an int?

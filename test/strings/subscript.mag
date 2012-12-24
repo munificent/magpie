@@ -1,0 +1,22 @@
+// Make sure it returns a character and not a string.
+print("abc"[1] is Char) // expect: true
+
+// Access characters.
+print("abcd"[0]) // expect: a
+print("abcd"[1]) // expect: b
+print("abcd"[2]) // expect: c
+print("abcd"[3]) // expect: d
+
+print("abcd"[-4]) // expect: a
+print("abcd"[-3]) // expect: b
+print("abcd"[-2]) // expect: c
+print("abcd"[-1]) // expect: d
+
+// Handle out of bounds.
+do
+    print("abcd"[4])
+catch is ArgError then print("caught") // expect: caught
+
+do
+    print("abcd"[-5])
+catch is ArgError then print("caught") // expect: caught

@@ -65,6 +65,7 @@ namespace magpie
     DEF_NATIVE(numGreaterThanNum);
     DEF_NATIVE(numGreaterThanEqualToNum);
     DEF_NATIVE(stringCount);
+    DEF_NATIVE(stringSubscriptNum);
     DEF_NATIVE(numToString);
     DEF_NATIVE(channelClose);
     DEF_NATIVE(channelIsOpen);
@@ -78,9 +79,9 @@ namespace magpie
     DEF_NATIVE(functionCall);
     DEF_NATIVE(listAdd);
     DEF_NATIVE(listCount);
-    DEF_NATIVE(listIndex);
-    DEF_NATIVE(listIndexRange);
-    DEF_NATIVE(listIndexSet);
+    DEF_NATIVE(listSubscriptNum);
+    DEF_NATIVE(listSubscriptRange);
+    DEF_NATIVE(listSubscriptSetNum);
     DEF_NATIVE(listInsert);
 
     true_ = new BoolObject(true);

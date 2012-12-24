@@ -28,6 +28,7 @@ namespace magpie
   NATIVE(numGreaterThanNum);
   NATIVE(numGreaterThanEqualToNum);
   NATIVE(stringCount);
+  NATIVE(stringSubscriptNum);
   NATIVE(numToString);
   NATIVE(channelClose);
   NATIVE(channelIsOpen);
@@ -41,9 +42,9 @@ namespace magpie
   NATIVE(functionCall);
   NATIVE(listAdd);
   NATIVE(listCount);
-  NATIVE(listIndex);
-  NATIVE(listIndexRange);
-  NATIVE(listIndexSet);
+  NATIVE(listSubscriptNum);
+  NATIVE(listSubscriptRange);
+  NATIVE(listSubscriptSetNum);
   NATIVE(listInsert);
 }
 
