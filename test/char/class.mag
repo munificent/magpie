@@ -1,0 +1,2 @@
+print('a' is Char) // expect: true
+print('a' class == Char) // expect: true

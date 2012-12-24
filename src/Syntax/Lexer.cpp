@@ -144,6 +144,9 @@ namespace magpie
 
         case '\n':
           return makeToken(TOKEN_LINE);
+
+        case '\'':
+          return readCharacter();
           
         case '"':
           return readString();
@@ -375,6 +378,19 @@ namespace magpie
     }
     
     return makeToken(type, text);
+  }
+
+  gc<Token> Lexer::readCharacter()
+  {
+    // TODO(bob): Needs lots of work:
+    // - Handle missing '.
+    // - Handle EOF.
+    // - Handle non-printing characters.
+    
+    char c[1];
+    c[0] = advance();
+    if (advance() != '\'') return error(String::create("Unterminated character."));
+    return makeToken(TOKEN_CHARACTER, String::create(c, 1));
   }
   
   gc<Token> Lexer::readString()

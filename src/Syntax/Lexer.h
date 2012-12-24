@@ -53,6 +53,7 @@ namespace magpie
     gc<Token> readName();
     gc<Token> readNumber();
     gc<Token> readOperator();
+    gc<Token> readCharacter();
     gc<Token> readString();
 
     gc<SourceFile> source_;

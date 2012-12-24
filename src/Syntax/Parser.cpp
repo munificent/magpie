@@ -74,6 +74,7 @@ namespace magpie
     { &Parser::record,  NULL, -1 },                                    // TOKEN_FIELD
     { &Parser::name,    &Parser::call, PRECEDENCE_CALL },              // TOKEN_NAME
     { &Parser::number,  NULL, -1 },                                    // TOKEN_NUMBER
+    { &Parser::character, NULL, -1 },                                    // TOKEN_CHARACTER
     { &Parser::string,  NULL, -1 },                                    // TOKEN_STRING
 
     { NULL,             NULL, -1 },                                    // TOKEN_LINE
@@ -549,6 +550,12 @@ namespace magpie
   gc<Expr> Parser::boolean(gc<Token> token)
   {
     return new BoolExpr(token->pos(), token->type() == TOKEN_TRUE);
+  }
+
+  gc<Expr> Parser::character(gc<Token> token)
+  {
+    // TODO(bob): Handle non-literal characters.
+    return new CharacterExpr(token->pos(), (*token->text())[0]);
   }
 
   gc<Expr> Parser::function(gc<Token> token)

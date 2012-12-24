@@ -1,0 +1,4 @@
+// TODO(bob): Non-printing characters, Unicode, escapes, etc.
+
+print('a' toString == "a") // expect: true
+print('Z' toString == "Z") // expect: true

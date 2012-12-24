@@ -305,6 +305,12 @@ namespace magpie
     endJump(jumpPastCatch, OP_JUMP, 1);
   }
 
+  void ExprCompiler::visit(CharacterExpr& expr, int dest)
+  {
+    int index = compileConstant(expr);
+    write(expr, OP_CONSTANT, index, dest);
+  }
+  
   void ExprCompiler::visit(DefExpr& expr, int dest)
   {
     gc<String> signature = SignatureBuilder::build(expr);
@@ -748,6 +754,14 @@ namespace magpie
     return chunk_->addConstant(new NumberObject(expr.value()));
   }
 
+  int ExprCompiler::compileConstant(const CharacterExpr& expr)
+  {
+    // TODO(bob): Putting characters in the constant table is overkill for most
+    // characters. Should have an inline opcode for at least basic ASCII or BMP
+    // ones.
+    return chunk_->addConstant(new CharacterObject(expr.value()));
+  }
+  
   int ExprCompiler::compileConstant(const StringExpr& expr)
   {
     return chunk_->addConstant(new StringObject(expr.value()));

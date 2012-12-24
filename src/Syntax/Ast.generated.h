@@ -9,6 +9,7 @@ class BoolExpr;
 class BreakExpr;
 class CallExpr;
 class CatchExpr;
+class CharacterExpr;
 class DefExpr;
 class DefClassExpr;
 class DoExpr;
@@ -57,6 +58,7 @@ public:
   virtual void visit(BreakExpr& node, int arg) = 0;
   virtual void visit(CallExpr& node, int arg) = 0;
   virtual void visit(CatchExpr& node, int arg) = 0;
+  virtual void visit(CharacterExpr& node, int arg) = 0;
   virtual void visit(DefExpr& node, int arg) = 0;
   virtual void visit(DefClassExpr& node, int arg) = 0;
   virtual void visit(DoExpr& node, int arg) = 0;
@@ -111,6 +113,7 @@ public:
   virtual BreakExpr* asBreakExpr() { return NULL; }
   virtual CallExpr* asCallExpr() { return NULL; }
   virtual CatchExpr* asCatchExpr() { return NULL; }
+  virtual CharacterExpr* asCharacterExpr() { return NULL; }
   virtual DefExpr* asDefExpr() { return NULL; }
   virtual DefClassExpr* asDefClassExpr() { return NULL; }
   virtual DoExpr* asDoExpr() { return NULL; }
@@ -393,6 +396,30 @@ private:
   gc<Expr> body_;
   Array<MatchClause> catches_;
   NO_COPY(CatchExpr);
+};
+
+class CharacterExpr : public Expr
+{
+public:
+  CharacterExpr(gc<SourcePos> pos, unsigned int value)
+  : Expr(pos),
+    value_(value)
+  {}
+
+  virtual void accept(ExprVisitor& visitor, int arg)
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual CharacterExpr* asCharacterExpr() { return this; }
+
+  unsigned int value() const { return value_; }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  unsigned int value_;
+  NO_COPY(CharacterExpr);
 };
 
 class DefExpr : public Expr

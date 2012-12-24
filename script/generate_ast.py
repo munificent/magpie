@@ -34,6 +34,8 @@ exprs = sorted({
     'Catch': [
         ('body',        'gc<Expr>'),
         ('catches',     'Array<MatchClause>')],
+    'Character': [
+        ('value',       'unsigned int')],
     'DefClass': [
         ('name',        'gc<String>'),
         ('isNative',    'bool'),

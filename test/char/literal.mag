@@ -1,0 +1,4 @@
+// TODO(bob): Non-printing characters, Unicode, escapes, etc.
+
+print('a') // expect: a
+print('Z') // expect: Z

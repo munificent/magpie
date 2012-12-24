@@ -1,5 +1,6 @@
 defclass Bool native
 defclass Channel native
+defclass Char native
 defclass Class native
 defclass Function native
 defclass List native

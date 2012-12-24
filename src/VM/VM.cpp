@@ -95,6 +95,7 @@ namespace magpie
     
     registerClass(core, boolClass_, "Bool");
     registerClass(core, channelClass_, "Channel");
+    registerClass(core, characterClass_, "Char");
     registerClass(core, classClass_, "Class");
     registerClass(core, functionClass_, "Function");
     registerClass(core, listClass_, "List");

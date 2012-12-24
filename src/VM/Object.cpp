@@ -110,7 +110,18 @@ namespace magpie
     senders_.reach();
     receivers_.reach();
   }
-  
+
+  gc<ClassObject> CharacterObject::getClass(VM& vm) const
+  {
+    return vm.characterClass();
+  }
+
+  gc<String> CharacterObject::toString() const
+  {
+    // TODO(bob): This will probably barf on non-ASCII stuff. Fix.
+    return String::format("%c", value_);
+  }
+
   gc<ClassObject> ClassObject::getClass(VM& vm) const
   {
     return vm.classClass();

@@ -290,6 +290,10 @@ namespace magpie
                 equal = a->toBool() == b->toBool();
                 break;
 
+              case OBJECT_CHARACTER:
+                equal = a->asCharacter()->value() == b->asCharacter()->value();
+                break;
+
               case OBJECT_CHANNEL:
                 ASSERT(false, "Equality on channels not implemented.");
                 break;

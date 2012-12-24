@@ -56,6 +56,7 @@ namespace magpie
     virtual void visit(BreakExpr& expr, int dest);
     virtual void visit(CallExpr& expr, int dest);
     virtual void visit(CatchExpr& expr, int dest);
+    virtual void visit(CharacterExpr& expr, int dest);
     virtual void visit(DefExpr& expr, int dest);
     virtual void visit(DefClassExpr& expr, int dest);
     virtual void visit(DoExpr& expr, int dest);
@@ -100,6 +101,7 @@ namespace magpie
     int compileExpressionOrConstant(gc<Expr> expr);
 
     int compileConstant(const DefClassExpr& expr);
+    int compileConstant(const CharacterExpr& expr);
     int compileConstant(const NumberExpr& expr);
     int compileConstant(const StringExpr& expr);
 

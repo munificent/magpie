@@ -56,6 +56,7 @@ namespace magpie
     
     inline gc<ClassObject> boolClass() const { return boolClass_; }
     inline gc<ClassObject> channelClass() const { return channelClass_; }
+    inline gc<ClassObject> characterClass() const { return characterClass_; }
     inline gc<ClassObject> classClass() const { return classClass_; }
     inline gc<ClassObject> fileClass() const { return fileClass_; }
     inline gc<ClassObject> functionClass() const { return functionClass_; }
@@ -128,6 +129,7 @@ namespace magpie
     gc<Object> done_;
     gc<ClassObject> boolClass_;
     gc<ClassObject> channelClass_;
+    gc<ClassObject> characterClass_;
     gc<ClassObject> classClass_;
     gc<ClassObject> fileClass_;
     gc<ClassObject> functionClass_;

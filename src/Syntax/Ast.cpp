@@ -70,7 +70,13 @@ namespace magpie
     
     out << ")";
   }
-    
+  
+  void CharacterExpr::trace(std::ostream& out) const
+  {
+    // TODO(bob): Convert back to character representation.
+    out << "'" << value_ << "'";
+  }
+  
   void DefExpr::trace(std::ostream& out) const
   {
     out << "(def ";

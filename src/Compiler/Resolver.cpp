@@ -358,7 +358,12 @@ namespace magpie
       caseScope.end();
     }
   }
-  
+
+  void Resolver::visit(CharacterExpr& expr, int dummy)
+  {
+    // Do nothing.
+  }
+
   void Resolver::visit(DefExpr& expr, int dummy)
   {
     // Resolve the method itself.

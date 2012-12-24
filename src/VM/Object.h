@@ -11,6 +11,7 @@ namespace magpie
   class BoolObject;
   class Chunk;
   class ChannelObject;
+  class CharacterObject;
   class ClassObject;
   class DynamicObject;
   class FileObject;
@@ -30,6 +31,7 @@ namespace magpie
   enum ObjectType {
     OBJECT_BOOL,
     OBJECT_CHANNEL,
+    OBJECT_CHARACTER,
     OBJECT_CLASS,
     OBJECT_DYNAMIC,
     OBJECT_FILE,
@@ -55,6 +57,13 @@ namespace magpie
     virtual ChannelObject* asChannel()
     {
       ASSERT(false, "Not a channel.");
+      return NULL;
+    }
+
+    // Returns the object as a character. Object *must* be a CharacterObject.
+    virtual CharacterObject* asCharacter()
+    {
+      ASSERT(false, "Not a class.");
       return NULL;
     }
     
@@ -118,9 +127,6 @@ namespace magpie
     virtual gc<String> toString() const = 0;
 
     virtual void trace(std::ostream& stream) const;
-    
-  private:
-    NO_COPY(Object);
   };
   
   class BoolObject : public Object
@@ -141,8 +147,6 @@ namespace magpie
     
   private:
     bool value_;
-    
-    NO_COPY(BoolObject);
   };
 
   class ChannelObject : public Object
@@ -186,10 +190,31 @@ namespace magpie
 
     // The fibers that are suspended waiting to receive a value on this channel.
     Array<gc<Fiber> > receivers_;
-
-    NO_COPY(ChannelObject);
   };
-  
+
+  class CharacterObject : public Object
+  {
+  public:
+    CharacterObject(unsigned int value)
+    : Object(),
+      value_(value)
+    {}
+
+    unsigned int value() const { return value_; }
+
+    virtual ObjectType type() const { return OBJECT_CHARACTER; }
+    virtual CharacterObject* asCharacter() { return this; }
+    
+    virtual gc<ClassObject> getClass(VM& vm) const;
+
+    // TODO(bob): Do we want to do this here, or rely on a "true?" method?
+    virtual bool toBool() const { return value_ != 0; }
+    virtual gc<String> toString() const;
+
+  private:
+    unsigned int value_;
+  };
+
   class ClassObject : public Object
   {
   public:
@@ -254,8 +279,6 @@ namespace magpie
 
     gc<ClassObject> class_;
     gc<Object>      fields_[FLEXIBLE_SIZE];
-
-    NO_COPY(DynamicObject);
   };
 
   class FileObject : public Object
@@ -279,8 +302,6 @@ namespace magpie
     // TODO(bob): Need some kind of finalization system so that files that get
     // GC'd get closed.
     File* file_;
-
-    NO_COPY(FileObject);
   };
 
   class FunctionObject : public Object
@@ -313,8 +334,6 @@ namespace magpie
 
     gc<Chunk> chunk_;
     gc<Upvar> upvars_[FLEXIBLE_SIZE];
-
-    NO_COPY(FunctionObject);
   };
   
   class ListObject : public Object
@@ -339,8 +358,6 @@ namespace magpie
 
   private:
     Array<gc<Object> > elements_;
-    
-    NO_COPY(ListObject);
   };
   
   class NothingObject : public Object
@@ -358,9 +375,6 @@ namespace magpie
     virtual bool toBool() const { return false; }
 
     virtual gc<String> toString() const;
-    
-  private:
-    NO_COPY(NothingObject);
   };
   
   class NumberObject : public Object
@@ -382,8 +396,6 @@ namespace magpie
     
   private:
     double value_;
-    
-    NO_COPY(NumberObject);
   };
   
   // A record's "type" is an implicit class that describes the set of fields
@@ -410,8 +422,6 @@ namespace magpie
     
     int numFields_;
     int names_[FLEXIBLE_SIZE];
-
-    NO_COPY(RecordType);
   };
   
   // A record or tuple object.
@@ -440,8 +450,6 @@ namespace magpie
     
     gc<RecordType> type_;
     gc<Object>     fields_[FLEXIBLE_SIZE];
-    
-    NO_COPY(RecordObject);
   };
   
   // TODO(bob): The double boxing here where this has a pointer to a String is
@@ -465,7 +473,5 @@ namespace magpie
 
   private:
     gc<String> value_;
-    
-    NO_COPY(StringObject);
   };
 }
