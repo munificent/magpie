@@ -207,7 +207,8 @@ def run_test(path):
         #print color.GREEN + 'PASS' + color.DEFAULT + ': ' + path
     else:
         failed += 1
-        print color.RED + 'FAIL' + color.DEFAULT + ': ' + path
+        print_line(color.RED + 'FAIL' + color.DEFAULT + ': ' + path)
+        print
         for fail in fails:
             print '     ', color.PINK + fail + color.DEFAULT
         print
