@@ -322,9 +322,9 @@ namespace magpie
 
   void ExprCompiler::visit(DefClassExpr& expr, int dest)
   {
-    // Create and load the class.
-    int index = compileConstant(expr);
-    write(expr, OP_CONSTANT, index, dest);
+    // Create the class.
+    symbolId name = compiler_.addSymbol(expr.name());
+    write(expr, OP_CLASS, name, expr.fields().count(), dest);
 
     // Also store it in its named variable.
     compileAssignment(expr.pos(), expr.resolved(), dest, true);
@@ -719,12 +719,6 @@ namespace magpie
 
   int ExprCompiler::compileExpressionOrConstant(gc<Expr> expr)
   {
-    const DefClassExpr* defClass = expr->asDefClassExpr();
-    if (defClass != NULL)
-    {
-      return MAKE_CONSTANT(compileConstant(*defClass));
-    }
-
     const NumberExpr* number = expr->asNumberExpr();
     if (number != NULL)
     {
@@ -741,12 +735,6 @@ namespace magpie
 
     compile(expr, dest);
     return dest;
-  }
-
-  int ExprCompiler::compileConstant(const DefClassExpr& expr)
-  {
-    return chunk_->addConstant(
-        new ClassObject(expr.name(), expr.fields().count()));
   }
 
   int ExprCompiler::compileConstant(const NumberExpr& expr)

@@ -83,7 +83,10 @@ namespace magpie
     gc<RecordType> getRecordType(int id);
     
     symbolId addSymbol(gc<String> name);
-    
+
+    // Gets the text for the symbol with the given ID.
+    gc<String> getSymbol(symbolId symbol) const;
+
     // Adds a method to the list of methods that have been compiled, but whose
     // definitions have not yet been executed.
     methodId addMethod(gc<Method> method);

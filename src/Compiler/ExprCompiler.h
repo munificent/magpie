@@ -100,7 +100,6 @@ namespace magpie
     // slot or a constant. This is used to compile the operands for those.
     int compileExpressionOrConstant(gc<Expr> expr);
 
-    int compileConstant(const DefClassExpr& expr);
     int compileConstant(const CharacterExpr& expr);
     int compileConstant(const NumberExpr& expr);
     int compileConstant(const StringExpr& expr);

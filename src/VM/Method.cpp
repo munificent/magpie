@@ -88,124 +88,130 @@ namespace magpie
   void Chunk::debugTrace(VM& vm, instruction ins) const
   {
     using namespace std;
-    
+
+    int a = GET_A(ins);
+    int b = GET_B(ins);
+    int c = GET_C(ins);
+
     switch (GET_OP(ins))
     {
       case OP_MOVE:
-        cout << "MOVE            " << GET_A(ins) << " -> " << GET_B(ins);
+        cout << "MOVE            " << a << " -> " << b;
         break;
         
       case OP_CONSTANT:
-        cout << "CONSTANT        "
-             << GET_A(ins) << " -> " << GET_B(ins)
-             << " \"" << constants_[GET_A(ins)] << "\"";
+        cout << "CONSTANT        " << a << " -> " << b
+             << " \"" << constants_[a] << "\"";
         break;
         
       case OP_BUILT_IN:
-        cout << "BUILT_IN        " << GET_A(ins) << " -> " << GET_B(ins);
+        cout << "BUILT_IN        " << a << " -> " << b;
         break;
         
       case OP_METHOD:
-        cout << "METHOD          "
-             << GET_A(ins) << " <- " << GET_B(ins)
-             << " \"" << vm.getMultimethod(GET_A(ins))->signature() << "\"";
+        cout << "METHOD          " << a << " <- " << b
+             << " \"" << vm.getMultimethod(a)->signature() << "\"";
         break;
         
       case OP_RECORD:
-        cout << "RECORD          " << GET_A(ins) << "[" << GET_B(ins) << "] -> " << GET_C(ins);
+        cout << "RECORD          " << a << "[" << b << "] -> " << c;
         break;
         
       case OP_LIST:
-        cout << "LIST            [" << GET_A(ins) << "..." << GET_B(ins) << "] -> " << GET_C(ins);
+        cout << "LIST            [" << a << "..." << b << "] -> " << c;
         break;
 
       case OP_FUNCTION:
-        cout << "FUNCTION        " << GET_A(ins) << " -> " << GET_B(ins);
+        cout << "FUNCTION        " << a << " -> " << b;
         break;
         
       case OP_ASYNC:
-        cout << "ASYNC           " << GET_A(ins);
+        cout << "ASYNC           " << a;
+        break;
+
+      case OP_CLASS:
+        cout << "CLASS           " << constants_[a] << " " << b
+             << " fields -> " << c;
         break;
 
       case OP_GET_FIELD:
-        cout << "GET_FIELD       " << GET_A(ins) << "[" << GET_B(ins) << "] -> " << GET_C(ins);
+        cout << "GET_FIELD       " << a << "[" << b << "] -> " << c;
         break;
         
       case OP_TEST_FIELD:
-        cout << "TEST_FIELD      " << GET_A(ins) << "[" << GET_B(ins) << "] -> " << GET_C(ins);
+        cout << "TEST_FIELD      " << a << "[" << b << "] -> " << c;
         break;
 
       case OP_GET_CLASS_FIELD:
-        cout << "GET_CLASS_FIELD " << GET_A(ins) << "[" << GET_B(ins) << "] -> " << GET_C(ins);
+        cout << "GET_CLASS_FIELD " << a << "[" << b << "] -> " << c;
         break;
 
       case OP_SET_CLASS_FIELD:
-        cout << "SET_CLASS_FIELD " << GET_A(ins) << "[" << GET_B(ins) << "] = " << GET_C(ins);
+        cout << "SET_CLASS_FIELD " << a << "[" << b << "] = " << c;
         break;
 
       case OP_GET_VAR:
-        cout << "OP_GET_VAR      module " << GET_A(ins) << ", var " << GET_B(ins) << " -> " << GET_C(ins);
+        cout << "OP_GET_VAR      module " << a << ", var " << b << " -> " << c;
         break;
         
       case OP_SET_VAR:
-        cout << "OP_SET_VAR      module " << GET_A(ins) << ", var " << GET_B(ins) << " <- " << GET_C(ins);
+        cout << "OP_SET_VAR      module " << a << ", var " << b << " <- " << c;
         break;
 
       case OP_GET_UPVAR:
-        cout << "OP_GET_UPVAR    " << GET_A(ins) << " -> " << GET_B(ins);
+        cout << "OP_GET_UPVAR    " << a << " -> " << b;
         break;
 
       case OP_SET_UPVAR:
-        cout << "OP_SET_UPVAR    " << GET_A(ins) << " <- " << GET_B(ins);
+        cout << "OP_SET_UPVAR    " << a << " <- " << b;
         break;
         
       case OP_EQUAL:
-        cout << "EQUAL           " << GET_A(ins) << " == " << GET_B(ins) << " -> " << GET_C(ins);
+        cout << "EQUAL           " << a << " == " << b << " -> " << c;
         break;
         
       case OP_NOT:
-        cout << "NOT             " << GET_A(ins);
+        cout << "NOT             " << a;
         break;
         
       case OP_IS:
-        cout << "IS              " << GET_A(ins) << " is " << GET_B(ins);
+        cout << "IS              " << a << " is " << b;
         break;
         
       case OP_JUMP:
-        cout << "JUMP            " << GET_A(ins) << " " << GET_B(ins);
+        cout << "JUMP            " << a << " " << b;
         break;
         
       case OP_JUMP_IF_FALSE:
-        cout << "JUMP_IF_FALSE   " << GET_A(ins) << "? " << GET_B(ins);
+        cout << "JUMP_IF_FALSE   " << a << "? " << b;
         break;
         
       case OP_JUMP_IF_TRUE:
-        cout << "JUMP_IF_TRUE    " << GET_A(ins) << "? " << GET_B(ins);
+        cout << "JUMP_IF_TRUE    " << a << "? " << b;
         break;
         
       case OP_CALL:
       {
-        gc<Multimethod> method = vm.getMultimethod(GET_A(ins));
-        cout << "CALL            "
-             << GET_A(ins) << "(" << GET_B(ins) << ") -> "
-             << GET_C(ins) << " \"" << method->signature() << "\"";
+        gc<Multimethod> method = vm.getMultimethod(a);
+        cout << "CALL            " << a << "(" << b << ") -> "
+             << c << " \"" << method->signature() << "\"";
         break;
       }
         
       case OP_NATIVE:
-        cout << "NATIVE          " << GET_A(ins) << "(" << GET_B(ins) << ") -> " << GET_C(ins);
+        cout << "NATIVE          " << a << "(" << b << ") -> " << c;
         break;
         
       case OP_RETURN:
-        cout << "RETURN          " << GET_A(ins);
+        cout << "RETURN          " << a;
         break;
         
       case OP_THROW:
-        cout << "THROW           " << GET_A(ins);
+        cout << "THROW           " << a;
         break;
         
       case OP_ENTER_TRY:
-        cout << "ENTER_TRY       " << GET_A(ins);
+        cout << "ENTER_TRY       " << a;
         break;
         
       case OP_EXIT_TRY:
@@ -213,7 +219,7 @@ namespace magpie
         break;
         
       case OP_TEST_MATCH:
-        cout << "TEST_MATCH      " << GET_A(ins);
+        cout << "TEST_MATCH      " << a;
         break;
     }
     

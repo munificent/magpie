@@ -121,6 +121,14 @@ namespace magpie
           scheduler_.spawn(function);
           break;
         }
+
+        case OP_CLASS:
+        {
+          gc<String> name = vm_.getSymbol(GET_A(ins));
+          gc<ClassObject> classObj = new ClassObject(name, GET_B(ins));
+          store(frame, GET_C(ins), classObj);
+          break;
+        }
           
         case OP_GET_FIELD:
         {

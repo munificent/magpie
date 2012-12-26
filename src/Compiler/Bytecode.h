@@ -53,6 +53,12 @@ namespace magpie
     // Creates an async fiber. A is constant index of the chunk for the fiber.
     OP_ASYNC,
 
+    // Creates a class. A is the symbol ID for the name. B is the number of
+    // fields. Stores the result in slot C.
+    // TODO(bob): The destination slot will almost never be needed since classes
+    // usually appear in "statement" position. Can it be eliminated?
+    OP_CLASS,
+
     // Destructures a record field. Slot A holds the record to destructure. B
     // is the symbol for the field (see VM::addSymbol()). Stores the field
     // value in slot C. If slot A does not have a record, or the record does

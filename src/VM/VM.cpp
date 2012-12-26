@@ -335,6 +335,12 @@ namespace magpie
     return symbols_.count() - 1;
   }
 
+  gc<String> VM::getSymbol(symbolId symbol) const
+  {
+    ASSERT_INDEX(symbol, symbols_.count());
+    return symbols_[symbol];
+  }
+
   methodId VM::addMethod(gc<Method> method)
   {
     methods_.add(method);
