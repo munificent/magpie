@@ -37,10 +37,11 @@ exprs = sorted({
     'Character': [
         ('value',       'unsigned int')],
     'DefClass': [
-        ('name',        'gc<String>'),
-        ('isNative',    'bool'),
-        ('fields',      'Array<gc<ClassField> >'),
-        ('resolved*',   'gc<ResolvedName>'),
+        ('name',         'gc<String>'),
+        ('isNative',     'bool'),
+        ('superclasses', 'Array<gc<Expr> >'),
+        ('fields',       'Array<gc<ClassField> >'),
+        ('resolved*',    'gc<ResolvedName>'),
         ('synthesizedMethods*', 'Array<gc<DefExpr> >')],
     'Def': [
         ('leftParam',   'gc<Pattern>'),

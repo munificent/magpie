@@ -473,10 +473,11 @@ private:
 class DefClassExpr : public Expr
 {
 public:
-  DefClassExpr(gc<SourcePos> pos, gc<String> name, bool isNative, const Array<gc<ClassField> >& fields)
+  DefClassExpr(gc<SourcePos> pos, gc<String> name, bool isNative, const Array<gc<Expr> >& superclasses, const Array<gc<ClassField> >& fields)
   : Expr(pos),
     name_(name),
     isNative_(isNative),
+    superclasses_(superclasses),
     fields_(fields),
     resolved_(),
     synthesizedMethods_()
@@ -491,6 +492,7 @@ public:
 
   gc<String> name() const { return name_; }
   bool isNative() const { return isNative_; }
+  const Array<gc<Expr> >& superclasses() const { return superclasses_; }
   const Array<gc<ClassField> >& fields() const { return fields_; }
   gc<ResolvedName> resolved() const { return resolved_; }
   void setResolved(gc<ResolvedName> resolved) { resolved_ = resolved; }
@@ -500,6 +502,7 @@ public:
   virtual void reach()
   {
     name_.reach();
+    superclasses_.reach();
     fields_.reach();
     resolved_.reach();
     synthesizedMethods_.reach();
@@ -510,6 +513,7 @@ public:
 private:
   gc<String> name_;
   bool isNative_;
+  Array<gc<Expr> > superclasses_;
   Array<gc<ClassField> > fields_;
   gc<ResolvedName> resolved_;
   Array<gc<DefExpr> > synthesizedMethods_;

@@ -301,6 +301,16 @@ namespace magpie
       gc<Token> name = consume(TOKEN_NAME,
                                "Expect name after 'defclass'.");
 
+      Array<gc<Expr> > superclasses;
+      if (match(TOKEN_IS))
+      {
+        do
+        {
+          superclasses.add(parsePrecedence(PRECEDENCE_CALL));
+        }
+        while (match(TOKEN_COMMA));
+      }
+
       bool isNative = false;
       Array<gc<ClassField> > fields;
 
@@ -343,7 +353,8 @@ namespace magpie
         }
       }
       
-      return new DefClassExpr(spanFrom(start), name->text(), isNative, fields);
+      return new DefClassExpr(spanFrom(start), name->text(), isNative,
+                              superclasses, fields);
     }
 
     if (match(TOKEN_IMPORT))
