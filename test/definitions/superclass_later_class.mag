@@ -1,8 +1,6 @@
-// skip
-defclass Bar is Foo // expect error
+// expect exit 3
+defclass Bar is Foo
 end
 
 defclass Foo
 end
-
-print(Bar new is Foo)

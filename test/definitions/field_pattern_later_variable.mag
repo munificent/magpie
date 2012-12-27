@@ -1,4 +1,3 @@
-// skip
 defclass Foo
     var field is bar
 end
