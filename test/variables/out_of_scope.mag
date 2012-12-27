@@ -1,0 +1,6 @@
+do
+    do
+        val gone = "here"
+    end
+    print(gone) // expect error
+end

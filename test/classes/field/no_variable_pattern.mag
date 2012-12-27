@@ -1,0 +1,3 @@
+defclass Foo
+    var a blah // expect error
+end

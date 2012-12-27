@@ -1,11 +1,10 @@
-// skip
 defclass Foo
     var field is bar
 end
 
 do
     var foo = Foo new(field: 123)
-catch is NoMethodError then
+catch is UndefinedVarError then
     print("caught") // expect: caught
 end
 

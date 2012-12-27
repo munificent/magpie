@@ -1,12 +1,3 @@
-// Accessing an unknown name.
 do
     print(unknown) // expect error
-end
-
-// Accessing a name that has gone out of scope.
-do
-    do
-        val gone = "here"
-    end
-    print(gone) // expect error
 end

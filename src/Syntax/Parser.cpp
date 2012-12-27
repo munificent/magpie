@@ -331,9 +331,11 @@ namespace magpie
             gc<String> name = consume(TOKEN_NAME, "Expect field name.")->text();
             gc<Pattern> pattern;
             gc<Expr> initializer;
-            if (!lookAhead(TOKEN_LINE) && !lookAhead(TOKEN_EQ))
+
+            if (match(TOKEN_IS))
             {
-              pattern = primaryPattern(true);
+              gc<Expr> type = parseExpressionInPattern(true);
+              pattern = new TypePattern(type->pos(), type);
             }
             
             if (match(TOKEN_EQ))
@@ -1063,9 +1065,16 @@ namespace magpie
     if (expected == TOKEN_LINE) checkForMissingLine();
     reporter_.error(current()->pos(), errorMessage);
 
-    // Just so that we can keep going and try to find other errors, consume the
-    // failed token and proceed.
-    return consume();
+    // Try to consume tokens until we find what we're looking for (or we run
+    // out). This should reduce the number of cascaded errors caused after this
+    // one.
+    gc<Token> token = consume();
+    while (!match(expected) && !lookAhead(TOKEN_EOF))
+    {
+      token = consume();
+    }
+
+    return token;
   }
 
   void Parser::checkForMissingLine()
