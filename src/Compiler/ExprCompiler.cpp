@@ -322,9 +322,20 @@ namespace magpie
 
   void ExprCompiler::visit(DefClassExpr& expr, int dest)
   {
+    // Evaluate the superclasses.
+    int firstSuperclass = getNextTemp();
+    for (int i = 0; i < expr.superclasses().count(); i++)
+    {
+      int superclass = makeTemp();
+      compile(expr.superclasses()[i], superclass);
+    }
+
     // Create the class.
     symbolId name = compiler_.addSymbol(expr.name());
     write(expr, OP_CLASS, name, expr.fields().count(), dest);
+    write(expr, OP_MOVE, firstSuperclass, expr.superclasses().count());
+
+    releaseTemps(expr.superclasses().count());
 
     // Also store it in its named variable.
     compileAssignment(expr.pos(), expr.resolved(), dest, true);

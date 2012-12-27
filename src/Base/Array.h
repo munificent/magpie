@@ -278,6 +278,12 @@ namespace magpie
     {}
 
     // Gets the item at the given index.
+    inline const T& operator[] (int index) const
+    {
+      return array_[start_ + index];
+    }
+
+    // Gets the item at the given index.
     inline T& operator[] (int index)
     {
       return array_[start_ + index];

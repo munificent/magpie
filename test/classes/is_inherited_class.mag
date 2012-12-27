@@ -1,0 +1,18 @@
+defclass A
+end
+
+defclass B1 is A
+end
+
+defclass B2
+end
+
+defclass C is B1, B2
+end
+
+print(B1 new is B1) // expect: true
+print(B1 new is A) // expect: true
+print(B1 new is C) // expect: false
+print(C new is A) // expect: true
+print(C new is B1) // expect: true
+print(C new is B2) // expect: true

@@ -43,8 +43,6 @@ var a = 1 is Num, 1 is Bool
 print(a) // expect: (true, false)
 
 // TODO(bob):
-// - Subtyping
-// - User-defined classes
 // - Expressions for type
 // - Precedence related to == on left and right
 // - Precedence related to not on left and right

@@ -218,15 +218,13 @@ namespace magpie
   class ClassObject : public Object
   {
   public:
-    ClassObject(gc<String> name, int numFields)
-    : Object(),
-      name_(name),
-      numFields_(numFields)
-    {}
+    static gc<ClassObject> create(gc<String> name, int numFields,
+                                  int numSuperclasses,
+                                  const ArrayView<gc<Object> >& superclasses);
     
     gc<String> name() const { return name_; }
     int numFields() const { return numFields_; }
-    
+
     bool is(const ClassObject& other) const;
     
     virtual ObjectType type() const { return OBJECT_CLASS; }
@@ -240,8 +238,17 @@ namespace magpie
     virtual void reach();
     
   private:
-    gc<String> name_;
-    int numFields_;
+    ClassObject(gc<String> name, int numFields, int numSuperclasses)
+    : Object(),
+      name_(name),
+      numFields_(numFields),
+      numSuperclasses_(numSuperclasses)
+    {}
+
+    gc<String>      name_;
+    int             numFields_;
+    int             numSuperclasses_;
+    gc<ClassObject> superclasses_[FLEXIBLE_SIZE];
   };
   
   // A regular instance of some class.

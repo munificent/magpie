@@ -380,6 +380,12 @@ namespace magpie
     
     expr.setResolved(new ResolvedName(module, index));
 
+    // Resolve the superclasses.
+    for (int i = 0; i < expr.superclasses().count(); i++)
+    {
+      resolve(expr.superclasses()[i]);
+    }
+    
     // Resolve the synthesized stuff.
     for (int i = 0; i < expr.synthesizedMethods().count(); i++)
     {

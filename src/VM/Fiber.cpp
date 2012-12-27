@@ -124,8 +124,21 @@ namespace magpie
 
         case OP_CLASS:
         {
+          // A class definition is two instructions long.
+          instruction ins2 = chunk.code()[frame.ip++];
+          ASSERT(GET_OP(ins2) == OP_MOVE,
+                 "Expect pseudo-instruction after OP_CLASS.");
+          
           gc<String> name = vm_.getSymbol(GET_A(ins));
-          gc<ClassObject> classObj = new ClassObject(name, GET_B(ins));
+
+          int superclassSlot = GET_A(ins2);
+          int numSuperclasses = GET_B(ins2);
+
+          ArrayView<gc<Object> > superclasses(stack_,
+              frame.stackStart + superclassSlot);
+          gc<ClassObject> classObj = ClassObject::create(
+              name, GET_B(ins), numSuperclasses, superclasses);
+
           store(frame, GET_C(ins), classObj);
           break;
         }

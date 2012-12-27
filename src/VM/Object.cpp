@@ -1,5 +1,6 @@
 #include <sstream>
 
+#include "Array.h"
 #include "Object.h"
 #include "VM.h"
 
@@ -122,6 +123,26 @@ namespace magpie
     return String::format("%c", value_);
   }
 
+  gc<ClassObject> ClassObject::create(gc<String> name, int numFields,
+      int numSuperclasses, const ArrayView<gc<Object> >& superclasses)
+  {
+    // Allocate enough memory for the record and its fields.
+    void* mem = Memory::allocate(sizeof(ClassObject) +
+        sizeof(gc<ClassObject>) * (numSuperclasses - 1));
+
+    // Construct it by calling global placement new.
+    gc<ClassObject> classObj = ::new(mem) ClassObject(name, numFields,
+                                                      numSuperclasses);
+
+    // Initialize the superclasses.
+    for (int i = 0; i < numSuperclasses; i++)
+    {
+      classObj->superclasses_[i] = superclasses[i]->asClass();
+    }
+
+    return classObj;
+  }
+
   gc<ClassObject> ClassObject::getClass(VM& vm) const
   {
     return vm.classClass();
@@ -135,12 +156,26 @@ namespace magpie
   void ClassObject::reach()
   {
     name_.reach();
+
+    for (int i = 0; i < numSuperclasses_; i++)
+    {
+      superclasses_[i].reach();
+    }
   }
 
   bool ClassObject::is(const ClassObject& other) const
   {
-    // TODO(bob): Subtyping.
-    return this == &other;
+    if (this == &other) return true;
+
+    // Walk the class hierarchy.
+    // TODO(bob): Slow! Do something constant time here, like a binary matrix
+    // of superclasses.
+    for (int i = 0; i < numSuperclasses_; i++)
+    {
+      if (superclasses_[i]->is(other)) return true;
+    }
+    
+    return false;
   }
 
   gc<DynamicObject> DynamicObject::create(gc<ClassObject> classObj)
