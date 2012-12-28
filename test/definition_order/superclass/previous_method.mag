@@ -1,9 +1,0 @@
-defclass Foo
-end
-
-def foo() Foo
-
-defclass Bar is foo()
-end
-
-print(Bar new is Foo) // expect: true

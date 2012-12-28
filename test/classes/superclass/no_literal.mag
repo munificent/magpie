@@ -1,0 +1,5 @@
+// skip
+// TODO(bob): This error causes cascaded errors that test.py doesn't handle
+// well yet.
+defclass Foo is 123 // expect error
+end

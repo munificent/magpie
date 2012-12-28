@@ -306,7 +306,11 @@ namespace magpie
       {
         do
         {
-          superclasses.add(parsePrecedence(PRECEDENCE_CALL));
+          gc<Token> superclassName = consume(TOKEN_NAME,
+                                             "Expect superclass name.");
+          gc<Expr> superclass = new NameExpr(superclassName->pos(),
+                                             superclassName->text());
+          superclasses.add(superclass);
         }
         while (match(TOKEN_COMMA));
       }
