@@ -53,6 +53,15 @@ def (left is String) + (right)
     left + right toString
 end
 
+// TODO(bob): Int
+def (left is String) * (right is Num)
+    if right < 0 then throw ArgError new
+    // TODO(bob): Use some kind of string builder?
+    var result = ""
+    for _ in 1..right do result = result + left
+    result
+end
+
 def print(arg)
     print(arg toString)
     arg

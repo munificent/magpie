@@ -1,0 +1,7 @@
+print("(" + ("ab" * 0) + ")") // expect: ()
+print("ab" * 1) // expect: ab
+print("ab" * 4) // expect: abababab
+
+do
+    "a" * -2
+catch is ArgError then print("caught") // expect: caught
