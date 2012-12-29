@@ -183,6 +183,22 @@ def (is List) _subscript(first is Int, last is Int) native "listSubscriptRange"
 
 def (is List) insert(item, at: index is Int) native "listInsert"
 
+def (is List) clear native "listClear"
+
+def (list is List) remove(at: index is Int)
+    list _remove(at: _boundsCheck(list count, index))
+end
+
+def (is List) _remove(at: index is Int) native "listRemoveAt"
+
+def (list is List) first
+    list[0]
+end
+
+def (list is List) last
+    list[-1]
+end
+
 // Makes lists iterable.
 defclass ListIterator
     val list is List

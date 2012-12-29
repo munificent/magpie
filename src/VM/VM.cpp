@@ -93,11 +93,13 @@ namespace magpie
     DEF_NATIVE(fileRead);
     DEF_NATIVE(functionCall);
     DEF_NATIVE(listAdd);
+    DEF_NATIVE(listClear);
     DEF_NATIVE(listCount);
+    DEF_NATIVE(listInsert);
+    DEF_NATIVE(listRemoveAt);
     DEF_NATIVE(listSubscriptInt);
     DEF_NATIVE(listSubscriptRange);
     DEF_NATIVE(listSubscriptSetInt);
-    DEF_NATIVE(listInsert);
 
     true_ = new BoolObject(true);
     false_ = new BoolObject(false);

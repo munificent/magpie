@@ -1,0 +1,6 @@
+var a = [1, 2, 3]
+a clear
+print(a) // expect: []
+
+// Returns nothing.
+print([1, 2] clear) // expect: nothing

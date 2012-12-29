@@ -307,11 +307,32 @@ namespace magpie
     list->elements().add(args[1]);
     return args[1];
   }
+
+  NATIVE(listClear)
+  {
+    ListObject* list = args[0]->asList();
+    list->elements().clear();
+    return vm.nothing();
+  }
   
   NATIVE(listCount)
   {
     ListObject* list = args[0]->asList();
     return new IntObject(list->elements().count());
+  }
+
+  NATIVE(listInsert)
+  {
+    ListObject* list = args[0]->asList();
+    list->elements().insert(args[1], args[2]->asInt());
+    return args[1];
+  }
+
+  NATIVE(listRemoveAt)
+  {
+    // Note: bounds checking is handled by core before calling this.
+    ListObject* list = args[0]->asList();
+    return list->elements().removeAt(args[1]->asInt());
   }
   
   NATIVE(listSubscriptInt)
@@ -343,13 +364,6 @@ namespace magpie
     ListObject* list = args[0]->asList();
     list->elements()[args[1]->asInt()] = args[2];
     return args[2];
-  }
-
-  NATIVE(listInsert)
-  {
-    ListObject* list = args[0]->asList();
-    list->elements().insert(args[1], args[2]->asInt());
-    return args[1];
   }
 }
 

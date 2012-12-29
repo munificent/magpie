@@ -56,10 +56,12 @@ namespace magpie
   NATIVE(fileRead);
   NATIVE(functionCall);
   NATIVE(listAdd);
+  NATIVE(listClear);
   NATIVE(listCount);
+  NATIVE(listInsert);
+  NATIVE(listRemoveAt);
   NATIVE(listSubscriptInt);
   NATIVE(listSubscriptRange);
   NATIVE(listSubscriptSetInt);
-  NATIVE(listInsert);
 }
 

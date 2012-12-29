@@ -1,0 +1,6 @@
+print(["only"] last) // expect: only
+print([1, 2, 3] last) // expect: 3
+
+do
+    [] last
+catch is ArgError then print("caught") // expect: caught
