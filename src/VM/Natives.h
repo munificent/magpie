@@ -39,6 +39,8 @@ namespace magpie
   NATIVE(intCompareToFloat);
   NATIVE(floatCompareToInt);
   NATIVE(floatCompareToFloat);
+  NATIVE(intSgn);
+  NATIVE(floatSgn);
   NATIVE(stringCount);
   NATIVE(stringSubscriptInt);
   NATIVE(floatToString);

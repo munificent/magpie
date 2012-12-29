@@ -156,7 +156,17 @@ namespace magpie
     double difference = args[0]->asFloat() - args[1]->asFloat();
     return new IntObject(sgn(difference));
   }
-  
+
+  NATIVE(intSgn)
+  {
+    return new IntObject(sgn(args[0]->asInt()));
+  }
+
+  NATIVE(floatSgn)
+  {
+    return new IntObject(sgn(args[0]->asFloat()));
+  }
+
   NATIVE(stringCount)
   {
     return new IntObject(args[0]->asString()->length());

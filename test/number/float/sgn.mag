@@ -1,0 +1,8 @@
+print(0.0 sgn) // expect: 0
+print(0.01 sgn) // expect: 1
+print(1234.5 sgn) // expect: 1
+print(-0.2 sgn) // expect: -1
+print(-1234.5 sgn) // expect: -1
+
+// TODO(bob): Is this right?
+print(-0.0 sgn) // expect: 0

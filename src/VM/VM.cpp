@@ -76,6 +76,8 @@ namespace magpie
     DEF_NATIVE(intCompareToFloat);
     DEF_NATIVE(floatCompareToInt);
     DEF_NATIVE(floatCompareToFloat);
+    DEF_NATIVE(intSgn);
+    DEF_NATIVE(floatSgn);
     DEF_NATIVE(stringCount);
     DEF_NATIVE(stringSubscriptInt);
     DEF_NATIVE(floatToString);

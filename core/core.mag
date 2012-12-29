@@ -64,6 +64,9 @@ def (is Int) <=> (is Float) native "intCompareToFloat"
 def (is Float) <=> (is Int) native "floatCompareToInt"
 def (is Float) <=> (is Float) native "floatCompareToFloat"
 
+def (is Int) sgn native "intSgn"
+def (is Float) sgn native "floatSgn"
+
 def (a) < (b)
     a <=> b == -1
 end
