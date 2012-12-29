@@ -19,6 +19,7 @@ namespace magpie
   class File;
   class FloatObject;
   class FunctionObject;
+  class IntObject;
   class ListObject;
   class Memory;
   class Multimethod;
@@ -37,6 +38,7 @@ namespace magpie
     OBJECT_FILE,
     OBJECT_FLOAT,
     OBJECT_FUNCTION,
+    OBJECT_INT,
     OBJECT_LIST,
     OBJECT_NOTHING,
     OBJECT_RECORD,
@@ -103,6 +105,13 @@ namespace magpie
     {
       ASSERT(false, "Not a dynamic object.");
       return NULL;
+    }
+
+    // Returns the object as an int. Object *must* be a IntObject.
+    virtual int asInt() const
+    {
+      ASSERT(false, "Not an int.");
+      return 0;
     }
     
     // Returns the object as a list. Object *must* be a ListObject.
@@ -365,6 +374,28 @@ namespace magpie
 
     gc<Chunk> chunk_;
     gc<Upvar> upvars_[FLEXIBLE_SIZE];
+  };
+
+  class IntObject : public Object
+  {
+  public:
+    IntObject(int value)
+    : Object(),
+      value_(value)
+    {}
+
+    virtual ObjectType type() const { return OBJECT_INT; }
+
+    virtual gc<ClassObject> getClass(VM& vm) const;
+    virtual int asInt() const { return value_; }
+
+    // TODO(bob): Do we want to do this here, or rely on a "true?" method?
+    virtual bool toBool() const { return value_ != 0; }
+    virtual gc<String> toString() const;
+
+  private:
+    // TODO(bob): long?
+    int value_;
   };
   
   class ListObject : public Object

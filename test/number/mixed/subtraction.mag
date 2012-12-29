@@ -1,0 +1,6 @@
+print(2 - 1.2) // expect: 0.8
+print(3.2 - 1) // expect: 2.2
+
+// Floating point arguments taint.
+print(1 - 1.0 is Float) // expect: true
+print(1.0 - 1 is Float) // expect: true

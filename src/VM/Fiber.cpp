@@ -327,6 +327,10 @@ namespace magpie
                 equal = a->asFloat() == b->asFloat();
                 break;
 
+              case OBJECT_INT:
+                equal = a->asInt() == b->asInt();
+                break;
+                
               case OBJECT_LIST:
                 ASSERT(false, "Equality on lists not implemented.");
                 break;

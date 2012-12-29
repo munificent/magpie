@@ -1,0 +1,5 @@
+// TODO(bob): More edge case values.
+
+print(1.2 + 3.4) // expect: 4.6
+print(12.34 + 76.54) // expect: 88.88
+print(3.0 + 4.0) // expect: 7.0

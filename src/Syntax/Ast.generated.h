@@ -19,6 +19,7 @@ class ForExpr;
 class GetFieldExpr;
 class IfExpr;
 class ImportExpr;
+class IntExpr;
 class IsExpr;
 class ListExpr;
 class MatchExpr;
@@ -68,6 +69,7 @@ public:
   virtual void visit(GetFieldExpr& node, int arg) = 0;
   virtual void visit(IfExpr& node, int arg) = 0;
   virtual void visit(ImportExpr& node, int arg) = 0;
+  virtual void visit(IntExpr& node, int arg) = 0;
   virtual void visit(IsExpr& node, int arg) = 0;
   virtual void visit(ListExpr& node, int arg) = 0;
   virtual void visit(MatchExpr& node, int arg) = 0;
@@ -123,6 +125,7 @@ public:
   virtual GetFieldExpr* asGetFieldExpr() { return NULL; }
   virtual IfExpr* asIfExpr() { return NULL; }
   virtual ImportExpr* asImportExpr() { return NULL; }
+  virtual IntExpr* asIntExpr() { return NULL; }
   virtual IsExpr* asIsExpr() { return NULL; }
   virtual ListExpr* asListExpr() { return NULL; }
   virtual MatchExpr* asMatchExpr() { return NULL; }
@@ -734,6 +737,30 @@ public:
 private:
   gc<String> name_;
   NO_COPY(ImportExpr);
+};
+
+class IntExpr : public Expr
+{
+public:
+  IntExpr(gc<SourcePos> pos, int value)
+  : Expr(pos),
+    value_(value)
+  {}
+
+  virtual void accept(ExprVisitor& visitor, int arg)
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual IntExpr* asIntExpr() { return this; }
+
+  int value() const { return value_; }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  int value_;
+  NO_COPY(IntExpr);
 };
 
 class IsExpr : public Expr

@@ -1,2 +1,0 @@
-print(123 is Num) // expect: true
-print(123 class == Num) // expect: true

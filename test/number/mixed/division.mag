@@ -1,0 +1,5 @@
+// TODO(bob): Test mixed division.
+
+// Floating point arguments taint.
+print(1 / 1.0 is Float) // expect: true
+print(1.0 / 1 is Float) // expect: true

@@ -165,6 +165,11 @@ namespace magpie
   {
     out << "(import " << name_ << ")";
   }
+
+  void IntExpr::trace(std::ostream& out) const
+  {
+    out << value_;
+  }
   
   void IsExpr::trace(std::ostream& out) const
   {

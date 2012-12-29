@@ -128,6 +128,7 @@ namespace magpie
       case TOKEN_NAME:          return "name";
       case TOKEN_CHARACTER:     return "character";
       case TOKEN_FLOAT:         return "float";
+      case TOKEN_INT:           return "int";
       case TOKEN_STRING:        return "string";
 
       case TOKEN_LINE:          return "line";
@@ -150,6 +151,7 @@ namespace magpie
       case TOKEN_NAME:
       case TOKEN_CHARACTER:
       case TOKEN_FLOAT:
+      case TOKEN_INT:
       case TOKEN_STRING:
       case TOKEN_ERROR:
         // Show the text.

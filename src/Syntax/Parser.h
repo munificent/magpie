@@ -61,6 +61,7 @@ namespace magpie
     gc<Expr> float_(gc<Token> token);
     gc<Expr> function(gc<Token> token);
     gc<Expr> group(gc<Token> token);
+    gc<Expr> int_(gc<Token> token);
     gc<Expr> list(gc<Token> token);
     gc<Expr> name(gc<Token> token);
     gc<Expr> not_(gc<Token> token);

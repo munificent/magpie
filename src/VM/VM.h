@@ -61,6 +61,7 @@ namespace magpie
     inline gc<ClassObject> fileClass() const { return fileClass_; }
     inline gc<ClassObject> floatClass() const { return floatClass_; }
     inline gc<ClassObject> functionClass() const { return functionClass_; }
+    inline gc<ClassObject> intClass() const { return intClass_; }
     inline gc<ClassObject> listClass() const { return listClass_; }
     inline gc<ClassObject> nothingClass() const { return nothingClass_; }
     inline gc<ClassObject> recordClass() const { return recordClass_; }
@@ -137,6 +138,7 @@ namespace magpie
     gc<ClassObject> fileClass_;
     gc<ClassObject> floatClass_;
     gc<ClassObject> functionClass_;
+    gc<ClassObject> intClass_;
     gc<ClassObject> listClass_;
     gc<ClassObject> nothingClass_;
     gc<ClassObject> recordClass_;

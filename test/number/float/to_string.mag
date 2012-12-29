@@ -1,0 +1,6 @@
+// TODO(bob): More examples.
+
+print(1.0 toString == "1.0") // expect: true
+print(0.1 toString == "0.1") // expect: true
+print(123.456 toString == "123.456") // expect: true
+print(-123.456 toString == "-123.456") // expect: true

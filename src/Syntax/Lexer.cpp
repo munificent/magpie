@@ -345,13 +345,15 @@ namespace magpie
     }
     
     // Read the fractional part, if any.
+    TokenType type = TOKEN_INT;
     if ((peek() == '.') && (isDigit(peek(1))))
     {
+      type = TOKEN_FLOAT;
       advance();
       while (isDigit(peek())) advance();
     }
 
-    return makeToken(TOKEN_FLOAT);
+    return makeToken(type);
   }
   
   gc<Token> Lexer::readOperator()

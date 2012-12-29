@@ -6,6 +6,8 @@ defclass Function native
 defclass List native
 defclass Nothing native
 defclass Num native
+defclass Float is Num native
+defclass Int is Num native
 defclass Record native
 defclass String native
 
@@ -34,16 +36,49 @@ def (is Done) toString
     "done"
 end
 
-def (is Num) + (is Num) native "numPlusNum"
-def (is Num) - (is Num) native "numMinusNum"
-def (is Num) * (is Num) native "numTimesNum"
-def (is Num) / (is Num) native "numDivNum"
-def (is Num) % (is Num) native "numModNum"
+def (is Int) + (is Int) native "intPlusInt"
+def (is Int) + (is Float) native "intPlusFloat"
+def (is Float) + (is Int) native "floatPlusInt"
+def (is Float) + (is Float) native "floatPlusFloat"
 
-def (is Num) < (is Num) native "numLessThanNum"
-def (is Num) <= (is Num) native "numLessThanEqualToNum"
-def (is Num) > (is Num) native "numGreaterThanNum"
-def (is Num) >= (is Num) native "numGreaterThanEqualToNum"
+def (is Int) - (is Int) native "intMinusInt"
+def (is Int) - (is Float) native "intMinusFloat"
+def (is Float) - (is Int) native "floatMinusInt"
+def (is Float) - (is Float) native "floatMinusFloat"
+
+def (is Int) * (is Int) native "intTimesInt"
+def (is Int) * (is Float) native "intTimesFloat"
+def (is Float) * (is Int) native "floatTimesInt"
+def (is Float) * (is Float) native "floatTimesFloat"
+
+def (is Int) / (is Int) native "intDivInt"
+def (is Int) / (is Float) native "intDivFloat"
+def (is Float) / (is Int) native "floatDivInt"
+def (is Float) / (is Float) native "floatDivFloat"
+
+// TODO(bob): What about floating point modulo?
+def (is Int) % (is Int) native "intModInt"
+
+def (is Int) <=> (is Int) native "intCompareToInt"
+def (is Int) <=> (is Float) native "intCompareToFloat"
+def (is Float) <=> (is Int) native "floatCompareToInt"
+def (is Float) <=> (is Float) native "floatCompareToFloat"
+
+def (a) < (b)
+    a <=> b == -1
+end
+
+def (a) <= (b)
+    a <=> b != 1
+end
+
+def (a) > (b)
+    a <=> b == 1
+end
+
+def (a) >= (b)
+    a <=> b != -1
+end
 
 def (is String) + (is String) native "stringPlusString"
 def (left) + (right is String)
@@ -53,8 +88,7 @@ def (left is String) + (right)
     left + right toString
 end
 
-// TODO(bob): Int
-def (left is String) * (right is Num)
+def (left is String) * (right is Int)
     if right < 0 then throw ArgError new
     // TODO(bob): Use some kind of string builder?
     var result = ""
@@ -73,18 +107,19 @@ def (_) class native "objectClass"
 
 def (is String) count native "stringCount"
 
-def (string is String)[index is Num]
+def (string is String)[index is Int]
     string _subscript(_boundsCheck(string count, index))
 end
 
-def (is String) _subscript(is Num) native "stringSubscriptNum"
+def (is String) _subscript(is Int) native "stringSubscriptInt"
 
 def (_) toString native "objectToString"
 
 def (true) toString "true"
 def (false) toString "false"
 
-def (is Num) toString native "numToString"
+def (is Int) toString native "intToString"
+def (is Float) toString native "floatToString"
 def (s is String) toString s
 
 def (is Channel) close native "channelClose"
@@ -108,7 +143,7 @@ def (is Function) call native "functionCall"
 def (is List) add(item) native "listAdd"
 def (is List) count native "listCount"
 
-def _boundsCheck(count is Num, index is Num)
+def _boundsCheck(count is Int, index is Int)
     // Negative indices index backwards from the end.
     if index < 0 then index = count + index
 
@@ -119,17 +154,17 @@ def _boundsCheck(count is Num, index is Num)
     index
 end
 
-def (list is List)[index is Num]
+def (list is List)[index is Int]
     list _subscript(_boundsCheck(list count, index))
 end
 
-def (is List) _subscript(is Num) native "listSubscriptNum"
+def (is List) _subscript(is Int) native "listSubscriptInt"
 
-def (list is List)[index is Num]=(value)
+def (list is List)[index is Int]=(value)
     list _subscriptSet(_boundsCheck(list count, index), value)
 end
 
-def (is List) _subscriptSet(index is Num, value) native "listSubscriptSetNum"
+def (is List) _subscriptSet(index is Int, value) native "listSubscriptSetInt"
 
 def (list is List)[range is Range]
     val first = range first
@@ -141,14 +176,14 @@ def (list is List)[range is Range]
     list _subscript(first, last)
 end
 
-def (is List) _subscript(first is Num, last is Num) native "listSubscriptRange"
+def (is List) _subscript(first is Int, last is Int) native "listSubscriptRange"
 
-def (is List) insert(item, at: index is Num) native "listInsert"
+def (is List) insert(item, at: index is Int) native "listInsert"
 
 // Makes lists iterable.
 defclass ListIterator
     val list is List
-    var index
+    var index is Int
 end
 
 def (list is List) iterate
@@ -164,21 +199,22 @@ def (iterator is ListIterator) advance
     end
 end
 
+// TODO(bob): What about floating point ranges?
 defclass Range
-    val first is Num
-    val last is Num
+    val first is Int
+    val last is Int
     val inclusive is Bool
 end
 
-def (== Range) new(first: first is Num, last: last is Num)
+def (== Range) new(first: first is Int, last: last is Int)
     Range new(first: first, last: last, inclusive: true)
 end
 
-def (first is Num) .. (last is Num)
+def (first is Int) .. (last is Int)
     Range new(first: first, last: last)
 end
 
-def (first is Num) ... (last is Num)
+def (first is Int) ... (last is Int)
     Range new(first: first, last: last, inclusive: false)
 end
 
@@ -189,8 +225,8 @@ def (range is Range) iterate
 end
 
 defclass RangeIterator
-    var current is Num
-    val last is Num
+    var current is Int
+    val last is Int
 end
 
 def (iterator is RangeIterator) advance

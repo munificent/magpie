@@ -3,11 +3,11 @@ import magpie.token
 defclass Lexer
     // TODO(bob): Support an iterable stream of characters.
     val _text is String
-    var _pos is Num
-    var _line is Num
-    var _col  is Num
-    var _startLine is Num
-    var _startCol is Num
+    var _pos is Int
+    var _line is Int
+    var _col  is Int
+    var _startLine is Int
+    var _startCol is Int
     var _read is String
 end
 

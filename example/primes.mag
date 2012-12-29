@@ -12,7 +12,7 @@ end
 
 // Copy the values from channel 'in' to channel 'out',
 // removing those divisible by 'prime'.
-def filter(input is Channel, output is Channel, prime is Num) async
+def filter(input is Channel, output is Channel, prime is Int) async
     while true do
         var i = input receive // Receive value from 'in'.
         if i % prime != 0 then

@@ -1,0 +1,49 @@
+// Floats and ints are never equal to each other.
+print(1.0 == 1) // expect: false
+print(1 == 1.0) // expect: false
+
+print(1.0 != 1) // expect: true
+print(1 != 1.0) // expect: true
+
+// Main comparison operators.
+print(1.0 <=> 2) // expect: -1
+print(1.0 <=> 1) // expect: 0
+print(2.0 <=> 1) // expect: 1
+
+print(1 <=> 2.0) // expect: -1
+print(1 <=> 1.0) // expect: 0
+print(2 <=> 1.0) // expect: 1
+
+// Comparison with float on the left.
+print(1.0 < 2) // expect: true
+print(1.0 < 1) // expect: false
+print(2.0 < 1) // expect: false
+
+print(1.0 > 2) // expect: false
+print(1.0 > 1) // expect: false
+print(2.0 > 1) // expect: true
+
+print(1.0 <= 2) // expect: true
+print(1.0 <= 1) // expect: true
+print(2.0 <= 1) // expect: false
+
+print(1.0 >= 2) // expect: false
+print(1.0 >= 1) // expect: true
+print(2.0 >= 1) // expect: true
+
+// Comparison with float on the right.
+print(1 < 2.0) // expect: true
+print(1 < 1.0) // expect: false
+print(2 < 1.0) // expect: false
+
+print(1 > 2.0) // expect: false
+print(1 > 1.0) // expect: false
+print(2 > 1.0) // expect: true
+
+print(1 <= 2.0) // expect: true
+print(1 <= 1.0) // expect: true
+print(2 <= 1.0) // expect: false
+
+print(1 >= 2.0) // expect: false
+print(1 >= 1.0) // expect: true
+print(2 >= 1.0) // expect: true

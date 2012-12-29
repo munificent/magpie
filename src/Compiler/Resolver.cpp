@@ -462,7 +462,12 @@ namespace magpie
 
   void Resolver::visit(ImportExpr& expr, int dummy)
   {
-    // Nothing to do.
+    // Do nothing.
+  }
+
+  void Resolver::visit(IntExpr& expr, int dummy)
+  {
+    // Do nothing.
   }
   
   void Resolver::visit(IsExpr& expr, int dummy)

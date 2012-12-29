@@ -461,6 +461,12 @@ namespace magpie
     // the actual import expression has been "executed". Should we allow that?
   }
 
+  void ExprCompiler::visit(IntExpr& expr, int dest)
+  {
+    int index = compileConstant(expr);
+    write(expr, OP_CONSTANT, index, dest);
+  }
+  
   void ExprCompiler::visit(IsExpr& expr, int dest)
   {
     compile(expr.value(), dest);
@@ -730,11 +736,24 @@ namespace magpie
 
   int ExprCompiler::compileExpressionOrConstant(gc<Expr> expr)
   {
+    const CharacterExpr* character = expr->asCharacterExpr();
+    if (character != NULL)
+    {
+      return MAKE_CONSTANT(compileConstant(*character));
+    }
+
     const FloatExpr* float_ = expr->asFloatExpr();
     if (float_ != NULL)
     {
       return MAKE_CONSTANT(compileConstant(*float_));
     }
+
+    const IntExpr* int_ = expr->asIntExpr();
+    if (int_ != NULL)
+    {
+      return MAKE_CONSTANT(compileConstant(*int_));
+    }
+
 
     const StringExpr* string = expr->asStringExpr();
     if (string != NULL)
@@ -761,6 +780,11 @@ namespace magpie
     return chunk_->addConstant(new FloatObject(expr.value()));
   }
 
+  int ExprCompiler::compileConstant(const IntExpr& expr)
+  {
+    return chunk_->addConstant(new IntObject(expr.value()));
+  }
+  
   int ExprCompiler::compileConstant(const StringExpr& expr)
   {
     return chunk_->addConstant(new StringObject(expr.value()));

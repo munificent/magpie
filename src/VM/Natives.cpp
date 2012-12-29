@@ -42,87 +42,166 @@ namespace magpie
     return args[0];
   }
 
-  NATIVE(numPlusNum)
-  {
-    double c = args[0]->asFloat() + args[1]->asFloat();
-    return new FloatObject(c);
-  }
-  
   NATIVE(stringPlusString)
   {
-    return new StringObject(
-        String::concat(args[0]->asString(), args[1]->asString()));
-  }
-  
-  NATIVE(numMinusNum)
-  {
-    double c = args[0]->asFloat() - args[1]->asFloat();
-    return new FloatObject(c);
-  }
-  
-  NATIVE(numTimesNum)
-  {
-    double c = args[0]->asFloat() * args[1]->asFloat();
-    return new FloatObject(c);
-  }
-  
-  NATIVE(numDivNum)
-  {
-    double c = args[0]->asFloat() / args[1]->asFloat();
-    return new FloatObject(c);
+    return new StringObject(String::concat(args[0]->asString(),
+                                           args[1]->asString()));
   }
 
-  NATIVE(numModNum)
+  NATIVE(intPlusInt)
   {
-    // TODO(bob): Handle floats!
-    int a = static_cast<int>(args[0]->asFloat());
-    int b = static_cast<int>(args[1]->asFloat());
-    return new FloatObject(a % b);
+    return new IntObject(args[0]->asInt() + args[1]->asInt());
+  }
+
+  NATIVE(intPlusFloat)
+  {
+    return new FloatObject(args[0]->asInt() + args[1]->asFloat());
+  }
+
+  NATIVE(floatPlusInt)
+  {
+    return new FloatObject(args[0]->asFloat() + args[1]->asInt());
+  }
+
+  NATIVE(floatPlusFloat)
+  {
+    return new FloatObject(args[0]->asFloat() + args[1]->asFloat());
+  }
+    
+  NATIVE(intMinusInt)
+  {
+    return new IntObject(args[0]->asInt() - args[1]->asInt());
+  }
+
+  NATIVE(intMinusFloat)
+  {
+    return new FloatObject(args[0]->asInt() - args[1]->asFloat());
+  }
+
+  NATIVE(floatMinusInt)
+  {
+    return new FloatObject(args[0]->asFloat() - args[1]->asInt());
+  }
+
+  NATIVE(floatMinusFloat)
+  {
+    return new FloatObject(args[0]->asFloat() - args[1]->asFloat());
+  }
+
+  NATIVE(intTimesInt)
+  {
+    return new IntObject(args[0]->asInt() * args[1]->asInt());
+  }
+
+  NATIVE(intTimesFloat)
+  {
+    return new FloatObject(args[0]->asInt() * args[1]->asFloat());
+  }
+
+  NATIVE(floatTimesInt)
+  {
+    return new FloatObject(args[0]->asFloat() * args[1]->asInt());
+  }
+
+  NATIVE(floatTimesFloat)
+  {
+    return new FloatObject(args[0]->asFloat() * args[1]->asFloat());
+  }
+
+  NATIVE(intDivInt)
+  {
+    return new IntObject(args[0]->asInt() / args[1]->asInt());
+  }
+
+  NATIVE(intDivFloat)
+  {
+    return new FloatObject(args[0]->asInt() / args[1]->asFloat());
+  }
+
+  NATIVE(floatDivInt)
+  {
+    return new FloatObject(args[0]->asFloat() / args[1]->asInt());
+  }
+
+  NATIVE(floatDivFloat)
+  {
+    return new FloatObject(args[0]->asFloat() / args[1]->asFloat());
   }
   
-  NATIVE(numLessThanNum)
+  NATIVE(intModInt)
   {
-    return vm.getBool(args[0]->asFloat() < args[1]->asFloat());
+    return new IntObject(args[0]->asInt() % args[1]->asInt());
   }
   
-  NATIVE(numLessThanEqualToNum)
+  NATIVE(intCompareToInt)
   {
-    return vm.getBool(args[0]->asFloat() <= args[1]->asFloat());
+    int difference = args[0]->asInt() - args[1]->asInt();
+    return new IntObject(sgn(difference));
   }
   
-  NATIVE(numGreaterThanNum)
+  NATIVE(intCompareToFloat)
   {
-    return vm.getBool(args[0]->asFloat() > args[1]->asFloat());
+    double difference = args[0]->asInt() - args[1]->asFloat();
+    return new IntObject(sgn(difference));
   }
   
-  NATIVE(numGreaterThanEqualToNum)
+  NATIVE(floatCompareToInt)
   {
-    return vm.getBool(args[0]->asFloat() >= args[1]->asFloat());
+    double difference = args[0]->asFloat() - args[1]->asInt();
+    return new IntObject(sgn(difference));
+  }
+  
+  NATIVE(floatCompareToFloat)
+  {
+    double difference = args[0]->asFloat() - args[1]->asFloat();
+    return new IntObject(sgn(difference));
   }
   
   NATIVE(stringCount)
   {
-    double c = args[0]->asString()->length();
-    // TODO(bob): IntObject.
-    return new FloatObject(c);
+    return new IntObject(args[0]->asString()->length());
   }
 
-  NATIVE(stringSubscriptNum)
+  NATIVE(stringSubscriptInt)
   {
     // Note: bounds checking is handled by core before calling this.
     gc<String> string = args[0]->asString();
 
     // TODO(bob): Handle non-ASCII.
-    // TODO(bob): What if the index isn't an int?
-    char c = (*string)[args[1]->asFloat()];
+    char c = (*string)[args[1]->asInt()];
 
     return new CharacterObject(c);
   }
 
-  NATIVE(numToString)
+  NATIVE(floatToString)
   {
-    double n = args[0]->asFloat();
-    return new StringObject(String::format("%g", n));
+    // TODO(bob): Hackish. "%g" gives nice short results without trailing
+    // zeroes, but it also drops the "." completely if not needed. We want to
+    // show that (i.e. "1.0") so that floats can be distinguished from numbers.
+    // So just look for a "." in the result string and add ".0" if not found.
+    // Do our own float->string conversion?
+    gc<String> string = String::format("%g", args[0]->asFloat());
+    bool hasDecimal = false;
+    for (int i = 0; i < string->length(); i++)
+    {
+      if ((*string)[i] == '.')
+      {
+        hasDecimal = true;
+        break;
+      }
+    }
+
+    if (!hasDecimal)
+    {
+      string = String::format("%s.0", string->cString());
+    }
+    
+    return new StringObject(string);
+  }
+
+  NATIVE(intToString)
+  {
+    return new StringObject(String::format("%d", args[0]->asInt()));
   }
 
   NATIVE(channelClose)
@@ -222,25 +301,22 @@ namespace magpie
   NATIVE(listCount)
   {
     ListObject* list = args[0]->asList();
-    // TODO(bob): IntObject.
-    return new FloatObject(list->elements().count());
+    return new IntObject(list->elements().count());
   }
   
-  NATIVE(listSubscriptNum)
+  NATIVE(listSubscriptInt)
   {
     // Note: bounds checking is handled by core before calling this.
     ListObject* list = args[0]->asList();
-    // TODO(bob): What if the index isn't an int?
-    return list->elements()[static_cast<int>(args[1]->asFloat())];
+    return list->elements()[args[1]->asInt()];
   }
 
   NATIVE(listSubscriptRange)
   {
     // Note: bounds checking is handled by core before calling this.
     ListObject* source = args[0]->asList();
-    // TODO(bob): What if first or last isn't an int?
-    int first = static_cast<int>(args[1]->asFloat());
-    int last = static_cast<int>(args[2]->asFloat());
+    int first = args[1]->asInt();
+    int last = args[2]->asInt();
 
     int size = last - first;
     gc<ListObject> list = new ListObject(size);
@@ -252,21 +328,17 @@ namespace magpie
     return list;
   }
   
-  NATIVE(listSubscriptSetNum)
+  NATIVE(listSubscriptSetInt)
   {
     ListObject* list = args[0]->asList();
-    // TODO(bob): What if the index isn't an int?
-    list->elements()[static_cast<int>(args[1]->asFloat())] = args[2];
+    list->elements()[args[1]->asInt()] = args[2];
     return args[2];
   }
 
   NATIVE(listInsert)
   {
     ListObject* list = args[0]->asList();
-    gc<Object> value = args[1];
-    // TODO(bob): How do we want to handle non-integer indices?
-    int index = static_cast<int>(args[2]->asFloat());
-    list->elements().insert(value, index);
+    list->elements().insert(args[1], args[2]->asInt());
     return args[1];
   }
 }

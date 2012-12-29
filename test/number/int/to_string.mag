@@ -1,4 +1,5 @@
 print(0 toString == "0") // expect: true
+print(-0 toString == "0") // expect: true
 print(123456 toString == "123456") // expect: true
 print(-123456 toString == "-123456") // expect: true
 

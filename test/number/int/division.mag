@@ -1,4 +1,4 @@
 print(10 / 2) // expect: 5
 print(1234 / 1) // expect: 1234
 
-// TODO(bob): Division by zero, floating point.
+// TODO(bob): Division by zero.

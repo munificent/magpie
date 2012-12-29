@@ -312,6 +312,16 @@ namespace magpie
     }
   }
 
+  gc<ClassObject> IntObject::getClass(VM& vm) const
+  {
+    return vm.intClass();
+  }
+
+  gc<String> IntObject::toString() const
+  {
+    return String::format("%d", value_);
+  }
+  
   gc<ClassObject> ListObject::getClass(VM& vm) const
   {
     return vm.listClass();

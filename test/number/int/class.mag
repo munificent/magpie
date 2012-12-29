@@ -1,0 +1,3 @@
+print(123 is Num) // expect: true
+print(123 is Int) // expect: true
+print(123 class == Int) // expect: true

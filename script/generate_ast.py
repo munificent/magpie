@@ -70,6 +70,8 @@ exprs = sorted({
         ('elseArm',     'gc<Expr>')],
     'Import': [
         ('name',        'gc<String>')],
+    'Int': [
+        ('value',       'int')],
     'Is': [
         ('value',       'gc<Expr>'),
         ('type',        'gc<Expr>')],

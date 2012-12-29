@@ -75,6 +75,7 @@ namespace magpie
     { &Parser::name,    &Parser::call, PRECEDENCE_CALL },              // TOKEN_NAME
     { &Parser::character, NULL, -1 },                                  // TOKEN_CHARACTER
     { &Parser::float_,  NULL, -1 },                                    // TOKEN_FLOAT
+    { &Parser::int_,    NULL, -1 },                                    // TOKEN_INT
     { &Parser::string,  NULL, -1 },                                    // TOKEN_STRING
 
     { NULL,             NULL, -1 },                                    // TOKEN_LINE
@@ -605,6 +606,12 @@ namespace magpie
     consume(TOKEN_RIGHT_PAREN, "Expect ')'.");
     return expr;
   }
+
+  gc<Expr> Parser::int_(gc<Token> token)
+  {
+    int value = atoi(token->text()->cString());
+    return new IntExpr(token->pos(), value);
+  }
   
   gc<Expr> Parser::list(gc<Token> token)
   {
@@ -933,9 +940,21 @@ namespace magpie
       return new ValuePattern(spanFrom(start), value);
     }
 
+    if (match(TOKEN_CHARACTER))
+    {
+      gc<Expr> value = character(last());
+      return new ValuePattern(spanFrom(start), value);
+    }
+
     if (match(TOKEN_FLOAT))
     {
       gc<Expr> value = float_(last());
+      return new ValuePattern(spanFrom(start), value);
+    }
+
+    if (match(TOKEN_INT))
+    {
+      gc<Expr> value = int_(last());
       return new ValuePattern(spanFrom(start), value);
     }
 
