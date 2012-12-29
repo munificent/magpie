@@ -99,9 +99,10 @@ namespace magpie
     registerClass(core, characterClass_, "Char");
     registerClass(core, classClass_, "Class");
     registerClass(core, functionClass_, "Function");
+    // TODO(bob): Rename to "Float"
+    registerClass(core, floatClass_, "Num");
     registerClass(core, listClass_, "List");
     registerClass(core, nothingClass_, "Nothing");
-    registerClass(core, numberClass_, "Num");
     registerClass(core, recordClass_, "Record");
     registerClass(core, stringClass_, "String");
     registerClass(core, noMatchErrorClass_, "NoMatchError");

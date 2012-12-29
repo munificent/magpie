@@ -60,6 +60,7 @@ namespace magpie
     virtual void visit(DefExpr& expr, int dest);
     virtual void visit(DefClassExpr& expr, int dest);
     virtual void visit(DoExpr& expr, int dest);
+    virtual void visit(FloatExpr& expr, int dest);
     virtual void visit(FnExpr& expr, int dest);
     virtual void visit(ForExpr& expr, int dest);
     virtual void visit(GetFieldExpr& expr, int dest);
@@ -72,7 +73,6 @@ namespace magpie
     virtual void visit(NativeExpr& expr, int dest);
     virtual void visit(NotExpr& expr, int dest);
     virtual void visit(NothingExpr& expr, int dest);
-    virtual void visit(NumberExpr& expr, int dest);
     virtual void visit(OrExpr& expr, int dest);
     virtual void visit(RecordExpr& expr, int dest);
     virtual void visit(ReturnExpr& expr, int dest);
@@ -101,7 +101,7 @@ namespace magpie
     int compileExpressionOrConstant(gc<Expr> expr);
 
     int compileConstant(const CharacterExpr& expr);
-    int compileConstant(const NumberExpr& expr);
+    int compileConstant(const FloatExpr& expr);
     int compileConstant(const StringExpr& expr);
 
     // Compiles a method call. If `valueSlot` is -1, then it's a regular call.

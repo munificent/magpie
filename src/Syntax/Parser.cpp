@@ -73,8 +73,8 @@ namespace magpie
 
     { &Parser::record,  NULL, -1 },                                    // TOKEN_FIELD
     { &Parser::name,    &Parser::call, PRECEDENCE_CALL },              // TOKEN_NAME
-    { &Parser::number,  NULL, -1 },                                    // TOKEN_NUMBER
-    { &Parser::character, NULL, -1 },                                    // TOKEN_CHARACTER
+    { &Parser::character, NULL, -1 },                                  // TOKEN_CHARACTER
+    { &Parser::float_,  NULL, -1 },                                    // TOKEN_FLOAT
     { &Parser::string,  NULL, -1 },                                    // TOKEN_STRING
 
     { NULL,             NULL, -1 },                                    // TOKEN_LINE
@@ -575,6 +575,12 @@ namespace magpie
     return new CharacterExpr(token->pos(), (*token->text())[0]);
   }
 
+  gc<Expr> Parser::float_(gc<Token> token)
+  {
+    double value = atof(token->text()->cString());
+    return new FloatExpr(token->pos(), value);
+  }
+  
   gc<Expr> Parser::function(gc<Token> token)
   {
     consume(TOKEN_LEFT_PAREN, "Expect '(' after 'fn'.");
@@ -633,12 +639,6 @@ namespace magpie
   gc<Expr> Parser::nothing(gc<Token> token)
   {
     return new NothingExpr(token->pos());
-  }
-
-  gc<Expr> Parser::number(gc<Token> token)
-  {
-    double number = atof(token->text()->cString());
-    return new NumberExpr(token->pos(), number);
   }
 
   gc<Expr> Parser::record(gc<Token> token)
@@ -933,9 +933,9 @@ namespace magpie
       return new ValuePattern(spanFrom(start), value);
     }
 
-    if (match(TOKEN_NUMBER))
+    if (match(TOKEN_FLOAT))
     {
-      gc<Expr> value = number(last());
+      gc<Expr> value = float_(last());
       return new ValuePattern(spanFrom(start), value);
     }
 

@@ -322,17 +322,17 @@ namespace magpie
               case OBJECT_DYNAMIC:
                 ASSERT(false, "Equality on arbitrary objects not implemented.");
                 break;
-                
+
+              case OBJECT_FLOAT:
+                equal = a->asFloat() == b->asFloat();
+                break;
+
               case OBJECT_LIST:
                 ASSERT(false, "Equality on lists not implemented.");
                 break;
                 
               case OBJECT_NOTHING:
                 ASSERT(false, "Should only be one instance of nothing.");
-                break;
-                
-              case OBJECT_NUMBER:
-                equal = a->asNumber() == b->asNumber();
                 break;
                 
               case OBJECT_RECORD:

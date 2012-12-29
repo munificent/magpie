@@ -85,6 +85,7 @@ namespace magpie
     virtual void visit(DefExpr& expr, int dummy);
     virtual void visit(DefClassExpr& expr, int dummy);
     virtual void visit(DoExpr& expr, int dummy);
+    virtual void visit(FloatExpr& expr, int dummy);
     virtual void visit(FnExpr& expr, int dummy);
     virtual void visit(ForExpr& expr, int dummy);
     virtual void visit(GetFieldExpr& expr, int dummy);
@@ -97,7 +98,6 @@ namespace magpie
     virtual void visit(NativeExpr& expr, int dest);
     virtual void visit(NotExpr& expr, int dummy);
     virtual void visit(NothingExpr& expr, int dummy);
-    virtual void visit(NumberExpr& expr, int dummy);
     virtual void visit(OrExpr& expr, int dummy);
     virtual void visit(RecordExpr& expr, int dummy);
     virtual void visit(ReturnExpr& expr, int dummy);

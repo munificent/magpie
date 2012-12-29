@@ -351,7 +351,7 @@ namespace magpie
       while (isDigit(peek())) advance();
     }
 
-    return makeToken(TOKEN_NUMBER);
+    return makeToken(TOKEN_FLOAT);
   }
   
   gc<Token> Lexer::readOperator()

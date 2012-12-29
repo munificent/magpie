@@ -259,6 +259,16 @@ namespace magpie
     // TODO(bob): How should we handle file_ here?
   }
 
+  gc<ClassObject> FloatObject::getClass(VM& vm) const
+  {
+    return vm.floatClass();
+  }
+
+  gc<String> FloatObject::toString() const
+  {
+    return String::format("%g", value_);
+  }
+
   gc<FunctionObject> FunctionObject::create(gc<Chunk> chunk)
   {
     // Allocate enough memory for the object and its upvars.
@@ -338,16 +348,6 @@ namespace magpie
     return String::create("nothing");
   }
   
-  gc<ClassObject> NumberObject::getClass(VM& vm) const
-  {
-    return vm.numberClass();
-  }
-
-  gc<String> NumberObject::toString() const
-  {
-    return String::format("%g", value_);
-  }
-
   gc<RecordType> RecordType::create(const Array<int>& fields)
   {
     // Allocate enough memory for the record and its fields.

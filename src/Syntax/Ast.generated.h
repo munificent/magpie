@@ -13,6 +13,7 @@ class CharacterExpr;
 class DefExpr;
 class DefClassExpr;
 class DoExpr;
+class FloatExpr;
 class FnExpr;
 class ForExpr;
 class GetFieldExpr;
@@ -25,7 +26,6 @@ class NameExpr;
 class NativeExpr;
 class NotExpr;
 class NothingExpr;
-class NumberExpr;
 class OrExpr;
 class RecordExpr;
 class ReturnExpr;
@@ -62,6 +62,7 @@ public:
   virtual void visit(DefExpr& node, int arg) = 0;
   virtual void visit(DefClassExpr& node, int arg) = 0;
   virtual void visit(DoExpr& node, int arg) = 0;
+  virtual void visit(FloatExpr& node, int arg) = 0;
   virtual void visit(FnExpr& node, int arg) = 0;
   virtual void visit(ForExpr& node, int arg) = 0;
   virtual void visit(GetFieldExpr& node, int arg) = 0;
@@ -74,7 +75,6 @@ public:
   virtual void visit(NativeExpr& node, int arg) = 0;
   virtual void visit(NotExpr& node, int arg) = 0;
   virtual void visit(NothingExpr& node, int arg) = 0;
-  virtual void visit(NumberExpr& node, int arg) = 0;
   virtual void visit(OrExpr& node, int arg) = 0;
   virtual void visit(RecordExpr& node, int arg) = 0;
   virtual void visit(ReturnExpr& node, int arg) = 0;
@@ -117,6 +117,7 @@ public:
   virtual DefExpr* asDefExpr() { return NULL; }
   virtual DefClassExpr* asDefClassExpr() { return NULL; }
   virtual DoExpr* asDoExpr() { return NULL; }
+  virtual FloatExpr* asFloatExpr() { return NULL; }
   virtual FnExpr* asFnExpr() { return NULL; }
   virtual ForExpr* asForExpr() { return NULL; }
   virtual GetFieldExpr* asGetFieldExpr() { return NULL; }
@@ -129,7 +130,6 @@ public:
   virtual NativeExpr* asNativeExpr() { return NULL; }
   virtual NotExpr* asNotExpr() { return NULL; }
   virtual NothingExpr* asNothingExpr() { return NULL; }
-  virtual NumberExpr* asNumberExpr() { return NULL; }
   virtual OrExpr* asOrExpr() { return NULL; }
   virtual RecordExpr* asRecordExpr() { return NULL; }
   virtual ReturnExpr* asReturnExpr() { return NULL; }
@@ -549,6 +549,30 @@ private:
   NO_COPY(DoExpr);
 };
 
+class FloatExpr : public Expr
+{
+public:
+  FloatExpr(gc<SourcePos> pos, double value)
+  : Expr(pos),
+    value_(value)
+  {}
+
+  virtual void accept(ExprVisitor& visitor, int arg)
+  {
+    visitor.visit(*this, arg);
+  }
+
+  virtual FloatExpr* asFloatExpr() { return this; }
+
+  double value() const { return value_; }
+
+  virtual void trace(std::ostream& out) const;
+
+private:
+  double value_;
+  NO_COPY(FloatExpr);
+};
+
 class FnExpr : public Expr
 {
 public:
@@ -921,30 +945,6 @@ public:
 
 private:
   NO_COPY(NothingExpr);
-};
-
-class NumberExpr : public Expr
-{
-public:
-  NumberExpr(gc<SourcePos> pos, double value)
-  : Expr(pos),
-    value_(value)
-  {}
-
-  virtual void accept(ExprVisitor& visitor, int arg)
-  {
-    visitor.visit(*this, arg);
-  }
-
-  virtual NumberExpr* asNumberExpr() { return this; }
-
-  double value() const { return value_; }
-
-  virtual void trace(std::ostream& out) const;
-
-private:
-  double value_;
-  NO_COPY(NumberExpr);
 };
 
 class OrExpr : public Expr

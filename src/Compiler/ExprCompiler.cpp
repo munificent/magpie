@@ -352,6 +352,12 @@ namespace magpie
     compile(expr.body(), dest);
   }
 
+  void ExprCompiler::visit(FloatExpr& expr, int dest)
+  {
+    int index = compileConstant(expr);
+    write(expr, OP_CONSTANT, index, dest);
+  }
+  
   void ExprCompiler::visit(FnExpr& expr, int dest)
   {
     // TODO(bob): Handle closures.
@@ -527,12 +533,6 @@ namespace magpie
   void ExprCompiler::visit(NothingExpr& expr, int dest)
   {
     write(expr, OP_BUILT_IN, BUILT_IN_NOTHING, dest);
-  }
-
-  void ExprCompiler::visit(NumberExpr& expr, int dest)
-  {
-    int index = compileConstant(expr);
-    write(expr, OP_CONSTANT, index, dest);
   }
 
   void ExprCompiler::visit(OrExpr& expr, int dest)
@@ -730,10 +730,10 @@ namespace magpie
 
   int ExprCompiler::compileExpressionOrConstant(gc<Expr> expr)
   {
-    const NumberExpr* number = expr->asNumberExpr();
-    if (number != NULL)
+    const FloatExpr* float_ = expr->asFloatExpr();
+    if (float_ != NULL)
     {
-      return MAKE_CONSTANT(compileConstant(*number));
+      return MAKE_CONSTANT(compileConstant(*float_));
     }
 
     const StringExpr* string = expr->asStringExpr();
@@ -748,11 +748,6 @@ namespace magpie
     return dest;
   }
 
-  int ExprCompiler::compileConstant(const NumberExpr& expr)
-  {
-    return chunk_->addConstant(new NumberObject(expr.value()));
-  }
-
   int ExprCompiler::compileConstant(const CharacterExpr& expr)
   {
     // TODO(bob): Putting characters in the constant table is overkill for most
@@ -760,7 +755,12 @@ namespace magpie
     // ones.
     return chunk_->addConstant(new CharacterObject(expr.value()));
   }
-  
+
+  int ExprCompiler::compileConstant(const FloatExpr& expr)
+  {
+    return chunk_->addConstant(new FloatObject(expr.value()));
+  }
+
   int ExprCompiler::compileConstant(const StringExpr& expr)
   {
     return chunk_->addConstant(new StringObject(expr.value()));

@@ -400,6 +400,11 @@ namespace magpie
     doScope.end();
   }
 
+  void Resolver::visit(FloatExpr& expr, int dummy)
+  {
+    // Do nothing.
+  }
+  
   void Resolver::visit(FnExpr& expr, int dummy)
   {
     // Resolve the function itself.
@@ -555,11 +560,6 @@ namespace magpie
   }
   
   void Resolver::visit(NothingExpr& expr, int dummy)
-  {
-    // Do nothing.
-  }
-  
-  void Resolver::visit(NumberExpr& expr, int dummy)
   {
     // Do nothing.
   }

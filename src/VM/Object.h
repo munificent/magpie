@@ -17,11 +17,11 @@ namespace magpie
   class FileObject;
   class Fiber;
   class File;
+  class FloatObject;
   class FunctionObject;
   class ListObject;
   class Memory;
   class Multimethod;
-  class NumberObject;
   class NothingObject;
   class RecordObject;
   class StringObject;
@@ -35,10 +35,10 @@ namespace magpie
     OBJECT_CLASS,
     OBJECT_DYNAMIC,
     OBJECT_FILE,
+    OBJECT_FLOAT,
     OBJECT_FUNCTION,
     OBJECT_LIST,
     OBJECT_NOTHING,
-    OBJECT_NUMBER,
     OBJECT_RECORD,
     OBJECT_STRING
   };
@@ -53,6 +53,9 @@ namespace magpie
     // Gets the ClassObject for this object's class.
     virtual gc<ClassObject> getClass(VM& vm) const = 0;
 
+    // TODO(bob): Since these are assertions anyway, make them casts instead
+    // of virtual methods.
+    
     // Returns the object as a channel. Object *must* be a ChannelObject.
     virtual ChannelObject* asChannel()
     {
@@ -87,7 +90,14 @@ namespace magpie
       ASSERT(false, "Not a file.");
       return NULL;
     }
-    
+
+    // Returns the object as a float. Object *must* be a FloatObject.
+    virtual double asFloat() const
+    {
+      ASSERT(false, "Not a float.");
+      return 0;
+    }
+
     // Returns the object as a function. Object *must* be a FunctionObject.
     virtual FunctionObject* asFunction()
     {
@@ -100,13 +110,6 @@ namespace magpie
     {
       ASSERT(false, "Not a list.");
       return NULL;
-    }
-
-    // Returns the object as a number. Object *must* be a NumberObject.
-    virtual double asNumber() const
-    {
-      ASSERT(false, "Not a number.");
-      return 0;
     }
     
     // Returns the object as a string. Object *must* be a StringObject.
@@ -311,6 +314,27 @@ namespace magpie
     File* file_;
   };
 
+  class FloatObject : public Object
+  {
+  public:
+    FloatObject(double value)
+    : Object(),
+    value_(value)
+    {}
+
+    virtual ObjectType type() const { return OBJECT_FLOAT; }
+
+    virtual gc<ClassObject> getClass(VM& vm) const;
+    virtual double asFloat() const { return value_; }
+
+    // TODO(bob): Do we want to do this here, or rely on a "true?" method?
+    virtual bool toBool() const { return value_ != 0; }
+    virtual gc<String> toString() const;
+
+  private:
+    double value_;
+  };
+  
   class FunctionObject : public Object
   {
   public:
@@ -382,27 +406,6 @@ namespace magpie
     virtual bool toBool() const { return false; }
 
     virtual gc<String> toString() const;
-  };
-  
-  class NumberObject : public Object
-  {
-  public:
-    NumberObject(double value)
-    : Object(),
-      value_(value)
-    {}
-    
-    virtual ObjectType type() const { return OBJECT_NUMBER; }
-
-    virtual gc<ClassObject> getClass(VM& vm) const;
-    virtual double asNumber() const { return value_; }
-
-    // TODO(bob): Do we want to do this here, or rely on a "true?" method?
-    virtual bool toBool() const { return value_ != 0; }
-    virtual gc<String> toString() const;
-    
-  private:
-    double value_;
   };
   
   // A record's "type" is an implicit class that describes the set of fields

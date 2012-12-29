@@ -65,8 +65,8 @@ namespace magpie
 
     TOKEN_FIELD,
     TOKEN_NAME,
-    TOKEN_NUMBER,
     TOKEN_CHARACTER,
+    TOKEN_FLOAT,
     TOKEN_STRING,
 
     TOKEN_LINE,

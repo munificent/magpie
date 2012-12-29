@@ -126,6 +126,11 @@ namespace magpie
     out << "(do " << body_ << ")";
   }
 
+  void FloatExpr::trace(std::ostream& out) const
+  {
+    out << value_;
+  }
+  
   void FnExpr::trace(std::ostream& out) const
   {
     out << "(fn " << pattern_ << " -> " << body_ << ")";
@@ -211,11 +216,6 @@ namespace magpie
   void NothingExpr::trace(std::ostream& out) const
   {
     out << "nothing";
-  }
-  
-  void NumberExpr::trace(std::ostream& out) const
-  {
-    out << value_;
   }
   
   void OrExpr::trace(std::ostream& out) const

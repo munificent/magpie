@@ -58,13 +58,13 @@ namespace magpie
     // Prefix expression parsers.
     gc<Expr> boolean(gc<Token> token);
     gc<Expr> character(gc<Token> token);
+    gc<Expr> float_(gc<Token> token);
     gc<Expr> function(gc<Token> token);
     gc<Expr> group(gc<Token> token);
     gc<Expr> list(gc<Token> token);
     gc<Expr> name(gc<Token> token);
     gc<Expr> not_(gc<Token> token);
     gc<Expr> nothing(gc<Token> token);
-    gc<Expr> number(gc<Token> token);
     gc<Expr> record(gc<Token> token);
     gc<Expr> string(gc<Token> token);
     gc<Expr> throw_(gc<Token> token);

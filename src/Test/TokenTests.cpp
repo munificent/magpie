@@ -30,7 +30,7 @@ namespace magpie
                                 new SourcePos(source, -1, -1, -1, -1));
     
     EXPECT(token->is(TOKEN_NAME));
-    EXPECT_FALSE(token->is(TOKEN_NUMBER));
+    EXPECT_FALSE(token->is(TOKEN_FLOAT));
   }
 }
 

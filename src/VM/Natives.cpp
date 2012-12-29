@@ -44,8 +44,8 @@ namespace magpie
 
   NATIVE(numPlusNum)
   {
-    double c = args[0]->asNumber() + args[1]->asNumber();
-    return new NumberObject(c);
+    double c = args[0]->asFloat() + args[1]->asFloat();
+    return new FloatObject(c);
   }
   
   NATIVE(stringPlusString)
@@ -56,54 +56,55 @@ namespace magpie
   
   NATIVE(numMinusNum)
   {
-    double c = args[0]->asNumber() - args[1]->asNumber();
-    return new NumberObject(c);
+    double c = args[0]->asFloat() - args[1]->asFloat();
+    return new FloatObject(c);
   }
   
   NATIVE(numTimesNum)
   {
-    double c = args[0]->asNumber() * args[1]->asNumber();
-    return new NumberObject(c);
+    double c = args[0]->asFloat() * args[1]->asFloat();
+    return new FloatObject(c);
   }
   
   NATIVE(numDivNum)
   {
-    double c = args[0]->asNumber() / args[1]->asNumber();
-    return new NumberObject(c);
+    double c = args[0]->asFloat() / args[1]->asFloat();
+    return new FloatObject(c);
   }
 
   NATIVE(numModNum)
   {
     // TODO(bob): Handle floats!
-    int a = static_cast<int>(args[0]->asNumber());
-    int b = static_cast<int>(args[1]->asNumber());
-    return new NumberObject(a % b);
+    int a = static_cast<int>(args[0]->asFloat());
+    int b = static_cast<int>(args[1]->asFloat());
+    return new FloatObject(a % b);
   }
   
   NATIVE(numLessThanNum)
   {
-    return vm.getBool(args[0]->asNumber() < args[1]->asNumber());
+    return vm.getBool(args[0]->asFloat() < args[1]->asFloat());
   }
   
   NATIVE(numLessThanEqualToNum)
   {
-    return vm.getBool(args[0]->asNumber() <= args[1]->asNumber());
+    return vm.getBool(args[0]->asFloat() <= args[1]->asFloat());
   }
   
   NATIVE(numGreaterThanNum)
   {
-    return vm.getBool(args[0]->asNumber() > args[1]->asNumber());
+    return vm.getBool(args[0]->asFloat() > args[1]->asFloat());
   }
   
   NATIVE(numGreaterThanEqualToNum)
   {
-    return vm.getBool(args[0]->asNumber() >= args[1]->asNumber());
+    return vm.getBool(args[0]->asFloat() >= args[1]->asFloat());
   }
   
   NATIVE(stringCount)
   {
     double c = args[0]->asString()->length();
-    return new NumberObject(c);
+    // TODO(bob): IntObject.
+    return new FloatObject(c);
   }
 
   NATIVE(stringSubscriptNum)
@@ -113,14 +114,14 @@ namespace magpie
 
     // TODO(bob): Handle non-ASCII.
     // TODO(bob): What if the index isn't an int?
-    char c = (*string)[args[1]->asNumber()];
+    char c = (*string)[args[1]->asFloat()];
 
     return new CharacterObject(c);
   }
 
   NATIVE(numToString)
   {
-    double n = args[0]->asNumber();
+    double n = args[0]->asFloat();
     return new StringObject(String::format("%g", n));
   }
 
@@ -221,7 +222,8 @@ namespace magpie
   NATIVE(listCount)
   {
     ListObject* list = args[0]->asList();
-    return new NumberObject(list->elements().count());
+    // TODO(bob): IntObject.
+    return new FloatObject(list->elements().count());
   }
   
   NATIVE(listSubscriptNum)
@@ -229,7 +231,7 @@ namespace magpie
     // Note: bounds checking is handled by core before calling this.
     ListObject* list = args[0]->asList();
     // TODO(bob): What if the index isn't an int?
-    return list->elements()[static_cast<int>(args[1]->asNumber())];
+    return list->elements()[static_cast<int>(args[1]->asFloat())];
   }
 
   NATIVE(listSubscriptRange)
@@ -237,8 +239,8 @@ namespace magpie
     // Note: bounds checking is handled by core before calling this.
     ListObject* source = args[0]->asList();
     // TODO(bob): What if first or last isn't an int?
-    int first = static_cast<int>(args[1]->asNumber());
-    int last = static_cast<int>(args[2]->asNumber());
+    int first = static_cast<int>(args[1]->asFloat());
+    int last = static_cast<int>(args[2]->asFloat());
 
     int size = last - first;
     gc<ListObject> list = new ListObject(size);
@@ -254,7 +256,7 @@ namespace magpie
   {
     ListObject* list = args[0]->asList();
     // TODO(bob): What if the index isn't an int?
-    list->elements()[static_cast<int>(args[1]->asNumber())] = args[2];
+    list->elements()[static_cast<int>(args[1]->asFloat())] = args[2];
     return args[2];
   }
 
@@ -263,7 +265,7 @@ namespace magpie
     ListObject* list = args[0]->asList();
     gc<Object> value = args[1];
     // TODO(bob): How do we want to handle non-integer indices?
-    int index = static_cast<int>(args[2]->asNumber());
+    int index = static_cast<int>(args[2]->asFloat());
     list->elements().insert(value, index);
     return args[1];
   }

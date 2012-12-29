@@ -52,6 +52,8 @@ exprs = sorted({
         ('resolved',    'ResolvedProcedure*')],
     'Do': [
         ('body',        'gc<Expr>')],
+    'Float': [
+        ('value',       'double')],
     'Fn': [
         ('pattern',     'gc<Pattern>'),
         ('body',        'gc<Expr>'),
@@ -85,8 +87,6 @@ exprs = sorted({
     'Not': [
         ('value',       'gc<Expr>')],
     'Nothing': [],
-    'Number': [
-        ('value',       'double')],
     'Or': [
         ('left',        'gc<Expr>'),
         ('right',       'gc<Expr>')],
