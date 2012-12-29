@@ -594,12 +594,46 @@ namespace magpie
       consume(TOKEN_RIGHT_PAREN, "Expect ')' after function pattern.");
     }
 
-    ASSERT(pattern.isNull(), "Functions with parameters aren't implemented yet.");
-
+    // Expand the pattern to what we need to correctly destructure the packed
+    // argument. We do this here so that the AST has been set up before
+    // resolving.
+    pattern = expandFunctionPattern(spanFrom(token), pattern);
+    
     gc<Expr> body = parseBlock();
     return new FnExpr(spanFrom(token), pattern, body);
   }
 
+  gc<Pattern> Parser::expandFunctionPattern(gc<SourcePos> pos,
+                                            gc<Pattern> pattern)
+  {
+    // A function is always invoked by the VM with a single non-destructured
+    // argument. This means we need a parameter signature that takes a single
+    // argument, which will then be a nested record if that's what the fn
+    // itself expects.
+
+    // fn() -> def func(_)
+    if (pattern.isNull())
+    {
+      // The function doesn't take an argument, so accept anything.
+      return new WildcardPattern(pos);
+    }
+
+    // fn(a, b) -> def func(_ (0: a, 1: b))
+    RecordPattern* record = pattern->asRecordPattern();
+    if (record != NULL)
+    {
+      // The function takes multiple arguments, so destructure the argument into
+      // that record.
+      return new VariablePattern(pos, String::create("_"), pattern);
+    }
+
+    // fn(a) -> def func(_ (0: a))
+    Array<PatternField> fields;
+    fields.add(PatternField(String::create("0"), pattern));
+    return new VariablePattern(pos, String::create("_"),
+                               new RecordPattern(pos, fields));
+  }
+  
   gc<Expr> Parser::group(gc<Token> token)
   {
     gc<Expr> expr = flowControl();

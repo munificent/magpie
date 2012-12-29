@@ -88,6 +88,11 @@ namespace magpie
     gc<Pattern> primaryPattern(bool isMethod);
     gc<Expr> parseExpressionInPattern(bool isMethod);
 
+    // Create an appropriate pattern for binding a function's expected
+    // parameters to the non-destructured single argument it will actually
+    // receive.
+    gc<Pattern> expandFunctionPattern(gc<SourcePos> pos, gc<Pattern> pattern);
+
     // The left-hand side of an assignment expression is an lvalue, but it will
     // initially be parsed as an expression. Correctly determining whether a
     // series of tokens is the LHS of an assignment before parsing them 

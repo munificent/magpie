@@ -1,0 +1,19 @@
+fn(a)
+    print(a)
+end call("a") // expect: a
+
+fn(a, b)
+    print(a + b)
+end call("a", "b") // expect: ab
+
+fn(a, b, c)
+    print(a + b + c)
+end call("a", "b", "c") // expect: abc
+
+fn(a, b, c, d)
+    print(a + b + c + d)
+end call("a", "b", "c", "d") // expect: abcd
+
+fn(a, b, c, d, e)
+    print(a + b + c + d + e)
+end call("a", "b", "c", "d", "e") // expect: abcde

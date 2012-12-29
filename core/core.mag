@@ -140,8 +140,34 @@ def (channel is Channel) advance
     channel receive
 end
 
-// TODO(bob): How should different argument patterns be handled?
-def (is Function) call native "functionCall"
+// TODO(bob): Instead of baking in a set of signatures, can this be handled
+// more generically?
+def (func is Function) call
+    func _call(nothing)
+end
+
+def (func is Function) call(a)
+    func _call(0: (0: a))
+end
+
+def (func is Function) call(a, b)
+    // TODO(bob): Need a better way to say "don't destructure".
+    func _call(0: (a, b))
+end
+
+def (func is Function) call(a, b, c)
+    func _call(0: (a, b, c))
+end
+
+def (func is Function) call(a, b, c, d)
+    func _call(0: (a, b, c, d))
+end
+
+def (func is Function) call(a, b, c, d, e)
+    func _call(0: (a, b, c, d, e))
+end
+
+def (is Function) _call(arg) native "functionCall"
 
 def (is List) add(item) native "listAdd"
 def (is List) count native "listCount"

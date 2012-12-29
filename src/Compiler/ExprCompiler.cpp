@@ -66,6 +66,7 @@ namespace magpie
     write(-1, OP_THROW, 0);
 
     chunk_->bind(maxSlots_, numClosures);
+
     return chunk_;
   }
 
@@ -73,6 +74,12 @@ namespace magpie
   {
     compile(module, function.resolved().maxLocals(),
             NULL, function.pattern(), NULL, function.body());
+
+    // TODO(bob): Is this the right error?
+    // If we get here, the argument didn't match the function's signature so
+    // throw a NoMethodError.
+    write(-1, OP_BUILT_IN, 3, 0);
+    write(-1, OP_THROW, 0);
 
     chunk_->bind(maxSlots_, function.resolved().closures().count());
     return chunk_;

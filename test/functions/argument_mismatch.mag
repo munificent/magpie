@@ -1,0 +1,35 @@
+// Extra arguments are discarded. Missing argument throw a NoMethodError.
+// TODO(bob): Is that the right error to throw? ArgError?
+
+// No argument function.
+fn()
+    print("ok") // expect: ok
+end call(1)
+
+fn()
+    print("ok") // expect: ok
+end call(1, 2)
+
+// One argument function.
+do
+    fn(a)
+        print(a)
+    end call
+catch is NoMethodError then print("caught") // expect: caught
+
+fn(a)
+    print(a) // expect: 1
+end call(1, 2)
+
+// Multi-argument function.
+do
+    fn(a, b)
+        print(a + b)
+    end call
+catch is NoMethodError then print("caught") // expect: caught
+
+do
+    fn(a, b)
+        print(a + b)
+    end call(1)
+catch is NoMethodError then print("caught") // expect: caught
