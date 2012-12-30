@@ -1,0 +1,25 @@
+// Returns an iterable.
+print([1, 2] where(fn(a) a) is Iterable) // expect: true
+
+// Filters the input.
+for i in [1, 2, 3, 4, 5, 6] where(fn(a) a % 2 == 0) do
+    print(i)
+end
+// expect: 2
+// expect: 4
+// expect: 6
+
+// Result is lazy.
+val filtered = [1, 2, 3, 4, 5, 6] where(fn(a) print(a % 2 == 0))
+print("before") // expect: before
+for i in filtered do print(i)
+// expect: false
+// expect: true
+// expect: 2
+// expect: false
+// expect: true
+// expect: 4
+// expect: false
+// expect: true
+// expect: 6
+print("after") // expect: after

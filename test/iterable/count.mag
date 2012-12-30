@@ -1,0 +1,10 @@
+// Use a channel to test since String and List have their own count methods.
+val channel = Channel new
+async
+    channel send(1)
+    channel send(2)
+    channel send(3)
+    channel close
+end
+
+print(channel count) // expect: 3

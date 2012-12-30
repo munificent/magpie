@@ -1,15 +1,17 @@
 defclass Bool native
-defclass Channel native
+defclass Iterable native
+defclass Indexable is Iterable native
+defclass Channel is Iterable native
 defclass Char native
 defclass Class native
 defclass Function native
-defclass List native
+defclass List is Indexable native
 defclass Nothing native
 defclass Num native
 defclass Float is Num native
 defclass Int is Num native
 defclass Record native
-defclass String native
+defclass String is Indexable native
 
 defclass NoMatchError
 end
@@ -225,23 +227,52 @@ def (list is List) last
     list[-1]
 end
 
-// Makes lists iterable.
-defclass ListIterator
-    val list is List
+def (iterable is Iterable) first
+    for i in iterable do return i
+    // If we got here, there were no values.
+    throw ArgError new
+end
+
+def (iterable is Iterable) count
+    var count = 0
+    for i in iterable do count = count + 1
+    count
+end
+
+// TODO(bob): Could specialize this for Indexables to create a result list with
+// the right capacity up front.
+def (iterable is Iterable) toList
+    val result = []
+    for i in iterable do result add(i)
+    result
+end
+
+// Make indexable collections iterable.
+defclass IndexableIterator
+    val collection // TODO(bob): Indexable?
     var index is Int
 end
 
-def (list is List) iterate
-    ListIterator new(list: list, index: -1)
+def (collection is Indexable) iterate
+    IndexableIterator new(collection: collection, index: -1)
 end
 
-def (iterator is ListIterator) advance
+def (iterator is IndexableIterator) advance
     iterator index = iterator index + 1
-    if iterator index >= iterator list count then
+    if iterator index >= iterator collection count then
         done
     else
-        iterator list[iterator index]
+        iterator collection[iterator index]
     end
+end
+
+def (list is List) where(predicate is Function)
+    val channel = Channel new
+    async
+        for item in list do if predicate call(item) then channel send(item)
+        channel close
+    end
+    channel
 end
 
 // TODO(bob): What about floating point ranges?

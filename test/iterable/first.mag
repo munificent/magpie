@@ -1,0 +1,29 @@
+// Return the first item.
+print(["only"] first) // expect: only
+print([1, 2, 3] first) // expect: 1
+print("abc" first) // expect: a
+
+// Throw an error if the iterable has no items.
+do
+    [] first
+catch is ArgError then print("caught") // expect: caught
+
+do
+    val channel = Channel new
+    async
+        print("none") // expect: none
+        channel close
+    end
+    channel first
+catch is ArgError then print("caught") // expect: caught
+
+// Stop iterating after the first item.
+do
+    val channel = Channel new
+    async
+        channel send(1)
+        print("bad")
+        channel send(2)
+    end
+    print(channel first) // expect: 1
+end

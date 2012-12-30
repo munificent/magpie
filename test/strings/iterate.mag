@@ -1,0 +1,8 @@
+// Iterates through the characters.
+for c in "abc" do print(c)
+// expect: a
+// expect: b
+// expect: c
+
+// Yields characters.
+for c in "a" do print(c class == Char) // expect: true

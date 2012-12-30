@@ -1,0 +1,25 @@
+// Converts argument to a list.
+print("abc" toList) // expect: [a, b, c]
+print([1, 2] toList) // expect: [1, 2]
+
+// Eagerly evaluates iterable.
+do
+    val channel = Channel new
+    async
+        print("a")
+        channel send(1)
+        print("b")
+        channel send(2)
+        print("c")
+        channel send(3)
+        print("d")
+        channel close
+    end
+
+    print(channel toList)
+    // expect: a
+    // expect: b
+    // expect: c
+    // expect: d
+    // expect: [1, 2, 3]
+end

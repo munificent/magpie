@@ -1,2 +1,4 @@
 print("s" is String) // expect: true
+print("s" is Iterable) // expect: true
+print("s" is Indexable) // expect: true
 print("s" class == String) // expect: true

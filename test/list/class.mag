@@ -1,2 +1,4 @@
 print([] is List) // expect: true
+print([] is Iterable) // expect: true
+print([] is Indexable) // expect: true
 print([] class == List) // expect: true

@@ -1,6 +1,0 @@
-print(["only"] first) // expect: only
-print([1, 2, 3] first) // expect: 1
-
-do
-    [] first
-catch is ArgError then print("caught") // expect: caught
