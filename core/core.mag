@@ -145,6 +145,10 @@ def (channel is Channel) advance
     channel receive
 end
 
+def (iterable is Iterable) pipeTo(channel is Channel)
+    for i in iterable do channel send(i)
+end
+
 // TODO(bob): Instead of baking in a set of signatures, can this be handled
 // more generically?
 def (func is Function) call
