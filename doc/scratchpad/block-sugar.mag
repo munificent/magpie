@@ -1,0 +1,203 @@
+// Filtering a collection
+
+items where(fn(n) n % 2 == 0)
+items where(n -> n % 2 == 0)
+items where(_ % 2 == 0)
+items filter with it % 2 == 0
+items filter with it in it % 2 == 0
+items where by it in it % 2 == 0
+items map by it in it % 2 == 0
+items map with it in it % 2 == 0
+
+// Test scope DSL
+
+// Vanilla style:
+specify("An 'and' expression", fn(it)
+    it should("return the first non-true argument", fn(it)
+        (0 and false) shouldEqual(0)
+        (1 and 0) shouldEqual(0)
+        (1 and 2 and 0) shouldEqual(0)
+    end)
+end)
+
+// Java interpreter "with" style:
+specify("An 'and' expression") with
+    it should("return the first non-true argument") with
+        (0 and false) shouldEqual(0)
+        (1 and 0) shouldEqual(0)
+        (1 and 2 and 0) shouldEqual(0)
+    end
+end
+
+// ... with ... in ...
+specify("An 'and' expression") with it in
+    it should("return the first non-true argument") with it in
+        (0 and false) shouldEqual(0)
+        (1 and 0) shouldEqual(0)
+        (1 and 2 and 0) shouldEqual(0)
+    end
+end
+
+// ... with ... do ...
+specify("An 'and' expression") with it do
+    it should("return the first non-true argument") with it do
+        (0 and false) shouldEqual(0)
+        (1 and 0) shouldEqual(0)
+        (1 and 2 and 0) shouldEqual(0)
+    end
+end
+
+// with ... in ... do
+with it in specify("An 'and' expression") do
+     with it in it should("return the first non-true argument") do
+        (0 and false) shouldEqual(0)
+        (1 and 0) shouldEqual(0)
+        (1 and 2 and 0) shouldEqual(0)
+    end
+end
+
+// Python style:
+with specify("An 'and' expression") as it do
+     with it should("return the first non-true argument") as it do
+        (0 and false) shouldEqual(0)
+        (1 and 0) shouldEqual(0)
+        (1 and 2 and 0) shouldEqual(0)
+    end
+end
+
+// do where test context is magically threaded through
+specify("An 'and' expression") do
+    should("return the first non-true argument") do
+        (0 and false) shouldEqual(0)
+        (1 and 0) shouldEqual(0)
+        (1 and 2 and 0) shouldEqual(0)
+    end
+end
+
+// generate
+
+generate(fn(channel)
+    for item in iterable do if predicate call(item) then channel send(item)
+end)
+
+generate() with channel in
+    for item in iterable do if predicate call(item) then channel send(item)
+end
+
+generate() with(channel)
+    for item in iterable do if predicate call(item) then channel send(item)
+end
+
+generate() with channel do
+    for item in iterable do if predicate call(item) then channel send(item)
+end
+
+with channel in generate() do
+    for item in iterable do if predicate call(item) then channel send(item)
+end
+
+with generate() as channel do
+    for item in iterable do if predicate call(item) then channel send(item)
+end
+
+// opening a file
+
+open("file.txt", fn(file)
+    print(file read)
+end)
+
+open("file.txt") with file in
+    print(file read)
+end
+
+open("file.txt") with file do
+    print(file read)
+end
+
+with file in open("file.txt") do
+    print(file read)
+end
+
+with open("file.txt") as file do
+    print(file read)
+end
+
+// Markaby-style DSL
+
+// Current style.
+Markamini document(fn(doc)
+    doc html(fn
+        doc head(fn
+            doc meta(name: "charset", content: "utf-8")
+            doc title("hi")
+        end)
+        doc body(fn
+            doc div(id: "foo", fn "A div block")
+        end)
+    end)
+end)
+
+// Somehow make the doc implicit.
+Markamini document(fn
+    html(fn
+        head(fn
+            meta(name: "charset", content: "utf-8")
+            title("hi")
+        end)
+        body(fn
+            div(id: "foo", fn "A div block")
+        end)
+    end)
+end)
+
+// "do" to pass no-param fn.
+Markamini document do
+    html do
+        head do
+            meta(name: "charset", content: "utf-8")
+            title("hi")
+        end
+        body do
+            div(id: "foo") do "A div block"
+        end
+    end
+end
+
+// Discarded:
+
+generate() with(channel)
+    for item in iterable do if predicate call(item) then channel send(item)
+end
+// The parenthesized pattern is lame. Looks ugly and means you can't have a
+// body that's a parenthesized expression.
+
+
+1 + 2 with blah in ...
+a = b with foo in ...
+
+for i in ([1, 2, 3, 4, 5, 6] filter with a in a % 2 == 0) do
+    print(i)
+end
+
+print("abcbd" where(fn(c) c != 'b') toList) // expect: [a, c, d]
+
+val filtered = [1, 2, 3, 4, 5, 6] where(fn(a) print(a % 2 == 0))
+
+open("foo.txt") with file in
+    print(file read)
+end
+
+with file in open("foo.txt") do
+    print(file read)
+end
+
+with locked(myLock):
+    # Code here executes with myLock held.
+
+with opened("/etc/passwd") as f:
+    for line in f:
+        print line.rstrip()
+
+with opened(filename, "w") as f:
+    with stdout_redirected(f):
+        print "Hello world"
