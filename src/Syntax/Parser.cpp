@@ -615,7 +615,7 @@ namespace magpie
     if (pattern.isNull())
     {
       // The function doesn't take an argument, so accept anything.
-      return new WildcardPattern(pos);
+      return new VariablePattern(pos, String::create("_"), NULL);
     }
 
     // fn(a, b) -> def func(_ (0: a, 1: b))
@@ -921,15 +921,8 @@ namespace magpie
     if (match(TOKEN_NAME))
     {
       gc<Token> name = last();
-      if (*name->text() == "_")
-      {
-        return new WildcardPattern(name->pos());
-      }
-      else
-      {
-        gc<Pattern> inner = primaryPattern(isMethod);
-        return new VariablePattern(spanFrom(name), name->text(), inner);
-      }
+      gc<Pattern> inner = primaryPattern(isMethod);
+      return new VariablePattern(spanFrom(name), name->text(), inner);
     }
     else
     {

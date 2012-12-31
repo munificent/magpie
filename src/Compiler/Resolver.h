@@ -170,7 +170,6 @@ namespace magpie
     virtual void visit(TypePattern& pattern, int dummy);
     virtual void visit(ValuePattern& pattern, int dummy);
     virtual void visit(VariablePattern& pattern, int dummy);
-    virtual void visit(WildcardPattern& pattern, int dummy);
     
   private:
     Resolver& resolver_;

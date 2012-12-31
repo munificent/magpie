@@ -150,7 +150,8 @@ namespace magpie
 
         if (pattern.isNull())
         {
-          pattern = new WildcardPattern(classExpr.pos());
+          pattern = new VariablePattern(classExpr.pos(), String::create("_"),
+                                        NULL);
         }
 
         fields.add(PatternField(field->name(), pattern));
@@ -192,7 +193,7 @@ namespace magpie
 
     if (pattern.isNull())
     {
-      pattern = new WildcardPattern(classExpr.pos());
+      pattern = new VariablePattern(classExpr.pos(), String::create("_"), NULL);
     }
 
     return new DefExpr(pos, leftPattern, field->name(), gc<Pattern>(),

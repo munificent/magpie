@@ -119,8 +119,7 @@ patterns = sorted({
     'Variable': [
         ('name',        'gc<String>'),
         ('pattern',     'gc<Pattern>'),
-        ('resolved*',   'gc<ResolvedName>')],
-    'Wildcard': []
+        ('resolved*',   'gc<ResolvedName>')]
 }.items())
 
 lvalues = sorted({
@@ -176,7 +175,6 @@ private:
 }};
 '''
 
-# TODO(bob): The "int arg" param is useless for the Def visitor. Should omit it.
 SUBCLASS = '''
 class {0}{6} : public {6}
 {{

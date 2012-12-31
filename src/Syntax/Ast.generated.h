@@ -43,7 +43,6 @@ class RecordPattern;
 class TypePattern;
 class ValuePattern;
 class VariablePattern;
-class WildcardPattern;
 
 class ExprVisitor
 {
@@ -1379,7 +1378,6 @@ public:
   virtual void visit(TypePattern& node, int arg) = 0;
   virtual void visit(ValuePattern& node, int arg) = 0;
   virtual void visit(VariablePattern& node, int arg) = 0;
-  virtual void visit(WildcardPattern& node, int arg) = 0;
 
 protected:
   PatternVisitor() {}
@@ -1405,7 +1403,6 @@ public:
   virtual TypePattern* asTypePattern() { return NULL; }
   virtual ValuePattern* asValuePattern() { return NULL; }
   virtual VariablePattern* asVariablePattern() { return NULL; }
-  virtual WildcardPattern* asWildcardPattern() { return NULL; }
 
   gc<SourcePos> pos() const { return pos_; }
 
@@ -1541,25 +1538,4 @@ private:
   gc<Pattern> pattern_;
   gc<ResolvedName> resolved_;
   NO_COPY(VariablePattern);
-};
-
-class WildcardPattern : public Pattern
-{
-public:
-  WildcardPattern(gc<SourcePos> pos)
-  : Pattern(pos)
-  {}
-
-  virtual void accept(PatternVisitor& visitor, int arg)
-  {
-    visitor.visit(*this, arg);
-  }
-
-  virtual WildcardPattern* asWildcardPattern() { return this; }
-
-
-  virtual void trace(std::ostream& out) const;
-
-private:
-  NO_COPY(WildcardPattern);
 };

@@ -201,7 +201,6 @@ namespace magpie
     virtual void visit(TypePattern& pattern, int slot);
     virtual void visit(ValuePattern& pattern, int slot);
     virtual void visit(VariablePattern& pattern, int slot);
-    virtual void visit(WildcardPattern& pattern, int slot);
 
   private:
     void writeTest(const Pattern& pattern, int slot);

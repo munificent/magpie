@@ -101,7 +101,7 @@ namespace magpie
   void Resolver::makeParamSlot(gc<Pattern> param)
   {
     VariablePattern* variable = param->asVariablePattern();
-    if (variable != NULL)
+    if (variable != NULL && *variable->name() != "_")
     {
       // It's a variable, so create a named local for it and resolve the
       // variable.
@@ -751,40 +751,38 @@ namespace magpie
   
   void Scope::visit(VariablePattern& pattern, int dummy)
   {
-    if (isTopLevel())
+    if (*pattern.name() != "_")
     {
-      // It's a top-level module variable. Since these are forward declared,
-      // they should already exist. Just look up the existing one.
-      int module = resolver_.compiler_.getModuleIndex(resolver_.module_);
-      int index = resolver_.module_.findVariable(pattern.name());
-      
-      if (index == -1)
+      if (isTopLevel())
       {
-        resolver_.compiler_.reporter().error(pattern.pos(),
-            "Variable '%s' is not defined.", pattern.name()->cString());
+        // It's a top-level module variable. Since these are forward declared,
+        // they should already exist. Just look up the existing one.
+        int module = resolver_.compiler_.getModuleIndex(resolver_.module_);
+        int index = resolver_.module_.findVariable(pattern.name());
         
-        // Put a fake index in so we can continue and report more errors.
-        index = 0;
+        if (index == -1)
+        {
+          resolver_.compiler_.reporter().error(pattern.pos(),
+              "Variable '%s' is not defined.", pattern.name()->cString());
+          
+          // Put a fake index in so we can continue and report more errors.
+          index = 0;
+        }
+        
+        pattern.setResolved(new ResolvedName(module, index));
       }
-      
-      pattern.setResolved(new ResolvedName(module, index));
+      else
+      {
+        // Declaring a local variable, so create a slot for it.
+        gc<ResolvedName> resolved = resolver_.makeLocal(pattern.pos(),
+                                                        pattern.name());
+        pattern.setResolved(resolved);
+      }
     }
-    else
-    {
-      // Declaring a local variable, so create a slot for it.
-      gc<ResolvedName> resolved = resolver_.makeLocal(pattern.pos(),
-                                                      pattern.name());
-      pattern.setResolved(resolved);
-    }
-        
+    
     if (!pattern.pattern().isNull())
     {
       pattern.pattern()->accept(*this, dummy);
     }
-  }
-  
-  void Scope::visit(WildcardPattern& pattern, int dummy)
-  {
-    // Nothing to do.
   }
 }

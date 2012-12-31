@@ -199,7 +199,7 @@ namespace magpie
   public:
     static MethodOrder compare(gc<Pattern> a, gc<Pattern> b);
 
-    PatternComparer(Pattern& other, MethodOrder* result)
+    PatternComparer(gc<Pattern> other, MethodOrder* result)
     : other_(other),
       result_(result)
     {}
@@ -208,12 +208,14 @@ namespace magpie
     virtual void visit(TypePattern& node, int dummy);
     virtual void visit(ValuePattern& node, int dummy);
     virtual void visit(VariablePattern& node, int dummy);
-    virtual void visit(WildcardPattern& node, int dummy);
 
   private:
-    Pattern& other_;
+    gc<Pattern> other_;
     MethodOrder* result_;
 
+    // Variable patterns don't affect pattern ordering, so this steps through
+    // them into their inner pattern. May return NULL.
+    static gc<Pattern> skipVariables(gc<Pattern> pattern);
     MethodOrder compareRecords(RecordPattern& a, RecordPattern& b);
   };
 }

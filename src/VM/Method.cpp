@@ -393,20 +393,8 @@ namespace magpie
 
   MethodOrder PatternComparer::compare(gc<Pattern> a, gc<Pattern> b)
   {
-    VariablePattern* variable = b->asVariablePattern();
-    if (variable != NULL)
-    {
-      b = variable->pattern();
-      // TODO(bob): Hackish. Treat variables without inner patterns as wildcards
-      // by manually creating a WildcardPattern. Lame.
-      if (b.isNull())
-      {
-        b = new WildcardPattern(variable->pos());
-      }
-    }
-
     MethodOrder result = ORDER_NONE;
-    PatternComparer comparer(*b, &result);
+    PatternComparer comparer(skipVariables(b), &result);
     a->accept(comparer, -1);
     
     return result;
@@ -414,80 +402,125 @@ namespace magpie
 
   void PatternComparer::visit(RecordPattern& node, int dummy)
   {
-    if (other_.asRecordPattern() != NULL) {
-      *result_ = compareRecords(node, *other_.asRecordPattern());
-    } else if (other_.asTypePattern() != NULL) {
+    if (other_.isNull())
+    {
+      *result_ = ORDER_BEFORE;
+    }
+    else if (other_->asRecordPattern() != NULL)
+    {
+      *result_ = compareRecords(node, *other_->asRecordPattern());
+    }
+    else if (other_->asTypePattern() != NULL)
+    {
       // TODO(bob): Is this right?
       *result_ = ORDER_NONE;
-    } else if (other_.asValuePattern() != NULL) {
+    }
+    else if (other_->asValuePattern() != NULL)
+    {
       *result_ = ORDER_AFTER;
-    } else if (other_.asWildcardPattern() != NULL) {
-      *result_ = ORDER_BEFORE;
-    } else {
+    }
+    else
+    {
       ASSERT(false, "Unknown pattern type.");
     }
   }
 
   void PatternComparer::visit(TypePattern& node, int dummy)
   {
-    if (other_.asRecordPattern() != NULL) {
+    if (other_.isNull())
+    {
+      *result_ = ORDER_BEFORE;
+    }
+    else if (other_->asRecordPattern() != NULL)
+    {
       // TODO(bob): Is this right?
       *result_ = ORDER_NONE;
-    } else if (other_.asTypePattern() != NULL) {
+    }
+    else if (other_->asTypePattern() != NULL)
+    {
       // TODO(bob): Should compare type relations in hierarchy.
       *result_ = ORDER_EQUAL;
-    } else if (other_.asValuePattern() != NULL) {
+    }
+    else if (other_->asValuePattern() != NULL)
+    {
       *result_ = ORDER_AFTER;
-    } else if (other_.asWildcardPattern() != NULL) {
-      *result_ = ORDER_BEFORE;
-    } else {
+    }
+    else
+    {
       ASSERT(false, "Unknown pattern type.");
     }
   }
 
   void PatternComparer::visit(ValuePattern& node, int dummy)
   {
-    if (other_.asRecordPattern() != NULL) {
-      *result_ = ORDER_NONE;
-    } else if (other_.asTypePattern() != NULL) {
+    if (other_.isNull())
+    {
       *result_ = ORDER_BEFORE;
-    } else if (other_.asValuePattern() != NULL) {
+    }
+    else if (other_->asRecordPattern() != NULL)
+    {
+      *result_ = ORDER_NONE;
+    }
+    else if (other_->asTypePattern() != NULL)
+    {
+      *result_ = ORDER_BEFORE;
+    }
+    else if (other_->asValuePattern() != NULL)
+    {
       // TODO(bob): Check for value collisions.
       *result_ = ORDER_EQUAL;
-    } else if (other_.asWildcardPattern() != NULL) {
-      *result_ = ORDER_BEFORE;
-    } else {
+    }
+    else
+    {
       ASSERT(false, "Unknown pattern type.");
     }
   }
 
   void PatternComparer::visit(VariablePattern& node, int dummy)
   {
-    // TODO(bob): Hackish. Treat variables without inner patterns as wildcards
-    // by manually creating a WildcardPattern. Lame.
-    if (node.pattern().isNull())
+    gc<Pattern> pattern = skipVariables(node.pattern());
+
+    if (pattern.isNull())
     {
-      (new WildcardPattern(node.pos()))->accept(*this, dummy);
-      return;
+      // No inner pattern, so this one is a wildcard.
+      if (other_.isNull())
+      {
+        *result_ = ORDER_EQUAL;
+      }
+      else if (other_->asRecordPattern() != NULL)
+      {
+        *result_ = ORDER_AFTER;
+      }
+      else if (other_->asTypePattern() != NULL)
+      {
+        *result_ = ORDER_AFTER;
+      }
+      else if (other_->asValuePattern() != NULL)
+      {
+        *result_ = ORDER_AFTER;
+      }
+      else
+      {
+        ASSERT(false, "Unknown pattern type.");
+      }
+    }
+    else
+    {
+      // Compare the inner pattern.
+      pattern->accept(*this, dummy);
+    }
+  }
+
+  gc<Pattern> PatternComparer::skipVariables(gc<Pattern> pattern)
+  {
+    while (!pattern.isNull())
+    {
+      VariablePattern* variable = pattern->asVariablePattern();
+      if (variable == NULL) break;
+      pattern = variable->pattern();
     }
 
-    // Just ignore the variable and compare the inner pattern.
-    node.pattern()->accept(*this, dummy);
-  }
-  
-  void PatternComparer::visit(WildcardPattern& node, int dummy)
-  {
-    if (other_.asRecordPattern() != NULL) {
-      *result_ = ORDER_AFTER;
-    } else if (other_.asTypePattern() != NULL) {
-      *result_ = ORDER_AFTER;
-    } else if (other_.asValuePattern() != NULL) {
-      *result_ = ORDER_AFTER;
-    } else if (other_.asWildcardPattern() != NULL) {
-      *result_ = ORDER_EQUAL;
-    } else {
-      ASSERT(false, "Unknown pattern type.");
-    }
+    return pattern;
   }
 
   MethodOrder PatternComparer::compareRecords(RecordPattern& a,

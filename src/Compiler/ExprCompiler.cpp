@@ -167,7 +167,8 @@ namespace magpie
 
       // If we closed over the parameter, then we don't want in a local slot,
       // we want it in the upvar, so create it and copy the value up.
-      if (variable->resolved()->scope() == NAME_CLOSURE)
+      if (*variable->name() != "_" &&
+          variable->resolved()->scope() == NAME_CLOSURE)
       {
         write(variable->pos(),
               OP_SET_UPVAR, variable->resolved()->index(), slot, 1);
@@ -998,18 +999,18 @@ namespace magpie
 
   void PatternCompiler::visit(VariablePattern& pattern, int value)
   {
-    compiler_.compileAssignment(pattern.pos(), pattern.resolved(), value, true);
+    // Assign to the variable if it isn't a throwaway.
+    if (*pattern.name() != "_")
+    {
+      compiler_.compileAssignment(pattern.pos(), pattern.resolved(), value,
+                                  true);
+    }
 
     // Compile the inner pattern.
     if (!pattern.pattern().isNull())
     {
       pattern.pattern()->accept(*this, value);
     }
-  }
-
-  void PatternCompiler::visit(WildcardPattern& pattern, int value)
-  {
-    // Nothing to do.
   }
 
   void PatternCompiler::writeTest(const Pattern& pattern, int slot)
