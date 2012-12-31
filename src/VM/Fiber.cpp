@@ -287,15 +287,15 @@ namespace magpie
           
         case OP_EQUAL:
         {
-          gc<Object> a = loadSlotOrConstant(frame, GET_A(ins));
-          gc<Object> b = loadSlotOrConstant(frame, GET_B(ins));
+          gc<Object> a = load(frame, GET_A(ins));
+          gc<Object> b = load(frame, GET_B(ins));
           store(frame, GET_C(ins), vm_.getBool(Object::equal(a, b)));
           break;
         }
           
         case OP_NOT:
         {
-          gc<Object> value = loadSlotOrConstant(frame, GET_A(ins));
+          gc<Object> value = load(frame, GET_A(ins));
           
           // TODO(bob): Handle user-defined types.
           bool result = !value->toBool();
@@ -391,7 +391,7 @@ namespace magpie
 
         case OP_RETURN:
         {
-          gc<Object> value = loadSlotOrConstant(frame, GET_A(ins));
+          gc<Object> value = load(frame, GET_A(ins));
           callFrames_.removeAt(-1);
           
           // Discard any try blocks enclosed in the current chunk.
@@ -580,18 +580,6 @@ namespace magpie
     return true;
   }
   
-  gc<Object> Fiber::loadSlotOrConstant(const CallFrame& frame, int index)
-  {
-    if (IS_CONSTANT(index))
-    {
-      return frame.function->chunk()->getConstant(GET_CONSTANT(index));
-    }
-    else
-    {
-      return load(frame, index);
-    }
-  }
-
   gc<FunctionObject> Fiber::loadFunction(CallFrame& frame, int chunkSlot)
   {
     Chunk& chunk = *frame.function->chunk();

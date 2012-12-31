@@ -156,8 +156,6 @@ namespace magpie
     // or false if the error unwound the entire callstack.
     bool throwError(gc<Object> error);
 
-    gc<Object> loadSlotOrConstant(const CallFrame& frame, int index);
-
     gc<FunctionObject> loadFunction(CallFrame& frame, int chunkSlot);
 
     // Gets the number of slots that are currently active on the stack.

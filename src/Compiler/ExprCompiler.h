@@ -90,21 +90,6 @@ namespace magpie
 
     void compileMatch(const Array<MatchClause>& clauses, int dest);
 
-    // Compiles the given expr. If it's a constant expr, it adds the constant
-    // to the method table and returns the constant id (with the mask bit set).
-    // Otherwise, creates a temporary slot and compiles the expr to evaluate
-    // into that. It then returns the shot. The caller is required to release
-    // release that slot when done with it.
-    //
-    // Some instructions like OP_END and OP_ADD can read an operand from a
-    // slot or a constant. This is used to compile the operands for those.
-    int compileExpressionOrConstant(gc<Expr> expr);
-
-    int compileConstant(const CharacterExpr& expr);
-    int compileConstant(const FloatExpr& expr);
-    int compileConstant(const IntExpr& expr);
-    int compileConstant(const StringExpr& expr);
-
     // Compiles a method call. If `valueSlot` is -1, then it's a regular call.
     // Otherwise, it's a call to a setter, and `valueSlot` is the slot holding
     // the right-hand side value.

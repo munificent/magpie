@@ -1,7 +1,6 @@
 #pragma once
 
 #define MAKE_ABC(a, b, c, op)          ((a << 24) | (b << 16) | (c << 8) | op)
-#define MAKE_AxC(a, c, op)             ((a << 16) | (c << 8) | op)
 
 // Macros for destructuring instructions.
 
@@ -9,14 +8,6 @@
 #define GET_A(i)  (static_cast<int>(((i) & 0xff000000) >> 24))
 #define GET_B(i)  (static_cast<int>(((i) & 0x00ff0000) >> 16))
 #define GET_C(i)  (static_cast<int>(((i) & 0x0000ff00) >>  8))
-
-#define GET_Ax(i) (static_cast<int>(((i) & 0xffff0000) >> 16))
-
-#define IS_CONSTANT(i) (((i) & 0x80) == 0x80)
-#define IS_SLOT(i) (((i) & 0x80) == 0x00)
-
-#define GET_CONSTANT(i) ((i) & 0x7f)
-#define MAKE_CONSTANT(i) ((i) | 0x80)
 
 namespace magpie
 {

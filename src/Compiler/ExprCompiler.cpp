@@ -290,7 +290,10 @@ namespace magpie
 
   void ExprCompiler::visit(CharacterExpr& expr, int dest)
   {
-    int index = compileConstant(expr);
+    // TODO(bob): Putting characters in the constant table is overkill for most
+    // characters. Should have an inline opcode for at least basic ASCII or BMP
+    // ones.
+    int index = chunk_->addConstant(new CharacterObject(expr.value()));
     write(expr, OP_CONSTANT, index, dest);
   }
   
@@ -337,7 +340,7 @@ namespace magpie
 
   void ExprCompiler::visit(FloatExpr& expr, int dest)
   {
-    int index = compileConstant(expr);
+    int index = chunk_->addConstant(new FloatObject(expr.value()));
     write(expr, OP_CONSTANT, index, dest);
   }
   
@@ -446,7 +449,7 @@ namespace magpie
 
   void ExprCompiler::visit(IntExpr& expr, int dest)
   {
-    int index = compileConstant(expr);
+    int index = chunk_->addConstant(new IntObject(expr.value()));
     write(expr, OP_CONSTANT, index, dest);
   }
   
@@ -601,7 +604,7 @@ namespace magpie
 
   void ExprCompiler::visit(StringExpr& expr, int dest)
   {
-    int index = compileConstant(expr);
+    int index = chunk_->addConstant(new StringObject(expr.value()));
     write(expr, OP_CONSTANT, index, dest);
   }
 
@@ -715,62 +718,6 @@ namespace magpie
     {
       endJump(endJumps[i], OP_JUMP, 1);
     }
-  }
-
-  int ExprCompiler::compileExpressionOrConstant(gc<Expr> expr)
-  {
-    const CharacterExpr* character = expr->asCharacterExpr();
-    if (character != NULL)
-    {
-      return MAKE_CONSTANT(compileConstant(*character));
-    }
-
-    const FloatExpr* float_ = expr->asFloatExpr();
-    if (float_ != NULL)
-    {
-      return MAKE_CONSTANT(compileConstant(*float_));
-    }
-
-    const IntExpr* int_ = expr->asIntExpr();
-    if (int_ != NULL)
-    {
-      return MAKE_CONSTANT(compileConstant(*int_));
-    }
-
-
-    const StringExpr* string = expr->asStringExpr();
-    if (string != NULL)
-    {
-      return MAKE_CONSTANT(compileConstant(*string));
-    }
-
-    int dest = makeTemp();
-
-    compile(expr, dest);
-    return dest;
-  }
-
-  int ExprCompiler::compileConstant(const CharacterExpr& expr)
-  {
-    // TODO(bob): Putting characters in the constant table is overkill for most
-    // characters. Should have an inline opcode for at least basic ASCII or BMP
-    // ones.
-    return chunk_->addConstant(new CharacterObject(expr.value()));
-  }
-
-  int ExprCompiler::compileConstant(const FloatExpr& expr)
-  {
-    return chunk_->addConstant(new FloatObject(expr.value()));
-  }
-
-  int ExprCompiler::compileConstant(const IntExpr& expr)
-  {
-    return chunk_->addConstant(new IntObject(expr.value()));
-  }
-  
-  int ExprCompiler::compileConstant(const StringExpr& expr)
-  {
-    return chunk_->addConstant(new StringObject(expr.value()));
   }
 
   void ExprCompiler::compileCall(const CallExpr& call, int dest,
