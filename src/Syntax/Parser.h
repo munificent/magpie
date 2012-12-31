@@ -157,4 +157,67 @@ namespace magpie
     
     NO_COPY(Parser);
   };
+
+  // Given the body of a "fn" expression without a parameter pattern, walks the
+  // body to find implicit parameters ("_"). Returns a new FnExpr with a valid
+  // pattern and with all occurrences of implicit parameters in the body
+  // replaced with references to the generated parameters.
+  class ImplicitParameterTransformer : public ExprVisitor /*, private LValueVisitor */
+  {
+  public:
+    static void transform(gc<Expr>& body, gc<Pattern>& pattern);
+
+  private:
+    ImplicitParameterTransformer();
+
+    virtual void visit(AndExpr& expr, int dummy);
+    virtual void visit(AssignExpr& expr, int dest);
+    virtual void visit(AsyncExpr& expr, int dummy);
+    virtual void visit(BoolExpr& expr, int dummy);
+    virtual void visit(BreakExpr& expr, int dummy);
+    virtual void visit(CallExpr& expr, int dummy);
+    virtual void visit(CatchExpr& expr, int dummy);
+    virtual void visit(CharacterExpr& expr, int dummy);
+    virtual void visit(DefExpr& expr, int dummy);
+    virtual void visit(DefClassExpr& expr, int dummy);
+    virtual void visit(DoExpr& expr, int dummy);
+    virtual void visit(FloatExpr& expr, int dummy);
+    virtual void visit(FnExpr& expr, int dummy);
+    virtual void visit(ForExpr& expr, int dummy);
+    virtual void visit(GetFieldExpr& expr, int dummy);
+    virtual void visit(IfExpr& expr, int dummy);
+    virtual void visit(ImportExpr& expr, int dummy);
+    virtual void visit(IntExpr& expr, int dummy);
+    virtual void visit(IsExpr& expr, int dummy);
+    virtual void visit(ListExpr& expr, int dummy);
+    virtual void visit(MatchExpr& expr, int dummy);
+    virtual void visit(NameExpr& expr, int dummy);
+    virtual void visit(NativeExpr& expr, int dest);
+    virtual void visit(NotExpr& expr, int dummy);
+    virtual void visit(NothingExpr& expr, int dummy);
+    virtual void visit(OrExpr& expr, int dummy);
+    virtual void visit(RecordExpr& expr, int dummy);
+    virtual void visit(ReturnExpr& expr, int dummy);
+    virtual void visit(SequenceExpr& expr, int dummy);
+    virtual void visit(SetFieldExpr& expr, int dummy);
+    virtual void visit(StringExpr& expr, int dummy);
+    virtual void visit(ThrowExpr& expr, int dummy);
+    virtual void visit(VariableExpr& expr, int dummy);
+    virtual void visit(WhileExpr& expr, int dummy);
+
+    /*
+    virtual void visit(CallLValue& lvalue, int dummy);
+    virtual void visit(NameLValue& lvalue, int dummy);
+    virtual void visit(RecordLValue& lvalue, int dummy);
+    virtual void visit(WildcardLValue& lvalue, int dummy);
+    */
+
+    void replace(gc<Expr> expr);
+    gc<Expr> transform(gc<Expr> expr);
+
+    int numParams_;
+    Array<gc<Expr> > results_;
+
+    NO_COPY(ImplicitParameterTransformer);
+  };
 }

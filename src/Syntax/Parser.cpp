@@ -584,22 +584,33 @@ namespace magpie
   
   gc<Expr> Parser::function(gc<Token> token)
   {
-    consume(TOKEN_LEFT_PAREN, "Expect '(' after 'fn'.");
-
-    // Allow an empty pattern.
     gc<Pattern> pattern;
-    if (!match(TOKEN_RIGHT_PAREN))
+    bool hasPattern = false;
+    if (match(TOKEN_LEFT_PAREN))
     {
-      pattern = parsePattern(false);
-      consume(TOKEN_RIGHT_PAREN, "Expect ')' after function pattern.");
+      // Allow an empty pattern.
+      if (!match(TOKEN_RIGHT_PAREN))
+      {
+        pattern = parsePattern(false);
+        consume(TOKEN_RIGHT_PAREN, "Expect ')' after function pattern.");
+      }
+
+      hasPattern = true;
     }
 
+    gc<Expr> body = parseBlock();
+
+    // If we didn't get a pattern, generate one from the implicit parameters.
+    if (!hasPattern)
+    {
+      ImplicitParameterTransformer::transform(body, pattern);
+    }
+    
     // Expand the pattern to what we need to correctly destructure the packed
     // argument. We do this here so that the AST has been set up before
     // resolving.
     pattern = expandFunctionPattern(spanFrom(token), pattern);
     
-    gc<Expr> body = parseBlock();
     return new FnExpr(spanFrom(token), pattern, body);
   }
 
@@ -1150,6 +1161,281 @@ namespace magpie
         read_.enqueue(token);
       }
     }
+  }
+
+  ImplicitParameterTransformer::ImplicitParameterTransformer()
+  : numParams_(0),
+    results_()
+  {}
+  
+  void ImplicitParameterTransformer::transform(gc<Expr>& body,
+                                               gc<Pattern>& pattern)
+  {
+    ImplicitParameterTransformer transformer;
+
+    // Walk the body, counting the implicit paramters and replacing references
+    // to them with generated parameter names.
+    body = transformer.transform(body);
+
+    // TODO(bob): Use a better position for this.
+    // Create a pattern that binds all of the implicit parameters.
+    if (transformer.numParams_ > 0)
+    {
+      Array<PatternField> fields;
+      for (int i = 0; i < transformer.numParams_; i++)
+      {
+        gc<Pattern> field = new VariablePattern(body->pos(),
+                                                String::format("implicit %d", i), NULL);
+        fields.add(PatternField(String::format("%d", i), field));
+      }
+
+      pattern = new RecordPattern(body->pos(), fields);
+    }
+  }
+
+  void ImplicitParameterTransformer::visit(AndExpr& expr, int dummy)
+  {
+    replace(new AndExpr(expr.pos(),
+                        transform(expr.left()),
+                        transform(expr.right())));
+  }
+
+  void ImplicitParameterTransformer::visit(AssignExpr& expr, int dummy)
+  {
+    ASSERT(false, "Assign not implemented.");
+  }
+
+  void ImplicitParameterTransformer::visit(AsyncExpr& expr, int dummy)
+  {
+    ASSERT(false, "Async not implemented.");
+  }
+
+  void ImplicitParameterTransformer::visit(BoolExpr& expr, int dummy)
+  {
+    // Do nothing.
+  }
+
+  void ImplicitParameterTransformer::visit(BreakExpr& expr, int dummy)
+  {
+    // Do nothing.
+  }
+
+  void ImplicitParameterTransformer::visit(CallExpr& expr, int dummy)
+  {
+    replace(new CallExpr(expr.pos(),
+                         transform(expr.leftArg()),
+                         expr.name(),
+                         transform(expr.rightArg())));
+  }
+
+  void ImplicitParameterTransformer::visit(CatchExpr& expr, int dummy)
+  {
+    // Transform the body before the clauses since it appears first.
+    gc<Expr> body = transform(expr.body());
+
+    Array<MatchClause> clauses;
+    for (int i = 0; i < expr.catches().count(); i++)
+    {
+      // TODO(bob): Transform pattern too in case it contains expressions?
+      clauses.add(MatchClause(expr.catches()[i].pattern(),
+                              transform(expr.catches()[i].body())));
+    }
+
+    replace(new CatchExpr(expr.pos(), body, clauses));
+  }
+
+  void ImplicitParameterTransformer::visit(CharacterExpr& expr, int dummy)
+  {
+    // Do nothing.
+  }
+
+  void ImplicitParameterTransformer::visit(DefExpr& expr, int dummy)
+  {
+    ASSERT(false, "'def' should not occur inside a function.");
+  }
+
+  void ImplicitParameterTransformer::visit(DefClassExpr& expr, int dummy)
+  {
+    ASSERT(false, "'defclass' should not occur inside a function.");
+  }
+
+  void ImplicitParameterTransformer::visit(DoExpr& expr, int dummy)
+  {
+    replace(new DoExpr(expr.pos(), transform(expr.body())));
+  }
+
+  void ImplicitParameterTransformer::visit(FloatExpr& expr, int dummy)
+  {
+    // Do nothing.
+  }
+
+  void ImplicitParameterTransformer::visit(FnExpr& expr, int dummy)
+  {
+    ASSERT(false, "Fn not implemented.");
+  }
+
+  void ImplicitParameterTransformer::visit(ForExpr& expr, int dummy)
+  {
+    // TODO(bob): Transform pattern too in case it contains expressions?
+    replace(new ForExpr(expr.pos(), expr.pattern(),
+                        transform(expr.iterator()),
+                        transform(expr.body())));
+  }
+
+  void ImplicitParameterTransformer::visit(GetFieldExpr& expr, int dummy)
+  {
+    // TODO(bob): This really shouldn't be an AST node. It should just be part
+    // of some IR.
+    // Do nothing.
+  }
+
+  void ImplicitParameterTransformer::visit(IfExpr& expr, int dummy)
+  {
+    replace(new IfExpr(expr.pos(),
+                       transform(expr.condition()),
+                       transform(expr.thenArm()),
+                       transform(expr.elseArm())));
+  }
+
+  void ImplicitParameterTransformer::visit(ImportExpr& expr, int dummy)
+  {
+    // Do nothing.
+  }
+
+  void ImplicitParameterTransformer::visit(IntExpr& expr, int dummy)
+  {
+    // Do nothing.
+  }
+
+  void ImplicitParameterTransformer::visit(IsExpr& expr, int dummy)
+  {
+    replace(new IsExpr(expr.pos(),
+                       transform(expr.value()),
+                       transform(expr.type()))); 
+  }
+
+  void ImplicitParameterTransformer::visit(ListExpr& expr, int dummy)
+  {
+    Array<gc<Expr> > elements;
+
+    for (int i = 0; i < expr.elements().count(); i++)
+    {
+      elements.add(transform(expr.elements()[i]));
+    }
+
+    replace(new ListExpr(expr.pos(), elements));
+  }
+
+  void ImplicitParameterTransformer::visit(MatchExpr& expr, int dummy)
+  {
+    ASSERT(false, "Match not implemented.");
+  }
+
+  void ImplicitParameterTransformer::visit(NameExpr& expr, int dummy)
+  {
+    // If it's an implicit parameter, replaced it with a generated symbol.
+    if (*expr.name() == "_")
+    {
+      replace(new NameExpr(expr.pos(),
+                           String::format("implicit %d", numParams_)));
+      numParams_++;
+    }
+  }
+
+  void ImplicitParameterTransformer::visit(NativeExpr& expr, int dummy)
+  {
+    // Do nothing.
+  }
+
+  void ImplicitParameterTransformer::visit(NotExpr& expr, int dummy)
+  {
+    replace(new NotExpr(expr.pos(), transform(expr.value())));
+  }
+
+  void ImplicitParameterTransformer::visit(NothingExpr& expr, int dummy)
+  {
+    // Do nothing.
+  }
+
+  void ImplicitParameterTransformer::visit(OrExpr& expr, int dummy)
+  {
+    replace(new OrExpr(expr.pos(),
+                       transform(expr.left()),
+                       transform(expr.right())));
+  }
+
+  void ImplicitParameterTransformer::visit(RecordExpr& expr, int dummy)
+  {
+    Array<Field> fields;
+
+    for (int i = 0; i < expr.fields().count(); i++)
+    {
+      fields.add(Field(expr.fields()[i].name,
+                       transform(expr.fields()[i].value)));
+
+    }
+
+    replace(new RecordExpr(expr.pos(), fields));
+  }
+
+  void ImplicitParameterTransformer::visit(ReturnExpr& expr, int dummy)
+  {
+    replace(new ReturnExpr(expr.pos(), transform(expr.value())));
+  }
+
+  void ImplicitParameterTransformer::visit(SequenceExpr& expr, int dummy)
+  {
+    Array<gc<Expr> > exprs;
+
+    for (int i = 0; i < expr.expressions().count(); i++)
+    {
+      exprs.add(transform(expr.expressions()[i]));
+    }
+
+    replace(new SequenceExpr(expr.pos(), exprs));
+  }
+
+  void ImplicitParameterTransformer::visit(SetFieldExpr& expr, int dummy)
+  {
+    // TODO(bob): This really shouldn't be an AST node. It should just be part
+    // of some IR.
+    // Do nothing.
+  }
+
+  void ImplicitParameterTransformer::visit(StringExpr& expr, int dummy)
+  {
+    // Do nothing.
+  }
+
+  void ImplicitParameterTransformer::visit(ThrowExpr& expr, int dummy)
+  {
+    replace(new ThrowExpr(expr.pos(), transform(expr.value())));
+  }
+
+  void ImplicitParameterTransformer::visit(VariableExpr& expr, int dummy)
+  {
+    ASSERT(false, "Variable not implemented.");
+  }
+
+  void ImplicitParameterTransformer::visit(WhileExpr& expr, int dest)
+  {
+    replace(new WhileExpr(expr.pos(),
+                          transform(expr.condition()),
+                          transform(expr.body())));
+  }
+
+  void ImplicitParameterTransformer::replace(gc<Expr> expr)
+  {
+    results_[-1] = expr;
+  }
+
+  gc<Expr> ImplicitParameterTransformer::transform(gc<Expr> expr)
+  {
+    if (expr.isNull()) return expr;
+    
+    results_.add(expr);
+    expr->accept(*this, -1);
+    return results_.removeAt(-1);
   }
 }
 

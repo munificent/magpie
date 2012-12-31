@@ -15,38 +15,3 @@ do
     var f = fn() "hel" + "lo"
     print(f call) // expect: hello
 end
-
-// TODO(bob): Implement these:
-/*
-specify("A 'fn' expression") with
-    it should("bind the argument to the parameter") with
-        var result = nothing
-        val f = fn(a) result = a
-        f call("one")
-        result shouldEqual("one")
-
-        f call("two")
-        result shouldEqual("two")
-    end
-
-    it should("bind a record argument to the parameter") with
-        val f = fn(arg)
-            var a, b = arg
-            a + b
-        end
-        f call("one", "two") shouldEqual("onetwo")
-    end
-
-    it should("allow omitting the parameter declaration") with
-        (fn "return") call() shouldEqual("return")
-    end
-
-    it should("throw a NoMethodError if the argument doesn't match the " +
-              "pattern") with
-        val f = fn (n is Int) n
-        fn
-            f call("not int")
-        end shouldThrow(NoMethodError)
-    end
-end
-*/

@@ -1,0 +1,80 @@
+// TODO(bob): Implicit parameters in:
+// - assign expr
+// - async expr
+// - (nested) fn expr
+// - match expr
+// - variable expr
+
+// A function with no () and no _ takes no parameters.
+(fn print("no params")) call // expect: no params
+
+// "_" can be used to define implicit parameters, in the order they appear.
+(fn print(_)) call("one param") // expect: one param
+(fn print(_ + _)) call("two", " params") // expect: two params
+(fn print(_ + _ + _)) call("three", " ", "params") // expect: three params
+
+def (a) foo(b, c)
+    print(a + " foo(" + b + ", " + c + ")")
+end
+
+// Transform and expression.
+fn
+    print(_ and _)
+end call(true, false) // expect: false
+
+// Transform call expression.
+fn
+    _ foo(_, _)
+end call("a", "b", "c") // expect: a foo(b, c)
+
+// Transform do expression.
+fn
+    do
+        print(_)
+    end
+end call("do") // expect: do
+
+// Transform for expression.
+fn
+    for i in 1..1 do print(_)
+end call("for") // expect: for
+
+// Transform if expression.
+fn
+    if 1 < 2 then print(_)
+end call("if") // expect: if
+
+// Transform list expression.
+fn
+    print([_, _, _])
+end call(1, 2, 3) // expect: [1, 2, 3]
+
+// Transform not expression.
+fn
+    print(not _)
+end call(true) // expect: false
+
+// Transform or expression.
+fn
+    print(_ or _)
+end call(true, false) // expect: true
+
+// Transform return expression.
+fn
+    return print(_)
+end call("return") // expect: return
+
+// Transform catch and throw expressions.
+fn
+    do
+        throw _
+    catch a then print(a)
+end call("throw") // expect: throw
+
+// Transform while expression.
+fn
+    while _ do
+        print(_)
+        break
+    end
+end call(true, "while") // expect: while
