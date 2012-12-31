@@ -1,8 +1,12 @@
 // Filtering a collection
 
+items where(n => n % 2 == 0)
+items where(fn n in n % 2 == 0)
 items where(fn(n) n % 2 == 0)
 items where(n -> n % 2 == 0)
+items where(-> _ % 2 == 0)
 items where(_ % 2 == 0)
+items where(fn _ % 2 == 0)
 items filter with it % 2 == 0
 items filter with it in it % 2 == 0
 items where by it in it % 2 == 0
