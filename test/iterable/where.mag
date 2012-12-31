@@ -9,6 +9,9 @@ end
 // expect: 4
 // expect: 6
 
+// Works on any iterable type.
+print("abcbd" where(fn(c) c != 'b') toList) // expect: [a, c, d]
+
 // Result is lazy.
 val filtered = [1, 2, 3, 4, 5, 6] where(fn(a) print(a % 2 == 0))
 print("before") // expect: before

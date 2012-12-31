@@ -266,13 +266,20 @@ def (iterator is IndexableIterator) advance
     end
 end
 
-def (list is List) where(predicate is Function)
+// TODO(bob): Test this.
+def generate(function is Function)
     val channel = Channel new
     async
-        for item in list do if predicate call(item) then channel send(item)
+        function call(channel)
         channel close
     end
     channel
+end
+
+def (iterable is Iterable) where(predicate is Function)
+    generate(fn(channel)
+        for item in iterable do if predicate call(item) then channel send(item)
+    end)
 end
 
 // TODO(bob): What about floating point ranges?
