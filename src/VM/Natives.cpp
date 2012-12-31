@@ -36,6 +36,16 @@ namespace magpie
     return new StringObject(args[0]->toString());
   }
 
+  NATIVE(objectEqualsObject)
+  {
+    return vm.getBool(Object::equal(args[0], args[1]));
+  }
+
+  NATIVE(objectNotEqualsObject)
+  {
+    return vm.getBool(!Object::equal(args[0], args[1]));
+  }
+
   NATIVE(printString)
   {
     std::cout << args[0]->toString() << std::endl;

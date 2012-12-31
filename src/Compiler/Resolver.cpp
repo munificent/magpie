@@ -311,12 +311,6 @@ namespace magpie
     resolve(compiler_, module_, this, &expr.resolved(), false, NULL, NULL,
             NULL, expr.body());
   }
-
-  void Resolver::visit(BinaryOpExpr& expr, int dummy)
-  {
-    resolve(expr.left());
-    resolve(expr.right());
-  }
   
   void Resolver::visit(BoolExpr& expr, int dummy)
   {

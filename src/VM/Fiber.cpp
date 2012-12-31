@@ -289,75 +289,7 @@ namespace magpie
         {
           gc<Object> a = loadSlotOrConstant(frame, GET_A(ins));
           gc<Object> b = loadSlotOrConstant(frame, GET_B(ins));
-          
-          // See if the objects are equal. If they have the same identity, they
-          // must be.
-          bool equal;
-          if (a.sameAs(b))
-          {
-            equal = true;
-          }
-          else if (a->type() != b->type())
-          {
-            // Different types, so not equal.
-            equal = false;
-          }
-          else
-          {
-            // Same type, so compare values.
-            switch (a->type())
-            {
-              case OBJECT_BOOL:
-                equal = a->toBool() == b->toBool();
-                break;
-
-              case OBJECT_CHARACTER:
-                equal = a->asCharacter()->value() == b->asCharacter()->value();
-                break;
-
-              case OBJECT_CHANNEL:
-                ASSERT(false, "Equality on channels not implemented.");
-                break;
-                
-              case OBJECT_DYNAMIC:
-                ASSERT(false, "Equality on arbitrary objects not implemented.");
-                break;
-
-              case OBJECT_FLOAT:
-                equal = a->asFloat() == b->asFloat();
-                break;
-
-              case OBJECT_INT:
-                equal = a->asInt() == b->asInt();
-                break;
-                
-              case OBJECT_LIST:
-                ASSERT(false, "Equality on lists not implemented.");
-                break;
-                
-              case OBJECT_NOTHING:
-                ASSERT(false, "Should only be one instance of nothing.");
-                break;
-                
-              case OBJECT_RECORD:
-                ASSERT(false, "Equality on records not implemented.");
-                break;
-                
-              case OBJECT_STRING:
-                equal = a->asString() == b->asString();
-                break;
-
-              case OBJECT_CLASS:
-              case OBJECT_FILE:
-              case OBJECT_FUNCTION:
-                // Equality is based on identity, so if we get here, they
-                // aren't equal.
-                equal = false;
-              break;
-            }
-          }
-
-          store(frame, GET_C(ins), vm_.getBool(equal));
+          store(frame, GET_C(ins), vm_.getBool(Object::equal(a, b)));
           break;
         }
           

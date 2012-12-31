@@ -8,11 +8,63 @@ namespace magpie
 {
   using std::ostream;
 
+  bool Object::equal(gc<Object> a, gc<Object> b)
+  {
+    // If they have the same identity, they must be equal.
+    if (a.sameAs(b)) return true;
+
+    // TODO(bob): Use double-dispatch pattern here?
+    // Different types are never equal since they can have different methods
+    // and thus different user-visible behavior.
+    if (a->type() != b->type()) return false;
+
+    // Same type, so compare values.
+    switch (a->type())
+    {
+      case OBJECT_BOOL:
+        return a->toBool() == b->toBool();
+
+      case OBJECT_CHARACTER:
+        return a->asCharacter()->value() == b->asCharacter()->value();
+
+      case OBJECT_FLOAT:
+        return a->asFloat() == b->asFloat();
+
+      case OBJECT_INT:
+        return a->asInt() == b->asInt();
+
+      case OBJECT_NOTHING:
+        ASSERT(false, "Should only be one instance of nothing.");
+        break;
+
+      case OBJECT_RECORD:
+        ASSERT(false, "Equality on records not implemented.");
+        break;
+
+      case OBJECT_STRING:
+        return a->asString() == b->asString();
+        break;
+
+      case OBJECT_CHANNEL:
+      case OBJECT_CLASS:
+      case OBJECT_DYNAMIC:
+      case OBJECT_FILE:
+      case OBJECT_FUNCTION:
+      case OBJECT_LIST:
+        // Equality is based on identity, so if we get here, they
+        // aren't equal.
+        return false;
+    }
+
+    UNREACHABLE();
+    return false;
+  }
+  
   void Object::trace(std::ostream& stream) const
   {
     stream << toString();
   }
-  
+
   gc<ClassObject> BoolObject::getClass(VM& vm) const
   {
     return vm.boolClass();

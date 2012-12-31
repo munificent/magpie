@@ -23,12 +23,6 @@ namespace magpie
   {
     out << "(async " << body_ << ")";
   }
-  
-  void BinaryOpExpr::trace(std::ostream& out) const
-  {
-    out << "(" << left_ << " " << Token::typeString(type_)
-        << " " << right_ << ")";
-  }
 
   void BoolExpr::trace(std::ostream& out) const
   {

@@ -34,8 +34,8 @@ namespace magpie
     { NULL,             &Parser::infixCall, PRECEDENCE_RANGE },       // TOKEN_DOTDOT
     { NULL,             &Parser::infixCall, PRECEDENCE_RANGE },       // TOKEN_DOTDOTDOT
     { NULL,             &Parser::assignment, PRECEDENCE_ASSIGNMENT }, // TOKEN_EQ
-    { NULL,             &Parser::binaryOp, PRECEDENCE_EQUALITY },     // TOKEN_EQEQ
-    { NULL,             &Parser::binaryOp, PRECEDENCE_EQUALITY },     // TOKEN_NEQ
+    { NULL,             &Parser::infixCall, PRECEDENCE_EQUALITY },    // TOKEN_EQEQ
+    { NULL,             &Parser::infixCall, PRECEDENCE_EQUALITY },    // TOKEN_NEQ
     { NULL,             &Parser::infixCall, PRECEDENCE_COMPARISON },  // TOKEN_COMPARISON
     { NULL,             &Parser::infixCall, PRECEDENCE_TERM },        // TOKEN_TERM_OP
     { NULL,             &Parser::infixCall, PRECEDENCE_PRODUCT },     // TOKEN_PRODUCT_OP
@@ -750,15 +750,6 @@ namespace magpie
     return new AssignExpr(spanFrom(left), lvalue, value);
   }
   
-  gc<Expr> Parser::binaryOp(gc<Expr> left, gc<Token> token)
-  {
-    // TODO(bob): Support right-associative infix. Needs to do precedence
-    // - 1 here, to be right-assoc.
-    gc<Expr> right = parsePrecedence(expressions_[token->type()].precedence);
-
-    return new BinaryOpExpr(token->pos(), left, token->type(), right);
-  }
-
   gc<Expr> Parser::call(gc<Expr> left, gc<Token> token)
   {
     // See if we have an argument on the right.

@@ -4,7 +4,6 @@
 class AndExpr;
 class AssignExpr;
 class AsyncExpr;
-class BinaryOpExpr;
 class BoolExpr;
 class BreakExpr;
 class CallExpr;
@@ -54,7 +53,6 @@ public:
   virtual void visit(AndExpr& node, int arg) = 0;
   virtual void visit(AssignExpr& node, int arg) = 0;
   virtual void visit(AsyncExpr& node, int arg) = 0;
-  virtual void visit(BinaryOpExpr& node, int arg) = 0;
   virtual void visit(BoolExpr& node, int arg) = 0;
   virtual void visit(BreakExpr& node, int arg) = 0;
   virtual void visit(CallExpr& node, int arg) = 0;
@@ -110,7 +108,6 @@ public:
   virtual AndExpr* asAndExpr() { return NULL; }
   virtual AssignExpr* asAssignExpr() { return NULL; }
   virtual AsyncExpr* asAsyncExpr() { return NULL; }
-  virtual BinaryOpExpr* asBinaryOpExpr() { return NULL; }
   virtual BoolExpr* asBoolExpr() { return NULL; }
   virtual BreakExpr* asBreakExpr() { return NULL; }
   virtual CallExpr* asCallExpr() { return NULL; }
@@ -245,42 +242,6 @@ private:
   gc<Expr> body_;
   ResolvedProcedure resolved_;
   NO_COPY(AsyncExpr);
-};
-
-class BinaryOpExpr : public Expr
-{
-public:
-  BinaryOpExpr(gc<SourcePos> pos, gc<Expr> left, TokenType type, gc<Expr> right)
-  : Expr(pos),
-    left_(left),
-    type_(type),
-    right_(right)
-  {}
-
-  virtual void accept(ExprVisitor& visitor, int arg)
-  {
-    visitor.visit(*this, arg);
-  }
-
-  virtual BinaryOpExpr* asBinaryOpExpr() { return this; }
-
-  gc<Expr> left() const { return left_; }
-  TokenType type() const { return type_; }
-  gc<Expr> right() const { return right_; }
-
-  virtual void reach()
-  {
-    left_.reach();
-    right_.reach();
-  }
-
-  virtual void trace(std::ostream& out) const;
-
-private:
-  gc<Expr> left_;
-  TokenType type_;
-  gc<Expr> right_;
-  NO_COPY(BinaryOpExpr);
 };
 
 class BoolExpr : public Expr

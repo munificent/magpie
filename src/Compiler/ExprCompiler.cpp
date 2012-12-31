@@ -247,30 +247,6 @@ namespace magpie
     compileClosures(expr.pos(), expr.resolved());
   }
 
-  void ExprCompiler::visit(BinaryOpExpr& expr, int dest)
-  {
-    int a = compileExpressionOrConstant(expr.left());
-    int b = compileExpressionOrConstant(expr.right());
-
-    OpCode op;
-    bool negate = false;
-    switch (expr.type())
-    {
-      case TOKEN_EQEQ:   op = OP_EQUAL; break;
-      case TOKEN_NEQ:    op = OP_EQUAL; negate = true; break;
-
-      default:
-        ASSERT(false, "Unknown infix operator.");
-    }
-
-    write(expr, op, a, b, dest);
-
-    if (negate) write(expr, OP_NOT, dest);
-
-    if (IS_SLOT(a)) releaseTemp();
-    if (IS_SLOT(b)) releaseTemp();
-  }
-
   void ExprCompiler::visit(BoolExpr& expr, int dest)
   {
     write(expr, OP_BUILT_IN, expr.value() ? BUILT_IN_TRUE : BUILT_IN_FALSE,

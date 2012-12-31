@@ -58,6 +58,9 @@ while (false) {                                             \
   *(static_cast<T* volatile*>(0)) = static_cast<S*>(0);     \
 }
 
+#define UNREACHABLE() \
+  ASSERT(false, "Unreachable code.");
+
 #define MAX(a, b) ((a > b) ? a : b)
 
 template <typename T> int sgn(T val) {

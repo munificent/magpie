@@ -48,6 +48,9 @@ namespace magpie
   class Object : public Managed
   {
   public:
+    // Compares [a] and [b] for equality using the built-in equality semantics.
+    static bool equal(gc<Object> a, gc<Object> b);
+
     Object() : Managed() {}
     
     virtual ObjectType type() const = 0;

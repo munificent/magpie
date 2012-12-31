@@ -53,6 +53,8 @@ namespace magpie
     DEF_NATIVE(objectClass);
     DEF_NATIVE(objectNew);
     DEF_NATIVE(objectToString);
+    DEF_NATIVE(objectEqualsObject);
+    DEF_NATIVE(objectNotEqualsObject);
     DEF_NATIVE(printString);
     DEF_NATIVE(intPlusInt);
     DEF_NATIVE(intPlusFloat);

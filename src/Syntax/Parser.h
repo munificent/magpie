@@ -73,7 +73,6 @@ namespace magpie
     // Infix expression parsers.
     gc<Expr> and_(gc<Expr> left, gc<Token> token);
     gc<Expr> assignment(gc<Expr> left, gc<Token> token);
-    gc<Expr> binaryOp(gc<Expr> left, gc<Token> token);
     gc<Expr> call(gc<Expr> left, gc<Token> token);
     gc<Expr> infixCall(gc<Expr> left, gc<Token> token);
     gc<Expr> infixRecord(gc<Expr> left, gc<Token> token);

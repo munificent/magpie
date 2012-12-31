@@ -16,6 +16,8 @@ namespace magpie
   NATIVE(objectClass);
   NATIVE(objectNew);
   NATIVE(objectToString);
+  NATIVE(objectEqualsObject);
+  NATIVE(objectNotEqualsObject);
   NATIVE(printString);
   NATIVE(stringPlusString);
   NATIVE(intPlusInt);

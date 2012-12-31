@@ -19,10 +19,6 @@ exprs = sorted({
     'Async': [
         ('body',        'gc<Expr>'),
         ('resolved',    'ResolvedProcedure*')],
-    'BinaryOp': [
-        ('left',        'gc<Expr>'),
-        ('type',        'TokenType'),
-        ('right',       'gc<Expr>')],
     'Bool': [
         ('value',       'bool')],
     'Break': [],

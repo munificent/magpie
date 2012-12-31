@@ -76,7 +76,6 @@ namespace magpie
     virtual void visit(AndExpr& expr, int dummy);
     virtual void visit(AssignExpr& expr, int dest);
     virtual void visit(AsyncExpr& expr, int dummy);
-    virtual void visit(BinaryOpExpr& expr, int dummy);
     virtual void visit(BoolExpr& expr, int dummy);
     virtual void visit(BreakExpr& expr, int dummy);
     virtual void visit(CallExpr& expr, int dummy);
