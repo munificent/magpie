@@ -285,6 +285,12 @@ def (iterable is Iterable) where(predicate is Function)
     end)
 end
 
+def (iterable is Iterable) map(transform is Function)
+    generate(fn(channel)
+        for item in iterable do channel send(transform call(item))
+    end)
+end
+
 // TODO(bob): What about floating point ranges?
 defclass Range
     val first is Int
