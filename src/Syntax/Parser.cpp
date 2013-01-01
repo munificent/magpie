@@ -1202,12 +1202,14 @@ namespace magpie
 
   void ImplicitParameterTransformer::visit(AssignExpr& expr, int dummy)
   {
-    ASSERT(false, "Assign not implemented.");
+    // TODO(bob): Do we need to do anything with the LValue?
+    replace(new AssignExpr(expr.pos(), expr.lvalue(),
+                           transform(expr.value())));
   }
 
   void ImplicitParameterTransformer::visit(AsyncExpr& expr, int dummy)
   {
-    ASSERT(false, "Async not implemented.");
+    replace(new AsyncExpr(expr.pos(), transform(expr.body())));
   }
 
   void ImplicitParameterTransformer::visit(BoolExpr& expr, int dummy)
@@ -1271,7 +1273,8 @@ namespace magpie
 
   void ImplicitParameterTransformer::visit(FnExpr& expr, int dummy)
   {
-    ASSERT(false, "Fn not implemented.");
+    // Do nothing. The inner function has already itself been transformed, and
+    // implicit parameters in this one do not transfer into that one.
   }
 
   void ImplicitParameterTransformer::visit(ForExpr& expr, int dummy)
@@ -1328,7 +1331,18 @@ namespace magpie
 
   void ImplicitParameterTransformer::visit(MatchExpr& expr, int dummy)
   {
-    ASSERT(false, "Match not implemented.");
+    // Transform the value before the clauses since it appears first.
+    gc<Expr> value = transform(expr.value());
+
+    Array<MatchClause> cases;
+    for (int i = 0; i < expr.cases().count(); i++)
+    {
+      // TODO(bob): Transform pattern too in case it contains expressions?
+      cases.add(MatchClause(expr.cases()[i].pattern(),
+                            transform(expr.cases()[i].body())));
+    }
+
+    replace(new MatchExpr(expr.pos(), value, cases));
   }
 
   void ImplicitParameterTransformer::visit(NameExpr& expr, int dummy)
@@ -1414,7 +1428,10 @@ namespace magpie
 
   void ImplicitParameterTransformer::visit(VariableExpr& expr, int dummy)
   {
-    ASSERT(false, "Variable not implemented.");
+    // TODO(bob): Transform pattern too in case it contains expressions?
+    replace(new VariableExpr(expr.pos(), expr.isMutable(),
+                             expr.pattern(),
+                             transform(expr.value())));
   }
 
   void ImplicitParameterTransformer::visit(WhileExpr& expr, int dest)

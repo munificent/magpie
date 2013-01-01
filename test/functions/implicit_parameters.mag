@@ -1,10 +1,3 @@
-// TODO(bob): Implicit parameters in:
-// - assign expr
-// - async expr
-// - (nested) fn expr
-// - match expr
-// - variable expr
-
 // A function with no () and no _ takes no parameters.
 (fn print("no params")) call // expect: no params
 
@@ -22,6 +15,24 @@ fn
     print(_ and _)
 end call(true, false) // expect: false
 
+// Transform assign expression.
+fn
+    var a = "before"
+    a = _
+    print(a)
+end call("assign") // expect: assign
+
+// Transform async expression.
+fn
+    var channel = Channel new
+    async
+        channel send(_)
+        channel send(_)
+    end
+    print(channel receive) // expect: one
+    print(channel receive) // expect: two
+end call("one", "two")
+
 // Transform call expression.
 fn
     _ foo(_, _)
@@ -33,6 +44,14 @@ fn
         print(_)
     end
 end call("do") // expect: do
+
+// Handle nested fn expression.
+fn
+    print(_) // expect: fn
+    fn
+        print(_) // expect: inner
+    end call("inner")
+end call("fn")
 
 // Transform for expression.
 fn
@@ -48,6 +67,14 @@ end call("if") // expect: if
 fn
     print([_, _, _])
 end call(1, 2, 3) // expect: [1, 2, 3]
+
+// Transform match expression.
+fn
+    match _
+        case 0 then print(_)
+        case 1 then print("no")
+    end
+end call(0, "match") // expect: match
 
 // Transform not expression.
 fn
@@ -70,6 +97,13 @@ fn
         throw _
     catch a then print(a)
 end call("throw") // expect: throw
+
+// Transform variable expressions.
+fn
+    val a = _
+    val b = _
+    print(a + b)
+end call("a", "b") // expect: ab
 
 // Transform while expression.
 fn
