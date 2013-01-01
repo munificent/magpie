@@ -15,6 +15,11 @@ Comments are as in C, C++, Java, etc.:
     /* Block comments
        can span multiple lines. */
 
+Unlike those languages, block comments nest in Magpie. That's handy for commenting out chunks of code which may themselves contain block comments.
+
+    :::magpie
+    code /* A /* nested */ block comment */ code code
+
 ## Doc Comments
 
 In addition to regular line and block comments, Magpie has a third kind of comment called *documentation comments* or simply *doc comments*. They start with three slashes and proceed to the end of the line.
@@ -35,26 +40,51 @@ Doc comments are used to document entire constructs: [modules](modules.html), [c
         val state
     end
 
-Doc comments are formatted using [Markdown](http://daringfireball.net/projects/markdown/) and are intended to be parsed to generate offline documentation files.
+Doc comments are formatted using [Markdown](http://daringfireball.net/projects/markdown/) and are intended to be parsed to generate documentation files.
+
+## Reserved Words
+
+Some people like to see all of the reserved words in a programming language in one lump. If you're one of those folks, here you go:
+
+    :::magpie
+    and async break case catch def defclass do end else false
+    fn for if import in is match not nothing or return then
+    throw true val var while xor
+
+Also, the following are *punctuators* in Magpie which means they are both
+reserved words and they can be used to separate tokens:
+
+    :::magpie
+    ( ) [ ] { } , . .. ...
+
+The only built-in operator is `=`. All other operators are just methods, as explained below.
 
 ## Names
 
-Identifiers come in two flavors in Magpie: regular names, and operators. A regular name is any sequence of letters, underscores (`_`), and periods (`.`). Digits may also be used after the first character. Case is sensitive.
+Identifiers are similar to other programming languages. They start with a letter or underscore and may contain letters, digits, and underscores. Case is sensitive.
 
     :::magpie
     hi
-    ._.
     camelCase
     PascalCase
+    _under_score
     abc123
-    d.o.t
-    ...
     ALL_CAPS
 
-Operators are any sequence of punctuation characters from the following set:
+## Operators
+
+Magpie does not many built-in operators. Instead, most are just [methods](multimethods.html) like any other method. However, the grammar of the language does treat them a bit specially.
+
+Lexically, an operator is any sequence of punctuation characters from the following set:
 
     :::magpie
     ~ ! $ % ^ & * - = + | / ? < >
+
+Also, the special tokens `..` and `...` are valid operator names.
+
+<p class="future">
+The exact set of operator characters is still a bit in flux.
+</p>
 
 These are all valid operators:
 
@@ -65,12 +95,26 @@ These are all valid operators:
     ?!
     <=>&^?!
 
-The *only* difference between regular names and operators is the tokenization process&mdash; how the parser splits a series of characters into "words".
+When expressions are parsed, infix operators have the same precedence that you expect from other languages. From lowest to highest:
 
     :::magpie
-    a+b
+    = !
+    < >
+    .. ...
+    + -
+    * / %
 
-This will get parsed into three separate tokens: `a`, `+`, `b`. Once that tokenization is done, though, regular names and operators are both just identifiers. You can use either to name [variables](variables.html) and [methods](multimethods.html), [classes](classes.html), etc.
+Every operator on the same line above has the same precedence. If an operator has multiple characters, the first determines the precedence. So this (unreadable) expression:
+
+    :::magpie
+    a +* b *- c <!! d !> e %< f
+
+Will be parsed like:
+
+    :::magpie
+    (((a +* (b *- c)) <!! d) !> (e %< f))
+
+The goal here is to have code that works more or less like you expect coming from other languages while still being a little more open-ended than those languages.
 
 ## Newlines
 

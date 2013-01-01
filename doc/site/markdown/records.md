@@ -1,6 +1,6 @@
 ^title Records
 
-Sometimes you need a little bundle of values where only a single one is expected. Maybe you want a division method that returns both the dividend *and* the remainder. To support this and much much more, as we'll see, Magpie has *records*. Records are anonymous composite objects.
+Sometimes you need a little bundle of values where only a single one is expected. Maybe you want a division method that returns both the dividend *and* the remainder. To support this and much much more, as we'll see, Magpie has *records*. Records are anonymous, immutable composite objects.
 
 Two little bits of syntax are used for them: fields and commas.
 
@@ -35,4 +35,4 @@ In other words, records in Magpie subsume both named records and [tuples](http:/
     val point = x: 2, y: 3
     drawPoint(x: 2, y: 3)
 
-In fact, *any* time you call a method that takes "multiple" arguments, you're actually just passing a record. Records are used pervasively through the language. Every time you see a comma in code, you're seeing a record (or a record [pattern](patterns.html)).
+In fact, *any* time you call a method that takes "multiple" arguments, you're actually just passing a record. Records are used pervasively through the language. Every time you see a comma in code, you're seeing a record or a record [pattern](patterns.html). (There's one exception, [lists](lists.html) use commas to separate elements too.)

@@ -9,11 +9,6 @@ several built-in classes that deserve special attention and that you'll use to
 as the building blocks for your own classes. They are:
 
 1. [Primitives](primitives.html)
-1. [Arrays](arrays.html)
 1. [Records](records.html)
+1. [Lists](lists.html)
 1. [Functions](functions.html)
-1. [Quotations](quotations.html)
-
-While the built-in types are all different, they have one important thing in common: they are all *immutable*. Once created, they cannot be modified. This is true of things like numbers, of course, but also even strings and arrays. (If you want a mutable array-like object, you'll use a list.)
-
-Immutability may seem like a limitation (and strictly speaking it is), but it has some nice benefits. First, it can make your code easier to understand. If you pass a string or a record to some [method](multimethods.html), you don't have to worry about it changing it on you. More importantly, immutable objects are inherently *concurrency-friendly:* you can share them between threads without having to worry about synchronization or locking.

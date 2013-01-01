@@ -5,12 +5,12 @@ Variables are named slots for storing values. You can define a new variable in M
     :::magpie
     var a = 1 + 2
 
-This creates a new variable `a` in the current scope and initializes it with the result of the expression following the `=`. Like everything, a variable definition is an expression in Magpie. It evaluates to the initialized value:
+This creates a new variable `a` in the current scope and initializes it with the result of the expression following the `=`. Like everything, a variable definition is an expression in Magpie. It evaluates to the initialized value.
 
     :::magpie
     print(var a = "hi") // prints "hi"
 
-Once a variable has been defined, it can be accessed by name as you would expect. If you try to access a variable that doesn't exist, it will [throw](error-handling.html) a `NoVariableError`.
+Once a variable has been defined, it can be accessed by name as you would expect.
 
     :::magpie
     var name = "Abraham Lincoln"
@@ -18,7 +18,7 @@ Once a variable has been defined, it can be accessed by name as you would expect
 
 ## Patterns
 
-In our previous examples, the part between `var` and the `=` has always been a simple name, but what you're seeing there is actually a [pattern](patterns.html). That means any pattern is allowed in a declaration. A simple case is what other languages call "multiple assignment":
+In our previous examples, the part between `var` and the `=` has always been a simple name, but what you're seeing there is actually a [pattern](patterns.html). That means any pattern is allowed in a declaration. A simple case is what other languages call "multiple assignment".
 
     :::magpie
     var x, y = 1, 2
@@ -55,7 +55,7 @@ A variable in Magpie has true block scope: it exists from the point where it is 
 
 All variables are lexically scoped. There is no single global scope in Magpie. Instead, each [module](modules.html) has its own top-level scope that isn't shared with other modules.
 
-Declaring a variable in an inner scope with the same name as an outer one is called *shadowing* and is not an error (although it's not something you likely intend to do much):
+Declaring a variable in an inner scope with the same name as an outer one is called *shadowing* and is not an error (although it's not something you likely intend to do much).
 
     :::magpie
     var a = "outer"
@@ -65,36 +65,41 @@ Declaring a variable in an inner scope with the same name as an outer one is cal
     end
     print(a) // Prints "outer".
 
-Declaring a variable with the same name in the *same* scope *is* an error:
+Declaring a variable with the same name in the *same* scope *is* an error.
 
     :::magpie
     var a = "hi"
     var a = "again" // ERROR!
 
-The second line will [throw](error-handling.html) a `RedefinitionError` when evaluated.
-
 ## Assignment
 
-After a variable has been declared, you can assign to it using `=`:
+After a variable has been declared, you can assign to it using `=`.
 
     :::magpie
     var a = 123
     a = 234
 
-An assignment will walk up the scope stack to find where the named variable is declared. If it can't find a variable with that name, it will throw a `NoVariableError`.
+An assignment will walk up the scope stack to find where the named variable is declared. It's an error to assign to a variable that isn't defined. Magpie doesn't roll with implicit variable definition.
 
-Like variable definition, an assignment expression returns the assigned value:
+Like variable definition, an assignment expression returns the assigned value.
 
     :::magpie
     var a = "before"
-    print(a = "after") // prints "after"
+    print(a = "after") // Prints "after".
+
+You can use can also use record pattern syntax to destructure when assigning to existing variables.
+
+    :::magpie
+    var a, b = 1, 2
+    a, b = 3, 4
+    print(a + ", " + b) // Prints "3, 4".
 
 ## Single-Assignment Variables
 
-The variables we've seen so far all allow assignment. You can prevent that by defining them using `val` instead of `var`:
+The variables we've seen so far all allow assignment. You can prevent that by defining them using `val` instead of `var`.
 
     :::magpie
     val a = "before"
     a = "after" // ERROR!
 
-Whenever possible, prefer using `val` over `var`. Single-assignment variables are easier to understand when reading code since you don't have to hunt around and see if it ever gets reassigned. Arguments to [methods](multimethods.html), variables bound in [pattern match expressions](pattern-matching.html), and [loop iterators](looping.html) are always defined as single-assignment.
+Single-assignment variables can make code easier to understand since you don't have to hunt around and see if they ever gets reassigned. Arguments to [methods](multimethods.html), variables bound in [pattern match expressions](pattern-matching.html), and [loop iterators](looping.html) are always defined as single-assignment.

@@ -1,6 +1,6 @@
 ^title Primitives
 
-Magpie is in its infancy, so it only has a small collection of primitive types built-in. Primitives can be created through *literals*, atomic expressions that evaluate to a value.
+Primitives are the built-in object types that all other objects are composed from. They can be created through *literals*, atomic expressions that evaluate to a value.
 
 All primitive values in Magpie are *immutable*. That means that once created, they cannot be changed. `3` is always `3` and `"hi"` is always `"hi"`.
 
@@ -10,18 +10,24 @@ A boolean value represents truth or falsehood. There are two boolean literals, `
 
 ## Numbers
 
-Magpie doesn't have floating point numbers yet. (I know, I know. I'm working on it!) Integers look like you expect:
+Magpie has two numeric types, integers and floating-point. Number literals look like you expect:
 
     :::magpie
+    // Ints
     0
     1234
     -5678
 
-Their class is `Int`.
+    // Floats
+    3.14159
+    1.0
+    -12.34
 
-<p class="future">
-The long-term goal here is to have a pretty complete numeric tower &agrave; la Scheme or Python.
-</p>
+Integers and floating-point numbers are instances of different classes (`Int` and `Float` respectively) and there are no implicit conversions in Magpie. This means that if you have a [method](multimethods.html) that expects a `Float`, then passing `1` won't work. You'll need to pass `1.0`.
+
+In practice, this is rarely an issue. Most arithmetic operations have specializations for both kinds of numbers and will work fine regardless of what you pass. In cases where mixed argument types are passed, then the result will be a float.
+
+If you want to write code that works generically with either kind of number, then you want the `Num` class. Both `Int` and `Float` inherit from that, so a method specialized to `Num` will accept either type.
 
 ## Strings
 
@@ -37,10 +43,18 @@ A couple of escape characters are supported:
     "\"" // A double quote character.
     "\\" // A backslash.
 
-Their class is `String`. Magpie strings are implemented internally using Java strings, so they are represented in UTF-16 format, although that shouldn't generally affect you. Most string operations in Magpie deal in logical characters, not bytes.
+Their class is `String`.
+
+## Characters
+
+Characters are instance of the `Char` class and represent the individual Unicode code points that make up strings. When you index into a string or iterate over it, character objects will be returned. They also have a literal form, which is the character surrounded by single quotes:
+
+    :::magpie
+    'A'
+    '!'
 
 <p class="future">
-Right now, getting a character out of a string returns another single-character string. Eventually, characters will be an atomic type in Magpie too.
+There will also be escape sequences for characters, but they haven't been implemented yet.
 </p>
 
 ## Nothing

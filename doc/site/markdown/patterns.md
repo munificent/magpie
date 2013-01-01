@@ -26,7 +26,7 @@ A [literal value](primitives.html) like `123` or `true` where a pattern is expec
 To check if a value is equal to the result of some [expression](expressions.html), you can use an *equality pattern*. It starts with `==`, followed by the value to be compared with.
 
     :::magpie
-    == math.Pi
+    == pi
 
 The above pattern will match the value &pi; and fail to match otherwise.
 
