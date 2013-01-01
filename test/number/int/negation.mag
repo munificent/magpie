@@ -1,0 +1,3 @@
+print(-(123)) // expect: -123
+print(-(-123)) // expect: 123
+print(-(0)) // expect: 0

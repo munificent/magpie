@@ -1,0 +1,27 @@
+// TODO(bob):
+// - What about ! | & @ # $ ^?
+// - What about comparison and equality operators?
+
+def ---(a)
+    "---(" + a + ")"
+end
+
+def +++(a)
+    "+++(" + a + ")"
+end
+
+def ***(a)
+    "***(" + a + ")"
+end
+
+def /--(a)
+    "/--(" + a + ")"
+end
+
+def %%%(a)
+    "%%%(" + a + ")"
+end
+
+// All have same precedence.
+print(--- +++ *** "a") // expect: ---(+++(***(a)))
+print(/-- +++ %%% "a") // expect: /--(+++(%%%(a)))

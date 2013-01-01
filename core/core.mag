@@ -61,6 +61,9 @@ def (is Float) / (is Float) native "floatDivFloat"
 // TODO(bob): What about floating point modulo?
 def (is Int) % (is Int) native "intModInt"
 
+def - (is Int) native "minusInt"
+def - (is Float) native "minusFloat"
+
 def (a) == (b) native "objectEqualsObject"
 def (a) != (b) native "objectNotEqualsObject"
 

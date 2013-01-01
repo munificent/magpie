@@ -74,6 +74,8 @@ namespace magpie
     DEF_NATIVE(floatDivInt);
     DEF_NATIVE(floatDivFloat);
     DEF_NATIVE(intModInt);
+    DEF_NATIVE(minusInt);
+    DEF_NATIVE(minusFloat);
     DEF_NATIVE(intCompareToInt);
     DEF_NATIVE(intCompareToFloat);
     DEF_NATIVE(floatCompareToInt);

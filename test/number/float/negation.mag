@@ -1,0 +1,4 @@
+print(-(1.2)) // expect: -1.2
+print(-(-1.2)) // expect: 1.2
+print(-(0.0)) // expect: -0.0
+print(-(-0.0)) // expect: 0.0

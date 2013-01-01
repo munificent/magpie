@@ -37,6 +37,8 @@ namespace magpie
   NATIVE(floatDivInt);
   NATIVE(floatDivFloat);
   NATIVE(intModInt);
+  NATIVE(minusInt);
+  NATIVE(minusFloat);
   NATIVE(intCompareToInt);
   NATIVE(intCompareToFloat);
   NATIVE(floatCompareToInt);

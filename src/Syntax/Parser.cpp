@@ -17,7 +17,7 @@ namespace magpie
     PRECEDENCE_RANGE      = 8, // .. ...
     PRECEDENCE_TERM       = 9, // + -
     PRECEDENCE_PRODUCT    = 10, // * / %
-    PRECEDENCE_NEGATE     = 11, // -
+    PRECEDENCE_PREFIX     = 11, // any operator in prefix position
     PRECEDENCE_CALL       = 12
   };
 
@@ -36,9 +36,9 @@ namespace magpie
     { NULL,             &Parser::assignment, PRECEDENCE_ASSIGNMENT }, // TOKEN_EQ
     { NULL,             &Parser::infixCall, PRECEDENCE_EQUALITY },    // TOKEN_EQEQ
     { NULL,             &Parser::infixCall, PRECEDENCE_EQUALITY },    // TOKEN_NEQ
-    { NULL,             &Parser::infixCall, PRECEDENCE_COMPARISON },  // TOKEN_COMPARISON
-    { NULL,             &Parser::infixCall, PRECEDENCE_TERM },        // TOKEN_TERM_OP
-    { NULL,             &Parser::infixCall, PRECEDENCE_PRODUCT },     // TOKEN_PRODUCT_OP
+    { &Parser::prefixCall, &Parser::infixCall, PRECEDENCE_COMPARISON },  // TOKEN_COMPARISON
+    { &Parser::prefixCall, &Parser::infixCall, PRECEDENCE_TERM },        // TOKEN_TERM_OP
+    { &Parser::prefixCall, &Parser::infixCall, PRECEDENCE_PRODUCT },     // TOKEN_PRODUCT_OP
 
     // Keywords.
     { NULL,             &Parser::and_, PRECEDENCE_LOGICAL },           // TOKEN_AND
@@ -858,6 +858,12 @@ namespace magpie
     return new OrExpr(spanFrom(left), left, right);
   }
 
+  gc<Expr> Parser::prefixCall(gc<Token> token)
+  {
+    gc<Expr> right = parsePrecedence(PRECEDENCE_PREFIX);
+    return new CallExpr(spanFrom(token), NULL, token->text(), right);
+  }
+  
   gc<Expr> Parser::subscript(gc<Expr> left, gc<Token> token)
   {
     // Parse the subscript.

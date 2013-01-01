@@ -142,6 +142,16 @@ namespace magpie
   {
     return new IntObject(args[0]->asInt() % args[1]->asInt());
   }
+
+  NATIVE(minusInt)
+  {
+    return new IntObject(-args[0]->asInt());
+  }
+
+  NATIVE(minusFloat)
+  {
+    return new FloatObject(-args[0]->asFloat());
+  }
   
   NATIVE(intCompareToInt)
   {

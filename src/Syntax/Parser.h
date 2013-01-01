@@ -78,6 +78,7 @@ namespace magpie
     gc<Expr> infixRecord(gc<Expr> left, gc<Token> token);
     gc<Expr> is(gc<Expr> left, gc<Token> token);
     gc<Expr> or_(gc<Expr> left, gc<Token> token);
+    gc<Expr> prefixCall(gc<Token> token);
     gc<Expr> subscript(gc<Expr> left, gc<Token> token);
 
     // Pattern parsing.
