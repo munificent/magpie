@@ -17,10 +17,6 @@ Here, the value being matched is the [record](records.html) `"s", 234, true`. Th
 
 Syntactically, patterns are a bit like the twin of expressions. Like expressions, there are different atomic pattern syntaxes which can be composed to form larger patterns. There are six kinds of patterns:
 
-### Wildcard Patterns
-
-The simplest pattern is the wildcard, a single underscore (`_`). A wildcard always successfully matches, but doesn't bind any variables.
-
 ### Literal Patterns
 
 A [literal value](primitives.html) like `123` or `true` where a pattern is expected defines a *literal* pattern. As you would expect, a literal pattern only matches an identical value. The pattern `"hi"` matches the string value `"hi"` and nothing else.
@@ -56,6 +52,10 @@ This pattern matches any value and creates a new variable named `name` when it d
     name is String
 
 This is a variable pattern containing a type pattern. The entire pattern matches only if the value is a string. If it is, then it will bind the variable `name` to the value.
+
+### Wildcard Patterns
+
+If the name in a variable pattern is `_`, then it's a *wildcard* pattern. It works exactly like a variable pattern except that no variable will actually be created. This can be useful if you want to say "a value goes here" but you don't care what the value is. Like other variable patterns, it may also have an inner pattern.
 
 ### Record Patterns
 
