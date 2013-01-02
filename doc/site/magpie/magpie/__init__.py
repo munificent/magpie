@@ -18,25 +18,19 @@ class MagpieLexer(RegexLexer):
             (r'\s+', Text),
 
             # keywords
-            (r'(and|as|break|case|catch|def|defclass|definfix|do|else|end|fn|for|'
-             r'if|import|in|is|match|or|return|then|throw|val|var|with|while)\b', Keyword),
-
-            # keywords
-            # (r'(=)', Keyword),
+            (r'(and|async|break|case|catch|def|defclass|do|end|else|false|fn|'
+             r'for|if|import|in|is|match|not|nothing|or|return|then|throw|true|'
+             r'val|var|with|while|xor)\b', Keyword),
 
             (r'[,()\\\[\]{}]', Punctuation),
 
             # comments
-            (r'//[^\n]*?\n', Comment.Single),
-            (r'/\*.*?\*/', Comment.Multiline),
+            (r'/\*', Comment.Multiline, 'comment'),
+            (r'//.*?$', Comment.Single),
 
             # names and operators
-            (r'[~!$%^&*\-=+\\|/?<>\.]+', Name),
+            (r'[~!$%^&*\-=+\\|/?<>\.]+', Operator),
             (r'[a-zA-Z_.][a-zA-Z_.0-9]+', Name),
-
-            # built-in names
-            (r'(true|false|nothing)\b', Name.Builtin),
-            (r'(this|it)\b', Name.Builtin.Pseudo),
 
             # literals
 
@@ -47,7 +41,18 @@ class MagpieLexer(RegexLexer):
             (r'\d+[Ll]?', Number.Integer),
 
             # strings
+            (r"L?'", String.Char, 'character'),
             (r'L?"', String, 'string'),
+        ],
+        'comment': [
+            (r'\*/', Comment.Multiline, '#pop'),
+            (r'/\*', Comment.Multiline, '#push'),
+            (r'.', Comment.Multiline), # all other characters
+        ],
+        'character': [
+            (r"'", String.Char, '#pop'),
+            (r'\\([\\abfnrtv"\']|x[a-fA-F0-9]{2,4}|[0-7]{1,3})', String.Escape),
+            (r'[^\\"\n]+', String.Char), # all other characters
         ],
         'string': [
             (r'"', String, '#pop'),

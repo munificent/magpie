@@ -124,9 +124,13 @@ p.future {
 
 pre .k {
   color: #cc0088; }
+pre .o {
+  color: #1b9898; }
 pre .s {
   color: #0077b3; }
 pre .se {
+  color: #0077b3; }
+pre .sc {
   color: #0077b3; }
 pre .c1 {
   color: #888888; }
@@ -135,6 +139,8 @@ pre .cm {
 pre .nb {
   color: #0077b3; }
 pre .mi {
+  color: #0077b3; }
+pre .mf {
   color: #0077b3; }
 pre .bp {
   color: #0095b3; }

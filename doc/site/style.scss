@@ -203,16 +203,20 @@ $syntax-keyword:     $primary;
 $syntax-comment:     lighten($syntax-default, 20%);
 $syntax-literal:     hsl(200, 100%, 35%);
 $syntax-pseudo:      hsl(190, 100%, 35%);
+$syntax-operator:    hsl(180, 70%, 35%);
 $syntax-punctuation: lighten($syntax-default, 20%);
 
 pre {
   .k  { color: $syntax-keyword; }
+  .o  { color: $syntax-operator; }
   .s  { color: $syntax-literal; }
   .se { color: $syntax-literal; }
+  .sc { color: $syntax-literal; }
   .c1 { color: $syntax-comment; }
   .cm { color: $syntax-comment; }
   .nb { color: $syntax-literal; }
   .mi { color: $syntax-literal; }
+  .mf { color: $syntax-literal; }
   .bp { color: $syntax-pseudo; }
   .p  { color: $syntax-punctuation; }
 }
