@@ -1,6 +1,6 @@
 ^title Pattern Matching
 
-Control flow&mdash; deciding which code to execute&mdash; is a big part of imperative languages. To execute a chunk of code more than one time, you use [looping](looping.html). To conditionally *skip* a chunk of code, you need some kind of *branching*. Magpie only has one branching construct built-in, but it's pretty swell: *pattern-matching*.
+Control flow&mdash;deciding which code to execute&mdash;is a big part of imperative languages. Magpie has your basic [looping](looping.html) and [branching](flow-control.html) expressions that you know from most imperative languages. But instead of a boring C-style `switch`, it's got something turbo-charged: *pattern matching*.
 
 A `match` expression evaluates a *value* expression. Then it looks at each of a series of *cases*. For each case, it tries to match the case's [*pattern*](patterns.html) against the value. If the pattern matches, then it evaluates the *body* of the case.
 
@@ -67,7 +67,7 @@ With simple literal patterns, this doesn't look like much more than `switch` sta
     describe(123)  // "Int : 123"
     describe(3, 4) // "Point : 3, 4"
 
-If the pattern for a case binds a variable (like `b` in the first case here) that variable's scope is limited to the body of that case. That way, we can ensure that you'll only get a variable bound if it matches what you want. For example, here we know for certain that `b` will only exist if `obj` is a boolean and `b` will be its value.
+If the pattern for a case binds a variable (like `b` in the first case here) that variable's scope is limited to the body of that case. That way, you can ensure that you'll only get a variable bound if it matches what you want. For example, here we know for certain that `b` will only exist if `obj` is a boolean and `b` will be its value.
 
 ## Match Failure
 

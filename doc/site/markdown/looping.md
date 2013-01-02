@@ -1,5 +1,7 @@
 ^title Looping
 
+**TODO: This needs to be rewritten now that `while` and `for` are distinct.**
+
 Many languages have three distinct loop structures: `for`, `while`, and `foreach` or something similar for generators. Magpie only has a single loop construct, but it subsumes all three of those. A simple loop looks like this:
 
     :::magpie

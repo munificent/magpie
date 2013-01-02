@@ -47,9 +47,9 @@ Doc comments are formatted using [Markdown](http://daringfireball.net/projects/m
 Some people like to see all of the reserved words in a programming language in one lump. If you're one of those folks, here you go:
 
     :::magpie
-    and async break case catch def defclass do end else false
-    fn for if import in is match not nothing or return then
-    throw true val var while xor
+    and async break case catch def defclass do end else
+    false fn for if import in is match not nothing or
+    return then throw true val var while xor
 
 Also, the following are *punctuators* in Magpie which means they are both
 reserved words and they can be used to separate tokens:
@@ -73,14 +73,14 @@ Identifiers are similar to other programming languages. They start with a letter
 
 ## Operators
 
-Magpie does not many built-in operators. Instead, most are just [methods](multimethods.html) like any other method. However, the grammar of the language does treat them a bit specially.
+Magpie does not have many built-in operators. Instead, most are just [methods](multimethods.html) like any other method. However, the grammar of the language does treat them a bit specially.
 
 Lexically, an operator is any sequence of punctuation characters from the following set:
 
     :::magpie
     ~ ! $ % ^ & * - = + | / ? < >
 
-Also, the special tokens `..` and `...` are valid operator names.
+Also, the special tokens `..` and `...` are valid operator names. But a `=` by itself is not&mdash;that's reserved for [assignment](variables.html#assignment).
 
 <p class="future">
 The exact set of operator characters is still a bit in flux.

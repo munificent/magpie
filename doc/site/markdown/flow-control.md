@@ -1,7 +1,5 @@
 ^title Flow Control
 
-**TODO: This needs to be re-organized since this is now in the core library and not the language.**
-
 Magpie doesn't shy away from imperative programming, so it supports the usual flow control structures you know and love, although it does try to spice them up a bit. Before we cover them, there's one minor point to cover first:
 
 ## Truthiness
