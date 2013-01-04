@@ -1,0 +1,29 @@
+// skip
+defclass Parent
+end
+
+defclass Child is Parent
+end
+
+// Define methods in either order to ensure definition order doesn't affect
+// behavior.
+def foo(is Parent)
+    print("parent")
+end
+
+def foo(is Child)
+    print("child")
+end
+
+def bar(is Child)
+    print("child")
+end
+
+def bar(is Parent)
+    print("parent")
+end
+
+foo(Child new) // expect: child
+foo(Parent new) // expect: parent
+bar(Child new) // expect: child
+bar(Parent new) // expect: parent

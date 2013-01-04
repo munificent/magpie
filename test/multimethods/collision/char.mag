@@ -1,0 +1,7 @@
+// skip
+def foo('c') print("zero")
+def foo('c') print("two")
+
+do
+    foo(123)
+catch is MethodCollisionError then print("caught") // expect: caught

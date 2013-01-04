@@ -1,0 +1,7 @@
+// skip
+// Int and floats with the same value do not collide.
+def foo(1) print("int")
+def foo(1.0) print("float")
+
+foo(1) // expect: int
+foo(1.0) // expect: float

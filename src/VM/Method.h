@@ -161,7 +161,7 @@ namespace magpie
 
   private:
     void sort(VM& vm);
-    MethodOrder compare(gc<Method> a, gc<Method> b);
+    MethodOrder compare(VM& vm, gc<Method> a, gc<Method> b);
 
     // Given an array of orders, determines the overall ordering. This is used
     // to determine how a pair of records are ordered given the ordering of all
@@ -197,10 +197,11 @@ namespace magpie
   class PatternComparer : public PatternVisitor
   {
   public:
-    static MethodOrder compare(gc<Pattern> a, gc<Pattern> b);
+    static MethodOrder compare(VM& vm, gc<Pattern> a, gc<Pattern> b);
 
-    PatternComparer(gc<Pattern> other, MethodOrder* result)
-    : other_(other),
+    PatternComparer(VM& vm, gc<Pattern> other, MethodOrder* result)
+    : vm_(vm),
+      other_(other),
       result_(result)
     {}
 
@@ -210,6 +211,7 @@ namespace magpie
     virtual void visit(VariablePattern& node, int dummy);
 
   private:
+    VM& vm_;
     gc<Pattern> other_;
     MethodOrder* result_;
 
@@ -217,5 +219,6 @@ namespace magpie
     // them into their inner pattern. May return NULL.
     static gc<Pattern> skipVariables(gc<Pattern> pattern);
     MethodOrder compareRecords(RecordPattern& a, RecordPattern& b);
+    gc<Object> getValue(gc<Expr> expr);
   };
 }

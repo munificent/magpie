@@ -2,6 +2,7 @@
 #include "ErrorReporter.h"
 #include "Method.h"
 #include "MagpieString.h"
+#include "Module.h"
 #include "Object.h"
 #include "VM.h"
 
@@ -295,7 +296,7 @@ namespace magpie
           if (i == j) continue;
           if (methods_[j].isNull()) continue;
           
-          MethodOrder order = compare(methods_[i], methods_[j]);
+          MethodOrder order = compare(vm, methods_[i], methods_[j]);
           if (order == ORDER_AFTER)
           {
             covered = true;
@@ -315,24 +316,24 @@ namespace magpie
     methods_.addAll(sorted);
   }
 
-  MethodOrder Multimethod::compare(gc<Method> a, gc<Method> b)
+  MethodOrder Multimethod::compare(VM& vm, gc<Method> a, gc<Method> b)
   {
     Array<MethodOrder> orders;
     if (!a->def()->leftParam().isNull())
     {
-      orders.add(PatternComparer::compare(
+      orders.add(PatternComparer::compare(vm,
           a->def()->leftParam(), b->def()->leftParam()));
     }
 
     if (!a->def()->rightParam().isNull())
     {
-      orders.add(PatternComparer::compare(
+      orders.add(PatternComparer::compare(vm,
           a->def()->rightParam(), b->def()->rightParam()));
     }
 
     if (!a->def()->value().isNull())
     {
-      orders.add(PatternComparer::compare(
+      orders.add(PatternComparer::compare(vm,
           a->def()->value(), b->def()->value()));
     }
 
@@ -391,10 +392,10 @@ namespace magpie
     return order;
   }
 
-  MethodOrder PatternComparer::compare(gc<Pattern> a, gc<Pattern> b)
+  MethodOrder PatternComparer::compare(VM& vm, gc<Pattern> a, gc<Pattern> b)
   {
     MethodOrder result = ORDER_NONE;
-    PatternComparer comparer(skipVariables(b), &result);
+    PatternComparer comparer(vm, skipVariables(b), &result);
     a->accept(comparer, -1);
     
     return result;
@@ -456,24 +457,40 @@ namespace magpie
     if (other_.isNull())
     {
       *result_ = ORDER_BEFORE;
+      return;
     }
-    else if (other_->asRecordPattern() != NULL)
+
+    if (other_->asRecordPattern() != NULL)
     {
       *result_ = ORDER_NONE;
+      return;
     }
-    else if (other_->asTypePattern() != NULL)
+
+    if (other_->asTypePattern() != NULL)
     {
       *result_ = ORDER_BEFORE;
+      return;
     }
-    else if (other_->asValuePattern() != NULL)
+
+    ValuePattern* value = other_->asValuePattern();
+    if (value != NULL)
     {
-      // TODO(bob): Check for value collisions.
-      *result_ = ORDER_EQUAL;
+      // Check for collision.
+      gc<Object> a = getValue(node.value());
+      gc<Object> b = getValue(other_->asValuePattern()->value());
+
+      if (Object::equal(a, b))
+      {
+        *result_ = ORDER_EQUAL;
+      }
+      else
+      {
+        *result_ = ORDER_NONE;
+      }
+      return;
     }
-    else
-    {
-      ASSERT(false, "Unknown pattern type.");
-    }
+
+    ASSERT(false, "Unknown pattern type.");
   }
 
   void PatternComparer::visit(VariablePattern& node, int dummy)
@@ -605,7 +622,7 @@ namespace magpie
         }
       }
 
-      MethodOrder fieldOrder = compare(aField, bField);
+      MethodOrder fieldOrder = compare(vm_, aField, bField);
       if (fieldOrder == ORDER_NONE) return ORDER_NONE;
 
       if (order == ORDER_EQUAL)
@@ -625,5 +642,69 @@ namespace magpie
     }
 
     return order;
+  }
+
+  gc<Object> PatternComparer::getValue(gc<Expr> expr)
+  {
+    // Handle literal values.
+    BoolExpr* boolExpr = expr->asBoolExpr();
+    if (boolExpr != NULL)
+    {
+      return new BoolObject(boolExpr->value());
+    }
+
+    CharacterExpr* charExpr = expr->asCharacterExpr();
+    if (charExpr != NULL)
+    {
+      return new CharacterObject(charExpr->value());
+    }
+
+    FloatExpr* floatExpr = expr->asFloatExpr();
+    if (floatExpr != NULL)
+    {
+      return new FloatObject(floatExpr->value());
+    }
+
+    IntExpr* intExpr = expr->asIntExpr();
+    if (intExpr != NULL)
+    {
+      return new IntObject(intExpr->value());
+    }
+
+    StringExpr* stringExpr = expr->asStringExpr();
+    if (stringExpr != NULL)
+    {
+      return new StringObject(stringExpr->value());
+    }
+
+    // Handle top-level names.
+    NameExpr* name = expr->asNameExpr();
+    if (name != NULL)
+    {
+      ASSERT(name->resolved()->scope() == NAME_MODULE,
+             "Method patterns should only contain module-level names.");
+      
+      int moduleIndex = name->resolved()->module();
+      int variableIndex = name->resolved()->index();
+      
+      Module* module = vm_.getModule(moduleIndex);
+      gc<Object> object = module->getVariable(variableIndex);
+
+      // TODO(bob): Handle undefined names.
+      /*
+       if (object.isNull())
+       {
+       gc<Object> error = DynamicObject::create(
+       vm_.undefinedVarErrorClass());
+
+       if (!throwError(error)) return FIBER_UNCAUGHT_ERROR;
+       }
+       */
+
+      return object;
+    }
+
+    ASSERT(false, "Unexpected expression in method pattern.");
+    return NULL;
   }
 }
