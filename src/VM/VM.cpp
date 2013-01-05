@@ -200,16 +200,17 @@ namespace magpie
       // TODO(bob): Better error-handling.
       if (!madeProgress) return false;
     }
-    
+
+    // Compile all modules before running any of them.
+    for (int i = 0; i < modules.count(); i++)
+    {
+      if (!modules[i]->compile(*this)) return false;
+    }
+
     // Run each loaded module.
     for (int i = 0; i < modules.count(); i++)
     {
-      Module* module = modules[i];
-
-      // Compile it.
-      if (!module->compile(*this)) return false;
-
-      scheduler_.runModule(module);
+      scheduler_.runModule(modules[i]);
     }
 
     return true;

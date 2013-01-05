@@ -1,0 +1,3 @@
+import foo
+
+print(not_defined) // expect error
