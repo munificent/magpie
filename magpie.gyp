@@ -32,13 +32,20 @@
   },
   'target_defaults': {
     'default_configuration': 'Debug',
+    'dependencies': [
+      'dep/libuv/uv.gyp:libuv'
+    ],
     'configurations': {
       'Debug': {
       },
       'Release': {
       },
     },
+    'defines': [
+      'PLATFORM="<(OS)"',
+    ],
     'include_dirs': [
+      'dep/libuv/include',
       'src/Base',
       'src/Compiler',
       'src/Memory',

@@ -1,0 +1,2 @@
+# TODO: Better path to gyp.
+../gyp/gyp --depth=1 -Dlibrary=static_library
