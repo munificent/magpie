@@ -8,6 +8,7 @@ doc/site/.sass-cache/
 
 # Ignore gyp generated projects
 magpie.xcodeproj/project.pbxproj
+dep/libuv/uv.xcodeproj/project.pbxproj
 
 # Ignore user-specific config files.
 xcuserdata

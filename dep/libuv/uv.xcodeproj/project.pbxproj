@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 45;
 	objects = {
 
 /* Begin PBXAggregateTarget section */
@@ -669,15 +669,10 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 0450;
 			};
 			buildConfigurationList = 8C5C4470AE99DE5DE330356A /* Build configuration list for PBXProject "uv" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
 			hasScannedForEncodings = 1;
-			knownRegions = (
-				en,
-			);
 			mainGroup = 9441FFEF004DB5FD3E72FDB0;
 			projectDirPath = "";
 			projectRoot = "";
@@ -887,6 +882,7 @@
 				);
 				HEADER_SEARCH_PATHS = include;
 				LIBRARY_SEARCH_PATHS = (
+					"",
 					"$(SDKROOT)/System/Library/Frameworks",
 				);
 				PRODUCT_NAME = "run-tests";
@@ -896,7 +892,6 @@
 		19E0C09436AF887CB2DB6108 /* Default */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COMBINE_HIDPI_IMAGES = YES;
 				PRODUCT_NAME = All;
 			};
 			name = Default;
@@ -915,6 +910,7 @@
 				);
 				HEADER_SEARCH_PATHS = include;
 				LIBRARY_SEARCH_PATHS = (
+					"",
 					"$(SDKROOT)/System/Library/Frameworks",
 				);
 				PRODUCT_NAME = "run-benchmarks";
@@ -924,7 +920,6 @@
 		A99C1EF3080BAD852B8D3E92 /* Default */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COMBINE_HIDPI_IMAGES = YES;
 				EXECUTABLE_PREFIX = lib;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"\"_LARGEFILE_SOURCE\"",

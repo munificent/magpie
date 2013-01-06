@@ -95,10 +95,19 @@ namespace magpie
   class Fiber : public Managed
   {
   public:
-    Fiber(VM& vm, Scheduler& scheduler, gc<FunctionObject> function);
+    Fiber(VM& vm, Scheduler& scheduler, gc<FunctionObject> function,
+          gc<Fiber> successor);
 
+    // TODO(bob): Do we want to expose this?
+    Scheduler& scheduler() { return scheduler_; }
+
+    gc<Fiber> successor() { return successor_; }
+    
     // Returns true if this fiber has finished executing all of its code.
     bool isDone();
+
+    void setAsMain() { isMain_ = true; }
+    bool isMain() const { return isMain_; }
 
     FiberResult run(gc<Object>& result);
     void storeReturn(gc<Object> value);
@@ -110,6 +119,8 @@ namespace magpie
     void suspend(gc<Suspension> suspension);
 
     gc<Suspension> suspension() { return suspension_; }
+
+    void sleep(int ms);
 
     // TODO(bob): Hackish. Temp!
     void readFile(gc<FileObject> file);
@@ -166,10 +177,17 @@ namespace magpie
 
     gc<Upvar> captureUpvar(int slot);
 
-    static int          nextId_;
+    static int nextId_;
 
-    VM&                 vm_;
-    Scheduler&          scheduler_;
+    VM& vm_;
+    Scheduler& scheduler_;
+
+    // The next fiber to run after this one completes, if any. Used to sequence
+    // module body fibers.
+    gc<Fiber> successor_;
+
+    // True if this fiber is the module fiber for the entrypoint module.
+    bool isMain_;
 
     int                 id_;
     Array<gc<Object> >  stack_;

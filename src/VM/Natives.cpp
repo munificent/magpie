@@ -234,6 +234,13 @@ namespace magpie
     return new StringObject(String::format("%d", args[0]->asInt()));
   }
 
+  NATIVE(sleepMsInt)
+  {
+    fiber.sleep(args[0]->asInt());
+    result = NATIVE_RESULT_SUSPEND;
+    return NULL;
+  }
+
   NATIVE(channelClose)
   {
     ChannelObject* channel = args[0]->asChannel();

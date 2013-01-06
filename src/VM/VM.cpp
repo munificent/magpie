@@ -35,7 +35,7 @@ namespace magpie
     Module* module;
     Array<Module*> imports;
   };
-  
+
   VM::VM()
   : modules_(),
     replModule_(NULL),
@@ -47,7 +47,7 @@ namespace magpie
     scheduler_(*this)
   {
     Memory::initialize(this, 1024 * 1024 * 2); // TODO(bob): Use non-magic number.
-    
+
     DEF_NATIVE(bindCore);
     DEF_NATIVE(bindIO);
     DEF_NATIVE(objectClass);
@@ -86,6 +86,7 @@ namespace magpie
     DEF_NATIVE(stringSubscriptInt);
     DEF_NATIVE(floatToString);
     DEF_NATIVE(intToString);
+    DEF_NATIVE(sleepMsInt);
     DEF_NATIVE(channelClose);
     DEF_NATIVE(channelIsOpen);
     DEF_NATIVE(channelNew);
@@ -114,7 +115,7 @@ namespace magpie
   {
     Module* core = findModule("core");
     ASSERT_NOT_NULL(core);
-    
+
     registerClass(core, boolClass_, "Bool");
     registerClass(core, channelClass_, "Channel");
     registerClass(core, characterClass_, "Char");
@@ -207,12 +208,7 @@ namespace magpie
       if (!modules[i]->compile(*this)) return false;
     }
 
-    // Run each loaded module.
-    for (int i = 0; i < modules.count(); i++)
-    {
-      scheduler_.runModule(modules[i]);
-    }
-
+    scheduler_.run(modules);
     return true;
   }
 
@@ -243,12 +239,12 @@ namespace magpie
   gc<Object> VM::evaluateReplExpression(gc<Expr> expr)
   {
     ErrorReporter reporter;
-    
+
     if (replModule_ == NULL)
     {
       replModule_ = new Module(String::create("<repl>"), String::create(""));
       modules_.add(replModule_);
-      
+
       // Implicitly import core.
       importModule(reporter, replModule_, NULL, String::create("core"));
     }
@@ -278,7 +274,7 @@ namespace magpie
     done_.reach();
     symbols_.reach();
     methods_.reach();
-    
+
     for (int i = 0; i < modules_.count(); i++)
     {
       modules_[i]->reach();
@@ -298,7 +294,7 @@ namespace magpie
 
     ASSERT(false, "Unknown built-in ID.");
   }
-  
+
   int VM::findNative(gc<String> name)
   {
     for (int i = 0; i < nativeNames_.count(); i++)
@@ -316,10 +312,10 @@ namespace magpie
     for (int i = 0; i < recordTypes_.count(); i++)
     {
       RecordType& type = *recordTypes_[i];
-      
+
       // See if this record type matches what we're looking for.
       if (fields.count() != type.numFields()) continue;
-      
+
       bool found = true;
       for (int j = 0; j < fields.count(); j++)
       {
@@ -330,10 +326,10 @@ namespace magpie
           break;
         }
       }
-      
+
       if (found) return i;
     }
-    
+
     // It's a new type, so add it.
     gc<RecordType> type = RecordType::create(fields);
     recordTypes_.add(type);
@@ -344,7 +340,7 @@ namespace magpie
   {
     return recordTypes_[id];
   }
-  
+
   symbolId VM::addSymbol(gc<String> name)
   {
     // See if it's already in the table.
@@ -352,7 +348,7 @@ namespace magpie
     {
       if (*name == *symbols_[i]) return i;
     }
-    
+
     // It's a new symbol.
     symbols_.add(name);
     return symbols_.count() - 1;
@@ -369,25 +365,25 @@ namespace magpie
     methods_.add(method);
     return methods_.count() - 1;
   }
-  
+
   int VM::declareMultimethod(gc<String> signature)
   {
     // See if it's already declared.
     int index = findMultimethod(signature);
     if (index != -1) return index;
-    
+
     // It's a new multimethod.
     multimethods_.add(new Multimethod(signature));
     return multimethods_.count() - 1;
   }
-  
+
   int VM::findMultimethod(gc<String> signature)
   {
     for (int i = 0; i < multimethods_.count(); i++)
     {
       if (signature == multimethods_[i]->signature()) return i;
     }
-    
+
     // Not found.
     return -1;
   }
@@ -401,7 +397,7 @@ namespace magpie
   {
     return multimethods_[multimethodId];
   }
-
+  
   Module* VM::addModule(ErrorReporter& reporter, gc<String> name,
                         gc<String> path)
   {
@@ -413,7 +409,7 @@ namespace magpie
       // TODO(bob): Should take the file name without an extension.
       name = path;
     }
-    
+
     // Make sure it hasn't already been added.
     // TODO(bob): Could make modules_ a hash table for performance.
     for (int i = 0; i < modules_.count(); i++)
@@ -435,7 +431,7 @@ namespace magpie
 
     Module* module = new Module(name, path);
     modules_.add(module);
-    
+
     if (!module->parse(reporter)) return NULL;
 
     module->addImports(*this, reporter);
@@ -456,7 +452,7 @@ namespace magpie
     {
       if (*modules_[i]->name() == name) return modules_[i];
     }
-
+    
     ASSERT(false, "Could not find core module.");
     return NULL;
   }

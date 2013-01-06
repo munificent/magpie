@@ -96,7 +96,7 @@ namespace magpie
     int findMultimethod(gc<String> signature);
     void defineMethod(int multimethod, methodId method);
     gc<Multimethod> getMultimethod(int multimethod);
-
+    
   private:
     // Loads module [name] from [path] and the recursively loads its imports.
     // [from] is the module that's depending on the added one. If [path] is
