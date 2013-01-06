@@ -31,11 +31,10 @@ namespace magpie
     gc<Fiber> fiber() { return fiber_; }
     
   private:
-    WaitingFiber(gc<Fiber> fiber, uv_handle_type type, uv_handle_t* handle);
+    WaitingFiber(gc<Fiber> fiber, uv_handle_t* handle);
 
     gc<Fiber> fiber_;
 
-    uv_handle_type type_;
     uv_handle_t*   handle_;
 
     WaitingFiber* prev_;
@@ -53,7 +52,7 @@ namespace magpie
     // Adds [fiber] and the event its waiting on to the list. This will take
     // ownership of [handle]: when the WaitingFiber is freed, it will free the
     // handle itself.
-    void add(gc<Fiber> fiber, uv_handle_type type, uv_handle_t* handle);
+    void add(gc<Fiber> fiber, uv_handle_t* handle);
 
     // Cancel all waiting fibers so that the event loop can exit.
     void killAll();

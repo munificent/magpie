@@ -12,19 +12,16 @@ namespace magpie
     delete handle_;
   }
 
-  WaitingFiber::WaitingFiber(gc<Fiber> fiber, uv_handle_type type,
-                             uv_handle_t* handle)
+  WaitingFiber::WaitingFiber(gc<Fiber> fiber, uv_handle_t* handle)
   : fiber_(fiber),
-    type_(type),
     handle_(handle),
     prev_(NULL),
     next_(NULL)
   {}
 
-  void WaitingFiberList::add(gc<Fiber> fiber, uv_handle_type type,
-                             uv_handle_t* handle)
+  void WaitingFiberList::add(gc<Fiber> fiber, uv_handle_t* handle)
   {
-    WaitingFiber* waiting = new WaitingFiber(fiber, type, handle);
+    WaitingFiber* waiting = new WaitingFiber(fiber, handle);
 
     // Stuff the wait into the handle so we can get it in the callback.
     handle->data = waiting;
@@ -170,7 +167,7 @@ namespace magpie
     // as needed.
     uv_timer_t* timer = new uv_timer_t;
 
-    waiting_.add(fiber, UV_TIMER, reinterpret_cast<uv_handle_t*>(timer));
+    waiting_.add(fiber, reinterpret_cast<uv_handle_t*>(timer));
     uv_timer_init(loop_, timer);
     uv_timer_start(timer, timerCallback, ms, 0);
   }
