@@ -7,6 +7,62 @@
 
 namespace magpie
 {
+  WaitingFiber::~WaitingFiber()
+  {
+    delete handle_;
+  }
+
+  WaitingFiber::WaitingFiber(gc<Fiber> fiber, uv_handle_type type,
+                             uv_handle_t* handle)
+  : fiber_(fiber),
+    type_(type),
+    handle_(handle),
+    prev_(NULL),
+    next_(NULL)
+  {}
+
+  void WaitingFiberList::add(gc<Fiber> fiber, uv_handle_type type,
+                             uv_handle_t* handle)
+  {
+    WaitingFiber* waiting = new WaitingFiber(fiber, type, handle);
+
+    // Stuff the wait into the handle so we can get it in the callback.
+    handle->data = waiting;
+
+    if (head_ == NULL)
+    {
+      // Only item in the list.
+      head_ = waiting;
+      tail_ = waiting;
+    }
+    else
+    {
+      // Add to the end of the list.
+      waiting->prev_ = tail_;
+      tail_->next_ = waiting;
+    }
+  }
+
+  void WaitingFiberList::killAll()
+  {
+    WaitingFiber* waiting = head_;
+    while (waiting != NULL)
+    {
+      uv_unref(waiting->handle_);
+      waiting = waiting->next_;
+    }
+  }
+
+  void WaitingFiberList::reach()
+  {
+    WaitingFiber* waiting = head_;
+    while (waiting != NULL)
+    {
+      waiting->fiber_.reach();
+      waiting = waiting->next_;
+    }
+  }
+
   void Scheduler::run(Array<Module*> modules)
   {
     // Queue up fibers for each module body.
@@ -51,7 +107,11 @@ namespace magpie
       {
         case FIBER_DONE:
           // If the main module has completed, stop.
-          if (fiber->isMain()) return value;
+          if (fiber->isMain())
+          {
+            waiting_.killAll();
+            return value;
+          }
 
           // Advance to the successor if it has one, otherwise try to unsuspend
           // something else.
@@ -98,28 +158,27 @@ namespace magpie
   static void timerCallback(uv_timer_t* handle, int status)
   {
     // TODO(bob): Check status?
-    gc<Fiber> fiber = static_cast<Fiber*>(handle->data);
-
+    WaitingFiber* waiting = static_cast<WaitingFiber*>(handle->data);
+    gc<Fiber> fiber = waiting->fiber();
     Scheduler& scheduler = fiber->scheduler();
     scheduler.run(fiber);
   }
 
   void Scheduler::sleep(gc<Fiber> fiber, int ms)
   {
-    // TODO(bob): Manage this memory!
-    uv_timer_t* timer_req = new uv_timer_t;
+    // TODO(bob): We could allocate this on the GC heap and then just reach it
+    // as needed.
+    uv_timer_t* timer = new uv_timer_t;
 
-    // TODO(bob): Need to hang onto this fiber somewhere the GC can find it.
-    // Otherwise a GC while this fiber is sleeping will collect it.
-    timer_req->data = &*fiber;
-    
-    uv_timer_init(loop_, timer_req);
-    uv_timer_start(timer_req, timerCallback, ms, 0);
+    waiting_.add(fiber, UV_TIMER, reinterpret_cast<uv_handle_t*>(timer));
+    uv_timer_init(loop_, timer);
+    uv_timer_start(timer, timerCallback, ms, 0);
   }
   
   void Scheduler::reach()
   {
     ready_.reach();
+    waiting_.reach();
   }
 
   gc<Fiber> Scheduler::getNext()

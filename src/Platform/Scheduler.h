@@ -19,6 +19,53 @@ namespace magpie
   // Forward-declaration of the platform-specific scheduler data.
   class OSScheduler;
 
+  // Wraps a Fiber that is waiting for an event to complete. This is a manually
+  // memory managed doubly linked list.
+  class WaitingFiber
+  {
+    friend class WaitingFiberList;
+
+  public:
+    ~WaitingFiber();
+    
+    gc<Fiber> fiber() { return fiber_; }
+    
+  private:
+    WaitingFiber(gc<Fiber> fiber, uv_handle_type type, uv_handle_t* handle);
+
+    gc<Fiber> fiber_;
+
+    uv_handle_type type_;
+    uv_handle_t*   handle_;
+
+    WaitingFiber* prev_;
+    WaitingFiber* next_;
+  };
+
+  class WaitingFiberList
+  {
+  public:
+    WaitingFiberList()
+    : head_(NULL),
+      tail_(NULL)
+    {}
+    
+    // Adds [fiber] and the event its waiting on to the list. This will take
+    // ownership of [handle]: when the WaitingFiber is freed, it will free the
+    // handle itself.
+    void add(gc<Fiber> fiber, uv_handle_type type, uv_handle_t* handle);
+
+    // Cancel all waiting fibers so that the event loop can exit.
+    void killAll();
+
+    // Reach all of the waiting fibers so they don't get collected.
+    void reach();
+
+  private:
+    WaitingFiber* head_;
+    WaitingFiber* tail_;
+  };
+
   // The Fiber scheduler.
   class Scheduler
   {
@@ -56,6 +103,9 @@ namespace magpie
 
     // Fibers that are not blocked and can run now.
     Array<gc<Fiber> > ready_;
+
+    // Fibers that are waiting on an OS event to complete.
+    WaitingFiberList waiting_;
 
     NO_COPY(Scheduler);
   };
