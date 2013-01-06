@@ -1,0 +1,30 @@
+val channel = Channel new
+
+async
+    print("before sleep 10")
+    sleep(ms: 10)
+    channel send("after sleep 10")
+end
+
+async
+    print("before sleep 30")
+    sleep(ms: 30)
+    channel send("after sleep 30")
+end
+
+async
+    print("before sleep 20")
+    sleep(ms: 20)
+    channel send("after sleep 20")
+end
+
+print("main") // expect: main
+print(channel receive)
+// expect: before sleep 10
+// expect: before sleep 30
+// expect: before sleep 20
+// expect: after sleep 10
+print(channel receive)
+// expect: after sleep 20
+print(channel receive)
+// expect: after sleep 30
