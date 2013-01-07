@@ -294,10 +294,13 @@ namespace magpie
     }
   }
 
-  void FileObject::close()
+  void FileObject::close(gc<Fiber> fiber)
   {
     ASSERT(isOpen_, "IO library should not call close on a closed file.");
+    // Mark the file closed immediately so other fibers can't try to use it.
     isOpen_ = false;
+
+    fiber->scheduler().closeFile(fiber, this);
   }
 
   gc<ClassObject> FileObject::getClass(VM& vm) const

@@ -26,7 +26,14 @@ namespace magpie
     ~WaitingFiber();
     
     gc<Fiber> fiber() { return fiber_; }
-    
+
+    // Resumes this fiber. Removes it from the list of waiting fibers and runs
+    // the fiber (and any other fibers that are able to be run).
+    //
+    // This object will be freed at the end of this call. You cannot use it
+    // after this returns!
+    void resume(gc<Object> returnValue);
+
   private:
     WaitingFiber(gc<Fiber> fiber, uv_handle_t* handle);
     WaitingFiber(gc<Fiber> fiber, uv_req_t* request);
@@ -58,6 +65,9 @@ namespace magpie
     // handle itself.
     void add(gc<Fiber> fiber, uv_req_t* request);
 
+    // Removes [waiting] from this list. Does not free it.
+    void remove(WaitingFiber* waiting);
+
     // Cancel all waiting fibers so that the event loop can exit.
     void killAll();
 
@@ -74,6 +84,8 @@ namespace magpie
   // The Fiber scheduler.
   class Scheduler
   {
+    friend class WaitingFiber;
+    
   public:
     Scheduler(VM& vm);
 

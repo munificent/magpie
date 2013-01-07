@@ -296,7 +296,7 @@ namespace magpie
   NATIVE(fileClose)
   {
     gc<FileObject> fileObj = args[0]->asFile();
-    fiber.closeFile(fileObj);
+    fileObj->close(&fiber);
 
     result = NATIVE_RESULT_SUSPEND;
     return NULL;

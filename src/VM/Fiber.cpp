@@ -490,11 +490,6 @@ namespace magpie
   {
     scheduler_.openFile(this, path);
   }
-
-  void Fiber::closeFile(gc<FileObject> file)
-  {
-    scheduler_.closeFile(this, file);
-  }
   
   void Fiber::reach()
   {

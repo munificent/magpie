@@ -13,6 +13,26 @@ namespace magpie
     delete handle_;
   }
 
+  void WaitingFiber::resume(gc<Object> returnValue)
+  {
+    // Unlink from the list. We do this before running the fiber so that if
+    // the main fiber ends and kills all waiting fibers, it doesn't see this
+    // one.
+    fiber_->scheduler().waiting_.remove(this);
+
+    // Translate VM NULL to Magpie nothing so that the callback doesn't have
+    // to bother looking up the VM to get it.
+    if (returnValue.isNull()) returnValue = fiber_->vm().nothing();
+    
+    fiber_->storeReturn(returnValue);
+
+    Scheduler& scheduler = fiber_->scheduler();
+    scheduler.run(fiber_);
+
+    // We're done!
+    delete this;
+  }
+
   WaitingFiber::WaitingFiber(gc<Fiber> fiber, uv_handle_t* handle)
   : fiber_(fiber),
     handle_(handle),
@@ -48,6 +68,17 @@ namespace magpie
     request->data = waiting;
 
     add(waiting);
+  }
+
+  void WaitingFiberList::remove(WaitingFiber* waiting)
+  {
+    // Unlink it from its siblings.
+    if (waiting->prev_ != NULL) waiting->prev_->next_ = waiting->next_;
+    if (waiting->next_ != NULL) waiting->next_->prev_ = waiting->prev_;
+
+    // Handle the ends of the list.
+    if (head_ == waiting) head_ = waiting->next_;
+    if (tail_ == waiting) tail_ = waiting->prev_;
   }
 
   void WaitingFiberList::killAll()
@@ -188,15 +219,9 @@ namespace magpie
   {
     // TODO(bob): Check status?
     WaitingFiber* waiting = static_cast<WaitingFiber*>(handle->data);
-    gc<Fiber> fiber = waiting->fiber();
-    Scheduler& scheduler = fiber->scheduler();
 
-    // TODO(bob): Need to remove WaitingFiber from list.
-    
     // Calling sleep() returns nothing.
-    fiber->storeReturn(fiber->vm().nothing());
-
-    scheduler.run(fiber);
+    waiting->resume(NULL);
   }
 
   void Scheduler::sleep(gc<Fiber> fiber, int ms)
@@ -213,13 +238,9 @@ namespace magpie
   static void openFileCallback(uv_fs_t* handle)
   {
     WaitingFiber* waiting = static_cast<WaitingFiber*>(handle->data);
-    gc<Fiber> fiber = waiting->fiber();
-    Scheduler& scheduler = fiber->scheduler();
 
     // Create and return the file object.
-    fiber->storeReturn(new FileObject(handle->file));
-
-    scheduler.run(fiber);
+    waiting->resume(new FileObject(handle->file));
   }
   
   void Scheduler::openFile(gc<Fiber> fiber, gc<String> path)
@@ -241,20 +262,13 @@ namespace magpie
   static void closeFileCallback(uv_fs_t* handle)
   {
     WaitingFiber* waiting = static_cast<WaitingFiber*>(handle->data);
-    gc<Fiber> fiber = waiting->fiber();
-    Scheduler& scheduler = fiber->scheduler();
 
     // Close returns nothing.
-    fiber->storeReturn(fiber->vm().nothing());
-
-    scheduler.run(fiber);
+    waiting->resume(NULL);
   }
   
   void Scheduler::closeFile(gc<Fiber> fiber, gc<FileObject> file)
   {
-    // Mark the file closed immediately so other fibers can't try to use it.
-    file->close();
-
     // TODO(bob): We could allocate this on the GC heap and then just reach it
     // as needed.
     uv_fs_t* request = new uv_fs_t;

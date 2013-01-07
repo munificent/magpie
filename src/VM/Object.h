@@ -316,7 +316,7 @@ namespace magpie
     uv_file file() { return file_; }
     bool isOpen() const { return isOpen_; }
 
-    void close();
+    void close(gc<Fiber> fiber);
 
     virtual ObjectType type() const { return OBJECT_FILE; }
 
