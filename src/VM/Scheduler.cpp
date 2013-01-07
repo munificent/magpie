@@ -235,6 +235,7 @@ namespace magpie
     // TODO(bob): Make this configurable when creating a file.
     int mode = 0;
     uv_fs_open(loop_, request, path->cString(), flags, mode, openFileCallback);
+    uv_fs_req_cleanup(request);
   }
 
   static void closeFileCallback(uv_fs_t* handle)
@@ -261,6 +262,7 @@ namespace magpie
     waiting_.add(fiber, reinterpret_cast<uv_req_t*>(request));
     
     uv_fs_close(loop_, request, file->file(), closeFileCallback);
+    uv_fs_req_cleanup(request);
   }
 
   void Scheduler::reach()
