@@ -294,6 +294,11 @@ namespace magpie
     }
   }
 
+  void FileObject::close()
+  {
+    ASSERT(isOpen_, "IO library should not call close on a closed file.");
+    isOpen_ = false;
+  }
 
   gc<ClassObject> FileObject::getClass(VM& vm) const
   {

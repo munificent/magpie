@@ -13,11 +13,6 @@ namespace magpie
   {
     value_.reach();
   }
-
-  void FileReadSuspension::reach()
-  {
-    file_.reach();
-  }
   
   Fiber::Fiber(VM& vm, Scheduler& scheduler, gc<FunctionObject> function,
                gc<Fiber> successor)
@@ -491,11 +486,16 @@ namespace magpie
     scheduler_.sleep(this, ms);
   }
 
-  void Fiber::readFile(gc<FileObject> fileObj)
+  void Fiber::openFile(gc<String> path)
   {
-    scheduler_.scheduleRead(this, fileObj);
+    scheduler_.openFile(this, path);
   }
 
+  void Fiber::closeFile(gc<FileObject> file)
+  {
+    scheduler_.closeFile(this, file);
+  }
+  
   void Fiber::reach()
   {
     // Walk the stack.

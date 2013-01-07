@@ -4,6 +4,7 @@
 #include "Module.h"
 #include "Object.h"
 #include "Scheduler.h"
+#include "VM.h"
 
 namespace magpie
 {
@@ -15,6 +16,15 @@ namespace magpie
   WaitingFiber::WaitingFiber(gc<Fiber> fiber, uv_handle_t* handle)
   : fiber_(fiber),
     handle_(handle),
+    request_(NULL),
+    prev_(NULL),
+    next_(NULL)
+  {}
+
+  WaitingFiber::WaitingFiber(gc<Fiber> fiber, uv_req_t* request)
+  : fiber_(fiber),
+    handle_(NULL),
+    request_(request),
     prev_(NULL),
     next_(NULL)
   {}
@@ -26,18 +36,18 @@ namespace magpie
     // Stuff the wait into the handle so we can get it in the callback.
     handle->data = waiting;
 
-    if (head_ == NULL)
-    {
-      // Only item in the list.
-      head_ = waiting;
-      tail_ = waiting;
-    }
-    else
-    {
-      // Add to the end of the list.
-      waiting->prev_ = tail_;
-      tail_->next_ = waiting;
-    }
+    add(waiting);
+
+  }
+
+  void WaitingFiberList::add(gc<Fiber> fiber, uv_req_t* request)
+  {
+    WaitingFiber* waiting = new WaitingFiber(fiber, request);
+
+    // Stuff the wait into the request so we can get it in the callback.
+    request->data = waiting;
+
+    add(waiting);
   }
 
   void WaitingFiberList::killAll()
@@ -45,7 +55,9 @@ namespace magpie
     WaitingFiber* waiting = head_;
     while (waiting != NULL)
     {
-      uv_unref(waiting->handle_);
+      if (waiting->handle_ != NULL) uv_unref(waiting->handle_);
+      if (waiting->request_ != NULL) uv_cancel(waiting->request_);
+      
       waiting = waiting->next_;
     }
   }
@@ -60,6 +72,26 @@ namespace magpie
     }
   }
 
+  void WaitingFiberList::add(WaitingFiber* waiting)
+  {
+    if (head_ == NULL)
+    {
+      // Only item in the list.
+      head_ = waiting;
+      tail_ = waiting;
+    }
+    else
+    {
+      // Add to the end of the list.
+      waiting->prev_ = tail_;
+      tail_->next_ = waiting;
+    }
+  }
+
+  Scheduler::Scheduler(VM& vm)
+  : vm_(vm)
+  {}
+  
   void Scheduler::run(Array<Module*> modules)
   {
     // Queue up fibers for each module body.
@@ -158,6 +190,12 @@ namespace magpie
     WaitingFiber* waiting = static_cast<WaitingFiber*>(handle->data);
     gc<Fiber> fiber = waiting->fiber();
     Scheduler& scheduler = fiber->scheduler();
+
+    // TODO(bob): Need to remove WaitingFiber from list.
+    
+    // Calling sleep() returns nothing.
+    fiber->storeReturn(fiber->vm().nothing());
+
     scheduler.run(fiber);
   }
 
@@ -165,13 +203,66 @@ namespace magpie
   {
     // TODO(bob): We could allocate this on the GC heap and then just reach it
     // as needed.
-    uv_timer_t* timer = new uv_timer_t;
+    uv_timer_t* request = new uv_timer_t;
 
-    waiting_.add(fiber, reinterpret_cast<uv_handle_t*>(timer));
-    uv_timer_init(loop_, timer);
-    uv_timer_start(timer, timerCallback, ms, 0);
+    waiting_.add(fiber, reinterpret_cast<uv_handle_t*>(request));
+    uv_timer_init(loop_, request);
+    uv_timer_start(request, timerCallback, ms, 0);
+  }
+
+  static void openFileCallback(uv_fs_t* handle)
+  {
+    WaitingFiber* waiting = static_cast<WaitingFiber*>(handle->data);
+    gc<Fiber> fiber = waiting->fiber();
+    Scheduler& scheduler = fiber->scheduler();
+
+    // Create and return the file object.
+    fiber->storeReturn(new FileObject(handle->file));
+
+    scheduler.run(fiber);
   }
   
+  void Scheduler::openFile(gc<Fiber> fiber, gc<String> path)
+  {
+    // TODO(bob): We could allocate this on the GC heap and then just reach it
+    // as needed.
+    uv_fs_t* request = new uv_fs_t;
+
+    waiting_.add(fiber, reinterpret_cast<uv_req_t*>(request));
+
+    // TODO(bob): Make this configurable.
+    int flags = O_RDONLY;
+    // TODO(bob): Make this configurable when creating a file.
+    int mode = 0;
+    uv_fs_open(loop_, request, path->cString(), flags, mode, openFileCallback);
+  }
+
+  static void closeFileCallback(uv_fs_t* handle)
+  {
+    WaitingFiber* waiting = static_cast<WaitingFiber*>(handle->data);
+    gc<Fiber> fiber = waiting->fiber();
+    Scheduler& scheduler = fiber->scheduler();
+
+    // Close returns nothing.
+    fiber->storeReturn(fiber->vm().nothing());
+
+    scheduler.run(fiber);
+  }
+  
+  void Scheduler::closeFile(gc<Fiber> fiber, gc<FileObject> file)
+  {
+    // Mark the file closed immediately so other fibers can't try to use it.
+    file->close();
+
+    // TODO(bob): We could allocate this on the GC heap and then just reach it
+    // as needed.
+    uv_fs_t* request = new uv_fs_t;
+
+    waiting_.add(fiber, reinterpret_cast<uv_req_t*>(request));
+    
+    uv_fs_close(loop_, request, file->file(), closeFileCallback);
+  }
+
   void Scheduler::reach()
   {
     ready_.reach();

@@ -50,11 +50,9 @@ namespace magpie
     NATIVE_RESULT_SUSPEND
   };
 
-  // TODO(bob): Better name.
-  class Suspension : public Managed
-  {
-
-  };
+  // TODO(bob): Roll this into Fiber since there won't be other kinds of
+  // suspensions. (The IO events are handled by the Scheduler.
+  class Suspension : public Managed {};
 
   // A suspend because the fiber is trying to send a value on a channel and no
   // receivers are pending yet.
@@ -74,29 +72,14 @@ namespace magpie
     gc<Object> value_;
   };
 
-  // A suspend because the fiber is reading from a file and it's waiting for
-  // the OS to say data is available.
-  class FileReadSuspension : public Suspension
-  {
-  public:
-    FileReadSuspension(gc<FileObject> file)
-    : file_(file)
-    {}
-
-    gc<FileObject> file() { return file_; }
-
-    virtual void reach();
-    
-  private:
-    // TODO(bob): Should this be a File, or a FileObject?
-    gc<FileObject> file_;
-  };
-
   class Fiber : public Managed
   {
   public:
     Fiber(VM& vm, Scheduler& scheduler, gc<FunctionObject> function,
           gc<Fiber> successor);
+
+    // Gets the VM that owns this fiber.
+    VM& vm() { return vm_; }
 
     // TODO(bob): Do we want to expose this?
     Scheduler& scheduler() { return scheduler_; }
@@ -122,9 +105,10 @@ namespace magpie
 
     void sleep(int ms);
 
-    // TODO(bob): Hackish. Temp!
-    void readFile(gc<FileObject> file);
-
+    // TODO(bob): Routing this through Fiber is lame. Reorganize.
+    void openFile(gc<String> path);
+    void closeFile(gc<FileObject> file);
+        
     virtual void reach();
     virtual void trace(std::ostream& out) const;
 

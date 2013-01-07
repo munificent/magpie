@@ -1,6 +1,5 @@
 #include <sstream>
 
-#include "File.h"
 #include "Object.h"
 #include "Natives.h"
 #include "VM.h"
@@ -297,27 +296,33 @@ namespace magpie
   NATIVE(fileClose)
   {
     gc<FileObject> fileObj = args[0]->asFile();
-    fileObj->file().close();
-    return vm.nothing();
+    fiber.closeFile(fileObj);
+
+    result = NATIVE_RESULT_SUSPEND;
+    return NULL;
   }
   
   NATIVE(fileIsOpen)
   {
     gc<FileObject> fileObj = args[0]->asFile();
-    return vm.getBool(fileObj->file().isOpen());
+    return vm.getBool(fileObj->isOpen());
   }
   
   NATIVE(fileOpen)
   {
-    File* file = new File(args[1]->asString());
-    return new FileObject(file);
+    fiber.openFile(args[1]->asString());
+    result = NATIVE_RESULT_SUSPEND;
+    return NULL;
   }
 
   NATIVE(fileRead)
   {
+    /*
     gc<FileObject> fileObj = args[0]->asFile();
     fiber.readFile(fileObj);
-    
+     */
+    ASSERT(false, "File read native not implemented.");
+
     result = NATIVE_RESULT_SUSPEND;
     return NULL;
   }

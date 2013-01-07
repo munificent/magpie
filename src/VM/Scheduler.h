@@ -15,9 +15,6 @@ namespace magpie
   class FunctionObject;
   class Module;
   class Object;
-  
-  // Forward-declaration of the platform-specific scheduler data.
-  class OSScheduler;
 
   // Wraps a Fiber that is waiting for an event to complete. This is a manually
   // memory managed doubly linked list.
@@ -32,10 +29,12 @@ namespace magpie
     
   private:
     WaitingFiber(gc<Fiber> fiber, uv_handle_t* handle);
+    WaitingFiber(gc<Fiber> fiber, uv_req_t* request);
 
     gc<Fiber> fiber_;
 
-    uv_handle_t*   handle_;
+    uv_handle_t*  handle_;
+    uv_req_t*     request_;
 
     WaitingFiber* prev_;
     WaitingFiber* next_;
@@ -54,6 +53,11 @@ namespace magpie
     // handle itself.
     void add(gc<Fiber> fiber, uv_handle_t* handle);
 
+    // Adds [fiber] and the event its waiting on to the list. This will take
+    // ownership of [handle]: when the WaitingFiber is freed, it will free the
+    // handle itself.
+    void add(gc<Fiber> fiber, uv_req_t* request);
+
     // Cancel all waiting fibers so that the event loop can exit.
     void killAll();
 
@@ -61,6 +65,8 @@ namespace magpie
     void reach();
 
   private:
+    void add(WaitingFiber* waiting);
+
     WaitingFiber* head_;
     WaitingFiber* tail_;
   };
@@ -70,7 +76,6 @@ namespace magpie
   {
   public:
     Scheduler(VM& vm);
-    ~Scheduler();
 
     void run(Array<Module*> modules);
 
@@ -84,12 +89,13 @@ namespace magpie
     // Spawns a new Fiber running the given procedure.
     void spawn(gc<FunctionObject> function);
     void add(gc<Fiber> fiber);
-
-    // TODO(bob): Temp?
-    void scheduleRead(gc<Fiber> fiber, gc<FileObject> file);
-
-    void sleep(gc<Fiber> fiber, int ms);
     
+    void sleep(gc<Fiber> fiber, int ms);
+
+    // TODO(bob): Putting these right on Scheduler feels wrong.
+    void openFile(gc<Fiber> fiber, gc<String> path);
+    void closeFile(gc<Fiber> fiber, gc<FileObject> file);
+
     void reach();
 
   private:
@@ -97,7 +103,6 @@ namespace magpie
     gc<Fiber> getNext();
 
     VM& vm_;
-    OSScheduler* os_;
     uv_loop_t *loop_;
 
     // Fibers that are not blocked and can run now.
