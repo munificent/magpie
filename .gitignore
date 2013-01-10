@@ -12,3 +12,4 @@ dep/libuv/uv.xcodeproj/project.pbxproj
 
 # Ignore user-specific config files.
 xcuserdata
+magpie.xcworkspace/

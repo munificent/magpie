@@ -3,44 +3,10 @@
 # See README for more.
 
 {
-  'xcode_settings': {
-    'GCC_ENABLE_CPP_EXCEPTIONS': 'NO', # -fno-exceptions
-    'GCC_ENABLE_CPP_RTTI': 'NO', # -fno-rtti
-    'GCC_TREAT_WARNINGS_AS_ERRORS': 'YES',    # -Werror
-    'GCC_WARN_CHECK_SWITCH_STATEMENTS': 'YES', # -Wswitch
-    'WARNING_CFLAGS': [
-      '-Wall',
-      '-W',
-      '-Wno-unused-parameter',
-      '-Wnon-virtual-dtor',
-    ],
-  },
-  'configurations': {
-    'Debug': {
-      'cflags': [ '-g', '-O0' ],
-      'defines': [ 'DEBUG' ],
-      'xcode_settings': {
-        'GCC_OPTIMIZATION_LEVEL': '0',
-      },
-    },
-    'Release': {
-      'cflags': [ '-O3' ],
-      'xcode_settings': {
-        'GCC_OPTIMIZATION_LEVEL': '3',
-      },
-    },
-  },
   'target_defaults': {
-    'default_configuration': 'Debug',
     'dependencies': [
       'dep/libuv/uv.gyp:libuv'
     ],
-    'configurations': {
-      'Debug': {
-      },
-      'Release': {
-      },
-    },
     'defines': [
       'PLATFORM="<(OS)"',
     ],

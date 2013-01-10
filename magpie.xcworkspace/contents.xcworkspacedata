@@ -4,4 +4,7 @@
    <FileRef
       location = "container:magpie.xcodeproj">
    </FileRef>
+   <FileRef
+      location = "group:dep/libuv/uv.xcodeproj">
+   </FileRef>
 </Workspace>
