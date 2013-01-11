@@ -485,11 +485,6 @@ namespace magpie
   {
     scheduler_.sleep(this, ms);
   }
-
-  void Fiber::openFile(gc<String> path)
-  {
-    scheduler_.openFile(this, path);
-  }
   
   void Fiber::reach()
   {

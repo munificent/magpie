@@ -8,17 +8,12 @@
 
 namespace magpie
 {
-  WaitingFiber::~WaitingFiber()
-  {
-    delete handle_;
-  }
-
-  void WaitingFiber::resume(gc<Object> returnValue)
+  void Task::complete(gc<Object> returnValue)
   {
     // Unlink from the list. We do this before running the fiber so that if
     // the main fiber ends and kills all waiting fibers, it doesn't see this
     // one.
-    fiber_->scheduler().waiting_.remove(this);
+    fiber_->scheduler().tasks_.remove(this);
 
     // Translate VM NULL to Magpie nothing so that the callback doesn't have
     // to bother looking up the VM to get it.
@@ -33,90 +28,124 @@ namespace magpie
     delete this;
   }
 
-  WaitingFiber::WaitingFiber(gc<Fiber> fiber, uv_handle_t* handle)
+  Task::Task(gc<Fiber> fiber)
   : fiber_(fiber),
-    handle_(handle),
-    request_(NULL),
     prev_(NULL),
     next_(NULL)
   {}
 
-  WaitingFiber::WaitingFiber(gc<Fiber> fiber, uv_req_t* request)
-  : fiber_(fiber),
-    handle_(NULL),
-    request_(request),
-    prev_(NULL),
-    next_(NULL)
+  FSTask::~FSTask()
+  {
+    uv_fs_req_cleanup(&fs_);
+  }
+
+  FSTask::FSTask(gc<Fiber> fiber)
+  : Task(fiber)
   {}
 
-  void WaitingFiberList::add(gc<Fiber> fiber, uv_handle_t* handle)
+  void FSTask::kill()
   {
-    WaitingFiber* waiting = new WaitingFiber(fiber, handle);
-
-    // Stuff the wait into the handle so we can get it in the callback.
-    handle->data = waiting;
-
-    add(waiting);
-
+    uv_cancel(reinterpret_cast<uv_req_t*>(&fs_));
   }
 
-  void WaitingFiberList::add(gc<Fiber> fiber, uv_req_t* request)
+  PipeTask::PipeTask(gc<Fiber> fiber)
+  : Task(fiber)
+  {}
+
+  void PipeTask::kill()
   {
-    WaitingFiber* waiting = new WaitingFiber(fiber, request);
-
-    // Stuff the wait into the request so we can get it in the callback.
-    request->data = waiting;
-
-    add(waiting);
+    uv_unref(reinterpret_cast<uv_handle_t*>(&pipe_));
   }
 
-  void WaitingFiberList::remove(WaitingFiber* waiting)
+  TimerTask::TimerTask(gc<Fiber> fiber)
+  : Task(fiber)
+  {}
+
+  void TimerTask::kill()
+  {
+    uv_unref(reinterpret_cast<uv_handle_t*>(&timer_));
+  }
+
+  uv_fs_t* TaskList::createFS(gc<Fiber> fiber)
+  {
+    // TODO(bob): We could allocate this on the GC heap and then just reach it
+    // as needed.
+    FSTask* task = new FSTask(fiber);
+
+    // Stuff the task into the handle so we can get it in the callback.
+    task->fs_.data = task;
+
+    add(task);
+    return &task->fs_;
+  }
+
+  uv_pipe_t* TaskList::createPipe(gc<Fiber> fiber)
+  {
+    // TODO(bob): We could allocate this on the GC heap and then just reach it
+    // as needed.
+    PipeTask* task = new PipeTask(fiber);
+
+    // Stuff the task into the handle so we can get it in the callback.
+    task->pipe_.data = task;
+
+    add(task);
+    return &task->pipe_;
+  }
+
+  uv_timer_t* TaskList::createTimer(gc<Fiber> fiber)
+  {
+    // TODO(bob): We could allocate this on the GC heap and then just reach it
+    // as needed.
+    TimerTask* task = new TimerTask(fiber);
+
+    // Stuff the task into the handle so we can get it in the callback.
+    task->timer_.data = task;
+
+    add(task);
+    return &task->timer_;
+  }
+  
+  void TaskList::remove(Task* task)
   {
     // Unlink it from its siblings.
-    if (waiting->prev_ != NULL) waiting->prev_->next_ = waiting->next_;
-    if (waiting->next_ != NULL) waiting->next_->prev_ = waiting->prev_;
+    if (task->prev_ != NULL) task->prev_->next_ = task->next_;
+    if (task->next_ != NULL) task->next_->prev_ = task->prev_;
 
     // Handle the ends of the list.
-    if (head_ == waiting) head_ = waiting->next_;
-    if (tail_ == waiting) tail_ = waiting->prev_;
+    if (head_ == task) head_ = task->next_;
+    if (tail_ == task) tail_ = task->prev_;
   }
 
-  void WaitingFiberList::killAll()
+  void TaskList::killAll()
   {
-    WaitingFiber* waiting = head_;
-    while (waiting != NULL)
+    Task* task = head_;
+    while (task != NULL)
     {
-      if (waiting->handle_ != NULL) uv_unref(waiting->handle_);
-      if (waiting->request_ != NULL) uv_cancel(waiting->request_);
-      
-      waiting = waiting->next_;
+      task->kill();
+      task = task->next_;
+    }
+    // TODO(bob): Delete Tasks.
+  }
+
+  void TaskList::reach()
+  {
+    Task* task = head_;
+    while (task != NULL)
+    {
+      task->fiber_.reach();
+      task = task->next_;
     }
   }
 
-  void WaitingFiberList::reach()
+  void TaskList::add(Task* task)
   {
-    WaitingFiber* waiting = head_;
-    while (waiting != NULL)
-    {
-      waiting->fiber_.reach();
-      waiting = waiting->next_;
-    }
-  }
+    // Handle the ends of the list.
+    if (head_ == NULL) head_ = task;
+    if (tail_ != NULL) tail_->next_ = task;
 
-  void WaitingFiberList::add(WaitingFiber* waiting)
-  {
-    if (head_ == NULL)
-    {
-      // Only item in the list.
-      head_ = waiting;
-      tail_ = waiting;
-    }
-    else
-    {
-      // Add to the end of the list.
-      waiting->prev_ = tail_;
-      tail_->next_ = waiting;
-    }
+    // Add it to the end of the list.
+    task->prev_ = tail_;
+    tail_ = task;
   }
 
   Scheduler::Scheduler(VM& vm)
@@ -169,7 +198,7 @@ namespace magpie
           // If the main module has completed, stop.
           if (fiber->isMain())
           {
-            waiting_.killAll();
+            tasks_.killAll();
             return value;
           }
 
@@ -217,72 +246,87 @@ namespace magpie
 
   static void timerCallback(uv_timer_t* handle, int status)
   {
-    // TODO(bob): Check status?
-    WaitingFiber* waiting = static_cast<WaitingFiber*>(handle->data);
+    // TODO(bob): Check status.
+    Task* task = static_cast<Task*>(handle->data);
 
     // Calling sleep() returns nothing.
-    waiting->resume(NULL);
+    task->complete(NULL);
   }
 
   void Scheduler::sleep(gc<Fiber> fiber, int ms)
   {
     // TODO(bob): We could allocate this on the GC heap and then just reach it
     // as needed.
-    uv_timer_t* request = new uv_timer_t;
-
-    waiting_.add(fiber, reinterpret_cast<uv_handle_t*>(request));
+    uv_timer_t* request = tasks_.createTimer(fiber);
     uv_timer_init(loop_, request);
     uv_timer_start(request, timerCallback, ms, 0);
   }
 
   static void openFileCallback(uv_fs_t* handle)
   {
-    WaitingFiber* waiting = static_cast<WaitingFiber*>(handle->data);
+    // TODO(bob): Handle errors!
+    Task* task = static_cast<Task*>(handle->data);
 
-    // Create and return the file object.
-    waiting->resume(new FileObject(handle->file));
+    // Note that the file descriptor is returned in [result] and not [file].
+    task->complete(new FileObject(handle->result));
   }
   
   void Scheduler::openFile(gc<Fiber> fiber, gc<String> path)
   {
-    // TODO(bob): We could allocate this on the GC heap and then just reach it
-    // as needed.
-    uv_fs_t* request = new uv_fs_t;
-
-    waiting_.add(fiber, reinterpret_cast<uv_req_t*>(request));
+    uv_fs_t* request = tasks_.createFS(fiber);
 
     // TODO(bob): Make this configurable.
     int flags = O_RDONLY;
     // TODO(bob): Make this configurable when creating a file.
     int mode = 0;
     uv_fs_open(loop_, request, path->cString(), flags, mode, openFileCallback);
-    uv_fs_req_cleanup(request);
   }
 
+  static uv_buf_t allocateCallback(uv_handle_t *handle, size_t suggested_size)
+  {
+    printf("Alloc %ld\n", suggested_size);
+    // TODO(bob): Don't use malloc() here.
+    return uv_buf_init((char*) malloc(suggested_size), suggested_size);
+  }
+
+  static void readCallback(uv_stream_t *stream, ssize_t nread, uv_buf_t buf)
+  {
+    // TODO(bob): Implement me!
+    printf("Read %ld bytes\n", nread);
+  }
+
+  void Scheduler::read(gc<Fiber> fiber, gc<FileObject> file)
+  {
+    // TODO(bob): What if you call read on the same file multiple times?
+    // Should the pipe be reused?
+    // Get a pipe to the file.
+    uv_pipe_t* pipe = tasks_.createPipe(fiber);
+    uv_pipe_init(loop_, pipe, 0);
+    uv_pipe_open(pipe, file->file());
+
+    // TODO(bob): Check result.
+    uv_read_start(reinterpret_cast<uv_stream_t*>(pipe), allocateCallback,
+                  readCallback);
+  }
+  
   static void closeFileCallback(uv_fs_t* handle)
   {
-    WaitingFiber* waiting = static_cast<WaitingFiber*>(handle->data);
+    Task* task = static_cast<Task*>(handle->data);
 
     // Close returns nothing.
-    waiting->resume(NULL);
+    task->complete(NULL);
   }
   
   void Scheduler::closeFile(gc<Fiber> fiber, gc<FileObject> file)
   {
-    // TODO(bob): We could allocate this on the GC heap and then just reach it
-    // as needed.
-    uv_fs_t* request = new uv_fs_t;
-
-    waiting_.add(fiber, reinterpret_cast<uv_req_t*>(request));
-    
+    uv_fs_t* request = tasks_.createFS(fiber);
     uv_fs_close(loop_, request, file->file(), closeFileCallback);
-    uv_fs_req_cleanup(request);
   }
 
   void Scheduler::reach()
   {
     ready_.reach();
-    waiting_.reach();
+    tasks_.reach();
   }
 
   gc<Fiber> Scheduler::getNext()

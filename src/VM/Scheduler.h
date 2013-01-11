@@ -16,57 +16,104 @@ namespace magpie
   class Module;
   class Object;
 
-  // Wraps a Fiber that is waiting for an event to complete. This is a manually
-  // memory managed doubly linked list.
-  class WaitingFiber
+  // Wraps a Fiber that is waiting for an asynchronous event to complete. This
+  // is a manually memory managed doubly linked list.
+  class Task
   {
-    friend class WaitingFiberList;
+    friend class TaskList;
 
   public:
-    ~WaitingFiber();
+    virtual ~Task() {}
     
     gc<Fiber> fiber() { return fiber_; }
 
-    // Resumes this fiber. Removes it from the list of waiting fibers and runs
+    virtual void kill() = 0;
+    
+    // Completes the task. Removes it from the list of pending tasks and runs
     // the fiber (and any other fibers that are able to be run).
     //
     // This object will be freed at the end of this call. You cannot use it
     // after this returns!
-    void resume(gc<Object> returnValue);
+    void complete(gc<Object> returnValue);
+
+  protected:
+    Task(gc<Fiber> fiber);
 
   private:
-    WaitingFiber(gc<Fiber> fiber, uv_handle_t* handle);
-    WaitingFiber(gc<Fiber> fiber, uv_req_t* request);
-
     gc<Fiber> fiber_;
 
-    uv_handle_t*  handle_;
-    uv_req_t*     request_;
-
-    WaitingFiber* prev_;
-    WaitingFiber* next_;
+    Task* prev_;
+    Task* next_;
   };
 
-  class WaitingFiberList
+  // TODO(bob): These subclasses seemed like a good idea at first, but they're
+  // pretty verbose and boilerplately. Do we really want a different subclass
+  // for each handle and request type?
+  
+  // A task for a file system operation.
+  class FSTask : public Task
+  {
+    friend class TaskList;
+
+  public:
+    ~FSTask();
+
+    virtual void kill();
+
+  private:
+    FSTask(gc<Fiber> fiber);
+
+    uv_fs_t fs_;
+  };
+
+  // A task for a pipe.
+  class PipeTask : public Task
+  {
+    friend class TaskList;
+
+  public:
+    virtual void kill();
+
+  private:
+    PipeTask(gc<Fiber> fiber);
+
+    uv_pipe_t pipe_;
+  };
+
+  // A task for a timer.
+  class TimerTask : public Task
+  {
+    friend class TaskList;
+
+  public:
+    virtual void kill();
+
+  private:
+    TimerTask(gc<Fiber> fiber);
+
+    uv_timer_t timer_;
+  };
+  
+  // A list of pending asynchronous tasks.
+  class TaskList
   {
   public:
-    WaitingFiberList()
+    TaskList()
     : head_(NULL),
       tail_(NULL)
     {}
     
-    // Adds [fiber] and the event its waiting on to the list. This will take
-    // ownership of [handle]: when the WaitingFiber is freed, it will free the
-    // handle itself.
-    void add(gc<Fiber> fiber, uv_handle_t* handle);
+    // Create a new file system task that is blocking [fiber].
+    uv_fs_t* createFS(gc<Fiber> fiber);
 
-    // Adds [fiber] and the event its waiting on to the list. This will take
-    // ownership of [handle]: when the WaitingFiber is freed, it will free the
-    // handle itself.
-    void add(gc<Fiber> fiber, uv_req_t* request);
+    // Create a new pipe task that is blocking [fiber].
+    uv_pipe_t* createPipe(gc<Fiber> fiber);
+
+    // Create a new timer task that is blocking [fiber].
+    uv_timer_t* createTimer(gc<Fiber> fiber);
 
     // Removes [waiting] from this list. Does not free it.
-    void remove(WaitingFiber* waiting);
+    void remove(Task* task);
 
     // Cancel all waiting fibers so that the event loop can exit.
     void killAll();
@@ -75,16 +122,16 @@ namespace magpie
     void reach();
 
   private:
-    void add(WaitingFiber* waiting);
+    void add(Task* task);
 
-    WaitingFiber* head_;
-    WaitingFiber* tail_;
+    Task* head_;
+    Task* tail_;
   };
 
   // The Fiber scheduler.
   class Scheduler
   {
-    friend class WaitingFiber;
+    friend class Task;
     
   public:
     Scheduler(VM& vm);
@@ -106,6 +153,7 @@ namespace magpie
 
     // TODO(bob): Putting these right on Scheduler feels wrong.
     void openFile(gc<Fiber> fiber, gc<String> path);
+    void read(gc<Fiber>, gc<FileObject> file);
     void closeFile(gc<Fiber> fiber, gc<FileObject> file);
 
     void reach();
@@ -121,7 +169,7 @@ namespace magpie
     Array<gc<Fiber> > ready_;
 
     // Fibers that are waiting on an OS event to complete.
-    WaitingFiberList waiting_;
+    TaskList tasks_;
 
     NO_COPY(Scheduler);
   };

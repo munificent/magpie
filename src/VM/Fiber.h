@@ -105,9 +105,6 @@ namespace magpie
 
     void sleep(int ms);
 
-    // TODO(bob): Routing this through Fiber is lame. Reorganize.
-    void openFile(gc<String> path);
-        
     virtual void reach();
     virtual void trace(std::ostream& out) const;
 

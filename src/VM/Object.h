@@ -307,6 +307,8 @@ namespace magpie
   class FileObject : public Object
   {
   public:
+    static void open(gc<Fiber> fiber, gc<String> path);
+
     FileObject(uv_file file)
     : Object(),
       file_(file),
@@ -316,6 +318,7 @@ namespace magpie
     uv_file file() { return file_; }
     bool isOpen() const { return isOpen_; }
 
+    void read(gc<Fiber> fiber);
     void close(gc<Fiber> fiber);
 
     virtual ObjectType type() const { return OBJECT_FILE; }

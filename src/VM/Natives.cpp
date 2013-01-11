@@ -310,19 +310,15 @@ namespace magpie
   
   NATIVE(fileOpen)
   {
-    fiber.openFile(args[1]->asString());
+    FileObject::open(&fiber, args[1]->asString());
     result = NATIVE_RESULT_SUSPEND;
     return NULL;
   }
 
   NATIVE(fileRead)
   {
-    /*
     gc<FileObject> fileObj = args[0]->asFile();
-    fiber.readFile(fileObj);
-     */
-    ASSERT(false, "File read native not implemented.");
-
+    fileObj->read(&fiber);
     result = NATIVE_RESULT_SUSPEND;
     return NULL;
   }

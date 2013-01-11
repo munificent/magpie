@@ -294,6 +294,16 @@ namespace magpie
     }
   }
 
+  void FileObject::open(gc<Fiber> fiber, gc<String> path)
+  {
+    fiber->scheduler().openFile(fiber, path);
+  }
+
+  void FileObject::read(gc<Fiber> fiber)
+  {
+    fiber->scheduler().read(fiber, this);
+  }
+
   void FileObject::close(gc<Fiber> fiber)
   {
     ASSERT(isOpen_, "IO library should not call close on a closed file.");
