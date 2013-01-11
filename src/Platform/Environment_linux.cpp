@@ -10,7 +10,7 @@ namespace magpie
 {
   gc<String> getCoreLibDir()
   {
-    char* relativePath[PATH_MAX];
+    char relativePath[PATH_MAX];
 
     int len = readlink("/proc/self/exe", relativePath, PATH_MAX - 1);
     ASSERT(len != -1, "Executable path too long.");
