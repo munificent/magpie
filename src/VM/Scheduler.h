@@ -46,10 +46,6 @@ namespace magpie
     Task* next_;
   };
 
-  // TODO(bob): These subclasses seemed like a good idea at first, but they're
-  // pretty verbose and boilerplately. Do we really want a different subclass
-  // for each handle and request type?
-  
   // A task for a file system operation.
   class FSTask : public Task
   {
@@ -66,32 +62,19 @@ namespace magpie
     uv_fs_t fs_;
   };
 
-  // A task for a pipe.
-  class PipeTask : public Task
+  // A task using a uv_handle_t.
+  class HandleTask : public Task
   {
     friend class TaskList;
 
   public:
+    ~HandleTask();
     virtual void kill();
 
   private:
-    PipeTask(gc<Fiber> fiber);
+    HandleTask(gc<Fiber> fiber, uv_handle_t* handle);
 
-    uv_pipe_t pipe_;
-  };
-
-  // A task for a timer.
-  class TimerTask : public Task
-  {
-    friend class TaskList;
-
-  public:
-    virtual void kill();
-
-  private:
-    TimerTask(gc<Fiber> fiber);
-
-    uv_timer_t timer_;
+    uv_handle_t* handle_;
   };
   
   // A list of pending asynchronous tasks.

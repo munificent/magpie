@@ -48,22 +48,21 @@ namespace magpie
     uv_cancel(reinterpret_cast<uv_req_t*>(&fs_));
   }
 
-  PipeTask::PipeTask(gc<Fiber> fiber)
-  : Task(fiber)
+  HandleTask::HandleTask(gc<Fiber> fiber, uv_handle_t* handle)
+  : Task(fiber),
+    handle_(handle)
   {}
 
-  void PipeTask::kill()
+  HandleTask::~HandleTask()
   {
-    uv_unref(reinterpret_cast<uv_handle_t*>(&pipe_));
+    delete handle_;
   }
 
-  TimerTask::TimerTask(gc<Fiber> fiber)
-  : Task(fiber)
-  {}
-
-  void TimerTask::kill()
+  void HandleTask::kill()
   {
-    uv_unref(reinterpret_cast<uv_handle_t*>(&timer_));
+    uv_unref(handle_);
+    delete handle_;
+    handle_ = NULL;
   }
 
   uv_fs_t* TaskList::createFS(gc<Fiber> fiber)
@@ -81,28 +80,32 @@ namespace magpie
 
   uv_pipe_t* TaskList::createPipe(gc<Fiber> fiber)
   {
-    // TODO(bob): We could allocate this on the GC heap and then just reach it
+    // TODO(bob): We could allocate these on the GC heap and then just reach it
     // as needed.
-    PipeTask* task = new PipeTask(fiber);
+    uv_pipe_t* pipe = new uv_pipe_t;
+    HandleTask* task = new HandleTask(fiber,
+                                      reinterpret_cast<uv_handle_t*>(pipe));
 
     // Stuff the task into the handle so we can get it in the callback.
-    task->pipe_.data = task;
+    pipe->data = task;
 
     add(task);
-    return &task->pipe_;
+    return pipe;
   }
 
   uv_timer_t* TaskList::createTimer(gc<Fiber> fiber)
   {
-    // TODO(bob): We could allocate this on the GC heap and then just reach it
+    // TODO(bob): We could allocate these on the GC heap and then just reach it
     // as needed.
-    TimerTask* task = new TimerTask(fiber);
+    uv_timer_t* timer = new uv_timer_t;
+    HandleTask* task = new HandleTask(fiber,
+                                      reinterpret_cast<uv_handle_t*>(timer));
 
     // Stuff the task into the handle so we can get it in the callback.
-    task->timer_.data = task;
+    timer->data = task;
 
     add(task);
-    return &task->timer_;
+    return timer;
   }
   
   void TaskList::remove(Task* task)
