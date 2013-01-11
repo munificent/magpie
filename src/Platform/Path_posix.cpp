@@ -1,4 +1,10 @@
-#include <linux/limits.h>
+// TODO(bob): PATH_MAX isn't actually part of POSIX. Need to do something
+// smarter here.
+#ifdef __linux__
+  #include <linux/limits.h>
+#else
+#include <limits.h>
+#endif
 #include <stdlib.h>
 #include <sys/stat.h>
 
