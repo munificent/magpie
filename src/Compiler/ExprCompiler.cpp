@@ -797,7 +797,12 @@ namespace magpie
 
   void ExprCompiler::write(const Expr& expr, OpCode op, int a, int b, int c)
   {
-    write(expr.pos()->startLine(), op, a, b, c);
+    write(expr.pos(), op, a, b, c);
+  }
+
+  void ExprCompiler::write(gc<SourcePos> pos, OpCode op, int a, int b, int c)
+  {
+    write(pos->startLine(), op, a, b, c);
   }
 
   void ExprCompiler::write(int line, OpCode op, int a, int b, int c)

@@ -157,7 +157,7 @@ BASE_CLASS = '''
 class {0} : public Managed
 {{
 public:
-  {0}(gc<SourcePos> pos)
+  explicit {0}(gc<SourcePos> pos)
   : pos_(pos)
   {{}}
 
@@ -179,7 +179,7 @@ SUBCLASS = '''
 class {0}{6} : public {6}
 {{
 public:
-  {0}{6}(gc<SourcePos> pos{1})
+  explicit {0}{6}(gc<SourcePos> pos{1})
   : {6}(pos){2}
   {{}}
 

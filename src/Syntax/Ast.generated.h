@@ -94,7 +94,7 @@ private:
 class Expr : public Managed
 {
 public:
-  Expr(gc<SourcePos> pos)
+  explicit Expr(gc<SourcePos> pos)
   : pos_(pos)
   {}
 
@@ -148,7 +148,7 @@ private:
 class AndExpr : public Expr
 {
 public:
-  AndExpr(gc<SourcePos> pos, gc<Expr> left, gc<Expr> right)
+  explicit AndExpr(gc<SourcePos> pos, gc<Expr> left, gc<Expr> right)
   : Expr(pos),
     left_(left),
     right_(right)
@@ -181,7 +181,7 @@ private:
 class AssignExpr : public Expr
 {
 public:
-  AssignExpr(gc<SourcePos> pos, gc<LValue> lvalue, gc<Expr> value)
+  explicit AssignExpr(gc<SourcePos> pos, gc<LValue> lvalue, gc<Expr> value)
   : Expr(pos),
     lvalue_(lvalue),
     value_(value)
@@ -214,7 +214,7 @@ private:
 class AsyncExpr : public Expr
 {
 public:
-  AsyncExpr(gc<SourcePos> pos, gc<Expr> body)
+  explicit AsyncExpr(gc<SourcePos> pos, gc<Expr> body)
   : Expr(pos),
     body_(body),
     resolved_()
@@ -246,7 +246,7 @@ private:
 class BoolExpr : public Expr
 {
 public:
-  BoolExpr(gc<SourcePos> pos, bool value)
+  explicit BoolExpr(gc<SourcePos> pos, bool value)
   : Expr(pos),
     value_(value)
   {}
@@ -270,7 +270,7 @@ private:
 class BreakExpr : public Expr
 {
 public:
-  BreakExpr(gc<SourcePos> pos)
+  explicit BreakExpr(gc<SourcePos> pos)
   : Expr(pos)
   {}
 
@@ -291,7 +291,7 @@ private:
 class CallExpr : public Expr
 {
 public:
-  CallExpr(gc<SourcePos> pos, gc<Expr> leftArg, gc<String> name, gc<Expr> rightArg)
+  explicit CallExpr(gc<SourcePos> pos, gc<Expr> leftArg, gc<String> name, gc<Expr> rightArg)
   : Expr(pos),
     leftArg_(leftArg),
     name_(name),
@@ -332,7 +332,7 @@ private:
 class CatchExpr : public Expr
 {
 public:
-  CatchExpr(gc<SourcePos> pos, gc<Expr> body, const Array<MatchClause>& catches)
+  explicit CatchExpr(gc<SourcePos> pos, gc<Expr> body, const Array<MatchClause>& catches)
   : Expr(pos),
     body_(body),
     catches_(catches)
@@ -364,7 +364,7 @@ private:
 class CharacterExpr : public Expr
 {
 public:
-  CharacterExpr(gc<SourcePos> pos, unsigned int value)
+  explicit CharacterExpr(gc<SourcePos> pos, unsigned int value)
   : Expr(pos),
     value_(value)
   {}
@@ -388,7 +388,7 @@ private:
 class DefExpr : public Expr
 {
 public:
-  DefExpr(gc<SourcePos> pos, gc<Pattern> leftParam, gc<String> name, gc<Pattern> rightParam, gc<Pattern> value, gc<Expr> body)
+  explicit DefExpr(gc<SourcePos> pos, gc<Pattern> leftParam, gc<String> name, gc<Pattern> rightParam, gc<Pattern> value, gc<Expr> body)
   : Expr(pos),
     leftParam_(leftParam),
     name_(name),
@@ -436,7 +436,7 @@ private:
 class DefClassExpr : public Expr
 {
 public:
-  DefClassExpr(gc<SourcePos> pos, gc<String> name, bool isNative, const Array<gc<Expr> >& superclasses, const Array<gc<ClassField> >& fields)
+  explicit DefClassExpr(gc<SourcePos> pos, gc<String> name, bool isNative, const Array<gc<Expr> >& superclasses, const Array<gc<ClassField> >& fields)
   : Expr(pos),
     name_(name),
     isNative_(isNative),
@@ -486,7 +486,7 @@ private:
 class DoExpr : public Expr
 {
 public:
-  DoExpr(gc<SourcePos> pos, gc<Expr> body)
+  explicit DoExpr(gc<SourcePos> pos, gc<Expr> body)
   : Expr(pos),
     body_(body)
   {}
@@ -515,7 +515,7 @@ private:
 class FloatExpr : public Expr
 {
 public:
-  FloatExpr(gc<SourcePos> pos, double value)
+  explicit FloatExpr(gc<SourcePos> pos, double value)
   : Expr(pos),
     value_(value)
   {}
@@ -539,7 +539,7 @@ private:
 class FnExpr : public Expr
 {
 public:
-  FnExpr(gc<SourcePos> pos, gc<Pattern> pattern, gc<Expr> body)
+  explicit FnExpr(gc<SourcePos> pos, gc<Pattern> pattern, gc<Expr> body)
   : Expr(pos),
     pattern_(pattern),
     body_(body),
@@ -575,7 +575,7 @@ private:
 class ForExpr : public Expr
 {
 public:
-  ForExpr(gc<SourcePos> pos, gc<Pattern> pattern, gc<Expr> iterator, gc<Expr> body)
+  explicit ForExpr(gc<SourcePos> pos, gc<Pattern> pattern, gc<Expr> iterator, gc<Expr> body)
   : Expr(pos),
     pattern_(pattern),
     iterator_(iterator),
@@ -612,7 +612,7 @@ private:
 class GetFieldExpr : public Expr
 {
 public:
-  GetFieldExpr(gc<SourcePos> pos, int index)
+  explicit GetFieldExpr(gc<SourcePos> pos, int index)
   : Expr(pos),
     index_(index)
   {}
@@ -636,7 +636,7 @@ private:
 class IfExpr : public Expr
 {
 public:
-  IfExpr(gc<SourcePos> pos, gc<Expr> condition, gc<Expr> thenArm, gc<Expr> elseArm)
+  explicit IfExpr(gc<SourcePos> pos, gc<Expr> condition, gc<Expr> thenArm, gc<Expr> elseArm)
   : Expr(pos),
     condition_(condition),
     thenArm_(thenArm),
@@ -673,7 +673,7 @@ private:
 class ImportExpr : public Expr
 {
 public:
-  ImportExpr(gc<SourcePos> pos, gc<String> name)
+  explicit ImportExpr(gc<SourcePos> pos, gc<String> name)
   : Expr(pos),
     name_(name)
   {}
@@ -702,7 +702,7 @@ private:
 class IntExpr : public Expr
 {
 public:
-  IntExpr(gc<SourcePos> pos, int value)
+  explicit IntExpr(gc<SourcePos> pos, int value)
   : Expr(pos),
     value_(value)
   {}
@@ -726,7 +726,7 @@ private:
 class IsExpr : public Expr
 {
 public:
-  IsExpr(gc<SourcePos> pos, gc<Expr> value, gc<Expr> type)
+  explicit IsExpr(gc<SourcePos> pos, gc<Expr> value, gc<Expr> type)
   : Expr(pos),
     value_(value),
     type_(type)
@@ -759,7 +759,7 @@ private:
 class ListExpr : public Expr
 {
 public:
-  ListExpr(gc<SourcePos> pos, const Array<gc<Expr> >& elements)
+  explicit ListExpr(gc<SourcePos> pos, const Array<gc<Expr> >& elements)
   : Expr(pos),
     elements_(elements)
   {}
@@ -788,7 +788,7 @@ private:
 class MatchExpr : public Expr
 {
 public:
-  MatchExpr(gc<SourcePos> pos, gc<Expr> value, const Array<MatchClause>& cases)
+  explicit MatchExpr(gc<SourcePos> pos, gc<Expr> value, const Array<MatchClause>& cases)
   : Expr(pos),
     value_(value),
     cases_(cases)
@@ -820,7 +820,7 @@ private:
 class NameExpr : public Expr
 {
 public:
-  NameExpr(gc<SourcePos> pos, gc<String> name)
+  explicit NameExpr(gc<SourcePos> pos, gc<String> name)
   : Expr(pos),
     name_(name),
     resolved_()
@@ -854,7 +854,7 @@ private:
 class NativeExpr : public Expr
 {
 public:
-  NativeExpr(gc<SourcePos> pos, gc<String> name)
+  explicit NativeExpr(gc<SourcePos> pos, gc<String> name)
   : Expr(pos),
     name_(name),
     index_(-1)
@@ -887,7 +887,7 @@ private:
 class NotExpr : public Expr
 {
 public:
-  NotExpr(gc<SourcePos> pos, gc<Expr> value)
+  explicit NotExpr(gc<SourcePos> pos, gc<Expr> value)
   : Expr(pos),
     value_(value)
   {}
@@ -916,7 +916,7 @@ private:
 class NothingExpr : public Expr
 {
 public:
-  NothingExpr(gc<SourcePos> pos)
+  explicit NothingExpr(gc<SourcePos> pos)
   : Expr(pos)
   {}
 
@@ -937,7 +937,7 @@ private:
 class OrExpr : public Expr
 {
 public:
-  OrExpr(gc<SourcePos> pos, gc<Expr> left, gc<Expr> right)
+  explicit OrExpr(gc<SourcePos> pos, gc<Expr> left, gc<Expr> right)
   : Expr(pos),
     left_(left),
     right_(right)
@@ -970,7 +970,7 @@ private:
 class RecordExpr : public Expr
 {
 public:
-  RecordExpr(gc<SourcePos> pos, const Array<Field>& fields)
+  explicit RecordExpr(gc<SourcePos> pos, const Array<Field>& fields)
   : Expr(pos),
     fields_(fields)
   {}
@@ -1004,7 +1004,7 @@ private:
 class ReturnExpr : public Expr
 {
 public:
-  ReturnExpr(gc<SourcePos> pos, gc<Expr> value)
+  explicit ReturnExpr(gc<SourcePos> pos, gc<Expr> value)
   : Expr(pos),
     value_(value)
   {}
@@ -1033,7 +1033,7 @@ private:
 class SequenceExpr : public Expr
 {
 public:
-  SequenceExpr(gc<SourcePos> pos, const Array<gc<Expr> >& expressions)
+  explicit SequenceExpr(gc<SourcePos> pos, const Array<gc<Expr> >& expressions)
   : Expr(pos),
     expressions_(expressions)
   {}
@@ -1062,7 +1062,7 @@ private:
 class SetFieldExpr : public Expr
 {
 public:
-  SetFieldExpr(gc<SourcePos> pos, int index)
+  explicit SetFieldExpr(gc<SourcePos> pos, int index)
   : Expr(pos),
     index_(index)
   {}
@@ -1086,7 +1086,7 @@ private:
 class StringExpr : public Expr
 {
 public:
-  StringExpr(gc<SourcePos> pos, gc<String> value)
+  explicit StringExpr(gc<SourcePos> pos, gc<String> value)
   : Expr(pos),
     value_(value)
   {}
@@ -1115,7 +1115,7 @@ private:
 class ThrowExpr : public Expr
 {
 public:
-  ThrowExpr(gc<SourcePos> pos, gc<Expr> value)
+  explicit ThrowExpr(gc<SourcePos> pos, gc<Expr> value)
   : Expr(pos),
     value_(value)
   {}
@@ -1144,7 +1144,7 @@ private:
 class VariableExpr : public Expr
 {
 public:
-  VariableExpr(gc<SourcePos> pos, bool isMutable, gc<Pattern> pattern, gc<Expr> value)
+  explicit VariableExpr(gc<SourcePos> pos, bool isMutable, gc<Pattern> pattern, gc<Expr> value)
   : Expr(pos),
     isMutable_(isMutable),
     pattern_(pattern),
@@ -1180,7 +1180,7 @@ private:
 class WhileExpr : public Expr
 {
 public:
-  WhileExpr(gc<SourcePos> pos, gc<Expr> condition, gc<Expr> body)
+  explicit WhileExpr(gc<SourcePos> pos, gc<Expr> condition, gc<Expr> body)
   : Expr(pos),
     condition_(condition),
     body_(body)
@@ -1230,7 +1230,7 @@ private:
 class LValue : public Managed
 {
 public:
-  LValue(gc<SourcePos> pos)
+  explicit LValue(gc<SourcePos> pos)
   : pos_(pos)
   {}
 
@@ -1254,7 +1254,7 @@ private:
 class CallLValue : public LValue
 {
 public:
-  CallLValue(gc<SourcePos> pos, gc<CallExpr> call)
+  explicit CallLValue(gc<SourcePos> pos, gc<CallExpr> call)
   : LValue(pos),
     call_(call)
   {}
@@ -1283,7 +1283,7 @@ private:
 class NameLValue : public LValue
 {
 public:
-  NameLValue(gc<SourcePos> pos, gc<String> name)
+  explicit NameLValue(gc<SourcePos> pos, gc<String> name)
   : LValue(pos),
     name_(name),
     resolved_()
@@ -1317,7 +1317,7 @@ private:
 class RecordLValue : public LValue
 {
 public:
-  RecordLValue(gc<SourcePos> pos, const Array<LValueField>& fields)
+  explicit RecordLValue(gc<SourcePos> pos, const Array<LValueField>& fields)
   : LValue(pos),
     fields_(fields)
   {}
@@ -1351,7 +1351,7 @@ private:
 class WildcardLValue : public LValue
 {
 public:
-  WildcardLValue(gc<SourcePos> pos)
+  explicit WildcardLValue(gc<SourcePos> pos)
   : LValue(pos)
   {}
 
@@ -1389,7 +1389,7 @@ private:
 class Pattern : public Managed
 {
 public:
-  Pattern(gc<SourcePos> pos)
+  explicit Pattern(gc<SourcePos> pos)
   : pos_(pos)
   {}
 
@@ -1413,7 +1413,7 @@ private:
 class RecordPattern : public Pattern
 {
 public:
-  RecordPattern(gc<SourcePos> pos, const Array<PatternField>& fields)
+  explicit RecordPattern(gc<SourcePos> pos, const Array<PatternField>& fields)
   : Pattern(pos),
     fields_(fields)
   {}
@@ -1447,7 +1447,7 @@ private:
 class TypePattern : public Pattern
 {
 public:
-  TypePattern(gc<SourcePos> pos, gc<Expr> type)
+  explicit TypePattern(gc<SourcePos> pos, gc<Expr> type)
   : Pattern(pos),
     type_(type)
   {}
@@ -1476,7 +1476,7 @@ private:
 class ValuePattern : public Pattern
 {
 public:
-  ValuePattern(gc<SourcePos> pos, gc<Expr> value)
+  explicit ValuePattern(gc<SourcePos> pos, gc<Expr> value)
   : Pattern(pos),
     value_(value)
   {}
@@ -1505,7 +1505,7 @@ private:
 class VariablePattern : public Pattern
 {
 public:
-  VariablePattern(gc<SourcePos> pos, gc<String> name, gc<Pattern> pattern)
+  explicit VariablePattern(gc<SourcePos> pos, gc<String> name, gc<Pattern> pattern)
   : Pattern(pos),
     name_(name),
     pattern_(pattern),

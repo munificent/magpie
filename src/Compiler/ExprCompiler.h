@@ -101,7 +101,10 @@ namespace magpie
 
     void write(const Expr& expr, OpCode op,
                int a = 0xff, int b = 0xff, int c = 0xff);
-    void write(int line, OpCode op, int a = 0xff, int b = 0xff, int c = 0xff);
+    void write(gc<SourcePos> pos, OpCode op,
+               int a = 0xff, int b = 0xff, int c = 0xff);
+    void write(int line, OpCode op,
+               int a = 0xff, int b = 0xff, int c = 0xff);
     int startJump(const Expr& expr);
     int startJump(gc<SourcePos> pos);
     int startJumpBack();
