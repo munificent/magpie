@@ -6,6 +6,8 @@ namespace magpie
 {
   class OSFile
   {
+  public:
+      int descriptor;
   };
 }
 
