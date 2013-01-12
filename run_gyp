@@ -1,0 +1,1 @@
+./dep/gyp/gyp --depth=1 -Dlibrary=static_library -Icommon.gypi

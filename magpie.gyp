@@ -3,42 +3,15 @@
 # See README for more.
 
 {
-  'xcode_settings': {
-    'GCC_ENABLE_CPP_EXCEPTIONS': 'NO', # -fno-exceptions
-    'GCC_ENABLE_CPP_RTTI': 'NO', # -fno-rtti
-    'GCC_TREAT_WARNINGS_AS_ERRORS': 'YES',    # -Werror
-    'GCC_WARN_CHECK_SWITCH_STATEMENTS': 'YES', # -Wswitch
-    'WARNING_CFLAGS': [
-      '-Wall',
-      '-W',
-      '-Wno-unused-parameter',
-      '-Wnon-virtual-dtor',
-    ],
-  },
-  'configurations': {
-    'Debug': {
-      'cflags': [ '-g', '-O0' ],
-      'defines': [ 'DEBUG' ],
-      'xcode_settings': {
-        'GCC_OPTIMIZATION_LEVEL': '0',
-      },
-    },
-    'Release': {
-      'cflags': [ '-O3' ],
-      'xcode_settings': {
-        'GCC_OPTIMIZATION_LEVEL': '3',
-      },
-    },
-  },
   'target_defaults': {
-    'default_configuration': 'Debug',
-    'configurations': {
-      'Debug': {
-      },
-      'Release': {
-      },
-    },
+    'dependencies': [
+      'dep/libuv/uv.gyp:libuv'
+    ],
+    'defines': [
+      'PLATFORM="<(OS)"',
+    ],
     'include_dirs': [
+      'dep/libuv/include',
       'src/Base',
       'src/Compiler',
       'src/Memory',
@@ -74,23 +47,10 @@
       'src/Platform/Environment_linux.cpp',
       'src/Platform/Environment_mac.cpp',
       'src/Platform/Environment_win.cpp',
-      'src/Platform/File.cpp',
-      'src/Platform/File_linux.cpp',
-      'src/Platform/File_linux.h',
-      'src/Platform/File_mac.cpp',
-      'src/Platform/File_mac.h',
-      'src/Platform/File_win.cpp',
-      'src/Platform/File_win.h',
-      'src/Platform/File.h',
       'src/Platform/Path.h',
       'src/Platform/Path.cpp',
       'src/Platform/Path_posix.cpp',
       'src/Platform/Path_win.cpp',
-      'src/Platform/Scheduler.cpp',
-      'src/Platform/Scheduler_linux.cpp',
-      'src/Platform/Scheduler_mac.cpp',
-      'src/Platform/Scheduler_win.cpp',
-      'src/Platform/Scheduler.h',
       'src/Syntax/Ast.cpp',
       'src/Syntax/Ast.generated.h',
       'src/Syntax/Ast.h',
@@ -112,6 +72,8 @@
       'src/VM/Natives.h',
       'src/VM/Object.cpp',
       'src/VM/Object.h',
+      'src/VM/Scheduler.cpp',
+      'src/VM/Scheduler.h',
       'src/VM/VM.cpp',
       'src/VM/VM.h',
     ],

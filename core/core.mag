@@ -139,6 +139,8 @@ def (is Int) toString native "intToString"
 def (is Float) toString native "floatToString"
 def (s is String) toString s
 
+def sleep(ms: is Int) native "sleepMsInt"
+
 def (is Channel) close native "channelClose"
 def (is Channel) isOpen native "channelIsOpen"
 def (== Channel) new native "channelNew"

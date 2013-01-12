@@ -1,0 +1,3 @@
+print("before") // expect: before
+sleep(ms: 10)
+print("after") // expect: after

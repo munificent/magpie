@@ -50,11 +50,9 @@ namespace magpie
     NATIVE_RESULT_SUSPEND
   };
 
-  // TODO(bob): Better name.
-  class Suspension : public Managed
-  {
-
-  };
+  // TODO(bob): Roll this into Fiber since there won't be other kinds of
+  // suspensions. (The IO events are handled by the Scheduler.
+  class Suspension : public Managed {};
 
   // A suspend because the fiber is trying to send a value on a channel and no
   // receivers are pending yet.
@@ -74,31 +72,25 @@ namespace magpie
     gc<Object> value_;
   };
 
-  // A suspend because the fiber is reading from a file and it's waiting for
-  // the OS to say data is available.
-  class FileReadSuspension : public Suspension
-  {
-  public:
-    FileReadSuspension(gc<FileObject> file)
-    : file_(file)
-    {}
-
-    gc<FileObject> file() { return file_; }
-
-    virtual void reach();
-    
-  private:
-    // TODO(bob): Should this be a File, or a FileObject?
-    gc<FileObject> file_;
-  };
-
   class Fiber : public Managed
   {
   public:
-    Fiber(VM& vm, Scheduler& scheduler, gc<FunctionObject> function);
+    Fiber(VM& vm, Scheduler& scheduler, gc<FunctionObject> function,
+          gc<Fiber> successor);
 
+    // Gets the VM that owns this fiber.
+    VM& vm() { return vm_; }
+
+    // TODO(bob): Do we want to expose this?
+    Scheduler& scheduler() { return scheduler_; }
+
+    gc<Fiber> successor() { return successor_; }
+    
     // Returns true if this fiber has finished executing all of its code.
     bool isDone();
+
+    void setAsMain() { isMain_ = true; }
+    bool isMain() const { return isMain_; }
 
     FiberResult run(gc<Object>& result);
     void storeReturn(gc<Object> value);
@@ -111,8 +103,7 @@ namespace magpie
 
     gc<Suspension> suspension() { return suspension_; }
 
-    // TODO(bob): Hackish. Temp!
-    void readFile(gc<FileObject> file);
+    void sleep(int ms);
 
     virtual void reach();
     virtual void trace(std::ostream& out) const;
@@ -166,10 +157,17 @@ namespace magpie
 
     gc<Upvar> captureUpvar(int slot);
 
-    static int          nextId_;
+    static int nextId_;
 
-    VM&                 vm_;
-    Scheduler&          scheduler_;
+    VM& vm_;
+    Scheduler& scheduler_;
+
+    // The next fiber to run after this one completes, if any. Used to sequence
+    // module body fibers.
+    gc<Fiber> successor_;
+
+    // True if this fiber is the module fiber for the entrypoint module.
+    bool isMain_;
 
     int                 id_;
     Array<gc<Object> >  stack_;

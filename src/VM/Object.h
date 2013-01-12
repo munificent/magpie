@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include "uv.h"
 
 #include "Macros.h"
 #include "Managed.h"
@@ -306,13 +307,20 @@ namespace magpie
   class FileObject : public Object
   {
   public:
-    FileObject(File* file)
+    static void open(gc<Fiber> fiber, gc<String> path);
+
+    FileObject(uv_file file)
     : Object(),
-      file_(file)
+      file_(file),
+      isOpen_(true)
     {}
 
-    File& file() { return *file_; }
-    
+    uv_file file() { return file_; }
+    bool isOpen() const { return isOpen_; }
+
+    void read(gc<Fiber> fiber);
+    void close(gc<Fiber> fiber);
+
     virtual ObjectType type() const { return OBJECT_FILE; }
 
     virtual gc<ClassObject> getClass(VM& vm) const;
@@ -323,7 +331,9 @@ namespace magpie
   private:
     // TODO(bob): Need some kind of finalization system so that files that get
     // GC'd get closed.
-    File* file_;
+    uv_file file_;
+
+    bool isOpen_;
   };
 
   class FloatObject : public Object

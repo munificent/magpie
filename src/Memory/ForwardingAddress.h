@@ -26,5 +26,4 @@ namespace magpie
 
     NO_COPY(ForwardingAddress);
   };
-
 }

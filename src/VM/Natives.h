@@ -49,6 +49,7 @@ namespace magpie
   NATIVE(stringSubscriptInt);
   NATIVE(floatToString);
   NATIVE(intToString);
+  NATIVE(sleepMsInt);
   NATIVE(channelClose);
   NATIVE(channelIsOpen);
   NATIVE(channelNew);

@@ -1,6 +1,5 @@
 #include <sstream>
 
-#include "File.h"
 #include "Object.h"
 #include "Natives.h"
 #include "VM.h"
@@ -234,6 +233,13 @@ namespace magpie
     return new StringObject(String::format("%d", args[0]->asInt()));
   }
 
+  NATIVE(sleepMsInt)
+  {
+    fiber.sleep(args[0]->asInt());
+    result = NATIVE_RESULT_SUSPEND;
+    return NULL;
+  }
+
   NATIVE(channelClose)
   {
     ChannelObject* channel = args[0]->asChannel();
@@ -290,27 +296,29 @@ namespace magpie
   NATIVE(fileClose)
   {
     gc<FileObject> fileObj = args[0]->asFile();
-    fileObj->file().close();
-    return vm.nothing();
+    fileObj->close(&fiber);
+
+    result = NATIVE_RESULT_SUSPEND;
+    return NULL;
   }
   
   NATIVE(fileIsOpen)
   {
     gc<FileObject> fileObj = args[0]->asFile();
-    return vm.getBool(fileObj->file().isOpen());
+    return vm.getBool(fileObj->isOpen());
   }
   
   NATIVE(fileOpen)
   {
-    File* file = new File(args[1]->asString());
-    return new FileObject(file);
+    FileObject::open(&fiber, args[1]->asString());
+    result = NATIVE_RESULT_SUSPEND;
+    return NULL;
   }
 
   NATIVE(fileRead)
   {
     gc<FileObject> fileObj = args[0]->asFile();
-    fiber.readFile(fileObj);
-    
+    fileObj->read(&fiber);
     result = NATIVE_RESULT_SUSPEND;
     return NULL;
   }

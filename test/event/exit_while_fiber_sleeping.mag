@@ -1,0 +1,12 @@
+val channel = Channel new
+
+async
+    sleep(ms: 20)
+    // should exit before this prints
+    print("should not print")
+end
+
+print("main") // expect: main
+
+// Sleep the main fiber a bit to make sure we get into the event loop.
+sleep(ms: 10)

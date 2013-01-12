@@ -43,32 +43,16 @@ bytecode VM in C++. This is the "real" Magpie implementation, but it's still a
 work in progress. All current development is going on here. The Java interpreter
 is mainly a reference.
 
-### Building the Java Interpreter
-
-1.  **Pull down the code.** It lives here: https://github.com/munificent/magpie
-
-2.  **Build it.** The repo includes an Eclipse project if that's your thing. If
-    you rock the command-line, you can just do:
-
-        $ cd magpie
-        $ ant jar
-
 ### Building the Bytecode VM
 
 1.  **Pull down the code.** It lives here: https://github.com/munificent/magpie
 
-2.  **Install [gyp][].** This is used to generate a makefile, Visual Studio
-    solution or XCode project as appropriate for your OS. You can pull it down
-    from the repo using:
-
-        $ git clone http://git.chromium.org/external/gyp.git
-
-3.  **Generate a project.** Run gyp from the root directory of the magpie repo:
+2.  **Generate a project.** From the root directory of the magpie repo:
 
         $ cd <path to magpie repo>
-        $ <path to gyp repo>/gyp --depth=1
+        $ ./run_gyp
 
-4.  **Set the output directory (XCode 4 only).** Recent versions of XCode build
+3.  **Set the output directory (XCode 4 only).** Recent versions of XCode build
     into some shared directory not related to where the project is. This borks
     Magpie since it's a command-line executable that loads the core library
     from a path relative to that executable.
@@ -85,12 +69,24 @@ is mainly a reference.
 
     This should ensure that Magpie gets built into `build/<config>/magpie`.
 
-5.  **Build the project.** Do what you usually do on your OS to build the thing.
+4.  **Build the project.** Do what you usually do on your OS to build the thing.
     On Mac, that means open the XCode project and build from there. In Windows,
     there is a Visual Studio solution you can build. On Linux, you can just run
     `make`.
 
 [gyp]: http://code.google.com/p/gyp/
+
+[gyp]: http://code.google.com/p/gyp/
+
+### Building the Java Interpreter
+
+1.  **Pull down the code.** It lives here: https://github.com/munificent/magpie
+
+2.  **Build it.** The repo includes an Eclipse project if that's your thing. If
+    you rock the command-line, you can just do:
+
+        $ cd magpie
+        $ ant jar
 
 ### Running Magpie
 
