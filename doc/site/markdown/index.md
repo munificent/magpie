@@ -76,8 +76,6 @@ is mainly a reference.
 
 [gyp]: http://code.google.com/p/gyp/
 
-[gyp]: http://code.google.com/p/gyp/
-
 ### Building the Java Interpreter
 
 1.  **Pull down the code.** It lives here: https://github.com/munificent/magpie
