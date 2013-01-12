@@ -1,3 +1,5 @@
+#include <string>
+
 #include "Ast.h"
 #include "Compiler.h"
 #include "Environment.h"
@@ -55,7 +57,7 @@ int repl(VM& vm)
       }
 
       gc<SourceFile> source = new SourceFile(String::create("<repl>"), code);
-      
+
       ErrorReporter reporter(true);
       Parser parser(source, reporter);
       expr = parser.parseExpression();
