@@ -1,0 +1,7 @@
+import io
+
+print(Buffer new(0) count) // expect: 0
+print(Buffer new(1) count) // expect: 1
+print(Buffer new(2) count) // expect: 2
+print(Buffer new(1024) count) // expect: 1024
+print(Buffer new(65536) count) // expect: 65536

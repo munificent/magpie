@@ -3,7 +3,8 @@
 #include "ErrorReporter.h"
 #include "Environment.h"
 #include "Module.h"
-#include "Natives.h"
+#include "NativesCore.h"
+#include "NativesIO.h"
 #include "Object.h"
 #include "Parser.h"
 #include "Path.h"
@@ -96,6 +97,8 @@ namespace magpie
     DEF_NATIVE(fileIsOpen);
     DEF_NATIVE(fileOpen);
     DEF_NATIVE(fileRead);
+    DEF_NATIVE(bufferNewSize);
+    DEF_NATIVE(bufferCount);
     DEF_NATIVE(functionCall);
     DEF_NATIVE(listAdd);
     DEF_NATIVE(listClear);
@@ -140,6 +143,7 @@ namespace magpie
     Module* io = findModule("io");
     ASSERT_NOT_NULL(io);
 
+    registerClass(io, bufferClass_, "Buffer");
     registerClass(io, fileClass_, "File");
   }
 

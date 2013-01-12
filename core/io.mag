@@ -10,6 +10,12 @@ def (is File) isOpen native "fileIsOpen"
 def (== File) open(path is String) native "fileOpen"
 def (is File) read native "fileRead"
 
+// TODO(bob): Move to separate "data" module.
+defclass Buffer is Indexable native
+
+def (== Buffer) new(size is Int) native "bufferNewSize"
+def (is Buffer) count native "bufferCount"
+
 // Now that everything is defined, wire it up to the VM.
 def _bindIO() native "bindIO"
 _bindIO()

@@ -12,7 +12,6 @@
 namespace magpie
 {
   NATIVE(bindCore);
-  NATIVE(bindIO);
   NATIVE(objectClass);
   NATIVE(objectNew);
   NATIVE(objectToString);
@@ -55,10 +54,6 @@ namespace magpie
   NATIVE(channelNew);
   NATIVE(channelReceive);
   NATIVE(channelSend);
-  NATIVE(fileClose);
-  NATIVE(fileIsOpen);
-  NATIVE(fileOpen);
-  NATIVE(fileRead);
   NATIVE(functionCall);
   NATIVE(listAdd);
   NATIVE(listClear);

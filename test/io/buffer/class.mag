@@ -1,0 +1,7 @@
+import io
+
+val buffer = Buffer new(1024)
+print(buffer is Buffer) // expect: true
+print(buffer is Iterable) // expect: true
+print(buffer is Indexable) // expect: true
+print(buffer class == Buffer) // expect: true

@@ -1,7 +1,7 @@
 #include <sstream>
 
 #include "Object.h"
-#include "Natives.h"
+#include "NativesCore.h"
 #include "VM.h"
 
 namespace magpie
@@ -12,12 +12,6 @@ namespace magpie
     return vm.nothing();
   }
 
-  NATIVE(bindIO)
-  {
-    vm.bindIO();
-    return vm.nothing();
-  }
-  
   NATIVE(objectClass)
   {
     return args[0]->getClass(vm);
@@ -289,36 +283,6 @@ namespace magpie
     channel->send(&fiber, args[1]);
 
     // TODO(bob): If the channel is buffered, sending won't always suspend.
-    result = NATIVE_RESULT_SUSPEND;
-    return NULL;
-  }
-
-  NATIVE(fileClose)
-  {
-    gc<FileObject> fileObj = args[0]->asFile();
-    fileObj->close(&fiber);
-
-    result = NATIVE_RESULT_SUSPEND;
-    return NULL;
-  }
-  
-  NATIVE(fileIsOpen)
-  {
-    gc<FileObject> fileObj = args[0]->asFile();
-    return vm.getBool(fileObj->isOpen());
-  }
-  
-  NATIVE(fileOpen)
-  {
-    FileObject::open(&fiber, args[1]->asString());
-    result = NATIVE_RESULT_SUSPEND;
-    return NULL;
-  }
-
-  NATIVE(fileRead)
-  {
-    gc<FileObject> fileObj = args[0]->asFile();
-    fileObj->read(&fiber);
     result = NATIVE_RESULT_SUSPEND;
     return NULL;
   }
