@@ -1,4 +1,4 @@
-// skip
+// skip: Field initializers are not implemented yet.
 def baz() "baz"
 
 var foo = Foo new // expect exit 3

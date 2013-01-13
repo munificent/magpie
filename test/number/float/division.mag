@@ -1,2 +1,2 @@
-// skip
+// skip: Need to write floating point arithmatic tests.
 // TODO(bob): Division by zero, floating point.

@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 # Runs the language tests.
+from collections import defaultdict
 from os import listdir
 from os.path import abspath, dirname, isdir, isfile, join, realpath, relpath, splitext
 import re
@@ -32,7 +33,7 @@ elif sys.platform.startswith('darwin'):
 else:
     sys.exit('System not supported!')
 
-SKIP_PATTERN = re.compile(r'// skip')
+SKIP_PATTERN = re.compile(r'// skip: (.*)')
 NONTEST_PATTERN = re.compile(r'// nontest')
 EXPECT_PATTERN = re.compile(r'// expect: (.*)')
 EXPECT_ERROR_PATTERN = re.compile(r'// expect error')
@@ -43,7 +44,8 @@ EXPECT_EXIT_PATTERN = re.compile(r'// expect exit (\d+)')
 
 passed = 0
 failed = 0
-skipped = 0
+skipped = defaultdict(int)
+num_skipped = 0;
 
 if sys.platform == 'win32':
     class color:
@@ -84,6 +86,7 @@ def run_test(path):
     global passed
     global failed
     global skipped
+    global num_skipped
 
     if (splitext(path)[1] != '.mag'):
         return
@@ -104,14 +107,15 @@ def run_test(path):
 
     print_line('Passed: ' + color.GREEN + str(passed) + color.DEFAULT +
                ' Failed: ' + color.RED + str(failed) + color.DEFAULT +
-               ' Skipped: ' + color.YELLOW + str(skipped) + color.DEFAULT)
+               ' Skipped: ' + color.YELLOW + str(num_skipped) + color.DEFAULT)
 
     i = 1
     with open(path, 'r') as file:
         for line in file:
             match = SKIP_PATTERN.search(line)
             if match:
-                skipped += 1
+                num_skipped += 1
+                skipped[match.group(1)] += 1
                 return
 
             match = NONTEST_PATTERN.search(line)
@@ -222,5 +226,6 @@ else:
     print (color.GREEN + str(passed) + color.DEFAULT + ' tests passed. ' +
            color.RED + str(failed) + color.DEFAULT + ' tests failed.')
 
-if skipped > 0:
-    print 'Skipped ' + color.YELLOW + str(skipped) + color.DEFAULT + ' tests.'
+for key in sorted(skipped.keys()):
+    print ('Skipped ' + color.YELLOW + str(skipped[key]) + color.DEFAULT +
+           ' tests: ' + key)

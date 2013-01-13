@@ -1,4 +1,4 @@
-// skip
+// skip: Field initializers are not implemented yet.
 var baz = "baz"
 
 defclass Foo

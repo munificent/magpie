@@ -1,5 +1,4 @@
-// skip
-// Unwind past uncaught error types.
+// skip: Bug in unwinding past uncaught errors.
 do
     do
         throw "unwind error"

@@ -1,4 +1,4 @@
-// skip
+// skip: Method collision is not implemented yet.
 def foo(1.2) print("zero")
 def foo(1.2) print("two")
 
