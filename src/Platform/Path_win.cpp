@@ -1,7 +1,8 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <shlwapi.h>
+
+#pragma comment(lib, "Shlwapi")
 
 #include "MagpieString.h"
 
@@ -20,9 +21,7 @@ namespace magpie
 
     bool fileExists(gc<String> path)
     {
-      // If we can stat it, it exists.
-      struct _stat64 dummy;
-      return _stat64(path->cString(), &dummy) == 0;
+      return PathFileExists(path->cString()) == 1;
     }
   }
 }
