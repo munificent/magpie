@@ -15,5 +15,7 @@ namespace magpie
   NATIVE(fileRead);
   NATIVE(bufferNewSize);
   NATIVE(bufferCount);
+  NATIVE(bufferSubscriptInt);
+  NATIVE(bufferSubscriptSetInt);
 }
 

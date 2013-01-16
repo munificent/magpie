@@ -1,0 +1,25 @@
+import io
+
+val buffer = Buffer new(4)
+// TODO(bob): Do we want buffers to be mutable?
+buffer[0] = 1
+buffer[1] = 2
+buffer[2] = 3
+buffer[3] = 4
+
+print(buffer[0]) // expect: 1
+print(buffer[1]) // expect: 2
+print(buffer[2]) // expect: 3
+print(buffer[3]) // expect: 4
+print(buffer[-1]) // expect: 4
+print(buffer[-2]) // expect: 3
+print(buffer[-3]) // expect: 2
+print(buffer[-4]) // expect: 1
+
+do
+    buffer[4]
+catch is ArgError then print("caught") // expect: caught
+
+do
+    buffer[-5]
+catch is ArgError then print("caught") // expect: caught

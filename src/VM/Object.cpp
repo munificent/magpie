@@ -87,7 +87,11 @@ namespace magpie
     // Construct it by calling global placement new.
     gc<BufferObject> buffer = ::new(mem) BufferObject(count);
 
-    // TODO(bob): Zero out the bytes.
+    // Fill with zero.
+    for (int i = 0; i < count; i++)
+    {
+      buffer->bytes_[i] = 0;
+    }
     
     return buffer;
   }

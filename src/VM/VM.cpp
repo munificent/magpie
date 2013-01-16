@@ -99,6 +99,8 @@ namespace magpie
     DEF_NATIVE(fileRead);
     DEF_NATIVE(bufferNewSize);
     DEF_NATIVE(bufferCount);
+    DEF_NATIVE(bufferSubscriptInt);
+    DEF_NATIVE(bufferSubscriptSetInt);
     DEF_NATIVE(functionCall);
     DEF_NATIVE(listAdd);
     DEF_NATIVE(listClear);

@@ -353,6 +353,7 @@ namespace magpie
   
   NATIVE(listSubscriptSetInt)
   {
+    // Note: bounds checking is handled by core before calling this.
     ListObject* list = args[0]->asList();
     list->elements()[args[1]->asInt()] = args[2];
     return args[2];

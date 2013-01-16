@@ -52,5 +52,22 @@ namespace magpie
     gc<BufferObject> buffer = args[0]->asBuffer();
     return new IntObject(buffer->count());
   }
+
+  NATIVE(bufferSubscriptInt)
+  {
+    // Note: bounds checking is handled by core before calling this.
+    BufferObject* buffer = args[0]->asBuffer();
+    return new IntObject(buffer->get(args[1]->asInt()));
+  }
+  
+  NATIVE(bufferSubscriptSetInt)
+  {
+    // Note: bounds checking is handled by core before calling this.
+    BufferObject* buffer = args[0]->asBuffer();
+    // TODO(bob): Need to decide how to handle value outside of byte range.
+    buffer->set(args[1]->asInt(),
+                static_cast<unsigned char>(args[2]->asInt()));
+    return args[2];
+  }
 }
 

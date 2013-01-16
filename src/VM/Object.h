@@ -188,7 +188,9 @@ namespace magpie
     virtual gc<String> toString() const;
 
     int count() const { return count_; }
-
+    unsigned char get(int index) { return bytes_[index]; }
+    void set(int index, unsigned char value) { bytes_[index] = value; }
+    
   private:
     BufferObject(int count)
     : Object(),
