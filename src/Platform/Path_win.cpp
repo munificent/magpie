@@ -1,8 +1,5 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include <shlwapi.h>
-
-#pragma comment(lib, "Shlwapi")
 
 #include "MagpieString.h"
 
@@ -21,7 +18,8 @@ namespace magpie
 
     bool fileExists(gc<String> path)
     {
-      return PathFileExists(path->cString()) == 1;
+      DWORD fileAttribs = GetFileAttributes(path->cString());
+      return (fileAttribs != INVALID_FILE_ATTRIBUTES) && !(fileAttribs & FILE_ATTRIBUTE_DIRECTORY);
     }
   }
 }
