@@ -1,0 +1,11 @@
+import io
+
+print(Buffer new(0) count) // expect: 0
+
+// Initialized with zeroes.
+val buffer = Buffer new(5)
+print(buffer[0]) // expect: 0
+print(buffer[1]) // expect: 0
+print(buffer[2]) // expect: 0
+print(buffer[3]) // expect: 0
+print(buffer[4]) // expect: 0

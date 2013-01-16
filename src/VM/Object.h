@@ -10,6 +10,7 @@
 namespace magpie
 {
   class BoolObject;
+  class BufferObject;
   class Chunk;
   class ChannelObject;
   class CharacterObject;
@@ -32,6 +33,7 @@ namespace magpie
   
   enum ObjectType {
     OBJECT_BOOL,
+    OBJECT_BUFFER,
     OBJECT_CHANNEL,
     OBJECT_CHARACTER,
     OBJECT_CLASS,
@@ -61,6 +63,13 @@ namespace magpie
 
     // TODO(bob): Since these are assertions anyway, make them casts instead
     // of virtual methods.
+
+    // Returns the object as a buffer. Object *must* be a BufferObject.
+    virtual BufferObject* asBuffer()
+    {
+      ASSERT(false, "Not a buffer.");
+      return NULL;
+    }
     
     // Returns the object as a channel. Object *must* be a ChannelObject.
     virtual ChannelObject* asChannel()
@@ -163,6 +172,34 @@ namespace magpie
     
   private:
     bool value_;
+  };
+
+  class BufferObject : public Object
+  {
+  public:
+    static gc<BufferObject> create(int count);
+
+    virtual ObjectType type() const { return OBJECT_BUFFER; }
+
+    virtual gc<ClassObject> getClass(VM& vm) const;
+
+    virtual BufferObject* asBuffer() { return this; }
+    
+    virtual gc<String> toString() const;
+
+    int count() const { return count_; }
+    unsigned char get(int index) { return bytes_[index]; }
+    void set(int index, unsigned char value) { bytes_[index] = value; }
+    
+  private:
+    BufferObject(int count)
+    : Object(),
+      count_(count)
+    {}
+    
+    // Number of bytes in the buffer.
+    int count_;
+    unsigned char bytes_[FLEXIBLE_SIZE];
   };
 
   class ChannelObject : public Object

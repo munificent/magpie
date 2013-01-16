@@ -10,6 +10,36 @@ def (is File) isOpen native "fileIsOpen"
 def (== File) open(path is String) native "fileOpen"
 def (is File) read native "fileRead"
 
+// TODO(bob): Move to separate "data" module.
+defclass Buffer is Indexable native
+
+// TODO(bob): Copied from core.mag. Unify.
+def _boundsCheck(count is Int, index is Int)
+    // Negative indices index backwards from the end.
+    if index < 0 then index = count + index
+
+    // Check bounds.
+    if index < 0 then throw ArgError new
+    if index >= count then throw ArgError new
+
+    index
+end
+
+def (== Buffer) new(size is Int) native "bufferNewSize"
+def (is Buffer) count native "bufferCount"
+
+def (buffer is Buffer)[index is Int]
+    buffer _subscript(_boundsCheck(buffer count, index))
+end
+
+def (is Buffer) _subscript(is Int) native "bufferSubscriptInt"
+
+def (buffer is Buffer)[index is Int]=(value)
+    buffer _subscriptSet(_boundsCheck(buffer count, index), value)
+end
+
+def (is Buffer) _subscriptSet(index is Int, value) native "bufferSubscriptSetInt"
+
 // Now that everything is defined, wire it up to the VM.
 def _bindIO() native "bindIO"
 _bindIO()

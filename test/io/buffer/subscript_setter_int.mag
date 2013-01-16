@@ -1,0 +1,54 @@
+// TODO(bob):
+// - What happens when you set a value outside of [0-255]?
+import io
+
+def makeBuffer()
+    val buffer = Buffer new(3)
+    buffer[0] = 1
+    buffer[1] = 2
+    buffer[2] = 3
+    buffer
+end
+
+// Basic assignment.
+do
+    val buffer = makeBuffer()
+    buffer[1] = 5
+    print(buffer[1]) // expect: 5
+end
+
+// Returns right-hand side.
+do
+    val buffer = makeBuffer()
+    print(buffer[1] = 5) // expect: 5
+end
+
+// Negative indices.
+do
+    val buffer = makeBuffer()
+    buffer[-1] = 5
+    buffer[-2] = 6
+    buffer[-3] = 7
+    print(buffer[0]) // expect: 7
+    print(buffer[1]) // expect: 6
+    print(buffer[2]) // expect: 5
+end
+
+// Multiple assignment.
+do
+    val buffer = makeBuffer()
+    buffer[0], (buffer[1], buffer[2]) = 4, (5, 6)
+    print(buffer[0]) // expect: 4
+    print(buffer[1]) // expect: 5
+    print(buffer[2]) // expect: 6
+end
+
+do
+    val buffer = makeBuffer()
+    buffer[3] = 1
+catch is ArgError then print("caught") // expect: caught
+
+do
+    val buffer = makeBuffer()
+    buffer[-4] = 1
+catch is ArgError then print("caught") // expect: caught

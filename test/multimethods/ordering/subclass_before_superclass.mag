@@ -1,4 +1,3 @@
-// skip: Method sorting is not implemented yet.
 defclass Parent
 end
 

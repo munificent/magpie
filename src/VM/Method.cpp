@@ -431,25 +431,54 @@ namespace magpie
     if (other_.isNull())
     {
       *result_ = ORDER_BEFORE;
+      return;
     }
-    else if (other_->asRecordPattern() != NULL)
+
+    if (other_->asRecordPattern() != NULL)
     {
       // TODO(bob): Is this right?
       *result_ = ORDER_NONE;
+      return;
     }
-    else if (other_->asTypePattern() != NULL)
+
+    TypePattern* type = other_->asTypePattern();
+    if (type != NULL)
     {
-      // TODO(bob): Should compare type relations in hierarchy.
-      *result_ = ORDER_EQUAL;
+      // Compare type relations.
+      // TODO(bob): Need to handle types not resolving to class objects.
+      gc<ClassObject> a = getValue(node.type())->asClass();
+      gc<ClassObject> b = getValue(type->type())->asClass();
+
+      if (Object::equal(a, b))
+      {
+        // Same class.
+        *result_ = ORDER_EQUAL;
+      }
+      else if (a->is(*b))
+      {
+        // A is a subclass of B.
+        *result_ = ORDER_BEFORE;
+      }
+      else if (b->is(*a))
+      {
+        // B is a subclass of A.
+        *result_ = ORDER_AFTER;
+      }
+      else
+      {
+        // Unrelated types.
+        *result_ = ORDER_NONE;
+      }
+      return;
     }
-    else if (other_->asValuePattern() != NULL)
+
+    if (other_->asValuePattern() != NULL)
     {
       *result_ = ORDER_AFTER;
+      return;
     }
-    else
-    {
-      ASSERT(false, "Unknown pattern type.");
-    }
+
+    ASSERT(false, "Unknown pattern type.");
   }
 
   void PatternComparer::visit(ValuePattern& node, int dummy)
@@ -477,7 +506,7 @@ namespace magpie
     {
       // Check for collision.
       gc<Object> a = getValue(node.value());
-      gc<Object> b = getValue(other_->asValuePattern()->value());
+      gc<Object> b = getValue(value->value());
 
       if (Object::equal(a, b))
       {

@@ -22,6 +22,7 @@ namespace magpie
     switch (a->type())
     {
       case OBJECT_BOOL:
+        // TODO(bob): Make true and false singleton objects.
         return a->toBool() == b->toBool();
 
       case OBJECT_CHARACTER:
@@ -45,6 +46,7 @@ namespace magpie
         return a->asString() == b->asString();
         break;
 
+      case OBJECT_BUFFER:
       case OBJECT_CHANNEL:
       case OBJECT_CLASS:
       case OBJECT_DYNAMIC:
@@ -74,6 +76,35 @@ namespace magpie
   {
     // TODO(bob): Store these as constants.
     return String::create(value_ ? "true" : "false");
+  }
+
+  gc<BufferObject> BufferObject::create(int count)
+  {
+    // Allocate enough memory for the buffer and its data.
+    void* mem = Memory::allocate(sizeof(BufferObject) +
+                                 sizeof(unsigned char) * (count - 1));
+
+    // Construct it by calling global placement new.
+    gc<BufferObject> buffer = ::new(mem) BufferObject(count);
+
+    // Fill with zero.
+    for (int i = 0; i < count; i++)
+    {
+      buffer->bytes_[i] = 0;
+    }
+    
+    return buffer;
+  }
+  
+  gc<ClassObject> BufferObject::getClass(VM& vm) const
+  {
+    return vm.bufferClass();
+  }
+
+  gc<String> BufferObject::toString() const
+  {
+    // TODO(bob): Do something more useful here?
+    return String::format("[buffer %d]", count_);
   }
 
   bool ChannelObject::close(VM& vm, gc<Fiber> sender)

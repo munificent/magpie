@@ -17,7 +17,7 @@ namespace magpie
   class Module;
   class ModuleAst;
   class RecordType;
-  
+
   typedef gc<Object> (*Native)(VM& vm, Fiber& fiber,
                                ArrayView<gc<Object> >& args,
                                NativeResult& result);
@@ -29,7 +29,7 @@ namespace magpie
     VM();
 
     virtual void reachRoots();
-    
+
     // This is called by a native method at the end of the core library so the
     // VM can register the types defined there that it cares about.
     void bindCore();
@@ -53,8 +53,9 @@ namespace magpie
     int getModuleIndex(Module& module) const;
 
     inline gc<Object> nothing() const { return nothing_; }
-    
+
     inline gc<ClassObject> boolClass() const { return boolClass_; }
+    inline gc<ClassObject> bufferClass() const { return bufferClass_; }
     inline gc<ClassObject> channelClass() const { return channelClass_; }
     inline gc<ClassObject> characterClass() const { return characterClass_; }
     inline gc<ClassObject> classClass() const { return classClass_; }
@@ -74,15 +75,15 @@ namespace magpie
     {
       return value ? true_ : false_;
     }
-    
+
     gc<Object> getBuiltIn(BuiltIn value) const;
 
     int findNative(gc<String> name);
     Native getNative(int index) const { return natives_[index]; }
-    
+
     int addRecordType(const Array<int>& fields);
     gc<RecordType> getRecordType(int id);
-    
+
     symbolId addSymbol(gc<String> name);
 
     // Gets the text for the symbol with the given ID.
@@ -91,12 +92,12 @@ namespace magpie
     // Adds a method to the list of methods that have been compiled, but whose
     // definitions have not yet been executed.
     methodId addMethod(gc<Method> method);
-    
+
     int declareMultimethod(gc<String> signature);
     int findMultimethod(gc<String> signature);
     void defineMethod(int multimethod, methodId method);
     gc<Multimethod> getMultimethod(int multimethod);
-    
+
   private:
     // Loads module [name] from [path] and the recursively loads its imports.
     // [from] is the module that's depending on the added one. If [path] is
@@ -114,14 +115,14 @@ namespace magpie
 
     Array<Module*> modules_;
     Module* replModule_;
-    
+
     Array<gc<String> > nativeNames_;
     Array<Native> natives_;
-    
+
     Array<gc<RecordType> > recordTypes_;
     // TODO(bob): Something more optimal than an O(n) array.
     Array<gc<String> > symbols_;
-    
+
     Array<gc<Method> > methods_;
     Array<gc<Multimethod> > multimethods_;
 
@@ -132,6 +133,7 @@ namespace magpie
     gc<Object> nothing_;
     gc<Object> done_;
     gc<ClassObject> boolClass_;
+    gc<ClassObject> bufferClass_;
     gc<ClassObject> channelClass_;
     gc<ClassObject> characterClass_;
     gc<ClassObject> classClass_;
