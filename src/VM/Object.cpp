@@ -26,7 +26,7 @@ namespace magpie
         return a->toBool() == b->toBool();
 
       case OBJECT_CHARACTER:
-        return a->asCharacter()->value() == b->asCharacter()->value();
+        return a->asCharacter() == b->asCharacter();
 
       case OBJECT_FLOAT:
         return a->asFloat() == b->asFloat();
@@ -61,7 +61,73 @@ namespace magpie
     UNREACHABLE();
     return false;
   }
+
+  BufferObject* Object::asBuffer()
+  {
+    ASSERT(type() == OBJECT_BUFFER, "Not a buffer.");
+    return static_cast<BufferObject*>(this);
+  }
+
+  ChannelObject* Object::asChannel()
+  {
+    ASSERT(type() == OBJECT_CHANNEL, "Not a channel.");
+    return static_cast<ChannelObject*>(this);
+  }
+
+  unsigned int Object::asCharacter() const
+  {
+    ASSERT(type() == OBJECT_CHARACTER, "Not a character.");
+    return static_cast<const CharacterObject*>(this)->value();
+  }
+
+  ClassObject* Object::asClass()
+  {
+    ASSERT(type() == OBJECT_CLASS, "Not a class.");
+    return static_cast<ClassObject*>(this);
+  }
+
+  DynamicObject* Object::asDynamic()
+  {
+    ASSERT(type() == OBJECT_DYNAMIC, "Not a dynamic object.");
+    return static_cast<DynamicObject*>(this);
+  }
+
+  FileObject* Object::asFile()
+  {
+    ASSERT(type() == OBJECT_FILE, "Not a file.");
+    return static_cast<FileObject*>(this);
+  }
+
+  double Object::asFloat() const
+  {
+    ASSERT(type() == OBJECT_FLOAT, "Not a float.");
+    return static_cast<const FloatObject*>(this)->value();
+  }
+
+  FunctionObject* Object::asFunction()
+  {
+    ASSERT(type() == OBJECT_FUNCTION, "Not a function.");
+    return static_cast<FunctionObject*>(this);
+  }
+
+  int Object::asInt() const
+  {
+    ASSERT(type() == OBJECT_INT, "Not an int.");
+    return static_cast<const IntObject*>(this)->value();
+  }
+
+  ListObject* Object::asList()
+  {
+    ASSERT(type() == OBJECT_LIST, "Not a list.");
+    return static_cast<ListObject*>(this);
+  }
   
+  gc<String> Object::asString() const
+  {
+    ASSERT(type() == OBJECT_STRING, "Not a string.");
+    return static_cast<const StringObject*>(this)->value();
+  }
+
   void Object::trace(std::ostream& stream) const
   {
     stream << toString();

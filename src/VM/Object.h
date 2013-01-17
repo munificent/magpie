@@ -61,85 +61,19 @@ namespace magpie
     // Gets the ClassObject for this object's class.
     virtual gc<ClassObject> getClass(VM& vm) const = 0;
 
-    // TODO(bob): Since these are assertions anyway, make them casts instead
-    // of virtual methods.
-
-    // Returns the object as a buffer. Object *must* be a BufferObject.
-    virtual BufferObject* asBuffer()
-    {
-      ASSERT(false, "Not a buffer.");
-      return NULL;
-    }
-    
-    // Returns the object as a channel. Object *must* be a ChannelObject.
-    virtual ChannelObject* asChannel()
-    {
-      ASSERT(false, "Not a channel.");
-      return NULL;
-    }
-
-    // Returns the object as a character. Object *must* be a CharacterObject.
-    virtual CharacterObject* asCharacter()
-    {
-      ASSERT(false, "Not a class.");
-      return NULL;
-    }
-    
-    // Returns the object as a class. Object *must* be a ClassObject.
-    virtual ClassObject* asClass()
-    {
-      ASSERT(false, "Not a class.");
-      return NULL;
-    }
-    
-    // Returns the object as a dynamic object. Object *must* be a DynamicObject.
-    virtual DynamicObject* asDynamic()
-    {
-      ASSERT(false, "Not a dynamic object.");
-      return NULL;
-    }
-
-    // Returns the object as a file. Object *must* be a FileObject.
-    virtual FileObject* asFile()
-    {
-      ASSERT(false, "Not a file.");
-      return NULL;
-    }
-
-    // Returns the object as a float. Object *must* be a FloatObject.
-    virtual double asFloat() const
-    {
-      ASSERT(false, "Not a float.");
-      return 0;
-    }
-
-    // Returns the object as a function. Object *must* be a FunctionObject.
-    virtual FunctionObject* asFunction()
-    {
-      ASSERT(false, "Not a dynamic object.");
-      return NULL;
-    }
-
-    // Returns the object as an int. Object *must* be a IntObject.
-    virtual int asInt() const
-    {
-      ASSERT(false, "Not an int.");
-      return 0;
-    }
-    
-    // Returns the object as a list. Object *must* be a ListObject.
-    virtual ListObject* asList()
-    {
-      ASSERT(false, "Not a list.");
-      return NULL;
-    }
-    
-    // Returns the object as a string. Object *must* be a StringObject.
-    virtual gc<String> asString() const
-    {
-      ASSERT(false, "Not a string.");
-      return gc<String>();
-    }
+    // Downcasting methods. These must *only* be called after the object has
+    // been verified as being the right type.
+    BufferObject* asBuffer();
+    ChannelObject* asChannel();
+    unsigned int asCharacter() const;
+    ClassObject* asClass();
+    DynamicObject* asDynamic();
+    FileObject* asFile();
+    double asFloat() const;
+    FunctionObject* asFunction();
+    int asInt() const;
+    ListObject* asList();
+    gc<String> asString() const;
 
     // Returns the boolean value of the object.
     virtual bool toBool() const { return true; }
@@ -183,8 +117,6 @@ namespace magpie
 
     virtual gc<ClassObject> getClass(VM& vm) const;
 
-    virtual BufferObject* asBuffer() { return this; }
-    
     virtual gc<String> toString() const;
 
     int count() const { return count_; }
@@ -226,9 +158,6 @@ namespace magpie
     virtual ObjectType type() const { return OBJECT_CHANNEL; }
 
     virtual gc<ClassObject> getClass(VM& vm) const;
-
-    // Returns the object as a channel. Object *must* be a ChannelObject.
-    virtual ChannelObject* asChannel() { return this; }
     
     virtual gc<String> toString() const;
 
@@ -256,8 +185,7 @@ namespace magpie
     unsigned int value() const { return value_; }
 
     virtual ObjectType type() const { return OBJECT_CHARACTER; }
-    virtual CharacterObject* asCharacter() { return this; }
-    
+
     virtual gc<ClassObject> getClass(VM& vm) const;
 
     // TODO(bob): Do we want to do this here, or rely on a "true?" method?
@@ -283,8 +211,6 @@ namespace magpie
     virtual ObjectType type() const { return OBJECT_CLASS; }
 
     virtual gc<ClassObject> getClass(VM& vm) const;
-
-    virtual ClassObject* asClass() { return this; }
 
     virtual gc<String> toString() const;
 
@@ -319,8 +245,6 @@ namespace magpie
     virtual ObjectType type() const { return OBJECT_DYNAMIC; }
 
     virtual gc<ClassObject> getClass(VM& vm) const;
-
-    virtual DynamicObject* asDynamic() { return this; }
 
     virtual gc<String> toString() const;
     
@@ -361,7 +285,6 @@ namespace magpie
     virtual ObjectType type() const { return OBJECT_FILE; }
 
     virtual gc<ClassObject> getClass(VM& vm) const;
-    virtual FileObject* asFile() { return this; }
     virtual gc<String> toString() const;
     virtual void reach();
 
@@ -381,10 +304,11 @@ namespace magpie
     value_(value)
     {}
 
+    double value() const { return value_; }
+
     virtual ObjectType type() const { return OBJECT_FLOAT; }
 
     virtual gc<ClassObject> getClass(VM& vm) const;
-    virtual double asFloat() const { return value_; }
 
     // TODO(bob): Do we want to do this here, or rely on a "true?" method?
     virtual bool toBool() const { return value_ != 0; }
@@ -404,8 +328,6 @@ namespace magpie
     virtual ObjectType type() const { return OBJECT_FUNCTION; }
 
     virtual gc<ClassObject> getClass(VM& vm) const;
-
-    virtual FunctionObject* asFunction() { return this; }
 
     virtual gc<String> toString() const;
 
@@ -434,10 +356,11 @@ namespace magpie
       value_(value)
     {}
 
+    int value() const { return value_; }
+    
     virtual ObjectType type() const { return OBJECT_INT; }
 
     virtual gc<ClassObject> getClass(VM& vm) const;
-    virtual int asInt() const { return value_; }
 
     // TODO(bob): Do we want to do this here, or rely on a "true?" method?
     virtual bool toBool() const { return value_ != 0; }
@@ -459,8 +382,6 @@ namespace magpie
     virtual ObjectType type() const { return OBJECT_LIST; }
 
     virtual gc<ClassObject> getClass(VM& vm) const;
-
-    virtual ListObject* asList() { return this; }
 
     virtual gc<String> toString() const;
     
@@ -552,12 +473,13 @@ namespace magpie
     : Object(),
       value_(value)
     {}
-    
+
+    gc<String> value() const { return value_; }
+
     virtual ObjectType type() const { return OBJECT_STRING; }
 
     virtual gc<ClassObject> getClass(VM& vm) const;
 
-    virtual gc<String> asString() const { return value_; }
     virtual gc<String> toString() const { return value_; }
 
     virtual void reach();
