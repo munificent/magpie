@@ -11,15 +11,15 @@ namespace magpie
 
     gc<String> real(gc<String> path)
     {
-      char* absolute[MAX_PATH];
-      _fullpath(absolute, path, MAX_PATH);
+      char absolute[MAX_PATH];
+      _fullpath(absolute, path->cString(), MAX_PATH);
       return String::create(absolute);
     }
 
     bool fileExists(gc<String> path)
     {
-      ASSERT(false, "Not implemented yet.");
-      return false;
+      DWORD fileAttribs = GetFileAttributes(path->cString());
+      return (fileAttribs != INVALID_FILE_ATTRIBUTES) && !(fileAttribs & FILE_ATTRIBUTE_DIRECTORY);
     }
   }
 }
