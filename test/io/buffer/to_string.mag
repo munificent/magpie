@@ -1,0 +1,21 @@
+import io
+
+def makeBuffer(size)
+    val buffer = Buffer new(size)
+    for i in 0...size do buffer[i] = i % 256
+    buffer
+end
+
+print(makeBuffer(0)) // expect: [buffer]
+print(makeBuffer(1)) // expect: [buffer 00]
+print(makeBuffer(2)) // expect: [buffer 00 01]
+print(makeBuffer(3)) // expect: [buffer 00 01 02]
+print(makeBuffer(4)) // expect: [buffer 00 01 02 03]
+print(makeBuffer(5)) // expect: [buffer 00 01 02 03 04]
+print(makeBuffer(6)) // expect: [buffer 00 01 02 03 04 05]
+print(makeBuffer(7)) // expect: [buffer 00 01 02 03 04 05 06]
+print(makeBuffer(8)) // expect: [buffer 00 01 02 03 04 05 06 07]
+print(makeBuffer(9)) // expect: [buffer 00 01 02 03 ... 05 06 07 08]
+print(makeBuffer(10)) // expect: [buffer 00 01 02 03 ... 06 07 08 09]
+print(makeBuffer(11)) // expect: [buffer 00 01 02 03 ... 07 08 09 0a]
+print(makeBuffer(12)) // expect: [buffer 00 01 02 03 ... 08 09 0a 0b]

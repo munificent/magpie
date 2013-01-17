@@ -103,8 +103,35 @@ namespace magpie
 
   gc<String> BufferObject::toString() const
   {
-    // TODO(bob): Do something more useful here?
-    return String::format("[buffer %d]", count_);
+    if (count_ == 0) return String::create("[buffer]");
+
+    gc<String> result = String::create("[buffer");
+
+    if (count_ <= 8)
+    {
+      // Small buffer, so show the whole contents.
+      for (int i = 0; i < count_; i++)
+      {
+        result = String::format("%s %02x", result->cString(), bytes_[i]);
+      }
+    }
+    else
+    {
+      // Long buffer, so just shows the first and last few octets.
+      for (int i = 0; i < 4; i++)
+      {
+        result = String::format("%s %02x", result->cString(), bytes_[i]);
+      }
+
+      result = String::format("%s ...", result->cString());
+      
+      for (int i = count_ - 4; i < count_; i++)
+      {
+        result = String::format("%s %02x", result->cString(), bytes_[i]);
+      }
+    }
+
+    return String::format("%s]", result->cString());
   }
 
   bool ChannelObject::close(VM& vm, gc<Fiber> sender)
