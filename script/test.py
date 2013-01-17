@@ -46,15 +46,19 @@ failed = 0
 skipped = 0
 
 if sys.platform == 'win32':
-    from colorama import init
-    init()
-
-class color:
-    GREEN = '\033[32m'
-    RED = '\033[31m'
-    DEFAULT = '\033[0m'
-    PINK = '\033[91m'
-    YELLOW = '\033[33m'
+    class color:
+        GREEN = ''
+        RED = ''
+        DEFAULT = ''
+        PINK = ''
+        YELLOW = ''
+else:
+    class color:
+        GREEN = '\033[32m'
+        RED = '\033[31m'
+        DEFAULT = '\033[0m'
+        PINK = '\033[91m'
+        YELLOW = '\033[33m'
 
 def print_line(line=None):
     # Erase the line.
