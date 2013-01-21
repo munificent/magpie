@@ -11,8 +11,8 @@ namespace magpie
 
     gc<String> real(gc<String> path)
     {
-      char* absolute[MAX_PATH];
-      _fullpath(absolute, path, MAX_PATH);
+      char absolute[MAX_PATH];
+      _fullpath(absolute, path->cString(), MAX_PATH);
       return String::create(absolute);
     }
 
