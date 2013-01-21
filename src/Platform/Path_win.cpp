@@ -18,8 +18,8 @@ namespace magpie
 
     bool fileExists(gc<String> path)
     {
-      ASSERT(false, "Not implemented yet.");
-      return false;
+      DWORD fileAttribs = GetFileAttributes(path->cString());
+      return (fileAttribs != INVALID_FILE_ATTRIBUTES) && !(fileAttribs & FILE_ATTRIBUTE_DIRECTORY);
     }
   }
 }
