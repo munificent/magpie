@@ -10,7 +10,7 @@ namespace magpie
 {
   gc<String> getCoreLibDir()
   {
-    char* relativePath[MAX_PATH];
+    char relativePath[MAX_PATH];
 
     GetModuleFileName(NULL, relativePath, MAX_PATH);
     ASSERT(GetLastError() != ERROR_INSUFFICIENT_BUFFER, "Executable path too long.")
@@ -42,7 +42,7 @@ namespace magpie
     strncat(relativePath, "/core", MAX_PATH);
 
     // Canonicalize the path.
-    char* path[MAX_PATH];
+    char path[MAX_PATH];
     _fullpath(path, relativePath, MAX_PATH);
     return String::create(path);
   }
