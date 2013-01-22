@@ -8,123 +8,58 @@ namespace magpie
 {
   using std::ostream;
 
-  bool Object::equal(gc<Object> a, gc<Object> b)
-  {
-    // If they have the same identity, they must be equal.
-    if (a.sameAs(b)) return true;
-
-    // TODO(bob): Use double-dispatch pattern here?
-    // Different types are never equal since they can have different methods
-    // and thus different user-visible behavior.
-    if (a->type() != b->type()) return false;
-
-    // Same type, so compare values.
-    switch (a->type())
-    {
-      case OBJECT_BOOL:
-        // TODO(bob): Make true and false singleton objects.
-        return a->toBool() == b->toBool();
-
-      case OBJECT_CHARACTER:
-        return a->asCharacter() == b->asCharacter();
-
-      case OBJECT_FLOAT:
-        return a->asFloat() == b->asFloat();
-
-      case OBJECT_INT:
-        return a->asInt() == b->asInt();
-
-      case OBJECT_NOTHING:
-        ASSERT(false, "Should only be one instance of nothing.");
-        break;
-
-      case OBJECT_RECORD:
-        ASSERT(false, "Equality on records not implemented.");
-        break;
-
-      case OBJECT_STRING:
-        return a->asString() == b->asString();
-        break;
-
-      case OBJECT_BUFFER:
-      case OBJECT_CHANNEL:
-      case OBJECT_CLASS:
-      case OBJECT_DYNAMIC:
-      case OBJECT_FILE:
-      case OBJECT_FUNCTION:
-      case OBJECT_LIST:
-        // Equality is based on identity, so if we get here, they
-        // aren't equal.
-        return false;
-    }
-
-    UNREACHABLE();
-    return false;
-  }
-
   BufferObject* Object::asBuffer()
   {
-    ASSERT(type() == OBJECT_BUFFER, "Not a buffer.");
     return static_cast<BufferObject*>(this);
   }
 
   ChannelObject* Object::asChannel()
   {
-    ASSERT(type() == OBJECT_CHANNEL, "Not a channel.");
     return static_cast<ChannelObject*>(this);
   }
 
   unsigned int Object::asCharacter() const
   {
-    ASSERT(type() == OBJECT_CHARACTER, "Not a character.");
     return static_cast<const CharacterObject*>(this)->value();
   }
 
   ClassObject* Object::asClass()
   {
-    ASSERT(type() == OBJECT_CLASS, "Not a class.");
     return static_cast<ClassObject*>(this);
   }
 
   DynamicObject* Object::asDynamic()
   {
-    ASSERT(type() == OBJECT_DYNAMIC, "Not a dynamic object.");
     return static_cast<DynamicObject*>(this);
   }
 
   FileObject* Object::asFile()
   {
-    ASSERT(type() == OBJECT_FILE, "Not a file.");
     return static_cast<FileObject*>(this);
   }
 
   double Object::asFloat() const
   {
-    ASSERT(type() == OBJECT_FLOAT, "Not a float.");
     return static_cast<const FloatObject*>(this)->value();
   }
 
   FunctionObject* Object::asFunction()
   {
-    ASSERT(type() == OBJECT_FUNCTION, "Not a function.");
     return static_cast<FunctionObject*>(this);
   }
 
   int Object::asInt() const
   {
-    ASSERT(type() == OBJECT_INT, "Not an int.");
     return static_cast<const IntObject*>(this)->value();
   }
 
   ListObject* Object::asList()
   {
-    ASSERT(type() == OBJECT_LIST, "Not a list.");
     return static_cast<ListObject*>(this);
   }
   
   gc<String> Object::asString() const
   {
-    ASSERT(type() == OBJECT_STRING, "Not a string.");
     return static_cast<const StringObject*>(this)->value();
   }
 

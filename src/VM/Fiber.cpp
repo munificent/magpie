@@ -287,7 +287,7 @@ namespace magpie
         {
           gc<Object> a = load(frame, GET_A(ins));
           gc<Object> b = load(frame, GET_B(ins));
-          store(frame, GET_C(ins), vm_.getBool(Object::equal(a, b)));
+          store(frame, GET_C(ins), vm_.getBool(a->equals(b)));
           break;
         }
           

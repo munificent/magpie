@@ -449,7 +449,7 @@ namespace magpie
       gc<ClassObject> a = getValue(node.type())->asClass();
       gc<ClassObject> b = getValue(type->type())->asClass();
 
-      if (Object::equal(a, b))
+      if (a.sameAs(b))
       {
         // Same class.
         *result_ = ORDER_EQUAL;
@@ -508,7 +508,7 @@ namespace magpie
       gc<Object> a = getValue(node.value());
       gc<Object> b = getValue(value->value());
 
-      if (Object::equal(a, b))
+      if (a->equals(b))
       {
         *result_ = ORDER_EQUAL;
       }

@@ -30,33 +30,11 @@ namespace magpie
   class StringObject;
   class Upvar;
   class VM;
-  
-  enum ObjectType {
-    OBJECT_BOOL,
-    OBJECT_BUFFER,
-    OBJECT_CHANNEL,
-    OBJECT_CHARACTER,
-    OBJECT_CLASS,
-    OBJECT_DYNAMIC,
-    OBJECT_FILE,
-    OBJECT_FLOAT,
-    OBJECT_FUNCTION,
-    OBJECT_INT,
-    OBJECT_LIST,
-    OBJECT_NOTHING,
-    OBJECT_RECORD,
-    OBJECT_STRING
-  };
-  
+    
   class Object : public Managed
   {
   public:
-    // Compares [a] and [b] for equality using the built-in equality semantics.
-    static bool equal(gc<Object> a, gc<Object> b);
-
     Object() : Managed() {}
-    
-    virtual ObjectType type() const = 0;
 
     // Gets the ClassObject for this object's class.
     virtual gc<ClassObject> getClass(VM& vm) const = 0;
@@ -85,6 +63,18 @@ namespace magpie
     // any type.
     virtual gc<String> toString() const = 0;
 
+    // Returns true if this object is equivalent to [other]. This is "built-in"
+    // equality and does not take into account user-defined specializations of
+    // the "==" operator.
+    virtual bool equals(gc<Object> other) { return this == &*other; }
+
+    // Double-dispatch methods for value equality.
+    bool equalsBool(bool value) { return value == toBool(); }
+    virtual bool equalsChar(unsigned int value) { return false; }
+    virtual bool equalsFloat(double value) { return false; }
+    virtual bool equalsInt(int value) { return false; }
+    virtual bool equalsString(gc<String> value) { return false; }
+
     virtual void trace(std::ostream& stream) const;
   };
   
@@ -95,15 +85,15 @@ namespace magpie
     : Object(),
       value_(value)
     {}
-    
-    virtual ObjectType type() const { return OBJECT_BOOL; }
 
     virtual gc<ClassObject> getClass(VM& vm) const;
 
     virtual bool toBool() const { return value_; }
 
     virtual gc<String> toString() const;
-    
+
+    virtual bool equals(gc<Object> other) { return other->equalsBool(value_); }
+
   private:
     bool value_;
   };
@@ -112,8 +102,6 @@ namespace magpie
   {
   public:
     static gc<BufferObject> create(int count);
-
-    virtual ObjectType type() const { return OBJECT_BUFFER; }
 
     virtual gc<ClassObject> getClass(VM& vm) const;
 
@@ -155,8 +143,6 @@ namespace magpie
     // Sends a value along this channel.
     void send(gc<Fiber> sender, gc<Object> value);
 
-    virtual ObjectType type() const { return OBJECT_CHANNEL; }
-
     virtual gc<ClassObject> getClass(VM& vm) const;
     
     virtual gc<String> toString() const;
@@ -184,13 +170,14 @@ namespace magpie
 
     unsigned int value() const { return value_; }
 
-    virtual ObjectType type() const { return OBJECT_CHARACTER; }
-
     virtual gc<ClassObject> getClass(VM& vm) const;
 
     // TODO(bob): Do we want to do this here, or rely on a "true?" method?
     virtual bool toBool() const { return value_ != 0; }
     virtual gc<String> toString() const;
+
+    virtual bool equals(gc<Object> other) { return other->equalsChar(value_); }
+    virtual bool equalsChar(unsigned int value) { return value == value_; }
 
   private:
     unsigned int value_;
@@ -208,8 +195,6 @@ namespace magpie
 
     bool is(const ClassObject& other) const;
     
-    virtual ObjectType type() const { return OBJECT_CLASS; }
-
     virtual gc<ClassObject> getClass(VM& vm) const;
 
     virtual gc<String> toString() const;
@@ -241,8 +226,6 @@ namespace magpie
     // Creates a new instance of [classObj] using [args] to initialize its
     // fields.
     static gc<DynamicObject> create(ArrayView<gc<Object> >& args);
-    
-    virtual ObjectType type() const { return OBJECT_DYNAMIC; }
 
     virtual gc<ClassObject> getClass(VM& vm) const;
 
@@ -282,8 +265,6 @@ namespace magpie
     void read(gc<Fiber> fiber);
     void close(gc<Fiber> fiber);
 
-    virtual ObjectType type() const { return OBJECT_FILE; }
-
     virtual gc<ClassObject> getClass(VM& vm) const;
     virtual gc<String> toString() const;
     virtual void reach();
@@ -306,13 +287,14 @@ namespace magpie
 
     double value() const { return value_; }
 
-    virtual ObjectType type() const { return OBJECT_FLOAT; }
-
     virtual gc<ClassObject> getClass(VM& vm) const;
 
     // TODO(bob): Do we want to do this here, or rely on a "true?" method?
     virtual bool toBool() const { return value_ != 0; }
     virtual gc<String> toString() const;
+
+    virtual bool equals(gc<Object> other) { return other->equalsFloat(value_); }
+    virtual bool equalsFloat(double value) { return value == value_; }
 
   private:
     double value_;
@@ -324,8 +306,6 @@ namespace magpie
     // Creates a new function with the given chunk. If there are any upvars,
     // they should be initialized after this by calling setUpvar().
     static gc<FunctionObject> create(gc<Chunk> chunk);
-
-    virtual ObjectType type() const { return OBJECT_FUNCTION; }
 
     virtual gc<ClassObject> getClass(VM& vm) const;
 
@@ -358,13 +338,14 @@ namespace magpie
 
     int value() const { return value_; }
     
-    virtual ObjectType type() const { return OBJECT_INT; }
-
     virtual gc<ClassObject> getClass(VM& vm) const;
 
     // TODO(bob): Do we want to do this here, or rely on a "true?" method?
     virtual bool toBool() const { return value_ != 0; }
     virtual gc<String> toString() const;
+
+    virtual bool equals(gc<Object> other) { return other->equalsInt(value_); }
+    virtual bool equalsInt(int value) { return value == value_; }
 
   private:
     // TODO(bob): long?
@@ -379,8 +360,6 @@ namespace magpie
       elements_(capacity)
     {}
     
-    virtual ObjectType type() const { return OBJECT_LIST; }
-
     virtual gc<ClassObject> getClass(VM& vm) const;
 
     virtual gc<String> toString() const;
@@ -399,8 +378,6 @@ namespace magpie
     NothingObject()
     : Object()
     {}
-    
-    virtual ObjectType type() const { return OBJECT_NOTHING; }
 
     virtual gc<ClassObject> getClass(VM& vm) const;
 
@@ -444,8 +421,6 @@ namespace magpie
                              const Array<gc<Object> >& stack, int startIndex);
     
     gc<Object> getField(int symbol);
-    
-    virtual ObjectType type() const { return OBJECT_RECORD; }
 
     virtual gc<ClassObject> getClass(VM& vm) const;
 
@@ -476,11 +451,12 @@ namespace magpie
 
     gc<String> value() const { return value_; }
 
-    virtual ObjectType type() const { return OBJECT_STRING; }
-
     virtual gc<ClassObject> getClass(VM& vm) const;
 
     virtual gc<String> toString() const { return value_; }
+
+    virtual bool equals(gc<Object> other) { return other->equalsString(value_); }
+    virtual bool equalsString(gc<String> value) { return value == value_; }
 
     virtual void reach();
 

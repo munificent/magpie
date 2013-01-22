@@ -31,12 +31,12 @@ namespace magpie
 
   NATIVE(objectEqualsObject)
   {
-    return vm.getBool(Object::equal(args[0], args[1]));
+    return vm.getBool(args[0]->equals(args[1]));
   }
 
   NATIVE(objectNotEqualsObject)
   {
-    return vm.getBool(!Object::equal(args[0], args[1]));
+    return vm.getBool(!args[0]->equals(args[1]));
   }
 
   NATIVE(printString)
