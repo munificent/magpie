@@ -8,59 +8,59 @@ namespace magpie
 {
   using std::ostream;
 
-  BufferObject* Object::asBuffer()
+  gc<BufferObject> asBuffer(gc<Object> obj)
   {
-    return static_cast<BufferObject*>(this);
+    return static_cast<BufferObject*>(&(*obj));
   }
 
-  ChannelObject* Object::asChannel()
+  gc<ChannelObject> asChannel(gc<Object> obj)
   {
-    return static_cast<ChannelObject*>(this);
+    return static_cast<ChannelObject*>(&(*obj));
   }
 
-  unsigned int Object::asCharacter() const
+  unsigned int asCharacter(gc<Object> obj)
   {
-    return static_cast<const CharacterObject*>(this)->value();
+    return static_cast<CharacterObject*>(&(*obj))->value();
   }
 
-  ClassObject* Object::asClass()
+  gc<ClassObject> asClass(gc<Object> obj)
   {
-    return static_cast<ClassObject*>(this);
+    return static_cast<ClassObject*>(&(*obj));
   }
 
-  DynamicObject* Object::asDynamic()
+  gc<DynamicObject> asDynamic(gc<Object> obj)
   {
-    return static_cast<DynamicObject*>(this);
+    return static_cast<DynamicObject*>(&(*obj));
   }
 
-  FileObject* Object::asFile()
+  gc<FileObject> asFile(gc<Object> obj)
   {
-    return static_cast<FileObject*>(this);
+    return static_cast<FileObject*>(&(*obj));
   }
 
-  double Object::asFloat() const
+  double asFloat(gc<Object> obj)
   {
-    return static_cast<const FloatObject*>(this)->value();
+    return static_cast<const FloatObject*>(&(*obj))->value();
   }
 
-  FunctionObject* Object::asFunction()
+  gc<FunctionObject> asFunction(gc<Object> obj)
   {
-    return static_cast<FunctionObject*>(this);
+    return static_cast<FunctionObject*>(&(*obj));
   }
 
-  int Object::asInt() const
+  int asInt(gc<Object> obj)
   {
-    return static_cast<const IntObject*>(this)->value();
+    return static_cast<const IntObject*>(&(*obj))->value();
   }
 
-  ListObject* Object::asList()
+  gc<ListObject> asList(gc<Object> obj)
   {
-    return static_cast<ListObject*>(this);
+    return static_cast<ListObject*>(&(*obj));
   }
   
-  gc<String> Object::asString() const
+  gc<String> asString(gc<Object> obj)
   {
-    return static_cast<const StringObject*>(this)->value();
+    return static_cast<const StringObject*>(&(*obj))->value();
   }
 
   void Object::trace(std::ostream& stream) const
@@ -248,7 +248,7 @@ namespace magpie
     // Initialize the superclasses.
     for (int i = 0; i < numSuperclasses; i++)
     {
-      classObj->superclasses_[i] = superclasses[i]->asClass();
+      classObj->superclasses_[i] = asClass(superclasses[i]);
     }
 
     return classObj;
@@ -302,7 +302,7 @@ namespace magpie
 
   gc<DynamicObject> DynamicObject::create(ArrayView<gc<Object> >& args)
   {
-    gc<ClassObject> classObj = args[0]->asClass();
+    gc<ClassObject> classObj = asClass(args[0]);
     
     // Allocate enough memory for the object and its fields.
     void* mem = Memory::allocate(sizeof(DynamicObject) +

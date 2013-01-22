@@ -449,7 +449,7 @@ namespace magpie
                          const char* name)
   {
     int index = module->findVariable(String::create(name));
-    classObj = module->getVariable(index)->asClass();
+    classObj = asClass(module->getVariable(index));
   }
 
   Module* VM::findModule(const char* name)

@@ -16,7 +16,7 @@ namespace magpie
   {
     return args[0]->getClass(vm);
   }
-  
+
   NATIVE(objectNew)
   {
     // This assumes the args list has, in order, the class object and then all
@@ -47,151 +47,151 @@ namespace magpie
 
   NATIVE(stringPlusString)
   {
-    return new StringObject(String::concat(args[0]->asString(),
-                                           args[1]->asString()));
+    return new StringObject(String::concat(asString(args[0]),
+                                           asString(args[1])));
   }
 
   NATIVE(intPlusInt)
   {
-    return new IntObject(args[0]->asInt() + args[1]->asInt());
+    return new IntObject(asInt(args[0]) + asInt(args[1]));
   }
 
   NATIVE(intPlusFloat)
   {
-    return new FloatObject(args[0]->asInt() + args[1]->asFloat());
+    return new FloatObject(asInt(args[0]) + asFloat(args[1]));
   }
 
   NATIVE(floatPlusInt)
   {
-    return new FloatObject(args[0]->asFloat() + args[1]->asInt());
+    return new FloatObject(asFloat(args[0]) + asInt(args[1]));
   }
 
   NATIVE(floatPlusFloat)
   {
-    return new FloatObject(args[0]->asFloat() + args[1]->asFloat());
+    return new FloatObject(asFloat(args[0]) + asFloat(args[1]));
   }
-    
+
   NATIVE(intMinusInt)
   {
-    return new IntObject(args[0]->asInt() - args[1]->asInt());
+    return new IntObject(asInt(args[0]) - asInt(args[1]));
   }
 
   NATIVE(intMinusFloat)
   {
-    return new FloatObject(args[0]->asInt() - args[1]->asFloat());
+    return new FloatObject(asInt(args[0]) - asFloat(args[1]));
   }
 
   NATIVE(floatMinusInt)
   {
-    return new FloatObject(args[0]->asFloat() - args[1]->asInt());
+    return new FloatObject(asFloat(args[0]) - asInt(args[1]));
   }
 
   NATIVE(floatMinusFloat)
   {
-    return new FloatObject(args[0]->asFloat() - args[1]->asFloat());
+    return new FloatObject(asFloat(args[0]) - asFloat(args[1]));
   }
 
   NATIVE(intTimesInt)
   {
-    return new IntObject(args[0]->asInt() * args[1]->asInt());
+    return new IntObject(asInt(args[0]) * asInt(args[1]));
   }
 
   NATIVE(intTimesFloat)
   {
-    return new FloatObject(args[0]->asInt() * args[1]->asFloat());
+    return new FloatObject(asInt(args[0]) * asFloat(args[1]));
   }
 
   NATIVE(floatTimesInt)
   {
-    return new FloatObject(args[0]->asFloat() * args[1]->asInt());
+    return new FloatObject(asFloat(args[0]) * asInt(args[1]));
   }
 
   NATIVE(floatTimesFloat)
   {
-    return new FloatObject(args[0]->asFloat() * args[1]->asFloat());
+    return new FloatObject(asFloat(args[0]) * asFloat(args[1]));
   }
 
   NATIVE(intDivInt)
   {
-    return new IntObject(args[0]->asInt() / args[1]->asInt());
+    return new IntObject(asInt(args[0]) / asInt(args[1]));
   }
 
   NATIVE(intDivFloat)
   {
-    return new FloatObject(args[0]->asInt() / args[1]->asFloat());
+    return new FloatObject(asInt(args[0]) / asFloat(args[1]));
   }
 
   NATIVE(floatDivInt)
   {
-    return new FloatObject(args[0]->asFloat() / args[1]->asInt());
+    return new FloatObject(asFloat(args[0]) / asInt(args[1]));
   }
 
   NATIVE(floatDivFloat)
   {
-    return new FloatObject(args[0]->asFloat() / args[1]->asFloat());
+    return new FloatObject(asFloat(args[0]) / asFloat(args[1]));
   }
-  
+
   NATIVE(intModInt)
   {
-    return new IntObject(args[0]->asInt() % args[1]->asInt());
+    return new IntObject(asInt(args[0]) % asInt(args[1]));
   }
 
   NATIVE(minusInt)
   {
-    return new IntObject(-args[0]->asInt());
+    return new IntObject(-asInt(args[0]));
   }
 
   NATIVE(minusFloat)
   {
-    return new FloatObject(-args[0]->asFloat());
+    return new FloatObject(-asFloat(args[0]));
   }
-  
+
   NATIVE(intCompareToInt)
   {
-    int difference = args[0]->asInt() - args[1]->asInt();
+    int difference = asInt(args[0]) - asInt(args[1]);
     return new IntObject(sgn(difference));
   }
-  
+
   NATIVE(intCompareToFloat)
   {
-    double difference = args[0]->asInt() - args[1]->asFloat();
+    double difference = asInt(args[0]) - asFloat(args[1]);
     return new IntObject(sgn(difference));
   }
-  
+
   NATIVE(floatCompareToInt)
   {
-    double difference = args[0]->asFloat() - args[1]->asInt();
+    double difference = asFloat(args[0]) - asInt(args[1]);
     return new IntObject(sgn(difference));
   }
-  
+
   NATIVE(floatCompareToFloat)
   {
-    double difference = args[0]->asFloat() - args[1]->asFloat();
+    double difference = asFloat(args[0]) - asFloat(args[1]);
     return new IntObject(sgn(difference));
   }
 
   NATIVE(intSgn)
   {
-    return new IntObject(sgn(args[0]->asInt()));
+    return new IntObject(sgn(asInt(args[0])));
   }
 
   NATIVE(floatSgn)
   {
-    return new IntObject(sgn(args[0]->asFloat()));
+    return new IntObject(sgn(asFloat(args[0])));
   }
 
   NATIVE(stringCount)
   {
-    return new IntObject(args[0]->asString()->length());
+    return new IntObject(asString(args[0])->length());
   }
 
   NATIVE(stringSubscriptInt)
   {
     // Note: bounds checking is handled by core before calling this.
-    gc<String> string = args[0]->asString();
+    gc<String> string = asString(args[0]);
 
     // TODO(bob): Handle non-ASCII.
-    char c = (*string)[args[1]->asInt()];
+    char c = (*string)[asInt(args[1])];
 
     return new CharacterObject(c);
   }
@@ -203,7 +203,7 @@ namespace magpie
     // show that (i.e. "1.0") so that floats can be distinguished from numbers.
     // So just look for a "." in the result string and add ".0" if not found.
     // Do our own float->string conversion?
-    gc<String> string = String::format("%g", args[0]->asFloat());
+    gc<String> string = String::format("%g", asFloat(args[0]));
     bool hasDecimal = false;
     for (int i = 0; i < string->length(); i++)
     {
@@ -218,25 +218,25 @@ namespace magpie
     {
       string = String::format("%s.0", string->cString());
     }
-    
+
     return new StringObject(string);
   }
 
   NATIVE(intToString)
   {
-    return new StringObject(String::format("%d", args[0]->asInt()));
+    return new StringObject(String::format("%d", asInt(args[0])));
   }
 
   NATIVE(sleepMsInt)
   {
-    fiber.sleep(args[0]->asInt());
+    fiber.sleep(asInt(args[0]));
     result = NATIVE_RESULT_SUSPEND;
     return NULL;
   }
 
   NATIVE(channelClose)
   {
-    ChannelObject* channel = args[0]->asChannel();
+    gc<ChannelObject> channel = asChannel(args[0]);
 
     if (channel->close(vm, &fiber))
     {
@@ -248,10 +248,10 @@ namespace magpie
       return vm.nothing();
     }
   }
-  
+
   NATIVE(channelIsOpen)
   {
-    ChannelObject* channel = args[0]->asChannel();
+    gc<ChannelObject> channel = asChannel(args[0]);
     return vm.getBool(channel->isOpen());
   }
 
@@ -259,11 +259,11 @@ namespace magpie
   {
     return new ChannelObject();
   }
-  
+
   NATIVE(channelReceive)
   {
     // Hang this fiber off the channel we're waiting for a value from.
-    ChannelObject* channel = args[0]->asChannel();
+    gc<ChannelObject> channel = asChannel(args[0]);
     gc<Object> value = channel->receive(vm, &fiber);
 
     // If we don't have an immediate value, suspend this fiber.
@@ -277,7 +277,7 @@ namespace magpie
 
   NATIVE(channelSend)
   {
-    ChannelObject* channel = args[0]->asChannel();
+    gc<ChannelObject> channel = asChannel(args[0]);
 
     // Send the value and suspend this fiber until it's been received.
     channel->send(&fiber, args[1]);
@@ -286,60 +286,60 @@ namespace magpie
     result = NATIVE_RESULT_SUSPEND;
     return NULL;
   }
-  
+
   NATIVE(functionCall)
   {
     result = NATIVE_RESULT_CALL;
     return args[0];
   }
-  
+
   NATIVE(listAdd)
   {
-    ListObject* list = args[0]->asList();
+    gc<ListObject> list = asList(args[0]);
     list->elements().add(args[1]);
     return args[1];
   }
 
   NATIVE(listClear)
   {
-    ListObject* list = args[0]->asList();
+    gc<ListObject> list = asList(args[0]);
     list->elements().clear();
     return vm.nothing();
   }
-  
+
   NATIVE(listCount)
   {
-    ListObject* list = args[0]->asList();
+    gc<ListObject> list = asList(args[0]);
     return new IntObject(list->elements().count());
   }
 
   NATIVE(listInsert)
   {
-    ListObject* list = args[0]->asList();
-    list->elements().insert(args[1], args[2]->asInt());
+    gc<ListObject> list = asList(args[0]);
+    list->elements().insert(args[1], asInt(args[2]));
     return args[1];
   }
 
   NATIVE(listRemoveAt)
   {
     // Note: bounds checking is handled by core before calling this.
-    ListObject* list = args[0]->asList();
-    return list->elements().removeAt(args[1]->asInt());
+    gc<ListObject> list = asList(args[0]);
+    return list->elements().removeAt(asInt(args[1]));
   }
-  
+
   NATIVE(listSubscriptInt)
   {
     // Note: bounds checking is handled by core before calling this.
-    ListObject* list = args[0]->asList();
-    return list->elements()[args[1]->asInt()];
+    gc<ListObject> list = asList(args[0]);
+    return list->elements()[asInt(args[1])];
   }
 
   NATIVE(listSubscriptRange)
   {
     // Note: bounds checking is handled by core before calling this.
-    ListObject* source = args[0]->asList();
-    int first = args[1]->asInt();
-    int last = args[2]->asInt();
+    gc<ListObject> source = asList(args[0]);
+    int first = asInt(args[1]);
+    int last = asInt(args[2]);
 
     int size = last - first;
     gc<ListObject> list = new ListObject(size);
@@ -350,12 +350,12 @@ namespace magpie
 
     return list;
   }
-  
+
   NATIVE(listSubscriptSetInt)
   {
     // Note: bounds checking is handled by core before calling this.
-    ListObject* list = args[0]->asList();
-    list->elements()[args[1]->asInt()] = args[2];
+    gc<ListObject> list = asList(args[0]);
+    list->elements()[asInt(args[1])] = args[2];
     return args[2];
   }
 }

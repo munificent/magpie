@@ -446,8 +446,8 @@ namespace magpie
     {
       // Compare type relations.
       // TODO(bob): Need to handle types not resolving to class objects.
-      gc<ClassObject> a = getValue(node.type())->asClass();
-      gc<ClassObject> b = getValue(type->type())->asClass();
+      gc<ClassObject> a = asClass(getValue(node.type()));
+      gc<ClassObject> b = asClass(getValue(type->type()));
 
       if (a.sameAs(b))
       {

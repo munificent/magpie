@@ -26,11 +26,26 @@ namespace magpie
   class Memory;
   class Multimethod;
   class NothingObject;
+  class Object;
   class RecordObject;
   class StringObject;
   class Upvar;
   class VM;
-    
+
+  // Unsafe downcasting functions. These must *only* be called after the object
+  // has been verified as being the right type.
+  gc<BufferObject> asBuffer(gc<Object> obj);
+  gc<ChannelObject> asChannel(gc<Object> obj);
+  unsigned int asCharacter(gc<Object> obj);
+  gc<ClassObject> asClass(gc<Object> obj);
+  gc<DynamicObject> asDynamic(gc<Object> obj);
+  gc<FileObject> asFile(gc<Object> obj);
+  double asFloat(gc<Object> obj);
+  gc<FunctionObject> asFunction(gc<Object> obj);
+  int asInt(gc<Object> obj);
+  gc<ListObject> asList(gc<Object> obj);
+  gc<String> asString(gc<Object> obj);
+
   class Object : public Managed
   {
   public:
@@ -38,20 +53,6 @@ namespace magpie
 
     // Gets the ClassObject for this object's class.
     virtual gc<ClassObject> getClass(VM& vm) const = 0;
-
-    // Downcasting methods. These must *only* be called after the object has
-    // been verified as being the right type.
-    BufferObject* asBuffer();
-    ChannelObject* asChannel();
-    unsigned int asCharacter() const;
-    ClassObject* asClass();
-    DynamicObject* asDynamic();
-    FileObject* asFile();
-    double asFloat() const;
-    FunctionObject* asFunction();
-    int asInt() const;
-    ListObject* asList();
-    gc<String> asString() const;
 
     // Returns the boolean value of the object.
     virtual bool toBool() const { return true; }
@@ -77,7 +78,7 @@ namespace magpie
 
     virtual void trace(std::ostream& stream) const;
   };
-  
+
   class BoolObject : public Object
   {
   public:
@@ -110,13 +111,13 @@ namespace magpie
     int count() const { return count_; }
     unsigned char get(int index) { return bytes_[index]; }
     void set(int index, unsigned char value) { bytes_[index] = value; }
-    
+
   private:
     BufferObject(int count)
     : Object(),
       count_(count)
     {}
-    
+
     // Number of bytes in the buffer.
     int count_;
     unsigned char bytes_[FLEXIBLE_SIZE];
@@ -144,7 +145,7 @@ namespace magpie
     void send(gc<Fiber> sender, gc<Object> value);
 
     virtual gc<ClassObject> getClass(VM& vm) const;
-    
+
     virtual gc<String> toString() const;
 
     virtual void reach();
@@ -189,18 +190,18 @@ namespace magpie
     static gc<ClassObject> create(gc<String> name, int numFields,
                                   int numSuperclasses,
                                   const ArrayView<gc<Object> >& superclasses);
-    
+
     gc<String> name() const { return name_; }
     int numFields() const { return numFields_; }
 
     bool is(const ClassObject& other) const;
-    
+
     virtual gc<ClassObject> getClass(VM& vm) const;
 
     virtual gc<String> toString() const;
 
     virtual void reach();
-    
+
   private:
     ClassObject(gc<String> name, int numFields, int numSuperclasses)
     : Object(),
@@ -214,7 +215,7 @@ namespace magpie
     int             numSuperclasses_;
     gc<ClassObject> superclasses_[FLEXIBLE_SIZE];
   };
-  
+
   // A regular instance of some class.
   class DynamicObject : public Object
   {
@@ -230,7 +231,7 @@ namespace magpie
     virtual gc<ClassObject> getClass(VM& vm) const;
 
     virtual gc<String> toString() const;
-    
+
     gc<ClassObject> classObj() { return class_; }
 
     gc<Object> getField(int index);
@@ -299,7 +300,7 @@ namespace magpie
   private:
     double value_;
   };
-  
+
   class FunctionObject : public Object
   {
   public:
@@ -337,7 +338,7 @@ namespace magpie
     {}
 
     int value() const { return value_; }
-    
+
     virtual gc<ClassObject> getClass(VM& vm) const;
 
     // TODO(bob): Do we want to do this here, or rely on a "true?" method?
@@ -351,7 +352,7 @@ namespace magpie
     // TODO(bob): long?
     int value_;
   };
-  
+
   class ListObject : public Object
   {
   public:
@@ -359,11 +360,11 @@ namespace magpie
     : Object(),
       elements_(capacity)
     {}
-    
+
     virtual gc<ClassObject> getClass(VM& vm) const;
 
     virtual gc<String> toString() const;
-    
+
     Array<gc<Object> >& elements() { return elements_; }
 
     virtual void reach();
@@ -371,7 +372,7 @@ namespace magpie
   private:
     Array<gc<Object> > elements_;
   };
-  
+
   class NothingObject : public Object
   {
   public:
@@ -386,40 +387,40 @@ namespace magpie
 
     virtual gc<String> toString() const;
   };
-  
+
   // A record's "type" is an implicit class that describes the set of fields
   // that a record has.
   class RecordType : public Managed
   {
   public:
     static gc<RecordType> create(const Array<int>& fields);
-    
+
     int numFields() const { return numFields_; }
-    
+
     // Returns the index for the given field, or -1 if this record doesn't have
     // a field with that name. Given a RecordObject whose RecordType is this,
     // the index of a field here will be the index in that object's fields for
     // the field with the given name.
     int getField(symbolId symbol) const;
-    
+
     // Given the index of a field in this type, returns the symbol ID of that
     // field.
     symbolId getSymbol(int index) const;
 
   private:
     RecordType(const Array<int>& fields);
-    
+
     int numFields_;
     int names_[FLEXIBLE_SIZE];
   };
-  
+
   // A record or tuple object.
   class RecordObject : public Object
   {
   public:
     static gc<Object> create(gc<RecordType> type,
                              const Array<gc<Object> >& stack, int startIndex);
-    
+
     gc<Object> getField(int symbol);
 
     virtual gc<ClassObject> getClass(VM& vm) const;
@@ -428,17 +429,17 @@ namespace magpie
     virtual gc<String> toString() const;
 
     virtual void reach();
-    
+
   private:
     RecordObject(gc<RecordType> type)
     : Object(),
       type_(type)
     {}
-    
+
     gc<RecordType> type_;
     gc<Object>     fields_[FLEXIBLE_SIZE];
   };
-  
+
   // TODO(bob): The double boxing here where this has a pointer to a String is
   // lame. Consider unifying this with the real string class.
   class StringObject : public Object

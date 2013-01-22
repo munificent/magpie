@@ -212,7 +212,7 @@ namespace magpie
           // appears in auto-generated getter methods.
           int fieldIndex = GET_A(ins);
 
-          gc<DynamicObject> object = load(frame, 0)->asDynamic();
+          gc<DynamicObject> object = asDynamic(load(frame, 0));
           store(frame, 1, object->getField(fieldIndex));
           break;
         }
@@ -223,7 +223,7 @@ namespace magpie
           // appears in auto-generated getter methods.
           int fieldIndex = GET_A(ins);
 
-          gc<DynamicObject> object = load(frame, 0)->asDynamic();
+          gc<DynamicObject> object = asDynamic(load(frame, 0));
           object->setField(fieldIndex, load(frame, 1));
           store(frame, 2, load(frame, 1));
           break;
@@ -306,7 +306,7 @@ namespace magpie
           gc<Object> value = load(frame, GET_A(ins));
           
           // TODO(bob): Handle it not being a class.
-          const ClassObject* expected = load(frame, GET_B(ins))->asClass();
+          gc<ClassObject> expected = asClass(load(frame, GET_B(ins)));
           gc<ClassObject> classObject = value->getClass(vm_);
           store(frame, GET_C(ins), vm_.getBool(classObject->is(*expected)));
           break;
@@ -373,7 +373,7 @@ namespace magpie
 
             case NATIVE_RESULT_CALL:
             {
-              FunctionObject* function = args[0]->asFunction();
+              gc<FunctionObject> function = asFunction(args[0]);
 
               // Call the function, passing in this method's arguments except
               // the first one, which is the function itself.

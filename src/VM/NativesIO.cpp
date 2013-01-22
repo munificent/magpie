@@ -14,7 +14,7 @@ namespace magpie
 
   NATIVE(fileClose)
   {
-    gc<FileObject> fileObj = args[0]->asFile();
+    gc<FileObject> fileObj = asFile(args[0]);
     fileObj->close(&fiber);
 
     result = NATIVE_RESULT_SUSPEND;
@@ -23,20 +23,20 @@ namespace magpie
   
   NATIVE(fileIsOpen)
   {
-    gc<FileObject> fileObj = args[0]->asFile();
+    gc<FileObject> fileObj = asFile(args[0]);
     return vm.getBool(fileObj->isOpen());
   }
   
   NATIVE(fileOpen)
   {
-    FileObject::open(&fiber, args[1]->asString());
+    FileObject::open(&fiber, asString(args[1]));
     result = NATIVE_RESULT_SUSPEND;
     return NULL;
   }
 
   NATIVE(fileRead)
   {
-    gc<FileObject> fileObj = args[0]->asFile();
+    gc<FileObject> fileObj = asFile(args[0]);
     fileObj->read(&fiber);
     result = NATIVE_RESULT_SUSPEND;
     return NULL;
@@ -44,29 +44,29 @@ namespace magpie
 
   NATIVE(bufferNewSize)
   {
-    return BufferObject::create(args[1]->asInt());
+    return BufferObject::create(asInt(args[1]));
   }
 
   NATIVE(bufferCount)
   {
-    gc<BufferObject> buffer = args[0]->asBuffer();
+    gc<BufferObject> buffer = asBuffer(args[0]);
     return new IntObject(buffer->count());
   }
 
   NATIVE(bufferSubscriptInt)
   {
     // Note: bounds checking is handled by core before calling this.
-    BufferObject* buffer = args[0]->asBuffer();
-    return new IntObject(buffer->get(args[1]->asInt()));
+    gc<BufferObject> buffer = asBuffer(args[0]);
+    return new IntObject(buffer->get(asInt(args[1])));
   }
   
   NATIVE(bufferSubscriptSetInt)
   {
     // Note: bounds checking is handled by core before calling this.
-    BufferObject* buffer = args[0]->asBuffer();
+    gc<BufferObject> buffer = asBuffer(args[0]);
     // TODO(bob): Need to decide how to handle value outside of byte range.
-    buffer->set(args[1]->asInt(),
-                static_cast<unsigned char>(args[2]->asInt()));
+    buffer->set(asInt(args[1]),
+                static_cast<unsigned char>(asInt(args[2])));
     return args[2];
   }
 }
