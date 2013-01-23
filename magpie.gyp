@@ -74,6 +74,8 @@
       'src/VM/NativesIO.h',
       'src/VM/Object.cpp',
       'src/VM/Object.h',
+      'src/VM/ObjectIO.cpp',
+      'src/VM/ObjectIO.h',
       'src/VM/Scheduler.cpp',
       'src/VM/Scheduler.h',
       'src/VM/VM.cpp',

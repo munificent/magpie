@@ -1,6 +1,6 @@
 #include <sstream>
 
-#include "Object.h"
+#include "ObjectIO.h"
 #include "NativesIO.h"
 #include "VM.h"
 

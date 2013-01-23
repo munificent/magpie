@@ -8,7 +8,6 @@
 namespace magpie
 {
   class CatchFrame;
-  class FileObject; // Temp.
   class FunctionObject;
   class Object;
   class Scheduler;

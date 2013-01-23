@@ -1,7 +1,6 @@
 #pragma once
 
 #include <iostream>
-#include "uv.h"
 
 #include "Macros.h"
 #include "Managed.h"
@@ -10,15 +9,12 @@
 namespace magpie
 {
   class BoolObject;
-  class BufferObject;
   class Chunk;
   class ChannelObject;
   class CharacterObject;
   class ClassObject;
   class DynamicObject;
-  class FileObject;
   class Fiber;
-  class File;
   class FloatObject;
   class FunctionObject;
   class IntObject;
@@ -34,12 +30,10 @@ namespace magpie
 
   // Unsafe downcasting functions. These must *only* be called after the object
   // has been verified as being the right type.
-  gc<BufferObject> asBuffer(gc<Object> obj);
   gc<ChannelObject> asChannel(gc<Object> obj);
   unsigned int asCharacter(gc<Object> obj);
   gc<ClassObject> asClass(gc<Object> obj);
   gc<DynamicObject> asDynamic(gc<Object> obj);
-  gc<FileObject> asFile(gc<Object> obj);
   double asFloat(gc<Object> obj);
   gc<FunctionObject> asFunction(gc<Object> obj);
   int asInt(gc<Object> obj);
@@ -97,30 +91,6 @@ namespace magpie
 
   private:
     bool value_;
-  };
-
-  class BufferObject : public Object
-  {
-  public:
-    static gc<BufferObject> create(int count);
-
-    virtual gc<ClassObject> getClass(VM& vm) const;
-
-    virtual gc<String> toString() const;
-
-    int count() const { return count_; }
-    unsigned char get(int index) { return bytes_[index]; }
-    void set(int index, unsigned char value) { bytes_[index] = value; }
-
-  private:
-    BufferObject(int count)
-    : Object(),
-      count_(count)
-    {}
-
-    // Number of bytes in the buffer.
-    int count_;
-    unsigned char bytes_[FLEXIBLE_SIZE];
   };
 
   class ChannelObject : public Object
@@ -247,35 +217,6 @@ namespace magpie
 
     gc<ClassObject> class_;
     gc<Object>      fields_[FLEXIBLE_SIZE];
-  };
-
-  class FileObject : public Object
-  {
-  public:
-    static void open(gc<Fiber> fiber, gc<String> path);
-
-    FileObject(uv_file file)
-    : Object(),
-      file_(file),
-      isOpen_(true)
-    {}
-
-    uv_file file() { return file_; }
-    bool isOpen() const { return isOpen_; }
-
-    void read(gc<Fiber> fiber);
-    void close(gc<Fiber> fiber);
-
-    virtual gc<ClassObject> getClass(VM& vm) const;
-    virtual gc<String> toString() const;
-    virtual void reach();
-
-  private:
-    // TODO(bob): Need some kind of finalization system so that files that get
-    // GC'd get closed.
-    uv_file file_;
-
-    bool isOpen_;
   };
 
   class FloatObject : public Object

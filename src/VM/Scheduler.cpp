@@ -3,6 +3,7 @@
 #include "Fiber.h"
 #include "Module.h"
 #include "Object.h"
+#include "ObjectIO.h"
 #include "Scheduler.h"
 #include "VM.h"
 
