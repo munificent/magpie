@@ -112,6 +112,7 @@ namespace magpie
     DEF_NATIVE(bufferCount);
     DEF_NATIVE(bufferSubscriptInt);
     DEF_NATIVE(bufferSubscriptSetInt);
+    DEF_NATIVE(bufferDecodeAscii);
 
     true_ = new BoolObject(true);
     false_ = new BoolObject(false);

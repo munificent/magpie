@@ -1,0 +1,14 @@
+import io
+
+// TODO(bob):
+// - What if there are \0 bytes in the buffer?
+// - High-bit ASCII.
+
+val buffer = Buffer new(5)
+buffer[0] = 72 // H
+buffer[1] = 101 // e
+buffer[2] = 108 // l
+buffer[3] = 108 // l
+buffer[4] = 111 // o
+
+print(buffer decode(ASCII)) // expect: Hello

@@ -41,8 +41,19 @@ def (buffer is Buffer)[index is Int]=(value)
 end
 
 def (is Buffer) _subscriptSet(index is Int, value) native "bufferSubscriptSetInt"
+def (is Buffer) decode(== ASCII) native "bufferDecodeAscii"
+def (is Buffer) decode(== UTF8)
+    throw "Not implemented yet."
+end
 
 defclass Stream is Iterable native
+
+defclass Encoding
+    val name is String
+end
+
+val ASCII = Encoding new(name: "ASCII")
+val UTF8 = Encoding new(name: "UTF-8")
 
 // Now that everything is defined, wire it up to the VM.
 def _bindIO() native "bindIO"

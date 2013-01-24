@@ -18,5 +18,6 @@ namespace magpie
   NATIVE(bufferCount);
   NATIVE(bufferSubscriptInt);
   NATIVE(bufferSubscriptSetInt);
+  NATIVE(bufferDecodeAscii);
 }
 

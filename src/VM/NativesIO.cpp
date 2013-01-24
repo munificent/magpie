@@ -76,5 +76,13 @@ namespace magpie
                 static_cast<unsigned char>(asInt(args[2])));
     return args[2];
   }
+
+  NATIVE(bufferDecodeAscii)
+  {
+    gc<BufferObject> buffer = asBuffer(args[0]);
+    return new StringObject(
+        String::create(reinterpret_cast<char*>(buffer->data()),
+                       buffer->count()));
+  }
 }
 
