@@ -1,3 +1,5 @@
+#include <fcntl.h>
+
 #include "uv.h"
 
 #include "Fiber.h"
@@ -24,7 +26,7 @@ namespace magpie
     // Translate VM NULL to Magpie nothing so that the callback doesn't have
     // to bother looking up the VM to get it.
     if (returnValue.isNull()) returnValue = fiber_->vm().nothing();
-    
+
     fiber_->storeReturn(returnValue);
 
     Scheduler& scheduler = fiber_->scheduler();
@@ -46,7 +48,7 @@ namespace magpie
   {
     fiber_.reach();
   }
-    
+
   void TaskList::remove(Task* task)
   {
     // Unlink it from its siblings.
@@ -93,7 +95,7 @@ namespace magpie
   Scheduler::Scheduler(VM& vm)
   : vm_(vm)
   {}
-  
+
   void Scheduler::run(Array<Module*> modules)
   {
     // Queue up fibers for each module body.
@@ -123,7 +125,7 @@ namespace magpie
     gc<FunctionObject> function = FunctionObject::create(module->body());
     return run(new Fiber(vm_, *this, function, NULL));
   }
-  
+
   gc<Object> Scheduler::run(gc<Fiber> fiber)
   {
     gc<Object> value;
@@ -175,7 +177,7 @@ namespace magpie
     // was last completed.
     return value;
   }
-  
+
   void Scheduler::spawn(gc<FunctionObject> function)
   {
     ready_.add(new Fiber(vm_, *this, function, NULL));
@@ -224,4 +226,3 @@ namespace magpie
     return ready_.removeAt(0);
   }
 }
-
