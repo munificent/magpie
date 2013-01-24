@@ -93,14 +93,6 @@ namespace magpie
     DEF_NATIVE(channelNew);
     DEF_NATIVE(channelReceive);
     DEF_NATIVE(channelSend);
-    DEF_NATIVE(fileClose);
-    DEF_NATIVE(fileIsOpen);
-    DEF_NATIVE(fileOpen);
-    DEF_NATIVE(fileRead);
-    DEF_NATIVE(bufferNewSize);
-    DEF_NATIVE(bufferCount);
-    DEF_NATIVE(bufferSubscriptInt);
-    DEF_NATIVE(bufferSubscriptSetInt);
     DEF_NATIVE(functionCall);
     DEF_NATIVE(listAdd);
     DEF_NATIVE(listClear);
@@ -110,6 +102,16 @@ namespace magpie
     DEF_NATIVE(listSubscriptInt);
     DEF_NATIVE(listSubscriptRange);
     DEF_NATIVE(listSubscriptSetInt);
+
+    DEF_NATIVE(fileClose);
+    DEF_NATIVE(fileIsOpen);
+    DEF_NATIVE(fileOpen);
+    DEF_NATIVE(fileReadBytesInt);
+    DEF_NATIVE(fileStreamBytes);
+    DEF_NATIVE(bufferNewSize);
+    DEF_NATIVE(bufferCount);
+    DEF_NATIVE(bufferSubscriptInt);
+    DEF_NATIVE(bufferSubscriptSetInt);
 
     true_ = new BoolObject(true);
     false_ = new BoolObject(false);
@@ -147,6 +149,7 @@ namespace magpie
 
     registerClass(io, bufferClass_, "Buffer");
     registerClass(io, fileClass_, "File");
+    registerClass(io, streamClass_, "Stream");
   }
 
   bool VM::runProgram(gc<String> path)

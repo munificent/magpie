@@ -34,14 +34,21 @@ namespace magpie
     return NULL;
   }
 
-  NATIVE(fileRead)
+  NATIVE(fileReadBytesInt)
   {
     gc<FileObject> fileObj = asFile(args[0]);
-    fileObj->read(&fiber);
+    fileObj->readBytes(&fiber, asInt(args[1]));
     result = NATIVE_RESULT_SUSPEND;
     return NULL;
   }
 
+  NATIVE(fileStreamBytes)
+  {
+    gc<StreamObject> stream = new StreamObject();
+    // TODO(bob): Hook up to file.
+    return stream;
+  }
+  
   NATIVE(bufferNewSize)
   {
     return BufferObject::create(asInt(args[1]));

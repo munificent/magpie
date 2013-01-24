@@ -8,7 +8,9 @@ end
 
 def (is File) isOpen native "fileIsOpen"
 def (== File) open(path is String) native "fileOpen"
-def (is File) read native "fileRead"
+// TODO(bob): Validate size is non-negative.
+def (is File) readBytes(size is Int) native "fileReadBytesInt"
+def (is File) streamBytes native "fileStreamBytes"
 
 // TODO(bob): Move to separate "data" module.
 defclass Buffer is Indexable native
@@ -39,6 +41,8 @@ def (buffer is Buffer)[index is Int]=(value)
 end
 
 def (is Buffer) _subscriptSet(index is Int, value) native "bufferSubscriptSetInt"
+
+defclass Stream is Iterable native
 
 // Now that everything is defined, wire it up to the VM.
 def _bindIO() native "bindIO"

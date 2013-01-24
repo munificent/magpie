@@ -9,6 +9,11 @@
 
 namespace magpie
 {
+  uv_loop_t* Task::loop()
+  {
+    return fiber_->scheduler().loop_;
+  }
+
   void Task::complete(gc<Object> returnValue)
   {
     // Unlink from the list. We do this before running the fiber so that if
@@ -33,82 +38,15 @@ namespace magpie
   : fiber_(fiber),
     prev_(NULL),
     next_(NULL)
-  {}
-
-  FSTask::~FSTask()
   {
-    uv_fs_req_cleanup(&fs_);
+    fiber->scheduler().add(this);
   }
 
-  FSTask::FSTask(gc<Fiber> fiber)
-  : Task(fiber)
-  {}
-
-  void FSTask::kill()
+  void Task::reach()
   {
-    uv_cancel(reinterpret_cast<uv_req_t*>(&fs_));
+    fiber_.reach();
   }
-
-  HandleTask::HandleTask(gc<Fiber> fiber, uv_handle_t* handle)
-  : Task(fiber),
-    handle_(handle)
-  {}
-
-  HandleTask::~HandleTask()
-  {
-    delete handle_;
-  }
-
-  void HandleTask::kill()
-  {
-    uv_unref(handle_);
-    delete handle_;
-    handle_ = NULL;
-  }
-
-  uv_fs_t* TaskList::createFS(gc<Fiber> fiber)
-  {
-    // TODO(bob): We could allocate this on the GC heap and then just reach it
-    // as needed.
-    FSTask* task = new FSTask(fiber);
-
-    // Stuff the task into the handle so we can get it in the callback.
-    task->fs_.data = task;
-
-    add(task);
-    return &task->fs_;
-  }
-
-  uv_pipe_t* TaskList::createPipe(gc<Fiber> fiber)
-  {
-    // TODO(bob): We could allocate these on the GC heap and then just reach it
-    // as needed.
-    uv_pipe_t* pipe = new uv_pipe_t;
-    HandleTask* task = new HandleTask(fiber,
-                                      reinterpret_cast<uv_handle_t*>(pipe));
-
-    // Stuff the task into the handle so we can get it in the callback.
-    pipe->data = task;
-
-    add(task);
-    return pipe;
-  }
-
-  uv_timer_t* TaskList::createTimer(gc<Fiber> fiber)
-  {
-    // TODO(bob): We could allocate these on the GC heap and then just reach it
-    // as needed.
-    uv_timer_t* timer = new uv_timer_t;
-    HandleTask* task = new HandleTask(fiber,
-                                      reinterpret_cast<uv_handle_t*>(timer));
-
-    // Stuff the task into the handle so we can get it in the callback.
-    timer->data = task;
-
-    add(task);
-    return timer;
-  }
-  
+    
   void TaskList::remove(Task* task)
   {
     // Unlink it from its siblings.
@@ -136,7 +74,7 @@ namespace magpie
     Task* task = head_;
     while (task != NULL)
     {
-      task->fiber_.reach();
+      task->reach();
       task = task->next_;
     }
   }
@@ -261,76 +199,23 @@ namespace magpie
   {
     // TODO(bob): We could allocate this on the GC heap and then just reach it
     // as needed.
-    uv_timer_t* request = tasks_.createTimer(fiber);
-    uv_timer_init(loop_, request);
+    uv_timer_t* request = new uv_timer_t;
+    HandleTask* task = new HandleTask(fiber,
+                                      reinterpret_cast<uv_handle_t*>(request));
+
+    uv_timer_init(task->loop(), request);
     uv_timer_start(request, timerCallback, ms, 0);
-  }
-
-  static void openFileCallback(uv_fs_t* handle)
-  {
-    // TODO(bob): Handle errors!
-    Task* task = static_cast<Task*>(handle->data);
-
-    // Note that the file descriptor is returned in [result] and not [file].
-    task->complete(new FileObject(handle->result));
-  }
-  
-  void Scheduler::openFile(gc<Fiber> fiber, gc<String> path)
-  {
-    uv_fs_t* request = tasks_.createFS(fiber);
-
-    // TODO(bob): Make this configurable.
-    int flags = O_RDONLY;
-    // TODO(bob): Make this configurable when creating a file.
-    int mode = 0;
-    uv_fs_open(loop_, request, path->cString(), flags, mode, openFileCallback);
-  }
-
-  static uv_buf_t allocateCallback(uv_handle_t *handle, size_t suggested_size)
-  {
-    printf("Alloc %ld\n", suggested_size);
-    // TODO(bob): Don't use malloc() here.
-    return uv_buf_init((char*) malloc(suggested_size), suggested_size);
-  }
-
-  static void readCallback(uv_stream_t *stream, ssize_t nread, uv_buf_t buf)
-  {
-    // TODO(bob): Implement me!
-    printf("Read %ld bytes\n", nread);
-  }
-
-  void Scheduler::read(gc<Fiber> fiber, gc<FileObject> file)
-  {
-    // TODO(bob): What if you call read on the same file multiple times?
-    // Should the pipe be reused?
-    // Get a pipe to the file.
-    uv_pipe_t* pipe = tasks_.createPipe(fiber);
-    uv_pipe_init(loop_, pipe, 0);
-    uv_pipe_open(pipe, file->file());
-
-    // TODO(bob): Check result.
-    uv_read_start(reinterpret_cast<uv_stream_t*>(pipe), allocateCallback,
-                  readCallback);
-  }
-  
-  static void closeFileCallback(uv_fs_t* handle)
-  {
-    Task* task = static_cast<Task*>(handle->data);
-
-    // Close returns nothing.
-    task->complete(NULL);
-  }
-  
-  void Scheduler::closeFile(gc<Fiber> fiber, gc<FileObject> file)
-  {
-    uv_fs_t* request = tasks_.createFS(fiber);
-    uv_fs_close(loop_, request, file->file(), closeFileCallback);
   }
 
   void Scheduler::reach()
   {
     ready_.reach();
     tasks_.reach();
+  }
+
+  void Scheduler::add(Task* task)
+  {
+    tasks_.add(task);
   }
 
   gc<Fiber> Scheduler::getNext()

@@ -66,6 +66,7 @@ namespace magpie
     inline gc<ClassObject> listClass() const { return listClass_; }
     inline gc<ClassObject> nothingClass() const { return nothingClass_; }
     inline gc<ClassObject> recordClass() const { return recordClass_; }
+    inline gc<ClassObject> streamClass() const { return streamClass_; }
     inline gc<ClassObject> stringClass() const { return stringClass_; }
     inline gc<ClassObject> noMatchErrorClass() const { return noMatchErrorClass_; }
     inline gc<ClassObject> noMethodErrorClass() const { return noMethodErrorClass_; }
@@ -144,6 +145,7 @@ namespace magpie
     gc<ClassObject> listClass_;
     gc<ClassObject> nothingClass_;
     gc<ClassObject> recordClass_;
+    gc<ClassObject> streamClass_;
     gc<ClassObject> stringClass_;
     gc<ClassObject> noMatchErrorClass_;
     gc<ClassObject> noMethodErrorClass_;

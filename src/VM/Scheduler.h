@@ -9,7 +9,8 @@ namespace magpie
 {
   // suspend stuff:
   class ChannelObject;
-  
+
+  class BufferObject;
   class Fiber;
   class FileObject;
   class FunctionObject;
@@ -27,6 +28,9 @@ namespace magpie
     
     gc<Fiber> fiber() { return fiber_; }
 
+    // Gets the main libuv loop this task will run on.
+    uv_loop_t* loop();
+    
     virtual void kill() = 0;
     
     // Completes the task. Removes it from the list of pending tasks and runs
@@ -36,7 +40,11 @@ namespace magpie
     // after this returns!
     void complete(gc<Object> returnValue);
 
+    virtual void reach();
+
   protected:
+    // Creates a new task. Note that instantiating a task implicitly adds it
+    // to the scheduler's task list.
     Task(gc<Fiber> fiber);
 
   private:
@@ -45,38 +53,7 @@ namespace magpie
     Task* prev_;
     Task* next_;
   };
-
-  // A task for a file system operation.
-  class FSTask : public Task
-  {
-    friend class TaskList;
-
-  public:
-    ~FSTask();
-
-    virtual void kill();
-
-  private:
-    FSTask(gc<Fiber> fiber);
-
-    uv_fs_t fs_;
-  };
-
-  // A task using a uv_handle_t.
-  class HandleTask : public Task
-  {
-    friend class TaskList;
-
-  public:
-    ~HandleTask();
-    virtual void kill();
-
-  private:
-    HandleTask(gc<Fiber> fiber, uv_handle_t* handle);
-
-    uv_handle_t* handle_;
-  };
-  
+    
   // A list of pending asynchronous tasks.
   class TaskList
   {
@@ -86,14 +63,7 @@ namespace magpie
       tail_(NULL)
     {}
     
-    // Create a new file system task that is blocking [fiber].
-    uv_fs_t* createFS(gc<Fiber> fiber);
-
-    // Create a new pipe task that is blocking [fiber].
-    uv_pipe_t* createPipe(gc<Fiber> fiber);
-
-    // Create a new timer task that is blocking [fiber].
-    uv_timer_t* createTimer(gc<Fiber> fiber);
+    void add(Task* task);
 
     // Removes [waiting] from this list. Does not free it.
     void remove(Task* task);
@@ -105,8 +75,6 @@ namespace magpie
     void reach();
 
   private:
-    void add(Task* task);
-
     Task* head_;
     Task* tail_;
   };
@@ -131,17 +99,13 @@ namespace magpie
     // Spawns a new Fiber running the given procedure.
     void spawn(gc<FunctionObject> function);
     void add(gc<Fiber> fiber);
-    
+
     void sleep(gc<Fiber> fiber, int ms);
-
-    // TODO(bob): Putting these right on Scheduler feels wrong.
-    void openFile(gc<Fiber> fiber, gc<String> path);
-    void read(gc<Fiber>, gc<FileObject> file);
-    void closeFile(gc<Fiber> fiber, gc<FileObject> file);
-
     void reach();
 
   private:
+    void add(Task* task);
+
     void waitForOSEvents();
     gc<Fiber> getNext();
 

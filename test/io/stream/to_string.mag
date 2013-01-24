@@ -1,0 +1,5 @@
+import io
+
+val file = File open("test/io/file/data.txt")
+val stream = file streamBytes
+print(stream) // expect: [stream]

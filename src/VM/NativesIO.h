@@ -12,7 +12,8 @@ namespace magpie
   NATIVE(fileClose);
   NATIVE(fileIsOpen);
   NATIVE(fileOpen);
-  NATIVE(fileRead);
+  NATIVE(fileReadBytesInt);
+  NATIVE(fileStreamBytes);
   NATIVE(bufferNewSize);
   NATIVE(bufferCount);
   NATIVE(bufferSubscriptInt);

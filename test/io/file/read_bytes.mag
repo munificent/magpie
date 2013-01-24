@@ -1,0 +1,49 @@
+import io
+
+// TODO(bob): Reading from closed file.
+
+do
+    // TODO(bob): Path should be relative to this script.
+    val file = File open("test/io/file/data.txt")
+    val buffer = file readBytes(100)
+
+    print(buffer is Buffer) // expect: true
+
+    // Reading when at EOF returns done.
+    var buffer2 = file readBytes(100)
+    print(buffer2) // expect: done
+
+    file close
+end
+
+do
+    // TODO(bob): Path should be relative to this script.
+    val file = File open("test/io/file/data.txt")
+    val buffer = file readBytes(10)
+
+    print(buffer is Buffer) // expect: true
+
+    // Only read up to max size.
+    print(buffer count) // expect: 10
+
+    // "Th"
+    print(buffer[0]) // expect: 84
+    print(buffer[1]) // expect: 104
+    file close
+end
+
+do
+    // TODO(bob): Path should be relative to this script.
+    val file = File open("test/io/file/data.txt")
+    val buffer = file readBytes(100)
+    file close
+
+    print(buffer is Buffer) // expect: true
+
+    // Truncate to actually read size.
+    print(buffer count) // expect: 48
+
+    // "Th"
+    print(buffer[0]) // expect: 84
+    print(buffer[1]) // expect: 104
+end
