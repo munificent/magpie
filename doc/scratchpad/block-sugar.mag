@@ -106,23 +106,27 @@ end
 
 // opening a file
 
-open("file.txt", fn(file)
+File open("file.txt", fn(file)
     print(file read)
 end)
 
-open("file.txt") with file in
+File open("file.txt") with file in
     print(file read)
 end
 
-open("file.txt") with file do
+File open("file.txt") with file do
     print(file read)
 end
 
-with file in open("file.txt") do
+with file in File open("file.txt") do
     print(file read)
 end
 
-with open("file.txt") as file do
+with File open("file.txt") as file do
+    print(file read)
+end
+
+File open("file.txt") as file do
     print(file read)
 end
 
