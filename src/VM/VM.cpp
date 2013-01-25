@@ -106,6 +106,7 @@ namespace magpie
     DEF_NATIVE(fileClose);
     DEF_NATIVE(fileIsOpen);
     DEF_NATIVE(fileOpen);
+    DEF_NATIVE(fileSize);
     DEF_NATIVE(fileReadBytesInt);
     DEF_NATIVE(fileStreamBytes);
     DEF_NATIVE(bufferNewSize);

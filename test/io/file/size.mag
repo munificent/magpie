@@ -1,0 +1,22 @@
+import io
+
+// TODO(bob):
+// - Non-existent file.
+
+do
+    // TODO(bob): Path should be relative to this script.
+    val file = File open("test/io/file/data.txt")
+    print(file size) // expect: 48
+    file close
+end
+
+// Call on a closed file.
+do
+    // TODO(bob): Path should be relative to this script.
+    val file = File open("test/io/file/data.txt")
+    file close
+
+    do
+        file size
+    catch is ArgError then print("caught") // expect: caught
+end

@@ -29,7 +29,7 @@ namespace magpie
     FSTask(gc<Fiber> fiber);
     ~FSTask();
 
-    uv_fs_t& request() { return fs_; }
+    uv_fs_t* request() { return &fs_; }
 
     virtual void kill();
 
@@ -107,10 +107,16 @@ namespace magpie
       isOpen_(true)
     {}
 
-    uv_file file() { return file_; }
     bool isOpen() const { return isOpen_; }
 
+    // Gets the size of this file and sends it to [fiber].
+    void getSize(gc<Fiber> fiber);
+
+    // Reads [size] bytes from this file and sends the result as a buffer to
+    // [fiber].
     void readBytes(gc<Fiber> fiber, int size);
+
+    // Closes this file and resumes [fiber] when done.
     void close(gc<Fiber> fiber);
 
     virtual gc<ClassObject> getClass(VM& vm) const;

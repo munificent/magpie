@@ -34,6 +34,14 @@ namespace magpie
     return NULL;
   }
 
+  NATIVE(fileSize)
+  {
+    gc<FileObject> fileObj = asFile(args[0]);
+    fileObj->getSize(&fiber);
+    result = NATIVE_RESULT_SUSPEND;
+    return NULL;
+  }
+  
   NATIVE(fileReadBytesInt)
   {
     gc<FileObject> fileObj = asFile(args[0]);

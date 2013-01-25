@@ -149,10 +149,22 @@ namespace magpie
     int flags = O_RDONLY;
     // TODO(bob): Make this configurable when creating a file.
     int mode = 0;
-    uv_fs_open(task->loop(), &task->request(), path->cString(), flags, mode,
+    uv_fs_open(task->loop(), task->request(), path->cString(), flags, mode,
                openFileCallback);
   }
 
+  static void getSizeCallback(uv_fs_t* handle)
+  {
+    // TODO(bob): Handle errors!
+    Task* task = static_cast<Task*>(handle->data);
+    task->complete(new IntObject(handle->statbuf.st_size));
+  }
+
+  void FileObject::getSize(gc<Fiber> fiber)
+  {
+    FSTask* task = new FSTask(fiber);
+    uv_fs_fstat(task->loop(), task->request(), file_, getSizeCallback);
+  }
 
   // TODO(bob): Stream-based code. Saving it for later.
   /*
@@ -195,7 +207,7 @@ namespace magpie
     FSReadTask* task = new FSReadTask(fiber, size);
 
     // TODO(bob): Check result.
-    uv_fs_read(task->loop(), &task->request(), file_,
+    uv_fs_read(task->loop(), task->request(), file_,
                task->buffer()->data(), task->buffer()->count(), -1,
                readBytesCallback);
 
@@ -229,7 +241,7 @@ namespace magpie
     isOpen_ = false;
 
     FSTask* task = new FSTask(fiber);
-    uv_fs_close(task->loop(), &task->request(), file_,
+    uv_fs_close(task->loop(), task->request(), file_,
                 closeFileCallback);
   }
 

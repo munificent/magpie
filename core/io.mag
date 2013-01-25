@@ -8,6 +8,14 @@ end
 
 def (is File) isOpen native "fileIsOpen"
 def (== File) open(path is String) native "fileOpen"
+
+def (file is File) size
+    if not file isOpen then throw ArgError new
+    file _size
+end
+
+def (is File) _size native "fileSize"
+
 // TODO(bob): Validate size is non-negative.
 def (is File) readBytes(size is Int) native "fileReadBytesInt"
 def (is File) streamBytes native "fileStreamBytes"
