@@ -49,8 +49,8 @@ namespace magpie
     gc<Expr> parseBlock(bool allowCatch, TokenType end1, TokenType end2,
                         TokenType end3, TokenType* outEndToken);
     gc<Expr> topLevelExpression();
-    gc<Expr> statementLike();
-    gc<Expr> flowControl();
+    gc<Expr> statement(bool allowBlockArgument);
+    gc<Expr> flowControl(bool allowBlockArgument);
 
     // Parses an expression with the given precedence or higher.
     gc<Expr> parsePrecedence(int precedence = 0);

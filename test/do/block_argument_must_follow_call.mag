@@ -1,0 +1,70 @@
+def foo(block)
+    print("should not get called")
+end
+
+// After literals.
+true do print("bad") // expect error
+'c' do print("bad") // expect error
+1.2 do print("bad") // expect error
+123 do print("bad") // expect error
+[] do print("bad") // expect error
+nothing do print("bad") // expect error
+"s" do print("bad") // expect error
+
+// After and expression.
+true and foo do "block" // expect error
+
+// After assignment.
+var a = 1
+a = foo do print("block") // expect error
+
+// After async.
+async
+    nothing
+end do print("bad") // expect error
+
+// After break.
+for i in 1..2 do
+    break do print("bad") // expect error
+end
+
+// After catch.
+do
+    nothing
+catch is String then
+    print("caught")
+end do print("block") // expect error
+
+// After do.
+do
+    nothing
+end do print("block") // expect error
+
+// After for.
+for i in 1..2 do
+    nothing
+end do print("block") // expect error
+
+// After if.
+if true then
+    nothing
+end do print("block") // expect error
+
+if true then
+    nothing
+else
+    nothing
+end do print("block") // expect error
+
+// After match.
+match true
+    case true then "true"
+end do print("block") // expect error
+
+// After or expression.
+false or foo do print("block") // expect error
+
+// After while.
+while false do
+    nothing
+end do print("block") // expect error

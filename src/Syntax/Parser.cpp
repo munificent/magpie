@@ -18,7 +18,7 @@ namespace magpie
     PRECEDENCE_TERM       = 9, // + -
     PRECEDENCE_PRODUCT    = 10, // * / %
     PRECEDENCE_PREFIX     = 11, // any operator in prefix position
-    PRECEDENCE_CALL       = 12
+    PRECEDENCE_CALL       = 12  // infix () []
   };
 
   Parser::Parselet Parser::expressions_[] = {
@@ -144,7 +144,7 @@ namespace magpie
         if (lookAhead(end3)) break;
         if (lookAhead(TOKEN_CATCH)) break;
 
-        gc<Expr> expr = statementLike();
+        gc<Expr> expr = statement(true);
         if (expr.isNull()) break;
         exprs.add(expr);
       }
@@ -200,7 +200,7 @@ namespace magpie
     {
       // Not a block, so no block end token.
       *outEndToken = TOKEN_EOF;
-      return statementLike();
+      return statement(end1 != TOKEN_DO);
     }
   }
   
@@ -345,7 +345,7 @@ namespace magpie
             
             if (match(TOKEN_EQ))
             {
-              initializer = flowControl();
+              initializer = flowControl(true);
             }
             
             consume(TOKEN_LINE, "Expect newline after class field.");
@@ -386,10 +386,10 @@ namespace magpie
       return new ImportExpr(spanFrom(start), name);
     }
     
-    return statementLike();
+    return statement(true);
   }
     
-  gc<Expr> Parser::statementLike()
+  gc<Expr> Parser::statement(bool allowBlockArgument)
   {
     gc<Token> start = current();
 
@@ -419,7 +419,7 @@ namespace magpie
       gc<Expr> value;
       if (!lookAhead(TOKEN_LINE))
       {
-        value = flowControl();
+        value = flowControl(true);
       }
 
       return new ReturnExpr(spanFrom(start), value);
@@ -431,15 +431,15 @@ namespace magpie
 
       gc<Pattern> pattern = parsePattern(false);
       consume(TOKEN_EQ, "Expect '=' after variable declaration.");
-      gc<Expr> value = flowControl();
+      gc<Expr> value = flowControl(true);
 
       return new VariableExpr(spanFrom(start), isMutable, pattern, value);
     }
 
-    return flowControl();
+    return flowControl(allowBlockArgument);
   }
 
-  gc<Expr> Parser::flowControl()
+  gc<Expr> Parser::flowControl(bool allowBlockArgument)
   {
     gc<Token> start = current();
     
@@ -533,7 +533,59 @@ namespace magpie
       return new WhileExpr(spanFrom(start), condition, body);
     }
     
-    return parsePrecedence();
+    gc<Expr> expr = parsePrecedence();
+
+    // See if we have a "do" block argument after the expression.
+    if (allowBlockArgument && match(TOKEN_DO))
+    {
+      gc<Expr> body = parseBlock();
+      gc<Expr> bodyFn = new FnExpr(body->pos(), NULL, body);
+
+      gc<SourcePos> pos = expr->pos()->spanTo(bodyFn->pos());
+
+      // Attach it as an argument to the LHS call.
+      gc<NameExpr> name = expr->asNameExpr();
+      if (!name.isNull())
+      {
+        // Turn a bare name into a right-argument call.
+        return new CallExpr(pos, NULL, name->name(), bodyFn);
+      }
+
+      gc<CallExpr> call = expr->asCallExpr();
+      if (!call.isNull())
+      {
+        gc<Expr> rightArg = call->rightArg();
+        if (rightArg.isNull())
+        {
+          rightArg = bodyFn;
+        }
+        else if (rightArg->asRecordExpr() != NULL)
+        {
+          gc<RecordExpr> record = rightArg->asRecordExpr();
+          Array<Field> fields;
+          fields.addAll(record->fields());
+          gc<String> name = String::format("%d", record->fields().count());
+          fields.add(Field(name, bodyFn));
+          
+          rightArg = new RecordExpr(pos, fields);
+        }
+        else
+        {
+          Array<Field> fields;
+          fields.add(Field(String::create("0"), rightArg));
+          fields.add(Field(String::create("1"), bodyFn));
+
+          rightArg = new RecordExpr(pos, fields);
+        }
+
+        return new CallExpr(pos, call->leftArg(), call->name(), rightArg);
+      }
+
+      reporter_.error(pos,
+                      "A block argument cannot appear after this expression.");
+    }
+
+    return expr;
   }
 
   gc<Expr> Parser::parsePrecedence(int precedence)
@@ -647,7 +699,7 @@ namespace magpie
   
   gc<Expr> Parser::group(gc<Token> token)
   {
-    gc<Expr> expr = flowControl();
+    gc<Expr> expr = flowControl(true);
     consume(TOKEN_RIGHT_PAREN, "Expect ')'.");
     return expr;
   }
@@ -778,7 +830,7 @@ namespace magpie
       {
         // TODO(bob): Is this right? Do we want to allow variable declarations
         // here?
-        right = statementLike();
+        right = statement(true);
         consume(TOKEN_RIGHT_PAREN, "Expect ')' after call argument.");
       }
     }
@@ -869,7 +921,7 @@ namespace magpie
     // Parse the subscript.
     // TODO(bob): Is this right? Do we want to allow variable declarations
     // here?
-    gc<Expr> subscript = statementLike();
+    gc<Expr> subscript = statement(true);
     consume(TOKEN_RIGHT_BRACKET, "Expect ']' after subscript argument.");
 
     return new CallExpr(spanFrom(left), left, String::create("[]"), subscript);

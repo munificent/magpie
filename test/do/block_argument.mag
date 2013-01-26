@@ -1,0 +1,69 @@
+// TODO(bob):
+// - Closure
+// - Non-local returns
+
+// No arguments.
+def foo(block)
+    print("before")
+    block call
+    print("after")
+end
+
+foo do print("block")
+// expect: before
+// expect: block
+// expect: after
+
+// One argument.
+def baz(a, block)
+    print(a)
+    block call
+end
+
+baz("one") do print("block")
+// expect: one
+// expect: block
+
+// Multiple arguments.
+def bar(a, b, block)
+    print(a)
+    block call
+    print(b)
+end
+
+bar("one", "two") do print("block")
+// expect: one
+// expect: block
+// expect: two
+
+// With left arguments.
+def (arg) foo(block)
+    print(arg)
+    block call
+    print("after")
+end
+
+"left" foo do print("block")
+// expect: left
+// expect: block
+// expect: after
+
+// Block body.
+foo do
+    print("block")
+end
+// expect: before
+// expect: block
+// expect: after
+
+// Operator call.
+def (left) +++ (right, block)
+    print(left)
+    block call
+    print(right)
+end
+
+"left" +++ "right" do print("block")
+// expect: left
+// expect: block
+// expect: right
