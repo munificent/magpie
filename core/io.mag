@@ -9,6 +9,12 @@ end
 def (is File) isOpen native "fileIsOpen"
 def (== File) open(path is String) native "fileOpen"
 
+def (== File) open(path is String, block is Function)
+    val file = File open(path)
+    block call(file)
+    file close
+end
+
 def (file is File) size
     if not file isOpen then throw ArgError new
     file _size

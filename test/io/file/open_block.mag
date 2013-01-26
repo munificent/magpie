@@ -1,0 +1,10 @@
+// TODO(bob): Test exception thrown from block.
+import io
+
+var outer = nothing
+// TODO(bob): Path should be relative to this script.
+File open("test/io/file/class.mag") as file do
+    print(file isOpen) // expect: true
+    outer = file
+end
+print(outer isOpen) // expect: false
