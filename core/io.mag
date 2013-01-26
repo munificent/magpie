@@ -26,6 +26,12 @@ def (is File) _size native "fileSize"
 def (is File) readBytes(size is Int) native "fileReadBytesInt"
 def (is File) streamBytes native "fileStreamBytes"
 
+def (file is File) read
+    // TODO(bob): The node docs say the OS lies about file size sometimes.
+    // Should check that here and make sure we've read the entire file.
+    file readBytes(file size) decode(ASCII)
+end
+
 // TODO(bob): Move to separate "data" module.
 defclass Buffer is Indexable native
 

@@ -1,0 +1,14 @@
+import io
+
+// TODO(bob):
+// - Reading from closed file.
+// - Reading from zero byte file.
+// - Reading from a big file.
+// - Calling read after the file has been partially read.
+
+// TODO(bob): Path should be relative to this script.
+File open("test/io/file/data.txt") as file do
+    print(file read)
+    // expect: This is the first line.
+    // expect: This is the second line.
+end
