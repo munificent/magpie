@@ -49,28 +49,6 @@ namespace magpie
     NATIVE_RESULT_SUSPEND
   };
 
-  // TODO(bob): Roll this into Fiber since there won't be other kinds of
-  // suspensions. (The IO events are handled by the Scheduler.
-  class Suspension : public Managed {};
-
-  // A suspend because the fiber is trying to send a value on a channel and no
-  // receivers are pending yet.
-  class ChannelSendSuspension : public Suspension
-  {
-  public:
-    ChannelSendSuspension(gc<Object> value)
-    : value_(value)
-    {}
-    
-    // Gets the value waiting to be sent.
-    gc<Object> value() { return value_; }
-
-    virtual void reach();
-    
-  private:
-    gc<Object> value_;
-  };
-
   class Fiber : public Managed
   {
   public:
@@ -94,13 +72,15 @@ namespace magpie
     FiberResult run(gc<Object>& result);
     void storeReturn(gc<Object> value);
 
-    // Mark this fiber as being no longer suspended and able to run.
-    gc<Suspension> ready();
+    // Mark this fiber as being no longer blocked on a channel and able to run.
+    void ready();
 
-    // Mark this fiber as being suspended for the given reason.
-    void suspend(gc<Suspension> suspension);
+    // Suspend this fiber until another fiber will receive the given value on
+    // the channel this one is sending on.
+    void waitToSend(gc<Object> value);
 
-    gc<Suspension> suspension() { return suspension_; }
+    // Finish sending the value passed to waitToSend() and resume this fiber.
+    gc<Object> sendValue();
 
     void sleep(int ms);
 
@@ -174,7 +154,11 @@ namespace magpie
     gc<CatchFrame>      nearestCatch_;
     gc<Upvar>           openUpvars_;
 
-    gc<Suspension>      suspension_;
+    // If this fiber is suspended waiting to send a value on a channel, this is
+    // that value.
+    gc<Object> sendingValue_;
+
+    //    gc<Suspension>      suspension_;
 
     NO_COPY(Fiber);
   };

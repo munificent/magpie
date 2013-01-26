@@ -87,7 +87,7 @@ namespace magpie
 
     receivers_.clear();
 
-    // Add the sender back to the scheduler after the receivers so it can
+    // Add the sender back to the scheduler after the receiver so it can
     // continue.
     sender->ready();
     
@@ -106,11 +106,7 @@ namespace magpie
     if (senders_.count() > 0)
     {
       gc<Fiber> sender = senders_.removeAt(0);
-
-      // TODO(bob): Nasty. Do something cleaner to downcast here.
-      gc<ChannelSendSuspension> suspension = static_cast<ChannelSendSuspension*>(
-          &(*sender->ready()));
-      return suspension->value();
+      return sender->sendValue();
     }
 
     // Otherwise, suspend.
@@ -135,7 +131,7 @@ namespace magpie
     }
 
     // Otherwise, stuff the value and suspend.
-    sender->suspend(new ChannelSendSuspension(value));
+    sender->waitToSend(value);
     senders_.add(sender);
     return;
   }

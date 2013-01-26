@@ -9,11 +9,6 @@ namespace magpie
 {
   int Fiber::nextId_ = 0;
 
-  void ChannelSendSuspension::reach()
-  {
-    value_.reach();
-  }
-  
   Fiber::Fiber(VM& vm, Scheduler& scheduler, gc<FunctionObject> function,
                gc<Fiber> successor)
   : vm_(vm),
@@ -462,23 +457,26 @@ namespace magpie
     store(frame, GET_C(instruction), value);
   }
 
-  gc<Suspension> Fiber::ready()
+  void Fiber::ready()
   {
-    // Remove the suspension.
-    gc<Suspension> suspension = suspension_;
-    suspension_ = NULL;
-
     scheduler_.add(this);
-
-    return suspension;
   }
 
-  // Mark this fiber as being suspended for the given reason.
-  void Fiber::suspend(gc<Suspension> suspension)
+  void Fiber::waitToSend(gc<Object> value)
   {
-    ASSERT(suspension_.isNull(), "Already suspended.");
+    ASSERT(sendingValue_.isNull(), "Already waiting to send a value.");
+    sendingValue_ = value;
+  }
+
+  gc<Object> Fiber::sendValue()
+  {
+    ASSERT(!sendingValue_.isNull(), "Not sending a value.");
+    gc<Object> value = sendingValue_;
+    sendingValue_ = NULL;
+
+    ready();
     
-    suspension_ = suspension;
+    return value;
   }
 
   void Fiber::sleep(int ms)
