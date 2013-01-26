@@ -34,6 +34,7 @@ namespace magpie
     
     // Keywords.
     TOKEN_AND,
+    TOKEN_AS,
     TOKEN_ASYNC,
     TOKEN_BREAK,
     TOKEN_CASE,

@@ -75,7 +75,7 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(and|async|break|case|catch|defclass|def|do|else|end|fn|for|if|import|in|is|let|match|or|return|then|var|val|while|with)\b</string>
+			<string>\b(and|as|async|break|case|catch|defclass|def|do|else|end|fn|for|if|import|in|is|let|match|or|return|then|throw|var|val|while|with)\b</string>
 			<key>name</key>
 			<string>keyword.language.magpie</string>
 		</dict>

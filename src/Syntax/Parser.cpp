@@ -42,6 +42,7 @@ namespace magpie
 
     // Keywords.
     { NULL,             &Parser::and_, PRECEDENCE_LOGICAL },           // TOKEN_AND
+    { NULL,             NULL, -1 },                                    // TOKEN_AS
     { NULL,             NULL, -1 },                                    // TOKEN_ASYNC
     { NULL,             NULL, -1 },                                    // TOKEN_BREAK
     { NULL,             NULL, -1 },                                    // TOKEN_CASE
@@ -536,10 +537,20 @@ namespace magpie
     gc<Expr> expr = parsePrecedence();
 
     // See if we have a "do" block argument after the expression.
-    if (allowBlockArgument && match(TOKEN_DO))
+    if (allowBlockArgument && (match(TOKEN_AS) || match(TOKEN_DO)))
     {
+      gc<Pattern> pattern;
+
+      // Parse the pattern if there is one.
+      if (last()->is(TOKEN_AS))
+      {
+        pattern = parsePattern(true);
+        pattern = expandFunctionPattern(pattern->pos(), pattern);
+        consume(TOKEN_DO, "Expect 'do' after block pattern.");
+      }
+
       gc<Expr> body = parseBlock();
-      gc<Expr> bodyFn = new FnExpr(body->pos(), NULL, body);
+      gc<Expr> bodyFn = new FnExpr(body->pos(), pattern, body);
 
       gc<SourcePos> pos = expr->pos()->spanTo(bodyFn->pos());
 
