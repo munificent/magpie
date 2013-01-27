@@ -27,9 +27,28 @@ def (is File) readBytes(size is Int) native "fileReadBytesInt"
 def (is File) streamBytes native "fileStreamBytes"
 
 def (file is File) read
+    // TODO(bob): Should default to UTF-8 when that's implemented.
+    file read(encoding: ASCII)
+end
+
+def (file is File) read(encoding: encoding is Encoding)
     // TODO(bob): The node docs say the OS lies about file size sometimes.
     // Should check that here and make sure we've read the entire file.
-    file readBytes(file size) decode(ASCII)
+    file readBytes(file size) decode(encoding)
+end
+
+def (== File) read(path is String, encoding: encoding is Encoding)
+    var result = nothing
+    File open(path) as file do
+        // TODO(bob): Can just do "return" here if we do non-local returns.
+        result = file read
+    end
+    result
+end
+
+def (== File) read(path is String)
+    // TODO(bob): Should default to UTF-8 when that's implemented.
+    File read(path, encoding: ASCII)
 end
 
 // TODO(bob): Move to separate "data" module.

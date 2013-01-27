@@ -1,0 +1,18 @@
+import io
+
+// TODO(bob):
+// - Reading from closed file.
+// - Reading from zero byte file.
+// - Reading from a big file.
+// - Calling read after the file has been partially read.
+// - Other encodings.
+
+// TODO(bob): Path should be relative to this script.
+print(File read("test/io/file/data.txt"))
+// expect: This is the first line.
+// expect: This is the second line.
+
+// TODO(bob): Path should be relative to this script.
+print(File read("test/io/file/data.txt", encoding: ASCII))
+// expect: This is the first line.
+// expect: This is the second line.
