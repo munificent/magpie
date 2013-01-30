@@ -107,8 +107,7 @@ namespace magpie
     Array<gc<DefExpr> > synthesizedMethods;
     synthesizedMethods.add(synthesizeConstructor(classExpr));
 
-    // Create getters for fields.
-    // TODO(bob): Create setters for fields.
+    // Create getters and setters for fields.
     for (int i = 0; i < classExpr.fields().count(); i++)
     {
       synthesizedMethods.add(synthesizeGetter(classExpr, i));
@@ -298,7 +297,6 @@ namespace magpie
 
   void SignatureBuilder::writeArg(gc<Expr> expr)
   {
-    // TODO(bob): Clean up. Redundant with build().
     // If it's a record, destructure it into the signature.
     RecordExpr* record = expr->asRecordExpr();
     if (record != NULL)
