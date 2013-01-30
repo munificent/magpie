@@ -48,6 +48,7 @@ namespace magpie
                         TokenType* outEndToken);
     gc<Expr> parseBlock(bool allowCatch, TokenType end1, TokenType end2,
                         TokenType end3, TokenType* outEndToken);
+    gc<Expr> maybeImport();
     gc<Expr> topLevelExpression();
     gc<Expr> statement(bool allowBlockArgument);
     gc<Expr> flowControl(bool allowBlockArgument);

@@ -88,6 +88,16 @@ namespace magpie
   {
     Array<gc<Expr> > exprs;
 
+    // All imports must come first.
+    do
+    {
+      if (lookAhead(TOKEN_EOF)) break;
+      gc<Expr> expr = maybeImport();
+      if (expr.isNull()) break;
+      exprs.add(expr);
+    }
+    while (match(TOKEN_LINE));
+
     do
     {
       if (lookAhead(TOKEN_EOF)) break;
@@ -108,6 +118,10 @@ namespace magpie
 
   gc<Expr> Parser::parseExpression()
   {
+    // Allow imports at any time in the REPL.
+    gc<Expr> expr = maybeImport();
+    if (!expr.isNull()) return expr;
+    
     return topLevelExpression();
   }
 
@@ -203,6 +217,31 @@ namespace magpie
       *outEndToken = TOKEN_EOF;
       return statement(end1 != TOKEN_DO);
     }
+  }
+
+  gc<Expr> Parser::maybeImport()
+  {
+    gc<Token> start = current();
+    if (!match(TOKEN_IMPORT)) return NULL;
+
+    Array<gc<String> > names;
+    do
+    {
+      const char* firstError = "Expect name after 'import'.";
+      const char* restError = "Expect name after '.' in import.";
+      gc<Token> namePart = consume(TOKEN_NAME,
+                                   names.count() == 0 ? firstError : restError);
+      names.add(namePart->text());
+    } while (match(TOKEN_DOT));
+
+    // TODO(bob): Create String::join() to optimize this?
+    gc<String> name = names[0];
+    for (int i = 1; i < names.count(); i++)
+    {
+      name = String::format("%s.%s", name->cString(), names[i]->cString());
+    }
+
+    return new ImportExpr(spanFrom(start), name);
   }
   
   gc<Expr> Parser::topLevelExpression()
@@ -365,28 +404,6 @@ namespace magpie
                               superclasses, fields);
     }
 
-    if (match(TOKEN_IMPORT))
-    {
-      Array<gc<String> > names;
-      do
-      {
-        const char* firstError = "Expect name after 'import'.";
-        const char* restError = "Expect name after '.' in import.";
-        gc<Token> namePart = consume(TOKEN_NAME,
-            names.count() == 0 ? firstError : restError);
-        names.add(namePart->text());
-      } while (match(TOKEN_DOT));
-
-      // TODO(bob): Create String::join() to optimize this?
-      gc<String> name = names[0];
-      for (int i = 1; i < names.count(); i++)
-      {
-        name = String::format("%s.%s", name->cString(), names[i]->cString());
-      }
-
-      return new ImportExpr(spanFrom(start), name);
-    }
-    
     return statement(true);
   }
     

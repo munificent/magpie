@@ -1,0 +1,8 @@
+print("before")
+import io // expect error
+print("after")
+
+// At some point, we may want to loosen this to allow imports to appear later.
+// But, currently, the compiler processes all imports and the names they export
+// before any code in the module, so it makes sense to require the imports to
+// syntactically appear first.
