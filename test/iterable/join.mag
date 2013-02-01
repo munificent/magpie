@@ -1,0 +1,15 @@
+// Joins elements.
+print(["a", "bc", "def"] join) // expect: abcdef
+
+// Converts elements to strings.
+print(["a", 2, nothing, true] join) // expect: a2nothingtrue
+
+// Joining an empty collection yields an empty string.
+print([] join == "") // expect: true
+
+// Since a string is an iterable sequence of characters, joining it results in
+// the original string.
+print("abcd" join) // expect: abcd
+
+// Optional separator argument.
+print(["a", "b", "c"] join("|")) // expect: a|b|c

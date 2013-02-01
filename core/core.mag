@@ -265,6 +265,27 @@ def (iterable is Iterable) toList
     result
 end
 
+def (iterable is Iterable) join
+    // TODO(bob): Use a string builder for perf.
+    var result = ""
+    for i in iterable do
+        result = result + i toString
+    end
+    result
+end
+
+def (iterable is Iterable) join(separator is String)
+    // TODO(bob): Use a string builder for perf.
+    var result = ""
+    var first = true
+    for i in iterable do
+        if not first then result = result + separator
+        result = result + i toString
+        first = false
+    end
+    result
+end
+
 // Make indexable collections iterable.
 defclass IndexableIterator
     val collection // TODO(bob): Indexable?

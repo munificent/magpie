@@ -64,7 +64,7 @@ namespace magpie
     virtual bool equals(gc<Object> other) { return this == &*other; }
 
     // Double-dispatch methods for value equality.
-    bool equalsBool(bool value) { return value == toBool(); }
+    virtual bool equalsBool(bool value) { return false; }
     virtual bool equalsChar(unsigned int value) { return false; }
     virtual bool equalsFloat(double value) { return false; }
     virtual bool equalsInt(int value) { return false; }
@@ -88,6 +88,7 @@ namespace magpie
     virtual gc<String> toString() const;
 
     virtual bool equals(gc<Object> other) { return other->equalsBool(value_); }
+    virtual bool equalsBool(bool value) { return value_ == value; }
 
   private:
     bool value_;

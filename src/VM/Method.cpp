@@ -79,9 +79,19 @@ namespace magpie
     using namespace std;
     
     // TODO(bob): Constants.
-    
+
+    int file = -1;
+
     for (int i = 0; i < code_.count(); i++)
     {
+      if (codePos_[i].file != file)
+      {
+        file = codePos_[i].file;
+        std::cout << files_[file]->path() << std::endl;
+      }
+
+      std::cout << codePos_[i].line << " ";
+      
       debugTrace(vm, code_[i]);
     }
   }
@@ -131,7 +141,7 @@ namespace magpie
         break;
 
       case OP_CLASS:
-        cout << "CLASS           " << constants_[a] << " " << b
+        cout << "CLASS           " << vm.getSymbol(a) << " " << b
              << " fields -> " << c;
         break;
 
