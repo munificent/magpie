@@ -265,6 +265,14 @@ def (iterable is Iterable) toList
     result
 end
 
+def (iterable is Iterable) contains(item)
+    for i in iterable do
+        if i == item then return true
+    end
+
+    false
+end
+
 def (iterable is Iterable) join
     // TODO(bob): Use a string builder for perf.
     var result = ""

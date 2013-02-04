@@ -1,0 +1,25 @@
+// TODO(bob):
+// - Test that it calls "==" method.
+
+print([1, 2, 3] contains(2)) // expect: true
+print([1, 2, 3] contains(5)) // expect: false
+print([] contains(5)) // expect: false
+
+// Works on any iterable type.
+print("abcd" contains('b')) // expect: true
+print("abcd" contains('x')) // expect: false
+
+// Stops iterating as soon as a result is found.
+var channel = Channel new
+async
+    for i in 1..100 do
+        print(i)
+        channel send(i)
+    end
+end
+
+print(channel contains(3))
+// expect: 1
+// expect: 2
+// expect: 3
+// expect: true
