@@ -1,5 +1,3 @@
-#include <fcntl.h>
-
 #include "uv.h"
 
 #include "Fiber.h"
