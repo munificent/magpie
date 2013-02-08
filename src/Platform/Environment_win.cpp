@@ -50,7 +50,7 @@ namespace magpie
   // Reads a file from the given path into a String.
   gc<String> readFile(gc<String> path)
   {
-    // TODO(bob): Use platform-native API for this.
+    // TODO(bob): Use platform-native API for this?
     using namespace std;
 
     ifstream stream(path->cString());

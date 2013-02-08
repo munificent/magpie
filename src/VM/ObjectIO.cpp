@@ -1,4 +1,5 @@
 #include <sstream>
+#include <fcntl.h>
 
 #include "Array.h"
 #include "ObjectIO.h"
@@ -84,10 +85,10 @@ namespace magpie
     {
       buffer->bytes_[i] = 0;
     }
-    
+
     return buffer;
   }
-  
+
   gc<ClassObject> BufferObject::getClass(VM& vm) const
   {
     return vm.bufferClass();
@@ -116,7 +117,7 @@ namespace magpie
       }
 
       result = String::format("%s ...", result->cString());
-      
+
       for (int i = count_ - 4; i < count_; i++)
       {
         result = String::format("%s %02x", result->cString(), bytes_[i]);
@@ -157,7 +158,8 @@ namespace magpie
   {
     // TODO(bob): Handle errors!
     Task* task = static_cast<Task*>(handle->data);
-    task->complete(new IntObject(handle->statbuf.st_size));
+    uv_statbuf_t* statbuf = static_cast<uv_statbuf_t*>(handle->ptr);
+    task->complete(new IntObject(statbuf->st_size));
   }
 
   void FileObject::getSize(gc<Fiber> fiber)
@@ -233,7 +235,7 @@ namespace magpie
     // Close returns nothing.
     task->complete(NULL);
   }
-  
+
   void FileObject::close(gc<Fiber> fiber)
   {
     ASSERT(isOpen_, "IO library should not call close on a closed file.");

@@ -2,6 +2,7 @@
 #include <windows.h>
 
 #include "MagpieString.h"
+#include "Path.h"
 
 namespace magpie
 {
