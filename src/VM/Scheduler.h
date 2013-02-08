@@ -53,7 +53,7 @@ namespace magpie
     Task* prev_;
     Task* next_;
   };
-    
+
   // A list of pending asynchronous tasks.
   class TaskList
   {
@@ -87,6 +87,8 @@ namespace magpie
   public:
     Scheduler(VM& vm);
 
+    uv_tty_t* tty() { return &tty_; }
+    
     void run(Array<Module*> modules);
 
     // TODO(bob): Get this working with libuv!
@@ -111,6 +113,7 @@ namespace magpie
 
     VM& vm_;
     uv_loop_t *loop_;
+    uv_tty_t tty_;
 
     // Fibers that are not blocked and can run now.
     Array<gc<Fiber> > ready_;

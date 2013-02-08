@@ -6,6 +6,65 @@
 
 namespace magpie
 {
+  // TODO(bob): Move this to be closer to other Task classes.
+  class PrintTask : public Task
+  {
+    friend class TaskList;
+
+  public:
+    PrintTask(gc<Fiber> fiber, gc<Object> value, int numBuffers);
+    virtual void kill();
+    virtual void reach();
+
+    uv_stream_t* stream()
+    {
+      return reinterpret_cast<uv_stream_t*>(fiber()->scheduler().tty());
+    }
+
+    gc<Object> value() { return value_; }
+    
+  private:
+    uv_write_t   request_;
+    uv_stream_t* stream_;
+    uv_buf_t     buffers_[2];
+    gc<Object>   value_;
+  };
+
+  void printCallback(uv_write_t* req, int status)
+  {
+    // TODO(bob): Check status.
+    PrintTask* task = (PrintTask*) req->data;
+    task->complete(task->value());
+  }
+
+  PrintTask::PrintTask(gc<Fiber> fiber, gc<Object> value, int numBuffers)
+  : Task(fiber),
+    value_(value)
+  {
+    request_.data = this;
+
+    buffers_[0].base = const_cast<char*>(asString(value)->cString());
+    buffers_[0].len = asString(value)->length();
+
+    buffers_[1].base = const_cast<char*>("\n");
+    buffers_[1].len = 1;
+
+    uv_write(&request_,
+             reinterpret_cast<uv_stream_t*>(fiber->scheduler().tty()),
+             buffers_, 2, printCallback);
+  }
+
+  void PrintTask::kill()
+  {
+    // TODO(bob): Do nothing? What about the request?
+  }
+
+  void PrintTask::reach()
+  {
+    Task::reach();
+    value_.reach();
+  }
+  
   NATIVE(bindCore)
   {
     vm.bindCore();
@@ -38,11 +97,13 @@ namespace magpie
   {
     return vm.getBool(!args[0]->equals(args[1]));
   }
-
+  
   NATIVE(printString)
   {
-    std::cout << args[0]->toString() << std::endl;
-    return args[0];
+    new PrintTask(&fiber, args[0], 2);
+
+    result = NATIVE_RESULT_SUSPEND;
+    return NULL;
   }
 
   NATIVE(stringPlusString)
