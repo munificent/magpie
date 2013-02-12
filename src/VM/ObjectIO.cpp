@@ -158,6 +158,8 @@ namespace magpie
   {
     // TODO(bob): Handle errors!
     Task* task = static_cast<Task*>(handle->data);
+    // TODO(bob): Use handle.statbuf after upgrading to latest libuv where
+    // that's public.
     uv_statbuf_t* statbuf = static_cast<uv_statbuf_t*>(handle->ptr);
     task->complete(new IntObject(statbuf->st_size));
   }
