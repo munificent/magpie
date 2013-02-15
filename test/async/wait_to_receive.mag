@@ -1,14 +1,16 @@
-var channel = Channel new
+val result = []
+val channel = Channel new
 async
-    print("before send")
+    result add("before send")
     channel send("sent value")
-    print("after send")
+    result add("after send")
 end
 
-print("before receive")
-print(channel receive)
-print("after receive")
+result add("before receive")
+result add(channel receive)
+result add("after receive")
 
+print(result join("\n"))
 // expect: before receive
 // expect: before send
 // expect: sent value

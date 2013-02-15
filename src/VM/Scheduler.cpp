@@ -110,12 +110,18 @@ namespace magpie
     // their initialization.
     loop_ = uv_loop_new();
 
+    // Initialize the TTY.
+    uv_tty_init(loop_, &tty_, 1, 0);
+    uv_tty_set_mode(&tty_, 0);
+
     // Start running the first module.
     run(moduleFiber);
 
     // Now that all of the module initialization is done (or suspended on
     // events), start the event loop.
     uv_run(loop_);
+
+    uv_tty_reset_mode();
   }
 
   gc<Object> Scheduler::runModule(Module* module)

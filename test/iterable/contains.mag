@@ -10,16 +10,25 @@ print("abcd" contains('b')) // expect: true
 print("abcd" contains('x')) // expect: false
 
 // Stops iterating as soon as a result is found.
-var channel = Channel new
-async
-    for i in 1..100 do
-        print(i)
-        channel send(i)
-    end
+defclass Counter is Iterable
 end
 
-print(channel contains(3))
-// expect: 1
-// expect: 2
-// expect: 3
+def (is Counter) iterate
+    CounterIterator new(i: 0)
+end
+
+defclass CounterIterator
+    var i
+end
+
+def (iterator is CounterIterator) advance
+    iterator i = iterator i + 1
+    print("count " + iterator i)
+    iterator i
+end
+
+print(Counter new contains(3))
+// expect: count 1
+// expect: count 2
+// expect: count 3
 // expect: true

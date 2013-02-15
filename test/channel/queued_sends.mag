@@ -1,21 +1,22 @@
 val channel = Channel new
-
+val result = []
 async channel send("a")
 async channel send("b")
 async channel send("c")
 async channel send("d")
 
 async
-    print("receiving")
-    print(channel receive)
-    print(channel receive)
-    print(channel receive)
-    print(channel receive)
-    print(channel receive)
+    result add("receiving")
+    result add(channel receive)
+    result add(channel receive)
+    result add(channel receive)
+    result add(channel receive)
+    result add(channel receive)
 end
 
 channel send("main")
-print("done")
+result add("done")
+print(result join("\n"))
 // expect: receiving
 // expect: main
 // expect: a

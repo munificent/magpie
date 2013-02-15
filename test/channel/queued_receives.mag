@@ -1,12 +1,12 @@
 val channel = Channel new
-
-async print("a " + channel receive)
-async print("b " + channel receive)
-async print("c " + channel receive)
-async print("d " + channel receive)
+val result = []
+async result add("a " + channel receive)
+async result add("b " + channel receive)
+async result add("c " + channel receive)
+async result add("d " + channel receive)
 
 async
-    print("sending")
+    result add("sending")
     channel send("one")
     channel send("two")
     channel send("three")
@@ -15,8 +15,9 @@ async
     channel send("six")
 end
 
-print("main " + channel receive)
-print("done " + channel receive)
+result add("main " + channel receive)
+result add("done " + channel receive)
+print(result join("\n"))
 // expect: sending
 // expect: main one
 // expect: a two
