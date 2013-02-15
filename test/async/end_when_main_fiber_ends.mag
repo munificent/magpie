@@ -1,8 +1,12 @@
 // Stops when the main fiber is done, even if there are other fibers that can
 // run.
 
+val result = []
+
 async
-    print("in spawned")
+    result add("in spawned")
 end
 
-print("in main") // expect: in main
+result add("in main")
+
+print(result join("\n")) // expect: in main

@@ -18,12 +18,25 @@ do
 catch is ArgError then print("caught") // expect: caught
 
 // Stop iterating after the first item.
+defclass Counter is Iterable
+end
+
+def (is Counter) iterate
+    CounterIterator new(i: 0)
+end
+
+defclass CounterIterator
+    var i
+end
+
+def (iterator is CounterIterator) advance
+    iterator i = iterator i + 1
+    print("count " + iterator i)
+    iterator i
+end
+
 do
-    val channel = Channel new
-    async
-        channel send(1)
-        print("bad")
-        channel send(2)
-    end
-    print(channel first) // expect: 1
+    print(Counter new first)
+    // expect: count 1
+    // expect: 1
 end
