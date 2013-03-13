@@ -227,11 +227,7 @@ namespace magpie
                         gc<SourcePos> pos, gc<String> name)
   {
     Module* module = addModule(reporter, name, NULL);
-    if (module == NULL)
-    {
-      reporter.error(pos, "Could not find module \"%s\".", name->cString());
-      return;
-    }
+    if (module == NULL) return;
 
     from->imports().add(module);
   }
@@ -240,7 +236,7 @@ namespace magpie
   {
     ErrorReporter reporter;
     Module* core = addModule(reporter, String::create("core"), NULL);
-    if (reporter.numErrors() > 0) return false;
+    if (!core || reporter.numErrors() > 0) return false;
     if (!core->compile(*this)) return false;
     scheduler_.runModule(core);
 
@@ -437,7 +433,11 @@ namespace magpie
       ASSERT(!name.isNull(), "Must be given a path or a name.");
       path = locateModule(programDir_, name);
 
-      if (path.isNull()) return NULL;
+      if (path.isNull())
+      {
+        reporter.error(NULL, "Could not find module \"%s\".", name->cString());
+        return NULL;
+      }
     }
 
     Module* module = new Module(name, path);
