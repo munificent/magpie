@@ -236,7 +236,7 @@ namespace magpie
   {
     ErrorReporter reporter;
     Module* core = addModule(reporter, String::create("core"), NULL);
-    if (!core || reporter.numErrors() > 0) return false;
+    if (reporter.numErrors() > 0) return false;
     if (!core->compile(*this)) return false;
     scheduler_.runModule(core);
 

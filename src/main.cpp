@@ -17,7 +17,7 @@ gc<String> readLine(bool isContinued)
   while (line.size() == 0)
   {
     std::cout << (isContinued ? "| " : "> ");
-    if(!std::getline(std::cin, line)) return NULL;
+    if (!std::getline(std::cin, line)) return NULL;
   }
 
   return String::create(line.c_str());
@@ -47,7 +47,7 @@ int repl(VM& vm)
     while (true)
     {
       gc<String> line = readLine(!code.isNull());
-      if(line.isNull()) return 0;
+      if (line.isNull()) return 0;
       
       if (code.isNull())
       {
