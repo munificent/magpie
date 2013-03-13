@@ -296,7 +296,7 @@ end
 
 // Make indexable collections iterable.
 defclass IndexableIterator
-    val collection // TODO(bob): Indexable?
+    val collection is Indexable
     var index is Int
 end
 
