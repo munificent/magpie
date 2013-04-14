@@ -1,0 +1,32 @@
+// Returns an iterable.
+print([1, 2, 3] skip(1) is Iterable) // expect: true
+
+// Skips a given number of items.
+for i in [1, 2, 3, 4, 5] skip(2) do print(i)
+// expect: 3
+// expect: 4
+// expect: 5
+
+// Returns an empty iterable if more than the length are skipped.
+for i in [1, 2, 3] skip(4) do print(i)
+print("after") // expect: after
+
+// Throws if count is negative.
+do
+    [1, 2, 3] skip(-1)
+catch is ArgError then print("caught") // expect: caught
+
+// Works on any iterable type.
+print("abcde" skip(2) toList) // expect: [c, d, e]
+
+// Result is lazy.
+val sequence = [1, 2, 3, 4, 5] map(fn print(_))
+for i in sequence skip(2) do print("got " + i)
+// expect: 1
+// expect: 2
+// expect: 3
+// expect: got 3
+// expect: 4
+// expect: got 4
+// expect: 5
+// expect: got 5

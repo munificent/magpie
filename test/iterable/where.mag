@@ -25,4 +25,3 @@ for i in filtered do print(i)
 // expect: false
 // expect: true
 // expect: 6
-print("after") // expect: after

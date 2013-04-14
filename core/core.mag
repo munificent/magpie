@@ -313,26 +313,78 @@ def (iterator is IndexableIterator) advance
     end
 end
 
-// TODO(bob): Test this.
-def generate(function is Function)
-    val channel = Channel new
-    async
-        function call(channel)
-        channel close
+/// An iterable object that simply wraps a function which will create the
+/// iterator.
+defclass _FactoryIterable is Iterable
+    /// The factory function that will create an iterator when invoked.
+    val factory is Function
+end
+
+def (t is _FactoryIterable) iterate
+    t factory call
+end
+
+def (== _FactoryIterable) new(factory is Function)
+    _FactoryIterable new(factory: factory)
+end
+
+// where()
+
+def (i is Iterable) where(predicate is Function)
+    _FactoryIterable new do
+        _WhereIterator new(iterator: i iterate, predicate: predicate)
     end
-    channel
 end
 
-def (iterable is Iterable) where(predicate is Function)
-    generate(fn(channel)
-        for item in iterable do if predicate call(item) then channel send(item)
-    end)
+defclass _WhereIterator
+    /// The sequence being mapped.
+    val iterator
+
+    /// The filter function.
+    val predicate is Function
 end
 
-def (iterable is Iterable) map(transform is Function)
-    generate(fn(channel)
-        for item in iterable do channel send(transform call(item))
-    end)
+def (w is _WhereIterator) advance
+    while true do
+        match w iterator advance
+            case == done then return done
+            case value then if w predicate call(value) then return value
+        end
+    end
+end
+
+// map()
+
+def (i is Iterable) map(transform is Function)
+    _FactoryIterable new do
+        _MapIterator new(iterator: i iterate, transform: transform)
+    end
+end
+
+defclass _MapIterator
+    /// The sequence being mapped.
+    val iterator
+
+    /// The transformation function.
+    val transform is Function
+end
+
+def (m is _MapIterator) advance
+    match m iterator advance
+        case == done then done
+        case value then m transform call(value)
+    end
+end
+
+// skip()
+
+def (i is Iterable) skip(count is Int)
+    if count < 0 then throw ArgError new
+    i where as item do
+        if count <= 0 then return true
+        count = count - 1
+        false
+    end
 end
 
 // TODO(bob): What about floating point ranges?

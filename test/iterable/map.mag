@@ -1,25 +1,23 @@
 // Returns an iterable.
-print([1, 2] map(fn(a) a) is Iterable) // expect: true
+print([1, 2] map(fn _) is Iterable) // expect: true
 
 // Transforms the input.
-for i in [1, 2, 3] map(fn(a) a + 1) do
-    print(i)
-end
+for i in [1, 2, 3] map(fn _ + 1) do print(i)
 // expect: 2
 // expect: 3
 // expect: 4
 
 // Works on any iterable type.
-print("abc" map(fn(c) c + "!") toList) // expect: [a!, b!, c!]
+print("abc" map(fn _ + "!") toList) // expect: [a!, b!, c!]
 
 // Result is lazy.
-val mapped = [1, 2, 3] map(fn(a) print(a) * 2)
+val mapped = [1, 2, 3] map(fn print(_))
 print("before") // expect: before
-for i in mapped do print(i)
+for i in mapped do print("got " + i)
 // expect: 1
+// expect: got 1
 // expect: 2
-// expect: 2
-// expect: 4
+// expect: got 2
 // expect: 3
-// expect: 6
+// expect: got 3
 print("after") // expect: after
