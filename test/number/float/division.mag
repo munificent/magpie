@@ -1,2 +1,6 @@
-// skip: Need to write floating point arithmatic tests.
-// TODO(bob): Division by zero, floating point.
+// TODO(bob): Division by zero.
+
+print(10.0 / 2.0) // expect: 5.0
+print(1.0 / 3.0) // expect: 0.333333
+print(-8.0 / 2.0) // expect: -4.0
+print(-8.0 / -2.0) // expect: 4.0
