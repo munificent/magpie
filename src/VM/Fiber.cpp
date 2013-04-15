@@ -534,7 +534,9 @@ namespace magpie
     // If there is nothing to catch it, end the fiber.
     if (nearestCatch_.isNull())
     {
-      // TODO(bob): Temp. Print a stack trace.
+      // TODO(bob): This should be consolidated and moved somewhere else.
+      // Ideally, the stack trace would be shown after the error.
+      // Print a stack trace.
       for (int i = callFrames_.count() - 1; i >= 0; i--)
       {
         CallFrame& frame = callFrames_[i];
@@ -552,6 +554,10 @@ namespace magpie
           std::cerr << source->getLine(line) << std::endl;
         }
       }
+
+      vm_.printUncaughtError(this, error);
+      callFrames_.clear();
+
       return false;
     }
 

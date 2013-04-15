@@ -425,6 +425,33 @@ def (iterator is RangeIterator) advance
     end
 end
 
+// TODO(bob): Where should this go?
+def exit(exitCode is Int) native "exit"
+
+// TODO(bob): Figure out something more systematic for dealing with std streams.
+def printError(text)
+    printError(text toString)
+end
+
+def printError(text is String) native "printErrorString"
+
+// When an error isn't caught, the error object needs to be shown to the user.
+// This means calling toString on it, which means running Magpie code. Since
+// the fiber where the error was thrown is in a bad state, we'll create a
+// separate fiber whose sole job is to receive an error object, print it, then
+// kill the VM.
+val _errorChannel = Channel new
+async
+    do
+        printError(_errorChannel receive)
+    catch _ then
+        printError("Could not display error.")
+    end
+
+    // TODO(bob): Should have a way to handle uncaught errors from other fibers.
+    exit(3)
+end
+
 // Now that everything is defined, wire it up to the VM.
 def _bindCore() native "bindCore"
 _bindCore()

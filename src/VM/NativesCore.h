@@ -18,6 +18,7 @@ namespace magpie
   NATIVE(objectEqualsObject);
   NATIVE(objectNotEqualsObject);
   NATIVE(printString);
+  NATIVE(printErrorString);
   NATIVE(stringPlusString);
   NATIVE(intPlusInt);
   NATIVE(intPlusFloat);
@@ -63,5 +64,6 @@ namespace magpie
   NATIVE(listSubscriptInt);
   NATIVE(listSubscriptRange);
   NATIVE(listSubscriptSetInt);
+  NATIVE(exit);
 }
 

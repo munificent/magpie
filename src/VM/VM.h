@@ -99,6 +99,11 @@ namespace magpie
     void defineMethod(int multimethod, methodId method);
     gc<Multimethod> getMultimethod(int multimethod);
 
+    // Sends [error], which is an error that [fiber] did not catch, to the
+    // error-displaying fiber so it can be converted to a string and shown to
+    // the user.
+    void printUncaughtError(gc<Fiber> fiber, gc<Object> error);
+
   private:
     // Loads module [name] from [path] and the recursively loads its imports.
     // [from] is the module that's depending on the added one. If [path] is
@@ -133,6 +138,7 @@ namespace magpie
     gc<Object> false_;
     gc<Object> nothing_;
     gc<Object> done_;
+    gc<ChannelObject> errorChannel_;
     gc<ClassObject> boolClass_;
     gc<ClassObject> bufferClass_;
     gc<ClassObject> channelClass_;

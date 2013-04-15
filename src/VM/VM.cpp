@@ -57,6 +57,7 @@ namespace magpie
     DEF_NATIVE(objectEqualsObject);
     DEF_NATIVE(objectNotEqualsObject);
     DEF_NATIVE(printString);
+    DEF_NATIVE(printErrorString);
     DEF_NATIVE(intPlusInt);
     DEF_NATIVE(intPlusFloat);
     DEF_NATIVE(floatPlusInt);
@@ -102,6 +103,7 @@ namespace magpie
     DEF_NATIVE(listSubscriptInt);
     DEF_NATIVE(listSubscriptRange);
     DEF_NATIVE(listSubscriptSetInt);
+    DEF_NATIVE(exit);
 
     DEF_NATIVE(fileClose);
     DEF_NATIVE(fileIsOpen);
@@ -140,8 +142,8 @@ namespace magpie
     registerClass(core, noMethodErrorClass_, "NoMethodError");
     registerClass(core, undefinedVarErrorClass_, "UndefinedVarError");
 
-    int index = core->findVariable(String::create("done"));
-    done_ = core->getVariable(index);
+    done_ = core->getVariable("done");
+    errorChannel_ = asChannel(core->getVariable("_errorChannel"));
   }
 
   void VM::bindIO()
@@ -404,7 +406,13 @@ namespace magpie
   {
     return multimethods_[multimethodId];
   }
-  
+
+  void VM::printUncaughtError(gc<Fiber> fiber, gc<Object> error)
+  {
+    // Send the error to the error-printing fiber and suspend the erroring one.
+    errorChannel_->send(fiber, error);
+  }
+
   Module* VM::addModule(ErrorReporter& reporter, gc<String> name,
                         gc<String> path)
   {

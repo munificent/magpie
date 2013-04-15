@@ -168,11 +168,10 @@ namespace magpie
           break;
 
         case FIBER_UNCAUGHT_ERROR:
-          // TODO(bob): Kind of hackish.
-          // TODO(bob): Give other fibers a chance to handle this.
-          // If we got an uncaught error, exit with an error.
-          std::cerr << "Uncaught error." << std::endl;
-          exit(3);
+          // This fiber died, so we need to run the error-displaying fiber.
+          // TODO(bob): Select the error-displaying fiber explicitly.
+          // TODO(bob): Have a system where users can handle uncaught errors.
+          fiber = getNext();
           break;
       }
     }

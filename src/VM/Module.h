@@ -52,6 +52,7 @@ namespace magpie
     int findVariable(gc<String> name);
     
     gc<Object> getVariable(int index) const { return variables_[index]; }
+    gc<Object> getVariable(const char* name) const;
     gc<String> getVariableName(int index) const { return variableNames_[index]; }
 
     void setVariable(int index, gc<Object> value);

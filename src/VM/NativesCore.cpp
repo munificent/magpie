@@ -106,6 +106,13 @@ namespace magpie
     return NULL;
   }
 
+  NATIVE(printErrorString)
+  {
+    // TODO(bob): Go through libuv for this?
+    std::cerr << args[0] << std::endl;
+    return args[0];
+  }
+
   NATIVE(stringPlusString)
   {
     return new StringObject(String::concat(asString(args[0]),
@@ -418,6 +425,12 @@ namespace magpie
     gc<ListObject> list = asList(args[0]);
     list->elements()[asInt(args[1])] = args[2];
     return args[2];
+  }
+
+  NATIVE(exit)
+  {
+    exit(asInt(args[0]));
+    return vm.nothing();
   }
 }
 

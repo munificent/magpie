@@ -158,8 +158,6 @@ namespace magpie
     // that value.
     gc<Object> sendingValue_;
 
-    //    gc<Suspension>      suspension_;
-
     NO_COPY(Fiber);
   };
 

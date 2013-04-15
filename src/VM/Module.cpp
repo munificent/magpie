@@ -79,7 +79,18 @@ namespace magpie
     
     return -1;
   }
-  
+
+  gc<Object> Module::getVariable(const char* name) const
+  {
+    for (int i = 0; i < variableNames_.count(); i++)
+    {
+      if (*variableNames_[i] == name) return variables_[i];
+    }
+
+    ASSERT(false, "Could not find expected variable.");
+    return NULL;
+  }
+
   void Module::setVariable(int index, gc<Object> value)
   {
     variables_[index] = value;
