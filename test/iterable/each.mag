@@ -1,5 +1,5 @@
 // Returns the original iterable.
-val list = [1, 2, 3]
+val list = [1, 2, 3, 4, 5]
 print(list each(fn _) == list) // expect: true
 
 // Invokes the function on each element.
@@ -7,9 +7,20 @@ list each(fn print(_))
 // expect: 1
 // expect: 2
 // expect: 3
+// expect: 4
+// expect: 5
 
 // Works on any iterable type.
 "abc" each(fn print(_))
 // expect: a
 // expect: b
 // expect: c
+
+// Stops if the function returns done.
+list each as i do
+    print(i)
+    if i == 3 then done
+end
+// expect: 1
+// expect: 2
+// expect: 3

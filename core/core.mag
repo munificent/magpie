@@ -258,7 +258,7 @@ def (iterable is Iterable) count
 end
 
 def (iterable is Iterable) each(callback is Function)
-    for i in iterable do callback call(i)
+    for i in iterable do if callback call(i) == done then break
     iterable
 end
 
@@ -353,7 +353,13 @@ def (w is _WhereIterator) advance
     while true do
         match w iterator advance
             case == done then return done
-            case value then if w predicate call(value) then return value
+            case value then
+                match w predicate call(value)
+                    case true then return value
+                    case == done then return done
+                    else nothing
+                end
+            end
         end
     end
 end
