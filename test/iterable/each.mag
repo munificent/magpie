@@ -1,0 +1,15 @@
+// Returns the original iterable.
+val list = [1, 2, 3]
+print(list each(fn _) == list) // expect: true
+
+// Invokes the function on each element.
+list each(fn print(_))
+// expect: 1
+// expect: 2
+// expect: 3
+
+// Works on any iterable type.
+"abc" each(fn print(_))
+// expect: a
+// expect: b
+// expect: c

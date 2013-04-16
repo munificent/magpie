@@ -257,6 +257,11 @@ def (iterable is Iterable) count
     count
 end
 
+def (iterable is Iterable) each(callback is Function)
+    for i in iterable do callback call(i)
+    iterable
+end
+
 // TODO(bob): Could specialize this for Indexables to create a result list with
 // the right capacity up front.
 def (iterable is Iterable) toList
