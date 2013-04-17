@@ -62,7 +62,7 @@ namespace magpie
     }
 
     // If we get here, all methods failed to match, so throw a NoMethodError.
-    write(-1, OP_BUILT_IN, 3, 0);
+    write(-1, OP_ATOM, ATOM_NO_METHOD, 0);
     write(-1, OP_THROW, 0);
 
     chunk_->bind(maxSlots_, numClosures);
@@ -78,7 +78,7 @@ namespace magpie
     // TODO(bob): Is this the right error?
     // If we get here, the argument didn't match the function's signature so
     // throw a NoMethodError.
-    write(-1, OP_BUILT_IN, 3, 0);
+    write(-1, OP_ATOM, ATOM_NO_METHOD, 0);
     write(-1, OP_THROW, 0);
 
     chunk_->bind(maxSlots_, function.resolved().closures().count());
@@ -248,10 +248,9 @@ namespace magpie
     compileClosures(expr.pos(), expr.resolved());
   }
 
-  void ExprCompiler::visit(BoolExpr& expr, int dest)
+  void ExprCompiler::visit(AtomExpr& expr, int dest)
   {
-    write(expr, OP_BUILT_IN, expr.value() ? BUILT_IN_TRUE : BUILT_IN_FALSE,
-          dest);
+    write(expr, OP_ATOM, expr.atom(), dest);
   }
 
   void ExprCompiler::visit(BreakExpr& expr, int dummy)
@@ -383,7 +382,7 @@ namespace magpie
 
     // If done, jump to exit.
     int doneSlot = makeTemp();
-    write(expr, OP_BUILT_IN, BUILT_IN_DONE, doneSlot);
+    write(expr, OP_ATOM, ATOM_DONE, doneSlot);
     write(expr, OP_EQUAL, dest, doneSlot, doneSlot);
 
     int loopExit = startJump(expr);
@@ -434,7 +433,7 @@ namespace magpie
     else
     {
       // A missing 'else' arm is implicitly 'nothing'.
-      write(expr, OP_BUILT_IN, BUILT_IN_NOTHING, dest);
+      write(expr, OP_ATOM, ATOM_NOTHING, dest);
     }
 
     endJump(jumpPastElse, OP_JUMP, 1);
@@ -523,11 +522,6 @@ namespace magpie
     write(expr, OP_NOT, dest);
   }
 
-  void ExprCompiler::visit(NothingExpr& expr, int dest)
-  {
-    write(expr, OP_BUILT_IN, BUILT_IN_NOTHING, dest);
-  }
-
   void ExprCompiler::visit(OrExpr& expr, int dest)
   {
     compile(expr.left(), dest);
@@ -577,7 +571,7 @@ namespace magpie
     if (expr.value().isNull())
     {
       // No value, so implicitly "nothing".
-      write(expr, OP_BUILT_IN, BUILT_IN_NOTHING, dest);
+      write(expr, OP_ATOM, ATOM_NOTHING, dest);
     }
     else
     {

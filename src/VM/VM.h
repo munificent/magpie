@@ -59,6 +59,7 @@ namespace magpie
     inline gc<ClassObject> channelClass() const { return channelClass_; }
     inline gc<ClassObject> characterClass() const { return characterClass_; }
     inline gc<ClassObject> classClass() const { return classClass_; }
+    inline gc<ClassObject> doneClass() const { return doneClass_; }
     inline gc<ClassObject> fileClass() const { return fileClass_; }
     inline gc<ClassObject> floatClass() const { return floatClass_; }
     inline gc<ClassObject> functionClass() const { return functionClass_; }
@@ -77,7 +78,7 @@ namespace magpie
       return value ? true_ : false_;
     }
 
-    gc<Object> getBuiltIn(BuiltIn value) const;
+    gc<Object> getAtom(Atom atom) const;
 
     int findNative(gc<String> name);
     Native getNative(int index) const { return natives_[index]; }
@@ -144,6 +145,7 @@ namespace magpie
     gc<ClassObject> channelClass_;
     gc<ClassObject> characterClass_;
     gc<ClassObject> classClass_;
+    gc<ClassObject> doneClass_;
     gc<ClassObject> fileClass_;
     gc<ClassObject> floatClass_;
     gc<ClassObject> functionClass_;

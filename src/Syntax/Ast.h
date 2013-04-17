@@ -14,7 +14,17 @@ namespace magpie
   class Module;
   class Pattern;
   class SequenceExpr;
-  
+
+  // The built-in singleton values in the language.
+  enum Atom
+  {
+    ATOM_FALSE     = 0,
+    ATOM_TRUE      = 1,
+    ATOM_NOTHING   = 2,
+    ATOM_DONE      = 3,
+    ATOM_NO_METHOD = 4
+  };
+
   // A record field.
   struct Field
   {

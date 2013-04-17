@@ -58,17 +58,44 @@ namespace magpie
     stream << toString();
   }
 
-  gc<ClassObject> BoolObject::getClass(VM& vm) const
+  gc<ClassObject> AtomObject::getClass(VM& vm) const
   {
-    return vm.boolClass();
+    switch (atom_)
+    {
+      case ATOM_FALSE:
+      case ATOM_TRUE:
+        return vm.boolClass();
+      case ATOM_NOTHING: return vm.nothingClass();
+      case ATOM_DONE: return vm.doneClass();
+      case ATOM_NO_METHOD:
+        ASSERT(false, "NO_METHOD shouldn't be in AtomObject.");
+    }
+
+    ASSERT(false, "Unexpected atom value.");
+    return NULL;
   }
 
-  gc<String> BoolObject::toString() const
+  bool AtomObject::toBool() const
   {
-    // TODO(bob): Store these as constants.
-    return String::create(value_ ? "true" : "false");
+    return atom_ == ATOM_TRUE;
   }
 
+  gc<String> AtomObject::toString() const
+  {
+    switch (atom_)
+    {
+      case ATOM_FALSE: return String::create("false");
+      case ATOM_TRUE: return String::create("true");
+      case ATOM_NOTHING: return String::create("nothing");
+      case ATOM_DONE: return String::create("done");
+      case ATOM_NO_METHOD:
+        ASSERT(false, "NO_METHOD shouldn't be in AtomObject.");
+    }
+
+    ASSERT(false, "Unexpected atom value.");
+    return NULL;
+  }
+  
   bool ChannelObject::close(VM& vm, gc<Fiber> sender)
   {
     if (!isOpen_) return false;
@@ -81,7 +108,7 @@ namespace magpie
     // Send "done" to all of the receivers.
     for (int i = 0; i < receivers_.count(); i++)
     {
-      receivers_[i]->storeReturn(vm.getBuiltIn(BUILT_IN_DONE));
+      receivers_[i]->storeReturn(vm.getAtom(ATOM_DONE));
       receivers_[i]->ready();
     }
 
@@ -97,10 +124,7 @@ namespace magpie
   gc<Object> ChannelObject::receive(VM& vm, gc<Fiber> receiver)
   {
     // If the channel is closed, immediately receive 'done'.
-    if (!isOpen_)
-    {
-      return vm.getBuiltIn(BUILT_IN_DONE);
-    }
+    if (!isOpen_) return vm.getAtom(ATOM_DONE);
 
     // If we have a sender, take its value.
     if (senders_.count() > 0)
@@ -369,17 +393,6 @@ namespace magpie
   void ListObject::reach()
   {
     elements_.reach();
-  }
-  
-  gc<ClassObject> NothingObject::getClass(VM& vm) const
-  {
-    return vm.nothingClass();
-  }
-
-  gc<String> NothingObject::toString() const
-  {
-    // TODO(bob): Store in constant.
-    return String::create("nothing");
   }
   
   gc<RecordType> RecordType::create(const Array<int>& fields)

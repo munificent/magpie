@@ -57,11 +57,11 @@ namespace magpie
           break;
         }
           
-        case OP_BUILT_IN:
+        case OP_ATOM:
         {
-          BuiltIn value = static_cast<BuiltIn>(GET_A(ins));
+          Atom atom = static_cast<Atom>(GET_A(ins));
           int slot = GET_B(ins);
-          store(frame, slot, vm_.getBuiltIn(value));
+          store(frame, slot, vm_.getAtom(atom));
           break;
         }
 

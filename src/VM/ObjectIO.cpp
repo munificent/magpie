@@ -200,7 +200,7 @@ namespace magpie
     else
     {
       // If we read when at EOF, return done.
-      result = task->fiber()->vm().getBuiltIn(BUILT_IN_DONE);
+      result = task->fiber()->vm().getAtom(ATOM_DONE);
     }
 
     task->complete(result);

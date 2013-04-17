@@ -4,7 +4,7 @@
 class AndExpr;
 class AssignExpr;
 class AsyncExpr;
-class BoolExpr;
+class AtomExpr;
 class BreakExpr;
 class CallExpr;
 class CatchExpr;
@@ -25,7 +25,6 @@ class MatchExpr;
 class NameExpr;
 class NativeExpr;
 class NotExpr;
-class NothingExpr;
 class OrExpr;
 class RecordExpr;
 class ReturnExpr;
@@ -52,7 +51,7 @@ public:
   virtual void visit(AndExpr& node, int arg) = 0;
   virtual void visit(AssignExpr& node, int arg) = 0;
   virtual void visit(AsyncExpr& node, int arg) = 0;
-  virtual void visit(BoolExpr& node, int arg) = 0;
+  virtual void visit(AtomExpr& node, int arg) = 0;
   virtual void visit(BreakExpr& node, int arg) = 0;
   virtual void visit(CallExpr& node, int arg) = 0;
   virtual void visit(CatchExpr& node, int arg) = 0;
@@ -73,7 +72,6 @@ public:
   virtual void visit(NameExpr& node, int arg) = 0;
   virtual void visit(NativeExpr& node, int arg) = 0;
   virtual void visit(NotExpr& node, int arg) = 0;
-  virtual void visit(NothingExpr& node, int arg) = 0;
   virtual void visit(OrExpr& node, int arg) = 0;
   virtual void visit(RecordExpr& node, int arg) = 0;
   virtual void visit(ReturnExpr& node, int arg) = 0;
@@ -107,7 +105,7 @@ public:
   virtual AndExpr* asAndExpr() { return NULL; }
   virtual AssignExpr* asAssignExpr() { return NULL; }
   virtual AsyncExpr* asAsyncExpr() { return NULL; }
-  virtual BoolExpr* asBoolExpr() { return NULL; }
+  virtual AtomExpr* asAtomExpr() { return NULL; }
   virtual BreakExpr* asBreakExpr() { return NULL; }
   virtual CallExpr* asCallExpr() { return NULL; }
   virtual CatchExpr* asCatchExpr() { return NULL; }
@@ -128,7 +126,6 @@ public:
   virtual NameExpr* asNameExpr() { return NULL; }
   virtual NativeExpr* asNativeExpr() { return NULL; }
   virtual NotExpr* asNotExpr() { return NULL; }
-  virtual NothingExpr* asNothingExpr() { return NULL; }
   virtual OrExpr* asOrExpr() { return NULL; }
   virtual RecordExpr* asRecordExpr() { return NULL; }
   virtual ReturnExpr* asReturnExpr() { return NULL; }
@@ -243,12 +240,12 @@ private:
   NO_COPY(AsyncExpr);
 };
 
-class BoolExpr : public Expr
+class AtomExpr : public Expr
 {
 public:
-  explicit BoolExpr(gc<SourcePos> pos, bool value)
+  explicit AtomExpr(gc<SourcePos> pos, Atom atom)
   : Expr(pos),
-    value_(value)
+    atom_(atom)
   {}
 
   virtual void accept(ExprVisitor& visitor, int arg)
@@ -256,15 +253,15 @@ public:
     visitor.visit(*this, arg);
   }
 
-  virtual BoolExpr* asBoolExpr() { return this; }
+  virtual AtomExpr* asAtomExpr() { return this; }
 
-  bool value() const { return value_; }
+  Atom atom() const { return atom_; }
 
   virtual void trace(std::ostream& out) const;
 
 private:
-  bool value_;
-  NO_COPY(BoolExpr);
+  Atom atom_;
+  NO_COPY(AtomExpr);
 };
 
 class BreakExpr : public Expr
@@ -911,27 +908,6 @@ public:
 private:
   gc<Expr> value_;
   NO_COPY(NotExpr);
-};
-
-class NothingExpr : public Expr
-{
-public:
-  explicit NothingExpr(gc<SourcePos> pos)
-  : Expr(pos)
-  {}
-
-  virtual void accept(ExprVisitor& visitor, int arg)
-  {
-    visitor.visit(*this, arg);
-  }
-
-  virtual NothingExpr* asNothingExpr() { return this; }
-
-
-  virtual void trace(std::ostream& out) const;
-
-private:
-  NO_COPY(NothingExpr);
 };
 
 class OrExpr : public Expr

@@ -117,9 +117,10 @@ namespace magpie
     DEF_NATIVE(bufferSubscriptSetInt);
     DEF_NATIVE(bufferDecodeAscii);
 
-    true_ = new BoolObject(true);
-    false_ = new BoolObject(false);
-    nothing_ = new NothingObject();
+    true_ = new AtomObject(ATOM_TRUE);
+    false_ = new AtomObject(ATOM_FALSE);
+    nothing_ = new AtomObject(ATOM_NOTHING);
+    done_ = new AtomObject(ATOM_DONE);
   }
 
   void VM::bindCore()
@@ -131,6 +132,7 @@ namespace magpie
     registerClass(core, channelClass_, "Channel");
     registerClass(core, characterClass_, "Char");
     registerClass(core, classClass_, "Class");
+    registerClass(core, doneClass_, "Done");
     registerClass(core, functionClass_, "Function");
     registerClass(core, floatClass_, "Float");
     registerClass(core, intClass_, "Int");
@@ -142,7 +144,6 @@ namespace magpie
     registerClass(core, noMethodErrorClass_, "NoMethodError");
     registerClass(core, undefinedVarErrorClass_, "UndefinedVarError");
 
-    done_ = core->getVariable("done");
     errorChannel_ = asChannel(core->getVariable("_errorChannel"));
   }
 
@@ -290,18 +291,18 @@ namespace magpie
     }
   }
 
-  gc<Object> VM::getBuiltIn(BuiltIn value) const
+  gc<Object> VM::getAtom(Atom atom) const
   {
-    switch (value) {
-      case BUILT_IN_FALSE: return false_;
-      case BUILT_IN_TRUE: return true_;
-      case BUILT_IN_NOTHING: return nothing_;
-      case BUILT_IN_NO_METHOD:
+    switch (atom) {
+      case ATOM_FALSE: return false_;
+      case ATOM_TRUE: return true_;
+      case ATOM_NOTHING: return nothing_;
+      case ATOM_DONE: return done_;
+      case ATOM_NO_METHOD:
         return DynamicObject::create(noMethodErrorClass_);
-      case BUILT_IN_DONE: return done_;
     }
 
-    ASSERT(false, "Unknown built-in ID.");
+    ASSERT(false, "Unknown atom ID.");
   }
 
   int VM::findNative(gc<String> name)

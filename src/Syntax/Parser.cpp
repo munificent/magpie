@@ -50,6 +50,7 @@ namespace magpie
     { NULL,             NULL, -1 },                                    // TOKEN_DEF
     { NULL,             NULL, -1 },                                    // TOKEN_DEFCLASS
     { NULL,             NULL, -1 },                                    // TOKEN_DO
+    { &Parser::done,    NULL, -1 },                                    // TOKEN_DONE
     { NULL,             NULL, -1 },                                    // TOKEN_ELSE
     { NULL,             NULL, -1 },                                    // TOKEN_END
     { &Parser::boolean, NULL, -1 },                                    // TOKEN_FALSE
@@ -110,7 +111,7 @@ namespace magpie
     // An empty module is equivalent to `nothing`.
     if (exprs.count() == 0)
     {
-      exprs.add(new NothingExpr(last()->pos()));
+      exprs.add(new AtomExpr(last()->pos(), ATOM_NOTHING));
     }
 
     return new ModuleAst(new SequenceExpr(spanFrom(exprs[0]), exprs));
@@ -209,7 +210,7 @@ namespace magpie
           "Expected block or expression but reached end of file.");
       
       // Return a fake node so we can continue and report errors.
-      return new NothingExpr(current()->pos());
+      return new AtomExpr(current()->pos(), ATOM_NOTHING);
     }
     else
     {
@@ -628,7 +629,7 @@ namespace magpie
                       tokenText->cString());
       
       // Return a fake expression so we can keep parsing to find more errors.
-      return new NothingExpr(token->pos());
+      return new AtomExpr(token->pos(), ATOM_NOTHING);
     }
 
     gc<Expr> left = (this->*prefix)(token);
@@ -647,7 +648,8 @@ namespace magpie
 
   gc<Expr> Parser::boolean(gc<Token> token)
   {
-    return new BoolExpr(token->pos(), token->type() == TOKEN_TRUE);
+    return new AtomExpr(token->pos(),
+                        token->type() == TOKEN_TRUE ? ATOM_TRUE : ATOM_FALSE);
   }
 
   gc<Expr> Parser::character(gc<Token> token)
@@ -656,6 +658,11 @@ namespace magpie
     return new CharacterExpr(token->pos(), (*token->text())[0]);
   }
 
+  gc<Expr> Parser::done(gc<Token> token)
+  {
+    return new AtomExpr(token->pos(), ATOM_DONE);
+  }
+  
   gc<Expr> Parser::float_(gc<Token> token)
   {
     double value = atof(token->text()->cString());
@@ -770,7 +777,7 @@ namespace magpie
 
   gc<Expr> Parser::nothing(gc<Token> token)
   {
-    return new NothingExpr(token->pos());
+    return new AtomExpr(token->pos(), ATOM_NOTHING);
   }
 
   gc<Expr> Parser::record(gc<Token> token)
@@ -1037,6 +1044,12 @@ namespace magpie
       return new ValuePattern(spanFrom(start), value);
     }
 
+    if (match(TOKEN_DONE))
+    {
+      gc<Expr> value = done(last());
+      return new ValuePattern(spanFrom(start), value);
+    }
+    
     if (match(TOKEN_EQEQ))
     {
       gc<Expr> value = parseExpressionInPattern(isMethod);
@@ -1145,7 +1158,8 @@ namespace magpie
   gc<Expr> Parser::createSequence(const Array<gc<Expr> >& exprs)
   {
     // If the sequence is empty, just default it to nothing.
-    if (exprs.count() == 0) return new NothingExpr(last()->pos());
+    if (exprs.count() == 0) return new AtomExpr(last()->pos(), ATOM_NOTHING);
+
 
     // If there is just one expression in the sequence, don't wrap it.
     if (exprs.count() == 1) return exprs[0];
@@ -1298,7 +1312,7 @@ namespace magpie
     replace(new AsyncExpr(expr.pos(), transform(expr.body())));
   }
 
-  void ImplicitParameterTransformer::visit(BoolExpr& expr, int dummy)
+  void ImplicitParameterTransformer::visit(AtomExpr& expr, int dummy)
   {
     // Do nothing.
   }
@@ -1450,11 +1464,6 @@ namespace magpie
   void ImplicitParameterTransformer::visit(NotExpr& expr, int dummy)
   {
     replace(new NotExpr(expr.pos(), transform(expr.value())));
-  }
-
-  void ImplicitParameterTransformer::visit(NothingExpr& expr, int dummy)
-  {
-    // Do nothing.
   }
 
   void ImplicitParameterTransformer::visit(OrExpr& expr, int dummy)

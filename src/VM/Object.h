@@ -2,13 +2,14 @@
 
 #include <iostream>
 
+#include "Ast.h"
 #include "Macros.h"
 #include "Managed.h"
 #include "MagpieString.h"
 
 namespace magpie
 {
-  class BoolObject;
+  class AtomObject;
   class Chunk;
   class ChannelObject;
   class CharacterObject;
@@ -64,7 +65,6 @@ namespace magpie
     virtual bool equals(gc<Object> other) { return this == &*other; }
 
     // Double-dispatch methods for value equality.
-    virtual bool equalsBool(bool value) { return false; }
     virtual bool equalsChar(unsigned int value) { return false; }
     virtual bool equalsFloat(double value) { return false; }
     virtual bool equalsInt(int value) { return false; }
@@ -73,25 +73,23 @@ namespace magpie
     virtual void trace(std::ostream& stream) const;
   };
 
-  class BoolObject : public Object
+  // An atomic value like true or nothing.
+  class AtomObject : public Object
   {
   public:
-    BoolObject(bool value)
+    AtomObject(Atom atom)
     : Object(),
-      value_(value)
+      atom_(atom)
     {}
 
     virtual gc<ClassObject> getClass(VM& vm) const;
 
-    virtual bool toBool() const { return value_; }
+    virtual bool toBool() const;
 
     virtual gc<String> toString() const;
 
-    virtual bool equals(gc<Object> other) { return other->equalsBool(value_); }
-    virtual bool equalsBool(bool value) { return value_ == value; }
-
   private:
-    bool value_;
+    Atom atom_;
   };
 
   class ChannelObject : public Object
@@ -313,21 +311,6 @@ namespace magpie
 
   private:
     Array<gc<Object> > elements_;
-  };
-
-  class NothingObject : public Object
-  {
-  public:
-    NothingObject()
-    : Object()
-    {}
-
-    virtual gc<ClassObject> getClass(VM& vm) const;
-
-    // TODO(bob): Do we want to do this here, or rely on a "true?" method?
-    virtual bool toBool() const { return false; }
-
-    virtual gc<String> toString() const;
   };
 
   // A record's "type" is an implicit class that describes the set of fields

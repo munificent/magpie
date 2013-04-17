@@ -4,6 +4,7 @@ defclass Indexable is Iterable native
 defclass Channel is Iterable native
 defclass Char native
 defclass Class native
+defclass Done native
 defclass Function native
 defclass List is Indexable native
 defclass Nothing native
@@ -32,16 +33,6 @@ defclass ArgError is Error
 end
 
 defclass UndefinedVarError is Error
-end
-
-// TODO(bob): Make native so users can't construct their own instances.
-defclass Done
-end
-
-val done = Done new
-
-def (is Done) toString
-    "done"
 end
 
 def (is Int) + (is Int) native "intPlusInt"
@@ -131,9 +122,6 @@ end
 def (is String) _subscript(is Int) native "stringSubscriptInt"
 
 def (_) toString native "objectToString"
-
-def (true) toString "true"
-def (false) toString "false"
 
 def (is Int) toString native "intToString"
 def (is Float) toString native "floatToString"

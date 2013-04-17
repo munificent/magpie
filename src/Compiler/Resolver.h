@@ -76,7 +76,7 @@ namespace magpie
     virtual void visit(AndExpr& expr, int dummy);
     virtual void visit(AssignExpr& expr, int dest);
     virtual void visit(AsyncExpr& expr, int dummy);
-    virtual void visit(BoolExpr& expr, int dummy);
+    virtual void visit(AtomExpr& expr, int dummy);
     virtual void visit(BreakExpr& expr, int dummy);
     virtual void visit(CallExpr& expr, int dummy);
     virtual void visit(CatchExpr& expr, int dummy);
@@ -97,7 +97,6 @@ namespace magpie
     virtual void visit(NameExpr& expr, int dummy);
     virtual void visit(NativeExpr& expr, int dest);
     virtual void visit(NotExpr& expr, int dummy);
-    virtual void visit(NothingExpr& expr, int dummy);
     virtual void visit(OrExpr& expr, int dummy);
     virtual void visit(RecordExpr& expr, int dummy);
     virtual void visit(ReturnExpr& expr, int dummy);

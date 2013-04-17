@@ -19,9 +19,8 @@ namespace magpie
     // Loads the constant with index A into slot B.
     OP_CONSTANT,
     
-    // Loads the built-in value with index A (see VM::getBuiltIn()) into
-    // slot B.
-    OP_BUILT_IN,
+    // Loads the atomic value with index A (see VM::getAtom()) into slot B.
+    OP_ATOM,
     
     // Adds a method to a multimethod. A is the index of the multimethod to
     // specialize. B is the index of the method to add.
@@ -135,15 +134,6 @@ namespace magpie
     // Throws a NoMatchError if slot A is false.
     OP_TEST_MATCH
   };
-  
-  enum BuiltIn
-  {
-    BUILT_IN_FALSE     = 0,
-    BUILT_IN_TRUE      = 1,
-    BUILT_IN_NOTHING   = 2,
-    BUILT_IN_NO_METHOD = 3,
-    BUILT_IN_DONE      = 4
-  };
-  
+    
   typedef unsigned int instruction;
 }

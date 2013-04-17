@@ -24,9 +24,16 @@ namespace magpie
     out << "(async " << body_ << ")";
   }
 
-  void BoolExpr::trace(std::ostream& out) const
+  void AtomExpr::trace(std::ostream& out) const
   {
-    out << (value_ ? "true" : "false");
+    switch (atom_)
+    {
+      case ATOM_FALSE: out << "false"; break;
+      case ATOM_TRUE: out << "true"; break;
+      case ATOM_NOTHING: out << "nothing"; break;
+      case ATOM_DONE: out << "done"; break;
+      case ATOM_NO_METHOD: out << "<no method>"; break;
+    }
   }
 
   void BreakExpr::trace(std::ostream& out) const
@@ -210,11 +217,6 @@ namespace magpie
   void NotExpr::trace(std::ostream& out) const
   {
     out << "(not " << value_ << ")";
-  }
-  
-  void NothingExpr::trace(std::ostream& out) const
-  {
-    out << "nothing";
   }
   
   void OrExpr::trace(std::ostream& out) const

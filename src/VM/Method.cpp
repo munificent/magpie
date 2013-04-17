@@ -115,8 +115,8 @@ namespace magpie
              << " \"" << constants_[a] << "\"";
         break;
         
-      case OP_BUILT_IN:
-        cout << "BUILT_IN        " << a << " -> " << b;
+      case OP_ATOM:
+        cout << "ATOM            " << a << " -> " << b;
         break;
         
       case OP_METHOD:
@@ -686,10 +686,10 @@ namespace magpie
   gc<Object> PatternComparer::getValue(gc<Expr> expr)
   {
     // Handle literal values.
-    BoolExpr* boolExpr = expr->asBoolExpr();
-    if (boolExpr != NULL)
+    AtomExpr* atomExpr = expr->asAtomExpr();
+    if (atomExpr != NULL)
     {
-      return new BoolObject(boolExpr->value());
+      return vm_.getAtom(atomExpr->atom());
     }
 
     CharacterExpr* charExpr = expr->asCharacterExpr();

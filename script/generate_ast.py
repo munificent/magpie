@@ -19,8 +19,8 @@ exprs = sorted({
     'Async': [
         ('body',        'gc<Expr>'),
         ('resolved',    'ResolvedProcedure*')],
-    'Bool': [
-        ('value',       'bool')],
+    'Atom': [
+        ('atom',        'Atom')],
     'Break': [],
     'Call': [
         ('leftArg',     'gc<Expr>'),
@@ -84,7 +84,6 @@ exprs = sorted({
         ('index*',      'int')],
     'Not': [
         ('value',       'gc<Expr>')],
-    'Nothing': [],
     'Or': [
         ('left',        'gc<Expr>'),
         ('right',       'gc<Expr>')],

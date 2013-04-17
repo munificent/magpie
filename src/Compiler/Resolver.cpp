@@ -312,7 +312,7 @@ namespace magpie
             NULL, expr.body());
   }
   
-  void Resolver::visit(BoolExpr& expr, int dummy)
+  void Resolver::visit(AtomExpr& expr, int dummy)
   {
     // Do nothing.
   }
@@ -556,11 +556,6 @@ namespace magpie
   void Resolver::visit(NotExpr& expr, int dummy)
   {
     resolve(expr.value());
-  }
-  
-  void Resolver::visit(NothingExpr& expr, int dummy)
-  {
-    // Do nothing.
   }
   
   void Resolver::visit(OrExpr& expr, int dummy)
