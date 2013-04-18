@@ -1,33 +1,20 @@
-// A concurrent prime sieve.
-// Ported from the Go one at http://golang.org/doc/play/sieve.go.
-
-// Send the sequence 2, 3, 4, ... to channel 'ch'.
+// Send the sequence 2, 3, 4, ... to 'channel'.
 def generate(channel is Channel) async
-    var i = 2
-    while true do
-        channel send(i)
-        i = i + 1
-    end
+    for i in 2..9999 do channel send(i)
 end
 
-// Copy the values from channel 'in' to channel 'out',
+// Copy the values from 'input' to 'output',
 // removing those divisible by 'prime'.
 def filter(input is Channel, output is Channel, prime is Int) async
-    while true do
-        var i = input receive // Receive value from 'in'.
-        if i % prime != 0 then
-            output send(i) // Send 'i' to 'out'.
-        end
-    end
+    input where(fn _ % prime != 0) pipeTo(output)
 end
 
 // The prime sieve: Daisy-chain Filter processes.
-var channel = Channel new // Create a new channel.
+var channel = Channel new
 generate(channel) // Spawn generate fiber.
 
-for i in 0..100 do
-    val prime = channel receive
-    print(prime)
+for i in 0..50 do
+    val prime = print(channel receive)
     val sieve = Channel new
     filter(channel, sieve, prime)
     channel = sieve
