@@ -79,13 +79,13 @@ If you pass too many arguments to a function, the extra ones will be ignored.
 
     :::magpie
     var takeOne = fn(n) print(n)
-    takeOne("first", "second") // Prints "first".
+    takeOne call("first", "second") // Prints "first".
 
 However, if you pass too *few*, it will throw a `NoMethodError`.
 
     :::magpie
     var takeTwo = fn(a, b) print(a + b)
-    takeOne("first") // Throws NoMethodError.
+    takeOne call("first") // Throws NoMethodError.
 
 ## Returning Values
 

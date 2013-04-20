@@ -87,7 +87,8 @@ namespace magpie
     virtual void visit(RecordLValue& lvalue, int value);
     virtual void visit(WildcardLValue& lvalue, int value);
 
-    void compileMatch(const Array<MatchClause>& clauses, int dest);
+    void compileMatch(const Array<MatchClause>& clauses, int dest,
+                      bool isCatch);
 
     // Compiles a method call. If `valueSlot` is -1, then it's a regular call.
     // Otherwise, it's a call to a setter, and `valueSlot` is the slot holding

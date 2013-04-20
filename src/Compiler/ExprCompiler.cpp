@@ -265,7 +265,7 @@ namespace magpie
 
   void ExprCompiler::visit(CatchExpr& expr, int dest)
   {
-    // Register the catch handler.
+    // Register the catch handler so we know where to jump if the body throws.
     int enter = startJump(expr);
 
     // Compile the block body.
@@ -274,7 +274,7 @@ namespace magpie
     // Complete the catch handler.
     write(expr, OP_EXIT_TRY);
 
-    // Jump past it if an exception is not thrown.
+    // Jump over the catch handlers when an exception is not thrown.
     int jumpPastCatch = startJump(expr);
 
     endJump(enter, OP_ENTER_TRY);
@@ -283,8 +283,8 @@ namespace magpie
     // Write a pseudo-opcode so we know what slot to put the error in.
     write(expr, OP_MOVE, dest);
 
-    compileMatch(expr.catches(), dest);
-
+    compileMatch(expr.catches(), dest, true);
+    
     endJump(jumpPastCatch, OP_JUMP, 1);
   }
 
@@ -486,7 +486,7 @@ namespace magpie
   void ExprCompiler::visit(MatchExpr& expr, int dest)
   {
     compile(expr.value(), dest);
-    compileMatch(expr.cases(), dest);
+    compileMatch(expr.cases(), dest, false);
   }
 
   void ExprCompiler::visit(NameExpr& expr, int dest)
@@ -678,7 +678,8 @@ namespace magpie
     // Nothing to do.
   }
 
-  void ExprCompiler::compileMatch(const Array<MatchClause>& clauses, int dest)
+  void ExprCompiler::compileMatch(const Array<MatchClause>& clauses, int dest,
+                                  bool isCatch)
   {
     Array<int> endJumps;
 
@@ -686,10 +687,13 @@ namespace magpie
     for (int i = 0; i < clauses.count(); i++)
     {
       const MatchClause& clause = clauses[i];
-      bool lastPattern = i == clauses.count() - 1;
+
+      // The last clause in a match expression will throw. All others just jump
+      // to the next clause (or to the rethrow if the last clause in a catch).
+      bool jumpOnFailure = isCatch || (i != clauses.count() - 1);
 
       // Compile the pattern (if there is one and it isn't the "else" case).
-      PatternCompiler compiler(*this, !lastPattern);
+      PatternCompiler compiler(*this, jumpOnFailure);
       if (!clause.pattern().isNull())
       {
         clause.pattern()->accept(compiler, dest);
@@ -699,13 +703,20 @@ namespace magpie
       compile(clause.body(), dest);
 
       // Then jump past the other cases.
-      if (!lastPattern)
+      if (jumpOnFailure)
       {
         endJumps.add(startJump(*clause.body()));
 
         // If this pattern fails, make it jump to the next case.
         compiler.endJumps();
       }
+    }
+
+    // If no clauses in a catch match, then we rethrow it.
+    if (isCatch)
+    {
+      // TODO(bob): Should be a rethrow to preserve the original stack trace.
+      write(*clauses[-1].body(), OP_THROW, dest);
     }
 
     // Patch all the jumps now that we know where the end is.
@@ -921,6 +932,9 @@ namespace magpie
 
   void PatternCompiler::endJumps()
   {
+    ASSERT(jumpOnFailure_,
+           "Should not generate jumps if the last clause throws.");
+    
     // Since this isn't the last case, then every match failure should just
     // jump to the next case.
     for (int j = 0; j < tests_.count(); j++)
@@ -1018,6 +1032,9 @@ namespace magpie
     {
       tests_.add(MatchTest(compiler_.chunk_->code().count(), slot));
     }
+
+    // Regardless of the action, write the test op. If we are jumping, this
+    // will be replaced by a jump.
     compiler_.write(pattern.pos(), OP_TEST_MATCH, slot);
   }
 }

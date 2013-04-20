@@ -1,4 +1,3 @@
-// skip: Bug in unwinding past uncaught errors.
 do
     do
         throw "unwind error"

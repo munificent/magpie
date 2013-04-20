@@ -57,6 +57,5 @@ end
 
 // TODO(bob):
 // - catch patterns, destructuring, value patterns, etc.
-// - continue to unwind if no clause matches
 // - catches in other block expressions (for, while, etc.)
 
