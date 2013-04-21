@@ -1217,15 +1217,17 @@ namespace magpie
     if (expected == TOKEN_LINE) checkForMissingLine();
     reporter_.error(current()->pos(), errorMessage);
 
-    // Try to consume tokens until we find what we're looking for (or we run
-    // out). This should reduce the number of cascaded errors caused after this
-    // one.
+    // Discard the unexpected token. This makes sure we don't get stuck in an
+    // infinite loop and may help avoid cascaded errors.
     gc<Token> token = consume();
-    while (!match(expected) && !lookAhead(TOKEN_EOF))
-    {
-      token = consume();
-    }
 
+    // Also, if we're looking for a newline, just ditch everything until we
+    // hit one. This seems to lead to fewer cascaded errors.
+    if (expected == TOKEN_LINE)
+    {
+      while (!match(TOKEN_LINE) && !lookAhead(TOKEN_EOF)) consume();
+    }
+    
     return token;
   }
 
