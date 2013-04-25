@@ -186,6 +186,11 @@ namespace magpie
     ready_.add(new Fiber(vm_, *this, function, NULL));
   }
 
+  void Scheduler::run(gc<FunctionObject> function)
+  {
+    run(new Fiber(vm_, *this, function, NULL));
+  }
+  
   void Scheduler::add(gc<Fiber> fiber)
   {
     ready_.add(fiber);

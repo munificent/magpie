@@ -87,6 +87,8 @@ namespace magpie
   public:
     Scheduler(VM& vm);
 
+    uv_loop_t* loop() { return loop_; }
+
     uv_tty_t* tty() { return &tty_; }
     
     void run(Array<Module*> modules);
@@ -98,8 +100,15 @@ namespace magpie
     // main fiber has ended or all fibers are waiting for events.
     gc<Object> run(gc<Fiber> fiber);
 
-    // Spawns a new Fiber running the given procedure.
+    // Spawns a new Fiber to run the given procedure but does not immediately
+    // start it.
     void spawn(gc<FunctionObject> function);
+
+    // Spawns a new Fiber to run the given procedure and immediately runs it.
+    // This should only be called from libuv callbacks and not from code already
+    // within the main scheduler run loop to prevent re-entrancy.
+    void run(gc<FunctionObject> function);
+
     void add(gc<Fiber> fiber);
 
     void sleep(gc<Fiber> fiber, int ms);

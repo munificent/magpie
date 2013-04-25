@@ -92,5 +92,25 @@ namespace magpie
         String::create(reinterpret_cast<char*>(buffer->data()),
                        buffer->count()));
   }
+
+  NATIVE(tcpListenerNew)
+  {
+    return new TcpListenerObject(fiber, asString(args[1]), asInt(args[2]));
+  }
+
+  NATIVE(tcpListenerStart)
+  {
+    gc<TcpListenerObject> listener = asTcpListener(args[0]);
+    listener->start(fiber, asFunction(args[1]));
+
+    return vm.nothing();
+  }
+
+  NATIVE(tcpListenerStop)
+  {
+    gc<TcpListenerObject> listener = asTcpListener(args[0]);
+    listener->stop();
+    return vm.nothing();
+  }
 }
 

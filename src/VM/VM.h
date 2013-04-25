@@ -71,6 +71,7 @@ namespace magpie
     inline gc<ClassObject> stringClass() const { return stringClass_; }
     inline gc<ClassObject> noMatchErrorClass() const { return noMatchErrorClass_; }
     inline gc<ClassObject> noMethodErrorClass() const { return noMethodErrorClass_; }
+    inline gc<ClassObject> tcpListenerClass() const { return tcpListenerClass_; }
     inline gc<ClassObject> undefinedVarErrorClass() const { return undefinedVarErrorClass_; }
 
     inline gc<Object> getBool(bool value) const
@@ -157,6 +158,7 @@ namespace magpie
     gc<ClassObject> stringClass_;
     gc<ClassObject> noMatchErrorClass_;
     gc<ClassObject> noMethodErrorClass_;
+    gc<ClassObject> tcpListenerClass_;
     gc<ClassObject> undefinedVarErrorClass_;
 
     NO_COPY(VM);

@@ -116,6 +116,9 @@ namespace magpie
     DEF_NATIVE(bufferSubscriptInt);
     DEF_NATIVE(bufferSubscriptSetInt);
     DEF_NATIVE(bufferDecodeAscii);
+    DEF_NATIVE(tcpListenerNew);
+    DEF_NATIVE(tcpListenerStart);
+    DEF_NATIVE(tcpListenerStop);
 
     true_ = new AtomObject(ATOM_TRUE);
     false_ = new AtomObject(ATOM_FALSE);
@@ -155,6 +158,7 @@ namespace magpie
     registerClass(io, bufferClass_, "Buffer");
     registerClass(io, fileClass_, "File");
     registerClass(io, streamClass_, "Stream");
+    registerClass(io, tcpListenerClass_, "TcpListener");
   }
 
   bool VM::runProgram(gc<String> path)

@@ -1,0 +1,13 @@
+import io
+
+print("Listening on port 8124")
+
+// Waits for two incoming TCP connections and then stops.
+var numConnections = 0
+TcpListener new("0.0.0.0", 8124) as connection do
+    numConnections = numConnections + 1
+    print("Got connection #" + numConnections)
+    if numConnections > 1 then done
+end
+
+print("Done listening")

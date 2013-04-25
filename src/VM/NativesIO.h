@@ -20,5 +20,8 @@ namespace magpie
   NATIVE(bufferSubscriptInt);
   NATIVE(bufferSubscriptSetInt);
   NATIVE(bufferDecodeAscii);
+  NATIVE(tcpListenerNew);
+  NATIVE(tcpListenerStart);
+  NATIVE(tcpListenerStop);
 }
 

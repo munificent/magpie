@@ -15,13 +15,15 @@ namespace magpie
   class FileObject;
   class File;
   class StreamObject;
+  class TcpListenerObject;
 
   // Unsafe downcasting functions. These must *only* be called after the object
   // has been verified as being the right type.
   gc<BufferObject> asBuffer(gc<Object> obj);
   gc<FileObject> asFile(gc<Object> obj);
   gc<StreamObject> asStream(gc<Object> obj);
-
+  gc<TcpListenerObject> asTcpListener(gc<Object> obj);
+  
   // A task for a file system operation.
   class FSTask : public Task
   {
@@ -53,8 +55,6 @@ namespace magpie
   // A task using a uv_handle_t.
   class HandleTask : public Task
   {
-    friend class TaskList;
-
   public:
     HandleTask(gc<Fiber> fiber, uv_handle_t* handle);
     ~HandleTask();
@@ -63,7 +63,7 @@ namespace magpie
   private:
     uv_handle_t* handle_;
   };
-
+  
   class BufferObject : public Object
   {
   public:
@@ -131,7 +131,6 @@ namespace magpie
     bool isOpen_;
   };
 
-
   class StreamObject : public Object
   {
   public:
@@ -143,5 +142,31 @@ namespace magpie
     virtual gc<String> toString() const;
 
   private:
+  };
+
+  class TcpListenerObject : public Object
+  {
+  public:
+    TcpListenerObject(Fiber& fiber, gc<String> address, int port);
+
+    virtual gc<ClassObject> getClass(VM& vm) const;
+    virtual gc<String> toString() const;
+
+    void start(Fiber& fiber, gc<FunctionObject> callback);
+    void stop();
+
+    void accept();
+
+  private:
+    // The scheduler for the VM that owns this listener.
+    Scheduler& scheduler_;
+
+    // The function to run on a new fiber when a connection comes in. Will be
+    // null if the listener is not currently listening.
+    gc<FunctionObject> callback_;
+
+    // TODO(bob): This needs to be allocated on a non-GC heap so it doesn't get
+    // moved under libuv when a GC occurs.
+    uv_tcp_t server_;
   };
 }
