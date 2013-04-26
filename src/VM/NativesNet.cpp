@@ -31,5 +31,13 @@ namespace magpie
     listener->stop();
     return vm.nothing();
   }
+
+  void defineNetNatives(VM& vm)
+  {
+    DEF_NATIVE(bindNet);
+    DEF_NATIVE(tcpListenerNew);
+    DEF_NATIVE(tcpListenerStart);
+    DEF_NATIVE(tcpListenerStop);
+  }
 }
 

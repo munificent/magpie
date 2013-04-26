@@ -6,9 +6,6 @@
 
 namespace magpie
 {
-  NATIVE(bindNet);
-  NATIVE(tcpListenerNew);
-  NATIVE(tcpListenerStart);
-  NATIVE(tcpListenerStop);
+  void defineNetNatives(VM& vm);
 }
 

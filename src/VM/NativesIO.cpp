@@ -94,5 +94,21 @@ namespace magpie
         String::create(reinterpret_cast<char*>(buffer->data()),
                        buffer->count()));
   }
+
+  void defineIONatives(VM& vm)
+  {
+    DEF_NATIVE(bindIO);
+    DEF_NATIVE(fileClose);
+    DEF_NATIVE(fileIsOpen);
+    DEF_NATIVE(fileOpen);
+    DEF_NATIVE(fileSize);
+    DEF_NATIVE(fileReadBytesInt);
+    DEF_NATIVE(fileStreamBytes);
+    DEF_NATIVE(bufferNewSize);
+    DEF_NATIVE(bufferCount);
+    DEF_NATIVE(bufferSubscriptInt);
+    DEF_NATIVE(bufferSubscriptSetInt);
+    DEF_NATIVE(bufferDecodeAscii);
+  }
 }
 

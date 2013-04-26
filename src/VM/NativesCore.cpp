@@ -446,5 +446,63 @@ namespace magpie
     exit(asInt(args[0]));
     return vm.nothing();
   }
+
+  void defineCoreNatives(VM& vm)
+  {
+    DEF_NATIVE(bindCore);
+    DEF_NATIVE(objectClass);
+    DEF_NATIVE(objectNew);
+    DEF_NATIVE(objectToString);
+    DEF_NATIVE(objectEqualsObject);
+    DEF_NATIVE(objectNotEqualsObject);
+    DEF_NATIVE(printString);
+    DEF_NATIVE(printErrorString);
+    DEF_NATIVE(intPlusInt);
+    DEF_NATIVE(intPlusFloat);
+    DEF_NATIVE(floatPlusInt);
+    DEF_NATIVE(floatPlusFloat);
+    DEF_NATIVE(stringPlusString);
+    DEF_NATIVE(intMinusInt);
+    DEF_NATIVE(intMinusFloat);
+    DEF_NATIVE(floatMinusInt);
+    DEF_NATIVE(floatMinusFloat);
+    DEF_NATIVE(intTimesInt);
+    DEF_NATIVE(intTimesFloat);
+    DEF_NATIVE(floatTimesInt);
+    DEF_NATIVE(floatTimesFloat);
+    DEF_NATIVE(intDivInt);
+    DEF_NATIVE(intDivFloat);
+    DEF_NATIVE(floatDivInt);
+    DEF_NATIVE(floatDivFloat);
+    DEF_NATIVE(intModInt);
+    DEF_NATIVE(minusInt);
+    DEF_NATIVE(minusFloat);
+    DEF_NATIVE(intCompareToInt);
+    DEF_NATIVE(intCompareToFloat);
+    DEF_NATIVE(floatCompareToInt);
+    DEF_NATIVE(floatCompareToFloat);
+    DEF_NATIVE(intSgn);
+    DEF_NATIVE(floatSgn);
+    DEF_NATIVE(stringCount);
+    DEF_NATIVE(stringSubscriptInt);
+    DEF_NATIVE(floatToString);
+    DEF_NATIVE(intToString);
+    DEF_NATIVE(sleepMsInt);
+    DEF_NATIVE(channelClose);
+    DEF_NATIVE(channelIsOpen);
+    DEF_NATIVE(channelNew);
+    DEF_NATIVE(channelReceive);
+    DEF_NATIVE(channelSend);
+    DEF_NATIVE(functionCall);
+    DEF_NATIVE(listAdd);
+    DEF_NATIVE(listClear);
+    DEF_NATIVE(listCount);
+    DEF_NATIVE(listInsert);
+    DEF_NATIVE(listRemoveAt);
+    DEF_NATIVE(listSubscriptInt);
+    DEF_NATIVE(listSubscriptRange);
+    DEF_NATIVE(listSubscriptSetInt);
+    DEF_NATIVE(exit);
+  }
 }
 

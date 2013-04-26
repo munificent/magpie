@@ -9,59 +9,6 @@
 
 namespace magpie
 {
-  NATIVE(bindCore);
-  NATIVE(objectClass);
-  NATIVE(objectNew);
-  NATIVE(objectToString);
-  NATIVE(objectEqualsObject);
-  NATIVE(objectNotEqualsObject);
-  NATIVE(printString);
-  NATIVE(printErrorString);
-  NATIVE(stringPlusString);
-  NATIVE(intPlusInt);
-  NATIVE(intPlusFloat);
-  NATIVE(floatPlusInt);
-  NATIVE(floatPlusFloat);
-  NATIVE(intMinusInt);
-  NATIVE(intMinusFloat);
-  NATIVE(floatMinusInt);
-  NATIVE(floatMinusFloat);
-  NATIVE(intTimesInt);
-  NATIVE(intTimesFloat);
-  NATIVE(floatTimesInt);
-  NATIVE(floatTimesFloat);
-  NATIVE(intDivInt);
-  NATIVE(intDivFloat);
-  NATIVE(floatDivInt);
-  NATIVE(floatDivFloat);
-  NATIVE(intModInt);
-  NATIVE(minusInt);
-  NATIVE(minusFloat);
-  NATIVE(intCompareToInt);
-  NATIVE(intCompareToFloat);
-  NATIVE(floatCompareToInt);
-  NATIVE(floatCompareToFloat);
-  NATIVE(intSgn);
-  NATIVE(floatSgn);
-  NATIVE(stringCount);
-  NATIVE(stringSubscriptInt);
-  NATIVE(floatToString);
-  NATIVE(intToString);
-  NATIVE(sleepMsInt);
-  NATIVE(channelClose);
-  NATIVE(channelIsOpen);
-  NATIVE(channelNew);
-  NATIVE(channelReceive);
-  NATIVE(channelSend);
-  NATIVE(functionCall);
-  NATIVE(listAdd);
-  NATIVE(listClear);
-  NATIVE(listCount);
-  NATIVE(listInsert);
-  NATIVE(listRemoveAt);
-  NATIVE(listSubscriptInt);
-  NATIVE(listSubscriptRange);
-  NATIVE(listSubscriptSetInt);
-  NATIVE(exit);
+  void defineCoreNatives(VM& vm);
 }
 

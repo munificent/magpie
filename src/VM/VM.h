@@ -8,6 +8,8 @@
 #include "RootSource.h"
 #include "Scheduler.h"
 
+#define DEF_NATIVE(name) vm.defineNative(#name, name##Native);
+
 namespace magpie
 {
   class ClassObject;
@@ -86,6 +88,7 @@ namespace magpie
 
     gc<Object> getAtom(Atom atom);
 
+    void defineNative(const char* name, Native native);
     int findNative(gc<String> name);
     Native getNative(int index) const { return natives_[index]; }
 

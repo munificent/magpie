@@ -10,10 +10,6 @@
 #include "Parser.h"
 #include "Path.h"
 
-#define DEF_NATIVE(name) \
-    nativeNames_.add(String::create(#name)); \
-    natives_.add(name##Native);
-
 namespace magpie
 {
   // TODO(bob): Move somewhere else?
@@ -50,77 +46,9 @@ namespace magpie
   {
     Memory::initialize(this, 1024 * 1024 * 2); // TODO(bob): Use non-magic number.
 
-    DEF_NATIVE(bindCore);
-    DEF_NATIVE(bindIO);
-    DEF_NATIVE(bindNet);
-    DEF_NATIVE(objectClass);
-    DEF_NATIVE(objectNew);
-    DEF_NATIVE(objectToString);
-    DEF_NATIVE(objectEqualsObject);
-    DEF_NATIVE(objectNotEqualsObject);
-    DEF_NATIVE(printString);
-    DEF_NATIVE(printErrorString);
-    DEF_NATIVE(intPlusInt);
-    DEF_NATIVE(intPlusFloat);
-    DEF_NATIVE(floatPlusInt);
-    DEF_NATIVE(floatPlusFloat);
-    DEF_NATIVE(stringPlusString);
-    DEF_NATIVE(intMinusInt);
-    DEF_NATIVE(intMinusFloat);
-    DEF_NATIVE(floatMinusInt);
-    DEF_NATIVE(floatMinusFloat);
-    DEF_NATIVE(intTimesInt);
-    DEF_NATIVE(intTimesFloat);
-    DEF_NATIVE(floatTimesInt);
-    DEF_NATIVE(floatTimesFloat);
-    DEF_NATIVE(intDivInt);
-    DEF_NATIVE(intDivFloat);
-    DEF_NATIVE(floatDivInt);
-    DEF_NATIVE(floatDivFloat);
-    DEF_NATIVE(intModInt);
-    DEF_NATIVE(minusInt);
-    DEF_NATIVE(minusFloat);
-    DEF_NATIVE(intCompareToInt);
-    DEF_NATIVE(intCompareToFloat);
-    DEF_NATIVE(floatCompareToInt);
-    DEF_NATIVE(floatCompareToFloat);
-    DEF_NATIVE(intSgn);
-    DEF_NATIVE(floatSgn);
-    DEF_NATIVE(stringCount);
-    DEF_NATIVE(stringSubscriptInt);
-    DEF_NATIVE(floatToString);
-    DEF_NATIVE(intToString);
-    DEF_NATIVE(sleepMsInt);
-    DEF_NATIVE(channelClose);
-    DEF_NATIVE(channelIsOpen);
-    DEF_NATIVE(channelNew);
-    DEF_NATIVE(channelReceive);
-    DEF_NATIVE(channelSend);
-    DEF_NATIVE(functionCall);
-    DEF_NATIVE(listAdd);
-    DEF_NATIVE(listClear);
-    DEF_NATIVE(listCount);
-    DEF_NATIVE(listInsert);
-    DEF_NATIVE(listRemoveAt);
-    DEF_NATIVE(listSubscriptInt);
-    DEF_NATIVE(listSubscriptRange);
-    DEF_NATIVE(listSubscriptSetInt);
-    DEF_NATIVE(exit);
-
-    DEF_NATIVE(fileClose);
-    DEF_NATIVE(fileIsOpen);
-    DEF_NATIVE(fileOpen);
-    DEF_NATIVE(fileSize);
-    DEF_NATIVE(fileReadBytesInt);
-    DEF_NATIVE(fileStreamBytes);
-    DEF_NATIVE(bufferNewSize);
-    DEF_NATIVE(bufferCount);
-    DEF_NATIVE(bufferSubscriptInt);
-    DEF_NATIVE(bufferSubscriptSetInt);
-    DEF_NATIVE(bufferDecodeAscii);
-    DEF_NATIVE(tcpListenerNew);
-    DEF_NATIVE(tcpListenerStart);
-    DEF_NATIVE(tcpListenerStop);
+    defineCoreNatives(*this);
+    defineIONatives(*this);
+    defineNetNatives(*this);
 
     true_ = new AtomObject(ATOM_TRUE);
     false_ = new AtomObject(ATOM_FALSE);
@@ -274,6 +202,12 @@ namespace magpie
     }
 
     ASSERT(false, "Unknown atom ID.");
+  }
+
+  void VM::defineNative(const char* name, Native native)
+  {
+    nativeNames_.add(String::create(name));
+    natives_.add(native);
   }
 
   int VM::findNative(gc<String> name)
