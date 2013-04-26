@@ -64,9 +64,9 @@ namespace magpie
     {
       case ATOM_FALSE:
       case ATOM_TRUE:
-        return vm.boolClass();
-      case ATOM_NOTHING: return vm.nothingClass();
-      case ATOM_DONE: return vm.doneClass();
+        return vm.getClass(CLASS_BOOL);
+      case ATOM_NOTHING: return vm.getClass(CLASS_NOTHING);
+      case ATOM_DONE: return vm.getClass(CLASS_DONE);
       case ATOM_NO_METHOD:
         ASSERT(false, "NO_METHOD shouldn't be in AtomObject.");
     }
@@ -162,7 +162,7 @@ namespace magpie
 
   gc<ClassObject> ChannelObject::getClass(VM& vm) const
   {
-    return vm.channelClass();
+    return vm.getClass(CLASS_CHANNEL);
   }
 
   gc<String> ChannelObject::toString() const
@@ -179,7 +179,7 @@ namespace magpie
 
   gc<ClassObject> CharacterObject::getClass(VM& vm) const
   {
-    return vm.characterClass();
+    return vm.getClass(CLASS_CHAR);
   }
 
   gc<String> CharacterObject::toString() const
@@ -210,7 +210,7 @@ namespace magpie
 
   gc<ClassObject> ClassObject::getClass(VM& vm) const
   {
-    return vm.classClass();
+    return vm.getClass(CLASS_CLASS);
   }
 
   gc<String> ClassObject::toString() const
@@ -309,7 +309,7 @@ namespace magpie
 
   gc<ClassObject> FloatObject::getClass(VM& vm) const
   {
-    return vm.floatClass();
+    return vm.getClass(CLASS_FLOAT);
   }
 
   gc<String> FloatObject::toString() const
@@ -329,7 +329,7 @@ namespace magpie
   
   gc<ClassObject> FunctionObject::getClass(VM& vm) const
   {
-    return vm.functionClass();
+    return vm.getClass(CLASS_FUNCTION);
   }
 
   gc<String> FunctionObject::toString() const
@@ -362,7 +362,7 @@ namespace magpie
 
   gc<ClassObject> IntObject::getClass(VM& vm) const
   {
-    return vm.intClass();
+    return vm.getClass(CLASS_INT);
   }
 
   gc<String> IntObject::toString() const
@@ -372,7 +372,7 @@ namespace magpie
   
   gc<ClassObject> ListObject::getClass(VM& vm) const
   {
-    return vm.listClass();
+    return vm.getClass(CLASS_LIST);
   }
 
   gc<String> ListObject::toString() const
@@ -463,7 +463,7 @@ namespace magpie
 
   gc<ClassObject> RecordObject::getClass(VM& vm) const
   {
-    return vm.recordClass();
+    return vm.getClass(CLASS_RECORD);
   }
 
   gc<String> RecordObject::toString() const
@@ -494,7 +494,7 @@ namespace magpie
   
   gc<ClassObject> StringObject::getClass(VM& vm) const
   {
-    return vm.stringClass();
+    return vm.getClass(CLASS_STRING);
   }
   
   void StringObject::reach()

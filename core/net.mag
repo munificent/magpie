@@ -1,0 +1,30 @@
+defclass TcpListener native
+
+def (== TcpListener) new(address is String, port is Int) native "tcpListenerNew"
+
+def (is TcpListener) _start(callback is Function) native "tcpListenerStart"
+def (is TcpListener) stop native "tcpListenerStop"
+
+def (l is TcpListener) listen(callback is Function)
+    val wait = Channel new
+    l _start do
+        // TODO(bob): Get connection (stream?) and pass to callback.
+        if callback call("blah") == done then
+            l stop
+            wait close
+        end
+    end
+    wait receive
+end
+
+def (== TcpListener) new(address is String, port is Int, callback is Function)
+    /// Creates a new listener and immediately starts listening on it. This will
+    /// not return until the listener is stopped.
+    val listener = TcpListener new(address, port)
+    listener listen(callback)
+    listener
+end
+
+// Now that everything is defined, wire it up to the VM.
+def _bindNet() native "bindNet"
+_bindNet()

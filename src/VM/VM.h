@@ -22,6 +22,39 @@ namespace magpie
                                ArrayView<gc<Object> >& args,
                                NativeResult& result);
 
+  // Identifies classes that are defined in core lib but have a native C++
+  // object class. The VM stores a reference to each class object so that it
+  // can get the class for a given C++ object.
+  enum CoreClass
+  {
+    // core
+    CLASS_BOOL = 0,
+    CLASS_CHANNEL,
+    CLASS_CHAR,
+    CLASS_CLASS,
+    CLASS_DONE,
+    CLASS_FLOAT,
+    CLASS_FUNCTION,
+    CLASS_INT,
+    CLASS_LIST,
+    CLASS_NOTHING,
+    CLASS_RECORD,
+    CLASS_STRING,
+    CLASS_NO_MATCH_ERROR,
+    CLASS_NO_METHOD_ERROR,
+    CLASS_UNDEFINED_VAR_ERROR,
+
+    // io
+    CLASS_BUFFER,
+    CLASS_FILE,
+    CLASS_STREAM,
+
+    // new
+    CLASS_TCP_LISTENER,
+
+    CLASS_MAX
+  };
+
   // The main Virtual Machine class for a running Magpie interpreter.
   class VM : public RootSource
   {
@@ -29,14 +62,6 @@ namespace magpie
     VM();
 
     virtual void reachRoots();
-
-    // This is called by a native method at the end of the core library so the
-    // VM can register the types defined there that it cares about.
-    void bindCore();
-
-    // This is called by a native method at the end of the io library so the
-    // VM can register the types defined there that it cares about.
-    void bindIO();
 
     bool runProgram(gc<String> path);
 
@@ -54,32 +79,12 @@ namespace magpie
 
     inline gc<Object> nothing() const { return nothing_; }
 
-    inline gc<ClassObject> boolClass() const { return boolClass_; }
-    inline gc<ClassObject> bufferClass() const { return bufferClass_; }
-    inline gc<ClassObject> channelClass() const { return channelClass_; }
-    inline gc<ClassObject> characterClass() const { return characterClass_; }
-    inline gc<ClassObject> classClass() const { return classClass_; }
-    inline gc<ClassObject> doneClass() const { return doneClass_; }
-    inline gc<ClassObject> fileClass() const { return fileClass_; }
-    inline gc<ClassObject> floatClass() const { return floatClass_; }
-    inline gc<ClassObject> functionClass() const { return functionClass_; }
-    inline gc<ClassObject> intClass() const { return intClass_; }
-    inline gc<ClassObject> listClass() const { return listClass_; }
-    inline gc<ClassObject> nothingClass() const { return nothingClass_; }
-    inline gc<ClassObject> recordClass() const { return recordClass_; }
-    inline gc<ClassObject> streamClass() const { return streamClass_; }
-    inline gc<ClassObject> stringClass() const { return stringClass_; }
-    inline gc<ClassObject> noMatchErrorClass() const { return noMatchErrorClass_; }
-    inline gc<ClassObject> noMethodErrorClass() const { return noMethodErrorClass_; }
-    inline gc<ClassObject> tcpListenerClass() const { return tcpListenerClass_; }
-    inline gc<ClassObject> undefinedVarErrorClass() const { return undefinedVarErrorClass_; }
-
     inline gc<Object> getBool(bool value) const
     {
       return value ? true_ : false_;
     }
 
-    gc<Object> getAtom(Atom atom) const;
+    gc<Object> getAtom(Atom atom);
 
     int findNative(gc<String> name);
     Native getNative(int index) const { return natives_[index]; }
@@ -100,6 +105,12 @@ namespace magpie
     int findMultimethod(gc<String> signature);
     void defineMethod(int multimethod, methodId method);
     gc<Multimethod> getMultimethod(int multimethod);
+
+    // Looks up a top-level class variable named [name] inside [module] and
+    // binds that value as [coreClass].
+    void bindClass(const char* module, CoreClass core, const char* name);
+
+    gc<ClassObject> getClass(CoreClass core);
 
     // Sends [error], which is an error that [fiber] did not catch, to the
     // error-displaying fiber so it can be converted to a string and shown to
@@ -141,25 +152,10 @@ namespace magpie
     gc<Object> nothing_;
     gc<Object> done_;
     gc<ChannelObject> errorChannel_;
-    gc<ClassObject> boolClass_;
-    gc<ClassObject> bufferClass_;
-    gc<ClassObject> channelClass_;
-    gc<ClassObject> characterClass_;
-    gc<ClassObject> classClass_;
-    gc<ClassObject> doneClass_;
-    gc<ClassObject> fileClass_;
-    gc<ClassObject> floatClass_;
-    gc<ClassObject> functionClass_;
-    gc<ClassObject> intClass_;
-    gc<ClassObject> listClass_;
-    gc<ClassObject> nothingClass_;
-    gc<ClassObject> recordClass_;
-    gc<ClassObject> streamClass_;
-    gc<ClassObject> stringClass_;
-    gc<ClassObject> noMatchErrorClass_;
-    gc<ClassObject> noMethodErrorClass_;
-    gc<ClassObject> tcpListenerClass_;
-    gc<ClassObject> undefinedVarErrorClass_;
+
+    // References to class objects for classes that are defined in the core lib
+    // but have native C++ implementations.
+    gc<ClassObject> coreClasses_[CLASS_MAX];
 
     NO_COPY(VM);
   };

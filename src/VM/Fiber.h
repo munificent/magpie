@@ -5,6 +5,9 @@
 #include "Memory.h"
 #include "Method.h"
 
+// TODO(bob): Is this the best place to define this?
+#define NATIVE(name) gc<Object> name##Native(VM& vm, Fiber& fiber, ArrayView<gc<Object> >& args, NativeResult& result)
+
 namespace magpie
 {
   class CatchFrame;

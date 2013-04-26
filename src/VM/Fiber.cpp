@@ -159,7 +159,8 @@ namespace magpie
           
           if (!success)
           {
-            gc<Object> error = DynamicObject::create(vm_.noMatchErrorClass());
+            gc<Object> error = DynamicObject::create(
+                vm_.getClass(CLASS_NO_MATCH_ERROR));
             if (!throwError(error)) return FIBER_UNCAUGHT_ERROR;
           }
           break;
@@ -234,7 +235,7 @@ namespace magpie
           if (object.isNull())
           {
             gc<Object> error = DynamicObject::create(
-                vm_.undefinedVarErrorClass());
+                vm_.getClass(CLASS_UNDEFINED_VAR_ERROR));
 
             if (!throwError(error)) return FIBER_UNCAUGHT_ERROR;
           }
@@ -434,7 +435,8 @@ namespace magpie
           gc<Object> pass = load(frame, GET_A(ins));
           if (!pass->toBool())
           {
-            gc<Object> error = DynamicObject::create(vm_.noMatchErrorClass());
+            gc<Object> error = DynamicObject::create(
+                vm_.getClass(CLASS_NO_MATCH_ERROR));
             if (!throwError(error)) return FIBER_UNCAUGHT_ERROR;
           }
           break;

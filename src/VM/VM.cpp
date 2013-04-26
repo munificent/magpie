@@ -5,6 +5,7 @@
 #include "Module.h"
 #include "NativesCore.h"
 #include "NativesIO.h"
+#include "NativesNet.h"
 #include "Object.h"
 #include "Parser.h"
 #include "Path.h"
@@ -51,6 +52,7 @@ namespace magpie
 
     DEF_NATIVE(bindCore);
     DEF_NATIVE(bindIO);
+    DEF_NATIVE(bindNet);
     DEF_NATIVE(objectClass);
     DEF_NATIVE(objectNew);
     DEF_NATIVE(objectToString);
@@ -125,42 +127,7 @@ namespace magpie
     nothing_ = new AtomObject(ATOM_NOTHING);
     done_ = new AtomObject(ATOM_DONE);
   }
-
-  void VM::bindCore()
-  {
-    Module* core = findModule("core");
-    ASSERT_NOT_NULL(core);
-
-    registerClass(core, boolClass_, "Bool");
-    registerClass(core, channelClass_, "Channel");
-    registerClass(core, characterClass_, "Char");
-    registerClass(core, classClass_, "Class");
-    registerClass(core, doneClass_, "Done");
-    registerClass(core, functionClass_, "Function");
-    registerClass(core, floatClass_, "Float");
-    registerClass(core, intClass_, "Int");
-    registerClass(core, listClass_, "List");
-    registerClass(core, nothingClass_, "Nothing");
-    registerClass(core, recordClass_, "Record");
-    registerClass(core, stringClass_, "String");
-    registerClass(core, noMatchErrorClass_, "NoMatchError");
-    registerClass(core, noMethodErrorClass_, "NoMethodError");
-    registerClass(core, undefinedVarErrorClass_, "UndefinedVarError");
-
-    errorChannel_ = asChannel(core->getVariable("_errorChannel"));
-  }
-
-  void VM::bindIO()
-  {
-    Module* io = findModule("io");
-    ASSERT_NOT_NULL(io);
-
-    registerClass(io, bufferClass_, "Buffer");
-    registerClass(io, fileClass_, "File");
-    registerClass(io, streamClass_, "Stream");
-    registerClass(io, tcpListenerClass_, "TcpListener");
-  }
-
+  
   bool VM::runProgram(gc<String> path)
   {
     // Remember where the program is so we can import modules from there.
@@ -295,7 +262,7 @@ namespace magpie
     }
   }
 
-  gc<Object> VM::getAtom(Atom atom) const
+  gc<Object> VM::getAtom(Atom atom)
   {
     switch (atom) {
       case ATOM_FALSE: return false_;
@@ -303,7 +270,7 @@ namespace magpie
       case ATOM_NOTHING: return nothing_;
       case ATOM_DONE: return done_;
       case ATOM_NO_METHOD:
-        return DynamicObject::create(noMethodErrorClass_);
+        return DynamicObject::create(getClass(CLASS_NO_METHOD_ERROR));
     }
 
     ASSERT(false, "Unknown atom ID.");
@@ -412,8 +379,38 @@ namespace magpie
     return multimethods_[multimethodId];
   }
 
+  void VM::bindClass(const char* module, CoreClass core, const char* name)
+  {
+    ASSERT_INDEX(core, CLASS_MAX);
+    ASSERT(coreClasses_[core].isNull(), "Class is already bound.");
+
+    Module* moduleObj = findModule(module);
+    ASSERT_NOT_NULL(moduleObj);
+    
+    gc<Object> value = moduleObj->getVariable(name);
+    ASSERT(!value.isNull(), "Could not find variable.");
+
+    coreClasses_[core] = asClass(value);
+  }
+
+  gc<ClassObject> VM::getClass(CoreClass core)
+  {
+    ASSERT_INDEX(core, CLASS_MAX);
+    ASSERT(!coreClasses_[core].isNull(), "Class has not been bound yet.");
+    return coreClasses_[core];
+  }
+
   void VM::printUncaughtError(gc<Fiber> fiber, gc<Object> error)
   {
+    // Lazy lookup the error channel.
+    if (errorChannel_.isNull())
+    {
+      Module* core = findModule("core");
+      ASSERT_NOT_NULL(core);
+
+      errorChannel_ = asChannel(core->getVariable("_errorChannel"));
+    }
+
     // Send the error to the error-printing fiber and suspend the erroring one.
     errorChannel_->send(fiber, error);
   }

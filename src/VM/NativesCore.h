@@ -7,8 +7,6 @@
 #include "Method.h"
 #include "RootSource.h"
 
-#define NATIVE(name) gc<Object> name##Native(VM& vm, Fiber& fiber, ArrayView<gc<Object> >& args, NativeResult& result)
-
 namespace magpie
 {
   NATIVE(bindCore);

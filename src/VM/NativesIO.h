@@ -4,8 +4,6 @@
 #include "Macros.h"
 #include "Memory.h"
 
-#define NATIVE(name) gc<Object> name##Native(VM& vm, Fiber& fiber, ArrayView<gc<Object> >& args, NativeResult& result)
-
 namespace magpie
 {
   NATIVE(bindIO);
@@ -20,8 +18,5 @@ namespace magpie
   NATIVE(bufferSubscriptInt);
   NATIVE(bufferSubscriptSetInt);
   NATIVE(bufferDecodeAscii);
-  NATIVE(tcpListenerNew);
-  NATIVE(tcpListenerStart);
-  NATIVE(tcpListenerStop);
 }
 

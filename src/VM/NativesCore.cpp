@@ -67,7 +67,21 @@ namespace magpie
   
   NATIVE(bindCore)
   {
-    vm.bindCore();
+    vm.bindClass("core", CLASS_BOOL, "Bool");
+    vm.bindClass("core", CLASS_CHANNEL, "Channel");
+    vm.bindClass("core", CLASS_CHAR, "Char");
+    vm.bindClass("core", CLASS_CLASS, "Class");
+    vm.bindClass("core", CLASS_DONE, "Done");
+    vm.bindClass("core", CLASS_FUNCTION, "Function");
+    vm.bindClass("core", CLASS_FLOAT, "Float");
+    vm.bindClass("core", CLASS_INT, "Int");
+    vm.bindClass("core", CLASS_LIST, "List");
+    vm.bindClass("core", CLASS_NOTHING, "Nothing");
+    vm.bindClass("core", CLASS_RECORD, "Record");
+    vm.bindClass("core", CLASS_STRING, "String");
+    vm.bindClass("core", CLASS_NO_MATCH_ERROR, "NoMatchError");
+    vm.bindClass("core", CLASS_NO_METHOD_ERROR, "NoMethodError");
+    vm.bindClass("core", CLASS_UNDEFINED_VAR_ERROR, "UndefinedVarError");
     return vm.nothing();
   }
 

@@ -8,7 +8,9 @@ namespace magpie
 {
   NATIVE(bindIO)
   {
-    vm.bindIO();
+    vm.bindClass("io", CLASS_BUFFER, "Buffer");
+    vm.bindClass("io", CLASS_FILE, "File");
+    vm.bindClass("io", CLASS_STREAM, "Stream");
     return vm.nothing();
   }
 
@@ -91,26 +93,6 @@ namespace magpie
     return new StringObject(
         String::create(reinterpret_cast<char*>(buffer->data()),
                        buffer->count()));
-  }
-
-  NATIVE(tcpListenerNew)
-  {
-    return new TcpListenerObject(fiber, asString(args[1]), asInt(args[2]));
-  }
-
-  NATIVE(tcpListenerStart)
-  {
-    gc<TcpListenerObject> listener = asTcpListener(args[0]);
-    listener->start(fiber, asFunction(args[1]));
-
-    return vm.nothing();
-  }
-
-  NATIVE(tcpListenerStop)
-  {
-    gc<TcpListenerObject> listener = asTcpListener(args[0]);
-    listener->stop();
-    return vm.nothing();
   }
 }
 
