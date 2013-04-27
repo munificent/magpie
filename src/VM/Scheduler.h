@@ -54,6 +54,18 @@ namespace magpie
     Task* next_;
   };
 
+  // A task using a uv_handle_t.
+  class HandleTask : public Task
+  {
+  public:
+    HandleTask(gc<Fiber> fiber, uv_handle_t* handle);
+    ~HandleTask();
+    virtual void kill();
+
+  private:
+    uv_handle_t* handle_;
+  };
+
   // A list of pending asynchronous tasks.
   class TaskList
   {

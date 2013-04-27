@@ -1,7 +1,7 @@
 #include <sstream>
 
 #include "Object.h"
-#include "NativesCore.h"
+#include "Native/Core.h"
 #include "VM.h"
 
 namespace magpie

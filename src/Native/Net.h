@@ -1,20 +1,15 @@
 #pragma once
 
-#include <iostream>
 #include "uv.h"
 
+#include "Fiber.h"
 #include "Macros.h"
-#include "Managed.h"
+#include "Memory.h"
 #include "Object.h"
-#include "Scheduler.h"
 
 namespace magpie
 {
-  class TcpListenerObject;
-
-  // Unsafe downcasting functions. These must *only* be called after the object
-  // has been verified as being the right type.
-  gc<TcpListenerObject> asTcpListener(gc<Object> obj);
+  void defineNetNatives(VM& vm);
 
   class TcpListenerObject : public Object
   {
@@ -42,3 +37,4 @@ namespace magpie
     uv_tcp_t server_;
   };
 }
+

@@ -1,27 +1,20 @@
 #pragma once
 
-#include <iostream>
-#include "uv.h"
-
+#include "Fiber.h"
 #include "Macros.h"
-#include "Managed.h"
-#include "MagpieString.h"
+#include "Memory.h"
 #include "Object.h"
 #include "Scheduler.h"
 
 namespace magpie
 {
+  void defineIONatives(VM& vm);
+
   class BufferObject;
   class FileObject;
   class File;
   class StreamObject;
 
-  // Unsafe downcasting functions. These must *only* be called after the object
-  // has been verified as being the right type.
-  gc<BufferObject> asBuffer(gc<Object> obj);
-  gc<FileObject> asFile(gc<Object> obj);
-  gc<StreamObject> asStream(gc<Object> obj);
-  
   // A task for a file system operation.
   class FSTask : public Task
   {
@@ -50,18 +43,6 @@ namespace magpie
     gc<BufferObject> buffer_;
   };
 
-  // A task using a uv_handle_t.
-  class HandleTask : public Task
-  {
-  public:
-    HandleTask(gc<Fiber> fiber, uv_handle_t* handle);
-    ~HandleTask();
-    virtual void kill();
-
-  private:
-    uv_handle_t* handle_;
-  };
-  
   class BufferObject : public Object
   {
   public:
@@ -79,14 +60,14 @@ namespace magpie
 
     // Gets a raw pointer to the buffer data.
     void* data() { return bytes_; }
-    
+
     unsigned char get(int index) { return bytes_[index]; }
     void set(int index, unsigned char value) { bytes_[index] = value; }
 
   private:
     BufferObject(int count)
     : Object(),
-      count_(count)
+    count_(count)
     {}
 
     // Number of bytes in the buffer.
@@ -101,8 +82,8 @@ namespace magpie
 
     FileObject(uv_file file)
     : Object(),
-      file_(file),
-      isOpen_(true)
+    file_(file),
+    isOpen_(true)
     {}
 
     bool isOpen() const { return isOpen_; }
@@ -138,7 +119,8 @@ namespace magpie
 
     virtual gc<ClassObject> getClass(VM& vm) const;
     virtual gc<String> toString() const;
-
+    
   private:
   };
 }
+

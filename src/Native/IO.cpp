@@ -1,14 +1,10 @@
 #include <sstream>
-#include <fcntl.h>
 
-#include "Array.h"
-#include "ObjectIO.h"
+#include "Native/IO.h"
 #include "VM.h"
 
 namespace magpie
 {
-  using std::ostream;
-
   gc<BufferObject> asBuffer(gc<Object> obj)
   {
     return static_cast<BufferObject*>(&(*obj));
@@ -22,6 +18,111 @@ namespace magpie
   gc<StreamObject> asStream(gc<Object> obj)
   {
     return static_cast<StreamObject*>(&(*obj));
+  }
+  
+  NATIVE(bindIO)
+  {
+    vm.bindClass("io", CLASS_BUFFER, "Buffer");
+    vm.bindClass("io", CLASS_FILE, "File");
+    vm.bindClass("io", CLASS_STREAM, "Stream");
+    return vm.nothing();
+  }
+
+  NATIVE(fileClose)
+  {
+    gc<FileObject> fileObj = asFile(args[0]);
+    fileObj->close(&fiber);
+
+    result = NATIVE_RESULT_SUSPEND;
+    return NULL;
+  }
+  
+  NATIVE(fileIsOpen)
+  {
+    gc<FileObject> fileObj = asFile(args[0]);
+    return vm.getBool(fileObj->isOpen());
+  }
+  
+  NATIVE(fileOpen)
+  {
+    FileObject::open(&fiber, asString(args[1]));
+    result = NATIVE_RESULT_SUSPEND;
+    return NULL;
+  }
+
+  NATIVE(fileSize)
+  {
+    gc<FileObject> fileObj = asFile(args[0]);
+    fileObj->getSize(&fiber);
+    result = NATIVE_RESULT_SUSPEND;
+    return NULL;
+  }
+  
+  NATIVE(fileReadBytesInt)
+  {
+    gc<FileObject> fileObj = asFile(args[0]);
+    fileObj->readBytes(&fiber, asInt(args[1]));
+    result = NATIVE_RESULT_SUSPEND;
+    return NULL;
+  }
+
+  NATIVE(fileStreamBytes)
+  {
+    gc<StreamObject> stream = new StreamObject();
+    // TODO(bob): Hook up to file.
+    return stream;
+  }
+  
+  NATIVE(bufferNewSize)
+  {
+    return BufferObject::create(asInt(args[1]));
+  }
+
+  NATIVE(bufferCount)
+  {
+    gc<BufferObject> buffer = asBuffer(args[0]);
+    return new IntObject(buffer->count());
+  }
+
+  NATIVE(bufferSubscriptInt)
+  {
+    // Note: bounds checking is handled by core before calling this.
+    gc<BufferObject> buffer = asBuffer(args[0]);
+    return new IntObject(buffer->get(asInt(args[1])));
+  }
+  
+  NATIVE(bufferSubscriptSetInt)
+  {
+    // Note: bounds checking is handled by core before calling this.
+    gc<BufferObject> buffer = asBuffer(args[0]);
+    // TODO(bob): Need to decide how to handle value outside of byte range.
+    buffer->set(asInt(args[1]),
+                static_cast<unsigned char>(asInt(args[2])));
+    return args[2];
+  }
+
+  NATIVE(bufferDecodeAscii)
+  {
+    gc<BufferObject> buffer = asBuffer(args[0]);
+    return new StringObject(
+        String::create(reinterpret_cast<char*>(buffer->data()),
+                       buffer->count()));
+  }
+
+  void defineIONatives(VM& vm)
+  {
+    DEF_NATIVE(bindIO);
+    DEF_NATIVE(fileClose);
+    DEF_NATIVE(fileIsOpen);
+    DEF_NATIVE(fileOpen);
+    DEF_NATIVE(fileSize);
+    DEF_NATIVE(fileReadBytesInt);
+    DEF_NATIVE(fileStreamBytes);
+    DEF_NATIVE(bufferNewSize);
+    DEF_NATIVE(bufferCount);
+    DEF_NATIVE(bufferSubscriptInt);
+    DEF_NATIVE(bufferSubscriptSetInt);
+    DEF_NATIVE(bufferDecodeAscii);
   }
 
   FSTask::FSTask(gc<Fiber> fiber)
@@ -52,25 +153,6 @@ namespace magpie
     buffer_.reach();
   }
 
-  HandleTask::HandleTask(gc<Fiber> fiber, uv_handle_t* handle)
-  : Task(fiber),
-    handle_(handle)
-  {
-    handle_->data = this;
-  }
-
-  HandleTask::~HandleTask()
-  {
-    delete handle_;
-  }
-
-  void HandleTask::kill()
-  {
-    uv_unref(handle_);
-    delete handle_;
-    handle_ = NULL;
-  }
-  
   gc<BufferObject> BufferObject::create(int count)
   {
     // Allocate enough memory for the buffer and its data.
@@ -276,3 +358,4 @@ namespace magpie
     return String::create("[stream]");
   }
 }
+

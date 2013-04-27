@@ -3,7 +3,6 @@
 #include "Fiber.h"
 #include "Module.h"
 #include "Object.h"
-#include "ObjectIO.h"
 #include "Scheduler.h"
 #include "VM.h"
 
@@ -45,6 +44,25 @@ namespace magpie
   void Task::reach()
   {
     fiber_.reach();
+  }
+
+  HandleTask::HandleTask(gc<Fiber> fiber, uv_handle_t* handle)
+  : Task(fiber),
+    handle_(handle)
+  {
+    handle_->data = this;
+  }
+
+  HandleTask::~HandleTask()
+  {
+    delete handle_;
+  }
+
+  void HandleTask::kill()
+  {
+    uv_unref(handle_);
+    delete handle_;
+    handle_ = NULL;
   }
 
   void TaskList::remove(Task* task)

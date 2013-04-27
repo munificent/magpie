@@ -1,8 +1,6 @@
 #include <sstream>
-#include <fcntl.h>
 
-#include "Array.h"
-#include "ObjectNet.h"
+#include "Native/Net.h"
 #include "VM.h"
 
 namespace magpie
@@ -12,10 +10,44 @@ namespace magpie
     return static_cast<TcpListenerObject*>(&(*obj));
   }
 
+  NATIVE(bindNet)
+  {
+    vm.bindClass("net", CLASS_TCP_LISTENER, "TcpListener");
+    return vm.nothing();
+  }
+
+  NATIVE(tcpListenerNew)
+  {
+    return new TcpListenerObject(fiber, asString(args[1]), asInt(args[2]));
+  }
+
+  NATIVE(tcpListenerStart)
+  {
+    gc<TcpListenerObject> listener = asTcpListener(args[0]);
+    listener->start(fiber, asFunction(args[1]));
+
+    return vm.nothing();
+  }
+
+  NATIVE(tcpListenerStop)
+  {
+    gc<TcpListenerObject> listener = asTcpListener(args[0]);
+    listener->stop();
+    return vm.nothing();
+  }
+
+  void defineNetNatives(VM& vm)
+  {
+    DEF_NATIVE(bindNet);
+    DEF_NATIVE(tcpListenerNew);
+    DEF_NATIVE(tcpListenerStart);
+    DEF_NATIVE(tcpListenerStop);
+  }
+
   TcpListenerObject::TcpListenerObject(Fiber& fiber, gc<String> address,
                                        int port)
   : scheduler_(fiber.scheduler()),
-    callback_()
+  callback_()
   {
     uv_tcp_init(fiber.scheduler().loop(), &server_);
     server_.data = this;
@@ -49,7 +81,7 @@ namespace magpie
   {
     // TODO(bob): Should check that we aren't already listening.
     callback_ = callback;
-    
+
     // TODO(bob): Make backlog queue configurable.
     int result = uv_listen(reinterpret_cast<uv_stream_t*>(&server_), 128,
                            tcpListenCallback);
@@ -73,7 +105,7 @@ namespace magpie
   void TcpListenerObject::accept()
   {
     ASSERT(!callback_.isNull(), "Cannot accept when not listening.");
-    
+
     // TODO(bob): Manage this memory (but not on the GC heap since that can get
     // moved out from under libuv.
     uv_tcp_t *client = reinterpret_cast<uv_tcp_t*>(malloc(sizeof(uv_tcp_t)));
@@ -94,3 +126,4 @@ namespace magpie
     }
   }
 }
+
