@@ -1,8 +1,8 @@
 #include <sstream>
 
-#include "Ast.h"
-#include "Lexer.h"
-#include "Parser.h"
+#include "Syntax/Ast.h"
+#include "Syntax/Lexer.h"
+#include "Syntax/Parser.h"
 
 namespace magpie
 {
@@ -122,7 +122,7 @@ namespace magpie
     // Allow imports at any time in the REPL.
     gc<Expr> expr = maybeImport();
     if (!expr.isNull()) return expr;
-    
+
     return topLevelExpression();
   }
 
@@ -143,7 +143,7 @@ namespace magpie
   {
     return parseBlock(true, end1, end2, end3, outEndToken);
   }
-  
+
   gc<Expr> Parser::parseBlock(bool allowCatch, TokenType end1, TokenType end2,
                               TokenType end3, TokenType* outEndToken)
   {
@@ -165,13 +165,13 @@ namespace magpie
         exprs.add(expr);
       }
       while (match(TOKEN_LINE));
-      
+
       if (lookAhead(TOKEN_EOF))
       {
         checkForMissingLine();
         reporter_.error(current()->pos(), "Unterminated block.");
       }
-      
+
       // Return which kind of token we ended the block with, for callers that
       // care.
       *outEndToken = current()->type();
@@ -208,7 +208,7 @@ namespace magpie
       checkForMissingLine();
       reporter_.error(current()->pos(),
           "Expected block or expression but reached end of file.");
-      
+
       // Return a fake node so we can continue and report errors.
       return new AtomExpr(current()->pos(), ATOM_NOTHING);
     }
@@ -244,11 +244,11 @@ namespace magpie
 
     return new ImportExpr(spanFrom(start), name);
   }
-  
+
   gc<Expr> Parser::topLevelExpression()
   {
     gc<Token> start = current();
-    
+
     if (match(TOKEN_DEF))
     {
       // Examples:
@@ -264,13 +264,13 @@ namespace magpie
       gc<String> name;
       gc<Pattern> rightParam;
       gc<Pattern> value;
-      
+
       if (match(TOKEN_LEFT_PAREN))
       {
         leftParam = parsePattern(true);
         consume(TOKEN_RIGHT_PAREN, "Expect ')' after pattern.");
       }
-      
+
       if (lookAhead(TOKEN_NAME) ||
           lookAhead(TOKEN_DOTDOT) ||
           lookAhead(TOKEN_DOTDOTDOT) ||
@@ -281,7 +281,7 @@ namespace magpie
           lookAhead(TOKEN_PRODUCT_OP))
       {
         name = consume()->text();
-        
+
         if (match(TOKEN_LEFT_PAREN))
         {
           if (match(TOKEN_RIGHT_PAREN))
@@ -301,7 +301,7 @@ namespace magpie
       {
         // It's an indexer.
         name = String::create("[]");
-        
+
         rightParam = parsePattern(true);
         consume(TOKEN_RIGHT_BRACKET, "Except ']' after indexer pattern.");
       }
@@ -311,7 +311,7 @@ namespace magpie
             "Expect a method name or pattern after 'def' but got '%s'.",
             current()->text()->cString());
       }
-      
+
       // See if it's a setter.
       if (match(TOKEN_EQ))
       {
@@ -319,7 +319,7 @@ namespace magpie
         value = parsePattern(true);
         consume(TOKEN_RIGHT_PAREN, "Expect ')' after value pattern.");
       }
-      
+
       // See if this is a native method.
       gc<Expr> body;
       if (lookAhead(TOKEN_NAME) && (*current()->text() == "native"))
@@ -333,11 +333,11 @@ namespace magpie
       {
         body = parseBlock();
       }
-      
+
       return new DefExpr(spanFrom(start), leftParam, name, rightParam, value,
                          body);
     }
-    
+
     if (match(TOKEN_DEFCLASS))
     {
       gc<Token> name = consume(TOKEN_NAME,
@@ -383,14 +383,14 @@ namespace magpie
               gc<Expr> type = parseExpressionInPattern(true);
               pattern = new TypePattern(type->pos(), type);
             }
-            
+
             if (match(TOKEN_EQ))
             {
               initializer = flowControl(true);
             }
-            
+
             consume(TOKEN_LINE, "Expect newline after class field.");
-            
+
             fields.add(new ClassField(isMutable, name, pattern, initializer));
           }
           else
@@ -400,14 +400,14 @@ namespace magpie
           }
         }
       }
-      
+
       return new DefClassExpr(spanFrom(start), name->text(), isNative,
                               superclasses, fields);
     }
 
     return statement(true);
   }
-    
+
   gc<Expr> Parser::statement(bool allowBlockArgument)
   {
     gc<Token> start = current();
@@ -424,14 +424,14 @@ namespace magpie
       // exit multiple nexted loops?
       return new BreakExpr(spanFrom(start));
     }
-    
+
     if (match(TOKEN_DEF))
     {
       // Methods can only be declared at the top level. Show a friendly error.
       reporter_.error(current()->pos(),
           "Methods can only be declared at the top level of a module.");
     }
-    
+
     if (match(TOKEN_RETURN))
     {
       // Parse the value if there is one.
@@ -461,13 +461,13 @@ namespace magpie
   gc<Expr> Parser::flowControl(bool allowBlockArgument)
   {
     gc<Token> start = current();
-    
+
     if (match(TOKEN_DO))
     {
       gc<Expr> body = parseBlock();
       return new DoExpr(spanFrom(start), body);
     }
-    
+
     if (match(TOKEN_FOR))
     {
       gc<Pattern> pattern = parsePattern(false);
@@ -475,7 +475,7 @@ namespace magpie
       gc<Expr> iterator = parseBlock(TOKEN_DO);
       consume(TOKEN_DO, "Expect 'do' after for loop iterator.");
       gc<Expr> body = parseBlock();
-      
+
       return new ForExpr(spanFrom(start), pattern, iterator, body);
     }
 
@@ -548,10 +548,10 @@ namespace magpie
       gc<Expr> condition = parseBlock(TOKEN_DO);
       consume(TOKEN_DO, "Expect 'do' after 'while' condition.");
       gc<Expr> body = parseBlock();
-      
+
       return new WhileExpr(spanFrom(start), condition, body);
     }
-    
+
     gc<Expr> expr = parsePrecedence();
 
     // See if we have a "do" block argument after the expression.
@@ -595,7 +595,7 @@ namespace magpie
           fields.addAll(record->fields());
           gc<String> name = String::format("%d", record->fields().count());
           fields.add(Field(name, bodyFn));
-          
+
           rightArg = new RecordExpr(pos, fields);
         }
         else
@@ -627,7 +627,7 @@ namespace magpie
       gc<String> tokenText = token->toString();
       reporter_.error(token->pos(), "Unexpected token '%s'.",
                       tokenText->cString());
-      
+
       // Return a fake expression so we can keep parsing to find more errors.
       return new AtomExpr(token->pos(), ATOM_NOTHING);
     }
@@ -662,13 +662,13 @@ namespace magpie
   {
     return new AtomExpr(token->pos(), ATOM_DONE);
   }
-  
+
   gc<Expr> Parser::float_(gc<Token> token)
   {
     double value = atof(token->text()->cString());
     return new FloatExpr(token->pos(), value);
   }
-  
+
   gc<Expr> Parser::function(gc<Token> token)
   {
     gc<Pattern> pattern;
@@ -692,12 +692,12 @@ namespace magpie
     {
       ImplicitParameterTransformer::transform(body, pattern);
     }
-    
+
     // Expand the pattern to what we need to correctly destructure the packed
     // argument. We do this here so that the AST has been set up before
     // resolving.
     pattern = expandFunctionPattern(spanFrom(token), pattern);
-    
+
     return new FnExpr(spanFrom(token), pattern, body);
   }
 
@@ -731,7 +731,7 @@ namespace magpie
     return new VariablePattern(pos, String::create("_"),
                                new RecordPattern(pos, fields));
   }
-  
+
   gc<Expr> Parser::group(gc<Token> token)
   {
     gc<Expr> expr = flowControl(true);
@@ -744,11 +744,11 @@ namespace magpie
     int value = atoi(token->text()->cString());
     return new IntExpr(token->pos(), value);
   }
-  
+
   gc<Expr> Parser::list(gc<Token> token)
   {
     Array<gc<Expr> > elements;
-    
+
     // Handle empty lists.
     if (!lookAhead(TOKEN_RIGHT_BRACKET))
     {
@@ -759,11 +759,11 @@ namespace magpie
         if (!match(TOKEN_COMMA)) break;
       }
     }
-    
+
     consume(TOKEN_RIGHT_BRACKET, "Except ']' to close list.");
     return new ListExpr(spanFrom(token), elements);
   }
-  
+
   gc<Expr> Parser::name(gc<Token> token)
   {
     return call(gc<Expr>(), token);
@@ -840,14 +840,14 @@ namespace magpie
     gc<Expr> right = parsePrecedence(expressions_[token->type()].precedence);
     return new AndExpr(token->pos(), left, right);
   }
-  
+
   gc<Expr> Parser::assignment(gc<Expr> left, gc<Token> token)
   {
     gc<LValue> lvalue = convertToLValue(left);
     gc<Expr> value = parsePrecedence(PRECEDENCE_ASSIGNMENT);
     return new AssignExpr(spanFrom(left), lvalue, value);
   }
-  
+
   gc<Expr> Parser::call(gc<Expr> left, gc<Token> token)
   {
     // See if we have an argument on the right.
@@ -878,17 +878,17 @@ namespace magpie
 
     return new CallExpr(spanFrom(token), left, token->text(), right);
   }
-    
+
   gc<Expr> Parser::infixCall(gc<Expr> left, gc<Token> token)
   {
     // TODO(bob): Support right-associative infix. Needs to do precedence
     // - 1 here, to be right-assoc.
     gc<Expr> right = parsePrecedence(
         expressions_[token->type()].precedence + 1);
-    
+
     return new CallExpr(spanFrom(left), left, token->text(), right);
   }
-  
+
   gc<Expr> Parser::infixRecord(gc<Expr> left, gc<Token> token)
   {
     Array<Field> fields;
@@ -950,7 +950,7 @@ namespace magpie
     gc<Expr> right = parsePrecedence(PRECEDENCE_PREFIX);
     return new CallExpr(spanFrom(token), NULL, token->text(), right);
   }
-  
+
   gc<Expr> Parser::subscript(gc<Expr> left, gc<Token> token)
   {
     // Parse the subscript.
@@ -1049,7 +1049,7 @@ namespace magpie
       gc<Expr> value = done(last());
       return new ValuePattern(spanFrom(start), value);
     }
-    
+
     if (match(TOKEN_EQEQ))
     {
       gc<Expr> value = parseExpressionInPattern(isMethod);
@@ -1126,10 +1126,10 @@ namespace magpie
       {
         return new WildcardLValue(name->pos());
       }
-      
+
       return new NameLValue(name->pos(), name->name());
     }
-    
+
     RecordExpr* record = expr->asRecordExpr();
     if (record != NULL)
     {
@@ -1139,16 +1139,16 @@ namespace magpie
         const Field& field = record->fields()[i];
         fields.add(LValueField(field.name, convertToLValue(field.value)));
       }
-      
+
       return new RecordLValue(expr->pos(), fields);
     }
-    
+
     CallExpr* call = expr->asCallExpr();
     if (call != NULL)
     {
       return new CallLValue(expr->pos(), call);
     }
-    
+
     // If we got here, the expression is not a valid LValue.
     // TODO(bob): Better error message here.
     reporter_.error(expr->pos(), "Invalid left-hand side of assignment.");
@@ -1213,7 +1213,7 @@ namespace magpie
   gc<Token> Parser::consume(TokenType expected, const char* errorMessage)
   {
     if (lookAhead(expected)) return consume();
-    
+
     if (expected == TOKEN_LINE) checkForMissingLine();
     reporter_.error(current()->pos(), errorMessage);
 
@@ -1227,7 +1227,7 @@ namespace magpie
     {
       while (!match(TOKEN_LINE) && !lookAhead(TOKEN_EOF)) consume();
     }
-    
+
     return token;
   }
 
@@ -1243,7 +1243,7 @@ namespace magpie
   {
     return from->pos()->spanTo(last()->pos());
   }
-  
+
   gc<SourcePos> Parser::spanFrom(gc<Expr> from)
   {
     return from->pos()->spanTo(last()->pos());
@@ -1269,7 +1269,7 @@ namespace magpie
   : numParams_(0),
     results_()
   {}
-  
+
   void ImplicitParameterTransformer::transform(gc<Expr>& body,
                                                gc<Pattern>& pattern)
   {
@@ -1416,7 +1416,7 @@ namespace magpie
   {
     replace(new IsExpr(expr.pos(),
                        transform(expr.value()),
-                       transform(expr.type()))); 
+                       transform(expr.type())));
   }
 
   void ImplicitParameterTransformer::visit(ListExpr& expr, int dummy)
@@ -1546,7 +1546,7 @@ namespace magpie
   gc<Expr> ImplicitParameterTransformer::transform(gc<Expr> expr)
   {
     if (expr.isNull()) return expr;
-    
+
     results_.add(expr);
     expr->accept(*this, -1);
     return results_.removeAt(-1);

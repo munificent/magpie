@@ -2,9 +2,9 @@
 
 #include <iostream>
 
-#include "Array.h"
-#include "Macros.h"
-#include "Managed.h"
+#include "Common.h"
+#include "Data/Array.h"
+#include "Memory/Managed.h"
 
 namespace magpie
 {
@@ -24,14 +24,14 @@ namespace magpie
     // Creates a new heap-allocated string containing the given array of
     // characters.
     static gc<String> create(const Array<char>& text);
-    
+
     // Creates a new string using the given C-style format string and a
     // number of arguments to be formatted.
     static gc<String> format(const char* format, ...);
-    
+
     // Creates a new string that is the concatenation of [a] and [b].
     static gc<String> concat(gc<String> a, gc<String> b);
-    
+
     // Gets the character at the given index.
     char operator [](int index) const;
 
@@ -64,14 +64,14 @@ namespace magpie
 
   private:
     static const int FORMATTED_STRING_MAX = 512;
-    
+
     static size_t calcStringSize(int length);
 
     String(int length);
 
     int length_;
     char chars_[FLEXIBLE_SIZE];
-    
+
     NO_COPY(String);
   };
 

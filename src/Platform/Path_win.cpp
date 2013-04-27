@@ -1,8 +1,8 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-#include "MagpieString.h"
-#include "Path.h"
+#include "Data/String.h"
+#include "Platform/Path.h"
 
 namespace magpie
 {

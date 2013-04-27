@@ -1,8 +1,8 @@
 #include <sstream>
 
-#include "Object.h"
 #include "Native/Core.h"
-#include "VM.h"
+#include "VM/Object.h"
+#include "VM/VM.h"
 
 namespace magpie
 {
@@ -22,7 +22,7 @@ namespace magpie
     }
 
     gc<Object> value() { return value_; }
-    
+
   private:
     uv_write_t   request_;
     uv_stream_t* stream_;
@@ -64,7 +64,7 @@ namespace magpie
     Task::reach();
     value_.reach();
   }
-  
+
   NATIVE(bindCore)
   {
     vm.bindClass("core", CLASS_BOOL, "Bool");
@@ -111,7 +111,7 @@ namespace magpie
   {
     return vm.getBool(!args[0]->equals(args[1]));
   }
-  
+
   NATIVE(printString)
   {
     new PrintTask(&fiber, args[0], 2);

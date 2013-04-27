@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "Macros.h"
+#include "Common.h"
 
 namespace magpie
 {

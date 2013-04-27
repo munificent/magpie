@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Array.h"
-#include "Ast.h"
-#include "Bytecode.h"
-#include "Macros.h"
-#include "Managed.h"
-#include "Memory.h"
+#include "Common.h"
+#include "Compiler/Bytecode.h"
+#include "Data/Array.h"
+#include "Memory/Managed.h"
+#include "Memory/Memory.h"
+#include "Syntax/Ast.h"
 
 namespace magpie
 {

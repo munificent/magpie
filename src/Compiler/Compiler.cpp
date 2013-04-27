@@ -1,12 +1,12 @@
-#include "Ast.h"
-#include "Compiler.h"
-#include "ErrorReporter.h"
-#include "ExprCompiler.h"
-#include "Method.h"
-#include "Module.h"
-#include "Object.h"
-#include "Resolver.h"
-#include "VM.h"
+#include "Compiler/Compiler.h"
+#include "Compiler/ExprCompiler.h"
+#include "Compiler/Resolver.h"
+#include "Syntax/Ast.h"
+#include "Syntax/ErrorReporter.h"
+#include "VM/Method.h"
+#include "VM/Module.h"
+#include "VM/Object.h"
+#include "VM/VM.h"
 
 namespace magpie
 {

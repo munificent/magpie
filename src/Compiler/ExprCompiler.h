@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Array.h"
-#include "Ast.h"
-#include "Bytecode.h"
-#include "Compiler.h"
-#include "Memory.h"
+#include "Compiler/Bytecode.h"
+#include "Compiler/Compiler.h"
+#include "Data/Array.h"
+#include "Memory/Memory.h"
+#include "Syntax/Ast.h"
 
 namespace magpie
 {
@@ -23,7 +23,7 @@ namespace magpie
 
   private:
     ExprCompiler(Compiler& compiler);
-    
+
     gc<Chunk> compileBody(Module* module, gc<Expr> body);
 
     // Compiles [multimethod] to bytecode. Assumes the methods have already
@@ -174,10 +174,10 @@ namespace magpie
 
     void addBreak(const Expr& expr);
     void end();
-    
+
   private:
     ExprCompiler* compiler_;
-    
+
     // The enclosing loop, or NULL if this is the outermost loop.
     Loop* parent_;
 

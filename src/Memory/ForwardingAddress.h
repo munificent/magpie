@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Macros.h"
-#include "Managed.h"
+#include "Common.h"
+#include "Memory/Managed.h"
 
 namespace magpie
 {

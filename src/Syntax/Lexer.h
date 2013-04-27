@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Macros.h"
-#include "Token.h"
+#include "Common.h"
+#include "Syntax/Token.h"
 
 namespace magpie
 {
@@ -30,7 +30,7 @@ namespace magpie
   private:
     // Reads a single token without and newline processing.
     gc<Token> readRawToken();
-    
+
     bool isDone() const;
 
     bool isWhitespace(char c) const;
@@ -46,7 +46,7 @@ namespace magpie
     gc<Token> makeToken(TokenType type);
     gc<Token> makeToken(TokenType type, gc<String> text);
     gc<Token> error(gc<String> message);
-    
+
     void skipLineComment();
     void skipBlockComment();
 
@@ -64,7 +64,7 @@ namespace magpie
     int     startCol_;
     int     currentRow_;
     int     currentCol_;
-    
+
     NO_COPY(Lexer);
   };
 }

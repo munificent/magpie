@@ -3,8 +3,8 @@
 #include <fstream>
 #include <linux/limits.h>
 
-#include "Macros.h"
-#include "Environment.h"
+#include "Common.h"
+#include "Platform/Environment.h"
 
 namespace magpie
 {

@@ -3,8 +3,8 @@
 #include <fstream>
 #include <limits.h>
 
-#include "Macros.h"
-#include "Environment.h"
+#include "Common.h"
+#include "Platform/Environment.h"
 
 namespace magpie
 {
@@ -53,7 +53,7 @@ namespace magpie
   {
     // TODO(bob): Use platform-native API for this?
     using namespace std;
-    
+
     ifstream stream(path->cString());
 
     if (stream.fail()) return gc<String>();
@@ -69,7 +69,7 @@ namespace magpie
     // Read it in.
     str.assign((istreambuf_iterator<char>(stream)),
                istreambuf_iterator<char>());
-    
+
     return String::create(str.c_str());
   }
 }

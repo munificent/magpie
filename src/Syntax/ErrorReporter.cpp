@@ -1,7 +1,7 @@
 #include <sstream>
 #include <cstdarg>
 
-#include "ErrorReporter.h"
+#include "Syntax/ErrorReporter.h"
 
 namespace magpie
 {
@@ -9,7 +9,7 @@ namespace magpie
   {
     // If we're just waiting for more input, don't show any errors.
     if (needMoreLines_) return;
-    
+
     numErrors_++;
 
     // TODO(bob): Hackish. Need to figure out if we want C-style, C++-style or
@@ -27,7 +27,7 @@ namespace magpie
       std::cerr << "Error: " << message << std::endl;
       return;
     }
-    
+
     std::cerr << "[" << pos->file()->path() << "] Error: " << message << std::endl;
 
     if (pos->startLine() == pos->endLine())

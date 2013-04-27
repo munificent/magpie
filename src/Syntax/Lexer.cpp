@@ -2,8 +2,8 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "Array.h"
-#include "Lexer.h"
+#include "Data/Array.h"
+#include "Syntax/Lexer.h"
 
 namespace magpie
 {
@@ -108,7 +108,7 @@ namespace magpie
         case '=':
           if (match('=')) return makeToken(TOKEN_EQEQ);
           return makeToken(TOKEN_EQ);
-          
+
         case '!':
           if (match('=')) return makeToken(TOKEN_NEQ);
           return error(String::create("Expect '=' after '!'."));
@@ -119,7 +119,7 @@ namespace magpie
         case '<':
         case '>':
           return readOperator();
-          
+
         case '-':
           if (isDigit(peek()))
           {
@@ -147,7 +147,7 @@ namespace magpie
 
         case '\'':
           return readCharacter();
-          
+
         case '"':
           return readString();
 
@@ -182,14 +182,14 @@ namespace magpie
   {
     return isNameStart(c) || isDigit(c);
   }
-  
+
   bool Lexer::isOperator(char c) const
   {
     return (c == '+') || (c == '-') ||
            (c == '*') || (c == '/') || (c == '%') ||
            (c == '<') || (c == '>') || (c == '=');
   }
-  
+
   bool Lexer::isDigit(char c) const
   {
     return (c >= '0') && (c <= '9');
@@ -288,14 +288,14 @@ namespace magpie
     while (isName(peek())) advance();
 
     gc<String> text = source_->substring(start_, pos_);
-    
+
     // See if it's a field.
     if (peek() == ':')
     {
       advance();
       return makeToken(TOKEN_FIELD, text);
     }
-    
+
     // See if it's a reserved word.
     TokenType type = TOKEN_NAME;
     if      (*text == "and"     ) type = TOKEN_AND;
@@ -336,16 +336,16 @@ namespace magpie
   gc<Token> Lexer::readNumber()
   {
     while (isDigit(peek())) advance();
-    
+
     // See if it's a field.
     if (peek() == ':')
     {
       gc<String> text = source_->substring(start_, pos_);
-      
+
       advance();
       return makeToken(TOKEN_FIELD, text);
     }
-    
+
     // Read the fractional part, if any.
     TokenType type = TOKEN_INT;
     if ((peek() == '.') && (isDigit(peek(1))))
@@ -357,13 +357,13 @@ namespace magpie
 
     return makeToken(type);
   }
-  
+
   gc<Token> Lexer::readOperator()
   {
     while (isOperator(peek())) advance();
-    
+
     gc<String> text = source_->substring(start_, pos_);
-    
+
     TokenType type;
     switch ((*text)[0])
     {
@@ -380,7 +380,7 @@ namespace magpie
       default:
         ASSERT(false, "Unexpected operator character.");
     }
-    
+
     return makeToken(type, text);
   }
 
@@ -390,13 +390,13 @@ namespace magpie
     // - Handle missing '.
     // - Handle EOF.
     // - Handle non-printing characters.
-    
+
     char c[1];
     c[0] = advance();
     if (advance() != '\'') return error(String::create("Unterminated character."));
     return makeToken(TOKEN_CHARACTER, String::create(c, 1));
   }
-  
+
   gc<Token> Lexer::readString()
   {
     Array<char> chars;

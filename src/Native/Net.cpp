@@ -1,7 +1,7 @@
 #include <sstream>
 
 #include "Native/Net.h"
-#include "VM.h"
+#include "VM/VM.h"
 
 namespace magpie
 {
@@ -47,7 +47,7 @@ namespace magpie
   TcpListenerObject::TcpListenerObject(Fiber& fiber, gc<String> address,
                                        int port)
   : scheduler_(fiber.scheduler()),
-  callback_()
+    callback_()
   {
     uv_tcp_init(fiber.scheduler().loop(), &server_);
     server_.data = this;

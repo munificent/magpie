@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Fiber.h"
-#include "Lexer.h"
-#include "Macros.h"
-#include "Memory.h"
-#include "Method.h"
-#include "RootSource.h"
-#include "Scheduler.h"
+#include "Common.h"
+#include "Memory/Memory.h"
+#include "Memory/RootSource.h"
+#include "Syntax/Lexer.h"
+#include "VM/Fiber.h"
+#include "VM/Method.h"
+#include "VM/Scheduler.h"
 
 #define DEF_NATIVE(name) vm.defineNative(#name, name##Native);
 

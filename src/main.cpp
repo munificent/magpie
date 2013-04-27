@@ -1,13 +1,13 @@
 #include <string>
 
-#include "Ast.h"
-#include "Compiler.h"
-#include "Environment.h"
-#include "Fiber.h"
-#include "MagpieString.h"
-#include "Object.h"
-#include "Parser.h"
-#include "VM.h"
+#include "Syntax/Ast.h"
+#include "Compiler/Compiler.h"
+#include "Platform/Environment.h"
+#include "VM/Fiber.h"
+#include "Data/String.h"
+#include "VM/Object.h"
+#include "Syntax/Parser.h"
+#include "VM/VM.h"
 
 using namespace magpie;
 
@@ -48,7 +48,7 @@ int repl(VM& vm)
     {
       gc<String> line = readLine(!code.isNull());
       if (line.isNull()) return 0;
-      
+
       if (code.isNull())
       {
         code = line;

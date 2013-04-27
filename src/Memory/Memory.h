@@ -2,14 +2,14 @@
 
 #include <iostream>
 
-#include "Macros.h"
-#include "Semispace.h"
+#include "Common.h"
+#include "Memory/Semispace.h"
 
 namespace magpie
 {
   class Managed;
   class RootSource;
-  
+
   // The dynamic memory manager. Uses a basic Cheney-style semi-space copying
   // collector. To keep things extremely simple, this GC has a couple of
   // restrictions.
@@ -38,36 +38,36 @@ namespace magpie
   class Memory
   {
     template <class> friend class gc;
-    
+
   public:
     static void initialize(RootSource* roots, size_t heapSize);
     static void shutDown();
-    
+
     static bool checkCollect();
-    
+
     static void* allocate(size_t size);
-    
+
     static int numCollections() { return numCollections_; }
-    
+
   private:
     // If the pointed-to object is in from-space, copies it to to-space and
     // leaves a forwarding pointer. If it's a forwarding pointer already, just
     // updates the reference. Returns the new address of the object.
     static Managed* copy(Managed* obj);
-    
+
     static RootSource*  roots_;
-    
+
     // Pointers to a and b. These will swap back and forth on each collection.
     static Semispace* from_;
     static Semispace* to_;
-    
+
     // The actual semispaces.
     static Semispace a_;
     static Semispace b_;
-    
+
     static int numCollections_;
   };
-  
+
   // A reference to an object on the garbage-collected heap. It's basically a
   // wrapper around a pointer, but it clarifies in code which pointers are to
   // GC objects and which aren't. This is a value type: it can be freely copied
@@ -80,68 +80,68 @@ namespace magpie
     gc(T* object)
     : object_(object)
     {}
-    
+
     gc()
     : object_(NULL)
     {}
-    
+
     // GC pointers can be freely copied.
     gc(const gc& object)
     : object_(object.object_)
     {}
-    
+
     template <class S>
     gc(const gc<S>& object)
     : object_(object.object_)
     {
       CHECK_SUBTYPE(T, S);
     }
-    
+
     gc<T>& operator =(T* right)
     {
       object_ = right;
       return *this;
     }
-    
+
     gc<T>& operator =(const gc<T>& right)
     {
       if (&right != this) object_ = right.object_;
       return *this;
     }
-    
+
     T& operator *() const
     {
       ASSERT(object_ != NULL, "Cannot dereference NULL pointer.");
       return *static_cast<T*>(object_);
     }
-    
+
     T* operator ->() const
     {
       ASSERT(object_ != NULL, "Cannot dereference NULL pointer.");
       return static_cast<T*>(object_);
     }
-    
+
     // Compare two references. If both are non-null then compares the objects.
     template <class S>
     bool operator ==(const gc<S>& other) const
     {
       CHECK_SUBTYPE(T, S);
-      
+
       // Have to either both be null or neither.
       if (isNull() != other.isNull()) return false;
-      
+
       const T* left = static_cast<const T*>(object_);
       const S* right = static_cast<const S*>(other.object_);
       return *left == *right;
     }
-    
+
     // Compares two references.
     template <class S>
     inline bool operator !=(const gc<S>& other) const
     {
       return !(this == other);
     }
-    
+
     // Indicates that the referenced object is reachable and should be
     // preserved during garbage collection.
     void reach()
@@ -149,18 +149,18 @@ namespace magpie
       if (object_ == NULL) return;
       object_ = static_cast<T*>(Memory::copy(object_));
     }
-    
+
     bool isNull() const { return object_ == NULL; }
-    
+
     // Unlike operator ==, this only checks that the two gc<T> objects are
     // referring to the exact same object in memory.
     inline bool sameAs(gc<T> other)
     {
       return object_ == other.object_;
     }
-    
+
     void set(T* object) { object_ = object; }
-    
+
   private:
     Managed* object_;
 

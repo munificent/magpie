@@ -2,8 +2,8 @@
 
 #include <cstdio>
 
-#include "Macros.h"
-#include "Token.h"
+#include "Common.h"
+#include "Syntax/Token.h"
 
 namespace magpie
 {

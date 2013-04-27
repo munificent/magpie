@@ -2,8 +2,8 @@
 #include <cstdarg>
 #include <cstring>
 
-#include "Macros.h"
-#include "MagpieString.h"
+#include "Common.h"
+#include "Data/String.h"
 
 namespace magpie
 {

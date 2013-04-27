@@ -2,10 +2,10 @@
 
 #include "uv.h"
 
-#include "Fiber.h"
-#include "Macros.h"
-#include "Memory.h"
-#include "Object.h"
+#include "Common.h"
+#include "Memory/Memory.h"
+#include "VM/Fiber.h"
+#include "VM/Object.h"
 
 namespace magpie
 {

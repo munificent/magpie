@@ -1,14 +1,14 @@
-#include "VM.h"
-#include "Compiler.h"
-#include "ErrorReporter.h"
-#include "Environment.h"
-#include "Module.h"
+#include "Compiler/Compiler.h"
 #include "Native/Core.h"
 #include "Native/IO.h"
 #include "Native/Net.h"
-#include "Object.h"
-#include "Parser.h"
-#include "Path.h"
+#include "Platform/Environment.h"
+#include "Platform/Path.h"
+#include "Syntax/ErrorReporter.h"
+#include "Syntax/Parser.h"
+#include "VM/Module.h"
+#include "VM/Object.h"
+#include "VM/VM.h"
 
 namespace magpie
 {
@@ -55,7 +55,7 @@ namespace magpie
     nothing_ = new AtomObject(ATOM_NOTHING);
     done_ = new AtomObject(ATOM_DONE);
   }
-  
+
   bool VM::runProgram(gc<String> path)
   {
     // Remember where the program is so we can import modules from there.
@@ -320,7 +320,7 @@ namespace magpie
 
     Module* moduleObj = findModule(module);
     ASSERT_NOT_NULL(moduleObj);
-    
+
     gc<Object> value = moduleObj->getVariable(name);
     ASSERT(!value.isNull(), "Could not find variable.");
 
@@ -407,7 +407,7 @@ namespace magpie
     {
       if (*modules_[i]->name() == name) return modules_[i];
     }
-    
+
     ASSERT(false, "Could not find core module.");
     return NULL;
   }

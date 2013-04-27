@@ -2,10 +2,10 @@
 
 #include <iostream>
 
-#include "Ast.h"
-#include "Macros.h"
-#include "Managed.h"
-#include "MagpieString.h"
+#include "Common.h"
+#include "Data/String.h"
+#include "Memory/Managed.h"
+#include "Syntax/Ast.h"
 
 namespace magpie
 {

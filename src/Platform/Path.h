@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MagpieString.h"
+#include "Data/String.h"
 
 namespace magpie
 {
@@ -16,7 +16,7 @@ namespace magpie
     //
     //     path/to/file.txt -> path/to
     gc<String> dir(gc<String> path);
-    
+
     // Canonicalizes [path] and returns the full absolute path relative to the
     // current working directory.
     gc<String> real(gc<String> path);

@@ -2,13 +2,13 @@
 
 #include <iostream>
 
-#include "Macros.h"
-#include "Memory.h"
+#include "Common.h"
+#include "Memory/Memory.h"
 
 namespace magpie
 {
   class String;
-  
+
   // Base class for any object that is memory managed by the garbage collector
   class Managed
   {
@@ -18,7 +18,7 @@ namespace magpie
     virtual ~Managed() {}
 
     gc<String> toString() const;
-    
+
     // Gets the forwarding pointer that this object has been replaced with if
     // it has been. Otherwise returns NULL.
     virtual Managed* getForwardingAddress() const { return NULL; }
@@ -29,14 +29,14 @@ namespace magpie
     virtual void reach() {}
 
     virtual void trace(std::ostream& out) const;
-    
+
     void* operator new(size_t s);
 
   private:
 
     NO_COPY(Managed);
   };
-  
+
   inline std::ostream& operator <<(std::ostream& out, const Managed& object)
   {
     object.trace(out);

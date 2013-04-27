@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MagpieString.h"
+#include "Data/String.h"
 
 namespace magpie
 {

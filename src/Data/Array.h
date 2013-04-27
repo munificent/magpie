@@ -3,8 +3,8 @@
 #include <iostream>
 #include <cstring>
 
-#include "Macros.h"
-#include "Memory.h"
+#include "Common.h"
+#include "Memory/Memory.h"
 
 namespace magpie
 {
@@ -110,7 +110,7 @@ namespace magpie
       ASSERT_INDEX(index, count_);
 
       T item = items_[index];
-      
+
       // Shift items up.
       for (int i = index; i < count_ - 1; i++) items_[i] = items_[i + 1];
 

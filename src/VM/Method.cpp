@@ -1,10 +1,10 @@
-#include "Compiler.h"
-#include "ErrorReporter.h"
-#include "Method.h"
-#include "MagpieString.h"
-#include "Module.h"
-#include "Object.h"
-#include "VM.h"
+#include "Compiler/Compiler.h"
+#include "Data/String.h"
+#include "Syntax/ErrorReporter.h"
+#include "VM/Method.h"
+#include "VM/Module.h"
+#include "VM/Object.h"
+#include "VM/VM.h"
 
 namespace magpie
 {
@@ -44,7 +44,7 @@ namespace magpie
     constants_.add(constant);
     return constants_.count() - 1;
   }
-  
+
   gc<Object> Chunk::getConstant(int index) const
   {
     ASSERT_INDEX(index, constants_.count());
@@ -77,7 +77,7 @@ namespace magpie
   void Chunk::debugTrace(VM& vm) const
   {
     using namespace std;
-    
+
     // TODO(bob): Constants.
 
     int file = -1;
@@ -91,11 +91,11 @@ namespace magpie
       }
 
       std::cout << codePos_[i].line << " ";
-      
+
       debugTrace(vm, code_[i]);
     }
   }
-  
+
   void Chunk::debugTrace(VM& vm, instruction ins) const
   {
     using namespace std;
@@ -109,25 +109,25 @@ namespace magpie
       case OP_MOVE:
         cout << "MOVE            " << a << " -> " << b;
         break;
-        
+
       case OP_CONSTANT:
         cout << "CONSTANT        " << a << " -> " << b
              << " \"" << constants_[a] << "\"";
         break;
-        
+
       case OP_ATOM:
         cout << "ATOM            " << a << " -> " << b;
         break;
-        
+
       case OP_METHOD:
         cout << "METHOD          " << a << " <- " << b
              << " \"" << vm.getMultimethod(a)->signature() << "\"";
         break;
-        
+
       case OP_RECORD:
         cout << "RECORD          " << a << "[" << b << "] -> " << c;
         break;
-        
+
       case OP_LIST:
         cout << "LIST            [" << a << "..." << b << "] -> " << c;
         break;
@@ -135,7 +135,7 @@ namespace magpie
       case OP_FUNCTION:
         cout << "FUNCTION        " << a << " -> " << b;
         break;
-        
+
       case OP_ASYNC:
         cout << "ASYNC           " << a;
         break;
@@ -148,7 +148,7 @@ namespace magpie
       case OP_GET_FIELD:
         cout << "GET_FIELD       " << a << "[" << b << "] -> " << c;
         break;
-        
+
       case OP_TEST_FIELD:
         cout << "TEST_FIELD      " << a << "[" << b << "] -> " << c;
         break;
@@ -164,7 +164,7 @@ namespace magpie
       case OP_GET_VAR:
         cout << "OP_GET_VAR      module " << a << ", var " << b << " -> " << c;
         break;
-        
+
       case OP_SET_VAR:
         cout << "OP_SET_VAR      module " << a << ", var " << b << " <- " << c;
         break;
@@ -176,31 +176,31 @@ namespace magpie
       case OP_SET_UPVAR:
         cout << "OP_SET_UPVAR    " << a << " <- " << b;
         break;
-        
+
       case OP_EQUAL:
         cout << "EQUAL           " << a << " == " << b << " -> " << c;
         break;
-        
+
       case OP_NOT:
         cout << "NOT             " << a;
         break;
-        
+
       case OP_IS:
         cout << "IS              " << a << " is " << b;
         break;
-        
+
       case OP_JUMP:
         cout << "JUMP            " << a << " " << b;
         break;
-        
+
       case OP_JUMP_IF_FALSE:
         cout << "JUMP_IF_FALSE   " << a << "? " << b;
         break;
-        
+
       case OP_JUMP_IF_TRUE:
         cout << "JUMP_IF_TRUE    " << a << "? " << b;
         break;
-        
+
       case OP_CALL:
       {
         gc<Multimethod> method = vm.getMultimethod(a);
@@ -208,32 +208,32 @@ namespace magpie
              << c << " \"" << method->signature() << "\"";
         break;
       }
-        
+
       case OP_NATIVE:
         cout << "NATIVE          " << a << "(" << b << ") -> " << c;
         break;
-        
+
       case OP_RETURN:
         cout << "RETURN          " << a;
         break;
-        
+
       case OP_THROW:
         cout << "THROW           " << a;
         break;
-        
+
       case OP_ENTER_TRY:
         cout << "ENTER_TRY       " << a;
         break;
-        
+
       case OP_EXIT_TRY:
         cout << "EXIT_TRY        ";
         break;
-        
+
       case OP_TEST_MATCH:
         cout << "TEST_MATCH      " << a;
         break;
     }
-    
+
     cout << endl;
   }
 
@@ -254,15 +254,15 @@ namespace magpie
     function_(),
     methods_()
   {}
-  
+
   void Multimethod::addMethod(gc<Method> method)
   {
     methods_.add(method);
-    
+
     // Clear out the code since it needs to be recompiled.
     function_ = NULL;
   }
-  
+
   gc<FunctionObject> Multimethod::getFunction(VM& vm)
   {
     // Re-compile if methods have been defined since the last time this was
@@ -272,11 +272,11 @@ namespace magpie
       // Determine their specialization order.
       sort(vm);
       ErrorReporter reporter;
-      
+
       gc<Chunk> chunk = Compiler::compileMultimethod(vm, reporter, *this);
       function_ = FunctionObject::create(chunk);
     }
-    
+
     return function_;
   }
 
@@ -305,7 +305,7 @@ namespace magpie
         {
           if (i == j) continue;
           if (methods_[j].isNull()) continue;
-          
+
           MethodOrder order = compare(vm, methods_[i], methods_[j]);
           if (order == ORDER_AFTER)
           {
@@ -362,10 +362,10 @@ namespace magpie
       case ORDER_NONE: std::cout << "none"; break;
       case ORDER_EQUAL: std::cout << "equal"; break;
     }
-    
+
     std::cout << std::endl;
     */
-    
+
     return order;
   }
 
@@ -407,7 +407,7 @@ namespace magpie
     MethodOrder result = ORDER_NONE;
     PatternComparer comparer(vm, skipVariables(b), &result);
     a->accept(comparer, -1);
-    
+
     return result;
   }
 
@@ -722,10 +722,10 @@ namespace magpie
     {
       ASSERT(name->resolved()->scope() == NAME_MODULE,
              "Method patterns should only contain module-level names.");
-      
+
       int moduleIndex = name->resolved()->module();
       int variableIndex = name->resolved()->index();
-      
+
       Module* module = vm_.getModule(moduleIndex);
       gc<Object> object = module->getVariable(variableIndex);
 

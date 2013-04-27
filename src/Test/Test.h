@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "Memory.h"
-#include "RootSource.h"
+#include "Memory/Memory.h"
+#include "Memory/RootSource.h"
 
 #define EXPECT(condition) \
 _expect(__FILE__, __LINE__, #condition, condition)
@@ -27,12 +27,12 @@ namespace magpie
   {
   public:
     static void showResults();
-    
+
     virtual ~Test() {}
-    
+
     void run();
     virtual void runTests() = 0;
-    
+
   protected:
     static void _expect(const char * file, int line,
                         const char * expression,

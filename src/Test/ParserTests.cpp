@@ -1,8 +1,8 @@
-#include "Ast.h"
+#include "Syntax/Ast.h"
 #include "ParserTests.h"
-#include "Memory.h"
-#include "Parser.h"
-#include "RootSource.h"
+#include "Memory/Memory.h"
+#include "Syntax/Parser.h"
+#include "Memory/RootSource.h"
 
 namespace magpie
 {
@@ -18,7 +18,7 @@ namespace magpie
     gc<SourceFile> source = new SourceFile(String::create("<file>"), code);
     Parser parser(source, reporter);
     gc<ModuleAst> module = parser.parseModule();
-    
+
     gc<String> text = module->toString();
     EXPECT_EQUAL("((1 + (2 * 3)) and ((4 / 5) + (6 % 7)))", *text);
   }

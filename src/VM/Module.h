@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Array.h"
-#include "Macros.h"
-#include "Managed.h"
+#include "Common.h"
+#include "Data/Array.h"
+#include "Memory/Managed.h"
 
 namespace magpie
 {
@@ -37,20 +37,20 @@ namespace magpie
     bool parse(ErrorReporter& reporter);
     void addImports(VM& vm, ErrorReporter& reporter);
     bool compile(VM& vm);
-    
+
     void setBody(gc<Chunk> body);
     gc<Chunk> body() const { return body_; }
-    
+
     Array<Module*>& imports() { return imports_; }
     const Array<Module*>& imports() const { return imports_; }
-    
+
     void addVariable(gc<String> name, gc<Object> value);
     int numVariables() const { return variables_.count(); }
-    
+
     // Finds the previously-declared module-level variable with the given name.
     // Returns -1 if not found.
     int findVariable(gc<String> name);
-    
+
     gc<Object> getVariable(int index) const { return variables_[index]; }
     gc<Object> getVariable(const char* name) const;
     gc<String> getVariableName(int index) const { return variableNames_[index]; }
@@ -62,7 +62,7 @@ namespace magpie
   private:
     // The name of the module. This is how it will be referenced in imports.
     gc<String> name_;
-    
+
     // The path to the file the module was loaded from.
     gc<String> path_;
 
@@ -77,14 +77,14 @@ namespace magpie
     // The code compromising a module is compiled to a fake method so that
     // loading a module is basically just executing a function call.
     gc<Chunk> body_;
-    
+
     // The modules imported by this one.
     Array<Module*> imports_;
-    
+
     // The top-level variables defined by this module.
     Array<gc<Object> > variables_;
     Array<gc<String> > variableNames_;
-    
+
     NO_COPY(Module);
   };
 }

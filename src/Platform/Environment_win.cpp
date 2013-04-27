@@ -3,8 +3,8 @@
 #include <cstring>
 #include <fstream>
 
-#include "Macros.h"
-#include "Environment.h"
+#include "Common.h"
+#include "Platform/Environment.h"
 
 namespace magpie
 {

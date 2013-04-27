@@ -1,7 +1,7 @@
 #include <sstream>
 
 #include "Native/IO.h"
-#include "VM.h"
+#include "VM/VM.h"
 
 namespace magpie
 {
@@ -19,7 +19,7 @@ namespace magpie
   {
     return static_cast<StreamObject*>(&(*obj));
   }
-  
+
   NATIVE(bindIO)
   {
     vm.bindClass("io", CLASS_BUFFER, "Buffer");
@@ -36,13 +36,13 @@ namespace magpie
     result = NATIVE_RESULT_SUSPEND;
     return NULL;
   }
-  
+
   NATIVE(fileIsOpen)
   {
     gc<FileObject> fileObj = asFile(args[0]);
     return vm.getBool(fileObj->isOpen());
   }
-  
+
   NATIVE(fileOpen)
   {
     FileObject::open(&fiber, asString(args[1]));
@@ -57,7 +57,7 @@ namespace magpie
     result = NATIVE_RESULT_SUSPEND;
     return NULL;
   }
-  
+
   NATIVE(fileReadBytesInt)
   {
     gc<FileObject> fileObj = asFile(args[0]);
@@ -72,7 +72,7 @@ namespace magpie
     // TODO(bob): Hook up to file.
     return stream;
   }
-  
+
   NATIVE(bufferNewSize)
   {
     return BufferObject::create(asInt(args[1]));
@@ -90,7 +90,7 @@ namespace magpie
     gc<BufferObject> buffer = asBuffer(args[0]);
     return new IntObject(buffer->get(asInt(args[1])));
   }
-  
+
   NATIVE(bufferSubscriptSetInt)
   {
     // Note: bounds checking is handled by core before calling this.

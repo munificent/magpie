@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Array.h"
-#include "Managed.h"
-#include "Memory.h"
-#include "Method.h"
+#include "Data/Array.h"
+#include "Memory/Managed.h"
+#include "Memory/Memory.h"
+#include "VM/Method.h"
 
 // TODO(bob): Is this the best place to define this?
 #define NATIVE(name) gc<Object> name##Native(VM& vm, Fiber& fiber, ArrayView<gc<Object> >& args, NativeResult& result)
@@ -25,10 +25,10 @@ namespace magpie
 
     // The fiber has been suspended to pass execution to another fiber.
     FIBER_SUSPEND,
-    
+
     // A garbage collection is happened, so the fiber has moved in memory.
     FIBER_DID_GC,
-    
+
     // An error was thrown and not caught by anything, so the fiber has
     // completely unwound.
     FIBER_UNCAUGHT_ERROR
@@ -65,7 +65,7 @@ namespace magpie
     Scheduler& scheduler() { return scheduler_; }
 
     gc<Fiber> successor() { return successor_; }
-    
+
     // Returns true if this fiber has finished executing all of its code.
     bool isDone();
 
@@ -99,32 +99,32 @@ namespace magpie
         ip(0),
         stackStart(0)
       {}
-      
+
       CallFrame(gc<FunctionObject> function, int stackStart)
       : function(function),
         ip(0),
         stackStart(stackStart)
       {}
-      
+
       gc<FunctionObject> function;
       int                ip;
       int                stackStart;
     };
-    
+
     void call(gc<FunctionObject> function, int stackStart);
-    
+
     // Loads a slot for the given callframe.
     inline gc<Object> load(const CallFrame& frame, int slot)
     {
       return stack_[frame.stackStart + slot];
     }
-    
+
     // Stores a slot for the given callframe.
     inline void store(const CallFrame& frame, int slot, gc<Object> value)
     {
       stack_[frame.stackStart + slot] = value;
     }
-    
+
     // Throws the given error object. Returns true if a catch handler was found
     // or false if the error unwound the entire callstack.
     bool throwError(gc<Object> error);
@@ -180,7 +180,7 @@ namespace magpie
   private:
     gc<Object> value_;
   };
-    
+
   // Describes a block containing a "catch" clause that is currently on the
   // stack. When an error is thrown, this is used to jump to the appropriate
   // catch handler(s).
@@ -192,22 +192,22 @@ namespace magpie
       callFrame_(callFrame),
       offset_(offset)
     {}
-    
+
     void reach();
-    
+
     gc<CatchFrame> parent() const { return parent_; }
     int callFrame() const { return callFrame_; }
     int offset() const { return offset_; }
-    
+
   private:
     // The next enclosing catch. If this catch doesn't handle the error, it
     // will be rethrown to its parent. If the parent is null, then the error
     // is unhandled and the fiber will abort.
     gc<CatchFrame> parent_;
-    
+
     // Index of the CallFrame for the chunk containing this catch.
     int callFrame_;
-    
+
     // The offset of the instruction to jump to in the containing chunk to
     // start executing the catch handler.
     int offset_;

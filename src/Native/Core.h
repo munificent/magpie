@@ -1,11 +1,10 @@
 #pragma once
 
-#include "Fiber.h"
-#include "Lexer.h"
-#include "Macros.h"
-#include "Memory.h"
-#include "Method.h"
-#include "RootSource.h"
+#include "Common.h"
+#include "Memory/Memory.h"
+#include "Memory/RootSource.h"
+#include "VM/Fiber.h"
+#include "VM/Method.h"
 
 namespace magpie
 {

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Array.h"
-#include "Macros.h"
-#include "Managed.h"
-#include "Token.h"
+#include "Common.h"
+#include "Data/Array.h"
+#include "Memory/Managed.h"
+#include "Syntax/Token.h"
 
 namespace magpie
 {
@@ -32,7 +32,7 @@ namespace magpie
     : name(),
       value()
     {}
-    
+
     Field(gc<String> name, gc<Expr> value)
     : name(name),
       value(value)
@@ -41,7 +41,7 @@ namespace magpie
     gc<String> name;
     gc<Expr> value;
   };
-  
+
   // A record pattern field.
   struct PatternField
   {
@@ -49,12 +49,12 @@ namespace magpie
     : name(),
       value()
     {}
-    
+
     PatternField(gc<String> name, gc<Pattern> value)
     : name(name),
       value(value)
     {}
-    
+
     gc<String> name;
     gc<Pattern> value;
   };
@@ -66,16 +66,16 @@ namespace magpie
     : name(),
       value()
     {}
-    
+
     LValueField(gc<String> name, gc<LValue> value)
     : name(name),
       value(value)
     {}
-    
+
     gc<String> name;
     gc<LValue> value;
   };
-  
+
   // A class field.
   class ClassField : public Managed
   {
@@ -87,21 +87,21 @@ namespace magpie
       pattern_(pattern),
       initializer_(initializer)
     {}
-    
+
     bool isMutable() const { return isMutable_; }
     gc<String> name() const { return name_; }
     gc<Pattern> pattern() const { return pattern_; }
     gc<Expr> initializer() const { return initializer_; }
-    
+
     void reach();
-    
+
   private:
     bool isMutable_;
     gc<String> name_;
     gc<Pattern> pattern_;
     gc<Expr> initializer_;
   };
-  
+
   // A pattern paired with the expression to execute when the pattern matches.
   // Used for match expressions and catch clauses.
   class MatchClause
@@ -111,15 +111,15 @@ namespace magpie
     : pattern_(),
       body_()
     {}
-    
+
     MatchClause(gc<Pattern> pattern, gc<Expr> body)
     : pattern_(pattern),
       body_(body)
     {}
-    
+
     gc<Pattern> pattern() const { return pattern_; }
     gc<Expr> body() const { return body_; }
-    
+
   private:
     gc<Pattern> pattern_;
     gc<Expr> body_;
@@ -203,7 +203,7 @@ namespace magpie
       maxLocals_ = maxLocals;
       closures_.addAll(closures);
     }
-    
+
   private:
     int maxLocals_;
 
@@ -218,18 +218,18 @@ namespace magpie
     ModuleAst(gc<SequenceExpr> body)
     : body_(body)
     {}
-    
+
     gc<SequenceExpr> body() const { return body_; }
-    
+
     virtual void reach()
     {
       body_.reach();
     }
-    
+
   private:
     gc<SequenceExpr> body_;
   };
-  
+
 #include "Ast.generated.h"
 }
 

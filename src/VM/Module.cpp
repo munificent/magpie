@@ -1,11 +1,11 @@
-#include "Compiler.h"
-#include "Environment.h"
-#include "Module.h"
-#include "Memory.h"
-#include "Method.h"
-#include "Object.h"
-#include "Parser.h"
-#include "VM.h"
+#include "Compiler/Compiler.h"
+#include "Memory/Memory.h"
+#include "Platform/Environment.h"
+#include "Syntax/Parser.h"
+#include "VM/Method.h"
+#include "VM/Module.h"
+#include "VM/Object.h"
+#include "VM/VM.h"
 
 namespace magpie
 {
@@ -58,25 +58,25 @@ namespace magpie
 
     return reporter.numErrors() == 0;
   }
-  
+
   void Module::setBody(gc<Chunk> body)
   {
     body_ = body;
   }
-  
+
   void Module::addVariable(gc<String> name, gc<Object> value)
   {
     variableNames_.add(name);
     variables_.add(value);
   }
-  
+
   int Module::findVariable(gc<String> name)
   {
     for (int i = 0; i < variableNames_.count(); i++)
     {
       if (variableNames_[i] == name) return i;
     }
-    
+
     return -1;
   }
 

@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "Array.h"
-#include "Macros.h"
+#include "Common.h"
+#include "Data/Array.h"
 
 namespace magpie
 {

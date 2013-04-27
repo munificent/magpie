@@ -1,10 +1,10 @@
 #include "uv.h"
 
-#include "Fiber.h"
-#include "Module.h"
-#include "Object.h"
-#include "Scheduler.h"
-#include "VM.h"
+#include "VM/Fiber.h"
+#include "VM/Module.h"
+#include "VM/Object.h"
+#include "VM/Scheduler.h"
+#include "VM/VM.h"
 
 namespace magpie
 {
@@ -208,7 +208,7 @@ namespace magpie
   {
     run(new Fiber(vm_, *this, function, NULL));
   }
-  
+
   void Scheduler::add(gc<Fiber> fiber)
   {
     ready_.add(fiber);

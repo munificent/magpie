@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Array.h"
-#include "Memory.h"
-#include "Ast.h"
+#include "Data/Array.h"
+#include "Memory/Memory.h"
+#include "Syntax/Ast.h"
 
 namespace magpie
 {
@@ -48,7 +48,7 @@ namespace magpie
 
     Resolver(Compiler& compiler, Module& module, Resolver* parent,
              bool isModuleBody);
-    
+
     // The AST for a method parameter is a single pattern on each side, but the
     // compile implicitly destructures it when the pattern is a record so that
     // we don't allocate a record only to immediately destructure it. These
@@ -64,7 +64,7 @@ namespace magpie
     // the index of the closure in this procedure if found, or -1 if the name
     // could not be resolved.
     int resolveClosure(gc<String> name);
-    
+
     bool resolveTopLevelName(Module& module, NameExpr& expr);
 
     // Returns the resolved local variable with [name] or NULL if not found.
@@ -72,7 +72,7 @@ namespace magpie
 
     // Creates a new local variable with the given name.
     gc<ResolvedName> makeLocal(gc<SourcePos> pos, gc<String> name);
-        
+
     virtual void visit(AndExpr& expr, int dummy);
     virtual void visit(AssignExpr& expr, int dest);
     virtual void visit(AsyncExpr& expr, int dummy);
@@ -118,16 +118,16 @@ namespace magpie
     // If this resolver is resolving a function or async block, this will point
     // to the resolver for the containing expression. Used to resolve closures.
     Resolver* parent_;
-    
+
     // True if this resolver is resolving top-level expressions in a module
     // body. False if it's resolving a method body.
     bool isModuleBody_;
-    
+
     // The names of the current in-scope local variables (including all outer
     // scopes). The indices in this array correspond to the slots where those
     // locals are stored.
     Array<Local> locals_;
-    
+
     // The maximum number of locals that are in scope at the same time.
     int maxLocals_;
 
@@ -136,7 +136,7 @@ namespace magpie
     // We sometimes need to create placeholder locals to make sure the indices
     // in locals_ line up with slots. This is used to name them.
     int unnamedSlotId_;
-    
+
     // The current inner-most local variable scope.
     Scope* scope_;
 
@@ -145,36 +145,36 @@ namespace magpie
 
     NO_COPY(Resolver);
   };
-  
+
   // Keeps track of local variable scopes to handle nesting and shadowing.
   // This class can also visit patterns in order to create slots for the
   // variables declared in a pattern.
   class Scope : private PatternVisitor
   {
   public:
-    Scope(Resolver* resolver);      
+    Scope(Resolver* resolver);
     ~Scope();
-    
+
     bool isTopLevel() const;
-    
+
     void resolve(Pattern& pattern);
-    
+
     int startSlot() const { return start_; }
-    
+
     // Closes this scope. This must be called before the Scope object goes out
     // of (C++) scope.
     void end();
-    
+
     virtual void visit(RecordPattern& pattern, int dummy);
     virtual void visit(TypePattern& pattern, int dummy);
     virtual void visit(ValuePattern& pattern, int dummy);
     virtual void visit(VariablePattern& pattern, int dummy);
-    
+
   private:
     Resolver& resolver_;
     Scope* parent_;
     int start_;
-    
+
     NO_COPY(Scope);
   };
 }

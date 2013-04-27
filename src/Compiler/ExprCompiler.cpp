@@ -1,10 +1,10 @@
-#include "ErrorReporter.h"
-#include "Method.h"
-#include "Module.h"
-#include "ExprCompiler.h"
-#include "Object.h"
-#include "Resolver.h"
-#include "Token.h"
+#include "Compiler/ExprCompiler.h"
+#include "Compiler/Resolver.h"
+#include "VM/Method.h"
+#include "VM/Module.h"
+#include "VM/Object.h"
+#include "Syntax/ErrorReporter.h"
+#include "Syntax/Token.h"
 
 namespace magpie
 {
@@ -99,7 +99,7 @@ namespace magpie
                              gc<Pattern> valueParam, gc<Expr> body)
   {
     currentFile_ = chunk_->addFile(module->source());
-    
+
     module_ = module;
     // Reserve slots up front for all of the locals. This ensures that
     // temps will always be after locals.
@@ -131,7 +131,7 @@ namespace magpie
 
     compiler.endJumps();
   }
-  
+
   void ExprCompiler::compileParam(PatternCompiler& compiler,
                                     gc<Pattern> param, int& slot)
   {
@@ -284,7 +284,7 @@ namespace magpie
     write(expr, OP_MOVE, dest);
 
     compileMatch(expr.catches(), dest, true);
-    
+
     endJump(jumpPastCatch, OP_JUMP, 1);
   }
 
@@ -296,7 +296,7 @@ namespace magpie
     int index = chunk_->addConstant(new CharacterObject(expr.value()));
     write(expr, OP_CONSTANT, index, dest);
   }
-  
+
   void ExprCompiler::visit(DefExpr& expr, int dest)
   {
     gc<String> signature = SignatureBuilder::build(expr);
@@ -343,7 +343,7 @@ namespace magpie
     int index = chunk_->addConstant(new FloatObject(expr.value()));
     write(expr, OP_CONSTANT, index, dest);
   }
-  
+
   void ExprCompiler::visit(FnExpr& expr, int dest)
   {
     // TODO(bob): Handle closures.
@@ -355,7 +355,7 @@ namespace magpie
 
     compileClosures(expr.pos(), expr.resolved());
   }
-  
+
   void ExprCompiler::visit(ForExpr& expr, int dest)
   {
     // TODO(bob): Hackish. An actual intermediate representation would help
@@ -398,7 +398,7 @@ namespace magpie
     endJumpBack(expr, loopStart);
     endJump(loopExit, OP_JUMP_IF_TRUE, doneSlot);
     loop.end();
-    
+
     releaseTemp(); // iterator.
 
     // TODO(bob): Need to figure out what the result value should be.
@@ -452,7 +452,7 @@ namespace magpie
     int index = chunk_->addConstant(new IntObject(expr.value()));
     write(expr, OP_CONSTANT, index, dest);
   }
-  
+
   void ExprCompiler::visit(IsExpr& expr, int dest)
   {
     compile(expr.value(), dest);
@@ -818,7 +818,7 @@ namespace magpie
 
     chunk_->write(currentFile_, line, MAKE_ABC(a, b, c, op));
   }
-  
+
   int ExprCompiler::startJump(const Expr& expr)
   {
     return startJump(expr.pos());
@@ -901,7 +901,7 @@ namespace magpie
     parent_ = compiler_->currentLoop_;
     compiler_->currentLoop_ = this;
   }
-  
+
   Loop::~Loop()
   {
     ASSERT(compiler_ == NULL, "Forgot to end() loop.");
@@ -934,7 +934,7 @@ namespace magpie
   {
     ASSERT(jumpOnFailure_,
            "Should not generate jumps if the last clause throws.");
-    
+
     // Since this isn't the last case, then every match failure should just
     // jump to the next case.
     for (int j = 0; j < tests_.count(); j++)
@@ -960,7 +960,7 @@ namespace magpie
     for (int i = 0; i < pattern.fields().count(); i++)
     {
       const PatternField& field = pattern.fields()[i];
-      
+
       // Test and destructure the field. This takes two instructions to encode
       // all of the operands.
       int fieldSlot = compiler_.makeTemp();

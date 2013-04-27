@@ -1,5 +1,5 @@
-#include "Token.h"
-#include "Memory.h"
+#include "Memory/Memory.h"
+#include "Syntax/Token.h"
 
 namespace magpie
 {

@@ -1,7 +1,7 @@
 #include "LexerTests.h"
-#include "Lexer.h"
-#include "Memory.h"
-#include "RootSource.h"
+#include "Syntax/Lexer.h"
+#include "Memory/Memory.h"
+#include "Memory/RootSource.h"
 
 namespace magpie
 {
@@ -41,7 +41,7 @@ namespace magpie
     EXPECT_EQUAL(TOKEN_RIGHT_BRACE, token->type());
     EXPECT_EQUAL("}", *token->text());
   }
-  
+
   void LexerTests::stringLiteral()
   {
     gc<String> code = String::create("\"st\\nr\"");

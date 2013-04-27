@@ -1,6 +1,6 @@
-#include "Macros.h"
-#include "Environment.h"
-#include "Path.h"
+#include "Common.h"
+#include "Platform/Environment.h"
+#include "Platform/Path.h"
 
 namespace magpie
 {

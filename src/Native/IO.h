@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Fiber.h"
-#include "Macros.h"
-#include "Memory.h"
-#include "Object.h"
-#include "Scheduler.h"
+#include "Common.h"
+#include "Memory/Memory.h"
+#include "VM/Fiber.h"
+#include "VM/Object.h"
+#include "VM/Scheduler.h"
 
 namespace magpie
 {
@@ -67,7 +67,7 @@ namespace magpie
   private:
     BufferObject(int count)
     : Object(),
-    count_(count)
+      count_(count)
     {}
 
     // Number of bytes in the buffer.
@@ -82,8 +82,8 @@ namespace magpie
 
     FileObject(uv_file file)
     : Object(),
-    file_(file),
-    isOpen_(true)
+      file_(file),
+      isOpen_(true)
     {}
 
     bool isOpen() const { return isOpen_; }
@@ -119,7 +119,7 @@ namespace magpie
 
     virtual gc<ClassObject> getClass(VM& vm) const;
     virtual gc<String> toString() const;
-    
+
   private:
   };
 }

@@ -2,8 +2,8 @@
 
 #include "uv.h"
 
-#include "Array.h"
-#include "Macros.h"
+#include "Common.h"
+#include "Data/Array.h"
 
 namespace magpie
 {
@@ -25,14 +25,14 @@ namespace magpie
 
   public:
     virtual ~Task() {}
-    
+
     gc<Fiber> fiber() { return fiber_; }
 
     // Gets the main libuv loop this task will run on.
     uv_loop_t* loop();
-    
+
     virtual void kill() = 0;
-    
+
     // Completes the task. Removes it from the list of pending tasks and runs
     // the fiber (and any other fibers that are able to be run).
     //
@@ -74,7 +74,7 @@ namespace magpie
     : head_(NULL),
       tail_(NULL)
     {}
-    
+
     void add(Task* task);
 
     // Removes [waiting] from this list. Does not free it.
@@ -95,14 +95,14 @@ namespace magpie
   class Scheduler
   {
     friend class Task;
-    
+
   public:
     Scheduler(VM& vm);
 
     uv_loop_t* loop() { return loop_; }
 
     uv_tty_t* tty() { return &tty_; }
-    
+
     void run(Array<Module*> modules);
 
     // TODO(bob): Get this working with libuv!

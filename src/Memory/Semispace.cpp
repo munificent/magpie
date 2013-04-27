@@ -1,7 +1,7 @@
 #include "Semispace.h"
 
-#include "ForwardingAddress.h"
-#include "Managed.h"
+#include "Memory/ForwardingAddress.h"
+#include "Memory/Managed.h"
 
 namespace magpie
 {
@@ -31,13 +31,13 @@ namespace magpie
   void Semispace::shutDown()
   {
     ASSERT(memory_ != NULL, "Not initialized.");
-    
+
     ::operator delete(memory_);
     memory_ = NULL;
     free_ = NULL;
     end_ = NULL;
   }
-  
+
   bool Semispace::canAllocate(size_t size) const
   {
     // Find the end of the allocated object.
@@ -55,7 +55,7 @@ namespace magpie
     {
       size = sizeof(ForwardingAddress);
     }
-    
+
     // The allocated object will start just after its size.
     char* allocated = free_ + sizeof(size_t);
     char* next = allocated + size;
@@ -64,17 +64,17 @@ namespace magpie
     if (next >= end_) return NULL;
 
     free_ = next;
-    
+
     // Store the allocated size so we know where the next object starts.
     *reinterpret_cast<size_t*>(allocated - sizeof(size_t)) = size;
-    
+
     return allocated;
   }
 
   void Semispace::reset()
   {
     free_ = memory_;
-    
+
     // Clear it out so we can track down GC bugs.
     /*
     memset(memory_, 0xff, end_ - memory_);
@@ -85,7 +85,7 @@ namespace magpie
   {
     // Bail if there are no objects in the heap.
     if (*reinterpret_cast<size_t*>(memory_) == 0) return NULL;
-    
+
     // Skip past the size.
     return reinterpret_cast<Managed*>(memory_ + sizeof(size_t));
   }
@@ -96,10 +96,10 @@ namespace magpie
     char* pos = reinterpret_cast<char*>(current);
     size_t size = *reinterpret_cast<size_t*>(pos - sizeof(size_t));
     char* next = pos + size;
-    
+
     // Don't walk past the end.
     if (next >= free_) return NULL;
-    
+
     // Skip past the size header of the next object.
     return reinterpret_cast<Managed*>(next + sizeof(size_t));
   }

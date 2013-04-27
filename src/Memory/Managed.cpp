@@ -1,8 +1,8 @@
 #include <sstream>
 
-#include "Managed.h"
-#include "VM.h"
-#include "Memory.h"
+#include "Memory/Managed.h"
+#include "Memory/Memory.h"
+#include "VM/VM.h"
 
 namespace magpie
 {
