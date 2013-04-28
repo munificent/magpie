@@ -4,7 +4,7 @@
 
 namespace magpie
 {
-  class QueueTests : public Test
+  class FixedQueueTests : public Test
   {
   public:
     virtual void runTests();

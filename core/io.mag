@@ -87,6 +87,12 @@ end
 
 defclass Stream is Iterable native
 
+def (s is Stream) iterate
+    s
+end
+
+def (is Stream) advance native "streamAdvance"
+
 defclass Encoding
     val name is String
 end

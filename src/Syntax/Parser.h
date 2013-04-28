@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Common.h"
-#include "Data/Queue.h"
+#include "Data/FixedQueue.h"
 #include "Syntax/ErrorReporter.h"
 #include "Syntax/Lexer.h"
 
@@ -153,7 +153,7 @@ namespace magpie
     ErrorReporter& reporter_;
 
     // The 2 here is the maximum number of lookahead tokens.
-    Queue<gc<Token>, 2> read_;
+    FixedQueue<gc<Token>, 2> read_;
 
     // The most recently consumed token.
     gc<Token> last_;

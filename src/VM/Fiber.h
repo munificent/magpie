@@ -75,6 +75,8 @@ namespace magpie
     FiberResult run(gc<Object>& result);
     void storeReturn(gc<Object> value);
 
+    void resume(gc<Object> returnValue);
+
     // Mark this fiber as being no longer blocked on a channel and able to run.
     void ready();
 

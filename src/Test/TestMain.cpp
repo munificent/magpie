@@ -3,7 +3,7 @@
 #include "ArrayTests.h"
 #include "LexerTests.h"
 #include "MemoryTests.h"
-#include "QueueTests.h"
+#include "FixedQueueTests.h"
 #include "StringTests.h"
 #include "TokenTests.h"
 
@@ -14,7 +14,7 @@ int main (int argc, char * const argv[])
   ArrayTests().run();
   LexerTests().run();
   MemoryTests().run();
-  QueueTests().run();
+  FixedQueueTests().run();
   StringTests().run();
   TokenTests().run();
 

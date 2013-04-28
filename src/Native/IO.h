@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Common.h"
+#include "Data/Queue.h"
 #include "Memory/Memory.h"
 #include "VM/Fiber.h"
 #include "VM/Object.h"
@@ -43,6 +44,18 @@ namespace magpie
     gc<BufferObject> buffer_;
   };
 
+  // A task for reading from a stream.
+  class StreamReadTask : public Task
+  {
+  public:
+    StreamReadTask(gc<Fiber> fiber, gc<StreamObject> stream);
+
+    virtual void reach();
+
+  private:
+    gc<StreamObject> stream_;
+  };
+  
   class BufferObject : public Object
   {
   public:
@@ -114,13 +127,30 @@ namespace magpie
   {
   public:
     StreamObject()
-    : Object()
+    : Object(),
+      read_(),
+      pending_()
     {}
 
     virtual gc<ClassObject> getClass(VM& vm) const;
     virtual gc<String> toString() const;
 
+    virtual void reach();
+
+    void add(uv_buf_t data);
+
+    // Reads a buffer from the stream. If a buffer is already available, returns
+    // it immediately. Otherwise, pauses [fiber] and creates a task that will
+    // complete when a buffer is available.
+    gc<BufferObject> read(gc<Fiber> fiber);
+
   private:
+    // The buffers that have already been read and are ready to be consumed.
+    Queue<gc<BufferObject> > read_;
+
+    // The fibers that are waiting to read from this stream. read_ and pending_
+    // will not both be non-empty at the same time.
+    Queue<gc<Fiber> > pending_;
   };
 }
 

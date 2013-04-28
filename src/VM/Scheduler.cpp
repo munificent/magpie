@@ -20,14 +20,7 @@ namespace magpie
     // one.
     fiber_->scheduler().tasks_.remove(this);
 
-    // Translate VM NULL to Magpie nothing so that the callback doesn't have
-    // to bother looking up the VM to get it.
-    if (returnValue.isNull()) returnValue = fiber_->vm().nothing();
-
-    fiber_->storeReturn(returnValue);
-
-    Scheduler& scheduler = fiber_->scheduler();
-    scheduler.run(fiber_);
+    fiber_->resume(returnValue);
 
     // We're done!
     delete this;

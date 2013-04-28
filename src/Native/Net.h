@@ -23,6 +23,7 @@ namespace magpie
     void stop();
 
     void accept();
+    gc<StreamObject> takeLastStream();
 
   private:
     // The scheduler for the VM that owns this listener.
@@ -35,6 +36,8 @@ namespace magpie
     // TODO(bob): This needs to be allocated on a non-GC heap so it doesn't get
     // moved under libuv when a GC occurs.
     uv_tcp_t server_;
+
+    gc<StreamObject> lastStream_;
   };
 }
 

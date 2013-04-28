@@ -6,73 +6,78 @@
 
 namespace magpie
 {
-  // A simple queue of items with a fixed capacity. Implemented using a
-  // circular buffer. Enqueue and dequeue are O(1). Queue items must support
-  // a default constructor and copying.
-  template <class T, int Size>
+  // A simple queue using a linked-list of nodes.
+  template <class T>
   class Queue
   {
   public:
     Queue()
-    : head_(0),
-      count_(0) {}
-
-    // Gets the number of items currently in the queue.
-    int count() const { return count_; }
+    : head_(NULL),
+      tail_(NULL) {}
 
     // Gets whether or not the queue is empty.
-    bool isEmpty() const { return count_ == 0; }
+    bool isEmpty() const { return head_ == NULL; }
 
-    // Gets the maximum number of items the queue can hold.
-    int capacity() const { return Size; }
-
-    // Clears the entire queue.
-    void clear()
-    {
-      while (!isEmpty()) dequeue();
-    }
-
-    // Adds the given item to the head of the queue.
+    // Adds the given item to the end of the queue.
     void enqueue(const T& item)
     {
-      ASSERT(count_ < capacity(), "Cannot enqueue a full queue.");
+      QueueNode* node = new QueueNode(item);
 
-      items_[head_] = item;
-      head_ = wrap(head_ + 1);
-      count_++;
+      if (head_ == NULL)
+      {
+        // No items in the queue yet.
+        head_ = node;
+        tail_ = node;
+      }
+      else
+      {
+        tail_->next = node;
+        tail_ = node;
+      }
     }
 
-    // Removes the tail item from the queue.
+    // Removes the first item from the queue.
     T dequeue()
     {
-      ASSERT(count_ > 0, "Cannot dequeue an empty queue.");
+      ASSERT(head_ != NULL, "Cannot read from an empty queue.");
 
-      int tail = wrap(head_ - count_);
+      QueueNode* node = head_;
+      const T& item = node->item;
 
-      // Clear the item from the queue.
-      T dequeued = items_[tail];
-      items_[tail] = T();
+      head_ = head_->next;
+      if (head_ == NULL) tail_ = NULL;
 
-      count_--;
-      return dequeued;
+      delete node;
+
+      return item;
     }
 
-    // Gets the item at the given index in the queue. Index zero is the
-    // next item which will be dequeued. Index one is the item after that,
-    // etc.
-    T& operator[] (int index)
+    // Indicates that the given array of objects is reachable and should be
+    // preserved during garbage collection. T should be a gc type.
+    void reach()
     {
-      ASSERT_INDEX(index, count_);
-
-      return items_[wrap(head_ - count_ + index)];
+      QueueNode* node = head_;
+      while (node != NULL)
+      {
+        node->item.reach();
+        node = node->next;
+      }
     }
-
+    
   private:
-    inline int wrap(int index) const { return (index + Size) % Size; }
+    struct QueueNode
+    {
+      QueueNode(const T& item)
+      : item(item),
+        next(NULL)
+      {}
+      
+      T item;
+      QueueNode* next;
+    };
 
-    int head_;
-    int count_;
-    T   items_[Size];
+    QueueNode* head_;
+    QueueNode* tail_;
 
     NO_COPY(Queue);
   };

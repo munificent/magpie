@@ -2,12 +2,9 @@ import net
 
 print("Listening on port 8124")
 
-// Waits for two incoming TCP connections and then stops.
-var numConnections = 0
-TcpListener new("0.0.0.0", 8124) as connection do
-    numConnections = numConnections + 1
-    print("Got connection #" + numConnections)
-    if numConnections > 1 then done
+TcpListener new("0.0.0.0", 8124) as stream do
+    print("Got connection")
+    for data in stream do print(data)
 end
 
 print("Done listening")

@@ -459,6 +459,16 @@ namespace magpie
     store(frame, GET_C(instruction), value);
   }
 
+  void Fiber::resume(gc<Object> returnValue)
+  {
+    // Translate VM NULL to Magpie nothing so that the caller doesn't have to
+    // bother looking up the VM to get it.
+    if (returnValue.isNull()) returnValue = vm_.nothing();
+
+    storeReturn(returnValue);
+    scheduler_.run(this);
+  }
+
   void Fiber::ready()
   {
     scheduler_.add(this);

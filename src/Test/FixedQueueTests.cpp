@@ -1,9 +1,9 @@
-#include "QueueTests.h"
-#include "Data/Queue.h"
+#include "FixedQueueTests.h"
+#include "Data/FixedQueue.h"
 
 namespace magpie
 {
-  void QueueTests::runTests()
+  void FixedQueueTests::runTests()
   {
     enqueueDequeue();
     serialEnqueue();
@@ -12,9 +12,9 @@ namespace magpie
     subscript();
   }
 
-  void QueueTests::enqueueDequeue()
+  void FixedQueueTests::enqueueDequeue()
   {
-    Queue<int, 3> queue;
+    FixedQueue<int, 3> queue;
 
     EXPECT_EQUAL(0, queue.count());
     EXPECT_EQUAL(3, queue.capacity());
@@ -30,9 +30,9 @@ namespace magpie
     EXPECT_EQUAL(2, result);
   }
 
-  void QueueTests::serialEnqueue()
+  void FixedQueueTests::serialEnqueue()
   {
-    Queue<int, 3> queue;
+    FixedQueue<int, 3> queue;
 
     for (int i = 0; i < 6; i++)
     {
@@ -45,9 +45,9 @@ namespace magpie
     }
   }
 
-  void QueueTests::multipleEnqueue()
+  void FixedQueueTests::multipleEnqueue()
   {
-    Queue<int, 3> queue;
+    FixedQueue<int, 3> queue;
 
     queue.enqueue(5);
     queue.enqueue(6);
@@ -68,9 +68,9 @@ namespace magpie
     EXPECT_EQUAL(0, queue.count());
   }
 
-  void QueueTests::count()
+  void FixedQueueTests::count()
   {
-    Queue<int, 3> queue;
+    FixedQueue<int, 3> queue;
 
     EXPECT_EQUAL(0, queue.count());
     queue.enqueue(1);
@@ -91,9 +91,9 @@ namespace magpie
     EXPECT_EQUAL(0, queue.count());
   }
 
-  void QueueTests::subscript()
+  void FixedQueueTests::subscript()
   {
-    Queue<int, 3> queue;
+    FixedQueue<int, 3> queue;
 
     queue.enqueue(5);
     queue.enqueue(6);

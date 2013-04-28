@@ -109,6 +109,19 @@ namespace magpie
                        buffer->count()));
   }
 
+  NATIVE(streamAdvance)
+  {
+    gc<StreamObject> stream = asStream(args[0]);
+    gc<BufferObject> buffer = stream->read(&fiber);
+
+    // If we already have data, synchronously return it and continue.
+    if (!buffer.isNull()) return buffer;
+
+    // Otherwise, wait for some data to come in.
+    result = NATIVE_RESULT_SUSPEND;
+    return NULL;
+  }
+  
   void defineIONatives(VM& vm)
   {
     DEF_NATIVE(bindIO);
@@ -123,6 +136,8 @@ namespace magpie
     DEF_NATIVE(bufferSubscriptInt);
     DEF_NATIVE(bufferSubscriptSetInt);
     DEF_NATIVE(bufferDecodeAscii);
+    DEF_NATIVE(bufferDecodeAscii);
+    DEF_NATIVE(streamAdvance);
   }
 
   FSTask::FSTask(gc<Fiber> fiber)
@@ -153,6 +168,17 @@ namespace magpie
     buffer_.reach();
   }
 
+  StreamReadTask::StreamReadTask(gc<Fiber> fiber, gc<StreamObject> stream)
+  : Task(fiber),
+    stream_(stream)
+  {}
+
+  void StreamReadTask::reach()
+  {
+    Task::reach();
+    stream_.reach();
+  }
+  
   gc<BufferObject> BufferObject::create(int count)
   {
     // Allocate enough memory for the buffer and its data.
@@ -252,22 +278,6 @@ namespace magpie
     uv_fs_fstat(task->loop(), task->request(), file_, getSizeCallback);
   }
 
-  // TODO(bob): Stream-based code. Saving it for later.
-  /*
-   static uv_buf_t allocateCallback(uv_handle_t *handle, size_t suggested_size)
-   {
-   printf("Alloc %ld\n", suggested_size);
-   // TODO(bob): Don't use malloc() here.
-   return uv_buf_init((char*) malloc(suggested_size), suggested_size);
-   }
-
-   static void readCallback(uv_stream_t *stream, ssize_t nread, uv_buf_t buf)
-   {
-   // TODO(bob): Implement me!
-   printf("Read %ld bytes\n", nread);
-   }
-   */
-
   static void readBytesCallback(uv_fs_t *request)
   {
     // TODO(bob): Handle errors!
@@ -356,6 +366,45 @@ namespace magpie
   {
     // TODO(bob): Include some kind of ID or something here.
     return String::create("[stream]");
+  }
+
+  void StreamObject::reach()
+  {
+    read_.reach();
+    pending_.reach();
+  }
+
+  void StreamObject::add(uv_buf_t data)
+  {
+    // TODO(bob): Pause reading if the queue reaches a certain size.
+    // TODO(bob): Doing the copy here is lame. The allocate calllback we pass
+    // to libuv should create the BufferObject then so libuv can write directly
+    // to it. (Though we need to think about how that plays with the copying
+    // collector.)
+    gc<BufferObject> buffer = BufferObject::create(data.len);
+    memcpy(buffer->data(), data.base, data.len);
+
+    // If there are fibers waiting for data, immediately resume one.
+    if (!pending_.isEmpty())
+    {
+      pending_.dequeue()->resume(buffer);
+      return;
+    }
+
+    read_.enqueue(buffer);
+  }
+
+  gc<BufferObject> StreamObject::read(gc<Fiber> fiber)
+  {
+    // If the queue is empty, we'll have to wait.
+    if (!read_.isEmpty())
+    {
+      return read_.dequeue();
+    }
+
+    // Queue up the fiber to resume when we have data.
+    pending_.enqueue(fiber);
+    return NULL;
   }
 }
 

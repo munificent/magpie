@@ -1,5 +1,6 @@
 #include <sstream>
 
+#include "Native/IO.h"
 #include "Native/Net.h"
 #include "VM/VM.h"
 
@@ -36,12 +37,22 @@ namespace magpie
     return vm.nothing();
   }
 
+  NATIVE(tcpListenerTakeLastStream)
+  {
+    gc<TcpListenerObject> listener = asTcpListener(args[0]);
+    gc<Object> stream = listener->takeLastStream();
+    std::cout << "last stream " << stream << std::endl;
+    if (!stream.isNull()) return stream;
+    return vm.nothing();
+  }
+  
   void defineNetNatives(VM& vm)
   {
     DEF_NATIVE(bindNet);
     DEF_NATIVE(tcpListenerNew);
     DEF_NATIVE(tcpListenerStart);
     DEF_NATIVE(tcpListenerStop);
+    DEF_NATIVE(tcpListenerTakeLastStream);
   }
 
   TcpListenerObject::TcpListenerObject(Fiber& fiber, gc<String> address,
@@ -73,7 +84,6 @@ namespace magpie
       return;
     }
 
-    // TODO(bob): Pass in connection info.
     reinterpret_cast<TcpListenerObject*>(server->data)->accept();
   }
 
@@ -99,9 +109,23 @@ namespace magpie
     // and handle it, not just assert).
 
     callback_ = NULL;
+    lastStream_ = NULL;
     uv_unref(reinterpret_cast<uv_handle_t*>(&server_));
   }
 
+  static uv_buf_t allocateCallback(uv_handle_t *handle, size_t suggestedSize)
+  {
+    // TODO(bob): Manage this memory!
+    return uv_buf_init((char*) malloc(suggestedSize), suggestedSize);
+  }
+  
+  static void tcpReadCallback(uv_stream_t* stream, ssize_t nread, uv_buf_t buf)
+  {
+    gc<StreamObject> streamObj = reinterpret_cast<StreamObject*>(stream->data);
+    // TODO(bob): What about nread?
+    streamObj->add(buf);
+  }
+  
   void TcpListenerObject::accept()
   {
     ASSERT(!callback_.isNull(), "Cannot accept when not listening.");
@@ -111,19 +135,33 @@ namespace magpie
     uv_tcp_t *client = reinterpret_cast<uv_tcp_t*>(malloc(sizeof(uv_tcp_t)));
     uv_tcp_init(scheduler_.loop(), client);
 
-    if (uv_accept((uv_stream_t*) &server_, (uv_stream_t*) client) == 0)
+    if (uv_accept(reinterpret_cast<uv_stream_t*>(&server_),
+                  reinterpret_cast<uv_stream_t*>(client)) == 0)
     {
+      // Create a stream.
+      // TODO(bob): How do we make sure this isn't collected?
+      lastStream_ = new StreamObject();
+      client->data = &*lastStream_;
+
       // Spin up a fiber to handle the connection.
       scheduler_.run(callback_);
 
-      // TODO(bob): Create stream and pass to callback.
-      //uv_read_start((uv_stream_t*) client, alloc_buffer, echo_read);
+      uv_read_start(reinterpret_cast<uv_stream_t*>(client), allocateCallback,
+                    tcpReadCallback);
     }
     else
     {
       uv_close(reinterpret_cast<uv_handle_t*>(client), NULL);
       std::cout << "Closed :(" << std::endl;
+      lastStream_ = NULL;
     }
+  }
+
+  gc<StreamObject> TcpListenerObject::takeLastStream()
+  {
+    gc<StreamObject> stream = lastStream_;
+    lastStream_ = NULL;
+    return stream;
   }
 }
 
