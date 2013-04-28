@@ -59,7 +59,7 @@ namespace magpie
   class BufferObject : public Object
   {
   public:
-    static gc<BufferObject> create(int count);
+    static gc<BufferObject> create(int count, const char* data = NULL);
 
     virtual gc<ClassObject> getClass(VM& vm) const;
 
@@ -137,7 +137,7 @@ namespace magpie
 
     virtual void reach();
 
-    void add(uv_buf_t data);
+    void add(uv_buf_t data, size_t numRead);
 
     // Reads a buffer from the stream. If a buffer is already available, returns
     // it immediately. Otherwise, pauses [fiber] and creates a task that will

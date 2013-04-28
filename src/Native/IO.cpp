@@ -179,7 +179,7 @@ namespace magpie
     stream_.reach();
   }
   
-  gc<BufferObject> BufferObject::create(int count)
+  gc<BufferObject> BufferObject::create(int count, const char* data)
   {
     // Allocate enough memory for the buffer and its data.
     void* mem = Memory::allocate(sizeof(BufferObject) +
@@ -188,10 +188,14 @@ namespace magpie
     // Construct it by calling global placement new.
     gc<BufferObject> buffer = ::new(mem) BufferObject(count);
 
-    // Fill with zero.
-    for (int i = 0; i < count; i++)
+    if (data != NULL)
     {
-      buffer->bytes_[i] = 0;
+      memcpy(buffer->bytes_, data, count);
+    }
+    else
+    {
+      // Fill with zero.
+      memset(buffer->bytes_, 0, count);
     }
 
     return buffer;
@@ -374,15 +378,12 @@ namespace magpie
     pending_.reach();
   }
 
-  void StreamObject::add(uv_buf_t data)
+  void StreamObject::add(uv_buf_t data, size_t numRead)
   {
+    ASSERT(numRead <= data.len, "Read more than buffer size.");
+
     // TODO(bob): Pause reading if the queue reaches a certain size.
-    // TODO(bob): Doing the copy here is lame. The allocate calllback we pass
-    // to libuv should create the BufferObject then so libuv can write directly
-    // to it. (Though we need to think about how that plays with the copying
-    // collector.)
-    gc<BufferObject> buffer = BufferObject::create(data.len);
-    memcpy(buffer->data(), data.base, data.len);
+    gc<BufferObject> buffer = BufferObject::create(numRead, data.base);
 
     // If there are fibers waiting for data, immediately resume one.
     if (!pending_.isEmpty())

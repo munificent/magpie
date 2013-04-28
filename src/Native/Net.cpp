@@ -119,11 +119,14 @@ namespace magpie
     return uv_buf_init((char*) malloc(suggestedSize), suggestedSize);
   }
   
-  static void tcpReadCallback(uv_stream_t* stream, ssize_t nread, uv_buf_t buf)
+  static void tcpReadCallback(uv_stream_t* stream, ssize_t numRead,
+                              uv_buf_t buffer)
   {
+    // TODO(bob): Handle errors and EOF!
     gc<StreamObject> streamObj = reinterpret_cast<StreamObject*>(stream->data);
-    // TODO(bob): What about nread?
-    streamObj->add(buf);
+    streamObj->add(buffer, numRead);
+
+    free(buffer.base);
   }
   
   void TcpListenerObject::accept()
