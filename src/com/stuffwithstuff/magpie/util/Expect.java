@@ -1,5 +1,7 @@
 package com.stuffwithstuff.magpie.util;
 
+import com.stuffwithstuff.magpie.app.QuitException;
+
 public final class Expect {
   public static void notEmpty(String arg) {
     if (arg == null) {
@@ -12,7 +14,7 @@ public final class Expect {
   
   public static void notNull(Object arg) {
     if (arg == null) {
-      throw new NullPointerException("Argument cannot be null.");
+      throw new QuitException();
     }
   }
   
