@@ -10,7 +10,9 @@ import com.stuffwithstuff.magpie.util.Expect;
 public class StringReader implements SourceReader {
   public StringReader(String description, String text) {
     Expect.notNull(description);
-    Expect.notNull(text);
+    if (text == null) {
+      System.exit(0);
+    }
 
     mDescription = description;
     mText = text;
