@@ -20,7 +20,7 @@ public class ConsoleRepl extends MagpieAppHost {
   public void run() {
     System.out.println();
     System.out.println("      _/Oo>");
-    System.out.println("     /__/     magpie v0.0.0");
+    System.out.println("     /__/     magpie v1.0.0");
     System.out.println("____//hh___________________");
     System.out.println("   //");
     System.out.println();

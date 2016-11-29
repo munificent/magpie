@@ -14,12 +14,15 @@ public class MagpieApp {
    */
   public static void main(String[] args) {
     String path = null;
-    
+    String version = null;
+
     // Process the arguments.
     boolean niceRepl = true;
     for (int i = 0; i < args.length; i++) {
       if (args[i].equals("-p")) {
         Profiler.setEnabled(true);
+      } else if (args[i].equals("--version")) {
+        version = "1.0.0";
       } else if (args[i].equals("--dumbrepl")) {
         niceRepl = false;
       } else {
@@ -33,9 +36,11 @@ public class MagpieApp {
     }
     
     // If no script is given, just spin up the REPL.
-    if (path == null) {
+    if (path == null && version == null) {
       ConsoleRepl repl = niceRepl ? new ColorRepl() : new ConsoleRepl();
       repl.run();
+    } else if (version != null) {
+      System.out.println("Magpie version 1.0.0");
     } else {
       runScript(path);
     }
