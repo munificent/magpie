@@ -303,7 +303,7 @@ namespace magpie
         name = String::create("[]");
 
         rightParam = parsePattern(true);
-        consume(TOKEN_RIGHT_BRACKET, "Except ']' after indexer pattern.");
+        consume(TOKEN_RIGHT_BRACKET, "Expect ']' after indexer pattern.");
       }
       else
       {
@@ -760,7 +760,7 @@ namespace magpie
       }
     }
 
-    consume(TOKEN_RIGHT_BRACKET, "Except ']' to close list.");
+    consume(TOKEN_RIGHT_BRACKET, "Expect ']' to close list.");
     return new ListExpr(spanFrom(token), elements);
   }
 
