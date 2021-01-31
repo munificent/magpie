@@ -1,6 +1,8 @@
 {
   'variables': {
     'visibility%': 'hidden',         # V8's visibility setting
+    'target_arch%': 'ia32',          # set V8's target architecture
+    'host_arch%': 'ia32',            # set V8's host architecture
     'library%': 'static_library',    # allow override to 'shared_library' for DLL/.so builds
     'component%': 'static_library',  # NB. these names match with what V8 expects
     'gcc_version%': 'unknown',

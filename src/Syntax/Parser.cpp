@@ -755,10 +755,12 @@ namespace magpie
       while (true)
       {
         // TODO(bob): What about parse errors or EOF?
+        if (match(TOKEN_LINE)) continue;
         elements.add(parsePrecedence(PRECEDENCE_LOGICAL));
         if (!match(TOKEN_COMMA)) break;
       }
     }
+    while(lookAhead(TOKEN_LINE)) consume();
 
     consume(TOKEN_RIGHT_BRACKET, "Expect ']' to close list.");
     return new ListExpr(spanFrom(token), elements);

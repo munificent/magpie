@@ -4,6 +4,7 @@
 #include "LexerTests.h"
 #include "MemoryTests.h"
 #include "FixedQueueTests.h"
+#include "ParserTests.h"
 #include "StringTests.h"
 #include "TokenTests.h"
 
@@ -15,6 +16,7 @@ int main (int argc, char * const argv[])
   LexerTests().run();
   MemoryTests().run();
   FixedQueueTests().run();
+  ParserTests().run();
   StringTests().run();
   TokenTests().run();
 
