@@ -134,7 +134,7 @@ You can also define *indexer setters* which combines the syntax of those:
 
     :::magpie
     def (this is Grid)[x is Int, y is Int] = (value)
-        cells[y * with + x] = value
+        cells[y * width + x] = value
     end
 
     grid[2, 3] = "some value"
